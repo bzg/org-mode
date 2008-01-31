@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.65
+@set VERSION 4.66
 @set DATE February 2007
 
 @dircategory Emacs
@@ -150,7 +150,6 @@ Hyperlinks
 Internal links
 
 * Radio targets::               Make targets trigger links in plain text.
-* CamelCase links::             Activating CamelCase words as links
 
 Remember
 
@@ -644,6 +643,8 @@ argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 '--------------------------------------'
 @end example
 
+When @kbd{S-@key{TAB}} is called with a numerical prefix N, the CONTENTS
+view up to headlines of level N will be shown.
 Note that inside tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
@@ -1413,7 +1414,16 @@ directly at the hline is used.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
-row/column is implied.  Here are a few examples:
+row/column is implied. 
+
+Org-mode's references with @emph{positive} numbers correspond to fixed
+references in other spreadsheet programs.  For example, @code{@@3$28}
+corresponds to @code{$AB$3}.  Org-mode's references with @emph{negative}
+numbers behave similar to non-fixed references in other spreadsheet
+programs, because when the same formula is used in several fields,
+different fields are referenced each time.
+
+Here are a few examples:
 
 @example
 @@2$3      @r{2nd row, 3rd column}
@@ -1669,6 +1679,14 @@ different rows.
 @item M-@key{up}/@key{down}
 Scroll the window displaying the table.
 @end table
+@kindex C-c @}
+@item C-c @}
+Toggle the display of row and column numbers for a table, using
+overlays.  These are uptated each time the table is aligned, you can
+force it with @kbd{C-c C-c}.
+@kindex C-c @{
+@item C-c @{
+Toggle the formula debugger on and off.  See below.
 @end table
 
 Making a table field blank does not remove the formula associated with
@@ -1881,7 +1899,6 @@ internal structure of all links, use the menu entry
 @section Internal links
 @cindex internal links
 @cindex links, internal
-@cindex CamelCase links
 @cindex targets, for links
 
 If the link does not look like a URL, it is considered to be internal in
@@ -1890,7 +1907,7 @@ Target][Find my target]]} lead to a text search in the current file.
 The link can be followed with @kbd{C-c C-o} when the cursor is on the
 link, or with a mouse click (@pxref{Handling links}).  The preferred
 match for such a link is a dedicated target: the same string in double
-angular brackets.  Targets may be located anywhere; often it is
+angular brackets.  Targets may be located anywhere; sometimes it is
 convenient to put them into a comment line. For example
 
 @example
@@ -1928,10 +1945,9 @@ earlier.
 
 @menu
 * Radio targets::               Make targets trigger links in plain text.
-* CamelCase links::             Activating CamelCase words as links
 @end menu
 
-@node Radio targets, CamelCase links, Internal links, Internal links
+@node Radio targets,  , Internal links, Internal links
 @subsection Radio targets
 @cindex radio targets
 @cindex targets, radio
@@ -1946,19 +1962,6 @@ normal text to become activated as a link.  The Org-mode file is
 scanned automatically for radio targets only when the file is first
 loaded into Emacs.  To update the target list during editing, press
 @kbd{C-c C-c} with the cursor on or at a target.
-
-@node CamelCase links,  , Radio targets, Internal links
-@subsection CamelCase words as links
-@cindex completion, of CamelCase links
-@cindex CamelCase links, completion of
-
-Org-mode also supports CamelCase words as links.  This feature is not
-turned on by default because of the inconsistencies this system suffers
-from.  It is also possible that this feature will disappear entirely in
-a future version of Org-mode.  To activate CamelCase words as links, you
-need to customize the option @code{org-activate-links}.  A CamelCase
-word then leads to a text search such that @samp{CamelCaseLink} is
-equivalent to @samp{[[camel case link]]}.
 
 @node External links, Handling links, Internal links, Hyperlinks
 @section External links
@@ -3004,8 +3007,11 @@ the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 @cindex calendar, for selecting date
 Parallel to the minibuffer prompt, a calendar is popped up@footnote{If
 you don't need/want the calendar, configure the variable
-@code{org-popup-calendar-for-date-prompt}.}.  You can control the
-calendar fully from the minibuffer:
+@code{org-popup-calendar-for-date-prompt}.}.  When you exit the date
+prompt, either by clicking on a date in the calendar, or by pressing
+@key{RET}, the date selected in the calendar will be combined with the
+information entered at the prompt.  You can control the calendar fully
+from the minibuffer:
 
 @table @kbd
 @kindex <
@@ -3452,7 +3458,11 @@ modify your list of tags, set the variable
 @code{org-fast-tag-selection-single-key}.  Then you no longer have to
 press @key{RET} to exit fast tag selection - it will immediately exit
 after the first change.  If you then occasionally need more keys, press
-@kbd{C-c} to turn off auto-exit for the current tag selection process.
+@kbd{C-c} to turn off auto-exit for the current tag selection process
+(in effect: start selection with @kbd{C-c C-c C-c} instead of @kbd{C-c
+C-c}).  If you set the variable to the value @code{expert}, the special
+window is not even shown for single-key tag selection, it comes up only
+when you press that extra @kbd{C-c}.
 
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches
@@ -4803,12 +4813,25 @@ creates two levels of headings and does the rest as items.
 @node Quoting HTML tags, Links, Export commands, HTML export
 @subsection Quoting HTML tags
 
-If you want to include HTML tags which should be interpreted as such,
-mark them with @samp{@@} as in @samp{@@<b>bold text@@</b>}.  Note that
-this wirks only for simple tags, but not for complex ones like a
-@samp{<span>} that contains, for example a link.  Plain @samp{<} and
-@samp{>} are always transformed to @samp{&lt;} and @samp{&gt;} in HTML
-export.
+Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
+@samp{&gt;} in HTML export.  If you want to include simple HTML tags
+which should be interpreted as such, mark them with @samp{@@} as in
+@samp{@@<b>bold text@@</b>}.  Note that this really works only for
+simple tags.  For more extensive HTML that should be copied verbatim to
+the exported file use either
+
+@example
+#+HTML: Literal HTML code for export
+@end example
+
+@noindent or
+
+@example
+#+BEGIN_HTML
+All lines between these markers are exported literally
+#+END_HTML
+@end example
+
 
 @node Links, Images, Quoting HTML tags, HTML export
 @subsection Links
@@ -4917,7 +4940,8 @@ still prefer a standard calendar application for anniversaries and
 appointments.  In this case it can be useful to have deadlines and
 other time-stamped items in Org-mode files show up in the calendar
 application.  Org-mode can export calendar information in the standard
-iCalendar format.
+iCalendar format.  If you also want to have TODO entries included in the
+export, configure the variable @code{org-icalendar-include-todo}.
 
 @table @kbd
 @kindex C-c C-e i
@@ -5081,7 +5105,7 @@ you can:
 @example
 H:      @r{set the number of headline levels for export}
 num:    @r{turn on/off section-numbers}
-toc:    @r{turn on/off table of contents}
+toc:    @r{turn on/off table of contents, or set level limit (integer)}
 \n:     @r{turn on/off linebreak-preservation}
 @@:      @r{turn on/off quoted HTML tags}
 ::      @r{turn on/off fixed-width sections}
@@ -5451,14 +5475,12 @@ force publishing of all files by giving a prefix argument.
 @cindex completion, of TODO keywords
 @cindex completion, of dictionary words
 @cindex completion, of option keywords
-@cindex completion, of CamelCase links
 @cindex completion, of tags
 @cindex completion, of link abbreviations
 @cindex @TeX{} symbol completion
 @cindex TODO keywords completion
 @cindex dictionary word completion
 @cindex option keyword completion
-@cindex CamelCase link completion
 @cindex tag completion
 @cindex link abbreviations, completion of
 
@@ -6022,7 +6044,7 @@ specific languages, for example LaTeX.  However, this is extremely hard
 to do in a general way, would lead to a customization nightmare, and
 would take away much of the simplicity of the Orgtbl-mode table editor.
 
-This appendix describes different approach.  We keep the Orgtbl-mode
+This appendix describes a different approach.  We keep the Orgtbl-mode
 table in its native format (the @i{source table}), and use a custom
 function to @i{translate} the table to the correct syntax, and to
 @i{install} it in the right location (the @i{target table}).  This puts
@@ -6063,8 +6085,8 @@ in the receiver lines. @code{translation_function} is the Lisp function
 that does the translation.  Furthermore, the line can contain a list of
 arguments (alternating key and value) at the end.  The arguments will be
 passed as a property list to the translation function for
-interpretation.  However, a few standard parameters are already
-recognized and acted upon before the translation function is called:
+interpretation.  A few standard parameters are already recognized and
+acted upon before the translation function is called:
 
 @table @code
 @item :skip N
@@ -6093,12 +6115,11 @@ Sometimes it is possible to put the table after some kind of @i{END}
 statement, for example @samp{\bye} in TeX and @samp{\end@{document@}}
 in LaTeX.
 @item
-If all else fails@footnote{In principle the source table could also be
-in a separate file, but so far this is not implemented.}, you can just
-comment the table line by line whenever you want to process the file,
-and uncomment it whenever you need to edit the table.  The command
-@kbd{M-x orgtbl-toggle-comment} does make this a viable option, in
-particular if you bind it to a key.
+You can just comment the table line by line whenever you want to process
+the file, and uncomment it whenever you need to edit the table.  This
+only sounds tedious - the command @kbd{M-x orgtbl-toggle-comment} does
+make this comment-toggling very easy, in particular if you bind it to a
+key.
 @end itemize
 
 @node A LaTeX example, Translator functions, Radio tables, Tables in arbitrary syntax
@@ -6158,9 +6179,9 @@ table inserted between the two marker lines.
 
 Now lets assume you want to make the table header by hand, because you
 want to control how columns are aligned etc.  In this case we make sure
-that the table translator does skip the first 2 lines, and tell the
-command to work as a @i{splice}, i.e. to not produce header and footer
-commands of the table:
+that the table translator does skip the first 2 lines of the source
+table, and tell the command to work as a @i{splice}, i.e. to not produce
+header and footer commands of the target table:
 
 @example
 \begin@{tabular@}@{lrrr@}
@@ -6191,10 +6212,10 @@ When set to t, return only table body lines, don't wrap them into a
 tabular environment.  Default is nil.
 
 @item :fmt fmt
-A format to be used to wrap the field, should contain @code{%s} for the
+A format to be used to wrap each field, should contain @code{%s} for the
 original field value.  For example, to wrap each field value in dollars,
 you could use @code{:fmt "$%s$"}.  This may also be a property list with
-column numbers and formats. for example @code{:fmt (2 "$%s$" 4 "%s%%")}.
+column numbers and formats. for example @code{:fmt (2 "$%s$" 4 "%s\\%%")}.
 
 @item :efmt efmt
 Use this format to print numbers with exponentials.  The format should
@@ -6213,29 +6234,80 @@ applied.
 
 Orgtbl-mode has several translator functions built-in:
 @code{orgtbl-to-latex}, @code{orgtbl-to-html}, and
-@code{orgtbl-to-texinfo}.  For deatils on each of them, please check
-the corresponding documentation strings.
+@code{orgtbl-to-texinfo}.  Except for @code{orgtbl-to-html}@footnote{The
+HTML translator uses the same code that produces tables during HTML
+export.}, these all use a generic translator, @code{orgtbl-to-generic}.
+For example, @code{orgtbl-to-latex} itself is a very short function that
+computes the column definitions for the @code{tabular} environment,
+defines a few field and line separators and then hands over to the
+generic translator.  Here is the entire code:
 
-In order to write your own translator function, start by looking at
-@code{orgtbl-to-latex} which is well documented.  Basically you have to
-write a function that takes two arguments.  The first argument is the
-table, a list of lines, each line either the symbol @code{hline} or a
-list of fields.  The second argument is a property list that will
-contain all parameters specified in the @samp{#+ORGTBL: SEND} line.
-Orgtbl-mode always handles the @code{:skip} and @code{:skipcols}
-parameters, but your translator function may use any number of
-additional parameters.  If you write a generally useful translator,
-please post it on @code{emacs-orgmode@@gnu.org} so that others can
-benefit from your work.
+@lisp
+@group
+(defun orgtbl-to-latex (table params)
+  "Convert the orgtbl-mode TABLE to LaTeX."
+  (let* ((alignment (mapconcat (lambda (x) (if x "r" "l"))
+                               org-table-last-alignment ""))
+         (params2
+          (list
+           :tstart (concat "\\begin@{tabular@}@{" alignment "@}")
+           :tend "\\end@{tabular@}"
+           :lstart "" :lend " \\\\" :sep " & "
+           :efmt "%s\\,(%s)" :hline "\\hline")))
+    (orgtbl-to-generic table (org-combine-plists params2 params))))
+@end group
+@end lisp
+
+As you can see, the properties passed into the function (variable
+@var{PARAMS}) are combined with the ones newly defined in the function
+(variable @var{PARAMS2}).  The ones passed into the function (i.e. the
+ones set by the @samp{ORGTBL SEND} line) take precedence.  So if you
+would like to use the LaTeX translator, but wanted the line endings to
+be @samp{\\[2mm]} instead of the default @samp{\\}, you could just
+overrule the default with
+
+@example
+#+ORGTBL: SEND test orgtbl-to-latex :lend " \\\\[2mm]"
+@end example
+
+For a new language, you can either write your own converter function in
+analogy with the LaTeX translator, or you can use the generic function
+directly.  For example, if you have a language where a table is started
+with @samp{!BTBL!}, ended with @samp{!ETBL!}, and where table lines are
+started with @samp{!BL!}, ended with @samp{!EL!} and where the field
+separator is a TAB, you could call the generic translator like this (on
+a single line!):
+
+@example
+#+ORGTBL: SEND test orgtbl-to-generic :tstart "!BTBL!" :tend "!ETBL!"
+                              :lstart "!BL! " :lend " !EL!" :sep "\t"
+@end example
+
+@noindent
+Please check the documentation string of the function
+@code{orgtbl-to-generic} for a full list of parameters understood by
+that function and remember that you can pass each of them into
+@code{orgtbl-to-latex}, @code{orgtbl-to-texinfo}, and any other function
+using the generic function.
+
+Of course you can also write a completely new function doing complicated
+things the generic translator cannot do.  A translator function takes
+two arguments.  The first argument is the table, a list of lines, each
+line either the symbol @code{hline} or a list of fields.  The second
+argument is the property list containing all parameters specified in the
+@samp{#+ORGTBL: SEND} line.  The function must return a single string
+containing the formatted table.  If you write a generally useful
+translator, please post it on @code{emacs-orgmode@@gnu.org} so that
+others can benefit from your work.
 
 @node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Extensions and Hacking
 @section Dynamic blocks
 @cindex dynamic blocks
 
 Org-mode documents can contain @emph{dynamic blocks}.  These are
-specially marked regions that are updated by some user-written
-function.  A good example for such a block is the clock table inserted
-by the command @kbd{C-c C-x C-r} (@pxref{Clocking work time}).
+specially marked regions that are updated by some user-written function.
+A good example for such a block is the clock table inserted by the
+command @kbd{C-c C-x C-r} (@pxref{Clocking work time}).
 
 Dynamic block are enclosed by a BEGIN-END structure that assigns a name
 to the block and can also specify parameters for the function producing

@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.65).
+   This manual is for Org-mode (version 4.66).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.65).
+This manual is for Org-mode (version 4.66).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -119,7 +119,6 @@ Hyperlinks
 Internal links
 
 * Radio targets::               Make targets trigger links in plain text.
-* CamelCase links::             Activating CamelCase words as links
 
 Remember
 
@@ -553,7 +552,9 @@ the visibility in the buffer.
           ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
           '--------------------------------------'
 
-     Note that inside tables, `S-<TAB>' jumps to the previous field.
+     When `S-<TAB>' is called with a numerical prefix N, the CONTENTS
+     view up to headlines of level N will be shown.  Note that inside
+     tables, `S-<TAB>' jumps to the previous field.
 
 `C-c C-a'
      Show all.  
@@ -1261,7 +1262,16 @@ the value directly at the hline is used.
 
    `0' refers to the current row and column.  Also, if you omit either
 the column or the row part of the reference, the current row/column is
-implied.  Here are a few examples:
+implied.
+
+   Org-mode's references with _positive_ numbers correspond to fixed
+references in other spreadsheet programs.  For example, `@3$28'
+corresponds to `$AB$3'.  Org-mode's references with _negative_ numbers
+behave similar to non-fixed references in other spreadsheet programs,
+because when the same formula is used in several fields, different
+fields are referenced each time.
+
+   Here are a few examples:
 
      @2$3      2nd row, 3rd column
      $5        column 5 in the current row
@@ -1489,6 +1499,14 @@ formulas of a table.
 
     `M-<up>/<down>'
           Scroll the window displaying the table.
+     
+`C-c }'
+     Toggle the display of row and column numbers for a table, using
+     overlays.  These are uptated each time the table is aligned, you
+     can force it with `C-c C-c'.  
+
+`C-c {'
+     Toggle the formula debugger on and off.  See below.
 
    Making a table field blank does not remove the formula associated
 with the field, because that is stored in a different line (the `TBLFM'
@@ -1698,8 +1716,8 @@ my target]]' lead to a text search in the current file.  The link can
 be followed with `C-c C-o' when the cursor is on the link, or with a
 mouse click (*note Handling links::).  The preferred match for such a
 link is a dedicated target: the same string in double angular brackets.
-Targets may be located anywhere; often it is convenient to put them
-into a comment line. For example
+Targets may be located anywhere; sometimes it is convenient to put
+them into a comment line. For example
 
      # <<My Target>>
 
@@ -1731,7 +1749,6 @@ earlier.
 * Menu:
 
 * Radio targets::               Make targets trigger links in plain text.
-* CamelCase links::             Activating CamelCase words as links
 
    ---------- Footnotes ----------
 
@@ -1739,7 +1756,7 @@ earlier.
 so the first such target must be after the first headline.
 
 
-File: org,  Node: Radio targets,  Next: CamelCase links,  Prev: Internal links,  Up: Internal links
+File: org,  Node: Radio targets,  Prev: Internal links,  Up: Internal links
 
 4.2.1 Radio targets
 -------------------
@@ -1753,20 +1770,6 @@ become activated as a link.  The Org-mode file is scanned automatically
 for radio targets only when the file is first loaded into Emacs.  To
 update the target list during editing, press `C-c C-c' with the cursor
 on or at a target.
-
-
-File: org,  Node: CamelCase links,  Prev: Radio targets,  Up: Internal links
-
-4.2.2 CamelCase words as links
-------------------------------
-
-Org-mode also supports CamelCase words as links.  This feature is not
-turned on by default because of the inconsistencies this system suffers
-from.  It is also possible that this feature will disappear entirely in
-a future version of Org-mode.  To activate CamelCase words as links, you
-need to customize the option `org-activate-links'.  A CamelCase word
-then leads to a text search such that `CamelCaseLink' is equivalent to
-`[[camel case link]]'.
 
 
 File: org,  Node: External links,  Next: Handling links,  Prev: Internal links,  Up: Hyperlinks
@@ -2702,8 +2705,11 @@ specified with the current date and time.  For example:
 you want to use unabbreviated names and/or other languages, configure
 the variables `parse-time-months' and `parse-time-weekdays'.
 
-   Parallel to the minibuffer prompt, a calendar is popped up(1).  You
-can control the calendar fully from the minibuffer:
+   Parallel to the minibuffer prompt, a calendar is popped up(1).  When
+you exit the date prompt, either by clicking on a date in the calendar,
+or by pressing <RET>, the date selected in the calendar will be
+combined with the information entered at the prompt.  You can control
+the calendar fully from the minibuffer:
 
 `<'
      Scroll calendar backwards by one month.  
@@ -3122,7 +3128,11 @@ modify your list of tags, set the variable
 `org-fast-tag-selection-single-key'.  Then you no longer have to press
 <RET> to exit fast tag selection - it will immediately exit after the
 first change.  If you then occasionally need more keys, press `C-c' to
-turn off auto-exit for the current tag selection process.
+turn off auto-exit for the current tag selection process (in effect:
+start selection with `C-c C-c C-c' instead of `C-c C-c').  If you set
+the variable to the value `expert', the special window is not even
+shown for single-key tag selection, it comes up only when you press
+that extra `C-c'.
 
    ---------- Footnotes ----------
 
@@ -4380,11 +4390,19 @@ File: org,  Node: Quoting HTML tags,  Next: Links,  Prev: Export commands,  Up: 
 10.2.2 Quoting HTML tags
 ------------------------
 
-If you want to include HTML tags which should be interpreted as such,
-mark them with `@' as in `@<b>bold text@</b>'.  Note that this wirks
-only for simple tags, but not for complex ones like a `<span>' that
-contains, for example a link.  Plain `<' and `>' are always transformed
-to `&lt;' and `&gt;' in HTML export.
+Plain `<' and `>' are always transformed to `&lt;' and `&gt;' in HTML
+export.  If you want to include simple HTML tags which should be
+interpreted as such, mark them with `@' as in `@<b>bold text@</b>'.
+Note that this really works only for simple tags.  For more extensive
+HTML that should be copied verbatim to the exported file use either
+
+     #+HTML: Literal HTML code for export
+
+or
+
+     #+BEGIN_HTML
+     All lines between these markers are exported literally
+     #+END_HTML
 
 
 File: org,  Node: Links,  Next: Images,  Prev: Quoting HTML tags,  Up: HTML export
@@ -4494,7 +4512,8 @@ still prefer a standard calendar application for anniversaries and
 appointments.  In this case it can be useful to have deadlines and
 other time-stamped items in Org-mode files show up in the calendar
 application.  Org-mode can export calendar information in the standard
-iCalendar format.
+iCalendar format.  If you also want to have TODO entries included in the
+export, configure the variable `org-icalendar-include-todo'.
 
 `C-c C-e i'
      Create iCalendar entries for the current file and store them in
@@ -4613,7 +4632,7 @@ The OPTIONS line is a compact form to specify export settings.  Here
 you can: 
      H:      set the number of headline levels for export
      num:    turn on/off section-numbers
-     toc:    turn on/off table of contents
+     toc:    turn on/off table of contents, or set level limit (integer)
      \n:     turn on/off linebreak-preservation
      @:      turn on/off quoted HTML tags
      ::      turn on/off fixed-width sections
@@ -5499,12 +5518,12 @@ specific languages, for example LaTeX.  However, this is extremely hard
 to do in a general way, would lead to a customization nightmare, and
 would take away much of the simplicity of the Orgtbl-mode table editor.
 
-   This appendix describes different approach.  We keep the Orgtbl-mode
-table in its native format (the source table), and use a custom
-function to translate the table to the correct syntax, and to install
-it in the right location (the target table).  This puts the burden of
-writing conversion functions on the user, but it allows for a very
-flexible system.
+   This appendix describes a different approach.  We keep the
+Orgtbl-mode table in its native format (the source table), and use a
+custom function to translate the table to the correct syntax, and to
+install it in the right location (the target table).  This puts the
+burden of writing conversion functions on the user, but it allows for a
+very flexible system.
 
 * Menu:
 
@@ -5536,8 +5555,8 @@ the receiver lines. `translation_function' is the Lisp function that
 does the translation.  Furthermore, the line can contain a list of
 arguments (alternating key and value) at the end.  The arguments will be
 passed as a property list to the translation function for
-interpretation.  However, a few standard parameters are already
-recognized and acted upon before the translation function is called:
+interpretation.  A few standard parameters are already recognized and
+acted upon before the translation function is called:
 
 `:skip N'
      Skip the first N lines of the table. Hlines do count!
@@ -5561,16 +5580,11 @@ number of different solutions:
    * Sometimes it is possible to put the table after some kind of END
      statement, for example `\bye' in TeX and `\end{document}' in LaTeX.
 
-   * If all else fails(1), you can just comment the table line by line
-     whenever you want to process the file, and uncomment it whenever
-     you need to edit the table.  The command `M-x
-     orgtbl-toggle-comment' does make this a viable option, in
-     particular if you bind it to a key.
-
-   ---------- Footnotes ----------
-
-   (1) In principle the source table could also be in a separate file,
-but so far this is not implemented.
+   * You can just comment the table line by line whenever you want to
+     process the file, and uncomment it whenever you need to edit the
+     table.  This only sounds tedious - the command `M-x
+     orgtbl-toggle-comment' does make this comment-toggling very easy,
+     in particular if you bind it to a key.
 
 
 File: org,  Node: A LaTeX example,  Next: Translator functions,  Prev: Radio tables,  Up: Tables in arbitrary syntax
@@ -5616,9 +5630,9 @@ table inserted between the two marker lines.
 
    Now lets assume you want to make the table header by hand, because
 you want to control how columns are aligned etc.  In this case we make
-sure that the table translator does skip the first 2 lines, and tell the
-command to work as a splice, i.e. to not produce header and footer
-commands of the table:
+sure that the table translator does skip the first 2 lines of the source
+table, and tell the command to work as a splice, i.e. to not produce
+header and footer commands of the target table:
 
      \begin{tabular}{lrrr}
      Month & \multicolumn{1}{c}{Days} & Nr.\ sold & per day\\
@@ -5646,11 +5660,11 @@ following parameters:
      tabular environment.  Default is nil.
 
 `:fmt fmt'
-     A format to be used to wrap the field, should contain `%s' for the
+     A format to be used to wrap each field, should contain `%s' for the
      original field value.  For example, to wrap each field value in
      dollars, you could use `:fmt "$%s$"'.  This may also be a property
      list with column numbers and formats. for example `:fmt (2 "$%s$"
-     4 "%s%%")'.
+     4 "%s\\%%")'.
 
 `:efmt efmt'
      Use this format to print numbers with exponentials.  The format
@@ -5682,20 +5696,66 @@ A.2.3 Translator functions
 --------------------------
 
 Orgtbl-mode has several translator functions built-in:
-`orgtbl-to-latex', `orgtbl-to-html', and `orgtbl-to-texinfo'.  For
-deatils on each of them, please check the corresponding documentation
-strings.
+`orgtbl-to-latex', `orgtbl-to-html', and `orgtbl-to-texinfo'.  Except
+for `orgtbl-to-html'(1), these all use a generic translator,
+`orgtbl-to-generic'.  For example, `orgtbl-to-latex' itself is a very
+short function that computes the column definitions for the `tabular'
+environment, defines a few field and line separators and then hands
+over to the generic translator.  Here is the entire code:
 
-   In order to write your own translator function, start by looking at
-`orgtbl-to-latex' which is well documented.  Basically you have to
-write a function that takes two arguments.  The first argument is the
-table, a list of lines, each line either the symbol `hline' or a list
-of fields.  The second argument is a property list that will contain
-all parameters specified in the `#+ORGTBL: SEND' line.  Orgtbl-mode
-always handles the `:skip' and `:skipcols' parameters, but your
-translator function may use any number of additional parameters.  If
-you write a generally useful translator, please post it on
-`emacs-orgmode@gnu.org' so that others can benefit from your work.
+     (defun orgtbl-to-latex (table params)
+       "Convert the orgtbl-mode TABLE to LaTeX."
+       (let* ((alignment (mapconcat (lambda (x) (if x "r" "l"))
+                                    org-table-last-alignment ""))
+              (params2
+               (list
+                :tstart (concat "\\begin{tabular}{" alignment "}")
+                :tend "\\end{tabular}"
+                :lstart "" :lend " \\\\" :sep " & "
+                :efmt "%s\\,(%s)" :hline "\\hline")))
+         (orgtbl-to-generic table (org-combine-plists params2 params))))
+
+   As you can see, the properties passed into the function (variable
+PARAMS) are combined with the ones newly defined in the function
+(variable PARAMS2).  The ones passed into the function (i.e. the ones
+set by the `ORGTBL SEND' line) take precedence.  So if you would like
+to use the LaTeX translator, but wanted the line endings to be
+`\\[2mm]' instead of the default `\\', you could just overrule the
+default with
+
+     #+ORGTBL: SEND test orgtbl-to-latex :lend " \\\\[2mm]"
+
+   For a new language, you can either write your own converter function
+in analogy with the LaTeX translator, or you can use the generic
+function directly.  For example, if you have a language where a table
+is started with `!BTBL!', ended with `!ETBL!', and where table lines are
+started with `!BL!', ended with `!EL!' and where the field separator is
+a TAB, you could call the generic translator like this (on a single
+line!):
+
+     #+ORGTBL: SEND test orgtbl-to-generic :tstart "!BTBL!" :tend "!ETBL!"
+                                   :lstart "!BL! " :lend " !EL!" :sep "\t"
+
+Please check the documentation string of the function
+`orgtbl-to-generic' for a full list of parameters understood by that
+function and remember that you can pass each of them into
+`orgtbl-to-latex', `orgtbl-to-texinfo', and any other function using
+the generic function.
+
+   Of course you can also write a completely new function doing
+complicated things the generic translator cannot do.  A translator
+function takes two arguments.  The first argument is the table, a list
+of lines, each line either the symbol `hline' or a list of fields.  The
+second argument is the property list containing all parameters
+specified in the `#+ORGTBL: SEND' line.  The function must return a
+single string containing the formatted table.  If you write a generally
+useful translator, please post it on `emacs-orgmode@gnu.org' so that
+others can benefit from your work.
+
+   ---------- Footnotes ----------
+
+   (1) The HTML translator uses the same code that produces tables
+during HTML export.
 
 
 File: org,  Node: Dynamic blocks,  Next: Special agenda views,  Prev: Tables in arbitrary syntax,  Up: Extensions and Hacking
@@ -6007,9 +6067,6 @@ Index
 * calendar integration:                  Weekly/Daily agenda. (line  24)
 * calendar, for selecting date:          The date/time prompt.
                                                               (line  26)
-* CamelCase link completion:             Completion.          (line   6)
-* CamelCase links:                       Internal links.      (line   6)
-* CamelCase links, completion of:        CamelCase links.     (line   6)
 * category:                              Categories.          (line   6)
 * CDLaTeX:                               CDLaTeX mode.        (line   6)
 * cdlatex.el:                            Cooperation.         (line  29)
@@ -6022,8 +6079,6 @@ Index
 * column formula:                        Column formulas.     (line   6)
 * commands, in agenda buffer:            Agenda commands.     (line   6)
 * comment lines:                         Comment lines.       (line   6)
-* completion, of CamelCase links <1>:    Completion.          (line   6)
-* completion, of CamelCase links:        CamelCase links.     (line   6)
 * completion, of dictionary words:       Completion.          (line   6)
 * completion, of file names:             Handling links.      (line  43)
 * completion, of link abbreviations:     Completion.          (line   6)
@@ -6036,7 +6091,7 @@ Index
 * completion, of TeX symbols:            Completion.          (line   6)
 * completion, of TODO keywords <1>:      Completion.          (line   6)
 * completion, of TODO keywords:          Workflow states.     (line  12)
-* constants, in calculations:            References.          (line  65)
+* constants, in calculations:            References.          (line  74)
 * constants.el:                          Cooperation.         (line  14)
 * content, STARTUP keyword:              In-buffer settings.  (line  22)
 * contents, global visibility state:     Visibility cycling.  (line  22)
@@ -6061,7 +6116,7 @@ Index
 * deadlines:                             Time stamps.         (line   6)
 * deadlines, repeating:                  Repeating items.     (line   6)
 * debugging, of table formulas:          Editing and debugging formulas.
-                                                              (line  70)
+                                                              (line  78)
 * demotion, of subtrees:                 Structure editing.   (line   6)
 * diary entries, creating from agenda:   Agenda commands.     (line 198)
 * diary integration:                     Weekly/Daily agenda. (line  24)
@@ -6107,7 +6162,7 @@ Index
                                                               (line  15)
 * format, of links:                      Link format.         (line   6)
 * formula debugging:                     Editing and debugging formulas.
-                                                              (line  70)
+                                                              (line  78)
 * formula editing:                       Editing and debugging formulas.
                                                               (line   6)
 * formula syntax, Calc:                  Formula syntax for Calc.
@@ -6202,8 +6257,8 @@ Index
                                                               (line  15)
 * motion commands in agenda:             Agenda commands.     (line  19)
 * motion, between headlines:             Motion.              (line   6)
-* name, of column or field:              References.          (line  65)
-* named references:                      References.          (line  65)
+* name, of column or field:              References.          (line  74)
+* named references:                      References.          (line  74)
 * names as TODO keywords:                TODO types.          (line   6)
 * narrow columns in tables:              Narrow columns.      (line   6)
 * noalign, STARTUP keyword:              In-buffer settings.  (line  29)
@@ -6249,13 +6304,13 @@ Index
 * quoted HTML tags:                      Export options.      (line  25)
 * radio tables:                          Radio tables.        (line   6)
 * radio targets:                         Radio targets.       (line   6)
-* range references:                      References.          (line  44)
+* range references:                      References.          (line  53)
 * ranges, time:                          Time stamps.         (line   6)
 * recomputing table fields:              Updating the table.  (line   6)
 * references:                            References.          (line   6)
-* references, named:                     References.          (line  65)
+* references, named:                     References.          (line  74)
 * references, to fields:                 References.          (line  14)
-* references, to ranges:                 References.          (line  44)
+* references, to ranges:                 References.          (line  53)
 * region, active <1>:                    Export commands.     (line   6)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
@@ -6277,7 +6332,7 @@ Index
 * section-numbers:                       Export options.      (line  25)
 * setting tags:                          Setting tags.        (line   6)
 * SHELL links:                           External links.      (line   6)
-* show all, command:                     Visibility cycling.  (line  31)
+* show all, command:                     Visibility cycling.  (line  33)
 * show all, global visibility state:     Visibility cycling.  (line  22)
 * show hidden text:                      Visibility cycling.  (line   6)
 * showall, STARTUP keyword:              In-buffer settings.  (line  22)
@@ -6405,12 +6460,12 @@ Key Index
 * .:                                     Agenda commands.     (line 100)
 * ::                                     Agenda commands.     (line 131)
 * <:                                     The date/time prompt.
-                                                              (line  29)
+                                                              (line  32)
 * <left>:                                Agenda commands.     (line  97)
 * <RET> <1>:                             Agenda commands.     (line  41)
 * <RET> <2>:                             Setting tags.        (line  76)
 * <RET> <3>:                             The date/time prompt.
-                                                              (line  54)
+                                                              (line  57)
 * <RET>:                                 Built-in table editor.
                                                               (line  64)
 * <right>:                               Agenda commands.     (line  92)
@@ -6427,7 +6482,7 @@ Key Index
 * <TAB>:                                 Visibility cycling.  (line  10)
 * > <1>:                                 Agenda commands.     (line 173)
 * >:                                     The date/time prompt.
-                                                              (line  30)
+                                                              (line  33)
 * ^:                                     CDLaTeX mode.        (line  33)
 * _:                                     CDLaTeX mode.        (line  33)
 * `:                                     CDLaTeX mode.        (line  39)
@@ -6486,7 +6541,7 @@ Key Index
 * C-c a T:                               Global TODO list.    (line  14)
 * C-c a t <1>:                           Global TODO list.    (line   9)
 * C-c a t:                               TODO basics.         (line  33)
-* C-c C-a:                               Visibility cycling.  (line  31)
+* C-c C-a:                               Visibility cycling.  (line  33)
 * C-c C-b:                               Motion.              (line  15)
 * C-c C-c <1>:                           Cooperation.         (line  37)
 * C-c C-c <2>:                           The very busy C-c C-c key.
@@ -6505,10 +6560,10 @@ Key Index
 * C-c C-e:                               Exporting.           (line  19)
 * C-c C-e a:                             ASCII export.        (line   9)
 * C-c C-e b:                             Export commands.     (line   7)
-* C-c C-e c:                             iCalendar export.    (line  20)
+* C-c C-e c:                             iCalendar export.    (line  21)
 * C-c C-e h:                             Export commands.     (line   6)
-* C-c C-e I:                             iCalendar export.    (line  15)
-* C-c C-e i:                             iCalendar export.    (line  13)
+* C-c C-e I:                             iCalendar export.    (line  16)
+* C-c C-e i:                             iCalendar export.    (line  14)
 * C-c C-e t:                             Export options.      (line  13)
 * C-c C-e v <1>:                         XOXO export.         (line  11)
 * C-c C-e v:                             Sparse trees.        (line  41)
@@ -6527,7 +6582,7 @@ Key Index
                                                               (line  34)
 * C-c C-q:                               Built-in table editor.
                                                               (line 125)
-* C-c C-r:                               Visibility cycling.  (line  32)
+* C-c C-r:                               Visibility cycling.  (line  34)
 * C-c C-s <1>:                           Agenda commands.     (line 155)
 * C-c C-s:                               Creating timestamps. (line  48)
 * C-c C-t <1>:                           Clocking work time.  (line  27)
@@ -6535,7 +6590,7 @@ Key Index
 * C-c C-u:                               Motion.              (line  18)
 * C-c C-v:                               TODO basics.         (line  26)
 * C-c C-w:                               Creating timestamps. (line  41)
-* C-c C-x b:                             Visibility cycling.  (line  39)
+* C-c C-x b:                             Visibility cycling.  (line  41)
 * C-c C-x C-a:                           ARCHIVE tag.         (line  28)
 * C-c C-x C-b:                           Checkboxes.          (line  38)
 * C-c C-x C-c:                           Agenda commands.     (line 220)
@@ -6564,9 +6619,13 @@ Key Index
 * C-c C-y <1>:                           Clocking work time.  (line  22)
 * C-c C-y:                               Creating timestamps. (line  66)
 * C-c l:                                 Handling links.      (line   9)
-* C-c {:                                 CDLaTeX mode.        (line  21)
+* C-c { <1>:                             CDLaTeX mode.        (line  21)
+* C-c {:                                 Editing and debugging formulas.
+                                                              (line  60)
 * C-c |:                                 Built-in table editor.
                                                               (line  40)
+* C-c }:                                 Editing and debugging formulas.
+                                                              (line  56)
 * C-c ~:                                 Cooperation.         (line  50)
 * C-k:                                   Agenda commands.     (line 117)
 * C-TAB:                                 ARCHIVE tag.         (line  38)
@@ -6620,7 +6679,7 @@ Key Index
 * M-S-<down> <2>:                        Plain lists.         (line  59)
 * M-S-<down>:                            Structure editing.   (line  36)
 * M-S-<left> <1>:                        The date/time prompt.
-                                                              (line  51)
+                                                              (line  54)
 * M-S-<left> <2>:                        Built-in table editor.
                                                               (line  76)
 * M-S-<left> <3>:                        Plain lists.         (line  65)
@@ -6629,7 +6688,7 @@ Key Index
 * M-S-<RET> <2>:                         Plain lists.         (line  52)
 * M-S-<RET>:                             Structure editing.   (line  18)
 * M-S-<right> <1>:                       The date/time prompt.
-                                                              (line  48)
+                                                              (line  51)
 * M-S-<right> <2>:                       Built-in table editor.
                                                               (line  79)
 * M-S-<right> <3>:                       Plain lists.         (line  65)
@@ -6640,7 +6699,7 @@ Key Index
 * M-S-<up>:                              Structure editing.   (line  33)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           The date/time prompt.
-                                                              (line  33)
+                                                              (line  36)
 * mouse-1:                               Handling links.      (line  72)
 * mouse-2 <1>:                           Agenda commands.     (line  35)
 * mouse-2:                               Handling links.      (line  72)
@@ -6658,7 +6717,7 @@ Key Index
 * s:                                     Agenda commands.     (line  89)
 * S-<down> <1>:                          Agenda commands.     (line 151)
 * S-<down> <2>:                          The date/time prompt.
-                                                              (line  42)
+                                                              (line  45)
 * S-<down> <3>:                          Creating timestamps. (line  58)
 * S-<down> <4>:                          Priorities.          (line  25)
 * S-<down> <5>:                          Editing and debugging formulas.
@@ -6666,14 +6725,14 @@ Key Index
 * S-<down>:                              Plain lists.         (line  55)
 * S-<left> <1>:                          Agenda commands.     (line 169)
 * S-<left> <2>:                          The date/time prompt.
-                                                              (line  39)
+                                                              (line  42)
 * S-<left> <3>:                          Creating timestamps. (line  53)
 * S-<left>:                              TODO basics.         (line  20)
 * S-<RET>:                               Built-in table editor.
                                                               (line 146)
 * S-<right> <1>:                         Agenda commands.     (line 161)
 * S-<right> <2>:                         The date/time prompt.
-                                                              (line  36)
+                                                              (line  39)
 * S-<right> <3>:                         Creating timestamps. (line  53)
 * S-<right>:                             TODO basics.         (line  20)
 * S-<TAB> <1>:                           Built-in table editor.
@@ -6681,7 +6740,7 @@ Key Index
 * S-<TAB>:                               Visibility cycling.  (line  22)
 * S-<up> <1>:                            Agenda commands.     (line 145)
 * S-<up> <2>:                            The date/time prompt.
-                                                              (line  45)
+                                                              (line  48)
 * S-<up> <3>:                            Creating timestamps. (line  58)
 * S-<up> <4>:                            Priorities.          (line  25)
 * S-<up> <5>:                            Editing and debugging formulas.
@@ -6697,182 +6756,181 @@ Key Index
 
 Tag Table:
 Node: Top970
-Node: Introduction11466
-Node: Summary11881
-Node: Installation14889
-Node: Activation16267
-Node: Feedback17516
-Node: Document structure19592
-Node: Outlines20366
-Node: Headlines21026
-Node: Visibility cycling21649
-Ref: Visibility cycling-Footnote-123740
-Ref: Visibility cycling-Footnote-223798
-Ref: Visibility cycling-Footnote-323848
-Node: Motion24117
-Node: Structure editing24901
-Node: Archiving27727
-Node: ARCHIVE tag28285
-Node: Moving subtrees30078
-Node: Sparse trees31389
-Ref: Sparse trees-Footnote-133521
-Ref: Sparse trees-Footnote-233703
-Node: Plain lists33818
-Ref: Plain lists-Footnote-137343
-Ref: Plain lists-Footnote-237700
-Node: Tables37884
-Node: Built-in table editor38398
-Node: Narrow columns45394
-Ref: Narrow columns-Footnote-147326
-Node: orgtbl-mode47372
-Node: The spreadsheet48176
-Node: References48994
-Node: Formula syntax for Calc52251
-Node: Formula syntax for Lisp54568
-Node: Field formulas55796
-Node: Column formulas57107
-Node: Editing and debugging formulas58530
-Node: Updating the table61640
-Node: Advanced features62671
-Node: Hyperlinks67196
-Node: Link format67969
-Node: Internal links69262
-Ref: Internal links-Footnote-171251
-Node: Radio targets71383
-Node: CamelCase links72098
-Node: External links72692
-Node: Handling links75096
-Ref: Handling links-Footnote-180188
-Ref: Handling links-Footnote-280425
-Node: Link abbreviations80499
-Node: Search options82178
-Ref: Search options-Footnote-183958
-Node: Custom searches84039
-Node: Remember85087
-Node: Setting up remember86074
-Node: Remember templates86656
-Ref: Remember templates-Footnote-189971
-Node: Storing notes90069
-Node: TODO items91877
-Node: TODO basics92859
-Node: TODO extensions94386
-Node: Workflow states95181
-Node: TODO types96166
-Ref: TODO types-Footnote-197824
-Node: Per file keywords97906
-Ref: Per file keywords-Footnote-199360
-Node: Priorities99561
-Node: Breaking down tasks100805
-Ref: Breaking down tasks-Footnote-1101324
-Node: Checkboxes101420
-Node: Timestamps104175
-Node: Time stamps104709
-Ref: Time stamps-Footnote-1108203
-Ref: Time stamps-Footnote-2108319
-Node: Creating timestamps108474
-Node: The date/time prompt111100
-Ref: The date/time prompt-Footnote-1112866
-Node: Custom time format112972
-Node: Repeating items114530
-Node: Progress logging116340
-Node: Closing items116986
-Ref: Closing items-Footnote-1117920
-Ref: Closing items-Footnote-2117989
-Node: Tracking TODO state changes118062
-Node: Clocking work time118918
-Ref: Clocking work time-Footnote-1122564
-Ref: Clocking work time-Footnote-2122642
-Node: Tags122768
-Node: Tag inheritance123530
-Node: Setting tags124467
-Ref: Setting tags-Footnote-1128666
-Ref: Setting tags-Footnote-2128778
-Node: Tag searches128861
-Node: Agenda views131572
-Node: Agenda files133517
-Ref: Agenda files-Footnote-1134483
-Ref: Agenda files-Footnote-2134632
-Node: Agenda dispatcher134825
-Node: Built-in agenda views136516
-Node: Weekly/Daily agenda137094
-Node: Global TODO list139223
-Node: Matching headline tags141396
-Node: Timeline142467
-Node: Stuck projects143133
-Node: Presentation and sorting144832
-Node: Categories145623
-Node: Time-of-day specifications146287
-Node: Sorting of agenda items148258
-Node: Agenda commands149540
-Node: Custom agenda views156193
-Node: Storing searches156868
-Node: Block agenda158780
-Node: Setting Options160010
-Node: Batch processing162722
-Node: Embedded LaTeX163852
-Ref: Embedded LaTeX-Footnote-1164944
-Node: Math symbols165134
-Node: Subscripts and Superscripts165899
-Node: LaTeX fragments166743
-Ref: LaTeX fragments-Footnote-1168851
-Node: Processing LaTeX fragments169113
-Node: CDLaTeX mode170059
-Ref: CDLaTeX mode-Footnote-1172543
-Node: Exporting172691
-Node: ASCII export174005
-Node: HTML export175295
-Node: Export commands175914
-Node: Quoting HTML tags176638
-Node: Links177101
-Node: Images177798
-Ref: Images-Footnote-1178669
-Node: CSS support178730
-Ref: CSS support-Footnote-1180049
-Node: XOXO export180162
-Node: iCalendar export180601
-Node: Text interpretation181704
-Node: Comment lines182183
-Node: Enhancing text182654
-Node: Export options184472
-Node: Publishing186139
-Ref: Publishing-Footnote-1186935
-Node: Configuration187131
-Node: Project alist187849
-Node: Sources and destinations188915
-Node: Selecting files189645
-Node: Publishing action190393
-Node: Publishing options191626
-Node: Publishing links193778
-Node: Project page index195291
-Node: Sample configuration196069
-Node: Simple example196561
-Node: Complex example197234
-Node: Triggering publication199310
-Node: Miscellaneous199995
-Node: Completion200629
-Node: Customization202100
-Node: In-buffer settings202683
-Node: The very busy C-c C-c key206923
-Node: Clean view208567
-Node: TTY keys211144
-Node: Interaction212753
-Node: Cooperation213150
-Node: Conflicts215890
-Node: Bugs217482
-Node: Extensions and Hacking218978
-Node: Extensions219574
-Node: Tables in arbitrary syntax221521
-Node: Radio tables222596
-Ref: Radio tables-Footnote-1225128
-Node: A LaTeX example225236
-Ref: A LaTeX example-Footnote-1228852
-Ref: A LaTeX example-Footnote-2229000
-Node: Translator functions229435
-Node: Dynamic blocks230466
-Node: Special agenda views232438
-Ref: Special agenda views-Footnote-1234717
-Node: History and Acknowledgments234977
-Node: Index240766
-Node: Key Index271825
+Node: Introduction11398
+Node: Summary11813
+Node: Installation14821
+Node: Activation16199
+Node: Feedback17448
+Node: Document structure19524
+Node: Outlines20298
+Node: Headlines20958
+Node: Visibility cycling21581
+Ref: Visibility cycling-Footnote-123795
+Ref: Visibility cycling-Footnote-223853
+Ref: Visibility cycling-Footnote-323903
+Node: Motion24172
+Node: Structure editing24956
+Node: Archiving27782
+Node: ARCHIVE tag28340
+Node: Moving subtrees30133
+Node: Sparse trees31444
+Ref: Sparse trees-Footnote-133576
+Ref: Sparse trees-Footnote-233758
+Node: Plain lists33873
+Ref: Plain lists-Footnote-137398
+Ref: Plain lists-Footnote-237755
+Node: Tables37939
+Node: Built-in table editor38453
+Node: Narrow columns45449
+Ref: Narrow columns-Footnote-147381
+Node: orgtbl-mode47427
+Node: The spreadsheet48231
+Node: References49049
+Node: Formula syntax for Calc52684
+Node: Formula syntax for Lisp55001
+Node: Field formulas56229
+Node: Column formulas57540
+Node: Editing and debugging formulas58963
+Node: Updating the table62328
+Node: Advanced features63359
+Node: Hyperlinks67884
+Node: Link format68657
+Node: Internal links69950
+Ref: Internal links-Footnote-171875
+Node: Radio targets72007
+Node: External links72698
+Node: Handling links75102
+Ref: Handling links-Footnote-180194
+Ref: Handling links-Footnote-280431
+Node: Link abbreviations80505
+Node: Search options82184
+Ref: Search options-Footnote-183964
+Node: Custom searches84045
+Node: Remember85093
+Node: Setting up remember86080
+Node: Remember templates86662
+Ref: Remember templates-Footnote-189977
+Node: Storing notes90075
+Node: TODO items91883
+Node: TODO basics92865
+Node: TODO extensions94392
+Node: Workflow states95187
+Node: TODO types96172
+Ref: TODO types-Footnote-197830
+Node: Per file keywords97912
+Ref: Per file keywords-Footnote-199366
+Node: Priorities99567
+Node: Breaking down tasks100811
+Ref: Breaking down tasks-Footnote-1101330
+Node: Checkboxes101426
+Node: Timestamps104181
+Node: Time stamps104715
+Ref: Time stamps-Footnote-1108209
+Ref: Time stamps-Footnote-2108325
+Node: Creating timestamps108480
+Node: The date/time prompt111106
+Ref: The date/time prompt-Footnote-1113067
+Node: Custom time format113173
+Node: Repeating items114731
+Node: Progress logging116541
+Node: Closing items117187
+Ref: Closing items-Footnote-1118121
+Ref: Closing items-Footnote-2118190
+Node: Tracking TODO state changes118263
+Node: Clocking work time119119
+Ref: Clocking work time-Footnote-1122765
+Ref: Clocking work time-Footnote-2122843
+Node: Tags122969
+Node: Tag inheritance123731
+Node: Setting tags124668
+Ref: Setting tags-Footnote-1129101
+Ref: Setting tags-Footnote-2129213
+Node: Tag searches129296
+Node: Agenda views132007
+Node: Agenda files133952
+Ref: Agenda files-Footnote-1134918
+Ref: Agenda files-Footnote-2135067
+Node: Agenda dispatcher135260
+Node: Built-in agenda views136951
+Node: Weekly/Daily agenda137529
+Node: Global TODO list139658
+Node: Matching headline tags141831
+Node: Timeline142902
+Node: Stuck projects143568
+Node: Presentation and sorting145267
+Node: Categories146058
+Node: Time-of-day specifications146722
+Node: Sorting of agenda items148693
+Node: Agenda commands149975
+Node: Custom agenda views156628
+Node: Storing searches157303
+Node: Block agenda159215
+Node: Setting Options160445
+Node: Batch processing163157
+Node: Embedded LaTeX164287
+Ref: Embedded LaTeX-Footnote-1165379
+Node: Math symbols165569
+Node: Subscripts and Superscripts166334
+Node: LaTeX fragments167178
+Ref: LaTeX fragments-Footnote-1169286
+Node: Processing LaTeX fragments169548
+Node: CDLaTeX mode170494
+Ref: CDLaTeX mode-Footnote-1172978
+Node: Exporting173126
+Node: ASCII export174440
+Node: HTML export175730
+Node: Export commands176349
+Node: Quoting HTML tags177073
+Node: Links177703
+Node: Images178400
+Ref: Images-Footnote-1179271
+Node: CSS support179332
+Ref: CSS support-Footnote-1180651
+Node: XOXO export180764
+Node: iCalendar export181203
+Node: Text interpretation182422
+Node: Comment lines182901
+Node: Enhancing text183372
+Node: Export options185190
+Node: Publishing186887
+Ref: Publishing-Footnote-1187683
+Node: Configuration187879
+Node: Project alist188597
+Node: Sources and destinations189663
+Node: Selecting files190393
+Node: Publishing action191141
+Node: Publishing options192374
+Node: Publishing links194526
+Node: Project page index196039
+Node: Sample configuration196817
+Node: Simple example197309
+Node: Complex example197982
+Node: Triggering publication200058
+Node: Miscellaneous200743
+Node: Completion201377
+Node: Customization202848
+Node: In-buffer settings203431
+Node: The very busy C-c C-c key207671
+Node: Clean view209315
+Node: TTY keys211892
+Node: Interaction213501
+Node: Cooperation213898
+Node: Conflicts216638
+Node: Bugs218230
+Node: Extensions and Hacking219726
+Node: Extensions220322
+Node: Tables in arbitrary syntax222269
+Node: Radio tables223346
+Node: A LaTeX example225849
+Ref: A LaTeX example-Footnote-1229495
+Ref: A LaTeX example-Footnote-2229643
+Node: Translator functions230078
+Ref: Translator functions-Footnote-1233187
+Node: Dynamic blocks233275
+Node: Special agenda views235247
+Ref: Special agenda views-Footnote-1237526
+Node: History and Acknowledgments237786
+Node: Index243575
+Node: Key Index274269
 
 End Tag Table

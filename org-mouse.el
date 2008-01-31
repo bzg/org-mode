@@ -3,8 +3,8 @@
 ;; Copyright (c) 2006 Piotr Zielinski
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
-;; Version: 0.23
-;; $Id: org-mouse.el 806 2007-01-30 23:16:24Z pz215 $
+;; Version: 0.24
+;; $Id: org-mouse.el 817 2007-02-01 00:28:02Z pz215 $
 ;; 
 ;; The latest version of this file is available from
 ;;
@@ -86,6 +86,9 @@
 ;; Please email me with new feature suggestions / bugs
 
 ;; History:
+;;
+;; Version 0.24
+;; + minor changes to the table menu
 ;;
 ;; Version 0.23
 ;; + preliminary support for tables and calculation marks
@@ -726,14 +729,17 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	 ["Fill Rectangle" org-table-wrap-region])
 	"--"
 	["Set Column Formula" org-table-eval-formula]
-	["Set Named Field Formula" (org-table-eval-formula '(4))]
+	["Set Field Formula" (org-table-eval-formula '(4))]
 	["Edit Formulas" org-table-edit-formulas]
-	["Recalculate line" org-table-recalculate]
-	["Recalculate all" (org-table-recalculate '(4))]
+	"--"
+	["Recalculate Line" org-table-recalculate]
+	["Recalculate All" (org-table-recalculate '(4))]
+	["Iterate All" (org-table-recalculate '(16))]
+	"--"
 	["Toggle Recalculate Mark" org-table-rotate-recalc-marks]
 	["Sum Column/Rectangle" org-table-sum
 	 :active (or (org-at-table-p) (org-region-active-p))]
-	["Which Column?" org-table-current-column]
+	["Field Info" org-table-field-info]
 	["Debug Formulas"
 	 (setq org-table-formula-debug (not org-table-formula-debug))
 	 :style toggle :selected org-table-formula-debug]
