@@ -1,3 +1,16 @@
+2007-10-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-get-restriction-and-command): Fix window size.
+	(org-read-date-get-relative): Require [-+] at the beginning.
+
+2007-10-23  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-open-link-from-string): New function.
+	(org-columns-open-link): New commands.
+
+2007-10-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-scan-tags): Handle indirect buffers.
 
 -----------------------------------------------------------------------
 

@@ -63,11 +63,12 @@ CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
 TEXIFILES  = org.texi
 INFOFILES  = org
 HTMLDIR    = /home/dominik/public_html/Tools/org
+HG_RELEASES = ../org-mode-all-releases-hg/
 
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog request-assign.future
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog request-assign-future.txt
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
@@ -176,6 +177,14 @@ release:
 #	cp ORGWEBPAGE/tmp/*.zip org-release
 	cp org-release/org-$(TAG).zip    org-release/org.zip
 	cp org-release/org-$(TAG).tar.gz org-release/org.tar.gz
+	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
+	cp -r org-$(TAG)/* $(HG_RELEASES)
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
+
+trackrelease:
+	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
+	cp -r org-$(TAG)/* $(HG_RELEASES)
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
 
 dist:
 	make distfile TAG=$(TAG)

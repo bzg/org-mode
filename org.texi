@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.13
+@set VERSION 5.13e
 @set DATE October 2007
 
 @dircategory Emacs
@@ -3939,13 +3939,16 @@ Furthermore you can specify a relative date by giving, as the
 @emph{first} thing in the input: a plus/minus sign, a number and a
 letter [dwmy] to indicate change in days weeks, months, years.  With a
 single plus or minus, the date is always relative to today.  With a
-double plus or minus, it is relative to the default date.  E.g.
+double plus or minus, it is relative to the default date.  If instead of
+a single letter, you use the abbreviation of day name, the date will be
+the nth such day.  E.g.
 
 @example
 +4d           --> four days from today
 +4            --> same as above
 +2w           --> two weeks from today
 ++5           --> five days from default date
++2tue         --> second tuesday from now.
 @end example
 
 The function understands English month and weekday abbreviations.  If
