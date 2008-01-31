@@ -1,3 +1,11 @@
+2007-10-20  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-file-regexp): New variable.
+
+2007-10-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-files): Allow directories in the variable.
+
 2007-10-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-get-restriction-and-command): New function.

@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.13a
+;; Version: 5.13c
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.13a"
+(defconst org-version "5.13c"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1987,13 +1987,24 @@ is used instead.")
 Entries may be added to this list with \\[org-agenda-file-to-front] and removed with
 \\[org-remove-file].  You can also use customize to edit the list.
 
+If an entry is a directory, all files in that directory that are matched by
+`org-agenda-file-regexp' will be part of the file list.
+
 If the value of the variable is not a list but a single file name, then
 the list of agenda files is actually stored and maintained in that file, one
 agenda file per line."
   :group 'org-agenda
   :type '(choice
-	  (repeat :tag "List of files" file)
+	  (repeat :tag "List of files and directories" file)
 	  (file :tag "Store list in a file\n" :value "~/.agenda_files")))
+
+(defcustom org-agenda-file-regexp "\\.org\\'"
+  "Regular expression to match files for `org-agenda-files'.
+If ny element in the list in that variable contains a directory instead
+of a normal file, all files in that directory that are matched by this
+regular expression will be included."
+  :group 'org-agenda
+  :type 'regexp)
 
 (defcustom org-agenda-skip-unavailable-files nil
   "t means to just skip non-reachable files in `org-agenda-files'.
@@ -9767,7 +9778,8 @@ With prefix arg ALL, do this for all lines in the table."
 
 (defun org-table-formula-substitute-names (f)
   "Replace $const with values in string F."
-  (let ((start 0) a (f1 f))
+  (message "form %s" f) (sit-for 1)
+  (let ((start 0) a (f1 f) (pp (/= (string-to-char f) ?')))
     ;; First, check for column names
     (while (setq start (string-match org-table-column-name-regexp f start))
       (setq start (1+ start))
@@ -9779,7 +9791,8 @@ With prefix arg ALL, do this for all lines in the table."
       (setq start (1+ start))
       (if (setq a (save-match-data
 		    (org-table-get-constant (match-string 1 f))))
-	  (setq f (replace-match (concat "(" a ")") t t f))))
+	  (setq f (replace-match
+		   (concat (if pp "(") a (if pp ")")) t t f))))
     (if org-table-formula-debug
 	(put-text-property 0 (length f) :orig-formula f1 f))
     f))
@@ -18613,6 +18626,12 @@ is currently in place."
 	  ((stringp org-agenda-files) (org-read-agenda-file-list))
 	  ((listp org-agenda-files) org-agenda-files)
 	  (t (error "Invalid value of `org-agenda-files'")))))
+    (setq files (apply 'append
+		       (mapcar (lambda (f)
+				 (if (file-directory-p f)
+				     (directory-files f t "\\.org\\'")
+				   (list f)))
+			       files)))
     (if org-agenda-skip-unavailable-files
 	(delq nil
 	      (mapcar (function
@@ -23830,7 +23849,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
       (unless body-only
 	(when (plist-get opt-plist :auto-postamble)
-	  (insert "<div=\"postamble\">")
+	  (insert "<div id=\"postamble\">")
 	  (when (and org-export-author-info author)
 	    (insert "<p class=\"author\"> "
 		    (nth 1 lang-words) ": " author "\n")
@@ -23866,7 +23885,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (looking-at "\\s-*</p>")
 	    (goto-char (match-end 0))
 	    (insert "\n")))
-	(insert "<div class=\"table-of-contents\">\n")
+	(insert "<div id=\"table-of-contents\">\n")
 	(mapc 'insert thetoc)
 	(insert "</div>\n"))
       ;; remove empty paragraphs and lists
@@ -24210,8 +24229,10 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
 (defun org-html-expand (string)
   "Prepare STRING for HTML export.  Applies all active conversions.
 If there are links in the string, don't modify these."
-  (let* (m s l res)
-    (while (setq m (string-match org-bracket-link-regexp string))
+  (let* ((re (concat org-bracket-link-regexp "\\|"
+		     (org-re "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$")))
+	 m s l res)
+    (while (setq m (string-match re string))
       (setq s (substring string 0 m)
 	    l (match-string 0 string)
 	    string (substring string (match-end 0)))

@@ -4523,11 +4523,14 @@ window configuration is restored when the agenda exits:
 The information to be shown is collected from all @emph{agenda files},
 the files listed in the variable @code{org-agenda-files}@footnote{If the
 value of that variable is not a list, but a single file name, then the
-list of agenda files will be maintained in that external file.}.  Thus even
-if you only work with a single Org-mode file, this file should be put
-into that list@footnote{When using the dispatcher, pressing @kbd{1}
-before selecting a command will actually limit the command to the
-current file, and ignore @code{org-agenda-files} until the next
+list of agenda files will be maintained in that external file.}. If a
+directory is part of this list, all files with the extension @file{.org}
+in this directory will be part of the list.
+
+Thus even if you only work with a single Org-mode file, this file should
+be put into that list@footnote{When using the dispatcher, pressing
+@kbd{<} before selecting a command will actually limit the command to
+the current file, and ignore @code{org-agenda-files} until the next
 dispatcher command.}.  You can customize @code{org-agenda-files}, but
 the easiest way to maintain it is through the following commands
 

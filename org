@@ -4174,10 +4174,13 @@ File: org,  Node: Agenda files,  Next: Agenda dispatcher,  Prev: Agenda views,  
 =================
 
 The information to be shown is collected from all _agenda files_, the
-files listed in the variable `org-agenda-files'(1).  Thus even if you
-only work with a single Org-mode file, this file should be put into
-that list(2).  You can customize `org-agenda-files', but the easiest
-way to maintain it is through the following commands
+files listed in the variable `org-agenda-files'(1). If a directory is
+part of this list, all files with the extension `.org' in this
+directory will be part of the list.
+
+   Thus even if you only work with a single Org-mode file, this file
+should be put into that list(2).  You can customize `org-agenda-files',
+but the easiest way to maintain it is through the following commands
 
 `C-c ['
      Add current file to the list of agenda files.  The file is added to
@@ -4200,7 +4203,7 @@ visit any of them.
 name, then the list of agenda files will be maintained in that external
 file.
 
-   (2) When using the dispatcher, pressing `1' before selecting a
+   (2) When using the dispatcher, pressing `<' before selecting a
 command will actually limit the command to the current file, and ignore
 `org-agenda-files' until the next dispatcher command.
 
@@ -7762,7 +7765,7 @@ Index
 * file links, searching:                 Search options.      (line   6)
 * file name completion:                  Handling links.      (line  44)
 * files for agenda:                      Agenda files.        (line   6)
-* files, adding to agenda list:          Agenda files.        (line  12)
+* files, adding to agenda list:          Agenda files.        (line  15)
 * files, selecting for publishing:       Selecting files.     (line   6)
 * fixed width:                           Enhancing text.      (line  28)
 * fixed-width sections:                  Export options.      (line  26)
@@ -8145,8 +8148,8 @@ Key Index
 * C:                                     Agenda commands.     (line 216)
 * c:                                     Agenda commands.     (line 196)
 * C-#:                                   Advanced features.   (line   9)
-* C-':                                   Agenda files.        (line  18)
-* C-,:                                   Agenda files.        (line  18)
+* C-':                                   Agenda files.        (line  21)
+* C-,:                                   Agenda files.        (line  21)
 * C-<RET>:                               Structure editing.   (line  18)
 * C-_:                                   Agenda commands.     (line 108)
 * C-c ! <1>:                             Footnotes.           (line  14)
@@ -8180,9 +8183,9 @@ Key Index
 * C-c >:                                 Creating timestamps. (line  27)
 * C-c ?:                                 Editing and debugging formulas.
                                                               (line  24)
-* C-c [:                                 Agenda files.        (line  12)
+* C-c [:                                 Agenda files.        (line  15)
 * C-c \:                                 Tag searches.        (line   9)
-* C-c ]:                                 Agenda files.        (line  15)
+* C-c ]:                                 Agenda files.        (line  18)
 * C-c ^ <1>:                             Built-in table editor.
                                                               (line  96)
 * C-c ^:                                 Structure editing.   (line  58)
@@ -8625,105 +8628,105 @@ Node: Storing notes166201
 Ref: Storing notes-Footnote-1168680
 Node: Agenda views168782
 Node: Agenda files170733
-Ref: Agenda files-Footnote-1171701
-Ref: Agenda files-Footnote-2171850
-Node: Agenda dispatcher172043
-Ref: Agenda dispatcher-Footnote-1174097
-Ref: Agenda dispatcher-Footnote-2174191
-Node: Built-in agenda views174285
-Node: Weekly/Daily agenda174867
-Node: Global TODO list178204
-Node: Matching tags and properties180484
-Node: Timeline181575
-Node: Stuck projects182249
-Node: Presentation and sorting184102
-Node: Categories184895
-Ref: Categories-Footnote-1185606
-Node: Time-of-day specifications185926
-Node: Sorting of agenda items187899
-Node: Agenda commands189183
-Node: Custom agenda views196646
-Node: Storing searches197367
-Ref: Storing searches-Footnote-1199901
-Node: Block agenda200018
-Node: Setting Options201250
-Node: Exporting Agenda Views203991
-Ref: Exporting Agenda Views-Footnote-1208277
-Ref: Exporting Agenda Views-Footnote-2208334
-Node: Extracting Agenda Information for other programs208520
-Node: Embedded LaTeX212648
-Ref: Embedded LaTeX-Footnote-1213742
-Node: Math symbols213932
-Node: Subscripts and Superscripts214699
-Node: LaTeX fragments215545
-Ref: LaTeX fragments-Footnote-1217778
-Ref: LaTeX fragments-Footnote-2218039
-Node: Processing LaTeX fragments218173
-Node: CDLaTeX mode219121
-Ref: CDLaTeX mode-Footnote-1221607
-Node: Exporting221755
-Node: ASCII export223222
-Node: HTML export224723
-Node: HTML Export commands225349
-Node: Quoting HTML tags227136
-Node: Links227771
-Node: Images228468
-Ref: Images-Footnote-1229339
-Node: CSS support229400
-Ref: CSS support-Footnote-1230719
-Node: LaTeX export230832
-Node: LaTeX export commands231156
-Node: Quoting LaTeX code232318
-Node: XOXO export232823
-Node: iCalendar export233263
-Node: Text interpretation234732
-Node: Comment lines235323
-Node: Initial text235718
-Node: Footnotes237387
-Node: Enhancing text238178
-Ref: Enhancing text-Footnote-1240047
-Node: Export options240137
-Node: Publishing242539
-Ref: Publishing-Footnote-1243500
-Ref: Publishing-Footnote-2243644
-Node: Configuration243795
-Node: Project alist244513
-Node: Sources and destinations245579
-Node: Selecting files246309
-Node: Publishing action247057
-Node: Publishing options248391
-Node: Publishing links250766
-Node: Project page index252279
-Node: Sample configuration253057
-Node: Simple example253549
-Node: Complex example254222
-Node: Triggering publication256298
-Node: Miscellaneous256983
-Node: Completion257617
-Node: Customization259287
-Node: In-buffer settings259870
-Node: The very busy C-c C-c key265540
-Node: Clean view267395
-Node: TTY keys269972
-Node: Interaction271582
-Node: Cooperation271979
-Node: Conflicts274855
-Node: Bugs276858
-Node: Extensions and Hacking278354
-Node: Extensions279079
-Node: Adding hyperlink types281341
-Node: Tables in arbitrary syntax285003
-Node: Radio tables286092
-Node: A LaTeX example288595
-Ref: A LaTeX example-Footnote-1292241
-Ref: A LaTeX example-Footnote-2292389
-Node: Translator functions292824
-Ref: Translator functions-Footnote-1295933
-Node: Dynamic blocks296021
-Node: Special agenda views297993
-Node: Using the property API301238
-Node: History and Acknowledgments302719
-Node: Index309280
-Node: Key Index344349
+Ref: Agenda files-Footnote-1171821
+Ref: Agenda files-Footnote-2171970
+Node: Agenda dispatcher172163
+Ref: Agenda dispatcher-Footnote-1174217
+Ref: Agenda dispatcher-Footnote-2174311
+Node: Built-in agenda views174405
+Node: Weekly/Daily agenda174987
+Node: Global TODO list178324
+Node: Matching tags and properties180604
+Node: Timeline181695
+Node: Stuck projects182369
+Node: Presentation and sorting184222
+Node: Categories185015
+Ref: Categories-Footnote-1185726
+Node: Time-of-day specifications186046
+Node: Sorting of agenda items188019
+Node: Agenda commands189303
+Node: Custom agenda views196766
+Node: Storing searches197487
+Ref: Storing searches-Footnote-1200021
+Node: Block agenda200138
+Node: Setting Options201370
+Node: Exporting Agenda Views204111
+Ref: Exporting Agenda Views-Footnote-1208397
+Ref: Exporting Agenda Views-Footnote-2208454
+Node: Extracting Agenda Information for other programs208640
+Node: Embedded LaTeX212768
+Ref: Embedded LaTeX-Footnote-1213862
+Node: Math symbols214052
+Node: Subscripts and Superscripts214819
+Node: LaTeX fragments215665
+Ref: LaTeX fragments-Footnote-1217898
+Ref: LaTeX fragments-Footnote-2218159
+Node: Processing LaTeX fragments218293
+Node: CDLaTeX mode219241
+Ref: CDLaTeX mode-Footnote-1221727
+Node: Exporting221875
+Node: ASCII export223342
+Node: HTML export224843
+Node: HTML Export commands225469
+Node: Quoting HTML tags227256
+Node: Links227891
+Node: Images228588
+Ref: Images-Footnote-1229459
+Node: CSS support229520
+Ref: CSS support-Footnote-1230839
+Node: LaTeX export230952
+Node: LaTeX export commands231276
+Node: Quoting LaTeX code232438
+Node: XOXO export232943
+Node: iCalendar export233383
+Node: Text interpretation234852
+Node: Comment lines235443
+Node: Initial text235838
+Node: Footnotes237507
+Node: Enhancing text238298
+Ref: Enhancing text-Footnote-1240167
+Node: Export options240257
+Node: Publishing242659
+Ref: Publishing-Footnote-1243620
+Ref: Publishing-Footnote-2243764
+Node: Configuration243915
+Node: Project alist244633
+Node: Sources and destinations245699
+Node: Selecting files246429
+Node: Publishing action247177
+Node: Publishing options248511
+Node: Publishing links250886
+Node: Project page index252399
+Node: Sample configuration253177
+Node: Simple example253669
+Node: Complex example254342
+Node: Triggering publication256418
+Node: Miscellaneous257103
+Node: Completion257737
+Node: Customization259407
+Node: In-buffer settings259990
+Node: The very busy C-c C-c key265660
+Node: Clean view267515
+Node: TTY keys270092
+Node: Interaction271702
+Node: Cooperation272099
+Node: Conflicts274975
+Node: Bugs276978
+Node: Extensions and Hacking278474
+Node: Extensions279199
+Node: Adding hyperlink types281461
+Node: Tables in arbitrary syntax285123
+Node: Radio tables286212
+Node: A LaTeX example288715
+Ref: A LaTeX example-Footnote-1292361
+Ref: A LaTeX example-Footnote-2292509
+Node: Translator functions292944
+Ref: Translator functions-Footnote-1296053
+Node: Dynamic blocks296141
+Node: Special agenda views298113
+Node: Using the property API301358
+Node: History and Acknowledgments302839
+Node: Index309400
+Node: Key Index344469
 
 End Tag Table
