@@ -4778,7 +4778,7 @@ between words."
 	(setq org-cycle-global-status 'overview)
 	(run-hook-with-args 'org-cycle-hook 'overview))))
 
-     ((and org-drawers
+     ((and org-drawers org-drawer-regexp
 	   (save-excursion
 	     (beginning-of-line 1)
 	     (looking-at org-drawer-regexp)))
@@ -6757,7 +6757,8 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
 
 (defun org-cycle-hide-drawers (state)
   "Re-hide all drawers after a visibility state change."
-  (when (not (memq state '(overview folded)))
+  (when (and (org-mode-p)
+	     (not (memq state '(overview folded))))
     (save-excursion
       (let* ((globalp (memq state '(contents all)))
              (beg (if globalp (point-min) (point)))
@@ -18320,7 +18321,8 @@ the documentation of `org-diary'."
 				       (point))))
 		    (setq donep (string-match org-looking-at-done-regexp head))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(setq timestr (concat (match-string 1 s) " ")))
+			(setq timestr (concat (match-string 1 s) " "))
+		      (setq timestr nil))
 		    (if (and donep
 			     (or org-agenda-skip-deadline-if-done
 				 (not (= diff 0))))
