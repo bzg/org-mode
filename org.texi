@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.64
+@set VERSION 4.65
 @set DATE February 2007
 
 @dircategory Emacs
@@ -296,8 +296,15 @@ Interaction with other packages
 Extensions, Hooks and Hacking
 
 * Extensions::                  Existing 3rd-part extensions
+* Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
-* Special agenda views::        
+* Special agenda views::        Customized views
+
+Tables in arbitrary syntax
+
+* Radio tables::                Sending and receiving
+* A LaTeX example::             Step by step, almost a tutorial
+* Translator functions::        Copy and modify
 
 @end detailmenu
 @end menu
@@ -363,7 +370,8 @@ example as:
 
 Org-mode's automatic, context sensitive table editor with spreadsheet
 capabilities can be integrated into any major mode by activating the
-minor Orgtbl-mode.
+minor Orgtbl-mode.  Using a translation step, it can be used to maintain
+tables in arbitray file types, for example in LaTeX.
 
 @cindex FAQ
 There is a website for Org-mode which provides links to the newest
@@ -372,6 +380,7 @@ questions (FAQ), links to tutorials etc.  This page is located at
 @uref{http://www.astro.uva.nl/~dominik/Tools/org/}.
 
 @page
+
 
 @node Installation, Activation, Summary, Introduction
 @section Installation
@@ -1342,6 +1351,12 @@ example in mail mode, use
 (add-hook 'mail-mode-hook 'turn-on-orgtbl)
 @end lisp
 
+Furthermore, with some special setup, it is possible to maintain tables
+in arbitrary syntax with Orgtbl-mode.  For example, it is possible to
+construct LaTeX tables with the underlying ease and power of
+Orgtbl-mode, including spreadsheet capabulities.  For details, see
+@ref{Tables in arbitrary syntax}.
+
 @node The spreadsheet,  , orgtbl-mode, Tables
 @section The spreadsheet
 @cindex calculations, in tables
@@ -1634,6 +1649,15 @@ also apply the new formulas to the entire table.
 @kindex C-c C-q
 @item C-c C-q
 Exit the buffer without installing changes.
+@kindex @key{TAB}
+@item @key{TAB}
+Pretty-print or indent lisp formula at point.  When in a line containing
+a lisp formula, format the formula according to Emacs Lisp rules.
+Another @key{TAB} collapses the formula back again.  In the open
+formula, @key{TAB} re-indents just like in Emacs-lisp-mode.
+@kindex M-@key{TAB}
+@item M-@key{TAB}
+Complete Lisp symbols, just like in Emacs-lisp-mode.
 @kindex S-@key{up}
 @kindex S-@key{down}
 @item S-@key{up}/@key{down}
@@ -1779,6 +1803,9 @@ recalculation slows down editing too much.
 Unmarked lines are exempt from recalculation with @kbd{C-u C-c *}.
 All lines that should be recalculated should be marked with @samp{#}
 or @samp{*}.
+@item /
+Do not export this line.  Useful for lines that contain the narrowing
+@samp{<N>} markers.
 @end table
 
 Finally, just to whet your appetite on what can be done with the
@@ -2590,7 +2617,7 @@ anywhere in the file:
 #+TYP_TODO: Fred Sara Lucy Mike DONE
 @end example
 
-@cindex Completion, of option keywords
+@cindex completion, of option keywords
 @kindex M-@key{TAB}
 @noindent To make sure you are using the correct keyword, type
 @samp{#+} into the buffer and then use @kbd{M-@key{TAB}} completion.
@@ -3059,8 +3086,8 @@ format is shorter, things do work as expected.
 @node Repeating items, Progress logging, Custom time format, Timestamps
 @section Repeating items
 @cindex TODO items, repeating
-@cindex Deadlines, repeating
-@cindex Scheduling, repeating
+@cindex deadlines, repeating
+@cindex scheduling, repeating
 
 Org-mode integrates with the Emacs calendar and diary to display cyclic
 appointments, anniversaries and other special entries in the agenda
@@ -5935,12 +5962,14 @@ Org-mode.
 
 @menu
 * Extensions::                  Existing 3rd-part extensions
+* Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
-* Special agenda views::        
+* Special agenda views::        Customized views
 @end menu
 
-@node Extensions, Dynamic blocks, Extensions and Hacking, Extensions and Hacking
+@node Extensions, Tables in arbitrary syntax, Extensions and Hacking, Extensions and Hacking
 @section Third-party extensions for Org-mode
+@cindex extension, third-party
 
 The following extensions for Org-mode have been written by other people:
 
@@ -5948,7 +5977,7 @@ The following extensions for Org-mode have been written by other people:
 @cindex @file{org-publish.el}
 @item @file{org-publish.el} by David O'Toole
 This package provides facilities for publishing related sets of Org-mode
-files together with linked files like images as a webpages.  It is
+files together with linked files like images as webpages.  It is
 highly configurable and can be used for other publishing purposes as
 well.  As of Org-mode version 4.30, @file{org-publish.el} is part of the
 Org-mode distribution.  It is not yet part of Emacs, however, a delay
@@ -5980,8 +6009,228 @@ Translates Org-mode files into something readable by
 Remind. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
 @end table
 
-@node Dynamic blocks, Special agenda views, Extensions, Extensions and Hacking
+@page
+
+@node Tables in arbitrary syntax, Dynamic blocks, Extensions, Extensions and Hacking
+@section Tables in arbitrary syntax
+@cindex tables, in other modes
+@cindex orgtbl-mode
+
+Since Orgtbl-mode can be used as a minor mode in arbitrary buffers, a
+frequent feature request has been to make it work with native tables in
+specific languages, for example LaTeX.  However, this is extremely hard
+to do in a general way, would lead to a customization nightmare, and
+would take away much of the simplicity of the Orgtbl-mode table editor.
+
+This appendix describes different approach.  We keep the Orgtbl-mode
+table in its native format (the @i{source table}), and use a custom
+function to @i{translate} the table to the correct syntax, and to
+@i{install} it in the right location (the @i{target table}).  This puts
+the burden of writing conversion functions on the user, but it allows
+for a very flexible system.
+
+@menu
+* Radio tables::                Sending and receiving
+* A LaTeX example::             Step by step, almost a tutorial
+* Translator functions::        Copy and modify
+@end menu
+
+@node Radio tables, A LaTeX example, Tables in arbitrary syntax, Tables in arbitrary syntax
+@subsection Radio tables
+@cindex radio tables
+
+To define the location of the target table, you first need to create two
+lines that are comments in the current mode, but contain magic words for
+Orgtbl-mode to find.  Orgtbl-mode will insert the translated table
+between these lines, replacing whatever was there before.  For example:
+
+@example
+/* BEGIN RECEIVE ORGTBL table_name */
+/* END RECEIVE ORGTBL table_name */
+@end example
+
+@noindent
+Just above the source table, we put a special line that tells
+Orgtbl-mode how to translate this table and where to install it.  For
+example:
+@example
+#+ORGTBL: SEND table_name translation_function arguments....
+@end example
+
+@noindent
+@code{table_name} is the reference name for the table that is also used
+in the receiver lines. @code{translation_function} is the Lisp function
+that does the translation.  Furthermore, the line can contain a list of
+arguments (alternating key and value) at the end.  The arguments will be
+passed as a property list to the translation function for
+interpretation.  However, a few standard parameters are already
+recognized and acted upon before the translation function is called:
+
+@table @code
+@item :skip N
+Skip the first N lines of the table. Hlines do count!
+@item :skipcols (n1 n2 ...)
+List of columns that should be skipped.  If the table has a column with
+calculation marks, that column is automatically discarded as well.
+Please note that the translator function sees the table @emph{after} the
+removal of these columns, the function never knows that there have been
+additional columns.
+@end table
+
+@noindent
+The one problem remaining is how to keep the source table in the buffer
+without disturbing the normal workings of the file, for example during
+compilation of a C file or processing of a LaTeX file.  There are a
+number of different solutions:
+
+@itemize @bullet
+@item
+The table could be placed in a block comment if that is supported by the
+language.  For example, in C-mode you could wrap the table between
+@samp{/*} and @samp{*/} lines.
+@item 
+Sometimes it is possible to put the table after some kind of @i{END}
+statement, for example @samp{\bye} in TeX and @samp{\end@{document@}}
+in LaTeX.
+@item
+If all else fails@footnote{In principle the source table could also be
+in a separate file, but so far this is not implemented.}, you can just
+comment the table line by line whenever you want to process the file,
+and uncomment it whenever you need to edit the table.  The command
+@kbd{M-x orgtbl-toggle-comment} does make this a viable option, in
+particular if you bind it to a key.
+@end itemize
+
+@node A LaTeX example, Translator functions, Radio tables, Tables in arbitrary syntax
+@subsection A LaTeX example
+@cindex LaTeX, and orgtbl-mode
+
+The best way to wrap the source table in LaTeX is to use the
+@code{comment} environment provided by @file{comment.sty}.  It has to be
+activated by placing @code{\usepackage@{comment@}} into the document
+header.  Orgtbl-mode can insert a radio table skeleton@footnote{By
+default this works only for LaTeX, HTML, and TeXInfo.  Configure the
+variable @code{orgtbl-radio-tables} to install templates for other
+modes.}  with the command @kbd{M-x orgtbl-insert-radio-table}.  You will
+be prompted for a table name, lets say we use @samp{salesfigures}.  You
+will then get the following template:
+
+@example
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\begin@{comment@}
+#+ORGTBL: SEND salesfigures orgtbl-to-latex
+| | |
+\end@{comment@}
+@end example
+
+@noindent
+The @code{#+ORGTBL: SEND} line tells orgtbl-mode to use the function
+@code{orgtbl-to-latex} to convert the table into LaTeX and to put it
+into the receiver location with name @code{salesfigures}.  You may now
+fill in the table, feel free to use the spreadsheet features@footnote{If
+the @samp{#+TBLFM} line contains an odd number of dollar characters,
+this may cause problems with font-lock in latex-mode.  As shown in the
+example you can fix this by adding an extra line inside the
+@code{comment} environment that is used to balance the dollar
+expressions.  If you are using AUCTeX with the font-latex library, a
+much better solution is to add the @code{comment} environment to the
+variable @code{LaTeX-verbatim-environments}.}:
+
+@example
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\begin@{comment@}
+#+ORGTBL: SEND salesfigures orgtbl-to-latex
+| Month | Days | Nr sold | per day |
+|-------+------+---------+---------|
+| Jan   |   23 |      55 |     2.4 |
+| Feb   |   21 |      16 |     0.8 |
+| March |   22 |     278 |    12.6 |
+#+TBLFM: $4=$3/$2;%.1f
+% $ (optional extra dollar to keep font-lock happy, see footnote)
+\end@{comment@}
+@end example
+
+@noindent
+When you are done, press @kbd{C-c C-c} in the table to get the converted
+table inserted between the two marker lines.
+
+Now lets assume you want to make the table header by hand, because you
+want to control how columns are aligned etc.  In this case we make sure
+that the table translator does skip the first 2 lines, and tell the
+command to work as a @i{splice}, i.e. to not produce header and footer
+commands of the table:
+
+@example
+\begin@{tabular@}@{lrrr@}
+Month & \multicolumn@{1@}@{c@}@{Days@} & Nr.\ sold & per day\\
+% BEGIN RECEIVE ORGTBL salesfigures
+% END RECEIVE ORGTBL salesfigures
+\end@{tabular@}
+%
+\begin@{comment@}
+#+ORGTBL: SEND salesfigures orgtbl-to-latex :splice t :skip 2
+| Month | Days | Nr sold | per day |
+|-------+------+---------+---------|
+| Jan   |   23 |      55 |     2.4 |
+| Feb   |   21 |      16 |     0.8 |
+| March |   22 |     278 |    12.6 |
+#+TBLFM: $4=$3/$2;%.1f
+\end@{comment@}
+@end example
+
+The LaTeX translator function @code{orgtbl-to-latex} is already part of
+Orgtbl-mode.  It uses a @code{tabular} environment to typeset the table
+and marks horizontal lines with @code{\hline}.  Furthermore, it
+interprets the following parameters:
+
+@table @code
+@item :splice nil/t
+When set to t, return only table body lines, don't wrap them into a
+tabular environment.  Default is nil.
+
+@item :fmt fmt
+A format to be used to wrap the field, should contain @code{%s} for the
+original field value.  For example, to wrap each field value in dollars,
+you could use @code{:fmt "$%s$"}.  This may also be a property list with
+column numbers and formats. for example @code{:fmt (2 "$%s$" 4 "%s%%")}.
+
+@item :efmt efmt
+Use this format to print numbers with exponentials.  The format should
+have @code{%s} twice for inserting mantissa and exponent, for example
+@code{"%s\\times10^@{%s@}"}.  The default is @code{"%s\\,(%s)"}.  This
+may also be a property list with column numbers and formats, for example
+@code{:efmt (2 "$%s\\times10^@{%s@}$" 4 "$%s\\cdot10^@{%s@}$")}.  After
+@code{efmt} has been applied to a value, @code{fmt} will also be
+applied.
+@end table
+
+@node Translator functions,  , A LaTeX example, Tables in arbitrary syntax
+@subsection Translator functions
+@cindex HTML, and orgtbl-mode
+@cindex translator function
+
+Orgtbl-mode has several translator functions built-in:
+@code{orgtbl-to-latex}, @code{orgtbl-to-html}, and
+@code{orgtbl-to-texinfo}.  For deatils on each of them, please check
+the corresponding documentation strings.
+
+In order to write your own translator function, start by looking at
+@code{orgtbl-to-latex} which is well documented.  Basically you have to
+write a function that takes two arguments.  The first argument is the
+table, a list of lines, each line either the symbol @code{hline} or a
+list of fields.  The second argument is a property list that will
+contain all parameters specified in the @samp{#+ORGTBL: SEND} line.
+Orgtbl-mode always handles the @code{:skip} and @code{:skipcols}
+parameters, but your translator function may use any number of
+additional parameters.  If you write a generally useful translator,
+please post it on @code{emacs-orgmode@@gnu.org} so that others can
+benefit from your work.
+
+@node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Extensions and Hacking
 @section Dynamic blocks
+@cindex dynamic blocks
 
 Org-mode documents can contain @emph{dynamic blocks}.  These are
 specially marked regions that are updated by some user-written
@@ -6041,6 +6290,7 @@ written in a way that is does nothing in buffers that are not in Org-mode.
 
 @node Special agenda views,  , Dynamic blocks, Extensions and Hacking
 @section Special Agenda Views
+@cindex agenda views, user-defined
 
 Org-mode provides a special hook that can be used to narrow down the
 selection made by any of the agenda views.  You may specify a function
@@ -6099,17 +6349,21 @@ MATCH is being ignored."
 @cindex thanks
 
 Org-mode was borne in 2003, out of frustration over the user interface
-of the Emacs outline-mode.  All I initially wanted was to make working
-with an outline tree possible without having to remember more than 10
-commands just for hiding and unhiding parts of the outline tree, and to
-allow to restructure a tree easily.  Visibility cycling and structure
-editing were originally implemented in the package
+of the Emacs outline-mode.  I was trying to organize my notes and
+projects, and using Emacs seemed to be the natural way to go.  However,
+having to remember eleven different commands with two or three keys per
+command, only to hide and unhide parts of the outline tree, that seemed
+entirely unacceptable to me.  Also, when using outlines to take notes, I
+constantly want to restructure the tree, organizing it parallel to my
+thoughts and plans.  @emph{Visibility cycling} and @emph{structure
+editing} were originally implemented in the package
 @file{outline-magic.el}, but quickly moved to the more general
-@file{org.el}.  TODO entries, basic time stamps, and table support were
-added next, and highlight the two main goals that Org-mode still has
-today: To create a new, outline-based, plain text mode with innovative
-and intuitive editing features, and to incorporate project planning
-functionality directly into a notes file.
+@file{org.el}.  As this environment became comfortable for project
+planning, the next step was adding @emph{TODO entries}, basic @emph{time
+stamps}, and @emph{table support}.  These areas highlight the two main
+goals that Org-mode still has today: To create a new, outline-based,
+plain text mode with innovative and intuitive editing features, and to
+incorporate project planning functionality directly into a notes file.
 
 Since the first release, hundreds of emails to me or on
 @code{emacs-orgmode@@gnu.org} have provided a constant stream of bug

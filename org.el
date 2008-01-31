@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.64a
+;; Version: 4.65
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defvar org-version "4.64a"
+(defvar org-version "4.65"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -678,6 +678,33 @@ Org-mode.  See the variable `org-enable-table-editor' for details.  Changing
 this variable requires a restart of Emacs to become effective."
   :group 'org-table
   :type 'boolean)
+
+(defcustom orgtbl-radio-table-templates
+  '((latex-mode "% BEGIN RECEIVE ORGTBL %n
+% END RECEIVE ORGTBL %n
+\\begin{comment}
+#+ORGTBL: SEND %n orgtbl-to-latex :splice nil :skip 0
+| | |
+\\end{comment}\n")
+    (texinfo-mode "@c BEGIN RECEIVE ORGTBL %n
+@c END RECEIVE ORGTBL %n
+@ignore
+#+ORGTBL: SEND %n orgtbl-to-html :splice nil :skip 0
+| | |
+@end ignore\n")
+    (html-mode "<!-- BEGIN RECEIVE ORGTBL %n -->
+<!-- END RECEIVE ORGTBL %n -->
+<!--
+#+ORGTBL: SEND %n orgtbl-to-html :splice nil :skip 0
+| | |
+-->\n"))
+  "Templates for radio tables in different major modes.
+All occurrences of %n in a template will be replaced with the name of the
+table, obtained by prompting the user."
+  :group 'org-table
+  :type '(repeat
+	  (list (symbol :tag "Major mode")
+		(string :tag "Format"))))
 
 (defgroup org-table-settings nil
   "Settings for tables in Org-mode."
@@ -2540,7 +2567,7 @@ Otherwise the buffer will just be saved to a file and stay hidden."
   table { border-collapse: collapse; }
   td, th {
 	vertical-align: top;
-	border: 1pt solid #ADB9CC;
+	<!--border: 1pt solid #ADB9CC;-->
   }
 </style>"
   "The default style specification for exported HTML files.
@@ -2610,7 +2637,7 @@ This option can also be set with the +OPTIONS line, e.g. \"@:nil\"."
   :type 'boolean)
 
 (defcustom org-export-html-table-tag
-  "<table border=\"1\" cellspacing=\"0\" cellpadding=\"6\">"
+  "<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"
   "The HTML tag used to start a table.
 This must be a <table> tag, but you may change the options like
 borders and spacing."
@@ -7945,6 +7972,10 @@ Parameters get priority."
 (define-key org-edit-formulas-map [(shift right)] 'org-table-edit-next-field)
 (define-key org-edit-formulas-map [(meta up)]     'org-table-edit-scroll-down)
 (define-key org-edit-formulas-map [(meta down)]   'org-table-edit-scroll)
+(define-key org-edit-formulas-map [(meta tab)]    'lisp-complete-symbol)
+(define-key org-edit-formulas-map "\M-\C-i"       'lisp-complete-symbol)
+(define-key org-edit-formulas-map [(tab)]         'org-edit-formula-lisp-indent)
+(define-key org-edit-formulas-map "\C-i"          'org-edit-formula-lisp-indent)
 
 (defvar org-pos)
 
@@ -7965,39 +7996,45 @@ Parameters get priority."
     (use-local-map org-edit-formulas-map)
     (org-add-hook 'post-command-hook 'org-table-edit-formulas-post-command t t)
     (setq s "# `C-c C-c' to finish, `C-u C-c C-c' to also apply, `C-c C-q' to abort.
-# `M-up/down' to scroll table, `S-up/down' to change line for column formulas\n")
+# `TAB' to pretty-print Lisp expressions, `M-TAB' to complete List symbols
+# `M-up/down' to scroll table, `S-up/down' to change line for column formulas\n\n")
 
     (put-text-property 0 (length s) 'face 'font-lock-comment-face s)
     (insert s)
     (while (setq entry (pop eql))
       (setq s (concat (if (equal (string-to-char (car entry)) ?@) "" "$")
-		      (car entry) "=" (cdr entry) "\n"))
+		      (car entry) " = " (cdr entry) "\n"))
       (remove-text-properties 0 (length s) '(face nil) s)
       (insert s))
     (goto-char (point-min))
     (message "Edit formulas and finish with `C-c C-c'.")))
 
 (defun org-table-edit-formulas-post-command ()
-  (let ((win (selected-window)))
-    (save-excursion
-      (condition-case nil
-	  (org-show-reference)
-	(error nil))
-      (select-window win))))
+  (when (not (memq this-command '(lisp-complete-symbol)))
+    (let ((win (selected-window)))
+      (save-excursion
+	(condition-case nil
+	    (org-show-reference)
+	  (error nil))
+	(select-window win)))))
 
 (defun org-finish-edit-formulas (&optional arg)
   "Parse the buffer for formula definitions and install them.
 With prefix ARG, apply the new formulas to the table."
   (interactive "P")
   (org-table-remove-rectangle-highlight)
-  (let ((pos org-pos) eql)
+  (let ((pos org-pos) eql var form)
     (setq org-pos nil)
     (goto-char (point-min))
     (while (re-search-forward
-	    "^\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*?\\) *$"
+	    "^\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
 	    nil t)
-      (push (cons (if (match-end 2) (match-string 2) (match-string 1))
-		  (match-string 3)) eql))
+      (setq var (if (match-end 2) (match-string 2) (match-string 1))
+	    form (match-string 3))
+      (setq form (org-trim form))
+      (while (string-match "[ \t]*\n[ \t]*" form)
+	(setq form (replace-match " " t t form)))
+      (push (cons var form) eql))
     (set-window-configuration org-window-configuration)
     (select-window (get-buffer-window (marker-buffer pos)))
     (goto-char pos)
@@ -8020,6 +8057,45 @@ With prefix ARG, apply the new formulas to the table."
     (goto-char pos)
     (move-marker pos nil)
     (message "Formula editing aborted without installing changes")))
+
+(defun org-edit-formula-lisp-indent ()
+  "Pretty-print and re-indent Lisp expressions in the Formula Editor."
+  (interactive)
+  (let ((pos (point)) beg end ind)
+    (beginning-of-line 1)
+    (cond
+     ((looking-at "[ \t]")
+      (goto-char pos)
+      (call-interactively 'lisp-indent-line))
+     ((looking-at "[$@0-9a-zA-Z]+ *= *[^ \t\n']") (goto-char pos))
+     ((not (fboundp 'pp-buffer))
+      (error "Cannot pretty-print.  Command `pp-buffer' is not available."))
+     ((looking-at "[$@0-9a-zA-Z]+ *= *'(")
+      (goto-char (- (match-end 0) 2))
+      (setq beg (point))
+      (setq ind (make-string (current-column) ?\ ))
+      (condition-case nil (forward-sexp 1)
+	(error
+	 (error "Cannot pretty-print Lisp expression: Unbalanced parenthesis")))
+      (setq end (point))
+      (save-restriction
+	(narrow-to-region beg end)
+	(if (eq last-command this-command)
+	    (progn
+	      (goto-char (point-min))
+	      (setq this-command nil)
+	      (while (re-search-forward "[ \t]*\n[ \t]*" nil t)
+		(replace-match " ")))
+	  (pp-buffer)
+	  (untabify (point-min) (point-max))
+	  (goto-char (1+ (point-min)))
+	  (while (re-search-forward "^." nil t)
+	    (beginning-of-line 1)
+	    (insert ind))
+	  (goto-char (point-max))
+	  (backward-delete-char 1)))
+      (goto-char beg))
+     (t nil))))
 
 (defvar org-show-positions nil)
 
@@ -8132,7 +8208,7 @@ With prefix ARG, apply the new formulas to the table."
 	(let ((min (apply 'min org-show-positions))
 	      (max (apply 'max org-show-positions)))
 	  (when (or (not (pos-visible-in-window-p min))
-		    (no t(pos-visible-in-window-p max)))
+		    (not (pos-visible-in-window-p max)))
 	    (goto-char min)
 	    (set-window-start (selected-window) (point-at-bol))
 	    (goto-char pos))))
@@ -8283,6 +8359,14 @@ table editor in arbitrary modes.")
 (defvar org-old-auto-fill-inhibit-regexp nil
   "Local variable used by `orgtbl-mode'")
 
+(defconst orgtbl-line-start-regexp "[ \t]*\\(|\\|#\\+\\(TBLFM\\|ORGTBL\\):\\)"
+  "Matches a line belonging to an orgtbl.")
+
+(defconst orgtbl-extra-font-lock-keywords
+  (list (list (concat "^" orgtbl-line-start-regexp ".*")
+	      0 (quote 'org-table) 'prepend))
+  "Extra font-lock-keywords to be added when orgtbl-mode is active.")
+
 ;;;###autoload
 (defun orgtbl-mode (&optional arg)
   "The `org-mode' table editor as a minor mode for use in other modes."
@@ -8307,15 +8391,22 @@ table editor in arbitrary modes.")
 			 auto-fill-inhibit-regexp)
 	  (org-set-local 'auto-fill-inhibit-regexp
 			 (if auto-fill-inhibit-regexp
-			     (concat "\\([ \t]*|\\|" auto-fill-inhibit-regexp)
-			   "[ \t]*|"))
+			     (concat orgtbl-line-start-regexp "\\|"
+				     auto-fill-inhibit-regexp)
+			   orgtbl-line-start-regexp))
 	  (org-add-to-invisibility-spec '(org-cwidth))
+	  (when (fboundp 'font-lock-add-keywords)
+	    (font-lock-add-keywords nil orgtbl-extra-font-lock-keywords)
+	    (org-restart-font-lock))
 	  (easy-menu-add orgtbl-mode-menu)
 	  (run-hooks 'orgtbl-mode-hook))
       (setq auto-fill-inhibit-regexp org-old-auto-fill-inhibit-regexp)
       (org-cleanup-narrow-column-properties)
       (org-remove-from-invisibility-spec '(org-cwidth))
       (remove-hook 'before-change-functions 'org-before-change-function t)
+      (when (fboundp 'font-lock-remove-keywords)
+	(font-lock-remove-keywords nil orgtbl-extra-font-lock-keywords)
+	(org-restart-font-lock))
       (easy-menu-remove orgtbl-mode-menu)
       (force-mode-line-update 'all))))
 
@@ -8418,7 +8509,7 @@ to execute outside of tables."
     (define-key orgtbl-mode-map "\C-i"
       (orgtbl-make-binding 'orgtbl-tab 104 [(shift tab)]))
     (define-key orgtbl-mode-map "\C-c\C-c"
-      (orgtbl-make-binding 'org-ctrl-c-ctrl-c 105 "\C-c\C-c"))
+      (orgtbl-make-binding 'orgtbl-ctrl-c-ctrl-c 105 "\C-c\C-c"))
     (when orgtbl-optimized
       ;; If the user wants maximum table support, we need to hijack
       ;; some standard editing functions
@@ -8429,6 +8520,11 @@ to execute outside of tables."
       (define-key orgtbl-mode-map "|" 'org-force-self-insert))
     (easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu"
       '("OrgTbl"
+	("Radio tables"
+	 ["Insert radio table" orgtbl-insert-radio-table
+	  (assq major-mode orgtbl-radio-table-templates)]
+	 ["Comment/uncomment table" orgtbl-toggle-comment t]) ;; FIXME: only at a table
+	"--"
 	["Align" org-ctrl-c-ctrl-c :active (org-at-table-p) :keys "C-c C-c"]
 	["Next Field" org-cycle :active (org-at-table-p) :keys "TAB"]
 	["Previous Field" org-shifttab :active (org-at-table-p) :keys "S-TAB"]
@@ -8476,6 +8572,18 @@ to execute outside of tables."
 	))
     t)
 
+(defun orgtbl-ctrl-c-ctrl-c (arg)
+  "If the cursor is inside a table, realign the table.
+It it is a table to be sent away to a receiver, do it.
+With prefix arg, also recompute table."
+  (interactive "P")
+  (org-table-maybe-eval-formula)
+  (if arg
+      (call-interactively 'org-table-recalculate)
+    (org-table-maybe-recalculate-line))
+  (call-interactively 'org-table-align)
+  (orgtbl-send-table 'maybe))
+
 (defun orgtbl-tab (arg)
   "Justification and field motion for `orgtbl-mode'."
   (interactive "P")
@@ -8521,6 +8629,272 @@ overwritten, and the table is not marked as requiring realignment."
   "Needed to enforce self-insert under remapping."
   (interactive "p")
   (self-insert-command N))
+
+(defvar orgtbl-exp-regexp "^\\([-+]?[0-9][0-9.]*\\)[eE]\\([-+]?[0-9]+\\)$"
+  "Regula expression matching exponentials as produced by calc.")
+
+(defvar org-table-clean-did-remove-column-1 nil)
+
+(defun orgtbl-send-table (&optional maybe)
+  "Send a tranformed version of this table to the receiver position.
+With argument MAYBE, fail quietly if no transformation is defined for
+this table."
+  (interactive)
+  (catch 'exit
+    (unless (org-at-table-p) (error "Not at a table"))
+    ;; when non-interactive, we assume align has just happened.
+    (when (interactive-p) (org-table-align))
+    (save-excursion
+      (goto-char (org-table-begin))
+      (beginning-of-line 0)
+      (unless (looking-at "#\\+ORGTBL: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
+	(if maybe
+	    (throw 'exit nil)
+	  (error "Don't know how to transform this table."))))
+    (let* ((name (match-string 1))
+	   i line beg
+	   (transform (intern (match-string 2)))
+	   (params (if (match-end 3) (read (concat "(" (match-string 3) ")"))))
+	   (skip (plist-get params :skip))
+	   (skipcols (plist-get params :skipcols))
+	   (txt (buffer-substring-no-properties
+		 (org-table-begin) (org-table-end)))
+	   (lines (nthcdr (or skip 0) (org-split-string txt "[ \t]*\n[ \t]*")))
+	   (lines (org-table-clean-before-export lines))
+	   (table (mapcar
+		   (lambda (x)
+		     (if (string-match org-table-hline-regexp x)
+			 'hline
+		       (setq line (org-split-string (org-trim x) "\\s-*|\\s-*"))
+		       (when skipcols
+			 ;; Remove columns that should be skipped
+			 (setq i (if org-table-clean-did-remove-column-1 1 0)
+			       line
+			       (delq nil 
+				     (mapcar (lambda (x)
+					       (if (member (setq i (1+ i))
+							   skipcols) nil x))
+					     line))))
+		       line))
+		   lines)))
+
+      (unless (fboundp transform)
+	(error "No such transformation function %s" transform))
+      (setq txt (funcall transform table params))
+      ;; Find the insertion place
+      (save-excursion
+	(goto-char (point-min))
+	(unless (re-search-forward
+		 (concat "BEGIN RECEIVE ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
+	  (error "Don't know where to insert translated table"))
+	(goto-char (match-beginning 0))
+	(beginning-of-line 2)
+	(setq beg (point))
+	(unless (re-search-forward (concat "END RECEIVE ORGTBL +" name) nil t)
+	  (error "Cannot find end of insertion region"))
+	(beginning-of-line 1)
+	(delete-region beg (point))
+	(goto-char beg)
+	(insert txt "\n"))
+      (message "Table converted and installed at receiver location"))))
+
+(defun orgtbl-toggle-comment ()
+  "Comment or uncomment the orgtbl at point."
+  (interactive)
+  (let* ((re1 (concat "^" (regexp-quote comment-start) orgtbl-line-start-regexp))
+	 (re2 (concat "^" orgtbl-line-start-regexp))
+	 (commented (save-excursion (beginning-of-line 1)
+			     (cond ((looking-at re1) t)
+				   ((looking-at re2) nil)
+				   (t (error "Not at an org table")))))
+	 (re (if commented re1 re2))
+	 beg end)
+    (save-excursion
+      (beginning-of-line 1)
+      (while (looking-at re) (beginning-of-line 0))
+      (beginning-of-line 2)
+      (setq beg (point))
+      (while (looking-at re) (beginning-of-line 2))
+      (setq end (point)))
+    (comment-region beg end (if commented '(4) nil))))
+
+(defun orgtbl-insert-radio-table ()
+  "Insert a radio table template appropriate for this major mode."
+  (interactive)
+  (let* ((e (assq major-mode orgtbl-radio-table-templates))
+	 (txt (nth 1 e))
+	 name pos)
+    (unless e (error "No radio table setup defined for %s" major-mode))
+    (setq name (read-string "Table name: "))
+    (while (string-match "%n" txt)
+      (setq txt (replace-match name t t txt)))
+    (or (bolp) (insert "\n"))
+    (setq pos (point))
+    (insert txt)
+    (goto-char pos)))
+    
+(defun orgtbl-to-latex (table params)
+  "Convert the orgtbl-mode TABLE to LaTeX.
+TABLE is a list, each entry either the symbol `hline' for a horizontal
+separator line, or a list of fields for that line.
+PARAMS is a property list of parameters that can influence the conversion.
+Valid parameters are
+
+:splice nil/t      When set to t, return only table body lines, don't wrap
+                   them into a tabular environment.  Default is nil.
+
+:fmt fmt           A format to be used to wrap the field, should contain
+                   %s for the original field value.  For example, to wrap
+                   everything in dollars, you could use :fmt \"$%s$\".
+                   This may also be a property list with column numbers and
+                   formats. for example :fmt (2 \"$%s$\" 4 \"%s%%\")
+
+:efmt efmt         Use this format to print numbers with exponentials.
+                   The format should have %s twice for inserting mantissa
+                   and exponent, for example \"%s\\\\times10^{%s}\".  Default
+                   is \"%s\\\\,(%s)\".  This may also be a property list
+                   with column numbers and formats.
+
+In addition to this, a number of standard parameters are always handled
+directly by `orgtbl-send-table'.  See manual."
+  (interactive)
+  (let* ((splicep (plist-get params :splice))  ; do we need table header?
+	 (fmt (plist-get params :fmt))         ; General format
+	 (efmt (plist-get params :efmt))       ; Format for numbers with exp
+	 rtn                                   ; list collecting converted lines
+	 alignment line i fm efm)
+    
+    ;; First check if we need to put the tabular environment ourselves
+    (unless splicep
+      ;; yes, we do
+      (setq alignment (mapconcat (lambda (x) (if x "r" "l"))
+				 org-table-last-alignment ""))
+      (push (concat "\\begin{tabular}{" alignment "}") rtn))
+
+    ;; Now loop over all lines
+    (while (setq line (pop table))
+      (if (eq line 'hline)
+	  ;; A horizontal separator line
+	  (push "\\hline" rtn)
+	;; A normal line.  Convert the fields, push line onto the result list
+	(setq i 0)  ; counter for column, to access column-specific settings
+	(push
+	 (concat
+	  (mapconcat
+	   (lambda (f)
+	     ;; First get the settings that apply here.
+	     (setq i (1+ i)
+		   fm (if (stringp fmt) fmt (or (plist-get fmt i) "%s"))
+		   efm (if (stringp efmt) efmt (or (plist-get efmt i)
+						   "%s\\,(%s)")))
+	     (if (string-match orgtbl-exp-regexp f)
+		 ;; exponential, format accordingly
+		 (setq f (format efm (match-string 1 f) (match-string 2 f))))
+	     ;; Apply standard format
+	     (format fm f))
+	   line
+	   " & ")   ; Field separator
+	  "\\\\")   ; Line separator
+	 rtn)))
+    
+    ;; Close the tabular environment?
+    (unless splicep (push "\\end{tabular}" rtn))
+    
+    ;; Concatenate the lines, to return a single block of text
+    (mapconcat 'identity (nreverse rtn) "\n")))
+
+(defun orgtbl-to-html (table params)
+  "Convert the orgtbl-mode TABLE to LaTeX.
+TABLE is a list, each entry either the symbol `hline' for a horizontal
+separator line, or a list of fields for that line.
+PARAMS is a property list of parameters that can influence the conversion.
+Currently this function recognizes the following parameters:
+
+:splice nil/t      When set to t, return only table body lines, don't wrap
+                   them into a <table> environment.  Default is nil.
+
+A number of standard parameters are always handled directly by
+`orgtbl-send-table'.  See manual."
+  (interactive)
+  (let* ((splicep (plist-get params :splice))
+	 html)
+    ;; Just call the formatter we already have
+    ;; We need to make text lines for it, so put the fields back together.
+    (setq html (org-format-org-table-html
+		(mapcar
+		 (lambda (x)
+		   (if (eq x 'hline)
+		       "|----+----|"
+		     (concat "| " (mapconcat 'identity x " | ") " |")))
+		 table)
+		splicep))
+    (if (string-match "\n+\\'" html)
+	(setq html (replace-match "" t t html)))
+    html))
+
+(defun orgtbl-to-texinfo (table params)
+  "Convert the orgtbl-mode TABLE to TeXInfo.
+TABLE is a list, each entry either the symbol `hline' for a horizontal
+separator line, or a list of fields for that line.
+PARAMS is a property list of parameters that can influence the conversion.
+Valid parameters are
+
+:splice nil/t      When set to t, return only table body lines, don't wrap
+                   them into a multitable environment.  Default is nil.
+
+:fmt fmt           A format to be used to wrap the field, should contain
+                   %s for the original field value.  For example, to wrap
+                   everything in @kbd{}, you could use :fmt \"@kbd{%s}\".
+                   This may also be a property list with column numbers and
+                   formats. for example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
+
+:cf \"f1 f2..\"    The column fractions for the table.  Bye default these
+                   are computed automatically from the width of the columns
+                   under org-mode.
+
+Furthermore, a number of standard parameters are always handled directly
+by `orgtbl-send-table'.  See manual."
+  (interactive)
+  (let* ((splicep (plist-get params :splice))  ; do we need table header?
+	 (fmt (plist-get params :fmt))         ; General format
+	 (colfrac (plist-get params :cf))     ; Column fractions
+	 rtn                                   ; list collecting converted lines
+	 total line head i fm)
+    
+    (if (and (not splicep) (listp (car table)) (eq 'hline (nth 1 table)))
+	(setq head t))
+
+    ;; First check if we need to put the multitable environment ourselves
+    (unless splicep
+      (unless colfrac
+	(setq total (float (apply '+ org-table-last-column-widths))
+	      colfrac (mapconcat
+		       (lambda (x) (format "%.3f" (/ (float x) total)))
+		       org-table-last-column-widths " ")))
+      (push (concat "@multitable @columnfractions " colfrac) rtn))
+
+    ;; Loop over all lines
+    (while (setq line (pop table))
+      (if (eq line 'hline)
+	  ;; A horizontal separator line - TeXinfo cannot handle this
+	  nil
+	;; A normal line.  Convert the fields, push line onto the result list
+	(setq i 0)  ; counter for column, to access column-specific settings
+	(push
+	 (concat
+	  (if head (progn (setq head nil) "@headitem ") "@item ")
+	  (mapconcat
+	   (lambda (f)
+	     ;; First get the settings that apply here.
+	     (setq i (1+ i)
+		   fm (if (stringp fmt) fmt (or (plist-get fmt i) "%s")))
+	     (format fm f))
+	   line
+	   " @tab ")  ; Field separator
+	  "")
+	 rtn)))
+    (unless splicep (push "@end multitable" rtn))
+    (mapconcat 'identity (nreverse rtn) "\n")))
 
 ;;;; Link Stuff
 
@@ -10047,7 +10421,7 @@ to be run from that hook to fucntion properly."
 		  (or headline ""))))
 	(insert tpl) (goto-char (point-min))
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuTai]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUai]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
@@ -10098,7 +10472,7 @@ to be run from that hook to fucntion properly."
 ;;;###autoload
 (defun org-remember ()
   "Call `remember'.  If this is already a remember buffer, re-apply template.
-If there is an active region, amke sure remember uses it as initial content
+If there is an active region, make sure remember uses it as initial content
 of the remember buffer."
   (interactive)
   (if (eq org-finish-function 'remember-buffer)
@@ -11028,7 +11402,7 @@ are included in the output."
 	      (goto-char lspos)
 	      (setq marker (org-agenda-new-marker))
 	      (org-add-props txt props
-		'org-marker marker 'org-hd-marker marker 'category category)
+		'org-marker marker 'org-hd-marker marker 'org-category category)
 	      (push txt rtn))
 	    ;; if we are to skip sublevels, jump to end of subtree
 	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))))
@@ -12487,7 +12861,8 @@ The following commands are available:
   ;; Make sure properties are removed when copying text
   (when (boundp 'buffer-substring-filters)
     (org-set-local 'buffer-substring-filters
-		   (cons (lambda (x) (set-text-properties 0 (length x) nil x) x)
+		   (cons (lambda (x)
+                           (set-text-properties 0 (length x) nil x) x)
 			 buffer-substring-filters)))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
@@ -14022,7 +14397,7 @@ the documentation of `org-diary'."
 		     1)))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
-	  'priority priority 'category category)
+	  'priority priority 'org-category category)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
 	    (goto-char (match-end 1))
@@ -14091,13 +14466,13 @@ the documentation of `org-diary'."
 	      (org-add-props txt nil
 		'face (if donep 'org-done 'org-warning)
 		'undone-face 'org-warning 'done-face 'org-done
-		'category category 'priority (+ 100 priority))
+		'org-category category 'priority (+ 100 priority))
 	    (if scheduledp
 		(org-add-props txt nil
 		  'face 'org-scheduled-today
 		  'undone-face 'org-scheduled-today 'done-face 'org-done
-		  'category category 'priority (+ 99 priority))
-	      (org-add-props txt nil 'priority priority 'category category)))
+		  'org-category category 'priority (+ 99 priority))
+	      (org-add-props txt nil 'priority priority 'org-category category)))
 	  (push txt ee))
 	(outline-next-heading)))
     (nreverse ee)))
@@ -14148,7 +14523,7 @@ the documentation of `org-diary'."
 	  (setq priority 100000)
 	  (org-add-props txt props
 	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-done
-	    'priority priority 'category category
+	    'priority priority 'org-category category
 	    'undone-face 'org-warning 'done-face 'org-done)
 	  (push txt ee))
 	(outline-next-heading)))
@@ -14204,7 +14579,7 @@ the documentation of `org-diary'."
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'priority (+ (- 10 diff) (org-get-priority txt))
-		  'category category
+		  'org-category category
 		  'face face 'undone-face face 'done-face 'org-done)
 		(push txt ee))))))
     ee))
@@ -14257,7 +14632,7 @@ the documentation of `org-diary'."
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'priority (+ (- 5 diff) (org-get-priority txt))
-		  'category category)
+		  'org-category category)
 		(push txt ee))))))
     ee))
 
@@ -14303,7 +14678,7 @@ the documentation of `org-diary'."
 		(setq txt org-agenda-no-heading-message))
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker hdmarker
-		'priority (org-get-priority txt) 'category category)
+		'priority (org-get-priority txt) 'org-category category)
 	      (push txt ee)))
 	(goto-char pos)))
     ;; Sort the entries by expiration date.
@@ -14420,7 +14795,7 @@ only the correctly processes TXT should be returned - this is used by
 
       ;; And finally add the text properties
       (org-add-props rtn nil
-	'category (downcase category) 'tags tags
+	'org-category (downcase category) 'tags tags
 	'prefix-length (- (length rtn) (length txt))
 	'time-of-day time-of-day
 	'dotime dotime))))
@@ -15084,7 +15459,7 @@ the new TODO state."
 		   (equal m hdmarker))
 	  (setq props (text-properties-at (point))
 		dotime (get-text-property (point) 'dotime)
-		cat (get-text-property (point) 'category)
+		cat (get-text-property (point) 'org-category)
 		tags (get-text-property (point) 'tags)
 		new (org-format-agenda-item "x" newhead cat tags dotime 'noprefix)
 		pl (get-text-property (point) 'prefix-length)
@@ -15111,6 +15486,8 @@ the new TODO state."
 	(beginning-of-line 0)))
     (org-finalize-agenda)))
 
+;; FIXME: allow negative value for org-agenda-align-tags-to-column
+;; See the code in set-tags for the way to do this.
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-align-tags-to-column'."
   (let ((buffer-read-only))
@@ -17415,8 +17792,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	;; Need to use the code generator in table.el, with the original text.
 	(org-format-table-table-html-using-table-generate-source olines)))))
 
-(defun org-format-org-table-html (lines)
+(defun org-format-org-table-html (lines &optional splice)
   "Format a table into HTML."
+  ;; Get rid of hlines at beginning and end
   (if (string-match "^[ \t]*|-" (car lines)) (setq lines (cdr lines)))
   (setq lines (nreverse lines))
   (if (string-match "^[ \t]*|-" (car lines)) (setq lines (cdr lines)))
@@ -17424,52 +17802,84 @@ lang=\"%s\" xml:lang=\"%s\">
   (when org-export-table-remove-special-lines
     ;; Check if the table has a marking column.  If yes remove the
     ;; column and the special lines
-    (let* ((special
-	    (not
-	     (memq nil
-		   (mapcar
-		    (lambda (x)
-		      (or (string-match "^[ \t]*|-" x)
-			  (string-match "^[ \t]*| *\\([#!$*_^ ]\\) *|" x)))
-		    lines)))))
-      (if special
-	  (setq lines
-		(delq nil
-		      (mapcar
-		       (lambda (x)
-			 (if (string-match "^[ \t]*| *[!_^] *|" x)
-			     nil ; ignore this line
-			   (and (or (string-match "^[ \t]*|-+\\+" x)
-				    (string-match "^[ \t]*|[^|]*|" x))
-				(replace-match "|" t t x))))
-		       lines))))))
+    (setq lines (org-table-clean-before-export lines)))
 
   (let ((head (and org-export-highlight-first-table-line
 		   (delq nil (mapcar
 			      (lambda (x) (string-match "^[ \t]*|-" x))
 			      (cdr lines)))))
-	line fields html)
-    (setq html (concat org-export-html-table-tag "\n"))
+	(nlines 0) fnum i align al2
+	tbopen line fields html)
+    (if splice (setq head nil))
+    (unless splice (push (if head "<thead>" "<tbody>") html))
+    (setq tbopen t)
     (while (setq line (pop lines))
       (catch 'next-line
 	(if (string-match "^[ \t]*|-" line)
 	    (progn
+	      (unless splice 
+		(push (if head "</thead>" "</tbody>") html)
+		(if lines (push "<tbody>" html) (setq tbopen nil)))
 	      (setq head nil)   ;; head ends here, first time around
 	      ;; ignore this line
 	      (throw 'next-line t)))
 	;; Break the line into fields
 	(setq fields (org-split-string line "[ \t]*|[ \t]*"))
-	(setq html (concat
-		    html
-		    "<tr>"
-		    (mapconcat (lambda (x)
-				 (if head
-				     (concat "<th>" x "</th>")
-				   (concat "<td>" x "</td>")))
-			       fields "")
-		    "</tr>\n"))))
-    (setq html (concat html "</table>\n"))
-    html))
+	(unless fnum (setq fnum (make-vector (length fields) 0)))
+	(setq nlines (1+ nlines) i -1)
+	(push (concat "<tr>"
+		      (mapconcat
+		       (lambda (x)
+			 (setq i (1+ i))
+			 (if (and (< i nlines)
+				  (string-match org-table-number-regexp x))
+			     (incf (aref fnum i)))
+			 (if head
+			     (concat "<th>" x "</th>")
+			   (concat "<td>" x "</td>")))
+		       fields "")
+		      "</tr>")
+	      html)))
+    (unless splice (if tbopen (push "</tbody>" html)))
+    (unless splice (push "</table>\n" html))
+    (setq html (nreverse html))
+    (unless splice
+      (setq align (mapcar
+		   (lambda (x)
+		     (if (> (/ (float x) nlines) org-table-number-fraction)
+			 "right" "left"))
+		   fnum))
+      ;; Put in COL tags with the alignment (unfortuntely often ignored...)
+      (push (mapconcat
+	     (lambda (x)
+	       (format "<COL align=\"%s\">"
+		       (if (> (/ (float x) nlines) org-table-number-fraction)
+			   "right" "left")))
+	     fnum "")
+	    html)
+      (push org-export-html-table-tag html))
+    (concat (mapconcat 'identity html "\n") "\n")))
+
+(defun org-table-clean-before-export (lines)
+  "Check if the table has a marking column.
+If yes remove the column and the special lines."
+  (if (memq nil
+	    (mapcar
+	     (lambda (x) (or (string-match "^[ \t]*|-" x)
+			     (string-match "^[ \t]*| *\\([#!$*_^ /]\\) *|" x)))
+	     lines))
+      (progn
+	(setq org-table-clean-did-remove-column-1 nil)
+	lines)
+    (setq org-table-clean-did-remove-column-1 t)
+    (delq nil
+	  (mapcar
+	   (lambda (x) (if (string-match "^[ \t]*| *[!_^/] *|" x)
+			   nil ; ignore this line
+			 (and (or (string-match "^[ \t]*|-+\\+" x)
+				  (string-match "^[ \t]*|[^|]*|" x))
+			      (replace-match "|" t t x))))
+	   lines))))
 
 (defun org-fake-empty-table-line (line)
   "Replace everything except \"|\" with spaces."
@@ -19313,6 +19723,7 @@ This function should be run in the `org-after-todo-state-change-hook'."
 	(setq msg (concat msg type org-last-changed-timestamp " ")))
       (setq org-log-post-message msg)
       (message msg))))
+
 
 ;;;; Finish up
 
