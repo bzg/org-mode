@@ -21306,7 +21306,8 @@ the documentation of `org-diary'."
 	    'type "closed" 'date date
 	    'undone-face 'org-warning 'done-face 'org-done)
 	  (push txt ee))
-	(outline-next-heading)))
+	(goto-char (point-at-eol))))
+;	(outline-next-heading)))
     (nreverse ee)))
 
 (defun org-agenda-get-deadlines ()

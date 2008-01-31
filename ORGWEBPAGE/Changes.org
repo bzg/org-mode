@@ -64,7 +64,11 @@
     - It is no longer necessary to update the refiling targets -
       they are always current.
 
- *** Misc
+*** Misc
+
+   - If an entry is clocked multiple times, it ill now show up
+     several times in the agenda and timeline buffers, when
+     log-mode is on.  This was a proposal by Jurgen Defurne.
 
    - In `org-goto', typing characters now automatically starts
      isearch from the beginning of the buffer.  The isearch is
