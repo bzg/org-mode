@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.53).
+   This manual is for Org-mode (version 4.54).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.53).
+This manual is for Org-mode (version 4.54).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -398,14 +398,14 @@ File: org,  Node: Feedback,  Prev: Activation,  Up: Introduction
 
 If you find problems with Org-mode, or if you have questions, remarks,
 or ideas about it, please contact the maintainer Carsten Dominik at
-<dominik@science.uva.nl>.
+<dominik at science dot uva dot nl>.
 
    For bug reports, please provide as much information as possible,
 including the version information of Emacs (`C-h v emacs-version
 <RET>') and Org-mode (`C-h v org-version <RET>'), as well as the
-Org-mode related setup in `.emacs'.  If an error occurs, a traceback
-can be very useful.  Often a small example file helps, along with clear
-information about:
+Org-mode related setup in `.emacs'.  If an error occurs, a backtrace
+can be very useful (see below on how to create one).  Often a small
+example file helps, along with clear information about:
 
   1. What exactly did you do?
 
@@ -413,6 +413,33 @@ information about:
 
   3. What happened instead?
         Thank you for helping to improve this mode.
+
+How to create a useful backtrace
+................................
+
+If working with Org-mode produces an error with a message you don't
+understand, you may have hit a bug.  The best way to report this is by
+providing, in addition to what was mentioned above, a _Backtrace_.
+This is information from the built-in debugger about where and how the
+error occurred.  Here is how to produce a useful backtrace:
+
+  1. Start a fresh Emacs or XEmacs, and make sure that it will load the
+     original Lisp code in `org.el' instead of the compiled version in
+     `org.elc'.  The backtrace contains much more information if it is
+     produced with uncompiled code.  To do this, either rename `org.elc'
+     to something else before starting Emacs, or ask Emacs explicitly
+     to load `org.el' by using the command line
+          emacs -l /path/to/org.el
+
+  2. Go to the `Options' menu and select `Enter Debugger on Error'
+     (XEmacs has this option in the `Troubleshooting' sub-menu).
+
+  3. Do whatever you have to do to hit the error.  Don't forget to to
+     document the steps you take.
+
+  4. When you hit the error, a `*Backtrace*' buffer will appear on the
+     screen.  Safe this buffer to a file (for example using `C-x C-w'
+     and attach) it to your bug report.
 
 
 File: org,  Node: Document structure,  Next: Tables,  Prev: Introduction,  Up: Top
@@ -502,7 +529,13 @@ the visibility in the buffer.
      Note that inside tables, `S-<TAB>' jumps to the previous field.
 
 `C-c C-a'
-     Show all.
+     Show all.  
+
+`C-c C-r'
+     Reveal context around point, showing the current entry, the
+     following heading and the hierarchy above.  Useful for working
+     near a location exposed by a sparse tree command (*note Sparse
+     trees::) or an agenda command (*note Agenda commands::).
 
    When Emacs first visits an Org-mode file, the global state is set to
 OVERVIEW, i.e. only the top level headlines are visible.  This can be
@@ -2736,19 +2769,37 @@ following keys:
 `C-g'
      Abort without installing changes.
 
+`q'
+     If `q' is not assigned to a tag, it aborts like `C-g'.
+
+`!'
+     Turn of groups of mutually exclusive tags.  Use this to (as an
+     exception) assign several tags from such a group.
+
+`C-c'
+     Toggle auto-exit after the next change (see below).
+
 This method lets you assign tags to a headline with very few keys.  With
 the above setup, you could clear the current tags and set `@HOME',
 `Laptop' and `PC' tags with just the following keys: `C-c C-c <SPC> h l
 p <RET>'.  Switching from `@HOME' to `@WORK' would be done with `C-c
-C-c w <RET>'.  Adding the non-predefined tag `Sarah' could be done with
-`C-c C-c <TAB> S a r a h <RET> <RET>'.
+C-c w <RET>' or alternatively with `C-c C-c C-c w'.  Adding the
+non-predefined tag `Sarah' could be done with `C-c C-c <TAB> S a r a h
+<RET> <RET>'.
+
+   If you find that most of the time, you need only a single keypress to
+modify your list of tags, set the variable
+`org-fast-tag-selection-single-key'.  Then you no longer have to press
+<RET> to exit fast tag selection - it will immediately exit after the
+first change.  If you then occasionally need more keys, press `C-c' to
+turn off auto-exit for the current tag selection process.
 
    ---------- Footnotes ----------
 
    (1) In `org-mode-alist' use `'(:startgroup)' and `'(:endgroup)',
 respectively.  Several groups are allowed.
 
-   (2) Keys will automatically assigned to tags which have no
+   (2) Keys will automatically be assigned to tags which have no
 configured keys.
 
 
@@ -4906,14 +4957,6 @@ A.1 Third-party extensions for Org-mode
 
 The following extensions for Org-mode have been written by other people:
 
-`org-mouse.el' by Piotr Zielinski
-     This package implements extended mouse functionality for Org-mode.
-     It allows you to cycle visibility and to edit the document
-     structure with the mouse.  Best of all, it provides a
-     context-sensitive menu on <mouse-3> that changes depending on the
-     context of a mouse-click.  `org-mouse.el' is freely available at
-     `http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el'.  
-
 `org-publish.el' by David O'Toole
      This package provides facilities for publishing related sets of
      Org-mode files together with linked files like images as a
@@ -4924,6 +4967,18 @@ The following extensions for Org-mode have been written by other people:
      the 22.1 release.  In the mean time, `org-publish.el' can be
      downloaded from David's site:
      `http://dto.freeshell.org/e/org-publish.el'.  
+
+`org-mouse.el' by Piotr Zielinski
+     This package implements extended mouse functionality for Org-mode.
+     It allows you to cycle visibility and to edit the document
+     structure with the mouse.  Best of all, it provides a
+     context-sensitive menu on <mouse-3> that changes depending on the
+     context of a mouse-click.  As of Org-mode version 4.53,
+     `org-mouse.el' is part of the Org-mode distribution.  It is not
+     yet part of Emacs, however, a delay caused by the preparations for
+     the 22.1 release.  In the mean time, `org-mouse.el' can be
+     downloaded from Piotr's site:
+     `http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el'.  
 
 `org-blog.el' by David O'Toole
      A blogging plug-in for `org-publish.el'.
@@ -5152,6 +5207,7 @@ Index
 * ASCII export:                          ASCII export.        (line   6)
 * author:                                Feedback.            (line   6)
 * autoload:                              Activation.          (line   6)
+* backtrace of an error:                 Feedback.            (line  27)
 * BBDB links:                            External links.      (line   6)
 * block agenda:                          Block agenda.        (line   6)
 * bold text:                             Enhancing text.      (line  15)
@@ -5349,12 +5405,12 @@ Index
 * options, for publishing:               Publishing options.  (line   6)
 * ordered lists:                         Plain lists.         (line   6)
 * org-agenda, command:                   Weekly/Daily agenda. (line   9)
-* org-blog.el:                           Extensions.          (line  25)
-* org-blogging.el:                       Extensions.          (line  29)
+* org-blog.el:                           Extensions.          (line  29)
+* org-blogging.el:                       Extensions.          (line  33)
 * org-mode, turning on:                  Activation.          (line  22)
-* org-mouse.el:                          Extensions.          (line   8)
+* org-mouse.el:                          Extensions.          (line  17)
 * org-publish-project-alist:             Project alist.       (line   6)
-* org-publish.el:                        Extensions.          (line  14)
+* org-publish.el:                        Extensions.          (line   8)
 * orgtbl-mode:                           orgtbl-mode.         (line   6)
 * outline tree:                          Headlines.           (line   6)
 * outline-mode:                          Outlines.            (line   6)
@@ -5634,6 +5690,7 @@ Key Index
                                                               (line  20)
 * C-c C-q:                               Built-in table editor.
                                                               (line 119)
+* C-c C-r:                               Visibility cycling.  (line  32)
 * C-c C-s <1>:                           Agenda commands.     (line 136)
 * C-c C-s:                               Creating timestamps. (line  48)
 * C-c C-t <1>:                           Clocking work time.  (line  26)
@@ -5787,150 +5844,150 @@ Node: Summary10777
 Node: Installation13689
 Node: Activation15067
 Node: Feedback16316
-Node: Document structure17085
-Node: Outlines17859
-Node: Headlines18519
-Node: Visibility cycling19142
-Ref: Visibility cycling-Footnote-120617
-Ref: Visibility cycling-Footnote-220675
-Node: Motion20725
-Node: Structure editing21509
-Node: Archiving23825
-Node: ARCHIVE tag24383
-Node: Moving subtrees26176
-Node: Sparse trees27217
-Ref: Sparse trees-Footnote-129348
-Ref: Sparse trees-Footnote-229440
-Node: Plain lists29555
-Ref: Plain lists-Footnote-133080
-Ref: Plain lists-Footnote-233437
-Node: Tables33619
-Node: Built-in table editor34167
-Node: Narrow columns41775
-Ref: Narrow columns-Footnote-143714
-Node: Table calculations43760
-Node: Formula syntax45080
-Ref: Formula syntax-Footnote-147985
-Node: Lisp formulas48285
-Node: Column formulas49074
-Node: Advanced features50836
-Node: Named-field formulas54090
-Node: Editing/debugging formulas54730
-Node: Appetizer56488
-Node: orgtbl-mode57591
-Node: table.el58082
-Node: Hyperlinks59059
-Node: Link format59832
-Node: Internal links61125
-Ref: Internal links-Footnote-163114
-Node: Radio targets63246
-Node: CamelCase links63961
-Node: External links64555
-Node: Handling links66686
-Ref: Handling links-Footnote-171338
-Ref: Handling links-Footnote-271575
-Node: Link abbreviations71649
-Node: Search options73328
-Ref: Search options-Footnote-175106
-Node: Custom searches75187
-Node: Remember76235
-Node: TODO items79925
-Node: TODO basics80907
-Node: TODO extensions82434
-Node: Workflow states83229
-Node: TODO types84097
-Ref: TODO types-Footnote-185755
-Node: Per file keywords85837
-Ref: Per file keywords-Footnote-187291
-Node: Priorities87492
-Node: Breaking down tasks88736
-Ref: Breaking down tasks-Footnote-189256
-Node: Checkboxes89352
-Node: Timestamps92088
-Node: Time stamps92549
-Ref: Time stamps-Footnote-196038
-Node: Creating timestamps96154
-Node: The date/time prompt98779
-Ref: The date/time prompt-Footnote-1100472
-Node: Custom time format100578
-Node: Progress logging102137
-Node: Closing items102666
-Node: Clocking work time103570
-Ref: Clocking work time-Footnote-1107196
-Node: Tags107322
-Node: Tag inheritance108084
-Node: Setting tags109021
-Ref: Setting tags-Footnote-1112537
-Ref: Setting tags-Footnote-2112649
-Node: Tag searches112729
-Node: Agenda views114729
-Node: Agenda files116822
-Ref: Agenda files-Footnote-1117782
-Ref: Agenda files-Footnote-2117931
-Node: Agenda dispatcher118124
-Node: Weekly/Daily agenda119741
-Node: Calendar/Diary integration120706
-Node: Global TODO list122044
-Node: Matching headline tags124204
-Node: Timeline125262
-Node: Presentation and sorting125925
-Node: Categories126703
-Node: Time-of-day specifications127367
-Node: Sorting of agenda items129345
-Node: Agenda commands130627
-Node: Custom agenda views136515
-Node: Storing searches137190
-Node: Block agenda139102
-Node: Setting Options140332
-Node: Batch processing143044
-Node: Embedded LaTeX144174
-Ref: Embedded LaTeX-Footnote-1145266
-Node: Math symbols145456
-Node: Subscripts and Superscripts146221
-Node: LaTeX fragments147065
-Ref: LaTeX fragments-Footnote-1149173
-Node: Processing LaTeX fragments149435
-Node: CDLaTeX mode150381
-Ref: CDLaTeX mode-Footnote-1152865
-Node: Exporting153013
-Node: ASCII export154327
-Node: HTML export155617
-Node: XOXO export158453
-Node: iCalendar export158892
-Node: Text interpretation160715
-Node: Comment lines161194
-Node: Enhancing text161665
-Node: Export options163357
-Node: Publishing165024
-Ref: Publishing-Footnote-1165820
-Node: Configuration166016
-Node: Project alist166734
-Node: Sources and destinations167800
-Node: Selecting files168530
-Node: Publishing action169278
-Node: Publishing options170511
-Node: Publishing links172663
-Node: Project page index174176
-Node: Sample configuration174954
-Node: Simple example175446
-Node: Complex example176119
-Node: Triggering publication178195
-Node: Miscellaneous178880
-Node: Completion179514
-Node: Customization180985
-Node: In-buffer settings181570
-Node: The very busy C-c C-c key185190
-Node: Clean view186834
-Node: TTY keys189411
-Node: Interaction191020
-Node: Cooperation191417
-Node: Conflicts193284
-Node: Bugs194876
-Node: Extensions and Hacking196499
-Node: Extensions196985
-Node: Dynamic blocks198555
-Node: History and Acknowledgments200482
-Node: Index205490
-Node: Key Index232505
+Node: Document structure18395
+Node: Outlines19169
+Node: Headlines19829
+Node: Visibility cycling20452
+Ref: Visibility cycling-Footnote-122203
+Ref: Visibility cycling-Footnote-222261
+Node: Motion22311
+Node: Structure editing23095
+Node: Archiving25411
+Node: ARCHIVE tag25969
+Node: Moving subtrees27762
+Node: Sparse trees28803
+Ref: Sparse trees-Footnote-130934
+Ref: Sparse trees-Footnote-231026
+Node: Plain lists31141
+Ref: Plain lists-Footnote-134666
+Ref: Plain lists-Footnote-235023
+Node: Tables35205
+Node: Built-in table editor35753
+Node: Narrow columns43361
+Ref: Narrow columns-Footnote-145300
+Node: Table calculations45346
+Node: Formula syntax46666
+Ref: Formula syntax-Footnote-149571
+Node: Lisp formulas49871
+Node: Column formulas50660
+Node: Advanced features52422
+Node: Named-field formulas55676
+Node: Editing/debugging formulas56316
+Node: Appetizer58074
+Node: orgtbl-mode59177
+Node: table.el59668
+Node: Hyperlinks60645
+Node: Link format61418
+Node: Internal links62711
+Ref: Internal links-Footnote-164700
+Node: Radio targets64832
+Node: CamelCase links65547
+Node: External links66141
+Node: Handling links68272
+Ref: Handling links-Footnote-172924
+Ref: Handling links-Footnote-273161
+Node: Link abbreviations73235
+Node: Search options74914
+Ref: Search options-Footnote-176692
+Node: Custom searches76773
+Node: Remember77821
+Node: TODO items81511
+Node: TODO basics82493
+Node: TODO extensions84020
+Node: Workflow states84815
+Node: TODO types85683
+Ref: TODO types-Footnote-187341
+Node: Per file keywords87423
+Ref: Per file keywords-Footnote-188877
+Node: Priorities89078
+Node: Breaking down tasks90322
+Ref: Breaking down tasks-Footnote-190842
+Node: Checkboxes90938
+Node: Timestamps93674
+Node: Time stamps94135
+Ref: Time stamps-Footnote-197624
+Node: Creating timestamps97740
+Node: The date/time prompt100365
+Ref: The date/time prompt-Footnote-1102058
+Node: Custom time format102164
+Node: Progress logging103723
+Node: Closing items104252
+Node: Clocking work time105156
+Ref: Clocking work time-Footnote-1108782
+Node: Tags108908
+Node: Tag inheritance109670
+Node: Setting tags110607
+Ref: Setting tags-Footnote-1114805
+Ref: Setting tags-Footnote-2114917
+Node: Tag searches115000
+Node: Agenda views117000
+Node: Agenda files119093
+Ref: Agenda files-Footnote-1120053
+Ref: Agenda files-Footnote-2120202
+Node: Agenda dispatcher120395
+Node: Weekly/Daily agenda122012
+Node: Calendar/Diary integration122977
+Node: Global TODO list124315
+Node: Matching headline tags126475
+Node: Timeline127533
+Node: Presentation and sorting128196
+Node: Categories128974
+Node: Time-of-day specifications129638
+Node: Sorting of agenda items131616
+Node: Agenda commands132898
+Node: Custom agenda views138786
+Node: Storing searches139461
+Node: Block agenda141373
+Node: Setting Options142603
+Node: Batch processing145315
+Node: Embedded LaTeX146445
+Ref: Embedded LaTeX-Footnote-1147537
+Node: Math symbols147727
+Node: Subscripts and Superscripts148492
+Node: LaTeX fragments149336
+Ref: LaTeX fragments-Footnote-1151444
+Node: Processing LaTeX fragments151706
+Node: CDLaTeX mode152652
+Ref: CDLaTeX mode-Footnote-1155136
+Node: Exporting155284
+Node: ASCII export156598
+Node: HTML export157888
+Node: XOXO export160724
+Node: iCalendar export161163
+Node: Text interpretation162986
+Node: Comment lines163465
+Node: Enhancing text163936
+Node: Export options165628
+Node: Publishing167295
+Ref: Publishing-Footnote-1168091
+Node: Configuration168287
+Node: Project alist169005
+Node: Sources and destinations170071
+Node: Selecting files170801
+Node: Publishing action171549
+Node: Publishing options172782
+Node: Publishing links174934
+Node: Project page index176447
+Node: Sample configuration177225
+Node: Simple example177717
+Node: Complex example178390
+Node: Triggering publication180466
+Node: Miscellaneous181151
+Node: Completion181785
+Node: Customization183256
+Node: In-buffer settings183841
+Node: The very busy C-c C-c key187461
+Node: Clean view189105
+Node: TTY keys191682
+Node: Interaction193291
+Node: Cooperation193688
+Node: Conflicts195555
+Node: Bugs197147
+Node: Extensions and Hacking198770
+Node: Extensions199256
+Node: Dynamic blocks201057
+Node: History and Acknowledgments202984
+Node: Index207992
+Node: Key Index235080
 
 End Tag Table

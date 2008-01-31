@@ -164,7 +164,6 @@
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
-
 (defun org-mouse-show-context-menu (event prefix)
   (interactive "@e \nP")
   (if (and (= (event-click-count event) 1)

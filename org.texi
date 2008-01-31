@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.53
+@set VERSION 4.54
 @set DATE November 2006
 
 @dircategory Emacs
@@ -15,8 +15,8 @@
 @set MAINTAINERSITE @uref{http://www.astro.uva.nl/~dominik/Tools/org/,maintainers webpage}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Carsten Dominik
-@set MAINTAINEREMAIL @email{dominik@@science.uva.nl}
-@set MAINTAINERCONTACT @uref{mailto:dominik@@science.uva.nl,contact the maintainer}
+@set MAINTAINEREMAIL @email{dominik at science dot uva dot nl}
+@set MAINTAINERCONTACT @uref{mailto:dominik at science dot uva dot nl,contact the maintainer}
 @c %**end of header
 @finalout
 
@@ -461,8 +461,8 @@ For bug reports, please provide as much information as possible,
 including the version information of Emacs (@kbd{C-h v emacs-version
 @key{RET}}) and Org-mode (@kbd{C-h v org-version @key{RET}}), as well as
 the Org-mode related setup in @file{.emacs}.  If an error occurs, a
-traceback can be very useful.  Often a small example file helps, along
-with clear information about:
+backtrace can be very useful (see below on how to create one).  Often a
+small example file helps, along with clear information about:
 
 @enumerate
 @item What exactly did you do?
@@ -470,6 +470,38 @@ with clear information about:
 @item What happened instead?
 @end enumerate
 @noindent Thank you for helping to improve this mode.
+
+@subsubheading How to create a useful backtrace
+
+@cindex backtrace of an error
+If working with Org-mode produces an error with a message you don't
+understand, you may have hit a bug.  The best way to report this is by
+providing, in addition to what was mentioned above, a @emph{Backtrace}.
+This is information from the built-in debugger about where and how the
+error occurred.  Here is how to produce a useful backtrace:
+
+@enumerate
+@item
+Start a fresh Emacs or XEmacs, and make sure that it will load the
+original Lisp code in @file{org.el} instead of the compiled version in
+@file{org.elc}.  The backtrace contains much more information if it is
+produced with uncompiled code.  To do this, either rename @file{org.elc}
+to something else before starting Emacs, or ask Emacs explicitly to load
+@file{org.el} by using the command line
+@example
+emacs -l /path/to/org.el
+@end example
+@item
+Go to the @code{Options} menu and select @code{Enter Debugger on Error}
+(XEmacs has this option in the @code{Troubleshooting} sub-menu).
+@item
+Do whatever you have to do to hit the error.  Don't forget to to
+document the steps you take.
+@item
+When you hit the error, a @file{*Backtrace*} buffer will appear on the
+screen.  Safe this buffer to a file (for example using @kbd{C-x C-w} and
+attach) it to your bug report.
+@end enumerate
 
 @node Document structure, Tables, Introduction, Top
 @chapter Document Structure
@@ -583,6 +615,12 @@ Note that inside tables, @kbd{S-@key{TAB}} jumps to the previous field.
 @kindex C-c C-a
 @item C-c C-a
 Show all.
+@kindex C-c C-r
+@item C-c C-r
+Reveal context around point, showing the current entry, the following
+heading and the hierarchy above.  Useful for working near a location
+exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda
+command (@pxref{Agenda commands}).
 @end table
 
 When Emacs first visits an Org-mode file, the global state is set to
@@ -3007,7 +3045,7 @@ these lines to activate any changes.
 If at least one tag has a selection key, pressing @kbd{C-c C-c} will
 automatically present you with a special interface, listing inherited
 tags, the tags of the current headline, and a list of all legal tags
-with corresponding keys@footnote{Keys will automatically assigned to
+with corresponding keys@footnote{Keys will automatically be assigned to
 tags which have no configured keys.}.  In this interface, you can use
 the following keys:
 
@@ -3028,6 +3066,13 @@ Clear all tags for this line.
 Accept the modified set.
 @item C-g
 Abort without installing changes.
+@item q
+If @kbd{q} is not assigned to a tag, it aborts like @kbd{C-g}.
+@item !
+Turn of groups of mutually exclusive tags.  Use this to (as an
+exception) assign several tags from such a group.
+@item C-c
+Toggle auto-exit after the next change (see below).
 @end table
 
 @noindent
@@ -3035,10 +3080,17 @@ This method lets you assign tags to a headline with very few keys.  With
 the above setup, you could clear the current tags and set @samp{@@HOME},
 @samp{Laptop} and @samp{PC} tags with just the following keys: @kbd{C-c
 C-c @key{SPC} h l p @key{RET}}.  Switching from @samp{@@HOME} to
-@samp{@@WORK} would be done with @kbd{C-c C-c w @key{RET}}.  Adding the
-non-predefined tag @samp{Sarah} could be done with @kbd{C-c C-c
-@key{TAB} S a r a h @key{RET} @key{RET}}.
+@samp{@@WORK} would be done with @kbd{C-c C-c w @key{RET}} or
+alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
+@samp{Sarah} could be done with @kbd{C-c C-c @key{TAB} S a r a h
+@key{RET} @key{RET}}.
 
+If you find that most of the time, you need only a single keypress to
+modify your list of tags, set the variable
+@code{org-fast-tag-selection-single-key}.  Then you no longer have to
+press @key{RET} to exit fast tag selection - it will immediately exit
+after the first change.  If you then occasionally need more keys, press
+@kbd{C-c} to turn off auto-exit for the current tag selection process.
 
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches
@@ -5379,13 +5431,6 @@ functionality of Org-mode.
 The following extensions for Org-mode have been written by other people:
 
 @table @asis
-@cindex @file{org-mouse.el}
-@item @file{org-mouse.el} by Piotr Zielinski
-This package implements extended mouse functionality for Org-mode.  It
-allows you to cycle visibility and to edit the document structure with
-the mouse.  Best of all, it provides a context-sensitive menu on
-@key{mouse-3} that changes depending on the context of a mouse-click.
-@file{org-mouse.el} is freely available at @url{http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el}.
 @cindex @file{org-publish.el}
 @item @file{org-publish.el} by David O'Toole
 This package provides facilities for publishing related sets of Org-mode
@@ -5396,6 +5441,17 @@ Org-mode distribution.  It is not yet part of Emacs, however, a delay
 caused by the preparations for the 22.1 release.  In the mean time,
 @file{org-publish.el} can be downloaded from David's site:
 @url{http://dto.freeshell.org/e/org-publish.el}.
+@cindex @file{org-mouse.el}
+@item @file{org-mouse.el} by Piotr Zielinski
+This package implements extended mouse functionality for Org-mode.  It
+allows you to cycle visibility and to edit the document structure with
+the mouse.  Best of all, it provides a context-sensitive menu on
+@key{mouse-3} that changes depending on the context of a mouse-click.
+As of Org-mode version 4.53, @file{org-mouse.el} is part of the
+Org-mode distribution.  It is not yet part of Emacs, however, a delay
+caused by the preparations for the 22.1 release.  In the mean time,
+@file{org-mouse.el} can be downloaded from Piotr's site:
+@url{http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el}.
 @cindex @file{org-blog.el}
 @item @file{org-blog.el} by David O'Toole
 A blogging plug-in for @file{org-publish.el}.@*
