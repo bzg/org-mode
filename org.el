@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.18
+;; Version: 5.18a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -5750,7 +5750,8 @@ This function is the default value of the hook `org-cycle-hook'."
 	    (hide-subtree)
 	    (show-entry)
 	    (show-children)
-	    (org-cycle-show-empty-lines 'children))
+	    (org-cycle-show-empty-lines 'children)
+	    (org-cycle-hide-drawers 'children))
 	(org-overview)))))
 
 (defun org-cycle-show-empty-lines (state)
@@ -6377,7 +6378,8 @@ is signaled in this case."
     (org-compact-display-after-subtree-move)
     (unless folded
       (org-show-entry)
-      (show-children))))
+      (show-children)
+      (org-cycle-hide-drawers 'children))))
 
 (defvar org-subtree-clip ""
   "Clipboard for cut and paste of subtrees.
