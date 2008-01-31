@@ -1,3 +1,14 @@
 test
 *~
 *.html
+*.elc
+org.pdf
+org
+orgcard.pdf
+orgcard.ps
+orgcard_letter.*
+*.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs
+*.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+org-install.el
+manual
+RELEASEDIR
