@@ -56,7 +56,7 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES  = org.el org-publish.el org-install.el
+LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
 ELCFILES   = $(LISPFILES:.el=.elc)
 TEXIFILES  = org.texi
 INFOFILES  = org

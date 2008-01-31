@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.52
-@set DATE October 2006
+@set VERSION 4.53
+@set DATE November 2006
 
 @dircategory Emacs
 @direntry
@@ -170,11 +170,12 @@ Timestamps
 
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
+* Custom time format::          If you cannot work with the ISO format
 * Progress logging::            Documenting when what work was done.
 
 Creating timestamps
 
-* The date/time prompt::        
+* The date/time prompt::        How org-mode helps you entring date and time
 
 Progress Logging
 
@@ -316,6 +317,15 @@ structured ASCII file, as HTML, or (todo and agenda items only) as an
 iCalendar file.  It can also serve as a publishing tool for a set of
 linked webpages.
 
+An important design aspect that distinguishes Org-mode from other
+packages like Planner/Muse is that it encougages to store every piece of
+information only once.  In Planner, you have project pages, day pages
+and possibly other files, duplicating some information such as tasks.
+In Org-mode, you only have notes files.  In your notes you mark entries
+as tasks, label them with tags and timestamps.  All necessary lists like
+a schedule for the day, the agenda for a meeting, tasks lists selected
+by tags etc are created dynamically when you need them.
+
 Org-mode keeps simple things simple.  When first fired up, it should
 feel like a straightforward, easy to use outliner.  Complexity is not
 imposed, but a large amount of functionality is available when you need
@@ -328,12 +338,13 @@ example:
 @r{@bullet{} as an ASCII table editor with spreadsheet-like capabilities}
 @r{@bullet{} as a TODO list editor}
 @r{@bullet{} as a full agenda and planner with deadlines and work scheduling}
+@r{@bullet{} as an environment to implement David Allen's GTD system}
 @r{@bullet{} as a simple hypertext system, with HTML export}
 @r{@bullet{} as a publishing tool to create a set of interlinked webpages}
 @end example
 
-The Org-mode table editor can be integrated into any major mode by
-activating the minor Orgtbl-mode.
+Org-mode's automatic, context sensitive table editor can be integrated
+into any major mode by activating the minor Orgtbl-mode.
 
 @cindex FAQ
 There is a website for Org-mode which provides links to the newest
@@ -642,7 +653,9 @@ the middle of a line, the line is split and the rest of the line becomes
 the new headline.  If the command is used at the beginning of a
 headline, the new headline is created before the current line.  If at
 the beginning of any other line, the content of that line is made the
-new heading.
+new heading.  If the command is used at the end of a folded subtree
+(i.e. behind the ellipses at the end of a headline), then a headline
+like the current one will be inserted after the end of the subtree.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert new TODO entry with same level as current heading.
@@ -2441,6 +2454,7 @@ planning.
 @menu
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
+* Custom time format::          If you cannot work with the ISO format
 * Progress logging::            Documenting when what work was done.
 @end menu
 
@@ -2454,10 +2468,12 @@ planning.
 @cindex scheduling
 
 A time stamp is a specification of a date (possibly with time) in a
-special format, either @samp{<2003-09-16 Tue>} or @samp{<2003-09-16
-Tue 09:39>}.  A time stamp can appear anywhere in the headline or body
-of an org-tree entry.  Its presence allows entries to be shown on specific
-dates in the agenda (@pxref{Weekly/Daily agenda}).  We distinguish:
+special format, either @samp{<2003-09-16 Tue>} or @samp{<2003-09-16 Tue
+09:39>}@footnote{This is the standard ISO date/time format.  If you
+cannot get used to these, see @ref{Custom time format}}.  A time stamp
+can appear anywhere in the headline or body of an org-tree entry.  Its
+presence allows entries to be shown on specific dates in the agenda
+(@pxref{Weekly/Daily agenda}).  We distinguish:
 
 @table @var
 @item Plain time stamp
@@ -2467,6 +2483,21 @@ like writing down an appointment in a paper agenda, or like writing down
 an event in a diary, when you want to take note of when something
 happened.  In the timeline and agenda displays, the headline of an entry
 associated with a plain time stamp will be shown exactly on that date.
+
+@example
+* Meet Peter at the movies <2006-11-01 Wed 19:15>
+@end example
+
+@item Inactive time stamp
+@cindex timestamp, inactive
+@cindex inactive timestamp
+Just like a plain time stamp, but with square brackets instead of
+angular ones.  These time stamps are inactive in the sense that thay do
+@emph{not} trigger an entry to show up in the agenda.
+
+@example
+* Gillian comes late for the fifth time [2006-11-01 Wed]
+@end example
 
 @item Time stamp range
 @cindex timerange
@@ -2524,7 +2555,7 @@ automatically into the file.  The time stamps are enclosed in square
 brackets instead of angular brackets.  @xref{Clocking work time}.
 @end table
 
-@node Creating timestamps, Progress logging, Time stamps, Timestamps
+@node Creating timestamps, Custom time format, Time stamps, Timestamps
 @section Creating timestamps
 @cindex creating timestamps
 @cindex timestamps, creating
@@ -2563,8 +2594,8 @@ instead.
 
 @kindex C-c C-o
 @item C-c C-o
-Access the agenda for the date given by the time stamp at point
-(@pxref{Weekly/Daily agenda}).
+Access the agenda for the date given by the time stamp or -range at
+point (@pxref{Weekly/Daily agenda}).
 
 @kindex C-c C-d
 @item C-c C-d
@@ -2598,11 +2629,11 @@ CUA-mode (@pxref{Conflicts}).
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
-Change the item under the cursor in a timestamp.  The cursor can be on
-a year, month, day, hour or minute.  Note that if the cursor is not at
-a time stamp, these same keys modify the priority of an item.
-(@pxref{Priorities}). The key bindings also conflict with CUA-mode
-(@pxref{Conflicts}).
+Change the item under the cursor in a timestamp.  The cursor can be on a
+year, month, day, hour or minute.  Note that if the cursor is in a
+headline and not at a time stamp, these same keys modify the priority of
+an item.  (@pxref{Priorities}). The key bindings also conflict with
+CUA-mode (@pxref{Conflicts}).
 
 
 @kindex C-c C-y
@@ -2615,7 +2646,7 @@ into the following column).
 
 
 @menu
-* The date/time prompt::        
+* The date/time prompt::        How org-mode helps you entring date and time
 @end menu
 
 @node The date/time prompt,  , Creating timestamps, Creating timestamps
@@ -2680,10 +2711,53 @@ One month forward.
 One month back.
 @kindex @key{RET}
 @item @key{RET}
-Choose date in calendar (only if nothing typed into minibuffer).
+Choose date in calendar (only if nothing was typed into minibuffer).
 @end table
 
-@node Progress logging,  , Creating timestamps, Timestamps
+@node Custom time format, Progress logging, Creating timestamps, Timestamps
+@section Custom time format
+@cindex custom date/time format
+@cindex time format, custom
+@cindex date format, custom
+
+Org-mode uses the standard ISO notation for dates and times as it is
+defined in ISO 8601.  If you cannot get used to this and require another
+representation of date and time to keep you happy, you can get it by
+customizing the variables @code{org-display-custom-times} and
+@code{org-time-stamp-custom-formats}.
+
+@table @kbd
+@kindex C-c C-x C-t
+@item C-c C-x C-t
+Toggle the display of custom formats for dates and times.
+@end table
+
+@noindent
+Org-mode needs the default format for scanning, so the custom date/time
+format does not @emph{replace} the default format - instead it is put
+@emph{over} the default format using text properties.  This has the
+following consequences:
+@itemize @bullet
+@item 
+You cannot place the cursor onto a time stamp anymore, only before or
+after.
+@item
+The @kbd{S-@key{up}/@key{down}} keys can no longer be used to adjust
+each component of a time stamp.  If the cursor is at the beginning of
+the stamp, @kbd{S-@key{up}/@key{down}} will change the stamp by one day,
+just like @kbd{S-@key{left}/@key{right}}.  At the end of the stamp, the
+time will be changed by one minute.
+@item
+When you delete a time stamp character-by-character, it will only
+disappear from the buffer after @emph{all} (invisible) characters
+belonging to the ISO timestamp have been removed.
+@item
+If the custom time stamp format is longer than the default and you are
+using dates in tables, table alignment will be messed up.  If the custom
+format is shorter, things do work as expected.
+@end itemize
+
+@node Progress logging,  , Custom time format, Timestamps
 @section Progress Logging
 @cindex progress logging
 @cindex logging, of progress
@@ -2739,7 +2813,8 @@ keyword together with a timestamp.
 Stop the clock (clock-out).  The inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
 the resulting time in inserts it after the time range as @samp{=>
-HH:MM}.  
+HH:MM}.  See the variable @code{org-log-done} for the possibility to
+record an additional note together with a the clock-out time stamp.
 @kindex C-c C-y
 @item C-c C-y
 Recompute the time interval after changing one of the time stamps.  This
@@ -2759,7 +2834,8 @@ Display time summaries for each subtree in the current buffer.  This
 puts overlays at the end of each headline, showing the total time
 recorded under that heading, including the time of any subheadings. You
 can use visibility cycling to study the tree, but the overlays disappear
-automatically when the buffer is changed.
+when you change the buffer (see variable
+@code{org-remove-highlights-with-change}) or press @kbd{C-c C-c}.
 @kindex C-c C-x C-r
 @item C-c C-x C-r
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
@@ -2806,9 +2882,6 @@ you have several clocktable blocks in a buffer.
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
-
-See the variable @code{org-log-done} for the possibility to record an
-additional note together with a the clock-out time stamp.
 
 @node Tags, Agenda views, Timestamps, Top
 @chapter Tags
@@ -3012,20 +3085,20 @@ tagged also @samp{NIGHT}.
 @cindex TODO keyword matching, with tags search
 If you are using multi-state TODO keywords (@pxref{TODO extensions}), it
 can be useful to also match on the TODO keyword.  This can be done by
-adding a condition after a double slash to a tags match.  The syntax is
-similar to the tag matches, but should be applied with consideration:
-For example, a positive selection on several TODO keywords can not
+adding a condition after a slash to a tags match.  The syntax is similar
+to the tag matches, but should be applied with consideration: For
+example, a positive selection on several TODO keywords can not
 meaningfully be combined with boolean AND.  However, @emph{negative
 selection} combined with AND can be meaningful.  Examples:
 
 @table @samp
-@item WORK//WAITING
+@item WORK/WAITING
 Select @samp{:WORK:}-tagged TODO lines with the specific TODO
 keyword @samp{WAITING}.
-@item WORK//-WAITING-NEXT
+@item WORK/-WAITING-NEXT
 Select @samp{:WORK:}-tagged TODO lines that are neither @samp{WAITING}
 nor @samp{NEXT}
-@item WORK//+WAITING|+NEXT
+@item WORK/+WAITING|+NEXT
 Select @samp{:WORK:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
@@ -4943,6 +5016,12 @@ hidestars  @r{make all but one of the stars starting a headline invisible.}
 showstars  @r{show all stars starting a headline}
 odd        @r{allow only odd outline levels (1,3,...)}
 oddeven    @r{allow all outline levels}
+@end example
+To turn on custom format overlayes over time stamps (variables
+@code{org-put-time-stamp-overlays} and
+@code{org-time-stamp-overlay-formats}), use
+@example
+customtime @r{overlay custom time format}
 @end example
 @item #+SEQ_TODO:   #+TYP_TODO:
 These lines set the TODO keywords and their interpretation in the
