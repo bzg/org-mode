@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.12
+;; Version: 4.13
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -81,6 +81,10 @@
 ;;
 ;; Changes since version 4.00:
 ;; ---------------------------
+;; Version 4.13
+;;    - The list of agenda files can be maintainted in an external file.
+;;    - Bug fixes.
+;;
 ;; Version 4.12
 ;;    - Templates for remember buffer.  Note that the remember setup changes.
 ;;      To set up templates, see `org-remember-templates'.
@@ -155,17 +159,14 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.12"
+(defvar org-version "4.13"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
   (message "Org-mode version %s" org-version))
 
-;; The following two constants are for compatibility with different Emacs
-;; versions (Emacs versus XEmacs) and with different versions of outline.el.
-;; The compatibility code in org.el is based on these two constants.
-(defconst org-xemacs-p (featurep 'xemacs)
-  "Are we running XEmacs?")
+;; The following constant is for compatibility with different versions
+;; of outline.el.
 (defconst org-noutline-p (featurep 'noutline)
   "Are we using the new outline mode?")
 
@@ -485,11 +486,17 @@ closing date."
   :group 'org)
 
 (defcustom org-agenda-files nil
-  "A list of org files for agenda/diary display.
-Entries are added to this list with \\[org-agenda-file-to-front] and removed with
-\\[org-remove-file].  You can also use customize to edit the list."
+  "The files to be used for agenda display.
+Entries may be added to this list with \\[org-agenda-file-to-front] and removed with
+\\[org-remove-file].  You can also use customize to edit the list.
+
+If the value of the variable is not a list but a single file name, then
+the list of agenda files is actually stored in that file, one agenda file
+per line"
   :group 'org-agenda
-  :type '(repeat file))
+  :type '(choice
+	  (repeat :tag "List of files" file)
+	  (file :tag "Store list in a file\n" :value "~/.agenda_files")))
 
 (defcustom org-agenda-custom-commands '(("w" todo "WAITING"))
   "Custom commands for the agenda.
@@ -2167,7 +2174,7 @@ The following commands are available:
   ;; Get rid of Outline menus, they are not needed
   ;; Need to do this here because define-derived-mode sets up
   ;; the keymap so late.
-  (if org-xemacs-p
+  (if (featurep 'xemacs)
       (progn
 	(delete-menu-item '("Headings"))
 	(delete-menu-item '("Show"))
@@ -2210,9 +2217,9 @@ The following commands are available:
 
 (defvar org-mouse-map (make-sparse-keymap))
 (define-key org-mouse-map
-  (if org-xemacs-p [button2] [mouse-2]) 'org-open-at-mouse)
+  (if (featurep 'xemacs) [button2] [mouse-2]) 'org-open-at-mouse)
 (define-key org-mouse-map
-  (if org-xemacs-p [button3] [mouse-3]) 'org-find-file-at-mouse)
+  (if (featurep 'xemacs) [button3] [mouse-3]) 'org-find-file-at-mouse)
 (define-key org-mouse-map [follow-link] 'mouse-face)
 (when org-tab-follows-link
   (define-key org-mouse-map [(tab)] 'org-open-at-point)
@@ -2432,7 +2439,8 @@ between words."
   "Get the right face for match N in font-lock matching of healdines."
   (setq org-l (- (match-end 2) (match-beginning 1)))
   (if org-odd-levels-only (setq org-l (1+ (/ org-l 2))))
-  (setq org-f (nth (1- (% org-l org-n-levels)) org-level-faces))
+;  (setq org-f (nth (1- (% org-l org-n-levels)) org-level-faces))
+  (setq org-f (nth (% (1- org-l) org-n-levels) org-level-faces))
   (cond
    ((eq n 1) (if org-hide-leading-stars 'org-hide org-f))
    ((eq n 2) org-f)
@@ -3774,17 +3782,19 @@ that the match should indeed be shown."
 
 ;; Overlay compatibility functions
 (defun org-make-overlay (beg end &optional buffer)
-  (if org-xemacs-p (make-extent beg end buffer) (make-overlay beg end buffer)))
+  (if (featurep 'xemacs)
+      (make-extent beg end buffer)
+    (make-overlay beg end buffer)))
 (defun org-delete-overlay (ovl)
-  (if org-xemacs-p (delete-extent ovl) (delete-overlay ovl)))
+  (if (featurep 'xemacs) (delete-extent ovl) (delete-overlay ovl)))
 (defun org-detatch-overlay (ovl)
-  (if org-xemacs-p (detach-extent ovl) (delete-overlay ovl)))
+  (if (featurep 'xemacs) (detach-extent ovl) (delete-overlay ovl)))
 (defun org-move-overlay (ovl beg end &optional buffer)
-  (if org-xemacs-p
+  (if (featurep 'xemacs)
       (set-extent-endpoints ovl beg end buffer)
     (move-overlay ovl beg end buffer)))
 (defun org-overlay-put (ovl prop value)
-  (if org-xemacs-p
+  (if (featurep 'xemacs)
       (set-extent-property ovl prop value)
     (overlay-put ovl prop value)))
 
@@ -4008,9 +4018,9 @@ used to insert the time stamp into the buffer to include the time."
 		   (map (copy-keymap calendar-mode-map))
 		   (minibuffer-local-map (copy-keymap minibuffer-local-map)))
 	      (define-key map (kbd "RET") 'org-calendar-select)
-	      (define-key map (if org-xemacs-p [button1] [mouse-1])
+	      (define-key map (if (featurep 'xemacs) [button1] [mouse-1])
 		'org-calendar-select-mouse)
-	      (define-key map (if org-xemacs-p [button2] [mouse-2])
+	      (define-key map (if (featurep 'xemacs) [button2] [mouse-2])
 		'org-calendar-select-mouse)
 	      (define-key minibuffer-local-map [(meta shift left)]
 		(lambda () (interactive)
@@ -4422,7 +4432,7 @@ The following commands are available:
       (if (get 'org-agenda-files 'org-restrict)
 	  "Restricted to single file"
 	"Edit File List")
-      '(customize-variable 'org-agenda-files)
+      '(org-edit-agenda-file-list)
       (not (get 'org-agenda-files 'org-restrict)))
      "--")
     (mapcar 'org-file-menu-entry (org-agenda-files))))
@@ -4493,9 +4503,9 @@ The following commands are available:
   "Local keymap for agenda entries from Org-mode.")
 
 (define-key org-agenda-keymap
-  (if org-xemacs-p [(button2)] [(mouse-2)]) 'org-agenda-goto-mouse)
+  (if (featurep 'xemacs) [(button2)] [(mouse-2)]) 'org-agenda-goto-mouse)
 (define-key org-agenda-keymap
-  (if org-xemacs-p [(button3)] [(mouse-3)]) 'org-agenda-show-mouse)
+  (if (featurep 'xemacs) [(button3)] [(mouse-3)]) 'org-agenda-show-mouse)
 (define-key org-agenda-keymap [follow-link] 'mouse-face)
 (easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu"
   '("Agenda"
@@ -4664,10 +4674,58 @@ C   Configure your own agenda commands")
        (fit-window-to-buffer nil (/ (* (frame-height) 3) 4)
                              (/ (frame-height) 2))))
 
-(defun org-agenda-files ()
-  "Get the list of agenda files."
-  (or (get 'org-agenda-files 'org-restrict)
-      org-agenda-files))
+(defun org-agenda-files (&optional unrestricted)
+  "Get the list of agenda files.
+Optional UNRESTRICTED means return the full list even if a restriction
+is currently in place."
+  (cond
+   ((and (not unrestricted) (get 'org-agenda-files 'org-restrict)))
+   ((stringp org-agenda-files) (org-read-agenda-file-list))
+   ((listp org-agenda-files) org-agenda-files)
+   (t (error "Invalid value of `org-agenda-files'"))))
+
+(defvar org-window-configuration)
+
+(defun org-edit-agenda-file-list ()
+  "Edit the list of agenda files.
+Depending on setup, this either uses customize to edit the variable
+`org-agenda-files', or it visits the file that is holding the list.  In the
+latter case, the buffer is set up in a way that saving it automatically kills
+the buffer and restores the previous window configuration."
+  (interactive)
+  (if (stringp org-agenda-files)
+      (let ((cw (current-window-configuration)))
+	(find-file org-agenda-files)
+	(set (make-local-variable 'org-window-configuration) cw)
+	(org-add-hook 'after-save-hook
+		      (lambda ()
+			(set-window-configuration
+			 (prog1 org-window-configuration
+			   (kill-buffer (current-buffer))))
+			(org-install-agenda-files-menu)
+			(message "New agenda file list installed"))
+		      nil 'local)
+	(message (substitute-command-keys
+		  "Edit list and finish with \\[save-buffer]")))
+    (customize-variable 'org-agenda-files)))
+
+(defun org-store-new-agenda-file-list (list)
+  "Set new value for the agenda file list and save it correcly."
+  (if (stringp org-agenda-files)
+      (let ((f org-agenda-files) b)
+	(while (setq b (find-buffer-visiting f)) (kill-buffer b))
+	(with-temp-file f
+	  (insert (mapconcat 'identity list) "\n") "\n"))
+    (let ((org-mode-hook nil) (default-major-mode 'fundamental-mode))
+      (setq org-agenda-files list)
+      (customize-save-variable 'org-agenda-files org-agenda-files))))
+
+(defun org-read-agenda-file-list ()
+  "Read the list of agenda files from a file."
+  (when (stringp org-agenda-files)
+    (with-temp-buffer
+      (insert-file-contents org-agenda-files)
+      (org-split-string (buffer-string) "[ \t\r\n]*?[\r\n][ \t\r\n]*"))))
 
 (defvar org-agenda-markers nil
   "List of all currently active markers created by `org-agenda'.")
@@ -4821,7 +4879,8 @@ NDAYS defaults to `org-agenda-ndays'."
 		  (and (null ndays) (equal 1 org-agenda-ndays)))
 	      nil org-agenda-start-on-weekday))
 	 (org-agenda-keep-modes keep-modes)
-	 (files (copy-sequence (org-agenda-files)))
+	 (thefiles (copy-sequence (org-agenda-files))) ;; FIXME: Why copy???
+	 (files thefiles)
 	 (win (selected-window))
 	 (today (time-to-days (current-time)))
 	 (sd (or start-day today))
@@ -4858,7 +4917,7 @@ NDAYS defaults to `org-agenda-ndays'."
     (set (make-local-variable 'include-all-loc) include-all)
     (when (and (or include-all org-agenda-include-all-todo)
 	       (member today day-numbers))
-      (setq files (org-agenda-files)
+      (setq files thefiles
 	    rtnall nil)
       (while (setq file (pop files))
 	(catch 'nextfile
@@ -4880,7 +4939,7 @@ NDAYS defaults to `org-agenda-ndays'."
 	  (setq start-pos (point))
 	(if (and start-pos (not end-pos))
 	    (setq end-pos (point))))
-      (setq files (org-agenda-files)
+      (setq files thefiles
 	    rtnall nil)
       (while (setq file (pop files))
 	(catch 'nextfile
@@ -4999,12 +5058,9 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 
 (defun org-check-agenda-file (file)
   "Make sure FILE exists.  If not, ask user what to do."
-  ;; FIXME:  this does not correctly change the menus
-  ;; Could probably be fixed by explicitly going to the buffer where
-  ;; the call originated.
   (when (not (file-exists-p file))
-    (message "non-existent file %s.  [R]emove from agenda-files or [A]bort?"
-	     file)
+    (message "non-existent file %s. [R]emove from list or [A]bort?"
+	     (abbreviate-file-name file))
     (let ((r (downcase (read-char-exclusive))))
       (cond
        ((equal r ?r)
@@ -5125,12 +5181,12 @@ With prefix ARG, go back that many times `org-agenda-ndays'."
 
 (defun org-highlight (begin end &optional buffer)
   "Highlight a region with overlay."
-  (funcall (if org-xemacs-p 'set-extent-endpoints 'move-overlay)
+  (funcall (if (featurep 'xemacs) 'set-extent-endpoints 'move-overlay)
 	   org-hl begin end (or buffer (current-buffer))))
 
 (defun org-unhighlight ()
   "Detach overlay INDEX."
-  (funcall (if org-xemacs-p 'detach-extent 'delete-overlay) org-hl))
+  (funcall (if (featurep 'xemacs) 'detach-extent 'delete-overlay) org-hl))
 
 
 (defun org-agenda-follow-mode ()
@@ -5297,9 +5353,10 @@ Needed to avoid empty dates which mess up holiday display."
 If the current buffer visits an agenda file, find the next one in the list.
 If the current buffer does not, find the first agenda file."
   (interactive)
-  (let ((files (append org-agenda-files (list (car org-agenda-files))))
-	(tcf (if buffer-file-name (file-truename buffer-file-name)))
-	file)
+  (let* ((fs (org-agenda-files t))
+	 (files (append fs (list (car fs))))
+	 (tcf (if buffer-file-name (file-truename buffer-file-name)))
+	 file)
     (unless files (error "No agenda files"))
     (catch 'exit
       (while (setq file (pop files))
@@ -5307,7 +5364,7 @@ If the current buffer does not, find the first agenda file."
 	    (when (car files)
 	      (find-file (car files))
 	      (throw 'exit t))))
-      (find-file (car org-agenda-files)))))
+      (find-file (car fs)))))
 
 (defun org-agenda-file-to-end ()
   "Move/add the current file to the end of the agenda file list.
@@ -5324,7 +5381,7 @@ end of the list."
   (interactive "P")
   (let ((file-alist (mapcar (lambda (x)
 			      (cons (file-truename x) x))
-			    org-agenda-files))
+			    (org-agenda-files t)))
 	(ctf (file-truename buffer-file-name))
 	x had)
     (setq x (assoc ctf file-alist) had x)
@@ -5333,9 +5390,7 @@ end of the list."
     (if to-end
 	(setq file-alist (append (delq x file-alist) (list x)))
       (setq file-alist (cons x (delq x file-alist))))
-    (setq org-agenda-files (mapcar 'cdr file-alist))
-    (let ((org-mode-hook nil) (default-major-mode 'fundamental-mode))
-      (customize-save-variable 'org-agenda-files org-agenda-files))
+    (org-store-new-agenda-file-list (mapcar 'cdr file-alist))
     (org-install-agenda-files-menu)
     (message "File %s to %s of agenda file list"
 	     (if had "moved" "added") (if to-end "end" "front"))))
@@ -5353,11 +5408,10 @@ Optional argument FILE means, use this file instead of the current."
 			     (if (equal true-file
 					(file-truename x))
 				 nil x))
-			   org-agenda-files))))
-    (if (not (= (length files) (length org-agenda-files)))
+			   (org-agenda-files t)))))
+    (if (not (= (length files) (length (org-agenda-files t))))
 	(progn
-	  (setq org-agenda-files files)
-	  (customize-save-variable 'org-agenda-files org-agenda-files)
+	  (org-store-new-agenda-file-list files)
 	  (org-install-agenda-files-menu)
 	  (message "Removed file: %s" afile))
       (message "File was not in list: %s" afile))))
@@ -5444,7 +5498,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
   (setq args (or args '(:deadline :scheduled :timestamp)))
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
 		    (list entry)
-		  org-agenda-files))
+		  (org-agenda-files t)))
 	 file rtn results)
     ;; If this is called during org-agenda, don't return any entries to
     ;; the calendar.  Org Agenda will list these entries itself.
@@ -7251,12 +7305,12 @@ onto the ring."
 	(cond
 	 ((featurep 'tramp)
 	  ;; use tramp to access the file
-	  (if org-xemacs-p
+	  (if (featurep 'xemacs)
 	      (setq folder (format "[%s@%s]%s" user host file))
 	    (setq folder (format "/%s@%s:%s" user host file))))
 	 (t
 	  ;; use ange-ftp or efs
-	  (require (if org-xemacs-p 'efs 'ange-ftp))
+	  (require (if (featurep 'xemacs) 'efs 'ange-ftp))
 	  (setq folder (format "/%s@%s:%s" user host file))))))
   (when folder
     (funcall (cdr (assq 'vm org-link-frame-setup)) folder readonly)
@@ -9895,7 +9949,6 @@ Parameters get priority."
 (define-key org-edit-formulas-map "\C-c?" 'org-show-variable)
 
 (defvar org-pos)
-(defvar org-window-configuration)
 
 (defun org-table-edit-formulas ()
   "Edit the formulas of the current table in a separate buffer."
@@ -11848,14 +11901,14 @@ file, but with extension `.ics'."
 Each iCalendar file will be located in the same directory as the Org-mode
 file, but with extension `.ics'."
   (interactive)
-  (apply 'org-export-icalendar nil org-agenda-files))
+  (apply 'org-export-icalendar nil (org-agenda-files t)))
 
 ;;;###autoload
 (defun org-export-icalendar-combine-agenda-files ()
   "Export all files in `org-agenda-files' to a single combined iCalendar file.
 The file is stored under the name `org-combined-agenda-icalendar-file'."
   (interactive)
-  (apply 'org-export-icalendar t org-agenda-files))
+  (apply 'org-export-icalendar t (org-agenda-files t)))
 
 (defun org-export-icalendar (combine &rest files)
   "Create iCalendar files for all elements of FILES.
@@ -12016,7 +12069,7 @@ a time), or the day by one (if it does not contain a time)."
 (define-key org-mode-map [(meta tab)] 'org-complete)
 (define-key org-mode-map "\M-\C-i"    'org-complete)            ; for tty emacs
 ;; The following line is necessary under Suse GNU/Linux
-(unless org-xemacs-p
+(unless (featurep 'xemacs)
   (define-key org-mode-map [S-iso-lefttab]  'org-shifttab))
 (define-key org-mode-map [(shift tab)]    'org-shifttab)
 
@@ -12619,16 +12672,22 @@ With optional NODE, go directly to that node."
   (Info-goto-node (format "(org)%s" (or node ""))))
 
 (defun org-install-agenda-files-menu ()
-  (easy-menu-change
-   '("Org") "File List for Agenda"
-   (append
-    (list
-     ["Edit File List" (customize-variable 'org-agenda-files) t]
-     ["Add/Move Current File to Front of List" org-agenda-file-to-front t]
-     ["Remove Current File from List" org-remove-file t]
-     ["Cycle through agenda files" org-cycle-agenda-files t]
-     "--")
-    (mapcar 'org-file-menu-entry org-agenda-files))))
+  (let ((bl (buffer-list)))
+    (save-excursion
+      (while bl
+	(set-buffer (pop bl))
+	(if (eq major-mode 'org-mode) (setq bl nil)))
+      (when (eq major-mode 'org-mode)
+	(easy-menu-change
+	 '("Org") "File List for Agenda"
+	 (append
+	  (list
+	   ["Edit File List" (org-edit-agenda-file-list) t]
+	   ["Add/Move Current File to Front of List" org-agenda-file-to-front t]
+	   ["Remove Current File from List" org-remove-file t]
+	   ["Cycle through agenda files" org-cycle-agenda-files t]
+	   "--")
+	  (mapcar 'org-file-menu-entry (org-agenda-files t))))))))
 
 ;;; Documentation
 
@@ -12739,7 +12798,7 @@ work correctly."
 
 (defun org-add-hook (hook function &optional append local)
   "Add-hook, compatible with both Emacsen."
-  (if (and local org-xemacs-p)
+  (if (and local (featurep 'xemacs))
       (add-local-hook hook function append)
     (add-hook hook function append local)))
 
@@ -12748,7 +12807,7 @@ work correctly."
 Works on both Emacs and XEmacs."
   (if org-ignore-region
       nil
-    (if org-xemacs-p
+    (if (featurep 'xemacs)
 	(and zmacs-regions (region-active-p))
       (and transient-mark-mode mark-active))))
 
@@ -13024,7 +13083,6 @@ Show the heading too, if it is currently invisible."
 (run-hooks 'org-load-hook)
 
 ;; Experimental code
-
 
 
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
