@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.67
-@set DATE February 2007
+@set VERSION 4.68
+@set DATE March 2007
 
 @dircategory Emacs
 @direntry
@@ -162,7 +162,7 @@ TODO items
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into managable pieces
+* Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
 
 Extended use of TODO keywords
@@ -243,7 +243,7 @@ Exporting
 
 HTML export
 
-* Export commands::             How to invode HTML export
+* Export commands::             How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       How hyperlinks get transferred to HTML
 * Images::                      To inline or not to inline?
@@ -370,7 +370,7 @@ example as:
 Org-mode's automatic, context sensitive table editor with spreadsheet
 capabilities can be integrated into any major mode by activating the
 minor Orgtbl-mode.  Using a translation step, it can be used to maintain
-tables in arbitray file types, for example in LaTeX.
+tables in arbitrary file types, for example in LaTeX.
 
 @cindex FAQ
 There is a website for Org-mode which provides links to the newest
@@ -1319,7 +1319,7 @@ value.
 @noindent
 Fields that are wider become clipped and end in the string @samp{=>}.
 Note that the full text is still in the buffer, it is only invisible.
-To see the full text, hold the mouse over the field - a tooltip window
+To see the full text, hold the mouse over the field - a tool-tip window
 will show the full content.  To edit such a field, use the command
 @kbd{C-c `} (that is @kbd{C-c} followed by the backquote).  This will
 open a new window with the full field.  Edit it and finish with @kbd{C-c
@@ -1355,7 +1355,7 @@ example in mail mode, use
 Furthermore, with some special setup, it is possible to maintain tables
 in arbitrary syntax with Orgtbl-mode.  For example, it is possible to
 construct LaTeX tables with the underlying ease and power of
-Orgtbl-mode, including spreadsheet capabulities.  For details, see
+Orgtbl-mode, including spreadsheet capabilities.  For details, see
 @ref{Tables in arbitrary syntax}.
 
 @node The spreadsheet,  , orgtbl-mode, Tables
@@ -1366,7 +1366,12 @@ Orgtbl-mode, including spreadsheet capabulities.  For details, see
 
 The table editor makes use of the Emacs @file{calc} package to implement
 spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
-derive fields from other fields.
+derive fields from other fields.  While fully featured, Org-mode's
+implementation is not identical to other spreadsheets.  For example,
+Org-mode knows the concept of a @emph{column formula} that will be
+applied to all non-header fields in a column without having to copy the
+formula to each relevant field.
+
 @menu
 * References::                  How to refer to another field or range
 * Formula syntax for Calc::     Using Calc to compute stuff
@@ -1386,17 +1391,26 @@ To compute fields in the table from other fields, formulas must
 reference other fields or ranges.  In Org-mode, fields can be referenced
 by name, by absolute coordinates, and by relative coordinates.  To find
 out what the coordinates of a field are, press @kbd{C-c ?} in that
-field.
+field, or press @kbd{C-c @}} to toggle the display of a grid.
 
 @subsubheading Field references
 @cindex field references
 @cindex references, to fields
 
-Formulas can reference the value of another field with the operator
+Formulas can reference the value of another field in two ways.  Like in
+any other spreadsheet, you may reference fields with a letter/number
+combination like @code{B3}, meaning the 2nd field in the 3rd row.
+@c Such references are always fixed to that field, they don't change
+@c when you copy and paste a formula to a different field.  So
+@c Org-mode's @code{B3} behaves like @code{$B$3} in other spreadsheets.
+
+@noindent
+Org-mode also uses another, more general operator that looks like this:
 @example
 @@row$column
 @end example
 
+@noindent
 Column references can be absolute like @samp{1}, @samp{2},...@samp{N},
 or relative to the current column like @samp{+1} or @samp{-2}.
 
@@ -1416,18 +1430,20 @@ directly at the hline is used.
 either the column or the row part of the reference, the current
 row/column is implied. 
 
-Org-mode's references with @emph{positive} numbers correspond to fixed
-references in other spreadsheet programs.  For example, @code{@@3$28}
-corresponds to @code{$AB$3}.  Org-mode's references with @emph{negative}
-numbers behave similar to non-fixed references in other spreadsheet
-programs, because when the same formula is used in several fields,
-different fields are referenced each time.
+Org-mode's references with @emph{unsigned} numbers are fixed references
+in the sense that if you use the same reference in the formula for two
+different fields, the same field will be referenced each time.
+Org-mode's references with @emph{signed} numbers are floating
+references because the same reference operator can reference different
+fields depending on the field being calculated by the formula.
 
 Here are a few examples:
 
 @example
 @@2$3      @r{2nd row, 3rd column}
+C2        @r{same as previous}
 $5        @r{column 5 in the current row}
+E&        @r{same as previous}
 @@2        @r{current column, row 2}
 @@-1$-3    @r{the field one row up, three columns to the left}
 @@-I$2     @r{field just under hline above current row, column 2}
@@ -1448,6 +1464,7 @@ format at least for the first field (i.e the reference must start with
 $1..$3        @r{First three fields in the current row.}
 $P..$Q        @r{Range, using column names (see under Advanced)}
 @@2$1..@@4$3    @r{6 fields between these two fields.}
+A2..C4        @r{Same as above.}
 @@-1$-2..@@-1   @r{3 numbers from the column to the left, 2 up to current row}
 @end example
 
@@ -1465,12 +1482,16 @@ see the @samp{E} mode switch below).  If there are no non-empty fields,
 
 @samp{$name} is interpreted as the name of a column, parameter or
 constant.  Constants are defined globally through the variable
-@code{org-table-formula-constants}.  If you have the
-@file{constants.el} package, it will also be used to resolve
-constants, including natural constants like @samp{$h} for Planck's
-constant, and units like @samp{$km} for kilometers.  Column names and
-parameters can be specified in special table lines.  These are
-described below, see @ref{Advanced features}.
+@code{org-table-formula-constants}.  If you have the @file{constants.el}
+package, it will also be used to resolve constants, including natural
+constants like @samp{$h} for Planck's constant, and units like
+@samp{$km} for kilometers@footnote{@file{Constant.el} can supply the
+values of constants in two different unit systems, @code{SI} and
+@code{cgs}.  Which one is used depends on the value of the variable
+@code{constants-unit-system}.  You can use the @code{#+STARTUP} options
+@code{constSI} and @code{constcgs} to set this value for the current
+buffer.}.  Column names and parameters can be specified in special table
+lines.  These are described below, see @ref{Advanced features}.
 
 @node Formula syntax for Calc, Formula syntax for Lisp, References, The spreadsheet
 @subsection Formula syntax for Calc
@@ -1517,7 +1538,7 @@ reformat the final result.  A few examples:
 $1+$2                @r{Sum of first and second field}
 $1+$2;%.2f           @r{Same, format result to two decimals}
 exp($2)+exp($1)      @r{Math functions can be used}
-$;%.1f               @r{Reformat current cell to 1 decimal}
+$0;%.1f              @r{Reformat current cell to 1 decimal}
 ($3-32)*5/9          @r{Degrees F -> C conversion}
 $c/$1/$cm            @r{Hz -> cm conversion, using @file{constants.el}}
 tan($1);Dp3s1        @r{Compute in degrees, precision 3, display SCI 1}
@@ -1527,21 +1548,28 @@ vmean($2..$7);EN     @r{Same, but treat empty fields as 0}
 taylor($3,x=7,2)     @r{taylor series of $3, at x=7, second degree}
 @end example
 
+Calc also contains a complete set of logical operations.  For example
+
+@example
+if($1<20,teen,string(""))  @r{``teen'' if age $1 less than 20, else empty}
+@end example
+
 @node Formula syntax for Lisp, Field formulas, Formula syntax for Calc, The spreadsheet
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
 
 It is also possible to write a formula in Emacs Lisp; this can be useful
-for string manipulation and control structures.  If a formula starts
-with a single quote followed by an opening parenthesis, then it is
-evaluated as a lisp form.  The evaluation should return either a string
-or a number.  Just as with @file{calc} formulas, you can specify modes
-and a printf format after a semicolon.  A reference will be replaced
-with a string (in double quotes) containing the field.  If you provide
-the @samp{N} mode switch, all referenced elements will be numbers.
-Ranges are inserted as space-separated fields, so you can embed them in
-list or vector syntax.  A few examples, note how the @samp{N} mode is
-used when we do computations in lisp.
+for string manipulation and control structures, if the Calc's
+functionality is not enough.  If a formula starts with a single quote
+followed by an opening parenthesis, then it is evaluated as a lisp form.
+The evaluation should return either a string or a number.  Just as with
+@file{calc} formulas, you can specify modes and a printf format after a
+semicolon.  A reference will be replaced with a string (in double
+quotes) containing the field.  If you provide the @samp{N} mode switch,
+all referenced elements will be numbers.  Ranges are inserted as
+space-separated fields, so you can embed them in list or vector syntax.
+A few examples, note how the @samp{N} mode is used when we do
+computations in lisp.
 
 @example
 @r{Swap the first two characters of the content of column 1}
@@ -1566,12 +1594,11 @@ evaluated, and the current field replaced with the result.
 Formulas are stored in a special line starting with @samp{#+TBLFM:}
 directly below the table.  If you typed the equation in the 4th field of
 the 3rd data line in the table, the formula will look like
-@samp{@@3$2=$1+$2}.  When inserting/deleting/swapping column and rows
+@samp{@@3$4=$1+$2}.  When inserting/deleting/swapping column and rows
 with the appropriate commands, @i{absolute references} (but not relative
-ones) in stored formulas are modified in order to
-still reference the same field.  Of cause this is not true if you edit
-the table structure with normal editing commands - then you must go and
-fix equations yourself.
+ones) in stored formulas are modified in order to still reference the
+same field.  Of cause this is not true if you edit the table structure
+with normal editing commands - then you must fix the equations yourself.
 
 Instead of typing an equation into the field, you may also use the
 following command
@@ -1592,7 +1619,9 @@ it to the current field and stores it.
 Often in a table, the same formula should be used for all fields in a
 particular column.  Instead of having to copy the formula to all fields
 in that column, org-mode allows to assign a single formula to an entire
-column.
+column.  If the table contains horizontal separator hlines, everything
+before the first such line is considered part of the table @emph{header}
+and will not be modified by column formulas.
 
 To assign a formula to a column, type it directly into any field in the
 column, preceded by an equal sign, like @samp{=$1+$2}.  When you press
@@ -1625,7 +1654,11 @@ will apply it to that many consecutive fields in the current column.
 
 You can edit individual formulas in the minibuffer or directly in the
 field.  Org-mode can also prepare a special buffer with all active
-formulas of a table.
+formulas of a table.  When offering a formula for editing, Org-mode
+converts references to the standard format (like @code{B3} or @code{D&})
+if possible.  If you prefer to only work with the internal format (like
+@code{@@3$2} or @code{$4}), configure the variable
+@code{org-table-use-standard-references}.
 
 @table @kbd
 @kindex C-c =
@@ -1644,21 +1677,36 @@ minibuffer is that you can use the command @kbd{C-c ?}.
 @item C-c ?
 While editing a formula in a table field, highlight the field(s)
 referenced by the reference at the cursor position in the formula.
+@kindex C-c @}
+@item C-c @}
+Toggle the display of row and column numbers for a table, using
+overlays.  These are updated each time the table is aligned, you can
+force it with @kbd{C-c C-c}.
+@kindex C-c @{
+@item C-c @{
+Toggle the formula debugger on and off.  See below.
 @kindex C-c '
 @item C-c '
 Edit all formulas for the current table in a special buffer, where the
-formulas will be displayed one per line. 
+formulas will be displayed one per line.  If the current field has an
+active formula, the cursor in the formula editor will mark it.
 While inside the special buffer, Org-mode will automatically highlight
 any field or range reference at the cursor position.  You may edit,
 remove and add formulas, and use the following commands:
 @table @kbd
 @kindex C-c C-c
+@kindex C-x C-s
 @item C-c C-c
-Exit the buffer and store the modified formulas.  With @kbd{C-u} prefix,
-also apply the new formulas to the entire table.
+@itemx C-x C-s
+Exit the formula editor and store the modified formulas.  With @kbd{C-u}
+prefix, also apply the new formulas to the entire table.
 @kindex C-c C-q
 @item C-c C-q
-Exit the buffer without installing changes.
+Exit the formula editor without installing changes.
+@kindex C-c C-r
+@item C-c C-r
+Toggle all references in the formula editor between standard (like
+@code{B3}) and internal (like @code{@@3$2}).
 @kindex @key{TAB}
 @item @key{TAB}
 Pretty-print or indent lisp formula at point.  When in a line containing
@@ -1670,23 +1718,25 @@ formula, @key{TAB} re-indents just like in Emacs-lisp-mode.
 Complete Lisp symbols, just like in Emacs-lisp-mode.
 @kindex S-@key{up}
 @kindex S-@key{down}
-@item S-@key{up}/@key{down}
-Move the reference line in the Org-mode buffer up and down.  This is
-important for highlighting the references of column formulas for
-different rows.
+@kindex S-@key{left}
+@kindex S-@key{right}
+@item S-@key{up}/@key{down}/@key{left}/@key{right}
+Shift the reference at point.  For example, if the reference is
+@code{B3} and you press @kbd{S-@key{right}}, it will become @code{C3}.
+This also works for relative references, and for hline references.
+@kindex M-S-@key{up}
+@kindex M-S-@key{down}
+@item M-S-@key{up}/@key{down}
+Move the test line for column formulas in the Org-mode buffer up and
+down.
 @kindex M-@key{up}
 @kindex M-@key{down}
 @item M-@key{up}/@key{down}
 Scroll the window displaying the table.
-@end table
 @kindex C-c @}
 @item C-c @}
-Toggle the display of row and column numbers for a table, using
-overlays.  These are uptated each time the table is aligned, you can
-force it with @kbd{C-c C-c}.
-@kindex C-c @{
-@item C-c @{
-Toggle the formula debugger on and off.  See below.
+Turn the coordinate grid in the table on and off.
+@end table
 @end table
 
 Making a table field blank does not remove the formula associated with
@@ -1707,8 +1757,8 @@ When the evaluation of a formula leads to an error, the field content
 becomes the string @samp{#ERROR}.  If you would like see what is going
 on during variable substitution and calculation in order to find a bug,
 turn on formula debugging in the @code{Tbl} menu and repeat the
-calculation, for example by pressing @kbd{C-c = @key{RET}} in a field.
-Detailed information will be displayed.
+calculation, for example by pressing @kbd{C-u C-u C-c = @key{RET}} in a
+field.  Detailed information will be displayed.
 
 @node Updating the table, Advanced features, Editing and debugging formulas, The spreadsheet
 @subsection Updating the Table
@@ -1741,7 +1791,6 @@ Iterate the table by recomputing it until no further changes occur.
 This may be necessary if some computed fields use the value of other
 fields that are computed @i{later} in the calculation sequence.
 @end table
-
 
 @node Advanced features,  , Updating the table, The spreadsheet
 @subsection Advanced features
@@ -2407,7 +2456,7 @@ template has been expanded:
 @noindent
 If you change you mind about which template to use, call
 @code{org-remember} in the remember buffer.  You may then select a new
-template that will be filled with the previoous context information.
+template that will be filled with the previous context information.
 
 @node Storing notes,  , Remember templates, Remember
 @subsection Storing notes
@@ -2466,7 +2515,7 @@ things you have to do.
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into managable pieces
+* Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
 @end menu
 
@@ -2686,7 +2735,7 @@ Furthermore, these keys are also used by CUA-mode (@pxref{Conflicts}).
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
 
-It is often advisable to break down large tasks into smaller, managable
+It is often advisable to break down large tasks into smaller, manageable
 subtasks.  You can do this by creating an outline tree below a TODO
 item, with detailed subtasks on the tree@footnote{To keep subtasks out
 of the global TODO list, see the
@@ -2907,8 +2956,8 @@ see the option @code{org-time-stamp-rounding-minutes}.
 
 @kindex C-c !
 @item C-c !
-Like @kbd{C-c .}, but insert an inactive time stamp not triggering the
-agenda.
+Like @kbd{C-c .}, but insert an inactive time stamp that will not cause
+an agenda entry.
 
 @kindex C-c <
 @item C-c <
@@ -4772,7 +4821,7 @@ HTML formatting, in ways similar to John Grubers @emph{markdown}
 language, but with additional support for tables.
 
 @menu
-* Export commands::             How to invode HTML export
+* Export commands::             How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       How hyperlinks get transferred to HTML
 * Images::                      To inline or not to inline?
@@ -5610,6 +5659,14 @@ To turn on custom format overlays over time stamps (variables
 @cindex @code{customtime}, STARTUP keyword
 @example
 customtime @r{overlay custom time format}
+@end example
+The following options influence the table spreadsheet (variable
+@code{constants-unit-system}).
+@cindex @code{constcgs}, STARTUP keyword
+@cindex @code{constSI}, STARTUP keyword
+@example
+constcgs   @r{@file{constants.el} should use the c-g-s unit system}
+constSI    @r{@file{constants.el} should use the SI unit system}
 @end example
 @item #+SEQ_TODO:   #+TYP_TODO:
 These lines set the TODO keywords and their interpretation in the

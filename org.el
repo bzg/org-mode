@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.67
+;; Version: 4.68
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defvar org-version "4.67"
+(defconst org-version "4.68"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -783,6 +783,18 @@ calls `table-recognize-table'."
   :tag "Org Table Calculation"
   :group 'org-table)
 
+(defcustom org-table-use-standard-references t
+  "Should org-mode work with table refrences like B3 instead of @3$2?
+Possible values are:
+nil     never use them
+from    accept as input, do not present for editing
+t:      accept as input and present for editing"
+  :group 'org-table-calculation
+  :type '(choice
+	  (const :tag "Never, don't even check unser input for them" nil)
+	  (const :tag "Always, both as user input, and when editing" t)
+	  (const :tag "Conver user input, don't offerr during editing" 'from)))
+
 (defcustom org-table-copy-increment t
   "Non-nil means, increment when copying current field with \\[org-table-copy-down]."
   :group 'org-table-calculation
@@ -815,9 +827,6 @@ the command \\[org-table-eval-formula]."
   :group 'org-table-calculation
   :type 'boolean)
 
-;; FIXME this is also a variable that makes Org-mode files non-portable
-;; Maybe I should have a #+ options for constants?
-;; How about the SI/cgs issue?
 (defcustom org-table-formula-use-constants t
   "Non-nil means, interpret constants in formulas in tables.
 A constant looks like `$c' or `$Grav' and will be replaced before evaluation
@@ -826,6 +835,8 @@ from the `constants.el' package."
   :group 'org-table-calculation
   :type 'boolean)
 
+;; FIXME this is also a variable that makes Org-mode files non-portable
+;; Maybe I should have a #+ options for constants?
 (defcustom org-table-formula-constants nil
   "Alist with constant names and values, for use in table formulas.
 The car of each element is a name of a constant, without the `$' before it.
@@ -1332,6 +1343,7 @@ Changes become only effective after restarting Emacs."
   :group 'org-keywords
   :type '(repeat (string :tag "Keyword")))
 
+;; FIXME: remove priority as a possible value, this seems to be obsolete.
 (defcustom org-todo-interpretation 'sequence
   "Controls how TODO keywords are interpreted.
 This variable is only relevant if `org-todo-keywords' contains more than two
@@ -2006,7 +2018,7 @@ a grid line."
   (defcustom org-agenda-sorting-strategy
     '((agenda time-up category-keep priority-down)
       (todo category-keep priority-down)
-      (tags category-keep))
+      (tags category-keep priority-down))
     "Sorting structure for the agenda items of a single day.
 This is a list of symbols which will be used in sequence to determine
 if an entry should be listed before another entry.  The following
@@ -3102,6 +3114,12 @@ Also put tags into group 4 if tags are present.")
 	((assoc key option) (cdr (assoc key option)))
 	(t (cdr (assq 'default option)))))
 
+(defsubst org-inhibit-invisibility ()
+  "Modified `buffer-invisibility-spec' for Emacs 21.
+Some ops with invisible text do not work correctly on Emacs 21.  For these
+we turn off invisibility temporarily.  Use this in a `let' form."
+  (if (< emacs-major-version 22) nil buffer-invisibility-spec))
+
 (defsubst org-set-local (var value)
   "Make VAR local in current buffer and set it to VALUE."
   (set (make-variable-buffer-local var) value))
@@ -3139,7 +3157,9 @@ Also put tags into group 4 if tags are present.")
     ("nologging" org-log-done nil)
     ("lognotedone" org-log-done done push)
     ("lognotestate" org-log-done state push)
-    ("lognoteclock-out" org-log-done clock-out push))
+    ("lognoteclock-out" org-log-done clock-out push)
+    ("constcgs" constants-unit-system cgs)
+    ("constSI" constants-unit-system SI))
   "Variable associated with STARTUP options for org-mode.
 Each element is a list of three items: The startup options as written
 in the #+STARTUP line, the corresponding variable, and the value to
@@ -3184,14 +3204,15 @@ means to push this value onto the list in the variable.")
 	     ((equal key "STARTUP")
 	      (let ((opts (org-split-string value splitre))
 		    l var val)
-		(while (setq l (assoc (pop opts) org-startup-options))
-		  (setq var (nth 1 l) val (nth 2 l))
-		  (if (not (nth 3 l))
-		      (set (make-local-variable var) val)
-		    (if (not (listp (symbol-value var)))
-			(set (make-local-variable var) nil))
-		    (set (make-local-variable var) (symbol-value var))
-		    (add-to-list var val)))))
+		(while (setq l (pop opts))
+		  (when (setq l (assoc l org-startup-options))
+		    (setq var (nth 1 l) val (nth 2 l))
+		    (if (not (nth 3 l))
+			(set (make-local-variable var) val)
+		      (if (not (listp (symbol-value var)))
+			  (set (make-local-variable var) nil))
+		      (set (make-local-variable var) (symbol-value var))
+		      (add-to-list var val))))))
 	     ((equal key "ARCHIVE")
 	      (string-match " *$" value)
 	      (setq arch (replace-match "" t t value))
@@ -3325,6 +3346,7 @@ This is for getting out of special buffers like remember.")
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
 (defvar org-latex-regexps)
+(defvar constants-unit-system)
 
 (defvar original-date) ; dynamically scoped in calendar.el does scope this
 
@@ -3521,7 +3543,6 @@ The following commands are available:
   (when (featurep 'xemacs)
     (org-set-local 'line-move-ignore-invisible t))
   (setq outline-regexp "\\*+")
-  ;;(setq outline-regexp "\\(?:\\*+\\|[ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\) \\)")
   (setq outline-level 'org-outline-level)
   (when (and org-ellipsis (stringp org-ellipsis)
              (fboundp 'set-display-table-slot) (boundp 'buffer-display-table))
@@ -3534,6 +3555,7 @@ The following commands are available:
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
   (modify-syntax-entry ?# "<")
+  (modify-syntax-entry ?@ "w")
   (if org-startup-truncated (setq truncate-lines t))
   (org-set-local 'font-lock-unfontify-region-function
 		 'org-unfontify-region)
@@ -3545,6 +3567,7 @@ The following commands are available:
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
   ;; Paragraphs and auto-filling
   (org-set-autofill-regexps)
+  (setq indent-line-function 'org-indent-line-function)
   (org-update-radio-target-regexp)
 
   ;; Comment characters
@@ -3912,6 +3935,7 @@ between words."
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
 	   (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
+	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines
 	   (list (concat "^\\*+[ \t]*" org-not-done-regexp)
 		 '(1 'org-todo t))
@@ -4473,10 +4497,13 @@ the current headline."
 	     pos)
 	(cond
 	 ((and (org-on-heading-p) (bolp)
-	       (save-excursion (backward-char 1) (not (org-invisible-p))))
+	       (or (bobp)
+		   (save-excursion (backward-char 1) (not (org-invisible-p)))))
 	  (open-line (if blank 2 1)))
-	 ((and (bolp) (save-excursion
-			(backward-char 1) (not (org-invisible-p))))
+	 ((and (bolp)
+	       (or (bobp)
+		   (save-excursion
+		     (backward-char 1) (not (org-invisible-p)))))
 	  nil)
 	 (t (newline (if blank 2 1))))
 	(insert head) (just-one-space)
@@ -5129,7 +5156,7 @@ with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
   (interactive "P")
   (save-excursion
-    (let* ((buffer-invisibility-spec nil) ; Emacs 21 compatibility
+    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
 	   (beg (progn (outline-back-to-heading) (point)))
 	   (end (move-marker (make-marker)
 			     (progn (outline-next-heading) (point))))
@@ -5528,9 +5555,10 @@ this heading. "
 	      (org-done-string tr-org-done-string)
 	      (org-todo-regexp tr-org-todo-regexp)
 	      (org-todo-line-regexp tr-org-todo-line-regexp)
-	      (org-odd-levels-only (if (local-variable-p org-odd-levels-only)
-				       org-odd-levels-only
-				     tr-org-odd-levels-only)))
+	      (org-odd-levels-only
+	       (if (local-variable-p 'org-odd-levels-only (current-buffer))
+		   org-odd-levels-only
+		 tr-org-odd-levels-only)))
 	  (goto-char (point-min))
 	  (if heading
 	      (progn
@@ -5651,7 +5679,7 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
 If ONOFF is `on' or `off', don't toggle but set to this state."
-  (unless (org-on-heading-p) (error "Not on headling"))
+  (unless (org-on-heading-p t) (error "Not on headling"))
   (let (res current)
     (save-excursion
       (beginning-of-line)
@@ -5747,6 +5775,8 @@ outside the table.")
   "Table row types, non-nil only for the duration of a comand.")
 (defvar org-table-current-begin-line nil
   "Table begin line, non-nil only for the duration of a comand.")
+(defvar org-table-current-begin-pos nil
+  "Table begin position, non-nil only for the duration of a comand.")
 (defvar org-table-dlines nil
   "Vector of data line line numbers in the current table.")
 (defvar org-table-hlines nil
@@ -5758,11 +5788,17 @@ outside the table.")
   "Regular expression for matching ranges in formulas.")
 
 (defconst org-table-range-regexp2
-   "@\\([-+]?I*[-+]?[0-9]*\\)?\\(\\$[-+]?[a-zA-Z0-9]+\\)?\\(\\.\\.@?\\([-+]?I*[-+]?[0-9]*\\)?\\(\\$[-+]?[a-zA-Z0-9]+\\)?\\)?\\|\\$[a-zA-Z0-9]+\\.\\.\\$[a-zA-Z0-9]+"
-  "Regular expression to recognize ranges in formulas for highlighting.")
+  (concat
+   "\\(" "@[-0-9I$&]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\|" "\\$[a-zA-Z0-9]+" "\\)"
+   "\\.\\."
+   "\\(" "@?[-0-9I$&]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\|" "\\$[a-zA-Z0-9]+" "\\)")
+  "Match a range for reference display.")
 
-(defvar org-inhibit-highlight-removal nil)
+(defconst org-table-translate-regexp
+  (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
+  "Match a reference that needs translation, for reference display.")
 
+(defvar org-inhibit-highlight-removal nil) ; dynamically scoped param
 
 (defun org-table-create-with-table.el ()
   "Use the table.el package to insert a new table.
@@ -6323,7 +6359,7 @@ is always the old value."
       (let* ((pos (match-beginning 0))
 	     (val (buffer-substring (1+ pos) (match-end 0))))
 	(if replace
-	    (replace-match (concat "|" replace)))
+	    (replace-match (concat "|" replace) t t))
 	(goto-char (min (point-at-eol) (+ 2 pos)))
 	val)
     (forward-char 1) ""))
@@ -6342,21 +6378,26 @@ is always the old value."
 	   (eql (org-table-get-stored-formulas))
 	   (dline (org-table-current-dline))
 	   (ref (format "@%d$%d" dline col))
+	   (ref1 (org-table-convert-refs-to-an ref))
 	   (fequation (or (assoc name eql) (assoc ref eql)))
-	   (cequation (assoc (int-to-string col) eql)))
+	   (cequation (assoc (int-to-string col) eql))
+	   (eqn (or fequation cequation)))
       (goto-char pos)
       (condition-case nil
-	  (org-show-reference 'local)
+	  (org-table-show-reference 'local)
 	(error nil))
-      (message "line @%d, col $%s%s, ref @%d$%d%s%s"
+      (message "line @%d, col $%s%s, ref @%d$%d or %s%s%s"
 	       dline col
 	       (if cname (concat " or $" cname) "")
-	       dline col
+	       dline col ref1
 	       (if name (concat " or $" name) "")
 	       ;; FIXME: formula info not correct if special table line
-	       (if (or fequation cequation)
-		   (concat ", " (if fequation "field" "column")
-			   " formula applies" "")
+	       (if eqn
+		   (concat ", formula: "
+			   (org-table-formula-to-user
+			    (concat
+			     (if (string-match "^[$@]"(car eqn)) "" "$")
+			     (car eqn) "=" (cdr eqn))))
 		 "")))))
 
 (defun org-table-current-column ()
@@ -7157,21 +7198,25 @@ If NLAST is a number, only the NLAST fields will actually be summed."
      ((equal n 0)                             nil)
      (t n))))
 
-(defun org-table-current-field-formula ()
+(defun org-table-current-field-formula (&optional key noerror)
   "Return the formula active for the current field.
-Assumes that specials are in place."
+Assumes that specials are in place.
+If KEY is given, return the key to this formula.
+Otherwise return the formula preceeded with \"=\" or \":=\"."
   (let* ((name (car (rassoc (list (org-current-line)
 				  (org-table-current-column))
 			    org-table-named-field-locations)))
 	 (col (org-table-current-column))
 	 (scol (int-to-string col))
 	 (ref (format "@%d$%d" (org-table-current-dline) col))
-	 (stored-list (org-table-get-stored-formulas))
+	 (stored-list (org-table-get-stored-formulas noerror))
 	 (ass (or (assoc name stored-list)
 		  (assoc ref stored-list)
 		  (assoc scol stored-list))))
-    (if ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
-		    (cdr ass)))))
+    (if key
+	(car ass)
+      (if ass (concat (if (string-match "^[0-9]+$" (car ass)) "=" ":=")
+		      (cdr ass))))))
 
 (defun org-table-get-formula (&optional equation named)
   "Read a formula from the minibuffer, offer stored formula as default.
@@ -7197,11 +7242,16 @@ When NAMED is non-nil, look for a named equation."
 	       stored)
 	      ((stringp equation)
 	       equation)
-	      (t (read-string
-		  (format "%s formula $%s=" (if named "Field" "Column") scol)
-		  (or stored "") 'org-table-formula-history
-		  ;stored
-		  ))))
+	      (t (org-table-formula-from-user 
+		  (read-string
+		   (org-table-formula-to-user
+		    (format "%s formula %s%s="
+			    (if named "Field" "Column")
+			    (if (member (string-to-char scol) '(?$ ?@)) "" "$")
+			    scol))
+		   (if stored (org-table-formula-to-user stored) "")
+		   'org-table-formula-history
+		   )))))
 	 mustsave)
     (when (not (string-match "\\S-" eq))
       ;; remove formula
@@ -7223,7 +7273,7 @@ When NAMED is non-nil, look for a named equation."
 
 (defun org-table-store-formulas (alist)
   "Store the list of formulas below the current table."
-  (setq alist (sort alist (lambda (a b) (string< (car a) (car b)))))
+  (setq alist (sort alist 'org-table-formula-less-p))
   (save-excursion
     (goto-char (org-table-end))
     (if (looking-at "\\([ \t]*\n\\)*#\\+TBLFM:\\(.*\n?\\)")
@@ -7240,7 +7290,20 @@ When NAMED is non-nil, look for a named equation."
 		       alist "::")
 	    "\n")))
 
-(defun org-table-get-stored-formulas ()
+(defsubst org-table-formula-make-cmp-string (a)
+  (when (string-match "^\\(@\\([0-9]+\\)\\)?\\(\\$?\\([0-9]+\\)\\)?\\(\\$?[a-zA-Z0-9]+\\)?" a)
+    (concat
+     (if (match-end 2) (format "@%05d" (string-to-number (match-string 2 a))) "")
+     (if (match-end 4) (format "$%05d" (string-to-number (match-string 4 a))) "")
+     (if (match-end 5) (concat "@@" (match-string 5 a))))))
+
+(defun org-table-formula-less-p (a b)
+  "Compare two formulas for sorting."
+  (let ((as (org-table-formula-make-cmp-string (car a)))
+	(bs (org-table-formula-make-cmp-string (car b))))
+    (and as bs (string< as bs))))
+
+(defun org-table-get-stored-formulas (&optional noerror)
   "Return an alist with the stored formulas directly after current table."
   (interactive)
   (let (scol eq eq-alist strings string seen)
@@ -7256,7 +7319,12 @@ When NAMED is non-nil, look for a named equation."
 		  eq (match-string 3 string)
 		  eq-alist (cons (cons scol eq) eq-alist))
 	    (if (member scol seen)
-		(error "Double definition `$%s=' in TBLFM line, please fix by hand" scol)
+                (if noerror
+                    (progn
+                      (message "Double definition `$%s=' in TBLFM line, please fix by hand" scol)
+                      (ding)
+                      (sit-for 2))
+                  (error "Double definition `$%s=' in TBLFM line, please fix by hand" scol))
 	      (push scol seen))))))
     (nreverse eq-alist)))
 
@@ -7295,6 +7363,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	    org-table-local-parameters nil
 	    org-table-named-field-locations nil
 	    org-table-current-begin-line nil
+	    org-table-current-begin-pos nil
 	    org-table-current-line-types nil)	    
       (goto-char beg)
       (when (re-search-forward "^[ \t]*| *! *\\(|.*\\)" end t)
@@ -7332,6 +7401,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
       ;; Analyse the line types
       (goto-char beg)
       (setq org-table-current-begin-line (org-current-line)
+	    org-table-current-begin-pos (point)
 	    l org-table-current-begin-line)      
       (while (looking-at "[ \t]*|\\(-\\)?")
 	(push (if (match-end 1) 'hline 'dline) types)
@@ -7362,7 +7432,8 @@ If yes, store the formula and apply it."
 	      eq (match-string 1 field))
 	(if (or (fboundp 'calc-eval)
 		(equal (substring eq 0 (min 2 (length eq))) "'("))
-	    (org-table-eval-formula (if named '(4) nil) eq)
+	    (org-table-eval-formula (if named '(4) nil)
+				    (org-table-formula-from-user eq))
 	  (error "Calc does not seem to be installed, and is needed to evaluate the formula"))))))
 
 (defvar org-recalc-commands nil
@@ -7483,7 +7554,7 @@ formula is installed as valid in only this specific field.
 
 When called with two `C-u' prefixes, insert the active equation
 for the field back into the current field, so that it can be
-edited there.  This is useful in order to use \\[org-show-reference]
+edited there.  This is useful in order to use \\[org-table-show-reference]
 to check the referenced fields.
 
 When called, the command first prompts for a formula, which is read in
@@ -7594,17 +7665,16 @@ not overwrite the stored one."
 		 t t form)))
 	(setq form0 form)
 	;; Insert the references to fields in same row
-	(while (string-match "\\$\\([0-9]+\\)?" form)
-	  (setq n (if (match-beginning 1)
-		      (string-to-number (match-string 1 form))
-		    n0)
-		x (nth (1- n) fields))
+	(while (string-match "\\$\\([0-9]+\\)" form)
+	  (setq n (string-to-number (match-string 1 form))
+		x (nth (1- (if (= n 0) n0 n)) fields))
 	  (unless x (error "Invalid field specifier \"%s\""
 			   (match-string 0 form)))
 	  (setq form (replace-match
 		      (save-match-data
 			(org-table-make-reference x nil numbers lispp))
 		      t t form)))
+
 	(if lispp
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
@@ -7922,69 +7992,121 @@ Parameters get priority."
       (and (fboundp 'constants-get) (constants-get const))
       "#UNDEFINED_NAME"))
 
-(defvar org-edit-formulas-map (make-sparse-keymap))
-(define-key org-edit-formulas-map "\C-c\C-c"      'org-finish-edit-formulas)
-(define-key org-edit-formulas-map "\C-c\C-q"      'org-abort-edit-formulas)
-(define-key org-edit-formulas-map "\C-c?"         'org-show-reference)
-(define-key org-edit-formulas-map [(shift up)]    'org-table-edit-line-up)
-(define-key org-edit-formulas-map [(shift down)]  'org-table-edit-line-down)
-(define-key org-edit-formulas-map [(shift left)] 'org-table-edit-backward-field)
-(define-key org-edit-formulas-map [(shift right)] 'org-table-edit-next-field)
-(define-key org-edit-formulas-map [(meta up)]     'org-table-edit-scroll-down)
-(define-key org-edit-formulas-map [(meta down)]   'org-table-edit-scroll)
-(define-key org-edit-formulas-map [(meta tab)]    'lisp-complete-symbol)
-(define-key org-edit-formulas-map "\M-\C-i"       'lisp-complete-symbol)
-(define-key org-edit-formulas-map [(tab)]         'org-edit-formula-lisp-indent)
-(define-key org-edit-formulas-map "\C-i"          'org-edit-formula-lisp-indent)
+(defvar org-table-fedit-map (make-sparse-keymap))
+(define-key org-table-fedit-map "\C-x\C-s"      'org-table-fedit-finish)
+(define-key org-table-fedit-map "\C-c\C-s"      'org-table-fedit-finish)
+(define-key org-table-fedit-map "\C-c\C-c"      'org-table-fedit-finish)
+(define-key org-table-fedit-map "\C-c\C-q"      'org-table-fedit-abort)
+(define-key org-table-fedit-map "\C-c?"         'org-table-show-reference)
+(define-key org-table-fedit-map [(meta shift up)]    'org-table-fedit-line-up)
+(define-key org-table-fedit-map [(meta shift down)]  'org-table-fedit-line-down)
+(define-key org-table-fedit-map [(shift up)]    'org-table-fedit-ref-up)
+(define-key org-table-fedit-map [(shift down)]  'org-table-fedit-ref-down)
+(define-key org-table-fedit-map [(shift left)]  'org-table-fedit-ref-left)
+(define-key org-table-fedit-map [(shift right)] 'org-table-fedit-ref-right)
+(define-key org-table-fedit-map [(meta up)]     'org-table-fedit-scroll-down)
+(define-key org-table-fedit-map [(meta down)]   'org-table-fedit-scroll)
+(define-key org-table-fedit-map [(meta tab)]    'lisp-complete-symbol)
+(define-key org-table-fedit-map "\M-\C-i"       'lisp-complete-symbol)
+(define-key org-table-fedit-map [(tab)]         'org-table-fedit-lisp-indent)
+(define-key org-table-fedit-map "\C-i"          'org-table-fedit-lisp-indent)
+(define-key org-table-fedit-map "\C-c\C-r" 'org-table-fedit-toggle-ref-type)
+(define-key org-table-fedit-map "\C-c}"    'org-table-fedit-toggle-coordinates)
+
+(easy-menu-define org-table-fedit-menu org-table-fedit-map "Org Edit Formulas Menu"
+  '("Edit-Formulas"
+    ["Finish and Install" org-table-fedit-finish t]
+    ["Finish, Install, and Apply" (org-table-fedit-finish t) :keys "C-u C-c C-c"]
+    ["Abort" org-table-fedit-abort t]
+    "--"
+    ["Pretty-Print Lisp Formula" org-table-fedit-lisp-indent t]
+    ["Complete Lisp Symbol" lisp-complete-symbol t]
+    "--"
+    "Shift Reference at Point"
+    ["Up" org-table-fedit-ref-up t]
+    ["Down" org-table-fedit-ref-down t]
+    ["Left" org-table-fedit-ref-left t]
+    ["Right" org-table-fedit-ref-right t]
+    "-"
+    "Change Test Row for Column Formulas"
+    ["Up" org-table-fedit-line-up t]
+    ["Down" org-table-fedit-line-down t]
+    "--"
+    ["Scroll Table Window" org-table-fedit-scroll t]
+    ["Scroll Table Window down" org-table-fedit-scroll-down t]
+    ["Show Table Grid" org-table-fedit-toggle-coordinates
+     :style toggle :selected (with-current-buffer (marker-buffer org-pos)
+			       org-table-overlay-coordinates)]
+    "--"
+    ["Standard Refs (B3 instead of @3$2)" org-table-fedit-toggle-ref-type
+     :style toggle :selected org-table-buffer-is-an]))
 
 (defvar org-pos)
 
 (defun org-table-edit-formulas ()
   "Edit the formulas of the current table in a separate buffer."
   (interactive)
+  (when (save-excursion (beginning-of-line 1) (looking-at "#\\+TBLFM"))
+    (beginning-of-line 0))
   (unless (org-at-table-p) (error "Not at a table"))
   (org-table-get-specials)
-  (let ((eql (org-table-get-stored-formulas))
+  (let ((key (org-table-current-field-formula 'key 'noerror))
+	(eql (sort (org-table-get-stored-formulas 'noerror)
+                   'org-table-formula-less-p))
 	(pos (move-marker (make-marker) (point)))
+	(startline 1)
 	(wc (current-window-configuration))
-	entry s)
+	(titles '((column . "# Column Formulas\n")
+		  (field . "# Field Formulas\n")
+		  (named . "# Named Field Formulas\n")))
+	entry s type title)
     (switch-to-buffer-other-window "*Edit Formulas*")
     (erase-buffer)
     (fundamental-mode)
     (org-set-local 'org-pos pos)
     (org-set-local 'org-window-configuration wc)
-    (use-local-map org-edit-formulas-map)
-    (org-add-hook 'post-command-hook 'org-table-edit-formulas-post-command t t)
-    (setq s "# `C-c C-c' to finish, `C-u C-c C-c' to also apply, `C-c C-q' to abort.
-# `TAB' to pretty-print Lisp expressions, `M-TAB' to complete List symbols
-# `M-up/down' to scroll table, `S-up/down' to change line for column formulas\n\n")
-
-    (put-text-property 0 (length s) 'face 'font-lock-comment-face s)
-    (insert s)
+    (use-local-map org-table-fedit-map)
+    (org-add-hook 'post-command-hook 'org-table-fedit-post-command t t)
+    (easy-menu-add org-table-fedit-menu)
+    (setq startline (org-current-line))
     (while (setq entry (pop eql))
+      (setq type (cond
+		  ((equal (string-to-char (car entry)) ?@) 'field)
+		  ((string-match "^[0-9]" (car entry)) 'column)
+		  (t 'named)))
+      (when (setq title (assq type titles))
+	(or (bobp) (insert "\n"))
+	(insert (org-add-props (cdr title) nil 'face font-lock-comment-face))
+	(setq titles (delq title titles)))
+      (if (equal key (car entry)) (setq startline (org-current-line)))
       (setq s (concat (if (equal (string-to-char (car entry)) ?@) "" "$")
 		      (car entry) " = " (cdr entry) "\n"))
       (remove-text-properties 0 (length s) '(face nil) s)
       (insert s))
-    (goto-char (point-min))
-    (message "Edit formulas and finish with `C-c C-c'.")))
+    (if (eq org-table-use-standard-references t)
+	(org-table-fedit-toggle-ref-type))
+    (goto-line startline)
+    (message "Edit formulas and finish with `C-c C-c'.  See menu for more commands.")))
 
-(defun org-table-edit-formulas-post-command ()
+(defun org-table-fedit-post-command ()
   (when (not (memq this-command '(lisp-complete-symbol)))
     (let ((win (selected-window)))
       (save-excursion
 	(condition-case nil
-	    (org-show-reference)
+	    (org-table-show-reference)
 	  (error nil))
 	(select-window win)))))
 
-(defun org-finish-edit-formulas (&optional arg)
+(defun org-table-fedit-finish (&optional arg)
   "Parse the buffer for formula definitions and install them.
 With prefix ARG, apply the new formulas to the table."
   (interactive "P")
   (org-table-remove-rectangle-highlight)
+  (if org-table-use-standard-references
+      (progn
+	(org-table-fedit-convert-buffer 'org-table-convert-refs-to-rc)
+	(setq org-table-buffer-is-an nil)))
   (let ((pos org-pos) eql var form)
-    (setq org-pos nil)
     (goto-char (point-min))
     (while (re-search-forward
 	    "^\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*\\(\n[ \t]+.*$\\)*\\)"
@@ -7992,9 +8114,13 @@ With prefix ARG, apply the new formulas to the table."
       (setq var (if (match-end 2) (match-string 2) (match-string 1))
 	    form (match-string 3))
       (setq form (org-trim form))
-      (while (string-match "[ \t]*\n[ \t]*" form)
-	(setq form (replace-match " " t t form)))
-      (push (cons var form) eql))
+      (when (not (equal form ""))
+	(while (string-match "[ \t]*\n[ \t]*" form)
+	  (setq form (replace-match " " t t form)))
+	(when (assoc var eql)
+	  (error "Double formulas for %s" var))
+	(push (cons var form) eql)))
+    (setq org-pos nil)
     (set-window-configuration org-window-configuration)
     (select-window (get-buffer-window (marker-buffer pos)))
     (goto-char pos)
@@ -8007,7 +8133,7 @@ With prefix ARG, apply the new formulas to the table."
 	(org-table-recalculate 'all)
       (message "New formulas installed - press C-u C-c C-c to apply."))))
 
-(defun org-abort-edit-formulas ()
+(defun org-table-fedit-abort ()
   "Abort editing formulas, without installing the changes."
   (interactive)
   (org-table-remove-rectangle-highlight)
@@ -8018,7 +8144,7 @@ With prefix ARG, apply the new formulas to the table."
     (move-marker pos nil)
     (message "Formula editing aborted without installing changes")))
 
-(defun org-edit-formula-lisp-indent ()
+(defun org-table-fedit-lisp-indent ()
   "Pretty-print and re-indent Lisp expressions in the Formula Editor."
   (interactive)
   (let ((pos (point)) beg end ind)
@@ -8059,7 +8185,7 @@ With prefix ARG, apply the new formulas to the table."
 
 (defvar org-show-positions nil)
 
-(defun org-show-reference (&optional local)
+(defun org-table-show-reference (&optional local)
   "Show the location/value of the $ expression at point."
   (interactive)
   (org-table-remove-rectangle-highlight)
@@ -8072,12 +8198,18 @@ With prefix ARG, apply the new formulas to the table."
 	  var name e what match dest)
       (if local (org-table-get-specials))
       (setq what (cond
-		  ((org-at-regexp-p org-table-range-regexp2) 'range)
+		  ((or (org-at-regexp-p org-table-range-regexp2)
+		       (org-at-regexp-p org-table-translate-regexp)
+		       (org-at-regexp-p org-table-range-regexp))
+		   (setq match 
+			 (save-match-data
+			   (org-table-convert-refs-to-rc (match-string 0))))
+		   'range)
 		  ((org-at-regexp-p "\\$[a-zA-Z][a-zA-Z0-9]*") 'name)
 		  ((org-at-regexp-p "\\$[0-9]+") 'column)
 		  ((not local) nil)
 		  (t (error "No reference at point")))
-	    match (and what (match-string 0)))
+	    match (and what (or match (match-string 0))))
       (when (and  match (not (equal (match-beginning 0) (point-at-bol))))
 	(org-table-add-rectangle-overlay (match-beginning 0) (match-end 0)
 					 'secondary-selection))
@@ -8089,9 +8221,13 @@ With prefix ARG, apply the new formulas to the table."
 	(setq match (org-table-formula-substitute-names match)))
       (unless local
 	(save-excursion
+	  (end-of-line 1)
+	  (re-search-backward "^\\S-" nil t)
 	  (beginning-of-line 1)
-	  (when (looking-at "\\(\\$[0-9a-zA-Z]+\\|@[0-9]+\\$[0-9]+\\)=")
-	    (setq dest (match-string 1))
+	  (when (looking-at "\\(\\$[0-9a-zA-Z]+\\|@[0-9]+\\$[0-9]+\\|[a-zA-Z]+\\([0-9]+\\|&\\)\\) *=")
+	    (setq dest 
+		  (save-match-data
+		    (org-table-convert-refs-to-rc (match-string 1))))
 	    (org-table-add-rectangle-overlay
 	     (match-beginning 1) (match-end 1) face2))))
       (if (and (markerp pos) (marker-buffer pos))
@@ -8160,18 +8296,20 @@ With prefix ARG, apply the new formulas to the table."
 	  (message "Constant: $%s=%s in `org-table-formula-constants'."
 		   var (cdr e)))
 	 ((setq e (and (fboundp 'constants-get) (constants-get var)))
-	  (message "Constant: $%s=%s, retrieved from `constants.el'." var e))
+	  (message "Constant: $%s=%s, from `constants.el'%s."
+		   var e (format " (%s units)" constants-unit-system)))
 	 (t (error "Undefined name $%s" var)))))
       (goto-char pos)
-      (when org-show-positions
+      (when (and org-show-positions
+                 (not (memq this-command '(org-table-fedit-scroll
+                                           org-table-fedit-scroll-down))))
 	(push pos org-show-positions)
+	(push org-table-current-begin-pos org-show-positions)
 	(let ((min (apply 'min org-show-positions))
 	      (max (apply 'max org-show-positions)))
-	  (when (or (not (pos-visible-in-window-p min))
-		    (not (pos-visible-in-window-p max)))
-	    (goto-char min)
-	    (set-window-start (selected-window) (point-at-bol))
-	    (goto-char pos))))
+          (goto-char min) (recenter 0)
+          (goto-char max)
+          (or (pos-visible-in-window-p max) (recenter -1))))
       (select-window win))))
 
 (defun org-table-force-dataline ()
@@ -8188,27 +8326,17 @@ With prefix ARG, apply the new formulas to the table."
 	    ((or p1 p2) (goto-char (or p1 p2)))
 	    (t (error "No table dataline around here"))))))
 
-(defun org-table-edit-line-up ()
+(defun org-table-fedit-line-up ()
   "Move cursor one line up in the window showing the table."
   (interactive)
-  (org-table-edit-move 'previous-line))
+  (org-table-fedit-move 'previous-line))
 
-(defun org-table-edit-line-down ()
+(defun org-table-fedit-line-down ()
   "Move cursor one line down in the window showing the table."
   (interactive)
- (org-table-edit-move 'next-line))
+ (org-table-fedit-move 'next-line))
 
-(defun org-table-edit-backward-field ()
-  "Move cursor one field backward in the window showing the table."
-  (interactive)
-  (org-table-edit-move 'org-table-previous-field))
-
-(defun org-table-edit-next-field ()
-  "Move cursor one field forward in the window showing the table."
-  (interactive)
-  (org-table-edit-move 'org-table-next-field))
-
-(defun org-table-edit-move (command)
+(defun org-table-fedit-move (command)
   "Move the cursor in the window shoinw the table.
 Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   (let ((org-table-allow-automatic-line-recalculation nil)
@@ -8223,14 +8351,14 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
     (move-marker pos (point))
     (select-window win)))
 
-(defun org-table-edit-scroll (N)
+(defun org-table-fedit-scroll (N)
   (interactive "p")
   (let ((other-window-scroll-buffer (marker-buffer org-pos)))
     (scroll-other-window N)))
 
-(defun org-table-edit-scroll-down (N)
+(defun org-table-fedit-scroll-down (N)
   (interactive "p")
-  (org-table-edit-scroll (- N)))
+  (org-table-fedit-scroll (- N)))
 
 (defvar org-table-rectangle-overlays nil)
 	
@@ -8285,7 +8413,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   (mapc 'org-delete-overlay org-table-coordinate-overlays)
   (setq org-table-coordinate-overlays nil)
   (save-excursion
-    (let ((id 0) (ih 0) hline eol str ic ov beg)
+    (let ((id 0) (ih 0) hline eol s1 s2 str ic ov beg)
       (goto-char (org-table-begin))
       (while (org-at-table-p)
 	(setq eol (point-at-eol))
@@ -8294,15 +8422,18 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 	(setq hline (looking-at org-table-hline-regexp))
 	(setq str (if hline (format "I*%-2d" (setq ih (1+ ih)))
 		    (format "%4d" (setq id (1+ id)))))
-	(org-overlay-before-string ov str 'org-formula 'evaporate)
+	(org-overlay-before-string ov str 'org-special-keyword 'evaporate)
 	(when hline
 	  (setq ic 0)
-	  (while (re-search-forward "[+|]-+" eol t)
+	  (while (re-search-forward "[+|]\\(-+\\)" eol t)
 	    (setq beg (1+ (match-beginning 0))
-		  str (concat "$" (int-to-string (setq ic (1+ ic)))))
+		  ic (1+ ic)
+		  s1 (concat "$" (int-to-string ic))
+		  s2 (org-number-to-letters ic)
+		  str (if org-table-use-standard-references s2 s1))
 	    (setq ov (org-make-overlay beg (+ beg (length str))))
 	    (push ov org-table-coordinate-overlays)
-	    (org-overlay-display ov str 'org-formula 'evaporate)))
+	    (org-overlay-display ov str 'org-special-keyword 'evaporate)))
 	(beginning-of-line 2)))))
 
 (defun org-table-toggle-coordinate-overlays ()
@@ -11430,7 +11561,7 @@ are included in the output."
 	 (case-fold-search nil)
          lspos
 	 tags tags-list tags-alist (llast 0) rtn level category i txt
-	 todo marker entry)
+	 todo marker entry priority)
     (save-excursion
       (goto-char (point-min))
       (when (eq action 'sparse-tree) (org-overview))
@@ -11472,11 +11603,13 @@ are included in the output."
 			  (if org-tags-match-list-sublevels
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
-			 category tags-list))
+			 category tags-list)
+		    priority (org-get-priority txt))
 	      (goto-char lspos)
 	      (setq marker (org-agenda-new-marker))
 	      (org-add-props txt props
-		'org-marker marker 'org-hd-marker marker 'org-category category)
+		'org-marker marker 'org-hd-marker marker 'org-category category
+		'priority priority)
 	      (push txt rtn))
 	    ;; if we are to skip sublevels, jump to end of subtree
 	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))))
@@ -11605,7 +11738,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
     (if arg
 	(save-excursion
 	  (goto-char (point-min))
-	  (let (buffer-invisibility-spec)  ; Emacs 21 compatibility
+	  (let ((buffer-invisibility-spec (org-inhibit-invisibility)))
 	    (while (re-search-forward re nil t)
 	      (org-set-tags nil t)
 	      (end-of-line 1)))
@@ -11613,24 +11746,26 @@ With prefix ARG, realign all tags in headings in the current buffer."
       (if just-align
 	  (setq tags current)
 	;; Get a new set of tags from the user
-	(setq table (or org-tag-alist (org-get-buffer-tags))
-	      org-last-tags-completion-table table
-	      current-tags (org-split-string current ":")
-	      inherited-tags (nreverse
-			      (nthcdr (length current-tags)
-				      (nreverse (org-get-tags-at))))
-	      tags
-	      (if (or (eq t org-use-fast-tag-selection)
-		      (and org-use-fast-tag-selection
-			   (delq nil (mapcar 'cdr table))))
-		  (org-fast-tag-selection current-tags inherited-tags table)
-		(let ((org-add-colon-after-tag-completion t))
-		  (org-trim
-		   (completing-read "Tags: " 'org-tags-completion-function
-				    nil nil current 'org-tags-history)))))
+	(save-excursion
+	  (setq table (or org-tag-alist (org-get-buffer-tags))
+		org-last-tags-completion-table table
+		current-tags (org-split-string current ":")
+		inherited-tags (nreverse
+				(nthcdr (length current-tags)
+					(nreverse (org-get-tags-at))))
+		tags
+		(if (or (eq t org-use-fast-tag-selection)
+			(and org-use-fast-tag-selection
+			     (delq nil (mapcar 'cdr table))))
+		    (org-fast-tag-selection current-tags inherited-tags table)
+		  (let ((org-add-colon-after-tag-completion t))
+		    (org-trim
+		     (completing-read "Tags: " 'org-tags-completion-function
+				      nil nil current 'org-tags-history))))))
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
+      
       (if (string-match "\\`[\t ]*\\'" tags)
           (setq tags "")
 	(unless (string-match ":$" tags) (setq tags (concat tags ":")))
@@ -11650,7 +11785,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 					org-tags-column
 				      (- (- org-tags-column) (length tags))))
 		    rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
-	    (replace-match rpl)
+	    (replace-match rpl t t)
 	    (and (not (featurep 'xemacs)) c0 (tabify p0 (point)))
 	    tags)
 	(error "Tags alignment failed")))))
@@ -12008,9 +12143,9 @@ used to insert the time stamp into the buffer to include the time."
 	 (timestr (format-time-string
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") default-time))
 	 (prompt (concat (if prompt (concat prompt " ") "")
-			 (format "YYYY-MM-DD [%s]: " timestr)))
+			 (format "Date and/or time (default [%s]): " timestr)))
 	 ans (org-ans0 "") org-ans1 org-ans2 (deltadays 0)
-	 second minute hour day month year tl wday wday1)
+	 second minute hour day month year tl wday wday1 pm)
 
     (cond
      (from-string (setq ans from-string))
@@ -12058,7 +12193,6 @@ used to insert the time stamp into the buffer to include the time."
 		(progn
 		  (use-local-map map)
 		  (setq org-ans0 (read-string prompt "" nil nil))
-;		  (if (not (string-match "\\S-" org-ans0)) (setq org-ans0 nil))
 		  ;; org-ans0: from prompt
 		  ;; org-ans1: from mouse click
 		  ;; org-ans2: from calendar motion
@@ -12071,17 +12205,30 @@ used to insert the time stamp into the buffer to include the time."
     (if (string-match "^[ \t]*[-+][0-9]+[ \t]*$" org-ans0)
 	(setq deltadays (string-to-number ans) ans ""))
 
-    (if (string-match
-	 "^ *\\(\\([0-9]+\\)-\\)?\\([0-1]?[0-9]\\)-\\([0-3]?[0-9]\\)\\([^-0-9]\\|$\\)" ans)
-	(progn
-	  (setq year (if (match-end 2)
-			 (string-to-number (match-string 2 ans))
-		       (string-to-number (format-time-string "%Y")))
-		month (string-to-number (match-string 3 ans))
-		day (string-to-number (match-string 4 ans)))
-	  (if (< year 100) (setq year (+ 2000 year)))
-	  (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
-				   t nil ans))))
+    ;; Help matching ISO dates with single digit month ot day, like 2006-8-11.
+    (when (string-match
+	   "^ *\\(\\([0-9]+\\)-\\)?\\([0-1]?[0-9]\\)-\\([0-3]?[0-9]\\)\\([^-0-9]\\|$\\)" ans)
+      (setq year (if (match-end 2)
+		     (string-to-number (match-string 2 ans))
+		   (string-to-number (format-time-string "%Y")))
+	    month (string-to-number (match-string 3 ans))
+	    day (string-to-number (match-string 4 ans)))
+      (if (< year 100) (setq year (+ 2000 year)))
+      (setq ans (replace-match (format "%04d-%02d-%02d\\5" year month day)
+			       t nil ans)))
+    ;; Help matching am/pm times, because `parse-time-string' does not do that.
+    ;; If there is a time with am/pm, and *no* time without it, we convert
+    ;; convert so that matching will be successful.
+    (when (and (not (string-match "[012]?[0-9]:[0-9][0-9]\\([ \t\n]\\|$\\)" ans))
+	       (string-match "\\([012]?[0-9]\\)\\(:\\([0-5][0-9]\\)\\)?\\(am\\|AM\\|pm\\|PM\\)\\>" ans))
+      (setq hour (string-to-number (match-string 1 ans))
+	    minute (if (match-end 3) (string-to-number (match-string 3 ans)) 0)
+	    pm (equal ?p (string-to-char (downcase (match-string 4 ans)))))
+      (if (and (= hour 12) (not pm))
+	  (setq hour 0)
+	(if (and pm (< hour 12)) (setq hour (+ 12 hour))))
+      (setq ans (replace-match (format "%02d:%02d" hour minute) t t ans)))
+
     (setq tl (parse-time-string ans)
 	  year (or (nth 5 tl) (string-to-number (format-time-string "%Y" ct)))
 	  month (or (nth 4 tl) (string-to-number (format-time-string "%m" ct)))
@@ -12118,7 +12265,16 @@ Also, store the cursor date in variable org-ans2."
 	     (time (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
     (org-move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))
-    (select-window sw)))
+    (select-window sw)
+    ;; Update the prompt to show new default date
+    (save-excursion
+      (goto-char (point-min))
+      (when (and (re-search-forward "\\[[-0-9]+\\]" nil t)
+		 (get-text-property (match-end 0) 'field))
+	(let ((inhibit-read-only t))
+	  (replace-match (concat "[" org-ans2 "]") t t)
+	  (add-text-properties (point-min) (1+ (match-end 0))
+			       (text-properties-at (1+ (point-min)))))))))
 
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.
@@ -12981,6 +13137,7 @@ The following commands are available:
 (define-key org-agenda-mode-map "\C-m"     'org-agenda-switch-to)
 (define-key org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (define-key org-agenda-mode-map "\C-c$"    'org-agenda-archive)
+(define-key org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (define-key org-agenda-mode-map "$"        'org-agenda-archive)
 (define-key org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (define-key org-agenda-mode-map " "        'org-agenda-show)
@@ -13631,7 +13788,7 @@ Optional argument FILE means, use this file instead of the current."
 	    (when org-agenda-skip-archived-trees
 	      (goto-char (point-min))
 	      (while (re-search-forward rea nil t)
-		(if (org-on-heading-p)
+		(if (org-on-heading-p t)
 		    (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	    (goto-char (point-min))
 	    (setq re (concat "^\\*+ +" org-comment-string "\\>"))
@@ -14443,6 +14600,7 @@ the documentation of `org-diary'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
+	 ;; FIXME: get rid of the \n at some point  but watch out
 	 (regexp (concat "[\n\r]\\*+ *\\("
 			 (if org-select-this-todo-keyword
 			     (concat "\\<\\(" org-select-this-todo-keyword
@@ -14465,6 +14623,7 @@ the documentation of `org-diary'."
 	    (goto-char beg)
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))
 	    (throw :skip nil)))
+	(goto-char beg)
 	(org-agenda-skip)
 	(goto-char (match-beginning 1))
 	(setq marker (org-agenda-new-marker (1+ (match-beginning 0)))
@@ -14883,7 +15042,7 @@ only the correctly processes TXT should be returned - this is used by
 	'time-of-day time-of-day
 	'dotime dotime))))
 
-(defvar org-agenda-sorting-strategy)
+(defvar org-agenda-sorting-strategy) ;; FIXME: can be removed?
 (defvar org-agenda-sorting-strategy-selected nil)
 
 (defun org-agenda-add-time-grid-maybe (list ndays todayp)
@@ -15663,10 +15822,12 @@ the tags of the current headline come last."
       (with-current-buffer buffer
 	(widen)
 	(goto-char pos)
-	(org-show-context 'agenda)
+	(save-excursion
+	  (org-show-context 'agenda))
 	(save-excursion
 	  (and (outline-next-heading)
 	       (org-flag-heading nil)))   ; show the next heading
+	(goto-char pos)
 	(call-interactively 'org-set-tags)
 	(end-of-line 1)
 	(setq newhead (org-get-heading)))
@@ -16770,7 +16931,7 @@ translations.  There is currently no way for users to extend this.")
       (when (not (eq org-export-with-archived-trees t))
 	(goto-char (point-min))
 	(while (re-search-forward re-archive nil t)
-	  (if (not (org-on-heading-p))
+	  (if (not (org-on-heading-p t))
 	      (org-end-of-subtree t)
 	    (beginning-of-line 1)
 	    (delete-region
@@ -17442,7 +17603,7 @@ org-mode's default settings, but still inferior to file-local settings."
 		       (coding-system-get coding-system 'mime-charset)))
 	 table-open type
 	 table-buffer table-orig-buffer
-	 ind start-is-num starter
+	 ind start-is-num starter didclose
 	 rpl path desc descp desc1 desc2 link
 	 )
     (message "Exporting...")
@@ -17792,10 +17953,12 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (unless (string-match "[^ \t]" line)
 		;; empty line.  Pretend indentation is large.
 		(setq ind (1+ (or (car local-list-indent) 1))))
+	      (setq didclose nil)
 	      (while (and in-local-list
 			  (or (and (= ind (car local-list-indent))
 				   (not starter))
 			      (< ind (car local-list-indent))))
+		(setq didclose t)
 		(org-close-li)
 		(insert (if (car local-list-num) "</ol>\n" "</ul>"))
 		(pop local-list-num) (pop local-list-indent)
@@ -17804,7 +17967,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	       ((and starter
 		     (or (not in-local-list)
 			 (> ind (car local-list-indent))))
-		;; Start new (level of ) list
+		;; Start new (level of) list
 		(org-close-par-maybe)
 		(insert (if start-is-num "<ol>\n<li>\n" "<ul>\n<li>\n"))
 		(push start-is-num local-list-num)
@@ -17813,7 +17976,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	       (starter
 		;; continue current list
 		(org-close-li)
-		(insert "<li>\n")))
+		(insert "<li>\n"))
+	       (didclose
+		;; we did close a list, normal text follows: need <p>
+		(org-open-par)))
 	      (if (string-match "^[ \t]*\\[\\([X ]\\)\\]" line)
 		  (setq line
 			(replace-match
@@ -18206,10 +18372,6 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Close <li> if necessary."
   (org-close-par-maybe)
   (insert "</li>\n"))
-;  (when (save-excursion
-;	  (re-search-backward "</?\\(ul\\|ol\\|li\\|[hH][0-9]\\)>" nil t))
-;    (if (member (match-string 0) '("</ul>" "</ol>" "<li>"))
-;	(insert "</li>"))))
 
 (defun org-html-level-start (level title umax with-toc head-count)
   "Insert a new level in HTML export.
@@ -18258,7 +18420,7 @@ When TITLE is nil, just close all open levels."
 (defun org-html-level-close (&rest args)
   "Terminate one level in HTML export."
   (org-close-li)
-  (insert "</ul>"))
+  (insert "</ul>\n"))
 
 ;;; iCalendar export
 
@@ -18535,13 +18697,6 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 
 ;;;; Key bindings
 
-;; - Bindings in Org-mode map are currently
-;;   0123456789abcdefghijklmnopqrstuvwxyz!?@#$%^&-+*/=()_{}[]:;"|,.<>~`'\t  the alphabet
-;;             abcd fgh j lmnopqrstuvwxyz!? #$ ^ -+*/=     [] ; |,.<>~ '\t  necessary bindings
-;;                 e                                                        (?) useful from outline-mode
-;;                     i k                 @                                expendable from outline-mode
-;;   0123456789                               % &     ()_{}    "      `     free
-
 ;; Make `C-c C-x' a prefix key
 (define-key org-mode-map "\C-c\C-x" (make-sparse-keymap))
 
@@ -18762,6 +18917,12 @@ because, in this case the deletion might narrow the column."
 (put 'orgtbl-self-insert-command 'delete-selection t)
 (put 'org-delete-char 'delete-selection 'supersede)
 (put 'org-delete-backward-char 'delete-selection 'supersede)
+
+;; Make `flyspell-mode' delay after some commands                               
+(put 'org-self-insert-command 'flyspell-delayed t)
+(put 'orgtbl-self-insert-command 'flyspell-delayed t)
+(put 'org-delete-char 'flyspell-delayed t)
+(put 'org-delete-backward-char 'flyspell-delayed t)
 
 ;; How to do this: Measure non-white length of current string
 ;; If equal to column width, we should realign.
@@ -19193,6 +19354,7 @@ See the individual commands for more information."
      ["Priority Up" org-shiftup t]
      ["Priority Down" org-shiftdown t]
      "--"
+     ;; FIXME:  why is this still here????
 ;     ["Insert Checkbox" org-insert-todo-heading (org-in-item-p)]
 ;     ["Toggle Checkbox" org-ctrl-c-ctrl-c (org-at-item-checkbox-p)]
 ;     ["Insert [n/m] cookie" (progn (insert "[/]") (org-update-checkbox-count))
@@ -19377,7 +19539,7 @@ and :keyword."
 	 (p (point)) clist o)
     ;; First the large context
     (cond
-     ((org-on-heading-p)
+     ((org-on-heading-p t)
       (push (list :headline (point-at-bol) (point-at-eol)) clist)
       (when (progn
 	      (beginning-of-line 1)
@@ -19558,7 +19720,22 @@ not an indirect buffer"
 
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.
-;; FIXME: configure filladapt for XEmacs
+
+(defun org-indent-line-function ()
+  "Indent line like previous, but further if previous was headline or item."
+  (interactive)
+  (let ((column (save-excursion
+		  (beginning-of-line)
+		  (if (looking-at "#") 0
+		    (skip-chars-backward "\n \t")
+		    (beginning-of-line)
+		    (if (or (looking-at "\\*+[ \t]+")
+			    (looking-at "[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)"))
+			(progn (goto-char (match-end 0)) (current-column))
+		      (current-indentation))))))
+    (if (<= (current-column) (current-indentation))
+	(indent-line-to column)
+      (save-excursion (indent-line-to column)))))
 
 (defun org-set-autofill-regexps ()
   (interactive)
@@ -19615,6 +19792,7 @@ work correctly."
 	(t nil)))
 
 
+;; FIXME: these 2 functions are not in the right place.
 (defun org-image-file-name-regexp ()
   "Return regexp matching the file names of images."
   (if (fboundp 'image-file-name-regexp)
@@ -19833,6 +20011,179 @@ Show the heading too, if it is currently invisible."
 
 ;;;; Experimental code
 
+(defun org-table-formula-to-user (s)
+  "Convert a formula from internal to user representation."
+  (if (eq org-table-use-standard-references t)
+      (org-table-convert-refs-to-an s)
+    s))
+
+(defun org-table-formula-from-user (s)
+  "Convert a formula from user to internal representation."
+  (if org-table-use-standard-references
+      (org-table-convert-refs-to-rc s)
+    s))
+
+(defun org-table-convert-refs-to-rc (s)
+  "Convert spreadsheet references from AB7 to @7$28.
+Works for single references, but also for entire formulas and even the
+full TBLFM line."
+  (let ((start 0))
+    (while (string-match "\\<\\([a-zA-Z]+\\)\\([0-9]+\\>\\|&\\)\\|\\(;[^\r\n:]+\\)" s start)
+      (if (match-end 3)
+	  ;; format match, just advance
+	  (setq start (match-end 0))
+	(setq start (match-beginning 0)
+	      s (replace-match
+		 (if (equal (match-string 2 s) "&")
+		     (format "$%d" (org-letters-to-number (match-string 1 s)))
+		   (format "@%d$%d"
+			   (string-to-number (match-string 2 s))
+			   (org-letters-to-number (match-string 1 s))))
+		 t t s))))
+    s))
+
+(defun org-table-convert-refs-to-an (s)
+  "Convert spreadsheet references from to @7$28 to AB7.
+Works for single references, but also for entire formulas and even the
+full TBLFM line."
+  (while (string-match "@\\([0-9]+\\)$\\([0-9]+\\)" s)
+    (setq s (replace-match
+	     (format "%s%d"
+		     (org-number-to-letters
+		      (string-to-number (match-string 2 s)))
+		     (string-to-number (match-string 1 s)))
+	     t t s)))
+  (while (string-match "\\(^\\|[^0-9a-zA-Z]\\)\\$\\([0-9]+\\)" s)
+    (setq s (replace-match (concat "\\1"
+				   (org-number-to-letters
+				    (string-to-number (match-string 2 s))) "&")
+			   t nil s)))
+  s)
+
+(defun org-letters-to-number (s)
+  "Convert a base 26 number represented by letters into an integer.
+For example:  AB -> 28."
+  (let ((n 0))
+    (setq s (upcase s))
+    (while (> (length s) 0)
+	  (setq n (+ (* n 26) (string-to-char s) (- ?A) 1)
+		s (substring s 1)))
+    n))
+
+(defun org-number-to-letters (n)
+  "Convert an integer into a base 26 number represented by letters.
+For example:  28 -> AB."
+  (let ((s ""))
+    (while (> n 0)
+      (setq s (concat (char-to-string (+ (mod (1- n) 26) ?A)) s)
+	    n (/ (1- n) 26)))
+    s))
+
+(defun org-table-fedit-convert-buffer (function)
+  "Convert all references in this buffer, using FUNTION."
+  (let ((line (org-current-line)))
+    (goto-char (point-min))
+    (while (not (eobp))
+      (insert (funcall function (buffer-substring (point) (point-at-eol))))
+      (delete-region (point) (point-at-eol))
+      (or (eobp) (forward-char 1)))
+    (goto-line line)))
+
+(defvar org-table-buffer-is-an nil)
+
+(defun org-table-fedit-toggle-ref-type ()
+  "Convert all references in the buffer from B3 to @3$2 and back."
+  (interactive)
+  (org-set-local 'org-table-buffer-is-an (not org-table-buffer-is-an))
+  (org-table-fedit-convert-buffer
+   (if org-table-buffer-is-an
+       'org-table-convert-refs-to-an 'org-table-convert-refs-to-rc))
+  (message "Reference type switched to %s"
+	   (if org-table-buffer-is-an "A1 etc" "@row$column")))
+
+(defun org-table-fedit-ref-up ()
+  "Shift the reference at point one row/hline up."
+  (interactive)
+  (org-table-fedit-shift-reference 'up))
+(defun org-table-fedit-ref-down ()
+  "Shift the reference at point one row/hline down."
+  (interactive)
+  (org-table-fedit-shift-reference 'down))
+(defun org-table-fedit-ref-left ()
+  "Shift the reference at point one field to the left."
+  (interactive)
+  (org-table-fedit-shift-reference 'left))
+(defun org-table-fedit-ref-right ()
+  "Shift the reference at point one field to the right."
+  (interactive)
+  (org-table-fedit-shift-reference 'right))
+
+(defun org-table-fedit-shift-reference (dir)
+  (cond
+   ((org-at-regexp-p "\\(\\<[a-zA-Z]\\)&")
+    (if (memq dir '(left right))
+	(org-rematch-and-replace 1 (eq dir 'left))
+      (error "Cannot shift reference in this direction")))
+   ((org-at-regexp-p "\\(\\<[a-zA-Z]\\{1,2\\}\\)\\([0-9]+\\)")
+    ;; A B3-like reference
+    (if (memq dir '(up down))
+	(org-rematch-and-replace 2 (eq dir 'up))
+      (org-rematch-and-replace 1 (eq dir 'left))))
+   ((org-at-regexp-p
+     "\\(@\\|\\.\\.\\)\\([-+]?\\(I+\\>\\|[0-9]+\\)\\)\\(\\$\\([-+]?[0-9]+\\)\\)?")
+    ;; An internal reference
+    (if (memq dir '(up down))
+	(org-rematch-and-replace 2 (eq dir 'up) (match-end 3))
+      (org-rematch-and-replace 5 (eq dir 'left))))))
+
+(defun org-rematch-and-replace (n &optional decr hline)
+  "Re-match the group N, and replace it with the shifted refrence."
+  (or (match-end n) (error "Cannot shift reference in this direction"))
+  (goto-char (match-beginning n))
+  (and (looking-at (regexp-quote (match-string n)))
+       (replace-match (org-shift-refpart (match-string 0) decr hline)
+		      t t)))
+
+(defun org-shift-refpart (ref &optional decr hline)
+  "Shift a refrence part REF.
+If DECR is set, decrease the references row/column, else increase.
+If HLINE is set, this may be a hline reference, it certainly is not
+a translation reference."
+  (save-match-data
+    (let* ((sign (string-match "^[-+]" ref)) n)
+      
+      (if sign (setq sign (substring ref 0 1) ref (substring ref 1)))
+      (cond
+       ((and hline (string-match "^I+" ref))
+	(setq n (string-to-number (concat sign (number-to-string (length ref)))))
+	(setq n (+ n (if decr -1 1)))
+	(if (= n 0) (setq n (+ n (if decr -1 1))))
+	(if sign
+	    (setq sign (if (< n 0) "-" "+") n (abs n))
+	  (setq n (max 1 n)))
+	(concat sign (make-string n ?I)))
+      
+       ((string-match "^[0-9]+" ref)
+	(setq n (string-to-number (concat sign ref)))
+	(setq n (+ n (if decr -1 1)))
+	(if sign
+	    (concat (if (< n 0) "-" "+") (number-to-string (abs n)))
+	  (number-to-string (max 1 n))))
+       
+       ((string-match "^[a-zA-Z]+" ref)
+	(org-number-to-letters
+	 (max 1 (+ (org-letters-to-number ref) (if decr -1 1)))))
+
+       (t (error "Cannot shift reference"))))))
+
+(defun org-table-fedit-toggle-coordinates ()
+  "Toggle the display of coordinates in the refrenced table."
+  (interactive)
+  (let ((pos (marker-position org-pos)))
+    (with-current-buffer (marker-buffer org-pos)
+      (save-excursion
+	(goto-char pos)
+	(org-table-toggle-coordinate-overlays)))))
 
 ;;;; Finish up
 

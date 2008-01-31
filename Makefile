@@ -74,6 +74,12 @@ install: install-lisp
 
 doc: org.html org.pdf orgcard.pdf
 
+p:
+	make pdf && open org.pdf
+
+c:
+	make card && gv orgcard.ps
+
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) $(LISPFILES) $(lispdir)

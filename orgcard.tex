@@ -1,6 +1,7 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.67}
-\def\year{2007}
+\def\orgversionnumber{4.68}
+\def\versionyear{2007}          % latest update
+\def\year{2007}                 % latest copyright year
 %
 %**start of header
 \newcount\columnsperpage
@@ -20,7 +21,7 @@
 
 \columnsperpage=3
 
-% Copyright (c) 2004, 2005, 2006, 2007 Free Software Foundation
+% Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc
 
 % GNU Emacs is free software; you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -61,14 +62,14 @@
 % for their many good ideas.
 
 \def\shortcopyrightnotice{\vskip 1ex plus 2 fill
-  \centerline{\small \copyright\ 2004, 2005, 2006, 2007\ Free Software Foundation, Inc.
+  \centerline{\small \copyright\ \year\ Free Software Foundation, Inc.
   Permissions on back.  v\orgversionnumber}}
 
 \def\copyrightnotice{
 \vskip 1ex plus 100 fill\begingroup\small
 \centerline{Copyright \copyright\ \year\ Free Software Foundation, Inc.}
-\centerline{v\orgversionnumber{} for Org-Mode \orgversionnumber{}, \year}
-\centerline{Authors: Philip Rooke \& Carsten Dominik}
+\centerline{v\orgversionnumber{} for Org-Mode \orgversionnumber{}, \versionyear}
+\centerline{Author: Philip Rooke}
 \centerline{based on refcard design and format by Stephen Gildea}
 
 Permission is granted to make and distribute copies of
@@ -377,34 +378,6 @@ Outside of tables, the same keys may have other functionality.
 \key{paste rectangular region}{C-c C-x C-y}
 \key{fill paragraph across selected cells}{C-c C-q}
 
-{\bf Calculations} (in combination with Emacs \kbd{calc} package)
-
-\key{set and eval column formula}{C-c =}
-\key{set and eval field formula}{C-u C-c =}
-\key{edit formulas in separate buffer}{C-c '}
-\key{re-apply all stored equations to current line}{C-c *}
-\key{re-apply all stored equations to entire table}{C-u C-c *}
-\key{iterate table to stability}{C-u C-u C-c *}
-
-%\kbd{TAB}, \kbd{RET} and \kbd{C-c C-c} trigger automatic recalculation
-%in lines starting with: {\tt | \# |}.
-
-\key{rotate calculation mark through \# * ! \^ \_ \$}{C-\#}
-
-\key{show line, column, formula reference}{C-c ?}
-\key{sum numbers in current column/rectangle}{C-c +}
-\key{copy down with increment}{S-RET$^3$}
-
-Formulas typed in field are executed by \kbd{TAB},
-\kbd{RET} and \kbd{C-c C-c}.  \kbd{=} introduces a column
-formula, \kbd{:=} a named-field formula.
-
-\key{Example: Add Col1 and Col2}{=\$1+\$2}
-\key{... with printf format specification}{=\$1+\$2;\%.2f}
-\key{... with constants from constants.el}{=\$1/\$c/\$cm}
-\metax{sum from 2nd to 3rd hline}{:=vsum(@II..@III)}
-\key{apply current column formula}{=}
-
 {\bf Miscellaneous}
 
 \key{to limit column width to \kbd{N} characters, use}{...| <N> |...}
@@ -412,12 +385,50 @@ formula, \kbd{:=} a named-field formula.
 \key{make current field fully visible}{C-u TAB}
 \metax{export as tab-separated file}{M-x org-table-export}
 \metax{import tab-separated file}{M-x org-table-import}
+\key{sum numbers in current column/rectangle}{C-c +}
+\key{copy down with increment}{S-RET$^3$}
 
 {\bf Tables created with the \kbd{table.el} package}
 
 \key{insert a new \kbd{table.el} table}{C-c ~}
 \key{recognize existing table.el table}{C-c C-c}
 \key{convert table (Org-mode $\leftrightarrow$ table.el)}{C-c ~}
+
+{\bf Spreadsheet}
+
+Formulas typed in field are executed by \kbd{TAB},
+\kbd{RET} and \kbd{C-c C-c}.  \kbd{=} introduces a column
+formula, \kbd{:=} a field formula.
+
+\key{Example: Add Col1 and Col2}{|=\$1+\$2      |}
+\key{... with printf format specification}{|=\$1+\$2;\%.2f|}
+\key{... with constants from constants.el}{|=\$1/\$c/\$cm |}
+\metax{sum from 2nd to 3rd hline}{|:=vsum(@II..@III)|}
+\key{apply current column formula}{| = |}
+
+\key{set and eval column formula}{C-c =}
+\key{set and eval field formula}{C-u C-c =}
+\key{re-apply all stored equations to current line}{C-c *}
+\key{re-apply all stored equations to entire table}{C-u C-c *}
+\key{iterate table to stability}{C-u C-u C-c *}
+\key{rotate calculation mark through \# * ! \^ \_ \$}{C-\#}
+\key{show line, column, formula reference}{C-c ?}
+\key{toggle coordinate grid}{C-c \}}
+\key{toggle formula debugger}{C-c \{}
+
+{\it Formula Editor}
+
+\key{edit formulas in separate buffer}{C-c '}
+\key{exit and install new formulas}{C-c C-c}
+\key{exit, install, and apply new formulas}{C-u C-c C-c}
+\key{abort}{C-c C-q}
+\key{toggle reference style}{C-c C-r}
+\key{pretty-print Lisp formula}{TAB}
+\key{complete Lisp symbol}{M-TAB}
+\key{shift reference point}{S-cursor}
+\key{shift test line for column references}{M-up/down}
+\key{scroll the window showing the table}{M-S-up/down}
+\key{toggle table coordinate grid}{C-c \}}
 
 \section{Links}
 
@@ -465,24 +476,24 @@ formula, \kbd{:=} a named-field formula.
 %\key{\kbd{vm://myself@some.where.org/folder\#id}}{\rm VM remote}
 
 
-\section{Remember-mode Integration}
+% \section{Remember-mode Integration}
 
-See the manual for how to make remember.el use Org-mode links and
-files.  The note-finishing command \kbd{C-c C-c} will first prompt for
-an org file. In the file, find a location with:
+% See the manual for how to make remember.el use Org-mode links and
+% files.  The note-finishing command \kbd{C-c C-c} will first prompt for
+% an org file. In the file, find a location with:
 
-\key{rotate subtree visibility}{TAB}
-\key{next heading}{DOWN}
-\key{previous heading}{UP}
+% \key{rotate subtree visibility}{TAB}
+% \key{next heading}{DOWN}
+% \key{previous heading}{UP}
 
-Insert the note with one of the following: 
+% Insert the note with one of the following: 
 
-\key{as sublevel of heading at cursor}{RET}
-\key{right here (cursor not on heading)}{RET}
-\key{before current heading}{LEFT}
-\key{after current heading}{RIGHT}
-\key{shortcut to end of buffer (cursor at buf-start)}{RET}
-\key{Abort}{q}
+% \key{as sublevel of heading at cursor}{RET}
+% \key{right here (cursor not on heading)}{RET}
+% \key{before current heading}{LEFT}
+% \key{after current heading}{RIGHT}
+% \key{shortcut to end of buffer (cursor at buf-start)}{RET}
+% \key{Abort}{q}
 
 \section{Completion}
 

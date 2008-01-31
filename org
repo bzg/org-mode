@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.67).
+   This manual is for Org-mode (version 4.68).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.67).
+This manual is for Org-mode (version 4.68).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -131,7 +131,7 @@ TODO items
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into managable pieces
+* Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
 
 Extended use of TODO keywords
@@ -212,7 +212,7 @@ Exporting
 
 HTML export
 
-* Export commands::             How to invode HTML export
+* Export commands::             How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       How hyperlinks get transferred to HTML
 * Images::                      To inline or not to inline?
@@ -338,7 +338,7 @@ example as:
    Org-mode's automatic, context sensitive table editor with spreadsheet
 capabilities can be integrated into any major mode by activating the
 minor Orgtbl-mode.  Using a translation step, it can be used to maintain
-tables in arbitray file types, for example in LaTeX.
+tables in arbitrary file types, for example in LaTeX.
 
    There is a website for Org-mode which provides links to the newest
 version of Org-mode, as well as additional information, frequently asked
@@ -1169,7 +1169,7 @@ to no more than this value.
 
 Fields that are wider become clipped and end in the string `=>'.  Note
 that the full text is still in the buffer, it is only invisible.  To
-see the full text, hold the mouse over the field - a tooltip window
+see the full text, hold the mouse over the field - a tool-tip window
 will show the full content.  To edit such a field, use the command `C-c
 `' (that is `C-c' followed by the backquote).  This will open a new
 window with the full field.  Edit it and finish with `C-c C-c'.
@@ -1205,7 +1205,7 @@ in mail mode, use
    Furthermore, with some special setup, it is possible to maintain
 tables in arbitrary syntax with Orgtbl-mode.  For example, it is
 possible to construct LaTeX tables with the underlying ease and power of
-Orgtbl-mode, including spreadsheet capabulities.  For details, see
+Orgtbl-mode, including spreadsheet capabilities.  For details, see
 *Note Tables in arbitrary syntax::.
 
 
@@ -1216,7 +1216,11 @@ File: org,  Node: The spreadsheet,  Prev: orgtbl-mode,  Up: Tables
 
 The table editor makes use of the Emacs `calc' package to implement
 spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
-derive fields from other fields.
+derive fields from other fields.  While fully featured, Org-mode's
+implementation is not identical to other spreadsheets.  For example,
+Org-mode knows the concept of a _column formula_ that will be applied
+to all non-header fields in a column without having to copy the formula
+to each relevant field.
 
 * Menu:
 
@@ -1238,16 +1242,21 @@ File: org,  Node: References,  Next: Formula syntax for Calc,  Prev: The spreads
 To compute fields in the table from other fields, formulas must
 reference other fields or ranges.  In Org-mode, fields can be referenced
 by name, by absolute coordinates, and by relative coordinates.  To find
-out what the coordinates of a field are, press `C-c ?' in that field.
+out what the coordinates of a field are, press `C-c ?' in that field,
+or press `C-c }' to toggle the display of a grid.
 
 Field references
 ................
 
-Formulas can reference the value of another field with the operator
+Formulas can reference the value of another field in two ways.  Like in
+any other spreadsheet, you may reference fields with a letter/number
+combination like `B3', meaning the 2nd field in the 3rd row.
+
+Org-mode also uses another, more general operator that looks like this:
      @row$column
 
-   Column references can be absolute like `1', `2',...`N', or relative
-to the current column like `+1' or `-2'.
+Column references can be absolute like `1', `2',...`N', or relative to
+the current column like `+1' or `-2'.
 
    The row specification only counts data lines and ignores horizontal
 separator lines (hlines).  You can use absolute row numbers `1'...`N',
@@ -1264,17 +1273,19 @@ the value directly at the hline is used.
 the column or the row part of the reference, the current row/column is
 implied.
 
-   Org-mode's references with _positive_ numbers correspond to fixed
-references in other spreadsheet programs.  For example, `@3$28'
-corresponds to `$AB$3'.  Org-mode's references with _negative_ numbers
-behave similar to non-fixed references in other spreadsheet programs,
-because when the same formula is used in several fields, different
-fields are referenced each time.
+   Org-mode's references with _unsigned_ numbers are fixed references
+in the sense that if you use the same reference in the formula for two
+different fields, the same field will be referenced each time.
+Org-mode's references with _signed_ numbers are floating references
+because the same reference operator can reference different fields
+depending on the field being calculated by the formula.
 
    Here are a few examples:
 
      @2$3      2nd row, 3rd column
+     C2        same as previous
      $5        column 5 in the current row
+     E&        same as previous
      @2        current column, row 2
      @-1$-3    the field one row up, three columns to the left
      @-I$2     field just under hline above current row, column 2
@@ -1292,6 +1303,7 @@ order to be interpreted correctly).  Examples:
      $1..$3        First three fields in the current row.
      $P..$Q        Range, using column names (see under Advanced)
      @2$1..@4$3    6 fields between these two fields.
+     A2..C4        Same as above.
      @-1$-2..@-1   3 numbers from the column to the left, 2 up to current row
 
 Range references return a vector of values that can be fed into Calc
@@ -1307,9 +1319,17 @@ Named references
 Constants are defined globally through the variable
 `org-table-formula-constants'.  If you have the `constants.el' package,
 it will also be used to resolve constants, including natural constants
-like `$h' for Planck's constant, and units like `$km' for kilometers.
-Column names and parameters can be specified in special table lines.
-These are described below, see *Note Advanced features::.
+like `$h' for Planck's constant, and units like `$km' for
+kilometers(1).  Column names and parameters can be specified in special
+table lines.  These are described below, see *Note Advanced features::.
+
+   ---------- Footnotes ----------
+
+   (1) `Constant.el' can supply the values of constants in two
+different unit systems, `SI' and `cgs'.  Which one is used depends on
+the value of the variable `constants-unit-system'.  You can use the
+`#+STARTUP' options `constSI' and `constcgs' to set this value for the
+current buffer.
 
 
 File: org,  Node: Formula syntax for Calc,  Next: Formula syntax for Lisp,  Prev: References,  Up: The spreadsheet
@@ -1348,7 +1368,7 @@ the final result.  A few examples:
      $1+$2                Sum of first and second field
      $1+$2;%.2f           Same, format result to two decimals
      exp($2)+exp($1)      Math functions can be used
-     $;%.1f               Reformat current cell to 1 decimal
+     $0;%.1f              Reformat current cell to 1 decimal
      ($3-32)*5/9          Degrees F -> C conversion
      $c/$1/$cm            Hz -> cm conversion, using `constants.el'
      tan($1);Dp3s1        Compute in degrees, precision 3, display SCI 1
@@ -1357,6 +1377,10 @@ the final result.  A few examples:
      vmean($2..$7);EN     Same, but treat empty fields as 0
      taylor($3,x=7,2)     taylor series of $3, at x=7, second degree
 
+   Calc also contains a complete set of logical operations.  For example
+
+     if($1<20,teen,string(""))  "teen" if age $1 less than 20, else empty
+
 
 File: org,  Node: Formula syntax for Lisp,  Next: Field formulas,  Prev: Formula syntax for Calc,  Up: The spreadsheet
 
@@ -1364,16 +1388,17 @@ File: org,  Node: Formula syntax for Lisp,  Next: Field formulas,  Prev: Formula
 ----------------------------------
 
 It is also possible to write a formula in Emacs Lisp; this can be useful
-for string manipulation and control structures.  If a formula starts
-with a single quote followed by an opening parenthesis, then it is
-evaluated as a lisp form.  The evaluation should return either a string
-or a number.  Just as with `calc' formulas, you can specify modes and a
-printf format after a semicolon.  A reference will be replaced with a
-string (in double quotes) containing the field.  If you provide the `N'
-mode switch, all referenced elements will be numbers.  Ranges are
-inserted as space-separated fields, so you can embed them in list or
-vector syntax.  A few examples, note how the `N' mode is used when we
-do computations in lisp.
+for string manipulation and control structures, if the Calc's
+functionality is not enough.  If a formula starts with a single quote
+followed by an opening parenthesis, then it is evaluated as a lisp form.
+The evaluation should return either a string or a number.  Just as with
+`calc' formulas, you can specify modes and a printf format after a
+semicolon.  A reference will be replaced with a string (in double
+quotes) containing the field.  If you provide the `N' mode switch, all
+referenced elements will be numbers.  Ranges are inserted as
+space-separated fields, so you can embed them in list or vector syntax.
+A few examples, note how the `N' mode is used when we do computations
+in lisp.
 
      Swap the first two characters of the content of column 1
        '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
@@ -1397,11 +1422,11 @@ current field replaced with the result.
    Formulas are stored in a special line starting with `#+TBLFM:'
 directly below the table.  If you typed the equation in the 4th field of
 the 3rd data line in the table, the formula will look like
-`@3$2=$1+$2'.  When inserting/deleting/swapping column and rows with
+`@3$4=$1+$2'.  When inserting/deleting/swapping column and rows with
 the appropriate commands, absolute references (but not relative ones)
 in stored formulas are modified in order to still reference the same
 field.  Of cause this is not true if you edit the table structure with
-normal editing commands - then you must go and fix equations yourself.
+normal editing commands - then you must fix the equations yourself.
 
    Instead of typing an equation into the field, you may also use the
 following command
@@ -1420,7 +1445,9 @@ File: org,  Node: Column formulas,  Next: Editing and debugging formulas,  Prev:
 Often in a table, the same formula should be used for all fields in a
 particular column.  Instead of having to copy the formula to all fields
 in that column, org-mode allows to assign a single formula to an entire
-column.
+column.  If the table contains horizontal separator hlines, everything
+before the first such line is considered part of the table _header_ and
+will not be modified by column formulas.
 
    To assign a formula to a column, type it directly into any field in
 the column, preceded by an equal sign, like `=$1+$2'.  When you press
@@ -1451,7 +1478,11 @@ File: org,  Node: Editing and debugging formulas,  Next: Updating the table,  Pr
 
 You can edit individual formulas in the minibuffer or directly in the
 field.  Org-mode can also prepare a special buffer with all active
-formulas of a table.
+formulas of a table.  When offering a formula for editing, Org-mode
+converts references to the standard format (like `B3' or `D&') if
+possible.  If you prefer to only work with the internal format (like
+`@3$2' or `$4'), configure the variable
+`org-table-use-standard-references'.
 
 `C-c ='
 `C-u C-c ='
@@ -1469,18 +1500,34 @@ formulas of a table.
      While editing a formula in a table field, highlight the field(s)
      referenced by the reference at the cursor position in the formula.  
 
+`C-c }'
+     Toggle the display of row and column numbers for a table, using
+     overlays.  These are updated each time the table is aligned, you
+     can force it with `C-c C-c'.  
+
+`C-c {'
+     Toggle the formula debugger on and off.  See below.  
+
 `C-c ''
      Edit all formulas for the current table in a special buffer, where
-     the formulas will be displayed one per line.  While inside the
-     special buffer, Org-mode will automatically highlight any field or
-     range reference at the cursor position.  You may edit, remove and
-     add formulas, and use the following commands:
+     the formulas will be displayed one per line.  If the current field
+     has an active formula, the cursor in the formula editor will mark
+     it.  While inside the special buffer, Org-mode will automatically
+     highlight any field or range reference at the cursor position.
+     You may edit, remove and add formulas, and use the following
+     commands:
     `C-c C-c'
-          Exit the buffer and store the modified formulas.  With `C-u'
-          prefix, also apply the new formulas to the entire table.  
+    `C-x C-s'
+          Exit the formula editor and store the modified formulas.
+          With `C-u' prefix, also apply the new formulas to the entire
+          table.  
 
     `C-c C-q'
-          Exit the buffer without installing changes.  
+          Exit the formula editor without installing changes.  
+
+    `C-c C-r'
+          Toggle all references in the formula editor between standard
+          (like `B3') and internal (like `@3$2').  
 
     `<TAB>'
           Pretty-print or indent lisp formula at point.  When in a line
@@ -1492,21 +1539,20 @@ formulas of a table.
     `M-<TAB>'
           Complete Lisp symbols, just like in Emacs-lisp-mode.  
 
-    `S-<up>/<down>'
-          Move the reference line in the Org-mode buffer up and down.
-          This is important for highlighting the references of column
-          formulas for different rows.  
+    `S-<up>/<down>/<left>/<right>'
+          Shift the reference at point.  For example, if the reference
+          is `B3' and you press `S-<right>', it will become `C3'.  This
+          also works for relative references, and for hline references.  
+
+    `M-S-<up>/<down>'
+          Move the test line for column formulas in the Org-mode buffer
+          up and down.  
 
     `M-<up>/<down>'
-          Scroll the window displaying the table.
-     
-`C-c }'
-     Toggle the display of row and column numbers for a table, using
-     overlays.  These are uptated each time the table is aligned, you
-     can force it with `C-c C-c'.  
+          Scroll the window displaying the table.  
 
-`C-c {'
-     Toggle the formula debugger on and off.  See below.
+    `C-c }'
+          Turn the coordinate grid in the table on and off.
 
    Making a table field blank does not remove the formula associated
 with the field, because that is stored in a different line (the `TBLFM'
@@ -1525,8 +1571,8 @@ When the evaluation of a formula leads to an error, the field content
 becomes the string `#ERROR'.  If you would like see what is going on
 during variable substitution and calculation in order to find a bug,
 turn on formula debugging in the `Tbl' menu and repeat the calculation,
-for example by pressing `C-c = <RET>' in a field.  Detailed information
-will be displayed.
+for example by pressing `C-u C-u C-c = <RET>' in a field.  Detailed
+information will be displayed.
 
 
 File: org,  Node: Updating the table,  Next: Advanced features,  Prev: Editing and debugging formulas,  Up: The spreadsheet
@@ -2153,7 +2199,7 @@ template has been expanded:
 
 If you change you mind about which template to use, call `org-remember'
 in the remember buffer.  You may then select a new template that will
-be filled with the previoous context information.
+be filled with the previous context information.
 
    ---------- Footnotes ----------
 
@@ -2220,7 +2266,7 @@ overview over all things you have to do.
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
-* Breaking down tasks::         Splitting a task into managable pieces
+* Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
 
 
@@ -2423,7 +2469,7 @@ File: org,  Node: Breaking down tasks,  Next: Checkboxes,  Prev: Priorities,  Up
 5.4 Breaking tasks down into subtasks
 =====================================
 
-It is often advisable to break down large tasks into smaller, managable
+It is often advisable to break down large tasks into smaller, manageable
 subtasks.  You can do this by creating an outline tree below a TODO
 item, with detailed subtasks on the tree(1).  Another possibility is
 the use of checkboxes to identify (a hierarchy of) a large number of
@@ -2626,8 +2672,8 @@ format.
      minutes, see the option `org-time-stamp-rounding-minutes'.
 
 `C-c !'
-     Like `C-c .', but insert an inactive time stamp not triggering the
-     agenda.
+     Like `C-c .', but insert an inactive time stamp that will not cause
+     an agenda entry.
 
 `C-c <'
      Insert a time stamp corresponding to the cursor date in the
@@ -4353,7 +4399,7 @@ but with additional support for tables.
 
 * Menu:
 
-* Export commands::             How to invode HTML export
+* Export commands::             How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       How hyperlinks get transferred to HTML
 * Images::                      To inline or not to inline?
@@ -5100,6 +5146,10 @@ file is visited again in a new Emacs session.
      `org-put-time-stamp-overlays' and
      `org-time-stamp-overlay-formats'), use 
           customtime overlay custom time format
+     The following options influence the table spreadsheet (variable
+     `constants-unit-system').  
+          constcgs   `constants.el' should use the c-g-s unit system
+          constSI    `constants.el' should use the SI unit system
 
 `#+SEQ_TODO:   #+TYP_TODO:'
      These lines set the TODO keywords and their interpretation in the
@@ -6093,8 +6143,10 @@ Index
 * completion, of TeX symbols:            Completion.          (line   6)
 * completion, of TODO keywords <1>:      Completion.          (line   6)
 * completion, of TODO keywords:          Workflow states.     (line  12)
-* constants, in calculations:            References.          (line  74)
+* constants, in calculations:            References.          (line  82)
 * constants.el:                          Cooperation.         (line  14)
+* constcgs, STARTUP keyword:             In-buffer settings.  (line  52)
+* constSI, STARTUP keyword:              In-buffer settings.  (line  52)
 * content, STARTUP keyword:              In-buffer settings.  (line  22)
 * contents, global visibility state:     Visibility cycling.  (line  22)
 * copying, of subtrees:                  Structure editing.   (line   6)
@@ -6118,7 +6170,7 @@ Index
 * deadlines:                             Time stamps.         (line   6)
 * deadlines, repeating:                  Repeating items.     (line   6)
 * debugging, of table formulas:          Editing and debugging formulas.
-                                                              (line  78)
+                                                              (line  97)
 * demotion, of subtrees:                 Structure editing.   (line   6)
 * diary entries, creating from agenda:   Agenda commands.     (line 198)
 * diary integration:                     Weekly/Daily agenda. (line  24)
@@ -6148,7 +6200,7 @@ Index
 * FAQ:                                   Summary.             (line  53)
 * feedback:                              Feedback.            (line   6)
 * field formula:                         Field formulas.      (line   6)
-* field references:                      References.          (line  14)
+* field references:                      References.          (line  15)
 * file links:                            External links.      (line   6)
 * file links, searching:                 Search options.      (line   6)
 * file name completion:                  Handling links.      (line  43)
@@ -6164,7 +6216,7 @@ Index
                                                               (line  15)
 * format, of links:                      Link format.         (line   6)
 * formula debugging:                     Editing and debugging formulas.
-                                                              (line  78)
+                                                              (line  97)
 * formula editing:                       Editing and debugging formulas.
                                                               (line   6)
 * formula syntax, Calc:                  Formula syntax for Calc.
@@ -6259,8 +6311,8 @@ Index
                                                               (line  15)
 * motion commands in agenda:             Agenda commands.     (line  19)
 * motion, between headlines:             Motion.              (line   6)
-* name, of column or field:              References.          (line  74)
-* named references:                      References.          (line  74)
+* name, of column or field:              References.          (line  82)
+* named references:                      References.          (line  82)
 * names as TODO keywords:                TODO types.          (line   6)
 * narrow columns in tables:              Narrow columns.      (line   6)
 * noalign, STARTUP keyword:              In-buffer settings.  (line  29)
@@ -6306,13 +6358,13 @@ Index
 * quoted HTML tags:                      Export options.      (line  25)
 * radio tables:                          Radio tables.        (line   6)
 * radio targets:                         Radio targets.       (line   6)
-* range references:                      References.          (line  53)
+* range references:                      References.          (line  60)
 * ranges, time:                          Time stamps.         (line   6)
 * recomputing table fields:              Updating the table.  (line   6)
 * references:                            References.          (line   6)
-* references, named:                     References.          (line  74)
-* references, to fields:                 References.          (line  14)
-* references, to ranges:                 References.          (line  53)
+* references, named:                     References.          (line  82)
+* references, to fields:                 References.          (line  15)
+* references, to ranges:                 References.          (line  60)
 * region, active <1>:                    Export commands.     (line   6)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
@@ -6477,7 +6529,7 @@ Key Index
 * <TAB> <2>:                             Agenda commands.     (line  35)
 * <TAB> <3>:                             Setting tags.        (line  68)
 * <TAB> <4>:                             Editing and debugging formulas.
-                                                              (line  37)
+                                                              (line  57)
 * <TAB> <5>:                             Built-in table editor.
                                                               (line  57)
 * <TAB> <6>:                             Plain lists.         (line  37)
@@ -6502,7 +6554,7 @@ Key Index
 * C-c %:                                 Handling links.      (line  81)
 * C-c &:                                 Handling links.      (line  85)
 * C-c ':                                 Editing and debugging formulas.
-                                                              (line  24)
+                                                              (line  36)
 * C-c *:                                 Updating the table.  (line  13)
 * C-c +:                                 Built-in table editor.
                                                               (line 141)
@@ -6517,11 +6569,11 @@ Key Index
 * C-c <TAB>:                             Built-in table editor.
                                                               (line 163)
 * C-c = <1>:                             Editing and debugging formulas.
-                                                              (line  10)
-* C-c =:                                 Column formulas.     (line  24)
+                                                              (line  14)
+* C-c =:                                 Column formulas.     (line  26)
 * C-c >:                                 Creating timestamps. (line  29)
 * C-c ?:                                 Editing and debugging formulas.
-                                                              (line  20)
+                                                              (line  24)
 * C-c [:                                 Agenda files.        (line  12)
 * C-c \:                                 Tag searches.        (line   9)
 * C-c ]:                                 Agenda files.        (line  15)
@@ -6553,7 +6605,7 @@ Key Index
 * C-c C-c <4>:                           Setting tags.        (line  10)
 * C-c C-c <5>:                           Checkboxes.          (line  37)
 * C-c C-c <6>:                           Editing and debugging formulas.
-                                                              (line  32)
+                                                              (line  46)
 * C-c C-c <7>:                           Built-in table editor.
                                                               (line  54)
 * C-c C-c:                               Plain lists.         (line  74)
@@ -6581,9 +6633,11 @@ Key Index
 * C-c C-o:                               Handling links.      (line  58)
 * C-c C-p:                               Motion.              (line   9)
 * C-c C-q <1>:                           Editing and debugging formulas.
-                                                              (line  34)
+                                                              (line  50)
 * C-c C-q:                               Built-in table editor.
                                                               (line 125)
+* C-c C-r <1>:                           Editing and debugging formulas.
+                                                              (line  53)
 * C-c C-r:                               Visibility cycling.  (line  34)
 * C-c C-s <1>:                           Agenda commands.     (line 155)
 * C-c C-s:                               Creating timestamps. (line  48)
@@ -6623,18 +6677,18 @@ Key Index
 * C-c l:                                 Handling links.      (line   9)
 * C-c { <1>:                             CDLaTeX mode.        (line  21)
 * C-c {:                                 Editing and debugging formulas.
-                                                              (line  60)
+                                                              (line  33)
 * C-c |:                                 Built-in table editor.
                                                               (line  40)
 * C-c }:                                 Editing and debugging formulas.
-                                                              (line  56)
+                                                              (line  28)
 * C-c ~:                                 Cooperation.         (line  50)
 * C-k:                                   Agenda commands.     (line 117)
 * C-TAB:                                 ARCHIVE tag.         (line  38)
 * C-u C-c *:                             Updating the table.  (line  18)
 * C-u C-c .:                             Creating timestamps. (line  16)
 * C-u C-c = <1>:                         Editing and debugging formulas.
-                                                              (line  10)
+                                                              (line  14)
 * C-u C-c =:                             Field formulas.      (line  24)
 * C-u C-c C-c:                           Updating the table.  (line  19)
 * C-u C-c C-l:                           Handling links.      (line  43)
@@ -6644,7 +6698,9 @@ Key Index
 * C-u C-c C-x C-u:                       Clocking work time.  (line  70)
 * C-u C-u C-c *:                         Updating the table.  (line  24)
 * C-u C-u C-c =:                         Editing and debugging formulas.
-                                                              (line  14)
+                                                              (line  18)
+* C-x C-s:                               Editing and debugging formulas.
+                                                              (line  46)
 * D:                                     Agenda commands.     (line  74)
 * d:                                     Agenda commands.     (line  71)
 * f:                                     Agenda commands.     (line  44)
@@ -6656,7 +6712,7 @@ Key Index
 * L:                                     Agenda commands.     (line  32)
 * M:                                     Agenda commands.     (line 204)
 * M-<down> <1>:                          Editing and debugging formulas.
-                                                              (line  52)
+                                                              (line  76)
 * M-<down>:                              Built-in table editor.
                                                               (line  82)
 * M-<left> <1>:                          Built-in table editor.
@@ -6671,14 +6727,16 @@ Key Index
 * M-<TAB> <2>:                           Setting tags.        (line   6)
 * M-<TAB> <3>:                           Per file keywords.   (line  17)
 * M-<TAB>:                               Editing and debugging formulas.
-                                                              (line  44)
+                                                              (line  64)
 * M-<up> <1>:                            Editing and debugging formulas.
-                                                              (line  52)
+                                                              (line  76)
 * M-<up>:                                Built-in table editor.
                                                               (line  82)
-* M-S-<down> <1>:                        Built-in table editor.
+* M-S-<down> <1>:                        Editing and debugging formulas.
+                                                              (line  72)
+* M-S-<down> <2>:                        Built-in table editor.
                                                               (line  89)
-* M-S-<down> <2>:                        Plain lists.         (line  59)
+* M-S-<down> <3>:                        Plain lists.         (line  59)
 * M-S-<down>:                            Structure editing.   (line  36)
 * M-S-<left> <1>:                        The date/time prompt.
                                                               (line  54)
@@ -6695,9 +6753,11 @@ Key Index
                                                               (line  79)
 * M-S-<right> <3>:                       Plain lists.         (line  65)
 * M-S-<right>:                           Structure editing.   (line  30)
-* M-S-<up> <1>:                          Built-in table editor.
+* M-S-<up> <1>:                          Editing and debugging formulas.
+                                                              (line  72)
+* M-S-<up> <2>:                          Built-in table editor.
                                                               (line  86)
-* M-S-<up> <2>:                          Plain lists.         (line  59)
+* M-S-<up> <3>:                          Plain lists.         (line  59)
 * M-S-<up>:                              Structure editing.   (line  33)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           The date/time prompt.
@@ -6723,20 +6783,24 @@ Key Index
 * S-<down> <3>:                          Creating timestamps. (line  58)
 * S-<down> <4>:                          Priorities.          (line  25)
 * S-<down> <5>:                          Editing and debugging formulas.
-                                                              (line  47)
+                                                              (line  67)
 * S-<down>:                              Plain lists.         (line  55)
 * S-<left> <1>:                          Agenda commands.     (line 169)
 * S-<left> <2>:                          The date/time prompt.
                                                               (line  42)
 * S-<left> <3>:                          Creating timestamps. (line  53)
-* S-<left>:                              TODO basics.         (line  20)
+* S-<left> <4>:                          TODO basics.         (line  20)
+* S-<left>:                              Editing and debugging formulas.
+                                                              (line  67)
 * S-<RET>:                               Built-in table editor.
                                                               (line 146)
 * S-<right> <1>:                         Agenda commands.     (line 161)
 * S-<right> <2>:                         The date/time prompt.
                                                               (line  39)
 * S-<right> <3>:                         Creating timestamps. (line  53)
-* S-<right>:                             TODO basics.         (line  20)
+* S-<right> <4>:                         TODO basics.         (line  20)
+* S-<right>:                             Editing and debugging formulas.
+                                                              (line  67)
 * S-<TAB> <1>:                           Built-in table editor.
                                                               (line  61)
 * S-<TAB>:                               Visibility cycling.  (line  22)
@@ -6746,7 +6810,7 @@ Key Index
 * S-<up> <3>:                            Creating timestamps. (line  58)
 * S-<up> <4>:                            Priorities.          (line  25)
 * S-<up> <5>:                            Editing and debugging formulas.
-                                                              (line  47)
+                                                              (line  67)
 * S-<up>:                                Plain lists.         (line  55)
 * T:                                     Agenda commands.     (line 126)
 * t:                                     Agenda commands.     (line 113)
@@ -6758,181 +6822,182 @@ Key Index
 
 Tag Table:
 Node: Top970
-Node: Introduction11398
-Node: Summary11813
-Node: Installation14821
-Node: Activation16199
-Node: Feedback17448
-Node: Document structure19524
-Node: Outlines20298
-Node: Headlines20958
-Node: Visibility cycling21581
-Ref: Visibility cycling-Footnote-123795
-Ref: Visibility cycling-Footnote-223853
-Ref: Visibility cycling-Footnote-323903
-Node: Motion24172
-Node: Structure editing24956
-Node: Archiving27782
-Node: ARCHIVE tag28340
-Node: Moving subtrees30133
-Node: Sparse trees31444
-Ref: Sparse trees-Footnote-133576
-Ref: Sparse trees-Footnote-233758
-Node: Plain lists33873
-Ref: Plain lists-Footnote-137398
-Ref: Plain lists-Footnote-237755
-Node: Tables37939
-Node: Built-in table editor38453
-Node: Narrow columns45449
-Ref: Narrow columns-Footnote-147381
-Node: orgtbl-mode47427
-Node: The spreadsheet48231
-Node: References49049
-Node: Formula syntax for Calc52684
-Node: Formula syntax for Lisp55001
-Node: Field formulas56229
-Node: Column formulas57540
-Node: Editing and debugging formulas58963
-Node: Updating the table62328
-Node: Advanced features63359
-Node: Hyperlinks67884
-Node: Link format68657
-Node: Internal links69950
-Ref: Internal links-Footnote-171875
-Node: Radio targets72007
-Node: External links72698
-Node: Handling links75102
-Ref: Handling links-Footnote-180194
-Ref: Handling links-Footnote-280431
-Node: Link abbreviations80505
-Node: Search options82184
-Ref: Search options-Footnote-183964
-Node: Custom searches84045
-Node: Remember85093
-Node: Setting up remember86080
-Node: Remember templates86662
-Ref: Remember templates-Footnote-189977
-Node: Storing notes90075
-Node: TODO items91883
-Node: TODO basics92865
-Node: TODO extensions94392
-Node: Workflow states95187
-Node: TODO types96172
-Ref: TODO types-Footnote-197830
-Node: Per file keywords97912
-Ref: Per file keywords-Footnote-199366
-Node: Priorities99567
-Node: Breaking down tasks100811
-Ref: Breaking down tasks-Footnote-1101330
-Node: Checkboxes101426
-Node: Timestamps104181
-Node: Time stamps104715
-Ref: Time stamps-Footnote-1108209
-Ref: Time stamps-Footnote-2108325
-Node: Creating timestamps108480
-Node: The date/time prompt111106
-Ref: The date/time prompt-Footnote-1113067
-Node: Custom time format113173
-Node: Repeating items114731
-Node: Progress logging116541
-Node: Closing items117187
-Ref: Closing items-Footnote-1118121
-Ref: Closing items-Footnote-2118190
-Node: Tracking TODO state changes118263
-Node: Clocking work time119119
-Ref: Clocking work time-Footnote-1122765
-Ref: Clocking work time-Footnote-2122843
-Node: Tags122969
-Node: Tag inheritance123731
-Node: Setting tags124668
-Ref: Setting tags-Footnote-1129191
-Ref: Setting tags-Footnote-2129303
-Node: Tag searches129386
-Node: Agenda views132097
-Node: Agenda files134042
-Ref: Agenda files-Footnote-1135008
-Ref: Agenda files-Footnote-2135157
-Node: Agenda dispatcher135350
-Node: Built-in agenda views137041
-Node: Weekly/Daily agenda137619
-Node: Global TODO list139748
-Node: Matching headline tags141921
-Node: Timeline142992
-Node: Stuck projects143658
-Node: Presentation and sorting145357
-Node: Categories146148
-Node: Time-of-day specifications146812
-Node: Sorting of agenda items148783
-Node: Agenda commands150065
-Node: Custom agenda views156718
-Node: Storing searches157393
-Node: Block agenda159305
-Node: Setting Options160535
-Node: Batch processing163247
-Node: Embedded LaTeX164377
-Ref: Embedded LaTeX-Footnote-1165469
-Node: Math symbols165659
-Node: Subscripts and Superscripts166424
-Node: LaTeX fragments167268
-Ref: LaTeX fragments-Footnote-1169376
-Node: Processing LaTeX fragments169638
-Node: CDLaTeX mode170584
-Ref: CDLaTeX mode-Footnote-1173068
-Node: Exporting173216
-Node: ASCII export174530
-Node: HTML export175820
-Node: Export commands176439
-Node: Quoting HTML tags177163
-Node: Links177793
-Node: Images178490
-Ref: Images-Footnote-1179361
-Node: CSS support179422
-Ref: CSS support-Footnote-1180741
-Node: XOXO export180854
-Node: iCalendar export181293
-Node: Text interpretation182512
-Node: Comment lines182991
-Node: Enhancing text183462
-Node: Export options185280
-Node: Publishing186977
-Ref: Publishing-Footnote-1187773
-Node: Configuration187969
-Node: Project alist188687
-Node: Sources and destinations189753
-Node: Selecting files190483
-Node: Publishing action191231
-Node: Publishing options192464
-Node: Publishing links194616
-Node: Project page index196129
-Node: Sample configuration196907
-Node: Simple example197399
-Node: Complex example198072
-Node: Triggering publication200148
-Node: Miscellaneous200833
-Node: Completion201467
-Node: Customization202938
-Node: In-buffer settings203521
-Node: The very busy C-c C-c key207761
-Node: Clean view209405
-Node: TTY keys211982
-Node: Interaction213591
-Node: Cooperation213988
-Node: Conflicts216728
-Node: Bugs218320
-Node: Extensions and Hacking219816
-Node: Extensions220412
-Node: Tables in arbitrary syntax222359
-Node: Radio tables223436
-Node: A LaTeX example225939
-Ref: A LaTeX example-Footnote-1229585
-Ref: A LaTeX example-Footnote-2229733
-Node: Translator functions230168
-Ref: Translator functions-Footnote-1233277
-Node: Dynamic blocks233365
-Node: Special agenda views235337
-Ref: Special agenda views-Footnote-1237616
-Node: History and Acknowledgments237876
-Node: Index243665
-Node: Key Index274359
+Node: Introduction11399
+Node: Summary11814
+Node: Installation14823
+Node: Activation16201
+Node: Feedback17450
+Node: Document structure19526
+Node: Outlines20300
+Node: Headlines20960
+Node: Visibility cycling21583
+Ref: Visibility cycling-Footnote-123797
+Ref: Visibility cycling-Footnote-223855
+Ref: Visibility cycling-Footnote-323905
+Node: Motion24174
+Node: Structure editing24958
+Node: Archiving27784
+Node: ARCHIVE tag28342
+Node: Moving subtrees30135
+Node: Sparse trees31446
+Ref: Sparse trees-Footnote-133578
+Ref: Sparse trees-Footnote-233760
+Node: Plain lists33875
+Ref: Plain lists-Footnote-137400
+Ref: Plain lists-Footnote-237757
+Node: Tables37941
+Node: Built-in table editor38455
+Node: Narrow columns45451
+Ref: Narrow columns-Footnote-147384
+Node: orgtbl-mode47430
+Node: The spreadsheet48234
+Node: References49321
+Ref: References-Footnote-153370
+Node: Formula syntax for Calc53659
+Node: Formula syntax for Lisp56125
+Node: Field formulas57394
+Node: Column formulas58702
+Node: Editing and debugging formulas60301
+Node: Updating the table64454
+Node: Advanced features65485
+Node: Hyperlinks70010
+Node: Link format70783
+Node: Internal links72076
+Ref: Internal links-Footnote-174001
+Node: Radio targets74133
+Node: External links74824
+Node: Handling links77228
+Ref: Handling links-Footnote-182320
+Ref: Handling links-Footnote-282557
+Node: Link abbreviations82631
+Node: Search options84310
+Ref: Search options-Footnote-186090
+Node: Custom searches86171
+Node: Remember87219
+Node: Setting up remember88206
+Node: Remember templates88788
+Ref: Remember templates-Footnote-192102
+Node: Storing notes92200
+Node: TODO items94008
+Node: TODO basics94991
+Node: TODO extensions96518
+Node: Workflow states97313
+Node: TODO types98298
+Ref: TODO types-Footnote-199956
+Node: Per file keywords100038
+Ref: Per file keywords-Footnote-1101492
+Node: Priorities101693
+Node: Breaking down tasks102937
+Ref: Breaking down tasks-Footnote-1103457
+Node: Checkboxes103553
+Node: Timestamps106308
+Node: Time stamps106842
+Ref: Time stamps-Footnote-1110336
+Ref: Time stamps-Footnote-2110452
+Node: Creating timestamps110607
+Node: The date/time prompt113243
+Ref: The date/time prompt-Footnote-1115204
+Node: Custom time format115310
+Node: Repeating items116868
+Node: Progress logging118678
+Node: Closing items119324
+Ref: Closing items-Footnote-1120258
+Ref: Closing items-Footnote-2120327
+Node: Tracking TODO state changes120400
+Node: Clocking work time121256
+Ref: Clocking work time-Footnote-1124902
+Ref: Clocking work time-Footnote-2124980
+Node: Tags125106
+Node: Tag inheritance125868
+Node: Setting tags126805
+Ref: Setting tags-Footnote-1131328
+Ref: Setting tags-Footnote-2131440
+Node: Tag searches131523
+Node: Agenda views134234
+Node: Agenda files136179
+Ref: Agenda files-Footnote-1137145
+Ref: Agenda files-Footnote-2137294
+Node: Agenda dispatcher137487
+Node: Built-in agenda views139178
+Node: Weekly/Daily agenda139756
+Node: Global TODO list141885
+Node: Matching headline tags144058
+Node: Timeline145129
+Node: Stuck projects145795
+Node: Presentation and sorting147494
+Node: Categories148285
+Node: Time-of-day specifications148949
+Node: Sorting of agenda items150920
+Node: Agenda commands152202
+Node: Custom agenda views158855
+Node: Storing searches159530
+Node: Block agenda161442
+Node: Setting Options162672
+Node: Batch processing165384
+Node: Embedded LaTeX166514
+Ref: Embedded LaTeX-Footnote-1167606
+Node: Math symbols167796
+Node: Subscripts and Superscripts168561
+Node: LaTeX fragments169405
+Ref: LaTeX fragments-Footnote-1171513
+Node: Processing LaTeX fragments171775
+Node: CDLaTeX mode172721
+Ref: CDLaTeX mode-Footnote-1175205
+Node: Exporting175353
+Node: ASCII export176667
+Node: HTML export177957
+Node: Export commands178576
+Node: Quoting HTML tags179300
+Node: Links179930
+Node: Images180627
+Ref: Images-Footnote-1181498
+Node: CSS support181559
+Ref: CSS support-Footnote-1182878
+Node: XOXO export182991
+Node: iCalendar export183430
+Node: Text interpretation184649
+Node: Comment lines185128
+Node: Enhancing text185599
+Node: Export options187417
+Node: Publishing189114
+Ref: Publishing-Footnote-1189910
+Node: Configuration190106
+Node: Project alist190824
+Node: Sources and destinations191890
+Node: Selecting files192620
+Node: Publishing action193368
+Node: Publishing options194601
+Node: Publishing links196753
+Node: Project page index198266
+Node: Sample configuration199044
+Node: Simple example199536
+Node: Complex example200209
+Node: Triggering publication202285
+Node: Miscellaneous202970
+Node: Completion203604
+Node: Customization205075
+Node: In-buffer settings205658
+Node: The very busy C-c C-c key210135
+Node: Clean view211779
+Node: TTY keys214356
+Node: Interaction215965
+Node: Cooperation216362
+Node: Conflicts219102
+Node: Bugs220694
+Node: Extensions and Hacking222190
+Node: Extensions222786
+Node: Tables in arbitrary syntax224733
+Node: Radio tables225810
+Node: A LaTeX example228313
+Ref: A LaTeX example-Footnote-1231959
+Ref: A LaTeX example-Footnote-2232107
+Node: Translator functions232542
+Ref: Translator functions-Footnote-1235651
+Node: Dynamic blocks235739
+Node: Special agenda views237711
+Ref: Special agenda views-Footnote-1239990
+Node: History and Acknowledgments240250
+Node: Index246039
+Node: Key Index276879
 
 End Tag Table
