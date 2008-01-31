@@ -1,3 +1,38 @@
+2007-10-12  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi: Small fixes.
+
+2007-10-11  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-get-date-from-calendar): New function.
+	(org-at-timestamp-p, org-timestamp-change)
+	(org-remember-templates): First element of each entry is now a
+	name for the template.
+	(org-store-log-note): Check for `org-note-abort'.
+	(org-kill-note-or-show-branches): New command.
+	(org-fontify-priorities): New option.
+	(org-fontify-priorities): New function.
+	(org-cut-subtree, org-copy-subtree): New argument N to
+	act on N sequential subtrees.
+	(org-paste-subtree): Fix the level at which a tree is pasted.
+	(org-fit-agenda-window): Limitations on window size removed.
+	(org-agenda-find-same-or-today-or-agenda): Renamed from
+	`org-agenda-find-today-or-agenda'. 
+	(org-scheduled-past-days): New option.
+	(org-agenda-scheduled-leaders)
+	(org-agenda-deadline-leaders): New options.
+	(org-agenda-get-deadlines): Use `org-agenda-deadline-leaders'.
+	(org-agenda-get-scheduled): Use `org-agenda-scheduled-leaders'.
+	(org-export-with-tags, org-export-plist-vars)
+	(org-infile-export-plist): New "tags" option.
+	(org-use-property-inheritance): New option.
+	(org-cached-entry-get): Use `org-use-property-inheritance'.
+	(org-remember-apply-template): Fixed typo.
+
+----------------------------------------------------------------------
+Installed as 5.11
+	
+
 2007-10-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-additional-option-like-keywords): New constant.

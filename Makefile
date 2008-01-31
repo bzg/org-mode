@@ -67,7 +67,7 @@ HTMLDIR    = /home/dominik/public_html/Tools/org
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog request-assign.future
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)

@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.11b
+@set VERSION 5.12
 @set DATE October 2007
 
 @dircategory Emacs
@@ -839,9 +839,10 @@ Move subtree down (swap with next subtree of same level).
 @item C-c C-x C-w
 @itemx C-c C-x C-k
 Kill subtree, i.e. remove it from buffer but save in kill ring.
+With prefix arg, kill N sequential subtrees.
 @kindex C-c C-x M-w
 @item C-c C-x M-w
-Copy subtree to kill ring.
+Copy subtree to kill ring.  With prefix arg, copy N sequential subtrees.
 @kindex C-c C-x C-y
 @item C-c C-x C-y
 Yank subtree from kill ring.  This does modify the level of the subtree to
@@ -994,12 +995,15 @@ headline structure above it@footnote{See also the variables
 shown around each match.}.  Just try it out and you will see immediately
 how it works.
 
-Org-mode contains several commands creating such trees.  The most
-basic one is @command{org-occur}:
+Org-mode contains several commands creating such trees, all these
+commands can be accessed through a dispatcher:
 
 @table @kbd
 @kindex C-c /
 @item C-c /
+This prompts for an extra key to select a sparse-tree creating command.
+@kindex C-c / r
+@item C-c / r
 Occur.  Prompts for a regexp and shows a sparse tree with all matches.
 If the match is in a headline, the headline is made visible.  If the
 match is in the body of an entry, headline and body are made visible.
@@ -1025,8 +1029,8 @@ For example:
 @noindent will define the key @kbd{C-c a f} as a shortcut for creating
 a sparse tree matching the string @samp{FIXME}.
 
-Other commands use sparse trees as well.  For example @kbd{C-c
-C-v} creates a sparse TODO tree (@pxref{TODO basics}).
+The other sparse tree commands select headings based on TODO keywords,
+tags, or properties and will be discussed later in this manual.
 
 @kindex C-c C-e v
 @cindex printing sparse trees
@@ -2624,8 +2628,10 @@ TODO state.  For this you need to assign keys to TODO state, like this:
 @noindent See @ref{Per file keywords} and @ref{Setting tags} for more
 information.
 @kindex C-c C-v
+@kindex C-c / t
 @cindex sparse tree, for TODO
 @item C-c C-v
+@itemx C-c / t
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
 the entire buffer, but shows all TODO items and the headings hierarchy
 above them.  With prefix arg, search for a specific TODO.  You will be
@@ -3095,6 +3101,7 @@ Tags are normal words containing letters, numbers, @samp{_}, and
 
 @node Tag inheritance, Setting tags, Tags, Tags
 @section Tag inheritance
+@cindex tag inheritance
 @cindex inheritance, of tags
 @cindex sublevels, inclusion into tags match
 
@@ -3258,7 +3265,9 @@ information into special lists.
 
 @table @kbd
 @kindex C-c \
+@kindex C-c / T
 @item C-c \
+@itemx C-c / T
 Create a sparse tree with all headlines matching a tags search.  With a
 @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
 @kindex C-c a m
@@ -3408,6 +3417,10 @@ The following commands help to work with properties:
 @item M-@key{TAB}
 After an initial colon in a line, complete property keys.  All keys used
 in the current file will be offered as possible completions.
+@kindex C-c C-x p
+@item C-c C-x p
+Set a property.  This prompts for a property name and a value.  If
+necessary, the property drawer is created as well.
 @item M-x org-insert-property-drawer
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
@@ -3454,6 +3467,9 @@ SCHEDULED    @r{The scheduling time stamp, without the angular brackets.}
 @node Property searches, Column view, Special properties, Properties and columns
 @section Property searches
 @cindex properties, searching
+@cindex properties, inheritance
+@cindex searching, of properties
+@cindex inheritance, of properties
 
 To create sparse trees and special lists with selection based on
 properties, the same commands are used as for tag searches (@pxref{Tag
@@ -3468,6 +3484,23 @@ finds entries tagged @samp{:WORK:} but not @samp{:BOSS:}, which
 also have a priority value @samp{A}, a @samp{:coffee:} property with the
 value @samp{unlimited}, and a @samp{:with:} property that is matched by
 the regular expression @samp{Sarah\|Denny}.
+
+During a search, properties will be inherited from parent entries only
+if you configure the variable @code{org-use-property-inheritance}.
+
+There is also a special command for creating sparse trees based on a
+single property:
+
+@table @kbd
+@kindex C-c / p
+@item C-c / p
+Create a sparse tree based on the value of a property.  This first
+prompts for the name of a property, and then for a value.  A sparse tree
+is created with all entries that define this property with the given
+value.  If you enclose the value into curly braces, it is interpreted as
+a regular expression and matched against the property values.
+@end table
+
 
 @node Column view, Property API, Property searches, Properties and columns
 @section Column View
@@ -3823,17 +3856,32 @@ ISO date.  But it will in fact accept any string containing some date
 and/or time information.  You can, for example, use @kbd{C-y} to paste a
 (possibly multi-line) string copied from an email message.  Org-mode
 will find whatever information is in there and will replace anything not
-specified with the current date and time.  For example:
+specified with the @emph{default date and time}.  The default is usually
+the current date and time, but when modifying an existing time stamp, or
+when entering the second stamp of a range, it is taken from the stamp in
+the buffer.  For example:
 
 @example
-  3-2-5         --> 2003-02-05
-  feb 15        --> currentyear-02-15
-  sep 12 9      --> 2009-09-12
-  12:45         --> today 12:45
-  22 sept 0:34  --> currentyear-09-22 0:34
-  12            --> currentyear-currentmonth-12
-  Fri           --> nearest Friday (today or later)
-  +4            --> 4 days from now (if +N is the only thing given)
+3-2-5         --> 2003-02-05
+feb 15        --> defaultyear-02-15
+sep 12 9      --> 2009-09-12
+12:45         --> default-date 12:45
+22 sept 0:34  --> defaultyear-09-22 0:34
+12            --> defaultyear-defaultmonth-12
+Fri           --> nearest Friday (defaultdate or later)
+@end example
+
+Furthermore you can specify a relative date by giving, as the
+@emph{first} thing in the input: a plus/minus sign, a number and a
+letter [dwmy] to indicate change in days weeks, months, years.  With a
+single plus or minus, the date is always relative to today.  With a
+double plus or minus, it is relative to the default date.  E.g.
+
+@example
++4d           --> four days from today
++4            --> same as above
++2w           --> two weeks from today
+++5           --> five days from default date
 @end example
 
 The function understands English month and weekday abbreviations.  If
@@ -4182,7 +4230,7 @@ little interruption of your work flow.  See
 @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
 information.  It is an excellent way to add new notes and TODO items to
 Org-mode files.  Org-mode significantly expands the possibilities of
-@i{remember}: You may define templates for different note types, and to
+@i{remember}: You may define templates for different note types, and
 associate target files and headlines with specific templates.  It also
 allows you to select the location where a note should be stored
 interactively, on the fly.
@@ -4220,16 +4268,18 @@ use:
 
 @example
 (setq org-remember-templates
- '((?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks")
-   (?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
-   (?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
+ '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks")
+   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
+   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
 @end example
 
-@noindent In these entries, the character specifies how to select the
-template.  The first string specifies the template.  Two more (optional)
-strings give the file in which, and the headline under which the new
-note should be stored.  The file defaults (if not present or @code{nil})
-to @code{org-default-notes-file}, the heading to
+@noindent In these entries, the first string is just a name, and the
+character specifies how to select the template.  It is useful if the
+character is also the first letter of the name.  The next string
+specifies the template.  Two more (optional) strings give the file in
+which, and the headline under which the new note should be stored.  The
+file defaults (if not present or @code{nil}) to
+@code{org-default-notes-file}, the heading to
 @code{org-remember-default-headline}.  Both defaults help to get to the
 storing location quickly, but you can change the location interactively
 while storing the note.
@@ -4239,14 +4289,6 @@ something, org will prompt for a key to select the template (if you have
 more than one template) and then prepare the buffer like
 @example
 * TODO
-  [[file:link to where you called remember]]
-@end example
-
-@noindent or
-
-@example
-* [2006-03-21 Tue 15:37]
-
   [[file:link to where you called remember]]
 @end example
 
@@ -4440,10 +4482,6 @@ Remove current file from the list of agenda files.
 @item C-,
 @itemx C-'
 Cycle through agenda file list, visiting one file after the other.
-@kindex C-c C-x /
-@item C-c C-x /
-Search for a regular rexpression in all agenda files and display the
-results in an @code{occur} buffer.
 @end table
 
 @noindent
@@ -4472,6 +4510,12 @@ tags and properties}).
 Create the timeline view for the current buffer (@pxref{Timeline}).
 @item # @r{/} !
 Create a list of stuck projects (@pxref{Stuck projects}).
+@item /
+Search for a regular expression in all agenda files and additionally in
+the files listed in @code{org-agenda-multi-occur-extra-files}.  This
+uses the Emacs command @code{multi-occur}.  A prefix argument can be
+used to specify the number of context lines for each match, default is
+1.
 @item 1
 Restrict an agenda command to the current buffer.  After pressing
 @kbd{1}, you still need to press the character selecting the command.
@@ -6379,6 +6423,7 @@ LaTeX:     @r{turn on/off La@TeX{} fragments}
 skip:      @r{turn on/off skipping the text before the first heading}
 author:    @r{turn on/off inclusion of author name/email into exported file}
 timestamp: @r{turn on/off inclusion creation time into exported file}
+p:         @r{turn on/off inclusion of tags}
 @end example
 
 These options take effect in both the HTML and La@TeX{} export, except
