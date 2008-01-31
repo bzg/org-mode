@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.10a
+;; Version: 5.10b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.10a"
+(defconst org-version "5.10b"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -16651,14 +16651,15 @@ the returned times will be formatted strings."
 
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
-  (let ((hlchars '((1 . "*") (2 . ?/)))
+  (let ((hlchars '((1 . "*") (2 . "/")))
 	(emph nil)
 	(ins (make-marker))
 	(total-time nil)
 	ipos time h m p level hlc hdl maxlevel
-	ts te cc block beg end pos scope tbl tostring)
+	ts te cc block beg end pos scope tbl tostring multifile)
     (setq scope (plist-get params :scope)
 	  tostring (plist-get  params :tostring)
+	  multifile (plist-get  params :multifile)
 	  maxlevel (or (plist-get params :maxlevel) 3)
 	  emph (plist-get params :emphasize)
 	  ts (plist-get params :tstart)
@@ -16699,13 +16700,15 @@ the returned times will be formatted strings."
 	       (p1 (copy-sequence params))
 	       file)
 	  (plist-put p1 :tostring t)
+	  (plist-put p1 :multifile t)
 	  (plist-put p1 :scope 'file)
 	  (org-prepare-agenda-buffers files)
-	  (setq total-time (+ (or total-time 0) org-clock-file-total-minutes))
 	  (while (setq file (pop files))
 	    (with-current-buffer (find-buffer-visiting file)
 	      (push (org-clocktable-add-file
-		     file(org-dblock-write:clocktable p1)) tbl))))))
+		     file (org-dblock-write:clocktable p1)) tbl)
+	      (setq total-time (+ (or total-time 0)
+				  org-clock-file-total-minutes)))))))
       (goto-char pos)
       
       (unless (eq scope 'agenda)
@@ -16717,21 +16720,22 @@ the returned times will be formatted strings."
 	    (save-excursion
 	      (beginning-of-line 1)
 	      (when (and (looking-at (org-re "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@:]+:\\)?[ \t]*$"))
-			 (setq level (- (match-end 1) (match-beginning 1)))
+			 (setq level (org-reduced-level
+				      (- (match-end 1) (match-beginning 1))))
 			 (<= level maxlevel))
 		(setq hlc (if emph (or (cdr (assoc level hlchars)) "") "")
 		      hdl (match-string 2)
 		      h (/ time 60)
 		      m (- time (* 60 h)))
-		(if (= level 1) (push "|-\n" tbl))
+		(if (and (not multifile) (= level 1)) (push "|-" tbl))
 		(push (concat
 		       "| " (int-to-string level) "|" hlc hdl hlc " |"
 		       (make-string (1- level) ?|)
 		       hlc (format "%d:%02d" h m) hlc
-		       " |\n") tbl))))))
+		       " |") tbl))))))
       (setq tbl (nreverse tbl))
       (if tostring
-	  (mapconcat 'identity tbl "")
+	  (if tbl (mapconcat 'identity tbl "\n") nil)
 	(goto-char ins)
 	(insert-before-markers
 	 "Clock summary at ["
@@ -16754,24 +16758,26 @@ the returned times will be formatted strings."
 	 "|" 
 	 "*Total time*| "
 	 (format "*%d:%02d*" h m)
-	 "|\n")
-	(insert-before-markers (mapconcat 'identity (nreverse tbl)
-					  (if (eq scope 'agenda) "|-\n" "")))
+	 "|\n|-\n")
+	(insert-before-markers (mapconcat
+				'identity (delq nil (nreverse tbl))
+				(if (eq scope 'agenda) "\n|-\n" "\n")))
 	(backward-delete-char 1)
 	(goto-char ipos)
 	(skip-chars-forward "^|")
 	(org-table-align)))))
 
 (defun org-clocktable-add-file (file table)
-  (let ((lines (org-split-string table "\n"))
-	(ff (file-name-nondirectory file)))
-    (mapconcat 'identity
-	       (mapcar (lambda (x)
-			 (if (string-match org-table-dataline-regexp x)
-			     (concat "|" ff x)
-			   x))
-		       lines)
-	       "\n")))
+  (if table
+      (let ((lines (org-split-string table "\n"))
+	    (ff (file-name-nondirectory file)))
+	(mapconcat 'identity
+		   (mapcar (lambda (x)
+			     (if (string-match org-table-dataline-regexp x)
+				 (concat "|" ff x)
+			       x))
+			   lines)
+		   "\n"))))
 
 ;; FIXME: I don't think anybody uses this, ask David
 (defun org-collect-clock-time-entries ()
@@ -24112,7 +24118,8 @@ This command does many different things, depending on context:
       (call-interactively 'org-maybe-renumber-ordered-list))
      ((save-excursion (beginning-of-line 1) (looking-at "#\\+BEGIN:"))
       ;; Dynamic block
-      (call-interactively 'org-update-dblock))
+      (beginning-of-line 1)
+      (org-update-dblock))
      ((save-excursion (beginning-of-line 1) (looking-at "#\\+\\([A-Z]+\\)"))
       (cond
        ((equal (match-string 1) "TBLFM")
