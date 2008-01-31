@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.19
+@set VERSION 5.20
 @set DATE January 2008
 
 @dircategory Emacs
@@ -1252,7 +1252,7 @@ Org-mode comes with a fast and intuitive table editor.  Spreadsheet-like
 calculations are supported in connection with the Emacs @file{calc}
 package 
 @ifinfo
-(@pxref{Calc,,,calc,Gnu Emacs Calculator Manual}).
+(@pxref{Top,Calc,,calc,Gnu Emacs Calculator Manual}).
 @end ifinfo
 @ifnotinfo
 (see the Emacs Calculator manual for more information about the Emacs
@@ -3409,7 +3409,7 @@ application of properties, imagine keeping track of one's music CD's,
 where properties could be things such as the album artist, date of
 release, number of tracks, and so on.
 
-Properties can be conveiently edited and viewed in column view
+Properties can be conveniently edited and viewed in column view
 (@pxref{Column view}).
 
 Properties are like tags, but with a value.  For example, in a file
@@ -3739,6 +3739,12 @@ the entire tree, starting from the entry that contains the @code{:COLUMNS:}
 property.  If none is found, the format is taken from the @code{#+COLUMNS}
 line or from the variable @code{org-columns-default-format}, and column
 view is established for the current entry and its subtree.
+@kindex r
+@item r
+Recreate the column view, to included hanges happening in the buffer.
+@kindex g
+@item g
+Same as @kbd{r}.
 @kindex q
 @item q
 Exit column view.
@@ -4270,8 +4276,8 @@ the scheduling date from the entry.
 @subsection Repeated Tasks
 
 Some tasks need to be repeated again and again.  Org-mode helps to
-organize such tasks using a so-called repeater in a DEADLINE or
-SCHEDULED time stamp.  In the following example
+organize such tasks using a so-called repeater in a DEADLINE, SCHEDULED,
+or plain time stamp.  In the following example
 @example
 ** TODO Pay the rent
    DEADLINE: <2005-10-01 Sat +1m>
@@ -4284,7 +4290,7 @@ Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
 completed once you have done so.  When you mark a DEADLINE or a SCHEDULE
 with the todo keyword DONE, it will no longer produce entries in the
-agenda. The problem with this is, however, that then also the
+agenda.  The problem with this is, however, that then also the
 @emph{next} instance of the repeated entry will not be active.  Org-mode
 deals with this in the following way: When you try to mark such an entry
 DONE (using @kbd{C-c C-t}), it will shift the base date of the repeating
@@ -4393,6 +4399,7 @@ new table.  The @samp{BEGIN} line can specify options:
              @r{@code{thismonth}, @code{lastmonth}, @code{thisyear}, or @code{lastyear}}.
 :tstart      @r{A time string specifying when to start considering times}
 :tend        @r{A time string specifying when to stop considering times}
+:step        @r{@code{week} or @code{day}, to split the table into chunks}
 @end example
 So to get a clock summary of the current level 1 tree, for the current
 day, you could write
@@ -4466,7 +4473,9 @@ suggestion.}.  @code{org-remember} basically just calls @code{remember},
 but it makes a few things easier: If there is an active region, it will
 automatically copy the region into the remember buffer.  It also allows
 to jump to the buffer and location where remember notes are being
-stored: Just call @code{org-remember} with a prefix argument.
+stored: Just call @code{org-remember} with a prefix argument.  If you
+use two prefix arguments, Org-mode jumps to the location where the last
+remember note was stored.
 
 @node Remember templates, Storing notes, Setting up remember, Remember
 @section Remember templates
@@ -4633,13 +4642,16 @@ Refile the entry at point.  This command offers possible locations for
 refiling the entry and lets you select one with completion.  The item is
 filed below the target heading as a subitem.  Depending on
 @code{org-reverse-note-order}, it will be either the first of last
-subitem, and you can toggle the value of this variable for the duration
-of the command by using a @kbd{C-u} prefix.@* By default, all level 1
-headlines in the current buffer are considered to be targets, but you
-can have more complex definitions across a number of files.  See the
-variable @code{org-refile-targets} for details.  The list of targets is
-compiled upon first use, you can update it by using a double prefix
-argument (@kbd{C-u C-u}) to this command.
+subitem.@* By default, all level 1 headlines in the current buffer are
+considered to be targets, but you can have more complex definitions
+across a number of files.  See the variable @code{org-refile-targets}
+for details.
+@kindex C-u C-c C-w
+@item C-u C-c C-w
+Use the refile interface to jump to a heading.
+@kindex C-u C-u C-c C-w
+@item C- C-u C-c C-w
+Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
 @node Agenda views, Embedded LaTeX, Remember, Top
@@ -5281,8 +5293,8 @@ month and year views are slow to create, the do not become the default.
 @item D
 Toggle the inclusion of diary entries.  See @ref{Weekly/Daily agenda}.
 @c
-@kindex g
-@item g
+@kindex G
+@item G
 Toggle the time grid on and off.  See also the variables
 @code{org-agenda-use-time-grid} and @code{org-agenda-time-grid}.
 @c
@@ -5293,6 +5305,9 @@ after modification of the time stamps of items with S-@key{left} and
 S-@key{right}.  When the buffer is the global todo list, a prefix
 argument is interpreted to create a selective list for a specific TODO
 keyword.
+@kindex g
+@item g
+Same as @kbd{r}.
 @c
 @kindex s
 @kindex C-x C-s

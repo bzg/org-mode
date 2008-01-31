@@ -1,0 +1,372 @@
+
+#+STARTUP:   overview align
+#+TYP_TODO:  TODO IDEA WISH QUESTION DECLINED INCONSISTENCY BUG DONE
+#+OPTIONS:   H:2 num:t toc:t \n:nil @:t ::t |:t ^:t *:t TeX:t
+#+EMAIL:     carsten.dominik@gmail.com
+#+TITLE:     Org-mode Frequently Asked Questions
+
+* General
+** Use features in other modes
+ *I would like to use editing features of org-mode in other modes, is
+ this possible?* 
+
+Not really.  For tables there is =orgtbl-mode= which implements the
+table editor as a minor mode.  For other features you need to switch to
+Org-mode temporarily, or prepare text in a different buffer.
+
+
+** Visibility cycling in Outline-mode and Outline-minor-mode
+
+ *Can I get the visibility-cycling features in outline-mode and
+outline-minor-mode?* 
+
+   Yes, these functions are written in a way that they are independent of
+   the outline setup.  The following setup provides standard Org-mode
+   functionality in outline-mode on =TAB= and =S-TAB=.  For
+   outline-minor-mode, we use =C-TAB= instead of =TAB=,
+   because =TAB= usually has mode-specific tasks.
+
+:(add-hook 'outline-minor-mode-hook
+:  (lambda ()
+:    (define-key outline-minor-mode-map [(control tab)] 'org-cycle)
+:    (define-key outline-minor-mode-map [(shift tab)] 'org-global-cycle)))
+:(add-hook 'outline-mode-hook
+:  (lambda ()
+:    (define-key outline-mode-map [(tab)] 'org-cycle)
+:    (define-key outline-mode-map [(shift tab)] 'org-global-cycle)))
+
+Or check out /outline-magic.el/, which does this and also provides
+promotion and demotion functionality.  /outline-magic.el/ is
+available at [[http://www.astro.uva.nl/~dominik/Tools/OutlineMagic][Outline Magic]].
+
+* Errors
+** =(wrong-type-argument keymapp nil)=
+ *When I try to use Org-mode, I always get the error message
+@code{(wrong-type-argument keymapp nil)}*
+
+This is a conflict with an outdated version of the /allout.el/, see
+the [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section in the manual
+
+** CUA mode does not work with Org-mode
+
+ *Org-mode takes over the S-cursor keys.  I also want to use CUA-mode,
+is there a way to fix this conflict?*
+
+Yes, see the  [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section of the manual.
+
+** =winddmove.el= does not work with Org-mode.
+
+ *Org-mode takes over the S-cursor keys.  I also want to use windmove.el,
+is there a way to fix this conflict?*
+
+Yes, see the [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section of the manual.
+
+* Setup and Structure
+** Org-mode as default mode
+
+ *Org-mode seems to be a useful default mode for the various README
+files I have scattered through my directories*.  *How do I turn it on
+for all README files?*
+
+Add the following to your .emacs file:
+
+: (add-to-list 'auto-mode-alist '("README$" . org-mode))
+
+You can even make it the default mode for any files with unspecified
+mode using
+
+: (setq default-major-mode 'org-mode)
+
+** Get rid of extra stars in outline
+
+ *All these stars are driving me mad, I just find the Emacs outlines
+unreadable.  Can't you just put white space and a single star as a
+starter for headlines?* 
+
+See the section  [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Clean%20outline%20view][Clean outline view]] in the manual.
+
+** Two windows on same Org-mode file
+ *I would like to have two windows on the same Org-mode file, but with
+different outline visibility.  Is that possible?* 
+
+You may use /indirect buffers/ which do exactly this.  See the
+documentation on the command =make-indirect-buffer=.
+
+** Insert empty lines before new headings and plain list items
+
+ *I would like to have an empty line before each newly inserted
+headline, but not before each newly inserted plain-list item*.
+
+: (setq org-blank-before-new-entry
+:       '((heading . t) (plain-list-item . nil))
+
+
+** Amount of context in sparse trees
+
+   *Sparse tree show the headline hierarchy above each match, and also
+   the headline following a match.  I'd like to construct more compact
+   trees, with less context.*
+
+Take a look at the variables =org-show-hierarchy-above= and
+=org-show-following-headline=.
+
+** Stacking calls to org-occur
+
+ *Each call to org-occur starts again from OVERVIEW and exposes only
+ the matches of the current call.  I'd like to combine the effect of
+ several calls*.
+
+You can construct a regular expression that matches all targets you
+want.  Alternatively, use a =C-u= prefix with the second and any
+further calls to =org-occur= to keep the current visibility and
+highlighting in addition to the new ones.
+
+* Hyperlinks
+
+** Confirmation for shell and elisp links
+
+ *When I am executing shell/elisp links I always get a confirmation
+prompt and need to type "yes RET", that's 4 key presses!  Can I get
+rid of this?* 
+
+The confirmation is there to protect you from unwantingly execute
+potentially dangerous commands.  For example, imagine a link
+:[[shell:rm -rf ~/*][ Google Search]]
+
+In an Org-mode buffer, this command would look like /Google Search/,
+but really it would remove your home directory.  If you wish, you can
+make it easier to respond to the query by setting
+
+: (setq org-confirm-shell-link-function 'y-or-n-p
+:       org-confirm-elisp-link-function 'y-or-n-p).
+
+Then a single keypress will be enough to confirm those links.  It is
+also possible to turn off this check entirely, but I strongly recommend
+against this.  Be warned.
+
+** Use RET or TAB to follow a link
+
+ *From other packages like Emacs-wiki, I am used to follow links with
+ =RET= when the cursor is on the link.  Is this also possible in org-mode?*
+
+Yes, and you may also use TAB.
+
+: (setq org-return-follows-link t)
+: (setq org-tab-follows-link t)
+
+** Clicking on a link without activating it
+
+ *Each time I click inside a link in order to set point to this
+ location, Org-mode actually follows the link*
+
+Activating links with =mouse-1= is a new feature in Emacs 22, to make
+link behavior similar to other applications like web browsers.  If you
+hold the mouse button down a bit longer, the cursor will be set
+without following the link.  If you cannot get used to this behavior,
+you can (as in Emacs 21) use =mouse-2= to follow links and turn off
+link activation for =mouse-1= with
+
+: (setq org-mouse-1-follows-link nil)
+
+* Remember
+
+ *Can I automatically start the clock when opening a remember template?*
+
+Yes, this is possible.  Use the following code and make sure that
+after executing it, `my-start-clock-if-needed' is in
+`remember-mode-hook' /after/ `org-remember-apply-template'.
+
+: (add-hook 'remember-mode-hook 'my-start-clock-if-needed 'append)
+: (defun my-start-clock-if-needed ()
+:   (save-excursion
+:     (goto-char (point-min))
+:     (when (re-search-forward " *CLOCK-IN *" nil t)
+:       (replace-match "")
+:       (org-clock-in))))
+
+Then, when a template contains the key string CLOCK-IN, the clock will
+be started.  Starting with Org-mode version 5.20, the clock will
+automatically be stopped when storing the remember buffer.
+
+* Export
+** Make TODO entries items, not headlines in HTML export
+
+ *When I export my TODO list, every TODO item becomes a separate
+section.  How do I enforce these items to be exported as an itemized
+list?* 
+
+If you plan to use ASCII or HTML export, make sure things you want to
+be exported as item lists are level 4 at least, even if that does mean
+there is a level jump.  For example:
+
+: * Todays top priorities
+: **** TODO write a letter to xyz
+: **** TODO Finish the paper
+: **** Pick up kids at the school
+
+Alternatively, if you need a specific value for the heading/item
+transition in a particular file, use the =#+OPTIONS= line to
+configure the H switch.
+
+: #+OPTIONS:   H:2; ...
+
+** Export only a subtree
+
+ *I would like to export only a subtree of my file to HTML. How?*
+
+If you want to export a subtree, mark the subtree as region and then
+export.  Marking can be done with =C-c @ C-x C-x=, for example.
+
+** How to import org-mode calendar data into Mac OSX ical
+
+ *I would like my iCal program on Mac OSX to import the iCalendar file
+  produced by Org-mode. How?*
+
+ /This is for OSX 10.3, see below for 10.4:/ When using iCal under
+Apple MacOS X, you can create a new calendar /OrgMode/ (the default
+name for the calendar created by =C-c C-e c=, see the variables
+=org-icalendar-combined-name= and
+=org-combined-agenda-icalendar-file=).  Then set Org-mode to overwrite
+the corresponding file /~/Library/Calendars/OrgMode.ics/.  You may
+even use AppleScript to make iCal re-read the calendar files each time
+a new version of /OrgMode.ics/ is produced.  Here is the setup needed
+for this:
+
+: (setq org-combined-agenda-icalendar-file
+:     "~/Library/Calendars/OrgMode.ics")
+: (add-hook 'org-after-save-iCalendar-file-hook
+:  (lambda ()
+:   (shell-command
+:    "osascript -e 'tell application \"iCal\" to reload calendars'")))
+
+
+For Mac OS X 10.4, you need to write the ics file to
+=/Library/WebServer/Documents/= and then subscribe iCalendar to
+=http: //localhost/orgmode.ics=
+
+* Tables
+** #ERROR fields in tables
+
+ *One of my table columns has started to fill up with =#ERROR=.  What
+is going on?*
+
+Org-mode tried to compute the column from other fields using a
+formula stored in the =#+TBLFM:= line just below the table, and
+the evaluation of the formula fails.  Fix the fields used in the
+formula, or fix the formula, or remove it!
+
+** Unwanted new lines in table
+
+ *When I am in the last column of a table and just above a horizontal
+line in the table, pressing TAB creates a new table line before the
+horizontal line*.  *How can I quickly move to the line below the
+horizontal line instead?* 
+
+Press =down= (to get on the separator line) and then =TAB=.
+Or configure the variable
+
+: (setq org-table-tab-jumps-over-hlines t)
+
+** Automatic detection of formulas
+ *I need to use fields in my table that start with "=", and each time
+ I enter such a field, Org-mode thinks this is a formula*.
+
+With the setting
+
+: (setq org-table-formula-evaluate-inline nil)
+
+this will no longer happen.  You can still use formulas using the
+commands @<tt>C-c =@</tt> and @<tt>C-u C-c =@</tt>
+
+
+** Change indentation of a table
+ *How can I change the indentation of an entire table without fixing
+every line by hand?*
+
+The indentation of a table is set by the first line.  So just fix the
+indentation of the first line and realign with =TAB=.
+
+** Performance issues with table alignment
+ *I have a huge table in a file, and the automatic realign of tables
+ is just taking too long.  What can I do?*
+
+Either split the table into several by inserting an empty line every
+100 lines or so.  Or turn off the automatic re-align with
+
+: (setq org-table-automatic-realign nil)
+
+After this the only way to realign a table is to press =C-c C-c=.  It
+will no longer happen automatically, removing the corresponding delays
+during editing.
+
+** Performance issues with table calculation
+ *I have a complex table with lots of formulas, and recomputing the
+ table takes rather long.  What can I do?*
+
+Nothing, really.  The spreadsheet in org is mostly done to make
+calculations possible, not so much to make them fast.  Since Org-mode
+is firmly committed to the ASCII format, nothing is stopping you from
+editing the table by hand.  Therefore, there is no internal
+representation of the data.  Each time Org-mode starts a computation,
+it must scan the table for special lines, find the fields etc.  This
+is slow.  Furthermore, Calc is slow compared to hardware computations.
+To make this work with normal editing, recalculation is not happening
+automatically, or only for the current line, so that the long wait for
+a full table iteration only happens when you ask for it.
+
+So for really complex tables, moving to a "real" spreadsheet may still
+be the best option.
+
+That said, there are some ways to optimize things in Org-mode, and I
+have been thinking about moving a bit further down this line.
+However, for my applications this has so far not been an issue at all.
+If you have a good case,you could try to convince me.
+
+** Incrementing numbers
+ *When I press =S-RET= in a table field to copy its value down, the
+ content is not copied as is, but it is increased by one.
+ Is that a bug or a feature*
+
+Well, it is /supposed/ to be a feature, to make it easy to create a
+column with increasing numbers.  If this gets into your way, turn it
+off with
+
+: (setq org-org-table-copy-increment nil)
+
+* Agenda
+** Include Org-mode agenda into Emacs diary
+ *Is it possible to include entries from org-mode files into my emacs
+diary?* 
+
+Since the org-mode agenda is much more powerful and can contain the
+diary, you should think twice before deciding to do this.  If you
+insist, however, integrating Org-mode information into the diary is
+possible.  You need to turn on /fancy diary display/ by setting in
+.emacs:
+
+: (add-hook 'diary-display-hook 'fancy-diary-display)
+
+Then include the following line into your ~/diary file, in
+order to get the entries from all files listed in the variable
+=org-agenda-files=
+
+: &%%(org-diary)
+You may also select specific files with
+
+: &%%(org-diary) ~/path/to/some/org-file.org
+: &%%(org-diary) ~/path/to/another/org-file.org
+
+If you now launch the calendar and press @<tt>d@</tt> to display a diary, the
+headlines of entries containing a timestamp, date range, schedule, or
+deadline referring to the selected date will be listed.  Just like
+Org-mode's agenda view, the diary for /today/ contains additional
+entries for overdue deadlines and scheduled items.  See also the
+documentation of the =org-diary= function.  Under XEmacs, it is
+not possible to jump back from the diary to the org, this works only in
+the agenda buffer.
+
+* COMMENT HTML style specifications
+
+# Local Variables: 
+# org-export-html-style: "<link rel=stylesheet href=\"freeshell2.css\" type=\"text/css\"> <style type=\"text/css\"> .tag { color: red; font-weight:bold}</style>" 
+# End:

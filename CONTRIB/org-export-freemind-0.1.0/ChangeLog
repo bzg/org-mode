@@ -1,0 +1,33 @@
+2007-06-25  Marco Vezzoli  <noise dot otn at alice dot it>
+
+	* org-export-freemind-install.el (org-export-as-freemind): 
+	- created installation file
+
+2007-06-25  Marco Vezzoli  <noise dot otn at alice dot it>
+
+	* org-export-freemind.el (org-export-as-freemind): 
+	- created customization variables for org-freemind-icons-alist and
+	org-freemind-cloud-alist
+
+	- fixed export bug to handle level jump (e.g. a * followed by a ***)
+
+	- added keybinding 'C-c C-x f' org-export-as-freemind
+
+2007-06-02  Marco Vezzoli  <noise dot otn at alice dot it>
+
+	* org-export-freemind.el (org-export-as-freemind): 
+	
+	- fixed conversion bug: all headings are converted inserting html
+	entities 
+
+	- added configuration with org-freemind-icons-alist: an alist that
+	allows to associate regexp with builtins freemind icons
+
+	- added configuration with org-freemind-cloud-alist: an alist that
+	allows to associate regexp with cloud colors
+
+	- added org-export-as-freemind-agenda-files : exports all agenda
+	files in separate files with the same name and extension .mm
+
+	- added org-export-as-freemind-agenda-files-one-file : do the same
+	but grouping all trees in a single file

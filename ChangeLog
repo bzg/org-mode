@@ -1,13 +1,46 @@
+2008-01-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-archive-all-done): Fixed incorrect number of stars
+	in regexp.
+
+2008-01-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-refile-get-location): New function.
+	(org-refile-goto-last-stored): New function.
+	(org-global-tags-completion-table): Add the value of org-tag-alist
+	in each buffer, to make sure that also unused tags will be
+	available for completion.
+
+2008-01-24  Carsten Dominik  <dominik@carsten-dominiks-macbook-pro.local>
+
+	* org.el (org-columns-edit-value)
+	(org-columns-next-allowed-value): Only update if not in agenda.
+
+2008-01-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-clocktable-steps): New function.
+	(org-dblock-write:clocktable): Call `org-clocktable-steps'.
+	(org-archive-subtree): Add the outline tree context as a
+	property.
+	(org-closest-date): New optional argument `prefer'.
+	(org-goto-auto-isearch): New option.
+	(org-goto-map, org-get-location): Implement auto-isearch.
+	(org-goto-local-auto-isearch-map): New variable.
+	(org-goto-local-search-forward-headings)
+	(org-goto-local-auto-isearch): New functions
+
+-----------------------------------------------------------------------
+
+Installed as 5.19a
+
+
 2008-01-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-entry-properties): Include the CLOCKSUM special
 	property.
 	(org-columns-edit-value): Do not allow to edit the special
 	CLOCKSUM property.
-
-2008-01-15  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-flag-drawer): Use the original value of
+	(org-flag-drawer): Use the original value of
 	`outline-regexp'.
 	(org-remember-handler): Add invisible-ok flag to call to
 	`org-end-of-subtree'

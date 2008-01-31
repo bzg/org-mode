@@ -1,0 +1,211 @@
+#+TITLE:     Org-Mode Homepage
+#+LANGUAGE:  en
+#+EMAIL:     carsten at orgmode dot org
+#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t
+
+* Org - an Emacs Mode for Notes and Project Planning
+
+#+HTML:  <BASE href="http://orgmode.org/index.html">
+
+Org-mode is a mode for keeping notes, maintaining ToDo lists, and doing
+project planning with a fast and effective plain-text system.
+
+Org-mode develops organizational tasks around NOTES files that contain
+information about projects as plain text.  Org-mode is implemented on
+top of outline-mode, which makes it possible to keep the content of
+large files well structured.  Visibility cycling and structure editing
+help to work with the tree.  Tables are easily created with a built-in
+table editor.  Org-mode supports ToDo items, deadlines, time stamps,
+and scheduling.  It dynamically compiles entries into an agenda.
+Plain text URL-like links connect to websites, emails, Usenet
+messages, BBDB entries, and any files related to the projects.  For
+printing and sharing of notes, an Org-mode file can be exported as a
+structured ASCII file, HTML, and LaTeX.
+
+* Current Version (5.19a) and Compatibility
+
+The current version is 5.19a.  To see what has changed in recent
+releases, check this [[file:Changes.html][list of user-visible changes]].  These descriptions
+are extensive, to avoid that people will be printing the manual after
+each incremental release.  If you have an older version of the manual,
+just check the release notes and you will be up-to-date.
+
+This package works on Emacs 22, and (with minor restrictions) on Emacs
+21 and XEmacs 21 (where you must also use /noutline.el/ shipped with
+Org-mode).  The Emacs 22.1 release ships with Org-mode version 4.67c.
+The latest CVS emacs trunk usually contains a fairly recent version,
+but may lag a bit behind the website release.
+
+* Downloads
+
+**** Distribution
+Download as [[file:org-5.19a.zip][zip file]] or [[file:org-5.19a.tar.gz][gzipped tar archive]].  These archives contain
+both the Lisp file org.el and the documentation in PDF and (TeX)Info
+formats.  A shell script to simplify upgrading to the newest release
+has been posted [[http://www.philfam.co.uk/pete/GTD/org-mode/update-org.sh][here]].
+
+* Documentation
+** Manual and Reference card
+   - Read the documentation [[file:manual/index.html][online]].  This is a version consisting of many
+     small files, to save bandwidth.  If you really need it, you can also
+     have the entire manual in a [[file:org.html][single monolithic file]].
+   - Download the documentation in other formats: [[file:org.pdf][PDF]], [[file:org][Info]], or [[file:org.texi][TeXInfo]].
+   - Download the [[file:orgcard.pdf][Refcard]] for org-mode, and Kyle Sherman hast created a
+     [[file:orgcard.txt][text version]] of the reference card
+   - There is also a [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60),
+     produced by Takeshi Okano.
+   - The [[file:faq.org][FAQ]] is not very up-to-date, but may still answer some of your
+     questions.  Please have a look before posting to emacs-orgmode@gnu.org.
+
+* Links
+
+** Mailing list
+
+   There is a mailing list for discussion about org-mode.
+
+   - Subscribe to it at [[http://lists.gnu.org/mailman/listinfo/emacs-orgmode][this webpage]].
+   - Directly [[mailto:emacs-orgmode@gnu.org][send mail to it]].  If you are not subscribed, a moderator
+     will look at the message before passing it through to the
+     list.  If that has happened once, future messages from your email
+     address will get through immediately, even if you remain
+     unsubscribed.
+   - Read the list on [[http://www.gmane.org][Gmane]] through a [[http://news.gmane.org/gmane.emacs.orgmode][web interface]] or with a
+     [[news://news.gmane.org/gmane.emacs.orgmode][newsreader]].
+#+BEGIN_HTML
+<li><form method="get" action="http://search.gmane.org/">
+<input type="text" name="query">
+<input type="hidden" name="group" value="gmane.emacs.orgmode">
+<input type="submit" value="Search gmane.emacs.orgmode">
+</form>
+#+END_HTML
+
+** Worg - user-driven knowledge-base about org-mode
+
+[[http://129.199.80.1/~guerry/worg/][Worg]], created by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]], is a setup to allow users to jointly
+edit a number of Org-mode files containing documentation about
+Org-mode.  This is something like a wiki.  If you'd like to contribute
+your own setup, screenshots, tutorials etc, please go to [[http://129.199.80.1/~guerry/worg/][the Worg
+page]], and start from there.
+
+** Tutorials
+
+   [[file:tutorials.org][Tutorials and screencasts]] are listed on a separate page.
+
+** Survey
+
+   In November 2007, Charles Cave organized a survey among Org-mode
+   users.  The answers given in this survey can be found [[file:survey.html][here]].
+
+** Org-mode, GTD and other task management systems 
+    Org-mode is flexible enough to implement many different ways of
+    organizing your projects.  A frequently discusses scheme is [[http://www.davidco.com/][David
+    Allen's]] strategy for [[http://en.wikipedia.org/wiki/GTD][Getting Things Done]].  But it is clearly not
+    the only way to us Org-mode for planning.  Here are a couple of
+    links related to this topic.
+
+    - [[http://johnwiegley.com][John Wiegley]] has written an excellent document describing his
+      way of using Org-mode as a [[http://johnwiegley.com/org.mode.day.planner.html][day planner]]. See also some later
+      messages for enhancements of his setup:
+      [[http://article.gmane.org/gmane.emacs.orgmode/2963][emacs-orgmode-2962]], [[http://article.gmane.org/gmane.emacs.orgmode/3629][emacs-orgmode-3629]]
+
+    - [[http://members.optusnet.com.au/charles57/Creative/][Charles Cave]] has written an [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][article/tutorial]] about the basic
+      elements of GTD and how he implements them in Org-mode.  There
+      is also a [[http://129.199.80.1/~guerry/org-gtd.html][french translation]] of this document.
+
+    - There have been several threads on emacs-orgmode@gnu.org related
+      to GTD, the most important ones are:
+
+      + [[http://thread.gmane.org/gmane.emacs.orgmode/683][Another GTD question]], which contains a discussion about basic
+        GTD aspects.  It also contains this
+      + [[http://article.gmane.org/gmane.emacs.orgmode/715][Post by Carsten]] summarizing several options for implementing
+        GTD in org-mode.
+      + [[http://thread.gmane.org/gmane.emacs.orgmode/523][GTD, Projects and Next Actions in org-mode]] is a thread where
+        several people describe their personal setup is 
+      + The [[http://thread.gmane.org/gmane.emacs.orgmode/4915][SOMEDAY/MAYBE vs. low priorities]] thread contains a
+        discussion about priorities that is quite instructive.
+      + Here is a [[http://thread.gmane.org/gmane.emacs.orgmode/4832/focus%3D4854][very instructive post]] by Pete Phillips explaining
+        why David Allens book is where you should start to learn GTD,
+        and that the Internet and Org-mode only come into the game
+        later, when thinking about the implementation.  And since
+        doing GTD the right way will give you lots of free time, don't
+        forget to listen to [[http://www.detox-jazz.co.uk/][Pete's music]]!
+
+    - Also on the web you can find information about how people are
+      setting up Org-mode to fit their habits.  A few examples:
+
+      + This [[http://www.brool.com/?p=82][blog post]] shows a very simple and clear GTD setup.
+
+** Add-Ons
+
+   - [[http://www.cl.cam.ac.uk/~pz215/][Piotr Zielinski]] wrote [[http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el][org-mouse.el]] which is now distributed with
+     Org-mode. It implements great mouse support for many functions in
+     org-mode.
+
+   - [[http://dto.freeshell.org/notebook/][David O'Toole]] is the author of [[http://dto.freeshell.org/e/org-publish.el][org-publish.el]]. While this is
+     now part of the Org-mode distribution, you might find the newest
+     bug fixes and developments at his [[http://dto.freeshell.org/notebook/OrgMode.html][Org-mode page]], along with
+     several other projects like /org-blog.el/ and
+     /org-publish-escript.el/.
+
+   - [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]] has been really prolific in writing interesting
+     add-ons, all available at his [[http://www.cognition.ens.fr/~guerry/bastien-org-mode.html][org-mode page]]:
+     + a package for using Org-mode as the basis for blogging
+     + a LaTeX exporter that is now distributed together with
+       org-mode
+     + a special table-of-contents buffer that simplifies navigation
+     + a registry to find locations that link a specific document.
+
+   - George C.F. Greve wrote [[http://www.emacswiki.org/emacs/org-mairix.el][org-mairix.el]] to add links that trigger a
+     mairix search.
+
+** Translators
+   
+   I know about the following attempts to translate from and to
+   Org-mode files:
+
+*** Org-mode to XXX
+
+    - [[http://www.cognition.ens.fr/~guerry/u/org2rem.el][From Org-mode to remind]] by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]].
+      
+    - [[file:org-export-freemind-0.1.0.tar.gz][From Org-mode to Freemind]] by Marco Vezzoli.
+
+*** XXX to Org-mode
+
+    - [[http://www.olafdietsche.de/palm/palm2orgmode.pl][From Palm TODO database to Orgmode]].  This Translator was
+      written by [[http://www.olafdietsche.de/][Olaf Dietsche]].
+
+    - From [[http://thread.gmane.org/gmane.emacs.orgmode/5073][Remind to Org]] by Detlef Steuer.
+
+*** Bi-directional
+    
+    Unfortunately nothing so far.
+
+** Alternative distributions
+
+   - Mark A. Hershberger has made some [[https://launchpad.net/~hexmode/+archive][Ubuntu packages]] for org-mode.
+
+** Contributing to Org-mode
+
+   You can always contribute with ideas and bug reports on the mailing
+   list.  If you want to contribute a patch, code snippets, or a full
+   add-on, this is very welcome too!  However, I can only make it an
+   official part of Org-mode if you have signed the papers with the
+   Free Software Foundation.  Org-mode is distributed as part of Emacs
+   and must therefore adhere to strict rules about the copyright of
+   all included material.  If this is what you want to do, [[file:request-assign-future.txt][here]] is the
+   form that you have to fill in and send to the FSF.  After you
+   received the final copy with signatures, please scan it and send
+   the scan to the maintainer.
+
+** Future Development
+
+   Org-mode is still developing fast.  The best way to stay up-to-date
+   is to join the mailing list where the changes are developed and
+   discusssed.
+
+   Here is a loose [[file:todo.org][list of ideas]] that are still to be processed
+   somehow, when I get to it...
+
+* Related Software
+  [[http://sachachua.com/wp/][Sacha Chua]] about [[http://sachachua.com/wp/2007/12/26/emacs-choosing-between-org-and-planner/][Choosing between Planner and Org]].
+ 

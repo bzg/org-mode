@@ -1,0 +1,649 @@
+         -*- mode:org -*-
+
+#+STARTUP:   align
+#+TYP_TODO:  TODO IDEA WISH QUESTION DECLINED INCONSISTENCY BUG DONE
+#+TAGS:      NEW(n)
+#+OPTIONS:   H:2 num:t toc:t \n:nil @:t ::t |:t ^:t *:t TeX:t
+#+ARCHIVE:   ::** Archived Tasks
+#+EMAIL:     carsten.dominik@gmail.com
+#+TITLE:     The Org-mode TODO list
+
+* Introduction
+
+This is a loose collection of ideas and TODO items for the future
+development of Org-mode.  These ideas come from various sources,
+mostly from emacs-orgmode@gnu.org, from direct emails to me, or from
+my own day-dreaming.  I don't always mention the source of an idea,
+out of laziness.  However, when I implement a good idea, I try to
+mention the origin of this idea in the /Acknowledgments/ section of
+the manual - let me know if I forgot to give /you/ credit for
+something.
+
+** Nomenclature
+   On this page, I am using TODO keywords in the following way:
+   |-----------------+----------------------------------------------------|
+   | *Keyword*       | Intention                                          |
+   |-----------------+----------------------------------------------------|
+   | *TODO*          | A development  that is going to happen, once I have time or once I figure out how to do it. |
+   | *IDEA*          | A new idea, I have not yet decided what if anything I will do about it. |
+   | *WISH*          | A wish, probably voiced by someone on  emacs-orgmode@gnu.org.  This is less than a new idea, more a change in existing behavior. |
+   | *QUESTION*      | A question someone asked, that needs some thinking before it can be answered |
+   | *DECLINED*      | I have decided not to implement this feature, but I am keeping it in the list so that people can see it, complain, or still try to convince me. |
+   | *INCONSISTENCY* | Some behavior in Org-mode that is not as clean and consistent as I would like it to be. |
+   | *BUG*           | This needs to be fixed, as soon as possible.       |
+   | *DONE*          | Well, done is done.                                |
+   | /NEW/           | This is a tag, indicating recently added entries   |
+   |                 | <50>                                               |
+   |-----------------+----------------------------------------------------|
+
+   
+* Tasks
+
+** Structure
+*** TODO Definition lists, like in Muse
+*** TODO Get rid of all the \r instances, which were used only for XEmacs.
+*** IDEA Should we allow #+TODO as an alias for #+SEQ_TODO?
+*** TODO proper visibility cycling for items
+    Make them not hide the text after the final list item.
+    This is not trivial, we cannot usenormal outline stuff,
+    needs a separate implementaiton.
+*** IDEA allow different colors for different TODO keywords/tags.
+*** TODO Use an indirect buffer for org-goto.
+    Is there a problem with the overriding map?
+
+*** WISH Inline TODO entries
+    A way to put a TODO entry without starting a new section.
+
+*** TODO Speedbar support for agenda.
+
+** Agenda issues
+*** QUESTION COLUMN View
+    is this safe, or could things be messed up with this?
+*** TODO Make S-right and S-left change TODO keywords
+    Right now they change the time stamps.  This could be
+    M-left/right, but this could also cause inconsistencies, because
+    when on a time stamp, the same keys do exactly this.
+*** WISH Make more modes changeable from the agenda
+    These could be made available for toggling, just like
+    follow-mode. Examples:
+    - org-agenda-todo-list-sublevels
+    - org-tags-match-list-sublevels
+    - org-agenda-todo-ignore-scheduled
+*** IDEA Sort TODO entries according to type?
+    This would apply for the list collection, not in the day entries.
+    However, I could also have a TODO keyword criterion that could be
+    used in the day entries, as one of the minor criteria.
+
+*** DECLINED Allow separators in the Tag-sorted agenda view
+    This feature is not going to come, because block agendas can
+    achieve the same thing.
+
+
+** Links
+*** WISH When editing links, give access to stored links.
+    Not sure why this is needed.
+    Idea from William Henney.
+*** WISH Variable of standard links for completion with C-c C-l
+    Or something like that, to make standard links fast.
+*** WISH Make brackets in links possible
+    Would require a display property also for the label part of
+    links.
+*** IDEA Find all links to a specific file
+*** IDEA Make info HTML links work for links to Info files
+    Info links of course only work inside Emacs.  However, many info
+    documents are on the web, so the HTML exporter could try to be
+    smart and convert an Info link into the corresponding link on the
+    web.  For example, we could use the GNU software site then
+    Name.HTML.  Here is the link to be used:
+    http://www.gnu.org/software/emacs/manual/html_node/ Another
+    question is, is this URL going to be stable so that it makes sense
+    to actually put this into org.el?
+
+*** IDEA Make news HTML links work, using Google.
+    I can use Google groups with a message id to find a USENET message,
+    even if the original link points to gnus.
+
+*** TODO Remove irretrievable links from /published/ HTML output
+    This is on David's table, and he will hopefully integrate a
+    mechanism for this into org-publish.el.  The discussion about this
+    was started by [[http://thread.gmane.org/gmane.emacs.orgmode/281][Austin Frank]]
+
+*** DECLINED Agenda collections, based on #+COLLECTION lines.
+    [[http://thread.gmane.org/gmane.emacs.orgmode/139][Tim Callaghan]] started the discussion on this one.
+    Declined because this would depend on local variables and the
+    agenda commands are global.  Also, this can actually be done by
+    specifying the file list in a custom agenda command.
+
+*** DECLINED Make CamelCase words link to corresponding org-mode files.
+    Files in the same directory.  Or some other way to easy do that.
+    Would be useful for publishing projects.  This would be an
+    incompatible change, but I don't think anyone is using CamelCase
+    anyway?
+    This is marked declined, because link abbreviations now provide an
+    easy way to make links to other files.
+
+*** TODO Document the character protection in links
+    I don't think this is really covered anywhere.
+    Maybe we also should protect characters in the visible part, to
+    make sure thing will never be on two lines...?
+*** WISH Radio targets across files
+    I guess each org file could write a .orgtargets.filename file, if
+    it has any radio targets.
+
+
+** DECLINED Fast update for external editing
+   Could I use a dynamic block for this?
+
+
+** Tables
+*** WISH Row formulas
+    @4=.....
+*** TODO Write a tutorial
+    Demonstrate running averages.
+
+*** WISH Make a variable that current line should be recomputed always
+   in each table, skipping headers of course.
+
+*** TODO Allow a table to locally change the unit system
+    This is for using constants.el.
+    Well, it is now possible to do this for the file, is this enough???
+*** QUESTION Does inserting hlines change references correctly?
+*** WISH Interactive way to get a converted table?
+*** BUG When computing in a narrowed column, this may go wrong.
+    Computing changes fields and does not yet see correctly if the column
+    width has changed, in the case of a narrowed column.
+
+*** DECLINED Alternative for the implementation of orgtbl-minor-mode:
+    I could use post-command-hook to set the variable orgtbl-mode.
+    I will not do this now and only consider it if problems show up.
+    
+*** DECLINED Table info lines are not necessarily comments in orgtbl-mode
+    Should I generalize this?  No, because the table itself will not be
+    in the correct syntax for whatever mode.
+
+*** DECLINED S-cursor motion to select part of a table, with proper highlighting.
+    Similar to CUA
+
+
+** Properties and Column View
+*** TODO Mouse support for selecting values
+    This could/should be part of org-mouse.el.
+    - [ ] tags
+    - [ ] todo
+    - [ ] priority
+    - [ ] allowed values
+    - [ ] deadline
+    - [ ] scheduled.
+*** BUG We have no clear view on what to do with properties upon export.
+
+
+** Compatibility issues
+*** Emacs 21 compatibility
+    This is being phased out.  Almost everything works under Emacs 21,
+    but in the future I will make little effort to support it.
+**** DECLINED Column view does not yet work for Emacs 21s.
+     Declined, because I don't know how to do this.  Too many
+     problems.
+*** XEmacs compatibility
+**** QUESTION Is there an issue with the coding system of HTML exported files?
+     In the code I used to have a comment saying that
+     :  (and (fboundp 'coding-system-get)
+     :       (boundp 'buffer-file-coding-system)
+     :                 buffer-file-coding-system))
+     always returns nil, implicating that setting the coding system for
+     the export buffer would not work correctly.  however, I have never
+     followed up on this and never had a bug report - so I am wondering
+     if there is an issue at all.
+  
+**** DECLINED Column view does not yet work for XEmacs.
+     Declined, because I don't know how to do this.  Too many
+     problems.
+**** DECLINED Rewrite the `format' function
+     To make narrowing work under XEmacs, I would need to write a
+     version of /format/ that does transport text properties, or I
+     would have to rework narrowing entirely.  Unlikely that this will
+     happen, mainly because it is working in Emacs and so does not
+     bother me personally so much.  Anyway, I don't know if people are
+     actually using narrowing very much at all.
+
+
+** Exporting
+*** IDEA Convert links to footnotes for ASCII export.
+*** DECLINED Store LaTeX code as HTML comments
+    Declined because I don't really see the need for this.
+*** IDEA Microformats
+    Nic Ferrier has been pushing this agenda for a long time, for
+    example with [[http://thread.gmane.org/gmane.emacs.orgmode/140/][this email]].  I am not deep enough into the semantic
+    web that I could do this myself.  Maybe we can do this by
+    modifying the html exporter step-by-step?
+*** INCONSISTENCY Find a better place for formatting checkboxes
+    Right now this is being done as part of `org-html-expand', which
+    does not seem logically correct.
+*** DECLINED Can I make the exporter more efficient?
+    The line-by-line processing may not be the fastest way to do
+    this.  It certainly uses more resources.  Right now the exporters
+    do work though, so it is unlikely that I am going to change this.
+
+*** DECLINED CSV import/export of tables?
+    I remember this coming up several times, for example in emails
+    from [[http://thread.gmane.org/gmane.emacs.orgmode/156][Niels Giesen]] and [[http://thread.gmane.org/gmane.emacs.orgmode/139][Tim Callaghan]].  Org-mode does have
+    Tab-separated export of tables, so right now I don't really see
+    the benefit of adding CSV export.  Are there applications that do
+    not understand tab-separated files, but do understand
+    comma-separated ones?
+
+*** DECLINED In HTML export, make links from the time stamps
+    Time stamps have their own class now which allows to highlight
+    them etc.  But I was wondering if something more useful could be
+    done with them, like a link to some kind of calendar...
+
+
+
+** Miscellaneous Stuff
+*** TODO reinstating a repeated item: keyword for logging.
+*** BUG Comments cannot be filled
+*** IDEA New uses for C-c C-c
+    - Compute time interval on time range
+    - Update CLOCK interval
+*** QUESTION Fix more beginning-of-line commands
+    Org-mode re-binds C-a to make this command go to the beginning of
+    a visible line.  There are other keys which might invoke C-a.
+    Should these keys be changed as well?  one could use
+    `substitute-key-definition' on the global map to find them all.
+*** QUESTION Inlining of images in Org-mode files
+*** TODO Fixup outline-magic.el, so that it can be used.
+*** TODO Use the new argument of bibtex-url
+    Roland Winkler was kind enough to implement a new argument to the
+    `bibtex-url' command that allows me to retrieve the corresponding
+    URL, whether it is taken from a URL field or constructed in some
+    clever way.  Currently I am not using this, because too many
+    people use an old Emacs version which does not have this.
+    however, eventually I will implement this.
+*** WISH Get people to write articles about how to do GTD with Org-mode.
+    There is now one by Charles Cave, read it [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][here]]
+
+*** IDEA Tree statistics
+    A key that can be applied to a tree, showing statistics:
+    - how many headlines
+    - how many TODO
+    - how many DONE
+    - Checkboxes
+    - etc....
+
+*** QUESTION Do we need a 43 folders implementation?
+    That could easily be done in an org-mode file.  But then, maybe
+    this should really be a paper thing. 
+
+*** Priorities
+    Here is some information about priorities, which is not yet
+    documented.
+**** QUOTE Priorities
+    TODO entries: 1 or 1,2,...
+    DEADLINE is 10-ddays, i.e. it is 10 on the due day
+                          i.e. it goes above top todo stuff 7 days
+                               before due
+    SCHEDULED is 5-ddays, i.e. it is 5 on the due date
+                          i.e. it goes above top todo on the due day
+    TIMESTAMP is 0        i.e. always at bottom
+                          but as a deadline it is 100
+                          but if scheduled it is 99
+    TIMERANGE is 0        i.e. always at bottom
+    DIARY is 0            i.e. always at bottom
+
+    Priority * 1000
+
+*** INCONSISTENCY: items don't grow/shrink due to promotion.
+    In plain lists, multiple demote/promote commands executed directly
+    after each other don't change the scope of the command - the
+    initially selected text continues to be selected.  This is
+    inconsistent with the behavior of outline sections, were the subtree
+    for promotion/demotion is newly defined after each command.  Which
+    convention is better?  Should this be consistent between trees and
+    plain lists?
+
+*** INCONSISTENCY: M-TAB does not work on plain lists.  Why???
+
+*** QUESTION grep on directory does not yet work.
+    I am actually not sure, I might have addressed this already, but
+    my memory is failing me.  Needs some checking.
+
+*** DECLINED HAVE a TIME 3:55 line collecting CLOCK results
+    The CLOCK lines could be there in addition, or could even be
+    removed, so that only one line is kept.
+*** DECLINED Think about Piotr's idea of treating TODO like a TAG.
+    The answer is probably NO because the simple part of TODO must
+    still be there and I like the keyword at the beginning of the line,
+    just like a checkbox.  Of course you can make a TODO tag yourself
+    at any time.
+
+*** DECLINED Inlining of external files
+
+*** DECLINED Should TAB on TODO keyword rotate its state?
+    Problem:  If the keyword disappears, it will suddenly start to fold....
+    So my feeling right now is that the answer should be NO.
+
+    No, because S-left/right does this already pretty well
+
+*** DECLINED Create a DONE counter in the mode line
+    That counter shows what faction of entries has been marked DONE.  I
+    am not yet sure how useful such a thing would be, because of the
+    huge number of entries that can be in a file, and the different
+    weight of such entries.
+    Declined because we do now have counters for checkboxes, and the
+    feeling is that this is not so useful for TODOs.
+
+
+* Archive
+** Archived Tasks
+
+*** DONE(<2006-06-01 Thu 09:15>) Commands to move through an item list
+    next item, previous item.  What should happen at the boundaries of
+    the current list?
+
+*** DONE(<2006-06-01 Thu 09:16>) Force relative links, would this be useful?
+    
+
+*** DONE(<2006-06-01 Thu 09:16>) Fix empty search string.
+
+*** DONE(<2006-06-01 Thu 09:16>) STARTUP options for logging
+
+*** DONE(<2006-06-01 Thu 09:16>) Make a variable for Pete, to have SCHEDULED at point
+
+*** DONE(<2006-06-01 Thu 09:16>) Fix ASCII export of narrowed columns
+
+*** DONE(<2006-06-01 Thu 09:16>) org-file-apps should allow regular expressions
+
+*** DONE(<2006-06-01 Thu 09:16>) fix problem with w32- versus mswindows-....
+
+*** DONE(<2006-06-01 Thu 09:17>) Document that font-lock-mode is needed
+
+*** DONE(<2006-06-01 Thu 09:17>) Add keyboard access and menu commands for org-project.el
+    C-c C-x C-p or something like that.
+    In the menu, it goes under export, or even its own group.
+
+*** DONE(<2006-06-01 Thu 09:17>) Document those new keys in orgcard.tex
+    C-c C-x C-p or something like that.
+    In the menu, it goes under export, or even its own group.
+
+*** DONE(<2006-06-01 Thu 09:17>) Remove SCHEDULED keyword when marking it done.
+    in particular when adding a CLOSED timestamp.
+    Only problem is that when unclosing it, it should be scheduled
+    again
+
+*** DONE(<2006-06-01 Thu 09:17>) Don't show tasks already scheduled for the future, only stuff which
+    is not yet scheduled.
+
+*** DONE(<2006-06-01 Thu 09:17>) Put title and tags in separate classes
+
+*** DONE(<2006-06-01 Thu 09:17>) Option to leave out TAGS from export
+
+*** DONE(<2006-06-01 Thu 09:17>) Option to leave out Timestamps from export
+
+*** DONE(<2006-06-01 Thu 09:17>) Checkable items like Frank Ruell's proposal
+
+*** DONE(<2006-06-01 Thu 09:17>) Classify Keywords and time stamps
+    <span class="keyword">SCHEDULED: </span><span
+    class="timestamp">timestamp goes here</span><br>
+
+*** DONE(<2006-06-01 Thu 09:17>) Change default for include-all-todo to nil
+
+*** DONE(<2006-06-01 Thu 09:17>) Specify TAGS in a special line instead of collecting them dynamically
+    The could help to avoid typos and could be faster for very large files.
+
+*** DONE(<2006-06-01 Thu 09:17>) Some much faster interface for setting tags.
+    Basically, use single keys to add/remove tags from the list.  Also
+    for this the idea to define tags in a special line would be good,
+    in order to have a way to define the shortcuts. 
+
+*** DONE(<2006-06-01 Thu 09:17>) Remove date stamps from headline if they are not needed.
+    Bug report from Scott.
+
+
+*** DONE(<2006-06-01 Thu 09:17>) : Maybe s-up/down should change priorities only in headlines
+    Right now this works wherever the cursor is.  If this is changed,
+    should S-up or S-down do something else?  
+
+*** DONE(<2006-06-01 Thu 09:21>) Need a command to remove tabulators from a line.
+    Use this in ASCII export, to make sure we get the indentation
+    right.
+
+*** DONE(<2006-06-01 Thu 09:24>) Improve tab in org-cycle:
+    - there is a bug when the setting is 'white:  It requires a
+      non-empty white line!
+    - There should be another setting to have tab be the tabulator in
+      the white space at the beginning of the line.
+    - Finally, when TAB closes an entry, maybe it should go beck to the
+      beginning of the entry???  On the other hand, it is good to be
+      able to go back to the old place with just another tab.
+
+*** DONE(<2006-06-01 Thu 11:48>) Include TAGS into sorting.
+    But what strategy should be used when there are several tags?
+
+*** DONE(<2006-06-06 Tue 10:15>) Archiving an entry in current buffer goes to end of file
+    Should go to end of subtree.
+    This is done now, and I also control the amount of empty lines
+    created by the archiving process in general.
+
+*** DONE(<2006-06-06 Tue 10:16>) Narrowing agenda to current files does not work as advertized.
+    C-c a 1 t should make the TODO list for the current file, but does
+    not.
+
+*** DONE(<2006-06-06 Tue 10:17>) Radio TAGS for the fast tag interface.
+    Make lists of tags that are mutually exclusive.  So when I turn on
+    @HOME, @WORK would be turned off automagically.  A good syntax for
+    defining these groups in the #+TAGS line would be:
+    : #+TAGS: [@WORK(w) @HOME(h) @CLUB(c)] Laptop(l) PC(p) Car(r)
+    This could indicate that @WORK, @HOME, @CLUB are mutually exclusive.
+
+    If I do this, I will also need a syntax for the global alist to
+    indicate the same thing.
+
+    It seems to me that with such grouping of tags, sorting would be
+    useful as it would improve the overview over the current tags.  I
+    might even be able to support mutually exclusive tags with
+    fontification in the interface.  Or arrange things such that the
+    mutually exclusive ones are all in the same row or column, to
+    optimize the visual feedback.
+
+    For the internal format, I think best would be something like
+
+    : '( (:startgroup) ("@work") ("@home") ("@club") (:endgroup)
+    :    ("Laptop") ("PC") ("Car"))
+    This setup makes sure that assoc and rassoc still do work as
+    expected.
+
+*** DONE(<2006-06-06 Tue 10:17>) Should tags be sorted in a certain way?
+    Right now, you can either set the tag sequence yourself through
+    the completion interface.  If you use the fast tag selection
+    interface, the tag sequence depends on the order in which tags are
+    selected and deselected.  maybe a specific roder would be useful
+    for example the same order as the one given in the configuration?
+
+*** DONE(<2006-06-06 Tue 10:17>) Remove narrowing cookies for export
+    Exported tables should not show narrowing cookies.  In fact, if a
+    table line does contain nothing but narrowing cookies, the entire
+    line should be removed.
+
+*** DONE(<2006-06-11 Sun 07:32>) Track working times similar to time-clock.el
+    This was proposed by David O'Toole in an
+    [[http://thread.gmane.org/gmane.emacs.orgmode/387][email to emacs-orgmode@gnu.org]].  He wants to be able to know the
+    times when he worked at a particular project.  Some reporting
+    possibility would be needed to make this useful.  Maybe sparse
+    trees with broken-down working times?
+
+*** DONE(<2006-06-15 Thu 13:35>) Make org-store-link do better in image-mode buffers
+    Just link to the file.
+
+*** DONE(<2006-06-15 Thu 13:35>) Use a ported version of noutline.el
+    Programming the old outline-mode is really a nightmare - the new
+    outline mode that uses invisibility properties instead of
+    selective display works really much much better.  There is now
+    an [[http://thread.gmane.org/gmane.emacs.orgmode/214/focus=218][experimental port]] by Greg Chernov, so when I find time I will
+    try if this works well.  If yes, this port should become part of
+    XEmacs.  Once that happens, I could remove a large amount of
+    ballast from org.el
+
+*** DONE(<2006-06-15 Thu 13:35>) Verify links during export
+
+*** DONE(<2006-09-25 Mon 16:11>) Allow counting checkboxes
+    Then some statistics should be displayed.  One idea is for
+    checkboxes, to use a special box [%] which will be updated with
+    percent of done.  I could have an alternative [/] that will be
+    updated with something like [19/25] to show progress, and when the
+    two numbers are equal, I could highlight then in DONE face, just
+    like [100%].  All smaller numbers could be highlighted even in
+    TODO face if I wanted.  Hmmm, I am beginning to like this.
+
+    Then: how to update this?  Each time a checkbox is added or
+    toggled, go up and update all the counts, right up to something
+    which is not an item, or up to the previous header line.
+
+    Maybe I should also make an option for turning this on, to avoid
+    slowdown.  I guess for long lists this could be slow.
+
+    Also would need a command for global update.
+
+    An maybe plain list and checkboxes should get their own chapter?
+    In Structure they seem to be a bit hidden.....
+
+    Also a menu sublist...
+
+*** DONE(<2006-09-25 Mon 16:11>) Allow stacking calls to org-occur
+    This was a proposal from Piotr.  It is now possible, the second
+    and subsequent calls to org-occur need a prefix argument to keep
+    the previous highlights.
+
+*** DONE(<2006-09-25 Mon 16:12>) Create a hook to be run after an agenda buffer has been finalized.
+
+*** DONE(<2006-09-25 Mon 16:12>) Include TAGS into sorting.
+    But what strategy should be used when there are several tags?
+
+*** DONE(<2006-09-25 Mon 16:12>) Fixup tag display in agenda buffer.
+    The tabs mess up everything.  Either remove the tabs, or realign
+    the tags to some useful column.
+
+*** DONE(<2006-09-25 Mon 16:12>) Blocks in agenda:
+    Make a single agenda buffer that contains several sets of items,
+    like the TODO list, a tags list, and a day view.  Not a bad idea.
+    This was [[http://thread.gmane.org/gmane.emacs.orgmode/167/focus=168][Piotr's idea]].
+
+*** DONE(<2006-09-25 Mon 16:12>) Make org-store-link do the right thing in dired-mode
+
+*** DONE([2006-11-02 Thu 10:24]) Control over windows being used for agenda and related buffers :NEW:
+
+*** DONE([2007-01-24 Wed 12:59]) Extend access to table fields
+    Find a general way to get any rectangular region into a calc
+    vector
+
+*** DONE([2007-01-24 Wed 12:59]) Allow links to remote images to be inlined.
+
+*** DONE([2007-01-24 Wed 12:59]) M-TAB on an already complete tag should add the ":"
+
+*** DONE([2007-01-24 Wed 13:07]) Need a command to do show hierarchy after isearch.
+    Maybe automatically, using isearch-mode-end-hook.  But this does
+    not seem to work, because to is called before the overlays are
+    re-installed.  I can create a new hook, isearch-exit-hook, run in
+    `isearch-exit'.
+
+*** DONE([2007-02-18 Sun 07:16]) hook for users to do their own agenda lists
+    New function dumping headline into the agenda buffer, based on regexp
+    and callback, to allow general stuff.  For the special tags, we can
+    search for one and check for the others using the callback.
+
+*** DONE([2007-02-18 Sun 07:37]) Make C-c C-l also work on a plain link, converting it into bracket.
+
+*** DONE([2007-02-18 Sun 07:37]) GNUS gnus:mail.general#123 stuff should be "Email from:..."
+
+*** DONE([2007-02-18 Sun 07:38]) Email/message context:  What format?
+    I can think of two good formats for this:
+    : Email from John Smith   (if I an the receiver)
+    : Email to John Smith     (if I am the author)
+    or
+    : John Smith on: Some subject     (this is the current Org-mode default.)
+    The first format requires better parsing of the messages (to get
+    both author and receiver names), and also
+    some way to detect if I am the author of this email or not.
+
+*** DONE([2007-02-21 Wed 12:04]) Allow internal links to match inside *other* link
+    Only the link itself that actually triggered the search.
+
+*** DONE([2007-02-21 Wed 12:07]) Allow fully protected HTML code that will be exported as is
+    Currently, @<...> works only for simple tags, and I think we
+    should have something better.  Idea:  Text between <protecthtml>
+    and </protecthtml>, mark it with a text property and then exclude
+    each match in the run preparing the export.
+    I guess I could require these at the beginning of the line, like
+
+#+PROTECT
+
+#+ENDPROECT
+
+    or something like that.......
+
+*** DONE([2007-03-13 Tue 05:19]) Make it possible to set TOC levels independently of headline levels
+    The easiest way to do this would obviously be to allow a number
+    setting for the tco switch, not only a simple t/nil switch.  This
+    can be nice for webpages:  One could have only top-level or level
+    1 and 2 in the toc at the beginning of the page, and then still a
+    more complex structure below.
+
+*** DONE([2007-03-13 Tue 05:20]) Filling is not done in a compatible way.
+    The current setup used the Emacs variables and machine to get the
+    filling of plain lists and everything lese right.  XEmacs uses the
+    filladapt package, which has different ways to do the same
+    things.  org.el should be smart about this and setup filling under
+    XEmacs correctly.
+
+*** DONE([2007-06-06 Wed 17:44]) Repeating Schedules?
+    [[http://thread.gmane.org/gmane.emacs.orgmode/149][Dieter Grollman]] requested this feature, but for now I have decided
+    not to do anything about it.  I don't see a good way to implement
+    this, and I believe that cyclic diary entries are good enough for
+    such tasks.
+
+*** DONE([2007-06-14 Thu 13:16]) improve item indentation when promoting and demoting
+
+*** DONE([2007-06-14 Thu 13:17]) The TODO buffer lists possible TODO keywords
+    These are taken from the current buffer, so when multiple buffers
+    are involved, this list may not be correct.....
+
+*** DONE([2007-06-14 Thu 13:20]) Conflict between bold emphasis and headlines
+    At the beginning of a line, Org-mode does not know if *bold* is a
+    headline or an emphasis.  This will not be easy to fix.  The way
+    to do ii is to require a space after the star in headlines.  This
+    requires to change outline-regexp, outline-level, the many many
+    times when outline regexp is used in the program, and also the
+    countless times when I am simply matching th stars directly.
+
+*** DONE C-c - for cycling bullet types.
+    ARCHIVED: <2007-07-02 Mon>
+
+*** DONE improve what TAB does with new item
+    ARCHIVED: <2007-07-02 Mon>
+    same or additional indentation????
+
+*** DONE Make it easier to do monthly agendas, and agendas for ranges
+    ARCHIVED: <2007-07-02 Mon>
+
+*** DONE Introduce a LOCATION keyword
+    ARCHIVED: <2007-07-02 Mon>
+    similar to DEADLINE and SCHEDULED
+    Idea from Bastien
+    This could be done now using properties, I don't think we need a
+    special thing for this anymore.
+
+*** DONE Times/date not always removed in agenda lines
+    ARCHIVED: <2007-07-02 Mon>
+    Even when org-agenda-remove-times-when-in-prefix is set, there
+    seem to be cases where this does not work.  I forgot what the
+    example was - does anyone remember?
+
+*** DONE Links are still highlighted in fixed-width environments.
+    ARCHIVED: <2007-07-02 Mon>
+    This ties in with the problem that there is no way to have
+    protected HTML code in the file.
+
+* COMMENT HTML style specifications
+
+# Local Variables: 
+# org-export-html-style: "<link rel=stylesheet href=\"freeshell2.css\" type=\"text/css\"> <style type=\"text/css\"> .tag { color: red; font-weight:bold}</style>" 
+# End:

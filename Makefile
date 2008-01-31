@@ -68,8 +68,8 @@ DOCFILES   = org.texi org.pdf org
 CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
 TEXIFILES  = org.texi
 INFOFILES  = org
-HTMLDIR    = /home/dominik/public_html/Tools/org
 HG_RELEASES = ../org-mode-all-releases-hg/
+
 
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
@@ -154,6 +154,10 @@ orgcard_letter.ps: orgcard_letter.dvi
 webfiles:
 	(cd ORGWEBPAGE; emacs -batch -l ~/.emacs index.org -f org-publish-current-project)
 
+web:
+	make webfiles
+	(cd ORGWEBPAGE/tmp; lftp -f ../../../org-mode-proprietary/ftp_upload_website)
+
 html: org.html
 
 html_split: org.texi
@@ -167,12 +171,6 @@ info:
 pdf:	org.pdf
 
 card:	orgcard.pdf orgcard.ps orgcard_letter.pdf orgcard_letter.ps
-
-xcompile:
-	xemacs -batch -q -f batch-byte-compile $(LISPFILES)
-
-ecompile:
-	emacs -batch -q -f batch-byte-compile $(LISPFILES)
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -214,15 +212,15 @@ trackrelease:
 	cp -r org-$(TAG)/* $(HG_RELEASES)
 	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
 
-upload:
-	(cd RELEASEDIR; lftp -f ../ftp_script)
+upload_release:
+	(cd RELEASEDIR; lftp -f ../../org-mode-proprietary/ftp_upload_release)
 
 upload_manual:
-	 lftp -f ftp_script2
+	lftp -f ../org-mode-proprietary/ftp_upload_manual
 
 relup:
 	make release
-	make upload
+	make upload_release
 	make upload_manual
 
 clean:
@@ -230,7 +228,14 @@ clean:
 	rm -f *~ 
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs
 	rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
+	rm -f orgcard_letter.tex orgcard_letter.pdf
+	rm -f org-install.el
+	rm -rf manual
+	rm -rf RELEASEDIR
 
 .el.elc:
 	$(ELC) $<
 
+
+push:
+	git+ssh://repo.or.cz/svr/git/org-mode.git master

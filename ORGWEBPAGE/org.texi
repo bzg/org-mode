@@ -1,0 +1,5 @@
+
+@c Local Variables: 
+@c mode: texinfo
+@c TeX-master: t
+@c End: 
