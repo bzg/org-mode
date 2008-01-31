@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.16a
+@set VERSION 5.17
 @set DATE December 2007
 
 @dircategory Emacs
@@ -91,7 +91,7 @@ Software Foundation raise funds for GNU development.''
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Extensions and Hacking::      It is possible to write add-on code
 * History and Acknowledgments::  How Org-mode came into being 
-* Main Index::                  
+* Index::                       The index
 * Key Index::                   Key bindings and where they are described
 
 @detailmenu
@@ -169,10 +169,10 @@ TODO items
 Extended use of TODO keywords
 
 * Workflow states::             From TODO to DONE in steps
-* TODO types::                  I do this, Fred the rest
+* TODO types::                  I do this, Fred does the rest
 * Multiple sets in one file::   Mixing it all, and still finding your way
 * Fast access to TODO states::  Single letter selection of a state
-* Per file keywords::           Different files, different requirements
+* Per-file keywords::           Different files, different requirements
 * Faces for TODO keywords::     Highlighting states
 
 Progress Logging
@@ -594,23 +594,22 @@ attach it to your bug report.
 @node Conventions,  , Feedback, Introduction
 @section Typesetting conventions used in this manual
 
-Org-mode has 3 types of keywords that are being used.  TODO keywords,
-tags, and property names.  For this manual we are using the following
-conventions:
+Org-mode uses three types of keywords: TODO keywords, tags, and property
+names.  In this manual we use the following conventions:
 
 @table @code
 @item TODO
 @itemx WAITING
-TODO keyword are written with all capitals, even if they are
+TODO keywords are written with all capitals, even if they are
 user-defined.
 @item boss
 @itemx ARCHIVE
-User-defined Tags are written in lowercase, built-in tags with special
-meaning a all-caps.
+User-defined tags are written in lowercase; built-in tags with special
+meaning are written with all capitals.
 @item Release
 @itemx PRIORITY
-User-defined properties are capitalized in all examples, while
-built-in properties with special meaning are all-caps.
+User-defined properties are capitalized; built-in properties with
+special meaning are written with all capitals.
 @end table
 
 @node Document structure, Tables, Introduction, Top
@@ -740,8 +739,10 @@ Show all.
 @item C-c C-r
 Reveal context around point, showing the current entry, the following
 heading and the hierarchy above.  Useful for working near a location
-exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda
-command (@pxref{Agenda commands}).  With prefix arg show, on each
+that has been exposed by a sparse tree command (@pxref{Sparse trees}) or
+an agenda command (@pxref{Agenda commands}).  With prefix arg show, on
+each
+
 level, all sibling headings.
 @kindex C-c C-x b
 @item C-c C-x b
@@ -1022,14 +1023,13 @@ location as the value (@pxref{Properties and columns}).
 @cindex occur, command
 
 An important feature of Org-mode is the ability to construct
-@emph{sparse trees} for selected information in an outline tree.  A
-sparse tree means that the entire document is folded as much as
-possible, but the selected information is made visible along with the
-headline structure above it@footnote{See also the variables
-@code{org-show-hierarchy-above}, @code{org-show-following-heading}, and
-@code{org-show-siblings} for detailed control on how much context is
-shown around each match.}.  Just try it out and you will see immediately
-how it works.
+@emph{sparse trees} for selected information in an outline tree, so that
+the entire document is folded as much as possible, but the selected
+information is made visible along with the headline structure above
+it@footnote{See also the variables @code{org-show-hierarchy-above},
+@code{org-show-following-heading}, and @code{org-show-siblings} for
+detailed control on how much context is shown around each match.}.  Just
+try it out and you will see immediately how it works.
 
 Org-mode contains several commands creating such trees, all these
 commands can be accessed through a dispatcher:
@@ -1050,6 +1050,7 @@ when the buffer is changed by an editing command, or by pressing
 @kbd{C-c C-c}.  When called with a @kbd{C-u} prefix argument, previous
 highlights are kept, so several calls to this command can be stacked.
 @end table
+
 @noindent
 For frequently used sparse trees of specific search strings, you can
 use the variable @code{org-agenda-custom-commands} to define fast
@@ -1088,7 +1089,7 @@ part of the document and print the resulting file.
 Within an entry of the outline tree, hand-formatted lists can provide
 additional structure.  They also provide a way to create lists of
 checkboxes (@pxref{Checkboxes}).  Org-mode supports editing such lists,
-and the HTML exporter (@pxref{Exporting}) does parse and format them.
+and the HTML exporter (@pxref{Exporting}) parses and formats them.
 
 Org-mode knows ordered and unordered lists.  Unordered list items start
 with @samp{-}, @samp{+}, or @samp{*}@footnote{When using @samp{*} as a
@@ -1096,8 +1097,9 @@ bullet, lines must be indented or they will be seen as top-level
 headlines.  Also, when you are hiding leading stars to get a clean
 outline view, plain list items starting with a star are visually
 indistinguishable from true headlines.  In short: even though @samp{*}
-is supported, it may be better not to use it for plain list items.} as
-bullets.  Ordered list items start with @samp{1.} or @samp{1)}.  Items
+is supported, it may be better to not use it for plain list items.} as
+bullets.  Ordered list items start with a numeral followed by either a
+period or a right parenthesis, such as @samp{1.} or @samp{1)}.  Items
 belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then
 the 2--digit numbers must be written left-aligned with the other numbers
@@ -1181,9 +1183,9 @@ the command chain with a cursor motion or so.
 @kindex C-c C-c
 @item C-c C-c
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
-state of the checkbox.  If not, make this command makes sure that all
-the items on this list level use the same bullet.  Furthermore, if this
-is an ordered list, make sure the numbering is ok.
+state of the checkbox.  If not, this command makes sure that all the
+items on this list level use the same bullet.  Furthermore, if this is
+an ordered list, make sure the numbering is ok.
 @kindex C-c -
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate
@@ -1200,7 +1202,7 @@ Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org-mode has @emph{drawers}.
 Drawers need to be configured with the variable
 @code{org-drawers}@footnote{You can define drawers on a per-file basis
-with a line like @code{#+DRAWERS: HIDDEN PROPPERTIES STATE}}, and
+with a line like @code{#+DRAWERS: HIDDEN PROPERTIES STATE}}.  Drawers
 look like this:
 
 @example
@@ -1246,9 +1248,16 @@ silently in the shadow.
 @cindex tables
 @cindex editing tables
 
-Org-mode has a very fast and intuitive table editor built-in.
-Spreadsheet-like calculations are supported in connection with the
-Emacs @file{calc} package.
+Org-mode comes with a fast and intuitive table editor.  Spreadsheet-like
+calculations are supported in connection with the Emacs @file{calc}
+package 
+@ifinfo
+(@pxref{Calc,,,calc,Gnu Emacs Calculator Manual}).
+@end ifinfo
+@ifnotinfo
+(see the Emacs Calculator manual for more information about the Emacs
+calculator).
+@end ifnotinfo
 
 @menu
 * Built-in table editor::       Simple tables
@@ -2145,8 +2154,8 @@ series of degree @code{n} at location @code{x} for a couple of functions
 @chapter Hyperlinks
 @cindex hyperlinks
 
-Just like HTML, Org-mode provides links inside a file, and external
-links to other files, Usenet articles, emails, and much more.
+Like HTML, Org-mode provides links inside a file, external links to
+other files, Usenet articles, emails, and much more.
 
 @menu
 * Link format::                 How links in Org-mode are formatted
@@ -2600,16 +2609,16 @@ file.
 @chapter TODO items
 @cindex TODO items
 
-Org-mode does not maintain TODO lists as a separate document.  TODO
-items are an integral part of the notes file, because TODO items
-usually come up while taking notes!  With Org-mode, you simply mark
-any entry in a tree as being a TODO item.  In this way, the
-information is not duplicated, and the entire context from which the
-item emerged is always present when you check.
+Org-mode does not maintain TODO lists as separate documents.  Instead,
+TODO items are an integral part of the notes file, because TODO items
+usually come up while taking notes!  With Org-mode, simply mark any
+entry in a tree as being a TODO item.  In this way, information is not
+duplicated, and the entire context from which the TODO item emerged is
+always present.
 
-Of course, this technique causes TODO items to be scattered throughout
-your file.  Org-mode provides methods to give you an overview over all
-things you have to do.
+Of course, this technique for managing TODO items scatters them
+throughout your notes file.  Org-mode compensates for this by providing
+methods to give you an overview of all the things that you have to do.
 
 @menu
 * TODO basics::                 Marking and displaying TODO entries
@@ -2623,8 +2632,8 @@ things you have to do.
 @node TODO basics, TODO extensions, TODO items, TODO items
 @section Basic TODO functionality
 
-Any headline can become a TODO item by starting it with the word TODO,
-for example:
+Any headline becomes a TODO item when it starts with the word
+@samp{TODO}, for example:
 
 @example
 *** TODO Write letter to Sam Fortune
@@ -2649,24 +2658,24 @@ agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
 
 @kindex C-u C-c C-t
 @item C-u C-c C-t
-Select a specific keyword using completion of (if it has been set up)
+Select a specific keyword using completion or (if it has been set up)
 the fast selection interface.
 
 @kindex S-@key{right}
 @kindex S-@key{left}
 @item S-@key{right}
 @itemx S-@key{left}
-Select the following/preceding TODO state, similar to cycling.  Mostly
-useful if more than two TODO states are possible (@pxref{TODO
+Select the following/preceding TODO state, similar to cycling.  Useful
+mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).
 @kindex C-c C-c
 @item C-c C-c
-Use the fast tag interface to quickly and directly select a specific
-TODO state.  For this you need to assign keys to TODO state, like this:
+Use the fast tag interface to directly select a specific TODO state.
+For this you need to assign keys to TODO states, like this:
 @example
 #+SEQ_TODO: TODO(t) STARTED(s) WAITING(w) | DONE(d)
 @end example
-@noindent See @ref{Per file keywords} and @ref{Setting tags} for more
+@noindent See @ref{Per-file keywords} and @ref{Setting tags} for more
 information.
 @kindex C-c C-v
 @kindex C-c / t
@@ -2682,11 +2691,11 @@ Nth keyword in the variable @code{org-todo-keywords}.  With two prefix
 args, find all TODO and DONE entries.
 @kindex C-c a t
 @item C-c a t
-Show the global TODO list.  This collects the TODO items from all
-agenda files (@pxref{Agenda views}) into a single buffer.  The buffer is in
-@code{agenda-mode}, so there are commands to examine and manipulate
-the TODO entries directly from that buffer (@pxref{Agenda commands}).
-@xref{Global TODO list}, for more information.
+Show the global TODO list.  Collects the TODO items from all agenda
+files (@pxref{Agenda views}) into a single buffer.  The new buffer will
+be in @code{agenda-mode}, which provides commands to examine and
+manipulate the TODO entries from the new buffer (@pxref{Agenda
+commands}).  @xref{Global TODO list}, for more information.
 @kindex S-M-@key{RET}
 @item S-M-@key{RET}
 Insert a new TODO entry below the current one.
@@ -2696,20 +2705,21 @@ Insert a new TODO entry below the current one.
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
-The default implementation of TODO entries is just two states: TODO and
-DONE.  You can use the TODO feature for more complicated things by
-configuring the variable @code{org-todo-keywords}.  With special setup,
-the TODO keyword system can work differently in different files.
+By default, marked TODO entries have one of only two states: TODO and
+DONE.  Org-mode allows you to classify TODO items in more complex ways
+with @emph{TODO keywords} (stored in @code{org-todo-keywords}).  With
+special setup, the TODO keyword system can work differently in different
+files.
 
 Note that @i{tags} are another way to classify headlines in general and
 TODO items in particular (@pxref{Tags}).
 
 @menu
 * Workflow states::             From TODO to DONE in steps
-* TODO types::                  I do this, Fred the rest
+* TODO types::                  I do this, Fred does the rest
 * Multiple sets in one file::   Mixing it all, and still finding your way
 * Fast access to TODO states::  Single letter selection of a state
-* Per file keywords::           Different files, different requirements
+* Per-file keywords::           Different files, different requirements
 * Faces for TODO keywords::     Highlighting states
 @end menu
 
@@ -2818,7 +2828,7 @@ These keys jump from one TODO subset to the next.  In the above example,
 would switch from @code{DONE} to @code{REPORT} in the example above.
 @end table
 
-@node Fast access to TODO states, Per file keywords, Multiple sets in one file, TODO extensions
+@node Fast access to TODO states, Per-file keywords, Multiple sets in one file, TODO extensions
 @subsection Fast access to TODO states
 
 If you would like to quickly change an entry to an arbitrary TODO state
@@ -2842,10 +2852,10 @@ the default.  Check also the variable
 @code{org-fast-tag-selection-include-todo}, it allows to change the TODO
 state through the tags interface (@pxref{Setting tags}).
 
-@node Per file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
+@node Per-file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
 @subsection Setting up keywords for individual files
 @cindex keyword options
-@cindex per file keywords
+@cindex per-file keywords
 
 It can be very useful to use different aspects of the TODO mechanism in
 different files.  For file-local settings, you need to add special lines
@@ -2885,7 +2895,7 @@ Org-mode is activated after visiting a file.  @kbd{C-c C-c} with the
 cursor in a line starting with @samp{#+} is simply restarting Org-mode
 for the current buffer.}.
 
-@node Faces for TODO keywords,  , Per file keywords, TODO extensions
+@node Faces for TODO keywords,  , Per-file keywords, TODO extensions
 @subsection Faces for TODO keywords
 @cindex faces, for TODO keywords
 
@@ -2985,20 +2995,24 @@ states with an additional @samp{@@}, like this:
 @section Priorities
 @cindex priorities
 
-If you use Org-mode extensively to organize your work, you may end up
-with a number of TODO entries so large that you'd like to prioritize
-them.  This can be done by placing a @emph{priority cookie} into the
-headline, like this
+If you use Org-mode extensively, you may end up enough TODO items that
+it starts to make sense to prioritize them.  Prioritizing can be done by
+placing a @emph{priority cookie} into the headline of a TODO item, like
+this
 
 @example
 *** TODO [#A] Write letter to Sam Fortune
 @end example
 
 @noindent
-With its standard setup, Org-mode supports priorities @samp{A},
-@samp{B}, and @samp{C}.  @samp{A} is the highest priority.  An entry
-without a cookie is treated as priority @samp{B}.  Priorities make a
-difference only in the agenda (@pxref{Weekly/Daily agenda}).
+By default, Org-mode supports three priorities: @samp{A}, @samp{B}, and
+@samp{C}.  @samp{A} is the highest priority.  An entry without a cookie
+is treated as priority @samp{B}.  Priorities make a difference only in
+the agenda (@pxref{Weekly/Daily agenda}); outside the agenda, they have
+no inherent meaning to Org-mode.
+
+Priorities can be attached to any outline tree entries; they do not need
+to be TODO items.
 
 @table @kbd
 @kindex @kbd{C-c ,}
@@ -3047,13 +3061,15 @@ of checkboxes to identify (a hierarchy of) a large number of subtasks
 @section Checkboxes
 @cindex checkboxes
 
-Every item in a plain list (@pxref{Plain lists}) can be made a checkbox
-by starting it with the string @samp{[ ]}.  This feature is similar to
-TODO items (@pxref{TODO items}), but more lightweight.  Checkboxes are
-not included into the global TODO list, so they are often great to split
-a task into a number of simple steps.  Or you can use them in a shopping
-list.  To toggle a checkbox, use @kbd{C-c C-c}, or try Piotr Zielinski's
-@file{org-mouse.el}.  Here is an example of a checkbox list.
+Every item in a plain list (@pxref{Plain lists}) can be made into a
+checkbox by starting it with the string @samp{[ ]}.  This feature is
+similar to TODO items (@pxref{TODO items}), but is more lightweight.
+Checkboxes are not included into the global TODO list, so they are often
+great to split a task into a number of simple steps.  Or you can use
+them in a shopping list.  To toggle a checkbox, use @kbd{C-c C-c}, or
+use the mouse (thanks to Piotr Zielinski's @file{org-mouse.el}).
+
+Here is an example of a checkbox list.
 
 @example
 * TODO Organize party [3/6]
@@ -3069,16 +3085,17 @@ list.  To toggle a checkbox, use @kbd{C-c C-c}, or try Piotr Zielinski's
 @cindex statistics, for checkboxes
 @cindex checkbox statistics
 The @samp{[3/6]} and @samp{[1/3]} in the first and second line are
-cookies indicating how many checkboxes are present in this entry, and
-how many of them have been checked off.  This can give you an idea on
-how many checkboxes remain, even without opening a folded entry.  The
-cookies can be placed into a headline or into (the first line of) a
-plain list item. Each cookie covers all checkboxes structurally below
-that headline/item.  You have to insert the cookie yourself by typing
-either @samp{[/]} or @samp{[%]}.  In the first case you get an @samp{n
-out of m} result, in the second case you get information about the
+cookies indicating how many checkboxes present in this entry have been
+checked off, and the total number of checkboxes are present.  This can
+give you an idea on how many checkboxes remain, even without opening a
+folded entry.  The cookies can be placed into a headline or into (the
+first line of) a plain list item. Each cookie covers all checkboxes
+structurally below the headline/item on which the cookie appear.  You
+have to insert the cookie yourself by typing either @samp{[/]} or
+@samp{[%]}.  With @samp{[/]} you get an @samp{n out of m} result, as in
+the examples above.  With @samp{[%]} you get information about the
 percentage of checkboxes checked (in the above example, this would be
-@samp{[50%]} and @samp{[33%], respectively}).
+@samp{[50%]} and @samp{[33%]}, respectively).
 
 @noindent The following commands work with checkboxes:
 
@@ -3117,7 +3134,6 @@ delete boxes or add/change them by hand, use this command to get things
 back into synch.  Or simply toggle any checkbox twice with @kbd{C-c C-c}.
 @end table
 
-
 @node Tags, Properties and columns, TODO items, Top
 @chapter Tags
 @cindex tags
@@ -3125,14 +3141,15 @@ back into synch.  Or simply toggle any checkbox twice with @kbd{C-c C-c}.
 @cindex matching, tags
 @cindex sparse tree, tag based
 
-If you wish to implement a system of labels and contexts for
-cross-correlating information, an excellent way is to assign @i{tags} to
-headlines.  Org-mode has extensive support for using tags.
+An excellent way to implement labels and contexts for cross-correlating
+information is to assign @i{tags} to headlines.  Org-mode has extensive
+support for tags.
 
-Every headline can contain a list of tags, at the end of the headline.
-Tags are normal words containing letters, numbers, @samp{_}, and
-@samp{@@}.  Tags must be preceded and followed by a single colon; like
-@samp{:WORK:}.  Several tags can be specified like @samp{:work:URGENT:}.
+Every headline can contain a list of tags; they occur at the end of the
+headline.  Tags are normal words containing letters, numbers, @samp{_},
+and @samp{@@}.  Tags must be preceded and followed by a single colon,
+e.g., @samp{:WORK:}.  Several tags can be specified, as in
+@samp{:work:URGENT:}.
 
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
@@ -3158,13 +3175,14 @@ well.  For example, in the list
 
 @noindent
 the final heading will have the tags @samp{:work:}, @samp{:boss:},
-@samp{:notes:}, and @samp{:action:}.  When executing tag searches and
+@samp{:notes:}, and @samp{:action:} even though the final heading is not
+explicitly marked with those tags.  When executing tag searches and
 Org-mode finds that a certain headline matches the search criterion, it
-will not check any sublevel headline, assuming that these likely also
-match, and that the list of matches can become very long.  This may
-not be what you want, however, and you can influence inheritance and
-searching using the variables @code{org-use-tag-inheritance} and
-@code{org-tags-match-list-sublevels}.
+will not check any sublevel headline, assuming that these also match and
+that the list of matches could become very long because of that.  If you
+do want the subevels be tested and listed as well, you may set the
+variable @code{org-tags-match-list-sublevels}.  To turn off tag
+inheritance entirely, use the variable @code{org-use-tag-inheritance}.
 
 @node Setting tags, Tag searches, Tag inheritance, Tags
 @section Setting tags
@@ -3202,7 +3220,7 @@ the default tags for a given file with lines like
 
 If you have globally defined your preferred set of tags using the
 variable @code{org-tag-alist}, but would like to use a dynamic tag list
-in a specific file: Just add an empty TAGS option line to that file:
+in a specific file, add an empty TAGS option line to that file:
 
 @example
 #+TAGS:
@@ -3301,7 +3319,7 @@ when you press an extra @kbd{C-c}.
 @cindex tag searches
 @cindex searching for tags
 
-Once a tags system has been set up, it can be used to collect related
+Once a system of tags has been set up, it can be used to collect related
 information into special lists.
 
 @table @kbd
@@ -3385,6 +3403,25 @@ tag @samp{boss} and are @emph{not} marked with the todo keyword DONE.
 
 Properties are a set of key-value pairs associated with an entry.  There
 are two main applications for properties in Org-mode.  First, properties
+are like tags, but with a value.  Second, you can use properties to
+implement (very basic) database capabilities in an Org-mode buffer.  For
+an example of the first application, imagine maintaining a file where
+you document bugs and plan releases of a piece of software.  Instead of
+using tags like @code{:release_1:}, @code{:release_2:}, one can use a
+property, say @code{Release}, that in different subtrees has different
+values, such as @code{1.0} or @code{2.0}.  For an example of the second
+application of properties, imagine keeping track of one's music CD's,
+where properties could be things such as the album artist, date of
+release, number of tracks, and so on.
+
+Properties can be conveiently edited and viewed in column view
+(@pxref{Column view}).
+
+
+
+
+
+
 are like tags, but with a value.  For example, in a file where you
 document bugs and plan releases of a piece of software, instead of using
 tags like @code{:release_1:}, @code{:release_2:}, it can be more
@@ -3826,10 +3863,10 @@ property API}.
 @cindex time stamps
 @cindex date stamps
 
-Items can be labeled with a date and/or a time to make them useful for
-project planning.  The specially formatted string carrying the date and
-time information is called a @emph{timestamp} in Org-mode.  This may be
-a little confusing because timestamp is often used as indicating when
+To assist project planning, TODO items can be labeled with a date and/or
+a time.  The specially formatted string carrying the date and time
+information is called a @emph{timestamp} in Org-mode.  This may be a
+little confusing because timestamp is often used as indicating when
 something was created or last changed.  However, in Org-mode this term
 is used in a much wider sense.
 
@@ -3852,10 +3889,10 @@ is used in a much wider sense.
 A time stamp is a specification of a date (possibly with time or a range
 of times) in a special format, either @samp{<2003-09-16 Tue>} or
 @samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16 Tue
-12:00-12:30>}@footnote{This is the standard ISO date/time format.  If
-you cannot get used to these, see @ref{Custom time format}}.  A time
-stamp can appear anywhere in the headline or body of an org-tree entry.
-Its presence causes entries to be shown on specific dates in the agenda
+12:00-12:30>}@footnote{This is the standard ISO date/time format.  To
+use an alternative format, see @ref{Custom time format}.}.  A time stamp
+can appear anywhere in the headline or body of an org-tree entry.  Its
+presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/Daily agenda}).  We distinguish:
 
 @table @var
@@ -4131,17 +4168,20 @@ format is shorter, things do work as expected.
 @node Deadlines and scheduling, Clocking work time, Creating timestamps, Dates and times
 @section Deadlines and Scheduling
 
-A time stamp may be preceded by special keywords to facilitate planning
-of work:
+A time stamp may be preceded by special keywords to facilitate planning:
 
 @table @var
 @item DEADLINE
 @cindex DEADLINE keyword
-The task (most likely a TODO item) is supposed to be finished on that
-date, and it will be listed then.  In addition, the compilation for
-@emph{today} will carry a warning about the approaching or missed
-deadline, starting @code{org-deadline-warning-days} before the due date,
-and continuing until the entry is marked DONE.  An example:
+
+Meaning: the task (most likely a TODO item, though not necessarily) is supposed
+to be finished on that date.
+
+On the deadline date, the task will be listed in the agenda.  In
+addition, the agenda for @emph{today} will carry a warning about the
+approaching or missed deadline, starting
+@code{org-deadline-warning-days} before the due date, and continuing
+until the entry is marked DONE.  An example:
 
 @example
 *** TODO write article about the Earth for the Guide
@@ -4155,9 +4195,12 @@ period of 5 days @code{DEADLINE: <2004-02-29 Sun -5d>}.
 
 @item SCHEDULED
 @cindex SCHEDULED keyword
-You are planning to start working on that task on the given date. The
-headline will be listed under the given date@footnote{It will still be
-listed on that date after it has been marked DONE.  If you don't like
+
+Meaning: you are planning to start working on that task on the given
+date.
+
+The headline will be listed under the given date@footnote{It will still
+be listed on that date after it has been marked DONE.  If you don't like
 this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
 addition, a reminder that the scheduled date has passed will be present
 in the compilation for @emph{today}, until the entry is marked DONE.
@@ -4170,12 +4213,12 @@ I.e., the task will automatically be forwarded until completed.
 
 @noindent
 @b{Important:} Scheduling an item in Org-mode should @i{not} be
-understood like @i{Scheduling a meeting}.  Setting a date for a meeting
-is just a simple appointment, you should mark this entry with a simple
-plain time stamp, to get this item shown on the date where it applies.
-This is a frequent mis-understanding from Org-users.  In Org-mode,
-@i{Scheduling} means setting a date when you want to start working on an
-action item.
+understood in the same way that we understand @i{scheduling a meeting}.
+Setting a date for a meeting is just a simple appointment, you should
+mark this entry with a simple plain time stamp, to get this item shown
+on the date where it applies.  This is a frequent mis-understanding from
+Org-users.  In Org-mode, @i{scheduling} means setting a date when you
+want to start working on an action item.
 @end table
 
 @menu
@@ -4218,13 +4261,16 @@ the scheduling date from the entry.
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
 @subsection Repeated Tasks
 
-Some tasks need to be repeated again and again, and Org-mode therefore
-allows to use a repeater in a DEADLINE or SCHEDULED time stamp, for
-example:
+Some tasks need to be repeated again and again.  Org-mode helps to
+organize such tasks using a so-called repeater in a DEADLINE or
+SCHEDULED time stamp.  In the following example
 @example
 ** TODO Pay the rent
    DEADLINE: <2005-10-01 Sat +1m>
 @end example
+the @code{+1m} is a repeater; the intended interpretation is that the
+task has a deadline on <2005-10-01> and repeats itself every (one) month
+starting from that time.
 
 Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
@@ -4453,6 +4499,9 @@ During expansion of the template, special @kbd{%}-escapes allow dynamic
 insertion of content:
 @example
 %^@{prompt@}  @r{prompt the user for a string and replace this sequence with it.}
+            @r{You may specify a default value and a completion table with}
+            @r{%^@{prompt|default|completion2|completion3...@}}
+            @r{The arrow keys access a prompt-specific history.}
 %t          @r{time stamp, date only}
 %T          @r{time stamp with date and time}
 %u, %U      @r{like the above, but inactive time stamps}
@@ -4469,6 +4518,8 @@ insertion of content:
 %:keyword   @r{specific information for certain link types, see below}
 %[pathname] @r{insert the contents of the file given by @code{pathname}}
 %(sexp)     @r{evaluate elisp @code{(sexp)} and replace with the result}
+%!          @r{immediately store note after completing the template}
+            @r{(skipping the @kbd{C-c C-c} that normally triggers storing)}
 @end example
 
 @noindent
@@ -4507,11 +4558,11 @@ template that will be filled with the previous context information.
 @node Storing notes, Refiling notes, Remember templates, Remember
 @section Storing notes
 
-When you are finished preparing a note with @i{remember}, you have to press
-@kbd{C-c C-c} to file the note away.  The handler will store the note in
-the file and under the headline specified in the template, or it will
-use the default file and headlines.  The window configuration will be
-restored, and you are back in the working context before the call to
+When you are finished preparing a note with @i{remember}, you have to
+press @kbd{C-c C-c} to file the note away.  The handler will store the
+note in the file and under the headline specified in the template, or it
+will use the default file and headlines.  The window configuration will
+be restored, sending you back to the working context before the call to
 @code{remember}.  To re-use the location found during the last call to
 @code{remember}, exit the remember buffer with @kbd{C-u C-u C-c C-c},
 i.e. specify a double prefix argument to @kbd{C-c C-c}.
@@ -4589,8 +4640,8 @@ argument (@kbd{C-u C-u}) to this command.
 
 Due to the way Org-mode works, TODO items, time-stamped items, and
 tagged headlines can be scattered throughout a file or even a number of
-files.  To get an overview over open action items, or over events that
-are important for a particular date, this information must be collected,
+files.  To get an overview of open action items, or of events that are
+important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
@@ -7475,18 +7526,17 @@ org-convert-to-oddeven-levels}.
 @section Using org-mode on a tty
 @cindex tty keybindings
 
-Org-mode uses a number of keys that are not accessible on a tty.  This
-applies to most special keys like cursor keys, @key{TAB} and
-@key{RET}, when these are combined with modifier keys like @key{Meta}
-and/or @key{Shift}.  Org-mode uses these bindings because it needs to
-provide keys for a large number of commands, and because these keys
-appeared particularly easy to remember.  In order to still be able to
-access the core functionality of Org-mode on a tty, alternative
-bindings are provided.  Here is a complete list of these bindings,
-which are obviously more cumbersome to use.  Note that sometimes a
-work-around can be better.  For example changing a time stamp is
-really only fun with @kbd{S-@key{cursor}} keys.  On a tty you would
-rather use @kbd{C-c .}  to re-insert the timestamp.
+Because Org-mode contains a large number of commands, by default much of
+Org-mode's core commands are bound to keys that are generally not
+accessible on a tty, such as the cursor keys (@key{left}, @key{right},
+@key{up}, @key{down}), @key{TAB} and @key{RET}, in particular when used
+together with modifiers like @key{Meta} and/or @key{Shift}.  To access
+these commands on a tty when special keys are unavailable, the following
+alternative bindings can be used.  The tty bindings below will likely be
+more cumbersome; you may find for some of the bindings below that a
+customized work-around suits you better.  For example, changing a time
+stamp is really only fun with @kbd{S-@key{cursor}} keys, whereas on a
+tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 
 @multitable @columnfractions 0.15 0.2 0.2
 @item @b{Default} @tab @b{Alternative 1} @tab @b{Alternative 2}
@@ -7753,7 +7803,7 @@ Translates Org-mode files into something readable by
 Remind. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
 @item @file{org-toc.el} by Bastien Guerry
 Produces a simple table of contents of an Org-mode file, for easy
-navigation. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
+navigation. @url{http://www.cognition.ens.fr/~guerry/u/org-registry.el}.
 @item @file{org-registry.el} by Bastien Guerry
 Find which Org-file link to a certain document.
 @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
@@ -8357,7 +8407,7 @@ Get all property keys in the current buffer.
 Insert a property drawer at point.
 @end defun
 
-@node History and Acknowledgments, Main Index, Extensions and Hacking, Top
+@node History and Acknowledgments, Index, Extensions and Hacking, Top
 @appendix History and Acknowledgments
 @cindex acknowledgments
 @cindex history
@@ -8532,12 +8582,12 @@ and contributed various ideas and code snippets.
 @end itemize
 
 
-@node Main Index, Key Index, History and Acknowledgments, Top
-@unnumbered Main Index
+@node Index, Key Index, History and Acknowledgments, Top
+@unnumbered The Main Index
 
 @printindex cp
 
-@node Key Index,  , Main Index, Top
+@node Key Index,  , Index, Top
 @unnumbered Key Index
 
 @printindex ky

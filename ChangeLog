@@ -1,3 +1,24 @@
+2007-12-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-first-list-item-p): New function.
+	(org-last-remember-storage-locations): New variable.
+	(org-get-refile-targets): Interpret the new maxlevel setting.
+	(org-refile-targets): New option `:maxlevel'.
+
+2007-12-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-copy-subtree): Include empty lines before but not
+	after subtree.
+	(org-back-over-empty-lines, org-skip-whitespace): New functions.
+	(org-move-item-down, org-move-item-up): Include empty lines before
+	but not after item.
+	(org-first-sibling-p): New function.
+
+2007-12-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-remember-apply-template): Defaults, completions and
+	history for template prompts.  Also, interpret new `%!' escape.
+
 2007-12-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-context-choices): New constant.

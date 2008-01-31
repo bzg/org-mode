@@ -202,12 +202,12 @@ release:
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
 	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
 
 trackrelease:
 	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
 	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
 
 upload:
 	(cd RELEASEDIR; lftp -f ../ftp_script)
