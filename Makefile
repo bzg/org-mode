@@ -28,7 +28,7 @@ infodir = $(prefix)/info
 
 # Using emacs in batch mode.
 # BATCH=$(EMACS) -batch -q
-BATCH=$(EMACS) -batch -q -eval "(add-to-list (quote load-path) \"$(lispdir)\")"
+BATCH=$(EMACS) -batch -q -eval "(add-to-list (quote load-path) \".\")"
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile

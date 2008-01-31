@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.10
-@set DATE September 2007
+@set VERSION 5.11
+@set DATE October 2007
 
 @dircategory Emacs
 @direntry
@@ -2316,20 +2316,21 @@ Insert a link.  This prompts for a link to be inserted into the buffer.
 You can just type a link, using text for an internal link, or one of the
 link type prefixes mentioned in the examples above.  All links stored
 during the current session are part of the history for this prompt, so
-you can access them with @key{up} and @key{down}.  Completion, on the
-other hand, will help you to insert valid link prefixes like
-@samp{http:} or @samp{ftp:}, including the prefixes defined through link
-abbreviations (@pxref{Link abbreviations}).  The link will be inserted
-into the buffer@footnote{After insertion of a stored link, the link will
-be removed from the list of stored links.  To keep it in the list later
-use, use a triple @kbd{C-u} prefix to @kbd{C-c C-l}, or configure the
-option @code{org-keep-stored-link-after-insertion}.}, along with a
-descriptive text.  If some text was selected when this command is
-called, the selected text becomes the default description.@* Note that
-you don't have to use this command to insert a link.  Links in Org-mode
-are plain text, and you can type or paste them straight into the buffer.
-By using this command, the links are automatically enclosed in double
-brackets, and you will be asked for the optional descriptive text.
+you can access them with @key{up} and @key{down} (or @kbd{M-p/n}).
+Completion, on the other hand, will help you to insert valid link
+prefixes like @samp{http:} or @samp{ftp:}, including the prefixes
+defined through link abbreviations (@pxref{Link abbreviations}).  The
+link will be inserted into the buffer@footnote{After insertion of a
+stored link, the link will be removed from the list of stored links.  To
+keep it in the list later use, use a triple @kbd{C-u} prefix to @kbd{C-c
+C-l}, or configure the option
+@code{org-keep-stored-link-after-insertion}.}, along with a descriptive
+text.  If some text was selected when this command is called, the
+selected text becomes the default description.@* Note that you don't
+have to use this command to insert a link.  Links in Org-mode are plain
+text, and you can type or paste them straight into the buffer.  By using
+this command, the links are automatically enclosed in double brackets,
+and you will be asked for the optional descriptive text.
 @c
 @c  If the link is a @samp{file:} link and
 @c the linked file is located in the same directory as the current file or
@@ -2855,6 +2856,7 @@ special faces for some of them.  This can be done using the variable
         ("CANCELED"  . (:foreground "blue" :weight bold))))
 @end lisp
 
+@page
 @node Progress logging, Priorities, TODO extensions, TODO items
 @section Progress Logging
 @cindex progress logging
@@ -2874,7 +2876,9 @@ a TODO item.
 
 If you want to keep track of @emph{when} a certain TODO item was
 finished, turn on logging with@footnote{The corresponding in-buffer
-setting is: @code{#+STARTUP: logdone}}
+setting is: @code{#+STARTUP: logdone}.  You may also set this for the
+scope of a subtree by adding a @code{LOGGING} property with one or more
+of the logging keywords in the value.}
 
 @lisp
 (setq org-log-done t)
@@ -2901,7 +2905,8 @@ setting is: @code{#+STARTUP: lognotedone}}
 
 When TODO keywords are used as workflow states (@pxref{Workflow
 states}), you might want to keep track of when a state change occurred
-and record a note about this change.  With the setting
+and record a note about this change.  With the setting@footnote{The
+corresponding in-buffer setting is: @code{#+STARTUP: lognotestate}.}
 
 @lisp
 (setq org-log-done '(state))
@@ -3421,6 +3426,9 @@ Switch property at point to the next/previous allowed value.
 Remove a property from the current entry.
 @item C-c C-c D
 Globally remove a property, from all entries in the current file.
+@item C-c C-c c
+Compute the property at point, using the operator and scope from the
+nearest column format definition.
 @end table
 
 @node Special properties, Property searches, Property syntax, Properties and columns
@@ -3987,7 +3995,8 @@ an item:
 @kindex C-c C-d
 @item C-c C-d
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.
+happen in the line directly following the headline.  When called with a
+prefix arg, an existing deadline will be removed from the entry.
 @c FIXME Any CLOSED timestamp will be removed.????????
 @c
 @kindex C-c C-w
@@ -4003,7 +4012,8 @@ all deadlines due tomorrow.
 @item C-c C-s
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  Any CLOSED
-timestamp will be removed.
+timestamp will be removed.  When called with a prefix argument, remove
+the scheduling date from the entry.
 @end table
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
@@ -4034,9 +4044,11 @@ actually switch the date like this:
    DEADLINE: <2005-11-01 Tue +1m>
 @end example
 
-You will also be prompted for a note that will be put under the DEADLINE
-line to keep a record that you actually acted on the previous instance
-of this deadline.
+You will also be prompted for a note@footnote{You can change this using
+the option @code{org-log-repeat}, or the @code{#+STARTUP} options
+@code{logrepeat} and @code{nologrepeat}.} that will be put under the
+DEADLINE line to keep a record that you actually acted on the previous
+instance of this deadline.
 
 As a consequence of shifting the base date, this entry will no longer be
 visible in the agenda when checking past dates, but all future instances
@@ -4058,7 +4070,10 @@ also computes the total time spent on each subtree of a project.
 @kindex C-c C-x C-i
 @item C-c C-x C-i
 Start the clock on the current item (clock-in).  This inserts the CLOCK
-keyword together with a timestamp.
+keyword together with a timestamp.  If this is not the first clocking of
+this item, the multiple CLOCK lines will be wrapped into a
+@code{:CLOCK:} drawer (see also the variable
+@code{org-clock-into-drawer}.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 Stop the clock (clock-out).  The inserts another timestamp at the same
@@ -4081,6 +4096,10 @@ if it is running in this same item.
 @item C-c C-x C-x
 Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
+@kindex C-c C-x C-j
+@item C-c C-x C-j
+Jump to the entry that contains the currently running clock, an another
+window.
 @kindex C-c C-x C-d
 @item C-c C-x C-d
 Display time summaries for each subtree in the current buffer.  This
@@ -4094,13 +4113,13 @@ when you change the buffer (see variable
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
 report as an org-mode table into the current file.
 @example
-#+BEGIN: clocktable :maxlevel 2 :emphasize nil
+#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
 
 #+END: clocktable
 @end example
 @noindent
-If such a block already exists, its content is replaced by the new
-table.  The @samp{BEGIN} line can specify options:
+If such a block already exists at point, its content is replaced by the
+new table.  The @samp{BEGIN} line can specify options:
 @example
 :maxlevel    @r{Maximum level depth to which times are listed in the table.}
 :emphasize   @r{When @code{t}, emphasize level one and level two items}
@@ -4552,6 +4571,18 @@ will be made in the agenda:
 %%(diary-anniversary  2 10 1869) Mahatma Gandhi would be %d years old
 @end example
 
+@subsubheading Appointment reminders
+@cindex @file{appt.el}
+@cindex appointment reminders
+
+Org can interact with Emacs appointments notification facility.
+
+To add all the appointments of your agenda files, use the command
+@code{org-agenda-to-appt}.  This commands also lets you filter through
+the list of your appointments and add only those belonging to a specific
+category or matching a regular expression. See the docstring for
+details.
+
 @node Global TODO list, Matching tags and properties, Weekly/Daily agenda, Built-in agenda views
 @subsection The global TODO list
 @cindex global TODO list
@@ -4843,10 +4874,10 @@ the other commands, the cursor needs to be in the desired line.
 @cindex motion commands in agenda
 @kindex n
 @item n
-Next line (same as @key{up}).
+Next line (same as @key{up} and @kbd{C-p}).
 @kindex p
 @item p
-Previous line (same as @key{down}).
+Previous line (same as @key{down} and @kbd{C-n}).
 @tsubheading{View/GoTo org file}
 @kindex mouse-3
 @kindex @key{SPC}
@@ -4925,7 +4956,9 @@ argument is interpreted to create a selective list for a specific TODO
 keyword.
 @c
 @kindex s
+@kindex C-x C-s
 @item s
+@itemx C-x C-s
 Save all Org-mode buffers in the current Emacs session.
 @c
 @kindex @key{right}
@@ -5049,6 +5082,10 @@ Stop the previously started clock.
 @kindex X
 @item X
 Cancel the currently running clock.
+
+@kindex J
+@item J
+Jump to the running clock in another window.
 
 @tsubheading{Calendar commands}
 @cindex calendar commands, from agenda
@@ -6104,6 +6141,11 @@ Create a single large iCalendar file from all files in
 @code{org-combined-agenda-icalendar-file}.
 @end table
 
+The export will honor SUMMARY, DESCRIPTION and LOCATION properties if
+the selected entries have them.  If not, the summary will be derived
+from the headline, and the description from the body (limited to
+@code{org-icalendar-include-body} characters).  
+
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
 
@@ -6843,8 +6885,9 @@ variable is @code{org-startup-align-all-tables}, with a default value
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
-Logging TODO state changes and clock intervals (variable
-@code{org-log-done}) can be configured using these options.
+Logging TODO state changes and clock intervals (variables
+@code{org-log-done} and @code{org-log-repeat}) can be configured using
+these options.
 @cindex @code{logdone}, STARTUP keyword
 @cindex @code{nologging}, STARTUP keyword
 @cindex @code{lognotedone}, STARTUP keyword
@@ -7948,7 +7991,6 @@ around a match in a hidden outline tree.
 @item
 @i{Bastien Guerry} wrote the La@TeX{} exporter and has been prolific
 with patches, ideas, and bug reports.
-to Org-mode.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
