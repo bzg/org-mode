@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.33).
+   This manual is for Org-mode (version 4.34).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.33).
+This manual is for Org-mode (version 4.34).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -2543,8 +2543,7 @@ collected into a single place.
      agenda files (*note Agenda views::) into a single buffer.  The
      buffer is in `agenda-mode', so there are commands to examine and
      manipulate the TODO entries directly from that buffer (*note
-     Agenda commands::).  *Note Global TODO list::, for more
-     information.  
+     Agenda commands::).  
 
 `C-c a T'
      Like the above, but allows selection of a specific TODO keyword.
@@ -2859,7 +2858,7 @@ will be exported as itemized lists.  If you want that transition to
 occur at a different level, specify it with a prefix argument.  For
 example,
 
-     C-1 C-c C-x a org-export-as-ascii
+     C-1 C-c C-x a
 
 creates only top level headlines and does the rest as items.
 
@@ -2927,10 +2926,10 @@ of the outline tree.  For example:
 
      # Local Variables:
      # org-export-html-style: "   <style type=\"text/css\">
-            p {font-weight: normal; color: gray; }
-            h1 {color: black; }
-        </style>"
-     # End: ***
+     #       p {font-weight: normal; color: gray; }
+     #       h1 {color: black; }
+     #   </style>"
+     # End:
 
    Remember to execute `M-x normal-mode' after changing this to make
 the new style visible to Emacs.  This command restarts org-mode for the
@@ -3491,8 +3490,8 @@ File: org,  Node: Summary of in-buffer settings,  Next: The very busy C-c C-c ke
 
 Org-mode uses special lines in the buffer to define settings on a
 per-file basis.  These lines start with a `#+' followed by a keyword, a
-colon, and then individual words defining a setting.  Several settings
-words con be in the same line, but you can also have multiple lines for
+colon, and then individual words defining a setting.  Several setting
+words can be in the same line, but you can also have multiple lines for
 the keyword.  While these settings are described throughout the manual,
 here is a summary.  After changing any of those lines in the buffer,
 press `C-c C-c' with the cursor still in the line to activate the
@@ -3529,7 +3528,7 @@ file is visited again in a new Emacs session.
           oddeven    allow all outline levels
 
 `#+SEQ_TODO:   #+TYP_TODO:'
-     These lines that the TODO keywords and their interpretation in the
+     These lines set the TODO keywords and their interpretation in the
      current file.  The corresponding variables are `org-todo-keywords'
      and `org-todo-interpretation'.
 
@@ -4055,7 +4054,7 @@ File: org,  Node: Acknowledgments,  Prev: Bugs,  Up: Miscellaneous
 11.10 Acknowledgments
 =====================
 
-Org-mode was written by Carsten Dominik, who still maintains it at the
+Org-mode was created by Carsten Dominik, who still maintains it at the
 Org-mode homepage `http://www.astro.uva.nl/~dominik/Tools/org/'.  The
 following people (in alphabetic order) have helped the development
 along with ideas, suggestions and patches.  Many thanks to all of you,
@@ -4066,7 +4065,7 @@ Org-mode would not be what it is without your input.
 
    * Alex Bochannek provided a patch for rounding time stamps.
 
-   * Charles Caves' suggestion sparked the implementation of templates
+   * Charles Cave's suggestion sparked the implementation of templates
      for Remember.
 
    * Pavel Chalmoviansky influenced the agenda treatment of items with
@@ -4093,8 +4092,8 @@ Org-mode would not be what it is without your input.
 
    * Todd Neal provided patches for links to Info files and elisp forms.
 
-   * Tim O'Callaghan suggested in-file links, search options for
-     general file links, and TAGS.
+   * Tim O'Callaghan suggested in-file links, search options for general
+     file links, and TAGS.
 
    * Oliver Oppitz suggested multi-state TODO items.
 
@@ -4110,8 +4109,8 @@ Org-mode would not be what it is without your input.
 
    * Kevin Rogers contributed code to access VM files on remote hosts.
 
-   * Frank Ruell solved the mystery of the `keymapp nil' bug, a conflict
-     with `allout.el'.
+   * Frank Ruell solved the mystery of the `keymapp nil' bug, a
+     conflict with `allout.el'.
 
    * Philip Rooke created the Org-mode reference card and provided lots
      of feedback.
@@ -4122,8 +4121,8 @@ Org-mode would not be what it is without your input.
    * Linking to VM/BBDB/GNUS was inspired by Tom Shannon's
      `organizer-mode.el'.
 
-   * David O'Toole wrote `org-publish.el' and came up with lots is ideas
-     for small changes.
+   * David O'Toole wrote `org-publish.el' and came up with lots is
+     ideas for small changes.
 
    * Ju"rgen Vollmer contributed code generating the table of contents
      in HTML output.
@@ -4147,8 +4146,8 @@ Org-mode would not be what it is without your input.
    * Roland Winkler requested additional keybindings to make Org-mode
      work on a tty.
 
-   * Piotr Zielinski wrote `org-mouse.el' and showed how to follow links
-     with mouse-1.
+   * Piotr Zielinski wrote `org-mouse.el' and showed how to follow
+     links with mouse-1.
 
 
 File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
@@ -4544,7 +4543,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
                                                               (line  10)
 * C-c a M:                               Tag searches.        (line  14)
 * C-c a m:                               Tag searches.        (line  10)
-* C-c a T:                               Global TODO list.    (line  15)
+* C-c a T:                               Global TODO list.    (line  14)
 * C-c a t <1>:                           Global TODO list.    (line   9)
 * C-c a t:                               TODO basics.         (line  33)
 * C-c C-a:                               Visibility cycling.  (line  31)
@@ -4668,7 +4667,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * p:                                     Agenda commands.     (line  20)
 * q:                                     Agenda commands.     (line 192)
 * r <1>:                                 Agenda commands.     (line  76)
-* r:                                     Global TODO list.    (line  21)
+* r:                                     Global TODO list.    (line  20)
 * S:                                     Agenda commands.     (line 173)
 * S-<down> <1>:                          Agenda commands.     (line 126)
 * S-<down> <2>:                          Creating timestamps. (line  58)
@@ -4771,47 +4770,47 @@ Node: Time-of-day specifications99904
 Node: Calendar/Diary integration101880
 Node: Sorting of agenda items103257
 Node: Global TODO list104089
-Node: Matching headline tags105504
-Node: Timeline106447
-Node: Agenda commands107320
-Node: Exporting112788
-Node: ASCII export113921
-Node: HTML export114811
-Node: XOXO export117627
-Node: iCalendar export118066
-Node: Text interpretation119889
-Node: Comment lines120366
-Node: Enhancing text120835
-Node: Export options122666
-Node: Publishing124268
-Ref: Publishing-Footnote-1125064
-Node: Configuration125260
-Node: Project alist125981
-Node: File sources and destinations127039
-Node: Selecting files127591
-Node: Publishing action128344
-Node: Publishing options129458
-Node: Publishing links131497
-Node: Project page index132300
-Node: Sample configuration133078
-Node: Simple example133570
-Node: Complex example134243
-Node: Triggering publication136277
-Node: Miscellaneous136933
-Node: Completion137692
-Node: Customization138688
-Node: Summary of in-buffer settings139295
-Node: The very busy C-c C-c key142537
-Node: Clean view144052
-Node: TTY keys146629
-Node: FAQ148230
-Node: Interaction156027
-Node: Extensions156487
-Node: Cooperation158057
-Node: Conflicts159751
-Node: Bugs161343
-Node: Acknowledgments163241
-Node: Index166680
-Node: Key Index188999
+Node: Matching headline tags105450
+Node: Timeline106393
+Node: Agenda commands107266
+Node: Exporting112734
+Node: ASCII export113867
+Node: HTML export114737
+Node: XOXO export117552
+Node: iCalendar export117991
+Node: Text interpretation119814
+Node: Comment lines120291
+Node: Enhancing text120760
+Node: Export options122591
+Node: Publishing124193
+Ref: Publishing-Footnote-1124989
+Node: Configuration125185
+Node: Project alist125906
+Node: File sources and destinations126964
+Node: Selecting files127516
+Node: Publishing action128269
+Node: Publishing options129383
+Node: Publishing links131422
+Node: Project page index132225
+Node: Sample configuration133003
+Node: Simple example133495
+Node: Complex example134168
+Node: Triggering publication136202
+Node: Miscellaneous136858
+Node: Completion137617
+Node: Customization138613
+Node: Summary of in-buffer settings139220
+Node: The very busy C-c C-c key142460
+Node: Clean view143975
+Node: TTY keys146552
+Node: FAQ148153
+Node: Interaction155950
+Node: Extensions156410
+Node: Cooperation157980
+Node: Conflicts159674
+Node: Bugs161266
+Node: Acknowledgments163164
+Node: Index166603
+Node: Key Index188922
 
 End Tag Table
