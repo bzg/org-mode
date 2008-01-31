@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.66
+;; Version: 4.67
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defvar org-version "4.66"
+(defvar org-version "4.67"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -5479,6 +5479,7 @@ this heading. "
 	  (tr-org-done-string org-done-string)
 	  (tr-org-todo-regexp org-todo-regexp)
 	  (tr-org-todo-line-regexp org-todo-line-regexp)
+	  (tr-org-odd-levels-only org-odd-levels-only)
 	  (this-buffer (current-buffer))
 	  (org-archive-location org-archive-location)
 	  (re "^#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
@@ -5526,7 +5527,10 @@ this heading. "
 	      (org-todo-interpretation tr-org-todo-interpretation)
 	      (org-done-string tr-org-done-string)
 	      (org-todo-regexp tr-org-todo-regexp)
-	      (org-todo-line-regexp tr-org-todo-line-regexp))
+	      (org-todo-line-regexp tr-org-todo-line-regexp)
+	      (org-odd-levels-only (if (local-variable-p org-odd-levels-only)
+				       org-odd-levels-only
+				     tr-org-odd-levels-only)))
 	  (goto-char (point-min))
 	  (if heading
 	      (progn
@@ -5549,7 +5553,7 @@ this heading. "
 	    ;; No specific heading, just go to end of file.
 	    (goto-char (point-max)) (insert "\n"))
 	  ;; Paste
-	  (org-paste-subtree (1+ level))
+	  (org-paste-subtree (org-get-legal-level level 1))
 	  ;; Mark the entry as done, i.e. set to last work in org-todo-keywords
 	  (if org-archive-mark-done
 	      (let (org-log-done)
@@ -10613,12 +10617,12 @@ See also the variable `org-reverse-note-order'."
 					      ; not handle this note
 	    (goto-char spos)
 	    (cond ((and (bobp) (not reversed))
-		   ;; Put it at the end, as level 2
+		   ;; Put it at the end, one level below level 1
 		   (save-restriction
 		     (widen)
 		     (goto-char (point-max))
 		     (if (not (bolp)) (newline))
-		     (org-paste-subtree 2 txt)))
+		     (org-paste-subtree (org-get-legal-level 1 1) txt)))
 		  ((and (bobp) reversed)
 		   ;; Put it at the start, as level 1
 		   (save-restriction
@@ -11797,19 +11801,20 @@ Returns the new tags string, or nil to not change the current settings."
       (setq rtn
 	    (catch 'exit
 	      (while t
-		(message "[a-z..]:Toggle [SPC]:clear [RET]:accept [TAB]:free [C-c]: multi%s"
-			 (if groups "  [!] no groups" ""))
+		(message "[a-z..]:Toggle [SPC]:clear [RET]:accept [TAB]:free%s%s"
+			 (if groups " [!] no groups" " [!]groups")
+			 (if expert " [C-c]:window" (if exit-after-next " [C-c]:single" " [C-c]:multi")))
 		(setq c (let ((inhibit-quit t)) (read-char-exclusive)))
 		(cond
 		 ((= c ?\r) (throw 'exit t))
 		 ((= c ?!)
-		  (setq groups nil)
+		  (setq groups (not groups))
 		  (goto-char (point-min))
 		  (while (re-search-forward "[{}]" nil t) (replace-match " ")))
 		 ((= c ?\C-c)
-		  (org-fast-tag-show-exit
-		   (setq exit-after-next (not exit-after-next)))
-		  (when expert
+		  (if (not expert)
+		      (org-fast-tag-show-exit
+		       (setq exit-after-next (not exit-after-next)))
 		    (setq expert nil)
 		    (delete-other-windows)
 		    (split-window-vertically)

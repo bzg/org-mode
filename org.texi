@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.66
+@set VERSION 4.67
 @set DATE February 2007
 
 @dircategory Emacs
@@ -3441,6 +3441,8 @@ Turn off groups of mutually exclusive tags.  Use this to (as an
 exception) assign several tags from such a group.
 @item C-c
 Toggle auto-exit after the next change (see below).
+If you are using expert mode, the first @kbd{C-c} will display the
+selection window.
 @end table
 
 @noindent
@@ -3462,7 +3464,7 @@ after the first change.  If you then occasionally need more keys, press
 (in effect: start selection with @kbd{C-c C-c C-c} instead of @kbd{C-c
 C-c}).  If you set the variable to the value @code{expert}, the special
 window is not even shown for single-key tag selection, it comes up only
-when you press that extra @kbd{C-c}.
+when you press an extra @kbd{C-c}.
 
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches

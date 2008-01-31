@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.66).
+   This manual is for Org-mode (version 4.67).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.66).
+This manual is for Org-mode (version 4.67).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -3113,7 +3113,9 @@ following keys:
      exception) assign several tags from such a group.
 
 `C-c'
-     Toggle auto-exit after the next change (see below).
+     Toggle auto-exit after the next change (see below).  If you are
+     using expert mode, the first `C-c' will display the selection
+     window.
 
 This method lets you assign tags to a headline with very few keys.  With
 the above setup, you could clear the current tags and set `@HOME',
@@ -3131,8 +3133,8 @@ first change.  If you then occasionally need more keys, press `C-c' to
 turn off auto-exit for the current tag selection process (in effect:
 start selection with `C-c C-c C-c' instead of `C-c C-c').  If you set
 the variable to the value `expert', the special window is not even
-shown for single-key tag selection, it comes up only when you press
-that extra `C-c'.
+shown for single-key tag selection, it comes up only when you press an
+extra `C-c'.
 
    ---------- Footnotes ----------
 
@@ -6843,94 +6845,94 @@ Ref: Clocking work time-Footnote-2122843
 Node: Tags122969
 Node: Tag inheritance123731
 Node: Setting tags124668
-Ref: Setting tags-Footnote-1129101
-Ref: Setting tags-Footnote-2129213
-Node: Tag searches129296
-Node: Agenda views132007
-Node: Agenda files133952
-Ref: Agenda files-Footnote-1134918
-Ref: Agenda files-Footnote-2135067
-Node: Agenda dispatcher135260
-Node: Built-in agenda views136951
-Node: Weekly/Daily agenda137529
-Node: Global TODO list139658
-Node: Matching headline tags141831
-Node: Timeline142902
-Node: Stuck projects143568
-Node: Presentation and sorting145267
-Node: Categories146058
-Node: Time-of-day specifications146722
-Node: Sorting of agenda items148693
-Node: Agenda commands149975
-Node: Custom agenda views156628
-Node: Storing searches157303
-Node: Block agenda159215
-Node: Setting Options160445
-Node: Batch processing163157
-Node: Embedded LaTeX164287
-Ref: Embedded LaTeX-Footnote-1165379
-Node: Math symbols165569
-Node: Subscripts and Superscripts166334
-Node: LaTeX fragments167178
-Ref: LaTeX fragments-Footnote-1169286
-Node: Processing LaTeX fragments169548
-Node: CDLaTeX mode170494
-Ref: CDLaTeX mode-Footnote-1172978
-Node: Exporting173126
-Node: ASCII export174440
-Node: HTML export175730
-Node: Export commands176349
-Node: Quoting HTML tags177073
-Node: Links177703
-Node: Images178400
-Ref: Images-Footnote-1179271
-Node: CSS support179332
-Ref: CSS support-Footnote-1180651
-Node: XOXO export180764
-Node: iCalendar export181203
-Node: Text interpretation182422
-Node: Comment lines182901
-Node: Enhancing text183372
-Node: Export options185190
-Node: Publishing186887
-Ref: Publishing-Footnote-1187683
-Node: Configuration187879
-Node: Project alist188597
-Node: Sources and destinations189663
-Node: Selecting files190393
-Node: Publishing action191141
-Node: Publishing options192374
-Node: Publishing links194526
-Node: Project page index196039
-Node: Sample configuration196817
-Node: Simple example197309
-Node: Complex example197982
-Node: Triggering publication200058
-Node: Miscellaneous200743
-Node: Completion201377
-Node: Customization202848
-Node: In-buffer settings203431
-Node: The very busy C-c C-c key207671
-Node: Clean view209315
-Node: TTY keys211892
-Node: Interaction213501
-Node: Cooperation213898
-Node: Conflicts216638
-Node: Bugs218230
-Node: Extensions and Hacking219726
-Node: Extensions220322
-Node: Tables in arbitrary syntax222269
-Node: Radio tables223346
-Node: A LaTeX example225849
-Ref: A LaTeX example-Footnote-1229495
-Ref: A LaTeX example-Footnote-2229643
-Node: Translator functions230078
-Ref: Translator functions-Footnote-1233187
-Node: Dynamic blocks233275
-Node: Special agenda views235247
-Ref: Special agenda views-Footnote-1237526
-Node: History and Acknowledgments237786
-Node: Index243575
-Node: Key Index274269
+Ref: Setting tags-Footnote-1129191
+Ref: Setting tags-Footnote-2129303
+Node: Tag searches129386
+Node: Agenda views132097
+Node: Agenda files134042
+Ref: Agenda files-Footnote-1135008
+Ref: Agenda files-Footnote-2135157
+Node: Agenda dispatcher135350
+Node: Built-in agenda views137041
+Node: Weekly/Daily agenda137619
+Node: Global TODO list139748
+Node: Matching headline tags141921
+Node: Timeline142992
+Node: Stuck projects143658
+Node: Presentation and sorting145357
+Node: Categories146148
+Node: Time-of-day specifications146812
+Node: Sorting of agenda items148783
+Node: Agenda commands150065
+Node: Custom agenda views156718
+Node: Storing searches157393
+Node: Block agenda159305
+Node: Setting Options160535
+Node: Batch processing163247
+Node: Embedded LaTeX164377
+Ref: Embedded LaTeX-Footnote-1165469
+Node: Math symbols165659
+Node: Subscripts and Superscripts166424
+Node: LaTeX fragments167268
+Ref: LaTeX fragments-Footnote-1169376
+Node: Processing LaTeX fragments169638
+Node: CDLaTeX mode170584
+Ref: CDLaTeX mode-Footnote-1173068
+Node: Exporting173216
+Node: ASCII export174530
+Node: HTML export175820
+Node: Export commands176439
+Node: Quoting HTML tags177163
+Node: Links177793
+Node: Images178490
+Ref: Images-Footnote-1179361
+Node: CSS support179422
+Ref: CSS support-Footnote-1180741
+Node: XOXO export180854
+Node: iCalendar export181293
+Node: Text interpretation182512
+Node: Comment lines182991
+Node: Enhancing text183462
+Node: Export options185280
+Node: Publishing186977
+Ref: Publishing-Footnote-1187773
+Node: Configuration187969
+Node: Project alist188687
+Node: Sources and destinations189753
+Node: Selecting files190483
+Node: Publishing action191231
+Node: Publishing options192464
+Node: Publishing links194616
+Node: Project page index196129
+Node: Sample configuration196907
+Node: Simple example197399
+Node: Complex example198072
+Node: Triggering publication200148
+Node: Miscellaneous200833
+Node: Completion201467
+Node: Customization202938
+Node: In-buffer settings203521
+Node: The very busy C-c C-c key207761
+Node: Clean view209405
+Node: TTY keys211982
+Node: Interaction213591
+Node: Cooperation213988
+Node: Conflicts216728
+Node: Bugs218320
+Node: Extensions and Hacking219816
+Node: Extensions220412
+Node: Tables in arbitrary syntax222359
+Node: Radio tables223436
+Node: A LaTeX example225939
+Ref: A LaTeX example-Footnote-1229585
+Ref: A LaTeX example-Footnote-2229733
+Node: Translator functions230168
+Ref: Translator functions-Footnote-1233277
+Node: Dynamic blocks233365
+Node: Special agenda views235337
+Ref: Special agenda views-Footnote-1237616
+Node: History and Acknowledgments237876
+Node: Index243665
+Node: Key Index274359
 
 End Tag Table
