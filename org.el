@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 5.06d
+;; Version: 5.06e
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.06d"
+(defconst org-version "5.06e"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -18321,7 +18321,8 @@ the documentation of `org-diary'."
 				       (point))))
 		    (setq donep (string-match org-looking-at-done-regexp head))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(setq timestr (concat (match-string 1 s) " "))
+			(setq timestr
+			      (concat (substring s (match-beginning 1)) " "))
 		      (setq timestr nil))
 		    (if (and donep
 			     (or org-agenda-skip-deadline-if-done
@@ -18396,7 +18397,8 @@ FRACTION is what fraction of the head-warning time has passed."
 				(progn (skip-chars-forward "^\r\n") (point))))
 		    (setq donep (string-match org-looking-at-done-regexp head))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(setq timestr (concat (match-string 1 s) " "))
+			(setq timestr
+			      (concat (substring s (match-beginning 1)) " "))
 		      (setq timestr nil))
 		    (if (and donep
 			     (or org-agenda-skip-scheduled-if-done
