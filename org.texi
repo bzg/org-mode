@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.68
+@set VERSION 4.69
 @set DATE March 2007
 
 @dircategory Emacs
@@ -170,6 +170,7 @@ Extended use of TODO keywords
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
 * Per file keywords::           Different files, different requirements
+* Multiple sets in one file::   Mixing it all, and still finding your way
 
 Timestamps
 
@@ -252,6 +253,7 @@ HTML export
 Text interpretation by the exporter
 
 * Comment lines::               Some lines will not be exported
+* Initial text::                Text before the first headline
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 
@@ -979,14 +981,17 @@ bullet, lines must be indented or they will be seen as top-level
 headlines.  Also, when you are hiding leading stars to get a clean
 outline view, plain list items starting with a star are visually
 indistinguishable from true headlines.  In short: even though @samp{*}
-is supported, it may be better not to use it for plain list items} as
+is supported, it may be better not to use it for plain list items.} as
 bullets.  Ordered list items start with @samp{1.} or @samp{1)}.  Items
 belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then
 the 2--digit numbers must be written left-aligned with the other numbers
 in the list.  Indentation also determines the end of a list item.  It
 ends before the next line that is indented like the bullet/number, or
-less.  For example:
+less.  Empty lines are part of the previous item, so you can have
+several paragraphs in one item.  If you would like an emtpy line to
+terminate all currently open plain lists, configure the variable
+@code{org-empty-line-terminates-plain-lists}.  Here is an for example:
 
 @example
 @group
@@ -1140,16 +1145,16 @@ table.  But it's easier just to start typing, like
 @kindex C-c C-c
 @item C-c C-c
 Re-align the table without moving the cursor.
-
+@c
 @kindex @key{TAB}
 @item @key{TAB}
 Re-align the table, move to the next field.  Creates a new row if
 necessary.
-
+@c
 @kindex S-@key{TAB}
 @item S-@key{TAB}
 Re-align, move to previous field.
-
+@c
 @kindex @key{RET}
 @item @key{RET}
 Re-align the table and move down to next row.  Creates a new row if
@@ -1162,34 +1167,34 @@ NEWLINE, so it can be used to split a table.
 @item M-@key{left}
 @itemx M-@key{right}
 Move the current column left/right.
-
+@c
 @kindex M-S-@key{left}
 @item M-S-@key{left}
 Kill the current column.
-
+@c
 @kindex M-S-@key{right}
 @item M-S-@key{right}
 Insert a new column to the left of the cursor position.
-
+@c
 @kindex M-@key{up}
 @kindex M-@key{down}
 @item M-@key{up}
 @itemx M-@key{down}
 Move the current row up/down.
-
+@c
 @kindex M-S-@key{up}
 @item M-S-@key{up}
 Kill the current row or horizontal line.
-
+@c
 @kindex M-S-@key{down}
 @item M-S-@key{down}
 Insert a new row above (with arg: below) the current row.
-
+@c
 @kindex C-c -
 @item C-c -
 Insert a horizontal line below current row. With prefix arg, the line
 is created above the current line.
-
+@c
 @kindex C-c ^
 @item C-c ^
 Sort the table lines in the region.  The position of point indicates the
@@ -1208,10 +1213,12 @@ argument, alphabetic sorting will be case-sensitive.
 Copy a rectangular region from a table to a special clipboard.  Point
 and mark determine edge fields of the rectangle.  The process ignores
 horizontal separator lines.
+@c
 @kindex C-c C-x C-w
 @item C-c C-x C-w
 Copy a rectangular region from a table to a special clipboard, and
 blank all fields in the rectangle.  So this is the ``cut'' operation.
+@c
 @kindex C-c C-x C-y
 @item C-c C-x C-y
 Paste a rectangular region into a table.
@@ -1219,6 +1226,7 @@ The upper right corner ends up in the current field.  All involved fields
 will be overwritten.  If the rectangle does not fit into the present table,
 the table is enlarged as needed.  The process ignores horizontal separator
 lines.
+@c
 @kindex C-c C-q
 @item C-c C-q
 Wrap several fields in a column like a paragraph.  If there is an active
@@ -1234,7 +1242,6 @@ above.
 @tsubheading{Calculations}
 @cindex formula, in tables
 @cindex calculations, in tables
-
 @cindex region, active
 @cindex active region
 @cindex transient-mark-mode
@@ -1243,7 +1250,7 @@ above.
 Sum the numbers in the current column, or in the rectangle defined by
 the active region.  The result is shown in the echo area and can
 be inserted with @kbd{C-y}.
-
+@c
 @kindex S-@key{RET}
 @item S-@key{RET}
 When current field is empty, copy from first non-empty field above.
@@ -1260,12 +1267,12 @@ Edit the current field in a separate window.  This is useful for fields
 that are not fully visible (@pxref{Narrow columns}).  When called with a
 @kbd{C-u} prefix, just make the full field visible, so that it can be
 edited in place.
-
+@c
 @kindex C-c @key{TAB}
 @item C-c @key{TAB}
 This is an alias for @kbd{C-u C-c `} to make the current field fully
 visible.
-
+@c
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB- or whitespace
 separated.  Useful, for example, to import an Excel table or data from a
@@ -1273,11 +1280,10 @@ database, because these programs generally can write TAB-separated text
 files.  This command works by inserting the file into the buffer and
 then converting the region to a table.  Any prefix argument is passed on
 to the converter, which uses it to determine the separator.
-
+@c
 @item M-x org-table-export
 Export the table as a TAB-separated file.  Useful for data exchange with,
 for example, Excel or database programs.
-
 @end table
 
 If you don't like the automatic table editor because it gets in your
@@ -1491,7 +1497,9 @@ values of constants in two different unit systems, @code{SI} and
 @code{constants-unit-system}.  You can use the @code{#+STARTUP} options
 @code{constSI} and @code{constcgs} to set this value for the current
 buffer.}.  Column names and parameters can be specified in special table
-lines.  These are described below, see @ref{Advanced features}.
+lines.  These are described below, see @ref{Advanced features}.  All
+names must start with a letter, and further consist of letters and
+numbers.
 
 @node Formula syntax for Calc, Formula syntax for Lisp, References, The spreadsheet
 @subsection Formula syntax for Calc
@@ -1777,14 +1785,14 @@ following commands:
 @item C-c *
 Recalculate the current row by first applying the stored column formulas
 from left to right, and all field formulas in the current row.
-
+@c
 @kindex C-u C-c *
 @item C-u C-c *
 @kindex C-u C-c C-c
 @itemx C-u C-c C-c
 Recompute the entire table, line by line.  Any lines before the first
 hline are left alone, assuming that these are part of the table header.
-
+@c
 @kindex C-u C-u C-c *
 @item C-u C-u C-c *
 Iterate the table by recomputing it until no further changes occur.
@@ -2106,7 +2114,7 @@ automatically created link is not working correctly or accurately
 enough, you can write custom functions to select the search string and
 to do the search for particular file types - see @ref{Custom searches}.
 The key binding @kbd{C-c l} is only a suggestion - see @ref{Installation}.
-
+@c
 @kindex C-c C-l
 @cindex link completion
 @cindex completion, of links
@@ -2128,12 +2136,12 @@ insert a link.  Links in Org-mode are plain text, and you can type or
 paste them straight into the buffer.  By using this command, the links
 are automatically enclosed in double brackets, and you will be asked for
 the optional descriptive text.
-
+@c
 @c  If the link is a @samp{file:} link and
 @c the linked file is located in the same directory as the current file or
 @c a subdirectory of it, the path of the file will be inserted relative to
 @c the current directory.
-
+@c
 @kindex C-u C-c C-l
 @cindex file name completion
 @cindex completion, of file names
@@ -2146,11 +2154,11 @@ directory or in a subdirectory of it, or if the path is written relative
 to the current directory using @samp{../}.  Otherwise an absolute path
 is used, if possible with @samp{~/} for your home directory.  You can
 force an absolute path with two @kbd{C-u} prefixes.
-
-@item C-c C-l @r{with cursor on existing link}
+@c
+@item C-c C-l @r{(with cursor on existing link)}
 When the cursor is on an existing link, @kbd{C-c C-l} allows you to edit the
 link and description parts of the link.
-
+@c
 @cindex following links
 @kindex C-c C-o
 @item C-c C-o
@@ -2166,26 +2174,26 @@ suitable application for local non-text files.  Classification of files
 is based on file extension only.  See option @code{org-file-apps}.  If
 you want to override the default application and visit the file with
 Emacs, use a @kbd{C-u} prefix.
-
+@c
 @kindex mouse-2
 @kindex mouse-1
 @item mouse-2
 @itemx mouse-1
 On links, @kbd{mouse-2} will open the link just as @kbd{C-c C-o}
 would.  Under Emacs 22, also @kbd{mouse-1} will follow a link.
-
+@c
 @kindex mouse-3
 @item mouse-3
 Like @kbd{mouse-2}, but force file links to be opened with Emacs, and
 internal links to be displayed in another window@footnote{See the
 variable @code{org-display-internal-link-with-indirect-buffer}}.
-
+@c
 @cindex mark ring
 @kindex C-c %
 @item C-c %
 Push the current position onto the mark ring, to be able to return
 easily. Commands following an internal link do this automatically.
-
+@c
 @cindex links, returning to
 @kindex C-c &
 @item C-c &
@@ -2193,7 +2201,7 @@ Jump back to a recorded position.  A position is recorded by the
 commands following internal links, and by @kbd{C-c %}.  Using this
 command several times in direct succession moves through a ring of
 previously recorded positions.
-
+@c
 @kindex C-c C-x C-n
 @kindex C-c C-x C-p
 @cindex links, finding next/previous
@@ -2571,7 +2579,6 @@ the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @c agenda, customize the variable @code{org-agenda-include-all-todo}.
 @end table
 
-
 @node TODO extensions, Priorities, TODO basics, TODO items
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
@@ -2589,6 +2596,7 @@ TODO items in particular (@pxref{Tags}).
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
 * Per file keywords::           Different files, different requirements
+* Multiple sets in one file::   Mixing it all, and still finding your way
 @end menu
 
 @node Workflow states, TODO types, TODO extensions, TODO extensions
@@ -2651,7 +2659,7 @@ Lucy's items from all agenda files into a single buffer, you
 would use the prefix arg as well when creating the global todo list:
 @kbd{C-3 C-c t}.
 
-@node Per file keywords,  , TODO types, TODO extensions
+@node Per file keywords, Multiple sets in one file, TODO types, TODO extensions
 @subsection Setting up TODO keywords for individual files
 @cindex keyword options
 @cindex per file keywords
@@ -2676,23 +2684,51 @@ anywhere in the file:
 
 @cindex DONE, final TODO keyword
 Remember that the last keyword must always mean that the item is DONE
-(although you may use a different word).  Also note that in each file,
-only one of the two aspects of TODO keywords can be used.  After
-changing one of these lines, use @kbd{C-c C-c} with the cursor still
-in the line to make the changes known to Org-mode@footnote{Org-mode
-parses these lines only when Org-mode is activated after visiting a
-file.  @kbd{C-c C-c} with the cursor in a line starting with @samp{#+}
-is simply restarting Org-mode for the current buffer.}.
+(although you may use a different word).  After changing one of these
+lines, use @kbd{C-c C-c} with the cursor still in the line to make the
+changes known to Org-mode@footnote{Org-mode parses these lines only when
+Org-mode is activated after visiting a file.  @kbd{C-c C-c} with the
+cursor in a line starting with @samp{#+} is simply restarting Org-mode
+for the current buffer.}.
 
-If you want to use very many keywords, for example when working with a
-large group of people, you may split the names over several lines:
+@node Multiple sets in one file,  , Per file keywords, TODO extensions
+@subsection Multiple TODO keyword sets in one file
+@cindex todo keyword sets
+
+Sometimes you may want to use different sets of TODO keywords in the
+same file.  For example, you may want to have the basic
+@code{TODO}/@code{DONE}, but also a workflow for bug fixing.  Your setup
+would then look like this:
 
 @example
-#+TYP_TODO: Fred Sara Lucy Mike
-#+TYP_TODO: Luis George Jules Jessica
-#+TYP_TODO: Kim Arnold Peter
-#+TYP_TODO: DONE
+#+SEQ_TODO: TODO DONE
+#+SEQ_TODO: REPORT BUG KNOWNCAUSE RESOLVED
 @end example
+
+The keywords should all be different, this helps Org-mode to keep track
+of which subsequence should be used for a given entry.  In this setup,
+@kbd{C-c C-t} only operates within a subsequence, so it switches from
+@code{DONE} to (nothing) to @code{TODO}, and from @code{RESOLVED} to
+(nothing) to @code{REPORT}.  Therefore you need a mechanism to initially
+select the correct sequence.  Besides the obvious ways like typing a
+keyword or using completion, you may also apply the following commands:
+
+@table @kbd
+@kindex S-@key{right}
+@kindex S-@key{left}
+@item S-@key{right}
+@itemx S-@key{left}
+@kbd{S-@key{<left>}} and @kbd{S-@key{<right>}} and walk through all
+keywords from all sets, so for example @kbd{S-@key{<right>}} would
+switch from @code{DONE} to @code{REPORT} in the example above. 
+@kindex C-S-@key{right}
+@kindex C-S-@key{left}
+@item C-S-@key{right}
+@itemx C-S-@key{left}
+These key jump from one TODO subset to the next.  So
+@kbd{C-S-@key{right}} would jump from @code{TODO} to @code{REPORT} and
+from @code{KNOWNCAUSE} to @code{TODO} in the above example.
+@end table
 
 @node Priorities, Breaking down tasks, TODO extensions, TODO items
 @section Priorities
@@ -2721,7 +2757,7 @@ priority character @samp{A}, @samp{B} or @samp{C}.  When you press
 @key{SPC} instead, the priority cookie is removed from the headline.
 The priorities can also be changed ``remotely'' from the timeline and
 agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
-
+@c
 @kindex S-@key{up}
 @kindex S-@key{down}
 @item S-@key{up}
@@ -2947,39 +2983,39 @@ format.
 Prompt for a date and insert a corresponding time stamp.  When the
 cursor is at a previously used time stamp, it is updated to NOW.  When
 this command is used twice in succession, a time range is inserted.
-
+@c
 @kindex C-u C-c .
 @item C-u C-c .
 Like @kbd{C-c .}, but use the alternative format which contains date
 and time.  The default time can be rounded to multiples of 5 minutes,
 see the option @code{org-time-stamp-rounding-minutes}.
-
+@c
 @kindex C-c !
 @item C-c !
 Like @kbd{C-c .}, but insert an inactive time stamp that will not cause
 an agenda entry.
-
+@c
 @kindex C-c <
 @item C-c <
 Insert a time stamp corresponding to the cursor date in the Calendar.
-
+@c
 @kindex C-c >
 @item C-c >
 Access the Emacs calendar for the current date.  If there is a
 timestamp in the current line, goto the corresponding date
 instead.
-
+@c
 @kindex C-c C-o
 @item C-c C-o
 Access the agenda for the date given by the time stamp or -range at
 point (@pxref{Weekly/Daily agenda}).
-
+@c
 @kindex C-c C-d
 @item C-c C-d
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  
 @c FIXME Any CLOSED timestamp will be removed.????????
-
+@c
 @kindex C-c C-w
 @cindex sparse tree, for deadlines
 @item C-c C-w
@@ -2988,20 +3024,20 @@ which will become due within @code{org-deadline-warning-days}.
 With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
 prefix, check that many days.  For example, @kbd{C-1 C-c C-w} shows
 all deadlines due tomorrow.
-
+@c
 @kindex C-c C-s
 @item C-c C-s
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  Any CLOSED
 timestamp will be removed.
-
+@c
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}
 @itemx S-@key{right}
 Change date at cursor by one day.  These key bindings conflict with
 CUA-mode (@pxref{Conflicts}).
-
+@c
 @kindex S-@key{up}
 @kindex S-@key{down}
 @item S-@key{up}
@@ -3011,8 +3047,7 @@ year, month, day, hour or minute.  Note that if the cursor is in a
 headline and not at a time stamp, these same keys modify the priority of
 an item.  (@pxref{Priorities}). The key bindings also conflict with
 CUA-mode (@pxref{Conflicts}).
-
-
+@c
 @kindex C-c C-y
 @cindex evaluate time range
 @item C-c C-y
@@ -3178,6 +3213,8 @@ of each exist at any given time.  So if you look back or ahead in the
 agenda, you will not find past and future instances, only the current
 one will show up.  Use a cyclic diary entry if you need all past and
 future instances to be visible in the agenda.
+
+@c FIXME: Document that a note is always being taken.
 
 @node Progress logging,  , Repeating items, Timestamps
 @section Progress Logging
@@ -4079,11 +4116,11 @@ Previous line (same as @key{down}).
 @item mouse-3
 @itemx @key{SPC}
 Display the original location of the item in another window.
-
+@c
 @kindex L
 @item L
 Display original location and recenter that window.
-
+@c
 @kindex mouse-2
 @kindex mouse-1
 @kindex @key{TAB}
@@ -4092,11 +4129,11 @@ Display original location and recenter that window.
 @itemx @key{TAB}
 Go to the original location of the item in another window.  Under Emacs
 22, @kbd{mouse-1} will also works for this.
-
+@c
 @kindex @key{RET}
 @itemx @key{RET}
 Go to the original location of the item and delete other windows.
-
+@c
 @kindex f
 @item f
 Toggle Follow mode.  In Follow mode, as you move the cursor through
@@ -4104,14 +4141,14 @@ the agenda buffer, the other window always shows the corresponding
 location in the org file.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-follow-mode}.
-
+@c
 @kindex b
 @item b
 Display the entire subtree of the current item in an indirect buffer.
 With numerical prefix ARG, go up to this level and then take that tree.
 If ARG is negative, go up that many levels.  With @kbd{C-u} prefix, do
 not remove the previously used indirect buffer.
-
+@c
 @kindex l
 @item l
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
@@ -4123,24 +4160,24 @@ as are entries that have been clocked on that day.
 @kindex o
 @item o
 Delete other windows.
-
+@c
 @kindex w
 @item w
 Switch to weekly view (7 days displayed together).
-
+@c
 @kindex d
 @item d
 Switch to daily view (just one day displayed).
-
+@c
 @kindex D
 @item D
 Toggle the inclusion of diary entries.  See @ref{Weekly/Daily agenda}.
-
+@c
 @kindex g
 @item g
 Toggle the time grid on and off.  See also the variables
 @code{org-agenda-use-time-grid} and @code{org-agenda-time-grid}.
-
+@c
 @kindex r
 @item r
 Recreate the agenda buffer, for example to reflect the changes
@@ -4148,21 +4185,21 @@ after modification of the time stamps of items with S-@key{left} and
 S-@key{right}.  When the buffer is the global todo list, a prefix
 argument is interpreted to create a selective list for a specific TODO
 keyword.
-
+@c
 @kindex s
 @item s
 Save all Org-mode buffers in the current Emacs session.
-
+@c
 @kindex @key{right}
 @item @key{right}
 Display the following @code{org-agenda-ndays} days.  For example, if
 the display covers a week, switch to the following week.  With prefix
 arg, go forward that many times @code{org-agenda-ndays} days.
-
+@c
 @kindex @key{left}
 @item @key{left}
 Display the previous dates.
-
+@c
 @kindex .
 @item .
 Goto today.
@@ -4172,53 +4209,53 @@ Goto today.
 
 @item 0-9
 Digit argument.
-
+@c
 @cindex undoing remote-editing events
 @cindex remote editing, undo
 @kindex C-_
 @item C-_
 Undo a change due to a remote editing command.  The change is undone
 both in the agenda buffer and in the remote buffer.
-
+@c
 @kindex t
 @item t
 Change the TODO state of the item, both in the agenda and in the
 original org file.
-
+@c
 @kindex C-k
 @item C-k
 Delete the current agenda item along with the entire subtree belonging
 to it in the original Org-mode file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
 variable @code{org-agenda-confirm-kill}.
-
+@c
 @kindex $
 @item $
 Archive the subtree corresponding to the current headline.
-
+@c
 @kindex T
 @item T
 Show all tags associated with the current item.  Because of
 inheritance, this may be more than the tags listed in the line itself.
-
+@c
 @kindex :
 @item :
 Set tags for the current headline.
-
+@c
 @kindex a
 @item a
 Toggle the ARCHIVE tag for the current headline.
-
+@c
 @kindex ,
 @item ,
 Set the priority for the current item.  Org-mode prompts for the
 priority character. If you reply with @key{SPC}, the priority cookie
 is removed from the entry.
-
+@c
 @kindex P
 @item P
 Display weighted priority of current item.
-
+@c
 @kindex +
 @kindex S-@key{up}
 @item +
@@ -4226,21 +4263,21 @@ Display weighted priority of current item.
 Increase the priority of the current item.  The priority is changed in
 the original buffer, but the agenda is not resorted.  Use the @kbd{r}
 key for this.
-
+@c
 @kindex -
 @kindex S-@key{down}
 @item -
 @itemx S-@key{down}
 Decrease the priority of the current item.
-
+@c
 @kindex C-c C-s
 @item C-c C-s
 Schedule this item
-
+@c
 @kindex C-c C-d
 @item C-c C-d
 Set a deadline for this item.
-
+@c
 @kindex S-@key{right}
 @item S-@key{right}
 Change the time stamp associated with the current line by one day into
@@ -4249,25 +4286,27 @@ example, @kbd{3 6 5 S-@key{right}} will change it by a year.  The
 stamp is changed in the original org file, but the change is not
 directly reflected in the agenda buffer.  Use the
 @kbd{r} key to update the buffer.
-
+@c
 @kindex S-@key{left}
 @item S-@key{left}
 Change the time stamp associated with the current line by one day
 into the past.
-
+@c
 @kindex >
 @item >
 Change the time stamp associated with the current line to today.
 The key @kbd{>} has been chosen, because it is the same as @kbd{S-.}
 on my keyboard.
-
+@c
 @kindex I
 @item I
 Start the clock on the current item.  If a clock is running already, it
 is stopped first.
+@c
 @kindex O
 @item O
 Stop the previously started clock.
+@c
 @kindex X
 @item X
 Cancel the currently running clock.
@@ -4277,11 +4316,11 @@ Cancel the currently running clock.
 @kindex c
 @item c
 Open the Emacs calendar and move to the date at the agenda cursor.
-
+@c
 @item c
 When in the calendar, compute and show the Org-mode agenda for the
 date at the cursor.
-
+@c
 @cindex diary entries, creating from agenda
 @kindex i
 @item i
@@ -4289,25 +4328,25 @@ Insert a new entry into the diary.  Prompts for the type of entry
 (day, weekly, monthly, yearly, anniversary, cyclic) and creates a new
 entry in the diary, just as @kbd{i d} etc. would do in the calendar.
 The date is taken from the cursor position.
-
+@c
 @kindex M
 @item M
 Show the phases of the moon for the three months around current date.
-
+@c
 @kindex S
 @item S
 Show sunrise and sunset times.  The geographical location must be set
 with calendar variables, see documentation of the Emacs calendar.
-
+@c
 @kindex C
 @item C
 Convert the date at cursor into many other cultural and historic
 calendars.
-
+@c
 @kindex H
 @item H
 Show holidays for three month around the cursor date.
-
+@c
 @c FIXME:  This should be a different key.
 @kindex C-c C-x C-c
 @item C-c C-x C-c
@@ -4317,14 +4356,13 @@ Export a single iCalendar file containing entries from all agenda files.
 @kindex q
 @item q
 Quit agenda, remove the agenda buffer.
-
+@c
 @kindex x
 @cindex agenda files, removing buffers
 @item x
 Exit agenda, remove the agenda buffer and all buffers loaded by Emacs
 for the compilation of the agenda.  Buffers created by the user to
 visit org files will not be removed.
-
 @end table
 
 
@@ -5023,19 +5061,19 @@ in order to produce better output.
 
 @menu
 * Comment lines::               Some lines will not be exported
+* Initial text::                Text before the first headline
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 @end menu
 
-@node Comment lines, Enhancing text, Text interpretation, Text interpretation
+@node Comment lines, Initial text, Text interpretation, Text interpretation
 @subsection Comment lines
 @cindex comment lines
 @cindex exporting, not
 
 Lines starting with @samp{#} in column zero are treated as comments
 and will never be exported.  Also entire subtrees starting with the
-word @samp{COMMENT} will never be exported.  Finally, any text before
-the first headline will not be exported either.
+word @samp{COMMENT} will never be exported.
 
 @table @kbd
 @kindex C-c ;
@@ -5043,7 +5081,44 @@ the first headline will not be exported either.
 Toggle the COMMENT keyword at the beginning of an entry.
 @end table
 
-@node Enhancing text, Export options, Comment lines, Text interpretation
+@node Initial text, Enhancing text, Comment lines, Text interpretation
+@subsection Text before the first headline
+
+Org-mode normally ignores any text before the first headline when
+exporting, because this region is often used for internal links to speed
+up navigation etc.  However, there are occasions when you might want to
+have some text before the first headline, like a small intorduction,
+special HTML code with a navigation bar, etc.  You can ask to have this
+part of the file exported as well by setting the variable
+@code{org-export-skip-text-before-1st-heading} to @code{nil}.  On a
+per-file basis, you can get the same effect with
+
+@example
+#+OPTIONS: skip:nil
+@end example
+
+The text before the first headline will be fully processed
+(@pxref{Enhancing text}).  If you need to include literal HTML, use the
+special constructs described in @ref{Quoting HTML tags}.  The table of
+contents is normally inserted directly before the first headline of the
+file.  If you would like to get it to a different location, insert
+the string @code{[TABLE-OF-CONTENTS]} on a line by itself at the desired
+location.
+
+Finally, if you want to use the space before the first headline for
+internal purposes, but @emph{still} want to place something before the
+first headline when exporting the file, you can use the @code{#+TEXT}
+construct:
+
+@example
+#+OPTIONS: skip:t
+#+TEXT: This text will go before the *first* headline.
+#+TEXT: We place the table of contents here:
+#+TEXT: [TABLE-OF-CONTENTS]
+#+TEXT: This goes between the table of contents and the first headline
+@end example
+
+@node Enhancing text, Export options, Initial text, Text interpretation
 @subsection Enhancing text for export
 @cindex enhancing text
 @cindex richer text
@@ -5105,7 +5180,7 @@ this position.
 @end itemize
 
 If these conversions conflict with your habits of typing ASCII text,
-they can all be turned off with corresponding variables (see the
+they can all be turned off with corresponding variables.  See the
 customization group @code{org-export-general}, and the following section
 which explains how to set export options with special lines in a
 buffer.
@@ -5136,7 +5211,7 @@ Insert template with export options, see example below.
 #+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
 #+TEXT:      Some descriptive text to be inserted at the beginning.
 #+TEXT:      Several lines may be given.
-#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t *:nil TeX:t LaTeX:t
+#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t *:nil TeX:t LaTeX:t skip:t
 @end example
 
 @noindent
@@ -5161,10 +5236,13 @@ toc:    @r{turn on/off table of contents, or set level limit (integer)}
 @@:      @r{turn on/off quoted HTML tags}
 ::      @r{turn on/off fixed-width sections}
 |:      @r{turn on/off tables}
-^:      @r{turn on/off @TeX{}-like syntax for sub- and superscripts.}
+^:      @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
+        @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
+        @r{the simple @code{a_b} will be left as it is.}
 *:      @r{turn on/off emphasized text (bold, italic, underlined)}
 TeX:    @r{turn on/off simple @TeX{} macros in plain text}
 LaTeX:  @r{turn on/off La@TeX{} fragments}
+skip:   @r{turn on/off skipping the text before the first heading}
 @end example
 
 @node Publishing, Miscellaneous, Exporting, Top
@@ -5943,7 +6021,7 @@ to execute Org-mode-related commands, leave the table.
 @item C-c C-c
 Recognize @file{table.el} table.  Works when the cursor is in a
 table.el table.
-
+@c
 @kindex C-c ~
 @item C-c ~
 Insert a table.el table.  If there is already a table at point, this
@@ -6546,12 +6624,13 @@ translated David O'Toole's tutorial into French.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
-@i{Shidai Liu} (``Leo'') provided extensive feedback and some patches.
-@item
-@i{Leon Liu} asked for embedded LaTeX and tested it.
+@i{Shidai Liu} ("Leo") asked for embedded LaTeX and tested it.  He also
+provided frequent feedback and some patches.
 @item
 @i{Stefan Monnier} provided a patch to keep the Emacs-Lisp compiler
 happy.
+@item
+@i{Rick Moynihan} proposed to allow multiple TODO sequences in a file.
 @item
 @i{Todd Neal} provided patches for links to Info files and elisp forms.
 @item
