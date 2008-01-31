@@ -1,10 +1,10 @@
 ;;; org-mouse.el --- Better mouse support for org-mode
 
-;; Copyright (c) 2006 Piotr Zielinski, 2007 Free Software Foundation
+;; Copyright (c) 2006 Piotr Zielinski, 2007, 2008 Free Software Foundation
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
-;; Version: 5.11
+;; Version: 5.18
 ;;
 ;; This file is part of GNU Emacs.
 ;;

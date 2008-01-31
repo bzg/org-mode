@@ -1,3 +1,27 @@
+2008-01-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-current-project): Fix bug with
+	forcing publication.
+
+2008-01-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-table-sort-lines): Make sure sorting works on link
+	descritions only, and ignores the link.
+
+2008-01-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-sort-entries-or-items): Make sure the end of the
+	subtree is included.
+	(org-refile-use-outline-path): New allowed values `file' and
+	`full-file-path'.
+	(org-get-refile-targets): Respect new values for
+	`org-refile-use-outline-path'.
+	(org-agenda-get-restriction-and-command): DEL goes back to initial
+	list.
+	(org-export-as-xoxo): Restore point when done.
+	(org-open-file): Allow multiple %s in command.
+	(org-clock-in-switch-to-state): New option.
+
 2007-12-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-first-list-item-p): New function.

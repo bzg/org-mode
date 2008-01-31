@@ -1,10 +1,10 @@
 ;;; org-publish.el --- publish related org-mode files as a website
 
-;; Copyright (C) 2006, 2007  Free Software Foundation, Inc.
+;; Copyright (C) 2006, 2007, 2008  Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
-;; Version: 1.80a
+;; Version: 1.80b
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -572,11 +572,10 @@ default is 'index.org'."
 With prefix argument, force publishing all files in project."
   (interactive "P")
   (save-window-excursion
-    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
-	   (org-publish-use-timestamps-flag (if force nil t)))
+    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name))))
       (if (not project-name)
 	  (error (format "File %s is not part of any known project." (buffer-file-name))))
-      (org-publish project-name))))
+      (org-publish project-name (if force nil t)))))
 
 
 ;;;###autoload

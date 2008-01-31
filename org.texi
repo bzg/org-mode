@@ -3,8 +3,8 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.17
-@set DATE December 2007
+@set VERSION 5.18
+@set DATE January 2008
 
 @dircategory Emacs
 @direntry
@@ -35,7 +35,7 @@
 @copying
 This manual is for Org-mode (version @value{VERSION}).
 
-Copyright @copyright{} 2004, 2005, 2006, 2007 Free Software Foundation
+Copyright @copyright{} 2004, 2005, 2006, 2007, 2008 Free Software Foundation
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -387,7 +387,7 @@ agenda that utilizes and smoothly integrates much of the Emacs calendar
 and diary.  Plain text URL-like links connect to websites, emails,
 Usenet messages, BBDB entries, and any files related to the projects.
 For printing and sharing of notes, an Org-mode file can be exported as a
-structured ASCII file, as HTML, or (todo and agenda items only) as an
+structured ASCII file, as HTML, or (TODO and agenda items only) as an
 iCalendar file.  It can also serve as a publishing tool for a set of
 linked webpages.
 
@@ -1452,11 +1452,6 @@ that are not fully visible (@pxref{Narrow columns}).  When called with a
 @kbd{C-u} prefix, just make the full field visible, so that it can be
 edited in place.
 @c
-@kindex C-c @key{TAB}
-@item C-c @key{TAB}
-This is an alias for @kbd{C-u C-c `} to make the current field fully
-visible.
-@c
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB- or whitespace
 separated.  Useful, for example, to import a spreadsheet table or data
@@ -1723,8 +1718,8 @@ line like
 
 @noindent
 Also properties (@pxref{Properties and columns}) can be used as
-constants in table formulas: For a property @samp{:XYZ:} use the name
-@samp{$PROP_XYZ}, and the property will be searched in the current
+constants in table formulas: For a property @samp{:Xyz:} use the name
+@samp{$PROP_Xyz}, and the property will be searched in the current
 outline entry and in the hierarchy above it.  If you have the
 @file{constants.el} package, it will also be used to resolve constants,
 including natural constants like @samp{$h} for Planck's constant, and
@@ -2686,7 +2681,7 @@ View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
 the entire buffer, but shows all TODO items and the headings hierarchy
 above them.  With prefix arg, search for a specific TODO.  You will be
 prompted for the keyword, and you can also give a list of keywords like
-@code{kwd1|kwd2|...}.  With numerical prefix N, show the tree for the
+@code{KWD1|KWD2|...}.  With numerical prefix N, show the tree for the
 Nth keyword in the variable @code{org-todo-keywords}.  With two prefix
 args, find all TODO and DONE entries.
 @kindex C-c a t
@@ -2934,7 +2929,7 @@ a TODO item.
 If you want to keep track of @emph{when} a certain TODO item was
 finished, turn on logging with@footnote{The corresponding in-buffer
 setting is: @code{#+STARTUP: logdone}.  You may also set this for the
-scope of a subtree by adding a @code{LOGGING} property with one or more
+scope of a subtree by adding a @code{:LOGGING:} property with one or more
 of the logging keywords in the value.}
 
 @lisp
@@ -3356,7 +3351,7 @@ Select headlines tagged @samp{:work:}, but discard those also tagged
 Selects lines tagged @samp{:work:} or @samp{:laptop:}.
 @item work|laptop&night
 Like before, but require the @samp{:laptop:} lines to be tagged also
-@samp{night}.
+@samp{:night:}.
 @end table
 
 @cindex TODO keyword matching, with tags search
@@ -3387,7 +3382,7 @@ Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 Any element of the tag/todo match can be a regular expression - in this
 case it must be enclosed in curly braces.  For example,
 @samp{work+@{^boss.*@}} matches headlines that contain the tag
-@samp{work} and any tag @i{starting} with @samp{boss}.
+@samp{:work:} and any tag @i{starting} with @samp{boss}.
 
 @cindex level, require for tags/property match
 @cindex category, require for tags/property match
@@ -3408,7 +3403,7 @@ implement (very basic) database capabilities in an Org-mode buffer.  For
 an example of the first application, imagine maintaining a file where
 you document bugs and plan releases of a piece of software.  Instead of
 using tags like @code{:release_1:}, @code{:release_2:}, one can use a
-property, say @code{Release}, that in different subtrees has different
+property, say @code{:Release:}, that in different subtrees has different
 values, such as @code{1.0} or @code{2.0}.  For an example of the second
 application of properties, imagine keeping track of one's music CD's,
 where properties could be things such as the album artist, date of
@@ -3417,18 +3412,13 @@ release, number of tracks, and so on.
 Properties can be conveiently edited and viewed in column view
 (@pxref{Column view}).
 
-
-
-
-
-
-are like tags, but with a value.  For example, in a file where you
-document bugs and plan releases of a piece of software, instead of using
-tags like @code{:release_1:}, @code{:release_2:}, it can be more
-efficient to use a property @code{Release} with a value @code{1.0} or
-@code{2.0}.  Second, you can use properties to implement (very basic)
-database capabilities in an Org-mode buffer, for example to create a
-list of Music CD's you own.  You can edit and view properties
+Properties are like tags, but with a value.  For example, in a file
+where you document bugs and plan releases of a piece of software,
+instead of using tags like @code{:release_1:}, @code{:release_2:}, it
+can be more efficient to use a property @code{:Release:} with a value
+@code{1.0} or @code{2.0}.  Second, you can use properties to implement
+(very basic) database capabilities in an Org-mode buffer, for example to
+create a list of Music CD's you own.  You can edit and view properties
 conveniently in column view (@pxref{Column view}).
 
 @menu
@@ -3463,8 +3453,8 @@ first, and the value after it.  Here is an example:
     :END:       
 @end example
 
-You may define the allowed values for a particular property @samp{Xyz}
-by setting a property @samp{Xyz_ALL}.  This special property is
+You may define the allowed values for a particular property @samp{:Xyz:}
+by setting a property @samp{:Xyz_ALL:}.  This special property is
 @emph{inherited}, so if you set it in a level 1 entry, it will apply to
 the entire tree.  When allowed values are defined, setting the
 corresponding property becomes easier and is less prone to typing
@@ -3602,16 +3592,16 @@ least for the special applications for which they are used:
 
 @table @code
 @item COLUMNS
-The column property defines the format of column view (@pxref{Column
-view}).  It is inherited in the sense that the level where a
-@code{COLUMNS} property is defined is used as the starting point for a
-column view table, independently of the location in the subtree from
-where columns view is turned on.
+The @code{:COLUMNS:} property defines the format of column view
+(@pxref{Column view}).  It is inherited in the sense that the level
+where a @code{:COLUMNS:} property is defined is used as the starting
+point for a column view table, independently of the location in the
+subtree from where columns view is turned on.
 @item CATEGORY
-For agenda view, a category set through a @code{CATEGORY} property
+For agenda view, a category set through a @code{:CATEGORY:} property
 applies to the entire subtree.
 @item ARCHIVE
-For archiving, the @code{ARCHIVE} property may define the archive
+For archiving, the @code{:ARCHIVE:} property may define the archive
 location for the entire subtree (@pxref{Moving subtrees}).
 @end table
 
@@ -3660,8 +3650,9 @@ To define a column format for an entire file, use a line like
 #+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
 @end example
 
-To specify a format that only applies to a specific tree, add a COLUMNS
-property to the top node of that tree, for example
+To specify a format that only applies to a specific tree, add a
+@code{:COLUMNS:} property to the top node of that tree, for example:
+
 @example
 ** Top node for columns view
    :PROPERTIES:
@@ -3669,7 +3660,7 @@ property to the top node of that tree, for example
    :END:
 @end example
 
-If a @code{COLUMNS} property is present in an entry, it defines columns
+If a @code{:COLUMNS:} property is present in an entry, it defines columns
 for the entry itself, and for the entire subtree below it.  Since the
 column definition is part of the hierarchical structure of the document,
 you can define columns on level 1 that are general enough for all
@@ -3737,9 +3728,9 @@ an @samp{[X]} status if all children have been checked.
 @kindex C-c C-x C-c
 @item C-c C-x C-c
 Create the column view for the local environment.  This command searches
-the hierarchy, up from point, for a @code{COLUMNS} property that defines
+the hierarchy, up from point, for a @code{:COLUMNS:} property that defines
 a format.  When one is found, the column view table is established for
-the entire tree, starting from the entry that contains the @code{COLUMNS}
+the entire tree, starting from the entry that contains the @code{:COLUMNS:}
 property.  If none is found, the format is taken from the @code{#+COLUMNS}
 line or from the variable @code{org-columns-default-format}, and column
 view is established for the current entry and its subtree.
@@ -5522,14 +5513,14 @@ search types:
 (setq org-agenda-custom-commands
       '(("w" todo "WAITING")
         ("W" todo-tree "WAITING")
-        ("u" tags "+BOSS-URGENT")
-        ("v" tags-todo "+BOSS-URGENT")
-        ("U" tags-tree "+BOSS-URGENT")
+        ("u" tags "+boss-urgent")
+        ("v" tags-todo "+boss-urgent")
+        ("U" tags-tree "+boss-urgent")
         ("f" occur-tree "\\<FIXME\\>")
         ("h" . "HOME+Name tags searches") ; description for "h" prefix
-        ("hl" tags "+HOME+Lisa")
-        ("hp" tags "+HOME+Peter")
-        ("hk" tags "+HOME+Kim")))
+        ("hl" tags "+home+Lisa")
+        ("hp" tags "+home+Peter")
+        ("hk" tags "+home+Kim")))
 @end group
 @end lisp
 
@@ -5553,8 +5544,8 @@ keyword
 as the same search, but only in the current buffer and displaying the
 results as a sparse tree
 @item C-c a u
-as a global tags search for headlines marked @samp{:BOSS:} but not
-@samp{:URGENT:}
+as a global tags search for headlines marked @samp{:boss:} but not
+@samp{:urgent:}
 @item C-c a v
 as the same search as @kbd{C-c a u}, but limiting the search to
 headlines that are also TODO items
@@ -5588,12 +5579,12 @@ matching commands discussed above: @code{todo}, @code{tags}, and
 (setq org-agenda-custom-commands
       '(("h" "Agenda and Home-related tasks"
          ((agenda)
-          (tags-todo "HOME")
-          (tags "GARDEN")))
+          (tags-todo "home")
+          (tags "garden")))
         ("o" "Agenda and Office-related tasks"
          ((agenda)
-          (tags-todo "WORK")
-          (tags "OFFICE")))))
+          (tags-todo "work")
+          (tags "office")))))
 @end group
 @end lisp
 
@@ -5601,7 +5592,7 @@ matching commands discussed above: @code{todo}, @code{tags}, and
 This will define @kbd{C-c a h} to create a multi-block view for stuff
 you need to attend to at home.  The resulting agenda buffer will contain
 your agenda for the current week, all TODO items that carry the tag
-@samp{HOME}, and also all lines tagged with @samp{GARDEN}.  Finally the
+@samp{home}, and also all lines tagged with @samp{garden}.  Finally the
 command @kbd{C-c a o} provides a similar view for office tasks.
 
 
@@ -5622,7 +5613,7 @@ right spot in @code{org-agenda-custom-commands}.  For example:
       '(("w" todo "WAITING"
          ((org-agenda-sorting-strategy '(priority-down))
           (org-agenda-prefix-format "  Mixed: ")))
-        ("U" tags-tree "+BOSS-URGENT"
+        ("U" tags-tree "+boss-urgent"
          ((org-show-following-heading nil)
           (org-show-hierarchy-above nil)))))
 @end group
@@ -5630,7 +5621,7 @@ right spot in @code{org-agenda-custom-commands}.  For example:
 
 @noindent
 Now the @kbd{C-c a w} command will sort the collected entries only by
-priority, and the prefix format is modified to just say @samp{  Mixed:}
+priority, and the prefix format is modified to just say @samp{  Mixed: }
 instead of giving the category of the entry.  The sparse tags tree of
 @kbd{C-c a U} will now turn out ultra-compact, because neither the
 headline hierarchy above the match, nor the headline following the match
@@ -5652,14 +5643,14 @@ the results for GARDEN tags query in the opposite order,
 (setq org-agenda-custom-commands
       '(("h" "Agenda and Home-related tasks"
          ((agenda)
-          (tags-todo "HOME")
-          (tags "GARDEN"
+          (tags-todo "home")
+          (tags "garden"
                 ((org-agenda-sorting-strategy '(priority-up)))))
          ((org-agenda-sorting-strategy '(priority-down))))
         ("o" "Agenda and Office-related tasks"
          ((agenda)
-          (tags-todo "WORK")
-          (tags "OFFICE")))))
+          (tags-todo "work")
+          (tags "office")))))
 @end group
 @end lisp
 
@@ -5718,14 +5709,14 @@ or absolute.
         ("Y" alltodo "" nil ("todo.html" "todo.txt" "todo.ps"))
         ("h" "Agenda and Home-related tasks"
          ((agenda)
-          (tags-todo "HOME")
-          (tags "GARDEN"))
+          (tags-todo "home")
+          (tags "garden"))
          nil
          ("~/views/home.html"))
         ("o" "Agenda and Office-related tasks"
          ((agenda)
-          (tags-todo "WORK")
-          (tags "OFFICE"))
+          (tags-todo "work")
+          (tags "office"))
          nil
          ("~/views/office.ps"))))
 @end group
@@ -6166,7 +6157,8 @@ will be @file{myfile.txt}.  The file will be overwritten without
 warning.  If there is an active region, only the region will be
 exported. If the selected region is a single tree, the tree head will
 become the document title.  If the tree head entry has or inherits an
-EXPORT_FILE_NAME property, that name will be used for the export.
+@code{:EXPORT_FILE_NAME:} property, that name will be used for the
+export. 
 @kindex C-c C-e v a
 @item C-c C-e v a
 Export only the visible part of the document.
@@ -6221,8 +6213,8 @@ Export as HTML file @file{myfile.html}.  For an org file
 will be overwritten without warning.  If there is an active region, only
 the region will be exported. If the selected region is a single tree,
 the tree head will become the document title.  If the tree head entry
-has or inherits an EXPORT_FILE_NAME property, that name will be used for
-the export.
+has or inherits an @code{:EXPORT_FILE_NAME:} property, that name will be
+used for the export.
 @kindex C-c C-e b
 @item C-c C-e b
 Export as HTML file and immediately open it with a browser.
@@ -6854,11 +6846,11 @@ Each element of the list configures one project, and may be in one of
 the two following forms:
 
 @lisp
-("project-name"  :property value :property value ...)
+("project-name" :property value :property value ...)
 
 @r{or} 
  
-("project-name"  :components ("project-name" "project-name" ...))
+("project-name" :components ("project-name" "project-name" ...))
 
 @end lisp
 
@@ -7264,7 +7256,8 @@ for all subsequent lines until the next @samp{#+CATEGORY} line, or the
 end of the file.  The first such line also applies to any entries before it.
 @item #+COLUMNS: %25ITEM .....
 Set the default format for columns view.  This format applies when
-columns view is invoked in location where no COLUMNS property applies.
+columns view is invoked in location where no @code{COLUMNS} property
+applies.
 @item #+CONSTANTS: name1=value1 ...
 Set file-local values for constants to be used in table formulas.  This
 line set the local variable @code{org-table-formula-constants-local}.
@@ -8314,7 +8307,7 @@ search should continue from there.
 (defun my-skip-unless-waiting ()
   "Skip trees that are not waiting"
   (let ((subtree-end (save-excursion (org-end-of-subtree t))))
-    (if (re-search-forward ":WAITING:" subtree-end t)
+    (if (re-search-forward ":waiting:" subtree-end t)
         nil          ; tag found, do not skip
       subtree-end))) ; tag not found, continue after end of subtree
 @end lisp
@@ -8360,7 +8353,7 @@ like this, even without defining a special function:
 (org-add-agenda-custom-command
  '("b" todo "PROJECT"
    ((org-agenda-skip-function '(org-agenda-skip-subtree-if
-                                'regexp ":WAITING:"))
+                                'regexp ":waiting:"))
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
