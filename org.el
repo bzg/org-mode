@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 5.01
+;; Version: 5.01b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -21422,7 +21422,6 @@ When COMBINE is non nil, add the category to each line."
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (save-excursion
       (goto-char (point-min))
-      (debug)
       (while (re-search-forward re1 nil t)
 	(catch :skip
 	  (org-agenda-skip)
