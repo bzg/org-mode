@@ -4,7 +4,7 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.20
+@set VERSION 4.21
 @set DATE April 2006
 
 @dircategory Emacs
@@ -197,6 +197,7 @@ Miscellaneous
 
 * Completion::                  M-TAB knows what you need
 * Customization::               Adapting Org-mode to your taste
+* Updating settings::           How to tell Org-mode that settings have changed
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org-mode on a tty
 * FAQ::                         Frequently asked questions
@@ -1368,7 +1369,7 @@ links to other files, Usenet articles, emails and much more.
 @cindex format, of links
 
 Org-mode will recognize plain URL-like links and activate them as
-clickable links.  However, the general linkformat looks like this:
+clickable links.  However, the general link format looks like this:
 
 @example
 [[link][description]]       @r{or alternatively}           [[link]]  
@@ -3099,7 +3100,9 @@ end of the outline tree.  For example:
 @end example
 
 Remember to execute @kbd{M-x normal-mode} after changing this to make
-the new style visible to Emacs.
+the new style visible to Emacs.  This command reastarts org-mode for the
+current buffer and forces Emacs to re-evaluate the loval variables
+section in the buffer.
 
 @node Comment lines,  , Export options, HTML export
 @subsection Comment lines
@@ -3173,6 +3176,7 @@ to make iCal re-read the calendar files each time a new version of
 @menu
 * Completion::                  M-TAB knows what you need
 * Customization::               Adapting Org-mode to your taste
+* Updating settings::           How to tell Org-mode that settings have changed
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org-mode on a tty
 * FAQ::                         Frequently asked questions
@@ -3225,7 +3229,7 @@ Elsewhere, complete dictionary words using ispell.
 @end table
 
 
-@node Customization, Clean view, Completion, Miscellaneous
+@node Customization, Updating settings, Completion, Miscellaneous
 @section Customization
 @cindex customization
 @cindex options, for customization
@@ -3237,7 +3241,41 @@ describing the variables here.  A structured overview of customization
 variables is available with @kbd{M-x org-customize}.  Or select
 @code{Browse Org Group} from the @code{Org->Customization} menu.
 
-@node Clean view, TTY keys, Customization, Miscellaneous
+@node Updating settings, Clean view, Customization, Miscellaneous
+@section Updating settings after changes
+@cindex updating, after setting changes
+@kindex C-c C-c
+
+Org-mode uses special lines in the buffer to set file-local values for a
+number of user options.  When such settings are changed, you need to
+inform Org-mode that something has be modified and that it should
+recheck the buffer for setting.  This is done with the command @kbd{C-c
+C-c} in the following situations:
+
+@itemize @bullet
+@item
+After changing any of the special buffer lines starting with @samp{#+},
+for example @samp{#+STARTUP}, @samp{#+CATEGORY}.  Org-mode will then
+read these settings and activate them (see @ref{Visibility cycling},
+@ref{Narrow columns}, @ref{Clean view}, @ref{Per file keywords},
+@ref{Categories})
+@item
+After editing by hand a @samp{#+TBLFM} line containing formulas for a
+table.  When pressing @kbd{C-c C-c} in that line, all formulas are
+re-applied to the entire table (@pxref{Editing/debugging formulas}).
+@item
+In a table, @kbd{C-c C-c} does force a re-align, even if the table
+editor is turned off (@pxref{Built-in table editor})
+@item
+In an ordered plain list, @kbd{C-c C-c} forces a renumbering of the list
+(@pxref{Plain Lists}).
+@item
+After adding a new radio target @samp{<<<New target>>>}, @kbd{C-c C-c}
+must be used with the cursor on that target to activate it throughout
+the buffer.
+@end itemize
+
+@node Clean view, TTY keys, Updating settings, Miscellaneous
 @section A cleaner outline view
 @cindex hiding leading stars
 @cindex clean outline view
@@ -3487,7 +3525,7 @@ Yes, see @ref{Interaction}.
 @samp{#ERROR}.  What is going on?}@*
 @c
 Org-mode tried to compute the column from other fields using a
-formula stored in the @samp{#+TBLFMT:} line just below the table, and
+formula stored in the @samp{#+TBLFM:} line just below the table, and
 the evaluation of the formula fails.  Fix the fields used in the
 formula, or fix the formula, or remove it!
 

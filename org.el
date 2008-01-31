@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.20
+;; Version: 4.21
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -81,6 +81,9 @@
 ;;
 ;; Changes since version 4.00:
 ;; ---------------------------
+;; Version 4.21
+;;    - Bug fixes.
+;;
 ;; Version 4.20
 ;;    - Links use now the [[link][description]] format by default.
 ;;      When inserting links, the user is prompted for a description.
@@ -171,7 +174,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.20"
+(defvar org-version "4.21"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -5153,7 +5156,7 @@ NDAYS defaults to `org-agenda-ndays'."
 			 (d (- nt n1)))
 		    (- sd (+ (if (< d 0) 7 0) d)))))
 	 (day-numbers (list start))
-	 (inhibit-redisplay t)
+;FIXME	 (inhibit-redisplay t)
 	 s e rtn rtnall file date d start-pos end-pos todayp nd)
     (setq org-agenda-redo-command
 	  (list 'org-agenda-list (list 'quote include-all) start-day ndays t))
@@ -9163,21 +9166,13 @@ With prefix ARG, insert below the current line."
   (interactive "P")
   (if (not (org-at-table-p))
       (error "Not at a table"))
-  (let* ((line
-	  (org-expand-wide-chars
-	   (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-	 new)
-    (if (string-match "^[ \t]*|-" line)
-	(setq new (mapcar (lambda (x) (if (member x '(?| ?+)) ?| ?\ )) line))
-      (setq new (mapcar (lambda (x) (if (equal x ?|) ?| ?\ )) line)))
+  (let* ((line (buffer-substring (point-at-bol) (point-at-eol)))
+	 (new (org-table-clean-line line)))
     ;; Fix the first field if necessary
-    (setq new (concat new))
     (if (string-match "^[ \t]*| *[#$] *|" line)
 	(setq new (replace-match (match-string 0 line) t t new)))
     (beginning-of-line (if arg 2 1))
-    (let (org-table-may-need-update)
-      (insert-before-markers new)
-      (insert-before-markers "\n"))
+    (let (org-table-may-need-update) (insert-before-markers new "\n"))
     (beginning-of-line 0)
     (re-search-forward "| ?" (point-at-eol) t)
     (and org-table-may-need-update (org-table-align))))
@@ -9188,39 +9183,31 @@ With prefix ARG, insert above the current line."
   (interactive "P")
   (if (not (org-at-table-p))
       (error "Not at a table"))
-  (let ((line
-	 (org-expand-wide-chars
-	  (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
-	(col (current-column))
-	start)
-    (if (string-match "^[ \t]*|-" line)
-	(setq line
-	      (mapcar (lambda (x) (if (member x '(?| ?+))
-				      (prog1 (if start ?+ ?|) (setq start t))
-				    (if start ?- ?\ )))
-		      line))
-      (setq line
-	    (mapcar (lambda (x) (if (equal x ?|)
-				    (prog1 (if start ?+ ?|) (setq start t))
-				    (if start ?- ?\ )))
-		    line)))
+  (let ((line (org-table-clean-line
+	       (buffer-substring (point-at-bol) (point-at-eol))))
+	(col (current-column)))
+    (while (string-match "|\\( +\\)|" line)
+      (setq line (replace-match 
+		  (concat "+" (make-string (- (match-end 1) (match-beginning 1))
+					   ?-) "|") t t line)))
+    (and (string-match "\\+" line) (setq line (replace-match "|" t t line)))
     (beginning-of-line (if arg 1 2))
-    (apply 'insert line)
-    (if (equal (char-before (point)) ?+)
-	(progn (backward-delete-char 1) (insert "|")))
-    (insert "\n")
+    (insert line "\n")
     (beginning-of-line (if arg 1 -1))
     (move-to-column col)))
 
-(defun org-expand-wide-chars (s)
-  "Expand wide characters to spaces."
-  (let (w a)
-    (mapconcat
-     (lambda (x)
-       (if (> (setq w (string-width (setq a (char-to-string x)))) 1)
-	   (make-string w ?\ )
-	 a))
-     s "")))
+(defun org-table-clean-line (s)
+  "Convert a table line S into a string with only \"|\" and space.
+In particular, this does handle wide and invisible characters."
+  (if (string-match "^[ \t]*|-" s)
+      ;; It's a hline, just map the characters
+      (setq s (mapcar (lambda (x) (if (member x '(?| ?+)) ?| ?\ )) s))
+    (while (string-match "|\\([ \t]*?[^ \t\r\n|][^\r\n|]*\\)|" s)
+      (setq s (replace-match
+	       (concat "|" (make-string (org-string-width (match-string 1 s))
+					?\ ) "|")
+	       t t s)))
+    s))
 
 (defun org-table-kill-row ()
   "Delete the current row or horizontal line from the table."

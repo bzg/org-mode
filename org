@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.20).
+   This manual is for Org-mode (version 4.21).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.20).
+This manual is for Org-mode (version 4.21).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -165,6 +165,7 @@ Miscellaneous
 
 * Completion::                  M-TAB knows what you need
 * Customization::               Adapting Org-mode to your taste
+* Updating settings::           How to tell Org-mode that settings have changed
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org-mode on a tty
 * FAQ::                         Frequently asked questions
@@ -1224,7 +1225,7 @@ File: org,  Node: Link format,  Next: Internal links,  Prev: Hyperlinks,  Up: Hy
 ===============
 
 Org-mode will recognize plain URL-like links and activate them as
-clickable links.  However, the general linkformat looks like this:
+clickable links.  However, the general link format looks like this:
 
      [[link][description]]       or alternatively           [[link]]
 
@@ -2772,7 +2773,9 @@ of the outline tree.  For example:
      # End: ***
 
    Remember to execute `M-x normal-mode' after changing this to make
-the new style visible to Emacs.
+the new style visible to Emacs.  This command reastarts org-mode for the
+current buffer and forces Emacs to re-evaluate the loval variables
+section in the buffer.
 
 
 File: org,  Node: Comment lines,  Prev: Export options,  Up: HTML export
@@ -2844,6 +2847,7 @@ File: org,  Node: Miscellaneous,  Next: Index,  Prev: Exporting,  Up: Top
 
 * Completion::                  M-TAB knows what you need
 * Customization::               Adapting Org-mode to your taste
+* Updating settings::           How to tell Org-mode that settings have changed
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org-mode on a tty
 * FAQ::                         Frequently asked questions
@@ -2880,7 +2884,7 @@ buffer and use the key to complete text right there.
         * Elsewhere, complete dictionary words using ispell.
 
 
-File: org,  Node: Customization,  Next: Clean view,  Prev: Completion,  Up: Miscellaneous
+File: org,  Node: Customization,  Next: Updating settings,  Prev: Completion,  Up: Miscellaneous
 
 10.2 Customization
 ==================
@@ -2892,9 +2896,42 @@ variables is available with `M-x org-customize'.  Or select `Browse Org
 Group' from the `Org->Customization' menu.
 
 
-File: org,  Node: Clean view,  Next: TTY keys,  Prev: Customization,  Up: Miscellaneous
+File: org,  Node: Updating settings,  Next: Clean view,  Prev: Customization,  Up: Miscellaneous
 
-10.3 A cleaner outline view
+10.3 Updating settings after changes
+====================================
+
+Org-mode uses special lines in the buffer to set file-local values for a
+number of user options.  When such settings are changed, you need to
+inform Org-mode that something has be modified and that it should
+recheck the buffer for setting.  This is done with the command `C-c
+C-c' in the following situations:
+
+   * After changing any of the special buffer lines starting with `#+',
+     for example `#+STARTUP', `#+CATEGORY'.  Org-mode will then read
+     these settings and activate them (see *Note Visibility cycling::,
+     *Note Narrow columns::, *Note Clean view::, *Note Per file
+     keywords::, *Note Categories::)
+
+   * After editing by hand a `#+TBLFM' line containing formulas for a
+     table.  When pressing `C-c C-c' in that line, all formulas are
+     re-applied to the entire table (*note Editing/debugging
+     formulas::).
+
+   * In a table, `C-c C-c' does force a re-align, even if the table
+     editor is turned off (*note Built-in table editor::)
+
+   * In an ordered plain list, `C-c C-c' forces a renumbering of the
+     list (*note Plain Lists::).
+
+   * After adding a new radio target `<<<New target>>>', `C-c C-c' must
+     be used with the cursor on that target to activate it throughout
+     the buffer.
+
+
+File: org,  Node: Clean view,  Next: TTY keys,  Prev: Updating settings,  Up: Miscellaneous
+
+10.4 A cleaner outline view
 ===========================
 
 Some people find it noisy and distracting that the Org-mode headlines
@@ -2977,7 +3014,7 @@ of the tree.
 
 File: org,  Node: TTY keys,  Next: FAQ,  Prev: Clean view,  Up: Miscellaneous
 
-10.4 Using org-mode on a tty
+10.5 Using org-mode on a tty
 ============================
 
 Org-mode uses a number of keys that are not accessible on a tty.  This
@@ -3019,7 +3056,7 @@ Default     Alternative 1  Alternative 2
 
 File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
 
-10.5 Frequently asked questions
+10.6 Frequently asked questions
 ===============================
 
   1. Org-mode seems to be a useful default mode for the various
@@ -3105,7 +3142,7 @@ File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
  11. One of my table columns has started to fill up with `#ERROR'.
      What is going on?
      Org-mode tried to compute the column from other fields using a
-     formula stored in the `#+TBLFMT:' line just below the table, and
+     formula stored in the `#+TBLFM:' line just below the table, and
      the evaluation of the formula fails.  Fix the fields used in the
      formula, or fix the formula, or remove it!
 
@@ -3155,7 +3192,7 @@ File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
 
 File: org,  Node: Interaction,  Next: Bugs,  Prev: FAQ,  Up: Miscellaneous
 
-10.6 Interaction with other packages
+10.7 Interaction with other packages
 ====================================
 
 Org-mode can cooperate with the following packages:
@@ -3217,7 +3254,7 @@ Org-mode can cooperate with the following packages:
 
 File: org,  Node: Bugs,  Next: Acknowledgments,  Prev: Interaction,  Up: Miscellaneous
 
-10.7 Bugs
+10.8 Bugs
 =========
 
 Here is a list of things that should work differently, but which I have
@@ -3271,7 +3308,7 @@ found too hard to fix.
 
 File: org,  Node: Acknowledgments,  Prev: Bugs,  Up: Miscellaneous
 
-10.8 Acknowledgments
+10.9 Acknowledgments
 ====================
 
 Org-mode was written by Carsten Dominik, who still maintains it at the
@@ -3637,6 +3674,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * tty keybindings:                       TTY keys.            (line   6)
 * types as TODO keywords:                TODO types.          (line   6)
 * underlined text:                       HTML formatting.     (line  13)
+* updating, after setting changes:       Updating settings.   (line   6)
 * URL links:                             External links.      (line   6)
 * USENET links:                          External links.      (line   6)
 * variables, for customization:          Customization.       (line   6)
@@ -3730,11 +3768,12 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c a t:                               TODO basics.         (line  27)
 * C-c C-a:                               Visibility cycling.  (line  27)
 * C-c C-b:                               Motion.              (line  15)
-* C-c C-c <1>:                           Setting tags.        (line  11)
-* C-c C-c <2>:                           table.el.            (line   6)
-* C-c C-c <3>:                           Editing/debugging formulas.
+* C-c C-c <1>:                           Updating settings.   (line   6)
+* C-c C-c <2>:                           Setting tags.        (line  11)
+* C-c C-c <3>:                           table.el.            (line   6)
+* C-c C-c <4>:                           Editing/debugging formulas.
                                                               (line  16)
-* C-c C-c <4>:                           Built-in table editor.
+* C-c C-c <5>:                           Built-in table editor.
                                                               (line  54)
 * C-c C-c:                               Plain Lists.         (line  61)
 * C-c C-d:                               Creating timestamps. (line  37)
@@ -3865,95 +3904,96 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 
 Tag Table:
 Node: Top959
-Node: Introduction7179
-Node: Summary7493
-Node: Installation and activation9605
-Node: Feedback11274
-Node: Document Structure12060
-Node: Outlines12826
-Node: Headlines13486
-Node: Visibility cycling14109
-Node: Motion15300
-Node: Structure editing16084
-Node: Archiving17827
-Node: Sparse trees18687
-Ref: Sparse trees-Footnote-120716
-Ref: Sparse trees-Footnote-220808
-Node: Plain Lists20922
-Ref: Plain Lists-Footnote-123678
-Node: Tables24035
-Node: Built-in table editor24583
-Node: Narrow columns32197
-Ref: Narrow columns-Footnote-134130
-Node: Table calculations34176
-Node: Formula syntax35352
-Ref: Formula syntax-Footnote-138286
-Node: Column formulas38585
-Node: Advanced features40347
-Node: Named-field formulas43602
-Node: Editing/debugging formulas44242
-Node: Appetizer46000
-Node: orgtbl-mode47102
-Node: table.el47593
-Node: Hyperlinks48570
-Node: Link format49204
-Node: Internal links50500
-Node: Radio targets52390
-Node: CamelCase links53105
-Node: External links53603
-Node: Managing links55528
-Node: Search Options59512
-Ref: Search Options-Footnote-160832
-Node: Remember60913
-Ref: Remember-Footnote-164779
-Node: TODO items64903
-Node: TODO basics65826
-Node: Progress logging67341
-Node: TODO extensions68127
-Node: Workflow states68927
-Node: TODO types69795
-Ref: TODO types-Footnote-171453
-Node: Per file keywords71535
-Ref: Per file keywords-Footnote-172988
-Node: Priorities73216
-Node: Timestamps74425
-Node: Time stamps74746
-Node: Creating timestamps76761
-Node: Tags79890
-Node: Tag inheritance80625
-Node: Setting tags81562
-Node: Tag searches82524
-Node: Agenda Views83733
-Node: Agenda files85272
-Ref: Agenda files-Footnote-186232
-Ref: Agenda files-Footnote-286381
-Node: Agenda dispatcher86573
-Node: Weekly/Daily Agenda88703
-Node: Categories89838
-Node: Time-of-day specifications90486
-Node: Calendar/Diary integration92462
-Node: Sorting of agenda items93839
-Node: Global TODO list94671
-Node: Matching headline tags96086
-Node: Timeline97029
-Node: Agenda commands97902
-Node: Exporting103158
-Node: ASCII export103730
-Node: HTML export104565
-Node: HTML formatting105681
-Node: Export options107313
-Node: Comment lines109504
-Node: iCalendar export109974
-Node: Miscellaneous111769
-Node: Completion112396
-Node: Customization113392
-Node: Clean view113840
-Node: TTY keys116480
-Node: FAQ118081
-Node: Interaction124316
-Node: Bugs127157
-Node: Acknowledgments129466
-Node: Index132396
-Node: Key Index153038
+Node: Introduction7259
+Node: Summary7573
+Node: Installation and activation9685
+Node: Feedback11354
+Node: Document Structure12140
+Node: Outlines12906
+Node: Headlines13566
+Node: Visibility cycling14189
+Node: Motion15380
+Node: Structure editing16164
+Node: Archiving17907
+Node: Sparse trees18767
+Ref: Sparse trees-Footnote-120796
+Ref: Sparse trees-Footnote-220888
+Node: Plain Lists21002
+Ref: Plain Lists-Footnote-123758
+Node: Tables24115
+Node: Built-in table editor24663
+Node: Narrow columns32277
+Ref: Narrow columns-Footnote-134210
+Node: Table calculations34256
+Node: Formula syntax35432
+Ref: Formula syntax-Footnote-138366
+Node: Column formulas38665
+Node: Advanced features40427
+Node: Named-field formulas43682
+Node: Editing/debugging formulas44322
+Node: Appetizer46080
+Node: orgtbl-mode47182
+Node: table.el47673
+Node: Hyperlinks48650
+Node: Link format49284
+Node: Internal links50581
+Node: Radio targets52471
+Node: CamelCase links53186
+Node: External links53684
+Node: Managing links55609
+Node: Search Options59593
+Ref: Search Options-Footnote-160913
+Node: Remember60994
+Ref: Remember-Footnote-164860
+Node: TODO items64984
+Node: TODO basics65907
+Node: Progress logging67422
+Node: TODO extensions68208
+Node: Workflow states69008
+Node: TODO types69876
+Ref: TODO types-Footnote-171534
+Node: Per file keywords71616
+Ref: Per file keywords-Footnote-173069
+Node: Priorities73297
+Node: Timestamps74506
+Node: Time stamps74827
+Node: Creating timestamps76842
+Node: Tags79971
+Node: Tag inheritance80706
+Node: Setting tags81643
+Node: Tag searches82605
+Node: Agenda Views83814
+Node: Agenda files85353
+Ref: Agenda files-Footnote-186313
+Ref: Agenda files-Footnote-286462
+Node: Agenda dispatcher86654
+Node: Weekly/Daily Agenda88784
+Node: Categories89919
+Node: Time-of-day specifications90567
+Node: Calendar/Diary integration92543
+Node: Sorting of agenda items93920
+Node: Global TODO list94752
+Node: Matching headline tags96167
+Node: Timeline97110
+Node: Agenda commands97983
+Node: Exporting103239
+Node: ASCII export103811
+Node: HTML export104646
+Node: HTML formatting105762
+Node: Export options107394
+Node: Comment lines109716
+Node: iCalendar export110186
+Node: Miscellaneous111981
+Node: Completion112688
+Node: Customization113684
+Node: Updating settings114139
+Node: Clean view115547
+Node: TTY keys118191
+Node: FAQ119792
+Node: Interaction126026
+Node: Bugs128867
+Node: Acknowledgments131176
+Node: Index134106
+Node: Key Index154821
 
 End Tag Table
