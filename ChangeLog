@@ -1,3 +1,7 @@
+2007-12-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-context-choices): New constant.
+
 2007-11-30  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-imenu-depth): New option.

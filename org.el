@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.16
+;; Version: 5.16a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.16"
+(defconst org-version "5.16a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -333,6 +333,25 @@ After a match, group 1 contains the repeat expression.")
   :tag "Org Reveal Location"
   :group 'org-structure)
 
+(defconst org-context-choice
+  '(choice
+    (const :tag "Always" t)
+    (const :tag "Never" nil)
+    (repeat :greedy t :tag "Individual contexts"
+	    (cons
+	     (choice :tag "Context"
+		     (const agenda)
+		     (const org-goto)
+		     (const occur-tree)
+		     (const tags-tree)
+		     (const link-search)
+		     (const mark-goto)
+		     (const bookmark-jump)
+		     (const isearch)
+		     (const default))
+	     (boolean))))
+  "Contexts for the reveal options.")
+
 (defcustom org-show-hierarchy-above '((default . t))
   "Non-nil means, show full hierarchy when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
@@ -351,22 +370,7 @@ contexts.  Valid contexts are
   isearch        when exiting from an incremental search
   default        default for all contexts not set explicitly"
   :group 'org-reveal-location
-  :type '(choice
-	  (const :tag "Always" t)
-	  (const :tag "Never" nil)
-	  (repeat :greedy t :tag "Individual contexts"
-		  (cons
-		   (choice :tag "Context"
-		    (const agenda)
-		    (const org-goto)
-		    (const occur-tree)
-		    (const tags-tree)
-		    (const link-search)
-		    (const mark-goto)
-		    (const bookmark-jump)
-		    (const isearch)
-		    (const default))
-		   (boolean)))))
+  :type org-context-choice)
 
 (defcustom org-show-following-heading '((default . nil))
   "Non-nil means, show following heading when revealing a location.
@@ -379,22 +383,7 @@ use the command \\[org-reveal] to show more context.
 Instead of t, this can also be an alist specifying this option for different
 contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-reveal-location
-  :type '(choice
-	  (const :tag "Always" t)
-	  (const :tag "Never" nil)
-	  (repeat :greedy t :tag "Individual contexts"
-		  (cons
-		   (choice :tag "Context"
-		    (const agenda)
-		    (const org-goto)
-		    (const occur-tree)
-		    (const tags-tree)
-		    (const link-search)
-		    (const mark-goto)
-		    (const bookmark-jump)
-		    (const isearch)
-		    (const default))
-		   (boolean)))))
+  :type org-context-choice)
 
 (defcustom org-show-siblings '((default . nil) (isearch t))
   "Non-nil means, show all sibling heading when revealing a location.
@@ -410,22 +399,7 @@ use the command \\[org-reveal] to show more context.
 Instead of t, this can also be an alist specifying this option for different
 contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-reveal-location
-  :type '(choice
-	  (const :tag "Always" t)
-	  (const :tag "Never" nil)
-	  (repeat :greedy t :tag "Individual contexts"
-		  (cons
-		   (choice :tag "Context"
-		    (const agenda)
-		    (const org-goto)
-		    (const occur-tree)
-		    (const tags-tree)
-		    (const link-search)
-		    (const mark-goto)
-		    (const bookmark-jump)
-		    (const isearch)
-		    (const default))
-		   (boolean)))))
+  :type org-context-choice)
 
 (defcustom org-show-entry-below '((default . nil))
   "Non-nil means, show the entry below a headline when revealing a location.
@@ -437,22 +411,7 @@ By default this is off for all contexts.
 Instead of t, this can also be an alist specifying this option for different
 contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-reveal-location
-  :type '(choice
-	  (const :tag "Always" t)
-	  (const :tag "Never" nil)
-	  (repeat :greedy t :tag "Individual contexts"
-		  (cons
-		   (choice :tag "Context"
-		    (const agenda)
-		    (const org-goto)
-		    (const occur-tree)
-		    (const tags-tree)
-		    (const link-search)
-		    (const mark-goto)
-		    (const bookmark-jump)
-		    (const isearch)
-		    (const default))
-		   (boolean)))))
+  :type org-context-choice)
 
 (defgroup org-cycle nil
   "Options concerning visibility cycling in Org-mode."
@@ -2679,18 +2638,19 @@ a grid line."
   :tag "Org Agenda Sorting"
   :group 'org-agenda)
 
-(let ((sorting-choice
-       '(choice
-	 (const time-up) (const time-down)
-	 (const category-keep) (const category-up) (const category-down)
-	 (const tag-down) (const tag-up)
-	 (const priority-up) (const priority-down))))
+(defconst org-sorting-choice
+  '(choice
+    (const time-up) (const time-down)
+    (const category-keep) (const category-up) (const category-down)
+    (const tag-down) (const tag-up)
+    (const priority-up) (const priority-down))
+  "Sorting choices.")
 
-  (defcustom org-agenda-sorting-strategy
-    '((agenda time-up category-keep priority-down)
-      (todo category-keep priority-down)
-      (tags category-keep priority-down))
-    "Sorting structure for the agenda items of a single day.
+(defcustom org-agenda-sorting-strategy
+  '((agenda time-up category-keep priority-down)
+    (todo category-keep priority-down)
+    (tags category-keep priority-down))
+  "Sorting structure for the agenda items of a single day.
 This is a list of symbols which will be used in sequence to determine
 if an entry should be listed before another entry.  The following
 symbols are recognized:
@@ -2724,14 +2684,14 @@ contents, with a context symbol in the car of the list, any of
 `agenda', `todo', `tags' for the corresponding agenda views."
   :group 'org-agenda-sorting
   :type `(choice
-	  (repeat :tag "General" ,sorting-choice)
+	  (repeat :tag "General" org-sorting-choice)
 	  (list :tag "Individually"
 		(cons (const :tag "Strategy for Weekly/Daily agenda" agenda)
-		      (repeat ,sorting-choice))
+		      (repeat ,org-sorting-choice))
 		(cons (const :tag "Strategy for TODO lists" todo)
-		      (repeat ,sorting-choice))
+		      (repeat ,org-sorting-choice))
 		(cons (const :tag "Strategy for Tags matches" tags)
-		      (repeat ,sorting-choice))))))
+		      (repeat ,org-sorting-choice)))))
 
 (defcustom org-sort-agenda-notime-is-late t
   "Non-nil means, items without time are considered late.
@@ -3532,6 +3492,11 @@ Changing this variable requires a restart of Emacs to take effect."
   :group 'org-font-lock
   :type 'boolean)
 
+(defcustom org-highlight-latex-fragments-and-specials nil
+  "Non-nil means, fontify what is treated specially by the exporters."
+  :group 'org-font-lock
+  :type 'boolean)
+
 (defcustom org-hide-emphasis-markers nil
   "Non-nil mean font-lock should hide the emphasis marker characters."
   :group 'org-font-lock
@@ -4035,7 +4000,7 @@ month and 365.24 days for a year)."
 	   (number :tag "Fraction of head-warning time passed")
 	   (sexp :tag "Face"))))
 
-;; FIXME: this is not good
+;; FIXME: this is not a good face yet.
 (defface org-agenda-restriction-lock
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light)) (:background "yellow1"))
@@ -4330,8 +4295,6 @@ means to push this value onto the list in the variable.")
 		dws (if sep (org-remove-keyword-keys (cdr sep)) (last kws1))
 		tail (list inter hw (car dws) (org-last dws)))
 	  (add-to-list 'org-todo-heads hw 'append)
-;?????????????????	  (setq org-todo-heads (append org-todo-heads (list hw)))
-	  (add-to-list 'org-todo-heads hw 'append)
 	  (push kws1 org-todo-sets)
 	  (setq org-done-keywords (append org-done-keywords dws nil))
 	  (setq org-todo-key-alist (append org-todo-key-alist kwsa))
@@ -4451,6 +4414,31 @@ means to push this value onto the list in the variable.")
 		(substring x 0 (match-beginning 0))
 	      x))
 	  list))
+
+;; FIXME: this could be done much better, using second characters etc.
+(defun org-assign-fast-keys (alist)
+  "Assign fast keys to a keyword-key alist.
+Respect keys that are already there."
+  (let (new e k c c1 c2 (char ?a))
+    (while (setq e (pop alist))
+      (cond
+       ((equal e '(:startgroup)) (push e new))
+       ((equal e '(:endgroup)) (push e new))
+       (t
+	(setq k (car e) c2 nil)
+	(if (cdr e)
+	    (setq c (cdr e))
+	  ;; automatically assign a character.
+	  (setq c1 (string-to-char
+		    (downcase (substring
+			       k (if (= (string-to-char k) ?@) 1 0)))))
+	  (if (or (rassoc c1 new) (rassoc c1 alist))
+	      (while (or (rassoc char new) (rassoc char alist))
+		(setq char (1+ char)))
+	    (setq c2 c1))
+	  (setq c (or c2 char)))
+	(push (cons k c) new))))
+    (nreverse new)))
 
 ;;; Some variables ujsed in various places
 
@@ -5115,6 +5103,97 @@ We use a macro so that the test can happen at compilation time."
       (add-text-properties s e (org-maybe-intangible '(invisible org-cwidth)))
       (goto-char e)
       t)))
+
+(defvar org-latex-and-specials-regexp nil
+  "Regular expression for highlighting export special stuff.")
+(defvar org-match-substring-regexp)
+(defvar org-match-substring-with-braces-regexp)
+(defvar org-export-html-special-string-regexps)
+
+(defun org-compute-latex-and-specials-regexp ()
+  "Compute regular expression for stuff treated specially by exporters."
+  (if (not org-highlight-latex-fragments-and-specials)
+      (org-set-local 'org-latex-and-specials-regexp nil)
+    (let*
+	((matchers (plist-get org-format-latex-options :matchers))
+	 (latexs (delq nil (mapcar (lambda (x) (if (member (car x) matchers) x))
+				   org-latex-regexps)))
+	 (options (org-combine-plists (org-default-export-plist)
+				      (org-infile-export-plist)))
+	 (org-export-with-sub-superscripts (plist-get options :sub-superscript))
+	 (org-export-with-LaTeX-fragments (plist-get options :LaTeX-fragments))
+	 (org-export-with-TeX-macros (plist-get options :TeX-macros))
+	 (org-export-html-expand (plist-get options :expand-quoted-html))
+	 (org-export-with-special-strings (plist-get options :special-strings))
+	 (re-sub
+	  (cond
+	   ((equal org-export-with-sub-superscripts '{})
+	    (list org-match-substring-with-braces-regexp))
+	   (org-export-with-sub-superscripts
+	    (list org-match-substring-regexp))
+	   (t nil)))
+	 (re-latex
+	  (if org-export-with-LaTeX-fragments
+	      (mapcar (lambda (x) (nth 1 x)) latexs)))
+	 (re-macros
+	  (if org-export-with-TeX-macros
+	      (list (concat "\\\\"
+			    (regexp-opt 
+			     (append (mapcar 'car org-html-entities)
+				     (if (boundp 'org-latex-entities)
+					 org-latex-entities nil))
+			     'words))) ; FIXME
+	    ))
+    ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
+	 (re-special (if org-export-with-special-strings
+			 (mapcar (lambda (x) (car x))
+				 org-export-html-special-string-regexps)))
+	 (re-rest
+	  (delq nil
+		(list
+		 (if org-export-html-expand "@<[^>\n]+>")
+		 ))))
+      (org-set-local
+       'org-latex-and-specials-regexp
+       (mapconcat 'identity (append re-latex re-sub re-macros re-special
+				    re-rest) "\\|")))))
+
+(defface org-latex-and-export-specials
+  (let ((font (cond ((assq :inherit custom-face-attributes)
+		     '(:inherit underline))
+		    (t '(:underline t)))))
+    `((((class grayscale) (background light))
+       (:foreground "DimGray" ,@font))
+      (((class grayscale) (background dark))
+       (:foreground "LightGray" ,@font))
+      (((class color) (background light))
+       (:foreground "SaddleBrown"))
+      (((class color) (background dark))
+       (:foreground "burlywood"))
+      (t (,@font))))
+  "Face used to highlight math latex and other special exporter stuff."
+  :group 'org-faces)
+
+(defun org-do-latex-and-special-faces (limit)
+  "Run through the buffer and add overlays to links."
+  (when org-latex-and-specials-regexp
+    (let (rtn d)
+      (while (and (not rtn) (re-search-forward org-latex-and-specials-regexp
+					       limit t))
+	(if (not (memq (car-safe (get-text-property (1+ (match-beginning 0))
+						    'face))
+		       '(org-code org-verbatim underline)))
+	    (progn
+	      (setq rtn t
+		    d (cond ((member (char-after (1+ (match-beginning 0)))
+				     '(?_ ?^)) 1)
+			    (t 0)))
+	      (font-lock-prepend-text-property
+	       (+ d (match-beginning 0)) (match-end 0)
+	       'face 'org-latex-and-export-specials)
+	      (add-text-properties (+ d (match-beginning 0)) (match-end 0)
+				   '(font-lock-multiline t)))))
+      rtn)))
 
 (defun org-restart-font-lock ()
   "Restart font-lock-mode, to force refontification."
@@ -12971,6 +13050,9 @@ RET at beg-of-buf -> Append to file as level 2 headline
 			 char0))))))
       (cddr (assoc char templates)))))
 
+(defvar x-last-selected-text)
+(defvar x-last-selected-text-primary)
+
 ;;;###autoload
 (defun org-remember-apply-template (&optional use-char skip-interactive)
   "Initialize *remember* buffer with template, invoke `org-mode'.
@@ -12989,8 +13071,8 @@ to be run from that hook to function properly."
 	     (headline (nth 2 entry))
 	     (v-c (if (or (and (eq window-system 'x)
 			       (x-cut-buffer-or-selection-value))
-			  (bound-and-true-p x-last-selected-text)
-			  (bound-and-true-p x-last-selected-text-primary))
+			  (bound-and-true-p 'x-last-selected-text)
+			  (bound-and-true-p 'x-last-selected-text-primary))
 		      x-last-selected-text-primary
 		    (if (> (length kill-ring) 0)
 			(current-kill 0)
@@ -16049,7 +16131,7 @@ Where possible, use the standard interface for changing this line."
 	 (key1 (concat key "_ALL"))
 	 (allowed (org-entry-get (point) key1 t))
 	 nval)
-    ;; FIXME: Cover editing TODO, TAGS etc inbiffer settings.????
+    ;; FIXME: Cover editing TODO, TAGS etc in-buffer settings.????
     (setq nval (read-string "Allowed: " allowed))
     (org-entry-put
      (cond ((marker-position org-entry-property-inherited-from)
@@ -16066,8 +16148,6 @@ Where possible, use the standard interface for changing this line."
     (save-excursion
       (beginning-of-line 1)
       ;; `next-line' is needed here, because it skips invisible line.
-      ;; FIXME: RMS says this should be wrapped into `with-no-warnings'
-      ;; but I don't know how to do this and keep the code XEmacs compatible.
       (condition-case nil (org-no-warnings (next-line 1)) (error nil))
       (setq hidep (org-on-heading-p 1)))
     (eval form)
@@ -16441,7 +16521,6 @@ display, or in the #+COLUMNS line of the current buffer."
 	    (org-entry-put nil property (if flag str val)))
 	  ;; add current to current  level accumulator
 	  (when (or flag valflag)
-	    ;; FIXME: is this ok?????????
 	    (aset lsum level (+ (aref lsum level)
 				(if flag sum (org-column-string-to-number
 					      (if flag str val) format))))
@@ -17771,6 +17850,7 @@ belonging to the category \"Work\"."
   (if (equal filter '(4))
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
+	 (org-agenda-new-buffers nil)
 	 (today (org-date-to-gregorian
 		 (time-to-days (current-time))))
 	 (files (org-agenda-files)) entries file)
@@ -17795,7 +17875,7 @@ belonging to the category \"Work\"."
 				(cadr (assoc 'category filter)) cat)
 			       (string-match
 				(cadr (assoc 'headline filter)) evt))))))
-	 ;; FIXME Shall we remove text-properties for the appt text?
+	 ;; FIXME: Shall we remove text-properties for the appt text?
 	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
 	 (when (and ok tod)
 	   (setq tod (number-to-string tod)
@@ -17805,6 +17885,7 @@ belonging to the category \"Work\"."
 			       (match-string 2 tod))))
 	   (appt-add tod evt)
 	   (setq cnt (1+ cnt))))) entries)
+    (org-release-buffers org-agenda-new-buffers)
     (message "Added %d event%s for today" cnt (if (> cnt 1) "s" ""))))
 
 ;;; The clock for measuring work time.
@@ -20395,14 +20476,6 @@ the documentation of `org-diary'."
 		  (setq results (append results rtn))))))))
 	results))))
 
-;; FIXME: this works only if the cursor is *not* at the
-;; beginning of the entry
-;(defun org-entry-is-done-p ()
-;  "Is the current entry marked DONE?"
-;  (save-excursion
-;    (and (re-search-backward "[\r\n]\\*+ " nil t)
-;	 (looking-at org-nl-done-regexp))))
-
 (defun org-entry-is-todo-p ()
   (member (org-get-todo-state) org-not-done-keywords))
 
@@ -21025,7 +21098,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	'extra extra
 	'dotime dotime))))
 
-(defvar org-agenda-sorting-strategy) ;; FIXME: can be removed?
+(defvar org-agenda-sorting-strategy) ;; because the def is in a let form
 (defvar org-agenda-sorting-strategy-selected nil)
 
 (defun org-agenda-add-time-grid-maybe (list ndays todayp)
@@ -22643,7 +22716,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     (:tables               . org-export-with-tables)
     (:table-auto-headline  . org-export-highlight-first-table-line)
     (:style                . org-export-html-style)
-    (:agenda-style         . org-agenda-export-html-style) ;; FIXME: Does this work????
+    (:agenda-style         . org-agenda-export-html-style)
     (:convert-org-links    . org-export-html-link-org-files-as-html)
     (:inline-images        . org-export-html-inline-images)
     (:html-extension       . org-export-html-extension)
@@ -27246,7 +27319,10 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
      (define-key speedbar-file-key-map "<" 'org-speedbar-set-agenda-restriction)
      (define-key speedbar-file-key-map "\C-c\C-x<" 'org-speedbar-set-agenda-restriction)
      (define-key speedbar-file-key-map ">" 'org-agenda-remove-restriction-lock)
-     (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)))
+     (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
+     (add-hook 'speedbar-visiting-tag-hook
+	       (lambda () (org-show-context 'org-goto)))))
+
 
 ;;; Fixes and Hacks
 
@@ -27306,139 +27382,6 @@ Still experimental, may disappear in the future."
                        (and (>= time time1) (<= time time2))))))
     ;; make tree, check each match with the callback
     (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
-
-;; FIXME: this needs a much better algorithm
-(defun org-assign-fast-keys (alist)
-  "Assign fast keys to a keyword-key alist.
-Respect keys that are already there."
-  (let (new e k c c1 c2 (char ?a))
-    (while (setq e (pop alist))
-      (cond
-       ((equal e '(:startgroup)) (push e new))
-       ((equal e '(:endgroup)) (push e new))
-       (t
-	(setq k (car e) c2 nil)
-	(if (cdr e)
-	    (setq c (cdr e))
-	  ;; automatically assign a character.
-	  (setq c1 (string-to-char
-		    (downcase (substring
-			       k (if (= (string-to-char k) ?@) 1 0)))))
-	  (if (or (rassoc c1 new) (rassoc c1 alist))
-	      (while (or (rassoc char new) (rassoc char alist))
-		(setq char (1+ char)))
-	    (setq c2 c1))
-	  (setq c (or c2 char)))
-	(push (cons k c) new))))
-    (nreverse new)))
-
-
-(defcustom org-highlight-latex-fragments-and-specials nil
-  "Non-nil means, fontify what is treated specially by the exporters."
-  :group 'org-font-lock
-  :type 'boolean)
-
-(defvar org-latex-and-specials-regexp nil
-  "Regular expression for highlighting export special stuff.")
-
-(defun org-compute-latex-and-specials-regexp ()
-  "Compute regular expression for stuff treated specially by exporters."
-  (if (not org-highlight-latex-fragments-and-specials)
-      (org-set-local 'org-latex-and-specials-regexp nil)
-    (let*
-	((matchers (plist-get org-format-latex-options :matchers))
-	 (latexs (delq nil (mapcar (lambda (x) (if (member (car x) matchers) x))
-				   org-latex-regexps)))
-	 (options (org-combine-plists (org-default-export-plist)
-				      (org-infile-export-plist)))
-	 (org-export-with-sub-superscripts (plist-get options :sub-superscript))
-	 (org-export-with-LaTeX-fragments (plist-get options :LaTeX-fragments))
-	 (org-export-with-TeX-macros (plist-get options :TeX-macros))
-	 (org-export-html-expand (plist-get options :expand-quoted-html))
-	 (org-export-with-special-strings (plist-get options :special-strings))
-	 (re-sub
-	  (cond
-	   ((equal org-export-with-sub-superscripts '{})
-	    (list org-match-substring-with-braces-regexp))
-	   (org-export-with-sub-superscripts
-	    (list org-match-substring-regexp))
-	   (t nil)))
-	 (re-latex
-	  (if org-export-with-LaTeX-fragments
-	      (mapcar (lambda (x) (nth 1 x)) latexs)))
-	 (re-macros
-	  (if org-export-with-TeX-macros
-	      (list (concat "\\\\"
-			    (regexp-opt 
-			     (append (mapcar 'car org-html-entities)
-				     (if (boundp 'org-latex-entities)
-					 org-latex-entities nil))
-			     'words))) ; FIXME
-	    ))
-    ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
-	 (re-special (if org-export-with-special-strings
-			 (mapcar (lambda (x) (car x))
-				 org-export-html-special-string-regexps)))
-	 (re-rest
-	  (delq nil
-		(list
-		 (if org-export-html-expand "@<[^>\n]+>")
-		 ))))
-      (org-set-local
-       'org-latex-and-specials-regexp
-       (mapconcat 'identity (append re-latex re-sub re-macros re-special re-rest) "\\|")))))
-
-(defface org-latex-and-export-specials
-  (let ((font (cond ((assq :inherit custom-face-attributes)
-		     '(:inherit underline))
-		    (t '(:underline t)))))
-    `((((class grayscale) (background light))
-       (:foreground "DimGray" ,@font))
-      (((class grayscale) (background dark))
-       (:foreground "LightGray" ,@font))
-      (((class color) (background light))
-       (:foreground "SaddleBrown"))
-      (((class color) (background dark))
-       (:foreground "burlywood"))
-      (t (,@font))))
-  "Face used to highlight math latex and other special exporter stuff."
-  :group 'org-faces)
-
-(defun org-do-latex-and-special-faces (limit)
-  "Run through the buffer and add overlays to links."
-  (when org-latex-and-specials-regexp
-    (let (rtn d)
-      (while (and (not rtn) (re-search-forward org-latex-and-specials-regexp
-					       limit t))
-	(if (not (memq (car-safe (get-text-property (1+ (match-beginning 0)) 'face))
-		       '(org-code org-verbatim underline)))
-	    (progn
-	      (setq rtn t
-		    d (cond ((member (char-after (1+ (match-beginning 0))) '(?_ ?^)) 1)
-			    (t 0)))
-	      (font-lock-prepend-text-property
-	       (+ d (match-beginning 0)) (match-end 0)
-	       'face 'org-latex-and-export-specials)
-	      (add-text-properties (+ d (match-beginning 0)) (match-end 0)
-				   '(font-lock-multiline t)))))
-      rtn)))
-
-
-(defun org-find-first-timestamp (keyword inactive end)
-  "Return location of first timestamp matching KEYWORD and INACTIVE.
-KEYWORD may be any of the timestamp keywords, or nil.
-INACTIVE means it should be an inactive timestamp.
-If there is no such time stamp, return nil."
-  (catch 'exit
-    (let (key ia)
-      (setq inactive (and inactive t))
-      (while (re-search-forward org-maybe-keyword-time-regexp end t)
-	(setq key (and (match-end 1) (substring (match-string 1) 0 -1)
-		       (equal (char-after (match-beginning 3)) ?\[)))
-	(when (and (equal keyword key)
-		   (equal inactive ia))
-	  (throw 'exit (match-beginning 3)))))))
-
 
 ;;;; Finish up
 

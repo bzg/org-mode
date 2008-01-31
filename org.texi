@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.16
+@set VERSION 5.16a
 @set DATE December 2007
 
 @dircategory Emacs
