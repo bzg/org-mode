@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 5.06
+;; Version: 5.06b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.06"
+(defconst org-version "5.06b"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -489,17 +489,19 @@ the values `folded', `children', or `subtree'."
   :tag "Org Edit Structure"
   :group 'org-structure)
 
-; FIXME
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
-When set, `C-a' will bring back the cursor to the beginning of the
+When t, `C-a' will bring back the cursor to the beginning of the
 headline text, i.e. after the stars and after a possible TODO keyword.
 In an item, this will be the position after the bullet.
 When the cursor is already at that position, another `C-a' will bring
 it to the beginning of the line.
 `C-e' will jump to the end of the headline, ignoring the presence of tags
 in the headline.  A second `C-e' will then jump to the true end of the
-line, after any tags."
+line, after any tags.
+When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
+and only a directly following, identical keypress will bring the cursor
+to the special positions."
   :group 'org-edit-structure
   :type '(choice
 	  (const :tag "off" nil)
@@ -3164,7 +3166,7 @@ Use customize to modify this, or restart Emacs after changing it."
   '(("*" bold "<b>" "</b>")
     ("/" italic "<i>" "</i>")
     ("_" underline "<u>" "</u>")
-    ("=" shadow "<code>" "</code>")
+    ("=" org-code "<code>" "</code>")
     ("+" (:strike-through t) "<del>" "</del>")
     )
 "Special syntax for emphasized text.
@@ -3445,6 +3447,20 @@ to the part of the headline after the DONE keyword."
      (t (:bold t :italic t))))
   "Face for formulas."
   :group 'org-faces)
+
+(defface org-code
+  (org-compatible-face
+   '((((class color grayscale) (min-colors 88) (background light))
+      :foreground "grey50")
+     (((class color grayscale) (min-colors 88) (background dark))
+      :foreground "grey70")
+     (((class color) (min-colors 8) (background light))
+      :foreground "green")
+     (((class color) (min-colors 8) (background dark))
+      :foreground "yellow")))
+   "Face for fixed-with text like code snippets."
+   :group 'org-faces
+   :version "22.1")
 
 (defface org-agenda-structure ;; font-lock-function-name-face
   (org-compatible-face
@@ -4620,15 +4636,13 @@ between words."
 			   (mapconcat 'regexp-quote org-done-keywords "\\|")
 			   "\\)\\>")
 		   '(1 'org-done t)))
-	   ;; Table stuff
-	   '("^[ \t]*\\(:.*\\)" (1 'org-table t))
+	   ;; Code
+	   '("^[ \t]*\\(:.*\\)" (1 'org-code t))
+	   ;; Table
 	   '("| *\\(:?=[^|\n]*\\)" (1 'org-formula t))
-;	   '("^[ \t]*| *\\([#!$*_^/]\\) *|" (1 'org-formula t))
 	   '("^[ \t]*| *\\([#*]\\) *|" (1 'org-formula t))
 	   '("^[ \t]*|\\( *\\([$!_^/]\\) *|.*\\)|" (1 'org-formula t))
 	   ;; Drawers
-;	   (list org-drawer-regexp '(0 'org-drawer t))
-;	   (list "^[ \t]*:END:" '(0 'org-drawer t))
 	   (list org-drawer-regexp '(0 'org-special-keyword t))
 	   (list "^[ \t]*:END:" '(0 'org-special-keyword t))
 	   ;; Properties
@@ -17737,10 +17751,10 @@ that can be put into `org-agenda-skip-function' for the duration of a command."
 	   (not (re-search-forward org-deadline-time-regexp end t)))
       (and (setq m (memq 'regexp conditions))
 	   (stringp (setq r (nth 1 m)))
-	   (re-search-forward m end t))
+	   (re-search-forward (nth 1 m) end t))
       (and (setq m (memq 'notregexp conditions))
 	   (stringp (setq r (nth 1 m)))
-	   (not (re-search-forward m end t))))
+	   (not (re-search-forward (nth 1 m) end t))))
      end)))
 
 (defun org-agenda-list-stuck-projects (&rest ignore)
@@ -18380,7 +18394,8 @@ FRACTION is what fraction of the head-warning time has passed."
 				(progn (skip-chars-forward "^\r\n") (point))))
 		    (setq donep (string-match org-looking-at-done-regexp head))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
-			(setq timestr (concat (match-string 1 s) " ")))
+			(setq timestr (concat (match-string 1 s) " "))
+		      (setq timestr nil))
 		    (if (and donep
 			     (or org-agenda-skip-scheduled-if-done
 				 (not (= diff 0))))
@@ -21465,7 +21480,6 @@ the body tags themselves."
          (level 0) (line "") (origline "") txt todo
          (umax nil)
          (umax-toc nil)
-	 (dummy (debug))
          (filename (if to-buffer nil
 		     (concat (file-name-as-directory
 			      (org-export-directory :html opt-plist))

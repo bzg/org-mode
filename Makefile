@@ -103,8 +103,8 @@ org-install.elc:	org-install.el
 
 xemacs/noutline.elc: xemacs/noutline.el
 
-org:	org.texi
-	$(MAKEINFO) --no-split org.texi -o org
+#org:	org.texi
+#	$(MAKEINFO) --no-split org.texi -o org
 
 org.pdf: org.texi
 	$(TEXI2PDF) org.texi
@@ -133,8 +133,8 @@ orgcard_letter.ps: orgcard_letter.dvi
 
 # Below here are special targets for maintenance only
 
-info:	
-	$(MAKEINFO) --no-split org.texi -o org
+#info:	
+#	$(MAKEINFO) --no-split org.texi -o org
 
 pdf:	org.pdf
 
@@ -149,7 +149,7 @@ ecompile:
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 #	touch org.texi orgcard.tex
-	make info
+#	make info
 	make doc
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
