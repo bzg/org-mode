@@ -1,0 +1,18 @@
+The is the distribution of org-mode, version 3.14
+
+The homepage of org-mode is at http://www.astro.uva.nl/~domnik/Tools/org/
+
+INSTALLATION
+------------
+
+The installation instructions are in the documentation, org.pdf
+
+FILES IN THE DISTRIBUTION
+-------------------------
+
+org.el         The Emacs lisp code
+org.texi       Documentation source file
+org.pdf        Documentation in PDF format
+org            Documentation in Info format
+orgcard.pdf    Refcard, PDF format
+orgcard.tex    TeX source for refcard.pdf
