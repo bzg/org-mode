@@ -3,8 +3,8 @@
 ;; Copyright (c) 2006 Piotr Zielinski
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
-;; Version: 0.21
-;; $Id: org-mouse.el 347 2006-11-12 23:57:50Z pz215 $
+;; Version: 0.23
+;; $Id: org-mouse.el 806 2007-01-30 23:16:24Z pz215 $
 ;; 
 ;; The latest version of this file is available from
 ;;
@@ -67,7 +67,7 @@
 ;;
 ;;    (require 'org-mouse)
 ;;
-;; Tested with Emacs 22.0.50, org-mode 4.33
+;; Tested with Emacs 22.0.50, org-mode 4.58
 
 ;; Fixme:
 ;; + deal with folding / unfolding issues
@@ -86,6 +86,13 @@
 ;; Please email me with new feature suggestions / bugs
 
 ;; History:
+;;
+;; Version 0.23
+;; + preliminary support for tables and calculation marks
+;; + context menu support for org-agenda-undo & org-sort-entries
+;;
+;; Version 0.22
+;; + handles undo support for the agenda buffer (requires org-mode >=4.58)
 ;;
 ;; Version 0.21
 ;; + selected text activates its context menu
@@ -138,7 +145,7 @@
 ;;
 ;; Versions 0.01 -- 0.07: (I don't remember)
 
-(eval-when-compile (require 'cl))
+(require 'cl)
 
 (defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) ")
 (defvar org-mouse-direct t)
@@ -217,13 +224,12 @@
 
 (defun org-mouse-timestamp-today (&optional shift units) 
   (interactive)
-  (flet ((org-read-date (x &optional y) (current-time)))
+  (flet ((org-read-date (&rest rest) (current-time)))
      (org-time-stamp nil))
   (when shift
     (org-timestamp-change shift units)))
 
 (defun org-mouse-keyword-menu (keywords function &optional selected itemformat)
-  (message "kmenu: %S" selected)
   (mapcar 
    `(lambda (keyword) 
      (vector (cond
@@ -256,10 +262,12 @@
     (just-one-space)))
   
 
-(defun org-mouse-keyword-replace-menu (keywords &optional group itemformat)
+(defun org-mouse-keyword-replace-menu (keywords &optional group itemformat
+						nosurround)
   (setq group (or group 0))
   (let ((replace (org-mouse-match-closure 
-		  'org-mouse-replace-match-and-surround)))
+		  (if nosurround 'replace-match
+		    'org-mouse-replace-match-and-surround))))
     (append
      (org-mouse-keyword-menu 
       keywords
@@ -329,11 +337,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	      
 
 (defun org-mouse-priority-list ()
-  (let ((ret) (current org-lowest-priority))
-    (while (>= current ?A)
-      (push (char-to-string current) ret)
-      (decf current))
-    ret))
+   (loop for priority from ?A to org-lowest-priority 
+	 collect (char-to-string priority)))
 
 (defun org-mouse-tag-menu ()		;todo
   (append
@@ -476,15 +481,12 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
       :visible (org-at-item-p)])))
 
 			      
-;     ["Jump" org-goto])))
-
 (defun org-mouse-get-context (contextlist context)
-  (let ((contextdata (find-if (lambda (x) (eq (car x) context)) contextlist)))
+  (let ((contextdata (assq context contextlist)))
     (when contextdata
       (save-excursion 
-	(goto-char (nth 1 contextdata))
-;	(looking-at regexp)))))
-	(re-search-forward ".*" (nth 2 contextdata))))))
+	(goto-char (second contextdata))
+	(re-search-forward ".*" (third contextdata))))))
 
 (defun org-mouse-for-each-item (function)
   (save-excursion 
@@ -587,7 +589,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
        ,@(org-mouse-list-options-menu (mapcar 'car org-startup-options)
 				      'org-mode-restart))))
    ((or (eolp) 
-	(and (looking-at "  \\|\t") (looking-back "  \\|\t")))
+	(and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
+	     (looking-back "  \\|\t")))
     (org-mouse-popup-global-menu))
    ((get-context :checkbox)
     (popup-menu 
@@ -630,7 +633,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
        )))
    ((org-mouse-looking-at org-mouse-priority-regexp "[]A-Z#") ; priority
     (popup-menu `(nil ,@(org-mouse-keyword-replace-menu 
-			 (org-mouse-priority-list) 1 "Priority %s"))))
+			 (org-mouse-priority-list) 1 "Priority %s" t))))
    ((org-mouse-at-link)
     (popup-menu
      '(nil
@@ -642,6 +645,9 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(progn 
 	  (kill-region (match-beginning 0) (match-end 0))
 	  (just-one-space))]
+       "--"
+       ["Grep for TODOs"
+	(grep (format "grep -nH -i 'todo\\|fixme' %s*" (match-string 2)))]
 ;       ["Paste file link" ((insert "file:") (yank))]
        )))
    ((org-mouse-looking-at ":\\([A-Za-z0-9_]+\\):" "A-Za-z0-9_" -1) ;tags
@@ -674,6 +680,64 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
        ["- 1 Day" (org-timestamp-change -1 'day)]
        ["- 1 Week" (org-timestamp-change -7 'day)]
        ["- 1 Month" (org-timestamp-change -1 'month)])))
+   ((get-context :table-special)
+    (let ((mdata (match-data)))
+      (incf (car mdata) 2)
+      (store-match-data mdata))
+    (message "match: %S" (match-string 0))
+    (popup-menu `(nil ,@(org-mouse-keyword-replace-menu 
+			 '(" " "!" "^" "_" "$" "#" "*" "'") 0 
+			 (lambda (mark)
+			   (case (string-to-char mark)
+			     (?  "( ) Nothing Special")
+			     (?! "(!) Column Names")
+			     (?^ "(^) Field Names Above")
+			     (?_ "(^) Field Names Below")
+			     (?$ "($) Formula Parameters")
+			     (?# "(#) Recalculation: Auto")
+			     (?* "(*) Recalculation: Manual")
+			     (?' "(') Recalculation: None"))) t))))
+   ((assq :table contextlist)
+    (popup-menu
+     '(nil
+       ["Align Table" org-ctrl-c-ctrl-c]
+       ["Blank Field" org-table-blank-field]
+       ["Edit Field" org-table-edit-field]
+	"--"
+	("Column"
+	 ["Move Column Left" org-metaleft]
+	 ["Move Column Right" org-metaright]
+	 ["Delete Column" org-shiftmetaleft]
+	 ["Insert Column" org-shiftmetaright]
+	 "--"
+	 ["Enable Narrowing" (setq org-table-limit-column-width (not org-table-limit-column-width)) :selected org-table-limit-column-width :style toggle])
+	("Row"
+	 ["Move Row Up" org-metaup]
+	 ["Move Row Down" org-metadown]
+	 ["Delete Row" org-shiftmetaup]
+	 ["Insert Row" org-shiftmetadown]
+	 ["Sort lines in region" org-table-sort-lines (org-at-table-p)]
+	 "--"
+	 ["Insert Hline" org-table-insert-hline])
+	("Rectangle"
+	 ["Copy Rectangle" org-copy-special]
+	 ["Cut Rectangle" org-cut-special]
+	 ["Paste Rectangle" org-paste-special]
+	 ["Fill Rectangle" org-table-wrap-region])
+	"--"
+	["Set Column Formula" org-table-eval-formula]
+	["Set Named Field Formula" (org-table-eval-formula '(4))]
+	["Edit Formulas" org-table-edit-formulas]
+	["Recalculate line" org-table-recalculate]
+	["Recalculate all" (org-table-recalculate '(4))]
+	["Toggle Recalculate Mark" org-table-rotate-recalc-marks]
+	["Sum Column/Rectangle" org-table-sum
+	 :active (or (org-at-table-p) (org-region-active-p))]
+	["Which Column?" org-table-current-column]
+	["Debug Formulas"
+	 (setq org-table-formula-debug (not org-table-formula-debug))
+	 :style toggle :selected org-table-formula-debug]
+	)))
    ((and (assq :headline contextlist) (not (eolp)))
     (let ((priority (org-mouse-get-priority t)))
       (popup-menu
@@ -713,6 +777,14 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	 ["Cut Subtree"  org-cut-special]
 	 ["Copy Subtree"  org-copy-special]
 	 ["Paste Subtree"  org-paste-special :visible org-mouse-direct]
+	 ("Sort Children" 
+	  ["Alphabetically" (org-sort-entries nil ?a)]
+	  ["Numerically" (org-sort-entries nil ?n)]
+	  ["By Time/Date" (org-sort-entries nil ?t)]
+	  "--"
+	  ["Reverse Alphabetically" (org-sort-entries nil ?A)]
+	  ["Reverse Numerically" (org-sort-entries nil ?N)]
+	  ["Reverse By Time/Date" (org-sort-entries nil ?T)])
 	 "--"
 	 ["Move Trees" org-mouse-move-tree :active nil]
 	 ))))
@@ -875,23 +947,26 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 			  (outline-end-of-subtree) 
 			  (forward-char 1)
 			  (copy-marker (point)))))
-	  (with-current-buffer buffer
-	    (widen)
-	    (goto-char pos)
-	    (org-show-hidden-entry)
+	  (org-with-remote-undo buffer
+	    (with-current-buffer buffer
+	      (widen)
+	      (goto-char pos)
+	      (org-show-hidden-entry)
+	      (save-excursion
+		(and (outline-next-heading)
+		     (org-flag-heading nil)))   ; show the next heading
+	      (org-back-to-heading)
+	      (setq marker (copy-marker (point)))
+	      (goto-char (max (point-at-bol) (- (point-at-eol) anticol)))
+	      (funcall command)
+	      (message "_cmd: %S" _cmd)
+	      (message "this-command: %S" this-command)
+	      (unless (eq (marker-position marker) (marker-position endmarker))
+		(setq newhead (org-get-heading))))
+	    
+	    (beginning-of-line 1)
 	    (save-excursion
-	      (and (outline-next-heading)
-		   (org-flag-heading nil)))   ; show the next heading
-	    (org-back-to-heading)
-	    (setq marker (copy-marker (point)))
-	    (goto-char (max (point-at-bol) (- (point-at-eol) anticol)))
-	    (funcall command)
-	    (unless (eq (marker-position marker) (marker-position endmarker))
-	      (setq newhead (org-get-heading))))
-	  
-	  (beginning-of-line 1)
-	  (save-excursion
-	    (org-agenda-change-all-lines newhead hdmarker 'fixface)))
+	      (org-agenda-change-all-lines newhead hdmarker 'fixface))))
 	t))))
 
 (defun org-mouse-agenda-context-menu (&optional event)
@@ -900,6 +975,10 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
        '("Agenda"
 	 ("Agenda Files")
 	 "--"
+	 ["Undo" (progn (message "last command: %S" last-command) (setq this-command 'org-agenda-undo) (org-agenda-undo))
+	  :visible (if (eq last-command 'org-agenda-undo) 
+		       org-agenda-pending-undo-list
+		     org-agenda-undo-list)]
 	 ["Rebuild Buffer" org-agenda-redo t]
 	 ["New Diary Entry" 
 	  org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline) t]

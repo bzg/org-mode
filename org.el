@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.62
+;; Version: 4.64a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -59,81 +59,8 @@
 ;; excellent reference card made by Philip Rooke.  This card can be found
 ;; in the etc/ directory of Emacs 22.
 ;;
-;; Recent changes
-;; --------------
-;; Version 4.62
-;;    - Many changes to the spreadsheet functions in the table editor.
-;;      For deatils, please re-read the manual section 3.4.
-;;      + New Features
-;;        - It is much easier to assign formulas to individual fields.
-;;        - References to arbitrary fields and ranges.
-;;        - Absolute references are modified in row-editing commands.
-;;        - Formula editor that highlights referenced fields.
-;;      + Incompatible changes
-;;        - Empty fields are excluded in range references, see "E" mode flag.
-;;        - &... ranges no longer supported, use new @... ranges.
-;;        - Variable insertion into Lisp formulas work differently.
-;;    - Selected text becomes the default description for C-c C-l links.(Scott)
-;;    - The date format in the agenda/timeline views is now customizable.
-;;      See the new option `org-agenda-date-format'. (request by Victor)
-;;    - Link abbreviations no longer need a double colon, single colon is fine.
-;;    - Bug fixes.
-;;
-;; Version 4.61
-;;    - Avoiding keybinding clashes with flyspell
-;;      - Archiving is now also on `C-C C-x C-s' (was just `C-c $')
-;;      - Cycling through agenda files is now also on "C-'" (was just "C-,")
-;;    - Colon is considered part of number, to align times in clock tables.
-;;    - Fixed bug for list of stuck projects.
-;;    - Fixed several bugs/problems concerning linking to gnus.
-;;    - Block agendas can contain the list of stuck projects.
-;;    - #+ARCHIVE may now appear several times in the buffer.
-;;    - More bug fixes.
-;;
-;; Version 4.60
-;;    - HTML export: inlining images, clickable images (manual 10.2.4).
-;;    - Incremental search now shows proper context when exiting.
-;;    - Tables calculation and Calc package.
-;;      - Calc is no longer needed when using only elisp formulas.
-;;      - Proper error messages when calc is needed and not available.
-;;    - Tracking TODO state changes with time stamps and notes.
-;;    - Empty entries go full circle.
-;;    - Links in iCalendar export cleaned up.
-;;    - Bug fixes.
-;;
-;; Version 4.59
-;;    - Cleanup code, bug fixes.
-;;
-;; Version 4.58
-;;    - Full undo support in the agenda buffer.
-;;    - Listing stuck GTD projects (projects without any NEXT ACTIONS).
-;;      Configure `org-stuck-projects' before using it.
-;;    - C-c C-x b shows the current subtree in an indirect buffer, in
-;;      another, dedicated frame.
-;;    - Custom agenda commands take precedence over builtin commands.
-;;    - auto-fill for comments works on the Emacs side, XEmacs not yet.
-;;
-;; Version 4.57
-;;    - Sorting of outline items on same level.
-;;    - Sorting tables automatically selects line range between hlines.
-;;    - Changes in Agenda buffer
-;;      - `C-c C-o' follows a link in the current line.
-;;      - `C-c $' archives the subtree corresponding to the line.
-;;      - Changing dates with S-left and S-right show new date in agenda,
-;;        but still do not move the entry to the new date.
-;;      - new option `org-agenda-skip-scheduled-if-done'.
-;;    - Agenda and sparse tree construction using tag matches can now
-;;      use regular expressions.
-;;    - When prompted for a date/time, entering "+7" indicates a date
-;;      7 days from now - but only this is the only thing you give.
-;;    - Custom time formats also apply to exported html and ascii.
-;;    - Bug fixes.
-;;
-;; Version 4.56
-;;    - `C-k' in agenda kills current line and corresponding subtree in file.
-;;    - XEmacs compatibility issues fixed, in particular tag alignment.
-;;    - M-left/right now in/outdents plain list items, no Shift needed.
-;;    - Bug fixes.
+;; A list of recent changes can be found at
+;; http://www.astro.uva.nl/~dominik/Tools/org/Changes
 ;;
 ;;; Code:
 
@@ -156,7 +83,7 @@
 
 ;;; Version
 
-(defvar org-version "4.62"
+(defvar org-version "4.64a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1021,6 +948,39 @@ Changing this variable requires a restart of Emacs to become effective."
   :tag "Org Store Link"
   :group 'org-link)
 
+;; FIXME: separate format for gnus?
+(defcustom org-email-link-description-format "Email %c: %.30s"
+  "Format of the description part of a link to an email or usenet message.
+The following %-excapes will be replaced by corresponding information:
+
+%F   full \"From\" field
+%f   name, taken from \"From\" field, address if no name
+%T   full \"To\" field
+%t   first name in \"To\" field, address if no name
+%c   correspondent.  Unually \"from NAME\", but if you sent it yourself, it
+     will be \"to NAME\".  See also the variable `org-from-is-user-regexp'.
+%s   subject
+%m   message-id.
+
+You may use normal field width specification between the % and the letter.
+This is for example useful to limit the length of the subject.
+
+Examples: \"%f on: %.30s\", \"Email from %f\", \"Email %c\""
+  :group 'org-link-store
+  :type 'string)
+
+(defcustom org-from-is-user-regexp
+  (let (r1 r2)
+    (when (and user-mail-address (not (string= user-mail-address "")))
+      (setq r1 (concat "\\<" (regexp-quote user-mail-address) "\\>")))
+    (when (and user-full-name (not (string= user-full-name "")))
+      (setq r2 (concat "\\<" (regexp-quote user-full-name) "\\>")))
+    (if (and r1 r2) (concat r1 "\\|" r2) (or r1 r2)))
+  "Regexp mached against the \"From:\" header of an email or usenet message.
+It should match if the message is from the user him/herself."
+  :group 'org-link-store
+  :type 'regexp)
+
 (defcustom org-context-in-file-links t
   "Non-nil means, file links from `org-store-link' contain context.
 A search string will be added to the file name with :: as separator and
@@ -1293,39 +1253,83 @@ Used by the hooks for remember.el."
 (defcustom org-default-notes-file "~/.notes"
   "Default target for storing notes.
 Used by the hooks for remember.el.  This can be a string, or nil to mean
-the value of `remember-data-file'."
+the value of `remember-data-file'.
+You can set this on a per-template basis with the variable
+`org-remember-templates'."
   :group 'org-remember
   :type '(choice
 	  (const :tag "Default from remember-data-file" nil)
 	  file))
 
+(defcustom org-remember-default-headline ""
+  "The headline that should be the default location in the notes file.
+When filing remember notes, the cursor will start at that position.
+You can set this on a per-template basis with the variable
+`org-remember-templates'."
+  :group 'org-remember
+  :type 'string)
+
 (defcustom org-remember-templates nil
   "Templates for the creation of remember buffers.
 When nil, just let remember make the buffer.
-When not nil, this is a list of 3-element lists.  In each entry, the first
+When not nil, this is a list of 4-element lists.  In each entry, the first
 element is a character, a unique key to select this template.
 The second element is the template.  The third element is optional and can
 specify a destination file for remember items created with this template.
-The default file is given by `org-default-notes-file'.
+The default file is given by `org-default-notes-file'.  An optional third
+element can specify the headline in that file that should be offered
+first when the user is asked to file the entry.  The default headline is
+given in the variable `org-remember-default-headline'.
 
 The template specifies the structure of the remember buffer.  It should have
 a first line starting with a star, to act as the org-mode headline.
 Furthermore, the following %-escapes will be replaced with content:
-  %t  time stamp, date only
-  %T  time stamp with date and time
-  %u  inactive time stamp, date only
-  %U  inactive time stamp with date and time
-  %n  user name
-  %a  annotation, normally the link created with org-store-link
-  %i  initial content, the region when remember is called with C-u.
-      If %i is indented, the entire inserted text will be indented as well.
-  %?  This will be removed, and the cursor placed at this position."
+
+  %^{prompt}  prompt the user for a string and replace this sequence with it.
+  %t          time stamp, date only
+  %T          time stamp with date and time
+  %u, %U      like the above, but inactive time stamps
+  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U
+              You may define a prompt like %^{Please specify birthday}t
+  %n          user name (taken from `user-full-name')
+  %a          annotation, normally the link created with org-store-link
+  %i          initial content, the region when remember is called with C-u.
+              If %i is indented, the entire inserted text will be indented
+              as well.
+
+  %?          After completing the template, position cursor here.
+
+Apart from these general escapes, you can access information specific to the
+link type that is created.  For example, calling `remember' in emails or gnus
+will record the author and the subject of the message, which you can access
+with %:author and %:subject, respectively.  Here is a complete list of what
+is recorded for each link type.
+
+Link type          |  Available information
+-------------------+------------------------------------------------------
+bbdb               |  %:type %:name %:company
+vm, wl, mh, rmail  |  %:type %:subject %:message-id
+                   |  %:from %:fromname %:fromaddress
+                   |  %:to   %:toname   %:toaddress
+                   |  %:fromto (either \"to NAME\" or \"from NAME\")
+gnus               |  %:group, for messages also all email fields
+w3, w3m            |  %:type %:url
+info               |  %:type %:file %:node
+calendar           |  %:type %:date"
   :group 'org-remember
-  :type '(repeat :tag "enabled"
-		 (list :value (?a "\n" nil)
-		       (character :tag "Selection Key")
-		       (string :tag "Template")
-		       (file :tag "Destination file (optional)"))))
+  :get (lambda (var) ; Make sure all entries have 4 elements
+	 (mapcar (lambda (x)
+		   (cond ((= (length x) 3) (append x '("")))
+			 ((= (length x) 2) (append x '("" "")))
+			 (t x)))
+		 (default-value var)))
+  :type '(repeat
+	  :tag "enabled"
+	  (list :value (?a "\n" nil nil)
+		(character :tag "Selection Key")
+		(string :tag "Template")
+		(file :tag "Destination file (optional)")
+		(string :tag "Destination headline (optional)"))))
 
 (defcustom org-reverse-note-order nil
   "Non-nil means, store new notes at the beginning of a file or entry.
@@ -1958,7 +1962,8 @@ When nil, only the days which actually have entries are shown."
 (defcustom org-agenda-date-format "%A %d %B %Y"
   "Format string for displaying dates in the agenda.
 Used by the daily/weekly agenda and by the timeline.  This should be
-a format string understood by `format-time-string'."
+a format string understood by `format-time-string'.
+FIXME: Not used currently, because of timezone problem."
   :group 'org-agenda-daily/weekly
   :type 'string)
   
@@ -3694,6 +3699,12 @@ that will be added to PLIST.  Returns the string that was modified."
 ; 4: [desc]
 ; 5: desc
 
+(defconst org-any-link-re
+  (concat "\\(" org-bracket-link-regexp "\\)\\|\\("
+	  org-angle-link-re "\\)\\|\\("
+	  org-plain-link-re "\\)")
+  "Regular expression matching any link.")	  
+
 (defconst org-ts-lengths
   (cons (length (format-time-string (car org-time-stamp-formats)))
 	(length (format-time-string (cdr org-time-stamp-formats))))
@@ -4337,8 +4348,13 @@ or nil."
 	      (org-startup-with-deadline-check nil))
 	  (org-mode))
 	(setq buffer-read-only t)
-	(if (boundp 'org-goto-start-pos)
-	    (goto-char org-goto-start-pos)
+	(if (and (boundp 'org-goto-start-pos)
+		 (integer-or-marker-p org-goto-start-pos))
+	    (let ((org-show-hierarchy-above t)
+		  (org-show-siblings t)
+		  (org-show-following-heading t))
+	      (goto-char org-goto-start-pos)
+	      (and (org-invisible-p) (org-show-context)))
 	  (goto-char (point-min)))
 	(org-beginning-of-line)
 	(message "Select location and press RET")
@@ -7224,9 +7240,13 @@ When NAMED is non-nil, look for a named equation."
   (setq alist (sort alist (lambda (a b) (string< (car a) (car b)))))
   (save-excursion
     (goto-char (org-table-end))
-    (if (looking-at "\\([ \t]*\n\\)*#\\+TBLFM:.*\n?")
-	(delete-region (point) (match-end 0)))
-    (insert "#+TBLFM: "
+    (if (looking-at "\\([ \t]*\n\\)*#\\+TBLFM:\\(.*\n?\\)")
+	(progn
+	  ;; don't overwrite TBLFM, we might use text properties to store stuff
+	  (goto-char (match-beginning 2))
+	  (delete-region (match-beginning 2) (match-end 0)))
+      (insert "#+TBLFM:"))
+    (insert " "
 	    (mapconcat (lambda (x)
 			 (concat
 			  (if (equal (string-to-char (car x)) ?@) "" "$")
@@ -7862,6 +7882,7 @@ With prefix arg ALL, do this for all lines in the table."
 	  (org-table-eval-formula nil (cdr eq) 'noalign 'nocst
 				  'nostore 'noanalysis)))
       ;; back to initial position
+      (message "Re-applying formulas...done")
       (goto-line thisline)
       (org-table-goto-column thiscol)
       (or noalign (and org-table-may-need-update (org-table-align))
@@ -8440,7 +8461,7 @@ to execute outside of tables."
 	 ["Fill Rectangle" org-table-wrap-region :active (org-at-table-p)])
 	"--"
 	["Set Column Formula" org-table-eval-formula :active (org-at-table-p) :keys "C-c ="]
-	["Set Named Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
+	["Set Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
 	["Edit Formulas" org-table-edit-formulas :active (org-at-table-p) :keys "C-c '"]
 	["Recalculate line" org-table-recalculate :active (org-at-table-p) :keys "C-c *"]
 	["Recalculate all" (org-table-recalculate '(4)) :active (org-at-table-p) :keys "C-u C-c *"]
@@ -8530,6 +8551,9 @@ overwritten, and the table is not marked as requiring realignment."
 (defvar org-stored-links nil
   "Contains the links stored with `org-store-link'.")
 
+(defvar org-store-link-plist nil
+  "Plist with info about the most recently link created with `org-store-link'.")
+
 ;;;###autoload
 (defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
@@ -8539,22 +8563,25 @@ For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
+  (setq org-store-link-plist nil)  ; reset
   (let (link cpltxt desc description search txt (pos (point)))
     (cond
 
      ((eq major-mode 'bbdb-mode)
-      (setq cpltxt (concat
-		    "bbdb:"
-		    (or (bbdb-record-name (bbdb-current-record))
-			(bbdb-record-company (bbdb-current-record))))
-	    link (org-make-link cpltxt)))
-
+      (let ((name (bbdb-record-name (bbdb-current-record)))
+	    (company (bbdb-record-company (bbdb-current-record))))
+	(setq cpltxt (concat "bbdb:" (or name company))
+	      link (org-make-link cpltxt))
+	(org-store-link-props :type "bbdb" :name name :company company)))
+     
      ((eq major-mode 'Info-mode)
       (setq link (org-make-link "info:"
 				(file-name-nondirectory Info-current-file)
 				":" Info-current-node))
       (setq cpltxt (concat (file-name-nondirectory Info-current-file)
-			   ":" Info-current-node)))
+			   ":" Info-current-node))
+      (org-store-link-props :type "info" :file Info-current-file
+			    :node Info-current-node))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
@@ -8563,7 +8590,8 @@ For file links, arg negates `org-context-in-file-links'."
 	       (car org-time-stamp-formats)
 	       (apply 'encode-time
 		      (list 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd)
-			    nil nil nil))))))
+			    nil nil nil))))
+	(org-store-link-props :type "calendar" :date cd)))
 
      ((or (eq major-mode 'vm-summary-mode)
 	  (eq major-mode 'vm-presentation-mode))
@@ -8574,14 +8602,17 @@ For file links, arg negates `org-context-in-file-links'."
        (let* ((message (car vm-message-pointer))
 	      (folder buffer-file-name)
 	      (subject (vm-su-subject message))
-	      (author (vm-su-full-name message))
+	      (to (vm-get-header-contents message "To")) ; FIXME: untested
+	      (from (vm-get-header-contents message "From")) ; FIXME: untested
 	      (message-id (vm-su-message-id message)))
+	 (org-store-link-props :type "vm" :from from :to to :subject subject
+			       :message-id message-id)
 	 (setq message-id (org-remove-angle-brackets message-id))
 	 (setq folder (abbreviate-file-name folder))
 	 (if (string-match (concat "^" (regexp-quote vm-folder-directory))
 			   folder)
 	     (setq folder (replace-match "" t t folder)))
-	 (setq cpltxt (concat author " on: " subject))
+	 (setq cpltxt (org-email-link-description))
 	 (setq link (org-make-link "vm:" folder "#" message-id)))))
 
      ((eq major-mode 'wl-summary-mode)
@@ -8594,23 +8625,26 @@ For file links, arg negates `org-context-in-file-links'."
 		   wl-summary-buffer-elmo-folder msgnum)
 		  (elmo-msgdb-overview-get-entity
 		   msgnum (wl-summary-buffer-msgdb))))
-	     ;; FIXME: How to get author and subject in wl???
-	     (author (wl-summary-line-from)) ; ?
-	     (subject "???"))
+	     (from (wl-summary-line-from))
+	     (subject (wl-summary-line-subject))) ; FIXME: untested
+	(org-store-link-props :type "wl" :from from :to "???"
+			      :subject subject :message-id message-id)
 	(setq message-id (org-remove-angle-brackets message-id))
-	(setq cpltxt (concat author  " on: " subject))
+	(setq cpltxt (org-email-link-description))
 	(setq link (org-make-link "wl:" wl-summary-buffer-folder-name
 				  "#" message-id))))
 
      ((or (equal major-mode 'mh-folder-mode)
 	  (equal major-mode 'mh-show-mode))
-      (let ((from-header (org-mhe-get-header "From:"))
-	    (to-header (org-mhe-get-header "To:"))
+      (let ((from (org-mhe-get-header "From:"))
+	    (to (org-mhe-get-header "To:"))
+	    (message-id (org-mhe-get-header "Message-Id:"))
 	    (subject (org-mhe-get-header "Subject:")))
-	(setq cpltxt (concat from-header " on: " subject))
+	(org-store-link-props :type "mh" :from from :to to
+			      :subject subject :message-id message-id)
+	(setq cpltxt (org-email-link-description))
 	(setq link (org-make-link "mhe:" (org-mhe-get-message-real-folder) "#"
-				  (org-remove-angle-brackets
-				   (org-mhe-get-header "Message-Id:"))))))
+				  (org-remove-angle-brackets message-id)))))
 
      ((eq major-mode 'rmail-mode)
       (save-excursion
@@ -8618,10 +8652,14 @@ For file links, arg negates `org-context-in-file-links'."
 	  (rmail-narrow-to-non-pruned-header)
 	  (let ((folder buffer-file-name)
 		(message-id (mail-fetch-field "message-id"))
-		(author (mail-fetch-field "from"))
+		(from (mail-fetch-field "from"))
+		(to (mail-fetch-field "to"))
 		(subject (mail-fetch-field "subject")))
+	    (org-store-link-props
+	     :type "rmail" :from from :to to
+	     :subject subject :message-id message-id)
 	    (setq message-id (org-remove-angle-brackets message-id))
-	    (setq cpltxt (concat author  " on: " subject))
+	    (setq cpltxt (org-email-link-description))
 	    (setq link (org-make-link "rmail:" folder "#" message-id))))))
 
      ((eq major-mode 'gnus-group-mode)
@@ -8631,6 +8669,7 @@ For file links, arg negates `org-context-in-file-links'."
 			  (gnus-group-name))
 			 (t "???"))))
 	(unless group (error "Not on a group"))
+	(org-store-link-props :type "gnus" :group group)
 	(setq cpltxt (concat
 		      (if (org-xor arg org-usenet-links-prefer-google)
 			  "http://groups.google.com/groups?group="
@@ -8643,11 +8682,13 @@ For file links, arg negates `org-context-in-file-links'."
       (let* ((group gnus-newsgroup-name)
 	     (article (gnus-summary-article-number))
 	     (header (gnus-summary-article-header article))
-	     (author (mail-header-from header))
+	     (from (mail-header-from header))
 	     (message-id (mail-header-id header))
 	     (date (mail-header-date header))
 	     (subject (gnus-summary-subject-string)))
-	(setq cpltxt (concat author " on: " subject))
+	(org-store-link-props :type "gnus" :from from :subject subject
+			      :message-id message-id :group group)
+	(setq cpltxt (org-email-link-description))
 	(if (org-xor arg org-usenet-links-prefer-google)
 	    (setq link
 		  (concat
@@ -8659,10 +8700,13 @@ For file links, arg negates `org-context-in-file-links'."
 
      ((eq major-mode 'w3-mode)
       (setq cpltxt (url-view-url t)
-	    link (org-make-link cpltxt)))
+	    link (org-make-link cpltxt))
+      (org-store-link-props :type "w3" :url (url-view-url t)))
+
      ((eq major-mode 'w3m-mode)
       (setq cpltxt (or w3m-current-title w3m-current-url)
-	    link (org-make-link w3m-current-url)))
+	    link (org-make-link w3m-current-url))
+      (org-store-link-props :type "w3m" :url (url-view-url t)))
 
      ((setq search (run-hook-with-args-until-success
 		    'org-create-file-search-functions))
@@ -8673,7 +8717,8 @@ For file links, arg negates `org-context-in-file-links'."
      ((eq major-mode 'image-mode)
       (setq cpltxt (concat "file:"
 			   (abbreviate-file-name buffer-file-name))
-	    link (org-make-link cpltxt)))
+	    link (org-make-link cpltxt))
+      (org-store-link-props :type "image" :file buffer-file-name))
 
      ((eq major-mode 'dired-mode)
       ;; link to the file in the current line
@@ -8712,7 +8757,7 @@ For file links, arg negates `org-context-in-file-links'."
       (if (string-match "::\\'" cpltxt)
 	  (setq cpltxt (substring cpltxt 0 -2)))
       (setq link (org-make-link cpltxt)))
-
+     
      (buffer-file-name
       ;; Just link to this file here.
       (setq cpltxt (concat "file:"
@@ -8748,6 +8793,51 @@ For file links, arg negates `org-context-in-file-links'."
 		(cons (list cpltxt link desc) org-stored-links))
 	  (message "Stored: %s" (or cpltxt link)))
       (org-make-link-string link desc))))
+
+(defun org-store-link-props (&rest plist)
+  "Store link properties, extract names and addresses."
+  (let (x adr)
+    (when (setq x (plist-get plist :from))
+      (setq adr (mail-extract-address-components x))
+      (plist-put plist :fromname (car adr))
+      (plist-put plist :fromaddress (nth 1 adr)))
+    (when (setq x (plist-get plist :to))
+      (setq adr (mail-extract-address-components x))
+      (plist-put plist :toname (car adr))
+      (plist-put plist :toaddress (nth 1 adr))))
+  (let ((from (plist-get plist :from))
+	(to (plist-get plist :to)))
+    (when (and from to org-from-is-user-regexp)
+      (plist-put plist :fromto
+		 (if (string-match org-from-is-user-regexp from)
+		     (concat "to %t")
+		   (concat "from %f")))))
+  (setq org-store-link-plist plist))
+
+(defun org-email-link-description (&optional fmt)
+  "Return the description part of an email link.
+This takes information from `org-store-link-plist' and formats it
+according to FMT (default from `org-email-link-description-format')."
+  (setq fmt (or fmt org-email-link-description-format))
+  (let* ((p org-store-link-plist)
+	 (to (plist-get p :toaddress))
+	 (from (plist-get p :fromaddress))
+	 (table
+	  (list
+	   (cons "%c" (plist-get p :fromto))
+	   (cons "%F" (plist-get p :from))
+	   (cons "%f" (or (plist-get p :fromname) (plist-get p :fromaddress) "?"))
+	   (cons "%T" (plist-get p :to))
+	   (cons "%t" (or (plist-get p :toname) (plist-get p :toaddress) "?"))
+	   (cons "%s" (plist-get p :subject))
+	   (cons "%m" (plist-get p :message-id)))))
+    (when (string-match "%c" fmt)
+      ;; Check if the user wrote this message
+      (if (and org-from-is-user-regexp from to
+	       (save-match-data (string-match org-from-is-user-regexp from)))
+	  (setq fmt (replace-match "to %t" t t fmt))
+	(setq fmt (replace-match "from %f" t t fmt))))
+    (org-replace-escapes fmt table)))
 
 (defun org-make-org-heading-search-string (&optional string heading)
   "Make search string for STRING or current headline."
@@ -8906,10 +8996,10 @@ is in the current directory or below.
 With three \\[universal-argument] prefixes, negate the meaning of
 `org-keep-stored-link-after-insertion'."
   (interactive "P")
-  (let ((region (if (and nil (org-region-active-p))
+  (let ((region (if (org-region-active-p)
 		    (prog1 (buffer-substring (region-beginning) (region-end))
 		      (delete-region (region-beginning) (region-end)))))
-	link desc entry remove file (pos (point)))
+	link desc entry remove file (pos (point)) tmphist)
     (cond
      ((save-excursion
 	(skip-chars-forward "^]\n\r")
@@ -8943,11 +9033,15 @@ With three \\[universal-argument] prefixes, negate the meaning of
 	 (t (setq link (org-make-link "file:" file))))))
      (t
       ;; Read link, with completion for stored links.
+      ;; Fake a link history
+      (setq tmphist (append (mapcar 'car org-stored-links)
+			    org-insert-link-history))
       (setq link (org-completing-read
 		  "Link: " org-stored-links nil nil nil
-		  org-insert-link-history
+		  'tmphist
 		  (or (car (car org-stored-links)))))
       (setq entry (assoc link org-stored-links))
+      (or entry (push link org-insert-link-history))
       (if (funcall (if (equal complete-file '(64)) 'not 'identity)
 		   (not org-keep-stored-link-after-insertion))
 	  (setq org-stored-links (delq (assoc link org-stored-links)
@@ -9005,6 +9099,47 @@ With three \\[universal-argument] prefixes, negate the meaning of
     (apply 'completing-read args)))
 
 ;;; Opening/following a link
+(defvar org-link-search-failed nil)
+
+(defun org-next-link ()
+  "Move forward to the next link.
+If the link is in hidden text, expose it."
+  (interactive)
+  (when (and org-link-search-failed (eq this-command last-command))
+    (goto-char (point-min))
+    (message "Link search wrapped back to beginning of buffer"))
+  (setq org-link-search-failed nil)
+  (let* ((pos (point))
+	 (ct (org-context))
+	 (a (assoc :link ct)))
+    (if a (goto-char (nth 2 a)))
+    (if (re-search-forward org-any-link-re nil t)
+	(progn
+	  (goto-char (match-beginning 0))
+	  (if (org-invisible-p) (org-show-context)))
+      (goto-char pos)
+      (setq org-link-search-failed t)
+      (error "No further link found"))))
+
+(defun org-previous-link ()
+  "Move backward to the previous link.
+If the link is in hidden text, expose it."
+  (interactive)
+  (when (and org-link-search-failed (eq this-command last-command))
+    (goto-char (point-max))
+    (message "Link search wrapped back to end of buffer"))
+  (setq org-link-search-failed nil)
+  (let* ((pos (point))
+	 (ct (org-context))
+	 (a (assoc :link ct)))
+    (if a (goto-char (nth 1 a)))
+    (if (re-search-backward org-any-link-re nil t)
+	(progn
+	  (goto-char (match-beginning 0))
+	  (if (org-invisible-p) (org-show-context)))
+      (goto-char pos)
+      (setq org-link-search-failed t)
+      (error "No further link found"))))
 
 (defun org-find-file-at-mouse (ev)
   "Open file link or URL at mouse."
@@ -9867,31 +10002,51 @@ RET on headline   -> Store as sublevel entry to current headline
 <left>/<right>    -> before/after current headline, same headings level")
 
 ;;;###autoload
-(defun org-remember-apply-template ()
+(defun org-remember-apply-template (&optional use-char skip-interactive)
   "Initialize *remember* buffer with template, invoke `org-mode'.
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to fucntion properly."
   (if org-remember-templates
 
-      (let* ((entry (if (= (length org-remember-templates) 1)
-			(cdar org-remember-templates)
-		      (message "Select template: %s"
-			       (mapconcat
-				(lambda (x) (char-to-string (car x)))
-				org-remember-templates " "))
-		      (cdr (assoc (read-char-exclusive) org-remember-templates))))
+      (let* ((char (or use-char
+		       (if (= (length org-remember-templates) 1)
+			   (caar org-remember-templates)
+			 (message "Select template: %s"
+				  (mapconcat
+				   (lambda (x) (char-to-string (car x)))
+				   org-remember-templates " "))
+			 (read-char-exclusive))))
+	     (entry (cdr (assoc char org-remember-templates)))
 	     (tpl (car entry))
-	     (file (if (consp (cdr entry)) (nth 1 entry)))
+	     (plist-p (if org-store-link-plist t nil))
+	     (file (if (and (nth 1 entry) (stringp (nth 1 entry))
+			    (string-match "\\S-" (nth 1 entry)))
+		       (nth 1 entry)
+		     org-default-notes-file))
+	     (headline (nth 2 entry))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
 	     (v-U (concat "[" (substring v-T 1 -1) "]"))
-	     (v-a annotation)   ; defined in `remember-mode'
 	     (v-i initial)      ; defined in `remember-mode'
+	     (v-a (if (equal annotation "[[]]") "" annotation)) ; likewise
 	     (v-n user-full-name)
-	     )
+	     (org-startup-folded nil)
+	     (org-startup-with-deadline-check nil)
+	     org-time-was-given x prompt char time)
+	(setq org-store-link-plist
+	      (append (list :annotation v-a :initial v-i)))
 	(unless tpl (setq tpl "")	(message "No template") (ding))
+	(erase-buffer)
+	(insert (substitute-command-keys
+		 (format
+		  "## `C-c C-c' to file interactively, `C-u C-c C-c' to file directly.
+## Target file \"%s\", headline \"%s\"
+## To switch templates, use `\\[org-remember]'.\n\n"
+		  (abbreviate-file-name (or file org-default-notes-file))
+		  (or headline ""))))
 	(insert tpl) (goto-char (point-min))
+	;; Simple %-escapes
 	(while (re-search-forward "%\\([tTuTai]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
@@ -9903,17 +10058,61 @@ to be run from that hook to fucntion properly."
 	  (replace-match
 	   (or (eval (intern (concat "v-" (match-string 1)))) "")
 	   t t))
-	(let ((org-startup-folded nil)
-	      (org-startup-with-deadline-check nil))
-	  (org-mode))
+	;; From the property list
+	(when plist-p
+	  (goto-char (point-min))
+	  (while (re-search-forward "%\\(:[-a-zA-Z]+\\)" nil t)
+	    (and (setq x (plist-get org-store-link-plist
+				    (intern (match-string 1))))
+		 (replace-match x t t))))
+	;; Turn on org-mode in the remember buffer, set local variables
+	(org-mode)
+	(org-set-local 'org-finish-function 'remember-buffer)
 	(if (and file (string-match "\\S-" file) (not (file-directory-p file)))
 	    (org-set-local 'org-default-notes-file file))
+	(if (and headline (stringp headline) (string-match "\\S-" headline))
+	    (org-set-local 'org-remember-default-headline headline))
+	;; Interactive template entries
 	(goto-char (point-min))
-	(if (re-search-forward "%\\?" nil t) (replace-match "")))
-    (let ((org-startup-folded nil)
-	  (org-startup-with-deadline-check nil))
-      (org-mode)))
-  (org-set-local 'org-finish-function 'remember-buffer))
+	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([uUtT]\\)?" nil t)
+	  (setq char (if (match-end 3) (match-string 3))
+		prompt (if (match-end 2) (match-string 2)))
+	  (goto-char (match-beginning 0))
+	  (replace-match "")
+	  (if char
+	      (progn
+		(setq org-time-was-given (equal (upcase char) char))
+		(setq time (org-read-date (equal (upcase char) "U") t nil
+					  prompt))
+		(org-insert-time-stamp time org-time-was-given
+				       (member char '("u" "U"))))
+	    (insert (read-string
+		     (if prompt (concat prompt ": ") "Enter string")))))
+	(goto-char (point-min))
+	(if (re-search-forward "%\\?" nil t)
+	    (replace-match "")
+	  (and (re-search-forward "^[^#\n]" nil t) (backward-char 1))))
+    (org-mode)
+    (org-set-local 'org-finish-function 'remember-buffer)))
+
+;;;###autoload
+(defun org-remember ()
+  "Call `remember'.  If this is already a remember buffer, re-apply template.
+If there is an active region, amke sure remember uses it as initial content
+of the remember buffer."
+  (interactive)
+  (if (eq org-finish-function 'remember-buffer)
+      (progn
+	(when (< (length org-remember-templates) 2)
+	  (error "No other template available"))
+	(erase-buffer)
+	(let ((annotation (plist-get org-store-link-plist :annotation))
+	      (initial (plist-get org-store-link-plist :initial)))
+	  (org-remember-apply-template))
+	(message "Press C-c C-c to remember data"))
+    (if (org-region-active-p)
+	(remember (buffer-substring (point) (mark)))
+      (call-interactively 'remember))))
 
 ;;;###autoload
 (defun org-remember-handler ()
@@ -9949,22 +10148,24 @@ also indented so that it starts in the same column as the headline
 \(i.e. after the stars).
 
 See also the variable `org-reverse-note-order'."
+  (goto-char (point-min))
+  (while (looking-at "^[ \t]*\n\\|^##.*\n")
+    (replace-match ""))
   (catch 'quit
     (let* ((txt (buffer-substring (point-min) (point-max)))
 	   (fastp current-prefix-arg)
 	   (file (if fastp org-default-notes-file (org-get-org-file)))
+	   (heading org-remember-default-headline)
 	   (visiting (find-buffer-visiting file))
 	   (org-startup-with-deadline-check nil)
 	   (org-startup-folded nil)
 	   (org-startup-align-all-tables nil)
+	   (org-goto-start-pos 1)
 	   spos level indent reversed)
       ;; Modify text so that it becomes a nice subtree which can be inserted
       ;; into an org tree.
       (let* ((lines (split-string txt "\n"))
 	     first)
-	;; remove empty lines at the beginning
-	(while (and lines (string-match "^[ \t]*\n" (car lines)))
-	  (setq lines (cdr lines)))
 	(setq first (car lines) lines (cdr lines))
 	(if (string-match "^\\*+" first)
 	    ;; Is already a headline
@@ -9989,10 +10190,20 @@ See also the variable `org-reverse-note-order'."
 	(save-excursion
 	  (save-restriction
 	    (widen)
+
+	    ;; Find the default location
+	    (when (and heading (stringp heading) (string-match "\\S-" heading))
+	      (goto-char (point-min))
+	      (if (re-search-forward
+		   (concat "^\\*+[ \t]+" (regexp-quote heading)
+			   "\\([ \t]+:[@a-zA-Z0-9_:]*\\)?[ \t]*$")
+		   nil t)
+		  (setq org-goto-start-pos (match-beginning 0))))
+
 	    ;; Ask the User for a location
-	    (setq spos (if fastp 1 (org-get-location
-				    (current-buffer)
-				    org-remember-help)))
+	    (setq spos (if fastp
+			   org-goto-start-pos
+			 (org-get-location (current-buffer) org-remember-help)))
 	    (if (not spos) (throw 'quit nil)) ; return nil to show we did
 					      ; not handle this note
 	    (goto-char spos)
@@ -10013,11 +10224,11 @@ See also the variable `org-reverse-note-order'."
 		     (org-paste-subtree 1 txt)))
 		  ((and (org-on-heading-p nil) (not current-prefix-arg))
 		   ;; Put it below this entry, at the beg/end of the subtree
-		   (org-back-to-heading)
+		   (org-back-to-heading t)
 		   (setq level (funcall outline-level))
 		   (if reversed
 		       (outline-end-of-heading)
-		     (outline-end-of-subtree))
+		     (org-end-of-subtree t))
 		   (if (not (bolp)) (newline))
 		   (beginning-of-line 1)
 		   (org-paste-subtree (org-get-legal-level level 1) txt))
@@ -10612,15 +10823,15 @@ that the match should indeed be shown."
     cnt))
 
 ;; FIXME: Remove the siblings argument, or add args for the others too?
-(defun org-show-context (&optional key siblings)
+(defun org-show-context (&optional key)
   "Make sure point and context and visible.
 How much context is shown depends upon the variables
 `org-show-hierarchy-above' and `org-show-following-heading'.
 When SIBLINGS is non-nil, show all siblings on each hierarchy level."
-  (let ((heading-p (org-on-heading-p t))
+  (let ((heading-p   (org-on-heading-p t))
 	(hierarchy-p (org-get-alist-option org-show-hierarchy-above key))
 	(following-p (org-get-alist-option org-show-following-heading key))
-	(siblings-p (or siblings (org-get-alist-option org-show-siblings key))))
+	(siblings-p  (org-get-alist-option org-show-siblings key)))
     (catch 'exit
       ;; Show heading or entry text
       (if heading-p
@@ -10654,8 +10865,9 @@ siblings are shown.  This repairs the tree structure to what it would
 look like when opened with hierarchical calls to `org-cycle'."
   (interactive "P")
   (let ((org-show-hierarchy-above t)
-	(org-show-following-heading t))
-    (org-show-context nil siblings)))
+	(org-show-following-heading t)
+	(org-show-siblings (if siblings t org-show-siblings)))
+    (org-show-context nil)))
 
 (defun org-highlight-new-match (beg end)
   "Highlight from BEG to END and mark the highlight is an occur headline."
@@ -11284,7 +11496,7 @@ So these are more for recording a certain time/date."
 (defvar org-ans1) ; dynamically scoped parameter
 (defvar org-ans2) ; dynamically scoped parameter
 
-(defun org-read-date (&optional with-time to-time from-string)
+(defun org-read-date (&optional with-time to-time from-string prompt)
   "Read a date and make things smooth for the user.
 The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
@@ -11337,7 +11549,8 @@ used to insert the time stamp into the buffer to include the time."
 	 (view-calendar-holidays-initially nil)
 	 (timestr (format-time-string
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") default-time))
-	 (prompt (format "YYYY-MM-DD [%s]: " timestr))
+	 (prompt (concat (if prompt (concat prompt " ") "")
+			 (format "YYYY-MM-DD [%s]: " timestr)))
 	 ans org-ans1 org-ans2 (deltadays 0)
 	 second minute hour day month year tl wday wday1)
 
@@ -11499,7 +11712,6 @@ The command returns the inserted time stamp."
 	       (org-parse-time-string (buffer-substring beg end) t)))
 	 (w1 (- end beg))
 	 (with-hm (and (nth 1 t1) (nth 2 t1)))
-	 (inactive (= (char-before (1- beg)) ?\[))
 	 (tf (funcall (if with-hm 'cdr 'car) org-time-stamp-custom-formats))
 	 (time (org-fix-decoded-time t1))
 	 (str (org-add-props
@@ -12273,9 +12485,10 @@ The following commands are available:
   (org-add-hook 'post-command-hook 'org-agenda-post-command-hook nil 'local)
   (org-add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   ;; Make sure properties are removed when copying text
-  (org-set-local 'buffer-substring-filters
-		 (cons (lambda (x) (set-text-properties 0 (length x) nil x) x)
-		       buffer-substring-filters))
+  (when (boundp 'buffer-substring-filters)
+    (org-set-local 'buffer-substring-filters
+		   (cons (lambda (x) (set-text-properties 0 (length x) nil x) x)
+			 buffer-substring-filters)))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-show-log nil))
@@ -13126,9 +13339,14 @@ dates."
 			      entry date args)))
 	(if (or rtn (equal d today) org-timeline-show-empty-dates)
 	    (progn
-	      (insert (format-time-string org-agenda-date-format
-					  (calendar-time-from-absolute d 0))
-		      "\n")
+	      (insert (calendar-day-name date) " "
+		      (number-to-string (extract-calendar-day date)) " "
+		      (calendar-month-name (extract-calendar-month date)) " "
+		      (number-to-string (extract-calendar-year date)) "\n")
+; FIXME: this gives a timezone problem
+;	      (insert (format-time-string org-agenda-date-format
+;					  (calendar-time-from-absolute d 0))
+;		      "\n")
 	      (put-text-property s (1- (point)) 'face 'org-level-3)
 	      (put-text-property s (1- (point)) 'org-date-line t)
 	      (if (equal d today)
@@ -13294,8 +13512,14 @@ NDAYS defaults to `org-agenda-ndays'."
 	    (setq rtnall (append rtnall rtn))))
       (if (or rtnall org-agenda-show-all-dates)
 	  (progn
-	    (insert (format-time-string org-agenda-date-format
-					(calendar-time-from-absolute d 0)) "\n")
+	    (insert (format "%-9s %2d %s %4d\n"
+			    (calendar-day-name date)
+			    (extract-calendar-day date)
+			    (calendar-month-name (extract-calendar-month date))
+			    (extract-calendar-year date)))
+; FIXME: this gives a timezone problem
+;	    (insert (format-time-string org-agenda-date-format
+;					(calendar-time-from-absolute d 0)) "\n")
 	    (put-text-property s (1- (point)) 'face 'org-level-3)
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (if todayp (put-text-property s (1- (point)) 'org-today t))
@@ -13999,7 +14223,7 @@ the documentation of `org-diary'."
 	 (regexp org-scheduled-time-regexp)
 	 (todayp (equal date (calendar-current-date))) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
-	 d2 diff pos pos1 category tags donep
+	 d2 diff pos pos1 category tags
 	 ee txt head)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -14655,7 +14879,6 @@ and by additional input from the age of a schedules or deadline entry."
   (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
   (let* ((marker (or (get-text-property (point) 'org-marker)
 		     (org-agenda-error)))
-	 (hdmarker (get-text-property (point) 'org-hd-marker))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
 	 dbeg dend (n 0) conf)
@@ -16278,7 +16501,7 @@ underlined headlines.  The default is 3."
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
 	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
-	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
+;	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
 	 (text        nil)
 	 (todo nil)
 	 (lang-words nil))
@@ -16899,6 +17122,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "</pre>\n"))
 	    (throw 'nextline nil))
 
+	  ;; Horizontal line
+	  (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
+	    (insert "\n<hr/>\n")
+	    (throw 'nextline nil))
 
 	  ;; make targets to anchors
 	  (while (string-match "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)
@@ -17874,6 +18101,8 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 (define-key org-mode-map "\C-c\\"   'org-tags-sparse-tree) ; Minor-mode res.
 (define-key org-mode-map "\C-c\C-m" 'org-insert-heading)
 (define-key org-mode-map "\M-\C-m"  'org-insert-heading)
+(define-key org-mode-map "\C-c\C-x\C-n" 'org-next-link)
+(define-key org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
 (define-key org-mode-map "\C-c\C-l" 'org-insert-link)
 (define-key org-mode-map "\C-c\C-o" 'org-open-at-point)
 (define-key org-mode-map "\C-c%"    'org-mark-ring-push)
@@ -18341,7 +18570,7 @@ See the individual commands for more information."
     "--"
     ("Calculate"
      ["Set Column Formula" org-table-eval-formula (org-at-table-p)]
-     ["Set Named Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
+     ["Set Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
      ["Edit Formulas" org-table-edit-formulas (org-at-table-p)]
      "--"
      ["Recalculate line" org-table-recalculate (org-at-table-p)]
@@ -18487,6 +18716,9 @@ See the individual commands for more information."
      ["Insert Link" org-insert-link t]
      ["Follow Link" org-open-at-point t]
      "--"
+     ["Next link" org-next-link t]
+     ["Previous link" org-previous-link t]
+     "--"
      ["Descriptive Links"
       (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
       :style radio :selected (member '(org-link) buffer-invisibility-spec)]
@@ -18601,7 +18833,7 @@ contexts are:
 :table            in an org-mode table
 :table-special    on a special filed in a table
 :table-table      in a table.el table
-:link             on a hyperline
+:link             on a hyperlink
 :keyword          on a keyword: SCHEDULED, DEADLINE, CLOSE,COMMENT, QUOTE.
 :target           on a <<target>>
 :radio-target     on a <<<radio-target>>>
@@ -18721,7 +18953,8 @@ return nil."
 
 (defun org-replace-escapes (string table)
   ;; FIXME: document and make safer
-  (let (e re rpl)
+  (let ((case-fold-search nil)
+	e re rpl)	  
     (while (setq e (pop table))
       (setq re (concat "%-?[0-9.]*" (substring (car e) 1)))
       (while (string-match re string)
@@ -18729,6 +18962,7 @@ return nil."
 			  (cdr e)))
 	(setq string (replace-match rpl t t string))))
     string))
+
 
 (defun org-sublist (list start end)
   "Return a section of LIST, from START to END.
@@ -19088,5 +19322,4 @@ This function should be run in the `org-after-todo-state-change-hook'."
 
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
-
 

@@ -118,8 +118,7 @@ orgcard.ps: orgcard.dvi
 info:	
 	$(MAKEINFO) --no-split org.texi -o org
 
-pdf:	
-	$(TEXI2PDF) org.texi
+pdf:	org.pdf
 
 card:	orgcard.pdf orgcard.ps
 
@@ -131,6 +130,7 @@ ecompile:
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	touch org.texi orgcard.tex
 	make info
 	make doc
 	rm -rf org-$(TAG) org-$(TAG).zip
