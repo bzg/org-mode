@@ -22,6 +22,7 @@
 (autoload 'org-export-icalendar-combine-agenda-files "org"
   "Export all files in `org-agenda-files' to a single combined iCalendar file." t)
 (autoload 'org-batch-agenda "org")
+(autoload 'org-batch-agenda-csv "org")
 (autoload 'org-store-agenda-views "org" "Store agenda views to files" t)
 (autoload 'org-batch-store-agenda-views "org")
 

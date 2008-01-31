@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.74
+;; Version: 4.75
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "4.74"
+(defconst org-version "4.75"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -273,7 +273,9 @@ An entry can be toggled between QUOTE and normal with
   :group 'org-keywords
   :type 'string)
 
-(defvar org-repeat-re "\\<REPEAT(\\([-+ 0-9dwmy]+\\))"
+(defconst org-repeat-re
+  (concat "\\(?:\\<\\(?:" org-scheduled-string "\\|" org-deadline-string "\\)"
+	  " +<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*\\)\\(\\+[0-9]+[dwmy]\\)")
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
@@ -404,6 +406,7 @@ nil         Never
 white       Only in completely white lines
 whitestart  Only at the beginning of lines, before the first non-white char.
 t           Everywhere except in headlines
+exc-hl-bol  Everywhere except at the start of a headline
 If TAB is used in a place where it does not emulate TAB, the current subtree
 visibility is cycled."
   :group 'org-cycle
@@ -411,6 +414,7 @@ visibility is cycled."
 		 (const :tag "Only in completely white lines" white)
 		 (const :tag "Before first char in a line" whitestart)
 		 (const :tag "Everywhere except in headlines" t)
+		 (const :tag "Everywhere except at bol in headlines" exc-hl-bol)
 		 ))
 
 (defcustom org-cycle-separator-lines 2
@@ -904,7 +908,7 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :group 'org)
 
 (defvar org-link-abbrev-alist-local nil
-  "buffer-local version of `org-link-abbrev-alist', which see.
+  "Buffer-local version of `org-link-abbrev-alist', which see.
 The value of this is taken from the #+LINK lines.")
 (make-variable-buffer-local 'org-link-abbrev-alist-local)
 
@@ -1506,15 +1510,6 @@ empty string.
 		       state) string)
 	  (cons (const :tag "Heading when clocking out" clock-out) string)))
 
-(defcustom org-allow-auto-repeat t
-  "Non-nil means, find REPEAT cookies in entries and apply them.
-A repeat cookie looks like REPEAT(+1m) and causes deadlines and schedules
-to repeat themselves shifted by a certain amount of time, each time an
-entry is marked DONE."
-  :group 'org-todo
-  :group 'org-progress
-  :type 'boolean)
-
 (defcustom org-log-repeat t
   "Non-nil means, prompt for a note when REPEAT is resetting a TODO entry.
 When nil, no note will be taken."
@@ -1527,14 +1522,21 @@ When nil, no note will be taken."
   :tag "Org Priorities"
   :group 'org-todo)
 
-(defcustom org-default-priority ?B
-  "The default priority of TODO items.
-This is the priority an item get if no explicit priority is given."
+(defcustom org-highest-priority ?A
+  "The highest priority of TODO items.  A character like ?A, ?B etc.
+Must have a smaller ASCII number than `org-lowest-priority'."
   :group 'org-priorities
   :type 'character)
 
 (defcustom org-lowest-priority ?C
-  "The lowest priority of TODO items.  A character like ?A, ?B etc."
+  "The lowest priority of TODO items.  A character like ?A, ?B etc.
+Must have a larger ASCII number than `org-highest-priority'."
+  :group 'org-priorities
+  :type 'character)
+
+(defcustom org-default-priority ?B
+  "The default priority of TODO items.
+This is the priority an item get if no explicit priority is given."
   :group 'org-priorities
   :type 'character)
 
@@ -1771,6 +1773,45 @@ This is a good place to set uptions for ps-print and for htmlize."
 	  (list
 	   (variable)
 	   (sexp :tag "Value"))))
+
+(defcustom org-agenda-export-html-style ""
+  "The style specification for exported HTML Agenda files.
+If this variable contains a string, it will replace the default <style>
+section as produced by `htmlize'.
+Since there are different ways of setting style information, this variable
+needs to contain the full HTML structure to provide a style, including the
+surrounding HTML tags.  The style specifications should include definitions
+the fonts used by the agenda, here is an example:
+
+   <style type=\"text/css\">
+       p { font-weight: normal; color: gray; }
+       .org-agenda-structure {
+          font-size: 110%;
+          color: #003399;
+          font-weight: 600;
+       }
+       .org-todo {
+          color: #cc6666;Week-agenda:
+          font-weight: bold;
+       }
+       .org-done {
+          color: #339933;
+       }
+       .title { text-align: center; }
+       .todo, .deadline { color: red; }
+       .done { color: green; }
+    </style>
+
+or, if you want to keep the style in a file,
+
+   <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
+
+As the value of this option simply gets inserted into the HTML <head> header,
+you can \"misuse\" it to also add other text to the header.  However,
+<style>...</style> is required, if not present the variable will be ignored."
+  :group 'org-agenda-export
+  :group 'org-export-html
+  :type 'string)
 
 (defgroup org-agenda-custom-commands nil
  "Options concerning agenda views in Org-mode."
@@ -2708,6 +2749,7 @@ you can \"misuse\" it to add arbitrary text to the header."
   :group 'org-export-html
   :type 'string)
 
+
 (defcustom org-export-html-title-format "<h1 class=\"title\">%s</h1>\n"
   "Format for typesetting the document title in HTML export."
   :group 'org-export-html
@@ -2803,6 +2845,12 @@ The file name should be absolute."
 	  (const :tag "None" nil)
 	  (const :tag "Unfinished" t)
 	  (const :tag "All" all)))
+
+(defcustom org-icalendar-include-sexps t
+  "Non-nil means, export to iCalendar files should also cover sexp entries.
+These are entries like in the diary, but directly in an Org-mode file."
+  :group 'org-export-icalendar
+  :type 'boolean)
 
 (defcustom org-icalendar-combined-name "OrgMode"
   "Calendar name for the combined iCalendar representing all agenda files."
@@ -2930,11 +2978,11 @@ Use customize to modify this, or restart Emacs after changing it."
     ("_" underline "<u>" "</u>")
     ("=" shadow "<code>" "</code>")
     ("+" (:strike-through t) "<del>" "</del>")
-)
+    )
 "Special syntax for emphasized text.
 Text starting and ending with a special character will be emphasized, for
 example *bold*, _underlined_ and /italic/.  This variable sets the marker
-characters, the face to bbe used by font-lock for highlighting in Org-mode
+characters, the face to be used by font-lock for highlighting in Org-mode
 Emacs buffers, and the HTML tags to be used for this.
 Use customize to modify this, or restart Emacs after changing it."
   :group 'org-font-lock
@@ -3106,6 +3154,13 @@ color of the frame."
   "Face for links."
   :group 'org-faces)
 
+(defface org-sexp-date
+  '((((class color) (background light)) (:foreground "Purple"))
+    (((class color) (background dark)) (:foreground "Cyan"))
+    (t (:underline t)))
+  "Face for links."
+  :group 'org-faces)
+
 (defface org-tag
   '((t (:bold t)))
   "Face for tags."
@@ -3159,6 +3214,17 @@ to the part of the headline after the DONE keyword."
      (((class color) (min-colors 8)  (background dark)) (:foreground "red"))
      (t (:bold t :italic t))))
   "Face for formulas."
+  :group 'org-faces)
+
+(defface org-agenda-structure ;; font-lock-function-name-face
+  (org-compatible-face
+   '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+     (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+     (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+     (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+     (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+     (t (:bold t))))
+  "Face used in agenda for captions and dates."
   :group 'org-faces)
 
 (defface org-scheduled-today
@@ -3346,9 +3412,9 @@ means to push this value onto the list in the variable.")
     (org-set-local 'org-todo-sets nil)
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "SEQ_TODO" "PRI_TODO" "TYP_TODO"
-		 "STARTUP" "ARCHIVE" "TAGS" "LINK")))
+		 "STARTUP" "ARCHIVE" "TAGS" "LINK" "PRIORITIES")))
 	  (splitre "[ \t]+")
-	  kwds key value cat arch tags links hw dws tail sep kws1)
+	  kwds key value cat arch tags links hw dws tail sep kws1 prio)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -3371,6 +3437,8 @@ means to push this value onto the list in the variable.")
 		(push (cons (match-string 1 value)
 			    (org-trim (match-string 2 value)))
 		      links)))
+	     ((equal key "PRIORITIES")
+	      (setq prio (org-split-string " +" value)))
 	     ((equal key "STARTUP")
 	      (let ((opts (org-split-string value splitre))
 		    l var val)
@@ -3390,6 +3458,12 @@ means to push this value onto the list in the variable.")
 				      '(face t fontified t) arch)))
 	    )))
       (and cat (org-set-local 'org-category cat))
+      (when prio
+	(if (< (length prio) 3) (setq prio '("A" "C" "B")))
+	(setq prio (mapcar 'string-to-char prio))
+	(org-set-local 'org-highest-priority (aref (nth 0 prio) 0))
+	(org-set-local 'org-lowest-priority  (aref (nth 1 prio) 0))
+	(org-set-local 'org-default-priority (aref (nth 2 prio) 0)))
       (and arch (org-set-local 'org-archive-location arch))
       (and links (setq org-link-abbrev-alist-local (nreverse links)))
       ;; Process the TODO keywords
@@ -3490,7 +3564,7 @@ means to push this value onto the list in the variable.")
 		  "\\|" org-deadline-string
 		  "\\|" org-closed-string
 		  "\\|" org-clock-string "\\)\\)?"
-		  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^]\r\n>]*?[]>]\\)")
+		  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^]\r\n>]*?[]>]\\|<%%([^\r\n>]*>\\)")
 	  org-planning-or-clock-line-re
 	  (concat "\\(?:^[ \t]*\\(" org-scheduled-string
 		  "\\|" org-deadline-string
@@ -3855,7 +3929,7 @@ that will be added to PLIST.  Returns the string that was modified."
 (require 'font-lock)
 
 (defconst org-non-link-chars "]\t\n\r<>")
-(defconst org-link-types '("https?" "ftp" "mailto" "file" "news" "bbdb" "vm"
+(defconst org-link-types '("http" "https" "ftp" "mailto" "file" "news" "bbdb" "vm"
 			   "wl" "mhe" "rmail" "gnus" "shell" "info" "elisp"))
 (defconst org-link-re-with-space
   (concat
@@ -3914,15 +3988,15 @@ that will be added to PLIST.  Returns the string that was modified."
   (cons (length (format-time-string (car org-time-stamp-formats)))
 	(length (format-time-string (cdr org-time-stamp-formats))))
   "This holds the lengths of the two different time formats.")
-(defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^\r\n>]*?\\)>"
+(defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^\r\n>]*?\\)>"
   "Regular expression for fast time stamp matching.")
-(defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}[^\r\n>]*?\\)[]>]"
+(defconst org-ts-regexp-both "[[<]\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^\r\n>]*?\\)[]>]"
   "Regular expression for fast time stamp matching.")
-(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\)\\([^]0-9>\r\n]*\\)\\(\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
+(defconst org-ts-regexp1 "\\(\\([0-9]\\{4\\}\\)-\\([0-9]\\{2\\}\\)-\\([0-9]\\{2\\}\\) \\([^]0-9>\r\n]*\\)\\(\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)\\)?\\)"
   "Regular expression matching time strings for analysis.")
-(defconst org-ts-regexp2 (concat "<" org-ts-regexp1 ">")
+(defconst org-ts-regexp2 (concat "<" org-ts-regexp1 "[^>\n]\\{0,5\\}>")
   "Regular expression matching time stamps, with groups.")
-(defconst org-ts-regexp3 (concat "[[<]" org-ts-regexp1 "[]>]")
+(defconst org-ts-regexp3 (concat "[[<]" org-ts-regexp1 "[^>\n]\\{0,5\\}[]>]")
   "Regular expression matching time stamps (also [..]), with groups.")
 (defconst org-tr-regexp (concat org-ts-regexp "--?-?" org-ts-regexp)
   "Regular expression matching a time stamp range.")
@@ -3956,6 +4030,57 @@ The time stamps may be either active or inactive.")
 	    (backward-char 1))))
     rtn))
 
+(defun org-emphasize (&optional char)
+  "Insert or change an emphasis, i.e. a font like bold or italic.
+If there is an active region, change that region to a new emphasis.
+If there is no region, just insert the marker characters and position
+the cursor between them.
+CHAR should be either the marker character, or the first character of the
+HTML tag associated with that emphasis.  If CHAR is a space, the means
+to remove the emphasis of the selected region.
+If char is not given (for example in an interactive call) it
+will be prompted for."
+  (interactive)
+  (let ((eal org-emphasis-alist) e det
+	(erc org-emphasis-regexp-components)
+	(prompt "")
+	(string "") beg end move tag c s)
+    (if (org-region-active-p)
+	(setq beg (region-beginning) end (region-end)
+	      string (buffer-substring beg end))
+      (setq move t))
+    
+    (while (setq e (pop eal))
+      (setq tag (car (org-split-string (nth 2 e) "[ <>/]+"))
+	    c (aref tag 0))
+      (push (cons c (string-to-char (car e))) det)
+      (setq prompt (concat prompt (format " [%s%c]%s" (car e) c
+					  (substring tag 1)))))
+    (unless char
+      (message "%s" (concat "Emphasis marker or tag:" prompt))
+      (setq char (read-char-exclusive)))
+    (setq char (or (cdr (assoc char det)) char))
+    (if (equal char ?\ )
+	(setq s "" move nil)
+      (unless (assoc (char-to-string char) org-emphasis-alist)
+	(error "No such emphasis marker: \"%c\"" char))
+      (setq s (char-to-string char)))
+    (while (and (> (length string) 1)
+		(equal (substring string 0 1) (substring string -1))
+		(assoc (substring string 0 1) org-emphasis-alist))
+      (setq string (substring string 1 -1)))
+    (setq string (concat s string s))
+    (if beg (delete-region beg end))
+    (unless (or (bolp)
+		(string-match (concat "[" (nth 0 erc) "\n]")
+			      (char-to-string (char-before (point)))))
+      (insert " "))
+    (unless (string-match (concat "[" (nth 1 erc) "\n]")
+			  (char-to-string (char-after (point))))
+      (insert " ") (backward-char 1))
+    (insert string)
+    (and move (backward-char 1))))
+    
 (defun org-activate-plain-links (limit)
   "Run through the buffer and add overlays to links."
   (catch 'exit
@@ -4145,12 +4270,13 @@ between words."
 	   (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines
 	   (list (concat "^\\*+[ \t]*" org-not-done-regexp)
 		 '(1 'org-todo t))
 	   ;; Priorities
-	   (list (concat "\\[#[A-Z]\\]") '(0 'org-special-keyword t))
+	   (list (concat "\\[#[A-Z0-9]\\]") '(0 'org-special-keyword t))
 	   ;; Special keywords
 	   (list org-repeat-re  '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
@@ -4325,7 +4451,8 @@ between words."
 			      (- (funcall outline-level) arg)))
 	(org-show-subtree)))
 
-     ((save-excursion (beginning-of-line 1) (looking-at outline-regexp))
+     ((and (save-excursion (beginning-of-line 1) (looking-at outline-regexp))
+	   (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
       ;; At a heading: rotate between three different views
       (org-back-to-heading)
       (let ((goal-column 0) eoh eol eos)
@@ -4374,6 +4501,11 @@ between words."
 
      ((org-try-cdlatex-tab))
 
+     ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
+	   (or (not (bolp))
+	       (not (looking-at outline-regexp))))
+      (call-interactively (global-key-binding "\t")))
+
      ((if (and (memq org-cycle-emulate-tab '(white whitestart))
 	       (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
 	       (or (and (eq org-cycle-emulate-tab 'white)
@@ -4388,8 +4520,8 @@ between words."
 	  (progn
 	    (beginning-of-line 1)
 	    (and (looking-at "[ \t]+") (replace-match ""))))
-      (indent-relative))
-
+      (call-interactively (global-key-binding "\t")))
+      
      (t (save-excursion
 	  (org-back-to-heading)
 	  (org-cycle))))))
@@ -4483,7 +4615,15 @@ are at least `org-cycle-separator-lines' empty lines before the headeline."
 	  (while (re-search-forward re end t)
 	    (if (not (get-char-property (match-end 1) 'invisible))
 		(outline-flag-region
-		 (match-beginning 1) (match-end 1) nil))))))))
+		 (match-beginning 1) (match-end 1) nil)))))))
+  ;; Never hide empty lines at the end of the file.
+  (save-excursion
+    (goto-char (point-max))
+    (outline-previous-heading)
+    (outline-end-of-heading)
+    (if (and (looking-at "[ \t\n]+")
+	     (= (match-end 0) (point-max)))
+	(outline-flag-region (point) (match-end 0) nil))))
 
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
@@ -5021,7 +5161,9 @@ This is a short-hand for marking the subtree and then copying it.
 If CUT is non-nil, actually cut the subtree."
   (interactive)
   (let (beg end folded)
-    (org-back-to-heading)
+    (if (interactive-p)
+	(org-back-to-heading nil) ; take what looks like a subtree
+      (org-back-to-heading t)) ; take what is really there
     (setq beg (point))
     (save-match-data
       (save-excursion (outline-end-of-heading)
@@ -10061,8 +10203,18 @@ With three \\[universal-argument] prefixes, negate the meaning of
       ;; Fake a link history
       (setq tmphist (append (mapcar 'car org-stored-links)
 			    org-insert-link-history))
+;      (setq link (org-completing-read
+;		  "Link: " org-stored-links nil nil nil
+;		  'tmphist
+;		  (or (car (car org-stored-links)))))
       (setq link (org-completing-read
-		  "Link: " org-stored-links nil nil nil
+		  "Link: " 
+		  (append
+		   (mapcar (lambda (x) (concat (car x) ":"))
+			   (append org-link-abbrev-alist-local org-link-abbrev-alist))
+		   (mapcar (lambda (x) (concat x ":")) org-link-types))
+;		  org-stored-links
+		  nil nil nil
 		  'tmphist
 		  (or (car (car org-stored-links)))))
       (setq entry (assoc link org-stored-links))
@@ -10656,7 +10808,7 @@ onto the ring."
   (funcall (cdr (assq 'gnus org-link-frame-setup)))
   (if gnus-other-frame-object (select-frame gnus-other-frame-object))
   (cond ((and group article)
-	 (gnus-group-read-group 0 nil group)
+	 (gnus-group-read-group 1 nil group)
 	 (gnus-summary-goto-article (string-to-number article) nil t))
 	(group (gnus-group-jump-to-group group))))
 
@@ -11224,7 +11376,7 @@ See also the variable `org-reverse-note-order'."
 		     (re-search-forward "^\\*" nil t)
 		     (beginning-of-line 1)
 		     (org-paste-subtree 1 txt)))
-		  ((and (org-on-heading-p nil) (not current-prefix-arg))
+		  ((and (org-on-heading-p t) (not current-prefix-arg))
 		   ;; Put it below this entry, at the beg/end of the subtree
 		   (org-back-to-heading t)
 		   (setq level (funcall outline-level))
@@ -11637,7 +11789,7 @@ right sequence."
      (t (nth 2 (assoc kwd org-todo-kwd-alist))))))
   
 (defun org-get-repeat ()
-  "Return the REPEAT statement of this entry."
+  "Check if tere is a deadline/schedule with repeater in this entry."
   (save-match-data
     (save-excursion
       (org-back-to-heading t)
@@ -11648,9 +11800,9 @@ right sequence."
 (defvar org-last-changed-timestamp)
 (defvar org-log-post-message)
 (defun org-auto-repeat-maybe ()
-  "Check if the current headline contains a REPEAT key.
-If yes, set TODO state back to what it was and change any SCHEDULED
-or DEADLINE times the new date.
+  "Check if the current headline contains a repeated deadline/schedule.
+If yes, set TODO state back to what it was and change the base date
+of repeating deadline/scheduled time stamps to new date.
 This function should be run in the `org-after-todo-state-change-hook'."
   ;; last-state is dynamically scoped into this function
   (let* ((repeat (org-get-repeat))
@@ -11661,7 +11813,7 @@ This function should be run in the `org-after-todo-state-change-hook'."
 	 (whata '(("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
 	 (org-log-done)
-	 re type n what start)
+	 re type n what ts)
     (when repeat
       (org-todo (if (eq interpret 'type) last-state head))
       (when (and org-log-repeat
@@ -11678,11 +11830,10 @@ This function should be run in the `org-after-todo-state-change-hook'."
       (while (re-search-forward
 	      re (save-excursion (outline-next-heading) (point)) t)
 	(setq type (if (match-end 1) org-scheduled-string org-deadline-string)
-	      start 0)
-	(while (string-match "\\([-+]?[0-9]+\\)\\([dwmy]\\)" repeat start)
-	  (setq start (match-end 0)
-		n (string-to-number (match-string 1 repeat))
-		what (match-string 2 repeat))
+	      ts (match-string (if (match-end 2) 2 4)))
+	(when (string-match "\\([-+]?[0-9]+\\)\\([dwmy]\\)" ts)
+	  (setq	n (string-to-number (match-string 1 ts))
+		what (match-string 2 ts))
 	  (if (equal what "w") (setq n (* n 7) what "d"))
 	  (org-timestamp-change n (cdr (assoc what whata))))
 	(setq msg (concat msg type org-last-changed-timestamp " ")))
@@ -11983,7 +12134,7 @@ from the `before-change-functions' in the current buffer."
 
 ;;;; Priorities
 
-(defvar org-priority-regexp ".*?\\(\\[#\\([A-Z]\\)\\] ?\\)"
+(defvar org-priority-regexp ".*?\\(\\[#\\([A-Z0-9]\\)\\] ?\\)"
   "Regular expression matching the priority indicator.")
 
 (defvar org-remove-priority-next-time nil)
@@ -12012,18 +12163,18 @@ ACTION can be set, up, or down."
 	(setq current org-default-priority))
       (cond
        ((eq action 'set)
-	(message "Priority A-%c, SPC to remove: " org-lowest-priority)
+	(message "Priority %c-%c, SPC to remove: " org-highest-priority org-lowest-priority)
 	(setq new (read-char-exclusive))
 	(cond ((equal new ?\ ) (setq remove t))
-	      ((or (< (upcase new) ?A) (> (upcase new) org-lowest-priority))
+	      ((or (< (upcase new) org-highest-priority) (> (upcase new) org-lowest-priority))
 	       (error "Priority must be between `%c' and `%c'"
-		      ?A org-lowest-priority))))
+		      org-highest-priority org-lowest-priority))))
        ((eq action 'up)
 	(setq new (1- current)))
        ((eq action 'down)
 	(setq new (1+ current)))
        (t (error "Invalid action")))
-      (setq new (min (max ?A (upcase new)) org-lowest-priority))
+      (setq new (min (max org-highest-priority (upcase new)) org-lowest-priority))
       (setq news (format "%c" new))
       (if have
 	  (if remove
@@ -12801,7 +12952,7 @@ This is used by `org-read-date' in a temporary keymap for the calendar buffer."
       (setq org-ans1 (format-time-string "%Y-%m-%d" time)))
     (if (active-minibuffer-window) (exit-minibuffer))))
 
-(defun org-insert-time-stamp (time &optional with-hm inactive pre post)
+(defun org-insert-time-stamp (time &optional with-hm inactive pre post extra)
   "Insert a date stamp for the date given by the internal TIME.
 WITH-HM means, use the stamp format that includes the time of the day.
 INACTIVE means use square brackets instead of angular ones, so that the
@@ -12814,6 +12965,10 @@ The command returns the inserted time stamp."
     (if inactive (setq fmt (concat "[" (substring fmt 1 -1) "]")))
     (insert (or pre ""))
     (insert (setq stamp (format-time-string fmt time)))
+    (when extra
+      (backward-char 1)
+      (insert extra)
+      (forward-char 1))
     (insert (or post ""))
     stamp))
 
@@ -12838,6 +12993,7 @@ The command returns the inserted time stamp."
       (message "Time stamps are overlayed with custom format")
     (message "Time stamp overlays removed")))
 
+;; FIXME: do something about the repeaters
 (defun org-display-custom-time (beg end)
   "Overlay modified time stamp format over timestamp between BED and END."
   (let* ((t1 (save-match-data
@@ -13014,6 +13170,133 @@ days in order to avoid rounding problems."
 (defun org-time-string-to-time (s)
   (apply 'encode-time (org-parse-time-string s)))
 
+(defun org-time-string-to-absolute (s &optional daynr)
+  "Convert a time stamp to an absolute day number.
+If there is a specifyer for a cyclic time stamp, get the closest date to
+DATE."
+  (cond
+   ((and daynr (string-match "\\`%%\\((.*)\\)" s))
+    (if (org-diary-sexp-entry (match-string 1 s) "" date)
+	daynr
+      (+ daynr 1000)))
+   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
+    (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
+			  (time-to-days (current-time))) (match-string 0 s)))
+   (t (time-to-days (apply 'encode-time (org-parse-time-string s))))))
+
+(defun org-calendar-holiday ()
+  "List of holidays, for Diary display in Org-mode."
+  (let ((hl (check-calendar-holidays date)))
+    (if hl (mapconcat 'identity hl "; "))))
+
+(defun org-diary-sexp-entry (sexp entry date)
+  "Process a SEXP diary ENTRY for DATE."
+  (let ((result (if calendar-debug-sexp
+                    (let ((stack-trace-on-error t))
+                      (eval (car (read-from-string sexp))))
+                  (condition-case nil
+                      (eval (car (read-from-string sexp)))
+                    (error
+                     (beep)
+                     (message "Bad sexp at line %d in %s: %s"
+			      (org-current-line)
+			      (buffer-file-name) sexp)
+                     (sleep-for 2))))))
+    (cond ((stringp result) result)
+	  ((and (consp result)
+		(stringp (cdr result))) (cdr result))
+	  (result entry)
+          (t nil))))
+
+(defun org-diary-to-ical-string (frombuf)
+  "FIXME"
+  (let* ((tmpdir (if (featurep 'xemacs)
+		     (temp-directory)
+		   temporary-file-directory))
+	 (tmpfile (make-temp-name
+		   (expand-file-name "orgics" tmpdir)))
+	 buf rtn b e)
+    (save-excursion
+      (set-buffer frombuf)
+      (icalendar-export-region (point-min) (point-max) tmpfile)
+      (setq buf (find-buffer-visiting tmpfile))
+      (set-buffer buf)
+      (goto-char (point-min))
+      (if (re-search-forward "^BEGIN:VEVENT" nil t)
+	  (setq b (match-beginning 0)))
+      (goto-char (point-max))
+      (if (re-search-backward "^END:VEVENT" nil t)
+	  (setq e (match-end 0)))
+      (setq rtn (if (and b e) (concat (buffer-substring b e) "\n") "")))
+    (kill-buffer buf)
+    (kill-buffer frombuf)
+    (delete-file tmpfile)
+    rtn))
+
+(defun org-closest-date (start current change)
+  "Find the date closest to CURRENT that is consistent with START and CHANGE."
+  ;; Make the proper lists from the dates
+  (catch 'exit
+    (let ((a1 '(("d" . day) ("w" . week) ("m" . month) ("y" . year)))
+	  dn dw sday cday n1 n2
+	  d m y y1 y2 date1 date2 nmonths nm ny m2)
+      
+      (setq start (org-date-to-gregorian start)
+	    current (org-date-to-gregorian current)
+	    sday (calendar-absolute-from-gregorian start)
+	    cday  (calendar-absolute-from-gregorian current))
+
+      (if (<= cday sday) (throw 'exit sday))
+      
+      (if (string-match "\\(\\+[0-9]+\\)\\([dwmy]\\)" change)
+	  (setq dn (string-to-number (match-string 1 change))
+		dw (cdr (assoc (match-string 2 change) a1)))
+	(error "Invalid change specifyer: %s" change))
+      (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
+      (cond
+       ((eq dw 'day)
+	(setq n1 (+ sday (* dn (floor (/ (- cday sday) dn))))
+	      n2 (+ n1 dn)))
+       ((eq dw 'year)
+	(setq d (nth 1 start) m (car start) y1 (nth 2 start) y2 (nth 2 current))
+	(setq y1 (+ (* (floor (/ (- y2 y1) dn)) dn) y1))
+	(setq date1 (list m d y1)
+	      n1 (calendar-absolute-from-gregorian date1)
+	      date2 (list m d (+ y1 (* (if (< n1 cday) 1 -1) dn)))
+	      n2 (calendar-absolute-from-gregorian date2)))
+       ((eq dw 'month)
+	;; approx number of month between the tow dates
+	(setq nmonths (floor (/ (- cday sday) 30.436875)))
+	;; How often does dn fit in there?
+	(setq d (nth 1 start) m (car start) y (nth 2 start)
+	      nm (* dn (max 0 (1- (floor (/ nmonths dn)))))
+	      m (+ m nm)
+	      ny (floor (/ m 12))
+	      y (+ y ny)
+	      m (- m (* ny 12)))
+	(while (> m 12) (setq m (- m 12) y (1+ y)))
+	(setq n1 (calendar-absolute-from-gregorian (list m d y)))
+	(setq m2 (+ m dn) y2 y)
+	(if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
+	(setq n2 (calendar-absolute-from-gregorian (list m2 d y2)))
+	(while (< n2 cday)
+	  (setq n1 n2 m m2 y y2)
+	  (setq m2 (+ m dn) y2 y)
+	  (if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
+	  (setq n2 (calendar-absolute-from-gregorian (list m2 d y2))))))
+
+      (if (> (abs (- cday n1)) (abs (- cday n2))) n2 n1))))
+      
+(defun org-date-to-gregorian (date)
+  "Turn any specification of DATE into a gregorian date for the calendar."
+  (cond ((integerp date) (calendar-gregorian-from-absolute date))
+	((and (listp date) (= (length date) 3)) date)
+	((stringp date)
+	 (setq date (org-parse-time-string date))
+	 (list (nth 4 date) (nth 3 date) (nth 5 date)))
+	((listp date)
+	 (list (nth 4 date) (nth 3 date) (nth 5 date)))))
+
 (defun org-parse-time-string (s &optional nodefault)
   "Parse the standard Org-mode time string.
 This should be a lot faster than the normal `parse-time-string'.
@@ -13101,6 +13384,7 @@ in the timestamp determines what will be changed."
   (let ((pos (point))
 	with-hm inactive
 	org-ts-what
+	extra
 	ts time time0)
     (if (not (org-at-timestamp-p t))
 	(error "Not at a timestamp"))
@@ -13116,6 +13400,8 @@ in the timestamp determines what will be changed."
 	  inactive (= (char-after (match-beginning 0)) ?\[)
 	  ts (match-string 0))
     (replace-match "")
+    (if (string-match " \\+[0-9]+[dwmy]" ts)
+	(setq extra (match-string 0 ts)))
     (setq time0 (org-parse-time-string ts))
     (setq time
 	  (apply 'encode-time
@@ -13141,7 +13427,7 @@ in the timestamp determines what will be changed."
 	  (setcar (nthcdr 2 time0) (or (nth 1 time0) 0))
 	  (setq time (apply 'encode-time time0))))
     (setq org-last-changed-timestamp
-	  (org-insert-time-stamp time with-hm inactive))
+	  (org-insert-time-stamp time with-hm inactive nil nil extra))
     (org-clock-update-time-maybe)
     (goto-char pos)
     ;; Try to recenter the calendar window, if any
@@ -13198,8 +13484,8 @@ If there is already a time stamp at the cursor position, update it."
 (defvar org-clock-start-time "")
 
 (defun org-update-mode-line ()
-  (let* ((now (current-time))
-	 (delta (- (time-to-seconds (current-time)) (time-to-seconds org-clock-start-time)))
+  (let* ((delta (- (time-to-seconds (current-time))
+                   (time-to-seconds org-clock-start-time)))
 	 (h (floor delta 3600))
 	 (m (floor (- delta (* 3600 h)) 60)))
     (setq org-mode-line-string 
@@ -14219,7 +14505,7 @@ priority-n   The computed numerical priority"
 	(setq tmp (calendar-date-string tmp)))
       (setq props (plist-put props 'date tmp)))
     (when (setq tmp (plist-get props 'txt))
-      (when (string-match "\\[#\\([A-Z]\\)\\] ?" tmp)
+      (when (string-match "\\[#\\([A-Z0-9]\\)\\] ?" tmp)
 	(plist-put props 'priority-letter (match-string 1 tmp))
 	(setq tmp (replace-match "" t t tmp)))
       (when (and (setq re (plist-get props 'org-todo-regexp))
@@ -14245,7 +14531,7 @@ priority-n   The computed numerical priority"
 ;;;###autoload
 (defun org-store-agenda-views (&rest parameters)
   (interactive)
-  (org-batch-store-agenda-views))
+  (funcall (intern "org-batch-store-agenda-views")))
 
 (defvar org-agenda-buffer-name)
 
@@ -14253,7 +14539,7 @@ priority-n   The computed numerical priority"
 (defmacro org-batch-store-agenda-views (&rest parameters)
   "Run all custom agenda commands that have a file argument."
   (let ((cmds org-agenda-custom-commands)
-	pars cmd thiscmdkey files file bs opts)
+	pars cmd thiscmdkey files opts)
     (while parameters
       (push (list (pop parameters) (if parameters (pop parameters))) pars))
     (setq pars (reverse pars))
@@ -14271,7 +14557,7 @@ priority-n   The computed numerical priority"
 	  (set-buffer "*Org Agenda*")
 	  (while files
 	    (eval (list 'let (append org-agenda-exporter-settings opts pars)
-			(list 'org-write-agenda (pop files) 'nosettings)))))
+			(list 'org-write-agenda (pop files) t)))))
 	(kill-buffer org-agenda-buffer-name)))))
 
 (defun org-write-agenda (file &optional nosettings)
@@ -14285,18 +14571,27 @@ higher priority settings."
   (interactive "FWrite agenda to file: ")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
+  (cond
+   ((string-match "\\.html?\\'" file) (require 'htmlize))
+   ((string-match "\\.ps\\'" file) (require 'ps-print)))
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
        (save-window-excursion
 	 (cond
 	  ((string-match "\\.html?\\'" file)
-	   (require 'htmlize)
 	   (set-buffer (htmlize-buffer (current-buffer)))
+
+	   (when (and org-agenda-export-html-style
+		      (string-match "<style>" org-agenda-export-html-style))
+	     ;; replace <style> section with org-agenda-export-html-style
+	     (goto-char (point-min))
+	     (kill-region (- (search-forward "<style") 6) 
+			  (search-forward "</style>"))
+	     (insert org-agenda-export-html-style))
 	   (write-file file)
 	   (kill-buffer (current-buffer))
 	   (message "HTML written to %s" file))
 	  ((string-match "\\.ps\\'" file)
-	   (require 'ps-print)
 	   (ps-print-buffer-with-faces file)
 	   (message "Postscript written to %s" file))
 	  (t
@@ -14695,13 +14990,14 @@ dates."
     (org-prepare-agenda)
     (if doclosed (push :closed args))
     (push :timestamp args)
+    (push :sexp args)
     (if dotodo (push :todo args))
     (while (setq d (pop day-numbers))
       (if (and (listp d) (eq (car d) :omitted))
 	  (progn
 	    (setq s (point))
 	    (insert (format "\n[... %d empty days omitted]\n\n" (cdr d)))
-	    (put-text-property s (1- (point)) 'face 'org-level-3))
+	    (put-text-property s (1- (point)) 'face 'org-agenda-structure))
 	(if (listp d) (setq d (car d) emptyp t) (setq emptyp nil))
 	(if (and (>= d today)
 		 dopast
@@ -14724,7 +15020,7 @@ dates."
 ;	      (insert (format-time-string org-agenda-date-format
 ;					  (calendar-time-from-absolute d 0))
 ;		      "\n")
-	      (put-text-property s (1- (point)) 'face 'org-level-3)
+	      (put-text-property s (1- (point)) 'face 'org-agenda-structure)
 	      (put-text-property s (1- (point)) 'org-date-line t)
 	      (if (equal d today)
 		  (put-text-property s (1- (point)) 'org-today t))
@@ -14853,11 +15149,11 @@ NDAYS defaults to `org-agenda-ndays'."
       (when rtnall
 	(insert "ALL CURRENTLY OPEN TODO ITEMS:\n")
 	(add-text-properties (point-min) (1- (point))
-			     (list 'face 'org-level-3))
+			     (list 'face 'org-agenda-structure))
 	(insert (org-finalize-agenda-entries rtnall) "\n")))
     (setq s (point))
     (insert (if (= nd 7) "Week-" "Day-") "agenda:\n")
-    (add-text-properties s (1- (point)) (list 'face 'org-level-3
+    (add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
 					      'org-date-line t))
     (while (setq d (pop day-numbers))
       (setq date (calendar-gregorian-from-absolute d)
@@ -14875,10 +15171,10 @@ NDAYS defaults to `org-agenda-ndays'."
 	  (if org-agenda-show-log
 	      (setq rtn (org-agenda-get-day-entries
 			 file date
-			 :deadline :scheduled :timestamp :closed))
+			 :deadline :scheduled :timestamp :sexp :closed))
 	    (setq rtn (org-agenda-get-day-entries
 		       file date
-		       :deadline :scheduled :timestamp)))
+		       :deadline :scheduled :sexp :timestamp)))
 	  (setq rtnall (append rtnall rtn))))
       (if org-agenda-include-diary
 	  (progn
@@ -14895,7 +15191,7 @@ NDAYS defaults to `org-agenda-ndays'."
 ; FIXME: this gives a timezone problem
 ;	    (insert (format-time-string org-agenda-date-format
 ;					(calendar-time-from-absolute d 0)) "\n")
-	    (put-text-property s (1- (point)) 'face 'org-level-3)
+	    (put-text-property s (1- (point)) 'face 'org-agenda-structure)
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (if todayp (put-text-property s (1- (point)) 'org-today t))
 	    (if rtnall (insert
@@ -14964,10 +15260,10 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	(setq rtnall (append rtnall rtn))))
     (if org-agenda-overriding-header
 	(insert (org-add-props (copy-sequence org-agenda-overriding-header)
-		    nil 'face 'org-level-3) "\n")
+		    nil 'face 'org-agenda-structure) "\n")
       (insert "Global list of TODO items of type: ")
       (add-text-properties (point-min) (1- (point))
-			   (list 'face 'org-level-3))
+			   (list 'face 'org-agenda-structure))
       (setq pos (point))
       (insert (or org-select-this-todo-keyword "ALL") "\n")
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
@@ -14982,7 +15278,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 		  (insert " " s))
 		kwds))
 	(insert "\n"))
-      (add-text-properties pos (1- (point)) (list 'face 'org-level-3)))
+      (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
@@ -15038,17 +15334,17 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 		(setq rtnall (append rtnall rtn))))))))
     (if org-agenda-overriding-header
 	(insert (org-add-props (copy-sequence org-agenda-overriding-header)
-		    nil 'face 'org-level-3) "\n")
+		    nil 'face 'org-agenda-structure) "\n")
       (insert "Headlines with TAGS match: ")
       (add-text-properties (point-min) (1- (point))
-			   (list 'face 'org-level-3))
+			   (list 'face 'org-agenda-structure))
       (setq pos (point))
       (insert match "\n")
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
       (setq pos (point))
       (unless org-agenda-multi
 	(insert "Press `C-u r' to search again with new search string\n"))
-      (add-text-properties pos (1- (point)) (list 'face 'org-level-3)))
+      (add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
@@ -15233,6 +15529,8 @@ items should be listed.  The following arguments are allowed:
 		 date range matching the selected date.  Deadlines will
 		 also be listed, on the expiration day.
 
+   :sexp         FIXME
+
    :deadline     List any deadlines past due, or due within
 		 `org-deadline-warning-days'.  The listing occurs only
 		 in the diary for *today*, not at any other date.  If
@@ -15257,10 +15555,10 @@ all files listed in `org-agenda-files' will be checked automatically:
    &%%(org-diary)
 
 If you don't give any arguments (as in the example above), the default
-arguments (:deadline :scheduled :timestamp) are used.  So the example above may
-also be written as
+arguments (:deadline :scheduled :timestamp :sexp) are used.
+So the example above may also be written as
 
-   &%%(org-diary :deadline :timestamp :scheduled)
+   &%%(org-diary :deadline :timestamp :sexp :scheduled)
 
 The function expects the lisp variables `entry' and `date' to be provided
 by the caller, because this is how the calendar works.  Don't use this
@@ -15268,7 +15566,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
   (org-agenda-maybe-reset-markers)
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
-  (setq args (or args '(:deadline :scheduled :timestamp)))
+  (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
 		    (list entry)
 		  (org-agenda-files t)))
@@ -15291,7 +15589,7 @@ FILE is the path to a file to be checked for entries.  DATE is date like
 the one returned by `calendar-current-date'.  ARGS are symbols indicating
 which kind of entries should be extracted.  For details about these, see
 the documentation of `org-diary'."
-  (setq args (or args '(:deadline :scheduled :timestamp)))
+  (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
   (let* ((org-startup-folded nil)
 	 (org-startup-align-all-tables nil)
 	 (buffer (if (file-exists-p file)
@@ -15323,6 +15621,9 @@ the documentation of `org-diary'."
 		  (setq rtn (org-agenda-get-blocks))
 		  (setq results (append results rtn))
 		  (setq rtn (org-agenda-get-timestamps))
+		  (setq results (append results rtn)))
+		 ((eq arg :sexp)
+		  (setq rtn (org-agenda-get-sexps))
 		  (setq results (append results rtn)))
 		 ((eq arg :scheduled)
 		  (setq rtn (org-agenda-get-scheduled))
@@ -15426,27 +15727,46 @@ the documentation of `org-diary'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (regexp (regexp-quote
-		  (substring
-		   (format-time-string
-		    (car org-time-stamp-formats)
-		    (apply 'encode-time  ; DATE bound by calendar
-			   (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
-		   0 11)))
+;????	 (regexp (regexp-quote
+;		  (substring
+;		   (format-time-string
+;		    (car org-time-stamp-formats)
+;		    (apply 'encode-time  ; DATE bound by calendar
+;			   (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
+;		   0 11)))
+	 (d1 (calendar-absolute-from-gregorian date))
+	 (regexp
+	  (concat
+	   (regexp-quote
+	    (substring
+	     (format-time-string
+	      (car org-time-stamp-formats)
+	      (apply 'encode-time  ; DATE bound by calendar
+		     (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
+	     0 11))
+	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
+	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp donep tmp priority category
-	 ee txt timestr tags)
+	 ee txt timestr tags b0 b3 e3)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
+      (setq b0 (match-beginning 0)
+	    b3 (match-beginning 3) e3 (match-end 3))
       (catch :skip
-	(and (save-match-data (org-at-date-range-p)) (throw :skip nil))
+	(and (org-at-date-range-p) (throw :skip nil))
 	(org-agenda-skip)
-	(setq marker (org-agenda-new-marker (match-beginning 0))
-	      category (org-get-category (match-beginning 0))
+	(if (and (match-end 1)
+		 (not (= d1 (org-time-string-to-absolute (match-string 1) d1))))
+	    (throw :skip nil))
+	(if (and e3
+		 (not (org-diary-sexp-entry (buffer-substring b3 e3) "" date)))
+	    (throw :skip nil))
+	(setq marker (org-agenda-new-marker b0)
+	      category (org-get-category b0)
 	      tmp (buffer-substring (max (point-min)
-					 (- (match-beginning 0)
-					    org-ds-keyword-length))
-				    (match-beginning 0))
-	      timestr (buffer-substring (match-beginning 0) (point-at-eol))
+					 (- b0 org-ds-keyword-length))
+				    b0)
+	      timestr (if b3 "" (buffer-substring b0 (point-at-eol)))
 	      deadlinep (string-match org-deadline-regexp tmp)
 	      scheduledp (string-match org-scheduled-regexp tmp)
 	      donep (org-entry-is-done-p))
@@ -15492,6 +15812,47 @@ the documentation of `org-diary'."
 			     'type "timestamp")))
 	  (push txt ee))
 	(outline-next-heading)))
+    (nreverse ee)))
+
+(defun org-agenda-get-sexps ()
+  "Return the sexp information for agenda display."
+  (require 'diary-lib)
+  (let* ((props (list 'face nil
+		      'mouse-face 'highlight
+		      'keymap org-agenda-keymap
+		      'help-echo
+		      (format "mouse-2 or RET jump to org file %s"
+			      (abbreviate-file-name buffer-file-name))))
+	 (regexp "^&?%%(")
+	 marker category ee txt tags entry result beg b sexp sexp-entry)
+    (goto-char (point-min))
+    (while (re-search-forward regexp nil t)
+      (catch :skip
+	(org-agenda-skip)
+	(setq beg (match-beginning 0))
+	(goto-char (1- (match-end 0)))
+	(setq b (point))
+	(forward-sexp 1)
+	(setq sexp (buffer-substring b (point)))
+	(setq sexp-entry (if (looking-at "[ \t]*\\(\\S-.*\\)")
+			     (org-trim (match-string 1))
+			   ""))
+	(setq result (org-diary-sexp-entry sexp sexp-entry date))
+	(when result
+	  (setq marker (org-agenda-new-marker beg)
+		category (org-get-category beg))
+
+	  (if (string-match "\\S-" result)
+	      (setq txt result)
+	    (setq txt "SEXP entry returned empty string"))
+
+	  (setq txt (org-format-agenda-item
+                     "" txt category tags 'time))
+	  (org-add-props txt props 'org-marker marker)
+	  (org-add-props txt nil
+	    'org-category category 'date date
+	    'type "sexp")
+	  (push txt ee))))
     (nreverse ee)))
 
 (defun org-agenda-get-closed ()
@@ -15568,8 +15929,9 @@ the documentation of `org-diary'."
       (catch :skip
 	(org-agenda-skip)
 	(setq pos (1- (match-beginning 1))
-	      d2 (time-to-days
-		  (org-time-string-to-time (match-string 1)))
+;???	      d2 (time-to-days
+;???		  (org-time-string-to-time (match-string 1)))
+	      d2 (org-time-string-to-absolute (match-string 1) d1)
 	      diff (- d2 d1))
 	;; When to show a deadline in the calendar:
 	;; If the expiration is within wdays warning time.
@@ -15627,8 +15989,9 @@ the documentation of `org-diary'."
       (catch :skip
 	(org-agenda-skip)
 	(setq pos (1- (match-beginning 1))
-	      d2 (time-to-days
-		  (org-time-string-to-time (match-string 1)))
+	      d2 (org-time-string-to-absolute (match-string 1) d1)
+;???	      d2 (time-to-days
+;???		  (org-time-string-to-time (match-string 1)))
 	      diff (- d2 d1))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
@@ -16286,12 +16649,13 @@ and by additional input from the age of a schedules or deadline entry."
 		     (org-agenda-error)))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
+	 (type (get-text-property (point) 'type))
 	 dbeg dend (n 0) conf)
     (org-with-remote-undo buffer
      (with-current-buffer buffer
        (save-excursion
 	 (goto-char pos)
-	 (if (org-mode-p)
+	 (if (and (org-mode-p) (not (member type '("sexp"))))
 	     (setq dbeg (progn (org-back-to-heading t) (point))
 		   dend (org-end-of-subtree t))
 	   (setq dbeg (point-at-bol)
@@ -17269,6 +17633,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     (:tables               . org-export-with-tables)
     (:table-auto-headline  . org-export-highlight-first-table-line)
     (:style                . org-export-html-style)
+    (:agenda-style         . org-agenda-export-html-style) ;; FIXME: Does this work????
     (:convert-org-links    . org-export-html-link-org-files-as-html)
     (:inline-images        . org-export-html-inline-images)
     (:expand-quoted-html   . org-export-html-expand)
@@ -17391,6 +17756,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	   (?h . org-export-as-html)
 	   (?b . org-export-as-html-and-open)
 	   (?H . org-export-as-html-to-buffer)
+	   (?R . org-export-region-as-html)
 	   (?x . org-export-as-xoxo)
 	   (?i . org-export-icalendar-this-file)
 	   (?I . org-export-icalendar-all-agenda-files)
@@ -18208,7 +18574,7 @@ continue to use it.  The prefix arg ARG is passed through to the exporting
 command."
   (interactive
    (list (progn
-	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H]uffer with HTML  [x]OXO  [ ]keep buffer")
+	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]uffer with HTML  [x]OXO  [ ]keep buffer")
 	   (read-char-exclusive))
 	 current-prefix-arg))
   (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?x ?\ )))
@@ -18220,6 +18586,7 @@ command."
 				(?\C-b . org-export-as-html-and-open)
 				(?h . org-export-as-html)
 				(?H . org-export-as-html-to-buffer)
+				(?R . org-export-region-as-html)
 				(?x . org-export-as-xoxo)))))
 	 (keepp (equal type ?\ ))
 	 (file buffer-file-name)
@@ -18279,6 +18646,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+CATEGORY:  %s
 #+SEQ_TODO:  %s
 #+TYP_TODO:  %s
+#+PRIORITIES: %c %c %c
 #+STARTUP:   %s %s %s %s %s
 #+TAGS:      %s
 #+ARCHIVE:   %s
@@ -18300,6 +18668,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    (file-name-nondirectory buffer-file-name)
    "TODO FEEDBACK VERIFY DONE"
    "Me Jason Marie DONE"
+   org-highest-priority org-lowest-priority org-default-priority
    (cdr (assoc org-startup-folded
 	       '((nil . "showall") (t . "overview") (content . "content"))))
    (if org-odd-levels-only "odd" "oddeven")
@@ -18395,10 +18764,64 @@ emacs 	--batch
   "Call `org-exort-as-html` with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to `org-export-as-html'."
   (interactive "P")
-  (org-export-as-html arg nil nil t)
+  (org-export-as-html arg nil nil "*Org HTML Export*")
   (switch-to-buffer-other-window "*Org HTML Export*"))
 
-(defun org-export-as-html (arg &optional hidden ext-plist temp-buffer-only)
+(defun org-replace-region-by-html (beg end)
+  "Assume the current region has org-mode syntax, and convert it to HTML.
+This can be used in any buffer.  For example, you could write an
+itemized list in org-mode syntax in an HTML buffer and then use this
+command to convert it."
+  (interactive "r")
+  (let (reg html buf)
+    (if (org-mode-p)
+	(setq html (org-export-region-as-html
+		    beg end t 'string))
+      (setq reg (buffer-substring beg end)
+	    buf (get-buffer-create "*Org tmp*"))
+      (save-excursion
+	(set-buffer buf)
+	(erase-buffer)
+	(insert reg)
+	(org-mode)
+	(setq html (org-export-region-as-html
+		    (point-min) (point-max) t 'string)))
+      (kill-buffer buf))
+    (delete-region beg end)
+    (insert html)))
+
+(defun org-export-region-as-html (beg end &optional body-only buffer)
+  "Convert region from BEG to END in org-mode buffer to HTML.
+If prefix arg BODY-ONLY is set, omit file header, footer, and table of
+contents, and only produce the region of converted text, useful for
+cut-and-paste operations.
+If BUFFER is a buffer or a string, use/create that buffer as a target
+of the converted HTML.  If BUFFER is the symbol `string', return the
+produced HTML as a string and leave not buffer behind.  For example,
+a Lisp program could call this function in the following way:
+
+  (setq html (org-export-region-as-html beg end t 'string))
+
+When called interactively, the output buffer is selected, and shown
+in a window.  A non-interactive call will only retunr the buffer."
+  (interactive "r\nP")
+  (when (interactive-p)
+    (setq buffer "*Org HTML EXPORT*"))
+  (let ((transient-mark-mode t) (zmacs-regions t)
+	rtn)
+    (goto-char end)
+    (set-mark (point)) ;; to activate the region
+    (goto-char beg)
+    (setq rtn (org-export-as-html 
+	       nil nil nil
+	       buffer body-only))
+    (if (fboundp 'deactivate-mark) (deactivate-mark))
+    (if (and (interactive-p) (bufferp rtn))
+	(switch-to-buffer-other-window rtn)
+      rtn)))
+
+(defun org-export-as-html (arg &optional hidden ext-plist
+			       to-buffer body-only)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
@@ -18406,8 +18829,12 @@ headlines.  The default is 3.  Lower levels will become bulleted
 lists.  When HIDDEN is non-nil, don't display the HTML buffer.
 EXT-PLIST is a property list with external parameters overriding
 org-mode's default settings, but still inferior to file-local
-settings.  Wehn TEMP-BUFFER-ONLY is non-nil, export to a buffer not
-associated with a file."
+settings.  When TO-BUFFER is non-nil, create a buffer with that
+name and export to that buffer.  If TO-BUFFER is the symbol `string',
+don't leave any buffer behind but just return the resulting HTML as
+a string.  When BODY-ONLY is set, don't produce the file header and footer,
+simply return the content of <body>...</body>, without even
+the body tags themselves."
   (interactive "P")
   (message "Exporting...")
   (setq-default org-todo-line-regexp org-todo-line-regexp)
@@ -18423,10 +18850,6 @@ associated with a file."
 	 valid thetoc have-headings first-heading-pos
 	 (odd org-odd-levels-only)
 	 (region-p (org-region-active-p))
-         (region
-          (buffer-substring
-           (if region-p (region-beginning) (point-min))
-           (if region-p (region-end) (point-max))))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
 	 (org-current-export-dir (org-export-directory :html opt-plist))
@@ -18434,14 +18857,19 @@ associated with a file."
          (level 0) (line "") (origline "") txt todo
          (umax nil)
          (umax-toc nil)
-         (filename (concat (file-name-as-directory
-			    (org-export-directory :html opt-plist))
-			   (file-name-sans-extension
-			    (file-name-nondirectory buffer-file-name))
-			   ".html"))
-	 (current-dir (file-name-directory buffer-file-name))
-	 (buffer (if temp-buffer-only
-		     (get-buffer-create "*Org HTML Export*")
+         (filename (if to-buffer nil
+		     (concat (file-name-as-directory
+			      (org-export-directory :html opt-plist))
+			     (file-name-sans-extension
+			      (file-name-nondirectory buffer-file-name))
+			     ".html")))
+	 (current-dir (if buffer-file-name
+			  (file-name-directory buffer-file-name)
+			default-directory))
+	 (buffer (if to-buffer
+		     (cond
+		      ((eq to-buffer 'string) (get-buffer-create "*Org HTML Export*"))
+		      (t (get-buffer-create  to-buffer)))
 		   (find-file-noselect filename)))
          (org-levels-open (make-vector org-level-max nil))
 	 (date (format-time-string "%Y/%m/%d" (current-time)))
@@ -18451,8 +18879,10 @@ associated with a file."
 			  (and (not 
 				(plist-get opt-plist :skip-before-1st-heading))
 			       (org-export-grab-title-from-buffer))
-			  (file-name-sans-extension
-			   (file-name-nondirectory buffer-file-name))))
+			  (and buffer-file-name
+			       (file-name-sans-extension
+				(file-name-nondirectory buffer-file-name)))
+			  "UNTITLED"))
 	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
 	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
 	 (inquote     nil)
@@ -18474,6 +18904,10 @@ associated with a file."
 	 (charset (and coding-system
 		       (fboundp 'coding-system-get)
 		       (coding-system-get coding-system 'mime-charset)))
+         (region
+          (buffer-substring
+           (if region-p (region-beginning) (point-min))
+           (if region-p (region-end) (point-max))))
          (lines
           (org-skip-comments (org-split-string
 			      (org-cleaned-string-for-export
@@ -18508,9 +18942,7 @@ associated with a file."
                          (assoc "en" org-export-language-setup)))
 
     ;; Switch to the output buffer
-    (if (or hidden t)
-        (set-buffer buffer)
-      (switch-to-buffer-other-window buffer))
+    (set-buffer buffer)
     (erase-buffer)
     (fundamental-mode)
     (let ((case-fold-search nil)
@@ -18526,9 +18958,10 @@ associated with a file."
       (setq umax-toc (if (integerp org-export-with-toc)
 			 (min org-export-with-toc umax)
 		       umax))
-      ;; File header
-      (insert (format
-               "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+      (unless body-only
+	;; File header
+	(insert (format
+		 "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
                \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\"
 lang=\"%s\" xml:lang=\"%s\">
@@ -18541,17 +18974,16 @@ lang=\"%s\" xml:lang=\"%s\">
 %s
 </head><body>
 "
-	       language language (org-html-expand title) (or charset "iso-8859-1")
-	       date time author style))
-
-
-      (insert (or (plist-get opt-plist :preamble) ""))
-
-      (when (plist-get opt-plist :auto-preamble)
-	(if title (insert (format org-export-html-title-format
-				  (org-html-expand title)))))
-
-      (if org-export-with-toc
+		 language language (org-html-expand title)
+		 (or charset "iso-8859-1") date time author style))
+	
+	(insert (or (plist-get opt-plist :preamble) ""))
+	
+	(when (plist-get opt-plist :auto-preamble)
+	  (if title (insert (format org-export-html-title-format
+				    (org-html-expand title))))))
+	
+      (if (and org-export-with-toc (not body-only))
 	  (progn
 	    (push (format "<h%d>%s</h%d>\n"
 			  org-export-html-toplevel-hlevel
@@ -18560,77 +18992,78 @@ lang=\"%s\" xml:lang=\"%s\">
 		  thetoc)
 	    (push "<ul>\n<li>" thetoc)
 	    (setq lines
-	    (mapcar '(lambda (line)
-		       (if (string-match org-todo-line-regexp line)
-			   ;; This is a headline
-			   (progn
-			     (setq have-headings t)
-			     (setq level (- (match-end 1) (match-beginning 1))
-				   level (org-tr-level level)
-				   txt (save-match-data
-					 (org-html-expand
-					  (org-export-cleanup-toc-line
-					   (match-string 3 line))))
-				   todo
-				   (or (and org-export-mark-todo-in-toc
-					    (match-beginning 2)
-					    (not (member (match-string 2 line)
-							org-done-keywords)))
+		  (mapcar '(lambda (line)
+		    (if (string-match org-todo-line-regexp line)
+			;; This is a headline
+			(progn
+			  (setq have-headings t)
+			  (setq level (- (match-end 1) (match-beginning 1))
+				level (org-tr-level level)
+				txt (save-match-data
+				      (org-html-expand
+				       (org-export-cleanup-toc-line
+					(match-string 3 line))))
+				todo
+				(or (and org-export-mark-todo-in-toc
+					 (match-beginning 2)
+					 (not (member (match-string 2 line)
+						      org-done-keywords)))
 					; TODO, not DONE
-				       (and org-export-mark-todo-in-toc
-					    (= level umax-toc)
-					    (org-search-todo-below
-					     line lines level))))
-			     (if (and (memq org-export-with-tags '(not-in-toc nil))
-				      (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
-				 (setq txt (replace-match "" t t txt)))
-			     (if (string-match quote-re0 txt)
-				 (setq txt (replace-match "" t t txt)))
-			     (if org-export-with-section-numbers
-				 (setq txt (concat (org-section-number level)
-						   " " txt)))
-			     (if (<= level (max umax umax-toc))
-				 (setq head-count (+ head-count 1)))
-			     (if (<= level umax-toc)
-				 (progn
-				   (if (> level org-last-level)
-				       (progn
-					 (setq cnt (- level org-last-level))
-					 (while (>= (setq cnt (1- cnt)) 0)
-					   (push "\n<ul>\n<li>" thetoc))
-					 (push "\n" thetoc)))
-				   (if (< level org-last-level)
-				       (progn
-					 (setq cnt (- org-last-level level))
-					 (while (>= (setq cnt (1- cnt)) 0)
-					   (push "</li>\n</ul>" thetoc))
-					 (push "\n" thetoc)))
-				   ;; Check for targets
-				   (while (string-match org-target-regexp line)
-				     (setq tg (match-string 1 line)
-					   line (replace-match
-						 (concat "@<span class=\"target\">" tg "@</span> ")
-						 t t line))
-				     (push (cons (org-solidify-link-text tg)
-						 (format "sec-%d" head-count))
-					   target-alist))
-				   (while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
-				     (setq txt (replace-match "" t t txt)))
-				   (push
-				    (format
-				     (if todo
-					 "</li>\n<li><a href=\"#sec-%d\"><span class=\"todo\">%s</span></a>"
-				       "</li>\n<li><a href=\"#sec-%d\">%s</a>")
-				     head-count txt) thetoc)
-				   
-				   (setq org-last-level level))
-			       )))
-		       line)
-		    lines))
+				    (and org-export-mark-todo-in-toc
+					 (= level umax-toc)
+					 (org-search-todo-below
+					  line lines level))))
+			  (if (and (memq org-export-with-tags '(not-in-toc nil))
+				   (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
+			      (setq txt (replace-match "" t t txt)))
+			  (if (string-match quote-re0 txt)
+			      (setq txt (replace-match "" t t txt)))
+			  (if org-export-with-section-numbers
+			      (setq txt (concat (org-section-number level)
+						" " txt)))
+			  (if (<= level (max umax umax-toc))
+			      (setq head-count (+ head-count 1)))
+			  (if (<= level umax-toc)
+			      (progn
+				(if (> level org-last-level)
+				    (progn
+				      (setq cnt (- level org-last-level))
+				      (while (>= (setq cnt (1- cnt)) 0)
+					(push "\n<ul>\n<li>" thetoc))
+				      (push "\n" thetoc)))
+				(if (< level org-last-level)
+				    (progn
+				      (setq cnt (- org-last-level level))
+				      (while (>= (setq cnt (1- cnt)) 0)
+					(push "</li>\n</ul>" thetoc))
+				      (push "\n" thetoc)))
+				;; Check for targets
+				(while (string-match org-target-regexp line)
+				  (setq tg (match-string 1 line)
+					line (replace-match
+					      (concat "@<span class=\"target\">" tg "@</span> ")
+					      t t line))
+				  (push (cons (org-solidify-link-text tg)
+					      (format "sec-%d" head-count))
+					target-alist))
+				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
+				  (setq txt (replace-match "" t t txt)))
+				(push
+				 (format
+				  (if todo
+				      "</li>\n<li><a href=\"#sec-%d\"><span class=\"todo\">%s</span></a>"
+				    "</li>\n<li><a href=\"#sec-%d\">%s</a>")
+				  head-count txt) thetoc)
+				
+				(setq org-last-level level))
+			    )))
+		    line)
+			  lines))
 	    (while (> org-last-level 0)
 	      (setq org-last-level (1- org-last-level))
 	      (push "</li>\n</ul>\n" thetoc))
 	    (setq thetoc (if have-headings (nreverse thetoc) nil))))
+
       (setq head-count 0)
       (org-init-section-numbers)
 
@@ -18729,7 +19162,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (setq rpl
 		    (concat
 		     "<a href=\"#"
-		     (org-solidify-link-text path target-alist)
+		     (org-solidify-link-text 
+		      (save-match-data (org-link-unescape path)) target-alist)
 		     "\">" desc "</a>")))
 	     ((member type '("http" "https")) ; FIXME: need to test this.
 	      ;; standard URL, just check if we need to inline an image
@@ -18922,24 +19356,28 @@ lang=\"%s\" xml:lang=\"%s\">
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
 
-      (when (plist-get opt-plist :auto-postamble)
-	(when author
-	  (insert "<p class=\"author\"> "
-		  (nth 1 lang-words) ": " author "\n")
-	  (when email
-	    (insert "<a href=\"mailto:" email "\">&lt;"
-		    email "&gt;</a>\n"))
-	  (insert "</p>\n"))
-	(when (and date time)
-	  (insert "<p class=\"date\"> "
-		  (nth 2 lang-words) ": "
-		  date " " time "</p>\n")))
+      (unless body-only
+	(when (plist-get opt-plist :auto-postamble)
+	  (when author
+	    (insert "<p class=\"author\"> "
+		    (nth 1 lang-words) ": " author "\n")
+	    (when email
+	      (insert "<a href=\"mailto:" email "\">&lt;"
+		      email "&gt;</a>\n"))
+	    (insert "</p>\n"))
+	  (when (and date time)
+	    (insert "<p class=\"date\"> "
+		    (nth 2 lang-words) ": "
+		    date " " time "</p>\n")))
 
-      (if org-export-html-with-timestamp
-	  (insert org-export-html-html-helper-timestamp))
-      (insert (or (plist-get opt-plist :postamble) ""))
-      (insert "</body>\n</html>\n")
+	(if org-export-html-with-timestamp
+	    (insert org-export-html-html-helper-timestamp))
+	(insert (or (plist-get opt-plist :postamble) ""))
+	(insert "</body>\n</html>\n"))
+
       (normal-mode)
+      (if (eq major-mode default-major-mode) (html-mode))
+
       ;; insert the table of contents
       (goto-char (point-min))
       (when thetoc
@@ -18962,9 +19400,13 @@ lang=\"%s\" xml:lang=\"%s\">
       (goto-char (point-min))
       (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
 	(replace-match ""))
-      (or temp-buffer-only (save-buffer))
+      (or to-buffer (save-buffer))
       (goto-char (point-min))
-      (message "Exporting... done"))))
+      (message "Exporting... done")
+      (if (eq to-buffer 'string)
+	  (prog1 (buffer-substring (point-min) (point-max))
+	    (kill-buffer (current-buffer)))
+	(current-buffer)))))
 
 (defun org-format-table-html (lines olines)
   "Find out which HTML converter to use and return the HTML code."
@@ -19187,6 +19629,9 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
   (when org-export-remove-timestamps-from-toc
     (while (string-match org-maybe-keyword-time-regexp s)
       (setq s (replace-match "" t t s))))
+  (while (string-match org-bracket-link-regexp s)
+    (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
+			   t t s)))		       
   s)
 
 (defun org-html-expand (string)
@@ -19383,11 +19828,13 @@ The file is stored under the name `org-combined-agenda-icalendar-file'."
 If COMBINE is non-nil, combine all calendar entries into a single large
 file and store it under the name `org-combined-agenda-icalendar-file'."
   (save-excursion
+    (org-prepare-agenda-buffers files)
     (let* ((dir (org-export-directory
 		 :ical (list :publishing-directory
 			     org-export-publishing-directory)))
 	   file ical-file ical-buffer category started org-agenda-new-buffers)
-
+      
+      (and (get-buffer "*ical-tmp*") (kill-buffer "*ical-tmp*"))
       (when combine
 	(setq ical-file
 	      (if (file-name-absolute-p org-combined-agenda-icalendar-file)
@@ -19432,76 +19879,112 @@ the iCalendar file.")
 (defun org-print-icalendar-entries (&optional combine)
   "Print iCalendar entries for the current Org-mode file to `standard-output'.
 When COMBINE is non nil, add the category to each line."
-  (let ((re2 (concat "--?-?\\(" org-ts-regexp "\\)"))
+  (let ((re1 (concat org-ts-regexp "\\|<%%([^>\n]+>"))
+	(re2 (concat "--?-?\\(" org-ts-regexp "\\)"))
 	(org-category-table (org-get-category-table))
 	(dts (org-ical-ts-to-string
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
-	hd ts ts2 state status (inc t) pos
-	scheduledp deadlinep tmp pri category)
+	hd ts ts2 state status (inc t) pos b sexp rrule
+	scheduledp deadlinep tmp pri category
+	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward org-ts-regexp nil t)
-	(setq pos (match-beginning 0)
-	      ts (match-string 0)
-	      inc t
-	      hd (org-get-heading)
-	      category (org-get-category))
-	(if (looking-at re2)
-	    (progn
-	      (goto-char (match-end 0))
-	      (setq ts2 (match-string 1) inc nil))
-	  (setq ts2 ts
-		tmp (buffer-substring (max (point-min)
+      (while (re-search-forward re1 nil t)
+	(catch :skip
+	  (org-agenda-skip)
+	  (setq pos (match-beginning 0)
+		ts (match-string 0)
+		inc t
+		hd (org-get-heading)
+		category (org-get-category))
+	  (if (looking-at re2)
+	      (progn
+		(goto-char (match-end 0))
+		(setq ts2 (match-string 1) inc nil))
+	    (setq ts2 ts
+		  tmp (buffer-substring (max (point-min)
 					     (- pos org-ds-keyword-length))
-				      pos)
-		deadlinep (string-match org-deadline-regexp tmp)
-		scheduledp (string-match org-scheduled-regexp tmp)
-		;; donep (org-entry-is-done-p)
-                ))
-	(if (or (string-match org-tr-regexp hd)
-		(string-match org-ts-regexp hd))
-	    (setq hd (replace-match "" t t hd)))
-	(if (string-match org-bracket-link-regexp hd)
-	    (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
-				      (match-string 1 hd))
-				    t t hd)))
-	(if deadlinep (setq hd (concat "DL: " hd)))
-	(if scheduledp (setq hd (concat "S: " hd)))
-	(princ (format "BEGIN:VEVENT
+					pos)
+		  deadlinep (string-match org-deadline-regexp tmp)
+		  scheduledp (string-match org-scheduled-regexp tmp)
+		  ;; donep (org-entry-is-done-p)
+		  ))
+	  (if (or (string-match org-tr-regexp hd)
+		  (string-match org-ts-regexp hd))
+	      (setq hd (replace-match "" t t hd)))
+	  (if (string-match "\\+\\([0-9]+\\)\\([dwmy]\\)>" ts)
+	      (setq rrule
+		    (concat "\nRRULE:FREQ="
+			    (cdr (assoc
+				  (match-string 2 ts)
+				  '(("d" . "DAILY")("w" . "WEEKLY")
+				    ("m" . "MONTHLY")("y" . "YEARLY"))))
+			    ";INTERVAL=" (match-string 1 ts)))
+	    (setq rrule ""))
+	  (if (string-match org-bracket-link-regexp hd)
+	      (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
+					(match-string 1 hd))
+				      t t hd)))
+	  (if deadlinep (setq hd (concat "DL: " hd)))
+	  (if scheduledp (setq hd (concat "S: " hd)))
+	  (if (string-match "\\`<%%" ts)
+	      (with-current-buffer sexp-buffer
+		(insert (substring ts 1 -1) " " hd "\n"))
+	    (princ (format "BEGIN:VEVENT
 %s
-%s
+%s%s
 SUMMARY:%s
 CATEGORIES:%s
 END:VEVENT\n"
-		       (org-ical-ts-to-string ts "DTSTART")
-		       (org-ical-ts-to-string ts2 "DTEND" inc)
-		       hd category)))
+			   (org-ical-ts-to-string ts "DTSTART")
+			   (org-ical-ts-to-string ts2 "DTEND" inc)
+			   rrule hd category)))))
+	
+      (when (and org-icalendar-include-sexps
+		 (condition-case nil (require 'icalendar) (error nil))
+		 (fboundp 'icalendar-export-region))
+	;; Get all the literal sexps
+	(goto-char (point-min))
+	(while (re-search-forward "^&?%%(" nil t)
+	  (catch :skip
+	    (org-agenda-skip)
+	    (setq b (match-beginning 0))
+	    (goto-char (1- (match-end 0)))
+	    (forward-sexp 1)
+	    (end-of-line 1)
+	    (setq sexp (buffer-substring b (point)))
+	    (with-current-buffer sexp-buffer
+	      (insert sexp "\n"))
+	    (princ (org-diary-to-ical-string sexp-buffer)))))
+
       (when org-icalendar-include-todo
 	(goto-char (point-min))
 	(while (re-search-forward org-todo-line-regexp nil t)
-	  (setq state (match-string 2))
-	  (setq status (if (member state org-done-keywords)
-			   "COMPLETED" "NEEDS-ACTION"))
-	  (when (and state
-		     (or (not (member state org-done-keywords))
-			 (eq org-icalendar-include-todo 'all))
-		     (not (member org-archive-tag (org-get-tags-at)))
-		     )
-	    (setq hd (match-string 3))
-	    (if (string-match org-bracket-link-regexp hd)
-		(setq hd (replace-match (if (match-end 3) (match-string 3 hd)
-					  (match-string 1 hd))
-					t t hd)))
-	    (if (string-match org-priority-regexp hd)
-		(setq pri (string-to-char (match-string 2 hd))
-		      hd (concat (substring hd 0 (match-beginning 1))
-				 (substring hd (match-end 1))))
-	      (setq pri org-default-priority))
-	    (setq pri (floor (1+ (* 8. (/ (float (- org-lowest-priority pri))
-					  (- org-lowest-priority ?A))))))
-
-	    (princ (format "BEGIN:VTODO
+	  (catch :skip
+	    (org-agenda-skip)
+	    (setq state (match-string 2))
+	    (setq status (if (member state org-done-keywords)
+			     "COMPLETED" "NEEDS-ACTION"))
+	    (when (and state
+		       (or (not (member state org-done-keywords))
+			   (eq org-icalendar-include-todo 'all))
+		       (not (member org-archive-tag (org-get-tags-at)))
+		       )
+	      (setq hd (match-string 3))
+	      (if (string-match org-bracket-link-regexp hd)
+		  (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
+					    (match-string 1 hd))
+					  t t hd)))
+	      (if (string-match org-priority-regexp hd)
+		  (setq pri (string-to-char (match-string 2 hd))
+			hd (concat (substring hd 0 (match-beginning 1))
+				   (substring hd (match-end 1))))
+		(setq pri org-default-priority))
+	      (setq pri (floor (1+ (* 8. (/ (float (- org-lowest-priority pri))
+					    (- org-lowest-priority org-highest-priority))))))
+	      
+	      (princ (format "BEGIN:VTODO
 %s
 SUMMARY:%s
 CATEGORIES:%s
@@ -19509,7 +19992,7 @@ SEQUENCE:1
 PRIORITY:%d
 STATUS:%s
 END:VTODO\n"
-			   dts hd category pri status))))))))
+			     dts hd category pri status)))))))))
 
 (defun org-start-icalendar-file (name)
   "Start an iCalendar file by inserting the header."
@@ -19760,6 +20243,7 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 (org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
 (org-defkey org-mode-map "\C-c\C-e" 'org-export)
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
+(org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 
 (org-defkey org-mode-map "\C-c\C-x\C-k" 'org-cut-special)
 (org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
@@ -20270,7 +20754,11 @@ See the individual commands for more information."
      ["Next Same Level" outline-forward-same-level t]
      ["Previous Same Level" outline-backward-same-level t]
      "--"
-     ["Jump" org-goto t])
+     ["Jump" org-goto t]
+     "--"
+     ["C-a finds headline start"
+      (setq org-special-ctrl-a (not org-special-ctrl-a))
+      :style toggle :selected org-special-ctrl-a])
     ("Edit Structure"
      ["Move Subtree Up" org-shiftmetaup (not (org-at-table-p))]
      ["Move Subtree Down" org-shiftmetadown (not (org-at-table-p))]
@@ -20288,6 +20776,8 @@ See the individual commands for more information."
      "--"
      ["Convert to odd levels" org-convert-to-odd-levels t]
      ["Convert to odd/even levels" org-convert-to-oddeven-levels t])
+    ("Editing"
+     ["Emphasis..." org-emphasize t])
     ("Archive"
      ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
 ;     ["Check and Tag Children" (org-toggle-archive-tag (4))
@@ -20509,7 +20999,7 @@ and :keyword."
 	(push (org-point-in-group p 4 :tags) clist))
       (goto-char p)
       (skip-chars-backward "^[\n\r \t") (or (eobp) (backward-char 1))
-      (if (looking-at "\\[#[A-Z]\\]")
+      (if (looking-at "\\[#[A-Z0-9]\\]")
 	  (push (org-point-in-group p 0 :priority) clist)))
 
      ((org-at-item-p)
@@ -21000,14 +21490,6 @@ Show the heading too, if it is currently invisible."
 
 ;;;; Experimental code
 
-(defun org-get-item-columns ()
-  (save-excursion
-    (when (condition-case nil
-	      (org-beginning-of-item)
-	    (error nil))
-      (if (looking-at "\\([ \t]*\\)[-+*0-9.)]+")
-	  (cons (progn (goto-char (match-end 1)) (current-column))
-		(progn (goto-char (match-end 0)) (1+ (current-column))))))))
 
 ;;;; Finish up
 

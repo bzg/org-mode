@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.74
-@set DATE April 2007
+@set VERSION 4.75
+@set DATE May 2007
 
 @dircategory Emacs
 @direntry
@@ -176,13 +176,18 @@ Timestamps
 
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
-* Custom time format::          If you cannot work with the ISO format
-* Repeating items::             Deadlines that come back again and again
+* Deadlines and scheduling::    Planning your work
 * Progress logging::            Documenting when what work was done.
 
 Creating timestamps
 
 * The date/time prompt::        How org-mode helps you entering date and time
+* Custom time format::          Making dates look differently
+
+Deadlines and Scheduling
+
+* Inserting deadline/schedule::  
+* Repeated tasks::              
 
 Progress Logging
 
@@ -2150,18 +2155,20 @@ Insert a link.  This prompts for a link to be inserted into the buffer.
 You can just type a link, using text for an internal link, or one of the
 link type prefixes mentioned in the examples above.  All links stored
 during the current session are part of the history for this prompt, so
-you can access them with @key{up} and @key{down}, or with
-completion@footnote{After insertion of a stored link, the link will be
-removed from the list of stored links.  To keep it in the list later
+you can access them with @key{up} and @key{down}.  Completion, on the
+other hand, will help you to insert valid link prefixes like
+@samp{http:} or @samp{ftp:}, including the prefixes defined through link
+abbreviations (@pxref{Link abbreviations}).  The link will be inserted
+into the buffer@footnote{After insertion of a stored link, the link will
+be removed from the list of stored links.  To keep it in the list later
 use, use a triple @kbd{C-u} prefix to @kbd{C-c C-l}, or configure the
-option @code{org-keep-stored-link-after-insertion}.}.  The link will be
-inserted into the buffer, along with a descriptive text.  If some text
-was selected when this command is called, the selected text becomes the
-default description.@* Note that you don't have to use this command to
-insert a link.  Links in Org-mode are plain text, and you can type or
-paste them straight into the buffer.  By using this command, the links
-are automatically enclosed in double brackets, and you will be asked for
-the optional descriptive text.
+option @code{org-keep-stored-link-after-insertion}.}, along with a
+descriptive text.  If some text was selected when this command is
+called, the selected text becomes the default description.@* Note that
+you don't have to use this command to insert a link.  Links in Org-mode
+are plain text, and you can type or paste them straight into the buffer.
+By using this command, the links are automatically enclosed in double
+brackets, and you will be asked for the optional descriptive text.
 @c
 @c  If the link is a @samp{file:} link and
 @c the linked file is located in the same directory as the current file or
@@ -2818,6 +2825,17 @@ are also used to modify time stamps (@pxref{Creating timestamps}).
 Furthermore, these keys are also used by CUA-mode (@pxref{Conflicts}).
 @end table
 
+You can change the range of allowed priorities by setting the variables
+@code{org-highest-priority}, @code{org-lowest-priority}, and
+@code{org-default-priority}.  For an individual buffer, you may set
+these values (highest, lowest, default) like this (please make sure that
+the highest priority is earlier in the alphabet than the lowest
+priority):
+
+@example
+#+PRIORITIES: A C B
+@end example
+
 @node Breaking down tasks, Checkboxes, Priorities, TODO items
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
@@ -2915,8 +2933,7 @@ planning.
 @menu
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
-* Custom time format::          If you cannot work with the ISO format
-* Repeating items::             Deadlines that come back again and again
+* Deadlines and scheduling::    Planning your work
 * Progress logging::            Documenting when what work was done.
 @end menu
 
@@ -2934,7 +2951,7 @@ special format, either @samp{<2003-09-16 Tue>} or @samp{<2003-09-16 Tue
 09:39>}@footnote{This is the standard ISO date/time format.  If you
 cannot get used to these, see @ref{Custom time format}}.  A time stamp
 can appear anywhere in the headline or body of an org-tree entry.  Its
-presence allows entries to be shown on specific dates in the agenda
+presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/Daily agenda}).  We distinguish:
 
 @table @var
@@ -2950,6 +2967,39 @@ associated with a plain time stamp will be shown exactly on that date.
 * Meet Peter at the movies <2006-11-01 Wed 19:15>
 @end example
 
+@item Time stamp with repeater interval
+@cindex timestamp, with repeater interval
+A time stamp may contain a @emph{repeater interval}, indicating that it
+applies not only on the given date, but again and again after a certain
+interval of N days (d), weeks (w), months(m), or years(y).  The
+following will show up in the agenda every Wednesday:
+
+@example
+* Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
+@end example
+
+@item Diary-style sexp entries
+For more complex date specifications, Org-mode supports using the
+special sexp diary entries implemented in the Emacs calendar/diary
+package.  For example
+
+@example
+* The nerd meeting on every 2nd Thursday of the month
+  <%%(diary-float t 4 2)>
+@end example
+
+@item Time/Date range
+@cindex timerange
+@cindex date range
+Two time stamps connected by @samp{--} denote a range.  The headline
+will be shown on the first and last day of the range, and on any dates
+that are displayed and fall in the range.  Here is an example:
+
+@example
+** Meeting in Amsterdam
+   <2004-08-23 Mon>--<2004-08-26 Thu>
+@end example
+
 @item Inactive time stamp
 @cindex timestamp, inactive
 @cindex inactive timestamp
@@ -2961,65 +3011,9 @@ angular ones.  These time stamps are inactive in the sense that they do
 * Gillian comes late for the fifth time [2006-11-01 Wed]
 @end example
 
-@item Time stamp range
-@cindex timerange
-Two time stamps connected by @samp{--} denote a time range.  The
-headline will be shown on the first and last day of the range, and on
-any dates that are displayed and fall in the range.  Here is an
-example:
-
-@example
-** Meeting in Amsterdam
-   <2004-08-23 Mon>--<2004-08-26 Thu>
-@end example
-
-@item Time stamp with SCHEDULED keyword
-@cindex SCHEDULED keyword
-If a time stamp is preceded by the word @samp{SCHEDULED:}, it means you
-are planning to start working on that task on the given date. So this is
-not about recording an event, but about planning your work.  The
-headline will be listed under the given date@footnote{It will still be
-listed on that date after it has been marked DONE.  If you don't like
-this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
-addition, a reminder that the scheduled date has passed will be present
-in the compilation for @emph{today}, until the entry is marked DONE.
-I.e., the task will automatically be forwarded until completed.
-
-@example
-*** TODO Call Trillian for a date on New Years Eve.
-    SCHEDULED: <2004-12-25 Sat>
-@end example
-
-@item Time stamp with DEADLINE keyword
-@cindex DEADLINE keyword
-If a time stamp is preceded by the word @samp{DEADLINE:}, the task
-(most likely a TODO item) is supposed to be finished on that date, and
-it will be listed then.  In addition, the compilation for @emph{today}
-will carry a warning about the approaching or missed deadline,
-starting @code{org-deadline-warning-days} before the due date, and
-continuing until the entry is marked DONE.  An example:
-
-@example
-*** TODO write article about the Earth for the Guide
-    The editor in charge is [[bbdb:Ford Prefect]]
-    DEADLINE: <2004-02-29 Sun>
-@end example
-@item Time stamp with CLOSED keyword
-@cindex CLOSED keyword
-When @code{org-log-done} is non-nil, Org-mode will automatically insert
-a special time stamp each time a TODO entry is marked done
-(@pxref{Progress logging}).  This time stamp is enclosed in square
-brackets instead of angular brackets.
-
-@item Time range with CLOCK keyword
-@cindex CLOCK keyword
-When using the clock to time the work that is being done on specific
-items, time ranges preceded by the CLOCK keyword are inserted
-automatically into the file.  The time stamps are enclosed in square
-brackets instead of angular brackets.  @xref{Clocking work time}.
 @end table
 
-@node Creating timestamps, Custom time format, Time stamps, Timestamps
+@node Creating timestamps, Deadlines and scheduling, Time stamps, Timestamps
 @section Creating timestamps
 @cindex creating timestamps
 @cindex timestamps, creating
@@ -3061,27 +3055,6 @@ instead.
 Access the agenda for the date given by the time stamp or -range at
 point (@pxref{Weekly/Daily agenda}).
 @c
-@kindex C-c C-d
-@item C-c C-d
-Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.  
-@c FIXME Any CLOSED timestamp will be removed.????????
-@c
-@kindex C-c C-w
-@cindex sparse tree, for deadlines
-@item C-c C-w
-Create a sparse tree with all deadlines that are either past-due, or
-which will become due within @code{org-deadline-warning-days}.
-With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
-prefix, check that many days.  For example, @kbd{C-1 C-c C-w} shows
-all deadlines due tomorrow.
-@c
-@kindex C-c C-s
-@item C-c C-s
-Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
-happen in the line directly following the headline.  Any CLOSED
-timestamp will be removed.
-@c
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}
@@ -3110,9 +3083,10 @@ into the following column).
 
 @menu
 * The date/time prompt::        How org-mode helps you entering date and time
+* Custom time format::          Making dates look differently
 @end menu
 
-@node The date/time prompt,  , Creating timestamps, Creating timestamps
+@node The date/time prompt, Custom time format, Creating timestamps, Creating timestamps
 @subsection The date/time prompt
 @cindex date, reading in minibuffer
 @cindex time, reading in minibuffer
@@ -3181,8 +3155,8 @@ One month back.
 Choose date in calendar (only if nothing was typed into minibuffer).
 @end table
 
-@node Custom time format, Repeating items, Creating timestamps, Timestamps
-@section Custom time format
+@node Custom time format,  , The date/time prompt, Creating timestamps
+@subsection Custom time format
 @cindex custom date/time format
 @cindex time format, custom
 @cindex date format, custom
@@ -3224,50 +3198,119 @@ using dates in tables, table alignment will be messed up.  If the custom
 format is shorter, things do work as expected.
 @end itemize
 
-@node Repeating items, Progress logging, Custom time format, Timestamps
-@section Repeating items
-@cindex TODO items, repeating
-@cindex deadlines, repeating
-@cindex scheduling, repeating
 
-Org-mode integrates with the Emacs calendar and diary to display cyclic
-appointments, anniversaries and other special entries in the agenda
-(@pxref{Weekly/Daily agenda}).  However, it can be useful to have
-certain deadlines and scheduling items to auto-repeat.  The advantage of
-a deadline or scheduled item is that the they produce warnings ahead of
-time and automatically forward themselves in the agenda until they are
-done.  The abstract difference is therefore between cyclic
-@i{appointments} and cyclic @i{action items}.  For appointments you
-should use the diary, for actions you can uses an org-mode deadline or
-scheduling time stamp together with a REPEAT cookie.  For example:
+@node Deadlines and scheduling, Progress logging, Creating timestamps, Timestamps
+@section Deadlines and Scheduling
+
+A time stamp may be preceded by special keywords to facilitate planning
+of work:
+
+@table @var
+@item DEADLINE
+@cindex DEADLINE keyword
+The task (most likely a TODO item) is supposed to be finished on that
+date, and it will be listed then.  In addition, the compilation for
+@emph{today} will carry a warning about the approaching or missed
+deadline, starting @code{org-deadline-warning-days} before the due date,
+and continuing until the entry is marked DONE.  An example:
 
 @example
-* TODO Replace batteries in smoke detector REPEAT(+18m)
-  SCHEDULED: <2007-01-01 Mon>
-
-* TODO Get dentist appointment REPEAT(+6m)
-  SCHEDULED: <2006-12-19 Tue>
-
-* TODO Tax report to IRS REPEAT(+1y)
-  DEADLINE: <2007-04-01 Sun>
+*** TODO write article about the Earth for the Guide
+    The editor in charge is [[bbdb:Ford Prefect]]
+    DEADLINE: <2004-02-29 Sun>
 @end example
 
-Each time you try to mark one of these entries DONE using @kbd{C-c C-t},
-they will automatically switch back to the state TODO, and the
-deadline/scheduling will be shifted accordingly.  The time units
-recognized by org-mode are year (y), month (m), week (w), and day (d).
-Org-mode will also prompt you for a note and record the fact that you
-have closed this item in a note under the headline.
+@item SCHEDULED
+@cindex SCHEDULED keyword
+You are planning to start working on that task on the given date. The
+headline will be listed under the given date@footnote{It will still be
+listed on that date after it has been marked DONE.  If you don't like
+this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
+addition, a reminder that the scheduled date has passed will be present
+in the compilation for @emph{today}, until the entry is marked DONE.
+I.e., the task will automatically be forwarded until completed.
 
-One unusual property of these repeating items is that only one instance
-of each exist at any given time.  So if you look back or ahead in the
-agenda, you will not find past and future instances, only the current
-one will show up.  Use a cyclic diary entry if you need all past and
-future instances to be visible in the agenda.
+@example
+*** TODO Call Trillian for a date on New Years Eve.
+    SCHEDULED: <2004-12-25 Sat>
+@end example
+@end table
 
-@c FIXME: Document that a note is always being taken.
+@menu
+* Inserting deadline/schedule::  
+* Repeated tasks::              
+@end menu
 
-@node Progress logging,  , Repeating items, Timestamps
+@node Inserting deadline/schedule, Repeated tasks, Deadlines and scheduling, Deadlines and scheduling
+@subsection Inserting deadline/schedule
+
+The following commands allow to quickly insert a deadline or to schedule
+an item:
+
+@table @kbd
+@c
+@kindex C-c C-d
+@item C-c C-d
+Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will
+happen in the line directly following the headline.
+@c FIXME Any CLOSED timestamp will be removed.????????
+@c
+@kindex C-c C-w
+@cindex sparse tree, for deadlines
+@item C-c C-w
+Create a sparse tree with all deadlines that are either past-due, or
+which will become due within @code{org-deadline-warning-days}.
+With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
+prefix, check that many days.  For example, @kbd{C-1 C-c C-w} shows
+all deadlines due tomorrow.
+@c
+@kindex C-c C-s
+@item C-c C-s
+Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
+happen in the line directly following the headline.  Any CLOSED
+timestamp will be removed.
+@end table
+
+@node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
+@subsection Repeated Tasks
+
+Some tasks need to be repeated again and again, and Org-mode therefore
+allows to use a repeater in a DEADLINE or SCHEDULED time stamp, for
+example:
+@example
+** TODO Pay the rent
+   DEADLINE: <2005-10-01 Sat +1m>
+@end example
+
+Deadlines and scheduled items produce entries in the agenda when they
+are over-due, so it is important to be able to mark such an entry as
+completed once you have done so.  When you mark a DEADLINE or a SCHEDULE
+with the todo keyword DONE, it will no longer produce entries in the
+agenda. The problem with this is, however, that then also the
+@emph{next} instance of the repeated entry will not be active.  Org-mode
+deals with this in the following way: When you try to mark such an entry
+DONE (using @kbd{C-c C-t}), it will shift the base date of the repeating
+time stamp by the repeater interval, and immediately set the entry state
+back to TODO.  In the example above, setting the state to DONE would
+actually switch the date like this:
+
+@example
+** TODO Pay the rent
+   DEADLINE: <2005-11-01 Tue +1m>
+@end example
+
+You will also be prompted for a note that will be put under the DEADLINE
+line to keep a record that you actually acted on the previous instance
+of this deadline.
+
+As a consequence of shifting the base date, this entry will no longer be
+visible in the agenda when checking past dates, but all future instances
+will be visible.
+
+You may have both scheduling and deadline information for a specific
+task - just make sure that the repeater intervals on both are the same.
+
+@node Progress logging,  , Deadlines and scheduling, Timestamps
 @section Progress Logging
 @cindex progress logging
 @cindex logging, of progress
@@ -3334,6 +3377,7 @@ these into a separate file that starts with:
 #+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
 #+STARTUP: lognotestate
 @end example
+
 
 @node Clocking work time,  , Tracking TODO state changes, Progress logging
 @subsection Clocking work time
@@ -3879,6 +3923,23 @@ Sunrise/Sunset times, show lunar phases and to convert to other
 calendars, respectively.  @kbd{c} can be used to switch back and forth
 between calendar and agenda.
 
+If you are using the diary only for sexp entries and holidays, it is
+faster to not use the above setting, but instead to copy or even move
+the entries into an Org-mode file. Org-mode evaluates diary-style sexp
+entries, and does it faster because there is no overhead for first
+creating the diary display.  Note that the sexp entries must start at
+the left margin, no white space is allowed before them.  For example,
+the following segment of an Org-mode file will be processed and entries
+will be made in the agenda:
+
+@example
+* Birthdays and similar stuff
+#+CATEGORY: Holiday
+%%(org-calendar-holiday)   ; special function for holiday names
+#+CATEGORY: Ann
+%%(diary-anniversary 14  5 1956) Artur Dent %d is years old
+%%(diary-anniversary  2 10 1869) Mahatma Gandhi would be %d years old
+@end example
 
 @node Global TODO list, Matching headline tags, Weekly/Daily agenda, Built-in agenda views
 @subsection The global TODO list
@@ -5151,13 +5212,24 @@ Export as HTML file and open it with a browser.
 @kindex C-c C-e H
 @item C-c C-e H
 Export to a temporary buffer, do not create a file.
+@kindex C-c C-e R
+@item C-c C-e H
+Export the active region to a temporary buffer.  With prefix arg, do not
+produce file header and foot, but just the plain HTML section for the
+region.  This is good for cut-and-paste operations.
 @kindex C-c C-e v h
 @kindex C-c C-e v b
 @kindex C-c C-e v H
+@kindex C-c C-e v R
 @item C-c C-e v h
 @item C-c C-e v b
 @item C-c C-e v H
+@item C-c C-e v R
 Export only the visible part of the document.
+@item M-x org-export-region-as-html
+Convert the region to HTML under the assumption that it was org-mode
+syntax before.  This is a global command that can be invoked in any
+buffer.
 @end table
 
 @cindex headline levels, for exporting
@@ -6048,6 +6120,10 @@ This line sets the archive location for the agenda file.  It applies for
 all subsequent lines until the next @samp{#+CATEGORY} line, or the end
 of the file.  The first such line also applies to any entries before it.
 The corresponding variable is @code{org-archive-location}.
+@item #+PRIORITIES: highest lowest default
+This line sets the limits and the default for the priorities.  All three
+must be either letters A-Z or numbers 0-9.  The highest priority must
+have a lower ASCII number that the lowest priority.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS:
@@ -6893,6 +6969,9 @@ asked for a way to narrow wide table columns.
 @i{Christian Egli} converted the documentation into TeXInfo format,
 patched CSS formatting into the HTML exporter, and inspired the agenda.
 @item
+@i{David Emery} provided a patch for custom CSS support in exported
+HTML agendas.
+@item
 @i{Nic Ferrier} contributed mailcap and XOXO support.
 @item
 @i{John Foerch} figured out how to make incremental search show context
@@ -6907,6 +6986,11 @@ translated David O'Toole's tutorial into French.
 @item
 @i{Shidai Liu} ("Leo") asked for embedded LaTeX and tested it.  He also
 provided frequent feedback and some patches.
+@item
+@i{Jason F. McBrayer} suggested agenda export to CSV format.
+@item
+@i{Dmitri Minaev} sent a patch to set priority limits on a per-file
+basis.
 @item
 @i{Stefan Monnier} provided a patch to keep the Emacs-Lisp compiler
 happy.
