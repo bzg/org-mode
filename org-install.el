@@ -28,6 +28,7 @@
 (autoload 'org-export-icalendar-combine-agenda-files "org"
   "Export all files in `org-agenda-files' to a single combined iCalendar file." t)
 (autoload 'org-run-like-in-org-mode "Run a command like in Org-mode.")
+(autoload 'org-agenda-to-appt "Activate appointments in `org-agenda-files'.")
 
 ;; org-latex.el
 (autoload 'org-export-as-latex-batch "org-export-latex")

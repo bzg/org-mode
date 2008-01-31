@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.12
+@set VERSION 5.13
 @set DATE October 2007
 
 @dircategory Emacs
@@ -197,6 +197,7 @@ Column View
 
 * Defining columns::            The COLUMNS format property
 * Using column view::           How to create and use column view
+* Capturing Column View::       A dynamic block for column view
 
 Defining Columns
 
@@ -855,7 +856,8 @@ Sort same-level entries.  When there is an active region, all entries in
 the region will be sorted.  Otherwise the children of the current
 headline are sorted.  The command prompts for the sorting method, which
 can be alphabetically, numerically, by time (using the first time stamp
-in each entry), by priority, and each of these in reverse order.  With a
+in each entry), by priority, and each of these in reverse order.  You
+can also supply your own function to extract the sorting key.  With a
 @kbd{C-u} prefix, sorting will be case-sensitive.  With two @kbd{C-u
 C-u} prefixes, duplicate entries will also be removed.
 @end table
@@ -1162,7 +1164,9 @@ With prefix arg, select the nth bullet from this list.
 
 Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org-mode has @emph{drawers}.
-Drawers need to be configured with the variable @code{org-drawers}, and
+Drawers need to be configured with the variable
+@code{org-drawers}@footnote{You can define drawers on a per-file basis
+with a line like @code{#+DRAWERS: HIDDEN PROPPERTIES STATE}}, and
 look like this:
 
 @example
@@ -3522,6 +3526,7 @@ queries have collected selected items, possibly from a number of files.
 @menu
 * Defining columns::            The COLUMNS format property
 * Using column view::           How to create and use column view
+* Capturing Column View::       A dynamic block for column view
 @end menu
 
 @node Defining columns, Using column view, Column view, Column view
@@ -3613,7 +3618,7 @@ be created for the @samp{Time_Spent} column by adding time duration
 expressions like HH:MM, and for the @samp{Approved} column, by providing
 an @samp{[X]} status if all children have been checked.
 
-@node Using column view,  , Defining columns, Column view
+@node Using column view, Capturing Column View, Defining columns, Column view
 @subsection Using Column View
 
 @table @kbd
@@ -3648,6 +3653,9 @@ Edit the property at point.  For the special properties, this will
 invoke the same interface that you normally use to change that
 property.  For example, when editing a TAGS property, the tag completion
 or fast selection interface will pop up.
+@kindex C-c C-c
+@item C-c C-c
+When there is a checkbox at point, toggle it.
 @kindex v
 @item v
 View the full value of this property.  This is useful if the width of
@@ -3669,6 +3677,62 @@ Insert a new column, to the right of the current column.
 @kindex S-M-@key{left}
 @item S-M-@key{left}
 Delete the current column.
+@end table
+
+@node Capturing Column View,  , Using column view, Column view
+@subsection Capturing Column View
+
+Since column view is just an overlay over a buffer, it cannot be
+exported or printed directly.  If you want to capture a column view, use
+the dynamic block (@pxref{Dynamic blocks}).  The frame of this block
+looks like this:
+
+@example
+* The column view
+#+BEGIN: columnview :hlines 1 :id "label"
+
+#+END:
+@end example
+
+@noindent This dynamic block has the following parameters:
+
+@table @code
+@item :id
+This is most important parameter.  Column view is a feature that is
+often localized to a certain (sub)tree, and the capture block might be
+in a different location in the file.  To identify the tree whose view to
+capture, you can use 3 values:
+@example
+local     @r{use the tree in which the capture block is located}
+global    @r{make a global view, including all headings in the file}
+"label"   @r{call column view in the tree that has and @code{:ID:}}
+          @r{property with the value @i{label}}
+@end example
+@item :hlines
+When @code{t}, insert a hline after every line.  When a number N, insert
+a hline before each headline with level @code{<= N}.
+@item :vlines
+When set to @code{t}, enforce column groups to get vertical lines.
+@end table
+
+@noindent
+The following commands insert or update the dynamic block:
+
+@table @kbd
+@kindex C-c C-x r
+@item C-c C-x r
+Insert a dynamic block capturing a column view.  You will be prompted
+for the scope or id of the view.
+@kindex C-c C-c
+@item C-c C-c
+@kindex C-c C-x C-u
+@itemx C-c C-x C-u
+Update dynamical block at point.  The cursor needs to be in the
+@code{#+BEGIN} line of the dynamic block.
+@kindex C-u C-c C-x C-u
+@item C-u C-c C-x C-u
+Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
+you have several clocktable blocks in a buffer.
 @end table
 
 @node Property API,  , Column view, Properties and columns
@@ -4516,14 +4580,17 @@ the files listed in @code{org-agenda-multi-occur-extra-files}.  This
 uses the Emacs command @code{multi-occur}.  A prefix argument can be
 used to specify the number of context lines for each match, default is
 1.
-@item 1
-Restrict an agenda command to the current buffer.  After pressing
-@kbd{1}, you still need to press the character selecting the command.
-@item 0
+@item <
+Restrict an agenda command to the current buffer@footnote{For backward
+compatibility, you can also press @kbd{1} to restrict to the current
+buffer.}.  After pressing @kbd{<}, you still need to press the character
+selecting the command.
+@item < <
 If there is an active region, restrict the following agenda command to
-the region.  Otherwise, restrict it to the current subtree.  After
-pressing @kbd{0}, you still need to press the character selecting the
-command.
+the region.  Otherwise, restrict it to the current subtree@footnote{For
+backward compatibility, you can also press @kbd{0} to restrict to the
+current buffer.}.  After pressing @kbd{< <}, you still need to press the
+character selecting the command.
 @end table
 
 You can also define custom commands that will be accessible through the
@@ -5241,16 +5308,25 @@ search types:
         ("u" tags "+BOSS-URGENT")
         ("v" tags-todo "+BOSS-URGENT")
         ("U" tags-tree "+BOSS-URGENT")
-        ("f" occur-tree "\\<FIXME\\>")))
+        ("f" occur-tree "\\<FIXME\\>")
+        ("h" . "HOME+Name tags searches") ; description for "h" prefix
+        ("hl" tags "+HOME+Lisa")
+        ("hp" tags "+HOME+Peter")
+        ("hk" tags "+HOME+Kim")))
 @end group
 @end lisp
 
 @noindent
-The initial single-character string in each entry defines the character
-you have to press after the dispatcher command @kbd{C-c a} in order to
-access the command.   The second parameter is the search type, followed
-by the string or regular expression to be used for the matching.  The
-example above will therefore define:
+The initial string in each entry defines the keys you have to press
+after the dispatcher command @kbd{C-c a} in order to access the command.
+Usually this will be just a single character, but if you have many
+similar commands, you can also define two-letter combinations where the
+first character is the same in several combinations and serves as a
+prefix key@footnote{You can provide a description for a prefix key by
+inserting a cons cell with the prefix and the description.}.  The second
+parameter is the search type, followed by the string or regular
+expression to be used for the matching.  The example above will
+therefore define:
 
 @table @kbd
 @item C-c a w
@@ -5270,7 +5346,11 @@ as the same search as @kbd{C-c a u}, but only in the current buffer and
 displaying the result as a sparse tree
 @item C-c a f
 to create a sparse tree (again: current buffer only) with all entries
-containing the word @samp{FIXME}.
+containing the word @samp{FIXME}
+@item C-c a h
+as a prefix command for a HOME tags search where you have to press an
+additional key (@kbd{l}, @kbd{p} or @kbd{k}) to select a name (Lisa,
+Peter, or Kim) as additional tag to match.
 @end table
 
 @node Block agenda, Setting Options, Storing searches, Custom agenda views
@@ -6423,7 +6503,7 @@ LaTeX:     @r{turn on/off La@TeX{} fragments}
 skip:      @r{turn on/off skipping the text before the first heading}
 author:    @r{turn on/off inclusion of author name/email into exported file}
 timestamp: @r{turn on/off inclusion creation time into exported file}
-p:         @r{turn on/off inclusion of tags}
+d:         @r{turn on/off inclusion of drawers}
 @end example
 
 These options take effect in both the HTML and La@TeX{} export, except
@@ -6895,9 +6975,11 @@ columns view is invoked in location where no COLUMNS property applies.
 @item #+CONSTANTS: name1=value1 ...
 Set file-local values for constants to be used in table formulas.  This
 line set the local variable @code{org-table-formula-constants-local}.
-The global version of theis variable is
+The global version of this variable is
 @code{org-table-formula-constants}.
-corresponding 
+@item #+DRAWERS: NAME1 .....
+Set the file-local set of drawers.  The corresponding global variable is
+@code{org-drawers}.
 @item #+LINK:  linkword replace
 These lines (several are allowed) specify link abbreviations.
 @xref{Link abbreviations}.  The corresponding variable is
@@ -8035,7 +8117,7 @@ HTML agendas.
 @i{John Foerch} figured out how to make incremental search show context
 around a match in a hidden outline tree.
 @item
-@i{Niels Giessen} had the idea to automatically archive DONE trees.
+@i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
 @i{Bastien Guerry} wrote the La@TeX{} exporter and has been prolific
 with patches, ideas, and bug reports.

@@ -167,11 +167,13 @@ release:
 	$(MKDIR) org-release
 	cp org-$(TAG).zip org-$(TAG).tar.gz org-release
 	cp org.pdf orgcard.pdf org.texi org.html org-release
-	cp ORGWEBPAGE/tmp/*.html org-release
-	cp ORGWEBPAGE/tmp/*.el   org-release
-	cp ORGWEBPAGE/tmp/*.txt  org-release
-	cp ORGWEBPAGE/tmp/*.css  org-release
-	cp ORGWEBPAGE/tmp/*.jpg  org-release
+	cp ORGWEBPAGE/tmp/*.html   org-release
+	cp ORGWEBPAGE/tmp/*.el     org-release
+	cp ORGWEBPAGE/tmp/*.txt    org-release
+	cp ORGWEBPAGE/tmp/*.css    org-release
+	cp ORGWEBPAGE/tmp/*.jpg    org-release
+#	cp ORGWEBPAGE/tmp/*.tar.gz org-release
+#	cp ORGWEBPAGE/tmp/*.zip org-release
 	cp org-release/org-$(TAG).zip    org-release/org.zip
 	cp org-release/org-$(TAG).tar.gz org-release/org.tar.gz
 
