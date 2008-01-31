@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.08
+@set VERSION 5.10
 @set DATE September 2007
 
 @dircategory Emacs
@@ -12,11 +12,11 @@
 @end direntry
 
 @c Version and Contact Info
-@set MAINTAINERSITE @uref{http://www.astro.uva.nl/~dominik/Tools/org/,maintainers webpage}
+@set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Carsten Dominik
-@set MAINTAINEREMAIL @email{dominik at science dot uva dot nl}
-@set MAINTAINERCONTACT @uref{mailto:dominik at science dot uva dot nl,contact the maintainer}
+@set MAINTAINEREMAIL @email{carsten at orgmode dot org}
+@set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
 @c %**end of header
 @finalout
 
@@ -81,8 +81,9 @@ Software Foundation raise funds for GNU development.''
 * Hyperlinks::                  Notes in context
 * TODO items::                  Every tree branch can be a TODO item
 * Tags::                        Tagging headlines and matching sets of tags
-* Properties and columns::      
+* Properties and columns::      Storing information about an entry
 * Timestamps::                  Assign date and time to items
+* Remember::                    Quickly adding nodes to the outline tree
 * Agenda views::                Collecting information into views
 * Embedded LaTeX::              LaTeX fragments and formulas
 * Exporting::                   Sharing and publishing of notes
@@ -150,22 +151,16 @@ Hyperlinks
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
-* Remember::                    Org-trees store quick notes
 
 Internal links
 
 * Radio targets::               Make targets trigger links in plain text.
 
-Remember
-
-* Setting up remember::         Some code for .emacs to get things going
-* Remember templates::          Define the outline of different note types
-* Storing notes::               Directly get the note to where it belongs
-
 TODO items
 
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
+* Progress logging::            Dates and notes for progress
 * Priorities::                  Some things are more important than others
 * Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
@@ -175,7 +170,14 @@ Extended use of TODO keywords
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Fast access to TODO states::  Single letter selection of a state
 * Per file keywords::           Different files, different requirements
+* Faces for TODO keywords::     Highlighting states
+
+Progress Logging
+
+* Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
 
 Tags
 
@@ -206,7 +208,7 @@ Timestamps
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Progress logging::            Documenting when what work was done.
+* Clocking work time::          
 
 Creating timestamps
 
@@ -218,11 +220,11 @@ Deadlines and Scheduling
 * Inserting deadline/schedule::  Planning items
 * Repeated tasks::              Items that show up again and again
 
-Progress Logging
+Remember
 
-* Closing items::               When was this entry marked DONE?
-* Tracking TODO state changes::  When did the status change?
-* Clocking work time::          When exactly did you work on this item?
+* Setting up remember::         Some code for .emacs to get things going
+* Remember templates::          Define the outline of different note types
+* Storing notes::               Directly get the note to where it belongs
 
 Agenda Views
 
@@ -419,7 +421,7 @@ the minor Orgstruct-mode.
 There is a website for Org-mode which provides links to the newest
 version of Org-mode, as well as additional information, frequently asked
 questions (FAQ), links to tutorials etc.  This page is located at
-@uref{http://www.astro.uva.nl/~dominik/Tools/org/}.
+@uref{http://orgmode.org}.
 
 @page
 
@@ -806,6 +808,10 @@ the beginning of any other line, the content of that line is made the
 new heading.  If the command is used at the end of a folded subtree
 (i.e. behind the ellipses at the end of a headline), then a headline
 like the current one will be inserted after the end of the subtree.
+@kindex C-@key{RET}
+@item C-@key{RET}
+Insert a new heading after the current subtree, same level as the
+current headline.  This command works from anywhere in the entry.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert new TODO entry with same level as current heading.
@@ -956,16 +962,20 @@ current file, with the name derived by appending @file{_archive} to the
 current file name.  For information and examples on how to change this,
 see the documentation string of the variable
 @code{org-archive-location}.  There is also an in-buffer option for
-setting this variable, for example
+setting this variable, for example@footnote{If there are several such
+lines in the buffer, each will be valid for the entries below it.  The
+first will also apply to any text before it.  This method is only kept
+for backward compatibility.  The preferred methods for setting multiple
+archive locations is using a property.}:
 
 @example
 #+ARCHIVE: %s_done::
 @end example
 
 @noindent
-You may have several such lines in the buffer, they will then be valid
-for the entries following the line (the first will also apply to any
-text before it).
+If you would like to have a special ARCHIVE location for a single entry
+or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
+location as the value (@pxref{Properties and columns}).
 
 @node Sparse trees, Plain lists, Archiving, Document structure
 @section Sparse trees
@@ -1254,9 +1264,12 @@ unpredictable for you, configure the variables
 @item C-c |
 Convert the active region to table. If every line contains at least one
 TAB character, the function assumes that the material is tab separated.
+If every line contains a comma, comma-separated values (CSV) are assumed.
 If not, lines are split at whitespace into fields.  You can use a prefix
-argument to indicate the minimum number of consecutive spaces required
-to identify a field separator (default: just one).@* 
+argument to force a specific separator: @kbd{C-u} forces CSV, @kbd{C-u
+C-u} forces TAB, and a numeric argument N indicates that at least N
+consequtive spaces, or alternatively a TAB will be the separator.
+@* 
 If there is no active region, this command creates an empty Org-mode
 table.  But it's easier just to start typing, like
 @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
@@ -2099,7 +2112,6 @@ links to other files, Usenet articles, emails, and much more.
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
-* Remember::                    Org-trees store quick notes
 @end menu
 
 @node Link format, Internal links, Hyperlinks, Hyperlinks
@@ -2513,7 +2525,7 @@ to search the current file.  For example, @code{[[file:::find me]]} does
 a search for @samp{find me} in the current file, just as
 @samp{[[find me]]} would.
 
-@node Custom searches, Remember, Search options, Hyperlinks
+@node Custom searches,  , Search options, Hyperlinks
 @section Custom Searches
 @cindex custom search strings
 @cindex search strings, custom
@@ -2537,175 +2549,6 @@ an implementation example.  Search for @samp{BibTeX links} in the source
 file.
 
 
-@node Remember,  , Custom searches, Hyperlinks
-@section Remember
-@cindex @file{remember.el}
-
-Another way to create org entries with links to other files is through
-the @i{remember} package by John Wiegley.  @i{Remember} lets you store
-quick notes with little interruption of your work flow.  See
-@uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
-information.  The notes produced by @i{Remember} can be stored in
-different ways, and Org-mode files are a good target.  Org-mode
-significantly expands the possibilities of @i{remember}: You may define
-templates for different note types, and to associate target files and
-headlines with specific templates.  It also allows you to select the
-location where a note should be stored interactively, on the fly.
-
-@menu
-* Setting up remember::         Some code for .emacs to get things going
-* Remember templates::          Define the outline of different note types
-* Storing notes::               Directly get the note to where it belongs
-@end menu
-
-@node Setting up remember, Remember templates, Remember, Remember
-@subsection Setting up remember
-
-The following customization will tell @i{remember} to use org files as
-target, and to create annotations compatible with Org-mode links.
-
-@example
-(setq org-directory "~/path/to/my/orgfiles/")
-(setq org-default-notes-file "~/.notes")
-(setq remember-annotation-functions '(org-remember-annotation))
-(setq remember-handler-functions '(org-remember-handler))
-(add-hook 'remember-mode-hook 'org-remember-apply-template)
-@end example
-
-@node Remember templates, Storing notes, Setting up remember, Remember
-@subsection Remember templates
-@cindex templates, for remember
-
-In combination with Org-mode, you can use templates to generate
-different types of @i{remember} notes.  For example, if you would like
-to use one template to create general TODO entries, another one for
-journal entries, and a third one for collecting random ideas, you could
-use:
-
-@example
-(setq org-remember-templates
- '((?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org")
-   (?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
-   (?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
-@end example
-
-@noindent In these entries, the character specifies how to select the
-template.  The first string specifies the template.  Two more (optional)
-strings give the file in which, and the headline under which the new
-note should be stored.  The file defaults (if not present or @code{nil})
-to @code{org-default-notes-file}, the heading to
-@code{org-remember-default-headline}.  Both defaults help to get to the
-storing location quickly, but you can change the location interactively
-while storing the note.
-
-When you call @kbd{M-x remember} (or @kbd{M-x org-remember}) to remember
-something, org will prompt for a key to select the template (if you have
-more than one template) and then prepare the buffer like
-@example
-* TODO
-  [[file:link to where you called remember]]
-@end example
-
-@noindent or
-
-@example
-* [2006-03-21 Tue 15:37]
-
-  [[file:link to where you called remember]]
-@end example
-
-@noindent
-During expansion of the template, special @kbd{%}-escapes allow dynamic
-insertion of content:
-@example
-%^@{prompt@}  @r{prompt the user for a string and replace this sequence with it.}
-%t          @r{time stamp, date only}
-%T          @r{time stamp with date and time}
-%u, %U      @r{like the above, but inactive time stamps}
-%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
-            @r{You may define a prompt like @code{%^@{Birthday@}t}}
-%n          @r{user name (taken from @code{user-full-name})}
-%a          @r{annotation, normally the link created with @code{org-store-link}}
-%i          @r{initial content, the region when remember is called with C-u.}
-            @r{The entire text will be indented like @code{%i} itself.}
-%^g         @r{prompt for tags, with completion on tags in target file.}
-%^G         @r{prompt for tags, with completion all tags in all agenda files.}
-%:keyword   @r{specific information for certain link types, see below}
-@end example
-
-@noindent
-For specific link types, the following keywords will be defined:
-
-@example
-Link type          |  Available keywords
--------------------+----------------------------------------------
-bbdb               |  %:name %:company
-vm, wl, mh, rmail  |  %:type %:subject %:message-id
-                   |  %:from %:fromname %:fromaddress
-                   |  %:to   %:toname   %:toaddress
-                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}       
-gnus               |  %:group, @r{for messages also all email fields}
-w3, w3m            |  %:url
-info               |  %:file %:node
-calendar           |  %:date"
-@end example
-
-@noindent
-To place the cursor after template expansion use:
-
-@example
-%?          @r{After completing the template, position cursor here.}
-@end example
-
-@noindent
-If you change you mind about which template to use, call
-@code{org-remember} in the remember buffer.  You may then select a new
-template that will be filled with the previous context information.
-
-@node Storing notes,  , Remember templates, Remember
-@subsection Storing notes
-
-When you are finished preparing a note with @i{remember}, you have to press
-@kbd{C-c C-c} to file the note away.  The handler first prompts for a
-target file - if you press @key{RET}, the value specified for the
-template is used.  Then the command offers the headings tree of the
-selected file, with the cursor position at the default headline (if you
-had specified one in the template).  You can either immediately press
-@key{RET} to get the note placed there.  Or you can use the following
-keys to find a better location:
-@example
-@key{TAB}         @r{Cycle visibility.}
-@key{down} / @key{up}   @r{Next/previous visible headline.}
-n / p        @r{Next/previous visible headline.}
-f / b        @r{Next/previous headline same level.}
-u            @r{One level up.}
-@c 0-9          @r{Digit argument.}
-@end example
-@noindent
-Pressing @key{RET} or @key{left} or @key{right}
-then leads to the following result.
-
-@multitable @columnfractions 0.2 0.15 0.65
-@item @b{Cursor position} @tab @b{Key} @tab @b{Note gets inserted}
-@item buffer-start @tab @key{RET} @tab as level 2 heading at end of file
-@item on headline @tab @key{RET} @tab as sublevel of the heading at cursor
-@item             @tab @key{left}/@key{right} @tab as same level, before/after current heading
-@item not on headline @tab @key{RET}
-      @tab at cursor position, level taken from context.
-@end multitable
-
-So a fast way to store the note to its default location is to press
-@kbd{C-c C-c @key{RET} @key{RET}}.  Even shorter would be @kbd{C-u C-c
-C-c}, which does the same without even asking for a file or showing the
-tree.
-
-Before inserting the text into a tree, the function ensures that the
-text has a headline, i.e. a first line that starts with a @samp{*}.
-If not, a headline is constructed from the current date and some
-additional data.  If the variable @code{org-adapt-indentation} is
-non-nil, the entire text is also indented so that it starts in the
-same column as the headline (after the asterisks).
-
 
 @node TODO items, Tags, Hyperlinks, Top
 @chapter TODO items
@@ -2725,6 +2568,7 @@ things you have to do.
 @menu
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
+* Progress logging::            Dates and notes for progress
 * Priorities::                  Some things are more important than others
 * Breaking down tasks::         Splitting a task into manageable pieces
 * Checkboxes::                  Tick-off lists
@@ -2756,6 +2600,12 @@ Rotate the TODO state of the current item among
 
 The same rotation can also be done ``remotely'' from the timeline and
 agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
+
+@kindex C-u C-c C-t
+@item C-u C-c C-t
+Select a specific keyword using completion of (if it has been set up)
+the fast selection interface.
+
 @kindex S-@key{right}
 @kindex S-@key{left}
 @item S-@key{right}
@@ -2794,7 +2644,7 @@ the TODO entries directly from that buffer (@pxref{Agenda commands}).
 Insert a new TODO entry below the current one.
 @end table
 
-@node TODO extensions, Priorities, TODO basics, TODO items
+@node TODO extensions, Progress logging, TODO basics, TODO items
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
@@ -2810,7 +2660,9 @@ TODO items in particular (@pxref{Tags}).
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Fast access to TODO states::  Single letter selection of a state
 * Per file keywords::           Different files, different requirements
+* Faces for TODO keywords::     Highlighting states
 @end menu
 
 @node Workflow states, TODO types, TODO extensions, TODO extensions
@@ -2875,7 +2727,7 @@ would use @kbd{C-3 C-c C-v}.  To collect Lucy's items from all agenda
 files into a single buffer, you would use the prefix arg as well when
 creating the global todo list: @kbd{C-3 C-c t}.
 
-@node Multiple sets in one file, Per file keywords, TODO types, TODO extensions
+@node Multiple sets in one file, Fast access to TODO states, TODO types, TODO extensions
 @subsection Multiple keyword sets in one file
 @cindex todo keyword sets
 
@@ -2918,7 +2770,31 @@ These keys jump from one TODO subset to the next.  In the above example,
 would switch from @code{DONE} to @code{REPORT} in the example above.
 @end table
 
-@node Per file keywords,  , Multiple sets in one file, TODO extensions
+@node Fast access to TODO states, Per file keywords, Multiple sets in one file, TODO extensions
+@subsection Fast access to TODO states
+
+If you would like to quickly change an entry to an arbitrary TODO state
+instead of cycling through the states, you can set up keys for
+single-letter access to the states.  This is done by adding the section
+key after each keyword, in parenthesis.  For example:
+
+@lisp
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "|" "DONE(d)")
+        (sequence "REPORT(r)" "BUG(b)" "KNOWNCAUSE(k)" "|" "FIXED(f)")
+        (sequence "|" "CANCELED(c)")))
+@end lisp
+
+If you then press @code{C-u C-c C-t} followed by the selection key, the
+entry will be switched to this state.  @key{SPC} can be used to remove
+any TODO keyword from an entry.  Should you like this way of selecting
+TODO states a lot, you might want to set the variable
+@code{org-use-fast-todo-selection} to @code{t} and make this behavior
+the default.  Check also the variable
+@code{org-fast-tag-selection-include-todo}, it allows to change the TODO
+state through the tags interface (@pxref{Setting tags}).
+
+@node Per file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
 @subsection Setting up keywords for individual files
 @cindex keyword options
 @cindex per file keywords
@@ -2961,7 +2837,99 @@ Org-mode is activated after visiting a file.  @kbd{C-c C-c} with the
 cursor in a line starting with @samp{#+} is simply restarting Org-mode
 for the current buffer.}.
 
-@node Priorities, Breaking down tasks, TODO extensions, TODO items
+@node Faces for TODO keywords,  , Per file keywords, TODO extensions
+@subsection Faces for TODO keywords
+@cindex faces, for TODO keywords
+
+Org-mode highlights TODO keywords with special faces: @code{org-todo}
+for keywords indicating that an item still has to be acted upon, and
+@code{org-done} for keywords indicating that an item is finished.  If
+you are using more than 2 different states, you might want to use
+special faces for some of them.  This can be done using the variable
+@code{org-todo-keyword-faces}.  For example:
+
+@lisp
+(setq org-todo-keyword-faces
+      '(("TODO"      . org-warning)
+        ("DEFERRED"  . shadow)
+        ("CANCELED"  . (:foreground "blue" :weight bold))))
+@end lisp
+
+@node Progress logging, Priorities, TODO extensions, TODO items
+@section Progress Logging
+@cindex progress logging
+@cindex logging, of progress
+
+Org-mode can automatically record a time stamp and even a note when you
+mark a TODO item as DONE, or even each time you change the state of
+a TODO item.
+
+@menu
+* Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
+@end menu
+
+@node Closing items, Tracking TODO state changes, Progress logging, Progress logging
+@subsection Closing items
+
+If you want to keep track of @emph{when} a certain TODO item was
+finished, turn on logging with@footnote{The corresponding in-buffer
+setting is: @code{#+STARTUP: logdone}}
+
+@lisp
+(setq org-log-done t)
+@end lisp
+
+@noindent
+Then each time you turn a TODO entry into DONE using either @kbd{C-c
+C-t} in the Org-mode buffer or @kbd{t} in the agenda buffer, a line
+@samp{CLOSED: [timestamp]} will be inserted just after the headline.  If
+you turn the entry back into a TODO item through further state cycling,
+that line will be removed again.  In the timeline (@pxref{Timeline}) and
+in the agenda (@pxref{Weekly/Daily agenda}), you can then use the
+@kbd{l} key to display the TODO items closed on each day, giving you an
+overview of what has been done on a day.  If you want to record a note
+along with the timestamp, use@footnote{The corresponding in-buffer
+setting is: @code{#+STARTUP: lognotedone}}
+
+@lisp
+(setq org-log-done '(done))
+@end lisp
+
+@node Tracking TODO state changes,  , Closing items, Progress logging
+@subsection Tracking TODO state changes
+
+When TODO keywords are used as workflow states (@pxref{Workflow
+states}), you might want to keep track of when a state change occurred
+and record a note about this change.  With the setting
+
+@lisp
+(setq org-log-done '(state))
+@end lisp
+
+@noindent
+each state change will prompt you for a note that will be attached to
+the current headline.  If you press @kbd{C-c C-c} without typing
+anything into the note buffer, only the time of the state change will be
+noted.  Very likely you do not want this verbose tracking all the time,
+so it is probably better to configure this behavior with in-buffer
+options.  For example, if you are tracking purchases, put these into a
+separate file that contains:
+
+@example
+#+SEQ_TODO: TODO(t) ORDERED(o) INVOICE(i) PAYED(p) | RECEIVED(r)
+#+STARTUP: lognotestate
+@end example
+
+If you only need to take a note for some of the states, mark those
+states with an additional @samp{@@}, like this:
+
+@example
+#+SEQ_TODO: TODO(t) ORDERED(o@@) INVOICE(i@@) PAYED(p) | RECEIVED(r)
+#+STARTUP: lognotestate
+@end example
+
+@node Priorities, Breaking down tasks, Progress logging, TODO items
 @section Priorities
 @cindex priorities
 
@@ -2993,8 +2961,9 @@ agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
-Increase/decrease priority of current headline.  Note that these keys
-are also used to modify time stamps (@pxref{Creating timestamps}).
+Increase/decrease priority of current headline@footnote{See also the
+option @code{org-priority-start-cycle-with-default'}.}.  Note that these
+keys are also used to modify time stamps (@pxref{Creating timestamps}).
 Furthermore, these keys are also used by CUA-mode (@pxref{Conflicts}).
 @end table
 
@@ -3671,7 +3640,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Timestamps, Agenda views, Properties and columns, Top
+@node Timestamps, Remember, Properties and columns, Top
 @chapter Timestamps
 @cindex time stamps
 @cindex date stamps
@@ -3683,7 +3652,7 @@ planning.
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Progress logging::            Documenting when what work was done.
+* Clocking work time::          
 @end menu
 
 
@@ -3705,13 +3674,12 @@ Its presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/Daily agenda}).  We distinguish:
 
 @table @var
-@item Plain time stamp
+@item Plain time stamp, Event, Appointment
 @cindex timestamp
 A simple time stamp just assigns a date/time to an item.  This is just
-like writing down an appointment in a paper agenda, or like writing down
-an event in a diary, when you want to take note of when something
-happened.  In the timeline and agenda displays, the headline of an entry
-associated with a plain time stamp will be shown exactly on that date.
+like writing down an appointment or event in a paper agenda.  In the
+timeline and agenda displays, the headline of an entry associated with a
+plain time stamp will be shown exactly on that date.
 
 @example
 * Meet Peter at the movies <2006-11-01 Wed 19:15>
@@ -3953,7 +3921,7 @@ format is shorter, things do work as expected.
 @end itemize
 
 
-@node Deadlines and scheduling, Progress logging, Creating timestamps, Timestamps
+@node Deadlines and scheduling, Clocking work time, Creating timestamps, Timestamps
 @section Deadlines and Scheduling
 
 A time stamp may be preceded by special keywords to facilitate planning
@@ -3992,6 +3960,15 @@ I.e., the task will automatically be forwarded until completed.
 *** TODO Call Trillian for a date on New Years Eve.
     SCHEDULED: <2004-12-25 Sat>
 @end example
+
+@noindent
+@b{Important:} Scheduling an item in Org-mode should @i{not} be
+understood like @i{Scheduling a meeting}.  Setting a date for a meeting
+is just a simple appointment, you should mark this entry with a simple
+plain time stamp, to get this item shown on the date where it applies.
+This is a frequent mis-understanding from Org-users.  In Org-mode,
+@i{Scheduling} means setting a date when you want to start working on an
+action item.
 @end table
 
 @menu
@@ -4068,77 +4045,8 @@ will be visible.
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
 
-@node Progress logging,  , Deadlines and scheduling, Timestamps
-@section Progress Logging
-@cindex progress logging
-@cindex logging, of progress
-
-Org-mode can automatically record a time stamp when you mark a TODO item
-as DONE, or even each time when you change the state of a TODO item.
-You can also measure precisely the time you spent on specific items in a
-project by starting and stopping a clock when you start and stop working
-on an aspect of a project.
-
-@menu
-* Closing items::               When was this entry marked DONE?
-* Tracking TODO state changes::  When did the status change?
-* Clocking work time::          When exactly did you work on this item?
-@end menu
-
-@node Closing items, Tracking TODO state changes, Progress logging, Progress logging
-@subsection Closing items
-
-If you want to keep track of @emph{when} a certain TODO item was
-finished, turn on logging with@footnote{The corresponding in-buffer
-setting is: @code{#+STARTUP: logdone}}
-
-@lisp
-(setq org-log-done t)
-@end lisp
-
-@noindent
-Then each time you turn a TODO entry into DONE using either @kbd{C-c
-C-t} in the Org-mode buffer or @kbd{t} in the agenda buffer, a line
-@samp{CLOSED: [timestamp]} will be inserted just after the headline.  If
-you turn the entry back into a TODO item through further state cycling,
-that line will be removed again.  In the timeline (@pxref{Timeline}) and
-in the agenda (@pxref{Weekly/Daily agenda}), you can then use the
-@kbd{l} key to display the TODO items closed on each day, giving you an
-overview of what has been done on a day.  If you want to record a note
-along with the timestamp, use@footnote{The corresponding in-buffer
-setting is: @code{#+STARTUP: lognotedone}}
-
-@lisp
-(setq org-log-done '(done))
-@end lisp
-
-@node Tracking TODO state changes, Clocking work time, Closing items, Progress logging
-@subsection Tracking TODO state changes
-
-When TODO keywords are used as workflow states (@pxref{Workflow
-states}), you might want to keep track of when a state change occurred,
-and you may even want to attach notes to that state change.  With the
-setting
-
-@lisp
-(setq org-log-done '(state))
-@end lisp
-
-@noindent
-each state change will prompt you for a note that will be attached to
-the current headline.  Very likely you do not want this verbose tracking
-all the time, so it is probably better to configure this behavior with
-in-buffer options.  For example, if you are tracking purchases, put
-these into a separate file that starts with:
-
-@example
-#+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
-#+STARTUP: lognotestate
-@end example
-
-
-@node Clocking work time,  , Tracking TODO state changes, Progress logging
-@subsection Clocking work time
+@node Clocking work time,  , Deadlines and scheduling, Timestamps
+@section Clocking work time
 
 Org-mode allows you to clock the time you spent on specific tasks in a
 project.  When you start working on an item, you can start the clock.
@@ -4194,8 +4102,16 @@ report as an org-mode table into the current file.
 If such a block already exists, its content is replaced by the new
 table.  The @samp{BEGIN} line can specify options:
 @example
-:maxlevels   @r{Maximum level depth to which times are listed in the table.}
+:maxlevel    @r{Maximum level depth to which times are listed in the table.}
 :emphasize   @r{When @code{t}, emphasize level one and level two items}
+:scope       @r{The scope to consider.  This can be any of the following:}
+             nil        @r{the current buffer or narrowed region}
+             file       @r{the full current buffer}
+             subtree    @r{the subtree where the clocktable is located}
+             treeN      @r{the surrounding level N tree, for example @code{tree3}}
+             tree       @r{the surrounding level 1 tree}
+             agenda     @r{all agenda files}
+             ("file"..) @r{scan these files}
 :block       @r{The time block to consider.  This block is specified relative}
              @r{to the current time and may be any of these keywords:}
              @r{@code{today}, @code{yesterday}, @code{thisweek}, @code{lastweek},}
@@ -4203,9 +4119,10 @@ table.  The @samp{BEGIN} line can specify options:
 :tstart      @r{A time string specifying when to start considering times}
 :tend        @r{A time string specifying when to stop considering times}
 @end example
-So to get a clock summary for the current day, you could write
+So to get a clock summary of the current level 1 tree, for the current
+day, you could write
 @example
-#+BEGIN: clocktable :maxlevel 2 :block today
+#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1
 
 #+END: clocktable
 @end example
@@ -4218,6 +4135,12 @@ only to fit it onto the manual.}
 
 #+END: clocktable
 @end example
+@kindex C-c C-c
+@item C-c C-c
+@kindex C-c C-x C-u
+@itemx C-c C-x C-u
+Update dynamical block at point.  The cursor needs to be in the
+@code{#+BEGIN} line of the dynamic block.
 @kindex C-u C-c C-x C-u
 @item C-u C-c C-x C-u
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
@@ -4228,7 +4151,189 @@ The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
-@node Agenda views, Embedded LaTeX, Timestamps, Top
+@node Remember, Agenda views, Timestamps, Top
+@chapter Remember
+@cindex @file{remember.el}
+
+The @i{Remember} package by John Wiegley lets you store quick notes with
+little interruption of your work flow.  See
+@uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
+information.  It is an excellent way to add new notes and TODO items to
+Org-mode files.  Org-mode significantly expands the possibilities of
+@i{remember}: You may define templates for different note types, and to
+associate target files and headlines with specific templates.  It also
+allows you to select the location where a note should be stored
+interactively, on the fly.
+
+@menu
+* Setting up remember::         Some code for .emacs to get things going
+* Remember templates::          Define the outline of different note types
+* Storing notes::               Directly get the note to where it belongs
+@end menu
+
+@node Setting up remember, Remember templates, Remember, Remember
+@section Setting up remember
+
+The following customization will tell @i{remember} to use org files as
+target, and to create annotations compatible with Org-mode links.
+
+@example
+(setq org-directory "~/path/to/my/orgfiles/")
+(setq org-default-notes-file (concat org-directory "/notes.org"))
+(setq remember-annotation-functions '(org-remember-annotation))
+(setq remember-handler-functions '(org-remember-handler))
+(add-hook 'remember-mode-hook 'org-remember-apply-template)
+@end example
+
+
+@node Remember templates, Storing notes, Setting up remember, Remember
+@section Remember templates
+@cindex templates, for remember
+
+In combination with Org-mode, you can use templates to generate
+different types of @i{remember} notes.  For example, if you would like
+to use one template to create general TODO entries, another one for
+journal entries, and a third one for collecting random ideas, you could
+use:
+
+@example
+(setq org-remember-templates
+ '((?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks")
+   (?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")
+   (?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
+@end example
+
+@noindent In these entries, the character specifies how to select the
+template.  The first string specifies the template.  Two more (optional)
+strings give the file in which, and the headline under which the new
+note should be stored.  The file defaults (if not present or @code{nil})
+to @code{org-default-notes-file}, the heading to
+@code{org-remember-default-headline}.  Both defaults help to get to the
+storing location quickly, but you can change the location interactively
+while storing the note.
+
+When you call @kbd{M-x remember} (or @kbd{M-x org-remember}) to remember
+something, org will prompt for a key to select the template (if you have
+more than one template) and then prepare the buffer like
+@example
+* TODO
+  [[file:link to where you called remember]]
+@end example
+
+@noindent or
+
+@example
+* [2006-03-21 Tue 15:37]
+
+  [[file:link to where you called remember]]
+@end example
+
+@noindent
+During expansion of the template, special @kbd{%}-escapes allow dynamic
+insertion of content:
+@example
+%^@{prompt@}  @r{prompt the user for a string and replace this sequence with it.}
+%t          @r{time stamp, date only}
+%T          @r{time stamp with date and time}
+%u, %U      @r{like the above, but inactive time stamps}
+%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
+            @r{You may define a prompt like @code{%^@{Birthday@}t}}
+%n          @r{user name (taken from @code{user-full-name})}
+%a          @r{annotation, normally the link created with @code{org-store-link}}
+%A          @r{like @code{%a}, but prompt for the description part}
+%i          @r{initial content, the region when remember is called with C-u.}
+            @r{The entire text will be indented like @code{%i} itself.}
+%^g         @r{prompt for tags, with completion on tags in target file.}
+%^G         @r{prompt for tags, with completion all tags in all agenda files.}
+%:keyword   @r{specific information for certain link types, see below}
+@end example
+
+@noindent
+For specific link types, the following keywords will be
+defined@footnote{If you define your own link types (@pxref{Adding
+hyperlink types}), any property you store with
+@code{org-store-link-props} can be accessed in remember templates in a
+similar way.}:
+
+@example
+Link type          |  Available keywords
+-------------------+----------------------------------------------
+bbdb               |  %:name %:company
+vm, wl, mh, rmail  |  %:type %:subject %:message-id
+                   |  %:from %:fromname %:fromaddress
+                   |  %:to   %:toname   %:toaddress
+                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}       
+gnus               |  %:group, @r{for messages also all email fields}
+w3, w3m            |  %:url
+info               |  %:file %:node
+calendar           |  %:date"
+@end example
+
+@noindent
+To place the cursor after template expansion use:
+
+@example
+%?          @r{After completing the template, position cursor here.}
+@end example
+
+@noindent
+If you change you mind about which template to use, call
+@code{org-remember} in the remember buffer.  You may then select a new
+template that will be filled with the previous context information.
+
+@node Storing notes,  , Remember templates, Remember
+@section Storing notes
+
+When you are finished preparing a note with @i{remember}, you have to press
+@kbd{C-c C-c} to file the note away.  The handler will store the note in
+the file and under the headline specified in the template, or it will
+use the default file and headlines.  The window configuration will be
+restored, and you are back in the working context before the call to
+@code{remember}.  To re-use the location found during the last call to
+@code{remember}, exit the remember buffer with @kbd{C-u C-u C-c C-c},
+i.e. specify a double prefix argument to @kbd{C-c C-c}.
+
+If you want to store the note to a different place, use @kbd{C-u C-c
+C-c} instead to exit remember@footnote{Configure the variable
+@code{org-remember-store-without-prompt} to make this behavior the
+default.}.  The handler will then first prompt for a target file - if you
+press @key{RET}, the value specified for the template is used.  Then the
+command offers the headings tree of the selected file, with the cursor
+position at the default headline (if you had specified one in the
+template).  You can either immediately press @key{RET} to get the note
+placed there.  Or you can use the following keys to find a different
+location:
+@example
+@key{TAB}         @r{Cycle visibility.}
+@key{down} / @key{up}   @r{Next/previous visible headline.}
+n / p        @r{Next/previous visible headline.}
+f / b        @r{Next/previous headline same level.}
+u            @r{One level up.}
+@c 0-9          @r{Digit argument.}
+@end example
+@noindent
+Pressing @key{RET} or @key{left} or @key{right}
+then leads to the following result.
+
+@multitable @columnfractions 0.2 0.15 0.65
+@item @b{Cursor position} @tab @b{Key} @tab @b{Note gets inserted}
+@item on headline     @tab @key{RET}              @tab as sublevel of the heading at cursor, first or last
+@item                 @tab                        @tab depending on @code{org-reverse-note-order}.
+@item                 @tab @key{left}/@key{right} @tab as same level, before/after current heading
+@item buffer-start    @tab @key{RET} @tab as level 2 heading at end of file or level 1 at beginning
+@item                 @tab @tab depending on @code{org-reverse-note-order}.
+@item not on headline @tab @key{RET}
+      @tab at cursor position, level taken from context.
+@end multitable
+
+Before inserting the text into a tree, the function ensures that the
+text has a headline, i.e. a first line that starts with a @samp{*}.  If
+not, a headline is constructed from the current date and some additional
+data.  If you have indented the text of the note below the headline, the
+indentation will be adapted if inserting the note into the tree requires
+demotion from level 1.
+
+@node Agenda views, Embedded LaTeX, Remember, Top
 @chapter Agenda Views
 @cindex agenda views
 
@@ -4313,6 +4418,10 @@ Remove current file from the list of agenda files.
 @item C-,
 @itemx C-'
 Cycle through agenda file list, visiting one file after the other.
+@kindex C-c C-x /
+@item C-c C-x /
+Search for a regular rexpression in all agenda files and display the
+results in an @code{occur} buffer.
 @end table
 
 @noindent
@@ -4616,16 +4725,25 @@ associated with the item.
 @cindex category
 The category is a broad label assigned to each agenda item.  By default,
 the category is simply derived from the file name, but you can also
-specify it with a special line in the buffer, like this:
+specify it with a special line in the buffer, like this@footnote{If
+there are several such lines in a file, each specifies the category for
+the text below it.  The first category also applies to any text before
+the first CATEGORY line.  This method is only kept for backward
+compatibility.  The preferred method for setting multiple categories in
+a buffer is using a property.}:
 
 @example
 #+CATEGORY: Thesis
 @end example
 
-If there are several such lines in a file, each specifies the category
-for the text below it (but the first category also applies to any text
-before the first CATEGORY line).  The display in the agenda buffer looks
-best if the category is not longer than 10 characters.
+@noindent
+If you would like to have a special CATEGORY for a single entry or a
+(sub)tree, give the entry a @code{:CATEGORY:} property with the location
+as the value (@pxref{Properties and columns}).
+
+@noindent
+The display in the agenda buffer looks best if the category is not
+longer than 10 characters.
 
 @node Time-of-day specifications, Sorting of agenda items, Categories, Presentation and sorting
 @subsection Time-of-Day Specifications
@@ -4860,7 +4978,8 @@ inheritance, this may be more than the tags listed in the line itself.
 @c
 @kindex :
 @item :
-Set tags for the current headline.
+Set tags for the current headline.  If there is an active region in the
+agenda, change a tag for all headings in the region.
 @c
 @kindex a
 @item a
@@ -6068,7 +6187,7 @@ the Emacs package @file{footnote.el} to create footnotes.  For example:
 The org-mode homepage[1] clearly needs help from
 a good web designer.
 
-[1] The link is: http://www.astro.uva.nl/~dominik/Tools/org
+[1] The link is: http://orgmode.org
 @end example
 
 @noindent
@@ -6172,6 +6291,7 @@ Insert template with export options, see example below.
 @example
 #+TITLE:     the title to be shown (default is the buffer name)
 #+AUTHOR:    the author (default taken from @code{user-full-name})
+#+DATE:      A date, fixed, of a format string for @code{format-time-string}
 #+EMAIL:     his/her email address (default from @code{user-mail-address})
 #+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
 #+TEXT:      Some descriptive text to be inserted at the beginning.
@@ -6776,7 +6896,7 @@ this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
-@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS:
+@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
 @item #+SEQ_TODO:   #+TYP_TODO:
@@ -6830,6 +6950,9 @@ of the checkbox.
 @item
 If the cursor is on a numbered item in a plain list, renumber the
 ordered list.
+@item
+If the cursor is on the @code{#+BEGIN} line of a dynamical block, the
+block is updated.
 @end itemize
 
 @node Clean view, TTY keys, The very busy C-c C-c key, Miscellaneous
@@ -7197,6 +7320,12 @@ blogs. @url{http://www.cognition.ens.fr/~guerry/blorg.html}.
 @item @file{org2rem.el} by Bastien Guerry
 Translates Org-mode files into something readable by
 Remind. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
+@item @file{org-toc.el} by Bastien Guerry
+Produces a simple table of contents of an Org-mode file, for easy
+navigation. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
+@item @file{org-registry.el} by Bastien Guerry
+Find which Org-file link to a certain document.
+@url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
 @end table
 
 @page
@@ -7683,8 +7812,9 @@ Skip current entry if it has a deadline.
 @item '(org-agenda-skip-entry-if 'scheduled 'deadline)
 Skip current entry if it has a deadline, or if it is scheduled.
 @item '(org-agenda-skip-entry 'regexp "regular expression")
-Skip current entry if the regular expression contained in the variable
-@code{org-agenda-skip-regexp} matches in the entry.
+Skip current entry if the regular expression matches in the entry.
+@item '(org-agenda-skip-entry 'notregexp "regular expression")
+Skip current entry unless the regular expression matches.
 @item '(org-agenda-skip-subtree-if 'regexp "regular expression")
 Same as above, but check and skip the entire subtree.
 @end table

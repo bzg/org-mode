@@ -1,43 +1,35 @@
 ;;; org-mouse.el --- Better mouse support for org-mode
 
-;; Copyright (c) 2006 Piotr Zielinski
+;; Copyright (c) 2006 Piotr Zielinski, 2007 Free Software Foundation
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
-;; Version: 0.24a
-;; $Id: org-mouse.el 817 2007-02-01 00:28:02Z pz215 $
-;; 
-;; The latest version of this file is available from
+;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
+;; Version: 5.10
 ;;
-;; http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el
+;; This file is part of GNU Emacs.
 ;;
-;; This file is *NOT* part of GNU Emacs.
-;; This file is distributed under the same terms as GNU Emacs.
+;; GNU Emacs is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2 of
-;; the License, or (at your option) any later version.
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
-;; This program is distributed in the hope that it will be
-;; useful, but WITHOUT ANY WARRANTY; without even the implied
-;; warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-;; PURPOSE.  See the GNU General Public License for more details.
-
-;; You should have received a copy of the GNU General Public
-;; License along with this program; if not, write to the Free
-;; Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
-;; MA 02111-1307 USA
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
 ;;
-;; Org-mouse provides better mouse support for org-mode.  Org-mode is
-;; a mode for keeping notes, maintaining ToDo lists, and doing project
-;; planning with a fast and effective plain-text system.  It is
-;; available from
+;; Org-mouse provides mouse support for org-mode.
 ;;
-;; http://staff.science.uva.nl/~dominik/Tools/org/
+;; http://orgmode.org
 ;;
 ;; Org-mouse implements the following features:
 ;; * following links with the left mouse button (in Emacs 22)
@@ -52,22 +44,14 @@
 ;; * promoting/demoting/moving subtrees with mouse-3
 ;;    + if the drag starts and ends in the same line then promote/demote
 ;;    + otherwise move the subtree 
-;; * date/time extraction from selected text (requires a python script)
-;;   (eg. select text from your email and click "Add Appointment")
-;;
-;; The python script that automatically extracts date/time information
-;; from a piece of English text is available from:
-;;
-;; http://www.cl.cam.ac.uk/~pz215/files/timeparser.py
 ;;
 ;; Use
-;; ------------
+;; ---
 ;;
 ;; To use this package, put the following line in your .emacs:
 ;;
 ;;    (require 'org-mouse)
 ;;
-;; Tested with Emacs 22.0.50, org-mode 4.58
 
 ;; Fixme:
 ;; + deal with folding / unfolding issues
@@ -83,9 +67,17 @@
 ;; + ctrl-c ctrl-c, for example, renumber the current list
 ;; + internal links
 
-;; Please email me with new feature suggestions / bugs
+;; Please email the maintainer with new feature suggestions / bugs
 
 ;; History:
+;;
+;; SInce version 5.10: Changes are listed in the general org-mode docs.
+;;
+;; Version 5.09
+;; + Version number synchronization with Org-mode.
+;;
+;; Version 0.25
+;; + made compatible with org-mode 4.70 (thanks to Carsten for the patch)
 ;;
 ;; Version 0.24
 ;; + minor changes to the table menu
@@ -148,24 +140,31 @@
 ;;
 ;; Versions 0.01 -- 0.07: (I don't remember)
 
-(require 'cl)
+(eval-when-compile (require 'cl))
+(require 'org)
 
-(defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) ")
-(defvar org-mouse-direct t)
+(defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) "
+  "Regular expression that matches a plain list.")
+(defvar org-mouse-direct t
+  "Internal variable indicating whether the current action is direct.
+
+If t, then the current action has been invoked directly through the buffer
+it is intended to operate on.  If nil, then the action has been invoked
+indirectly, for example, through the agenda buffer.")
 
 (defgroup org-mouse nil
-  "Org-mouse"
-  :tag "Org Mouse."
+  "Mouse support for org-mode."
+  :tag "Org Mouse"
   :group 'org)
 
 (defcustom org-mouse-punctuation ":"
-  ""
+  "Punctuation used when inserting text by drag and drop."
   :group 'org-mouse
   :type 'string)
 
 
 (defun org-mouse-re-search-line (regexp)
-  "Searches the current line for a given regular expression."
+  "Search the current line for a given regular expression."
   (beginning-of-line)
   (re-search-forward regexp (point-at-eol) t))
 
@@ -178,8 +177,17 @@
     (skip-chars-backward ":A-Za-z")
     (skip-chars-backward "\t ")))
 
+(defvar org-mouse-context-menu-function nil
+  "Function to create the context menu.
+The value of this variable is the function invoked by
+`org-mouse-context-menu' as the context menu.")
+(make-variable-buffer-local 'org-mouse-context-menu-function)
 
 (defun org-mouse-show-context-menu (event prefix)
+  "Invoke the context menu.
+
+If the value of `org-mouse-context-menu-function' is a function, then
+this function is called.  Otherwise, the current major mode menu is used."  
   (interactive "@e \nP")
   (if (and (= (event-click-count event) 1)
 	   (or (not mark-active) 
@@ -193,24 +201,30 @@
 	    (sit-for 0)))
 	(if (functionp org-mouse-context-menu-function)
 	    (funcall org-mouse-context-menu-function event)
-	  (mouse-major-mode-menu event prefix))
-	)
+	  (mouse-major-mode-menu event prefix)))
     (setq this-command 'mouse-save-then-kill)
     (mouse-save-then-kill event)))
 
 
 (defun org-mouse-line-position ()
-  "Returns :beginning :middle :end"
+  "Returns `:beginning' or `:middle' or `:end', depending on the point position.
+
+If the point is at the end of the line, return `:end'.
+If the point is separated from the beginning of the line only by white
+space and *'s (`org-mouse-bolp'), return `:beginning'.  Otherwise,
+return `:middle'."
   (cond
    ((eolp) :end)
-   ((org-mouse-bolp) :begin)
+   ((org-mouse-bolp) :beginning)
    (t :middle)))
 
 (defun org-mouse-empty-line ()
+  "Return non-nil iff the line contains only white space."
   (save-excursion (beginning-of-line) (looking-at "[ \t]*$")))
 
 (defun org-mouse-next-heading ()
-  "Goes to the next heading and if there is none, it ensures that the point is at the beginning of an empty line."
+  "Go to the next heading.
+If there is none, ensure that the point is at the beginning of an empty line."
   (unless (outline-next-heading)
     (beginning-of-line)
     (unless (org-mouse-empty-line)
@@ -218,14 +232,22 @@
       (newline))))
 
 (defun org-mouse-insert-heading ()
+  "Insert a new heading, as `org-insert-heading'.
+
+If the point is at the :beginning (`org-mouse-line-position') of the line,
+insert the new heading before the current line.  Otherwise, insert it
+after the current heading."
   (interactive)
   (case (org-mouse-line-position)
-    (:begin (beginning-of-line)
+    (:beginning (beginning-of-line)
 	    (org-insert-heading))
     (t (org-mouse-next-heading)
        (org-insert-heading))))
 
 (defun org-mouse-timestamp-today (&optional shift units) 
+  "Change the timestamp into SHIFT UNITS in the future.  
+
+For the acceptable UNITS, see `org-timestamp-change'."
   (interactive)
   (flet ((org-read-date (&rest rest) (current-time)))
      (org-time-stamp nil))
@@ -233,6 +255,24 @@
     (org-timestamp-change shift units)))
 
 (defun org-mouse-keyword-menu (keywords function &optional selected itemformat)
+  "A helper function.
+
+Returns a menu fragment consisting of KEYWORDS.  When a keyword
+is selected by the user, FUNCTION is called with the selected
+keyword as the only argument.
+
+If SELECTED is nil, then all items are normal menu items.  If
+SELECTED is a function, then each item is a checkbox, which is
+enabled for a given keyword iff (funcall SELECTED keyword) return
+non-nil.  If SELECTED is neither nil nor a function, then the
+items are radio buttons.  A radio button is enabled for the
+keyword `equal' to SELECTED. 
+
+ITEMFORMAT governs formatting of the elements of KEYWORDS.  If it
+is a function, it is invoked with the keyword as the only
+argument.  If it is a string, it is interpreted as the format
+string to (format ITEMFORMAT keyword).  If it is neither a string
+nor a function, elements of KEYWORDS are used directly. "
   (mapcar 
    `(lambda (keyword) 
      (vector (cond
@@ -250,13 +290,15 @@
     keywords))
      
 (defun org-mouse-remove-match-and-spaces ()
+  "Remove the match, make just one space around the point."
   (interactive)
   (replace-match "")
   (just-one-space))
 
+(defvar rest)
 (defun org-mouse-replace-match-and-surround (newtext &optional fixedcase 
 						     literal string subexp)
-  "The same as replace-match, but surrounds the replacement with spaces."
+  "The same as `replace-match', but surrounds the replacement with spaces."
   (apply 'replace-match rest)
   (save-excursion
     (goto-char (match-beginning (or subexp 0))) 
@@ -267,6 +309,23 @@
 
 (defun org-mouse-keyword-replace-menu (keywords &optional group itemformat
 						nosurround)
+  "A helper function.
+
+Returns a menu fragment consisting of KEYWORDS.  When a keyword
+is selected, group GROUP of the current match is replaced by the
+keyword.  The method ensures that both ends of the replacement
+are separated from the rest of the text in the buffer by
+individual spaces (unless NOSURROND is non-nil).
+
+The final entry of the menu is always \"None\", which removes the
+match.
+
+ITEMFORMAT governs formatting of the elements of KEYWORDS.  If it
+is a function, it is invoked with the keyword as the only
+argument.  If it is a string, it is interpreted as the format
+string to (format ITEMFORMAT keyword).  If it is neither a string
+nor a function, elements of KEYWORDS are used directly. 
+"
   (setq group (or group 0))
   (let ((replace (org-mouse-match-closure 
 		  (if nosurround 'replace-match
@@ -281,10 +340,8 @@
 	:style radio
 	:selected ,(not (member (match-string group) keywords))]))))
      
-(defvar org-mouse-context-menu-function nil)
-(make-variable-buffer-local 'org-mouse-context-menu-function)
-
 (defun org-mouse-show-headlines ()
+  "Change the visibility of the current org buffer to only show headlines."
   (interactive) 
   (let ((this-command 'org-cycle) 
 	(last-command 'org-cycle)
@@ -293,35 +350,40 @@
     (org-cycle '(4))))
 
 (defun org-mouse-show-overview ()
+  "Change visibility of current org buffer to first-level headlines only."
   (interactive) 
   (let ((org-cycle-global-status nil))
     (org-cycle '(4))))
 
 (defun org-mouse-set-priority (priority)
+  "Set the priority of the current headline to PRIORITY."
   (flet ((read-char-exclusive () priority))
     (org-priority)))
 
 (defvar org-mouse-priority-regexp "\\[#\\([A-Z]\\)\\]"
-  "Regular expression matching the priority indicator.  Differs from `org-priority-regexp' in that it doesn't contain the leading '.*?'.")
-
+  "Regular expression matching the priority indicator.
+Differs from `org-priority-regexp' in that it doesn't contain the
+leading '.*?'.")
 
 (defun org-mouse-get-priority (&optional default)
+  "Return the priority of the current headline.
+DEFAULT is returned if no priority is given in the headline."
   (save-excursion 
     (if (org-mouse-re-search-line org-mouse-priority-regexp)
 	(match-string 1)
       (when default (char-to-string org-default-priority)))))
 
-(defun org-mouse-at-link ()
-  (and (eq (get-text-property (point) 'face) 'org-link)
-       (save-excursion
-         (goto-char (previous-single-property-change (point) 'face))
-         (or (looking-at org-bracket-link-regexp)
-             (looking-at org-angle-link-re)
-             (looking-at org-plain-link-re)))))
+;; (defun org-mouse-at-link ()
+;;   (and (eq (get-text-property (point) 'face) 'org-link)
+;;        (save-excursion
+;;          (goto-char (previous-single-property-change (point) 'face))
+;;          (or (looking-at org-bracket-link-regexp)
+;;              (looking-at org-angle-link-re)
+;;              (looking-at org-plain-link-re)))))
 
 
 (defun org-mouse-delete-timestamp ()
-  "Deletes the current timestamp as well as the preceding
+  "Deletes the current timestamp as well as the preceding keyword.
 SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
   (when (or (org-at-date-range-p) (org-at-timestamp-p))
     (replace-match "")			; delete the timestamp
@@ -338,7 +400,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(when (looking-at regexp)
 	  (> (match-end 0) point))))))
 	      
-
 (defun org-mouse-priority-list ()
    (loop for priority from ?A to org-lowest-priority 
 	 collect (char-to-string priority)))
@@ -414,9 +475,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 		    :style 'toggle
 		    :selected (and (member name options) t)))))
 
-		    
-	    
-
 (defun org-mouse-clip-text (text maxlength)
   (if (> (length text) maxlength)
       (concat (substring text 0 (- maxlength 3)) "...")
@@ -471,7 +529,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 			(nth 2 entry)))
 	       (t "Agenda Command '%s'"))
 	      30))))
-;; )
      "--"
      ["Delete Blank Lines" delete-blank-lines 
       :visible (org-mouse-empty-line)]
@@ -507,7 +564,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
   
 (defun org-mouse-insert-item (text)
   (case (org-mouse-line-position)
-    (:begin			; insert before 
+    (:beginning			; insert before 
      (beginning-of-line) 
      (looking-at "[ \t]*")
      (open-line 1)
@@ -528,8 +585,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
     
   (insert text)
   (beginning-of-line))
-
-
 
 (defadvice dnd-insert-text (around org-mouse-dnd-insert-text activate)
   (if (eq major-mode 'org-mode)
@@ -566,7 +621,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
   (setq mouse-selection-click-count 0)
   (delete-horizontal-space)
   (insert-for-yank (concat " [[" (current-kill 0) "]] ")))
-
 
 (defun org-mouse-context-menu (&optional event)
   (let ((stamp-prefixes (list org-deadline-string org-scheduled-string))
@@ -640,7 +694,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
    ((org-mouse-looking-at org-mouse-priority-regexp "[]A-Z#") ; priority
     (popup-menu `(nil ,@(org-mouse-keyword-replace-menu 
 			 (org-mouse-priority-list) 1 "Priority %s" t))))
-   ((org-mouse-at-link)
+   ((get-context :link)
     (popup-menu
      '(nil
        ["Open" org-open-at-point t]
@@ -800,8 +854,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	 ))))
    (t 
     (org-mouse-popup-global-menu))))))
-   
-
 
 ;; (defun org-mouse-at-regexp (regexp)
 ;;   (save-excursion
@@ -936,9 +988,9 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 		 (eq minlevel (- (match-end 1) (match-beginning 1))))
 	(replace-match replace-text))
       (forward-line))))
-	
-    
-      
+
+(defvar _cmd) ;dynamically scoped from `org-with-remote-undo'.
+
 (defun org-mouse-do-remotely (command)
 ;  (org-agenda-check-no-diary)
   (when (get-text-property (point) 'org-marker)
@@ -1055,4 +1107,3 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	    (:right (org-agenda-later 1)))))))
 
 (provide 'org-mouse)
-  

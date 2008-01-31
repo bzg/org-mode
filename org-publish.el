@@ -6,11 +6,9 @@
 ;; Keywords: hypermedia, outlines
 ;; Version: 1.80
 
-;; $Id: org-publish.el,v 1.80 2007/03/22 02:31:03 dto Exp dto $
-
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
+;; the Free Software Foundation; either version 3, or (at your option)
 ;; any later version.
 
 ;; This file is distributed in the hope that it will be useful,
@@ -440,20 +438,6 @@ nil if not found."
 
 ;;;; Pluggable publishing back-end functions
 
-
-(defun org-publish-org-to-html (plist filename)
-  "Publish an org file to HTML.
-PLIST is the property list for the given project.
-FILENAME is the filename of the org file to be published."
-  (require 'org)
-  (let* ((arg (plist-get plist :headline-levels)))
-    (progn
-      (find-file filename)
-      (org-export-as-html arg nil plist)
-      ;; get rid of HTML buffer
-      (kill-buffer (current-buffer)))))
-
-
 (defun org-publish-org-to-latex (plist filename)
   "Publish an org file to LaTeX."
   (org-publish-org-to "latex" plist filename))
@@ -619,4 +603,6 @@ With prefix argument, force publish all files."
 
 
 (provide 'org-publish)
+
+;; arch-tag: 72807f3c-8af0-4a6b-8dca-c3376eb25adb
 ;;; org-publish.el ends here

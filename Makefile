@@ -67,7 +67,7 @@ HTMLDIR    = /home/dominik/public_html/Tools/org
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
@@ -148,7 +148,7 @@ ecompile:
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	touch org.pdf orgcard.tex
+	touch org.texi orgcard.tex
 	make info
 	make doc
 	rm -rf org-$(TAG) org-$(TAG).zip
@@ -158,6 +158,22 @@ distfile:
 	cp $(DISTFILES_xemacs) org-$(TAG)/xemacs/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
+
+release:
+	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	make distfile
+	make doc
+	rm -rf org-release
+	$(MKDIR) org-release
+	cp org-$(TAG).zip org-$(TAG).tar.gz org-release
+	cp org.pdf orgcard.pdf org.texi org.html org-release
+	cp ORGWEBPAGE/tmp/*.html org-release
+	cp ORGWEBPAGE/tmp/*.el   org-release
+	cp ORGWEBPAGE/tmp/*.txt  org-release
+	cp ORGWEBPAGE/tmp/*.css  org-release
+	cp ORGWEBPAGE/tmp/*.jpg  org-release
+	cp org-release/org-$(TAG).zip    org-release/org.zip
+	cp org-release/org-$(TAG).tar.gz org-release/org.tar.gz
 
 dist:
 	make distfile TAG=$(TAG)
