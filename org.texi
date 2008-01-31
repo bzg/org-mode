@@ -1,10 +1,11 @@
 \input texinfo
+
 @c %**start of header
 @setfilename org
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.29
+@set VERSION 4.30
 @set DATE May 2006
 
 @dircategory Emacs
@@ -84,6 +85,7 @@ Software Foundation raise funds for GNU development.''
 * Tags::                        Tagging headlines and matching sets of tags
 * Agenda views::                Collecting information into views
 * Exporting::                   Sharing and publishing of notes
+* Publishing::                  
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Index::                       The fast road to specific information
 * Key Index::                   Key bindings and where they are described
@@ -186,7 +188,7 @@ Exporting
 
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
-* XML export::                  Exporting to XML
+* XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
 
@@ -195,6 +197,27 @@ Text interpretation by the exporter
 * Comment lines::               Some lines will not be exported
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
+
+Publishing
+
+* Configuration::               Defining projects
+* Sample configuration::        Example projects
+* Triggering publication::      Publication commands
+
+Configuration
+
+* Project alist::               The central configuration variable
+* File sources and destinations::  From here to there
+* Selecting files::             What files are part of the project?
+* Publishing action::           
+* Publishing options::          Tweaking HTML export
+* Links::                       Linking between files of a project
+* Project page index::          Publishing a list of project files
+
+Sample configuration
+
+* Simple example::              One-component publishing
+* Complex example::             A multi-component publishing example
 
 Miscellaneous
 
@@ -208,6 +231,12 @@ Miscellaneous
 * Interaction::                 Other Emacs packages
 * Bugs::                        Things which do not work perfectly
 * Acknowledgments::             These people provided feedback and more
+
+Interaction with other packages
+
+* Extensions::                  Third-party extensions for Org-mode
+* Cooperation::                 Packages Org-mode cooperates with
+* Conflicts::                   Packages that lead to conflicts
 
 @end detailmenu
 @end menu
@@ -241,21 +270,23 @@ Plain text URL-like links connect to websites, emails, Usenet
 messages, BBDB entries, and any files related to the projects.  For
 printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, as HTML, or (todo and agenda items only) as an
-iCalendar file.
+iCalendar file.  It can also serve as a publishing tool for a set of
+linked webpages.
 
 Org-mode keeps simple things simple.  When first fired up, it should
-feel like a simple, easy to use outliner.  Complexity is not imposed,
-but a large amount of functionality is available when you need it.
-Org-mode can be used on different levels and in different ways, for
+feel like a straightforward, easy to use outliner.  Complexity is not
+imposed, but a large amount of functionality is available when you need
+it.  Org-mode can be used on different levels and in different ways, for
 example:
 
 @example
 @r{@bullet{} as an outline extension with visibility cycling and structure editing}
 @r{@bullet{} as an ASCII system and table editor for taking structured notes}
 @r{@bullet{} as an ASCII table editor with spreadsheet-like capabilities}
-@r{@bullet{} as a simple hypertext system, with HTML export}
 @r{@bullet{} as a TODO list editor}
 @r{@bullet{} as a full agenda and planner with deadlines and work scheduling}
+@r{@bullet{} as a simple hypertext system, with HTML export}
+@r{@bullet{} as a publishing tool to create a set of interlinked webpages}
 @end example
 
 The Org-mode table editor can be integrated into any major mode by
@@ -288,19 +319,22 @@ choose suitable keys yourself.
 (define-key global-map "\C-ca" 'org-agenda)
 @end lisp
 
-If you have downloaded Org-mode from the Web, you must byte-compile
-@file{org.el} and put it on your load path.  In addition to the Emacs
-Lisp lines above, you also need to add the following lines to
+Furthermore, you must activate @code{font-lock-mode} in org-mode
+buffers, because significant functionality depends on font-locking being
+active.  You can do this with either one of the following two lines:
+@lisp
+(global-font-lock-mode 1)                     ; for all buffers
+(add-hook 'org-mode-hook 'turn-on-font-lock)  ; org-mode buffers only
+@end lisp
+
+If you have downloaded Org-mode from the Web, you must take additional
+action:  Byte-compile @file{org.el} and @file{org-publish.el} and put
+them together with @file{org-install.el} on your load path.  Then add to
 @file{.emacs}:
 
 @lisp
-;; These lines only if org-mode is not part of the X/Emacs distribution.
-(autoload 'org-mode "org" "Org mode" t)
-(autoload 'org-diary "org" "Diary entries from Org mode")
-(autoload 'org-agenda "org" "Multi-file agenda from Org mode" t)
-(autoload 'org-store-link "org" "Store a link to the current location" t)
-(autoload 'orgtbl-mode "org" "Org tables as a minor mode" t)
-(autoload 'turn-on-orgtbl "org" "Org tables as a minor mode")
+;; This line only if org-mode is not part of the X/Emacs distribution.
+(require 'org-install)
 @end lisp
 
 @cindex org-mode, turning on
@@ -407,33 +441,40 @@ starters.  @ref{Clean view} describes a setup to realize this.
 @cindex hide text
 
 Outlines make it possible to hide parts of the text in the buffer.
-Org-mode uses a single command bound to the @key{TAB} key to change
-the visibility in the buffer.
+Org-mode uses just two commands, bound to @key{TAB} and
+@kbd{S-@key{TAB}} to change the visibility in the buffer.
 
 @cindex subtree visibility states
+@cindex subtree cycling
 @cindex folded, subtree visibility state
 @cindex children, subtree visibility state
 @cindex subtree, subtree visibility state
 @table @kbd
 @kindex @key{TAB}
 @item @key{TAB}
-Rotate current subtree between the states
+@emph{Subtree cycling}: Rotate current subtree between the states
 
 @example
 ,-> FOLDED -> CHILDREN -> SUBTREE --.
 '-----------------------------------'
 @end example
 
-At the beginning of the buffer (or when called with @kbd{C-u}), this does
-the same as the command @kbd{S-@key{TAB}} below.
+The cursor must be on a headline for this to work@footnote{see, however,
+the option @code{org-cycle-emulate-tab}.}.  When the cursor is at the
+beginning of the buffer and the first line is not a headline, then
+@key{TAB} actually runs global cycling (see below)@footnote{see the
+option @code{org-cycle-global-at-bob}.}.  Also when called with a prefix
+argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 
 @cindex global visibility states
+@cindex global cycling
 @cindex overview, global visibility state
 @cindex contents, global visibility state
 @cindex show all, global visibility state
 @kindex S-@key{TAB}
 @item S-@key{TAB}
-Rotate the entire buffer between the states
+@itemx C-u @key{TAB}
+@emph{Global cycling}: Rotate the entire buffer between the states
 
 @example
 ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
@@ -694,9 +735,22 @@ But in the end, not individual scenes matter but the film as a whole.
 @end example
 
 Org-mode supports these lists by tuning filling and wrapping commands
-to correctly deal with them.  Furthermore, the following commands act
-on items when the cursor is in the first line of an item (the line
-with the bullet or number).
+to correctly deal with them.  
+
+@cindex checkboxes
+Every item in a plain list can be made a checkbox by starting it with
+the string @samp{[_]}.  The checkbox status can conveniently be toggled
+with @kbd{C-c C-c}.
+
+@example
+* Shopping list
+  - [_] Milk
+  - [X] Butter
+  - [_] bred
+@end example
+
+The following commands act on items when the cursor is in the first line
+of an item (the line with the bullet or number).
 
 @table @kbd
 @kindex @key{TAB}
@@ -715,7 +769,8 @@ item.  If this command is executed in the @emph{whitespace before a bullet or
 number}, the new item is created @emph{before} the current item.  If the
 command is executed in the white space before the text that is part of
 an item but does not contain the bullet, a bullet is added to the
-current line.
+current line.  If the current item has a checkbox, so will the newly
+created item.
 @kindex M-S-@key{up}
 @kindex M-S-@key{down}
 @item M-S-@key{up}
@@ -735,7 +790,9 @@ would imply a different hierarchy.  To use the new hierarchy, break
 the command chain with a cursor motion or so.
 @kindex C-c C-c
 @item C-c C-c
-Renumber the ordered list at the cursor.
+If there is a checkbox in the item line, toggle the state of the
+checkbox.  Otherwise, if this is an ordered list, renumber the ordered
+list at the cursor.
 @end table
 
 @node Tables, Hyperlinks, Document structure, Top
@@ -954,7 +1011,7 @@ When not empty, copy current field down to next row and move cursor
 along with it.  Depending on the variable
 @code{org-table-copy-increment}, integer field values will be
 incremented during copy.  This key is also used by CUA-mode
-(@pxref{Interaction}).
+(@pxref{Cooperation}).
 
 @tsubheading{Miscellaneous}
 @kindex C-c `
@@ -1389,7 +1446,7 @@ possible.
 @chapter Hyperlinks
 @cindex hyperlinks
 
-Just like HMTL, Org-mode provides links inside a file, and external
+Just like HTML, Org-mode provides links inside a file, and external
 links to other files, Usenet articles, emails and much more.
 
 @menu
@@ -1605,7 +1662,9 @@ that you don't have to use this command to insert a link.  Links in
 Org-mode are plain text, and you can type or paste them straight into
 the buffer.  By using this command, the links are automatically enclosed
 in double brackets, and you will be asked for the optional descriptive
-text.
+text.  If the link is a @samp{file:} link and the linked file is located
+in the same directory as the current file or a subdirectory of it, the
+path of the file will be inserted relative to the current directory.
 
 @kindex C-u C-c C-l
 @cindex file name completion
@@ -1749,19 +1808,14 @@ store quick notes with little interruption of your work flow.  See
 @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
 information.  The notes produced by @emph{Remember} can be stored in
 different ways, and Org-mode files are a good target.  Org-mode allows
-to file away notes either to a default file, or directly to the
-correct location in your Org-mode outline tree.  The following
-customization@footnote{The three autoload forms are only necessary if
-@file{org.el} is not part of the Emacs distribution or an XEmacs
-package.} will tell @emph{Remember} to use org files as target, and to
-create annotations compatible with Org-mode links.
+to file away notes either to a default file, or directly to the correct
+location in your Org-mode outline tree.  The following customization
+will tell @emph{Remember} to use org files as target, and to create
+annotations compatible with Org-mode links.
 
 @example
 (setq org-directory "~/path/to/my/orgfiles/")
 (setq org-default-notes-file "~/.notes")
-(autoload 'org-remember-annotation "org")
-(autoload 'org-remember-apply-template "org")
-(autoload 'org-remember-handler "org")
 (setq remember-annotation-functions '(org-remember-annotation))
 (setq remember-handler-functions '(org-remember-handler))
 (add-hook 'remember-mode-hook 'org-remember-apply-template)
@@ -2081,7 +2135,7 @@ agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
 Increase/decrease priority of current item.  Note that these keys are
 also used to modify time stamps (@pxref{Creating timestamps}).
 Furthermore, these keys are also used by CUA-mode
-(@pxref{Interaction}).
+(@pxref{Conflicts}).
 @end table
 
 @node Timestamps, Tags, TODO items, Top
@@ -2225,7 +2279,7 @@ Insert @samp{SCHEDULED} keyword along with a stamp.
 @item S-@key{left}
 @itemx S-@key{right}
 Change date at cursor by one day.  These key bindings conflict with
-CUA-mode (@pxref{Interaction}).
+CUA-mode (@pxref{Conflicts}).
 
 @kindex S-@key{up}
 @kindex S-@key{down}
@@ -2235,7 +2289,7 @@ Change the item under the cursor in a timestamp.  The cursor can be on
 a year, month, day, hour or minute.  Note that if the cursor is not at
 a time stamp, these same keys modify the priority of an item.
 (@pxref{Priorities}). The key bindings also conflict with CUA-mode
-(@pxref{Interaction}).
+(@pxref{Conflicts}).
 
 
 @kindex C-c C-y
@@ -2978,14 +3032,14 @@ visit org files will not be removed.
 
 @end table
 
-@node Exporting, Miscellaneous, Agenda views, Top
+@node Exporting, Publishing, Agenda views, Top
 @chapter Exporting
 @cindex exporting
 
 Org-mode documents can be exported into a variety of other formats.  For
 printing and sharing of notes, ASCII export produces a readable and
 simple version of an Org-mode file.  HTML export allows to publish a
-notes file on the web, while the XML format provides a solid base for
+notes file on the web, while the XOXO format provides a solid base for
 exchange with a broad range of other applications.  To incorporate
 entries with associated times like deadlines or appointments into a
 desktop calendar program like iCal, Org-mode can also produce extracts
@@ -2998,7 +3052,7 @@ produced.  @xref{Text interpretation}, for more details.
 @menu
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
-* XML export::                  Exporting to XML
+* XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
 @end menu
@@ -3038,7 +3092,7 @@ at a different level, specify it with a prefix argument.  For example,
 @noindent
 creates only top level headlines and does the rest as items.
 
-@node HTML export, XML export, ASCII export, Exporting
+@node HTML export, XOXO export, ASCII export, Exporting
 @section HTML export
 @cindex HTML export
 
@@ -3081,7 +3135,20 @@ mark them with a @samp{@@} like in @samp{@@<b>bold text@@</b>}.
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
 @samp{&gt;} in HTML export.
 
-You can also give style information for the exported file.  The
+You can also give style information for the exported file.  The HTML
+exporter asigns the following CSS classes to appropriate parts of the
+document - your style specifications may change these.
+@example
+.todo           @r{TODO keywords}
+.done           @r{the DONE keyword}
+.timestamp      @r{time stamp}
+.timestamp-kwd  @r{keyword associated with a time stamp, like SCHEDULED}
+.tag            @r{tag in a headline}
+.target         @r{target for links}
+@end example
+
+
+The
 default specification can be configured through the option
 @code{org-export-html-style}.  If you want to use a file-local style,
 you may use file variables, best wrapped into a COMMENT section at the
@@ -3106,24 +3173,24 @@ section in the buffer.
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
 
-@node XML export, iCalendar export, HTML export, Exporting
-@section XML export
-@cindex XML export
+@node XOXO export, iCalendar export, HTML export, Exporting
+@section XOXO export
+@cindex XOXO export
 
-Org-mode contains an XML exporter that produces XOXO-style XML.
+Org-mode contains an exporter that produces XOXO-style output.
 Currently, this exporter only handles the general outline structure and
 does not interpret any additional Org-mode features.
 
 @table @kbd
 @kindex C-c C-x C-x
 @item C-c C-x C-x
-Export as XML file @file{myfile.xml}.
+Export as XOXO file @file{myfile.html}.
 @kindex C-c C-x v
 @item C-c C-x v x
 Export only the visible part of the document.
 @end table
 
-@node iCalendar export, Text interpretation, XML export, Exporting
+@node iCalendar export, Text interpretation, XOXO export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
@@ -3322,7 +3389,313 @@ toc:    @r{turn on/off table of contents}
 TeX:    @r{turn on/off @TeX{} macros}
 @end example
 
-@node Miscellaneous, Index, Exporting, Top
+@node Publishing, Miscellaneous, Exporting, Top
+@chapter Publishing
+
+Org-mode includes@footnote{@file{org-publish.el} is not yet part of
+emacs, so if you are using @file{org.el} as it comes with Emacs, you
+need to download this file separately.  Also make sure org.el is at
+least version 4.27.} a publishing management system
+that allows you to configure automatic html conversion of
+@emph{projects} composed of interlinked org files.  This system is
+called @emph{org-publish}.  You can also configure org-publish to
+automatically upload your exported HTML pages and related attachments,
+such as images and source code files, to a web server.  Org-publish turns
+org-mode into a web-site authoring tool.
+
+Org-publish has been contributed to Org-mode by David O'Toole.
+
+@menu
+* Configuration::               Defining projects
+* Sample configuration::        Example projects
+* Triggering publication::      Publication commands
+@end menu
+
+@node Configuration, Sample configuration, Publishing, Publishing
+@section Configuration
+
+Publishing needs significant configuration to specify files, destination
+and many other properties of a project.
+
+@menu
+* Project alist::               The central configuration variable
+* File sources and destinations::  From here to there
+* Selecting files::             What files are part of the project?
+* Publishing action::           
+* Publishing options::          Tweaking HTML export
+* Links::                       Linking between files of a project
+* Project page index::          Publishing a list of project files
+@end menu
+
+@node Project alist, File sources and destinations, Configuration, Configuration
+@subsection The variable @code{org-publish-project-alist}
+
+Org-publish is configured almost entirely through setting the value of
+one variable, called @code{org-publish-project-alist}.
+Each element of the list configures one project, and may be in one of
+the two following forms:
+
+@lisp
+("project-name"  :property value :property value ...)
+
+@r{or} 
+ 
+("project-name"  
+    ("component1" :property value :property value ...)
+    ("component2" :property value :property value ...)
+    ...)
+@end lisp
+
+In both cases, projects are configured by specifying property values.
+A project defines the set of files that will be published, as well as
+the publishing configuration to use when publishing those files. 
+When a project takes the second form listed above, the individual
+property lists are taken to be "components" of the project, which
+group together files requiring different publishing options. 
+
+@node File sources and destinations, Selecting files, Project alist, Configuration
+@subsection Sources and destinations for files
+
+Most properties are optional, but some should always be set. In
+particular, org-publish needs to know where to look for source files,
+and where to put published files.
+
+@multitable @columnfractions 0.3 0.7
+@item @code{:base-directory}
+@tab Directory containing publishing source files
+@item @code{:publishing-directory}
+@tab Directory (possibly remote) where output files will be published.
+@end multitable
+@noindent
+
+@node Selecting files, Publishing action, File sources and destinations, Configuration
+@subsection Selecting files
+
+By default, all files with extension @file{.org} in the base directory
+are considered part of the project.  This can be modified by setting the
+properties 
+@multitable @columnfractions 0.25 0.75
+@item @code{:base-extension}
+@tab Extension (without the dot!) of source files.  This actually is a
+regular expression.
+
+@item @code{:exclude} 
+@tab Regular expression to match file names that should not be
+published, even though they have been selected on the basis of their
+extension.
+
+@item @code{:include}
+@tab List of files to be included regardless of @code{:base-extension}
+and @code{:exclude}.
+@end multitable
+
+@node Publishing action, Publishing options, Selecting files, Configuration
+@subsection Publishing Action
+
+Publishing means that a file is copied to the destination directory and
+possibly transformed in the process.  The default transformation is to
+export Org-mode files as HTML files, and this is done by the function
+@code{org-publish-org-to-html} which calls the HTML exporter
+(@pxref{HTML export}).  Other files like images only need to be copied
+to the publishing destination.  For non-Org-mode files, you need to
+specify the publishing function.
+
+@multitable @columnfractions 0.3 0.7
+@item @code{:publishing-function}
+@tab Function executing the publication of a file.
+@end multitable
+
+The function must accept two arguments: a property list containing at
+least a @code{:publishing-directory} property, and the name of the file
+to be published.  I should take the specified file, make the necessary
+transformation (if any) and place the result into the destination folder.
+You can write your own publishing function, but @code{org-publish}
+provides one for attachments (files that only need to be copied):
+@code{org-publish-attachment}.
+
+@node Publishing options, Links, Publishing action, Configuration
+@subsection Options for the HTML exporter
+
+The property list can be used to set many export options for the HTML
+exporter.  In most cases, these properties correspond to user variables
+in Org-mode.  The table below lists these properties along with the
+variable they belong to.  See the documentation string for the
+respective variable for details.
+
+@multitable @columnfractions 0.3 0.7
+@item @code{:language}              @tab @code{org-export-default-language}
+@item @code{:headline-levels}       @tab @code{org-export-headline-levels}
+@item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
+@item @code{:table-of-contents}     @tab @code{org-export-with-toc}
+@item @code{:emphasize}             @tab @code{org-export-with-emphasize}
+@item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
+@item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
+@item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
+@item @code{:timestamps}           .@tab @code{org-export-with-timestamps}
+@item @code{:tags}                 .@tab @code{org-export-with-tags}
+@item @code{:tables}                @tab @code{org-export-with-tables}
+@item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
+@item @code{:style}                 @tab @code{org-export-html-style}
+@item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
+@item @code{:inline-images}         @tab @code{org-export-html-inline-images}
+@item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}
+@item @code{:timestamp}             @tab @code{org-export-html-with-timestamp}
+@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
+@item @code{:preamble}              @tab @code{org-export-html-preamble}
+@item @code{:postamble}             @tab @code{org-export-html-postamble}
+@item @code{:auto-preamble}         @tab @code{org-export-html-auto-preamble}
+@item @code{:auto-postamble}        @tab @code{org-export-html-auto-postamble}
+@item @code{:author}                @tab @code{user-full-name}
+@item @code{:email}                 @tab @code{user-mail-address}
+@end multitable
+
+When a property is given a value in org-publish-project-alist, its
+setting overrides the value of the corresponding user variable (if any)
+during publishing.  However, options set within a file (@pxref{Export
+options}) override everything.
+
+@node Links, Project page index, Publishing options, Configuration
+@subsection Links between published files
+
+To create a link from one Org-mode file to another, you would use
+something like @samp{[[file:foo.org][The foo]]} or simply
+@samp{file:foo.org.} (@pxref{Hyperlinks}).  Upon publishing this link
+becomes a link to @file{foo.html}.  In this way, you can interlink the
+pages of your "org web" project and the links will work as expected when
+you publish them to HTML.
+
+You may also link to related files, such as images. Provided you are
+careful with relative pathnames, and provided you have also configured
+org-publish to upload the related files, these links will work
+too. @ref{Complex example} for an example of this usage.
+
+@node Project page index,  , Links, Configuration
+@subsection Project page index
+
+The following properties may be used to control publishing of an
+index of files or summary page for a given project.
+
+@multitable @columnfractions 0.25 0.75
+@item @code{:auto-index}
+@tab When non-nil, publish an index during org-publish-current-project or
+org-publish-all.
+
+@item @code{:index-filename}
+@tab Filename for output of index. Defaults to @file{index.org} (which
+becomes @file{index.html}).
+
+@item @code{:index-title}
+@tab Title of index page. Defaults to name of file.
+
+@item @code{:index-function}
+@tab Plugin function to use for generation of index.
+Defaults to @code{org-publish-org-index}, which generates a plain list
+of links to all files in the project.
+@end multitable
+
+@node Sample configuration, Triggering publication, Configuration, Publishing
+@section Sample configuration
+
+Below we provide two example configurations.  The first one is a simple
+project publishing only a set of Org-mode files.  The second example is
+more complex, with a multi-component project.
+
+@menu
+* Simple example::              One-component publishing
+* Complex example::             A multi-component publishing example
+@end menu
+
+@node Simple example, Complex example, Sample configuration, Sample configuration
+@subsection Example: simple publishing configuration
+
+This example publishes a set of Org-mode files to the @file{public_html}
+directory on the local machine.
+
+@lisp
+(setq org-publish-project-alist
+      '(("org" 
+         :base-directory "~/org/"
+         :publishing-directory "~/public_html"
+         :section-numbers nil
+         :table-of-contents nil
+         :style "<link rel=stylesheet 
+                href=\"../other/mystyle.css\"
+                type=\"text/css\">")))
+@end lisp
+
+@node Complex example,  , Simple example, Sample configuration
+@subsection Example: complex publishing configuration
+
+This more complicated example publishes an entire website, including
+org files converted to HTML, image files, emacs lisp source code, and
+stylesheets. The publishing-directory is remote and private files are
+excluded.
+
+To ensure that links are preserved, care should be taken to replicate
+your directory structure on the web server, and to use relative file
+paths. For example, if your org files are kept in @file{~/org} and your
+publishable images in @file{~/images}, you'd link to an image with
+@c
+@example
+file:../images/myimage.png
+@end example
+@c
+On the web server, the relative path to the image should be the
+same. You can accomplish this by setting up an "images" folder in the
+right place on the webserver, and publishing images to it.
+
+@lisp
+(setq org-publish-project-alist
+      '(("website"
+         ("orgfiles"
+          :base-directory "~/org/"
+          :base-extension "org"
+          :publishing-directory "/ssh:user@@host:~/html/notebook/"
+          :publishing-function org-publish-org-to-html
+          :exclude "PrivatePage.org"   ;; regexp
+          :headline-levels 3
+          :section-numbers nil
+          :table-of-contents nil
+          :style "<link rel=stylesheet 
+                  href=\"../other/mystyle.css\" type=\"text/css\">"
+          :auto-preamble t
+          :auto-postamble nil)
+         
+         ("images"
+          :base-directory "~/images/"
+          :base-extension "jpg\\|gif\\|png"
+          :publishing-directory "/ssh:user@@host:~/html/images/"
+          :publishing-function org-publish-attachment)
+ 
+         ("other"
+          :base-directory "~/other/"
+          :base-extension "css\\|el"
+          :publishing-directory "/ssh:user@@host:~/html/other/"
+          :publishing-function org-publish-attachment))))
+@end lisp
+
+@node Triggering publication,  , Sample configuration, Publishing
+@section Triggering publication
+
+Once org-publish is properly configured, you can publish with the
+following functions: 
+
+@table @kbd
+@item C-c C-e c
+Prompts for a specific project to publish.
+@item C-c C-e p
+Publishes the project the current file is part of. 
+@item C-c C-e f
+Publishes only the current file.
+@item C-c C-e a
+Publish all projects.
+@end table
+
+Org uses timestamps to track when a file has changed. The above
+functions normally only publish changed files. You can override this and
+force publishing of all files by giving a prefix argument. 
+
+@node Miscellaneous, Index, Publishing, Top
 @chapter Miscellaneous
 
 @menu
@@ -3431,6 +3804,12 @@ variable is @code{org-startup-align-all-tables}, with a default value
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
+Logging when a TODO item is marked DONE (variable @code{org-log-done})
+can be configured using these options.
+@example
+logging    @r{record a timestamp when an item is marked DONE}
+nologging  @r{don't record when items are marked DONE}
+@end example
 Here are the options for hiding leading stars in outline headings.  The
 corresponding variables are @code{org-hide-leading-stars} and
 @code{org-odd-levels-only}, both with a default setting @code{nil}
@@ -3473,14 +3852,14 @@ this means in different contexts.
 @c into the current line, aligned to `org-tags-column'.  When called
 @c with prefix arg, realign all tags in the current buffer.
 @item
-If the cursor is in one of the special #+KEYWORD lines, this
+If the cursor is in one of the special @code{#+KEYWORD} lines, this
 triggers scanning the buffer for these lines and updating the
 information. 
 @item
 If the cursor is inside a table, realign the table.  This command
 works even if the automatic table editor has been turned off.
 @item
-If the cursor is on a #+TBLFM line, re-apply the formulas to
+If the cursor is on a @code{#+TBLFM} line, re-apply the formulas to
 the entire table.
 @item
 If the cursor is inside a table created by the @file{table.el} package,
@@ -3490,8 +3869,11 @@ If the current buffer is a remember buffer, close note and file it.
 with a prefix argument, file it without further interaction to the default
 location.
 @item
-If the cursor is on a <<<target>>>, update radio targets and corresponding
-links in this buffer.
+If the cursor is on a @code{<<<target>>>}, update radio targets and
+corresponding links in this buffer.
+@item
+If the cursor is in a plain list item with a checkbox, toggle the status
+of the checkbox.
 @item
 If the cursor is on a numbered item in a plain list, renumber the
 ordered list.
@@ -3640,27 +4022,50 @@ rather use @kbd{C-c .}  to re-insert the timestamp.
 @cindex FAQ
 
 @enumerate
-
-@cindex allout.el, conflict with
 @cindex @code{keymapp nil} error
 @item @b{When I try to use Org-mode, I always get
 @code{(wrong-type-argument keymapp nil)}}.@*
-This is a conflict with an outdated version of the @file{allout.el}
-package which pretends to be also the standard outline-mode but is not.
-This happens with older versions of @file{allout.el}, for example the
-one distributed with Emacs 21.  Upgrade to Emacs 22 and this problem
-will disappear.  If for some reason you cannot do this, make sure that
-org.el is loaded @emph{before} @file{allout.el}, for example by putting
-@code{(require 'org)} early enough into your @file{.emacs} file.
+@cindex allout.el, conflict with
+This is a conflict with an outdated version of the @file{allout.el}.
+See @ref{Conflicts}.
 
 @item @b{Org-mode seems to be a useful default mode for the various
 @file{README} files I have scattered through my directories.  How do I
 turn it on for all @file{README} files?}
-@c @*
 
-@example
+@lisp
 (add-to-list 'auto-mode-alist '("README$" . org-mode))
-@end example
+@end lisp
+
+@item @b{I would like to use editing features of org-mode in other
+modes, is his possible?}@*
+@c
+Not really.  For tables there is @code{orgtbl-mode} which implements the
+table editor as a minor mode.  For other features you need to switch to
+Org-mode temporarily, or prepare text in a different buffer.
+
+@item @b{Can I get the visibility-cycling features in outline-mode and
+outline-minor-mode?}@* 
+@c
+Yes, these functions are written in a way that they are independent of
+the outline setup.  The following setup provides standard Org-mode
+functionality in outline-mode on @key{TAB} and @kbd{S-@key{TAB}}.  For
+outline-minor-mode, we use @kbd{C-@key{TAB}} instead of @key{TAB},
+because @key{TAB} usually has mode-specific tasks.
+@lisp
+(add-hook 'outline-minor-mode-hook
+  (lambda ()
+    (define-key outline-minor-mode-map [(control tab)] 'org-cycle)
+    (define-key outline-minor-mode-map [(shift tab)] 'org-global-cycle)))
+(add-hook 'outline-mode-hook
+  (lambda ()
+    (define-key outline-mode-map [(tab)] 'org-cycle)
+    (define-key outline-mode-map [(shift tab)] 'org-global-cycle)))
+@end lisp
+
+Or check out @file{outline-magic.el}, which does this and also provides
+promotion and demotion functionality.  @file{outline-magic.el} is
+available at @url{http://www.astro.uva.nl/~dominik/Tools/OutlineMagic}.
 
 @item @b{Some of my links stopped working after I upgraded to a version
 4.20 or later.  Why is this, and how can I fix it?}@*
@@ -3690,7 +4095,7 @@ Would I let you down like that?  If you must, you can do this
 @end lisp
 
 @item @b{When I am executing shell links I always get a 
-confirmation prompt and need to type @kbd{yes @key{RET}}, thats 4 key
+confirmation prompt and need to type @kbd{yes @key{RET}}, that's 4 key
 presses!  Can I get rid of this?}@*
 @c
 @cindex shell links, confirmation
@@ -3753,7 +4158,7 @@ export.  Marking can be done with @kbd{C-c @@ C-x C-x}, for example.
 
 @item @b{Org-mode takes over the S-cursor keys.  I also want to use
 CUA-mode, is there a way to fix this conflict?}@*
-Yes, see @ref{Interaction}.
+Yes, see @ref{Conflicts}.
 
 @item @b{One of my table columns has started to fill up with
 @samp{#ERROR}.  What is going on?}@*
@@ -3784,10 +4189,8 @@ emacs diary?}@*
 Since the org-mode agenda is much more powerful and can contain the
 diary (@pxref{Calendar/Diary integration}), you should think twice
 before deciding to do this.  Integrating Org-mode information into the
-diary is, however, possible.  The following steps are necessary:
-Autoload the function @command{org-diary} as shown above under
-@ref{Installation and activation}.  You also need to use @emph{fancy
-diary display} by setting in @file{.emacs}:
+diary is, however, possible.  You need to turn on @emph{fancy diary
+display} by setting in @file{.emacs}:
 
 @lisp
 (add-hook 'diary-display-hook 'fancy-diary-display)
@@ -3823,20 +4226,50 @@ the agenda buffer.
 @node Interaction, Bugs, FAQ, Miscellaneous
 @section Interaction with other packages
 @cindex packages, interaction with other
-Org-mode can cooperate with the following packages:
+Org-mode lives in the world of GNU Emacs and interacts in various ways
+with other code out there.
+
+@menu
+* Extensions::                  Third-party extensions for Org-mode
+* Cooperation::                 Packages Org-mode cooperates with
+* Conflicts::                   Packages that lead to conflicts
+@end menu
+
+@node Extensions, Cooperation, Interaction, Interaction
+@subsection Third-party extensions for Org-mode
+
+The following extensions for Org-mode have been written by other people:
 
 @table @asis
+@cindex @file{org-checklet.el}
+@item @file{org-checklet.el} by Frank Ruell
+Provides checklist of items which can be either checked or unchecked.
+This is similar to the TODO functionality in Org-mode, but never shows
+up in the agenda.  @file{org-checklet} is freely available at
+@url{http://www.emacswiki.org/cgi-bin/emacs/org-checklet.el}.
 @cindex @file{org-mouse.el}
 @item @file{org-mouse.el} by Piotr Zielinski
 This package implements extended mouse functionality for Org-mode.  It
 allows you to cycle visibility and to edit the document structure with
 the mouse.  Best of all, it provides a context-sensitive menu on
 @key{mouse-3} that changes depending on the context of a mouse-click.
-Use a search engine to find this package on the web.
-@cindex @file{table.el}
-@item @file{table.el} by Takaaki Ota
-Org mode cooperates with table.el, see @ref{table.el}.  @file{table.el}
-is part of Emacs 22.
+@file{org-mouse.el} is freely avaliable at @url{http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el}.
+@cindex @file{org-publish.el}
+@item @file{org-publish.el} by David O'Toole
+This package provides facilities for publishing related sets of Org-mode
+files together with linked files like images as a webpages.  It is
+highly configurable and can be used for other publishing purposes as
+well.  As of Org-mode version 4.30, @file{org-publish.el} is part of
+the Org-mode distribution.  However, it is not yet part of Emacs due to
+a pending copyright assignment.  In the mean time, @file{org-publish.el}
+can be downloaded from David's site:
+@url{http://dto.freeshell.org/e/org-publish.el}.
+@end table
+
+@node Cooperation, Conflicts, Extensions, Interaction
+@subsection Packages that Org-mode cooperates with
+
+@table @asis
 @cindex @file{calc.el}
 @item @file{calc.el} by Dave Gillespie
 Org-mode uses the calc package for implementing spreadsheet
@@ -3859,6 +4292,31 @@ at @url{http://www.astro.uva.nl/~dominik/Tools}. Org-mode checks for
 the function @code{constants-get}, which has to be autoloaded in your
 setup.  See the installation instructions in the file
 @file{constants.el}.
+@item @file{remember.el} by John Wiegley
+@cindex @file{remember.el}
+Org mode cooperates with remember, see @ref{Remember}.
+@file{Remember.el} is not part of Emacs, find it on the web.
+@cindex @file{table.el}
+@item @file{table.el} by Takaaki Ota
+Org mode cooperates with table.el, see @ref{table.el}.  @file{table.el}
+is part of Emacs 22.
+@end table
+
+@node Conflicts,  , Cooperation, Interaction
+@subsection Packages that lead to conflicts with Org-mode
+
+@table @asis
+
+@cindex @file{allout.el}
+@item @file{allout.el} by Ken Manheimer
+Startup of Org-mode may fail with the error message
+@code{(wrong-type-argument keymapp nil)} when there is an outdated
+version @file{allout.el} on the load path, for example the version
+distributed with Emacs 21.x.  Upgrade to Emacs 22 and this problem will
+disappear.  If for some reason you cannot do this, make sure that org.el
+is loaded @emph{before} @file{allout.el}, for example by putting
+@code{(require 'org)} early enough into your @file{.emacs} file.
+
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm
 Keybindings in Org-mode conflict with the @kbd{S-<cursor>} keys
@@ -3882,11 +4340,8 @@ to have other replacement keys, look at the variable
 @cindex @file{windmove.el}
 Also this package uses the @kbd{S-<cursor>} keys, so everything written
 in the paragraph above about CUA mode also applies here.
-@item @file{remember.el} by John Wiegley
-@cindex @file{remember.el}
-Org mode cooperates with remember, see @ref{Remember}.
-@file{Remember.el} is not part of Emacs, find it on the web.
 @end table
+
 
 @node Bugs, Acknowledgments, Interaction, Miscellaneous
 @section Bugs
@@ -3911,7 +4366,7 @@ Text in an entry protected with the @samp{QUOTE} keyword should not
 autowrap.
 @item
 When the application called by @kbd{C-c C-o} to open a file link fails
-(for example because the application does not exits or refuses to open
+(for example because the application does not exist or refuses to open
 the file), it does so silently.  No error message is displayed.
 @item
 Plain list items should be able to hold a TODO item.  Unfortunately this
@@ -3927,9 +4382,8 @@ Recalculating a table line applies the formulas from left to right.
 If a formula uses @emph{calculated} fields further down the row,
 multiple recalculation may be needed to get all fields consistent.
 @item
-You can only make a single word boldface or italic.  To emphasize
-several words in a row, each must have the emphasize markers, like in
-@samp{*three* *bold* *words*}.
+Several words in a rom may @b{*be made bold*}, but this does not work if
+the string is distributed over two lines.
 @item
 The exporters work well, but could be made more efficient.
 @end itemize
