@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.21).
+   This manual is for Org-mode (version 4.22).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.21).
+This manual is for Org-mode (version 4.22).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -3007,9 +3007,8 @@ activate changes immediately).
 
    You can convert an Org-mode file from single-star-per-level to the
 double-star-per-level convention with `M-x org-convert-to-odd-levels
-RET' in that file.  There is no command for the back conversion because
-such a command might merge levels and in this way destroy the structure
-of the tree.
+RET' in that file.  The reverse operation is `M-x
+org-convert-to-oddeven-levels'.
 
 
 File: org,  Node: TTY keys,  Next: FAQ,  Prev: Clean view,  Up: Miscellaneous
@@ -3988,12 +3987,12 @@ Node: Completion112688
 Node: Customization113684
 Node: Updating settings114139
 Node: Clean view115547
-Node: TTY keys118191
-Node: FAQ119792
-Node: Interaction126026
-Node: Bugs128867
-Node: Acknowledgments131176
-Node: Index134106
-Node: Key Index154821
+Node: TTY keys118116
+Node: FAQ119717
+Node: Interaction125951
+Node: Bugs128792
+Node: Acknowledgments131101
+Node: Index134031
+Node: Key Index154746
 
 End Tag Table
