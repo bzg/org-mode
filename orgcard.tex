@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.69}
+\def\orgversionnumber{4.70}
 \def\versionyear{2007}          % latest update
 \def\year{2007}                 % latest copyright year
 %
@@ -512,6 +512,8 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \section{TODO Items and Checkboxes}
 
 \key{rotate the state of the current item}{C-c C-t}
+\metax{select next/previous state}{S-LEFT/RIGHT}
+\metax{select next/previous set}{C-S-LEFT/RIGHT}
 \key{view TODO items in a sparse tree}{C-c C-v}
 \key{view 3rd TODO keyword's sparse tree}{C-3 C-c C-v}
 
@@ -558,8 +560,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 %\key{... forward/backward one month}{M-S-LEFT/RIGT}
 \key{Toggle custom format display for dates/times}{C-c C-x C-t}
 
-
-\section{Clocking Time}
+{\bf Clocking time}
 
 \key{start clock on current item}{C-c C-x C-i}
 \key{stop clock on current item}{C-c C-x C-o}

@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.69).
+   This manual is for Org-mode (version 4.70).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.69).
+This manual is for Org-mode (version 4.70).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -138,8 +138,8 @@ Extended use of TODO keywords
 
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
-* Per file keywords::           Different files, different requirements
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Per file keywords::           Different files, different requirements
 
 Timestamps
 
@@ -570,9 +570,9 @@ the visibility in the buffer.
 
 `C-c C-x b'
      Show the current subtree in an indirect buffer(3).  With numerical
-     prefix ARG, go up to this level and then take that tree.  If ARG
-     is negative, go up that many levels.  With `C-u' prefix, do not
-     remove the previously used indirect buffer.
+     prefix ARG, go up to this level and then take that tree.  If ARG is
+     negative, go up that many levels.  With `C-u' prefix, do not remove
+     the previously used indirect buffer.
 
    When Emacs first visits an Org-mode file, the global state is set to
 OVERVIEW, i.e. only the top level headlines are visible.  This can be
@@ -590,7 +590,7 @@ basis by adding one of the following lines anywhere in the buffer:
    (2) see the option `org-cycle-global-at-bob'.
 
    (3) The indirect buffer (*note Indirect Buffers: (emacs)Indirect
-Buffers.) will contain the entire buffer, but will be narrowed to the
+Buffers.)  will contain the entire buffer, but will be narrowed to the
 current tree.  Editing the indirect buffer will also change the
 original buffer, but without affecting visibility in that buffer.
 
@@ -2307,9 +2307,12 @@ The most important commands to work with TODO entries are:
 `C-c C-v'
      View TODO items in a _sparse tree_ (*note Sparse trees::).  Folds
      the entire buffer, but shows all TODO items and the headings
-     hierarchy above them.  With prefix arg, show also the DONE
-     entries.  With numerical prefix N, show the tree for the Nth
-     keyword in the variable `org-todo-keywords'.  
+     hierarchy above them.  With prefix arg, search for a specific
+     TODO.  You will be prompted for the keyword, and you can also give
+     a list of keywords like `kwd1|kwd2|...'.  With numerical prefix N,
+     show the tree for the Nth keyword in the variable
+     `org-todo-keywords'.  With two prefix args, find all TODO and DONE
+     entries.  
 
 `C-c a t'
      Show the global TODO list.  This collects the TODO items from all
@@ -2326,10 +2329,9 @@ File: org,  Node: TODO extensions,  Next: Priorities,  Prev: TODO basics,  Up: T
 =================================
 
 The default implementation of TODO entries is just two states: TODO and
-DONE.  You can, however, use the TODO feature for more complicated
-things by configuring the variables `org-todo-keywords' and
-`org-todo-interpretation'.  Using special setup, you can even use TODO
-keywords in different ways in different org files.
+DONE.  You can use the TODO feature for more complicated things by
+configuring the variable `org-todo-keywords'.  With special setup, the
+TODO keyword system can work differently in different files.
 
    Note that tags are another way to classify headlines in general and
 TODO items in particular (*note Tags::).
@@ -2338,8 +2340,8 @@ TODO items in particular (*note Tags::).
 
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
-* Per file keywords::           Different files, different requirements
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Per file keywords::           Different files, different requirements
 
 
 File: org,  Node: Workflow states,  Next: TODO types,  Prev: TODO extensions,  Up: TODO extensions
@@ -2347,46 +2349,52 @@ File: org,  Node: Workflow states,  Next: TODO types,  Prev: TODO extensions,  U
 5.2.1 TODO keywords as workflow states
 --------------------------------------
 
-You can use TODO keywords to indicate different states in the process
-of working on an item, for example:
+You can use TODO keywords to indicate different _sequential_ states in
+the process of working on an item, for example(1):
 
-     (setq org-todo-keywords '("TODO" "FEEDBACK" "VERIFY" "DONE")
-           org-todo-interpretation 'sequence)
+     (setq org-todo-keywords
+       '((sequence "TODO" "FEEDBACK" "VERIFY" "|" "DONE" "DELEGATED")))
 
-   Changing these variables only becomes effective in a new Emacs
-session.  With this setup, the command `C-c C-t' will cycle an entry
-from TODO to FEEDBACK, then to VERIFY, and finally to DONE.  You may
-also use a prefix argument to quickly select a specific state.  For
-example `C-3 C-c C-t' will change the state immediately to VERIFY.  If
-you define many keywords, you can use in-buffer completion (see *Note
-Completion::) to insert these words into the buffer.  Changing a todo
-state can be logged with a timestamp, see *Note Tracking TODO state
-changes:: for more information.
+   The vertical bar separates the TODO keywords (states that _need
+action_) from the DONE states (which need _no further action_.  If you
+don't provide the separator bar, the last state is used as the DONE
+state.  With this setup, the command `C-c C-t' will cycle an entry from
+TODO to FEEDBACK, then to VERIFY, and finally to DONE and DELEGATED.
+You may also use a prefix argument to quickly select a specific state.
+For example `C-3 C-c C-t' will change the state immediately to VERIFY.
+If you define many keywords, you can use in-buffer completion (see
+*Note Completion::) to insert these words into the buffer.  Changing a
+todo state can be logged with a timestamp, see *Note Tracking TODO
+state changes:: for more information.
+
+   ---------- Footnotes ----------
+
+   (1) Changing this variable only becomes effective after restarting
+Org-mode in a buffer.
 
 
-File: org,  Node: TODO types,  Next: Per file keywords,  Prev: Workflow states,  Up: TODO extensions
+File: org,  Node: TODO types,  Next: Multiple sets in one file,  Prev: Workflow states,  Up: TODO extensions
 
 5.2.2 TODO keywords as types
 ----------------------------
 
 The second possibility is to use TODO keywords to indicate different
-types of action items.  For example, you might want to indicate that
-items are for "work" or "home".  If you are into David Allen's _Getting
-Things DONE_, you might want to use todo types `NEXTACTION', `WAITING',
-`MAYBE'.  Or, when you work with several people on a single project,
-you might want to assign action items directly to persons, by using
-their names as TODO keywords.  This would be set up like this:
+_types_ of action items.  For example, you might want to indicate that
+items are for "work" or "home".  Or, when you work with several people
+on a single project, you might want to assign action items directly to
+persons, by using their names as TODO keywords.  This would be set up
+like this:
 
-     (setq org-todo-keywords '("Fred" "Sara" "Lucy" "Mike" "DONE")
-           org-todo-interpretation 'type)
+     (setq org-todo-keywords '((type "Fred" "Sara" "Lucy" "|" "DONE")))
 
    In this case, different keywords do not indicate a sequence, but
-rather different types.  So it is normally not useful to change from
-one type to another.  Therefore, in this case the behavior of the
-command `C-c C-t' is changed slightly(1).  When used several times in
-succession, it will still cycle through all names.  But when you return
+rather different types.  So the normal work flow would be to assign a
+task to a person, and later to mark it DONE.  Org-mode supports this
+style by adapting the workings of the command `C-c C-t'(1).  When used
+several times in succession, it will still cycle through all names, in
+order to first select the right type for a task.  But when you return
 to the item after some time and execute `C-c C-t' again, it will switch
-from each name directly to DONE.  Use prefix arguments or completion to
+from any name directly to DONE.  Use prefix arguments or completion to
 quickly select a specific name.  You can also review the items of a
 specific TODO type in a sparse tree by using a numeric prefix to `C-c
 C-v'.  For example, to see all things Lucy has to do, you would use
@@ -2400,26 +2408,70 @@ global todo list: `C-3 C-c t'.
 buffers.
 
 
-File: org,  Node: Per file keywords,  Next: Multiple sets in one file,  Prev: TODO types,  Up: TODO extensions
+File: org,  Node: Multiple sets in one file,  Next: Per file keywords,  Prev: TODO types,  Up: TODO extensions
 
-5.2.3 Setting up TODO keywords for individual files
----------------------------------------------------
+5.2.3 Multiple keyword sets in one file
+---------------------------------------
+
+Sometimes you may want to use different sets of TODO keywords in
+parallel.  For example, you may want to have the basic `TODO'/`DONE',
+but also a workflow for bug fixing, and a separate state indicating
+that an item has been canceled (so it is not DONE, but also does not
+require action).  Your setup would then look like this:
+
+     (setq org-todo-keywords
+           '((sequence "TODO" "|" "DONE")
+             (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED")
+             (sequence "|" "CANCELED")))
+
+   The keywords should all be different, this helps Org-mode to keep
+track of which subsequence should be used for a given entry.  In this
+setup, `C-c C-t' only operates within a subsequence, so it switches from
+`DONE' to (nothing) to `TODO', and from `FIXED' to (nothing) to
+`REPORT'.  Therefore you need a mechanism to initially select the
+correct sequence.  Besides the obvious ways like typing a keyword or
+using completion, you may also apply the following commands:
+
+`C-S-<right>'
+`C-S-<left>'
+     These keys jump from one TODO subset to the next.  In the above
+     example, `C-S-<right>' would jump from `TODO' or `DONE' to
+     `REPORT', and any of the words in the second row to `CANCELED'.  
+
+`S-<right>'
+`S-<left>'
+     `S-<<left>>' and `S-<<right>>' and walk through _all_ keywords
+     from all sets, so for example `S-<<right>>' would switch from
+     `DONE' to `REPORT' in the example above.
+
+
+File: org,  Node: Per file keywords,  Prev: Multiple sets in one file,  Up: TODO extensions
+
+5.2.4 Setting up keywords for individual files
+----------------------------------------------
 
 It can be very useful to use different aspects of the TODO mechanism in
-different files, which is not possible with the global settings
-described above.  For file-local settings, you need to add special
-lines to the file which set the keywords and interpretation for that
-file only.  For example, to set one of the two examples discussed
-above, you need one of the following lines, starting in column zero
-anywhere in the file:
+different files.  For file-local settings, you need to add special lines
+to the file which set the keywords and interpretation for that file
+only.  For example, to set one of the two examples discussed above, you
+need one of the following lines, starting in column zero anywhere in the
+file:
 
-     #+SEQ_TODO: TODO FEEDBACK VERIFY DONE
-     #+TYP_TODO: Fred Sara Lucy Mike DONE
+     #+SEQ_TODO: TODO FEEDBACK VERIFY | DONE CANCELED
+   or
+     #+TYP_TODO: Fred Sara Lucy Mike | DONE
+
+   A setup for using several sets in parallel would be:
+
+     #+SEQ_TODO: "TODO" "|" "DONE"
+     #+SEQ_TODO: "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"
+     #+SEQ_TODO: "|" "CANCELED"
 
 To make sure you are using the correct keyword, type `#+' into the
 buffer and then use `M-<TAB>' completion.
 
-   Remember that the last keyword must always mean that the item is DONE
+   Remember that the keywords after the vertical bar (or the last
+keyword if no bar is there) must always mean that the item is DONE
 (although you may use a different word).  After changing one of these
 lines, use `C-c C-c' with the cursor still in the line to make the
 changes known to Org-mode(1).
@@ -2429,40 +2481,6 @@ changes known to Org-mode(1).
    (1) Org-mode parses these lines only when Org-mode is activated
 after visiting a file.  `C-c C-c' with the cursor in a line starting
 with `#+' is simply restarting Org-mode for the current buffer.
-
-
-File: org,  Node: Multiple sets in one file,  Prev: Per file keywords,  Up: TODO extensions
-
-5.2.4 Multiple TODO keyword sets in one file
---------------------------------------------
-
-Sometimes you may want to use different sets of TODO keywords in the
-same file.  For example, you may want to have the basic `TODO'/`DONE',
-but also a workflow for bug fixing.  Your setup would then look like
-this:
-
-     #+SEQ_TODO: TODO DONE
-     #+SEQ_TODO: REPORT BUG KNOWNCAUSE RESOLVED
-
-   The keywords should all be different, this helps Org-mode to keep
-track of which subsequence should be used for a given entry.  In this
-setup, `C-c C-t' only operates within a subsequence, so it switches from
-`DONE' to (nothing) to `TODO', and from `RESOLVED' to (nothing) to
-`REPORT'.  Therefore you need a mechanism to initially select the
-correct sequence.  Besides the obvious ways like typing a keyword or
-using completion, you may also apply the following commands:
-
-`S-<right>'
-`S-<left>'
-     `S-<<left>>' and `S-<<right>>' and walk through all keywords from
-     all sets, so for example `S-<<right>>' would switch from `DONE' to
-     `REPORT' in the example above.  
-
-`C-S-<right>'
-`C-S-<left>'
-     These key jump from one TODO subset to the next.  So `C-S-<right>'
-     would jump from `TODO' to `REPORT' and from `KNOWNCAUSE' to `TODO'
-     in the above example.
 
 
 File: org,  Node: Priorities,  Next: Breaking down tasks,  Prev: TODO extensions,  Up: TODO items
@@ -3509,13 +3527,14 @@ collected into a single place.
 `C-c a T'
      Like the above, but allows selection of a specific TODO keyword.
      You can also do this by specifying a prefix argument to `C-c a t'.
-     With a `C-u' prefix you are prompted for a keyword.  With a
-     numeric prefix, the Nth keyword in `org-todo-keywords' is selected.  The
-     `r' key in the agenda buffer regenerates it, and you can give a
-     prefix argument to this command to change the selected TODO
-     keyword, for example `3 r'.  If you often need a search for a
-     specific keyword, define a custom command for it (*note Agenda
-     dispatcher::).
+     With a `C-u' prefix you are prompted for a keyword, and you may
+     also specify several keywords by separating them with `|' as
+     boolean OR operator.  With a numeric prefix, the Nth keyword in
+     `org-todo-keywords' is selected.  The `r' key in the agenda buffer
+     regenerates it, and you can give a prefix argument to this command
+     to change the selected TODO keyword, for example `3 r'.  If you
+     often need a search for a specific keyword, define a custom
+     command for it (*note Agenda dispatcher::).
      Matching specific TODO keywords can also be done as part of a tags
      search (*note Tag searches::).
 
@@ -4449,9 +4468,14 @@ File: org,  Node: Export commands,  Next: Quoting HTML tags,  Prev: HTML export,
 `C-c C-e b'
      Export as HTML file and open it with a browser.  
 
+`C-c C-e H'
+     Export to a temporary buffer, do not create a file.  
+
 `C-c C-e v h'
 
 `C-c C-e v b'
+
+`C-c C-e v H'
      Export only the visible part of the document.
 
    In the exported version, the first 3 outline levels will become
@@ -4648,22 +4672,23 @@ File: org,  Node: Initial text,  Next: Enhancing text,  Prev: Comment lines,  Up
 -------------------------------------
 
 Org-mode normally ignores any text before the first headline when
-exporting, because this region is often used for internal links to speed
-up navigation etc.  However, there are occasions when you might want to
-have some text before the first headline, like a small intorduction,
-special HTML code with a navigation bar, etc.  You can ask to have this
-part of the file exported as well by setting the variable
+exporting, leaving this region for internal links to speed up navigation
+etc.  However, in publishing-oriented files, you might want to have some
+text before the first headline, like a small introduction, special HTML
+code with a navigation bar, etc.  You can ask to have this part of the
+file exported as well by setting the variable
 `org-export-skip-text-before-1st-heading' to `nil'.  On a per-file
 basis, you can get the same effect with
 
      #+OPTIONS: skip:nil
 
    The text before the first headline will be fully processed (*note
-Enhancing text::).  If you need to include literal HTML, use the
-special constructs described in *Note Quoting HTML tags::.  The table of
-contents is normally inserted directly before the first headline of the
-file.  If you would like to get it to a different location, insert the
-string `[TABLE-OF-CONTENTS]' on a line by itself at the desired
+Enhancing text::), and the first non-comment line becomes the title of
+the exported document.  If you need to include literal HTML, use the
+special constructs described in *Note Quoting HTML tags::.  The table
+of contents is normally inserted directly before the first headline of
+the file.  If you would like to get it to a different location, insert
+the string `[TABLE-OF-CONTENTS]' on a line by itself at the desired
 location.
 
    Finally, if you want to use the space before the first headline for
@@ -4692,7 +4717,7 @@ formatted output.
      supports lists.  See *Note Plain lists::.
 
    * You can make words *bold*, /italic/, _underlined_, `=code=', and
-     `+strikethrough+'.
+     even `+strikethrough+'(1).
 
    * A line consisting of only dashes, and at least 5 of them, will be
      exported as a horizontal line (`<hr/>' in HTML).
@@ -4718,6 +4743,11 @@ formatted output.
 they can all be turned off with corresponding variables.  See the
 customization group `org-export-general', and the following section
 which explains how to set export options with special lines in a buffer.
+
+   ---------- Footnotes ----------
+
+   (1) but remember that strikethrough is typographically evil and
+should never be used.
 
 
 File: org,  Node: Export options,  Prev: Enhancing text,  Up: Text interpretation
@@ -5414,14 +5444,14 @@ Default     Alternative 1  Alternative 2
 `S-<RET>'   `C-c C-x c'    
 `M-<RET>'   `C-c C-x m'    `<Esc> <RET>'
 `M-S-<RET>' `C-c C-x M'    
-`S-<left>'  `C-c C-x       
+`S-<left>'  `C-c <left>'   
+`S-<right>' `C-c <right>'  
+`S-<up>'    `C-c <up>'     
+`S-<down>'  `C-c <down>'   
+`C-S-<left>'`C-c C-x       
             <left>'        
-`S-<right>' `C-c C-x       
+`C-S-<right>'`C-c C-x       
             <right>'       
-`S-<up>'    `C-c C-x       
-            <up>'          
-`S-<down>'  `C-c C-x       
-            <down>'        
 
 
 File: org,  Node: Interaction,  Next: Bugs,  Prev: TTY keys,  Up: Miscellaneous
@@ -6208,12 +6238,12 @@ Index
 * completion, of links:                  Handling links.      (line  25)
 * completion, of option keywords <1>:    Completion.          (line   6)
 * completion, of option keywords <2>:    Export options.      (line   6)
-* completion, of option keywords:        Per file keywords.   (line  17)
+* completion, of option keywords:        Per file keywords.   (line  23)
 * completion, of tags <1>:               Completion.          (line   6)
 * completion, of tags:                   Setting tags.        (line  11)
 * completion, of TeX symbols:            Completion.          (line   6)
 * completion, of TODO keywords <1>:      Completion.          (line   6)
-* completion, of TODO keywords:          Workflow states.     (line  12)
+* completion, of TODO keywords:          Workflow states.     (line  15)
 * constants, in calculations:            References.          (line  82)
 * constants.el:                          Cooperation.         (line  14)
 * constcgs, STARTUP keyword:             In-buffer settings.  (line  52)
@@ -6251,7 +6281,7 @@ Index
 * dispatching agenda commands:           Agenda dispatcher.   (line   6)
 * display changing, in agenda:           Agenda commands.     (line  65)
 * document structure:                    Document structure.  (line   6)
-* DONE, final TODO keyword:              Per file keywords.   (line  20)
+* DONE, final TODO keyword:              Per file keywords.   (line  26)
 * dynamic blocks:                        Dynamic blocks.      (line   6)
 * editing tables:                        Tables.              (line   6)
 * editing, of table formulas:            Editing and debugging formulas.
@@ -6303,7 +6333,7 @@ Index
 * GNUS links:                            External links.      (line   6)
 * hand-formatted lists:                  Enhancing text.      (line  11)
 * headline levels:                       Export options.      (line  25)
-* headline levels, for exporting <1>:    Export commands.     (line  17)
+* headline levels, for exporting <1>:    Export commands.     (line  22)
 * headline levels, for exporting:        ASCII export.        (line  18)
 * headline navigation:                   Motion.              (line   6)
 * headline tagging:                      Tags.                (line   6)
@@ -6475,7 +6505,7 @@ Index
 * structure editing:                     Structure editing.   (line   6)
 * structure of document:                 Document structure.  (line   6)
 * sublevels, inclusion into tags match:  Tag inheritance.     (line   6)
-* sublevels, inclusion into todo list:   Global TODO list.    (line  33)
+* sublevels, inclusion into todo list:   Global TODO list.    (line  34)
 * subscript:                             Subscripts and Superscripts.
                                                               (line   6)
 * subtree cycling:                       Visibility cycling.  (line  10)
@@ -6667,7 +6697,7 @@ Key Index
 * C-c a m:                               Tag searches.        (line  12)
 * C-c a T:                               Global TODO list.    (line  14)
 * C-c a t <1>:                           Global TODO list.    (line   9)
-* C-c a t:                               TODO basics.         (line  33)
+* C-c a t:                               TODO basics.         (line  36)
 * C-c C-a:                               Visibility cycling.  (line  33)
 * C-c C-b:                               Motion.              (line  15)
 * C-c C-c <1>:                           Cooperation.         (line  37)
@@ -6688,6 +6718,7 @@ Key Index
 * C-c C-e a:                             ASCII export.        (line   9)
 * C-c C-e b:                             Export commands.     (line   7)
 * C-c C-e c:                             iCalendar export.    (line  21)
+* C-c C-e H:                             Export commands.     (line  10)
 * C-c C-e h:                             Export commands.     (line   6)
 * C-c C-e I:                             iCalendar export.    (line  16)
 * C-c C-e i:                             iCalendar export.    (line  14)
@@ -6695,8 +6726,9 @@ Key Index
 * C-c C-e v <1>:                         XOXO export.         (line  11)
 * C-c C-e v:                             Sparse trees.        (line  41)
 * C-c C-e v a:                           ASCII export.        (line  13)
-* C-c C-e v b:                           Export commands.     (line  10)
-* C-c C-e v h:                           Export commands.     (line  10)
+* C-c C-e v b:                           Export commands.     (line  13)
+* C-c C-e v H:                           Export commands.     (line  13)
+* C-c C-e v h:                           Export commands.     (line  13)
 * C-c C-e x:                             XOXO export.         (line  10)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
@@ -6758,9 +6790,9 @@ Key Index
 * C-c ~:                                 Cooperation.         (line  48)
 * C-k:                                   Agenda commands.     (line 115)
 * C-S-<left>:                            Multiple sets in one file.
-                                                              (line  26)
+                                                              (line  25)
 * C-S-<right>:                           Multiple sets in one file.
-                                                              (line  26)
+                                                              (line  25)
 * C-TAB:                                 ARCHIVE tag.         (line  38)
 * C-u C-c *:                             Updating the table.  (line  16)
 * C-u C-c .:                             Creating timestamps. (line  14)
@@ -6802,7 +6834,7 @@ Key Index
 * M-<right>:                             Structure editing.   (line  24)
 * M-<TAB> <1>:                           Completion.          (line  10)
 * M-<TAB> <2>:                           Setting tags.        (line   6)
-* M-<TAB> <3>:                           Per file keywords.   (line  17)
+* M-<TAB> <3>:                           Per file keywords.   (line  23)
 * M-<TAB>:                               Editing and debugging formulas.
                                                               (line  64)
 * M-<up> <1>:                            Editing and debugging formulas.
@@ -6851,7 +6883,7 @@ Key Index
 * p:                                     Agenda commands.     (line  20)
 * q:                                     Agenda commands.     (line 227)
 * r <1>:                                 Agenda commands.     (line  80)
-* r:                                     Global TODO list.    (line  20)
+* r:                                     Global TODO list.    (line  22)
 * S:                                     Agenda commands.     (line 206)
 * s:                                     Agenda commands.     (line  87)
 * S-<down> <1>:                          Agenda commands.     (line 149)
@@ -6867,7 +6899,7 @@ Key Index
                                                               (line  42)
 * S-<left> <3>:                          Creating timestamps. (line  51)
 * S-<left> <4>:                          Multiple sets in one file.
-                                                              (line  22)
+                                                              (line  29)
 * S-<left> <5>:                          TODO basics.         (line  20)
 * S-<left>:                              Editing and debugging formulas.
                                                               (line  67)
@@ -6878,7 +6910,7 @@ Key Index
                                                               (line  39)
 * S-<right> <3>:                         Creating timestamps. (line  51)
 * S-<right> <4>:                         Multiple sets in one file.
-                                                              (line  22)
+                                                              (line  29)
 * S-<right> <5>:                         TODO basics.         (line  20)
 * S-<right>:                             Editing and debugging formulas.
                                                               (line  67)
@@ -6915,172 +6947,174 @@ Node: Visibility cycling21720
 Ref: Visibility cycling-Footnote-123934
 Ref: Visibility cycling-Footnote-223992
 Ref: Visibility cycling-Footnote-324042
-Node: Motion24311
-Node: Structure editing25095
-Node: Archiving27921
-Node: ARCHIVE tag28479
-Node: Moving subtrees30272
-Node: Sparse trees31583
-Ref: Sparse trees-Footnote-133715
-Ref: Sparse trees-Footnote-233897
-Node: Plain lists34012
-Ref: Plain lists-Footnote-137781
-Ref: Plain lists-Footnote-238139
-Node: Tables38323
-Node: Built-in table editor38837
-Node: Narrow columns45856
-Ref: Narrow columns-Footnote-147789
-Node: orgtbl-mode47835
-Node: The spreadsheet48639
-Node: References49726
-Ref: References-Footnote-153855
-Node: Formula syntax for Calc54144
-Node: Formula syntax for Lisp56610
-Node: Field formulas57879
-Node: Column formulas59187
-Node: Editing and debugging formulas60786
-Node: Updating the table64939
-Node: Advanced features65974
-Node: Hyperlinks70499
-Node: Link format71272
-Node: Internal links72565
-Ref: Internal links-Footnote-174490
-Node: Radio targets74622
-Node: External links75313
-Node: Handling links77717
-Ref: Handling links-Footnote-182827
-Ref: Handling links-Footnote-283064
-Node: Link abbreviations83138
-Node: Search options84817
-Ref: Search options-Footnote-186597
-Node: Custom searches86678
-Node: Remember87726
-Node: Setting up remember88713
-Node: Remember templates89295
-Ref: Remember templates-Footnote-192609
-Node: Storing notes92707
-Node: TODO items94515
-Node: TODO basics95498
-Node: TODO extensions97025
-Node: Workflow states97894
-Node: TODO types98879
-Ref: TODO types-Footnote-1100537
-Node: Per file keywords100619
-Ref: Per file keywords-Footnote-1101740
-Node: Multiple sets in one file101941
-Node: Priorities103299
-Node: Breaking down tasks104545
-Ref: Breaking down tasks-Footnote-1105065
-Node: Checkboxes105161
-Node: Timestamps107916
-Node: Time stamps108450
-Ref: Time stamps-Footnote-1111944
-Ref: Time stamps-Footnote-2112060
-Node: Creating timestamps112215
-Node: The date/time prompt114873
-Ref: The date/time prompt-Footnote-1116834
-Node: Custom time format116940
-Node: Repeating items118498
-Node: Progress logging120308
-Node: Closing items120954
-Ref: Closing items-Footnote-1121888
-Ref: Closing items-Footnote-2121957
-Node: Tracking TODO state changes122030
-Node: Clocking work time122886
-Ref: Clocking work time-Footnote-1126532
-Ref: Clocking work time-Footnote-2126610
-Node: Tags126736
-Node: Tag inheritance127498
-Node: Setting tags128435
-Ref: Setting tags-Footnote-1132958
-Ref: Setting tags-Footnote-2133070
-Node: Tag searches133153
-Node: Agenda views135864
-Node: Agenda files137809
-Ref: Agenda files-Footnote-1138775
-Ref: Agenda files-Footnote-2138924
-Node: Agenda dispatcher139117
-Node: Built-in agenda views140808
-Node: Weekly/Daily agenda141386
-Node: Global TODO list143515
-Node: Matching headline tags145688
-Node: Timeline146759
-Node: Stuck projects147425
-Node: Presentation and sorting149124
-Node: Categories149915
-Node: Time-of-day specifications150579
-Node: Sorting of agenda items152550
-Node: Agenda commands153832
-Node: Custom agenda views160561
-Node: Storing searches161236
-Node: Block agenda163148
-Node: Setting Options164378
-Node: Batch processing167090
-Node: Embedded LaTeX168220
-Ref: Embedded LaTeX-Footnote-1169312
-Node: Math symbols169502
-Node: Subscripts and Superscripts170267
-Node: LaTeX fragments171111
-Ref: LaTeX fragments-Footnote-1173219
-Node: Processing LaTeX fragments173481
-Node: CDLaTeX mode174427
-Ref: CDLaTeX mode-Footnote-1176911
-Node: Exporting177059
-Node: ASCII export178373
-Node: HTML export179663
-Node: Export commands180282
-Node: Quoting HTML tags181006
-Node: Links181636
-Node: Images182333
-Ref: Images-Footnote-1183204
-Node: CSS support183265
-Ref: CSS support-Footnote-1184584
-Node: XOXO export184697
-Node: iCalendar export185136
-Node: Text interpretation186355
-Node: Comment lines186897
-Node: Initial text187292
-Node: Enhancing text188900
-Node: Export options190718
-Node: Publishing192611
-Ref: Publishing-Footnote-1193407
-Node: Configuration193603
-Node: Project alist194321
-Node: Sources and destinations195387
-Node: Selecting files196117
-Node: Publishing action196865
-Node: Publishing options198098
-Node: Publishing links200250
-Node: Project page index201763
-Node: Sample configuration202541
-Node: Simple example203033
-Node: Complex example203706
-Node: Triggering publication205782
-Node: Miscellaneous206467
-Node: Completion207101
-Node: Customization208572
-Node: In-buffer settings209155
-Node: The very busy C-c C-c key213632
-Node: Clean view215276
-Node: TTY keys217853
-Node: Interaction219462
-Node: Cooperation219859
-Node: Conflicts222601
-Node: Bugs224193
-Node: Extensions and Hacking225689
-Node: Extensions226285
-Node: Tables in arbitrary syntax228232
-Node: Radio tables229309
-Node: A LaTeX example231812
-Ref: A LaTeX example-Footnote-1235458
-Ref: A LaTeX example-Footnote-2235606
-Node: Translator functions236041
-Ref: Translator functions-Footnote-1239150
-Node: Dynamic blocks239238
-Node: Special agenda views241210
-Ref: Special agenda views-Footnote-1243489
-Node: History and Acknowledgments243749
-Node: Index249609
-Node: Key Index280590
+Node: Motion24312
+Node: Structure editing25096
+Node: Archiving27922
+Node: ARCHIVE tag28480
+Node: Moving subtrees30273
+Node: Sparse trees31584
+Ref: Sparse trees-Footnote-133716
+Ref: Sparse trees-Footnote-233898
+Node: Plain lists34013
+Ref: Plain lists-Footnote-137782
+Ref: Plain lists-Footnote-238140
+Node: Tables38324
+Node: Built-in table editor38838
+Node: Narrow columns45857
+Ref: Narrow columns-Footnote-147790
+Node: orgtbl-mode47836
+Node: The spreadsheet48640
+Node: References49727
+Ref: References-Footnote-153856
+Node: Formula syntax for Calc54145
+Node: Formula syntax for Lisp56611
+Node: Field formulas57880
+Node: Column formulas59188
+Node: Editing and debugging formulas60787
+Node: Updating the table64940
+Node: Advanced features65975
+Node: Hyperlinks70500
+Node: Link format71273
+Node: Internal links72566
+Ref: Internal links-Footnote-174491
+Node: Radio targets74623
+Node: External links75314
+Node: Handling links77718
+Ref: Handling links-Footnote-182828
+Ref: Handling links-Footnote-283065
+Node: Link abbreviations83139
+Node: Search options84818
+Ref: Search options-Footnote-186598
+Node: Custom searches86679
+Node: Remember87727
+Node: Setting up remember88714
+Node: Remember templates89296
+Ref: Remember templates-Footnote-192610
+Node: Storing notes92708
+Node: TODO items94516
+Node: TODO basics95499
+Node: TODO extensions97198
+Node: Workflow states98017
+Ref: Workflow states-Footnote-199192
+Node: TODO types99285
+Ref: TODO types-Footnote-1100868
+Node: Multiple sets in one file100950
+Node: Per file keywords102561
+Ref: Per file keywords-Footnote-1103850
+Node: Priorities104051
+Node: Breaking down tasks105297
+Ref: Breaking down tasks-Footnote-1105817
+Node: Checkboxes105913
+Node: Timestamps108668
+Node: Time stamps109202
+Ref: Time stamps-Footnote-1112696
+Ref: Time stamps-Footnote-2112812
+Node: Creating timestamps112967
+Node: The date/time prompt115625
+Ref: The date/time prompt-Footnote-1117586
+Node: Custom time format117692
+Node: Repeating items119250
+Node: Progress logging121060
+Node: Closing items121706
+Ref: Closing items-Footnote-1122640
+Ref: Closing items-Footnote-2122709
+Node: Tracking TODO state changes122782
+Node: Clocking work time123638
+Ref: Clocking work time-Footnote-1127284
+Ref: Clocking work time-Footnote-2127362
+Node: Tags127488
+Node: Tag inheritance128250
+Node: Setting tags129187
+Ref: Setting tags-Footnote-1133710
+Ref: Setting tags-Footnote-2133822
+Node: Tag searches133905
+Node: Agenda views136616
+Node: Agenda files138561
+Ref: Agenda files-Footnote-1139527
+Ref: Agenda files-Footnote-2139676
+Node: Agenda dispatcher139869
+Node: Built-in agenda views141560
+Node: Weekly/Daily agenda142138
+Node: Global TODO list144267
+Node: Matching headline tags146539
+Node: Timeline147610
+Node: Stuck projects148276
+Node: Presentation and sorting149975
+Node: Categories150766
+Node: Time-of-day specifications151430
+Node: Sorting of agenda items153401
+Node: Agenda commands154683
+Node: Custom agenda views161412
+Node: Storing searches162087
+Node: Block agenda163999
+Node: Setting Options165229
+Node: Batch processing167941
+Node: Embedded LaTeX169071
+Ref: Embedded LaTeX-Footnote-1170163
+Node: Math symbols170353
+Node: Subscripts and Superscripts171118
+Node: LaTeX fragments171962
+Ref: LaTeX fragments-Footnote-1174070
+Node: Processing LaTeX fragments174332
+Node: CDLaTeX mode175278
+Ref: CDLaTeX mode-Footnote-1177762
+Node: Exporting177910
+Node: ASCII export179224
+Node: HTML export180514
+Node: Export commands181133
+Node: Quoting HTML tags181944
+Node: Links182574
+Node: Images183271
+Ref: Images-Footnote-1184142
+Node: CSS support184203
+Ref: CSS support-Footnote-1185522
+Node: XOXO export185635
+Node: iCalendar export186074
+Node: Text interpretation187293
+Node: Comment lines187835
+Node: Initial text188230
+Node: Enhancing text189904
+Ref: Enhancing text-Footnote-1191766
+Node: Export options191856
+Node: Publishing193749
+Ref: Publishing-Footnote-1194545
+Node: Configuration194741
+Node: Project alist195459
+Node: Sources and destinations196525
+Node: Selecting files197255
+Node: Publishing action198003
+Node: Publishing options199236
+Node: Publishing links201388
+Node: Project page index202901
+Node: Sample configuration203679
+Node: Simple example204171
+Node: Complex example204844
+Node: Triggering publication206920
+Node: Miscellaneous207605
+Node: Completion208239
+Node: Customization209710
+Node: In-buffer settings210293
+Node: The very busy C-c C-c key214770
+Node: Clean view216414
+Node: TTY keys218991
+Node: Interaction220601
+Node: Cooperation220998
+Node: Conflicts223740
+Node: Bugs225332
+Node: Extensions and Hacking226828
+Node: Extensions227424
+Node: Tables in arbitrary syntax229371
+Node: Radio tables230448
+Node: A LaTeX example232951
+Ref: A LaTeX example-Footnote-1236597
+Ref: A LaTeX example-Footnote-2236745
+Node: Translator functions237180
+Ref: Translator functions-Footnote-1240289
+Node: Dynamic blocks240377
+Node: Special agenda views242349
+Ref: Special agenda views-Footnote-1244628
+Node: History and Acknowledgments244888
+Node: Index250748
+Node: Key Index281729
 
 End Tag Table

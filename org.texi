@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.69
+@set VERSION 4.70
 @set DATE March 2007
 
 @dircategory Emacs
@@ -169,8 +169,8 @@ Extended use of TODO keywords
 
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
-* Per file keywords::           Different files, different requirements
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Per file keywords::           Different files, different requirements
 
 Timestamps
 
@@ -663,13 +663,19 @@ level, all sibling headings.
 @kindex C-c C-x b
 @item C-c C-x b
 Show the current subtree in an indirect buffer@footnote{The indirect
-buffer (@pxref{Indirect Buffers,Indirect Buffers,Indirect
-Buffers,emacs,GNU Emacs Manual}) will contain the entire buffer, but
-will be narrowed to the current tree.  Editing the indirect buffer will
-also change the original buffer, but without affecting visibility in
-that buffer.}.  With numerical prefix ARG, go up to this level and then
-take that tree.  If ARG is negative, go up that many levels.  With
-@kbd{C-u} prefix, do not remove the previously used indirect buffer.
+buffer
+@ifinfo
+(@pxref{Indirect Buffers,,,emacs,GNU Emacs Manual})
+@end ifinfo
+@ifnotinfo
+(see the Emacs manual for more information about indirect buffers)
+@end ifnotinfo
+will contain the entire buffer, but will be narrowed to the current
+tree.  Editing the indirect buffer will also change the original buffer,
+but without affecting visibility in that buffer.}.  With numerical
+prefix ARG, go up to this level and then take that tree.  If ARG is
+negative, go up that many levels.  With @kbd{C-u} prefix, do not remove
+the previously used indirect buffer.
 @end table
 
 When Emacs first visits an Org-mode file, the global state is set to
@@ -2564,9 +2570,11 @@ useful if more than two TODO states are possible (@pxref{TODO extensions}).
 @item C-c C-v
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
 the entire buffer, but shows all TODO items and the headings hierarchy
-above them.  With prefix arg, show also the DONE entries.  With
-numerical prefix N, show the tree for the Nth keyword in the variable
-@code{org-todo-keywords}.
+above them.  With prefix arg, search for a specific TODO.  You will be
+prompted for the keyword, and you can also give a list of keywords like
+@code{kwd1|kwd2|...}.  With numerical prefix N, show the tree for the
+Nth keyword in the variable @code{org-todo-keywords}.  With two prefix
+args, find all TODO and DONE entries.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  This collects the TODO items from all
@@ -2584,10 +2592,9 @@ the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @cindex extended TODO keywords
 
 The default implementation of TODO entries is just two states: TODO and
-DONE.  You can, however, use the TODO feature for more complicated
-things by configuring the variables @code{org-todo-keywords} and
-@code{org-todo-interpretation}.  Using special setup, you can even use
-TODO keywords in different ways in different org files.
+DONE.  You can use the TODO feature for more complicated things by
+configuring the variable @code{org-todo-keywords}.  With special setup,
+the TODO keyword system can work differently in different files.
 
 Note that @i{tags} are another way to classify headlines in general and
 TODO items in particular (@pxref{Tags}).
@@ -2595,8 +2602,8 @@ TODO items in particular (@pxref{Tags}).
 @menu
 * Workflow states::             From TODO to DONE in steps
 * TODO types::                  I do this, Fred the rest
-* Per file keywords::           Different files, different requirements
 * Multiple sets in one file::   Mixing it all, and still finding your way
+* Per file keywords::           Different files, different requirements
 @end menu
 
 @node Workflow states, TODO types, TODO extensions, TODO extensions
@@ -2604,78 +2611,134 @@ TODO items in particular (@pxref{Tags}).
 @cindex TODO workflow
 @cindex workflow states as TODO keywords
 
-You can use TODO keywords to indicate different states in the process
-of working on an item, for example:
+You can use TODO keywords to indicate different @emph{sequential} states
+in the process of working on an item, for example@footnote{Changing
+this variable only becomes effective after restarting Org-mode in a
+buffer.}:
 
 @lisp
-(setq org-todo-keywords '("TODO" "FEEDBACK" "VERIFY" "DONE")
-      org-todo-interpretation 'sequence)
+(setq org-todo-keywords
+  '((sequence "TODO" "FEEDBACK" "VERIFY" "|" "DONE" "DELEGATED")))
 @end lisp
 
+The vertical bar separates the TODO keywords (states that @emph{need
+action}) from the DONE states (which need @emph{no further action}.  If
+you don't provide the separator bar, the last state is used as the DONE
+state.
 @cindex completion, of TODO keywords
-Changing these variables only becomes effective in a new Emacs session.
-With this setup, the command @kbd{C-c C-t} will cycle an entry from
-TODO to FEEDBACK, then to VERIFY, and finally to DONE.  You may also
-use a prefix argument to quickly select a specific state.  For example
-@kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
+With this setup, the command @kbd{C-c C-t} will cycle an entry from TODO
+to FEEDBACK, then to VERIFY, and finally to DONE and DELEGATED.  You may
+also use a prefix argument to quickly select a specific state.  For
+example @kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
 If you define many keywords, you can use in-buffer completion (see
-@ref{Completion}) to insert these words into the buffer.  Changing a todo
-state can be logged with a timestamp, see @ref{Tracking TODO state
+@ref{Completion}) to insert these words into the buffer.  Changing a
+todo state can be logged with a timestamp, see @ref{Tracking TODO state
 changes} for more information.
 
-@node TODO types, Per file keywords, Workflow states, TODO extensions
+@node TODO types, Multiple sets in one file, Workflow states, TODO extensions
 @subsection TODO keywords as types
 @cindex TODO types
 @cindex names as TODO keywords
 @cindex types as TODO keywords
 
 The second possibility is to use TODO keywords to indicate different
-types of action items.  For example, you might want to indicate that
-items are for ``work'' or ``home''.  If you are into David Allen's
-@emph{Getting Things DONE}, you might want to use todo types
-@samp{NEXTACTION}, @samp{WAITING}, @samp{MAYBE}.  Or, when you work
-with several people on a single project, you might want to assign
-action items directly to persons, by using their names as TODO
-keywords.  This would be set up like this:
+@emph{types} of action items.  For example, you might want to indicate
+that items are for ``work'' or ``home''.  Or, when you work with several
+people on a single project, you might want to assign action items
+directly to persons, by using their names as TODO keywords.  This would
+be set up like this:
 
 @lisp
-(setq org-todo-keywords '("Fred" "Sara" "Lucy" "Mike" "DONE")
-      org-todo-interpretation 'type)
+(setq org-todo-keywords '((type "Fred" "Sara" "Lucy" "|" "DONE")))
 @end lisp
 
-In this case, different keywords do not indicate a sequence, but
-rather different types.  So it is normally not useful to change from
-one type to another.  Therefore, in this case the behavior of the
-command @kbd{C-c C-t} is changed slightly@footnote{This is also true
-for the @kbd{t} command in the timeline and agenda buffers.}.  When
-used several times in succession, it will still cycle through all
-names.  But when you return to the item after some time and execute
-@kbd{C-c C-t} again, it will switch from each name directly to DONE.
-Use prefix arguments or completion to quickly select a specific name.
-You can also review the items of a specific TODO type in a sparse tree
-by using a numeric prefix to @kbd{C-c C-v}.  For example, to see all
-things Lucy has to do, you would use @kbd{C-3 C-c C-v}.  To collect
-Lucy's items from all agenda files into a single buffer, you
-would use the prefix arg as well when creating the global todo list:
-@kbd{C-3 C-c t}.
+In this case, different keywords do not indicate a sequence, but rather
+different types.  So the normal work flow would be to assign a task to a
+person, and later to mark it DONE.  Org-mode supports this style by
+adapting the workings of the command @kbd{C-c C-t}@footnote{This is also
+true for the @kbd{t} command in the timeline and agenda buffers.}.  When
+used several times in succession, it will still cycle through all names,
+in order to first select the right type for a task.  But when you return
+to the item after some time and execute @kbd{C-c C-t} again, it will
+switch from any name directly to DONE.  Use prefix arguments or
+completion to quickly select a specific name.  You can also review the
+items of a specific TODO type in a sparse tree by using a numeric prefix
+to @kbd{C-c C-v}.  For example, to see all things Lucy has to do, you
+would use @kbd{C-3 C-c C-v}.  To collect Lucy's items from all agenda
+files into a single buffer, you would use the prefix arg as well when
+creating the global todo list: @kbd{C-3 C-c t}.
 
-@node Per file keywords, Multiple sets in one file, TODO types, TODO extensions
-@subsection Setting up TODO keywords for individual files
+@node Multiple sets in one file, Per file keywords, TODO types, TODO extensions
+@subsection Multiple keyword sets in one file
+@cindex todo keyword sets
+
+Sometimes you may want to use different sets of TODO keywords in
+parallel.  For example, you may want to have the basic
+@code{TODO}/@code{DONE}, but also a workflow for bug fixing, and a
+separate state indicating that an item has been canceled (so it is not
+DONE, but also does not require action).  Your setup would then look
+like this:
+
+@lisp
+(setq org-todo-keywords
+      '((sequence "TODO" "|" "DONE")
+        (sequence "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED")
+        (sequence "|" "CANCELED")))
+@end lisp
+
+The keywords should all be different, this helps Org-mode to keep track
+of which subsequence should be used for a given entry.  In this setup,
+@kbd{C-c C-t} only operates within a subsequence, so it switches from
+@code{DONE} to (nothing) to @code{TODO}, and from @code{FIXED} to
+(nothing) to @code{REPORT}.  Therefore you need a mechanism to initially
+select the correct sequence.  Besides the obvious ways like typing a
+keyword or using completion, you may also apply the following commands:
+
+@table @kbd
+@kindex C-S-@key{right}
+@kindex C-S-@key{left}
+@item C-S-@key{right}
+@itemx C-S-@key{left}
+These keys jump from one TODO subset to the next.  In the above example,
+@kbd{C-S-@key{right}} would jump from @code{TODO} or @code{DONE} to
+@code{REPORT}, and any of the words in the second row to @code{CANCELED}.
+@kindex S-@key{right}
+@kindex S-@key{left}
+@item S-@key{right}
+@itemx S-@key{left}
+@kbd{S-@key{<left>}} and @kbd{S-@key{<right>}} and walk through
+@emph{all} keywords from all sets, so for example @kbd{S-@key{<right>}}
+would switch from @code{DONE} to @code{REPORT} in the example above.
+@end table
+
+@node Per file keywords,  , Multiple sets in one file, TODO extensions
+@subsection Setting up keywords for individual files
 @cindex keyword options
 @cindex per file keywords
 
-It can be very useful to use different aspects of the TODO mechanism
-in different files, which is not possible with the global settings
-described above.  For file-local settings, you need to add special
-lines to the file which set the keywords and interpretation for that
-file only.  For example, to set one of the two examples discussed
-above, you need one of the following lines, starting in column zero
-anywhere in the file:
+It can be very useful to use different aspects of the TODO mechanism in
+different files.  For file-local settings, you need to add special lines
+to the file which set the keywords and interpretation for that file
+only.  For example, to set one of the two examples discussed above, you
+need one of the following lines, starting in column zero anywhere in the
+file:
 
 @example
-#+SEQ_TODO: TODO FEEDBACK VERIFY DONE
-#+TYP_TODO: Fred Sara Lucy Mike DONE
+#+SEQ_TODO: TODO FEEDBACK VERIFY | DONE CANCELED
 @end example
+or
+@example
+#+TYP_TODO: Fred Sara Lucy Mike | DONE
+@end example
+
+A setup for using several sets in parallel would be:
+
+@example
+#+SEQ_TODO: "TODO" "|" "DONE"
+#+SEQ_TODO: "REPORT" "BUG" "KNOWNCAUSE" "|" "FIXED"
+#+SEQ_TODO: "|" "CANCELED"
+@end example
+
 
 @cindex completion, of option keywords
 @kindex M-@key{TAB}
@@ -2683,52 +2746,14 @@ anywhere in the file:
 @samp{#+} into the buffer and then use @kbd{M-@key{TAB}} completion.
 
 @cindex DONE, final TODO keyword
-Remember that the last keyword must always mean that the item is DONE
-(although you may use a different word).  After changing one of these
-lines, use @kbd{C-c C-c} with the cursor still in the line to make the
-changes known to Org-mode@footnote{Org-mode parses these lines only when
+Remember that the keywords after the vertical bar (or the last keyword
+if no bar is there) must always mean that the item is DONE (although you
+may use a different word).  After changing one of these lines, use
+@kbd{C-c C-c} with the cursor still in the line to make the changes
+known to Org-mode@footnote{Org-mode parses these lines only when
 Org-mode is activated after visiting a file.  @kbd{C-c C-c} with the
 cursor in a line starting with @samp{#+} is simply restarting Org-mode
 for the current buffer.}.
-
-@node Multiple sets in one file,  , Per file keywords, TODO extensions
-@subsection Multiple TODO keyword sets in one file
-@cindex todo keyword sets
-
-Sometimes you may want to use different sets of TODO keywords in the
-same file.  For example, you may want to have the basic
-@code{TODO}/@code{DONE}, but also a workflow for bug fixing.  Your setup
-would then look like this:
-
-@example
-#+SEQ_TODO: TODO DONE
-#+SEQ_TODO: REPORT BUG KNOWNCAUSE RESOLVED
-@end example
-
-The keywords should all be different, this helps Org-mode to keep track
-of which subsequence should be used for a given entry.  In this setup,
-@kbd{C-c C-t} only operates within a subsequence, so it switches from
-@code{DONE} to (nothing) to @code{TODO}, and from @code{RESOLVED} to
-(nothing) to @code{REPORT}.  Therefore you need a mechanism to initially
-select the correct sequence.  Besides the obvious ways like typing a
-keyword or using completion, you may also apply the following commands:
-
-@table @kbd
-@kindex S-@key{right}
-@kindex S-@key{left}
-@item S-@key{right}
-@itemx S-@key{left}
-@kbd{S-@key{<left>}} and @kbd{S-@key{<right>}} and walk through all
-keywords from all sets, so for example @kbd{S-@key{<right>}} would
-switch from @code{DONE} to @code{REPORT} in the example above. 
-@kindex C-S-@key{right}
-@kindex C-S-@key{left}
-@item C-S-@key{right}
-@itemx C-S-@key{left}
-These key jump from one TODO subset to the next.  So
-@kbd{C-S-@key{right}} would jump from @code{TODO} to @code{REPORT} and
-from @code{KNOWNCAUSE} to @code{TODO} in the above example.
-@end table
 
 @node Priorities, Breaking down tasks, TODO extensions, TODO items
 @section Priorities
@@ -3847,10 +3872,12 @@ the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @kindex C-c a T
 @item C-c a T
 @cindex TODO keyword matching
-Like the above, but allows selection of a specific TODO keyword.  You can
-also do this by specifying a prefix argument to @kbd{C-c a t}.  With a
-@kbd{C-u} prefix you are prompted for a keyword.  With a numeric
-prefix, the Nth keyword in @code{org-todo-keywords} is selected.
+Like the above, but allows selection of a specific TODO keyword.  You
+can also do this by specifying a prefix argument to @kbd{C-c a t}.  With
+a @kbd{C-u} prefix you are prompted for a keyword, and you may also
+specify several keywords by separating them with @samp{|} as boolean OR
+operator.  With a numeric prefix, the Nth keyword in
+@code{org-todo-keywords} is selected.
 @kindex r
 The @kbd{r} key in the agenda buffer regenerates it, and you can give
 a prefix argument to this command to change the selected TODO keyword,
@@ -4879,10 +4906,15 @@ Export as HTML file @file{myfile.html}.
 @kindex C-c C-e b
 @item C-c C-e b
 Export as HTML file and open it with a browser.
+@kindex C-c C-e H
+@item C-c C-e H
+Export to a temporary buffer, do not create a file.
 @kindex C-c C-e v h
 @kindex C-c C-e v b
+@kindex C-c C-e v H
 @item C-c C-e v h
 @item C-c C-e v b
+@item C-c C-e v H
 Export only the visible part of the document.
 @end table
 
@@ -5085,11 +5117,11 @@ Toggle the COMMENT keyword at the beginning of an entry.
 @subsection Text before the first headline
 
 Org-mode normally ignores any text before the first headline when
-exporting, because this region is often used for internal links to speed
-up navigation etc.  However, there are occasions when you might want to
-have some text before the first headline, like a small intorduction,
-special HTML code with a navigation bar, etc.  You can ask to have this
-part of the file exported as well by setting the variable
+exporting, leaving this region for internal links to speed up navigation
+etc.  However, in publishing-oriented files, you might want to have some
+text before the first headline, like a small introduction, special HTML
+code with a navigation bar, etc.  You can ask to have this part of the
+file exported as well by setting the variable
 @code{org-export-skip-text-before-1st-heading} to @code{nil}.  On a
 per-file basis, you can get the same effect with
 
@@ -5098,12 +5130,13 @@ per-file basis, you can get the same effect with
 @end example
 
 The text before the first headline will be fully processed
-(@pxref{Enhancing text}).  If you need to include literal HTML, use the
-special constructs described in @ref{Quoting HTML tags}.  The table of
-contents is normally inserted directly before the first headline of the
-file.  If you would like to get it to a different location, insert
-the string @code{[TABLE-OF-CONTENTS]} on a line by itself at the desired
-location.
+(@pxref{Enhancing text}), and the first non-comment line becomes the
+title of the exported document.  If you need to include literal HTML,
+use the special constructs described in @ref{Quoting HTML tags}.  The
+table of contents is normally inserted directly before the first
+headline of the file.  If you would like to get it to a different
+location, insert the string @code{[TABLE-OF-CONTENTS]} on a line by
+itself at the desired location.
 
 Finally, if you want to use the space before the first headline for
 internal purposes, but @emph{still} want to place something before the
@@ -5142,7 +5175,9 @@ backend supports lists.  See @xref{Plain lists}.
 @cindex italic text
 @item
 You can make words @b{*bold*}, @i{/italic/}, _underlined_,
-@code{=code=}, and @samp{+strikethrough+}.
+@code{=code=}, and even @samp{+strikethrough+}@footnote{but remember
+that strikethrough is typographically evil and should @i{never} be
+used.}.
 
 @cindex horizontal rules, in exported files
 @item
@@ -5950,10 +5985,12 @@ rather use @kbd{C-c .}  to re-insert the timestamp.
 @item @kbd{S-@key{RET}}     @tab @kbd{C-c C-x c}           @tab
 @item @kbd{M-@key{RET}}     @tab @kbd{C-c C-x m}           @tab @kbd{@key{Esc} @key{RET}}
 @item @kbd{M-S-@key{RET}}   @tab @kbd{C-c C-x M}           @tab
-@item @kbd{S-@key{left}}    @tab @kbd{C-c C-x @key{left}}  @tab
-@item @kbd{S-@key{right}}   @tab @kbd{C-c C-x @key{right}} @tab
-@item @kbd{S-@key{up}}      @tab @kbd{C-c C-x @key{up}}    @tab
-@item @kbd{S-@key{down}}    @tab @kbd{C-c C-x @key{down}}  @tab
+@item @kbd{S-@key{left}}    @tab @kbd{C-c @key{left}}      @tab
+@item @kbd{S-@key{right}}   @tab @kbd{C-c @key{right}}     @tab
+@item @kbd{S-@key{up}}      @tab @kbd{C-c @key{up}}        @tab
+@item @kbd{S-@key{down}}    @tab @kbd{C-c @key{down}}      @tab
+@item @kbd{C-S-@key{left}}  @tab @kbd{C-c C-x @key{left}}  @tab
+@item @kbd{C-S-@key{right}} @tab @kbd{C-c C-x @key{right}} @tab
 @end multitable
 
 @node Interaction, Bugs, TTY keys, Miscellaneous
