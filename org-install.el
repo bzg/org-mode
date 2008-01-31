@@ -8,7 +8,7 @@
 ;;;;;;  org-remember-insinuate org-open-at-point-global org-insert-link-global
 ;;;;;;  org-store-link orgtbl-mode turn-on-orgtbl org-run-like-in-org-mode
 ;;;;;;  turn-on-orgstruct++ turn-on-orgstruct orgstruct-mode org-global-cycle
-;;;;;;  org-cycle org-mode) "org" "org.el" (18304 62409))
+;;;;;;  org-cycle org-mode) "org" "org.el" (18320 37851))
 ;;; Generated autoloads from org.el
 
 (autoload (quote org-mode) "org" "\
@@ -170,12 +170,12 @@ If there is an active region, make sure remember uses it as initial content
 of the remember buffer.
 
 When called interactively with a `C-u' prefix argument GOTO, don't remember
-anything, just go to the file/headline where the selected templated usually
-stores its notes.  With a double prefix arg `C-u C-u', got to the last
+anything, just go to the file/headline where the selected template usually
+stores its notes.  With a double prefix arg `C-u C-u', go to the last
 note stored by remember.
 
 Lisp programs can set ORG-FORCE-REMEMBER-TEMPLATE-CHAR to a character
-associated with a template in `org-remember-tempates'.
+associated with a template in `org-remember-templates'.
 
 \(fn &optional GOTO ORG-FORCE-REMEMBER-TEMPLATE-CHAR)" t nil)
 
@@ -441,7 +441,7 @@ The file is stored under the name `org-combined-agenda-icalendar-file'.
 ;;;***
 
 ;;;### (autoloads (org-publish-all org-publish-current-file org-publish-current-project
-;;;;;;  org-publish) "org-publish" "org-publish.el" (18304 28298))
+;;;;;;  org-publish) "org-publish" "org-publish.el" (18320 38272))
 ;;; Generated autoloads from org-publish.el
 
 (autoload (quote org-publish) "org-publish" "\
@@ -472,7 +472,7 @@ With prefix argument, force publish all files.
 ;;;### (autoloads (org-export-as-latex org-export-region-as-latex
 ;;;;;;  org-replace-region-by-latex org-export-as-latex-to-buffer
 ;;;;;;  org-export-as-latex-batch) "org-export-latex" "org-export-latex.el"
-;;;;;;  (18252 7249))
+;;;;;;  (18320 39683))
 ;;; Generated autoloads from org-export-latex.el
 
 (autoload (quote org-export-as-latex-batch) "org-export-latex" "\

@@ -1,10 +1,10 @@
 ;;; org-export-latex.el --- LaTeX exporter for org-mode
 ;;
-;; Copyright (c) 2007 free software foundation, inc.
+;; Copyright (c) 2007, 2008 Free Software Foundation, Inc.
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-export-latex.el
-;; Version: 5.14
+;; Version: 5.19
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: org, wp, tex

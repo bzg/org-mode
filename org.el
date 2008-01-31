@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.18a
+;; Version: 5.19
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.17a"
+(defconst org-version "5.19"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1411,6 +1411,14 @@ When this variable is nil, `C-c C-c' give you the prompts, and
   :group 'org-remember
   :type 'boolean)
 
+(defcustom org-remember-use-refile-when-interactive t
+  "Non-nil means, use refile to file a remember note.
+This is only used when the the interactive mode for selecting a filing
+location is used (see the variable `org-remember-store-without-prompt').
+When nil, the `org-goto' interface is used."
+  :group 'org-remember
+  :type 'boolean)
+
 (defcustom org-remember-default-headline ""
   "The headline that should be the default location in the notes file.
 When filing remember notes, the cursor will start at that position.
@@ -1423,9 +1431,9 @@ You can set this on a per-template basis with the variable
   "Templates for the creation of remember buffers.
 When nil, just let remember make the buffer.
 When not nil, this is a list of 5-element lists.  In each entry, the first
-element is a the name of the template, It should be a single short word.
+element is the name of the template, which should be a single short word.
 The second element is a character, a unique key to select this template.
-The third element is the template.  The forth element is optional and can
+The third element is the template.  The fourth element is optional and can
 specify a destination file for remember items created with this template.
 The default file is given by `org-default-notes-file'.  An optional fifth
 element can specify the headline in that file that should be offered
@@ -1509,7 +1517,7 @@ are matched against file names, and values."
 	  (repeat :tag "By file name regexp"
 		  (cons regexp boolean))))
 
-(defcustom org-refile-targets '((nil . (:level . 1)))
+(defcustom org-refile-targets nil
   "Targets for refiling entries with \\[org-refile].
 This is list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
@@ -2809,6 +2817,13 @@ See also the variables `org-agenda-remove-times-when-in-prefix' and
 (defvar org-prefix-format-compiled nil
   "The compiled version of the most recently used prefix format.
 See the variable `org-agenda-prefix-format'.")
+
+(defcustom org-agenda-todo-keyword-format "%-1s"
+  "Format for the TODO keyword in agenda lines.
+Set this to something like \"%-12s\" if you want all TODO keywords
+to occupy a fixed space in the agenda display."
+  :group 'org-agenda-line-format
+  :type 'string)
 
 (defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%2dx: ")
   "Text preceeding scheduled items in the agenda view.
@@ -4182,6 +4197,7 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (defvar vm-folder-directory)
 (defvar w3m-current-url)
 (defvar w3m-current-title)
+;; backward compatibility to old version of wl
 (declare-function wl-summary-buffer-msgdb "ext:wl-folder" (&rest unknown) t)
 (declare-function wl-folder-get-elmo-folder "ext:wl-folder" (entity &optional no-cache))
 (declare-function wl-summary-goto-folder-subr "ext:wl-summary" (&optional name scan-type other-window sticky interactive scoring force-exit))
@@ -4929,7 +4945,7 @@ that will be added to PLIST.  Returns the string that was modified."
 
 (defconst org-non-link-chars "]\t\n\r<>")
 (defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news" "bbdb" "vm"
-			   "wl" "mhe" "rmail" "gnus" "shell" "info" "elisp"))
+			   "wl" "mhe" "rmail" "gnus" "shell" "info" "elisp" "message"))
 (defvar org-link-re-with-space nil
    "Matches a link with spaces, optional angular brackets around it.")
 (defvar org-link-re-with-space2 nil
@@ -7891,7 +7907,8 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
   (save-excursion
     (beginning-of-line 1)
     (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
-      (let ((b (match-end 0)))
+      (let ((b (match-end 0))
+	    (outline-regexp org-outline-regexp))
 	(if (re-search-forward
 	     "^[ \t]*:END:"
 	     (save-excursion (outline-next-heading) (point)) t)
@@ -11814,8 +11831,8 @@ For file links, arg negates `org-context-in-file-links'."
 	      (if (fboundp 'elmo-message-entity)
 		  (elmo-message-entity
 		   wl-summary-buffer-elmo-folder msgnum)
-		  (elmo-msgdb-overview-get-entity
-		   msgnum (wl-summary-buffer-msgdb))))
+		(elmo-msgdb-overview-get-entity
+		 msgnum (wl-summary-buffer-msgdb))))
 	     (from (wl-summary-line-from))
 	     (to (car (elmo-message-entity-field wl-message-entity 'to)))
 	     (subject (let (wl-thr-indent-string wl-parent-message-entity)
@@ -12478,6 +12495,9 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	 ((member type '("http" "https" "ftp" "news"))
 	  (browse-url (concat type ":" (org-link-escape
 					path org-link-escape-chars-browser))))
+
+	 ((member type '("message"))
+	  (browse-url (concat type ":" path)))
 
 	 ((string= type "tags")
 	  (org-tags-view in-emacs path))
@@ -13472,12 +13492,12 @@ If there is an active region, make sure remember uses it as initial content
 of the remember buffer.
 
 When called interactively with a `C-u' prefix argument GOTO, don't remember
-anything, just go to the file/headline where the selected templated usually
-stores its notes.  With a double prefix arg `C-u C-u', got to the last
+anything, just go to the file/headline where the selected template usually
+stores its notes.  With a double prefix arg `C-u C-u', go to the last
 note stored by remember.
 
 Lisp programs can set ORG-FORCE-REMEMBER-TEMPLATE-CHAR to a character
-associated with a template in `org-remember-tempates'."
+associated with a template in `org-remember-templates'."
   (interactive "P")
   (cond
    ((equal goto '(4)) (org-go-to-remember-target))
@@ -13568,21 +13588,31 @@ See also the variable `org-reverse-note-order'."
   (while (looking-at "^[ \t]*\n\\|^##.*\n")
     (replace-match ""))
   (goto-char (point-max))
+  (beginning-of-line 1)
+  (while (looking-at "[ \t]*$\\|##.*")
+    (delete-region (1- (point)) (point-max))
+    (beginning-of-line 1))
   (catch 'quit
     (if org-note-abort (throw 'quit nil))
     (let* ((txt (buffer-substring (point-min) (point-max)))
 	   (fastp (org-xor (equal current-prefix-arg '(4))
 			   org-remember-store-without-prompt))
-	   (file (if fastp org-default-notes-file (org-get-org-file)))
+	   (file (cond
+		  (fastp org-default-notes-file)
+		  ((and org-remember-use-refile-when-interactive
+			org-refile-targets)
+		   nil)
+		  (t (org-get-org-file))))
 	   (heading org-remember-default-headline)
-	   (visiting (org-find-base-buffer-visiting file))
+	   (visiting (and file (org-find-base-buffer-visiting file)))
 	   (org-startup-folded nil)
 	   (org-startup-align-all-tables nil)
 	   (org-goto-start-pos 1)
 	   spos exitcmd level indent reversed)
       (if (and (equal current-prefix-arg '(16)) org-remember-previous-location)
 	  (setq file (car org-remember-previous-location)
-		heading (cdr org-remember-previous-location)))
+		heading (cdr org-remember-previous-location)
+		fastp t))
       (setq current-prefix-arg nil)
       (if (string-match "[ \t\n]+\\'" txt)
 	  (setq txt (replace-match "" t t txt)))
@@ -13611,6 +13641,14 @@ See also the variable `org-reverse-note-order'."
 	  (setq txt (replace-match "\n\n" t t txt))
 	(if (string-match "[ \t\n]*\\'" txt)
 	    (setq txt (replace-match "\n" t t txt))))
+      ;; Put the modified text back into the remember buffer, for refile.
+      (erase-buffer)
+      (insert txt)
+      (goto-char (point-min))
+      (when (and org-remember-use-refile-when-interactive
+		 (not fastp))
+	(org-refile)
+	(throw 'quit t))
       ;; Find the file
       (if (not visiting) (find-file-noselect file))
       (with-current-buffer (or visiting (get-file-buffer file))
@@ -13659,7 +13697,7 @@ See also the variable `org-reverse-note-order'."
 				 (org-get-heading 'notags)))
 		     (if reversed
 			 (outline-next-heading)
-		       (org-end-of-subtree)
+		       (org-end-of-subtree t)
 		       (if (not (bolp))
 			   (if (looking-at "[ \t]*\n")
 			       (beginning-of-line 2)
@@ -13706,6 +13744,7 @@ See also the variable `org-reverse-note-order'."
 	    (when remember-save-after-remembering
 	      (save-buffer)
 	      (if (not visiting) (kill-buffer (current-buffer)))))))))
+  
   t)    ;; return t to indicate that we took care of this note.
 
 (defun org-get-org-file ()
@@ -13739,8 +13778,8 @@ See also the variable `org-reverse-note-order'."
 
 (defun org-get-refile-targets ()
   "Produce a table with refile targets."
-  (let ((entries org-refile-targets)
-	org-agenda-new-files targets txt re files f desc descre)
+  (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
+	org-agenda-new-buffers targets txt re files f desc descre)
     (while (setq entry (pop entries))
       (setq files (car entry) desc (cdr entry))
       (cond
@@ -13815,11 +13854,15 @@ See also the variable `org-reverse-note-order'."
 	  (push (org-match-string-no-properties 4) rtn)))
       rtn)))
 
+(defvar org-refile-history nil
+  "History for refiling operations.")
+
 (defun org-refile (&optional reversed-or-update)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.  This list is created upon first use, and
 you can update it by calling this command with a double prefix (`C-u C-u').
+FIXME: Can we find a better way of updating?
 
 At the target location, the entry is filed as a subitem of the target heading.
 Depending on `org-reverse-note-order', the new subitem will either be the
@@ -15686,6 +15729,7 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 	(when (condition-case nil (org-back-to-heading t) (error nil))
 	  (setq beg (point))
 	  (setq sum-props (get-text-property (point) 'org-summaries))
+	  (setq clocksum (get-text-property (point) :org-clock-minutes))
 	  (outline-next-heading)
 	  (setq end (point))
 	  (when (memq which '(all special))
@@ -15730,6 +15774,11 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 		      value (org-trim (or (org-match-string-no-properties 2) "")))
 		(unless (member key excluded)
 		  (push (cons key (or value "")) props)))))
+	  (if clocksum
+	      (push (cons "CLOCKSUM" 
+			  (org-column-number-to-string (/ (float clocksum) 60.)
+						       'add_times))
+		    props))
 	  (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit)
@@ -16363,6 +16412,8 @@ Where possible, use the standard interface for changing this line."
 			    org-columns-overlays)))
 	 nval eval allowed)
     (cond
+     ((equal key "CLOCKSUM")
+      (error "This special column cannot be edited"))
      ((equal key "ITEM")
       (setq eval '(org-with-point-at pom
 		    (org-edit-headline))))
@@ -16550,7 +16601,7 @@ Where possible, use the standard interface for changing this line."
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let (beg end fmt cache maxwidths)
+  (let (beg end fmt cache maxwidths clocksump)
     (setq fmt (org-columns-get-format-and-top-level))
     (save-excursion
       (goto-char org-columns-top-level-marker)
@@ -16559,8 +16610,14 @@ Where possible, use the standard interface for changing this line."
 	(org-columns-compute-all))
       (setq end (or (condition-case nil (org-end-of-subtree t t) (error nil))
 		    (point-max)))
-      (goto-char beg)
       ;; Get and cache the properties
+      (goto-char beg)
+      (when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
+	(setq clocksump t)
+	(save-excursion
+	  (save-restriction
+	    (narrow-to-region beg end)
+	    (org-clock-sum))))
       (while (re-search-forward (concat "^" outline-regexp) end t)
 	(push (cons (org-current-line) (org-entry-properties)) cache))
       (when cache
@@ -16572,7 +16629,7 @@ Where possible, use the standard interface for changing this line."
 		(org-columns-display-here (cdr x)))
 	      cache)))))
 
-(defun org-columns-new (&optional prop title width op fmt)
+(defun org-columns-new (&optional prop title width op fmt &rest rest)
   "Insert a new column, to the leeft o the current column."
   (interactive)
   (let ((editp (and prop (assoc prop org-columns-current-fmt-compiled)))
@@ -16865,7 +16922,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	(setq sum (+ (string-to-number (pop l)) (/ sum 60))))
       sum)))
 
-(defun org-column-number-to-string (n fmt printf)
+(defun org-column-number-to-string (n fmt &optional printf)
   "Convert a computed column number to a string value, according to FMT."
   (cond
    ((eq fmt 'add_times)
@@ -21555,16 +21612,32 @@ HH:MM."
 	  (beginning-of-line 1)
 	  (setq re (get-text-property (point) 'org-todo-regexp))
 	  (goto-char (+ (point) (or (get-text-property (point) 'prefix-length) 0)))
-	  (and (looking-at (concat "[ \t]*\\.*" re))
-	       (add-text-properties (match-beginning 0) (match-end 0)
-				    (list 'face (org-get-todo-face 0)))))
+	  (when (looking-at (concat "[ \t]*\\.*" re " +"))
+	    (add-text-properties (match-beginning 0) (match-end 0)
+				 (list 'face (org-get-todo-face 0)))
+	    (let ((s (buffer-substring (match-beginning 1) (match-end 1))))
+	      (delete-region (match-beginning 1) (1- (match-end 0)))
+	      (goto-char (match-beginning 1))
+	      (insert (format org-agenda-todo-keyword-format s)))))
       (setq re (concat (get-text-property 0 'org-todo-regexp x))
 	    pl (get-text-property 0 'prefix-length x))
-      (and re (equal (string-match (concat "\\(\\.*\\)" re) x (or pl 0)) pl)
-	   (add-text-properties
-	    (or (match-end 1) (match-end 0)) (match-end 0)
-	    (list 'face (org-get-todo-face (match-string 2 x)))
-	    x))
+;      (and re (equal (string-match (concat "\\(\\.*\\)" re) x (or pl 0)) pl)
+;	   (add-text-properties
+;	    (or (match-end 1) (match-end 0)) (match-end 0)
+;	    (list 'face (org-get-todo-face (match-string 2 x)))
+;	    x))
+      (when (and re
+		 (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
+				      x (or pl 0)) pl))
+	(add-text-properties
+	 (or (match-end 1) (match-end 0)) (match-end 0)
+	 (list 'face (org-get-todo-face (match-string 2 x)))
+	 x)
+	(setq x (concat (substring x 0 (match-end 1))
+			(format org-agenda-todo-keyword-format
+				(match-string 2 x))
+			" "
+			(substring x (match-end 3)))))
       x)))
 
 (defsubst org-cmp-priority (a b)
@@ -23080,51 +23153,53 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (defun org-infile-export-plist ()
   "Return the property list with file-local settings for export."
   (save-excursion
-    (goto-char 0)
-    (let ((re (org-make-options-regexp
-	       '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE")))
-	  p key val text options)
-      (while (re-search-forward re nil t)
-	(setq key (org-match-string-no-properties 1)
-	      val (org-match-string-no-properties 2))
-	(cond
-	 ((string-equal key "TITLE") (setq p (plist-put p :title val)))
-	 ((string-equal key "AUTHOR")(setq p (plist-put p :author val)))
-	 ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
-	 ((string-equal key "DATE") (setq p (plist-put p :date val)))
-	 ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
-	 ((string-equal key "TEXT")
-	  (setq text (if text (concat text "\n" val) val)))
-	 ((string-equal key "OPTIONS") (setq options val))))
-      (setq p (plist-put p :text text))
-      (when options
-	(let ((op '(("H"     . :headline-levels)
-		    ("num"   . :section-numbers)
-		    ("toc"   . :table-of-contents)
-		    ("\\n"   . :preserve-breaks)
-		    ("@"     . :expand-quoted-html)
-		    (":"     . :fixed-width)
-		    ("|"     . :tables)
-		    ("^"     . :sub-superscript)
-		    ("-"     . :special-strings)
-		    ("f"     . :footnotes)
-		    ("d"     . :drawers)
-		    ("tags"  . :tags)
-		    ("*"     . :emphasize)
-		    ("TeX"   . :TeX-macros)
-		    ("LaTeX" . :LaTeX-fragments)
-		    ("skip"  . :skip-before-1st-heading)
-		    ("author" . :author-info)
-		    ("timestamp" . :time-stamp-file)))
-	      o)
-	  (while (setq o (pop op))
-	    (if (string-match (concat (regexp-quote (car o))
-				      ":\\([^ \t\n\r;,.]*\\)")
-			      options)
-		(setq p (plist-put p (cdr o)
-				   (car (read-from-string
-					 (match-string 1 options)))))))))
-      p)))
+    (save-restriction
+      (widen)
+      (goto-char 0)
+      (let ((re (org-make-options-regexp
+		 '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE")))
+	    p key val text options)
+	(while (re-search-forward re nil t)
+	  (setq key (org-match-string-no-properties 1)
+		val (org-match-string-no-properties 2))
+	  (cond
+	   ((string-equal key "TITLE") (setq p (plist-put p :title val)))
+	   ((string-equal key "AUTHOR")(setq p (plist-put p :author val)))
+	   ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
+	   ((string-equal key "DATE") (setq p (plist-put p :date val)))
+	   ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
+	   ((string-equal key "TEXT")
+	    (setq text (if text (concat text "\n" val) val)))
+	   ((string-equal key "OPTIONS") (setq options val))))
+	(setq p (plist-put p :text text))
+	(when options
+	  (let ((op '(("H"     . :headline-levels)
+		      ("num"   . :section-numbers)
+		      ("toc"   . :table-of-contents)
+		      ("\\n"   . :preserve-breaks)
+		      ("@"     . :expand-quoted-html)
+		      (":"     . :fixed-width)
+		      ("|"     . :tables)
+		      ("^"     . :sub-superscript)
+		      ("-"     . :special-strings)
+		      ("f"     . :footnotes)
+		      ("d"     . :drawers)
+		      ("tags"  . :tags)
+		      ("*"     . :emphasize)
+		      ("TeX"   . :TeX-macros)
+		      ("LaTeX" . :LaTeX-fragments)
+		      ("skip"  . :skip-before-1st-heading)
+		      ("author" . :author-info)
+		      ("timestamp" . :time-stamp-file)))
+		o)
+	    (while (setq o (pop op))
+	      (if (string-match (concat (regexp-quote (car o))
+					":\\([^ \t\n\r;,.]*\\)")
+				options)
+		  (setq p (plist-put p (cdr o)
+				     (car (read-from-string
+					   (match-string 1 options)))))))))
+	p))))
 
 (defun org-export-directory (type plist)
   (let* ((val (plist-get plist :publishing-directory))
@@ -24616,7 +24691,7 @@ the body tags themselves."
 
     ;; Switch to the output buffer
     (set-buffer buffer)
-    (erase-buffer)
+    (let ((inhibit-read-only t)) (erase-buffer))
     (fundamental-mode)
 
     (and (fboundp 'set-buffer-file-coding-system)
@@ -27113,6 +27188,7 @@ Returns the number o empty lines passed."
   (let ((pos (point)))
     (skip-chars-backward " \t\n\r")
     (beginning-of-line 2)
+    (goto-char (min (point) pos))
     (count-lines (point) pos)))
 
 (defun org-skip-whitespace ()
