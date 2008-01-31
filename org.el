@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.51
+;; Version: 4.52
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -61,6 +61,12 @@
 ;;
 ;; Recent changes
 ;; --------------
+;; Version 4.52
+;;    - TAG matches can also specify conditions on TODO keywords.
+;;    - The fast tag interface allows setting tags that are not in the
+;;      predefined list.
+;;    - Bug fixes.
+;;
 ;; Version 4.51
 ;;    - Link abbreviations (manual section 4.5).
 ;;    - More control over how agenda is displayed.  See the new variables
@@ -143,7 +149,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.51"
+(defvar org-version "4.52"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1676,7 +1682,7 @@ other-window      Use `switch-to-buffer-other-window' to display agenda.
 reorganize-frame  Show only two windows on the current frame, the current
                   window and the agenda.  Also, if the option
                   `org-fit-agenda-window' is set, resize the agenda window to
-                  try to as much as possible of the buffer content.
+                  try to show as much as possible of the buffer content.
 See also the variable `org-agenda-restore-windows-after-quit'."
   :group 'org-agenda-setup
   :type '(choice
@@ -9237,7 +9243,8 @@ MATCH can contain positive and negative selection of tags, like
 	(org-show-hierarchy-above nil))
     (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match)))))
 
-(defun org-make-tags-matcher (match)
+;; FIXME: remove this function.
+(defun org-make-tags-matcher-old (match)
   "Create the TAGS matcher form for the tags-selecting string MATCH."
   (unless match
     ;; Get a new match request, with completion
@@ -9264,6 +9271,76 @@ MATCH can contain positive and negative selection of tags, like
       (setq matcher nil))
     (setq matcher (if (> (length orlist) 1) (cons 'or orlist) (car orlist)))
     ;; Return the string and lisp forms of the matcher
+    (cons match0 matcher)))
+
+
+(defun org-make-tags-matcher (match)
+  "Create the TAGS//TODO matcher form for the selection string MATCH."
+  (unless match
+    ;; Get a new match request, with completion
+    (setq org-last-tags-completion-table
+	  (or org-tag-alist
+	      org-last-tags-completion-table))
+    (setq match (completing-read
+		 "Match: " 'org-tags-completion-function nil nil nil
+		 'org-tags-history)))  ; FIXME: SHould we have a separate history for this?
+
+  ;; Parse the string and create a lisp form
+  (let ((match0 match) minus tag mm
+	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
+	orterms term orlist)
+    (if (string-match "//" match)
+	;; match contains also a todo-matching request
+	(setq tagsmatch (substring match 0 (match-beginning 0))
+	      todomatch (substring match (match-end 0)))
+      ;; only matching tags
+      (setq tagsmatch match todomatch nil))
+
+    ;; Make the tags matcher
+    (if (or (not tagsmatch) (not (string-match "\\S-" tagsmatch)))
+	(setq tagsmatcher t)
+      (setq orterms (org-split-string tagsmatch "|") orlist nil)
+      (while (setq term (pop orterms))
+	(while (string-match "^&?\\([-+:]\\)?\\([A-Za-z_@0-9]+\\)" term)
+	  (setq minus (and (match-end 1)
+			   (equal (match-string 1 term) "-"))
+		tag (match-string 2 term)
+		term (substring term (match-end 0))
+		mm (list 'member (downcase tag) 'tags-list)
+		mm (if minus (list 'not mm) mm))
+	  (push mm tagsmatcher))
+	(push (if (> (length tagsmatcher) 1)
+		  (cons 'and tagsmatcher)
+		(car tagsmatcher))
+	      orlist)
+	(setq tagsmatcher nil))
+      (setq tagsmatcher (if (> (length orlist) 1) (cons 'or orlist) (car orlist))))
+
+    ;; Make the todo matcher ;; FIXME: reduce syntax richness?
+    (if (or (not todomatch) (not (string-match "\\S-" todomatch)))
+	(setq todomatcher t)
+      (setq orterms (org-split-string todomatch "|") orlist nil)
+      (while (setq term (pop orterms))
+	(while (string-match "^&?\\([-+:]\\)?\\([A-Za-z_@0-9]+\\)" term)
+	  (setq minus (and (match-end 1)
+			   (equal (match-string 1 term) "-"))
+		kwd (match-string 2 term)
+		term (substring term (match-end 0))
+		mm (list 'equal 'todo kwd)
+		mm (if minus (list 'not mm) mm))
+	  (push mm todomatcher))
+	(push (if (> (length todomatcher) 1)
+		  (cons 'and todomatcher)
+		(car todomatcher))
+	      orlist)
+	(setq todomatcher nil))
+      (setq todomatcher (if (> (length orlist) 1)
+			    (cons 'or orlist) (car orlist))))
+    
+    ;; Return the string and lisp forms of the matcher
+    (setq matcher (if todomatcher
+		      (list 'and tagsmatcher todomatcher)
+		    tagsmatcher))
     (cons match0 matcher)))
 
 ;;;###autoload
@@ -9342,8 +9419,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
     (if arg
 	(save-excursion
 	  (goto-char (point-min))
-	  (while (re-search-forward re nil t)
-	    (org-set-tags nil t))
+	  (let (buffer-invisibility-spec)  ; Emacs 21 compatibility
+	    (while (re-search-forward re nil t)
+	      (org-set-tags nil t)))
 	  (message "All tags realigned to column %d" org-tags-column))
       (if just-align
 	  (setq tags current)
@@ -9437,6 +9515,8 @@ Returns the new tags string, or nil to not change the current settings."
 			      (lambda (x)
 				(if (stringp (car x)) (string-width (car x)) 0))
 			      table)))
+	 (buf (current-buffer))
+	 (buffer-tags nil)
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
 	 (i-face 'org-done)
@@ -9496,8 +9576,8 @@ Returns the new tags string, or nil to not change the current settings."
       (setq rtn
 	    (catch 'exit
 	      (while t
-		(message "[key]:Toggle  SPC: clear current  RET accept%s"
-			 (if groups "  [!] ignore goups" ""))
+		(message "[a-z..]:Toggle   [SPC] clear   [RET] accept   [TAB] free tag%s"
+			 (if groups "  [!] no goups" ""))
 		(setq c (read-char-exclusive))
 		(cond
 		 ((= c ?\r) (throw 'exit t))
@@ -9509,6 +9589,19 @@ Returns the new tags string, or nil to not change the current settings."
 		      (and (= c ?q) (not (rassoc c ntable))))
 		  (setq quit-flag t))
 		 ((= c ?\ ) (setq current nil))
+		 ((= c ?\t)
+		  (condition-case nil
+		      (setq tg (completing-read 
+				"Tag: "
+				(or buffer-tags
+				    (with-current-buffer buf
+				      (org-get-buffer-tags)))))
+		    (quit (setq tg "")))
+		  (when (string-match "\\S-" tg)
+		    (add-to-list 'buffer-tags (list tg))
+		    (if (member tg current)
+			(setq current (delete tg current))
+		      (push tg current))))
 		 ((setq e (rassoc c ntable) tg (car e))
 		  (if (member tg current)
 		      (setq current (delete tg current))
@@ -9517,7 +9610,7 @@ Returns the new tags string, or nil to not change the current settings."
 			      (mapcar (lambda (x)
 					(setq current (delete x current)))
 				      g)))
-		    (setq current (cons tg current)))))
+		    (push tg current))))
 		;; Create a sorted list
 		(setq current
 		      (sort current
@@ -9820,7 +9913,6 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 
        (t
 	(browse-url-at-point))))))
-
 
 (defun org-link-expand-abbrev (link)
   "Apply replacements as defined in `org-link-abbrev-alist."
@@ -13967,6 +14059,11 @@ translations.  There is currently no way for users to extend this.")
       (while (re-search-forward "^#.*?\\(<<<?[^>\r\n]+>>>?\\).*" nil t)
 	(replace-match "\\1(INVISIBLE)"))
 
+      ;; Remove comments
+      (goto-char (point-min))
+      (while (re-search-forward "^#.*\n?" nil t)
+	(replace-match ""))
+
       ;; Find matches for radio targets and turn them into internal links
       (goto-char (point-min))
       (when re-radio
@@ -14003,10 +14100,16 @@ translations.  There is currently no way for users to extend this.")
 	  (match-string 1) "[[" (match-string 2) ":" (match-string 3) "]]")
 	 t t))
       (goto-char (point-min))
-      (while (re-search-forward "\\[\\[\\([^]]+\\)\\]" nil t)
-	(replace-match (concat "[[" (save-match-data
-				      (org-link-expand-abbrev (match-string 1)))
-			       "]")))
+      (while (re-search-forward org-bracket-link-regexp nil t)
+	(replace-match 
+	 (concat "[[" (save-match-data
+			(org-link-expand-abbrev (match-string 1)))
+		 "]"
+		 (if (match-end 3)
+		     (match-string 2)
+		   (concat "[" (match-string 1) "]"))
+		 "]")
+	 t t))
 
       ;; Find multiline emphasis and put them into single line
       (when (memq :emph-multiline parameters)
@@ -14015,10 +14118,6 @@ translations.  There is currently no way for users to extend this.")
 	  (subst-char-in-region (match-beginning 0) (match-end 0) ?\n ?\  t)
 	  (goto-char (1- (match-end 0)))))
 
-      ;; Remove comments
-      (goto-char (point-min))
-      (while (re-search-forward "^#.*\n?" nil t)
-	(replace-match ""))
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
     rtn))

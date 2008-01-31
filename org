@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.51).
+   This manual is for Org-mode (version 4.52).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.51).
+This manual is for Org-mode (version 4.52).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -2610,16 +2610,22 @@ special command for inserting tags:
 default this list is constructed dynamically, containing all tags
 currently used in the buffer.  You may also globally specify a hard list
 of tags with the variable `org-tag-alist'.  Finally you can set the
-allowed tags for a given file with lines like
+default tags for a given file with lines like
 
      #+TAGS: @WORK @HOME @TENNISCLUB
      #+TAGS: Laptop Car PC Sailboat
 
-   The default support method is minibuffer completion.  However,
-Org-mode also implements a much better method: _fast tag selection_.
-This method allows to select and deselect tags with a single key per
-tag.  To function efficiently, you should assign unique keys to all
-tags.  This can be done globally with
+   If you have globally defined your preferred set of tags using the
+variable `org-tag-alist', but would like to use a dynamic tag list in a
+specific file: Just add an empty TAGS option line to that file:
+
+     #+TAGS:
+
+   The default support method for entering tags is minibuffer
+completion.  However, Org-mode also implements a much better method:
+_fast tag selection_.  This method allows to select and deselect tags
+with a single key per tag.  To function efficiently, you should assign
+unique keys to most tags.  This can be done globally with
 
      (setq org-tag-alist '(("@WORK" . ?w) ("@HOME" . ?h) ("Laptop" . ?l)))
 
@@ -2641,21 +2647,35 @@ to activate any changes.
    If at least one tag has a selection key, pressing `C-c C-c' will
 automatically present you with a special interface, listing inherited
 tags, the tags of the current headline, and a list of all legal tags
-with corresponding keys(2).  Pressing keys for the tags will add or
-remove them from the list of tags in the current line.  Selecting a tag
-in a group of mutually exclusive tags will turn off any other tags from
-that group.  <SPC> clears all tags for this line, `RET' accepts the
-modified set, and `C-g' aborts without installing changes.  This method
-lets you assign tags to a headline with very few keys.  With the above
-setup, you could clear the current tags and set `@HOME', `Laptop' and
-`PC' tags with just the following keys: `C-c C-c <SPC> h l p <RET>'.
-Switching from `@HOME' to `@WORK' would be done with `C-c C-c w <RET>'.
+with corresponding keys(2).  In this interface, you can use the
+following keys:
 
-   What if you have globally defined your preferred set of tags using
-the variable `org-tag-alist', but would like to use a dynamic tag list
-in a specific file?  Just add an empty TAGS option line to that file:
+`a-z...'
+     Pressing keys assigned to tags will add or remove them from the
+     list of tags in the current line.  Selecting a tag in a group of
+     mutually exclusive tags will turn off any other tags from that
+     group.  
 
-     #+TAGS:
+`<TAB>'
+     Enter a tag in the minibuffer, even if the tag is not in the
+     predefined list.  You will be able to complete on all tags present
+     in the buffer.  
+
+`<SPC>'
+     Clear all tags for this line.  
+
+`<RET>'
+     Accept the modified set.
+
+`C-g'
+     Abort without installing changes.
+
+This method lets you assign tags to a headline with very few keys.  With
+the above setup, you could clear the current tags and set `@HOME',
+`Laptop' and `PC' tags with just the following keys: `C-c C-c <SPC> h l
+p <RET>'.  Switching from `@HOME' to `@WORK' would be done with `C-c
+C-c w <RET>'.  Adding the non-predefined tag `Sarah' could be done with
+`C-c C-c <TAB> S a r a h <RET> <RET>'.
 
    ---------- Footnotes ----------
 
@@ -2690,12 +2710,38 @@ information into special lists.
 for OR.  `&' binds more strongly than `|'.  Parenthesis are currently
 not implemented.  A tag may also be preceded by `-', to select against
 it, and `+' is syntactic sugar for positive selection.  The AND
-operator `&' is optional when `+' or `-' is present.  For example,
-`+WORK-BOSS' would select all headlines that are tagged `:WORK:', but
-discard those also tagged `:BOSS:'.  The search string `WORK|LAPTOP'
-selects all lines tagged `:WORK:' or `:LAPTOP:'.  The string
-`WORK|LAPTOP&NIGHT' requires that the `:LAPTOP:' lines are also tagged
-`NIGHT'.
+operator `&' is optional when `+' or `-' is present.  Examples:
+
+`+WORK-BOSS'
+     Select all headlines that are tagged `:WORK:', but discard those
+     also tagged `:BOSS:'.
+
+`WORK|LAPTOP'
+     Selects lines tagged `:WORK:' or `:LAPTOP:'.
+
+`WORK|LAPTOP&NIGHT'
+     Like the previous example, but require  the `:LAPTOP:' lines to be
+     tagged also `NIGHT'.
+
+   If you are using multi-state TODO keywords (*note TODO
+extensions::), it can be useful to also match on the TODO keyword.
+This can be done by adding a condition after a double slash to a tags
+match.  The syntax is similar to the tag matches, but should be applied
+with consideration: For example, a positive selection on several TODO
+keywords can not meaningfully be combined with boolean AND.  However,
+_negative selection_ combined with AND can be meaningful.  Examples:
+
+`WORK//WAITING'
+     Select `:WORK:'-tagged TODO lines with the specific TODO keyword
+     `WAITING'.
+
+`WORK//-WAITING-NEXT'
+     Select `:WORK:'-tagged TODO lines that are neither `WAITING' nor
+     `NEXT'
+
+`WORK//+WAITING|+NEXT'
+     Select `:WORK:'-tagged TODO lines that are either `WAITING' or
+     `NEXT'.
 
 
 File: org,  Node: Agenda views,  Next: Embedded LaTeX,  Prev: Tags,  Up: Top
@@ -2904,6 +2950,8 @@ collected into a single place.
      keyword, for example `3 r'.  If you often need a search for a
      specific keyword, define a custom command for it (*note Agenda
      dispatcher::).
+     Matching specific TODO keywords can also be done as part of a tags
+     search (*note Tag searches::).
 
    Remote editing of TODO items means that you can change the state of a
 TODO entry with a single key press.  The commands available in the TODO
@@ -2942,7 +2990,9 @@ collect them into an agenda buffer.
 `C-c a M'
      Like `C-c a m', but only select headlines that are also TODO items
      and force checking subitems (see variable
-     `org-tags-match-list-sublevels').
+     `org-tags-match-list-sublevels').  Matching specific todo keywords
+     together with a tags match is also possible, see *Note Tag
+     searches::.
 
    The commands available in the tags list are described in *Note
 Agenda commands::.
@@ -5035,6 +5085,7 @@ Index
 * BBDB links:                            External links.      (line   6)
 * block agenda:                          Block agenda.        (line   6)
 * bold text:                             Enhancing text.      (line  15)
+* Boolean logic, for tag searches:       Tag searches.        (line  21)
 * bug reports:                           Feedback.            (line   6)
 * bugs:                                  Bugs.                (line   6)
 * C-c C-c, overview:                     The very busy C-c C-c key.
@@ -5289,7 +5340,7 @@ Index
 * structure editing:                     Structure editing.   (line   6)
 * structure of document:                 Document structure.  (line   6)
 * sublevels, inclusion into tags match:  Tag inheritance.     (line   6)
-* sublevels, inclusion into todo list:   Global TODO list.    (line  31)
+* sublevels, inclusion into todo list:   Global TODO list.    (line  33)
 * subscript:                             Subscripts and Superscripts.
                                                               (line   6)
 * subtree cycling:                       Visibility cycling.  (line  10)
@@ -5342,6 +5393,8 @@ Index
 * timestamp:                             Time stamps.         (line  13)
 * timestamps, creating:                  Creating timestamps. (line   6)
 * TODO items:                            TODO items.          (line   6)
+* TODO keyword matching:                 Global TODO list.    (line  17)
+* TODO keyword matching, with tags search: Tag searches.      (line  38)
 * TODO keywords completion:              Completion.          (line   6)
 * TODO list, global:                     Global TODO list.    (line   6)
 * TODO types:                            TODO types.          (line   6)
@@ -5389,17 +5442,20 @@ Key Index
                                                               (line  28)
 * <left>:                                Agenda commands.     (line  91)
 * <RET> <1>:                             Agenda commands.     (line  41)
-* <RET> <2>:                             The date/time prompt.
+* <RET> <2>:                             Setting tags.        (line  76)
+* <RET> <3>:                             The date/time prompt.
                                                               (line  53)
 * <RET>:                                 Built-in table editor.
                                                               (line  64)
 * <right>:                               Agenda commands.     (line  86)
-* <SPC>:                                 Agenda commands.     (line  28)
+* <SPC> <1>:                             Agenda commands.     (line  28)
+* <SPC>:                                 Setting tags.        (line  73)
 * <TAB> <1>:                             CDLaTeX mode.        (line  23)
 * <TAB> <2>:                             Agenda commands.     (line  35)
-* <TAB> <3>:                             Built-in table editor.
+* <TAB> <3>:                             Setting tags.        (line  68)
+* <TAB> <4>:                             Built-in table editor.
                                                               (line  57)
-* <TAB> <4>:                             Plain lists.         (line  37)
+* <TAB> <5>:                             Plain lists.         (line  37)
 * <TAB>:                                 Visibility cycling.  (line  10)
 * > <1>:                                 Agenda commands.     (line 154)
 * >:                                     The date/time prompt.
@@ -5726,77 +5782,77 @@ Ref: Clocking work time-Footnote-1103930
 Node: Tags104056
 Node: Tag inheritance104818
 Node: Setting tags105755
-Ref: Setting tags-Footnote-1108887
-Ref: Setting tags-Footnote-2108999
-Node: Tag searches109079
-Node: Agenda views110288
-Node: Agenda files112381
-Ref: Agenda files-Footnote-1113341
-Ref: Agenda files-Footnote-2113490
-Node: Agenda dispatcher113683
-Node: Weekly/Daily agenda115300
-Node: Calendar/Diary integration116265
-Node: Global TODO list117603
-Node: Matching headline tags119655
-Node: Timeline120599
-Node: Presentation and sorting121262
-Node: Categories122040
-Node: Time-of-day specifications122704
-Node: Sorting of agenda items124682
-Node: Agenda commands125964
-Node: Custom agenda views131852
-Node: Storing searches132527
-Node: Block agenda134439
-Node: Setting Options135669
-Node: Batch processing138381
-Node: Embedded LaTeX139511
-Ref: Embedded LaTeX-Footnote-1140603
-Node: Math symbols140793
-Node: Subscripts and Superscripts141558
-Node: LaTeX fragments142402
-Ref: LaTeX fragments-Footnote-1144510
-Node: Processing LaTeX fragments144772
-Node: CDLaTeX mode145718
-Ref: CDLaTeX mode-Footnote-1148202
-Node: Exporting148350
-Node: ASCII export149664
-Node: HTML export150954
-Node: XOXO export153790
-Node: iCalendar export154229
-Node: Text interpretation156052
-Node: Comment lines156531
-Node: Enhancing text157002
-Node: Export options158694
-Node: Publishing160361
-Ref: Publishing-Footnote-1161157
-Node: Configuration161353
-Node: Project alist162071
-Node: Sources and destinations163137
-Node: Selecting files163867
-Node: Publishing action164615
-Node: Publishing options165848
-Node: Publishing links168000
-Node: Project page index169513
-Node: Sample configuration170291
-Node: Simple example170783
-Node: Complex example171456
-Node: Triggering publication173532
-Node: Miscellaneous174217
-Node: Completion174851
-Node: Customization176322
-Node: In-buffer settings176907
-Node: The very busy C-c C-c key180328
-Node: Clean view181972
-Node: TTY keys184549
-Node: Interaction186158
-Node: Cooperation186555
-Node: Conflicts188422
-Node: Bugs190014
-Node: Extensions and Hacking191637
-Node: Extensions192123
-Node: Dynamic blocks193693
-Node: History and Acknowledgments195620
-Node: Index200628
-Node: Key Index227059
+Ref: Setting tags-Footnote-1109271
+Ref: Setting tags-Footnote-2109383
+Node: Tag searches109463
+Node: Agenda views111474
+Node: Agenda files113567
+Ref: Agenda files-Footnote-1114527
+Ref: Agenda files-Footnote-2114676
+Node: Agenda dispatcher114869
+Node: Weekly/Daily agenda116486
+Node: Calendar/Diary integration117451
+Node: Global TODO list118789
+Node: Matching headline tags120949
+Node: Timeline122007
+Node: Presentation and sorting122670
+Node: Categories123448
+Node: Time-of-day specifications124112
+Node: Sorting of agenda items126090
+Node: Agenda commands127372
+Node: Custom agenda views133260
+Node: Storing searches133935
+Node: Block agenda135847
+Node: Setting Options137077
+Node: Batch processing139789
+Node: Embedded LaTeX140919
+Ref: Embedded LaTeX-Footnote-1142011
+Node: Math symbols142201
+Node: Subscripts and Superscripts142966
+Node: LaTeX fragments143810
+Ref: LaTeX fragments-Footnote-1145918
+Node: Processing LaTeX fragments146180
+Node: CDLaTeX mode147126
+Ref: CDLaTeX mode-Footnote-1149610
+Node: Exporting149758
+Node: ASCII export151072
+Node: HTML export152362
+Node: XOXO export155198
+Node: iCalendar export155637
+Node: Text interpretation157460
+Node: Comment lines157939
+Node: Enhancing text158410
+Node: Export options160102
+Node: Publishing161769
+Ref: Publishing-Footnote-1162565
+Node: Configuration162761
+Node: Project alist163479
+Node: Sources and destinations164545
+Node: Selecting files165275
+Node: Publishing action166023
+Node: Publishing options167256
+Node: Publishing links169408
+Node: Project page index170921
+Node: Sample configuration171699
+Node: Simple example172191
+Node: Complex example172864
+Node: Triggering publication174940
+Node: Miscellaneous175625
+Node: Completion176259
+Node: Customization177730
+Node: In-buffer settings178315
+Node: The very busy C-c C-c key181736
+Node: Clean view183380
+Node: TTY keys185957
+Node: Interaction187566
+Node: Cooperation187963
+Node: Conflicts189830
+Node: Bugs191422
+Node: Extensions and Hacking193045
+Node: Extensions193531
+Node: Dynamic blocks195101
+Node: History and Acknowledgments197028
+Node: Index202036
+Node: Key Index228686
 
 End Tag Table

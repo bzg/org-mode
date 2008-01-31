@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.51
-@set DATE September 2006
+@set VERSION 4.52
+@set DATE October 2006
 
 @dircategory Emacs
 @direntry
@@ -2884,18 +2884,26 @@ Org will support tag insertion based on a @emph{list of tags}.  By
 default this list is constructed dynamically, containing all tags
 currently used in the buffer.  You may also globally specify a hard list
 of tags with the variable @code{org-tag-alist}.  Finally you can set
-the allowed tags for a given file with lines like
+the default tags for a given file with lines like
 
 @example
 #+TAGS: @@WORK @@HOME @@TENNISCLUB
 #+TAGS: Laptop Car PC Sailboat
 @end example
 
-The default support method is minibuffer completion.  However, Org-mode
-also implements a much better method: @emph{fast tag selection}.  This
-method allows to select and deselect tags with a single key per tag.  To
-function efficiently, you should assign unique keys to all tags.  This
-can be done globally with
+If you have globally defined your preferred set of tags using the
+variable @code{org-tag-alist}, but would like to use a dynamic tag list
+in a specific file: Just add an empty TAGS option line to that file:
+
+@example
+#+TAGS:
+@end example
+
+The default support method for entering tags is minibuffer completion.
+However, Org-mode also implements a much better method: @emph{fast tag
+selection}.  This method allows to select and deselect tags with a
+single key per tag.  To function efficiently, you should assign unique
+keys to most tags.  This can be done globally with
 
 @lisp
 (setq org-tag-alist '(("@@WORK" . ?w) ("@@HOME" . ?h) ("Laptop" . ?l)))
@@ -2927,26 +2935,36 @@ If at least one tag has a selection key, pressing @kbd{C-c C-c} will
 automatically present you with a special interface, listing inherited
 tags, the tags of the current headline, and a list of all legal tags
 with corresponding keys@footnote{Keys will automatically assigned to
-tags which have no configured keys.}.  Pressing keys for the tags will
-add or remove them from the list of tags in the current line.  Selecting
-a tag in a group of mutually exclusive tags will turn off any other tags
-from that group.  @key{SPC} clears all tags for this line, @kbd{RET}
-accepts the modified set, and @kbd{C-g} aborts without installing
-changes.  This method lets you assign tags to a headline with very few
-keys.  With the above setup, you could clear the current tags and set
-@samp{@@HOME}, @samp{Laptop} and @samp{PC} tags with just the following
-keys: @kbd{C-c C-c @key{SPC} h l p @key{RET}}.  Switching from
-@samp{@@HOME} to @samp{@@WORK} would be done with @kbd{C-c C-c w
-@key{RET}}.
+tags which have no configured keys.}.  In this interface, you can use
+the following keys:
 
-What if you have globally defined your preferred set of tags using the
-variable @code{org-tag-alist}, but would like to use a dynamic tag list
-in a specific file?  Just add an empty TAGS option line to that file:
+@table @kbd
+@item a-z...
+Pressing keys assigned to tags will add or remove them from the list of
+tags in the current line.  Selecting a tag in a group of mutually
+exclusive tags will turn off any other tags from that group.
+@kindex @key{TAB}
+@item @key{TAB}
+Enter a tag in the minibuffer, even if the tag is not in the predefined
+list.  You will be able to complete on all tags present in the buffer.
+@kindex @key{SPC}
+@item @key{SPC}
+Clear all tags for this line.
+@kindex @key{RET}
+@item @key{RET}
+Accept the modified set.
+@item C-g
+Abort without installing changes.
+@end table
 
-@example
-#+TAGS:
-@end example
-
+@noindent
+This method lets you assign tags to a headline with very few keys.  With
+the above setup, you could clear the current tags and set @samp{@@HOME},
+@samp{Laptop} and @samp{PC} tags with just the following keys: @kbd{C-c
+C-c @key{SPC} h l p @key{RET}}.  Switching from @samp{@@HOME} to
+@samp{@@WORK} would be done with @kbd{C-c C-c w @key{RET}}.  Adding the
+non-predefined tag @samp{Sarah} could be done with @kbd{C-c C-c
+@key{TAB} S a r a h @key{RET} @key{RET}}.
 
 
 @node Tag searches,  , Setting tags, Tags
@@ -2972,17 +2990,45 @@ only TODO items and force checking subitems (see variable
 @code{org-tags-match-list-sublevels}).
 @end table
 
+@cindex Boolean logic, for tag searches
 A @i{tags} search string can use Boolean operators @samp{&} for AND and
 @samp{|} for OR.  @samp{&} binds more strongly than @samp{|}.
 Parenthesis are currently not implemented.  A tag may also be preceded
 by @samp{-}, to select against it, and @samp{+} is syntactic sugar for
 positive selection.  The AND operator @samp{&} is optional when @samp{+}
-or @samp{-} is present.  For example, @samp{+WORK-BOSS} would select all
-headlines that are tagged @samp{:WORK:}, but discard those also tagged
-@samp{:BOSS:}.  The search string @samp{WORK|LAPTOP} selects all lines
-tagged @samp{:WORK:} or @samp{:LAPTOP:}.  The string
-@samp{WORK|LAPTOP&NIGHT} requires that the @samp{:LAPTOP:} lines are
-also tagged @samp{NIGHT}.
+or @samp{-} is present.  Examples:
+
+@table @samp
+@item +WORK-BOSS
+Select all headlines that are tagged @samp{:WORK:}, but discard those also tagged
+@samp{:BOSS:}.
+@item WORK|LAPTOP
+Selects lines tagged @samp{:WORK:} or @samp{:LAPTOP:}.
+@item WORK|LAPTOP&NIGHT
+Like the previous example, but require  the @samp{:LAPTOP:} lines to be
+tagged also @samp{NIGHT}.
+@end table
+
+@cindex TODO keyword matching, with tags search
+If you are using multi-state TODO keywords (@pxref{TODO extensions}), it
+can be useful to also match on the TODO keyword.  This can be done by
+adding a condition after a double slash to a tags match.  The syntax is
+similar to the tag matches, but should be applied with consideration:
+For example, a positive selection on several TODO keywords can not
+meaningfully be combined with boolean AND.  However, @emph{negative
+selection} combined with AND can be meaningful.  Examples:
+
+@table @samp
+@item WORK//WAITING
+Select @samp{:WORK:}-tagged TODO lines with the specific TODO
+keyword @samp{WAITING}.
+@item WORK//-WAITING-NEXT
+Select @samp{:WORK:}-tagged TODO lines that are neither @samp{WAITING}
+nor @samp{NEXT}
+@item WORK//+WAITING|+NEXT
+Select @samp{:WORK:}-tagged TODO lines that are either @samp{WAITING} or
+@samp{NEXT}.
+@end table
 
 @node Agenda views, Embedded LaTeX, Tags, Top
 @chapter Agenda Views
@@ -3188,6 +3234,7 @@ agenda files (@pxref{Agenda views}) into a single buffer.  The buffer is in
 the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @kindex C-c a T
 @item C-c a T
+@cindex TODO keyword matching
 Like the above, but allows selection of a specific TODO keyword.  You can
 also do this by specifying a prefix argument to @kbd{C-c a t}.  With a
 @kbd{C-u} prefix you are prompted for a keyword.  With a numeric
@@ -3196,7 +3243,9 @@ prefix, the Nth keyword in @code{org-todo-keywords} is selected.
 The @kbd{r} key in the agenda buffer regenerates it, and you can give
 a prefix argument to this command to change the selected TODO keyword,
 for example @kbd{3 r}.  If you often need a search for a specific
-keyword, define a custom command for it (@pxref{Agenda dispatcher}).
+keyword, define a custom command for it (@pxref{Agenda dispatcher}).@*
+Matching specific TODO keywords can also be done as part of a tags
+search (@pxref{Tag searches}).
 @end table
 
 Remote editing of TODO items means that you can change the state of a
@@ -3241,7 +3290,8 @@ define a custom command for it (@pxref{Agenda dispatcher}).
 @item C-c a M
 Like @kbd{C-c a m}, but only select headlines that are also TODO items
 and force checking subitems (see variable
-@code{org-tags-match-list-sublevels}).
+@code{org-tags-match-list-sublevels}).  Matching specific todo keywords
+together with a tags match is also possible, see @ref{Tag searches}.
 @end table
 
 The commands available in the tags list are described in @ref{Agenda

@@ -44,6 +44,7 @@
 
 ;;; Code:
 
+(require 'xemacs)
 (require 'easymenu)
 
 ;; XEmacs and compatibility
