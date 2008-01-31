@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.58}
+\def\orgversionnumber{4.59}
 \def\year{2006}
 %
 %**start of header
@@ -285,6 +285,7 @@ are preserved on all copies.
 \key{rotate entire buffer between states}{S-TAB}
 \key{show the whole file}{C-c C-a}
 \key{reveal context around point}{C-c C-r}
+\key{show subtree in indirect buffer, ded.\ frame}{C-c C-k}
 %\key{show branches}{C-c C-k}
 
 \section{Motion}
@@ -572,8 +573,10 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{compile TODO list for specific keyword}{C-c a T$^1$}
 \key{match tags in agenda files}{C-c a m$^1$}
 \key{match tags in TODO entries}{C-c a M$^1$}
+\key{find stuck projects}{C-c a \#$^1$}
 \key{show timeline of current org file}{C-c a L$^1$}
 \key{configure custom commands}{C-c a C$^1$}
+\key{configure stuck projects}{C-c a !$^1$}
 \key{agenda for date at cursor}{C-c C-o}
 
 \vskip 1mm
@@ -593,6 +596,7 @@ To set categories, add lines like$^2$:
 \key{goto original location in other window}{TAB/mouse-2}
 %\key{... also available with}{mouse-2}
 \key{goto original location, delete other windows}{RET}
+\key{show subtree in indirect buffer, ded.\ frame}{b}
 \key{toggle follow-mode}{f}
 
 {\bf Change display}
@@ -633,6 +637,7 @@ To set categories, add lines like$^2$:
 
 \key{Open link in current line}{C-c C-o}
 
+\newcolumn
 {\bf Calendar commands}
 
 \key{find agenda cursor date in calendar}{c}

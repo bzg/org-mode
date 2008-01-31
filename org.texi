@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.58
+@set VERSION 4.59
 @set DATE December 2006
 
 @dircategory Emacs
@@ -626,14 +626,13 @@ command (@pxref{Agenda commands}).
 @kindex C-c C-x b
 @item C-c C-x b
 Show the current subtree in an indirect buffer@footnote{The indirect
-buffer (@pxref{Indirect Buffers,Indirect Buffers,Indirect Buffers,emacs,GNU
-Emacs Manual}) will contain the entire buffer, but will
-be narrowed to the current tree.  Editing the indirect buffer will also
-change the original buffer, but without affecting visibility in that
-buffer .}, in a separate, dedicated frame.  With positive numerical
-prefix N, go up to level N before selecting the subtree.  With negative
-prefix -N, go up N levels.  With @kbd{C-u} prefix, don't use the
-dedicated frame, but another, new frame.
+buffer (@pxref{Indirect Buffers,Indirect Buffers,Indirect
+Buffers,emacs,GNU Emacs Manual}) will contain the entire buffer, but
+will be narrowed to the current tree.  Editing the indirect buffer will
+also change the original buffer, but without affecting visibility in
+that buffer.}.  With numerical prefix ARG, go up to this level and then
+take that tree.  If ARG is negative, go up that many levels.  With
+@kbd{C-u} prefix, do not remove the previously used indirect buffer.
 @end table
 
 When Emacs first visits an Org-mode file, the global state is set to
@@ -3713,11 +3712,10 @@ agenda buffers can be set with the variable
 
 @kindex b
 @item b
-Display the entire subtree of the current item in an indirect buffer, in
-a separate, dedicated frame.  With positive numerical prefix N, go up to
-level N before selecting the subtree.  With negative prefix -N, go up N
-levels.  With @kbd{C-u} prefix, don't use the dedicated frame, but
-another, new frame.
+Display the entire subtree of the current item in an indirect buffer.
+With numerical prefix ARG, go up to this level and then take that tree.
+If ARG is negative, go up that many levels.  With @kbd{C-u} prefix, do
+not remove the previously used indirect buffer.
 
 @kindex l
 @item l

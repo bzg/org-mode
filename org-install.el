@@ -12,6 +12,7 @@
 (autoload 'org-cycle-agenda-files "org" "Cycle through agenda-files." t)
 (autoload 'org-todo-list "org" "Produce global TODO list." t)
 (autoload 'org-tags-view "org" "Produce global TAGS agenda view." t)
+(autoload 'org-agenda-list-stuck-projects "org" "List stuck projects." t)
 (autoload 'org-remember-annotation "org")
 (autoload 'org-remember-apply-template "org")
 (autoload 'org-remember-handler "org")
