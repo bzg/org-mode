@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 5.06b
+;; Version: 5.06d
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.06b"
+(defconst org-version "5.06d"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -3945,6 +3945,7 @@ This is for getting out of special buffers like remember.")
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
+(defvar org-agenda-buffer-name)
 (defvar org-agenda-undo-list)
 (defvar org-agenda-pending-undo-list)
 (defvar org-agenda-overriding-header)
@@ -16713,7 +16714,7 @@ before running the agenda command."
 		    (list 'org-tags-view nil cmd-key)))
       (flet ((read-char-exclusive () (string-to-char cmd-key)))
 	(eval (list 'let (nreverse pars) '(org-agenda nil)))))
-    (set-buffer "*Org Agenda*")
+    (set-buffer org-agenda-buffer-name)
     (princ (org-encode-for-stdout (buffer-string)))))
 
 (defun org-encode-for-stdout (string)
@@ -16768,7 +16769,7 @@ agenda-day   The day in the agenda where this is listed"
 		    (list 'org-tags-view nil cmd-key)))
       (flet ((read-char-exclusive () (string-to-char cmd-key)))
 	(eval (list 'let (nreverse pars) '(org-agenda nil)))))
-    (set-buffer "*Org Agenda*")
+    (set-buffer org-agenda-buffer-name)
     (let* ((lines (org-split-string (buffer-string) "\n"))
 	   line)
       (while (setq line (pop lines))
@@ -16831,8 +16832,6 @@ agenda-day   The day in the agenda where this is listed"
   (interactive)
   (eval (list 'org-batch-store-agenda-views)))
 
-(defvar org-agenda-buffer-name)
-
 ;; FIXME, why is this a macro?????
 ;;;###autoload
 (defmacro org-batch-store-agenda-views (&rest parameters)
@@ -16848,18 +16847,19 @@ agenda-day   The day in the agenda where this is listed"
 	(setq cmd (pop cmds)
 	      thiscmdkey (car cmd)
 	      opts (nth 3 cmd)
-	      files (org-last cmd))
+	      files (nth 4 cmd))
 	(if (stringp files) (setq files (list files)))
 	(when files
 	  (flet ((read-char-exclusive () (string-to-char thiscmdkey)))
 	    (eval (list 'let (append org-agenda-exporter-settings opts pars)
 			'(org-agenda nil))))
-	  (set-buffer "*Org Agenda*")
+	  (set-buffer org-agenda-buffer-name)
 	  (while files
 	    (eval (list 'let (append org-agenda-exporter-settings opts pars)
 			(list 'org-write-agenda
-			      (expand-file-name (pop files) dir) t)))))
-	(kill-buffer org-agenda-buffer-name)))))
+			      (expand-file-name (pop files) dir) t))))
+	  (and (get-buffer org-agenda-buffer-name)
+	       (kill-buffer org-agenda-buffer-name)))))))
 
 (defun org-write-agenda (file &optional nosettings)
   "Write the current buffer (an agenda view) as a file.
