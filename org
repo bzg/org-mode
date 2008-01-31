@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.19a).
+   This manual is for Org-mode (version 4.19b).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.19a).
+This manual is for Org-mode (version 4.19b).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -265,6 +265,12 @@ this:
 which will select Org-mode for this buffer no matter what the file's
 name is.  See also the variable `org-insert-mode-line-in-empty-file'.
 
+   If you are upgrading to version 4.20 or later from a version 4.14 or
+earlier, some links may stop working.  These are links containing space
+characters.  To make such links work again, and also to transform all
+links from the old `<link>' format to the new `[[link]]' format,
+execute once in each file: `M-x org-upgrade-old-links'.
+
 
 File: org,  Node: Feedback,  Prev: Installation and activation,  Up: Introduction
 
@@ -281,6 +287,7 @@ including the version information of Emacs (`C-h v emacs-version
 Org-mode related setup in `.emacs'.  If an error occurs, a traceback
 can be very useful.  Often a small example file helps, along with clear
 information about:
+
   1. What exactly did you do?
 
   2. What did you expect to happen?
@@ -339,9 +346,10 @@ Org-mode start with one or more stars, on the left margin.  For example:
      *** 3rd level
          more text
      * Another top level headline
-   Some people find the many stars too noisy and would prefer an
-outline that has whitespace followed by a single star as headline
-starters.  *Note Clean view:: describes a setup to realize this.
+
+Some people find the many stars too noisy and would prefer an outline
+that has whitespace followed by a single star as headline starters.
+*Note Clean view:: describes a setup to realize this.
 
 
 File: org,  Node: Visibility cycling,  Next: Motion,  Prev: Headlines,  Up: Document Structure
@@ -355,15 +363,19 @@ visibility in the buffer.
 
 `<TAB>'
      Rotate current subtree between the states
+
           ,-> FOLDED -> CHILDREN -> SUBTREE --.
           '-----------------------------------'
+
      At the beginning of the buffer (or when called with `C-u'), this
      does the same as the command `S-<TAB>' below.
 
 `S-<TAB>'
      Rotate the entire buffer between the states
+
           ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
           '--------------------------------------'
+
      Note that inside tables, `S-<TAB>' jumps to the previous field.
 
 `C-c C-a'
@@ -512,10 +524,12 @@ use the variable `org-agenda-custom-commands' to define fast keyboard
 access to specific sparse trees.  These commands will then be
 accessible through the agenda dispatcher (*note Agenda dispatcher::).
 For example:
+
      (setq org-agenda-custom-commands
            '(("f" occur-tree "FIXME")))
-   will define the key `C-c a f' as a shortcut for creating a sparse
-tree matching the string `FIXME'.
+
+will define the key `C-c a f' as a shortcut for creating a sparse tree
+matching the string `FIXME'.
 
    Other commands are using sparse trees as well.  For example `C-c
 C-v' creates a sparse TODO tree (*note TODO basics::).
@@ -653,7 +667,8 @@ only type
 
      |Name|Phone|Age
      |-
-   and then press <TAB> to align the table and start filling in fields.
+
+and then press <TAB> to align the table and start filling in fields.
 
    When typing text into a field, Org-mode treats <DEL>, <Backspace>,
 and all character keys in a special way, so that inserting and deleting
@@ -811,7 +826,13 @@ Miscellaneous
 
 `C-c `'
      Edit the current field in a separate window.  This is useful for
-     fields that are not fully visible (*note Narrow columns::).
+     fields that are not fully visible (*note Narrow columns::).  When
+     called with a `C-u' prefix, just make the full field visible, so
+     that it can be edited in place.
+
+`C-c <TAB>'
+     This is an alias for `C-u C-c `' to make the current field fully
+     visible.
 
 `C-c |'
      Toggle the visibility of vertical lines in tables.  The lines are
@@ -835,8 +856,10 @@ Miscellaneous
    If you don't like the automatic table editor because it gets in your
 way on lines which you would like to start with `|', you can turn it
 off with
+
      (setq org-enable-table-editor nil)
-   The only table command which then still works is `C-c C-c' to do a
+
+The only table command which then still works is `C-c C-c' to do a
 manual re-align.
 
 
@@ -860,9 +883,10 @@ to no more than this value.
      | 3 | This is a long chunk of text |     ----/     | 3 | This=> |
      | 4 | four                         |               | 4 | four   |
      |---+------------------------------|               |---+--------|
-   Fields that are wider become clipped and end in the string `=>'.
-Note that the full text is still in the buffer, it is only invisible.
-To see the full text, hold the mouse over the field - a tooltip window
+
+Fields that are wider become clipped and end in the string `=>'.  Note
+that the full text is still in the buffer, it is only invisible.  To
+see the full text, hold the mouse over the field - a tooltip window
 will show the full content.  To edit such a field, use the command `C-c
 `' (that is `C-c' followed by the backquote).  This will open a new
 window with the full field.  Edit it and finish with `C-c C-c'.
@@ -873,6 +897,7 @@ be aligned before it looks nice.  Setting the option
 `org-startup-align-all-tables' will realign all tables in a file upon
 visiting, but also slow down startup.  You can also set this option on
 a per-file basis with:
+
      #+STARTUP: align
      #+STARTUP: noalign
 
@@ -947,6 +972,7 @@ or fixed display format, respectively, and `D', `R', `F', and `S' to
 turn on degrees, radians, fraction and symbolic modes, respectively.
 In addition, you may provide a `printf' format specifier to reformat
 the final result.  A few examples:
+
        $1+$2                Sum of first and second field
        $1+$2;%.2f           Same, format result to two decimals
        exp($2)+exp($1)      Math functions can be used
@@ -1013,6 +1039,7 @@ you want to be able to assign a formula to an individual field (instead
 of an entire column) you need to reserve the first column of the table
 for special marking characters.  Here is an example of a table that
 collects exam results of students and makes use of these features:
+
      |---+---------+--------+--------+--------+-------+------|
      |   | Student | Prob 1 | Prob 2 | Prob 3 | Total | Note |
      |---+---------+--------+--------+--------+-------+------|
@@ -1157,6 +1184,7 @@ might want to use it also in other modes like text-mode or mail-mode.
 The minor mode Orgtbl-mode makes this possible.  You can always toggle
 the mode with `M-x orgtbl-mode'.  To turn it on by default, for example
 in mail mode, use
+
      (add-hook 'mail-mode-hook 'turn-on-orgtbl)
 
 
@@ -1209,24 +1237,24 @@ File: org,  Node: Link format,  Next: Internal links,  Prev: Hyperlinks,  Up: Hy
 ===============
 
 Org-mode will recognize plain URL-like links in the buffer and activate
-them as clickable links.  However, the general linkformat in Org-mode
-looks like:
+them as clickable links.  However, the general linkformat looks like
+this:
+
      [[link][description]]       or alternatively           [[link]]
+
    The description part is optional.  Once a link in the buffer is
 complete, Org-mode will change the display so that `description'( is
 displayed instead of `[[link][description]]' and `link' is displayed
 instead of `[[link]]'.  Links will be highlighted in the face
 `org-link', which by default is an underlined face.  You can directly
 edit the visible part of a link.  To edit the invisible part, use `C-c
-C-l' with the cursor on the link(1).
-
-   ---------- Footnotes ----------
-
-   (1) You can also position the cursor directly after the link and
-press <BACKSPACE> to remove the (invisible) closing bracket `]'.  This
-makes the link incomplete, and shows the full raw link text for you to
-edit.  You may also use the menu entry `Org->Hperlinks->Literal links'
-to unhide all links.
+C-l' with the cursor on the link.  If you place the cursor at the
+beginning of end of the displayed text and press <BACKSPACE>, you will
+remove the (invisible) bracket at that location.  This makes the link
+incomplete and the internals are again displayed as plain text.
+Inserting the missing bracket does hide the link internal again.
+Finally, you may also use the menu entry `Org->Hperlinks->Literal
+links' to unhide all links.
 
 
 File: org,  Node: Internal links,  Next: External links,  Prev: Link format,  Up: Hyperlinks
@@ -1242,6 +1270,7 @@ or with a mouse click (*note Managing links::).  The preferred match
 for such a link is a dedicated target: The same string in double
 angular brackets.  Targets may be located anywhere, often it is
 convenient to put them into a comment line, for example
+
      # <<My Target>>
 
    If no dedicated target exists, Org-mode will search for the words in
@@ -1251,6 +1280,7 @@ star like `*My Target' restrict the search to headlines.  When
 searching, Org-mode will first try an exact match, but then move on to
 more and more lenient searches.  For example, the link `[[*My
 Targets]]' will find any of the following:
+
      ** My targets
      ** TODO my targets are bright
      ** my 20 targets are
@@ -1293,11 +1323,13 @@ File: org,  Node: CamelCase links,  Prev: Radio targets,  Up: Internal links
 4.2.2 CamelCase words as links
 ------------------------------
 
-As an alternative to `[[...]]' links, Org-mode also supports CamelCase
-words as links.  This feature is not turned on by default because of
-the occasional inconsistencies this system suffers from.  To activate
-CamelCase words as links, and to make headline completion offer
-CamelCase version of headlines, the following customization is needed:
+Org-mode also supports CamelCase words as links.  This feature is not
+turned on by default because of the inconsistencies this system suffers
+from.  It is mainly kept for backward compatibility, but the use is
+deprecated.  To activate CamelCase words as links, and to make headline
+completion offer CamelCase version of headlines, the following
+customization is needed:
+
      (setq org-activate-camels t
            org-file-link-context-use-camel-case t)
 
@@ -1308,40 +1340,37 @@ File: org,  Node: External links,  Next: Managing links,  Prev: Internal links, 
 ==================
 
 Org-mode supports links to files, websites, Usenet and email messages;
-and BBDB database entries.  External links are plain-text URL-like
-locators, optionally enclosed in angular brackets.  The following list
-shows examples for each link type.
+and BBDB database entries.  External links are URL-like locators.  The
+following list shows examples for each link type.
 
-     <http://www.astro.uva.nl/~dominik>         on the web
-     <file:/home/dominik/images/jupiter.jpg>    file, absolute path
-     <file:papers/last.pdf>                     file, relative path
-     <news:comp.emacs>                          Usenet link
-     <mailto:adent@galaxy.net>                  Mail link
-     <vm:folder>                                VM folder link
-     <vm:folder#id>                             VM message link
-     <vm://myself@some.where.org/folder#id>     VM on remote machine
-     <wl:folder>                                WANDERLUST folder link
-     <wl:folder#id>                             WANDERLUST message link
-     <mhe:folder>                               MH-E folder link
-     <mhe:folder#id>                            MH-E message link
-     <rmail:folder>                             RMAIL folder link
-     <rmail:folder#id>                          RMAIL message link
-     <gnus:group>                               GNUS group link
-     <gnus:group#id>                            GNUS article link
-     <bbdb:Richard Stallman>                    BBDB link
-     <shell:ls *.org>(1)                          A shell command
+     http://www.astro.uva.nl/~dominik         on the web
+     file:/home/dominik/images/jupiter.jpg    file, absolute path
+     file:papers/last.pdf                     file, relative path
+     news:comp.emacs                          Usenet link
+     mailto:adent@galaxy.net                  Mail link
+     vm:folder                                VM folder link
+     vm:folder#id                             VM message link
+     vm://myself@some.where.org/folder#id     VM on remote machine
+     wl:folder                                WANDERLUST folder link
+     wl:folder#id                             WANDERLUST message link
+     mhe:folder                               MH-E folder link
+     mhe:folder#id                            MH-E message link
+     rmail:folder                             RMAIL folder link
+     rmail:folder#id                          RMAIL message link
+     gnus:group                               GNUS group link
+     gnus:group#id                            GNUS article link
+     bbdb:Richard Stallman                    BBDB link
+     shell:ls *.org(1)                          A shell command
 
-   A link may contain space characters and is terminated by `>' or by
-the end of a line.  In tables, the end of a table field also terminates
-a link.  Angle brackets around a link are not required, but are
-recommended to avoid problems with punctuation and other text following
-the link.
+   A link should be enclosed in double brackets and may contain a
+descriptive text to be displayed instead of the url (*note Link
+format::), for example:
 
-   To display a descriptive text instead of the URL, enclose the link
-into double brackets and add the descriptive text like this:
-     [[<http://www.gnu.org/software/emacs/>][GNU Emacs]]
-   Links inserted with `C-c C-l' automatically use the double bracket
-format (*note Managing links::).
+     [[http://www.gnu.org/software/emacs/][GNU Emacs]]
+
+   Org-mode also finds external links in the normal text and activates
+them as links.  Plain text links cannot contain spaces.  To remove
+ambiguities about the end of the link, enclose them in angular brackets.
 
    ---------- Footnotes ----------
 
@@ -1376,31 +1405,41 @@ insert it into an org-mode file, and to follow the link.
      buffer.  You can just type a link, using text for an internal
      link, or one of the link type prefixes mentioned in the examples
      above.  Through completion, all links stored during the current
-     session can be accessed.  When called with prefix arg, you can use
-     file name completion to enter a file link.  The link will be
-     formatted as given in the variable `org-link-format' and inserted
-     into the buffer, along with a descriptive text.  Note that you
-     don't have to use this command to insert a link.  Links in
-     Org-mode are plain text, and you can type or paste them straight
-     into the buffer.
+     session can be accessed.  The link will be formatted as given in
+     the variable `org-link-format' and inserted into the buffer, along
+     with a descriptive text.  Note that you don't have to use this
+     command to insert a link.  Links in Org-mode are plain text, and
+     you can type or paste them straight into the buffer.  By using
+     this command, the links are automatically enclosed in double
+     brackets, and you will be asked for the optional descriptive text.
+
+`C-u C-c C-l'
+     When `C-c C-l' is called with a `C-u' prefix argument, a link to a
+     file will be inserted and you may use file name completion to
+     select the name of the file.  The path to the file is inserted
+     relative to the directory of the current org file, if the linked
+     file is in the current directory or in a subdirectory of it.
+     Otherwise an absolute path, if possible with `~/' for your home
+     directory is used.  You can force an absolute path with two `C-u'
+     prefixes.
+
+`C-c C-l with cursor on existing link'
+     When the cursor is on an existing link, `C-c C-l' allows to edit
+     the link and description parts of the link.
 
 `C-c C-o'
      Open link at point.  This will launch a web browser for URLs (using
-     `browse-url-at-point'), run vm/gnus/bbdb for the corresponding
-     links, and execute the command in a shell link.  When the cursor
-     is on am internal link, this commands runs the corresponding
-     search.  When the cursor is on a TAGS list in a headline, it
-     creates the corresponding TAGS view.  Furthermore, it will visit
-     text files in `file:' links with Emacs and select a suitable
-     application for non-text files.  Classification of files is based
-     on file extension only.  See option `org-file-apps'.  If there is
-     no link at point, the current subtree will be searched for one.
-     If you want to override the default application and visit the file
-     with Emacs, use a `C-u' prefix.  If the cursor is on a time stamp,
-     it compiles the agenda for that date.
-
-     *IMPORTANT*: Be careful not to use any dangerous commands in a
-     shell link.
+     `browse-url-at-point'), run vm/mh-e/wanderlust/rmail/gnus/bbdb for
+     the corresponding links, and execute the command in a shell link.
+     When the cursor is on an internal link, this commands runs the
+     corresponding search.  When the cursor is on a TAGS list in a
+     headline, it creates the corresponding TAGS view.  If the cursor
+     is on a time stamp, it compiles the agenda for that date.
+     Furthermore, it will visit text files in `file:' links with Emacs
+     and select a suitable application for non-text files.
+     Classification of files is based on file extension only.  See
+     option `org-file-apps'.  If you want to override the default
+     application and visit the file with Emacs, use a `C-u' prefix.
 
 `mouse-2'
 `mouse-1'
@@ -1429,11 +1468,13 @@ File: org,  Node: Search Options,  Next: Remember,  Prev: Managing links,  Up: H
 File links can contain additional information to make Emacs jump to a
 particular location in the file when following a link.  This can be a
 line number or a search option after a double(1) colon.  For example:
-     <file:~/code/main.c::255>
-     <file:~/xx.org::My Target>
-     <file:~/xx.org::*My Target>
-     <file:~/xx.org::/regexp/>
-   Here is what these options do.
+
+     [[file:~/code/main.c::255]]
+     [[file:~/xx.org::My Target]]
+     [[file:~/xx.org::*My Target]]
+     [[file:~/xx.org::/regexp/]]
+
+Here is what these options do.
 
 `255'
      Jump to line 255.
@@ -1495,8 +1536,9 @@ journal entries, you could use:
      (setq org-remember-templates
            '((?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org")
              (?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")))
-   In these entries, the character specifies how to select the
-template, the first string specifies the template, and the second string
+
+In these entries, the character specifies how to select the template,
+the first string specifies the template, and the second string
 specifies a default file (overruling `org-default-notes-file') as a
 target for this note.
 
@@ -1504,7 +1546,9 @@ target for this note.
 for a key to select the template and then prepare the buffer like
      * TODO
        <file:link to where you called remember>
-   or
+
+or
+
      * [2006-03-21 Tue 15:37]
 
        <file:link to where you called remember>
@@ -1587,8 +1631,10 @@ The most important commands to work with TODO entries are:
 
 `C-c C-t'
      Rotate the TODO state of the current item between
+
           ,-> (unmarked) -> TODO -> DONE --.
           '--------------------------------'
+
      The same rotation can also be done "remotely" from the timeline and
      agenda buffers with the `t' command key (*note Agenda commands::).  
 
@@ -1619,15 +1665,17 @@ File: org,  Node: Progress logging,  Next: TODO extensions,  Prev: TODO basics, 
 
 If you want to keep track of _when_ a certain TODO item was finished,
 turn on logging with
+
      (setq org-log-done t)
-   Then each time you turn a TODO entry into DONE using either `C-c
-C-t' in the Org-mode buffer or `t' in the agenda buffer, a line
-`CLOSED: [timestamp]' will be inserted just after the headline.  If you
-turn the entry back into a TODO item again through further state
-cycling, that line will be removed again.  In the timeline (*note
-Timeline::) and in the agenda (*note Weekly/Daily Agenda::), you can
-then use the `L' key to display the TODO items closed on each day,
-giving you an overview of what has been done on a day.
+
+Then each time you turn a TODO entry into DONE using either `C-c C-t'
+in the Org-mode buffer or `t' in the agenda buffer, a line `CLOSED:
+[timestamp]' will be inserted just after the headline.  If you turn the
+entry back into a TODO item again through further state cycling, that
+line will be removed again.  In the timeline (*note Timeline::) and in
+the agenda (*note Weekly/Daily Agenda::), you can then use the `L' key
+to display the TODO items closed on each day, giving you an overview of
+what has been done on a day.
 
 
 File: org,  Node: TODO extensions,  Next: Priorities,  Prev: Progress logging,  Up: TODO items
@@ -1951,7 +1999,7 @@ File: org,  Node: Tags,  Next: Agenda Views,  Prev: Timestamps,  Up: Top
 ******
 
 If you wish to implement a system to cross-correlate information, an
-excellent ways is assigning tags to headline.  Org-mode has extensive
+excellent way is to assign tags to headline.  Org-mode has extensive
 support for using tags.
 
    Every headline can contain a list of tags, at the end of the
@@ -1978,8 +2026,9 @@ well.  For example, in the list
      * Meeting with the French group      :WORK:
      ** Summary by Frank                  :BOSS:NOTES:
      *** TODO Prepare slides for him      :ACTION:
-   the final heading will have the tags `:WORK:', `:BOSS:', `:NOTES:',
-and `:ACTION:'.  When executing tag searches and Org-mode finds that a
+
+the final heading will have the tags `:WORK:', `:BOSS:', `:NOTES:', and
+`:ACTION:'.  When executing tag searches and Org-mode finds that a
 certain headline matches the search criterion, it will not check any
 sublevel headline, assuming that these likely also match, and that the
 list of matches can become very long.  However, this may not be what
@@ -2054,6 +2103,7 @@ sorted and displayed in an organized way.
 
    Org-mode can select items based on various criteria, and display them
 in a separate buffer.  Three different views are provided:
+
    * an _agenda_ that is like a calendar and shows information for
      specific dates
 
@@ -2061,7 +2111,8 @@ in a separate buffer.  Three different views are provided:
 
    * a _tags view_ that shows information based on the tags associated
      with headlines in the outline tree.
-   The extracted information is displayed in a special _agenda buffer_.
+
+The extracted information is displayed in a special _agenda buffer_.
 This buffer is read-only, but provides commands to visit the
 corresponding locations in the original Org-mode files, and even to
 edit these files remotely.
@@ -2098,7 +2149,8 @@ way to maintain it is through the following commands
 
 `C-,'
      Cycle through agenda file list, visiting one file after the other.
-   The Org menu contains the current list of files and can be used to
+
+The Org menu contains the current list of files and can be used to
 visit any of them.
 
    ---------- Footnotes ----------
@@ -2145,12 +2197,14 @@ on the current buffer instead of the list of agenda files.
 `org-agenda-custom-commands'.  You can customize this variable, for
 example by pressing `C-c a C'.  You can also directly set it with Emacs
 Lisp in `.emacs'.  For example:
+
      (setq org-agenda-custom-commands
            '(("w" todo "WAITING")
              ("u" tags "+BOSS-URGENT")
              ("U" tags-tree "+BOSS-URGENT")
              ("f" occur-tree "\\<FIXME\\>")))
-   will define `C-c a w' as a global search for TODO entries with
+
+will define `C-c a w' as a global search for TODO entries with
 `WAITING' as the TODO keyword, `C-c a u' as a global tags search for
 headlines marked `:BOSS:' but not `:URGENT:', `C-c a U' to do the same
 search but only in the current buffer and display the result as a
@@ -2195,7 +2249,9 @@ File: org,  Node: Categories,  Next: Time-of-day specifications,  Prev: Weekly/D
 In the agenda buffer, each entry is preceded by a _category_, which is
 derived from the file name.  The category can also be set with a
 special line anywhere in the buffer, looking like this:
+
      #+CATEGORY: Thesis
+
    If there are several such lines in a file, each specifies the
 category for the text below it (but the first category also applies to
 any text before the first CATEGORY line).  The display in the agenda
@@ -2264,7 +2320,8 @@ the diary.
 agenda, you only need to customize the variable
 
      (setq org-agenda-include-diary t)
-   After that, everything will happen automatically.  All diary entries
+
+After that, everything will happen automatically.  All diary entries
 including holidays, anniversaries etc will be included in the agenda
 buffer created by Org-mode.  <SPC>, <TAB>, and <RET> can be used from
 the agenda buffer to jump to the diary file in order to edit existing
@@ -2368,7 +2425,8 @@ is to give an overview over events in a project.
      Show a time-sorted view of the org file, with all time-stamped
      items.  When called with a `C-u' prefix, all unfinished TODO
      entries (scheduled or not) are also listed under the current date.
-   The commands available in the timeline buffer are listed in *Note
+
+The commands available in the timeline buffer are listed in *Note
 Agenda commands::.
 
 
@@ -2598,8 +2656,10 @@ headlines, defining a general document structure.  Additional levels
 will be exported as itemized lists.  If you want that transition to
 occur at a different level, specify it with a prefix argument.  For
 example,
+
      C-1 C-c C-x a org-export-as-ascii
-   creates only top level headlines and does the rest as items.  Lines
+
+creates only top level headlines and does the rest as items.  Lines
 starting with `#' and subtrees starting with the word `COMMENT' will
 not be exported.
 
@@ -2630,8 +2690,10 @@ headlines, defining a general document structure.  Additional levels
 will be exported as itemized lists.  If you want that transition to
 occur at a different level, specify it with a prefix argument.  For
 example,
+
      C-2 C-c C-x b
-   creates two levels of headings and does the rest as items.
+
+creates two levels of headings and does the rest as items.
 
 * Menu:
 
@@ -2700,7 +2762,8 @@ Completion::).
      #+TEXT:      Some descriptive text to be inserted at the beginning.
      #+TEXT:      Several lines may be given.
      #+OPTIONS:   H:2  num:t  toc:t  \n:nil  t  ::t  |:t  ^:t  *:nil  TeX:t
-   The OPTIONS line is a compact form to specify export settings.  Here
+
+The OPTIONS line is a compact form to specify export settings.  Here
 you can: 
      H:      set the number of headline levels for export
      num:    turn on/off section-numbers
@@ -2879,7 +2942,8 @@ the buffer)
 
      #+STARTUP: showstars
      #+STARTUP: hidestars
-   Press `C-c C-c' with the cursor in a `STARTUP' line to activate the
+
+Press `C-c C-c' with the cursor in a `STARTUP' line to activate the
 modifications.
 
    With stars hidden, the tree becomes:
@@ -2983,19 +3047,35 @@ File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
      turn it on for all `README' files?
           (add-to-list 'auto-mode-alist '("README$" . org-mode))
 
-  2. All these stars are driving me mad, I just find the Emacs outlines
+  2. Some of my links stopped working after I upgraded to a version
+     4.20 or later.  Why is this, and how can I fix it?
+     The newer versions of Org-mode have a better link system and no
+     longer allow unescaped space characters as part of a link.  To fix
+     these links, and also to move all `<link>' style links to the new
+     `[[link]]' system, execute once in each Org-mode file: `M-x
+     org-upgrade-old-links'.
+
+  3. I really like the old style links with angular brackets better.
+     Please give them back to me, don't tell me it is not possible!
+     Would I let you down like that?  If you must (even if I don't
+     understand why), you can do this
+          (setq org-allow-space-in-plain-links t
+                org-link-style 'plain
+                org-link-format "<%s>")
+
+  4. All these stars are driving me mad, I just find the Emacs outlines
      unreadable. Can't you just put white space and a single star as a
      starter for headlines?
      See *Note Clean view::.
 
-  3. I would like to have two windows on the same Org-mode file, but
+  5. I would like to have two windows on the same Org-mode file, but
      with different outline visibility.  Is that possible?
      In GNU Emacs, you may use _indirect buffers_ which do exactly
      this.  See the documentation on the command
      `make-indirect-buffer'.  In XEmacs, this is currently not possible
      because of the different outline implementation.
 
-  4. When I export my TODO list, every TODO item becomes a separate
+  6. When I export my TODO list, every TODO item becomes a separate
      section.  How do I enforce these items to be exported as an
      itemized list?
      If you plan to use ASCII or HTML export, make sure things you want
@@ -3013,42 +3093,42 @@ File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
 
           +OPTIONS:   H:2; ...
 
-  5. I would like to export only a subtree of my file to HTML.  How?
+  7. I would like to export only a subtree of my file to HTML.  How?
      If you want to export a subtree, mark the subtree as region and
      then export.  Marking can be done with `C-c @ C-x C-x', for
      example.
 
-  6. Org-mode takes over the S-cursor keys.  I also want to use
+  8. Org-mode takes over the S-cursor keys.  I also want to use
      CUA-mode, is there a way to fix this conflict?
      Yes, see *Note Interaction::.
 
-  7. Is there an easy way to insert an empty table template with a
+  9. Is there an easy way to insert an empty table template with a
      default number of rows and columns?
      To insert an empty table template, just type `|-' and use <TAB>.
      The default size can be changed with the variable
      `org-table-default-size'.  However, just starting to type the
      first line is usually much easier.
 
-  8. One of my table columns has started to fill up with `#ERROR'.
+ 10. One of my table columns has started to fill up with `#ERROR'.
      What is going on?
      Org-mode tried to compute the column from other fields using a
      formula stored in the `#+TBLFMT:' line just below the table, and
      the evaluation of the formula fails.  Fix the fields used in the
      formula, or fix the formula, or remove it!
 
-  9. When I am in the last column of a table and just above a
+ 11. When I am in the last column of a table and just above a
      horizontal line in the table, pressing TAB creates a new table line
      before the horizontal line.  How can I quickly move to the line
      below the horizontal line instead?
      Press <down> (to get on the separator line) and then <TAB>.  Or
      configure the variable `org-table-tab-jumps-over-hlines'.
 
- 10. How can I change the indentation of an entire table without fixing
+ 12. How can I change the indentation of an entire table without fixing
      every line by hand?
      The indentation of a table is set by the first line.  So just fix
      the indentation of the first line and realign with <TAB>.
 
- 11. Is it possible to include entries from org-mode files into my
+ 13. Is it possible to include entries from org-mode files into my
      emacs diary?
      Since the org-mode agenda is much more powerful and can contain the
      diary (*note Calendar/Diary integration::), you should think twice
@@ -3128,9 +3208,11 @@ Org-mode can cooperate with the following packages:
      `org-CUA-compatible'.  When set, Org-mode will move the following
      keybindings in org-mode files, and in the agenda buffer (but not
      during date selection).
+
           S-UP    -> M-p             S-DOWN  -> M-n
           S-LEFT  -> M--             S-RIGHT -> M-+
           S-RET   -> C-S-RET
+
      Yes, these are unfortunately more difficult to remember.  If you
      want to have other replacement keys, look at the variable
      `org-disputed-keys'.
@@ -3216,12 +3298,13 @@ Org-mode would not be what it is without your input.
    * Pavel Chalmoviansky influenced the agenda treatment of items with
      specified time.
 
-   * Sacha Chua suggested to copy linking code from Planner (we did take
-     some).
+   * Sacha Chua suggested to copy some linking code from Planner.
 
    * Christian Egli converted the documentation into TeXInfo format,
      patched CSS formatting into the HTML exporter, and inspired the
      agenda.
+
+   * Nic Ferrier contributed mailcap and XML support.
 
    * Kai Grossjohann pointed out key-binding conflicts caused by
      Org-mode.
@@ -3261,10 +3344,13 @@ Org-mode would not be what it is without your input.
    * David Wainberg suggested archiving, and improvements to the linking
      system.
 
-   * Org-mode's linking system was an independent development, but with
-     time has evolved to work similar to John's implementation in
-     `emacs-wiki-mode'.  In particular, I adopted his way to make the
-     link itself invisible and only show descriptive text.
+   * John Wiegley wrote `emacs-wiki.el' and `planner.el'.  The
+     development of Org-mode was fully independent, and both systems are
+     really different beasts in their basic ideas and implementation
+     details.  However, I have later looked at John's code and learned
+     from his implementation of (i) links where the link itself is
+     hidden and only a description is shown, and (ii) popping up a
+     calendar to select a date.
 
    * Carsten Wimmer suggested some changes and helped fix a bug in
      linking to GNUS.
@@ -3288,7 +3374,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * active region <1>:                     HTML export.         (line  10)
 * active region <2>:                     ASCII export.        (line   6)
 * active region <3>:                     Built-in table editor.
-                                                              (line 166)
+                                                              (line 167)
 * active region:                         Structure editing.   (line  46)
 * agenda:                                Weekly/Daily Agenda. (line   6)
 * agenda commands, custom:               Agenda dispatcher.   (line   6)
@@ -3296,6 +3382,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * agenda files, removing buffers:        Agenda commands.     (line 187)
 * agenda views:                          Agenda Views.        (line   6)
 * agenda, for single file:               Timeline.            (line   6)
+* angular brackets, around links:        External links.      (line  35)
 * applescript, for calendar update:      iCalendar export.    (line  38)
 * archive locations:                     Archiving.           (line  13)
 * archiving:                             Archiving.           (line   6)
@@ -3311,7 +3398,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * calc.el:                               Interaction.         (line  17)
 * calculations, in tables <1>:           Table calculations.  (line   6)
 * calculations, in tables:               Built-in table editor.
-                                                              (line 136)
+                                                              (line 137)
 * calendar integration:                  Calendar/Diary integration.
                                                               (line   6)
 * calendar, for selecting date:          Creating timestamps. (line  68)
@@ -3327,7 +3414,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * completion, of CamelCase links <1>:    Completion.          (line   6)
 * completion, of CamelCase links:        CamelCase links.     (line   6)
 * completion, of dictionary words:       Completion.          (line   6)
-* completion, of file names:             Managing links.      (line  23)
+* completion, of file names:             Managing links.      (line  36)
 * completion, of links:                  Managing links.      (line  23)
 * completion, of option keywords <1>:    Completion.          (line   6)
 * completion, of option keywords:        Export options.      (line   6)
@@ -3340,7 +3427,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * completion, of TODO keywords:          Workflow states.     (line  12)
 * constants, in calculations:            Formula syntax.      (line  26)
 * constants.el:                          Interaction.         (line  27)
-* contents, global visibility state:     Visibility cycling.  (line  17)
+* contents, global visibility state:     Visibility cycling.  (line  19)
 * copying, of subtrees:                  Structure editing.   (line   6)
 * creating timestamps:                   Creating timestamps. (line   6)
 * CUA.el:                                Interaction.         (line  39)
@@ -3364,10 +3451,10 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * editing tables:                        Tables.              (line   6)
 * editing, of table formulas:            Editing/debugging formulas.
                                                               (line   6)
-* emphasized text:                       Export options.      (line  21)
+* emphasized text:                       Export options.      (line  22)
 * evaluate time range:                   Creating timestamps. (line  63)
 * exporting:                             Exporting.           (line   6)
-* exporting a subtree:                   FAQ.                 (line  42)
+* exporting a subtree:                   FAQ.                 (line  58)
 * exporting, not:                        Comment lines.       (line   6)
 * extended TODO keywords:                TODO extensions.     (line   6)
 * external links:                        External links.      (line   6)
@@ -3375,14 +3462,14 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * feedback:                              Feedback.            (line   6)
 * file links:                            External links.      (line   6)
 * file links, searching:                 Search Options.      (line   6)
-* file name completion:                  Managing links.      (line  23)
+* file name completion:                  Managing links.      (line  36)
 * files, adding to agenda list:          Agenda files.        (line  12)
 * filing subtrees:                       Archiving.           (line   6)
 * fixed width:                           HTML formatting.     (line  28)
-* fixed-width sections:                  Export options.      (line  21)
+* fixed-width sections:                  Export options.      (line  22)
 * folded, subtree visibility state:      Visibility cycling.  (line  10)
 * folding, sparse trees:                 Sparse trees.        (line   6)
-* following links:                       Managing links.      (line  36)
+* following links:                       Managing links.      (line  50)
 * format specifier:                      Formula syntax.      (line  34)
 * format, of links:                      Link format.         (line   6)
 * formula editing:                       Editing/debugging formulas.
@@ -3392,14 +3479,14 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
                                                               (line   6)
 * formula, for table column:             Column formulas.     (line   6)
 * formula, in tables:                    Built-in table editor.
-                                                              (line 136)
+                                                              (line 137)
 * global keybindings:                    Installation and activation.
                                                               (line   6)
 * global TODO list:                      Global TODO list.    (line   6)
-* global visibility states:              Visibility cycling.  (line  17)
+* global visibility states:              Visibility cycling.  (line  19)
 * GNUS links:                            External links.      (line   6)
 * hand-formatted lists:                  HTML formatting.     (line   9)
-* headline levels:                       Export options.      (line  21)
+* headline levels:                       Export options.      (line  22)
 * headline levels, for exporting <1>:    HTML export.         (line  22)
 * headline levels, for exporting:        ASCII export.        (line  12)
 * headline navigation:                   Motion.              (line   6)
@@ -3412,8 +3499,8 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * HTML tags:                             HTML formatting.     (line  33)
 * hyperlinks:                            Hyperlinks.          (line   6)
 * iCalendar export:                      iCalendar export.    (line   6)
-* indentation, of tables:                FAQ.                 (line  73)
-* indirect buffers:                      FAQ.                 (line  18)
+* indentation, of tables:                FAQ.                 (line  89)
+* indirect buffers:                      FAQ.                 (line  34)
 * inheritance, of tags:                  Tag inheritance.     (line   6)
 * inserting links:                       Managing links.      (line  23)
 * installation:                          Installation and activation.
@@ -3425,20 +3512,20 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * keybindings, global:                   Installation and activation.
                                                               (line   6)
 * keyword options:                       Per file keywords.   (line   6)
-* linebreak preservation:                Export options.      (line  21)
+* linebreak preservation:                Export options.      (line  22)
 * link completion:                       Managing links.      (line  23)
 * link format:                           Link format.         (line   6)
 * links, external:                       External links.      (line   6)
 * links, internal:                       Internal links.      (line   6)
-* links, returning to:                   Managing links.      (line  66)
+* links, returning to:                   Managing links.      (line  76)
 * lists, hand-formatted:                 HTML formatting.     (line   9)
 * lists, ordered:                        Plain Lists.         (line   6)
 * lists, plain:                          Plain Lists.         (line   6)
 * logging, of progress:                  Progress logging.    (line   6)
 * maintainer:                            Feedback.            (line   6)
-* make-indirect-buffer:                  FAQ.                 (line  18)
-* mark ring:                             Managing links.      (line  62)
-* marking characters, tables:            Advanced features.   (line  33)
+* make-indirect-buffer:                  FAQ.                 (line  34)
+* mark ring:                             Managing links.      (line  72)
+* marking characters, tables:            Advanced features.   (line  34)
 * matching, of tags:                     Matching headline tags.
                                                               (line   6)
 * matching, tags:                        Tags.                (line   6)
@@ -3464,24 +3551,25 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * outline tree:                          Headlines.           (line   6)
 * outline-mode:                          Outlines.            (line   6)
 * outlines:                              Outlines.            (line   6)
-* overview, global visibility state:     Visibility cycling.  (line  17)
+* overview, global visibility state:     Visibility cycling.  (line  19)
 * packages, interaction with other:      Interaction.         (line   6)
 * pasting, of subtrees:                  Structure editing.   (line   6)
 * per file keywords:                     Per file keywords.   (line   6)
 * plain lists:                           Plain Lists.         (line   6)
-* printing sparse trees:                 Sparse trees.        (line  37)
+* plain text external links:             External links.      (line  35)
+* printing sparse trees:                 Sparse trees.        (line  39)
 * priorities:                            Priorities.          (line   6)
 * priorities, of agenda items:           Sorting of agenda items.
                                                               (line   6)
 * progress logging:                      Progress logging.    (line   6)
 * promotion, of subtrees:                Structure editing.   (line   6)
-* quoted html tags:                      Export options.      (line  21)
+* quoted html tags:                      Export options.      (line  22)
 * ranges, time:                          Time stamps.         (line   6)
 * recomputing table fields:              Column formulas.     (line  27)
 * region, active <1>:                    HTML export.         (line  10)
 * region, active <2>:                    ASCII export.        (line   6)
 * region, active <3>:                    Built-in table editor.
-                                                              (line 166)
+                                                              (line 167)
 * region, active:                        Structure editing.   (line  46)
 * remember.el <1>:                       Interaction.         (line  39)
 * remember.el:                           Remember.            (line   6)
@@ -3489,17 +3577,17 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * SCHEDULED keyword:                     Time stamps.         (line  39)
 * scheduling:                            Time stamps.         (line   6)
 * search option in file links:           Search Options.      (line   6)
-* section-numbers:                       Export options.      (line  21)
+* section-numbers:                       Export options.      (line  22)
 * setting tags:                          Setting tags.        (line   6)
 * SHELL links:                           External links.      (line   6)
-* show all, command:                     Visibility cycling.  (line  23)
-* show all, global visibility state:     Visibility cycling.  (line  17)
+* show all, command:                     Visibility cycling.  (line  27)
+* show all, global visibility state:     Visibility cycling.  (line  19)
 * show hidden text:                      Visibility cycling.  (line   6)
 * single file summary:                   Timeline.            (line   6)
 * sorting, of agenda items:              Sorting of agenda items.
                                                               (line   6)
 * sparse tree, for deadlines:            Creating timestamps. (line  38)
-* sparse tree, for TODO:                 TODO basics.         (line  18)
+* sparse tree, for TODO:                 TODO basics.         (line  20)
 * sparse tree, tag based:                Tags.                (line   6)
 * sparse trees:                          Sparse trees.        (line   6)
 * spreadsheet capabilities:              Table calculations.  (line   6)
@@ -3515,11 +3603,11 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * table editor, builtin:                 Built-in table editor.
                                                               (line   6)
 * table editor, table.el:                table.el.            (line   6)
-* table of contents:                     Export options.      (line  21)
-* table, empty template:                 FAQ.                 (line  52)
+* table of contents:                     Export options.      (line  22)
+* table, empty template:                 FAQ.                 (line  68)
 * table.el <1>:                          Interaction.         (line  13)
 * table.el:                              table.el.            (line   6)
-* tables <1>:                            Export options.      (line  21)
+* tables <1>:                            Export options.      (line  22)
 * tables:                                Tables.              (line   6)
 * tables, export to HTML:                HTML formatting.     (line  24)
 * tag completion:                        Completion.          (line   6)
@@ -3529,9 +3617,9 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
                                                               (line   6)
 * templates, for remember:               Remember.            (line  26)
 * TeX interpretation:                    HTML formatting.     (line  15)
-* TeX macros:                            Export options.      (line  21)
+* TeX macros:                            Export options.      (line  22)
 * TeX symbol completion:                 Completion.          (line   6)
-* TeX-like syntax for sub- and superscripts: Export options.  (line  21)
+* TeX-like syntax for sub- and superscripts: Export options.  (line  22)
 * thanks:                                Acknowledgments.     (line   6)
 * time stamps:                           Time stamps.         (line   6)
 * time, reading in minibuffer:           Creating timestamps. (line  68)
@@ -3548,7 +3636,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * transient-mark-mode <1>:               HTML export.         (line  10)
 * transient-mark-mode <2>:               ASCII export.        (line   6)
 * transient-mark-mode <3>:               Built-in table editor.
-                                                              (line 166)
+                                                              (line 167)
 * transient-mark-mode:                   Structure editing.   (line  46)
 * trees, sparse:                         Sparse trees.        (line   6)
 * trees, visibility:                     Visibility cycling.  (line   6)
@@ -3560,7 +3648,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * variables, for customization:          Customization.       (line   6)
 * vectors, in table calculations:        Formula syntax.      (line  23)
 * visibility cycling:                    Visibility cycling.  (line   6)
-* visible text, printing:                Sparse trees.        (line  37)
+* visible text, printing:                Sparse trees.        (line  39)
 * VM links:                              External links.      (line   6)
 * WANDERLUST links:                      External links.      (line   6)
 * workflow states as TODO keywords:      Workflow states.     (line   6)
@@ -3584,12 +3672,12 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * <RET> <1>:                             Agenda commands.     (line  41)
 * <RET> <2>:                             Creating timestamps. (line 100)
 * <RET>:                                 Built-in table editor.
-                                                              (line  65)
+                                                              (line  66)
 * <right>:                               Agenda commands.     (line  81)
 * <SPC>:                                 Agenda commands.     (line  28)
 * <TAB> <1>:                             Agenda commands.     (line  35)
 * <TAB> <2>:                             Built-in table editor.
-                                                              (line  58)
+                                                              (line  59)
 * <TAB> <3>:                             Plain Lists.         (line  37)
 * <TAB>:                                 Visibility cycling.  (line  10)
 * > <1>:                                 Agenda commands.     (line 140)
@@ -3597,42 +3685,44 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C:                                     Agenda commands.     (line 170)
 * c:                                     Agenda commands.     (line 154)
 * C-#:                                   Built-in table editor.
-                                                              (line 156)
+                                                              (line 157)
 * C-,:                                   Agenda files.        (line  18)
 * C-c !:                                 Creating timestamps. (line  21)
 * C-c $:                                 Archiving.           (line   9)
-* C-c %:                                 Managing links.      (line  62)
-* C-c &:                                 Managing links.      (line  66)
+* C-c %:                                 Managing links.      (line  72)
+* C-c &:                                 Managing links.      (line  76)
 * C-c ' <1>:                             Editing/debugging formulas.
                                                               (line  20)
 * C-c ':                                 Built-in table editor.
-                                                              (line 145)
+                                                              (line 146)
 * C-c *:                                 Built-in table editor.
-                                                              (line 149)
+                                                              (line 150)
 * C-c +:                                 Built-in table editor.
-                                                              (line 166)
+                                                              (line 167)
 * C-c ,:                                 Priorities.          (line  18)
 * C-c -:                                 Built-in table editor.
-                                                              (line  93)
+                                                              (line  94)
 * C-c .:                                 Creating timestamps. (line  10)
 * C-c /:                                 Sparse trees.        (line  15)
 * C-c ::                                 HTML export.         (line  17)
 * C-c ;:                                 Comment lines.       (line  12)
 * C-c <:                                 Creating timestamps. (line  25)
+* C-c <TAB>:                             Built-in table editor.
+                                                              (line 189)
 * C-c =:                                 Built-in table editor.
-                                                              (line 136)
+                                                              (line 137)
 * C-c >:                                 Creating timestamps. (line  29)
 * C-c ? <1>:                             Editing/debugging formulas.
                                                               (line  20)
 * C-c ?:                                 Built-in table editor.
-                                                              (line 162)
+                                                              (line 163)
 * C-c [:                                 Agenda files.        (line  12)
 * C-c \:                                 Tag searches.        (line   9)
 * C-c ]:                                 Agenda files.        (line  15)
 * C-c ^:                                 Built-in table editor.
-                                                              (line  97)
+                                                              (line  98)
 * C-c `:                                 Built-in table editor.
-                                                              (line 182)
+                                                              (line 183)
 * C-c a a:                               Weekly/Daily Agenda. (line   9)
 * C-c a C:                               Agenda dispatcher.   (line  30)
 * C-c a M:                               Matching headline tags.
@@ -3643,15 +3733,15 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c a m:                               Tag searches.        (line  10)
 * C-c a T:                               Global TODO list.    (line  15)
 * C-c a t <1>:                           Global TODO list.    (line   9)
-* C-c a t:                               TODO basics.         (line  25)
-* C-c C-a:                               Visibility cycling.  (line  23)
+* C-c a t:                               TODO basics.         (line  27)
+* C-c C-a:                               Visibility cycling.  (line  27)
 * C-c C-b:                               Motion.              (line  15)
 * C-c C-c <1>:                           Setting tags.        (line  11)
 * C-c C-c <2>:                           table.el.            (line   6)
 * C-c C-c <3>:                           Editing/debugging formulas.
                                                               (line  16)
 * C-c C-c <4>:                           Built-in table editor.
-                                                              (line  43)
+                                                              (line  44)
 * C-c C-c:                               Plain Lists.         (line  61)
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-f:                               Motion.              (line  12)
@@ -3659,17 +3749,17 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-l:                               Managing links.      (line  23)
 * C-c C-n:                               Motion.              (line   8)
 * C-c C-o <1>:                           Creating timestamps. (line  33)
-* C-c C-o:                               Managing links.      (line  36)
+* C-c C-o:                               Managing links.      (line  50)
 * C-c C-p:                               Motion.              (line   9)
 * C-c C-q <1>:                           Editing/debugging formulas.
                                                               (line  20)
 * C-c C-q:                               Built-in table editor.
-                                                              (line 120)
+                                                              (line 121)
 * C-c C-r:                               Timeline.            (line  13)
 * C-c C-s:                               Creating timestamps. (line  47)
 * C-c C-t:                               TODO basics.         (line  13)
 * C-c C-u:                               Motion.              (line  18)
-* C-c C-v:                               TODO basics.         (line  18)
+* C-c C-v:                               TODO basics.         (line  20)
 * C-c C-w:                               Creating timestamps. (line  38)
 * C-c C-x a:                             ASCII export.        (line   6)
 * C-c C-x b:                             HTML export.         (line  11)
@@ -3678,26 +3768,27 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-x C-i:                           iCalendar export.    (line  15)
 * C-c C-x C-k:                           Structure editing.   (line  31)
 * C-c C-x C-w <1>:                       Built-in table editor.
-                                                              (line 109)
+                                                              (line 110)
 * C-c C-x C-w:                           Structure editing.   (line  31)
 * C-c C-x C-y <1>:                       Built-in table editor.
-                                                              (line 113)
+                                                              (line 114)
 * C-c C-x C-y:                           Structure editing.   (line  38)
 * C-c C-x h:                             HTML export.         (line  10)
 * C-c C-x i:                             iCalendar export.    (line  13)
 * C-c C-x M-w <1>:                       Built-in table editor.
-                                                              (line 106)
+                                                              (line 107)
 * C-c C-x M-w:                           Structure editing.   (line  35)
 * C-c C-x t:                             HTML export.         (line  14)
-* C-c C-x v:                             Sparse trees.        (line  37)
+* C-c C-x v:                             Sparse trees.        (line  39)
 * C-c C-y:                               Creating timestamps. (line  63)
 * C-c l:                                 Managing links.      (line   9)
 * C-c |:                                 Built-in table editor.
-                                                              (line 186)
+                                                              (line 193)
 * C-c ~:                                 table.el.            (line  18)
 * C-u C-c .:                             Creating timestamps. (line  16)
 * C-u C-c =:                             Built-in table editor.
-                                                              (line 140)
+                                                              (line 141)
+* C-u C-c C-l:                           Managing links.      (line  36)
 * D:                                     Agenda commands.     (line  66)
 * d:                                     Agenda commands.     (line  63)
 * f:                                     Agenda commands.     (line  44)
@@ -3708,46 +3799,46 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * L:                                     Agenda commands.     (line  32)
 * M:                                     Agenda commands.     (line 161)
 * M-<down>:                              Built-in table editor.
-                                                              (line  83)
+                                                              (line  84)
 * M-<left> <1>:                          Built-in table editor.
-                                                              (line  73)
+                                                              (line  74)
 * M-<left>:                              Structure editing.   (line  13)
 * M-<RET> <1>:                           Plain Lists.         (line  42)
 * M-<RET>:                               Structure editing.   (line   6)
 * M-<right> <1>:                         Built-in table editor.
-                                                              (line  73)
+                                                              (line  74)
 * M-<right>:                             Structure editing.   (line  16)
 * M-<TAB> <1>:                           Completion.          (line  10)
 * M-<TAB> <2>:                           Setting tags.        (line   6)
 * M-<TAB>:                               Per file keywords.   (line  17)
 * M-<up>:                                Built-in table editor.
-                                                              (line  83)
+                                                              (line  84)
 * M-S-<down> <1>:                        Built-in table editor.
-                                                              (line  90)
+                                                              (line  91)
 * M-S-<down> <2>:                        Plain Lists.         (line  46)
 * M-S-<down>:                            Structure editing.   (line  28)
 * M-S-<left> <1>:                        Creating timestamps. (line  97)
 * M-S-<left> <2>:                        Built-in table editor.
-                                                              (line  77)
+                                                              (line  78)
 * M-S-<left> <3>:                        Plain Lists.         (line  52)
 * M-S-<left>:                            Structure editing.   (line  19)
 * M-S-<RET>:                             Structure editing.   (line  10)
 * M-S-<right> <1>:                       Creating timestamps. (line  94)
 * M-S-<right> <2>:                       Built-in table editor.
-                                                              (line  80)
+                                                              (line  81)
 * M-S-<right> <3>:                       Plain Lists.         (line  52)
 * M-S-<right>:                           Structure editing.   (line  22)
 * M-S-<up> <1>:                          Built-in table editor.
-                                                              (line  87)
+                                                              (line  88)
 * M-S-<up> <2>:                          Plain Lists.         (line  46)
 * M-S-<up>:                              Structure editing.   (line  25)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           Creating timestamps. (line  79)
-* mouse-1:                               Managing links.      (line  54)
+* mouse-1:                               Managing links.      (line  64)
 * mouse-2 <1>:                           Agenda commands.     (line  35)
-* mouse-2:                               Managing links.      (line  54)
+* mouse-2:                               Managing links.      (line  64)
 * mouse-3 <1>:                           Agenda commands.     (line  28)
-* mouse-3:                               Managing links.      (line  59)
+* mouse-3:                               Managing links.      (line  69)
 * n:                                     Agenda commands.     (line  19)
 * o:                                     Agenda commands.     (line  57)
 * P:                                     Agenda commands.     (line 115)
@@ -3762,12 +3853,12 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * S-<left> <1>:                          Agenda commands.     (line 136)
 * S-<left>:                              Creating timestamps. (line  50)
 * S-<RET>:                               Built-in table editor.
-                                                              (line 171)
+                                                              (line 172)
 * S-<right> <1>:                         Agenda commands.     (line 128)
 * S-<right>:                             Creating timestamps. (line  50)
 * S-<TAB> <1>:                           Built-in table editor.
-                                                              (line  62)
-* S-<TAB>:                               Visibility cycling.  (line  17)
+                                                              (line  63)
+* S-<TAB>:                               Visibility cycling.  (line  19)
 * S-<up> <1>:                            Agenda commands.     (line 118)
 * S-<up> <2>:                            Creating timestamps. (line  55)
 * S-<up>:                                Priorities.          (line  25)
@@ -3783,94 +3874,93 @@ Node: Top960
 Node: Introduction7181
 Node: Summary7495
 Node: Installation and activation9607
-Node: Feedback11276
-Node: Document Structure12061
-Node: Outlines12827
-Node: Headlines13487
-Node: Visibility cycling14113
-Node: Motion15300
-Node: Structure editing16084
-Node: Archiving17827
-Node: Sparse trees18687
-Ref: Sparse trees-Footnote-120717
-Ref: Sparse trees-Footnote-220809
-Node: Plain Lists20923
-Ref: Plain Lists-Footnote-123679
-Node: Tables24036
-Node: Built-in table editor24584
-Node: Narrow columns32267
-Ref: Narrow columns-Footnote-134199
-Node: Table calculations34245
-Node: Formula syntax35421
-Ref: Formula syntax-Footnote-138354
-Node: Column formulas38653
-Node: Advanced features40415
-Node: Named-field formulas43669
-Node: Editing/debugging formulas44309
-Node: Appetizer46067
-Node: orgtbl-mode47169
-Node: table.el47659
-Node: Hyperlinks48636
-Node: Link format49270
-Ref: Link format-Footnote-150100
-Node: Internal links50403
-Node: Radio targets52291
-Node: CamelCase links53006
-Node: External links53579
-Ref: External links-Footnote-155750
-Node: Managing links55889
-Node: Search Options59290
-Ref: Search Options-Footnote-160603
-Node: Remember60684
-Ref: Remember-Footnote-164568
-Node: TODO items64692
-Node: TODO basics65615
-Node: Progress logging67128
-Node: TODO extensions67915
-Node: Workflow states68715
-Node: TODO types69583
-Ref: TODO types-Footnote-171241
-Node: Per file keywords71323
-Ref: Per file keywords-Footnote-172776
-Node: Priorities73004
-Node: Timestamps74213
-Node: Time stamps74534
-Node: Creating timestamps76549
-Node: Tags79678
-Node: Tag inheritance80414
-Node: Setting tags81353
-Node: Tag searches82315
-Node: Agenda Views83524
-Node: Agenda files85064
-Ref: Agenda files-Footnote-186026
-Ref: Agenda files-Footnote-286175
-Node: Agenda dispatcher86367
-Node: Weekly/Daily Agenda88498
-Node: Categories89633
-Node: Time-of-day specifications90279
-Node: Calendar/Diary integration92255
-Node: Sorting of agenda items93634
-Node: Global TODO list94466
-Node: Matching headline tags95881
-Node: Timeline96824
-Node: Agenda commands97699
-Node: Exporting102954
-Node: ASCII export103526
-Node: HTML export104362
-Node: HTML formatting105479
-Node: Export options107111
-Node: Comment lines109304
-Node: iCalendar export109774
-Node: Miscellaneous111569
-Node: Completion112196
-Node: Customization113192
-Node: Clean view113640
-Node: TTY keys116282
-Node: FAQ117883
-Node: Interaction122588
-Node: Bugs125427
-Node: Acknowledgments127736
-Node: Index130455
-Node: Key Index150878
+Node: Feedback11612
+Node: Document Structure12398
+Node: Outlines13164
+Node: Headlines13824
+Node: Visibility cycling14447
+Node: Motion15638
+Node: Structure editing16422
+Node: Archiving18165
+Node: Sparse trees19025
+Ref: Sparse trees-Footnote-121054
+Ref: Sparse trees-Footnote-221146
+Node: Plain Lists21260
+Ref: Plain Lists-Footnote-124016
+Node: Tables24373
+Node: Built-in table editor24921
+Node: Narrow columns32811
+Ref: Narrow columns-Footnote-134744
+Node: Table calculations34790
+Node: Formula syntax35966
+Ref: Formula syntax-Footnote-138900
+Node: Column formulas39199
+Node: Advanced features40961
+Node: Named-field formulas44216
+Node: Editing/debugging formulas44856
+Node: Appetizer46614
+Node: orgtbl-mode47716
+Node: table.el48207
+Node: Hyperlinks49184
+Node: Link format49818
+Node: Internal links51000
+Node: Radio targets52890
+Node: CamelCase links53605
+Node: External links54204
+Ref: External links-Footnote-156129
+Node: Managing links56268
+Node: Search Options60246
+Ref: Search Options-Footnote-161566
+Node: Remember61647
+Ref: Remember-Footnote-165528
+Node: TODO items65652
+Node: TODO basics66575
+Node: Progress logging68090
+Node: TODO extensions68876
+Node: Workflow states69676
+Node: TODO types70544
+Ref: TODO types-Footnote-172202
+Node: Per file keywords72284
+Ref: Per file keywords-Footnote-173737
+Node: Priorities73965
+Node: Timestamps75174
+Node: Time stamps75495
+Node: Creating timestamps77510
+Node: Tags80639
+Node: Tag inheritance81374
+Node: Setting tags82311
+Node: Tag searches83273
+Node: Agenda Views84482
+Node: Agenda files86021
+Ref: Agenda files-Footnote-186981
+Ref: Agenda files-Footnote-287130
+Node: Agenda dispatcher87322
+Node: Weekly/Daily Agenda89452
+Node: Categories90587
+Node: Time-of-day specifications91235
+Node: Calendar/Diary integration93211
+Node: Sorting of agenda items94588
+Node: Global TODO list95420
+Node: Matching headline tags96835
+Node: Timeline97778
+Node: Agenda commands98651
+Node: Exporting103906
+Node: ASCII export104478
+Node: HTML export105313
+Node: HTML formatting106429
+Node: Export options108061
+Node: Comment lines110252
+Node: iCalendar export110722
+Node: Miscellaneous112517
+Node: Completion113144
+Node: Customization114140
+Node: Clean view114588
+Node: TTY keys117228
+Node: FAQ118829
+Node: Interaction124335
+Node: Bugs127176
+Node: Acknowledgments129485
+Node: Index132415
+Node: Key Index152984
 
 End Tag Table

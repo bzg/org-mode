@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.19a}
+\def\orgversionnumber{4.19b}
 \def\year{2006}
 %
 %**start of header
@@ -401,22 +401,22 @@ To set archive location for current file, add a line like$^3$:
 
 {\bf External Links}
 
-\key{\kbd{<file:/home/dominik/img/mars.jpg>}}{\rm file, absolute}
-\key{\kbd{<file:papers/last.pdf>}}{\rm file, relative}
-\key{\kbd{<file:projects.org::*that text>}}{\rm find headline}
-\key{\kbd{<file:projects.org::find me>}}{\rm find tgt/string}
-\key{\kbd{<file:projects.org::/regexp/>}}{\rm regexp search}
-\key{\kbd{<http://www.astro.uva.nl/~dominik>}}{\rm on the web}
-\key{\kbd{<mailto:adent@galaxy.net>}}{\rm EMail address}
-\key{\kbd{<news:comp.emacs>}}{\rm Usenet group}
-\key{\kbd{<bbdb:Richard Stallman>}}{\rm BBDB person}
-\key{\kbd{<shell:ls *.org>}}{\rm shell command}
-\key{\kbd{<gnus:group>}}{\rm GNUS group}
-\key{\kbd{<gnus:group\#id>}}{\rm GNUS message}
-\key{\kbd{<vm|wl|mhe|rmail:folder>}}{\rm Mail folder}
-\key{\kbd{<vm|wl|mhe|rmail:folder\#id>}}{\rm Mail message}
-\metax{\kbd{[[<external link>][description]]}}{\rm optional link text}
-%\key{\kbd{<vm://myself@some.where.org/folder\#id>}}{\rm VM remote}
+\key{\kbd{file:/home/dominik/img/mars.jpg}}{\rm file, absolute}
+\key{\kbd{file:papers/last.pdf}}{\rm file, relative}
+\key{\kbd{file:projects.org::*that text}}{\rm find headline}
+\key{\kbd{file:projects.org::find me}}{\rm find tgt/string}
+\key{\kbd{file:projects.org::/regexp/}}{\rm regexp search}
+\key{\kbd{http://www.astro.uva.nl/~dominik}}{\rm on the web}
+\key{\kbd{mailto:adent@galaxy.net}}{\rm EMail address}
+\key{\kbd{news:comp.emacs}}{\rm Usenet group}
+\key{\kbd{bbdb:Richard Stallman}}{\rm BBDB person}
+\key{\kbd{shell:ls *.org}}{\rm shell command}
+\key{\kbd{gnus:group}}{\rm GNUS group}
+\key{\kbd{gnus:group\#id}}{\rm GNUS message}
+\key{\kbd{vm|wl|mhe|rmail:folder}}{\rm Mail folder}
+\key{\kbd{vm|wl|mhe|rmail:folder\#id}}{\rm Mail message}
+\metax{\kbd{[[external link][description]]}}{\rm optional link text}
+%\key{\kbd{vm://myself@some.where.org/folder\#id}}{\rm VM remote}
 
 \section{Tables}
 
@@ -484,9 +484,9 @@ in lines starting with: {\tt | \# |}.
 \key{sum numbers in current column/rectangle}{C-c +}
 \key{copy down with increment}{S-RET$^4$}
 
-A formula can also be typed directly into into a field and will
-executed by \kbd{TAB}, \kbd{RET} and \kbd{C-c C-c}.  A leading \kbd{=}
-introduces a column formula, \kbd{:=} a named-field formula.
+Formulas typed in field are executed by \kbd{TAB},
+\kbd{RET} and \kbd{C-c C-c}.  \kbd{=} introduces a column
+formula, \kbd{:=} a named-field formula.
 
 \key{Example: Add Col1 and Col2}{=\$1+\$2}
 \key{... with printf format specification}{=\$1+\$2;\%.2f}
@@ -497,6 +497,7 @@ introduces a column formula, \kbd{:=} a named-field formula.
 {\bf Miscellaneous}
 
 \key{edit the current field in a separate window}{C-c `}
+\key{make current field fully visible}{C-u TAB}
 \key{toggle visibility of vertical lines}{C-c |}
 \metax{export as tab-separated file}{M-x org-table-export}
 \metax{import tab-separated file}{M-x org-table-import}

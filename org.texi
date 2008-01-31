@@ -4,7 +4,7 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.19a
+@set VERSION 4.19b
 @set DATE March 2006
 
 @dircategory Emacs
@@ -311,6 +311,12 @@ MY PROJECTS    -*- mode: org; -*-
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
+If you are upgrading to version 4.20 or later from a version 4.14 or
+earlier, some links may stop working.  These are links containing space
+characters.  To make such links work again, and also to transform all
+links from the old @samp{<link>} format to the new @samp{[[link]]}
+format, execute once in each file: @kbd{M-x org-upgrade-old-links}.
+
 @node Feedback,  , Installation and activation, Introduction
 @section Feedback
 @cindex feedback
@@ -328,6 +334,7 @@ including the version information of Emacs (@kbd{C-h v emacs-version
 the Org-mode related setup in @file{.emacs}.  If an error occurs, a
 traceback can be very useful.  Often a small example file helps, along
 with clear information about:
+
 @enumerate
 @item What exactly did you do?
 @item What did you expect to happen?
@@ -387,6 +394,7 @@ example:
     more text
 * Another top level headline
 @end example
+
 @noindent Some people find the many stars too noisy and would prefer an
 outline that has whitespace followed by a single star as headline
 starters.  @ref{Clean view} describes a setup to realize this.
@@ -411,10 +419,12 @@ the visibility in the buffer.
 @kindex @key{TAB}
 @item @key{TAB}
 Rotate current subtree between the states
+
 @example
 ,-> FOLDED -> CHILDREN -> SUBTREE --.
 '-----------------------------------'
 @end example
+
 At the beginning of the buffer (or when called with @kbd{C-u}), this does
 the same as the command @kbd{S-@key{TAB}} below.
 
@@ -425,10 +435,12 @@ the same as the command @kbd{S-@key{TAB}} below.
 @kindex S-@key{TAB}
 @item S-@key{TAB}
 Rotate the entire buffer between the states
+
 @example
 ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
 '--------------------------------------'
 @end example
+
 Note that inside tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
@@ -610,10 +622,12 @@ use the variable @code{org-agenda-custom-commands} to define fast
 keyboard access to specific sparse trees.  These commands will then be
 accessible through the agenda dispatcher (@pxref{Agenda dispatcher}).
 For example:
+
 @lisp
 (setq org-agenda-custom-commands
       '(("f" occur-tree "FIXME")))
 @end lisp
+
 @noindent will define the key @kbd{C-c a f} as a shortcut for creating
 a sparse tree matching the string @samp{FIXME}.
 
@@ -757,6 +771,7 @@ create the above table, you would only type
 |Name|Phone|Age
 |-
 @end example
+
 @noindent and then press @key{TAB} to align the table and start filling in
 fields.
 
@@ -934,7 +949,14 @@ incremented during copy.  This key is also used by CUA-mode
 @kindex C-c `
 @item C-c `
 Edit the current field in a separate window.  This is useful for fields
-that are not fully visible (@pxref{Narrow columns}).
+that are not fully visible (@pxref{Narrow columns}).  When called with a
+@kbd{C-u} prefix, just make the full field visible, so that it can be
+edited in place.
+
+@kindex C-c @key{TAB}
+@item C-c @key{TAB}
+This is an alias for @kbd{C-u C-c `} to make the current field fully
+visible.
 
 @kindex C-c |
 @item C-c |
@@ -959,9 +981,11 @@ for example, Excel or database programs.
 If you don't like the automatic table editor because it gets in your
 way on lines which you would like to start with @samp{|}, you can turn
 it off with
+
 @lisp
 (setq org-enable-table-editor nil)
 @end lisp
+
 @noindent The only table command which then still works is
 @kbd{C-c C-c} to do a manual re-align.
 
@@ -986,6 +1010,7 @@ will then set the width of this column to no more than this value.
 | 4 | four                         |               | 4 | four   |
 |---+------------------------------|               |---+--------|
 @end example
+
 @noindent
 Fields that are wider become clipped and end in the string @samp{=>}.
 Note that the full text is still in the buffer, it is only invisible.
@@ -1001,6 +1026,7 @@ be aligned before it looks nice.  Setting the option
 @code{org-startup-align-all-tables} will realign all tables in a file
 upon visiting, but also slow down startup.  You can also set this option
 on a per-file basis with:
+
 @example
 #+STARTUP: align
 #+STARTUP: noalign
@@ -1087,6 +1113,7 @@ or fixed display format, respectively, and @samp{D}, @samp{R}, @samp{F},
 and @samp{S} to turn on degrees, radians, fraction and symbolic modes,
 respectively.  In addition, you may provide a @code{printf} format
 specifier to reformat the final result.  A few examples:
+
 @example
   $1+$2                @r{Sum of first and second field}
   $1+$2;%.2f           @r{Same, format result to two decimals}
@@ -1147,6 +1174,7 @@ or if you want to be able to assign a formula to an individual field
 the table for special marking characters.  Here is an example of a
 table that collects exam results of students and makes use of these
 features:
+
 @example
 @group
 |---+---------+--------+--------+--------+-------+------|
@@ -1297,6 +1325,7 @@ might want to use it also in other modes like text-mode or mail-mode.
 The minor mode Orgtbl-mode makes this possible.  You can always toggle
 the mode with @kbd{M-x orgtbl-mode}.  To turn it on by default, for
 example in mail mode, use
+
 @lisp
 (add-hook 'mail-mode-hook 'turn-on-orgtbl)
 @end lisp
@@ -1353,11 +1382,13 @@ links to other files, Usenet articles, emails and much more.
 @cindex format, of links
 
 Org-mode will recognize plain URL-like links in the buffer and activate
-them as clickable links.  However, the general linkformat in Org-mode
-looks like:
+them as clickable links.  However, the general linkformat looks like
+this:
+
 @example
 [[link][description]]       @r{or alternatively}           [[link]]  
 @end example
+
 The description part is optional.  Once a link in the buffer is
 complete, Org-mode will change the display so that
 @u{@samp{description}} is displayed instead of
@@ -1365,11 +1396,13 @@ complete, Org-mode will change the display so that
 @samp{[[link]]}.  Links will be highlighted in the face @code{org-link},
 which by default is an underlined face.  You can directly edit the
 visible part of a link.  To edit the invisible part, use @kbd{C-c C-l}
-with the cursor on the link@footnote{You can also position the cursor
-directly after the link and press @key{BACKSPACE} to remove the
-(invisible) closing bracket @samp{]}.  This makes the link incomplete,
-and shows the full raw link text for you to edit.  You may also use the
-menu entry @code{Org->Hperlinks->Literal links} to unhide all links.}.
+with the cursor on the link.  If you place the cursor at the beginning
+of end of the displayed text and press @key{BACKSPACE}, you will remove
+the (invisible) bracket at that location.  This makes the link incomplete
+and the internals are again displayed as plain text.  Inserting the
+missing bracket does hide the link internal again.  Finally, you may also
+use the menu entry @code{Org->Hperlinks->Literal links} to unhide all
+links.
 
 @node Internal links, External links, Link format, Hyperlinks
 @section Internal links
@@ -1385,6 +1418,7 @@ cursor is on the link, or with a mouse click (@pxref{Managing links}).
 The preferred match for such a link is a dedicated target: The same
 string in double angular brackets.  Targets may be located anywhere,
 often it is convenient to put them into a comment line, for example
+
 @example
 # <<My Target>>
 @end example
@@ -1396,6 +1430,7 @@ star like @samp{*My Target} restrict the search to headlines.  When
 searching, Org-mode will first try an exact match, but then move on to
 more and more lenient searches.  For example, the link @samp{[[*My
 Targets]]} will find any of the following:
+
 @example
 ** My targets
 ** TODO my targets are bright
@@ -1436,12 +1471,13 @@ loaded into Emacs.  To update the target list during editing, press
 @cindex completion, of CamelCase links
 @cindex CamelCase links, completion of
 
-As an alternative to @samp{[[...]]} links, Org-mode also supports
-CamelCase words as links.  This feature is not turned on by default
-because of the occasional inconsistencies this system suffers from.
-To activate CamelCase words as links, and to make headline completion
-offer CamelCase version of headlines, the following customization is
-needed:
+Org-mode also supports CamelCase words as links.  This feature is not
+turned on by default because of the inconsistencies this system suffers
+from.  It is mainly kept for backward compatibility, but the use is
+deprecated.  To activate CamelCase words as links, and to make headline
+completion offer CamelCase version of headlines, the following
+customization is needed:
+
 @lisp
 (setq org-activate-camels t
       org-file-link-context-use-camel-case t)
@@ -1464,45 +1500,43 @@ needed:
 @cindex SHELL links
 
 Org-mode supports links to files, websites, Usenet and email messages;
-and BBDB database entries.  External links are plain-text URL-like
-locators, optionally enclosed in angular brackets.  The following list
-shows examples for each link type.
+and BBDB database entries.  External links are URL-like locators.  The
+following list shows examples for each link type.
 
 @example
-<http://www.astro.uva.nl/~dominik>         @r{on the web}
-<file:/home/dominik/images/jupiter.jpg>    @r{file, absolute path}
-<file:papers/last.pdf>                     @r{file, relative path}
-<news:comp.emacs>                          @r{Usenet link}
-<mailto:adent@@galaxy.net>                  @r{Mail link}
-<vm:folder>                                @r{VM folder link}
-<vm:folder#id>                             @r{VM message link}
-<vm://myself@@some.where.org/folder#id>     @r{VM on remote machine}
-<wl:folder>                                @r{WANDERLUST folder link}
-<wl:folder#id>                             @r{WANDERLUST message link}
-<mhe:folder>                               @r{MH-E folder link}
-<mhe:folder#id>                            @r{MH-E message link}
-<rmail:folder>                             @r{RMAIL folder link}
-<rmail:folder#id>                          @r{RMAIL message link}
-<gnus:group>                               @r{GNUS group link}
-<gnus:group#id>                            @r{GNUS article link}
-<bbdb:Richard Stallman>                    @r{BBDB link}
-<shell:ls *.org>@footnote{Note that @samp{<} and @samp{>} cannot be part of a link, and therefore of a shell command.  If you need redirection, use @@@{ and @@@} instead.}                          @r{A shell command}
+http://www.astro.uva.nl/~dominik         @r{on the web}
+file:/home/dominik/images/jupiter.jpg    @r{file, absolute path}
+file:papers/last.pdf                     @r{file, relative path}
+news:comp.emacs                          @r{Usenet link}
+mailto:adent@@galaxy.net                  @r{Mail link}
+vm:folder                                @r{VM folder link}
+vm:folder#id                             @r{VM message link}
+vm://myself@@some.where.org/folder#id     @r{VM on remote machine}
+wl:folder                                @r{WANDERLUST folder link}
+wl:folder#id                             @r{WANDERLUST message link}
+mhe:folder                               @r{MH-E folder link}
+mhe:folder#id                            @r{MH-E message link}
+rmail:folder                             @r{RMAIL folder link}
+rmail:folder#id                          @r{RMAIL message link}
+gnus:group                               @r{GNUS group link}
+gnus:group#id                            @r{GNUS article link}
+bbdb:Richard Stallman                    @r{BBDB link}
+shell:ls *.org@footnote{Note that @samp{<} and @samp{>} cannot be part of a link, and therefore of a shell command.  If you need redirection, use @@@{ and @@@} instead.}                          @r{A shell command}
 @end example
 
-A link may contain space characters and is terminated by @samp{>} or by
-the end of a line.  In tables, the end of a table field also terminates
-a link.  Angle brackets around a link are not required, but are
-recommended to avoid problems with punctuation and other text following
-the link.
+A link should be enclosed in double brackets and may contain a
+descriptive text to be displayed instead of the url (@pxref{Link
+format}), for example:
 
-To display a descriptive text instead of the URL, enclose the link into
-double brackets and add the descriptive text like this:
 @example
-[[<http://www.gnu.org/software/emacs/>][GNU Emacs]]
+[[http://www.gnu.org/software/emacs/][GNU Emacs]]
 @end example
-@noindent Links inserted with @kbd{C-c C-l} automatically use the double
-bracket format (@pxref{Managing links}).
 
+@cindex angular brackets, around links
+@cindex plain text external links
+Org-mode also finds external links in the normal text and activates them
+as links.  Plain text links cannot contain spaces.  To remove
+ambiguities about the end of the link, enclose them in angular brackets.
 
 @node Managing links, Search Options, External links, Hyperlinks
 @section Managing links
@@ -1529,41 +1563,51 @@ activation}.
 
 @kindex C-c C-l
 @cindex link completion
-@cindex file name completion
 @cindex completion, of links
-@cindex completion, of file names
 @cindex inserting links
 @item C-c C-l
 Insert a link.  This prompts for a link to be inserted into the buffer.
 You can just type a link, using text for an internal link, or one of the
 link type prefixes mentioned in the examples above.  Through completion,
-all links stored during the current session can be accessed.  When
-called with prefix arg, you can use file name completion to enter a file
-link.  The link will be formatted as given in the variable
-@code{org-link-format} and inserted into the buffer, along with a
-descriptive text.  Note that you don't have to use this command to
-insert a link.  Links in Org-mode are plain text, and you can type or
-paste them straight into the buffer.
+all links stored during the current session can be accessed.  The link
+will be formatted as given in the variable @code{org-link-format} and
+inserted into the buffer, along with a descriptive text.  Note that you
+don't have to use this command to insert a link.  Links in Org-mode are
+plain text, and you can type or paste them straight into the buffer.
+By using this command, the links are automatically enclosed in double
+brackets, and you will be asked for the optional descriptive text.
+
+@kindex C-u C-c C-l
+@cindex file name completion
+@cindex completion, of file names
+@item C-u C-c C-l
+When @kbd{C-c C-l} is called with a @kbd{C-u} prefix argument, a link to
+a file will be inserted and you may use file name completion to select
+the name of the file.  The path to the file is inserted relative to the
+directory of the current org file, if the linked file is in the current
+directory or in a subdirectory of it.  Otherwise an absolute path, if
+possible with @samp{~/} for your home directory is used.  You can force
+an absolute path with two @kbd{C-u} prefixes.
+
+@item C-c C-l @r{with cursor on existing link}
+When the cursor is on an existing link, @kbd{C-c C-l} allows to edit the
+link and description parts of the link.
 
 @cindex following links
 @kindex C-c C-o
 @item C-c C-o
 Open link at point.  This will launch a web browser for URLs (using
-@command{browse-url-at-point}), run vm/gnus/bbdb for the corresponding
-links, and execute the command in a shell link.  When the cursor is on
-am internal link, this commands runs the corresponding search.  When
-the cursor is on a TAGS list in a headline, it creates the
-corresponding TAGS view.  Furthermore, it will visit text files in
-@samp{file:} links with Emacs and select a suitable application for
-non-text files.  Classification of files is based on file extension
-only.  See option @code{org-file-apps}.  If there is no link at point,
-the current subtree will be searched for one.  If you want to override
-the default application and visit the file with Emacs, use a @kbd{C-u}
-prefix.  If the cursor is on a time stamp, it compiles the agenda for
-that date.
-
-@strong{IMPORTANT}: Be careful not to use any dangerous commands in a
-shell link.
+@command{browse-url-at-point}), run vm/mh-e/wanderlust/rmail/gnus/bbdb
+for the corresponding links, and execute the command in a shell link.
+When the cursor is on an internal link, this commands runs the
+corresponding search.  When the cursor is on a TAGS list in a headline,
+it creates the corresponding TAGS view.  If the cursor is on a time
+stamp, it compiles the agenda for that date.  Furthermore, it will visit
+text files in @samp{file:} links with Emacs and select a suitable
+application for non-text files.  Classification of files is based on
+file extension only.  See option @code{org-file-apps}.  If you want to
+override the default application and visit the file with Emacs, use a
+@kbd{C-u} prefix.
 
 @kindex mouse-2
 @kindex mouse-1
@@ -1602,12 +1646,14 @@ particular location in the file when following a link.  This can be a
 line number or a search option after a double@footnote{For backward
 compatibility, line numbers can also follow a single colon.} colon.
 For example:
+
 @example
-<file:~/code/main.c::255>
-<file:~/xx.org::My Target>
-<file:~/xx.org::*My Target>
-<file:~/xx.org::/regexp/>
+[[file:~/code/main.c::255]]
+[[file:~/xx.org::My Target]]
+[[file:~/xx.org::*My Target]]
+[[file:~/xx.org::/regexp/]]
 @end example
+
 @noindent Here is what these options do.
 
 @table @code
@@ -1672,6 +1718,7 @@ journal entries, you could use:
       '((?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org")
         (?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org")))
 @end example
+
 @noindent In these entries, the character specifies how to select the
 template, the first string specifies the template, and the second string
 specifies a default file (overruling @code{org-default-notes-file}) as a
@@ -1683,7 +1730,9 @@ for a key to select the template and then prepare the buffer like
 * TODO
   <file:link to where you called remember>
 @end example
+
 @noindent or
+
 @example
 * [2006-03-21 Tue 15:37]
 
@@ -1767,10 +1816,12 @@ The most important commands to work with TODO entries are:
 @cindex cycling, of TODO states
 @item C-c C-t
 Rotate the TODO state of the current item between
+
 @example
 ,-> (unmarked) -> TODO -> DONE --.
 '--------------------------------'
 @end example
+
 The same rotation can also be done ``remotely'' from the timeline and
 agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
 @kindex C-c C-v
@@ -1799,9 +1850,11 @@ agenda, customize the variable @code{org-agenda-include-all-todo}.
 @cindex logging, of progress
 If you want to keep track of @emph{when} a certain TODO item was
 finished, turn on logging with
+
 @lisp
 (setq org-log-done t)
 @end lisp
+
 @noindent
 Then each time you turn a TODO entry into DONE using either @kbd{C-c
 C-t} in the Org-mode buffer or @kbd{t} in the agenda buffer, a line
@@ -2176,7 +2229,7 @@ Choose date in calendar (only if nothing typed into minibuffer).
 @cindex sparse tree, tag based
 
 If you wish to implement a system to cross-correlate information, an
-excellent ways is assigning @i{tags} to headline.  Org-mode has
+excellent way is to assign @i{tags} to headline.  Org-mode has
 extensive support for using tags.
 
 Every headline can contain a list of tags, at the end of the headline.
@@ -2203,6 +2256,7 @@ well.  For example, in the list
 ** Summary by Frank                  :BOSS:NOTES:
 *** TODO Prepare slides for him      :ACTION:
 @end example
+
 @noindent
 the final heading will have the tags @samp{:WORK:}, @samp{:BOSS:},
 @samp{:NOTES:}, and @samp{:ACTION:}.  When executing tag searches and
@@ -2283,6 +2337,7 @@ sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
 in a separate buffer.  Three different views are provided:
+
 @itemize @bullet
 @item
 an @emph{agenda} that is like a calendar and shows information
@@ -2294,6 +2349,7 @@ action items, and
 a @emph{tags view} that shows information based on
 the tags associated with headlines in the outline tree.
 @end itemize
+
 @noindent
 The extracted information is displayed in a special @emph{agenda
 buffer}.  This buffer is read-only, but provides commands to visit the
@@ -2338,6 +2394,7 @@ Remove current file from the list of agenda files.
 @item C-,
 Cycle through agenda file list, visiting one file after the other.
 @end table
+
 @noindent
 The Org menu contains the current list of files and can be used
 to visit any of them.
@@ -2377,6 +2434,7 @@ Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable,
 for example by pressing @kbd{C-c a C}.  You can also directly set it
 with Emacs Lisp in @file{.emacs}.  For example:
+
 @lisp
 (setq org-agenda-custom-commands
       '(("w" todo "WAITING")
@@ -2384,6 +2442,7 @@ with Emacs Lisp in @file{.emacs}.  For example:
         ("U" tags-tree "+BOSS-URGENT")
         ("f" occur-tree "\\<FIXME\\>")))
 @end lisp
+
 @noindent will define @kbd{C-c a w} as a global search for
 TODO entries with @samp{WAITING} as the TODO keyword, @kbd{C-c a u} as a
 global tags search for headlines marked @samp{:BOSS:} but not
@@ -2430,9 +2489,11 @@ commands}.
 In the agenda buffer, each entry is preceded by a @emph{category},
 which is derived from the file name.  The category can also be set
 with a special line anywhere in the buffer, looking like this:
+
 @example
 #+CATEGORY: Thesis
 @end example
+
 If there are several such lines in a file, each specifies the category
 for the text below it (but the first category also applies to any text
 before the first CATEGORY line).  The display in the agenda buffer looks
@@ -2505,7 +2566,6 @@ agenda, you only need to customize the variable
 @lisp
 (setq org-agenda-include-diary t)
 @end lisp
-@noindent
 
 @noindent After that, everything will happen automatically.  All diary
 entries including holidays, anniversaries etc will be included in the
@@ -2618,8 +2678,8 @@ Show a time-sorted view of the org file, with all time-stamped items.
 When called with a @kbd{C-u} prefix, all unfinished TODO entries
 (scheduled or not) are also listed under the current date.
 @end table
-@noindent
 
+@noindent
 The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
 
@@ -2876,9 +2936,11 @@ In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
 will be exported as itemized lists.  If you want that transition to occur
 at a different level, specify it with a prefix argument.  For example,
+
 @example
 @kbd{C-1 C-c C-x a org-export-as-ascii}
 @end example
+
 @noindent
 creates only top level headlines and does the rest as items.  Lines
 starting with @samp{#} and subtrees starting with the word @samp{COMMENT}
@@ -2915,9 +2977,11 @@ In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
 will be exported as itemized lists.  If you want that transition to occur
 at a different level, specify it with a prefix argument.  For example,
+
 @example
 @kbd{C-2 C-c C-x b}
 @end example
+
 @noindent
 creates two levels of headings and does the rest as items.
 
@@ -3007,6 +3071,7 @@ correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
 #+TEXT:      Several lines may be given.
 #+OPTIONS:   H:2  num:t  toc:t  \n:nil  @:t  ::t  |:t  ^:t  *:nil  TeX:t
 @end example
+
 @noindent
 The OPTIONS line is a compact form to specify export settings.  Here
 you can:
@@ -3227,6 +3292,7 @@ the buffer)
 #+STARTUP: showstars
 #+STARTUP: hidestars
 @end example
+
 @noindent
 Press @kbd{C-c C-c} with the cursor in a @samp{STARTUP} line to activate
 the modifications.
@@ -3339,6 +3405,23 @@ turn it on for all @file{README} files?}
 @example
 (add-to-list 'auto-mode-alist '("README$" . org-mode))
 @end example
+
+@item @b{Some of my links stopped working after I upgraded to a version
+4.20 or later.  Why is this, and how can I fix it?}@* The newer versions of
+Org-mode have a better link system and no longer allow unescaped space
+characters as part of a link.  To fix these links, and also to move all
+@samp{<link>} style links to the new @samp{[[link]]} system, execute
+once in each Org-mode file: @kbd{M-x org-upgrade-old-links}.
+
+@item @b{I really like the old style links with angular brackets
+better.  Please give them back to me, don't tell me it is not
+possible!}@* Would I let you down like that?  If you must (even if I
+don't understand why), you can do this
+@lisp
+(setq org-allow-space-in-plain-links t
+      org-link-style 'plain
+      org-link-format "<%s>")
+@end lisp
 
 @item @b{All these stars are driving me mad, I just find the Emacs
 outlines unreadable. Can't you just put white space and a single star as a
@@ -3501,11 +3584,13 @@ packages along with Org-mode, configure the variable
 @code{org-CUA-compatible}.  When set, Org-mode will move the following
 keybindings in org-mode files, and in the agenda buffer (but not
 during date selection).
+
 @example
 S-UP    -> M-p             S-DOWN  -> M-n
 S-LEFT  -> M--             S-RIGHT -> M-+
 S-RET   -> C-S-RET
 @end example
+
 Yes, these are unfortunately more difficult to remember.  If you want
 to have other replacement keys, look at the variable
 @code{org-disputed-keys}.
@@ -3589,11 +3674,12 @@ Remember.
 Pavel Chalmoviansky influenced the agenda treatment of items with
 specified time.
 @item
-Sacha Chua suggested to copy linking code from Planner (we did take
-some).
+Sacha Chua suggested to copy some linking code from Planner.
 @item
 Christian Egli converted the documentation into TeXInfo format, patched
 CSS formatting into the HTML exporter, and inspired the agenda.
+@item
+Nic Ferrier contributed mailcap and XML support.
 @item
 Kai Grossjohann pointed out key-binding conflicts caused by Org-mode.
 @item
@@ -3630,10 +3716,12 @@ Chris Wallace provided a patch implementing the @samp{QUOTE} keyword.
 David Wainberg suggested archiving, and improvements to the linking
 system.
 @item
-Org-mode's linking system was an independent development, but with time
-has evolved to work similar to John's implementation in
-@file{emacs-wiki-mode}.  In particular, I adopted his way to make the
-link itself invisible and only show descriptive text.
+John Wiegley wrote @file{emacs-wiki.el} and @file{planner.el}.  The
+development of Org-mode was fully independent, and both systems are
+really different beasts in their basic ideas and implementation details.
+However, I have later looked at John's code and learned from his
+implementation of (i) links where the link itself is hidden and only a
+description is shown, and (ii) popping up a calendar to select a date.
 @item
 Carsten Wimmer suggested some changes and helped fix a bug in linking
 to GNUS.
