@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.50
+;; Version: 4.51
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -61,6 +61,12 @@
 ;;
 ;; Recent changes
 ;; --------------
+;; Version 4.51
+;;    - Link abbreviations (manual section 4.5).
+;;    - More control over how agenda is displayed.  See the new variables
+;;      `org-agenda-window-setup', `org-agenda-restore-windows-after-quit'.
+;;    - Bug fixes.
+;;   
 ;; Version 4.50
 ;;    - Closing a TODO item can record an additional note.
 ;;      See variables `org-log-done' and `org-log-note-headings'.
@@ -137,7 +143,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.50"
+(defvar org-version "4.51"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -691,7 +697,8 @@ this variable requires a restart of Emacs to become effective."
   :group 'org-table-settings
    :type 'string)
 
-(defcustom org-table-number-regexp "^[<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%]*$"
+(defcustom org-table-number-regexp
+  "^\\([<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%]*\\|\\(0[xX]\\)?[0-9a-fA-F]+\\)$"
   "Regular expression for recognizing numbers in table columns.
 If a table column contains mostly numbers, it will be aligned to the
 right.  If not, it will be aligned to the left.
@@ -715,8 +722,8 @@ Other options offered by the customize interface are more restrictive."
 		 "^[-+]?\\([0-9]*\\.[0-9]+\\|[0-9]+\\.?[0-9]*\\)$")
 	  (const :tag "Exponential, Floating point, Integer"
 		 "^[-+]?[0-9.]+\\([eEdD][-+0-9]+\\)?$")
-	  (const :tag "Very General Number-Like"
-		 "^[<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%]*$")
+	  (const :tag "Very General Number-Like, including hex"
+		 "^\\([<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%]*\\|\\(0[xX]\\)?[0-9a-fA-F]+\\)$")
 	  (string :tag "Regexp:")))
 
 (defcustom org-table-number-fraction 0.5
@@ -846,6 +853,26 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   "Options concerning links in Org-mode."
   :tag "Org Link"
   :group 'org)
+
+(defvar org-link-abbrev-alist-local nil
+  "buffer-local version of `org-link-abbrev-alist', which see.
+The value of this is taken from the #+LINK lines.")
+(make-variable-buffer-local 'org-link-abbrev-alist-local)
+
+(defcustom org-link-abbrev-alist nil
+  "Alist of link abbreviations.
+The car of each element is a string, to be replaced at the start of a link.
+The cdrs are replacement values, like (\"linkkey\" . REPLACE).  Abbreviated
+links in Org-mode buffers can have an optional tag after a double colon, e.g.
+
+     [[linkkey::tag][description]]
+
+If REPLACE is a string, the tag will simply be appended to create the link.
+If the string contains \"%s\", the tag will be inserted there.  REPLACE may
+also be a function that will be called with the tag as the only argument to
+create the link.  See the manual for examples."
+  :group 'org-link
+  :type 'alist)
 
 (defcustom org-descriptive-links t
   "Non-nil means, hide link part and only show description of bracket links.
@@ -1031,6 +1058,18 @@ another window."
 		 (const find-file)
 		 (const find-file-other-window)
 		 (const find-file-other-frame)))))
+
+(defcustom org-display-internal-link-with-indirect-buffer nil
+  "Non-nil means, use indirect buffer to display infile links.
+Activating internal links (from one location in a file to another location
+in the same file) normally just jumps to the location.  When the link is
+activated with a C-u prefix (or with mouse-3), the link is displayed in
+another window.  When this option is set, the other window actually displays
+an indirect buffer clone of the current buffer, to avoid any visibility
+changes to the current buffer."
+  :group 'org-link-follow
+  :type 'boolean)
+
 
 (defcustom org-open-non-existing-files nil
   "Non-nil means, `org-open-file' will open non-existing file.
@@ -1627,6 +1666,54 @@ forth between agenda and calendar."
   :tag "Org Agenda Window Setup"
   :group 'org-agenda)
 
+(defcustom org-agenda-window-setup 'reorganize-frame
+  "How the agenda buffer should be displayed.
+Possible values for this option are:
+
+current-window    Show agenda in the current window, keeping all other windows.
+other-frame       Use `switch-to-buffer-other-frame' to display agenda.
+other-window      Use `switch-to-buffer-other-window' to display agenda.
+reorganize-frame  Show only two windows on the current frame, the current
+                  window and the agenda.  Also, if the option
+                  `org-fit-agenda-window' is set, resize the agenda window to
+                  try to as much as possible of the buffer content.
+See also the variable `org-agenda-restore-windows-after-quit'."
+  :group 'org-agenda-setup
+  :type '(choice
+	  (const current-window)
+	  (const other-frame)
+	  (const other-window)
+	  (const reorganize-frame)))
+
+(defcustom org-agenda-restore-windows-after-quit nil
+  "Non-nil means, restore window configuration open exiting agenda.
+Before the window configuration is changed for displaying the agenda,
+the current status is recorded.  When the agenda is exited with
+`q' or `x' and this option is set, the old state is restored.  If
+`org-agenda-window-setup' is `other-frame', the value of this
+option will be ignored.."
+  :group 'org-agenda-setup
+  :type 'boolean)
+
+;; FIXME: I think this variable could be removed.
+(defcustom org-select-agenda-window t
+  "Non-nil means, after creating an agenda, move cursor into Agenda window.
+When nil, cursor will remain in the current window."
+  :group 'org-agenda-setup
+  :type 'boolean)
+
+;; FIXME: I think this variable could be removed.
+(defcustom org-fit-agenda-window t
+  "Non-nil means, change window size of agenda to fit content.
+This is only effective if `org-agenda-window-setup' is `reorganize-frame'."
+  :group 'org-agenda-setup
+  :type 'boolean)
+
+(defcustom org-finalize-agenda-hook nil
+  "Hook run just before displaying an agenda buffer."
+  :group 'org-agenda-setup
+  :type 'hook)
+
 (defcustom org-agenda-mouse-1-follows-link nil
   "Non-nil means, mouse-1 on a link will follow the link in the agenda.
 A longer mouse click will still set point.  Does not wortk on XEmacs.
@@ -1638,22 +1725,6 @@ Needs to be set before org.el is loaded."
   "The initial value of follwo-mode in a newly created agenda window."
   :group 'org-agenda-setup
   :type 'boolean)
-
-(defcustom org-select-agenda-window t
-  "Non-nil means, after creating an agenda, move cursor into Agenda window.
-When nil, cursor will remain in the current window."
-  :group 'org-agenda-setup
-  :type 'boolean)
-
-(defcustom org-fit-agenda-window t
-  "Non-nil means, change window size of agenda to fit content."
-  :group 'org-agenda-setup
-  :type 'boolean)
-
-(defcustom org-finalize-agenda-hook nil
-  "Hook run just before displaying an agenda buffer."
-  :group 'org-agenda ;??????
-  :type 'hook)
 
 (defgroup org-agenda-display nil
   "Options concerning what to display initially in Agenda."
@@ -2415,7 +2486,11 @@ Changing this variable requires a restart of Emacs to take effect."
 	  (setq markers (concat (replace-match "" t t markers) "^")))
       (if (string-match "-" markers)
 	  (setq markers (concat (replace-match "" t t markers) "-")))
-      (while (>= (setq nl (1- nl)) 0) (setq body1 (concat body1 "\n?" body "*?")))
+;      (while (>= (setq nl (1- nl)) 0) (setq body1 (concat body1 "\n?" body "*?")))
+;      (while (>= (setq nl (1- nl)) 0) (setq body1 (concat body1 "\\(?:\n?" body "*?\\)?")))
+      (if (> nl 0)
+          (setq body1 (concat body1 "\\(?:\n" body "*?\\)\\{0,"
+                              (int-to-string nl) "\\}")))
       ;; Make the regexp
       (setq org-emph-re
 	    (concat "\\([" pre (if stacked markers) "]\\|^\\)"
@@ -2859,9 +2934,9 @@ Also put tags into group 4 if tags are present.")
   (when (org-mode-p)
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "SEQ_TODO" "PRI_TODO" "TYP_TODO"
-		 "STARTUP" "ARCHIVE" "TAGS" "CALC")))
+		 "STARTUP" "ARCHIVE" "TAGS" "LINK")))
 	  (splitre "[ \t]+")
-	  kwds int key value cat arch tags)
+	  kwds int key value cat arch tags links tmp)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -2884,6 +2959,11 @@ Also put tags into group 4 if tags are present.")
 		    kwds (append kwds (org-split-string value splitre))))
 	     ((equal key "TAGS")
 	      (setq tags (append tags (org-split-string value splitre))))
+	     ((equal key "LINK")
+	      (when (string-match "^\\(\\S-+\\)[ \t]+\\(.+\\)" value)
+		(push (cons (match-string 1 value)
+			    (org-trim (match-string 2 value)))
+		      links)))
 	     ((equal key "STARTUP")
 	      (let ((opts (org-split-string value splitre))
 		    l var val)
@@ -2900,6 +2980,7 @@ Also put tags into group 4 if tags are present.")
       (and kwds (org-set-local 'org-todo-keywords kwds))
       (and arch (org-set-local 'org-archive-location arch))
       (and int (org-set-local 'org-todo-interpretation int))
+      (and links (setq org-link-abbrev-alist-local (nreverse links)))
       (when tags
 	(let (e tgs)
 	  (while (setq e (pop tags))
@@ -3455,7 +3536,10 @@ between words."
 	   (list (concat "\\<" org-closed-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-clock-string) '(0 'org-special-keyword t))
 	   ;; Emphasis
-	   (if em '(org-do-emphasis-faces))
+	   (if em
+               (if (featurep 'xemacs)
+                   '(org-do-emphasis-faces (0 nil append))
+                 '(org-do-emphasis-faces)))
 	   ;; Checkboxes, similar to Frank Ruell's org-checklet.el
 	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
 	     2 'bold prepend)
@@ -4381,7 +4465,7 @@ with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
   (interactive "P")
   (save-excursion
-    (let* ((buffer-invisibility-spec nil)
+    (let* ((buffer-invisibility-spec nil) ; Emacs 21 compatibility
 	   (beg (progn (outline-back-to-heading) (point)))
 	   (end (move-marker (make-marker)
 			     (progn (outline-next-heading) (point))))
@@ -4933,6 +5017,7 @@ the children that do not contain any open TODO items."
 
 (defvar org-agenda-multi nil)  ; dynammically scoped
 (defvar org-agenda-buffer-name "*Org Agenda*")
+(defvar org-pre-agenda-window-conf nil)
 (defun org-prepare-agenda ()
   (if org-agenda-multi
       (progn
@@ -4943,10 +5028,21 @@ the children that do not contain any open TODO items."
 	(narrow-to-region (point) (point-max)))
     (org-agenda-maybe-reset-markers 'force)
     (org-prepare-agenda-buffers (org-agenda-files))
-    (unless (equal (current-buffer) (get-buffer org-agenda-buffer-name))
-      (delete-other-windows)
-      (switch-to-buffer-other-window
-       (get-buffer-create org-agenda-buffer-name)))
+    (let* ((abuf (get-buffer-create org-agenda-buffer-name))
+	   (awin (get-buffer-window abuf)))
+      (cond
+       ((equal (current-buffer) abuf) nil)
+       (awin (select-window awin))
+       ((not (setq org-pre-agenda-window-conf (current-window-configuration))))
+       ((equal org-agenda-window-setup 'current-window)
+	(switch-to-buffer abuf))
+       ((equal org-agenda-window-setup 'other-window)
+	(switch-to-buffer-other-window abuf))
+       ((equal org-agenda-window-setup 'other-frame)
+	(switch-to-buffer-other-frame abuf))
+       ((equal org-agenda-window-setup 'reorganize-frame)
+	(delete-other-windows)
+	(switch-to-buffer-other-window abuf))))
     (setq buffer-read-only nil)
     (erase-buffer)
     (org-agenda-mode))
@@ -5163,6 +5259,7 @@ At all other locations, this simply calls `ispell-complete-word'."
 	   (camel (equal (char-before beg) ?*))
 	   (tag (equal (char-before beg1) ?:))
 	   (texp (equal (char-before beg) ?\\))
+	   (link (equal (char-before beg) ?\[))
 	   (opt (equal (buffer-substring (max (point-at-bol) (- beg 2))
 					 beg)
 		       "#+"))
@@ -5181,6 +5278,8 @@ At all other locations, this simply calls `ispell-complete-word'."
 		   (startup
 		    (setq type :startup)
 		    org-startup-options)
+		   (link (append org-link-abbrev-alist-local
+				 org-link-abbrev-alist))		    
 		   (texp
 		    (setq type :tex)
 		    org-html-entities)
@@ -5382,7 +5481,7 @@ be removed."
      (format-time-string (car org-time-stamp-formats) time))
     (setq what nil))
   (save-excursion
-    (let (col list elt (buffer-invisibility-spec nil) ts)
+    (let (col list elt ts buffer-invisibility-spec)
       (org-back-to-heading t)
       (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
       (goto-char (match-end 1))
@@ -5739,7 +5838,7 @@ While prompting, a calendar is popped up - you can also select the
 date with the mouse (button 1).  The calendar shows a period of three
 months.  To scroll it to other months, use the keys `>' and `<'.
 If you don't like the calendar, turn it off with
-       \(setq org-popup-calendar-for-date-prompt nil)
+       \(setq org-popup-calendar-for-date-prompt Nil)
 
 With optional argument TO-TIME, the date will immediately be converted
 to an internal time.
@@ -6696,7 +6795,7 @@ The following commands are available:
     "--"
     ["Show" org-agenda-show t]
     ["Go To (other window)" org-agenda-goto t]
-    ["Go To (one window)" org-agenda-switch-to t]
+    ["Go To (this window)" org-agenda-switch-to t]
     ["Follow Mode" org-agenda-follow-mode
      :style toggle :selected org-agenda-follow-mode :active t]
     "--"
@@ -6893,7 +6992,6 @@ L   Timeline for current buffer          C   Configure custom agenda commands")
        (t (error "Invalid key"))))))
 
 ;; FIXME: what is the meaning of WINDOW?????
-;; FIXME: need to force KEEP-MODES for series comands......
 (defun org-run-agenda-series (series &optional window)
   (org-prepare-agenda)
   (let* ((org-agenda-multi t)
@@ -6947,6 +7045,7 @@ before running the agenda command."
 (defun org-fit-agenda-window ()
   "Fit the window to the buffer size."
   (and org-fit-agenda-window
+       (memq org-agenda-window-setup '(reorganize-frame))
        (fboundp 'fit-window-to-buffer)
        (fit-window-to-buffer nil (/ (* (frame-height) 3) 4)
                              (/ (frame-height) 2))))
@@ -7054,7 +7153,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(with-current-buffer buf (save-buffer)))
       (kill-buffer buf))))
 
-(defun org-timeline (&optional include-all keep-modes)
+(defun org-timeline (&optional include-all)
   "Show a time-sorted view of the entries in the current org file.
 Only entries with a time stamp of today or later will be listed.  With
 \\[universal-argument] prefix, all unfinished TODO items will also be shown,
@@ -7068,7 +7167,6 @@ dates."
   (let* ((dopast t)
 	 (dotodo include-all)
 	 (doclosed org-agenda-show-log)
-	 (org-agenda-keep-modes keep-modes)
 	 (entry buffer-file-name)
 	 (date (calendar-current-date))
 	 (win (selected-window))
@@ -7085,7 +7183,7 @@ dates."
     (setq org-agenda-redo-command
 	  (list 'progn
 		(list 'switch-to-buffer-other-window (current-buffer))
-		(list 'org-timeline (list 'quote include-all) t)))
+		(list 'org-timeline (list 'quote include-all))))
     (if (not dopast)
 	;; Remove past dates from the list of dates.
 	(setq day-numbers (delq nil (mapcar (lambda(x)
@@ -7140,7 +7238,7 @@ dates."
   "The arguments of the previous call to org-agenda")
 
 ;;;###autoload
-(defun org-agenda-list (&optional include-all start-day ndays keep-modes)
+(defun org-agenda-list (&optional include-all start-day ndays)
   "Produce a weekly view from all files in variable `org-agenda-files'.
 The view will be for the current week, but from the overview buffer you
 will be able to go to other weeks.
@@ -7156,9 +7254,8 @@ NDAYS defaults to `org-agenda-ndays'."
   (if org-agenda-overriding-arguments
       (setq include-all (car org-agenda-overriding-arguments)
 	    start-day (nth 1 org-agenda-overriding-arguments)
-	    ndays (nth 2 org-agenda-overriding-arguments)
-	    keep-modes (nth 3 org-agenda-overriding-arguments)))
-  (setq org-agenda-last-arguments (list include-all start-day ndays keep-modes))
+	    ndays (nth 2 org-agenda-overriding-arguments)))
+  (setq org-agenda-last-arguments (list include-all start-day ndays))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
   (require 'calendar)
@@ -7166,7 +7263,6 @@ NDAYS defaults to `org-agenda-ndays'."
 	  (if (or (equal ndays 1)
 		  (and (null ndays) (equal 1 org-agenda-ndays)))
 	      nil org-agenda-start-on-weekday))
-	 (org-agenda-keep-modes keep-modes)
 	 (thefiles (org-agenda-files))
 	 (files thefiles)
 	 (win (selected-window))
@@ -7181,10 +7277,10 @@ NDAYS defaults to `org-agenda-ndays'."
 			 (d (- nt n1)))
 		    (- sd (+ (if (< d 0) 7 0) d)))))
 	 (day-numbers (list start))
-	 (inhibit-redisplay t)
+;FIXME	 (inhibit-redisplay t)
 	 s e rtn rtnall file date d start-pos end-pos todayp nd)
     (setq org-agenda-redo-command
-	  (list 'org-agenda-list (list 'quote include-all) start-day ndays t))
+	  (list 'org-agenda-list (list 'quote include-all) start-day ndays))
     ;; Make the list of days
     (setq ndays (or ndays org-agenda-ndays)
 	  nd ndays)
@@ -7277,7 +7373,7 @@ NDAYS defaults to `org-agenda-ndays'."
 (defvar org-select-this-todo-keyword nil)
 
 ;;;###autoload
-(defun org-todo-list (arg &optional keep-modes)
+(defun org-todo-list (arg)
   "Show all TODO entries from all agenda file in a single list.
 The prefix arg can be used to select a specific TODO keyword and limit
 the list to these.  When using \\[universal-argument], you will be prompted
@@ -7286,8 +7382,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (interactive "P")
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
-  (let* ((org-agenda-keep-modes keep-modes)
-	 (today (time-to-days (current-time)))
+  (let* ((today (time-to-days (current-time)))
 	 (date (calendar-gregorian-from-absolute today))
 	 (win (selected-window))
 	 (kwds org-todo-keywords)
@@ -7306,7 +7401,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
     (org-set-local 'last-arg arg)
     (org-set-local 'org-todo-keywords kwds)
     (setq org-agenda-redo-command
-	  '(org-todo-list (or current-prefix-arg last-arg) t))
+	  '(org-todo-list (or current-prefix-arg last-arg)))
     (setq files (org-agenda-files)
 	  rtnall nil)
     (while (setq file (pop files))
@@ -7366,7 +7461,12 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (let ((buf (current-buffer)))
     (if (not (one-window-p)) (delete-window))
     (kill-buffer buf)
-    (org-agenda-maybe-reset-markers 'force)))
+    (org-agenda-maybe-reset-markers 'force))
+  ;; Maybe restore the pre-agenda window configuration.
+  (and org-agenda-restore-windows-after-quit
+       (not (eq org-agenda-window-setup 'other-frame))
+       org-pre-agenda-window-conf
+       (set-window-configuration org-pre-agenda-window-conf)))
 
 (defun org-agenda-exit ()
   "Exit agenda by removing the window or the buffer.
@@ -7388,7 +7488,8 @@ Org-mode buffers visited directly by the user will not be touched."
   "Rebuild Agenda.
 When this is the global TODO list, a prefix argument will be interpreted."
   (interactive)
-  (let* ((line (org-current-line))
+  (let* ((org-agenda-keep-modes t)
+	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start)))))
     (message "Rebuilding agenda buffer...")
     (eval org-agenda-redo-command)
@@ -8589,7 +8690,7 @@ and by additional input from the age of a schedules or deadline entry."
 	     (org-flag-heading nil)))) ; show the next heading
     (and highlight (org-highlight (point-at-bol) (point-at-eol)))))
 
-(defun org-agenda-switch-to ()
+(defun org-agenda-switch-to (&optional delete-other-windows)
   "Go to the Org-mode file which contains the item at point."
   (interactive)
   (let* ((marker (or (get-text-property (point) 'org-marker)
@@ -8597,7 +8698,7 @@ and by additional input from the age of a schedules or deadline entry."
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker)))
     (switch-to-buffer buffer)
-    (delete-other-windows)
+    (and delete-other-windows (delete-other-windows))
     (widen)
     (goto-char pos)
     (when (org-mode-p)
@@ -9018,7 +9119,7 @@ This is a command that has to be installed in `calendar-mode-map'."
   (interactive)
   (org-agenda-list nil (calendar-absolute-from-gregorian
 			(calendar-cursor-to-date))
-		   nil t))
+		   nil))
 
 (defun org-agenda-convert-date ()
   (interactive)
@@ -9166,14 +9267,13 @@ MATCH can contain positive and negative selection of tags, like
     (cons match0 matcher)))
 
 ;;;###autoload
-(defun org-tags-view (&optional todo-only match keep-modes)
+(defun org-tags-view (&optional todo-only match)
   "Show all headlines for all `org-agenda-files' matching a TAGS criterion.
 The prefix arg TODO-ONLY limits the search to TODO entries."
   (interactive "P")
   (org-compile-prefix-format 'tags)
   (org-set-sorting-strategy 'tags)
-  (let* ((org-agenda-keep-modes keep-modes)
-	 (org-tags-match-list-sublevels
+  (let* ((org-tags-match-list-sublevels
 	  (if todo-only t org-tags-match-list-sublevels))
 	 (win (selected-window))
 	 (completion-ignore-case t)
@@ -9184,7 +9284,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (org-prepare-agenda)
     (setq org-agenda-redo-command
 	  (list 'org-tags-view (list 'quote todo-only)
-		(list 'if 'current-prefix-arg nil match) t))
+		(list 'if 'current-prefix-arg nil match)))
     (setq files (org-agenda-files)
 	  rtnall nil)
     (while (setq file (pop files))
@@ -9263,7 +9363,6 @@ With prefix ARG, realign all tags in headings in the current buffer."
 				   nil nil current 'org-tags-history))))
 	(while (string-match "[-+&]+" tags)
 	  (setq tags (replace-match ":" t t tags))))
-      
       (unless (setq empty (string-match "\\`[\t ]*\\'" tags))
 	(unless (string-match ":$" tags) (setq tags (concat tags ":")))
 	(unless (string-match "^:" tags) (setq tags (concat ":" tags))))
@@ -9284,14 +9383,15 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	    (if (= (char-after) ?\ ) (forward-char 1))
 	    (and (re-search-forward "[ \t]+$" (point-at-eol) t)
 		 (replace-match "")))
-	(move-to-column (max (current-column)
-			     (if (> org-tags-column 0)
-				 org-tags-column
-			       (- (- org-tags-column) (length tags))))
-			t)
+	(let (buffer-invisibility-spec) ; Emacs 21 compatibility
+	  (move-to-column (max (current-column)
+			       (if (> org-tags-column 0)
+				   org-tags-column
+				 (- (- org-tags-column) (length tags))))
+			  t))
 	(insert tags)
 	(if (and (not invis) (org-invisible-p))
-	    (outline-flag-region (point-at-bol) (point) nil)))
+	    (outline-flag-region (point) (point-at-bol) nil))) ; show
       (move-to-column col))))
 
 (defun org-tags-completion-function (string predicate &optional flag)
@@ -9522,6 +9622,7 @@ the window configuration before `org-open-at-point' was called using:
   "The window configuration before following a link.
 This is saved in case the need arises to restore it.")
 
+;; FIXME: IN-EMACS is used for many purposes, maybe rename this argument???
 (defun org-open-at-point (&optional in-emacs)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
@@ -9544,6 +9645,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	    (setq link (org-link-unescape (org-match-string-no-properties 1)))
 	    (while (string-match " *\n *" link)
 	      (setq link (replace-match " " t t link)))
+	    (setq link (org-link-expand-abbrev link))
 	    (if (string-match org-link-re-with-space2 link)
 		(setq type (match-string 1 link)
 		      path (match-string 2 link))
@@ -9621,7 +9723,10 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	(org-tags-view in-emacs path))
        ((or (string= type "camel")
 	    (string= type "thisfile"))
-	(org-mark-ring-push)
+	(if in-emacs
+	    (switch-to-buffer-other-window
+	     (org-get-buffer-for-internal-link (current-buffer)))
+	  (org-mark-ring-push))
 	(org-link-search
 	 path
 	 (cond ((equal in-emacs '(4)) 'occur)
@@ -9715,6 +9820,24 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 
        (t
 	(browse-url-at-point))))))
+
+
+(defun org-link-expand-abbrev (link)
+  "Apply replacements as defined in `org-link-abbrev-alist."
+  (if (string-match "^\\([a-zA-Z]+\\)\\(::\\(.*\\)\\)?$" link)
+      (let* ((key (match-string 1 link))
+	     (as (or (assoc key org-link-abbrev-alist-local)
+		     (assoc key org-link-abbrev-alist)))
+	     (tag (and (match-end 2) (match-string 3 link)))
+	     rpl)
+	(if (not as)
+	    link
+	  (setq rpl (cdr as))
+	  (cond
+	   ((symbolp rpl) (funcall rpl tag))
+	   ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
+	   (t (concat rpl tag)))))
+    link))
 
 (defun org-link-search (s &optional type)
   "Search for a link search option.
@@ -9816,6 +9939,22 @@ in all files."
 	    (progn (goto-char (match-end 0))
 		   (throw 'exit (point)))
 	  (goto-char (match-end 0)))))))
+
+(defun org-get-buffer-for-internal-link (buffer)
+  "Return a buffer to be used for displaying the link target of internal links."
+  (cond
+   ((not org-display-internal-link-with-indirect-buffer)
+    buffer)
+   ((string-match "(Clone)$" (buffer-name buffer))
+    (message "Buffer is already a clone, not making another one")
+    ;; we also do not modify visibility in this case
+    buffer)
+   (t ; make a new indirect buffer for displaying the link
+    (let* ((bn (buffer-name buffer))
+	   (ibn (concat bn "(Clone)"))
+	   (ib (or (get-buffer ibn) (make-indirect-buffer buffer ibn 'clone))))
+      (with-current-buffer ib (org-overview))
+      ib))))
 
 (defun org-do-occur (regexp &optional cleanup)
   "Call the Emacs command `occur'.
@@ -10300,7 +10439,7 @@ on the system \"/user@host:\"."
         ((fboundp 'tramp-handle-file-remote-p)
          (tramp-handle-file-remote-p file))
         ((and (boundp 'ange-ftp-name-format)
-              (string-match ange-ftp-name-format file))
+              (string-match (car ange-ftp-name-format) file))
          t)
         (t nil)))
 
@@ -13850,6 +13989,7 @@ translations.  There is currently no way for users to extend this.")
       (message "Exporting...")
 
       ;; Normalize links: Convert angle and plain links into bracket links
+      ;; Expand link abbreviations
       (goto-char (point-min))
       (while (re-search-forward re-plain-link nil t)
 	(replace-match
@@ -13862,6 +14002,11 @@ translations.  There is currently no way for users to extend this.")
 	 (concat
 	  (match-string 1) "[[" (match-string 2) ":" (match-string 3) "]]")
 	 t t))
+      (goto-char (point-min))
+      (while (re-search-forward "\\[\\[\\([^]]+\\)\\]" nil t)
+	(replace-match (concat "[[" (save-match-data
+				      (org-link-expand-abbrev (match-string 1)))
+			       "]")))
 
       ;; Find multiline emphasis and put them into single line
       (when (memq :emph-multiline parameters)
@@ -16948,8 +17093,9 @@ Show the heading too, if it is currently invisible."
 ;	       (progn (outline-end-of-heading) (point))
 ;	       nil))))
 
-;;; Finish up
 
+
+;;; Finish up
 
 (provide 'org)
 
