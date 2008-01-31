@@ -1,8 +1,28 @@
+2007-11-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-columns-compute, org-column-number-to-string)
+	(org-columns-uncompile-format, org-columns-compile-format)
+	(org-columns-compile-format): Handle printf format specifier.
+	(org-columns-new, org-column-number-to-string)
+	(org-columns-uncompile-format, org-columns-compile-format):
+	Support for new currency summary type.
+
+2007-10-30  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-format-org-table-html): Use lower-case for <col>
+	tag.
+
+2007-10-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-execute): New command.
+	(org-agenda-mode-map): Keybindings of "g" "G", "e" modified.
+
 2007-10-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-select-remember-template): New function.
 	(org-remember-apply-template): Use
 	`org-select-remember-template'.
+	(org-go-to-remember-target): New function.
 
 -----------------------------------------------------------------------
 
