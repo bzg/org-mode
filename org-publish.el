@@ -6,7 +6,7 @@
 ;; Keywords: hypermedia, outlines
 ;; Version:
 
-;; $Id: org-publish.el,v 1.77 2006/09/07 14:20:05 dto Exp $
+;; $Id: org-publish.el,v 1.78 2006/09/10 06:41:23 dto Exp dto $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -138,6 +138,7 @@
 
 ;;; List of user-visible changes since version 1.27
 
+;; 1.78: Allow list-valued :publishing-function
 ;; 1.77: Added :preparation-function, this allows you to use GNU Make etc.
 ;; 1.65: Remove old "composite projects". They're redundant.
 ;; 1.64: Allow meta-projects with :components
@@ -213,9 +214,12 @@ publishing files in the project. This can be used to extend the
 set of file types publishable by org-publish, as well as the set
 of output formats.
 
-    :publishing-function   Function to publish file. The default is
+    :publishing-function     Function to publish file. The default is
                              org-publish-org-to-html, but other
-                             values are possible.
+                             values are possible. May also be a
+                             list of functions, in which case 
+                             each function in the list is invoked
+                             in turn.
 
 Another property allows you to insert code that prepares a
 project for publishing. For example, you could call GNU Make on a
@@ -468,7 +472,12 @@ FILENAME is the filename of the file to be published."
     (if (not project-name)
 	(error (format "File %s is not part of any known project." filename)))
     (when (org-publish-needed-p filename)
-      (funcall publishing-function plist filename)
+      (if (listp publishing-function)
+	  ;; allow chain of publishing functions
+	  (mapc (lambda (f)
+		  (funcall f plist filename)) 
+		publishing-function)
+	(funcall publishing-function plist filename))
       (org-publish-update-timestamp filename))))
 
 
@@ -491,7 +500,12 @@ FILENAME is the filename of the file to be published."
       (while (setq f (pop files))
 	;; check timestamps
 	(when (org-publish-needed-p f)
-	  (funcall publishing-function plist f)
+	  (if (listp publishing-function)
+	      ;; allow chain of publishing functions
+	      (mapc (lambda (func)
+		      (funcall func plist f)) 
+		    publishing-function)
+	    (funcall publishing-function plist f))
 	  (org-publish-update-timestamp f))))))
 
 

@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.48
+@set VERSION 4.50
 @set DATE September 2006
 
 @dircategory Emacs
@@ -806,7 +806,9 @@ match is in the body of an entry, headline and body are made visible.
 In order to provide minimal context, also the full hierarchy of
 headlines above the match is shown, as well as the headline following
 the match.  Each match is also highlighted; the highlights disappear
-when the buffer is changed with an editing command.
+when the bufer is changes an editing command, or by pressing @kbd{C-c
+C-c}.  When called with a @kbd{C-u} prefix argument, previous highlights
+are kept, so several calls to this command can be stacked.
 @end table
 @noindent
 For frequently used sparse trees of specific search strings, you can
@@ -2622,6 +2624,8 @@ state cycling, that line will be removed again.  In the timeline
 (@pxref{Timeline}) and in the agenda (@pxref{Weekly/Daily agenda}),
 you can then use the @kbd{l} key to display the TODO items closed on
 each day, giving you an overview of what has been done on a day.
+See the variable @code{org-log-done} for the possibility to record an
+additional note together with a timestamp.
 
 @node Clocking work time,  , Closing items, Progress logging
 @subsection Clocking work time
@@ -2709,6 +2713,9 @@ you have several clocktable blocks in a buffer.
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
+
+See the variable @code{org-log-done} for the possibility to record an
+additional note together with a the clock-out time stamp.
 
 @node Tags, Agenda views, Timestamps, Top
 @chapter Tags
@@ -2817,7 +2824,7 @@ groups are allowed.}
 @end example
 
 @noindent you indicate that at most one of @samp{@@WORK}, @samp{@@HOME},
-and @samp{@@SAILBOAT} should be selected.
+and @samp{@@TENNISCLUB} should be selected.
 
 @noindent Don't forget to press @kbd{C-c C-c} with the cursor in one of
 these lines to activate any changes.
@@ -3797,7 +3804,11 @@ are surrounded with @code{<sub>} and @code{<sup>} tags, respectively.
 @section LaTeX fragments
 
 With symbols, sub- and superscripts, HTML is pretty much at its end when
-it comes to representing mathematical formulas.  More complex
+it comes to representing mathematical formulas@footnote{Yes, there is
+MathML, but that is not yet fully supported by many browsers, and there
+is no decent converter for turning LaTeX of ASCII representations of
+formulas into MathML.  So for the time being, converting formulas into
+images seems the way to go.}.  More complex
 expressions need a dedicated formula processor.  To this end, Org-mode
 can contain arbitrary La@TeX{} fragments.  It provides commands to
 preview the typeset result of these fragments, and upon export to HTML,
@@ -4386,7 +4397,8 @@ and where to put published files.
 @item @code{:publishing-directory}
 @tab Directory (possibly remote) where output files will be published.
 @item @code{:preparation-function}
-@tab Function called before starting publishing proxess.
+@tab Function called before starting publishing process, for example to
+run @code{make} for updating files to be published.
 @end multitable
 @noindent
 
@@ -4426,7 +4438,8 @@ specify the publishing function.
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
-@tab Function executing the publication of a file.
+@tab Function executing the publication of a file.  This may also be a
+list of functions, which will all be called in turn.
 @end multitable
 
 The function must accept two arguments: a property list containing at

@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.48
+;; Version: 4.50
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -61,10 +61,24 @@
 ;;
 ;; Recent changes
 ;; --------------
-;; Version 4.48
+;; Version 4.50
+;;    - Closing a TODO item can record an additional note.
+;;      See variables `org-log-done' and `org-log-note-headings'.
+;;    - Inserting headlines and bullets can leave an extra blank line.
+;;      See variable `org-blank-before-new-entry'. (Ed Hirgelt patch)
+;;    - [[bracket links]] in the agenda are active just as in org-mode buffers.
+;;    - C-c C-o on a date range displays the agenda for exactly this range.
+;;    - The default for `org-cycle-include-plain-lists' is back to nil.
+;;    - Calls to `org-occur' can be stacked by using a prefix argument.
+;;    - The options `org-show-hierarchy-above' and `org-show-following-heading'
+;;      now always default to `t', but can be customized differently for
+;;      different types of sparse trees or jump commands.
+;;    - Bug fixes.
+;;
+;; Version 4.49
 ;;    - Agenda views can be made in batch mode from the command line.
 ;;    - `org-store-link' does the right thing in dired-mode.
-;;    - File links can contain environment variables (thanks to Ed Hirgelt).
+;;    - File links can contain environment variables.
 ;;    - Full Emacs 21 compatibility has been restored.
 ;;    - Bug fixes.
 ;;
@@ -123,7 +137,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.47"
+(defvar org-version "4.50"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -381,6 +395,16 @@ body starts at column 0, indentation is not changed at all."
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-blank-before-new-entry '((heading . nil)
+					(plain-list-item . nil))
+  "Should `org-insert-heading' leave a blank line before new heading/item?
+The value is an alist, with `heading' and `plain-list-item' as car, 
+and a boolean flag as cdr."
+  :group 'org-edit-structure
+  :type '(list
+	  (cons (const heading) (boolean))
+	  (cons (const plain-list-item) (boolean))))
+
 (defcustom org-insert-heading-hook nil
   "Hook being run after inserting a new heading."
   :group 'org-edit-structure
@@ -406,21 +430,71 @@ changed by an edit command."
   :group 'org-sparse-trees
   :type 'boolean)
 
-(defcustom org-show-hierarchy-above t
-  "Non-nil means, show full hierarchy when showing a spot in the tree.
-Turning this off makes sparse trees more compact, but also less clear."
+(defcustom org-remove-highlights-with-change t
+  "Non-nil means, any change to the buffer will remove temporary highlights.
+Such highlights are created by `org-occur' and `org-clock-display'.
+When nil, `C-c C-c needs to be used to get rid of the highlights.
+The highlights created by `org-preview-latex-fragment' always need
+`C-c C-c' to be removed."
   :group 'org-sparse-trees
+  :group 'org-time
   :type 'boolean)
 
-(defcustom org-show-following-heading t
+(defcustom org-show-hierarchy-above '((default t))
+  "Non-nil means, show full hierarchy when showing a spot in the tree.
+Turning this off makes sparse trees more compact, but also less clear.
+Instead of t, this can also be an alist specifying this option for different
+contexts.  Valid contexts are
+  agenda         when exposing an entry from the agenda
+  org-goto       when using the command `org-goto' on key C-c C-j
+  occur-tree     when using the command `org-occur' on key C-c /
+  tags-tree      when constructing a sparse tree based on tags matches
+  link-search    when exposing search matches associated with a link
+  mark-goto      when exposing the jump goal of a mark
+  bookmark-jump  when exposing a bookmark location
+  default        default for all contexts not set explicitly"
+  :group 'org-sparse-trees
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "Never" nil)
+	  (repeat :greedy t :tag "Individual contexts"
+		  (cons
+		   (choice :tag "Context"
+		    (const agenda)
+		    (const org-goto)
+		    (const occur-tree)
+		    (const tags-tree)
+		    (const link-search)
+		    (const mark-goto)
+		    (const bookmark-jump)
+		    (const default))
+		   (boolean)))))
+
+(defcustom org-show-following-heading '((default t))
   "Non-nil means, show heading following match in `org-occur'.
 When doing an `org-occur' it is useful to show the headline which
 follows the match, even if they do not match the regexp.  This makes it
 easier to edit directly inside the sparse tree.  However, if you use
 `org-occur' mainly as an overview, the following headlines are
-unnecessary clutter."
+unnecessary clutter.
+Instead of t, this can also be an alist specifying this option for different
+contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-sparse-trees
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "Never" nil)
+	  (repeat :greedy t :tag "Individual contexts"
+		  (cons
+		   (choice :tag "Context"
+		    (const agenda)
+		    (const org-goto)
+		    (const occur-tree)
+		    (const tags-tree)
+		    (const link-search)
+		    (const mark-goto)
+		    (const bookmark-jump)
+		    (const default))
+		   (boolean)))))
 
 (defcustom org-occur-hook '(org-first-headline-recenter)
   "Hook that is run after `org-occur' has constructed a sparse tree.
@@ -434,7 +508,7 @@ as possible."
   :tag "Org Plain lists"
   :group 'org-structure)
 
-(defcustom org-cycle-include-plain-lists t
+(defcustom org-cycle-include-plain-lists nil
   "Non-nil means, include plain lists into visibility cycling.
 This means that during cycling, plain list items will *temporarily* be
 interpreted as outline headlines with a level given by 1000+i where i is the
@@ -568,8 +642,8 @@ When nil, such lines will be treated like ordinary lines.
 
 When equal to the symbol `optimized', the table editor will be optimized to
 do the following:
-- Use automatic overwrite mode in front of whitespace in table fields.
-  This make the structure of the table stay in tact as long as the edited
+- Automatic overwrite mode in front of whitespace in table fields.
+  This makes the structure of the table stay in tact as long as the edited
   field does not exceed the column width.
 - Minimize the number of realigns.  Normally, the table is aligned each time
   TAB or RET are pressed to move to another field.  With optimization this
@@ -1201,13 +1275,41 @@ Lisp variable `state'."
   "When set, insert a (non-active) time stamp when TODO entry is marked DONE.
 When the state of an entry is changed from nothing to TODO, remove a previous
 closing date.
-This can also be configured on a per-file basis by adding one of
+
+This can also be a list of symbols indicating under which conditions
+the time stamp recording the action should be annotated with a short note.
+Valid members of this list are
+
+  done       Offer to record a note when marking entries done
+  clock-out  Offer to record a note when clocking out of an item.
+
+A separate window will then pop up and allow you to type a note.
+After finishing with C-c C-c, the note will be added directly after the
+timestamp, as a plain list item.  See also the variable
+`org-log-note-headings'.
+
+Logging can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
    #+STARTUP: logging
    #+STARTUP: nologging"
+;; FIXME: in-buffer words for notes???????
   :group 'org-todo
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "off" nil)
+	  (const :tag "on" t)
+	  (set :tag "on, with notes" :greedy t :value (done)
+	       (const done) (const clock-out))))
+
+(defcustom org-log-note-headings '((done . "CLOSING NOTE") (clock-out . ""))
+  "Headings for notes added when clocking out or closing TODO items.
+The value is an alist, with the car being a sympol indicating the note
+context, and the cdr is the heading to be used.  The heading may also be the
+empty string."
+  :group  'org-todo
+  :type '(list :greedy t
+	  (cons (const :tag "Heading when closing an item" done) string)
+	  (cons (const :tag "Heading when clocking out" clock-out) string)))
 
 (defgroup org-priorities nil
   "Priorities in Org-mode."
@@ -1548,6 +1650,11 @@ When nil, cursor will remain in the current window."
   :group 'org-agenda-setup
   :type 'boolean)
 
+(defcustom org-finalize-agenda-hook nil
+  "Hook run just before displaying an agenda buffer."
+  :group 'org-agenda ;??????
+  :type 'hook)
+
 (defgroup org-agenda-display nil
   "Options concerning what to display initially in Agenda."
   :tag "Org Agenda Display"
@@ -1675,7 +1782,6 @@ agenda entries."
   :group 'org-agenda-display
   :type 'boolean)
 
-
 (defgroup org-agenda-prefix nil
   "Options concerning the entry prefix in the Org-mode agenda display."
   :tag "Org Agenda Prefix"
@@ -1776,7 +1882,7 @@ When this is the symbol `prefix', only remove tags when
 
 (defcustom org-agenda-align-tags-to-column 65
   "Shift tags in agenda items to this column."
-  :group 'org-agenda-prefix ;; FIXME
+  :group 'org-agenda-prefix
   :type 'integer)
 
 (defgroup org-latex nil
@@ -2316,15 +2422,15 @@ Changing this variable requires a restart of Emacs to take effect."
 		    "\\("
 		    "\\([" markers "]\\)"
 		    "\\("
-		    (if stacked (concat "[^" border markers "]")) ; FIXME: correct?
+		    "[^" border markers "]"
 		    body1
-		    (if stacked (concat "[^" border markers "]")) ; FIXME: correct?
+		    "[^" border markers "]"
 		    "\\)"
 		    "\\3\\)"
 		    "\\([" post (if stacked markers) "]\\|$\\)")))))
 
 (defcustom org-emphasis-regexp-components
-  '(" \t(" " \t.,?;:'\")" " \t\r\n,." "." 1 nil)
+  '(" \t(" " \t.,?;'\")" " \t\r\n," "." 1 nil)
   "Components used to build the reqular expression for emphasis.
 This is a list with 6 entries.  Terminology:  In an emphasis string
 like \" *strong word* \", we call the initial space PREMATCH, the final
@@ -2704,6 +2810,12 @@ Also put tags into group 4 if tags are present.")
 (defsubst org-no-properties (s)
   (remove-text-properties 0 (length s) org-rm-props s)
   s)
+
+(defsubst org-get-alist-option (option key)
+  (cond ((eq key t) t)
+	((eq option t) t)
+	((assoc key option) (cdr (assoc key option)))
+	(t (cdr (assq 'default option)))))
 
 (defsubst org-set-local (var value)
   "Make VAR local in current buffer and set it to VALUE."
@@ -3437,7 +3549,7 @@ between words."
   no headline in line 1, this function will act as if called with prefix arg."
   (interactive "P")
   (let* ((outline-regexp
-	  (if org-cycle-include-plain-lists
+	  (if (and (org-mode-p) org-cycle-include-plain-lists)
 	      "\\(?:\\*+\\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"
 	    outline-regexp))
 	 (bob-special (and org-cycle-global-at-bob (bobp)
@@ -3570,12 +3682,14 @@ between words."
 (defun org-global-cycle (&optional arg)
   "Cycle the global visibility.  For details see `org-cycle'."
   (interactive "P")
-  (if (integerp arg)
-      (progn
-	(show-all)
-	(hide-sublevels arg)
-	(setq org-cycle-global-status 'contents))
-    (org-cycle '(4))))
+  (let ((org-cycle-include-plain-lists
+	 (if (org-mode-p) org-cycle-include-plain-lists nil)))
+    (if (integerp arg)
+	(progn
+	  (show-all)
+	  (hide-sublevels arg)
+	  (setq org-cycle-global-status 'contents))
+      (org-cycle '(4)))))
 
 (defun org-overview ()
   "Switch to overview mode, shoing only top-level headlines.
@@ -3688,7 +3802,7 @@ to the new location, making it and the headline hierarchy above it visible."
 	  (org-mark-ring-push org-goto-start-pos)
 	  (goto-char selected-point)
 	  (if (or (org-invisible-p) (org-invisible-p2))
-	      (org-show-hierarchy-above)))
+	      (org-show-hierarchy-above 'org-goto)))
       (error "Quit"))))
 
 (defun org-get-location (buf help)
@@ -3787,15 +3901,16 @@ the current headline."
 			   (org-back-to-heading)
 			   (match-string 0))
 		       (error "*"))))
+	     (blank (cdr (assq 'heading org-blank-before-new-entry)))
 	     pos)
 	(cond
 	 ((and (org-on-heading-p) (bolp)
 	       (save-excursion (backward-char 1) (not (org-invisible-p))))
-	  (open-line 1))
+	  (open-line (if blank 2 1)))
 	 ((and (bolp) (save-excursion
 			(backward-char 1) (not (org-invisible-p))))
 	  nil)
-	 (t (newline)))
+	 (t (newline (if blank 2 1))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
@@ -3826,15 +3941,16 @@ Return t when things worked, nil when we are not in an item."
     (let* ((bul (match-string 0))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
+	   (blank (cdr (assq 'plain-list-item org-blank-before-new-entry)))
 	   pos)
       (cond
        ((and (org-at-item-p) (<= (point) eow))
 	;; before the bullet
 	(beginning-of-line 1)
-	(open-line 1))
+	(open-line (if blank 2 1)))
        ((<= (point) eow)
 	(beginning-of-line 1))
-       (t (newline)))
+       (t (newline (if blank 2 1))))
       (insert bul (if checkbox "[ ]" ""))
       (just-one-space)
       (setq pos (point))
@@ -4668,7 +4784,7 @@ this heading. "
 		;; Make the subtree visible
 		(show-subtree)
 		(org-end-of-subtree t)
-		(skip-chars-backward " \t\r\n]")
+		(skip-chars-backward " \t\r\n")
 		(and (looking-at "[ \t\r\n]*")
 		     (replace-match "\n\n")))
 	    ;; No specific heading, just go to end of file.
@@ -4717,7 +4833,7 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
 				  ?*))
 			    " "))
 	  (move-marker begm (point))
-	  (move-marker endm (org-end-of-subtree)))
+	  (move-marker endm (org-end-of-subtree t)))
       (setq re1 "^* ")
       (move-marker begm (point-min))
       (move-marker endm (point-max)))
@@ -4747,7 +4863,7 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
     (save-excursion
       (let* ((globalp (memq state '(contents all)))
              (beg (if globalp (point-min) (point)))
-             (end (if globalp (point-max) (org-end-of-subtree))))
+             (end (if globalp (point-max) (org-end-of-subtree t))))
 	(org-hide-archived-subtrees beg end)
 	(goto-char beg)
 	(if (looking-at (concat ".*:" org-archive-tag ":"))
@@ -4768,7 +4884,7 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
       (goto-char beg)
       (while (re-search-forward re end t)
 	(and (org-on-heading-p) (hide-subtree))
-	(org-end-of-subtree)))))
+	(org-end-of-subtree t)))))
 
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
@@ -4834,7 +4950,19 @@ the children that do not contain any open TODO items."
     (setq buffer-read-only nil)
     (erase-buffer)
     (org-agenda-mode))
-  (setq buffer-read-only nil)) ;;; FIXME:  do we need all these occasions????
+  (setq buffer-read-only nil))
+
+(defun org-finalize-agenda ()
+  "Finishing touch for the agenda buffer, called just before displaying it."
+  (unless org-agenda-multi
+    (org-agenda-align-tags)
+    (save-excursion
+      (let ((buffer-read-only))
+	(goto-char (point-min))
+	(while (org-activate-bracket-links (point-max))
+	  (add-text-properties (match-beginning 0) (match-end 0)
+			       '(face org-link))))
+      (run-hooks 'org-finalize-agenda-hook))))
 
 (defun org-prepare-agenda-buffers (files)
   "Create buffers for all agenda files, protect archived trees and comments."
@@ -4869,10 +4997,10 @@ the children that do not contain any open TODO items."
   (let ((p (point-at-bol)))
     (and org-agenda-skip-archived-trees
 	 (get-text-property p :org-archived)
-	 (org-end-of-subtree)
+	 (org-end-of-subtree t)
 	 (throw :skip t))
     (and (get-text-property p :org-comment)
-	 (org-end-of-subtree)
+	 (org-end-of-subtree t)
 	 (throw :skip t))
     (if (equal (char-after p) ?#) (throw :skip t))))
   
@@ -4890,7 +5018,7 @@ the children that do not contain any open TODO items."
     (with-current-buffer buffer
       (widen)
       (goto-char pos)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))   ; show the next heading
@@ -5026,11 +5154,9 @@ At all other locations, this simply calls `ispell-complete-word'."
   (catch 'exit
     (let* ((end (point))
 	   (beg1 (save-excursion
-;FIXME???	   (if (equal (char-before (point)) ?\ ) (backward-char 1))
 		   (skip-chars-backward "a-zA-Z_@0-9")
 		   (point)))
 	   (beg (save-excursion
-;FIXME???	  (if (equal (char-before (point)) ?\ ) (backward-char 1))
 		  (skip-chars-backward "a-zA-Z0-9_:$")
 		  (point)))
 	   (confirm (lambda (x) (stringp (car x))))
@@ -5207,38 +5333,6 @@ prefix arg, switch to that state."
 	(goto-char (or (match-end 2) (match-end 1)))
 	(just-one-space))))
 
-(defun org-log-done (&optional undone)
-  "Add a time stamp logging that a TODO entry has been closed.
-When UNDONE is non-nil, remove such a time stamp again."
-  (interactive)
-  (let (beg end col)
-    (save-excursion
-      (org-back-to-heading t)
-      (setq beg (point))
-      (looking-at (concat outline-regexp " *"))
-      (goto-char (match-end 0))
-      (setq col (current-column))
-      (outline-next-heading)
-      (setq end (point))
-      (goto-char beg)
-      (when (re-search-forward (concat
-				"[\r\n]\\([ \t]*"
-				(regexp-quote org-closed-string)
-				" *\\[.*?\\][^\n\r]*[\n\r]?\\)") end t)
-	(delete-region (match-beginning 1) (match-end 1)))
-      (unless undone
-	(org-back-to-heading t)
-	(skip-chars-forward "^\n\r")
-	(goto-char (min (1+ (point)) (point-max)))
-	(when (not (member (char-before) '(?\r ?\n)))
-	  (insert "\n"))
-	(indent-to col)
-	(insert org-closed-string " "
-		(format-time-string
-		 (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
-		 (org-current-time))
-		"\n")))))
-
 (defun org-show-todo-tree (arg)
   "Make a compact tree which shows all headlines marked with TODO.
 The tree will show the lines where the regexp matches, and all higher
@@ -5330,34 +5424,99 @@ be removed."
 		(if (eq what 'closed)
 		    (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
 		  (car org-time-stamp-formats))
-		time))))
+		time)))
+	(end-of-line 1)
+	(org-add-log-maybe 'done))
       (goto-char (point-min))
       (widen)
       (if (looking-at "[ \t]+\r?\n")
 	  (replace-match ""))
       ts)))
 
-(defun org-occur (regexp &optional callback)
+(defvar org-log-note-marker (make-marker))
+(defvar org-log-note-purpose nil)
+(defvar org-log-note-window-configuration nil)
+
+(defun org-add-log-maybe (&optional purpose)
+  (when (and (listp org-log-done)
+	     (memq purpose org-log-done))
+    (move-marker org-log-note-marker (point))
+    (setq org-log-note-purpose purpose)
+    (add-hook 'post-command-hook 'org-add-log-note 'append)))
+
+(defun org-add-log-note (&optional purpose)
+  "Pop up a window for taking a note, and add this note later at point."
+  (remove-hook 'post-command-hook 'org-add-log-note)
+  (setq org-log-note-window-configuration (current-window-configuration))
+  (delete-other-windows)
+  (switch-to-buffer (marker-buffer org-log-note-marker))
+  (goto-char org-log-note-marker)
+  (switch-to-buffer-other-window "*Org Note*")
+  (erase-buffer)
+  (org-mode)
+  (insert (format "# Insert note for %s, finish with C-c C-c.\n\n"
+		  (cond 
+		   ((eq org-log-note-purpose 'clock-out) "stopped clock")
+		   ((eq org-log-note-purpose 'done)  "closed todo item")
+		   (t (error "This should not happen")))))
+  (org-set-local 'org-finish-function 'org-store-log-note))
+
+(defun org-store-log-note ()
+  "Finish taking a log note, and insert it to where it belongs."
+  (let ((txt (buffer-string))
+	(note (cdr (assq org-log-note-purpose org-log-note-headings)))
+	lines ind)
+    (kill-buffer (current-buffer))
+    (if (string-match "^#.*\n[ \t\\n]*" txt)
+	(setq txt (replace-match "" t t txt)))
+    (when (string-match "\\S-" txt)
+      (if (string-match "\\s-+\\'" txt)
+	  (setq txt (replace-match "" t t txt)))
+      (setq lines (org-split-string txt "\n"))
+      (and note (string-match "\\S-" note) (push note lines))
+      (save-excursion
+	(set-buffer (marker-buffer org-log-note-marker))
+	(save-excursion
+	  (goto-char org-log-note-marker)
+	  (if (not (bolp)) (newline))
+	  (indent-relative t)
+	  (setq ind (concat (buffer-substring (point-at-bol) (point)) "    "))
+	  (insert "-   " (pop lines))
+	  (while lines
+	    (insert "\n" ind (pop lines))))))
+    (set-window-configuration org-log-note-window-configuration)))
+
+(defvar org-occur-highlights nil)
+(make-variable-buffer-local 'org-occur-highlights)
+
+(defun org-occur (regexp &optional keep-previous callback)
   "Make a compact tree which shows all matches of REGEXP.
 The tree will show the lines where the regexp matches, and all higher
 headlines above the match.  It will also show the heading after the match,
 to make sure editing the matching entry is easy.
+If KEEP-PREVIOUS is non-nil, highlighting and exposing done by a previous
+call to `org-occur' will be kept, to allow stacking of calls to this
+command.
 If CALLBACK is non-nil, it is a function which is called to confirm
 that the match should indeed be shown."
-  (interactive "sRegexp: ")
-  (org-remove-occur-highlights nil nil t)
+  (interactive "sRegexp: \nP")
+  (or keep-previous (org-remove-occur-highlights nil nil t))
   (let ((cnt 0))
     (save-excursion
       (goto-char (point-min))
-      (org-overview)
+      (if (or (not keep-previous)          ; do not want to keep
+	      (not org-occur-highlights))  ; no previous matches
+	  ;; hide everything
+	  (org-overview))
       (while (re-search-forward regexp nil t)
 	(when (or (not callback)
 		  (save-match-data (funcall callback)))
 	  (setq cnt (1+ cnt))
 	  (org-highlight-new-match (match-beginning 0) (match-end 0))
-	  (org-show-hierarchy-above))))
-    (org-add-hook 'before-change-functions 'org-remove-occur-highlights
-		  nil 'local)
+	  (org-show-hierarchy-above 'occur-tree))))
+    (when org-remove-highlights-with-change
+      (org-add-hook 'before-change-functions 'org-remove-occur-highlights
+		    nil 'local))
     (unless org-sparse-tree-open-archived-trees
       (org-hide-archived-subtrees (point-min) (point-max)))
     (run-hooks 'org-occur-hook)
@@ -5365,7 +5524,7 @@ that the match should indeed be shown."
 	(message "%d match(es) for regexp %s" cnt regexp))
     cnt))
 
-(defun org-show-hierarchy-above ()
+(defun org-show-hierarchy-above (&optional context)
   "Make sure point and the headings hierarchy above is visible."
   (catch 'exit
     (if (org-on-heading-p t)
@@ -5373,10 +5532,10 @@ that the match should indeed be shown."
       (and (or (org-invisible-p) (org-invisible-p2))
 	   (org-show-hidden-entry)))    ; show entire entry
     (save-excursion
-      (and org-show-following-heading
+      (and (org-get-alist-option org-show-following-heading context)
 	   (outline-next-heading)
 	   (org-flag-heading nil)))  ; show the next heading
-    (when org-show-hierarchy-above
+    (when (org-get-alist-option org-show-hierarchy-above context)
       (save-excursion                  ; show all higher headings
 	(while (and (condition-case nil
 			(progn (org-up-heading-all 1) t)
@@ -5408,8 +5567,6 @@ that the match should indeed be shown."
 (defun org-overlay-end (o)
   (if (featurep 'xemacs) (extent-end-position o) (overlay-end o)))
 
-(defvar org-occur-highlights nil)
-(make-variable-buffer-local 'org-occur-highlights)
 (defun org-highlight-new-match (beg end)
   "Highlight from BEG to END and mark the highlight is an occur headline."
   (let ((ov (org-make-overlay beg end)))
@@ -5758,7 +5915,7 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 		   (< (- d2 d1) org-warn-days))
 		 (not (org-entry-is-done-p))))))
     (message "%d deadlines past-due or due within %d days"
-	     (org-occur regexp callback)
+	     (org-occur regexp nil callback)
 	     org-warn-days)))
 
 (defun org-evaluate-time-range (&optional to-buffer)
@@ -6068,6 +6225,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	    s (- s (* 60 s)))
       (insert "--" te " => " (format "%2d:%02d" h m))
       (move-marker org-clock-marker nil)
+      (org-add-log-maybe 'clock-out)
       (message "Clock stopped at %s after HH:MM = %d:%02d" te h m)))))
 
 (defun org-clock-cancel ()
@@ -6146,9 +6304,10 @@ in the echo area."
 	(setq h (/ org-clock-file-total-minutes 60)
 	      m (- org-clock-file-total-minutes (* 60 h)))
 	;; Arrange to remove the overlays upon next change.
-	(org-add-hook 'before-change-functions 'org-remove-clock-overlays
-		      nil 'local)))
-  (message "Total file time: %d:%02d (%d hours and %d minutes)" h m h m)))
+	(when org-remove-highlights-with-change
+	  (org-add-hook 'before-change-functions 'org-remove-clock-overlays
+			nil 'local))))
+    (message "Total file time: %d:%02d (%d hours and %d minutes)" h m h m)))
 
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)
@@ -6196,7 +6355,12 @@ This is used to stop the clock after a TODO entry is marked DONE."
 	     (< (point) org-clock-marker)
 	     (> (save-excursion (outline-next-heading) (point))
 		org-clock-marker))
-    (org-clock-out)))
+    ;; Clock out, but don't accept a logging message for this.
+    (let ((org-log-done (if (and (listp org-log-done)
+				 (member 'clock-out org-log-done))
+			    '(done)
+			  org-log-done)))
+      (org-clock-out))))
 
 (add-hook 'org-after-todo-state-change-hook
 	  'org-clock-out-if-current)
@@ -6728,6 +6892,8 @@ L   Timeline for current buffer          C   Configure custom agenda commands")
 	  (org-run-agenda-series (cddr entry))))
        (t (error "Invalid key"))))))
 
+;; FIXME: what is the meaning of WINDOW?????
+;; FIXME: need to force KEEP-MODES for series comands......
 (defun org-run-agenda-series (series &optional window)
   (org-prepare-agenda)
   (let* ((org-agenda-multi t)
@@ -6755,7 +6921,8 @@ L   Timeline for current buffer          C   Configure custom agenda commands")
        (t (error "Invalid type in command series"))))
     (widen)
     (setq org-agenda-redo-command redo)
-    (goto-char (point-min))))
+    (goto-char (point-min)))
+  (org-finalize-agenda))
 
 ;;;###autoload
 (defmacro org-batch-agenda (cmd-key &rest parameters)
@@ -6962,7 +7129,7 @@ dates."
     (goto-char (or (text-property-any (point-min) (point-max) 'org-today t)
 		   (point-min)))
     (add-text-properties (point-min) (point-max) '(org-agenda-type timeline))
-    (org-agenda-align-tags)
+    (org-finalize-agenda)
     (setq buffer-read-only t)
     (when (not org-select-agenda-window)
       (select-window win)
@@ -7102,7 +7269,7 @@ NDAYS defaults to `org-agenda-ndays'."
 	    (recenter 1))))
     (goto-char (or start-pos 1))
     (add-text-properties (point-min) (point-max) '(org-agenda-type agenda))
-    (org-agenda-align-tags)
+    (org-finalize-agenda)
     (setq buffer-read-only t)
     (if (not org-select-agenda-window) (select-window win))
     (message "")))
@@ -7168,7 +7335,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
     (goto-char (point-min))
     (org-fit-agenda-window)
     (add-text-properties (point-min) (point-max) '(org-agenda-type todo))
-    (org-agenda-align-tags)
+    (org-finalize-agenda)
     (setq buffer-read-only t)
     (if (not org-select-agenda-window) (select-window win))))
 
@@ -7210,7 +7377,6 @@ Org-mode buffers visited directly by the user will not be touched."
   (setq org-agenda-new-buffers nil)
   (org-agenda-quit))
 
-;; FIXME: move this function.
 (defun org-save-all-org-buffers ()
   "Save all Org-mode buffers without user confirmation."
   (interactive)
@@ -7648,7 +7814,7 @@ also be written as
 The function expects the lisp variables `entry' and `date' to be provided
 by the caller, because this is how the calendar works.  Don't use this
 function from a program - use `org-agenda-get-day-entries' instead."
-  (org-agenda-maybe-reset-markers)   ;; FIXME: does this still do the right thing?
+  (org-agenda-maybe-reset-markers)
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
   (setq args (or args '(:deadline :scheduled :timestamp)))
@@ -8091,7 +8257,6 @@ the documentation of `org-diary'."
 		'priority (org-get-priority txt) 'category category)
 	      (push txt ee)))
 	(goto-char pos)))
-;	(outline-next-heading))) ;FIXME: correct to be removed??????
     ;; Sort the entries by expiration date.
     (nreverse ee)))
 
@@ -8329,13 +8494,13 @@ HH:MM."
 	  (beginning-of-line 1)
 	  (setq re (get-text-property (point) 'org-not-done-regexp))
 	  (goto-char (+ (point) (get-text-property (point) 'prefix-length)))
-	  (and (looking-at (concat "[ \t]*" re))
+	  (and (looking-at (concat "[ \t]*\\.*" re))
 	       (add-text-properties (match-beginning 0) (match-end 0)
 				    '(face org-todo))))
-      (setq re (get-text-property 0 'org-not-done-regexp x)
+      (setq re (concat (get-text-property 0 'org-not-done-regexp x))
 	    pl (get-text-property 0 'prefix-length x))
-      (and re (equal (string-match re x pl) pl)
-	   (add-text-properties (match-beginning 0) (match-end 0)
+      (and re (equal (string-match (concat "\\(\\.*\\)" re) x pl) pl)
+	   (add-text-properties (match-end 1) (match-end 0)
 				'(face org-todo) x))
       x)))
 
@@ -8418,7 +8583,7 @@ and by additional input from the age of a schedules or deadline entry."
     (widen)
     (goto-char pos)
     (when (org-mode-p)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))) ; show the next heading
@@ -8436,7 +8601,7 @@ and by additional input from the age of a schedules or deadline entry."
     (widen)
     (goto-char pos)
     (when (org-mode-p)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil))))))  ; show the next heading
@@ -8497,7 +8662,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
     (with-current-buffer buffer
       (widen)
       (goto-char pos)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))   ; show the next heading
@@ -8549,10 +8714,11 @@ the new TODO state."
 			 (if org-last-todo-state-is-todo
 			     undone-face done-face)))
 		  (org-agenda-highlight-todo 'line))
-		(org-agenda-align-tags 'line)
+		;; (org-agenda-align-tags 'line) ;; done below by finalize
 		(beginning-of-line 1))
 	    (error "Line update did not work")))
-	(beginning-of-line 0)))))
+	(beginning-of-line 0)))
+    (org-finalize-agenda)))    
 
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-align-tags-to-column'."
@@ -8594,7 +8760,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
     (with-current-buffer buffer
       (widen)
       (goto-char pos)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))   ; show the next heading
@@ -8640,7 +8806,7 @@ the tags of the current headline come last."
     (with-current-buffer buffer
       (widen)
       (goto-char pos)
-      (org-show-hidden-entry)
+      (org-show-hierarchy-above 'agenda)
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))   ; show the next heading
@@ -8941,7 +9107,7 @@ are included in the output."
 	    ;; list this headline
 	    (if (eq action 'sparse-tree)
 		(progn
-		  (org-show-hierarchy-above))
+		  (org-show-hierarchy-above 'tags-tree))
 	      (setq txt (org-format-agenda-item
 			 ""
 			 (concat
@@ -8955,8 +9121,7 @@ are included in the output."
 		'org-marker marker 'org-hd-marker marker 'category category)
 	      (push txt rtn))
 	    ;; if we are to skip sublevels, jump to end of subtree
-	    (point)
-	    (or org-tags-match-list-sublevels (org-end-of-subtree))))))
+	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))))
     (when (and (eq action 'sparse-tree)
 	       (not org-sparse-tree-open-archived-trees))
       (org-hide-archived-subtrees (point-min) (point-max)))
@@ -8976,7 +9141,7 @@ MATCH can contain positive and negative selection of tags, like
   (unless match
     ;; Get a new match request, with completion
     (setq org-last-tags-completion-table
-	  (or (org-get-buffer-tags)
+	  (or org-tag-alist
 	      org-last-tags-completion-table))
     (setq match (completing-read
 		 "Tags: " 'org-tags-completion-function nil nil nil
@@ -9060,7 +9225,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (goto-char (point-min))
     (org-fit-agenda-window)
     (add-text-properties (point-min) (point-max) '(org-agenda-type tags))
-    (org-agenda-align-tags)
+    (org-finalize-agenda)
     (setq buffer-read-only t)
     (if (not org-select-agenda-window) (select-window win))))
 
@@ -9367,9 +9532,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)
   (if (org-at-timestamp-p)
-      (org-agenda-list nil (time-to-days (org-time-string-to-time
-					  (substring (match-string 1) 0 10)))
-		       1)
+      (org-follow-timestamp-link)
     (let (type path link line search (pos (point)))
       (catch 'match
 	(save-excursion
@@ -9637,7 +9800,7 @@ in all files."
       (if (search-forward s nil t)
 	  (goto-char (match-beginning 0))
 	(error "No match"))))
-    (and (org-mode-p) (org-show-hierarchy-above))))
+    (and (org-mode-p) (org-show-hierarchy-above 'link-search))))
 
 (defun org-search-not-link (&rest args)
   "Execute `re-search-forward', but only accept matches that are not a link."
@@ -9712,7 +9875,7 @@ onto the ring."
     (setq m (car p))
     (switch-to-buffer (marker-buffer m))
     (goto-char m)
-    (if (or (org-invisible-p) (org-invisible-p2)) (org-show-hierarchy-above))))
+    (if (or (org-invisible-p) (org-invisible-p2)) (org-show-hierarchy-above 'mark-goto))))
 
 (defun org-camel-to-words (s)
   "Split \"CamelCaseWords\" to (\"Camel\" \"Case\" \"Words\")."
@@ -9731,6 +9894,22 @@ onto the ring."
   (if (equal (substring s 0 1) "<") nil (setq s (concat "<" s)))
   (if (equal (substring s -1) ">") nil (setq s (concat s ">")))
   s)
+
+(defun org-follow-timestamp-link ()
+  (cond
+   ((org-at-date-range-p)
+    (let ((org-agenda-start-on-weekday)
+	  (t1 (match-string 1))
+	  (t2 (match-string 2)))
+      (setq t1 (time-to-days (org-time-string-to-time t1))
+	    t2 (time-to-days (org-time-string-to-time t2)))
+      (org-agenda-list nil t1 (1+ (- t2 t1)))))
+   ((org-at-timestamp-p)
+    (org-agenda-list nil (time-to-days (org-time-string-to-time
+					(substring (match-string 1) 0 10)))
+		     1))
+   (t (error "This should not happen"))))
+
 
 (defun org-follow-bbdb-link (name)
   "Follow a BBDB link to NAME."
@@ -10992,9 +11171,10 @@ This is being used to correctly align a single field after TAB or RET.")
 	 (beg (org-table-begin))
 	 (end (org-table-end))
 	 ;; Current cursor position
-	 (linepos (+ (if (bolp) 1 0) (count-lines (point-min) (point))))
+	 (linepos (org-current-line))
 	 (colpos (org-table-current-column))
 	 (winstart (window-start))
+	 (winstartline (org-current-line (min winstart (1- (point-max)))))
 	 lines (new "") lengths l typenums ty fields maxfields i
 	 column
 	 (indent "") cnt frac
@@ -11045,7 +11225,7 @@ This is being used to correctly align a single field after TAB or RET.")
        (kill-region beg end)
        (org-table-create org-table-default-size)
        (error "Empty table - created default table")))
-    ;; A list of empty string to fill any short rows on output
+    ;; A list of empty strings to fill any short rows on output
     (setq emptystrings (make-list maxfields ""))
     ;; Check for special formatting.
     (setq i -1)
@@ -11127,7 +11307,9 @@ This is being used to correctly align a single field after TAB or RET.")
     (when (and orgtbl-mode (not (org-mode-p)))
       (goto-char org-table-aligned-begin-marker)
       (while (org-hide-wide-columns org-table-aligned-end-marker)))
-    ;; Try to move to the old location (approximately)
+    ;; Try to move to the old location
+    (goto-line winstartline)
+    (setq winstart (point-at-bol))
     (goto-line linepos)
     (set-window-start (selected-window) winstart 'noforce)
     (org-table-goto-column colpos)
@@ -11473,7 +11655,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	 (beg (org-table-begin))
 	 (end (org-table-end))
 	 ;; Current cursor position
-	 (linepos (+ (if (bolp) 1 0) (count-lines (point-min) (point))))
+	 (linepos (org-current-line))
 	 (colpos col))
     (goto-char beg)
     (while (< (point) end)
@@ -11518,7 +11700,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	 (beg (org-table-begin))
 	 (end (org-table-end))
 	 ;; Current cursor position
-	 (linepos (+ (if (bolp) 1 0) (count-lines (point-min) (point))))
+	 (linepos (org-current-line))
 	 (colpos col))
     (goto-char beg)
     (while (< (point) end)
@@ -11555,7 +11737,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	 (beg (org-table-begin))
 	 (end (org-table-end))
 	 ;; Current cursor position
-	 (linepos (+ (if (bolp) 1 0) (count-lines (point-min) (point))))
+	 (linepos (org-current-line))
 	 (colpos (if left (1- col) (1+ col))))
     (if (and left (= col 1))
 	(error "Cannot move column further left"))
@@ -12617,7 +12799,7 @@ With prefix arg ALL, do this for all lines in the table."
 		       (lambda (a b) (string< (car a) (car b)))))
 	 (inhibit-redisplay t)
 	 (line-re org-table-dataline-regexp)
-	 (thisline (+ (if (bolp) 1 0) (count-lines (point-min) (point))))
+	 (thisline (org-current-line))
 	 (thiscol (org-table-current-column))
 	 beg end entry eqlnum eqlname eql (cnt 0) eq a name)
     ;; Insert constants in all formulas
@@ -13638,7 +13820,7 @@ translations.  There is currently no way for users to extend this.")
 	    (beginning-of-line 1)
 	    (delete-region
 	     (if org-export-with-archived-trees (1+ (point-at-eol)) (point))
-	     (org-end-of-subtree)))))
+	     (org-end-of-subtree t)))))
 
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
@@ -13731,7 +13913,7 @@ is signaled in this case."
   (goto-char (point-min))
   ;; First check if there are no even levels
   (when (re-search-forward "^\\(\\*\\*\\)+[^*]" nil t)
-    (org-show-hierarchy-above)
+    (org-show-hierarchy-above t)
     (error "Not all levels are odd in this file.  Conversion not possible."))
   (when (yes-or-no-p "Are you sure you want to globally change levels to odd-even? ")
     (let ((org-odd-levels-only nil) n)
@@ -14808,8 +14990,8 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
   (catch 'exit
     (let (r b)
       (while (string-match org-maybe-keyword-time-regexp s)
-	;; FIXME: is it good to never export CLOCK, or do we need control?
 	(if (and (match-end 1) (equal (match-string 1 s) org-clock-string))
+	    ;; never export CLOCK
 	    (throw 'exit ""))
 	(or b (setq b (substring s 0 (match-beginning 0))))
 	(if (not org-export-with-timestamps)
@@ -15406,7 +15588,6 @@ It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
   - inside a LaTeX fragment, or
   - after the first word in a line, where an abbreviation expansion could
     insert a LaTeX environment."
-  ;; FIXME:  This may still need refinement.
   (when org-cdlatex-mode
     (cond
      ((save-excursion
@@ -15467,7 +15648,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 		msg "Creating images for buffer...%s"))
 	 ((equal subtree '(4))
 	  (org-back-to-heading)
-	  (setq beg (point) end (org-end-of-subtree)
+	  (setq beg (point) end (org-end-of-subtree t)
 		msg "Creating images for subtree...%s"))
 	 (t
 	  (if (setq at (org-inside-LaTeX-fragment-p))
@@ -16027,7 +16208,8 @@ This command does many different things, depending on context:
   (interactive "P")
   (let  ((org-enable-table-editor t))
     (cond
-     ((or org-clock-overlays org-occur-highlights
+     ((or org-clock-overlays
+	  org-occur-highlights
 	  org-latex-fragment-image-overlays)
       (org-remove-clock-overlays)
       (org-remove-occur-highlights)
@@ -16445,7 +16627,7 @@ and :keyword."
       (push (list :latex-preview 
 		  (org-overlay-start o) (org-overlay-end o)) clist))
      ((org-inside-LaTeX-fragment-p)
-      ;; FIXME: positions wring.
+      ;; FIXME: positions wrong.
       (push (list :latex-fragment (point) (point)) clist)))
 
     (setq clist (nreverse (delq nil clist)))
@@ -16746,10 +16928,9 @@ Show the heading too, if it is currently invisible."
        (or (org-invisible-p)
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
 			   (org-invisible-p)))
-       (org-show-hierarchy-above)))
+       (org-show-hierarchy-above 'bookmark-jump)))
 
 ;;; Experimental code
-
 
 ;(add-hook 'org-load-hook
 ;	  (lambda ()
@@ -16769,9 +16950,11 @@ Show the heading too, if it is currently invisible."
 
 ;;; Finish up
 
+
 (provide 'org)
 
 (run-hooks 'org-load-hook)
 
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
+
