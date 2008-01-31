@@ -1,12 +1,12 @@
 ;;; org-publish.el --- publish related org-mode files as a website
 
-;; Copyright (C) 2006  Free Software Foundation, Inc. 
+;; Copyright (C) 2006  David O'Toole
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
 ;; Version: 
 
-;; $Id: org-publish.el,v 1.69 2006/06/03 17:17:53 dto Exp dto $
+;; $Id: org-publish.el,v 1.67 2006/05/30 10:44:31 dto Exp dto $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
+
+;; This file is NOT part of GNU Emacs. 
 
 ;;; Commentary:
 
@@ -448,6 +450,7 @@ FILENAME is the filename of the file to be published."
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
 	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
+	 (buf (current-buffer))
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
@@ -460,7 +463,9 @@ FILENAME is the filename of the file to be published."
 	;; check timestamps
 	(when (org-publish-needed-p f)
 	  (funcall publishing-function plist f)
-	  (org-publish-update-timestamp f))))))
+	  (org-publish-update-timestamp f))))
+    ;; back to original buffer
+    (switch-to-buffer buf)))
 
 
 (defun org-publish-org-index (plist &optional index-filename)
