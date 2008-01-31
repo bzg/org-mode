@@ -5,9 +5,9 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.61).
+   This manual is for Org-mode (version 4.62).
 
-   Copyright (C) 2004, 2005, 2006 Free Software Foundation
+   Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -27,9 +27,9 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.61).
+This manual is for Org-mode (version 4.62).
 
-   Copyright (C) 2004, 2005, 2006 Free Software Foundation
+   Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
      Permission is granted to copy, distribute and/or modify this
      document under the terms of the GNU Free Documentation License,
@@ -91,19 +91,19 @@ Tables
 
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
-* Table calculations::          Compute a field from other fields
 * orgtbl-mode::                 The table editor as minor mode
-* table.el::                    Complex tables
+* The spreadsheet::             The table editor has spreadsheet capabilities.
 
-Calculations in tables
+The spreadsheet
 
-* Formula syntax::              How to write a formula
-* Lisp formulas::               An alternative way to write formulas
-* Column formulas::             Formulas valid for all fields in a column
+* References::                  How to refer to another field or range
+* Formula syntax for Calc::     Using Calc to compute stuff
+* Formula syntax for Lisp::     Writing formulas in Emacs Lisp
+* Field formulas::              Formulas valid for a single field
+* Column formulas::             Formulas valid for an entire column
+* Editing and debuggung formulas::  Fixing formulas
+* Updating the table::          Recomputing all dependent fields
 * Advanced features::           Field names, parameters and automatic recalc
-* Named-field formulas::        Formulas valid in single fields
-* Editing/debugging formulas::  Changing a stored formula
-* Appetizer::                   Taste the power of calc
 
 Hyperlinks
 
@@ -140,7 +140,7 @@ Timestamps
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Custom time format::          If you cannot work with the ISO format
-* Repeating items::
+* Repeating items::             Deadlines that come back again and again
 * Progress logging::            Documenting when what work was done.
 
 Creating timestamps
@@ -312,19 +312,20 @@ selected by tags etc are created dynamically when you need them.
 feel like a straightforward, easy to use outliner.  Complexity is not
 imposed, but a large amount of functionality is available when you need
 it.  Org-mode can be used on different levels and in different ways, for
-example:
+example as:
 
-     * as an outline extension with visibility cycling and structure editing
-     * as an ASCII system and table editor for taking structured notes
-     * as an ASCII table editor with spreadsheet-like capabilities
-     * as a TODO list editor
-     * as a full agenda and planner with deadlines and work scheduling
-     * as an environment to implement David Allen's GTD system
-     * as a simple hypertext system, with HTML export
-     * as a publishing tool to create a set of interlinked webpages
+     * outline extension with visibility cycling and structure editing
+     * ASCII system and table editor for taking structured notes
+     * ASCII table editor with spreadsheet-like capabilities
+     * TODO list editor
+     * full agenda and planner with deadlines and work scheduling
+     * environment to implement David Allen's GTD system
+     * simple hypertext system, with HTML export
+     * publishing tool to create a set of interlinked webpages
 
-   Org-mode's automatic, context sensitive table editor can be
-integrated into any major mode by activating the minor Orgtbl-mode.
+   Org-mode's automatic, context sensitive table editor with spreadsheet
+capabilities can be integrated into any major mode by activating the
+minor Orgtbl-mode.
 
    There is a website for Org-mode which provides links to the newest
 version of Org-mode, as well as additional information, frequently asked
@@ -936,9 +937,8 @@ Emacs `calc' package.
 
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
-* Table calculations::          Compute a field from other fields
 * orgtbl-mode::                 The table editor as minor mode
-* table.el::                    Complex tables
+* The spreadsheet::             The table editor has spreadsheet capabilities.
 
 
 File: org,  Node: Built-in table editor,  Next: Narrow columns,  Prev: Tables,  Up: Tables
@@ -1081,38 +1081,6 @@ Regions
 Calculations
 ............
 
-`C-c ='
-     Install a new formula for the current column and replace current
-     field with the result of the formula.
-
-`C-u C-c ='
-     Install a new formula for the current field, which must be a named
-     field.  Evaluate the formula and replace the field content with the
-     result.
-
-`C-c ''
-     Edit all formulas associated with the current table in a separate
-     buffer.  Use `C-u C-u C-c =' to edit the formula directly in the
-     current field, to allow checking complex references with `C-c ?'.
-
-`C-c *'
-     Recalculate the current row by applying the stored formulas from
-     left to right.  When called with a `C-u' prefix, recalculate the
-     entire table, starting with the first non-header line (i.e. below
-     the first horizontal separator line).  For details, see *Note
-     Table calculations::.
-
-`C-#'
-     Rotate the calculation mark in first column through the states `',
-     `#', `*', `!', `$'.  For the meaning of these marks see *Note
-     Advanced features::.  When there is an active region, change all
-     marks in the region.
-
-`C-c ?'
-     Display line and column number of current field in echo area.  If
-     the cursor is currently editing a formula, the field or range
-     referenced by the expression at point will be highlighted.
-
 `C-c +'
      Sum the numbers in the current column, or in the rectangle defined
      by the active region.  The result is shown in the echo area and can
@@ -1163,7 +1131,7 @@ Then the only table command that still works is `C-c C-c' to do a
 manual re-align.
 
 
-File: org,  Node: Narrow columns,  Next: Table calculations,  Prev: Built-in table editor,  Up: Tables
+File: org,  Node: Narrow columns,  Next: orgtbl-mode,  Prev: Built-in table editor,  Up: Tables
 
 3.2 Narrow columns
 ==================
@@ -1206,72 +1174,144 @@ a per-file basis with:
    (1) This feature does not work on XEmacs.
 
 
-File: org,  Node: Table calculations,  Next: orgtbl-mode,  Prev: Narrow columns,  Up: Tables
+File: org,  Node: orgtbl-mode,  Next: The spreadsheet,  Prev: Narrow columns,  Up: Tables
 
-3.3 Calculations in tables
-==========================
+3.3 The Orgtbl minor mode
+=========================
+
+If you like the intuitive way the Org-mode table editor works, you
+might also want to use it in other modes like text-mode or mail-mode.
+The minor mode Orgtbl-mode makes this possible.  You can always toggle
+the mode with `M-x orgtbl-mode'.  To turn it on by default, for example
+in mail mode, use
+
+     (add-hook 'mail-mode-hook 'turn-on-orgtbl)
+
+
+File: org,  Node: The spreadsheet,  Prev: orgtbl-mode,  Up: Tables
+
+3.4 The spreadsheet
+===================
 
 The table editor makes use of the Emacs `calc' package to implement
 spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
-derive fields from other fields.  Org-mode has two levels of complexity
-for table calculations.  On the basic level, tables do only horizontal
-computations, so a field can be computed from other fields _in the same
-row_, and Org-mode assumes that there is only one formula for each
-column.  This is very efficient to work with and enough for many tasks.
-On the complex level, columns and individual fields can be named for
-easier referencing in formulas, individual named fields can have their
-own formula associated with them, and recalculation can be automated.
+derive fields from other fields.
 
 * Menu:
 
-* Formula syntax::              How to write a formula
-* Lisp formulas::               An alternative way to write formulas
-* Column formulas::             Formulas valid for all fields in a column
+* References::                  How to refer to another field or range
+* Formula syntax for Calc::     Using Calc to compute stuff
+* Formula syntax for Lisp::     Writing formulas in Emacs Lisp
+* Field formulas::              Formulas valid for a single field
+* Column formulas::             Formulas valid for an entire column
+* Editing and debuggung formulas::  Fixing formulas
+* Updating the table::          Recomputing all dependent fields
 * Advanced features::           Field names, parameters and automatic recalc
-* Named-field formulas::        Formulas valid in single fields
-* Editing/debugging formulas::  Changing a stored formula
-* Appetizer::                   Taste the power of calc
 
 
-File: org,  Node: Formula syntax,  Next: Lisp formulas,  Prev: Table calculations,  Up: Table calculations
+File: org,  Node: References,  Next: Formula syntax for Calc,  Prev: The spreadsheet,  Up: The spreadsheet
 
-3.3.1 Formula syntax
---------------------
+3.4.1 References
+----------------
 
-A formula can be any algebraic expression understood by the Emacs
-`calc' package.  Note that `calc' has the slightly non-standard
-convention that `/' has lower precedence than `*', so that `a/b*c' is
-interpreted as `a/(b*c)'.  Before evaluation by `calc-eval' (*note
-calc-eval: (calc)Calling Calc from Your Programs.), variable
-substitution takes place:
+To compute fields in the table from other fields, formulas must
+reference other fields or ranges.  In Org-mode, fields can be referenced
+by name, by absolute coordinates, and by relative coordinates.  To find
+out what the coordinates of a field are, press `C-c ?' in that field.
 
-       $        refers to the current field
-       $3       refers to the field in column 3 of the current row
-       $3..$7   a vector of the fields in columns 3-7 of current row
-       $P1..$P3 vector of column range, using column names
-       &2       second data field above the current, in same column
-       &5-2     vector from fifth to second field above current
-       &III-II  vector of fields between 2nd and 3rd hline above
-       &III     vector of fields between third hline above and current field
-       $name    a named field, parameter or constant
+Field references
+................
 
-   The range vectors can be directly fed into the calc vector functions
-like `vmean' and `vsum'.
+Formulas can reference the value of another field with the operator
+     @row$column
 
-   `$name' is interpreted as the name of a column, parameter or
-constant.  Constants are defined globally through the variable
+   Column references can be absolute like `1', `2',...`N', or relative
+to the current column like `+1' or `-2'.
+
+   The row specification only counts data lines and ignores horizontal
+separator lines (hlines).  You can use absolute row numbers `1'...`N',
+and row numbers relative to the current row like `+3' or `-1'.  Or
+specify the row relative to one of the hlines: `I' refers to the first
+hline, `II' to the second etc.  `-I' refers to the first such line
+above the current line, `+I' to the first such line below the current
+line.  You can also write `III+2' which is the second data line after
+the third hline in the table.  Relative row numbers like `-3' will not
+cross hlines if the current line is too close to the hline.  Instead,
+the value directly at the hline is used.
+
+   `0' refers to the current row and column.  Also, if you omit either
+the column or the row part of the reference, the current row/column is
+implied.  Here are a few examples:
+
+     @2$3      2nd row, 3rd column
+     $5        column 5 in the current row
+     @2        current column, row 2
+     @-1$-3    the field one row up, three columns to the left
+     @-I$2     field just under hline above current row, column 2
+
+Range references
+................
+
+You may reference a rectangular range of fields by specifying two field
+references connected by two dots `..'.  If both fields are in the
+current row, you may simply use `$2..$7', but if at least one field is
+in a different row, you need to use the general `@row$column' format at
+least for the first field (i.e the reference must start with `@' in
+order to be interpreted correctly).  Examples:
+
+     $1..$3        First three fields in the current row.
+     $P..$Q        Range, using column names (see under Advanced)
+     @2$1..@4$3    6 fields between these two fields.
+     @-1$-2..@-1   3 numbers from the column to the left, 2 up to current row
+
+Range references return a vector of values that can be fed into Calc
+vector functions.  Empty fields in ranges are normally suppressed, so
+that the vector contains only the non-empty fields (but see the `E'
+mode switch below).  If there are no non-empty fields, `[0]' is
+returned to avoid syntax errors in formulas.
+
+Named references
+................
+
+`$name' is interpreted as the name of a column, parameter or constant.
+Constants are defined globally through the variable
 `org-table-formula-constants'.  If you have the `constants.el' package,
 it will also be used to resolve constants, including natural constants
 like `$h' for Planck's constant, and units like `$km' for kilometers.
 Column names and parameters can be specified in special table lines.
 These are described below, see *Note Advanced features::.
 
+
+File: org,  Node: Formula syntax for Calc,  Next: Formula syntax for Lisp,  Prev: References,  Up: The spreadsheet
+
+3.4.2 Formula syntax for Calc
+-----------------------------
+
+A formula can be any algebraic expression understood by the Emacs
+`Calc' package.  Note that `calc' has the slightly non-standard
+convention that `/' has lower precedence than `*', so that `a/b*c' is
+interpreted as `a/(b*c)'.  Before evaluation by `calc-eval' (*note
+calc-eval: (calc)Calling Calc from Your Programs.), variable
+substitution takes place according to the rules described above.  The
+range vectors can be directly fed into the calc vector functions like
+`vmean' and `vsum'.
+
    A formula can contain an optional mode string after a semicolon.
-This string consists of flags to influence calc's modes(1) during
-execution, e.g.  `p20' to switch the internal precision to 20 digits,
-`n3', `s3', `e2' or `f4' to switch to normal, scientific, engineering,
-or fixed display format, respectively, and `D', `R', `F', and `S' to
-turn on degrees, radians, fraction and symbolic modes, respectively.
+This string consists of flags to influence Calc and other modes during
+execution.  By default, Org-mode uses the standard calc modes (precision
+12, angular units degrees, fraction and symbolic modes off.  The display
+format, however, has been changed to `(float 5)' to keep tables
+compact.  The default settings can be configured using the variable
+`org-calc-default-modes'.
+
+     p20           switch the internal precision to 20 digits
+     n3 s3 e2 f4   normal, scientific, engineering, or fixed display format
+     D R           angle modes: degrees, radians
+     F S           fraction and symbolic modes
+     N             interpret all fields as numbers, use 0 for non-numbers
+     T             force text interpretation
+     E             keep empty fields in ranges
+
 In addition, you may provide a `printf' format specifier to reformat
 the final result.  A few examples:
 
@@ -1284,81 +1324,208 @@ the final result.  A few examples:
      tan($1);Dp3s1        Compute in degrees, precision 3, display SCI 1
      sin($1);Dp3%.1e      Same, but use printf specifier for display
      vmean($2..$7)        Compute column range mean, using vector function
-     vsum(&III)           Sum numbers from 3rd hline above, up to here
+     vmean($2..$7);EN     Same, but treat empty fields as 0
      taylor($3,x=7,2)     taylor series of $3, at x=7, second degree
 
-   ---------- Footnotes ----------
-
-   (1) By default, Org-mode uses the standard calc modes (precision 12,
-angular units degrees, fraction and symbolic modes off).  The display
-format, however, has been changed to `(float 5)' to keep tables compact.
-The default settings can be configured using the variable
-`org-calc-default-modes'.
-
 
-File: org,  Node: Lisp formulas,  Next: Column formulas,  Prev: Formula syntax,  Up: Table calculations
+File: org,  Node: Formula syntax for Lisp,  Next: Field formulas,  Prev: Formula syntax for Calc,  Up: The spreadsheet
 
-3.3.2 Emacs Lisp forms as formulas
+3.4.3 Emacs Lisp forms as formulas
 ----------------------------------
 
-It is also possible to write a formula in Emacs lisp; this can be useful
+It is also possible to write a formula in Emacs Lisp; this can be useful
 for string manipulation and control structures.  If a formula starts
 with a single quote followed by an opening parenthesis, then it is
 evaluated as a lisp form.  The evaluation should return either a string
-or a number.  Just as with `calc' formulas, you can provide a format
-specifier after a semicolon.  A few examples:
+or a number.  Just as with `calc' formulas, you can specify modes and a
+printf format after a semicolon.  A reference will be replaced with a
+string (in double quotes) containing the field.  If you provide the `N'
+mode switch, all referenced elements will be numbers.  Ranges are
+inserted as space-separated fields, so you can embed them in list or
+vector syntax.  A few examples, note how the `N' mode is used when we
+do computations in lisp.
 
-     swap the first two characters of the content of column 1
-     '(concat (substring "$1" 1 2) (substring "$1" 0 1) (substring "$1" 2))
-     Add columns 1 and 2, equivalent to the calc's `$1+$2'
-     '(+ $1 $2)
+     Swap the first two characters of the content of column 1
+       '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
+     Add columns 1 and 2, equivalent to the Calc's `$1+$2'
+       '(+ $1 $2);N
+     Compute the sum of columns 1-4, like Calc's `vsum($1..$4)'
+       '(apply '+ '($1..$4));N
 
 
-File: org,  Node: Column formulas,  Next: Advanced features,  Prev: Lisp formulas,  Up: Table calculations
+File: org,  Node: Field formulas,  Next: Column formulas,  Prev: Formula syntax for Lisp,  Up: The spreadsheet
 
-3.3.3 Column formulas
----------------------
+3.4.4 Field formulas
+--------------------
 
-To apply a formula to a field, type it directly into the field,
-preceded by an equal sign, like `=$1+$2'.  When you press <TAB> or
-<RET> or `C-c C-c' with the cursor still in the field, the formula will
-be stored as the formula for the current column, evaluated and the
-current field replaced with the result.  If the field contains only
-`=', the previously stored formula for this column is used.
+To assign a formula to a particular field, type it directly into the
+field, preceded by `=:', for example `=:$1+$2'.  When you press <TAB>
+or <RET> or `C-c C-c' with the cursor still in the field, the formula
+will be stored as the formula for this field, evaluated, and the
+current field replaced with the result.
 
-   For each column, Org-mode will remember the most recently used
-formula.  The information is stored in a special line starting with
-`#+TBLFM' directly below the table.  When adding/deleting/moving
-columns with the appropriate commands, the stored equations will be
-modified accordingly.  When a column used in a calculation is removed,
-references to this column become invalid and will cause an error upon
-applying the equation.
+   Formulas are stored in a special line starting with `#+TBLFM:'
+directly below the table.  If you typed the equation in the 4th field of
+the 3rd data line in the table, the formula will look like
+`@3$2=$1+$2'.  When inserting/deleting/swapping column and rows with
+the appropriate commands, absolute references (but not relative ones)
+in stored formulas are modified in order to still reference the same
+field.  Of cause this is not true if you edit the table structure with
+normal editing commands - then you must go and fix equations yourself.
 
    Instead of typing an equation into the field, you may also use the
-command `C-c ='.  It prompts for a formula (with default taken from the
-`#+TBLFM:' line) and applies it to the current field.  A numerical
-prefix (e.g. `C-5 C-c =') will apply it to that many consecutive fields
-in the current column.
+following command
 
-   To recompute all the fields in a line, use the command `C-c *'.  It
-re-applies all stored equations to the current row, from left to right.
-With a `C-u' prefix, this will be done to every line in the table, so
-use this command it you want to make sure the entire table is
-up-to-date. `C-u C-c C-c' is another way to update the entire table.
-Global updating does not touch the line(s) above the first horizontal
-separator line, assuming that this is the table header.
+`C-u C-c ='
+     Install a new formula for the current field.  The command prompts
+     for a formula, with default taken from the `#+TBLFM:' line, applies
+     it to the current field and stores it.
 
 
-File: org,  Node: Advanced features,  Next: Named-field formulas,  Prev: Column formulas,  Up: Table calculations
+File: org,  Node: Column formulas,  Next: Editing and debuggung formulas,  Prev: Field formulas,  Up: The spreadsheet
 
-3.3.4 Advanced features
+3.4.5 Column formulas
+---------------------
+
+Often in a table, the same formula should be used for all fields in a
+particular column.  Instead of having to copy the formula to all fields
+in that column, org-mode allows to assign a single formula to an entire
+column.
+
+   To assign a formula to a column, type it directly into any field in
+the column, preceded by an equal sign, like `=$1+$2'.  When you press
+<TAB> or <RET> or `C-c C-c' with the cursor still in the field, the
+formula will be stored as the formula for the current column, evaluated
+and the current field replaced with the result.  If the field contains
+only `=', the previously stored formula for this column is used.  For
+each column, Org-mode will only remember the most recently used
+formula.  In the `TBLFM:' line, column formulas will look like
+`$4=$1+$2'.
+
+   Instead of typing an equation into the field, you may also use the
+following command:
+
+`C-c ='
+     Install a new formula for the current column and replace current
+     field with the result of the formula.  The command prompts for a
+     formula, with default taken from the `#+TBLFM' line, applies it to
+     the current field and stores it.  With a numerical prefix (e.g.
+     `C-5 C-c =') will apply it to that many consecutive fields in the
+     current column.
+
+
+File: org,  Node: Editing and debuggung formulas,  Next: Updating the table,  Prev: Column formulas,  Up: The spreadsheet
+
+3.4.6 Editing and Debugging formulas
+------------------------------------
+
+You can edit individual formulas in the minibuffer or directly in the
+field.  Org-mode can also prepare a special buffer with all active
+formulas of a table.
+
+`C-c ='
+`C-u C-c ='
+     Edit the formula associated with the current column/field in the
+     minibuffer.  See *Note Column formulas:: and *Note Field
+     formulas::.  
+
+`C-u C-u C-c ='
+     Re-insert the active formula (either a field formula, or a column
+     formula) into the current field, so that you can edit it directly
+     in the field.  The advantage over editing in the minibuffer is
+     that you can use the command `C-c ?'.  
+
+`C-c ?'
+     While editing a formula in a table field, highlight the field(s)
+     referenced by the reference at the cursor position in the formula.  
+
+`C-c ''
+     Edit all formulas for the current table in a special buffer, where
+     the formulas will be displayed one per line.  While inside the
+     special buffer, Org-mode will automatically highlight any field or
+     range reference at the cursor position.  You may edit, remove and
+     add formulas, and use the following commands:
+    `C-c C-c'
+          Exit the buffer and store the modified formulas.  With `C-u'
+          prefix, also apply the new formulas to the entire table.  
+
+    `C-c C-q'
+          Exit the buffer without installing changes.  
+
+    `S-<up>/<down>'
+          Move the reference line in the Org-mode buffer up and down.
+          This is important for highlighting the references of column
+          formulas for different rows.  
+
+    `M-<up>/<down>'
+          Scroll the window displaying the table.
+
+   Making a table field blank does not remove the formula associated
+with the field, because that is stored in a different line (the `TBLFM'
+line) - during the next recalculation the field will be filled again.
+To remove a formula from a field, you have to give an empty reply when
+prompted for the formula, or to edit the `#+TBLFM' line.
+
+   You may edit the `#+TBLFM' directly and re-apply the changed
+equations with `C-c C-c' in that line, or with the normal recalculation
+commands in the table.
+
+Debugging formulas
+..................
+
+When the evaluation of a formula leads to an error, the field content
+becomes the string `#ERROR'.  If you would like see what is going on
+during variable substitution and calculation in order to find a bug,
+turn on formula debugging in the `Tbl' menu and repeat the calculation,
+for example by pressing `C-c = <RET>' in a field.  Detailed information
+will be displayed.
+
+
+File: org,  Node: Updating the table,  Next: Advanced features,  Prev: Editing and debuggung formulas,  Up: The spreadsheet
+
+3.4.7 Updating the Table
+------------------------
+
+Recalculation of a table is normally not automatic, but needs to be
+triggered by a command.  See *Note Advanced features:: for a way to make
+recalculation at least semi-automatically.
+
+   In order to recalculate a line of a table or the entire table, use
+the following commands:
+
+`C-c *'
+     Recalculate the current row by first applying the stored column
+     formulas from left to right, and all field formulas in the current
+     row.
+
+`C-u C-c *'
+`C-u C-c C-c'
+     Recompute the entire table, line by line.  Any lines before the
+     first hline are left alone, assuming that these are part of the
+     table header.
+
+`C-u C-u C-c *'
+     Iterate the table by recomputing it until no further changes occur.
+     This may be necessary if some computed fields use the value of
+     other fields that are computed later in the calculation sequence.
+
+
+File: org,  Node: Advanced features,  Prev: Updating the table,  Up: The spreadsheet
+
+3.4.8 Advanced features
 -----------------------
 
 If you want the recalculation of fields to happen automatically, or if
-you want to be able to assign a formula to an individual field (instead
-of an entire column) you need to reserve the first column of the table
-for special marking characters.  Here is an example of a table that
-collects exam results of students and makes use of these features:
+you want to be able to assign names to fields and columns, you need to
+reserve the first column of the table for special marking characters.
+`C-#'
+     Rotate the calculation mark in first column through the states `',
+     `#', `*', `!', `$'.  The meaning of these characters is discussed
+     below.  When there is an active region, change all marks in the
+     region.
+
+   Here is an example of a table that collects exam results of students
+and makes use of these features:
 
      |---+---------+--------+--------+--------+-------+------|
      |   | Student | Prob 1 | Prob 2 | Prob 3 | Total | Note |
@@ -1375,12 +1542,12 @@ collects exam results of students and makes use of these features:
      | ^ |         |        |        |        |    at |      |
      | $ | max=50  |        |        |        |       |      |
      |---+---------+--------+--------+--------+-------+------|
-     #+TBLFM: $6=vsum($P1..$P3)::$7=10*$Tot/$max;%.1f::$at=vmean(&II);%.1f
+     #+TBLFM: $6=vsum($P1..$P3)::$7=10*$Tot/$max;%.1f::$at=vmean(@-II..@-I);%.1f
 
 Important: Please note that for these special tables, recalculating the
 table with `C-u C-c *' will only affect rows that are marked `#' or
-`*', and named fields.  The column formulas are not applied in rows
-with empty first field.
+`*', and fields that have a formula assigned to the field itself.  The
+column formulas are not applied in rows with empty first field.
 
    The marking characters have the following meaning:
 `!'
@@ -1390,8 +1557,8 @@ with empty first field.
 `^'
      This row defines names for the fields _above_ the row.  With such
      a definition, any formula in the table may use `$m1' to refer to
-     the value `10'.  Also, named fields can have their own formula
-     associated with them.
+     the value `10'.  Also, if you assign a formula to a names field, it
+     will be stored as `$name=...'.
 
 `_'
      Similar to `^', but defines names for the fields in the row
@@ -1402,8 +1569,7 @@ with empty first field.
      example, if a field in a `$' row contains `max=50', then formulas
      in this table can refer to the value 50 using `$max'.  Parameters
      work exactly like constants, only that they can be defined on a
-     per-table basis.  Changing a parameter and then recalculating the
-     table can be useful.
+     per-table basis.
 
 `#'
      Fields in this row are automatically recalculated when pressing
@@ -1421,65 +1587,10 @@ with empty first field.
      All lines that should be recalculated should be marked with `#' or
      `*'.
 
-
-File: org,  Node: Named-field formulas,  Next: Editing/debugging formulas,  Prev: Advanced features,  Up: Table calculations
-
-3.3.5 Named-field formulas
---------------------------
-
-A named field can have its own formula associated with it.  In the
-example above, this is used for the `at' field that contains the
-average result of the students.  To enter a formula for a named field,
-just type it into the buffer, preceded by `:='.  Or use `C-u C-c ='.
-This equation will be stored below the table like `$name=...'.  Any
-recalculation in the table (even if only requested for the current
-line) will also update all named field formulas.
-
-
-File: org,  Node: Editing/debugging formulas,  Next: Appetizer,  Prev: Named-field formulas,  Up: Table calculations
-
-3.3.6 Editing and debugging formulas
-------------------------------------
-
-To edit a column or field formula, use the commands `C-c =' and `C-u
-C-c =', respectively.  The currently active expression is then
-presented as default in the minibuffer, where it may be edited.
-
-   Note that making a table field blank does not remove the formula
-associated with the field - during the next recalculation the field
-will be filled again.  To remove a formula from a field, you have to
-give an empty reply when prompted for the formula, or to edit the
-`#+TBLFM' line.
-
-   You may edit the `#+TBLFM' directly and re-apply the changed
-equations with `C-c C-c' in that line, or with the normal recalculation
-commands in the table.
-
-   In particular for large tables with many formulas, it is convenient
-to use the command `C-c '' to edit the formulas of the current table in
-a separate buffer.  That buffer will show the formulas one per line,
-and you are free to edit, add and remove formulas.  Press `C-c ?' on a
-`$...'  expression to get information about its interpretation.
-Exiting the buffer with `C-c C-c' only stores the modified formulas
-below the table.  Exiting with `C-u C-c C-c' also applies them to the
-entire table.  `C-c C-q' exits without installing the changes.
-
-   When the evaluation of a formula leads to an error, the field content
-becomes the string `#ERROR'.  If you would like see what is going on
-during variable substitution and calculation in order to find a bug,
-turn on formula debugging in the menu and repeat the calculation, for
-example by pressing `C-c = <RET>' in a field.  Detailed information
-will be displayed.
-
-
-File: org,  Node: Appetizer,  Prev: Editing/debugging formulas,  Up: Table calculations
-
-3.3.7 Appetizer
----------------
-
-Finally, just to whet your appetite on what can be done with the
+   Finally, just to whet your appetite on what can be done with the
 fantastic `calc' package, here is a table that computes the Taylor
-series for a couple of functions (homework: try that with Excel :-)
+series of degree `n' at location `x' for a couple of functions
+(homework: try that with Excel :-)
 
      |---+-------------+---+-----+--------------------------------------|
      |   | Func        | n | x   | Result                               |
@@ -1492,45 +1603,6 @@ series for a couple of functions (homework: try that with Excel :-)
      | * | tan(x)      | 3 | x   | 0.0175 x + 1.77e-6 x^3               |
      |---+-------------+---+-----+--------------------------------------|
      #+TBLFM: $5=taylor($2,$4,$3);n3
-
-
-File: org,  Node: orgtbl-mode,  Next: table.el,  Prev: Table calculations,  Up: Tables
-
-3.4 The Orgtbl minor mode
-=========================
-
-If you like the intuitive way the Org-mode table editor works, you
-might also want to use it in other modes like text-mode or mail-mode.
-The minor mode Orgtbl-mode makes this possible.  You can always toggle
-the mode with `M-x orgtbl-mode'.  To turn it on by default, for example
-in mail mode, use
-
-     (add-hook 'mail-mode-hook 'turn-on-orgtbl)
-
-
-File: org,  Node: table.el,  Prev: orgtbl-mode,  Up: Tables
-
-3.5 The `table.el' package
-==========================
-
-Complex ASCII tables with automatic line wrapping, column- and
-row-spanning, and alignment can be created using the Emacs table
-package by Takaaki Ota (`http://sourceforge.net/projects/table', and
-also part of Emacs 22).  When <TAB> or `C-c C-c' is pressed in such a
-table, Org-mode will call `table-recognize-table' and move the cursor
-into the table.  Inside a table, the keymap of Org-mode is inactive.
-In order to execute Org-mode-related commands, leave the table.
-
-`C-c C-c'
-     Recognize `table.el' table.  Works when the cursor is in a
-     table.el table.
-
-`C-c ~'
-     Insert a table.el table.  If there is already a table at point,
-     this command converts it between the table.el format and the
-     Org-mode format.  See the documentation string of the command
-     `org-convert-table' for the restrictions under which this is
-     possible.
 
 
 File: org,  Node: Hyperlinks,  Next: TODO items,  Prev: Tables,  Up: Top
@@ -1743,15 +1815,17 @@ insert it into an org-mode file, and to follow the link.
      link, or one of the link type prefixes mentioned in the examples
      above.  Through completion, all links stored during the current
      session can be accessed(1).  The link will be inserted into the
-     buffer, along with a descriptive text.  Note that you don't have
-     to use this command to insert a link.  Links in Org-mode are plain
-     text, and you can type or paste them straight into the buffer.  By
-     using this command, the links are automatically enclosed in double
-     brackets, and you will be asked for the optional descriptive text.
-     If the link is a `file:' link and the linked file is located in
-     the same directory as the current file or a subdirectory of it, the
-     path of the file will be inserted relative to the current
-     directory.
+     buffer, along with a descriptive text.  If some text was selecten
+     when this command is called, the selected text becomes the default
+     description.
+     Note that you don't have to use this command to insert a link.
+     Links in Org-mode are plain text, and you can type or paste them
+     straight into the buffer.  By using this command, the links are
+     automatically enclosed in double brackets, and you will be asked
+     for the optional descriptive text.  If the link is a `file:' link
+     and the linked file is located in the same directory as the
+     current file or a subdirectory of it, the path of the file will be
+     inserted relative to the current directory.
 
 `C-u C-c C-l'
      When `C-c C-l' is called with a `C-u' prefix argument, a link to a
@@ -2623,7 +2697,7 @@ have closed this item in a note under the headline.
 instance of each exist at any given time.  So if you look back or ahead
 in the agenda, you will not find past and future instances, only the
 current one will show up.  Use a cyclic diary entry if you need all
-past and future instances to be visible in the angenda.
+past and future instances to be visible in the agenda.
 
 
 File: org,  Node: Progress logging,  Prev: Repeating items,  Up: Timestamps
@@ -3012,7 +3086,7 @@ tag starting with `BOSS'.
    You can also require a headline to be of a certain level, by writing
 instead of any TAG an expression like `LEVEL=3'.  For example, a search
 `+LEVEL=3+BOSS/-DONE' lists all level three headlines that have the tag
-BOSS and are _not_ marked witht the todo keyword DONE.
+BOSS and are _not_ marked with the todo keyword DONE.
 
 
 File: org,  Node: Agenda views,  Next: Embedded LaTeX,  Prev: Tags,  Up: Top
@@ -3035,7 +3109,7 @@ in a separate buffer.  Six different view types are provided:
    * a _TODO list_ that covers all unfinished action items,
 
    * a _tags view_, showings headlines based on the tags associated
-     them,
+     with them,
 
    * a _timeline view_ that shows all events in a single Org-mode file,
      in time-sorted view,
@@ -3085,6 +3159,7 @@ way to maintain it is through the following commands
      Remove current file from the list of agenda files.  
 
 `C-,'
+`C-''
      Cycle through agenda file list, visiting one file after the other.
 
 The Org menu contains the current list of files and can be used to
@@ -3589,7 +3664,7 @@ Remote editing
      priority character. If you reply with <SPC>, the priority cookie
      is removed from the entry.
 
-`p'
+`P'
      Display weighted priority of current item.
 
 `+'
@@ -4923,7 +4998,7 @@ file is visited again in a new Emacs session.
      This line sets the archive location for the agenda file.  It
      applies for all subsequent lines until the next `#+CATEGORY' line,
      or the end of the file.  The first such line also applies to any
-     entries before it.  The correspoinding variable is
+     entries before it.  The corresponding variable is
      `org-archive-location'.
 
 `#+TBLFM:'
@@ -5122,23 +5197,23 @@ File: org,  Node: Cooperation,  Next: Conflicts,  Prev: Interaction,  Up: Intera
 
 `calc.el' by Dave Gillespie
      Org-mode uses the calc package for implementing spreadsheet
-     functionality in its tables (*note Table calculations::).
-     Org-modes checks for the availability of calc by looking for the
-     function `calc-eval' which should be autoloaded in your setup if
-     calc has been installed properly.  As of Emacs 22, calc is part of
-     the Emacs distribution.  Another possibility for interaction
-     between the two packages is using calc for embedded calculations.
-     *Note Embedded Mode: (calc)Embedded Mode.  
+     functionality in its tables (*note The spreadsheet::).  Org-modes
+     checks for the availability of calc by looking for the function
+     `calc-eval' which should be autoloaded in your setup if calc has
+     been installed properly.  As of Emacs 22, calc is part of the Emacs
+     distribution.  Another possibility for interaction between the two
+     packages is using calc for embedded calculations. *Note Embedded
+     Mode: (calc)Embedded Mode.  
 
 `constants.el' by Carsten Dominik
-     In a table formula (*note Table calculations::), it is possible to
-     use names for natural constants or units.  Instead of defining
-     your own constants in the variable `org-table-formula-constants',
-     install the `constants' package which defines a large number of
-     constants and units, and lets you use unit prefixes like `M' for
-     `Mega' etc.  You will need version 2.0 of this package, available
-     at `http://www.astro.uva.nl/~dominik/Tools'. Org-mode checks for
-     the function `constants-get', which has to be autoloaded in your
+     In a table formula (*note The spreadsheet::), it is possible to use
+     names for natural constants or units.  Instead of defining your own
+     constants in the variable `org-table-formula-constants', install
+     the `constants' package which defines a large number of constants
+     and units, and lets you use unit prefixes like `M' for `Mega' etc.
+     You will need version 2.0 of this package, available at
+     `http://www.astro.uva.nl/~dominik/Tools'. Org-mode checks for the
+     function `constants-get', which has to be autoloaded in your
      setup.  See the installation instructions in the file
      `constants.el'.
 
@@ -5151,7 +5226,25 @@ File: org,  Node: Cooperation,  Next: Conflicts,  Prev: Interaction,  Up: Intera
      `Remember.el' is not part of Emacs, find it on the web.  
 
 `table.el' by Takaaki Ota
-     Org mode cooperates with table.el, see *Note table.el::.
+     Complex ASCII tables with automatic line wrapping, column- and
+     row-spanning, and alignment can be created using the Emacs table
+     package by Takaaki Ota (`http://sourceforge.net/projects/table',
+     and also part of Emacs 22).  When <TAB> or `C-c C-c' is pressed in
+     such a table, Org-mode will call `table-recognize-table' and move
+     the cursor into the table.  Inside a table, the keymap of Org-mode
+     is inactive.  In order to execute Org-mode-related commands, leave
+     the table.
+
+    `C-c C-c'
+          Recognize `table.el' table.  Works when the cursor is in a
+          table.el table.
+
+    `C-c ~'
+          Insert a table.el table.  If there is already a table at
+          point, this command converts it between the table.el format
+          and the Org-mode format.  See the documentation string of the
+          command `org-convert-table' for the restrictions under which
+          this is possible.
      `table.el' is part of Emacs 22.
 
 
@@ -5353,7 +5446,7 @@ WAITING tag anywhere in the project tree.  Let's further assume that
 you have marked all tree headings that define a project with the todo
 keyword PROJECT.  In this case you would run a todo search for the
 keyword PROJECT, but skip the match unless there is a WAITING tag
-anywhere in the subtree belonging to the project line..
+anywhere in the subtree belonging to the project line.
 
    To achieve this, you must write a function that searches the subtree
 for the tag.  If the tag is found, the function must return `nil' to
@@ -5369,7 +5462,7 @@ search should continue from there.
            subtree-end))) ; tag not found, continue after end of subtree
 
    Furthermore you must write a command that uses `let' to temporarily
-puts this function into the variable `org-agenda-skip-function', sets
+put this function into the variable `org-agenda-skip-function', sets
 the header string for the agenda buffer, and calls the todo-list
 generator while asking for the specific TODO keyword PROJECT.  The
 function must also accept one argument MATCH, but it can choose to
@@ -5549,7 +5642,7 @@ Index
 * active region <1>:                     Export commands.     (line   6)
 * active region <2>:                     ASCII export.        (line   9)
 * active region <3>:                     Built-in table editor.
-                                                              (line 173)
+                                                              (line 141)
 * active region:                         Structure editing.   (line  64)
 * agenda:                                Weekly/Daily agenda. (line   6)
 * agenda dispatcher:                     Agenda dispatcher.   (line   6)
@@ -5578,9 +5671,9 @@ Index
 * bugs:                                  Bugs.                (line   6)
 * C-c C-c, overview:                     The very busy C-c C-c key.
                                                               (line   6)
-* calc package:                          Table calculations.  (line   6)
+* calc package:                          The spreadsheet.     (line   6)
 * calc.el:                               Cooperation.         (line   6)
-* calculations, in tables <1>:           Table calculations.  (line   6)
+* calculations, in tables <1>:           The spreadsheet.     (line   6)
 * calculations, in tables:               Built-in table editor.
                                                               (line 141)
 * calendar commands, from agenda:        Agenda commands.     (line 191)
@@ -5605,7 +5698,8 @@ Index
 * completion, of CamelCase links <1>:    Completion.          (line   6)
 * completion, of CamelCase links:        CamelCase links.     (line   6)
 * completion, of dictionary words:       Completion.          (line   6)
-* completion, of file names:             Handling links.      (line  43)
+* completion, of file names:             Handling links.      (line  45)
+* completion, of link abbreviations:     Completion.          (line   6)
 * completion, of links:                  Handling links.      (line  27)
 * completion, of option keywords <1>:    Completion.          (line   6)
 * completion, of option keywords:        Export options.      (line   6)
@@ -5615,7 +5709,7 @@ Index
 * completion, of TeX symbols:            Completion.          (line   6)
 * completion, of TODO keywords <1>:      Completion.          (line   6)
 * completion, of TODO keywords:          Workflow states.     (line  12)
-* constants, in calculations:            Formula syntax.      (line  26)
+* constants, in calculations:            References.          (line  65)
 * constants.el:                          Cooperation.         (line  14)
 * content, STARTUP keyword:              In-buffer settings.  (line  22)
 * contents, global visibility state:     Visibility cycling.  (line  22)
@@ -5639,6 +5733,8 @@ Index
 * DEADLINE keyword:                      Time stamps.         (line  53)
 * deadlines:                             Time stamps.         (line   6)
 * Deadlines, repeating:                  Repeating items.     (line   6)
+* debugging, of table formulas:          Editing and debuggung formulas.
+                                                              (line  60)
 * demotion, of subtrees:                 Structure editing.   (line   6)
 * diary entries, creating from agenda:   Agenda commands.     (line 198)
 * diary integration:                     Weekly/Daily agenda. (line  24)
@@ -5650,7 +5746,7 @@ Index
 * document structure:                    Document structure.  (line   6)
 * DONE, final TODO keyword:              Per file keywords.   (line  20)
 * editing tables:                        Tables.              (line   6)
-* editing, of table formulas:            Editing/debugging formulas.
+* editing, of table formulas:            Editing and debuggung formulas.
                                                               (line   6)
 * elisp links:                           External links.      (line   6)
 * emphasized text:                       Export options.      (line  25)
@@ -5663,11 +5759,13 @@ Index
 * external archiving:                    Moving subtrees.     (line   6)
 * external links:                        External links.      (line   6)
 * external links, in HTML export:        Links.               (line   6)
-* FAQ:                                   Summary.             (line  51)
+* FAQ:                                   Summary.             (line  52)
 * feedback:                              Feedback.            (line   6)
+* field formula:                         Field formulas.      (line   6)
+* field references:                      References.          (line  14)
 * file links:                            External links.      (line   6)
 * file links, searching:                 Search options.      (line   6)
-* file name completion:                  Handling links.      (line  43)
+* file name completion:                  Handling links.      (line  45)
 * files for agenda:                      Agenda files.        (line   6)
 * files, adding to agenda list:          Agenda files.        (line  12)
 * files, selecting for publishing:       Selecting files.     (line   6)
@@ -5675,14 +5773,17 @@ Index
 * fixed-width sections:                  Export options.      (line  25)
 * folded, subtree visibility state:      Visibility cycling.  (line  10)
 * folding, sparse trees:                 Sparse trees.        (line   6)
-* following links:                       Handling links.      (line  58)
-* format specifier:                      Formula syntax.      (line  34)
+* following links:                       Handling links.      (line  60)
+* format specifier:                      Formula syntax for Calc.
+                                                              (line  15)
 * format, of links:                      Link format.         (line   6)
-* formula editing:                       Editing/debugging formulas.
+* formula debugging:                     Editing and debuggung formulas.
+                                                              (line  60)
+* formula editing:                       Editing and debuggung formulas.
                                                               (line   6)
-* formula syntax:                        Formula syntax.      (line   6)
-* formula, for named table field:        Named-field formulas.
+* formula syntax, Calc:                  Formula syntax for Calc.
                                                               (line   6)
+* formula, for individual table field:   Field formulas.      (line   6)
 * formula, for table column:             Column formulas.     (line   6)
 * formula, in tables:                    Built-in table editor.
                                                               (line 141)
@@ -5734,6 +5835,7 @@ Index
 * linebreak preservation:                Export options.      (line  25)
 * linebreak, forced:                     Enhancing text.      (line  32)
 * link abbreviations:                    Link abbreviations.  (line   6)
+* link abbreviations, completion of:     Completion.          (line   6)
 * link completion:                       Handling links.      (line  27)
 * link format:                           Link format.         (line   6)
 * links, external:                       External links.      (line   6)
@@ -5742,8 +5844,9 @@ Index
 * links, internal:                       Internal links.      (line   6)
 * links, publishing:                     Publishing links.    (line   6)
 * links, radio targets:                  Radio targets.       (line   6)
-* links, returning to:                   Handling links.      (line  85)
-* Lisp forms, as table formulas:         Lisp formulas.       (line   6)
+* links, returning to:                   Handling links.      (line  87)
+* Lisp forms, as table formulas:         Formula syntax for Lisp.
+                                                              (line   6)
 * lists, hand-formatted:                 Enhancing text.      (line  11)
 * lists, ordered:                        Plain lists.         (line   6)
 * lists, plain:                          Plain lists.         (line   6)
@@ -5753,20 +5856,20 @@ Index
 * lognotedone, STARTUP keyword:          In-buffer settings.  (line  33)
 * lognotestate, STARTUP keyword:         In-buffer settings.  (line  33)
 * maintainer:                            Feedback.            (line   6)
-* mark ring:                             Handling links.      (line  81)
-* marking characters, tables:            Advanced features.   (line  34)
+* mark ring:                             Handling links.      (line  83)
+* marking characters, tables:            Advanced features.   (line  40)
 * matching, of tags:                     Matching headline tags.
                                                               (line   6)
 * matching, tags:                        Tags.                (line   6)
 * math symbols:                          Math symbols.        (line   6)
 * MH-E links:                            External links.      (line   6)
 * minor mode for tables:                 orgtbl-mode.         (line   6)
-* mode, for calc:                        Formula syntax.      (line  34)
+* mode, for calc:                        Formula syntax for Calc.
+                                                              (line  15)
 * motion commands in agenda:             Agenda commands.     (line  19)
 * motion, between headlines:             Motion.              (line   6)
-* name, of column or field:              Formula syntax.      (line  26)
-* named field formula:                   Named-field formulas.
-                                                              (line   6)
+* name, of column or field:              References.          (line  65)
+* named references:                      References.          (line  65)
 * names as TODO keywords:                TODO types.          (line   6)
 * narrow columns in tables:              Narrow columns.      (line   6)
 * noalign, STARTUP keyword:              In-buffer settings.  (line  29)
@@ -5809,12 +5912,17 @@ Index
 * publishing:                            Publishing.          (line   6)
 * quoted HTML tags:                      Export options.      (line  25)
 * radio targets:                         Radio targets.       (line   6)
+* range references:                      References.          (line  44)
 * ranges, time:                          Time stamps.         (line   6)
-* recomputing table fields:              Column formulas.     (line  27)
+* recomputing table fields:              Updating the table.  (line   6)
+* references:                            References.          (line   6)
+* references, named:                     References.          (line  65)
+* references, to fields:                 References.          (line  14)
+* references, to ranges:                 References.          (line  44)
 * region, active <1>:                    Export commands.     (line   6)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
-                                                              (line 173)
+                                                              (line 141)
 * region, active:                        Structure editing.   (line  64)
 * regular expressions, with tags search: Tag searches.        (line  63)
 * remember.el <1>:                       Cooperation.         (line  33)
@@ -5844,7 +5952,7 @@ Index
 * sparse tree, tag based:                Tags.                (line   6)
 * sparse trees:                          Sparse trees.        (line   6)
 * special keywords:                      In-buffer settings.  (line   6)
-* spreadsheet capabilities:              Table calculations.  (line   6)
+* spreadsheet capabilities:              The spreadsheet.     (line   6)
 * statistics, for checkboxes:            Checkboxes.          (line  23)
 * storing links:                         Handling links.      (line   9)
 * structure editing:                     Structure editing.   (line   6)
@@ -5861,13 +5969,13 @@ Index
 * summary:                               Summary.             (line   6)
 * superscript:                           Subscripts and Superscripts.
                                                               (line   6)
-* syntax, of formulas:                   Formula syntax.      (line   6)
+* syntax, of formulas:                   Formula syntax for Calc.
+                                                              (line   6)
 * table editor, builtin:                 Built-in table editor.
                                                               (line   6)
-* table editor, table.el:                table.el.            (line   6)
+* table editor, table.el:                Cooperation.         (line  37)
 * table of contents:                     Export options.      (line  25)
-* table.el <1>:                          Cooperation.         (line  34)
-* table.el:                              table.el.            (line   6)
+* table.el:                              Cooperation.         (line  34)
 * tables <1>:                            Export options.      (line  25)
 * tables:                                Tables.              (line   6)
 * tables, export:                        Enhancing text.      (line  21)
@@ -5915,7 +6023,7 @@ Index
 * transient-mark-mode <1>:               Export commands.     (line   6)
 * transient-mark-mode <2>:               ASCII export.        (line   9)
 * transient-mark-mode <3>:               Built-in table editor.
-                                                              (line 173)
+                                                              (line 141)
 * transient-mark-mode:                   Structure editing.   (line  64)
 * trees, sparse:                         Sparse trees.        (line   6)
 * trees, visibility:                     Visibility cycling.  (line   6)
@@ -5923,10 +6031,12 @@ Index
 * types as TODO keywords:                TODO types.          (line   6)
 * underlined text:                       Enhancing text.      (line  15)
 * undoing remote-editing events:         Agenda commands.     (line 109)
+* updating, table:                       Updating the table.  (line   6)
 * URL links:                             External links.      (line   6)
 * USENET links:                          External links.      (line   6)
 * variables, for customization:          Customization.       (line   6)
-* vectors, in table calculations:        Formula syntax.      (line  23)
+* vectors, in table calculations:        Formula syntax for Calc.
+                                                              (line  11)
 * visibility cycling:                    Visibility cycling.  (line   6)
 * visible text, printing:                Sparse trees.        (line  41)
 * VM links:                              External links.      (line   6)
@@ -5982,23 +6092,20 @@ Key Index
 * b:                                     Agenda commands.     (line  51)
 * C:                                     Agenda commands.     (line 213)
 * c:                                     Agenda commands.     (line 191)
-* C-#:                                   Built-in table editor.
-                                                              (line 162)
+* C-#:                                   Advanced features.   (line   9)
+* C-':                                   Agenda files.        (line  18)
 * C-,:                                   Agenda files.        (line  18)
 * C-_:                                   Agenda commands.     (line 109)
 * C-a a L:                               Timeline.            (line  10)
 * C-c !:                                 Creating timestamps. (line  21)
 * C-c #:                                 Checkboxes.          (line  56)
-* C-c %:                                 Handling links.      (line  81)
-* C-c &:                                 Handling links.      (line  85)
-* C-c ' <1>:                             Editing/debugging formulas.
-                                                              (line  20)
-* C-c ':                                 Built-in table editor.
-                                                              (line 150)
-* C-c *:                                 Built-in table editor.
-                                                              (line 155)
+* C-c %:                                 Handling links.      (line  83)
+* C-c &:                                 Handling links.      (line  87)
+* C-c ':                                 Editing and debuggung formulas.
+                                                              (line  24)
+* C-c *:                                 Updating the table.  (line  13)
 * C-c +:                                 Built-in table editor.
-                                                              (line 173)
+                                                              (line 141)
 * C-c ,:                                 Priorities.          (line  18)
 * C-c -:                                 Built-in table editor.
                                                               (line  92)
@@ -6008,14 +6115,13 @@ Key Index
 * C-c ;:                                 Comment lines.       (line  11)
 * C-c <:                                 Creating timestamps. (line  25)
 * C-c <TAB>:                             Built-in table editor.
-                                                              (line 195)
-* C-c =:                                 Built-in table editor.
-                                                              (line 141)
+                                                              (line 163)
+* C-c = <1>:                             Editing and debuggung formulas.
+                                                              (line  10)
+* C-c =:                                 Column formulas.     (line  24)
 * C-c >:                                 Creating timestamps. (line  29)
-* C-c ? <1>:                             Editing/debugging formulas.
+* C-c ?:                                 Editing and debuggung formulas.
                                                               (line  20)
-* C-c ?:                                 Built-in table editor.
-                                                              (line 168)
 * C-c [:                                 Agenda files.        (line  12)
 * C-c \:                                 Tag searches.        (line   9)
 * C-c ]:                                 Agenda files.        (line  15)
@@ -6023,7 +6129,7 @@ Key Index
                                                               (line  96)
 * C-c ^:                                 Structure editing.   (line  52)
 * C-c `:                                 Built-in table editor.
-                                                              (line 189)
+                                                              (line 157)
 * C-c a !:                               Stuck projects.      (line  14)
 * C-c a #:                               Stuck projects.      (line  13)
 * C-c a a:                               Weekly/Daily agenda. (line   9)
@@ -6039,15 +6145,15 @@ Key Index
 * C-c a t:                               TODO basics.         (line  33)
 * C-c C-a:                               Visibility cycling.  (line  31)
 * C-c C-b:                               Motion.              (line  15)
-* C-c C-c <1>:                           The very busy C-c C-c key.
+* C-c C-c <1>:                           Cooperation.         (line  37)
+* C-c C-c <2>:                           The very busy C-c C-c key.
                                                               (line   6)
-* C-c C-c <2>:                           Processing LaTeX fragments.
+* C-c C-c <3>:                           Processing LaTeX fragments.
                                                               (line  15)
-* C-c C-c <3>:                           Setting tags.        (line  10)
-* C-c C-c <4>:                           Checkboxes.          (line  37)
-* C-c C-c <5>:                           table.el.            (line   6)
-* C-c C-c <6>:                           Editing/debugging formulas.
-                                                              (line  16)
+* C-c C-c <4>:                           Setting tags.        (line  10)
+* C-c C-c <5>:                           Checkboxes.          (line  37)
+* C-c C-c <6>:                           Editing and debuggung formulas.
+                                                              (line  32)
 * C-c C-c <7>:                           Built-in table editor.
                                                               (line  54)
 * C-c C-c:                               Plain lists.         (line  74)
@@ -6072,10 +6178,10 @@ Key Index
 * C-c C-l:                               Handling links.      (line  27)
 * C-c C-n:                               Motion.              (line   8)
 * C-c C-o <1>:                           Creating timestamps. (line  33)
-* C-c C-o:                               Handling links.      (line  58)
+* C-c C-o:                               Handling links.      (line  60)
 * C-c C-p:                               Motion.              (line   9)
-* C-c C-q <1>:                           Editing/debugging formulas.
-                                                              (line  20)
+* C-c C-q <1>:                           Editing and debuggung formulas.
+                                                              (line  34)
 * C-c C-q:                               Built-in table editor.
                                                               (line 125)
 * C-c C-r:                               Visibility cycling.  (line  32)
@@ -6116,17 +6222,23 @@ Key Index
 * C-c {:                                 CDLaTeX mode.        (line  21)
 * C-c |:                                 Built-in table editor.
                                                               (line  40)
-* C-c ~:                                 table.el.            (line  18)
+* C-c ~:                                 Cooperation.         (line  50)
 * C-k:                                   Agenda commands.     (line 117)
 * C-TAB:                                 ARCHIVE tag.         (line  38)
+* C-u C-c *:                             Updating the table.  (line  18)
 * C-u C-c .:                             Creating timestamps. (line  16)
-* C-u C-c =:                             Built-in table editor.
-                                                              (line 145)
-* C-u C-c C-l:                           Handling links.      (line  43)
+* C-u C-c = <1>:                         Editing and debuggung formulas.
+                                                              (line  10)
+* C-u C-c =:                             Field formulas.      (line  24)
+* C-u C-c C-c:                           Updating the table.  (line  19)
+* C-u C-c C-l:                           Handling links.      (line  45)
 * C-u C-c C-x C-a:                       ARCHIVE tag.         (line  31)
 * C-u C-c C-x C-s:                       Moving subtrees.     (line  12)
 * C-u C-c C-x C-u <1>:                   Dynamic blocks.      (line  22)
 * C-u C-c C-x C-u:                       Clocking work time.  (line  70)
+* C-u C-u C-c *:                         Updating the table.  (line  24)
+* C-u C-u C-c =:                         Editing and debuggung formulas.
+                                                              (line  14)
 * D:                                     Agenda commands.     (line  74)
 * d:                                     Agenda commands.     (line  71)
 * f:                                     Agenda commands.     (line  44)
@@ -6137,6 +6249,8 @@ Key Index
 * l:                                     Agenda commands.     (line  57)
 * L:                                     Agenda commands.     (line  32)
 * M:                                     Agenda commands.     (line 204)
+* M-<down> <1>:                          Editing and debuggung formulas.
+                                                              (line  42)
 * M-<down>:                              Built-in table editor.
                                                               (line  82)
 * M-<left> <1>:                          Built-in table editor.
@@ -6150,6 +6264,8 @@ Key Index
 * M-<TAB> <1>:                           Completion.          (line  10)
 * M-<TAB> <2>:                           Setting tags.        (line   6)
 * M-<TAB>:                               Per file keywords.   (line  17)
+* M-<up> <1>:                            Editing and debuggung formulas.
+                                                              (line  42)
 * M-<up>:                                Built-in table editor.
                                                               (line  82)
 * M-S-<down> <1>:                        Built-in table editor.
@@ -6178,11 +6294,11 @@ Key Index
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           The date/time prompt.
                                                               (line  33)
-* mouse-1:                               Handling links.      (line  72)
+* mouse-1:                               Handling links.      (line  74)
 * mouse-2 <1>:                           Agenda commands.     (line  35)
-* mouse-2:                               Handling links.      (line  72)
+* mouse-2:                               Handling links.      (line  74)
 * mouse-3 <1>:                           Agenda commands.     (line  28)
-* mouse-3:                               Handling links.      (line  77)
+* mouse-3:                               Handling links.      (line  79)
 * n:                                     Agenda commands.     (line  19)
 * O:                                     Agenda commands.     (line 180)
 * o:                                     Agenda commands.     (line  65)
@@ -6198,6 +6314,8 @@ Key Index
                                                               (line  42)
 * S-<down> <3>:                          Creating timestamps. (line  58)
 * S-<down> <4>:                          Priorities.          (line  25)
+* S-<down> <5>:                          Editing and debuggung formulas.
+                                                              (line  37)
 * S-<down>:                              Plain lists.         (line  55)
 * S-<left> <1>:                          Agenda commands.     (line 169)
 * S-<left> <2>:                          The date/time prompt.
@@ -6205,7 +6323,7 @@ Key Index
 * S-<left> <3>:                          Creating timestamps. (line  53)
 * S-<left>:                              TODO basics.         (line  20)
 * S-<RET>:                               Built-in table editor.
-                                                              (line 178)
+                                                              (line 146)
 * S-<right> <1>:                         Agenda commands.     (line 161)
 * S-<right> <2>:                         The date/time prompt.
                                                               (line  36)
@@ -6219,6 +6337,8 @@ Key Index
                                                               (line  45)
 * S-<up> <3>:                            Creating timestamps. (line  58)
 * S-<up> <4>:                            Priorities.          (line  25)
+* S-<up> <5>:                            Editing and debuggung formulas.
+                                                              (line  37)
 * S-<up>:                                Plain lists.         (line  55)
 * T:                                     Agenda commands.     (line 126)
 * t:                                     Agenda commands.     (line 113)
@@ -6229,173 +6349,172 @@ Key Index
 
 
 Tag Table:
-Node: Top964
-Node: Introduction10853
-Node: Summary11268
-Node: Installation14180
-Node: Activation15558
-Node: Feedback16807
-Node: Document structure18883
-Node: Outlines19657
-Node: Headlines20317
-Node: Visibility cycling20940
-Ref: Visibility cycling-Footnote-123031
-Ref: Visibility cycling-Footnote-223089
-Ref: Visibility cycling-Footnote-323139
-Node: Motion23408
-Node: Structure editing24192
-Node: Archiving27018
-Node: ARCHIVE tag27576
-Node: Moving subtrees29369
-Node: Sparse trees30680
-Ref: Sparse trees-Footnote-132811
-Ref: Sparse trees-Footnote-232993
-Node: Plain lists33108
-Ref: Plain lists-Footnote-136633
-Ref: Plain lists-Footnote-236990
-Node: Tables37174
-Node: Built-in table editor37722
-Node: Narrow columns45999
-Ref: Narrow columns-Footnote-147938
-Node: Table calculations47984
-Node: Formula syntax49304
-Ref: Formula syntax-Footnote-152209
-Node: Lisp formulas52509
-Node: Column formulas53298
-Node: Advanced features55060
-Node: Named-field formulas58314
-Node: Editing/debugging formulas58954
-Node: Appetizer60712
-Node: orgtbl-mode61815
-Node: table.el62306
-Node: Hyperlinks63283
-Node: Link format64056
-Node: Internal links65349
-Ref: Internal links-Footnote-167338
-Node: Radio targets67470
-Node: CamelCase links68185
-Node: External links68779
-Node: Handling links71183
-Ref: Handling links-Footnote-175835
-Ref: Handling links-Footnote-276072
-Node: Link abbreviations76146
-Node: Search options77825
-Ref: Search options-Footnote-179605
-Node: Custom searches79686
-Node: Remember80734
-Node: TODO items84428
-Node: TODO basics85410
-Node: TODO extensions86937
-Node: Workflow states87732
-Node: TODO types88717
-Ref: TODO types-Footnote-190375
-Node: Per file keywords90457
-Ref: Per file keywords-Footnote-191911
-Node: Priorities92112
-Node: Breaking down tasks93356
-Ref: Breaking down tasks-Footnote-193875
-Node: Checkboxes93971
-Node: Timestamps96726
-Node: Time stamps97260
-Ref: Time stamps-Footnote-1100754
-Ref: Time stamps-Footnote-2100870
-Node: Creating timestamps101025
-Node: The date/time prompt103651
-Ref: The date/time prompt-Footnote-1105417
-Node: Custom time format105523
-Node: Repeating items107081
-Node: Progress logging108892
-Node: Closing items109538
-Ref: Closing items-Footnote-1110472
-Ref: Closing items-Footnote-2110541
-Node: Tracking TODO state changes110614
-Node: Clocking work time111470
-Ref: Clocking work time-Footnote-1115116
-Ref: Clocking work time-Footnote-2115194
-Node: Tags115320
-Node: Tag inheritance116082
-Node: Setting tags117019
-Ref: Setting tags-Footnote-1121218
-Ref: Setting tags-Footnote-2121330
-Node: Tag searches121413
-Node: Agenda views124125
-Node: Agenda files126065
-Ref: Agenda files-Footnote-1127025
-Ref: Agenda files-Footnote-2127174
-Node: Agenda dispatcher127367
-Node: Built-in agenda views129058
-Node: Weekly/Daily agenda129636
-Node: Global TODO list131765
-Node: Matching headline tags133938
-Node: Timeline135009
-Node: Stuck projects135675
-Node: Presentation and sorting137374
-Node: Categories138165
-Node: Time-of-day specifications138829
-Node: Sorting of agenda items140800
-Node: Agenda commands142082
-Node: Custom agenda views148735
-Node: Storing searches149410
-Node: Block agenda151322
-Node: Setting Options152552
-Node: Batch processing155264
-Node: Embedded LaTeX156394
-Ref: Embedded LaTeX-Footnote-1157486
-Node: Math symbols157676
-Node: Subscripts and Superscripts158441
-Node: LaTeX fragments159285
-Ref: LaTeX fragments-Footnote-1161393
-Node: Processing LaTeX fragments161655
-Node: CDLaTeX mode162601
-Ref: CDLaTeX mode-Footnote-1165085
-Node: Exporting165233
-Node: ASCII export166547
-Node: HTML export167837
-Node: Export commands168456
-Node: Quoting HTML tags169180
-Node: Links169523
-Node: Images170220
-Ref: Images-Footnote-1171091
-Node: CSS support171152
-Ref: CSS support-Footnote-1172471
-Node: XOXO export172584
-Node: iCalendar export173023
-Node: Text interpretation174846
-Node: Comment lines175325
-Node: Enhancing text175796
-Node: Export options177488
-Node: Publishing179155
-Ref: Publishing-Footnote-1179951
-Node: Configuration180147
-Node: Project alist180865
-Node: Sources and destinations181931
-Node: Selecting files182661
-Node: Publishing action183409
-Node: Publishing options184642
-Node: Publishing links186794
-Node: Project page index188307
-Node: Sample configuration189085
-Node: Simple example189577
-Node: Complex example190250
-Node: Triggering publication192326
-Node: Miscellaneous193011
-Node: Completion193645
-Node: Customization195116
-Node: In-buffer settings195699
-Node: The very busy C-c C-c key199940
-Node: Clean view201584
-Node: TTY keys204161
-Node: Interaction205770
-Node: Cooperation206167
-Node: Conflicts208034
-Node: Bugs209626
-Node: Extensions and Hacking211020
-Node: Extensions211524
-Node: Dynamic blocks213467
-Node: Special agenda views215423
-Ref: Special agenda views-Footnote-1217704
-Node: History and Acknowledgments217964
-Node: Index223323
-Node: Key Index252098
+Node: Top970
+Node: Introduction10946
+Node: Summary11361
+Node: Installation14262
+Node: Activation15640
+Node: Feedback16889
+Node: Document structure18965
+Node: Outlines19739
+Node: Headlines20399
+Node: Visibility cycling21022
+Ref: Visibility cycling-Footnote-123113
+Ref: Visibility cycling-Footnote-223171
+Ref: Visibility cycling-Footnote-323221
+Node: Motion23490
+Node: Structure editing24274
+Node: Archiving27100
+Node: ARCHIVE tag27658
+Node: Moving subtrees29451
+Node: Sparse trees30762
+Ref: Sparse trees-Footnote-132893
+Ref: Sparse trees-Footnote-233075
+Node: Plain lists33190
+Ref: Plain lists-Footnote-136715
+Ref: Plain lists-Footnote-237072
+Node: Tables37256
+Node: Built-in table editor37770
+Node: Narrow columns44766
+Ref: Narrow columns-Footnote-146698
+Node: orgtbl-mode46744
+Node: The spreadsheet47238
+Node: References48056
+Node: Formula syntax for Calc51313
+Node: Formula syntax for Lisp53630
+Node: Field formulas54858
+Node: Column formulas56169
+Node: Editing and debuggung formulas57592
+Node: Updating the table60300
+Node: Advanced features61331
+Node: Hyperlinks65756
+Node: Link format66529
+Node: Internal links67822
+Ref: Internal links-Footnote-169811
+Node: Radio targets69943
+Node: CamelCase links70658
+Node: External links71252
+Node: Handling links73656
+Ref: Handling links-Footnote-178424
+Ref: Handling links-Footnote-278661
+Node: Link abbreviations78735
+Node: Search options80414
+Ref: Search options-Footnote-182194
+Node: Custom searches82275
+Node: Remember83323
+Node: TODO items87017
+Node: TODO basics87999
+Node: TODO extensions89526
+Node: Workflow states90321
+Node: TODO types91306
+Ref: TODO types-Footnote-192964
+Node: Per file keywords93046
+Ref: Per file keywords-Footnote-194500
+Node: Priorities94701
+Node: Breaking down tasks95945
+Ref: Breaking down tasks-Footnote-196464
+Node: Checkboxes96560
+Node: Timestamps99315
+Node: Time stamps99849
+Ref: Time stamps-Footnote-1103343
+Ref: Time stamps-Footnote-2103459
+Node: Creating timestamps103614
+Node: The date/time prompt106240
+Ref: The date/time prompt-Footnote-1108006
+Node: Custom time format108112
+Node: Repeating items109670
+Node: Progress logging111480
+Node: Closing items112126
+Ref: Closing items-Footnote-1113060
+Ref: Closing items-Footnote-2113129
+Node: Tracking TODO state changes113202
+Node: Clocking work time114058
+Ref: Clocking work time-Footnote-1117704
+Ref: Clocking work time-Footnote-2117782
+Node: Tags117908
+Node: Tag inheritance118670
+Node: Setting tags119607
+Ref: Setting tags-Footnote-1123806
+Ref: Setting tags-Footnote-2123918
+Node: Tag searches124001
+Node: Agenda views126712
+Node: Agenda files128657
+Ref: Agenda files-Footnote-1129623
+Ref: Agenda files-Footnote-2129772
+Node: Agenda dispatcher129965
+Node: Built-in agenda views131656
+Node: Weekly/Daily agenda132234
+Node: Global TODO list134363
+Node: Matching headline tags136536
+Node: Timeline137607
+Node: Stuck projects138273
+Node: Presentation and sorting139972
+Node: Categories140763
+Node: Time-of-day specifications141427
+Node: Sorting of agenda items143398
+Node: Agenda commands144680
+Node: Custom agenda views151333
+Node: Storing searches152008
+Node: Block agenda153920
+Node: Setting Options155150
+Node: Batch processing157862
+Node: Embedded LaTeX158992
+Ref: Embedded LaTeX-Footnote-1160084
+Node: Math symbols160274
+Node: Subscripts and Superscripts161039
+Node: LaTeX fragments161883
+Ref: LaTeX fragments-Footnote-1163991
+Node: Processing LaTeX fragments164253
+Node: CDLaTeX mode165199
+Ref: CDLaTeX mode-Footnote-1167683
+Node: Exporting167831
+Node: ASCII export169145
+Node: HTML export170435
+Node: Export commands171054
+Node: Quoting HTML tags171778
+Node: Links172121
+Node: Images172818
+Ref: Images-Footnote-1173689
+Node: CSS support173750
+Ref: CSS support-Footnote-1175069
+Node: XOXO export175182
+Node: iCalendar export175621
+Node: Text interpretation177444
+Node: Comment lines177923
+Node: Enhancing text178394
+Node: Export options180086
+Node: Publishing181753
+Ref: Publishing-Footnote-1182549
+Node: Configuration182745
+Node: Project alist183463
+Node: Sources and destinations184529
+Node: Selecting files185259
+Node: Publishing action186007
+Node: Publishing options187240
+Node: Publishing links189392
+Node: Project page index190905
+Node: Sample configuration191683
+Node: Simple example192175
+Node: Complex example192848
+Node: Triggering publication194924
+Node: Miscellaneous195609
+Node: Completion196243
+Node: Customization197714
+Node: In-buffer settings198297
+Node: The very busy C-c C-c key202537
+Node: Clean view204181
+Node: TTY keys206758
+Node: Interaction208367
+Node: Cooperation208764
+Node: Conflicts211505
+Node: Bugs213097
+Node: Extensions and Hacking214491
+Node: Extensions214995
+Node: Dynamic blocks216938
+Node: Special agenda views218894
+Ref: Special agenda views-Footnote-1221173
+Node: History and Acknowledgments221433
+Node: Index226792
+Node: Key Index256794
 
 End Tag Table

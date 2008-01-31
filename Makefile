@@ -42,7 +42,6 @@ MKDIR = mkdir -p
 MAKEINFO = makeinfo
 
 # How to create the HTML file
-#TEXI2HTML = ./texi2html -monolithic -number
 TEXI2HTML = makeinfo --html --number-sections --no-split
 
 # How to move the byte compiled files to their destination.  
@@ -58,6 +57,7 @@ CP = cp -p
 # The following variables need to be defined by the maintainer
 LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
 ELCFILES   = $(LISPFILES:.el=.elc)
+DOCFILES   = org.texi org.pdf org orgcard.tex orgcard.pdf
 TEXIFILES  = org.texi
 INFOFILES  = org
 HTMLDIR    = /home/dominik/public_html/Tools/org
@@ -65,7 +65,8 @@ HTMLDIR    = /home/dominik/public_html/Tools/org
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README xemacs ${LISPFILES} org.texi org.pdf org orgcard.tex orgcard.pdf Makefile
+DISTFILES=  README ${LISPFILES} ${DOCFILES} Makefile
+DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
 
@@ -134,7 +135,9 @@ distfile:
 	make doc
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
-	cp -r $(DISTFILES) org-$(TAG)/
+	$(MKDIR) org-$(TAG)/xemacs
+	cp $(DISTFILES) org-$(TAG)/
+	cp $(DISTFILES_xemacs) org-$(TAG)/xemacs/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
 

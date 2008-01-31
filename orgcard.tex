@@ -1,6 +1,6 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.61}
-\def\year{2006}
+\def\orgversionnumber{4.62}
+\def\year{2007}
 %
 %**start of header
 \newcount\columnsperpage
@@ -318,7 +318,7 @@ are preserved on all copies.
 \metax{mark fully done children}{C-u C-c C-x C-a}
 \key{force cycling of an ARCHIVEd tree}{C-TAB}
 \key{move subtree to archive file}{C-c C-x C-s}
-\key{move all fully done children}{C-u C-c C-x C-s}
+\metax{move all fully done children}{C-u C-c C-x C-s}
 To set archive location for current file, add a line like$^2$:
 \vskip -1mm
 \beginexample%
@@ -367,8 +367,7 @@ Outside of tables, the same keys may have other functionality.
 \key{move the current row down}{M-DOWN}
 \key{kill the current row or horizontal line}{M-S-UP}
 \key{insert new row above the current row}{M-S-DOWN}
-\key{insert horizontal line below the current row}{C-c -}
-\key{insert horizontal line above the current row}{C-u C-c -}
+\key{insert hline below (\kbd{C-u} : above) current row}{C-c -}
 \key{sort lines in region}{C-c \^{}}
 
 {\bf Regions}
@@ -381,10 +380,11 @@ Outside of tables, the same keys may have other functionality.
 {\bf Calculations} (in combination with Emacs \kbd{calc} package)
 
 \key{set and eval column formula}{C-c =}
-\key{set and eval named-field formula}{C-u C-c =}
+\key{set and eval field formula}{C-u C-c =}
 \key{edit formulas in separate buffer}{C-c '}
 \key{re-apply all stored equations to current line}{C-c *}
 \key{re-apply all stored equations to entire table}{C-u C-c *}
+\key{iterate table to stability}{C-u C-u C-c *}
 
 %\kbd{TAB}, \kbd{RET} and \kbd{C-c C-c} trigger automatic recalculation
 %in lines starting with: {\tt | \# |}.
@@ -402,7 +402,7 @@ formula, \kbd{:=} a named-field formula.
 \key{Example: Add Col1 and Col2}{=\$1+\$2}
 \key{... with printf format specification}{=\$1+\$2;\%.2f}
 \key{... with constants from constants.el}{=\$1/\$c/\$cm}
-\key{sum from 3rd hline above to here}{:=vsum(\&III)}
+\metax{sum from 2nd to 3rd hline}{:=vsum(@II..@III)}
 \key{apply current column formula}{=}
 
 {\bf Miscellaneous}
