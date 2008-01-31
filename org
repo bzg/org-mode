@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.34).
+   This manual is for Org-mode (version 4.36).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.34).
+This manual is for Org-mode (version 4.36).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -1102,7 +1102,7 @@ applying the equation.
    Instead of typing an equation into the field, you may also use the
 command `C-c ='.  It prompts for a formula (with default taken from the
 `#+TBLFM:' line) and applies it to the current field.  A numerical
-prefix (e.g. `C-5 C-c =') will apply it to that many subsequent fields
+prefix (e.g. `C-5 C-c =') will apply it to that many consecutive fields
 in the current column.
 
    To recompute all the fields in a line, use the command `C-c *'.  It
@@ -1333,7 +1333,7 @@ instead of `[[link][description]]' and `link' is displayed instead of
 `[[link]]'.  Links will be highlighted in the face `org-link', which by
 default is an underlined face.  You can directly edit the visible part
 of a link.  Note that this can be either the `link' part (if there is
-not description) or the `description' part.  To edit also the invisible
+no description) or the `description' part.  To edit also the invisible
 `link' part, use `C-c C-l' with the cursor on the link.
 
    If you place the cursor at the beginning or just behind the end of
@@ -1977,7 +1977,7 @@ the agenda (*note Weekly/Daily agenda::).  We distinguish:
 PLAIN TIME STAMP
      A simple time stamp just assigns a date/time to an item.  This is
      just like writing down an appointment in a paper agenda, or like
-     writing down an event in a diary, when you want to take not of
+     writing down an event in a diary, when you want to take note of
      when something happened.  In the timeline and agenda displays, the
      headline of an entry associated with a plain time stamp will be
      shown exactly on that date.
@@ -2202,38 +2202,55 @@ allowed tags for a given file with lines like
      #+TAGS: @WORK @HOME @TENNISCLUB
      #+TAGS: Laptop Car PC Sailboat
 
-   The default method Org-mode uses to support setting tags is
-completion.  However, it also implements a much better method: _fast tag
-selection_.  This method allows to select and deselect tags with a
-single key per tag.  To function efficiently, you need to assign unique
-keys to all tags.  This can be done globally with
+   The default support method is minibuffer completion.  However,
+Org-mode also implements a much better method: _fast tag selection_.
+This method allows to select and deselect tags with a single key per
+tag.  To function efficiently, you should assign unique keys to all
+tags.  This can be done globally with
 
      (setq org-tag-alist '(("@WORK" . ?w) ("@HOME" . ?h) ("Laptop" . ?l)))
 
 or on a per-file basis with
 
-     #+TAGS: @WORK(w)  @HOME(h)  @TENNISCLUB(t)
-     #+TAGS: Laptop(l)  Car(c)  PC(p) Sailboat(s)
+     #+TAGS: @WORK(w)  @HOME(h)  @TENNISCLUB(t)  Laptop(l)  PC(p)
+
+You can also group together tags that are mutually exclusive.  With
+curly braces(1)
+
+     #+TAGS: { @WORK(w)  @HOME(h)  @TENNISCLUB(t) }  Laptop(l)  PC(p)
+
+you indicate that at most one of `@WORK', `@HOME', and `@SAILBOAT'
+should be selected.
 
 Don't forget to press `C-c C-c' with the cursor in one of these lines
 to activate any changes.
 
-   If selection keys have been configured, pressing `C-c C-c' will
+   If at least one tag has a selection key, pressing `C-c C-c' will
 automatically present you with a special interface, listing inherited
 tags, the tags of the current headline, and a list of all legal tags
-with corresponding keys.  Pressing keys for the tags will add or remove
-them from the list of tags in the current line.  <SPC> clears all tags
-for this line, `RET' accepts the modified set, and `C-g' aborts without
-installing changes.  This method lets you assing tags to a headline
-with very few keys.  With the above setup, you could clear the current
-tags and set `@HOME', `Laptop' and `PC' tags with just the following
-keys: `C-c C-c <SPC> h l p <RET>'.
+with corresponding keys(2).  Pressing keys for the tags will add or
+remove them from the list of tags in the current line.  Selecting a tag
+in a group of mutually exclusive tags will turn off any other tags from
+that group.  <SPC> clears all tags for this line, `RET' accepts the
+modified set, and `C-g' aborts without installing changes.  This method
+lets you assign tags to a headline with very few keys.  With the above
+setup, you could clear the current tags and set `@HOME', `Laptop' and
+`PC' tags with just the following keys: `C-c C-c <SPC> h l p <RET>'.
+Switching from `@HOME' to `@WORK' would be done with `C-c C-c w <RET>'.
 
    What if you have globally defined your preferred set of tags using
 the variable `org-tag-alist', but would like to use a dynamic tag list
-in a specific file?  Just add and empty TAGS option line to that file:
+in a specific file?  Just add an empty TAGS option line to that file:
 
      #+TAGS:
+
+   ---------- Footnotes ----------
+
+   (1) In `org-mode-alist' use `'(:startgroup)' and `'(:endgroup)',
+respectively.  Several groups are allowed.
+
+   (2) Keys will automatically assigned to tags which have no
+configured keys.
 
 
 File: org,  Node: Tag searches,  Prev: Setting tags,  Up: Tags
@@ -2840,7 +2857,7 @@ File: org,  Node: ASCII export,  Next: HTML export,  Prev: Exporting,  Up: Expor
 9.1 ASCII export
 ================
 
-ASCII export produces an simple and very readable version of an Org-mode
+ASCII export produces a simple and very readable version of an Org-mode
 file.
 
 `C-c C-x a'
@@ -2860,7 +2877,13 @@ example,
 
      C-1 C-c C-x a
 
-creates only top level headlines and does the rest as items.
+creates only top level headlines and does the rest as items.  When
+headlines are converted to items, the indentation of the text following
+the headline is changed to fit nicely under the item.  This is done with
+the assumption that the first bodyline indicates the base indenation of
+the body text.  Any indenation larger than this is adjusted to preserve
+the layout relative to the first line.  Should there be lines with less
+indentation than the first, these are left alone.
 
 
 File: org,  Node: HTML export,  Next: XOXO export,  Prev: ASCII export,  Up: Exporting
@@ -2868,9 +2891,9 @@ File: org,  Node: HTML export,  Next: XOXO export,  Prev: ASCII export,  Up: Exp
 9.2 HTML export
 ===============
 
-Org-mode contains an HTML exporter with extensive HTML formatting, in
-ways similar to John Grubers _markdown_ language, but with additional
-support for tables.
+Org-mode contains an HTML (XHTML 1.0 strict) exporter with extensive
+HTML formatting, in ways similar to John Grubers _markdown_ language,
+but with additional support for tables.
 
 `C-c C-x h'
      Export as HTML file `myfile.html'.  
@@ -3063,6 +3086,9 @@ formatted output.
     `C-c :'
           Toggle fixed-width for entry (QUOTE) or region, see below.
 
+   * A double backslash _at the end of a line_ enforces a line break at
+     this position.
+
    If these conversions conflict with your habits of typing ASCII text,
 they can all be turned off with corresponding variables (see the
 customization group `org-export-general', and the following section
@@ -3167,17 +3193,15 @@ forms:
 
      or
 
-     ("project-name"
-         ("component1" :property value :property value ...)
-         ("component2" :property value :property value ...)
-         ...)
+     ("project-name"  :components ("project-name" "project-name" ...))
 
    In both cases, projects are configured by specifying property values.
 A project defines the set of files that will be published, as well as
 the publishing configuration to use when publishing those files.  When
-a project takes the second form listed above, the individual property
-lists are taken to be "components" of the project, which group together
-files requiring different publishing options.
+a project takes the second form listed above, the individual members of
+the "components" property are taken to be components of the project,
+which group together files requiring different publishing options. When
+you publish such a "meta-project" all the components will also publish.
 
 
 File: org,  Node: File sources and destinations,  Next: Selecting files,  Prev: Project alist,  Up: Configuration
@@ -3228,7 +3252,7 @@ the publishing function.
 
    The function must accept two arguments: a property list containing at
 least a `:publishing-directory' property, and the name of the file to
-be published.  I should take the specified file, make the necessary
+be published.  It should take the specified file, make the necessary
 transformation (if any) and place the result into the destination
 folder.  You can write your own publishing function, but `org-publish'
 provides one for attachments (files that only need to be copied):
@@ -3369,8 +3393,7 @@ same. You can accomplish this by setting up an "images" folder in the
 right place on the webserver, and publishing images to it.
 
      (setq org-publish-project-alist
-           '(("website"
-              ("orgfiles"
+           '(("orgfiles"
                :base-directory "~/org/"
                :base-extension "org"
                :publishing-directory "/ssh:user@host:~/html/notebook/"
@@ -3394,7 +3417,8 @@ right place on the webserver, and publishing images to it.
                :base-directory "~/other/"
                :base-extension "css\\|el"
                :publishing-directory "/ssh:user@host:~/html/other/"
-               :publishing-function org-publish-attachment))))
+               :publishing-function org-publish-attachment)
+              ("website" :components ("orgfiles" "images" "other"))))
 
 
 File: org,  Node: Triggering publication,  Prev: Sample configuration,  Up: Publishing
@@ -3534,7 +3558,7 @@ file is visited again in a new Emacs session.
 
 `#+TAGS:  TAG1(c1) TAG2(c2)'
      These lines (several such lines are allowed) specify the legal
-     tags in this file, and (potionally) the corresponding _fast tag
+     tags in this file, and (potentially) the corresponding _fast tag
      selection_ keys.  The corresponding variable is `org-tag-alist'.
 
 `#+CATEGORY:'
@@ -3547,8 +3571,8 @@ file is visited again in a new Emacs session.
      line.
 
 `#+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS:'
-     These lines provide setting for exporting files.  For more details
-     see *Note Export options::.
+     These lines provide settings for exporting files.  For more
+     details see *Note Export options::.
 
 
 File: org,  Node: The very busy C-c C-c key,  Next: Clean view,  Prev: Summary of in-buffer settings,  Up: Miscellaneous
@@ -3731,7 +3755,7 @@ File: org,  Node: FAQ,  Next: Interaction,  Prev: TTY keys,  Up: Miscellaneous
           (add-to-list 'auto-mode-alist '("README$" . org-mode))
 
   3. I would like to use editing features of org-mode in other modes,
-     is his possible?
+     is this possible?
      Not really.  For tables there is `orgtbl-mode' which implements the
      table editor as a minor mode.  For other features you need to
      switch to Org-mode temporarily, or prepare text in a different
@@ -3904,13 +3928,6 @@ File: org,  Node: Extensions,  Next: Cooperation,  Prev: Interaction,  Up: Inter
 ------------------------------------------
 
 The following extensions for Org-mode have been written by other people:
-
-`org-checklet.el' by Frank Ruell
-     Provides checklist of items which can be either checked or
-     unchecked.  This is similar to the TODO functionality in Org-mode,
-     but never shows up in the agenda.  `org-checklet' is freely
-     available at
-     `http://www.emacswiki.org/cgi-bin/emacs/org-checklet.el'.  
 
 `org-mouse.el' by Piotr Zielinski
      This package implements extended mouse functionality for Org-mode.
@@ -4121,8 +4138,8 @@ Org-mode would not be what it is without your input.
    * Linking to VM/BBDB/GNUS was inspired by Tom Shannon's
      `organizer-mode.el'.
 
-   * David O'Toole wrote `org-publish.el' and came up with lots is
-     ideas for small changes.
+   * David O'Toole wrote `org-publish.el' and drafted the manual
+     chapter about publishing.
 
    * Ju"rgen Vollmer contributed code generating the table of contents
      in HTML output.
@@ -4315,6 +4332,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * keymapp nil error:                     FAQ.                 (line   6)
 * keyword options:                       Per file keywords.   (line   6)
 * linebreak preservation:                Export options.      (line  25)
+* linebreak, forced:                     Enhancing text.      (line  37)
 * link completion:                       Handling links.      (line  28)
 * link format:                           Link format.         (line   6)
 * links, external:                       External links.      (line   6)
@@ -4348,11 +4366,10 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * options, for export:                   Export options.      (line   6)
 * ordered lists:                         Plain lists.         (line   6)
 * org-agenda, command:                   Weekly/Daily agenda. (line   9)
-* org-checklet.el:                       Extensions.          (line   8)
 * org-mode, turning on:                  Installation and activation.
                                                               (line  30)
-* org-mouse.el:                          Extensions.          (line  13)
-* org-publish.el:                        Extensions.          (line  21)
+* org-mouse.el:                          Extensions.          (line   8)
+* org-publish.el:                        Extensions.          (line  14)
 * orgtbl-mode:                           orgtbl-mode.         (line   6)
 * outline tree:                          Headlines.           (line   6)
 * outline-mode:                          Outlines.            (line   6)
@@ -4724,14 +4741,14 @@ Node: Formula syntax38979
 Ref: Formula syntax-Footnote-141884
 Node: Lisp formulas42184
 Node: Column formulas42973
-Node: Advanced features44734
-Node: Named-field formulas47988
-Node: Editing/debugging formulas48628
-Node: Appetizer50386
-Node: orgtbl-mode51489
-Node: table.el51980
-Node: Hyperlinks52957
-Node: Link format53662
+Node: Advanced features44735
+Node: Named-field formulas47989
+Node: Editing/debugging formulas48629
+Node: Appetizer50387
+Node: orgtbl-mode51490
+Node: table.el51981
+Node: Hyperlinks52958
+Node: Link format53663
 Node: Internal links54956
 Ref: Internal links-Footnote-156945
 Node: Radio targets57077
@@ -4754,63 +4771,65 @@ Ref: Per file keywords-Footnote-179663
 Node: Priorities79891
 Node: Timestamps81107
 Node: Time stamps81428
-Node: Creating timestamps84201
-Node: Tags87522
-Node: Tag inheritance88284
-Node: Setting tags89221
-Node: Tag searches91942
-Node: Agenda views93151
-Node: Agenda files94690
-Ref: Agenda files-Footnote-195650
-Ref: Agenda files-Footnote-295799
-Node: Agenda dispatcher95991
-Node: Weekly/Daily agenda98121
-Node: Categories99256
-Node: Time-of-day specifications99904
-Node: Calendar/Diary integration101880
-Node: Sorting of agenda items103257
-Node: Global TODO list104089
-Node: Matching headline tags105450
-Node: Timeline106393
-Node: Agenda commands107266
-Node: Exporting112734
-Node: ASCII export113867
-Node: HTML export114737
-Node: XOXO export117552
-Node: iCalendar export117991
-Node: Text interpretation119814
-Node: Comment lines120291
-Node: Enhancing text120760
-Node: Export options122591
-Node: Publishing124193
-Ref: Publishing-Footnote-1124989
-Node: Configuration125185
-Node: Project alist125906
-Node: File sources and destinations126964
-Node: Selecting files127516
-Node: Publishing action128269
-Node: Publishing options129383
-Node: Publishing links131422
-Node: Project page index132225
-Node: Sample configuration133003
-Node: Simple example133495
-Node: Complex example134168
-Node: Triggering publication136202
-Node: Miscellaneous136858
-Node: Completion137617
-Node: Customization138613
-Node: Summary of in-buffer settings139220
-Node: The very busy C-c C-c key142460
-Node: Clean view143975
-Node: TTY keys146552
-Node: FAQ148153
-Node: Interaction155950
-Node: Extensions156410
-Node: Cooperation157980
-Node: Conflicts159674
-Node: Bugs161266
-Node: Acknowledgments163164
-Node: Index166603
-Node: Key Index188922
+Node: Creating timestamps84202
+Node: Tags87523
+Node: Tag inheritance88285
+Node: Setting tags89222
+Ref: Setting tags-Footnote-192352
+Ref: Setting tags-Footnote-292464
+Node: Tag searches92544
+Node: Agenda views93753
+Node: Agenda files95292
+Ref: Agenda files-Footnote-196252
+Ref: Agenda files-Footnote-296401
+Node: Agenda dispatcher96593
+Node: Weekly/Daily agenda98723
+Node: Categories99858
+Node: Time-of-day specifications100506
+Node: Calendar/Diary integration102482
+Node: Sorting of agenda items103859
+Node: Global TODO list104691
+Node: Matching headline tags106052
+Node: Timeline106995
+Node: Agenda commands107868
+Node: Exporting113336
+Node: ASCII export114469
+Node: HTML export115755
+Node: XOXO export118589
+Node: iCalendar export119028
+Node: Text interpretation120851
+Node: Comment lines121328
+Node: Enhancing text121797
+Node: Export options123721
+Node: Publishing125323
+Ref: Publishing-Footnote-1126119
+Node: Configuration126315
+Node: Project alist127036
+Node: File sources and destinations128107
+Node: Selecting files128659
+Node: Publishing action129412
+Node: Publishing options130527
+Node: Publishing links132566
+Node: Project page index133369
+Node: Sample configuration134147
+Node: Simple example134639
+Node: Complex example135312
+Node: Triggering publication137388
+Node: Miscellaneous138044
+Node: Completion138803
+Node: Customization139799
+Node: Summary of in-buffer settings140406
+Node: The very busy C-c C-c key143648
+Node: Clean view145163
+Node: TTY keys147740
+Node: FAQ149341
+Node: Interaction157139
+Node: Extensions157599
+Node: Cooperation158851
+Node: Conflicts160545
+Node: Bugs162137
+Node: Acknowledgments164035
+Node: Index167473
+Node: Key Index189792
 
 End Tag Table

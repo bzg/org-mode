@@ -1,12 +1,12 @@
 ;;; org-publish.el --- publish related org-mode files as a website
 
-;; Copyright (C) 2006  David O'Toole
+;; Copyright (C) 2006  Free Software Foundation, Inc. 
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
 ;; Version: 
 
-;; $Id: org-publish.el,v 1.64 2006/05/19 19:45:34 dto Exp dto $
+;; $Id: org-publish.el,v 1.69 2006/06/03 17:17:53 dto Exp dto $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
-
-;; This file is NOT part of GNU Emacs. 
 
 ;;; Commentary:
 
@@ -60,6 +58,10 @@
 ;; (autoload 'org-publish "org-publish-all" nil t)
 ;; (autoload 'org-publish "org-publish-current-file" nil t)
 ;; (autoload 'org-publish "org-publish-current-project" nil t)
+
+;; NOTE: When org-publish.el is included with org.el, those forms are
+;; already in the file org-install.el, and hence don't need to be put
+;; in your emacs initialization file in this case.
 
 ;;; Usage: 
 ;;
@@ -103,28 +105,28 @@
 
 ;; (setq org-publish-project-alist
 ;;       (list 
-;;        '("website" . 
-;;            (("orgfiles" :base-directory "~/org/"
-;; 		           :base-extension "org"
-;; 		           :publishing-directory "/ssh:user@host:~/html/notebook/"
-;; 		           :publishing-function org-publish-org-to-html
-;; 		           :exclude "PrivatePage.org"   ;; regexp
-;; 		           :headline-levels 3
-;;                         :with-section-numbers nil
-;; 		           :table-of-contents nil
-;; 		           :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">"
-;; 		           :auto-preamble t
-;; 		           :auto-postamble nil)
+;;        '("orgfiles" :base-directory "~/org/"
+;; 		       :base-extension "org"
+;; 		       :publishing-directory "/ssh:user@host:~/html/notebook/"
+;; 		       :publishing-function org-publish-org-to-html
+;; 		       :exclude "PrivatePage.org"   ;; regexp
+;; 		       :headline-levels 3
+;;                     :with-section-numbers nil
+;; 		       :table-of-contents nil
+;; 		       :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">"
+;; 		       :auto-preamble t
+;; 		       :auto-postamble nil)
 ;;      
-;;            ("images" :base-directory "~/images/"
-;; 		        :base-extension "jpg\\|gif\\|png"
-;; 		        :publishing-directory "/ssh:user@host:~/html/images/"
-;; 		        :publishing-function org-publish-attachment)
+;;         ("images" :base-directory "~/images/"
+;; 	             :base-extension "jpg\\|gif\\|png"
+;; 		     :publishing-directory "/ssh:user@host:~/html/images/"
+;; 		     :publishing-function org-publish-attachment)
 ;;  
-;;            ("other"  :base-directory "~/other/"
-;; 	   	        :base-extension "css"
-;; 		        :publishing-directory "/ssh:user@host:~/html/other/"
-;; 		        :publishing-function org-publish-attachment)))))
+;;         ("other"  :base-directory "~/other/"
+;; 	   	     :base-extension "css"
+;; 		     :publishing-directory "/ssh:user@host:~/html/other/"
+;; 		     :publishing-function org-publish-attachment)
+;;         ("website" :components ("orgfiles" "images" "other"))))
 
 ;; For more information, see the documentation for the variable
 ;; `org-publish-project-alist'.
@@ -136,6 +138,8 @@
 
 ;;; List of user-visible changes since version 1.27
 
+;; 1.65: Remove old "composite projects". They're redundant. 
+;; 1.64: Allow meta-projects with :components
 ;; 1.57: Timestamps flag is now called "org-publish-use-timestamps-flag"
 ;; 1.52: Properly set default for :index-filename
 ;; 1.48: Composite projects allowed.
@@ -165,17 +169,19 @@
   "Association list to control publishing behavior.
 Each element of the alist is a publishing 'project.'  The CAR of
 each element is a string, uniquely identifying the project. The
-CDR of each element is either a property list with configuration
-options for the publishing process (see below), or a list of the
-following form:
+CDR of each element is in one of the following forms: 
 
-  ((\"component1\" :property value :property value ... )
-   (\"component2\" :property value :property value ... ))
+  (:property value :property value ... )
+
+OR,
+  
+  (:components (\"project-1\" \"project-2\" ...))
 
 When the CDR of an element of org-publish-project-alist is in
-this second form, the elements of this list are taken to be
-components of the project, which group together files requiring
-different publishing options.
+this second form, the elements of the list after :components are
+taken to be components of the project, which group together files
+requiring different publishing options. When you publish such a
+project with M-x org-publish, the components all publish.
 
 When a property is given a value in org-publish-project-alist, its
 setting overrides the value of the corresponding user variable
@@ -312,11 +318,8 @@ whether file should be published."
   (let ((timestamp (org-publish-timestamp-filename filename)))
     (set-file-times timestamp)))
 
-;;;; Getting project information out of org-publish-project-alist
 
-(defun org-publish-meta-project-p (element)
-  "Tell whether an ELEMENT of org-publish-project-alist is a metaproject."
-  (plist-get (cdr element) :components))
+;;;; Getting project information out of org-publish-project-alist
 
 
 (defun org-publish-get-plists (&optional project-name)
@@ -326,21 +329,24 @@ When argument is not given, return all property lists for all projects."
 		   (list (assoc project-name org-publish-project-alist))
 		 org-publish-project-alist))
 	(project nil)
-	(plists nil))
+	(plists nil)
+	(components nil))
     (while (setq project (pop alist))
-      (if (org-publish-meta-project-p project)
-	  ;; meta project
-	  (let* ((components (plist-get (cdr project) :components))
-		 (components-plists (mapcar 'org-publish-get-plists components)))
-	    (setq plists (append plists components-plists)))
+      (if (setq components (plist-get (cdr project) :components))
+	  ;; meta project. annotate each plist with name of enclosing project
+	  (setq plists 
+		(append plists 
+			(mapcar (lambda (p) 
+				  (plist-put p :project-name (car project)))
+				(mapcan 'org-publish-get-plists components))))
 	;; normal project
 	(let ((p (cdr project)))
 	  (setq p (plist-put p :project-name (car project)))
 	  (setq plists (append plists (list (cdr project)))))))
-      ;;
-      plists))
+    ;;
+    plists))
 
-  
+
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
 If EXCLUDE-REGEXP is set, this will be used to filter out
@@ -442,7 +448,6 @@ FILENAME is the filename of the file to be published."
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
 	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
-	 (buf (current-buffer))
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
@@ -455,9 +460,7 @@ FILENAME is the filename of the file to be published."
 	;; check timestamps
 	(when (org-publish-needed-p f)
 	  (funcall publishing-function plist f)
-	  (org-publish-update-timestamp f))))
-    ;; back to original buffer
-    (switch-to-buffer buf)))
+	  (org-publish-update-timestamp f))))))
 
 
 (defun org-publish-org-index (plist &optional index-filename)
