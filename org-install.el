@@ -8,7 +8,7 @@
 ;;;;;;  org-remember-insinuate org-open-at-point-global org-insert-link-global
 ;;;;;;  org-store-link orgtbl-mode turn-on-orgtbl org-run-like-in-org-mode
 ;;;;;;  turn-on-orgstruct++ turn-on-orgstruct orgstruct-mode org-global-cycle
-;;;;;;  org-cycle org-mode) "org" "org.el" (18281 37899))
+;;;;;;  org-cycle org-mode) "org" "org.el" (18282 28738))
 ;;; Generated autoloads from org.el
 
 (autoload (quote org-mode) "org" "\

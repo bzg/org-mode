@@ -91,7 +91,7 @@ Software Foundation raise funds for GNU development.''
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Extensions and Hacking::      It is possible to write add-on code
 * History and Acknowledgments::  How Org-mode came into being 
-* Index::                       The index
+* Main Index::                  
 * Key Index::                   Key bindings and where they are described
 
 @detailmenu
@@ -8407,7 +8407,7 @@ Get all property keys in the current buffer.
 Insert a property drawer at point.
 @end defun
 
-@node History and Acknowledgments, Index, Extensions and Hacking, Top
+@node History and Acknowledgments, Main Index, Extensions and Hacking, Top
 @appendix History and Acknowledgments
 @cindex acknowledgments
 @cindex history
@@ -8582,12 +8582,12 @@ and contributed various ideas and code snippets.
 @end itemize
 
 
-@node Index, Key Index, History and Acknowledgments, Top
+@node Main Index, Key Index, History and Acknowledgments, Top
 @unnumbered The Main Index
 
 @printindex cp
 
-@node Key Index,  , Index, Top
+@node Key Index,  , Main Index, Top
 @unnumbered Key Index
 
 @printindex ky

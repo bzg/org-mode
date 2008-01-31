@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.17
+;; Version: 5.17a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.17"
+(defconst org-version "5.17a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -4056,7 +4056,9 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 ;;; Functions and variables from ther packages
 ;;  Declared here to avoid compiler warnings
 
-(unless (fboundp 'declare-function) (defmacro declare-function (&rest args)))
+(eval-and-compile
+  (unless (fboundp 'declare-function)
+    (defmacro declare-function (fn file &optional arglist fileonly))))
 
 ;; XEmacs only
 (defvar outline-mode-menu-heading)
@@ -4953,7 +4955,7 @@ This should be called after the variable `org-link-types' has changed."
 	 "\\)>")
 	org-plain-link-re
 	(concat
-	 "\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "\\<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
 	 "\\([^]\t\n\r<>,;() ]+\\)")
 	org-bracket-link-regexp
 	"\\[\\[\\([^][]+\\)\\]\\(\\[\\([^][]+\\)\\]\\)?\\]"
