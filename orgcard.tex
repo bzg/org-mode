@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.60}
+\def\orgversionnumber{4.61}
 \def\year{2006}
 %
 %**start of header
@@ -317,8 +317,8 @@ are preserved on all copies.
 \key{toggle ARCHIVE tag}{C-c C-x C-a}
 \metax{mark fully done children}{C-u C-c C-x C-a}
 \key{force cycling of an ARCHIVEd tree}{C-TAB}
-\key{move subtree to archive file}{C-c \$}
-\key{move all fully done children}{C-u C-c \$}
+\key{move subtree to archive file}{C-c C-x C-s}
+\key{move all fully done children}{C-u C-c C-x C-s}
 To set archive location for current file, add a line like$^2$:
 \vskip -1mm
 \beginexample%
@@ -391,7 +391,7 @@ Outside of tables, the same keys may have other functionality.
 
 \key{rotate calculation mark through \# * ! \^ \_ \$}{C-\#}
 
-\key{display column number cursor is in}{C-c ?}
+\key{show line, column, formula reference}{C-c ?}
 \key{sum numbers in current column/rectangle}{C-c +}
 \key{copy down with increment}{S-RET$^3$}
 
@@ -566,7 +566,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 
 \key{add/move current file to front of agenda}{C-c [}
 \key{remove current file from your agenda}{C-c ]}
-\key{cycle through agenda file list}{C-,}
+\key{cycle through agenda file list}{C-'}
 
 \key{compile agenda for the current week}{C-c a a$^1$}
 \key{compile global TODO list}{C-c a t$^1$}

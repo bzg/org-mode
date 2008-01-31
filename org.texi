@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.60
-@set DATE December 2006
+@set VERSION 4.61
+@set DATE January 2007
 
 @dircategory Emacs
 @direntry
@@ -171,6 +171,7 @@ Timestamps
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Custom time format::          If you cannot work with the ISO format
+* Repeating items::             
 * Progress logging::            Documenting when what work was done.
 
 Creating timestamps
@@ -845,12 +846,12 @@ different location, either in the current file, or even in a different
 file, the archive file.
 
 @table @kbd
-@kindex C-c $
-@item C-c $
+@kindex C-c C-x C-s
+@item C-c C-x C-s
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.
-@kindex C-u C-c $
-@item C-u C-c $
+@kindex C-u C-c C-x C-s
+@item C-u C-c C-x C-s
 Check if any direct children of the current headline could be moved to
 the archive.  To do this, each subtree is checked for open TODO entries.
 If none are found, the command offers to move it to the archive
@@ -863,7 +864,17 @@ The default archive location is a file in the same directory as the
 current file, with the name derived by appending @file{_archive} to the
 current file name.  For information and examples on how to change this,
 see the documentation string of the variable
-@code{org-archive-location}.
+@code{org-archive-location}.  There is also an in-buffer option for
+setting this variable, for example
+
+@example
+#+ARCHIVE: %s_done::
+@end example
+
+@noindent
+You may have several such lines in the buffer, they will then be valid
+for the entries following the line (the first will also apply to any
+text before it).
 
 @node Sparse trees, Plain lists, Archiving, Document structure
 @section Sparse trees
@@ -1214,7 +1225,8 @@ result.
 @kindex C-c '
 @item C-c '
 Edit all formulas associated with the current table in a separate
-buffer.
+buffer.  Use @kbd{C-u C-u C-c =} to edit the formula directly in the
+current field, to allow checking complex references with @kbd{C-c ?}.
 
 @kindex C-c *
 @item C-c *
@@ -1232,8 +1244,9 @@ region, change all marks in the region.
 
 @kindex C-c ?
 @item C-c ?
-Which table column is the cursor in?  Displays number >0 in echo
-area.
+Display line and column number of current field in echo area.  If the
+cursor is currently editing a formula, the field or range referenced by
+the expression at point will be highlighted.
 
 @cindex region, active
 @cindex active region
@@ -2540,6 +2553,7 @@ planning.
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Custom time format::          If you cannot work with the ISO format
+* Repeating items::             Deadlines that come back again and again
 * Progress logging::            Documenting when what work was done.
 @end menu
 
@@ -2802,7 +2816,7 @@ One month back.
 Choose date in calendar (only if nothing was typed into minibuffer).
 @end table
 
-@node Custom time format, Progress logging, Creating timestamps, Timestamps
+@node Custom time format, Repeating items, Creating timestamps, Timestamps
 @section Custom time format
 @cindex custom date/time format
 @cindex time format, custom
@@ -2845,7 +2859,48 @@ using dates in tables, table alignment will be messed up.  If the custom
 format is shorter, things do work as expected.
 @end itemize
 
-@node Progress logging,  , Custom time format, Timestamps
+@node Repeating items, Progress logging, Custom time format, Timestamps
+@section Repeating items
+@cindex TODO items, repeating
+@cindex Deadlines, repeating
+@cindex Scheduling, repeating
+
+Org-mode integrates with the Emacs calendar and diary to display cyclic
+appointments, anniversaries and other special entries in the agenda
+(@pxref{Weekly/Daily agenda}).  However, it can be useful to have
+certain deadlines and scheduling items to auto-repeat.  The advantage of
+a deadline or scheduled item is that the they produce warnings ahead of
+time and automatically forward themselves in the agenda until they are
+done.  The abstract difference is therefore between cyclic
+@i{appointments} and cyclic @i{action items}.  For appointments you
+should use the diary, for actions you can uses an org-mode deadline or
+scheduling time stamp together with a REPEAT cookie.  For example:
+
+@example
+* TODO Replace batteries in smoke detector REPEAT(+18m)
+  SCHEDULED: <2007-01-01 Mon>
+
+* TODO Get dentist appointment REPEAT(+6m)
+  SCHEDULED: <2006-12-19 Tue>
+
+* TODO Tax report to IRS REPEAT(+1y)
+  DEADLINE: <2007-04-01 Sun>
+@end example
+
+Each time you try to mark one of these entries DONE using @kbd{C-c C-t},
+they will automatically switch back to the state TODO, and the
+deadline/scheduling will be shifted accordingly.  The time units
+recognized by org-mode are year (y), month (m), week (w), and day (d).
+Org-mode will also prompt you for a note and record the fact that you
+have closed this item in a note under the headline.
+
+One unusual property of these repeating items is that only one instance
+of each exist at any given time.  So if you look back or ahead in the
+agenda, you will not find past and future instances, only the current
+one will show up.  Use a cyclic diary entry if you need all past and
+future instances to be visible in the angenda.
+
+@node Progress logging,  , Repeating items, Timestamps
 @section Progress Logging
 @cindex progress logging
 @cindex logging, of progress
@@ -3003,29 +3058,6 @@ you have several clocktable blocks in a buffer.
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
-
-@c @node Self-repeating deadlines
-@c @section Self-repeating deadlines
-@c 
-@c Org-mode integrates with the Emacs calendar and diary to display cyclic
-@c appointments and anniversaries in the agenda (@pxref{The weekly/daily
-@c agenda}).  However, it can be useful to have certain deadlines and
-@c scheduling items to auto-repeat.  The advantage of a deadline or
-@c scheduled item is that the they produce warnings ahead of time and
-@c automatically forward themselves in the agenda until they are done.  The
-@c abstract difference is therefore between cyclic @i{appointments} and
-@c cyclic @i{action items}.  For appointments you should use the diary, for
-@c actions you can uses an org-mode deadline or scheduling time stamp
-@c together with a REPEAT cookie.  For example:
-@c 
-@c @example
-@c * TODO Income tax to IRS REPEAT(+1y)
-@c   DEADLINE: <2006-12-19 Tue>
-@c @end example
-@c 
-@c Each time you try to mark this entry DONE using @kbd{C-c C-t}, it will
-@c automatically switch back to the state TODO, and the deadline will be
-@c shifted by 1 year.
 
 @node Tags, Agenda views, Timestamps, Top
 @chapter Tags
@@ -5352,7 +5384,12 @@ These lines (several are allowed) specify link abbreviations.
 @item #+CATEGORY:
 This line sets the category for the agenda file.  The category applies
 for all subsequent lines until the next @samp{#+CATEGORY} line, or the
-end of the file.
+end of the file.  The first such line also applies to any entries before it.
+@item #+ARCHIVE: %s_done::
+This line sets the archive location for the agenda file.  It applies for
+all subsequent lines until the next @samp{#+CATEGORY} line, or the end
+of the file.  The first such line also applies to any entries before it.
+The correspoinding variable is @code{org-archive-location}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS:
@@ -5715,9 +5752,13 @@ caused by the preparations for the 22.1 release.  In the mean time,
 A blogging plug-in for @file{org-publish.el}.@*
 @url{http://dto.freeshell.org/notebook/OrgMode.html}.
 @cindex @file{blorg.el}
-@item @file{blorg.el} by  Bastien Guerry
+@item @file{blorg.el} by Bastien Guerry
 Publish Org-mode files as
 blogs. @url{http://www.cognition.ens.fr/~guerry/blorg.html}.
+@cindex @file{org2rem.el}
+@item @file{org2rem.el} by Bastien Guerry
+Translates Org-mode files into something readable by
+Remind. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
 @end table
 
 @node Dynamic blocks, Special agenda views, Extensions, Extensions and Hacking
@@ -5853,11 +5894,11 @@ into a notes file.
 
 Since the first release, hundreds of emails to me or on
 @code{emacs-orgmode@@gnu.org} have provided a constant stream of bug
-reports, feedback, new ideas, and sometimes even patches and add-on
-code.  Many thanks to everyone who has helped to improve this package.
-I am trying to keep here a list of the people who had significant
-influence in shaping one or more aspects of Org-mode.  The list may not
-be complete, if I have forgotten someone, please accept my apologies and
+reports, feedback, new ideas, and sometimes patches and add-on code.
+Many thanks to everyone who has helped to improve this package.  I am
+trying to keep here a list of the people who had significant influence
+in shaping one or more aspects of Org-mode.  The list may not be
+complete, if I have forgotten someone, please accept my apologies and
 let me know.
 
 @itemize @bullet
@@ -5894,9 +5935,12 @@ around a match in a hidden outline tree.
 @item
 @i{Niels Giessen} had the idea to automatically archive DONE trees.
 @item
-@i{Bastien Guerry} provided extensive feedback.
+@i{Bastien Guerry} provided extensive feedback and some patches, and
+translated David O'Toole's tutorial into French.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
+@item
+@i{Shidai Liu} (``Leo'') provided extensive feedback and some patches.
 @item
 @i{Leon Liu} asked for embedded LaTeX and tested it.
 @item
@@ -5907,6 +5951,9 @@ happy.
 @item
 @i{Tim O'Callaghan} suggested in-file links, search options for general
 file links, and TAGS.
+@item
+@i{Takeshi Okano} translated the manual and David O'Toole's tutorial
+into Japanese.
 @item
 @i{Oliver Oppitz} suggested multi-state TODO items.
 @item
