@@ -299,7 +299,7 @@ Turning on outline mode calls the value of `text-mode-hook' and then of
   (setq line-move-ignore-invisible t)
   ;; Cause use of ellipses for invisible text.
   (add-to-invisibility-spec '(outline . t))
-
+  
   (easy-menu-add outline-mode-menu-heading)
   (easy-menu-add outline-mode-menu-show)
   (easy-menu-add outline-mode-menu-hide)
@@ -719,15 +719,15 @@ BEG and END default respectively to the beginning and end of buffer."
     (map-extents 
      #'(lambda (ex ignored) 
 	 (if (< (extent-start-position ex) beg)
-	    (if (> (extent-end-position ex) end)
-		(progn
-		  (set-extent-endpoints (copy-extent ex)
-					(extent-start-position ex) beg)
-		  (set-extent-endpoints ex end (extent-end-position ex)))
-	      (set-extent-endpoints ex (extent-start-position ex) beg)))
-	  (if (> (extent-end-position ex) end)
-	      (set-extent-endpoints ex end (extent-end-position ex))
-	       (delete-extent ex)))
+	     (if (> (extent-end-position ex) end)
+		 (progn
+		   (set-extent-endpoints (copy-extent ex)
+					 (extent-start-position ex) beg)
+		   (set-extent-endpoints ex end (extent-end-position ex)))
+	       (set-extent-endpoints ex (extent-start-position ex) beg))
+	   (if (> (extent-end-position ex) end)
+	       (set-extent-endpoints ex end (extent-end-position ex))
+	     (delete-extent ex))))
      (current-buffer) beg end nil 'end-closed 'outline)))
 
 (defun outline-flag-region (from to flag)
@@ -881,8 +881,8 @@ Show the heading too, if it is currently invisible."
     (outline-back-to-heading)
     (outline-end-of-heading)
     (outline-flag-region (point)
-			  (progn (outline-end-of-subtree) (point))
-			  flag)))
+			 (progn (outline-end-of-subtree) (point))
+			 flag)))
 
 (defun outline-end-of-subtree ()
   (outline-back-to-heading)
@@ -1008,7 +1008,7 @@ Stop at the first and last subheadings of a superior heading."
       (outline-previous-visible-heading 1))
     (if (< (funcall outline-level) level)
 	nil
-        (point))))
+      (point))))
 
 (defun outline-headers-as-kill (beg end)
   "Save the visible outline headers in region at the start of the kill ring.

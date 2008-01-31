@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.76).
+   This manual is for Org-mode (version 4.77).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.76).
+This manual is for Org-mode (version 4.77).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -91,6 +91,7 @@ Tables
 
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
+* Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 
@@ -982,6 +983,7 @@ Emacs `calc' package.
 
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
+* Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 
@@ -1180,7 +1182,7 @@ Then the only table command that still works is `C-c C-c' to do a
 manual re-align.
 
 
-File: org,  Node: Narrow columns,  Next: orgtbl-mode,  Prev: Built-in table editor,  Up: Tables
+File: org,  Node: Narrow columns,  Next: Column groups,  Prev: Built-in table editor,  Up: Tables
 
 3.2 Narrow columns
 ==================
@@ -1223,9 +1225,42 @@ a per-file basis with:
    (1) This feature does not work on XEmacs.
 
 
-File: org,  Node: orgtbl-mode,  Next: The spreadsheet,  Prev: Narrow columns,  Up: Tables
+File: org,  Node: Column groups,  Next: orgtbl-mode,  Prev: Narrow columns,  Up: Tables
 
-3.3 The Orgtbl minor mode
+3.3 Column groups
+=================
+
+When Org-mode exports tables, it does so by default without vertical
+lines because that is visually more satisfying in general.  Occasionally
+however, vertical lines can be useful to structure a table into groups
+of columns, much like horizontal lines can do for groups of rows.  In
+order to specify column groups, you can use a special row where the
+first field contains only `/'.  The further fields can either contain
+`<' to indicate that this column should start a group, `>' to indicate
+the end of a column, or `<>' to make a column a group of its own.
+Boundaries between colum groups will upon export be marked with
+vertical lines.  Here is an example:
+
+     |   |  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+     |---+----+-----+-----+-----+---------+------------|
+     | / | <> |   < |     |   > |       < |          > |
+     | # |  1 |   1 |   1 |   1 |       1 |          1 |
+     | # |  2 |   4 |   8 |  16 |  1.4142 |     1.1892 |
+     | # |  3 |   9 |  27 |  81 |  1.7321 |     1.3161 |
+     |---+----+-----+-----+-----+---------+------------|
+     #+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2))
+
+   It is also sufficient to just insert the colum group starters after
+every vertical line you'd like to have:
+
+     |  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+     |----+-----+-----+-----+---------+------------|
+     | /  | <   |     |     | <       |            |
+
+
+File: org,  Node: orgtbl-mode,  Next: The spreadsheet,  Prev: Column groups,  Up: Tables
+
+3.4 The Orgtbl minor mode
 =========================
 
 If you like the intuitive way the Org-mode table editor works, you
@@ -1245,7 +1280,7 @@ Orgtbl-mode, including spreadsheet capabilities.  For details, see
 
 File: org,  Node: The spreadsheet,  Prev: orgtbl-mode,  Up: Tables
 
-3.4 The spreadsheet
+3.5 The spreadsheet
 ===================
 
 The table editor makes use of the Emacs `calc' package to implement
@@ -1270,7 +1305,7 @@ to each relevant field.
 
 File: org,  Node: References,  Next: Formula syntax for Calc,  Prev: The spreadsheet,  Up: The spreadsheet
 
-3.4.1 References
+3.5.1 References
 ----------------
 
 To compute fields in the table from other fields, formulas must
@@ -1370,7 +1405,7 @@ current buffer.
 
 File: org,  Node: Formula syntax for Calc,  Next: Formula syntax for Lisp,  Prev: References,  Up: The spreadsheet
 
-3.4.2 Formula syntax for Calc
+3.5.2 Formula syntax for Calc
 -----------------------------
 
 A formula can be any algebraic expression understood by the Emacs
@@ -1419,7 +1454,7 @@ the final result.  A few examples:
 
 File: org,  Node: Formula syntax for Lisp,  Next: Field formulas,  Prev: Formula syntax for Calc,  Up: The spreadsheet
 
-3.4.3 Emacs Lisp forms as formulas
+3.5.3 Emacs Lisp forms as formulas
 ----------------------------------
 
 It is also possible to write a formula in Emacs Lisp; this can be useful
@@ -1445,7 +1480,7 @@ in lisp.
 
 File: org,  Node: Field formulas,  Next: Column formulas,  Prev: Formula syntax for Lisp,  Up: The spreadsheet
 
-3.4.4 Field formulas
+3.5.4 Field formulas
 --------------------
 
 To assign a formula to a particular field, type it directly into the
@@ -1474,7 +1509,7 @@ following command
 
 File: org,  Node: Column formulas,  Next: Editing and debugging formulas,  Prev: Field formulas,  Up: The spreadsheet
 
-3.4.5 Column formulas
+3.5.5 Column formulas
 ---------------------
 
 Often in a table, the same formula should be used for all fields in a
@@ -1508,7 +1543,7 @@ following command:
 
 File: org,  Node: Editing and debugging formulas,  Next: Updating the table,  Prev: Column formulas,  Up: The spreadsheet
 
-3.4.6 Editing and Debugging formulas
+3.5.6 Editing and Debugging formulas
 ------------------------------------
 
 You can edit individual formulas in the minibuffer or directly in the
@@ -1612,7 +1647,7 @@ information will be displayed.
 
 File: org,  Node: Updating the table,  Next: Advanced features,  Prev: Editing and debugging formulas,  Up: The spreadsheet
 
-3.4.7 Updating the Table
+3.5.7 Updating the Table
 ------------------------
 
 Recalculation of a table is normally not automatic, but needs to be
@@ -1641,7 +1676,7 @@ the following commands:
 
 File: org,  Node: Advanced features,  Prev: Updating the table,  Up: The spreadsheet
 
-3.4.8 Advanced features
+3.5.8 Advanced features
 -----------------------
 
 If you want the recalculation of fields to happen automatically, or if
@@ -6669,6 +6704,7 @@ Index
 * global TODO list:                      Global TODO list.    (line   6)
 * global visibility states:              Visibility cycling.  (line  22)
 * GNUS links:                            External links.      (line   6)
+* grouping columns in tables:            Column groups.       (line   6)
 * hand-formatted lists:                  Enhancing text.      (line  11)
 * headline levels:                       Export options.      (line  25)
 * headline levels, for exporting <1>:    Export commands.     (line  34)
@@ -7289,193 +7325,194 @@ Key Index
 
 Tag Table:
 Node: Top970
-Node: Introduction11676
-Node: Summary12091
-Node: Installation15100
-Node: Activation16478
-Node: Feedback17727
-Node: Document structure19803
-Node: Outlines20577
-Node: Headlines21237
-Ref: Headlines-Footnote-122245
-Node: Visibility cycling22344
-Ref: Visibility cycling-Footnote-124554
-Ref: Visibility cycling-Footnote-224612
-Ref: Visibility cycling-Footnote-324662
-Node: Motion24932
-Node: Structure editing25886
-Node: Archiving28712
-Node: ARCHIVE tag29270
-Node: Moving subtrees31063
-Node: Sparse trees32374
-Ref: Sparse trees-Footnote-134506
-Ref: Sparse trees-Footnote-234688
-Node: Plain lists34803
-Ref: Plain lists-Footnote-138572
-Ref: Plain lists-Footnote-238930
-Node: Tables39114
-Node: Built-in table editor39628
-Node: Narrow columns46867
-Ref: Narrow columns-Footnote-148800
-Node: orgtbl-mode48846
-Node: The spreadsheet49650
-Node: References50737
-Ref: References-Footnote-154866
-Node: Formula syntax for Calc55155
-Node: Formula syntax for Lisp57612
-Node: Field formulas58881
-Node: Column formulas60189
-Node: Editing and debugging formulas61788
-Node: Updating the table65941
-Node: Advanced features66976
-Node: Hyperlinks71501
-Node: Link format72274
-Node: Internal links73567
-Ref: Internal links-Footnote-175492
-Node: Radio targets75624
-Node: External links76315
-Node: Handling links78719
-Ref: Handling links-Footnote-184006
-Ref: Handling links-Footnote-284243
-Node: Link abbreviations84317
-Node: Search options85996
-Ref: Search options-Footnote-187776
-Node: Custom searches87857
-Node: Remember88905
-Node: Setting up remember89892
-Node: Remember templates90474
-Ref: Remember templates-Footnote-193766
-Node: Storing notes93864
-Node: TODO items95751
-Node: TODO basics96734
-Node: TODO extensions98431
-Node: Workflow states99250
-Ref: Workflow states-Footnote-1100425
-Node: TODO types100518
-Ref: TODO types-Footnote-1102101
-Node: Multiple sets in one file102183
-Node: Per file keywords103794
-Ref: Per file keywords-Footnote-1105083
-Node: Priorities105284
-Node: Breaking down tasks106894
-Ref: Breaking down tasks-Footnote-1107414
-Node: Checkboxes107510
-Node: Timestamps110265
-Node: Time stamps110706
-Ref: Time stamps-Footnote-1113011
-Node: Creating timestamps113127
-Node: The date/time prompt115201
-Ref: The date/time prompt-Footnote-1117189
-Node: Custom time format117295
-Node: Deadlines and scheduling118843
-Ref: Deadlines and scheduling-Footnote-1120193
-Node: Inserting deadline/schedule120348
-Node: Repeated tasks121286
-Node: Progress logging122925
-Node: Closing items123580
-Ref: Closing items-Footnote-1124514
-Ref: Closing items-Footnote-2124583
-Node: Tracking TODO state changes124656
-Node: Clocking work time125512
-Ref: Clocking work time-Footnote-1129158
-Ref: Clocking work time-Footnote-2129236
-Node: Tags129362
-Node: Tag inheritance130124
-Node: Setting tags131061
-Ref: Setting tags-Footnote-1135584
-Ref: Setting tags-Footnote-2135696
-Node: Tag searches135779
-Node: Agenda views138490
-Node: Agenda files140435
-Ref: Agenda files-Footnote-1141401
-Ref: Agenda files-Footnote-2141550
-Node: Agenda dispatcher141743
-Node: Built-in agenda views143434
-Node: Weekly/Daily agenda144012
-Node: Global TODO list146953
-Node: Matching headline tags149225
-Node: Timeline150296
-Node: Stuck projects150962
-Node: Presentation and sorting152813
-Node: Categories153604
-Node: Time-of-day specifications154268
-Node: Sorting of agenda items156239
-Node: Agenda commands157521
-Node: Custom agenda views164675
-Node: Storing searches165394
-Node: Block agenda167306
-Node: Setting Options168536
-Node: Exporting Agenda Views171275
-Ref: Exporting Agenda Views-Footnote-1175559
-Ref: Exporting Agenda Views-Footnote-2175616
-Node: Extracting Agenda Information for other programs175802
-Node: Embedded LaTeX179928
-Ref: Embedded LaTeX-Footnote-1181020
-Node: Math symbols181210
-Node: Subscripts and Superscripts181975
-Node: LaTeX fragments182819
-Ref: LaTeX fragments-Footnote-1185053
-Node: Processing LaTeX fragments185315
-Node: CDLaTeX mode186261
-Ref: CDLaTeX mode-Footnote-1188745
-Node: Exporting188893
-Node: ASCII export190207
-Node: HTML export191497
-Node: Export commands192116
-Node: Quoting HTML tags193360
-Node: Links193990
-Node: Images194687
-Ref: Images-Footnote-1195558
-Node: CSS support195619
-Ref: CSS support-Footnote-1196938
-Node: XOXO export197051
-Node: iCalendar export197490
-Node: Text interpretation198709
-Node: Comment lines199300
-Node: Initial text199695
-Node: Footnotes201364
-Node: Enhancing text202179
-Ref: Enhancing text-Footnote-1204038
-Node: Export options204128
-Node: Publishing206021
-Ref: Publishing-Footnote-1206817
-Node: Configuration207013
-Node: Project alist207731
-Node: Sources and destinations208797
-Node: Selecting files209527
-Node: Publishing action210275
-Node: Publishing options211508
-Node: Publishing links213660
-Node: Project page index215173
-Node: Sample configuration215951
-Node: Simple example216443
-Node: Complex example217116
-Node: Triggering publication219192
-Node: Miscellaneous219877
-Node: Completion220511
-Node: Customization221982
-Node: In-buffer settings222565
-Node: The very busy C-c C-c key227441
-Node: Clean view229085
-Node: TTY keys231662
-Node: Interaction233272
-Node: Cooperation233669
-Node: Conflicts236545
-Node: Bugs238548
-Node: Extensions and Hacking240044
-Node: Extensions240640
-Node: Tables in arbitrary syntax242587
-Node: Radio tables243664
-Node: A LaTeX example246167
-Ref: A LaTeX example-Footnote-1249813
-Ref: A LaTeX example-Footnote-2249961
-Node: Translator functions250396
-Ref: Translator functions-Footnote-1253505
-Node: Dynamic blocks253593
-Node: Special agenda views255565
-Ref: Special agenda views-Footnote-1257844
-Node: History and Acknowledgments258104
-Node: Index264198
-Node: Key Index296279
+Node: Introduction11743
+Node: Summary12158
+Node: Installation15167
+Node: Activation16545
+Node: Feedback17794
+Node: Document structure19870
+Node: Outlines20644
+Node: Headlines21304
+Ref: Headlines-Footnote-122312
+Node: Visibility cycling22411
+Ref: Visibility cycling-Footnote-124621
+Ref: Visibility cycling-Footnote-224679
+Ref: Visibility cycling-Footnote-324729
+Node: Motion24999
+Node: Structure editing25953
+Node: Archiving28779
+Node: ARCHIVE tag29337
+Node: Moving subtrees31130
+Node: Sparse trees32441
+Ref: Sparse trees-Footnote-134573
+Ref: Sparse trees-Footnote-234755
+Node: Plain lists34870
+Ref: Plain lists-Footnote-138639
+Ref: Plain lists-Footnote-238997
+Node: Tables39181
+Node: Built-in table editor39762
+Node: Narrow columns47001
+Ref: Narrow columns-Footnote-148936
+Node: Column groups48982
+Node: orgtbl-mode50515
+Node: The spreadsheet51318
+Node: References52405
+Ref: References-Footnote-156534
+Node: Formula syntax for Calc56823
+Node: Formula syntax for Lisp59280
+Node: Field formulas60549
+Node: Column formulas61857
+Node: Editing and debugging formulas63456
+Node: Updating the table67609
+Node: Advanced features68644
+Node: Hyperlinks73169
+Node: Link format73942
+Node: Internal links75235
+Ref: Internal links-Footnote-177160
+Node: Radio targets77292
+Node: External links77983
+Node: Handling links80387
+Ref: Handling links-Footnote-185674
+Ref: Handling links-Footnote-285911
+Node: Link abbreviations85985
+Node: Search options87664
+Ref: Search options-Footnote-189444
+Node: Custom searches89525
+Node: Remember90573
+Node: Setting up remember91560
+Node: Remember templates92142
+Ref: Remember templates-Footnote-195434
+Node: Storing notes95532
+Node: TODO items97419
+Node: TODO basics98402
+Node: TODO extensions100099
+Node: Workflow states100918
+Ref: Workflow states-Footnote-1102093
+Node: TODO types102186
+Ref: TODO types-Footnote-1103769
+Node: Multiple sets in one file103851
+Node: Per file keywords105462
+Ref: Per file keywords-Footnote-1106751
+Node: Priorities106952
+Node: Breaking down tasks108562
+Ref: Breaking down tasks-Footnote-1109082
+Node: Checkboxes109178
+Node: Timestamps111933
+Node: Time stamps112374
+Ref: Time stamps-Footnote-1114679
+Node: Creating timestamps114795
+Node: The date/time prompt116869
+Ref: The date/time prompt-Footnote-1118857
+Node: Custom time format118963
+Node: Deadlines and scheduling120511
+Ref: Deadlines and scheduling-Footnote-1121861
+Node: Inserting deadline/schedule122016
+Node: Repeated tasks122954
+Node: Progress logging124593
+Node: Closing items125248
+Ref: Closing items-Footnote-1126182
+Ref: Closing items-Footnote-2126251
+Node: Tracking TODO state changes126324
+Node: Clocking work time127180
+Ref: Clocking work time-Footnote-1130826
+Ref: Clocking work time-Footnote-2130904
+Node: Tags131030
+Node: Tag inheritance131792
+Node: Setting tags132729
+Ref: Setting tags-Footnote-1137252
+Ref: Setting tags-Footnote-2137364
+Node: Tag searches137447
+Node: Agenda views140158
+Node: Agenda files142103
+Ref: Agenda files-Footnote-1143069
+Ref: Agenda files-Footnote-2143218
+Node: Agenda dispatcher143411
+Node: Built-in agenda views145102
+Node: Weekly/Daily agenda145680
+Node: Global TODO list148621
+Node: Matching headline tags150893
+Node: Timeline151964
+Node: Stuck projects152630
+Node: Presentation and sorting154481
+Node: Categories155272
+Node: Time-of-day specifications155936
+Node: Sorting of agenda items157907
+Node: Agenda commands159189
+Node: Custom agenda views166343
+Node: Storing searches167062
+Node: Block agenda168974
+Node: Setting Options170204
+Node: Exporting Agenda Views172943
+Ref: Exporting Agenda Views-Footnote-1177227
+Ref: Exporting Agenda Views-Footnote-2177284
+Node: Extracting Agenda Information for other programs177470
+Node: Embedded LaTeX181596
+Ref: Embedded LaTeX-Footnote-1182688
+Node: Math symbols182878
+Node: Subscripts and Superscripts183643
+Node: LaTeX fragments184487
+Ref: LaTeX fragments-Footnote-1186721
+Node: Processing LaTeX fragments186983
+Node: CDLaTeX mode187929
+Ref: CDLaTeX mode-Footnote-1190413
+Node: Exporting190561
+Node: ASCII export191875
+Node: HTML export193165
+Node: Export commands193784
+Node: Quoting HTML tags195028
+Node: Links195658
+Node: Images196355
+Ref: Images-Footnote-1197226
+Node: CSS support197287
+Ref: CSS support-Footnote-1198606
+Node: XOXO export198719
+Node: iCalendar export199158
+Node: Text interpretation200377
+Node: Comment lines200968
+Node: Initial text201363
+Node: Footnotes203032
+Node: Enhancing text203847
+Ref: Enhancing text-Footnote-1205706
+Node: Export options205796
+Node: Publishing207689
+Ref: Publishing-Footnote-1208485
+Node: Configuration208681
+Node: Project alist209399
+Node: Sources and destinations210465
+Node: Selecting files211195
+Node: Publishing action211943
+Node: Publishing options213176
+Node: Publishing links215328
+Node: Project page index216841
+Node: Sample configuration217619
+Node: Simple example218111
+Node: Complex example218784
+Node: Triggering publication220860
+Node: Miscellaneous221545
+Node: Completion222179
+Node: Customization223650
+Node: In-buffer settings224233
+Node: The very busy C-c C-c key229109
+Node: Clean view230753
+Node: TTY keys233330
+Node: Interaction234940
+Node: Cooperation235337
+Node: Conflicts238213
+Node: Bugs240216
+Node: Extensions and Hacking241712
+Node: Extensions242308
+Node: Tables in arbitrary syntax244255
+Node: Radio tables245332
+Node: A LaTeX example247835
+Ref: A LaTeX example-Footnote-1251481
+Ref: A LaTeX example-Footnote-2251629
+Node: Translator functions252064
+Ref: Translator functions-Footnote-1255173
+Node: Dynamic blocks255261
+Node: Special agenda views257233
+Ref: Special agenda views-Footnote-1259512
+Node: History and Acknowledgments259772
+Node: Index265866
+Node: Key Index298020
 
 End Tag Table

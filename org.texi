@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.76
-@set DATE May 2007
+@set VERSION 4.77
+@set DATE June 2007
 
 @dircategory Emacs
 @direntry
@@ -122,6 +122,7 @@ Tables
 
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables   
+* Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 
@@ -1109,6 +1110,7 @@ Emacs @file{calc} package.
 @menu
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables   
+* Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 @end menu
@@ -1328,7 +1330,7 @@ it off with
 @noindent Then the only table command that still works is
 @kbd{C-c C-c} to do a manual re-align.
 
-@node Narrow columns, orgtbl-mode, Built-in table editor, Tables
+@node Narrow columns, Column groups, Built-in table editor, Tables
 @section Narrow columns
 @cindex narrow columns in tables
 
@@ -1374,7 +1376,42 @@ on a per-file basis with:
 #+STARTUP: noalign
 @end example
 
-@node orgtbl-mode, The spreadsheet, Narrow columns, Tables
+@node Column groups, orgtbl-mode, Narrow columns, Tables
+@section Column groups
+@cindex grouping columns in tables
+
+When Org-mode exports tables, it does so by default without vertical
+lines because that is visually more satisfying in general.  Occasionally
+however, vertical lines can be useful to structure a table into groups
+of columns, much like horizontal lines can do for groups of rows.  In
+order to specify column groups, you can use a special row where the
+first field contains only @samp{/}.  The further fields can either
+contain @samp{<} to indicate that this column should start a group,
+@samp{>} to indicate the end of a column, or @samp{<>} to make a column
+a group of its own.  Boundaries between colum groups will upon export be
+marked with vertical lines.  Here is an example:
+
+@example
+|   |  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|---+----+-----+-----+-----+---------+------------|
+| / | <> |   < |     |   > |       < |          > |
+| # |  1 |   1 |   1 |   1 |       1 |          1 |
+| # |  2 |   4 |   8 |  16 |  1.4142 |     1.1892 |
+| # |  3 |   9 |  27 |  81 |  1.7321 |     1.3161 |
+|---+----+-----+-----+-----+---------+------------|
+#+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2))
+@end example
+
+It is also sufficient to just insert the colum group starters after
+every vertical line you'd like to have:
+
+@example
+|  N | N^2 | N^3 | N^4 | sqrt(n) | sqrt[4](N) |
+|----+-----+-----+-----+---------+------------|
+| /  | <   |     |     | <       |            |
+@end example
+
+@node orgtbl-mode, The spreadsheet, Column groups, Tables
 @section The Orgtbl minor mode
 @cindex orgtbl-mode
 @cindex minor mode for tables
