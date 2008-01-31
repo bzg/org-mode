@@ -1,6 +1,6 @@
 ;;; org-publish.el --- publish related org-mode files as a website
 
-;; Copyright (C) 2006  Free Software Foundation, Inc.
+;; Copyright (C) 2006, 2007  Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
@@ -22,6 +22,8 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
+
+;; This file is part of GNU Emacs.
 
 ;;; Commentary:
 
@@ -158,8 +160,10 @@
 
 ;;; Code:
 
+
 (eval-when-compile
   (require 'cl))
+
 
 (defgroup org-publish nil
 	"Options for publishing a set of Org-mode and related files."

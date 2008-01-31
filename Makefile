@@ -57,7 +57,8 @@ CP = cp -p
 # The following variables need to be defined by the maintainer
 LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
 ELCFILES   = $(LISPFILES:.el=.elc)
-DOCFILES   = org.texi org.pdf org orgcard.tex orgcard.pdf
+DOCFILES   = org.texi org.pdf org
+CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf orgcard_letter.ps
 TEXIFILES  = org.texi
 INFOFILES  = org
 HTMLDIR    = /home/dominik/public_html/Tools/org
@@ -65,7 +66,7 @@ HTMLDIR    = /home/dominik/public_html/Tools/org
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} Makefile
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
@@ -119,6 +120,16 @@ orgcard.pdf: orgcard.dvi
 orgcard.ps: orgcard.dvi
 	dvips -t landscape -o orgcard.ps orgcard.dvi 
 
+orgcard_letter.dvi: orgcard.tex
+	perl -pe 's/letterpaper=0/letterpaper=1/' orgcard.tex > orgcard_letter.tex
+	tex orgcard_letter.tex
+
+orgcard_letter.pdf: orgcard_letter.dvi
+	dvips -q -f -t landscape orgcard_letter.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=orgcard_letter.pdf -c .setpdfwrite -
+
+orgcard_letter.ps: orgcard_letter.dvi
+	dvips -t landscape -o orgcard_letter.ps orgcard_letter.dvi 
+
 # Below here are special targets for maintenance only
 
 info:	
@@ -126,7 +137,7 @@ info:
 
 pdf:	org.pdf
 
-card:	orgcard.pdf orgcard.ps
+card:	orgcard.pdf orgcard.ps orgcard_letter.pdf orgcard_letter.ps
 
 xcompile:
 	xemacs -batch -q -f batch-byte-compile $(LISPFILES)
