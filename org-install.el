@@ -6,6 +6,8 @@
 (autoload 'org-store-link "org" "Store a link to the current location." t)
 (autoload 'orgtbl-mode "org" "Org tables as a minor mode." t)
 (autoload 'turn-on-orgtbl "org" "Org tables as a minor mode.")
+(autoload 'orgstruct-mode "org" "Org structure as a minor mode." t)
+(autoload 'turn-on-orgstruct "org" "Org structure as a minor mode.")
 (autoload 'org-cycle "org" "Subtree visibility cycling." t)
 (autoload 'org-global-cycle "org" "Global visibility cycling." t)
 (autoload 'org-agenda-list "org" "Produce calendar-like agenda view." t)
