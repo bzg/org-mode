@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.70
-@set DATE March 2007
+@set VERSION 4.71
+@set DATE April 2007
 
 @dircategory Emacs
 @direntry
@@ -717,10 +717,16 @@ Backward to higher level heading.
 @item C-c C-j
 Jump to a different place without changing the current outline
 visibility.  Shows the document structure in a temporary buffer, where
-you can use visibility cycling (@key{TAB}) to find your destination.
-After pressing @key{RET}, the cursor moves to the selected location in
-the original buffer, and the headings hierarchy above it is made
-visible.
+you can use the following keys to find your destination:
+@example
+@key{TAB}         @r{Cycle visibility.}
+@key{down} / @key{up}   @r{Next/previous visible headline.}
+n / p        @r{Next/previous visible headline.}
+f / b        @r{Next/previous headline same level.}
+u            @r{One level up.}
+0-9          @r{Digit argument.}
+@key{RET}         @r{Select this location.}
+@end example
 @end table
 
 @node Structure editing, Archiving, Motion, Document structure
@@ -2460,8 +2466,7 @@ calendar           |  %:date"
 @end example
 
 @noindent
-If you would like to have the cursor in a specific position after the
-template has been expanded:
+To place the cursor after template expansion use:
 
 @example
 %?          @r{After completing the template, position cursor here.}
@@ -2481,17 +2486,25 @@ target file - if you press @key{RET}, the value specified for the
 template is used.  Then the command offers the headings tree of the
 selected file, with the cursor position at the default headline (if you
 had specified one in the template).  You can either immediately press
-@key{RET} to get the note placed there.  Or you can use vertical cursor
-motion (@key{up} and @key{down}) and visibility cycling (@key{TAB}) to
-find a better place.  Pressing @key{RET} or @key{left} or @key{right}
+@key{RET} to get the note placed there.  Or you can use the following
+keys to find a better location:
+@example
+@key{TAB}         @r{Cycle visibility.}
+@key{down} / @key{up}   @r{Next/previous visible headline.}
+n / p        @r{Next/previous visible headline.}
+f / b        @r{Next/previous headline same level.}
+u            @r{One level up.}
+@c 0-9          @r{Digit argument.}
+@end example
+@noindent
+Pressing @key{RET} or @key{left} or @key{right}
 then leads to the following result.
 
-@multitable @columnfractions 0.2 0.1 0.7
+@multitable @columnfractions 0.2 0.15 0.65
 @item @b{Cursor position} @tab @b{Key} @tab @b{Note gets inserted}
 @item buffer-start @tab @key{RET} @tab as level 2 heading at end of file
 @item on headline @tab @key{RET} @tab as sublevel of the heading at cursor
-@item             @tab @key{left}  @tab as same level, before current heading
-@item             @tab @key{right} @tab as same level, after current heading
+@item             @tab @key{left}/@key{right} @tab as same level, before/after current heading
 @item not on headline @tab @key{RET}
       @tab at cursor position, level taken from context.
            Or use prefix arg to specify level manually.
@@ -4679,7 +4692,9 @@ preview the typeset result of these fragments, and upon export to HTML,
 all fragments will be converted to images and inlined into the HTML
 document.  For this to work you need to be on a system with a working
 La@TeX{} installation.  You also need the @file{dvipng} program,
-available at @url{http://sourceforge.net/projects/dvipng/}.
+available at @url{http://sourceforge.net/projects/dvipng/}.  The LaTeX
+header that will be used when processing a fragment can be configured
+with the variable @code{org-format-latex-header}.
 
 La@TeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as LaTeX source code:
@@ -5605,13 +5620,13 @@ Once org-publish is properly configured, you can publish with the
 following functions: 
 
 @table @kbd
-@item C-c C-e c
+@item C-c C-e C
 Prompt for a specific project and publish all files that belong to it.
-@item C-c C-e p
+@item C-c C-e P
 Publish the project containing the current file.
-@item C-c C-e f
+@item C-c C-e F
 Publish only the current file.
-@item C-c C-e a
+@item C-c C-e A
 Publish all projects.
 @end table
 

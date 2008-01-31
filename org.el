@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.70
+;; Version: 4.71
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "4.70"
+(defconst org-version "4.71"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1368,6 +1368,7 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 
 (defvar org-todo-keywords-1 nil)
 (make-variable-buffer-local 'org-todo-keywords-1)
+(defvar org-todo-keywords-for-agenda nil)
 (defvar org-not-done-keywords nil)
 (make-variable-buffer-local 'org-not-done-keywords)
 (defvar org-done-keywords nil)
@@ -2232,6 +2233,18 @@ This is a property list with the following properties:
   :group 'org-latex
   :type 'plist)
 
+(defcustom org-format-latex-header "\\documentclass{article}
+\\usepackage{fullpage}         % do not remove
+\\usepackage{amssymb}
+\\usepackage[usenames]{color}
+\\usepackage{amsmath}
+\\usepackage{latexsym}
+\\usepackage[mathscr]{eucal}
+\\pagestyle{empty}             % do not remove"
+  "The document header used for processing LaTeX fragments."
+  :group 'org-latex
+  :type 'string)
+
 (defgroup org-export nil
   "Options for exporting org-listings."
   :tag "Org Export"
@@ -2642,11 +2655,23 @@ This option can also be set with the +OPTIONS line, e.g. \"@:nil\"."
 
 (defcustom org-export-html-table-tag
   "<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"
-  "The HTML tag used to start a table.
+  "The HTML tag that is used to start a table.
 This must be a <table> tag, but you may change the options like
 borders and spacing."
   :group 'org-export-html
   :type 'string)
+
+(defcustom org-export-table-header-tags '("<th>" . "</th>")
+  "The opening tag for table header fields.
+This is customizable so that alignment options can be specified."
+  :group 'org-export-tables
+  :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
+
+(defcustom org-export-table-data-tags '("<td>" . "</td>")
+  "The opening tag for table data fields.
+This is customizable so that alignment options can be specified."
+  :group 'org-export-tables
+  :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
 (defcustom org-export-html-with-timestamp nil
   "If non-nil, write `org-export-html-html-helper-timestamp'
@@ -4036,7 +4061,7 @@ between words."
 	   (if org-fontify-done-headline
 	       (list (concat "^[*]+ +\\<\\("
 			     (mapconcat 'regexp-quote org-done-keywords "\\|")
-			     "\\)\\(.*\\)\\>")
+			     "\\)\\(.*\\)")
 		     '(1 'org-done t) '(2 'org-headline-done t))
 	     (list (concat "^[*]+ +\\<\\("
 			   (mapconcat 'regexp-quote org-done-keywords "\\|")
@@ -4804,6 +4829,7 @@ is signaled in this case."
 		      (setq folded (org-invisible-p)))
       (outline-end-of-subtree))
     (outline-next-heading)
+    (if (not (bolp)) (insert "\n"))
     (setq end (point))
     ;; Find insertion point, with error handling
     (goto-char beg)
@@ -5340,7 +5366,7 @@ If the cursor is not in an item, throw an error."
       (if (catch 'exit
 	    (while t
 	      (beginning-of-line 0)
-	      (if (< (point) limit) (throw 'exit nil))
+	      (if (or (bobp) (< (point) limit)) (throw 'exit nil))
 
 	      (if (looking-at "[ \t]*$")
 		  (setq ind1 ind-empty)
@@ -12478,7 +12504,7 @@ used to insert the time stamp into the buffer to include the time."
 	  (calendar-forward-day (- (time-to-days default-time)
 				   (calendar-absolute-from-gregorian
 				    (calendar-current-date))))
-	  (org-eval-in-calendar nil)
+	  (org-eval-in-calendar nil t)
 	  (let* ((old-map (current-local-map))
 		 (map (copy-keymap calendar-mode-map))
 		 (minibuffer-local-map (copy-keymap minibuffer-local-map)))
@@ -12576,13 +12602,13 @@ used to insert the time stamp into the buffer to include the time."
 	  (format "%04d-%02d-%02d %02d:%02d" year month day hour minute)
 	(format "%04d-%02d-%02d" year month day)))))
 
-(defun org-eval-in-calendar (form)
+(defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
 Also, store the cursor date in variable org-ans2."
   (let ((sw (selected-window)))
     (select-window (get-buffer-window "*Calendar*"))
     (eval form)
-    (when (calendar-cursor-to-date)
+    (when (and (not keepdate) (calendar-cursor-to-date))
       (let* ((date (calendar-cursor-to-date))
 	     (time (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
@@ -12591,7 +12617,8 @@ Also, store the cursor date in variable org-ans2."
     ;; Update the prompt to show new default date
     (save-excursion
       (goto-char (point-min))
-      (when (and (re-search-forward "\\[[-0-9]+\\]" nil t)
+      (when (and org-ans2
+		 (re-search-forward "\\[[-0-9]+\\]" nil t)
 		 (get-text-property (match-end 0) 'field))
 	(let ((inhibit-read-only t))
 	  (replace-match (concat "[" org-ans2 "]") t t)
@@ -13620,6 +13647,11 @@ The following commands are available:
   `(unless (get-text-property (point) 'org-protected)
      ,@body))
 
+(defmacro org-unmodified (&rest body)
+  "Execute body without changing buffer-modified-p."
+  `(set-buffer-modified-p
+    (prog1 (buffer-modified-p) ,@body)))
+
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."
   (declare (indent 1) (debug t))
@@ -14046,6 +14078,7 @@ Optional argument FILE means, use this file instead of the current."
 (defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-pre-agenda-window-conf nil)
 (defun org-prepare-agenda ()
+  (setq org-todo-keywords-for-agenda nil)
   (if org-agenda-multi
       (progn
 	(setq buffer-read-only nil)
@@ -14055,6 +14088,8 @@ Optional argument FILE means, use this file instead of the current."
 	(narrow-to-region (point) (point-max)))
     (org-agenda-maybe-reset-markers 'force)
     (org-prepare-agenda-buffers (org-agenda-files))
+    (setq org-todo-keywords-for-agenda
+	  (org-uniquify org-todo-keywords-for-agenda))
     (let* ((abuf (get-buffer-create org-agenda-buffer-name))
 	   (awin (get-buffer-window abuf)))
       (cond
@@ -14102,6 +14137,8 @@ Optional argument FILE means, use this file instead of the current."
 	  (set-buffer (org-get-agenda-file-buffer file))
 	  (widen)
 	  (setq bmp (buffer-modified-p))
+	  (setq org-todo-keywords-for-agenda
+		(append org-todo-keywords-for-agenda org-todo-keywords-1))
 	  (save-excursion
 	    (remove-text-properties (point-min) (point-max) pall)
 	    (when org-agenda-skip-archived-trees
@@ -14506,24 +14543,23 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   (require 'calendar)
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
+  (org-prepare-agenda)
   (let* ((today (time-to-days (current-time)))
 	 (date (calendar-gregorian-from-absolute today))
-	 (kwds org-todo-keywords-1)
+	 (kwds org-todo-keywords-for-agenda)
 	 (completion-ignore-case t)
 	 (org-select-this-todo-keyword
 	  (if (stringp arg) arg
 	    (and arg (integerp arg) (> arg 0)
-                 (nth (1- arg) org-todo-keywords-1))))
+                 (nth (1- arg) kwds))))
 	 rtn rtnall files file pos)
     (when (equal arg '(4))
       (setq org-select-this-todo-keyword
 	    (completing-read "Keyword (or KWD1|K2D2|...): "
-			     (mapcar 'list org-todo-keywords-1)
-			     nil nil)))
+			     (mapcar 'list kwds) nil nil)))
     (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
-    (org-prepare-agenda)
     (org-set-local 'org-last-arg arg)
-    (org-set-local 'org-todo-keywords-1 kwds)
+;FIXME    (org-set-local 'org-todo-keywords-for-agenda kwds)
     (setq org-agenda-redo-command
 	  '(org-todo-list (or current-prefix-arg org-last-arg)))
     (setq files (org-agenda-files)
@@ -14544,13 +14580,15 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
       (setq pos (point))
       (unless org-agenda-multi
-	(insert
-	 "Available with `N r': (0)ALL "
-	 (let ((n 0))
-	   (mapconcat (lambda (x)
-			(format "(%d)%s" (setq n (1+ n)) x))
-		      org-todo-keywords-1 " "))
-	 "\n"))
+	(insert "Available with `N r': (0)ALL")
+	(let ((n 0) s)
+	  (mapc (lambda (x)
+		  (setq s (format "(%d)%s" (setq n (1+ n)) x))
+		  (if (> (+ (current-column) (string-width s) 1) (frame-width))
+		      (insert "\n                    "))
+		  (insert " " s))
+		kwds))
+	(insert "\n"))
       (add-text-properties pos (1- (point)) (list 'face 'org-level-3)))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
@@ -16726,15 +16764,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 (fg (or (plist-get options :foreground) "Black"))
 	 (bg (or (plist-get options :background) "Transparent")))
     (with-temp-file texfile
-      (insert "\\documentclass{article}
-\\usepackage{fullpage}
-\\usepackage{amssymb}
-\\usepackage[usenames]{color}
-\\usepackage{amsmath}
-\\usepackage{latexsym}
-\\usepackage[mathscr]{eucal}
-\\pagestyle{empty}
-\\begin{document}\n" string "\n\\end{document}\n"))
+      (insert org-format-latex-header
+	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
@@ -16864,6 +16895,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   "Skip lines starting with \"#\" and subtrees starting with COMMENT."
   (let ((re1 (concat "^\\(\\*+\\)[ \t]+" org-comment-string))
 	(re2 "^\\(\\*+\\)[ \t\n\r]")
+	(case-fold-search nil)
 	rtn line level)
     (while (setq line (pop lines))
       (cond
@@ -17387,8 +17419,9 @@ translations.  There is currently no way for users to extend this.")
     (let ((end (save-excursion (outline-next-heading) (point))))
       (when (re-search-forward "^[ \t]*[^# \t\r\n].*\n" end t)
 	;; Mark the line so that it will not be exported as normal text.
-	(add-text-properties (match-beginning 0) (match-end 0)
-			     (list :org-license-to-kill t))
+	(org-unmodified
+	 (add-text-properties (match-beginning 0) (match-end 0)
+			      (list :org-license-to-kill t)))
 	;; Return the title string
 	(org-trim (match-string 0))))))
 
@@ -17463,10 +17496,6 @@ underlined headlines.  The default is 3."
   (setq-default org-todo-line-regexp org-todo-line-regexp)
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
 					(org-infile-export-plist)))
-	 (region
-	  (buffer-substring
-	   (if (org-region-active-p) (region-beginning) (point-min))
-	   (if (org-region-active-p) (region-end) (point-max))))
 	 (custom-times org-display-custom-times)
 	 (org-ascii-current-indentation '(0 . 0))
 	 (level 0) line txt
@@ -17496,6 +17525,10 @@ underlined headlines.  The default is 3."
 ;	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
 	 (todo nil)
 	 (lang-words nil)
+	 (region
+	  (buffer-substring
+	   (if (org-region-active-p) (region-beginning) (point-min))
+	   (if (org-region-active-p) (region-end) (point-max))))
 	 (lines (org-skip-comments
 		 (org-split-string
 		  (org-cleaned-string-for-export
@@ -17506,7 +17539,8 @@ underlined headlines.  The default is 3."
 		  "[\r\n]")))
 	 thetoc have-headings first-heading-pos)
 
-    (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t))
+    (org-unmodified
+     (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t)))
 
     (setq org-last-level 1)
     (org-init-section-numbers)
@@ -18001,7 +18035,8 @@ associated with a file."
 	 rpl path desc descp desc1 desc2 link
 	 )
 
-    (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t))
+    (org-unmodified
+     (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t)))
 
     (message "Exporting...")
 
@@ -18536,8 +18571,10 @@ lang=\"%s\" xml:lang=\"%s\">
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
 			 (if head
-			     (concat "<th>" x "</th>")
-			   (concat "<td>" x "</td>")))
+			     (concat (car org-export-table-header-tags) x
+				     (cdr org-export-table-header-tags))
+			   (concat (car org-export-table-data-tags) x
+				   (cdr org-export-table-data-tags))))
 		       fields "")
 		      "</tr>")
 	      html)))
@@ -18593,17 +18630,21 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
 	    (progn
 	      (if field-buffer
 		  (progn
-		    (setq html (concat
-				html
-				"<tr>"
-				(mapconcat
-				 (lambda (x)
-				   (if (equal x "") (setq x empty))
-				   (if head
-				       (concat "<th>" x "</th>\n")
-				     (concat "<td>" x "</td>\n")))
-				 field-buffer "\n")
-				"</tr>\n"))
+		    (setq
+		     html
+		     (concat
+		      html
+		      "<tr>"
+		      (mapconcat
+		       (lambda (x)
+			 (if (equal x "") (setq x empty))
+			 (if head
+			     (concat (car org-export-table-header-tags) x
+				     (cdr org-export-table-header-tags))
+			   (concat (car org-export-table-data-tags) x
+				   (cdr org-export-table-data-tags))))
+		       field-buffer "\n")
+		      "</tr>\n"))
 		    (setq head nil)
 		    (setq field-buffer nil)))
 	      ;; Ignore this line
@@ -18748,6 +18789,10 @@ stacked delimiters is N.  Escaping delimiters is not possible."
    "\\(\\(?:\\*\\|[-+]?[^-+*!@#$%^_ \t\r\n,:\"?<>~;./{}=()]+\\)\\)\\)")
   "The regular expression matching a sub- or superscript.")
 
+;(let ((s "a\\_b"))
+;  (and (string-match org-match-substring-regexp s)
+;       (conca	     t (match-string 1 s) ":::" (match-string 2 s))))
+
 (defun org-export-html-convert-sub-super (string)
   "Convert sub- and superscripts in STRING to HTML."
   (let (key c (s 0) (requireb (eq org-export-with-sub-superscripts '{})))
@@ -18762,9 +18807,9 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	      string (replace-match
 		      (concat (match-string 1 string)
 			      "<" key ">" c "</" key ">")
-		      t t string)))
-      (while (string-match "\\\\\\([_^]\\)" string)
-	(setq string (replace-match (match-string 1 string) t t string))))
+		      t t string))))
+    (while (string-match "\\\\\\([_^]\\)" string)
+      (setq string (replace-match (match-string 1 string) t t string)))
     string))
 
 (defun org-export-html-convert-emphasize (string)
@@ -20075,6 +20120,12 @@ really on, so that the block visually is on the match."
 	      (throw 'exit t)))
 	nil))))
 
+(defun org-uniquify (list)
+  "Remove duplicate elements from LIST."
+  (let (res)
+    (mapc (lambda (x) (add-to-list 'res x 'append)) list)
+    res))
+
 (defun org-delete-all (elts list)
   "Remove all elements in ELTS from LIST."
   (while elts
@@ -20211,6 +20262,7 @@ not an indirect buffer"
   ;; fill the headline as well.
   (org-set-local 'comment-start-skip "^#+[ \t]*")
   (org-set-local 'paragraph-separate "\f\\|\\*\\|[ 	]*$\\|[ \t]*[:|]")
+;; FIXME!!!!!!!  (org-set-local 'paragraph-separate "\f\\|[ 	]*$")
   ;; The paragraph starter includes hand-formatted lists.
   (org-set-local 'paragraph-start
 		 "\f\\|[ 	]*$\\|\\([*\f]+\\)\\|[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)\\|[ \t]*[:|]")

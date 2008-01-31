@@ -6,7 +6,7 @@
 ;; Keywords: hypermedia, outlines
 ;; Version:
 
-;; $Id: org-publish.el,v 1.78 2006/09/10 06:41:23 dto Exp dto $
+;; $Id: org-publish.el,v 1.80 2007/03/22 02:31:03 dto Exp dto $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -319,6 +319,7 @@ whether file should be published."
 	      (if (not (file-exists-p timestamp))
 		  ;; create file
 		  (with-temp-buffer
+		    (make-directory (file-name-directory timestamp) :parents)
 		    (write-file timestamp)
 		    (kill-buffer (current-buffer)))))
 	  rtn))
@@ -549,9 +550,10 @@ default is 'index.org'."
   (interactive (list (completing-read "Project name: " org-publish-project-alist
 				      nil t)
 		     current-prefix-arg))
-  (let ((org-publish-use-timestamps-flag (if force nil t))
-	(plists (org-publish-get-plists project-name)))
-    (mapcar 'org-publish-plist plists)))
+  (save-window-excursion
+    (let ((org-publish-use-timestamps-flag (if force nil t))
+	  (plists (org-publish-get-plists project-name)))
+      (mapcar 'org-publish-plist plists))))
 
 
 ;;;###autoload
@@ -559,11 +561,12 @@ default is 'index.org'."
   "Publish the project associated with the current file.
 With prefix argument, force publishing all files in project."
   (interactive "P")
-  (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
-	 (org-publish-use-timestamps-flag (if force nil t)))
-    (if (not project-name)
-	(error (format "File %s is not part of any known project." (buffer-file-name))))
-    (org-publish project-name)))
+  (save-window-excursion
+    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
+	   (org-publish-use-timestamps-flag (if force nil t)))
+      (if (not project-name)
+	  (error (format "File %s is not part of any known project." (buffer-file-name))))
+      (org-publish project-name))))
 
 
 ;;;###autoload
@@ -571,9 +574,10 @@ With prefix argument, force publishing all files in project."
   "Publish the current file.
 With prefix argument, force publish the file."
   (interactive "P")
-  (let ((org-publish-use-timestamps-flag
-	 (if force nil t)))
-    (org-publish-file (buffer-file-name))))
+  (save-window-excursion
+    (let ((org-publish-use-timestamps-flag
+	   (if force nil t)))
+      (org-publish-file (buffer-file-name)))))
 
 
 ;;;###autoload
@@ -581,10 +585,11 @@ With prefix argument, force publish the file."
   "Publish all projects.
 With prefix argument, force publish all files."
   (interactive "P")
-  (let ((org-publish-use-timestamps-flag
-	 (if force nil t))
-	(plists (org-publish-get-plists)))
-    (mapcar 'org-publish-plist plists)))
+  (save-window-excursion
+    (let ((org-publish-use-timestamps-flag
+	   (if force nil t))
+	  (plists (org-publish-get-plists)))
+      (mapcar 'org-publish-plist plists))))
 
 
 

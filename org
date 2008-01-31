@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.70).
+   This manual is for Org-mode (version 4.71).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.70).
+This manual is for Org-mode (version 4.71).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -620,10 +620,14 @@ The following commands jump to other headlines in the buffer.
 `C-c C-j'
      Jump to a different place without changing the current outline
      visibility.  Shows the document structure in a temporary buffer,
-     where you can use visibility cycling (<TAB>) to find your
-     destination.  After pressing <RET>, the cursor moves to the
-     selected location in the original buffer, and the headings
-     hierarchy above it is made visible.
+     where you can use the following keys to find your destination:
+          <TAB>         Cycle visibility.
+          <down> / <up>   Next/previous visible headline.
+          n / p        Next/previous visible headline.
+          f / b        Next/previous headline same level.
+          u            One level up.
+          0-9          Digit argument.
+          <RET>         Select this location.
 
 
 File: org,  Node: Structure editing,  Next: Archiving,  Prev: Motion,  Up: Document structure
@@ -2199,8 +2203,7 @@ For specific link types, the following keywords will be defined:
      info               |  %:file %:node
      calendar           |  %:date"
 
-If you would like to have the cursor in a specific position after the
-template has been expanded:
+To place the cursor after template expansion use:
 
      %?          After completing the template, position cursor here.
 
@@ -2225,20 +2228,24 @@ target file - if you press <RET>, the value specified for the template
 is used.  Then the command offers the headings tree of the selected
 file, with the cursor position at the default headline (if you had
 specified one in the template).  You can either immediately press <RET>
-to get the note placed there.  Or you can use vertical cursor motion
-(<up> and <down>) and visibility cycling (<TAB>) to find a better
-place.  Pressing <RET> or <left> or <right> then leads to the following
+to get the note placed there.  Or you can use the following keys to
+find a better location:
+     <TAB>         Cycle visibility.
+     <down> / <up>   Next/previous visible headline.
+     n / p        Next/previous visible headline.
+     f / b        Next/previous headline same level.
+     u            One level up.
+   Pressing <RET> or <left> or <right> then leads to the following
 result.
 
-Cursor         Key     Note gets inserted
-position               
-buffer-start   <RET>   as level 2 heading at end of file
-on headline    <RET>   as sublevel of the heading at cursor
-               <left>  as same level, before current heading
-               <right> as same level, after current heading
-not on         <RET>   at cursor position, level taken from context.
-headline                      Or use prefix arg to specify level
-                       manually.
+Cursor         Key         Note gets inserted
+position                   
+buffer-start   <RET>       as level 2 heading at end of file
+on headline    <RET>       as sublevel of the heading at cursor
+               <left>/<right>as same level, before/after current heading
+not on         <RET>       at cursor position, level taken from context.
+headline                             Or use prefix arg to specify level
+                           manually.
 
    So a fast way to store the note to its default location is to press
 `C-c C-c <RET> <RET>'.  Even shorter would be `C-u C-c C-c', which does
@@ -4254,7 +4261,9 @@ the typeset result of these fragments, and upon export to HTML, all
 fragments will be converted to images and inlined into the HTML
 document.  For this to work you need to be on a system with a working
 LaTeX installation.  You also need the `dvipng' program, available at
-`http://sourceforge.net/projects/dvipng/'.
+`http://sourceforge.net/projects/dvipng/'.  The LaTeX header that will
+be used when processing a fragment can be configured with the variable
+`org-format-latex-header'.
 
    LaTeX fragments don't need any special marking at all.  The following
 snippets will be identified as LaTeX source code:
@@ -5109,17 +5118,17 @@ File: org,  Node: Triggering publication,  Prev: Sample configuration,  Up: Publ
 Once org-publish is properly configured, you can publish with the
 following functions:
 
-`C-c C-e c'
+`C-c C-e C'
      Prompt for a specific project and publish all files that belong to
      it.
 
-`C-c C-e p'
+`C-c C-e P'
      Publish the project containing the current file.
 
-`C-c C-e f'
+`C-c C-e F'
      Publish only the current file.
 
-`C-c C-e a'
+`C-c C-e A'
      Publish all projects.
 
    Org uses timestamps to track when a file has changed. The above
@@ -6948,173 +6957,173 @@ Ref: Visibility cycling-Footnote-123934
 Ref: Visibility cycling-Footnote-223992
 Ref: Visibility cycling-Footnote-324042
 Node: Motion24312
-Node: Structure editing25096
-Node: Archiving27922
-Node: ARCHIVE tag28480
-Node: Moving subtrees30273
-Node: Sparse trees31584
-Ref: Sparse trees-Footnote-133716
-Ref: Sparse trees-Footnote-233898
-Node: Plain lists34013
-Ref: Plain lists-Footnote-137782
-Ref: Plain lists-Footnote-238140
-Node: Tables38324
-Node: Built-in table editor38838
-Node: Narrow columns45857
-Ref: Narrow columns-Footnote-147790
-Node: orgtbl-mode47836
-Node: The spreadsheet48640
-Node: References49727
-Ref: References-Footnote-153856
-Node: Formula syntax for Calc54145
-Node: Formula syntax for Lisp56611
-Node: Field formulas57880
-Node: Column formulas59188
-Node: Editing and debugging formulas60787
-Node: Updating the table64940
-Node: Advanced features65975
-Node: Hyperlinks70500
-Node: Link format71273
-Node: Internal links72566
-Ref: Internal links-Footnote-174491
-Node: Radio targets74623
-Node: External links75314
-Node: Handling links77718
-Ref: Handling links-Footnote-182828
-Ref: Handling links-Footnote-283065
-Node: Link abbreviations83139
-Node: Search options84818
-Ref: Search options-Footnote-186598
-Node: Custom searches86679
-Node: Remember87727
-Node: Setting up remember88714
-Node: Remember templates89296
-Ref: Remember templates-Footnote-192610
-Node: Storing notes92708
-Node: TODO items94516
-Node: TODO basics95499
-Node: TODO extensions97198
-Node: Workflow states98017
-Ref: Workflow states-Footnote-199192
-Node: TODO types99285
-Ref: TODO types-Footnote-1100868
-Node: Multiple sets in one file100950
-Node: Per file keywords102561
-Ref: Per file keywords-Footnote-1103850
-Node: Priorities104051
-Node: Breaking down tasks105297
-Ref: Breaking down tasks-Footnote-1105817
-Node: Checkboxes105913
-Node: Timestamps108668
-Node: Time stamps109202
-Ref: Time stamps-Footnote-1112696
-Ref: Time stamps-Footnote-2112812
-Node: Creating timestamps112967
-Node: The date/time prompt115625
-Ref: The date/time prompt-Footnote-1117586
-Node: Custom time format117692
-Node: Repeating items119250
-Node: Progress logging121060
-Node: Closing items121706
-Ref: Closing items-Footnote-1122640
-Ref: Closing items-Footnote-2122709
-Node: Tracking TODO state changes122782
-Node: Clocking work time123638
-Ref: Clocking work time-Footnote-1127284
-Ref: Clocking work time-Footnote-2127362
-Node: Tags127488
-Node: Tag inheritance128250
-Node: Setting tags129187
-Ref: Setting tags-Footnote-1133710
-Ref: Setting tags-Footnote-2133822
-Node: Tag searches133905
-Node: Agenda views136616
-Node: Agenda files138561
-Ref: Agenda files-Footnote-1139527
-Ref: Agenda files-Footnote-2139676
-Node: Agenda dispatcher139869
-Node: Built-in agenda views141560
-Node: Weekly/Daily agenda142138
-Node: Global TODO list144267
-Node: Matching headline tags146539
-Node: Timeline147610
-Node: Stuck projects148276
-Node: Presentation and sorting149975
-Node: Categories150766
-Node: Time-of-day specifications151430
-Node: Sorting of agenda items153401
-Node: Agenda commands154683
-Node: Custom agenda views161412
-Node: Storing searches162087
-Node: Block agenda163999
-Node: Setting Options165229
-Node: Batch processing167941
-Node: Embedded LaTeX169071
-Ref: Embedded LaTeX-Footnote-1170163
-Node: Math symbols170353
-Node: Subscripts and Superscripts171118
-Node: LaTeX fragments171962
-Ref: LaTeX fragments-Footnote-1174070
-Node: Processing LaTeX fragments174332
-Node: CDLaTeX mode175278
-Ref: CDLaTeX mode-Footnote-1177762
-Node: Exporting177910
-Node: ASCII export179224
-Node: HTML export180514
-Node: Export commands181133
-Node: Quoting HTML tags181944
-Node: Links182574
-Node: Images183271
-Ref: Images-Footnote-1184142
-Node: CSS support184203
-Ref: CSS support-Footnote-1185522
-Node: XOXO export185635
-Node: iCalendar export186074
-Node: Text interpretation187293
-Node: Comment lines187835
-Node: Initial text188230
-Node: Enhancing text189904
-Ref: Enhancing text-Footnote-1191766
-Node: Export options191856
-Node: Publishing193749
-Ref: Publishing-Footnote-1194545
-Node: Configuration194741
-Node: Project alist195459
-Node: Sources and destinations196525
-Node: Selecting files197255
-Node: Publishing action198003
-Node: Publishing options199236
-Node: Publishing links201388
-Node: Project page index202901
-Node: Sample configuration203679
-Node: Simple example204171
-Node: Complex example204844
-Node: Triggering publication206920
-Node: Miscellaneous207605
-Node: Completion208239
-Node: Customization209710
-Node: In-buffer settings210293
-Node: The very busy C-c C-c key214770
-Node: Clean view216414
-Node: TTY keys218991
-Node: Interaction220601
-Node: Cooperation220998
-Node: Conflicts223740
-Node: Bugs225332
-Node: Extensions and Hacking226828
-Node: Extensions227424
-Node: Tables in arbitrary syntax229371
-Node: Radio tables230448
-Node: A LaTeX example232951
-Ref: A LaTeX example-Footnote-1236597
-Ref: A LaTeX example-Footnote-2236745
-Node: Translator functions237180
-Ref: Translator functions-Footnote-1240289
-Node: Dynamic blocks240377
-Node: Special agenda views242349
-Ref: Special agenda views-Footnote-1244628
-Node: History and Acknowledgments244888
-Node: Index250748
-Node: Key Index281729
+Node: Structure editing25266
+Node: Archiving28092
+Node: ARCHIVE tag28650
+Node: Moving subtrees30443
+Node: Sparse trees31754
+Ref: Sparse trees-Footnote-133886
+Ref: Sparse trees-Footnote-234068
+Node: Plain lists34183
+Ref: Plain lists-Footnote-137952
+Ref: Plain lists-Footnote-238310
+Node: Tables38494
+Node: Built-in table editor39008
+Node: Narrow columns46027
+Ref: Narrow columns-Footnote-147960
+Node: orgtbl-mode48006
+Node: The spreadsheet48810
+Node: References49897
+Ref: References-Footnote-154026
+Node: Formula syntax for Calc54315
+Node: Formula syntax for Lisp56781
+Node: Field formulas58050
+Node: Column formulas59358
+Node: Editing and debugging formulas60957
+Node: Updating the table65110
+Node: Advanced features66145
+Node: Hyperlinks70670
+Node: Link format71443
+Node: Internal links72736
+Ref: Internal links-Footnote-174661
+Node: Radio targets74793
+Node: External links75484
+Node: Handling links77888
+Ref: Handling links-Footnote-182998
+Ref: Handling links-Footnote-283235
+Node: Link abbreviations83309
+Node: Search options84988
+Ref: Search options-Footnote-186768
+Node: Custom searches86849
+Node: Remember87897
+Node: Setting up remember88884
+Node: Remember templates89466
+Ref: Remember templates-Footnote-192732
+Node: Storing notes92830
+Node: TODO items94798
+Node: TODO basics95781
+Node: TODO extensions97480
+Node: Workflow states98299
+Ref: Workflow states-Footnote-199474
+Node: TODO types99567
+Ref: TODO types-Footnote-1101150
+Node: Multiple sets in one file101232
+Node: Per file keywords102843
+Ref: Per file keywords-Footnote-1104132
+Node: Priorities104333
+Node: Breaking down tasks105579
+Ref: Breaking down tasks-Footnote-1106099
+Node: Checkboxes106195
+Node: Timestamps108950
+Node: Time stamps109484
+Ref: Time stamps-Footnote-1112978
+Ref: Time stamps-Footnote-2113094
+Node: Creating timestamps113249
+Node: The date/time prompt115907
+Ref: The date/time prompt-Footnote-1117868
+Node: Custom time format117974
+Node: Repeating items119532
+Node: Progress logging121342
+Node: Closing items121988
+Ref: Closing items-Footnote-1122922
+Ref: Closing items-Footnote-2122991
+Node: Tracking TODO state changes123064
+Node: Clocking work time123920
+Ref: Clocking work time-Footnote-1127566
+Ref: Clocking work time-Footnote-2127644
+Node: Tags127770
+Node: Tag inheritance128532
+Node: Setting tags129469
+Ref: Setting tags-Footnote-1133992
+Ref: Setting tags-Footnote-2134104
+Node: Tag searches134187
+Node: Agenda views136898
+Node: Agenda files138843
+Ref: Agenda files-Footnote-1139809
+Ref: Agenda files-Footnote-2139958
+Node: Agenda dispatcher140151
+Node: Built-in agenda views141842
+Node: Weekly/Daily agenda142420
+Node: Global TODO list144549
+Node: Matching headline tags146821
+Node: Timeline147892
+Node: Stuck projects148558
+Node: Presentation and sorting150257
+Node: Categories151048
+Node: Time-of-day specifications151712
+Node: Sorting of agenda items153683
+Node: Agenda commands154965
+Node: Custom agenda views161694
+Node: Storing searches162369
+Node: Block agenda164281
+Node: Setting Options165511
+Node: Batch processing168223
+Node: Embedded LaTeX169353
+Ref: Embedded LaTeX-Footnote-1170445
+Node: Math symbols170635
+Node: Subscripts and Superscripts171400
+Node: LaTeX fragments172244
+Ref: LaTeX fragments-Footnote-1174478
+Node: Processing LaTeX fragments174740
+Node: CDLaTeX mode175686
+Ref: CDLaTeX mode-Footnote-1178170
+Node: Exporting178318
+Node: ASCII export179632
+Node: HTML export180922
+Node: Export commands181541
+Node: Quoting HTML tags182352
+Node: Links182982
+Node: Images183679
+Ref: Images-Footnote-1184550
+Node: CSS support184611
+Ref: CSS support-Footnote-1185930
+Node: XOXO export186043
+Node: iCalendar export186482
+Node: Text interpretation187701
+Node: Comment lines188243
+Node: Initial text188638
+Node: Enhancing text190312
+Ref: Enhancing text-Footnote-1192174
+Node: Export options192264
+Node: Publishing194157
+Ref: Publishing-Footnote-1194953
+Node: Configuration195149
+Node: Project alist195867
+Node: Sources and destinations196933
+Node: Selecting files197663
+Node: Publishing action198411
+Node: Publishing options199644
+Node: Publishing links201796
+Node: Project page index203309
+Node: Sample configuration204087
+Node: Simple example204579
+Node: Complex example205252
+Node: Triggering publication207328
+Node: Miscellaneous208013
+Node: Completion208647
+Node: Customization210118
+Node: In-buffer settings210701
+Node: The very busy C-c C-c key215178
+Node: Clean view216822
+Node: TTY keys219399
+Node: Interaction221009
+Node: Cooperation221406
+Node: Conflicts224148
+Node: Bugs225740
+Node: Extensions and Hacking227236
+Node: Extensions227832
+Node: Tables in arbitrary syntax229779
+Node: Radio tables230856
+Node: A LaTeX example233359
+Ref: A LaTeX example-Footnote-1237005
+Ref: A LaTeX example-Footnote-2237153
+Node: Translator functions237588
+Ref: Translator functions-Footnote-1240697
+Node: Dynamic blocks240785
+Node: Special agenda views242757
+Ref: Special agenda views-Footnote-1245036
+Node: History and Acknowledgments245296
+Node: Index251156
+Node: Key Index282137
 
 End Tag Table

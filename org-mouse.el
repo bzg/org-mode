@@ -3,7 +3,7 @@
 ;; Copyright (c) 2006 Piotr Zielinski
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
-;; Version: 0.24
+;; Version: 0.24a
 ;; $Id: org-mouse.el 817 2007-02-01 00:28:02Z pz215 $
 ;; 
 ;; The latest version of this file is available from
@@ -548,6 +548,9 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(set-match-data ',match)
 	(apply ',function rest)))))
 
+(defun org-mouse-todo-keywords ()
+  (if (boundp 'org-todo-keywords-1) org-todo-keywords-1 org-todo-keywords))
+
 (defun org-mouse-match-todo-keyword ()
   (save-excursion
     (org-back-to-heading)
@@ -616,10 +619,10 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 			 (org-mouse-remove-match-and-spaces))))]
        )))
    ((and (org-mouse-looking-at "\\b\\w+" "a-zA-Z0-9_")
- 	 (member (match-string 0) org-todo-keywords))
+ 	 (member (match-string 0) (org-mouse-todo-keywords)))
     (popup-menu 
      `(nil
-       ,@(org-mouse-keyword-replace-menu org-todo-keywords)
+       ,@(org-mouse-keyword-replace-menu (org-mouse-todo-keywords))
        "--" 
        ["Check TODOs" org-show-todo-tree t]
        ["List all TODO keywords" org-todo-list t]
@@ -758,7 +761,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	  ,@(org-mouse-tag-menu))
 	 ("TODO Status"
 	  ,@(progn (org-mouse-match-todo-keyword)
-		   (org-mouse-keyword-replace-menu org-todo-keywords 1)))
+		   (org-mouse-keyword-replace-menu (org-mouse-todo-keywords)
+						   1)))
 	 ["Show Tags" 
 	  (with-current-buffer org-mouse-main-buffer (org-agenda-show-tags))
 	  :visible (not org-mouse-direct)]
@@ -1027,7 +1031,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	 ["Quit" org-agenda-quit t]
 	 ["Exit and Release Buffers" org-agenda-exit t]
 	 ))))
-
 
 (defun org-mouse-get-gesture (event)
   (let ((startxy (posn-x-y (event-start event)))
