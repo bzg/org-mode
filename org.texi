@@ -4,7 +4,7 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.27
+@set VERSION 4.28
 @set DATE April 2006
 
 @dircategory Emacs
@@ -2782,7 +2782,9 @@ Go to the original location of the item and delete other windows.
 @item f
 Toggle Follow mode.  In Follow mode, as you move the cursor through
 the agenda buffer, the other window always shows the corresponding
-location in the org file.
+location in the org file.  The initial setting for this mode in new
+agenda buffers can be set with the variable
+@code{org-agenda-start-with-follow-mode}.
 
 @kindex l
 @item l
@@ -3819,7 +3821,6 @@ at @url{http://www.astro.uva.nl/~dominik/Tools}. Org-mode checks for
 the function @code{constants-get}, which has to be autoloaded in your
 setup.  See the installation instructions in the file
 @file{constants.el}.
-@cindex @file{remember.el}
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm
 Keybindings in Org-mode conflict with the @kbd{S-<cursor>} keys
@@ -3839,7 +3840,12 @@ S-RET   -> C-S-RET
 Yes, these are unfortunately more difficult to remember.  If you want
 to have other replacement keys, look at the variable
 @code{org-disputed-keys}.
+@item @file{windmove.el} by Hovav Shacham
+@cindex @file{windmove.el}
+Also this package uses the @kbd{S-<cursor>} keys, so everything written
+in the paragraph above about CUA mode also applies here.
 @item @file{remember.el} by John Wiegley
+@cindex @file{remember.el}
 Org mode cooperates with remember, see @ref{Remember}.
 @file{Remember.el} is not part of Emacs, find it on the web.
 @end table

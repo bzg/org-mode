@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.27
+;; Version: 4.28
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -81,6 +81,9 @@
 ;;
 ;; Changes since version 4.10:
 ;; ---------------------------
+;; Version 4.28
+;;    - Bug fixes.
+;;
 ;; Version 4.27
 ;;    - HTML exporter generalized to receive external options.
 ;;      As part of the process, author, email and date have been moved to the
@@ -146,7 +149,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.27"
+(defvar org-version "4.28"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -382,6 +385,11 @@ When this is set and the *entire* text in an entry is indented, the
 indentation is increased by one space in a demotion command, and
 decreased by one in a promotion command.  If any line in the entry
 body starts at column 0, indentation is not changed at all."
+  :group 'org-edit-structure
+  :type 'boolean)
+
+(defcustom org-insert-heading-hook nil
+  "Hook being run after inserting a new heading."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -1244,6 +1252,7 @@ key    The key (a single char as a string) to be associated with the command.
 type   The command type, any of the following symbols:
         todo        Entries with a specific TODO keyword, in all agenda files.
         tags        Tags match in all agenda files.
+        tags-todo   Tags match in all agenda files, TODO entries only.
         todo-tree   Sparse tree of specific TODO keyword in *current* file.
         tags-tree   Sparse tree with all tags matches in *current* file.
         occur-tree  Occur sparse tree for current file.
@@ -1256,6 +1265,7 @@ match  What to search for:
 	  (list (string :tag "Key")
 		(choice :tag "Type"
 			(const :tag "Tags search in all agenda files" tags)
+			(const :tag "Tags search of TODO entries, all agenda files" tags-todo)
 			(const :tag "TODO keyword search in all agenda files" todo)
 			(const :tag "Tags sparse tree in current buffer" tags-tree)
 			(const :tag "TODO keyword tree in current buffer" todo-tree)
@@ -1272,7 +1282,7 @@ potentially much shorter TODO lists."
   :group 'org-todo
   :type 'boolean)
 
-(defcustom org-agenda-include-all-todo t
+(defcustom org-agenda-include-all-todo nil
   "Non-nil means, the agenda will always contain all TODO entries.
 When nil, date-less entries will only be shown if `org-agenda' is called
 with a prefix argument.
@@ -1294,7 +1304,7 @@ forth between agenda and calendar."
   :group 'org-agenda
   :type 'sexp)
 
-(defgroup org-agenda-window-setup nil
+(defgroup org-agenda-setup nil
   "Options concerning setting up the Agenda window in Org Mode."
   :tag "Org Agenda Window Setup"
   :group 'org-agenda)
@@ -1303,6 +1313,11 @@ forth between agenda and calendar."
   "Non-nil means, mouse-1 on a link will follow the link in the agenda.
 A longer mouse click will still set point.  Does not wortk on XEmacs.
 Needs to be set before org.el is loaded."
+  :group 'org-agenda-setup
+  :type 'boolean)
+
+(defcustom org-agenda-start-with-follow-mode t
+  "The initial value of follwo-mode in a newly created agenda window."
   :group 'org-agenda-setup
   :type 'boolean)
 
@@ -1615,6 +1630,16 @@ Normally, in HTML output paragraphs will be reformatted.  In ASCII
 export, line breaks will always be preserved, regardless of this variable.
 
 This option can also be set with the +OPTIONS line, e.g. \"\\n:t\"."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-with-tags t
+  "Nil means, do not export tags, just remove them from headlines."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-with-timestamps t
+  "Nil means, do not export timestamps and associated keywords."
   :group 'org-export-general
   :type 'boolean)
 
@@ -2220,6 +2245,13 @@ This face is only used if `org-fontify-done-headline' is set."
 (defvar org-scheduled-time-regexp nil
   "Matches the SCHEDULED keyword together with a time stamp.")
 (make-variable-buffer-local 'org-scheduled-time-regexp)
+(defvar org-closed-time-regexp nil
+  "Matches the CLOSED keyword together with a time stamp.")
+(make-variable-buffer-local 'org-closed-time-regexp)
+
+(defvar org-keyword-time-regexp nil
+  "Matches any of the 3 keywords, together with the time stamp.")
+(make-variable-buffer-local 'org-keyword-time-regexp)
 
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions for current buffer."
@@ -2309,7 +2341,15 @@ This face is only used if `org-fontify-done-headline' is set."
 	  org-scheduled-regexp
 	  (concat "\\<" org-scheduled-string)
 	  org-scheduled-time-regexp
-	  (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>"))
+	  (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
+	  org-closed-time-regexp
+	  (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
+	  org-keyword-time-regexp
+	  (concat "\\<\\(" org-scheduled-string
+		  "\\|" org-deadline-string
+		  "\\|" org-closed-string "\\)"
+		  " *[[<]\\([^]>]+\\)[]>]"))   ;; FIXME: is this correct?
+
     (org-set-font-lock-defaults)))
 
 ;; Tell the compiler about dynamically scoped variables,
@@ -3138,22 +3178,24 @@ or nil."
 (defun org-insert-heading (&optional force-heading)
   "Insert a new heading or item with same depth at point."
   (interactive "P")
-  (when (or force-heading (not (org-insert-item)))
-    (let* ((head (save-excursion
-		   (condition-case nil
-		       (org-back-to-heading)
-		     (error (outline-next-heading)))
-		   (prog1 (match-string 0)
-		     (funcall outline-level)))))
-      (cond 
-       ((and (org-on-heading-p) (bolp) 
-	     (save-excursion (backward-char 1) (not (org-invisible-p))))
-	(open-line 1))
-       ((bolp) nil)
-       (t (newline)))
-      (insert head)
-      (just-one-space)
-      (run-hooks 'org-insert-heading-hook))))
+  (if (= (buffer-size) 0)
+      (insert "\n* ")
+    (when (or force-heading (not (org-insert-item)))
+      (let* ((head (save-excursion
+		     (condition-case nil
+			 (org-back-to-heading)
+		       (error (outline-next-heading)))
+		     (prog1 (match-string 0)
+		       (funcall outline-level)))))
+	(cond 
+	 ((and (org-on-heading-p) (bolp) 
+	       (save-excursion (backward-char 1) (not (org-invisible-p))))
+	  (open-line 1))
+	 ((bolp) nil)
+	 (t (newline)))
+	(insert head)
+	(just-one-space)
+	(run-hooks 'org-insert-heading-hook)))))
 
 (defun org-insert-item ()
   "Insert a new item at the current level.
@@ -3838,7 +3880,7 @@ heading be marked DONE, and the current time will be added."
     ;; Here we are back in the original buffer.  Everything seems to have
     ;; worked.  So now cut the tree and finish up.
     (let (this-command) (org-cut-subtree))
-    (if (looking-at "[ \t]*$") (kill-line))
+    (if (and (not (eobp)) (looking-at "[ \t]*$")) (kill-line))
     (message "Subtree archived %s"
 	     (if (eq this-buffer buffer)
 		 (concat "under heading: " heading)
@@ -4108,6 +4150,61 @@ to modify it to the correct date."
   (message "%s" (substitute-command-keys
 		 "Use \\[org-timestamp-up-day] and \\[org-timestamp-down-day] to change the date.")))
 
+(defun org-add-planning-info (what &optional time &rest remove)
+  "Insert new timestamp with keyword in the line directly after the headline.
+WHAT indicates what kind of time stamp to add.  TIME indicated the time to use.
+If non is given, the user is prompted for a date.
+REMOVE indicates what kind of entries to remove.  An old WHAT entry will also
+be removed."
+  (interactive)
+  (save-excursion
+    (let (beg end col list elt)
+      (org-show-entry)   ; Avoid this.
+      (org-back-to-heading t)
+      (setq beg (point))
+      (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
+      (goto-char (match-end 1))
+      (setq col (current-column))
+      (goto-char (1+ (match-end 0)))
+      (if (and (not (looking-at outline-regexp))
+	       (looking-at (concat "[^\r\n]*?" org-keyword-time-regexp
+				   "[^\r\n]*")))
+	  (narrow-to-region (match-beginning 0) (match-end 0))
+	(insert "\n")
+	(backward-char 1)
+	(narrow-to-region (point) (point))
+	(indent-to-column col))
+      ;; Check if we have to remove something.
+      (setq list (cons what remove))
+      (while list
+	(setq elt (pop list))
+	(goto-char (point-min))
+	(when (or (and (eq elt 'scheduled)
+		       (re-search-forward org-scheduled-time-regexp nil t))
+		  (and (eq elt 'deadline)
+		       (re-search-forward org-deadline-time-regexp nil t))
+		  (and (eq elt 'closed)
+		       (re-search-forward org-closed-time-regexp nil t)))
+	  (replace-match "")
+	  (if (looking-at " +") (replace-match ""))))
+      (goto-char (point-max))
+      (when what
+	(insert
+	 (if (not (equal (char-before) ?\ )) " " "")
+	 (cond ((eq what 'scheduled) org-scheduled-string)
+	       ((eq what 'deadline) org-deadline-string)
+	       ((eq what 'closed) org-closed-string))
+	 " ")
+	(insert
+	 (format-time-string 
+	  (if (eq what 'closed)
+	      (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
+	    (car org-time-stamp-formats))
+	  (or time (org-read-date nil 'to-time)))))
+      (goto-char (point-min))
+      (widen)
+      (if (looking-at "[ \t]+\r?\n")
+	  (replace-match "")))))
 
 (defun org-occur (regexp &optional callback)
   "Make a compact tree which shows all matches of REGEXP.
@@ -4798,7 +4895,7 @@ The following commands are available:
   (org-add-hook 'post-command-hook 'org-agenda-post-command-hook nil 'local)
   (org-add-hook 'pre-command-hook 'org-unhighlight nil 'local)
   (unless org-agenda-keep-modes
-    (setq org-agenda-follow-mode nil
+    (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-show-log nil))
   (easy-menu-change
    '("Agenda") "Agenda Files"
@@ -5023,6 +5120,8 @@ C   Configure your own agenda commands")
 	(cond
 	 ((eq type 'tags)
 	  (org-tags-view current-prefix-arg string))
+	 ((eq type 'tags-todo)
+	  (org-tags-view '(4) string))
 	 ((eq type 'todo)
 	  (org-todo-list string))
 	 ((eq type 'tags-tree)
@@ -7497,7 +7596,6 @@ in all files."
     (cond
      ;; First check if there are any special 
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
-
      ;; Now try the builtin stuff
      ((save-excursion
 	(goto-char (point-min))
@@ -7538,7 +7636,7 @@ in all files."
 ;	    re4 (concat "\\<" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\>")
 	    re2 (concat "[ \t\r\n]\\(" (mapconcat 'downcase words "[ \t]+") "\\)[ \t\r\n]")
 	    re2a (concat "[ \t\r\n]\\(" (mapconcat 'downcase words "[ \t\r\n]+") "\\)[ \t\r\n]")
-	    re4 (concat "[^a-zA-Z_\r\n]\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_\r\n]")
+	    re4 (concat "[^a-zA-Z_]\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
 	    re1 (concat pre re2 post)
 	    re3 (concat pre re4 post)
 	    re5 (concat pre ".*" re4)
@@ -7917,9 +8015,9 @@ folders."
 	  (set-window-configuration org-window-config-before-follow-link)
 	  (save-excursion (set-buffer b) (goto-char p)
 	    (bibtex-url)))
-      (recenter 0)))  ; Move entry start to beginning of window
+      (recenter 0))  ; Move entry start to beginning of window
   ;; return t to indicate that the search is done.
-  t)
+    t))
 
 ;; Finally add the functions to the right hooks.
 (add-hook 'org-create-file-search-functions 'org-create-file-search-in-bibtex)
@@ -8473,45 +8571,48 @@ RET on headline   -> Store as sublevel entry to current headline
   "Initialize *remember* buffer with template, invode `org-mode'.
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to fucntion properly."
-  (when org-remember-templates
-    (let* ((entry (if (= (length org-remember-templates) 1)
-		      (cdar org-remember-templates)
-		    (message "Select template: %s"
-			     (mapconcat
-			      (lambda (x) (char-to-string (car x)))
-			      org-remember-templates " "))
-		    (cdr (assoc (read-char-exclusive) org-remember-templates))))
-	   (tpl (if (consp (cdr entry)) (cadr entry) (cdr entry)))
-	   (file (if (consp (cdr entry)) (nth 2 entry)))
-	   (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
-	   (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
-	   (v-u (concat "[" (substring v-t 1 -1) "]"))
-	   (v-U (concat "[" (substring v-T 1 -1) "]"))
-	   (v-a annotation)   ; defined in `remember-mode'
-	   (v-i initial)      ; defined in `remember-mode'
-	   (v-n user-full-name)
-	   )
-      (unless tpl (setq tpl "")	(message "No template") (ding))
-      (insert tpl) (goto-char (point-min))
-      (while (re-search-forward "%\\([tTuTai]\\)" nil t)
-	(when (and initial (equal (match-string 0) "%i"))
-	  (save-match-data
-	    (let* ((lead (buffer-substring
-			  (point-at-bol) (match-beginning 0))))
-	      (setq v-i (mapconcat 'identity
+  (if org-remember-templates
+      (let* ((entry (if (= (length org-remember-templates) 1)
+			(cdar org-remember-templates)
+		      (message "Select template: %s"
+			       (mapconcat
+				(lambda (x) (char-to-string (car x)))
+				org-remember-templates " "))
+		      (cdr (assoc (read-char-exclusive) org-remember-templates))))
+	     (tpl (if (consp (cdr entry)) (cadr entry) (cdr entry)))
+	     (file (if (consp (cdr entry)) (nth 2 entry)))
+	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
+	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
+	     (v-u (concat "[" (substring v-t 1 -1) "]"))
+	     (v-U (concat "[" (substring v-T 1 -1) "]"))
+	     (v-a annotation)   ; defined in `remember-mode'
+	     (v-i initial)      ; defined in `remember-mode'
+	     (v-n user-full-name)
+	     )
+	(unless tpl (setq tpl "")	(message "No template") (ding))
+	(insert tpl) (goto-char (point-min))
+	(while (re-search-forward "%\\([tTuTai]\\)" nil t)
+	  (when (and initial (equal (match-string 0) "%i"))
+	    (save-match-data
+	      (let* ((lead (buffer-substring
+			    (point-at-bol) (match-beginning 0))))
+		(setq v-i (mapconcat 'identity
 				     (org-split-string initial "\n")
 				     (concat "\n" lead))))))
-	(replace-match
-	 (or (eval (intern (concat "v-" (match-string 1)))) "")
-	 t t))
-      (let ((org-startup-folded nil)
-	    (org-startup-with-deadline-check nil))
-	(org-mode))
-      (if (and file (string-match "\\S-" file) (not (file-directory-p file)))
-	  (set (make-local-variable 'org-default-notes-file) file))
-      (goto-char (point-min))
-      (if (re-search-forward "%\\?" nil t) (replace-match ""))
-      (set (make-local-variable 'org-finish-function) 'remember-buffer))))
+	  (replace-match
+	   (or (eval (intern (concat "v-" (match-string 1)))) "")
+	   t t))
+	(let ((org-startup-folded nil)
+	      (org-startup-with-deadline-check nil))
+	  (org-mode))
+	(if (and file (string-match "\\S-" file) (not (file-directory-p file)))
+	    (set (make-local-variable 'org-default-notes-file) file))
+	(goto-char (point-min))
+	(if (re-search-forward "%\\?" nil t) (replace-match "")))
+    (let ((org-startup-folded nil)
+	  (org-startup-with-deadline-check nil))
+      (org-mode)))
+  (set (make-local-variable 'org-finish-function) 'remember-buffer))
 
 ;;;###autoload
 (defun org-remember-handler ()
@@ -8580,6 +8681,9 @@ See also the variable `org-reverse-note-order'."
       (if (not visiting)
 	  (find-file-noselect file))
       (with-current-buffer (get-file-buffer file)
+	(save-excursion (and (goto-char (point-min))
+			     (not (re-search-forward "^\\* " nil t))
+			     (insert "\n* Notes\n")))
 	(setq reversed (org-notes-order-reversed-p))
 	(save-excursion
 	  (save-restriction
@@ -9007,7 +9111,9 @@ With argument TABLE-TYPE, go to the beginning of a table.el-type table."
 	      (if table-type org-table-any-border-regexp
 		org-table-border-regexp)
 	      nil t))
-	(error "Can't find beginning of table")
+; FIXME: OK to just use beginning-of-buffer?
+	; (error "Can't find beginning of table")
+	(progn (goto-char (point-min)) (point))
       (goto-char (match-beginning 0))
       (beginning-of-line 2)
       (point))))
@@ -9542,7 +9648,7 @@ also in table column 3.  The command will prompt for the sorting method
 		  (lambda (a b) (< (car a) (car b)))
 		(lambda (a b) (string< (car a) (car b)))))
     (setq lns (mapcar (lambda(x) (cons (org-trim (substring x bcol ecol)) x))
-		      (split-string (buffer-substring beg end) "\n")))
+		      (org-split-string (buffer-substring beg end) "\n")))
     (if numericp
 	(setq lns (mapcar (lambda(x)
 			      (cons (string-to-number (car x)) (cdr x)))
@@ -10980,7 +11086,7 @@ overwritten, and the table is not marked as requiring realignment."
 (defconst org-export-plist-vars
   '((:language             . org-export-default-language)
     (:headline-levels      . org-export-headline-levels)
-    (:with-section-numbers . org-export-with-section-numbers)
+    (:section-numbers      . org-export-with-section-numbers)
     (:table-of-contents    . org-export-with-toc)
     (:emphasize            . org-export-with-emphasize)
     (:sub-superscript      . org-export-with-sub-superscripts)
@@ -11902,7 +12008,8 @@ org-mode's default settings, but still inferior to file-local settings."
 	 (title       (or (plist-get opt-plist :title)
 			  (file-name-sans-extension
 			   (file-name-nondirectory buffer-file-name))))
-	 (quote-re    (concat "^\\*+[ \t]*" org-quote-string "\\>"))
+	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
+	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
 	 (inquote     nil)
 	 (infixed     nil)
 	 (in-local-list nil)
@@ -12060,7 +12167,7 @@ org-mode's default settings, but still inferior to file-local settings."
 	(catch 'nextline
 
 	  ;; end of quote section?
-	  (when (and inquote (string-match "^\\*+" line))
+ 	  (when (and inquote (string-match "^\\*+" line))
 	    (insert "</pre>\n")
 	    (setq inquote nil))
 	  ;; inside a quote section?
@@ -12103,6 +12210,8 @@ org-mode's default settings, but still inferior to file-local settings."
 				  (org-solidify-link-text (match-string 1 line))
 				  "\" class=\"target\">" (match-string 1 line) "@</a> ")
 			  t t line)))))
+
+	  (setq line (org-html-handle-time-stamps line))
 
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
 	  ;; handle @<..> HTML tags (replace "@&gt;..&lt;" by "<..>")
@@ -12191,6 +12300,8 @@ org-mode's default settings, but still inferior to file-local settings."
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)))
 		  txt (match-string 2 line))
+	    (if (string-match quote-re0 txt)
+		(setq txt (replace-match "" t t txt)))
 	    (if (<= level umax) (setq head-count (+ head-count 1)))
 	    (when in-local-list
 	      ;; Close any local lists before inserting a new header line
@@ -12265,6 +12376,7 @@ org-mode's default settings, but still inferior to file-local settings."
 	  ))
 
       ;; Properly close all local lists and other lists
+      (when inquote (insert "</pre>\n"))
       (when in-local-list
 	;; Close any local lists before inserting a new header line
 	(while local-list-num
@@ -12440,6 +12552,10 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
     (table-generate-source 'html " org-tmp2 ")
     (set-buffer " org-tmp2 ")
     (buffer-substring (point-min) (point-max))))
+
+(defun org-html-handle-time-stamps (s)
+  "FIXME: Format time stamps, or remove them"
+  s)
 
 (defun org-html-protect (s)
   ;; convert & to &amp;, < to &lt; and > to &gt;
@@ -13072,7 +13188,8 @@ because, in this case the deletion might narrow the column."
 	    (goto-char pos)
 	    ;; noalign: if there were two spaces at the end, this field
 	    ;; does not determine the width of the column.
-	    (if noalign (setq org-table-may-need-update c))))
+	    (if noalign (setq org-table-may-need-update c)))
+	(delete-char N))
     (delete-char N)))
 
 ;; How to do this: Measure non-white length of current string
@@ -13103,7 +13220,8 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 
 (defun org-shifttab ()
   "Global visibility cycling or move to previous table field.
-Calls `(org-cycle t)' or `org-table-previous-field', depending on context.
+Calls `org-cycle' with argument t, or `org-table-previous-field', depending
+on context.
 See the individual commands for more information."
   (interactive)
   (cond
@@ -13507,6 +13625,11 @@ See the individual commands for more information."
      "--"
      ["Option Template" org-insert-export-options-template t]
      ["Toggle Fixed Width" org-toggle-fixed-width-section t])
+    ("Publish"
+     ["Current File" org-publish-current-file t]
+     ["Current Project" org-publish-current-project t]
+     ["Project..." org-publish t]
+     ["All Projects" org-publish-all t])
     "--"
     ("Documentation"
      ["Show Version" org-version t]

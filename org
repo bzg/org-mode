@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.27).
+   This manual is for Org-mode (version 4.28).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.27).
+This manual is for Org-mode (version 4.28).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -2514,7 +2514,9 @@ View/GoTo org file
 `f'
      Toggle Follow mode.  In Follow mode, as you move the cursor through
      the agenda buffer, the other window always shows the corresponding
-     location in the org file.
+     location in the org file.  The initial setting for this mode in new
+     agenda buffers can be set with the variable
+     `org-agenda-start-with-follow-mode'.
 
 `l'
      Toggle Logbook mode.  In Logbook mode, entries that where marked
@@ -3415,6 +3417,10 @@ Org-mode can cooperate with the following packages:
      want to have other replacement keys, look at the variable
      `org-disputed-keys'.
 
+`windmove.el' by Hovav Shacham
+     Also this package uses the `S-<cursor>' keys, so everything written
+     in the paragraph above about CUA mode also applies here.
+
 `remember.el' by John Wiegley
      Org mode cooperates with remember, see *Note Remember::.
      `Remember.el' is not part of Emacs, find it on the web.
@@ -3575,7 +3581,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * agenda:                                Weekly/Daily agenda. (line   6)
 * agenda commands, custom:               Agenda dispatcher.   (line   6)
 * agenda dispatcher:                     Agenda dispatcher.   (line   6)
-* agenda files, removing buffers:        Agenda commands.     (line 187)
+* agenda files, removing buffers:        Agenda commands.     (line 189)
 * agenda views:                          Agenda views.        (line   6)
 * agenda, for single file:               Timeline.            (line   6)
 * allout.el, conflict with:              FAQ.                 (line   6)
@@ -3640,7 +3646,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * DEADLINE keyword:                      Time stamps.         (line  43)
 * deadlines:                             Time stamps.         (line   6)
 * demotion, of subtrees:                 Structure editing.   (line   6)
-* diary entries, creating from agenda:   Agenda commands.     (line 145)
+* diary entries, creating from agenda:   Agenda commands.     (line 147)
 * diary integration:                     Calendar/Diary integration.
                                                               (line   6)
 * dictionary word completion:            Completion.          (line   6)
@@ -3773,7 +3779,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * region, active <3>:                    Built-in table editor.
                                                               (line 165)
 * region, active:                        Structure editing.   (line  51)
-* remember.el <1>:                       Interaction.         (line  40)
+* remember.el <1>:                       Interaction.         (line  64)
 * remember.el:                           Remember.            (line   6)
 * richer text:                           Enhancing text.      (line   6)
 * RMAIL links:                           External links.      (line   6)
@@ -3856,6 +3862,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * visible text, printing:                Sparse trees.        (line  39)
 * VM links:                              External links.      (line   6)
 * WANDERLUST links:                      External links.      (line   6)
+* windmove.el:                           Interaction.         (line  60)
 * workflow states as TODO keywords:      Workflow states.     (line   6)
 * XML export:                            XML export.          (line   6)
 
@@ -3868,28 +3875,28 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
  [index ]
 * Menu:
 
-* +:                                     Agenda commands.     (line 118)
-* ,:                                     Agenda commands.     (line 110)
-* -:                                     Agenda commands.     (line 124)
-* .:                                     Agenda commands.     (line  89)
-* ::                                     Agenda commands.     (line 107)
+* +:                                     Agenda commands.     (line 120)
+* ,:                                     Agenda commands.     (line 112)
+* -:                                     Agenda commands.     (line 126)
+* .:                                     Agenda commands.     (line  91)
+* ::                                     Agenda commands.     (line 109)
 * <:                                     Creating timestamps. (line  75)
-* <left>:                                Agenda commands.     (line  86)
+* <left>:                                Agenda commands.     (line  88)
 * <RET> <1>:                             Agenda commands.     (line  41)
 * <RET> <2>:                             Creating timestamps. (line 100)
 * <RET>:                                 Built-in table editor.
                                                               (line  64)
-* <right>:                               Agenda commands.     (line  81)
+* <right>:                               Agenda commands.     (line  83)
 * <SPC>:                                 Agenda commands.     (line  28)
 * <TAB> <1>:                             Agenda commands.     (line  35)
 * <TAB> <2>:                             Built-in table editor.
                                                               (line  57)
 * <TAB> <3>:                             Plain lists.         (line  38)
 * <TAB>:                                 Visibility cycling.  (line  10)
-* > <1>:                                 Agenda commands.     (line 140)
+* > <1>:                                 Agenda commands.     (line 142)
 * >:                                     Creating timestamps. (line  76)
-* C:                                     Agenda commands.     (line 170)
-* c:                                     Agenda commands.     (line 154)
+* C:                                     Agenda commands.     (line 172)
+* c:                                     Agenda commands.     (line 156)
 * C-#:                                   Built-in table editor.
                                                               (line 155)
 * C-,:                                   Agenda files.        (line  18)
@@ -3972,7 +3979,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-x a:                             ASCII export.        (line   9)
 * C-c C-x b:                             HTML export.         (line  11)
 * C-c C-x c:                             iCalendar export.    (line  20)
-* C-c C-x C-c:                           Agenda commands.     (line 177)
+* C-c C-x C-c:                           Agenda commands.     (line 179)
 * C-c C-x C-i:                           iCalendar export.    (line  15)
 * C-c C-x C-k:                           Structure editing.   (line  36)
 * C-c C-x C-w <1>:                       Built-in table editor.
@@ -3998,15 +4005,15 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-u C-c =:                             Built-in table editor.
                                                               (line 139)
 * C-u C-c C-l:                           Handling links.      (line  40)
-* D:                                     Agenda commands.     (line  66)
-* d:                                     Agenda commands.     (line  63)
+* D:                                     Agenda commands.     (line  68)
+* d:                                     Agenda commands.     (line  65)
 * f:                                     Agenda commands.     (line  44)
-* g:                                     Agenda commands.     (line  70)
-* H:                                     Agenda commands.     (line 174)
-* i:                                     Agenda commands.     (line 145)
-* l:                                     Agenda commands.     (line  49)
+* g:                                     Agenda commands.     (line  72)
+* H:                                     Agenda commands.     (line 176)
+* i:                                     Agenda commands.     (line 147)
+* l:                                     Agenda commands.     (line  51)
 * L:                                     Agenda commands.     (line  32)
-* M:                                     Agenda commands.     (line 161)
+* M:                                     Agenda commands.     (line 163)
 * M-<down>:                              Built-in table editor.
                                                               (line  82)
 * M-<left> <1>:                          Built-in table editor.
@@ -4049,32 +4056,32 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * mouse-3 <1>:                           Agenda commands.     (line  28)
 * mouse-3:                               Handling links.      (line  74)
 * n:                                     Agenda commands.     (line  19)
-* o:                                     Agenda commands.     (line  57)
-* P:                                     Agenda commands.     (line 115)
+* o:                                     Agenda commands.     (line  59)
+* P:                                     Agenda commands.     (line 117)
 * p:                                     Agenda commands.     (line  20)
-* q:                                     Agenda commands.     (line 184)
-* r <1>:                                 Agenda commands.     (line  74)
+* q:                                     Agenda commands.     (line 186)
+* r <1>:                                 Agenda commands.     (line  76)
 * r:                                     Global TODO list.    (line  21)
-* S:                                     Agenda commands.     (line 165)
-* S-<down> <1>:                          Agenda commands.     (line 124)
+* S:                                     Agenda commands.     (line 167)
+* S-<down> <1>:                          Agenda commands.     (line 126)
 * S-<down> <2>:                          Creating timestamps. (line  55)
 * S-<down>:                              Priorities.          (line  25)
-* S-<left> <1>:                          Agenda commands.     (line 136)
+* S-<left> <1>:                          Agenda commands.     (line 138)
 * S-<left>:                              Creating timestamps. (line  50)
 * S-<RET>:                               Built-in table editor.
                                                               (line 170)
-* S-<right> <1>:                         Agenda commands.     (line 128)
+* S-<right> <1>:                         Agenda commands.     (line 130)
 * S-<right>:                             Creating timestamps. (line  50)
 * S-<TAB> <1>:                           Built-in table editor.
                                                               (line  61)
 * S-<TAB>:                               Visibility cycling.  (line  19)
-* S-<up> <1>:                            Agenda commands.     (line 118)
+* S-<up> <1>:                            Agenda commands.     (line 120)
 * S-<up> <2>:                            Creating timestamps. (line  55)
 * S-<up>:                                Priorities.          (line  25)
-* T:                                     Agenda commands.     (line 102)
-* t:                                     Agenda commands.     (line  98)
-* w:                                     Agenda commands.     (line  60)
-* x:                                     Agenda commands.     (line 187)
+* T:                                     Agenda commands.     (line 104)
+* t:                                     Agenda commands.     (line 100)
+* w:                                     Agenda commands.     (line  62)
+* x:                                     Agenda commands.     (line 189)
 
 
 
@@ -4153,27 +4160,27 @@ Node: Global TODO list98135
 Node: Matching headline tags99550
 Node: Timeline100493
 Node: Agenda commands101366
-Node: Exporting106622
-Node: ASCII export107752
-Node: HTML export108574
-Node: XML export110322
-Node: iCalendar export110689
-Node: Text interpretation112511
-Node: Comment lines112988
-Node: Enhancing text113457
-Node: Export options115288
-Node: Miscellaneous116890
-Node: Completion117648
-Node: Customization118644
-Node: Summary of in-buffer settings119251
-Node: The very busy C-c C-c key122012
-Node: Clean view123417
-Node: TTY keys125994
-Node: FAQ127595
-Node: Interaction134497
-Node: Bugs137364
-Node: Acknowledgments139318
-Node: Index142413
-Node: Key Index163710
+Node: Exporting106755
+Node: ASCII export107885
+Node: HTML export108707
+Node: XML export110455
+Node: iCalendar export110822
+Node: Text interpretation112644
+Node: Comment lines113121
+Node: Enhancing text113590
+Node: Export options115421
+Node: Miscellaneous117023
+Node: Completion117781
+Node: Customization118777
+Node: Summary of in-buffer settings119384
+Node: The very busy C-c C-c key122145
+Node: Clean view123550
+Node: TTY keys126127
+Node: FAQ127728
+Node: Interaction134630
+Node: Bugs137664
+Node: Acknowledgments139618
+Node: Index142713
+Node: Key Index164083
 
 End Tag Table
