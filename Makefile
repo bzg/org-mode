@@ -55,7 +55,7 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES  = org.el org_xemacs.el org-publish.el org-mouse.el org-install.el
+LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
 CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf orgcard_letter.ps
@@ -93,9 +93,6 @@ install-info: $(INFOFILES)
 install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
-
-org_xemacs.el: org.el
-	perl -npe 's/\[:alnum:\]/a-zA-Z0-9/g' org.el > org_xemacs.el
 
 org.elc:		org.el
 

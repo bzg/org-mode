@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.78).
+   This manual is for Org-mode (version 4.79).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.78).
+This manual is for Org-mode (version 4.79).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -5121,7 +5121,7 @@ Completion::).
      #+LANGUAGE:  language for HTML, e.g. `en' (`org-export-default-language')
      #+TEXT:      Some descriptive text to be inserted at the beginning.
      #+TEXT:      Several lines may be given.
-     #+OPTIONS:   H:2 num:t toc:t \n:nil @:t ::t |:t ^:t *:nil TeX:t LaTeX:t skip:t
+     #+OPTIONS:   H:2 num:t toc:t \n:nil @:t ::t |:t ^:t f:t *:nil TeX:t LaTeX:t skip:t
 
 The OPTIONS line is a compact form to specify export settings.  Here
 you can: 
@@ -5135,6 +5135,7 @@ you can:
      ^:      turn on/off TeX-like syntax for sub- and superscripts.  If
              you write "^:{}", `a_{b}' will be interpreted, but
              the simple `a_b' will be left as it is.
+     f:      turn on/off foototes like this[1].
      *:      turn on/off emphasized text (bold, italic, underlined)
      TeX:    turn on/off simple TeX macros in plain text
      LaTeX:  turn on/off LaTeX fragments
@@ -6699,6 +6700,7 @@ Index
 * footnote.el <1>:                       Conflicts.           (line  35)
 * footnote.el <2>:                       Cooperation.         (line  56)
 * footnote.el:                           Footnotes.           (line   6)
+* footnotes <1>:                         Export options.      (line  25)
 * footnotes:                             Footnotes.           (line   6)
 * format specifier:                      Formula syntax for Calc.
                                                               (line  14)
@@ -7488,45 +7490,45 @@ Node: Footnotes203977
 Node: Enhancing text204792
 Ref: Enhancing text-Footnote-1206651
 Node: Export options206741
-Node: Publishing208634
-Ref: Publishing-Footnote-1209430
-Node: Configuration209626
-Node: Project alist210344
-Node: Sources and destinations211410
-Node: Selecting files212140
-Node: Publishing action212888
-Node: Publishing options214121
-Node: Publishing links216273
-Node: Project page index217786
-Node: Sample configuration218564
-Node: Simple example219056
-Node: Complex example219729
-Node: Triggering publication221805
-Node: Miscellaneous222490
-Node: Completion223124
-Node: Customization224595
-Node: In-buffer settings225178
-Node: The very busy C-c C-c key230054
-Node: Clean view231698
-Node: TTY keys234275
-Node: Interaction235885
-Node: Cooperation236282
-Node: Conflicts239158
-Node: Bugs241161
-Node: Extensions and Hacking242657
-Node: Extensions243253
-Node: Tables in arbitrary syntax245200
-Node: Radio tables246277
-Node: A LaTeX example248780
-Ref: A LaTeX example-Footnote-1252426
-Ref: A LaTeX example-Footnote-2252574
-Node: Translator functions253009
-Ref: Translator functions-Footnote-1256118
-Node: Dynamic blocks256206
-Node: Special agenda views258178
-Ref: Special agenda views-Footnote-1260457
-Node: History and Acknowledgments260717
-Node: Index266811
-Node: Key Index298965
+Node: Publishing208686
+Ref: Publishing-Footnote-1209482
+Node: Configuration209678
+Node: Project alist210396
+Node: Sources and destinations211462
+Node: Selecting files212192
+Node: Publishing action212940
+Node: Publishing options214173
+Node: Publishing links216325
+Node: Project page index217838
+Node: Sample configuration218616
+Node: Simple example219108
+Node: Complex example219781
+Node: Triggering publication221857
+Node: Miscellaneous222542
+Node: Completion223176
+Node: Customization224647
+Node: In-buffer settings225230
+Node: The very busy C-c C-c key230106
+Node: Clean view231750
+Node: TTY keys234327
+Node: Interaction235937
+Node: Cooperation236334
+Node: Conflicts239210
+Node: Bugs241213
+Node: Extensions and Hacking242709
+Node: Extensions243305
+Node: Tables in arbitrary syntax245252
+Node: Radio tables246329
+Node: A LaTeX example248832
+Ref: A LaTeX example-Footnote-1252478
+Ref: A LaTeX example-Footnote-2252626
+Node: Translator functions253061
+Ref: Translator functions-Footnote-1256170
+Node: Dynamic blocks256258
+Node: Special agenda views258230
+Ref: Special agenda views-Footnote-1260509
+Node: History and Acknowledgments260769
+Node: Index266863
+Node: Key Index299090
 
 End Tag Table
