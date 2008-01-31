@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.13}
+\def\orgversionnumber{4.19a}
 \def\year{2006}
 %
 %**start of header
@@ -366,10 +366,8 @@ To set archive location for current file, add a line like$^3$:
 \key{insert SCHEDULED timestamp}{C-c C-s}
 \key{create sparse tree with all deadlines due}{C-c C-w}
 \key{the time between 2 dates in a time range}{C-c C-y}
-\key{change timestamp at cursor by $-1$ day}{S-LEFT$^4$}
-\key{change timestamp at cursor by $+1$ day}{S-RIGHT$^4$}
-\key{change year/month/day at cursor by $-1$}{S-DOWN$^4$}
-\key{change year/month/day at cursor by $+1$}{S-UP$^4$}
+\key{change timestamp at cursor by $\pm 1$ day}{S-RIGHT/LEFT$^4$}
+\key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN$^4$}
 \key{access the calendar for the current date}{C-c >}
 \key{insert timestamp matching date in calendar}{C-c <}
 \key{access agenda for current date}{C-c C-o}
@@ -385,6 +383,7 @@ To set archive location for current file, add a line like$^3$:
 \key{globally store link to the current location}{C-c l$^2$}
 \key{insert a link (TAB completes stored links)}{C-c C-l}
 \key{insert file link with file name completion}{C-u C-c C-l}
+\key{edit (also hidden part of) link at point}{C-c C-l}
 
 \key{open file links in emacs (\kbd{C-u} : in emacs)}{C-c C-o}
 \key{open link at point (3: in emacs)}{mouse-2/3}
@@ -398,6 +397,7 @@ To set archive location for current file, add a line like$^3$:
 \key{\kbd{<<<My Target>>>}}{\rm radio target$^3$}
 \key{\kbd{[[*this text]]}}{\rm find headline}
 \metax{\kbd{[[this text]]}}{\rm find target or text in buffer}
+\metax{\kbd{[[this text][description]]}}{\rm optional link text}
 
 {\bf External Links}
 
@@ -415,6 +415,7 @@ To set archive location for current file, add a line like$^3$:
 \key{\kbd{<gnus:group\#id>}}{\rm GNUS message}
 \key{\kbd{<vm|wl|mhe|rmail:folder>}}{\rm Mail folder}
 \key{\kbd{<vm|wl|mhe|rmail:folder\#id>}}{\rm Mail message}
+\metax{\kbd{[[<external link>][description]]}}{\rm optional link text}
 %\key{\kbd{<vm://myself@some.where.org/folder\#id>}}{\rm VM remote}
 
 \section{Tables}
@@ -424,8 +425,8 @@ To set archive location for current file, add a line like$^3$:
 
 {\bf Creating a table}
 
-\metax{insert a new Org-mode table}{M-x org-table-create}
-\metax{... or just start typing, e.g.}{|Name|Phone|Age RET |- TAB}
+%\metax{insert a new Org-mode table}{M-x org-table-create}
+\metax{just start typing, e.g.}{|Name|Phone|Age RET |- TAB}
 \key{convert region to table}{C-c C-c}
 \key{... separator at least 3 spaces}{C-3 C-c C-c}
 %\key{... prompt for separator regexp}{C-u C-c C-c}
@@ -495,6 +496,7 @@ introduces a column formula, \kbd{:=} a named-field formula.
 
 {\bf Miscellaneous}
 
+\key{edit the current field in a separate window}{C-c `}
 \key{toggle visibility of vertical lines}{C-c |}
 \metax{export as tab-separated file}{M-x org-table-export}
 \metax{import tab-separated file}{M-x org-table-import}

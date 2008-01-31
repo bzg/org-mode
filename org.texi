@@ -4,7 +4,7 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.13
+@set VERSION 4.19a
 @set DATE March 2006
 
 @dircategory Emacs
@@ -82,6 +82,7 @@ Software Foundation raise funds for GNU development.''
 * Hyperlinks::                  Notes in context
 * TODO items::                  Every tree branch can be a TODO item
 * Timestamps::                  Assign date and time to items
+* Tags::                        Tagging headlines and matching sets of tags
 * Agenda Views::                Collecting information into views
 * Exporting::                   Sharing and publishing of notes
 * Miscellaneous::               All the rest which did not fit elsewhere
@@ -106,12 +107,12 @@ Document Structure
 * Structure editing::           Changing sequence and level of headlines
 * Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
-* Tags::                        Tagging headlines and matching sets of tags
 * Plain Lists::                 Editing hand-formatted lists
 
 Tables
 
 * Built-in table editor::       Simple tables
+* Narrow columns::              Stop wasting space in tables   
 * Table calculations::          Compute a field from other fields
 * orgtbl-mode::                 The table editor as minor mode
 * table.el::                    Complex tables
@@ -127,6 +128,7 @@ Calculations in tables
 
 Hyperlinks
 
+* Link format::                 How links in Org-mode are formatted
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Managing links::              Creating, inserting and following
@@ -155,6 +157,12 @@ Timestamps
 
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
+
+Tags
+
+* Tag inheritance::             Tags use the tree structure of the outline
+* Setting tags::                How to assign tags to a headline
+* Tag searches::                Searching for combinations of tags
 
 Agenda Views
 
@@ -343,7 +351,6 @@ edit the structure of the document.
 * Structure editing::           Changing sequence and level of headlines
 * Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
-* Tags::                        Tagging headlines and matching sets of tags
 * Plain Lists::                 Editing hand-formatted lists
 @end menu
 
@@ -567,7 +574,7 @@ this, see the documentation string of the variable
 agenda, archiving to a different file is a good way to keep archived
 trees from contributing agenda items.
 
-@node Sparse trees, Tags, Archiving, Document Structure
+@node Sparse trees, Plain Lists, Archiving, Document Structure
 @section Sparse trees
 @cindex sparse trees
 @cindex trees, sparse
@@ -624,85 +631,8 @@ Or you can use the command @kbd{C-c C-x v} to copy the visible part of
 the document to another file (extension @file{.txt}) which can then be
 printed in any desired way.
 
-@node Tags, Plain Lists, Sparse trees, Document Structure
-@section Tags
-@cindex tags
-@cindex headline tagging
-@cindex matching, tags
-@cindex sparse tree, tag based
 
-If you wish to implement a tag system to cross-correlate information,
-this can be done as well in Org-mode.  Every headline can contain a
-list of tags, at the end of the headline.  Tags are normal words
-containing letters, numbers, @samp{_}, and @samp{@@}.  Tags must be
-preceded and followed by a single colon; like @samp{:WORK:}.  Several
-tags can be specified like @samp{:WORK:URGENT:}.
-
-@cindex inheritance, of tags
-Tags make use of the hierarchical structure of outline trees.  If a
-heading has a certain tag, all subheadings will inherit the tag as
-well.  For example, in the list
-
-@example
-* Meeting with the French group      :WORK:
-** Summary by Frank                  :BOSS:NOTES:
-*** TODO Prepare slides for him      :ACTION:
-@end example
-@noindent
-the final heading will have the tags @samp{:WORK:}, @samp{:BOSS:},
-@samp{:NOTES:}, and @samp{:ACTION:}.  When executing tag searches and
-Org-mode finds that a certain headline matches the search criterion,
-it will not check any sublevel headline, assuming that these likely
-also match, and that the list of matches can become very long.  You
-can influence inheritance and searching using the variables
-@code{org-use-tag-inheritance} and
-@code{org-tags-match-list-sublevels}.
-
-@kindex M-@key{TAB}
-Tags can simply be typed into the buffer.  After a colon,
-@kbd{M-@key{TAB}} offers completion on all tags being used in the
-current buffer.  There are also special commands for inserting tags,
-and for executing searches based on tags.
-
-@table @kbd
-@kindex C-c C-c
-@item C-c C-c
-@cindex completion, of tags
-Enter new tags for the current headline.  The minibuffer will prompt
-for a list of tags and offer completion with respect to all other tags
-used in the current buffer.  Several tags, separated by colons, may be
-specified at the prompt.  After pressing @key{RET}, the tags will
-be inserted and aligned to @code{org-tags-column}.  When called with a
-@kbd{C-u} prefix, align all tags in the current buffer to that column,
-just to make things look nice.  TAGS are automatically realigned after
-promotion, demotion, and TODO state changes (@pxref{TODO basics}).
-@kindex C-c \
-@item C-c \
-Create a sparse tree with all headlines matching a tags search.
-@kindex C-c a m
-@item C-c a m
-Create a global list of tag matches from all agenda files.
-@xref{Matching headline tags}.
-@kindex C-c a M
-@item C-c a M
-Create a global list of tag matches from all agenda files, but check
-only TODO items and force checking subitems (see variable
-@code{org-tags-match-list-sublevels}).
-@end table
-
-A tags search string can use Boolean operators @samp{&} for AND and
-@samp{|} for OR.  @samp{&} binds more strongly than
-@samp{|}. Parenthesis are currently not implemented.  A tag may also be
-preceded by @samp{-}, to select against it, and @samp{+} is syntactic
-sugar for positive selection.  The AND operator @samp{&} is optional
-when @samp{+} or @samp{-} is present.  For example, @samp{+WORK-BOSS}
-would select all headlines that are tagged @samp{:WORK:}, but discard
-those also tagged @samp{:BOSS:}.  The search string @samp{WORK|LAPTOP}
-selects all lines tagged @samp{:WORK:} or @samp{:LAPTOP:}. The string
-@samp{WORK|LAPTOP&NIGHT} requires that the @samp{:LAPTOP:} lines are
-also tagged @samp{NIGHT}.
-
-@node Plain Lists,  , Tags, Document Structure
+@node Plain Lists,  , Sparse trees, Document Structure
 @section Plain Lists
 @cindex plain lists
 @cindex lists, plain
@@ -792,12 +722,13 @@ Emacs @file{calc} package.
 
 @menu
 * Built-in table editor::       Simple tables
+* Narrow columns::              Stop wasting space in tables   
 * Table calculations::          Compute a field from other fields
 * orgtbl-mode::                 The table editor as minor mode
 * table.el::                    Complex tables
 @end menu
 
-@node Built-in table editor, Table calculations, Tables, Tables
+@node Built-in table editor, Narrow columns, Tables, Tables
 @section The built-in table editor
 @cindex table editor, builtin
 
@@ -1000,6 +931,11 @@ incremented during copy.  This key is also used by CUA-mode
 (@pxref{Interaction}).
 
 @tsubheading{Miscellaneous}
+@kindex C-c `
+@item C-c `
+Edit the current field in a separate window.  This is useful for fields
+that are not fully visible (@pxref{Narrow columns}).
+
 @kindex C-c |
 @item C-c |
 Toggle the visibility of vertical lines in tables.  The lines are
@@ -1029,7 +965,48 @@ it off with
 @noindent The only table command which then still works is
 @kbd{C-c C-c} to do a manual re-align.
 
-@node Table calculations, orgtbl-mode, Built-in table editor, Tables
+@node Narrow columns, Table calculations, Built-in table editor, Tables
+@section Narrow columns
+@cindex narrow columns in tables
+
+The width of columns is automatically determined by the table editor.
+Sometimes a single field or a few fields need to carry more text,
+leading to unconveniently wide columns.  To limit@footnote{This feature
+does not work on XEmacs.} the width of a column, one field anywhere in
+the column must carry the string @samp{<N>} where @samp{N} is an integer
+specifying the width of the column in characters.  The next re-align
+will then set the width of this column to no more than this value.
+
+@example
+|---+------------------------------|               |---+--------|
+|   |                              |               |   | <6>    |
+| 1 | one                          |               | 1 | one    |
+| 2 | two                          |     ----\     | 2 | two    |
+| 3 | This is a long chunk of text |     ----/     | 3 | This=> |
+| 4 | four                         |               | 4 | four   |
+|---+------------------------------|               |---+--------|
+@end example
+@noindent
+Fields that are wider become clipped and end in the string @samp{=>}.
+Note that the full text is still in the buffer, it is only invisible.
+To see the full text, hold the mouse over the field - a tooltip window
+will show the full content.  To edit such a field, use the command
+@kbd{C-c `} (that is @kbd{C-c} followed by the backquote).  This will
+open a new window with the full field.  Edit it and finish with @kbd{C-c
+C-c}.
+
+When visiting a file containing a table with narrowed columns, the
+necessary character hiding has not yet happened, and the table needs to
+be aligned before it looks nice.  Setting the option
+@code{org-startup-align-all-tables} will realign all tables in a file
+upon visiting, but also slow down startup.  You can also set this option
+on a per-file basis with:
+@example
+#+STARTUP: align
+#+STARTUP: noalign
+@end example
+
+@node Table calculations, orgtbl-mode, Narrow columns, Tables
 @section Calculations in tables
 @cindex calculations, in tables
 @cindex spreadsheet capabilities
@@ -1362,6 +1339,7 @@ Just like HMTL, Org-mode provides links inside a file, and external
 links to other files, Usenet articles, emails and much more.
 
 @menu
+* Link format::                 How links in Org-mode are formatted
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Managing links::              Creating, inserting and following
@@ -1369,39 +1347,65 @@ links to other files, Usenet articles, emails and much more.
 * Remember::                    Org-trees store quick notes
 @end menu
 
-@node Internal links, External links, Hyperlinks, Hyperlinks
+@node Link format, Internal links, Hyperlinks, Hyperlinks
+@section Link format
+@cindex link format
+@cindex format, of links
+
+Org-mode will recognize plain URL-like links in the buffer and activate
+them as clickable links.  However, the general linkformat in Org-mode
+looks like:
+@example
+[[link][description]]       @r{or alternatively}           [[link]]  
+@end example
+The description part is optional.  Once a link in the buffer is
+complete, Org-mode will change the display so that
+@u{@samp{description}} is displayed instead of
+@samp{[[link][description]]} and @samp{link} is displayed instead of
+@samp{[[link]]}.  Links will be highlighted in the face @code{org-link},
+which by default is an underlined face.  You can directly edit the
+visible part of a link.  To edit the invisible part, use @kbd{C-c C-l}
+with the cursor on the link@footnote{You can also position the cursor
+directly after the link and press @key{BACKSPACE} to remove the
+(invisible) closing bracket @samp{]}.  This makes the link incomplete,
+and shows the full raw link text for you to edit.  You may also use the
+menu entry @code{Org->Hperlinks->Literal links} to unhide all links.}.
+
+@node Internal links, External links, Link format, Hyperlinks
 @section Internal links
 @cindex internal links
 @cindex links, internal
 @cindex CamelCase links
 
-Strings inside double brackets like @samp{[[My Target]]} are links
-that lead to a text search in the current file.  The link can be
-followed with @kbd{C-c C-o} or with a mouse click (@pxref{Managing
-links}).  The preferred match for such a link is a dedicated target:
-The same string in double angular brackets.  Targets may be located
-anywhere, often it is convenient to put them into a comment line, for
-example
+If the link text does not look like a URL, links are considered to be
+internal in the current file.  Links such as @samp{[[My Target]]} or
+@samp{[[My Target][Find my target]]} lead to a text search in the
+current file.  The link can be followed with @kbd{C-c C-o} when the
+cursor is on the link, or with a mouse click (@pxref{Managing links}).
+The preferred match for such a link is a dedicated target: The same
+string in double angular brackets.  Targets may be located anywhere,
+often it is convenient to put them into a comment line, for example
 @example
 # <<My Target>>
 @end example
 
-If no dedicated target exists, Org-mode will search for the words in
-the link, in the above example for @samp{my target}.  Links starting
-with a star like @samp{*My Target} restrict the search to headlines.
-When searching, Org-mode will first try an exact match, but then move
-on to more and more lenient searches.  For example, the link
-@samp{[[*My Targets]]} will find any of the following:
+If no dedicated target exists, Org-mode will search for the words in the
+link, often removing the need for a dedicated target.  In the above
+example the search would be for @samp{my target}.  Links starting with a
+star like @samp{*My Target} restrict the search to headlines.  When
+searching, Org-mode will first try an exact match, but then move on to
+more and more lenient searches.  For example, the link @samp{[[*My
+Targets]]} will find any of the following:
 @example
 ** My targets
 ** TODO my targets are bright
 ** my 20 targets are
 @end example
-It is therefore often not necessary to set a dedicated target.  To
-insert a link targeting a headline, in-buffer completion can be used.
-Just type a star followed by a few optional letters into the buffer
-and press @kbd{M-@key{TAB}}.  All headlines in the current buffer will
-be offered as completions.  @xref{Managing links}, for more commands
+
+To insert a link targeting a headline, in-buffer completion can be used.
+Just type a star followed by a few optional letters into the buffer and
+press @kbd{M-@key{TAB}}.  All headlines in the current buffer will be
+offered as completions.  @xref{Managing links}, for more commands
 creating links.
 
 Following a link pushes a mark onto Org-mode's own mark ring.  You can
@@ -1460,8 +1464,8 @@ needed:
 @cindex SHELL links
 
 Org-mode supports links to files, websites, Usenet and email messages;
-and BBDB database entries.  Links are just plain-text URL-like
-locators, optionally enclosed by angular brackets.  The following list
+and BBDB database entries.  External links are plain-text URL-like
+locators, optionally enclosed in angular brackets.  The following list
 shows examples for each link type.
 
 @example
@@ -1489,7 +1493,15 @@ A link may contain space characters and is terminated by @samp{>} or by
 the end of a line.  In tables, the end of a table field also terminates
 a link.  Angle brackets around a link are not required, but are
 recommended to avoid problems with punctuation and other text following
-the link.  See also the variable @code{org-allow-space-in-links}.
+the link.
+
+To display a descriptive text instead of the URL, enclose the link into
+double brackets and add the descriptive text like this:
+@example
+[[<http://www.gnu.org/software/emacs/>][GNU Emacs]]
+@end example
+@noindent Links inserted with @kbd{C-c C-l} automatically use the double
+bracket format (@pxref{Managing links}).
 
 
 @node Managing links, Search Options, External links, Hyperlinks
@@ -1522,15 +1534,16 @@ activation}.
 @cindex completion, of file names
 @cindex inserting links
 @item C-c C-l
-Insert a link.  This prompts for a link to be inserted into the
-buffer.  You can just type a link, using one of the link type prefixes
-mentioned in the examples above.  Through completion, all links stored
-during the current session can be accessed.  When called with prefix
-arg, you can use file name completion to enter a file link.  The link
-will be formatted as given in the variable @code{org-link-format} and
-inserted into the buffer.  Note that you don't have to use this
-command to insert a link.  Links in Org-mode are plain text, and you
-can type or paste them straight into the buffer.
+Insert a link.  This prompts for a link to be inserted into the buffer.
+You can just type a link, using text for an internal link, or one of the
+link type prefixes mentioned in the examples above.  Through completion,
+all links stored during the current session can be accessed.  When
+called with prefix arg, you can use file name completion to enter a file
+link.  The link will be formatted as given in the variable
+@code{org-link-format} and inserted into the buffer, along with a
+descriptive text.  Note that you don't have to use this command to
+insert a link.  Links in Org-mode are plain text, and you can type or
+paste them straight into the buffer.
 
 @cindex following links
 @kindex C-c C-o
@@ -1538,7 +1551,7 @@ can type or paste them straight into the buffer.
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run vm/gnus/bbdb for the corresponding
 links, and execute the command in a shell link.  When the cursor is on
-a CamelCase link, this commands runs the corresponding search.  When
+am internal link, this commands runs the corresponding search.  When
 the cursor is on a TAGS list in a headline, it creates the
 corresponding TAGS view.  Furthermore, it will visit text files in
 @samp{file:} links with Emacs and select a suitable application for
@@ -1803,12 +1816,14 @@ each day, giving you an overview of what has been done on a day.
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
-The default implementation of TODO entries is just two states:  TODO
-and DONE.  You can, however, use the TODO feature for more
-complicated things by configuring the variables
-@code{org-todo-keywords} and @code{org-todo-interpretation}.  Using
-special setup, you can even use TODO keywords in different ways in
-different org files.
+The default implementation of TODO entries is just two states: TODO and
+DONE.  You can, however, use the TODO feature for more complicated
+things by configuring the variables @code{org-todo-keywords} and
+@code{org-todo-interpretation}.  Using special setup, you can even use
+TODO keywords in different ways in different org files.
+
+Note that @i{tags} are another way to classify headlines in general and
+TODO items in particular (@pxref{Tags}).
 
 @menu
 * Workflow states::             From TODO to DONE in steps
@@ -1956,7 +1971,7 @@ Furthermore, these keys are also used by CUA-mode
 (@pxref{Interaction}).
 @end table
 
-@node Timestamps, Agenda Views, TODO items, Top
+@node Timestamps, Tags, TODO items, Top
 @chapter Timestamps
 
 Items can be labeled with timestamps to make them useful for project
@@ -2153,15 +2168,118 @@ One month back.
 Choose date in calendar (only if nothing typed into minibuffer).
 @end table
 
-@node Agenda Views, Exporting, Timestamps, Top
+@node Tags, Agenda Views, Timestamps, Top
+@chapter Tags
+@cindex tags
+@cindex headline tagging
+@cindex matching, tags
+@cindex sparse tree, tag based
+
+If you wish to implement a system to cross-correlate information, an
+excellent ways is assigning @i{tags} to headline.  Org-mode has
+extensive support for using tags.
+
+Every headline can contain a list of tags, at the end of the headline.
+Tags are normal words containing letters, numbers, @samp{_}, and
+@samp{@@}.  Tags must be preceded and followed by a single colon; like
+@samp{:WORK:}.  Several tags can be specified like @samp{:WORK:URGENT:}.
+
+@menu
+* Tag inheritance::             Tags use the tree structure of the outline
+* Setting tags::                How to assign tags to a headline
+* Tag searches::                Searching for combinations of tags
+@end menu
+
+@node Tag inheritance, Setting tags, Tags, Tags
+@section Tag inheritance
+@cindex inheritance, of tags
+
+@i{Tags} make use of the hierarchical structure of outline trees.  If a
+heading has a certain tag, all subheadings will inherit the tag as
+well.  For example, in the list
+
+@example
+* Meeting with the French group      :WORK:
+** Summary by Frank                  :BOSS:NOTES:
+*** TODO Prepare slides for him      :ACTION:
+@end example
+@noindent
+the final heading will have the tags @samp{:WORK:}, @samp{:BOSS:},
+@samp{:NOTES:}, and @samp{:ACTION:}.  When executing tag searches and
+Org-mode finds that a certain headline matches the search criterion, it
+will not check any sublevel headline, assuming that these likely also
+match, and that the list of matches can become very long.  However, this
+may not be what you want, and you can influence inheritance and
+searching using the variables @code{org-use-tag-inheritance} and
+@code{org-tags-match-list-sublevels}.
+
+@node Setting tags, Tag searches, Tag inheritance, Tags
+@section Setting tags
+@cindex setting tags
+
+@kindex M-@key{TAB}
+As Org-mode deals with plain text files, tags can simply be typed into
+the buffer.  After a colon, @kbd{M-@key{TAB}} offers completion on all
+tags being used in the current buffer.  There is also a special command
+for inserting tags:
+
+@table @kbd
+@kindex C-c C-c
+@item C-c C-c
+@cindex completion, of tags
+Enter new tags for the current headline.  The minibuffer will prompt for
+a list of tags and offer completion with respect to all other tags used
+in the current buffer.  Several tags, separated by colons, may be
+specified at the prompt.  After pressing @key{RET}, the tags will be
+inserted and aligned to @code{org-tags-column}.  When called with a
+@kbd{C-u} prefix, all tags in the current buffer will be aligned to that
+column, just to make things look nice.  TAGS are automatically realigned
+after promotion, demotion, and TODO state changes (@pxref{TODO basics}).
+@end table
+
+@node Tag searches,  , Setting tags, Tags
+@section Tag searches
+@cindex tag searches
+
+Once a tags system has been set up, it can be used to collect related
+information into special lists.
+
+@table @kbd
+@kindex C-c \
+@item C-c \
+Create a sparse tree with all headlines matching a tags search.
+@kindex C-c a m
+@item C-c a m
+Create a global list of tag matches from all agenda files.
+@xref{Matching headline tags}.
+@kindex C-c a M
+@item C-c a M
+Create a global list of tag matches from all agenda files, but check
+only TODO items and force checking subitems (see variable
+@code{org-tags-match-list-sublevels}).
+@end table
+
+A @i{tags} search string can use Boolean operators @samp{&} for AND and
+@samp{|} for OR.  @samp{&} binds more strongly than @samp{|}.
+Parenthesis are currently not implemented.  A tag may also be preceded
+by @samp{-}, to select against it, and @samp{+} is syntactic sugar for
+positive selection.  The AND operator @samp{&} is optional when @samp{+}
+or @samp{-} is present.  For example, @samp{+WORK-BOSS} would select all
+headlines that are tagged @samp{:WORK:}, but discard those also tagged
+@samp{:BOSS:}.  The search string @samp{WORK|LAPTOP} selects all lines
+tagged @samp{:WORK:} or @samp{:LAPTOP:}.  The string
+@samp{WORK|LAPTOP&NIGHT} requires that the @samp{:LAPTOP:} lines are
+also tagged @samp{NIGHT}.
+
+@node Agenda Views, Exporting, Tags, Top
 @chapter Agenda Views
 @cindex agenda views
 
-Due to the way Org-mode works, TODO items and time-stamped items can
-be scattered throughout a file or even a number of files.  To get an
-overview over open action items, or over events that are important for
-a particular date, this information must be collected, sorted and
-displayed in an organized way.
+Due to the way Org-mode works, TODO items, time-stamped items, and
+tagged headlines can be scattered throughout a file or even a number of
+files.  To get an overview over open action items, or over events that
+are important for a particular date, this information must be collected,
+sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
 in a separate buffer.  Three different views are provided:
@@ -2233,7 +2351,7 @@ to visit any of them.
 The views are created through a dispatcher that should be bound to a
 global key, for example @kbd{C-c a} (@pxref{Installation and
 activation}).  In the following we will assume that @kbd{C-c a} is
-indeed how the dispatcher is accessed and lists keyboard access to
+indeed how the dispatcher is accessed and list keyboard access to
 commands accordingly.  After pressing @kbd{C-c a}, an additional
 letter is required to execute a command.  The dispatcher offers the
 following default commands:
@@ -3077,8 +3195,8 @@ variables is available with @kbd{M-x org-customize}.  Or select
 @cindex clean outline view
 
 Some people find it noisy and distracting that the Org-mode headlines
-are starting with a potentially large number of stars.  For example in
-the example tree from @ref{Headlines}:
+are starting with a potentially large number of stars.  For example
+the tree from @ref{Headlines}:
 
 @example
 * Top level headline
@@ -3236,11 +3354,6 @@ this.  See the documentation on the command
 @code{make-indirect-buffer}.  In XEmacs, this is currently not
 possible because of the different outline implementation.
 
-@item @b{Is there an easy way to insert links to web locations?}@*
-@cindex URL, paste into buffer
-Sure, just type or paste them into the buffer.  A plain-text URL-like
-string is directly interpreted as a link.
-
 @item @b{When I export my TODO list, every TODO item becomes a
 separate section.  How do I enforce these items to be exported as an
 itemized list?}@*
@@ -3369,7 +3482,7 @@ packages is using calc for embedded calculations. @xref{Embedded Mode,
 @cindex @file{constants.el}
 @item @file{constants.el} by Carsten Dominik
 In a table formula (@pxref{Table calculations}), it is possible to use
-names for natural constants or units.  Instead of defining you own
+names for natural constants or units.  Instead of defining your own
 constants in the variable @code{org-table-formula-constants}, install
 the @file{constants} package which defines a large number of constants
 and units, and lets you use unit prefixes like @samp{M} for
@@ -3399,26 +3512,26 @@ to have other replacement keys, look at the variable
 @item @file{remember.el} by John Wiegley
 Org mode cooperates with remember, see @ref{Remember}.
 @file{Remember.el} is not part of Emacs, find it on the web.
-@cindex @file{planner.el}
-@item @file{planner.el} by John Wiegley
-Planner is another tool to plan work and keep track of tasks.  Planner
-uses a multi-file approach with project pages and day pages.  Is it
-based on Emacs-Wiki.  If Planner is your primary tool, it can be useful
-to display the agenda entries resulting from org files in day-pages of
-the planner.  This can be done through the diary of the calendar:
-integrate org files into the diary as described above, and then turn on
-the diary support of planner.  Planner is not part of Emacs, find it on
-the web.
 @end table
 
 @node Bugs, Acknowledgments, Interaction, Miscellaneous
 @section Bugs
 @cindex bugs
 
-Here is a list of things which should work differently, but which I
+Here is a list of things that should work differently, but which I
 have found too hard to fix.
 
 @itemize @bullet
+@item
+If a table field starts with a link, and if the corresponding table
+column is narrowed (@pxref{Narrow columns}) to a width too small to
+display the link, the field would look entirely empty even though it is
+not.  To prevent this, Org-mode throws an error.  The work-around is to
+make the column wide enough to fit the link, or to add some text (at
+least 2 characters) before the link in the same field.
+@item
+Narrowing table columns does not work on XEmacs, because the
+@code{format} function does not transport text properties.
 @item
 Text in an entry protected with the @samp{QUOTE} keyword should not
 autowrap.
@@ -3452,8 +3565,6 @@ several words in a row, each must have the emphasize markers, like in
 @item
 The exporters work well, but could be made more efficient.
 @end itemize
-
-@page
 
 @node Acknowledgments,  , Bugs, Miscellaneous
 @section Acknowledgments
@@ -3493,6 +3604,9 @@ general file links, and TAGS.
 @item
 Oliver Oppitz suggested multi-state TODO items.
 @item
+Scott Otterson sparked the introduction of descriptive text for links,
+among other things.
+@item
 Pete Phillips helped the development of the TAGS feature.
 @item
 Matthias Rempe (Oelde) provided ideas, Windows support, and quality
@@ -3516,7 +3630,10 @@ Chris Wallace provided a patch implementing the @samp{QUOTE} keyword.
 David Wainberg suggested archiving, and improvements to the linking
 system.
 @item
-Scheduling TODO items was inspired by John Wiegley's @file{planner.el}.
+Org-mode's linking system was an independent development, but with time
+has evolved to work similar to John's implementation in
+@file{emacs-wiki-mode}.  In particular, I adopted his way to make the
+link itself invisible and only show descriptive text.
 @item
 Carsten Wimmer suggested some changes and helped fix a bug in linking
 to GNUS.
@@ -3527,7 +3644,7 @@ work on a tty.
 Piotr Zielinski wrote @file{org-mouse.el} and showed how to follow links
 with mouse-1.
 @end itemize
-
+ 
 @node Index, Key Index, Miscellaneous, Top
 @chapter Index
 
