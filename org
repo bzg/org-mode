@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.44).
+   This manual is for Org-mode (version 4.45).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.44).
+This manual is for Org-mode (version 4.45).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -80,8 +80,7 @@ Document Structure
 * Structure editing::           Changing sequence and level of headlines
 * Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
-* Plain lists::                 Editing hand-formatted lists
-* Checkboxes::                  Easily checking off things.
+* Plain lists::                 Additional structure within an entry
 
 Archiving
 
@@ -126,6 +125,8 @@ TODO items
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
+* Breaking down tasks::         Splitting a task into managable pieces
+* Checkboxes::                  Tick-off lists
 
 Extended use of TODO keywords
 
@@ -403,8 +404,7 @@ edit the structure of the document.
 * Structure editing::           Changing sequence and level of headlines
 * Archiving::                   Move done task trees to a different place
 * Sparse trees::                Matches embedded in context
-* Plain lists::                 Editing hand-formatted lists
-* Checkboxes::                  Easily checking off things.
+* Plain lists::                 Additional structure within an entry
 
 
 File: org,  Node: Outlines,  Next: Headlines,  Prev: Document structure,  Up: Document structure
@@ -607,9 +607,10 @@ File: org,  Node: ARCHIVE tag,  Next: Moving subtrees,  Prev: Archiving,  Up: Ar
 A headline that is marked with the ARCHIVE tag (*note Tags::) stays at
 its location in the outline tree, but behaves in the following way:
    - It does not open when you attempt to do so with a visibility
-     cycling command (*note Visibility cycling::).  You can still open
-     it with a normal outline command like `show-all'.  Or you can
-     modify the option `org-cycle-open-archived-trees'.
+     cycling command (*note Visibility cycling::).  You can force
+     cycling archived subtrees with `C-<TAB>', or by setting the option
+     `org-cycle-open-archived-trees'.  Also normal outline commands like
+     `show-all' will open archived subtrees.
 
    - During sparse tree construction (*note Sparse trees::), matches in
      archived subtrees are not exposed, unless you configure the option
@@ -623,7 +624,7 @@ its location in the outline tree, but behaves in the following way:
      headline is.  Configure the details using the variable
      `org-export-with-archived-trees'.
 
-   The following commands allow to set or clear the ARCHIVE tag:
+   The following commands help managing the ARCHIVE tag:
 
 `C-c C-x C-a'
      Toggle the ARCHIVE tag for the current headline.  When the tag is
@@ -635,7 +636,10 @@ its location in the outline tree, but behaves in the following way:
      archived.  To do this, each subtree is checked for open TODO
      entries.  If none are found, the command offers to set the ARCHIVE
      tag for the child.  If the cursor is _not_ on a headline when this
-     command is invoked, the level 1 trees will be checked.
+     command is invoked, the level 1 trees will be checked.  
+
+`C-TAB'
+     Cycle a tree even if it is tagged with ARCHIVE.
 
 
 File: org,  Node: Moving subtrees,  Prev: ARCHIVE tag,  Up: Archiving
@@ -716,17 +720,15 @@ only the visible part of the document and print the resulting file.
 display for outlining, not text properties.
 
 
-File: org,  Node: Plain lists,  Next: Checkboxes,  Prev: Sparse trees,  Up: Document structure
+File: org,  Node: Plain lists,  Prev: Sparse trees,  Up: Document structure
 
 2.8 Plain lists
 ===============
 
-Headlines define both the structure of the Org-mode file, and also lists
-(for example, TODO items (*note TODO items::) should be created using
-headline levels).  When taking notes, however, the plain text is
-sometimes easier to read with hand-formatted lists.  Org-mode supports
-editing such lists, and the HTML exporter (*note Exporting::) does
-parse and format them.
+Within an entry of the outline tree, hand-formatted lists can provide
+additional structure.  They also provide a way to create lists of
+checkboxes (*note Checkboxes::).  Org-mode supports editing such lists,
+and the HTML exporter (*note Exporting::) does parse and format them.
 
    Org-mode knows ordered and unordered lists.  Unordered list items
 start with `-', `+', or `*'(1) as bullets.  Ordered list items start
@@ -738,15 +740,15 @@ determines the end of a list item.  It ends before the next line that
 is indented like the bullet/number, or less.  For example:
 
      ** Lord of the Rings
-     My favorite scenes are (in this order)
-     1. Eowyns fight with the witch king
-        + this was already my favorite scene in the book
-        + I really like Miranda Otto.
-     2. The attack of the Rohirrim
-     3. Peter Jackson being shot by Legolas
-         - on DVD only
-        He makes a really funny face when it happens.
-     But in the end, not individual scenes matter but the film as a whole.
+        My favorite scenes are (in this order)
+        1. The attack of the Rohirrim
+        2. Eowyns fight with the witch king
+           + this was already my favorite scene in the book
+           + I really like Miranda Otto.
+        3. Peter Jackson being shot by Legolas
+            - on DVD only
+           He makes a really funny face when it happens.
+        But in the end, not individual scenes matter but the film as a whole.
 
    Org-mode supports these lists by tuning filling and wrapping
 commands to deal with them correctly(2).
@@ -811,48 +813,6 @@ list items
 XEmacs, you should use Kyle E. Jones' `filladapt.el'.  To turn is on,
 put into `.emacs':
      (require 'filladapt)
-
-
-File: org,  Node: Checkboxes,  Prev: Plain lists,  Up: Document structure
-
-2.9 Checkboxes
-==============
-
-Every item in a plain list (ordered and unordered) can be made a
-checkbox by starting it with the string `[ ]'.  This feature is similar
-to TODO items (*note TODO items::), but more lightweight.  Checkboxes
-are not included into the global TODO list, so they are often great to
-split a task into a number of simple steps.  Or you can use them in a
-shopping list to select the items you need to buy.  To toggle a
-checkbox, use `C-c C-c', or try Piotr Zielinski's `org-mouse.el'.  Here
-is an example of a checkbox list.
-
-     * Avoid stupid mistakes when distributing a new version
-       - [ ] update also Emacs CVS
-       - [X] forget to update index.html on the website
-       - [X] leaving a `(debug)' form in the code
-
-The following commands work with checkboxes:
-
-`C-c C-c'
-     Toggle checkbox at point.  
-
-`C-c C-x C-b'
-     Toggle checkbox at point.
-        - If there is an active region, toggle the first checkbox in
-          the region and set all remaining boxes to the same status as
-          the first.  If you want to toggle all boxes in the region
-          independently, use a prefix argument.
-
-        - If the cursor is in a headline, toggle checkboxes in the
-          region between this headline and the next.  This does _not_
-          act on the entire subtree, just the current entry.
-
-        - If no active region, just toggle the checkbox at point.
-     
-`M-S-<RET>'
-     Insert a new item with a checkbox.  This works only if the cursor
-     is already in a plain list item (*note Plain lists::).
 
 
 File: org,  Node: Tables,  Next: Hyperlinks,  Prev: Document structure,  Up: Top
@@ -1898,6 +1858,8 @@ overview over all things you have to do.
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
 * Priorities::                  Some things are more important than others
+* Breaking down tasks::         Splitting a task into managable pieces
+* Checkboxes::                  Tick-off lists
 
 
 File: org,  Node: TODO basics,  Next: TODO extensions,  Prev: TODO items,  Up: TODO items
@@ -2057,11 +2019,10 @@ a large group of people, you may split the names over several lines:
 
    (1) Org-mode parses these lines only when Org-mode is activated
 after visiting a file.  `C-c C-c' with the cursor in a line starting
-with `#+' is simply restarting Org-mode, making sure that these changes
-will be respected.
+with `#+' is simply restarting Org-mode for the current buffer.
 
 
-File: org,  Node: Priorities,  Prev: TODO extensions,  Up: TODO items
+File: org,  Node: Priorities,  Next: Breaking down tasks,  Prev: TODO extensions,  Up: TODO items
 
 5.3 Priorities
 ==============
@@ -2091,6 +2052,90 @@ agenda (*note Weekly/Daily agenda::).
      keys are also used to modify time stamps (*note Creating
      timestamps::).  Furthermore, these keys are also used by CUA-mode
      (*note Conflicts::).
+
+
+File: org,  Node: Breaking down tasks,  Next: Checkboxes,  Prev: Priorities,  Up: TODO items
+
+5.4 Breaking tasks down into subtasks
+=====================================
+
+It is often advisable to break down large tasks into smaller, managable
+subtasks.  You can do this by creating an outline tree below a TODO
+item, with detailed subtasks on the tree(1).  Another possibility is
+the use of checkboxes to ideantify (a hierarchy of) a large number of
+subtasks (*note Checkboxes::).
+
+   ---------- Footnotes ----------
+
+   (1) To keep subtasks out of the global TODO list, see the
+`org-agenda-todo-list-sublevels'.
+
+
+File: org,  Node: Checkboxes,  Prev: Breaking down tasks,  Up: TODO items
+
+5.5 Checkboxes
+==============
+
+Every item in a plain list (*note Plain lists::) can be made a checkbox
+by starting it with the string `[ ]'.  This feature is similar to TODO
+items (*note TODO items::), but more lightweight.  Checkboxes are not
+included into the global TODO list, so they are often great to split a
+task into a number of simple steps.  Or you can use them in a shopping
+list to select the items you need to buy.  To toggle a checkbox, use
+`C-c C-c', or try Piotr Zielinski's `org-mouse.el'.  Here is an example
+of a checkbox list.
+
+     * TODO Organize party [3/6]
+       - call people [1/3]
+         - [ ] Peter
+         - [X] Sarah
+         - [ ] Sam
+       - [X] order food
+       - [ ] think about what music to play
+       - [X] talk to the neighbors
+
+   The `[3/6]' and `[1/3]' in the first and second line are cookies
+indicating how many checkboxes are present in this entry, and how many
+of them have been checked off.  This can give you an idea on how many
+checkboxes remain, even without opening a folded entry.  The cookies
+can be placed into a headline or into (the first line of) a plain list
+item. Each cookie covers all checkboxes structurally below that
+headline/item.  You have to insert the cookie yourself by typing either
+`[/]' or `[%]'.  In the first case you get an `n out of m' result, in
+the second case you get information about the percentage of checkboxes
+checked (in the above example, this would be `[50%]' and `[33%],
+respectively'.
+
+The following commands work with checkboxes:
+
+`C-c C-c'
+     Toggle checkbox at point.  
+
+`C-c C-x C-b'
+     Toggle checkbox at point.
+        - If there is an active region, toggle the first checkbox in
+          the region and set all remaining boxes to the same status as
+          the first.  If you want to toggle all boxes in the region
+          independently, use a prefix argument.
+
+        - If the cursor is in a headline, toggle checkboxes in the
+          region between this headline and the next.  This does _not_
+          act on the entire subtree, just the current entry.
+
+        - If no active region, just toggle the checkbox at point.
+     
+`M-S-<RET>'
+     Insert a new item with a checkbox.  This works only if the cursor
+     is already in a plain list item (*note Plain lists::).  
+
+`C-c #'
+     Update the checkbox statistics in the current outline entry.  When
+     called with a `C-u' prefix, update the entire file.  Checkbox
+     statistic cookies are updated automatically if you toggle
+     checkboxes with `C-c C-c' and make new ones with `M-S-<RET>'.  If
+     you delete boxes or add/change them by hand, use this command to
+     get things back into synch.  Or simply toggle any checkbox twice
+     with `C-c C-c'.
 
 
 File: org,  Node: Timestamps,  Next: Tags,  Prev: TODO items,  Up: Top
@@ -3650,7 +3695,7 @@ tool.
 
    ---------- Footnotes ----------
 
-   (1) `org-publish.el' is not yet part of emacs, so if you are using
+   (1) `org-publish.el' is not yet part of Emacs, so if you are using
 `org.el' as it comes with Emacs, you need to download this file
 separately.  Also make sure org.el is at least version 4.27.
 
@@ -3945,7 +3990,7 @@ following functions:
      it.
 
 `C-c C-e p'
-     Publish the project containin the current file.
+     Publish the project containing the current file.
 
 `C-c C-e f'
      Publish only the current file.
@@ -4113,9 +4158,9 @@ means in different contexts.
    - If the cursor is inside a table created by the `table.el' package,
      activate that table.
 
-   - If the current buffer is a remember buffer, close note and file it.
-     with a prefix argument, file it without further interaction to the
-     default location.
+   - If the current buffer is a remember buffer, close the note and
+     file it.  With a prefix argument, file it, without further
+     interaction, to the default location.
 
    - If the cursor is on a `<<<target>>>', update radio targets and
      corresponding links in this buffer.
@@ -4489,18 +4534,17 @@ File: org,  Node: History and Acknowledgments,  Next: Index,  Prev: Extensions a
 Appendix B History and Acknowledgments
 **************************************
 
-The beginnings of Org-mode go back to 2003.  It was borne out of
-frustration over the user interface of the emacs outline-mode.  All I
-wanted was to make working with an outline tree possible without having
-to remember more than 10 commands just for hiding and unhiding parts of
-the outline tree, and to allow to restructure a tree easily.  Visibility
-cycling and structure editing were originally implemented in the package
-`outline-magic.el', but quickly moved to the more general `org.el'.
-TODO entries, basic time stamps, and table support were added next, and
-highlight the two main goals that Org-mode still has today:  To create
-a new, outline-based, plain text mode with innovative and intuitive
-editing features, and to incorporate project planning functionality
-directly into a notes file.
+Org-mode was borne in 2003, out of frustration over the user interface
+of the Emacs outline-mode.  All I wanted was to make working with an
+outline tree possible without having to remember more than 10 commands
+just for hiding and unhiding parts of the outline tree, and to allow to
+restructure a tree easily.  Visibility cycling and structure editing
+were originally implemented in the package `outline-magic.el', but
+quickly moved to the more general `org.el'.  TODO entries, basic time
+stamps, and table support were added next, and highlight the two main
+goals that Org-mode still has today: To create a new, outline-based,
+plain text mode with innovative and intuitive editing features, and to
+incorporate project planning functionality directly into a notes file.
 
    Since the first release, hundreds of emails to me or on
 `emacs-orgmode@gnu.org' have provided a constant stream of bug reports,
@@ -4527,6 +4571,8 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Sacha Chua suggested to copy some linking code from Planner.
 
+   * Eddward DeVilla proposed Checkbox statistics.
+
    * Kees Dullemond inspired the use of narrowed tabled columns.
 
    * Christian Egli converted the documentation into TeXInfo format,
@@ -4537,10 +4583,10 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Niels Giessen had the idea to automatically archive DONE trees.
 
-   * Bastien Guerry provoded extensive feedback.
+   * Bastien Guerry provided extensive feedback.
 
-   * Kai Grossjohann pointed out key-binding conflicts caused by
-     Org-mode.
+   * Kai Grossjohann pointed out key-binding conflicts with other
+     packages.
 
    * Leon Liu asked for embedded LaTeX and tested it.
 
@@ -4658,6 +4704,7 @@ Index
 * CamelCase links, completion of:        CamelCase links.     (line   6)
 * category:                              Categories.          (line   6)
 * cdlatex.el:                            Cooperation.         (line  29)
+* checkbox statistics:                   Checkboxes.          (line  24)
 * checkboxes:                            Checkboxes.          (line   6)
 * children, subtree visibility state:    Visibility cycling.  (line  10)
 * clean outline view:                    Clean view.          (line   6)
@@ -4867,6 +4914,7 @@ Index
 * sparse trees:                          Sparse trees.        (line   6)
 * special keywords:                      In-buffer settings.  (line   6)
 * spreadsheet capabilities:              Table calculations.  (line   6)
+* statistics, for checkboxes:            Checkboxes.          (line  24)
 * storing links:                         Handling links.      (line   9)
 * structure editing:                     Structure editing.   (line   6)
 * structure of document:                 Document structure.  (line   6)
@@ -4891,6 +4939,7 @@ Index
 * tags:                                  Tags.                (line   6)
 * tags view:                             Matching headline tags.
                                                               (line   6)
+* tasks, breaking down:                  Breaking down tasks. (line   6)
 * templates, for remember:               Remember.            (line  23)
 * TeX interpretation:                    Embedded LaTeX.      (line   6)
 * TeX macros:                            Export options.      (line  25)
@@ -4937,8 +4986,8 @@ Index
 
 File: org,  Node: Key Index,  Prev: Index,  Up: Top
 
-3 Key Index
-***********
+Key Index
+*********
 
  [index ]
 * Menu:
@@ -4961,7 +5010,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * <TAB> <2>:                             Agenda commands.     (line  35)
 * <TAB> <3>:                             Built-in table editor.
                                                               (line  57)
-* <TAB> <4>:                             Plain lists.         (line  39)
+* <TAB> <4>:                             Plain lists.         (line  37)
 * <TAB>:                                 Visibility cycling.  (line  10)
 * > <1>:                                 Agenda commands.     (line 154)
 * >:                                     Creating timestamps. (line  79)
@@ -4975,6 +5024,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
                                                               (line 155)
 * C-,:                                   Agenda files.        (line  18)
 * C-c !:                                 Creating timestamps. (line  21)
+* C-c #:                                 Checkboxes.          (line  56)
 * C-c $:                                 Moving subtrees.     (line  10)
 * C-c %:                                 Handling links.      (line  80)
 * C-c &:                                 Handling links.      (line  84)
@@ -5028,13 +5078,13 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-c <2>:                           Processing LaTeX fragments.
                                                               (line  15)
 * C-c C-c <3>:                           Setting tags.        (line  10)
-* C-c C-c <4>:                           table.el.            (line   6)
-* C-c C-c <5>:                           Editing/debugging formulas.
+* C-c C-c <4>:                           Checkboxes.          (line  38)
+* C-c C-c <5>:                           table.el.            (line   6)
+* C-c C-c <6>:                           Editing/debugging formulas.
                                                               (line  16)
-* C-c C-c <6>:                           Built-in table editor.
+* C-c C-c <7>:                           Built-in table editor.
                                                               (line  54)
-* C-c C-c <7>:                           Checkboxes.          (line  22)
-* C-c C-c:                               Plain lists.         (line  76)
+* C-c C-c:                               Plain lists.         (line  74)
 * C-c C-d <1>:                           Agenda commands.     (line 139)
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-e:                               Exporting.           (line  19)
@@ -5070,8 +5120,8 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-u:                               Motion.              (line  18)
 * C-c C-v:                               TODO basics.         (line  26)
 * C-c C-w:                               Creating timestamps. (line  41)
-* C-c C-x C-a:                           ARCHIVE tag.         (line  27)
-* C-c C-x C-b:                           Checkboxes.          (line  23)
+* C-c C-x C-a:                           ARCHIVE tag.         (line  28)
+* C-c C-x C-b:                           Checkboxes.          (line  39)
 * C-c C-x C-c:                           Agenda commands.     (line 201)
 * C-c C-x C-d:                           Clocking work time.  (line  33)
 * C-c C-x C-i:                           Clocking work time.  (line  12)
@@ -5098,12 +5148,13 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c |:                                 Built-in table editor.
                                                               (line  40)
 * C-c ~:                                 table.el.            (line  18)
+* C-TAB:                                 ARCHIVE tag.         (line  38)
 * C-u C-c $:                             Moving subtrees.     (line  12)
 * C-u C-c .:                             Creating timestamps. (line  16)
 * C-u C-c =:                             Built-in table editor.
                                                               (line 139)
 * C-u C-c C-l:                           Handling links.      (line  43)
-* C-u C-c C-x C-a:                       ARCHIVE tag.         (line  30)
+* C-u C-c C-x C-a:                       ARCHIVE tag.         (line  31)
 * C-u C-c C-x C-u <1>:                   Dynamic blocks.      (line  22)
 * C-u C-c C-x C-u:                       Clocking work time.  (line  67)
 * D:                                     Agenda commands.     (line  68)
@@ -5121,7 +5172,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * M-<left> <1>:                          Built-in table editor.
                                                               (line  72)
 * M-<left>:                              Structure editing.   (line  18)
-* M-<RET> <1>:                           Plain lists.         (line  44)
+* M-<RET> <1>:                           Plain lists.         (line  42)
 * M-<RET>:                               Structure editing.   (line   6)
 * M-<right> <1>:                         Built-in table editor.
                                                               (line  72)
@@ -5133,24 +5184,24 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
                                                               (line  82)
 * M-S-<down> <1>:                        Built-in table editor.
                                                               (line  89)
-* M-S-<down> <2>:                        Plain lists.         (line  61)
+* M-S-<down> <2>:                        Plain lists.         (line  59)
 * M-S-<down>:                            Structure editing.   (line  33)
 * M-S-<left> <1>:                        Creating timestamps. (line 100)
 * M-S-<left> <2>:                        Built-in table editor.
                                                               (line  76)
-* M-S-<left> <3>:                        Plain lists.         (line  67)
+* M-S-<left> <3>:                        Plain lists.         (line  65)
 * M-S-<left>:                            Structure editing.   (line  24)
-* M-S-<RET> <1>:                         Checkboxes.          (line  37)
-* M-S-<RET> <2>:                         Plain lists.         (line  54)
+* M-S-<RET> <1>:                         Checkboxes.          (line  53)
+* M-S-<RET> <2>:                         Plain lists.         (line  52)
 * M-S-<RET>:                             Structure editing.   (line  15)
 * M-S-<right> <1>:                       Creating timestamps. (line  97)
 * M-S-<right> <2>:                       Built-in table editor.
                                                               (line  79)
-* M-S-<right> <3>:                       Plain lists.         (line  67)
+* M-S-<right> <3>:                       Plain lists.         (line  65)
 * M-S-<right>:                           Structure editing.   (line  27)
 * M-S-<up> <1>:                          Built-in table editor.
                                                               (line  86)
-* M-S-<up> <2>:                          Plain lists.         (line  61)
+* M-S-<up> <2>:                          Plain lists.         (line  59)
 * M-S-<up>:                              Structure editing.   (line  30)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           Creating timestamps. (line  82)
@@ -5172,7 +5223,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * S-<down> <1>:                          Agenda commands.     (line 132)
 * S-<down> <2>:                          Creating timestamps. (line  58)
 * S-<down> <3>:                          Priorities.          (line  25)
-* S-<down>:                              Plain lists.         (line  57)
+* S-<down>:                              Plain lists.         (line  55)
 * S-<left> <1>:                          Agenda commands.     (line 150)
 * S-<left> <2>:                          Creating timestamps. (line  53)
 * S-<left>:                              TODO basics.         (line  20)
@@ -5187,7 +5238,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * S-<up> <1>:                            Agenda commands.     (line 126)
 * S-<up> <2>:                            Creating timestamps. (line  58)
 * S-<up> <3>:                            Priorities.          (line  25)
-* S-<up>:                                Plain lists.         (line  57)
+* S-<up>:                                Plain lists.         (line  55)
 * T:                                     Agenda commands.     (line 107)
 * t:                                     Agenda commands.     (line 103)
 * w:                                     Agenda commands.     (line  62)
@@ -5198,140 +5249,142 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 
 Tag Table:
 Node: Top959
-Node: Introduction9617
-Node: Summary10032
-Node: Installation12299
-Node: Activation13677
-Node: Feedback14926
-Node: Document structure15695
-Node: Outlines16521
-Node: Headlines17181
-Node: Visibility cycling17804
-Ref: Visibility cycling-Footnote-119279
-Ref: Visibility cycling-Footnote-219337
-Node: Motion19387
-Node: Structure editing20171
-Node: Archiving22280
-Node: ARCHIVE tag22838
-Node: Moving subtrees24513
-Node: Sparse trees25554
-Ref: Sparse trees-Footnote-127533
-Ref: Sparse trees-Footnote-227625
-Node: Plain lists27740
-Ref: Plain lists-Footnote-131348
-Ref: Plain lists-Footnote-231705
-Node: Checkboxes31887
-Node: Tables33524
-Node: Built-in table editor34072
-Node: Narrow columns41679
-Ref: Narrow columns-Footnote-143618
-Node: Table calculations43664
-Node: Formula syntax44984
-Ref: Formula syntax-Footnote-147889
-Node: Lisp formulas48189
-Node: Column formulas48978
-Node: Advanced features50740
-Node: Named-field formulas53994
-Node: Editing/debugging formulas54634
-Node: Appetizer56392
-Node: orgtbl-mode57495
-Node: table.el57986
-Node: Hyperlinks58963
-Node: Link format59668
-Node: Internal links60961
-Ref: Internal links-Footnote-162950
-Node: Radio targets63082
-Node: CamelCase links63797
-Node: External links64295
-Node: Handling links66426
-Ref: Handling links-Footnote-171012
-Node: Search options71249
-Ref: Search options-Footnote-173023
-Node: Custom searches73104
-Node: Remember74152
-Node: TODO items77842
-Node: TODO basics78706
-Node: TODO extensions80233
-Node: Workflow states81028
-Node: TODO types81896
-Ref: TODO types-Footnote-183554
-Node: Per file keywords83636
-Ref: Per file keywords-Footnote-185090
-Node: Priorities85318
-Node: Timestamps86534
-Node: Time stamps86924
-Node: Creating timestamps90021
-Node: Progress logging93367
-Node: Closing items93897
-Node: Clocking work time94692
-Ref: Clocking work time-Footnote-198128
-Node: Tags98254
-Node: Tag inheritance99016
-Node: Setting tags99953
-Ref: Setting tags-Footnote-1103083
-Ref: Setting tags-Footnote-2103195
-Node: Tag searches103275
-Node: Agenda views104484
-Node: Agenda files106028
-Ref: Agenda files-Footnote-1106988
-Ref: Agenda files-Footnote-2107137
-Node: Agenda dispatcher107329
-Node: Weekly/Daily agenda109445
-Node: Categories110580
-Node: Time-of-day specifications111228
-Node: Calendar/Diary integration113204
-Node: Sorting of agenda items114581
-Node: Global TODO list115413
-Node: Matching headline tags117464
-Node: Timeline118407
-Node: Agenda commands119280
-Node: Embedded LaTeX125124
-Ref: Embedded LaTeX-Footnote-1126216
-Node: Math symbols126406
-Node: Subscripts and Superscripts127171
-Node: LaTeX fragments128015
-Node: Processing LaTeX fragments130084
-Node: CDLaTeX mode131030
-Ref: CDLaTeX mode-Footnote-1133514
-Node: Exporting133662
-Node: ASCII export134976
-Node: HTML export136266
-Node: XOXO export139102
-Node: iCalendar export139541
-Node: Text interpretation141364
-Node: Comment lines141843
-Node: Enhancing text142314
-Node: Export options144006
-Node: Publishing145673
-Ref: Publishing-Footnote-1146469
-Node: Configuration146665
-Node: Project alist147383
-Node: Sources and destinations148449
-Node: Selecting files148996
-Node: Publishing action149744
-Node: Publishing options150859
-Node: Publishing links153011
-Node: Project page index154524
-Node: Sample configuration155302
-Node: Simple example155794
-Node: Complex example156467
-Node: Triggering publication158543
-Node: Miscellaneous159227
-Node: Completion159861
-Node: Customization160857
-Node: In-buffer settings161442
-Node: The very busy C-c C-c key164673
-Node: Clean view166310
-Node: TTY keys168887
-Node: Interaction170496
-Node: Cooperation170893
-Node: Conflicts172760
-Node: Bugs174352
-Node: Extensions and Hacking175975
-Node: Extensions176461
-Node: Dynamic blocks178031
-Node: History and Acknowledgments179951
-Node: Index184732
-Node: Key Index207718
+Node: Introduction9683
+Node: Summary10098
+Node: Installation12365
+Node: Activation13743
+Node: Feedback14992
+Node: Document structure15761
+Node: Outlines16535
+Node: Headlines17195
+Node: Visibility cycling17818
+Ref: Visibility cycling-Footnote-119293
+Ref: Visibility cycling-Footnote-219351
+Node: Motion19401
+Node: Structure editing20185
+Node: Archiving22294
+Node: ARCHIVE tag22852
+Node: Moving subtrees24645
+Node: Sparse trees25686
+Ref: Sparse trees-Footnote-127665
+Ref: Sparse trees-Footnote-227757
+Node: Plain lists27872
+Ref: Plain lists-Footnote-131397
+Ref: Plain lists-Footnote-231754
+Node: Tables31936
+Node: Built-in table editor32484
+Node: Narrow columns40091
+Ref: Narrow columns-Footnote-142030
+Node: Table calculations42076
+Node: Formula syntax43396
+Ref: Formula syntax-Footnote-146301
+Node: Lisp formulas46601
+Node: Column formulas47390
+Node: Advanced features49152
+Node: Named-field formulas52406
+Node: Editing/debugging formulas53046
+Node: Appetizer54804
+Node: orgtbl-mode55907
+Node: table.el56398
+Node: Hyperlinks57375
+Node: Link format58080
+Node: Internal links59373
+Ref: Internal links-Footnote-161362
+Node: Radio targets61494
+Node: CamelCase links62209
+Node: External links62707
+Node: Handling links64838
+Ref: Handling links-Footnote-169424
+Node: Search options69661
+Ref: Search options-Footnote-171435
+Node: Custom searches71516
+Node: Remember72564
+Node: TODO items76254
+Node: TODO basics77236
+Node: TODO extensions78763
+Node: Workflow states79558
+Node: TODO types80426
+Ref: TODO types-Footnote-182084
+Node: Per file keywords82166
+Ref: Per file keywords-Footnote-183620
+Node: Priorities83821
+Node: Breaking down tasks85065
+Ref: Breaking down tasks-Footnote-185585
+Node: Checkboxes85681
+Node: Timestamps88490
+Node: Time stamps88880
+Node: Creating timestamps91977
+Node: Progress logging95323
+Node: Closing items95853
+Node: Clocking work time96648
+Ref: Clocking work time-Footnote-1100084
+Node: Tags100210
+Node: Tag inheritance100972
+Node: Setting tags101909
+Ref: Setting tags-Footnote-1105039
+Ref: Setting tags-Footnote-2105151
+Node: Tag searches105231
+Node: Agenda views106440
+Node: Agenda files107984
+Ref: Agenda files-Footnote-1108944
+Ref: Agenda files-Footnote-2109093
+Node: Agenda dispatcher109285
+Node: Weekly/Daily agenda111401
+Node: Categories112536
+Node: Time-of-day specifications113184
+Node: Calendar/Diary integration115160
+Node: Sorting of agenda items116537
+Node: Global TODO list117369
+Node: Matching headline tags119420
+Node: Timeline120363
+Node: Agenda commands121236
+Node: Embedded LaTeX127080
+Ref: Embedded LaTeX-Footnote-1128172
+Node: Math symbols128362
+Node: Subscripts and Superscripts129127
+Node: LaTeX fragments129971
+Node: Processing LaTeX fragments132040
+Node: CDLaTeX mode132986
+Ref: CDLaTeX mode-Footnote-1135470
+Node: Exporting135618
+Node: ASCII export136932
+Node: HTML export138222
+Node: XOXO export141058
+Node: iCalendar export141497
+Node: Text interpretation143320
+Node: Comment lines143799
+Node: Enhancing text144270
+Node: Export options145962
+Node: Publishing147629
+Ref: Publishing-Footnote-1148425
+Node: Configuration148621
+Node: Project alist149339
+Node: Sources and destinations150405
+Node: Selecting files150952
+Node: Publishing action151700
+Node: Publishing options152815
+Node: Publishing links154967
+Node: Project page index156480
+Node: Sample configuration157258
+Node: Simple example157750
+Node: Complex example158423
+Node: Triggering publication160499
+Node: Miscellaneous161184
+Node: Completion161818
+Node: Customization162814
+Node: In-buffer settings163399
+Node: The very busy C-c C-c key166630
+Node: Clean view168274
+Node: TTY keys170851
+Node: Interaction172460
+Node: Cooperation172857
+Node: Conflicts174724
+Node: Bugs176316
+Node: Extensions and Hacking177939
+Node: Extensions178425
+Node: Dynamic blocks179995
+Node: History and Acknowledgments181915
+Node: Index186719
+Node: Key Index209924
 
 End Tag Table

@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.44}
+\def\orgversionnumber{4.45}
 \def\year{2006}
 %
 %**start of header
@@ -298,8 +298,6 @@ are preserved on all copies.
 
 \key{insert new heading/item at current level}{M-RET}
 \key{insert new TODO entry/checkbox item}{M-S-RET}
-\key{toggle checkbox(es) in region/entry/at point}{C-c C-x C-b}
-\key{toggle checkbox at point}{C-c C-c}
 
 \key{promote current heading up one level}{M-LEFT}
 \key{demote current heading down one level}{M-RIGHT}
@@ -315,8 +313,9 @@ are preserved on all copies.
 \section{Archiving}
 
 \key{toggle ARCHIVE tag}{C-c C-x C-a}
-\metax{mark fully dine children}{C-u C-c C-x C-a}
-\key{move subtree to achive file}{C-c \$}
+\metax{mark fully done children}{C-u C-c C-x C-a}
+\key{force cycling of an ARCHIVEd tree}{C-TAB}
+\key{move subtree to archive file}{C-c \$}
 \key{move all fully done children}{C-u C-c \$}
 To set archive location for current file, add a line like$^2$:
 \vskip -1mm
@@ -444,10 +443,10 @@ formula, \kbd{:=} a named-field formula.
 \key{\kbd{file:/home/dominik/img/mars.jpg}}{\rm file, absolute}
 \key{\kbd{file:papers/last.pdf}}{\rm file, relative}
 \key{\kbd{file:projects.org::*that text}}{\rm find headline}
-\key{\kbd{file:projects.org::find me}}{\rm find tgt/string}
+\key{\kbd{file:projects.org::find me}}{\rm find trgt/string}
 %\key{\kbd{file:projects.org::/regexp/}}{\rm regexp search}
 \key{\kbd{http://www.astro.uva.nl/~dominik}}{\rm on the web}
-\key{\kbd{mailto:adent@galaxy.net}}{\rm EMail address}
+\key{\kbd{mailto:adent@galaxy.net}}{\rm Email address}
 \key{\kbd{news:comp.emacs}}{\rm Usenet group}
 \key{\kbd{bbdb:Richard Stallman}}{\rm BBDB person}
 \key{\kbd{gnus:group}}{\rm GNUS group}
@@ -494,7 +493,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 
 \centerline{(for version \orgversionnumber)}
 
-\section{TODO Items}
+\section{TODO Items and Checkboxes}
 
 \key{rotate the state of the current item}{C-c C-t}
 \key{view TODO items in a sparse tree}{C-c C-v}
@@ -507,6 +506,12 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 
 \key{\kbd{\#+SEQ_TODO: TODO TRY BLUFF DONE}}{\rm todo workflow}
 \key{\kbd{\#+TYP_TODO: Phil home work DONE}}{\rm todo types}
+
+\key{insert new checkbox item in plain list}{M-S-RET}
+\key{toggle checkbox(es) in region/entry/at point}{C-c C-x C-b}
+\key{toggle checkbox at point}{C-c C-c}
+\metax{checkbox statistics cookies: insert {\tt [/]} or {\tt [\%]}}{}
+\key{update checkbox satistics}{C-c \#}
 
 \section{Tags}
 
@@ -546,11 +551,6 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{display total subtree times}{C-c C-x C-d}
 \key{remove displayed times}{C-c C-c}
 \key{insert/update table with clock report}{C-c C-x C-r}
-
-\section{Dynamic Blocks}
-
-\key{update dynamic block at point}{C-c C-x C-u}
-\metax{update all dynamic blocks}{C-u C-c C-x C-u}
 
 \section{LaTeX and cdlatex-mode}
 
@@ -717,6 +717,11 @@ Subtrees whose header starts with COMMENT are never exported.
 %S-LEFT  $\to$ M--             S-RIGHT $\to$ M-+
 %S-RET   $\to$ C-S-RET
 %\endexample
+
+\section{Dynamic Blocks}
+
+\key{update dynamic block at point}{C-c C-x C-u}
+\metax{update all dynamic blocks}{C-u C-c C-x C-u}
 
 \section{Notes}
 $^1$ This is only a suggestion for a binding of this command.  Choose

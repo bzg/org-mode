@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.44
+;; Version: 4.45
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -90,6 +90,12 @@
 ;;
 ;; Recent changes
 ;; --------------
+;; Version 4.45
+;;    - Checkbox lists can show statistics about checked items.
+;;    - C-TAB will cycle the visibility of archived subtrees.
+;;;   - Documentation about checkboxes has been moved to chapter 5.
+;;    - Bux fixes.
+;;
 ;; Version 4.44
 ;;    - Clock table can be done for a limited time interval.
 ;;    - Obsolete support for the old outline mode has been removed.
@@ -214,7 +220,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.44"
+(defvar org-version "4.45"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -535,7 +541,6 @@ such an item."
   :group 'org-plain-lists
   :type 'boolean)
 
-
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
 Valid values are ?. and ?\).  To get both terminators, use t.  While
@@ -553,6 +558,14 @@ Renumbering happens when the sequence have been changed with
 \\[org-shiftmetaup] or \\[org-shiftmetadown].  After other editing commands,
 use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
   :group 'org-plain-lists
+  :type 'boolean)
+
+(defcustom org-provide-checkbox-statistics t
+  "Non-nil means, update checkbox statistics after insert and toggle.
+When this is set, checkbox statistics is updated each time you either insert
+a new checkbox with \\[org-insert-todo-heading] or toggle a checkbox
+with \\[org-ctrl-c-ctrl-c\\]."
+  :group 'org
   :type 'boolean)
 
 (defgroup org-archive nil
@@ -2559,8 +2572,8 @@ This face is only used if `org-fontify-done-headline' is set."
 
 (defface org-done ;; font-lock-type-face
   (org-compatible-face
-   '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen"))
+   '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen" :bold t))
+     (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen" :bold t))
      (((class color) (min-colors 8)) (:foreground "green"))
      (t (:bold t))))
   "Face used for DONE."
@@ -3331,6 +3344,9 @@ between words."
 	   ;; Checkboxes, similar to Frank Ruell's org-checklet.el
 	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
 	     2 'bold prepend)
+	   (if org-provide-checkbox-statistics
+	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
+		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; COMMENT
 	   (list (concat "^\\*+[ \t]*\\<\\(" org-comment-string
 			 "\\|" org-quote-string "\\)\\>")
@@ -3812,6 +3828,7 @@ Return t when things worked, nil when we are not in an item."
       (end-of-line 1)
       (unless (= (point) pos) (just-one-space) (backward-delete-char 1)))
     (org-maybe-renumber-ordered-list)
+    (and checkbox (org-update-checkbox-count-maybe))
     t))
 
 (defun org-insert-todo-heading (arg)
@@ -4212,7 +4229,67 @@ If optional TXT is given, check this string instead of the current kill."
 	      (setq firstnew (not status)))
 	    (replace-match 
 	     (if (if arg (not status) firstnew) "[X]" "[ ]") t t))
-	  (beginning-of-line 2))))))
+	  (beginning-of-line 2)))))
+  (org-update-checkbox-count-maybe))
+
+(defun org-update-checkbox-count-maybe ()
+  "Update checkbox statistics unless turned off by user."
+  (when org-provide-checkbox-statistics
+    (org-update-checkbox-count)))
+
+(defun org-update-checkbox-count (&optional all)
+  "Update the checkbox statistics in the current section.
+This will find all statistic cookies like [57%] and [6/12] and update them
+with the current numbers.  With optional prefix argument ALL, do this for
+the whole buffer."
+  (interactive "P")
+  (save-excursion
+    (let* ((beg (progn (outline-back-to-heading) (point)))
+	   (end (move-marker (make-marker)
+			     (progn (outline-next-heading) (point))))
+	   (re "\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)")
+	   (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)")
+	   b1 e1 f1 c-on c-off lim (cstat 0))
+      (when all
+	(goto-char (point-min))
+	(outline-next-heading)
+	(setq beg (point) end (point-max)))	
+      (goto-char beg)
+      (while (re-search-forward re end t)
+	(setq cstat (1+ cstat)
+	      b1 (match-beginning 0) 
+	      e1 (match-end 0)
+	      f1 (match-beginning 1)
+	      lim (cond
+		   ((org-on-heading-p) (outline-next-heading) (point))
+		   ((org-at-item-p) (org-end-of-item) (point))
+		   (t nil))
+	      c-on 0 c-off 0)
+	(goto-char e1)
+	(when lim
+	  (while (re-search-forward re-box lim t)
+	    (if (equal (match-string 2) "[ ]")
+		(setq c-off (1+ c-off))
+	      (setq c-on (1+ c-on))))
+	  (delete-region b1 e1)
+	  (goto-char b1)
+	  (insert (if f1 
+		      (format "[%d%%]" (/ (* 100 c-on) (+ c-on c-off)))
+		    (format "[%d/%d]" c-on (+ c-on c-off))))))
+      (when (interactive-p)
+	(message "Checkbox satistics updated %s (%d places)"
+		 (if all "globally" "in current outline entry") cstat)))))
+
+(defun org-get-checkbox-statistics-face ()
+  "Select the face for checkbox statistics.
+The face will be `org-done' when all relevant boxes are checked.  Otherwise
+it will be `org-todo'."
+  (if (match-end 1)
+      (if (equal (match-string 1) "100%") 'org-done 'org-todo)
+    (if (and (> (match-end 2) (match-beginning 2))
+	     (equal (match-string 2) (match-string 3)))
+	'org-done
+      'org-todo)))
 
 (defun org-get-indentation (&optional line)
   "Get the indentation of the current line, interpreting tabs.
@@ -4649,7 +4726,18 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
       (let* ((globalp (memq state '(contents all)))
              (beg (if globalp (point-min) (point)))
              (end (if globalp (point-max) (org-end-of-subtree))))
-	(org-hide-archived-subtrees beg end)))))
+	(org-hide-archived-subtrees beg end)
+	(goto-char beg)
+	(if (looking-at (concat ".*:" org-archive-tag ":"))
+	    (message (substitute-command-keys
+		      "Subtree is archived and stays closed.  Use \\[org-force-cycle-archived] to cycle it anyway.")))))))
+
+(defun org-force-cycle-archived ()
+  "Cycle subtree even if it is archived."
+  (interactive)
+  (setq this-command 'org-cycle)
+  (let ((org-cycle-open-archived-trees t))
+    (call-interactively 'org-cycle)))
 
 (defun org-hide-archived-subtrees (beg end)
   "Re-hide all archived subtrees after a visibility state change."
@@ -9467,6 +9555,7 @@ onto the ring."
   "Follow a Gnus link to GROUP and ARTICLE."
   (require 'gnus)
   (funcall (cdr (assq 'gnus org-link-frame-setup)))
+  (if gnus-other-frame-object (select-frame gnus-other-frame-object))
   (if group (gnus-fetch-group group))
   (if article
       (or (gnus-summary-goto-article article nil 'force)
@@ -13901,12 +13990,12 @@ org-mode's default settings, but still inferior to file-local settings."
 	 (target-alist nil) tg
 	 (head-count  0) cnt
 	 (start       0)
-	 (coding-system (and (fboundp 'coding-system-get)
-			     (boundp 'buffer-file-coding-system)
+	 (coding-system (and (boundp 'buffer-file-coding-system)
 			     buffer-file-coding-system))
-	 (coding-system-for-write (or coding-system coding-system-for-write))
-	 (save-buffer-coding-system (or coding-system save-buffer-coding-system))
+	 (coding-system-for-write coding-system)
+	 (save-buffer-coding-system coding-system)
 	 (charset (and coding-system
+		       (fboundp 'coding-system-get)
 		       (coding-system-get coding-system 'mime-charset)))
 	 table-open type
 	 table-buffer table-orig-buffer
@@ -14727,6 +14816,7 @@ file, but with extension `.ics'."
 (defun org-export-as-xoxo-insert-into (buffer &rest output)
   (with-current-buffer buffer
     (apply 'insert output)))
+(put 'org-export-as-xoxo-insert-into 'lisp-indent-function 1)
 
 (defun org-export-as-xoxo (&optional buffer)
   "Export the org buffer as XOXO.
@@ -15274,6 +15364,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 ;; TAB key with modifiers
 (define-key org-mode-map "\C-i"       'org-cycle)
 (define-key org-mode-map [(tab)]      'org-cycle)
+(define-key org-mode-map [(control tab)] 'org-force-cycle-archived)
 (define-key org-mode-map [(meta tab)] 'org-complete)
 (define-key org-mode-map "\M-\C-i"    'org-complete)            ; for tty emacs
 ;; The following line is necessary under Suse GNU/Linux
@@ -15355,6 +15446,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (define-key org-mode-map "\C-c-"          'org-table-insert-hline)
 (define-key org-mode-map "\C-c^"          'org-table-sort-lines)
 (define-key org-mode-map "\C-c\C-c"       'org-ctrl-c-ctrl-c)
+(define-key org-mode-map "\C-c#"          'org-update-checkbox-count)
 (define-key org-mode-map "\C-m"           'org-return)
 (define-key org-mode-map "\C-c?"          'org-table-current-column)
 (define-key org-mode-map "\C-c "          'org-table-blank-field)
