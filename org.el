@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.11
+;; Version: 5.11b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -12843,12 +12843,13 @@ This means to empty the block, parse for parameters and then call
 the correct writing function."
   (save-window-excursion
     (let* ((pos (point))
+	   (line (org-current-line))
 	   (params (org-prepare-dblock))
 	   (name (plist-get params :name))
 	   (cmd (intern (concat "org-dblock-write:" name))))
-      (message "Updating dynamic block %s at %d..." name pos)
+      (message "Updating dynamic block `%s' at line %d..." name line)
       (funcall cmd params)
-      (message "Updating dynamic block %s at %d...done" name pos)
+      (message "Updating dynamic block `%s' at line %d...done" name line)
       (goto-char pos))))
 
 (defun org-beginning-of-dblock ()
@@ -16503,14 +16504,14 @@ If necessary, clock-out of the currently active clock."
 (defun org-clock-find-position ()
   "Find the location where the next clock line should be inserted."
   (org-back-to-heading t)
-  (beginning-of-line 2)
   (catch 'exit
-    (let ((beg (point)) (end (progn (outline-next-heading) (point)))
+    (let ((beg (point-at-bol 2)) (end (progn (outline-next-heading) (point)))
 	  (re (concat "^[ \t]*" org-clock-string))
 	  (cnt 0)
 	  first last)
       (goto-char beg)
-      (when (re-search-forward "^[ \t]*:CLOCK:" nil t)
+      (when (eobp) (newline) (setq end (max (point) end)))
+      (when (re-search-forward "^[ \t]*:CLOCK:" end t)
 	;; we seem to have a CLOCK drawer, so go there.
 	(beginning-of-line 2)
 	(throw 'exit t))
@@ -16764,20 +16765,20 @@ If yes, offer to stop it and to save the buffer with the changes."
     (when (y-or-n-p "Save changed buffer?")
       (save-buffer))))
 
-(defun org-clock-report ()
+(defun org-clock-report (&optional arg)
   "Create a table containing a report about clocked time.
 If the cursor is inside an existing clocktable block, then the table
 will be updated.  If not, a new clocktable will be inserted.
-
-The BEGIN line can contain parameters.  See the manual for details."
-  (interactive)
+When called with a prefix argument, move to the first clock table in the
+buffer and update it."
+  (interactive "P")
   (org-remove-clock-overlays)
+  (when arg (org-find-dblock "clocktable"))
   (if (org-in-clocktable-p)
-      (progn
-	(goto-char (org-in-clocktable-p))
-	(org-update-dblock))
+      (goto-char (org-in-clocktable-p))
     (org-create-dblock (list :name "clocktable"
-			     :maxlevel 2 :scope 'file))))
+			     :maxlevel 2 :scope 'file)))
+  (org-update-dblock))
 
 (defun org-in-clocktable-p ()
   "Check if the cursor is in a clocktable."

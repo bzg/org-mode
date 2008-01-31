@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.11
+@set VERSION 5.11b
 @set DATE October 2007
 
 @dircategory Emacs
@@ -4111,7 +4111,10 @@ when you change the buffer (see variable
 @kindex C-c C-x C-r
 @item C-c C-x C-r
 Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
-report as an org-mode table into the current file.
+report as an org-mode table into the current file.  When the cursor is
+at an existing clock table, just update it.  When called with a prefix
+argument, jump to the first clock report in the current document and
+update it.
 @example
 #+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
 
