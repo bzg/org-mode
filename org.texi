@@ -4,8 +4,8 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.19b
-@set DATE March 2006
+@set VERSION 4.20
+@set DATE April 2006
 
 @dircategory Emacs
 @direntry
@@ -310,12 +310,6 @@ MY PROJECTS    -*- mode: org; -*-
 @noindent which will select Org-mode for this buffer no matter what
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
-
-If you are upgrading to version 4.20 or later from a version 4.14 or
-earlier, some links may stop working.  These are links containing space
-characters.  To make such links work again, and also to transform all
-links from the old @samp{<link>} format to the new @samp{[[link]]}
-format, execute once in each file: @kbd{M-x org-upgrade-old-links}.
 
 @node Feedback,  , Installation and activation, Introduction
 @section Feedback
@@ -786,18 +780,16 @@ unpredictable for you, configure the variables
 
 @table @kbd
 @tsubheading{Creation and conversion}
-@item M-x org-table-create
-Creates an empty Org-mode table.  However, it is much easier to just
-start typing, like @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}
-
-@kindex C-c C-c
-@item C-c C-c
-Convert region to table.  Works when the cursor is not in an existing
-table, and when there is a region defined.  If every line contains at
-least one TAB character, the function assumes that the material is tab
-separated.  If not, lines are split at whitespace into fields.  You
-can use a prefix argument to indicate the minimum number of consequtive
-spaces required to indentify a field separator (default: just one).
+@kindex C-c |
+@item C-c |
+Convert the active region to table. If every line contains at least one
+TAB character, the function assumes that the material is tab separated.
+If not, lines are split at whitespace into fields.  You can use a prefix
+argument to indicate the minimum number of consequtive spaces required
+to indentify a field separator (default: just one).@* 
+If there is no active region, this command creates an empty Org-mode
+table.  However, it's easier to just start typing, like
+@kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
 
 @tsubheading{Re-aligning and field motion}
 @kindex C-c C-c
@@ -957,12 +949,6 @@ edited in place.
 @item C-c @key{TAB}
 This is an alias for @kbd{C-u C-c `} to make the current field fully
 visible.
-
-@kindex C-c |
-@item C-c |
-Toggle the visibility of vertical lines in tables.  The lines are
-still there, only made invisible with a text property.  Any @samp{|}
-added by hand will become invisible on the next align.
 
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB- or whitespace
@@ -1381,28 +1367,30 @@ links to other files, Usenet articles, emails and much more.
 @cindex link format
 @cindex format, of links
 
-Org-mode will recognize plain URL-like links in the buffer and activate
-them as clickable links.  However, the general linkformat looks like
-this:
+Org-mode will recognize plain URL-like links and activate them as
+clickable links.  However, the general linkformat looks like this:
 
 @example
 [[link][description]]       @r{or alternatively}           [[link]]  
 @end example
 
-The description part is optional.  Once a link in the buffer is
-complete, Org-mode will change the display so that
-@u{@samp{description}} is displayed instead of
-@samp{[[link][description]]} and @samp{link} is displayed instead of
+Once a link in the buffer is complete (all brackets present), Org-mode
+will change the display so that @samp{description} is displayed instead
+of @samp{[[link][description]]} and @samp{link} is displayed instead of
 @samp{[[link]]}.  Links will be highlighted in the face @code{org-link},
 which by default is an underlined face.  You can directly edit the
-visible part of a link.  To edit the invisible part, use @kbd{C-c C-l}
-with the cursor on the link.  If you place the cursor at the beginning
-of end of the displayed text and press @key{BACKSPACE}, you will remove
-the (invisible) bracket at that location.  This makes the link incomplete
+visible part of a link.  Note that this can be either the @samp{link}
+part (if there is not description) or the @samp{description} part.  To
+edit also the invisible @samp{link} part, use @kbd{C-c C-l} with the
+cursor on the link.
+
+If you place the cursor at the beginning or just behind the end of the
+displayed text and press @key{BACKSPACE}, you will remove the
+(invisible) bracket at that location.  This makes the link incomplete
 and the internals are again displayed as plain text.  Inserting the
-missing bracket does hide the link internal again.  Finally, you may also
-use the menu entry @code{Org->Hperlinks->Literal links} to unhide all
-links.
+missing bracket does hide the link internals again.  To show the
+internal structure of all links, use the menu entry
+@code{Org->Hyperlinks->Literal links}.
 
 @node Internal links, External links, Link format, Hyperlinks
 @section Internal links
@@ -1473,15 +1461,10 @@ loaded into Emacs.  To update the target list during editing, press
 
 Org-mode also supports CamelCase words as links.  This feature is not
 turned on by default because of the inconsistencies this system suffers
-from.  It is mainly kept for backward compatibility, but the use is
-deprecated.  To activate CamelCase words as links, and to make headline
-completion offer CamelCase version of headlines, the following
-customization is needed:
-
-@lisp
-(setq org-activate-camels t
-      org-file-link-context-use-camel-case t)
-@end lisp
+from.  To activate CamelCase words as links, you need to customize
+the option @code{org-activate-links}.  A CamelCase word then leads to a
+text search such that @samp{CamelCaseLink} is equivalent to
+@samp{[[camel case link]]}.
 
 @node External links, Managing links, Internal links, Hyperlinks
 @section External links
@@ -1521,7 +1504,7 @@ rmail:folder#id                          @r{RMAIL message link}
 gnus:group                               @r{GNUS group link}
 gnus:group#id                            @r{GNUS article link}
 bbdb:Richard Stallman                    @r{BBDB link}
-shell:ls *.org@footnote{Note that @samp{<} and @samp{>} cannot be part of a link, and therefore of a shell command.  If you need redirection, use @@@{ and @@@} instead.}                          @r{A shell command}
+shell:ls *.org                           @r{A shell command}
 @end example
 
 A link should be enclosed in double brackets and may contain a
@@ -1535,8 +1518,9 @@ format}), for example:
 @cindex angular brackets, around links
 @cindex plain text external links
 Org-mode also finds external links in the normal text and activates them
-as links.  Plain text links cannot contain spaces.  To remove
-ambiguities about the end of the link, enclose them in angular brackets.
+as links.  If spaces must be part of the link (for example in
+@samp{bbdb:Richard Stallman}) or to remove ambiguities about the end of
+the link, enclose them in angular brackets.
 
 @node Managing links, Search Options, External links, Hyperlinks
 @section Managing links
@@ -1550,16 +1534,15 @@ insert it into an org-mode file, and to follow the link.
 @item C-c l
 Store a link to the current location.  This is a @emph{global} command
 which can be used in any buffer to create a link.  The link will be
-stored for later insertion into an Org-mode buffer (see below).  For
-VM, RMAIL, WANDERLUST, GNUS and BBDB buffers, the link will point to
-the current article/entry.  For W3 and W3M buffers, the link goes to
-the current URL.  For Org-mode files, the current headline is
-targeted.  For any other files, the link will point to the file, with
-a search string (@pxref{Search Options}) pointing to the
-contents of the current line.  If there is an active region, the
-selected words will form the basis of the search string.  The key
-binding @kbd{C-c l} is only a suggestion - see @ref{Installation and
-activation}.
+stored for later insertion into an Org-mode buffer (see below).  For VM,
+RMAIL, WANDERLUST, MH-E, GNUS and BBDB buffers, the link will point to
+the current article/entry.  For W3 and W3M buffers, the link goes to the
+current URL.  For Org-mode files, the current headline is targeted.  For
+any other files, the link will point to the file, with a search string
+(@pxref{Search Options}) pointing to the contents of the current line.
+If there is an active region, the selected words will form the basis of
+the search string.  The key binding @kbd{C-c l} is only a suggestion -
+see @ref{Installation and activation}.
 
 @kindex C-c C-l
 @cindex link completion
@@ -1697,11 +1680,11 @@ package.} will tell @emph{Remember} to use org files as target, and to
 create annotations compatible with Org-mode links.
 
 @example
+(setq org-directory "~/path/to/my/orgfiles/")
+(setq org-default-notes-file "~/.notes")
 (autoload 'org-remember-annotation "org")
 (autoload 'org-remember-apply-template "org")
 (autoload 'org-remember-handler "org")
-(setq org-directory "~/path/to/my/orgfiles/")
-(setq org-default-notes-file "~/.notes")
 (setq remember-annotation-functions '(org-remember-annotation))
 (setq remember-handler-functions '(org-remember-handler))
 (add-hook 'remember-mode-hook 'org-remember-apply-template)
@@ -1720,9 +1703,9 @@ journal entries, you could use:
 @end example
 
 @noindent In these entries, the character specifies how to select the
-template, the first string specifies the template, and the second string
-specifies a default file (overruling @code{org-default-notes-file}) as a
-target for this note.
+template, the first string specifies the template, and the (optional)
+second string specifies a default file (overruling
+@code{org-default-notes-file}) as a target for this note.
 
 When you call @kbd{M-x remember} to remember something, org will prompt
 for a key to select the template and then prepare the buffer like
@@ -1742,12 +1725,12 @@ for a key to select the template and then prepare the buffer like
 @noindent See the variable @code{org-remember-templates} for more details.
 
 When you are finished composing a note with remember, you have to press
-@kbd{C-c C-c} to exit remember-mode and to file the note away.  The
-handler first prompts for a target file - if you press @key{RET}, the
-value of @code{org-default-notes-file} is used.  Then the command offers
-the headings tree of the selected file.  You can either immediately
-press @key{RET} to get the note appended to the file.  Or you can use
-vertical cursor motion (@key{up} and @key{down}) and visibility cycling
+@kbd{C-c C-c} to file the note away.  The handler first prompts for a
+target file - if you press @key{RET}, the value of
+@code{org-default-notes-file} is used.  Then the command offers the
+headings tree of the selected file.  You can either immediately press
+@key{RET} to get the note appended to the file.  Or you can use vertical
+cursor motion (@key{up} and @key{down}) and visibility cycling
 (@key{TAB}) to find a better place.  Pressing @key{RET} or @key{left} or
 @key{right} leads to the following result.
 
@@ -2796,7 +2779,7 @@ original org file.
 
 @kindex T
 @item T
-Show all tags assiciated with the current item.  Because of
+Show all tags associated with the current item.  Because of
 inheritance, this may be more than the tags listed in the line itself.
 
 @kindex :
@@ -2866,7 +2849,7 @@ date at the cursor.
 
 @kindex M
 @item M
-Show the phases of the moon for the three month around current date.
+Show the phases of the moon for the three months around current date.
 
 @kindex S
 @item S
@@ -3401,45 +3384,75 @@ rather use @kbd{C-c .}  to re-insert the timestamp.
 @enumerate
 @item @b{Org-mode seems to be a useful default mode for the various
 @file{README} files I have scattered through my directories.  How do I
-turn it on for all @file{README} files?}
+turn it on for all @file{README} files?}@*
+@c
 @example
 (add-to-list 'auto-mode-alist '("README$" . org-mode))
 @end example
 
 @item @b{Some of my links stopped working after I upgraded to a version
-4.20 or later.  Why is this, and how can I fix it?}@* The newer versions of
-Org-mode have a better link system and no longer allow unescaped space
-characters as part of a link.  To fix these links, and also to move all
-@samp{<link>} style links to the new @samp{[[link]]} system, execute
-once in each Org-mode file: @kbd{M-x org-upgrade-old-links}.
+4.20 or later.  Why is this, and how can I fix it?}@*
+@c
+These must be links in plain text, containing white space, such as
+@samp{bbdb:Richard Stallman}.  You need to protect these links by
+putting double brackets around them, like @samp{[[bbdb:Richard
+Stallman]]}.
 
-@item @b{I really like the old style links with angular brackets
-better.  Please give them back to me, don't tell me it is not
-possible!}@* Would I let you down like that?  If you must (even if I
-don't understand why), you can do this
+@item @b{I see that Org-mode now creates links using the double bracket
+convention that hides the link part and the brackets, only showing the
+description part.  How can I convert my old links to this new format?}@*
+@c
+Execute once in each Org-mode file: @kbd{M-x org-upgrade-old-links}.
+The replaces angular brackets with the link format.
+
+@item @b{I don't care if you find the new bracket links great, I am
+attached to the old style using angular brackets and no hiding of the
+link text.  Please give them back to me, don't tell me it is not
+possible!}@*
+@c
+Would I let you down like that?  If you must (even if I don't understand
+why), you can do this
 @lisp
-(setq org-allow-space-in-plain-links t
-      org-link-style 'plain
+(setq org-link-style 'plain
       org-link-format "<%s>")
 @end lisp
+
+@item @b{When I am executing shell links I always get a 
+confirmation prompt and need to type @kbd{yes @key{RET}}, thats 4 key
+presses!  Can I get rid of this?}@*
+@c
+@cindex shell links, confirmation
+@cindex dangerous commands
+The confirmation is there to protect you from unwantingly execute
+potentially dangerous commands.  For example, imagine a link
+@samp{[[shell:rm -rf ~/*][Google Search]]}.  In an Org-mode buffer, this
+command would look like @samp{Google Search}, but really it would remove
+your home directory.  If you wish, you can make it easier to respond to
+the query by setting @code{org-confirm-shell-links} to @code{y-or-n-p}.
+Then a single @kbd{y} keypress will be enough to confirm shell links.
+It is also possible to turn off this check entirely, but I do not
+recommend to do this.  Be warned.
 
 @item @b{All these stars are driving me mad, I just find the Emacs
 outlines unreadable. Can't you just put white space and a single star as a
 starter for headlines?}@*
+@c
 See @ref{Clean view}.
 
 @item @b{I would like to have two windows on the same Org-mode
 file, but with different outline visibility.  Is that possible?}@*
+@c
 @cindex @code{make-indirect-buffer}
 @cindex indirect buffers
-In GNU Emacs, you may use @emph{indirect buffers} which do exactly
-this.  See the documentation on the command
-@code{make-indirect-buffer}.  In XEmacs, this is currently not
-possible because of the different outline implementation.
+In GNU Emacs, you may use @emph{indirect buffers} which do exactly this.
+See the documentation on the command @code{make-indirect-buffer}.  In
+XEmacs, this is currently not possible because of the different outline
+implementation.
 
 @item @b{When I export my TODO list, every TODO item becomes a
 separate section.  How do I enforce these items to be exported as an
 itemized list?}@*
+@c
 If you plan to use ASCII or HTML export, make sure things you want to
 be exported as item lists are level 4 at least, even if that does mean
 there is a level jump.  For example:
@@ -3459,7 +3472,9 @@ configure the @samp{H} switch.
 +OPTIONS:   H:2; ...
 @end example
 
-@item @b{I would like to export only a subtree of my file to HTML.  How?}@*
+@item @b{I would like to export only a subtree of my file to HTML.
+How?}@*
+@c
 @cindex exporting a subtree
 If you want to export a subtree, mark the subtree as region and then
 export.  Marking can be done with @kbd{C-c @@ C-x C-x}, for example.
@@ -3468,16 +3483,9 @@ export.  Marking can be done with @kbd{C-c @@ C-x C-x}, for example.
 CUA-mode, is there a way to fix this conflict?}@*
 Yes, see @ref{Interaction}.
 
-@item @b{Is there an easy way to insert an empty table template with a
-default number of rows and columns?}@*
-@cindex table, empty template
-To insert an empty table template, just type @samp{|-} and use
-@key{TAB}.  The default size can be changed with the variable
-@code{org-table-default-size}.  However, just starting to type the
-first line is usually much easier.
-
 @item @b{One of my table columns has started to fill up with
 @samp{#ERROR}.  What is going on?}@*
+@c
 Org-mode tried to compute the column from other fields using a
 formula stored in the @samp{#+TBLFMT:} line just below the table, and
 the evaluation of the formula fails.  Fix the fields used in the
@@ -3487,17 +3495,20 @@ formula, or fix the formula, or remove it!
 horizontal line in the table, pressing TAB creates a new table line
 @i{before} the horizontal line.  How can I quickly move to the line
 @i{below} the horizontal line instead?}@*
+@c
 Press @key{down} (to get on the separator line) and then @key{TAB}.
 Or configure the variable @code{org-table-tab-jumps-over-hlines}.
 
 @item @b{How can I change the indentation of an entire table without
 fixing every line by hand?}@*
+@c
 @cindex indentation, of tables
 The indentation of a table is set by the first line.  So just fix the
 indentation of the first line and realign with @key{TAB}.
 
 @item @b{Is it possible to include entries from org-mode files into my
 emacs diary?}@*
+@c
 Since the org-mode agenda is much more powerful and can contain the
 diary (@pxref{Calendar/Diary integration}), you should think twice
 before deciding to do this.  Integrating Org-mode information into the
