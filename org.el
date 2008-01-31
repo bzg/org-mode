@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 5.05
+;; Version: 5.06
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.05"
+(defconst org-version "5.06"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -428,7 +428,7 @@ the property API."
   :group 'org-structure
   :type '(repeat (string :tag "Drawer Name")))
 
-(defcustom org-cycle-global-at-bob t
+(defcustom org-cycle-global-at-bob nil
   "Cycle globally if cursor is at beginning of buffer and not at a headline.
 This makes it possible to do global cycling without having to use S-TAB or
 C-u TAB.  For this special case to work, the first line of the buffer
@@ -489,7 +489,7 @@ the values `folded', `children', or `subtree'."
   :tag "Org Edit Structure"
   :group 'org-structure)
 
-
+; FIXME
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
 When set, `C-a' will bring back the cursor to the beginning of the
@@ -501,7 +501,10 @@ it to the beginning of the line.
 in the headline.  A second `C-e' will then jump to the true end of the
 line, after any tags."
   :group 'org-edit-structure
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "off" nil)
+	  (const :tag "after bullet first" t)
+	  (const :tag "border first" reversed)))
 
 (if (fboundp 'defvaralias)
     (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e))
@@ -2111,15 +2114,19 @@ The idea behind this is that such items will appear in the agenda anyway."
 
 (defcustom org-agenda-skip-scheduled-if-done nil
   "Non-nil means don't show scheduled items in agenda when they are done.
-This is relevant for the daily/weekly agenda, not for the TODO list."
+This is relevant for the daily/weekly agenda, not for the TODO list.  And
+it applied only to the actualy date of the scheduling.  Warnings about
+an item with a past scheduling dates are always turned off when the item
+is DONE."
   :group 'org-agenda-skip
   :type 'boolean)
 
 (defcustom org-agenda-skip-deadline-if-done nil
   "Non-nil means don't show deadines when the corresponding item is done.
 When nil, the deadline is still shown and should give you a happy feeling.
-
-This is relevant for the daily/weekly agenda."
+This is relevant for the daily/weekly agenda.  And it applied only to the
+actualy date of the deadline.  Warnings about approching and past-due
+deadlines are always turned off when the item is DONE."
   :group 'org-agenda-skip
   :type 'boolean)
 
@@ -4159,6 +4166,7 @@ The following commands are available:
       (let ((bmp (buffer-modified-p)))
 	(org-table-map-tables 'org-table-align)
 	(set-buffer-modified-p bmp)))
+    (org-cycle-hide-drawers 'all)
     (cond
      ((eq org-startup-folded t)
       (org-cycle '(4)))
@@ -10873,6 +10881,8 @@ according to FMT (default from `org-email-link-description-format')."
 
 (defun org-make-link-string (link &optional description)
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
+  (unless (string-match "\\S-" link)
+    (error "Empty link"))
   (when (stringp description)
     ;; Remove brackets from the description, they are fatal.
     (while (string-match "\\[\\|\\]" description)
@@ -10963,8 +10973,7 @@ according to FMT (default from `org-email-link-description-format')."
 ;;;###autoload
 (defun org-insert-link-global ()
   "Insert a link like Org-mode does.
-This command can be called in any mode to follow a link that has
-Org-mode syntax."
+This command can be called in any mode to insert a link in Org-mode syntax."
   (interactive)
   (org-run-like-in-org-mode 'org-insert-link))
 
@@ -13439,6 +13448,45 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(and (not (featurep 'xemacs)) c0 (tabify p0 (point)))
 	tags)
        (t (error "Tags alignment failed"))))))
+
+(defun org-change-tag-in-region (beg end tag off)
+  "Add or remove TAG for each entry in the region.
+This works in the agenda, and also in an org-mode buffer."
+  (interactive
+   (list (region-beginning) (region-end)
+	 (let ((org-last-tags-completion-table
+		(if (org-mode-p)
+		    (org-get-buffer-tags)
+		  (org-global-tags-completion-table))))
+	   (completing-read
+	    "Tag: " 'org-tags-completion-function nil nil nil
+	    'org-tags-history))
+	 (progn
+	   (message "[s]et or [r]emove? ")
+	   (equal (read-char-exclusive) ?r))))
+  (if (fboundp 'deactivate-mark) (deactivate-mark))
+  (let ((agendap (equal major-mode 'org-agenda-mode))
+	l1 l2 m buf pos newhead (cnt 0))
+    (goto-char end)
+    (setq l2 (1- (org-current-line)))
+    (goto-char beg)
+    (setq l1 (org-current-line))
+    (loop for l from l1 to l2 do
+	  (goto-line l)
+	  (setq m (get-text-property (point) 'org-hd-marker))
+	  (when (or (and (org-mode-p) (org-on-heading-p))
+		    (and agendap m))
+	    (setq buf (if agendap (marker-buffer m) (current-buffer))
+		  pos (if agendap m (point)))
+	    (with-current-buffer buf
+	      (save-excursion
+		(save-restriction
+		  (goto-char pos)
+		  (setq cnt (1+ cnt))
+		  (org-toggle-tag tag (if off 'off 'on))
+		  (setq newhead (org-get-heading)))))
+	    (and agendap (org-agenda-change-all-lines newhead m))))
+    (message "Tag :%s: %s in %d headings" tag (if off "removed" "set") cnt)))
 
 (defun org-tags-completion-function (string predicate &optional flag)
   (let (s1 s2 rtn (ctable org-last-tags-completion-table)
@@ -16290,7 +16338,8 @@ The following commands are available:
     "--"
     ("Tags and Properties"
      ["Show all Tags" org-agenda-show-tags t]
-     ["Set Tags" org-agenda-set-tags t]
+     ["Set Tags current line" org-agenda-set-tags (not (org-region-active-p))]
+     ["Change tag in region" org-agenda-set-tags (org-region-active-p)]
      "--"
      ["Column View" org-columns t])
     ("Date/Schedule"
@@ -18220,7 +18269,7 @@ the documentation of `org-diary'."
 	 (todayp (equal date (calendar-current-date))) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category tags
-	 ee txt head face s upcomingp)
+	 ee txt head face s upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -18255,14 +18304,18 @@ the documentation of `org-diary'."
 				(point)
 				(progn (skip-chars-forward "^\r\n")
 				       (point))))
-		    (if (and org-agenda-skip-deadline-if-done
-			     (string-match org-looking-at-done-regexp head))
+		    (setq donep (string-match org-looking-at-done-regexp head))
+		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+			(setq timestr (concat (match-string 1 s) " ")))
+		    (if (and donep
+			     (or org-agenda-skip-deadline-if-done
+				 (not (= diff 0))))
 			(setq txt nil)
 		      (setq txt (org-format-agenda-item
 				 (if (= diff 0)
 				     "Deadline:  "
 				   (format "In %3d d.: " diff))
-				 head category tags))))
+				 head category tags timestr))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
 		(setq face (org-agenda-deadline-face dfrac))
@@ -18274,7 +18327,8 @@ the documentation of `org-diary'."
 		  'org-category category
 		  'type (if upcomingp "upcoming-deadline" "deadline")
 		  'date (if upcomingp date d2)
-		  'face face 'undone-face face 'done-face 'org-done)
+		  'face (if donep 'org-done face)
+		  'undone-face face 'done-face 'org-done)
 		(push txt ee))))))
     ee))
 
@@ -18300,15 +18354,16 @@ FRACTION is what fraction of the head-warning time has passed."
 	 (todayp (equal date (calendar-current-date))) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff pos pos1 category tags
-	 ee txt head pastduep donep face)
+	 ee txt head pastschedp donep face timestr s)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
 	(org-agenda-skip)
-	(setq pos (1- (match-beginning 1))
+	(setq s (match-string 1)
+	      pos (1- (match-beginning 1))
 	      d2 (org-time-string-to-absolute (match-string 1) d1)
 	      diff (- d2 d1))
-	(setq pastduep (and todayp (< diff 0)))
+	(setq pastschedp (and todayp (< diff 0)))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
 	(if (or (and (< diff 0) todayp)
@@ -18324,16 +18379,20 @@ FRACTION is what fraction of the head-warning time has passed."
 				(point)
 				(progn (skip-chars-forward "^\r\n") (point))))
 		    (setq donep (string-match org-looking-at-done-regexp head))
-		    (if (and org-agenda-skip-scheduled-if-done donep)
+		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
+			(setq timestr (concat (match-string 1 s) " ")))
+		    (if (and donep
+			     (or org-agenda-skip-scheduled-if-done
+				 (not (= diff 0))))
 			(setq txt nil)
 		      (setq txt (org-format-agenda-item
 				 (if (= diff 0)
 				     "Scheduled: "
 				   (format "Sched.%2dx: " (- 1 diff)))
-				 head category tags))))
+				 head category tags timestr))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
-		(setq face (if pastduep
+		(setq face (if pastschedp
 			       'org-scheduled-previously
 			     'org-scheduled-today))
 		(org-add-props txt props
@@ -18341,8 +18400,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		  'face (if donep 'org-done face)
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
-		  'type (if pastduep "past-scheduled" "scheduled")
-		  'date (if pastduep d2 date)
+		  'type (if pastschedp "past-scheduled" "scheduled")
+		  'date (if pastschedp d2 date)
 		  'priority (+ (- 5 diff) (org-get-priority txt))
 		  'org-category category)
 		(push txt ee))))))
@@ -19050,7 +19109,7 @@ and by additional input from the age of a schedules or deadline entry."
 	 (goto-char pos)
 	 (if (and (org-mode-p) (not (member type '("sexp"))))
 	     (setq dbeg (progn (org-back-to-heading t) (point))
-		   dend (org-end-of-subtree t))
+		   dend (org-end-of-subtree t t))
 	   (setq dbeg (point-at-bol)
 		 dend (min (point-max) (1+ (point-at-eol)))))
 	 (goto-char dbeg)
@@ -19365,28 +19424,30 @@ the tags of the current headline come last."
   "Set tags for the current headline."
   (interactive)
   (org-agenda-check-no-diary)
-  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
-  (let* ((hdmarker (or (get-text-property (point) 'org-hd-marker)
-                       (org-agenda-error)))
-	 (buffer (marker-buffer hdmarker))
-	 (pos (marker-position hdmarker))
-	 (inhibit-read-only t)
-	 newhead)
-    (org-with-remote-undo buffer
-      (with-current-buffer buffer
-	(widen)
-	(goto-char pos)
-	(save-excursion
-	  (org-show-context 'agenda))
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
-	(goto-char pos)
-	(call-interactively 'org-set-tags)
-	(end-of-line 1)
-	(setq newhead (org-get-heading)))
-      (org-agenda-change-all-lines newhead hdmarker)
-      (beginning-of-line 1))))
+  (if (and (org-region-active-p) (interactive-p))
+      (call-interactively 'org-change-tag-in-region)
+    (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
+    (let* ((hdmarker (or (get-text-property (point) 'org-hd-marker)
+			 (org-agenda-error)))
+	   (buffer (marker-buffer hdmarker))
+	   (pos (marker-position hdmarker))
+	   (inhibit-read-only t)
+	   newhead)
+      (org-with-remote-undo buffer
+	(with-current-buffer buffer
+	  (widen)
+	  (goto-char pos)
+	  (save-excursion
+	    (org-show-context 'agenda))
+	  (save-excursion
+	    (and (outline-next-heading)
+		 (org-flag-heading nil)))   ; show the next heading
+	  (goto-char pos)
+	  (call-interactively 'org-set-tags)
+	  (end-of-line 1)
+	  (setq newhead (org-get-heading)))
+	(org-agenda-change-all-lines newhead hdmarker)
+	(beginning-of-line 1)))))
 
 (defun org-agenda-toggle-archive-tag ()
   "Toggle the archive tag for the current entry."
@@ -20501,6 +20562,7 @@ translations.  There is currently no way for users to extend this.")
 	 (asciip (plist-get parameters :for-ascii))
 	 (latexp (plist-get parameters :for-LaTeX))
 	 (commentsp (plist-get parameters :comments))
+	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (outline-regexp "\\*+ ")
 	 a b xx
@@ -20528,13 +20590,13 @@ translations.  There is currently no way for users to extend this.")
 	(insert (plist-get parameters :add-text) "\n"))
 
       ;; Get rid of archived trees
-      (when (not (eq org-export-with-archived-trees t))
+      (when (not (eq archived-trees t))
 	(goto-char (point-min))
 	(while (re-search-forward re-archive nil t)
 	  (if (not (org-on-heading-p t))
 	      (org-end-of-subtree t)
 	    (beginning-of-line 1)
-	    (setq a (if org-export-with-archived-trees
+	    (setq a (if archived-trees
 			(1+ (point-at-eol)) (point))
 		  b (org-end-of-subtree t))
 	    (if (> b a) (delete-region a b)))))
@@ -20581,7 +20643,7 @@ translations.  There is currently no way for users to extend this.")
 				     '(org-protected t))
 	      (delete-region (match-beginning 0) (match-end 0))))))
 
-      ;; Protect quoted subtreedes
+      ;; Protect quoted subtrees
       (goto-char (point-min))
       (while (re-search-forward re-quote nil t)
 	(goto-char (match-beginning 0))
@@ -20607,12 +20669,24 @@ translations.  There is currently no way for users to extend this.")
 			     (point-at-eol))
 	    (end-of-line 1))))
 
-      ;; Specific LaTeX cleaning
+      ;; Specific LaTeX stuff
       (when latexp
 	(require 'org-export-latex nil t)
 	(org-export-latex-cleaned-string))
 
+      ;; Specific HTML stuff
+      (when htmlp
+	;; Convert LaTeX fragments to images
+	(when (plist-get parameters :LaTeX-fragments)
+	  (org-format-latex
+	   (concat "ltxpng/" (file-name-sans-extension
+			      (file-name-nondirectory
+			       org-current-export-file)))
+	   org-current-export-dir nil "Creating LaTeX image %s"))
+	(message "Exporting..."))
+
       ;; Remove or replace comments
+      ;; FIXME: Does LaTeX export take care of its own comments?
       ;; If :comments is set, use this char for commenting out comments and
       ;; protect them. otherwise delete them
       (goto-char (point-min))
@@ -20637,14 +20711,6 @@ translations.  There is currently no way for users to extend this.")
 	 (replace-match "\\1 \\3")
 	 (goto-char (match-beginning 0))))
 
-      ;; Convert LaTeX fragments to images
-      (when (plist-get parameters :LaTeX-fragments)
-	(org-format-latex
-	 (concat "ltxpng/" (file-name-sans-extension
-			    (file-name-nondirectory
-			     org-current-export-file)))
-	 org-current-export-dir nil "Creating LaTeX image %s"))
-      (message "Exporting...")
 
       ;; Normalize links: Convert angle and plain links into bracket links
       ;; Expand link abbreviations
@@ -20708,6 +20774,22 @@ translations.  There is currently no way for users to extend this.")
 	  ;; Return the title string
 	  (org-trim (match-string 0)))))))
 
+(defun org-export-get-title-from-subtree ()
+  "Return subtree title and exclude it from export."
+  (let (title (m (mark)))
+    (save-excursion
+      (goto-char (region-beginning))
+      (when (and (org-at-heading-p)
+		 (>= (org-end-of-subtree t t) (region-end)))
+	;; This is a subtree, we take the title from the first heading
+	(goto-char (region-beginning))
+	(looking-at org-todo-line-regexp)
+	(setq title (match-string 3))
+	(org-unmodified
+	 (add-text-properties (point) (1+ (point-at-eol))
+			      (list :org-license-to-kill t)))))
+    title))
+	 
 (defun org-solidify-link-text (s &optional alist)
   "Take link text and make a safe target out of it."
   (save-match-data
@@ -20767,6 +20849,7 @@ When LEVEL is non-nil, increase section numbers on that level."
 ;;; ASCII export
 
 (defvar org-last-level nil) ; dynamically scoped variable
+(defvar org-min-level nil) ; dynamically scoped variable
 (defvar org-levels-open nil) ; dynamically scoped parameter
 (defvar org-ascii-current-indentation nil) ; For communication
 
@@ -20779,6 +20862,13 @@ underlined headlines.  The default is 3."
   (setq-default org-todo-line-regexp org-todo-line-regexp)
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
 					(org-infile-export-plist)))
+	 (region-p (org-region-active-p))
+	 (subtree-p
+	  (when region-p
+	    (save-excursion
+	      (goto-char (region-beginning))
+	      (and (org-at-heading-p)
+		   (>= (org-end-of-subtree t t) (region-end))))))
 	 (custom-times org-display-custom-times)
 	 (org-ascii-current-indentation '(0 . 0))
 	 (level 0) line txt
@@ -20788,7 +20878,10 @@ underlined headlines.  The default is 3."
          (filename (concat (file-name-as-directory
 			    (org-export-directory :ascii opt-plist))
 			   (file-name-sans-extension
-			    (file-name-nondirectory buffer-file-name))
+			    (or (and subtree-p
+				     (org-entry-get (region-beginning)
+						    "EXPORT_FILE_NAME" t))
+				(file-name-nondirectory buffer-file-name)))
 			   ".txt"))
 	 (filename (if (equal (file-truename filename)
 			      (file-truename buffer-file-name))
@@ -20800,7 +20893,8 @@ underlined headlines.  The default is 3."
 	 (date  (format-time-string "%Y/%m/%d" (current-time)))
 	 (time  (format-time-string "%X" (org-current-time)))
 	 (author      (plist-get opt-plist :author))
-	 (title       (or (plist-get opt-plist :title)
+	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
+			  (plist-get opt-plist :title)
 			  (and (not
 				(plist-get opt-plist :skip-before-1st-heading))
 			       (org-export-grab-title-from-buffer))
@@ -20822,6 +20916,8 @@ underlined headlines.  The default is 3."
 		  :for-ascii t
 		  :skip-before-1st-heading
 		  (plist-get opt-plist :skip-before-1st-heading)
+		  :archived-trees
+		  (plist-get opt-plist :archived-trees)
 		  :add-text (plist-get opt-plist :text))
 		 "[\r\n]")) ;; FIXME: why \r here???/
 	 thetoc have-headings first-heading-pos
@@ -20832,7 +20928,8 @@ underlined headlines.  The default is 3."
        (remove-text-properties (point-min) (point-max)
 			       '(:org-license-to-kill t))))
 
-    (setq org-last-level 1)
+    (setq org-min-level (org-get-min-level lines))
+    (setq org-last-level org-min-level)
     (org-init-section-numbers)
 
     (find-file-noselect filename)
@@ -20908,7 +21005,8 @@ underlined headlines.  The default is 3."
 			       (progn
 				 (push
 				  (concat
-				   (make-string (* (1- level) 4) ?\ )
+				   (make-string
+				    (* (max 0 (- level org-min-level)) 4) ?\ )
 				   (format (if todo "%s (*)\n" "%s\n") txt))
 				  thetoc)
 				 (setq org-last-level level))
@@ -21354,6 +21452,12 @@ the body tags themselves."
 	 valid thetoc have-headings first-heading-pos
 	 (odd org-odd-levels-only)
 	 (region-p (org-region-active-p))
+	 (subtree-p
+	  (when region-p
+	    (save-excursion
+	      (goto-char (region-beginning))
+	      (and (org-at-heading-p)
+		   (>= (org-end-of-subtree t t) (region-end))))))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
 	 (org-current-export-dir (org-export-directory :html opt-plist))
@@ -21361,11 +21465,15 @@ the body tags themselves."
          (level 0) (line "") (origline "") txt todo
          (umax nil)
          (umax-toc nil)
+	 (dummy (debug))
          (filename (if to-buffer nil
 		     (concat (file-name-as-directory
 			      (org-export-directory :html opt-plist))
 			     (file-name-sans-extension
-			      (file-name-nondirectory buffer-file-name))
+			      (or (and subtree-p
+				       (org-entry-get (region-beginning)
+						      "EXPORT_FILE_NAME" t))
+				  (file-name-nondirectory buffer-file-name)))
 			     ".html")))
 	 (current-dir (if buffer-file-name
 			  (file-name-directory buffer-file-name)
@@ -21379,7 +21487,8 @@ the body tags themselves."
 	 (date (format-time-string "%Y/%m/%d" (current-time)))
 	 (time  (format-time-string "%X" (org-current-time)))
          (author      (plist-get opt-plist :author))
-	 (title       (or (plist-get opt-plist :title)
+	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
+			  (plist-get opt-plist :title)
 			  (and (not
 				(plist-get opt-plist :skip-before-1st-heading))
 			       (org-export-grab-title-from-buffer))
@@ -21423,6 +21532,8 @@ the body tags themselves."
 	    :for-html t
 	    :skip-before-1st-heading
 	    (plist-get opt-plist :skip-before-1st-heading)
+	    :archived-trees
+	    (plist-get opt-plist :archived-trees)
 	    :add-text
 	    (plist-get opt-plist :text)
 	    :LaTeX-fragments
@@ -21441,7 +21552,8 @@ the body tags themselves."
 
     (message "Exporting...")
 
-    (setq org-last-level 1)
+    (setq org-min-level (org-get-min-level lines))
+    (setq org-last-level org-min-level)
     (org-init-section-numbers)
 
     ;; Get the language-dependent settings
@@ -21572,7 +21684,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			    )))
 		    line)
 			  lines))
-	    (while (> org-last-level 0)
+	    (while (> org-last-level (1- org-min-level))
 	      (setq org-last-level (1- org-last-level))
 	      (push "</li>\n</ul>\n" thetoc))
 	    (setq thetoc (if have-headings (nreverse thetoc) nil))))
@@ -23410,11 +23522,7 @@ See the individual commands for more information."
      ["Next Same Level" outline-forward-same-level t]
      ["Previous Same Level" outline-backward-same-level t]
      "--"
-     ["Jump" org-goto t]
-     "--"
-     ["C-a/e find headline/item start/end"
-      (setq org-special-ctrl-a/e (not org-special-ctrl-a/e))
-      :style toggle :selected org-special-ctrl-a/e])
+     ["Jump" org-goto t])
     ("Edit Structure"
      ["Move Subtree Up" org-shiftmetaup (not (org-at-table-p))]
      ["Move Subtree Down" org-shiftmetadown (not (org-at-table-p))]
@@ -23470,6 +23578,7 @@ See the individual commands for more information."
      ["Priority Down" org-shiftdown t])
     ("TAGS and Properties"
      ["Set Tags" 'org-ctrl-c-ctrl-c (org-at-heading-p)]
+     ["Change tag in region" 'org-change-tag-in-region (org-region-active-p)] ;FIXME
      ["Column view of properties" org-columns t])
     ("Dates and Scheduling"
      ["Timestamp" org-time-stamp t]
@@ -23983,14 +24092,22 @@ beyond the end of the headline."
        ((and (looking-at org-todo-line-regexp)
 	     (= (char-after (match-end 1)) ?\ ))
 	(goto-char
-	 (cond ((> pos (match-beginning 3)) (match-beginning 3))
-	       ((= pos (point)) (match-beginning 3))
-	       (t (point)))))
+	 (if (eq org-special-ctrl-a/e t)
+	     (cond ((> pos (match-beginning 3)) (match-beginning 3))
+		   ((= pos (point)) (match-beginning 3))
+		   (t (point)))
+	   (cond ((> pos (point)) (point))
+		 ((not (eq last-command this-command)) (point))
+		 (t (match-beginning 3))))))
        ((org-at-item-p)
 	(goto-char
-	 (cond ((> pos (match-end 4)) (match-end 4))
-	       ((= pos (point)) (match-end 4))
-	       (t (point)))))))))
+	 (if (eq org-special-ctrl-a/e t)
+	     (cond ((> pos (match-end 4)) (match-end 4))
+		   ((= pos (point)) (match-end 4))
+		   (t (point)))
+	   (cond ((> pos (point)) (point))
+		 ((not (eq last-command this-command)) (point))
+		 (t (match-end 4))))))))))
 
 (defun org-end-of-line (&optional arg)
   "Go to the end of the line.
@@ -24004,10 +24121,14 @@ beyond the end of the headline."
     (let ((pos (point)))
       (beginning-of-line 1)
       (if (looking-at (org-re ".*?\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
-	  (if (or (< pos (match-beginning 1))
-		  (= pos (match-end 0)))
-	      (goto-char (match-beginning 1))
-	    (goto-char (match-end 0)))
+	  (if (eq org-special-ctrl-a/e t)
+	      (if (or (< pos (match-beginning 1))
+		      (= pos (match-end 0)))
+		  (goto-char (match-beginning 1))
+		(goto-char (match-end 0)))
+	    (if (or (< pos (match-end 0)) (not (eq this-command last-command)))
+		(goto-char (match-end 0))
+	      (goto-char (match-beginning 1))))
 	(end-of-line arg)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
@@ -24264,7 +24385,13 @@ Still experimental, may disappear in the furture."
 	       t)))
 	  (t nil))))                                 ; call paragraph-fill
 
-
+(defun org-get-min-level (lines)
+  (let ((re "^\\(\\*+\\) ") l min)
+    (catch 'exit
+      (while (setq l (pop lines))
+	(if (string-match re l)
+	    (throw 'exit (org-tr-level (length (match-string 1 l))))))
+      1)))
 
 ;;;; Finish up
 

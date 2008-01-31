@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 5.05).
+   This manual is for Org-mode (version 5.06).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 5.05).
+This manual is for Org-mode (version 5.06).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -1982,9 +1982,9 @@ File: org,  Node: Radio targets,  Prev: Internal links,  Up: Internal links
 4.2.1 Radio targets
 -------------------
 
-You can configure Org-mode to link any occurrences of certain target
-names in normal text.  So without explicitly creating a link, the text
-connects to the target radioing its position.  Radio targets are
+Org-mode can automatically turn any occurrences of certain target names
+in normal text into a link.  So without explicitly creating a link, the
+text connects to the target radioing its position.  Radio targets are
 enclosed by triple angular brackets.  For example, a target `<<<My
 Target>>>' causes each occurrence of `my target' in normal text to
 become activated as a link.  The Org-mode file is scanned automatically
@@ -2164,8 +2164,8 @@ Org-mode, but in any Emacs buffer.  For this, you should create two
 global commands, like this (please select suitable global keys
 yourself):
 
-     (define-key global-map 'org-insert-link-global "\\C-c L")
-     (define-key global-map 'org-open-at-point-global "\\C-c o")
+     (global-set-key "\C-c L" 'org-insert-link-global)
+     (global-set-key "\C-c o" 'org-open-at-point-global)
 
 
 File: org,  Node: Link abbreviations,  Next: Search options,  Prev: Using links outside Org-mode,  Up: Hyperlinks
@@ -5173,10 +5173,13 @@ ASCII export produces a simple and very readable version of an Org-mode
 file.
 
 `C-c C-e a'
-     Export as ASCII file.  If there is an active region, only the
-     region will be exported.  For an org file `myfile.org', the ASCII
-     file will be `myfile.txt'.  The file will be overwritten without
-     warning.  
+     Export as ASCII file.  For an org file `myfile.org', the ASCII file
+     will be `myfile.txt'.  The file will be overwritten without
+     warning.  If there is an active region, only the region will be
+     exported. If the selected region is a single tree, the tree head
+     will become the document title.  If the tree head entry has or
+     inherits an EXPORT_FILE_NAME property, that name will be used for
+     the export.  
 
 `C-c C-e v a'
      Export only the visible part of the document.
@@ -5222,10 +5225,16 @@ File: org,  Node: HTML Export commands,  Next: Quoting HTML tags,  Prev: HTML ex
 ---------------------------
 
 `C-c C-e h'
-     Export as HTML file `myfile.html'.  
+     Export as HTML file `myfile.html'.  For an org file `myfile.org',
+     the ASCII file will be `myfile.html'.  The file will be
+     overwritten without warning.  If there is an active region, only
+     the region will be exported. If the selected region is a single
+     tree, the tree head will become the document title.  If the tree
+     head entry has or inherits an EXPORT_FILE_NAME property, that name
+     will be used for the export.  
 
 `C-c C-e b'
-     Export as HTML file and open it with a browser.  
+     Export as HTML file and immediately open it with a browser.  
 
 `C-c C-e H'
      Export to a temporary buffer, do not create a file.  
@@ -7451,8 +7460,8 @@ Index
 * headline levels, for exporting <1>:    LaTeX export commands.
                                                               (line  26)
 * headline levels, for exporting <2>:    HTML Export commands.
-                                                              (line  38)
-* headline levels, for exporting:        ASCII export.        (line  18)
+                                                              (line  44)
+* headline levels, for exporting:        ASCII export.        (line  21)
 * headline navigation:                   Motion.              (line   6)
 * headline tagging:                      Tags.                (line   6)
 * headline, promotion and demotion:      Structure editing.   (line   6)
@@ -7869,10 +7878,10 @@ Key Index
 * C-c C-e:                               Exporting.           (line  20)
 * C-c C-e a:                             ASCII export.        (line   9)
 * C-c C-e b:                             HTML Export commands.
-                                                              (line   7)
+                                                              (line  13)
 * C-c C-e c:                             iCalendar export.    (line  21)
 * C-c C-e H:                             HTML Export commands.
-                                                              (line  10)
+                                                              (line  16)
 * C-c C-e h:                             HTML Export commands.
                                                               (line   6)
 * C-c C-e I:                             iCalendar export.    (line  16)
@@ -7882,23 +7891,23 @@ Key Index
 * C-c C-e l:                             LaTeX export commands.
                                                               (line   6)
 * C-c C-e R:                             HTML Export commands.
-                                                              (line  13)
+                                                              (line  19)
 * C-c C-e t:                             Export options.      (line  13)
 * C-c C-e v <1>:                         XOXO export.         (line  11)
 * C-c C-e v:                             Sparse trees.        (line  41)
-* C-c C-e v a:                           ASCII export.        (line  13)
+* C-c C-e v a:                           ASCII export.        (line  16)
 * C-c C-e v b:                           HTML Export commands.
-                                                              (line  18)
+                                                              (line  24)
 * C-c C-e v H:                           HTML Export commands.
-                                                              (line  18)
+                                                              (line  24)
 * C-c C-e v h:                           HTML Export commands.
-                                                              (line  18)
+                                                              (line  24)
 * C-c C-e v L:                           LaTeX export commands.
                                                               (line  10)
 * C-c C-e v l:                           LaTeX export commands.
                                                               (line  10)
 * C-c C-e v R:                           HTML Export commands.
-                                                              (line  18)
+                                                              (line  24)
 * C-c C-e x:                             XOXO export.         (line  10)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
@@ -8173,166 +8182,166 @@ Node: Link format78459
 Node: Internal links79752
 Ref: Internal links-Footnote-181677
 Node: Radio targets81812
-Node: External links82503
-Node: Handling links84907
-Ref: Handling links-Footnote-190204
-Ref: Handling links-Footnote-290441
-Node: Using links outside Org-mode90515
-Node: Link abbreviations91041
-Node: Search options92734
-Ref: Search options-Footnote-194514
-Node: Custom searches94595
-Node: Remember95643
-Node: Setting up remember96630
-Node: Remember templates97212
-Ref: Remember templates-Footnote-1100658
-Node: Storing notes100756
-Node: TODO items102643
-Node: TODO basics103620
-Node: TODO extensions105384
-Node: Workflow states106203
-Ref: Workflow states-Footnote-1107378
-Node: TODO types107471
-Ref: TODO types-Footnote-1109054
-Node: Multiple sets in one file109136
-Node: Per file keywords110747
-Ref: Per file keywords-Footnote-1112036
-Node: Priorities112237
-Node: Breaking down tasks113847
-Ref: Breaking down tasks-Footnote-1114367
-Node: Checkboxes114463
-Node: Tags117312
-Node: Tag inheritance118084
-Node: Setting tags119021
-Ref: Setting tags-Footnote-1123544
-Ref: Setting tags-Footnote-2123656
-Node: Tag searches123739
-Node: Properties and columns126456
-Node: Property syntax127561
-Node: Special properties129982
-Node: Property searches130898
-Node: Column view131553
-Node: Defining columns132720
-Node: Scope of column definitions133118
-Node: Column attributes134040
-Node: Using column view136288
-Node: Property API138275
-Node: Timestamps138629
-Node: Time stamps139090
-Ref: Time stamps-Footnote-1141518
-Node: Creating timestamps141634
-Node: The date/time prompt143708
-Ref: The date/time prompt-Footnote-1145696
-Node: Custom time format145802
-Node: Deadlines and scheduling147494
-Ref: Deadlines and scheduling-Footnote-1149114
-Node: Inserting deadline/schedule149269
-Node: Repeated tasks150207
-Node: Progress logging151846
-Node: Closing items152501
-Ref: Closing items-Footnote-1153435
-Ref: Closing items-Footnote-2153504
-Node: Tracking TODO state changes153577
-Node: Clocking work time154433
-Ref: Clocking work time-Footnote-1158079
-Ref: Clocking work time-Footnote-2158157
-Node: Agenda views158283
-Node: Agenda files160234
-Ref: Agenda files-Footnote-1161200
-Ref: Agenda files-Footnote-2161349
-Node: Agenda dispatcher161542
-Node: Built-in agenda views163239
-Node: Weekly/Daily agenda163819
-Node: Global TODO list166761
-Node: Matching tags and properties169039
-Node: Timeline170128
-Node: Stuck projects170800
-Node: Presentation and sorting172651
-Node: Categories173442
-Node: Time-of-day specifications174106
-Node: Sorting of agenda items176077
-Node: Agenda commands177359
-Node: Custom agenda views184640
-Node: Storing searches185359
-Node: Block agenda187271
-Node: Setting Options188501
-Node: Exporting Agenda Views191240
-Ref: Exporting Agenda Views-Footnote-1195524
-Ref: Exporting Agenda Views-Footnote-2195581
-Node: Extracting Agenda Information for other programs195767
-Node: Embedded LaTeX199893
-Ref: Embedded LaTeX-Footnote-1200987
-Node: Math symbols201177
-Node: Subscripts and Superscripts201944
-Node: LaTeX fragments202790
-Ref: LaTeX fragments-Footnote-1205023
-Ref: LaTeX fragments-Footnote-2205284
-Node: Processing LaTeX fragments205418
-Node: CDLaTeX mode206366
-Ref: CDLaTeX mode-Footnote-1208852
-Node: Exporting209000
-Node: ASCII export210467
-Node: HTML export211757
-Node: HTML Export commands212383
-Node: Quoting HTML tags213751
-Node: Links214386
-Node: Images215083
-Ref: Images-Footnote-1215954
-Node: CSS support216015
-Ref: CSS support-Footnote-1217334
-Node: LaTeX export217447
-Node: LaTeX export commands217771
-Node: Quoting LaTeX code218933
-Node: XOXO export219438
-Node: iCalendar export219878
-Node: Text interpretation221097
-Node: Comment lines221688
-Node: Initial text222083
-Node: Footnotes223752
-Node: Enhancing text224567
-Ref: Enhancing text-Footnote-1226436
-Node: Export options226526
-Node: Publishing228802
-Ref: Publishing-Footnote-1229763
-Ref: Publishing-Footnote-2229907
-Node: Configuration230058
-Node: Project alist230776
-Node: Sources and destinations231842
-Node: Selecting files232572
-Node: Publishing action233320
-Node: Publishing options234654
-Node: Publishing links237029
-Node: Project page index238542
-Node: Sample configuration239320
-Node: Simple example239812
-Node: Complex example240485
-Node: Triggering publication242561
-Node: Miscellaneous243246
-Node: Completion243880
-Node: Customization245550
-Node: In-buffer settings246133
-Node: The very busy C-c C-c key251660
-Node: Clean view253421
-Node: TTY keys255998
-Node: Interaction257608
-Node: Cooperation258005
-Node: Conflicts260881
-Node: Bugs262884
-Node: Extensions and Hacking264380
-Node: Extensions265105
-Node: Adding hyperlink types267048
-Node: Tables in arbitrary syntax270710
-Node: Radio tables271799
-Node: A LaTeX example274302
-Ref: A LaTeX example-Footnote-1277948
-Ref: A LaTeX example-Footnote-2278096
-Node: Translator functions278531
-Ref: Translator functions-Footnote-1281640
-Node: Dynamic blocks281728
-Node: Special agenda views283700
-Node: Using the property API286878
-Node: History and Acknowledgments288359
-Node: Index294935
-Node: Key Index329427
+Node: External links82512
+Node: Handling links84916
+Ref: Handling links-Footnote-190213
+Ref: Handling links-Footnote-290450
+Node: Using links outside Org-mode90524
+Node: Link abbreviations91034
+Node: Search options92727
+Ref: Search options-Footnote-194507
+Node: Custom searches94588
+Node: Remember95636
+Node: Setting up remember96623
+Node: Remember templates97205
+Ref: Remember templates-Footnote-1100651
+Node: Storing notes100749
+Node: TODO items102636
+Node: TODO basics103613
+Node: TODO extensions105377
+Node: Workflow states106196
+Ref: Workflow states-Footnote-1107371
+Node: TODO types107464
+Ref: TODO types-Footnote-1109047
+Node: Multiple sets in one file109129
+Node: Per file keywords110740
+Ref: Per file keywords-Footnote-1112029
+Node: Priorities112230
+Node: Breaking down tasks113840
+Ref: Breaking down tasks-Footnote-1114360
+Node: Checkboxes114456
+Node: Tags117305
+Node: Tag inheritance118077
+Node: Setting tags119014
+Ref: Setting tags-Footnote-1123537
+Ref: Setting tags-Footnote-2123649
+Node: Tag searches123732
+Node: Properties and columns126449
+Node: Property syntax127554
+Node: Special properties129975
+Node: Property searches130891
+Node: Column view131546
+Node: Defining columns132713
+Node: Scope of column definitions133111
+Node: Column attributes134033
+Node: Using column view136281
+Node: Property API138268
+Node: Timestamps138622
+Node: Time stamps139083
+Ref: Time stamps-Footnote-1141511
+Node: Creating timestamps141627
+Node: The date/time prompt143701
+Ref: The date/time prompt-Footnote-1145689
+Node: Custom time format145795
+Node: Deadlines and scheduling147487
+Ref: Deadlines and scheduling-Footnote-1149107
+Node: Inserting deadline/schedule149262
+Node: Repeated tasks150200
+Node: Progress logging151839
+Node: Closing items152494
+Ref: Closing items-Footnote-1153428
+Ref: Closing items-Footnote-2153497
+Node: Tracking TODO state changes153570
+Node: Clocking work time154426
+Ref: Clocking work time-Footnote-1158072
+Ref: Clocking work time-Footnote-2158150
+Node: Agenda views158276
+Node: Agenda files160227
+Ref: Agenda files-Footnote-1161193
+Ref: Agenda files-Footnote-2161342
+Node: Agenda dispatcher161535
+Node: Built-in agenda views163232
+Node: Weekly/Daily agenda163812
+Node: Global TODO list166754
+Node: Matching tags and properties169032
+Node: Timeline170121
+Node: Stuck projects170793
+Node: Presentation and sorting172644
+Node: Categories173435
+Node: Time-of-day specifications174099
+Node: Sorting of agenda items176070
+Node: Agenda commands177352
+Node: Custom agenda views184633
+Node: Storing searches185352
+Node: Block agenda187264
+Node: Setting Options188494
+Node: Exporting Agenda Views191233
+Ref: Exporting Agenda Views-Footnote-1195517
+Ref: Exporting Agenda Views-Footnote-2195574
+Node: Extracting Agenda Information for other programs195760
+Node: Embedded LaTeX199886
+Ref: Embedded LaTeX-Footnote-1200980
+Node: Math symbols201170
+Node: Subscripts and Superscripts201937
+Node: LaTeX fragments202783
+Ref: LaTeX fragments-Footnote-1205016
+Ref: LaTeX fragments-Footnote-2205277
+Node: Processing LaTeX fragments205411
+Node: CDLaTeX mode206359
+Ref: CDLaTeX mode-Footnote-1208845
+Node: Exporting208993
+Node: ASCII export210460
+Node: HTML export211961
+Node: HTML Export commands212587
+Node: Quoting HTML tags214374
+Node: Links215009
+Node: Images215706
+Ref: Images-Footnote-1216577
+Node: CSS support216638
+Ref: CSS support-Footnote-1217957
+Node: LaTeX export218070
+Node: LaTeX export commands218394
+Node: Quoting LaTeX code219556
+Node: XOXO export220061
+Node: iCalendar export220501
+Node: Text interpretation221720
+Node: Comment lines222311
+Node: Initial text222706
+Node: Footnotes224375
+Node: Enhancing text225190
+Ref: Enhancing text-Footnote-1227059
+Node: Export options227149
+Node: Publishing229425
+Ref: Publishing-Footnote-1230386
+Ref: Publishing-Footnote-2230530
+Node: Configuration230681
+Node: Project alist231399
+Node: Sources and destinations232465
+Node: Selecting files233195
+Node: Publishing action233943
+Node: Publishing options235277
+Node: Publishing links237652
+Node: Project page index239165
+Node: Sample configuration239943
+Node: Simple example240435
+Node: Complex example241108
+Node: Triggering publication243184
+Node: Miscellaneous243869
+Node: Completion244503
+Node: Customization246173
+Node: In-buffer settings246756
+Node: The very busy C-c C-c key252283
+Node: Clean view254044
+Node: TTY keys256621
+Node: Interaction258231
+Node: Cooperation258628
+Node: Conflicts261504
+Node: Bugs263507
+Node: Extensions and Hacking265003
+Node: Extensions265728
+Node: Adding hyperlink types267671
+Node: Tables in arbitrary syntax271333
+Node: Radio tables272422
+Node: A LaTeX example274925
+Ref: A LaTeX example-Footnote-1278571
+Ref: A LaTeX example-Footnote-2278719
+Node: Translator functions279154
+Ref: Translator functions-Footnote-1282263
+Node: Dynamic blocks282351
+Node: Special agenda views284323
+Node: Using the property API287501
+Node: History and Acknowledgments288982
+Node: Index295558
+Node: Key Index330050
 
 End Tag Table

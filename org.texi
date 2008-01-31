@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.05
+@set VERSION 5.06
 @set DATE August 2007
 
 @dircategory Emacs
@@ -2186,15 +2186,15 @@ earlier.
 @cindex targets, radio
 @cindex links, radio targets
 
-You can configure Org-mode to link any occurrences of certain target
-names in normal text.  So without explicitly creating a link, the text
-connects to the target radioing its position.  Radio targets are
-enclosed by triple angular brackets.  For example, a target
-@samp{<<<My Target>>>} causes each occurrence of @samp{my target} in
-normal text to become activated as a link.  The Org-mode file is
-scanned automatically for radio targets only when the file is first
-loaded into Emacs.  To update the target list during editing, press
-@kbd{C-c C-c} with the cursor on or at a target.
+Org-mode can automatically turn any occurrences of certain target names
+in normal text into a link.  So without explicitly creating a link, the
+text connects to the target radioing its position.  Radio targets are
+enclosed by triple angular brackets.  For example, a target @samp{<<<My
+Target>>>} causes each occurrence of @samp{my target} in normal text to
+become activated as a link.  The Org-mode file is scanned automatically
+for radio targets only when the file is first loaded into Emacs.  To
+update the target list during editing, press @kbd{C-c C-c} with the
+cursor on or at a target.
 
 @node External links, Handling links, Internal links, Hyperlinks
 @section External links
@@ -2406,8 +2406,8 @@ global commands, like this (please select suitable global keys
 yourself):
 
 @lisp
-(define-key global-map 'org-insert-link-global "\\C-c L")
-(define-key global-map 'org-open-at-point-global "\\C-c o")
+(global-set-key "\C-c L" 'org-insert-link-global)
+(global-set-key "\C-c o" 'org-open-at-point-global)
 @end lisp
 
 @node Link abbreviations, Search options, Using links outside Org-mode, Hyperlinks
@@ -5650,10 +5650,12 @@ file.
 @table @kbd
 @kindex C-c C-e a
 @item C-c C-e a
-Export as ASCII file.  If there is an active region, only the region
-will be exported.  For an org file @file{myfile.org}, the ASCII file
+Export as ASCII file.  For an org file @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
-warning.
+warning.  If there is an active region, only the region will be
+exported. If the selected region is a single tree, the tree head will
+become the document title.  If the tree head entry has or inherits an
+EXPORT_FILE_NAME property, that name will be used for the export.
 @kindex C-c C-e v a
 @item C-c C-e v a
 Export only the visible part of the document.
@@ -5703,10 +5705,16 @@ language, but with additional support for tables.
 @table @kbd
 @kindex C-c C-e h
 @item C-c C-e h
-Export as HTML file @file{myfile.html}.
+Export as HTML file @file{myfile.html}.  For an org file
+@file{myfile.org}, the ASCII file will be @file{myfile.html}.  The file
+will be overwritten without warning.  If there is an active region, only
+the region will be exported. If the selected region is a single tree,
+the tree head will become the document title.  If the tree head entry
+has or inherits an EXPORT_FILE_NAME property, that name will be used for
+the export.
 @kindex C-c C-e b
 @item C-c C-e b
-Export as HTML file and open it with a browser.
+Export as HTML file and immediately open it with a browser.
 @kindex C-c C-e H
 @item C-c C-e H
 Export to a temporary buffer, do not create a file.
