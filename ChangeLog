@@ -1,3 +1,10 @@
+2008-01-31  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-get-closed): List each clocking entry.
+	(org-set-tags): Only tabify before tags if indent-tabs-mode is t.
+	(org-special-ctrl-k): New option.
+	(org-kill-line): New function.
+
 2008-01-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-archive-all-done): Fixed incorrect number of stars

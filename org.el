@@ -522,6 +522,18 @@ to the special positions."
 (if (fboundp 'defvaralias)
     (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e))
 
+(defcustom org-special-ctrl-k nil
+  "Non-nil means `C-k' will behave specially in headlines.
+When nil, `C-k' will call the default `kill-line' command.
+When t, the following will happen while the cursor is in the headline:
+
+- When the cursor is at the beginning of a headline, kill the entire
+  line and possible the folded subtree below the line.
+- When in the middle of the headline text, kill the headline up to the tags.
+- When after the headline text, kill the tags."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-odd-levels-only nil
   "Non-nil means, skip even levels and only use odd levels for the outline.
 This has the effect that two stars are being added/taken away in
@@ -5873,7 +5885,9 @@ Optional argument N means, put the headline into the Nth line of the window."
     (org-defkey map [(down)] 'outline-next-visible-heading)
     (org-defkey map [(up)] 'outline-previous-visible-heading)
     (if org-goto-auto-isearch
-	(define-key-after map [t] 'org-goto-local-auto-isearch)
+	(if (fboundp 'define-key-after)
+	    (define-key-after map [t] 'org-goto-local-auto-isearch)
+	  nil)
       (org-defkey map "q" 'org-goto-quit)
       (org-defkey map "n" 'outline-next-visible-heading)
       (org-defkey map "p" 'outline-previous-visible-heading)
@@ -15427,7 +15441,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 				  (- (- org-tags-column) (length tags))))
 		rpl (concat (make-string (max 0 (- c1 c0)) ?\ ) tags)))
 	(replace-match rpl t t)
-	(and (not (featurep 'xemacs)) c0 (tabify p0 (point)))
+	(and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
 	tags)
        (t (error "Tags alignment failed")))
       (move-to-column col)
@@ -27626,6 +27640,7 @@ work correctly."
 
 ;;;; Functions extending outline functionality
 
+
 (defun org-beginning-of-line (&optional arg)
   "Go to the beginning of the current line.  If that is invisible, continue
 to a visible line beginning.  This makes the function of C-a more intuitive.
@@ -27689,6 +27704,21 @@ beyond the end of the headline."
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
+
+(defun org-kill-line (&optional arg)
+  "Kill line, to tags or end of line."
+  (interactive "P")
+  (cond
+   ((or (not org-special-ctrl-k)
+	(bolp)
+	(not (org-on-heading-p)))
+    (call-interactively 'kill-line))
+   ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$"))
+    (kill-region (point) (match-beginning 1))
+    (org-set-tags nil t))
+   (t (kill-region (point) (point-at-eol)))))
+
+(define-key org-mode-map "\C-k" 'org-kill-line)
 
 (defun org-invisible-p ()
   "Check if point is at a character currently not visible."
