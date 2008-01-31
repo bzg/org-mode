@@ -1,10 +1,10 @@
 \input texinfo
 @c %**start of header
-@setfilename ../info/org
+@setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.13e
-@set DATE October 2007
+@set VERSION 5.14
+@set DATE December 2007
 
 @dircategory Emacs
 @direntry
@@ -82,7 +82,7 @@ Software Foundation raise funds for GNU development.''
 * TODO items::                  Every tree branch can be a TODO item
 * Tags::                        Tagging headlines and matching sets of tags
 * Properties and columns::      Storing information about an entry
-* Timestamps::                  Assign date and time to items
+* Dates and times::             Making items useful for planning
 * Remember::                    Quickly adding nodes to the outline tree
 * Agenda views::                Collecting information into views
 * Embedded LaTeX::              LaTeX fragments and formulas
@@ -103,6 +103,7 @@ Introduction
 * Installation::                How to install a downloaded version of Org-mode
 * Activation::                  How to activate Org-mode for certain buffers.
 * Feedback::                    Bug reports, ideas, patches etc.
+* Conventions::                 Type-setting conventions in the manual
 
 Document Structure
 
@@ -190,6 +191,7 @@ Properties and Columns
 * Property syntax::             How properties are spelled out
 * Special properties::          Access to other Org-mode features
 * Property searches::           Matching property values
+* Property inheritance::        Passing values down the tree
 * Column view::                 Tabular viewing and editing
 * Property API::                Properties for Lisp programmers
 
@@ -204,7 +206,7 @@ Defining Columns
 * Scope of column definitions::  Where defined, where valid?
 * Column attributes::           Appearance and content of a column
 
-Timestamps
+Dates and Times
 
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
@@ -226,6 +228,7 @@ Remember
 * Setting up remember::         Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
+* Refiling notes::              Moving a note or task to a project
 
 Agenda Views
 
@@ -287,12 +290,14 @@ LaTeX export
 
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
+* Sectioning structure::        
 
 Text interpretation by the exporter
 
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
+* Quoted examples::             Inserting quoted chnuks of text            
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 
@@ -342,11 +347,12 @@ Extensions, Hooks and Hacking
 * Special agenda views::        Customized views
 * Using the property API::      Writing programs that use entry properties
 
-Tables in arbitrary syntax
+Tables and Lists in arbitrary syntax
 
 * Radio tables::                Sending and receiving
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
+* Radio lists::                 Doing the same for lists.
 
 @end detailmenu
 @end menu
@@ -360,6 +366,7 @@ Tables in arbitrary syntax
 * Installation::                How to install a downloaded version of Org-mode
 * Activation::                  How to activate Org-mode for certain buffers.
 * Feedback::                    Bug reports, ideas, patches etc.
+* Conventions::                 Type-setting conventions in the manual
 @end menu
 
 @node Summary, Installation, Introduction, Introduction
@@ -407,7 +414,7 @@ example as:
 @r{@bullet{} full agenda and planner with deadlines and work scheduling}
 @r{@bullet{} environment to implement David Allen's GTD system}
 @r{@bullet{} a basic database application}
-@r{@bullet{} simple hypertext system, with HTML export}
+@r{@bullet{} simple hypertext system, with HTML and LaTeX export}
 @r{@bullet{} publishing tool to create a set of interlinked webpages}
 @end example
 
@@ -527,7 +534,7 @@ MY PROJECTS    -*- mode: org; -*-
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
-@node Feedback,  , Activation, Introduction
+@node Feedback, Conventions, Activation, Introduction
 @section Feedback
 @cindex feedback
 @cindex bug reports
@@ -583,6 +590,28 @@ When you hit the error, a @file{*Backtrace*} buffer will appear on the
 screen.  Save this buffer to a file (for example using @kbd{C-x C-w}) and
 attach it to your bug report.
 @end enumerate
+
+@node Conventions,  , Feedback, Introduction
+@section Typesetting conventions used in this manual
+
+Org-mode has 3 types of keywords that are being used.  TODO keywords,
+tags, and property names.  For this manual we are using the following
+conventions:
+
+@table @code
+@item TODO
+@itemx WAITING
+TODO keyword are written with all capitals, even if they are
+user-defined.
+@item boss
+@itemx ARCHIVE
+User-defined Tags are written in lowercase, built-in tags with special
+meaning a all-caps.
+@item Release
+@itemx PRIORITY
+User-defined properties are capitalized in all examples, while
+built-in properties with special meaning are all-caps.
+@end table
 
 @node Document structure, Tables, Introduction, Top
 @chapter Document Structure
@@ -850,6 +879,9 @@ Yank subtree from kill ring.  This does modify the level of the subtree to
 make sure the tree fits in nicely at the yank position.  The yank
 level can also be specified with a prefix arg, or by yanking after a
 headline marker like @samp{****}.
+@kindex C-c C-w
+@item C-c C-w
+Refile entry to a different location.  @xref{Refiling notes}.
 @kindex C-c ^
 @item C-c ^
 Sort same-level entries.  When there is an active region, all entries in
@@ -965,11 +997,13 @@ current file, with the name derived by appending @file{_archive} to the
 current file name.  For information and examples on how to change this,
 see the documentation string of the variable
 @code{org-archive-location}.  There is also an in-buffer option for
-setting this variable, for example@footnote{If there are several such
-lines in the buffer, each will be valid for the entries below it.  The
-first will also apply to any text before it.  This method is only kept
-for backward compatibility.  The preferred methods for setting multiple
-archive locations is using a property.}:
+setting this variable, for example@footnote{For backward compatibility,
+the following also works: If there are several such lines in a file,
+each specifies the archive location for the text below it.  The first
+such line also applies to any text before its definition.  However,
+using this method is @emph{strongly} deprecated as it is incompatible
+with the outline structure of the document.  The correct method for
+setting multiple archive locations in a buffer is using a property.}:
 
 @example
 #+ARCHIVE: %s_done::
@@ -1416,11 +1450,12 @@ visible.
 @c
 @item M-x org-table-import
 Import a file as a table.  The table should be TAB- or whitespace
-separated.  Useful, for example, to import an Excel table or data from a
-database, because these programs generally can write TAB-separated text
-files.  This command works by inserting the file into the buffer and
-then converting the region to a table.  Any prefix argument is passed on
-to the converter, which uses it to determine the separator.
+separated.  Useful, for example, to import a spreadsheet table or data
+from a database, because these programs generally can write
+TAB-separated text files.  This command works by inserting the file into
+the buffer and then converting the region to a table.  Any prefix
+argument is passed on to the converter, which uses it to determine the
+separator.
 @item C-c |
 Tables can also be imported by pasting tabular text into the org-mode
 buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
@@ -1428,7 +1463,7 @@ buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
 @c
 @item M-x org-table-export
 Export the table as a TAB-separated file.  Useful for data exchange with,
-for example, Excel or database programs.
+for example, spreadsheet or database programs.
 @end table
 
 If you don't like the automatic table editor because it gets in your
@@ -1604,13 +1639,15 @@ The row specification only counts data lines and ignores horizontal
 separator lines (hlines).  You can use absolute row numbers
 @samp{1}...@samp{N}, and row numbers relative to the current row like
 @samp{+3} or @samp{-1}.  Or specify the row relative to one of the
-hlines: @samp{I} refers to the first hline, @samp{II} to the second etc.
-@samp{-I} refers to the first such line above the current line,
-@samp{+I} to the first such line below the current line.  You can also
-write @samp{III+2} which is the second data line after the third hline
-in the table.  Relative row numbers like @samp{-3} will not cross hlines
-if the current line is too close to the hline.  Instead, the value
-directly at the hline is used.
+hlines: @samp{I} refers to the first hline@footnote{Note that only
+hlines are counted that @emph{separate} table lines.  If the table
+starts with a hline above the header, it does not count.}, @samp{II} to
+the second etc.  @samp{-I} refers to the first such line above the
+current line, @samp{+I} to the first such line below the current line.
+You can also write @samp{III+2} which is the second data line after the
+third hline in the table.  Relative row numbers like @samp{-3} will not
+cross hlines if the current line is too close to the hline.  Instead,
+the value directly at the hline is used.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
@@ -3095,7 +3132,7 @@ headlines.  Org-mode has extensive support for using tags.
 Every headline can contain a list of tags, at the end of the headline.
 Tags are normal words containing letters, numbers, @samp{_}, and
 @samp{@@}.  Tags must be preceded and followed by a single colon; like
-@samp{:WORK:}.  Several tags can be specified like @samp{:WORK:URGENT:}.
+@samp{:WORK:}.  Several tags can be specified like @samp{:work:URGENT:}.
 
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
@@ -3114,14 +3151,14 @@ heading has a certain tag, all subheadings will inherit the tag as
 well.  For example, in the list
 
 @example
-* Meeting with the French group      :WORK:
-** Summary by Frank                  :BOSS:NOTES:
-*** TODO Prepare slides for him      :ACTION:
+* Meeting with the French group      :work:
+** Summary by Frank                  :boss:notes:
+*** TODO Prepare slides for him      :action:
 @end example
 
 @noindent
-the final heading will have the tags @samp{:WORK:}, @samp{:BOSS:},
-@samp{:NOTES:}, and @samp{:ACTION:}.  When executing tag searches and
+the final heading will have the tags @samp{:work:}, @samp{:boss:},
+@samp{:notes:}, and @samp{:action:}.  When executing tag searches and
 Org-mode finds that a certain headline matches the search criterion, it
 will not check any sublevel headline, assuming that these likely also
 match, and that the list of matches can become very long.  This may
@@ -3159,8 +3196,8 @@ of tags with the variable @code{org-tag-alist}.  Finally you can set
 the default tags for a given file with lines like
 
 @example
-#+TAGS: @@WORK @@HOME @@TENNISCLUB
-#+TAGS: Laptop Car PC Sailboat
+#+TAGS: @@work @@home @@tennisclub
+#+TAGS: laptop car pc sailboat
 @end example
 
 If you have globally defined your preferred set of tags using the
@@ -3178,13 +3215,13 @@ single key per tag.  To function efficiently, you should assign unique
 keys to most tags.  This can be done globally with
 
 @lisp
-(setq org-tag-alist '(("@@WORK" . ?w) ("@@HOME" . ?h) ("Laptop" . ?l)))
+(setq org-tag-alist '(("@@work" . ?w) ("@@home" . ?h) ("laptop" . ?l)))
 @end lisp
 
 @noindent or on a per-file basis with
 
 @example
-#+TAGS: @@WORK(w)  @@HOME(h)  @@TENNISCLUB(t)  Laptop(l)  PC(p)
+#+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end example
 
 @noindent
@@ -3194,11 +3231,11 @@ curly braces@footnote{In @code{org-mode-alist} use
 groups are allowed.}
 
 @example
-#+TAGS: @{ @@WORK(w)  @@HOME(h)  @@TENNISCLUB(t) @}  Laptop(l)  PC(p)
+#+TAGS: @{ @@work(w)  @@home(h)  @@tennisclub(t) @}  laptop(l)  pc(p)
 @end example
 
-@noindent you indicate that at most one of @samp{@@WORK}, @samp{@@HOME},
-and @samp{@@TENNISCLUB} should be selected.
+@noindent you indicate that at most one of @samp{@@work}, @samp{@@home},
+and @samp{@@tennisclub} should be selected.
 
 @noindent Don't forget to press @kbd{C-c C-c} with the cursor in one of
 these lines to activate any changes.
@@ -3240,10 +3277,10 @@ selection window.
 
 @noindent
 This method lets you assign tags to a headline with very few keys.  With
-the above setup, you could clear the current tags and set @samp{@@HOME},
-@samp{Laptop} and @samp{PC} tags with just the following keys: @kbd{C-c
-C-c @key{SPC} h l p @key{RET}}.  Switching from @samp{@@HOME} to
-@samp{@@WORK} would be done with @kbd{C-c C-c w @key{RET}} or
+the above setup, you could clear the current tags and set @samp{@@home},
+@samp{laptop} and @samp{pc} tags with just the following keys: @kbd{C-c
+C-c @key{SPC} h l p @key{RET}}.  Switching from @samp{@@home} to
+@samp{@@work} would be done with @kbd{C-c C-c w @key{RET}} or
 alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
 @samp{Sarah} could be done with @kbd{C-c C-c @key{TAB} S a r a h
 @key{RET} @key{RET}}.
@@ -3294,14 +3331,14 @@ positive selection.  The AND operator @samp{&} is optional when @samp{+}
 or @samp{-} is present.  Examples:
 
 @table @samp
-@item +WORK-BOSS
-Select headlines tagged @samp{:WORK:}, but discard those also tagged
-@samp{:BOSS:}.
-@item WORK|LAPTOP
-Selects lines tagged @samp{:WORK:} or @samp{:LAPTOP:}.
-@item WORK|LAPTOP&NIGHT
-Like before, but require the @samp{:LAPTOP:} lines to be tagged also
-@samp{NIGHT}.
+@item +work-boss
+Select headlines tagged @samp{:work:}, but discard those also tagged
+@samp{:boss:}.
+@item work|laptop
+Selects lines tagged @samp{:work:} or @samp{:laptop:}.
+@item work|laptop&night
+Like before, but require the @samp{:laptop:} lines to be tagged also
+@samp{night}.
 @end table
 
 @cindex TODO keyword matching, with tags search
@@ -3317,30 +3354,32 @@ M}, or equivalently start the todo part after the slash with @samp{!}.
 Examples:
 
 @table @samp
-@item WORK/WAITING
-Select @samp{:WORK:}-tagged TODO lines with the specific TODO
+@item work/WAITING
+Select @samp{:work:}-tagged TODO lines with the specific TODO
 keyword @samp{WAITING}.
-@item WORK/!-WAITING-NEXT
-Select @samp{:WORK:}-tagged TODO lines that are neither @samp{WAITING}
+@item work/!-WAITING-NEXT
+Select @samp{:work:}-tagged TODO lines that are neither @samp{WAITING}
 nor @samp{NEXT}
-@item WORK/+WAITING|+NEXT
-Select @samp{:WORK:}-tagged TODO lines that are either @samp{WAITING} or
+@item work/+WAITING|+NEXT
+Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
 
 @cindex regular expressions, with tags search
 Any element of the tag/todo match can be a regular expression - in this
 case it must be enclosed in curly braces.  For example,
-@samp{WORK+@{^BOSS.*@}} matches headlines that contain the tag
-@samp{WORK} and any tag @i{starting} with @samp{BOSS}.
+@samp{work+@{^boss.*@}} matches headlines that contain the tag
+@samp{work} and any tag @i{starting} with @samp{boss}.
 
-@cindex level, require for tags match
-You can also require a headline to be of a certain level, by writing
-instead of any TAG an expression like @samp{LEVEL=3}.  For example, a
-search @samp{+LEVEL=3+BOSS/-DONE} lists all level three headlines that
-have the tag BOSS and are @emph{not} marked with the todo keyword DONE.
+@cindex level, require for tags/property match
+@cindex category, require for tags/property match
+You can also require a headline to be of a certain level or category, by
+writing instead of any TAG an expression like @samp{LEVEL=3} or
+@samp{CATEGORY="work"}, respectively.  For example, a search
+@samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
+tag @samp{boss} and are @emph{not} marked with the todo keyword DONE.
 
-@node Properties and columns, Timestamps, Tags, Top
+@node Properties and columns, Dates and times, Tags, Top
 @chapter Properties and Columns
 @cindex properties
 
@@ -3349,7 +3388,7 @@ are two main applications for properties in Org-mode.  First, properties
 are like tags, but with a value.  For example, in a file where you
 document bugs and plan releases of a piece of software, instead of using
 tags like @code{:release_1:}, @code{:release_2:}, it can be more
-efficient to use a property @code{RELEASE} with a value @code{1.0} or
+efficient to use a property @code{Release} with a value @code{1.0} or
 @code{2.0}.  Second, you can use properties to implement (very basic)
 database capabilities in an Org-mode buffer, for example to create a
 list of Music CD's you own.  You can edit and view properties
@@ -3359,6 +3398,7 @@ conveniently in column view (@pxref{Column view}).
 * Property syntax::             How properties are spelled out
 * Special properties::          Access to other Org-mode features
 * Property searches::           Matching property values
+* Property inheritance::        Passing values down the tree
 * Column view::                 Tabular viewing and editing
 * Property API::                Properties for Lisp programmers
 @end menu
@@ -3386,8 +3426,8 @@ first, and the value after it.  Here is an example:
     :END:       
 @end example
 
-You may define the allowed values for a particular property @samp{XYZ}
-by setting a property @samp{XYZ_ALL}.  This special property is
+You may define the allowed values for a particular property @samp{Xyz}
+by setting a property @samp{Xyz_ALL}.  This special property is
 @emph{inherited}, so if you set it in a level 1 entry, it will apply to
 the entire tree.  When allowed values are defined, setting the
 corresponding property becomes easier and is less prone to typing
@@ -3455,9 +3495,9 @@ nearest column format definition.
 Special properties provide alternative access method to Org-mode
 features discussed in the previous chapters, like the TODO state or the
 priority of an entry.  This interface exists so that you can include
-these states into columns view (@pxref{Column view}).  The following
-property names are special and should not be used as keys in the
-properties drawer:
+these states into columns view (@pxref{Column view}), or to use them in
+queries.  The following property names are special and should not be
+used as keys in the properties drawer:
 
 @example
 TODO         @r{The TODO keyword of the entry.}
@@ -3468,7 +3508,7 @@ DEADLINE     @r{The deadline time string, without the angular brackets.}
 SCHEDULED    @r{The scheduling time stamp, without the angular brackets.}
 @end example
 
-@node Property searches, Column view, Special properties, Properties and columns
+@node Property searches, Property inheritance, Special properties, Properties and columns
 @section Property searches
 @cindex properties, searching
 @cindex properties, inheritance
@@ -3480,17 +3520,17 @@ properties, the same commands are used as for tag searches (@pxref{Tag
 searches}), and the same logic applies.  For example, a search string
 
 @example
-+WORK-BOSS+PRIORITY="A"+coffee="unlimited"+with=@{Sarah\|Denny@}
++work-boss+PRIORITY="A"+Coffee="unlimited"+With=@{Sarah\|Denny@}
 @end example
 
 @noindent
-finds entries tagged @samp{:WORK:} but not @samp{:BOSS:}, which
-also have a priority value @samp{A}, a @samp{:coffee:} property with the
-value @samp{unlimited}, and a @samp{:with:} property that is matched by
+finds entries tagged @samp{:work:} but not @samp{:boss:}, which
+also have a priority value @samp{A}, a @samp{:Coffee:} property with the
+value @samp{unlimited}, and a @samp{:With:} property that is matched by
 the regular expression @samp{Sarah\|Denny}.
 
-During a search, properties will be inherited from parent entries only
-if you configure the variable @code{org-use-property-inheritance}.
+You can configure Org-mode to use property inheritance during a search,
+see @ref{Property inheritance} for details.
 
 There is also a special command for creating sparse trees based on a
 single property:
@@ -3505,8 +3545,38 @@ value.  If you enclose the value into curly braces, it is interpreted as
 a regular expression and matched against the property values.
 @end table
 
+@node Property inheritance, Column view, Property searches, Properties and columns
+@section Property Inheritance
 
-@node Column view, Property API, Property searches, Properties and columns
+The outline structure of Org-mode documents lends itself for an
+inheritance model of properties: If the parent in a tree has a certain
+property, the children can inherit this property.  Org-mode does not
+turn this on by default, because it can slow down property searches
+significantly and is often not needed.  However, if you find inheritance
+useful, you can turn it on by setting the variable
+@code{org-use-property-inheritance}.  It may be set to @code{t}, to make
+all properties inherited from the parent, or to a list of properties
+that should be inherited.
+
+Org-mode has a few properties for which inheritance is hard-coded, at
+least for the special applications for which they are used:
+
+@table @code
+@item COLUMNS
+The column property defines the format of column view (@pxref{Column
+view}).  It is inherited in the sense that the level where a
+@code{COLUMNS} property is defined is used as the starting point for a
+column view table, independently of the location in the subtree from
+where columns view is turned on.
+@item CATEGORY
+For agenda view, a category set through a @code{CATEGORY} property
+applies to the entire subtree.
+@item ARCHIVE
+For archiving, the @code{ARCHIVE} property may define the archive
+location for the entire subtree (@pxref{Moving subtrees}).
+@end table
+
+@node Column view, Property API, Property inheritance, Properties and columns
 @section Column View
 
 A great way to view and edit properties in an outline tree is
@@ -3589,9 +3659,11 @@ property        @r{The property that should be edited in this column.}
 @{summary-type@}  @r{The summary type.  If specified, the column values for}
                 @r{parent nodes are computed from the children.}
                 @r{Supported summary types are:}
-                @{+@}  @r{Sum numbers in this column.}
-                @{:@}  @r{Sum times, HH:MM:SS, plain numbers are hours.}
-                @{X@}  @r{Checkbox status, [X] if all children are [X].}
+                @{+@}       @r{Sum numbers in this column.}
+                @{+;%.1f@}  @r{Like @samp{+}, but format result with @samp{%.1f}.}
+                @{$@}       @r{Currency, short for @samp{+;%.2f}.}
+                @{:@}       @r{Sum times, HH:MM:SS, plain numbers are hours.}
+                @{X@}       @r{Checkbox status, [X] if all children are [X].}
 @end example
 
 @noindent
@@ -3745,13 +3817,19 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Timestamps, Remember, Properties and columns, Top
-@chapter Timestamps
+@node Dates and times, Remember, Properties and columns, Top
+@chapter Dates and Times
+@cindex dates
+@cindex times
 @cindex time stamps
 @cindex date stamps
 
-Items can be labeled with timestamps to make them useful for project
-planning.
+Items can be labeled with a date and/or a time to make them useful for
+project planning.  The specially formatted string carrying the date and
+time information is called a @emph{timestamp} in Org-mode.  This may be
+a little confusing because timestamp is often used as indicating when
+something was created or last changed.  However, in Org-mode this term
+is used in a much wider sense.
 
 @menu
 * Time stamps::                 Assigning a time to a tree entry
@@ -3761,7 +3839,7 @@ planning.
 @end menu
 
 
-@node Time stamps, Creating timestamps, Timestamps, Timestamps
+@node Time stamps, Creating timestamps, Dates and times, Dates and times
 @section Time stamps, deadlines and scheduling
 @cindex time stamps
 @cindex ranges, time
@@ -3779,7 +3857,7 @@ Its presence causes entries to be shown on specific dates in the agenda
 (@pxref{Weekly/Daily agenda}).  We distinguish:
 
 @table @var
-@item Plain time stamp, Event, Appointment
+@item Plain time stamp; Event; Appointment
 @cindex timestamp
 A simple time stamp just assigns a date/time to an item.  This is just
 like writing down an appointment or event in a paper agenda.  In the
@@ -3837,7 +3915,7 @@ angular ones.  These time stamps are inactive in the sense that they do
 
 @end table
 
-@node Creating timestamps, Deadlines and scheduling, Time stamps, Timestamps
+@node Creating timestamps, Deadlines and scheduling, Time stamps, Dates and times
 @section Creating timestamps
 @cindex creating timestamps
 @cindex timestamps, creating
@@ -3915,24 +3993,36 @@ into the following column).
 @cindex date, reading in minibuffer
 @cindex time, reading in minibuffer
 
-When Org-mode prompts for a date/time, the prompt suggests to enter an
-ISO date.  But it will in fact accept any string containing some date
-and/or time information.  You can, for example, use @kbd{C-y} to paste a
-(possibly multi-line) string copied from an email message.  Org-mode
-will find whatever information is in there and will replace anything not
-specified with the @emph{default date and time}.  The default is usually
-the current date and time, but when modifying an existing time stamp, or
-when entering the second stamp of a range, it is taken from the stamp in
-the buffer.  For example:
+When Org-mode prompts for a date/time, the default is shown as an ISO
+date, and the prompt therefore seems to ask for an ISO date.  But it
+will in fact accept any string containing some date and/or time
+information, and it is really smart about interpreting your input.  You
+can, for example, use @kbd{C-y} to paste a (possibly multi-line) string
+copied from an email message.  Org-mode will find whatever information
+is in there and derive anything you have not specified from the
+@emph{default date and time}.  The default is usually the current date
+and time, but when modifying an existing time stamp, or when entering
+the second stamp of a range, it is taken from the stamp in the buffer.
+When filling in information, Org-mode assumes that most of the time you
+will want to enter a date in the future: If you omit the month/year and
+the given day/month is @i{before} today, it will assume that you mean a
+future date@footnote{See the variable
+@code{org-read-date-prefer-future}.}.
+
+For example, lets assume that today is @b{June 13, 2006}.  Here is how
+various inputs will be interpreted, the items filled in by Org-mode are
+in @b{bold}.
 
 @example
 3-2-5         --> 2003-02-05
-feb 15        --> defaultyear-02-15
-sep 12 9      --> 2009-09-12
-12:45         --> default-date 12:45
-22 sept 0:34  --> defaultyear-09-22 0:34
-12            --> defaultyear-defaultmonth-12
+14            --> @b{2006}-@b{06}-14
+12            --> @b{2006}-@b{07}-12
 Fri           --> nearest Friday (defaultdate or later)
+sep 15        --> @b{2006}-11-15
+feb 15        --> @b{2007}-02-15
+sep 12 9      --> 2009-09-12
+12:45         --> @b{2006}-@b{06}-@b{13} 12:45
+22 sept 0:34  --> @b{2006}-09-22 0:34
 @end example
 
 Furthermore you can specify a relative date by giving, as the
@@ -3964,38 +4054,30 @@ prompt, either by clicking on a date in the calendar, or by pressing
 information entered at the prompt.  You can control the calendar fully
 from the minibuffer:
 
-@table @kbd
 @kindex <
-@item <
-Scroll calendar backwards by one month.
 @kindex >
-@item >
-Scroll calendar forwards by one month.
 @kindex mouse-1
-@item mouse-1
-Select date by clicking on it.
 @kindex S-@key{right}
-@item S-@key{right}
-One day forward.
 @kindex S-@key{left}
-@item S-@key{left}
-One day back.
 @kindex S-@key{down}
-@item S-@key{down}
-One week forward.
 @kindex S-@key{up}
-@item S-@key{up}
-One week back.
 @kindex M-S-@key{right}
-@item M-S-@key{right}
-One month forward.
 @kindex M-S-@key{left}
-@item M-S-@key{left}
-One month back.
 @kindex @key{RET}
-@item @key{RET}
-Choose date in calendar (only if nothing was typed into minibuffer).
-@end table
+@example
+> / <          @r{Scroll calendar forward/backward by one month.}
+mouse-1        @r{Select date by clicking on it.}
+S-@key{right}/@key{left}     @r{One day forward/backward.}
+S-@key{down}/@key{up}     @r{One week forward/backward.}
+M-S-@key{right}/@key{left}   @r{One month forward/backward.}
+@key{RET}           @r{Choose date in calendar.}
+@end example
+
+The actions of the date/time prompt may seem complex, but I asure you
+they will grow on you.  To help you understand what is going on, the
+current interpretation of your input will be displayed live in the
+minibuffer@footnote{If you find this distracting, turn the display of
+with @code{org-read-date-display-live}.}.
 
 @node Custom time format,  , The date/time prompt, Creating timestamps
 @subsection Custom time format
@@ -4044,7 +4126,7 @@ format is shorter, things do work as expected.
 @end itemize
 
 
-@node Deadlines and scheduling, Clocking work time, Creating timestamps, Timestamps
+@node Deadlines and scheduling, Clocking work time, Creating timestamps, Dates and times
 @section Deadlines and Scheduling
 
 A time stamp may be preceded by special keywords to facilitate planning
@@ -4114,13 +4196,13 @@ happen in the line directly following the headline.  When called with a
 prefix arg, an existing deadline will be removed from the entry.
 @c FIXME Any CLOSED timestamp will be removed.????????
 @c
-@kindex C-c C-w
+@kindex C-c / d
 @cindex sparse tree, for deadlines
-@item C-c C-w
+@item C-c / d
 Create a sparse tree with all deadlines that are either past-due, or
 which will become due within @code{org-deadline-warning-days}.
 With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
-prefix, check that many days.  For example, @kbd{C-1 C-c C-w} shows
+prefix, check that many days.  For example, @kbd{C-1 C-c / d} shows
 all deadlines due tomorrow.
 @c
 @kindex C-c C-s
@@ -4172,7 +4254,7 @@ will be visible.
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
 
-@node Clocking work time,  , Deadlines and scheduling, Timestamps
+@node Clocking work time,  , Deadlines and scheduling, Dates and times
 @section Clocking work time
 
 Org-mode allows you to clock the time you spent on specific tasks in a
@@ -4288,14 +4370,14 @@ The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
-@node Remember, Agenda views, Timestamps, Top
+@node Remember, Agenda views, Dates and times, Top
 @chapter Remember
 @cindex @file{remember.el}
 
 The @i{Remember} package by John Wiegley lets you store quick notes with
 little interruption of your work flow.  See
 @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
-information.  It is an excellent way to add new notes and TODO items to
+information.  It is an excellent way to add new notes and tasks to
 Org-mode files.  Org-mode significantly expands the possibilities of
 @i{remember}: You may define templates for different note types, and
 associate target files and headlines with specific templates.  It also
@@ -4306,6 +4388,7 @@ interactively, on the fly.
 * Setting up remember::         Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
+* Refiling notes::              Moving a note or task to a project
 @end menu
 
 @node Setting up remember, Remember templates, Remember, Remember
@@ -4315,14 +4398,19 @@ The following customization will tell @i{remember} to use org files as
 target, and to create annotations compatible with Org-mode links.
 
 @example
-(require 'remember)
+(org-remember-insinuate)
 (setq org-directory "~/path/to/my/orgfiles/")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
-(setq remember-annotation-functions '(org-remember-annotation))
-(setq remember-handler-functions '(org-remember-handler))
-(add-hook 'remember-mode-hook 'org-remember-apply-template)
+(define-key global-map "\C-cr" 'org-remember)
 @end example
 
+The last line binds the command @code{org-remember} to a global
+key@footnote{Please select your own key, @kbd{C-c r} is only a
+suggestion.}.  @code{org-remember} basically just calls @code{remember},
+but it makes a few things easier: If there is an active region, it will
+automatically copy the region into the remember buffer.  It also allows
+to jump to the buffer and location where remember notes are being
+stored: Just call @code{org-remember} with a prefix argument.
 
 @node Remember templates, Storing notes, Setting up remember, Remember
 @section Remember templates
@@ -4346,11 +4434,9 @@ character specifies how to select the template.  It is useful if the
 character is also the first letter of the name.  The next string
 specifies the template.  Two more (optional) strings give the file in
 which, and the headline under which the new note should be stored.  The
-file defaults (if not present or @code{nil}) to
+file (if not present or @code{nil}) defaults to
 @code{org-default-notes-file}, the heading to
-@code{org-remember-default-headline}.  Both defaults help to get to the
-storing location quickly, but you can change the location interactively
-while storing the note.
+@code{org-remember-default-headline}.
 
 When you call @kbd{M-x remember} (or @kbd{M-x org-remember}) to remember
 something, org will prompt for a key to select the template (if you have
@@ -4375,9 +4461,12 @@ insertion of content:
 %A          @r{like @code{%a}, but prompt for the description part}
 %i          @r{initial content, the region when remember is called with C-u.}
             @r{The entire text will be indented like @code{%i} itself.}
+%c          @r{Content of the clipboard, or current kill ring head.}
 %^g         @r{prompt for tags, with completion on tags in target file.}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
 %:keyword   @r{specific information for certain link types, see below}
+%[pathname] @r{insert the contents of the file given by @code{pathname}}
+%(sexp)     @r{evaluate elisp @code{(sexp)} and replace with the result}
 @end example
 
 @noindent
@@ -4413,7 +4502,7 @@ If you change you mind about which template to use, call
 @code{org-remember} in the remember buffer.  You may then select a new
 template that will be filled with the previous context information.
 
-@node Storing notes,  , Remember templates, Remember
+@node Storing notes, Refiling notes, Remember templates, Remember
 @section Storing notes
 
 When you are finished preparing a note with @i{remember}, you have to press
@@ -4425,13 +4514,13 @@ restored, and you are back in the working context before the call to
 @code{remember}, exit the remember buffer with @kbd{C-u C-u C-c C-c},
 i.e. specify a double prefix argument to @kbd{C-c C-c}.
 
-If you want to store the note to a different place, use @kbd{C-u C-c
-C-c} instead to exit remember@footnote{Configure the variable
-@code{org-remember-store-without-prompt} to make this behavior the
-default.}.  The handler will then first prompt for a target file - if you
-press @key{RET}, the value specified for the template is used.  Then the
-command offers the headings tree of the selected file, with the cursor
-position at the default headline (if you had specified one in the
+If you want to store the note directly to a different place, use
+@kbd{C-u C-c C-c} instead to exit remember@footnote{Configure the
+variable @code{org-remember-store-without-prompt} to make this behavior
+the default.}.  The handler will then first prompt for a target file -
+if you press @key{RET}, the value specified for the template is used.
+Then the command offers the headings tree of the selected file, with the
+cursor position at the default headline (if you had specified one in the
 template).  You can either immediately press @key{RET} to get the note
 placed there.  Or you can use the following keys to find a different
 location:
@@ -4464,6 +4553,33 @@ not, a headline is constructed from the current date and some additional
 data.  If you have indented the text of the note below the headline, the
 indentation will be adapted if inserting the note into the tree requires
 demotion from level 1.
+
+@node Refiling notes,  , Storing notes, Remember
+@section Refiling notes
+@cindex refiling notes
+
+Remember is usually used to quickly capture notes and tasks into one or
+a few capture lists.  When reviewing the captured data, you may want to
+refile some of the entries into a different list, for example into a
+project.  Cutting, finding the right location and then pasting the note
+is cumbersome.  To simplify this process, you can use the following
+special command:
+
+@table @kbd
+@kindex C-c C-w
+@item C-c C-w
+Refile the entry at point.  This command offers possible locations for
+refiling the entry and lets you select one with completion.  The item is
+filed below the target heading as a subitem.  Depending on
+@code{org-reverse-note-order}, it will be either the first of last
+subitem, and you can toggle the value of this variable for the duration
+of the command by using a @kbd{C-u} prefix.@* By default, all level 1
+headlines in the current buffer are considered to be targets, but you
+can have more complex definitions across a number of files.  See the
+variable @code{org-refile-targets} for details.  The list of targets is
+compiled upon first use, you can update it by using a double prefix
+argument (@kbd{C-u C-u}) to this command.
+@end table
 
 @node Agenda views, Embedded LaTeX, Remember, Top
 @chapter Agenda Views
@@ -4775,8 +4891,8 @@ to them and collect them into an agenda buffer.
 @item C-c a m
 Produce a list of all headlines that match a given set of tags.  The
 command prompts for a selection criterion, which is a boolean logic
-expression with tags, like @samp{+WORK+URGENT-WITHBOSS} or
-@samp{WORK|HOME} (@pxref{Tags}).  If you often need a specific search,
+expression with tags, like @samp{+work+urgent-withboss} or
+@samp{work|home} (@pxref{Tags}).  If you often need a specific search,
 define a custom command for it (@pxref{Agenda dispatcher}).
 @kindex C-c a M
 @item C-c a M
@@ -4879,12 +4995,14 @@ associated with the item.
 @cindex category
 The category is a broad label assigned to each agenda item.  By default,
 the category is simply derived from the file name, but you can also
-specify it with a special line in the buffer, like this@footnote{If
-there are several such lines in a file, each specifies the category for
-the text below it.  The first category also applies to any text before
-the first CATEGORY line.  This method is only kept for backward
-compatibility.  The preferred method for setting multiple categories in
-a buffer is using a property.}:
+specify it with a special line in the buffer, like this@footnote{For
+backward compatibility, the following also works: If there are several
+such lines in a file, each specifies the category for the text below it.
+The first category also applies to any text before the first CATEGORY
+line.  However, using this method is @emph{strongly} deprecated as it is
+incompatible with the outline structure of the document.  The correct
+method for setting multiple categories in a buffer is using a
+property.}:
 
 @example
 #+CATEGORY: Thesis
@@ -5575,6 +5693,7 @@ or, if you need to modify some parameters
 @example
 emacs -eval '(org-batch-store-agenda-views                      \
               org-agenda-ndays 30                               \
+              org-agenda-start-day "2007-11-01"                 \
               org-agenda-include-diary nil                      \
               org-agenda-files (quote ("~/org/project.org")))'  \
       -kill
@@ -6021,7 +6140,7 @@ Export as HTML file and immediately open it with a browser.
 @item C-c C-e H
 Export to a temporary buffer, do not create a file.
 @kindex C-c C-e R
-@item C-c C-e H
+@item C-c C-e R
 Export the active region to a temporary buffer.  With prefix arg, do not
 produce file header and foot, but just the plain HTML section for the
 region.  This is good for cut-and-paste operations.
@@ -6169,6 +6288,7 @@ Org-mode contains a La@TeX{} exporter written by Bastien Guerry.
 @menu
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
+* Sectioning structure::        
 @end menu
 
 @node LaTeX export commands, Quoting LaTeX code, LaTeX export, LaTeX export
@@ -6212,7 +6332,7 @@ with a prefix argument. For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
-@node Quoting LaTeX code,  , LaTeX export commands, LaTeX export
+@node Quoting LaTeX code, Sectioning structure, LaTeX export commands, LaTeX export
 @subsection Quoting LaTeX code
 
 Embedded La@TeX{} as described in @ref{Embedded LaTeX} will be correctly
@@ -6231,6 +6351,23 @@ constructs:
 All lines between these markers are exported literally
 #+END_LaTeX
 @end example
+
+
+
+@node   Sectioning structure,  , Quoting LaTeX code, LaTeX export
+@subsection Sectioning structure
+@cindex LaTeX class
+@cindex LaTeX sectioning structure
+
+By default, the La@TeX{} output uses the class @code{article}.
+
+You can change this globally by setting a different value for
+@code{org-export-latex-default-class} or locally by adding an option
+like @code{#+LaTeX_CLASS: myclass} in your file.  The class should be
+listed in @code{org-export-latex-classes}, where you can also define the
+sectioning structure for each class.
+
+
 @node XOXO export, iCalendar export, LaTeX export, Exporting
 @section XOXO export
 @cindex XOXO export
@@ -6296,6 +6433,7 @@ in order to produce better output.
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
+* Quoted examples::             Inserting quoted chnuks of text            
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 @end menu
@@ -6353,7 +6491,7 @@ construct:
 #+TEXT: This goes between the table of contents and the first headline
 @end example
 
-@node Footnotes, Enhancing text, Initial text, Text interpretation
+@node Footnotes, Quoted examples, Initial text, Text interpretation
 @subsection Footnotes
 @cindex footnotes
 @cindex @file{footnote.el}
@@ -6378,14 +6516,48 @@ if you are too used to this binding, you could use
 @code{org-replace-disputed-keys} and @code{org-disputed-keys} to change
 the settings in Org-mode.
 
-@node Enhancing text, Export options, Footnotes, Text interpretation
+@node Quoted examples, Enhancing text, Footnotes, Text interpretation
+@subsection Quoted examples
+@cindex quoted examples
+@cindex examples, quoted
+@cindex text, fixed width
+@cindex fixed width text
+
+When writing technical documents, you often need to insert examples that
+are not further interpreted by Org-mode.  For historical reasons, there
+are several ways to do this:
+
+@itemize @bullet
+@item
+If a headline starts with the word @samp{QUOTE}, the text below the
+headline will be typeset as fixed-width, to allow quoting of computer
+codes etc.
+@item
+Lines starting with @samp{:} are also typeset in fixed-width font. 
+@table @kbd
+@kindex C-c :
+@item C-c :
+Toggle fixed-width for entry (QUOTE) or region, see below.
+@end table
+@item
+Finally, text between
+@example
+#+BEGIN_EXAMPLE
+quoted text
+#+END_EXAMPLE
+@end example
+will also be exported in this way.
+@end itemize
+
+
+@node Enhancing text, Export options, Quoted examples, Text interpretation
 @subsection Enhancing text for export
 @cindex enhancing text
 @cindex richer text
 
 Some of the export backends of Org-mode allow for sophisticated text
 formatting, this is true in particular for the HTML and La@TeX{}
-backends. Org-mode has a number of typing conventions that allow to
+backends.  Org-mode has a number of typing conventions that allow to
 produce a richly formatted output.
 
 @itemize @bullet
@@ -6400,11 +6572,12 @@ backend supports lists.  See @xref{Plain lists}.
 @cindex underlined text
 @cindex bold text
 @cindex italic text
+@cindex verbatim text
 @item
-You can make words @b{*bold*}, @i{/italic/}, _underlined_,
-@code{=code=}, and even @samp{+strikethrough+}@footnote{but remember
-that strikethrough is typographically evil and should @i{never} be
-used.}.
+You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
+and @code{~verbatim~}, and, if you must, @samp{+strikethrough+}.  Text
+in the code and verbatim string is not processed for org-mode specific
+syntax, it is exported verbatim.
 
 @cindex horizontal rules, in exported files
 @item
@@ -6434,11 +6607,27 @@ font.
 @item C-c :
 Toggle fixed-width for entry (QUOTE) or region, see below.
 @end table
+Finally, text between
+@example
+#+BEGIN_EXAMPLE
+quoted text
+#+END_EXAMPLE
+@end example
+will also be exported in this way.
 
 @cindex linebreak, forced
 @item 
 A double backslash @emph{at the end of a line} enforces a line break at
 this position.
+
+@cindex HTML entities, LaTeX entities
+@item
+Strings like @code{\alpha} will be exported as @code{&alpha;}, in the
+HTML output.  These strings are exported as @code{$\alpha$} in the
+La@TeX{} output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in
+HTML and in La@TeX{}.  This applies for a long list of entities, see
+the variable @code{org-html-entities} for the complete list.
+@c FIXME
 @end itemize
 
 If these conversions conflict with your habits of typing ASCII text,
@@ -6489,6 +6678,7 @@ you can:
 @cindex tables
 @cindex @TeX{}-like syntax for sub- and superscripts
 @cindex footnotes
+@cindex special strings
 @cindex emphasized text
 @cindex @TeX{} macros
 @cindex La@TeX{} fragments
@@ -6505,6 +6695,7 @@ toc:       @r{turn on/off table of contents, or set level limit (integer)}
 ^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
            @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
            @r{the simple @code{a_b} will be left as it is.}
+-:         @r{turn on/off conversion of special strings.}
 f:         @r{turn on/off foototes like this[1].}
 *:         @r{turn on/off emphasized text (bold, italic, underlined)}
 TeX:       @r{turn on/off simple @TeX{} macros in plain text}
@@ -6677,6 +6868,7 @@ respective variable for details.
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
 @item @code{:emphasize}             @tab @code{org-export-with-emphasize}
 @item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
+@item @code{:special-strings}       @tab @code{org-export-with-special-strings}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
@@ -6698,14 +6890,16 @@ respective variable for details.
 @item @code{:email}                 @tab @code{user-mail-address}
 @end multitable
 
+If you use several email addresses, separate them by a semi-column.
+
 Most of the @code{org-export-with-*} variables have the same effect in
 both HTML and La@TeX{} exporters, except for @code{:TeX-macros} and
 @code{:LaTeX-fragments}, respectively @code{nil} and @code{t} in the
 La@TeX{} export.
 
-When a property is given a value in org-publish-project-alist, its
-setting overrides the value of the corresponding user variable (if any)
-during publishing.  Options set within a file (@pxref{Export
+When a property is given a value in @code{org-publish-project-alist},
+its setting overrides the value of the corresponding user variable (if
+any) during publishing.  Options set within a file (@pxref{Export
 options}), however, override everything.
 
 @node Publishing links, Project page index, Publishing options, Configuration
@@ -6721,7 +6915,7 @@ you publish them to HTML.
 
 You may also link to related files, such as images. Provided you are
 careful with relative pathnames, and provided you have also configured
-org-publish to upload the related files, these links will work
+@code{org-publish} to upload the related files, these links will work
 too. @ref{Complex example} for an example of this usage.
 
 Sometime an Org-mode file to be published may contain links that are
@@ -7375,13 +7569,12 @@ is loaded @emph{before} @file{allout.el}, for example by putting
 
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm
-Keybindings in Org-mode conflict with the @kbd{S-<cursor>} keys
-used by CUA-mode (as well as pc-select-mode and s-region-mode) to
-select and extend the region.  If you want to use one of these
-packages along with Org-mode, configure the variable
-@code{org-CUA-compatible}.  When set, Org-mode will move the following
-keybindings in Org-mode files, and in the agenda buffer (but not
-during date selection).
+Keybindings in Org-mode conflict with the @kbd{S-<cursor>} keys used by
+CUA-mode (as well as pc-select-mode and s-region-mode) to select and
+extend the region.  If you want to use one of these packages along with
+Org-mode, configure the variable @code{org-replace-disputed-keys}.  When
+set, Org-mode will move the following keybindings in Org-mode files, and
+in the agenda buffer (but not during date selection).
 
 @example
 S-UP    -> M-p             S-DOWN  -> M-n
@@ -7610,15 +7803,18 @@ the link description when the link is later inserted into tan Org-mode
 buffer with @kbd{C-c C-l}.
 
 @node Tables in arbitrary syntax, Dynamic blocks, Adding hyperlink types, Extensions and Hacking
-@section Tables in arbitrary syntax
+@section Tables and Lists in arbitrary syntax
 @cindex tables, in other modes
+@cindex lists, in other modes
 @cindex orgtbl-mode
 
 Since Orgtbl-mode can be used as a minor mode in arbitrary buffers, a
 frequent feature request has been to make it work with native tables in
-specific languages, for example La@TeX{}.  However, this is extremely hard
-to do in a general way, would lead to a customization nightmare, and
-would take away much of the simplicity of the Orgtbl-mode table editor.
+specific languages, for example La@TeX{}.  However, this is extremely
+hard to do in a general way, would lead to a customization nightmare,
+and would take away much of the simplicity of the Orgtbl-mode table
+editor.
+
 
 This appendix describes a different approach.  We keep the Orgtbl-mode
 table in its native format (the @i{source table}), and use a custom
@@ -7627,10 +7823,17 @@ function to @i{translate} the table to the correct syntax, and to
 the burden of writing conversion functions on the user, but it allows
 for a very flexible system.
 
+Bastien added the ability to do the same with lists.  You can use Org's
+facilities to edit and structure lists by turning @code{orgstruct-mode}
+on, then locally exporting such lists in another format (HTML, La@TeX{}
+or TeXInfo.)
+
+
 @menu
 * Radio tables::                Sending and receiving
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
+* Radio lists::                 Doing the same for lists.
 @end menu
 
 @node Radio tables, A LaTeX example, Tables in arbitrary syntax, Tables in arbitrary syntax
@@ -7699,7 +7902,7 @@ key.
 @end itemize
 
 @node A LaTeX example, Translator functions, Radio tables, Tables in arbitrary syntax
-@subsection A LaTeX example
+@subsection A LaTeX example of radio tables
 @cindex LaTeX, and orgtbl-mode
 
 The best way to wrap the source table in La@TeX{} is to use the
@@ -7803,7 +8006,7 @@ may also be a property list with column numbers and formats, for example
 applied.
 @end table
 
-@node Translator functions,  , A LaTeX example, Tables in arbitrary syntax
+@node Translator functions, Radio lists, A LaTeX example, Tables in arbitrary syntax
 @subsection Translator functions
 @cindex HTML, and orgtbl-mode
 @cindex translator function
@@ -7875,6 +8078,49 @@ argument is the property list containing all parameters specified in the
 containing the formatted table.  If you write a generally useful
 translator, please post it on @code{emacs-orgmode@@gnu.org} so that
 others can benefit from your work.
+
+@node  Radio lists,  , Translator functions, Tables in arbitrary syntax
+@subsection Radio lists
+@cindex radio lists
+@cindex org-list-insert-radio-list
+
+Sending and receiving radio lists works exactly the same way than
+sending and receiving radio tables (@pxref{Radio tables}) @footnote{You
+need to load the @code{org-export-latex.el} package to use radio lists
+since the relevant code is there for now.}.  As for radio tables, you
+can insert radio lists templates in HTML, La@TeX{} and TeXInfo modes by
+calling @code{org-list-insert-radio-list}.
+
+Here are the differences with radio tables:
+
+@itemize @minus
+@item
+Use @code{ORGLST} instead of @code{ORGTBL}.
+@item
+The available translation functions for radio lists don't take
+parameters.
+@item 
+`C-c C-c' will work when pressed on the first item of the list.
+@end itemize
+
+Here is a La@TeX{} example.  Let's say that you have this in your
+La@TeX{} file:
+
+@example
+% BEGIN RECEIVE ORGLST to-buy
+% END RECEIVE ORGLST to-buy
+\begin@{comment@}
+#+ORGLIST: SEND to-buy orgtbl-to-latex
+- a new house
+- a new computer
+  + a new keyboard
+  + a new mouse
+- a new life
+\end@{comment@}
+@end example
+
+Pressing `C-c C-c' on @code{a new house} and will insert the converted
+La@TeX{} list between the two marker lines.
 
 @node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Extensions and Hacking
 @section Dynamic blocks
@@ -8034,7 +8280,9 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 @defun org-entry-get pom property &optional inherit
 Get value of PROPERTY for entry at point-or-marker POM.
 If INHERIT is non-nil and the entry does not have the property,
-then also check higher levels of the hierarchy.
+then also check higher levels of the hierarchy.  This function ignores
+the value of @code{org-use-property-inheritance} and requires the
+explicit INHERIT flag.
 @end defun
 
 @defun org-entry-delete pom property

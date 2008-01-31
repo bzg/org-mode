@@ -56,7 +56,8 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES  = org.el org-publish.el org-mouse.el org-export-latex.el org-install.el 
+LISPFILES1 = org.el org-publish.el org-mouse.el org-export-latex.el
+LISPFILES  = $(LISPFILES1) org-install.el 
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
 CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
@@ -95,6 +96,17 @@ install-info: $(INFOFILES)
 install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
+
+org-install.el: $(LISPFILES)
+	$(BATCH) --eval "(require 'autoload)" \
+		--eval '(find-file "org-install.el")'  \
+		--eval '(erase-buffer)' \
+		--eval '(generate-file-autoloads "org.el")' \
+		--eval '(generate-file-autoloads "org-mouse.el")' \
+		--eval '(generate-file-autoloads "org-publish.el")' \
+		--eval '(generate-file-autoloads "org-export-latex.el")' \
+		--eval '(save-buffer)'
+	cat < provide.el >> org-install.el
 
 org.elc:		org.el
 
@@ -152,6 +164,7 @@ distfile:
 	touch org.texi orgcard.tex
 	make info
 	make doc
+	make org-install.el
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
 	$(MKDIR) org-$(TAG)/xemacs

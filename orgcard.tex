@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{5.13e}
+\def\orgversionnumber{5.14}
 \def\versionyear{2007}          % latest update
 \def\year{2007}                 % latest copyright year
 
@@ -317,6 +317,7 @@ are preserved on all copies.
 \key{demote current subtree down one level}{M-S-RIGHT}
 
 \key{move subtree/list item up/down}{M-S-UP/DOWN}
+\key{refile subtree}{C-c C-w}
 \key{kill subtree}{C-c C-x C-w}
 \key{copy subtree}{C-c C-x M-w}
 \key{yank subtree}{C-c C-x C-y}
@@ -337,10 +338,10 @@ are preserved on all copies.
 
 \section{Filtering and Sparse Trees}
 
-\key{show sparse tree for all matches of a regexp}{C-c /}
+% FIXME: this is garbage
+\key{construct a sparse tree by various criteria}{C-c /}
 \key{view TODO's in sparse tree}{C-c C-v}
 \key{global TODO list in agenda mode}{C-c t$^1$}
-\key{create sparse tree with all deadlines due}{C-c C-w}
 \key{time sorted view of current org file}{C-c a L}
 %\key{agenda for the week}{C-c a$^1$}
 %\key{agenda for date at cursor}{C-c C-o}
@@ -572,7 +573,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{Like \kbd{C-c .} but make stamp inactive}{C-c !} % FIXME
 \key{insert DEADLINE timestamp}{C-c C-d}
 \key{insert SCHEDULED timestamp}{C-c C-s}
-\key{create sparse tree with all deadlines due}{C-c C-w}
+\key{create sparse tree with all deadlines due}{C-c / d}
 \key{the time between 2 dates in a time range}{C-c C-y}
 \key{change timestamp at cursor by $\pm 1$ day}{S-RIGHT/LEFT$^3$}
 \key{change year/month/day at cursor by $\pm 1$}{S-UP/DOWN$^3$}
