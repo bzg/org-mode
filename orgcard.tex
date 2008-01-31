@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.30}
+\def\orgversionnumber{4.33}
 \def\year{2006}
 %
 %**start of header
@@ -294,6 +294,7 @@ are preserved on all copies.
 \key{previous heading, same level}{C-c C-b}
 \key{backward to higher level heading}{C-c C-u}
 \key{jump to another place in document}{C-c C-j}
+\key{previous/next plain list item}{S-UP/DOWN$^3$}
 
 \section{Structure Editing}
 
@@ -380,7 +381,7 @@ To set archive location for current file, add a line like$^2$:
 \key{open file links in emacs (\kbd{C-u} : in emacs)}{C-c C-o}
 \key{open link at point (3: in emacs)}{mouse-2/3}
 %\key{open file links in emacs}{mouse-3}
-\key{record a position in mark ring}{C-c \%}
+%\key{record a position in mark ring}{C-c \%}
 \key{jump back to last followed link(s)}{C-c \&}
 
 {\bf Internal Links}
@@ -397,16 +398,18 @@ To set archive location for current file, add a line like$^2$:
 \key{\kbd{file:papers/last.pdf}}{\rm file, relative}
 \key{\kbd{file:projects.org::*that text}}{\rm find headline}
 \key{\kbd{file:projects.org::find me}}{\rm find tgt/string}
-\key{\kbd{file:projects.org::/regexp/}}{\rm regexp search}
+%\key{\kbd{file:projects.org::/regexp/}}{\rm regexp search}
 \key{\kbd{http://www.astro.uva.nl/~dominik}}{\rm on the web}
 \key{\kbd{mailto:adent@galaxy.net}}{\rm EMail address}
 \key{\kbd{news:comp.emacs}}{\rm Usenet group}
 \key{\kbd{bbdb:Richard Stallman}}{\rm BBDB person}
-\key{\kbd{shell:ls *.org}}{\rm shell command}
 \key{\kbd{gnus:group}}{\rm GNUS group}
 \key{\kbd{gnus:group\#id}}{\rm GNUS message}
 \key{\kbd{vm|wl|mhe|rmail:folder}}{\rm Mail folder}
 \key{\kbd{vm|wl|mhe|rmail:folder\#id}}{\rm Mail message}
+\key{\kbd{info:emacs:Regexps}}{\rm Info file:node}
+\key{\kbd{shell:ls *.org}}{\rm shell command}
+\key{\kbd{elisp:(calendar)}}{\rm elisp form}
 \metax{\kbd{[[external link][description]]}}{\rm optional link text}
 %\key{\kbd{vm://myself@some.where.org/folder\#id}}{\rm VM remote}
 

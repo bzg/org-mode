@@ -6,7 +6,7 @@
 ;; Keywords: hypermedia, outlines
 ;; Version: 
 
-;; $Id: org-publish.el,v 1.61 2006/05/19 12:03:51 dto Exp $
+;; $Id: org-publish.el,v 1.64 2006/05/19 19:45:34 dto Exp dto $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -152,11 +152,8 @@
 
 ;;; Code:
 
-;; these lines get code for function "eshell/cp" loaded
-(require 'eshell) 
-(require 'esh-maint)
-(require 'em-unix)
-(require 'org)
+(eval-when-compile 
+  (require 'cl))
 
 (defgroup org-publish nil
 	"Options for publishing a set of Org-mode and related files."
@@ -315,60 +312,35 @@ whether file should be published."
   (let ((timestamp (org-publish-timestamp-filename filename)))
     (set-file-times timestamp)))
 
+;;;; Getting project information out of org-publish-project-alist
 
-;;;; Utilities
-
-
-(defun org-publish-get-project (project-name)
-  "Return project object for project PROJECT-NAME."
-  (let ((project (assoc project-name org-publish-project-alist)))
-    (if project
-	(cdr project)
-      nil)))
+(defun org-publish-meta-project-p (element)
+  "Tell whether an ELEMENT of org-publish-project-alist is a metaproject."
+  (plist-get (cdr element) :components))
 
 
-(defun org-publish-get-project-component (project-name component-name)
-  "Return plist for project component COMPONENT-NAME within project PROJECT-NAME."
-  (let* ((components (org-publish-get-project project-name))
-	 (c nil)
-	 (plist nil))
-    (while (setq c (pop components))
-      (when (and (stringp (car c)) (string= component-name (car c)))
-	(setq plist (cdr c))))
-    plist))
-
-
-(defun org-publish-composite-project-p (element)
-  "Tell whether an ELEMENT of org-publish-project-alist is composite."
-  (listp (car (cdr element))))
-
-
-(defun org-publish-iterate-project-plists (action &optional project-name)
-  "Call function ACTION for each project component.
-ACTION should accept two arguments: the name of the enclosing
-project, and the property list associated with the project
-component. If PROJECT-NAME is set, iterate only over components
-of that project."
-  (let ((alist (if project-name 
-		   `((,project-name ,@(org-publish-get-project project-name)))
+(defun org-publish-get-plists (&optional project-name)
+  "Return a list of property lists for project PROJECT-NAME. 
+When argument is not given, return all property lists for all projects."
+  (let ((alist (if project-name
+		   (list (assoc project-name org-publish-project-alist))
 		 org-publish-project-alist))
-	(project nil))
+	(project nil)
+	(plists nil))
     (while (setq project (pop alist))
-      (if (org-publish-composite-project-p project)
-	  ;;
-	  ;; handle composite project
-	  (let ((components (cdr project))
-		(c nil))
-	    (while (setq c (pop components))
-	      (let ((plist (cdr c)))
-		(funcall action (car project) plist))))
-	;;
-	;; handle normal project
-	(let ((plist (cdr project)))
-	  (funcall action (car project) plist))))))
+      (if (org-publish-meta-project-p project)
+	  ;; meta project
+	  (let* ((components (plist-get (cdr project) :components))
+		 (components-plists (mapcar 'org-publish-get-plists components)))
+	    (setq plists (append plists components-plists)))
+	;; normal project
+	(let ((p (cdr project)))
+	  (setq p (plist-put p :project-name (car project)))
+	  (setq plists (append plists (list (cdr project)))))))
+      ;;
+      plists))
 
-    	      
-
+  
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
 If EXCLUDE-REGEXP is set, this will be used to filter out
@@ -401,22 +373,24 @@ matching filenames."
 Filename should contain full path. Returns name of project, or
 nil if not found."
   (let ((found nil))
-    (org-publish-iterate-project-plists 
-     (lambda (project-name project-plist)
-       (let ((files (org-publish-get-base-files project-plist)))
+    (mapcar 
+     (lambda (plist)
+       (let ((files (org-publish-get-base-files plist)))
 	 (if (member (expand-file-name filename) files)
-	     (setq found project-name)))))
+	     (setq found (plist-get plist :project-name)))))
+     (org-publish-get-plists))
     found))
 
 
 (defun org-publish-get-plist-from-filename (filename)
   "Return publishing configuration plist for file FILENAME."
   (let ((found nil))
-    (org-publish-iterate-project-plists
-     (lambda (project-name project-plist)
-       (let ((files (org-publish-get-base-files project-plist)))
+    (mapcar
+     (lambda (plist)
+       (let ((files (org-publish-get-base-files plist)))
 	 (if (member (expand-file-name filename) files)
-             (setq found project-plist)))))
+             (setq found plist))))
+     (org-publish-get-plists))
     found))
 
 
@@ -427,6 +401,7 @@ nil if not found."
   "Publish an org file to HTML.  
 PLIST is the property list for the given project. 
 FILENAME is the filename of the org file to be published."
+  (require 'org)
   (let* ((arg (plist-get plist :headline-levels)))
     (progn
       (find-file filename)
@@ -439,11 +414,15 @@ FILENAME is the filename of the org file to be published."
   "Publish a file with no transformation of any kind.
 PLIST is the property list for the given project. 
 FILENAME is the filename of the file to be published."
+  ;; make sure eshell/cp code is loaded
+  (require 'eshell) 
+  (require 'esh-maint)
+  (require 'em-unix)
   (let ((destination (file-name-as-directory (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
 
-;;;; Publishing files, projects, and indices
+;;;; Publishing files, sets of files, and indices
 
 
 (defun org-publish-file (filename)
@@ -458,8 +437,8 @@ FILENAME is the filename of the file to be published."
       (org-publish-update-timestamp filename))))
 
 
-(defun org-publish-project-plist (plist)
-  "Publish all base files in project defined by PLIST.
+(defun org-publish-plist (plist)
+  "Publish all files in set defined by PLIST.
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
 	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
@@ -482,7 +461,7 @@ FILENAME is the filename of the file to be published."
 
 
 (defun org-publish-org-index (plist &optional index-filename)
-  "Create an index of pages in project PLIST.  
+  "Create an index of pages in set defined by PLIST.  
 Optionally set the filename of the index with INDEX-FILENAME; 
 default is 'index.org'."
   (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
@@ -505,7 +484,12 @@ default is 'index.org'."
 			    "]]\n")))))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
-      
+
+
+;(defun org-publish-meta-index (meta-plist &optional index-filename)
+;  "Create an index for a metaproject."
+;  (let* ((plists (
+  
  
 ;;;; Interactive publishing functions
 
@@ -514,11 +498,9 @@ default is 'index.org'."
 (defun org-publish (project-name &optional force)
   "Publish the project PROJECT-NAME."
   (interactive "sProject name: \nP")
-  (let ((org-publish-use-timestamps-flag (if force nil t)))
-    (org-publish-iterate-project-plists 
-     (lambda (ignore project-plist)
-       (org-publish-project-plist project-plist))
-     project-name)))
+  (let ((org-publish-use-timestamps-flag (if force nil t))
+	(plists (org-publish-get-plists project-name)))
+    (mapcar 'org-publish-plist plists)))
        
 
 ;;;###autoload
@@ -549,11 +531,9 @@ With prefix argument, force publish the file."
 With prefix argument, force publish all files."
   (interactive "P")
   (let ((org-publish-use-timestamps-flag
-	 (if force nil t)))
-    (org-publish-iterate-project-plists
-     (lambda (project-name project-plist)
-       (org-publish-project-plist project-plist)))))
-
+	 (if force nil t))
+	(plists (org-publish-get-plists)))
+    (mapcar 'org-publish-plist plists)))
 
 
 
