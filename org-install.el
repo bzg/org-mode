@@ -18,10 +18,10 @@
   "Export all files in `org-agenda-files' to iCalendar .ics files." t)
 (autoload 'org-export-icalendar-combine-agenda-files "org"
   "Export all files in `org-agenda-files' to a single combined iCalendar file." t)
+(autoload 'org-batch-agenda "org")
 (autoload 'org-publish-current-file "org-publish" "Publish current file." t)
 (autoload 'org-publish-current-project "org-publish"
   "Publish all files of current project." t)
 (autoload 'org-publish "org-publish" "Publish a project." t)
 (autoload 'org-publish-all "org-publish" "Publish all projects." t)
-
 (provide 'org-install)

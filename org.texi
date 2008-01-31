@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.46
-@set DATE August 2006
+@set VERSION 4.48
+@set DATE September 2006
 
 @dircategory Emacs
 @direntry
@@ -209,6 +209,7 @@ Custom agenda views
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
+* Batch processing::            Agenda views from the command line
 
 Embedded LaTeX
 
@@ -3541,6 +3542,7 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
+* Batch processing::            Agenda views from the command line
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -3632,7 +3634,7 @@ your agenda for the current week, all TODO items that carry the tag
 command @kbd{C-c a o} provides a similar view for office tasks.
 
 
-@node Setting Options,  , Block agenda, Custom agenda views
+@node Setting Options, Batch processing, Block agenda, Custom agenda views
 @subsection Setting Options for custom commands
 @cindex options, for custom agenda views
 
@@ -3695,6 +3697,35 @@ fully supports its structure.  Just one caveat: When setting options in
 this interface, the @emph{values} are just lisp expressions.  So if the
 value is a string, you need to add the double quotes around the value
 yourself.
+
+@node Batch processing,  , Setting Options, Custom agenda views
+@subsection Creating agenda views in batch processing
+
+If you want to print or otherwise reprocess agenda views, it can be
+useful to create an agenda from the command line.  This is the purpose
+of the function @code{org-batch-agenda}.  It takes as a parameter one of
+the strings that are the keys in @code{org-agenda-custom-commands}.  For
+example, to directly print the current TODO list, you could use
+
+@example
+emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
+@end example
+
+@noindent
+You may also modify parameters on the fly like this:
+
+@example
+emacs -batch -l ~/.emacs                                      \
+   -eval '(org-batch-agenda "a"                               \
+            org-agenda-ndays 300                              \
+            org-agenda-include-diary nil                      \
+            org-agenda-files (quote ("~/org/project.org")))'  \
+   | lpr
+@end example
+
+@noindent
+which will produce a 300 day agenda, fully restricted to the Org file
+@file{~/org/projects.org}, not even including the diary.
 
 @node Embedded LaTeX, Exporting, Agenda views, Top
 @chapter Embedded LaTeX
@@ -4354,6 +4385,8 @@ and where to put published files.
 @tab Directory containing publishing source files
 @item @code{:publishing-directory}
 @tab Directory (possibly remote) where output files will be published.
+@item @code{:preparation-function}
+@tab Function called before starting publishing proxess.
 @end multitable
 @noindent
 
@@ -5264,6 +5297,8 @@ control.
 @item
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
+@item
+@i{Jason Riedy} sent a patch to fix a bug with export of TODO keywerds.
 @item
 @i{Philip Rooke} created the Org-mode reference card and provided lots
 of feedback.

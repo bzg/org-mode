@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.46).
+   This manual is for Org-mode (version 4.48).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.46).
+This manual is for Org-mode (version 4.48).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -178,6 +178,7 @@ Custom agenda views
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
+* Batch processing::            Agenda views from the command line
 
 Embedded LaTeX
 
@@ -3215,6 +3216,7 @@ dispatcher (*note Agenda dispatcher::), just like the default commands.
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
+* Batch processing::            Agenda views from the command line
 
 
 File: org,  Node: Storing searches,  Next: Block agenda,  Prev: Custom agenda views,  Up: Custom agenda views
@@ -3300,7 +3302,7 @@ your agenda for the current week, all TODO items that carry the tag
 `C-c a o' provides a similar view for office tasks.
 
 
-File: org,  Node: Setting Options,  Prev: Block agenda,  Up: Custom agenda views
+File: org,  Node: Setting Options,  Next: Batch processing,  Prev: Block agenda,  Up: Custom agenda views
 
 8.9.3 Setting Options for custom commands
 -----------------------------------------
@@ -3355,6 +3357,32 @@ fully supports its structure.  Just one caveat: When setting options in
 this interface, the _values_ are just lisp expressions.  So if the
 value is a string, you need to add the double quotes around the value
 yourself.
+
+
+File: org,  Node: Batch processing,  Prev: Setting Options,  Up: Custom agenda views
+
+8.9.4 Creating agenda views in batch processing
+-----------------------------------------------
+
+If you want to print or otherwise reprocess agenda views, it can be
+useful to create an agenda from the command line.  This is the purpose
+of the function `org-batch-agenda'.  It takes as a parameter one of the
+strings that are the keys in `org-agenda-custom-commands'.  For
+example, to directly print the current TODO list, you could use
+
+     emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
+
+You may also modify parameters on the fly like this:
+
+     emacs -batch -l ~/.emacs                                      \
+        -eval '(org-batch-agenda "a"                               \
+                 org-agenda-ndays 300                              \
+                 org-agenda-include-diary nil                      \
+                 org-agenda-files (quote ("~/org/project.org")))'  \
+        | lpr
+
+which will produce a 300 day agenda, fully restricted to the Org file
+`~/org/projects.org', not even including the diary.
 
 
 File: org,  Node: Embedded LaTeX,  Next: Exporting,  Prev: Agenda views,  Up: Top
@@ -3946,6 +3974,8 @@ and where to put published files.
 `:base-directory'      Directory containing publishing source files
 `:publishing-directory'Directory (possibly remote) where output files
                        will be published.
+`:preparation-function'Function called before starting publishing
+                       proxess.
 
 
 File: org,  Node: Selecting files,  Next: Publishing action,  Prev: Sources and destinations,  Up: Configuration
@@ -4813,6 +4843,8 @@ if I have forgotten someone, please accept my apologies and let me know.
    * Frank Ruell solved the mystery of the `keymapp nil' bug, a
      conflict with `allout.el'.
 
+   * Jason Riedy sent a patch to fix a bug with export of TODO keywerds.
+
    * Philip Rooke created the Org-mode reference card and provided lots
      of feedback.
 
@@ -5463,147 +5495,148 @@ Key Index
 
 Tag Table:
 Node: Top964
-Node: Introduction10057
-Node: Summary10472
-Node: Installation12739
-Node: Activation14117
-Node: Feedback15366
-Node: Document structure16135
-Node: Outlines16909
-Node: Headlines17569
-Node: Visibility cycling18192
-Ref: Visibility cycling-Footnote-119667
-Ref: Visibility cycling-Footnote-219725
-Node: Motion19775
-Node: Structure editing20559
-Node: Archiving22668
-Node: ARCHIVE tag23226
-Node: Moving subtrees25019
-Node: Sparse trees26060
-Ref: Sparse trees-Footnote-128039
-Ref: Sparse trees-Footnote-228131
-Node: Plain lists28246
-Ref: Plain lists-Footnote-131771
-Ref: Plain lists-Footnote-232128
-Node: Tables32310
-Node: Built-in table editor32858
-Node: Narrow columns40466
-Ref: Narrow columns-Footnote-142405
-Node: Table calculations42451
-Node: Formula syntax43771
-Ref: Formula syntax-Footnote-146676
-Node: Lisp formulas46976
-Node: Column formulas47765
-Node: Advanced features49527
-Node: Named-field formulas52781
-Node: Editing/debugging formulas53421
-Node: Appetizer55179
-Node: orgtbl-mode56282
-Node: table.el56773
-Node: Hyperlinks57750
-Node: Link format58455
-Node: Internal links59748
-Ref: Internal links-Footnote-161737
-Node: Radio targets61869
-Node: CamelCase links62584
-Node: External links63082
-Node: Handling links65213
-Ref: Handling links-Footnote-169799
-Node: Search options70036
-Ref: Search options-Footnote-171810
-Node: Custom searches71891
-Node: Remember72939
-Node: TODO items76629
-Node: TODO basics77611
-Node: TODO extensions79138
-Node: Workflow states79933
-Node: TODO types80801
-Ref: TODO types-Footnote-182459
-Node: Per file keywords82541
-Ref: Per file keywords-Footnote-183995
-Node: Priorities84196
-Node: Breaking down tasks85440
-Ref: Breaking down tasks-Footnote-185960
-Node: Checkboxes86056
-Node: Timestamps88792
-Node: Time stamps89182
-Node: Creating timestamps92279
-Node: Progress logging95625
-Node: Closing items96155
-Node: Clocking work time96950
-Ref: Clocking work time-Footnote-1100386
-Node: Tags100512
-Node: Tag inheritance101274
-Node: Setting tags102211
-Ref: Setting tags-Footnote-1105341
-Ref: Setting tags-Footnote-2105453
-Node: Tag searches105533
-Node: Agenda views106742
-Node: Agenda files108631
-Ref: Agenda files-Footnote-1109591
-Ref: Agenda files-Footnote-2109740
-Node: Agenda dispatcher109933
-Node: Weekly/Daily agenda111550
-Node: Calendar/Diary integration112515
-Node: Global TODO list113853
-Node: Matching headline tags115905
-Node: Timeline116849
-Node: Presentation and sorting117512
-Node: Categories118290
-Node: Time-of-day specifications118954
-Node: Sorting of agenda items120932
-Node: Agenda commands122214
-Node: Custom agenda views128102
-Node: Storing searches128710
-Node: Block agenda130622
-Node: Setting Options131852
-Node: Embedded LaTeX134539
-Ref: Embedded LaTeX-Footnote-1135631
-Node: Math symbols135821
-Node: Subscripts and Superscripts136586
-Node: LaTeX fragments137430
-Node: Processing LaTeX fragments139499
-Node: CDLaTeX mode140445
-Ref: CDLaTeX mode-Footnote-1142929
-Node: Exporting143077
-Node: ASCII export144391
-Node: HTML export145681
-Node: XOXO export148517
-Node: iCalendar export148956
-Node: Text interpretation150779
-Node: Comment lines151258
-Node: Enhancing text151729
-Node: Export options153421
-Node: Publishing155088
-Ref: Publishing-Footnote-1155884
-Node: Configuration156080
-Node: Project alist156798
-Node: Sources and destinations157864
-Node: Selecting files158411
-Node: Publishing action159159
-Node: Publishing options160274
-Node: Publishing links162426
-Node: Project page index163939
-Node: Sample configuration164717
-Node: Simple example165209
-Node: Complex example165882
-Node: Triggering publication167958
-Node: Miscellaneous168643
-Node: Completion169277
-Node: Customization170658
-Node: In-buffer settings171243
-Node: The very busy C-c C-c key174474
-Node: Clean view176118
-Node: TTY keys178695
-Node: Interaction180304
-Node: Cooperation180701
-Node: Conflicts182568
-Node: Bugs184160
-Node: Extensions and Hacking185783
-Node: Extensions186269
-Node: Dynamic blocks187839
-Node: History and Acknowledgments189766
-Node: Index194654
-Node: Key Index219013
+Node: Introduction10124
+Node: Summary10539
+Node: Installation12806
+Node: Activation14184
+Node: Feedback15433
+Node: Document structure16202
+Node: Outlines16976
+Node: Headlines17636
+Node: Visibility cycling18259
+Ref: Visibility cycling-Footnote-119734
+Ref: Visibility cycling-Footnote-219792
+Node: Motion19842
+Node: Structure editing20626
+Node: Archiving22735
+Node: ARCHIVE tag23293
+Node: Moving subtrees25086
+Node: Sparse trees26127
+Ref: Sparse trees-Footnote-128106
+Ref: Sparse trees-Footnote-228198
+Node: Plain lists28313
+Ref: Plain lists-Footnote-131838
+Ref: Plain lists-Footnote-232195
+Node: Tables32377
+Node: Built-in table editor32925
+Node: Narrow columns40533
+Ref: Narrow columns-Footnote-142472
+Node: Table calculations42518
+Node: Formula syntax43838
+Ref: Formula syntax-Footnote-146743
+Node: Lisp formulas47043
+Node: Column formulas47832
+Node: Advanced features49594
+Node: Named-field formulas52848
+Node: Editing/debugging formulas53488
+Node: Appetizer55246
+Node: orgtbl-mode56349
+Node: table.el56840
+Node: Hyperlinks57817
+Node: Link format58522
+Node: Internal links59815
+Ref: Internal links-Footnote-161804
+Node: Radio targets61936
+Node: CamelCase links62651
+Node: External links63149
+Node: Handling links65280
+Ref: Handling links-Footnote-169866
+Node: Search options70103
+Ref: Search options-Footnote-171877
+Node: Custom searches71958
+Node: Remember73006
+Node: TODO items76696
+Node: TODO basics77678
+Node: TODO extensions79205
+Node: Workflow states80000
+Node: TODO types80868
+Ref: TODO types-Footnote-182526
+Node: Per file keywords82608
+Ref: Per file keywords-Footnote-184062
+Node: Priorities84263
+Node: Breaking down tasks85507
+Ref: Breaking down tasks-Footnote-186027
+Node: Checkboxes86123
+Node: Timestamps88859
+Node: Time stamps89249
+Node: Creating timestamps92346
+Node: Progress logging95692
+Node: Closing items96222
+Node: Clocking work time97017
+Ref: Clocking work time-Footnote-1100453
+Node: Tags100579
+Node: Tag inheritance101341
+Node: Setting tags102278
+Ref: Setting tags-Footnote-1105408
+Ref: Setting tags-Footnote-2105520
+Node: Tag searches105600
+Node: Agenda views106809
+Node: Agenda files108698
+Ref: Agenda files-Footnote-1109658
+Ref: Agenda files-Footnote-2109807
+Node: Agenda dispatcher110000
+Node: Weekly/Daily agenda111617
+Node: Calendar/Diary integration112582
+Node: Global TODO list113920
+Node: Matching headline tags115972
+Node: Timeline116916
+Node: Presentation and sorting117579
+Node: Categories118357
+Node: Time-of-day specifications119021
+Node: Sorting of agenda items120999
+Node: Agenda commands122281
+Node: Custom agenda views128169
+Node: Storing searches128844
+Node: Block agenda130756
+Node: Setting Options131986
+Node: Batch processing134698
+Node: Embedded LaTeX135828
+Ref: Embedded LaTeX-Footnote-1136920
+Node: Math symbols137110
+Node: Subscripts and Superscripts137875
+Node: LaTeX fragments138719
+Node: Processing LaTeX fragments140788
+Node: CDLaTeX mode141734
+Ref: CDLaTeX mode-Footnote-1144218
+Node: Exporting144366
+Node: ASCII export145680
+Node: HTML export146970
+Node: XOXO export149806
+Node: iCalendar export150245
+Node: Text interpretation152068
+Node: Comment lines152547
+Node: Enhancing text153018
+Node: Export options154710
+Node: Publishing156377
+Ref: Publishing-Footnote-1157173
+Node: Configuration157369
+Node: Project alist158087
+Node: Sources and destinations159153
+Node: Selecting files159798
+Node: Publishing action160546
+Node: Publishing options161661
+Node: Publishing links163813
+Node: Project page index165326
+Node: Sample configuration166104
+Node: Simple example166596
+Node: Complex example167269
+Node: Triggering publication169345
+Node: Miscellaneous170030
+Node: Completion170664
+Node: Customization172045
+Node: In-buffer settings172630
+Node: The very busy C-c C-c key175861
+Node: Clean view177505
+Node: TTY keys180082
+Node: Interaction181691
+Node: Cooperation182088
+Node: Conflicts183955
+Node: Bugs185547
+Node: Extensions and Hacking187170
+Node: Extensions187656
+Node: Dynamic blocks189226
+Node: History and Acknowledgments191153
+Node: Index196115
+Node: Key Index220474
 
 End Tag Table

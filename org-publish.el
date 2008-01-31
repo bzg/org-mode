@@ -6,7 +6,7 @@
 ;; Keywords: hypermedia, outlines
 ;; Version:
 
-;; $Id: org-publish.el,v 1.73 2006/06/15 12:43:48 dto Exp $
+;; $Id: org-publish.el,v 1.77 2006/09/07 14:20:05 dto Exp $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -138,6 +138,7 @@
 
 ;;; List of user-visible changes since version 1.27
 
+;; 1.77: Added :preparation-function, this allows you to use GNU Make etc.
 ;; 1.65: Remove old "composite projects". They're redundant.
 ;; 1.64: Allow meta-projects with :components
 ;; 1.57: Timestamps flag is now called "org-publish-use-timestamps-flag"
@@ -215,6 +216,13 @@ of output formats.
     :publishing-function   Function to publish file. The default is
                              org-publish-org-to-html, but other
                              values are possible.
+
+Another property allows you to insert code that prepares a
+project for publishing. For example, you could call GNU Make on a
+certain makefile, to ensure published files are built up to date. 
+
+    :preparation-function   Function to be called before publishing
+                              this project.
 
 Some properties control details of the Org publishing process,
 and are equivalent to the corresponding user variables listed in
@@ -316,7 +324,10 @@ whether file should be published."
 (defun org-publish-update-timestamp (filename)
   "Update publishing timestamp for file FILENAME."
   (let ((timestamp (org-publish-timestamp-filename filename)))
-    (set-file-times timestamp)))
+    ;; Emacs 21 doesn't have set-file-times
+    (if (fboundp 'set-file-times)
+        (set-file-times timestamp)
+      (call-process "touch" nil 0 nil timestamp))))
 
 
 ;;;; A hash mapping files to project names
@@ -329,42 +340,45 @@ table mapping file names to project names.")
 ;;;; Checking filenames against this hash
 
 
-(defun org-publish-validate-link (link)
-  (gethash (file-truename link) org-publish-files))
+(defun org-publish-validate-link (link &optional directory)
+  (gethash (file-truename (expand-file-name link directory))
+	   org-publish-files))
 
 
 ;;;; Getting project information out of org-publish-project-alist
 
 
 (defun org-publish-get-plists (&optional project-name)
-  "Return a list of property lists for project PROJECT-NAME.
+ "Return a list of property lists for project PROJECT-NAME.
 When argument is not given, return all property lists for all projects."
-  (let ((alist (if project-name
+ (let ((alist (if project-name
 		   (list (assoc project-name org-publish-project-alist))
 		 org-publish-project-alist))
 	(project nil)
 	(plists nil)
+	(single nil)
 	(components nil))
 
-    ;;
-    ;;
-    (while (setq project (pop alist))
-      ;; what kind of project is it?
-      (if (setq components (plist-get (cdr project) :components))
+   ;;
+   ;;
+   (while (setq project (pop alist))
+     ;; what kind of project is it?
+     (if (setq components (plist-get (cdr project) :components))
 	  ;; meta project. annotate each plist with name of enclosing project
-	  (setq plists
-		(append plists
-			(apply 'append
-			       (mapcar 'org-publish-get-plists components))))
+	  (setq single
+		(apply 'append
+		       (mapcar 'org-publish-get-plists components)))
 	;; normal project
-	(setq plists (append plists (list (cdr project)))))
-      ;;
-      (dolist (p plists)
+	(setq single (list (cdr project))))
+     ;;
+     (setq plists (append plists single))
+     (dolist (p single)
 	(let* ((exclude (plist-get p :exclude))
 	       (files (org-publish-get-base-files p exclude)))
 	  (dolist (f files)
 	    (puthash (file-truename f) (car project) org-publish-files)))))
-    plists))
+   plists))
+
 
 
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
@@ -466,8 +480,11 @@ FILENAME is the filename of the file to be published."
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
+	 (preparation-function (plist-get plist :preparation-function))
 	 (f nil))
     ;;
+    (when preparation-function
+      (funcall preparation-function))
     (if index-p
 	(funcall index-function plist index-filename))
     (let ((files (org-publish-get-base-files plist exclude-regexp)))

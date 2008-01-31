@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.46
+;; Version: 4.48
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -61,7 +61,14 @@
 ;;
 ;; Recent changes
 ;; --------------
-;; Version 4.46
+;; Version 4.48
+;;    - Agenda views can be made in batch mode from the command line.
+;;    - `org-store-link' does the right thing in dired-mode.
+;;    - File links can contain environment variables (thanks to Ed Hirgelt).
+;;    - Full Emacs 21 compatibility has been restored.
+;;    - Bug fixes.
+;;
+;; Version 4.47
 ;;    - Custom commands may produce an agenda which contains several blocks,
 ;;      each block created by a different agenda command.  
 ;;    - Agenda commands can be restricted to the current file, region, subtree.
@@ -116,7 +123,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.46"
+(defvar org-version "4.47"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1917,10 +1924,15 @@ headline  Only export the headline, but skip the tree below it."
   :group 'org-export-general
   :type 'boolean)
 
-(defcustom org-export-with-tags t
-  "Nil means, do not export tags, just remove them from headlines."
+(defcustom org-export-with-tags 'not-in-toc
+  "Nil means, do not export tags, just remove them from headlines.
+If this is the sysmbol `not-in-toc', tags will be removed from table of
+contents entries, but still be shown in the headlines of the document."
   :group 'org-export-general
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Off" nil)
+	  (const :tag "Not in TOC" not-in-toc)
+	  (const :tag "On" t)))
 
 (defgroup org-export-translation nil
   "Options for translating special ascii sequences for the export backends."
@@ -2304,9 +2316,9 @@ Changing this variable requires a restart of Emacs to take effect."
 		    "\\("
 		    "\\([" markers "]\\)"
 		    "\\("
-		    "[^" border markers "]"
+		    (if stacked (concat "[^" border markers "]")) ; FIXME: correct?
 		    body1
-		    "[^" border markers "]"
+		    (if stacked (concat "[^" border markers "]")) ; FIXME: correct?
 		    "\\)"
 		    "\\3\\)"
 		    "\\([" post (if stacked markers) "]\\|$\\)")))))
@@ -2701,6 +2713,10 @@ Also put tags into group 4 if tags are present.")
   "Check if the current buffer is in Org-mode."
   (eq major-mode 'org-mode))
 
+(defsubst org-last (list)
+  "Return the last element of LIST."
+  (car (last list)))
+
 (defun org-let (list &rest body)
   (eval (cons 'let (cons list body))))
 (put 'org-let 'lisp-indent-function 1)
@@ -2806,15 +2822,15 @@ Also put tags into group 4 if tags are present.")
 			     "\\|")
 		  "\\)\\>")
 	  org-todo-line-regexp
-	  (concat "^\\(\\*+\\)[ \t]*\\("
+	  (concat "^\\(\\*+\\)[ \t]*\\(?:\\("
 		  (mapconcat 'regexp-quote org-todo-keywords "\\|")
-		  "\\)? *\\(.*\\)")
+		  "\\)\\>\\)? *\\(.*\\)")
 	  org-nl-done-regexp
 	  (concat "[\r\n]\\*+[ \t]+" org-done-string "\\>")
 	  org-todo-line-tags-regexp
-	  (concat "^\\(\\*+\\)[ \t]*\\("
+	  (concat "^\\(\\*+\\)[ \t]*\\(?:\\("
 		  (mapconcat 'regexp-quote org-todo-keywords "\\|")
-		  "\\)? *\\(.*?\\([ \t]:[a-zA-Z0-9:_@]+:[ \t]*\\)?$\\)")
+		  "\\)\\>\\)? *\\(.*?\\([ \t]:[a-zA-Z0-9:_@]+:[ \t]*\\)?$\\)")
 	  org-looking-at-done-regexp (concat "^" org-done-string "\\>")
 	  org-deadline-regexp (concat "\\<" org-deadline-string)
 	  org-deadline-time-regexp
@@ -6325,15 +6341,15 @@ the returned times will be formatted strings."
     (while (setq p (next-single-property-change (point) :org-clock-minutes))
       (goto-char p)
       (when (setq time (get-text-property p :org-clock-minutes))
-	(beginning-of-line 1)
-	(when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[0-9a-zA-Z_@:]+:\\)?[ \t]*$")
-		   (setq level (- (match-end 1) (match-beginning 1)))
-		   (<= level maxlevel))
-	  (setq hlc (if emph (or (cdr (assoc level hlchars)) "") "")
-		hdl (match-string 2)
-		h (/ time 60)
-		m (- time (* 60 h)))
-	  (save-excursion
+	(save-excursion
+	  (beginning-of-line 1)
+	  (when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[0-9a-zA-Z_@:]+:\\)?[ \t]*$")
+		     (setq level (- (match-end 1) (match-beginning 1)))
+		     (<= level maxlevel))
+	    (setq hlc (if emph (or (cdr (assoc level hlchars)) "") "")
+		  hdl (match-string 2)
+		  h (/ time 60)
+		  m (- time (* 60 h)))
 	    (goto-char ins)
 	    (if (= level 1) (insert-before-markers "|-\n"))
 	    (insert-before-markers
@@ -6740,6 +6756,20 @@ L   Timeline for current buffer          C   Configure custom agenda commands")
     (widen)
     (setq org-agenda-redo-command redo)
     (goto-char (point-min))))
+
+;;;###autoload
+(defmacro org-batch-agenda (cmd-key &rest parameters)
+  "Run an agenda command in batch mode, send result to STDOUT.
+CMD-KEY is a string that is also a key in `org-agenda-custom-commands'.
+Paramters are alternating variable names and values that will be bound
+before running the agenda command."
+  (let (pars)
+    (while parameters
+      (push (list (pop parameters) (if parameters (pop parameters))) pars))
+    (flet ((read-char-exclusive () (string-to-char cmd-key)))
+      (eval (list 'let (nreverse pars) '(org-agenda nil))))
+    (set-buffer "*Org Agenda*")
+    (princ (buffer-string))))
 
 (defun org-check-for-org-mode ()
   "Make sure current buffer is in org-mode.  Error if not."
@@ -10013,7 +10043,7 @@ If the file does not exist, an error is thrown."
   (setq in-emacs (or in-emacs line search))
   (let* ((file (if (equal path "")
 		   buffer-file-name
-		 path))
+		 (substitute-in-file-name (expand-file-name path))))
 	 (apps (append org-file-apps (org-default-apps)))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
@@ -10239,6 +10269,14 @@ For file links, arg negates `org-context-in-file-links'."
      ((eq major-mode 'image-mode)
       (setq cpltxt (concat "file:"
 			   (abbreviate-file-name buffer-file-name))
+	    link (org-make-link cpltxt)))      
+
+     ((eq major-mode 'dired-mode)
+      ;; link to the file in the current line
+      (setq cpltxt (concat "file:"
+			   (abbreviate-file-name
+			    (expand-file-name
+			     (dired-get-filename nil t))))
 	    link (org-make-link cpltxt)))      
 
      ((org-mode-p)
@@ -13751,6 +13789,8 @@ underlined headlines.  The default is 3."
 			   (file-name-nondirectory buffer-file-name))))
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
+	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
+	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
 	 (text        nil)
 	 (todo nil)
 	 (lang-words nil))
@@ -13813,6 +13853,12 @@ underlined headlines.  The default is 3."
 					  (org-search-todo-below
 					   line lines level))))
 			   (setq txt (org-html-expand-for-ascii txt))
+
+			   (if (and (memq org-export-with-tags '(not-in-toc nil))
+				    (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
+			       (setq txt (replace-match "" t t txt)))
+			   (if (string-match quote-re0 txt)
+			       (setq txt (replace-match "" t t txt)))
 
 			   (if org-export-with-section-numbers
 			       (setq txt (concat (org-section-number level)
@@ -13918,6 +13964,9 @@ underlined headlines.  The default is 3."
 	      (not (equal (char-before (1- (point))) ?\n)))
 	  (insert "\n"))
       (setq char (nth (- umax level) (reverse org-export-ascii-underline)))
+      (unless org-export-with-tags
+	(if (string-match "[ \t]+\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*$" title)
+	    (setq title (replace-match "" t t title))))
       (if org-export-with-section-numbers
 	  (setq title (concat (org-section-number level) " " title)))
       (insert title "\n" (make-string (string-width title) char) "\n")
@@ -14275,6 +14324,11 @@ lang=\"%s\" xml:lang=\"%s\">
 					    (= level umax)
 					    (org-search-todo-below
 					     line lines level))))
+			     (if (and (memq org-export-with-tags '(not-in-toc nil))
+				      (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
+				 (setq txt (replace-match "" t t txt)))
+			     (if (string-match quote-re0 txt)
+				 (setq txt (replace-match "" t t txt)))
 			     (if org-export-with-section-numbers
 				 (setq txt (concat (org-section-number level)
 						   " " txt)))
@@ -16162,13 +16216,14 @@ See the individual commands for more information."
      ["Priority Up" org-shiftup t]
      ["Priority Down" org-shiftdown t]
      "--"
-     ["Insert Checkbox" org-insert-todo-heading (org-in-item-p) t]
-     ["Toggle Checkbox" org-ctrl-c-ctrl-c (org-at-item-checkbox-p)]
-     ["Insert [n/m] cookie" (progn (insert "[/]") (org-update-checkbox-count))
-      (or (org-on-heading-p) (org-at-item-p))]
-     ["Insert [%] cookie" (progn (insert "[%]") (org-update-checkbox-count))
-      (or (org-on-heading-p) (org-at-item-p))]
-     ["Update Statistics" org-update-checkbox-count t])
+;     ["Insert Checkbox" org-insert-todo-heading (org-in-item-p)]
+;     ["Toggle Checkbox" org-ctrl-c-ctrl-c (org-at-item-checkbox-p)]
+;     ["Insert [n/m] cookie" (progn (insert "[/]") (org-update-checkbox-count))
+;      (or (org-on-heading-p) (org-at-item-p))]
+;     ["Insert [%] cookie" (progn (insert "[%]") (org-update-checkbox-count))
+;      (or (org-on-heading-p) (org-at-item-p))]
+;     ["Update Statistics" org-update-checkbox-count t]
+     )
     ("Dates and Scheduling"
      ["Timestamp" org-time-stamp t]
      ["Timestamp (inactive)" org-time-stamp-inactive t]
