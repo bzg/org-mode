@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.71}
+\def\orgversionnumber{4.72}
 \def\versionyear{2007}          % latest update
 \def\year{2007}                 % latest copyright year
 %
@@ -386,7 +386,6 @@ Outside of tables, the same keys may have other functionality.
 \metax{export as tab-separated file}{M-x org-table-export}
 \metax{import tab-separated file}{M-x org-table-import}
 \key{sum numbers in current column/rectangle}{C-c +}
-\key{copy down with increment}{S-RET$^3$}
 
 {\bf Tables created with the \kbd{table.el} package}
 
@@ -730,21 +729,6 @@ Lines starting with \kbd{\#} are comments and are not exported.
 Subtrees whose header starts with COMMENT are never exported.
 
 \key{toggle COMMENT keyword on entry}{C-c ;}
-
-
-%\section{CUA and pc-select compatibility}%
-
-%Configure the variable {\tt org-CUA-compatibility} to make Org-mode
-%avoid the \kbd{S-<cursor>} bindings used by these modes.  When set,
-%Org-mode will change the following keybindings (also in the agenda
-%buffer, but not during date selection). See note mark four$^3$
-%throughout the reference card.
-%%\vskip-mm
-%\beginexample
-%S-UP    $\to$ M-p             S-DOWN  $\to$ M-n
-%S-LEFT  $\to$ M--             S-RIGHT $\to$ M-+
-%S-RET   $\to$ C-S-RET
-%\endexample
 
 \section{Dynamic Blocks}
 

@@ -1,11 +1,11 @@
-;;;; org.el --- Outline-based notes management and organize
+;;;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
 ;; Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.71
+;; Version: 4.72
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "4.71"
+(defconst org-version "4.72"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -153,7 +153,7 @@ has been set."
   :group 'org-startup
   :type 'boolean)
 
-(defcustom org-CUA-compatible nil
+(defcustom org-replace-disputed-keys nil
   "Non-nil means use alternative key bindings for S-<cursor movement>.
 Org-mode used S-<cursor movement> for changing timestamps and priorities.
 S-<cursor movement> is also used for example by `CUA-mode' to select text.
@@ -161,7 +161,6 @@ If you want to use Org-mode together with `CUA-mode', Org-mode needs to use
 alternative bindings.  Setting this variable to t will replace the following
 keys both in Org-mode and in the Org-agenda buffer.
 
-S-RET   -> C-S-RET
 S-up    -> M-p
 S-down  -> M-n
 S-left  -> M--
@@ -176,21 +175,39 @@ become effective."
   :group 'org-startup
   :type 'boolean)
 
-(defvar org-disputed-keys
-  '((S-up     [(shift up)]      [(meta ?p)])
-    (S-down   [(shift down)]    [(meta ?n)])
-    (S-left   [(shift left)]    [(meta ?-)])
-    (S-right  [(shift right)]   [(meta ?+)])
-    (S-return [(shift return)]  [(control shift return)]))
+(defvaralias 'org-CUA-compatible 'org-replace-disputed-keys)
+
+(defcustom org-disputed-keys
+  '(([(shift up)]		. [(meta p)])
+    ([(shift down)]		. [(meta n)])
+    ([(shift left)]		. [(meta -)])
+    ([(shift right)]		. [(meta +)])
+    ([(control shift right)] 	. [(meta shift +)])
+    ([(control shift left)]	. [(meta shift -)]))
   "Keys for which Org-mode and other modes compete.
-This is an alist, cars are symbols for lookup, 1st element is the default key,
-second element will be used when `org-CUA-compatible' is t.")
+This is an alist, cars are the default keys, second element specifies 
+the alternative to use when `org-replace-disputed-keys' is t.
+
+Keys can be specified in any syntax supported by `define-key'.
+The value of this option takes effect only at Org-mode's startup,
+therefore you'll have to restart Emacs to apply it after changing."
+  :group 'org-startup
+  :type 'alist)
 
 (defun org-key (key)
-  "Select a key according to `org-CUA-compatible'."
-  (nth (if org-CUA-compatible 2 1)
-       (or (assq key org-disputed-keys)
-	   (error "Invalid Key %s in `org-key'" key))))
+  "Select key according to `org-replace-disputed-keys' and `org-disputed-keys'.
+Or return the original if not disputed."
+  (let* ((nkey (key-description key))
+	 (x (find-if (lambda (x) 
+		       (equal (key-description (car x)) nkey))
+		     org-disputed-keys)))
+    (cond ((not x) key) 
+	  (org-replace-disputed-keys (cdr x))
+	  (t (car x)))))
+
+(defun org-defkey (keymap key def)
+  "Define a key, possibly translated, as returned by `org-key'."
+  (define-key keymap (org-key key) def))
 
 (defcustom org-ellipsis nil
   "The ellipsis to use in the Org-mode outline.
@@ -395,7 +412,22 @@ visibility is cycled."
 		 (const :tag "Everywhere except in headlines" t)
 		 ))
 
+(defcustom org-cycle-separator-lines 2
+  "Number of empty lines needed to keep an empty line between collapsed trees.
+If you leave an empty line between the end of a subtree and the following
+headline, this empty line is hidden when the subtree is folded.
+Org-mode will leave (exactly) one empty line visible if the number of
+empty lines is equal or larger to the number given in this variable.
+So the default 2 means, at least 2 empty lines after the end of a subtree
+are needed to produce free space between a collapsed subtree and the
+following headline.
+
+Special case: when 0, never leave empty lines in collapsed view."
+  :group 'org-cycle
+  :type 'integer)
+
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
+			    org-cycle-show-empty-lines
 			    org-optimize-window-after-visibility-change)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
 The function(s) in this hook must accept a single argument which indicates
@@ -406,11 +438,19 @@ the values `folded', `children', or `subtree'."
   :group 'org-cycle
   :type 'hook)
 
-
 (defgroup org-edit-structure nil
   "Options concerning structure editing in Org-mode."
   :tag "Org Edit Structure"
   :group 'org-structure)
+
+(defcustom org-special-ctrl-a nil
+  "Non-nil means `C-a' behaves specially in headlines.
+When set, `C-a' will bring back the cursor to the beginning of the
+headline text, i.e. after the stars and after a possible TODO keyword.
+When the cursor is already at that position, another `C-a' will bring
+it to the beginning of the line."
+  :group 'org-edit-structure
+  :type 'boolean)
 
 (defcustom org-odd-levels-only nil
   "Non-nil means, skip even levels and only use odd levels for the outline.
@@ -1369,6 +1409,7 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 (defvar org-todo-keywords-1 nil)
 (make-variable-buffer-local 'org-todo-keywords-1)
 (defvar org-todo-keywords-for-agenda nil)
+(defvar org-done-keywords-for-agenda nil)
 (defvar org-not-done-keywords nil)
 (make-variable-buffer-local 'org-not-done-keywords)
 (defvar org-done-keywords nil)
@@ -1810,17 +1851,20 @@ precedence over the general options."
 			       (sexp :tag "Value")))))))
 
 (defcustom org-stuck-projects
-  '("+LEVEL=2/-DONE" ("TODO" "NEXT" "NEXTACTION") nil)
+  '("+LEVEL=2/-DONE" ("TODO" "NEXT" "NEXTACTION") nil "")
   "How to identify stuck projects.
-This is a list of three items:
+This is a list of four items:
 1. A tags/todo matcher string that is used to identify a project.
-   The entire tree below a headline matched by this is considered a project.
-2. A list of TODO keywords itentifying non-stuck projects.
+   The entire tree below a headline matched by this is considered one project.
+2. A list of TODO keywords identifying non-stuck projects.
    If the project subtree contains any headline with one of these todo
-   keywords, the project is consitered to be not stuck.
+   keywords, the project is considered to be not stuck.  If you specify
+   \"*\" as a keyword, any TODO keyword will mark the project unstuck.
 3. A list of tags identifying non-stuck projects.
    If the project subtree contains any headline with one of these tags,
-   the project is consitered to be not stuck.
+   the project is considered to be not stuck.  If you specify \"*\" as
+   a tag, any tag will mark the project unstuck.
+4. An arbitrary regular expression matching non-stuck projects.
 
 After defining this variable, you may use \\[org-agenda-list-stuck-projects]
 or `C-c a #' to produce the list."
@@ -1828,7 +1872,8 @@ or `C-c a #' to produce the list."
   :type '(list
 	  (string :tag "Tags/TODO match to identify a project")
 	  (repeat :tag "Projects are *not* stuck if they have an entry with TODO keyword any of" (string))
-	  (repeat :tag "Projects are *not* stuck if they have an entry with TAG being any of" (string))))
+	  (repeat :tag "Projects are *not* stuck if they have an entry with TAG being any of" (string))
+	  (regexp :tag "Projects are *not* stuck if this regexp matches\ninside the subtree")))
 
 
 (defgroup org-agenda-skip nil
@@ -2216,13 +2261,18 @@ When this is the symbol `prefix', only remove tags when
   :group 'org)
 
 (defcustom org-format-latex-options
-  '(:foreground "Black" :background "Transparent" :scale 1.0
-		:matchers ("begin" "$" "$$" "\\(" "\\["))
+  '(:foreground default :background default :scale 1.0
+    :html-foreground "Black" :html-background "Transparent" :html-scale 1.0
+    :matchers ("begin" "$" "$$" "\\(" "\\["))
   "Options for creating images from LaTeX fragments.
 This is a property list with the following properties:
-:foreground  the foreground color, for example \"Black\".
+:foreground  the foreground color for images embedded in emacs, e.g. \"Black\".
+             `default' means use the forground of the default face.
 :background  the background color, or \"Transparent\".
+             `default' means use the background of the default face.
 :scale       a scaling factor for the size of the images
+:html-foreground, :html-background, :html-scale
+             The same numbers for HTML export.
 :matchers    a list indicating which matchers should be used to
              find LaTeX fragments.  Valid members of this list are:
              \"begin\"  find environments
@@ -2778,8 +2828,6 @@ Changing this variable requires a restart of Emacs to take effect."
 	  (setq markers (concat (replace-match "" t t markers) "^")))
       (if (string-match "-" markers)
 	  (setq markers (concat (replace-match "" t t markers) "-")))
-;      (while (>= (setq nl (1- nl)) 0) (setq body1 (concat body1 "\n?" body "*?")))
-;      (while (>= (setq nl (1- nl)) 0) (setq body1 (concat body1 "\\(?:\n?" body "*?\\)?")))
       (if (> nl 0)
           (setq body1 (concat body1 "\\(?:\n" body "*?\\)\\{0,"
                               (int-to-string nl) "\\}")))
@@ -2789,15 +2837,15 @@ Changing this variable requires a restart of Emacs to take effect."
 		    "\\("
 		    "\\([" markers "]\\)"
 		    "\\("
-		    "[^" border markers "]"
+		    "[^" border (if (and nil stacked) markers) "]"
 		    body1
-		    "[^" border markers "]"
+		    "[^" border (if (and nil stacked) markers) "]"
 		    "\\)"
 		    "\\3\\)"
 		    "\\([" post (if stacked markers) "]\\|$\\)")))))
 
 (defcustom org-emphasis-regexp-components
-  '(" \t('\"" " \t.,?;'\")" " \t\r\n," "." 1 nil)
+  '(" \t('\"" "- \t.,:?;'\")" " \t\r\n,\"'" "." 1 nil)
   "Components used to build the reqular expression for emphasis.
 This is a list with 6 entries.  Terminology:  In an emphasis string
 like \" *strong word* \", we call the initial space PREMATCH, the final
@@ -2809,6 +2857,7 @@ pre          Chars allowed as prematch.  Beginning of line will be allowed too.
 post         Chars allowed as postmatch.  End of line will be allowed too.
 border       The chars *forbidden* as border characters.  In addition to the
              characters given here, all marker characters are forbidden too.
+             FIXME: the last statement is no longer true.
 body-regexp  A regexp like \".\" to match a body character.  Don't use
              non-shy groups here, and don't allow newline here.
 newline      The maximum number of newlines allowed in an emphasis exp.
@@ -3226,6 +3275,8 @@ we turn off invisibility temporarily.  Use this in a `let' form."
     ("lognotedone" org-log-done done push)
     ("lognotestate" org-log-done state push)
     ("lognoteclock-out" org-log-done clock-out push)
+    ("logrepeat" org-log-repeat t)
+    ("nologrepeat" org-log-repeat nil)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI))
   "Variable associated with STARTUP options for org-mode.
@@ -3732,18 +3783,18 @@ that will be added to PLIST.  Returns the string that was modified."
 ;;;; Font-Lock stuff, including the activators
 
 (defvar org-mouse-map (make-sparse-keymap))
-(define-key org-mouse-map
+(org-defkey org-mouse-map
   (if (featurep 'xemacs) [button2] [mouse-2]) 'org-open-at-mouse)
-(define-key org-mouse-map
+(org-defkey org-mouse-map
   (if (featurep 'xemacs) [button3] [mouse-3]) 'org-find-file-at-mouse)
 (when org-mouse-1-follows-link
-  (define-key org-mouse-map [follow-link] 'mouse-face))
+  (org-defkey org-mouse-map [follow-link] 'mouse-face))
 (when org-tab-follows-link
-  (define-key org-mouse-map [(tab)] 'org-open-at-point)
-  (define-key org-mouse-map "\C-i" 'org-open-at-point))
+  (org-defkey org-mouse-map [(tab)] 'org-open-at-point)
+  (org-defkey org-mouse-map "\C-i" 'org-open-at-point))
 (when org-return-follows-link
-  (define-key org-mouse-map [(return)] 'org-open-at-point)
-  (define-key org-mouse-map "\C-m" 'org-open-at-point))
+  (org-defkey org-mouse-map [(return)] 'org-open-at-point)
+  (org-defkey org-mouse-map "\C-m" 'org-open-at-point))
 
 (require 'font-lock)
 
@@ -3834,16 +3885,20 @@ The time stamps may be either active or inactive.")
 
 (defun org-do-emphasis-faces (limit)
   "Run through the buffer and add overlays to links."
-  (if (re-search-forward org-emph-re limit t)
-      (progn
-	(font-lock-prepend-text-property (match-beginning 2) (match-end 2)
-					 'face
-					 (nth 1 (assoc (match-string 3)
-						       org-emphasis-alist)))
-	(add-text-properties (match-beginning 2) (match-end 2)
-			     '(font-lock-multiline t))
-	(backward-char 1)
-	t)))
+  (let (rtn)
+    (while (and (not rtn) (re-search-forward org-emph-re limit t))
+      (if (not (= (char-after (match-beginning 3))
+		  (char-after (match-beginning 4))))
+	  (progn
+	    (setq rtn t)
+	    (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
+					     'face
+					     (nth 1 (assoc (match-string 3)
+							   org-emphasis-alist)))
+	    (add-text-properties (match-beginning 2) (match-end 2)
+				 '(font-lock-multiline t))
+	    (backward-char 1))))
+    rtn))
 
 (defun org-activate-plain-links (limit)
   "Run through the buffer and add overlays to links."
@@ -4298,13 +4353,13 @@ of the first headline in the buffer.  This is important, because if the
 first headline is not level one, then (hide-sublevels 1) gives confusing
 results."
   (interactive)
-  (hide-sublevels (save-excursion
-		    (goto-char (point-min))
-		    (if (re-search-forward (concat "^" outline-regexp) nil t)
-			(progn
-			  (goto-char (match-beginning 0))
-			  (funcall outline-level))
-		      1))))
+  (let ((level (save-excursion
+		 (goto-char (point-min))
+		 (if (re-search-forward (concat "^" outline-regexp) nil t)
+		     (progn
+		       (goto-char (match-beginning 0))
+		       (funcall outline-level))))))
+    (and level (hide-sublevels level))))
 
 (defun org-content (&optional arg)
   "Show all headlines in the buffer, like a table of contents.
@@ -4338,6 +4393,35 @@ This function is the default value of the hook `org-cycle-hook'."
      ((eq state 'children) (or (org-subtree-end-visible-p) (recenter 1)))
      ((eq state 'subtree)  (or (org-subtree-end-visible-p) (recenter 1))))))
 
+
+(defun org-cycle-show-empty-lines (state)
+  "Show empty lines above all visible headlines.
+The region to be covered depends on STATE when called through
+`org-cycle-hook'.  Lisp program can use t for STATE to get the
+entire buffer covered.  Note that an empty line is only shown if there
+are at least `org-cycle-separator-lines' empty lines before the headeline."
+  (when (> org-cycle-separator-lines 0)
+    (save-excursion
+      (let* ((n org-cycle-separator-lines)
+	     (re (cond
+		  ((= n 1) "\\(\n[ \t]*\n\\*+\\) ")
+		  ((= n 2) "^[ \t]*\\(\n[ \t]*\n\\*+\\) ")
+		  (t (let ((ns (number-to-string (- n 2))))
+		       (concat "^\\(?:[ \t]*\n\\)\\{" ns "," ns "\\}"
+			       "[ \t]*\\(\n[ \t]*\n\\*+\\) ")))))
+	     beg end)
+	(cond
+	 ((memq state '(overview content t))
+	  (setq beg (point-min) end (point-max)))
+	 ((memq state '(children))
+	  (setq beg (point) end (org-end-of-subtree t t))))
+	(when beg
+	  (goto-char beg)
+	  (while (re-search-forward re end t)
+	    (if (not (get-char-property (match-end 1) 'invisible))
+		(outline-flag-region
+		 (match-beginning 1) (match-end 1) nil))))))))
+
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
   (pos-visible-in-window-p
@@ -4359,27 +4443,27 @@ Optional argument N means, put the headline into the Nth line of the window."
 (let ((cmds '(isearch-forward isearch-backward)) cmd)
   (while (setq cmd (pop cmds))
     (substitute-key-definition cmd cmd org-goto-map global-map)))
-(define-key org-goto-map "\C-m"     'org-goto-ret)
-(define-key org-goto-map [(left)]   'org-goto-left)
-(define-key org-goto-map [(right)]  'org-goto-right)
-(define-key org-goto-map [(?q)]     'org-goto-quit)
-(define-key org-goto-map [(control ?g)] 'org-goto-quit)
-(define-key org-goto-map "\C-i" 'org-cycle)
-(define-key org-goto-map [(tab)] 'org-cycle)
-(define-key org-goto-map [(down)] 'outline-next-visible-heading)
-(define-key org-goto-map [(up)] 'outline-previous-visible-heading)
-(define-key org-goto-map "n" 'outline-next-visible-heading)
-(define-key org-goto-map "p" 'outline-previous-visible-heading)
-(define-key org-goto-map "f" 'outline-forward-same-level)
-(define-key org-goto-map "b" 'outline-backward-same-level)
-(define-key org-goto-map "u" 'outline-up-heading)
-(define-key org-goto-map "\C-c\C-n" 'outline-next-visible-heading)
-(define-key org-goto-map "\C-c\C-p" 'outline-previous-visible-heading)
-(define-key org-goto-map "\C-c\C-f" 'outline-forward-same-level)
-(define-key org-goto-map "\C-c\C-b" 'outline-backward-same-level)
-(define-key org-goto-map "\C-c\C-u" 'outline-up-heading)
+(org-defkey org-goto-map "\C-m"     'org-goto-ret)
+(org-defkey org-goto-map [(left)]   'org-goto-left)
+(org-defkey org-goto-map [(right)]  'org-goto-right)
+(org-defkey org-goto-map [(?q)]     'org-goto-quit)
+(org-defkey org-goto-map [(control ?g)] 'org-goto-quit)
+(org-defkey org-goto-map "\C-i" 'org-cycle)
+(org-defkey org-goto-map [(tab)] 'org-cycle)
+(org-defkey org-goto-map [(down)] 'outline-next-visible-heading)
+(org-defkey org-goto-map [(up)] 'outline-previous-visible-heading)
+(org-defkey org-goto-map "n" 'outline-next-visible-heading)
+(org-defkey org-goto-map "p" 'outline-previous-visible-heading)
+(org-defkey org-goto-map "f" 'outline-forward-same-level)
+(org-defkey org-goto-map "b" 'outline-backward-same-level)
+(org-defkey org-goto-map "u" 'outline-up-heading)
+(org-defkey org-goto-map "\C-c\C-n" 'outline-next-visible-heading)
+(org-defkey org-goto-map "\C-c\C-p" 'outline-previous-visible-heading)
+(org-defkey org-goto-map "\C-c\C-f" 'outline-forward-same-level)
+(org-defkey org-goto-map "\C-c\C-b" 'outline-backward-same-level)
+(org-defkey org-goto-map "\C-c\C-u" 'outline-up-heading)
 (let ((l '(1 2 3 4 5 6 7 8 9 0)))
-  (while l (define-key org-goto-map (int-to-string (pop l)) 'digit-argument)))
+  (while l (org-defkey org-goto-map (int-to-string (pop l)) 'digit-argument)))
 
 (defconst org-goto-help
 "Select a location to jump to, press RET
@@ -4829,7 +4913,6 @@ is signaled in this case."
 		      (setq folded (org-invisible-p)))
       (outline-end-of-subtree))
     (outline-next-heading)
-    (if (not (bolp)) (insert "\n"))
     (setq end (point))
     ;; Find insertion point, with error handling
     (goto-char beg)
@@ -4849,6 +4932,7 @@ is signaled in this case."
     (setq txt (buffer-substring beg end))
     (delete-region beg end)
     (insert txt)
+    (or (bolp) (insert "\n"))
     (goto-char ins-point)
     (if folded (hide-subtree))
     (move-marker ins-point nil)))
@@ -5013,7 +5097,7 @@ If optional TXT is given, check this string instead of the current kill."
   (save-excursion
     (narrow-to-region
      (progn (org-back-to-heading) (point))
-     (progn (org-end-of-subtree t) (point)))))
+     (progn (org-end-of-subtree t t) (point)))))
 
 
 ;;; Outline Sorting
@@ -7133,7 +7217,7 @@ it can be edited in place."
       (switch-to-buffer-other-window "*Org tmp*")
       (erase-buffer)
       (insert "#\n# Edit field and finish with C-c C-c\n#\n")
-      (org-mode)
+      (let ((org-inhibit-startup t)) (org-mode))
       (goto-char (setq p (point-max)))
       (insert (org-trim field))
       (remove-text-properties p (point-max)
@@ -8120,25 +8204,25 @@ Parameters get priority."
       "#UNDEFINED_NAME"))
 
 (defvar org-table-fedit-map (make-sparse-keymap))
-(define-key org-table-fedit-map "\C-x\C-s"      'org-table-fedit-finish)
-(define-key org-table-fedit-map "\C-c\C-s"      'org-table-fedit-finish)
-(define-key org-table-fedit-map "\C-c\C-c"      'org-table-fedit-finish)
-(define-key org-table-fedit-map "\C-c\C-q"      'org-table-fedit-abort)
-(define-key org-table-fedit-map "\C-c?"         'org-table-show-reference)
-(define-key org-table-fedit-map [(meta shift up)]    'org-table-fedit-line-up)
-(define-key org-table-fedit-map [(meta shift down)]  'org-table-fedit-line-down)
-(define-key org-table-fedit-map [(shift up)]    'org-table-fedit-ref-up)
-(define-key org-table-fedit-map [(shift down)]  'org-table-fedit-ref-down)
-(define-key org-table-fedit-map [(shift left)]  'org-table-fedit-ref-left)
-(define-key org-table-fedit-map [(shift right)] 'org-table-fedit-ref-right)
-(define-key org-table-fedit-map [(meta up)]     'org-table-fedit-scroll-down)
-(define-key org-table-fedit-map [(meta down)]   'org-table-fedit-scroll)
-(define-key org-table-fedit-map [(meta tab)]    'lisp-complete-symbol)
-(define-key org-table-fedit-map "\M-\C-i"       'lisp-complete-symbol)
-(define-key org-table-fedit-map [(tab)]         'org-table-fedit-lisp-indent)
-(define-key org-table-fedit-map "\C-i"          'org-table-fedit-lisp-indent)
-(define-key org-table-fedit-map "\C-c\C-r" 'org-table-fedit-toggle-ref-type)
-(define-key org-table-fedit-map "\C-c}"    'org-table-fedit-toggle-coordinates)
+(org-defkey org-table-fedit-map "\C-x\C-s"      'org-table-fedit-finish)
+(org-defkey org-table-fedit-map "\C-c\C-s"      'org-table-fedit-finish)
+(org-defkey org-table-fedit-map "\C-c\C-c"      'org-table-fedit-finish)
+(org-defkey org-table-fedit-map "\C-c\C-q"      'org-table-fedit-abort)
+(org-defkey org-table-fedit-map "\C-c?"         'org-table-show-reference)
+(org-defkey org-table-fedit-map [(meta shift up)]    'org-table-fedit-line-up)
+(org-defkey org-table-fedit-map [(meta shift down)]  'org-table-fedit-line-down)
+(org-defkey org-table-fedit-map [(shift up)]    'org-table-fedit-ref-up)
+(org-defkey org-table-fedit-map [(shift down)]  'org-table-fedit-ref-down)
+(org-defkey org-table-fedit-map [(shift left)]  'org-table-fedit-ref-left)
+(org-defkey org-table-fedit-map [(shift right)] 'org-table-fedit-ref-right)
+(org-defkey org-table-fedit-map [(meta up)]     'org-table-fedit-scroll-down)
+(org-defkey org-table-fedit-map [(meta down)]   'org-table-fedit-scroll)
+(org-defkey org-table-fedit-map [(meta tab)]    'lisp-complete-symbol)
+(org-defkey org-table-fedit-map "\M-\C-i"       'lisp-complete-symbol)
+(org-defkey org-table-fedit-map [(tab)]         'org-table-fedit-lisp-indent)
+(org-defkey org-table-fedit-map "\C-i"          'org-table-fedit-lisp-indent)
+(org-defkey org-table-fedit-map "\C-c\C-r" 'org-table-fedit-toggle-ref-type)
+(org-defkey org-table-fedit-map "\C-c}"    'org-table-fedit-toggle-coordinates)
 
 (easy-menu-define org-table-fedit-menu org-table-fedit-map "Org Edit Formulas Menu"
   '("Edit-Formulas"
@@ -8920,7 +9004,7 @@ to execute outside of tables."
 	  '("\C-c}"              org-table-toggle-coordinate-overlays)
 	  '("\C-c{"              org-table-toggle-formula-debugger)
 	  '("\C-m"               org-table-next-row)
-	  (list (org-key 'S-return) 'org-table-copy-down)
+	  '([(shift return)]     org-table-copy-down)
 	  '("\C-c\C-q"           org-table-wrap-region)
 	  '("\C-c?"              org-table-field-info)
 	  '("\C-c "              org-table-blank-field)
@@ -8935,34 +9019,34 @@ to execute outside of tables."
 	elt key fun cmd)
     (while (setq elt (pop bindings))
       (setq nfunc (1+ nfunc))
-      (setq key (car elt)
+      (setq key (org-key (car elt))
 	    fun (nth 1 elt)
 	    cmd (orgtbl-make-binding fun nfunc key))
-      (define-key orgtbl-mode-map key cmd))
+      (org-defkey orgtbl-mode-map key cmd))
 
     ;; Special treatment needed for TAB and RET
-    (define-key orgtbl-mode-map [(return)]
+    (org-defkey orgtbl-mode-map [(return)]
       (orgtbl-make-binding 'orgtbl-ret 100 [(return)] "\C-m"))
-    (define-key orgtbl-mode-map "\C-m"
+    (org-defkey orgtbl-mode-map "\C-m"
       (orgtbl-make-binding 'orgtbl-ret 101 "\C-m" [(return)]))
 
-    (define-key orgtbl-mode-map [(tab)]
+    (org-defkey orgtbl-mode-map [(tab)]
       (orgtbl-make-binding 'orgtbl-tab 102 [(tab)] "\C-i"))
-    (define-key orgtbl-mode-map "\C-i"
+    (org-defkey orgtbl-mode-map "\C-i"
       (orgtbl-make-binding 'orgtbl-tab 103 "\C-i" [(tab)]))
 
-    (define-key orgtbl-mode-map [(shift tab)]
+    (org-defkey orgtbl-mode-map [(shift tab)]
       (orgtbl-make-binding 'org-table-previous-field 104
 			   [(shift tab)] [(tab)] "\C-i"))
 
-    (define-key orgtbl-mode-map "\M-\C-m"
+    (org-defkey orgtbl-mode-map "\M-\C-m"
       (orgtbl-make-binding 'org-table-wrap-region 105
 			   "\M-\C-m" [(meta return)]))
-    (define-key orgtbl-mode-map [(meta return)]
+    (org-defkey orgtbl-mode-map [(meta return)]
       (orgtbl-make-binding 'org-table-wrap-region 106
 			   [(meta return)] "\M-\C-m"))
 
-    (define-key orgtbl-mode-map "\C-c\C-c" 'orgtbl-ctrl-c-ctrl-c)
+    (org-defkey orgtbl-mode-map "\C-c\C-c" 'orgtbl-ctrl-c-ctrl-c)
     (when orgtbl-optimized
       ;; If the user wants maximum table support, we need to hijack
       ;; some standard editing functions
@@ -8970,7 +9054,7 @@ to execute outside of tables."
 		 'self-insert-command 'orgtbl-self-insert-command
 		 'delete-char 'org-delete-char
 		 'delete-backward-char 'org-delete-backward-char)
-      (define-key orgtbl-mode-map "|" 'org-force-self-insert))
+      (org-defkey orgtbl-mode-map "|" 'org-force-self-insert))
     (easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu"
       '("OrgTbl"
 	["Align" org-ctrl-c-ctrl-c :active (org-at-table-p) :keys "C-c C-c"]
@@ -9959,7 +10043,7 @@ With three \\[universal-argument] prefixes, negate the meaning of
 (defun org-completing-read (&rest args)
   (let ((minibuffer-local-completion-map
 	 (copy-keymap minibuffer-local-completion-map)))
-    (define-key minibuffer-local-completion-map " " 'self-insert-command)
+    (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
     (apply 'completing-read args)))
 
 ;;; Opening/following a link
@@ -10995,7 +11079,7 @@ See also the variable `org-reverse-note-order'."
     (replace-match ""))
   (catch 'quit
     (let* ((txt (buffer-substring (point-min) (point-max)))
-	   (fastp current-prefix-arg)
+	   (fastp (equal current-prefix-arg '(4)))
 	   (file (if fastp org-default-notes-file (org-get-org-file)))
 	   (heading org-remember-default-headline)
 	   (visiting (org-find-base-buffer-visiting file))
@@ -11003,6 +11087,7 @@ See also the variable `org-reverse-note-order'."
 	   (org-startup-align-all-tables nil)
 	   (org-goto-start-pos 1)
 	   spos level indent reversed)
+      (setq current-prefix-arg nil)
       ;; Modify text so that it becomes a nice subtree which can be inserted
       ;; into an org tree.
       (let* ((lines (split-string txt "\n"))
@@ -11075,7 +11160,9 @@ See also the variable `org-reverse-note-order'."
 		  (t
 		   ;; Put it right there, with automatic level determined by
 		   ;; org-paste-subtree or from prefix arg
-		   (org-paste-subtree current-prefix-arg txt)))
+		   (org-paste-subtree 
+		    (if (numberp current-prefix-arg) current-prefix-arg)
+		    txt)))
 	    (when remember-save-after-remembering
 	      (save-buffer)
 	      (if (not visiting) (kill-buffer (current-buffer)))))))))
@@ -12205,7 +12292,7 @@ Returns the new tags string, or nil to not change the current settings."
 	 (fwidth (+ maxlen 3 1 3))
 	 (ncol (/ (- (window-width) 4) fwidth))
 	 (i-face 'org-done)
-	 (c-face 'org-tag)
+	 (c-face 'org-todo)
 	 tg cnt e c char c1 c2 ntable tbl rtn
 	 ov-start ov-end ov-prefix
 	 (exit-after-next org-fast-tag-selection-single-key)
@@ -12508,33 +12595,33 @@ used to insert the time stamp into the buffer to include the time."
 	  (let* ((old-map (current-local-map))
 		 (map (copy-keymap calendar-mode-map))
 		 (minibuffer-local-map (copy-keymap minibuffer-local-map)))
-	    (define-key map (kbd "RET") 'org-calendar-select)
-	    (define-key map (if (featurep 'xemacs) [button1] [mouse-1])
+	    (org-defkey map (kbd "RET") 'org-calendar-select)
+	    (org-defkey map (if (featurep 'xemacs) [button1] [mouse-1])
 	      'org-calendar-select-mouse)
-	    (define-key map (if (featurep 'xemacs) [button2] [mouse-2])
+	    (org-defkey map (if (featurep 'xemacs) [button2] [mouse-2])
 	      'org-calendar-select-mouse)
-	    (define-key minibuffer-local-map [(meta shift left)]
+	    (org-defkey minibuffer-local-map [(meta shift left)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-backward-month 1))))
-	    (define-key minibuffer-local-map [(meta shift right)]
+	    (org-defkey minibuffer-local-map [(meta shift right)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-forward-month 1))))
-	    (define-key minibuffer-local-map [(shift up)]
+	    (org-defkey minibuffer-local-map [(shift up)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-backward-week 1))))
-	    (define-key minibuffer-local-map [(shift down)]
+	    (org-defkey minibuffer-local-map [(shift down)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-forward-week 1))))
-	    (define-key minibuffer-local-map [(shift left)]
+	    (org-defkey minibuffer-local-map [(shift left)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-backward-day 1))))
-	    (define-key minibuffer-local-map [(shift right)]
+	    (org-defkey minibuffer-local-map [(shift right)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-forward-day 1))))
-	    (define-key minibuffer-local-map ">"
+	    (org-defkey minibuffer-local-map ">"
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(scroll-calendar-left 1))))
-	    (define-key minibuffer-local-map "<"
+	    (org-defkey minibuffer-local-map "<"
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(scroll-calendar-right 1))))
 	    (unwind-protect
@@ -13024,8 +13111,27 @@ If there is already a time stamp at the cursor position, update it."
 
 ;;; The clock for measuring work time.
 
+(defvar org-mode-line-string "")
+(put 'org-mode-line-string 'risky-local-variable t)
+
+(defvar org-mode-line-timer nil)
+(defvar org-clock-heading "")
+(defvar org-clock-start-time "")
+
+(defun org-update-mode-line ()
+  (let* ((now (current-time))
+	 (delta (- (time-to-seconds (current-time)) (time-to-seconds org-clock-start-time)))
+	 (h (floor delta 3600))
+	 (m (floor (- delta (* 3600 h)) 60)))
+    (setq org-mode-line-string 
+	  (propertize (format "-[%d:%02d (%s)]" h m org-clock-heading)
+		      'help-echo "Org-mode clock is running"))		      
+    (force-mode-line-update)))
+
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
+(defvar org-clock-mode-line-entry nil
+  "Information for the modeline about the running clock.")
 
 (defun org-clock-in ()
   "Start the clock on the current item.
@@ -13035,6 +13141,10 @@ If necessary, clock-out of the currently active clock."
   (let (ts)
     (save-excursion
       (org-back-to-heading t)
+      (if (looking-at org-todo-line-regexp)
+	  (setq org-clock-heading (match-string 3))
+	(setq org-clock-heading "???"))
+      (setq org-clock-heading (propertize org-clock-heading 'face nil))
       (beginning-of-line 2)
       (when (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
 		 (not (equal (match-string 1) org-clock-string)))
@@ -13044,8 +13154,15 @@ If necessary, clock-out of the currently active clock."
       (insert "\n") (backward-char 1)
       (indent-relative)
       (insert org-clock-string " ")
+      (setq org-clock-start-time (current-time))
       (setq ts (org-insert-time-stamp (current-time) 'with-hm 'inactive))
       (move-marker org-clock-marker (point) (buffer-base-buffer))
+      (or global-mode-string (setq global-mode-string '("")))
+      (or (memq 'org-mode-line-string global-mode-string)
+	  (setq global-mode-string
+		(append global-mode-string '(org-mode-line-string))))
+      (org-update-mode-line)
+      (setq org-mode-line-timer (run-with-timer 60 60 'org-update-mode-line))
       (message "Clock started at %s" ts))))
 
 (defun org-clock-out (&optional fail-quietly)
@@ -13076,6 +13193,12 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
       (insert " => " (format "%2d:%02d" h m))
       (move-marker org-clock-marker nil)
       (org-add-log-maybe 'clock-out)
+      (when org-mode-line-timer
+	(cancel-timer org-mode-line-timer)
+	(setq org-mode-line-timer nil))
+      (setq global-mode-string
+	    (delq 'org-mode-line-string global-mode-string))
+      (force-mode-line-update)
       (message "Clock stopped at %s after HH:MM = %d:%02d" te h m)))))
 
 (defun org-clock-cancel ()
@@ -13483,88 +13606,88 @@ The following commands are available:
 
 (substitute-key-definition 'undo 'org-agenda-undo
 			   org-agenda-mode-map global-map)
-(define-key org-agenda-mode-map "\C-i"     'org-agenda-goto)
-(define-key org-agenda-mode-map [(tab)]    'org-agenda-goto)
-(define-key org-agenda-mode-map "\C-m"     'org-agenda-switch-to)
-(define-key org-agenda-mode-map "\C-k"     'org-agenda-kill)
-(define-key org-agenda-mode-map "\C-c$"    'org-agenda-archive)
-(define-key org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
-(define-key org-agenda-mode-map "$"        'org-agenda-archive)
-(define-key org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
-(define-key org-agenda-mode-map " "        'org-agenda-show)
-(define-key org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
-(define-key org-agenda-mode-map [(control shift right)] 'org-agenda-todo-nextset)
-(define-key org-agenda-mode-map [(control shift left)] 'org-agenda-todo-previousset)
-(define-key org-agenda-mode-map "\C-c\C-xb" 'org-agenda-tree-to-indirect-buffer)
-(define-key org-agenda-mode-map "b"        'org-agenda-tree-to-indirect-buffer)
-(define-key org-agenda-mode-map "o"        'delete-other-windows)
-(define-key org-agenda-mode-map "L"        'org-agenda-recenter)
-(define-key org-agenda-mode-map "t"        'org-agenda-todo)
-(define-key org-agenda-mode-map "a"        'org-agenda-toggle-archive-tag)
-(define-key org-agenda-mode-map ":"        'org-agenda-set-tags)
-(define-key org-agenda-mode-map "."        'org-agenda-goto-today)
-(define-key org-agenda-mode-map "d"        'org-agenda-day-view)
-(define-key org-agenda-mode-map "w"        'org-agenda-week-view)
-(define-key org-agenda-mode-map (org-key 'S-right) 'org-agenda-date-later)
-(define-key org-agenda-mode-map (org-key 'S-left) 'org-agenda-date-earlier)
-(define-key org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-date-later)
-(define-key org-agenda-mode-map [?\C-c ?\C-x (left)] 'org-agenda-date-earlier)
+(org-defkey org-agenda-mode-map "\C-i"     'org-agenda-goto)
+(org-defkey org-agenda-mode-map [(tab)]    'org-agenda-goto)
+(org-defkey org-agenda-mode-map "\C-m"     'org-agenda-switch-to)
+(org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
+(org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
+(org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
+(org-defkey org-agenda-mode-map " "        'org-agenda-show)
+(org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
+(org-defkey org-agenda-mode-map [(control shift right)] 'org-agenda-todo-nextset)
+(org-defkey org-agenda-mode-map [(control shift left)]  'org-agenda-todo-previousset)
+(org-defkey org-agenda-mode-map "\C-c\C-xb" 'org-agenda-tree-to-indirect-buffer)
+(org-defkey org-agenda-mode-map "b"        'org-agenda-tree-to-indirect-buffer)
+(org-defkey org-agenda-mode-map "o"        'delete-other-windows)
+(org-defkey org-agenda-mode-map "L"        'org-agenda-recenter)
+(org-defkey org-agenda-mode-map "t"        'org-agenda-todo)
+(org-defkey org-agenda-mode-map "a"        'org-agenda-toggle-archive-tag)
+(org-defkey org-agenda-mode-map ":"        'org-agenda-set-tags)
+(org-defkey org-agenda-mode-map "."        'org-agenda-goto-today)
+(org-defkey org-agenda-mode-map "d"        'org-agenda-day-view)
+(org-defkey org-agenda-mode-map "w"        'org-agenda-week-view)
+(org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-date-later)
+(org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-date-earlier)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-date-later)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (left)] 'org-agenda-date-earlier)
 
-(define-key org-agenda-mode-map ">" 'org-agenda-date-prompt)
-(define-key org-agenda-mode-map "\C-c\C-s" 'org-agenda-schedule)
-(define-key org-agenda-mode-map "\C-c\C-d" 'org-agenda-deadline)
+(org-defkey org-agenda-mode-map ">" 'org-agenda-date-prompt)
+(org-defkey org-agenda-mode-map "\C-c\C-s" 'org-agenda-schedule)
+(org-defkey org-agenda-mode-map "\C-c\C-d" 'org-agenda-deadline)
 (let ((l '(1 2 3 4 5 6 7 8 9 0)))
-  (while l (define-key org-agenda-mode-map
+  (while l (org-defkey org-agenda-mode-map
 	     (int-to-string (pop l)) 'digit-argument)))
 
-(define-key org-agenda-mode-map "f" 'org-agenda-follow-mode)
-(define-key org-agenda-mode-map "l" 'org-agenda-log-mode)
-(define-key org-agenda-mode-map "D" 'org-agenda-toggle-diary)
-(define-key org-agenda-mode-map "g" 'org-agenda-toggle-time-grid)
-(define-key org-agenda-mode-map "r" 'org-agenda-redo)
-(define-key org-agenda-mode-map "q" 'org-agenda-quit)
-(define-key org-agenda-mode-map "x" 'org-agenda-exit)
-(define-key org-agenda-mode-map "s" 'org-save-all-org-buffers)
-(define-key org-agenda-mode-map "P" 'org-agenda-show-priority)
-(define-key org-agenda-mode-map "T" 'org-agenda-show-tags)
-(define-key org-agenda-mode-map "n" 'next-line)
-(define-key org-agenda-mode-map "p" 'previous-line)
-(define-key org-agenda-mode-map "\C-n" 'org-agenda-next-date-line)
-(define-key org-agenda-mode-map "\C-p" 'org-agenda-previous-date-line)
-(define-key org-agenda-mode-map "," 'org-agenda-priority)
-(define-key org-agenda-mode-map "\C-c," 'org-agenda-priority)
-(define-key org-agenda-mode-map "i" 'org-agenda-diary-entry)
-(define-key org-agenda-mode-map "c" 'org-agenda-goto-calendar)
+(org-defkey org-agenda-mode-map "f" 'org-agenda-follow-mode)
+(org-defkey org-agenda-mode-map "l" 'org-agenda-log-mode)
+(org-defkey org-agenda-mode-map "D" 'org-agenda-toggle-diary)
+(org-defkey org-agenda-mode-map "g" 'org-agenda-toggle-time-grid)
+(org-defkey org-agenda-mode-map "r" 'org-agenda-redo)
+(org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
+(org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
+(org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
+(org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
+(org-defkey org-agenda-mode-map "T" 'org-agenda-show-tags)
+(org-defkey org-agenda-mode-map "n" 'next-line)
+(org-defkey org-agenda-mode-map "p" 'previous-line)
+(org-defkey org-agenda-mode-map "\C-n" 'org-agenda-next-date-line)
+(org-defkey org-agenda-mode-map "\C-p" 'org-agenda-previous-date-line)
+(org-defkey org-agenda-mode-map "," 'org-agenda-priority)
+(org-defkey org-agenda-mode-map "\C-c," 'org-agenda-priority)
+(org-defkey org-agenda-mode-map "i" 'org-agenda-diary-entry)
+(org-defkey org-agenda-mode-map "c" 'org-agenda-goto-calendar)
 (eval-after-load "calendar"
-  '(define-key calendar-mode-map org-calendar-to-agenda-key
+  '(org-defkey calendar-mode-map org-calendar-to-agenda-key
      'org-calendar-goto-agenda))
-(define-key org-agenda-mode-map "C" 'org-agenda-convert-date)
-(define-key org-agenda-mode-map "m" 'org-agenda-phases-of-moon)
-(define-key org-agenda-mode-map "M" 'org-agenda-phases-of-moon)
-(define-key org-agenda-mode-map "S" 'org-agenda-sunrise-sunset)
-(define-key org-agenda-mode-map "h" 'org-agenda-holidays)
-(define-key org-agenda-mode-map "H" 'org-agenda-holidays)
-(define-key org-agenda-mode-map "+" 'org-agenda-priority-up)
-(define-key org-agenda-mode-map "I" 'org-agenda-clock-in)
-(define-key org-agenda-mode-map "O" 'org-agenda-clock-out)
-(define-key org-agenda-mode-map "X" 'org-agenda-clock-cancel)
-(define-key org-agenda-mode-map "-" 'org-agenda-priority-down)
-(define-key org-agenda-mode-map (org-key 'S-up) 'org-agenda-priority-up)
-(define-key org-agenda-mode-map (org-key 'S-down) 'org-agenda-priority-down)
-(define-key org-agenda-mode-map [?\C-c ?\C-x (up)] 'org-agenda-priority-up)
-(define-key org-agenda-mode-map [?\C-c ?\C-x (down)] 'org-agenda-priority-down)
-(define-key org-agenda-mode-map [(right)] 'org-agenda-later)
-(define-key org-agenda-mode-map [(left)] 'org-agenda-earlier)
-(define-key org-agenda-mode-map "\C-c\C-x\C-c" 'org-export-icalendar-combine-agenda-files)
+(org-defkey org-agenda-mode-map "C" 'org-agenda-convert-date)
+(org-defkey org-agenda-mode-map "m" 'org-agenda-phases-of-moon)
+(org-defkey org-agenda-mode-map "M" 'org-agenda-phases-of-moon)
+(org-defkey org-agenda-mode-map "S" 'org-agenda-sunrise-sunset)
+(org-defkey org-agenda-mode-map "h" 'org-agenda-holidays)
+(org-defkey org-agenda-mode-map "H" 'org-agenda-holidays)
+(org-defkey org-agenda-mode-map "+" 'org-agenda-priority-up)
+(org-defkey org-agenda-mode-map "I" 'org-agenda-clock-in)
+(org-defkey org-agenda-mode-map "O" 'org-agenda-clock-out)
+(org-defkey org-agenda-mode-map "X" 'org-agenda-clock-cancel)
+(org-defkey org-agenda-mode-map "-" 'org-agenda-priority-down)
+(org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-priority-up)
+(org-defkey org-agenda-mode-map [(shift down)] 'org-agenda-priority-down)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (up)] 'org-agenda-priority-up)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (down)] 'org-agenda-priority-down)
+(org-defkey org-agenda-mode-map [(right)] 'org-agenda-later)
+(org-defkey org-agenda-mode-map [(left)] 'org-agenda-earlier)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-c" 'org-export-icalendar-combine-agenda-files)
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
 
-(define-key org-agenda-keymap
+(org-defkey org-agenda-keymap
   (if (featurep 'xemacs) [(button2)] [(mouse-2)]) 'org-agenda-goto-mouse)
-(define-key org-agenda-keymap
+(org-defkey org-agenda-keymap
   (if (featurep 'xemacs) [(button3)] [(mouse-3)]) 'org-agenda-show-mouse)
 (when org-agenda-mouse-1-follows-link
-  (define-key org-agenda-keymap [follow-link] 'mouse-face))
+  (org-defkey org-agenda-keymap [follow-link] 'mouse-face))
 (easy-menu-define org-agenda-menu org-agenda-mode-map "Agenda menu"
   '("Agenda"
     ("Agenda Files")
@@ -14079,6 +14202,7 @@ Optional argument FILE means, use this file instead of the current."
 (defvar org-pre-agenda-window-conf nil)
 (defun org-prepare-agenda ()
   (setq org-todo-keywords-for-agenda nil)
+  (setq org-done-keywords-for-agenda nil)
   (if org-agenda-multi
       (progn
 	(setq buffer-read-only nil)
@@ -14090,6 +14214,8 @@ Optional argument FILE means, use this file instead of the current."
     (org-prepare-agenda-buffers (org-agenda-files))
     (setq org-todo-keywords-for-agenda
 	  (org-uniquify org-todo-keywords-for-agenda))
+    (setq org-done-keywords-for-agenda
+	  (org-uniquify org-done-keywords-for-agenda))
     (let* ((abuf (get-buffer-create org-agenda-buffer-name))
 	   (awin (get-buffer-window abuf)))
       (cond
@@ -14139,6 +14265,8 @@ Optional argument FILE means, use this file instead of the current."
 	  (setq bmp (buffer-modified-p))
 	  (setq org-todo-keywords-for-agenda
 		(append org-todo-keywords-for-agenda org-todo-keywords-1))
+	  (setq org-done-keywords-for-agenda
+		(append org-done-keywords-for-agenda org-done-keywords))
 	  (save-excursion
 	    (remove-text-properties (point-min) (point-max) pall)
 	    (when org-agenda-skip-archived-trees
@@ -14697,21 +14825,34 @@ MATCH is being ignored."
 	 (org-agenda-overriding-header "List of stuck projects: ")
 	 (matcher (nth 0 org-stuck-projects))
 	 (todo (nth 1 org-stuck-projects))
-	 (tags (nth 2 org-stuck-projects))
+	 (todo-wds (if (member "*" todo)
+		       (progn
+			 (org-prepare-agenda-buffers (org-agenda-files))
+			 (org-delete-all
+			  org-done-keywords-for-agenda
+			  (copy-sequence org-todo-keywords-for-agenda)))
+		     todo))
 	 (todo-re (concat "^\\*+[ \t]+\\("
-			  (mapconcat 'identity todo "\\|")
+			  (mapconcat 'identity todo-wds "\\|")
 			  "\\)\\>"))
-	 (tags-re (concat "^\\*+.*:\\("
-			  (mapconcat 'identity tags "\\|")
-			  "\\):[a-zA-Z0-9_@:]*[ \t]*$")))
-
+	 (tags (nth 2 org-stuck-projects))
+	 (tags-re (if (member "*" tags)
+		      "^\\*+.*:[a-zA-Z0-9_@]+:[ \t]*$"
+		    (concat "^\\*+.*:\\("
+			    (mapconcat 'identity tags "\\|")
+			    "\\):[a-zA-Z0-9_@:]*[ \t]*$")))
+	 (gen-re (nth 3 org-stuck-projects))
+	 (re-list
+	  (delq nil
+		(list
+		 (if todo todo-re)
+		 (if tags tags-re)
+		 (and gen-re (stringp gen-re) (string-match "\\S-" gen-re)
+		      gen-re)))))
     (setq org-agenda-skip-regexp
-	  (cond
-	   ((and todo tags)
-	    (concat todo-re "\\|" tags-re))
-	   (todo todo-re)
-	   (tags tags-re)
-	   (t (error "No information how to identify unstuck projects"))))
+	  (if re-list
+	      (mapconcat 'identity re-list "\\|")
+	    (error "No information how to identify unstuck projects")))
     (org-tags-view nil matcher)
     (with-current-buffer org-agenda-buffer-name
       (setq org-agenda-redo-command
@@ -16511,11 +16652,11 @@ This is a command that has to be installed in `calendar-mode-map'."
 (defvar org-cdlatex-mode-map (make-sparse-keymap)
   "Keymap for the minor `org-cdlatex-mode'.")
 
-(define-key org-cdlatex-mode-map "_" 'org-cdlatex-underscore-caret)
-(define-key org-cdlatex-mode-map "^" 'org-cdlatex-underscore-caret)
-(define-key org-cdlatex-mode-map "`" 'cdlatex-math-symbol)
-(define-key org-cdlatex-mode-map "'" 'org-cdlatex-math-modify)
-(define-key org-cdlatex-mode-map "\C-c{" 'cdlatex-environment)
+(org-defkey org-cdlatex-mode-map "_" 'org-cdlatex-underscore-caret)
+(org-defkey org-cdlatex-mode-map "^" 'org-cdlatex-underscore-caret)
+(org-defkey org-cdlatex-mode-map "`" 'cdlatex-math-symbol)
+(org-defkey org-cdlatex-mode-map "'" 'org-cdlatex-math-modify)
+(org-defkey org-cdlatex-mode-map "\C-c{" 'cdlatex-environment)
 
 (defvar org-cdlatex-texmathp-advice-is-done nil
   "Flag remembering if we have applied the advice to texmathp already.")
@@ -16583,7 +16724,7 @@ looks only before point, not after."
 	(while (string-match re str start)
 	  (cond
 	   ((= (match-end 0) (length str))
-	    (throw 'exit (cons "$" (+ lim (match-beginning 0)))))
+	    (throw 'exit (cons "$" (+ lim (match-beginning 0) 1))))
 	   ((= (match-end 0) (- (length str) 5))
 	    (throw 'exit nil))
 	   (t (setq start (match-end 0))))))
@@ -16675,11 +16816,12 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 		      "Creating images for entry...%s"))))
 	(message msg "")
 	(narrow-to-region beg end)
+	(goto-char beg)
 	(org-format-latex
 	 (concat "ltxpng/" (file-name-sans-extension
 			    (file-name-nondirectory
 			     buffer-file-name)))
-	 default-directory 'overlays msg at)
+	 default-directory 'overlays msg at 'forbuffer)
       (message msg "done.  Use `C-c C-c' to remove images.")))))
 
 (defvar org-latex-regexps
@@ -16692,7 +16834,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("$$" "\\$\\$[^\000]*?\\$\\$" 0 t))
   "Regular expressions for matching embedded LaTeX.")
 
-(defun org-format-latex (prefix &optional dir overlays msg at)
+(defun org-format-latex (prefix &optional dir overlays msg at forbuffer)
   "Replace LaTeX fragments with links to an image, and produce images."
   (if (and overlays (fboundp 'clear-image-cache)) (clear-image-cache))
   (let* ((prefixnodir (file-name-nondirectory prefix))
@@ -16729,7 +16871,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	      (setq checkdir t)
 	      (or (file-directory-p todir) (make-directory todir)))
 	    (org-create-formula-image
-	     txt movefile opt)
+	     txt movefile opt forbuffer)
 	    (if overlays
 		(progn
 		  (setq ov (org-make-overlay beg end))
@@ -16748,21 +16890,24 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	      (insert link))))))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
-(defun org-create-formula-image (string tofile options)
+(defun org-create-formula-image (string tofile options buffer)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
 	 (texfilebase (make-temp-name
 		       (expand-file-name "orgtex" tmpdir)))
-
-;(texfilebase (make-temp-file "orgtex"))
-;	 (dummy (delete-file texfilebase))
 	 (texfile (concat texfilebase ".tex"))
 	 (dvifile (concat texfilebase ".dvi"))
 	 (pngfile (concat texfilebase ".png"))
-	 (scale (number-to-string (* 1000 (or (plist-get options :scale) 1.0))))
-	 (fg (or (plist-get options :foreground) "Black"))
-	 (bg (or (plist-get options :background) "Transparent")))
+	 (fnh (face-attribute 'default :height nil 'inherit))
+	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))
+	 (dpi (number-to-string (floor (* 0.9 (if buffer fnh 140.)))))
+	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
+		 "Black"))
+	 (bg (or (plist-get options (if buffer :background :html-background))
+		 "Transparent")))
+    (if (eq fg 'default) (setq fg (org-dvipng-color :foreground)))
+    (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
     (with-temp-file texfile
       (insert org-format-latex-header
 	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
@@ -16777,7 +16922,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(progn (message "Failed to create dvi file from %s" texfile) nil)
       (call-process "dvipng" nil nil nil
 		    "-E" "-fg" fg "-bg" bg
-		    "-x" scale "-y" scale "-T" "tight"
+                    "-D" dpi
+		    ;;"-x" scale "-y" scale
+		    "-T" "tight"
 		    "-o" pngfile
 		    dvifile)
       (if (not (file-exists-p pngfile))
@@ -16787,6 +16934,18 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png") do
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
+
+(defun org-dvipng-color (attr)
+  "Return an rgb color specification for dvipng."
+  (apply 'format "rgb %s %s %s"
+	 (mapcar 'org-normalize-color
+		 (color-values (face-attribute 'default attr nil 'inherit)))))
+
+ (face-attribute 'default :height nil)
+
+(defun org-normalize-color (value)
+  "Return string to be used as color value for an RGB component."
+  (format "%g" (/ value 65535.0)))
 
 ;;;; Exporting
 
@@ -16973,6 +17132,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("curren")
     ("yen")
     ("brvbar")
+    ("vert" . "&#124;")
     ("sect")
     ("uml")
     ("copy")
@@ -17375,6 +17535,7 @@ translations.  There is currently no way for users to extend this.")
       ;; Expand link abbreviations
       (goto-char (point-min))
       (while (re-search-forward re-plain-link nil t)
+	(goto-char (1- (match-end 0)))
 	(org-if-unprotected
 	 (replace-match
 	  (concat
@@ -17382,6 +17543,7 @@ translations.  There is currently no way for users to extend this.")
 	  t t)))
       (goto-char (point-min))
       (while (re-search-forward re-angle-link nil t)
+	(goto-char (1- (match-end 0)))
 	(org-if-unprotected
 	 (replace-match
 	  (concat
@@ -17404,9 +17566,13 @@ translations.  There is currently no way for users to extend this.")
       (when (plist-get  parameters :emph-multiline)
 	(goto-char (point-min))
 	(while (re-search-forward org-emph-re nil t)
-	  (org-if-unprotected
-	   (subst-char-in-region (match-beginning 0) (match-end 0) ?\n ?\  t)
-	   (goto-char (1- (match-end 0))))))
+	  (if (not (= (char-after (match-beginning 3))
+		      (char-after (match-beginning 4))))
+	      (org-if-unprotected
+	       (subst-char-in-region (match-beginning 0) (match-end 0)
+				     ?\n ?\  t)
+	       (goto-char (1- (match-end 0))))
+	    (goto-char (1+ (match-beginning 0))))))
 
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
@@ -17414,16 +17580,17 @@ translations.  There is currently no way for users to extend this.")
 
 (defun org-export-grab-title-from-buffer ()
   "Get a title for the current document, from looking at the buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((end (save-excursion (outline-next-heading) (point))))
-      (when (re-search-forward "^[ \t]*[^# \t\r\n].*\n" end t)
-	;; Mark the line so that it will not be exported as normal text.
-	(org-unmodified
-	 (add-text-properties (match-beginning 0) (match-end 0)
-			      (list :org-license-to-kill t)))
-	;; Return the title string
-	(org-trim (match-string 0))))))
+  (let (buffer-read-only)
+    (save-excursion
+      (goto-char (point-min))
+      (let ((end (save-excursion (outline-next-heading) (point))))
+	(when (re-search-forward "^[ \t]*[^# \t\r\n].*\n" end t)
+	  ;; Mark the line so that it will not be exported as normal text.
+	  (org-unmodified
+	   (add-text-properties (match-beginning 0) (match-end 0)
+				(list :org-license-to-kill t)))
+	  ;; Return the title string
+	  (org-trim (match-string 0)))))))
 
 (defun org-solidify-link-text (s &optional alist)
   "Take link text and make a safe target out of it."
@@ -17539,8 +17706,10 @@ underlined headlines.  The default is 3."
 		  "[\r\n]")))
 	 thetoc have-headings first-heading-pos)
 
-    (org-unmodified
-     (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t)))
+    (let (buffer-read-only)
+      (org-unmodified
+       (remove-text-properties (point-min) (point-max)
+			       '(:org-license-to-kill t))))
 
     (setq org-last-level 1)
     (org-init-section-numbers)
@@ -18035,8 +18204,10 @@ associated with a file."
 	 rpl path desc descp desc1 desc2 link
 	 )
 
-    (org-unmodified
-     (remove-text-properties (point-min) (point-max) '(:org-license-to-kill t)))
+    (let (buffer-read-only)
+      (org-unmodified
+       (remove-text-properties (point-min) (point-max)
+			       '(:org-license-to-kill t))))
 
     (message "Exporting...")
 
@@ -18812,11 +18983,20 @@ stacked delimiters is N.  Escaping delimiters is not possible."
       (setq string (replace-match (match-string 1 string) t t string)))
     string))
 
+;; FIXME: what if the if does not match???????
 (defun org-export-html-convert-emphasize (string)
   "Apply emphasis."
-  (while (string-match org-emph-re string)
-    (setq string (replace-match (concat "\\1" (nth 2 (assoc (match-string 3 string) org-emphasis-alist)) "\\4" (nth 3 (assoc (match-string 3 string) org-emphasis-alist)) "\\5") t nil string)))
-  string)
+  (let ((s 0))
+    (while (string-match org-emph-re string s)
+      (if (not (equal
+		(substring string (match-beginning 3) (1+ (match-beginning 3)))
+		(substring string (match-beginning 4) (1+ (match-beginning 4)))))
+	  (setq string (replace-match
+			(concat "\\1" (nth 2 (assoc (match-string 3 string) org-emphasis-alist))
+				"\\4" (nth 3 (assoc (match-string 3 string) org-emphasis-alist))
+				"\\5") t nil string))
+	(setq s (1+ s))))
+    string))
 
 (defvar org-par-open nil)
 (defun org-open-par ()
@@ -19015,7 +19195,9 @@ END:VEVENT\n"
 			   "COMPLETED" "NEEDS-ACTION"))
 	  (when (and state
 		     (or (not (member state org-done-keywords))
-			 (eq org-icalendar-include-todo 'all)))
+			 (eq org-icalendar-include-todo 'all))
+		     (not (member org-archive-tag (org-get-tags-at)))
+		     )
 	    (setq hd (match-string 3))
 	    (if (string-match org-bracket-link-regexp hd)
 		(setq hd (replace-match (if (match-end 3) (match-string 3 hd)
@@ -19163,42 +19345,42 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;;;; Key bindings
 
 ;; Make `C-c C-x' a prefix key
-(define-key org-mode-map "\C-c\C-x" (make-sparse-keymap))
+(org-defkey org-mode-map "\C-c\C-x" (make-sparse-keymap))
 
 ;; TAB key with modifiers
-(define-key org-mode-map "\C-i"       'org-cycle)
-(define-key org-mode-map [(tab)]      'org-cycle)
-(define-key org-mode-map [(control tab)] 'org-force-cycle-archived)
-(define-key org-mode-map [(meta tab)] 'org-complete)
-(define-key org-mode-map "\M-\t" 'org-complete)
-(define-key org-mode-map "\M-\C-i"      'org-complete)
+(org-defkey org-mode-map "\C-i"       'org-cycle)
+(org-defkey org-mode-map [(tab)]      'org-cycle)
+(org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
+(org-defkey org-mode-map [(meta tab)] 'org-complete)
+(org-defkey org-mode-map "\M-\t" 'org-complete)
+(org-defkey org-mode-map "\M-\C-i"      'org-complete)
 ;; The following line is necessary under Suse GNU/Linux
 (unless (featurep 'xemacs)
-  (define-key org-mode-map [S-iso-lefttab]  'org-shifttab))
-(define-key org-mode-map [(shift tab)]    'org-shifttab)
+  (org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab))
+(org-defkey org-mode-map [(shift tab)]    'org-shifttab)
 
-(define-key org-mode-map (org-key 'S-return)   'org-table-copy-down)
-(define-key org-mode-map [(meta shift return)] 'org-insert-todo-heading)
-(define-key org-mode-map [(meta return)]       'org-meta-return)
+(org-defkey org-mode-map [(shift return)]   'org-table-copy-down)
+(org-defkey org-mode-map [(meta shift return)] 'org-insert-todo-heading)
+(org-defkey org-mode-map [(meta return)]       'org-meta-return)
 
 ;; Cursor keys with modifiers
-(define-key org-mode-map [(meta left)]  'org-metaleft)
-(define-key org-mode-map [(meta right)] 'org-metaright)
-(define-key org-mode-map [(meta up)]    'org-metaup)
-(define-key org-mode-map [(meta down)]  'org-metadown)
+(org-defkey org-mode-map [(meta left)]  'org-metaleft)
+(org-defkey org-mode-map [(meta right)] 'org-metaright)
+(org-defkey org-mode-map [(meta up)]    'org-metaup)
+(org-defkey org-mode-map [(meta down)]  'org-metadown)
 
-(define-key org-mode-map [(meta shift left)]   'org-shiftmetaleft)
-(define-key org-mode-map [(meta shift right)]  'org-shiftmetaright)
-(define-key org-mode-map [(meta shift up)]     'org-shiftmetaup)
-(define-key org-mode-map [(meta shift down)]   'org-shiftmetadown)
+(org-defkey org-mode-map [(meta shift left)]   'org-shiftmetaleft)
+(org-defkey org-mode-map [(meta shift right)]  'org-shiftmetaright)
+(org-defkey org-mode-map [(meta shift up)]     'org-shiftmetaup)
+(org-defkey org-mode-map [(meta shift down)]   'org-shiftmetadown)
 
-(define-key org-mode-map (org-key 'S-up)       'org-shiftup)
-(define-key org-mode-map (org-key 'S-down)     'org-shiftdown)
-(define-key org-mode-map (org-key 'S-left)     'org-shiftleft)
-(define-key org-mode-map (org-key 'S-right)    'org-shiftright)
+(org-defkey org-mode-map [(shift up)]          'org-shiftup)
+(org-defkey org-mode-map [(shift down)]        'org-shiftdown)
+(org-defkey org-mode-map [(shift left)]        'org-shiftleft)
+(org-defkey org-mode-map [(shift right)]       'org-shiftright)
 
-(define-key org-mode-map [(control shift right)] 'org-shiftcontrolright)
-(define-key org-mode-map [(control shift left)] 'org-shiftcontrolleft)
+(org-defkey org-mode-map [(control shift right)] 'org-shiftcontrolright)
+(org-defkey org-mode-map [(control shift left)]  'org-shiftcontrolleft)
 
 ;;; Extra keys for tty access.
 ;;  We only set them when really needed because otherwise the
@@ -19206,104 +19388,104 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 
 (when (or (featurep 'xemacs)   ;; because XEmacs supports multi-device stuff
 	  (not window-system))
-  (define-key org-mode-map "\C-c\C-xc"    'org-table-copy-down)
-  (define-key org-mode-map "\C-c\C-xM"    'org-insert-todo-heading)
-  (define-key org-mode-map "\C-c\C-xm"    'org-meta-return)
-  (define-key org-mode-map [?\e (return)] 'org-meta-return)
-  (define-key org-mode-map [?\e (left)]   'org-metaleft)
-  (define-key org-mode-map "\C-c\C-xl"    'org-metaleft)
-  (define-key org-mode-map [?\e (right)]  'org-metaright)
-  (define-key org-mode-map "\C-c\C-xr"    'org-metaright)
-  (define-key org-mode-map [?\e (up)]     'org-metaup)
-  (define-key org-mode-map "\C-c\C-xu"    'org-metaup)
-  (define-key org-mode-map [?\e (down)]   'org-metadown)
-  (define-key org-mode-map "\C-c\C-xd"    'org-metadown)
-  (define-key org-mode-map "\C-c\C-xL"    'org-shiftmetaleft)
-  (define-key org-mode-map "\C-c\C-xR"    'org-shiftmetaright)
-  (define-key org-mode-map "\C-c\C-xU"    'org-shiftmetaup)
-  (define-key org-mode-map "\C-c\C-xD"    'org-shiftmetadown)
-  (define-key org-mode-map [?\C-c (up)]    'org-shiftup)
-  (define-key org-mode-map [?\C-c (down)]  'org-shiftdown)
-  (define-key org-mode-map [?\C-c (left)]  'org-shiftleft)
-  (define-key org-mode-map [?\C-c (right)] 'org-shiftright)
-  (define-key org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
-  (define-key org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft))
+  (org-defkey org-mode-map "\C-c\C-xc"    'org-table-copy-down)
+  (org-defkey org-mode-map "\C-c\C-xM"    'org-insert-todo-heading)
+  (org-defkey org-mode-map "\C-c\C-xm"    'org-meta-return)
+  (org-defkey org-mode-map [?\e (return)] 'org-meta-return)
+  (org-defkey org-mode-map [?\e (left)]   'org-metaleft)
+  (org-defkey org-mode-map "\C-c\C-xl"    'org-metaleft)
+  (org-defkey org-mode-map [?\e (right)]  'org-metaright)
+  (org-defkey org-mode-map "\C-c\C-xr"    'org-metaright)
+  (org-defkey org-mode-map [?\e (up)]     'org-metaup)
+  (org-defkey org-mode-map "\C-c\C-xu"    'org-metaup)
+  (org-defkey org-mode-map [?\e (down)]   'org-metadown)
+  (org-defkey org-mode-map "\C-c\C-xd"    'org-metadown)
+  (org-defkey org-mode-map "\C-c\C-xL"    'org-shiftmetaleft)
+  (org-defkey org-mode-map "\C-c\C-xR"    'org-shiftmetaright)
+  (org-defkey org-mode-map "\C-c\C-xU"    'org-shiftmetaup)
+  (org-defkey org-mode-map "\C-c\C-xD"    'org-shiftmetadown)
+  (org-defkey org-mode-map [?\C-c (up)]    'org-shiftup)
+  (org-defkey org-mode-map [?\C-c (down)]  'org-shiftdown)
+  (org-defkey org-mode-map [?\C-c (left)]  'org-shiftleft)
+  (org-defkey org-mode-map [?\C-c (right)] 'org-shiftright)
+  (org-defkey org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
+  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft))
 
   ;; All the other keys
 
-(define-key org-mode-map "\C-c\C-a" 'show-all)  ; in case allout messed up.
-(define-key org-mode-map "\C-c\C-r" 'org-reveal)
-(define-key org-mode-map "\C-xns" 'org-narrow-to-subtree)
-(define-key org-mode-map "\C-c$"    'org-archive-subtree)
-(define-key org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
-(define-key org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
-(define-key org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
-(define-key org-mode-map "\C-c\C-j" 'org-goto)
-(define-key org-mode-map "\C-c\C-t" 'org-todo)
-(define-key org-mode-map "\C-c\C-s" 'org-schedule)
-(define-key org-mode-map "\C-c\C-d" 'org-deadline)
-(define-key org-mode-map "\C-c;"    'org-toggle-comment)
-(define-key org-mode-map "\C-c\C-v" 'org-show-todo-tree)
-(define-key org-mode-map "\C-c\C-w" 'org-check-deadlines)
-(define-key org-mode-map "\C-c/"    'org-occur)   ; Minor-mode reserved
-(define-key org-mode-map "\C-c\\"   'org-tags-sparse-tree) ; Minor-mode res.
-(define-key org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
-(define-key org-mode-map "\M-\C-m"  'org-insert-heading)
-(define-key org-mode-map "\C-c\C-x\C-n" 'org-next-link)
-(define-key org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
-(define-key org-mode-map "\C-c\C-l" 'org-insert-link)
-(define-key org-mode-map "\C-c\C-o" 'org-open-at-point)
-(define-key org-mode-map "\C-c%"    'org-mark-ring-push)
-(define-key org-mode-map "\C-c&"    'org-mark-ring-goto)
-(define-key org-mode-map "\C-c\C-z" 'org-time-stamp)  ; Alternative binding
-(define-key org-mode-map "\C-c."    'org-time-stamp)  ; Minor-mode reserved
-(define-key org-mode-map "\C-c!"    'org-time-stamp-inactive) ; Minor-mode r.
-(define-key org-mode-map "\C-c,"    'org-priority)    ; Minor-mode reserved
-(define-key org-mode-map "\C-c\C-y" 'org-evaluate-time-range)
-(define-key org-mode-map "\C-c>"    'org-goto-calendar)
-(define-key org-mode-map "\C-c<"    'org-date-from-calendar)
-(define-key org-mode-map [(control ?,)]     'org-cycle-agenda-files)
-(define-key org-mode-map [(control ?\')]     'org-cycle-agenda-files)
-(define-key org-mode-map "\C-c["    'org-agenda-file-to-front)
-(define-key org-mode-map "\C-c]"    'org-remove-file)
-(define-key org-mode-map "\C-c-"    'org-table-insert-hline)
-(define-key org-mode-map "\C-c^"    'org-sort)
-(define-key org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
-(define-key org-mode-map "\C-c#"    'org-update-checkbox-count)
-(define-key org-mode-map "\C-m"     'org-return)
-(define-key org-mode-map "\C-c?"    'org-table-field-info)
-(define-key org-mode-map "\C-c "    'org-table-blank-field)
-(define-key org-mode-map "\C-c+"    'org-table-sum)
-(define-key org-mode-map "\C-c="    'org-table-eval-formula)
-(define-key org-mode-map "\C-c'"    'org-table-edit-formulas)
-(define-key org-mode-map "\C-c`"    'org-table-edit-field)
-(define-key org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
-(define-key org-mode-map "\C-c*"    'org-table-recalculate)
-(define-key org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
-(define-key org-mode-map "\C-c~"    'org-table-create-with-table.el)
-(define-key org-mode-map "\C-c\C-q" 'org-table-wrap-region)
-(define-key org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
-(define-key org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
-(define-key org-mode-map "\C-c\C-e" 'org-export)
-(define-key org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
+(org-defkey org-mode-map "\C-c\C-a" 'show-all)  ; in case allout messed up.
+(org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
+(org-defkey org-mode-map "\C-xns" 'org-narrow-to-subtree)
+(org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
+(org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
+(org-defkey org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
+(org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
+(org-defkey org-mode-map "\C-c\C-j" 'org-goto)
+(org-defkey org-mode-map "\C-c\C-t" 'org-todo)
+(org-defkey org-mode-map "\C-c\C-s" 'org-schedule)
+(org-defkey org-mode-map "\C-c\C-d" 'org-deadline)
+(org-defkey org-mode-map "\C-c;"    'org-toggle-comment)
+(org-defkey org-mode-map "\C-c\C-v" 'org-show-todo-tree)
+(org-defkey org-mode-map "\C-c\C-w" 'org-check-deadlines)
+(org-defkey org-mode-map "\C-c/"    'org-occur)   ; Minor-mode reserved
+(org-defkey org-mode-map "\C-c\\"   'org-tags-sparse-tree) ; Minor-mode res.
+(org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
+(org-defkey org-mode-map "\M-\C-m"  'org-insert-heading)
+(org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
+(org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
+(org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)
+(org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
+(org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
+(org-defkey org-mode-map "\C-c&"    'org-mark-ring-goto)
+(org-defkey org-mode-map "\C-c\C-z" 'org-time-stamp)  ; Alternative binding
+(org-defkey org-mode-map "\C-c."    'org-time-stamp)  ; Minor-mode reserved
+(org-defkey org-mode-map "\C-c!"    'org-time-stamp-inactive) ; Minor-mode r.
+(org-defkey org-mode-map "\C-c,"    'org-priority)    ; Minor-mode reserved
+(org-defkey org-mode-map "\C-c\C-y" 'org-evaluate-time-range)
+(org-defkey org-mode-map "\C-c>"    'org-goto-calendar)
+(org-defkey org-mode-map "\C-c<"    'org-date-from-calendar)
+(org-defkey org-mode-map [(control ?,)]     'org-cycle-agenda-files)
+(org-defkey org-mode-map [(control ?\')]     'org-cycle-agenda-files)
+(org-defkey org-mode-map "\C-c["    'org-agenda-file-to-front)
+(org-defkey org-mode-map "\C-c]"    'org-remove-file)
+(org-defkey org-mode-map "\C-c-"    'org-table-insert-hline)
+(org-defkey org-mode-map "\C-c^"    'org-sort)
+(org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
+(org-defkey org-mode-map "\C-c#"    'org-update-checkbox-count)
+(org-defkey org-mode-map "\C-m"     'org-return)
+(org-defkey org-mode-map "\C-c?"    'org-table-field-info)
+(org-defkey org-mode-map "\C-c "    'org-table-blank-field)
+(org-defkey org-mode-map "\C-c+"    'org-table-sum)
+(org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
+(org-defkey org-mode-map "\C-c'"    'org-table-edit-formulas)
+(org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
+(org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
+(org-defkey org-mode-map "\C-c*"    'org-table-recalculate)
+(org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
+(org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
+(org-defkey org-mode-map "\C-c\C-q" 'org-table-wrap-region)
+(org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
+(org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
+(org-defkey org-mode-map "\C-c\C-e" 'org-export)
+(org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 
-(define-key org-mode-map "\C-c\C-x\C-k" 'org-cut-special)
-(define-key org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
-(define-key org-mode-map "\C-c\C-x\M-w" 'org-copy-special)
-(define-key org-mode-map "\C-c\C-x\C-y" 'org-paste-special)
+(org-defkey org-mode-map "\C-c\C-x\C-k" 'org-cut-special)
+(org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
+(org-defkey org-mode-map "\C-c\C-x\M-w" 'org-copy-special)
+(org-defkey org-mode-map "\C-c\C-x\C-y" 'org-paste-special)
 
-(define-key org-mode-map "\C-c\C-x\C-t" 'org-toggle-time-stamp-overlays)
-(define-key org-mode-map "\C-c\C-x\C-i" 'org-clock-in)
-(define-key org-mode-map "\C-c\C-x\C-o" 'org-clock-out)
-(define-key org-mode-map "\C-c\C-x\C-x" 'org-clock-cancel)
-(define-key org-mode-map "\C-c\C-x\C-d" 'org-clock-display)
-(define-key org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
-(define-key org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
-(define-key org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
-(define-key org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
+(org-defkey org-mode-map "\C-c\C-x\C-t" 'org-toggle-time-stamp-overlays)
+(org-defkey org-mode-map "\C-c\C-x\C-i" 'org-clock-in)
+(org-defkey org-mode-map "\C-c\C-x\C-o" 'org-clock-out)
+(org-defkey org-mode-map "\C-c\C-x\C-x" 'org-clock-cancel)
+(org-defkey org-mode-map "\C-c\C-x\C-d" 'org-clock-display)
+(org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
+(org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
+(org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
+(org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 
 (when (featurep 'xemacs)
-  (define-key org-mode-map 'button3   'popup-mode-menu))
+  (org-defkey org-mode-map 'button3   'popup-mode-menu))
 
 (defsubst org-table-p () (org-at-table-p))
 
@@ -19404,7 +19586,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
     (while commands
       (setq old (pop commands) new (pop commands))
       (if (fboundp 'command-remapping)
-	  (define-key map (vector 'remap old) new)
+	  (org-defkey map (vector 'remap old) new)
 	(substitute-key-definition old new map global-map)))))
 
 (when (eq org-enable-table-editor 'optimized)
@@ -19414,7 +19596,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 	     'self-insert-command 'org-self-insert-command
 	     'delete-char 'org-delete-char
 	     'delete-backward-char 'org-delete-backward-char)
-  (define-key org-mode-map "|" 'org-force-self-insert))
+  (org-defkey org-mode-map "|" 'org-force-self-insert))
 
 (defun org-shiftcursor-error ()
   "Throw an error because Shift-Cursor command was applied in wrong context."
@@ -20318,15 +20500,22 @@ work correctly."
   "Go to the beginning of the current line.  If that is invisible, continue
 to a visible line beginning.  This makes the function of C-a more intuitive."
   (interactive)
-  (beginning-of-line 1)
-  (if (bobp)
-      nil
-    (backward-char 1)
-    (if (org-invisible-p)
-	(while (and (not (bobp)) (org-invisible-p))
-	  (backward-char 1)
-	  (beginning-of-line 1))
-      (forward-char 1))))
+  (let ((pos (point)))
+    (beginning-of-line 1)
+    (if (bobp)
+	nil
+      (backward-char 1)
+      (if (org-invisible-p)
+	  (while (and (not (bobp)) (org-invisible-p))
+	    (backward-char 1)
+	    (beginning-of-line 1))
+	(forward-char 1)))
+    (when (and org-special-ctrl-a (looking-at org-todo-line-regexp)
+	       (= (char-after (match-end 1)) ?\ ))
+      (goto-char
+       (cond ((> pos (match-beginning 3)) (match-beginning 3))
+	     ((= pos (point)) (match-beginning 3))
+	     (t (point)))))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 
@@ -20413,7 +20602,7 @@ When ENTRY is non-nil, show the entire entry."
 			   (save-excursion (outline-end-of-heading) (point))
 			   flag))))
 
-(defun org-end-of-subtree (&optional invisible-OK)
+(defun org-end-of-subtree (&optional invisible-OK to-heading)
   ;; This is an exact copy of the original function, but it uses
   ;; `org-back-to-heading', to make it work also in invisible
   ;; trees.  And is uses an invisible-OK argument.
@@ -20425,13 +20614,14 @@ When ENTRY is non-nil, show the entire entry."
 		(or first (> (funcall outline-level) level)))
       (setq first nil)
       (outline-next-heading))
-    (if (memq (preceding-char) '(?\n ?\^M))
-	(progn
-	  ;; Go to end of line before heading
-	  (forward-char -1)
-	  (if (memq (preceding-char) '(?\n ?\^M))
-	      ;; leave blank line before heading
-	      (forward-char -1)))))
+    (unless to-heading
+      (if (memq (preceding-char) '(?\n ?\^M))
+	  (progn
+	    ;; Go to end of line before heading
+	    (forward-char -1)
+	    (if (memq (preceding-char) '(?\n ?\^M))
+		;; leave blank line before heading
+		(forward-char -1))))))
   (point))
 
 (defun org-show-subtree ()
@@ -20517,6 +20707,7 @@ Show the heading too, if it is currently invisible."
   '(add-to-list 'session-globals-exclude 'org-mark-ring))
 
 ;;;; Experimental code
+
 
 ;;;; Finish up
 

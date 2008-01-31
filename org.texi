@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.71
+@set VERSION 4.72
 @set DATE April 2007
 
 @dircategory Emacs
@@ -579,8 +579,9 @@ key.
 @cindex outline tree
 
 Headlines define the structure of an outline tree.  The headlines in
-Org-mode start with one or more stars, on the left margin.  For
-example:
+Org-mode start with one or more stars, on the left margin@footnote{See
+the variable @code{org-special-ctrl-a} to configure special behavior of
+@kbd{C-a} in headlines.}.  For example:
 
 @example
 * Top level headline
@@ -589,12 +590,19 @@ example:
     some text
 *** 3rd level
     more text
+
 * Another top level headline
 @end example
 
 @noindent Some people find the many stars too noisy and would prefer an
 outline that has whitespace followed by a single star as headline
 starters.  @ref{Clean view} describes a setup to realize this.
+
+An empty line after the end of a subtree is considered part of it and
+will be hidden when the subtree is folded.  However, if you leave at
+least two empty lines, one empty line will remain visible after folding
+the subtree, in order to structure the collapsed view.  See the
+variable @code{org-cycle-separator-lines} for modifying this behavior.
 
 @node Visibility cycling, Motion, Headlines, Document structure
 @section Visibility cycling
@@ -1519,9 +1527,9 @@ numbers.
 @cindex syntax, of formulas
 
 A formula can be any algebraic expression understood by the Emacs
-@file{Calc} package.  Note that @file{calc} has the slightly
+@file{Calc} package.  @b{Note that @file{calc} has the
 non-standard convention that @samp{/} has lower precedence than
-@samp{*}, so that @samp{a/b*c} is interpreted as @samp{a/(b*c)}.  Before
+@samp{*}, so that @samp{a/b*c} is interpreted as @samp{a/(b*c)}.}  Before
 evaluation by @code{calc-eval} (@pxref{Calling Calc from
 Your Programs,calc-eval,Calling calc from Your Lisp Programs,calc,GNU
 Emacs Calc Manual}),
@@ -2409,8 +2417,8 @@ use:
 @noindent In these entries, the character specifies how to select the
 template.  The first string specifies the template.  Two more (optional)
 strings give the file in which, and the headline under which the new
-note should be stored.  The file defaults to
-@code{org-default-notes-file}, the heading to
+note should be stored.  The file defaults (if not present or @code{nil})
+to @code{org-default-notes-file}, the heading to
 @code{org-remember-default-headline}.  Both defaults help to get to the
 storing location quickly, but you can change the location interactively
 while storing the note.
@@ -2507,7 +2515,6 @@ then leads to the following result.
 @item             @tab @key{left}/@key{right} @tab as same level, before/after current heading
 @item not on headline @tab @key{RET}
       @tab at cursor position, level taken from context.
-           Or use prefix arg to specify level manually.
 @end multitable
 
 So a fast way to store the note to its default location is to press
@@ -4000,16 +4007,18 @@ Lets assume that you, in your own way of using Org-mode, identify
 projects with a tag PROJECT, and that you use a todo keyword MAYBE to
 indicate a project that should not be considered yet.  Lets further
 assume that the todo keyword DONE marks finished projects, and that NEXT
-and TODO indicate next actions.  Finally, the tag @@SHOP indicates
-shopping and is a next action even without the NEXT tag.  In this case
-you would start by identifying eligible projects with a tags/todo match
-@samp{+PROJECT/-MAYBE-DONE}, and then check for TODO, NEXT and @@SHOP in
-the subtree to identify projects that are not stuck.  The correct
-customization for this is
+and TODO indicate next actions.  The tag @@SHOP indicates shopping and
+is a next action even without the NEXT tag.  Finally, if the project
+contains the special word IGNORE anywhere, it should not be listed
+either.  In this case you would start by identifying eligible projects
+with a tags/todo match @samp{+PROJECT/-MAYBE-DONE}, and then check for
+TODO, NEXT, @@SHOP, and IGNORE in the subtree to identify projects that
+are not stuck.  The correct customization for this is
 
 @lisp
 (setq org-stuck-projects
-      ("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@@SHOP")))
+      '("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@@SHOP")
+                               "\\<IGNORE\\>"))
 @end lisp
 
 
@@ -5760,11 +5769,15 @@ Logging TODO state changes and clock intervals (variable
 @cindex @code{lognotedone}, STARTUP keyword
 @cindex @code{lognoteclock-out}, STARTUP keyword
 @cindex @code{lognotestate}, STARTUP keyword
+@cindex @code{logrepeat}, STARTUP keyword
+@cindex @code{nologrepeat}, STARTUP keyword
 @example
 logging          @r{record a timestamp when an item is marked DONE}
 nologging        @r{don't record when items are marked DONE}
 lognotedone      @r{record timestamp and a note when DONE}
 lognotestate     @r{record timestamp, note when TODO state changes}
+logrepeat        @r{record a not when re-instating a repeating item}
+nologrepeat      @r{do not record when re-instating repeating item}
 lognoteclock-out @r{record timestamp and a note when clocking out}
 @end example
 Here are the options for hiding leading stars in outline headings.  The
@@ -6113,7 +6126,6 @@ during date selection).
 @example
 S-UP    -> M-p             S-DOWN  -> M-n
 S-LEFT  -> M--             S-RIGHT -> M-+
-S-RET   -> C-S-RET
 @end example
 
 Yes, these are unfortunately more difficult to remember.  If you want
@@ -6124,7 +6136,6 @@ to have other replacement keys, look at the variable
 Also this package uses the @kbd{S-<cursor>} keys, so everything written
 in the paragraph above about CUA mode also applies here.
 @end table
-
 
 @node Bugs,  , Interaction, Miscellaneous
 @section Bugs

@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.71).
+   This manual is for Org-mode (version 4.72).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.71).
+This manual is for Org-mode (version 4.72).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -511,7 +511,8 @@ File: org,  Node: Headlines,  Next: Visibility cycling,  Prev: Outlines,  Up: Do
 =============
 
 Headlines define the structure of an outline tree.  The headlines in
-Org-mode start with one or more stars, on the left margin.  For example:
+Org-mode start with one or more stars, on the left margin(1).  For
+example:
 
      * Top level headline
      ** Second level
@@ -519,11 +520,23 @@ Org-mode start with one or more stars, on the left margin.  For example:
          some text
      *** 3rd level
          more text
+
      * Another top level headline
 
 Some people find the many stars too noisy and would prefer an outline
 that has whitespace followed by a single star as headline starters.
 *Note Clean view:: describes a setup to realize this.
+
+   An empty line after the end of a subtree is considered part of it and
+will be hidden when the subtree is folded.  However, if you leave at
+least two empty lines, one empty line will remain visible after folding
+the subtree, in order to structure the collapsed view.  See the
+variable `org-cycle-separator-lines' for modifying this behavior.
+
+   ---------- Footnotes ----------
+
+   (1) See the variable `org-special-ctrl-a' to configure special
+behavior of `C-a' in headlines.
 
 
 File: org,  Node: Visibility cycling,  Next: Motion,  Prev: Headlines,  Up: Document structure
@@ -1349,13 +1362,12 @@ File: org,  Node: Formula syntax for Calc,  Next: Formula syntax for Lisp,  Prev
 -----------------------------
 
 A formula can be any algebraic expression understood by the Emacs
-`Calc' package.  Note that `calc' has the slightly non-standard
-convention that `/' has lower precedence than `*', so that `a/b*c' is
-interpreted as `a/(b*c)'.  Before evaluation by `calc-eval' (*note
-calc-eval: (calc)Calling Calc from Your Programs.), variable
-substitution takes place according to the rules described above.  The
-range vectors can be directly fed into the calc vector functions like
-`vmean' and `vsum'.
+`Calc' package.  Note that `calc' has the non-standard convention that
+`/' has lower precedence than `*', so that `a/b*c' is interpreted as
+`a/(b*c)'.  Before evaluation by `calc-eval' (*note calc-eval:
+(calc)Calling Calc from Your Programs.), variable substitution takes
+place according to the rules described above.  The range vectors can be
+directly fed into the calc vector functions like `vmean' and `vsum'.
 
    A formula can contain an optional mode string after a semicolon.
 This string consists of flags to influence Calc and other modes during
@@ -2158,10 +2170,11 @@ use:
 In these entries, the character specifies how to select the template.
 The first string specifies the template.  Two more (optional) strings
 give the file in which, and the headline under which the new note
-should be stored.  The file defaults to `org-default-notes-file', the
-heading to `org-remember-default-headline'.  Both defaults help to get
-to the storing location quickly, but you can change the location
-interactively while storing the note.
+should be stored.  The file defaults (if not present or `nil') to
+`org-default-notes-file', the heading to
+`org-remember-default-headline'.  Both defaults help to get to the
+storing location quickly, but you can change the location interactively
+while storing the note.
 
    When you call `M-x remember' (or `M-x org-remember') to remember
 something, org will prompt for a key to select the template (if you have
@@ -2244,8 +2257,7 @@ buffer-start   <RET>       as level 2 heading at end of file
 on headline    <RET>       as sublevel of the heading at cursor
                <left>/<right>as same level, before/after current heading
 not on         <RET>       at cursor position, level taken from context.
-headline                             Or use prefix arg to specify level
-                           manually.
+headline                   
 
    So a fast way to store the note to its default location is to press
 `C-c C-c <RET> <RET>'.  Even shorter would be `C-u C-c C-c', which does
@@ -3636,15 +3648,17 @@ one entry marked with a todo keyword TODO or NEXT or NEXTACTION.
 projects with a tag PROJECT, and that you use a todo keyword MAYBE to
 indicate a project that should not be considered yet.  Lets further
 assume that the todo keyword DONE marks finished projects, and that NEXT
-and TODO indicate next actions.  Finally, the tag @SHOP indicates
-shopping and is a next action even without the NEXT tag.  In this case
-you would start by identifying eligible projects with a tags/todo match
-`+PROJECT/-MAYBE-DONE', and then check for TODO, NEXT and @SHOP in the
-subtree to identify projects that are not stuck.  The correct
-customization for this is
+and TODO indicate next actions.  The tag @SHOP indicates shopping and
+is a next action even without the NEXT tag.  Finally, if the project
+contains the special word IGNORE anywhere, it should not be listed
+either.  In this case you would start by identifying eligible projects
+with a tags/todo match `+PROJECT/-MAYBE-DONE', and then check for TODO,
+NEXT, @SHOP, and IGNORE in the subtree to identify projects that are
+not stuck.  The correct customization for this is
 
      (setq org-stuck-projects
-           ("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@SHOP")))
+           '("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@SHOP")
+                                    "\\<IGNORE\\>"))
 
 
 File: org,  Node: Presentation and sorting,  Next: Agenda commands,  Prev: Built-in agenda views,  Up: Agenda views
@@ -5242,6 +5256,8 @@ file is visited again in a new Emacs session.
           nologging        don't record when items are marked DONE
           lognotedone      record timestamp and a note when DONE
           lognotestate     record timestamp, note when TODO state changes
+          logrepeat        record a not when re-instating a repeating item
+          nologrepeat      do not record when re-instating repeating item
           lognoteclock-out record timestamp and a note when clocking out
      Here are the options for hiding leading stars in outline headings.
      The corresponding variables are `org-hide-leading-stars' and
@@ -5560,7 +5576,6 @@ File: org,  Node: Conflicts,  Prev: Cooperation,  Up: Interaction
 
           S-UP    -> M-p             S-DOWN  -> M-n
           S-LEFT  -> M--             S-RIGHT -> M-+
-          S-RET   -> C-S-RET
 
      Yes, these are unfortunately more difficult to remember.  If you
      want to have other replacement keys, look at the variable
@@ -6255,8 +6270,8 @@ Index
 * completion, of TODO keywords:          Workflow states.     (line  15)
 * constants, in calculations:            References.          (line  82)
 * constants.el:                          Cooperation.         (line  14)
-* constcgs, STARTUP keyword:             In-buffer settings.  (line  52)
-* constSI, STARTUP keyword:              In-buffer settings.  (line  52)
+* constcgs, STARTUP keyword:             In-buffer settings.  (line  54)
+* constSI, STARTUP keyword:              In-buffer settings.  (line  54)
 * content, STARTUP keyword:              In-buffer settings.  (line  22)
 * contents, global visibility state:     Visibility cycling.  (line  22)
 * copying, of subtrees:                  Structure editing.   (line   6)
@@ -6266,7 +6281,7 @@ Index
 * custom date/time format:               Custom time format.  (line   6)
 * custom search strings:                 Custom searches.     (line   6)
 * customization:                         Customization.       (line   6)
-* customtime, STARTUP keyword:           In-buffer settings.  (line  49)
+* customtime, STARTUP keyword:           In-buffer settings.  (line  51)
 * cutting, of subtrees:                  Structure editing.   (line   6)
 * cycling, of TODO states:               TODO basics.         (line  13)
 * cycling, visibility:                   Visibility cycling.  (line   6)
@@ -6299,7 +6314,7 @@ Index
 * emphasized text:                       Export options.      (line  25)
 * enhancing text:                        Enhancing text.      (line   6)
 * evaluate time range:                   Creating timestamps. (line  64)
-* even, STARTUP keyword:                 In-buffer settings.  (line  42)
+* even, STARTUP keyword:                 In-buffer settings.  (line  44)
 * exporting:                             Exporting.           (line   6)
 * exporting, not:                        Comment lines.       (line   6)
 * extended TODO keywords:                TODO extensions.     (line   6)
@@ -6323,7 +6338,7 @@ Index
 * folding, sparse trees:                 Sparse trees.        (line   6)
 * following links:                       Handling links.      (line  56)
 * format specifier:                      Formula syntax for Calc.
-                                                              (line  15)
+                                                              (line  14)
 * format, of links:                      Link format.         (line   6)
 * formula debugging:                     Editing and debugging formulas.
                                                               (line  97)
@@ -6349,7 +6364,7 @@ Index
 * headline, promotion and demotion:      Structure editing.   (line   6)
 * headlines:                             Headlines.           (line   6)
 * hide text:                             Visibility cycling.  (line   6)
-* hidestars, STARTUP keyword:            In-buffer settings.  (line  42)
+* hidestars, STARTUP keyword:            In-buffer settings.  (line  44)
 * hiding leading stars:                  Clean view.          (line   6)
 * history:                               History and Acknowledgments.
                                                               (line   6)
@@ -6408,6 +6423,7 @@ Index
 * lognoteclock-out, STARTUP keyword:     In-buffer settings.  (line  33)
 * lognotedone, STARTUP keyword:          In-buffer settings.  (line  33)
 * lognotestate, STARTUP keyword:         In-buffer settings.  (line  33)
+* logrepeat, STARTUP keyword:            In-buffer settings.  (line  33)
 * maintainer:                            Feedback.            (line   6)
 * mark ring:                             Handling links.      (line  79)
 * marking characters, tables:            Advanced features.   (line  40)
@@ -6418,7 +6434,7 @@ Index
 * MH-E links:                            External links.      (line   6)
 * minor mode for tables:                 orgtbl-mode.         (line   6)
 * mode, for calc:                        Formula syntax for Calc.
-                                                              (line  15)
+                                                              (line  14)
 * motion commands in agenda:             Agenda commands.     (line  19)
 * motion, between headlines:             Motion.              (line   6)
 * name, of column or field:              References.          (line  82)
@@ -6427,8 +6443,9 @@ Index
 * narrow columns in tables:              Narrow columns.      (line   6)
 * noalign, STARTUP keyword:              In-buffer settings.  (line  29)
 * nologging, STARTUP keyword:            In-buffer settings.  (line  33)
+* nologrepeat, STARTUP keyword:          In-buffer settings.  (line  33)
 * occur, command:                        Sparse trees.        (line   6)
-* odd, STARTUP keyword:                  In-buffer settings.  (line  42)
+* odd, STARTUP keyword:                  In-buffer settings.  (line  44)
 * option keyword completion:             Completion.          (line   6)
 * options, for custom agenda views:      Setting Options.     (line   6)
 * options, for customization:            Customization.       (line   6)
@@ -6500,7 +6517,7 @@ Index
 * show all, global visibility state:     Visibility cycling.  (line  22)
 * show hidden text:                      Visibility cycling.  (line   6)
 * showall, STARTUP keyword:              In-buffer settings.  (line  22)
-* showstars, STARTUP keyword:            In-buffer settings.  (line  42)
+* showstars, STARTUP keyword:            In-buffer settings.  (line  44)
 * sorting, of agenda items:              Sorting of agenda items.
                                                               (line   6)
 * sparse tree, for deadlines:            Creating timestamps. (line  39)
@@ -6604,7 +6621,7 @@ Index
 * VM links:                              External links.      (line   6)
 * WANDERLUST links:                      External links.      (line   6)
 * weekly agenda:                         Weekly/Daily agenda. (line   6)
-* windmove.el:                           Conflicts.           (line  33)
+* windmove.el:                           Conflicts.           (line  32)
 * workflow states as TODO keywords:      Workflow states.     (line   6)
 * XEmacs:                                Installation.        (line   6)
 * XOXO export:                           XOXO export.         (line   6)
@@ -6952,178 +6969,179 @@ Node: Feedback17587
 Node: Document structure19663
 Node: Outlines20437
 Node: Headlines21097
-Node: Visibility cycling21720
-Ref: Visibility cycling-Footnote-123934
-Ref: Visibility cycling-Footnote-223992
-Ref: Visibility cycling-Footnote-324042
-Node: Motion24312
-Node: Structure editing25266
-Node: Archiving28092
-Node: ARCHIVE tag28650
-Node: Moving subtrees30443
-Node: Sparse trees31754
-Ref: Sparse trees-Footnote-133886
-Ref: Sparse trees-Footnote-234068
-Node: Plain lists34183
-Ref: Plain lists-Footnote-137952
-Ref: Plain lists-Footnote-238310
-Node: Tables38494
-Node: Built-in table editor39008
-Node: Narrow columns46027
-Ref: Narrow columns-Footnote-147960
-Node: orgtbl-mode48006
-Node: The spreadsheet48810
-Node: References49897
-Ref: References-Footnote-154026
-Node: Formula syntax for Calc54315
-Node: Formula syntax for Lisp56781
-Node: Field formulas58050
-Node: Column formulas59358
-Node: Editing and debugging formulas60957
-Node: Updating the table65110
-Node: Advanced features66145
-Node: Hyperlinks70670
-Node: Link format71443
-Node: Internal links72736
-Ref: Internal links-Footnote-174661
-Node: Radio targets74793
-Node: External links75484
-Node: Handling links77888
-Ref: Handling links-Footnote-182998
-Ref: Handling links-Footnote-283235
-Node: Link abbreviations83309
-Node: Search options84988
-Ref: Search options-Footnote-186768
-Node: Custom searches86849
-Node: Remember87897
-Node: Setting up remember88884
-Node: Remember templates89466
-Ref: Remember templates-Footnote-192732
-Node: Storing notes92830
-Node: TODO items94798
-Node: TODO basics95781
-Node: TODO extensions97480
-Node: Workflow states98299
-Ref: Workflow states-Footnote-199474
-Node: TODO types99567
-Ref: TODO types-Footnote-1101150
-Node: Multiple sets in one file101232
-Node: Per file keywords102843
-Ref: Per file keywords-Footnote-1104132
-Node: Priorities104333
-Node: Breaking down tasks105579
-Ref: Breaking down tasks-Footnote-1106099
-Node: Checkboxes106195
-Node: Timestamps108950
-Node: Time stamps109484
-Ref: Time stamps-Footnote-1112978
-Ref: Time stamps-Footnote-2113094
-Node: Creating timestamps113249
-Node: The date/time prompt115907
-Ref: The date/time prompt-Footnote-1117868
-Node: Custom time format117974
-Node: Repeating items119532
-Node: Progress logging121342
-Node: Closing items121988
-Ref: Closing items-Footnote-1122922
-Ref: Closing items-Footnote-2122991
-Node: Tracking TODO state changes123064
-Node: Clocking work time123920
-Ref: Clocking work time-Footnote-1127566
-Ref: Clocking work time-Footnote-2127644
-Node: Tags127770
-Node: Tag inheritance128532
-Node: Setting tags129469
-Ref: Setting tags-Footnote-1133992
-Ref: Setting tags-Footnote-2134104
-Node: Tag searches134187
-Node: Agenda views136898
-Node: Agenda files138843
-Ref: Agenda files-Footnote-1139809
-Ref: Agenda files-Footnote-2139958
-Node: Agenda dispatcher140151
-Node: Built-in agenda views141842
-Node: Weekly/Daily agenda142420
-Node: Global TODO list144549
-Node: Matching headline tags146821
-Node: Timeline147892
-Node: Stuck projects148558
-Node: Presentation and sorting150257
-Node: Categories151048
-Node: Time-of-day specifications151712
-Node: Sorting of agenda items153683
-Node: Agenda commands154965
-Node: Custom agenda views161694
-Node: Storing searches162369
-Node: Block agenda164281
-Node: Setting Options165511
-Node: Batch processing168223
-Node: Embedded LaTeX169353
-Ref: Embedded LaTeX-Footnote-1170445
-Node: Math symbols170635
-Node: Subscripts and Superscripts171400
-Node: LaTeX fragments172244
-Ref: LaTeX fragments-Footnote-1174478
-Node: Processing LaTeX fragments174740
-Node: CDLaTeX mode175686
-Ref: CDLaTeX mode-Footnote-1178170
-Node: Exporting178318
-Node: ASCII export179632
-Node: HTML export180922
-Node: Export commands181541
-Node: Quoting HTML tags182352
-Node: Links182982
-Node: Images183679
-Ref: Images-Footnote-1184550
-Node: CSS support184611
-Ref: CSS support-Footnote-1185930
-Node: XOXO export186043
-Node: iCalendar export186482
-Node: Text interpretation187701
-Node: Comment lines188243
-Node: Initial text188638
-Node: Enhancing text190312
-Ref: Enhancing text-Footnote-1192174
-Node: Export options192264
-Node: Publishing194157
-Ref: Publishing-Footnote-1194953
-Node: Configuration195149
-Node: Project alist195867
-Node: Sources and destinations196933
-Node: Selecting files197663
-Node: Publishing action198411
-Node: Publishing options199644
-Node: Publishing links201796
-Node: Project page index203309
-Node: Sample configuration204087
-Node: Simple example204579
-Node: Complex example205252
-Node: Triggering publication207328
-Node: Miscellaneous208013
-Node: Completion208647
-Node: Customization210118
-Node: In-buffer settings210701
-Node: The very busy C-c C-c key215178
-Node: Clean view216822
-Node: TTY keys219399
-Node: Interaction221009
-Node: Cooperation221406
-Node: Conflicts224148
-Node: Bugs225740
-Node: Extensions and Hacking227236
-Node: Extensions227832
-Node: Tables in arbitrary syntax229779
-Node: Radio tables230856
-Node: A LaTeX example233359
-Ref: A LaTeX example-Footnote-1237005
-Ref: A LaTeX example-Footnote-2237153
-Node: Translator functions237588
-Ref: Translator functions-Footnote-1240697
-Node: Dynamic blocks240785
-Node: Special agenda views242757
-Ref: Special agenda views-Footnote-1245036
-Node: History and Acknowledgments245296
-Node: Index251156
-Node: Key Index282137
+Ref: Headlines-Footnote-122105
+Node: Visibility cycling22204
+Ref: Visibility cycling-Footnote-124418
+Ref: Visibility cycling-Footnote-224476
+Ref: Visibility cycling-Footnote-324526
+Node: Motion24796
+Node: Structure editing25750
+Node: Archiving28576
+Node: ARCHIVE tag29134
+Node: Moving subtrees30927
+Node: Sparse trees32238
+Ref: Sparse trees-Footnote-134370
+Ref: Sparse trees-Footnote-234552
+Node: Plain lists34667
+Ref: Plain lists-Footnote-138436
+Ref: Plain lists-Footnote-238794
+Node: Tables38978
+Node: Built-in table editor39492
+Node: Narrow columns46511
+Ref: Narrow columns-Footnote-148444
+Node: orgtbl-mode48490
+Node: The spreadsheet49294
+Node: References50381
+Ref: References-Footnote-154510
+Node: Formula syntax for Calc54799
+Node: Formula syntax for Lisp57256
+Node: Field formulas58525
+Node: Column formulas59833
+Node: Editing and debugging formulas61432
+Node: Updating the table65585
+Node: Advanced features66620
+Node: Hyperlinks71145
+Node: Link format71918
+Node: Internal links73211
+Ref: Internal links-Footnote-175136
+Node: Radio targets75268
+Node: External links75959
+Node: Handling links78363
+Ref: Handling links-Footnote-183473
+Ref: Handling links-Footnote-283710
+Node: Link abbreviations83784
+Node: Search options85463
+Ref: Search options-Footnote-187243
+Node: Custom searches87324
+Node: Remember88372
+Node: Setting up remember89359
+Node: Remember templates89941
+Ref: Remember templates-Footnote-193233
+Node: Storing notes93331
+Node: TODO items95218
+Node: TODO basics96201
+Node: TODO extensions97900
+Node: Workflow states98719
+Ref: Workflow states-Footnote-199894
+Node: TODO types99987
+Ref: TODO types-Footnote-1101570
+Node: Multiple sets in one file101652
+Node: Per file keywords103263
+Ref: Per file keywords-Footnote-1104552
+Node: Priorities104753
+Node: Breaking down tasks105999
+Ref: Breaking down tasks-Footnote-1106519
+Node: Checkboxes106615
+Node: Timestamps109370
+Node: Time stamps109904
+Ref: Time stamps-Footnote-1113398
+Ref: Time stamps-Footnote-2113514
+Node: Creating timestamps113669
+Node: The date/time prompt116327
+Ref: The date/time prompt-Footnote-1118288
+Node: Custom time format118394
+Node: Repeating items119952
+Node: Progress logging121762
+Node: Closing items122408
+Ref: Closing items-Footnote-1123342
+Ref: Closing items-Footnote-2123411
+Node: Tracking TODO state changes123484
+Node: Clocking work time124340
+Ref: Clocking work time-Footnote-1127986
+Ref: Clocking work time-Footnote-2128064
+Node: Tags128190
+Node: Tag inheritance128952
+Node: Setting tags129889
+Ref: Setting tags-Footnote-1134412
+Ref: Setting tags-Footnote-2134524
+Node: Tag searches134607
+Node: Agenda views137318
+Node: Agenda files139263
+Ref: Agenda files-Footnote-1140229
+Ref: Agenda files-Footnote-2140378
+Node: Agenda dispatcher140571
+Node: Built-in agenda views142262
+Node: Weekly/Daily agenda142840
+Node: Global TODO list144969
+Node: Matching headline tags147241
+Node: Timeline148312
+Node: Stuck projects148978
+Node: Presentation and sorting150829
+Node: Categories151620
+Node: Time-of-day specifications152284
+Node: Sorting of agenda items154255
+Node: Agenda commands155537
+Node: Custom agenda views162266
+Node: Storing searches162941
+Node: Block agenda164853
+Node: Setting Options166083
+Node: Batch processing168795
+Node: Embedded LaTeX169925
+Ref: Embedded LaTeX-Footnote-1171017
+Node: Math symbols171207
+Node: Subscripts and Superscripts171972
+Node: LaTeX fragments172816
+Ref: LaTeX fragments-Footnote-1175050
+Node: Processing LaTeX fragments175312
+Node: CDLaTeX mode176258
+Ref: CDLaTeX mode-Footnote-1178742
+Node: Exporting178890
+Node: ASCII export180204
+Node: HTML export181494
+Node: Export commands182113
+Node: Quoting HTML tags182924
+Node: Links183554
+Node: Images184251
+Ref: Images-Footnote-1185122
+Node: CSS support185183
+Ref: CSS support-Footnote-1186502
+Node: XOXO export186615
+Node: iCalendar export187054
+Node: Text interpretation188273
+Node: Comment lines188815
+Node: Initial text189210
+Node: Enhancing text190884
+Ref: Enhancing text-Footnote-1192746
+Node: Export options192836
+Node: Publishing194729
+Ref: Publishing-Footnote-1195525
+Node: Configuration195721
+Node: Project alist196439
+Node: Sources and destinations197505
+Node: Selecting files198235
+Node: Publishing action198983
+Node: Publishing options200216
+Node: Publishing links202368
+Node: Project page index203881
+Node: Sample configuration204659
+Node: Simple example205151
+Node: Complex example205824
+Node: Triggering publication207900
+Node: Miscellaneous208585
+Node: Completion209219
+Node: Customization210690
+Node: In-buffer settings211273
+Node: The very busy C-c C-c key215899
+Node: Clean view217543
+Node: TTY keys220120
+Node: Interaction221730
+Node: Cooperation222127
+Node: Conflicts224869
+Node: Bugs226432
+Node: Extensions and Hacking227928
+Node: Extensions228524
+Node: Tables in arbitrary syntax230471
+Node: Radio tables231548
+Node: A LaTeX example234051
+Ref: A LaTeX example-Footnote-1237697
+Ref: A LaTeX example-Footnote-2237845
+Node: Translator functions238280
+Ref: Translator functions-Footnote-1241389
+Node: Dynamic blocks241477
+Node: Special agenda views243449
+Ref: Special agenda views-Footnote-1245728
+Node: History and Acknowledgments245988
+Node: Index251848
+Node: Key Index282975
 
 End Tag Table
