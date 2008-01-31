@@ -1,6 +1,22 @@
+2007-11-30  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-imenu-depth): New option.
+	(org-imenu-markers): New variable.
+	(org-imenu-new-marker, org-imenu-get-tree)
+	(org-speedbar-set-agenda-restriction): New functions.
+	(org-agenda-set-restriction-lock)
+	(org-agenda-remove-restriction-lock, org-agenda-maybe-redo): New
+	functions.
+	(org-agenda-restriction-lock): New face.
+	(org-agenda-restriction-lock-overlay)
+	(org-speedbar-restriction-lock-overlay): New variables.
+	(org-open-at-point): Removed obsolete way to do redirection in
+	shell links.
+	(org-imenu-and-speedbar): New customization group.
+
 2007-11-27  Carsten Dominik  <dominik@science.uva.nl>
 
-	* norg.el (org-entry-properties): Return keyword-less time strings.
+	* org.el (org-entry-properties): Return keyword-less time strings.
 	(org-clock-heading-function): New option.
 	(org-clock-in): Use `org-clock-heading-function'.
 

@@ -1,9 +1,9 @@
-\input texinfo
+]\input texinfo
 @c %**start of header
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.15
+@set VERSION 5.16
 @set DATE December 2007
 
 @dircategory Emacs
@@ -4642,12 +4642,13 @@ window configuration is restored when the agenda exits:
 @cindex agenda files
 @cindex files for agenda
 
-The information to be shown is collected from all @emph{agenda files},
-the files listed in the variable @code{org-agenda-files}@footnote{If the
-value of that variable is not a list, but a single file name, then the
-list of agenda files will be maintained in that external file.}. If a
-directory is part of this list, all files with the extension @file{.org}
-in this directory will be part of the list.
+The information to be shown is normally collected from all @emph{agenda
+files}, the files listed in the variable
+@code{org-agenda-files}@footnote{If the value of that variable is not a
+list, but a single file name, then the list of agenda files will be
+maintained in that external file.}. If a directory is part of this list,
+all files with the extension @file{.org} in this directory will be part
+of the list.
 
 Thus even if you only work with a single Org-mode file, this file should
 be put into that list@footnote{When using the dispatcher, pressing
@@ -4676,6 +4677,42 @@ Cycle through agenda file list, visiting one file after the other.
 @noindent
 The Org menu contains the current list of files and can be used
 to visit any of them.
+
+If you would like to focus the agenda temporarily onto a file not in
+this list, or onto just one file in the list or even only a subtree in a
+file, this can be done in different ways.  For a single agenda command,
+you may press @kbd{<} once or several times in the dispatcher
+(@pxref{Agenda dispatcher}).  To restrict the agenda scope for an
+extended period, use the following commands:
+
+@table @kbd
+@kindex C-c C-x <
+@item C-c C-x <
+Permanently restrict the agenda to the current subtree.  When with a
+prefix argument, or with the cursor before the first headline in a file,
+the agenda scope is set to the entire file.  This restriction remains in
+effect until removed with @kbd{C-c C-x >}, or by typing either @kbd{<}
+or @kbd{>} in the agenda dispatcher.  If there is a window displaying an
+agenda view, the new restriction takes effect immediately.
+@kindex C-c C-x <
+@item C-c C-x <
+Remove the permanent restriction created by @kbd{C-c C-x <}.
+@end table
+
+@noindent
+When working with @file{Speedbar}, you can use the following commands in
+the speedbar frame:
+@table @kbd
+@kindex <
+@item < @r{in the speedbar frame}
+Permanently restrict the agenda to the item at the cursor in the
+speedbar frame, either an Org-mode file or a subtree in such a file.
+If there is a window displaying an agenda view, the new restriction takes
+effect immediately.
+@kindex <
+@item > @r{in the speedbar frame}
+Lift the restriction again.
+@end table
 
 @node Agenda dispatcher, Built-in agenda views, Agenda files, Agenda views
 @section The agenda dispatcher
@@ -7514,10 +7551,27 @@ setup.  See the installation instructions in the file
 @cindex @file{cdlatex.el}
 Org-mode can make use of the cdlatex package to efficiently enter
 La@TeX{} fragments into Org-mode files. See @ref{CDLaTeX mode}.
+@item @file{imenu.el} by Ake Stenhoff and Lars Lindberg
+@cindex @file{imenu.el}
+Imenu allows menu access to an index of items in a file.  Org-mode
+supports imenu - all you need to do to get the index is the following:
+@lisp
+(add-hook 'org-mode-hook 
+          (lambda () 'imenu-add-to-menubar "Imenu"))
+@end lisp
+By default the index is two levels deep - you can modify the depth using
+the option @code{org-imenu-depth}.
 @item @file{remember.el} by John Wiegley
 @cindex @file{remember.el}
 Org mode cooperates with remember, see @ref{Remember}.
 @file{Remember.el} is not part of Emacs, find it on the web.
+@item @file{speedbar.el} by Eric M. Ludlam
+@cindex @file{speedbar.el}
+Speedbar is a package that creates a special frame displaying files and
+index items in files.  Org-mode supports speedbar and allows you to
+drill into Org-mode files directly from the speedbar.  It also allows to
+restrict the scope of agenda commands to a file or a subtree by using
+the command @kbd{<} in the speedbar frame.
 @cindex @file{table.el}
 @item @file{table.el} by Takaaki Ota
 @kindex C-c C-c
@@ -8391,13 +8445,16 @@ provided frequent feedback and some patches.
 @item
 @i{Jason F. McBrayer} suggested agenda export to CSV format.
 @item
+@i{Max Mikhanosha} came up with the idea of refiling.
+@item
 @i{Dmitri Minaev} sent a patch to set priority limits on a per-file
 basis.
 @item
 @i{Stefan Monnier} provided a patch to keep the Emacs-Lisp compiler
 happy.
 @item
-@i{Rick Moynihan} proposed to allow multiple TODO sequences in a file.
+@i{Rick Moynihan} proposed to allow multiple TODO sequences in a file
+and to be able to quickly restrict the agenda to a subtree.
 @item
 @i{Todd Neal} provided patches for links to Info files and elisp forms.
 @item

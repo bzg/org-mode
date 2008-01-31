@@ -1,11 +1,11 @@
-;; org.el --- Outline-based notes management and organizer
+;;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
 ;; Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.15a
+;; Version: 5.16
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.15a"
+(defconst org-version "5.16"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -797,6 +797,17 @@ information."
 	  (const :tag "Inherited tags" itags)
 	  (const :tag "Local tags" ltags)))
 
+(defgroup org-imenu-and-speedbar nil
+  "Options concerning imenu and speedbar in Org-mode."
+  :tag "Org Imenu and Speedbar"
+  :group 'org-structure)
+
+(defcustom org-imenu-depth 2
+  "The maximum level for Imenu access to Org-mode headlines.
+This also applied for speedbar access."
+  :group 'org-imenu-and-speedbar
+  :type 'number)
+
 (defgroup org-table nil
   "Options concerning tables in Org-mode."
   :tag "Org Table"
@@ -1061,9 +1072,12 @@ links in Org-mode buffers can have an optional tag after a double colon, e.g.
      [[linkkey:tag][description]]
 
 If REPLACE is a string, the tag will simply be appended to create the link.
-If the string contains \"%s\", the tag will be inserted there.  REPLACE may
-also be a function that will be called with the tag as the only argument to
-create the link.  See the manual for examples."
+If the string contains \"%s\", the tag will be inserted there.
+
+REPLACE may also be a function that will be called with the tag as the
+only argument to create the link, which should be returned as a string.
+
+See the manual for examples."
   :group 'org-link
   :type 'alist)
 
@@ -1522,6 +1536,37 @@ are matched against file names, and values."
 	  (const :tag "Reverse never" nil)
 	  (repeat :tag "By file name regexp"
 		  (cons regexp boolean))))
+
+(defcustom org-refile-targets '((nil . (:level . 1)))
+  "Targets for refiling entries with \\[org-refile].
+This is list of cons cells.  Each cell contains:
+- a specification of the files to be considered, either a list of files,
+  or a symbol whose function or value fields will be used to retrieve
+  a file name or a list of file names.  Nil means, refile to a different
+  heading in the current buffer.
+- A specification of how to find candidate refile targets.  This may be
+  any of
+  - a cons cell (:tag . \"TAG\") to identify refile targes by a tag.
+    This tag has to be present in all target headlines, inheritance will
+    not be considered.
+  - a cons cell (:todo . \"KEYWORD\" to identify refile targets by
+    todo keyword.
+  - a cons cell (:regexp . \"REGEXP\") with a regular expression matching
+    headlines that are refiling targets.
+  - a cons cell (:level . N).  Any headline of level N is considered a target."
+;; FIXME: what if there are a var and func with same name???
+  :group 'org
+  :type '(repeat
+	  (cons
+	   (choice :value org-agenda-files
+		   (const :tag "All agenda files" org-agenda-files)
+		   (const :tag "Current buffer" nil)
+		   (function) (variable) (file))
+	   (choice :tag "Identify target headline by"
+	    (cons :tag "Specific tag" (const :tag) (string))
+	    (cons :tag "TODO keyword" (const :todo) (string))
+	    (cons :tag "Regular expression" (const :regexp) (regexp))
+	    (cons :tag "Level number" (const :level) (integer))))))
 
 (defgroup org-todo nil
   "Options concerning TODO items in Org-mode."
@@ -3644,6 +3689,7 @@ any other entries, and any resulting duplicates will be removed entirely."
 	 (t (or (assoc (car e) r) (push e r)))))
       (nreverse r)))
    (t specs)))
+(put 'org-compatible-face 'lisp-indent-function 1)
 
 (defface org-hide
   '((((background light)) (:foreground "white"))
@@ -3654,108 +3700,98 @@ color of the frame."
   :group 'org-faces)
 
 (defface org-level-1 ;; font-lock-function-name-face
-  (org-compatible-face
-   'outline-1
-   '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 8)) (:foreground "blue" :bold t))
-     (t (:bold t))))
+  (org-compatible-face 'outline-1
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+      (t (:bold t))))
   "Face used for level 1 headlines."
   :group 'org-faces)
 
 (defface org-level-2 ;; font-lock-variable-name-face
-  (org-compatible-face
-   'outline-2
-   '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))
-     (((class color) (min-colors 16) (background dark))  (:foreground "LightGoldenrod"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "yellow"))
-     (((class color) (min-colors 8)  (background dark))  (:foreground "yellow" :bold t))
-     (t (:bold t))))
+  (org-compatible-face 'outline-2
+    '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))
+      (((class color) (min-colors 16) (background dark))  (:foreground "LightGoldenrod"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "yellow"))
+      (((class color) (min-colors 8)  (background dark))  (:foreground "yellow" :bold t))
+      (t (:bold t))))
   "Face used for level 2 headlines."
   :group 'org-faces)
 
 (defface org-level-3 ;; font-lock-keyword-face
-  (org-compatible-face
-   'outline-3
-   '((((class color) (min-colors 88) (background light)) (:foreground "Purple"))
-     (((class color) (min-colors 88) (background dark))  (:foreground "Cyan1"))
-     (((class color) (min-colors 16) (background light)) (:foreground "Purple"))
-     (((class color) (min-colors 16) (background dark))  (:foreground "Cyan"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "purple" :bold t))
-     (((class color) (min-colors 8)  (background dark))  (:foreground "cyan" :bold t))
-     (t (:bold t))))
+  (org-compatible-face 'outline-3
+    '((((class color) (min-colors 88) (background light)) (:foreground "Purple"))
+      (((class color) (min-colors 88) (background dark))  (:foreground "Cyan1"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Purple"))
+      (((class color) (min-colors 16) (background dark))  (:foreground "Cyan"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "purple" :bold t))
+      (((class color) (min-colors 8)  (background dark))  (:foreground "cyan" :bold t))
+      (t (:bold t))))
   "Face used for level 3 headlines."
   :group 'org-faces)
 
 (defface org-level-4   ;; font-lock-comment-face
-  (org-compatible-face
-   'outline-4
-   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
-     (((class color) (min-colors 88) (background dark))  (:foreground "chocolate1"))
-     (((class color) (min-colors 16) (background light)) (:foreground "red"))
-     (((class color) (min-colors 16) (background dark))  (:foreground "red1"))
-     (((class color) (min-colors 8) (background light))  (:foreground "red" :bold t))
-     (((class color) (min-colors 8) (background dark))   (:foreground "red" :bold t))
-     (t (:bold t))))
+  (org-compatible-face 'outline-4
+    '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
+      (((class color) (min-colors 88) (background dark))  (:foreground "chocolate1"))
+      (((class color) (min-colors 16) (background light)) (:foreground "red"))
+      (((class color) (min-colors 16) (background dark))  (:foreground "red1"))
+      (((class color) (min-colors 8) (background light))  (:foreground "red" :bold t))
+      (((class color) (min-colors 8) (background dark))   (:foreground "red" :bold t))
+      (t (:bold t))))
   "Face used for level 4 headlines."
   :group 'org-faces)
 
 (defface org-level-5 ;; font-lock-type-face
-  (org-compatible-face
-   'outline-5
-   '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen"))
-     (((class color) (min-colors 8)) (:foreground "green"))))
+  (org-compatible-face 'outline-5
+    '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen"))
+      (((class color) (min-colors 8)) (:foreground "green"))))
   "Face used for level 5 headlines."
   :group 'org-faces)
 
 (defface org-level-6 ;; font-lock-constant-face
-  (org-compatible-face
-   'outline-6
-   '((((class color) (min-colors 16) (background light)) (:foreground "CadetBlue"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "Aquamarine"))
-     (((class color) (min-colors 8)) (:foreground "magenta"))))
+  (org-compatible-face 'outline-6
+    '((((class color) (min-colors 16) (background light)) (:foreground "CadetBlue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "Aquamarine"))
+      (((class color) (min-colors 8)) (:foreground "magenta"))))
   "Face used for level 6 headlines."
   :group 'org-faces)
 
 (defface org-level-7 ;; font-lock-builtin-face
-  (org-compatible-face
-   'outline-7
-   '((((class color) (min-colors 16) (background light)) (:foreground "Orchid"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSteelBlue"))
-     (((class color) (min-colors 8)) (:foreground "blue"))))
+  (org-compatible-face 'outline-7
+    '((((class color) (min-colors 16) (background light)) (:foreground "Orchid"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSteelBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue"))))
   "Face used for level 7 headlines."
   :group 'org-faces)
 
 (defface org-level-8 ;; font-lock-string-face
-  (org-compatible-face
-   'outline-8
-   '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
-     (((class color) (min-colors 8)) (:foreground "green"))))
+  (org-compatible-face 'outline-8
+    '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
+      (((class color) (min-colors 8)) (:foreground "green"))))
   "Face used for level 8 headlines."
   :group 'org-faces)
 
 (defface org-special-keyword ;; font-lock-string-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
-     (t (:italic t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
+      (t (:italic t))))
   "Face used for special keywords."
   :group 'org-faces)
 
 (defface org-drawer ;; font-lock-function-name-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 8)) (:foreground "blue" :bold t))
-     (t (:bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+      (t (:bold t))))
   "Face used for drawers."
   :group 'org-faces)
 
@@ -3764,15 +3800,14 @@ color of the frame."
   :group 'org-faces)
 
 (defface org-column
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light))
-      (:background "grey90"))
-     (((class color) (min-colors 16) (background dark))
-      (:background "grey30"))
-     (((class color) (min-colors 8))
-      (:background "cyan" :foreground "black"))
-     (t (:inverse-video t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light))
+       (:background "grey90"))
+      (((class color) (min-colors 16) (background dark))
+       (:background "grey30"))
+      (((class color) (min-colors 8))
+       (:background "cyan" :foreground "black"))
+      (t (:inverse-video t))))
   "Face for column display of entry properties."
   :group 'org-faces)
 
@@ -3783,29 +3818,27 @@ color of the frame."
 		      :family (face-attribute 'default :family)))
 
 (defface org-warning
-  (org-compatible-face
-   'font-lock-warning-face
-   '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))
-     (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :bold t))
-     (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold t))
-     (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold t))
-     (t (:bold t))))
+  (org-compatible-face 'font-lock-warning-face
+    '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))
+      (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :bold t))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold t))
+      (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold t))
+      (t (:bold t))))
   "Face for deadlines and TODO keywords."
   :group 'org-faces)
 
 (defface org-archived    ; similar to shadow
-  (org-compatible-face
-   'shadow
-   '((((class color grayscale) (min-colors 88) (background light))
-      (:foreground "grey50"))
-     (((class color grayscale) (min-colors 88) (background dark))
-      (:foreground "grey70"))
-     (((class color) (min-colors 8) (background light))
-      (:foreground "green"))
-     (((class color) (min-colors 8) (background dark))
-      (:foreground "yellow"))))
-   "Face for headline with the ARCHIVE tag."
-   :group 'org-faces)
+  (org-compatible-face 'shadow
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50"))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70"))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green"))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow"))))
+  "Face for headline with the ARCHIVE tag."
+  :group 'org-faces)
 
 (defface org-link
   '((((class color) (background light)) (:foreground "Purple" :underline t))
@@ -3848,32 +3881,29 @@ color of the frame."
   :group 'org-faces)
 
 (defface org-todo ; font-lock-warning-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))
-     (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :bold t))
-     (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold t))
-     (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold t))
-     (t (:inverse-video t :bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))
+      (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :bold t))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold t))
+      (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold t))
+      (t (:inverse-video t :bold t))))
   "Face for TODO keywords."
   :group 'org-faces)
 
 (defface org-done ;; font-lock-type-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen" :bold t))
-     (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen" :bold t))
-     (((class color) (min-colors 8)) (:foreground "green"))
-     (t (:bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen" :bold t))
+      (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen" :bold t))
+      (((class color) (min-colors 8)) (:foreground "green"))
+      (t (:bold t))))
   "Face used for todo keywords that indicate DONE items."
   :group 'org-faces)
 
 (defface org-headline-done ;; font-lock-string-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
-     (((class color) (min-colors 8)  (background light)) (:bold nil))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
+      (((class color) (min-colors 8)  (background light)) (:bold nil))))
   "Face used to indicate that a headline is DONE.
 This face is only used if `org-fontify-done-headline' is set.  If applies
 to the part of the headline after the DONE keyword."
@@ -3892,99 +3922,91 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
 	   (sexp :tag "face"))))
 
 (defface org-table ;; font-lock-function-name-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "blue"))
-     (((class color) (min-colors 8)  (background dark)))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "blue"))
+      (((class color) (min-colors 8)  (background dark)))))
   "Face used for tables."
   :group 'org-faces)
 
 (defface org-formula
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "red"))
-     (((class color) (min-colors 8)  (background dark)) (:foreground "red"))
-     (t (:bold t :italic t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"))
+      (((class color) (min-colors 8)  (background dark)) (:foreground "red"))
+      (t (:bold t :italic t))))
   "Face for formulas."
   :group 'org-faces)
 
 (defface org-code
-  (org-compatible-face
-   nil
-   '((((class color grayscale) (min-colors 88) (background light))
-      (:foreground "grey50"))
-     (((class color grayscale) (min-colors 88) (background dark))
-      (:foreground "grey70"))
-     (((class color) (min-colors 8) (background light))
-      (:foreground "green"))
-     (((class color) (min-colors 8) (background dark))
-      (:foreground "yellow"))))
-   "Face for fixed-with text like code snippets."
-   :group 'org-faces
-   :version "22.1")
+  (org-compatible-face nil
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50"))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70"))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green"))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow"))))
+  "Face for fixed-with text like code snippets."
+  :group 'org-faces
+  :version "22.1")
 
 (defface org-verbatim
-  (org-compatible-face
-   nil
-   '((((class color grayscale) (min-colors 88) (background light))
-      (:foreground "grey50" :underline t))
-     (((class color grayscale) (min-colors 88) (background dark))
-      (:foreground "grey70" :underline t))
-     (((class color) (min-colors 8) (background light))
-      (:foreground "green" :underline t))
-     (((class color) (min-colors 8) (background dark))
-      (:foreground "yellow" :underline t))))
-   "Face for fixed-with text like code snippets."
-   :group 'org-faces
-   :version "22.1")
+  (org-compatible-face nil
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50" :underline t))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70" :underline t))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green" :underline t))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow" :underline t))))
+  "Face for fixed-with text like code snippets."
+  :group 'org-faces
+  :version "22.1")
 
 (defface org-agenda-structure ;; font-lock-function-name-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-     (((class color) (min-colors 8)) (:foreground "blue" :bold t))
-     (t (:bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+      (t (:bold t))))
   "Face used in agenda for captions and dates."
   :group 'org-faces)
 
 (defface org-scheduled-today
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "DarkGreen"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "PaleGreen"))
-     (((class color) (min-colors 8)) (:foreground "green"))
-     (t (:bold t :italic t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "DarkGreen"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "PaleGreen"))
+      (((class color) (min-colors 8)) (:foreground "green"))
+      (t (:bold t :italic t))))
   "Face for items scheduled for a certain day."
   :group 'org-faces)
 
 (defface org-scheduled-previously
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "red"))
-     (((class color) (min-colors 8)  (background dark)) (:foreground "red" :bold t))
-     (t (:bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"))
+      (((class color) (min-colors 8)  (background dark)) (:foreground "red" :bold t))
+      (t (:bold t))))
   "Face for items scheduled previously, and not yet done."
   :group 'org-faces)
 
 (defface org-upcoming-deadline
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
-     (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
-     (((class color) (min-colors 8)  (background light)) (:foreground "red"))
-     (((class color) (min-colors 8)  (background dark)) (:foreground "red" :bold t))
-     (t (:bold t))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "chocolate1"))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"))
+      (((class color) (min-colors 8)  (background dark)) (:foreground "red" :bold t))
+      (t (:bold t))))
   "Face for items scheduled previously, and not yet done."
   :group 'org-faces)
 
@@ -4013,12 +4035,23 @@ month and 365.24 days for a year)."
 	   (number :tag "Fraction of head-warning time passed")
 	   (sexp :tag "Face"))))
 
+;; FIXME: this is not good
+(defface org-agenda-restriction-lock
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:background "yellow1"))
+      (((class color) (min-colors 88) (background dark))  (:background "skyblue4"))
+      (((class color) (min-colors 16) (background light)) (:background "yellow1"))
+      (((class color) (min-colors 16) (background dark))  (:background "skyblue4"))
+      (((class color) (min-colors 8)) (:background "cyan" :foreground "black"))
+      (t (:inverse-video t))))
+  "Face for showing the agenda restriction lock."
+  :group 'org-faces)
+
 (defface org-time-grid ;; font-lock-variable-name-face
-  (org-compatible-face
-   nil
-   '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))
-     (((class color) (min-colors 16) (background dark)) (:foreground "LightGoldenrod"))
-     (((class color) (min-colors 8)) (:foreground "yellow" :weight light))))
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightGoldenrod"))
+      (((class color) (min-colors 8)) (:foreground "yellow" :weight light))))
   "Face used for time grids."
   :group 'org-faces)
 
@@ -11383,8 +11416,9 @@ FOLLOW and PUBLISH are two functions.  Both take the link path as
 an argument.
 FOLLOW should do whatever is necessary to follow the link, for example
 to find a file or display a mail message.
+
 PUBLISH takes the path and retuns the string that should be used when
-this document is published."
+this document is published. FIMXE: This is actually not yet implemented."
   (add-to-list 'org-link-types type t)
   (org-make-link-regexps)
   (add-to-list 'org-link-protocols
@@ -12058,191 +12092,189 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
-  (move-marker org-open-link-marker (point))
-  (setq org-window-config-before-follow-link (current-window-configuration))
-  (org-remove-occur-highlights nil nil t)
-  (if (org-at-timestamp-p t)
-      (org-follow-timestamp-link)
-    (let (type path link line search (pos (point)))
-      (catch 'match
-	(save-excursion
-	  (skip-chars-forward "^]\n\r")
-	  (when (org-in-regexp org-bracket-link-regexp)
-	    (setq link (org-link-unescape (org-match-string-no-properties 1)))
-	    (while (string-match " *\n *" link)
-	      (setq link (replace-match " " t t link)))
-	    (setq link (org-link-expand-abbrev link))
-	    (if (string-match org-link-re-with-space2 link)
-		(setq type (match-string 1 link) path (match-string 2 link))
-	      (setq type "thisfile" path link))
-	    (throw 'match t)))
-
-	(when (get-text-property (point) 'org-linked-text)
-	  (setq type "thisfile"
-		pos (if (get-text-property (1+ (point)) 'org-linked-text)
-			(1+ (point)) (point))
-		path (buffer-substring
-		      (previous-single-property-change pos 'org-linked-text)
-		      (next-single-property-change pos 'org-linked-text)))
-	  (throw 'match t))
-
-	(save-excursion
-	  (when (or (org-in-regexp org-angle-link-re)
-		    (org-in-regexp org-plain-link-re))
-	    (setq type (match-string 1) path (match-string 2))
-	    (throw 'match t)))
-	(when (org-in-regexp "\\<\\([^><\n]+\\)\\>")
-	  (setq type "tree-match"
-		path (match-string 1))
-	  (throw 'match t))
-	(save-excursion
-	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@:]+\\):[ \t]*$"))
-	    (setq type "tags"
+  (catch 'abort
+    (move-marker org-open-link-marker (point))
+    (setq org-window-config-before-follow-link (current-window-configuration))
+    (org-remove-occur-highlights nil nil t)
+    (if (org-at-timestamp-p t)
+	(org-follow-timestamp-link)
+      (let (type path link line search (pos (point)))
+	(catch 'match
+	  (save-excursion
+	    (skip-chars-forward "^]\n\r")
+	    (when (org-in-regexp org-bracket-link-regexp)
+	      (setq link (org-link-unescape (org-match-string-no-properties 1)))
+	      (while (string-match " *\n *" link)
+		(setq link (replace-match " " t t link)))
+	      (setq link (org-link-expand-abbrev link))
+	      (if (string-match org-link-re-with-space2 link)
+		  (setq type (match-string 1 link) path (match-string 2 link))
+		(setq type "thisfile" path link))
+	      (throw 'match t)))
+	  
+	  (when (get-text-property (point) 'org-linked-text)
+	    (setq type "thisfile"
+		  pos (if (get-text-property (1+ (point)) 'org-linked-text)
+			  (1+ (point)) (point))
+		  path (buffer-substring
+			(previous-single-property-change pos 'org-linked-text)
+			(next-single-property-change pos 'org-linked-text)))
+	    (throw 'match t))
+	  
+	  (save-excursion
+	    (when (or (org-in-regexp org-angle-link-re)
+		      (org-in-regexp org-plain-link-re))
+	      (setq type (match-string 1) path (match-string 2))
+	      (throw 'match t)))
+	  (when (org-in-regexp "\\<\\([^><\n]+\\)\\>")
+	    (setq type "tree-match"
 		  path (match-string 1))
-	    (while (string-match ":" path)
-	      (setq path (replace-match "+" t t path)))
-	    (throw 'match t))))
-      (unless path
-	(error "No link found"))
-      ;; Remove any trailing spaces in path
-      (if (string-match " +\\'" path)
-	  (setq path (replace-match "" t t path)))
-
-      (cond
-
-       ((assoc type org-link-protocols)
-	(funcall (nth 1 (assoc type org-link-protocols)) path))
-
-       ((equal type "mailto")
-	(let ((cmd (car org-link-mailto-program))
-	      (args (cdr org-link-mailto-program)) args1
-	      (address path) (subject "") a)
-	  (if (string-match "\\(.*\\)::\\(.*\\)" path)
-	      (setq address (match-string 1 path)
-		    subject (org-link-escape (match-string 2 path))))
-	  (while args
-	    (cond
-	     ((not (stringp (car args))) (push (pop args) args1))
-	     (t (setq a (pop args))
-		(if (string-match "%a" a)
-		    (setq a (replace-match address t t a)))
-		(if (string-match "%s" a)
-		    (setq a (replace-match subject t t a)))
-		(push a args1))))
-	  (apply cmd (nreverse args1))))
-
-       ((member type '("http" "https" "ftp" "news"))
-	(browse-url (concat type ":" (org-link-escape
-				      path org-link-escape-chars-browser))))
-
-       ((string= type "tags")
-	(org-tags-view in-emacs path))
-       ((string= type "thisfile")
-	(if in-emacs
-	    (switch-to-buffer-other-window
-	     (org-get-buffer-for-internal-link (current-buffer)))
-	  (org-mark-ring-push))
-	(let ((cmd `(org-link-search
-		     ,path
-		     ,(cond ((equal in-emacs '(4)) 'occur)
-			    ((equal in-emacs '(16)) 'org-occur)
-			    (t nil))
-		     ,pos)))
-	  (condition-case nil (eval cmd)
-	    (error (progn (widen) (eval cmd))))))
-
-       ((string= type "tree-match")
-	(org-occur (concat "\\[" (regexp-quote path) "\\]")))
-
-       ((string= type "file")
-	(if (string-match "::\\([0-9]+\\)\\'" path)
-	    (setq line (string-to-number (match-string 1 path))
-		  path (substring path 0 (match-beginning 0)))
-	  (if (string-match "::\\(.+\\)\\'" path)
-	      (setq search (match-string 1 path)
-		    path (substring path 0 (match-beginning 0)))))
-	(if (string-match "[*?{]" (file-name-nondirectory path))
-	    (dired path)
-	  (org-open-file path in-emacs line search)))
-
-       ((string= type "news")
-	(org-follow-gnus-link path))
-
-       ((string= type "bbdb")
-	(org-follow-bbdb-link path))
-
-       ((string= type "info")
-	(org-follow-info-link path))
-
-       ((string= type "gnus")
-	(let (group article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in Gnus link"))
-	  (setq group (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-gnus-link group article)))
-
-       ((string= type "vm")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in VM link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  ;; in-emacs is the prefix arg, will be interpreted as read-only
-	  (org-follow-vm-link folder article in-emacs)))
-
-       ((string= type "wl")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in Wanderlust link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-wl-link folder article)))
-
-       ((string= type "mhe")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in MHE link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-mhe-link folder article)))
-
-       ((string= type "rmail")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in RMAIL link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-rmail-link folder article)))
-
-       ((string= type "shell")
-	(let ((cmd path))
-	  ;; The following is only for backward compatibility
-	  (while (string-match "@{" cmd) (setq cmd (replace-match "<" t t cmd)))
-	  (while (string-match "@}" cmd) (setq cmd (replace-match ">" t t cmd)))
-	  (if (or (not org-confirm-shell-link-function)
-		  (funcall org-confirm-shell-link-function
-			   (format "Execute \"%s\" in shell? "
-				   (org-add-props cmd nil
-				     'face 'org-warning))))
-	      (progn
-		(message "Executing %s" cmd)
-		(shell-command cmd))
-	    (error "Abort"))))
-
-       ((string= type "elisp")
-	(let ((cmd path))
-	  (if (or (not org-confirm-elisp-link-function)
-		  (funcall org-confirm-elisp-link-function
-			   (format "Execute \"%s\" as elisp? "
-				   (org-add-props cmd nil
-						  'face 'org-warning))))
-              (message "%s => %s" cmd (eval (read cmd)))
-	    (error "Abort"))))
-
-       (t
-	(browse-url-at-point)))))
-  (move-marker org-open-link-marker nil))
+	    (throw 'match t))
+	  (save-excursion
+	    (when (org-in-regexp (org-re "\\(:[[:alnum:]_@:]+\\):[ \t]*$"))
+	      (setq type "tags"
+		    path (match-string 1))
+	      (while (string-match ":" path)
+		(setq path (replace-match "+" t t path)))
+	      (throw 'match t))))
+	(unless path
+	  (error "No link found"))
+	;; Remove any trailing spaces in path
+	(if (string-match " +\\'" path)
+	    (setq path (replace-match "" t t path)))
+	
+	(cond
+	 
+	 ((assoc type org-link-protocols)
+	  (funcall (nth 1 (assoc type org-link-protocols)) path))
+	 
+	 ((equal type "mailto")
+	  (let ((cmd (car org-link-mailto-program))
+		(args (cdr org-link-mailto-program)) args1
+		(address path) (subject "") a)
+	    (if (string-match "\\(.*\\)::\\(.*\\)" path)
+		(setq address (match-string 1 path)
+		      subject (org-link-escape (match-string 2 path))))
+	    (while args
+	      (cond
+	       ((not (stringp (car args))) (push (pop args) args1))
+	       (t (setq a (pop args))
+		  (if (string-match "%a" a)
+		      (setq a (replace-match address t t a)))
+		  (if (string-match "%s" a)
+		      (setq a (replace-match subject t t a)))
+		  (push a args1))))
+	    (apply cmd (nreverse args1))))
+	 
+	 ((member type '("http" "https" "ftp" "news"))
+	  (browse-url (concat type ":" (org-link-escape
+					path org-link-escape-chars-browser))))
+	 
+	 ((string= type "tags")
+	  (org-tags-view in-emacs path))
+	 ((string= type "thisfile")
+	  (if in-emacs
+	      (switch-to-buffer-other-window
+	       (org-get-buffer-for-internal-link (current-buffer)))
+	    (org-mark-ring-push))
+	  (let ((cmd `(org-link-search
+		       ,path
+		       ,(cond ((equal in-emacs '(4)) 'occur)
+			      ((equal in-emacs '(16)) 'org-occur)
+			      (t nil))
+		       ,pos)))
+	    (condition-case nil (eval cmd)
+	      (error (progn (widen) (eval cmd))))))
+	 
+	 ((string= type "tree-match")
+	  (org-occur (concat "\\[" (regexp-quote path) "\\]")))
+	 
+	 ((string= type "file")
+	  (if (string-match "::\\([0-9]+\\)\\'" path)
+	      (setq line (string-to-number (match-string 1 path))
+		    path (substring path 0 (match-beginning 0)))
+	    (if (string-match "::\\(.+\\)\\'" path)
+		(setq search (match-string 1 path)
+		      path (substring path 0 (match-beginning 0)))))
+	  (if (string-match "[*?{]" (file-name-nondirectory path))
+	      (dired path)
+	    (org-open-file path in-emacs line search)))
+	 
+	 ((string= type "news")
+	  (org-follow-gnus-link path))
+	 
+	 ((string= type "bbdb")
+	  (org-follow-bbdb-link path))
+	 
+	 ((string= type "info")
+	  (org-follow-info-link path))
+	 
+	 ((string= type "gnus")
+	  (let (group article)
+	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+		(error "Error in Gnus link"))
+	    (setq group (match-string 1 path)
+		  article (match-string 3 path))
+	    (org-follow-gnus-link group article)))
+	 
+	 ((string= type "vm")
+	  (let (folder article)
+	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+		(error "Error in VM link"))
+	    (setq folder (match-string 1 path)
+		  article (match-string 3 path))
+	    ;; in-emacs is the prefix arg, will be interpreted as read-only
+	    (org-follow-vm-link folder article in-emacs)))
+	 
+	 ((string= type "wl")
+	  (let (folder article)
+	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+		(error "Error in Wanderlust link"))
+	    (setq folder (match-string 1 path)
+		  article (match-string 3 path))
+	    (org-follow-wl-link folder article)))
+	 
+	 ((string= type "mhe")
+	  (let (folder article)
+	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+		(error "Error in MHE link"))
+	    (setq folder (match-string 1 path)
+		  article (match-string 3 path))
+	    (org-follow-mhe-link folder article)))
+	 
+	 ((string= type "rmail")
+	  (let (folder article)
+	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+		(error "Error in RMAIL link"))
+	    (setq folder (match-string 1 path)
+		  article (match-string 3 path))
+	    (org-follow-rmail-link folder article)))
+	 
+	 ((string= type "shell")
+	  (let ((cmd path))
+	    (if (or (not org-confirm-shell-link-function)
+		    (funcall org-confirm-shell-link-function
+			     (format "Execute \"%s\" in shell? "
+				     (org-add-props cmd nil
+						    'face 'org-warning))))
+		(progn
+		  (message "Executing %s" cmd)
+		  (shell-command cmd))
+	      (error "Abort"))))
+	 
+	 ((string= type "elisp")
+	  (let ((cmd path))
+	    (if (or (not org-confirm-elisp-link-function)
+		    (funcall org-confirm-elisp-link-function
+			     (format "Execute \"%s\" as elisp? "
+				     (org-add-props cmd nil
+						    'face 'org-warning))))
+		(message "%s => %s" cmd (eval (read cmd)))
+	      (error "Abort"))))
+	 
+	 (t
+	  (browse-url-at-point)))))
+    (move-marker org-open-link-marker nil)))
 
 ;;; File search
 
@@ -12875,7 +12907,7 @@ on the system \"/user@host:\"."
         (t nil)))
 
 
-;;;; Hooks for remember.el
+;;;; Hooks for remember.el, and refiling
 
 ;;;###autoload
 (defun org-remember-insinuate ()
@@ -13338,6 +13370,131 @@ See also the variable `org-reverse-note-order'."
 	    (if (string-match (car entry) buffer-file-name)
 		(throw 'exit (cdr entry))))
 	  nil)))))
+
+;;; Refiling
+
+(defvar org-refile-target-table nil
+  "The list of refile targets, created by `org-refile'.")
+
+(defvar org-agenda-new-buffers nil
+  "Buffers created to visit agenda files.")
+
+(defun org-get-refile-targets ()
+  "Produce a table with refile targets."
+  (let ((entries org-refile-targets)
+	org-agenda-new-files targets txt re files f desc descre)
+    (while (setq entry (pop entries))
+      (setq files (car entry) desc (cdr entry))
+      (cond
+       ((null files) (setq files (list (current-buffer))))
+       ((eq files 'org-agenda-files)
+	(setq files (org-agenda-files 'unrestricted)))
+       ((and (symbolp files) (fboundp files))
+	(setq files (funcall files)))
+       ((and (symbolp files) (boundp files))
+	(setq files (symbol-value files))))
+      (if (stringp files) (setq files (list files)))
+      (cond
+       ((eq (car desc) :tag)
+	(setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
+       ((eq (car desc) :todo)
+	(setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
+       ((eq (car desc) :regexp)
+	(setq descre (cdr desc)))
+       ((eq (car desc) :level)
+	(setq descre (concat "^\\*\\{" (number-to-string
+					(if org-odd-levels-only
+					    (1- (* 2 (cdr desc)))
+					  (cdr desc)))
+			     "\\}[ \t]")))
+       (t (error "Bad refiling target description %s" desc)))
+      (while (setq f (pop files))
+	(save-excursion
+	  (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
+	  (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+	      (while (re-search-forward descre nil t)
+		(goto-char (point-at-bol))
+		(when (looking-at org-complex-heading-regexp)
+		  (setq txt (match-string 4)
+			re (concat "^" (regexp-quote
+					(buffer-substring (match-beginning 1)
+							  (match-end 4)))))
+		  (if (match-end 5) (setq re (concat re "[ \t]+"
+						     (regexp-quote
+						      (match-string 5)))))
+		  (setq re (concat re "[ \t]*$"))
+		  (push (list txt f re (point)) targets))
+		(goto-char (point-at-eol))))))))
+    (org-release-buffers org-agenda-new-buffers)
+    (nreverse targets)))
+
+(defun org-refile (&optional reversed-or-update)
+  "Move the entry at point to another heading.
+The list of target headings is compiled using the information in
+`org-refile-targets', which see.  This list is created upon first use, and
+you can update it by calling this command with a double prefix (`C-u C-u').
+
+At the target location, the entry is filed as a subitem of the target heading.
+Depending on `org-reverse-note-order', the new subitem will either be the
+first of the last subitem.  A single C-u prefix will toggle the value of this
+variable for the duration of the command."
+  (interactive "P")
+  (if (equal reversed-or-update '(16))
+      (progn
+	(setq org-refile-target-table (org-get-refile-targets))
+	(message "Refile targets updated (%d targets)"
+		 (length org-refile-target-table)))
+    (when (or (not org-refile-target-table)
+	      (and (= (length org-refile-targets) 1)
+		   (not (caar org-refile-targets))))
+      (setq org-refile-target-table (org-get-refile-targets)))
+    (unless org-refile-target-table
+      (error "No refile targets"))
+    (let* ((cbuf (current-buffer))
+	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
+	   (fname (and filename (file-truename filename)))
+	   (tbl (mapcar
+		 (lambda (x)
+		   (if (not (equal fname (file-truename (nth 1 x))))
+		       (cons (concat (car x) " (" (file-name-nondirectory
+						   (nth 1 x)) ")")
+			     (cdr x))
+		     x))
+		 org-refile-target-table))
+	   (completion-ignore-case t)
+	   pos it nbuf file re level reversed)
+      (when (setq it (completing-read "Refile to: " tbl
+				      nil t nil 'org-refile-history))
+	(setq it (assoc it tbl)
+	      file (nth 1 it)
+	      re (nth 2 it))
+	(org-copy-special)
+	(save-excursion
+	  (set-buffer (setq nbuf (or (find-buffer-visiting file)
+				     (find-file-noselect file))))
+	  (setq reversed (org-notes-order-reversed-p))
+	  (if (equal reversed-or-update '(16)) (setq reversed (not reversed)))
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+	      (unless (re-search-forward re nil t)
+		(error "Cannot find target location - try again with `C-u' prefix."))
+	      (goto-char (match-beginning 0))
+	      (looking-at outline-regexp)
+	      (setq level (org-get-legal-level (funcall outline-level) 1))
+	      (goto-char (or (save-excursion
+			       (if reversed
+				   (outline-next-heading)
+				 (outline-get-next-sibling)))
+			     (point-max)))
+	      (org-paste-subtree level))))
+	(org-cut-special)
+	(message "Entry refiled to \"%s\"" (car it))))))
 
 ;;;; Dynamic blocks
 
@@ -19438,9 +19595,6 @@ no longer in use."
       (while org-agenda-markers
 	(move-marker (pop org-agenda-markers) nil))))
 
-(defvar org-agenda-new-buffers nil
-  "Buffers created to visit agenda files.")
-
 (defun org-get-agenda-file-buffer (file)
   "Get a buffer visiting FILE.  If the buffer needs to be created, add
 it to the list of buffers which might be released later."
@@ -21052,6 +21206,85 @@ HH:MM."
     (cdr (assoc
 	  (eval (cons 'or org-agenda-sorting-strategy-selected))
 	  '((-1 . t) (1 . nil) (nil . nil))))))
+
+;;; Agenda restriction lock
+
+(defvar org-agenda-restriction-lock-overlay (org-make-overlay 1 1)
+  "Overlay to mark the headline to which arenda commands are restricted.")
+(org-overlay-put org-agenda-restriction-lock-overlay
+		 'face 'org-agenda-restriction-lock)
+(org-overlay-put org-agenda-restriction-lock-overlay
+		 'help-echo "Agendas are currently limited to this subtree.")
+(org-detach-overlay org-agenda-restriction-lock-overlay)
+(defvar org-speedbar-restriction-lock-overlay (org-make-overlay 1 1)
+  "Overlay marking the agenda restriction line in speedbar.")
+(org-overlay-put org-speedbar-restriction-lock-overlay
+		 'face 'org-agenda-restriction-lock)
+(org-overlay-put org-speedbar-restriction-lock-overlay
+		 'help-echo "Agendas are currently limited to this item.")
+(org-detach-overlay org-speedbar-restriction-lock-overlay)
+
+(defun org-agenda-set-restriction-lock (&optional type)
+  "Set restriction lock for agenda, to current subtree or file.
+Restriction will be the file if TYPE is `file', or if type is the
+universal prefix '(4), or if the cursor is before the first headline
+in the file.  Otherwise, restriction will be to the current subtree."
+  (interactive "P")
+  (and (equal type '(4)) (setq type 'file))
+  (setq type (cond
+	      (type type)
+	      ((org-at-heading-p) 'subtree)
+	      ((condition-case nil (org-back-to-heading t) (error nil))
+	       'subtree)
+	      (t 'file)))
+  (if (eq type 'subtree)
+      (progn
+	(setq org-agenda-restrict t)
+	(setq org-agenda-overriding-restriction 'subtree)
+	(put 'org-agenda-files 'org-restrict
+	     (list (buffer-file-name (buffer-base-buffer))))
+	(org-back-to-heading t)
+	(org-move-overlay org-agenda-restriction-lock-overlay (point) (point-at-eol))
+	(move-marker org-agenda-restrict-begin (point))
+	(move-marker org-agenda-restrict-end
+		     (save-excursion (org-end-of-subtree t)))
+	(message "Locking agenda restriction to subtree"))
+    (put 'org-agenda-files 'org-restrict
+	 (list (buffer-file-name (buffer-base-buffer))))
+    (setq org-agenda-restrict nil)
+    (setq org-agenda-overriding-restriction 'file)
+    (move-marker org-agenda-restrict-begin nil)
+    (move-marker org-agenda-restrict-end nil)
+    (message "Locking agenda restriction to file"))
+  (setq current-prefix-arg nil)
+  (org-agenda-maybe-redo))
+
+(defun org-agenda-remove-restriction-lock (&optional noupdate)
+  "Remove the agenda restriction lock."
+  (interactive "P")
+  (org-detach-overlay org-agenda-restriction-lock-overlay)
+  (org-detach-overlay org-speedbar-restriction-lock-overlay)
+  (setq org-agenda-overriding-restriction nil)
+  (setq org-agenda-restrict nil)
+  (put 'org-agenda-files 'org-restrict nil)
+  (move-marker org-agenda-restrict-begin nil)
+  (move-marker org-agenda-restrict-end nil)
+  (setq current-prefix-arg nil)
+  (message "Agenda restriction lock removed")
+  (or noupdate (org-agenda-maybe-redo)))
+
+(defun org-agenda-maybe-redo ()
+  "If there is any window showing the agenda view, update it."
+  (let ((w (get-buffer-window org-agenda-buffer-name t))
+	(w0 (selected-window)))
+    (when w
+      (select-window w)
+      (org-agenda-redo)
+      (select-window w0)
+      (if org-agenda-overriding-restriction
+	  (message "Agenda view shifted to new %s restriction"
+		   org-agenda-overriding-restriction)
+	(message "Agenda restriction lock removed")))))
 
 ;;; Agenda commands
 
@@ -25499,6 +25732,8 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 (org-defkey org-mode-map [(control ?\')]     'org-cycle-agenda-files)
 (org-defkey org-mode-map "\C-c["    'org-agenda-file-to-front)
 (org-defkey org-mode-map "\C-c]"    'org-remove-file)
+(org-defkey org-mode-map "\C-c\C-x<" 'org-agenda-set-restriction-lock)
+(org-defkey org-mode-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
 (org-defkey org-mode-map "\C-c-"    'org-ctrl-c-minus)
 (org-defkey org-mode-map "\C-c^"    'org-sort)
 (org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
@@ -26919,7 +27154,101 @@ Show the heading too, if it is currently invisible."
   (org-show-context 'isearch))
 
 
-;;;; Address problems with some other packages
+;;;; Integration with and fixes for other packages
+
+;;; Imenu support
+
+(defvar org-imenu-markers nil
+  "All markers currently used by Imenu.")
+(make-variable-buffer-local 'org-imenu-markers)
+
+(defun org-imenu-new-marker (&optional pos)
+  "Return a new marker for use by Imenu, and remember the marker."
+  (let ((m (make-marker)))
+    (move-marker m (or pos (point)))
+    (push m org-imenu-markers)
+    m))
+
+(defun org-imenu-get-tree ()
+  "Produce the index for Imenu."
+  (mapc (lambda (x) (move-marker x nil)) org-imenu-markers)
+  (setq org-imenu-markers nil)
+  (let* ((n org-imenu-depth)
+	 (re (concat "^" outline-regexp))
+	 (subs (make-vector (1+ n) nil))
+	 (last-level 0)
+	 m tree level head)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-max))
+	(while (re-search-backward re nil t)
+	  (setq level (org-reduced-level (funcall outline-level)))
+	  (when (<= level n)
+	    (looking-at org-complex-heading-regexp)
+	    (setq head (org-match-string-no-properties 4)
+		  m (org-imenu-new-marker))
+	    (org-add-props head nil 'org-imenu-marker m 'org-imenu t)
+	    (if (>= level last-level)
+		(push (cons head m) (aref subs level))
+	      (push (cons head (aref subs (1+ level))) (aref subs level))
+	      (loop for i from (1+ level) to n do (aset subs i nil)))
+	    (setq last-level level)))))
+    (aref subs 1)))
+
+(eval-after-load "imenu"
+  '(progn
+     (add-hook 'imenu-after-jump-hook
+	       (lambda () (org-show-context 'org-goto)))))
+ 
+;; Speedbar support
+
+(defun org-speedbar-set-agenda-restriction ()
+  "Restrict future agenda commands to the location at point in speedbar.
+To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
+  (interactive)
+  (let (p m tp np dir txt w)
+    (cond
+     ((setq p (text-property-any (point-at-bol) (point-at-eol)
+				 'org-imenu t))
+      (setq m (get-text-property p 'org-imenu-marker))
+      (save-excursion
+	(save-restriction
+	  (set-buffer (marker-buffer m))
+	  (goto-char m)
+	  (org-agenda-set-restriction-lock 'subtree))))
+     ((setq p (text-property-any (point-at-bol) (point-at-eol)
+				 'speedbar-function 'speedbar-find-file))
+      (setq tp (previous-single-property-change
+		(1+ p) 'speedbar-function)
+	    np (next-single-property-change
+		tp 'speedbar-function)
+	    dir (speedbar-line-directory)
+	    txt (buffer-substring-no-properties (or tp (point-min))
+						(or np (point-max))))
+      (save-excursion
+	(save-restriction
+	  (set-buffer (find-file-noselect
+		       (let ((default-directory dir))
+			 (expand-file-name txt))))
+	  (unless (org-mode-p)
+	    (error "Cannot restrict to non-Org-mode file"))
+	  (org-agenda-set-restriction-lock 'file))))
+     (t (error "Don't know how to restrict Org-mode's agenda")))
+    (org-move-overlay org-speedbar-restriction-lock-overlay
+		      (point-at-bol) (point-at-eol))
+    (setq current-prefix-arg nil)
+    (org-agenda-maybe-redo)))
+
+(eval-after-load "speedbar"
+  '(progn
+     (speedbar-add-supported-extension ".org")
+     (define-key speedbar-file-key-map "<" 'org-speedbar-set-agenda-restriction)
+     (define-key speedbar-file-key-map "\C-c\C-x<" 'org-speedbar-set-agenda-restriction)
+     (define-key speedbar-file-key-map ">" 'org-agenda-remove-restriction-lock)
+     (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)))
+
+;;; Fixes and Hacks
 
 ;; Make flyspell not check words in links, to not mess up our keymap
 (defun org-mode-flyspell-verify ()
@@ -26978,24 +27307,6 @@ Still experimental, may disappear in the future."
     ;; make tree, check each match with the callback
     (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
 
-(defun org-fill-paragraph-experimental (&optional justify)
-  "Re-align a table, pass through to fill-paragraph if no table."
-  (let ((table-p (org-at-table-p))
-	(table.el-p (org-at-table.el-p)))
-    (cond ((equal (char-after (point-at-bol)) ?*) t) ; skip headlines
-	  (table.el-p t)                             ; skip table.el tables
-	  (table-p (org-table-align) t)              ; align org-mode tables
-	  ((save-excursion
-	     (let ((pos (1+ (point-at-eol))))
-	       (backward-paragraph 1)
-	       (re-search-forward "\\\\\\\\[ \t]*$" pos t)))
-	   (save-excursion
-	     (save-restriction
-	       (narrow-to-region (1+ (match-end 0)) (point-max))
-	       (fill-paragraph nil)
-	       t)))
-	  (t nil))))                                 ; call paragraph-fill
-
 ;; FIXME: this needs a much better algorithm
 (defun org-assign-fast-keys (alist)
   "Assign fast keys to a keyword-key alist.
@@ -27021,156 +27332,6 @@ Respect keys that are already there."
 	(push (cons k c) new))))
     (nreverse new)))
 
-(defcustom org-refile-targets '((nil . (:level . 1)))
-  "Targets for refiling entries with \\[org-refile].
-This is list of cons cells.  Each cell contains:
-- a specification of the files to be considered, either a list of files,
-  or a symbol whose function or value fields will be used to retrieve
-  a file name or a list of file names.  Nil means, refile to a different
-  heading in the current buffer.
-- A specification of how to find candidate refile targets.  This may be
-  any of
-  - a cons cell (:tag . \"TAG\") to identify refile targes by a tag.
-    This tag has to be present in all target headlines, inheritance will
-    not be considered.
-  - a cons cell (:todo . \"KEYWORD\" to identify refile targets by
-    todo keyword.
-  - a cons cell (:regexp . \"REGEXP\") with a regular expression matching
-    headlines that are refiling targets.
-  - a cons cell (:level . N).  Any headline of level N is considered a target."
-;; FIXME: what if there are a var and func with same name???
-  :group 'org
-  :type '(repeat
-	  (cons
-	   (choice :value org-agenda-files
-		   (const :tag "All agenda files" org-agenda-files)
-		   (const :tag "Current buffer" nil)
-		   (function) (variable) (file))
-	   (choice :tag "Identify target headline by"
-	    (cons :tag "Specific tag" (const :tag) (string))
-	    (cons :tag "TODO keyword" (const :todo) (string))
-	    (cons :tag "Regular expression" (const :regexp) (regexp))
-	    (cons :tag "Level number" (const :level) (integer))))))
-
-(defvar org-refile-target-table nil
-  "The list of refile targets, created by `org-refile'.")
-
-(defun org-get-refile-targets ()
-  "Produce a table with refile targets."
-  ;; FIXME: interpret the different specs for refile targets.
-  (put 'org-agenda-files 'org-restrict nil)
-  (let ((entries org-refile-targets)
-	org-agenda-new-files targets txt re files f desc descre)
-    (while (setq entry (pop entries))
-      (setq files (car entry) desc (cdr entry))
-      (cond
-       ((null files) (setq files (list (current-buffer))))
-       ((and (symbolp files) (fboundp files))
-	(setq files (funcall files)))
-       ((and (symbolp files) (boundp files))
-	(setq files (symbol-value files))))
-      (if (stringp files) (setq files (list files)))
-      (cond
-       ((eq (car desc) :tag)
-	(setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
-       ((eq (car desc) :todo)
-	(setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
-       ((eq (car desc) :regexp)
-	(setq descre (cdr desc)))
-       ((eq (car desc) :level)
-	(setq descre (concat "^\\*\\{" (number-to-string
-					(if org-odd-levels-only
-					    (1- (* 2 (cdr desc)))
-					  (cdr desc)))
-			     "\\}[ \t]")))
-       (t (error "Bad refiling target description %s" desc)))
-      (while (setq f (pop files))
-	(save-excursion
-	  (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
-	  (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char (point-min))
-	      (while (re-search-forward descre nil t)
-		(goto-char (point-at-bol))
-		(when (looking-at org-complex-heading-regexp)
-		  (setq txt (match-string 4)
-			re (concat "^" (regexp-quote
-					(buffer-substring (match-beginning 1)
-							  (match-end 4)))))
-		  (if (match-end 5) (setq re (concat re "[ \t]+"
-						     (regexp-quote
-						      (match-string 5)))))
-		  (setq re (concat re "[ \t]*$"))
-		  (push (list txt f re (point)) targets))
-		(goto-char (point-at-eol))))))))
-    (org-release-buffers org-agenda-new-buffers)
-    (nreverse targets)))
-
-(defun org-refile (&optional reversed-or-update)
-  "Move the entry at point to another heading.
-The list of target headings is compiled using the information in
-`org-refile-targets', which see.  This list is created upon first use, and
-you can update it by calling this command with a double prefix (`C-u C-u').
-
-At the target location, the entry is filed as a subitem of the target heading.
-Depending on `org-reverse-note-order', the new subitem will either be the
-first of the last subitem.  A single C-u prefix will toggle the value of this
-variable for the duration of the command."
-  (interactive "P")
-  (if (equal reversed-or-update '(16))
-      (progn
-	(setq org-refile-target-table (org-get-refile-targets))
-	(message "Refile targets updated (%d targets)"
-		 (length org-refile-target-table)))
-    (when (or (not org-refile-target-table)
-	      (and (= (length org-refile-targets) 1)
-		   (not (caar org-refile-targets))))
-      (setq org-refile-target-table (org-get-refile-targets)))
-    (unless org-refile-target-table
-      (error "No refile targets"))
-    (let* ((cbuf (current-buffer))
-	   (filename (buffer-file-name (buffer-base-buffer cbuf)))
-	   (fname (and filename (file-truename filename)))
-	   (tbl (mapcar
-		 (lambda (x)
-		   (if (not (equal fname (file-truename (nth 1 x))))
-		       (cons (concat (car x) " (" (file-name-nondirectory
-						   (nth 1 x)) ")")
-			     (cdr x))
-		     x))
-		 org-refile-target-table))
-	   (completion-ignore-case t)
-	   pos it nbuf file re level reversed)
-      (when (setq it (completing-read "Refile to: " tbl
-				      nil t nil 'org-refile-history))
-	(setq it (assoc it tbl)
-	      file (nth 1 it)
-	      re (nth 2 it))
-	(org-copy-special)
-	(save-excursion
-	  (set-buffer (setq nbuf (or (find-buffer-visiting file)
-				     (find-file-noselect file))))
-	  (setq reversed (org-notes-order-reversed-p))
-	  (if (equal reversed-or-update '(16)) (setq reversed (not reversed)))
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char (point-min))
-	      (unless (re-search-forward re nil t)
-		(error "Cannot find target location - try again with `C-u' prefix."))
-	      (goto-char (match-beginning 0))
-	      (looking-at outline-regexp)
-	      (setq level (org-get-legal-level (funcall outline-level) 1))
-	      (goto-char (or (save-excursion
-			       (if reversed
-				   (outline-next-heading)
-				 (outline-get-next-sibling)))
-			     (point-max)))
-	      (org-paste-subtree level))))
-	(org-cut-special)
-	(message "Entry refiled to \"%s\"" (car it))))))
 
 (defcustom org-highlight-latex-fragments-and-specials nil
   "Non-nil means, fontify what is treated specially by the exporters."
@@ -27262,11 +27423,21 @@ variable for the duration of the command."
 				   '(font-lock-multiline t)))))
       rtn)))
 
-(defun org-agenda-remove-restriction-lock (&optional noupdate)
-  (setq org-agenda-restrict nil)
-  (put 'org-agenda-files 'org-restrict nil)
-  (move-marker org-agenda-restrict-begin nil)
-  (move-marker org-agenda-restrict-end nil))
+
+(defun org-find-first-timestamp (keyword inactive end)
+  "Return location of first timestamp matching KEYWORD and INACTIVE.
+KEYWORD may be any of the timestamp keywords, or nil.
+INACTIVE means it should be an inactive timestamp.
+If there is no such time stamp, return nil."
+  (catch 'exit
+    (let (key ia)
+      (setq inactive (and inactive t))
+      (while (re-search-forward org-maybe-keyword-time-regexp end t)
+	(setq key (and (match-end 1) (substring (match-string 1) 0 -1)
+		       (equal (char-after (match-beginning 3)) ?\[)))
+	(when (and (equal keyword key)
+		   (equal inactive ia))
+	  (throw 'exit (match-beginning 3)))))))
 
 
 ;;;; Finish up
