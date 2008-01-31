@@ -59,7 +59,7 @@ CP = cp -p
 LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
-CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf orgcard_letter.ps
+CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
 TEXIFILES  = org.texi
 INFOFILES  = org
 HTMLDIR    = /home/dominik/public_html/Tools/org

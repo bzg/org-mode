@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.03
+@set VERSION 5.04
 @set DATE July 2007
 
 @dircategory Emacs
@@ -489,7 +489,7 @@ define @emph{global} keys for the commands @command{org-store-link} and
 
 @lisp
 ;; The following lines are always needed.  Choose your own keys.
-(add-to-list 'auto-mode-alist '("\\.org$" . org-mode))
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (define-key global-map "\C-cl" 'org-store-link)
 (define-key global-map "\C-ca" 'org-agenda)
 @end lisp
@@ -5133,7 +5133,7 @@ If you are away from your computer, it can be very useful to have a
 printed version of some agenda views to carry around.  Org-mode can
 export custom agenda views as plain text, HTML@footnote{You need to
 install Hrvoje Niksic' @file{htmlize.el}.} and postscript.  If you want
-to do this only occasionally, use the commend
+to do this only occasionally, use the command
 
 @table @kbd
 @kindex C-x C-w
@@ -6044,7 +6044,7 @@ Insert template with export options, see example below.
 #+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
 #+TEXT:      Some descriptive text to be inserted at the beginning.
 #+TEXT:      Several lines may be given.
-#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t *:nil TeX:t LaTeX:t skip:t
+#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 @end example
 
 @noindent
@@ -6062,22 +6062,26 @@ you can:
 @cindex emphasized text
 @cindex @TeX{} macros
 @cindex La@TeX{} fragments
+@cindex author info, in export
+@cindex time info, in export
 @example
-H:      @r{set the number of headline levels for export}
-num:    @r{turn on/off section-numbers}
-toc:    @r{turn on/off table of contents, or set level limit (integer)}
-\n:     @r{turn on/off linebreak-preservation}
-@@:      @r{turn on/off quoted HTML tags}
-::      @r{turn on/off fixed-width sections}
-|:      @r{turn on/off tables}
-^:      @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
-        @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
-        @r{the simple @code{a_b} will be left as it is.}
-f:      @r{turn on/off foototes like this[1].}
-*:      @r{turn on/off emphasized text (bold, italic, underlined)}
-TeX:    @r{turn on/off simple @TeX{} macros in plain text}
-LaTeX:  @r{turn on/off La@TeX{} fragments}
-skip:   @r{turn on/off skipping the text before the first heading}
+H:         @r{set the number of headline levels for export}
+num:       @r{turn on/off section-numbers}
+toc:       @r{turn on/off table of contents, or set level limit (integer)}
+\n:        @r{turn on/off linebreak-preservation}
+@@:         @r{turn on/off quoted HTML tags}
+::         @r{turn on/off fixed-width sections}
+|:         @r{turn on/off tables}
+^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
+           @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
+           @r{the simple @code{a_b} will be left as it is.}
+f:         @r{turn on/off foototes like this[1].}
+*:         @r{turn on/off emphasized text (bold, italic, underlined)}
+TeX:       @r{turn on/off simple @TeX{} macros in plain text}
+LaTeX:     @r{turn on/off La@TeX{} fragments}
+skip:      @r{turn on/off skipping the text before the first heading}
+author:    @r{turn on/off inclusion of author name/email into exported file}
+timestamp: @r{turn on/off inclusion creation time into exported file}
 @end example
 
 @node Publishing, Miscellaneous, Exporting, Top
