@@ -4,7 +4,7 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.26
+@set VERSION 4.27
 @set DATE April 2006
 
 @dircategory Emacs
@@ -97,7 +97,7 @@ Introduction
 * Installation and activation::  How to install Org-mode
 * Feedback::                    Bug reports, ideas, patches etc.
 
-Document structure
+Document Structure
 
 * Outlines::                    Org-mode is based on outline-mode
 * Headlines::                   How to typeset org-tree headlines
@@ -131,7 +131,8 @@ Hyperlinks
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Search Options::              Linking to a specific location
+* Search options::              Linking to a specific location
+* Custom searches::             When the default search is not enough
 * Remember::                    Org-trees store quick notes
 
 Internal links
@@ -163,7 +164,7 @@ Tags
 * Setting tags::                How to assign tags to a headline
 * Tag searches::                Searching for combinations of tags
 
-Agenda views
+Agenda Views
 
 * Agenda files::                Files being searched for agenda information
 * Agenda dispatcher::           Keyboard access to agenda views
@@ -1377,7 +1378,8 @@ links to other files, Usenet articles, emails and much more.
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Search Options::              Linking to a specific location
+* Search options::              Linking to a specific location
+* Custom searches::             When the default search is not enough
 * Remember::                    Org-trees store quick notes
 @end menu
 
@@ -1543,7 +1545,7 @@ as links.  If spaces must be part of the link (for example in
 @samp{bbdb:Richard Stallman}) or to remove ambiguities about the end of
 the link, enclose them in angular brackets.
 
-@node Handling links, Search Options, External links, Hyperlinks
+@node Handling links, Search options, External links, Hyperlinks
 @section Handling links
 
 Org-mode provides methods to create a link in the correct syntax, to
@@ -1561,11 +1563,14 @@ points to the target.  Otherwise it points to the current headline.  For
 VM, RMAIL, WANDERLUST, MH-E, GNUS and BBDB buffers, the link will
 indicate to the current article/entry.  For W3 and W3M buffers, the link
 goes to the current URL.  For any other files, the link will point to
-the file, with a search string (@pxref{Search Options}) pointing to the
+the file, with a search string (@pxref{Search options}) pointing to the
 contents of the current line.  If there is an active region, the
-selected words will form the basis of the search string.  The key
-binding @kbd{C-c l} is only a suggestion - see @ref{Installation and
-activation}.
+selected words will form the basis of the search string.  If the
+automatically created link is not working correctly or accurately
+enough, you can write custom functions to select the search string and
+to do the search for particular file types - see @ref{Custom searches}.
+The key binding @kbd{C-c l} is only a suggestion - see @ref{Installation
+and activation}.
 
 @kindex C-c C-l
 @cindex link completion
@@ -1643,7 +1648,7 @@ previously recorded positions.
 @end table
 
 
-@node Search Options, Remember, Handling links, Hyperlinks
+@node Search options, Custom searches, Handling links, Hyperlinks
 @section Search options in file links
 @cindex search option in file links
 @cindex file links, searching
@@ -1651,8 +1656,14 @@ previously recorded positions.
 File links can contain additional information to make Emacs jump to a
 particular location in the file when following a link.  This can be a
 line number or a search option after a double@footnote{For backward
-compatibility, line numbers can also follow a single colon.} colon.
-For example:
+compatibility, line numbers can also follow a single colon.} colon. For
+example, when the command @kbd{C-c l} creates a link (@pxref{Handling
+links}) to a file, it encodes the words in the current line as a search
+string that can be used to find this line back later when following the
+link with @kbd{C-c C-o}. 
+
+Here is the syntax of the different ways to attach a search to a file
+link, together with an explanation:
 
 @example
 [[file:~/code/main.c::255]]
@@ -1660,8 +1671,6 @@ For example:
 [[file:~/xx.org::*My Target]]
 [[file:~/xx.org::/regexp/]]
 @end example
-
-@noindent Here is what these options do.
 
 @table @code
 @item 255
@@ -1688,7 +1697,30 @@ to search the current file.  For example, @code{<file:::find me>} does
 a search for @samp{find me} in the current file, just like
 @samp{[[find me]]} would.
 
-@node Remember,  , Search Options, Hyperlinks
+@node Custom searches, Remember, Search options, Hyperlinks
+@section Custom Searches
+@cindex custom search strings
+
+The default mechanism for creating search strings and for doing the
+actual search related to a file link may not work correctly in all
+cases.  For example, BibTeX database files have many entries like
+@samp{year="1993"} which would not result in good search strings,
+because the only unique identification for a BibTeX entry is the
+citation key.
+
+If you come across such a problem, you can write custom functions to set
+the right search string for a particular file type, and to do the search
+for the string in the file.  Using @code{add-hook}, these functions need
+to be added to the hook variables
+@code{org-create-file-search-functions} and
+@code{org-execute-file-search-functions}.  See the docstring for these
+variables for more information.  Org-mode actually uses this mechanism
+for Bib@TeX{} database files, and you can use the corresponding code as
+an implementation example.  Search for @samp{BibTeX links} in the source
+file.
+
+
+@node Remember,  , Custom searches, Hyperlinks
 @section Remember
 @cindex @file{remember.el}
 

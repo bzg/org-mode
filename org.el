@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.26
+;; Version: 4.27
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -81,6 +81,15 @@
 ;;
 ;; Changes since version 4.10:
 ;; ---------------------------
+;; Version 4.27
+;;    - HTML exporter generalized to receive external options.
+;;      As part of the process, author, email and date have been moved to the
+;;      end of the HTML file.
+;;    - Support for customizable file search in file links.
+;;    - BibTeX database links as first application of the above.
+;;    - New option `org-agenda-todo-list-sublevels' to turn off listing TODO
+;;      entries that are sublevels of another TODO entry.
+;;
 ;; Version 4.26
 ;;    - Bug fixes.
 ;;
@@ -137,7 +146,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.26"
+(defvar org-version "4.27"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -946,6 +955,7 @@ See `org-file-apps'.")
     ("ltx" . emacs)
     ("org" . emacs)
     ("el"  . emacs)
+    ("bib" . emacs)
     )
   "External applications for opening `file:path' items in a document.
 Org-mode uses system defaults for different file types, but
@@ -1252,6 +1262,16 @@ match  What to search for:
 			(const :tag "Occur tree in current buffer" occur-tree))
 		(string :tag "Match"))))
 
+;; Fixme:  Need a way to toggle this variable, maybe a mode in the
+;; agenda buffer?
+(defcustom org-agenda-todo-list-sublevels t
+  "Non-nil means, check also the sublevels of a TODO entry for TODO entries.
+When nil, the sublevels of a TODO entry are not checked, resulting in
+potentially much shorter TODO lists."
+  :group 'org-agenda
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-agenda-include-all-todo t
   "Non-nil means, the agenda will always contain all TODO entries.
 When nil, date-less entries will only be shown if `org-agenda' is called
@@ -1519,6 +1539,13 @@ When this is the symbol `prefix', only remove tags when
   "General options for exporting Org-mode files."
   :tag "Org Export General"
   :group 'org-export)
+
+(defcustom org-export-publishing-directory "."
+  "Path to the location where exported files should be located.
+This path may be relative to the directory where the Org-mode file lives.
+The default is to put them into the same directory as the Org-mode file."
+  :group 'org-export-general
+  :type 'directory)
 
 (defcustom org-export-language-setup
   '(("en"  "Author"          "Date"  "Table of Contents")
@@ -2223,7 +2250,6 @@ This face is only used if `org-fontify-done-headline' is set."
 	      (setq int 'type
 		    kwds (append kwds (org-split-string value splitre))))
 	     ((equal key "STARTUP")
-              (debug)
 	      (let ((opts (org-split-string value splitre))
 		    (set '(("fold" org-startup-folded t)
 			   ("overview" org-startup-folded t)
@@ -2299,14 +2325,9 @@ This face is only used if `org-fontify-done-headline' is set."
 (defvar mark-active) ; Emacs only, not available in XEmacs.
 (defvar timecnt) ; dynamically scoped parameter
 (defvar levels-open) ; dynamically scoped parameter
-(defvar title) ; dynamically scoped parameter
-(defvar author) ; dynamically scoped parameter
-(defvar email) ; dynamically scoped parameter
-(defvar text) ; dynamically scoped parameter
 (defvar entry) ; dynamically scoped parameter
 (defvar date) ; dynamically scoped parameter
-(defvar language) ; dynamically scoped parameter
-(defvar options) ; dynamically scoped parameter
+(defvar description) ; dynamically scoped parameter
 (defvar ans1) ; dynamically scoped parameter
 (defvar ans2) ; dynamically scoped parameter
 (defvar starting-day) ; local variable
@@ -5996,7 +6017,9 @@ the documentation of `org-diary'."
 	'org-marker marker 'org-hd-marker marker
 	'priority priority 'category category)
       (push txt ee)
-      (goto-char (match-end 1)))
+      (if org-agenda-todo-list-sublevels
+	  (goto-char (match-end 1))
+	(org-end-of-subtree 'invisible)))
     (nreverse ee)))
 
 (defconst org-agenda-no-heading-message
@@ -7232,6 +7255,50 @@ With prefix ARG, realign all tags in headings in the current buffer."
 
 ;;; Link Stuff
 
+(defvar org-create-file-search-functions nil
+  "List of functions to construct the right search string for a file link.
+These functions are called in turn with point at the location to
+which the link should point.
+
+A function in the hook should first test if it would like to
+handle this file type, for example by checking the major-mode or
+the file extension.  If it decides not to handle this file, it
+should just return nil to give other functions a chance.  If it
+does handle the file, it must return the search string to be used
+when following the link.  The search string will be part of the
+file link, given after a double colon, and `org-open-at-point'
+will automatically search for it.  If special measures must be
+taken to make the search successful, another function should be
+added to the companion hook `org-execute-file-search-functions',
+which see.
+
+A function in this hook may also use `setq' to set the variable
+`description' to provide a suggestion for the descriptive text to
+be used for this link when it gets inserted into an Org-mode
+buffer with \\[org-insert-link].")
+
+(defvar org-execute-file-search-functions nil
+  "List of functions to execute a file search triggered by a link.
+
+Functions added to this hook must accept a single argument, the
+search string that was part of the file link, the part after the
+double colon.  The function must first check if it would like to
+handle this search, for example by checking the major-mode or the
+file extension.  If it decides not to handle this search, it
+should just return nil to give other functions a chance.  If it
+does handle the search, it must return a non-nil value to keep
+other functions from trying.
+
+Each function can access the current prefix argument through the
+variable `current-prefix-argument'.  Note that a single prefix is
+used to force opening a link in Emacs, so it may be good to only
+use a numeric or double prefix to guide the search function.
+
+In case this is needed, a function in this hook can also restore
+the window configuration before `org-open-at-point' was called using:
+
+    (set-window-configuration org-window-config-before-follow-link)")
+
 (defun org-find-file-at-mouse (ev)
   "Open file link or URL at mouse."
   (interactive "e")
@@ -7244,6 +7311,10 @@ With prefix ARG, realign all tags in headings in the current buffer."
   (mouse-set-point ev)
   (org-open-at-point))
 
+(defvar org-window-config-before-follow-link nil
+  "The window configuration before following a link.
+This is saved in case the need arises to restore it.")
+
 (defun org-open-at-point (&optional in-emacs)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
@@ -7251,6 +7322,7 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
+  (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)
   (if (org-at-timestamp-p)
       (org-agenda-list nil (time-to-days (org-time-string-to-time
@@ -7335,6 +7407,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 
        ((string= type "file")
 	(if (string-match "::?\\([0-9]+\\)\\'" path) ;; second : optional
+	    ;; FIXME: It is unsafe to allow a single colon.
 	    (setq line (string-to-number (match-string 1 path))
 		  path (substring path 0 (match-beginning 0)))
 	  (if (string-match "::\\(.+\\)\\'" path)
@@ -7421,73 +7494,82 @@ in all files."
 	(pos (point))
 	(pre "") (post "")
 	words re0 re1 re2 re3 re4 re5 re2a reall camel)
-    (cond ((save-excursion
-	     (goto-char (point-min))
-	     (and
-	      (re-search-forward
-	       (concat "<<" (regexp-quote s0) ">>") nil t)
-	      (setq pos (match-beginning 0))))
-	   ;; There is an exact target for this
-	   (goto-char pos))
-	  ((string-match "^/\\(.*\\)/$" s)
-	   ;; A regular expression
-	   (cond
-	    ((eq major-mode 'org-mode)
-	     (org-occur (match-string 1 s)))
-	    ;;((eq major-mode 'dired-mode)
-	    ;; (grep (concat "grep -n -e '" (match-string 1 s) "' *")))
-	    (t (org-do-occur (match-string 1 s)))))
-	  ((or (setq camel (string-match (concat "^" org-camel-regexp "$") s))
-	       t)
-	   ;; A camel or a normal search string
-	   (when (equal (string-to-char s) ?*)
-	     ;; Anchor on headlines, post may include tags.
-	     (setq pre "^\\*+[ \t]*\\(\\sw+\\)?[ \t]*"
-		   post "[ \t]*\\([ \t]+:[a-zA-Z_@0-9:+]:[ \t]*\\)?$"
-		   s (substring s 1)))
-	   (remove-text-properties
-	    0 (length s)
-	    '(face nil mouse-face nil keymap nil fontified nil) s)
-	   ;; Make a series of regular expressions to find a match
-	   (setq words
-		 (if camel
-		     (org-camel-to-words s)
-		   (org-split-string s "[ \n\r\t]+"))
-		 re0 (concat "<<" (regexp-quote s0) ">>")
-		 re2 (concat "\\<" (mapconcat 'downcase words "[ \t]+") "\\>")
-		 re2a (concat "\\<" (mapconcat 'downcase words "[ \t\r\n]+") "\\>")
-		 re4 (concat "\\<" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\>")
-		 re1 (concat pre re2 post)
-		 re3 (concat pre re4 post)
-		 re5 (concat pre ".*" re4)
-		 re2 (concat pre re2)
-		 re2a (concat pre re2a)
-		 re4 (concat pre re4)
-		 reall (concat "\\(" re0 "\\)\\|\\(" re1 "\\)\\|\\(" re2
-			       "\\)\\|\\(" re3 "\\)\\|\\(" re4 "\\)\\|\\("
-			       re5 "\\)"
-			       ))
-	   (cond
-	    ((eq type 'org-occur) (org-occur reall))
-	    ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
-	    (t (goto-char (point-min))
-	       (if (or (org-search-not-link re0 nil t)
-		       (org-search-not-link re1 nil t)
-		       (org-search-not-link re2 nil t)
-		       (org-search-not-link re2a nil t)
-		       (org-search-not-link re3 nil t)
-		       (org-search-not-link re4 nil t)
-		       (org-search-not-link re5 nil t)
-		       )
-		   (goto-char (match-beginning 0))
-		 (goto-char pos)
-		 (error "No match")))))
-	  (t
-	   ;; Normal string-search
-	   (goto-char (point-min))
-	   (if (search-forward s nil t)
-	       (goto-char (match-beginning 0))
-	     (error "No match"))))
+    (cond
+     ;; First check if there are any special 
+     ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
+
+     ;; Now try the builtin stuff
+     ((save-excursion
+	(goto-char (point-min))
+	(and
+	 (re-search-forward
+	  (concat "<<" (regexp-quote s0) ">>") nil t)
+	 (setq pos (match-beginning 0))))
+      ;; There is an exact target for this
+      (goto-char pos))
+     ((string-match "^/\\(.*\\)/$" s)
+      ;; A regular expression
+      (cond
+       ((eq major-mode 'org-mode)
+	(org-occur (match-string 1 s)))
+       ;;((eq major-mode 'dired-mode)
+       ;; (grep (concat "grep -n -e '" (match-string 1 s) "' *")))
+       (t (org-do-occur (match-string 1 s)))))
+     ((or (setq camel (string-match (concat "^" org-camel-regexp "$") s))
+	  t)
+      ;; A camel or a normal search string
+      (when (equal (string-to-char s) ?*)
+	;; Anchor on headlines, post may include tags.
+	(setq pre "^\\*+[ \t]*\\(?:\\sw+\\)?[ \t]*"
+	      post "[ \t]*\\(?:[ \t]+:[a-zA-Z_@0-9:+]:[ \t]*\\)?$"
+	      s (substring s 1)))
+      (remove-text-properties
+       0 (length s)
+       '(face nil mouse-face nil keymap nil fontified nil) s)
+      ;; Make a series of regular expressions to find a match
+      (setq words
+	    (if camel
+		(org-camel-to-words s)
+	      (org-split-string s "[ \n\r\t]+"))
+	    re0 (concat "\\(<<" (regexp-quote s0) ">>\\)")
+	    ;; FIXME: The word delimiters in the following are not quite correct.
+;	    re2 (concat "\\<" (mapconcat 'downcase words "[ \t]+") "\\>")
+;	    re2a (concat "\\<" (mapconcat 'downcase words "[ \t\r\n]+") "\\>")
+;	    re4 (concat "\\<" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\>")
+	    re2 (concat "[ \t\r\n]\\(" (mapconcat 'downcase words "[ \t]+") "\\)[ \t\r\n]")
+	    re2a (concat "[ \t\r\n]\\(" (mapconcat 'downcase words "[ \t\r\n]+") "\\)[ \t\r\n]")
+	    re4 (concat "[^a-zA-Z_\r\n]\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_\r\n]")
+	    re1 (concat pre re2 post)
+	    re3 (concat pre re4 post)
+	    re5 (concat pre ".*" re4)
+	    re2 (concat pre re2)
+	    re2a (concat pre re2a)
+	    re4 (concat pre re4)
+	    reall (concat "\\(" re0 "\\)\\|\\(" re1 "\\)\\|\\(" re2
+			  "\\)\\|\\(" re3 "\\)\\|\\(" re4 "\\)\\|\\("
+			  re5 "\\)"
+			  ))
+      (cond
+       ((eq type 'org-occur) (org-occur reall))
+       ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
+       (t (goto-char (point-min))
+	  (if (or (org-search-not-link re0 nil t)
+		  (org-search-not-link re1 nil t)
+		  (org-search-not-link re2 nil t)
+		  (org-search-not-link re2a nil t)
+		  (org-search-not-link re3 nil t)
+		  (org-search-not-link re4 nil t)
+		  (org-search-not-link re5 nil t)
+		  )
+	      (goto-char (match-beginning 1))  ;; Fixme: does every re have group 1?
+	    (goto-char pos)
+	    (error "No match")))))
+     (t
+      ;; Normal string-search
+      (goto-char (point-min))
+      (if (search-forward s nil t)
+	  (goto-char (match-beginning 0))
+	(error "No match"))))
     (and (eq major-mode 'org-mode) (org-show-hierarchy-above))))
 
 (defun org-search-not-link (&rest args)
@@ -7790,6 +7872,61 @@ folders."
       (kill-this-buffer)
       (error "Message not found"))))
 
+;; BibTeX links
+
+;; Use the custom search meachnism to construct and use search strings for
+;; file links to BibTeX database entries.
+
+(defun org-create-file-search-in-bibtex ()
+  "Create the search string and description for a BibTeX database entry."
+  (when (eq major-mode 'bibtex-mode)
+    ;; yes, we want to construct this search string.
+    ;; Make a good description for this entry, using names, year and the title
+    ;; Put it into the `description' variable which is dynamically scoped.
+    (let ((bibtex-autokey-names 1)
+	  (bibtex-autokey-names-stretch 1)
+	  (bibtex-autokey-name-case-convert-function 'identity)
+	  (bibtex-autokey-name-separator " & ")
+	  (bibtex-autokey-additional-names " et al.")
+	  (bibtex-autokey-year-length 4)
+	  (bibtex-autokey-name-year-separator " ")
+	  (bibtex-autokey-titlewords 3)
+	  (bibtex-autokey-titleword-separator " ")
+	  (bibtex-autokey-titleword-case-convert-function 'identity)
+	  (bibtex-autokey-titleword-length 'infty)
+	  (bibtex-autokey-year-title-separator ": "))
+      (setq description (bibtex-generate-autokey)))
+    ;; Now parse the entry, get the key and return it.
+    (save-excursion
+      (bibtex-beginning-of-entry)
+      (cdr (assoc "=key=" (bibtex-parse-entry))))))
+
+(defun org-execute-file-search-in-bibtex (s)
+  "Find the link search string S as a key for a database entry."
+  (when (eq major-mode 'bibtex-mode)
+    ;; Yes, we want to do the search in this file.
+    ;; We construct a regexp that searches for "@entrytype{" followed by the key
+    (goto-char (point-min))
+    (and (re-search-forward (concat "@[a-zA-Z]+[ \t\n]*{[ \t\n]*"
+				    (regexp-quote s) "[ \t\n]*,") nil t)
+	 (goto-char (match-beginning 0)))
+    (if (and (match-beginning 0) (equal current-prefix-arg '(16)))
+	;; Use double prefix to indicate that any web link should be browsed
+	(let ((b (current-buffer)) (p (point)))
+	  ;; Restore the window configuration because we just use the web link
+	  (set-window-configuration org-window-config-before-follow-link)
+	  (save-excursion (set-buffer b) (goto-char p)
+	    (bibtex-url)))
+      (recenter 0)))  ; Move entry start to beginning of window
+  ;; return t to indicate that the search is done.
+  t)
+
+;; Finally add the functions to the right hooks.
+(add-hook 'org-create-file-search-functions 'org-create-file-search-in-bibtex)
+(add-hook 'org-execute-file-search-functions 'org-execute-file-search-in-bibtex)
+
+;; end of Bibtex link setup
+
 (defun org-upgrade-old-links (&optional query-description)
   "Transfer old <...> style links to new [[...]] style links.
 With arg query-description, ask at each match for a description text to use
@@ -7905,7 +8042,7 @@ For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
-  (let (link cpltxt desc txt (pos (point)))
+  (let (link cpltxt desc description search txt (pos (point)))
     (cond
 
      ((eq major-mode 'bbdb-mode)
@@ -8017,6 +8154,12 @@ For file links, arg negates `org-context-in-file-links'."
      ((eq major-mode 'w3m-mode)
       (setq cpltxt w3m-current-url
 	    link (org-make-link cpltxt)))
+
+     ((setq search (run-hook-with-args-until-success
+		    'org-create-file-search-functions))
+      (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
+			 "::" search))
+      (setq cpltxt (or description link))) ;; FIXME: is this the best way?
 
      ((eq major-mode 'org-mode)
       ;; Just link to current headline
@@ -10825,6 +10968,101 @@ overwritten, and the table is not marked as requiring realignment."
 
 (defconst org-level-max 20)
 
+(defvar org-export-html-preamble nil
+  "Preamble, to be inserted just after <body>.  Set by publishing functions.")
+(defvar org-export-html-postamble nil
+  "Preamble, to be inserted just before </body>.  Set by publishing functions.")
+(defvar org-export-html-auto-preamble t
+  "Should default preamble be inserted?  Set by publishing functions.")
+(defvar org-export-html-auto-postamble t
+  "Should default postamble be inserted?  Set by publishing functions.")
+
+(defconst org-export-plist-vars
+  '((:language             . org-export-default-language)
+    (:headline-levels      . org-export-headline-levels)
+    (:with-section-numbers . org-export-with-section-numbers)
+    (:table-of-contents    . org-export-with-toc)
+    (:emphasize            . org-export-with-emphasize)
+    (:sub-superscript      . org-export-with-sub-superscripts)
+    (:TeX-macros           . org-export-with-TeX-macros)
+    (:fixed-width          . org-export-with-fixed-width)
+    (:tables               . org-export-with-tables)
+    (:table-auto-headline  . org-export-highlight-first-table-line)
+    (:style                . org-export-html-style)
+    (:convert-org-links    . org-export-html-link-org-files-as-html)
+    (:inline-images        . org-export-html-inline-images)
+    (:expand-quoted-html   . org-export-html-expand)
+    (:timestamp            . org-export-html-with-timestamp)
+    (:publishing-directory . org-export-publishing-directory)
+    (:preamble             . org-export-html-preamble)
+    (:postamble            . org-export-html-postamble)
+    (:auto-preamble        . org-export-html-auto-preamble)
+    (:auto-postamble       . org-export-html-auto-postamble)
+    (:author               . user-full-name)
+    (:email                . user-mail-address)))
+
+(defun org-default-export-plist ()
+  "Return the property list with default settings for the export variables."
+  (let ((l org-export-plist-vars) rtn e)
+    (while (setq e (pop l))
+      (setq rtn (cons (car e) (cons (symbol-value (cdr e)) rtn))))
+    rtn))
+
+(defun org-infile-export-plist ()
+  "Return the property list with file-local settings for export."
+  (save-excursion
+    (goto-char 0)
+    (let ((re (org-make-options-regexp
+	       '("TITLE" "AUTHOR" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE")))
+	  (text nil)
+	  p key val text options)
+      (while (re-search-forward re nil t)
+	(setq key (org-match-string-no-properties 1)
+	      val (org-match-string-no-properties 2))
+	(cond 
+	 ((string-equal key "TITLE") (setq p (plist-put p :title val)))
+	 ((string-equal key "AUTHOR")(setq p (plist-put p :author val)))
+	 ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
+	 ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
+	 ((string-equal key "TEXT")
+	  (setq text (if text (concat text "\n" val) val)))
+	 ((string-equal key "OPTIONS") (setq options val))))
+      (setq p (plist-put p :text text))
+      (when options
+	(let ((op '(("H"     . :headline-levels)
+		    ("num"   . :section-numbers)
+		    ("toc"   . :table-of-contents)
+		    ("\\n"   . :preserve-breaks) 
+		    ("@"     . :expand-quoted-html)
+		    (":"     . :fixed-width)
+		    ("|"     . :tables)
+		    ("^"     . :sub-superscript)
+		    ("*"     . :emphasize)
+		    ("TeX"   . :TeX-macros)))
+	      o)
+	  (while (setq o (pop op))
+	    (if (string-match (concat (regexp-quote (car o)) 
+				      ":\\([^ \t\n\r;,.]*\\)")
+			      options)
+		(setq p (plist-put p (cdr o)
+				   (car (read-from-string
+					 (match-string 1 options)))))))))
+      p)))
+
+(defun org-combine-plists (&rest plists)
+  "Create a single property list from all plists in PLISTS.
+The process starts by copying the last list, and then setting properties
+from the other lists.  Settings in the first list are the most significant
+ones and overrule settings in the other lists."
+  (let ((rtn (copy-sequence (pop plists)))
+	p v ls)
+    (while plists
+      (setq ls (pop plists))
+      (while ls
+	(setq p (pop ls) v (pop ls))
+	(setq rtn (plist-put rtn p v))))
+    rtn))
+
 (defun org-export-find-first-heading-line (list)
   "Remove all lines from LIST which are before the first headline."
   (let ((orig-list list)
@@ -11272,7 +11510,9 @@ The prefix ARG specifies how many levels of the outline should become
 underlined headlines.  The default is 3."
   (interactive "P")
   (setq-default org-todo-line-regexp org-todo-line-regexp)
-  (let* ((region
+  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					(org-infile-export-plist)))
+	 (region
 	  (buffer-substring
 	   (if (org-region-active-p) (region-beginning) (point-min))
 	   (if (org-region-active-p) (region-end) (point-max))))
@@ -11285,17 +11525,23 @@ underlined headlines.  The default is 3."
 	 (level 0) line txt
 	 (umax nil)
 	 (case-fold-search nil)
-	 (filename (concat (file-name-sans-extension buffer-file-name)
+         (filename (concat (file-name-as-directory
+			    (plist-get opt-plist :publishing-directory))
+			   (file-name-sans-extension 
+			    (file-name-nondirectory buffer-file-name))
 			   ".txt"))
 	 (buffer (find-file-noselect filename))
 	 (levels-open (make-vector org-level-max nil))
+	 (odd org-odd-levels-only)
 	 (date  (format-time-string "%Y/%m/%d" (current-time)))
 	 (time  (format-time-string "%X" (org-current-time)))
-	 (author      user-full-name)
-	 (title       (buffer-name))
+	 (author      (plist-get opt-plist :author))
+	 (title       (or (plist-get opt-plist :title)
+			  (file-name-sans-extension
+			   (file-name-nondirectory buffer-file-name))))
 	 (options     nil)
-	 (email       user-mail-address)
-	 (language    org-export-default-language)
+	 (email       (plist-get opt-plist :email))
+	 (language    (plist-get opt-plist :language))
 	 (text        nil)
 	 (todo nil)
 	 (lang-words nil))
@@ -11305,9 +11551,6 @@ underlined headlines.  The default is 3."
 
     (find-file-noselect filename)
 
-    ;; Search for the export key lines
-    (org-parse-key-lines)
-
     (setq lang-words (or (assoc language org-export-language-setup)
 			 (assoc "en" org-export-language-setup)))
     (if org-export-ascii-show-new-buffer
@@ -11315,7 +11558,13 @@ underlined headlines.  The default is 3."
       (set-buffer buffer))
     (erase-buffer)
     (fundamental-mode)
-    (if options (org-parse-export-options options))
+    ;; create local variables for all options, to make sure all called
+    ;; functions get the correct information
+    (mapcar (lambda (x)
+	      (set (make-local-variable (cdr x)) 
+		   (plist-get opt-plist (car x))))
+	    org-export-plist-vars)
+    (set (make-local-variable 'org-odd-levels-only) odd)
     (setq umax (if arg (prefix-numeric-value arg)
 		 org-export-headline-levels))
 
@@ -11345,7 +11594,8 @@ underlined headlines.  The default is 3."
 				 level (org-tr-level level)
 				 txt (match-string 3 line)
 				 todo
-				 (or (and (match-beginning 2)
+				 (or (and org-export-mark-todo-in-toc
+					  (match-beginning 2)
 					  (not (equal (match-string 2 line)
 						      org-done-string)))
 					; TODO, not DONE
@@ -11444,7 +11694,12 @@ underlined headlines.  The default is 3."
 Also removes the first line of the buffer if it specifies a mode,
 and all options lines."
   (interactive)
-  (let* ((filename (concat (file-name-sans-extension buffer-file-name)
+  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					(org-infile-export-plist)))
+	 (filename (concat (file-name-as-directory 
+			    (plist-get opt-plist :publishing-directory))
+			   (file-name-sans-extension 
+			    (file-name-nondirectory buffer-file-name))
 			   ".txt"))
 	 (buffer (find-file-noselect filename))
 	 (ore (concat
@@ -11604,16 +11859,23 @@ emacs 	--batch
 	--visit=MyFile --funcall org-export-as-html-batch"
   (org-export-as-html org-export-headline-levels 'hidden))
 
-(defun org-export-as-html (arg &optional hidden)
+(defun org-export-as-html (arg &optional hidden ext-plist)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.
 The prefix ARG specifies how many levels of the outline should become
-headlines.  The default is 3.  Lower levels will become bulleted lists."
+headlines.  The default is 3.  Lower levels will become bulleted lists.
+When HIDDEN is non-nil, don't display the HTML buffer.
+EXT-PLIST is a property list with external parameters overriding
+org-mode's default settings, but still inferior to file-local settings."
   (interactive "P")
   (setq-default org-todo-line-regexp org-todo-line-regexp)
   (setq-default org-deadline-line-regexp org-deadline-line-regexp)
   (setq-default org-done-string org-done-string)
-  (let* ((style org-export-html-style)
+  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					ext-plist
+					(org-infile-export-plist)))
+	 
+	 (style (plist-get opt-plist :style))
 	 (odd org-odd-levels-only)
 	 (region-p (org-region-active-p))
          (region
@@ -11627,15 +11889,19 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
          (lines (org-export-find-first-heading-line all_lines))
          (level 0) (line "") (origline "") txt todo
          (umax nil)
-         (filename (concat (file-name-sans-extension buffer-file-name)
-                           ".html"))
+         (filename (concat (file-name-as-directory 
+			    (plist-get opt-plist :publishing-directory))
+			   (file-name-sans-extension 
+			    (file-name-nondirectory buffer-file-name))
+			   ".html"))
          (buffer (find-file-noselect filename))
          (levels-open (make-vector org-level-max nil))
 	 (date (format-time-string "%Y/%m/%d" (current-time)))
 	 (time  (format-time-string "%X" (org-current-time)))
-         (author      user-full-name)
-	 (title       (buffer-name))
-         (options     nil)
+         (author      (plist-get opt-plist :author))
+	 (title       (or (plist-get opt-plist :title)
+			  (file-name-sans-extension
+			   (file-name-nondirectory buffer-file-name))))
 	 (quote-re    (concat "^\\*+[ \t]*" org-quote-string "\\>"))
 	 (inquote     nil)
 	 (infixed     nil)
@@ -11643,10 +11909,10 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 	 (local-list-num nil)
 	 (local-list-indent nil)
 	 (llt org-plain-list-ordered-item-terminator)
-	 (email       user-mail-address)
-         (language    org-export-default-language)
-	 (text        nil)
-         (lang-words  nil)
+	 (email       (plist-get opt-plist :email))
+         (language    (plist-get opt-plist :language))
+	 (text        (plist-get opt-plist :text))
+	 (lang-words  nil)
 	 (target-alist nil) tg
 	 (head-count  0) cnt
 	 (start       0)
@@ -11668,8 +11934,7 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
     (setq org-last-level 1)
     (org-init-section-numbers)
 
-    ;; Search for the export key lines
-    (org-parse-key-lines)
+    ;; Get the language-dependent settings
     (setq lang-words (or (assoc language org-export-language-setup)
                          (assoc "en" org-export-language-setup)))
 
@@ -11681,7 +11946,12 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
     (fundamental-mode)
     (let ((case-fold-search nil)
 	  (org-odd-levels-only odd))
-      (if options (org-parse-export-options options))
+      ;; create local variables for all options, to make sure all called
+      ;; functions get the correct information
+      (mapcar (lambda (x)
+		(set (make-local-variable (cdr x)) 
+		     (plist-get opt-plist (car x))))
+	      org-export-plist-vars)
       (setq umax (if arg (prefix-numeric-value arg)
                    org-export-headline-levels))
 
@@ -11700,15 +11970,21 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 "
 	       language (org-html-expand title) (or charset "iso-8859-1")
 	       date time author style))
-      (if title     (insert (concat "<H1 class=\"title\">"
-				    (org-html-expand title) "</H1>\n")))
-      (if author    (insert (concat (nth 1 lang-words) ": " author "\n")))
-      (if email	  (insert (concat "<a href=\"mailto:" email "\">&lt;"
-                                  email "&gt;</a>\n")))
-      (if (or author email) (insert "<br>\n"))
-      (if (and date time) (insert (concat (nth 2 lang-words) ": "
-                                          date " " time "<br>\n")))
-      (if text      (insert (concat "<p>\n" (org-html-expand text))))
+
+      
+      (insert (or (plist-get opt-plist :preamble) ""))
+
+      (when (plist-get opt-plist :auto-preamble)
+	(if title     (insert (concat "<H1 class=\"title\">"
+				      (org-html-expand title) "</H1>\n")))
+;	(if author    (insert (concat (nth 1 lang-words) ": " author "\n")))
+;	(if email	  (insert (concat "<a href=\"mailto:" email "\">&lt;"
+;					  email "&gt;</a>\n")))
+;	(if (or author email) (insert "<br>\n"))
+;	(if (and date time) (insert (concat (nth 2 lang-words) ": "
+;					    date " " time "<br>\n")))
+	(if text      (insert (concat "<p>\n" (org-html-expand text)))))
+
       (if org-export-with-toc
 	  (progn
 	    (insert (format "<H2>%s</H2>\n" (nth 3 lang-words)))
@@ -11724,7 +12000,8 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 					 (org-html-expand
 					  (match-string 3 line)))
 				   todo
-				   (or (and (match-beginning 2)
+				   (or (and org-export-mark-todo-in-toc
+					    (match-beginning 2)
 					    (not (equal (match-string 2 line)
 							org-done-string)))
 					; TODO, not DONE
@@ -11875,7 +12152,11 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 			     (not (string-match "^/.*/$" search)))
 			(setq thefile (concat thefile "#" 
 					      (org-solidify-link-text
-					       (org-link-unescape search)))))))
+					       (org-link-unescape search)))))
+		    (when (string-match "^file:" desc)
+		      (setq desc (replace-match "" t t desc))
+		      (if (string-match "\\.org$" desc)
+			  (setq desc (replace-match "" t t desc))))))
 		(setq rpl (if (and org-export-html-inline-images
 				   file-is-image-p)
 			      (concat "<img src=\"" thefile "\"/>")
@@ -11982,8 +12263,30 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 	    (if (string-match "^ [-+*]-\\|^[ \t]*$" line) (insert "<p>"))
 	    (insert line (if org-export-preserve-breaks "<br>\n" "\n"))))
 	  ))
+
+      ;; Properly close all local lists and other lists
+      (when in-local-list
+	;; Close any local lists before inserting a new header line
+	(while local-list-num
+	  (insert (if (car local-list-num) "</ol>\n" "</ul>"))
+	  (pop local-list-num))
+	(setq local-list-indent nil
+	      in-local-list nil))
+      (org-html-level-start 1 nil umax
+			    (and org-export-with-toc (<= level umax))
+			    head-count)
+
+      (when (plist-get opt-plist :auto-postamble)
+	(if author    (insert (concat (nth 1 lang-words) ": " author "\n")))
+	(if email	  (insert (concat "<a href=\"mailto:" email "\">&lt;"
+					  email "&gt;</a>\n")))
+	(if (or author email) (insert "<br>\n"))
+	(if (and date time) (insert (concat (nth 2 lang-words) ": "
+					    date " " time "<br>\n"))))
+      
       (if org-export-html-with-timestamp
 	  (insert org-export-html-html-helper-timestamp))
+      (insert (or (plist-get opt-plist :postamble) ""))
       (insert "</body>\n</html>\n")
       (normal-mode)
       (save-buffer)
@@ -12237,49 +12540,9 @@ stacked delimiters is N.  Escaping delimiters is not possible."
     (setq string (replace-match "\\1<u>\\3</u>\\4" t nil string)))
   string)
 
-(defun org-parse-key-lines ()
-  "Find the special key lines with the information for exporters."
-  (save-excursion
-    (goto-char 0)
-    (let ((re (org-make-options-regexp
-	       '("TITLE" "AUTHOR" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE")))
-	  key)
-      (while (re-search-forward re nil t)
-	(setq key (match-string 1))
-	(cond ((string-equal key "TITLE")
-	       (setq title (match-string 2)))
-	      ((string-equal key "AUTHOR")
-	       (setq author (match-string 2)))
-	      ((string-equal key "EMAIL")
-	       (setq email (match-string 2)))
-	      ((string-equal key "LANGUAGE")
-	       (setq language (match-string 2)))
-	      ((string-equal key "TEXT")
-	       (setq text (concat text "\n" (match-string 2))))
-	      ((string-equal key "OPTIONS")
-	       (setq options (match-string 2))))))))
-
-(defun org-parse-export-options (s)
-  "Parse the export options line."
-  (let ((op '(("H"     . org-export-headline-levels)
-	      ("num"   . org-export-with-section-numbers)
-	      ("toc"   . org-export-with-toc)
-	      ("\\n"   . org-export-preserve-breaks)
-	      ("@"     . org-export-html-expand)
-	      (":"     . org-export-with-fixed-width)
-	      ("|"     . org-export-with-tables)
-	      ("^"     . org-export-with-sub-superscripts)
-	      ("*"     . org-export-with-emphasize)
-	      ("TeX"   . org-export-with-TeX-macros)))
-	o)
-    (while (setq o (pop op))
-      (if (string-match (concat (regexp-quote (car o)) ":\\([^ \t\n\r;,.]*\\)")
-			s)
-	  (set (make-local-variable (cdr o))
-	       (car (read-from-string (match-string 1 s))))))))
-
 (defun org-html-level-start (level title umax with-toc head-count)
-  "Insert a new level in HTML export."
+  "Insert a new level in HTML export.
+When TITLE is nil, just close all open levels."
   (let ((l (1+ (max level umax))))
     (while (<= l org-level-max)
       (if (aref levels-open (1- l))
@@ -12287,19 +12550,22 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	    (org-html-level-close l)
 	    (aset levels-open (1- l) nil)))
       (setq l (1+ l)))
-    (if (> level umax)
-	(progn
-	  (if (aref levels-open (1- level))
-	      (insert "<li>" title "<p>\n")
-	    (aset levels-open (1- level) t)
-	    (insert "<ul><li>" title "<p>\n")))
-      (if org-export-with-section-numbers
-	  (setq title (concat (org-section-number level) " " title)))
-      (setq level (+ level 1))
-      (if with-toc
-	  (insert (format "\n<H%d><a name=\"sec-%d\">%s</a></H%d>\n"
-			  level head-count title level))
-	(insert (format "\n<H%d>%s</H%d>\n" level title level))))))
+    (when title
+      ;; If title is nil, this means this function is called to close
+      ;; all levels, so the rest is done only if title is given
+      (if (> level umax)
+	  (progn
+	    (if (aref levels-open (1- level))
+		(insert "<li>" title "<p>\n")
+	      (aset levels-open (1- level) t)
+	      (insert "<ul><li>" title "<p>\n")))
+	(if org-export-with-section-numbers
+	    (setq title (concat (org-section-number level) " " title)))
+	(setq level (+ level 1))
+	(if with-toc
+	    (insert (format "\n<H%d><a name=\"sec-%d\">%s</a></H%d>\n"
+			    level head-count title level))
+	  (insert (format "\n<H%d>%s</H%d>\n" level title level)))))))
 
 (defun org-html-level-close (&rest args)
   "Terminate one level in HTML export."
@@ -12378,7 +12644,12 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
   ;; Output everything as XOXO
   (with-current-buffer (get-buffer buffer)
     (goto-char (point-min))  ;; CD:  beginning-of-buffer is not allowed.
-    (let* ((filename (concat (file-name-sans-extension buffer-file-name)
+    (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					(org-infile-export-plist)))
+	   (filename (concat (file-name-as-directory 
+			      (plist-get opt-plist :publishing-directory))
+			     (file-name-sans-extension 
+			      (file-name-nondirectory buffer-file-name))
 			     ".xml"))
 	   (out (find-file-noselect filename))
 	   (last-level 1)
@@ -12437,7 +12708,7 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 
       ;; Finish the buffer off and clean it up.
       (switch-to-buffer-other-window out)
-      (indent-region (point-min) (point-max))
+      (indent-region (point-min) (point-max) nil)
       (save-buffer)
       (goto-char (point-min))
       )))

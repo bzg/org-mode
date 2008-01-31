@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.26).
+   This manual is for Org-mode (version 4.27).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.26).
+This manual is for Org-mode (version 4.27).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -66,7 +66,7 @@ Introduction
 * Installation and activation::  How to install Org-mode
 * Feedback::                    Bug reports, ideas, patches etc.
 
-Document structure
+Document Structure
 
 * Outlines::                    Org-mode is based on outline-mode
 * Headlines::                   How to typeset org-tree headlines
@@ -100,7 +100,8 @@ Hyperlinks
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Search Options::              Linking to a specific location
+* Search options::              Linking to a specific location
+* Custom searches::             When the default search is not enough
 * Remember::                    Org-trees store quick notes
 
 Internal links
@@ -132,7 +133,7 @@ Tags
 * Setting tags::                How to assign tags to a headline
 * Tag searches::                Searching for combinations of tags
 
-Agenda views
+Agenda Views
 
 * Agenda files::                Files being searched for agenda information
 * Agenda dispatcher::           Keyboard access to agenda views
@@ -1230,7 +1231,8 @@ links to other files, Usenet articles, emails and much more.
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Search Options::              Linking to a specific location
+* Search options::              Linking to a specific location
+* Custom searches::             When the default search is not enough
 * Remember::                    Org-trees store quick notes
 
 
@@ -1377,7 +1379,7 @@ them as links.  If spaces must be part of the link (for example in
 link, enclose them in angular brackets.
 
 
-File: org,  Node: Handling links,  Next: Search Options,  Prev: External links,  Up: Hyperlinks
+File: org,  Node: Handling links,  Next: Search options,  Prev: External links,  Up: Hyperlinks
 
 4.4 Handling links
 ==================
@@ -1395,10 +1397,14 @@ insert it into an org-mode file, and to follow the link.
      the link will indicate to the current article/entry.  For W3 and
      W3M buffers, the link goes to the current URL.  For any other
      files, the link will point to the file, with a search string
-     (*note Search Options::) pointing to the contents of the current
+     (*note Search options::) pointing to the contents of the current
      line.  If there is an active region, the selected words will form
-     the basis of the search string.  The key binding `C-c l' is only a
-     suggestion - see *Note Installation and activation::.
+     the basis of the search string.  If the automatically created link
+     is not working correctly or accurately enough, you can write
+     custom functions to select the search string and to do the search
+     for particular file types - see *Note Custom searches::.  The key
+     binding `C-c l' is only a suggestion - see *Note Installation and
+     activation::.
 
 `C-c C-l'
      Insert a link.  This prompts for a link to be inserted into the
@@ -1460,21 +1466,26 @@ insert it into an org-mode file, and to follow the link.
      previously recorded positions.
 
 
-File: org,  Node: Search Options,  Next: Remember,  Prev: Handling links,  Up: Hyperlinks
+File: org,  Node: Search options,  Next: Custom searches,  Prev: Handling links,  Up: Hyperlinks
 
 4.5 Search options in file links
 ================================
 
 File links can contain additional information to make Emacs jump to a
 particular location in the file when following a link.  This can be a
-line number or a search option after a double(1) colon.  For example:
+line number or a search option after a double(1) colon. For example,
+when the command `C-c l' creates a link (*note Handling links::) to a
+file, it encodes the words in the current line as a search string that
+can be used to find this line back later when following the link with
+`C-c C-o'.
+
+   Here is the syntax of the different ways to attach a search to a file
+link, together with an explanation:
 
      [[file:~/code/main.c::255]]
      [[file:~/xx.org::My Target]]
      [[file:~/xx.org::*My Target]]
      [[file:~/xx.org::/regexp/]]
-
-Here is what these options do.
 
 `255'
      Jump to line 255.
@@ -1505,9 +1516,31 @@ search for `find me' in the current file, just like `[[find me]]' would.
 single colon.
 
 
-File: org,  Node: Remember,  Prev: Search Options,  Up: Hyperlinks
+File: org,  Node: Custom searches,  Next: Remember,  Prev: Search options,  Up: Hyperlinks
 
-4.6 Remember
+4.6 Custom Searches
+===================
+
+The default mechanism for creating search strings and for doing the
+actual search related to a file link may not work correctly in all
+cases.  For example, BibTeX database files have many entries like
+`year="1993"' which would not result in good search strings, because
+the only unique identification for a BibTeX entry is the citation key.
+
+   If you come across such a problem, you can write custom functions to
+set the right search string for a particular file type, and to do the
+search for the string in the file.  Using `add-hook', these functions
+need to be added to the hook variables
+`org-create-file-search-functions' and
+`org-execute-file-search-functions'.  See the docstring for these
+variables for more information.  Org-mode actually uses this mechanism
+for BibTeX database files, and you can use the corresponding code as an
+implementation example.  Search for `BibTeX links' in the source file.
+
+
+File: org,  Node: Remember,  Prev: Custom searches,  Up: Hyperlinks
+
+4.7 Remember
 ============
 
 Another way to create org entries with links to other files is through
@@ -3578,8 +3611,8 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * completion, of CamelCase links <1>:    Completion.          (line   6)
 * completion, of CamelCase links:        CamelCase links.     (line   6)
 * completion, of dictionary words:       Completion.          (line   6)
-* completion, of file names:             Handling links.      (line  36)
-* completion, of links:                  Handling links.      (line  24)
+* completion, of file names:             Handling links.      (line  40)
+* completion, of links:                  Handling links.      (line  28)
 * completion, of option keywords <1>:    Completion.          (line   6)
 * completion, of option keywords:        Export options.      (line   6)
 * Completion, of option keywords:        Per file keywords.   (line  17)
@@ -3596,6 +3629,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * creating timestamps:                   Creating timestamps. (line   6)
 * CUA.el:                                Interaction.         (line  40)
 * custom agenda commands:                Agenda dispatcher.   (line   6)
+* custom search strings:                 Custom searches.     (line   6)
 * customization:                         Customization.       (line   6)
 * cutting, of subtrees:                  Structure editing.   (line   6)
 * cycling, of TODO states:               TODO basics.         (line  13)
@@ -3627,15 +3661,15 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * FAQ:                                   FAQ.                 (line   6)
 * feedback:                              Feedback.            (line   6)
 * file links:                            External links.      (line   6)
-* file links, searching:                 Search Options.      (line   6)
-* file name completion:                  Handling links.      (line  36)
+* file links, searching:                 Search options.      (line   6)
+* file name completion:                  Handling links.      (line  40)
 * files, adding to agenda list:          Agenda files.        (line  12)
 * filing subtrees:                       Archiving.           (line   6)
 * fixed width:                           Enhancing text.      (line  30)
 * fixed-width sections:                  Export options.      (line  25)
 * folded, subtree visibility state:      Visibility cycling.  (line  10)
 * folding, sparse trees:                 Sparse trees.        (line   6)
-* following links:                       Handling links.      (line  51)
+* following links:                       Handling links.      (line  55)
 * format specifier:                      Formula syntax.      (line  34)
 * format, of links:                      Link format.         (line   6)
 * formula editing:                       Editing/debugging formulas.
@@ -3669,7 +3703,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * indentation, of tables:                FAQ.                 (line 113)
 * indirect buffers:                      FAQ.                 (line  65)
 * inheritance, of tags:                  Tag inheritance.     (line   6)
-* inserting links:                       Handling links.      (line  24)
+* inserting links:                       Handling links.      (line  28)
 * installation:                          Installation and activation.
                                                               (line   6)
 * internal links:                        Internal links.      (line   6)
@@ -3681,18 +3715,18 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * keymapp nil error:                     FAQ.                 (line   6)
 * keyword options:                       Per file keywords.   (line   6)
 * linebreak preservation:                Export options.      (line  25)
-* link completion:                       Handling links.      (line  24)
+* link completion:                       Handling links.      (line  28)
 * link format:                           Link format.         (line   6)
 * links, external:                       External links.      (line   6)
 * links, internal:                       Internal links.      (line   6)
-* links, returning to:                   Handling links.      (line  77)
+* links, returning to:                   Handling links.      (line  81)
 * lists, hand-formatted:                 Enhancing text.      (line  11)
 * lists, ordered:                        Plain lists.         (line   6)
 * lists, plain:                          Plain lists.         (line   6)
 * logging, of progress:                  Progress logging.    (line   6)
 * maintainer:                            Feedback.            (line   6)
 * make-indirect-buffer:                  FAQ.                 (line  65)
-* mark ring:                             Handling links.      (line  73)
+* mark ring:                             Handling links.      (line  77)
 * marking characters, tables:            Advanced features.   (line  34)
 * matching, of tags:                     Matching headline tags.
                                                               (line   6)
@@ -3745,7 +3779,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * RMAIL links:                           External links.      (line   6)
 * SCHEDULED keyword:                     Time stamps.         (line  30)
 * scheduling:                            Time stamps.         (line   6)
-* search option in file links:           Search Options.      (line   6)
+* search option in file links:           Search options.      (line   6)
 * section-numbers:                       Export options.      (line  25)
 * setting tags:                          Setting tags.        (line   6)
 * SHELL links:                           External links.      (line   6)
@@ -3861,8 +3895,8 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-,:                                   Agenda files.        (line  18)
 * C-c !:                                 Creating timestamps. (line  21)
 * C-c $:                                 Archiving.           (line   9)
-* C-c %:                                 Handling links.      (line  73)
-* C-c &:                                 Handling links.      (line  77)
+* C-c %:                                 Handling links.      (line  77)
+* C-c &:                                 Handling links.      (line  81)
 * C-c ' <1>:                             Editing/debugging formulas.
                                                               (line  20)
 * C-c ':                                 Built-in table editor.
@@ -3920,10 +3954,10 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
-* C-c C-l:                               Handling links.      (line  24)
+* C-c C-l:                               Handling links.      (line  28)
 * C-c C-n:                               Motion.              (line   8)
 * C-c C-o <1>:                           Creating timestamps. (line  33)
-* C-c C-o:                               Handling links.      (line  51)
+* C-c C-o:                               Handling links.      (line  55)
 * C-c C-p:                               Motion.              (line   9)
 * C-c C-q <1>:                           Editing/debugging formulas.
                                                               (line  20)
@@ -3963,7 +3997,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-u C-c .:                             Creating timestamps. (line  16)
 * C-u C-c =:                             Built-in table editor.
                                                               (line 139)
-* C-u C-c C-l:                           Handling links.      (line  36)
+* C-u C-c C-l:                           Handling links.      (line  40)
 * D:                                     Agenda commands.     (line  66)
 * d:                                     Agenda commands.     (line  63)
 * f:                                     Agenda commands.     (line  44)
@@ -4009,11 +4043,11 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * M-S-<up>:                              Structure editing.   (line  30)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           Creating timestamps. (line  79)
-* mouse-1:                               Handling links.      (line  65)
+* mouse-1:                               Handling links.      (line  69)
 * mouse-2 <1>:                           Agenda commands.     (line  35)
-* mouse-2:                               Handling links.      (line  65)
+* mouse-2:                               Handling links.      (line  69)
 * mouse-3 <1>:                           Agenda commands.     (line  28)
-* mouse-3:                               Handling links.      (line  70)
+* mouse-3:                               Handling links.      (line  74)
 * n:                                     Agenda commands.     (line  19)
 * o:                                     Agenda commands.     (line  57)
 * P:                                     Agenda commands.     (line 115)
@@ -4046,99 +4080,100 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 
 Tag Table:
 Node: Top959
-Node: Introduction7444
-Node: Summary7758
-Node: Installation and activation9866
-Node: Feedback11535
-Node: Document structure12321
-Node: Outlines13087
-Node: Headlines13747
-Node: Visibility cycling14370
-Node: Motion15566
-Node: Structure editing16350
-Node: Archiving18459
-Node: Sparse trees19319
-Ref: Sparse trees-Footnote-121348
-Ref: Sparse trees-Footnote-221440
-Node: Plain lists21555
-Ref: Plain lists-Footnote-124849
-Node: Tables25206
-Node: Built-in table editor25754
-Node: Narrow columns33367
-Ref: Narrow columns-Footnote-135306
-Node: Table calculations35352
-Node: Formula syntax36528
-Ref: Formula syntax-Footnote-139457
-Node: Column formulas39756
-Node: Advanced features41518
-Node: Named-field formulas44773
-Node: Editing/debugging formulas45413
-Node: Appetizer47171
-Node: orgtbl-mode48273
-Node: table.el48764
-Node: Hyperlinks49741
-Node: Link format50375
-Node: Internal links51672
-Node: Radio targets53622
-Node: CamelCase links54337
-Node: External links54835
-Node: Handling links56760
-Node: Search Options60853
-Ref: Search Options-Footnote-162323
-Node: Remember62404
-Ref: Remember-Footnote-166270
-Node: TODO items66394
-Node: TODO basics67317
-Node: Progress logging68658
-Node: TODO extensions69444
-Node: Workflow states70244
-Node: TODO types71112
-Ref: TODO types-Footnote-172770
-Node: Per file keywords72852
-Ref: Per file keywords-Footnote-174305
-Node: Priorities74533
-Node: Timestamps75742
-Node: Time stamps76063
-Node: Creating timestamps78491
-Node: Tags81620
-Node: Tag inheritance82355
-Node: Setting tags83292
-Node: Tag searches84254
-Node: Agenda views85463
-Node: Agenda files87002
-Ref: Agenda files-Footnote-187962
-Ref: Agenda files-Footnote-288111
-Node: Agenda dispatcher88303
-Node: Weekly/Daily agenda90433
-Node: Categories91568
-Node: Time-of-day specifications92216
-Node: Calendar/Diary integration94192
-Node: Sorting of agenda items95569
-Node: Global TODO list96401
-Node: Matching headline tags97816
-Node: Timeline98759
-Node: Agenda commands99632
-Node: Exporting104888
-Node: ASCII export106018
-Node: HTML export106840
-Node: XML export108588
-Node: iCalendar export108955
-Node: Text interpretation110777
-Node: Comment lines111254
-Node: Enhancing text111723
-Node: Export options113554
-Node: Miscellaneous115156
-Node: Completion115914
-Node: Customization116910
-Node: Summary of in-buffer settings117517
-Node: The very busy C-c C-c key120278
-Node: Clean view121683
-Node: TTY keys124260
-Node: FAQ125861
-Node: Interaction132763
-Node: Bugs135630
-Node: Acknowledgments137584
-Node: Index140679
-Node: Key Index161903
+Node: Introduction7514
+Node: Summary7828
+Node: Installation and activation9936
+Node: Feedback11605
+Node: Document structure12391
+Node: Outlines13157
+Node: Headlines13817
+Node: Visibility cycling14440
+Node: Motion15636
+Node: Structure editing16420
+Node: Archiving18529
+Node: Sparse trees19389
+Ref: Sparse trees-Footnote-121418
+Ref: Sparse trees-Footnote-221510
+Node: Plain lists21625
+Ref: Plain lists-Footnote-124919
+Node: Tables25276
+Node: Built-in table editor25824
+Node: Narrow columns33437
+Ref: Narrow columns-Footnote-135376
+Node: Table calculations35422
+Node: Formula syntax36598
+Ref: Formula syntax-Footnote-139527
+Node: Column formulas39826
+Node: Advanced features41588
+Node: Named-field formulas44843
+Node: Editing/debugging formulas45483
+Node: Appetizer47241
+Node: orgtbl-mode48343
+Node: table.el48834
+Node: Hyperlinks49811
+Node: Link format50515
+Node: Internal links51812
+Node: Radio targets53762
+Node: CamelCase links54477
+Node: External links54975
+Node: Handling links56900
+Node: Search options61232
+Ref: Search options-Footnote-163008
+Node: Custom searches63089
+Node: Remember64137
+Ref: Remember-Footnote-168004
+Node: TODO items68128
+Node: TODO basics69051
+Node: Progress logging70392
+Node: TODO extensions71178
+Node: Workflow states71978
+Node: TODO types72846
+Ref: TODO types-Footnote-174504
+Node: Per file keywords74586
+Ref: Per file keywords-Footnote-176039
+Node: Priorities76267
+Node: Timestamps77476
+Node: Time stamps77797
+Node: Creating timestamps80225
+Node: Tags83354
+Node: Tag inheritance84089
+Node: Setting tags85026
+Node: Tag searches85988
+Node: Agenda views87197
+Node: Agenda files88736
+Ref: Agenda files-Footnote-189696
+Ref: Agenda files-Footnote-289845
+Node: Agenda dispatcher90037
+Node: Weekly/Daily agenda92167
+Node: Categories93302
+Node: Time-of-day specifications93950
+Node: Calendar/Diary integration95926
+Node: Sorting of agenda items97303
+Node: Global TODO list98135
+Node: Matching headline tags99550
+Node: Timeline100493
+Node: Agenda commands101366
+Node: Exporting106622
+Node: ASCII export107752
+Node: HTML export108574
+Node: XML export110322
+Node: iCalendar export110689
+Node: Text interpretation112511
+Node: Comment lines112988
+Node: Enhancing text113457
+Node: Export options115288
+Node: Miscellaneous116890
+Node: Completion117648
+Node: Customization118644
+Node: Summary of in-buffer settings119251
+Node: The very busy C-c C-c key122012
+Node: Clean view123417
+Node: TTY keys125994
+Node: FAQ127595
+Node: Interaction134497
+Node: Bugs137364
+Node: Acknowledgments139318
+Node: Index142413
+Node: Key Index163710
 
 End Tag Table
