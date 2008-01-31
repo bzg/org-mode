@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.23).
+   This manual is for Org-mode (version 4.24).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.23).
+This manual is for Org-mode (version 4.24).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -931,7 +931,7 @@ A formula can be any algebraic expression understood by the Emacs
 `calc' package.  Note that `calc' has the slightly non-standard
 convention that `/' has lower precedence than `*', so that `a/b*c' is
 interpreted as `a/(b*c)'.  Before evaluation by `calc-eval' (*note
-calc-eval: (calc)Calling Calc from Your Lisp Programs.), variable
+calc-eval: (calc)Calling Calc from Your Programs.), variable
 substitution takes place:
 
        $        refers to the current field
@@ -3426,6 +3426,8 @@ Org-mode would not be what it is without your input.
 
    * Sacha Chua suggested to copy some linking code from Planner.
 
+   * Kees Dullemond inspired the use of narrowed tabled columns.
+
    * Christian Egli converted the documentation into TeXInfo format,
      patched CSS formatting into the HTML exporter, and inspired the
      agenda.
@@ -4029,77 +4031,77 @@ Node: Narrow columns32466
 Ref: Narrow columns-Footnote-134399
 Node: Table calculations34445
 Node: Formula syntax35621
-Ref: Formula syntax-Footnote-138555
-Node: Column formulas38854
-Node: Advanced features40616
-Node: Named-field formulas43871
-Node: Editing/debugging formulas44511
-Node: Appetizer46269
-Node: orgtbl-mode47371
-Node: table.el47862
-Node: Hyperlinks48839
-Node: Link format49473
-Node: Internal links50770
-Node: Radio targets52660
-Node: CamelCase links53375
-Node: External links53873
-Node: Managing links55798
-Node: Search Options59782
-Ref: Search Options-Footnote-161102
-Node: Remember61183
-Ref: Remember-Footnote-165049
-Node: TODO items65173
-Node: TODO basics66096
-Node: Progress logging67611
-Node: TODO extensions68397
-Node: Workflow states69197
-Node: TODO types70065
-Ref: TODO types-Footnote-171723
-Node: Per file keywords71805
-Ref: Per file keywords-Footnote-173258
-Node: Priorities73486
-Node: Timestamps74695
-Node: Time stamps75016
-Node: Creating timestamps77031
-Node: Tags80160
-Node: Tag inheritance80895
-Node: Setting tags81832
-Node: Tag searches82794
-Node: Agenda Views84003
-Node: Agenda files85542
-Ref: Agenda files-Footnote-186502
-Ref: Agenda files-Footnote-286651
-Node: Agenda dispatcher86843
-Node: Weekly/Daily Agenda88973
-Node: Categories90108
-Node: Time-of-day specifications90756
-Node: Calendar/Diary integration92732
-Node: Sorting of agenda items94109
-Node: Global TODO list94941
-Node: Matching headline tags96356
-Node: Timeline97299
-Node: Agenda commands98172
-Node: Exporting103428
-Node: ASCII export104558
-Node: HTML export105380
-Node: XML export107128
-Node: iCalendar export107495
-Node: Text interpretation109317
-Node: Comment lines109794
-Node: Enhancing text110263
-Node: Export options112094
-Node: Miscellaneous113696
-Node: Completion114454
-Node: Customization115450
-Node: Summary of in-buffer settings116057
-Node: The very busy C-c C-c key118816
-Node: Clean view120221
-Node: TTY keys122798
-Node: FAQ124399
-Node: Interaction130713
-Node: Bugs133580
-Node: Acknowledgments135534
-Node: Index138466
-Node: Key Index159544
+Ref: Formula syntax-Footnote-138550
+Node: Column formulas38849
+Node: Advanced features40611
+Node: Named-field formulas43866
+Node: Editing/debugging formulas44506
+Node: Appetizer46264
+Node: orgtbl-mode47366
+Node: table.el47857
+Node: Hyperlinks48834
+Node: Link format49468
+Node: Internal links50765
+Node: Radio targets52655
+Node: CamelCase links53370
+Node: External links53868
+Node: Managing links55793
+Node: Search Options59777
+Ref: Search Options-Footnote-161097
+Node: Remember61178
+Ref: Remember-Footnote-165044
+Node: TODO items65168
+Node: TODO basics66091
+Node: Progress logging67606
+Node: TODO extensions68392
+Node: Workflow states69192
+Node: TODO types70060
+Ref: TODO types-Footnote-171718
+Node: Per file keywords71800
+Ref: Per file keywords-Footnote-173253
+Node: Priorities73481
+Node: Timestamps74690
+Node: Time stamps75011
+Node: Creating timestamps77026
+Node: Tags80155
+Node: Tag inheritance80890
+Node: Setting tags81827
+Node: Tag searches82789
+Node: Agenda Views83998
+Node: Agenda files85537
+Ref: Agenda files-Footnote-186497
+Ref: Agenda files-Footnote-286646
+Node: Agenda dispatcher86838
+Node: Weekly/Daily Agenda88968
+Node: Categories90103
+Node: Time-of-day specifications90751
+Node: Calendar/Diary integration92727
+Node: Sorting of agenda items94104
+Node: Global TODO list94936
+Node: Matching headline tags96351
+Node: Timeline97294
+Node: Agenda commands98167
+Node: Exporting103423
+Node: ASCII export104553
+Node: HTML export105375
+Node: XML export107123
+Node: iCalendar export107490
+Node: Text interpretation109312
+Node: Comment lines109789
+Node: Enhancing text110258
+Node: Export options112089
+Node: Miscellaneous113691
+Node: Completion114449
+Node: Customization115445
+Node: Summary of in-buffer settings116052
+Node: The very busy C-c C-c key118811
+Node: Clean view120216
+Node: TTY keys122793
+Node: FAQ124394
+Node: Interaction130708
+Node: Bugs133575
+Node: Acknowledgments135529
+Node: Index138527
+Node: Key Index159605
 
 End Tag Table
