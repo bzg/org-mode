@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.13e
+;; Version: 5.13g
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.13e"
+(defconst org-version "5.13g"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -4307,6 +4307,8 @@ This is for getting out of special buffers like remember.")
 (defvar texmathp-why)
 (defvar remember-save-after-remembering)
 (defvar remember-data-file)
+(defvar remember-register)
+(defvar remember-buffer)
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
 (defvar org-latex-regexps)
@@ -13410,7 +13412,8 @@ For calling through lisp, arg is also interpreted in the following way:
       (if (looking-at outline-regexp) (goto-char (1- (match-end 0))))
       (or (looking-at (concat " +" org-todo-regexp " *"))
 	  (looking-at " *"))
-      (let* ((startpos (line-beginning-position))
+      (let* ((match-data (match-data))
+	     (startpos (line-beginning-position))
 	     (logging (save-match-data (org-entry-get nil "LOGGING" t)))
 	     (org-log-done (org-parse-local-options logging 'org-log-done))
 	     (org-log-repeat (org-parse-local-options logging 'org-log-repeat))
@@ -13494,6 +13497,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	      ;; fail silently
 	      (message "TODO state change from %s to %s blocked" this state)
 	      (throw 'exit nil))))
+	(store-match-data match-data)
 	(replace-match next t t)
 	(unless (pos-visible-in-window-p hl-pos)
 	  (message "TODO state changed to %s" (org-trim next)))
@@ -13586,7 +13590,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	  (set-buffer (get-buffer-create " *Org todo*"))
 ;	(delete-other-windows)
 ;	(split-window-vertically)
-	(org-switch-to-buffer-other-window (get-buffer-create " *Org tags*")))
+	(org-switch-to-buffer-other-window (get-buffer-create " *Org todo*")))
       (erase-buffer)
       (org-set-local 'org-done-keywords done-keywords)
       (setq tbl fulltable cnt 0)
@@ -15607,12 +15611,17 @@ Where possible, use the standard interface for changing this line."
 	    org-columns-top-level-marker))
      key1 nval)))
 
+(defmacro org-no-warnings (&rest body)
+  (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
+    
 (defun org-columns-eval (form)
   (let (hidep)
     (save-excursion
       (beginning-of-line 1)
       ;; `next-line' is needed here, because it skips invisible line.
-      (condition-case nil (next-line 1) (error nil))
+      ;; FIXME: RMS says this should be wrapped into `with-no-warnings'
+      ;; but I don't know how to do this and keep the code XEmacs compatible.
+      (condition-case nil (org-no-warnings (next-line 1)) (error nil))
       (setq hidep (org-on-heading-p 1)))
     (eval form)
     (and hidep (hide-entry))))
@@ -18356,15 +18365,15 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		  (format "set of %d commands" (length match)))
 		 (t ""))))))
 	  (when prefixes
-	    (mapcar (lambda (x)
-		      (insert
-		       (format "\n%s   %s"
-			       (org-add-props (char-to-string x)
-				   nil 'face 'bold)
-			       (or (cdr (assoc (concat selstring (char-to-string x))
-					       prefix-descriptions))
-				   "Prefix key"))))
-		    prefixes))
+	    (mapc (lambda (x)
+		    (insert
+		     (format "\n%s   %s"
+			     (org-add-props (char-to-string x)
+					    nil 'face 'bold)
+			     (or (cdr (assoc (concat selstring (char-to-string x))
+					     prefix-descriptions))
+				 "Prefix key"))))
+		  prefixes))
 	  (goto-char (point-min))
 	  (when (fboundp 'fit-window-to-buffer)
 	    (if second-time
@@ -19182,18 +19191,24 @@ When EMPTY is non-nil, also include days without any entries."
 
 ;;;###autoload
 (defun org-agenda-list (&optional include-all start-day ndays)
-  "Produce a weekly view from all files in variable `org-agenda-files'.
-The view will be for the current week, but from the overview buffer you
-will be able to go to other weeks.
-With one \\[universal-argument] prefix argument INCLUDE-ALL, all unfinished TODO items will
-also be shown, under the current date.
-With two \\[universal-argument] prefix argument INCLUDE-ALL, all TODO entries marked DONE
-on the days are also shown.  See the variable `org-log-done' for how
-to turn on logging.
+  "Produce a daily/weekly view from all files in variable `org-agenda-files'.
+The view will be for the current day or week, but from the overview buffer
+you will be able to go to other days/weeks.
+
+With one \\[universal-argument] prefix argument INCLUDE-ALL,
+all unfinished TODO items will also be shown, before the agenda.
+This feature is considered obsolete, please use the TODO list or a block
+agenda instead.
+
+With a numeric prefix argument in an interactive call, the agenda will
+span INCLUDE-ALL days.  Lisp programs should instead specify NDAYS to change
+the number of days.  NDAYS defaults to `org-agenda-ndays'.
+
 START-DAY defaults to TODAY, or to the most recent match for the weekday
-given in `org-agenda-start-on-weekday'.
-NDAYS defaults to `org-agenda-ndays'."
+given in `org-agenda-start-on-weekday'."
   (interactive "P")
+  (if (and (integerp include-all) (> include-all 0))
+      (setq ndays include-all include-all nil))
   (setq ndays (or ndays org-agenda-ndays)
 	start-day (or start-day org-agenda-start-day))
   (if org-agenda-overriding-arguments

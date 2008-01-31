@@ -1,24 +1,32 @@
-2007-10-24  Carsten Dominik  <dominik@science.uva.nl>
+2007-10-25  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-agenda-get-restriction-and-command): Fix window size.
-	(org-read-date-get-relative): Require [-+] at the beginning.
-
-2007-10-23  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-open-link-from-string): New function.
-	(org-columns-open-link): New commands.
-
-2007-10-22  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-scan-tags): Handle indirect buffers.
+	* org.el (org-todo): Restore match data before doing the
+	replacement.
 
 -----------------------------------------------------------------------
 
-Installed as 5.13d
+Installed as 5.13f
 	
-2007-10-22  Carsten Dominik  <dominik@science.uva.nl>
+2007-10-24  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-read-date-get-relative): New function.
+	* org-publish.el (org-publish-get-plist-from-filename): Use `mapc'
+	instead of `mapcar'.
+
+	* org.el (org-agenda-get-restriction-and-command): Use `mapc'
+	instead of `mapcar'.
+	(org-agenda-list): Numeric prefix argument can specify the number
+	of days.
+	(remember-register, remember-buffer): Prevent byte compiler from
+	complaining.
+
+
+	* org.el (org-agenda-get-restriction-and-command): Fix window
+	size.
+	(org-read-date-get-relative): Require [-+] at the beginning.
+	(org-open-link-from-string): New function.
+	(org-columns-open-link): New commands.
+	(org-scan-tags): Handle indirect buffers.
+	(org-read-date-get-relative): New function.
 	(org-agenda-file-regexp): New variable.
 	(org-agenda-files): Allow directories in the variable.
 	(org-agenda-get-restriction-and-command): New function.

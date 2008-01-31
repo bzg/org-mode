@@ -179,12 +179,19 @@ release:
 	cp org-release/org-$(TAG).tar.gz org-release/org.tar.gz
 	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
 	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
 
 trackrelease:
 	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
 	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
+	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
+
+upload:
+	(cd org-release; lftp -f ../ftp_script)
+
+relup:
+	make release
+	make upload
 
 dist:
 	make distfile TAG=$(TAG)

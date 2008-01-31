@@ -4315,6 +4315,7 @@ The following customization will tell @i{remember} to use org files as
 target, and to create annotations compatible with Org-mode links.
 
 @example
+(require 'remember)
 (setq org-directory "~/path/to/my/orgfiles/")
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (setq remember-annotation-functions '(org-remember-annotation))
@@ -4632,10 +4633,12 @@ paper agenda, showing all the tasks for the current week or day.
 @kindex C-c a a
 @item C-c a a
 Compile an agenda for the current week from a list of org files.  The
-agenda shows the entries for each day.  With a @kbd{C-u} prefix (or
-when the variable @code{org-agenda-include-all-todo} is @code{t}), all
-unfinished TODO items (including those without a date) are also listed at
-the beginning of the buffer, before the first date.@*
+agenda shows the entries for each day.  With a numeric
+prefix@footnote{For backward compatibility, the universal prefix
+@kbd{C-u} causes all TODO entries to be listed before the agenda.  This
+feature is deprecated, use the dedicated TODO list, or a block agenda
+instead.}  (like @kbd{C-u 2 1 C-c a a}) you may set the number of days
+to be displayed (see also the variable @code{org-agenda-ndays})
 @end table
 
 Remote editing from the agenda buffer means, for example, that you can

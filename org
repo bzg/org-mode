@@ -3978,6 +3978,7 @@ File: org,  Node: Setting up remember,  Next: Remember templates,  Prev: Remembe
 The following customization will tell remember to use org files as
 target, and to create annotations compatible with Org-mode links.
 
+     (require 'remember)
      (setq org-directory "~/path/to/my/orgfiles/")
      (setq org-default-notes-file (concat org-directory "/notes.org"))
      (setq remember-annotation-functions '(org-remember-annotation))
@@ -4297,10 +4298,9 @@ paper agenda, showing all the tasks for the current week or day.
 
 `C-c a a'
      Compile an agenda for the current week from a list of org files.
-     The agenda shows the entries for each day.  With a `C-u' prefix (or
-     when the variable `org-agenda-include-all-todo' is `t'), all
-     unfinished TODO items (including those without a date) are also
-     listed at the beginning of the buffer, before the first date.
+     The agenda shows the entries for each day.  With a numeric
+     prefix(1)  (like `C-u 2 1 C-c a a') you may set the number of days
+     to be displayed (see also the variable `org-agenda-ndays')
 
    Remote editing from the agenda buffer means, for example, that you
 can change the dates of deadlines and appointments from the agenda
@@ -4359,6 +4359,12 @@ Org can interact with Emacs appointments notification facility.
 list of your appointments and add only those belonging to a specific
 category or matching a regular expression. See the docstring for
 details.
+
+   ---------- Footnotes ----------
+
+   (1) For backward compatibility, the universal prefix `C-u' causes
+all TODO entries to be listed before the agenda.  This feature is
+deprecated, use the dedicated TODO list, or a block agenda instead.
 
 
 File: org,  Node: Global TODO list,  Next: Matching tags and properties,  Prev: Weekly/Daily agenda,  Up: Built-in agenda views
@@ -7647,8 +7653,8 @@ Index
 * API, for properties <1>:               Property API.        (line   6)
 * API, for properties:                   Using the property API.
                                                               (line   6)
-* appointment reminders:                 Weekly/Daily agenda. (line  66)
-* appt.el:                               Weekly/Daily agenda. (line  66)
+* appointment reminders:                 Weekly/Daily agenda. (line  65)
+* appt.el:                               Weekly/Daily agenda. (line  65)
 * archive locations:                     Moving subtrees.     (line  23)
 * archiving:                             Archiving.           (line   6)
 * ASCII export:                          ASCII export.        (line   6)
@@ -7671,7 +7677,7 @@ Index
 * calculations, in tables:               Built-in table editor.
                                                               (line 143)
 * calendar commands, from agenda:        Agenda commands.     (line 196)
-* calendar integration:                  Weekly/Daily agenda. (line  24)
+* calendar integration:                  Weekly/Daily agenda. (line  23)
 * calendar, for selecting date:          The date/time prompt.
                                                               (line  42)
 * category:                              Categories.          (line   6)
@@ -7729,7 +7735,7 @@ Index
                                                               (line  97)
 * demotion, of subtrees:                 Structure editing.   (line   6)
 * diary entries, creating from agenda:   Agenda commands.     (line 201)
-* diary integration:                     Weekly/Daily agenda. (line  24)
+* diary integration:                     Weekly/Daily agenda. (line  23)
 * dictionary word completion:            Completion.          (line   6)
 * directories, for publishing:           Sources and destinations.
                                                               (line   6)
@@ -8624,112 +8630,113 @@ Ref: Clocking work time-Footnote-1160828
 Ref: Clocking work time-Footnote-2160906
 Node: Remember161032
 Node: Setting up remember161911
-Node: Remember templates162514
-Ref: Remember templates-Footnote-1166075
-Ref: Remember templates-Footnote-2166258
-Node: Storing notes166356
-Ref: Storing notes-Footnote-1168835
-Node: Agenda views168937
-Node: Agenda files170888
-Ref: Agenda files-Footnote-1171976
-Ref: Agenda files-Footnote-2172125
-Node: Agenda dispatcher172318
-Ref: Agenda dispatcher-Footnote-1174372
-Ref: Agenda dispatcher-Footnote-2174466
-Node: Built-in agenda views174560
-Node: Weekly/Daily agenda175142
-Node: Global TODO list178479
-Node: Matching tags and properties180759
-Node: Timeline181850
-Node: Stuck projects182524
-Node: Presentation and sorting184377
-Node: Categories185170
-Ref: Categories-Footnote-1185881
-Node: Time-of-day specifications186201
-Node: Sorting of agenda items188174
-Node: Agenda commands189458
-Node: Custom agenda views196921
-Node: Storing searches197642
-Ref: Storing searches-Footnote-1200176
-Node: Block agenda200293
-Node: Setting Options201525
-Node: Exporting Agenda Views204266
-Ref: Exporting Agenda Views-Footnote-1208552
-Ref: Exporting Agenda Views-Footnote-2208609
-Node: Extracting Agenda Information for other programs208795
-Node: Embedded LaTeX212923
-Ref: Embedded LaTeX-Footnote-1214017
-Node: Math symbols214207
-Node: Subscripts and Superscripts214974
-Node: LaTeX fragments215820
-Ref: LaTeX fragments-Footnote-1218053
-Ref: LaTeX fragments-Footnote-2218314
-Node: Processing LaTeX fragments218448
-Node: CDLaTeX mode219396
-Ref: CDLaTeX mode-Footnote-1221882
-Node: Exporting222030
-Node: ASCII export223497
-Node: HTML export224998
-Node: HTML Export commands225624
-Node: Quoting HTML tags227411
-Node: Links228046
-Node: Images228743
-Ref: Images-Footnote-1229614
-Node: CSS support229675
-Ref: CSS support-Footnote-1230994
-Node: LaTeX export231107
-Node: LaTeX export commands231431
-Node: Quoting LaTeX code232593
-Node: XOXO export233098
-Node: iCalendar export233538
-Node: Text interpretation235007
-Node: Comment lines235598
-Node: Initial text235993
-Node: Footnotes237662
-Node: Enhancing text238453
-Ref: Enhancing text-Footnote-1240322
-Node: Export options240412
-Node: Publishing242814
-Ref: Publishing-Footnote-1243775
-Ref: Publishing-Footnote-2243919
-Node: Configuration244070
-Node: Project alist244788
-Node: Sources and destinations245854
-Node: Selecting files246584
-Node: Publishing action247332
-Node: Publishing options248666
-Node: Publishing links251041
-Node: Project page index252554
-Node: Sample configuration253332
-Node: Simple example253824
-Node: Complex example254497
-Node: Triggering publication256573
-Node: Miscellaneous257258
-Node: Completion257892
-Node: Customization259562
-Node: In-buffer settings260145
-Node: The very busy C-c C-c key265815
-Node: Clean view267670
-Node: TTY keys270247
-Node: Interaction271857
-Node: Cooperation272254
-Node: Conflicts275130
-Node: Bugs277133
-Node: Extensions and Hacking278629
-Node: Extensions279354
-Node: Adding hyperlink types281616
-Node: Tables in arbitrary syntax285278
-Node: Radio tables286367
-Node: A LaTeX example288870
-Ref: A LaTeX example-Footnote-1292516
-Ref: A LaTeX example-Footnote-2292664
-Node: Translator functions293099
-Ref: Translator functions-Footnote-1296208
-Node: Dynamic blocks296296
-Node: Special agenda views298268
-Node: Using the property API301513
-Node: History and Acknowledgments302994
-Node: Index309555
-Node: Key Index344624
+Node: Remember templates162539
+Ref: Remember templates-Footnote-1166100
+Ref: Remember templates-Footnote-2166283
+Node: Storing notes166381
+Ref: Storing notes-Footnote-1168860
+Node: Agenda views168962
+Node: Agenda files170913
+Ref: Agenda files-Footnote-1172001
+Ref: Agenda files-Footnote-2172150
+Node: Agenda dispatcher172343
+Ref: Agenda dispatcher-Footnote-1174397
+Ref: Agenda dispatcher-Footnote-2174491
+Node: Built-in agenda views174585
+Node: Weekly/Daily agenda175167
+Ref: Weekly/Daily agenda-Footnote-1178465
+Node: Global TODO list178669
+Node: Matching tags and properties180949
+Node: Timeline182040
+Node: Stuck projects182714
+Node: Presentation and sorting184567
+Node: Categories185360
+Ref: Categories-Footnote-1186071
+Node: Time-of-day specifications186391
+Node: Sorting of agenda items188364
+Node: Agenda commands189648
+Node: Custom agenda views197111
+Node: Storing searches197832
+Ref: Storing searches-Footnote-1200366
+Node: Block agenda200483
+Node: Setting Options201715
+Node: Exporting Agenda Views204456
+Ref: Exporting Agenda Views-Footnote-1208742
+Ref: Exporting Agenda Views-Footnote-2208799
+Node: Extracting Agenda Information for other programs208985
+Node: Embedded LaTeX213113
+Ref: Embedded LaTeX-Footnote-1214207
+Node: Math symbols214397
+Node: Subscripts and Superscripts215164
+Node: LaTeX fragments216010
+Ref: LaTeX fragments-Footnote-1218243
+Ref: LaTeX fragments-Footnote-2218504
+Node: Processing LaTeX fragments218638
+Node: CDLaTeX mode219586
+Ref: CDLaTeX mode-Footnote-1222072
+Node: Exporting222220
+Node: ASCII export223687
+Node: HTML export225188
+Node: HTML Export commands225814
+Node: Quoting HTML tags227601
+Node: Links228236
+Node: Images228933
+Ref: Images-Footnote-1229804
+Node: CSS support229865
+Ref: CSS support-Footnote-1231184
+Node: LaTeX export231297
+Node: LaTeX export commands231621
+Node: Quoting LaTeX code232783
+Node: XOXO export233288
+Node: iCalendar export233728
+Node: Text interpretation235197
+Node: Comment lines235788
+Node: Initial text236183
+Node: Footnotes237852
+Node: Enhancing text238643
+Ref: Enhancing text-Footnote-1240512
+Node: Export options240602
+Node: Publishing243004
+Ref: Publishing-Footnote-1243965
+Ref: Publishing-Footnote-2244109
+Node: Configuration244260
+Node: Project alist244978
+Node: Sources and destinations246044
+Node: Selecting files246774
+Node: Publishing action247522
+Node: Publishing options248856
+Node: Publishing links251231
+Node: Project page index252744
+Node: Sample configuration253522
+Node: Simple example254014
+Node: Complex example254687
+Node: Triggering publication256763
+Node: Miscellaneous257448
+Node: Completion258082
+Node: Customization259752
+Node: In-buffer settings260335
+Node: The very busy C-c C-c key266005
+Node: Clean view267860
+Node: TTY keys270437
+Node: Interaction272047
+Node: Cooperation272444
+Node: Conflicts275320
+Node: Bugs277323
+Node: Extensions and Hacking278819
+Node: Extensions279544
+Node: Adding hyperlink types281806
+Node: Tables in arbitrary syntax285468
+Node: Radio tables286557
+Node: A LaTeX example289060
+Ref: A LaTeX example-Footnote-1292706
+Ref: A LaTeX example-Footnote-2292854
+Node: Translator functions293289
+Ref: Translator functions-Footnote-1296398
+Node: Dynamic blocks296486
+Node: Special agenda views298458
+Node: Using the property API301703
+Node: History and Acknowledgments303184
+Node: Index309745
+Node: Key Index344814
 
 End Tag Table

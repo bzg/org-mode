@@ -426,7 +426,7 @@ nil if not found."
 (defun org-publish-get-plist-from-filename (filename)
   "Return publishing configuration plist for file FILENAME."
   (let ((found nil))
-    (mapcar
+    (mapc
      (lambda (plist)
        (let ((files (org-publish-get-base-files plist)))
  	 (if (member (expand-file-name filename) files)
@@ -464,9 +464,10 @@ FILENAME is the filename of the org file to be published."
 PLIST is the property list for the given project.
 FILENAME is the filename of the file to be published."
   ;; make sure eshell/cp code is loaded
-  (require 'eshell)
-  (require 'esh-maint)
-  (require 'em-unix)
+  (eval-and-compile 
+    (require 'eshell)
+    (require 'esh-maint)
+    (require 'em-unix))
   (let ((destination (file-name-as-directory (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
