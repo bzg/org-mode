@@ -1,6 +1,6 @@
- ;;; org-export-latex.el --- LaTeX exporter for org-mode
+;;; org-export-latex.el --- LaTeX exporter for org-mode
 ;;
-;; copyright (c) 2007 free software foundation, inc.
+;; Copyright (c) 2007 free software foundation, inc.
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-export-latex.el

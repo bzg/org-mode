@@ -1,12 +1,18 @@
-2007-10-25  Carsten Dominik  <dominik@science.uva.nl>
+2007-10-26  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-todo): Restore match data before doing the
-	replacement.
+	* org.el (org-select-remember-template): New function.
+	(org-remember-apply-template): Use
+	`org-select-remember-template'.
 
 -----------------------------------------------------------------------
 
-Installed as 5.13f
+Installed as 5.13g
 	
+2007-10-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-remember-handler): Make sure the amount of
+	whitespace after the note is right.
+
 2007-10-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-get-plist-from-filename): Use `mapc'

@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.13g
+;; Version: 5.13h
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.13g"
+(defconst org-version "5.13h"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -23093,6 +23093,8 @@ command."
 				(?\C-b . org-export-as-html-and-open)
 				(?h . org-export-as-html)
 				(?H . org-export-as-html-to-buffer)
+				(?l . org-export-as-latex)
+				(?L . org-export-as-latex-to-buffer)
 				(?R . org-export-region-as-html)
 				(?x . org-export-as-xoxo)))))
 	 (keepp (equal type ?\ ))
@@ -23929,7 +23931,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (pop local-list-num))
 	(setq local-list-indent nil
 	      in-local-list nil))
-      (org-html-level-start 0 nil umax
+      (org-html-level-start 1 nil umax
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
 
@@ -24435,7 +24437,8 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
   (let ((l org-level-max))
-    (while (>= l (1+ level))
+    (while (>= l level)
+      ; (while (>= l (1+ level))
       (if (aref org-levels-open (1- l))
 	  (progn
 	    (org-html-level-close l umax)
