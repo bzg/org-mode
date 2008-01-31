@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.59
+@set VERSION 4.60
 @set DATE December 2006
 
 @dircategory Emacs
@@ -180,6 +180,7 @@ Creating timestamps
 Progress Logging
 
 * Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
 * Clocking work time::          When exactly did you work on this item?
 
 Tags
@@ -233,6 +234,14 @@ Exporting
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
+
+HTML export
+
+* Export commands::             How to invode HTML export
+* Quoting HTML tags::           Using direct HTML in Org-mode
+* Links::                       How hyperlinks get transferred to HTML
+* Images::                      To inline or not to inline?
+* CSS support::                 Style specifications
 
 Text interpretation by the exporter
 
@@ -622,7 +631,8 @@ Show all.
 Reveal context around point, showing the current entry, the following
 heading and the hierarchy above.  Useful for working near a location
 exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda
-command (@pxref{Agenda commands}).
+command (@pxref{Agenda commands}).  With prefix arg show, on each
+level, all sibling headings.
 @kindex C-c C-x b
 @item C-c C-x b
 Show the current subtree in an indirect buffer@footnote{The indirect
@@ -867,9 +877,10 @@ An important feature of Org-mode is the ability to construct
 sparse tree means that the entire document is folded as much as
 possible, but the selected information is made visible along with the
 headline structure above it@footnote{See also the variables
-@code{org-show-hierarchy-above} and
-@code{org-show-following-heading}.}.  Just try it out and you will see
-immediately how it works.
+@code{org-show-hierarchy-above}, @code{org-show-following-heading}, and
+@code{org-show-siblings} for detailed control on how much context is
+shown around each match.}.  Just try it out and you will see immediately
+how it works.
 
 Org-mode contains several commands creating such trees.  The most
 basic one is @command{org-occur}:
@@ -1857,12 +1868,19 @@ format}), for example:
 [[http://www.gnu.org/software/emacs/][GNU Emacs]]
 @end example
 
+@noindent
+If the description is a file name or URL that points to an image, HTML
+export (@pxref{HTML export}) will inline the image as a clickable
+button.  If there is no description at all and the link points to an
+image,
+that image will be inlined into the exported HTML file.
+
 @cindex angular brackets, around links
 @cindex plain text external links
 Org-mode also finds external links in the normal text and activates them
 as links.  If spaces must be part of the link (for example in
-@samp{bbdb:Richard Stallman}), or you need to remove ambiguities about the end of
-the link, enclose them in angular brackets.
+@samp{bbdb:Richard Stallman}), or if you need to remove ambiguities
+about the end of the link, enclose them in angular brackets.
 
 @node Handling links, Link abbreviations, External links, Hyperlinks
 @section Handling links
@@ -2304,7 +2322,9 @@ TODO to FEEDBACK, then to VERIFY, and finally to DONE.  You may also
 use a prefix argument to quickly select a specific state.  For example
 @kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
 If you define many keywords, you can use in-buffer completion (see
-@ref{Completion}) to insert these words into the buffer.
+@ref{Completion}) to insert these words into the buffer.  Changing a todo
+state can be logged with a timestamp, see @ref{Tracking TODO state
+changes} for more information.
 
 @node TODO types, Per file keywords, Workflow states, TODO extensions
 @subsection TODO keywords as types
@@ -2831,20 +2851,23 @@ format is shorter, things do work as expected.
 @cindex logging, of progress
 
 Org-mode can automatically record a time stamp when you mark a TODO item
-as DONE.  You can also measure precisely the time you spent on specific
-items in a project by starting and stopping a clock when you start and
-stop working on an aspect of a project.
+as DONE, or even each time when you change the state of a TODO item.
+You can also measure precisely the time you spent on specific items in a
+project by starting and stopping a clock when you start and stop working
+on an aspect of a project.
 
 @menu
 * Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
 * Clocking work time::          When exactly did you work on this item?
 @end menu
 
-@node Closing items, Clocking work time, Progress logging, Progress logging
+@node Closing items, Tracking TODO state changes, Progress logging, Progress logging
 @subsection Closing items
 
 If you want to keep track of @emph{when} a certain TODO item was
-finished, turn on logging with
+finished, turn on logging with@footnote{The corresponding in-buffer
+setting is: @code{#+STARTUP: logdone}}
 
 @lisp
 (setq org-log-done t)
@@ -2853,16 +2876,44 @@ finished, turn on logging with
 @noindent
 Then each time you turn a TODO entry into DONE using either @kbd{C-c
 C-t} in the Org-mode buffer or @kbd{t} in the agenda buffer, a line
-@samp{CLOSED: [timestamp]} will be inserted just after the headline.
-If you turn the entry back into a TODO item again through further
-state cycling, that line will be removed again.  In the timeline
-(@pxref{Timeline}) and in the agenda (@pxref{Weekly/Daily agenda}),
-you can then use the @kbd{l} key to display the TODO items closed on
-each day, giving you an overview of what has been done on a day.
-See the variable @code{org-log-done} for the possibility to record an
-additional note together with a timestamp.
+@samp{CLOSED: [timestamp]} will be inserted just after the headline.  If
+you turn the entry back into a TODO item through further state cycling,
+that line will be removed again.  In the timeline (@pxref{Timeline}) and
+in the agenda (@pxref{Weekly/Daily agenda}), you can then use the
+@kbd{l} key to display the TODO items closed on each day, giving you an
+overview of what has been done on a day.  If you want to record a note
+along with the timestamp, use@footnote{The corresponding in-buffer
+setting is: @code{#+STARTUP: lognotedone}}
 
-@node Clocking work time,  , Closing items, Progress logging
+@lisp
+(setq org-log-done '(done))
+@end lisp
+
+@node Tracking TODO state changes, Clocking work time, Closing items, Progress logging
+@subsection Tracking TODO state changes
+
+When TODO keywords are used as workflow states (@pxref{Workflow
+states}), you might want to keep track of when a state change occurred,
+and you may even want to attach notes to that state change.  With the
+setting
+
+@lisp
+(setq org-log-done '(state))
+@end lisp
+
+@noindent
+each state change will prompt you for a note that will be attached to
+the current headline.  Very likely you do not want this verbose tracking
+all the time, so it is probably better to configure this behavior with
+in-buffer options.  For example, if you are tracking purchases, put
+these into a separate file that starts with:
+
+@example
+#+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
+#+STARTUP: lognotestate
+@end example
+
+@node Clocking work time,  , Tracking TODO state changes, Progress logging
 @subsection Clocking work time
 
 Org-mode allows you to clock the time you spent on specific tasks in a
@@ -2882,7 +2933,9 @@ Stop the clock (clock-out).  The inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
 the resulting time in inserts it after the time range as @samp{=>
 HH:MM}.  See the variable @code{org-log-done} for the possibility to
-record an additional note together with the clock-out time stamp.
+record an additional note together with the clock-out time
+stamp@footnote{The corresponding in-buffer setting is: @code{#+STARTUP:
+lognoteclock-out}}.
 @kindex C-c C-y
 @item C-c C-y
 Recompute the time interval after changing one of the time stamps.  This
@@ -2950,6 +3003,29 @@ you have several clocktable blocks in a buffer.
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
 worked on or closed during a day.
+
+@c @node Self-repeating deadlines
+@c @section Self-repeating deadlines
+@c 
+@c Org-mode integrates with the Emacs calendar and diary to display cyclic
+@c appointments and anniversaries in the agenda (@pxref{The weekly/daily
+@c agenda}).  However, it can be useful to have certain deadlines and
+@c scheduling items to auto-repeat.  The advantage of a deadline or
+@c scheduled item is that the they produce warnings ahead of time and
+@c automatically forward themselves in the agenda until they are done.  The
+@c abstract difference is therefore between cyclic @i{appointments} and
+@c cyclic @i{action items}.  For appointments you should use the diary, for
+@c actions you can uses an org-mode deadline or scheduling time stamp
+@c together with a REPEAT cookie.  For example:
+@c 
+@c @example
+@c * TODO Income tax to IRS REPEAT(+1y)
+@c   DEADLINE: <2006-12-19 Tue>
+@c @end example
+@c 
+@c Each time you try to mark this entry DONE using @kbd{C-c C-t}, it will
+@c automatically switch back to the state TODO, and the deadline will be
+@c shifted by 1 year.
 
 @node Tags, Agenda views, Timestamps, Top
 @chapter Tags
@@ -4425,6 +4501,17 @@ Org-mode contains an HTML (XHTML 1.0 strict) exporter with extensive
 HTML formatting, in ways similar to John Grubers @emph{markdown}
 language, but with additional support for tables.
 
+@menu
+* Export commands::             How to invode HTML export
+* Quoting HTML tags::           Using direct HTML in Org-mode
+* Links::                       How hyperlinks get transferred to HTML
+* Images::                      To inline or not to inline?
+* CSS support::                 Style specifications
+@end menu
+
+@node Export commands, Quoting HTML tags, HTML export, HTML export
+@subsection HTML export commands
+
 @cindex region, active
 @cindex active region
 @cindex transient-mark-mode
@@ -4455,10 +4542,16 @@ at a different level, specify it with a prefix argument.  For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
+@node Quoting HTML tags, Links, Export commands, HTML export
+@subsection Quoting HTML tags
+
 If you want to include HTML tags which should be interpreted as such,
 mark them with @samp{@@} as in @samp{@@<b>bold text@@</b>}.
 Plain @samp{<} and @samp{>} are always transformed to @samp{&lt;} and
 @samp{&gt;} in HTML export.
+
+@node Links, Images, Quoting HTML tags, HTML export
+@subsection Links
 
 @cindex links, in HTML export
 @cindex internal links, in HTML export
@@ -4472,6 +4565,33 @@ files will be translated into HTML links under the assumption that an
 HTML version also exists of the linked file.  For information related to
 linking files while publishing them to a publishing directory see
 @ref{Publishing links}.
+
+@node Images, CSS support, Links, HTML export
+@subsection Images
+
+@cindex images, inline in HTML
+@cindex inlining images in HTML
+HTML export can inline images given as links in the Org-mode file, and
+it can make an image the clickable part of a link.  By
+default@footnote{but see the variable
+@code{org-export-html-inline-images}}, images are inlined if a link does
+not have a description.  So @samp{[[file:myimg.jpg]]} will be inlined,
+while @samp{[[file:myimg.jpg][the image]]} will just produce a link
+@samp{the image} that points to the image.  If the description part
+itself is a @code{file:} link or a @code{http:} URL pointing to an
+image, this image will be inlined and activated so that clicking on the
+image will activate the link.  For example, to include a thumbnail that
+will link to a high resolution version of the image, you could use:
+
+@example
+[[file:highres.jpg][file:thumb.jpg]]
+@end example
+
+@noindent
+and you could use @code{http} addresses just as well.
+
+@node CSS support,  , Images, HTML export
+@subsection CSS support
 
 You can also give style information for the exported file.  The HTML
 exporter assigns the following CSS classes to appropriate parts of the
@@ -4488,10 +4608,12 @@ document - your style specifications may change these:
 The default style specification can be configured through the option
 @code{org-export-html-style}.  If you want to use a file-local style,
 you may use file variables, best wrapped into a COMMENT section at the
-end of the outline tree.  For example:
+end of the outline tree.  For example@footnote{Under Emacs 21, the
+continuation lines for a variable value should have no @samp{#} at the
+start of the line.}:
 
 @example
-* COMMENT HTML style specifications
+* COMMENT html style specifications
 
 # Local Variables:
 # org-export-html-style: "   <style type=\"text/css\">
@@ -5162,6 +5284,9 @@ Org-mode file is being visited.  The first set of options deals with the
 initial visibility of the outline tree.  The corresponding variable for
 global default settings is @code{org-startup-folded}, with a default
 value @code{t}, which means @code{overview}.
+@cindex @code{overview}, STARTUP keyword
+@cindex @code{content}, STARTUP keyword
+@cindex @code{showall}, STARTUP keyword
 @example
 overview   @r{top-level headlines only}
 content    @r{all headlines}
@@ -5171,20 +5296,34 @@ Then there are options for aligning tables upon visiting a file.  This
 is useful in files containing narrowed table columns.  The corresponding
 variable is @code{org-startup-align-all-tables}, with a default value
 @code{nil}. 
+@cindex @code{align}, STARTUP keyword
+@cindex @code{noalign}, STARTUP keyword
 @example
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
-Logging when a TODO item is marked DONE (variable @code{org-log-done})
-can be configured using these options.
+Logging TODO state changes and clock intervals (variable
+@code{org-log-done}) can be configured using these options.
+@cindex @code{logdone}, STARTUP keyword
+@cindex @code{nologging}, STARTUP keyword
+@cindex @code{lognotedone}, STARTUP keyword
+@cindex @code{lognoteclock-out}, STARTUP keyword
+@cindex @code{lognotestate}, STARTUP keyword
 @example
-logging    @r{record a timestamp when an item is marked DONE}
-nologging  @r{don't record when items are marked DONE}
+logging          @r{record a timestamp when an item is marked DONE}
+nologging        @r{don't record when items are marked DONE}
+lognotedone      @r{record timestamp and a note when DONE}
+lognotestate     @r{record timestamp, note when TODO state changes}
+lognoteclock-out @r{record timestamp and a note when clocking out}
 @end example
 Here are the options for hiding leading stars in outline headings.  The
 corresponding variables are @code{org-hide-leading-stars} and
 @code{org-odd-levels-only}, both with a default setting @code{nil}
 (meaning @code{showstars} and @code{oddeven}).
+@cindex @code{hidestars}, STARTUP keyword
+@cindex @code{showstars}, STARTUP keyword
+@cindex @code{odd}, STARTUP keyword
+@cindex @code{even}, STARTUP keyword
 @example
 hidestars  @r{make all but one of the stars starting a headline invisible.}
 showstars  @r{show all stars starting a headline}
@@ -5194,6 +5333,7 @@ oddeven    @r{allow all outline levels}
 To turn on custom format overlays over time stamps (variables
 @code{org-put-time-stamp-overlays} and
 @code{org-time-stamp-overlay-formats}), use
+@cindex @code{customtime}, STARTUP keyword
 @example
 customtime @r{overlay custom time format}
 @end example
@@ -5748,6 +5888,9 @@ calculations and improved XEmacs compatibility, in particular by porting
 patched CSS formatting into the HTML exporter, and inspired the agenda.
 @item
 @i{Nic Ferrier} contributed mailcap and XOXO support.
+@item
+@i{John Foerch} figured out how to make incremental search show context
+around a match in a hidden outline tree.
 @item
 @i{Niels Giessen} had the idea to automatically archive DONE trees.
 @item

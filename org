@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.59).
+   This manual is for Org-mode (version 4.60).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.59).
+This manual is for Org-mode (version 4.60).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -149,6 +149,7 @@ Creating timestamps
 Progress Logging
 
 * Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
 * Clocking work time::          When exactly did you work on this item?
 
 Tags
@@ -202,6 +203,14 @@ Exporting
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
+
+HTML export
+
+* Export commands::             How to invode HTML export
+* Quoting HTML tags::           Using direct HTML in Org-mode
+* Links::                       How hyperlinks get transferred to HTML
+* Images::                      To inline or not to inline?
+* CSS support::                 Style specifications
 
 Text interpretation by the exporter
 
@@ -537,7 +546,8 @@ the visibility in the buffer.
      Reveal context around point, showing the current entry, the
      following heading and the hierarchy above.  Useful for working
      near a location exposed by a sparse tree command (*note Sparse
-     trees::) or an agenda command (*note Agenda commands::).  
+     trees::) or an agenda command (*note Agenda commands::).  With
+     prefix arg show, on each level, all sibling headings.  
 
 `C-c C-x b'
      Show the current subtree in an indirect buffer(3).  With numerical
@@ -802,8 +812,9 @@ only the visible part of the document and print the resulting file.
 
    ---------- Footnotes ----------
 
-   (1) See also the variables `org-show-hierarchy-above' and
-`org-show-following-heading'.
+   (1) See also the variables `org-show-hierarchy-above',
+`org-show-following-heading', and `org-show-siblings' for detailed
+control on how much context is shown around each match.
 
    (2) This does not work under XEmacs, because XEmacs uses selective
 display for outlining, not text properties.
@@ -1679,10 +1690,15 @@ format::), for example:
 
      [[http://www.gnu.org/software/emacs/][GNU Emacs]]
 
+If the description is a file name or URL that points to an image, HTML
+export (*note HTML export::) will inline the image as a clickable
+button.  If there is no description at all and the link points to an
+image, that image will be inlined into the exported HTML file.
+
    Org-mode also finds external links in the normal text and activates
 them as links.  If spaces must be part of the link (for example in
-`bbdb:Richard Stallman'), or you need to remove ambiguities about the
-end of the link, enclose them in angular brackets.
+`bbdb:Richard Stallman'), or if you need to remove ambiguities about
+the end of the link, enclose them in angular brackets.
 
 
 File: org,  Node: Handling links,  Next: Link abbreviations,  Prev: External links,  Up: Hyperlinks
@@ -2085,7 +2101,9 @@ from TODO to FEEDBACK, then to VERIFY, and finally to DONE.  You may
 also use a prefix argument to quickly select a specific state.  For
 example `C-3 C-c C-t' will change the state immediately to VERIFY.  If
 you define many keywords, you can use in-buffer completion (see *Note
-Completion::) to insert these words into the buffer.
+Completion::) to insert these words into the buffer.  Changing a todo
+state can be logged with a timestamp, see *Note Tracking TODO state
+changes:: for more information.
 
 
 File: org,  Node: TODO types,  Next: Per file keywords,  Prev: Workflow states,  Up: TODO extensions
@@ -2564,40 +2582,72 @@ File: org,  Node: Progress logging,  Prev: Custom time format,  Up: Timestamps
 ====================
 
 Org-mode can automatically record a time stamp when you mark a TODO item
-as DONE.  You can also measure precisely the time you spent on specific
-items in a project by starting and stopping a clock when you start and
-stop working on an aspect of a project.
+as DONE, or even each time when you change the state of a TODO item.
+You can also measure precisely the time you spent on specific items in a
+project by starting and stopping a clock when you start and stop working
+on an aspect of a project.
 
 * Menu:
 
 * Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
 * Clocking work time::          When exactly did you work on this item?
 
 
-File: org,  Node: Closing items,  Next: Clocking work time,  Prev: Progress logging,  Up: Progress logging
+File: org,  Node: Closing items,  Next: Tracking TODO state changes,  Prev: Progress logging,  Up: Progress logging
 
 6.4.1 Closing items
 -------------------
 
 If you want to keep track of _when_ a certain TODO item was finished,
-turn on logging with
+turn on logging with(1)
 
      (setq org-log-done t)
 
 Then each time you turn a TODO entry into DONE using either `C-c C-t'
 in the Org-mode buffer or `t' in the agenda buffer, a line `CLOSED:
 [timestamp]' will be inserted just after the headline.  If you turn the
-entry back into a TODO item again through further state cycling, that
-line will be removed again.  In the timeline (*note Timeline::) and in
-the agenda (*note Weekly/Daily agenda::), you can then use the `l' key
-to display the TODO items closed on each day, giving you an overview of
-what has been done on a day.  See the variable `org-log-done' for the
-possibility to record an additional note together with a timestamp.
+entry back into a TODO item through further state cycling, that line
+will be removed again.  In the timeline (*note Timeline::) and in the
+agenda (*note Weekly/Daily agenda::), you can then use the `l' key to
+display the TODO items closed on each day, giving you an overview of
+what has been done on a day.  If you want to record a note along with
+the timestamp, use(2)
+
+     (setq org-log-done '(done))
+
+   ---------- Footnotes ----------
+
+   (1) The corresponding in-buffer setting is: `#+STARTUP: logdone'
+
+   (2) The corresponding in-buffer setting is: `#+STARTUP: lognotedone'
 
 
-File: org,  Node: Clocking work time,  Prev: Closing items,  Up: Progress logging
+File: org,  Node: Tracking TODO state changes,  Next: Clocking work time,  Prev: Closing items,  Up: Progress logging
 
-6.4.2 Clocking work time
+6.4.2 Tracking TODO state changes
+---------------------------------
+
+When TODO keywords are used as workflow states (*note Workflow
+states::), you might want to keep track of when a state change occurred,
+and you may even want to attach notes to that state change.  With the
+setting
+
+     (setq org-log-done '(state))
+
+each state change will prompt you for a note that will be attached to
+the current headline.  Very likely you do not want this verbose tracking
+all the time, so it is probably better to configure this behavior with
+in-buffer options.  For example, if you are tracking purchases, put
+these into a separate file that starts with:
+
+     #+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
+     #+STARTUP: lognotestate
+
+
+File: org,  Node: Clocking work time,  Prev: Tracking TODO state changes,  Up: Progress logging
+
+6.4.3 Clocking work time
 ------------------------
 
 Org-mode allows you to clock the time you spent on specific tasks in a
@@ -2615,7 +2665,8 @@ also computes the total time spent on each subtree of a project.
      same location where the clock was last started.  It also directly
      computes the resulting time in inserts it after the time range as
      `=> HH:MM'.  See the variable `org-log-done' for the possibility to
-     record an additional note together with the clock-out time stamp.  
+     record an additional note together with the clock-out time
+     stamp(1).  
 
 `C-c C-y'
      Recompute the time interval after changing one of the time stamps.
@@ -2658,7 +2709,7 @@ also computes the total time spent on each subtree of a project.
           #+BEGIN: clocktable :maxlevel 2 :block today
 
           #+END: clocktable
-     and to use a specific time range you could write(1)
+     and to use a specific time range you could write(2)
           #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                               :tend "<2006-08-10 Thu 12:00>"
 
@@ -2674,7 +2725,10 @@ worked on or closed during a day.
 
    ---------- Footnotes ----------
 
-   (1) Note that all parameters must be specified in a single line -
+   (1) The corresponding in-buffer setting is: `#+STARTUP:
+lognoteclock-out'
+
+   (2) Note that all parameters must be specified in a single line -
 the line is broken here only to fit it onto the manual.
 
 
@@ -4043,6 +4097,20 @@ Org-mode contains an HTML (XHTML 1.0 strict) exporter with extensive
 HTML formatting, in ways similar to John Grubers _markdown_ language,
 but with additional support for tables.
 
+* Menu:
+
+* Export commands::             How to invode HTML export
+* Quoting HTML tags::           Using direct HTML in Org-mode
+* Links::                       How hyperlinks get transferred to HTML
+* Images::                      To inline or not to inline?
+* CSS support::                 Style specifications
+
+
+File: org,  Node: Export commands,  Next: Quoting HTML tags,  Prev: HTML export,  Up: HTML export
+
+10.2.1 HTML export commands
+---------------------------
+
 `C-c C-e h'
      Export as HTML file `myfile.html'.  
 
@@ -4064,11 +4132,23 @@ example,
 
 creates two levels of headings and does the rest as items.
 
-   If you want to include HTML tags which should be interpreted as such,
+
+File: org,  Node: Quoting HTML tags,  Next: Links,  Prev: Export commands,  Up: HTML export
+
+10.2.2 Quoting HTML tags
+------------------------
+
+If you want to include HTML tags which should be interpreted as such,
 mark them with `@' as in `@<b>bold text@</b>'.  Plain `<' and `>' are
 always transformed to `&lt;' and `&gt;' in HTML export.
 
-   Internal links (*note Internal links::) will continue to work in HTML
+
+File: org,  Node: Links,  Next: Images,  Prev: Quoting HTML tags,  Up: HTML export
+
+10.2.3 Links
+------------
+
+Internal links (*note Internal links::) will continue to work in HTML
 files only if they match a dedicated `<<target>>'.  Automatic links
 created by radio targets (*note Radio targets::) will also work in the
 HTML file.  Links to external files will still work if the HTML file is
@@ -4078,7 +4158,38 @@ HTML version also exists of the linked file.  For information related to
 linking files while publishing them to a publishing directory see *Note
 Publishing links::.
 
-   You can also give style information for the exported file.  The HTML
+
+File: org,  Node: Images,  Next: CSS support,  Prev: Links,  Up: HTML export
+
+10.2.4 Images
+-------------
+
+HTML export can inline images given as links in the Org-mode file, and
+it can make an image the clickable part of a link.  By default(1),
+images are inlined if a link does not have a description.  So
+`[[file:myimg.jpg]]' will be inlined, while `[[file:myimg.jpg][the
+image]]' will just produce a link `the image' that points to the image.
+If the description part itself is a `file:' link or a `http:' URL
+pointing to an image, this image will be inlined and activated so that
+clicking on the image will activate the link.  For example, to include
+a thumbnail that will link to a high resolution version of the image,
+you could use:
+
+     [[file:highres.jpg][file:thumb.jpg]]
+
+and you could use `http' addresses just as well.
+
+   ---------- Footnotes ----------
+
+   (1) but see the variable `org-export-html-inline-images'
+
+
+File: org,  Node: CSS support,  Prev: Images,  Up: HTML export
+
+10.2.5 CSS support
+------------------
+
+You can also give style information for the exported file.  The HTML
 exporter assigns the following CSS classes to appropriate parts of the
 document - your style specifications may change these:
      .todo           TODO keywords
@@ -4091,9 +4202,9 @@ document - your style specifications may change these:
    The default style specification can be configured through the option
 `org-export-html-style'.  If you want to use a file-local style, you
 may use file variables, best wrapped into a COMMENT section at the end
-of the outline tree.  For example:
+of the outline tree.  For example(1):
 
-     * COMMENT HTML style specifications
+     * COMMENT html style specifications
 
      # Local Variables:
      # org-export-html-style: "   <style type=\"text/css\">
@@ -4106,6 +4217,11 @@ of the outline tree.  For example:
 the new style visible to Emacs.  This command restarts org-mode for the
 current buffer and forces Emacs to re-evaluate the local variables
 section in the buffer.
+
+   ---------- Footnotes ----------
+
+   (1) Under Emacs 21, the continuation lines for a variable value
+should have no `#' at the start of the line.
 
 
 File: org,  Node: XOXO export,  Next: iCalendar export,  Prev: HTML export,  Up: Exporting
@@ -4702,31 +4818,34 @@ file is visited again in a new Emacs session.
      with the initial visibility of the outline tree.  The
      corresponding variable for global default settings is
      `org-startup-folded', with a default value `t', which means
-     `overview'.
+     `overview'.  
           overview   top-level headlines only
           content    all headlines
           showall    no folding at all, show everything
      Then there are options for aligning tables upon visiting a file.
      This is useful in files containing narrowed table columns.  The
      corresponding variable is `org-startup-align-all-tables', with a
-     default value `nil'.
+     default value `nil'.  
           align      align all tables
           noalign    don't align tables on startup
-     Logging when a TODO item is marked DONE (variable `org-log-done')
-     can be configured using these options.
-          logging    record a timestamp when an item is marked DONE
-          nologging  don't record when items are marked DONE
+     Logging TODO state changes and clock intervals (variable
+     `org-log-done') can be configured using these options.  
+          logging          record a timestamp when an item is marked DONE
+          nologging        don't record when items are marked DONE
+          lognotedone      record timestamp and a note when DONE
+          lognotestate     record timestamp, note when TODO state changes
+          lognoteclock-out record timestamp and a note when clocking out
      Here are the options for hiding leading stars in outline headings.
      The corresponding variables are `org-hide-leading-stars' and
      `org-odd-levels-only', both with a default setting `nil' (meaning
-     `showstars' and `oddeven').
+     `showstars' and `oddeven').  
           hidestars  make all but one of the stars starting a headline invisible.
           showstars  show all stars starting a headline
           odd        allow only odd outline levels (1,3,...)
           oddeven    allow all outline levels
      To turn on custom format overlays over time stamps (variables
      `org-put-time-stamp-overlays' and
-     `org-time-stamp-overlay-formats'), use
+     `org-time-stamp-overlay-formats'), use 
           customtime overlay custom time format
 
 `#+SEQ_TODO:   #+TYP_TODO:'
@@ -5263,6 +5382,9 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Nic Ferrier contributed mailcap and XOXO support.
 
+   * John Foerch figured out how to make incremental search show context
+     around a match in a hidden outline tree.
+
    * Niels Giessen had the idea to automatically archive DONE trees.
 
    * Bastien Guerry provided extensive feedback.
@@ -5356,7 +5478,7 @@ Index
                                                               (line   6)
 * action, for publishing:                Publishing action.   (line   6)
 * activation:                            Activation.          (line   6)
-* active region <1>:                     HTML export.         (line  10)
+* active region <1>:                     Export commands.     (line   6)
 * active region <2>:                     ASCII export.        (line   9)
 * active region <3>:                     Built-in table editor.
                                                               (line 171)
@@ -5369,8 +5491,9 @@ Index
 * agenda views, custom:                  Custom agenda views. (line   6)
 * agenda, batch production:              Batch processing.    (line   6)
 * agenda, with block views:              Block agenda.        (line   6)
+* align, STARTUP keyword:                In-buffer settings.  (line  29)
 * allout.el:                             Conflicts.           (line   6)
-* angular brackets, around links:        External links.      (line  38)
+* angular brackets, around links:        External links.      (line  43)
 * applescript, for calendar update:      iCalendar export.    (line  38)
 * archive locations:                     Moving subtrees.     (line  21)
 * archiving:                             Archiving.           (line   6)
@@ -5426,6 +5549,7 @@ Index
 * completion, of TODO keywords:          Workflow states.     (line  12)
 * constants, in calculations:            Formula syntax.      (line  26)
 * constants.el:                          Cooperation.         (line  14)
+* content, STARTUP keyword:              In-buffer settings.  (line  22)
 * contents, global visibility state:     Visibility cycling.  (line  22)
 * copying, of subtrees:                  Structure editing.   (line   6)
 * creating timestamps:                   Creating timestamps. (line   6)
@@ -5434,6 +5558,7 @@ Index
 * custom date/time format:               Custom time format.  (line   6)
 * custom search strings:                 Custom searches.     (line   6)
 * customization:                         Customization.       (line   6)
+* customtime, STARTUP keyword:           In-buffer settings.  (line  49)
 * cutting, of subtrees:                  Structure editing.   (line   6)
 * cycling, of TODO states:               TODO basics.         (line  13)
 * cycling, visibility:                   Visibility cycling.  (line   6)
@@ -5462,12 +5587,13 @@ Index
 * emphasized text:                       Export options.      (line  25)
 * enhancing text:                        Enhancing text.      (line   6)
 * evaluate time range:                   Creating timestamps. (line  66)
+* even, STARTUP keyword:                 In-buffer settings.  (line  42)
 * exporting:                             Exporting.           (line   6)
 * exporting, not:                        Comment lines.       (line   6)
 * extended TODO keywords:                TODO extensions.     (line   6)
 * external archiving:                    Moving subtrees.     (line   6)
 * external links:                        External links.      (line   6)
-* external links, in HTML export:        HTML export.         (line  35)
+* external links, in HTML export:        Links.               (line   6)
 * FAQ:                                   Summary.             (line  51)
 * feedback:                              Feedback.            (line   6)
 * file links:                            External links.      (line   6)
@@ -5498,29 +5624,32 @@ Index
 * GNUS links:                            External links.      (line   6)
 * hand-formatted lists:                  Enhancing text.      (line  11)
 * headline levels:                       Export options.      (line  25)
-* headline levels, for exporting <1>:    HTML export.         (line  21)
+* headline levels, for exporting <1>:    Export commands.     (line  17)
 * headline levels, for exporting:        ASCII export.        (line  18)
 * headline navigation:                   Motion.              (line   6)
 * headline tagging:                      Tags.                (line   6)
 * headline, promotion and demotion:      Structure editing.   (line   6)
 * headlines:                             Headlines.           (line   6)
 * hide text:                             Visibility cycling.  (line   6)
+* hidestars, STARTUP keyword:            In-buffer settings.  (line  42)
 * hiding leading stars:                  Clean view.          (line   6)
 * history:                               History and Acknowledgments.
                                                               (line   6)
 * HTML export:                           HTML export.         (line   6)
 * hyperlinks:                            Hyperlinks.          (line   6)
 * iCalendar export:                      iCalendar export.    (line   6)
+* images, inline in HTML:                Images.              (line   6)
 * in-buffer settings:                    In-buffer settings.  (line   6)
 * inactive timestamp:                    Time stamps.         (line  24)
 * index, of published pages:             Project page index.  (line   6)
 * Info links:                            External links.      (line   6)
 * inheritance, of tags:                  Tag inheritance.     (line   6)
+* inlining images in HTML:               Images.              (line   6)
 * inserting links:                       Handling links.      (line  27)
 * installation:                          Installation.        (line   6)
 * internal archiving:                    ARCHIVE tag.         (line   6)
 * internal links:                        Internal links.      (line   6)
-* internal links, in HTML export:        HTML export.         (line  35)
+* internal links, in HTML export:        Links.               (line   6)
 * introduction:                          Introduction.        (line   6)
 * italic text:                           Enhancing text.      (line  15)
 * jumping, to headlines:                 Motion.              (line   6)
@@ -5540,7 +5669,7 @@ Index
 * link format:                           Link format.         (line   6)
 * links, external:                       External links.      (line   6)
 * links, handling:                       Handling links.      (line   6)
-* links, in HTML export:                 HTML export.         (line  35)
+* links, in HTML export:                 Links.               (line   6)
 * links, internal:                       Internal links.      (line   6)
 * links, publishing:                     Publishing links.    (line   6)
 * links, radio targets:                  Radio targets.       (line   6)
@@ -5549,7 +5678,11 @@ Index
 * lists, hand-formatted:                 Enhancing text.      (line  11)
 * lists, ordered:                        Plain lists.         (line   6)
 * lists, plain:                          Plain lists.         (line   6)
+* logdone, STARTUP keyword:              In-buffer settings.  (line  33)
 * logging, of progress:                  Progress logging.    (line   6)
+* lognoteclock-out, STARTUP keyword:     In-buffer settings.  (line  33)
+* lognotedone, STARTUP keyword:          In-buffer settings.  (line  33)
+* lognotestate, STARTUP keyword:         In-buffer settings.  (line  33)
 * maintainer:                            Feedback.            (line   6)
 * mark ring:                             Handling links.      (line  81)
 * marking characters, tables:            Advanced features.   (line  34)
@@ -5567,7 +5700,10 @@ Index
                                                               (line   6)
 * names as TODO keywords:                TODO types.          (line   6)
 * narrow columns in tables:              Narrow columns.      (line   6)
+* noalign, STARTUP keyword:              In-buffer settings.  (line  29)
+* nologging, STARTUP keyword:            In-buffer settings.  (line  33)
 * occur, command:                        Sparse trees.        (line   6)
+* odd, STARTUP keyword:                  In-buffer settings.  (line  42)
 * option keyword completion:             Completion.          (line   6)
 * options, for custom agenda views:      Setting Options.     (line   6)
 * options, for customization:            Customization.       (line   6)
@@ -5585,11 +5721,12 @@ Index
 * outline-mode:                          Outlines.            (line   6)
 * outlines:                              Outlines.            (line   6)
 * overview, global visibility state:     Visibility cycling.  (line  22)
+* overview, STARTUP keyword:             In-buffer settings.  (line  22)
 * packages, interaction with other:      Interaction.         (line   6)
 * pasting, of subtrees:                  Structure editing.   (line   6)
 * per file keywords:                     Per file keywords.   (line   6)
 * plain lists:                           Plain lists.         (line   6)
-* plain text external links:             External links.      (line  38)
+* plain text external links:             External links.      (line  43)
 * presentation, of agenda items:         Presentation and sorting.
                                                               (line   6)
 * printing sparse trees:                 Sparse trees.        (line  41)
@@ -5604,7 +5741,7 @@ Index
 * radio targets:                         Radio targets.       (line   6)
 * ranges, time:                          Time stamps.         (line   6)
 * recomputing table fields:              Column formulas.     (line  27)
-* region, active <1>:                    HTML export.         (line  10)
+* region, active <1>:                    Export commands.     (line   6)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
                                                               (line 171)
@@ -5627,6 +5764,8 @@ Index
 * show all, command:                     Visibility cycling.  (line  31)
 * show all, global visibility state:     Visibility cycling.  (line  22)
 * show hidden text:                      Visibility cycling.  (line   6)
+* showall, STARTUP keyword:              In-buffer settings.  (line  22)
+* showstars, STARTUP keyword:            In-buffer settings.  (line  42)
 * sorting, of agenda items:              Sorting of agenda items.
                                                               (line   6)
 * sparse tree, for deadlines:            Creating timestamps. (line  41)
@@ -5701,7 +5840,7 @@ Index
 * TODO list, global:                     Global TODO list.    (line   6)
 * TODO types:                            TODO types.          (line   6)
 * TODO workflow:                         Workflow states.     (line   6)
-* transient-mark-mode <1>:               HTML export.         (line  10)
+* transient-mark-mode <1>:               Export commands.     (line   6)
 * transient-mark-mode <2>:               ASCII export.        (line   9)
 * transient-mark-mode <3>:               Built-in table editor.
                                                               (line 171)
@@ -5845,17 +5984,17 @@ Key Index
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-e:                               Exporting.           (line  19)
 * C-c C-e a:                             ASCII export.        (line   9)
-* C-c C-e b:                             HTML export.         (line  11)
+* C-c C-e b:                             Export commands.     (line   7)
 * C-c C-e c:                             iCalendar export.    (line  20)
-* C-c C-e h:                             HTML export.         (line  10)
+* C-c C-e h:                             Export commands.     (line   6)
 * C-c C-e I:                             iCalendar export.    (line  15)
 * C-c C-e i:                             iCalendar export.    (line  13)
 * C-c C-e t:                             Export options.      (line  13)
 * C-c C-e v <1>:                         XOXO export.         (line  11)
 * C-c C-e v:                             Sparse trees.        (line  41)
 * C-c C-e v a:                           ASCII export.        (line  13)
-* C-c C-e v b:                           HTML export.         (line  14)
-* C-c C-e v h:                           HTML export.         (line  14)
+* C-c C-e v b:                           Export commands.     (line  10)
+* C-c C-e v h:                           Export commands.     (line  10)
 * C-c C-e x:                             XOXO export.         (line  10)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
@@ -5871,35 +6010,35 @@ Key Index
 * C-c C-r:                               Visibility cycling.  (line  32)
 * C-c C-s <1>:                           Agenda commands.     (line 155)
 * C-c C-s:                               Creating timestamps. (line  48)
-* C-c C-t <1>:                           Clocking work time.  (line  26)
+* C-c C-t <1>:                           Clocking work time.  (line  27)
 * C-c C-t:                               TODO basics.         (line  13)
 * C-c C-u:                               Motion.              (line  18)
 * C-c C-v:                               TODO basics.         (line  26)
 * C-c C-w:                               Creating timestamps. (line  41)
-* C-c C-x b:                             Visibility cycling.  (line  38)
+* C-c C-x b:                             Visibility cycling.  (line  39)
 * C-c C-x C-a:                           ARCHIVE tag.         (line  28)
 * C-c C-x C-b:                           Checkboxes.          (line  38)
 * C-c C-x C-c:                           Agenda commands.     (line 220)
-* C-c C-x C-d:                           Clocking work time.  (line  34)
+* C-c C-x C-d:                           Clocking work time.  (line  35)
 * C-c C-x C-i:                           Clocking work time.  (line  12)
 * C-c C-x C-k:                           Structure editing.   (line  39)
 * C-c C-x C-l:                           Processing LaTeX fragments.
                                                               (line   9)
 * C-c C-x C-o:                           Clocking work time.  (line  14)
-* C-c C-x C-r:                           Clocking work time.  (line  42)
+* C-c C-x C-r:                           Clocking work time.  (line  43)
 * C-c C-x C-t:                           Custom time format.  (line  12)
 * C-c C-x C-u:                           Dynamic blocks.      (line  21)
 * C-c C-x C-w <1>:                       Built-in table editor.
                                                               (line 114)
 * C-c C-x C-w:                           Structure editing.   (line  39)
-* C-c C-x C-x:                           Clocking work time.  (line  30)
+* C-c C-x C-x:                           Clocking work time.  (line  31)
 * C-c C-x C-y <1>:                       Built-in table editor.
                                                               (line 118)
 * C-c C-x C-y:                           Structure editing.   (line  46)
 * C-c C-x M-w <1>:                       Built-in table editor.
                                                               (line 111)
 * C-c C-x M-w:                           Structure editing.   (line  43)
-* C-c C-y <1>:                           Clocking work time.  (line  21)
+* C-c C-y <1>:                           Clocking work time.  (line  22)
 * C-c C-y:                               Creating timestamps. (line  66)
 * C-c l:                                 Handling links.      (line   9)
 * C-c {:                                 CDLaTeX mode.        (line  21)
@@ -5915,7 +6054,7 @@ Key Index
 * C-u C-c C-l:                           Handling links.      (line  43)
 * C-u C-c C-x C-a:                       ARCHIVE tag.         (line  31)
 * C-u C-c C-x C-u <1>:                   Dynamic blocks.      (line  22)
-* C-u C-c C-x C-u:                       Clocking work time.  (line  69)
+* C-u C-c C-x C-u:                       Clocking work time.  (line  70)
 * D:                                     Agenda commands.     (line  74)
 * d:                                     Agenda commands.     (line  71)
 * f:                                     Agenda commands.     (line  44)
@@ -6019,160 +6158,171 @@ Key Index
 
 Tag Table:
 Node: Top964
-Node: Introduction10454
-Node: Summary10869
-Node: Installation13781
-Node: Activation15159
-Node: Feedback16408
-Node: Document structure18484
-Node: Outlines19258
-Node: Headlines19918
-Node: Visibility cycling20541
-Ref: Visibility cycling-Footnote-122567
-Ref: Visibility cycling-Footnote-222625
-Ref: Visibility cycling-Footnote-322675
-Node: Motion22944
-Node: Structure editing23728
-Node: Archiving26554
-Node: ARCHIVE tag27112
-Node: Moving subtrees28905
-Node: Sparse trees29946
-Ref: Sparse trees-Footnote-132077
-Ref: Sparse trees-Footnote-232169
-Node: Plain lists32284
-Ref: Plain lists-Footnote-135809
-Ref: Plain lists-Footnote-236166
-Node: Tables36350
-Node: Built-in table editor36898
-Node: Narrow columns44926
-Ref: Narrow columns-Footnote-146865
-Node: Table calculations46911
-Node: Formula syntax48231
-Ref: Formula syntax-Footnote-151136
-Node: Lisp formulas51436
-Node: Column formulas52225
-Node: Advanced features53987
-Node: Named-field formulas57241
-Node: Editing/debugging formulas57881
-Node: Appetizer59639
-Node: orgtbl-mode60742
-Node: table.el61233
-Node: Hyperlinks62210
-Node: Link format62983
-Node: Internal links64276
-Ref: Internal links-Footnote-166265
-Node: Radio targets66397
-Node: CamelCase links67112
-Node: External links67706
-Node: Handling links69837
-Ref: Handling links-Footnote-174489
-Ref: Handling links-Footnote-274726
-Node: Link abbreviations74800
-Node: Search options76479
-Ref: Search options-Footnote-178259
-Node: Custom searches78340
-Node: Remember79388
-Node: TODO items83082
-Node: TODO basics84064
-Node: TODO extensions85591
-Node: Workflow states86386
-Node: TODO types87254
-Ref: TODO types-Footnote-188912
-Node: Per file keywords88994
-Ref: Per file keywords-Footnote-190448
-Node: Priorities90649
-Node: Breaking down tasks91893
-Ref: Breaking down tasks-Footnote-192412
-Node: Checkboxes92508
-Node: Timestamps95263
-Node: Time stamps95724
-Ref: Time stamps-Footnote-199218
-Ref: Time stamps-Footnote-299334
-Node: Creating timestamps99489
-Node: The date/time prompt102115
-Ref: The date/time prompt-Footnote-1103881
-Node: Custom time format103987
-Node: Progress logging105546
-Node: Closing items106075
-Node: Clocking work time106979
-Ref: Clocking work time-Footnote-1110603
-Node: Tags110729
-Node: Tag inheritance111491
-Node: Setting tags112428
-Ref: Setting tags-Footnote-1116627
-Ref: Setting tags-Footnote-2116739
-Node: Tag searches116822
-Node: Agenda views119534
-Node: Agenda files121474
-Ref: Agenda files-Footnote-1122434
-Ref: Agenda files-Footnote-2122583
-Node: Agenda dispatcher122776
-Node: Built-in agenda views124467
-Node: Weekly/Daily agenda125045
-Node: Global TODO list127174
-Node: Matching headline tags129347
-Node: Timeline130418
-Node: Stuck projects131084
-Node: Presentation and sorting132783
-Node: Categories133574
-Node: Time-of-day specifications134238
-Node: Sorting of agenda items136209
-Node: Agenda commands137491
-Node: Custom agenda views144144
-Node: Storing searches144819
-Node: Block agenda146731
-Node: Setting Options147961
-Node: Batch processing150673
-Node: Embedded LaTeX151803
-Ref: Embedded LaTeX-Footnote-1152895
-Node: Math symbols153085
-Node: Subscripts and Superscripts153850
-Node: LaTeX fragments154694
-Ref: LaTeX fragments-Footnote-1156802
-Node: Processing LaTeX fragments157064
-Node: CDLaTeX mode158010
-Ref: CDLaTeX mode-Footnote-1160494
-Node: Exporting160642
-Node: ASCII export161956
-Node: HTML export163246
-Node: XOXO export166082
-Node: iCalendar export166521
-Node: Text interpretation168344
-Node: Comment lines168823
-Node: Enhancing text169294
-Node: Export options170986
-Node: Publishing172653
-Ref: Publishing-Footnote-1173449
-Node: Configuration173645
-Node: Project alist174363
-Node: Sources and destinations175429
-Node: Selecting files176159
-Node: Publishing action176907
-Node: Publishing options178140
-Node: Publishing links180292
-Node: Project page index181805
-Node: Sample configuration182583
-Node: Simple example183075
-Node: Complex example183748
-Node: Triggering publication185824
-Node: Miscellaneous186509
-Node: Completion187143
-Node: Customization188614
-Node: In-buffer settings189197
-Node: The very busy C-c C-c key192816
-Node: Clean view194460
-Node: TTY keys197037
-Node: Interaction198646
-Node: Cooperation199043
-Node: Conflicts200910
-Node: Bugs202502
-Node: Extensions and Hacking203896
-Node: Extensions204400
-Node: Dynamic blocks206187
-Node: Special agenda views208143
-Ref: Special agenda views-Footnote-1210424
-Node: History and Acknowledgments210684
-Node: Index215691
-Node: Key Index242933
+Node: Introduction10833
+Node: Summary11248
+Node: Installation14160
+Node: Activation15538
+Node: Feedback16787
+Node: Document structure18863
+Node: Outlines19637
+Node: Headlines20297
+Node: Visibility cycling20920
+Ref: Visibility cycling-Footnote-123011
+Ref: Visibility cycling-Footnote-223069
+Ref: Visibility cycling-Footnote-323119
+Node: Motion23388
+Node: Structure editing24172
+Node: Archiving26998
+Node: ARCHIVE tag27556
+Node: Moving subtrees29349
+Node: Sparse trees30390
+Ref: Sparse trees-Footnote-132521
+Ref: Sparse trees-Footnote-232703
+Node: Plain lists32818
+Ref: Plain lists-Footnote-136343
+Ref: Plain lists-Footnote-236700
+Node: Tables36884
+Node: Built-in table editor37432
+Node: Narrow columns45460
+Ref: Narrow columns-Footnote-147399
+Node: Table calculations47445
+Node: Formula syntax48765
+Ref: Formula syntax-Footnote-151670
+Node: Lisp formulas51970
+Node: Column formulas52759
+Node: Advanced features54521
+Node: Named-field formulas57775
+Node: Editing/debugging formulas58415
+Node: Appetizer60173
+Node: orgtbl-mode61276
+Node: table.el61767
+Node: Hyperlinks62744
+Node: Link format63517
+Node: Internal links64810
+Ref: Internal links-Footnote-166799
+Node: Radio targets66931
+Node: CamelCase links67646
+Node: External links68240
+Node: Handling links70644
+Ref: Handling links-Footnote-175296
+Ref: Handling links-Footnote-275533
+Node: Link abbreviations75607
+Node: Search options77286
+Ref: Search options-Footnote-179066
+Node: Custom searches79147
+Node: Remember80195
+Node: TODO items83889
+Node: TODO basics84871
+Node: TODO extensions86398
+Node: Workflow states87193
+Node: TODO types88178
+Ref: TODO types-Footnote-189836
+Node: Per file keywords89918
+Ref: Per file keywords-Footnote-191372
+Node: Priorities91573
+Node: Breaking down tasks92817
+Ref: Breaking down tasks-Footnote-193336
+Node: Checkboxes93432
+Node: Timestamps96187
+Node: Time stamps96648
+Ref: Time stamps-Footnote-1100142
+Ref: Time stamps-Footnote-2100258
+Node: Creating timestamps100413
+Node: The date/time prompt103039
+Ref: The date/time prompt-Footnote-1104805
+Node: Custom time format104911
+Node: Progress logging106470
+Node: Closing items107119
+Ref: Closing items-Footnote-1108053
+Ref: Closing items-Footnote-2108122
+Node: Tracking TODO state changes108195
+Node: Clocking work time109051
+Ref: Clocking work time-Footnote-1112697
+Ref: Clocking work time-Footnote-2112775
+Node: Tags112901
+Node: Tag inheritance113663
+Node: Setting tags114600
+Ref: Setting tags-Footnote-1118799
+Ref: Setting tags-Footnote-2118911
+Node: Tag searches118994
+Node: Agenda views121706
+Node: Agenda files123646
+Ref: Agenda files-Footnote-1124606
+Ref: Agenda files-Footnote-2124755
+Node: Agenda dispatcher124948
+Node: Built-in agenda views126639
+Node: Weekly/Daily agenda127217
+Node: Global TODO list129346
+Node: Matching headline tags131519
+Node: Timeline132590
+Node: Stuck projects133256
+Node: Presentation and sorting134955
+Node: Categories135746
+Node: Time-of-day specifications136410
+Node: Sorting of agenda items138381
+Node: Agenda commands139663
+Node: Custom agenda views146316
+Node: Storing searches146991
+Node: Block agenda148903
+Node: Setting Options150133
+Node: Batch processing152845
+Node: Embedded LaTeX153975
+Ref: Embedded LaTeX-Footnote-1155067
+Node: Math symbols155257
+Node: Subscripts and Superscripts156022
+Node: LaTeX fragments156866
+Ref: LaTeX fragments-Footnote-1158974
+Node: Processing LaTeX fragments159236
+Node: CDLaTeX mode160182
+Ref: CDLaTeX mode-Footnote-1162666
+Node: Exporting162814
+Node: ASCII export164128
+Node: HTML export165418
+Node: Export commands166037
+Node: Quoting HTML tags166761
+Node: Links167104
+Node: Images167801
+Ref: Images-Footnote-1168672
+Node: CSS support168733
+Ref: CSS support-Footnote-1170052
+Node: XOXO export170165
+Node: iCalendar export170604
+Node: Text interpretation172427
+Node: Comment lines172906
+Node: Enhancing text173377
+Node: Export options175069
+Node: Publishing176736
+Ref: Publishing-Footnote-1177532
+Node: Configuration177728
+Node: Project alist178446
+Node: Sources and destinations179512
+Node: Selecting files180242
+Node: Publishing action180990
+Node: Publishing options182223
+Node: Publishing links184375
+Node: Project page index185888
+Node: Sample configuration186666
+Node: Simple example187158
+Node: Complex example187831
+Node: Triggering publication189907
+Node: Miscellaneous190592
+Node: Completion191226
+Node: Customization192697
+Node: In-buffer settings193280
+Node: The very busy C-c C-c key197139
+Node: Clean view198783
+Node: TTY keys201360
+Node: Interaction202969
+Node: Cooperation203366
+Node: Conflicts205233
+Node: Bugs206825
+Node: Extensions and Hacking208219
+Node: Extensions208723
+Node: Dynamic blocks210510
+Node: Special agenda views212466
+Ref: Special agenda views-Footnote-1214747
+Node: History and Acknowledgments215007
+Node: Index220134
+Node: Key Index248617
 
 End Tag Table

@@ -77,7 +77,7 @@ that can be added."
   :group 'editing)
 
 (defcustom outline-regexp "[*\^L]+"
-  "*Regular expression to match the beginning of a heading.
+  "Regular expression to match the beginning of a heading.
 Any line whose beginning matches this regexp is considered to start a heading.
 Note that Outline mode only checks this regexp at the start of a line,
 so the regexp need not (and usually does not) start with `^'.
@@ -87,7 +87,7 @@ in the file it applies to.  See also `outline-heading-end-regexp'."
   :group 'outlines)
 
 (defcustom outline-heading-end-regexp "\n"
-  "*Regular expression to match the end of a heading line.
+  "Regular expression to match the end of a heading line.
 You can assume that point is at the beginning of a heading when this
 regexp is searched for.  The heading ends at the end of the match.
 The recommended way to set this is with a `Local Variables:' list
@@ -249,10 +249,10 @@ in the file it applies to."
   "Normal hook to be run after outline visibility changes.")
 
 (defvar outline-mode-hook nil
-  "*This hook is run when outline mode starts.")
+  "This hook is run when outline mode starts.")
 
 (defvar outline-blank-line nil
-  "*Non-nil means to leave unhidden blank line before heading.")
+  "Non-nil means to leave unhidden blank line before heading.")
 
 ;;;###autoload
 (define-derived-mode outline-mode text-mode "Outline"
@@ -316,7 +316,7 @@ Turning on outline mode calls the value of `text-mode-hook' and then of
   (add-hook 'change-major-mode-hook 'show-all nil t))
 
 (defcustom outline-minor-mode-prefix "\C-c@"
-  "*Prefix key to use for Outline commands in Outline minor mode.
+  "Prefix key to use for Outline commands in Outline minor mode.
 The value of this variable is checked as part of loading Outline mode.
 After that, changing the prefix key requires manipulating keymaps."
   :type 'string
@@ -351,7 +351,7 @@ See the command `outline-mode' for more information on this mode."
     (show-all)))
 
 (defvar outline-level 'outline-level
-  "*Function of no args to compute a header's nesting level in an outline.
+  "Function of no args to compute a header's nesting level in an outline.
 It can assume point is at the beginning of a header line and that the match
 data reflects the `outline-regexp'.")
 
@@ -702,6 +702,11 @@ This puts point at the start of the current subtree, and mark at the end."
     (goto-char beg)))
 
 
+(defvar outline-isearch-open-invisible-function nil
+  "Function called if `isearch' finishes in an invisible overlay.
+The function is called with the overlay as its only argument.
+If nil, `show-entry' is called to reveal the invisible text.")
+
 (defun outline-discard-extents (&optional beg end)
   "Clear BEG and END of overlays whose property NAME has value VAL.
 Overlays might be moved and/or split.
@@ -725,14 +730,6 @@ BEG and END default respectively to the beginning and end of buffer."
 	       (delete-extent ex)))
      (current-buffer) beg end nil 'end-closed 'outline)))
 
-
-;;;(defun outline-discard-extents (from to)
-;;;  "Delete hideshow extents in region defined by FROM and TO."
-;;;  (when (< to from)
-;;;    (setq from (prog1 to (setq to from))))
-;;;  (map-extents #'(lambda (ex ignored) (delete-extent ex))
-;;;	       (current-buffer) from to nil 'end-closed 'outline))
-
 (defun outline-flag-region (from to flag)
   "Hide or show lines from FROM to TO, according to FLAG.
 If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
@@ -744,11 +741,12 @@ If FLAG is nil then text is shown, while if FLAG is t the text is hidden."
     (let ((ex (make-extent from to)))
       (set-extent-property ex 'invisible 'outline)
       (set-extent-property ex 'outline flag)
-      (set-extent-property ex 'isearch-open-invisible 'outline-isearch-open-invisible)))
+      ;; FIXME: I don't think XEmacs uses this, actually.
+      (set-extent-property ex 'isearch-open-invisible
+                           (or outline-isearch-open-invisible-function
+                               'outline-isearch-open-invisible))))
   ;; Seems only used by lazy-lock.  I.e. obsolete.
   (run-hooks 'outline-view-change-hook))
-  
-
 
 ;; Function to be set as an outline-isearch-open-invisible' property
 ;; to the overlay that makes the outline invisible (see
@@ -894,7 +892,8 @@ Show the heading too, if it is currently invisible."
 		(or first (> (funcall outline-level) level)))
       (setq first nil)
       (outline-next-heading))
-    (if (bolp)
+    (if (and (bolp) (not (eolp)))
+	;; We stopped at a nonempty line (the next heading).
 	(progn
 	  ;; Go to end of line before heading
 	  (forward-char -1)
