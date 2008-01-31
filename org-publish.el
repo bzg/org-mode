@@ -4,7 +4,7 @@
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
-;; Version:
+;; Version: 1.80
 
 ;; $Id: org-publish.el,v 1.80 2007/03/22 02:31:03 dto Exp dto $
 

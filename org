@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.77).
+   This manual is for Org-mode (version 4.78).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.77).
+This manual is for Org-mode (version 4.78).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -50,8 +50,8 @@ This manual is for Org-mode (version 4.77).
 * Tables::                      Pure magic for quick formatting
 * Hyperlinks::                  Notes in context
 * TODO items::                  Every tree branch can be a TODO item
-* Timestamps::                  Assign date and time to items
 * Tags::                        Tagging headlines and matching sets of tags
+* Timestamps::                  Assign date and time to items
 * Agenda views::                Collecting information into views
 * Embedded LaTeX::              LaTeX fragments and formulas
 * Exporting::                   Sharing and publishing of notes
@@ -142,6 +142,12 @@ Extended use of TODO keywords
 * Multiple sets in one file::   Mixing it all, and still finding your way
 * Per file keywords::           Different files, different requirements
 
+Tags
+
+* Tag inheritance::             Tags use the tree structure of the outline
+* Setting tags::                How to assign tags to a headline
+* Tag searches::                Searching for combinations of tags
+
 Timestamps
 
 * Time stamps::                 Assigning a time to a tree entry
@@ -164,12 +170,6 @@ Progress Logging
 * Closing items::               When was this entry marked DONE?
 * Tracking TODO state changes::  When did the status change?
 * Clocking work time::          When exactly did you work on this item?
-
-Tags
-
-* Tag inheritance::             Tags use the tree structure of the outline
-* Setting tags::                How to assign tags to a headline
-* Tag searches::                Searching for combinations of tags
 
 Agenda Views
 
@@ -916,7 +916,10 @@ line of an item (the line with the bullet or number).
      variable `org-cycle-include-plain-lists'.  The level of an item is
      then given by the indentation of the bullet/number.  Items are
      always subordinate to real headlines, however; the hierarchies
-     remain completely separated.  
+     remain completely separated.
+
+     If `org-cycle-include-plain-lists' has not been set, <TAB> fixes
+     the indentation of the curent line in a heuristic way.  
 
 `M-<RET>'
      Insert new item at current level.  With prefix arg, force a new
@@ -952,8 +955,10 @@ line of an item (the line with the bullet or number).
 
 `C-c C-c'
      If there is a checkbox (*note Checkboxes::) in the item line,
-     toggle the state of the checkbox.  Otherwise, if this is an
-     ordered list, renumber the ordered list at the cursor.
+     toggle the state of the checkbox.  If not, make this command makes
+     sure that all the items on this list level use the same bullet.
+     Furthermore, if this is an ordered list, make sure the numbering
+     is ok.
 
    ---------- Footnotes ----------
 
@@ -966,8 +971,7 @@ list items.
 
    (2) Org-mode only changes the filling settings for Emacs.  For
 XEmacs, you should use Kyle E. Jones' `filladapt.el'.  To turn this on,
-put into `.emacs':
-     (require 'filladapt)
+put into `.emacs': `(require 'filladapt)'
 
 
 File: org,  Node: Tables,  Next: Hyperlinks,  Prev: Document structure,  Up: Top
@@ -1463,12 +1467,18 @@ functionality is not enough.  If a formula starts with a single quote
 followed by an opening parenthesis, then it is evaluated as a lisp form.
 The evaluation should return either a string or a number.  Just as with
 `calc' formulas, you can specify modes and a printf format after a
-semicolon.  A reference will be replaced with a string (in double
-quotes) containing the field.  If you provide the `N' mode switch, all
-referenced elements will be numbers.  Ranges are inserted as
-space-separated fields, so you can embed them in list or vector syntax.
-A few examples, note how the `N' mode is used when we do computations
-in lisp.
+semicolon.  With Emacs Lisp forms, you need to be concious about the way
+field references are interpolated into the form.  By default, a
+reference will be interpolated as a Lisp string (in double quotes)
+containing the field.  If you provide the `N' mode switch, all
+referenced elements will be numbers (non-number fields will be zero) and
+interpolated as Lisp numbers, without quotes.  If you provide the `L'
+flag, all fields will be interpolated literally, without quotes.  I.e.,
+if you want a reference to be interpreted as a string by the Lisp form,
+enclode the reference operator itself in double quotes, like `"$3"'.
+Ranges are inserted as space-separated fields, so you can embed them in
+list or vector syntax.  A few examples, note how the `N' mode is used
+when we do computations in lisp.
 
      Swap the first two characters of the content of column 1
        '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
@@ -1868,8 +1878,8 @@ earlier.
 
    ---------- Footnotes ----------
 
-   (1) Note that text before the first headline will never be exported,
-so the first such target must be after the first headline.
+   (1) Note that text before the first headline is usually not
+exported, so the first such target should be after the first headline.
 
 
 File: org,  Node: Radio targets,  Prev: Internal links,  Up: Internal links
@@ -2320,7 +2330,7 @@ text is also indented so that it starts in the same column as the
 headline (after the asterisks).
 
 
-File: org,  Node: TODO items,  Next: Timestamps,  Prev: Hyperlinks,  Up: Top
+File: org,  Node: TODO items,  Next: Tags,  Prev: Hyperlinks,  Up: Top
 
 5 TODO items
 ************
@@ -2675,511 +2685,9 @@ The following commands work with checkboxes:
      with `C-c C-c'.
 
 
-File: org,  Node: Timestamps,  Next: Tags,  Prev: TODO items,  Up: Top
+File: org,  Node: Tags,  Next: Timestamps,  Prev: TODO items,  Up: Top
 
-6 Timestamps
-************
-
-Items can be labeled with timestamps to make them useful for project
-planning.
-
-* Menu:
-
-* Time stamps::                 Assigning a time to a tree entry
-* Creating timestamps::         Commands which insert timestamps
-* Deadlines and scheduling::    Planning your work
-* Progress logging::            Documenting when what work was done.
-
-
-File: org,  Node: Time stamps,  Next: Creating timestamps,  Prev: Timestamps,  Up: Timestamps
-
-6.1 Time stamps, deadlines and scheduling
-=========================================
-
-A time stamp is a specification of a date (possibly with time) in a
-special format, either `<2003-09-16 Tue>' or `<2003-09-16 Tue
-09:39>'(1).  A time stamp can appear anywhere in the headline or body
-of an org-tree entry.  Its presence causes entries to be shown on
-specific dates in the agenda (*note Weekly/Daily agenda::).  We
-distinguish:
-
-PLAIN TIME STAMP
-     A simple time stamp just assigns a date/time to an item.  This is
-     just like writing down an appointment in a paper agenda, or like
-     writing down an event in a diary, when you want to take note of
-     when something happened.  In the timeline and agenda displays, the
-     headline of an entry associated with a plain time stamp will be
-     shown exactly on that date.
-
-          * Meet Peter at the movies <2006-11-01 Wed 19:15>
-
-TIME STAMP WITH REPEATER INTERVAL
-     A time stamp may contain a _repeater interval_, indicating that it
-     applies not only on the given date, but again and again after a
-     certain interval of N days (d), weeks (w), months(m), or years(y).
-     The following will show up in the agenda every Wednesday:
-
-          * Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
-
-DIARY-STYLE SEXP ENTRIES
-     For more complex date specifications, Org-mode supports using the
-     special sexp diary entries implemented in the Emacs calendar/diary
-     package.  For example
-
-          * The nerd meeting on every 2nd Thursday of the month
-            <%%(diary-float t 4 2)>
-
-TIME/DATE RANGE
-     Two time stamps connected by `--' denote a range.  The headline
-     will be shown on the first and last day of the range, and on any
-     dates that are displayed and fall in the range.  Here is an
-     example:
-
-          ** Meeting in Amsterdam
-             <2004-08-23 Mon>--<2004-08-26 Thu>
-
-INACTIVE TIME STAMP
-     Just like a plain time stamp, but with square brackets instead of
-     angular ones.  These time stamps are inactive in the sense that
-     they do _not_ trigger an entry to show up in the agenda.
-
-          * Gillian comes late for the fifth time [2006-11-01 Wed]
-
-
-   ---------- Footnotes ----------
-
-   (1) This is the standard ISO date/time format.  If you cannot get
-used to these, see *Note Custom time format::
-
-
-File: org,  Node: Creating timestamps,  Next: Deadlines and scheduling,  Prev: Time stamps,  Up: Timestamps
-
-6.2 Creating timestamps
-=======================
-
-For Org-mode to recognize time stamps, they need to be in the specific
-format.  All commands listed below produce time stamps in the correct
-format.
-
-`C-c .'
-     Prompt for a date and insert a corresponding time stamp.  When the
-     cursor is at a previously used time stamp, it is updated to NOW.
-     When this command is used twice in succession, a time range is
-     inserted.  
-
-`C-u C-c .'
-     Like `C-c .', but use the alternative format which contains date
-     and time.  The default time can be rounded to multiples of 5
-     minutes, see the option `org-time-stamp-rounding-minutes'.  
-
-`C-c !'
-     Like `C-c .', but insert an inactive time stamp that will not cause
-     an agenda entry.  
-
-`C-c <'
-     Insert a time stamp corresponding to the cursor date in the
-     Calendar.  
-
-`C-c >'
-     Access the Emacs calendar for the current date.  If there is a
-     timestamp in the current line, goto the corresponding date instead.  
-
-`C-c C-o'
-     Access the agenda for the date given by the time stamp or -range at
-     point (*note Weekly/Daily agenda::).  
-
-`S-<left>'
-`S-<right>'
-     Change date at cursor by one day.  These key bindings conflict with
-     CUA-mode (*note Conflicts::).  
-
-`S-<up>'
-`S-<down>'
-     Change the item under the cursor in a timestamp.  The cursor can
-     be on a year, month, day, hour or minute.  Note that if the cursor
-     is in a headline and not at a time stamp, these same keys modify
-     the priority of an item.  (*note Priorities::). The key bindings
-     also conflict with CUA-mode (*note Conflicts::).  
-
-`C-c C-y'
-     Evaluate a time range by computing the difference between start and
-     end.  With prefix arg, insert result after the time range (in a
-     table: into the following column).
-
-* Menu:
-
-* The date/time prompt::        How org-mode helps you entering date and time
-* Custom time format::          Making dates look differently
-
-
-File: org,  Node: The date/time prompt,  Next: Custom time format,  Prev: Creating timestamps,  Up: Creating timestamps
-
-6.2.1 The date/time prompt
---------------------------
-
-When Org-mode prompts for a date/time, the prompt suggests to enter an
-ISO date.  But it will in fact accept any string containing some date
-and/or time information.  You can, for example, use `C-y' to paste a
-(possibly multi-line) string copied from an email message.  Org-mode
-will find whatever information is in there and will replace anything not
-specified with the current date and time.  For example:
-
-       3-2-5         --> 2003-02-05
-       feb 15        --> currentyear-02-15
-       sep 12 9      --> 2009-09-12
-       12:45         --> today 12:45
-       22 sept 0:34  --> currentyear-09-22 0:34
-       12            --> currentyear-currentmonth-12
-       Fri           --> nearest Friday (today or later)
-       +4            --> 4 days from now (if +N is the only thing given)
-
-   The function understands English month and weekday abbreviations.  If
-you want to use unabbreviated names and/or other languages, configure
-the variables `parse-time-months' and `parse-time-weekdays'.
-
-   Parallel to the minibuffer prompt, a calendar is popped up(1).  When
-you exit the date prompt, either by clicking on a date in the calendar,
-or by pressing <RET>, the date selected in the calendar will be
-combined with the information entered at the prompt.  You can control
-the calendar fully from the minibuffer:
-
-`<'
-     Scroll calendar backwards by one month.  
-
-`>'
-     Scroll calendar forwards by one month.  
-
-`mouse-1'
-     Select date by clicking on it.  
-
-`S-<right>'
-     One day forward.  
-
-`S-<left>'
-     One day back.  
-
-`S-<down>'
-     One week forward.  
-
-`S-<up>'
-     One week back.  
-
-`M-S-<right>'
-     One month forward.  
-
-`M-S-<left>'
-     One month back.  
-
-`<RET>'
-     Choose date in calendar (only if nothing was typed into
-     minibuffer).
-
-   ---------- Footnotes ----------
-
-   (1) If you don't need/want the calendar, configure the variable
-`org-popup-calendar-for-date-prompt'.
-
-
-File: org,  Node: Custom time format,  Prev: The date/time prompt,  Up: Creating timestamps
-
-6.2.2 Custom time format
-------------------------
-
-Org-mode uses the standard ISO notation for dates and times as it is
-defined in ISO 8601.  If you cannot get used to this and require another
-representation of date and time to keep you happy, you can get it by
-customizing the variables `org-display-custom-times' and
-`org-time-stamp-custom-formats'.
-
-`C-c C-x C-t'
-     Toggle the display of custom formats for dates and times.
-
-Org-mode needs the default format for scanning, so the custom date/time
-format does not _replace_ the default format - instead it is put _over_
-the default format using text properties.  This has the following
-consequences:
-   * You cannot place the cursor onto a time stamp anymore, only before
-     or after.
-
-   * The `S-<up>/<down>' keys can no longer be used to adjust each
-     component of a time stamp.  If the cursor is at the beginning of
-     the stamp, `S-<up>/<down>' will change the stamp by one day, just
-     like `S-<left>/<right>'.  At the end of the stamp, the time will
-     be changed by one minute.
-
-   * When you delete a time stamp character-by-character, it will only
-     disappear from the buffer after _all_ (invisible) characters
-     belonging to the ISO timestamp have been removed.
-
-   * If the custom time stamp format is longer than the default and you
-     are using dates in tables, table alignment will be messed up.  If
-     the custom format is shorter, things do work as expected.
-
-
-File: org,  Node: Deadlines and scheduling,  Next: Progress logging,  Prev: Creating timestamps,  Up: Timestamps
-
-6.3 Deadlines and Scheduling
-============================
-
-A time stamp may be preceded by special keywords to facilitate planning
-of work:
-
-DEADLINE
-     The task (most likely a TODO item) is supposed to be finished on
-     that date, and it will be listed then.  In addition, the
-     compilation for _today_ will carry a warning about the approaching
-     or missed deadline, starting `org-deadline-warning-days' before
-     the due date, and continuing until the entry is marked DONE.  An
-     example:
-
-          *** TODO write article about the Earth for the Guide
-              The editor in charge is [[bbdb:Ford Prefect]]
-              DEADLINE: <2004-02-29 Sun>
-
-SCHEDULED
-     You are planning to start working on that task on the given date.
-     The headline will be listed under the given date(1).  In addition,
-     a reminder that the scheduled date has passed will be present in
-     the compilation for _today_, until the entry is marked DONE.
-     I.e., the task will automatically be forwarded until completed.
-
-          *** TODO Call Trillian for a date on New Years Eve.
-              SCHEDULED: <2004-12-25 Sat>
-
-* Menu:
-
-* Inserting deadline/schedule::
-* Repeated tasks::
-
-   ---------- Footnotes ----------
-
-   (1) It will still be listed on that date after it has been marked
-DONE.  If you don't like this, set the variable
-`org-agenda-skip-scheduled-if-done'.
-
-
-File: org,  Node: Inserting deadline/schedule,  Next: Repeated tasks,  Prev: Deadlines and scheduling,  Up: Deadlines and scheduling
-
-6.3.1 Inserting deadline/schedule
----------------------------------
-
-The following commands allow to quickly insert a deadline or to schedule
-an item:
-
-`C-c C-d'
-     Insert `DEADLINE' keyword along with a stamp.  The insertion will
-     happen in the line directly following the headline.  
-
-`C-c C-w'
-     Create a sparse tree with all deadlines that are either past-due,
-     or which will become due within `org-deadline-warning-days'.  With
-     `C-u' prefix, show all deadlines in the file.  With a numeric
-     prefix, check that many days.  For example, `C-1 C-c C-w' shows
-     all deadlines due tomorrow.  
-
-`C-c C-s'
-     Insert `SCHEDULED' keyword along with a stamp.  The insertion will
-     happen in the line directly following the headline.  Any CLOSED
-     timestamp will be removed.
-
-
-File: org,  Node: Repeated tasks,  Prev: Inserting deadline/schedule,  Up: Deadlines and scheduling
-
-6.3.2 Repeated Tasks
---------------------
-
-Some tasks need to be repeated again and again, and Org-mode therefore
-allows to use a repeater in a DEADLINE or SCHEDULED time stamp, for
-example:
-     ** TODO Pay the rent
-        DEADLINE: <2005-10-01 Sat +1m>
-
-   Deadlines and scheduled items produce entries in the agenda when they
-are over-due, so it is important to be able to mark such an entry as
-completed once you have done so.  When you mark a DEADLINE or a SCHEDULE
-with the todo keyword DONE, it will no longer produce entries in the
-agenda. The problem with this is, however, that then also the _next_
-instance of the repeated entry will not be active.  Org-mode deals with
-this in the following way: When you try to mark such an entry DONE
-(using `C-c C-t'), it will shift the base date of the repeating time
-stamp by the repeater interval, and immediately set the entry state
-back to TODO.  In the example above, setting the state to DONE would
-actually switch the date like this:
-
-     ** TODO Pay the rent
-        DEADLINE: <2005-11-01 Tue +1m>
-
-   You will also be prompted for a note that will be put under the
-DEADLINE line to keep a record that you actually acted on the previous
-instance of this deadline.
-
-   As a consequence of shifting the base date, this entry will no
-longer be visible in the agenda when checking past dates, but all
-future instances will be visible.
-
-   You may have both scheduling and deadline information for a specific
-task - just make sure that the repeater intervals on both are the same.
-
-
-File: org,  Node: Progress logging,  Prev: Deadlines and scheduling,  Up: Timestamps
-
-6.4 Progress Logging
-====================
-
-Org-mode can automatically record a time stamp when you mark a TODO item
-as DONE, or even each time when you change the state of a TODO item.
-You can also measure precisely the time you spent on specific items in a
-project by starting and stopping a clock when you start and stop working
-on an aspect of a project.
-
-* Menu:
-
-* Closing items::               When was this entry marked DONE?
-* Tracking TODO state changes::  When did the status change?
-* Clocking work time::          When exactly did you work on this item?
-
-
-File: org,  Node: Closing items,  Next: Tracking TODO state changes,  Prev: Progress logging,  Up: Progress logging
-
-6.4.1 Closing items
--------------------
-
-If you want to keep track of _when_ a certain TODO item was finished,
-turn on logging with(1)
-
-     (setq org-log-done t)
-
-Then each time you turn a TODO entry into DONE using either `C-c C-t'
-in the Org-mode buffer or `t' in the agenda buffer, a line `CLOSED:
-[timestamp]' will be inserted just after the headline.  If you turn the
-entry back into a TODO item through further state cycling, that line
-will be removed again.  In the timeline (*note Timeline::) and in the
-agenda (*note Weekly/Daily agenda::), you can then use the `l' key to
-display the TODO items closed on each day, giving you an overview of
-what has been done on a day.  If you want to record a note along with
-the timestamp, use(2)
-
-     (setq org-log-done '(done))
-
-   ---------- Footnotes ----------
-
-   (1) The corresponding in-buffer setting is: `#+STARTUP: logdone'
-
-   (2) The corresponding in-buffer setting is: `#+STARTUP: lognotedone'
-
-
-File: org,  Node: Tracking TODO state changes,  Next: Clocking work time,  Prev: Closing items,  Up: Progress logging
-
-6.4.2 Tracking TODO state changes
----------------------------------
-
-When TODO keywords are used as workflow states (*note Workflow
-states::), you might want to keep track of when a state change occurred,
-and you may even want to attach notes to that state change.  With the
-setting
-
-     (setq org-log-done '(state))
-
-each state change will prompt you for a note that will be attached to
-the current headline.  Very likely you do not want this verbose tracking
-all the time, so it is probably better to configure this behavior with
-in-buffer options.  For example, if you are tracking purchases, put
-these into a separate file that starts with:
-
-     #+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
-     #+STARTUP: lognotestate
-
-
-File: org,  Node: Clocking work time,  Prev: Tracking TODO state changes,  Up: Progress logging
-
-6.4.3 Clocking work time
-------------------------
-
-Org-mode allows you to clock the time you spent on specific tasks in a
-project.  When you start working on an item, you can start the clock.
-When you stop working on that task, or when you mark the task done, the
-clock is stopped and the corresponding time interval is recorded.  It
-also computes the total time spent on each subtree of a project.
-
-`C-c C-x C-i'
-     Start the clock on the current item (clock-in).  This inserts the
-     CLOCK keyword together with a timestamp.  
-
-`C-c C-x C-o'
-     Stop the clock (clock-out).  The inserts another timestamp at the
-     same location where the clock was last started.  It also directly
-     computes the resulting time in inserts it after the time range as
-     `=> HH:MM'.  See the variable `org-log-done' for the possibility to
-     record an additional note together with the clock-out time
-     stamp(1).  
-
-`C-c C-y'
-     Recompute the time interval after changing one of the time stamps.
-     This is only necessary if you edit the time stamps directly.  If
-     you change them with `S-<cursor>' keys, the update is automatic.  
-
-`C-c C-t'
-     Changing the TODO state of an item to DONE automatically stops the
-     clock if it is running in this same item.  
-
-`C-c C-x C-x'
-     Cancel the current clock.  This is useful if a clock was started by
-     mistake, or if you ended up working on something else.  
-
-`C-c C-x C-d'
-     Display time summaries for each subtree in the current buffer.
-     This puts overlays at the end of each headline, showing the total
-     time recorded under that heading, including the time of any
-     subheadings. You can use visibility cycling to study the tree, but
-     the overlays disappear when you change the buffer (see variable
-     `org-remove-highlights-with-change') or press `C-c C-c'.  
-
-`C-c C-x C-r'
-     Insert a dynamic block (*note Dynamic blocks::) containing a clock
-     report as an org-mode table into the current file.
-          #+BEGIN: clocktable :maxlevel 2 :emphasize nil
-
-          #+END: clocktable
-     If such a block already exists, its content is replaced by the new
-     table.  The `BEGIN' line can specify options:
-          :maxlevels   Maximum level depth to which times are listed in the table.
-          :emphasize   When `t', emphasize level one and level two items
-          :block       The time block to consider.  This block is specified relative
-                       to the current time and may be any of these keywords:
-                       `today', `yesterday', `thisweek', `lastweek',
-                       `thismonth', `lastmonth', `thisyear', or `lastyear'.
-          :tstart      A time string specifying when to start considering times
-          :tend        A time string specifying when to stop considering times
-     So to get a clock summary for the current day, you could write
-          #+BEGIN: clocktable :maxlevel 2 :block today
-
-          #+END: clocktable
-     and to use a specific time range you could write(2)
-          #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
-                              :tend "<2006-08-10 Thu 12:00>"
-
-          #+END: clocktable
-     
-`C-u C-c C-x C-u'
-     Update all dynamic blocks (*note Dynamic blocks::).  This is
-     useful if you have several clocktable blocks in a buffer.
-
-   The `l' key may be used in the timeline (*note Timeline::) and in
-the agenda (*note Weekly/Daily agenda::) to show which tasks have been
-worked on or closed during a day.
-
-   ---------- Footnotes ----------
-
-   (1) The corresponding in-buffer setting is: `#+STARTUP:
-lognoteclock-out'
-
-   (2) Note that all parameters must be specified in a single line -
-the line is broken here only to fit it onto the manual.
-
-
-File: org,  Node: Tags,  Next: Agenda views,  Prev: Timestamps,  Up: Top
-
-7 Tags
+6 Tags
 ******
 
 If you wish to implement a system of labels and contexts for
@@ -3200,7 +2708,7 @@ headline.  Tags are normal words containing letters, numbers, `_', and
 
 File: org,  Node: Tag inheritance,  Next: Setting tags,  Prev: Tags,  Up: Tags
 
-7.1 Tag inheritance
+6.1 Tag inheritance
 ===================
 
 Tags make use of the hierarchical structure of outline trees.  If a
@@ -3222,7 +2730,7 @@ variables `org-use-tag-inheritance' and `org-tags-match-list-sublevels'.
 
 File: org,  Node: Setting tags,  Next: Tag searches,  Prev: Tag inheritance,  Up: Tags
 
-7.2 Setting tags
+6.2 Setting tags
 ================
 
 Tags can simply be typed into the buffer at the end of a headline.
@@ -3345,7 +2853,7 @@ configured keys.
 
 File: org,  Node: Tag searches,  Prev: Setting tags,  Up: Tags
 
-7.3 Tag searches
+6.3 Tag searches
 ================
 
 Once a tags system has been set up, it can be used to collect related
@@ -3416,7 +2924,513 @@ instead of any TAG an expression like `LEVEL=3'.  For example, a search
 BOSS and are _not_ marked with the todo keyword DONE.
 
 
-File: org,  Node: Agenda views,  Next: Embedded LaTeX,  Prev: Tags,  Up: Top
+File: org,  Node: Timestamps,  Next: Agenda views,  Prev: Tags,  Up: Top
+
+7 Timestamps
+************
+
+Items can be labeled with timestamps to make them useful for project
+planning.
+
+* Menu:
+
+* Time stamps::                 Assigning a time to a tree entry
+* Creating timestamps::         Commands which insert timestamps
+* Deadlines and scheduling::    Planning your work
+* Progress logging::            Documenting when what work was done.
+
+
+File: org,  Node: Time stamps,  Next: Creating timestamps,  Prev: Timestamps,  Up: Timestamps
+
+7.1 Time stamps, deadlines and scheduling
+=========================================
+
+A time stamp is a specification of a date (possibly with time or a range
+of times) in a special format, either `<2003-09-16 Tue>' or
+`<2003-09-16 Tue 09:39>' or `<2003-09-16 Tue 12:00-12:30>'(1).  A time
+stamp can appear anywhere in the headline or body of an org-tree entry.
+Its presence causes entries to be shown on specific dates in the agenda
+(*note Weekly/Daily agenda::).  We distinguish:
+
+PLAIN TIME STAMP
+     A simple time stamp just assigns a date/time to an item.  This is
+     just like writing down an appointment in a paper agenda, or like
+     writing down an event in a diary, when you want to take note of
+     when something happened.  In the timeline and agenda displays, the
+     headline of an entry associated with a plain time stamp will be
+     shown exactly on that date.
+
+          * Meet Peter at the movies <2006-11-01 Wed 19:15>
+          * Discussion on climate change <2006-11-02 Thu 20:00-22:00>
+
+TIME STAMP WITH REPEATER INTERVAL
+     A time stamp may contain a _repeater interval_, indicating that it
+     applies not only on the given date, but again and again after a
+     certain interval of N days (d), weeks (w), months(m), or years(y).
+     The following will show up in the agenda every Wednesday:
+
+          * Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
+
+DIARY-STYLE SEXP ENTRIES
+     For more complex date specifications, Org-mode supports using the
+     special sexp diary entries implemented in the Emacs calendar/diary
+     package.  For example
+
+          * The nerd meeting on every 2nd Thursday of the month
+            <%%(diary-float t 4 2)>
+
+TIME/DATE RANGE
+     Two time stamps connected by `--' denote a range.  The headline
+     will be shown on the first and last day of the range, and on any
+     dates that are displayed and fall in the range.  Here is an
+     example:
+
+          ** Meeting in Amsterdam
+             <2004-08-23 Mon>--<2004-08-26 Thu>
+
+INACTIVE TIME STAMP
+     Just like a plain time stamp, but with square brackets instead of
+     angular ones.  These time stamps are inactive in the sense that
+     they do _not_ trigger an entry to show up in the agenda.
+
+          * Gillian comes late for the fifth time [2006-11-01 Wed]
+
+
+   ---------- Footnotes ----------
+
+   (1) This is the standard ISO date/time format.  If you cannot get
+used to these, see *Note Custom time format::
+
+
+File: org,  Node: Creating timestamps,  Next: Deadlines and scheduling,  Prev: Time stamps,  Up: Timestamps
+
+7.2 Creating timestamps
+=======================
+
+For Org-mode to recognize time stamps, they need to be in the specific
+format.  All commands listed below produce time stamps in the correct
+format.
+
+`C-c .'
+     Prompt for a date and insert a corresponding time stamp.  When the
+     cursor is at a previously used time stamp, it is updated to NOW.
+     When this command is used twice in succession, a time range is
+     inserted.  
+
+`C-u C-c .'
+     Like `C-c .', but use the alternative format which contains date
+     and time.  The default time can be rounded to multiples of 5
+     minutes, see the option `org-time-stamp-rounding-minutes'.  
+
+`C-c !'
+     Like `C-c .', but insert an inactive time stamp that will not cause
+     an agenda entry.  
+
+`C-c <'
+     Insert a time stamp corresponding to the cursor date in the
+     Calendar.  
+
+`C-c >'
+     Access the Emacs calendar for the current date.  If there is a
+     timestamp in the current line, goto the corresponding date instead.  
+
+`C-c C-o'
+     Access the agenda for the date given by the time stamp or -range at
+     point (*note Weekly/Daily agenda::).  
+
+`S-<left>'
+`S-<right>'
+     Change date at cursor by one day.  These key bindings conflict with
+     CUA-mode (*note Conflicts::).  
+
+`S-<up>'
+`S-<down>'
+     Change the item under the cursor in a timestamp.  The cursor can
+     be on a year, month, day, hour or minute.  Note that if the cursor
+     is in a headline and not at a time stamp, these same keys modify
+     the priority of an item.  (*note Priorities::). The key bindings
+     also conflict with CUA-mode (*note Conflicts::).  
+
+`C-c C-y'
+     Evaluate a time range by computing the difference between start and
+     end.  With prefix arg, insert result after the time range (in a
+     table: into the following column).
+
+* Menu:
+
+* The date/time prompt::        How org-mode helps you entering date and time
+* Custom time format::          Making dates look differently
+
+
+File: org,  Node: The date/time prompt,  Next: Custom time format,  Prev: Creating timestamps,  Up: Creating timestamps
+
+7.2.1 The date/time prompt
+--------------------------
+
+When Org-mode prompts for a date/time, the prompt suggests to enter an
+ISO date.  But it will in fact accept any string containing some date
+and/or time information.  You can, for example, use `C-y' to paste a
+(possibly multi-line) string copied from an email message.  Org-mode
+will find whatever information is in there and will replace anything not
+specified with the current date and time.  For example:
+
+       3-2-5         --> 2003-02-05
+       feb 15        --> currentyear-02-15
+       sep 12 9      --> 2009-09-12
+       12:45         --> today 12:45
+       22 sept 0:34  --> currentyear-09-22 0:34
+       12            --> currentyear-currentmonth-12
+       Fri           --> nearest Friday (today or later)
+       +4            --> 4 days from now (if +N is the only thing given)
+
+   The function understands English month and weekday abbreviations.  If
+you want to use unabbreviated names and/or other languages, configure
+the variables `parse-time-months' and `parse-time-weekdays'.
+
+   Parallel to the minibuffer prompt, a calendar is popped up(1).  When
+you exit the date prompt, either by clicking on a date in the calendar,
+or by pressing <RET>, the date selected in the calendar will be
+combined with the information entered at the prompt.  You can control
+the calendar fully from the minibuffer:
+
+`<'
+     Scroll calendar backwards by one month.  
+
+`>'
+     Scroll calendar forwards by one month.  
+
+`mouse-1'
+     Select date by clicking on it.  
+
+`S-<right>'
+     One day forward.  
+
+`S-<left>'
+     One day back.  
+
+`S-<down>'
+     One week forward.  
+
+`S-<up>'
+     One week back.  
+
+`M-S-<right>'
+     One month forward.  
+
+`M-S-<left>'
+     One month back.  
+
+`<RET>'
+     Choose date in calendar (only if nothing was typed into
+     minibuffer).
+
+   ---------- Footnotes ----------
+
+   (1) If you don't need/want the calendar, configure the variable
+`org-popup-calendar-for-date-prompt'.
+
+
+File: org,  Node: Custom time format,  Prev: The date/time prompt,  Up: Creating timestamps
+
+7.2.2 Custom time format
+------------------------
+
+Org-mode uses the standard ISO notation for dates and times as it is
+defined in ISO 8601.  If you cannot get used to this and require another
+representation of date and time to keep you happy, you can get it by
+customizing the variables `org-display-custom-times' and
+`org-time-stamp-custom-formats'.
+
+`C-c C-x C-t'
+     Toggle the display of custom formats for dates and times.
+
+Org-mode needs the default format for scanning, so the custom date/time
+format does not _replace_ the default format - instead it is put _over_
+the default format using text properties.  This has the following
+consequences:
+   * You cannot place the cursor onto a time stamp anymore, only before
+     or after.
+
+   * The `S-<up>/<down>' keys can no longer be used to adjust each
+     component of a time stamp.  If the cursor is at the beginning of
+     the stamp, `S-<up>/<down>' will change the stamp by one day, just
+     like `S-<left>/<right>'.  At the end of the stamp, the time will
+     be changed by one minute.
+
+   * If the time stamp contains a range of clock times or a repeater,
+     these will not be overlayed, but remain in the buffer as they were.
+
+   * When you delete a time stamp character-by-character, it will only
+     disappear from the buffer after _all_ (invisible) characters
+     belonging to the ISO timestamp have been removed.
+
+   * If the custom time stamp format is longer than the default and you
+     are using dates in tables, table alignment will be messed up.  If
+     the custom format is shorter, things do work as expected.
+
+
+File: org,  Node: Deadlines and scheduling,  Next: Progress logging,  Prev: Creating timestamps,  Up: Timestamps
+
+7.3 Deadlines and Scheduling
+============================
+
+A time stamp may be preceded by special keywords to facilitate planning
+of work:
+
+DEADLINE
+     The task (most likely a TODO item) is supposed to be finished on
+     that date, and it will be listed then.  In addition, the
+     compilation for _today_ will carry a warning about the approaching
+     or missed deadline, starting `org-deadline-warning-days' before
+     the due date, and continuing until the entry is marked DONE.  An
+     example:
+
+          *** TODO write article about the Earth for the Guide
+              The editor in charge is [[bbdb:Ford Prefect]]
+              DEADLINE: <2004-02-29 Sun>
+
+SCHEDULED
+     You are planning to start working on that task on the given date.
+     The headline will be listed under the given date(1).  In addition,
+     a reminder that the scheduled date has passed will be present in
+     the compilation for _today_, until the entry is marked DONE.
+     I.e., the task will automatically be forwarded until completed.
+
+          *** TODO Call Trillian for a date on New Years Eve.
+              SCHEDULED: <2004-12-25 Sat>
+
+* Menu:
+
+* Inserting deadline/schedule::
+* Repeated tasks::
+
+   ---------- Footnotes ----------
+
+   (1) It will still be listed on that date after it has been marked
+DONE.  If you don't like this, set the variable
+`org-agenda-skip-scheduled-if-done'.
+
+
+File: org,  Node: Inserting deadline/schedule,  Next: Repeated tasks,  Prev: Deadlines and scheduling,  Up: Deadlines and scheduling
+
+7.3.1 Inserting deadline/schedule
+---------------------------------
+
+The following commands allow to quickly insert a deadline or to schedule
+an item:
+
+`C-c C-d'
+     Insert `DEADLINE' keyword along with a stamp.  The insertion will
+     happen in the line directly following the headline.  
+
+`C-c C-w'
+     Create a sparse tree with all deadlines that are either past-due,
+     or which will become due within `org-deadline-warning-days'.  With
+     `C-u' prefix, show all deadlines in the file.  With a numeric
+     prefix, check that many days.  For example, `C-1 C-c C-w' shows
+     all deadlines due tomorrow.  
+
+`C-c C-s'
+     Insert `SCHEDULED' keyword along with a stamp.  The insertion will
+     happen in the line directly following the headline.  Any CLOSED
+     timestamp will be removed.
+
+
+File: org,  Node: Repeated tasks,  Prev: Inserting deadline/schedule,  Up: Deadlines and scheduling
+
+7.3.2 Repeated Tasks
+--------------------
+
+Some tasks need to be repeated again and again, and Org-mode therefore
+allows to use a repeater in a DEADLINE or SCHEDULED time stamp, for
+example:
+     ** TODO Pay the rent
+        DEADLINE: <2005-10-01 Sat +1m>
+
+   Deadlines and scheduled items produce entries in the agenda when they
+are over-due, so it is important to be able to mark such an entry as
+completed once you have done so.  When you mark a DEADLINE or a SCHEDULE
+with the todo keyword DONE, it will no longer produce entries in the
+agenda. The problem with this is, however, that then also the _next_
+instance of the repeated entry will not be active.  Org-mode deals with
+this in the following way: When you try to mark such an entry DONE
+(using `C-c C-t'), it will shift the base date of the repeating time
+stamp by the repeater interval, and immediately set the entry state
+back to TODO.  In the example above, setting the state to DONE would
+actually switch the date like this:
+
+     ** TODO Pay the rent
+        DEADLINE: <2005-11-01 Tue +1m>
+
+   You will also be prompted for a note that will be put under the
+DEADLINE line to keep a record that you actually acted on the previous
+instance of this deadline.
+
+   As a consequence of shifting the base date, this entry will no
+longer be visible in the agenda when checking past dates, but all
+future instances will be visible.
+
+   You may have both scheduling and deadline information for a specific
+task - just make sure that the repeater intervals on both are the same.
+
+
+File: org,  Node: Progress logging,  Prev: Deadlines and scheduling,  Up: Timestamps
+
+7.4 Progress Logging
+====================
+
+Org-mode can automatically record a time stamp when you mark a TODO item
+as DONE, or even each time when you change the state of a TODO item.
+You can also measure precisely the time you spent on specific items in a
+project by starting and stopping a clock when you start and stop working
+on an aspect of a project.
+
+* Menu:
+
+* Closing items::               When was this entry marked DONE?
+* Tracking TODO state changes::  When did the status change?
+* Clocking work time::          When exactly did you work on this item?
+
+
+File: org,  Node: Closing items,  Next: Tracking TODO state changes,  Prev: Progress logging,  Up: Progress logging
+
+7.4.1 Closing items
+-------------------
+
+If you want to keep track of _when_ a certain TODO item was finished,
+turn on logging with(1)
+
+     (setq org-log-done t)
+
+Then each time you turn a TODO entry into DONE using either `C-c C-t'
+in the Org-mode buffer or `t' in the agenda buffer, a line `CLOSED:
+[timestamp]' will be inserted just after the headline.  If you turn the
+entry back into a TODO item through further state cycling, that line
+will be removed again.  In the timeline (*note Timeline::) and in the
+agenda (*note Weekly/Daily agenda::), you can then use the `l' key to
+display the TODO items closed on each day, giving you an overview of
+what has been done on a day.  If you want to record a note along with
+the timestamp, use(2)
+
+     (setq org-log-done '(done))
+
+   ---------- Footnotes ----------
+
+   (1) The corresponding in-buffer setting is: `#+STARTUP: logdone'
+
+   (2) The corresponding in-buffer setting is: `#+STARTUP: lognotedone'
+
+
+File: org,  Node: Tracking TODO state changes,  Next: Clocking work time,  Prev: Closing items,  Up: Progress logging
+
+7.4.2 Tracking TODO state changes
+---------------------------------
+
+When TODO keywords are used as workflow states (*note Workflow
+states::), you might want to keep track of when a state change occurred,
+and you may even want to attach notes to that state change.  With the
+setting
+
+     (setq org-log-done '(state))
+
+each state change will prompt you for a note that will be attached to
+the current headline.  Very likely you do not want this verbose tracking
+all the time, so it is probably better to configure this behavior with
+in-buffer options.  For example, if you are tracking purchases, put
+these into a separate file that starts with:
+
+     #+SEQ_TODO: TODO ORDERED INVOICE PAYED RECEIVED SENT
+     #+STARTUP: lognotestate
+
+
+File: org,  Node: Clocking work time,  Prev: Tracking TODO state changes,  Up: Progress logging
+
+7.4.3 Clocking work time
+------------------------
+
+Org-mode allows you to clock the time you spent on specific tasks in a
+project.  When you start working on an item, you can start the clock.
+When you stop working on that task, or when you mark the task done, the
+clock is stopped and the corresponding time interval is recorded.  It
+also computes the total time spent on each subtree of a project.
+
+`C-c C-x C-i'
+     Start the clock on the current item (clock-in).  This inserts the
+     CLOCK keyword together with a timestamp.  
+
+`C-c C-x C-o'
+     Stop the clock (clock-out).  The inserts another timestamp at the
+     same location where the clock was last started.  It also directly
+     computes the resulting time in inserts it after the time range as
+     `=> HH:MM'.  See the variable `org-log-done' for the possibility to
+     record an additional note together with the clock-out time
+     stamp(1).  
+
+`C-c C-y'
+     Recompute the time interval after changing one of the time stamps.
+     This is only necessary if you edit the time stamps directly.  If
+     you change them with `S-<cursor>' keys, the update is automatic.  
+
+`C-c C-t'
+     Changing the TODO state of an item to DONE automatically stops the
+     clock if it is running in this same item.  
+
+`C-c C-x C-x'
+     Cancel the current clock.  This is useful if a clock was started by
+     mistake, or if you ended up working on something else.  
+
+`C-c C-x C-d'
+     Display time summaries for each subtree in the current buffer.
+     This puts overlays at the end of each headline, showing the total
+     time recorded under that heading, including the time of any
+     subheadings. You can use visibility cycling to study the tree, but
+     the overlays disappear when you change the buffer (see variable
+     `org-remove-highlights-with-change') or press `C-c C-c'.  
+
+`C-c C-x C-r'
+     Insert a dynamic block (*note Dynamic blocks::) containing a clock
+     report as an org-mode table into the current file.
+          #+BEGIN: clocktable :maxlevel 2 :emphasize nil
+
+          #+END: clocktable
+     If such a block already exists, its content is replaced by the new
+     table.  The `BEGIN' line can specify options:
+          :maxlevels   Maximum level depth to which times are listed in the table.
+          :emphasize   When `t', emphasize level one and level two items
+          :block       The time block to consider.  This block is specified relative
+                       to the current time and may be any of these keywords:
+                       `today', `yesterday', `thisweek', `lastweek',
+                       `thismonth', `lastmonth', `thisyear', or `lastyear'.
+          :tstart      A time string specifying when to start considering times
+          :tend        A time string specifying when to stop considering times
+     So to get a clock summary for the current day, you could write
+          #+BEGIN: clocktable :maxlevel 2 :block today
+
+          #+END: clocktable
+     and to use a specific time range you could write(2)
+          #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
+                              :tend "<2006-08-10 Thu 12:00>"
+
+          #+END: clocktable
+     
+`C-u C-c C-x C-u'
+     Update all dynamic blocks (*note Dynamic blocks::).  This is
+     useful if you have several clocktable blocks in a buffer.
+
+   The `l' key may be used in the timeline (*note Timeline::) and in
+the agenda (*note Weekly/Daily agenda::) to show which tasks have been
+worked on or closed during a day.
+
+   ---------- Footnotes ----------
+
+   (1) The corresponding in-buffer setting is: `#+STARTUP:
+lognoteclock-out'
+
+   (2) Note that all parameters must be specified in a single line -
+the line is broken here only to fit it onto the manual.
+
+
+File: org,  Node: Agenda views,  Next: Embedded LaTeX,  Prev: Timestamps,  Up: Top
 
 8 Agenda Views
 **************
@@ -6628,7 +6642,7 @@ Index
 * cycling, visibility:                   Visibility cycling.  (line   6)
 * daily agenda:                          Weekly/Daily agenda. (line   6)
 * date format, custom:                   Custom time format.  (line   6)
-* date range:                            Time stamps.         (line  40)
+* date range:                            Time stamps.         (line  41)
 * date stamps <1>:                       Time stamps.         (line   6)
 * date stamps:                           Timestamps.          (line   6)
 * date, reading in minibuffer:           The date/time prompt.
@@ -6726,7 +6740,7 @@ Index
 * iCalendar export:                      iCalendar export.    (line   6)
 * images, inline in HTML:                Images.              (line   6)
 * in-buffer settings:                    In-buffer settings.  (line   6)
-* inactive timestamp:                    Time stamps.         (line  49)
+* inactive timestamp:                    Time stamps.         (line  50)
 * index, of published pages:             Project page index.  (line   6)
 * Info links:                            External links.      (line   6)
 * inheritance, of tags:                  Tag inheritance.     (line   6)
@@ -6936,10 +6950,10 @@ Index
                                                               (line   6)
 * time-sorted view:                      Timeline.            (line   6)
 * timeline, single file:                 Timeline.            (line   6)
-* timerange:                             Time stamps.         (line  40)
+* timerange:                             Time stamps.         (line  41)
 * timestamp:                             Time stamps.         (line  14)
-* timestamp, inactive:                   Time stamps.         (line  49)
-* timestamp, with repeater interval:     Time stamps.         (line  24)
+* timestamp, inactive:                   Time stamps.         (line  50)
+* timestamp, with repeater interval:     Time stamps.         (line  25)
 * timestamps, creating:                  Creating timestamps. (line   6)
 * TODO items:                            TODO items.          (line   6)
 * TODO keyword matching:                 Global TODO list.    (line  17)
@@ -6999,9 +7013,9 @@ Key Index
                                                               (line  32)
 * <left>:                                Agenda commands.     (line  95)
 * <RET> <1>:                             Agenda commands.     (line  39)
-* <RET> <2>:                             Setting tags.        (line  76)
-* <RET> <3>:                             The date/time prompt.
+* <RET> <2>:                             The date/time prompt.
                                                               (line  57)
+* <RET> <3>:                             Setting tags.        (line  76)
 * <RET>:                                 Built-in table editor.
                                                               (line  62)
 * <right>:                               Agenda commands.     (line  90)
@@ -7093,7 +7107,7 @@ Key Index
                                                               (line  46)
 * C-c C-c <7>:                           Built-in table editor.
                                                               (line  54)
-* C-c C-c:                               Plain lists.         (line  78)
+* C-c C-c:                               Plain lists.         (line  81)
 * C-c C-d <1>:                           Agenda commands.     (line 156)
 * C-c C-d:                               Inserting deadline/schedule.
                                                               (line   9)
@@ -7217,7 +7231,7 @@ Key Index
 * M-<left> <1>:                          Built-in table editor.
                                                               (line  72)
 * M-<left>:                              Structure editing.   (line  21)
-* M-<RET> <1>:                           Plain lists.         (line  46)
+* M-<RET> <1>:                           Plain lists.         (line  49)
 * M-<RET>:                               Structure editing.   (line   6)
 * M-<right> <1>:                         Built-in table editor.
                                                               (line  72)
@@ -7235,28 +7249,28 @@ Key Index
                                                               (line  72)
 * M-S-<down> <2>:                        Built-in table editor.
                                                               (line  87)
-* M-S-<down> <3>:                        Plain lists.         (line  63)
+* M-S-<down> <3>:                        Plain lists.         (line  66)
 * M-S-<down>:                            Structure editing.   (line  36)
 * M-S-<left> <1>:                        The date/time prompt.
                                                               (line  54)
 * M-S-<left> <2>:                        Built-in table editor.
                                                               (line  74)
-* M-S-<left> <3>:                        Plain lists.         (line  69)
+* M-S-<left> <3>:                        Plain lists.         (line  72)
 * M-S-<left>:                            Structure editing.   (line  27)
 * M-S-<RET> <1>:                         Checkboxes.          (line  53)
-* M-S-<RET> <2>:                         Plain lists.         (line  56)
+* M-S-<RET> <2>:                         Plain lists.         (line  59)
 * M-S-<RET>:                             Structure editing.   (line  18)
 * M-S-<right> <1>:                       The date/time prompt.
                                                               (line  51)
 * M-S-<right> <2>:                       Built-in table editor.
                                                               (line  77)
-* M-S-<right> <3>:                       Plain lists.         (line  69)
+* M-S-<right> <3>:                       Plain lists.         (line  72)
 * M-S-<right>:                           Structure editing.   (line  30)
 * M-S-<up> <1>:                          Editing and debugging formulas.
                                                               (line  72)
 * M-S-<up> <2>:                          Built-in table editor.
                                                               (line  84)
-* M-S-<up> <3>:                          Plain lists.         (line  63)
+* M-S-<up> <3>:                          Plain lists.         (line  66)
 * M-S-<up>:                              Structure editing.   (line  33)
 * mouse-1 <1>:                           Agenda commands.     (line  33)
 * mouse-1 <2>:                           The date/time prompt.
@@ -7283,7 +7297,7 @@ Key Index
 * S-<down> <4>:                          Priorities.          (line  23)
 * S-<down> <5>:                          Editing and debugging formulas.
                                                               (line  67)
-* S-<down>:                              Plain lists.         (line  59)
+* S-<down>:                              Plain lists.         (line  62)
 * S-<left> <1>:                          Agenda commands.     (line 167)
 * S-<left> <2>:                          The date/time prompt.
                                                               (line  42)
@@ -7314,7 +7328,7 @@ Key Index
 * S-<up> <4>:                            Priorities.          (line  23)
 * S-<up> <5>:                            Editing and debugging formulas.
                                                               (line  67)
-* S-<up>:                                Plain lists.         (line  59)
+* S-<up>:                                Plain lists.         (line  62)
 * T:                                     Agenda commands.     (line 124)
 * t:                                     Agenda commands.     (line 111)
 * w:                                     Agenda commands.     (line  66)
@@ -7347,172 +7361,172 @@ Node: Sparse trees32441
 Ref: Sparse trees-Footnote-134573
 Ref: Sparse trees-Footnote-234755
 Node: Plain lists34870
-Ref: Plain lists-Footnote-138639
-Ref: Plain lists-Footnote-238997
-Node: Tables39181
-Node: Built-in table editor39762
-Node: Narrow columns47001
-Ref: Narrow columns-Footnote-148936
-Node: Column groups48982
-Node: orgtbl-mode50515
-Node: The spreadsheet51318
-Node: References52405
-Ref: References-Footnote-156534
-Node: Formula syntax for Calc56823
-Node: Formula syntax for Lisp59280
-Node: Field formulas60549
-Node: Column formulas61857
-Node: Editing and debugging formulas63456
-Node: Updating the table67609
-Node: Advanced features68644
-Node: Hyperlinks73169
-Node: Link format73942
-Node: Internal links75235
-Ref: Internal links-Footnote-177160
-Node: Radio targets77292
-Node: External links77983
-Node: Handling links80387
-Ref: Handling links-Footnote-185674
-Ref: Handling links-Footnote-285911
-Node: Link abbreviations85985
-Node: Search options87664
-Ref: Search options-Footnote-189444
-Node: Custom searches89525
-Node: Remember90573
-Node: Setting up remember91560
-Node: Remember templates92142
-Ref: Remember templates-Footnote-195434
-Node: Storing notes95532
-Node: TODO items97419
-Node: TODO basics98402
-Node: TODO extensions100099
-Node: Workflow states100918
-Ref: Workflow states-Footnote-1102093
-Node: TODO types102186
-Ref: TODO types-Footnote-1103769
-Node: Multiple sets in one file103851
-Node: Per file keywords105462
-Ref: Per file keywords-Footnote-1106751
-Node: Priorities106952
-Node: Breaking down tasks108562
-Ref: Breaking down tasks-Footnote-1109082
-Node: Checkboxes109178
-Node: Timestamps111933
-Node: Time stamps112374
-Ref: Time stamps-Footnote-1114679
-Node: Creating timestamps114795
-Node: The date/time prompt116869
-Ref: The date/time prompt-Footnote-1118857
-Node: Custom time format118963
-Node: Deadlines and scheduling120511
-Ref: Deadlines and scheduling-Footnote-1121861
-Node: Inserting deadline/schedule122016
-Node: Repeated tasks122954
-Node: Progress logging124593
-Node: Closing items125248
-Ref: Closing items-Footnote-1126182
-Ref: Closing items-Footnote-2126251
-Node: Tracking TODO state changes126324
-Node: Clocking work time127180
-Ref: Clocking work time-Footnote-1130826
-Ref: Clocking work time-Footnote-2130904
-Node: Tags131030
-Node: Tag inheritance131792
-Node: Setting tags132729
-Ref: Setting tags-Footnote-1137252
-Ref: Setting tags-Footnote-2137364
-Node: Tag searches137447
-Node: Agenda views140158
-Node: Agenda files142103
-Ref: Agenda files-Footnote-1143069
-Ref: Agenda files-Footnote-2143218
-Node: Agenda dispatcher143411
-Node: Built-in agenda views145102
-Node: Weekly/Daily agenda145680
-Node: Global TODO list148621
-Node: Matching headline tags150893
-Node: Timeline151964
-Node: Stuck projects152630
-Node: Presentation and sorting154481
-Node: Categories155272
-Node: Time-of-day specifications155936
-Node: Sorting of agenda items157907
-Node: Agenda commands159189
-Node: Custom agenda views166343
-Node: Storing searches167062
-Node: Block agenda168974
-Node: Setting Options170204
-Node: Exporting Agenda Views172943
-Ref: Exporting Agenda Views-Footnote-1177227
-Ref: Exporting Agenda Views-Footnote-2177284
-Node: Extracting Agenda Information for other programs177470
-Node: Embedded LaTeX181596
-Ref: Embedded LaTeX-Footnote-1182688
-Node: Math symbols182878
-Node: Subscripts and Superscripts183643
-Node: LaTeX fragments184487
-Ref: LaTeX fragments-Footnote-1186721
-Node: Processing LaTeX fragments186983
-Node: CDLaTeX mode187929
-Ref: CDLaTeX mode-Footnote-1190413
-Node: Exporting190561
-Node: ASCII export191875
-Node: HTML export193165
-Node: Export commands193784
-Node: Quoting HTML tags195028
-Node: Links195658
-Node: Images196355
-Ref: Images-Footnote-1197226
-Node: CSS support197287
-Ref: CSS support-Footnote-1198606
-Node: XOXO export198719
-Node: iCalendar export199158
-Node: Text interpretation200377
-Node: Comment lines200968
-Node: Initial text201363
-Node: Footnotes203032
-Node: Enhancing text203847
-Ref: Enhancing text-Footnote-1205706
-Node: Export options205796
-Node: Publishing207689
-Ref: Publishing-Footnote-1208485
-Node: Configuration208681
-Node: Project alist209399
-Node: Sources and destinations210465
-Node: Selecting files211195
-Node: Publishing action211943
-Node: Publishing options213176
-Node: Publishing links215328
-Node: Project page index216841
-Node: Sample configuration217619
-Node: Simple example218111
-Node: Complex example218784
-Node: Triggering publication220860
-Node: Miscellaneous221545
-Node: Completion222179
-Node: Customization223650
-Node: In-buffer settings224233
-Node: The very busy C-c C-c key229109
-Node: Clean view230753
-Node: TTY keys233330
-Node: Interaction234940
-Node: Cooperation235337
-Node: Conflicts238213
-Node: Bugs240216
-Node: Extensions and Hacking241712
-Node: Extensions242308
-Node: Tables in arbitrary syntax244255
-Node: Radio tables245332
-Node: A LaTeX example247835
-Ref: A LaTeX example-Footnote-1251481
-Ref: A LaTeX example-Footnote-2251629
-Node: Translator functions252064
-Ref: Translator functions-Footnote-1255173
-Node: Dynamic blocks255261
-Node: Special agenda views257233
-Ref: Special agenda views-Footnote-1259512
-Node: History and Acknowledgments259772
-Node: Index265866
-Node: Key Index298020
+Ref: Plain lists-Footnote-138868
+Ref: Plain lists-Footnote-239226
+Node: Tables39407
+Node: Built-in table editor39988
+Node: Narrow columns47227
+Ref: Narrow columns-Footnote-149162
+Node: Column groups49208
+Node: orgtbl-mode50741
+Node: The spreadsheet51544
+Node: References52631
+Ref: References-Footnote-156760
+Node: Formula syntax for Calc57049
+Node: Formula syntax for Lisp59506
+Node: Field formulas61224
+Node: Column formulas62532
+Node: Editing and debugging formulas64131
+Node: Updating the table68284
+Node: Advanced features69319
+Node: Hyperlinks73844
+Node: Link format74617
+Node: Internal links75910
+Ref: Internal links-Footnote-177835
+Node: Radio targets77970
+Node: External links78661
+Node: Handling links81065
+Ref: Handling links-Footnote-186352
+Ref: Handling links-Footnote-286589
+Node: Link abbreviations86663
+Node: Search options88342
+Ref: Search options-Footnote-190122
+Node: Custom searches90203
+Node: Remember91251
+Node: Setting up remember92238
+Node: Remember templates92820
+Ref: Remember templates-Footnote-196112
+Node: Storing notes96210
+Node: TODO items98097
+Node: TODO basics99074
+Node: TODO extensions100771
+Node: Workflow states101590
+Ref: Workflow states-Footnote-1102765
+Node: TODO types102858
+Ref: TODO types-Footnote-1104441
+Node: Multiple sets in one file104523
+Node: Per file keywords106134
+Ref: Per file keywords-Footnote-1107423
+Node: Priorities107624
+Node: Breaking down tasks109234
+Ref: Breaking down tasks-Footnote-1109754
+Node: Checkboxes109850
+Node: Tags112605
+Node: Tag inheritance113365
+Node: Setting tags114302
+Ref: Setting tags-Footnote-1118825
+Ref: Setting tags-Footnote-2118937
+Node: Tag searches119020
+Node: Timestamps121731
+Node: Time stamps122174
+Ref: Time stamps-Footnote-1124602
+Node: Creating timestamps124718
+Node: The date/time prompt126792
+Ref: The date/time prompt-Footnote-1128780
+Node: Custom time format128886
+Node: Deadlines and scheduling130578
+Ref: Deadlines and scheduling-Footnote-1131928
+Node: Inserting deadline/schedule132083
+Node: Repeated tasks133021
+Node: Progress logging134660
+Node: Closing items135315
+Ref: Closing items-Footnote-1136249
+Ref: Closing items-Footnote-2136318
+Node: Tracking TODO state changes136391
+Node: Clocking work time137247
+Ref: Clocking work time-Footnote-1140893
+Ref: Clocking work time-Footnote-2140971
+Node: Agenda views141097
+Node: Agenda files143048
+Ref: Agenda files-Footnote-1144014
+Ref: Agenda files-Footnote-2144163
+Node: Agenda dispatcher144356
+Node: Built-in agenda views146047
+Node: Weekly/Daily agenda146625
+Node: Global TODO list149566
+Node: Matching headline tags151838
+Node: Timeline152909
+Node: Stuck projects153575
+Node: Presentation and sorting155426
+Node: Categories156217
+Node: Time-of-day specifications156881
+Node: Sorting of agenda items158852
+Node: Agenda commands160134
+Node: Custom agenda views167288
+Node: Storing searches168007
+Node: Block agenda169919
+Node: Setting Options171149
+Node: Exporting Agenda Views173888
+Ref: Exporting Agenda Views-Footnote-1178172
+Ref: Exporting Agenda Views-Footnote-2178229
+Node: Extracting Agenda Information for other programs178415
+Node: Embedded LaTeX182541
+Ref: Embedded LaTeX-Footnote-1183633
+Node: Math symbols183823
+Node: Subscripts and Superscripts184588
+Node: LaTeX fragments185432
+Ref: LaTeX fragments-Footnote-1187666
+Node: Processing LaTeX fragments187928
+Node: CDLaTeX mode188874
+Ref: CDLaTeX mode-Footnote-1191358
+Node: Exporting191506
+Node: ASCII export192820
+Node: HTML export194110
+Node: Export commands194729
+Node: Quoting HTML tags195973
+Node: Links196603
+Node: Images197300
+Ref: Images-Footnote-1198171
+Node: CSS support198232
+Ref: CSS support-Footnote-1199551
+Node: XOXO export199664
+Node: iCalendar export200103
+Node: Text interpretation201322
+Node: Comment lines201913
+Node: Initial text202308
+Node: Footnotes203977
+Node: Enhancing text204792
+Ref: Enhancing text-Footnote-1206651
+Node: Export options206741
+Node: Publishing208634
+Ref: Publishing-Footnote-1209430
+Node: Configuration209626
+Node: Project alist210344
+Node: Sources and destinations211410
+Node: Selecting files212140
+Node: Publishing action212888
+Node: Publishing options214121
+Node: Publishing links216273
+Node: Project page index217786
+Node: Sample configuration218564
+Node: Simple example219056
+Node: Complex example219729
+Node: Triggering publication221805
+Node: Miscellaneous222490
+Node: Completion223124
+Node: Customization224595
+Node: In-buffer settings225178
+Node: The very busy C-c C-c key230054
+Node: Clean view231698
+Node: TTY keys234275
+Node: Interaction235885
+Node: Cooperation236282
+Node: Conflicts239158
+Node: Bugs241161
+Node: Extensions and Hacking242657
+Node: Extensions243253
+Node: Tables in arbitrary syntax245200
+Node: Radio tables246277
+Node: A LaTeX example248780
+Ref: A LaTeX example-Footnote-1252426
+Ref: A LaTeX example-Footnote-2252574
+Node: Translator functions253009
+Ref: Translator functions-Footnote-1256118
+Node: Dynamic blocks256206
+Node: Special agenda views258178
+Ref: Special agenda views-Footnote-1260457
+Node: History and Acknowledgments260717
+Node: Index266811
+Node: Key Index298965
 
 End Tag Table

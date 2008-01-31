@@ -3508,7 +3508,7 @@ means to push this value onto the list in the variable.")
 	    (cond
 	     ((equal e "{") (push '(:startgroup) tgs))
 	     ((equal e "}") (push '(:endgroup) tgs))
-	     ((string-match "^\\([[:alnum:]_@]+\\)(\\(.\\))$" e)
+	     ((string-match "^\\([a-zA-Z0-9_@]+\\)(\\(.\\))$" e)
 	      (push (cons (match-string 1 e)
 			  (string-to-char (match-string 2 e)))
 		    tgs))
@@ -3544,7 +3544,7 @@ means to push this value onto the list in the variable.")
 	  org-todo-line-tags-regexp
 	  (concat "^\\(\\*+\\)[ \t]*\\(?:\\("
 		  (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		  "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@]+:[ \t]*\\)?$\\)")
+		  "\\)\\>\\)? *\\(.*?\\([ \t]:[a-zA-Z0-9:_@]+:[ \t]*\\)?$\\)")
 	  org-looking-at-done-regexp
 	  (concat "^" "\\(?:"
 		  (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
@@ -4249,7 +4249,7 @@ between words."
 	"\\)\\>")))
 
 (defun org-activate-tags (limit)
-  (if (re-search-forward "[ \t]\\(:[[:alnum:]_@:]+:\\)[ \r\n]" limit t)
+  (if (re-search-forward "[ \t]\\(:[a-zA-Z0-9_@:]+:\\)[ \r\n]" limit t)
       (progn
 	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
@@ -6100,7 +6100,7 @@ this heading."
 	      (progn
 		(if (re-search-forward
 		     (concat "\\(^\\|\r\\)"
-			     (regexp-quote heading) "[ \t]*\\(:[[:alnum:]_@:]+:\\)?[ \t]*\\($\\|\r\\)")
+			     (regexp-quote heading) "[ \t]*\\(:[a-zA-Z0-9_@:]+:\\)?[ \t]*\\($\\|\r\\)")
 		     nil t)
 		    (goto-char (match-end 0))
 		  ;; Heading not found, just insert it at the end
@@ -6219,7 +6219,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   (let (res current)
     (save-excursion
       (beginning-of-line)
-      (if (re-search-forward "[ \t]:\\([[:alnum:]_@:]+\\):[ \t]*$"
+      (if (re-search-forward "[ \t]:\\([a-zA-Z0-9_@:]+\\):[ \t]*$"
 			     (point-at-eol) t)
 	  (progn
 	    (setq current (match-string 1))
@@ -10198,7 +10198,7 @@ according to FMT (default from `org-email-link-description-format')."
       ;; We are using a headline, clean up garbage in there.
       (if (string-match org-todo-regexp s)
 	  (setq s (replace-match "" t t s)))
-      (if (string-match ":[[:alnum:]_@:]+:[ \t]*$" s)
+      (if (string-match ":[a-zA-Z0-9_@:]+:[ \t]*$" s)
 	  (setq s (replace-match "" t t s)))
       (setq s (org-trim s))
       (if (string-match (concat "^\\(" org-quote-string "\\|"
@@ -10552,7 +10552,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		path (match-string 1))
 	  (throw 'match t))
 	(save-excursion
-	  (when (org-in-regexp "\\(:[[:alnum:]_@:]+\\):[ \t]*$")
+	  (when (org-in-regexp "\\(:[a-zA-Z0-9_@:]+\\):[ \t]*$")
 	    (setq type "tags"
 		  path (match-string 1))
 	    (while (string-match ":" path)
@@ -10780,7 +10780,7 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
       (when (equal (string-to-char s) ?*)
 	;; Anchor on headlines, post may include tags.
 	(setq pre "^\\*+[ \t]*\\(?:\\sw+\\)?[ \t]*"
-	      post "[ \t]*\\(?:[ \t]+:[[:alnum:]_@:+]:[ \t]*\\)?$"
+	      post "[ \t]*\\(?:[ \t]+:[a-zA-Z0-9_@:+]:[ \t]*\\)?$"
 	      s (substring s 1)))
       (remove-text-properties
        0 (length s)
@@ -11533,7 +11533,7 @@ See also the variable `org-reverse-note-order'."
 	      (goto-char (point-min))
 	      (if (re-search-forward
 		   (concat "^\\*+[ \t]+" (regexp-quote heading)
-			   "\\([ \t]+:[[:alnum:]@_:]*\\)?[ \t]*$")
+			   "\\([ \t]+:[a-zA-Z0-9@_:]*\\)?[ \t]*$")
 		   nil t)
 		  (setq org-goto-start-pos (match-beginning 0))))
 
@@ -11727,7 +11727,7 @@ At all other locations, this simply calls `ispell-complete-word'."
   (catch 'exit
     (let* ((end (point))
 	   (beg1 (save-excursion
-		   (skip-chars-backward "[:alnum:]_@")
+		   (skip-chars-backward "a-zA-Z0-9_@")
 		   (point)))
 	   (beg (save-excursion
 		  (skip-chars-backward "a-zA-Z0-9_:$")
@@ -12405,7 +12405,7 @@ inclusion.  When TODO-ONLY is non-nil, only lines with a TODO keyword
 are included in the output."
   (let* ((re (concat "[\n\r]" outline-regexp " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		     "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*$"))
+		     "\\>\\)\\)? *\\(.*?\\)\\(:[a-zA-Z0-9_@:]+:\\)?[ \t]*$"))
 	 (props (list 'face nil
 		      'done-face 'org-done
 		      'undone-face nil
@@ -12502,7 +12502,7 @@ also TODO lines."
 
   ;; Parse the string and create a lisp form
   (let ((match0 match)
-	(re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL=\\([0-9]+\\)\\|[[:alnum:]_@]+\\)")
+	(re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL=\\([0-9]+\\)\\|[a-zA-Z0-9_@]+\\)")
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p level-p)
@@ -12722,7 +12722,7 @@ Returns the new tags string, or nil to not change the current settings."
 	 groups ingroup)
     (save-excursion
       (beginning-of-line 1)
-      (if (looking-at ".*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \t]*\\(\r\\|$\\)")
+      (if (looking-at ".*[ \t]\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*\\(\r\\|$\\)")
 	  (setq ov-start (match-beginning 1)
 		ov-end (match-end 1)
 		ov-prefix "")
@@ -12857,7 +12857,7 @@ Returns the new tags string, or nil to not change the current settings."
 		(delete-region (point) (point-at-eol))
 		(org-fast-tag-insert "Current" current c-face)
 		(org-set-current-tags-overlay current ov-prefix)
-		(while (re-search-forward "\\[.\\] \\([[:alnum:]_@]+\\)" nil t)
+		(while (re-search-forward "\\[.\\] \\([a-zA-Z0-9_@]+\\)" nil t)
 		  (setq tg (match-string 1))
 		  (add-text-properties (match-beginning 1) (match-end 1)
 				       (list 'face
@@ -12877,7 +12877,7 @@ Returns the new tags string, or nil to not change the current settings."
     (error "Not on a heading"))
   (save-excursion
     (beginning-of-line 1)
-    (if (looking-at ".*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \t]*\\(\r\\|$\\)")
+    (if (looking-at ".*[ \t]\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*\\(\r\\|$\\)")
 	(org-match-string-no-properties 1)
       "")))
 
@@ -12886,7 +12886,7 @@ Returns the new tags string, or nil to not change the current settings."
   (let (tags)
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward "[ \t]:\\([[:alnum:]_@:]+\\):[ \t\r\n]" nil t)
+      (while (re-search-forward "[ \t]:\\([a-zA-Z0-9_@:]+\\):[ \t\r\n]" nil t)
 	(mapc (lambda (x) (add-to-list 'tags x))
 	      (org-split-string (org-match-string-no-properties 1) ":"))))
     (mapcar 'list tags)))
@@ -14108,7 +14108,7 @@ the returned times will be formatted strings."
       (when (setq time (get-text-property p :org-clock-minutes))
 	(save-excursion
 	  (beginning-of-line 1)
-	  (when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[[:alnum:]_@:]+:\\)?[ \t]*$")
+	  (when (and (looking-at "\\(\\*+\\)[ \t]+\\(.*?\\)\\([ \t]+:[a-zA-Z0-9_@:]+:\\)?[ \t]*$")
 		     (setq level (- (match-end 1) (match-beginning 1)))
 		     (<= level maxlevel))
 	    (setq hlc (if emph (or (cdr (assoc level hlchars)) "") "")
@@ -15686,10 +15686,10 @@ MATCH is being ignored."
 			  "\\)\\>"))
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
-		      "^\\*+.*:[[:alnum:]_@]+:[ \t]*$"
+		      "^\\*+.*:[a-zA-Z0-9_@]+:[ \t]*$"
 		    (concat "^\\*+.*:\\("
 			    (mapconcat 'identity tags "\\|")
-			    "\\):[[:alnum:]_@:]*[ \t]*$")))
+			    "\\):[a-zA-Z0-9_@:]*[ \t]*$")))
 	 (gen-re (nth 3 org-stuck-projects))
 	 (re-list
 	  (delq nil
@@ -16450,7 +16450,7 @@ only the correctly processes TXT should be returned - this is used by
 	(if s1 (setq s1 (org-get-time-of-day s1 'string t)))
 	(if s2 (setq s2 (org-get-time-of-day s2 'string t))))
 
-      (when (string-match "\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$" txt)
+      (when (string-match "\\([ \t]+\\)\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*$" txt)
 	;; Tags are in the string
 	(if (or (eq org-agenda-remove-tags t)
 		(and org-agenda-remove-tags
@@ -17189,7 +17189,7 @@ the new TODO state."
   (let ((buffer-read-only))
     (save-excursion
       (goto-char (if line (point-at-bol) (point-min)))
-      (while (re-search-forward "\\([ \t]+\\):[[:alnum:]_@:]+:[ \t]*$"
+      (while (re-search-forward "\\([ \t]+\\):[a-zA-Z0-9_@:]+:[ \t]*$"
 				(if line (point-at-eol) nil) t)
 	(delete-region (match-beginning 1) (match-end 1))
 	(goto-char (match-beginning 1))
@@ -17250,7 +17250,7 @@ the tags of the current headline come last."
 	  (org-back-to-heading t)
 	  (condition-case nil
 	      (while t
-		(if (looking-at "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*\\([\n\r]\\|\\'\\)")
+		(if (looking-at "[^\r\n]+?:\\([a-zA-Z0-9_@:]+\\):[ \t]*\\([\n\r]\\|\\'\\)")
 		    (setq tags (append (org-split-string
 					(org-match-string-no-properties 1) ":")
 				       tags)))
@@ -18720,7 +18720,7 @@ underlined headlines.  The default is 3."
 			   (setq txt (org-html-expand-for-ascii txt))
 
 			   (if (and (memq org-export-with-tags '(not-in-toc nil))
-				    (string-match "[ \t]+:[[:alnum:]_@:]+:[ \t]*$" txt))
+				    (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
 			       (setq txt (replace-match "" t t txt)))
 			   (if (string-match quote-re0 txt)
 			       (setq txt (replace-match "" t t txt)))
@@ -18867,7 +18867,7 @@ underlined headlines.  The default is 3."
 	  (insert "\n"))
       (setq char (nth (- umax level) (reverse org-export-ascii-underline)))
       (unless org-export-with-tags
-	(if (string-match "[ \t]+\\(:[[:alnum:]_@:]+:\\)[ \t]*$" title)
+	(if (string-match "[ \t]+\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*$" title)
 	    (setq title (replace-match "" t t title))))
       (if org-export-with-section-numbers
 	  (setq title (concat (org-section-number level) " " title)))
@@ -19338,7 +19338,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					 (org-search-todo-below
 					  line lines level))))
 			  (if (and (memq org-export-with-tags '(not-in-toc nil))
-				   (string-match "[ \t]+:[[:alnum:]_@:]+:[ \t]*$" txt))
+				   (string-match "[ \t]+:[a-zA-Z0-9_@:]+:[ \t]*$" txt))
 			      (setq txt (replace-match "" t t txt)))
 			  (if (string-match quote-re0 txt)
 			      (setq txt (replace-match "" t t txt)))
@@ -20052,7 +20052,7 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
 
 (defun org-export-cleanup-toc-line (s)
   "Remove tags and time staps from lines going into the toc."
-  (if (string-match " +:[[:alnum:]_@:]+: *$" s)
+  (if (string-match " +:[a-zA-Z0-9_@:]+: *$" s)
       (setq s (replace-match "" t t s)))
   (when org-export-remove-timestamps-from-toc
     (while (string-match org-maybe-keyword-time-regexp s)
@@ -20192,7 +20192,7 @@ When TITLE is nil, just close all open levels."
     (when title
       ;; If title is nil, this means this function is called to close
       ;; all levels, so the rest is done only if title is given
-	(when (string-match "\\(:[[:alnum:]_@:]+:\\)[ \t]*$" title)
+	(when (string-match "\\(:[a-zA-Z0-9_@:]+:\\)[ \t]*$" title)
 	  (setq title (replace-match
 		       (if org-export-with-tags
 			   (save-match-data
