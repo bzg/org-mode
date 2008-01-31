@@ -3,8 +3,8 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.57
-@set DATE November 2006
+@set VERSION 4.58
+@set DATE December 2006
 
 @dircategory Emacs
 @direntry
@@ -192,17 +192,18 @@ Agenda Views
 
 * Agenda files::                Files being searched for agenda information
 * Agenda dispatcher::           Keyboard access to agenda views
-* Weekly/Daily agenda::         The calendar page with current tasks
-* Global TODO list::            All unfinished action items
-* Matching headline tags::      Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
+* Built-in agenda views::       What is available out of the box?
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
 * Custom agenda views::         Defining special searches and views
 
-The weekly/daily agenda
+The built-in agenda views
 
-* Calendar/Diary integration::  Integrating Anniversaries and more
+* Weekly/Daily agenda::         The calendar page with current tasks
+* Global TODO list::            All unfinished action items
+* Matching headline tags::      Structured information with fine-tuned search
+* Timeline::                    Time-sorted view for single file
+* Stuck projects::              Find projects you need to review
 
 Presentation and sorting
 
@@ -280,6 +281,7 @@ Extensions, Hooks and Hacking
 
 * Extensions::                  Existing 3rd-part extensions
 * Dynamic blocks::              Automatically filled blocks
+* Special agenda views::        
 
 @end detailmenu
 @end menu
@@ -621,6 +623,17 @@ Reveal context around point, showing the current entry, the following
 heading and the hierarchy above.  Useful for working near a location
 exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda
 command (@pxref{Agenda commands}).
+@kindex C-c C-x b
+@item C-c C-x b
+Show the current subtree in an indirect buffer@footnote{The indirect
+buffer (@pxref{Indirect Buffers,Indirect Buffers,Indirect Buffers,emacs,GNU
+Emacs Manual}) will contain the entire buffer, but will
+be narrowed to the current tree.  Editing the indirect buffer will also
+change the original buffer, but without affecting visibility in that
+buffer .}, in a separate, dedicated frame.  With positive numerical
+prefix N, go up to level N before selecting the subtree.  With negative
+prefix -N, go up N levels.  With @kbd{C-u} prefix, don't use the
+dedicated frame, but another, new frame.
 @end table
 
 When Emacs first visits an Org-mode file, the global state is set to
@@ -1348,9 +1361,10 @@ A formula can be any algebraic expression understood by the Emacs
 @file{calc} package.  Note that @file{calc} has the slightly
 non-standard convention that @samp{/} has lower precedence than
 @samp{*}, so that @samp{a/b*c} is interpreted as @samp{a/(b*c)}.  Before
-evaluation by @code{calc-eval} (@pxref{Calling Calc from Your
-Programs,calc-eval,Calling calc from Your Lisp Programs,calc,GNU Emacs
-Calc Manual}), variable substitution takes place:
+evaluation by @code{calc-eval} (@pxref{Calling Calc from
+Your Programs,calc-eval,Calling calc from Your Lisp Programs,calc,GNU
+Emacs Calc Manual}),
+variable substitution takes place:
 
 @example
   $        @r{refers to the current field}
@@ -3120,7 +3134,8 @@ information into special lists.
 @table @kbd
 @kindex C-c \
 @item C-c \
-Create a sparse tree with all headlines matching a tags search.
+Create a sparse tree with all headlines matching a tags search.  With a
+@kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
 @kindex C-c a m
 @item C-c a m
 Create a global list of tag matches from all agenda files.
@@ -3142,13 +3157,13 @@ or @samp{-} is present.  Examples:
 
 @table @samp
 @item +WORK-BOSS
-Select all headlines that are tagged @samp{:WORK:}, but discard those also tagged
+Select headlines tagged @samp{:WORK:}, but discard those also tagged
 @samp{:BOSS:}.
 @item WORK|LAPTOP
 Selects lines tagged @samp{:WORK:} or @samp{:LAPTOP:}.
 @item WORK|LAPTOP&NIGHT
-Like the previous example, but require  the @samp{:LAPTOP:} lines to be
-tagged also @samp{NIGHT}.
+Like before, but require the @samp{:LAPTOP:} lines to be tagged also
+@samp{NIGHT}.
 @end table
 
 @cindex TODO keyword matching, with tags search
@@ -3158,13 +3173,16 @@ adding a condition after a slash to a tags match.  The syntax is similar
 to the tag matches, but should be applied with consideration: For
 example, a positive selection on several TODO keywords can not
 meaningfully be combined with boolean AND.  However, @emph{negative
-selection} combined with AND can be meaningful.  Examples:
+selection} combined with AND can be meaningful.  To make sure that only
+lines are checked that actually have any TODO keyword, use @kbd{C-c a
+M}, or equivalently start the todo part after the slash with @samp{!}.
+Examples:
 
 @table @samp
 @item WORK/WAITING
 Select @samp{:WORK:}-tagged TODO lines with the specific TODO
 keyword @samp{WAITING}.
-@item WORK/-WAITING-NEXT
+@item WORK/!-WAITING-NEXT
 Select @samp{:WORK:}-tagged TODO lines that are neither @samp{WAITING}
 nor @samp{NEXT}
 @item WORK/+WAITING|+NEXT
@@ -3178,6 +3196,12 @@ case it must be enclosed in curly braces.  For example,
 @samp{WORK+@{^BOSS.*@}} matches headlines that contain the tag
 @samp{WORK} and any tag @i{starting} with @samp{BOSS}.
 
+@cindex level, require for tags match
+You can also require a headline to be of a certain level, by writing
+instead of any TAG an expression like @samp{LEVEL=3}.  For example, a
+search @samp{+LEVEL=3+BOSS/-DONE} lists all level three headlines that
+have the tag BOSS and are @emph{not} marked witht the todo keyword DONE.
+
 @node Agenda views, Embedded LaTeX, Tags, Top
 @chapter Agenda Views
 @cindex agenda views
@@ -3189,23 +3213,26 @@ are important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
-in a separate buffer.  Five different view types are provided:
+in a separate buffer.  Six different view types are provided:
 
 @itemize @bullet
 @item
 an @emph{agenda} that is like a calendar and shows information
-for specific dates
+for specific dates,
 @item
 a @emph{TODO list} that covers all unfinished
 action items,
 @item
-a @emph{tags view} that shows information based on
-the tags associated with headlines in the outline tree,
+a @emph{tags view}, showings headlines based on
+the tags associated them,
 @item
 a @emph{timeline view} that shows all events in a single Org-mode file,
-in time-sorted view
+in time-sorted view,
 @item
-@emph{custom views} that are special tag and keyword searches and
+a @emph{stuck projects view} showing projects that currently don't move
+along, and
+@item
+@emph{custom views} that are special tag/keyword searches and
 combinations of different views.
 @end itemize
 
@@ -3223,10 +3250,7 @@ window configuration is restored when the agenda exits:
 @menu
 * Agenda files::                Files being searched for agenda information
 * Agenda dispatcher::           Keyboard access to agenda views
-* Weekly/Daily agenda::         The calendar page with current tasks
-* Global TODO list::            All unfinished action items
-* Matching headline tags::      Structured information with fine-tuned search
-* Timeline::                    Time-sorted view for single file
+* Built-in agenda views::       What is available out of the box?
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
 * Custom agenda views::         Defining special searches and views
@@ -3267,7 +3291,7 @@ Cycle through agenda file list, visiting one file after the other.
 The Org menu contains the current list of files and can be used
 to visit any of them.
 
-@node Agenda dispatcher, Weekly/Daily agenda, Agenda files, Agenda views
+@node Agenda dispatcher, Built-in agenda views, Agenda files, Agenda views
 @section The agenda dispatcher
 @cindex agenda dispatcher
 @cindex dispatching agenda commands
@@ -3280,13 +3304,15 @@ command.  The dispatcher offers the following default commands:
 @table @kbd
 @item a
 Create the calendar-like agenda (@pxref{Weekly/Daily agenda}).
-@item t / T
+@item t @r{/} T
 Create a list of all TODO items (@pxref{Global TODO list}).
-@item m / M
+@item m @r{/} M
 Create a list of headlines matching a TAGS expression (@pxref{Matching
 headline tags}).
 @item L
 Create the timeline view for the current buffer (@pxref{Timeline}).
+@item # @r{/} !
+Create a list of stuck projects (@pxref{Stuck projects}).
 @item 1
 Restrict an agenda command to the current buffer.  After pressing
 @kbd{1}, you still need to press the character selecting the command.
@@ -3303,8 +3329,21 @@ possibility to create extended agenda buffers that contain several
 blocks together, for example the weekly agenda, the global TODO list and
 a number of special tags matches.  @xref{Custom agenda views}.
 
-@node Weekly/Daily agenda, Global TODO list, Agenda dispatcher, Agenda views
-@section The weekly/daily agenda
+@node Built-in agenda views, Presentation and sorting, Agenda dispatcher, Agenda views
+@section The built-in agenda views
+
+In this section we describe the built-in views.
+
+@menu
+* Weekly/Daily agenda::         The calendar page with current tasks
+* Global TODO list::            All unfinished action items
+* Matching headline tags::      Structured information with fine-tuned search
+* Timeline::                    Time-sorted view for single file
+* Stuck projects::              Find projects you need to review
+@end menu
+
+@node Weekly/Daily agenda, Global TODO list, Built-in agenda views, Built-in agenda views
+@subsection The weekly/daily agenda
 @cindex agenda
 @cindex weekly agenda
 @cindex daily agenda
@@ -3328,13 +3367,7 @@ change the dates of deadlines and appointments from the agenda buffer.
 The commands available in the Agenda buffer are listed in @ref{Agenda
 commands}.
 
-@menu
-* Calendar/Diary integration::  Integrating Anniversaries and more
-@end menu
-
-
-@node Calendar/Diary integration,  , Weekly/Daily agenda, Weekly/Daily agenda
-@subsection Calendar/Diary integration
+@subsubheading Calendar/Diary integration
 @cindex calendar integration
 @cindex diary integration
 
@@ -3365,8 +3398,8 @@ calendars, respectively.  @kbd{c} can be used to switch back and forth
 between calendar and agenda.
 
 
-@node Global TODO list, Matching headline tags, Weekly/Daily agenda, Agenda views
-@section The global TODO list
+@node Global TODO list, Matching headline tags, Weekly/Daily agenda, Built-in agenda views
+@subsection The global TODO list
 @cindex global TODO list
 @cindex TODO list, global
 
@@ -3417,8 +3450,8 @@ and omit the sublevels from the global list.  Configure the variable
 @code{org-agenda-todo-list-sublevels} to get this behavior.
 @end itemize
 
-@node Matching headline tags, Timeline, Global TODO list, Agenda views
-@section Matching headline tags
+@node Matching headline tags, Timeline, Global TODO list, Built-in agenda views
+@subsection Matching headline tags
 @cindex matching, of tags
 @cindex tags view
 
@@ -3445,8 +3478,8 @@ together with a tags match is also possible, see @ref{Tag searches}.
 The commands available in the tags list are described in @ref{Agenda
 commands}.
 
-@node Timeline, Presentation and sorting, Matching headline tags, Agenda views
-@section Timeline for a single file
+@node Timeline, Stuck projects, Matching headline tags, Built-in agenda views
+@subsection Timeline for a single file
 @cindex timeline, single file
 @cindex time-sorted view
 
@@ -3467,7 +3500,49 @@ The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
 
 
-@node Presentation and sorting, Agenda commands, Timeline, Agenda views
+@node Stuck projects,  , Timeline, Built-in agenda views
+@subsection Stuck projects
+
+If you are following a system like David Allen's GTD to organize your
+work, one of the ``duties'' you have is a regular review to make sure
+that all projects move along.  A @emph{stuck} project is a project that
+has no defined next actions, so it will never show up in the TODO lists
+Org-mode produces.  During the review, you need to identify such
+projects and define next actions for them.
+
+@table @kbd
+@kindex C-c a #
+@item C-c a #
+List projects that are stuck.
+@kindex C-c a !
+@item C-c a !
+Customize the variable @code{org-stuck-projects} to define what a stuck
+project is and how to find it.
+@end table
+
+You almost certainly will have to configure this view before it will
+work for you.  The built-in default assumes that all your projects are
+level-2 headlines, and that a project is not stuck if it has at least
+one entry marked with a todo keyword TODO or NEXT or NEXTACTION.
+
+Lets assume that you, in your own way of using Org-mode, identify
+projects with a tag PROJECT, and that you use a todo keyword MAYBE to
+indicate a project that should not be considered yet.  Lets further
+assume that the todo keyword DONE marks finished projects, and that NEXT
+and TODO indicate next actions.  Finally, the tag @@SHOP indicates
+shopping and is a next action even without the NEXT tag.  In this case
+you would start by identifying elegible projects with a tags/todo match
+@samp{+PROJECT/-MAYBE-DONE}, and then check for TODO, NEXT and @@SHOP in
+the subtree to identify projects that are not stuck.  The correct
+customization for this is
+
+@lisp
+(setq org-stuck-projects
+      ("+PROJECT/-MAYBE-DONE" ("NEXT" "TODO") ("@@SHOP")))
+@end lisp
+
+
+@node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda views
 @section Presentation and sorting
 @cindex presentation, of agenda items
 
@@ -3515,7 +3590,7 @@ ranges can be specified with two time stamps, like
 
 In the headline of the entry itself, a time(range) may also appear as
 plain text (like @samp{12:45} or a @samp{8:30-1pm}.  If the agenda
-integrates the Emacs diary (@pxref{Calendar/Diary integration}), time
+integrates the Emacs diary (@pxref{Weekly/Daily agenda}), time
 specifications in diary entries are recognized as well.
 
 For agenda display, Org-mode extracts the time and displays it in a
@@ -3636,6 +3711,14 @@ location in the org file.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-follow-mode}.
 
+@kindex b
+@item b
+Display the entire subtree of the current item in an indirect buffer, in
+a separate, dedicated frame.  With positive numerical prefix N, go up to
+level N before selecting the subtree.  With negative prefix -N, go up N
+levels.  With @kbd{C-u} prefix, don't use the dedicated frame, but
+another, new frame.
+
 @kindex l
 @item l
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
@@ -3658,7 +3741,7 @@ Switch to daily view (just one day displayed).
 
 @kindex D
 @item D
-Toggle the inclusion of diary entries.  See @ref{Calendar/Diary integration}.
+Toggle the inclusion of diary entries.  See @ref{Weekly/Daily agenda}.
 
 @kindex g
 @item g
@@ -3696,6 +3779,13 @@ Goto today.
 
 @item 0-9
 Digit argument.
+
+@cindex undoing remote-editing events
+@cindex remote editing, undo
+@kindex C-_
+@item C-_
+Undo a change due to a remote editing command.  The change is undone
+both in the agenda buffer and in the remote buffer.
 
 @kindex t
 @item t
@@ -5044,8 +5134,8 @@ Elsewhere, complete dictionary words using ispell.
 @cindex options, for customization
 @cindex variables, for customization
 
-There are more than 100 variables that can be used to customize
-Org-mode.  For the sake of compactness of the manual, we are not
+There are more than 170 variables that can be used to customize
+Org-mode.  For the sake of compactness of the manual, I am not
 describing the variables here.  A structured overview of customization
 variables is available with @kbd{M-x org-customize}.  Or select
 @code{Browse Org Group} from the @code{Org->Customization} menu.  Many
@@ -5432,11 +5522,6 @@ When the application called by @kbd{C-c C-o} to open a file link fails
 (for example because the application does not exist or refuses to open
 the file), it does so silently.  No error message is displayed.
 @item
-The remote-editing commands in the agenda buffer cannot be undone with
-@code{undo} called from within the agenda buffer.  But you can go to
-the corresponding buffer (using @key{TAB} or @key{RET} and execute
-@code{undo} there.
-@item
 Recalculating a table line applies the formulas from left to right.
 If a formula uses @emph{calculated} fields further down the row,
 multiple recalculation may be needed to get all fields consistent.
@@ -5451,12 +5536,13 @@ The exporters work well, but could be made more efficient.
 @appendix Extensions, Hooks and Hacking
 
 This appendix lists extensions for Org-mode written by other authors.
-It also covers some aspects where users can easily extend the
-functionality of Org-mode.
+It also covers some aspects where users can extend the functionality of
+Org-mode.
 
 @menu
 * Extensions::                  Existing 3rd-part extensions
 * Dynamic blocks::              Automatically filled blocks
+* Special agenda views::        
 @end menu
 
 @node Extensions, Dynamic blocks, Extensions and Hacking, Extensions and Hacking
@@ -5496,7 +5582,7 @@ Publish Org-mode files as
 blogs. @url{http://www.cognition.ens.fr/~guerry/blorg.html}.
 @end table
 
-@node Dynamic blocks,  , Extensions, Extensions and Hacking
+@node Dynamic blocks, Special agenda views, Extensions, Extensions and Hacking
 @section Dynamic blocks
 
 Org-mode documents can contain @emph{dynamic blocks}.  These are
@@ -5554,6 +5640,59 @@ If you want to make sure that all dynamic blocks are always up-to-date,
 you could add the function @code{org-update-all-dblocks} to a hook, for
 example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way that is does nothing in buffers that are not in Org-mode.
+
+@node Special agenda views,  , Dynamic blocks, Extensions and Hacking
+@section Special Agenda Views
+
+Org-mode provides a special hook that can be used to narrow down the
+selection made by any of the agenda views.  You may specify a function
+that is used at each match to verify if the match should indeed be part
+of the agenda view, and if not, how much should be skipped.
+
+Let's say you want to produce a list of projects that contain a WAITING
+tag anywhere in the project tree.  Let's further assume that you have
+marked all tree headings that define a project with the todo keyword
+PROJECT.  In this case you would run a todo search for the keyword
+PROJECT, but skip the match unless there is a WAITING tag anywhere in
+the subtree belonging to the project line..
+
+To achieve this, you must write a function that searches the subtree for
+the tag.  If the tag is found, the function must return @code{nil} to
+indicate that this match should not be skipped.  If there is no such
+tag, return the location of the end of the subtree, to indicate that
+search should continue from there.
+
+@lisp
+(defun my-skip-unless-waiting ()
+  "Skip trees that are not waiting"
+  (let ((subtree-end (save-excursion (org-end-of-subtree t))))
+    (if (re-search-forward ":WAITING:" subtree-end t)
+        nil          ; tag found, do not skip
+      subtree-end))) ; tag not found, continue after end of subtree
+@end lisp
+
+Furthermore you must write a command that uses @code{let} to temporarily
+puts this function into the variable @code{org-agenda-skip-function},
+sets the header string for the agenda buffer, and calls the todo-list
+generator while asking for the specific TODO keyword PROJECT.  The
+function must also accept one argument MATCH, but it can choose to
+ignore it@footnote{MATCH must be present in case you want to define a
+custom command for producing this special list.  Custom commands always
+supply the MATCH argument, but it can be empty if you do not specify it
+while defining the command(@pxref{Custom agenda
+views}).} (as we do in the example below).  Here is the example:
+
+@lisp
+(defun my-org-waiting-projects (&optional match)
+  "Produce a list of projects that contain a WAITING tag.
+MATCH is being ignored."
+  (interactive)
+  (let ((org-agenda-skip-function 'my-skip-unless-waiting)
+        (org-agenda-overriding-header "Projects waiting for something: "))
+    ;; make the list
+    (org-todo-list "PROJECT")))
+@end lisp
+
 
 @node History and Acknowledgments, Index, Extensions and Hacking, Top
 @appendix History and Acknowledgments
