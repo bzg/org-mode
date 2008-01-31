@@ -1,11 +1,11 @@
-;;; org.el --- Outline-based notes management and organizer
+;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
 ;; Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.14-alpha7
+;; Version: 5.15
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.14-alpha7"
+(defconst org-version "5.15"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1885,6 +1885,13 @@ When a timestamp is modified and the calendar window is visible, it will be
 moved to the new date."
   :group 'org-time
   :type 'boolean)
+
+(defcustom org-clock-heading-function nil
+  "When non-nil, should be a function to create `org-clock-heading'.
+This is the string shown in the mode line when a clock is running.
+The function is called with point at the beginning of the headline."
+  :group 'org-time ; FIXME: Should we have a separate group????
+  :type 'function)
 
 (defgroup org-tags nil
   "Options concerning tags in Org-mode."
@@ -4882,10 +4889,9 @@ The time stamps may be either active or inactive.")
 	      (add-text-properties (match-end 4) (match-beginning 5)
 				   '(invisible org-link))
 	      (add-text-properties (match-beginning 3) (match-end 3)
-				   '(invisible org-link)))
-	    (backward-char 1))))
+				   '(invisible org-link)))))
+      (backward-char 1))
     rtn))
-
 
 (defun org-emphasize (&optional char)
   "Insert or change an emphasis, i.e. a font like bold or italic.
@@ -15025,7 +15031,8 @@ Returns the new tags string, or nil to not change the current settings."
 ;;; Setting and retrieving properties
 
 (defconst org-special-properties
-  '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "PRIORITY")
+  '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "PRIORITY"
+    "TIMESTAMP" "TIMESTAMP_IA")
   "The special properties valid in Org-mode.
 
 These are properties that are not defined in the property drawer,
@@ -15121,7 +15128,7 @@ If WHICH is nil or `all', get all properties.  If WHICH is
   (org-with-point-at pom
     (let ((clockstr (substring org-clock-string 0 -1))
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY"))
-	  beg end range props sum-props key value)
+	  beg end range props sum-props key value string)
       (save-excursion
 	(when (condition-case nil (org-back-to-heading t) (error nil))
 	  (setq beg (point))
@@ -15141,17 +15148,23 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 	    (when (setq value (org-get-tags-at))
 	      (push (cons "ALLTAGS" (concat ":" (mapconcat 'identity value ":") ":"))
 		    props))
-	    (while (re-search-forward org-keyword-time-regexp end t)
-	      (setq key (substring (org-match-string-no-properties 1) 0 -1))
-	      (unless (member key excluded) (push key excluded))
-	      (push (cons key
-			  (if (equal key clockstr)
-			      (org-no-properties
-			       (org-trim
-				(buffer-substring
-				 (match-beginning 2) (point-at-eol))))
-			    (org-match-string-no-properties 2)))
-		    props)))
+	    (while (re-search-forward org-maybe-keyword-time-regexp end t)
+	      (setq key (if (match-end 1) (substring (org-match-string-no-properties 1) 0 -1))
+		    string (if (equal key clockstr)
+			       (org-no-properties
+				(org-trim
+				 (buffer-substring
+				  (match-beginning 3) (goto-char (point-at-eol)))))
+			     (substring (org-match-string-no-properties 3) 1 -1)))
+	      (unless key
+		(if (= (char-after (match-beginning 3)) ?\[)
+		    (setq key "TIMESTAMP_IA")
+		  (setq key "TIMESTAMP")))
+	      (when (or (equal key clockstr) (not (assoc key props)))
+		(push (cons key string) props)))
+
+	    )
+
 	  (when (memq which '(all standard))
 	    ;; Get the standard properties, like :PORP: ...
 	    (setq range (org-get-property-block beg end))
@@ -17657,9 +17670,12 @@ If necessary, clock-out of the currently active clock."
   (let (ts)
     (save-excursion
       (org-back-to-heading t)
-      (if (looking-at org-todo-line-regexp)
-	  (setq org-clock-heading (match-string 3))
-	(setq org-clock-heading "???"))
+      (if (and org-clock-heading-function
+	       (functionp org-clock-heading-function))
+	  (setq org-clock-heading (funcall org-clock-heading-function))
+	(if (looking-at org-todo-line-regexp)
+	    (setq org-clock-heading (match-string 3))
+	  (setq org-clock-heading "???")))
       (setq org-clock-heading (propertize org-clock-heading 'face nil))
       (org-clock-find-position)
 
@@ -24126,7 +24142,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; replace "&" by "&amp;", "<" and ">" by "&lt;" and "&gt;"
 	  ;; handle @<..> HTML tags (replace "@&gt;..&lt;" by "<..>")
 	  ;; Also handle sub_superscripts and checkboxes
-	  (setq line (org-html-expand line))
+	  (or (string-match org-table-hline-regexp line)
+	      (setq line (org-html-expand line)))
 
 	  ;; Format the links
 	  (setq start 0)
@@ -27218,6 +27235,21 @@ variable for the duration of the command."
 				   '(font-lock-multiline t)))))
       rtn)))
 
+(defun org-find-first-timestamp (keyword inactive end)
+  "Return location of first timestamp matching KEYWORD and INACTIVE.
+KEYWORD may be any of the timestamp keywords, or nil.
+INACTIVE means it should be an inactive timestamp.
+If there is no such time stamp, return nil."
+  (catch 'exit
+    (let (key ia)
+      (setq inactive (and inactive t))
+      (while (re-search-forward org-maybe-keyword-time-regexp end t)
+	(setq key (and (match-end 1) (substring (match-string 1) 0 -1))
+	      (equal (char-after (match-beginning 3)) ?\[))
+	(when (and (equal keyword key)
+		   (equal inactive ia))
+	  (throw 'exit (match-beginning 3)))))))
+	
 ;;;; Finish up
 
 (provide 'org)

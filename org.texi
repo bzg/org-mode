@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.14
+@set VERSION 5.15
 @set DATE December 2007
 
 @dircategory Emacs
@@ -3506,6 +3506,8 @@ ALLTAGS      @r{All tags, including inherited ones.}
 PRIORITY     @r{The priority of the entry, a string with a single letter.}
 DEADLINE     @r{The deadline time string, without the angular brackets.}
 SCHEDULED    @r{The scheduling time stamp, without the angular brackets.}
+TIMESTAMP    @r{The first keyword-less time stamp in the entry.}
+TIMESTAMP_IA @r{The first inactive time stamp in the entry.}
 @end example
 
 @node Property searches, Property inheritance, Special properties, Properties and columns

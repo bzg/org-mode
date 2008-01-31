@@ -1,3 +1,9 @@
+2007-11-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* norg.el (org-entry-properties): Return keyword-less time strings.
+	(org-clock-heading-function): New option.
+	(org-clock-in): Use `org-clock-heading-function'.
+
 2007-11-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi (Property inheritance): New section
