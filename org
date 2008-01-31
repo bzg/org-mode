@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.42).
+   This manual is for Org-mode (version 4.43).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.42).
+This manual is for Org-mode (version 4.43).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -674,7 +674,7 @@ creates a sparse TODO tree (*note TODO basics::).
 
    To print a sparse tree, you can use the Emacs command
 `ps-print-buffer-with-faces' which does not print invisible parts of
-the document (2).  Or you can use the command `C-c C-x v' to export
+the document (2).  Or you can use the command `C-c C-e v' to export
 only the visible part of the document and print the resulting file.
 
    ---------- Footnotes ----------
@@ -2781,6 +2781,19 @@ collected into a single place.
 TODO entry with a single key press.  The commands available in the TODO
 list are described in *Note Agenda commands::.
 
+   Nomally the global todo list simply shows all headlines with TODO
+keywords.  This list can become very long.  There are two ways to keep
+it more compact:
+   - Some people view a TODO item that has been _scheduled_ for
+     execution (*note Time stamps::) as no longer _open_.  Configure the
+     variable `org-agenda-todo-ignore-scheduled' to exclude scheduled
+     items from the global TODO list.
+
+   - TODO items may have sublevels to break up the task into subtasks.
+     In such cases it may be enough to list only the highest level TODO
+     headline and omit the sublevels from the global list.  Configure
+     the variable `org-agenda-todo-list-sublevels' to get this behavior.
+
 
 File: org,  Node: Matching headline tags,  Next: Timeline,  Prev: Global TODO list,  Up: Agenda views
 
@@ -3260,6 +3273,11 @@ import of these different formats.
    When exporting, Org-mode uses special conventions to enrich the
 output produced.  *Note Text interpretation::, for more details.
 
+`C-c C-e'
+     Dispatcher for export and publishing commands.  Displays a
+     help-window listing the additional key(s) needed to launch an
+     export or publishing command.
+
 * Menu:
 
 * ASCII export::                Exporting to plain ASCII
@@ -3277,13 +3295,13 @@ File: org,  Node: ASCII export,  Next: HTML export,  Prev: Exporting,  Up: Expor
 ASCII export produces a simple and very readable version of an Org-mode
 file.
 
-`C-c C-x a'
+`C-c C-e a'
      Export as ASCII file.  If there is an active region, only the
      region will be exported.  For an org file `myfile.org', the ASCII
      file will be `myfile.txt'.  The file will be overwritten without
      warning.  
 
-`C-c C-x v a'
+`C-c C-e v a'
      Export only the visible part of the document.
 
    In the exported version, the first 3 outline levels will become
@@ -3292,7 +3310,7 @@ will be exported as itemized lists.  If you want that transition to
 occur at a different level, specify it with a prefix argument.  For
 example,
 
-     C-1 C-c C-x a
+     C-1 C-c C-e a
 
 creates only top level headlines and does the rest as items.  When
 headlines are converted to items, the indentation of the text following
@@ -3312,15 +3330,15 @@ Org-mode contains an HTML (XHTML 1.0 strict) exporter with extensive
 HTML formatting, in ways similar to John Grubers _markdown_ language,
 but with additional support for tables.
 
-`C-c C-x h'
+`C-c C-e h'
      Export as HTML file `myfile.html'.  
 
-`C-c C-x b'
+`C-c C-e b'
      Export as HTML file and open it with a browser.  
 
-`C-c C-x v h'
+`C-c C-e v h'
 
-`C-c C-x v b'
+`C-c C-e v b'
      Export only the visible part of the document.
 
    In the exported version, the first 3 outline levels will become
@@ -3329,7 +3347,7 @@ will be exported as itemized lists.  If you want that transition to
 occur at a different level, specify it with a prefix argument.  For
 example,
 
-     C-2 C-c C-x b
+     C-2 C-c C-e b
 
 creates two levels of headings and does the rest as items.
 
@@ -3386,10 +3404,10 @@ Org-mode contains an exporter that produces XOXO-style output.
 Currently, this exporter only handles the general outline structure and
 does not interpret any additional Org-mode features.
 
-`C-c C-x C-x'
+`C-c C-e x'
      Export as XOXO file `myfile.html'.  
 
-`C-c C-x v x'
+`C-c C-e v x'
      Export only the visible part of the document.
 
 
@@ -3405,16 +3423,16 @@ other time-stamped items in Org-mode files show up in the calendar
 application.  Org-mode can export calendar information in the standard
 iCalendar format.
 
-`C-c C-x i'
+`C-c C-e i'
      Create iCalendar entries for the current file and store them in
      the same directory, using a file extension `.ics'.  
 
-`C-c C-x C-i'
-     Like `C-c C-x i', but do this for all files in `org-agenda-files'.
+`C-c C-e I'
+     Like `C-c C-e i', but do this for all files in `org-agenda-files'.
      For each of these files, a separate iCalendar file will be
      written.  
 
-`C-c C-x c'
+`C-c C-e c'
      Create a single large iCalendar file from all files in
      `org-agenda-files' and write it to the file given by
      `org-combined-agenda-icalendar-file'.
@@ -3422,7 +3440,7 @@ iCalendar format.
    How this calendar is best read and updated, depends on the
 application you are using.  For example, when using iCal under Apple
 MacOS X, you could create a new calendar `OrgMode' (the default name
-for the calendar created by `C-c C-x c', see the variables
+for the calendar created by `C-c C-e c', see the variables
 `org-icalendar-combined-name' and
 `org-combined-agenda-icalendar-file').  Then set Org-mode to overwrite
 the corresponding file `~/Library/Calendars/OrgMode.ics'.  You may even
@@ -3514,12 +3532,12 @@ File: org,  Node: Export options,  Prev: Enhancing text,  Up: Text interpretatio
 
 The exporter recognizes special lines in the buffer which provide
 additional information.  These lines may be put anywhere in the file.
-The whole set of lines can be inserted into the buffer with `C-c C-x
+The whole set of lines can be inserted into the buffer with `C-c C-e
 t'.  For individual lines, a good way to make sure the keyword is
 correct is to type `#+' and then use `M-<TAB>' completion (*note
 Completion::).
 
-`C-c C-x t'
+`C-c C-e t'
      Insert template with export options, see example below.
 
      #+TITLE:     the title to be shown (default is the buffer name)
@@ -3859,13 +3877,14 @@ Once org-publish is properly configured, you can publish with the
 following functions:
 
 `C-c C-e c'
-     Prompts for a specific project to publish.
+     Prompt for a specific project and publish all files that belong to
+     it.
 
 `C-c C-e p'
-     Publishes the project the current file is part of.
+     Publish the project containin the current file.
 
 `C-c C-e f'
-     Publishes only the current file.
+     Publish only the current file.
 
 `C-c C-e a'
      Publish all projects.
@@ -4356,7 +4375,7 @@ A.2 Dynamic blocks
 ==================
 
 Org-mode documents can contain _dynamic blocks_.  These are specially
-marked regions that are updates by some user-written function.  A good
+marked regions that are updated by some user-written function.  A good
 example for such a block is the clock table inserted by the command
 `C-c C-x C-r' (*note Clocking work time::).
 
@@ -4390,7 +4409,7 @@ when the block update function was last run:
 
 The corresponding block writer function could look like this:
 
-     (defun org-dblock-write:date-and-time (params)
+     (defun org-dblock-write:block-update-time (params)
         (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
           (insert "Last block update at: "
      	     (format-time-string fmt (current-time)))))
@@ -4953,6 +4972,20 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-c:                               Plain lists.         (line  76)
 * C-c C-d <1>:                           Agenda commands.     (line 139)
 * C-c C-d:                               Creating timestamps. (line  37)
+* C-c C-e:                               Exporting.           (line  19)
+* C-c C-e a:                             ASCII export.        (line   9)
+* C-c C-e b:                             HTML export.         (line  11)
+* C-c C-e c:                             iCalendar export.    (line  20)
+* C-c C-e h:                             HTML export.         (line  10)
+* C-c C-e I:                             iCalendar export.    (line  15)
+* C-c C-e i:                             iCalendar export.    (line  13)
+* C-c C-e t:                             Export options.      (line  13)
+* C-c C-e v <1>:                         XOXO export.         (line  11)
+* C-c C-e v:                             Sparse trees.        (line  39)
+* C-c C-e v a:                           ASCII export.        (line  13)
+* C-c C-e v b:                           HTML export.         (line  14)
+* C-c C-e v h:                           HTML export.         (line  14)
+* C-c C-e x:                             XOXO export.         (line  10)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
 * C-c C-l:                               Handling links.      (line  27)
@@ -4972,14 +5005,10 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-u:                               Motion.              (line  18)
 * C-c C-v:                               TODO basics.         (line  26)
 * C-c C-w:                               Creating timestamps. (line  41)
-* C-c C-x a:                             ASCII export.        (line   9)
-* C-c C-x b:                             HTML export.         (line  11)
-* C-c C-x c:                             iCalendar export.    (line  20)
 * C-c C-x C-a:                           ARCHIVE tag.         (line  27)
 * C-c C-x C-b:                           Checkboxes.          (line  23)
 * C-c C-x C-c:                           Agenda commands.     (line 201)
 * C-c C-x C-d:                           Clocking work time.  (line  28)
-* C-c C-x C-i <1>:                       iCalendar export.    (line  15)
 * C-c C-x C-i:                           Clocking work time.  (line  12)
 * C-c C-x C-k:                           Structure editing.   (line  36)
 * C-c C-x C-l:                           Processing LaTeX fragments.
@@ -4990,22 +5019,13 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-x C-w <1>:                       Built-in table editor.
                                                               (line 108)
 * C-c C-x C-w:                           Structure editing.   (line  36)
-* C-c C-x C-x <1>:                       XOXO export.         (line  10)
 * C-c C-x C-x:                           Clocking work time.  (line  24)
 * C-c C-x C-y <1>:                       Built-in table editor.
                                                               (line 112)
 * C-c C-x C-y:                           Structure editing.   (line  43)
-* C-c C-x h:                             HTML export.         (line  10)
-* C-c C-x i:                             iCalendar export.    (line  13)
 * C-c C-x M-w <1>:                       Built-in table editor.
                                                               (line 105)
 * C-c C-x M-w:                           Structure editing.   (line  40)
-* C-c C-x t:                             Export options.      (line  13)
-* C-c C-x v <1>:                         XOXO export.         (line  11)
-* C-c C-x v:                             Sparse trees.        (line  39)
-* C-c C-x v a:                           ASCII export.        (line  13)
-* C-c C-x v b:                           HTML export.         (line  14)
-* C-c C-x v h:                           HTML export.         (line  14)
 * C-c C-y:                               Creating timestamps. (line  66)
 * C-c l:                                 Handling links.      (line   9)
 * C-c {:                                 CDLaTeX mode.        (line  21)
@@ -5192,56 +5212,56 @@ Node: Time-of-day specifications108610
 Node: Calendar/Diary integration110586
 Node: Sorting of agenda items111963
 Node: Global TODO list112795
-Node: Matching headline tags114156
-Node: Timeline115099
-Node: Agenda commands115972
-Node: Embedded LaTeX121816
-Ref: Embedded LaTeX-Footnote-1122908
-Node: Math symbols123098
-Node: Subscripts and Superscripts123863
-Node: LaTeX fragments124707
-Node: Processing LaTeX fragments126776
-Node: CDLaTeX mode127722
-Ref: CDLaTeX mode-Footnote-1130206
-Node: Exporting130354
-Node: ASCII export131491
-Node: HTML export132781
-Node: XOXO export135617
-Node: iCalendar export136058
-Node: Text interpretation137883
-Node: Comment lines138362
-Node: Enhancing text138833
-Node: Export options140525
-Node: Publishing142192
-Ref: Publishing-Footnote-1142988
-Node: Configuration143184
-Node: Project alist143902
-Node: Sources and destinations144968
-Node: Selecting files145515
-Node: Publishing action146263
-Node: Publishing options147378
-Node: Publishing links149530
-Node: Project page index151043
-Node: Sample configuration151821
-Node: Simple example152313
-Node: Complex example152986
-Node: Triggering publication155062
-Node: Miscellaneous155718
-Node: Completion156352
-Node: Customization157348
-Node: In-buffer settings157933
-Node: The very busy C-c C-c key161164
-Node: Clean view162801
-Node: TTY keys165378
-Node: Interaction166987
-Node: Cooperation167384
-Node: Conflicts169286
-Node: Bugs170878
-Node: Extensions and Hacking172501
-Node: Extensions172987
-Node: Dynamic blocks174557
-Node: History and Acknowledgments176475
-Node: Index181256
-Node: Key Index204096
+Node: Matching headline tags114846
+Node: Timeline115789
+Node: Agenda commands116662
+Node: Embedded LaTeX122506
+Ref: Embedded LaTeX-Footnote-1123598
+Node: Math symbols123788
+Node: Subscripts and Superscripts124553
+Node: LaTeX fragments125397
+Node: Processing LaTeX fragments127466
+Node: CDLaTeX mode128412
+Ref: CDLaTeX mode-Footnote-1130896
+Node: Exporting131044
+Node: ASCII export132358
+Node: HTML export133648
+Node: XOXO export136484
+Node: iCalendar export136923
+Node: Text interpretation138746
+Node: Comment lines139225
+Node: Enhancing text139696
+Node: Export options141388
+Node: Publishing143055
+Ref: Publishing-Footnote-1143851
+Node: Configuration144047
+Node: Project alist144765
+Node: Sources and destinations145831
+Node: Selecting files146378
+Node: Publishing action147126
+Node: Publishing options148241
+Node: Publishing links150393
+Node: Project page index151906
+Node: Sample configuration152684
+Node: Simple example153176
+Node: Complex example153849
+Node: Triggering publication155925
+Node: Miscellaneous156609
+Node: Completion157243
+Node: Customization158239
+Node: In-buffer settings158824
+Node: The very busy C-c C-c key162055
+Node: Clean view163692
+Node: TTY keys166269
+Node: Interaction167878
+Node: Cooperation168275
+Node: Conflicts170177
+Node: Bugs171769
+Node: Extensions and Hacking173392
+Node: Extensions173878
+Node: Dynamic blocks175448
+Node: History and Acknowledgments177370
+Node: Index182151
+Node: Key Index204991
 
 End Tag Table
