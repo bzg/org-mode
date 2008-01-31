@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.12
+;; Version: 5.12a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.12"
+(defconst org-version "5.12a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -4951,9 +4951,6 @@ between words."
 	   '("^\\*+ \\(.*:ARCHIVE:.*\\)" (1 'org-archived prepend))
 	   ;; Code
 	   '(org-activate-code (1 'org-code t))
-	   ;; Priorities
-	   '("^\\*+ .*?\\[#A\\].*" (0 'bold prepend))
-	   '("^\\*+ .*?\\[#C\\].*" (0 'italic prepend))
 	   )))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     ;; Now set the full font-lock-keywords
@@ -15956,8 +15953,8 @@ The command returns the inserted time stamp."
   (let ((fmt (funcall (if with-hm 'cdr 'car) org-time-stamp-formats))
 	stamp)
     (if inactive (setq fmt (concat "[" (substring fmt 1 -1) "]")))
-    (insert (or pre ""))
-    (insert (setq stamp (format-time-string fmt time)))
+    (insert-before-markers (or pre ""))
+    (insert-before-markers (setq stamp (format-time-string fmt time)))
     (when (listp extra)
       (setq extra (car extra))
       (if (and (stringp extra)
@@ -15968,9 +15965,9 @@ The command returns the inserted time stamp."
 	(setq extra nil)))
     (when extra
       (backward-char 1)
-      (insert extra)
+      (insert-before-markers extra)
       (forward-char 1))
-    (insert (or post ""))
+    (insert-before-markers (or post ""))
     stamp))
 
 (defun org-toggle-time-stamp-overlays ()
@@ -16442,15 +16439,13 @@ in the timestamp determines what will be changed."
 	(setq with-hm t))
     (setq time0 (org-parse-time-string ts))
     (setq time
-	  (apply 'encode-time
-		 (append
-		  (list (or (car time0) 0))
-		  (list (+ (if (eq org-ts-what 'minute) n 0) (nth 1 time0)))
-		  (list (+ (if (eq org-ts-what 'hour) n 0)   (nth 2 time0)))
-		  (list (+ (if (eq org-ts-what 'day) n 0)    (nth 3 time0)))
-		  (list (+ (if (eq org-ts-what 'month) n 0)  (nth 4 time0)))
-		  (list (+ (if (eq org-ts-what 'year) n 0)   (nth 5 time0)))
-		  (nthcdr 6 time0))))
+	  (encode-time (or (car time0) 0)
+		       (+ (if (eq org-ts-what 'minute) n 0) (nth 1 time0))
+		       (+ (if (eq org-ts-what 'hour) n 0)   (nth 2 time0))
+		       (+ (if (eq org-ts-what 'day) n 0)    (nth 3 time0))
+		       (+ (if (eq org-ts-what 'month) n 0)  (nth 4 time0))
+		       (+ (if (eq org-ts-what 'year) n 0)   (nth 5 time0))
+		       (nthcdr 6 time0)))
     (when (integerp org-ts-what)
       (setq extra (org-modify-ts-extra extra org-ts-what n)))
     (if (eq what 'calendar)
@@ -16460,7 +16455,7 @@ in the timestamp determines what will be changed."
 	  (setcar (nthcdr 5 time0) (nth 2 cal-date)) ; year
 	  (setcar time0 (or (car time0) 0))
 	  (setcar (nthcdr 1 time0) (or (nth 1 time0) 0))
-	  (setcar (nthcdr 2 time0) (or (nth 1 time0) 0))
+	  (setcar (nthcdr 2 time0) (or (nth 2 time0) 0))
 	  (setq time (apply 'encode-time time0))))
     (setq org-last-changed-timestamp
 	  (org-insert-time-stamp time with-hm inactive nil nil extra))
