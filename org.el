@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.13
+;; Version: 5.13a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.13"
+(defconst org-version "5.13a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -15441,14 +15441,16 @@ This is the compiled version of the format.")
 
 (defun org-columns-cleanup-item (item fmt)
   "Remove from ITEM what is a column in the format FMT."
-  (when (string-match org-complex-heading-regexp item)
-    (concat
-     (org-add-props (concat (match-string 1 item) " ") nil
-       'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
-     (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
-     (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
-     " " (match-string 4 item)
-     (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item))))))
+  (if (not org-complex-heading-regexp)
+      item
+    (when (string-match org-complex-heading-regexp item)
+      (concat
+       (org-add-props (concat (match-string 1 item) " ") nil
+	 'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
+       (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
+       (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
+       " " (match-string 4 item)
+       (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))))
   
 (defun org-columns-show-value ()
   "Show the full value of the property."
