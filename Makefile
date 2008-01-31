@@ -56,7 +56,7 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES  = org.el org-publish.el org-mouse.el org-install.el
+LISPFILES  = org.el org-publish.el org-mouse.el org-export-latex.el org-install.el 
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
 CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
@@ -67,7 +67,7 @@ HTMLDIR    = /home/dominik/public_html/Tools/org
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
@@ -148,7 +148,7 @@ ecompile:
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	touch org.texi orgcard.tex
+#	touch org.texi orgcard.tex
 	make info
 	make doc
 	rm -rf org-$(TAG) org-$(TAG).zip

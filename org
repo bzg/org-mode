@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      Outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 5.04).
+   This manual is for Org-mode (version 5.05).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 5.04).
+This manual is for Org-mode (version 5.05).
 
    Copyright (C) 2004, 2005, 2006, 2007 Free Software Foundation
 
@@ -115,6 +115,7 @@ Hyperlinks
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
+* Using links outside Org-mode::  Linking from my C source code?
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
@@ -166,8 +167,8 @@ Column View
 
 Defining Columns
 
-* Scope of column definitions::
-* Column attributes::
+* Scope of column definitions::  Where defined, where valid?
+* Column attributes::           Appearance and content of a column
 
 Timestamps
 
@@ -183,8 +184,8 @@ Creating timestamps
 
 Deadlines and Scheduling
 
-* Inserting deadline/schedule::
-* Repeated tasks::
+* Inserting deadline/schedule::  Planning items
+* Repeated tasks::              Items that show up again and again
 
 Progress Logging
 
@@ -235,17 +236,23 @@ Exporting
 
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
+* LaTeX export::                Exporting to LaTeX
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
 
 HTML export
 
-* Export commands::             How to invoke HTML export
+* HTML Export commands::        How to invoke LaTeX export
 * Quoting HTML tags::           Using direct HTML in Org-mode
-* Links::                       How hyperlinks get transferred to HTML
-* Images::                      To inline or not to inline?
-* CSS support::                 Style specifications
+* Links::                       Transformation of links for HTML
+* Images::                      How to include images
+* CSS support::                 Changing the appearence of the output
+
+LaTeX export
+
+* LaTeX export commands::       How to invoke LaTeX export
+* Quoting LaTeX code::          Incorporating literal LaTeX code
 
 Text interpretation by the exporter
 
@@ -295,6 +302,7 @@ Interaction with other packages
 Extensions, Hooks and Hacking
 
 * Extensions::                  Existing 3rd-part extensions
+* Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -530,14 +538,14 @@ File: org,  Node: Outlines,  Next: Headlines,  Prev: Document structure,  Up: Do
 2.1 Outlines
 ============
 
-Org-mode is implemented on top of outline-mode.  Outlines allow to
-organize a document in a hierarchical structure, which (at least for
-me) is the best representation of notes and thoughts.  Overview over
-this structure is achieved by folding (hiding) large parts of the
+Org-mode is implemented on top of outline-mode.  Outlines allow a
+document to be organized in a hierarchical structure, which (at least
+for me) is the best representation of notes and thoughts.  An overview
+of this structure is achieved by folding (hiding) large parts of the
 document to show only the general document structure and the parts
 currently being worked on.  Org-mode greatly simplifies the use of
-outlines by compressing the entire show/hide functionality into a
-single command `org-cycle', which is bound to the <TAB> key.
+outlines by compressing the entire show/hide functionality into a single
+command `org-cycle', which is bound to the <TAB> key.
 
 
 File: org,  Node: Headlines,  Next: Visibility cycling,  Prev: Outlines,  Up: Document structure
@@ -566,7 +574,7 @@ that has whitespace followed by a single star as headline starters.
 will be hidden when the subtree is folded.  However, if you leave at
 least two empty lines, one empty line will remain visible after folding
 the subtree, in order to structure the collapsed view.  See the
-variable `org-cycle-separator-lines' for modifying this behavior.
+variable `org-cycle-separator-lines' to modify this behavior.
 
    ---------- Footnotes ----------
 
@@ -864,7 +872,7 @@ basic one is `org-occur':
      body are made visible.  In order to provide minimal context, also
      the full hierarchy of headlines above the match is shown, as well
      as the headline following the match.  Each match is also
-     highlighted; the highlights disappear when the buffer is changes
+     highlighted; the highlights disappear when the buffer is changed
      an editing command, or by pressing `C-c C-c'.  When called with a
      `C-u' prefix argument, previous highlights are kept, so several
      calls to this command can be stacked.
@@ -1076,8 +1084,8 @@ File: org,  Node: Built-in table editor,  Next: Narrow columns,  Prev: Tables,  
 =============================
 
 Org-mode makes it easy to format tables in plain ASCII.  Any line with
-`|' as the first non-white character is considered part of a table.
-`|' is also the column separator.  A table might look like this:
+`|' as the first non-whitespace character is considered part of a
+table.  `|' is also the column separator.  A table might look like this:
 
      | Name  | Phone | Age |
      |-------+-------+-----|
@@ -1883,6 +1891,7 @@ links to other files, Usenet articles, emails, and much more.
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
+* Using links outside Org-mode::  Linking from my C source code?
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
@@ -2032,7 +2041,7 @@ them as links.  If spaces must be part of the link (for example in
 the end of the link, enclose them in angular brackets.
 
 
-File: org,  Node: Handling links,  Next: Link abbreviations,  Prev: External links,  Up: Hyperlinks
+File: org,  Node: Handling links,  Next: Using links outside Org-mode,  Prev: External links,  Up: Hyperlinks
 
 4.4 Handling links
 ==================
@@ -2145,9 +2154,23 @@ triple `C-u' prefix to `C-c C-l', or configure the option
    (2) See the variable `org-display-internal-link-with-indirect-buffer'
 
 
-File: org,  Node: Link abbreviations,  Next: Search options,  Prev: Handling links,  Up: Hyperlinks
+File: org,  Node: Using links outside Org-mode,  Next: Link abbreviations,  Prev: Handling links,  Up: Hyperlinks
 
-4.5 Link abbreviations
+4.5 Using links outside Org-mode
+================================
+
+You can insert and follow links that have Org-mode syntax not only in
+Org-mode, but in any Emacs buffer.  For this, you should create two
+global commands, like this (please select suitable global keys
+yourself):
+
+     (define-key global-map 'org-insert-link-global "\\C-c L")
+     (define-key global-map 'org-open-at-point-global "\\C-c o")
+
+
+File: org,  Node: Link abbreviations,  Next: Search options,  Prev: Using links outside Org-mode,  Up: Hyperlinks
+
+4.6 Link abbreviations
 ======================
 
 Long URLs can be cumbersome to type, and often many similar links are
@@ -2188,7 +2211,7 @@ complete link abbreviations.
 
 File: org,  Node: Search options,  Next: Custom searches,  Prev: Link abbreviations,  Up: Hyperlinks
 
-4.6 Search options in file links
+4.7 Search options in file links
 ================================
 
 File links can contain additional information to make Emacs jump to a
@@ -2238,7 +2261,7 @@ single colon.
 
 File: org,  Node: Custom searches,  Next: Remember,  Prev: Search options,  Up: Hyperlinks
 
-4.7 Custom Searches
+4.8 Custom Searches
 ===================
 
 The default mechanism for creating search strings and for doing the
@@ -2260,7 +2283,7 @@ implementation example.  Search for `BibTeX links' in the source file.
 
 File: org,  Node: Remember,  Prev: Custom searches,  Up: Hyperlinks
 
-4.8 Remember
+4.9 Remember
 ============
 
 Another way to create org entries with links to other files is through
@@ -2283,7 +2306,7 @@ note should be stored interactively, on the fly.
 
 File: org,  Node: Setting up remember,  Next: Remember templates,  Prev: Remember,  Up: Remember
 
-4.8.1 Setting up remember
+4.9.1 Setting up remember
 -------------------------
 
 The following customization will tell remember to use org files as
@@ -2298,7 +2321,7 @@ target, and to create annotations compatible with Org-mode links.
 
 File: org,  Node: Remember templates,  Next: Storing notes,  Prev: Setting up remember,  Up: Remember
 
-4.8.2 Remember templates
+4.9.2 Remember templates
 ------------------------
 
 In combination with Org-mode, you can use templates to generate
@@ -2379,7 +2402,7 @@ be filled with the previous context information.
 
 File: org,  Node: Storing notes,  Prev: Remember templates,  Up: Remember
 
-4.8.3 Storing notes
+4.9.3 Storing notes
 -------------------
 
 When you are finished preparing a note with remember, you have to press
@@ -3076,6 +3099,14 @@ disks in a box like this:
        :Publisher_ALL: "Deutsche Grammophon" Phillips EMI
        :END:
 
+   If you want to set properties that can be inherited by any entry in a
+file, use a line like
+
+     #+PROPERTY: NDisks_ALL 1 2 3 4
+
+   Property values set with the global variable `org-global-properties'
+can be inherited by all entries in all Org-mode files.
+
 The following commands help to work with properties:
 
 `M-<TAB>'
@@ -3592,6 +3623,10 @@ DEADLINE
               The editor in charge is [[bbdb:Ford Prefect]]
               DEADLINE: <2004-02-29 Sun>
 
+     You can specify a different lead time for warnings for a specific
+     deadlines using the following syntax.  Here is an example with a
+     warning period of 5 days `DEADLINE: <2004-02-29 Sun -5d>'.
+
 SCHEDULED
      You are planning to start working on that task on the given date.
      The headline will be listed under the given date(1).  In addition,
@@ -3604,8 +3639,8 @@ SCHEDULED
 
 * Menu:
 
-* Inserting deadline/schedule::
-* Repeated tasks::
+* Inserting deadline/schedule::  Planning items
+* Repeated tasks::              Items that show up again and again
 
    ---------- Footnotes ----------
 
@@ -4964,14 +4999,14 @@ File: org,  Node: LaTeX fragments,  Next: Processing LaTeX fragments,  Prev: Sub
 ====================
 
 With symbols, sub- and superscripts, HTML is pretty much at its end when
-it comes to representing mathematical formulas(1).  More complex
-expressions need a dedicated formula processor.  To this end, Org-mode
-can contain arbitrary LaTeX fragments.  It provides commands to preview
+it comes to representing mathematical formulas(1). More complex
+expressions need a dedicated formula processor. To this end, Org-mode
+can contain arbitrary LaTeX fragments. It provides commands to preview
 the typeset result of these fragments, and upon export to HTML, all
 fragments will be converted to images and inlined into the HTML
-document.  For this to work you need to be on a system with a working
-LaTeX installation.  You also need the `dvipng' program, available at
-`http://sourceforge.net/projects/dvipng/'.  The LaTeX header that will
+document(2). For this to work you need to be on a system with a working
+LaTeX installation. You also need the `dvipng' program, available at
+`http://sourceforge.net/projects/dvipng/'. The LaTeX header that will
 be used when processing a fragment can be configured with the variable
 `org-format-latex-header'.
 
@@ -5006,9 +5041,12 @@ ones you do not wish to have interpreted by the LaTeX converter.
    ---------- Footnotes ----------
 
    (1) Yes, there is MathML, but that is not yet fully supported by
-many browsers, and there is no decent converter for turning LaTeX of
-ASCII representations of formulas into MathML.  So for the time being,
+many browsers, and there is no decent converter for turning LaTeX or
+ASCII representations of formulas into MathML. So for the time being,
 converting formulas into images seems the way to go.
+
+   (2) The LaTeX export will not use images for displaying LaTeX
+fragments but include these fragments directly into the LaTeX code.
 
 
 File: org,  Node: Processing LaTeX fragments,  Next: CDLaTeX mode,  Prev: LaTeX fragments,  Up: Embedded LaTeX
@@ -5101,11 +5139,12 @@ Org-mode documents can be exported into a variety of other formats.  For
 printing and sharing of notes, ASCII export produces a readable and
 simple version of an Org-mode file.  HTML export allows you to publish a
 notes file on the web, while the XOXO format provides a solid base for
-exchange with a broad range of other applications.  To incorporate
-entries with associated times like deadlines or appointments into a
-desktop calendar program like iCal, Org-mode can also produce extracts
-in the iCalendar format.  Currently Org-mode only supports export, not
-import of these different formats.
+exchange with a broad range of other applications. LaTeX export lets
+you use Org-mode and its structured editing functions to easily create
+LaTeX files.  To incorporate entries with associated times like
+deadlines or appointments into a desktop calendar program like iCal,
+Org-mode can also produce extracts in the iCalendar format.  Currently
+Org-mode only supports export, not import of these different formats.
 
    When exporting, Org-mode uses special conventions to enrich the
 output produced.  *Note Text interpretation::, for more details.
@@ -5119,6 +5158,7 @@ output produced.  *Note Text interpretation::, for more details.
 
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
+* LaTeX export::                Exporting to LaTeX
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 * Text interpretation::         How the exporter looks at the file
@@ -5158,7 +5198,7 @@ the layout relative to the first line.  Should there be lines with less
 indentation than the first, these are left alone.
 
 
-File: org,  Node: HTML export,  Next: XOXO export,  Prev: ASCII export,  Up: Exporting
+File: org,  Node: HTML export,  Next: LaTeX export,  Prev: ASCII export,  Up: Exporting
 
 11.2 HTML export
 ================
@@ -5169,14 +5209,14 @@ but with additional support for tables.
 
 * Menu:
 
-* Export commands::             How to invoke HTML export
+* HTML Export commands::        How to invoke LaTeX export
 * Quoting HTML tags::           Using direct HTML in Org-mode
-* Links::                       How hyperlinks get transferred to HTML
-* Images::                      To inline or not to inline?
-* CSS support::                 Style specifications
+* Links::                       Transformation of links for HTML
+* Images::                      How to include images
+* CSS support::                 Changing the appearence of the output
 
 
-File: org,  Node: Export commands,  Next: Quoting HTML tags,  Prev: HTML export,  Up: HTML export
+File: org,  Node: HTML Export commands,  Next: Quoting HTML tags,  Prev: HTML export,  Up: HTML export
 
 11.2.1 HTML export commands
 ---------------------------
@@ -5209,6 +5249,10 @@ File: org,  Node: Export commands,  Next: Quoting HTML tags,  Prev: HTML export,
      org-mode syntax before.  This is a global command that can be
      invoked in any buffer.
 
+`M-x org-replace-region-by-HTML'
+     Replace the active region (assumed to be in Org-mode syntax) by
+     HTML code.
+
    In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
 will be exported as itemized lists.  If you want that transition to
@@ -5220,7 +5264,7 @@ example,
 creates two levels of headings and does the rest as items.
 
 
-File: org,  Node: Quoting HTML tags,  Next: Links,  Prev: Export commands,  Up: HTML export
+File: org,  Node: Quoting HTML tags,  Next: Links,  Prev: HTML Export commands,  Up: HTML export
 
 11.2.2 Quoting HTML tags
 ------------------------
@@ -5321,9 +5365,79 @@ section in the buffer.
 should have no `#' at the start of the line.
 
 
-File: org,  Node: XOXO export,  Next: iCalendar export,  Prev: HTML export,  Up: Exporting
+File: org,  Node: LaTeX export,  Next: XOXO export,  Prev: HTML export,  Up: Exporting
 
-11.3 XOXO export
+11.3 LaTeX export
+=================
+
+Org-mode contains a LaTeX exporter written by Bastien Guerry.
+
+* Menu:
+
+* LaTeX export commands::       How to invoke LaTeX export
+* Quoting LaTeX code::          Incorporating literal LaTeX code
+
+
+File: org,  Node: LaTeX export commands,  Next: Quoting LaTeX code,  Prev: LaTeX export,  Up: LaTeX export
+
+11.3.1 LaTeX export commands
+----------------------------
+
+`C-c C-e l'
+     Export as LaTeX file `myfile.tex'.  
+
+`C-c C-e L'
+     Export to a temporary buffer, do not create a file.  
+
+`C-c C-e v l'
+
+`C-c C-e v L'
+     Export only the visible part of the document.
+
+`M-x org-export-region-as-latex'
+     Convert the region to LaTeX under the assumption that it was
+     org-mode syntax before.  This is a global command that can be
+     invoked in any buffer.
+
+`M-x org-replace-region-by-latex'
+     Replace the active region (assumed to be in Org-mode syntax) by
+     LaTeX code.
+
+   In the exported version, the first 3 outline levels will become
+headlines, defining a general document structure.  Additional levels
+will be exported as description lists.  The exporter can ignore them or
+convert them to a custom string depending on `org-latex-low-levels'.
+
+   If you want that transition to occur at a different level, specify it
+with a prefix argument. For example,
+
+     C-2 C-c C-e l
+
+creates two levels of headings and does the rest as items.
+
+
+File: org,  Node: Quoting LaTeX code,  Prev: LaTeX export commands,  Up: LaTeX export
+
+11.3.2 Quoting LaTeX code
+-------------------------
+
+Embedded LaTeX as described in *Note Embedded LaTeX:: will be correctly
+inserted into the LaTeX file.  Forthermore, you can add special code
+that should only be present in LaTeX export with the following
+constructs:
+
+     #+LaTeX: Literal LaTeX code for export
+
+or
+
+     #+BEGIN_LaTeX
+     All lines between these markers are exported literally
+     #+END_LaTeX
+
+
+File: org,  Node: XOXO export,  Next: iCalendar export,  Prev: LaTeX export,  Up: Exporting
+
+11.4 XOXO export
 ================
 
 Org-mode contains an exporter that produces XOXO-style output.
@@ -5339,7 +5453,7 @@ does not interpret any additional Org-mode features.
 
 File: org,  Node: iCalendar export,  Next: Text interpretation,  Prev: XOXO export,  Up: Exporting
 
-11.4 iCalendar export
+11.5 iCalendar export
 =====================
 
 Some people like to use Org-mode for keeping track of projects, but
@@ -5370,7 +5484,7 @@ application you are using.  The FAQ covers this issue.
 
 File: org,  Node: Text interpretation,  Prev: iCalendar export,  Up: Exporting
 
-11.5 Text interpretation by the exporter
+11.6 Text interpretation by the exporter
 ========================================
 
 The exporter backends interpret additional structure in the Org-mode
@@ -5387,7 +5501,7 @@ file in order to produce better output.
 
 File: org,  Node: Comment lines,  Next: Initial text,  Prev: Text interpretation,  Up: Text interpretation
 
-11.5.1 Comment lines
+11.6.1 Comment lines
 --------------------
 
 Lines starting with `#' in column zero are treated as comments and will
@@ -5400,7 +5514,7 @@ never be exported.  Also entire subtrees starting with the word
 
 File: org,  Node: Initial text,  Next: Footnotes,  Prev: Comment lines,  Up: Text interpretation
 
-11.5.2 Text before the first headline
+11.6.2 Text before the first headline
 -------------------------------------
 
 Org-mode normally ignores any text before the first headline when
@@ -5436,7 +5550,7 @@ headline when exporting the file, you can use the `#+TEXT' construct:
 
 File: org,  Node: Footnotes,  Next: Enhancing text,  Prev: Initial text,  Up: Text interpretation
 
-11.5.3 Footnotes
+11.6.3 Footnotes
 ----------------
 
 Numbers in square brackets are treated as footnotes, so that you can use
@@ -5457,13 +5571,13 @@ binding, you could use `org-replace-disputed-keys' and
 
 File: org,  Node: Enhancing text,  Next: Export options,  Prev: Footnotes,  Up: Text interpretation
 
-11.5.4 Enhancing text for export
+11.6.4 Enhancing text for export
 --------------------------------
 
 Some of the export backends of Org-mode allow for sophisticated text
-formatting, this is true in particular for the HTML backend.  Org-mode
-has a number of typing conventions that allow to produce a richly
-formatted output.
+formatting, this is true in particular for the HTML and LaTeX backends.
+Org-mode has a number of typing conventions that allow to produce a
+richly formatted output.
 
    * Plain lists `-', `*' or `+' as bullet, or with `1.' or `2)' as
      enumerator will be recognized and transformed if the backend
@@ -5505,7 +5619,7 @@ should never be used.
 
 File: org,  Node: Export options,  Prev: Enhancing text,  Up: Text interpretation
 
-11.5.5 Export options
+11.6.5 Export options
 ---------------------
 
 The exporter recognizes special lines in the buffer which provide
@@ -5546,6 +5660,10 @@ you can:
      author:    turn on/off inclusion of author name/email into exported file
      timestamp: turn on/off inclusion creation time into exported file
 
+   These options take effect in both the HTML and LaTeX export, except
+for `TeX' and `LaTeX', which are respectively `t' and `nil' for the
+LaTeX export.
+
 
 File: org,  Node: Publishing,  Next: Miscellaneous,  Prev: Exporting,  Up: Top
 
@@ -5557,8 +5675,11 @@ configure automatic HTML conversion of _projects_ composed of
 interlinked org files.  This system is called _org-publish_.  You can
 also configure org-publish to automatically upload your exported HTML
 pages and related attachments, such as images and source code files, to
-a web server.  Org-publish turns org-mode into a web-site authoring
-tool.
+a web server. Org-publish turns org-mode into a web-site authoring tool.
+
+   You can also use Org-publish to convert files into LaTeX, or even
+combine HTML and LaTeX conversion so that files are available in both
+formats on the server(2).
 
    Org-publish has been contributed to Org-mode by David O'Toole.
 
@@ -5573,6 +5694,10 @@ tool.
    (1) `org-publish.el' is not distributed with Emacs 21, if you are
 still using Emacs 21, you need you need to download this file
 separately.
+
+   (2) Since LaTeX files on a server are not that helpful, you surely
+want to perform further conversion on them - e.g. convert them to `PDF'
+format.
 
 
 File: org,  Node: Configuration,  Next: Sample configuration,  Prev: Publishing,  Up: Publishing
@@ -5662,9 +5787,10 @@ Publishing means that a file is copied to the destination directory and
 possibly transformed in the process.  The default transformation is to
 export Org-mode files as HTML files, and this is done by the function
 `org-publish-org-to-html' which calls the HTML exporter (*note HTML
-export::).  Other files like images only need to be copied to the
-publishing destination.  For non-Org-mode files, you need to specify
-the publishing function.
+export::). But you also can publish your files in LaTeX by using the
+function `org-publish-org-to-latex' instead. Other files like images
+only need to be copied to the publishing destination. For non-Org-mode
+files, you need to specify the publishing function.
 
 `:publishing-function' Function executing the publication of a file.
                        This may also be a list of functions, which will
@@ -5681,13 +5807,13 @@ provides one for attachments (files that only need to be copied):
 
 File: org,  Node: Publishing options,  Next: Publishing links,  Prev: Publishing action,  Up: Configuration
 
-12.1.5 Options for the HTML exporter
-------------------------------------
+12.1.5 Options for the HTML/LaTeX exporters
+-------------------------------------------
 
 The property list can be used to set many export options for the HTML
-exporter.  In most cases, these properties correspond to user variables
-in Org-mode.  The table below lists these properties along with the
-variable they belong to.  See the documentation string for the
+and LaTeX exporters.  In most cases, these properties correspond to user
+variables in Org-mode.  The table below lists these properties along
+with the variable they belong to.  See the documentation string for the
 respective variable for details.
 
 `:language'            `org-export-default-language'
@@ -5718,6 +5844,10 @@ respective variable for details.
 `:auto-postamble'      `org-export-html-auto-postamble'
 `:author'              `user-full-name'
 `:email'               `user-mail-address'
+
+   Most of the `org-export-with-*' variables have the same effect in
+both HTML and LaTeX exporters, except for `:TeX-macros' and
+`:LaTeX-fragments', respectively `nil' and `t' in the LaTeX export.
 
    When a property is given a value in org-publish-project-alist, its
 setting overrides the value of the corresponding user variable (if any)
@@ -5974,7 +6104,7 @@ file is visited again in a new Emacs session.
 
 `#+ARCHIVE: %s_done::'
      This line sets the archive location for the agenda file.  It
-     applies for all subsequent lines until the next `#+CATEGORY' line,
+     applies for all subsequent lines until the next `#+ARCHIVE' line,
      or the end of the file.  The first such line also applies to any
      entries before it.  The corresponding variable is
      `org-archive-location'.
@@ -6006,8 +6136,13 @@ file is visited again in a new Emacs session.
      three must be either letters A-Z or numbers 0-9.  The highest
      priority must have a lower ASCII number that the lowest priority.
 
+`#+PROPERTY: Property_Name Value'
+     This line sets a default inheritance value for entries in the
+     current buffer, most useful for specifying the allowed values of a
+     property.
+
 `#+STARTUP:'
-     This line sets options to be used at startup of org-mode, when an
+     This line sets options to be used at startup of Org-mode, when an
      Org-mode file is being visited.  The first set of options deals
      with the initial visibility of the outline tree.  The
      corresponding variable for global default settings is
@@ -6332,7 +6467,7 @@ File: org,  Node: Conflicts,  Prev: Cooperation,  Up: Interaction
      select and extend the region.  If you want to use one of these
      packages along with Org-mode, configure the variable
      `org-CUA-compatible'.  When set, Org-mode will move the following
-     keybindings in org-mode files, and in the agenda buffer (but not
+     keybindings in Org-mode files, and in the agenda buffer (but not
      during date selection).
 
           S-UP    -> M-p             S-DOWN  -> M-n
@@ -6349,7 +6484,7 @@ File: org,  Node: Conflicts,  Prev: Cooperation,  Up: Interaction
 `footnote.el' by Steven L. Baur
      Org-mode supports the syntax of the footnote package, but only the
      numerical footnote markers.  Also, the default key for footnote
-     commands, `C-c !' is already used by org-mode.  You could use the
+     commands, `C-c !' is already used by Org-mode.  You could use the
      variable `footnote-prefix' to switch footnotes commands to another
      key.  Or, you could use `org-replace-disputed-keys' and
      `org-disputed-keys' to change the settings in Org-mode.
@@ -6406,13 +6541,14 @@ Org-mode.
 * Menu:
 
 * Extensions::                  Existing 3rd-part extensions
+* Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Using the property API::      Writing programs that use entry properties
 
 
-File: org,  Node: Extensions,  Next: Tables in arbitrary syntax,  Prev: Extensions and Hacking,  Up: Extensions and Hacking
+File: org,  Node: Extensions,  Next: Adding hyperlink types,  Prev: Extensions and Hacking,  Up: Extensions and Hacking
 
 A.1 Third-party extensions for Org-mode
 =======================================
@@ -6454,9 +6590,97 @@ The following extensions for Org-mode have been written by other people:
      `http://www.cognition.ens.fr/~guerry/u/org2rem.el'.
 
 
-File: org,  Node: Tables in arbitrary syntax,  Next: Dynamic blocks,  Prev: Extensions,  Up: Extensions and Hacking
+File: org,  Node: Adding hyperlink types,  Next: Tables in arbitrary syntax,  Prev: Extensions,  Up: Extensions and Hacking
 
-A.2 Tables in arbitrary syntax
+A.2 Adding hyperlink types
+==========================
+
+Org-mode has a large number of hyperlink types built-in (*note
+Hyperlinks::).  If you would like to add new link types, it provides an
+interface for doing so.  Lets look at an example file `org-man.el' that
+will add support for creating links like `[[man:printf][The printf
+manpage]]' to show unix manual pages inside emacs:
+
+     ;;; org-man.el - Support for links to manpages in Org-mode
+
+     (require 'org)
+
+     (org-add-link-type "man" 'org-man-open)
+     (add-hook 'org-store-link-functions 'org-man-store-link)
+
+     (defcustom org-man-command 'man
+       "The Emacs command to be used to display a man page."
+       :group 'org-link
+       :type '(choice (const man) (const woman)))
+
+     (defun org-man-open (path)
+       "Visit the manpage on PATH.
+     PATH should be a topic that can be thrown at the man command."
+       (funcall org-man-command path))
+
+     (defun org-man-store-link ()
+       "Store a link to a manpage."
+       (when (memq major-mode '(Man-mode woman-mode))
+         ;; This is a man page, we do make this link
+         (let* ((page (org-man-get-page-name))
+                (link (concat "man:" page))
+                (description (format "Manpage for %s" page)))
+           (org-store-link-props
+            :type "man"
+            :link link
+            :description description))))
+
+     (defun org-man-get-page-name ()
+       "Extract the page name from the buffer name."
+       ;; This works for both `Man-mode' and `woman-mode'.
+       (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
+           (match-string 1 (buffer-name))
+         (error "Cannot create link to this man page")))
+
+     (provide 'org-man)
+
+     ;;; org-man.el ends here
+
+You would activate this new link type in `.emacs' with
+
+     (require 'org-man)
+
+Lets go through the file and see what it does.
+  1. It does `(require 'org)' to make sure that `org.el' has been
+     loaded.
+
+  2. The next line calls `org-add-link-type' to define a new link type
+     with prefix `man'.  The call also contains the name of a function
+     that will be called to follow such a link.
+
+  3. The next line adds a function to `org-store-link-functions', in
+     order to allow the command `C-c l' to record a useful link in a
+     buffer displaying a man page.
+
+   The rest of the file defines the necessary variables and functions.
+First there is a customization variable that determines which emacs
+command should be used to display manpages.  There are two options,
+`man' and `woman'.  Then the function to follow a link is defined.  It
+gets the link path as an argument - in this case the link path is just
+a topic for the manual command.  The function calls the value of
+`org-man-command' to display the man page.
+
+   Finally the function `org-man-store-link' is defined.  When you try
+to store a link with `C-c l', also this function will be called to try
+to make a link.  The function must first decide if it is supposed to
+create the link for this buffer type, we do this by checking the value
+of the variable `major-mode'.  If not, the function must exit and
+retunr the value `nil'.  If yes, the link is created by getting the
+manual tpoic from the buffer name and prefixing it with the string
+`man:'.  Then it must call the command `org-store-link-props' and set
+the `:type' and `:link' properties.  Optionally you can also set the
+`:description' property to provide a default for the link description
+when the link is later inserted into tan Org-mode buffer with `C-c C-l'.
+
+
+File: org,  Node: Tables in arbitrary syntax,  Next: Dynamic blocks,  Prev: Adding hyperlink types,  Up: Extensions and Hacking
+
+A.3 Tables in arbitrary syntax
 ==============================
 
 Since Orgtbl-mode can be used as a minor mode in arbitrary buffers, a
@@ -6481,7 +6705,7 @@ very flexible system.
 
 File: org,  Node: Radio tables,  Next: A LaTeX example,  Prev: Tables in arbitrary syntax,  Up: Tables in arbitrary syntax
 
-A.2.1 Radio tables
+A.3.1 Radio tables
 ------------------
 
 To define the location of the target table, you first need to create two
@@ -6536,7 +6760,7 @@ number of different solutions:
 
 File: org,  Node: A LaTeX example,  Next: Translator functions,  Prev: Radio tables,  Up: Tables in arbitrary syntax
 
-A.2.2 A LaTeX example
+A.3.2 A LaTeX example
 ---------------------
 
 The best way to wrap the source table in LaTeX is to use the `comment'
@@ -6639,7 +6863,7 @@ solution is to add the `comment' environment to the variable
 
 File: org,  Node: Translator functions,  Prev: A LaTeX example,  Up: Tables in arbitrary syntax
 
-A.2.3 Translator functions
+A.3.3 Translator functions
 --------------------------
 
 Orgtbl-mode has several translator functions built-in:
@@ -6707,7 +6931,7 @@ during HTML export.
 
 File: org,  Node: Dynamic blocks,  Next: Special agenda views,  Prev: Tables in arbitrary syntax,  Up: Extensions and Hacking
 
-A.3 Dynamic blocks
+A.4 Dynamic blocks
 ==================
 
 Org-mode documents can contain _dynamic blocks_.  These are specially
@@ -6759,7 +6983,7 @@ Org-mode.
 
 File: org,  Node: Special agenda views,  Next: Using the property API,  Prev: Dynamic blocks,  Up: Extensions and Hacking
 
-A.4 Special Agenda Views
+A.5 Special Agenda Views
 ========================
 
 Org-mode provides a special hook that can be used to narrow down the
@@ -6787,33 +7011,53 @@ search should continue from there.
              nil          ; tag found, do not skip
            subtree-end))) ; tag not found, continue after end of subtree
 
-   Furthermore you must write a command that uses `let' to temporarily
-put this function into the variable `org-agenda-skip-function', sets
-the header string for the agenda buffer, and calls the todo-list
-generator while asking for the specific TODO keyword PROJECT.  The
-function must also accept one argument MATCH, but it can choose to
-ignore it(1) (as we do in the example below).  Here is the example:
+   Now you may use this function in an agenda custom command, for
+example like this:
 
-     (defun my-org-waiting-projects (&optional match)
-       "Produce a list of projects that contain a WAITING tag.
-     MATCH is being ignored."
-       (interactive)
-       (let ((org-agenda-skip-function 'my-skip-unless-waiting)
-             (org-agenda-overriding-header "Projects waiting for something: "))
-         ;; make the list
-         (org-todo-list "PROJECT")))
+     (org-add-agenda-custom-command
+      '("b" todo "PROJECT"
+        ((org-agenda-skip-function 'my-org-waiting-projects)
+         (org-agenda-overriding-header "Projects waiting for something: "))))
 
-   ---------- Footnotes ----------
+   Note that this also binds `org-agenda-overriding-header' to get a
+meaningful header in the agenda view.
 
-   (1) MATCH must be present in case you want to define a custom
-command for producing this special list.  Custom commands always supply
-the MATCH argument, but it can be empty if you do not specify it while
-defining the command(*note Custom agenda views::).
+   You may also put a Lisp form into `org-agenda-skip-function'.  In
+particular, you may use the functions `org-agenda-skip-entry-if' and
+`org-agenda-skip-subtree-if' in this form, for example:
+
+`'(org-agenda-skip-entry-if 'scheduled)'
+     Skip current entry if it has been scheduled.
+
+`'(org-agenda-skip-entry-if 'notscheduled)'
+     Skip current entry if it has not been scheduled.
+
+`'(org-agenda-skip-entry-if 'deadline)'
+     Skip current entry if it has a deadline.
+
+`'(org-agenda-skip-entry-if 'scheduled 'deadline)'
+     Skip current entry if it has a deadline, or if it is scheduled.
+
+`'(org-agenda-skip-entry 'regexp "regular expression")'
+     Skip current entry if the regular expression contained in the
+     variable `org-agenda-skip-regexp' matches in the entry.
+
+`'(org-agenda-skip-subtree-if 'regexp "regular expression")'
+     Same as above, but check and skip the entire subtree.
+
+   Therefore we could also have written the search for WAITING projects
+like this, even without defining a special function:
+
+     (org-add-agenda-custom-command
+      '("b" todo "PROJECT"
+        ((org-agenda-skip-function '(org-agenda-skip-subtree-if
+                                     'regexp ":WAITING:"))
+         (org-agenda-overriding-header "Projects waiting for something: "))))
 
 
 File: org,  Node: Using the property API,  Prev: Special agenda views,  Up: Extensions and Hacking
 
-A.5 Using the property API
+A.6 Using the property API
 ==========================
 
 Here is a description of the functions that can be used to work with
@@ -6918,8 +7162,8 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Niels Giessen had the idea to automatically archive DONE trees.
 
-   * Bastien Guerry provided extensive feedback and some patches, and
-     translated David O'Toole's tutorial into French.
+   * Bastien Guerry wrote the LaTeX exporter and has been prolific with
+     patches, ideas, and bug reports.  to Org-mode.
 
    * Kai Grossjohann pointed out key-binding conflicts with other
      packages.
@@ -6982,6 +7226,9 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Dale Smith proposed link abbreviations.
 
+   * Adam Spiers asked for global linking commands and inspired the link
+     extension system.  support mairix.
+
    * David O'Toole wrote `org-publish.el' and drafted the manual
      chapter about publishing.
 
@@ -6999,7 +7246,8 @@ if I have forgotten someone, please accept my apologies and let me know.
      details.  I later looked at John's code, however, and learned from
      his implementation of (i) links where the link itself is hidden
      and only a description is shown, and (ii) popping up a calendar to
-     select a date.
+     select a date.  John has also contributed a number of great ideas
+     directly to Org-mode.
 
    * Carsten Wimmer suggested some changes and helped fix a bug in
      linking to GNUS.
@@ -7024,7 +7272,8 @@ Index
                                                               (line   6)
 * action, for publishing:                Publishing action.   (line   6)
 * activation:                            Activation.          (line   6)
-* active region <1>:                     Export commands.     (line   6)
+* active region <1>:                     HTML Export commands.
+                                                              (line   6)
 * active region <2>:                     ASCII export.        (line   9)
 * active region <3>:                     Built-in table editor.
                                                               (line 141)
@@ -7043,7 +7292,7 @@ Index
 * agenda, pipe:                          Extracting Agenda Information for other programs.
                                                               (line   6)
 * agenda, with block views:              Block agenda.        (line   6)
-* align, STARTUP keyword:                In-buffer settings.  (line  63)
+* align, STARTUP keyword:                In-buffer settings.  (line  68)
 * allout.el:                             Conflicts.           (line   6)
 * angular brackets, around links:        External links.      (line  43)
 * API, for properties <1>:               Using the property API.
@@ -7100,9 +7349,9 @@ Index
 * completion, of TODO keywords:          Workflow states.     (line  15)
 * constants, in calculations:            References.          (line  82)
 * constants.el:                          Cooperation.         (line  14)
-* constcgs, STARTUP keyword:             In-buffer settings.  (line  88)
-* constSI, STARTUP keyword:              In-buffer settings.  (line  88)
-* content, STARTUP keyword:              In-buffer settings.  (line  56)
+* constcgs, STARTUP keyword:             In-buffer settings.  (line  93)
+* constSI, STARTUP keyword:              In-buffer settings.  (line  93)
+* content, STARTUP keyword:              In-buffer settings.  (line  61)
 * contents, global visibility state:     Visibility cycling.  (line  22)
 * copying, of subtrees:                  Structure editing.   (line   6)
 * creating timestamps:                   Creating timestamps. (line   6)
@@ -7111,7 +7360,7 @@ Index
 * custom date/time format:               Custom time format.  (line   6)
 * custom search strings:                 Custom searches.     (line   6)
 * customization:                         Customization.       (line   6)
-* customtime, STARTUP keyword:           In-buffer settings.  (line  85)
+* customtime, STARTUP keyword:           In-buffer settings.  (line  90)
 * cutting, of subtrees:                  Structure editing.   (line   6)
 * cycling, of TODO states:               TODO basics.         (line  13)
 * cycling, visibility:                   Visibility cycling.  (line   6)
@@ -7147,7 +7396,7 @@ Index
 * emphasized text:                       Export options.      (line  25)
 * enhancing text:                        Enhancing text.      (line   6)
 * evaluate time range:                   Creating timestamps. (line  48)
-* even, STARTUP keyword:                 In-buffer settings.  (line  78)
+* even, STARTUP keyword:                 In-buffer settings.  (line  83)
 * exporting:                             Exporting.           (line   6)
 * exporting agenda views <1>:            Exporting Agenda Views.
                                                               (line  12)
@@ -7199,14 +7448,17 @@ Index
 * grouping columns in tables:            Column groups.       (line   6)
 * hand-formatted lists:                  Enhancing text.      (line  11)
 * headline levels:                       Export options.      (line  25)
-* headline levels, for exporting <1>:    Export commands.     (line  34)
+* headline levels, for exporting <1>:    LaTeX export commands.
+                                                              (line  26)
+* headline levels, for exporting <2>:    HTML Export commands.
+                                                              (line  38)
 * headline levels, for exporting:        ASCII export.        (line  18)
 * headline navigation:                   Motion.              (line   6)
 * headline tagging:                      Tags.                (line   6)
 * headline, promotion and demotion:      Structure editing.   (line   6)
 * headlines:                             Headlines.           (line   6)
 * hide text:                             Visibility cycling.  (line   6)
-* hidestars, STARTUP keyword:            In-buffer settings.  (line  78)
+* hidestars, STARTUP keyword:            In-buffer settings.  (line  83)
 * hiding leading stars:                  Clean view.          (line   6)
 * history:                               History and Acknowledgments.
                                                               (line   6)
@@ -7215,6 +7467,8 @@ Index
 * HTML, and orgtbl-mode:                 Translator functions.
                                                               (line   6)
 * hyperlinks:                            Hyperlinks.          (line   6)
+* hyperlinks, adding new types:          Adding hyperlink types.
+                                                              (line   6)
 * iCalendar export:                      iCalendar export.    (line   6)
 * images, inline in HTML:                Images.              (line   6)
 * in-buffer settings:                    In-buffer settings.  (line   6)
@@ -7233,6 +7487,7 @@ Index
 * jumping, to headlines:                 Motion.              (line   6)
 * keybindings, global:                   Activation.          (line   6)
 * keyword options:                       Per file keywords.   (line   6)
+* LaTeX export:                          LaTeX export.        (line   6)
 * LaTeX fragments <1>:                   Export options.      (line  25)
 * LaTeX fragments:                       LaTeX fragments.     (line   6)
 * LaTeX fragments, export:               Enhancing text.      (line  21)
@@ -7260,12 +7515,12 @@ Index
 * lists, hand-formatted:                 Enhancing text.      (line  11)
 * lists, ordered:                        Plain lists.         (line   6)
 * lists, plain:                          Plain lists.         (line   6)
-* logdone, STARTUP keyword:              In-buffer settings.  (line  67)
+* logdone, STARTUP keyword:              In-buffer settings.  (line  72)
 * logging, of progress:                  Progress logging.    (line   6)
-* lognoteclock-out, STARTUP keyword:     In-buffer settings.  (line  67)
-* lognotedone, STARTUP keyword:          In-buffer settings.  (line  67)
-* lognotestate, STARTUP keyword:         In-buffer settings.  (line  67)
-* logrepeat, STARTUP keyword:            In-buffer settings.  (line  67)
+* lognoteclock-out, STARTUP keyword:     In-buffer settings.  (line  72)
+* lognotedone, STARTUP keyword:          In-buffer settings.  (line  72)
+* lognotestate, STARTUP keyword:         In-buffer settings.  (line  72)
+* logrepeat, STARTUP keyword:            In-buffer settings.  (line  72)
 * maintainer:                            Feedback.            (line   6)
 * mark ring:                             Handling links.      (line  81)
 * marking characters, tables:            Advanced features.   (line  40)
@@ -7286,11 +7541,11 @@ Index
 * named references:                      References.          (line  82)
 * names as TODO keywords:                TODO types.          (line   6)
 * narrow columns in tables:              Narrow columns.      (line   6)
-* noalign, STARTUP keyword:              In-buffer settings.  (line  63)
-* nologging, STARTUP keyword:            In-buffer settings.  (line  67)
-* nologrepeat, STARTUP keyword:          In-buffer settings.  (line  67)
+* noalign, STARTUP keyword:              In-buffer settings.  (line  68)
+* nologging, STARTUP keyword:            In-buffer settings.  (line  72)
+* nologrepeat, STARTUP keyword:          In-buffer settings.  (line  72)
 * occur, command:                        Sparse trees.        (line   6)
-* odd, STARTUP keyword:                  In-buffer settings.  (line  78)
+* odd, STARTUP keyword:                  In-buffer settings.  (line  83)
 * option keyword completion:             Completion.          (line   6)
 * options, for custom agenda views:      Setting Options.     (line   6)
 * options, for customization:            Customization.       (line   6)
@@ -7312,7 +7567,7 @@ Index
 * outline-mode:                          Outlines.            (line   6)
 * outlines:                              Outlines.            (line   6)
 * overview, global visibility state:     Visibility cycling.  (line  22)
-* overview, STARTUP keyword:             In-buffer settings.  (line  56)
+* overview, STARTUP keyword:             In-buffer settings.  (line  61)
 * packages, interaction with other:      Interaction.         (line   6)
 * pasting, of subtrees:                  Structure editing.   (line   6)
 * per file keywords:                     Per file keywords.   (line   6)
@@ -7347,7 +7602,8 @@ Index
 * references, named:                     References.          (line  82)
 * references, to fields:                 References.          (line  15)
 * references, to ranges:                 References.          (line  60)
-* region, active <1>:                    Export commands.     (line   6)
+* region, active <1>:                    HTML Export commands.
+                                                              (line   6)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
                                                               (line 141)
@@ -7360,7 +7616,7 @@ Index
 * richer text:                           Enhancing text.      (line   6)
 * RMAIL links:                           External links.      (line   6)
 * SCHEDULED keyword:                     Deadlines and scheduling.
-                                                              (line  22)
+                                                              (line  26)
 * scheduling:                            Time stamps.         (line   6)
 * Scripts, for agenda processing:        Extracting Agenda Information for other programs.
                                                               (line   6)
@@ -7373,8 +7629,8 @@ Index
 * show all, command:                     Visibility cycling.  (line  33)
 * show all, global visibility state:     Visibility cycling.  (line  22)
 * show hidden text:                      Visibility cycling.  (line   6)
-* showall, STARTUP keyword:              In-buffer settings.  (line  56)
-* showstars, STARTUP keyword:            In-buffer settings.  (line  78)
+* showall, STARTUP keyword:              In-buffer settings.  (line  61)
+* showstars, STARTUP keyword:            In-buffer settings.  (line  83)
 * sorting, of agenda items:              Sorting of agenda items.
                                                               (line   6)
 * sparse tree, for deadlines:            Inserting deadline/schedule.
@@ -7456,7 +7712,8 @@ Index
 * TODO list, global:                     Global TODO list.    (line   6)
 * TODO types:                            TODO types.          (line   6)
 * TODO workflow:                         Workflow states.     (line   6)
-* transient-mark-mode <1>:               Export commands.     (line   6)
+* transient-mark-mode <1>:               HTML Export commands.
+                                                              (line   6)
 * transient-mark-mode <2>:               ASCII export.        (line   9)
 * transient-mark-mode <3>:               Built-in table editor.
                                                               (line 141)
@@ -7598,7 +7855,7 @@ Key Index
                                                               (line   6)
 * C-c C-c <3>:                           Processing LaTeX fragments.
                                                               (line  15)
-* C-c C-c <4>:                           Property syntax.     (line  46)
+* C-c C-c <4>:                           Property syntax.     (line  54)
 * C-c C-c <5>:                           Setting tags.        (line  10)
 * C-c C-c <6>:                           Checkboxes.          (line  37)
 * C-c C-c <7>:                           Editing and debugging formulas.
@@ -7609,23 +7866,39 @@ Key Index
 * C-c C-d <1>:                           Agenda commands.     (line 156)
 * C-c C-d:                               Inserting deadline/schedule.
                                                               (line   9)
-* C-c C-e:                               Exporting.           (line  19)
+* C-c C-e:                               Exporting.           (line  20)
 * C-c C-e a:                             ASCII export.        (line   9)
-* C-c C-e b:                             Export commands.     (line   7)
+* C-c C-e b:                             HTML Export commands.
+                                                              (line   7)
 * C-c C-e c:                             iCalendar export.    (line  21)
-* C-c C-e H:                             Export commands.     (line  10)
-* C-c C-e h:                             Export commands.     (line   6)
+* C-c C-e H:                             HTML Export commands.
+                                                              (line  10)
+* C-c C-e h:                             HTML Export commands.
+                                                              (line   6)
 * C-c C-e I:                             iCalendar export.    (line  16)
 * C-c C-e i:                             iCalendar export.    (line  14)
-* C-c C-e R:                             Export commands.     (line  13)
+* C-c C-e L:                             LaTeX export commands.
+                                                              (line   7)
+* C-c C-e l:                             LaTeX export commands.
+                                                              (line   6)
+* C-c C-e R:                             HTML Export commands.
+                                                              (line  13)
 * C-c C-e t:                             Export options.      (line  13)
 * C-c C-e v <1>:                         XOXO export.         (line  11)
 * C-c C-e v:                             Sparse trees.        (line  41)
 * C-c C-e v a:                           ASCII export.        (line  13)
-* C-c C-e v b:                           Export commands.     (line  18)
-* C-c C-e v H:                           Export commands.     (line  18)
-* C-c C-e v h:                           Export commands.     (line  18)
-* C-c C-e v R:                           Export commands.     (line  18)
+* C-c C-e v b:                           HTML Export commands.
+                                                              (line  18)
+* C-c C-e v H:                           HTML Export commands.
+                                                              (line  18)
+* C-c C-e v h:                           HTML Export commands.
+                                                              (line  18)
+* C-c C-e v L:                           LaTeX export commands.
+                                                              (line  10)
+* C-c C-e v l:                           LaTeX export commands.
+                                                              (line  10)
+* C-c C-e v R:                           HTML Export commands.
+                                                              (line  18)
 * C-c C-e x:                             XOXO export.         (line  10)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
@@ -7738,7 +8011,7 @@ Key Index
                                                               (line  72)
 * M-<right>:                             Structure editing.   (line  24)
 * M-<TAB> <1>:                           Completion.          (line  10)
-* M-<TAB> <2>:                           Property syntax.     (line  38)
+* M-<TAB> <2>:                           Property syntax.     (line  46)
 * M-<TAB> <3>:                           Setting tags.        (line   6)
 * M-<TAB> <4>:                           Per file keywords.   (line  23)
 * M-<TAB>:                               Editing and debugging formulas.
@@ -7808,7 +8081,7 @@ Key Index
                                                               (line  42)
 * S-<left> <3>:                          Creating timestamps. (line  35)
 * S-<left> <4>:                          Using column view.   (line  26)
-* S-<left> <5>:                          Property syntax.     (line  54)
+* S-<left> <5>:                          Property syntax.     (line  62)
 * S-<left> <6>:                          Multiple sets in one file.
                                                               (line  29)
 * S-<left> <7>:                          TODO basics.         (line  20)
@@ -7821,7 +8094,7 @@ Key Index
                                                               (line  39)
 * S-<right> <3>:                         Creating timestamps. (line  35)
 * S-<right> <4>:                         Using column view.   (line  26)
-* S-<right> <5>:                         Property syntax.     (line  54)
+* S-<right> <5>:                         Property syntax.     (line  62)
 * S-<right> <6>:                         Multiple sets in one file.
                                                               (line  29)
 * S-<right> <7>:                         TODO basics.         (line  20)
@@ -7853,207 +8126,213 @@ Key Index
 
 Tag Table:
 Node: Top970
-Node: Introduction12513
-Node: Summary12928
-Node: Installation16080
-Node: Activation17458
-Node: Feedback18709
-Node: Document structure20785
-Node: Outlines21677
-Node: Headlines22337
-Ref: Headlines-Footnote-123345
-Node: Visibility cycling23456
-Ref: Visibility cycling-Footnote-125666
-Ref: Visibility cycling-Footnote-225724
-Ref: Visibility cycling-Footnote-325774
-Node: Motion26044
-Node: Structure editing26998
-Node: Archiving29824
-Node: ARCHIVE tag30382
-Node: Moving subtrees32175
-Node: Sparse trees33486
-Ref: Sparse trees-Footnote-135618
-Ref: Sparse trees-Footnote-235800
-Node: Plain lists35915
-Ref: Plain lists-Footnote-140112
-Ref: Plain lists-Footnote-240470
-Node: Drawers40651
-Node: orgstruct-mode41489
-Node: Tables42389
-Node: Built-in table editor42970
-Node: Narrow columns50209
-Ref: Narrow columns-Footnote-152144
-Node: Column groups52190
-Node: orgtbl-mode53723
-Node: The spreadsheet54526
-Node: References55613
-Ref: References-Footnote-160077
-Node: Formula syntax for Calc60366
-Node: Formula syntax for Lisp62823
-Node: Field formulas64541
-Node: Column formulas65849
-Node: Editing and debugging formulas67448
-Node: Updating the table71601
-Node: Advanced features72636
-Node: Hyperlinks77161
-Node: Link format77934
-Node: Internal links79227
-Ref: Internal links-Footnote-181152
-Node: Radio targets81287
-Node: External links81978
-Node: Handling links84382
-Ref: Handling links-Footnote-189669
-Ref: Handling links-Footnote-289906
-Node: Link abbreviations89980
-Node: Search options91659
-Ref: Search options-Footnote-193439
-Node: Custom searches93520
-Node: Remember94568
-Node: Setting up remember95555
-Node: Remember templates96137
-Ref: Remember templates-Footnote-199583
-Node: Storing notes99681
-Node: TODO items101568
-Node: TODO basics102545
-Node: TODO extensions104309
-Node: Workflow states105128
-Ref: Workflow states-Footnote-1106303
-Node: TODO types106396
-Ref: TODO types-Footnote-1107979
-Node: Multiple sets in one file108061
-Node: Per file keywords109672
-Ref: Per file keywords-Footnote-1110961
-Node: Priorities111162
-Node: Breaking down tasks112772
-Ref: Breaking down tasks-Footnote-1113292
-Node: Checkboxes113388
-Node: Tags116237
-Node: Tag inheritance117009
-Node: Setting tags117946
-Ref: Setting tags-Footnote-1122469
-Ref: Setting tags-Footnote-2122581
-Node: Tag searches122664
-Node: Properties and columns125381
-Node: Property syntax126486
-Node: Special properties128646
-Node: Property searches129562
-Node: Column view130217
-Node: Defining columns131384
-Node: Scope of column definitions131782
-Node: Column attributes132704
-Node: Using column view134952
-Node: Property API136939
-Node: Timestamps137293
-Node: Time stamps137754
-Ref: Time stamps-Footnote-1140182
-Node: Creating timestamps140298
-Node: The date/time prompt142372
-Ref: The date/time prompt-Footnote-1144360
-Node: Custom time format144466
-Node: Deadlines and scheduling146158
-Ref: Deadlines and scheduling-Footnote-1147508
-Node: Inserting deadline/schedule147663
-Node: Repeated tasks148601
-Node: Progress logging150240
-Node: Closing items150895
-Ref: Closing items-Footnote-1151829
-Ref: Closing items-Footnote-2151898
-Node: Tracking TODO state changes151971
-Node: Clocking work time152827
-Ref: Clocking work time-Footnote-1156473
-Ref: Clocking work time-Footnote-2156551
-Node: Agenda views156677
-Node: Agenda files158628
-Ref: Agenda files-Footnote-1159594
-Ref: Agenda files-Footnote-2159743
-Node: Agenda dispatcher159936
-Node: Built-in agenda views161633
-Node: Weekly/Daily agenda162213
-Node: Global TODO list165155
-Node: Matching tags and properties167433
-Node: Timeline168522
-Node: Stuck projects169194
-Node: Presentation and sorting171045
-Node: Categories171836
-Node: Time-of-day specifications172500
-Node: Sorting of agenda items174471
-Node: Agenda commands175753
-Node: Custom agenda views183034
-Node: Storing searches183753
-Node: Block agenda185665
-Node: Setting Options186895
-Node: Exporting Agenda Views189634
-Ref: Exporting Agenda Views-Footnote-1193918
-Ref: Exporting Agenda Views-Footnote-2193975
-Node: Extracting Agenda Information for other programs194161
-Node: Embedded LaTeX198287
-Ref: Embedded LaTeX-Footnote-1199381
-Node: Math symbols199571
-Node: Subscripts and Superscripts200338
-Node: LaTeX fragments201184
-Ref: LaTeX fragments-Footnote-1203420
-Node: Processing LaTeX fragments203682
-Node: CDLaTeX mode204630
-Ref: CDLaTeX mode-Footnote-1207116
-Node: Exporting207264
-Node: ASCII export208578
-Node: HTML export209868
-Node: Export commands210487
-Node: Quoting HTML tags211731
-Node: Links212361
-Node: Images213058
-Ref: Images-Footnote-1213929
-Node: CSS support213990
-Ref: CSS support-Footnote-1215309
-Node: XOXO export215422
-Node: iCalendar export215861
-Node: Text interpretation217080
-Node: Comment lines217671
-Node: Initial text218066
-Node: Footnotes219735
-Node: Enhancing text220550
-Ref: Enhancing text-Footnote-1222409
-Node: Export options222499
-Node: Publishing224621
-Ref: Publishing-Footnote-1225417
-Node: Configuration225561
-Node: Project alist226279
-Node: Sources and destinations227345
-Node: Selecting files228075
-Node: Publishing action228823
-Node: Publishing options230056
-Node: Publishing links232208
-Node: Project page index233721
-Node: Sample configuration234499
-Node: Simple example234991
-Node: Complex example235664
-Node: Triggering publication237740
-Node: Miscellaneous238425
-Node: Completion239059
-Node: Customization240729
-Node: In-buffer settings241312
-Node: The very busy C-c C-c key246651
-Node: Clean view248412
-Node: TTY keys250989
-Node: Interaction252599
-Node: Cooperation252996
-Node: Conflicts255872
-Node: Bugs257875
-Node: Extensions and Hacking259371
-Node: Extensions260042
-Node: Tables in arbitrary syntax261989
-Node: Radio tables263066
-Node: A LaTeX example265569
-Ref: A LaTeX example-Footnote-1269215
-Ref: A LaTeX example-Footnote-2269363
-Node: Translator functions269798
-Ref: Translator functions-Footnote-1272907
-Node: Dynamic blocks272995
-Node: Special agenda views274967
-Ref: Special agenda views-Footnote-1277277
-Node: Using the property API277537
-Node: History and Acknowledgments279018
-Node: Index285402
-Node: Key Index319294
+Node: Introduction12966
+Node: Summary13381
+Node: Installation16533
+Node: Activation17911
+Node: Feedback19162
+Node: Document structure21238
+Node: Outlines22130
+Node: Headlines22795
+Ref: Headlines-Footnote-123799
+Node: Visibility cycling23910
+Ref: Visibility cycling-Footnote-126120
+Ref: Visibility cycling-Footnote-226178
+Ref: Visibility cycling-Footnote-326228
+Node: Motion26498
+Node: Structure editing27452
+Node: Archiving30278
+Node: ARCHIVE tag30836
+Node: Moving subtrees32629
+Node: Sparse trees33940
+Ref: Sparse trees-Footnote-136072
+Ref: Sparse trees-Footnote-236254
+Node: Plain lists36369
+Ref: Plain lists-Footnote-140566
+Ref: Plain lists-Footnote-240924
+Node: Drawers41105
+Node: orgstruct-mode41943
+Node: Tables42843
+Node: Built-in table editor43424
+Node: Narrow columns50669
+Ref: Narrow columns-Footnote-152604
+Node: Column groups52650
+Node: orgtbl-mode54183
+Node: The spreadsheet54986
+Node: References56073
+Ref: References-Footnote-160537
+Node: Formula syntax for Calc60826
+Node: Formula syntax for Lisp63283
+Node: Field formulas65001
+Node: Column formulas66309
+Node: Editing and debugging formulas67908
+Node: Updating the table72061
+Node: Advanced features73096
+Node: Hyperlinks77621
+Node: Link format78459
+Node: Internal links79752
+Ref: Internal links-Footnote-181677
+Node: Radio targets81812
+Node: External links82503
+Node: Handling links84907
+Ref: Handling links-Footnote-190204
+Ref: Handling links-Footnote-290441
+Node: Using links outside Org-mode90515
+Node: Link abbreviations91041
+Node: Search options92734
+Ref: Search options-Footnote-194514
+Node: Custom searches94595
+Node: Remember95643
+Node: Setting up remember96630
+Node: Remember templates97212
+Ref: Remember templates-Footnote-1100658
+Node: Storing notes100756
+Node: TODO items102643
+Node: TODO basics103620
+Node: TODO extensions105384
+Node: Workflow states106203
+Ref: Workflow states-Footnote-1107378
+Node: TODO types107471
+Ref: TODO types-Footnote-1109054
+Node: Multiple sets in one file109136
+Node: Per file keywords110747
+Ref: Per file keywords-Footnote-1112036
+Node: Priorities112237
+Node: Breaking down tasks113847
+Ref: Breaking down tasks-Footnote-1114367
+Node: Checkboxes114463
+Node: Tags117312
+Node: Tag inheritance118084
+Node: Setting tags119021
+Ref: Setting tags-Footnote-1123544
+Ref: Setting tags-Footnote-2123656
+Node: Tag searches123739
+Node: Properties and columns126456
+Node: Property syntax127561
+Node: Special properties129982
+Node: Property searches130898
+Node: Column view131553
+Node: Defining columns132720
+Node: Scope of column definitions133118
+Node: Column attributes134040
+Node: Using column view136288
+Node: Property API138275
+Node: Timestamps138629
+Node: Time stamps139090
+Ref: Time stamps-Footnote-1141518
+Node: Creating timestamps141634
+Node: The date/time prompt143708
+Ref: The date/time prompt-Footnote-1145696
+Node: Custom time format145802
+Node: Deadlines and scheduling147494
+Ref: Deadlines and scheduling-Footnote-1149114
+Node: Inserting deadline/schedule149269
+Node: Repeated tasks150207
+Node: Progress logging151846
+Node: Closing items152501
+Ref: Closing items-Footnote-1153435
+Ref: Closing items-Footnote-2153504
+Node: Tracking TODO state changes153577
+Node: Clocking work time154433
+Ref: Clocking work time-Footnote-1158079
+Ref: Clocking work time-Footnote-2158157
+Node: Agenda views158283
+Node: Agenda files160234
+Ref: Agenda files-Footnote-1161200
+Ref: Agenda files-Footnote-2161349
+Node: Agenda dispatcher161542
+Node: Built-in agenda views163239
+Node: Weekly/Daily agenda163819
+Node: Global TODO list166761
+Node: Matching tags and properties169039
+Node: Timeline170128
+Node: Stuck projects170800
+Node: Presentation and sorting172651
+Node: Categories173442
+Node: Time-of-day specifications174106
+Node: Sorting of agenda items176077
+Node: Agenda commands177359
+Node: Custom agenda views184640
+Node: Storing searches185359
+Node: Block agenda187271
+Node: Setting Options188501
+Node: Exporting Agenda Views191240
+Ref: Exporting Agenda Views-Footnote-1195524
+Ref: Exporting Agenda Views-Footnote-2195581
+Node: Extracting Agenda Information for other programs195767
+Node: Embedded LaTeX199893
+Ref: Embedded LaTeX-Footnote-1200987
+Node: Math symbols201177
+Node: Subscripts and Superscripts201944
+Node: LaTeX fragments202790
+Ref: LaTeX fragments-Footnote-1205023
+Ref: LaTeX fragments-Footnote-2205284
+Node: Processing LaTeX fragments205418
+Node: CDLaTeX mode206366
+Ref: CDLaTeX mode-Footnote-1208852
+Node: Exporting209000
+Node: ASCII export210467
+Node: HTML export211757
+Node: HTML Export commands212383
+Node: Quoting HTML tags213751
+Node: Links214386
+Node: Images215083
+Ref: Images-Footnote-1215954
+Node: CSS support216015
+Ref: CSS support-Footnote-1217334
+Node: LaTeX export217447
+Node: LaTeX export commands217771
+Node: Quoting LaTeX code218933
+Node: XOXO export219438
+Node: iCalendar export219878
+Node: Text interpretation221097
+Node: Comment lines221688
+Node: Initial text222083
+Node: Footnotes223752
+Node: Enhancing text224567
+Ref: Enhancing text-Footnote-1226436
+Node: Export options226526
+Node: Publishing228802
+Ref: Publishing-Footnote-1229763
+Ref: Publishing-Footnote-2229907
+Node: Configuration230058
+Node: Project alist230776
+Node: Sources and destinations231842
+Node: Selecting files232572
+Node: Publishing action233320
+Node: Publishing options234654
+Node: Publishing links237029
+Node: Project page index238542
+Node: Sample configuration239320
+Node: Simple example239812
+Node: Complex example240485
+Node: Triggering publication242561
+Node: Miscellaneous243246
+Node: Completion243880
+Node: Customization245550
+Node: In-buffer settings246133
+Node: The very busy C-c C-c key251660
+Node: Clean view253421
+Node: TTY keys255998
+Node: Interaction257608
+Node: Cooperation258005
+Node: Conflicts260881
+Node: Bugs262884
+Node: Extensions and Hacking264380
+Node: Extensions265105
+Node: Adding hyperlink types267048
+Node: Tables in arbitrary syntax270710
+Node: Radio tables271799
+Node: A LaTeX example274302
+Ref: A LaTeX example-Footnote-1277948
+Ref: A LaTeX example-Footnote-2278096
+Node: Translator functions278531
+Ref: Translator functions-Footnote-1281640
+Node: Dynamic blocks281728
+Node: Special agenda views283700
+Node: Using the property API286878
+Node: History and Acknowledgments288359
+Node: Index294935
+Node: Key Index329427
 
 End Tag Table

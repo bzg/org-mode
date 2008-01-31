@@ -454,6 +454,27 @@ FILENAME is the filename of the org file to be published."
       (kill-buffer (current-buffer)))))
 
 
+(defun org-publish-org-to-latex (plist filename)
+  "Publish an org file to LaTeX."
+  (org-publish-org-to "latex" plist filename))
+
+(defun org-publish-org-to-html (plist filename)
+  "Publish an org file to HTML."
+  (org-publish-org-to "html" plist filename))
+
+(defun org-publish-org-to (format plist filename)
+  "Publish an org file to FORMAT.
+PLIST is the property list for the given project.
+FILENAME is the filename of the org file to be published."
+  (require 'org)
+  (let* ((arg (plist-get plist :headline-levels)))
+    (progn
+      (find-file filename)
+      (funcall (intern (concat "org-export-as-" format))
+	       arg nil plist)
+      (kill-buffer (current-buffer)))))
+
+
 (defun org-publish-attachment (plist filename)
   "Publish a file with no transformation of any kind.
 PLIST is the property list for the given project.
