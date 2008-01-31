@@ -1,4 +1,11 @@
-The is a distribution of org-mode
+The is a distribution of Org-mode, a plain text notes and project planning
+tool for Emacs.
 
-The homepage of org-mode is at http://www.astro.uva.nl/~domnik/Tools/org/
+The homepage of Org-mode is at http://www.astro.uva.nl/~domnik/Tools/org/
 
+The manual is in the file org.pdf, it includes a section about installation.
+
+The xemacs directory contains special code for XEmacs users, in particular
+a port of the GNU Emacs outline.el to XEmacs.  Org-mode does not work
+under XEmacs without this file installed.  It did until version 4.37,
+but no longer.

@@ -1,12 +1,12 @@
 ;;; org-publish.el --- publish related org-mode files as a website
 
-;; Copyright (C) 2006  David O'Toole
+;; Copyright (C) 2006  Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
-;; Version: 
+;; Version:
 
-;; $Id: org-publish.el,v 1.67 2006/05/30 10:44:31 dto Exp dto $
+;; $Id: org-publish.el,v 1.73 2006/06/15 12:43:48 dto Exp $
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
-;; This file is NOT part of GNU Emacs. 
-
 ;;; Commentary:
 
 ;; Requires at least version 4.27 of org.el
@@ -39,7 +37,7 @@
 ;; to allow configurable publishing of related sets of files as a
 ;; complete website.
 ;;
-;; org-publish.el can do the following: 
+;; org-publish.el can do the following:
 ;;
 ;; + Publish all one's org-files to html
 ;; + Upload html, images, attachments and other files to a web server
@@ -51,7 +49,7 @@
 ;; Special thanks to the org-mode maintainer Carsten Dominik for his
 ;; ideas, enthusiasm, and cooperation.
 
-;;; Installation: 
+;;; Installation:
 
 ;; Put org-publish.el in your load path, byte-compile it, and then add
 ;; the following lines to your emacs initialization file:
@@ -65,13 +63,13 @@
 ;; already in the file org-install.el, and hence don't need to be put
 ;; in your emacs initialization file in this case.
 
-;;; Usage: 
+;;; Usage:
 ;;
 ;; The program's main configuration variable is
 ;; `org-publish-project-alist'. See below for example configurations
 ;; with commentary.
 
-;; The main interactive functions are: 
+;; The main interactive functions are:
 ;;
 ;; M-x org-publish
 ;; M-x org-publish-all
@@ -81,7 +79,7 @@
 ;;;; Simple example configuration:
 
 ;; (setq org-publish-project-alist
-;;       (list 
+;;       (list
 ;;        '("org" . (:base-directory "~/org/"
 ;; 		     :base-extension "org"
 ;; 		     :publishing-directory "~/public_html"
@@ -103,10 +101,10 @@
 ;; following example configuration to your specific paths, run M-x
 ;; org-publish-all, and it should publish the files to the correct
 ;; directories on the web server, transforming the *.org files into
-;; HTML, and leaving other files alone.  
+;; HTML, and leaving other files alone.
 
 ;; (setq org-publish-project-alist
-;;       (list 
+;;       (list
 ;;        '("orgfiles" :base-directory "~/org/"
 ;; 		       :base-extension "org"
 ;; 		       :publishing-directory "/ssh:user@host:~/html/notebook/"
@@ -118,12 +116,12 @@
 ;; 		       :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">"
 ;; 		       :auto-preamble t
 ;; 		       :auto-postamble nil)
-;;      
+;;
 ;;         ("images" :base-directory "~/images/"
 ;; 	             :base-extension "jpg\\|gif\\|png"
 ;; 		     :publishing-directory "/ssh:user@host:~/html/images/"
 ;; 		     :publishing-function org-publish-attachment)
-;;  
+;;
 ;;         ("other"  :base-directory "~/other/"
 ;; 	   	     :base-extension "css"
 ;; 		     :publishing-directory "/ssh:user@host:~/html/other/"
@@ -140,13 +138,13 @@
 
 ;;; List of user-visible changes since version 1.27
 
-;; 1.65: Remove old "composite projects". They're redundant. 
+;; 1.65: Remove old "composite projects". They're redundant.
 ;; 1.64: Allow meta-projects with :components
 ;; 1.57: Timestamps flag is now called "org-publish-use-timestamps-flag"
 ;; 1.52: Properly set default for :index-filename
 ;; 1.48: Composite projects allowed.
 ;;       :include keyword allowed.
-;; 1.43: Index no longer includes itself in the index. 
+;; 1.43: Index no longer includes itself in the index.
 ;; 1.42: Fix "function definition is void" error
 ;;       when :publishing-function not set in org-publish-current-file.
 ;; 1.41: Fixed bug where index isn't published on first try.
@@ -158,7 +156,7 @@
 
 ;;; Code:
 
-(eval-when-compile 
+(eval-when-compile
   (require 'cl))
 
 (defgroup org-publish nil
@@ -167,16 +165,16 @@
    :group 'org)
 
 
-(defcustom org-publish-project-alist nil 
+(defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
 Each element of the alist is a publishing 'project.'  The CAR of
 each element is a string, uniquely identifying the project. The
-CDR of each element is in one of the following forms: 
+CDR of each element is in one of the following forms:
 
   (:property value :property value ... )
 
 OR,
-  
+
   (:components (\"project-1\" \"project-2\" ...))
 
 When the CDR of an element of org-publish-project-alist is in
@@ -191,7 +189,7 @@ setting overrides the value of the corresponding user variable
 override everything.
 
 Most properties are optional, but some should always be set:
-  
+
     :base-directory        Directory containing publishing source files
     :base-extension        Extension (without the dot!) of source files.
                              This can be a regular expression.
@@ -207,7 +205,7 @@ value may be a list of filenames to include. The filenames are
 considered relative to the publishing directory.
 
 When both :include and :exclude properties are given values, the
-exclusion step happens first. 
+exclusion step happens first.
 
 One special property controls which back-end function to use for
 publishing files in the project. This can be used to extend the
@@ -249,29 +247,29 @@ learn more about their use and default values.
 The following properties may be used to control publishing of an
 index of files or summary page for a given project.
 
-    :auto-index            Whether to publish an index during 
+    :auto-index            Whether to publish an index during
                            org-publish-current-project or org-publish-all.
     :index-filename        Filename for output of index. Defaults
                            to 'index.org' (which becomes 'index.html')
     :index-title           Title of index page. Defaults to name of file.
     :index-function        Plugin function to use for generation of index.
-                           Defaults to 'org-publish-org-index', which 
+                           Defaults to 'org-publish-org-index', which
                            generates a plain list of links to all files
-                           in the project. 
+                           in the project.
 "
   :group 'org-publish
   :type 'alist)
 
 
 (defcustom org-publish-use-timestamps-flag t
-  "When non-nil, use timestamp checking to publish only changed files. 
+  "When non-nil, use timestamp checking to publish only changed files.
 When nil, do no timestamp checking and always publish all
 files."
   :group 'org-publish
   :type 'boolean)
 
 
-(defcustom org-publish-timestamp-directory "~/.org-timestamps/" 
+(defcustom org-publish-timestamp-directory "~/.org-timestamps/"
   "Name of directory in which to store publishing timestamps."
   :group 'org-publish
   :type 'string)
@@ -287,8 +285,8 @@ files."
   (concat org-publish-timestamp-directory filename ".timestamp"))
 
 
-(defun org-publish-needed-p (filename) 
-  "Check whether file should be published. 
+(defun org-publish-needed-p (filename)
+  "Check whether file should be published.
 If org-publish-use-timestamps-flag is set to nil, this function always
 returns t. Otherwise, check the timestamps folder to determine
 whether file should be published."
@@ -304,7 +302,7 @@ whether file should be published."
 	;; check timestamp. ok if timestamp file doesn't exist
 	(let* ((timestamp (org-publish-timestamp-filename filename))
 	       (rtn (file-newer-than-file-p filename timestamp)))
-	  (if rtn 
+	  (if rtn
 	      ;; handle new timestamps
 	      (if (not (file-exists-p timestamp))
 		  ;; create file
@@ -321,11 +319,25 @@ whether file should be published."
     (set-file-times timestamp)))
 
 
+;;;; A hash mapping files to project names
+
+
+(defvar org-publish-files (make-hash-table :test 'equal) "Hash
+table mapping file names to project names.")
+
+
+;;;; Checking filenames against this hash
+
+
+(defun org-publish-validate-link (link)
+  (gethash (file-truename link) org-publish-files))
+
+
 ;;;; Getting project information out of org-publish-project-alist
 
 
 (defun org-publish-get-plists (&optional project-name)
-  "Return a list of property lists for project PROJECT-NAME. 
+  "Return a list of property lists for project PROJECT-NAME.
 When argument is not given, return all property lists for all projects."
   (let ((alist (if project-name
 		   (list (assoc project-name org-publish-project-alist))
@@ -333,19 +345,25 @@ When argument is not given, return all property lists for all projects."
 	(project nil)
 	(plists nil)
 	(components nil))
+
+    ;;
+    ;;
     (while (setq project (pop alist))
+      ;; what kind of project is it?
       (if (setq components (plist-get (cdr project) :components))
 	  ;; meta project. annotate each plist with name of enclosing project
-	  (setq plists 
-		(append plists 
-			(mapcar (lambda (p) 
-				  (plist-put p :project-name (car project)))
-				(mapcan 'org-publish-get-plists components))))
+	  (setq plists
+		(append plists
+			(apply 'append
+			       (mapcar 'org-publish-get-plists components))))
 	;; normal project
-	(let ((p (cdr project)))
-	  (setq p (plist-put p :project-name (car project)))
-	  (setq plists (append plists (list (cdr project)))))))
-    ;;
+	(setq plists (append plists (list (cdr project)))))
+      ;;
+      (dolist (p plists)
+	(let* ((exclude (plist-get p :exclude))
+	       (files (org-publish-get-base-files p exclude)))
+	  (dolist (f files)
+	    (puthash (file-truename f) (car project) org-publish-files)))))
     plists))
 
 
@@ -371,8 +389,8 @@ matching filenames."
     ;; include extra files
     (let ((inc nil))
       (while (setq inc (pop include-list))
-	(setq allfiles (cons (concat dir inc) allfiles))))
-    
+	(setq allfiles (cons (expand-file-name inc dir) allfiles))))
+
     allfiles))
 
 
@@ -380,14 +398,8 @@ matching filenames."
   "Figure out which project a given FILENAME belongs to, if any.
 Filename should contain full path. Returns name of project, or
 nil if not found."
-  (let ((found nil))
-    (mapcar 
-     (lambda (plist)
-       (let ((files (org-publish-get-base-files plist)))
-	 (if (member (expand-file-name filename) files)
-	     (setq found (plist-get plist :project-name)))))
-     (org-publish-get-plists))
-    found))
+  (org-publish-get-plists)
+  (gethash (file-truename filename) org-publish-files))
 
 
 (defun org-publish-get-plist-from-filename (filename)
@@ -396,18 +408,19 @@ nil if not found."
     (mapcar
      (lambda (plist)
        (let ((files (org-publish-get-base-files plist)))
-	 (if (member (expand-file-name filename) files)
-             (setq found plist))))
+ 	 (if (member (expand-file-name filename) files)
+	     (setq found plist))))
      (org-publish-get-plists))
     found))
+
 
 
 ;;;; Pluggable publishing back-end functions
 
 
 (defun org-publish-org-to-html (plist filename)
-  "Publish an org file to HTML.  
-PLIST is the property list for the given project. 
+  "Publish an org file to HTML.
+PLIST is the property list for the given project.
 FILENAME is the filename of the org file to be published."
   (require 'org)
   (let* ((arg (plist-get plist :headline-levels)))
@@ -416,14 +429,14 @@ FILENAME is the filename of the org file to be published."
       (org-export-as-html arg nil plist)
       ;; get rid of HTML buffer
       (kill-buffer (current-buffer)))))
-   
+
 
 (defun org-publish-attachment (plist filename)
   "Publish a file with no transformation of any kind.
-PLIST is the property list for the given project. 
+PLIST is the property list for the given project.
 FILENAME is the filename of the file to be published."
   ;; make sure eshell/cp code is loaded
-  (require 'eshell) 
+  (require 'eshell)
   (require 'esh-maint)
   (require 'em-unix)
   (let ((destination (file-name-as-directory (plist-get plist :publishing-directory))))
@@ -450,7 +463,6 @@ FILENAME is the filename of the file to be published."
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
 	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
-	 (buf (current-buffer))
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
@@ -463,14 +475,12 @@ FILENAME is the filename of the file to be published."
 	;; check timestamps
 	(when (org-publish-needed-p f)
 	  (funcall publishing-function plist f)
-	  (org-publish-update-timestamp f))))
-    ;; back to original buffer
-    (switch-to-buffer buf)))
+	  (org-publish-update-timestamp f))))))
 
 
 (defun org-publish-org-index (plist &optional index-filename)
-  "Create an index of pages in set defined by PLIST.  
-Optionally set the filename of the index with INDEX-FILENAME; 
+  "Create an index of pages in set defined by PLIST.
+Optionally set the filename of the index with INDEX-FILENAME;
 default is 'index.org'."
   (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
 	 (exclude-regexp (plist-get plist :exclude))
@@ -483,7 +493,7 @@ default is 'index.org'."
     ;; if buffer is already open, kill it to prevent error message
     (if index-buffer
 	(kill-buffer index-buffer))
-    (with-temp-buffer 
+    (with-temp-buffer
       (while (setq f (pop files))
 	(let ((fn (file-name-nondirectory f)))
 	  (unless (string= fn ifn) ;; index shouldn't index itself
@@ -497,19 +507,21 @@ default is 'index.org'."
 ;(defun org-publish-meta-index (meta-plist &optional index-filename)
 ;  "Create an index for a metaproject."
 ;  (let* ((plists (
-  
- 
+
+
 ;;;; Interactive publishing functions
 
 
 ;;;###autoload
 (defun org-publish (project-name &optional force)
   "Publish the project PROJECT-NAME."
-  (interactive "sProject name: \nP")
+  (interactive (list (completing-read "Project name: " org-publish-project-alist
+				      nil t)
+		     current-prefix-arg))
   (let ((org-publish-use-timestamps-flag (if force nil t))
 	(plists (org-publish-get-plists project-name)))
     (mapcar 'org-publish-plist plists)))
-       
+
 
 ;;;###autoload
 (defun org-publish-current-project (&optional force)
@@ -521,14 +533,14 @@ With prefix argument, force publishing all files in project."
     (if (not project-name)
 	(error (format "File %s is not part of any known project." (buffer-file-name))))
     (org-publish project-name)))
-	
 
-;;;###autoload		      
+
+;;;###autoload
 (defun org-publish-current-file (&optional force)
   "Publish the current file.
 With prefix argument, force publish the file."
   (interactive "P")
-  (let ((org-publish-use-timestamps-flag 
+  (let ((org-publish-use-timestamps-flag
 	 (if force nil t)))
     (org-publish-file (buffer-file-name))))
 
