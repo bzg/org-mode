@@ -105,8 +105,8 @@ org-install.el: $(LISPFILES)
 		--eval '(generate-file-autoloads "org-mouse.el")' \
 		--eval '(generate-file-autoloads "org-publish.el")' \
 		--eval '(generate-file-autoloads "org-export-latex.el")' \
+		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
-	cat < provide.el >> org-install.el
 
 org.elc:		org.el
 

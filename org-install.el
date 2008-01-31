@@ -8,7 +8,7 @@
 ;;;;;;  org-remember-insinuate org-open-at-point-global org-insert-link-global
 ;;;;;;  org-store-link orgtbl-mode turn-on-orgtbl org-run-like-in-org-mode
 ;;;;;;  turn-on-orgstruct++ turn-on-orgstruct orgstruct-mode org-global-cycle
-;;;;;;  org-cycle org-mode) "org" "org.el" (18253 34117))
+;;;;;;  org-cycle org-mode) "org" "org.el" (18255 54993))
 ;;; Generated autoloads from org.el
 
 (autoload (quote org-mode) "org" "\
@@ -452,6 +452,4 @@ without even the egin{document} and nd{document} commands." t nil)
 
 ;;;***
 
-
-(provide 'org-install)
-
+(provide (quote org-install))

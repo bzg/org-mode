@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.15
+;; Version: 5.15a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -77,13 +77,14 @@
 (require 'outline) (require 'noutline)
 ;; Other stuff we need.
 (require 'time-date)
+(unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
 (require 'easymenu)
 
 ;;;; Customization variables
 
 ;;; Version
 
-(defconst org-version "5.15"
+(defconst org-version "5.15a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -3487,7 +3488,7 @@ Changing this variable requires a restart of Emacs to take effect."
   :type 'boolean)
 
 (defcustom org-hide-emphasis-markers nil
-  "Non-nil measn font-lock should hide the emphasis marker characters."
+  "Non-nil mean font-lock should hide the emphasis marker characters."
   :group 'org-font-lock
   :type 'boolean)
 
@@ -4698,6 +4699,10 @@ The following commands are available:
   ;; Comment characters
 ;  (org-set-local 'comment-start "#") ;; FIXME: this breaks wrapping
   (org-set-local 'comment-padding " ")
+
+  ;; Imenu
+  (org-set-local 'imenu-create-index-function
+		 'org-imenu-get-tree)
 
   ;; Make isearch reveal context
   (if (or (featurep 'xemacs)
@@ -12950,7 +12955,14 @@ to be run from that hook to function properly."
 		       (nth 1 entry)
 		     org-default-notes-file))
 	     (headline (nth 2 entry))
-	     (v-c (current-kill 0)) ;; FIXME: protection needed?
+	     (v-c (if (or (and (eq window-system 'x)
+			       (x-cut-buffer-or-selection-value))
+			  (bound-and-true-p x-last-selected-text)
+			  (bound-and-true-p x-last-selected-text-primary))
+		      x-last-selected-text-primary
+		    (if (> (length kill-ring) 0)
+			(current-kill 0)
+		      nil)))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
@@ -17673,8 +17685,8 @@ If necessary, clock-out of the currently active clock."
       (if (and org-clock-heading-function
 	       (functionp org-clock-heading-function))
 	  (setq org-clock-heading (funcall org-clock-heading-function))
-	(if (looking-at org-todo-line-regexp)
-	    (setq org-clock-heading (match-string 3))
+	(if (looking-at org-complex-heading-regexp)
+	    (setq org-clock-heading (match-string 4))
 	  (setq org-clock-heading "???")))
       (setq org-clock-heading (propertize org-clock-heading 'face nil))
       (org-clock-find-position)
@@ -17793,6 +17805,9 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (set-buffer (marker-buffer org-clock-marker))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol)))
+  (setq global-mode-string
+	(delq 'org-mode-line-string global-mode-string))
+  (force-mode-line-update)
   (message "Clock canceled"))
 
 (defun org-clock-goto (&optional delete-windows)
@@ -18549,6 +18564,7 @@ that have been changed along."
 (defvar org-agenda-restrict-begin (make-marker))
 (defvar org-agenda-restrict-end (make-marker))
 (defvar org-agenda-last-dispatch-buffer nil)
+(defvar org-agenda-overriding-restriction nil)
 
 ;;;###autoload
 (defun org-agenda (arg &optional keys restriction)
@@ -18593,11 +18609,12 @@ Pressing `<' twice means to restrict to the current subtree or region
 	   (buf (current-buffer))
 	   (bfn (buffer-file-name (buffer-base-buffer)))
 	   entry key type match lprops ans)
-      ;; Turn off restriction
-      (put 'org-agenda-files 'org-restrict nil)
-      (setq org-agenda-restrict nil)
-      (move-marker org-agenda-restrict-begin nil)
-      (move-marker org-agenda-restrict-end nil)
+      ;; Turn off restriction unless there is an overriding one
+      (unless org-agenda-overriding-restriction
+	(put 'org-agenda-files 'org-restrict nil)
+	(setq org-agenda-restrict nil)
+	(move-marker org-agenda-restrict-begin nil)
+	(move-marker org-agenda-restrict-end nil))
       ;; Delete old local properties
       (put 'org-agenda-redo-command 'org-lprops nil)
       ;; Remember where this call originated
@@ -18607,7 +18624,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	      keys (car ans)
 	      restriction (cdr ans)))
       ;; Estabish the restriction, if any
-      (when restriction
+      (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
 	(cond
 	 ((eq restriction 'region)
@@ -18695,13 +18712,14 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
-"Press key for an agenda command:        <   Buffer,subtree/region restriction
---------------------------------        C   Configure custom agenda commands
+"
+Press key for an agenda command:        <   Buffer,subtree/region restriction
+--------------------------------        >   Remove restriction
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS query                  M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
-/   Multi-occur
+/   Multi-occur                         C   Configure custom agenda commands
 ")
 			(start 0))
 		    (while (string-match
@@ -18773,10 +18791,12 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	      (setq second-time t)
 	      (fit-window-to-buffer)))
 	  (message "Press key for agenda command%s:"
-		   (if restrict-ok
-		       (if restriction
-			   (format " (restricted to %s)" restriction)
-			 " (unrestricted)")
+		   (if (or restrict-ok org-agenda-overriding-restriction)
+		       (if org-agenda-overriding-restriction
+			   " (restriction lock active)"
+			 (if restriction
+			     (format " (restricted to %s)" restriction)
+			   " (unrestricted)"))
 		     ""))
 	  (setq c (read-char-exclusive))
 	  (message "")
@@ -18799,10 +18819,13 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	    (message "Restriction is only possible in Org-mode buffers")
 	    (ding) (sit-for 1))
 	   ((eq c ?1)
+	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction 'buffer))
 	   ((eq c ?0)
+	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction (if region-p 'region 'subtree)))
 	   ((eq c ?<)
+	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction
 		  (cond
 		   ((eq restriction 'buffer)
@@ -18810,6 +18833,9 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		   ((memq restriction '(subtree region))
 		    nil)
 		   (t 'buffer))))
+	   ((eq c ?>)
+	    (org-agenda-remove-restriction-lock 'noupdate)
+	    (setq restriction nil))
 	   ((and (equal selstring "") (memq c '(?a ?t ?m ?L ?C ?e ?T ?M ?# ?/)))
 	    (throw 'exit (cons (setq selstring (char-to-string c)) restriction)))
 	   ((equal c ?q) (error "Abort"))
@@ -26163,6 +26189,7 @@ See the individual commands for more information."
       :style toggle :selected org-log-done])
     "--"
     ["Agenda Command..." org-agenda t]
+    ["Set Restriction Lock" org-agenda-set-restriction-lock t]
     ("File List for Agenda")
     ("Special views current file"
      ["TODO Tree"  org-show-todo-tree t]
@@ -27235,21 +27262,13 @@ variable for the duration of the command."
 				   '(font-lock-multiline t)))))
       rtn)))
 
-(defun org-find-first-timestamp (keyword inactive end)
-  "Return location of first timestamp matching KEYWORD and INACTIVE.
-KEYWORD may be any of the timestamp keywords, or nil.
-INACTIVE means it should be an inactive timestamp.
-If there is no such time stamp, return nil."
-  (catch 'exit
-    (let (key ia)
-      (setq inactive (and inactive t))
-      (while (re-search-forward org-maybe-keyword-time-regexp end t)
-	(setq key (and (match-end 1) (substring (match-string 1) 0 -1))
-	      (equal (char-after (match-beginning 3)) ?\[))
-	(when (and (equal keyword key)
-		   (equal inactive ia))
-	  (throw 'exit (match-beginning 3)))))))
-	
+(defun org-agenda-remove-restriction-lock (&optional noupdate)
+  (setq org-agenda-restrict nil)
+  (put 'org-agenda-files 'org-restrict nil)
+  (move-marker org-agenda-restrict-begin nil)
+  (move-marker org-agenda-restrict-end nil))
+
+
 ;;;; Finish up
 
 (provide 'org)
