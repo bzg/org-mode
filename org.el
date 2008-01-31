@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.19
+;; Version: 5.19a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.19"
+(defconst org-version "5.19a"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -13601,7 +13601,7 @@ See also the variable `org-reverse-note-order'."
 		  (fastp org-default-notes-file)
 		  ((and org-remember-use-refile-when-interactive
 			org-refile-targets)
-		   nil)
+		   org-default-notes-file)
 		  (t (org-get-org-file))))
 	   (heading org-remember-default-headline)
 	   (visiting (and file (org-find-base-buffer-visiting file)))
@@ -13647,7 +13647,7 @@ See also the variable `org-reverse-note-order'."
       (goto-char (point-min))
       (when (and org-remember-use-refile-when-interactive
 		 (not fastp))
-	(org-refile)
+	(org-refile nil (or visiting (find-file-noselect file)))
 	(throw 'quit t))
       ;; Find the file
       (if (not visiting) (find-file-noselect file))
@@ -13776,76 +13776,77 @@ See also the variable `org-reverse-note-order'."
 (defvar org-agenda-new-buffers nil
   "Buffers created to visit agenda files.")
 
-(defun org-get-refile-targets ()
+(defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
 	org-agenda-new-buffers targets txt re files f desc descre)
-    (while (setq entry (pop entries))
-      (setq files (car entry) desc (cdr entry))
-      (cond
-       ((null files) (setq files (list (current-buffer))))
-       ((eq files 'org-agenda-files)
-	(setq files (org-agenda-files 'unrestricted)))
-       ((and (symbolp files) (fboundp files))
-	(setq files (funcall files)))
-       ((and (symbolp files) (boundp files))
-	(setq files (symbol-value files))))
-      (if (stringp files) (setq files (list files)))
-      (cond
-       ((eq (car desc) :tag)
-	(setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
-       ((eq (car desc) :todo)
-	(setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
-       ((eq (car desc) :regexp)
-	(setq descre (cdr desc)))
-       ((eq (car desc) :level)
-	(setq descre (concat "^\\*\\{" (number-to-string
-					(if org-odd-levels-only
-					    (1- (* 2 (cdr desc)))
-					  (cdr desc)))
-			     "\\}[ \t]")))
-       ((eq (car desc) :maxlevel)
-	(setq descre (concat "^\\*\\{1," (number-to-string
-					(if org-odd-levels-only
-					    (1- (* 2 (cdr desc)))
-					  (cdr desc)))
-			     "\\}[ \t]")))
-       (t (error "Bad refiling target description %s" desc)))
-      (while (setq f (pop files))
-	(save-excursion
-	  (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
-	  (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
+    (with-current-buffer (or default-buffer (current-buffer))
+      (while (setq entry (pop entries))
+	(setq files (car entry) desc (cdr entry))
+	(cond
+	 ((null files) (setq files (list (current-buffer))))
+	 ((eq files 'org-agenda-files)
+	  (setq files (org-agenda-files 'unrestricted)))
+	 ((and (symbolp files) (fboundp files))
+	  (setq files (funcall files)))
+	 ((and (symbolp files) (boundp files))
+	  (setq files (symbol-value files))))
+	(if (stringp files) (setq files (list files)))
+	(cond
+	 ((eq (car desc) :tag)
+	  (setq descre (concat "^\\*+[ \t]+.*?:" (regexp-quote (cdr desc)) ":")))
+	 ((eq (car desc) :todo)
+	  (setq descre (concat "^\\*+[ \t]+" (regexp-quote (cdr desc)) "[ \t]")))
+	 ((eq (car desc) :regexp)
+	  (setq descre (cdr desc)))
+	 ((eq (car desc) :level)
+	  (setq descre (concat "^\\*\\{" (number-to-string
+					  (if org-odd-levels-only
+					      (1- (* 2 (cdr desc)))
+					    (cdr desc)))
+			       "\\}[ \t]")))
+	 ((eq (car desc) :maxlevel)
+	  (setq descre (concat "^\\*\\{1," (number-to-string
+					    (if org-odd-levels-only
+						(1- (* 2 (cdr desc)))
+					      (cdr desc)))
+			       "\\}[ \t]")))
+	 (t (error "Bad refiling target description %s" desc)))
+	(while (setq f (pop files))
 	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char (point-min))
-	      (while (re-search-forward descre nil t)
-		(goto-char (point-at-bol))
-		(when (looking-at org-complex-heading-regexp)
-		  (setq txt (match-string 4)
-			re (concat "^" (regexp-quote
-					(buffer-substring (match-beginning 1)
-							  (match-end 4)))))
-		  (if (match-end 5) (setq re (concat re "[ \t]+"
-						     (regexp-quote
-						      (match-string 5)))))
-		  (setq re (concat re "[ \t]*$"))
-		  (when org-refile-use-outline-path
-		    (setq txt (mapconcat 'identity
-					 (append
-					  (if (eq org-refile-use-outline-path 'file)
-					      (list (file-name-nondirectory
-						     (buffer-file-name (buffer-base-buffer))))
-					    (if (eq org-refile-use-outline-path 'full-file-path)
-						(list (buffer-file-name (buffer-base-buffer)))))
-					  (org-get-outline-path)
-					  (list txt))
-					 "/")))
-		  (push (list txt f re (point)) targets))
-		(goto-char (point-at-eol))))))))
-    (org-release-buffers org-agenda-new-buffers)
-    (nreverse targets)))
-
+	    (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
+	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char (point-min))
+		(while (re-search-forward descre nil t)
+		  (goto-char (point-at-bol))
+		  (when (looking-at org-complex-heading-regexp)
+		    (setq txt (match-string 4)
+			  re (concat "^" (regexp-quote
+					  (buffer-substring (match-beginning 1)
+							    (match-end 4)))))
+		    (if (match-end 5) (setq re (concat re "[ \t]+"
+						       (regexp-quote
+							(match-string 5)))))
+		    (setq re (concat re "[ \t]*$"))
+		    (when org-refile-use-outline-path
+		      (setq txt (mapconcat 'identity
+					   (append
+					    (if (eq org-refile-use-outline-path 'file)
+						(list (file-name-nondirectory
+						       (buffer-file-name (buffer-base-buffer))))
+					      (if (eq org-refile-use-outline-path 'full-file-path)
+						  (list (buffer-file-name (buffer-base-buffer)))))
+					    (org-get-outline-path)
+					    (list txt))
+					   "/")))
+		    (push (list txt f re (point)) targets))
+		  (goto-char (point-at-eol))))))))
+      (org-release-buffers org-agenda-new-buffers)
+      (nreverse targets))))
+  
 (defun org-get-outline-path ()
   (let (rtn)
     (save-excursion
@@ -13857,7 +13858,7 @@ See also the variable `org-reverse-note-order'."
 (defvar org-refile-history nil
   "History for refiling operations.")
 
-(defun org-refile (&optional reversed-or-update)
+(defun org-refile (&optional reversed-or-update default-buffer)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.  This list is created upon first use, and
@@ -13871,13 +13872,12 @@ variable for the duration of the command."
   (interactive "P")
   (if (equal reversed-or-update '(16))
       (progn
-	(setq org-refile-target-table (org-get-refile-targets))
+	(setq org-refile-target-table (org-get-refile-targets default-buffer))
 	(message "Refile targets updated (%d targets)"
 		 (length org-refile-target-table)))
     (when (or (not org-refile-target-table)
-	      (and (= (length org-refile-targets) 1)
-		   (not (caar org-refile-targets))))
-      (setq org-refile-target-table (org-get-refile-targets)))
+	      (assq nil org-refile-targets))
+      (setq org-refile-target-table (org-get-refile-targets default-buffer)))
     (unless org-refile-target-table
       (error "No refile targets"))
     (let* ((cbuf (current-buffer))
