@@ -4,8 +4,8 @@
 @c @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.28
-@set DATE April 2006
+@set VERSION 4.29
+@set DATE May 2006
 
 @dircategory Emacs
 @direntry
@@ -119,6 +119,7 @@ Tables
 Calculations in tables
 
 * Formula syntax::              How to write a formula
+* Lisp formulas::               An alternative way to write formulas
 * Column formulas::             Formulas valid for all fields in a column
 * Advanced features::           Field names, parameters and automatic recalc
 * Named-field formulas::        Formulas valid in single fields
@@ -644,9 +645,8 @@ To print a sparse tree, you can use the Emacs command
 @code{ps-print-buffer-with-faces} which does not print invisible parts
 of the document @footnote{This does not work under XEmacs, because
 XEmacs uses selective display for outlining, not text properties.}.
-Or you can use the command @kbd{C-c C-x v} to copy the visible part of
-the document to another file (extension @file{.txt}) which can then be
-printed in any desired way.
+Or you can use the command @kbd{C-c C-x v} to export only the visible
+part of the document and print the resulting file.
 
 
 @node Plain lists,  , Sparse trees, Document structure
@@ -1044,19 +1044,20 @@ on a per-file basis with:
 @cindex spreadsheet capabilities
 @cindex @file{calc} package
 
-The table editor makes use of the Emacs @file{calc} package to
-implement spreadsheet-like capabilities.  Org-mode has two levels of
-complexity for table calculations.  On the basic level, tables do only
-horizontal computations, so a field can be computed from other fields
-@emph{in the same row}, and Org-mode assumes that there is only one
-formula for each column.  This is very efficient to work with and
-enough for many tasks.  On the complex level, columns and individual
-fields can be named for easier referencing in formulas, individual
-named fields can have their own formula associated with them, and
-recalculation can be automated.
+The table editor makes use of the Emacs @file{calc} package to implement
+spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
+derive fields from other fields.  Org-mode has two levels of complexity
+for table calculations.  On the basic level, tables do only horizontal
+computations, so a field can be computed from other fields @emph{in the
+same row}, and Org-mode assumes that there is only one formula for each
+column.  This is very efficient to work with and enough for many tasks.
+On the complex level, columns and individual fields can be named for
+easier referencing in formulas, individual named fields can have their
+own formula associated with them, and recalculation can be automated.
 
 @menu
 * Formula syntax::              How to write a formula
+* Lisp formulas::               An alternative way to write formulas
 * Column formulas::             Formulas valid for all fields in a column
 * Advanced features::           Field names, parameters and automatic recalc
 * Named-field formulas::        Formulas valid in single fields
@@ -1064,7 +1065,7 @@ recalculation can be automated.
 * Appetizer::                   Taste the power of calc
 @end menu
 
-@node Formula syntax, Column formulas, Table calculations, Table calculations
+@node Formula syntax, Lisp formulas, Table calculations, Table calculations
 @subsection Formula syntax
 @cindex formula syntax
 @cindex syntax, of formulas
@@ -1121,20 +1122,38 @@ respectively.  In addition, you may provide a @code{printf} format
 specifier to reformat the final result.  A few examples:
 
 @example
-  $1+$2                @r{Sum of first and second field}
-  $1+$2;%.2f           @r{Same, format result to two decimals}
-  exp($2)+exp($1)      @r{Math functions can be used}
-  $;%.1f               @r{Reformat current cell to 1 decimal}
-  ($3-32)*5/9          @r{Degrees F -> C conversion}
-  $c/$1/$cm            @r{Hz -> cm conversion, using @file{constants.el}}
-  tan($1);Dp3s1        @r{Compute in degrees, precision 3, display SCI 1}
-  sin($1);Dp3%.1e      @r{Same, but use printf specifier for display}
-  vmean($2..$7)        @r{Compute column range mean, using vector function}
-  vsum(&III)           @r{Sum numbers from 3rd hline above, up to here}
-  taylor($3,x=7,2)     @r{taylor series of $3, at x=7, second degree}
+$1+$2                @r{Sum of first and second field}
+$1+$2;%.2f           @r{Same, format result to two decimals}
+exp($2)+exp($1)      @r{Math functions can be used}
+$;%.1f               @r{Reformat current cell to 1 decimal}
+($3-32)*5/9          @r{Degrees F -> C conversion}
+$c/$1/$cm            @r{Hz -> cm conversion, using @file{constants.el}}
+tan($1);Dp3s1        @r{Compute in degrees, precision 3, display SCI 1}
+sin($1);Dp3%.1e      @r{Same, but use printf specifier for display}
+vmean($2..$7)        @r{Compute column range mean, using vector function}
+vsum(&III)           @r{Sum numbers from 3rd hline above, up to here}
+taylor($3,x=7,2)     @r{taylor series of $3, at x=7, second degree}
 @end example
 
-@node Column formulas, Advanced features, Formula syntax, Table calculations
+@node Lisp formulas, Column formulas, Formula syntax, Table calculations
+@subsection Emacs Lisp forms as formulas
+@cindex Lisp forms, as table fomulas
+
+It is also possible to write a formula in Emacs lisp, this can be useful
+for string manipulation and control structures.  If a formula starts
+with a single quote followed by an opening parenthesis, then it is
+evaluated as a lisp form.  The evaluation should return either a string
+or a number.  Just like with @file{calc} formulas, you can provide a
+format specifier after a semicolon.  A few examples:
+
+@example
+@r{swap the first two characters of the content of column 1}
+'(concat (substring "$1" 1 2) (substring "$1" 0 1) (substring "$1" 2))
+@r{Add columns 1 and 2, equivalent to the calc's @code{$1+$2}}
+'(+ $1 $2)
+@end example
+
+@node Column formulas, Advanced features, Lisp formulas, Table calculations
 @subsection Column formulas
 @cindex column formula
 @cindex formula, for table column
@@ -2878,6 +2897,14 @@ key for this.
 @itemx S-@key{down}
 Decrease the priority of the current item.
 
+@kindex C-c C-s
+@item C-c C-s
+Schedule this item
+
+@kindex C-c C-d
+@item C-c C-d
+Set a deadline for this item.
+
 @kindex S-@key{right}
 @item S-@key{right}
 Change the time stamp associated with the current line by one day into
@@ -2993,6 +3020,9 @@ Export as ASCII file.  If there is an active region, only the region
 will be exported.  For an org file @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
 warning.
+@kindex C-c C-x v a
+@item C-c C-x v a
+Export only the visible part of the document.
 @end table
 
 @cindex headline levels, for exporting
@@ -3026,6 +3056,11 @@ Export as HTML file @file{myfile.html}.
 @kindex C-c C-x b
 @item C-c C-x b
 Export as HTML file and open it with a browser.
+@kindex C-c C-x v h
+@kindex C-c C-x v b
+@item C-c C-x v h
+@item C-c C-x v b
+Export only the visible part of the document.
 @end table
 
 @cindex headline levels, for exporting
@@ -3083,6 +3118,9 @@ does not interpret any additional Org-mode features.
 @kindex C-c C-x C-x
 @item C-c C-x C-x
 Export as XML file @file{myfile.xml}.
+@kindex C-c C-x v
+@item C-c C-x v x
+Export only the visible part of the document.
 @end table
 
 @node iCalendar export, Text interpretation, XML export, Exporting
@@ -3919,6 +3957,9 @@ Remember.
 Pavel Chalmoviansky influenced the agenda treatment of items with
 specified time.
 @item
+Gregory Chenov patched support for lisp forms into table calculations
+and improved XEmacs compatibility.
+@item
 Sacha Chua suggested to copy some linking code from Planner.
 @item
 Kees Dullemond inspired the use of narrowed tabled columns.
@@ -3926,7 +3967,7 @@ Kees Dullemond inspired the use of narrowed tabled columns.
 Christian Egli converted the documentation into TeXInfo format, patched
 CSS formatting into the HTML exporter, and inspired the agenda.
 @item
-Nic Ferrier contributed mailcap and XML support.
+Nic Ferrier contributed mailcap and XOXO support.
 @item
 Kai Grossjohann pointed out key-binding conflicts caused by Org-mode.
 @item
@@ -3941,6 +3982,8 @@ Scott Otterson sparked the introduction of descriptive text for links,
 among other things.
 @item
 Pete Phillips helped the development of the TAGS feature.
+@item
+T.V. Raman reported bugs and suggested improvements.
 @item
 Matthias Rempe (Oelde) provided ideas, Windows support, and quality
 control.
@@ -3957,6 +4000,9 @@ things.
 @item
 Linking to VM/BBDB/GNUS was inspired by Tom Shannon's
 @file{organizer-mode.el}.
+@item
+David O'Toole wrote @file{org-publish.el} and came up with lots is ideas
+for small changes.
 @item
 J@"urgen Vollmer contributed code generating the table of contents
 in HTML output.

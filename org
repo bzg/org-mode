@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).	outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.28).
+   This manual is for Org-mode (version 4.29).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.28).
+This manual is for Org-mode (version 4.29).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -88,6 +88,7 @@ Tables
 Calculations in tables
 
 * Formula syntax::              How to write a formula
+* Lisp formulas::               An alternative way to write formulas
 * Column formulas::             Formulas valid for all fields in a column
 * Advanced features::           Field names, parameters and automatic recalc
 * Named-field formulas::        Formulas valid in single fields
@@ -540,9 +541,8 @@ C-v' creates a sparse TODO tree (*note TODO basics::).
 
    To print a sparse tree, you can use the Emacs command
 `ps-print-buffer-with-faces' which does not print invisible parts of
-the document (2).  Or you can use the command `C-c C-x v' to copy the
-visible part of the document to another file (extension `.txt') which
-can then be printed in any desired way.
+the document (2).  Or you can use the command `C-c C-x v' to export
+only the visible part of the document and print the resulting file.
 
    ---------- Footnotes ----------
 
@@ -916,7 +916,8 @@ File: org,  Node: Table calculations,  Next: orgtbl-mode,  Prev: Narrow columns,
 ==========================
 
 The table editor makes use of the Emacs `calc' package to implement
-spreadsheet-like capabilities.  Org-mode has two levels of complexity
+spreadsheet-like capabilities.  It can also evaluate Emacs Lisp forms to
+derive fields from other fields.  Org-mode has two levels of complexity
 for table calculations.  On the basic level, tables do only horizontal
 computations, so a field can be computed from other fields _in the same
 row_, and Org-mode assumes that there is only one formula for each
@@ -928,6 +929,7 @@ own formula associated with them, and recalculation can be automated.
 * Menu:
 
 * Formula syntax::              How to write a formula
+* Lisp formulas::               An alternative way to write formulas
 * Column formulas::             Formulas valid for all fields in a column
 * Advanced features::           Field names, parameters and automatic recalc
 * Named-field formulas::        Formulas valid in single fields
@@ -935,7 +937,7 @@ own formula associated with them, and recalculation can be automated.
 * Appetizer::                   Taste the power of calc
 
 
-File: org,  Node: Formula syntax,  Next: Column formulas,  Prev: Table calculations,  Up: Table calculations
+File: org,  Node: Formula syntax,  Next: Lisp formulas,  Prev: Table calculations,  Up: Table calculations
 
 3.3.1 Formula syntax
 --------------------
@@ -977,17 +979,17 @@ turn on degrees, radians, fraction and symbolic modes, respectively.
 In addition, you may provide a `printf' format specifier to reformat
 the final result.  A few examples:
 
-       $1+$2                Sum of first and second field
-       $1+$2;%.2f           Same, format result to two decimals
-       exp($2)+exp($1)      Math functions can be used
-       $;%.1f               Reformat current cell to 1 decimal
-       ($3-32)*5/9          Degrees F -> C conversion
-       $c/$1/$cm            Hz -> cm conversion, using `constants.el'
-       tan($1);Dp3s1        Compute in degrees, precision 3, display SCI 1
-       sin($1);Dp3%.1e      Same, but use printf specifier for display
-       vmean($2..$7)        Compute column range mean, using vector function
-       vsum(&III)           Sum numbers from 3rd hline above, up to here
-       taylor($3,x=7,2)     taylor series of $3, at x=7, second degree
+     $1+$2                Sum of first and second field
+     $1+$2;%.2f           Same, format result to two decimals
+     exp($2)+exp($1)      Math functions can be used
+     $;%.1f               Reformat current cell to 1 decimal
+     ($3-32)*5/9          Degrees F -> C conversion
+     $c/$1/$cm            Hz -> cm conversion, using `constants.el'
+     tan($1);Dp3s1        Compute in degrees, precision 3, display SCI 1
+     sin($1);Dp3%.1e      Same, but use printf specifier for display
+     vmean($2..$7)        Compute column range mean, using vector function
+     vsum(&III)           Sum numbers from 3rd hline above, up to here
+     taylor($3,x=7,2)     taylor series of $3, at x=7, second degree
 
    ---------- Footnotes ----------
 
@@ -998,9 +1000,27 @@ The default settings can be configured using the variable
 `org-calc-default-modes'.
 
 
-File: org,  Node: Column formulas,  Next: Advanced features,  Prev: Formula syntax,  Up: Table calculations
+File: org,  Node: Lisp formulas,  Next: Column formulas,  Prev: Formula syntax,  Up: Table calculations
 
-3.3.2 Column formulas
+3.3.2 Emacs Lisp forms as formulas
+----------------------------------
+
+It is also possible to write a formula in Emacs lisp, this can be useful
+for string manipulation and control structures.  If a formula starts
+with a single quote followed by an opening parenthesis, then it is
+evaluated as a lisp form.  The evaluation should return either a string
+or a number.  Just like with `calc' formulas, you can provide a format
+specifier after a semicolon.  A few examples:
+
+     swap the first two characters of the content of column 1
+     '(concat (substring "$1" 1 2) (substring "$1" 0 1) (substring "$1" 2))
+     Add columns 1 and 2, equivalent to the calc's `$1+$2'
+     '(+ $1 $2)
+
+
+File: org,  Node: Column formulas,  Next: Advanced features,  Prev: Lisp formulas,  Up: Table calculations
+
+3.3.3 Column formulas
 ---------------------
 
 To apply a formula to a field, type it directly into the field,
@@ -1035,7 +1055,7 @@ separator line, assuming that this is the table header.
 
 File: org,  Node: Advanced features,  Next: Named-field formulas,  Prev: Column formulas,  Up: Table calculations
 
-3.3.3 Advanced features
+3.3.4 Advanced features
 -----------------------
 
 If you want the recalculation of fields to happen automatically, or if
@@ -1108,7 +1128,7 @@ with empty first field.
 
 File: org,  Node: Named-field formulas,  Next: Editing/debugging formulas,  Prev: Advanced features,  Up: Table calculations
 
-3.3.4 Named-field formulas
+3.3.5 Named-field formulas
 --------------------------
 
 A named field can have its own formula associated with it.  In the
@@ -1122,7 +1142,7 @@ line) will also update all named field formulas.
 
 File: org,  Node: Editing/debugging formulas,  Next: Appetizer,  Prev: Named-field formulas,  Up: Table calculations
 
-3.3.5 Editing and debugging formulas
+3.3.6 Editing and debugging formulas
 ------------------------------------
 
 To edit a column or field formula, use the commands `C-c =' and `C-u
@@ -1158,7 +1178,7 @@ will be displayed.
 
 File: org,  Node: Appetizer,  Prev: Editing/debugging formulas,  Up: Table calculations
 
-3.3.6 Appetizer
+3.3.7 Appetizer
 ---------------
 
 Finally, just to wet your appetite on what can be done with the
@@ -2597,6 +2617,12 @@ Remote editing
 `S-<down>'
      Decrease the priority of the current item.
 
+`C-c C-s'
+     Schedule this item
+
+`C-c C-d'
+     Set a deadline for this item.
+
 `S-<right>'
      Change the time stamp associated with the current line by one day
      into the future.  With prefix argument, change it by that many
@@ -2702,7 +2728,10 @@ file.
      Export as ASCII file.  If there is an active region, only the
      region will be exported.  For an org file `myfile.org', the ASCII
      file will be `myfile.txt'.  The file will be overwritten without
-     warning.
+     warning.  
+
+`C-c C-x v a'
+     Export only the visible part of the document.
 
    In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
@@ -2728,7 +2757,12 @@ support for tables.
      Export as HTML file `myfile.html'.  
 
 `C-c C-x b'
-     Export as HTML file and open it with a browser.
+     Export as HTML file and open it with a browser.  
+
+`C-c C-x v h'
+
+`C-c C-x v b'
+     Export only the visible part of the document.
 
    In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
@@ -2775,7 +2809,10 @@ Currently, this exporter only handles the general outline structure and
 does not interpret any additional Org-mode features.
 
 `C-c C-x C-x'
-     Export as XML file `myfile.xml'.
+     Export as XML file `myfile.xml'.  
+
+`C-c C-x v x'
+     Export only the visible part of the document.
 
 
 File: org,  Node: iCalendar export,  Next: Text interpretation,  Prev: XML export,  Up: Exporting
@@ -3495,6 +3532,9 @@ Org-mode would not be what it is without your input.
    * Pavel Chalmoviansky influenced the agenda treatment of items with
      specified time.
 
+   * Gregory Chenov patched support for lisp forms into table
+     calculations and improved XEmacs compatibility.
+
    * Sacha Chua suggested to copy some linking code from Planner.
 
    * Kees Dullemond inspired the use of narrowed tabled columns.
@@ -3503,7 +3543,7 @@ Org-mode would not be what it is without your input.
      patched CSS formatting into the HTML exporter, and inspired the
      agenda.
 
-   * Nic Ferrier contributed mailcap and XML support.
+   * Nic Ferrier contributed mailcap and XOXO support.
 
    * Kai Grossjohann pointed out key-binding conflicts caused by
      Org-mode.
@@ -3521,6 +3561,8 @@ Org-mode would not be what it is without your input.
 
    * Pete Phillips helped the development of the TAGS feature.
 
+   * T.V. Raman reported bugs and suggested improvements.
+
    * Matthias Rempe (Oelde) provided ideas, Windows support, and quality
      control.
 
@@ -3537,6 +3579,9 @@ Org-mode would not be what it is without your input.
 
    * Linking to VM/BBDB/GNUS was inspired by Tom Shannon's
      `organizer-mode.el'.
+
+   * David O'Toole wrote `org-publish.el' and came up with lots is ideas
+     for small changes.
 
    * Ju"rgen Vollmer contributed code generating the table of contents
      in HTML output.
@@ -3581,7 +3626,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * agenda:                                Weekly/Daily agenda. (line   6)
 * agenda commands, custom:               Agenda dispatcher.   (line   6)
 * agenda dispatcher:                     Agenda dispatcher.   (line   6)
-* agenda files, removing buffers:        Agenda commands.     (line 189)
+* agenda files, removing buffers:        Agenda commands.     (line 195)
 * agenda views:                          Agenda views.        (line   6)
 * agenda, for single file:               Timeline.            (line   6)
 * allout.el, conflict with:              FAQ.                 (line   6)
@@ -3646,7 +3691,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * DEADLINE keyword:                      Time stamps.         (line  43)
 * deadlines:                             Time stamps.         (line   6)
 * demotion, of subtrees:                 Structure editing.   (line   6)
-* diary entries, creating from agenda:   Agenda commands.     (line 147)
+* diary entries, creating from agenda:   Agenda commands.     (line 153)
 * diary integration:                     Calendar/Diary integration.
                                                               (line   6)
 * dictionary word completion:            Completion.          (line   6)
@@ -3693,8 +3738,8 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * GNUS links:                            External links.      (line   6)
 * hand-formatted lists:                  Enhancing text.      (line  11)
 * headline levels:                       Export options.      (line  25)
-* headline levels, for exporting <1>:    HTML export.         (line  16)
-* headline levels, for exporting:        ASCII export.        (line  15)
+* headline levels, for exporting <1>:    HTML export.         (line  21)
+* headline levels, for exporting:        ASCII export.        (line  18)
 * headline navigation:                   Motion.              (line   6)
 * headline tagging:                      Tags.                (line   6)
 * headline, promotion and demotion:      Structure editing.   (line   6)
@@ -3726,6 +3771,7 @@ File: org,  Node: Index,  Next: Key Index,  Prev: Miscellaneous,  Up: Top
 * links, external:                       External links.      (line   6)
 * links, internal:                       Internal links.      (line   6)
 * links, returning to:                   Handling links.      (line  81)
+* Lisp forms, as table fomulas:          Lisp formulas.       (line   6)
 * lists, hand-formatted:                 Enhancing text.      (line  11)
 * lists, ordered:                        Plain lists.         (line   6)
 * lists, plain:                          Plain lists.         (line   6)
@@ -3893,10 +3939,10 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
                                                               (line  57)
 * <TAB> <3>:                             Plain lists.         (line  38)
 * <TAB>:                                 Visibility cycling.  (line  10)
-* > <1>:                                 Agenda commands.     (line 142)
+* > <1>:                                 Agenda commands.     (line 148)
 * >:                                     Creating timestamps. (line  76)
-* C:                                     Agenda commands.     (line 172)
-* c:                                     Agenda commands.     (line 156)
+* C:                                     Agenda commands.     (line 178)
+* c:                                     Agenda commands.     (line 162)
 * C-#:                                   Built-in table editor.
                                                               (line 155)
 * C-,:                                   Agenda files.        (line  18)
@@ -3958,6 +4004,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-c <5>:                           Built-in table editor.
                                                               (line  54)
 * C-c C-c:                               Plain lists.         (line  68)
+* C-c C-d <1>:                           Agenda commands.     (line 133)
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-f:                               Motion.              (line  12)
 * C-c C-j:                               Motion.              (line  21)
@@ -3971,6 +4018,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-q:                               Built-in table editor.
                                                               (line 119)
 * C-c C-r:                               Timeline.            (line  13)
+* C-c C-s <1>:                           Agenda commands.     (line 130)
 * C-c C-s:                               Creating timestamps. (line  47)
 * C-c C-t:                               TODO basics.         (line  13)
 * C-c C-u:                               Motion.              (line  18)
@@ -3979,7 +4027,7 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * C-c C-x a:                             ASCII export.        (line   9)
 * C-c C-x b:                             HTML export.         (line  11)
 * C-c C-x c:                             iCalendar export.    (line  20)
-* C-c C-x C-c:                           Agenda commands.     (line 179)
+* C-c C-x C-c:                           Agenda commands.     (line 185)
 * C-c C-x C-i:                           iCalendar export.    (line  15)
 * C-c C-x C-k:                           Structure editing.   (line  36)
 * C-c C-x C-w <1>:                       Built-in table editor.
@@ -3995,7 +4043,11 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
                                                               (line 105)
 * C-c C-x M-w:                           Structure editing.   (line  40)
 * C-c C-x t:                             Export options.      (line  13)
+* C-c C-x v <1>:                         XML export.          (line  11)
 * C-c C-x v:                             Sparse trees.        (line  39)
+* C-c C-x v a:                           ASCII export.        (line  13)
+* C-c C-x v b:                           HTML export.         (line  14)
+* C-c C-x v h:                           HTML export.         (line  14)
 * C-c C-y:                               Creating timestamps. (line  63)
 * C-c l:                                 Handling links.      (line   9)
 * C-c |:                                 Built-in table editor.
@@ -4009,11 +4061,11 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * d:                                     Agenda commands.     (line  65)
 * f:                                     Agenda commands.     (line  44)
 * g:                                     Agenda commands.     (line  72)
-* H:                                     Agenda commands.     (line 176)
-* i:                                     Agenda commands.     (line 147)
+* H:                                     Agenda commands.     (line 182)
+* i:                                     Agenda commands.     (line 153)
 * l:                                     Agenda commands.     (line  51)
 * L:                                     Agenda commands.     (line  32)
-* M:                                     Agenda commands.     (line 163)
+* M:                                     Agenda commands.     (line 169)
 * M-<down>:                              Built-in table editor.
                                                               (line  82)
 * M-<left> <1>:                          Built-in table editor.
@@ -4059,18 +4111,18 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * o:                                     Agenda commands.     (line  59)
 * P:                                     Agenda commands.     (line 117)
 * p:                                     Agenda commands.     (line  20)
-* q:                                     Agenda commands.     (line 186)
+* q:                                     Agenda commands.     (line 192)
 * r <1>:                                 Agenda commands.     (line  76)
 * r:                                     Global TODO list.    (line  21)
-* S:                                     Agenda commands.     (line 167)
+* S:                                     Agenda commands.     (line 173)
 * S-<down> <1>:                          Agenda commands.     (line 126)
 * S-<down> <2>:                          Creating timestamps. (line  55)
 * S-<down>:                              Priorities.          (line  25)
-* S-<left> <1>:                          Agenda commands.     (line 138)
+* S-<left> <1>:                          Agenda commands.     (line 144)
 * S-<left>:                              Creating timestamps. (line  50)
 * S-<RET>:                               Built-in table editor.
                                                               (line 170)
-* S-<right> <1>:                         Agenda commands.     (line 130)
+* S-<right> <1>:                         Agenda commands.     (line 136)
 * S-<right>:                             Creating timestamps. (line  50)
 * S-<TAB> <1>:                           Built-in table editor.
                                                               (line  61)
@@ -4081,106 +4133,107 @@ File: org,  Node: Key Index,  Prev: Index,  Up: Top
 * T:                                     Agenda commands.     (line 104)
 * t:                                     Agenda commands.     (line 100)
 * w:                                     Agenda commands.     (line  62)
-* x:                                     Agenda commands.     (line 189)
+* x:                                     Agenda commands.     (line 195)
 
 
 
 Tag Table:
 Node: Top959
-Node: Introduction7514
-Node: Summary7828
-Node: Installation and activation9936
-Node: Feedback11605
-Node: Document structure12391
-Node: Outlines13157
-Node: Headlines13817
-Node: Visibility cycling14440
-Node: Motion15636
-Node: Structure editing16420
-Node: Archiving18529
-Node: Sparse trees19389
-Ref: Sparse trees-Footnote-121418
-Ref: Sparse trees-Footnote-221510
-Node: Plain lists21625
-Ref: Plain lists-Footnote-124919
-Node: Tables25276
-Node: Built-in table editor25824
-Node: Narrow columns33437
-Ref: Narrow columns-Footnote-135376
-Node: Table calculations35422
-Node: Formula syntax36598
-Ref: Formula syntax-Footnote-139527
-Node: Column formulas39826
-Node: Advanced features41588
-Node: Named-field formulas44843
-Node: Editing/debugging formulas45483
-Node: Appetizer47241
-Node: orgtbl-mode48343
-Node: table.el48834
-Node: Hyperlinks49811
-Node: Link format50515
-Node: Internal links51812
-Node: Radio targets53762
-Node: CamelCase links54477
-Node: External links54975
-Node: Handling links56900
-Node: Search options61232
-Ref: Search options-Footnote-163008
-Node: Custom searches63089
-Node: Remember64137
-Ref: Remember-Footnote-168004
-Node: TODO items68128
-Node: TODO basics69051
-Node: Progress logging70392
-Node: TODO extensions71178
-Node: Workflow states71978
-Node: TODO types72846
-Ref: TODO types-Footnote-174504
-Node: Per file keywords74586
-Ref: Per file keywords-Footnote-176039
-Node: Priorities76267
-Node: Timestamps77476
-Node: Time stamps77797
-Node: Creating timestamps80225
-Node: Tags83354
-Node: Tag inheritance84089
-Node: Setting tags85026
-Node: Tag searches85988
-Node: Agenda views87197
-Node: Agenda files88736
-Ref: Agenda files-Footnote-189696
-Ref: Agenda files-Footnote-289845
-Node: Agenda dispatcher90037
-Node: Weekly/Daily agenda92167
-Node: Categories93302
-Node: Time-of-day specifications93950
-Node: Calendar/Diary integration95926
-Node: Sorting of agenda items97303
-Node: Global TODO list98135
-Node: Matching headline tags99550
-Node: Timeline100493
-Node: Agenda commands101366
-Node: Exporting106755
-Node: ASCII export107885
-Node: HTML export108707
-Node: XML export110455
-Node: iCalendar export110822
-Node: Text interpretation112644
-Node: Comment lines113121
-Node: Enhancing text113590
-Node: Export options115421
-Node: Miscellaneous117023
-Node: Completion117781
-Node: Customization118777
-Node: Summary of in-buffer settings119384
-Node: The very busy C-c C-c key122145
-Node: Clean view123550
-Node: TTY keys126127
-Node: FAQ127728
-Node: Interaction134630
-Node: Bugs137664
-Node: Acknowledgments139618
-Node: Index142713
-Node: Key Index164083
+Node: Introduction7583
+Node: Summary7897
+Node: Installation and activation10005
+Node: Feedback11674
+Node: Document structure12460
+Node: Outlines13226
+Node: Headlines13886
+Node: Visibility cycling14509
+Node: Motion15705
+Node: Structure editing16489
+Node: Archiving18598
+Node: Sparse trees19458
+Ref: Sparse trees-Footnote-121443
+Ref: Sparse trees-Footnote-221535
+Node: Plain lists21650
+Ref: Plain lists-Footnote-124944
+Node: Tables25301
+Node: Built-in table editor25849
+Node: Narrow columns33462
+Ref: Narrow columns-Footnote-135401
+Node: Table calculations35447
+Node: Formula syntax36767
+Ref: Formula syntax-Footnote-139672
+Node: Lisp formulas39971
+Node: Column formulas40762
+Node: Advanced features42523
+Node: Named-field formulas45778
+Node: Editing/debugging formulas46418
+Node: Appetizer48176
+Node: orgtbl-mode49278
+Node: table.el49769
+Node: Hyperlinks50746
+Node: Link format51450
+Node: Internal links52747
+Node: Radio targets54697
+Node: CamelCase links55412
+Node: External links55910
+Node: Handling links57835
+Node: Search options62167
+Ref: Search options-Footnote-163943
+Node: Custom searches64024
+Node: Remember65072
+Ref: Remember-Footnote-168939
+Node: TODO items69063
+Node: TODO basics69986
+Node: Progress logging71327
+Node: TODO extensions72113
+Node: Workflow states72913
+Node: TODO types73781
+Ref: TODO types-Footnote-175439
+Node: Per file keywords75521
+Ref: Per file keywords-Footnote-176974
+Node: Priorities77202
+Node: Timestamps78411
+Node: Time stamps78732
+Node: Creating timestamps81160
+Node: Tags84289
+Node: Tag inheritance85024
+Node: Setting tags85961
+Node: Tag searches86923
+Node: Agenda views88132
+Node: Agenda files89671
+Ref: Agenda files-Footnote-190631
+Ref: Agenda files-Footnote-290780
+Node: Agenda dispatcher90972
+Node: Weekly/Daily agenda93102
+Node: Categories94237
+Node: Time-of-day specifications94885
+Node: Calendar/Diary integration96861
+Node: Sorting of agenda items98238
+Node: Global TODO list99070
+Node: Matching headline tags100485
+Node: Timeline101428
+Node: Agenda commands102301
+Node: Exporting107771
+Node: ASCII export108901
+Node: HTML export109791
+Node: XML export111622
+Node: iCalendar export112057
+Node: Text interpretation113879
+Node: Comment lines114356
+Node: Enhancing text114825
+Node: Export options116656
+Node: Miscellaneous118258
+Node: Completion119016
+Node: Customization120012
+Node: Summary of in-buffer settings120619
+Node: The very busy C-c C-c key123380
+Node: Clean view124785
+Node: TTY keys127362
+Node: FAQ128963
+Node: Interaction135865
+Node: Bugs138899
+Node: Acknowledgments140853
+Node: Index144222
+Node: Key Index165665
 
 End Tag Table

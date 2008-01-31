@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <dominik at science dot uva dot nl>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://www.astro.uva.nl/~dominik/Tools/org/
-;; Version: 4.28
+;; Version: 4.29
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -81,6 +81,17 @@
 ;;
 ;; Changes since version 4.10:
 ;; ---------------------------
+;; Version 4.29
+;;    - Inlining images in HTML export now depends on wheather the link
+;;      contains a description or not.
+;;    - TODO items can be scheduled from the global TODO list using C-c C-s.
+;;    - TODO items already scheduled can be made to disappear from the global
+;;      todo list, see `org-agenda-todo-ignore-scheduled'.
+;;    - In Tables, formulas may also be Lisp forms.
+;;    - Exporting the visible part of an outline with `C-c C-x v' works now
+;;      for all available exporters.
+;;    - Bug fixes, lots of them :-(
+;;
 ;; Version 4.28
 ;;    - Bug fixes.
 ;;
@@ -149,7 +160,7 @@
 
 ;;; Customization variables
 
-(defvar org-version "4.28"
+(defvar org-version "4.29"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -1282,6 +1293,14 @@ potentially much shorter TODO lists."
   :group 'org-todo
   :type 'boolean)
 
+(defcustom org-agenda-todo-ignore-scheduled nil
+  "Non-nil means, don't show scheduled entries in the global todo list.
+The idea behind this is that by scheduling it, you have already taken care
+of this item."
+  :group 'org-agenda
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-agenda-include-all-todo nil
   "Non-nil means, the agenda will always contain all TODO entries.
 When nil, date-less entries will only be shown if `org-agenda' is called
@@ -1316,7 +1335,7 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-setup
   :type 'boolean)
 
-(defcustom org-agenda-start-with-follow-mode t
+(defcustom org-agenda-start-with-follow-mode nil
   "The initial value of follwo-mode in a newly created agenda window."
   :group 'org-agenda-setup
   :type 'boolean)
@@ -1848,13 +1867,16 @@ When nil, the links still point to the plain `.org' file."
   :group 'org-export-html
   :type 'boolean)
 
-(defcustom org-export-html-inline-images t
+(defcustom org-export-html-inline-images 'maybe
   "Non-nil means, inline images into exported HTML pages.
-The link will still be to the original location of the image file.
-So if you are moving the page, lets say to your public HTML site,
-you will have to move the image and maybe change the link."
+This is done using an <img> tag.  When nil, an anchor with href is used to
+link to the image.  If this option is `maybe', then images in links with
+an empty description will be inlined, while images with a description will
+be linked only."
   :group 'org-export-html
-  :type 'boolean)
+  :type '(choice (const :tag "Never" nil)
+		 (const :tag "Always" t)
+		 (const :tag "When there is no description" maybe)))
 
 (defcustom org-export-html-expand t
   "Non-nil means, for HTML export, treat @<...> as HTML tag.
@@ -2434,11 +2456,31 @@ can be exported as a structured ASCII or HTML file.
 The following commands are available:
 
 \\{org-mode-map}"
+
+  ;; Get rid of Outline menus, they are not needed
+  ;; Need to do this here because define-derived-mode sets up
+  ;; the keymap so late.
+  (if (featurep 'xemacs)
+      (if org-noutline-p
+	  (progn
+	    (easy-menu-remove outline-mode-menu-heading)
+	    (easy-menu-remove outline-mode-menu-show)
+	    (easy-menu-remove outline-mode-menu-hide))
+	(delete-menu-item '("Headings"))
+	(delete-menu-item '("Show"))
+	(delete-menu-item '("Hide"))
+	(set-menubar-dirty-flag))
+    (define-key org-mode-map [menu-bar headings] 'undefined)
+    (define-key org-mode-map [menu-bar hide] 'undefined)
+    (define-key org-mode-map [menu-bar show] 'undefined))
+
   (easy-menu-add org-org-menu)
   (easy-menu-add org-tbl-menu)
   (org-install-agenda-files-menu)
   (if org-descriptive-links (org-add-to-invisibility-spec '(org-link)))
   (org-add-to-invisibility-spec '(org-cwidth))
+  (when (featurep 'xemacs)
+    (set (make-local-variable 'line-move-ignore-invisible) t))
   (setq outline-regexp "\\*+")
   ;;(setq outline-regexp "\\(?:\\*+\\|[ \t]*\\(?:[-+*]\\|[0-9]+[.)]\\) \\)")
   (setq outline-level 'org-outline-level)
@@ -2466,19 +2508,6 @@ The following commands are available:
 	   (interactive-p)
 	   (= (point-min) (point-max)))
       (insert "    -*- mode: org -*-\n\n"))
-
-  ;; Get rid of Outline menus, they are not needed
-  ;; Need to do this here because define-derived-mode sets up
-  ;; the keymap so late.
-  (if (featurep 'xemacs)
-      (progn
-	(delete-menu-item '("Headings"))
-	(delete-menu-item '("Show"))
-	(delete-menu-item '("Hide"))
-	(set-menubar-dirty-flag))
-    (define-key org-mode-map [menu-bar headings] 'undefined)
-    (define-key org-mode-map [menu-bar hide] 'undefined)
-    (define-key org-mode-map [menu-bar show] 'undefined))
 
   (unless org-inhibit-startup
     (if org-startup-align-all-tables
@@ -3175,8 +3204,14 @@ or nil."
 (defvar org-ignore-region nil
   "To temporarily disable the active region.")
 
+;; FIXME: Fix behavior if point is on the stars but not at bol.
 (defun org-insert-heading (&optional force-heading)
-  "Insert a new heading or item with same depth at point."
+  "Insert a new heading or item with same depth at point.
+If point is in a plain list and FORCE-HEADING is nil, create a new list item.
+If point is at the beginning of a headline, insert a sibling before the
+current headline.  If point is in the middle of a headline, split the headline
+at that position and make the rest of the headline part of the sibling below
+the current headline."
   (interactive "P")
   (if (= (buffer-size) 0)
       (insert "\n* ")
@@ -3186,15 +3221,18 @@ or nil."
 			 (org-back-to-heading)
 		       (error (outline-next-heading)))
 		     (prog1 (match-string 0)
-		       (funcall outline-level)))))
+		       (funcall outline-level))))
+	     pos)
 	(cond 
 	 ((and (org-on-heading-p) (bolp) 
 	       (save-excursion (backward-char 1) (not (org-invisible-p))))
 	  (open-line 1))
 	 ((bolp) nil)
 	 (t (newline)))
-	(insert head)
-	(just-one-space)
+	(insert head) (just-one-space)
+	(setq pos (point))
+	(end-of-line 1)
+	(unless (= (point) pos) (just-one-space) (backward-delete-char 1))
 	(run-hooks 'org-insert-heading-hook)))))
 
 (defun org-insert-item ()
@@ -3210,7 +3248,8 @@ Return t when things worked, nil when we are not in an item."
     (let* ((bul (match-string 0))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
-	   (eowcol (save-excursion (goto-char eow) (current-column))))
+	   (eowcol (save-excursion (goto-char eow) (current-column)))
+	   pos)
       (cond
        ((and (org-at-item-p) (<= (point) eow))
 	;; before the bullet
@@ -3220,7 +3259,10 @@ Return t when things worked, nil when we are not in an item."
 	(beginning-of-line 1))
        (t (newline)))
       (insert bul)
-      (just-one-space))
+      (just-one-space)
+      (setq pos (point))
+      (end-of-line 1)
+      (unless (= (point) pos) (just-one-space) (backward-delete-char 1)))
     (org-maybe-renumber-ordered-list)
     t))
 
@@ -3232,7 +3274,9 @@ state (TODO by default).  Also with prefix arg, force first state."
   (org-insert-heading)
   (save-excursion
     (org-back-to-heading)
-    (outline-previous-heading)
+    (if org-noutline-p
+	(outline-previous-heading)
+      (outline-previous-visible-heading t))
     (looking-at org-todo-line-regexp))
   (if (or arg
 	  (not (match-beginning 2))
@@ -4059,9 +4103,9 @@ prefix arg, switch to that state."
 	    (not (equal state org-done-string)))
       (when org-log-done
 	(if (equal state org-done-string)
-	    (org-log-done)
+	    (org-add-planning-info 'closed (current-time) 'scheduled)
 	  (if (not this)
-	      (org-log-done t))))
+	      (org-add-planning-info nil nil 'closed))))
       ;; Fixup tag positioning
       (and org-auto-align-tags (org-set-tags nil t))
       (run-hooks 'org-after-todo-state-change-hook)))
@@ -4131,24 +4175,14 @@ of `org-todo-keywords'."
 A timestamp is also inserted - use \\[org-timestamp-up] and \\[org-timestamp-down]
 to modify it to the correct date."
   (interactive)
-  (insert
-   org-deadline-string " "
-   (format-time-string (car org-time-stamp-formats)
-		       (org-read-date nil 'to-time)))
-  (message "%s" (substitute-command-keys
-		 "Use \\[org-timestamp-up-day] and \\[org-timestamp-down-day] to change the date.")))
+  (org-add-planning-info 'deadline nil nil)) ;; FIXME: remove closed?
 
 (defun org-schedule ()
   "Insert the SCHEDULED: string to schedule a TODO item.
 A timestamp is also inserted - use \\[org-timestamp-up] and \\[org-timestamp-down]
 to modify it to the correct date."
   (interactive)
-  (insert
-   org-scheduled-string " "
-   (format-time-string (car org-time-stamp-formats)
-		       (org-read-date nil 'to-time)))
-  (message "%s" (substitute-command-keys
-		 "Use \\[org-timestamp-up-day] and \\[org-timestamp-down-day] to change the date.")))
+  (org-add-planning-info 'scheduled nil 'closed))
 
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the line directly after the headline.
@@ -4158,8 +4192,7 @@ REMOVE indicates what kind of entries to remove.  An old WHAT entry will also
 be removed."
   (interactive)
   (save-excursion
-    (let (beg end col list elt)
-      (org-show-entry)   ; Avoid this.
+    (let (beg end col list elt (buffer-invisibility-spec nil) ts)
       (org-back-to-heading t)
       (setq beg (point))
       (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
@@ -4196,15 +4229,17 @@ be removed."
 	       ((eq what 'closed) org-closed-string))
 	 " ")
 	(insert
-	 (format-time-string 
-	  (if (eq what 'closed)
-	      (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
-	    (car org-time-stamp-formats))
-	  (or time (org-read-date nil 'to-time)))))
+	 (setq ts
+	       (format-time-string 
+		(if (eq what 'closed)
+		    (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
+		  (car org-time-stamp-formats))
+		(or time (org-read-date nil 'to-time))))))
       (goto-char (point-min))
       (widen)
       (if (looking-at "[ \t]+\r?\n")
-	  (replace-match "")))))
+	  (replace-match ""))
+      ts)))
 
 (defun org-occur (regexp &optional callback)
   "Make a compact tree which shows all matches of REGEXP.
@@ -4468,6 +4503,7 @@ used to insert the time stamp into the buffer to include the time."
 	     ct))
 	 (calendar-move-hook nil)
 	 (view-diary-entries-initially nil)
+	 (view-calendar-holidays-initially nil)
 	 (timestr (format-time-string
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") default-time))
 	 (prompt (format "YYYY-MM-DD [%s]: " timestr))
@@ -4843,6 +4879,7 @@ A prefix ARG can be used to force the current date."
   (interactive "P")
   (let ((tsr org-ts-regexp) diff
 	(calendar-move-hook nil)
+	(view-calendar-holidays-initially nil)
 	(view-diary-entries-initially nil))
     (if (or (org-at-timestamp-p)
 	    (save-excursion
@@ -4932,6 +4969,8 @@ The following commands are available:
 (define-key org-agenda-mode-map [?\C-c ?\C-x (left)] 'org-agenda-date-earlier)
 
 (define-key org-agenda-mode-map ">" 'org-agenda-date-prompt)
+(define-key org-agenda-mode-map "\C-c\C-s" 'org-agenda-schedule)
+(define-key org-agenda-mode-map "\C-c\C-d" 'org-agenda-deadline)
 (let ((l '(1 2 3 4 5 6 7 8 9 0)))
   (while l (define-key org-agenda-mode-map
 	     (int-to-string (pop l)) 'digit-argument)))
@@ -4995,10 +5034,12 @@ The following commands are available:
     ("Tags"
      ["Show all Tags" org-agenda-show-tags t]
      ["Set Tags" org-agenda-set-tags t])
-    ("Reschedule"
+    ("Schedule"
+     ["Schedule" org-agenda-schedule t]
+     ["Set Deadline" org-agenda-deadline t]
+     "--"
      ["Reschedule +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
      ["Reschedule -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
-     "--"
      ["Reschedule to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
     ("Priority"
      ["Set Priority" org-agenda-priority t]
@@ -6096,10 +6137,13 @@ the documentation of `org-diary'."
 				     "\\)\\>")
 			   org-not-done-regexp)
 			 "[^\n\r]*\\)"))
+	 (sched-re (concat ".*\n.*?" org-scheduled-time-regexp))
 	 marker priority category tags
 	 ee txt)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
+      (when (not (and org-agenda-todo-ignore-scheduled
+		      (save-match-data (looking-at sched-re))))
       (goto-char (match-beginning 1))
       (setq marker (org-agenda-new-marker (1+ (match-beginning 0)))
 	    category (org-get-category)
@@ -6116,9 +6160,9 @@ the documentation of `org-diary'."
 	'org-marker marker 'org-hd-marker marker
 	'priority priority 'category category)
       (push txt ee)
-      (if org-agenda-todo-list-sublevels
+      (if org-agenda-todo-list-sublevels  ; FIXME???? Change needed?
 	  (goto-char (match-end 1))
-	(org-end-of-subtree 'invisible)))
+	(org-end-of-subtree 'invisible))))
     (nreverse ee)))
 
 (defconst org-agenda-no-heading-message
@@ -6929,6 +6973,38 @@ be used to request time specification in the time stamp."
       (org-time-stamp arg)
       (message "Time stamp changed to %s" org-last-changed-timestamp))))
 
+(defun org-agenda-schedule (arg)
+  "Schedule the item at point."
+  (interactive "P")
+  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags)
+  (org-agenda-check-no-diary)
+  (let* ((marker (or (get-text-property (point) 'org-marker)
+		     (org-agenda-error)))
+	 (buffer (marker-buffer marker))
+	 (pos (marker-position marker))
+	 ts)
+    (with-current-buffer buffer
+      (widen)
+      (goto-char pos)
+      (setq ts (org-schedule))
+      (message "Item scheduled for %s" ts))))
+
+(defun org-agenda-deadline (arg)
+  "Schedule the item at point."
+  (interactive "P")
+  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags)
+  (org-agenda-check-no-diary)
+  (let* ((marker (or (get-text-property (point) 'org-marker)
+		     (org-agenda-error)))
+	 (buffer (marker-buffer marker))
+	 (pos (marker-position marker))
+	 ts)
+    (with-current-buffer buffer
+      (widen)
+      (goto-char pos)
+      (setq ts (org-deadline))
+      (message "Deadline for this item set to %s" ts))))
+
 (defun org-get-heading ()
   "Return the heading of the current entry, without the stars."
   (save-excursion
@@ -7033,6 +7109,7 @@ argument, latitude and longitude will be prompted for."
 		  (error "Don't know which date to open in calendar")))
 	 (date (calendar-gregorian-from-absolute day))
 	 (calendar-move-hook nil)
+	 (view-calendar-holidays-initially nil)
 	 (view-diary-entries-initially nil))
     (calendar)
     (calendar-goto-date date)))
@@ -8572,6 +8649,7 @@ RET on headline   -> Store as sublevel entry to current headline
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to fucntion properly."
   (if org-remember-templates
+
       (let* ((entry (if (= (length org-remember-templates) 1)
 			(cdar org-remember-templates)
 		      (message "Select template: %s"
@@ -8579,8 +8657,8 @@ to be run from that hook to fucntion properly."
 				(lambda (x) (char-to-string (car x)))
 				org-remember-templates " "))
 		      (cdr (assoc (read-char-exclusive) org-remember-templates))))
-	     (tpl (if (consp (cdr entry)) (cadr entry) (cdr entry)))
-	     (file (if (consp (cdr entry)) (nth 2 entry)))
+	     (tpl (car entry))
+	     (file (if (consp (cdr entry)) (nth 1 entry)))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
@@ -10464,7 +10542,7 @@ not overwrite the stored one."
 		    (org-table-get-formula equation (equal arg '(4)))))
 	 (n0 (org-table-current-column))
 	 (modes (copy-sequence org-calc-default-modes))
-	 n form fmt x ev orig c)
+	 n form fmt x ev orig c lispp)
     ;; Parse the format string.  Since we have a lot of modes, this is
     ;; a lot of work.  However, I think calc still uses most of the time.
     (if (string-match ";" formula)
@@ -10499,7 +10577,8 @@ not overwrite the stored one."
 			(lambda (x) (number-to-string (string-to-number x)))
 			fields)))
       (setq ndown (1- ndown))
-      (setq form (copy-sequence formula))
+      (setq form (copy-sequence formula)
+	    lispp (equal (substring form 0 2) "'("))
       ;; Insert the references to fields in same row
       (while (string-match "\\$\\([0-9]+\\)?" form)
 	(setq n (if (match-beginning 1)
@@ -10509,7 +10588,9 @@ not overwrite the stored one."
 	(unless x (error "Invalid field specifier \"%s\""
 			 (match-string 0 form)))
 	(if (equal x "") (setq x "0"))
-	(setq form (replace-match (concat "(" x ")") t t form)))
+	(setq form (replace-match
+		    (if lispp x (concat "(" x ")"))
+		    t t form)))
       ;; Insert ranges in current column
       (while (string-match "\\&[-I0-9]+" form)
 	(setq form (replace-match
@@ -10517,8 +10598,14 @@ not overwrite the stored one."
 		       (org-table-get-vertical-vector (match-string 0 form)
 						      nil n0))
 		     t t form)))
-      (setq ev (calc-eval (cons form modes)
-			  (if org-table-formula-numbers-only 'num)))
+;;      (setq ev (calc-eval (cons form modes)
+;; FIXME  (if org-table-formula-numbers-only 'num)))
+
+      (if lispp
+	  (setq ev (eval (eval (read form)))
+		ev (if (numberp ev) (number-to-string ev) ev))
+	(setq ev (calc-eval (cons form modes)
+			    (if org-table-formula-numbers-only 'num))))
 
       (when org-table-formula-debug
 	(with-output-to-temp-buffer "*Help*"
@@ -11795,43 +11882,44 @@ underlined headlines.  The default is 3."
 	  (setq title (concat (org-section-number level) " " title)))
       (insert title "\n" (make-string (string-width title) char) "\n"))))
 
-(defun org-export-copy-visible ()
-  "Copy the visible part of the buffer to another buffer, for printing.
-Also removes the first line of the buffer if it specifies a mode,
-and all options lines."
-  (interactive)
-  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
-					(org-infile-export-plist)))
-	 (filename (concat (file-name-as-directory 
-			    (plist-get opt-plist :publishing-directory))
-			   (file-name-sans-extension 
-			    (file-name-nondirectory buffer-file-name))
-			   ".txt"))
-	 (buffer (find-file-noselect filename))
-	 (ore (concat
-	       (org-make-options-regexp
-		'("CATEGORY" "SEQ_TODO" "PRI_TODO" "TYP_TODO"
-		  "STARTUP" "ARCHIVE"
-		  "TITLE" "AUTHOR" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"))
-	       (if org-noutline-p "\\(\n\\|$\\)" "")))
+(defun org-export-visible (type arg)
+  "Create a copy of the visible part of the current buffer, and export it.
+The copy is created in a temporary buffer and removed after use.
+TYPE is the final key (as a string) of the `C-c C-x' key sequence that will
+run the export command - in interactive use, the command prompts for this
+key.  As a special case, if the you type SPC at the prompt, the temporary
+org-mode file will not be removed but presented to you so that you can
+continue to use it.  The prefix arg ARG is passed through to the exporting
+command."
+  (interactive 
+   (list (progn
+	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML  [x]OXO  [ ]keep buffer")
+	   (char-to-string (read-char-exclusive)))
+	 current-prefix-arg))
+  (if (not (member type '("a" "\C-a" "b" "\C-b" "h" "x" " ")))
+      (error "Invalid export key"))
+  (let* ((binding (key-binding (concat "\C-c\C-x" type)))
+	 (keepp (equal type " "))
+	 (file buffer-file-name)
+	 (buffer (get-buffer-create "*Org Export Visible*"))
 	 s e)
-    (with-current-buffer buffer
-      (erase-buffer)
-      (text-mode))
+    (with-current-buffer buffer (erase-buffer))
     (save-excursion
       (setq s (goto-char (point-min)))
       (while (not (= (point) (point-max)))
 	(goto-char (org-find-invisible))
 	(append-to-buffer buffer s (point))
-	(setq s (goto-char (org-find-visible)))))
-    (switch-to-buffer-other-window buffer)
-    (newline)
-    (goto-char (point-min))
-    (if (looking-at ".*-\\*- mode:.*\n")
-	(replace-match ""))
-    (while (re-search-forward ore nil t)
-      (replace-match ""))
-    (goto-char (point-min))))
+	(setq s (goto-char (org-find-visible))))
+      (set-buffer buffer)
+      (let ((buffer-file-name file)
+	    (org-inhibit-startup t))
+	(org-mode)
+	(show-all)
+	(unless keepp (funcall binding arg))))
+    (if (not keepp)
+	(kill-buffer buffer)
+      (switch-to-buffer-other-window buffer)
+      (goto-char (point-min)))))
 
 (defun org-find-visible ()
   (if (featurep 'noutline)
@@ -12034,7 +12122,7 @@ org-mode's default settings, but still inferior to file-local settings."
 	 table-open type
 	 table-buffer table-orig-buffer
 	 ind start-is-num starter
-	 rpl path desc desc1 desc2 link
+	 rpl path desc descp desc1 desc2 link
 	 )
     (message "Exporting...")
 
@@ -12225,7 +12313,9 @@ org-mode's default settings, but still inferior to file-local settings."
 	    (setq path (match-string 3 line))
 	    (setq desc1 (if (match-end 5) (match-string 5 line))
 		  desc2 (if (match-end 2) (concat type ":" path) path)
+		  descp (and desc1 (not (equal desc1 desc2)))
 		  desc (or desc1 desc2))
+	    ;; FIXME: do we need to unescape here somewhere?
 	    (cond
 	     ((equal type "internal")
 	      (setq rpl
@@ -12266,8 +12356,10 @@ org-mode's default settings, but still inferior to file-local settings."
 		      (setq desc (replace-match "" t t desc))
 		      (if (string-match "\\.org$" desc)
 			  (setq desc (replace-match "" t t desc))))))
-		(setq rpl (if (and org-export-html-inline-images
-				   file-is-image-p)
+		(setq rpl (if (and file-is-image-p
+				   (or (eq t org-export-html-inline-images)
+				       (and org-export-html-inline-images
+					    (not descp))))
 			      (concat "<img src=\"" thefile "\"/>")
 			    (concat "<a href=\"" thefile "\">" desc "</a>")))))
 	     ((member type '("bbdb" "vm" "wl" "mhe" "rmail" "gnus" "shell"))
@@ -12741,9 +12833,9 @@ file, but with extension `.ics'."
   (interactive)
   (org-export-icalendar nil buffer-file-name))
 
-(defun org-export-as-xml ()
+(defun org-export-as-xml (arg)
   "Export current buffer as XOXO XML buffer."
-  (interactive)
+  (interactive "P")
   (cond ((eq org-export-xml-type 'xoxo)
 	 (org-export-as-xoxo (current-buffer)))))
 
@@ -13093,8 +13185,8 @@ a time), or the day by one (if it does not contain a time)."
 (define-key org-mode-map "\C-c\C-q"       'org-table-wrap-region)
 (define-key org-mode-map "\C-c\C-xa"      'org-export-as-ascii)
 (define-key org-mode-map "\C-c\C-x\C-a"   'org-export-as-ascii)
-(define-key org-mode-map "\C-c\C-xv"      'org-export-copy-visible)
-(define-key org-mode-map "\C-c\C-x\C-v"   'org-export-copy-visible)
+(define-key org-mode-map "\C-c\C-xv"      'org-export-visible)
+(define-key org-mode-map "\C-c\C-x\C-v"   'org-export-visible)
 ;; OPML support is only an option for the future
 ;(define-key org-mode-map "\C-c\C-xo"      'org-export-as-opml)
 ;(define-key org-mode-map "\C-c\C-x\C-o"   'org-export-as-opml)
@@ -13114,6 +13206,9 @@ a time), or the day by one (if it does not contain a time)."
 (define-key org-mode-map "\C-c\C-x\C-w"   'org-cut-special)
 (define-key org-mode-map "\C-c\C-x\M-w"   'org-copy-special)
 (define-key org-mode-map "\C-c\C-x\C-y"   'org-paste-special)
+
+(when (featurep 'xemacs) 
+  (define-key org-mode-map 'button3   'popup-mode-menu))
 
 (defsubst org-table-p () (org-at-table-p))
 
@@ -13613,7 +13708,7 @@ See the individual commands for more information."
     "--"
     ("Export"
      ["ASCII" org-export-as-ascii t]
-     ["Extract Visible Text" org-export-copy-visible t]
+     ["Export visible part..." org-export-visible t]
      ["HTML"  org-export-as-html t]
      ["HTML and Open" org-export-as-html-and-open t]
      ["XML (XOXO)" org-export-as-xml t]
@@ -13843,7 +13938,7 @@ that can be added."
 ;; The following functions capture almost the entire compatibility code
 ;; between the different versions of outline-mode.  The only other
 ;; places where this is important are the font-lock-keywords, and in
-;; `org-export-copy-visible'.  Search for `org-noutline-p' to find them.
+;; `org-export-visible'.  Search for `org-noutline-p' to find them.
 
 ;; C-a should go to the beginning of a *visible* line, also in the
 ;; new outline.el.  I guess this should be patched into Emacs?
@@ -13895,15 +13990,15 @@ to a visible line beginning.  This makes the function of C-a more intuitive."
 Only visible heading lines are considered, unless INVISIBLE-OK is non-nil."
   (if org-noutline-p
       (outline-back-to-heading invisible-ok)
-    (if (and (memq (char-before) '(?\n ?\r))
+    (if (and (or (bobp) (memq (char-before) '(?\n ?\r)))
              (looking-at outline-regexp))
 	t
       (if (re-search-backward (concat (if invisible-ok "\\([\r\n]\\|^\\)" "^")
 				      outline-regexp)
 			      nil t)
 	  (if invisible-ok
-	      (progn (goto-char (match-end 1))
-		     (looking-at outline-regexp)))
+	      (progn (goto-char (or (match-end 1) (match-beginning 0)))
+                     (looking-at outline-regexp)))
 	(error "Before first heading")))))
 
 (defun org-on-heading-p (&optional invisible-ok)
@@ -14022,7 +14117,7 @@ Show the heading too, if it is currently invisible."
   (save-excursion
     (org-back-to-heading t)
     (outline-flag-region
-     (1- (point))
+     (max 1 (1- (point)))
      (save-excursion
        (re-search-forward (concat "[\r\n]\\(" outline-regexp "\\)") nil 'move)
        (or (match-beginning 1) (point-max)))
@@ -14060,6 +14155,7 @@ Show the heading too, if it is currently invisible."
 (provide 'org)
 
 (run-hooks 'org-load-hook)
+
 
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
