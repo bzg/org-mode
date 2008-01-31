@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.72
+@set VERSION 4.74
 @set DATE April 2007
 
 @dircategory Emacs
@@ -224,7 +224,8 @@ Custom agenda views
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Batch processing::            Agenda views from the command line
+* Exporting Agenda Views::      Writing agendas to files.
+* Extracting Agenda Information for other programs::  
 
 Embedded LaTeX
 
@@ -624,7 +625,7 @@ Org-mode uses just two commands, bound to @key{TAB} and
 @table @kbd
 @kindex @key{TAB}
 @item @key{TAB}
-@emph{Subtree cycling}: Rotate current subtree between the states
+@emph{Subtree cycling}: Rotate current subtree among the states
 
 @example
 ,-> FOLDED -> CHILDREN -> SUBTREE --.
@@ -646,7 +647,7 @@ argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 @kindex S-@key{TAB}
 @item S-@key{TAB}
 @itemx C-u @key{TAB}
-@emph{Global cycling}: Rotate the entire buffer between the states
+@emph{Global cycling}: Rotate the entire buffer among the states
 
 @example
 ,-> OVERVIEW -> CONTENTS -> SHOW ALL --.
@@ -1300,6 +1301,10 @@ database, because these programs generally can write TAB-separated text
 files.  This command works by inserting the file into the buffer and
 then converting the region to a table.  Any prefix argument is passed on
 to the converter, which uses it to determine the separator.
+@item C-c |
+Tables can also be imported by pasting tabular text into the org-mode
+buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
+@kbd{C-c |} command (see above under @i{Creation and conversion}.
 @c
 @item M-x org-table-export
 Export the table as a TAB-separated file.  Useful for data exchange with,
@@ -1533,6 +1538,7 @@ non-standard convention that @samp{/} has lower precedence than
 evaluation by @code{calc-eval} (@pxref{Calling Calc from
 Your Programs,calc-eval,Calling calc from Your Lisp Programs,calc,GNU
 Emacs Calc Manual}),
+@c FIXME:  The link to the calc manual in HTML does not work.
 variable substitution takes place according to the rules described above.
 @cindex vectors, in table calculations
 The range vectors can be directly fed into the calc vector functions
@@ -2570,7 +2576,7 @@ The most important commands to work with TODO entries are:
 @kindex C-c C-t
 @cindex cycling, of TODO states
 @item C-c C-t
-Rotate the TODO state of the current item between
+Rotate the TODO state of the current item among
 
 @example
 ,-> (unmarked) -> TODO -> DONE --.
@@ -4401,6 +4407,18 @@ Show holidays for three month around the cursor date.
 @item C-c C-x C-c
 Export a single iCalendar file containing entries from all agenda files.
 
+@tsubheading{Exporting to a file}
+@kindex C-x C-w
+@item C-x C-w
+@cindex exporting agenda views
+@cindex agenda views, exporting
+Write the agenda view to a file.  Depending on the extension of the
+selected file name, the view will be exported as HTML (extension
+@file{.html} or @file{.htm}), Postscript (extension @file{.ps}), or
+plain text (any other extension).  Use the variable
+@code{org-agenda-exporter-settings} to set options for @file{ps-print}
+and for @file{htmlize} to be used during export.
+
 @tsubheading{Quit and Exit}
 @kindex q
 @item q
@@ -4429,7 +4447,8 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Batch processing::            Agenda views from the command line
+* Exporting Agenda Views::      Writing agendas to files.
+* Extracting Agenda Information for other programs::  
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -4521,7 +4540,7 @@ your agenda for the current week, all TODO items that carry the tag
 command @kbd{C-c a o} provides a similar view for office tasks.
 
 
-@node Setting Options, Batch processing, Block agenda, Custom agenda views
+@node Setting Options, Exporting Agenda Views, Block agenda, Custom agenda views
 @subsection Setting Options for custom commands
 @cindex options, for custom agenda views
 
@@ -4569,7 +4588,8 @@ the results for GARDEN tags query in the opposite order,
       '(("h" "Agenda and Home-related tasks"
          ((agenda)
           (tags-todo "HOME")
-          (tags "GARDEN" ((org-agenda-sorting-strategy '(priority-up)))))
+          (tags "GARDEN"
+                ((org-agenda-sorting-strategy '(priority-up)))))
          ((org-agenda-sorting-strategy '(priority-down))))
         ("o" "Agenda and Office-related tasks"
          ((agenda)
@@ -4585,18 +4605,156 @@ this interface, the @emph{values} are just lisp expressions.  So if the
 value is a string, you need to add the double quotes around the value
 yourself.
 
-@node Batch processing,  , Setting Options, Custom agenda views
-@subsection Creating agenda views in batch processing
-@cindex agenda, batch production
 
-If you want to print or otherwise reprocess agenda views, it can be
-useful to create an agenda from the command line.  This is the purpose
-of the function @code{org-batch-agenda}.  It takes as a parameter one of
-the strings that are the keys in @code{org-agenda-custom-commands}.  For
-example, to directly print the current TODO list, you could use
+@node Exporting Agenda Views, Extracting Agenda Information for other programs, Setting Options, Custom agenda views
+@subsection Exporting Agenda Views
+@cindex agenda views, exporting
+
+If you are away from your computer, it can be very useful to have a
+printed version of some agenda views to carry around.  Org-mode can
+export custom agenda views as plain text, HTML@footnote{You need to
+install Hrvoje Niksic' @file{htmlize.el}.} and postscript.  If you want
+to do this only occasionally, use the commend
+
+@table @kbd
+@kindex C-x C-w
+@item C-x C-w
+@cindex exporting agenda views
+@cindex agenda views, exporting
+Write the agenda view to a file.  Depending on the extension of the
+selected file name, the view will be exported as HTML (extension
+@file{.html} or @file{.htm}), Postscript (extension @file{.ps}), or
+plain text (any other extension).  Use the variable
+@code{org-agenda-exporter-settings} to set options for @file{ps-print}
+and for @file{htmlize} to be used during export, for example
+@lisp
+(setq org-agenda-exporter-settings
+      '((ps-number-of-columns 2)
+        (ps-landscape-mode t)
+        (htmlize-output-type 'inline-css)))
+@end lisp
+@end table
+
+If you need to export certain agenda views frequently, you can associate
+any custom agenda command with a list of output file names
+@footnote{If you want to store standard views like the weekly agenda
+or the global TODO list as well, you need to define custom commands for
+them in order to be able to specify filenames.}.  Here is an example
+that first does define custom commands for the agenda and the global
+todo list, together with a number of files to which to export them.
+Then we define two block agenda commands and specify filenames for them
+as well.  File names can be relative to the current working directory,
+or absolute.
+
+@lisp
+@group
+(setq org-agenda-custom-commands
+      '(("X" agenda "" nil ("agenda.html" "agenda.ps"))
+        ("Y" alltodo "" nil ("todo.html" "todo.txt" "todo.ps"))
+        ("h" "Agenda and Home-related tasks"
+         ((agenda)
+          (tags-todo "HOME")
+          (tags "GARDEN"))
+         nil
+         ("~/views/home.html"))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda)
+          (tags-todo "WORK")
+          (tags "OFFICE"))
+         nil
+         ("~/views/office.ps"))))
+@end group
+@end lisp
+
+The extension of the file name determines the type of export.  If it is
+@file{.html}, Org-mode will use the @file{htmlize.el} package to convert
+the buffer to HTML and save it to this file name.  If the extension is
+@file{.ps}, @code{ps-print-buffer-with-faces} is used to produce
+postscript output.  Any other extension produces a plain ASCII file.
+
+The export files are @emph{not} created when you use one of those
+commands interactively.  Instead, there is a special command to produce
+@emph{all} specified files in one step:
+
+@table @kbd
+@kindex C-c a e
+@item C-c a e
+Export all agenda views that have export filenames associated with
+them.
+@end table
+
+You can use the options section of the custom agenda commands to also
+set options for the export commands.  For example:
+
+@lisp
+(setq org-agenda-custom-commands
+      '(("X" agenda ""
+         ((ps-number-of-columns 2)
+          (ps-landscape-mode t)
+          (org-agenda-prefix-format " [ ] ")
+          (org-agenda-with-colors nil)
+          (org-agenda-remove-tags t))
+         ("theagenda.ps"))))
+@end lisp
+
+@noindent
+This command sets two options for the postscript exporter, to make it
+print in two columns in landscape format - the resulting page can be cut
+in two and then used in a paper agenda.  The remaining settings modify
+the agenda prefix to omit category and scheduling information, and
+instead include a checkbox to check off items.  We also remove the tags
+to make the lines compact, and we don't want to use colors for the
+black-and-white printer.  Settings specified in
+@code{org-agenda-exporter-settings} will also apply, but the settings
+in @code{org-agenda-custom-commands} take precedence.
+
+@noindent
+From the command line you may also use
+@example
+emacs -f org-batch-store-agenda-views -kill
+@end example
+@noindent
+or, if you need to modify some parameters
+@example
+emacs -eval '(org-batch-store-agenda-views                      \
+              org-agenda-ndays 30                               \
+              org-agenda-include-diary nil                      \
+              org-agenda-files (quote ("~/org/project.org")))'  \
+      -kill
+@end example
+@noindent
+which will create the agenda views restricted to the file
+@file{~/org/project.org}, without diary entries and with 30 days
+extent. 
+
+@node Extracting Agenda Information for other programs,  , Exporting Agenda Views, Custom agenda views
+@subsection Extracting Agenda Information for other programs
+@cindex agenda, pipe
+@cindex Scripts, for agenda processing
+
+Org-mode provides commands to access agenda information for the command
+line in emacs batch mode.  This extracted information can be sent
+directly to a printer, or it can be read by a program that does further
+processing of the data.  The first of these commands is the function
+@code{org-batch-agenda}, that produces an agenda view and sends it as
+ASCII text to STDOUT.  The command takes a single string as parameter.
+If the string has length 1, it is used as a key to one of the commands
+you have configured in @code{org-agenda-custom-commands}, basically any
+key you can use after @kbd{C-c a}.  For example, to directly print the
+current TODO list, you could use
 
 @example
 emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
+@end example
+
+If the parameter is a string with 2 or more characters, it is used as a
+tags/todo match string.  For example, to print your local shopping list
+(all items with the tag @samp{shop}, but excluding the tag
+@samp{NewYork}), you could use
+
+@example
+emacs -batch -l ~/.emacs                                      \       
+      -eval '(org-batch-agenda "+shop-NewYork")' | lpr
 @end example
 
 @noindent
@@ -4605,15 +4763,75 @@ You may also modify parameters on the fly like this:
 @example
 emacs -batch -l ~/.emacs                                      \
    -eval '(org-batch-agenda "a"                               \
-            org-agenda-ndays 300                              \
+            org-agenda-ndays 30                               \
             org-agenda-include-diary nil                      \
             org-agenda-files (quote ("~/org/project.org")))'  \
    | lpr
 @end example
 
 @noindent
-which will produce a 300 day agenda, fully restricted to the Org file
+which will produce a 30 day agenda, fully restricted to the Org file
 @file{~/org/projects.org}, not even including the diary.
+
+If you want to process the agenda data in more sophisticated ways, you
+can use the command @code{org-batch-agenda-csv} to get a comma-separated
+list of values for each agenda item.  Each line in the output will
+contain a number of fields separated by commas.  The fields in a line
+are:
+
+@example
+category     @r{The category of the item}
+head         @r{The headline, without TODO kwd, TAGS and PRIORITY}
+type         @r{The type of the agenda entry, can be}
+                todo               @r{selected in TODO match}
+                tagsmatch          @r{selected in tags match}
+                diary              @r{imported from diary}
+                deadline           @r{a deadline}
+                scheduled          @r{scheduled}
+                timestamp          @r{appointment, selected by timestamp}
+                closed             @r{entry was closed on date}
+                upcoming-deadline  @r{warning about nearing deadline}
+                past-scheduled     @r{forwarded scheduled item}
+                block              @r{entry has date block including date}
+todo         @r{The todo keyword, if any}
+tags         @r{All tags including inherited ones, separated by colons}
+date         @r{The relevant date, like 2007-2-14}
+time         @r{The time, like 15:00-16:50}
+extra        @r{String with extra planning info}
+priority-l   @r{The priority letter if any was given}
+priority-n   @r{The computed numerical priority}
+@end example
+
+@noindent
+Time and date will only be given if a timestamp (or deadline/scheduled)
+lead to the selection of the item.
+
+A CSV list like this is very easy to use in a post processing script.
+For example, here is a Perl program that gets the TODO list from
+Emacs/org-mode and prints all the items, preceded by a checkbox:
+
+@example
+@group
+#!/usr/bin/perl
+
+# define the Emacs command to run
+$cmd = "emacs -batch -l ~/.emacs -eval '(org-batch-agenda-csv \"t\")'";
+
+# run it and capture the output
+$agenda = qx@{$cmd 2>/dev/null@};
+
+# loop over all lines
+foreach $line (split(/\n/,$agenda)) @{
+
+  # get the individual values
+  ($category,$head,$type,$todo,$tags,$date,$time,$extra,
+   $priority_l,$priority_n) = split(/,/,$line);
+
+  # proccess and print
+  print "[ ] $head\n";
+@}
+@end group
+@end example
 
 @node Embedded LaTeX, Exporting, Agenda views, Top
 @chapter Embedded LaTeX
