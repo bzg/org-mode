@@ -43,7 +43,7 @@ MKDIR = mkdir -p
 MAKEINFO = makeinfo
 
 # How to create the HTML file
-TEXI2HTML = makeinfo --html --number-sections --no-split
+TEXI2HTML = makeinfo --html --number-sections
 
 # How to move the byte compiled files to their destination.  
 MV = mv
@@ -56,8 +56,8 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES1 = org.el org-publish.el org-mouse.el org-export-latex.el
-LISPFILES  = $(LISPFILES1) org-install.el 
+LISPFILES0 = org.el org-publish.el org-mouse.el org-export-latex.el
+LISPFILES  = $(LISPFILES0) org-install.el 
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
 CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
@@ -97,7 +97,7 @@ install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
 
-org-install.el: $(LISPFILES)
+org-install.el: $(LISPFILES0)
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
@@ -123,7 +123,7 @@ org.pdf: org.texi
 	$(TEXI2PDF) org.texi
 
 org.html: org.texi
-	$(TEXI2HTML) -o org.html org.texi
+	$(TEXI2HTML) --no-split -o org.html org.texi
 
 orgcard.dvi: orgcard.tex
 	tex orgcard.tex
@@ -145,6 +145,16 @@ orgcard_letter.ps: orgcard_letter.dvi
 	dvips -t landscape -o orgcard_letter.ps orgcard_letter.dvi 
 
 # Below here are special targets for maintenance only
+
+webfiles:
+	(cd ORGWEBPAGE; emacs -batch -l ~/.emacs index.org -f org-publish-current-project)
+
+html: org.html
+
+html_split: org.texi
+	rm -rf manual
+	mkdir manual
+	$(TEXI2HTML) -o manual org.texi
 
 info:	
 	$(MAKEINFO) --no-split org.texi -o org
@@ -175,21 +185,21 @@ distfile:
 
 release:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
+	make webfiles
 	make distfile
 	make doc
-	rm -rf org-release
-	$(MKDIR) org-release
-	cp org-$(TAG).zip org-$(TAG).tar.gz org-release
-	cp org.pdf orgcard.pdf org.texi org.html org-release
-	cp ORGWEBPAGE/tmp/*.html   org-release
-	cp ORGWEBPAGE/tmp/*.el     org-release
-	cp ORGWEBPAGE/tmp/*.txt    org-release
-	cp ORGWEBPAGE/tmp/*.css    org-release
-	cp ORGWEBPAGE/tmp/*.jpg    org-release
-#	cp ORGWEBPAGE/tmp/*.tar.gz org-release
-#	cp ORGWEBPAGE/tmp/*.zip org-release
-	cp org-release/org-$(TAG).zip    org-release/org.zip
-	cp org-release/org-$(TAG).tar.gz org-release/org.tar.gz
+	make html_split
+	rm -rf RELEASEDIR
+	$(MKDIR) RELEASEDIR
+	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
+	cp org.pdf orgcard.pdf org.texi org.html RELEASEDIR
+	cp ORGWEBPAGE/tmp/*.html   RELEASEDIR
+	cp ORGWEBPAGE/tmp/*.el     RELEASEDIR
+	cp ORGWEBPAGE/tmp/*.txt    RELEASEDIR
+	cp ORGWEBPAGE/tmp/*.css    RELEASEDIR
+	cp ORGWEBPAGE/tmp/*.jpg    RELEASEDIR
+	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
+	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
 	cp -r org-$(TAG)/* $(HG_RELEASES)
 	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
@@ -200,25 +210,15 @@ trackrelease:
 	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag -f $(TAG))
 
 upload:
-	(cd org-release; lftp -f ../ftp_script)
+	(cd RELEASEDIR; lftp -f ../ftp_script)
+
+upload_manual:
+	 lftp -f ftp_script2
 
 relup:
 	make release
 	make upload
-
-dist:
-	make distfile TAG=$(TAG)
-	cp org-$(TAG).zip org-$(TAG).tar.gz $(HTMLDIR)
-	rm -f $(HTMLDIR)/org.zip $(HTMLDIR)/org.tar.gz
-	(cd $(HTMLDIR); ln -s org-$(TAG).zip org.zip)
-	(cd $(HTMLDIR); ln -s org-$(TAG).tar.gz org.tar.gz)
-	make doc
-	cp org.pdf orgcard.pdf org.texi org.html $(HTMLDIR)
-
-minidist:
-	rm -f org-$(TAG).zip
-	zip org-$(TAG).zip org.el
-	scp org-$(TAG).zip remote.science.uva.nl:public_html/Tools/org/
+	make upload_manual
 
 clean:
 	rm -f $(ELCFILES) org.pdf org org.html orgcard.pdf orgcard.ps

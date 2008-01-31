@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.16a
+;; Version: 5.16b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -97,6 +97,10 @@
     (add-text-properties 0 1 '(test t) x)
     (get-text-property 0 'test (format "%s" x)))
   "Does format transport text properties?")
+
+(defmacro org-bound-and-true-p (var)
+  "Return the value of symbol VAR if it is bound, else nil."
+  `(and (boundp (quote ,var)) ,var))
 
 (defmacro org-unmodified (&rest body)
   "Execute body without changing buffer-modified-p."
@@ -13069,14 +13073,12 @@ to be run from that hook to function properly."
 		       (nth 1 entry)
 		     org-default-notes-file))
 	     (headline (nth 2 entry))
-	     (v-c (if (or (and (eq window-system 'x)
-			       (x-cut-buffer-or-selection-value))
-			  (bound-and-true-p 'x-last-selected-text)
-			  (bound-and-true-p 'x-last-selected-text-primary))
-		      x-last-selected-text-primary
-		    (if (> (length kill-ring) 0)
-			(current-kill 0)
-		      nil)))
+	     (v-c (or (and (eq window-system 'x)
+			   (fboundp 'x-cut-buffer-or-selection-value)
+			   (x-cut-buffer-or-selection-value))
+		      (org-bound-and-true-p x-last-selected-text)
+		      (org-bound-and-true-p x-last-selected-text-primary)
+		      (and (> (length kill-ring) 0) (current-kill 0))))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))

@@ -1,6 +1,7 @@
 2007-12-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-context-choices): New constant.
+	(org-bound-and-true-p): New macro.
 
 2007-11-30  Carsten Dominik  <dominik@science.uva.nl>
 
