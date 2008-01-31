@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.56).
+   This manual is for Org-mode (version 4.57).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.56).
+This manual is for Org-mode (version 4.57).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -635,7 +635,17 @@ File: org,  Node: Structure editing,  Next: Archiving,  Prev: Motion,  Up: Docum
      Yank subtree from kill ring.  This does modify the level of the
      subtree to make sure the tree fits in nicely at the yank position.
      The yank level can also be specified with a prefix arg, or by
-     yanking after a headline marker like `****'.
+     yanking after a headline marker like `****'.  
+
+`C-c ^'
+     Sort same-level entries.  When there is an active region, all
+     entries in the region will be sorted.  Otherwise the children of
+     the current headline are sorted.  The command prompts for the
+     sorting method, which can be alphabetically, numerically, by time
+     (using the first time stamp in each entry), and each of these in
+     reverse order.  With a `C-u' prefix, sorting will be
+     case-sensitive.  With two `C-u C-u' prefixes, duplicate entries
+     will also be removed.
 
    When there is an active region (transient-mark-mode), promotion and
 demotion work on all headlines in the region.  To select a region of
@@ -995,10 +1005,16 @@ Column and row editing
      line is created above the current line.
 
 `C-c ^'
-     Sort the table lines in the region.  Point and mark must be in the
-     first and last line to be included, and must be in the column that
-     should be used for sorting.  The command prompts for numerical
-     versus alphanumerical sorting.
+     Sort the table lines in the region.  The position of point
+     indicates the column to be used for sorting, and the range of
+     lines is the range between the nearest horizontal separator lines,
+     or the entire table.  If point is before the first column, you
+     will be prompted for the sorting column.  If there is an active
+     region, the mark specifies the first line and the sorting column,
+     while point should be in the last line to be included into the
+     sorting.  The command prompts for the sorting type
+     (alphabetically, numerically, or by time).  When called with a
+     prefix argument, alphabetic sorting will be case-sensitive.
 
 Regions
 .......
@@ -1838,7 +1854,7 @@ link, together with an explanation:
      tree with the matches.
 
    As a degenerate case, a file link with an empty file name can be used
-to search the current file.  For example, `<file:::find me>' does a
+to search the current file.  For example, `[[file:::find me]]' does a
 search for `find me' in the current file, just as `[[find me]]' would.
 
    ---------- Footnotes ----------
@@ -1908,13 +1924,13 @@ as a target for this note.
    When you call `M-x remember' to remember something, org will prompt
 for a key to select the template and then prepare the buffer like
      * TODO
-       <file:link to where you called remember>
+       [[file:link to where you called remember]]
 
 or
 
      * [2006-03-21 Tue 15:37]
 
-       <file:link to where you called remember>
+       [[file:link to where you called remember]]
 
 See the variable `org-remember-templates' for more details.
 
@@ -2309,7 +2325,7 @@ TIME STAMP WITH SCHEDULED KEYWORD
      If a time stamp is preceded by the word `SCHEDULED:', it means you
      are planning to start working on that task on the given date. So
      this is not about recording an event, but about planning your
-     work.  The headline will be listed under the given date.  In
+     work.  The headline will be listed under the given date(2).  In
      addition, a reminder that the scheduled date has passed will be
      present in the compilation for _today_, until the entry is marked
      DONE.  I.e., the task will automatically be forwarded until
@@ -2327,7 +2343,7 @@ TIME STAMP WITH DEADLINE KEYWORD
      date, and continuing until the entry is marked DONE.  An example:
 
           *** TODO write article about the Earth for the Guide
-              The editor in charge is <bbdb:Ford Prefect>
+              The editor in charge is [[bbdb:Ford Prefect]]
               DEADLINE: <2004-02-29 Sun>
 
 TIME STAMP WITH CLOSED KEYWORD
@@ -2347,6 +2363,10 @@ TIME RANGE WITH CLOCK KEYWORD
 
    (1) This is the standard ISO date/time format.  If you cannot get
 used to these, see *Note Custom time format::
+
+   (2) It will still be listed on that date after it has been marked
+DONE.  If you don't like this, set the variable
+`org-agenda-skip-scheduled-if-done'.
 
 
 File: org,  Node: Creating timestamps,  Next: Custom time format,  Prev: Time stamps,  Up: Timestamps
@@ -2443,6 +2463,7 @@ specified with the current date and time.  For example:
        22 sept 0:34  --> currentyear-09-22 0:34
        12            --> currentyear-currentmonth-12
        Fri           --> nearest Friday (today or later)
+       +4            --> 4 days from now (if +N is the only thing given)
 
    The function understands English month and weekday abbreviations.  If
 you want to use unabbreviated names and/or other languages, configure
@@ -2860,6 +2881,11 @@ _negative selection_ combined with AND can be meaningful.  Examples:
 `WORK/+WAITING|+NEXT'
      Select `:WORK:'-tagged TODO lines that are either `WAITING' or
      `NEXT'.
+
+   Any element of the tag/todo match can be a regular expression - in
+this case it must be enclosed in curly braces.  For example,
+`WORK+{^BOSS.*}' matches headlines that contain the tag `WORK' and any
+tag starting with `BOSS'.
 
 
 File: org,  Node: Agenda views,  Next: Embedded LaTeX,  Prev: Tags,  Up: Top
@@ -3355,6 +3381,9 @@ Remote editing
      belonging to it in the original Org-mode file.  If the text to be
      deleted remotely is longer than one line, the kill needs to be
      confirmed by the user.  See variable `org-agenda-confirm-kill'.
+
+`$'
+     Archive the subtree corresponding to the current headline.
 
 `T'
      Show all tags associated with the current item.  Because of
@@ -4991,9 +5020,9 @@ The following extensions for Org-mode have been written by other people:
      A blogging plug-in for `org-publish.el'.
      `http://dto.freeshell.org/notebook/OrgMode.html'.  
 
-`org-blogging.el' by  Bastien Guerry
+`blorg.el' by  Bastien Guerry
      Publish Org-mode files as blogs.
-     `http://www.cognition.ens.fr/~guerry/org-blogging.html'.
+     `http://www.cognition.ens.fr/~guerry/blorg.html'.
 
 
 File: org,  Node: Dynamic blocks,  Prev: Extensions,  Up: Extensions and Hacking
@@ -5196,12 +5225,12 @@ Index
 * active region <1>:                     HTML export.         (line  10)
 * active region <2>:                     ASCII export.        (line   9)
 * active region <3>:                     Built-in table editor.
-                                                              (line 165)
-* active region:                         Structure editing.   (line  54)
+                                                              (line 171)
+* active region:                         Structure editing.   (line  64)
 * agenda:                                Weekly/Daily agenda. (line   6)
 * agenda dispatcher:                     Agenda dispatcher.   (line   6)
 * agenda files:                          Agenda files.        (line   6)
-* agenda files, removing buffers:        Agenda commands.     (line 217)
+* agenda files, removing buffers:        Agenda commands.     (line 220)
 * agenda views:                          Agenda views.        (line   6)
 * agenda views, custom:                  Custom agenda views. (line   6)
 * agenda, batch production:              Batch processing.    (line   6)
@@ -5217,6 +5246,7 @@ Index
 * backtrace of an error:                 Feedback.            (line  27)
 * BBDB links:                            External links.      (line   6)
 * block agenda:                          Block agenda.        (line   6)
+* blorg.el:                              Extensions.          (line  33)
 * bold text:                             Enhancing text.      (line  15)
 * Boolean logic, for tag searches:       Tag searches.        (line  21)
 * bug reports:                           Feedback.            (line   6)
@@ -5227,12 +5257,12 @@ Index
 * calc.el:                               Cooperation.         (line   6)
 * calculations, in tables <1>:           Table calculations.  (line   6)
 * calculations, in tables:               Built-in table editor.
-                                                              (line 135)
-* calendar commands, from agenda:        Agenda commands.     (line 178)
+                                                              (line 141)
+* calendar commands, from agenda:        Agenda commands.     (line 181)
 * calendar integration:                  Calendar/Diary integration.
                                                               (line   6)
 * calendar, for selecting date:          The date/time prompt.
-                                                              (line  25)
+                                                              (line  26)
 * CamelCase link completion:             Completion.          (line   6)
 * CamelCase links:                       Internal links.      (line   6)
 * CamelCase links, completion of:        CamelCase links.     (line   6)
@@ -5283,7 +5313,7 @@ Index
 * DEADLINE keyword:                      Time stamps.         (line  53)
 * deadlines:                             Time stamps.         (line   6)
 * demotion, of subtrees:                 Structure editing.   (line   6)
-* diary entries, creating from agenda:   Agenda commands.     (line 185)
+* diary entries, creating from agenda:   Agenda commands.     (line 188)
 * diary integration:                     Calendar/Diary integration.
                                                               (line   6)
 * dictionary word completion:            Completion.          (line   6)
@@ -5328,7 +5358,7 @@ Index
                                                               (line   6)
 * formula, for table column:             Column formulas.     (line   6)
 * formula, in tables:                    Built-in table editor.
-                                                              (line 135)
+                                                              (line 141)
 * global cycling:                        Visibility cycling.  (line  22)
 * global keybindings:                    Activation.          (line   6)
 * global TODO list:                      Global TODO list.    (line   6)
@@ -5413,7 +5443,6 @@ Index
 * ordered lists:                         Plain lists.         (line   6)
 * org-agenda, command:                   Weekly/Daily agenda. (line   9)
 * org-blog.el:                           Extensions.          (line  29)
-* org-blogging.el:                       Extensions.          (line  33)
 * org-mode, turning on:                  Activation.          (line  22)
 * org-mouse.el:                          Extensions.          (line  17)
 * org-publish-project-alist:             Project alist.       (line   6)
@@ -5445,8 +5474,9 @@ Index
 * region, active <1>:                    HTML export.         (line  10)
 * region, active <2>:                    ASCII export.        (line   9)
 * region, active <3>:                    Built-in table editor.
-                                                              (line 165)
-* region, active:                        Structure editing.   (line  54)
+                                                              (line 171)
+* region, active:                        Structure editing.   (line  64)
+* regular expressions, with tags search: Tag searches.        (line  58)
 * remember.el <1>:                       Cooperation.         (line  33)
 * remember.el:                           Remember.            (line   6)
 * remote editing, from agenda:           Agenda commands.     (line 100)
@@ -5540,8 +5570,8 @@ Index
 * transient-mark-mode <1>:               HTML export.         (line  10)
 * transient-mark-mode <2>:               ASCII export.        (line   9)
 * transient-mark-mode <3>:               Built-in table editor.
-                                                              (line 165)
-* transient-mark-mode:                   Structure editing.   (line  54)
+                                                              (line 171)
+* transient-mark-mode:                   Structure editing.   (line  64)
 * trees, sparse:                         Sparse trees.        (line   6)
 * trees, visibility:                     Visibility cycling.  (line   6)
 * tty keybindings:                       TTY keys.            (line   6)
@@ -5570,19 +5600,20 @@ Key Index
  [index ]
 * Menu:
 
+* $:                                     Agenda commands.     (line 113)
 * ':                                     CDLaTeX mode.        (line  43)
-* +:                                     Agenda commands.     (line 132)
-* ,:                                     Agenda commands.     (line 124)
-* -:                                     Agenda commands.     (line 138)
+* +:                                     Agenda commands.     (line 135)
+* ,:                                     Agenda commands.     (line 127)
+* -:                                     Agenda commands.     (line 141)
 * .:                                     Agenda commands.     (line  94)
-* ::                                     Agenda commands.     (line 118)
+* ::                                     Agenda commands.     (line 121)
 * <:                                     The date/time prompt.
-                                                              (line  28)
+                                                              (line  29)
 * <left>:                                Agenda commands.     (line  91)
 * <RET> <1>:                             Agenda commands.     (line  41)
 * <RET> <2>:                             Setting tags.        (line  76)
 * <RET> <3>:                             The date/time prompt.
-                                                              (line  53)
+                                                              (line  54)
 * <RET>:                                 Built-in table editor.
                                                               (line  64)
 * <right>:                               Agenda commands.     (line  86)
@@ -5595,17 +5626,17 @@ Key Index
                                                               (line  57)
 * <TAB> <5>:                             Plain lists.         (line  37)
 * <TAB>:                                 Visibility cycling.  (line  10)
-* > <1>:                                 Agenda commands.     (line 160)
+* > <1>:                                 Agenda commands.     (line 163)
 * >:                                     The date/time prompt.
-                                                              (line  29)
+                                                              (line  30)
 * ^:                                     CDLaTeX mode.        (line  33)
 * _:                                     CDLaTeX mode.        (line  33)
 * `:                                     CDLaTeX mode.        (line  39)
-* a:                                     Agenda commands.     (line 121)
-* C:                                     Agenda commands.     (line 200)
-* c:                                     Agenda commands.     (line 178)
+* a:                                     Agenda commands.     (line 124)
+* C:                                     Agenda commands.     (line 203)
+* c:                                     Agenda commands.     (line 181)
 * C-#:                                   Built-in table editor.
-                                                              (line 155)
+                                                              (line 161)
 * C-,:                                   Agenda files.        (line  18)
 * C-a a L:                               Timeline.            (line  10)
 * C-c !:                                 Creating timestamps. (line  21)
@@ -5616,11 +5647,11 @@ Key Index
 * C-c ' <1>:                             Editing/debugging formulas.
                                                               (line  20)
 * C-c ':                                 Built-in table editor.
-                                                              (line 144)
+                                                              (line 150)
 * C-c *:                                 Built-in table editor.
-                                                              (line 148)
+                                                              (line 154)
 * C-c +:                                 Built-in table editor.
-                                                              (line 165)
+                                                              (line 171)
 * C-c ,:                                 Priorities.          (line  18)
 * C-c -:                                 Built-in table editor.
                                                               (line  92)
@@ -5630,21 +5661,22 @@ Key Index
 * C-c ;:                                 Comment lines.       (line  11)
 * C-c <:                                 Creating timestamps. (line  25)
 * C-c <TAB>:                             Built-in table editor.
-                                                              (line 187)
+                                                              (line 193)
 * C-c =:                                 Built-in table editor.
-                                                              (line 135)
+                                                              (line 141)
 * C-c >:                                 Creating timestamps. (line  29)
 * C-c ? <1>:                             Editing/debugging formulas.
                                                               (line  20)
 * C-c ?:                                 Built-in table editor.
-                                                              (line 161)
+                                                              (line 167)
 * C-c [:                                 Agenda files.        (line  12)
 * C-c \:                                 Tag searches.        (line   9)
 * C-c ]:                                 Agenda files.        (line  15)
-* C-c ^:                                 Built-in table editor.
+* C-c ^ <1>:                             Built-in table editor.
                                                               (line  96)
+* C-c ^:                                 Structure editing.   (line  52)
 * C-c `:                                 Built-in table editor.
-                                                              (line 181)
+                                                              (line 187)
 * C-c a a:                               Weekly/Daily agenda. (line   9)
 * C-c a C:                               Storing searches.    (line   9)
 * C-c a M:                               Matching headline tags.
@@ -5670,7 +5702,7 @@ Key Index
 * C-c C-c <7>:                           Built-in table editor.
                                                               (line  54)
 * C-c C-c:                               Plain lists.         (line  74)
-* C-c C-d <1>:                           Agenda commands.     (line 145)
+* C-c C-d <1>:                           Agenda commands.     (line 148)
 * C-c C-d:                               Creating timestamps. (line  37)
 * C-c C-e:                               Exporting.           (line  19)
 * C-c C-e a:                             ASCII export.        (line   9)
@@ -5696,9 +5728,9 @@ Key Index
 * C-c C-q <1>:                           Editing/debugging formulas.
                                                               (line  20)
 * C-c C-q:                               Built-in table editor.
-                                                              (line 119)
+                                                              (line 125)
 * C-c C-r:                               Visibility cycling.  (line  32)
-* C-c C-s <1>:                           Agenda commands.     (line 142)
+* C-c C-s <1>:                           Agenda commands.     (line 145)
 * C-c C-s:                               Creating timestamps. (line  48)
 * C-c C-t <1>:                           Clocking work time.  (line  26)
 * C-c C-t:                               TODO basics.         (line  13)
@@ -5707,7 +5739,7 @@ Key Index
 * C-c C-w:                               Creating timestamps. (line  41)
 * C-c C-x C-a:                           ARCHIVE tag.         (line  28)
 * C-c C-x C-b:                           Checkboxes.          (line  38)
-* C-c C-x C-c:                           Agenda commands.     (line 207)
+* C-c C-x C-c:                           Agenda commands.     (line 210)
 * C-c C-x C-d:                           Clocking work time.  (line  34)
 * C-c C-x C-i:                           Clocking work time.  (line  12)
 * C-c C-x C-k:                           Structure editing.   (line  39)
@@ -5718,14 +5750,14 @@ Key Index
 * C-c C-x C-t:                           Custom time format.  (line  12)
 * C-c C-x C-u:                           Dynamic blocks.      (line  21)
 * C-c C-x C-w <1>:                       Built-in table editor.
-                                                              (line 108)
+                                                              (line 114)
 * C-c C-x C-w:                           Structure editing.   (line  39)
 * C-c C-x C-x:                           Clocking work time.  (line  30)
 * C-c C-x C-y <1>:                       Built-in table editor.
-                                                              (line 112)
+                                                              (line 118)
 * C-c C-x C-y:                           Structure editing.   (line  46)
 * C-c C-x M-w <1>:                       Built-in table editor.
-                                                              (line 105)
+                                                              (line 111)
 * C-c C-x M-w:                           Structure editing.   (line  43)
 * C-c C-y <1>:                           Clocking work time.  (line  21)
 * C-c C-y:                               Creating timestamps. (line  66)
@@ -5739,7 +5771,7 @@ Key Index
 * C-u C-c $:                             Moving subtrees.     (line  12)
 * C-u C-c .:                             Creating timestamps. (line  16)
 * C-u C-c =:                             Built-in table editor.
-                                                              (line 139)
+                                                              (line 145)
 * C-u C-c C-l:                           Handling links.      (line  43)
 * C-u C-c C-x C-a:                       ARCHIVE tag.         (line  31)
 * C-u C-c C-x C-u <1>:                   Dynamic blocks.      (line  22)
@@ -5748,12 +5780,12 @@ Key Index
 * d:                                     Agenda commands.     (line  65)
 * f:                                     Agenda commands.     (line  44)
 * g:                                     Agenda commands.     (line  72)
-* H:                                     Agenda commands.     (line 204)
-* i:                                     Agenda commands.     (line 185)
-* I:                                     Agenda commands.     (line 165)
+* H:                                     Agenda commands.     (line 207)
+* i:                                     Agenda commands.     (line 188)
+* I:                                     Agenda commands.     (line 168)
 * l:                                     Agenda commands.     (line  51)
 * L:                                     Agenda commands.     (line  32)
-* M:                                     Agenda commands.     (line 191)
+* M:                                     Agenda commands.     (line 194)
 * M-<down>:                              Built-in table editor.
                                                               (line  82)
 * M-<left> <1>:                          Built-in table editor.
@@ -5774,7 +5806,7 @@ Key Index
 * M-S-<down> <2>:                        Plain lists.         (line  59)
 * M-S-<down>:                            Structure editing.   (line  36)
 * M-S-<left> <1>:                        The date/time prompt.
-                                                              (line  50)
+                                                              (line  51)
 * M-S-<left> <2>:                        Built-in table editor.
                                                               (line  76)
 * M-S-<left> <3>:                        Plain lists.         (line  65)
@@ -5783,7 +5815,7 @@ Key Index
 * M-S-<RET> <2>:                         Plain lists.         (line  52)
 * M-S-<RET>:                             Structure editing.   (line  18)
 * M-S-<right> <1>:                       The date/time prompt.
-                                                              (line  47)
+                                                              (line  48)
 * M-S-<right> <2>:                       Built-in table editor.
                                                               (line  79)
 * M-S-<right> <3>:                       Plain lists.         (line  65)
@@ -5794,54 +5826,54 @@ Key Index
 * M-S-<up>:                              Structure editing.   (line  33)
 * mouse-1 <1>:                           Agenda commands.     (line  35)
 * mouse-1 <2>:                           The date/time prompt.
-                                                              (line  32)
+                                                              (line  33)
 * mouse-1:                               Handling links.      (line  72)
 * mouse-2 <1>:                           Agenda commands.     (line  35)
 * mouse-2:                               Handling links.      (line  72)
 * mouse-3 <1>:                           Agenda commands.     (line  28)
 * mouse-3:                               Handling links.      (line  77)
 * n:                                     Agenda commands.     (line  19)
-* O:                                     Agenda commands.     (line 167)
+* O:                                     Agenda commands.     (line 170)
 * o:                                     Agenda commands.     (line  59)
-* P:                                     Agenda commands.     (line 129)
+* P:                                     Agenda commands.     (line 132)
 * p:                                     Agenda commands.     (line  20)
-* q:                                     Agenda commands.     (line 214)
+* q:                                     Agenda commands.     (line 217)
 * r <1>:                                 Agenda commands.     (line  76)
 * r:                                     Global TODO list.    (line  20)
-* S:                                     Agenda commands.     (line 195)
+* S:                                     Agenda commands.     (line 198)
 * s:                                     Agenda commands.     (line  83)
-* S-<down> <1>:                          Agenda commands.     (line 138)
+* S-<down> <1>:                          Agenda commands.     (line 141)
 * S-<down> <2>:                          The date/time prompt.
-                                                              (line  41)
+                                                              (line  42)
 * S-<down> <3>:                          Creating timestamps. (line  58)
 * S-<down> <4>:                          Priorities.          (line  25)
 * S-<down>:                              Plain lists.         (line  55)
-* S-<left> <1>:                          Agenda commands.     (line 156)
+* S-<left> <1>:                          Agenda commands.     (line 159)
 * S-<left> <2>:                          The date/time prompt.
-                                                              (line  38)
+                                                              (line  39)
 * S-<left> <3>:                          Creating timestamps. (line  53)
 * S-<left>:                              TODO basics.         (line  20)
 * S-<RET>:                               Built-in table editor.
-                                                              (line 170)
-* S-<right> <1>:                         Agenda commands.     (line 148)
+                                                              (line 176)
+* S-<right> <1>:                         Agenda commands.     (line 151)
 * S-<right> <2>:                         The date/time prompt.
-                                                              (line  35)
+                                                              (line  36)
 * S-<right> <3>:                         Creating timestamps. (line  53)
 * S-<right>:                             TODO basics.         (line  20)
 * S-<TAB> <1>:                           Built-in table editor.
                                                               (line  61)
 * S-<TAB>:                               Visibility cycling.  (line  22)
-* S-<up> <1>:                            Agenda commands.     (line 132)
+* S-<up> <1>:                            Agenda commands.     (line 135)
 * S-<up> <2>:                            The date/time prompt.
-                                                              (line  44)
+                                                              (line  45)
 * S-<up> <3>:                            Creating timestamps. (line  58)
 * S-<up> <4>:                            Priorities.          (line  25)
 * S-<up>:                                Plain lists.         (line  55)
-* T:                                     Agenda commands.     (line 113)
+* T:                                     Agenda commands.     (line 116)
 * t:                                     Agenda commands.     (line 103)
 * w:                                     Agenda commands.     (line  62)
-* x:                                     Agenda commands.     (line 217)
-* X:                                     Agenda commands.     (line 170)
+* x:                                     Agenda commands.     (line 220)
+* X:                                     Agenda commands.     (line 173)
 
 
 
@@ -5860,142 +5892,143 @@ Ref: Visibility cycling-Footnote-122201
 Ref: Visibility cycling-Footnote-222259
 Node: Motion22309
 Node: Structure editing23093
-Node: Archiving25409
-Node: ARCHIVE tag25967
-Node: Moving subtrees27760
-Node: Sparse trees28801
-Ref: Sparse trees-Footnote-130932
-Ref: Sparse trees-Footnote-231024
-Node: Plain lists31139
-Ref: Plain lists-Footnote-134664
-Ref: Plain lists-Footnote-235021
-Node: Tables35205
-Node: Built-in table editor35753
-Node: Narrow columns43361
-Ref: Narrow columns-Footnote-145300
-Node: Table calculations45346
-Node: Formula syntax46666
-Ref: Formula syntax-Footnote-149571
-Node: Lisp formulas49871
-Node: Column formulas50660
-Node: Advanced features52422
-Node: Named-field formulas55676
-Node: Editing/debugging formulas56316
-Node: Appetizer58074
-Node: orgtbl-mode59177
-Node: table.el59668
-Node: Hyperlinks60645
-Node: Link format61418
-Node: Internal links62711
-Ref: Internal links-Footnote-164700
-Node: Radio targets64832
-Node: CamelCase links65547
-Node: External links66141
-Node: Handling links68272
-Ref: Handling links-Footnote-172924
-Ref: Handling links-Footnote-273161
-Node: Link abbreviations73235
-Node: Search options74914
-Ref: Search options-Footnote-176692
-Node: Custom searches76773
-Node: Remember77821
-Node: TODO items81511
-Node: TODO basics82493
-Node: TODO extensions84020
-Node: Workflow states84815
-Node: TODO types85683
-Ref: TODO types-Footnote-187341
-Node: Per file keywords87423
-Ref: Per file keywords-Footnote-188877
-Node: Priorities89078
-Node: Breaking down tasks90322
-Ref: Breaking down tasks-Footnote-190841
-Node: Checkboxes90937
-Node: Timestamps93692
-Node: Time stamps94153
-Ref: Time stamps-Footnote-197642
-Node: Creating timestamps97758
-Node: The date/time prompt100384
-Ref: The date/time prompt-Footnote-1102077
-Node: Custom time format102183
-Node: Progress logging103742
-Node: Closing items104271
-Node: Clocking work time105175
-Ref: Clocking work time-Footnote-1108799
-Node: Tags108925
-Node: Tag inheritance109687
-Node: Setting tags110624
-Ref: Setting tags-Footnote-1114823
-Ref: Setting tags-Footnote-2114935
-Node: Tag searches115018
-Node: Agenda views117018
-Node: Agenda files119111
-Ref: Agenda files-Footnote-1120071
-Ref: Agenda files-Footnote-2120220
-Node: Agenda dispatcher120413
-Node: Weekly/Daily agenda122030
-Node: Calendar/Diary integration122995
-Node: Global TODO list124333
-Node: Matching headline tags126493
-Node: Timeline127551
-Node: Presentation and sorting128214
-Node: Categories128992
-Node: Time-of-day specifications129656
-Node: Sorting of agenda items131634
-Node: Agenda commands132916
-Node: Custom agenda views139085
-Node: Storing searches139760
-Node: Block agenda141672
-Node: Setting Options142902
-Node: Batch processing145614
-Node: Embedded LaTeX146744
-Ref: Embedded LaTeX-Footnote-1147836
-Node: Math symbols148026
-Node: Subscripts and Superscripts148791
-Node: LaTeX fragments149635
-Ref: LaTeX fragments-Footnote-1151743
-Node: Processing LaTeX fragments152005
-Node: CDLaTeX mode152951
-Ref: CDLaTeX mode-Footnote-1155435
-Node: Exporting155583
-Node: ASCII export156897
-Node: HTML export158187
-Node: XOXO export161023
-Node: iCalendar export161462
-Node: Text interpretation163285
-Node: Comment lines163764
-Node: Enhancing text164235
-Node: Export options165927
-Node: Publishing167594
-Ref: Publishing-Footnote-1168390
-Node: Configuration168586
-Node: Project alist169304
-Node: Sources and destinations170370
-Node: Selecting files171100
-Node: Publishing action171848
-Node: Publishing options173081
-Node: Publishing links175233
-Node: Project page index176746
-Node: Sample configuration177524
-Node: Simple example178016
-Node: Complex example178689
-Node: Triggering publication180765
-Node: Miscellaneous181450
-Node: Completion182084
-Node: Customization183555
-Node: In-buffer settings184140
-Node: The very busy C-c C-c key187759
-Node: Clean view189403
-Node: TTY keys191980
-Node: Interaction193589
-Node: Cooperation193986
-Node: Conflicts195853
-Node: Bugs197445
-Node: Extensions and Hacking199068
-Node: Extensions199554
-Node: Dynamic blocks201355
-Node: History and Acknowledgments203282
-Node: Index208289
-Node: Key Index235377
+Node: Archiving25919
+Node: ARCHIVE tag26477
+Node: Moving subtrees28270
+Node: Sparse trees29311
+Ref: Sparse trees-Footnote-131442
+Ref: Sparse trees-Footnote-231534
+Node: Plain lists31649
+Ref: Plain lists-Footnote-135174
+Ref: Plain lists-Footnote-235531
+Node: Tables35715
+Node: Built-in table editor36263
+Node: Narrow columns44291
+Ref: Narrow columns-Footnote-146230
+Node: Table calculations46276
+Node: Formula syntax47596
+Ref: Formula syntax-Footnote-150501
+Node: Lisp formulas50801
+Node: Column formulas51590
+Node: Advanced features53352
+Node: Named-field formulas56606
+Node: Editing/debugging formulas57246
+Node: Appetizer59004
+Node: orgtbl-mode60107
+Node: table.el60598
+Node: Hyperlinks61575
+Node: Link format62348
+Node: Internal links63641
+Ref: Internal links-Footnote-165630
+Node: Radio targets65762
+Node: CamelCase links66477
+Node: External links67071
+Node: Handling links69202
+Ref: Handling links-Footnote-173854
+Ref: Handling links-Footnote-274091
+Node: Link abbreviations74165
+Node: Search options75844
+Ref: Search options-Footnote-177624
+Node: Custom searches77705
+Node: Remember78753
+Node: TODO items82447
+Node: TODO basics83429
+Node: TODO extensions84956
+Node: Workflow states85751
+Node: TODO types86619
+Ref: TODO types-Footnote-188277
+Node: Per file keywords88359
+Ref: Per file keywords-Footnote-189813
+Node: Priorities90014
+Node: Breaking down tasks91258
+Ref: Breaking down tasks-Footnote-191777
+Node: Checkboxes91873
+Node: Timestamps94628
+Node: Time stamps95089
+Ref: Time stamps-Footnote-198583
+Ref: Time stamps-Footnote-298699
+Node: Creating timestamps98854
+Node: The date/time prompt101480
+Ref: The date/time prompt-Footnote-1103246
+Node: Custom time format103352
+Node: Progress logging104911
+Node: Closing items105440
+Node: Clocking work time106344
+Ref: Clocking work time-Footnote-1109968
+Node: Tags110094
+Node: Tag inheritance110856
+Node: Setting tags111793
+Ref: Setting tags-Footnote-1115992
+Ref: Setting tags-Footnote-2116104
+Node: Tag searches116187
+Node: Agenda views118416
+Node: Agenda files120509
+Ref: Agenda files-Footnote-1121469
+Ref: Agenda files-Footnote-2121618
+Node: Agenda dispatcher121811
+Node: Weekly/Daily agenda123428
+Node: Calendar/Diary integration124393
+Node: Global TODO list125731
+Node: Matching headline tags127891
+Node: Timeline128949
+Node: Presentation and sorting129612
+Node: Categories130390
+Node: Time-of-day specifications131054
+Node: Sorting of agenda items133032
+Node: Agenda commands134314
+Node: Custom agenda views140552
+Node: Storing searches141227
+Node: Block agenda143139
+Node: Setting Options144369
+Node: Batch processing147081
+Node: Embedded LaTeX148211
+Ref: Embedded LaTeX-Footnote-1149303
+Node: Math symbols149493
+Node: Subscripts and Superscripts150258
+Node: LaTeX fragments151102
+Ref: LaTeX fragments-Footnote-1153210
+Node: Processing LaTeX fragments153472
+Node: CDLaTeX mode154418
+Ref: CDLaTeX mode-Footnote-1156902
+Node: Exporting157050
+Node: ASCII export158364
+Node: HTML export159654
+Node: XOXO export162490
+Node: iCalendar export162929
+Node: Text interpretation164752
+Node: Comment lines165231
+Node: Enhancing text165702
+Node: Export options167394
+Node: Publishing169061
+Ref: Publishing-Footnote-1169857
+Node: Configuration170053
+Node: Project alist170771
+Node: Sources and destinations171837
+Node: Selecting files172567
+Node: Publishing action173315
+Node: Publishing options174548
+Node: Publishing links176700
+Node: Project page index178213
+Node: Sample configuration178991
+Node: Simple example179483
+Node: Complex example180156
+Node: Triggering publication182232
+Node: Miscellaneous182917
+Node: Completion183551
+Node: Customization185022
+Node: In-buffer settings185607
+Node: The very busy C-c C-c key189226
+Node: Clean view190870
+Node: TTY keys193447
+Node: Interaction195056
+Node: Cooperation195453
+Node: Conflicts197320
+Node: Bugs198912
+Node: Extensions and Hacking200535
+Node: Extensions201021
+Node: Dynamic blocks202808
+Node: History and Acknowledgments204735
+Node: Index209742
+Node: Key Index236903
 
 End Tag Table

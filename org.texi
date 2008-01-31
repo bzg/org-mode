@@ -3,7 +3,7 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.56
+@set VERSION 4.57
 @set DATE November 2006
 
 @dircategory Emacs
@@ -730,6 +730,15 @@ Yank subtree from kill ring.  This does modify the level of the subtree to
 make sure the tree fits in nicely at the yank position.  The yank
 level can also be specified with a prefix arg, or by yanking after a
 headline marker like @samp{****}.
+@kindex C-c ^
+@item C-c ^
+Sort same-level entries.  When there is an active region, all entries in
+the region will be sorted.  Otherwise the children of the current
+headline are sorted.  The command prompts for the sorting method, which
+can be alphabetically, numerically, by time (using the first time stamp
+in each entry), and each of these in reverse order.  With a @kbd{C-u}
+prefix, sorting will be case-sensitive.  With two @kbd{C-u C-u}
+prefixes, duplicate entries will also be removed.
 @end table
 
 @cindex region, active
@@ -1126,10 +1135,15 @@ is created above the current line.
 
 @kindex C-c ^
 @item C-c ^
-Sort the table lines in the region.  Point and mark must be in the first
-and last line to be included, and must be in the column that should be
-used for sorting.  The command prompts for numerical versus
-alphanumerical sorting.
+Sort the table lines in the region.  The position of point indicates the
+column to be used for sorting, and the range of lines is the range
+between the nearest horizontal separator lines, or the entire table.  If
+point is before the first column, you will be prompted for the sorting
+column.  If there is an active region, the mark specifies the first line
+and the sorting column, while point should be in the last line to be
+included into the sorting.  The command prompts for the sorting type
+(alphabetically, numerically, or by time).  When called with a prefix
+argument, alphabetic sorting will be case-sensitive.
 
 @tsubheading{Regions}
 @kindex C-c C-x M-w
@@ -2042,7 +2056,7 @@ sparse tree with the matches.
 @end table
 
 As a degenerate case, a file link with an empty file name can be used
-to search the current file.  For example, @code{<file:::find me>} does
+to search the current file.  For example, @code{[[file:::find me]]} does
 a search for @samp{find me} in the current file, just as
 @samp{[[find me]]} would.
 
@@ -2114,7 +2128,7 @@ When you call @kbd{M-x remember} to remember something, org will prompt
 for a key to select the template and then prepare the buffer like
 @example
 * TODO
-  <file:link to where you called remember>
+  [[file:link to where you called remember]]
 @end example
 
 @noindent or
@@ -2122,7 +2136,7 @@ for a key to select the template and then prepare the buffer like
 @example
 * [2006-03-21 Tue 15:37]
 
-  <file:link to where you called remember>
+  [[file:link to where you called remember]]
 @end example
 
 @noindent See the variable @code{org-remember-templates} for more details.
@@ -2554,10 +2568,12 @@ example:
 If a time stamp is preceded by the word @samp{SCHEDULED:}, it means you
 are planning to start working on that task on the given date. So this is
 not about recording an event, but about planning your work.  The
-headline will be listed under the given date.  In addition, a reminder
-that the scheduled date has passed will be present in the compilation
-for @emph{today}, until the entry is marked DONE.  I.e., the task will
-automatically be forwarded until completed.
+headline will be listed under the given date@footnote{It will still be
+listed on that date after it has been marked DONE.  If you don't like
+this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
+addition, a reminder that the scheduled date has passed will be present
+in the compilation for @emph{today}, until the entry is marked DONE.
+I.e., the task will automatically be forwarded until completed.
 
 @example
 *** TODO Call Trillian for a date on New Years Eve.
@@ -2575,7 +2591,7 @@ continuing until the entry is marked DONE.  An example:
 
 @example
 *** TODO write article about the Earth for the Guide
-    The editor in charge is <bbdb:Ford Prefect>
+    The editor in charge is [[bbdb:Ford Prefect]]
     DEADLINE: <2004-02-29 Sun>
 @end example
 @item Time stamp with CLOSED keyword
@@ -2707,6 +2723,7 @@ specified with the current date and time.  For example:
   22 sept 0:34  --> currentyear-09-22 0:34
   12            --> currentyear-currentmonth-12
   Fri           --> nearest Friday (today or later)
+  +4            --> 4 days from now (if +N is the only thing given)
 @end example
 
 The function understands English month and weekday abbreviations.  If
@@ -3154,6 +3171,12 @@ nor @samp{NEXT}
 Select @samp{:WORK:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
+
+@cindex regular expressions, with tags search
+Any element of the tag/todo match can be a regular expression - in this
+case it must be enclosed in curly braces.  For example,
+@samp{WORK+@{^BOSS.*@}} matches headlines that contain the tag
+@samp{WORK} and any tag @i{starting} with @samp{BOSS}.
 
 @node Agenda views, Embedded LaTeX, Tags, Top
 @chapter Agenda Views
@@ -3685,6 +3708,10 @@ Delete the current agenda item along with the entire subtree belonging
 to it in the original Org-mode file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
 variable @code{org-agenda-confirm-kill}.
+
+@kindex $
+@item $
+Archive the subtree corresponding to the current headline.
 
 @kindex T
 @item T
@@ -5463,10 +5490,10 @@ caused by the preparations for the 22.1 release.  In the mean time,
 @item @file{org-blog.el} by David O'Toole
 A blogging plug-in for @file{org-publish.el}.@*
 @url{http://dto.freeshell.org/notebook/OrgMode.html}.
-@cindex @file{org-blogging.el}
-@item @file{org-blogging.el} by  Bastien Guerry
+@cindex @file{blorg.el}
+@item @file{blorg.el} by  Bastien Guerry
 Publish Org-mode files as
-blogs. @url{http://www.cognition.ens.fr/~guerry/org-blogging.html}.
+blogs. @url{http://www.cognition.ens.fr/~guerry/blorg.html}.
 @end table
 
 @node Dynamic blocks,  , Extensions, Extensions and Hacking

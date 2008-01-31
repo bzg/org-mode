@@ -1,5 +1,5 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.56}
+\def\orgversionnumber{4.57}
 \def\year{2006}
 %
 %**start of header
@@ -613,6 +613,7 @@ To set categories, add lines like$^2$:
 \key{digit argument}{0-9}
 \key{change state of current TODO item}{t}
 \key{kill item and source}{C-k}
+\key{archive the subtree}{\$}
 \key{show tags of current headline}{T}
 \key{set tags for current headline}{:}
 \key{toggle ARCHIVE tag}{a}
@@ -624,10 +625,13 @@ To set categories, add lines like$^2$:
 \key{change timestamp to today}{>}
 \key{insert new entry into diary}{i}
 
-\key{Start the clock on current item (clock-in)}{I}
-\key{Stop the clock (clock-out)}{O}
-\key{Cancel current clock}{X}
+\key{start the clock on current item (clock-in)}{I}
+\key{stop the clock (clock-out)}{O}
+\key{cancel current clock}{X}
 
+{\bf Misc}
+
+\key{Open link in current line}{C-c C-o}
 
 {\bf Calendar commands}
 
@@ -674,20 +678,19 @@ some other place.
 \key{links become HTML links}{http:... etc}
 \key{include html tags}{@<b>...@</b>}
 
-{\bf Export options}
-
-Include additional information for export by putting these anywhere in the
-org file.  Use {\tt M-TAB} completion to make sure to get the right
-keywords. {\tt M-TAB} again just after keyword is complete inserts examples.
-
-\key{the title to be shown}{\#+TITLE:}
-\key{the author}{\#+AUTHOR:}
-\key{authors email address}{\#+EMAIL:}
-\key{language code for html}{\#+LANGUAGE:}
-\key{free text description of file}{\#+TEXT:}
-\key{... which can carry over multiple lines}{\#+TEXT:}
-%\key{settings for the export process - see below}{\#+OPTIONS:}
-\key{settings for the export process}{\#+OPTIONS:}
+%{\bf Export options}
+%
+%Include additional information for export by putting these anywhere in the
+%org file.  Use {\tt M-TAB} completion to make sure to get the right
+%keywords. {\tt M-TAB} again just after keyword is complete inserts examples.
+%
+%\key{the title to be shown}{\#+TITLE:}
+%\key{the author}{\#+AUTHOR:}
+%\key{authors email address}{\#+EMAIL:}
+%\key{language code for html}{\#+LANGUAGE:}
+%\key{free text description of file}{\#+TEXT:}
+%\key{... which can carry over multiple lines}{\#+TEXT:}
+%\key{settings for the export process}{\#+OPTIONS:}
 
 %\key{set number of headline levels for export}{H:2}
 %\key{turn on/off section numbers}{num:t}
