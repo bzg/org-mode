@@ -1,7 +1,7 @@
 % Reference Card for Org Mode
-\def\orgversionnumber{4.45}
+\def\orgversionnumber{4.46}
 \def\year{2006}
-%
+g%
 %**start of header
 \newcount\columnsperpage
 
@@ -329,7 +329,7 @@ To set archive location for current file, add a line like$^2$:
 \key{view TODO's in sparse tree}{C-c C-v}
 \key{global TODO list in agenda mode}{C-c t$^1$}
 \key{create sparse tree with all deadlines due}{C-c C-w}
-\key{time sorted view of current org file}{C-c C-r}
+\key{time sorted view of current org file}{C-c a L}
 %\key{agenda for the week}{C-c a$^1$}
 %\key{agenda for date at cursor}{C-c C-o}
 
@@ -511,7 +511,7 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{toggle checkbox(es) in region/entry/at point}{C-c C-x C-b}
 \key{toggle checkbox at point}{C-c C-c}
 \metax{checkbox statistics cookies: insert {\tt [/]} or {\tt [\%]}}{}
-\key{update checkbox satistics}{C-c \#}
+\key{update checkbox statistics (\kbd{C-u} : whole file)}{C-c \#}
 
 \section{Tags}
 
@@ -568,8 +568,10 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{compile global TODO list}{C-c a t$^1$}
 \key{compile TODO list for specific keyword}{C-c a T$^1$}
 \key{match tags in agenda files}{C-c a m$^1$}
+\key{match tags in TODO entries}{C-c a M$^1$}
+\key{show timeline of current org file}{C-c a L$^1$}
+\key{configure custom commands}{C-c a C$^1$}
 \key{agenda for date at cursor}{C-c C-o}
-\key{show timeline of current org file}{C-c C-r}
 
 \vskip 1mm
 To set categories, add lines like$^2$:

@@ -2,10 +2,10 @@ This is org, produced by makeinfo version 4.8 from org.texi.
 
 INFO-DIR-SECTION Emacs
 START-INFO-DIR-ENTRY
-* Org Mode: (org).	outline-based notes management and organizer
+* Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.45).
+   This manual is for Org-mode (version 4.46).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.45).
+This manual is for Org-mode (version 4.46).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -159,14 +159,25 @@ Agenda Views
 * Global TODO list::            All unfinished action items
 * Matching headline tags::      Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
+* Custom agenda views::         Defining special searches and views
 
 The weekly/daily agenda
 
+* Calendar/Diary integration::  Integrating Anniversaries and more
+
+Presentation and sorting
+
 * Categories::                  Not all tasks are equal
 * Time-of-day specifications::  How the agenda knows the time
-* Calendar/Diary integration::  Integrating Anniversaries and more
 * Sorting of agenda items::     The order of things
+
+Custom agenda views
+
+* Storing searches::            Type once, use often
+* Block agenda::                All the stuff you need in a single buffer
+* Setting Options::             Changing the rules
 
 Embedded LaTeX
 
@@ -856,7 +867,7 @@ horizontal separator line and will be expanded on the next re-align to
 span the whole table width.  So, to create the above table, you would
 only type
 
-     |Name|Phone|Age
+     |Name|Phone|Age|
      |-
 
 and then press <TAB> to align the table and start filling in fields.
@@ -2081,9 +2092,8 @@ by starting it with the string `[ ]'.  This feature is similar to TODO
 items (*note TODO items::), but more lightweight.  Checkboxes are not
 included into the global TODO list, so they are often great to split a
 task into a number of simple steps.  Or you can use them in a shopping
-list to select the items you need to buy.  To toggle a checkbox, use
-`C-c C-c', or try Piotr Zielinski's `org-mouse.el'.  Here is an example
-of a checkbox list.
+list.  To toggle a checkbox, use `C-c C-c', or try Piotr Zielinski's
+`org-mouse.el'.  Here is an example of a checkbox list.
 
      * TODO Organize party [3/6]
        - call people [1/3]
@@ -2104,7 +2114,7 @@ headline/item.  You have to insert the cookie yourself by typing either
 `[/]' or `[%]'.  In the first case you get an `n out of m' result, in
 the second case you get information about the percentage of checkboxes
 checked (in the above example, this would be `[50%]' and `[33%],
-respectively'.
+respectively').
 
 The following commands work with checkboxes:
 
@@ -2119,8 +2129,8 @@ The following commands work with checkboxes:
           independently, use a prefix argument.
 
         - If the cursor is in a headline, toggle checkboxes in the
-          region between this headline and the next.  This does _not_
-          act on the entire subtree, just the current entry.
+          region between this headline and the next (so _not_ the
+          entire subtree).
 
         - If no active region, just toggle the checkbox at point.
      
@@ -2611,15 +2621,21 @@ are important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
    Org-mode can select items based on various criteria, and display them
-in a separate buffer.  Three different views are provided:
+in a separate buffer.  Five different view types are provided:
 
    * an _agenda_ that is like a calendar and shows information for
      specific dates
 
-   * a _TODO list_ that covers all unfinished action items, and
+   * a _TODO list_ that covers all unfinished action items,
 
    * a _tags view_ that shows information based on the tags associated
-     with headlines in the outline tree.
+     with headlines in the outline tree,
+
+   * a _timeline view_ that shows all events in a single Org-mode file,
+     in time-sorted view
+
+   * _custom views_ that are special tag and keyword searches and
+     combinations of different views.
 
 The extracted information is displayed in a special _agenda buffer_.
 This buffer is read-only, but provides commands to visit the
@@ -2634,7 +2650,9 @@ edit these files remotely.
 * Global TODO list::            All unfinished action items
 * Matching headline tags::      Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
+* Custom agenda views::         Defining special searches and views
 
 
 File: org,  Node: Agenda files,  Next: Agenda dispatcher,  Prev: Agenda views,  Up: Agenda views
@@ -2668,7 +2686,7 @@ visit any of them.
 name, then the list of agenda files will be maintained in that external
 file.
 
-   (2) When using the dispatcher pressing `1' before selecting a
+   (2) When using the dispatcher, pressing `1' before selecting a
 command will actually limit the command to the current file, and ignore
 `org-agenda-files' until the next dispatcher command.
 
@@ -2694,31 +2712,24 @@ command.  The dispatcher offers the following default commands:
      Create a list of headlines matching a TAGS expression (*note
      Matching headline tags::).
 
+`L'
+     Create the timeline view for the current buffer (*note Timeline::).
+
+`1'
+     Restrict an agenda command to the current buffer.  After pressing
+     `1', you still need to press the character selecting the command.
+
+`0'
+     If there is an active region, restrict the following agenda
+     command to the region.  Otherwise, restrict it to the current
+     subtree.  After pressing `0', you still need to press the
+     character selecting the command.
+
    You can also define custom commands that will be accessible through
-the dispatcher, just like the default commands.  Custom commands are
-global searches for tags and specific TODO keywords, or a variety of
-sparse tree creating commands (*note Sparse trees::).  As sparse trees
-are only defined for a single org-mode file, these latter commands act
-on the current buffer instead of the list of agenda files.
-
-   Custom commands are configured in the variable
-`org-agenda-custom-commands'.  You can customize this variable, for
-example by pressing `C-c a C'.  You can also directly set it with Emacs
-Lisp in `.emacs'.  For example:
-
-     (setq org-agenda-custom-commands
-           '(("w" todo "WAITING")
-             ("u" tags "+BOSS-URGENT")
-             ("U" tags-tree "+BOSS-URGENT")
-             ("f" occur-tree "\\<FIXME\\>")))
-
-will define `C-c a w' as a global search for TODO entries with
-`WAITING' as the TODO keyword, `C-c a u' as a global tags search for
-headlines marked `:BOSS:' but not `:URGENT:', `C-c a U' to do the same
-search but only in the current buffer and display the result as a
-sparse tree, and `C-c a f' to create a sparse tree with all entries
-containing the word `FIXME'.  For more information, look at the
-documentation string of the variable `org-agenda-custom-commands'.
+the dispatcher, just like the default commands.  This includes the
+possibility to create extended agenda buffers that contain several
+blocks together, for example the weekly agenda, the global TODO list and
+a number of special tags matches.  *Note Custom agenda views::.
 
 
 File: org,  Node: Weekly/Daily agenda,  Next: Global TODO list,  Prev: Agenda dispatcher,  Up: Agenda views
@@ -2743,20 +2754,153 @@ buffer.  The commands available in the Agenda buffer are listed in
 
 * Menu:
 
+* Calendar/Diary integration::  Integrating Anniversaries and more
+
+
+File: org,  Node: Calendar/Diary integration,  Prev: Weekly/Daily agenda,  Up: Weekly/Daily agenda
+
+8.3.1 Calendar/Diary integration
+--------------------------------
+
+Emacs contains the calendar and diary by Edward M. Reingold.  The
+calendar displays a three-month calendar with holidays from different
+countries and cultures.  The diary allows you to keep track of
+anniversaries, lunar phases, sunrise/set, recurrent appointments
+(weekly, monthly) and more.  In this way, it is quite complementary to
+Org-mode.  It can be very useful to combine output from Org-mode with
+the diary.
+
+   In order to include entries from the Emacs diary into Org-mode's
+agenda, you only need to customize the variable
+
+     (setq org-agenda-include-diary t)
+
+After that, everything will happen automatically.  All diary entries
+including holidays, anniversaries etc will be included in the agenda
+buffer created by Org-mode.  <SPC>, <TAB>, and <RET> can be used from
+the agenda buffer to jump to the diary file in order to edit existing
+diary entries.  The `i' command to insert new entries for the current
+date works in the agenda buffer, as well as the commands `S', `M', and
+`C' to display Sunrise/Sunset times, show lunar phases and to convert
+to other calendars, respectively.  `c' can be used to switch back and
+forth between calendar and agenda.
+
+
+File: org,  Node: Global TODO list,  Next: Matching headline tags,  Prev: Weekly/Daily agenda,  Up: Agenda views
+
+8.4 The global TODO list
+========================
+
+The global TODO list contains all unfinished TODO items, formatted and
+collected into a single place.
+
+`C-c a t'
+     Show the global TODO list.  This collects the TODO items from all
+     agenda files (*note Agenda views::) into a single buffer.  The
+     buffer is in `agenda-mode', so there are commands to examine and
+     manipulate the TODO entries directly from that buffer (*note
+     Agenda commands::).  
+
+`C-c a T'
+     Like the above, but allows selection of a specific TODO keyword.
+     You can also do this by specifying a prefix argument to `C-c a t'.
+     With a `C-u' prefix you are prompted for a keyword.  With a
+     numeric prefix, the Nth keyword in `org-todo-keywords' is selected.  The
+     `r' key in the agenda buffer regenerates it, and you can give a
+     prefix argument to this command to change the selected TODO
+     keyword, for example `3 r'.  If you often need a search for a
+     specific keyword, define a custom command for it (*note Agenda
+     dispatcher::).
+
+   Remote editing of TODO items means that you can change the state of a
+TODO entry with a single key press.  The commands available in the TODO
+list are described in *Note Agenda commands::.
+
+   Normally the global todo list simply shows all headlines with TODO
+keywords.  This list can become very long.  There are two ways to keep
+it more compact:
+   - Some people view a TODO item that has been _scheduled_ for
+     execution (*note Time stamps::) as no longer _open_.  Configure the
+     variable `org-agenda-todo-ignore-scheduled' to exclude scheduled
+     items from the global TODO list.
+
+   - TODO items may have sublevels to break up the task into subtasks.
+     In such cases it may be enough to list only the highest level TODO
+     headline and omit the sublevels from the global list.  Configure
+     the variable `org-agenda-todo-list-sublevels' to get this behavior.
+
+
+File: org,  Node: Matching headline tags,  Next: Timeline,  Prev: Global TODO list,  Up: Agenda views
+
+8.5 Matching headline tags
+==========================
+
+If headlines in the agenda files are marked with _tags_ (*note Tags::),
+you can select headlines based on the tags that apply to them and
+collect them into an agenda buffer.
+
+`C-c a m'
+     Produce a list of all headlines that match a given set of tags.
+     The command prompts for a selection criterion, which is a boolean
+     logic expression with tags, like `+WORK+URGENT-WITHBOSS' or
+     `WORK|HOME' (*note Tags::).  If you often need a specific search,
+     define a custom command for it (*note Agenda dispatcher::).  
+
+`C-c a M'
+     Like `C-c a m', but only select headlines that are also TODO items
+     and force checking subitems (see variable
+     `org-tags-match-list-sublevels').
+
+   The commands available in the tags list are described in *Note
+Agenda commands::.
+
+
+File: org,  Node: Timeline,  Next: Presentation and sorting,  Prev: Matching headline tags,  Up: Agenda views
+
+8.6 Timeline for a single file
+==============================
+
+The timeline summarizes all time-stamped items from a single Org-mode
+file in a _time-sorted view_.  The main purpose of this command is to
+give an overview over events in a project.
+
+`C-c a L'
+     Show a time-sorted view of the org file, with all time-stamped
+     items.  When called with a `C-u' prefix, all unfinished TODO
+     entries (scheduled or not) are also listed under the current date.
+
+The commands available in the timeline buffer are listed in *Note
+Agenda commands::.
+
+
+File: org,  Node: Presentation and sorting,  Next: Agenda commands,  Prev: Timeline,  Up: Agenda views
+
+8.7 Presentation and sorting
+============================
+
+Before displaying items in an agenda view, Org-mode visually prepares
+the items and sorts them.  Each item occupies a single line.  The line
+starts with a _prefix_ that contains the _category_ (*note
+Categories::) of the item and other important information.  You can
+customize the prefix using the option `org-agenda-prefix-format'.  The
+prefix is followed by a cleaned-up version of the outline headline
+associated with the item.
+
+* Menu:
+
 * Categories::                  Not all tasks are equal
 * Time-of-day specifications::  How the agenda knows the time
-* Calendar/Diary integration::  Integrating Anniversaries and more
 * Sorting of agenda items::     The order of things
 
 
-File: org,  Node: Categories,  Next: Time-of-day specifications,  Prev: Weekly/Daily agenda,  Up: Weekly/Daily agenda
+File: org,  Node: Categories,  Next: Time-of-day specifications,  Prev: Presentation and sorting,  Up: Presentation and sorting
 
-8.3.1 Categories
+8.7.1 Categories
 ----------------
 
-In the agenda buffer, each entry is preceded by a _category_, which is
-derived from the file name.  The category can also be set with a
-special line anywhere in the buffer, looking like this:
+The category is a broad label assigned to each agenda item.  By default,
+the category is simply derived from the file name, but you can also
+specify it with a special line in the buffer, like this:
 
      #+CATEGORY: Thesis
 
@@ -2766,9 +2910,9 @@ any text before the first CATEGORY line).  The display in the agenda
 buffer looks best if the category is not longer than 10 characters.
 
 
-File: org,  Node: Time-of-day specifications,  Next: Calendar/Diary integration,  Prev: Categories,  Up: Weekly/Daily agenda
+File: org,  Node: Time-of-day specifications,  Next: Sorting of agenda items,  Prev: Categories,  Up: Presentation and sorting
 
-8.3.2 Time-of-Day Specifications
+8.7.2 Time-of-Day Specifications
 --------------------------------
 
 Org-mode checks each agenda item for a time-of-day specification.  The
@@ -2811,148 +2955,37 @@ timed entries are embedded in a time grid, like
 `org-agenda-time-grid'.
 
 
-File: org,  Node: Calendar/Diary integration,  Next: Sorting of agenda items,  Prev: Time-of-day specifications,  Up: Weekly/Daily agenda
+File: org,  Node: Sorting of agenda items,  Prev: Time-of-day specifications,  Up: Presentation and sorting
 
-8.3.3 Calendar/Diary integration
---------------------------------
-
-Emacs contains the calendar and diary by Edward M. Reingold.  The
-calendar displays a three-month calendar with holidays from different
-countries and cultures.  The diary allows you to keep track of
-anniversaries, lunar phases, sunrise/set, recurrent appointments
-(weekly, monthly) and more.  In this way, it is quite complementary to
-Org-mode.  It can be very useful to combine output from Org-mode with
-the diary.
-
-   In order to include entries from the Emacs diary into Org-mode's
-agenda, you only need to customize the variable
-
-     (setq org-agenda-include-diary t)
-
-After that, everything will happen automatically.  All diary entries
-including holidays, anniversaries etc will be included in the agenda
-buffer created by Org-mode.  <SPC>, <TAB>, and <RET> can be used from
-the agenda buffer to jump to the diary file in order to edit existing
-diary entries.  The `i' command to insert new entries for the current
-date works in the agenda buffer, as well as the commands `S', `M', and
-`C' to display Sunrise/Sunset times, show lunar phases and to convert
-to other calendars, respectively.  `c' can be used to switch back and
-forth between calendar and agenda.
-
-
-File: org,  Node: Sorting of agenda items,  Prev: Calendar/Diary integration,  Up: Weekly/Daily agenda
-
-8.3.4 Sorting of agenda items
+8.7.3 Sorting of agenda items
 -----------------------------
 
-The entries for each day are sorted.  The default order is to first
-collect all items containing an explicit time-of-day specification.
-These entries will be shown at the beginning of the list, as a
-_schedule_ for the day.  After that, items remain grouped in
-categories, in the sequence given by `org-agenda-files'.  Within each
-category, items are sorted by priority (*note Priorities::).
+Before being inserted into a view, the items are sorted.  How this is
+done depends on the type of view.
+   * For the daily/weekly agenda, the items for each day are sorted.
+     The default order is to first collect all items containing an
+     explicit time-of-day specification.  These entries will be shown
+     at the beginning of the list, as a _schedule_ for the day.  After
+     that, items remain grouped in categories, in the sequence given by
+     `org-agenda-files'.  Within each category, items are sorted by
+     priority (*note Priorities::), which is composed of the base
+     priority (2000 for priority `A', 1000 for `B', and 0 for `C'),
+     plus additional increments for overdue scheduled or deadline items.
 
-   The priority is a numerical quantity composed of the base priority
-(2000 for priority `A', 1000 for `B', and 0 for `C'), plus additional
-increments for overdue scheduled or deadline items.
+   * For the TODO list, items remain in the order of categories, but
+     within each category, sorting takes place according to priority
+     (*note Priorities::).
+
+   * For tags matches, items are not sorted at all, but just appear in
+     the sequence in which they are found in the agenda files.
 
    Sorting can be customized using the variable
 `org-agenda-sorting-strategy'.
 
 
-File: org,  Node: Global TODO list,  Next: Matching headline tags,  Prev: Weekly/Daily agenda,  Up: Agenda views
+File: org,  Node: Agenda commands,  Next: Custom agenda views,  Prev: Presentation and sorting,  Up: Agenda views
 
-8.4 The global TODO list
-========================
-
-The global TODO list contains all unfinished TODO items, formatted and
-collected into a single place.
-
-`C-c a t'
-     Show the global TODO list.  This collects the TODO items from all
-     agenda files (*note Agenda views::) into a single buffer.  The
-     buffer is in `agenda-mode', so there are commands to examine and
-     manipulate the TODO entries directly from that buffer (*note
-     Agenda commands::).  
-
-`C-c a T'
-     Like the above, but allows selection of a specific TODO keyword.
-     You can also do this by specifying a prefix argument to `C-c a t'.
-     With a `C-u' prefix you are prompted for a keyword.  With a
-     numeric prefix, the Nth keyword in `org-todo-keywords' is selected.  The
-     `r' key in the agenda buffer regenerates it, and you can give a
-     prefix argument to this command to change the selected TODO
-     keyword, for example `3 r'.  If you often need a search for a
-     specific keyword, define a custom command for it (*note Agenda
-     dispatcher::).
-
-   Remote editing of TODO items means that you can change the state of a
-TODO entry with a single key press.  The commands available in the TODO
-list are described in *Note Agenda commands::.
-
-   Nomally the global todo list simply shows all headlines with TODO
-keywords.  This list can become very long.  There are two ways to keep
-it more compact:
-   - Some people view a TODO item that has been _scheduled_ for
-     execution (*note Time stamps::) as no longer _open_.  Configure the
-     variable `org-agenda-todo-ignore-scheduled' to exclude scheduled
-     items from the global TODO list.
-
-   - TODO items may have sublevels to break up the task into subtasks.
-     In such cases it may be enough to list only the highest level TODO
-     headline and omit the sublevels from the global list.  Configure
-     the variable `org-agenda-todo-list-sublevels' to get this behavior.
-
-
-File: org,  Node: Matching headline tags,  Next: Timeline,  Prev: Global TODO list,  Up: Agenda views
-
-8.5 Matching headline tags
-==========================
-
-If headlines in the agenda files are marked with _tags_ (*note Tags::),
-you can select headlines based on the tags that apply to them and
-collect them into an agenda buffer.
-
-`C-c a m'
-     Produce a list of all headlines that match a given set of tags.
-     The command prompts for a selection criterion, which is a boolean
-     logic expression with tags, like `+WORK+URGENT-WITHBOSS' or
-     `WORK|HOME' (*note Tags::).  If you often need a specific search,
-     define a custom command for it (*note Agenda dispatcher::).  
-
-`C-c a M'
-     Like `C-c a m', but only select headlines that are also TODO items
-     and force checking subitems (see variable
-     `org-tags-match-list-sublevels'.
-
-   The commands available in the tags list are described in *Note
-Agenda commands::.
-
-
-File: org,  Node: Timeline,  Next: Agenda commands,  Prev: Matching headline tags,  Up: Agenda views
-
-8.6 Timeline for a single file
-==============================
-
-The timeline is not really an agenda view, because it only summarizes
-items from a single Org-mode file.  But it also uses the agenda buffer
-and provides similar commands, so we discuss it here.  The timeline
-shows all time-stamped items in a single Org-mode file (or the selected
-part of it), in a _time-sorted view_.  The main purpose of this command
-is to give an overview over events in a project.
-
-`C-c C-r'
-     Show a time-sorted view of the org file, with all time-stamped
-     items.  When called with a `C-u' prefix, all unfinished TODO
-     entries (scheduled or not) are also listed under the current date.
-
-The commands available in the timeline buffer are listed in *Note
-Agenda commands::.
-
-
-File: org,  Node: Agenda commands,  Prev: Timeline,  Up: Agenda views
-
-8.7 Commands in the agenda buffer
+8.8 Commands in the agenda buffer
 =================================
 
 Entries in the agenda buffer are linked back to the org file or diary
@@ -3165,6 +3198,163 @@ Quit and Exit
      Emacs for the compilation of the agenda.  Buffers created by the
      user to visit org files will not be removed.
 
+
+
+File: org,  Node: Custom agenda views,  Prev: Agenda commands,  Up: Agenda views
+
+8.9 Custom agenda views
+=======================
+
+Custom agenda commands serve two purposes: to store and quickly access
+frequently used TODO and tags searches, and to create special composite
+agenda buffers.  Custom agenda commands will be accessible through the
+dispatcher (*note Agenda dispatcher::), just like the default commands.
+
+* Menu:
+
+* Storing searches::            Type once, use often
+* Block agenda::                All the stuff you need in a single buffer
+* Setting Options::             Changing the rules
+
+
+File: org,  Node: Storing searches,  Next: Block agenda,  Prev: Custom agenda views,  Up: Custom agenda views
+
+8.9.1 Storing searches
+----------------------
+
+The first application of custom searches is the definition of keyboard
+shortcuts for frequently used searches, either creating an agenda
+buffer, or a sparse tree (the latter covering of course only the current
+buffer).  Custom commands are configured in the variable
+`org-agenda-custom-commands'.  You can customize this variable, for
+example by pressing `C-c a C'.  You can also directly set it with Emacs
+Lisp in `.emacs'.  The following example contains all valid search
+types:
+
+     (setq org-agenda-custom-commands
+           '(("w" todo "WAITING")
+             ("W" todo-tree "WAITING")
+             ("u" tags "+BOSS-URGENT")
+             ("v" tags-todo "+BOSS-URGENT")
+             ("U" tags-tree "+BOSS-URGENT")
+             ("f" occur-tree "\\<FIXME\\>")))
+
+The initial single-character string in each entry defines the character
+you have to press after the dispatcher command `C-c a' in order to
+access the command.   The second parameter is the search type, followed
+by the string or regular expression to be used for the matching.  The
+example above will therefore define:
+
+`C-c a w'
+     as a global search for TODO entries with `WAITING' as the TODO
+     keyword
+
+`C-c a W'
+     as the same search, but only in the current buffer and displaying
+     the results as a sparse tree
+
+`C-c a u'
+     as a global tags search for headlines marked `:BOSS:' but not
+     `:URGENT:'
+
+`C-c a v'
+     as the same search as `C-c a u', but limiting the search to
+     headlines that are also TODO items
+
+`C-c a U'
+     as the same search as `C-c a u', but only in the current buffer and
+     displaying the result as a sparse tree
+
+`C-c a f'
+     to create a sparse tree (again: current buffer only) with all
+     entries containing the word `FIXME'.
+
+
+File: org,  Node: Block agenda,  Next: Setting Options,  Prev: Storing searches,  Up: Custom agenda views
+
+8.9.2 Block agenda
+------------------
+
+Another possibility is the construction of agenda views that comprise
+the results of _several_ commands, each of which creates a block in the
+agenda buffer.  The available commands include `agenda' for the daily
+or weekly agenda (as created with `C-c a a'), `alltodo' for the global
+todo list (as constructed with `C-c a t'), and the matching commands
+discussed above: `todo', `tags', and `tags-todo'.  Here are two
+examples:
+
+     (setq org-agenda-custom-commands
+           '(("h" "Agenda and Home-related tasks"
+              ((agenda)
+               (tags-todo "HOME")
+               (tags "GARDEN")))
+             ("o" "Agenda and Office-related tasks"
+              ((agenda)
+               (tags-todo "WORK")
+               (tags "OFFICE")))))
+
+This will define `C-c a h' to create a multi-block view for stuff you
+need to attend to at home.  The resulting agenda buffer will contain
+your agenda for the current week, all TODO items that carry the tag
+`HOME', and also all lines tagged with `GARDEN'.  Finally the command
+`C-c a o' provides a similar view for office tasks.
+
+
+File: org,  Node: Setting Options,  Prev: Block agenda,  Up: Custom agenda views
+
+8.9.3 Setting Options for custom commands
+-----------------------------------------
+
+Org-mode contains a number of variables regulating agenda construction
+and display.  The global variables define the behavior for all agenda
+commands, including the custom commands.  However, if you want to change
+some settings just for a single custom view, you can do so.  Setting
+options requires inserting a list of variable names and values at the
+right spot in `org-agenda-custom-commands'.  For example:
+
+     (setq org-agenda-custom-commands
+           '(("w" todo "WAITING"
+              ((org-agenda-sorting-strategy '(priority-down))
+               (org-agenda-prefix-format "  Mixed: ")))
+             ("U" tags-tree "+BOSS-URGENT"
+              ((org-show-following-heading nil)
+               (org-show-hierarchy-above nil)))))
+
+Now the `C-c a w' command will sort the collected entries only by
+priority, and the prefix format is modified to just say `  Mixed:'
+instead of giving the category of the entry.  The sparse tags tree of
+`C-c a U' will now turn out ultra-compact, because neither the headline
+hierarchy above the match, nor the headline following the match will be
+shown.
+
+   For command sets creating a block agenda,
+`org-agenda-custom-commands' has two separate spots for setting
+options.  You can add options that should be valid for just a single
+command in the set, and options that should be valid for all commands in
+the set.  The former are just added to the command entry, the latter
+must come after the list of command entries.  Going back to the block
+agenda example (*note Block agenda::), let's change the sorting strategy
+for the `C-c a h' commands to `priority-down', but let's sort the
+results for GARDEN tags query in the opposite order, `priority-up'.
+This would look like this:
+
+     (setq org-agenda-custom-commands
+           '(("h" "Agenda and Home-related tasks"
+              ((agenda)
+               (tags-todo "HOME")
+               (tags "GARDEN" ((org-agenda-sorting-strategy '(priority-up)))))
+              ((org-agenda-sorting-strategy '(priority-down))))
+             ("o" "Agenda and Office-related tasks"
+              ((agenda)
+               (tags-todo "WORK")
+               (tags "OFFICE")))))
+
+   As you see, the values and parenthesis setting is a little complex.
+When in doubt, use the customize interface to set this variable - it
+fully supports its structure.  Just one caveat: When setting options in
+this interface, the _values_ are just lisp expressions.  So if the
+value is a string, you need to add the double quotes around the value
+yourself.
 
 
 File: org,  Node: Embedded LaTeX,  Next: Exporting,  Prev: Agenda views,  Up: Top
@@ -4035,15 +4225,22 @@ buffer and use the key to complete text right there.
 
         * After `\', complete TeX symbols supported by the exporter.
 
-        * After `*', complete CamelCase versions of all headlines in the
-          buffer.
+        * After `*', complete headlines in the current buffer so that
+          they can be used in search links like `[[*find this
+          headline]]'.
 
-        * After `:', complete tags used elsewhere in the buffer.
+        * After `:', complete tags.  The list of tags is taken from the
+          variable `org-tag-alist' (possibly set through the `#+TAGS'
+          in-buffer option, *note Setting tags::), or it is created
+          dynamically from all tags used in the current buffer.
 
         * After `#+', complete the special keywords like `TYP_TODO' or
           `OPTIONS' which set file-specific options for Org-mode.  When
           the option keyword is already complete, pressing `M-<TAB>'
           again will insert example settings for this keyword.
+
+        * In the line after `#+STARTUP: ', complete startup keywords,
+          i.e. valid keys for this line.
 
         * Elsewhere, complete dictionary words using ispell.
 
@@ -4520,7 +4717,7 @@ The corresponding block writer function could look like this:
      (defun org-dblock-write:block-update-time (params)
         (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
           (insert "Last block update at: "
-     	     (format-time-string fmt (current-time)))))
+                  (format-time-string fmt (current-time)))))
 
    If you want to make sure that all dynamic blocks are always
 up-to-date, you could add the function `org-update-all-dblocks' to a
@@ -4571,7 +4768,7 @@ if I have forgotten someone, please accept my apologies and let me know.
 
    * Sacha Chua suggested to copy some linking code from Planner.
 
-   * Eddward DeVilla proposed Checkbox statistics.
+   * Eddward DeVilla proposed and tested checkbox statistics.
 
    * Kees Dullemond inspired the use of narrowed tabled columns.
 
@@ -4603,7 +4800,8 @@ if I have forgotten someone, please accept my apologies and let me know.
    * Scott Otterson sparked the introduction of descriptive text for
      links, among other things.
 
-   * Pete Phillips helped the development of the TAGS feature.
+   * Pete Phillips helped during the development of the TAGS feature,
+     and provided frequent feedback.
 
    * T.V. Raman reported bugs and suggested improvements.
 
@@ -4652,8 +4850,8 @@ if I have forgotten someone, please accept my apologies and let me know.
    * Roland Winkler requested additional keybindings to make Org-mode
      work on a tty.
 
-   * Piotr Zielinski wrote `org-mouse.el' and showed how to follow
-     links with mouse-1.
+   * Piotr Zielinski wrote `org-mouse.el', proposed angenda blocks and
+     contributed various ideas and code snippets.
 
 
 File: org,  Node: Index,  Next: Key Index,  Prev: History and Acknowledgments,  Up: Top
@@ -4674,11 +4872,12 @@ Index
                                                               (line 165)
 * active region:                         Structure editing.   (line  51)
 * agenda:                                Weekly/Daily agenda. (line   6)
-* agenda commands, custom:               Agenda dispatcher.   (line   6)
 * agenda dispatcher:                     Agenda dispatcher.   (line   6)
+* agenda files:                          Agenda files.        (line   6)
 * agenda files, removing buffers:        Agenda commands.     (line 211)
 * agenda views:                          Agenda views.        (line   6)
-* agenda, for single file:               Timeline.            (line   6)
+* agenda views, custom:                  Custom agenda views. (line   6)
+* agenda, with block views:              Block agenda.        (line   6)
 * allout.el:                             Conflicts.           (line   6)
 * angular brackets, around links:        External links.      (line  38)
 * applescript, for calendar update:      iCalendar export.    (line  38)
@@ -4688,6 +4887,7 @@ Index
 * author:                                Feedback.            (line   6)
 * autoload:                              Activation.          (line   6)
 * BBDB links:                            External links.      (line   6)
+* block agenda:                          Block agenda.        (line   6)
 * bold text:                             Enhancing text.      (line  15)
 * bug reports:                           Feedback.            (line   6)
 * bugs:                                  Bugs.                (line   6)
@@ -4696,6 +4896,7 @@ Index
 * calculations, in tables <1>:           Table calculations.  (line   6)
 * calculations, in tables:               Built-in table editor.
                                                               (line 135)
+* calendar commands, from agenda:        Agenda commands.     (line 172)
 * calendar integration:                  Calendar/Diary integration.
                                                               (line   6)
 * calendar, for selecting date:          Creating timestamps. (line  71)
@@ -4704,7 +4905,7 @@ Index
 * CamelCase links, completion of:        CamelCase links.     (line   6)
 * category:                              Categories.          (line   6)
 * cdlatex.el:                            Cooperation.         (line  29)
-* checkbox statistics:                   Checkboxes.          (line  24)
+* checkbox statistics:                   Checkboxes.          (line  23)
 * checkboxes:                            Checkboxes.          (line   6)
 * children, subtree visibility state:    Visibility cycling.  (line  10)
 * clean outline view:                    Clean view.          (line   6)
@@ -4732,12 +4933,13 @@ Index
 * copying, of subtrees:                  Structure editing.   (line   6)
 * creating timestamps:                   Creating timestamps. (line   6)
 * CUA.el:                                Conflicts.           (line  15)
-* custom agenda commands:                Agenda dispatcher.   (line   6)
+* custom agenda views:                   Custom agenda views. (line   6)
 * custom search strings:                 Custom searches.     (line   6)
 * customization:                         Customization.       (line   6)
 * cutting, of subtrees:                  Structure editing.   (line   6)
 * cycling, of TODO states:               TODO basics.         (line  13)
 * cycling, visibility:                   Visibility cycling.  (line   6)
+* daily agenda:                          Weekly/Daily agenda. (line   6)
 * date stamps:                           Time stamps.         (line   6)
 * date, reading in minibuffer:           Creating timestamps. (line  71)
 * DEADLINE keyword:                      Time stamps.         (line  43)
@@ -4750,6 +4952,7 @@ Index
 * directories, for publishing:           Sources and destinations.
                                                               (line   6)
 * dispatching agenda commands:           Agenda dispatcher.   (line   6)
+* display changing, in agenda:           Agenda commands.     (line  59)
 * document structure:                    Document structure.  (line   6)
 * DONE, final TODO keyword:              Per file keywords.   (line  20)
 * editing tables:                        Tables.              (line   6)
@@ -4847,6 +5050,7 @@ Index
 * MH-E links:                            External links.      (line   6)
 * minor mode for tables:                 orgtbl-mode.         (line   6)
 * mode, for calc:                        Formula syntax.      (line  34)
+* motion commands in agenda:             Agenda commands.     (line  19)
 * motion, between headlines:             Motion.              (line   6)
 * name, of column or field:              Formula syntax.      (line  26)
 * named field formula:                   Named-field formulas.
@@ -4855,6 +5059,7 @@ Index
 * narrow columns in tables:              Narrow columns.      (line   6)
 * occur, command:                        Sparse trees.        (line   6)
 * option keyword completion:             Completion.          (line   6)
+* options, for custom agenda views:      Setting Options.     (line   6)
 * options, for customization:            Customization.       (line   6)
 * options, for export:                   Export options.      (line   6)
 * options, for publishing:               Publishing options.  (line   6)
@@ -4876,6 +5081,8 @@ Index
 * per file keywords:                     Per file keywords.   (line   6)
 * plain lists:                           Plain lists.         (line   6)
 * plain text external links:             External links.      (line  38)
+* presentation, of agenda items:         Presentation and sorting.
+                                                              (line   6)
 * printing sparse trees:                 Sparse trees.        (line  39)
 * priorities:                            Priorities.          (line   6)
 * priorities, of agenda items:           Sorting of agenda items.
@@ -4894,6 +5101,7 @@ Index
 * region, active:                        Structure editing.   (line  51)
 * remember.el <1>:                       Cooperation.         (line  33)
 * remember.el:                           Remember.            (line   6)
+* remote editing, from agenda:           Agenda commands.     (line 100)
 * richer text:                           Enhancing text.      (line   6)
 * RMAIL links:                           External links.      (line   6)
 * SCHEDULED keyword:                     Time stamps.         (line  30)
@@ -4905,7 +5113,6 @@ Index
 * show all, command:                     Visibility cycling.  (line  31)
 * show all, global visibility state:     Visibility cycling.  (line  22)
 * show hidden text:                      Visibility cycling.  (line   6)
-* single file summary:                   Timeline.            (line   6)
 * sorting, of agenda items:              Sorting of agenda items.
                                                               (line   6)
 * sparse tree, for deadlines:            Creating timestamps. (line  41)
@@ -4914,10 +5121,12 @@ Index
 * sparse trees:                          Sparse trees.        (line   6)
 * special keywords:                      In-buffer settings.  (line   6)
 * spreadsheet capabilities:              Table calculations.  (line   6)
-* statistics, for checkboxes:            Checkboxes.          (line  24)
+* statistics, for checkboxes:            Checkboxes.          (line  23)
 * storing links:                         Handling links.      (line   9)
 * structure editing:                     Structure editing.   (line   6)
 * structure of document:                 Document structure.  (line   6)
+* sublevels, inclusion into tags match:  Tag inheritance.     (line   6)
+* sublevels, inclusion into todo list:   Global TODO list.    (line  31)
 * subtree cycling:                       Visibility cycling.  (line  10)
 * subtree visibility states:             Visibility cycling.  (line  10)
 * subtree, cut and paste:                Structure editing.   (line   6)
@@ -4948,8 +5157,12 @@ Index
 * TeX-like syntax for sub- and superscripts: Export options.  (line  25)
 * thanks:                                History and Acknowledgments.
                                                               (line   6)
+* time grid:                             Time-of-day specifications.
+                                                              (line  26)
 * time stamps:                           Time stamps.         (line   6)
 * time, reading in minibuffer:           Creating timestamps. (line  71)
+* time-of-day specification:             Time-of-day specifications.
+                                                              (line   6)
 * time-sorted view:                      Timeline.            (line   6)
 * timeline, single file:                 Timeline.            (line   6)
 * timerange:                             Time stamps.         (line  21)
@@ -4978,6 +5191,7 @@ Index
 * visible text, printing:                Sparse trees.        (line  39)
 * VM links:                              External links.      (line   6)
 * WANDERLUST links:                      External links.      (line   6)
+* weekly agenda:                         Weekly/Daily agenda. (line   6)
 * windmove.el:                           Conflicts.           (line  33)
 * workflow states as TODO keywords:      Workflow states.     (line   6)
 * XEmacs:                                Installation.        (line   6)
@@ -5023,8 +5237,9 @@ Key Index
 * C-#:                                   Built-in table editor.
                                                               (line 155)
 * C-,:                                   Agenda files.        (line  18)
+* C-a a L:                               Timeline.            (line  10)
 * C-c !:                                 Creating timestamps. (line  21)
-* C-c #:                                 Checkboxes.          (line  56)
+* C-c #:                                 Checkboxes.          (line  55)
 * C-c $:                                 Moving subtrees.     (line  10)
 * C-c %:                                 Handling links.      (line  80)
 * C-c &:                                 Handling links.      (line  84)
@@ -5061,7 +5276,7 @@ Key Index
 * C-c `:                                 Built-in table editor.
                                                               (line 181)
 * C-c a a:                               Weekly/Daily agenda. (line   9)
-* C-c a C:                               Agenda dispatcher.   (line  29)
+* C-c a C:                               Storing searches.    (line   9)
 * C-c a M:                               Matching headline tags.
                                                               (line  15)
 * C-c a m:                               Matching headline tags.
@@ -5078,7 +5293,7 @@ Key Index
 * C-c C-c <2>:                           Processing LaTeX fragments.
                                                               (line  15)
 * C-c C-c <3>:                           Setting tags.        (line  10)
-* C-c C-c <4>:                           Checkboxes.          (line  38)
+* C-c C-c <4>:                           Checkboxes.          (line  37)
 * C-c C-c <5>:                           table.el.            (line   6)
 * C-c C-c <6>:                           Editing/debugging formulas.
                                                               (line  16)
@@ -5112,7 +5327,6 @@ Key Index
                                                               (line  20)
 * C-c C-q:                               Built-in table editor.
                                                               (line 119)
-* C-c C-r:                               Timeline.            (line  13)
 * C-c C-s <1>:                           Agenda commands.     (line 136)
 * C-c C-s:                               Creating timestamps. (line  48)
 * C-c C-t <1>:                           Clocking work time.  (line  25)
@@ -5121,7 +5335,7 @@ Key Index
 * C-c C-v:                               TODO basics.         (line  26)
 * C-c C-w:                               Creating timestamps. (line  41)
 * C-c C-x C-a:                           ARCHIVE tag.         (line  28)
-* C-c C-x C-b:                           Checkboxes.          (line  39)
+* C-c C-x C-b:                           Checkboxes.          (line  38)
 * C-c C-x C-c:                           Agenda commands.     (line 201)
 * C-c C-x C-d:                           Clocking work time.  (line  33)
 * C-c C-x C-i:                           Clocking work time.  (line  12)
@@ -5191,7 +5405,7 @@ Key Index
                                                               (line  76)
 * M-S-<left> <3>:                        Plain lists.         (line  65)
 * M-S-<left>:                            Structure editing.   (line  24)
-* M-S-<RET> <1>:                         Checkboxes.          (line  53)
+* M-S-<RET> <1>:                         Checkboxes.          (line  52)
 * M-S-<RET> <2>:                         Plain lists.         (line  52)
 * M-S-<RET>:                             Structure editing.   (line  15)
 * M-S-<right> <1>:                       Creating timestamps. (line  97)
@@ -5248,143 +5462,148 @@ Key Index
 
 
 Tag Table:
-Node: Top959
-Node: Introduction9683
-Node: Summary10098
-Node: Installation12365
-Node: Activation13743
-Node: Feedback14992
-Node: Document structure15761
-Node: Outlines16535
-Node: Headlines17195
-Node: Visibility cycling17818
-Ref: Visibility cycling-Footnote-119293
-Ref: Visibility cycling-Footnote-219351
-Node: Motion19401
-Node: Structure editing20185
-Node: Archiving22294
-Node: ARCHIVE tag22852
-Node: Moving subtrees24645
-Node: Sparse trees25686
-Ref: Sparse trees-Footnote-127665
-Ref: Sparse trees-Footnote-227757
-Node: Plain lists27872
-Ref: Plain lists-Footnote-131397
-Ref: Plain lists-Footnote-231754
-Node: Tables31936
-Node: Built-in table editor32484
-Node: Narrow columns40091
-Ref: Narrow columns-Footnote-142030
-Node: Table calculations42076
-Node: Formula syntax43396
-Ref: Formula syntax-Footnote-146301
-Node: Lisp formulas46601
-Node: Column formulas47390
-Node: Advanced features49152
-Node: Named-field formulas52406
-Node: Editing/debugging formulas53046
-Node: Appetizer54804
-Node: orgtbl-mode55907
-Node: table.el56398
-Node: Hyperlinks57375
-Node: Link format58080
-Node: Internal links59373
-Ref: Internal links-Footnote-161362
-Node: Radio targets61494
-Node: CamelCase links62209
-Node: External links62707
-Node: Handling links64838
-Ref: Handling links-Footnote-169424
-Node: Search options69661
-Ref: Search options-Footnote-171435
-Node: Custom searches71516
-Node: Remember72564
-Node: TODO items76254
-Node: TODO basics77236
-Node: TODO extensions78763
-Node: Workflow states79558
-Node: TODO types80426
-Ref: TODO types-Footnote-182084
-Node: Per file keywords82166
-Ref: Per file keywords-Footnote-183620
-Node: Priorities83821
-Node: Breaking down tasks85065
-Ref: Breaking down tasks-Footnote-185585
-Node: Checkboxes85681
-Node: Timestamps88490
-Node: Time stamps88880
-Node: Creating timestamps91977
-Node: Progress logging95323
-Node: Closing items95853
-Node: Clocking work time96648
-Ref: Clocking work time-Footnote-1100084
-Node: Tags100210
-Node: Tag inheritance100972
-Node: Setting tags101909
-Ref: Setting tags-Footnote-1105039
-Ref: Setting tags-Footnote-2105151
-Node: Tag searches105231
-Node: Agenda views106440
-Node: Agenda files107984
-Ref: Agenda files-Footnote-1108944
-Ref: Agenda files-Footnote-2109093
-Node: Agenda dispatcher109285
-Node: Weekly/Daily agenda111401
-Node: Categories112536
-Node: Time-of-day specifications113184
-Node: Calendar/Diary integration115160
-Node: Sorting of agenda items116537
-Node: Global TODO list117369
-Node: Matching headline tags119420
-Node: Timeline120363
-Node: Agenda commands121236
-Node: Embedded LaTeX127080
-Ref: Embedded LaTeX-Footnote-1128172
-Node: Math symbols128362
-Node: Subscripts and Superscripts129127
-Node: LaTeX fragments129971
-Node: Processing LaTeX fragments132040
-Node: CDLaTeX mode132986
-Ref: CDLaTeX mode-Footnote-1135470
-Node: Exporting135618
-Node: ASCII export136932
-Node: HTML export138222
-Node: XOXO export141058
-Node: iCalendar export141497
-Node: Text interpretation143320
-Node: Comment lines143799
-Node: Enhancing text144270
-Node: Export options145962
-Node: Publishing147629
-Ref: Publishing-Footnote-1148425
-Node: Configuration148621
-Node: Project alist149339
-Node: Sources and destinations150405
-Node: Selecting files150952
-Node: Publishing action151700
-Node: Publishing options152815
-Node: Publishing links154967
-Node: Project page index156480
-Node: Sample configuration157258
-Node: Simple example157750
-Node: Complex example158423
-Node: Triggering publication160499
-Node: Miscellaneous161184
-Node: Completion161818
-Node: Customization162814
-Node: In-buffer settings163399
-Node: The very busy C-c C-c key166630
-Node: Clean view168274
-Node: TTY keys170851
-Node: Interaction172460
-Node: Cooperation172857
-Node: Conflicts174724
-Node: Bugs176316
-Node: Extensions and Hacking177939
-Node: Extensions178425
-Node: Dynamic blocks179995
-Node: History and Acknowledgments181915
-Node: Index186719
-Node: Key Index209924
+Node: Top964
+Node: Introduction10057
+Node: Summary10472
+Node: Installation12739
+Node: Activation14117
+Node: Feedback15366
+Node: Document structure16135
+Node: Outlines16909
+Node: Headlines17569
+Node: Visibility cycling18192
+Ref: Visibility cycling-Footnote-119667
+Ref: Visibility cycling-Footnote-219725
+Node: Motion19775
+Node: Structure editing20559
+Node: Archiving22668
+Node: ARCHIVE tag23226
+Node: Moving subtrees25019
+Node: Sparse trees26060
+Ref: Sparse trees-Footnote-128039
+Ref: Sparse trees-Footnote-228131
+Node: Plain lists28246
+Ref: Plain lists-Footnote-131771
+Ref: Plain lists-Footnote-232128
+Node: Tables32310
+Node: Built-in table editor32858
+Node: Narrow columns40466
+Ref: Narrow columns-Footnote-142405
+Node: Table calculations42451
+Node: Formula syntax43771
+Ref: Formula syntax-Footnote-146676
+Node: Lisp formulas46976
+Node: Column formulas47765
+Node: Advanced features49527
+Node: Named-field formulas52781
+Node: Editing/debugging formulas53421
+Node: Appetizer55179
+Node: orgtbl-mode56282
+Node: table.el56773
+Node: Hyperlinks57750
+Node: Link format58455
+Node: Internal links59748
+Ref: Internal links-Footnote-161737
+Node: Radio targets61869
+Node: CamelCase links62584
+Node: External links63082
+Node: Handling links65213
+Ref: Handling links-Footnote-169799
+Node: Search options70036
+Ref: Search options-Footnote-171810
+Node: Custom searches71891
+Node: Remember72939
+Node: TODO items76629
+Node: TODO basics77611
+Node: TODO extensions79138
+Node: Workflow states79933
+Node: TODO types80801
+Ref: TODO types-Footnote-182459
+Node: Per file keywords82541
+Ref: Per file keywords-Footnote-183995
+Node: Priorities84196
+Node: Breaking down tasks85440
+Ref: Breaking down tasks-Footnote-185960
+Node: Checkboxes86056
+Node: Timestamps88792
+Node: Time stamps89182
+Node: Creating timestamps92279
+Node: Progress logging95625
+Node: Closing items96155
+Node: Clocking work time96950
+Ref: Clocking work time-Footnote-1100386
+Node: Tags100512
+Node: Tag inheritance101274
+Node: Setting tags102211
+Ref: Setting tags-Footnote-1105341
+Ref: Setting tags-Footnote-2105453
+Node: Tag searches105533
+Node: Agenda views106742
+Node: Agenda files108631
+Ref: Agenda files-Footnote-1109591
+Ref: Agenda files-Footnote-2109740
+Node: Agenda dispatcher109933
+Node: Weekly/Daily agenda111550
+Node: Calendar/Diary integration112515
+Node: Global TODO list113853
+Node: Matching headline tags115905
+Node: Timeline116849
+Node: Presentation and sorting117512
+Node: Categories118290
+Node: Time-of-day specifications118954
+Node: Sorting of agenda items120932
+Node: Agenda commands122214
+Node: Custom agenda views128102
+Node: Storing searches128710
+Node: Block agenda130622
+Node: Setting Options131852
+Node: Embedded LaTeX134539
+Ref: Embedded LaTeX-Footnote-1135631
+Node: Math symbols135821
+Node: Subscripts and Superscripts136586
+Node: LaTeX fragments137430
+Node: Processing LaTeX fragments139499
+Node: CDLaTeX mode140445
+Ref: CDLaTeX mode-Footnote-1142929
+Node: Exporting143077
+Node: ASCII export144391
+Node: HTML export145681
+Node: XOXO export148517
+Node: iCalendar export148956
+Node: Text interpretation150779
+Node: Comment lines151258
+Node: Enhancing text151729
+Node: Export options153421
+Node: Publishing155088
+Ref: Publishing-Footnote-1155884
+Node: Configuration156080
+Node: Project alist156798
+Node: Sources and destinations157864
+Node: Selecting files158411
+Node: Publishing action159159
+Node: Publishing options160274
+Node: Publishing links162426
+Node: Project page index163939
+Node: Sample configuration164717
+Node: Simple example165209
+Node: Complex example165882
+Node: Triggering publication167958
+Node: Miscellaneous168643
+Node: Completion169277
+Node: Customization170658
+Node: In-buffer settings171243
+Node: The very busy C-c C-c key174474
+Node: Clean view176118
+Node: TTY keys178695
+Node: Interaction180304
+Node: Cooperation180701
+Node: Conflicts182568
+Node: Bugs184160
+Node: Extensions and Hacking185783
+Node: Extensions186269
+Node: Dynamic blocks187839
+Node: History and Acknowledgments189766
+Node: Index194654
+Node: Key Index219013
 
 End Tag Table

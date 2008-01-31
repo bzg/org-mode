@@ -3,12 +3,12 @@
 @setfilename ../info/org
 @settitle Org Mode Manual
 
-@set VERSION 4.45
+@set VERSION 4.46
 @set DATE August 2006
 
 @dircategory Emacs
 @direntry
-* Org Mode: (org).	outline-based notes management and organizer
+* Org Mode: (org).      outline-based notes management and organizer
 @end direntry
 
 @c Version and Contact Info
@@ -190,14 +190,25 @@ Agenda Views
 * Global TODO list::            All unfinished action items
 * Matching headline tags::      Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
+* Custom agenda views::         Defining special searches and views
 
 The weekly/daily agenda
 
+* Calendar/Diary integration::  Integrating Anniversaries and more
+
+Presentation and sorting
+
 * Categories::                  Not all tasks are equal
 * Time-of-day specifications::  How the agenda knows the time
-* Calendar/Diary integration::  Integrating Anniversaries and more
 * Sorting of agenda items::     The order of things
+
+Custom agenda views
+
+* Storing searches::            Type once, use often
+* Block agenda::                All the stuff you need in a single buffer
+* Setting Options::             Changing the rules
 
 Embedded LaTeX
 
@@ -971,7 +982,7 @@ expanded on the next re-align to span the whole table width.  So, to
 create the above table, you would only type
 
 @example
-|Name|Phone|Age
+|Name|Phone|Age|
 |-
 @end example
 
@@ -2283,13 +2294,12 @@ of checkboxes to ideantify (a hierarchy of) a large number of subtasks
 @section Checkboxes
 @cindex checkboxes
 
-Every item in a plain list (@pxref{Plain lists}) can be made a
-checkbox by starting it with the string @samp{[ ]}.  This feature is
-similar to TODO items (@pxref{TODO items}), but more lightweight.
-Checkboxes are not included into the global TODO list, so they are often
-great to split a task into a number of simple steps.  Or you can use
-them in a shopping list to select the items you need to buy.  To toggle
-a checkbox, use @kbd{C-c C-c}, or try Piotr Zielinski's
+Every item in a plain list (@pxref{Plain lists}) can be made a checkbox
+by starting it with the string @samp{[ ]}.  This feature is similar to
+TODO items (@pxref{TODO items}), but more lightweight.  Checkboxes are
+not included into the global TODO list, so they are often great to split
+a task into a number of simple steps.  Or you can use them in a shopping
+list.  To toggle a checkbox, use @kbd{C-c C-c}, or try Piotr Zielinski's
 @file{org-mouse.el}.  Here is an example of a checkbox list.
 
 @example
@@ -2315,7 +2325,7 @@ that headline/item.  You have to insert the cookie yourself by typing
 either @samp{[/]} or @samp{[%]}.  In the first case you get an @samp{n
 out of m} result, in the second case you get information about the
 percentage of checkboxes checked (in the above example, this would be
-@samp{[50%]} and @samp{[33%], respectively}.
+@samp{[50%]} and @samp{[33%], respectively}).
 
 @noindent The following commands work with checkboxes:
 
@@ -2334,8 +2344,7 @@ want to toggle all boxes in the region independently, use a prefix
 argument.
 @item
 If the cursor is in a headline, toggle checkboxes in the region between
-this headline and the next.  This does @emph{not} act on the entire
-subtree, just the current entry.
+this headline and the next (so @emph{not} the entire subtree).
 @item
 If no active region, just toggle the checkbox at point.
 @end itemize
@@ -2725,6 +2734,7 @@ Tags are normal words containing letters, numbers, @samp{_}, and
 @node Tag inheritance, Setting tags, Tags, Tags
 @section Tag inheritance
 @cindex inheritance, of tags
+@cindex sublevels, inclusion into tags match
 
 @i{Tags} make use of the hierarchical structure of outline trees.  If a
 heading has a certain tag, all subheadings will inherit the tag as
@@ -2882,7 +2892,7 @@ are important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
-in a separate buffer.  Three different views are provided:
+in a separate buffer.  Five different view types are provided:
 
 @itemize @bullet
 @item
@@ -2890,10 +2900,16 @@ an @emph{agenda} that is like a calendar and shows information
 for specific dates
 @item
 a @emph{TODO list} that covers all unfinished
-action items, and
+action items,
 @item
 a @emph{tags view} that shows information based on
-the tags associated with headlines in the outline tree.
+the tags associated with headlines in the outline tree,
+@item
+a @emph{timeline view} that shows all events in a single Org-mode file,
+in time-sorted view
+@item
+@emph{custom views} that are special tag and keyword searches and
+combinations of different views.
 @end itemize
 
 @noindent
@@ -2909,18 +2925,21 @@ edit these files remotely.
 * Global TODO list::            All unfinished action items
 * Matching headline tags::      Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of org trees
+* Custom agenda views::         Defining special searches and views
 @end menu
 
 @node Agenda files, Agenda dispatcher, Agenda views, Agenda views
 @section Agenda files
+@cindex agenda files
 
 The information to be shown is collected from all @emph{agenda files},
 the files listed in the variable @code{org-agenda-files}@footnote{If the
 value of that variable is not a list, but a single file name, then the
 list of agenda files will be maintained in that external file.}.  Thus even
 if you only work with a single Org-mode file, this file should be put
-into that list@footnote{When using the dispatcher pressing @kbd{1}
+into that list@footnote{When using the dispatcher, pressing @kbd{1}
 before selecting a command will actually limit the command to the
 current file, and ignore @code{org-agenda-files} until the next
 dispatcher command.}.  You can customize @code{org-agenda-files}, but
@@ -2949,8 +2968,6 @@ to visit any of them.
 @section The agenda dispatcher
 @cindex agenda dispatcher
 @cindex dispatching agenda commands
-@cindex custom agenda commands
-@cindex agenda commands, custom
 The views are created through a dispatcher that should be bound to a
 global key, for example @kbd{C-c a} (@pxref{Installation}).  In the
 following we will assume that @kbd{C-c a} is indeed how the dispatcher
@@ -2965,44 +2982,32 @@ Create a list of all TODO items (@pxref{Global TODO list}).
 @item m / M
 Create a list of headlines matching a TAGS expression (@pxref{Matching
 headline tags}).
+@item L
+Create the timeline view for the current buffer (@pxref{Timeline}).
+@item 1
+Restrict an agenda command to the current buffer.  After pressing
+@kbd{1}, you still need to press the character selecting the command.
+@item 0
+If there is an active region, restrict the following agenda command to
+the region.  Otherwise, restrict it to the current subtree.  After
+pressing @kbd{0}, you still need to press the character selecting the
+command.
 @end table
 
-You can also define custom commands that will be accessible through
-the dispatcher, just like the default commands.  Custom commands are
-global searches for tags and specific TODO keywords, or a variety of
-sparse tree creating commands (@pxref{Sparse trees}).  As sparse trees
-are only defined for a single org-mode file, these latter commands act
-on the current buffer instead of the list of agenda files.
-
-@kindex C-c a C
-Custom commands are configured in the variable
-@code{org-agenda-custom-commands}.  You can customize this variable,
-for example by pressing @kbd{C-c a C}.  You can also directly set it
-with Emacs Lisp in @file{.emacs}.  For example:
-
-@lisp
-(setq org-agenda-custom-commands
-      '(("w" todo "WAITING")
-        ("u" tags "+BOSS-URGENT")
-        ("U" tags-tree "+BOSS-URGENT")
-        ("f" occur-tree "\\<FIXME\\>")))
-@end lisp
-
-@noindent will define @kbd{C-c a w} as a global search for
-TODO entries with @samp{WAITING} as the TODO keyword, @kbd{C-c a u} as a
-global tags search for headlines marked @samp{:BOSS:} but not
-@samp{:URGENT:}, @kbd{C-c a U} to do the same search but only in the
-current buffer and display the result as a sparse tree, and @kbd{C-c a
-f} to create a sparse tree with all entries containing the word
-@samp{FIXME}.  For more information, look at the documentation string
-of the variable @code{org-agenda-custom-commands}.
+You can also define custom commands that will be accessible through the
+dispatcher, just like the default commands.  This includes the
+possibility to create extended agenda buffers that contain several
+blocks together, for example the weekly agenda, the global TODO list and
+a number of special tags matches.  @xref{Custom agenda views}.
 
 @node Weekly/Daily agenda, Global TODO list, Agenda dispatcher, Agenda views
 @section The weekly/daily agenda
 @cindex agenda
+@cindex weekly agenda
+@cindex daily agenda
 
-The purpose of the weekly/daily @emph{agenda} is to act like a page of
-a paper agenda, showing all the tasks for the current week or day.
+The purpose of the weekly/daily @emph{agenda} is to act like a page of a
+paper agenda, showing all the tasks for the current week or day.
 
 @table @kbd
 @cindex org-agenda, command
@@ -3021,78 +3026,11 @@ The commands available in the Agenda buffer are listed in @ref{Agenda
 commands}.
 
 @menu
-* Categories::                  Not all tasks are equal
-* Time-of-day specifications::  How the agenda knows the time
 * Calendar/Diary integration::  Integrating Anniversaries and more
-* Sorting of agenda items::     The order of things
 @end menu
 
-@node Categories, Time-of-day specifications, Weekly/Daily agenda, Weekly/Daily agenda
-@subsection Categories
 
-@cindex category
-In the agenda buffer, each entry is preceded by a @emph{category},
-which is derived from the file name.  The category can also be set
-with a special line anywhere in the buffer, looking like this:
-
-@example
-#+CATEGORY: Thesis
-@end example
-
-If there are several such lines in a file, each specifies the category
-for the text below it (but the first category also applies to any text
-before the first CATEGORY line).  The display in the agenda buffer looks
-best if the category is not longer than 10 characters.
-
-@node Time-of-day specifications, Calendar/Diary integration, Categories, Weekly/Daily agenda
-@subsection Time-of-Day Specifications
-
-Org-mode checks each agenda item for a time-of-day specification.  The
-time can be part of the time stamp that triggered inclusion into the
-agenda, for example as in @w{@samp{<2005-05-10 Tue 19:00>}}.  Time
-ranges can be specified with two time stamps, like
-@c
-@w{@samp{<2005-05-10 Tue 20:30>--<2005-05-10 Tue 22:15>}}.
-
-In the headline of the entry itself, a time(range) may also appear as
-plain text (like @samp{12:45} or a @samp{8:30-1pm}.  If the agenda
-integrates the Emacs diary (@pxref{Calendar/Diary integration}), time
-specifications in diary entries are recognized as well.
-
-For agenda display, Org-mode extracts the time and displays it in a
-standard 24 hour format as part of the prefix.  The example times in
-the previous paragraphs would end up in the agenda like this:
-
-@example
-    8:30-13:00 Arthur Dent lies in front of the bulldozer
-   12:45...... Ford Prefect arrives and takes Arthur to the pub
-   19:00...... The Vogon reads his poem
-   20:30-22:15 Marwin escorts the Hitchhikers to the bridge
-@end example
-
-If the agenda is in single-day mode, or for the display of today, the
-timed entries are embedded in a time grid, like
-
-@example
-    8:00...... ------------------
-    8:30-13:00 Arthur Dent lies in front of the bulldozer
-   10:00...... ------------------
-   12:00...... ------------------
-   12:45...... Ford Prefect arrives and takes Arthur to the pub
-   14:00...... ------------------
-   16:00...... ------------------
-   18:00...... ------------------
-   19:00...... The Vogon reads his poem
-   20:00...... ------------------
-   20:30-22:15 Marwin escorts the Hitchhikers to the bridge
-@end example
-
-The time grid can be turned on and off with the variable
-@code{org-agenda-use-time-grid}, and can be configured with
-@code{org-agenda-time-grid}.
-
-
-@node Calendar/Diary integration, Sorting of agenda items, Time-of-day specifications, Weekly/Daily agenda
+@node Calendar/Diary integration,  , Weekly/Daily agenda, Weekly/Daily agenda
 @subsection Calendar/Diary integration
 @cindex calendar integration
 @cindex diary integration
@@ -3122,24 +3060,6 @@ well as the commands @kbd{S}, @kbd{M}, and @kbd{C} to display
 Sunrise/Sunset times, show lunar phases and to convert to other
 calendars, respectively.  @kbd{c} can be used to switch back and forth
 between calendar and agenda.
-
-@node Sorting of agenda items,  , Calendar/Diary integration, Weekly/Daily agenda
-@subsection Sorting of agenda items
-@cindex sorting, of agenda items
-@cindex priorities, of agenda items
-The entries for each day are sorted.  The default order is to first
-collect all items containing an explicit time-of-day specification.
-These entries will be shown at the beginning of the list, as a
-@emph{schedule} for the day.  After that, items remain grouped in
-categories, in the sequence given by @code{org-agenda-files}.  Within
-each category, items are sorted by priority (@pxref{Priorities}).
-
-The priority is a numerical quantity composed of the base priority
-(2000 for priority @samp{A}, 1000 for @samp{B}, and 0 for @samp{C}),
-plus additional increments for overdue scheduled or deadline items.
-
-Sorting can be customized using the variable
-@code{org-agenda-sorting-strategy}.
 
 
 @node Global TODO list, Matching headline tags, Weekly/Daily agenda, Agenda views
@@ -3174,7 +3094,8 @@ Remote editing of TODO items means that you can change the state of a
 TODO entry with a single key press.  The commands available in the
 TODO list are described in @ref{Agenda commands}.
 
-Nomally the global todo list simply shows all headlines with TODO
+@cindex sublevels, inclusion into todo list
+Normally the global todo list simply shows all headlines with TODO
 keywords.  This list can become very long.  There are two ways to keep
 it more compact:
 @itemize @minus
@@ -3189,7 +3110,6 @@ such cases it may be enough to list only the highest level TODO headline
 and omit the sublevels from the global list.  Configure the variable
 @code{org-agenda-todo-list-sublevels} to get this behavior.
 @end itemize
-
 
 @node Matching headline tags, Timeline, Global TODO list, Agenda views
 @section Matching headline tags
@@ -3212,29 +3132,24 @@ define a custom command for it (@pxref{Agenda dispatcher}).
 @item C-c a M
 Like @kbd{C-c a m}, but only select headlines that are also TODO items
 and force checking subitems (see variable
-@code{org-tags-match-list-sublevels}.
+@code{org-tags-match-list-sublevels}).
 @end table
 
 The commands available in the tags list are described in @ref{Agenda
 commands}.
 
-@node Timeline, Agenda commands, Matching headline tags, Agenda views
+@node Timeline, Presentation and sorting, Matching headline tags, Agenda views
 @section Timeline for a single file
-@cindex single file summary
-@cindex agenda, for single file
 @cindex timeline, single file
 @cindex time-sorted view
 
-The timeline is not really an agenda view, because it only summarizes
-items from a single Org-mode file.  But it also uses the agenda buffer
-and provides similar commands, so we discuss it here.  The timeline
-shows all time-stamped items in a single Org-mode file (or the
-selected part of it), in a @emph{time-sorted view}.  The main purpose of
-this command is to give an overview over events in a project.
+The timeline summarizes all time-stamped items from a single Org-mode
+file in a @emph{time-sorted view}.  The main purpose of this command is
+to give an overview over events in a project.
 
 @table @kbd
-@kindex C-c C-r
-@item C-c C-r
+@kindex C-a a L
+@item C-c a L
 Show a time-sorted view of the org file, with all time-stamped items.
 When called with a @kbd{C-u} prefix, all unfinished TODO entries
 (scheduled or not) are also listed under the current date.
@@ -3244,7 +3159,122 @@ When called with a @kbd{C-u} prefix, all unfinished TODO entries
 The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
 
-@node Agenda commands,  , Timeline, Agenda views
+
+@node Presentation and sorting, Agenda commands, Timeline, Agenda views
+@section Presentation and sorting
+@cindex presentation, of agenda items
+
+Before displaying items in an agenda view, Org-mode visually prepares
+the items and sorts them.  Each item occupies a single line.  The line
+starts with a @emph{prefix} that contains the @emph{category}
+(@pxref{Categories}) of the item and other important information.  You can
+customize the prefix using the option @code{org-agenda-prefix-format}.
+The prefix is followed by a cleaned-up version of the outline headline
+associated with the item.
+
+@menu
+* Categories::                  Not all tasks are equal
+* Time-of-day specifications::  How the agenda knows the time
+* Sorting of agenda items::     The order of things
+@end menu
+
+@node Categories, Time-of-day specifications, Presentation and sorting, Presentation and sorting
+@subsection Categories
+
+@cindex category
+The category is a broad label assigned to each agenda item.  By default,
+the category is simply derived from the file name, but you can also
+specify it with a special line in the buffer, like this:
+
+@example
+#+CATEGORY: Thesis
+@end example
+
+If there are several such lines in a file, each specifies the category
+for the text below it (but the first category also applies to any text
+before the first CATEGORY line).  The display in the agenda buffer looks
+best if the category is not longer than 10 characters.
+
+@node Time-of-day specifications, Sorting of agenda items, Categories, Presentation and sorting
+@subsection Time-of-Day Specifications
+@cindex time-of-day specification
+
+Org-mode checks each agenda item for a time-of-day specification.  The
+time can be part of the time stamp that triggered inclusion into the
+agenda, for example as in @w{@samp{<2005-05-10 Tue 19:00>}}.  Time
+ranges can be specified with two time stamps, like
+@c
+@w{@samp{<2005-05-10 Tue 20:30>--<2005-05-10 Tue 22:15>}}.
+
+In the headline of the entry itself, a time(range) may also appear as
+plain text (like @samp{12:45} or a @samp{8:30-1pm}.  If the agenda
+integrates the Emacs diary (@pxref{Calendar/Diary integration}), time
+specifications in diary entries are recognized as well.
+
+For agenda display, Org-mode extracts the time and displays it in a
+standard 24 hour format as part of the prefix.  The example times in
+the previous paragraphs would end up in the agenda like this:
+
+@example
+    8:30-13:00 Arthur Dent lies in front of the bulldozer
+   12:45...... Ford Prefect arrives and takes Arthur to the pub
+   19:00...... The Vogon reads his poem
+   20:30-22:15 Marwin escorts the Hitchhikers to the bridge
+@end example
+
+@cindex time grid
+If the agenda is in single-day mode, or for the display of today, the
+timed entries are embedded in a time grid, like
+
+@example
+    8:00...... ------------------
+    8:30-13:00 Arthur Dent lies in front of the bulldozer
+   10:00...... ------------------
+   12:00...... ------------------
+   12:45...... Ford Prefect arrives and takes Arthur to the pub
+   14:00...... ------------------
+   16:00...... ------------------
+   18:00...... ------------------
+   19:00...... The Vogon reads his poem
+   20:00...... ------------------
+   20:30-22:15 Marwin escorts the Hitchhikers to the bridge
+@end example
+
+The time grid can be turned on and off with the variable
+@code{org-agenda-use-time-grid}, and can be configured with
+@code{org-agenda-time-grid}.
+
+@node Sorting of agenda items,  , Time-of-day specifications, Presentation and sorting
+@subsection Sorting of agenda items
+@cindex sorting, of agenda items
+@cindex priorities, of agenda items
+Before being inserted into a view, the items are sorted.  How this is
+done depends on the type of view.
+@itemize @bullet
+@item
+For the daily/weekly agenda, the items for each day are sorted.  The
+default order is to first collect all items containing an explicit
+time-of-day specification.  These entries will be shown at the beginning
+of the list, as a @emph{schedule} for the day.  After that, items remain
+grouped in categories, in the sequence given by @code{org-agenda-files}.
+Within each category, items are sorted by priority (@pxref{Priorities}),
+which is composed of the base priority (2000 for priority @samp{A}, 1000
+for @samp{B}, and 0 for @samp{C}), plus additional increments for
+overdue scheduled or deadline items.
+@item 
+For the TODO list, items remain in the order of categories, but within
+each category, sorting takes place according to priority
+(@pxref{Priorities}).
+@item
+For tags matches, items are not sorted at all, but just appear in the
+sequence in which they are found in the agenda files.
+@end itemize
+
+Sorting can be customized using the variable
+@code{org-agenda-sorting-strategy}.
+
+
+@node Agenda commands, Custom agenda views, Presentation and sorting, Agenda views
 @section Commands in the agenda buffer
 @cindex commands, in agenda buffer
 
@@ -3260,6 +3290,7 @@ the other commands, the cursor needs to be in the desired line.
 
 @table @kbd
 @tsubheading{Motion}
+@cindex motion commands in agenda
 @kindex n
 @item n
 Next line (same as @key{up}).
@@ -3305,6 +3336,7 @@ logging was on (variable @code{org-log-done}) are shown in the agenda,
 as are entries that have been clocked on that day.
 
 @tsubheading{Change display}
+@cindex display changing, in agenda
 @kindex o
 @item o
 Delete other windows.
@@ -3353,6 +3385,7 @@ Display the previous dates.
 Goto today.
 
 @tsubheading{Remote editing}
+@cindex remote editing, from agenda
 
 @item 0-9
 Digit argument.
@@ -3439,6 +3472,7 @@ Stop the previously started clock.
 Cancel the currently running clock.
 
 @tsubheading{Calendar commands}
+@cindex calendar commands, from agenda
 @kindex c
 @item c
 Open the Emacs calendar and move to the date at the agenda cursor.
@@ -3491,6 +3525,176 @@ for the compilation of the agenda.  Buffers created by the user to
 visit org files will not be removed.
 
 @end table
+
+
+@node Custom agenda views,  , Agenda commands, Agenda views
+@section Custom agenda views
+@cindex custom agenda views
+@cindex agenda views, custom
+
+Custom agenda commands serve two purposes: to store and quickly access
+frequently used TODO and tags searches, and to create special composite
+agenda buffers.  Custom agenda commands will be accessible through the
+dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
+
+@menu
+* Storing searches::            Type once, use often
+* Block agenda::                All the stuff you need in a single buffer
+* Setting Options::             Changing the rules
+@end menu
+
+@node Storing searches, Block agenda, Custom agenda views, Custom agenda views
+@subsection Storing searches
+
+The first application of custom searches is the definition of keyboard
+shortcuts for frequently used searches, either creating an agenda
+buffer, or a sparse tree (the latter covering of course only the current
+buffer).
+@kindex C-c a C
+Custom commands are configured in the variable
+@code{org-agenda-custom-commands}.  You can customize this variable, for
+example by pressing @kbd{C-c a C}.  You can also directly set it with
+Emacs Lisp in @file{.emacs}.  The following example contains all valid
+search types:
+
+@lisp
+@group
+(setq org-agenda-custom-commands
+      '(("w" todo "WAITING")
+        ("W" todo-tree "WAITING")
+        ("u" tags "+BOSS-URGENT")
+        ("v" tags-todo "+BOSS-URGENT")
+        ("U" tags-tree "+BOSS-URGENT")
+        ("f" occur-tree "\\<FIXME\\>")))
+@end group
+@end lisp
+
+@noindent
+The initial single-character string in each entry defines the character
+you have to press after the dispatcher command @kbd{C-c a} in order to
+access the command.   The second parameter is the search type, followed
+by the string or regular expression to be used for the matching.  The
+example above will therefore define:
+
+@table @kbd
+@item C-c a w
+as a global search for TODO entries with @samp{WAITING} as the TODO
+keyword
+@item C-c a W
+as the same search, but only in the current buffer and displaying the
+results as a sparse tree
+@item C-c a u
+as a global tags search for headlines marked @samp{:BOSS:} but not
+@samp{:URGENT:}
+@item C-c a v
+as the same search as @kbd{C-c a u}, but limiting the search to
+headlines that are also TODO items
+@item C-c a U
+as the same search as @kbd{C-c a u}, but only in the current buffer and
+displaying the result as a sparse tree
+@item C-c a f
+to create a sparse tree (again: current buffer only) with all entries
+containing the word @samp{FIXME}.
+@end table
+
+@node Block agenda, Setting Options, Storing searches, Custom agenda views
+@subsection Block agenda
+@cindex block agenda
+@cindex agenda, with block views
+
+Another possibility is the construction of agenda views that comprise
+the results of @emph{several} commands, each of which creates a block in
+the agenda buffer.  The available commands include @code{agenda} for the
+daily or weekly agenda (as created with @kbd{C-c a a}), @code{alltodo}
+for the global todo list (as constructed with @kbd{C-c a t}), and the
+matching commands discussed above: @code{todo}, @code{tags}, and
+@code{tags-todo}.  Here are two examples:
+
+@lisp
+@group
+(setq org-agenda-custom-commands
+      '(("h" "Agenda and Home-related tasks"
+         ((agenda)
+          (tags-todo "HOME")
+          (tags "GARDEN")))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda)
+          (tags-todo "WORK")
+          (tags "OFFICE")))))
+@end group
+@end lisp
+
+@noindent
+This will define @kbd{C-c a h} to create a multi-block view for stuff
+you need to attend to at home.  The resulting agenda buffer will contain
+your agenda for the current week, all TODO items that carry the tag
+@samp{HOME}, and also all lines tagged with @samp{GARDEN}.  Finally the
+command @kbd{C-c a o} provides a similar view for office tasks.
+
+
+@node Setting Options,  , Block agenda, Custom agenda views
+@subsection Setting Options for custom commands
+@cindex options, for custom agenda views
+
+Org-mode contains a number of variables regulating agenda construction
+and display.  The global variables define the behavior for all agenda
+commands, including the custom commands.  However, if you want to change
+some settings just for a single custom view, you can do so.  Setting
+options requires inserting a list of variable names and values at the
+right spot in @code{org-agenda-custom-commands}.  For example:
+
+@lisp
+@group
+(setq org-agenda-custom-commands
+      '(("w" todo "WAITING"
+         ((org-agenda-sorting-strategy '(priority-down))
+          (org-agenda-prefix-format "  Mixed: ")))
+        ("U" tags-tree "+BOSS-URGENT"
+         ((org-show-following-heading nil)
+          (org-show-hierarchy-above nil)))))
+@end group
+@end lisp
+
+@noindent
+Now the @kbd{C-c a w} command will sort the collected entries only by
+priority, and the prefix format is modified to just say @samp{  Mixed:}
+instead of giving the category of the entry.  The sparse tags tree of
+@kbd{C-c a U} will now turn out ultra-compact, because neither the
+headline hierarchy above the match, nor the headline following the match
+will be shown.
+
+For command sets creating a block agenda,
+@code{org-agenda-custom-commands} has two separate spots for setting
+options.  You can add options that should be valid for just a single
+command in the set, and options that should be valid for all commands in
+the set.  The former are just added to the command entry, the latter
+must come after the list of command entries.  Going back to the block
+agenda example (@pxref{Block agenda}), let's change the sorting strategy
+for the @kbd{C-c a h} commands to @code{priority-down}, but let's sort
+the results for GARDEN tags query in the opposite order,
+@code{priority-up}.  This would look like this:
+
+@lisp
+@group
+(setq org-agenda-custom-commands
+      '(("h" "Agenda and Home-related tasks"
+         ((agenda)
+          (tags-todo "HOME")
+          (tags "GARDEN" ((org-agenda-sorting-strategy '(priority-up)))))
+         ((org-agenda-sorting-strategy '(priority-down))))
+        ("o" "Agenda and Office-related tasks"
+         ((agenda)
+          (tags-todo "WORK")
+          (tags "OFFICE")))))
+@end group
+@end lisp
+
+As you see, the values and parenthesis setting is a little complex.
+When in doubt, use the customize interface to set this variable - it
+fully supports its structure.  Just one caveat: When setting options in
+this interface, the @emph{values} are just lisp expressions.  So if the
+value is a string, you need to add the double quotes around the value
+yourself.
 
 @node Embedded LaTeX, Exporting, Agenda views, Top
 @chapter Embedded LaTeX
@@ -4448,15 +4652,21 @@ At the beginning of a headline, complete TODO keywords.
 @item
 After @samp{\}, complete @TeX{} symbols supported by the exporter.
 @item
-After @samp{*}, complete CamelCase versions of all headlines in the
-buffer.
+After @samp{*}, complete headlines in the current buffer so that they
+can be used in search links like @samp{[[*find this headline]]}.
 @item
-After @samp{:}, complete tags used elsewhere in the buffer.
+After @samp{:}, complete tags.  The list of tags is taken from the
+variable @code{org-tag-alist} (possibly set through the @samp{#+TAGS}
+in-buffer option, @pxref{Setting tags}), or it is created dynamically
+from all tags used in the current buffer.
 @item
 After @samp{#+}, complete the special keywords like @samp{TYP_TODO} or
 @samp{OPTIONS} which set file-specific options for Org-mode.  When the
 option keyword is already complete, pressing @kbd{M-@key{TAB}} again
 will insert example settings for this keyword.
+@item
+In the line after @samp{#+STARTUP: }, complete startup keywords,
+i.e. valid keys for this line.
 @item
 Elsewhere, complete dictionary words using ispell.
 @end itemize
@@ -4957,14 +5167,13 @@ The corresponding block writer function could look like this:
 (defun org-dblock-write:block-update-time (params)
    (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
      (insert "Last block update at: "
-	     (format-time-string fmt (current-time)))))
+             (format-time-string fmt (current-time)))))
 @end lisp
 
 If you want to make sure that all dynamic blocks are always up-to-date,
 you could add the function @code{org-update-all-dblocks} to a hook, for
 example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way that is does nothing in buffers that are not in Org-mode.
-
 
 @node History and Acknowledgments, Index, Extensions and Hacking, Top
 @appendix History and Acknowledgments
@@ -5013,7 +5222,7 @@ calculations and improved XEmacs compatibility, in particular by porting
 @item
 @i{Sacha Chua} suggested to copy some linking code from Planner.
 @item
-@i{Eddward DeVilla} proposed Checkbox statistics.
+@i{Eddward DeVilla} proposed and tested checkbox statistics.
 @item
 @i{Kees Dullemond} inspired the use of narrowed tabled columns.
 @item
@@ -5043,7 +5252,8 @@ file links, and TAGS.
 @i{Scott Otterson} sparked the introduction of descriptive text for
 links, among other things.
 @item
-@i{Pete Phillips} helped the development of the TAGS feature.
+@i{Pete Phillips} helped during the development of the TAGS feature, and
+provided frequent feedback.
 @item
 @i{T.V. Raman} reported bugs and suggested improvements.
 @item
@@ -5092,8 +5302,8 @@ linking to GNUS.
 @i{Roland Winkler} requested additional keybindings to make Org-mode
 work on a tty.
 @item
-@i{Piotr Zielinski} wrote @file{org-mouse.el} and showed how to follow
-links with mouse-1.
+@i{Piotr Zielinski} wrote @file{org-mouse.el}, proposed angenda blocks
+and contributed various ideas and code snippets.
 @end itemize
 
 
