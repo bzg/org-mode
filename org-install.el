@@ -53,7 +53,7 @@
 (autoload 'org-publish-all "org-publish" "Publish all projects." t)
 
 ;; org-toc.el
-(autoload 'org-show-toc "org-toc" "Create and display a table of contents" t)
+(autoload 'org-toc-show "org-toc" "Create and display a table of contents" t)
  
 (provide 'org-install)
 

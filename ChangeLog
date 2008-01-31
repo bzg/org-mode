@@ -1,5 +1,18 @@
 2007-10-12  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-sort-entries): Rewrite using `sort-subr'.
+	(org-set-property): More appropriate completion during
+	interactive use.
+	(org-sort-entries): Allow sorting by property.
+	(org-additional-option-like-keywords): Added more values.
+
+----------------------------------------------------------------------
+
+installed as 5.12
+
+2007-10-12  Carsten Dominik  <dominik@science.uva.nl>
+
+
 	* org.texi: Small fixes.
 
 2007-10-11  Carsten Dominik  <dominik@science.uva.nl>
