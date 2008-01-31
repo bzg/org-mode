@@ -5,7 +5,7 @@ START-INFO-DIR-ENTRY
 * Org Mode: (org).      outline-based notes management and organizer
 END-INFO-DIR-ENTRY
 
-   This manual is for Org-mode (version 4.54).
+   This manual is for Org-mode (version 4.55).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -27,7 +27,7 @@ File: org,  Node: Top,  Next: Introduction,  Prev: (dir),  Up: (dir)
 Org Mode Manual
 ***************
 
-This manual is for Org-mode (version 4.54).
+This manual is for Org-mode (version 4.55).
 
    Copyright (C) 2004, 2005, 2006 Free Software Foundation
 
@@ -273,28 +273,28 @@ Org-mode is a mode for keeping notes, maintaining ToDo lists, and doing
 project planning with a fast and effective plain-text system.
 
    Org-mode develops organizational tasks around NOTES files that
-contain information about projects as plain text.  Org-mode is
+contain lists or information about projects as plain text.  Org-mode is
 implemented on top of outline-mode, which makes it possible to keep the
 content of large files well structured.  Visibility cycling and
-structure editing help to work with the tree.  Tables are easily
-created with a built-in table editor.  Org-mode supports ToDo items,
-deadlines, time stamps, and scheduling.  It dynamically compiles
-entries into an agenda that utilizes and smoothly integrates much of
-the Emacs calendar and diary.  Plain text URL-like links connect to
-websites, emails, Usenet messages, BBDB entries, and any files related
-to the projects.  For printing and sharing of notes, an Org-mode file
-can be exported as a structured ASCII file, as HTML, or (todo and
-agenda items only) as an iCalendar file.  It can also serve as a
-publishing tool for a set of linked webpages.
+structure editing help to work with the tree.  Tables are easily created
+with a built-in table editor.  Org-mode supports ToDo items, deadlines,
+time stamps, and scheduling.  It dynamically compiles entries into an
+agenda that utilizes and smoothly integrates much of the Emacs calendar
+and diary.  Plain text URL-like links connect to websites, emails,
+Usenet messages, BBDB entries, and any files related to the projects.
+For printing and sharing of notes, an Org-mode file can be exported as a
+structured ASCII file, as HTML, or (todo and agenda items only) as an
+iCalendar file.  It can also serve as a publishing tool for a set of
+linked webpages.
 
-   An important design aspect that distinguishes Org-mode from other
-packages like Planner/Muse is that it encougages to store every piece of
+   An important design aspect that distinguishes Org-mode from for
+example Planner/Muse is that it encougages to store every piece of
 information only once.  In Planner, you have project pages, day pages
 and possibly other files, duplicating some information such as tasks.
 In Org-mode, you only have notes files.  In your notes you mark entries
-as tasks, label them with tags and timestamps.  All necessary lists like
-a schedule for the day, the agenda for a meeting, tasks lists selected
-by tags etc are created dynamically when you need them.
+as tasks, label them with tags and timestamps.  All necessary lists
+like a schedule for the day, the agenda for a meeting, tasks lists
+selected by tags etc are created dynamically when you need them.
 
    Org-mode keeps simple things simple.  When first fired up, it should
 feel like a straightforward, easy to use outliner.  Complexity is not
@@ -434,12 +434,12 @@ error occurred.  Here is how to produce a useful backtrace:
   2. Go to the `Options' menu and select `Enter Debugger on Error'
      (XEmacs has this option in the `Troubleshooting' sub-menu).
 
-  3. Do whatever you have to do to hit the error.  Don't forget to to
+  3. Do whatever you have to do to hit the error.  Don't forget to
      document the steps you take.
 
   4. When you hit the error, a `*Backtrace*' buffer will appear on the
-     screen.  Safe this buffer to a file (for example using `C-x C-w'
-     and attach) it to your bug report.
+     screen.  Save this buffer to a file (for example using `C-x C-w')
+     and attach it to your bug report.
 
 
 File: org,  Node: Document structure,  Next: Tables,  Prev: Introduction,  Up: Top
@@ -4726,7 +4726,7 @@ modifications.
 
 Note that the leading stars are not truly replaced by whitespace, they
 are only fontified with the face `org-hide' that uses the background
-color as font color.  If are are not using either white or black
+color as font color.  If you are not using either white or black
 background, you may have to customize this face to get the wanted
 effect.  Another possibility is to set this font such that the extra
 stars are almost invisible, for example using the color `grey90' on a
@@ -5844,150 +5844,150 @@ Node: Summary10777
 Node: Installation13689
 Node: Activation15067
 Node: Feedback16316
-Node: Document structure18395
-Node: Outlines19169
-Node: Headlines19829
-Node: Visibility cycling20452
-Ref: Visibility cycling-Footnote-122203
-Ref: Visibility cycling-Footnote-222261
-Node: Motion22311
-Node: Structure editing23095
-Node: Archiving25411
-Node: ARCHIVE tag25969
-Node: Moving subtrees27762
-Node: Sparse trees28803
-Ref: Sparse trees-Footnote-130934
-Ref: Sparse trees-Footnote-231026
-Node: Plain lists31141
-Ref: Plain lists-Footnote-134666
-Ref: Plain lists-Footnote-235023
-Node: Tables35205
-Node: Built-in table editor35753
-Node: Narrow columns43361
-Ref: Narrow columns-Footnote-145300
-Node: Table calculations45346
-Node: Formula syntax46666
-Ref: Formula syntax-Footnote-149571
-Node: Lisp formulas49871
-Node: Column formulas50660
-Node: Advanced features52422
-Node: Named-field formulas55676
-Node: Editing/debugging formulas56316
-Node: Appetizer58074
-Node: orgtbl-mode59177
-Node: table.el59668
-Node: Hyperlinks60645
-Node: Link format61418
-Node: Internal links62711
-Ref: Internal links-Footnote-164700
-Node: Radio targets64832
-Node: CamelCase links65547
-Node: External links66141
-Node: Handling links68272
-Ref: Handling links-Footnote-172924
-Ref: Handling links-Footnote-273161
-Node: Link abbreviations73235
-Node: Search options74914
-Ref: Search options-Footnote-176692
-Node: Custom searches76773
-Node: Remember77821
-Node: TODO items81511
-Node: TODO basics82493
-Node: TODO extensions84020
-Node: Workflow states84815
-Node: TODO types85683
-Ref: TODO types-Footnote-187341
-Node: Per file keywords87423
-Ref: Per file keywords-Footnote-188877
-Node: Priorities89078
-Node: Breaking down tasks90322
-Ref: Breaking down tasks-Footnote-190842
-Node: Checkboxes90938
-Node: Timestamps93674
-Node: Time stamps94135
-Ref: Time stamps-Footnote-197624
-Node: Creating timestamps97740
-Node: The date/time prompt100365
-Ref: The date/time prompt-Footnote-1102058
-Node: Custom time format102164
-Node: Progress logging103723
-Node: Closing items104252
-Node: Clocking work time105156
-Ref: Clocking work time-Footnote-1108782
-Node: Tags108908
-Node: Tag inheritance109670
-Node: Setting tags110607
-Ref: Setting tags-Footnote-1114805
-Ref: Setting tags-Footnote-2114917
-Node: Tag searches115000
-Node: Agenda views117000
-Node: Agenda files119093
-Ref: Agenda files-Footnote-1120053
-Ref: Agenda files-Footnote-2120202
-Node: Agenda dispatcher120395
-Node: Weekly/Daily agenda122012
-Node: Calendar/Diary integration122977
-Node: Global TODO list124315
-Node: Matching headline tags126475
-Node: Timeline127533
-Node: Presentation and sorting128196
-Node: Categories128974
-Node: Time-of-day specifications129638
-Node: Sorting of agenda items131616
-Node: Agenda commands132898
-Node: Custom agenda views138786
-Node: Storing searches139461
-Node: Block agenda141373
-Node: Setting Options142603
-Node: Batch processing145315
-Node: Embedded LaTeX146445
-Ref: Embedded LaTeX-Footnote-1147537
-Node: Math symbols147727
-Node: Subscripts and Superscripts148492
-Node: LaTeX fragments149336
-Ref: LaTeX fragments-Footnote-1151444
-Node: Processing LaTeX fragments151706
-Node: CDLaTeX mode152652
-Ref: CDLaTeX mode-Footnote-1155136
-Node: Exporting155284
-Node: ASCII export156598
-Node: HTML export157888
-Node: XOXO export160724
-Node: iCalendar export161163
-Node: Text interpretation162986
-Node: Comment lines163465
-Node: Enhancing text163936
-Node: Export options165628
-Node: Publishing167295
-Ref: Publishing-Footnote-1168091
-Node: Configuration168287
-Node: Project alist169005
-Node: Sources and destinations170071
-Node: Selecting files170801
-Node: Publishing action171549
-Node: Publishing options172782
-Node: Publishing links174934
-Node: Project page index176447
-Node: Sample configuration177225
-Node: Simple example177717
-Node: Complex example178390
-Node: Triggering publication180466
-Node: Miscellaneous181151
-Node: Completion181785
-Node: Customization183256
-Node: In-buffer settings183841
-Node: The very busy C-c C-c key187461
-Node: Clean view189105
-Node: TTY keys191682
-Node: Interaction193291
-Node: Cooperation193688
-Node: Conflicts195555
-Node: Bugs197147
-Node: Extensions and Hacking198770
-Node: Extensions199256
-Node: Dynamic blocks201057
-Node: History and Acknowledgments202984
-Node: Index207992
-Node: Key Index235080
+Node: Document structure18392
+Node: Outlines19166
+Node: Headlines19826
+Node: Visibility cycling20449
+Ref: Visibility cycling-Footnote-122200
+Ref: Visibility cycling-Footnote-222258
+Node: Motion22308
+Node: Structure editing23092
+Node: Archiving25408
+Node: ARCHIVE tag25966
+Node: Moving subtrees27759
+Node: Sparse trees28800
+Ref: Sparse trees-Footnote-130931
+Ref: Sparse trees-Footnote-231023
+Node: Plain lists31138
+Ref: Plain lists-Footnote-134663
+Ref: Plain lists-Footnote-235020
+Node: Tables35202
+Node: Built-in table editor35750
+Node: Narrow columns43358
+Ref: Narrow columns-Footnote-145297
+Node: Table calculations45343
+Node: Formula syntax46663
+Ref: Formula syntax-Footnote-149568
+Node: Lisp formulas49868
+Node: Column formulas50657
+Node: Advanced features52419
+Node: Named-field formulas55673
+Node: Editing/debugging formulas56313
+Node: Appetizer58071
+Node: orgtbl-mode59174
+Node: table.el59665
+Node: Hyperlinks60642
+Node: Link format61415
+Node: Internal links62708
+Ref: Internal links-Footnote-164697
+Node: Radio targets64829
+Node: CamelCase links65544
+Node: External links66138
+Node: Handling links68269
+Ref: Handling links-Footnote-172921
+Ref: Handling links-Footnote-273158
+Node: Link abbreviations73232
+Node: Search options74911
+Ref: Search options-Footnote-176689
+Node: Custom searches76770
+Node: Remember77818
+Node: TODO items81508
+Node: TODO basics82490
+Node: TODO extensions84017
+Node: Workflow states84812
+Node: TODO types85680
+Ref: TODO types-Footnote-187338
+Node: Per file keywords87420
+Ref: Per file keywords-Footnote-188874
+Node: Priorities89075
+Node: Breaking down tasks90319
+Ref: Breaking down tasks-Footnote-190839
+Node: Checkboxes90935
+Node: Timestamps93671
+Node: Time stamps94132
+Ref: Time stamps-Footnote-197621
+Node: Creating timestamps97737
+Node: The date/time prompt100362
+Ref: The date/time prompt-Footnote-1102055
+Node: Custom time format102161
+Node: Progress logging103720
+Node: Closing items104249
+Node: Clocking work time105153
+Ref: Clocking work time-Footnote-1108779
+Node: Tags108905
+Node: Tag inheritance109667
+Node: Setting tags110604
+Ref: Setting tags-Footnote-1114802
+Ref: Setting tags-Footnote-2114914
+Node: Tag searches114997
+Node: Agenda views116997
+Node: Agenda files119090
+Ref: Agenda files-Footnote-1120050
+Ref: Agenda files-Footnote-2120199
+Node: Agenda dispatcher120392
+Node: Weekly/Daily agenda122009
+Node: Calendar/Diary integration122974
+Node: Global TODO list124312
+Node: Matching headline tags126472
+Node: Timeline127530
+Node: Presentation and sorting128193
+Node: Categories128971
+Node: Time-of-day specifications129635
+Node: Sorting of agenda items131613
+Node: Agenda commands132895
+Node: Custom agenda views138783
+Node: Storing searches139458
+Node: Block agenda141370
+Node: Setting Options142600
+Node: Batch processing145312
+Node: Embedded LaTeX146442
+Ref: Embedded LaTeX-Footnote-1147534
+Node: Math symbols147724
+Node: Subscripts and Superscripts148489
+Node: LaTeX fragments149333
+Ref: LaTeX fragments-Footnote-1151441
+Node: Processing LaTeX fragments151703
+Node: CDLaTeX mode152649
+Ref: CDLaTeX mode-Footnote-1155133
+Node: Exporting155281
+Node: ASCII export156595
+Node: HTML export157885
+Node: XOXO export160721
+Node: iCalendar export161160
+Node: Text interpretation162983
+Node: Comment lines163462
+Node: Enhancing text163933
+Node: Export options165625
+Node: Publishing167292
+Ref: Publishing-Footnote-1168088
+Node: Configuration168284
+Node: Project alist169002
+Node: Sources and destinations170068
+Node: Selecting files170798
+Node: Publishing action171546
+Node: Publishing options172779
+Node: Publishing links174931
+Node: Project page index176444
+Node: Sample configuration177222
+Node: Simple example177714
+Node: Complex example178387
+Node: Triggering publication180463
+Node: Miscellaneous181148
+Node: Completion181782
+Node: Customization183253
+Node: In-buffer settings183838
+Node: The very busy C-c C-c key187458
+Node: Clean view189102
+Node: TTY keys191679
+Node: Interaction193288
+Node: Cooperation193685
+Node: Conflicts195552
+Node: Bugs197144
+Node: Extensions and Hacking198767
+Node: Extensions199253
+Node: Dynamic blocks201054
+Node: History and Acknowledgments202981
+Node: Index207989
+Node: Key Index235077
 
 End Tag Table
