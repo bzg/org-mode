@@ -238,4 +238,4 @@ clean:
 
 
 push:
-	git+ssh://repo.or.cz/svr/git/org-mode.git master
+	git-push git+ssh://repo.or.cz/srv/git/org-mode.git master
