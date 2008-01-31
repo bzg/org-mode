@@ -1,14 +1,14 @@
-2007-10-20  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-agenda-file-regexp): New variable.
+-----------------------------------------------------------------------
 
-2007-10-19  Carsten Dominik  <dominik@science.uva.nl>
+Installed as 5.13d
+	
+2007-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-agenda-files): Allow directories in the variable.
-
-2007-10-18  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-agenda-get-restriction-and-command): New function.
+	* org.el (org-read-date-get-relative): New function.
+	(org-agenda-file-regexp): New variable.
+	(org-agenda-files): Allow directories in the variable.
+	(org-agenda-get-restriction-and-command): New function.
 	(org-agenda): Use `org-agenda-get-restriction-and-command'.
 	(org-todo-blocker-hook, org-todo-trigger-hook): New hook.
 	(org-entry-is-todo-p, org-entry-is-done-p, org-get-todo-state):

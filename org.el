@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.13c
+;; Version: 5.13d
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -83,7 +83,7 @@
 
 ;;; Version
 
-(defconst org-version "5.13c"
+(defconst org-version "5.13d"
   "The version number of the file org.el.")
 (defun org-version ()
   (interactive)
@@ -16330,7 +16330,7 @@ user."
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") def))
 	 (prompt (concat (if prompt (concat prompt " ") "")
 			 (format "Date and/or time (default [%s]): " timestr)))
-	 ans (org-ans0 "") org-ans1 org-ans2 deltan deltaw deltarel
+	 ans (org-ans0 "") org-ans1 org-ans2 delta deltan deltaw deltadef
 	 second minute hour day month year tl wday wday1 pm h2 m2)
 
     (cond
@@ -16388,12 +16388,11 @@ user."
       (setq ans (read-string prompt "" nil timestr))))
     (org-detach-overlay org-date-ovl)
 
-    (when (string-match
-	   "\\`[ \t]*\\([-+]\\)?\\([-+][0-9]+\\)\\([dwmy]?\\)\\([ \t\n]\\|$\\)"
-	   org-ans0)
-      (setq deltan (string-to-number (match-string 2 ans))
-	    deltaw (match-string 3 ans)
-            deltarel (match-end 1)))
+    (when (setq delta (org-read-date-get-relative ans (current-time) def))
+      (setq ans (replace-match "" t t ans)
+	    deltan (car delta)
+	    deltaw (nth 1 delta)
+            deltadef (nth 2 delta)))
 
     ;; Help matching ISO dates with single digit month ot day, like 2006-8-11.
     (when (string-match
@@ -16449,7 +16448,7 @@ user."
 	  second (or (nth 0 tl) 0)
 	  wday (nth 6 tl))
     (when deltan
-      (unless deltarel
+      (unless deltadef
 	(let ((now (decode-time (current-time))))
 	  (setq day (nth 3 now) month (nth 4 now) year (nth 5 now))))
       (cond ((member deltaw '("d" "")) (setq day (+ day deltan)))
@@ -16471,6 +16470,40 @@ user."
       (if (or (nth 1 tl) (nth 2 tl))
 	  (format "%04d-%02d-%02d %02d:%02d" year month day hour minute)
 	(format "%04d-%02d-%02d" year month day)))))
+
+(defvar parse-time-weekdays)
+
+(defun org-read-date-get-relative (s today default)
+  "Check string S for special relative date string.
+TODAY and DEFAULT are ionternal times, for today and for a default.
+Return shift list (N what def-flag)
+WHAT       is \"d\", \"w\", \"m\", or \"y\" for day. week, month, year.
+N          is the number if WHATs to shift
+DEF-FLAG   is t when a double ++ or -- indicates shift relative to
+           the DEFAULT date rather than TODAY."
+  (when (string-match
+	 (concat
+	  "\\`[ \t]*\\([-+]\\{1,2\\}\\)?"
+	  "\\([0-9]+\\)?"
+	  "\\([dwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
+	  "\\([ \t]\\|$\\)") s)
+    (let* ((dir (if (match-end 1)
+		    (string-to-char (substring (match-string 1 s) -1))
+		  ?+))
+	   (rel (and (match-end 1) (= 2 (- (match-end 1) (match-beginning 1)))))
+	   (n (if (match-end 2) (string-to-number (match-string 2 s)) 1))
+	   (what (if (match-end 3) (match-string 3 s) "d"))
+	   (wday1 (cdr (assoc (downcase what) parse-time-weekdays)))
+	   (date (if rel default today))
+	   (wday (nth 6 (decode-time date)))
+	   delta)
+      (if wday1
+	  (progn
+	    (setq delta (mod (+ 7 (- wday1 wday)) 7))
+	    (if (= dir ?-) (setq delta (- delta 7)))
+	    (if (> n 1) (setq delta (+ delta (* (1- n) (if (= dir ?-) -7 7)))))
+	    (list delta "d" rel))
+	(list (* n (if (= dir ?-) -1 1)) what rel)))))
 
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
