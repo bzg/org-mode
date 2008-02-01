@@ -1,5 +1,6 @@
 test
 *~
+*#
 *.html
 *.elc
 org.pdf
