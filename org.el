@@ -21387,7 +21387,7 @@ the documentation of `org-diary'."
 		(org-add-props txt props
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
-		  'priority (+ (if upcomingp (floor (* dfrac 10.)) 100)
+		  'priority (+ (floor (* dfrac 100.))
 			       (org-get-priority txt))
 		  'org-category category
 		  'type (if upcomingp "upcoming-deadline" "deadline")
