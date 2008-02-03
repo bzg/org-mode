@@ -2,6 +2,8 @@
 
 	* org.el (org-agenda-get-deadlines): Make sure priorities increase
 	as the due date approaches and is passed.
+	(org-remember-apply-template): Fixed problem with tags that
+	contain "_" or "@".
 
 2008-02-01  Carsten Dominik  <dominik@science.uva.nl>
 
