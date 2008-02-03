@@ -9,3 +9,13 @@ The xemacs directory contains special code for XEmacs users, in particular
 a port of the GNU Emacs outline.el to XEmacs.  Org-mode does not work
 under XEmacs without this file installed.  It did until version 4.37,
 but no longer.
+
+If this is the git project, there are additional directories here:
+
+CONTRIB
+    contains bits and pieces contributed by users.  These are not yet
+    part of the Org-mode core, and also not part of Emacs.
+
+EXPERIMENTAL
+    files that contain code bits for experimenting.  Nothing has been
+    decided on what to do with these.
