@@ -14693,7 +14693,7 @@ With argument REMOVE, remove any deadline from the item."
   (interactive "P")
   (if remove
       (progn
-	(org-add-planning-info nil nil 'deadline)
+	(org-remove-timestamp-with-keyword org-deadline-string)
 	(message "Item no longer has a deadline."))
     (org-add-planning-info 'deadline nil 'closed)))
 
@@ -14703,9 +14703,22 @@ With argument REMOVE, remove any scheduling date from the item."
   (interactive "P")
   (if remove
       (progn
-	(org-add-planning-info nil nil 'scheduled)
+	(org-remove-timestamp-with-keyword org-scheduled-string)
 	(message "Item is no longer scheduled."))
     (org-add-planning-info 'scheduled nil 'closed)))
+
+(defun org-remove-timestamp-with-keyword (keyword)
+  "Remove all time stamps with KEYWORD in the current entry."
+  (let ((re (concat "\\<" (regexp-quote keyword) " +<[^>\n]+>[ \t]*"))
+	beg)
+    (save-excursion
+      (org-back-to-heading t)
+      (setq beg (point))
+      (org-end-of-subtree t t)
+      (while (re-search-backward re beg t)
+	(replace-match "")
+	(unless (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
+	  (delete-region (point-at-bol) (min (1+ (point)) (point-max))))))))
 
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the line directly after the headline.
@@ -28069,12 +28082,88 @@ Still experimental, may disappear in the future."
 
 
 
-;(let ((org-refile-targets org-refile-targets)
-;      (org-refile-use-outline-path org-refile-use-outline-path))
-;  (when (equal just-goto '(16))
-;    (setq org-refile-targets '((nil . (:maxlevel . 10))))
-;    (setq org-refile-use-outline-path t))
-;  (setq org-refile-target-table (org-get-refile-targets default-buffer)))
+(defun org-update-checkbox-count (&optional all)
+ "Update the checkbox statistics in the current section.
+This will find all statistic cookies like [57%] and [6/12] and update them
+with the current numbers.  With optional prefix argument ALL, do this for
+the whole buffer."
+ (interactive "P")
+ (save-excursion
+   (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
+	  (beg (condition-case nil
+		   (progn (outline-back-to-heading) (point))
+		 (error (point-min))))
+	  (end (move-marker (make-marker)
+			    (progn (outline-next-heading) (point))))
+	  (re "\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)")
+	  (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
+	  beg-cookie end-cookie is-percent c-on c-off lim
+          eline curr-ind next-ind
+          (cstat 0)
+          )
+     (when all
+       (goto-char (point-min))
+       (outline-next-heading)
+       (setq beg (point) end (point-max)))
+     (goto-char end)
+     ;; find each statistic cookie
+     (while (re-search-backward re beg t)
+       (setq cstat (1+ cstat)
+             beg-cookie (match-beginning 0)
+             end-cookie (match-end       0)
+             is-percent (match-beginning 1)
+	     lim (cond
+		  ((org-on-heading-p) (outline-next-heading) (point))
+		  ((org-at-item-p) (org-end-of-item) (point))
+		  (t nil))
+             c-on  0
+             c-off 0
+             )
+       (when lim
+         ;; find first checkbox for this cookie and gather
+         ;; statistics from all that are at this indentation level
+         (goto-char end-cookie)
+         (if (re-search-forward re-box lim t)
+             (progn
+               (org-beginning-of-item)
+               (setq curr-ind (org-get-indentation))
+               (setq next-ind curr-ind)
+               (while (= curr-ind next-ind)
+                 (save-excursion (end-of-line) (setq eline (point)))
+                 (if (re-search-forward re-box eline t)
+		     (if (member (match-string 2) '("[ ]" "[-]"))
+			 (setq c-off (1+ c-off))
+                       (setq c-on (1+ c-on))
+                       )
+                   )
+                 (org-end-of-item)
+                 (setq next-ind (org-get-indentation))
+                 )))
+         ;; update cookie
+         (delete-region beg-cookie end-cookie)
+         (goto-char beg-cookie)
+         (insert
+          (if is-percent
+	      (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
+	    (format "[%d/%d]" c-on (+ c-on c-off))))
+         ;; update items checkbox if it has one
+         (when (org-at-item-p)
+           (org-beginning-of-item)
+           (save-excursion (end-of-line) (setq eline (point)))
+           (when (re-search-forward re-box eline t)
+             (setq beg-cookie (match-beginning 2)
+                   end-cookie (match-end       2))
+             (delete-region beg-cookie end-cookie)
+             (goto-char beg-cookie)
+             (cond ((= c-off 0) (insert "[X]"))
+                   ((= c-on  0) (insert "[ ]"))
+                   (t           (insert "[-]")))
+             )))
+       (goto-char beg-cookie)
+       )
+     (when (interactive-p)
+       (message "Checkbox satistics updated %s (%d places)"
+		(if all "in entire file" "in current outline entry") cstat)))))
 
 ;;;; Finish up
 

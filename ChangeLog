@@ -1,3 +1,10 @@
+2008-02-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-remove-timestamp-with-keyword): New function.
+	(org-schedule, org-deadline): Use
+	`org-remove-timestamp-with-keyword' to make sure all such time
+	stamps are removed.
+
 2008-02-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-get-deadlines): Make sure priorities increase
