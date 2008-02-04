@@ -4,6 +4,7 @@
 	(org-schedule, org-deadline): Use
 	`org-remove-timestamp-with-keyword' to make sure all such time
 	stamps are removed.
+	(org-mode): Support for `align'.
 
 2008-02-03  Carsten Dominik  <dominik@science.uva.nl>
 

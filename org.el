@@ -4905,6 +4905,13 @@ The following commands are available:
 ;  (org-set-local 'comment-start "#") ;; FIXME: this breaks wrapping
   (org-set-local 'comment-padding " ")
 
+  ;; Align options lines
+  (org-set-local
+   'align-mode-rules-list
+   '((org-in-buffer-settings
+      (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
+      (modes . '(org-mode)))))
+
   ;; Imenu
   (org-set-local 'imenu-create-index-function
 		 'org-imenu-get-tree)
