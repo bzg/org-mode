@@ -1,5 +1,7 @@
 2008-02-04  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-mac-message.el: New file.
+
 	* org.el (org-remove-timestamp-with-keyword): New function.
 	(org-schedule, org-deadline): Use
 	`org-remove-timestamp-with-keyword' to make sure all such time
