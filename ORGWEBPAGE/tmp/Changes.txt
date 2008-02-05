@@ -2,7 +2,7 @@
                      =====================================
 
 Author: Carsten Dominik <carsten at orgmode dot org>
-Date: 2008/01/28 09:04:09
+Date: 2008/02/05 20:05:28
 
 
 Version 5.20
@@ -11,26 +11,72 @@ Version 5.20
 Overview
 ========
 
+Remember/Refile/Goto
+--------------------
+
+    - The use of prefix arguments for the commands `org-remember'
+      and `org-refile' has been normalized.
+
+    - The clock can now safely be used in a remember buffer.
+      
+    - The variable `org-remember-use-refile-when-interactive'
+      introduced only in 5.19 is already obsolete.  Please use
+      `org-remember-interactive-interface' instead.
+
+    - It is no longer necessary to update the refiling targets.
+
+    - Automatic isearch in `org-goto'.
+
+    - Outline-path-completion as alternative org-goto interface.
+
+Misc
+----
+
+    - Checkboxes now work hierarchically.
+
+    - `C-k' can now behave specially in headlines.
+
+    - Repeater for tasks in plain timestamps.
+
+    - All clock intervals of an item show in agenda/timeline.
+      
+    - New parameter `:step' for clocktable, to get daily reports.
+
+    - Never loose a repeaded scheduled item from the agenda.
+
+    - Archiving a subtree now stores the outline path in a property.
+
+    - Links to messages in Apple Mail.
+
+    - Bug fixes.
+
 Incompatible Changes
 ====================
+   
+   - The variable `org-remember-use-refile-when-interactive'
+     introduced only in 5.19 is already obsolete.  Please use
+     `org-remember-interactive-interface' instead.
 
 Details
 =======
 
-Remember and Refile
--------------------
+Remember/Refile/Goto
+--------------------
 
     - The use of prefix arguments for the commands `org-remember'
       and `org-refile' has been normalized:
-      + when called without prefix argment, the command does its
+
+      + when called without prefix argument, the command does its
         normal job, starting a remember note or refiling a tree.
-      + when called with a single C-u pefix, these commands can be
+
+      + when called with a single C-u prefix, these commands can be
         used to select a target location and to jump there.  In
         the case of `org-remember', you will be prompted for a
-        template and then Emacs jumpt to the default target
+        template and then Emacs jumps to the default target
         location or this template.  In the case of `org-refile',
         you select a location from the refile target list and jump
         there.
+
       + when called with two prefixes (`C-u C-u'), the command
         jumps to the location last used for storing a note or a
         moved tree.
@@ -38,17 +84,9 @@ Remember and Refile
     - When the clock is running inside an remember buffer, storing
       the remember buffer with `C-c C-c' will automatically clock
       out.  This was inspired by a request by Rainer Stengle. 
-
-    - Outline-path-completion is now available as an alternative
-      interface in the command `org-goto'.  Please select the
-      default interface you'd like to use with the new variable
-      `org-goto-interface'.  You can then select the alternative
-      interface with a prefix argument to `C-c C-j' (org-goto).  I
-      am considering to make outline-path-completion the default
-      interface.  Comments?
-
+      
     - The variable `org-remember-use-refile-when-interactive'
-      introduced only in 5.19 is obsolete.  Please use
+      introduced only in 5.19 is already obsolete.  Please use
       `org-remember-interactive-interface' instead.  This new
       variable does select the interface that is used to select
       the target for a remember note in an interactive way.
@@ -61,61 +99,99 @@ Remember and Refile
       + `refile': Offer the `org-refile-targets' as possible
         targets.
 
+    - It is no longer necessary to update the refiling targets -
+      they are always current.
+
+    - In `org-goto', typing characters now automatically starts
+      isearch from the beginning of the buffer.  The isearch is
+      special also because it only matches in headline.  This
+      goes some way toward saving org-goto from being removed
+      from Org-mode.  Thanks to Piotr Zielinski for the code, and
+      sorry that it took me so long to put it in.  If you prefer
+      to use single letters n,p,f,b,u,q for navigation as before,
+      configure the variable `org-goto-auto-isearch'.
+
+    - Outline-path-completion is now available as an alternative
+      interface in the command `org-goto'.  Please select the
+      default interface you'd like to use with the new variable
+      `org-goto-interface'.  You can then select the alternative
+      interface with a prefix argument to `C-c C-j' (org-goto).  I
+      am considering to make outline-path-completion the default
+      interface.  Comments?
+
+
+Misc
+----
+
+    - Checkboxes now work hierarchically.  When a plain-list item
+      with a checkbox has children with checkboxes, the status of
+      the item's checkbox is calculated from the children, each
+      time a checkbox is toggled with C-c C-c.  Thanks to Miguel
+      A. Figueroa-Villanueva for a patch to this effect.
+
+    - There is a new variable `org-special-ctrl-k'.  When set,
+      `C-k' will behave specially in headlines:
+
+      + When the cursor is at the beginning of a headline, kill
+        the entire line and possible the folded subtree below the
+        line.
+      + When in the middle of the headline text, kill the
+        headline up to the tags.
+      + When after the headline text, kill the tags.
+
+      This is following a proposal by Piotr Zielinski.
+
     - You can now also have a plain (as opposed to deadline or
       scheduled) repeater timestamp in a task.  Switching the task
       to DONE will now also shift a plain time stamp.  This was a
       request by Austin Frank.
 
-    - It is no longer necessary to update the refiling targets -
-      they are always current.
+    - If an entry is clocked multiple times, it will now show up
+      several times in the agenda and timeline buffers, when
+      log-mode is on.  This was a proposal by Jurgen Defurne.
+      
+    - The clock table accepts a new parameter `:step'.  This
+      parameter can be `day' or `week' and will result in separate
+      tables for each day or week in the requested time interval.
+      This was triggered by a proposal by Sacha Chua in her [blog].
 
- *** Misc
+    - A time-stamp with a repeater now no longer refers to the
+      date *closest* to the current day.  Instead, it means either
+      today or the most recent match.  This change makes sure that
+      overdue scheduled or deadline items never disappear from the
+      agenda.  With the previous convention, an overdue scheduled
+      item would disappear.  For example, a weekly item scheduled
+      for Sunday would appear as overdue until Wednesday, and the
+      suddenly disappear until next Sunday.  Now the item will
+      show up as "Sched 7x" on Saturday.  From Sunday on it will
+      be in the list as "Scheduled", i.e. old sins will be
+      forgiven.  This follows a request by Warong, Dennis and
+      Bernt.
 
-   - In `org-goto', typing characters now automatically starts
-     isearch from the beginning of the buffer.  The isearch is
-     special also because it only matches in headline.  This goes
-     some way toward saving org-goto from being removed from
-     Org-mode.  Thanks to Piotr Zielinski for the code, and sorry
-     that it took me o long to ut it in.  If you prefer to use
-     single letters n,p,f,b,u,q for navigation as before,
-     configure the variable `org-goto-auto-isearch'.
+    - Archiving a subtree now creates an additional property,
+      `ARCHIVE_OLPATH'.  This property contains the "path" in the
+      outline tree to the archived entry, as it was in the
+      original file.  For example, archiving `Fix the door' in the
+      following hierarchy
+      
+       * Tasks
+       ** HOME
+       *** Garage
+       **** Fix the door
+      
+      will file is with the following property
+      
+       :ARCHIVE_PATH: Task/HOME/Garage
+      
+      Note that you can configure (i.e. limit) the information
+      that gets stored upon archiving with the variable
+      `org-archive-save-context-info'.
 
-   - The clock table accepts a new parameter `:step'.  This
-     parameter can be `day' or `week' and will result in separate
-     tables for each day or week in the requested time interval.
-     This was triggered by a proposal by Sacha Chua in her [blog].
+    - New file `org-mac-message.el' by John Wiegley to create
+      links for messages in Apple Mail, and to follow these
+      links.
 
-   - A time-stamp with a repeater now no longer refers to the
-     date *closest* to the current day.  Instead, it means either
-     today or the most recent match.  This change makes sure that
-     overdue scheduled or deadline items never disappear from the
-     agenda.  With the previous convention, an overdue sheduled
-     item would disappear.  For example, a weekly item scheduled
-     for Sunday would appear as overdue until Wednesday, and the
-     suddenly disappear until next Sunday.  Now the item will
-     show up as "Sched 7x" on Saturday.  From Sunday on it will
-     be in the list as "Scheduled", i.e. old sins will be
-     forgiven.  This follows a request by Warong, Dennis and
-     Bernt.
-
-   - Archving a subtree now creates an additional property,
-     `ARCHIVE_OLPATH'.  This property contains the "path" in the
-     outline tree to the archived entry, as it was in the
-     original file.  For example, archiving `Fix the door' in the
-     following hierarchy
-
-      * Tasks
-      ** HOME
-      *** Garage
-      **** Fix the door
-
-     will file is with the following property
-
-      :ARCHIVE_PATH: Task/HOME/Garage
-
-     Note that you can configure (i.e. limit) the information
-     that gets stored upon archiving with the variable
-     `org-archive-save-context-info'.
+    - Bug fixes.
 
 Version 5.19
 ~~~~~~~~~~~~
@@ -3070,7 +3146,7 @@ Version 4.47
    - Agenda items can be sorted by tag.  The *last* tag is used for this.
    - The prefix and the sorting strategy for agenda items can depend
      upon the agenda type.
-   - The handling of `[mailto:'] links can be customized, see the new
+   - The handling of `mailto:' links can be customized, see the new
      variable `org-link-mailto-program'.
    - `mailto' links can specify a subject after a double colon,
      like [mailto:carsten@orgmode.org::Org-mode is buggy].

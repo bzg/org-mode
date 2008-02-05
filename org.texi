@@ -8507,6 +8507,8 @@ HTML agendas.
 @item
 @i{Nic Ferrier} contributed mailcap and XOXO support.
 @item
+@i{Miguel A. Figueroa-Villanueva} implemented hierarchical checkboxes.
+@item
 @i{John Foerch} figured out how to make incremental search show context
 around a match in a hidden outline tree.
 @item
