@@ -4,7 +4,7 @@
 @settitle Org Mode Manual
 
 @set VERSION 5.20
-@set DATE January 2008
+@set DATE February 2008
 
 @dircategory Emacs
 @direntry
@@ -3067,8 +3067,8 @@ use the mouse (thanks to Piotr Zielinski's @file{org-mouse.el}).
 Here is an example of a checkbox list.
 
 @example
-* TODO Organize party [3/6]
-  - call people [1/3]
+* TODO Organize party [2/4]
+  - [-] call people [1/3]
     - [ ] Peter
     - [X] Sarah
     - [ ] Sam
@@ -3077,9 +3077,14 @@ Here is an example of a checkbox list.
   - [X] talk to the neighbors
 @end example
 
+Checkboxes work hierarchically, so if a checkbox item has children that
+are checkboxes, toggling one of the children checkboxes will make the
+parent checkbox reflect if none, some, or all o the children are
+checked.
+
 @cindex statistics, for checkboxes
 @cindex checkbox statistics
-The @samp{[3/6]} and @samp{[1/3]} in the first and second line are
+The @samp{[2/4]} and @samp{[1/3]} in the first and second line are
 cookies indicating how many checkboxes present in this entry have been
 checked off, and the total number of checkboxes are present.  This can
 give you an idea on how many checkboxes remain, even without opening a
