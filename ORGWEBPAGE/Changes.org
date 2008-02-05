@@ -145,6 +145,8 @@
       links for messages in Apple Mail, and to follow these
       links.
 
+    - Bug fixes.
+
 * Version 5.19
 
 ** Overview
