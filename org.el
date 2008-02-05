@@ -4218,6 +4218,7 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
+(declare-function remember-finalize "remember" ())
 (defvar remember-save-after-remembering)
 (defvar remember-data-file)
 (defvar remember-register)
@@ -5955,6 +5956,7 @@ the headline hierarchy above."
 
 (defvar org-goto-selected-point nil) ; dynamically scoped parameter
 (defvar org-goto-exit-command nil) ; dynamically scoped parameter
+(defvar org-goto-local-auto-isearch-map) ; defined below
 
 (defun org-get-location (buf help)
   "Let the user select a location in the Org-mode buffer BUF.
@@ -6990,52 +6992,89 @@ Return t when things worked, nil when we are not in an item."
     (org-update-checkbox-count)))
 
 (defun org-update-checkbox-count (&optional all)
-  "Update the checkbox statistics in the current section.
+ "Update the checkbox statistics in the current section.
 This will find all statistic cookies like [57%] and [6/12] and update them
 with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
-  (interactive "P")
-  (save-excursion
-    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
-	   (beg (condition-case nil
-		    (progn (outline-back-to-heading) (point))
-		  (error (point-min))))
-	   (end (move-marker (make-marker)
-			     (progn (outline-next-heading) (point))))
-	   (re "\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)")
-	   (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
-	   b1 e1 f1 c-on c-off lim (cstat 0))
-      (when all
-	(goto-char (point-min))
-	(outline-next-heading)
-	(setq beg (point) end (point-max)))
-      (goto-char beg)
-      (while (re-search-forward re end t)
-	(setq cstat (1+ cstat)
-	      b1 (match-beginning 0)
-	      e1 (match-end 0)
-	      f1 (match-beginning 1)
-	      lim (cond
-		   ((org-on-heading-p) (outline-next-heading) (point))
-		   ((org-at-item-p) (org-end-of-item) (point))
-		   (t nil))
-	      c-on 0 c-off 0)
-	(goto-char e1)
-	(when lim
-	  (while (re-search-forward re-box lim t)
-	    (if (member (match-string 2) '("[ ]" "[-]"))
-		(setq c-off (1+ c-off))
-	      (setq c-on (1+ c-on))))
-;	  (delete-region b1 e1)
-	  (goto-char b1)
-	  (insert (if f1
-		      (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
-		    (format "[%d/%d]" c-on (+ c-on c-off))))
-	  (and (looking-at "\\[.*?\\]")
-	       (replace-match ""))))
-      (when (interactive-p)
-	(message "Checkbox satistics updated %s (%d places)"
-		 (if all "in entire file" "in current outline entry") cstat)))))
+ (interactive "P")
+ (save-excursion
+   (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
+	  (beg (condition-case nil
+		   (progn (outline-back-to-heading) (point))
+		 (error (point-min))))
+	  (end (move-marker (make-marker)
+			    (progn (outline-next-heading) (point))))
+	  (re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	  (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
+	  (re-find (concat re "\\|" re-box))
+	  beg-cookie end-cookie is-percent c-on c-off lim
+          eline curr-ind next-ind continue-from startsearch
+          (cstat 0)
+          )
+     (when all
+       (goto-char (point-min))
+       (outline-next-heading)
+       (setq beg (point) end (point-max)))
+     (goto-char end)
+     ;; find each statistic cookie
+     (while (re-search-backward re-find beg t)
+       (setq beg-cookie (match-beginning 1)
+             end-cookie (match-end 1)
+	     cstat (+ cstat (if end-cookie 1 0))
+	     startsearch (point-at-eol)
+	     continue-from (point-at-bol)
+             is-percent (match-beginning 2)
+	     lim (cond
+		  ((org-on-heading-p) (outline-next-heading) (point))
+		  ((org-at-item-p) (org-end-of-item) (point))
+		  (t nil))
+             c-on 0
+             c-off 0)
+       (when lim
+         ;; find first checkbox for this cookie and gather
+         ;; statistics from all that are at this indentation level
+         (goto-char startsearch)
+         (if (re-search-forward re-box lim t)
+             (progn
+               (org-beginning-of-item)
+               (setq curr-ind (org-get-indentation))
+               (setq next-ind curr-ind)
+               (while (= curr-ind next-ind)
+                 (save-excursion (end-of-line) (setq eline (point)))
+                 (if (re-search-forward re-box eline t)
+		     (if (member (match-string 2) '("[ ]" "[-]"))
+			 (setq c-off (1+ c-off))
+                       (setq c-on (1+ c-on))
+                       )
+                   )
+                 (org-end-of-item)
+                 (setq next-ind (org-get-indentation))
+                 )))
+         ;; update cookie
+	 (when end-cookie
+	   (delete-region beg-cookie end-cookie)
+	   (goto-char beg-cookie)
+	   (insert
+	    (if is-percent
+		(format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
+	      (format "[%d/%d]" c-on (+ c-on c-off)))))
+         ;; update items checkbox if it has one
+         (when (org-at-item-p)
+           (org-beginning-of-item)
+           (when (and (> (+ c-on c-off) 0)
+		      (re-search-forward re-box (point-at-eol) t))
+             (setq beg-cookie (match-beginning 2)
+                   end-cookie (match-end       2))
+             (delete-region beg-cookie end-cookie)
+             (goto-char beg-cookie)
+             (cond ((= c-off 0) (insert "[X]"))
+                   ((= c-on  0) (insert "[ ]"))
+                   (t           (insert "[-]")))
+             )))
+       (goto-char continue-from))
+     (when (interactive-p)
+       (message "Checkbox satistics updated %s (%d places)"
+		(if all "in entire file" "in current outline entry") cstat)))))
 
 (defun org-get-checkbox-statistics-face ()
   "Select the face for checkbox statistics.
@@ -13568,6 +13607,7 @@ from that hook."
   (when org-finish-function
     (funcall org-finish-function)))
 
+(defvar org-clock-marker) ; Defined below
 (defun org-remember-finalize ()
   "Finalize the remember process."
   (unless (fboundp 'remember-finalize)
@@ -28086,91 +28126,6 @@ Still experimental, may disappear in the future."
                        (and (>= time time1) (<= time time2))))))
     ;; make tree, check each match with the callback
     (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
-
-
-
-(defun org-update-checkbox-count (&optional all)
- "Update the checkbox statistics in the current section.
-This will find all statistic cookies like [57%] and [6/12] and update them
-with the current numbers.  With optional prefix argument ALL, do this for
-the whole buffer."
- (interactive "P")
- (save-excursion
-   (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
-	  (beg (condition-case nil
-		   (progn (outline-back-to-heading) (point))
-		 (error (point-min))))
-	  (end (move-marker (make-marker)
-			    (progn (outline-next-heading) (point))))
-	  (re "\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)")
-	  (re-box "^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[- X]\\]\\)")
-	  beg-cookie end-cookie is-percent c-on c-off lim
-          eline curr-ind next-ind
-          (cstat 0)
-          )
-     (when all
-       (goto-char (point-min))
-       (outline-next-heading)
-       (setq beg (point) end (point-max)))
-     (goto-char end)
-     ;; find each statistic cookie
-     (while (re-search-backward re beg t)
-       (setq cstat (1+ cstat)
-             beg-cookie (match-beginning 0)
-             end-cookie (match-end       0)
-             is-percent (match-beginning 1)
-	     lim (cond
-		  ((org-on-heading-p) (outline-next-heading) (point))
-		  ((org-at-item-p) (org-end-of-item) (point))
-		  (t nil))
-             c-on  0
-             c-off 0
-             )
-       (when lim
-         ;; find first checkbox for this cookie and gather
-         ;; statistics from all that are at this indentation level
-         (goto-char end-cookie)
-         (if (re-search-forward re-box lim t)
-             (progn
-               (org-beginning-of-item)
-               (setq curr-ind (org-get-indentation))
-               (setq next-ind curr-ind)
-               (while (= curr-ind next-ind)
-                 (save-excursion (end-of-line) (setq eline (point)))
-                 (if (re-search-forward re-box eline t)
-		     (if (member (match-string 2) '("[ ]" "[-]"))
-			 (setq c-off (1+ c-off))
-                       (setq c-on (1+ c-on))
-                       )
-                   )
-                 (org-end-of-item)
-                 (setq next-ind (org-get-indentation))
-                 )))
-         ;; update cookie
-         (delete-region beg-cookie end-cookie)
-         (goto-char beg-cookie)
-         (insert
-          (if is-percent
-	      (format "[%d%%]" (/ (* 100 c-on) (max 1 (+ c-on c-off))))
-	    (format "[%d/%d]" c-on (+ c-on c-off))))
-         ;; update items checkbox if it has one
-         (when (org-at-item-p)
-           (org-beginning-of-item)
-           (save-excursion (end-of-line) (setq eline (point)))
-           (when (re-search-forward re-box eline t)
-             (setq beg-cookie (match-beginning 2)
-                   end-cookie (match-end       2))
-             (delete-region beg-cookie end-cookie)
-             (goto-char beg-cookie)
-             (cond ((= c-off 0) (insert "[X]"))
-                   ((= c-on  0) (insert "[ ]"))
-                   (t           (insert "[-]")))
-             )))
-       (goto-char beg-cookie)
-       )
-     (when (interactive-p)
-       (message "Checkbox satistics updated %s (%d places)"
-		(if all "in entire file" "in current outline entry") cstat)))))
 
 ;;;; Finish up
 

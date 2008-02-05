@@ -10,10 +10,17 @@
 ** Overview
 
 ** Incompatible Changes
+   
+   - The variable `org-remember-use-refile-when-interactive'
+     introduced only in 5.19 is already obsolete.  Please use
+     `org-remember-interactive-interface' instead.  This new
+     variable does select the interface that is used to select
+     the target for a remember note in an interactive way.
+     Possible values are:
 
 ** Details
 
-*** Remember and Refile
+*** Remember/Refile/Goto
 
     - The use of prefix arguments for the commands `org-remember'
       and `org-refile' has been normalized:
@@ -33,7 +40,7 @@
     - When the clock is running inside an remember buffer, storing
       the remember buffer with `C-c C-c' will automatically clock
       out.  This was inspired by a request by Rainer Stengle. 
-
+      
     - Outline-path-completion is now available as an alternative
       interface in the command `org-goto'.  Please select the
       default interface you'd like to use with the new variable
@@ -43,7 +50,7 @@
       interface.  Comments?
 
     - The variable `org-remember-use-refile-when-interactive'
-      introduced only in 5.19 is obsolete.  Please use
+      introduced only in 5.19 is already obsolete.  Please use
       `org-remember-interactive-interface' instead.  This new
       variable does select the interface that is used to select
       the target for a remember note in an interactive way.
@@ -65,6 +72,12 @@
       they are always current.
 
 *** Misc
+
+    - Checkboxes now work hierarchically.  When a plain-list item
+      with a checkbox has children with checkboxes, the status of
+      the item's checkbox is calculated from the children, each
+      time a checkbox is toggled with C-c C-c.  Thanks to Miguel
+      A. Figueroa-Villanueva for a patch to this effect.
 
     - There is a new variabls `org-special-ctrl-k'.  When set,
       `C-k' will behave specially in headlines:
@@ -127,6 +140,10 @@
       Note that you can configure (i.e. limit) the information
       that gets stored upon archiving with the variable
       `org-archive-save-context-info'.
+
+    - New file `org-mac-message.el' by John Wiegley to create
+      links for messages in Apple Mail, and to follow these
+      links.
 
 * Version 5.19
 
