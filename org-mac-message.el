@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008 John Wiegley
 ;;
 ;; Author: John Wiegey <johnw@gnu.org>
-;; Version: 1.1
+;; Version: 1.2
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;;
 ;; This file is not part of GNU Emacs.
@@ -42,11 +42,12 @@
       (concat "\"" (org-trim return) "\""))))
 
 (defun org-mac-message-open (message-id)
-  "Visit the nnml message with the given Message-ID."
+  "Visit the message with the given Message-ID."
   (start-process (concat "open message:" message-id) nil
-		 "open" (concat "message:" message-id)))
+		 "open" (concat "message://<" (substring message-id 2) ">")))
 
-(defun org-mac-insert-message-link ()
+(defun org-mac-message-insert-link ()
+  "Insrt a link to the messages currently selected in Apple Mail."
   (interactive)
   (let ((subject (do-applescript "tell application \"Mail\"
 	set theMessages to selection
