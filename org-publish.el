@@ -291,13 +291,12 @@ files."
 
 ;;;; Timestamp-related functions
 
-
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (while (string-match "~\\|/" filename)
+  (while (string-match (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/")
+		       filename)
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
-
 
 (defun org-publish-needed-p (filename)
   "Check whether file should be published.

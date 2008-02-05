@@ -1,5 +1,8 @@
 2008-02-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-timestamp-filename): Protect ":" in
+	file name path under windows.
+
 	* org.el (org-update-checkbox-count): Revamped to deal with
 	hierarchical beckboxes.  This was a patch from Miguel
 	A. Figueroa-Villanueva. 
