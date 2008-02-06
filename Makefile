@@ -75,14 +75,16 @@ HG_RELEASES = ../org-mode-all-releases-hg/
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} Makefile dir ChangeLog request-assign-future.txt
+DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} \
+	Makefile dir ChangeLog request-assign-future.txt \
+	CONTRIB
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
 
 install: install-lisp
 
-doc: org.html org.pdf orgcard.pdf
+doc: org.html org.pdf orgcard.pdf orgcard_letter.pdf
 
 p:
 	make pdf && open org.pdf
@@ -182,8 +184,8 @@ distfile:
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
 	$(MKDIR) org-$(TAG)/xemacs
-	cp $(DISTFILES) org-$(TAG)/
-	cp $(DISTFILES_xemacs) org-$(TAG)/xemacs/
+	cp -r $(DISTFILES) org-$(TAG)/
+	cp -r $(DISTFILES_xemacs) org-$(TAG)/xemacs/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
 
