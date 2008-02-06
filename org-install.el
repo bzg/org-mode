@@ -8,7 +8,7 @@
 ;;;;;;  org-remember-insinuate org-open-at-point-global org-insert-link-global
 ;;;;;;  org-store-link orgtbl-mode turn-on-orgtbl org-run-like-in-org-mode
 ;;;;;;  turn-on-orgstruct++ turn-on-orgstruct orgstruct-mode org-global-cycle
-;;;;;;  org-cycle org-mode) "org" "org.el" (18344 16141))
+;;;;;;  org-cycle org-mode) "org" "org.el" (18344 29816))
 ;;; Generated autoloads from org.el
 
 (autoload 'org-mode "org" "\
@@ -441,7 +441,7 @@ The file is stored under the name `org-combined-agenda-icalendar-file'.
 ;;;***
 
 ;;;### (autoloads (org-publish-all org-publish-current-file org-publish-current-project
-;;;;;;  org-publish) "org-publish" "org-publish.el" (18337 60100))
+;;;;;;  org-publish) "org-publish" "org-publish.el" (18344 35961))
 ;;; Generated autoloads from org-publish.el
 
 (autoload 'org-publish "org-publish" "\

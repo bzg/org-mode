@@ -1,0 +1,85 @@
+  -*- mode: org; fill-column:65 -*-
+
+This is the GIT repository for the development of Org-mode, an
+Emacs mode for organizing your life.
+
+This file explains the rules for participating in Org-mode
+development.
+
+
+* Main rules
+
+1. The git repository is hosted publicly at repo.or.cs.  Anyone
+   can get a clone of the current repository state using the
+   command
+
+     git clone git://repo.or.cz/org-mode.git
+
+   Having a clone is sufficient to start hacking and to produce
+   patches that can be easily and consistently be applied to the
+   main repository.
+
+2. People who are interested to participate in the Org-mode
+   development can do so by sending patches to
+   emacs-orgmode@gnu.org.
+
+3. Any interested developer can request push access to the
+   repository by sending their repo.or.cz user information to the
+   maintainer of Org-mode.  By requesting push access, you
+   acknowledge that you have read and agreed with the following
+   rules:
+
+   - Org-mode is part of Emacs.  Therefore we need to be very
+     conscious that any changes moving into the Org-mode core are
+     done only by people who have signed the appropriate papers
+     with the free software foundation.  The files to which this
+     applies are:
+
+     - all *.el files in the root directory of the repository
+     - org.texi, orgcard.tex, and ChangeLog.
+
+   - Before making any significant changes, please explain and
+     discuss them on the mailing list emacs-orgmode@gnu.org.
+
+     This does obviously not apply to people like Bastien Guerry,
+     David O'Toole, Piotr Zielinski, or anyone else who has
+     contributed and still maintains a file that is part of
+     Org-mode.  Please, just use the new mechanism to make sure
+     all changes end in the right place.
+
+   - Making and pushing a change to the Org-mode core requires
+     you also to provide ChangeLog entries.  Just press `C-x 4 a'
+     in each function or variable you have modified and describe
+     the change you made in the ChangeLog buffer/file.  This is
+     important, because these entries will be required when
+     uploading any new version into the Emacs CVS tree.
+
+   - Among other things, Org-mode is widely appreciated because
+     if its simplicity, cleanness and consistency.  We should try
+     hard to preserve this and I would like to ask everyone to
+     keep this in mind when developing changes.
+
+* The CONTRIB directory
+
+The git repository contains a CONTRIB directory.  This directory
+is the playing field for any developer, also people who have not
+(yet) signed the papers with the FSF.  You are free to add files
+to this directory, implementing extensions, new link types etc.
+Also non-Lisp extensions like scripts to process Org-mode files
+in different ways are welcome in this directory.  You should
+provide documentation with your extensions, at least in the form
+of commentary in the file.  Please discuss your extensions on
+emacs-orgmode@gnu.org.
+
+The CONTRIB directory will be part of the Org-mode distribution
+starting with version 6.0 (the first release after 5.20).  When
+that happens, people who want to use extensions will have to make
+sure their search path (executable or Lisp) includes the relevant
+directories.
+
+After files have been tested in CONTRIB and found to be generally
+useful, we may decide to clarify copyright questions and then
+move the file into the Org-mode core.  This means they will be
+moved up to the root directory and will also eventually be added
+to Emacs CVS tree.  The final decision about this rests with the
+maintainer.
