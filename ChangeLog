@@ -1,3 +1,7 @@
+2008-02-07  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* CONTRIB/lisp/org-irc.el: New File.
+
 2008-02-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-version): With refix argument, insert `org-version'
