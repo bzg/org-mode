@@ -1117,8 +1117,8 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 	      (if (match-string 2) "" (match-string 1)))) t t))
 
   ;; Delete @<...> constructs
-  (goto-char (point-min))
   ;; Thanks to Daniel Clemente for this regexp
+  (goto-char (point-min))
   (while (re-search-forward "@<\\(?:[^\"\n]\\|\".*\"\\)*?>" nil t)
     (replace-match ""))
 
