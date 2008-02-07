@@ -7003,7 +7003,6 @@ This will find all statistic cookies like [57%] and [6/12] and update them
 with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
  (interactive "P")
- (debug)
  (save-excursion
    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
 	  (beg (condition-case nil
