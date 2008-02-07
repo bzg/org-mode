@@ -5,6 +5,12 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
+* Version 5.21
+
+  Bug fixes, in particular the long-hunted bug about wrong window
+  positions after pressing SPACE in the agenda.  Hopefully this
+  is really fixed.
+
 * Version 5.20
 
 ** Overview
