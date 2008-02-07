@@ -1,0 +1,17 @@
+This directory contains add-ons to Org-mode.
+
+These contributions are not part of GNU Emacs or of the official Org-mode
+package.  But the git repository for Org-mode is glad to provide useful way
+to distribute and develop them as long as they are distributed under a free
+software license.
+
+Please put your contribution in one of these three directories:
+
+LISP
+    contains emacs-lisp code
+
+SCRIPTS
+    contains scripts (shell, bash, python, perl, makefiles, etc.)
+
+PACKAGE
+    contains code requiring more than one file
