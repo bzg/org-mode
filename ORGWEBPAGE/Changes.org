@@ -5,6 +5,19 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
+* Version 5.22
+
+** Details
+
+   - M-RET no longer brakes a line in the middle, it will make a
+     new line ofter the current or (if cursor is at the beginning
+     of the line) before the current line.
+
+   - RET, when executed in a headline after the main text and
+     before the tags will leave the tags in the current line and
+     create a new line below the current one.
+
+
 * Version 5.21
 
   Bug fixes, in particular the long-hunted bug about wrong window

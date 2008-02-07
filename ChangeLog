@@ -1,9 +1,16 @@
+2008-02-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-clock-report): Show the clocktable when found.
+
 2008-02-07  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-version): With refix argument, insert `org-version'
+	* org.el (org-version): With prefix argument, insert `org-version'
 	at point.
 	(org-agenda-goto): Recenter the window after finding the target
 	location, to make sure the correct position will be displayed.
+	(org-agenda-get-deadlines): Don't scale priority with the warning
+	period.
+	(org-insert-heading): Don't break line in the middle of the line.
 
 2008-02-06  Carsten Dominik  <dominik@science.uva.nl>
 
