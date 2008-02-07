@@ -1,12 +1,3 @@
-2008-02-07  Bastien Guerry  <bzg@altern.org>
-
-	* Added org-expiry.el org-registry.el org-iswitchb.el org2rem.el
-	to CONTRIB/lisp/.
-
-2008-02-07  Phil Jackson  <phil@shellarchive.co.uk>
-
-	* CONTRIB/lisp/org-irc.el: New File.
-	
 2008-02-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-version): With refix argument, insert `org-version'
