@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.20
+;; Version: 5.20a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,11 +84,17 @@
 
 ;;; Version
 
-(defconst org-version "5.20"
+(defconst org-version "5.20a"
   "The version number of the file org.el.")
-(defun org-version ()
-  (interactive)
-  (message "Org-mode version %s" org-version))
+
+(defun org-version (&optional here)
+  "Show the org-mode version in the echo area.
+With prefix arg HERE, insert it at point."
+  (interactive "P")
+  (let ((version (format "Org-mode version %s" org-version)))
+    (message version)
+    (if here
+	(insert version))))
 
 ;;; Compatibility constants
 (defconst org-xemacs-p (featurep 'xemacs)) ; not used by org.el itself
@@ -6997,6 +7003,7 @@ This will find all statistic cookies like [57%] and [6/12] and update them
 with the current numbers.  With optional prefix argument ALL, do this for
 the whole buffer."
  (interactive "P")
+ (debug)
  (save-excursion
    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
 	  (beg (condition-case nil
@@ -7050,6 +7057,7 @@ the whole buffer."
                  (org-end-of-item)
                  (setq next-ind (org-get-indentation))
                  )))
+	 (goto-char continue-from)
          ;; update cookie
 	 (when end-cookie
 	   (delete-region beg-cookie end-cookie)
@@ -14016,7 +14024,7 @@ At the target location, the entry is filed as a subitem of the target heading.
 Depending on `org-reverse-note-order', the new subitem will either be the
 first of the last subitem.
 
-With prefix are GOTO, the command will only visit the target location,
+With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
 With a double prefix `C-c C-c', go to the location where the last refiling
 operation has put the subtree.
@@ -21407,7 +21415,7 @@ the documentation of `org-diary'."
 	      d2 (org-time-string-to-absolute (match-string 1) d1 'past)
 	      diff (- d2 d1)
 	      wdays (org-get-wdays s)
-	      dfrac (/ (* 1.0 (- wdays diff)) wdays)
+	      dfrac (/ (* 1.0 (- wdays diff)) (max wdays 1))
 	      upcomingp (and todayp (> diff 0)))
 	;; When to show a deadline in the calendar:
 	;; If the expiration is within wdays warning time.
@@ -22352,6 +22360,7 @@ and by additional input from the age of a schedules or deadline entry."
       (save-excursion
 	(and (outline-next-heading)
 	     (org-flag-heading nil)))) ; show the next heading
+    (recenter (/ (window-height) 2))
     (run-hooks 'org-agenda-after-show-hook)
     (and highlight (org-highlight (point-at-bol) (point-at-eol)))))
 

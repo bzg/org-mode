@@ -1,3 +1,15 @@
+2008-02-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-version): With refix argument, insert `org-version'
+	at point.
+	(org-agenda-goto): Recenter the window after finding the target
+	location, to make sure the correct position will be displayed.
+
+2008-02-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-get-deadlines): Allow
+	`org-deadline-warning-days' to be 0.
+
 2008-02-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-timestamp-filename): Protect ":" in
@@ -5,7 +17,7 @@
 
 	* org.el (org-update-checkbox-count): Revamped to deal with
 	hierarchical beckboxes.  This was a patch from Miguel
-	A. Figueroa-Villanueva. 
+	A. Figueroa-Villanueva.
 
 2008-02-04  Carsten Dominik  <dominik@science.uva.nl>
 
