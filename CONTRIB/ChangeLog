@@ -1,0 +1,7 @@
+2008-02-07  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* lisp/org-irc.el: New file.
+
+	* ChangeLog: New file.
+
+
