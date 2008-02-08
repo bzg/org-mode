@@ -14065,11 +14065,12 @@ heading in the current buffer."
 		(goto-char pos)
 		(looking-at outline-regexp)
 		(setq level (org-get-legal-level (funcall outline-level) 1))
-		(goto-char (or (save-excursion
-				 (if reversed
-				     (outline-next-heading)
-				   (outline-get-next-sibling)))
-			       (point-max)))
+		(goto-char
+		 (if reversed
+		     (outline-next-heading)
+		   (or (save-excursion (outline-get-next-sibling))
+		       (org-end-of-subtree t t)
+		       (point-max))))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
 	  (org-cut-special)

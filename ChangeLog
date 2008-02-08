@@ -1,6 +1,8 @@
 2008-02-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-clock-report): Show the clocktable when found.
+	(org-refile): Fix positioning bug when `org-reverse-note-order' is
+	nil.
 
 2008-02-07  Carsten Dominik  <dominik@science.uva.nl>
 
