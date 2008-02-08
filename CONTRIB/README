@@ -5,13 +5,35 @@ package.  But the git repository for Org-mode is glad to provide useful way
 to distribute and develop them as long as they are distributed under a free
 software license.
 
-Please put your contribution in one of these three directories:
+Please put your contribution in one of these three directories: lisp,
+package, scripts.
 
-LISP
-    contains emacs-lisp code
+LISP (emacs-lisp code)
+======================
 
-SCRIPTS
-    contains scripts (shell, bash, python, perl, makefiles, etc.)
+This directory contains emacs-lisp code.
+
+org-annotate-file.el --- Annotate a file with org syntax
+org2rem.el           --- Convert org appointments into reminders
+org-bibtex.el        --- Org links to BibTeX entries
+org-depend.el        --- TODO dependencies for Org-mode
+org-elisp-symbol.el  --- Org links to emacs-lisp symbols
+org-expiry.el 	     --- expiry mechanism for Org entries
+org-irc.el 	     --- Store links to IRC sessions.
+org-iswitchb.el      --- use iswitchb to select Org buffer
+org-man.el 	     --- Support for links to manpages in Org-mode
+org-panel.el 	     --- Simple routines for us with bad memory
+org-registry.el      --- a registry for Org links
+org-toc.el 	     --- Table of contents for Org-mode buffer
+org-mairix.el 	     --- Hook mairix search into Org for different MUAs
+
 
 PACKAGE
-    contains code requiring more than one file
+=======
+
+org-export-freemind  --- exporting utilities from org-mode to freemind
+
+
+SCRIPTS (shell, bash, etc.)
+===========================
+
