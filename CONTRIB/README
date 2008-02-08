@@ -34,3 +34,4 @@ org-export-freemind  --- exporting utilities from org-mode to freemind
 SCRIPTS (shell, bash, etc.)
 ===========================
 
+dir2org.zsh          --- Org compatible fs structure output
