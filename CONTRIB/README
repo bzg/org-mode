@@ -5,8 +5,8 @@ package.  But the git repository for Org-mode is glad to provide useful way
 to distribute and develop them as long as they are distributed under a free
 software license.
 
-Please put your contribution in one of these three directories: lisp,
-package, scripts.
+Please put your contribution in one of these three directories: lisp/,
+packages/, scripts/.
 
 LISP (emacs-lisp code)
 ======================
@@ -28,8 +28,8 @@ org-toc.el 	     --- Table of contents for Org-mode buffer
 org-mairix.el 	     --- Hook mairix search into Org for different MUAs
 
 
-PACKAGE
-=======
+PACKAGES
+========
 
 org-export-freemind  --- exporting utilities from org-mode to freemind
 
