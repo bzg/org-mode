@@ -30,9 +30,12 @@ function scan_and_populate {
 
     headline ${depth} "${dir}"
 
+    # if there is no files in dir then just move on
+    [[ $(ls "${dir}" | wc -l) -eq 0 ]] && return
+
     (( depth += 1 ))
 
-    for f in $(ls -d "${dir}"/* 2>/dev/null); do
+    for f in $(ls -d "${dir}"/*); do
         if [ -d "${f}" ]; then
             scan_and_populate ${depth} "${f}"
         else
@@ -40,7 +43,7 @@ function scan_and_populate {
         fi
     done
 
-    let "depth -= 1"
+    (( depth -= 1 ))
 }
 
 function main {
