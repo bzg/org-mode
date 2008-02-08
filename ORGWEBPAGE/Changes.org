@@ -17,7 +17,6 @@
      before the tags will leave the tags in the current line and
      create a new line below the current one.
 
-
 * Version 5.21
 
   Bug fixes, in particular the long-hunted bug about wrong window
