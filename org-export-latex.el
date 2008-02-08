@@ -391,9 +391,10 @@ without even the \begin{document} and \end{document} commands."
 		   (find-file-noselect filename)))
 	 (odd org-odd-levels-only)
 	 (header (org-export-latex-make-header title opt-plist))
-	 (skip (if subtree-p nil
+	 (skip (cond (subtree-p nil)
+		     (region-p t)
 		 ;; never skip first lines when exporting a subtree
-		 (plist-get opt-plist :skip-before-1st-heading)))
+		     (t (plist-get opt-plist :skip-before-1st-heading))))
 	 (text (plist-get opt-plist :text))
 	 (first-lines (if skip "" (org-export-latex-first-lines)))
 	 (coding-system (and (boundp 'buffer-file-coding-system)
