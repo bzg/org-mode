@@ -1504,9 +1504,8 @@ Furthermore, the following %-escapes will be replaced with content:
               You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
-  %i          initial content, the region when remember is called with C-u.
-              If %i is indented, the entire inserted text will be indented
-              as well.
+  %i          initial content, the region active.  If %i is indented, 
+              the entire inserted text will be indented as well.
   %c          content of the clipboard, or current kill ring head
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion all tags in all agenda files
