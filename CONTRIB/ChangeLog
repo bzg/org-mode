@@ -1,3 +1,7 @@
+2008-02-08  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* scripts/dir2org.zsh: New file.
+
 2008-02-07  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* lisp/org-annotate-file.el: New file.

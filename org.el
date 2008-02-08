@@ -6156,9 +6156,8 @@ frame is not changed."
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
 If point is at the beginning of a headline, insert a sibling before the
-current headline.  If point is in the middle of a headline, split the headline
-at that position and make the rest of the headline part of the sibling below
-the current headline."
+current headline.  If point is not at the beginning, do not split the line,
+but create the new hedline after the current line."
   (interactive "P")
   (if (= (buffer-size) 0)
       (insert "\n* ")
@@ -6175,13 +6174,19 @@ the current headline."
 	 ((and (org-on-heading-p) (bolp)
 	       (or (bobp)
 		   (save-excursion (backward-char 1) (not (org-invisible-p)))))
+	  ;; insert before the current line
 	  (open-line (if blank 2 1)))
 	 ((and (bolp)
 	       (or (bobp)
 		   (save-excursion
 		     (backward-char 1) (not (org-invisible-p)))))
+	  ;; insert right here
 	  nil)
-	 (t (newline (if blank 2 1))))
+	 (t
+	  ;; in the middle of the line
+	  (org-show-entry)
+	  (end-of-line 1)
+	  (newline (if blank 2 1))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
@@ -14060,11 +14065,12 @@ heading in the current buffer."
 		(goto-char pos)
 		(looking-at outline-regexp)
 		(setq level (org-get-legal-level (funcall outline-level) 1))
-		(goto-char (or (save-excursion
-				 (if reversed
-				     (outline-next-heading)
-				   (outline-get-next-sibling)))
-			       (point-max)))
+		(goto-char
+		 (if reversed
+		     (outline-next-heading)
+		   (or (save-excursion (outline-get-next-sibling))
+		       (org-end-of-subtree t t)
+		       (point-max))))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
 	  (org-cut-special)
@@ -18804,7 +18810,9 @@ When called with a prefix argument, move to the first clock table in the
 buffer and update it."
   (interactive "P")
   (org-remove-clock-overlays)
-  (when arg (org-find-dblock "clocktable"))
+  (when arg
+    (org-find-dblock "clocktable")
+    (org-show-entry))
   (if (org-in-clocktable-p)
       (goto-char (org-in-clocktable-p))
     (org-create-dblock (list :name "clocktable"
@@ -21388,7 +21396,6 @@ the documentation of `org-diary'."
 	    'undone-face 'org-warning 'done-face 'org-done)
 	  (push txt ee))
 	(goto-char (point-at-eol))))
-;	(outline-next-heading)))
     (nreverse ee)))
 
 (defun org-agenda-get-deadlines ()
@@ -21454,7 +21461,7 @@ the documentation of `org-diary'."
 		(org-add-props txt props
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
-		  'priority (+ (floor (* dfrac 100.))
+		  'priority (+ (- diff)
 			       (org-get-priority txt))
 		  'org-category category
 		  'type (if upcomingp "upcoming-deadline" "deadline")
@@ -26965,6 +26972,12 @@ See the individual commands for more information."
   (interactive)
   (cond
    ((bobp) (if indent (newline-and-indent) (newline)))
+   ((and (org-at-heading-p)
+	 (looking-at
+	  (org-re "\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$")))
+    (org-show-entry)
+    (end-of-line 1)
+    (newline))
    ((org-at-table-p)
     (org-table-justify-field-maybe)
     (call-interactively 'org-table-next-row))

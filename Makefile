@@ -242,3 +242,7 @@ clean:
 
 push:
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git master
+
+pushtag:
+	git-tag -m "adding tag" -a $(TAG)
+	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
