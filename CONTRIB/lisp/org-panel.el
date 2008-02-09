@@ -8,7 +8,7 @@
 ;; Keywords:
 ;; Compatibility:
 ;;
-;; Fxeatures that might be required by this library:
+;; Features that might be required by this library:
 ;;
 ;;   `easymenu', `font-lock', `noutline', `org', `outline', `syntax',
 ;;   `time-date'.
