@@ -1,3 +1,9 @@
+2008-02-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-cleaned-string-for-export): Get rid of drawers
+	first, so that they will be removed also in the text before the
+	first headline.
+
 2008-02-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-clock-report): Show the clocktable when found.
