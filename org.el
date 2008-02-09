@@ -23887,6 +23887,19 @@ translations.  There is currently no way for users to extend this.")
       (let ((org-inhibit-startup t)) (org-mode))
       (untabify (point-min) (point-max))
 
+      ;; Get rid of drawers
+      (unless (eq t exp-drawers)
+	(goto-char (point-min))
+	(let ((re (concat "^[ \t]*:\\("
+			  (mapconcat
+			   'identity
+			   (org-delete-all exp-drawers
+					   (copy-sequence drawers))
+			   "\\|")
+			  "\\):[ \t]*\n\\([^@]*?\n\\)?[ \t]*:END:[ \t]*\n")))
+	  (while (re-search-forward re nil t)
+	    (replace-match ""))))
+
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
 	(goto-char (point-min))
@@ -23909,19 +23922,6 @@ translations.  There is currently no way for users to extend this.")
 			(1+ (point-at-eol)) (point))
 		  b (org-end-of-subtree t))
 	    (if (> b a) (delete-region a b)))))
-
-      ;; Get rid of drawers
-      (unless (eq t exp-drawers)
-	(goto-char (point-min))
-	(let ((re (concat "^[ \t]*:\\("
-			  (mapconcat
-			   'identity
-			   (org-delete-all exp-drawers
-					   (copy-sequence drawers))
-			   "\\|")
-			  "\\):[ \t]*\n\\([^@]*?\n\\)?[ \t]*:END:[ \t]*\n")))
-	  (while (re-search-forward re nil t)
-	    (replace-match ""))))
 
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
