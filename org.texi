@@ -4573,7 +4573,7 @@ To place the cursor after template expansion use:
 @end example
 
 @noindent
-If you change you mind about which template to use, call
+If you change your mind about which template to use, call
 @code{org-remember} in the remember buffer.  You may then select a new
 template that will be filled with the previous context information.
 
