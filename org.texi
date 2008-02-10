@@ -2126,8 +2126,8 @@ Do not export this line.  Useful for lines that contain the narrowing
 
 Finally, just to whet your appetite on what can be done with the
 fantastic @file{calc} package, here is a table that computes the Taylor
-series of degree @code{n} at location @code{x} for a couple of functions
-(homework: try that with another spreadsheet application :-)
+series of degree @code{n} at location @code{x} for a couple of
+functions.
 
 @example
 @group
