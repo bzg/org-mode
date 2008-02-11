@@ -24851,6 +24851,7 @@ the body tags themselves."
 					(org-infile-export-plist)))
 
 	 (style (plist-get opt-plist :style))
+	 (html-extension (plist-get opt-plist :html-extension))
 	 (link-validate (plist-get opt-plist :link-validation-function))
 	 valid thetoc have-headings first-heading-pos
 	 (odd org-odd-levels-only)
@@ -24876,7 +24877,7 @@ the body tags themselves."
 				 (org-entry-get (region-beginning)
 						"EXPORT_FILE_NAME" t))
 			    (file-name-nondirectory buffer-file-name)))
-		       "." org-export-html-extension)
+		       "." html-extension)
 		      (file-name-as-directory
 		       (org-export-directory :html opt-plist)))))
 	 (current-dir (if buffer-file-name
@@ -25232,7 +25233,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			     (string-match "\\.org$" thefile))
 		    (setq thefile (concat (substring thefile 0
 						     (match-beginning 0))
-					  "." org-export-html-extension))
+					  "." html-extension))
 		    (if (and search
 			     ;; make sure this is can be used as target search
 			     (not (string-match "^[0-9]*$" search))
