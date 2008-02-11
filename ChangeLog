@@ -1,3 +1,12 @@
+2008-02-11  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-columns-new, org-complete, org-set-property): Set
+	the `include-columns' argument in the call to
+	`org-buffer-property-keys'.
+	(org-buffer-property-keys): New argument `include-columns', to
+	include properties expected by any of the COLUMS formats in the
+	current buffer.
+
 2008-02-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-cleaned-string-for-export): Get rid of drawers

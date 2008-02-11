@@ -14297,7 +14297,7 @@ At all other locations, this simply calls the value of
 		    (tag (setq type :tag beg beg1)
 			 (or org-tag-alist (org-get-buffer-tags)))
 		    (prop (setq type :prop beg beg1)
-			  (mapcar 'list (org-buffer-property-keys)))
+			  (mapcar 'list (org-buffer-property-keys nil t t)))
 		    (t (progn
 			 (call-interactively org-completion-fallback-command)
 			 (throw 'exit nil)))))
@@ -16119,13 +16119,15 @@ If the property is not present at all, nil is returned."
 	  (and value (insert " " value))
 	  (org-indent-line-function)))))))
 
-(defun org-buffer-property-keys (&optional include-specials include-defaults)
+(defun org-buffer-property-keys (&optional include-specials include-defaults include-columns)
   "Get all property keys in the current buffer.
 With INCLUDE-SPECIALS, also list the special properties that relect things
 like tags and TODO state.
 With INCLUDE-DEFAULTS, also include properties that has special meaning
-internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING."
-  (let (rtn range)
+internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING.
+With INCLUDE-COLUMNS, also include property names given in COLUMN
+formats in the current buffer."
+  (let (rtn range cfmt cols)
     (save-excursion
       (save-restriction
 	(widen)
@@ -16134,7 +16136,7 @@ internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING."
 	  (setq range (org-get-property-block))
 	  (goto-char (car range))
 	  (while (re-search-forward
-		  (org-re "^[ \t]*:\\([[:alnum:]_-]+\\):")
+		  (org-re "^[ \t]*:\\([-[:alnum:]_]+\\):")
 		  (cdr range) t)
 	    (add-to-list 'rtn (org-match-string-no-properties 1)))
 	  (outline-next-heading))))
@@ -16145,6 +16147,23 @@ internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING."
     (when include-defaults
       (mapc (lambda (x) (add-to-list 'rtn x)) org-default-properties))
 
+    (when include-columns
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (while (re-search-forward
+		  "^\\(#\\+COLUMNS:\\|[ \t]*:COLUMNS:\\)[ \t]*\\(.*\\)"
+		  nil t)
+	    (setq cfmt (match-string 2) s 0)
+	    (while (string-match (org-re "%[0-9]*\\([-[:alnum:]_]+\\)")
+				 cfmt s)
+	      (setq s (match-end 0)
+		    p (match-string 1 cfmt))
+	      (unless (or (equal p "ITEM")
+			  (member p org-special-properties))
+		(add-to-list 'rtn (match-string 1 cfmt))))))))
+    
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
@@ -16199,7 +16218,7 @@ xxx_ALL property) or on existing values in other instances of this property
 in the current file."
   (interactive
    (let* ((prop	(completing-read
-		 "Property: " (mapcar 'list (org-buffer-property-keys nil t))))
+		 "Property: " (mapcar 'list (org-buffer-property-keys nil t t))))
 	  (cur (org-entry-get nil prop))
 	  (allowed (org-property-get-allowed-values nil prop 'table))
 	  (existing (mapcar 'list (org-property-values prop)))
@@ -16839,7 +16858,7 @@ Where possible, use the standard interface for changing this line."
   (let ((editp (and prop (assoc prop org-columns-current-fmt-compiled)))
 	cell)
     (setq prop (completing-read
-		"Property: " (mapcar 'list (org-buffer-property-keys t))
+		"Property: " (mapcar 'list (org-buffer-property-keys t nil t))
 		nil nil prop))
     (setq title (read-string (concat "Column title [" prop "]: ") (or title prop)))
     (setq width (read-string "Column width: " (if width (number-to-string width))))
