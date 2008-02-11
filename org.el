@@ -11895,8 +11895,9 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 ;;;###autoload
 (defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
-This link can later be inserted into an org-buffer with
-\\[org-insert-link].
+This link is added to `org-stored-links' and can later be inserted
+into an org-buffer with \\[org-insert-link].
+
 For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
@@ -11990,9 +11991,12 @@ For file links, arg negates `org-context-in-file-links'."
 	(setq link (org-make-link "mhe:" (org-mhe-get-message-real-folder) "#"
 				  (org-remove-angle-brackets message-id)))))
 
-     ((eq major-mode 'rmail-mode)
-      (save-excursion
+     ((or (eq major-mode 'rmail-mode)
+	  (eq major-mode 'rmail-summary-mode))
+      (save-window-excursion
 	(save-restriction
+	  (when (eq major-mode 'rmail-summary-mode)
+	    (rmail-show-message rmail-current-message))
 	  (rmail-narrow-to-non-pruned-header)
 	  (let ((folder buffer-file-name)
 		(message-id (mail-fetch-field "message-id"))
@@ -12004,7 +12008,8 @@ For file links, arg negates `org-context-in-file-links'."
 	     :subject subject :message-id message-id)
 	    (setq message-id (org-remove-angle-brackets message-id))
 	    (setq cpltxt (org-email-link-description))
-	    (setq link (org-make-link "rmail:" folder "#" message-id))))))
+	    (setq link (org-make-link "rmail:" folder "#" message-id)))
+	  (rmail-show-message rmail-current-message))))
 
      ((eq major-mode 'gnus-group-mode)
       (let ((group (cond ((fboundp 'gnus-group-group-name) ; depending on Gnus
