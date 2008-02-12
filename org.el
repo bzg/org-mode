@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.21
+;; Version: 5.21+
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.21"
+(defconst org-version "5.21+"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -25476,6 +25476,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	(replace-match ""))
       (goto-char (point-min))
       (while (re-search-forward "<li>[ \r\n\t]*</li>\n?" nil t)
+	(replace-match ""))
+      (goto-char (point-min))
+      (while (re-search-forward "</ul>\\s-*<ul>\n?" nil t)
 	(replace-match ""))
       ;; Convert whitespace place holders
       (goto-char (point-min))

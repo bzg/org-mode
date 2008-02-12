@@ -2,6 +2,9 @@
 
 	* org.el (org-make-tags-matcher): Allow "" to match an empty or
 	non-existent property value.
+	(org-export-as-html): Join unsorted lists when they directly
+	follow each other.  Such lists may be created by headlines that
+	are converted to lists.
 
 2008-02-12  Bastien Guerry  <bzg@altern.org>
 
