@@ -1,3 +1,8 @@
+2008-02-12  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-make-tags-matcher): Allow "" to match an empty or
+	non-existent property value.
+
 2008-02-12  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-export-as-html): Use :html-extension instead of

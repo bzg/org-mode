@@ -15332,7 +15332,7 @@ also TODO lines."
 
   ;; Parse the string and create a lisp form
   (let ((match0 match)
-	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL=\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)=\\({[^}]+}\\|\"[^\"]+\"\\)\\|[[:alnum:]_@]+\\)"))
+	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL=\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)=\\({[^}]+}\\|\"[^\"]*\"\\)\\|[[:alnum:]_@]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p level-p prop-p pn pv cat-p gv)
@@ -15377,7 +15377,7 @@ also TODO lines."
 		       (setq gv `(org-cached-entry-get nil ,pn)))
 		     (if re-p
 			 `(string-match ,pv (or ,gv ""))
-		       `(equal ,pv ,gv)))
+		       `(equal ,pv (or ,gv ""))))
 		    (t `(member ,(downcase tag) tags-list)))
 		mm (if minus (list 'not mm) mm)
 		term (substring term (match-end 0)))
