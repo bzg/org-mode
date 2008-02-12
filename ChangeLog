@@ -1,3 +1,9 @@
+2008-02-12  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-export-as-html): Use :html-extension instead of
+	org-export-html-extension. 
+	(org-store-link): Support for links from `rmail-summary-mode'.
+
 2008-02-11  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-columns-new, org-complete, org-set-property): Set
