@@ -6,7 +6,7 @@ lang="en" xml:lang="en">
 <title>The Org-mode TODO list</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2008/02/05 20:14:53"/>
+<meta name="generated" content="2008/02/12 12:28:15"/>
 <meta name="author" content="Carsten Dominik"/>
 <link rel=stylesheet href="freeshell2.css" type="text/css">
 </head><body>
@@ -94,39 +94,25 @@ something.
 <ul>
 <li><span class="todo">TODO</span> Definition lists, like in Muse<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Get rid of all the \r instances, which were used only for XEmacs.<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Should we allow #+TODO as an alias for #+SEQ<sub>TODO</sub>?<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> proper visibility cycling for items<br/>
 Make them not hide the text after the final list item.
 This is not trivial, we cannot usenormal outline stuff,
 needs a separate implementaiton.
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> allow different colors for different TODO keywords/tags.<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Use an indirect buffer for org-goto.<br/>
 Is there a problem with the overriding map?
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Inline TODO entries<br/>
 A way to put a TODO entry without starting a new section.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Speedbar support for agenda.<br/>
 
 </li>
@@ -140,15 +126,11 @@ A way to put a TODO entry without starting a new section.
 <li><span class="todo">QUESTION</span> COLUMN View<br/>
 is this safe, or could things be messed up with this?
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Make S-right and S-left change TODO keywords<br/>
 Right now they change the time stamps.  This could be
 M-left/right, but this could also cause inconsistencies, because
 when on a time stamp, the same keys do exactly this.
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Make more modes changeable from the agenda<br/>
 These could be made available for toggling, just like
 follow-mode. Examples:
@@ -163,16 +145,12 @@ org-tags-match-list-sublevels
 org-agenda-todo-ignore-scheduled
 </li>
 </ul></li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Sort TODO entries according to type?<br/>
 This would apply for the list collection, not in the day entries.
 However, I could also have a TODO keyword criterion that could be
 used in the day entries, as one of the minor criteria.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Allow separators in the Tag-sorted agenda view<br/>
 This feature is not going to come, because block agendas can
 achieve the same thing.
@@ -190,23 +168,15 @@ achieve the same thing.
 Not sure why this is needed.
 Idea from William Henney.
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Variable of standard links for completion with C-c C-l<br/>
 Or something like that, to make standard links fast.
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Make brackets in links possible<br/>
 Would require a display property also for the label part of
 links.
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Find all links to a specific file<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Make info HTML links work for links to Info files<br/>
 Info links of course only work inside Emacs.  However, many info
 documents are on the web, so the HTML exporter could try to be
@@ -218,23 +188,17 @@ question is, is this URL going to be stable so that it makes sense
 to actually put this into org.el?
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Make news HTML links work, using Google.<br/>
 I can use Google groups with a message id to find a USENET message,
 even if the original link points to gnus.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Remove irretrievable links from <i>published</i> HTML output<br/>
 This is on David's table, and he will hopefully integrate a
 mechanism for this into org-publish.el.  The discussion about this
 was started by <a href="http://thread.gmane.org/gmane.emacs.orgmode/281">Austin Frank</a>
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Agenda collections, based on #+COLLECTION lines.<br/>
 <a href="http://thread.gmane.org/gmane.emacs.orgmode/139">Tim Callaghan</a> started the discussion on this one.
 Declined because this would depend on local variables and the
@@ -242,8 +206,6 @@ agenda commands are global.  Also, this can actually be done by
 specifying the file list in a custom agenda command.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Make CamelCase words link to corresponding org-mode files.<br/>
 Files in the same directory.  Or some other way to easy do that.
 Would be useful for publishing projects.  This would be an
@@ -253,15 +215,11 @@ This is marked declined, because link abbreviations now provide an
 easy way to make links to other files.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Document the character protection in links<br/>
 I don't think this is really covered anywhere.
 Maybe we also should protect characters in the visible part, to
 make sure thing will never be on two lines&hellip;?
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Radio targets across files<br/>
 I guess each org file could write a .orgtargets.filename file, if
 it has any radio targets.
@@ -286,55 +244,37 @@ it has any radio targets.
 <li><span class="todo">WISH</span> Row formulas<br/>
 @4=&hellip;..
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Write a tutorial<br/>
 Demonstrate running averages.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Make a variable that current line should be recomputed always<br/>
 in each table, skipping headers of course.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Allow a table to locally change the unit system<br/>
 This is for using constants.el.
 Well, it is now possible to do this for the file, is this enough???
 </li>
-</ul>
-<ul>
 <li><span class="todo">QUESTION</span> Does inserting hlines change references correctly?<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Interactive way to get a converted table?<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">BUG</span> When computing in a narrowed column, this may go wrong.<br/>
 Computing changes fields and does not yet see correctly if the column
 width has changed, in the case of a narrowed column.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Alternative for the implementation of orgtbl-minor-mode:<br/>
 I could use post-command-hook to set the variable orgtbl-mode.
 I will not do this now and only consider it if problems show up.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Table info lines are not necessarily comments in orgtbl-mode<br/>
 Should I generalize this?  No, because the table itself will not be
 in the correct syntax for whatever mode.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> S-cursor motion to select part of a table, with proper highlighting.<br/>
 Similar to CUA
 
@@ -369,8 +309,6 @@ This could/should be part of org-mouse.el.
 <b>[<span style="visibility:hidden;">X</span>]</b> scheduled.
 </li>
 </ul></li>
-</ul>
-<ul>
 <li><span class="todo">BUG</span> We have no clear view on what to do with properties upon export.<br/>
 
 
@@ -392,8 +330,6 @@ problems.
 </li>
 </ul>
 </li>
-</ul>
-<ul>
 <li>XEmacs compatibility<br/>
 <ul>
 <li><span class="todo">QUESTION</span> Is there an issue with the coding system of HTML exported files?<br/>
@@ -409,14 +345,10 @@ followed up on this and never had a bug report - so I am wondering
 if there is an issue at all.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Column view does not yet work for XEmacs.<br/>
 Declined, because I don't know how to do this.  Too many
 problems.
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Rewrite the `format' function<br/>
 To make narrowing work under XEmacs, I would need to write a
 version of <i>format</i> that does transport text properties, or I
@@ -438,35 +370,25 @@ actually using narrowing very much at all.
 <ul>
 <li><span class="todo">IDEA</span> Convert links to footnotes for ASCII export.<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Store LaTeX code as HTML comments<br/>
 Declined because I don't really see the need for this.
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Microformats<br/>
 Nic Ferrier has been pushing this agenda for a long time, for
 example with <a href="http://thread.gmane.org/gmane.emacs.orgmode/140/">this email</a>.  I am not deep enough into the semantic
 web that I could do this myself.  Maybe we can do this by
 modifying the html exporter step-by-step?
 </li>
-</ul>
-<ul>
 <li><span class="todo">INCONSISTENCY</span> Find a better place for formatting checkboxes<br/>
 Right now this is being done as part of `org-html-expand', which
 does not seem logically correct.
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Can I make the exporter more efficient?<br/>
 The line-by-line processing may not be the fastest way to do
 this.  It certainly uses more resources.  Right now the exporters
 do work though, so it is unlikely that I am going to change this.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> CSV import/export of tables?<br/>
 I remember this coming up several times, for example in emails
 from <a href="http://thread.gmane.org/gmane.emacs.orgmode/156">Niels Giesen</a> and <a href="http://thread.gmane.org/gmane.emacs.orgmode/139">Tim Callaghan</a>.  Org-mode does have
@@ -476,8 +398,6 @@ not understand tab-separated files, but do understand
 comma-separated ones?
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> In HTML export, make links from the time stamps<br/>
 Time stamps have their own class now which allows to highlight
 them etc.  But I was wondering if something more useful could be
@@ -495,12 +415,8 @@ done with them, like a link to some kind of calendar&hellip;
 <ul>
 <li><span class="todo">TODO</span> reinstating a repeated item: keyword for logging.<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">BUG</span> Comments cannot be filled<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> New uses for C-c C-c<br/>
 <ul>
 <li>
@@ -510,24 +426,16 @@ Compute time interval on time range
 Update CLOCK interval
 </li>
 </ul></li>
-</ul>
-<ul>
 <li><span class="todo">QUESTION</span> Fix more beginning-of-line commands<br/>
 Org-mode re-binds C-a to make this command go to the beginning of
 a visible line.  There are other keys which might invoke C-a.
 Should these keys be changed as well?  one could use
 `substitute-key-definition' on the global map to find them all.
 </li>
-</ul>
-<ul>
 <li><span class="todo">QUESTION</span> Inlining of images in Org-mode files<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Fixup outline-magic.el, so that it can be used.<br/>
 </li>
-</ul>
-<ul>
 <li><span class="todo">TODO</span> Use the new argument of bibtex-url<br/>
 Roland Winkler was kind enough to implement a new argument to the
 `bibtex-url' command that allows me to retrieve the corresponding
@@ -536,14 +444,10 @@ clever way.  Currently I am not using this, because too many
 people use an old Emacs version which does not have this.
 however, eventually I will implement this.
 </li>
-</ul>
-<ul>
 <li><span class="todo">WISH</span> Get people to write articles about how to do GTD with Org-mode.<br/>
 There is now one by Charles Cave, read it <a href="http://members.optusnet.com.au/~charles57/GTD/orgmode.html">here</a>
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">IDEA</span> Tree statistics<br/>
 A key that can be applied to a tree, showing statistics:
 <ul>
@@ -564,15 +468,11 @@ etc&hellip;.
 
 </li>
 </ul></li>
-</ul>
-<ul>
 <li><span class="todo">QUESTION</span> Do we need a 43 folders implementation?<br/>
 That could easily be done in an org-mode file.  But then, maybe
 this should really be a paper thing. 
 
 </li>
-</ul>
-<ul>
 <li>Priorities<br/>
 Here is some information about priorities, which is not yet
 documented.
@@ -596,8 +496,6 @@ documented.
 </li>
 </ul>
 </li>
-</ul>
-<ul>
 <li><span class="todo">INCONSISTENCY</span>: items don't grow/shrink due to promotion.<br/>
 In plain lists, multiple demote/promote commands executed directly
 after each other don't change the scope of the command - the
@@ -608,26 +506,18 @@ convention is better?  Should this be consistent between trees and
 plain lists?
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">INCONSISTENCY</span>: M-TAB does not work on plain lists.  Why???<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">QUESTION</span> grep on directory does not yet work.<br/>
 I am actually not sure, I might have addressed this already, but
 my memory is failing me.  Needs some checking.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> HAVE a TIME 3:55 line collecting CLOCK results<br/>
 The CLOCK lines could be there in addition, or could even be
 removed, so that only one line is kept.
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Think about Piotr's idea of treating TODO like a TAG.<br/>
 The answer is probably NO because the simple part of TODO must
 still be there and I like the keyword at the beginning of the line,
@@ -635,13 +525,9 @@ just like a checkbox.  Of course you can make a TODO tag yourself
 at any time.
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Inlining of external files<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Should TAB on TODO keyword rotate its state?<br/>
 Problem:  If the keyword disappears, it will suddenly start to fold&hellip;.
 So my feeling right now is that the answer should be NO.
@@ -650,8 +536,6 @@ So my feeling right now is that the answer should be NO.
 No, because S-left/right does this already pretty well
 </p>
 </li>
-</ul>
-<ul>
 <li><span class="todo">DECLINED</span> Create a DONE counter in the mode line<br/>
 That counter shows what faction of entries has been marked DONE.  I
 am not yet sure how useful such a thing would be, because of the
@@ -680,144 +564,96 @@ next item, previous item.  What should happen at the boundaries of
 the current list?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) Force relative links, would this be useful?<br/>
 
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) Fix empty search string.<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) STARTUP options for logging<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) Make a variable for Pete, to have SCHEDULED at point<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) Fix ASCII export of narrowed columns<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) org-file-apps should allow regular expressions<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:16</span>) fix problem with w32- versus mswindows-&hellip;.<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Document that font-lock-mode is needed<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Add keyboard access and menu commands for org-project.el<br/>
 C-c C-x C-p or something like that.
 In the menu, it goes under export, or even its own group.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Document those new keys in orgcard.tex<br/>
 C-c C-x C-p or something like that.
 In the menu, it goes under export, or even its own group.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Remove SCHEDULED keyword when marking it done.<br/>
 in particular when adding a CLOSED timestamp.
 Only problem is that when unclosing it, it should be scheduled
 again
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Don't show tasks already scheduled for the future, only stuff which<br/>
 is not yet scheduled.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Put title and tags in separate classes<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Option to leave out TAGS from export<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Option to leave out Timestamps from export<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Checkable items like Frank Ruell's proposal<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Classify Keywords and time stamps<br/>
 &lt;span class="keyword"&gt;SCHEDULED: &lt;/span&gt;&lt;span
 class="timestamp"&gt;timestamp goes here&lt;/span&gt;&lt;br&gt;
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Change default for include-all-todo to nil<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Specify TAGS in a special line instead of collecting them dynamically<br/>
 The could help to avoid typos and could be faster for very large files.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Some much faster interface for setting tags.<br/>
 Basically, use single keys to add/remove tags from the list.  Also
 for this the idea to define tags in a special line would be good,
 in order to have a way to define the shortcuts. 
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) Remove date stamps from headline if they are not needed.<br/>
 Bug report from Scott.
 
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:17</span>) : Maybe s-up/down should change priorities only in headlines<br/>
 Right now this works wherever the cursor is.  If this is changed,
 should S-up or S-down do something else?  
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:21</span>) Need a command to remove tabulators from a line.<br/>
 Use this in ASCII export, to make sure we get the indentation
 right.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 09:24</span>) Improve tab in org-cycle:<br/>
 <ul>
 <li>
@@ -835,29 +671,21 @@ able to go back to the old place with just another tab.
 
 </li>
 </ul></li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-01 Thu 11:48</span>) Include TAGS into sorting.<br/>
 But what strategy should be used when there are several tags?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-06 Tue 10:15</span>) Archiving an entry in current buffer goes to end of file<br/>
 Should go to end of subtree.
 This is done now, and I also control the amount of empty lines
 created by the archiving process in general.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-06 Tue 10:16</span>) Narrowing agenda to current files does not work as advertized.<br/>
 C-c a 1 t should make the TODO list for the current file, but does
 not.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-06 Tue 10:17</span>) Radio TAGS for the fast tag interface.<br/>
 Make lists of tags that are mutually exclusive.  So when I turn on
 @HOME, @WORK would be turned off automagically.  A good syntax for
@@ -891,8 +719,6 @@ This setup makes sure that assoc and rassoc still do work as
 expected.
 </p>
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-06 Tue 10:17</span>) Should tags be sorted in a certain way?<br/>
 Right now, you can either set the tag sequence yourself through
 the completion interface.  If you use the fast tag selection
@@ -901,16 +727,12 @@ selected and deselected.  maybe a specific roder would be useful
 for example the same order as the one given in the configuration?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-06 Tue 10:17</span>) Remove narrowing cookies for export<br/>
 Exported tables should not show narrowing cookies.  In fact, if a
 table line does contain nothing but narrowing cookies, the entire
 line should be removed.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-11 Sun 07:32</span>) Track working times similar to time-clock.el<br/>
 This was proposed by David O'Toole in an
 <a href="http://thread.gmane.org/gmane.emacs.orgmode/387">email to emacs-orgmode@gnu.org</a>.  He wants to be able to know the
@@ -919,14 +741,10 @@ possibility would be needed to make this useful.  Maybe sparse
 trees with broken-down working times?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-15 Thu 13:35</span>) Make org-store-link do better in image-mode buffers<br/>
 Just link to the file.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-15 Thu 13:35</span>) Use a ported version of noutline.el<br/>
 Programming the old outline-mode is really a nightmare - the new
 outline mode that uses invisibility properties instead of
@@ -937,13 +755,9 @@ XEmacs.  Once that happens, I could remove a large amount of
 ballast from org.el
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-06-15 Thu 13:35</span>) Verify links during export<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:11</span>) Allow counting checkboxes<br/>
 Then some statistics should be displayed.  One idea is for
 checkboxes, to use a special box [%] which will be updated with
@@ -973,69 +787,47 @@ In Structure they seem to be a bit hidden&hellip;..
 Also a menu sublist&hellip;
 </p>
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:11</span>) Allow stacking calls to org-occur<br/>
 This was a proposal from Piotr.  It is now possible, the second
 and subsequent calls to org-occur need a prefix argument to keep
 the previous highlights.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:12</span>) Create a hook to be run after an agenda buffer has been finalized.<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:12</span>) Include TAGS into sorting.<br/>
 But what strategy should be used when there are several tags?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:12</span>) Fixup tag display in agenda buffer.<br/>
 The tabs mess up everything.  Either remove the tabs, or realign
 the tags to some useful column.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:12</span>) Blocks in agenda:<br/>
 Make a single agenda buffer that contains several sets of items,
 like the TODO list, a tags list, and a day view.  Not a bad idea.
 This was <a href="http://thread.gmane.org/gmane.emacs.orgmode/167/focus=168">Piotr's idea</a>.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-09-25 Mon 16:12</span>) Make org-store-link do the right thing in dired-mode<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2006-11-02 Thu 10:24</span>) Control over windows being used for agenda and related buffers &nbsp;&nbsp;&nbsp;<span class="tag">NEW</span><br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-01-24 Wed 12:59</span>) Extend access to table fields<br/>
 Find a general way to get any rectangular region into a calc
 vector
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-01-24 Wed 12:59</span>) Allow links to remote images to be inlined.<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-01-24 Wed 12:59</span>) M-TAB on an already complete tag should add the ":"<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-01-24 Wed 13:07</span>) Need a command to do show hierarchy after isearch.<br/>
 Maybe automatically, using isearch-mode-end-hook.  But this does
 not seem to work, because to is called before the overlays are
@@ -1043,26 +835,18 @@ re-installed.  I can create a new hook, isearch-exit-hook, run in
 `isearch-exit'.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-18 Sun 07:16</span>) hook for users to do their own agenda lists<br/>
 New function dumping headline into the agenda buffer, based on regexp
 and callback, to allow general stuff.  For the special tags, we can
 search for one and check for the others using the callback.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-18 Sun 07:37</span>) Make C-c C-l also work on a plain link, converting it into bracket.<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-18 Sun 07:37</span>) GNUS <i>&lt;gnus:mail.general#123&gt;</i> stuff should be "Email from:&hellip;"<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-18 Sun 07:38</span>) Email/message context:  What format?<br/>
 I can think of two good formats for this:
 <pre>
@@ -1078,14 +862,10 @@ both author and receiver names), and also
 some way to detect if I am the author of this email or not.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-21 Wed 12:04</span>) Allow internal links to match inside <b>other</b> link<br/>
 Only the link itself that actually triggered the search.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-02-21 Wed 12:07</span>) Allow fully protected HTML code that will be exported as is<br/>
 Currently, <&hellip;> works only for simple tags, and I think we
 should have something better.  Idea:  Text between &lt;protecthtml&gt;
@@ -1099,8 +879,6 @@ I guess I could require these at the beginning of the line, like
 or something like that&hellip;&hellip;.
 </p>
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-03-13 Tue 05:19</span>) Make it possible to set TOC levels independently of headline levels<br/>
 The easiest way to do this would obviously be to allow a number
 setting for the tco switch, not only a simple t/nil switch.  This
@@ -1109,8 +887,6 @@ can be nice for webpages:  One could have only top-level or level
 more complex structure below.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-03-13 Tue 05:20</span>) Filling is not done in a compatible way.<br/>
 The current setup used the Emacs variables and machine to get the
 filling of plain lists and everything lese right.  XEmacs uses the
@@ -1119,8 +895,6 @@ things.  org.el should be smart about this and setup filling under
 XEmacs correctly.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-06-06 Wed 17:44</span>) Repeating Schedules?<br/>
 <a href="http://thread.gmane.org/gmane.emacs.orgmode/149">Dieter Grollman</a> requested this feature, but for now I have decided
 not to do anything about it.  I don't see a good way to implement
@@ -1128,20 +902,14 @@ this, and I believe that cyclic diary entries are good enough for
 such tasks.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-06-14 Thu 13:16</span>) improve item indentation when promoting and demoting<br/>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-06-14 Thu 13:17</span>) The TODO buffer lists possible TODO keywords<br/>
 These are taken from the current buffer, so when multiple buffers
 are involved, this list may not be correct&hellip;..
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span>( <span class="timestamp">2007-06-14 Thu 13:20</span>) Conflict between bold emphasis and headlines<br/>
 At the beginning of a line, Org-mode does not know if <b>bold</b> is a
 headline or an emphasis.  This will not be easy to fix.  The way
@@ -1151,27 +919,19 @@ times when outline regexp is used in the program, and also the
 countless times when I am simply matching th stars directly.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> C-c - for cycling bullet types.<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> improve what TAB does with new item<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 same or additional indentation????
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> Make it easier to do monthly agendas, and agendas for ranges<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> Introduce a LOCATION keyword<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 similar to DEADLINE and SCHEDULED
@@ -1180,8 +940,6 @@ This could be done now using properties, I don't think we need a
 special thing for this anymore.
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> Times/date not always removed in agenda lines<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 Even when org-agenda-remove-times-when-in-prefix is set, there
@@ -1189,8 +947,6 @@ seem to be cases where this does not work.  I forgot what the
 example was - does anyone remember?
 
 </li>
-</ul>
-<ul>
 <li><span class="done">DONE</span> Links are still highlighted in fixed-width environments.<br/>
 ARCHIVED: <span class="timestamp">2007-07-02 Mon</span>
 This ties in with the problem that there is no way to have
@@ -1204,6 +960,6 @@ protected HTML code in the file.
 <div id="postamble"><p class="author"> Author: Carsten Dominik
 <a href="mailto:carsten.dominik@gmail.com">&lt;carsten.dominik@gmail.com&gt;</a>
 </p>
-<p class="date"> Date: 2008/02/05 20:14:53</p>
+<p class="date"> Date: 2008/02/12 12:28:15</p>
 </div></body>
 </html>
