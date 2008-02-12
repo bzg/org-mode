@@ -17228,10 +17228,13 @@ printf       a printf format for computed values"
 	(setq printf (substring op (match-end 0))
 	      op (substring op 0 (match-beginning 0))))
       (cond
-       ((equal op "+") (setq f 'add_numbers))
-       ((equal op "$") (setq f 'currency))
-       ((equal op ":") (setq f 'add_times))
-       ((equal op "X") (setq f 'checkbox)))
+       ((equal op "+")  (setq f 'add_numbers))
+       ((equal op "$")  (setq f 'currency))
+       ((equal op ":")  (setq f 'add_times))
+       ((equal op "X")  (setq f 'checkbox))
+       ((equal op "X/") (setq f 'checkbox))
+       ((equal op "X%") (setq f 'checkbox))
+       )
       (push (list prop title width op f printf) org-columns-current-fmt-compiled))
     (setq org-columns-current-fmt-compiled
 	  (nreverse org-columns-current-fmt-compiled))))
