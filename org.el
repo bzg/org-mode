@@ -16872,7 +16872,7 @@ Where possible, use the standard interface for changing this line."
 	(setq width (string-to-number width))
       (setq width nil))
     (setq fmt (completing-read "Summary [none]: "
-			       '(("none") ("add_numbers") ("currency") ("add_times") ("checkbox"))
+			       '(("none") ("add_numbers") ("currency") ("add_times") ("checkbox") ("checkbox-n-of-m") ("checkbox-percent"))
 			       nil t))
     (if (string-match "\\S-" fmt)
 	(setq fmt (intern fmt))
