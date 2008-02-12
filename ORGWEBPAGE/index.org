@@ -89,7 +89,7 @@ page]], and start from there.
 
 ** Tutorials
 
-   [[file:tutorials.org][Tutorials and screencasts]] are listed on a separate page.
+   [[http://www.legito.net/worg/org-tutorials/index.php][Tutorials and screencasts]] are maintained by the [[http://www.legito.net/worg][Worg project]].
 
 ** Survey
 
