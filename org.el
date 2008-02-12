@@ -16756,9 +16756,10 @@ Where possible, use the standard interface for changing this line."
 				   x))
 			    org-columns-overlays)))
 	 (allowed (or (org-property-get-allowed-values pom key)
-		      (and (equal
+		      (and (memq
 			    (nth 4 (assoc key org-columns-current-fmt-compiled))
-			    'checkbox) '("[ ]" "[X]"))))
+			    '(checkbox checkbox-n-of-m checkbox-percent))
+			   '("[ ]" "[X]"))))
 	 nval)
     (when (equal key "ITEM")
       (error "Cannot edit item headline from here"))
@@ -17160,10 +17161,18 @@ display, or in the #+COLUMNS line of the current buffer."
     (cond ((= n (floor n)) "[X]")
 	  ((> n 1.) "[-]")
 	  (t "[ ]")))
+   ((memq fmt '(checkbox-n-of-m checkbox-percent))
+    (let* ((n1 (floor n)) (n2 (floor (+ .5 (* 1000000 (- n n1))))))
+      (org-nofm-to-completion n1 (+ n2 n1) (eq fmt 'checkbox-percent))))
    (printf (format printf n))
    ((eq fmt 'currency)
     (format "%.2f" n))
    (t (number-to-string n))))
+
+(defun org-nofm-to-completion (n m &optional percent)
+  (if (not percent)
+      (format "[%d/%d]" n m)
+    (format "[%d%%]"(floor (+ 0.5 (* 100. (/ (* 1.0 n) m)))))))
 
 (defun org-column-string-to-number (s fmt)
   "Convert a column value to a number that can be used for column computing."
@@ -17173,7 +17182,7 @@ display, or in the #+COLUMNS line of the current buffer."
       (while l
 	(setq sum (+ (string-to-number (pop l)) (/ sum 60))))
       sum))
-   ((eq fmt 'checkbox)
+   ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
     (if (equal s "[X]") 1. 0.000001))
    (t (string-to-number s))))
 
@@ -17190,6 +17199,8 @@ display, or in the #+COLUMNS line of the current buffer."
       (cond
        ((eq fmt 'add_times) (setq op ":"))
        ((eq fmt 'checkbox) (setq op "X"))
+       ((eq fmt 'checkbox-n-of-m) (setq op "X/"))
+       ((eq fmt 'checkbox-percent) (setq op "X%"))
        ((eq fmt 'add_numbers) (setq op "+"))
        ((eq fmt 'currency) (setq op "$")))
       (if (and op printf) (setq op (concat op ";" printf)))
@@ -17232,8 +17243,8 @@ printf       a printf format for computed values"
        ((equal op "$")  (setq f 'currency))
        ((equal op ":")  (setq f 'add_times))
        ((equal op "X")  (setq f 'checkbox))
-       ((equal op "X/") (setq f 'checkbox))
-       ((equal op "X%") (setq f 'checkbox))
+       ((equal op "X/") (setq f 'checkbox-n-of-m))
+       ((equal op "X%") (setq f 'checkbox-percent))
        )
       (push (list prop title width op f printf) org-columns-current-fmt-compiled))
     (setq org-columns-current-fmt-compiled

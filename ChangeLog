@@ -5,6 +5,7 @@
 	(org-export-as-html): Join unsorted lists when they directly
 	follow each other.  Such lists may be created by headlines that
 	are converted to lists.
+	(org-nofm-to-completion): New function.
 
 2008-02-12  Bastien Guerry  <bzg@altern.org>
 
