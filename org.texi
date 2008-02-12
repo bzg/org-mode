@@ -3556,13 +3556,14 @@ properties, the same commands are used as for tag searches (@pxref{Tag
 searches}), and the same logic applies.  For example, a search string
 
 @example
-+work-boss+PRIORITY="A"+Coffee="unlimited"+With=@{Sarah\|Denny@}
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort=""+With=@{Sarah\|Denny@}
 @end example
 
 @noindent
 finds entries tagged @samp{:work:} but not @samp{:boss:}, which
 also have a priority value @samp{A}, a @samp{:Coffee:} property with the
-value @samp{unlimited}, and a @samp{:With:} property that is matched by
+value @samp{unlimited}, an @samp{Effort} property that is undefined or
+empty, and a @samp{:With:} property that is matched by
 the regular expression @samp{Sarah\|Denny}.
 
 You can configure Org-mode to use property inheritance during a search,
