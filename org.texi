@@ -2663,8 +2663,8 @@ the fast selection interface.
 Select the following/preceding TODO state, similar to cycling.  Useful
 mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).
-@kindex C-c C-c
-@item C-c C-c
+@kindex C-c C-t
+@item C-c C-t
 Use the fast tag interface to directly select a specific TODO state.
 For this you need to assign keys to TODO states, like this:
 @example
