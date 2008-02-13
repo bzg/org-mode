@@ -16914,7 +16914,6 @@ Where possible, use the standard interface for changing this line."
 (defun org-columns-widen (arg)
   "Make the column wider by ARG characters."
   (interactive "p")
-  (debug)
   (let* ((n (current-column))
 	 (entry (nth n org-columns-current-fmt-compiled))
 	 (width (or (nth 2 entry)
@@ -22883,6 +22882,8 @@ be used to request time specification in the time stamp."
 	 (pos (marker-position marker))
 	 (org-insert-labeled-timestamps-at-point nil)
 	 ts)
+    (message "%s" (marker-insertion-type marker)) (sit-for 3)
+    (set-marker-insertion-type marker t)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
 	(widen)
