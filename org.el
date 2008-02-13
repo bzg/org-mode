@@ -16914,6 +16914,7 @@ Where possible, use the standard interface for changing this line."
 (defun org-columns-widen (arg)
   "Make the column wider by ARG characters."
   (interactive "p")
+  (debug)
   (let* ((n (current-column))
 	 (entry (nth n org-columns-current-fmt-compiled))
 	 (width (or (nth 2 entry)
@@ -17026,7 +17027,7 @@ display, or in the #+COLUMNS line of the current buffer."
 (defun org-columns-get-autowidth-alist (s cache)
   "Derive the maximum column widths from the format and the cache."
   (let ((start 0) rtn)
-    (while (string-match (org-re "%\\([[:alpha:]]\\S-*\\)") s start)
+    (while (string-match (org-re "%\\([[:alpha:]][[:alnum:]_-]*\\)") s start)
       (push (cons (match-string 1 s) 1) rtn)
       (setq start (match-end 0)))
     (mapc (lambda (x)
@@ -20194,7 +20195,7 @@ Optional argument FILE means, use this file instead of the current."
 	(unless (or (bobp) org-agenda-compact-blocks)
 	  (insert "\n" (make-string (window-width) ?=) "\n"))
 	(narrow-to-region (point) (point-max)))
-    (org-agenda-maybe-reset-markers 'force)
+    (org-agenda-reset-markers)
     (org-prepare-agenda-buffers (org-agenda-files))
     (setq org-todo-keywords-for-agenda
 	  (org-uniquify org-todo-keywords-for-agenda))
@@ -20358,14 +20359,10 @@ no longer in use."
     (push m org-agenda-markers)
     m))
 
-(defun org-agenda-maybe-reset-markers (&optional force)
-  "Reset markers created by `org-agenda'.  But only if they are old enough."
-  (if (or (and force (not org-agenda-multi))
-	  (> (- (time-to-seconds (current-time))
-		org-agenda-last-marker-time)
-	     5))
-      (while org-agenda-markers
-	(move-marker (pop org-agenda-markers) nil))))
+(defun org-agenda-reset-markers ()
+  "Reset markers created by `org-agenda'."
+  (while org-agenda-markers
+    (move-marker (pop org-agenda-markers) nil)))
 
 (defun org-get-agenda-file-buffer (file)
   "Get a buffer visiting FILE.  If the buffer needs to be created, add
@@ -21097,7 +21094,10 @@ So the example above may also be written as
 The function expects the lisp variables `entry' and `date' to be provided
 by the caller, because this is how the calendar works.  Don't use this
 function from a program - use `org-agenda-get-day-entries' instead."
-  (org-agenda-maybe-reset-markers)
+  (when (> (- (time-to-seconds (current-time))
+	      org-agenda-last-marker-time)
+	   5)
+    (org-agenda-reset-markers))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
   (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
@@ -22088,7 +22088,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (let ((buf (current-buffer)))
     (if (not (one-window-p)) (delete-window))
     (kill-buffer buf)
-    (org-agenda-maybe-reset-markers 'force)
+    (org-agenda-reset-markers)
     (org-columns-remove-overlays))
   ;; Maybe restore the pre-agenda window configuration.
   (and org-agenda-restore-windows-after-quit

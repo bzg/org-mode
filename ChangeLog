@@ -1,3 +1,10 @@
+2008-02-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-reset-markers): Renamed from
+	`org-agenda-maybe-reset-markers'.  FORCE argument removed.
+	(org-diary, org-agenda-quit, org-prepare-agenda): Call the renamed
+	function, without force argument.
+
 2008-02-12  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-make-tags-matcher): Allow "" to match an empty or
@@ -10,7 +17,7 @@
 2008-02-12  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-export-as-html): Use :html-extension instead of
-	org-export-html-extension. 
+	org-export-html-extension.
 	(org-store-link): Support for links from `rmail-summary-mode'.
 
 2008-02-11  Carsten Dominik  <dominik@science.uva.nl>
