@@ -16132,7 +16132,7 @@ With INCLUDE-DEFAULTS, also include properties that has special meaning
 internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING.
 With INCLUDE-COLUMNS, also include property names given in COLUMN
 formats in the current buffer."
-  (let (rtn range cfmt cols)
+  (let (rtn range cfmt cols s p)
     (save-excursion
       (save-restriction
 	(widen)

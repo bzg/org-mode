@@ -4,6 +4,7 @@
 	`org-agenda-maybe-reset-markers'.  FORCE argument removed.
 	(org-diary, org-agenda-quit, org-prepare-agenda): Call the renamed
 	function, without force argument.
+	(org-buffer-property-keys): Bind local variables s and p.
 
 2008-02-12  Carsten Dominik  <dominik@science.uva.nl>
 
