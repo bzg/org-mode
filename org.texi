@@ -3702,6 +3702,8 @@ property        @r{The property that should be edited in this column.}
                 @{$@}       @r{Currency, short for @samp{+;%.2f}.}
                 @{:@}       @r{Sum times, HH:MM:SS, plain numbers are hours.}
                 @{X@}       @r{Checkbox status, [X] if all children are [X].}
+                @{X/@}      @r{Checkbox status, [n/m].}
+                @{X%@}      @r{Checkbox status, [n%].}
 @end example
 
 @noindent
