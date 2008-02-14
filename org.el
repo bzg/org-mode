@@ -1641,6 +1641,15 @@ cycling, see the manual.
 TODO keywords and interpretation can also be set on a per-file basis with
 the special #+SEQ_TODO and #+TYP_TODO lines.
 
+Each keyword can optionally specify a character for fast state selection
+\(in combination with the variable `org-use-fast-todo-selection')
+and a specifier for state change logging, using the same syntax
+that is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says
+that the WAIT state can be selected with the \"w\" key. \"WAIT(w!)\"
+indicates to record a time stamp each time this state is selected.
+\"WAIT(w@)\" says that the user should in addition be prompted for a
+note.
+
 For backward compatibility, this variable may also be just a list
 of keywords - in this case the interptetation (sequence or type) will be
 taken from the (otherwise obsolete) variable `org-todo-interpretation'."
@@ -1721,10 +1730,12 @@ Lisp variable `state'."
   :group 'org-todo
   :type 'hook)
 
-(defcustom org-log-done nil
+(defcustom org-log-progress nil
   "When set, insert a (non-active) time stamp when TODO entry is marked DONE.
 When the state of an entry is changed from nothing or a DONE state to
 a not-done TODO state, remove a previous closing date.
+
+If this is the symbol `state', that means log the time of each state change.
 
 This can also be a list of symbols indicating under which conditions
 the time stamp recording the action should be annotated with a short note.
@@ -1732,9 +1743,7 @@ Valid members of this list are
 
   done       Offer to record a note when marking entries done
   state      Offer to record a note whenever changing the TODO state
-             of an item.  This is only relevant if TODO keywords are
-             interpreted as sequence, see variable `org-todo-interpretation'.
-             When `state' is set, this includes tracking `done'.
+             of an item.
   clock-out  Offer to record a note when clocking out of an item.
 
 A separate window will then pop up and allow you to type a note.
@@ -1742,26 +1751,35 @@ After finishing with C-c C-c, the note will be added directly after the
 timestamp, as a plain list item.  See also the variable
 `org-log-note-headings'.
 
-Logging can also be configured on a per-file basis by adding one of
-the following lines anywhere in the buffer:
+Logging can also be configured on a per-file basis by adding one
+or several the following lines anywhere in the buffer:
 
    #+STARTUP: logdone
+   #+STARTUP: logstate
    #+STARTUP: nologging
    #+STARTUP: lognotedone
    #+STARTUP: lognotestate
    #+STARTUP: lognoteclock-out
 
 You can have local logging settings for a subtree by setting the LOGGING
-property to one or more of these keywords."
+property to one or more of these keywords.
+
+Finally, state logging can be configured on a per-state basis.
+See the variable `org-todo-keywords'."
   :group 'org-todo
   :group 'org-progress
   :type '(choice
 	  (const :tag "off" nil)
-	  (const :tag "on" t)
+	  (const :tag "when moving to a DONE state" done)
+	  (const :tag "when moving to a DONE state" t)
+	  (const :tag "all state changes" state)
 	  (set :tag "on, with notes, detailed control" :greedy t :value (done)
 	       (const :tag "when item is marked DONE" done)
 	       (const :tag "when TODO state changes" state)
 	       (const :tag "when clocking out" clock-out))))
+
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-log-done 'org-log-progress))
 
 (defcustom org-log-done-with-time t
   "Non-nil means, the CLOSED time stamp will contain date and time.
@@ -4391,12 +4409,13 @@ we turn off invisibility temporarily.  Use this in a `let' form."
     ("align" org-startup-align-all-tables t)
     ("noalign" org-startup-align-all-tables nil)
     ("customtime" org-display-custom-times t)
-    ("logging" org-log-done t)
-    ("logdone" org-log-done t)
-    ("nologging" org-log-done nil)
-    ("lognotedone" org-log-done done push)
-    ("lognotestate" org-log-done state push)
-    ("lognoteclock-out" org-log-done clock-out push)
+    ("logging" org-log-progress t)
+    ("logdone" org-log-progress t)
+    ("logstate" org-log-progress state)
+    ("nologging" org-log-progress nil)
+    ("lognotedone" org-log-progress done push)
+    ("lognotestate" org-log-progress state push)
+    ("lognoteclock-out" org-log-progress clock-out push)
     ("logrepeat" org-log-repeat t)
     ("nologrepeat" org-log-repeat nil)
     ("constcgs" constants-unit-system cgs)
@@ -4425,7 +4444,7 @@ means to push this value onto the list in the variable.")
 	  (splitre "[ \t]+")
 	  kwds kws0 kwsa key value cat arch tags const links hw dws
 	  tail sep kws1 prio props drawers
-	  ex log)
+	  ex note time)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -4511,11 +4530,14 @@ means to push this value onto the list in the variable.")
 			    (progn
 			      (setq kw (match-string 1 x)
 				    ex (and (match-end 2) (match-string 2 x))
-				    log (and ex (string-match "@" ex))
+				    note (and ex (string-match "@" ex))
+				    time (or note (and ex (string-match "!" ex)))
 				    key (and ex (substring ex 0 1)))
 			      (if (equal key "@") (setq key nil))
 			      (push (cons kw (and key (string-to-char key))) kwsa)
-			      (and log (push kw org-todo-log-states))
+			      (and (or note time)
+				   (push (cons kw (if note 'note 'time))
+					 org-todo-log-states))
 			      kw)
 			  (error "Invalid TODO keyword %s" x)))
 		      kws0)
@@ -7928,7 +7950,7 @@ this heading."
 		     (looking-at org-todo-line-regexp)
 		     (or (not (match-end 2))
 			 (not (member (match-string 2) org-done-keywords))))
-	    (let (org-log-done)
+	    (let (org-log-progress)
 	      (org-todo
 	       (car (or (member org-archive-mark-done org-done-keywords)
 			org-done-keywords)))))
@@ -13631,7 +13653,7 @@ from that hook."
   (when (and org-clock-marker
 	     (equal (marker-buffer org-clock-marker) (current-buffer)))
     ;; FIXME: test this, this is w/o notetaking!
-    (let (org-log-done) (org-clock-out)))
+    (let (org-log-progress) (org-clock-out)))
   (when buffer-file-name
     (save-buffer)
     (setq buffer-file-name nil))
@@ -14458,8 +14480,14 @@ For calling through lisp, arg is also interpreted in the following way:
       (let* ((match-data (match-data))
 	     (startpos (point-at-bol))
 	     (logging (save-match-data (org-entry-get nil "LOGGING" t)))
-	     (org-log-done (org-parse-local-options logging 'org-log-done))
+	     (old-progress org-log-progress)
+	     (org-log-progress
+	      (org-parse-local-options logging 'org-log-progress))
+	     (local-logging-p (not (equal old-progress org-log-progress)))
 	     (org-log-repeat (org-parse-local-options logging 'org-log-repeat))
+	     (org-todo-log-states (if local-logging-p
+				      nil
+				    org-todo-log-states))
 	     (this (match-string 1))
 	     (hl-pos (match-beginning 0))
 	     (head (org-get-todo-sequence-head this))
@@ -14529,7 +14557,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	     (next (if state (concat " " state " ") " "))
 	     (change-plist (list :type 'todo-state-change :from this :to state
 				 :position startpos))
-	     dostates)
+	     dolog now-done-p)
 	(when org-blocker-hook
 	  (unless (save-excursion
 		    (save-match-data
@@ -14558,26 +14586,36 @@ For calling through lisp, arg is also interpreted in the following way:
 		   (mapconcat 'identity (assoc state org-todo-sets) " ")))
 	(setq org-last-todo-state-is-todo
 	      (not (member state org-done-keywords)))
-	(when (and org-log-done (not (memq arg '(nextset previousset))))
-	  (setq dostates (and (listp org-log-done) (memq 'state org-log-done)
-			      (or (not org-todo-log-states)
-				  (member state org-todo-log-states))))
-
+	(setq now-done-p (and (member state org-done-keywords)
+			      (not (member this org-done-keywords))))
+	(when (and (or org-todo-log-states org-log-progress)
+		   (not (memq arg '(nextset previousset))))
+	  ;; we need to look at recording a time and note
+	  (if org-todo-log-states
+	      ;; The type of logging has been defined per state
+	      (setq dolog (cdr (assoc state org-todo-log-states)))
+	    ;; we only have general rules
+	    (setq dolog
+		  (cond ((memq org-log-progress '(t done)) nil)
+			((eq org-log-progress 'state) 'time)
+			((listp org-log-progress)
+			 (and (member 'state org-log-progress)
+			      'note)))))
 	  (cond
 	   ((and state (member state org-not-done-keywords)
 		 (not (member this org-not-done-keywords)))
 	    ;; This is now a todo state and was not one before
 	    ;; Remove any CLOSED timestamp, and possibly log the state change
 	    (org-add-planning-info nil nil 'closed)
-	    (and dostates (org-add-log-maybe 'state state 'findpos)))
-	   ((and state dostates)
+	    (and dolog (org-add-log-maybe 'state state 'findpos dolog)))
+	   ((and state dolog)
 	    ;; This is a non-nil state, and we need to log it
-	    (org-add-log-maybe 'state state 'findpos))
-	   ((and (member state org-done-keywords)
-		 (not (member this org-done-keywords)))
+	    (if now-done-p (org-add-planning-info 'closed (org-current-time)))
+	    (org-add-log-maybe 'state state 'findpos dolog))
+	   (now-done-p
 	    ;; It is now done, and it was not done before
 	    (org-add-planning-info 'closed (org-current-time))
-	    (org-add-log-maybe 'done state 'findpos))))
+	    (org-add-log-maybe 'done state 'findpos dolog))))
 	;; Fixup tag positioning
 	(and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
 	(run-hooks 'org-after-todo-state-change-hook)
@@ -14697,7 +14735,7 @@ This function should be run in the `org-after-todo-state-change-hook'."
 	 (done-word (nth 3 aa))
 	 (whata '(("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
-	 (org-log-done)
+	 (org-log-progress)
 	 re type n what ts)
     (when repeat
       (org-todo (if (eq interpret 'type) last-state head))
@@ -14705,7 +14743,8 @@ This function should be run in the `org-after-todo-state-change-hook'."
 		 (not (memq 'org-add-log-note
 			    (default-value 'post-command-hook))))
 	;; Make sure a note is taken
-	(let ((org-log-done '(done)))
+	(let ((org-log-progress '(done))
+	      (org-todo-log-states nil))
 	  (org-add-log-maybe 'done (or done-word (car org-done-keywords))
 			     'findpos)))
       (org-back-to-heading t)
@@ -14856,17 +14895,24 @@ be removed."
 (defvar org-log-note-marker (make-marker))
 (defvar org-log-note-purpose nil)
 (defvar org-log-note-state nil)
+(defvar org-log-note-how nil)
 (defvar org-log-note-window-configuration nil)
 (defvar org-log-note-return-to (make-marker))
 (defvar org-log-post-message nil
   "Message to be displayed after a log note has been stored.
 The auto-repeater uses this.")
 
-(defun org-add-log-maybe (&optional purpose state findpos)
-  "Set up the post command hook to take a note."
+(defun org-add-log-maybe (&optional purpose state findpos how)
+  "Set up the post command hook to take a note.
+For this to do anything, HOW must be set, or PURPOSE must
+be a member of the list in `org-log-progress'.
+If this is about to TODO state change, the new state is expected in STATE.
+When FINDPOS is non-nil, find the correct position for the note in
+the current entry.  If not, assume that it can be inserted at point."
   (save-excursion
-    (when (and (listp org-log-done)
-	       (memq purpose org-log-done))
+    (when (or how
+	      (and (listp org-log-progress)
+		   (memq purpose org-log-progress)))
       (when findpos
 	(org-back-to-heading t)
 	(looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
@@ -14878,8 +14924,9 @@ The auto-repeater uses this.")
 	  (org-skip-over-state-notes)
 	  (skip-chars-backward " \t\n\r")))
       (move-marker org-log-note-marker (point))
-      (setq org-log-note-purpose purpose)
-      (setq org-log-note-state state)
+      (setq org-log-note-purpose purpose
+	    org-log-note-state state
+	    org-log-note-how how)
       (add-hook 'post-command-hook 'org-add-log-note 'append))))
 
 (defun org-skip-over-state-notes ()
@@ -14900,16 +14947,18 @@ The auto-repeater uses this.")
   (goto-char org-log-note-marker)
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
-  (let ((org-inhibit-startup t)) (org-mode))
-  (insert (format "# Insert note for %s.
+  (if (eq org-log-note-how 'time)
+      (org-store-log-note)
+    (let ((org-inhibit-startup t)) (org-mode))
+    (insert (format "# Insert note for %s.
 # Finish with C-c C-c, or cancel with C-c C-k.\n\n"
-		  (cond
-		   ((eq org-log-note-purpose 'clock-out) "stopped clock")
-		   ((eq org-log-note-purpose 'done)  "closed todo item")
-		   ((eq org-log-note-purpose 'state)
-		    (format "state change to \"%s\"" org-log-note-state))
+		    (cond
+		     ((eq org-log-note-purpose 'clock-out) "stopped clock")
+		     ((eq org-log-note-purpose 'done)  "closed todo item")
+		     ((eq org-log-note-purpose 'state)
+		      (format "state change to \"%s\"" org-log-note-state))
 		   (t (error "This should not happen")))))
-  (org-set-local 'org-finish-function 'org-store-log-note))
+    (org-set-local 'org-finish-function 'org-store-log-note)))
 
 (defun org-store-log-note ()
   "Finish taking a log note, and insert it to where it belongs."
@@ -18652,7 +18701,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
       (insert " => " (format "%2d:%02d" h m))
       (move-marker org-clock-marker nil)
       (let* ((logging (save-match-data (org-entry-get nil "LOGGING" t)))
-	     (org-log-done (org-parse-local-options logging 'org-log-done))
+	     (org-log-progress (org-parse-local-options logging 'org-log-progress))
 	     (org-log-repeat (org-parse-local-options logging 'org-log-repeat)))
 	(org-add-log-maybe 'clock-out))
       (when org-mode-line-timer
@@ -18820,10 +18869,10 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 	     (> (save-excursion (outline-next-heading) (point))
 		org-clock-marker))
     ;; Clock out, but don't accept a logging message for this.
-    (let ((org-log-done (if (and (listp org-log-done)
-				 (member 'clock-out org-log-done))
+    (let ((org-log-progress (if (and (listp org-log-progress)
+				 (member 'clock-out org-log-progress))
 			    '(done)
-			  org-log-done)))
+			  org-log-progress)))
       (org-clock-out))))
 
 (add-hook 'org-after-todo-state-change-hook
@@ -24687,11 +24736,13 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    (if org-odd-levels-only "odd" "oddeven")
    (if org-hide-leading-stars "hidestars" "showstars")
    (if org-startup-align-all-tables "align" "noalign")
-   (cond ((eq t org-log-done) "logdone")
-	 ((not org-log-done) "nologging")
-	 ((listp org-log-done)
+   (cond ((eq t org-log-progress) "logdone")
+	 ((eq 'done org-log-progress) "logdone")
+	 ((eq 'state org-log-progress) "logstate")
+	 ((not org-log-progress) "nologging")
+	 ((listp org-log-progress)
 	  (mapconcat (lambda (x) (concat "lognote" (symbol-name x)))
-		     org-log-done " ")))
+		     org-log-progress " ")))
    (or (mapconcat (lambda (x)
 		    (cond
 		     ((equal '(:startgroup) x) "{")
@@ -27228,11 +27279,11 @@ See the individual commands for more information."
      ["Create clock table" org-clock-report t]
      "--"
      ["Record DONE time"
-      (progn (setq org-log-done (not org-log-done))
+      (progn (setq org-log-progress (not org-log-progress))
 	     (message "Switching to %s will %s record a timestamp"
 		      (car org-done-keywords)
-		      (if org-log-done "automatically" "not")))
-      :style toggle :selected org-log-done])
+		      (if org-log-progress "automatically" "not")))
+      :style toggle :selected org-log-progress])
     "--"
     ["Agenda Command..." org-agenda t]
     ["Set Restriction Lock" org-agenda-set-restriction-lock t]

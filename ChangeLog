@@ -1,3 +1,26 @@
+2008-02-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-todo): Make sure that LOGGING properties are
+	honoured.
+
+2008-02-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-log-progress): Renamed from `org-log-done'.
+	(org-log-done): New defvaralias.
+	(org-todo-keywords): Improve docstring.
+	(org-startup-options): Define the new startup option `logstate'.
+	(org-set-regexps-and-options): Process the "!" markers.
+	(org-todo): Respect the new logging stuff.
+	(org-log-note-how): New variable.
+	(org-add-log-maybe): New parameter HOW that defines how logging
+	should be done and also overrides PURPOSE.  Add a docstring.
+	(org-add-log-note): Check if we really need to ask for a note.
+	(org-get-current-options): Digest the new keyword.
+
+	* org.texi (Progress logging): Document the new variable
+	`org-log-progress' and the new possibilities for per-keyword
+	settings.
+
 2008-02-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-reset-markers): Renamed from
