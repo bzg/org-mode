@@ -2654,7 +2654,9 @@ agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
 @kindex C-u C-c C-t
 @item C-u C-c C-t
 Select a specific keyword using completion or (if it has been set up)
-the fast selection interface.
+the fast selection interface.  For the latter, you need to assign keys
+to TODO states, see @ref{Per-file keywords} and @ref{Setting tags} for
+more information.
 
 @kindex S-@key{right}
 @kindex S-@key{left}
@@ -2663,15 +2665,6 @@ the fast selection interface.
 Select the following/preceding TODO state, similar to cycling.  Useful
 mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).
-@kindex C-c C-t
-@item C-c C-t
-Use the fast tag interface to directly select a specific TODO state.
-For this you need to assign keys to TODO states, like this:
-@example
-#+SEQ_TODO: TODO(t) STARTED(s) WAITING(w) | DONE(d)
-@end example
-@noindent See @ref{Per-file keywords} and @ref{Setting tags} for more
-information.
 @kindex C-c C-v
 @kindex C-c / t
 @cindex sparse tree, for TODO
@@ -2845,7 +2838,8 @@ TODO states a lot, you might want to set the variable
 @code{org-use-fast-todo-selection} to @code{t} and make this behavior
 the default.  Check also the variable
 @code{org-fast-tag-selection-include-todo}, it allows to change the TODO
-state through the tags interface (@pxref{Setting tags}).
+state through the tags interface (@pxref{Setting tags}), in case you
+like to mingle the two concepts.
 
 @node Per-file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
 @subsection Setting up keywords for individual files
