@@ -9,45 +9,17 @@
 
 ** Incompatible changes
 
-   - The variable `org-log-done' is obsolete.  Please use
-     `org-log-progress' instead.  For Emacs 21 users this is a
-     must, for the rest of us, `org-log-done' can still be used
-     as an alias.
+   - The variable `org-log-done' is not less complex.
+   - The in-buffer settings for logging have changed.  Some
+     options no longer exists, some new ones have been added.
 
 ** Details
 
 *** Changes to logging progress
 
     There is now more control over which state changes are being
-    logged in what way.  You can now request that the change to a
-    state does one of three options:
-    - No extre record of this state change.
-    - Record a time stamp only, without further user interaction
-    - Prompt for a note and record a time stamp.
-
-    First of all, the variable `org-log-done' is obsolete and
-    will be replaced by `org-log-progress', which is used in
-    exactly the same way but has a more appropriate
-    name. `org-log-done' only exists as a variable alias now.
-
-    `org-log-progress' may have these values:
-
-    - 'done    Record a time stamp when the entry is done.
-    - t        backward compatibility for `done', should not be used
-    - 'state   Record a time stamp for each state change.
-    - list     symbols indicating where a note should be taken,
-               may contain the symbols `done', `state', and
-               `clock-out'
-
-    However, the better way to configure this on a per-keyword
-    basis, using the marker characters "!" and "@".  For example
-
-    #+TODO: TODO(t) STARTED(s!) WAIT(w@) | DONE(d!) CANCELLED(c@)
-
-    Now a time stamp will be recorded for STARTED, WAIT, DONE,
-    and CANCELLED.  You will be prompted for an additional note
-    for WAIT and CANCELLED.  Nothing will be recorded when you
-    switch to TODO. 
+    logged in what way.  Please read carefully the corresponding
+    sections in the manual.
 
 *** Misc
 

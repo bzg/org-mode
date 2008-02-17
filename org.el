@@ -1667,7 +1667,8 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 		   (repeat
 		    (string :tag "Keyword"))))))
 
-(defvar org-todo-keywords-1 nil)
+(defvar org-todo-keywords-1 nil
+  "All TODO and DONE keywords active in a buffer.")
 (make-variable-buffer-local 'org-todo-keywords-1)
 (defvar org-todo-keywords-for-agenda nil)
 (defvar org-done-keywords-for-agenda nil)
@@ -1731,16 +1732,28 @@ Lisp variable `state'."
   :type 'hook)
 
 (defcustom org-log-done nil
-  "Non-nil means, recored a CLOSED timestamp when moving an entry to DONE.
+  "Non-nil means, record a CLOSED timestamp when moving an entry to DONE.
+When equal to the list (done), also prompt for a closing note.
 This can also be configured on a per-file basis by adding one of
 the following lines anywhere in the buffer:
 
    #+STARTUP: logdone
+   #+STARTUP: lognotedone
    #+STARTUP: nologdone"
   :group 'org-todo
   :group 'org-progress
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "No logging" nil)
+	  (const :tag "Record CLOSED timestamp" time)
+	  (const :tag "Record CLOSED timestamp with closing note." note)))
 
+;; Normalize old uses of org-log-done.
+(cond
+ ((eq org-log-done t) (setq org-log-done 'time))
+ ((and (listp org-log-done) (memq 'done org-log-done))
+  (setq org-log-done 'note)))
+
+;; FIXME: document
 (defcustom org-log-note-clock-out nil
   "Non-nil means, recored a note when clocking out of an item.
 This can also be configured on a per-file basis by adding one of
@@ -1786,19 +1799,32 @@ When nil, the notes will be orderer according to time."
   :group 'org-progress
   :type 'boolean)
 
-(defcustom org-log-repeat t
-  "Non-nil means, prompt for a note when REPEAT is resetting a TODO entry.
-When nil, no note will be taken.
+(defcustom org-log-repeat 'time
+  "Non-nil means, record moving through the DONE state when triggering repeat.
+An auto-repeating tasks  is immediately switched back to TODO when marked
+done.  If you are not logging state changes (by adding \"@\" or \"!\" to
+the TODO keyword definition, or recording a cloing note by setting
+`org-log-done', there will be no record of the task moving trhough DONE.
+This variable forces taking a note anyway.  Possible values are:
+
+nil     Don't force a record
+time    Record a time stamp
+note    Record a note
+
 This option can also be set with on a per-file-basis with
 
    #+STARTUP: logrepeat
+   #+STARTUP: lognoterepeat
    #+STARTUP: nologrepeat
 
 You can have local logging settings for a subtree by setting the LOGGING
 property to one or more of these keywords."
   :group 'org-todo
   :group 'org-progress
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Don't force a record" nil)
+	  (const :tag "Force recording the DONE state" time)
+	  (const :tag "Force recording a note with the DONE state" note)))
 
 (defcustom org-clock-into-drawer 2
   "Should clocking info be wrapped into a drawer?
@@ -4380,11 +4406,13 @@ we turn off invisibility temporarily.  Use this in a `let' form."
     ("align" org-startup-align-all-tables t)
     ("noalign" org-startup-align-all-tables nil)
     ("customtime" org-display-custom-times t)
-    ("logdone" org-log-done t)
+    ("logdone" org-log-done time)
+    ("lognotedone" org-log-done note)
     ("nologdone" org-log-done nil)
     ("lognoteclock-out" org-log-note-clock-out t)
     ("nolognoteclock-out" org-log-note-clock-out nil)
-    ("logrepeat" org-log-repeat t)
+    ("logrepeat" org-log-repeat state)
+    ("lognoterepeat" org-log-repeat note)
     ("nologrepeat" org-log-repeat nil)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI))
@@ -4501,7 +4529,7 @@ means to push this value onto the list in the variable.")
 				    note (and ex (string-match "@" ex))
 				    time (or note (and ex (string-match "!" ex)))
 				    key (and ex (substring ex 0 1)))
-			      (if (equal key "@") (setq key nil))
+			      (if (member key '("@" "!")) (setq key nil))
 			      (push (cons kw (and key (string-to-char key))) kwsa)
 			      (and (or note time)
 				   (push (cons kw (if note 'note 'time))
@@ -14448,6 +14476,9 @@ For calling through lisp, arg is also interpreted in the following way:
       (let* ((match-data (match-data))
 	     (startpos (point-at-bol))
 	     (logging (save-match-data (org-entry-get nil "LOGGING" t)))
+	     (org-log-done org-log-done)
+	     (org-log-repeat org-log-repeat)
+	     (org-todo-log-states org-todo-log-states)
 	     (this (match-string 1))
 	     (hl-pos (match-beginning 0))
 	     (head (org-get-todo-sequence-head this))
@@ -14548,6 +14579,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	      (not (member state org-done-keywords)))
 	(setq now-done-p (and (member state org-done-keywords)
 			      (not (member this org-done-keywords))))
+	(and logging (org-local-logging logging))
 	(when (and (or org-todo-log-states org-log-done)
 		   (not (memq arg '(nextset previousset))))
 	  ;; we need to look at recording a time and note
@@ -14560,17 +14592,21 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (org-add-planning-info nil nil 'closed))
 	  (when (and now-done-p org-log-done)
 	    ;; It is now done, and it was not done before
-	    (org-add-planning-info 'closed (org-current-time)))
+	    (org-add-planning-info 'closed (org-current-time))
+	    (if (and (not dolog) (listp org-log-done)
+		     (member 'done org-log-done))
+		(org-add-log-maybe 'done state 'findpos 'note)))
 	  (when (and state dolog)
 	    ;; This is a non-nil state, and we need to log it
 	    (org-add-log-maybe 'state state 'findpos dolog)))
 	;; Fixup tag positioning
 	(and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
 	(run-hooks 'org-after-todo-state-change-hook)
-	(and (member state org-done-keywords) (org-auto-repeat-maybe))
 	(if (and arg (not (member state org-done-keywords)))
 	    (setq head (org-get-todo-sequence-head state)))
 	(put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
+	;; Do we need to trigger a repeat?
+	(when now-done-p (org-auto-repeat-maybe state))
 	;; Fixup cursor location if close to the keyword
 	(if (and (outline-on-heading-p)
 		 (not (bolp))
@@ -14583,6 +14619,26 @@ For calling through lisp, arg is also interpreted in the following way:
 	(when org-trigger-hook
 	  (save-excursion
 	    (run-hook-with-args 'org-trigger-hook change-plist)))))))
+
+(defun org-local-logging (property)
+  "Get logging settings from a property."
+  (let* (words w a)
+    ;; directly set the variables, they are already local.
+    (setq org-log-done nil
+	  org-log-repeat nil
+	  org-todo-log-states nil)
+    (setq words (org-split-string property))
+    (while (setq w (pop words))
+      (cond
+       ((setq a (assoc w org-startup-options))
+	(and (member (nth 1 a) '(org-log-done org-log-repeat))
+	     (set (nth 1 a) (nth 2 a))))
+       ((string-match "\\([a-zA-Z0-9]+\\)\\(([@!])\\)?" w)
+	(and (member (match-string 1 w) org-todo-keywords-1)
+	     (match-end 2)
+	     (push (cons (match-string 1 w)
+			 (if (equal (match-string 2 w) "(@)") 'note 'time))
+		   org-todo-log-states)))))))
 
 (defun org-get-todo-sequence-head (kwd)
   "Return the head of the TODO sequence to which KWD belongs.
@@ -14670,7 +14726,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 
 (defvar org-last-changed-timestamp)
 (defvar org-log-post-message)
-(defun org-auto-repeat-maybe ()
+(defun org-auto-repeat-maybe (done-word)
   "Check if the current headline contains a repeated deadline/schedule.
 If yes, set TODO state back to what it was and change the base date
 of repeating deadline/scheduled time stamps to new date.
@@ -14680,19 +14736,20 @@ This function should be run in the `org-after-todo-state-change-hook'."
 	 (aa (assoc last-state org-todo-kwd-alist))
 	 (interpret (nth 1 aa))
 	 (head (nth 2 aa))
-	 (done-word (nth 3 aa))
 	 (whata '(("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
-	 (org-log-done nil) ; ????????FIXME correct??
+	 (org-log-done nil)
 	 re type n what ts)
     (when repeat
+      (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (org-todo (if (eq interpret 'type) last-state head))
       (when (and org-log-repeat
-		 (not (memq 'org-add-log-note
-			    (default-value 'post-command-hook))))
+		 (or (not (memq 'org-add-log-note
+				(default-value 'post-command-hook)))
+		     (eq org-log-note-purpose 'done)))
 	;; Make sure a note is taken;
-	(org-add-log-maybe 'done (or done-word (car org-done-keywords))
-			   'findpos 'note))
+	(org-add-log-maybe 'state (or done-word (car org-done-keywords))
+			   'findpos org-log-repeat))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
       (setq re (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
@@ -14888,7 +14945,7 @@ the current entry.  If not, assume that it can be inserted at point."
   (goto-char org-log-note-marker)
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
-  (if (eq org-log-note-how 'time)
+  (if (memq org-log-note-how '(time state)) ; FIXME: time or state????????????
       (org-store-log-note)
     (let ((org-inhibit-startup t)) (org-mode))
     (insert (format "# Insert note for %s.
@@ -24672,7 +24729,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    (if org-odd-levels-only "odd" "oddeven")
    (if org-hide-leading-stars "hidestars" "showstars")
    (if org-startup-align-all-tables "align" "noalign")
-   (cond ((eq t org-log-done) "logdone")
+   (cond ((eq org-log-done t) "logdone")
+	 ((equal org-log-done '(done)) "lognotedone")
 	 ((not org-log-done) "nologdone"))
    (or (mapconcat (lambda (x)
 		    (cond

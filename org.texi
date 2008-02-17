@@ -2911,8 +2911,9 @@ special faces for some of them.  This can be done using the variable
 Org-mode can automatically record a time stamp and possibly a note when
 you mark a TODO item as DONE, or even each time you change the state of
 a TODO item.  This system is highly configurable, settings can be on a
-per-file and even on a per-keyword basis.  For information on how to
-clock working time for a task, see @ref{Clocking work time}.
+per-keyword basis and can be localized to a file or even a subtree.  For
+information on how to clock working time for a task, see @ref{Clocking
+work time}.
 
 @menu
 * Closing items::               When was this entry marked DONE?
@@ -2922,85 +2923,90 @@ clock working time for a task, see @ref{Clocking work time}.
 @node Closing items, Tracking TODO state changes, Progress logging, Progress logging
 @subsection Closing items
 
-If you want to keep track of @emph{when} a certain TODO item was
-finished, turn on logging with@footnote{The corresponding in-buffer
-setting is: @code{#+STARTUP: logdone}.  You may also set this for the
-scope of a subtree by adding a @code{:LOGGING:} property with
-one or more of the STARTUP logging keywords in the value.  When set with
-a property, all per-state settings are overruled.}
+The most basic logging is to keep track of @emph{when} a certain TODO
+item was finished.  This is achieved with@footnote{The corresponding
+in-buffer setting is: @code{#+STARTUP: logdone}}.
 
 @lisp
-(setq org-log-progress 'done)
+(setq org-log-done 'time)
 @end lisp
 
 @noindent
-Then each time you turn a TODO entry into DONE using either @kbd{C-c
-C-t} in the Org-mode buffer or @kbd{t} in the agenda buffer, a line
-@samp{CLOSED: [timestamp]} will be inserted just after the headline.  If
-you turn the entry back into a TODO item through further state cycling,
-that line will be removed again.  In the timeline (@pxref{Timeline}) and
-in the agenda (@pxref{Weekly/Daily agenda}), you can then use the
-@kbd{l} key to display the TODO items closed on each day, giving you an
-overview of what has been done on a day.  If you want to record a note
-along with the timestamp, use@footnote{The corresponding in-buffer
-setting is: @code{#+STARTUP: lognotedone}}
+Then each time you turn an entry from an arbitrary TODO (not-done) state
+into any of the DONE states using the dedicated commands like @kbd{C-c
+C-t}, a line @samp{CLOSED: [timestamp]} will be inserted just after the
+headline.  If you turn the entry back into a TODO item through further
+state cycling, that line will be removed again.  If you want
+to record a note along with the timestamp, use@footnote{The
+corresponding in-buffer setting is: @code{#+STARTUP: lognotedone}}
 
 @lisp
-(setq org-log-progress '(done))
+(setq org-log-done 'note)
 @end lisp
+
+@noindent
+You will then be prompted for a note, and that note will be stored below
+the entry with a @samp{Closing Note} heading.
+
+In the timeline (@pxref{Timeline}) and in the agenda
+(@pxref{Weekly/Daily agenda}), you can then use the @kbd{l} key to
+display the TODO items with a @samp{CLOSED} timestamp on each day,
+giving you an overview of what has been done.
 
 @node Tracking TODO state changes,  , Closing items, Progress logging
 @subsection Tracking TODO state changes
 
 When TODO keywords are used as workflow states (@pxref{Workflow
 states}), you might want to keep track of when a state change occurred
-and record a note about this change.  With the setting@footnote{The
-corresponding in-buffer setting is: @code{#+STARTUP: logstate}.}
+and record a note about this change.  Since it is normally too much to
+record a note for every state, Org-mode expects configuration on a
+per-keyword basis for this.  This is achieved by adding special markers
+@samp{!} and @samp{@@} in parenthesis behind each keyword.  For example,
+with the setting
 
 @lisp
-(setq org-log-progress 'state)
-@end lisp
-
-each state change will recorded with a time stamp.  With the
-setting@footnote{The corresponding in-buffer setting is:
-@code{#+STARTUP: lognotestate}.}
-
-@lisp
-(setq org-log-progress '(state))
+(setq org-todo-keywords
+      '((sequence "TODO(t)" "WAIT(w@@)" "|" "DONE(d!)" "CANCELED(c@@)")))
 @end lisp
 
 @noindent
-each state change will prompt you for a note that will be attached to
-the current headline.  If you exit without writing anything, a time
-stamp will still be recorded.
+you not only define global TODO keywords and fast access keys, but also
+request that a time is recorded when the entry is turned into
+DONE@footnote{It is possible that Org-mode will record two time stamps
+when you are using both @code{org-log-done} and state change logging.
+However, it will never prompt for two notes - if you have configured
+both, the state change recording note will take precedence and cancel
+the @samp{Closing Note}.}, and that a special note is recorded when
+switching to WAIT or CANCELED.
 
-Very likely you do not want this verbose tracking all the time, so it is
-probably better to configure this behavior on a per-keyword basis.  You
-can do this for a particular file with in-buffer settings, or globally
-by configuring org-todo-keywords.  For example, lets assume you are
-tracking purchases in a particular file with the following TODO states:
-
+You can use the exact same syntax for setting logging preferencs local
+to a buffer:
 @example
-#+SEQ_TODO: TODO(t) ORDERED(o) INVOICE(i) PAYED(p) | RECEIVED(r)
-#+STARTUP: lognotestate
+#+SEQ_TODO: TODO(t) WAIT(w@@) | DONE(d!) CANCELED(c@@)
 @end example
 
-If you only need to take a time stamp or a note for some of the states,
-mark those states with an additional @samp{!} or @samp{@@},
-respectively, like this:
+In order to define logging settings that are local to a subtree or a
+single item, define a LOGGING property in this entry.  Any non-empty
+LOGGING property resets all logging settings to nil.  You may then turn
+on logging for this specific tree using STARTUP keywords like
+@code{lognotedone} or @code{logrepeat}, as well as adding state specific
+settings like @code{TODO(!)}.  For example
 
 @example
-#+SEQ_TODO: TODO(t) ORDERED(o@@) INVOICE(i@@) PAYED(p!) | RECEIVED(r!)
+* TODO Log each state with only a time
+  :PROPERTIES:
+  :LOGGING: TODO(!) WAIT(!) DONE(!) CANCELED(!)
+  :END:
+* TODO Only log when switching to WAIT, and when repeating
+  :PROPERTIES:
+  :LOGGING: WAIT(@@) logrepeat
+  :END:
+* TODO No logging at all
+  :PROPERTIES:
+  :LOGGING: nil
+  :END:
 @end example
 
-Then changing to a state PAYED or RECEIVED will record a time stamp, and
-changing to the state ORDERED or INVOICE will also record a note.
-@i{Note that specifying a per-keyword setting for logging causes the
-corresponding #+STARTUP option to be ignored.}
-
-If you would like to define fast access keys and per-state logging
-indicators globally, you can use the same syntax in the variable
-@code{org-todo-keywords}.
 
 @node Priorities, Breaking down tasks, Progress logging, TODO items
 @section Priorities
@@ -4329,9 +4335,9 @@ actually switch the date like this:
 
 You will also be prompted for a note@footnote{You can change this using
 the option @code{org-log-repeat}, or the @code{#+STARTUP} options
-@code{logrepeat} and @code{nologrepeat}.} that will be put under the
-DEADLINE line to keep a record that you actually acted on the previous
-instance of this deadline.
+@code{logrepeat}, @code{lognoterepeat}, and @code{nologrepeat}.} that
+will be put under the DEADLINE line to keep a record that you actually
+acted on the previous instance of this deadline.
 
 As a consequence of shifting the base date, this entry will no longer be
 visible in the agenda when checking past dates, but all future instances
@@ -4356,16 +4362,16 @@ Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
 this item, the multiple CLOCK lines will be wrapped into a
 @code{:CLOCK:} drawer (see also the variable
-@code{org-clock-into-drawer}.
+@code{org-clock-into-drawer}).
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 Stop the clock (clock-out).  The inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
 the resulting time in inserts it after the time range as @samp{=>
-HH:MM}.  See the variable @code{org-log-progress} for the possibility to
-record an additional note together with the clock-out time
-stamp@footnote{The corresponding in-buffer setting is: @code{#+STARTUP:
-lognoteclock-out}}.
+HH:MM}.  See the variable @code{org-log-note-clock-out} for the
+possibility to record an additional note together with the clock-out
+time stamp@footnote{The corresponding in-buffer setting is:
+@code{#+STARTUP: lognoteclock-out}}.
 @kindex C-c C-y
 @item C-c C-y
 Recompute the time interval after changing one of the time stamps.  This
@@ -7357,28 +7363,26 @@ variable is @code{org-startup-align-all-tables}, with a default value
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
-Logging TODO state changes and clock intervals (variables
-@code{org-log-progress} and @code{org-log-repeat}) can be configured using
-these options.
+Logging closing and reinstating TODO items, and clock intervals
+(variables @code{org-log-done}, @code{org-log-note-clock-out}, and
+@code{org-log-repeat}) can be configured using these options.
 @cindex @code{logdone}, STARTUP keyword
-@cindex @code{logging}, STARTUP keyword
-@cindex @code{nologging}, STARTUP keyword
 @cindex @code{lognotedone}, STARTUP keyword
-@cindex @code{logstate}, STARTUP keyword
-@cindex @code{lognotestate}, STARTUP keyword
+@cindex @code{nologdone}, STARTUP keyword
 @cindex @code{lognoteclock-out}, STARTUP keyword
+@cindex @code{nolognoteclock-out}, STARTUP keyword
 @cindex @code{logrepeat}, STARTUP keyword
+@cindex @code{lognoterepeat}, STARTUP keyword
 @cindex @code{nologrepeat}, STARTUP keyword
 @example
-logdone          @r{record a timestamp when an item is marked DONE}
-logging          @r{alias for @code{logdone}}
-nologging        @r{don't record when items are marked DONE}
-lognotedone      @r{record timestamp and a note when DONE}
-logstate         @r{record a time stamp when a state change occurs}
-lognotestate     @r{record timestamp and a note when TODO state changes}
-logrepeat        @r{record a note when re-instating a repeating item}
-nologrepeat      @r{do not record when re-instating repeating item}
-lognoteclock-out @r{record timestamp and a note when clocking out}
+logdone            @r{record a timestamp when an item is marked DONE}
+lognotedone        @r{record timestamp and a note when DONE}
+nologdone          @r{don't record when items are marked DONE}
+logrepeat          @r{record a time when reinstating a repeating item}
+lognoterepeat      @r{record a note when reinstating a repeating item}
+nologrepeat        @r{do not record when reinstating repeating item}
+lognoteclock-out   @r{record a note when clocking out}
+nolognoteclock-out @r{don't record a note when clocking out}
 @end example
 Here are the options for hiding leading stars in outline headings.  The
 corresponding variables are @code{org-hide-leading-stars} and
@@ -8652,3 +8656,4 @@ and contributed various ideas and code snippets.
 @ignore
    arch-tag: 7893d1fe-cc57-4d13-b5e5-f494a1bcc7ac
 @end ignore
+)

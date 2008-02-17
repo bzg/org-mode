@@ -1,3 +1,7 @@
+2008-02-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-local-logging): New function
+
 2008-02-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-todo): Make sure that LOGGING properties are
@@ -5,10 +9,9 @@
 
 2008-02-14  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el (org-log-progress): Renamed from `org-log-done'.
-	(org-log-done): New defvaralias.
+	* org.el:
 	(org-todo-keywords): Improve docstring.
-	(org-startup-options): Define the new startup option `logstate'.
+	(org-startup-options): Cleanup startup options.
 	(org-set-regexps-and-options): Process the "!" markers.
 	(org-todo): Respect the new logging stuff.
 	(org-log-note-how): New variable.

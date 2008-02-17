@@ -1,32 +1,6 @@
           -*- mode:org -*-
 
 
-1. wenn org-log-done ist set, record a CLOSED time stamp.
-   when it is not set, don't.
-   logdone
-   nologdone
-
-2. log progress is about state changes, clocking
-   (closed . timestamp)
-   (state . timestamp/note)
-   (clockout . note)
-
-No, this is all too complex:
-
-org-log-done : record the CLOSED timestamp or not
-logdone nologdone
-
-org-log-note-clock-out
-should a note be taken when clocking out?
-
-State logging only on a pre keyword basis.
- Make sure that something like TODO(@) works correctly, i.e. that the
- key is not obligatory.
-
-
-
-
-
 
 Ideas for time estimates:
 
@@ -36,35 +10,10 @@ Ideas for time estimates:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Maybe make a new keyword APPT for appointment, meaning that this is
 something I need to attend, as opposed to something which is on that
 day and not necessarily something where we need to be present.  Not
 sure about this.
-
-
-
-
-
-
-
-
-
-
 
 
 Should we add this hierarchically? Should parents value be the summed
