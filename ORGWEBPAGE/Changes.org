@@ -9,7 +9,7 @@
 
 ** Incompatible changes
 
-   - The variable `org-log-done' is not less complex.
+   - The variable `org-log-done' is now less complex.
    - The in-buffer settings for logging have changed.  Some
      options no longer exists, some new ones have been added.
 
