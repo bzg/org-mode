@@ -1,3 +1,8 @@
+2008-02-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-mac-message.el (org-mac-message-get-link): New function for
+	non-interactive use.
+
 2008-02-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-local-logging): New function

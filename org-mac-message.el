@@ -53,6 +53,12 @@ This will use the command `open' with the message url."
 This will use applescript to get the message-id and the subject of the
 active mail in AppleMail and make a link out of it."
   (interactive)
+  (insert (org-mac-message-get-link)))
+
+(defun org-mac-message-get-link ()
+  "Insert a link to the messages currently selected in Apple Mail.
+This will use applescript to get the message-id and the subject of the
+active mail in AppleMail and make a link out of it."
   (let ((subject (do-applescript "tell application \"Mail\"
 	set theMessages to selection
 	subject of beginning of theMessages
@@ -61,10 +67,10 @@ end tell"))
 	set theMessages to selection
 	message id of beginning of theMessages
 end tell")))
-    (insert (org-make-link-string
-	     (concat "message://"
-		     (substring message-id 1 (1- (length message-id))))
-	     (substring subject 1 (1- (length subject)))))))
+    (org-make-link-string
+     (concat "message://"
+	     (substring message-id 1 (1- (length message-id))))
+     (substring subject 1 (1- (length subject))))))
 
 (provide 'org-mac-message)
 
