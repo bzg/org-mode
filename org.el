@@ -14594,8 +14594,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	  (when (and now-done-p org-log-done)
 	    ;; It is now done, and it was not done before
 	    (org-add-planning-info 'closed (org-current-time))
-	    (if (and (not dolog) (listp org-log-done)
-		     (member 'done org-log-done))
+	    (if (and (not dolog) (eq 'note org-log-done))
 		(org-add-log-maybe 'done state 'findpos 'note)))
 	  (when (and state dolog)
 	    ;; This is a non-nil state, and we need to log it
@@ -24731,7 +24730,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    (if org-hide-leading-stars "hidestars" "showstars")
    (if org-startup-align-all-tables "align" "noalign")
    (cond ((eq org-log-done t) "logdone")
-	 ((equal org-log-done '(done)) "lognotedone")
+	 ((equal org-log-done 'note) "lognotedone")
 	 ((not org-log-done) "nologdone"))
    (or (mapconcat (lambda (x)
 		    (cond
