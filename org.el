@@ -11671,7 +11671,7 @@ Valid parameters are
             %s for the original field value.  For example, to wrap
             everything in dollars, you could use :fmt \"$%s$\".
             This may also be a property list with column numbers and
-            formats. for example :fmt (2 \"$%s$\" 4 \"%s%%\")
+            formats. For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 
 :hlstart :hlend :hlsep :hlfmt :hfmt
             Same as above, specific for the header lines in the table.
@@ -11747,7 +11747,7 @@ LaTeX are:
 :fmt       A format to be used to wrap the field, should contain %s for the
            original field value.  For example, to wrap everything in dollars,
            use :fmt \"$%s$\".  This may also be a property list with column
-           numbers and formats. for example :fmt (2 \"$%s$\" 4 \"%s%%\")
+           numbers and formats.  For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 
 :efmt      Format for transforming numbers with exponentials.  The format
            should have %s twice for inserting mantissa and exponent, for
@@ -11810,7 +11810,7 @@ TeXInfo are:
                    %s for the original field value.  For example, to wrap
                    everything in @kbd{}, you could use :fmt \"@kbd{%s}\".
                    This may also be a property list with column numbers and
-                   formats. For example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
+                   formats.  For example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
 
 :cf \"f1 f2..\"    The column fractions for the table.  By default these
                    are computed automatically from the width of the columns
