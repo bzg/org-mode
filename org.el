@@ -21966,11 +21966,6 @@ HH:MM."
 	      (insert (format org-agenda-todo-keyword-format s)))))
       (setq re (concat (get-text-property 0 'org-todo-regexp x))
 	    pl (get-text-property 0 'prefix-length x))
-;      (and re (equal (string-match (concat "\\(\\.*\\)" re) x (or pl 0)) pl)
-;	   (add-text-properties
-;	    (or (match-end 1) (match-end 0)) (match-end 0)
-;	    (list 'face (org-get-todo-face (match-string 2 x)))
-;	    x))
       (when (and re
 		 (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
 				      x (or pl 0)) pl))
