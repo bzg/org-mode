@@ -2932,12 +2932,11 @@ in-buffer setting is: @code{#+STARTUP: logdone}}.
 @end lisp
 
 @noindent
-Then each time you turn an entry from an arbitrary TODO (not-done) state
-into any of the DONE states using the dedicated commands like @kbd{C-c
-C-t}, a line @samp{CLOSED: [timestamp]} will be inserted just after the
-headline.  If you turn the entry back into a TODO item through further
-state cycling, that line will be removed again.  If you want
-to record a note along with the timestamp, use@footnote{The
+Then each time you turn an entry from a TODO (not-done) state into any
+of the DONE states, a line @samp{CLOSED: [timestamp]} will be inserted
+just after the headline.  If you turn the entry back into a TODO item
+through further state cycling, that line will be removed again.  If you
+want to record a note along with the timestamp, use@footnote{The
 corresponding in-buffer setting is: @code{#+STARTUP: lognotedone}}
 
 @lisp
@@ -2958,15 +2957,15 @@ giving you an overview of what has been done.
 
 When TODO keywords are used as workflow states (@pxref{Workflow
 states}), you might want to keep track of when a state change occurred
-and record a note about this change.  Since it is normally too much to
-record a note for every state, Org-mode expects configuration on a
+and maybe take a note about this change.  Since it is normally too much
+to record a note for every state, Org-mode expects configuration on a
 per-keyword basis for this.  This is achieved by adding special markers
-@samp{!} and @samp{@@} in parenthesis behind each keyword.  For example,
-with the setting
+@samp{!} (for a time stamp) and @samp{@@} (for a note) in parenthesis
+after each keyword.  For example, with the setting
 
 @lisp
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w@@)" "|" "DONE(d!)" "CANCELED(c@@)")))
+      '((sequence "TODO(t)" "WAIT(w@@/!)" "|" "DONE(d!)" "CANCELED(c@@)")))
 @end lisp
 
 @noindent
@@ -2977,12 +2976,16 @@ when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes - if you have configured
 both, the state change recording note will take precedence and cancel
 the @samp{Closing Note}.}, and that a special note is recorded when
-switching to WAIT or CANCELED.
+switching to WAIT or CANCELED.  The setting for WAIT is even more
+special: The @samp{!} after the slash means that a time stamp should be
+recorded when @i{leaving} the WAIT state.  This allows you to get a
+record when switching from WAIT back to TODO, without getting one when
+first turning an entry into a TODO.
 
 You can use the exact same syntax for setting logging preferencs local
 to a buffer:
 @example
-#+SEQ_TODO: TODO(t) WAIT(w@@) | DONE(d!) CANCELED(c@@)
+#+SEQ_TODO: TODO(t) WAIT(w@@/!) | DONE(d!) CANCELED(c@@)
 @end example
 
 In order to define logging settings that are local to a subtree or a

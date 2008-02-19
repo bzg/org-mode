@@ -19,12 +19,33 @@
 
     There is now more control over which state changes are being
     logged in what way.  Please read carefully the corresponding
-    sections in the manual.
+    sections in the manual.  Basically: 
 
-*** Misc
+    - The variable `org-log-done' has been simplified, it no
+      longer influences logging state changes and clocking out.
+    - There is a new variable for triggering note-taking when
+      clocking out an item: `org-log-note-clock-out'.
+    - Logging of state changes now has to be configured on a
+      pre-keyword basis, either in `org-todo-keywords' or in the
+      #+TODO in-buffer setting.
+    - These per-keyword settings allow more control.  For example
+
+      : WAIT(w@)    Record a note when entering this state.
+      : WAIT(w!)    Record a timestamp when entering this state.
+      : WAIT(w@/!)  Recore a note when entering and timestamp
+      :             when leaving this state.  This is great for
+      :             getting a record when switching *back* from
+      :              WAIT to TODO.
+      : WAIT(/!)    Record a timestamp when leaving this state.
+      :             Here we not even define a fast access
+      :             character, but just the logging stuff.
+
+    This was triggered by requests from Wanrong Lin and Bernt Hansen.
+
+*** Other
 
    - M-RET no longer brakes a line in the middle, it will make a
-     new line ofter the current or (if cursor is at the beginning
+     new line after the current or (if cursor is at the beginning
      of the line) before the current line.
 
    - RET, when executed in a headline after the main text and

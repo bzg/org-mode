@@ -6,7 +6,7 @@ lang="en" xml:lang="en">
 <title>Org-mode list of User-visible changes</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2008/01/25 14:14:58"/>
+<meta name="generated" content="2008/02/19 08:08:42"/>
 <meta name="author" content="Carsten Dominik"/>
 <style type="text/css">
   html {
@@ -36,6 +36,104 @@ lang="en" xml:lang="en">
 <h1 class="title">Org-mode list of User-visible changes</h1>
 
 <div class="outline-2">
+<h2>Version 5.22</h2>
+
+
+
+<div class="outline-3">
+<h3>Incompatible changes</h3>
+
+
+<ul>
+<li>
+The variable `org-log-done' is now less complex.
+</li>
+<li>
+The in-buffer settings for logging have changed.  Some
+options no longer exists, some new ones have been added.
+
+</li>
+</ul></div>
+
+<div class="outline-3">
+<h3>Details</h3>
+
+
+
+<div class="outline-4">
+<h4>Changes to logging progress</h4>
+
+
+<p>
+There is now more control over which state changes are being
+logged in what way.  Please read carefully the corresponding
+sections in the manual.  Basically: 
+</p>
+<ul>
+<li>
+The variable `org-log-done' has been simplified, it no
+longer influences logging state changes and clocking out.
+</li>
+<li>
+There is a new variable for triggering note-taking when
+clocking out an item: `org-log-note-clock-out'.
+</li>
+<li>
+Logging of state changes now has to be configured on a
+pre-keyword basis, either in `org-todo-keywords' or in the
+#+TODO in-buffer setting.
+</li>
+<li>
+These per-keyword settings allow more control.  For example
+<pre>
+ WAIT(w@)    Record a note when entering this state.
+ WAIT(w!)    Record a timestamp when entering this state.
+ WAIT(w@/!)  Recore a note when entering and timestamp
+             when leaving this state.  This is great for
+             getting a record when switching *back* from
+              WAIT to TODO.
+ WAIT(/!)    Record a timestamp when leaving this state.
+             Here we not even define a fast access
+             character, but just the logging stuff.
+</pre>
+
+
+</li>
+</ul></div>
+
+<div class="outline-4">
+<h4>Misc</h4>
+
+
+<ul>
+<li>
+M-RET no longer brakes a line in the middle, it will make a
+new line ofter the current or (if cursor is at the beginning
+of the line) before the current line.
+
+</li>
+<li>
+RET, when executed in a headline after the main text and
+before the tags will leave the tags in the current line and
+create a new line below the current one.
+
+</li>
+</ul></div>
+</div>
+</div>
+
+<div class="outline-2">
+<h2>Version 5.21</h2>
+
+
+<p>
+Bug fixes, in particular the long-hunted bug about wrong window
+positions after pressing SPACE in the agenda.  Hopefully this
+is really fixed.
+</p>
+</div>
+
+<div class="outline-2">
 <h2>Version 5.20</h2>
 
 
@@ -44,34 +142,227 @@ lang="en" xml:lang="en">
 <h3>Overview</h3>
 
 
+
+<div class="outline-4">
+<h4>Remember/Refile/Goto</h4>
+
+
+<ul>
+<li>
+The use of prefix arguments for the commands `org-remember'
+and `org-refile' has been normalized.
+
+</li>
+<li>
+The clock can now safely be used in a remember buffer.
+
+</li>
+<li>
+The variable `org-remember-use-refile-when-interactive'
+introduced only in 5.19 is already obsolete.  Please use
+`org-remember-interactive-interface' instead.
+
+</li>
+<li>
+It is no longer necessary to update the refiling targets.
+
+</li>
+<li>
+Automatic isearch in `org-goto'.
+
+</li>
+<li>
+Outline-path-completion as alternative org-goto interface.
+
+</li>
+</ul></div>
+
+<div class="outline-4">
+<h4>Misc</h4>
+
+
+<ul>
+<li>
+Checkboxes now work hierarchically.
+
+</li>
+<li>
+`C-k' can now behave specially in headlines.
+
+</li>
+<li>
+Repeater for tasks in plain timestamps.
+
+</li>
+<li>
+All clock intervals of an item show in agenda/timeline.
+
+</li>
+<li>
+New parameter <code>:step</code> for clocktable, to get daily reports.
+
+</li>
+<li>
+Never loose a repeaded scheduled item from the agenda.
+
+</li>
+<li>
+Archiving a subtree now stores the outline path in a property.
+
+</li>
+<li>
+Links to messages in Apple Mail.
+
+</li>
+<li>
+Bug fixes.
+
+</li>
+</ul></div>
 </div>
 
 <div class="outline-3">
 <h3>Incompatible Changes</h3>
 
 
-</div>
+<ul>
+<li>
+The variable `org-remember-use-refile-when-interactive'
+introduced only in 5.19 is already obsolete.  Please use
+`org-remember-interactive-interface' instead.
+
+</li>
+</ul></div>
 
 <div class="outline-3">
 <h3>Details</h3>
 
 
-<p>
-+&mdash;&mdash;&mdash;&mdash;+&ndash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;+
-+&mdash;&mdash;&mdash;&mdash;+&ndash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;+
-+&mdash;&mdash;&mdash;&mdash;+&ndash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;+
-+&mdash;&mdash;&mdash;&mdash;+&ndash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;+
-+&mdash;&mdash;&mdash;&mdash;+&ndash;&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;&mdash;&mdash;+-&mdash;&mdash;&mdash;&mdash;+
-</p>
+
+<div class="outline-4">
+<h4>Remember/Refile/Goto</h4>
+
+
 <ul>
 <li>
+The use of prefix arguments for the commands `org-remember'
+and `org-refile' has been normalized:
+
+<ul>
+<li>
+when called without prefix argument, the command does its
+normal job, starting a remember note or refiling a tree.
+
+</li>
+<li>
+when called with a single C-u prefix, these commands can be
+used to select a target location and to jump there.  In
+the case of `org-remember', you will be prompted for a
+template and then Emacs jumps to the default target
+location or this template.  In the case of `org-refile',
+you select a location from the refile target list and jump
+there.
+
+</li>
+<li>
+when called with two prefixes (`C-u C-u'), the command
+jumps to the location last used for storing a note or a
+moved tree.
+
+</li>
+</ul></li>
+<li>
+When the clock is running inside an remember buffer, storing
+the remember buffer with `C-c C-c' will automatically clock
+out.  This was inspired by a request by Rainer Stengle. 
+
+</li>
+<li>
 The variable `org-remember-use-refile-when-interactive'
-introduced only in 5.19 is obsolete.  Please use
+introduced only in 5.19 is already obsolete.  Please use
 `org-remember-interactive-interface' instead.  This new
 variable does select the interface that is used to select
-the target for a remember note.  Possible values are:
-FIXME:
+the target for a remember note in an interactive way.
+Possible values are:
 
+<ul>
+<li>
+`outline': Use an outline of the document to select a
+location.  
+</li>
+<li>
+`outline-path-completion': Use completion of an outline
+path to select a location.
+</li>
+<li>
+`refile': Offer the `org-refile-targets' as possible
+targets.
+
+</li>
+</ul></li>
+<li>
+It is no longer necessary to update the refiling targets -
+they are always current.
+
+</li>
+<li>
+In `org-goto', typing characters now automatically starts
+isearch from the beginning of the buffer.  The isearch is
+special also because it only matches in headline.  This
+goes some way toward saving org-goto from being removed
+from Org-mode.  Thanks to Piotr Zielinski for the code, and
+sorry that it took me so long to put it in.  If you prefer
+to use single letters n,p,f,b,u,q for navigation as before,
+configure the variable `org-goto-auto-isearch'.
+
+</li>
+<li>
+Outline-path-completion is now available as an alternative
+interface in the command `org-goto'.  Please select the
+default interface you'd like to use with the new variable
+`org-goto-interface'.  You can then select the alternative
+interface with a prefix argument to `C-c C-j' (org-goto).  I
+am considering to make outline-path-completion the default
+interface.  Comments?
+
+
+</li>
+</ul></div>
+
+<div class="outline-4">
+<h4>Misc</h4>
+
+
+<ul>
+<li>
+Checkboxes now work hierarchically.  When a plain-list item
+with a checkbox has children with checkboxes, the status of
+the item's checkbox is calculated from the children, each
+time a checkbox is toggled with C-c C-c.  Thanks to Miguel
+A. Figueroa-Villanueva for a patch to this effect.
+
+</li>
+<li>
+There is a new variable `org-special-ctrl-k'.  When set,
+`C-k' will behave specially in headlines:
+
+<ul>
+<li>
+When the cursor is at the beginning of a headline, kill
+the entire line and possible the folded subtree below the
+line.
+</li>
+<li>
+When in the middle of the headline text, kill the
+headline up to the tags.
+</li>
+<li>
+When after the headline text, kill the tags.
+
+</li>
+</ul>
+<p>This is following a proposal by Piotr Zielinski.
+</p>
 </li>
 <li>
 You can now also have a plain (as opposed to deadline or
@@ -81,28 +372,9 @@ request by Austin Frank.
 
 </li>
 <li>
-It is no longer necessary to update the refiling targets -
-they are always current.
-
-</li>
-<li>
-`C-u C-c C-w' allows you to jump to a refiling location.
-
-</li>
-<li>
-`C-u C-u C-c C-w' uses the refile interface to jum to any
-headline in the current file.
-
-</li>
-<li>
-In `org-goto', typing characters now automatically starts
-isearch from the beginning of the buffer.  The isearch is
-special also because it only matches in headline.  This goes
-some way toward saving org-goto from being removed from
-Org-mode.  Thanks to Piotr Zielinski for the code, and sorry
-that it took me o long to ut it in.  If you prefer to use
-single letters n,p,f,b,u,q for navigation as before,
-configure the variable `org-goto-auto-isearch'.
+If an entry is clocked multiple times, it will now show up
+several times in the agenda and timeline buffers, when
+log-mode is on.  This was a proposal by Jurgen Defurne.
 
 </li>
 <li>
@@ -117,7 +389,7 @@ A time-stamp with a repeater now no longer refers to the
 date <b>closest</b> to the current day.  Instead, it means either
 today or the most recent match.  This change makes sure that
 overdue scheduled or deadline items never disappear from the
-agenda.  With the previous convention, an overdue sheduled
+agenda.  With the previous convention, an overdue scheduled
 item would disappear.  For example, a weekly item scheduled
 for Sunday would appear as overdue until Wednesday, and the
 suddenly disappear until next Sunday.  Now the item will
@@ -128,7 +400,7 @@ Bernt.
 
 </li>
 <li>
-Archving a subtree now creates an additional property,
+Archiving a subtree now creates an additional property,
 <code>ARCHIVE_OLPATH</code>.  This property contains the "path" in the
 outline tree to the archived entry, as it was in the
 original file.  For example, archiving <code>Fix the door</code> in the
@@ -156,7 +428,18 @@ that gets stored upon archiving with the variable
 `org-archive-save-context-info'.
 </p>
 </li>
+<li>
+New file `org-mac-message.el' by John Wiegley to create
+links for messages in Apple Mail, and to follow these
+links.
+
+</li>
+<li>
+Bug fixes.
+
+</li>
 </ul></div>
+</div>
 </div>
 
 <div class="outline-2">
@@ -934,19 +1217,8 @@ You can now export special strings in HTML.  Here is the
 list of newly performed conversions:
 
 <table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
-<col align="left"></col><col align="left"></col><col align="left"></col><col align="left"></col>
+<col align="left"></col><col align="left"></col><col align="left"></col>
 <thead>
-<tr><th>Command</th><th></th><th>C-u</th><th>C-u C-u</th></tr>
-<tr><th>org-remember</th><th>select template and</th><th>select template and</th><th>goto location</th></tr>
-<tr><th></th><th>store a note</th><th>go to its default</th><th>last used by</th></tr>
-<tr><th></th><th></th><th>target</th><th>remember</th></tr>
-<tr><th>org-refile</th><th>select a targer and</th><th>goto a target</th><th>goto location</th></tr>
-<tr><th></th><th>refile subtree</th><th></th><th>last used by</th></tr>
-<tr><th></th><th></th><th></th><th>refile</th></tr>
-<tr><th>org-goto</th><th>go to a headline</th><th>Use outline-path-</th><th></th></tr>
-<tr><th></th><th>selected from</th><th>completion to</th><th></th></tr>
-<tr><th></th><th>outline f current</th><th>select the</th><th></th></tr>
-<tr><th></th><th>buffer.</th><th>headline</th><th></th></tr>
 <tr><th>Org</th><th>Description</th><th>HTML</th></tr>
 </thead>
 <tbody>
@@ -5144,7 +5416,7 @@ The prefix and the sorting strategy for agenda items can depend
 upon the agenda type.
 </li>
 <li>
-The handling of `<a href="mailto:'">mailto:'</a> links can be customized, see the new
+The handling of `mailto:' links can be customized, see the new
 variable `org-link-mailto-program'.
 </li>
 <li>
@@ -6349,6 +6621,6 @@ HTML exporter upgrade, in particular table of contents
 <div id="postamble"><p class="author"> Author: Carsten Dominik
 <a href="mailto:carsten at orgmode dot org">&lt;carsten at orgmode dot org&gt;</a>
 </p>
-<p class="date"> Date: 2008/01/25 14:14:58</p>
+<p class="date"> Date: 2008/02/19 08:08:42</p>
 </div></body>
 </html>
