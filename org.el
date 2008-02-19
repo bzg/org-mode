@@ -11921,6 +11921,7 @@ For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (setq org-store-link-plist nil)  ; reset
+  (require 'org-irc)
   (let (link cpltxt desc description search txt)
     (cond
 

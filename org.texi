@@ -2268,6 +2268,7 @@ cursor on or at a target.
 @cindex links, external
 @cindex GNUS links
 @cindex BBDB links
+@cindex IRC links
 @cindex URL links
 @cindex file links
 @cindex VM links
@@ -2280,20 +2281,20 @@ cursor on or at a target.
 @cindex elisp links
 
 Org-mode supports links to files, websites, Usenet and email messages,
-and BBDB database entries.  External links are URL-like locators.  They
-start with a short identifying string followed by a colon.  There can be
-no space after the colon.  The following list shows examples for each
-link type.
+BBDB database entries and links to both IRC conversations and their
+logs.  External links are URL-like locators.  They start with a short
+identifying string followed by a colon.  There can be no space after
+the colon.  The following list shows examples for each link type.
 
 @example
 http://www.astro.uva.nl/~dominik          @r{on the web}
 file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
 file:papers/last.pdf                      @r{file, relative path}
 news:comp.emacs                           @r{Usenet link}
-mailto:adent@@galaxy.net                   @r{Mail link}
+mailto:adent@@galaxy.net                  @r{Mail link}
 vm:folder                                 @r{VM folder link}
 vm:folder#id                              @r{VM message link}
-vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
+vm://myself@@some.where.org/folder#id     @r{VM on remote machine}
 wl:folder                                 @r{WANDERLUST folder link}
 wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
@@ -2303,6 +2304,7 @@ rmail:folder#id                           @r{RMAIL message link}
 gnus:group                                @r{GNUS group link}
 gnus:group#id                             @r{GNUS article link}
 bbdb:Richard Stallman                     @r{BBDB link}
+irc:/irc.com/#emacs/bob                   @r{IRC link}
 shell:ls *.org                            @r{A shell command}
 elisp:(find-file-other-frame "Elisp.org") @r{An elisp form to evaluate}
 @end example
@@ -2343,18 +2345,23 @@ insert it into an org-mode file, and to follow the link.
 Store a link to the current location.  This is a @emph{global} command
 which can be used in any buffer to create a link.  The link will be
 stored for later insertion into an Org-mode buffer (see below).  For
-Org-mode files, if there is a @samp{<<target>>} at the cursor, the link
-points to the target.  Otherwise it points to the current headline.  For
-VM, RMAIL, WANDERLUST, MH-E, GNUS and BBDB buffers, the link will
-indicate the current article/entry.  For W3 and W3M buffers, the link
-goes to the current URL.  For any other files, the link will point to
-the file, with a search string (@pxref{Search options}) pointing to the
-contents of the current line.  If there is an active region, the
-selected words will form the basis of the search string.  If the
-automatically created link is not working correctly or accurately
-enough, you can write custom functions to select the search string and
-to do the search for particular file types - see @ref{Custom searches}.
-The key binding @kbd{C-c l} is only a suggestion - see @ref{Installation}.
+Org-mode files, if there is a @samp{<<target>>} at the cursor, the
+link points to the target.  Otherwise it points to the current
+headline.  For VM, RMAIL, WANDERLUST, MH-E, GNUS and BBDB buffers, the
+link will indicate the current article/entry.  For W3 and W3M buffers,
+the link goes to the current URL.  For IRC links, if you set the
+variable @code{org-irc-link-to-logs} to non-nil then @kbd{C-c l} will
+store a @samp{file:/} style link to the relevant point in the logs for
+the current conversation. Otherwise an @samp{irc:/} style link to the
+user/channel/server under the point will be stored.  For any other
+files, the link will point to the file, with a search string
+(@pxref{Search options}) pointing to the contents of the current line.
+If there is an active region, the selected words will form the basis
+of the search string.  If the automatically created link is not
+working correctly or accurately enough, you can write custom functions
+to select the search string and to do the search for particular file
+types - see @ref{Custom searches}.  The key binding @kbd{C-c l} is
+only a suggestion - see @ref{Installation}.
 @c
 @kindex C-c C-l
 @cindex link completion
@@ -4580,6 +4587,7 @@ similar way.}:
 Link type          |  Available keywords
 -------------------+----------------------------------------------
 bbdb               |  %:name %:company
+bbdb               |  %::server %:port %:nick
 vm, wl, mh, rmail  |  %:type %:subject %:message-id
                    |  %:from %:fromname %:fromaddress
                    |  %:to   %:toname   %:toaddress

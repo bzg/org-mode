@@ -51,8 +51,6 @@
 ;;
 ;;; Code:
 
-(require 'org)
-
 (defvar org-irc-client 'erc
   "The IRC client to act on")
 (defvar org-irc-link-to-logs nil
