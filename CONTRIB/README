@@ -35,3 +35,4 @@ SCRIPTS (shell, bash, etc.)
 ===========================
 
 dir2org.zsh          --- Org compatible fs structure output
+org2hpda	     --- Generate hipster pda style printouts from Org-mode

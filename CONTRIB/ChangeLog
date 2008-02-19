@@ -1,3 +1,8 @@
+2008-02-17  Christian Egli  <christian.egli@alumni.ethz.ch>
+
+	* scripts/org2hpda: Added a Makefile for generation of hipster pda
+	style printouts
+
 2008-02-08  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* scripts/dir2org.zsh: New file.
