@@ -25,14 +25,20 @@ development.
 
 3. An interested developer can also request push access to the
    central repository by sending his/her user-info at repo.or.cz
-   the maintainer of Org-mode.  By requesting push access, you
-   acknowledge that you have read and agreed with the following
-   rules:
+   the maintainer of Org-mode.
+
+   After you have been added as a user with push privileges,
+   clone the repository through ssh using
+
+        git+ssh://repo.or.cz/srv/git/org-mode.git
+
+   By requesting push access, you acknowledge that you have read
+   and agreed with the following rules:
 
    - Org-mode is part of Emacs.  Therefore we need to be very
      conscious about changes moving into the Org-mode core.
      These can originate only from people who have signed the
-     appropriate papers with the free software foundation.  The
+     appropriate papers with the Free Software Foundation.  The
      files to which this applies are:
 
      - all *.el files in the root directory of the repository

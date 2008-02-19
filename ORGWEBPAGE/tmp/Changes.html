@@ -6,7 +6,7 @@ lang="en" xml:lang="en">
 <title>Org-mode list of User-visible changes</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2008/02/12 12:28:13"/>
+<meta name="generated" content="2008/02/19 09:12:40"/>
 <meta name="author" content="Carsten Dominik"/>
 <link rel=stylesheet href="freeshell2.css" type="text/css">
 </head><body>
@@ -18,13 +18,78 @@ lang="en" xml:lang="en">
 
 
 <div class="outline-3">
+<h3>Incompatible changes</h3>
+
+
+<ul>
+<li>
+The variable `org-log-done' is now less complex.
+</li>
+<li>
+The in-buffer settings for logging have changed.  Some
+options no longer exists, some new ones have been added.
+
+</li>
+</ul></div>
+
+<div class="outline-3">
 <h3>Details</h3>
+
+
+
+<div class="outline-4">
+<h4>Changes to logging progress</h4>
+
+
+<p>
+There is now more control over which state changes are being
+logged in what way.  Please read carefully the corresponding
+sections in the manual.  Basically: 
+</p>
+<ul>
+<li>
+The variable `org-log-done' has been simplified, it no
+longer influences logging state changes and clocking out.
+</li>
+<li>
+There is a new variable for triggering note-taking when
+clocking out an item: `org-log-note-clock-out'.
+</li>
+<li>
+Logging of state changes now has to be configured on a
+pre-keyword basis, either in `org-todo-keywords' or in the
+#+TODO in-buffer setting.
+</li>
+<li>
+These per-keyword settings allow more control.  For example
+
+<p>
+<pre>
+ WAIT(w@)    Record a note when entering this state.
+ WAIT(w!)    Record a timestamp when entering this state.
+ WAIT(w@/!)  Recore a note when entering and timestamp
+             when leaving this state.  This is great for
+             getting a record when switching *back* from
+              WAIT to TODO.
+ WAIT(/!)    Record a timestamp when leaving this state.
+             Here we not even define a fast access
+             character, but just the logging stuff.
+</pre>
+</p>
+</li>
+</ul>
+<p>This was triggered by requests from Wanrong Lin and Bernt Hansen.
+</p>
+</div>
+
+<div class="outline-4">
+<h4>Other</h4>
 
 
 <ul>
 <li>
 M-RET no longer brakes a line in the middle, it will make a
-new line ofter the current or (if cursor is at the beginning
+new line after the current or (if cursor is at the beginning
 of the line) before the current line.
 
 </li>
@@ -35,6 +100,7 @@ create a new line below the current one.
 
 </li>
 </ul></div>
+</div>
 </div>
 
 <div class="outline-2">
@@ -6536,6 +6602,6 @@ HTML exporter upgrade, in particular table of contents
 <div id="postamble"><p class="author"> Author: Carsten Dominik
 <a href="mailto:carsten at orgmode dot org">&lt;carsten at orgmode dot org&gt;</a>
 </p>
-<p class="date"> Date: 2008/02/12 12:28:13</p>
+<p class="date"> Date: 2008/02/19 09:12:40</p>
 </div></body>
 </html>

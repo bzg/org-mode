@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.21
+@set VERSION 5.22a
 @set DATE February 2008
 
 @dircategory Emacs
@@ -1014,6 +1014,12 @@ setting multiple archive locations in a buffer is using a property.}:
 If you would like to have a special ARCHIVE location for a single entry
 or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
 location as the value (@pxref{Properties and columns}).
+
+When a subtree is moved, it receives a number of special properties that
+record context information like the file from where the entry came, it's
+outline path the archiving time etc.  Configure the variable
+@code{org-archive-save-context-info} to adjust the amount of information
+added.
 
 @node Sparse trees, Plain lists, Archiving, Document structure
 @section Sparse trees
@@ -2742,10 +2748,12 @@ With this setup, the command @kbd{C-c C-t} will cycle an entry from TODO
 to FEEDBACK, then to VERIFY, and finally to DONE and DELEGATED.  You may
 also use a prefix argument to quickly select a specific state.  For
 example @kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
-If you define many keywords, you can use in-buffer completion (see
-@ref{Completion}) to insert these words into the buffer.  Changing a
-todo state can be logged with a timestamp, see @ref{Tracking TODO state
-changes} for more information.
+Or you can use @kbd{S-left} to go backward through the sequence.  If you
+define many keywords, you can use in-buffer completion
+(@pxref{Completion}) or even a special one-key selection scheme
+(@pxref{Fast access to TODO states}) to insert these words into the
+buffer.  Changing a todo state can be logged with a timestamp, see
+@ref{Tracking TODO state changes} for more information.
 
 @node TODO types, Multiple sets in one file, Workflow states, TODO extensions
 @subsection TODO keywords as types
@@ -2909,6 +2917,10 @@ special faces for some of them.  This can be done using the variable
         ("CANCELED"  . (:foreground "blue" :weight bold))))
 @end lisp
 
+While using a list with face properties as shown for CANCELED
+@emph{should} work, this does not aways seem to be the case.  If
+necessary, define a special face and use that.
+
 @page
 @node Progress logging, Priorities, TODO extensions, TODO items
 @section Progress Logging
@@ -2939,12 +2951,11 @@ in-buffer setting is: @code{#+STARTUP: logdone}}.
 @end lisp
 
 @noindent
-Then each time you turn an entry from an arbitrary TODO (not-done) state
-into any of the DONE states using the dedicated commands like @kbd{C-c
-C-t}, a line @samp{CLOSED: [timestamp]} will be inserted just after the
-headline.  If you turn the entry back into a TODO item through further
-state cycling, that line will be removed again.  If you want
-to record a note along with the timestamp, use@footnote{The
+Then each time you turn an entry from a TODO (not-done) state into any
+of the DONE states, a line @samp{CLOSED: [timestamp]} will be inserted
+just after the headline.  If you turn the entry back into a TODO item
+through further state cycling, that line will be removed again.  If you
+want to record a note along with the timestamp, use@footnote{The
 corresponding in-buffer setting is: @code{#+STARTUP: lognotedone}}
 
 @lisp
@@ -2965,15 +2976,15 @@ giving you an overview of what has been done.
 
 When TODO keywords are used as workflow states (@pxref{Workflow
 states}), you might want to keep track of when a state change occurred
-and record a note about this change.  Since it is normally too much to
-record a note for every state, Org-mode expects configuration on a
+and maybe take a note about this change.  Since it is normally too much
+to record a note for every state, Org-mode expects configuration on a
 per-keyword basis for this.  This is achieved by adding special markers
-@samp{!} and @samp{@@} in parenthesis behind each keyword.  For example,
-with the setting
+@samp{!} (for a time stamp) and @samp{@@} (for a note) in parenthesis
+after each keyword.  For example, with the setting
 
 @lisp
 (setq org-todo-keywords
-      '((sequence "TODO(t)" "WAIT(w@@)" "|" "DONE(d!)" "CANCELED(c@@)")))
+  '((sequence "TODO(t)" "WAIT(w@@/!)" "|" "DONE(d!)" "CANCELED(c@@)")))
 @end lisp
 
 @noindent
@@ -2984,12 +2995,17 @@ when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes - if you have configured
 both, the state change recording note will take precedence and cancel
 the @samp{Closing Note}.}, and that a special note is recorded when
-switching to WAIT or CANCELED.
+switching to WAIT or CANCELED.  The setting for WAIT is even more
+special: The @samp{!} after the slash means that in addition to the note
+taken when entering the state, a time stamp should be recorded when
+@i{leaving} the WAIT state.  This allows you to get a record when
+switching from WAIT back to TODO, without getting one when first turning
+an entry into a TODO.
 
-You can use the exact same syntax for setting logging preferencs local
+You can use the exact same syntax for setting logging preferences local
 to a buffer:
 @example
-#+SEQ_TODO: TODO(t) WAIT(w@@) | DONE(d!) CANCELED(c@@)
+#+SEQ_TODO: TODO(t) WAIT(w@@/!) | DONE(d!) CANCELED(c@@)
 @end example
 
 In order to define logging settings that are local to a subtree or a
@@ -3289,7 +3305,7 @@ these lines to activate any changes.
 
 If at least one tag has a selection key, pressing @kbd{C-c C-c} will
 automatically present you with a special interface, listing inherited
-tags, the tags of the current headline, and a list of all legal tags
+tags, the tags of the current headline, and a list of all valid tags
 with corresponding keys@footnote{Keys will automatically be assigned to
 tags which have no configured keys.}.  In this interface, you can use
 the following keys:
@@ -5309,7 +5325,7 @@ not remove the previously used indirect buffer.
 @kindex l
 @item l
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
-logging was on (variable @code{org-log-progress}) are shown in the agenda,
+logging was on (variable @code{org-log-done}) are shown in the agenda,
 as are entries that have been clocked on that day.
 
 @tsubheading{Change display}
@@ -7422,7 +7438,7 @@ constcgs   @r{@file{constants.el} should use the c-g-s unit system}
 constSI    @r{@file{constants.el} should use the SI unit system}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
-These lines (several such lines are allowed) specify the legal tags in
+These lines (several such lines are allowed) specify the valid tags in
 this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:

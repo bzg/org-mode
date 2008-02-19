@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.21+
+;; Version: 5.22a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.21+"
+(defconst org-version "5.22a"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -1643,12 +1643,13 @@ the special #+SEQ_TODO and #+TYP_TODO lines.
 
 Each keyword can optionally specify a character for fast state selection
 \(in combination with the variable `org-use-fast-todo-selection')
-and a specifier for state change logging, using the same syntax
+and specifiers for state change logging, using the same syntax
 that is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says
 that the WAIT state can be selected with the \"w\" key. \"WAIT(w!)\"
 indicates to record a time stamp each time this state is selected.
 \"WAIT(w@)\" says that the user should in addition be prompted for a
-note.
+note, and \"WAIT(w@/@)\" says that a note should be taken both when
+entering and when leaving this state.
 
 For backward compatibility, this variable may also be just a list
 of keywords - in this case the interptetation (sequence or type) will be
@@ -4248,6 +4249,7 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (declare-function rmail-narrow-to-non-pruned-header "rmail" ())
 (declare-function rmail-show-message "rmail" (&optional n no-summary))
 (declare-function rmail-what-message "rmail" ())
+(defvar rmail-current-message)
 (defvar texmathp-why)
 (declare-function vm-beginning-of-message "ext:vm-page" ())
 (declare-function vm-follow-summary-cursor "ext:vm-motion" ())
@@ -4438,9 +4440,8 @@ means to push this value onto the list in the variable.")
 		 "STARTUP" "ARCHIVE" "TAGS" "LINK" "PRIORITIES"
 		 "CONSTANTS" "PROPERTY" "DRAWERS")))
 	  (splitre "[ \t]+")
-	  kwds kws0 kwsa key value cat arch tags const links hw dws
-	  tail sep kws1 prio props drawers
-	  ex note time)
+	  kwds kws0 kwsa key log value cat arch tags const links hw dws
+	  tail sep kws1 prio props drawers)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -4522,18 +4523,14 @@ means to push this value onto the list in the variable.")
 		kwsa nil
 		kws1 (mapcar
 		      (lambda (x)
-			(if (string-match "^\\(.*?\\)\\(?:(\\(..?\\))\\)?$" x)
+			;;                     1              2
+			(if (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$" x)
 			    (progn
 			      (setq kw (match-string 1 x)
-				    ex (and (match-end 2) (match-string 2 x))
-				    note (and ex (string-match "@" ex))
-				    time (or note (and ex (string-match "!" ex)))
-				    key (and ex (substring ex 0 1)))
-			      (if (member key '("@" "!")) (setq key nil))
+				    key (and (match-end 2) (match-string 2 x))
+				    log (org-extract-log-state-settings x))
 			      (push (cons kw (and key (string-to-char key))) kwsa)
-			      (and (or note time)
-				   (push (cons kw (if note 'note 'time))
-					 org-todo-log-states))
+			      (and log (push log org-todo-log-states))
 			      kw)
 			  (error "Invalid TODO keyword %s" x)))
 		      kws0)
@@ -4656,6 +4653,20 @@ means to push this value onto the list in the variable.")
 	  )
     (org-compute-latex-and-specials-regexp)
     (org-set-font-lock-defaults)))
+
+(defun org-extract-log-state-settings (x)
+  "Extract the log state setting from a TODO keyword string.
+This will extract info from a string like \"WAIT(w@/!)\"."
+  (let (kw key log1 log2)
+    (when (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?\\([!@]\\)?\\(?:/\\([!@]\\)\\)?)\\)?$" x)
+      (setq kw (match-string 1 x)
+	    key (and (match-end 2) (match-string 2 x))
+	    log1 (and (match-end 3) (match-string 3 x))
+	    log2 (and (match-end 4) (match-string 4 x)))
+      (and (or log1 log2)
+	   (list kw
+		 (and log1 (if (equal log1 "!") 'time 'note))
+		 (and log2 (if (equal log2 "!") 'time 'note)))))))
 
 (defun org-remove-keyword-keys (list)
   (mapcar (lambda (x)
@@ -6676,9 +6687,10 @@ If optional TXT is given, check this string instead of the current kill."
   "Narrow buffer to the current subtree."
   (interactive)
   (save-excursion
-    (narrow-to-region
-     (progn (org-back-to-heading) (point))
-     (progn (org-end-of-subtree t t) (point)))))
+    (save-match-data
+      (narrow-to-region
+       (progn (org-back-to-heading) (point))
+       (progn (org-end-of-subtree t t) (point))))))
 
 
 ;;; Outline Sorting
@@ -7308,8 +7320,8 @@ so this really moves item trees."
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive "p")
-  (let (beg beg0 end end0 ind ind1 (pos (point)) txt
-	    ne-beg ne-end ne-ins ins-end)
+  (let (beg beg0 end ind ind1 (pos (point)) txt
+	    ne-beg ne-ins ins-end)
     (org-beginning-of-item)
     (setq beg0 (point))
     (setq ind (org-get-indentation))
@@ -7318,7 +7330,6 @@ so this really moves item trees."
       (setq beg (point)))
     (goto-char beg0)
     (org-end-of-item)
-    (setq ne-end (org-back-over-empty-lines))
     (setq end (point))
     (goto-char beg0)
     (catch 'exit
@@ -11671,7 +11682,7 @@ Valid parameters are
             %s for the original field value.  For example, to wrap
             everything in dollars, you could use :fmt \"$%s$\".
             This may also be a property list with column numbers and
-            formats. for example :fmt (2 \"$%s$\" 4 \"%s%%\")
+            formats. For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 
 :hlstart :hlend :hlsep :hlfmt :hfmt
             Same as above, specific for the header lines in the table.
@@ -11747,7 +11758,7 @@ LaTeX are:
 :fmt       A format to be used to wrap the field, should contain %s for the
            original field value.  For example, to wrap everything in dollars,
            use :fmt \"$%s$\".  This may also be a property list with column
-           numbers and formats. for example :fmt (2 \"$%s$\" 4 \"%s%%\")
+           numbers and formats.  For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 
 :efmt      Format for transforming numbers with exponentials.  The format
            should have %s twice for inserting mantissa and exponent, for
@@ -11810,7 +11821,7 @@ TeXInfo are:
                    %s for the original field value.  For example, to wrap
                    everything in @kbd{}, you could use :fmt \"@kbd{%s}\".
                    This may also be a property list with column numbers and
-                   formats. For example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
+                   formats.  For example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
 
 :cf \"f1 f2..\"    The column fractions for the table.  By default these
                    are computed automatically from the width of the columns
@@ -12466,7 +12477,6 @@ With three \\[universal-argument] prefixes, negate the meaning of
     (when (string-match "\\<file:\\(.*\\)" link)
       (let* ((path (match-string 1 link))
 	     (origpath path)
-	     (desc-is-link (equal link desc))
 	     (case-fold-search nil))
 	(cond
 	 ((eq org-link-file-path-type 'absolute)
@@ -14061,7 +14071,6 @@ heading in the current buffer."
   (interactive "P")
   (let* ((cbuf (current-buffer))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
-	 (fname (and filename (file-truename filename)))
 	 pos it nbuf file re level reversed)
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
@@ -14123,8 +14132,7 @@ heading in the current buffer."
 			   (cdr x))
 		   x))
 	       org-refile-target-table))
-	 (completion-ignore-case t)
-	 pos it nbuf file re level reversed)
+	 (completion-ignore-case t))
     (assoc (completing-read prompt tbl nil t nil 'org-refile-history)
 	   tbl)))
 
@@ -14584,7 +14592,8 @@ For calling through lisp, arg is also interpreted in the following way:
 	(when (and (or org-todo-log-states org-log-done)
 		   (not (memq arg '(nextset previousset))))
 	  ;; we need to look at recording a time and note
-	  (setq dolog (cdr (assoc state org-todo-log-states)))
+	  (setq dolog (or (nth 1 (assoc state org-todo-log-states))
+			  (nth 2 (assoc this org-todo-log-states))))
 	  (when (and state
 		     (member state org-not-done-keywords)
 		     (not (member this org-not-done-keywords)))
@@ -14594,8 +14603,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	  (when (and now-done-p org-log-done)
 	    ;; It is now done, and it was not done before
 	    (org-add-planning-info 'closed (org-current-time))
-	    (if (and (not dolog) (listp org-log-done)
-		     (member 'done org-log-done))
+	    (if (and (not dolog) (eq 'note org-log-done))
 		(org-add-log-maybe 'done state 'findpos 'note)))
 	  (when (and state dolog)
 	    ;; This is a non-nil state, and we need to log it
@@ -14621,25 +14629,22 @@ For calling through lisp, arg is also interpreted in the following way:
 	  (save-excursion
 	    (run-hook-with-args 'org-trigger-hook change-plist)))))))
 
-(defun org-local-logging (property)
-  "Get logging settings from a property."
+(defun org-local-logging (value)
+  "Get logging settings from a property VALUE."
   (let* (words w a)
     ;; directly set the variables, they are already local.
     (setq org-log-done nil
 	  org-log-repeat nil
 	  org-todo-log-states nil)
-    (setq words (org-split-string property))
+    (setq words (org-split-string value))
     (while (setq w (pop words))
       (cond
        ((setq a (assoc w org-startup-options))
 	(and (member (nth 1 a) '(org-log-done org-log-repeat))
 	     (set (nth 1 a) (nth 2 a))))
-       ((string-match "\\([a-zA-Z0-9]+\\)\\(([@!])\\)?" w)
-	(and (member (match-string 1 w) org-todo-keywords-1)
-	     (match-end 2)
-	     (push (cons (match-string 1 w)
-			 (if (equal (match-string 2 w) "(@)") 'note 'time))
-		   org-todo-log-states)))))))
+       ((setq a (org-extract-log-state-settings w))
+	(and (member (car a) org-todo-keywords-1)
+	     (push a org-todo-log-states)))))))
 
 (defun org-get-todo-sequence-head (kwd)
   "Return the head of the TODO sequence to which KWD belongs.
@@ -14727,6 +14732,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 
 (defvar org-last-changed-timestamp)
 (defvar org-log-post-message)
+(defvar org-log-note-purpose)
 (defun org-auto-repeat-maybe (done-word)
   "Check if the current headline contains a repeated deadline/schedule.
 If yes, set TODO state back to what it was and change the base date
@@ -16844,9 +16850,8 @@ Where possible, use the standard interface for changing this line."
 
 (defun org-columns-open-link (&optional arg)
   (interactive "P")
-  (let ((key (get-char-property (point) 'org-columns-key))
-	(value (get-char-property (point) 'org-columns-value)))
-    (org-open-link-from-string arg)))
+  (let ((value (get-char-property (point) 'org-columns-value)))
+    (org-open-link-from-string value arg)))
 
 (defun org-open-link-from-string (s &optional arg)
   "Open a link in the string S, as if it was in Org-mode."
@@ -16878,7 +16883,7 @@ Where possible, use the standard interface for changing this line."
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let (beg end fmt cache maxwidths clocksump)
+  (let (beg end fmt cache maxwidths)
     (setq fmt (org-columns-get-format-and-top-level))
     (save-excursion
       (goto-char org-columns-top-level-marker)
@@ -16890,7 +16895,6 @@ Where possible, use the standard interface for changing this line."
       ;; Get and cache the properties
       (goto-char beg)
       (when (assoc "CLOCKSUM" org-columns-current-fmt-compiled)
-	(setq clocksump t)
 	(save-excursion
 	  (save-restriction
 	    (narrow-to-region beg end)
@@ -21963,11 +21967,6 @@ HH:MM."
 	      (insert (format org-agenda-todo-keyword-format s)))))
       (setq re (concat (get-text-property 0 'org-todo-regexp x))
 	    pl (get-text-property 0 'prefix-length x))
-;      (and re (equal (string-match (concat "\\(\\.*\\)" re) x (or pl 0)) pl)
-;	   (add-text-properties
-;	    (or (match-end 1) (match-end 0)) (match-end 0)
-;	    (list 'face (org-get-todo-face (match-string 2 x)))
-;	    x))
       (when (and re
 		 (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
 				      x (or pl 0)) pl))
@@ -24731,7 +24730,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    (if org-hide-leading-stars "hidestars" "showstars")
    (if org-startup-align-all-tables "align" "noalign")
    (cond ((eq org-log-done t) "logdone")
-	 ((equal org-log-done '(done)) "lognotedone")
+	 ((equal org-log-done 'note) "lognotedone")
 	 ((not org-log-done) "nologdone"))
    (or (mapconcat (lambda (x)
 		    (cond

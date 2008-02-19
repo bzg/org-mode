@@ -4,6 +4,22 @@
 	* org-irc.el (org-irc-get-erc-link): Fixed to allow the extraction
 	of a nick from both CVS and stable versions of erc.
 
+2008-02-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-set-regexps-and-options): Parse the new logging
+	options.
+	(org-extract-log-state-settings): New function.
+	(org-todo): Handle the new ways of recording state change stuff.
+	(org-local-logging): New function.
+
+2008-02-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-columns-open-link): Fixed bug with opening link in
+	column view.
+
+	* org-mac-message.el (org-mac-message-get-link): New function for
+	non-interactive use.
+
 2008-02-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-local-logging): New function
@@ -26,9 +42,8 @@
 	(org-add-log-note): Check if we really need to ask for a note.
 	(org-get-current-options): Digest the new keyword.
 
-	* org.texi (Progress logging): Document the new variable
-	`org-log-progress' and the new possibilities for per-keyword
-	settings.
+	* org.texi (Progress logging): Document the new progress logging
+	stuff.
 
 2008-02-13  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -140,7 +155,7 @@
 	in each buffer, to make sure that also unused tags will be
 	available for completion.
 
-2008-01-24  Carsten Dominik  <dominik@carsten-dominiks-macbook-pro.local>
+2008-01-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-columns-edit-value)
 	(org-columns-next-allowed-value): Only update if not in agenda.
@@ -633,7 +648,7 @@ Installed as 5.09
 	(org-todo): Respect org-todo-log-states.
 	(org-up-heading-safe): New function.
 	(org-entry-get-with-inheritance): Use `org-up-heading-safe'.
-	
+
 	* org.texi: Change links to webpage and maintained email.
 	(Remember): Promoted to Chapter, significant changes.
 	(Fast access to TODO states): New section.
