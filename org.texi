@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle Org Mode Manual
 
-@set VERSION 5.22
+@set VERSION 5.22a
 @set DATE February 2008
 
 @dircategory Emacs
@@ -2743,7 +2743,7 @@ also use a prefix argument to quickly select a specific state.  For
 example @kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
 Or you can use @kbd{S-left} to go backward through the sequence.  If you
 define many keywords, you can use in-buffer completion
-(@pref{Completion}) or even a special one-key selection scheme
+(@pxref{Completion}) or even a special one-key selection scheme
 (@pxref{Fast access to TODO states}) to insert these words into the
 buffer.  Changing a todo state can be logged with a timestamp, see
 @ref{Tracking TODO state changes} for more information.

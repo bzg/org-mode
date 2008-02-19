@@ -2,18 +2,548 @@
                      =====================================
 
 Author: Carsten Dominik <carsten at orgmode dot org>
-Date: 2007/11/13 12:21:31
+Date: 2008/02/19 09:16:04
 
 
-Version 5.14
+Version 5.22
 ~~~~~~~~~~~~
 
 Incompatible changes
 ====================
 
-   - If you have customize the variable `org-emphasis-alist', you
-     need to do it again by first canceling your customization and
-     then adding it again.
+   - The variable `org-log-done' is now less complex.
+   - The in-buffer settings for logging have changed.  Some
+     options no longer exists, some new ones have been added.
+
+Details
+=======
+
+Changes to logging progress
+---------------------------
+
+    There is now more control over which state changes are being
+    logged in what way.  Please read carefully the corresponding
+    sections in the manual.  Basically: 
+
+    - The variable `org-log-done' has been simplified, it no
+      longer influences logging state changes and clocking out.
+    - There is a new variable for triggering note-taking when
+      clocking out an item: `org-log-note-clock-out'.
+    - Logging of state changes now has to be configured on a
+      pre-keyword basis, either in `org-todo-keywords' or in the
+      #+TODO in-buffer setting.
+    - These per-keyword settings allow more control.  For example
+
+       WAIT(w@)    Record a note when entering this state.
+       WAIT(w!)    Record a timestamp when entering this state.
+       WAIT(w@/!)  Recore a note when entering and timestamp
+                   when leaving this state.  This is great for
+                   getting a record when switching *back* from
+                    WAIT to TODO.
+       WAIT(/!)    Record a timestamp when leaving this state.
+                   Here we not even define a fast access
+                   character, but just the logging stuff.
+
+    This was triggered by requests from Wanrong Lin and Bernt Hansen.
+
+Other
+-----
+
+   - M-RET no longer brakes a line in the middle, it will make a
+     new line after the current or (if cursor is at the beginning
+     of the line) before the current line.
+
+   - RET, when executed in a headline after the main text and
+     before the tags will leave the tags in the current line and
+     create a new line below the current one.
+
+Version 5.21
+~~~~~~~~~~~~
+
+  Bug fixes, in particular the long-hunted bug about wrong window
+  positions after pressing SPACE in the agenda.  Hopefully this
+  is really fixed.
+
+Version 5.20
+~~~~~~~~~~~~
+
+Overview
+========
+
+Remember/Refile/Goto
+--------------------
+
+    - The use of prefix arguments for the commands `org-remember'
+      and `org-refile' has been normalized.
+
+    - The clock can now safely be used in a remember buffer.
+      
+    - The variable `org-remember-use-refile-when-interactive'
+      introduced only in 5.19 is already obsolete.  Please use
+      `org-remember-interactive-interface' instead.
+
+    - It is no longer necessary to update the refiling targets.
+
+    - Automatic isearch in `org-goto'.
+
+    - Outline-path-completion as alternative org-goto interface.
+
+Misc
+----
+
+    - Checkboxes now work hierarchically.
+
+    - `C-k' can now behave specially in headlines.
+
+    - Repeater for tasks in plain timestamps.
+
+    - All clock intervals of an item show in agenda/timeline.
+      
+    - New parameter `:step' for clocktable, to get daily reports.
+
+    - Never loose a repeaded scheduled item from the agenda.
+
+    - Archiving a subtree now stores the outline path in a property.
+
+    - Links to messages in Apple Mail.
+
+    - Bug fixes.
+
+Incompatible Changes
+====================
+   
+   - The variable `org-remember-use-refile-when-interactive'
+     introduced only in 5.19 is already obsolete.  Please use
+     `org-remember-interactive-interface' instead.
+
+Details
+=======
+
+Remember/Refile/Goto
+--------------------
+
+    - The use of prefix arguments for the commands `org-remember'
+      and `org-refile' has been normalized:
+
+      + when called without prefix argument, the command does its
+        normal job, starting a remember note or refiling a tree.
+
+      + when called with a single C-u prefix, these commands can be
+        used to select a target location and to jump there.  In
+        the case of `org-remember', you will be prompted for a
+        template and then Emacs jumps to the default target
+        location or this template.  In the case of `org-refile',
+        you select a location from the refile target list and jump
+        there.
+
+      + when called with two prefixes (`C-u C-u'), the command
+        jumps to the location last used for storing a note or a
+        moved tree.
+
+    - When the clock is running inside an remember buffer, storing
+      the remember buffer with `C-c C-c' will automatically clock
+      out.  This was inspired by a request by Rainer Stengle. 
+      
+    - The variable `org-remember-use-refile-when-interactive'
+      introduced only in 5.19 is already obsolete.  Please use
+      `org-remember-interactive-interface' instead.  This new
+      variable does select the interface that is used to select
+      the target for a remember note in an interactive way.
+      Possible values are:
+
+      + `outline': Use an outline of the document to select a
+        location.  
+      + `outline-path-completion': Use completion of an outline
+        path to select a location.
+      + `refile': Offer the `org-refile-targets' as possible
+        targets.
+
+    - It is no longer necessary to update the refiling targets -
+      they are always current.
+
+    - In `org-goto', typing characters now automatically starts
+      isearch from the beginning of the buffer.  The isearch is
+      special also because it only matches in headline.  This
+      goes some way toward saving org-goto from being removed
+      from Org-mode.  Thanks to Piotr Zielinski for the code, and
+      sorry that it took me so long to put it in.  If you prefer
+      to use single letters n,p,f,b,u,q for navigation as before,
+      configure the variable `org-goto-auto-isearch'.
+
+    - Outline-path-completion is now available as an alternative
+      interface in the command `org-goto'.  Please select the
+      default interface you'd like to use with the new variable
+      `org-goto-interface'.  You can then select the alternative
+      interface with a prefix argument to `C-c C-j' (org-goto).  I
+      am considering to make outline-path-completion the default
+      interface.  Comments?
+
+
+Misc
+----
+
+    - Checkboxes now work hierarchically.  When a plain-list item
+      with a checkbox has children with checkboxes, the status of
+      the item's checkbox is calculated from the children, each
+      time a checkbox is toggled with C-c C-c.  Thanks to Miguel
+      A. Figueroa-Villanueva for a patch to this effect.
+
+    - There is a new variable `org-special-ctrl-k'.  When set,
+      `C-k' will behave specially in headlines:
+
+      + When the cursor is at the beginning of a headline, kill
+        the entire line and possible the folded subtree below the
+        line.
+      + When in the middle of the headline text, kill the
+        headline up to the tags.
+      + When after the headline text, kill the tags.
+
+      This is following a proposal by Piotr Zielinski.
+
+    - You can now also have a plain (as opposed to deadline or
+      scheduled) repeater timestamp in a task.  Switching the task
+      to DONE will now also shift a plain time stamp.  This was a
+      request by Austin Frank.
+
+    - If an entry is clocked multiple times, it will now show up
+      several times in the agenda and timeline buffers, when
+      log-mode is on.  This was a proposal by Jurgen Defurne.
+      
+    - The clock table accepts a new parameter `:step'.  This
+      parameter can be `day' or `week' and will result in separate
+      tables for each day or week in the requested time interval.
+      This was triggered by a proposal by Sacha Chua in her [blog].
+
+    - A time-stamp with a repeater now no longer refers to the
+      date *closest* to the current day.  Instead, it means either
+      today or the most recent match.  This change makes sure that
+      overdue scheduled or deadline items never disappear from the
+      agenda.  With the previous convention, an overdue scheduled
+      item would disappear.  For example, a weekly item scheduled
+      for Sunday would appear as overdue until Wednesday, and the
+      suddenly disappear until next Sunday.  Now the item will
+      show up as "Sched 7x" on Saturday.  From Sunday on it will
+      be in the list as "Scheduled", i.e. old sins will be
+      forgiven.  This follows a request by Warong, Dennis and
+      Bernt.
+
+    - Archiving a subtree now creates an additional property,
+      `ARCHIVE_OLPATH'.  This property contains the "path" in the
+      outline tree to the archived entry, as it was in the
+      original file.  For example, archiving `Fix the door' in the
+      following hierarchy
+      
+       * Tasks
+       ** HOME
+       *** Garage
+       **** Fix the door
+      
+      will file is with the following property
+      
+       :ARCHIVE_PATH: Task/HOME/Garage
+      
+      Note that you can configure (i.e. limit) the information
+      that gets stored upon archiving with the variable
+      `org-archive-save-context-info'.
+
+    - New file `org-mac-message.el' by John Wiegley to create
+      links for messages in Apple Mail, and to follow these
+      links.
+
+    - Bug fixes.
+
+Version 5.19
+~~~~~~~~~~~~
+
+Overview
+========
+
+   - Column view can list the clocked times of a subtree.
+
+   - Storing remember notes can use the `org-refile' interface.
+
+   - Storing remember notes no longer produced empty lines.
+
+   - Moving subtrees now folds all siblings of the subtree.
+
+   - New variable `org-agenda-todo-keyword-format'.
+
+   - Hack to allow brackets in link descriptions.
+
+   - Clocking into an entry can enforce a specific TODO state.
+
+   - EXPORT_FILE_NAME may be an absolute file name with "~".
+
+   - Bug fixes, lots of them.
+
+Details
+=======
+
+   - A new special column definition lists the sum of all CLOCK
+     entries in a subtree.  For example
+
+      #+COLUMNS: %20ITEM %10Time_Estimate{:} %CLOCKSUM
+
+     will allow you to compare estimated times (as given in the
+     Time_Estimate property) with the clocked times.  This was a
+     request by Bernt Hansen.
+
+   - Storing remember notes can now use the `org-refile'
+     interface instead of the `org-goto' interface (see the
+     variable `org-remember-use-refile-when-interactive').
+     Nothing will change if the note is stored immediately after
+     pressing `C-c C-c' in the `*Remember*' buffer.  But if you
+     have chosen (e.g. by pressing `C-u C-c C-c') to
+     interactively select the filing location (file and
+     headline), the refile interface will be used instead.  I am
+     excited about this change, because the `org-goto' interface
+     is basically a failure, at least for this application.  Note
+     that in any case the refile interface has to be configured
+     first by customizing `org-refile-targets'.
+
+   - Notes inserted with remember now remove any whitespace
+     before and after the note before being pasted, so that there
+     will be no empty lines inserted together with the note.  We
+     could invent special syntax in remember templates to allow
+     creating empty lines before a note - is there anyone who'd
+     want this?
+
+   - Moving subtrees now folds all siblings of the subtree.  This
+     is the only reasonably simple way I could find to avoid the
+     reported inconsistencies in the folding state of the outline
+     tree after moving entries.  There are reasons to like this
+     new behavior, because it easily visualizes where the tree is
+     located after the move.  Still, not everyone might be happy
+     with this.  Massive complaining would be needed to make me
+     fix this.
+
+   - New variable `org-agenda-todo-keyword-format' to specify the
+     width of the TODO keyword field in the agenda display.  Use
+     it to get things to line up better.  This was a proposal by
+     Rainer Stengele.
+
+   - If a link description inserted with `C-c C-l' contains
+     brackets, the brackets will now be converted into curly
+     braces.  This looks similar enough.  Supporting brackets in
+     link descriptions is, for technical reasons too long to
+     explain here, complex.
+
+   - The new option `org-clock-in-switch-to-state' can be set to
+     a TODO state that will be enforced when the clock is started
+     on an entry.  This follows an idea by Sacha Chua.
+
+   - The EXPORT_FILE_NAME property may now also be an absolute
+     file name, and it may contain abbreviations like "~" for the
+     users home directory.  This was requested by Adam Spiers.
+
+   - Bug fixes, lots of them.
+
+Version 5.18
+~~~~~~~~~~~~
+
+  Minor fixes.
+
+Version 5.17
+~~~~~~~~~~~~
+
+Details
+=======
+
+Whitespace
+----------
+
+    - When cutting, pasting, or moving subtrees and items, the
+      empty lines *before* the subtree/item now belong to the
+      part and will be moved with it.  There is one exception to
+      this rule: If the first child is moved down (or,
+      equivalently, the second is moved up), the amount of empty
+      lines *above* the first child to be moved along with it is
+      limited by the number of empty lines *below* it.  This
+      sounds complicated, but it allows to have extra empty space
+      before the first child and still have good behavior of the
+      subtree motion commands.
+
+    - Plain lists items work the same.
+
+    I believe we have finally nailed this one.  Thanks to Daniel
+    Pittman for bring this up again and to Eric Schulte for
+    pointing out that it is the empty lines *before* an entry
+    that really count.
+
+    This change was non-trivial, please give it a good test and
+    let me know about any problems.
+
+Remember
+--------
+
+    - The new command `org-remember-goto-last-stored' will jump
+      to the location of the remember note stored most recently.
+      If you have `org-remember' on a key like `C-c r', then you
+      can go to the location with a double prefix arg: `C-u C-u
+      C-c r'.  This was a proposal by Rainer Stengele.
+
+    - Template items that are being prompted for can now specify
+      a default value and a completion table.  Furthermore,
+      previous inputs at a specific prompt are captured in a
+      history variable.  For example:
+
+       %^{Author|Roald Dahl|Thomas Mann|Larry Niven}
+
+      will prompt for an author name.  Pressing RET without
+      typing anything will select "Roald Dahl".  Completion will
+      give you any of the three names.  And a history will be
+      kept, so you can use the arrow keys to get to previous
+      input.  The history is tied to the prompt.  By using the
+      same prompt in different templates, you can build a history
+      across templates.  The ideas for this came from proposals
+      by Bastien and Adam.
+
+    - When a remember template contains the string `%!', the note
+      will be stored immediately after all template parts have
+      been filled in, so you don't even have to press `C-c
+      C-c'. The was a proposal by Adam Spiers.
+
+Refile
+------
+
+    - `org-refile-targets' has a new parameter to specify a
+      maximum level for target selection.  Thanks to Wanrong Lin
+      for this proposal.
+
+    - When the new option `org-refile-use-outline-path' is set,
+      refile targets will be presented like a file path to the
+      completion interface: "level 1/level 2/level 3".  This
+      may be the fastest interface yet to get to a certain
+      outline entry.  Do we need to use this interface in other
+      places?  Thanks to Jose Ruiz for this proposal.
+
+Version 5.16
+~~~~~~~~~~~~
+
+Details
+=======
+
+Restriction lock on agenda scope
+--------------------------------
+
+    You can now permanently lock the agenda construction to a
+    certain scope, like a file or a subtree.  So instead of
+    pressing "<" for each command in the agenda dispatcher, you
+    only once select a restriction scope.  All subsequent agenda
+    commands will than respect this restriction.  For example,
+    you can use this at work, to limit agendas to your work file
+    or tree, and at home to limit to the home file or tree.  Or
+    you can use it during the day in order to focus in on certain
+    projects.
+
+    You select a scope with the command `C-c C-x <', which
+    restricts to the current subtree.  When called with a `C-u'
+    prefix, the restriction is to the current file.  You can also
+    make restrictions from the speedbar frame, see below.
+
+    When making a new restriction and an agenda window is
+    currently visible, it will immediately be updated to reflect
+    the new scope.  TO if you like you can display an agenda view
+    and then watch it change in various scopes.
+
+    To get rid of the restriction, use the command "C-c C-x >".
+    Or press ">" in the agenda dispatcher.  Also, and use of "<"
+    in the dispatcher will disable the restriction lock and
+    select a new restriction.
+
+    Thanks to Rick Moynihan for triggering this development. 
+
+Imenu and Speedbar support
+--------------------------
+
+    - Org-mode now supports Imenu.  For example, with the setting
+
+       (add-hook 'org-mode-hook 
+          (lambda () 'imenu-add-to-menubar "Imenu"))
+
+      a menu will be created in each Org-mode buffer that
+      provides access to all level 1 and level 2 headings.  The
+      depth of the menu can be set with the variable
+      `org-imenu-depth'.
+
+    - org-mode now supports Speedbar.  This means that you can
+      drill into the first and second level headlines of an
+      Org-mode file right from the speedbar frame.
+
+    - You can set a restriction lock for the Org-mode agenda to a
+      file or a subtree directly from the speedbar frame.  Just
+      press "<" with the cursor on an Org-mode file or subtree to
+      set the lock and immediately update the agenda if it is
+      visible.  Use ">" to get rid of the lock again.
+
+Version 5.15
+~~~~~~~~~~~~
+
+Details
+=======
+
+   - There are new special properties TIMESTAMP and TIMESTAMP_IA.
+     These can be used to access the first keyword-less active
+     and inactive timestamp in an entry, respectively.
+
+   - New variable `org-clock-heading-function'.  It can be set to
+     a function that creates the string shown in the mode line
+     when a clock is running.  Thanks to Tom Weissmann for this
+     idea.
+
+   - Bug fixes.
+
+Version 5.14
+~~~~~~~~~~~~
+
+Overview
+========
+
+   + Remember and related stuff
+     - New command `org-refile' to quickly move a note.
+     - Easy way to jump to the target location of remember template.
+     - New %-escapes in remember templates: %c %(...) and %[...]
+     - `org-remember-insinuate' simplifies remember setup
+
+   + Emphasis and Font-lock stuff
+     - Stacked emphasis is no longer allowed.
+     - You may finally emphasize a single character like `*a*'.
+     - Font-lock now can hide the emphasis markers
+     - Text in the "=" emphasis is exported verbatim
+     - There is a new emphasis marker "~" for verbatim text
+     - Constructs treated specially by the exporters can be highlighted
+
+   + Properties and Column view
+     - More control over which properties use inheritance
+     - CATEGORY="work" can now be used in a tags/property search
+     - the {+} summary type can specify a printf-style output format
+     - New currency summary type {$}
+
+   + The date/time prompt
+     - While entering data, watch live the current interpretation.
+     - The date prompt now prefers to select the future
+     - Easier modification of time in an existing time stamp.
+
+   + Export
+     - You can now export some special strings in HTML, like "..."
+     - #+EMAIL: may contain several email addresses
+
+   + Agenda
+     - In the agenda, a few keys have changed: `g', `G', and `e'.
+
+   + Miscellaneous
+     - Class-dependent sectioning structures in LaTeX export.
+     - Radio-lists modeled after the radio tables.
+     - The default for `org-ellipsis' is back to nil
+     - Support for pabbrev-mode
+     - New variable `org-show-entry-below'.
+
+Incompatible changes
+====================
+
+   - If you have customized the variable `org-emphasis-alist' or
+     org-export-emphasis-alist', you need to do it again by first
+     canceling your customization and then adding it again.
 
    - I know that some people have defined their own private helper
      functions to select a specific remember template, without being
@@ -23,12 +553,15 @@ Incompatible changes
          (interactive)
          (org-remember ?n))
 
-     You need to modify this.  The character selectiong the template
-     must now be the second argument to `org-remember':
+     You need to modify this.  The character selecting the template
+     must now be the /second/ argument to `org-remember':
 
       (defun my-remember-template-n ()
          (interactive)
          (org-remember nil ?n))
+
+   - `C-c C-w' now refiles an entry.  To get a sparse tree of
+     deadlines, use `C-c / d' instead.
 
 Details
 =======
@@ -46,23 +579,24 @@ Remember and related stuff
       headings in the current buffer, but you can configure the
       variable `org-refile-targets' to get more complex
       definitions.  For example:
-      
+
        (setq org-refile-targets '((nil . (:level . 2))))
-      
+
       selects all level 2 headlines in the current buffer as
       targets.  And
-      
+
        (setq org-refile-targets
             '((org-agenda-files . (:tag . "refile"))))
-      
+
       searches all agenda files and selects headlines that are
       explicitly marked with the tag :refile: .  Note that the
       list of targets is built upon first use only, to rebuilt
-      it, call the command `C-c C-w' with a prefix argument.
-      
+      it, call the command `C-c C-w' with a double prefix
+      argument.
+
       This is based on an idea and example implementation by Max
       Mikhanosha.  Many thanks Max.
-      
+
     - You can now use a C-u prefix on `org-remember' to jump to
       the location where a specific templates stores its notes.
       For example, if you have `org-remember' bound to `C-c r',
@@ -71,54 +605,63 @@ Remember and related stuff
 
       This was proposed by someone, but I have lost track who.
       Sorry, and thanks anyway.
-      
+
     - New %-escapes in remember templates:
-      
+
        %c     insert the current clipboard, like C-y would do
        %(..)  evaluate Lisp expression and insert the result
-      
+       %[..]  include file
+
       Thanks to Adam Spiers and Tim O'Callaghan.
-      
+
     - New function `org-remember-insinuate' that makes is easier
       to set Org-mode specific values for remember variables.
       Thanks to Michael Olson for this proposal.  It is
       equivalent to:
-      
+
        (require 'remember)
        (setq remember-annotation-functions '(org-remember-annotation))
        (setq remember-handler-functions '(org-remember-handler))
        (add-hook 'remember-mode-hook 'org-remember-apply-template))
-      
+
       You might still want to set `org-default-notes-file' to
       provide a default for templates without a file, and
       `org-directory' to show where to find other org files.
 
-Emphasis
---------
+Emphasis and Font-lock stuff
+----------------------------
 
-    - Stacked emphasis like ~*/bold italic/*~ is no longer allowed.
+    - Stacked emphasis like `*/bold italic/*' is no longer allowed.
 
-    - Font-lock now hides the emphasis markers - this makes for a more
-      readable text, and since we are all used to the hiding done by
-      links, I guess this is no problem?  If it is for you, configure
-      the variable org-hide-emphasis-markers'.
+    - You may finally emphasize a single character like `*a*'.
+
+    - Font-lock now can hide the emphasis markers, just like Muse
+      does.  Configure the variable `org-hide-emphasis-markers'
+      if you want this.  Showing the characters continues to be
+      the default in Org-mode.
 
     - Text in the "=" emphasis is now exported verbatim, i.e. no
       further parsing and interpretation of this text takes place.  So
-      you can write ~=quoted *xxx* a_x = b=~.  This and the following
+      you can write `=quoted *xxx* a_x = b='.  This and the following
       point implement a request by Daniel Clemente.
- 
+
     - There is a new emphasis marker "~" which marks text to be
       exported verbatim, without special formatting.  Inside an
       org-mode file, this text is highlighted with the org-verbatim
       face.  I am not happy with the face yet (currently is is like
       org-code, but underlined), please suggest a better one.
-       
+
     - Whether an emphasis environment is verbatim or not is now an
       extra flag in the variable `org-emphasis-alist'.  If you have
       configured this variable, do it again by first canceling your
       customization to revert to the default, and then adding it
       again.
+
+    - New variable `org-highlight-latex-fragments-and-specials'.
+      When turned on, Org-mode will highlight all strings that
+      are treated in a special way by the exporters.  This is
+      great for export-oriented writing, but maybe a bit noisy
+      for note taking, so this feature is off by default.
 
 Properties and Column view
 --------------------------
@@ -126,7 +669,7 @@ Properties and Column view
     - `org-use-property-inheritance' may now also be a list of
       property names that should be treated with inheritance
       during searches.
-      
+
     - CATEGORY="work" can now be used in a tags/property search,
       even if the category is not specified as a property in the
       entry, but rather is inherited or derived from #+CATEGORY.
@@ -141,19 +684,15 @@ Properties and Column view
         shorthand for {+;%.2f}.  Do we need to have a currency
         symbol in front of each value.  Scott Jaderholm asked for
         this, but I am not sure if this is already what he meant.
-  
 
 The date/time prompt
 --------------------
 
     There have been several small but *very* useful additions to
-    the date prompt.  I happen to think that it has become a very
-    compact and cool way to select or modify a date and a time,
-    better than anything I have seen in any other application -
-    at least if you like to work with the keyboard.
+    the date prompt.
 
     - While entering data at the date prompt, the current
-      interpretation of you input is shown next to your input in
+      interpretation of your input is shown next to your input in
       the minibuffer.  I find this great to understand how the
       input works.  If you find the extra stuff in the minibuffer
       annoying, turn it off with `org-read-date-display-live'.
@@ -167,38 +706,38 @@ The date/time prompt
       enter "May" in September.  Thanks to John Rakestraw for
       this great suggestion.  If you find it confusing, turn it
       off with `org-read-date-prefer-future'.
-      
+
     - When modifying an existing date using `C-c .' at the stamp,
       the time or time range in the stamp are now offered as
       default input at the prompt.  This goes a long way to
       simplifying the modification of an existing date.  Thanks
       to Adam Spiers for this proposal.
 
-Export
-------
+Export (all implemented by Bastien...)
+--------------------------------------
 
     - You can now export special strings in HTML.  Here is the
       list of newly performed conversions:
-      
-        Org     Description                          HTML      
-       -------+------------------------------------+----------
-        \\ -    double backslash followed by minus   &shy;     
-        - -     two dashes (minuses)                 &ndash;   
-        - - -   three dashes (minuses)               &mdash;   
-        . . .   three dots                           &hellip;  
-      
-      You can turn this globally on/off with
+
+        Org   Description                          HTML      
+       -----+------------------------------------+----------
+        `\\-'   double backslash followed by minus   &shy;     
+        `--'    two dashes (minuses)                 &ndash;   
+        `---'   three dashes (minuses)               &mdash;   
+        `...'   three dots                           &hellip;  
+
+      You can turn this globally on or off with
       `org-export-with-special-strings' or locally with "-:t" or
       "-:nil" in the #+OPTIONS line.  Thanks to Adam Spiers for
       starting the discussion, and thanks to Daniel Clemente and
       William Henney for relevant inputs.
-      
+
     - Comma-separated emails in #+EMAIL: are correctly exported.
-      Thanks to Raman for pointing this out.
+      Thanks to Raman for pointing out this omission.
 
 Agenda
 ------
-      
+
     - In the agenda, a few keys have changed
        g  does now the same a "r", refresh current display,
           because "g" is the Emacs standard for "refresh"
@@ -206,12 +745,25 @@ Agenda
        e  Execute another agenda command, pretty much the same as
           `C-c a', but shorter and keep the same agenda window.
 
-Miscellaneous
--------------
+Miscellaneous (much of it from Bastien)
+---------------------------------------
+
+    - You can now select the sectioning structure of your LaTeX
+      export by setting it either globally
+      (`org-export-latex-default-class') or locally in each Org
+      file (with #+LaTeX_CLASS: myclass).  You can also customize
+      the list of available classes and their sectioning
+      structures through the new `org-export-latex-classes'
+      option.  Thanks to Daniel for discussions and suggestion on
+      this issue.
+
+    - You can send and receive radio lists in HTML,
+      LaTeX or TeXInfo, just as you send and receive radio
+      tables.  Check the documentation for details and examples.
 
     - The default for `org-ellipsis' is back to nil, some people
       seem to have had problems with the face as a default.
-      
+
     - Support for pabbrev-mode, needs pabbrev version 1.1.  Thanks
       to Phillip Lord for adapting his package to make this
       possible.
@@ -219,9 +771,9 @@ Miscellaneous
     - New variable `org-show-entry-below' to force context-showing
       commands to expose the body of a headline that is being
       shown.  Thanks to Harald Weis for pointing out this omission.
-      
 
-Version 5.13g
+
+Version 5.13i
 ~~~~~~~~~~~~~
 
 Details
@@ -264,13 +816,13 @@ Overview
      + User-defined sorting keys.
      + Sorting by properties.
      + Sorting of plain lists.
- 
+
    - HTML <div> structure
 
    - Other stuff
      + New variables, several of them.
      + Drawers can be set on a per-file basis.
-     + Better control over priority fontification in agenda.      
+     + Better control over priority fontification in agenda.
      + M-up and M-down now move the current line up and down.
      + Abort remember template selection with C-g.
 
@@ -282,18 +834,18 @@ Bug fixes and improvements in column view
 
     - All the bugs described by Scott Jaderholm have been fixed
       (at least I hope so...).
-      
+
     - You can now capture a column view into a dynamic block, for
       exporting or printing it.  The column view can be
-      
+
       + global, i.e. for the entire file
       + local, i.e. for the subtree where the dynamic block is
       + from an entry with a specific :ID: property.
-        
+
       You can identify the entry whose column view you want to
       capture by assigning an :ID: property, and use that property
       in the dynamic block definition.  For example:
-      
+
        * Planning
          :PROPERTIES:
            :ID: planning-overview
@@ -305,7 +857,7 @@ Bug fixes and improvements in column view
        #+BEGIN: columnview :hlines 1 :id "planning-overview"
       
        #+END:
-      
+
       Use `C-c C-x r' to insert such a dynamic block, and you will
       be prompted for the ID.
 
@@ -361,11 +913,11 @@ Sorting improvements
 
 HTML <div> structure
 --------------------
-    
+
     There is now a <div>-based structure in exported HTML.
 
     - The table of context is wrapped into a div with a class
-      "table-of-contents". 
+      "table-of-contents".
 
     - The outline structure is embedded in <div> elements with
       classes "outline-1", "outline-2" etc.
@@ -395,22 +947,22 @@ Other stuff
       The :PROPERTY: drawer should always be part of this list, or
       your properties will not be folded away.
       Thanks to Richard G. Riley for this proposal.
-      
+
     - `org-agenda-fontify-priorities' may now also be an
       association list of priorities and faces, to specify the
       faces of priorities in the agenda individually.
-      
+
     - The variable `org-export-with-property-drawer' no longer
       exists, please use `org-export-with-drawers' instead.  Also,
       the corresponding switch in the #+OPTIONS line has changed
       from "p" to "d".  Thanks to Bastien for pointing out that we
       needed to handle not only the property drawer.
-      
+
     - M-up and M-down now move the current line up and down (if
       not at a headline, item or table).  Among other things you
       can use this to re-order properties in the drawer.  This was
       a proposal by Bastien.
-      
+
     - New variable `org-agenda-todo-ignore-with-date', based on a
       request by Wanrong Lin.
 
@@ -615,7 +1167,7 @@ Overview
 ========
 
    - Category and the archive location can be properties.
-   - The clocktable has a new =:scope= parameter.
+   - The clocktable has a new `:scope' parameter.
    - CSV support when importing a table.
    - Better defaults when modifying a time stamp.
    - New way to specify the duration of an appointment.
@@ -640,14 +1192,14 @@ Details
 
      This is a much cleaner way of dealing with multiple
      categories and archives in a single file.  The preferred use
-     of the =#+CATEGORY= and =#+ARCHIVE= lines is now to set a
+     of the `#+CATEGORY' and `#+ARCHIVE' lines is now to set a
      *single* default for the file which is then locally
      overruled by properties.  This was a proposal from Bastien
-     if I remember correctly.  Multiple =#+= lines still work
+     if I remember correctly.  Multiple `#+' lines still work
      and I don't plan to remove this support soon, but I
      encourage you to stop using them.
 
-   - The clocktable has a new =:scope= parameter that determines
+   - The clocktable has a new `:scope' parameter that determines
      the range in the file from which clock entries should be
      taken.  This can be anything from the local subtree to the
      entire buffer to even the full list of agenda files.  Legal
@@ -692,7 +1244,7 @@ Details
      auto-filling, indentation and paragraphs are exported into
      the buffer, so that typing list items with indentation works
      better.  This was Bastien's idea and request.
-     
+
    - New variable `org-priority-start-cycle-with-default'.  When
      t (the default), priority cycling will initially set the
      default priority and then increase or decrease.  When nil,
@@ -861,7 +1413,7 @@ Details
      use a format string that will be interpreted by
      `format-time-string', for example:
 
-      #+DATE: %Y/%m/%d %X 
+      #+DATE: %Y/%m/%d %X
 
    - The default of `org-deadline-warning-days' has changed to 14
      days.  30 was really too much, I suspect most people (me
@@ -941,7 +1493,7 @@ Details
    - New variable `org-archive-save-context-info' governs if
      information that would be lost by moving a subtree to the
      archive file, should be stored as special properties.  For
-     example, 
+     example,
 
       (setq org-archive-save-context-info '(itags category))
 
@@ -999,12 +1551,12 @@ Details
      like this a lot better than the `t' setting, because now the
      keys behave more predictable and still give easy access to
      the special locations.
-     
+
    - New command to set or remove a tag from all headlines in a
      region.
 
    - When Org-mode visits a file, it will initially hide all
-     drawers. 
+     drawers.
 
    - The default of the variable `org-cycle-global-at-bob' is now
      nil, meaning that TAB no longer does global visibility
@@ -1106,7 +1658,7 @@ Details
    - You can now set default values for properties that can be
      inherited by all entries in a buffer, or by all entries
      globally.  Global properties are set in the variable
-     `org-global-properties', like this: 
+     `org-global-properties', like this:
 
        (setq org-global-properties '(("NAME" "This is the value")))
 
@@ -1152,7 +1704,7 @@ Version 5.03
 
 Incompatible Changes
 ====================
-   
+
    - The variable `org-special-ctrl-a' has been renamed to
      `org-special-ctrl-a/e'.  The old one is still an alias (but
      not on Emacs 21 where variable aliases cannot be defined).
@@ -1254,7 +1806,7 @@ Version 5.01
 
 Overview
 ========
- 
+
    - A new minor mode, orgstruct-mode, exports the Org-mode
      structure editing commands into any other mode.
 
@@ -1318,16 +1870,16 @@ Drawers
     starts with a line containing only the name of the drawer
     bracketed by colons. It ends with :END:.  For example,
     after setting
-    
+
        (setq org-drawers '("PROPERTIES" "HIDDEN"))
 
     you can then create drawers like this:
-    
+
        :HIDDEN:
          here is some stuff that remains hidden
          unless TAB is pressed directly in that line
        :END:
-    
+
     The PROPERTIES drawer has special meaning for ORG-mode, it
     contains properties of an entry (see below).
 
@@ -1340,46 +1892,46 @@ Properties and Column View
       tags, and planning information like DEADLINE and SCHEDULED.
       In addition, you can assign arbitrary properties by creating
       a property drawer and inserting a line like
-      
+
          :PROPNAME: This is the value of the property
-      
+
       Org-mode has an API for properties, if you want to write a
       program using properties, use the functions
       `org-entry-properties', `org-entry-get', `org-entry-put',
       and `org-entry-delete'.
-      
+
     - Planning information like DEADLINE can be hidden in the
       properties drawer.
-      
+
       If the PROPERTIES drawer starts in the first line after a
       headline, also the DEADLINE, SCHEDULED and CLOCK information
       will be inserted inside the drawer.  If no PROPERTIES drawer
       is present, or if it does not start in the line right after
       the headline, this information remains in the lines directly
       after the headline, outside the drawer.
-      
+
     - TAGS searches can now also query properties.  For example,
       the search
-      
+
          LEVEL=3+BOSS+ASSIGNED="Hans"/WAITING
-      
-      will find entries that 
+
+      will find entries that
       - are level 3
       - have the tag BOSS
       - have an ASSIGNED property with the value "Hans"
       - are TODO status WAITING.
 
         So here is an entry that will match:
-        
+
            *** WAITING Clean up the factory     :BOSS:
                :PROPERTIES:
                :ASSIGNED: Hans
                :END:
-        
+
         You may also use a regular expression to match against a
         property value.  For example, to find stuff assigned to Hans
         or Sarah, use
-        
+
            ASSIGNED={^\(Hans\|Sarah\)$}
 
     - Column View is a special way to look at property values in
@@ -1429,11 +1981,11 @@ Properties and Column View
       necessarily in the same entry as the table.  This was a
       request by Eddward.  File-wide constants can be defined with
       #+CONSTANTS, see below.
-      
+
     - Things that still need to be sorted out about drawers,
       properties and column view - comments and suggestions
       welcome!
-      
+
       + How to deal with drawers and properties in HTML and ASCII
         export?
       + What key could be used to insert an empty property drawer
@@ -1465,20 +2017,19 @@ Spreadsheet
       results.  For example you can now finally have a column of
       increasing numbers by setting the first field to a fixed
       number, and let the rest follow from a column formula.
-      
+
       Here is an example
-      
+
          | 1 |
          | 2 |
          | 3 |
          #+TBLFM: $1=@-1+1::@1$1=1
-      
+
     - Constants for formulas in spreadsheets are globally defined
       with the variable `org-table-formula-constants'.  File-local
       constants can now be set with a line like:
-      
+
          #+CONSTANTS: c=299792458.  pi=3.14  eps=2.4e-6
-      
 
 Minor changes
 -------------
@@ -1486,13 +2037,13 @@ Minor changes
     - When entries are archived, a timestamp for the moment of
       archiving is added to the line with planning information.
       It looks like this:
-      
+
        ARCHIVED: [2007-07-02 Mon 11:34]
-      
+
       Thanks to J. David Boyd for constructive comments.
-      
+
     - Bug fixes
-      
+
       Many bugs are fixed, as usually all the ones where I replied
       "fixed" on emacs-orgmode.  If you reported one of these
       bugs, please check if it really has disappeared in the new
@@ -1534,18 +2085,17 @@ Version 4.78
 
 Overview
 ========
-  
+
    - Time stamps with a time range *included*, like
       <2007-06-18 Mon 17:33-18:23>
-     
+
    - Clock times without clocking in/out: CLOCK: => 2:00
 
    - Language-specific characters allowed in TAGS (Emacs only).
 
    - Promotion and demotion of items gets the indentation right.
-     
+
    - Indenting lines with TAB is more intelligent.
-     
 
 Incompatible changes
 ====================
@@ -1554,9 +2104,9 @@ Incompatible changes
      Before installation, as an XEmacs user you must rename the
      file org_xemacs.el to org.el, i.e. you must overwrite org.el
      with the xemacs version.  For example:
-     
+
       mv org_xemacs.el org.el
-     
+
      This is necessary so that I can make use of some features
      that would be cumbersome to support in a single file.  The
      XEmacs version is derived from the Emacs version with a
@@ -1565,11 +2115,11 @@ Incompatible changes
 
 Details
 =======
-   
+
    - A time stamp may now contain a range of times.  So you no
      longer need to use two separate stamps to indicate a time
      interval on a single day.  For example
-     
+
       <2007-06-18 Mon 17:30-18:20>
 
      This is now fully supported, including changing the time
@@ -1598,30 +2148,30 @@ Details
      Emacs configuration of another user, so if you are sharing
      org-mode files with other users, it might still be best to
      stick to the ASCII characters.
-     
+
    - Promotion and demotion of plain list items (commands M-left,
      M-right) no longer changes the indentation by just one
      space.  Instead, it uses intelligence gathered from the
      surrounding list structure to do the right thing.  Thanks to
      William Henney for starting the discussion about this.
-     
+
    - TAB does now a better job of indenting lines.
-     
+
      + After tables and code segments (lines starting with ":"),
        indentation goes back to what it was before (thanks to
        William Henney for suggesting this behavior).
-       
+
      + When plain lists items are involved, we had a long
        discussion on emacs-orgmode where I tried to show that a
        too-sophisticated implementation will still be easily
        fooled.   Here is what I have implemented now - lets see
-       if we can agree on this:  
-       
+       if we can agree on this:
+
        Indentation will flatten lists with the same bullet type,
        but indent another bullet type further.  The time when
        this fails is in a nested list, when you want to get back
        out to a previous level.  For example
-       
+
         - item 1
         - item 2
         + item 2a
@@ -1630,7 +2180,7 @@ Details
 
        When using TAB on every line in this list, the structure
        will change to
-       
+
         - item 1
         - item 2
           + item 2a
@@ -1639,7 +2189,6 @@ Details
 
        So you need to change the level of the last line by hand,
        using promotion and demotion functions.
- 
 
 Version 4.77
 ~~~~~~~~~~~~
@@ -1812,7 +2361,7 @@ Details
    - Highest, lowest, and default priority can be set on a
      per-file basis with #+PRIORITIES: H L D
      For example, to use priorities from 1 to 9, you could use
- 
+
        #+PRIORITIES: 1 9 9
 
      Thanks to Dmitri Minaev for a patch to this effect.
@@ -1861,7 +2410,7 @@ Incompatible Changes
 
 Details
 =======
- 
+
    - Agenda views can be exported as plain text, as HTML, and as
      Postscript(R).  This can simply be done from the agenda
      buffer with `C-x C-w' and then specifying a filename like
@@ -1967,7 +2516,7 @@ Details
      If the cursor is already at the beginning of the line, C-a
      will spring *forward* to the headline text.  This was a
      proposal from Leo, based on a request from Scott Jaderholm.
-     
+
      I have not turned this turned this on by default, should I?
 
    - When LaTeX fragments are processed into images, there is now
@@ -2005,11 +2554,9 @@ Version 4.71
 
 Overview
 ========
-   
 
 Incompatible changes
 ====================
-   
 
 Details
 =======
@@ -2031,21 +2578,21 @@ Details
     refers to the list of *all* todo keywords used in files
     that are scanned for the agenda.
 
-  - Many bug fixes. 
+  - Many bug fixes.
 
 Version 4.70
 ~~~~~~~~~~~~
 
 Overview
 ========
-   
+
    - Dust settles after revamp of TODO keyword system.
    - The export title can be taken from the first text line.
    - TTY replacement keys have changed.
 
 Incompatible changes
 ====================
-   
+
    - Some TTY replacement keys are changed, see below.
 
 Details
@@ -2124,7 +2671,7 @@ Version 4.69
 
 Overview
 ========
-   
+
    This time the changes affect the following areas:
 
    - TODO keywords:  Multiple sequences in a single file.
@@ -2140,7 +2687,7 @@ Incompatible changes
 
    - It used to be possible to spread the list of TODO keywords
      over several lines, like
- 
+
      #+SEQ_TODO: TODO
      #+SEQ_TODO: PROGRESS
      #+SEQ_TODO: DONE
@@ -2161,7 +2708,7 @@ Details
    - You can now use multiple sets of TODO keywords in the same
      buffer.  For example, you may put the following three lines
      into a file:
-   
+
        #+SEQ_TODO: TODO DONE
        #+SEQ_TODO: REPORT BUG KNOWNCAUSE RESOLVED
        #+TYP_TODO: Fred Laura Peter Me OK
@@ -2306,7 +2853,7 @@ Version 4.67
 
    - Synchronized with Emacs once more:  Emacs CVS has now org-mode
      4.67.  At least until it causes a problem, then the Emacs people
-     will switch back to 4.56.  Lets hope there will be no problem. 
+     will switch back to 4.56.  Lets hope there will be no problem.
 
    - Code cleanup
 
@@ -2432,10 +2979,9 @@ Overview
    - Easier access to the list of stored links.
    - Horizontal lines in HTML export.
    - Remember templates and storing of notes improved.
-    
 
-Detailed description of changes 
-================================
+Detailed description of changes
+===============================
 
    - The descriptive part of links to email messages can be configured
      using the variable `org-email-link-description-format'.  The new
@@ -2462,7 +3008,7 @@ Detailed description of changes
 
    - A line consisting only of "-", and at least 5 of them, is
      exported into HTML as <hr/>, as proposed by Giovanni Ridolfi.
-  
+
    - Several changes to org <-> remember integration
 
        - You can use `org-remember' as your default command to start
@@ -2503,7 +3049,6 @@ Detailed description of changes
          sure how well this would work though, since some things like
          the interactive time stamps are org.el specific, so treating
          them would require special hooks.  Comments?
- 
 
 Version 4.63
 ~~~~~~~~~~~~
@@ -2660,7 +3205,7 @@ Version 4.47
    - Agenda items can be sorted by tag.  The *last* tag is used for this.
    - The prefix and the sorting strategy for agenda items can depend
      upon the agenda type.
-   - The handling of `[mailto:'] links can be customized, see the new
+   - The handling of `mailto:' links can be customized, see the new
      variable `org-link-mailto-program'.
    - `mailto' links can specify a subject after a double colon,
      like [mailto:carsten@orgmode.org::Org-mode is buggy].
@@ -3081,7 +3626,7 @@ Version 2.10
      in the buffer without affecting outline visibility.
    - Hooks for John Wiegley's remember.el.
    - `org-read-date' pops up calendar for date selection with the mouse.
-     See variable `org-popup-calendar-for-date-prompt'.  
+     See variable `org-popup-calendar-for-date-prompt'.
 
 Version 2.6
 ~~~~~~~~~~~
