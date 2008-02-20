@@ -1,11 +1,12 @@
-;;; org-irc.el --- Store links to IRC sessions.
-;; Copyright (C) 2008 Phil Jackson
+;;; org-irc.el --- Store links to IRC sessions
+;;
+;; Copyright (C) 2008  Free Software Foundation, Inc.
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
-;; Version: 0.03
+;; Version: 1.0
 ;;
-;; This file is not yet part of GNU Emacs.
+;; This file is part of GNU Emacs.
 ;;
 ;; GNU Emacs is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -21,7 +22,6 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to the
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
 ;;
@@ -51,14 +51,12 @@
 ;;
 ;;; Code:
 
-(require 'org)
-
 (defvar org-irc-client 'erc
   "The IRC client to act on")
-(defvar org-irc-link-to-logs t
+(defvar org-irc-link-to-logs nil
   "non-nil will store a link to the logs, nil will store an irc: style link")
 
-;; Generic functions/config (extend for other clients)
+;; Generic functions/config (extend these for other clients)
 
 (add-to-list 'org-store-link-functions
              'org-irc-store-link)
@@ -149,16 +147,10 @@ of the current ERC session"
     (concat link "/"
             (if (and (erc-default-target)
                      (erc-channel-p (erc-default-target))
-                     (get-text-property (point) 'erc-parsed)
-                     (elt (get-text-property (point) 'erc-parsed) 1))
+                     (car (get-text-property (point) 'erc-data)))
                 ;; we can get a nick
-                (let ((nick
-                       (car
-                        (erc-parse-user
-                         (elt (get-text-property (point)
-                                                 'erc-parsed) 1)))))
-                  (concat (erc-default-target) "/"
-                          (substring nick 1)))
+                (let ((nick (car (get-text-property (point) 'erc-data))))
+                  (concat (erc-default-target) "/" nick))
                 (erc-default-target)))))
 
 (defun org-irc-visit-erc (link)

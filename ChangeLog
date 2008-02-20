@@ -1,3 +1,9 @@
+2008-02-19  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* org.el (org-store-link): org-irc required.
+	* org-irc.el (org-irc-get-erc-link): Fixed to allow the extraction
+	of a nick from both CVS and stable versions of erc.
+
 2008-02-19  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-set-regexps-and-options): Parse the new logging
