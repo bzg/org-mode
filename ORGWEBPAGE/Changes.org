@@ -5,6 +5,18 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
+* Version 5.23
+
+** Incompatible changes
+
+** Details
+
+   - M-RET can again be used to split a line, but it will keep
+     any tags in the current line.  A lot of people complained
+     about the M-RET in 5.22, so the splitting is back.  I hope
+     everyone can agree that is go to keep tags in place anyway.
+
+
 * Version 5.22
 
 ** Incompatible changes

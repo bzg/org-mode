@@ -2987,13 +2987,13 @@ DONE@footnote{It is possible that Org-mode will record two time stamps
 when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes - if you have configured
 both, the state change recording note will take precedence and cancel
-the @samp{Closing Note}.}, and that a special note is recorded when
-switching to WAIT or CANCELED.  The setting for WAIT is even more
-special: The @samp{!} after the slash means that in addition to the note
-taken when entering the state, a time stamp should be recorded when
-@i{leaving} the WAIT state.  This allows you to get a record when
-switching from WAIT back to TODO, without getting one when first turning
-an entry into a TODO.
+the @samp{Closing Note}.}, and that a note is recorded when switching to
+WAIT or CANCELED.  The setting for WAIT is even more special: The
+@samp{!} after the slash means that in addition to the note taken when
+entering the state, a time stamp should be recorded when @i{leaving} the
+WAIT state.  This allows you to get a record when switching from WAIT
+back to TODO, without getting one when first turning an entry into a
+TODO.
 
 You can use the exact same syntax for setting logging preferences local
 to a buffer:
@@ -3117,7 +3117,7 @@ Here is an example of a checkbox list.
 
 Checkboxes work hierarchically, so if a checkbox item has children that
 are checkboxes, toggling one of the children checkboxes will make the
-parent checkbox reflect if none, some, or all o the children are
+parent checkbox reflect if none, some, or all of the children are
 checked.
 
 @cindex statistics, for checkboxes
@@ -3649,6 +3649,9 @@ applies to the entire subtree.
 @item ARCHIVE
 For archiving, the @code{:ARCHIVE:} property may define the archive
 location for the entire subtree (@pxref{Moving subtrees}).
+@item LOGGING
+The LOGGING property may define logging settings for an entry or a
+subtree (@pxref{Tracking TODO state changes}).
 @end table
 
 @node Column view, Property API, Property inheritance, Properties and columns

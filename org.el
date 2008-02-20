@@ -6213,8 +6213,19 @@ but create the new hedline after the current line."
 	 (t
 	  ;; in the middle of the line
 	  (org-show-entry)
-	  (end-of-line 1)
-	  (newline (if blank 2 1))))
+	  (if (and (org-on-heading-p)
+		   (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \r\n]"))
+	      ;; protect the tags
+	      (let ((tags (match-string 2)) pos)
+		(delete-region (match-beginning 1) (match-end 1))
+		(setq pos (point-at-bol))
+		(newline (if blank 2 1))
+		(save-excursion
+		  (goto-char pos)
+		  (end-of-line 1)
+		  (insert " " tags)
+		  (org-set-tags nil 'align)))
+	  (newline (if blank 2 1)))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
