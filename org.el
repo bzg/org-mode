@@ -4670,7 +4670,7 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 
 (defun org-remove-keyword-keys (list)
   (mapcar (lambda (x)
-	    (if (string-match "(..?)$" x)
+	    (if (string-match "(.*)$" x)
 		(substring x 0 (match-beginning 0))
 	      x))
 	  list))
