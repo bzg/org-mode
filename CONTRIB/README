@@ -21,6 +21,7 @@ org-iswitchb.el      --- use iswitchb to select Org buffer
 org-man.el 	     --- Support for links to manpages in Org-mode
 org-panel.el 	     --- Simple routines for us with bad memory
 org-registry.el      --- a registry for Org links
+org-screen.el        --- visit screen sessions through Org-mode links
 org-toc.el 	     --- Table of contents for Org-mode buffer
 org-mairix.el 	     --- Hook mairix search into Org for different MUAs
 org-mew.el           --- Support for links to messages in Mew
