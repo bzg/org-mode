@@ -506,6 +506,31 @@ the values `folded', `children', or `subtree'."
   :tag "Org Edit Structure"
   :group 'org-structure)
 
+(defcustom org-odd-levels-only nil
+  "Non-nil means, skip even levels and only use odd levels for the outline.
+This has the effect that two stars are being added/taken away in
+promotion/demotion commands.  It also influences how levels are
+handled by the exporters.
+Changing it requires restart of `font-lock-mode' to become effective
+for fontification also in regions already fontified.
+You may also set this on a per-file basis by adding one of the following
+lines to the buffer:
+
+   #+STARTUP: odd
+   #+STARTUP: oddeven"
+  :group 'org-edit-structure
+  :group 'org-font-lock
+  :type 'boolean)
+
+(defcustom org-adapt-indentation t
+  "Non-nil means, adapt indentation when promoting and demoting.
+When this is set and the *entire* text in an entry is indented, the
+indentation is increased by one space in a demotion command, and
+decreased by one in a promotion command.  If any line in the entry
+body starts at column 0, indentation is not changed at all."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
 When t, `C-a' will bring back the cursor to the beginning of the
@@ -540,30 +565,32 @@ When t, the following will happen while the cursor is in the headline:
   :group 'org-edit-structure
   :type 'boolean)
 
-(defcustom org-odd-levels-only nil
-  "Non-nil means, skip even levels and only use odd levels for the outline.
-This has the effect that two stars are being added/taken away in
-promotion/demotion commands.  It also influences how levels are
-handled by the exporters.
-Changing it requires restart of `font-lock-mode' to become effective
-for fontification also in regions already fontified.
-You may also set this on a per-file basis by adding one of the following
-lines to the buffer:
+(defcustom org-M-RET-may-split-line '((default . t))
+  "Non-nil means, M-RET will split the line at the cursor position.
+When nil, it will go to the end of the line before making a
+new line.
+You may also set this option in a different way for different
+contexts.  Valid contexts are:
 
-   #+STARTUP: odd
-   #+STARTUP: oddeven"
-  :group 'org-edit-structure
-  :group 'org-font-lock
-  :type 'boolean)
+headline  when creating a new headline
+item      when creating a new item
+table     in a table field
+default   the value to be used for all contexts not explicitly
+          customized"
+  :group 'org-structure
+  :group 'org-table
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "Never" nil)
+	  (repeat :greedy t :tag "Individual contexts"
+		  (cons
+		   (choice :tag "Context"
+			   (const headline)
+			   (const item)
+			   (const table)
+			   (const default))
+		   (boolean)))))
 
-(defcustom org-adapt-indentation t
-  "Non-nil means, adapt indentation when promoting and demoting.
-When this is set and the *entire* text in an entry is indented, the
-indentation is increased by one space in a demotion command, and
-decreased by one in a promotion command.  If any line in the entry
-body starts at column 0, indentation is not changed at all."
-  :group 'org-edit-structure
-  :type 'boolean)
 
 (defcustom org-blank-before-new-entry '((heading . nil)
 					(plain-list-item . nil))
@@ -6245,7 +6272,7 @@ but create the new hedline after the current line."
 		       (delete-region (match-beginning 1) (match-end 1)))
 		  (setq pos (point-at-bol))
 		  (or split (end-of-line 1))
-		  (just-one-space 0)
+		  (delete-horizontal-space)
 		  (newline (if blank 2 1))
 		  (when tags
 		    (save-excursion
@@ -7017,7 +7044,7 @@ Return t when things worked, nil when we are not in an item."
        (t 
 	(unless (org-get-alist-option org-M-RET-may-split-line 'item)
 	  (end-of-line 1)
-	  (just-one-space ))
+	  (delete-horizontal-space))
 	(newline (if blank 2 1))))
       (insert bul (if checkbox "[ ]" ""))
       (just-one-space)
@@ -28286,28 +28313,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
 
-(defcustom org-M-RET-may-split-line '((default . t))
-  "Non-nil means, M-RET will split the line at the cursor position.
-When nil, it will go to the end of the line before making a
-new line.
-You may also set this option in a different way for different
-contexts.  Valid contexts are:
-
-headline  when creating a new headline
-item      when creating a new item
-table     in a table field
-default   the value to be used for all contexts not explicitly
-          customized"
-  :group 'org-structure
-  :group 'org-table
-  :type '(choice
-	  (const :tag "Always" t)
-	  (const :tag "Never" nil)
-	  (repeat :greedy t :tag "Individual contexts"
-		  (cons
-		   (choice :tag "Context"
-			   (const headline)
-			   (const item)
-			   (const table)
-			   (const default))
-		   (boolean)))))
