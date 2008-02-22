@@ -1,3 +1,11 @@
+2008-02-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-insert-heading, org-insert-item): More intelligent
+	splitting of lines when creating a new headline or item.
+	(org-M-RET-may-split-line): New option.
+	(org-table-wrap-region): Respect the table setting in
+	org-M-RET-may-split-line'.
+
 2008-02-19  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* org.el (org-store-link): org-irc required.

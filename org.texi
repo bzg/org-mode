@@ -833,12 +833,14 @@ plain list item, a new item is created (@pxref{Plain lists}).  To force
 creation of a new headline, use a prefix arg, or first press @key{RET}
 to get to the beginning of the next line.  When this command is used in
 the middle of a line, the line is split and the rest of the line becomes
-the new headline.  If the command is used at the beginning of a
-headline, the new headline is created before the current line.  If at
-the beginning of any other line, the content of that line is made the
-new heading.  If the command is used at the end of a folded subtree
-(i.e. behind the ellipses at the end of a headline), then a headline
-like the current one will be inserted after the end of the subtree.
+the new headline@footnote{If you do not want the line to be split,
+customize the variable @code{org-M-RET-may-split-line}.}.  If the
+command is used at the beginning of a headline, the new headline is
+created before the current line.  If at the beginning of any other line,
+the content of that line is made the new heading.  If the command is
+used at the end of a folded subtree (i.e. behind the ellipses at the end
+of a headline), then a headline like the current one will be inserted
+after the end of the subtree.
 @kindex C-@key{RET}
 @item C-@key{RET}
 Insert a new heading after the current subtree, same level as the
@@ -1156,11 +1158,12 @@ fixes the indentation of the curent line in a heuristic way.
 Insert new item at current level.  With prefix arg, force a new heading
 (@pxref{Structure editing}).  If this command is used in the middle of a
 line, the line is @emph{split} and the rest of the line becomes the new
-item.  If this command is executed in the @emph{whitespace before a bullet or
-number}, the new item is created @emph{before} the current item.  If the
-command is executed in the white space before the text that is part of
-an item but does not contain the bullet, a bullet is added to the
-current line.
+item@footnote{If you do not want the line to be split, customize the
+variable @code{org-M-RET-may-split-line}.}.  If this command is executed
+in the @emph{whitespace before a bullet or number}, the new item is
+created @emph{before} the current item.  If the command is executed in
+the white space before the text that is part of an item but does not
+contain the bullet, a bullet is added to the current line.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
@@ -1418,7 +1421,9 @@ the table is enlarged as needed.  The process ignores horizontal separator
 lines.
 @c
 @kindex C-c C-q
+@kindex M-@key{RET}
 @item C-c C-q
+@itemx M-@kbd{RET}
 Wrap several fields in a column like a paragraph.  If there is an active
 region, and both point and mark are in the same column, the text in the
 column is wrapped to minimum width for the given number of lines.  A

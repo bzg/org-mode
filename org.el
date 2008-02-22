@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.22a
+;; Version: 5.22a+
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.22a"
+(defconst org-version "5.22a+"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -4669,6 +4669,7 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 		 (and log2 (if (equal log2 "!") 'time 'note)))))))
 
 (defun org-remove-keyword-keys (list)
+  "Remove a pair of parenthesis at the end of each string in LIST."
   (mapcar (lambda (x)
 	    (if (string-match "(.*)$" x)
 		(substring x 0 (match-beginning 0))
@@ -6211,21 +6212,49 @@ but create the new hedline after the current line."
 	  ;; insert right here
 	  nil)
 	 (t
+;	  ;; in the middle of the line
+;	  (org-show-entry)
+;	  (if (org-get-alist-option org-M-RET-may-split-line 'headline)
+;	      (if (and
+;		   (org-on-heading-p)
+;		   (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \r\n]"))
+;		  ;; protect the tags
+;;		  (let ((tags (match-string 2)) pos)
+;		    (delete-region (match-beginning 1) (match-end 1))
+;		    (setq pos (point-at-bol))
+;		    (newline (if blank 2 1))
+;		    (save-excursion
+;		      (goto-char pos)
+;		      (end-of-line 1)
+;		      (insert " " tags)
+;		      (org-set-tags nil 'align)))
+;		(newline (if blank 2 1)))
+;	    (newline (if blank 2 1))))
+
+
 	  ;; in the middle of the line
 	  (org-show-entry)
-	  (if (and (org-on-heading-p)
-		   (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \r\n]"))
-	      ;; protect the tags
-	      (let ((tags (match-string 2)) pos)
-		(delete-region (match-beginning 1) (match-end 1))
-		(setq pos (point-at-bol))
-		(newline (if blank 2 1))
-		(save-excursion
-		  (goto-char pos)
-		  (end-of-line 1)
-		  (insert " " tags)
-		  (org-set-tags nil 'align)))
-	  (newline (if blank 2 1)))))
+	  (let ((split
+		 (org-get-alist-option org-M-RET-may-split-line 'headline))
+		tags pos)
+	    (if (org-on-heading-p)
+		(progn
+		  (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+		  (setq tags (and (match-end 2) (match-string 2)))
+		  (and (match-end 1)
+		       (delete-region (match-beginning 1) (match-end 1)))
+		  (setq pos (point-at-bol))
+		  (or split (end-of-line 1))
+		  (just-one-space 0)
+		  (newline (if blank 2 1))
+		  (when tags
+		    (save-excursion
+		      (goto-char pos)
+		      (end-of-line 1)
+		      (insert " " tags)
+		      (org-set-tags nil 'align))))
+	      (or split (end-of-line 1))
+	      (newline (if blank 2 1))))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
@@ -6985,7 +7014,11 @@ Return t when things worked, nil when we are not in an item."
 	(open-line (if blank 2 1)))
        ((<= (point) eow)
 	(beginning-of-line 1))
-       (t (newline (if blank 2 1))))
+       (t 
+	(unless (org-get-alist-option org-M-RET-may-split-line 'item)
+	  (end-of-line 1)
+	  (just-one-space ))
+	(newline (if blank 2 1))))
       (insert bul (if checkbox "[ ]" ""))
       (just-one-space)
       (setq pos (point))
@@ -9454,6 +9487,8 @@ blank, and the content is appended to the field above."
 	(org-table-goto-column ccol)
 	(org-table-paste-rectangle))
     ;; No region, split the current field at point
+    (unless (org-get-alist-option org-M-RET-may-split-line 'table)
+      (skip-chars-forward "^\r\n|"))
     (if arg
 	;; combine with field above
 	(let ((s (org-table-blank-field))
@@ -9466,13 +9501,14 @@ blank, and the content is appended to the field above."
 	  (insert " " (org-trim s))
 	  (org-table-align))
       ;;  split field
-      (when (looking-at "\\([^|]+\\)+|")
-	(let ((s (match-string 1)))
-	  (replace-match " |")
-	  (goto-char (match-beginning 0))
-	  (org-table-next-row)
-	  (insert (org-trim s) " ")
-	  (org-table-align))))))
+      (if (looking-at "\\([^|]+\\)+|")
+	  (let ((s (match-string 1)))
+	    (replace-match " |")
+	    (goto-char (match-beginning 0))
+	    (org-table-next-row)
+	    (insert (org-trim s) " ")
+	    (org-table-align))
+	(org-table-next-row)))))
 
 (defvar org-field-marker nil)
 
@@ -28250,3 +28286,28 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
 
+(defcustom org-M-RET-may-split-line '((default . t))
+  "Non-nil means, M-RET will split the line at the cursor position.
+When nil, it will go to the end of the line before making a
+new line.
+You may also set this option in a different way for different
+contexts.  Valid contexts are:
+
+headline  when creating a new headline
+item      when creating a new item
+table     in a table field
+default   the value to be used for all contexts not explicitly
+          customized"
+  :group 'org-structure
+  :group 'org-table
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "Never" nil)
+	  (repeat :greedy t :tag "Individual contexts"
+		  (cons
+		   (choice :tag "Context"
+			   (const headline)
+			   (const item)
+			   (const table)
+			   (const default))
+		   (boolean)))))

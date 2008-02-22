@@ -11,10 +11,15 @@
 
 ** Details
 
-   - M-RET can again be used to split a line, but it will keep
-     any tags in the current line.  A lot of people complained
-     about the M-RET in 5.22, so the splitting is back.  I hope
-     everyone can agree that is go to keep tags in place anyway.
+   - M-RET can again be used to split a line so tha the rest of
+     the line becomes the new heading.  However, if you do this
+     in a heading containing tags, the tags will stay in the old
+     line. 
+
+     Customize the variable `org-M-RET-may-split-line' if you
+     don't want this command to split a line in the middle.  The
+     same variable also influences line splitting in items and in
+     tables.
 
 
 * Version 5.22
