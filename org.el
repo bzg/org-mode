@@ -18606,6 +18606,7 @@ belonging to the \"Work\" category."
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
+	 (org-deadline-warning-days 0)
 	 (today (org-date-to-gregorian
 		 (time-to-days (current-time))))
 	 (files (org-agenda-files)) entries file)
@@ -18614,7 +18615,7 @@ belonging to the \"Work\" category."
       (setq entries
 	    (append entries
 		    (org-agenda-get-day-entries
-		     file today :timestamp :scheduled))))
+		     file today :timestamp :scheduled :deadline))))
     (setq entries (delq nil entries))
     ;; Map thru entries and find if we should filter them out
     (mapc

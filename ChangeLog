@@ -2,8 +2,6 @@
 
 	* org.el (org-agenda-to-appt): New argument `refresh' let the user
 	delete previous appointments stored in `appt-time-msg-list'.
-	Remove :deadline from the args of `org-agenda-get-day-entries'
-	instead of setting `org-deadline-warning-days' to nil.
 	(org-deadline-warning-days): Mention the fact that a value of zero
 	will be treated like negative values.
 	(org-show-todo-tree): Fix a small typo in the docstring.
