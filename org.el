@@ -2708,7 +2708,7 @@ nearest into the future."
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
-When negative, it means use this number (the absolute value of it)
+When 0 or negative, it means use this number (the absolute value of it)
 even if a deadline has a different individual lead time specified."
   :group 'org-time
   :group 'org-agenda-daily/weekly
@@ -7004,7 +7004,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
        (cond
 	((eq llt t)  "\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
 	((= llt ?.)  "\\([ \t]*\\([-+]\\|\\([0-9]+\\.\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
-	((= llt ?\)) "\\([ \t]*\\([-+]\\|\\([0-9]+)\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
+	((= llt ?\)) "\\([ \t]*\\([-+]\\|\\([0-9]+))\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
 	(t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))))))
 
 (defun org-in-item-p ()
@@ -14811,7 +14811,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
   "Check if the current headline contains a repeated deadline/schedule.
 If yes, set TODO state back to what it was and change the base date
 of repeating deadline/scheduled time stamps to new date.
-This function should be run in the `org-after-todo-state-change-hook'."
+This function is run automatically after each state change to a DONE state."
   ;; last-state is dynamically scoped into this function
   (let* ((repeat (org-get-repeat))
 	 (aa (assoc last-state org-todo-kwd-alist))
@@ -16482,6 +16482,7 @@ Return the position where this entry starts, or nil if there is no such entry."
 	(case-fold-search nil))
     (save-excursion
       (save-restriction
+	(widen)
 	(goto-char (point-min))
 	(when (re-search-forward
 	       (concat "^[ \t]*:ID:[ \t]+" (regexp-quote id) "[ \t]*$")
@@ -25470,7 +25471,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		   (cond
 		    ((eq llt t) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+[.)]\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
 		    ((= llt ?.) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+\\.\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
-		    ((= llt ?\)) "^\\( \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+)\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
+		    ((= llt ?\)) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+)\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
 		    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))
 		   line)
 	      (setq ind (org-get-string-indentation line)

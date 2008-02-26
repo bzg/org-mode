@@ -7,6 +7,11 @@
 	(org-publish-all): Do not overrule the default value of
 	`org-publish-use-timestamps-flag' with a nil value of FORCE.
 
+	* org.el (org-find-entry-with-id): Also find entry outside the
+	restriction.
+	(org-at-item-p, org-export-as-html): Fixed bug with
+	`org-plain-list-ordered-item-terminator' set to ?\).
+
 2008-02-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-heading, org-insert-item): More intelligent
