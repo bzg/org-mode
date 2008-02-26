@@ -36,10 +36,7 @@
 ;;        Get the ID property of an entry.  Using appropriate arguments
 ;;        to the function, it can also create the id for this entry.
 ;;
-;; org-id-get-from-refile-location
-;;        Use the refile interface to select an entry and get its ID.
-;;        If necessary, create an id for this item.
-;;
+;; FIXME: more to describe
 ;; TODO:
 ;; get/create id at current entry, safe in kill or so.
 
@@ -251,32 +248,41 @@ It returns the id of the entry.  If necessary, the id is created."
 			  (throw 'found (car x))))
 	  org-id-locations)))
 
-(defun org-id-find-id-in-file (id file)
-  "Return a marker pointing to the entry ID in FILE.
+(defun org-id-find-id-in-file (id file &optional markerp)
+  "Return the position of the entry ID in FILE.
 If that files does not exist, or if it does not contain this ID,
-return nil."
-  (let (org-agenda-new-buffers m)
+return nil.
+The position is returned as a cons cell (file-name . position).  With
+optional argument MARKERP, return the position as a marker."
+  (let (org-agenda-new-buffers m buf)
     (cond
      ((not file) nil)
-     ((not file-exists-p file) nil)
-     (t (with-current-buffer (org-get-agenda-file-buffer file)
+     ((not (file-exists-p file)) nil)
+     (t (with-current-buffer (setq buf (org-get-agenda-file-buffer file))
 	  (setq pos (org-find-entry-with-id id))
 	  (when pos
-	    (cons file pos)))))))  
+	    (cons file pos (move-marker (make-marker) pos buf))))))))
 
-(defun org-id-find (id)
+(defun org-id-find (id &optional markerp)
   "Return the location of the entry with the id ID.
-The return value is a cons cell with file name and location."
+The return value is a cons cell (file-name . position), or nil
+if there is no entry with that ID.
+With optional argument MARKERP, return the position as a markerp."
   (let ((file (org-id-find-id-file id))
 	org-agenda-new-buffers where)
     (when file
-      (setq where (org-id-find-id-in-file id file)))
+      (setq where (org-id-find-id-in-file id file markerp)))
     (unless where
       (org-id-update-id-locations)
       (setq file (org-id-find-id-file id))
       (when file
-	(setq where (org-id-find-id-in-file id file))))
+	(setq where (org-id-find-id-in-file id file markerp))))
     where))
+
+(defun org-id-goto (id)
+  "Switch to the buffer containing the entry with id ID.
+Move the cursor to that entry in that buffer."
+  (interactive))
     
 
 (provide 'org-id)
