@@ -1,3 +1,9 @@
+2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish, org-publish-current-file)
+	(org-publish-all): Do not overrule the default value of
+	`org-publish-use-timestamps-flag' with a nil value of FORCE.
+
 2008-02-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-heading, org-insert-item): More intelligent

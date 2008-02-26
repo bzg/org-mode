@@ -560,7 +560,8 @@ default is 'index.org'."
 				      nil t)
 		     current-prefix-arg))
   (save-window-excursion
-    (let ((org-publish-use-timestamps-flag (if force nil t))
+    (let ((org-publish-use-timestamps-flag
+	   (if force nil org-publish-use-timestamps-flag))
 	  (plists (org-publish-get-plists project-name)))
       (mapcar 'org-publish-plist plists))))
 
@@ -584,7 +585,7 @@ With prefix argument, force publish the file."
   (interactive "P")
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
-	   (if force nil t)))
+	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-file (buffer-file-name)))))
 
 
@@ -595,7 +596,7 @@ With prefix argument, force publish all files."
   (interactive "P")
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
-	   (if force nil t))
+	   (if force nil org-publish-use-timestamps-flag))
 	  (plists (org-publish-get-plists)))
       (mapcar 'org-publish-plist plists))))
 
