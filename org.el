@@ -2708,8 +2708,8 @@ nearest into the future."
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
-When negative or null, it means use the absolute value of this number
-even if a deadline has a different individual lead time specified."
+When negative or null, use the absolute value of this number even if 
+a deadline has a different individual lead time specified."
   :group 'org-time
   :group 'org-agenda-daily/weekly
   :type 'number)
@@ -4195,8 +4195,6 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 ;; FIXME: get the argument lists for the UNKNOWN stuff
 (declare-function add-to-diary-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
-(defvar appt-time-msg-list)
-(declare-function appt-check "appt" (&optional force))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
 (declare-function Info-find-node "info" (filename nodename &optional no-going-back))
 (declare-function Info-goto-node "info" (nodename &optional fork))
@@ -14856,7 +14854,7 @@ This function should be run in the `org-after-todo-state-change-hook'."
   "Make a compact tree which shows all headlines marked with TODO.
 The tree will show the lines where the regexp matches, and all higher
 headlines above the match.
-With \\[universal-argument] prefix, also show the DONE entries.
+With a \\[universal-argument] prefix, also show the DONE entries.
 With a numeric prefix N, construct a sparse tree for the Nth element
 of `org-todo-keywords-1'."
   (interactive "P")
@@ -18579,29 +18577,32 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
+(defvar appt-time-msg-list)
+
 ;;;###autoload
-(defun org-agenda-to-appt (&optional filter)
+(defun org-agenda-to-appt (&optional refresh filter)
   "Activate appointments found in `org-agenda-files'.
-When prefixed, prompt for a regular expression and use it as a
-filter: only add entries if they match this regular expression.
+With a \\[universal-argument] prefix, refresh the list of
+appointements. 
 
-FILTER can be a string. In this case, use this string as a
-regular expression to filter results.
+If FILTER is t, interactively prompt the user for a regular
+expression, and filter out entries that don't match it.
 
-FILTER can also be an alist, with the car of each cell being
+If FILTER is a string, use this string as a regular expression
+for filtering entries out.
+
+FILTER can also be an alist with the car of each cell being
 either 'headline or 'category.  For example:
 
   '((headline \"IMPORTANT\")
     (category \"Work\"))
 
 will only add headlines containing IMPORTANT or headlines
-belonging to the category \"Work\"."
+belonging to the \"Work\" category."
   (interactive "P")
   (require 'calendar)
-  (require 'appt)
-  (setq appt-time-msg-list nil)
-  (save-window-excursion (appt-check t))
-  (if (equal filter '(4))
+  (if refresh (setq appt-time-msg-list nil))
+  (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
@@ -18639,7 +18640,9 @@ belonging to the category \"Work\"."
 	   (appt-add tod evt)
 	   (setq cnt (1+ cnt))))) entries)
     (org-release-buffers org-agenda-new-buffers)
-    (message "Added %d event%s for today" cnt (if (> cnt 1) "s" ""))))
+    (if (eq cnt 0) 
+	(message "No event to add")
+      (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
 ;;; The clock for measuring work time.
 

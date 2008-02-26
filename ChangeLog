@@ -1,11 +1,12 @@
 2008-02-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
-	* org.el (org-agenda-to-appt): Don't set
-	`org-deadline-warning-days' to nil, but use a different list of
-	arguments for `org-agenda-get-day-entries'.  Also refresh the list
-	of appointments.
+	* org.el (org-agenda-to-appt): New argument `refresh' let the user
+	delete previous appointments stored in `appt-time-msg-list'.
+	Remove :deadline from the args of `org-agenda-get-day-entries'
+	instead of setting `org-deadline-warning-days' to nil.
 	(org-deadline-warning-days): Mention the fact that a value of zero
-	will also be enforced.
+	will be treated like negative values.
+	(org-show-todo-tree): Fix a small typo in the docstring.
 
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
