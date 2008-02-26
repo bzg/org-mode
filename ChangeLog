@@ -1,5 +1,8 @@
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-agenda-to-appt): Set `org-deadline-warning-days' to
+	nil for the duration of the command.
+
 	* org-publish.el (org-publish, org-publish-current-file)
 	(org-publish-all): Do not overrule the default value of
 	`org-publish-use-timestamps-flag' with a nil value of FORCE.

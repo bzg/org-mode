@@ -18605,6 +18605,7 @@ belonging to the category \"Work\"."
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
+	 (org-deadline-warning-days 0)
 	 (today (org-date-to-gregorian
 		 (time-to-days (current-time))))
 	 (files (org-agenda-files)) entries file)
