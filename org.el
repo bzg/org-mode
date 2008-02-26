@@ -2708,7 +2708,7 @@ nearest into the future."
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
-When negative, it means use this number (the absolute value of it)
+When negative or null, it means use the absolute value of this number
 even if a deadline has a different individual lead time specified."
   :group 'org-time
   :group 'org-agenda-daily/weekly
@@ -18600,12 +18600,11 @@ belonging to the category \"Work\"."
   (require 'calendar)
   (require 'appt)
   (setq appt-time-msg-list nil)
-  (appt-check t)
+  (save-window-excursion (appt-check t))
   (if (equal filter '(4))
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
-	 (org-deadline-warning-days 0)
 	 (today (org-date-to-gregorian
 		 (time-to-days (current-time))))
 	 (files (org-agenda-files)) entries file)
