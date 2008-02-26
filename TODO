@@ -1,6 +1,8 @@
           -*- mode:org -*-
 
+
 Radio links accross files?  Like in Pony?  Or HOWM.
+How can this be done in an efficient way?
 
 Ideas for time estimates:
 
@@ -8,13 +10,14 @@ Ideas for time estimates:
  {2:}    2 hours
  {2:30}  2 hours, 30 minutes
 
-
+What should be done with appointments that show up in the agenda.
+Do we need something to distinguish appointment that we have to be
+at from dates that are there just for information?
 
 Maybe make a new keyword APPT for appointment, meaning that this is
 something I need to attend, as opposed to something which is on that
 day and not necessarily something where we need to be present.  Not
 sure about this.
-
 
 Should we add this hierarchically? Should parents value be the summed
 values of children?  I guess not.  No.  Estimated times should be
@@ -25,10 +28,8 @@ times to parents, their fault.
 |---+---+---+---+---|
 |   |   |   |   |   |
 
-
-make special completion for refile path, similar to file completion.
-
 Make variables for case-fold-search, there is a request in the survey
+about case-sensitive search in tags or todo, something.
 
 ">" does not work well in column view, when currently there is no
 width defined.

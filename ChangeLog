@@ -1,3 +1,8 @@
+2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-find-entry-with-id): Also find entry outside the
+	restriction.
+
 2008-02-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-heading, org-insert-item): More intelligent
