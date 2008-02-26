@@ -4195,6 +4195,8 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 ;; FIXME: get the argument lists for the UNKNOWN stuff
 (declare-function add-to-diary-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
+(defvar appt-time-msg-list)
+(declare-function appt-check "appt" (&optional force))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
 (declare-function Info-find-node "info" (filename nodename &optional no-going-back))
 (declare-function Info-goto-node "info" (nodename &optional fork))
@@ -18577,7 +18579,6 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
-;; Make appt aware of appointments from the agenda
 ;;;###autoload
 (defun org-agenda-to-appt (&optional filter)
   "Activate appointments found in `org-agenda-files'.
@@ -18597,6 +18598,9 @@ will only add headlines containing IMPORTANT or headlines
 belonging to the category \"Work\"."
   (interactive "P")
   (require 'calendar)
+  (require 'appt)
+  (setq appt-time-msg-list nil)
+  (appt-check t)
   (if (equal filter '(4))
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
@@ -18609,10 +18613,9 @@ belonging to the category \"Work\"."
       (setq entries
 	    (append entries
 		    (org-agenda-get-day-entries
-		     file today
-		     :timestamp :scheduled :deadline))))
+		     file today :timestamp :scheduled))))
     (setq entries (delq nil entries))
-    ;; Map thru entries and find if they pass thru the filter
+    ;; Map thru entries and find if we should filter them out
     (mapc
      (lambda(x)
        (let* ((evt (org-trim (get-text-property 1 'txt x)))
