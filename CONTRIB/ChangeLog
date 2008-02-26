@@ -1,6 +1,10 @@
+2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-id.el: New file.
+
 2008-02-21  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org-screen.el: New file.
+	* lisp/org-screen.el: New file.
 
 2008-02-17  Christian Egli  <christian.egli@alumni.ethz.ch>
 
