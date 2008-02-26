@@ -1,3 +1,12 @@
+2008-02-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
+
+	* org.el (org-agenda-to-appt): Don't set
+	`org-deadline-warning-days' to nil, but use a different list of
+	arguments for `org-agenda-get-day-entries'.  Also refresh the list
+	of appointments.
+	(org-deadline-warning-days): Mention the fact that a value of zero
+	will also be enforced.
+
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-to-appt): Set `org-deadline-warning-days' to
