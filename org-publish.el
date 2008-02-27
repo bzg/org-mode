@@ -4,7 +4,7 @@
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Keywords: hypermedia, outlines
-;; Version: 1.80b
+;; Version: 1.80c
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -572,10 +572,12 @@ default is 'index.org'."
 With prefix argument, force publishing all files in project."
   (interactive "P")
   (save-window-excursion
-    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name))))
+    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
+	   (org-publish-use-timestamps-flag
+	    (if force nil org-publish-use-timestamps-flag)))
       (if (not project-name)
 	  (error "File %s is not part of any known project." (buffer-file-name)))
-      (org-publish project-name (if force nil t)))))
+      (org-publish project-name))))
 
 
 ;;;###autoload

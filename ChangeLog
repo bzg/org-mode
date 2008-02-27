@@ -1,3 +1,7 @@
+2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-current-project): Fixed another
+	problem with the FORCE argument.
 
 2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
 
