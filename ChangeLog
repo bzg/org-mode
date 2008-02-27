@@ -1,3 +1,9 @@
+2008-02-27  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* org-irc.el (org-irc-erc-store-link): Links now have
+	descriptions. The cpltxt and link variables are no longer directly
+	set.
+
 2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-current-project): Fixed another

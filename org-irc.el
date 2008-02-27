@@ -4,7 +4,7 @@
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
-;; Version: 1.0
+;; Version: 1.1
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -28,8 +28,10 @@
 ;; Link to an IRC session. Only ERC has been implemented at the
 ;; moment.
 ;;
-;; Please configure the variable `org-default-extensions' to ensure that
-;; this extension will be loaded.
+;; Place org-irc.el in your load path and add this to your
+;; .emacs:
+;;
+;; (require 'org-irc)
 ;;
 ;; Please note that at the moment only ERC is supported. Other clients
 ;; shouldn't be diffficult to add though.
@@ -48,8 +50,6 @@
 ;; requested server then one will be created.
 ;;
 ;;; Code:
-
-(require 'org-irc)
 
 (defvar org-irc-client 'erc
   "The IRC client to act on")
@@ -95,50 +95,55 @@ something IRC related"
 (defun org-irc-erc-get-line-from-log (erc-line)
   "Find the most suitable line to link to from the erc logs. If
 the user is on the erc-prompt then search backward for the first
-non-blank line, otherwise return the current line."
+non-blank line, otherwise return the current line. The result is
+a cons of the filename and search string."
   (erc-save-buffer-in-logs)
   (with-current-buffer (find-file-noselect (erc-current-logfile))
     (goto-char (point-max))
-    (concat
-     "file:" (abbreviate-file-name
-              buffer-file-name)
+    (list
+     (abbreviate-file-name buffer-file-name)
      ;; can we get a '::' part?
-     (if (equal erc-line (erc-prompt))
+     (if (string= erc-line (erc-prompt))
          (progn
            (goto-char (point-at-bol))
            (when (search-backward-regexp "^[^ 	]" nil t)
-             (concat "::" (buffer-substring-no-properties
-                           (point-at-bol)
-                           (point-at-eol)))))
+             (buffer-substring-no-properties (point-at-bol)
+                                             (point-at-eol))))
          (when (search-backward erc-line nil t)
-           (concat "::" (buffer-substring-no-properties
-                         (point-at-bol)
-                         (point-at-eol))))))))
+           (buffer-substring-no-properties (point-at-bol)
+                                           (point-at-eol)))))))
 
 (defun org-irc-erc-store-link ()
-  "Return an org compatible file:/ link which links to a log file
-of the current ERC session"
+  "Depending on the variable `org-irc-link-to-logs' store either
+a link to the log file for the current session or an irc: link to
+the session itself."
   (if org-irc-link-to-logs
-      (let ((erc-line (buffer-substring-no-properties
-                       (point-at-bol) (point-at-eol))))
+      (let* ((erc-line (buffer-substring-no-properties
+                        (point-at-bol) (point-at-eol)))
+             (parsed-line (org-irc-erc-get-line-from-log erc-line)))
         (if (erc-logging-enabled nil)
             (progn
-              (setq cpltxt (org-irc-erc-get-line-from-log erc-line))
+              (org-store-link-props
+               :type "file"
+               :description (concat "'" (cadr parsed-line)
+                                    "' from an IRC conversation")
+               :link (concat "file:" (car parsed-line) "::"
+                             (cadr parsed-line)))
               t)
             (error "This ERC session is not being logged")))
-      (let ((link (org-irc-get-erc-link)))
-        (if link
+      (let* ((link-text (org-irc-get-erc-link))
+             (link (org-irc-parse-link link-text)))
+        (if link-text
             (progn
-              (setq cpltxt (concat "irc:/" link))
-              (org-make-link cpltxt)
-              (setq link (org-irc-parse-link link))
-              (org-store-link-props :type "irc"
-                                    :server (car (car link))
-                                    :port (or (cadr (pop link))
-                                              erc-default-port)
-                                    :nick (pop link))
+              (org-store-link-props
+               :type "irc"
+               :link (org-make-link "irc:/" link-text)
+               :description (concat "irc session '" link-text "'")
+               :server (car (car link))
+               :port (or (cadr (pop link)) erc-default-port)
+               :nick (pop link))
               t)
-            (error "Failed to create (non-log) ERC link")))))
+            (error "Failed to create ('irc:/' style) ERC link")))))
 
 (defun org-irc-get-erc-link ()
   "Return an org compatible irc:/ link from an ERC buffer"
