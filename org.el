@@ -151,6 +151,32 @@ With prefix arg HERE, insert it at point."
   :group 'hypermedia
   :group 'calendar)
 
+(defcustom org-load-hook '(org-load-default-extensions)
+  "Hook that is run after org.el has been loaded.
+This happens also after `org' has been provided, so
+requiring something in this hook that does a (require 'org) is ok."
+  :group 'org
+  :type 'hook)
+
+(defcustom org-default-extensions '(org-irc)
+  "Extensions that should always be loaded together with org.el
+If the description starts with <A>, this means the extension
+will be autoloaded when needed, to preloading is not necessary."
+  :group 'org
+  :type
+  '(set :greedy t
+	(const :tag "    Mouse support (org-mouse.el)" org-mouse)
+	(const :tag "<A> Publishing (org-publish.el)" org-publish)
+	(const :tag "<A> LaTeX export (org-export-latex.el)" org-export-latex)
+	(const :tag "    IRC/ERC links (org-irc.el)" org-irc)
+	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)
+))
+
+(defun org-load-default-extensions ()
+  "Load all extensions that are listed in `org-default-extensions'."
+  (mapc 'require org-default-extensions))
+	  
+
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
   "The expansion command called by \\[org-complete] in normal context.
@@ -12006,7 +12032,6 @@ For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (setq org-store-link-plist nil)  ; reset
-  (require 'org-irc)
   (let (link cpltxt desc description search txt)
     (cond
 

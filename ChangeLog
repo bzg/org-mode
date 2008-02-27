@@ -1,3 +1,13 @@
+2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-irc.el: Modified the installation instructions.
+
+	* org.el (org-store-link): Removed the (require 'org-irc), this is
+	now handled by `org-default-extensions'.
+	(org-load-hook): This hok is now exlicitly defined and made
+	customizable.
+	(org-default-extensions): New option.
+
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-to-appt): Set `org-deadline-warning-days' to

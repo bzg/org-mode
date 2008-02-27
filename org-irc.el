@@ -28,10 +28,8 @@
 ;; Link to an IRC session. Only ERC has been implemented at the
 ;; moment.
 ;;
-;; Place org-irc.el in your load path and add this to your
-;; .emacs:
-;;
-;; (require 'org-irc)
+;; Please configure the variable `org-default-extensions' to ensure that
+;; this extension will be loaded.
 ;;
 ;; Please note that at the moment only ERC is supported. Other clients
 ;; shouldn't be diffficult to add though.
@@ -50,6 +48,8 @@
 ;; requested server then one will be created.
 ;;
 ;;; Code:
+
+(require 'org-irc)
 
 (defvar org-irc-client 'erc
   "The IRC client to act on")

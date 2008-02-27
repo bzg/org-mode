@@ -228,7 +228,7 @@ relup:
 
 clean:
 	rm -f $(ELCFILES) org.pdf org org.html orgcard.pdf orgcard.ps
-	rm -f *~ 
+	rm -f *~ */*~ */*/*~
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs
 	rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
 	rm -f orgcard_letter.tex orgcard_letter.pdf
