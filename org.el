@@ -14879,7 +14879,7 @@ This function is run automatically after each state change to a DONE state."
   "Make a compact tree which shows all headlines marked with TODO.
 The tree will show the lines where the regexp matches, and all higher
 headlines above the match.
-With \\[universal-argument] prefix, also show the DONE entries.
+With a \\[universal-argument] prefix, also show the DONE entries.
 With a numeric prefix N, construct a sparse tree for the Nth element
 of `org-todo-keywords-1'."
   (interactive "P")
@@ -18603,27 +18603,32 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
-;; Make appt aware of appointments from the agenda
+(defvar appt-time-msg-list)
+
 ;;;###autoload
-(defun org-agenda-to-appt (&optional filter)
+(defun org-agenda-to-appt (&optional refresh filter)
   "Activate appointments found in `org-agenda-files'.
-When prefixed, prompt for a regular expression and use it as a
-filter: only add entries if they match this regular expression.
+With a \\[universal-argument] prefix, refresh the list of
+appointements. 
 
-FILTER can be a string. In this case, use this string as a
-regular expression to filter results.
+If FILTER is t, interactively prompt the user for a regular
+expression, and filter out entries that don't match it.
 
-FILTER can also be an alist, with the car of each cell being
+If FILTER is a string, use this string as a regular expression
+for filtering entries out.
+
+FILTER can also be an alist with the car of each cell being
 either 'headline or 'category.  For example:
 
   '((headline \"IMPORTANT\")
     (category \"Work\"))
 
 will only add headlines containing IMPORTANT or headlines
-belonging to the category \"Work\"."
+belonging to the \"Work\" category."
   (interactive "P")
   (require 'calendar)
-  (if (equal filter '(4))
+  (if refresh (setq appt-time-msg-list nil))
+  (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
 	 (org-agenda-new-buffers nil)
@@ -18636,10 +18641,9 @@ belonging to the category \"Work\"."
       (setq entries
 	    (append entries
 		    (org-agenda-get-day-entries
-		     file today
-		     :timestamp :scheduled :deadline))))
+		     file today :timestamp :scheduled :deadline))))
     (setq entries (delq nil entries))
-    ;; Map thru entries and find if they pass thru the filter
+    ;; Map thru entries and find if we should filter them out
     (mapc
      (lambda(x)
        (let* ((evt (org-trim (get-text-property 1 'txt x)))
@@ -18663,7 +18667,9 @@ belonging to the category \"Work\"."
 	   (appt-add tod evt)
 	   (setq cnt (1+ cnt))))) entries)
     (org-release-buffers org-agenda-new-buffers)
-    (message "Added %d event%s for today" cnt (if (> cnt 1) "s" ""))))
+    (if (eq cnt 0) 
+	(message "No event to add")
+      (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
 ;;; The clock for measuring work time.
 

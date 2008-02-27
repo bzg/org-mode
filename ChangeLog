@@ -1,4 +1,6 @@
+
 2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
+
 
 	* org-irc.el: Modified the installation instructions.
 
@@ -7,6 +9,15 @@
 	(org-load-hook): This hok is now exlicitly defined and made
 	customizable.
 	(org-default-extensions): New option.
+
+2008-02-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
+
+	* org.el (org-agenda-to-appt): New argument `refresh' let the user
+	delete previous appointments stored in `appt-time-msg-list'.
+	(org-deadline-warning-days): Mention the fact that a value of zero
+	will be treated like negative values.
+	(org-show-todo-tree): Fix a small typo in the docstring.
+
 
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
