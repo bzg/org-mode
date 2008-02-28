@@ -35,11 +35,23 @@
 
 (defun org-bookmark-store-link ()
   "Store a link to the current line's bookmark in Emacs bookmark list window."
-  (if (eq major-mode 'bookmark-bmenu-mode)
-      (let ((bookmark (bookmark-bmenu-bookmark)))
-	(if bookmark
-	    (org-store-link-props :link (org-make-link "bookmark:" bookmark)
-				  :description bookmark)))))
+  (let (file bookmark)
+    (cond ((eq major-mode 'dired-mode)
+	   (setq file (abbreviate-file-name (dired-get-filename))))
+	  ((buffer-file-name (buffer-base-buffer))
+	   (setq file (abbreviate-file-name  
+		       (buffer-file-name (buffer-base-buffer))))))
+    (if (not file)
+	(when (eq major-mode 'bookmark-bmenu-mode)
+	  (setq bookmark (bookmark-bmenu-bookmark)))
+      (setq bmks (mapcar (lambda(bmk) 
+			   (if (equal file (cdr (assoc 'filename (cadr bmk))))
+			       (car bmk)))
+			 bookmark-alist))
+      (setq bookmark (completing-read "Bookmark: " bmks nil t 
+				      nil nil (car bmks))))
+    (org-store-link-props :link (org-make-link "bookmark:" bookmark)
+			  :description bookmark)))
 
 (provide 'org-bookmark)
 
