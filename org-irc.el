@@ -4,7 +4,7 @@
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
-;; Version: 1.2
+;; Version: 1.3
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -91,6 +91,20 @@ something IRC related"
     ((eq major-mode 'erc-mode)
      (org-irc-erc-store-link))))
 
+(defun org-irc-elipsify-description (string &optional after)
+  "Strip starting and ending whitespace and replace any chars
+that appear after the value in `after' with '...'"
+  (let* ((after (number-to-string (or after 30)))
+         (replace-map (list (cons "^[ \t]*" "")
+                            (cons "[ \t]*$" "")
+                            (cons (concat "^\\(.\\{" after
+                                          "\\}\\).*") "\\1..."))))
+    (mapc (lambda (x)
+            (when (string-match (car x) string)
+              (setq string (replace-match (cdr x) nil nil string))))
+          replace-map)
+    string))
+
 ;; ERC specific functions
 
 (defun org-irc-erc-get-line-from-log (erc-line)
@@ -126,7 +140,8 @@ the session itself."
             (progn
               (org-store-link-props
                :type "file"
-               :description (concat "'" (cadr parsed-line)
+               :description (concat "'" (org-irc-elipsify-description
+                                         (cadr parsed-line) 20)
                                     "' from an IRC conversation")
                :link (concat "file:" (car parsed-line) "::"
                              (cadr parsed-line)))
