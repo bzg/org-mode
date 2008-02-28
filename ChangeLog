@@ -2,8 +2,15 @@
 
 	* org.el (org-auto-repeat-maybe): Make sure that the repeat stuff
 	does not add another state note.
+	(org-agenda-search-history): New variable.
+	(org-search-view): New command.
+	(org-agenda-prefix-format, org-agenda-sorting-strategy): New
+	setting for search.
+	(org-agenda-custom-commands, org-agenda)
+	(org-agenda-get-restriction-and-command, org-run-agenda-series):
+	Cater for new agenda view.
 
-2008-02-28  Bernt Hansen <bernt@norang.ca>  (tiny change)
+2008-02-28  Bernt Hansen <bernt@norang.ca>
 
 	* org.el (org-put-clock-overlay): increase the limit of allowed
 	levels to 8 when building the clock summary.

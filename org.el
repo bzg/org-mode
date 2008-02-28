@@ -2367,9 +2367,11 @@ key     The key (one or more characters as a string) to be associated
 desc    A description of the commend, when omitted or nil, a default
         description is built using MATCH.
 type    The command type, any of the following symbols:
+         agenda      The daily/weekly agenda.
          todo        Entries with a specific TODO keyword, in all agenda files.
-         tags        Tags match in all agenda files.
-         tags-todo   Tags match in all agenda files, TODO entries only.
+         search      Entries containing search words entry or headline.
+         tags        Tags/Property/TODO match in all agenda files.
+         tags-todo   Tags/P/T match in all agenda files, TODO entries only.
          todo-tree   Sparse tree of specific TODO keyword in *current* file.
          tags-tree   Sparse tree with all tags matches in *current* file.
          occur-tree  Occur sparse tree for *current* file.
@@ -2401,6 +2403,7 @@ cmd    An agenda command, similar to the above.  However, tree commands
        (alltodo)
        (stuck)
        (todo \"match\" options files)
+       (search \"match\" options files)
        (tags \"match\" options files)
        (tags-todo \"match\" options files)
 
@@ -2426,6 +2429,7 @@ should provide a description for the prefix, like
 		 (choice
 		  (const :tag "Agenda" agenda)
 		  (const :tag "TODO list" alltodo)
+		  (const :tag "Search words" search)
 		  (const :tag "Stuck projects" stuck)
 		  (const :tag "Tags search (all agenda files)" tags)
 		  (const :tag "Tags search of TODO entries (all agenda files)" tags-todo)
@@ -2445,6 +2449,12 @@ should provide a description for the prefix, like
 		  (choice
 		   (const :tag "Agenda" (agenda))
 		   (const :tag "TODO list" (alltodo))
+		   (list :tag "Search words"
+			 (const :format "" search)
+			 (string :tag "Match")
+			 (repeat :tag "Local options"
+				 (list (variable :tag "Option")
+				       (sexp :tag "Value"))))
 		   (const :tag "Stuck projects" (stuck))
 		   (list :tag "Tags search"
 			 (const :format "" tags)
@@ -2810,7 +2820,8 @@ a grid line."
 (defcustom org-agenda-sorting-strategy
   '((agenda time-up category-keep priority-down)
     (todo category-keep priority-down)
-    (tags category-keep priority-down))
+    (tags category-keep priority-down)
+    (search category-keep))
   "Sorting structure for the agenda items of a single day.
 This is a list of symbols which will be used in sequence to determine
 if an entry should be listed before another entry.  The following
@@ -2873,7 +2884,8 @@ agenda entries."
   '((agenda  . "  %-12:c%?-12t% s")
     (timeline  . "  % s")
     (todo  . "  %-12:c")
-    (tags  . "  %-12:c"))
+    (tags  . "  %-12:c")
+    (search . "  %-12:c"))
   "Format specifications for the prefix of items in the agenda views.
 An alist with four entries, for the different agenda types.  The keys to the
 sublists are `agenda', `timeline', `todo', and `tags'.  The values
@@ -2928,7 +2940,8 @@ See also the variables `org-agenda-remove-times-when-in-prefix' and
 		(cons  (const agenda) (string :tag "Format"))
 		(cons  (const timeline) (string :tag "Format"))
 		(cons  (const todo) (string :tag "Format"))
-		(cons  (const tags) (string :tag "Format"))))
+		(cons  (const tags) (string :tag "Format"))
+		(cons  (const search) (string :tag "Format"))))
   :group 'org-agenda-line-format)
 
 (defvar org-prefix-format-compiled nil
@@ -19716,6 +19729,8 @@ Pressing `<' twice means to restrict to the current subtree or region
 		(org-let lprops '(org-agenda-list current-prefix-arg)))
 	       ((eq type 'alltodo)
 		(org-let lprops '(org-todo-list current-prefix-arg)))
+	       ((eq type 'search)
+		(org-let lprops '(org-search-view current-prefix-arg match)))
 	       ((eq type 'stuck)
 		(org-let lprops '(org-agenda-list-stuck-projects
 				  current-prefix-arg)))
@@ -19746,6 +19761,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
 	(customize-variable 'org-agenda-custom-commands))
        ((equal keys "a") (call-interactively 'org-agenda-list))
+       ((equal keys "s") (call-interactively 'org-search-view))
        ((equal keys "t") (call-interactively 'org-todo-list))
        ((equal keys "T") (org-call-with-arg 'org-todo-list (or arg '(4))))
        ((equal keys "m") (call-interactively 'org-tags-view))
@@ -19795,7 +19811,8 @@ a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS query                  M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
-/   Multi-occur                         C   Configure custom agenda commands
+s   Search for keywords                 C   Configure custom agenda commands
+/   Multi-occur 
 ")
 			(start 0))
 		    (while (string-match
@@ -19832,6 +19849,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		 ((string-match "\\S-" desc) desc)
 		 ((eq type 'agenda) "Agenda for current week or day")
 		 ((eq type 'alltodo) "List of all TODO entries")
+		 ((eq type 'search) "Word search")
 		 ((eq type 'stuck) "List of stuck projects")
 		 ((eq type 'todo) "TODO keyword")
 		 ((eq type 'tags) "Tags query")
@@ -19912,7 +19930,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	   ((eq c ?>)
 	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction nil))
-	   ((and (equal selstring "") (memq c '(?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/)))
+	   ((and (equal selstring "") (memq c '(?s ?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/)))
 	    (throw 'exit (cons (setq selstring (char-to-string c)) restriction)))
            ((and (> (length selstring) 0) (eq c ?\d))
             (delete-window)
@@ -19938,6 +19956,9 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
        ((eq type 'alltodo)
 	(org-let2 gprops lprops
 	  '(call-interactively 'org-todo-list)))
+       ((eq type 'search)
+	(org-let2 gprops lprops
+		  '(org-search-view current-prefix-arg match)))
        ((eq type 'stuck)
 	(org-let2 gprops lprops
 	  '(call-interactively 'org-agenda-list-stuck-projects)))
@@ -20839,6 +20860,121 @@ given in `org-agenda-start-on-weekday'."
 
 (defun org-agenda-ndays-to-span (n)
   (cond ((< n 7) 'day) ((= n 7) 'week) ((< n 32) 'month) (t 'year)))
+
+;;; Agenda word search
+
+(defvar org-agenda-search-history nil)
+
+;;;###autoload
+(defun org-search-view (&optional arg string)
+  "Show all entries that contain the words given in the search string.
+If the search string starts with an asterisks, only search in headlines."
+  (interactive "P")
+  (org-compile-prefix-format 'search)
+  (org-set-sorting-strategy 'search)
+  (org-prepare-agenda "SEARCH")
+  (let* ((props (list 'face nil
+		      'done-face 'org-done
+		      'org-not-done-regexp org-not-done-regexp
+		      'org-todo-regexp org-todo-regexp
+		      'mouse-face 'highlight
+		      'keymap org-agenda-keymap
+		      'help-echo (format "mouse-2 or RET jump to location")))
+	 ;; FIXME: get rid of the \n at some point  but watch out
+	 (regexp (concat "^" org-outline-regexp))
+	 rtn rtnall files file pos
+	 marker priority category tags
+	 ee txt beg end words word-regexps hdl-only buffer beg1 str)
+    (unless (and (stringp string)
+		 (string-match "\\S-" string))
+      (setq string (read-string "Word Search: " nil
+				'org-agenda-search-history)))
+
+    (setq org-agenda-redo-command
+	  (list 'org-search-view 'current-prefix-arg string))
+
+    (if (equal (string-to-char string) ?*)
+	(setq hdl-only t
+	      words (substring string 1))
+      (setq words string))
+    (setq words (org-split-string words)
+	  word-regexps
+	  (mapcar (lambda (w) (concat "\\<" (regexp-quote (downcase w)) "\\>"))
+		  words))
+    (setq files (org-agenda-files)
+	  rtnall nil)
+    (while (setq file (pop files))
+      (setq ee nil)
+      (catch 'nextfile
+	(org-check-agenda-file file)
+	(setq buffer (if (file-exists-p file)
+			 (org-get-agenda-file-buffer file)
+		       (error "No such file %s" file)))
+	(if (not buffer)
+	    ;; If file does not exist, make sure an error message is sent
+	    (setq rtn (list (format "ORG-AGENDA-ERROR: No such org-file %s"
+				    file))))
+	(with-current-buffer buffer
+	  (unless (org-mode-p)
+	    (error "Agenda file %s is not in `org-mode'" file))
+	  (let ((case-fold-search t))
+	    (save-excursion
+	      (save-restriction
+		(if org-agenda-restrict
+		    (narrow-to-region org-agenda-restrict-begin
+				      org-agenda-restrict-end)
+		  (widen))
+		(goto-char (point-min))
+		(while (re-search-forward regexp nil t)
+		  (catch :skip
+		    (setq beg (point-at-bol)
+			  beg1 (match-end 0)
+			  end (progn (outline-next-heading) (point)))
+		    (goto-char beg)
+		    (org-agenda-skip)
+		    (setq str (buffer-substring-no-properties
+			       (point-at-bol)
+			       (if hdl-only (point-at-eol) end)))
+		    (mapc
+		     (lambda (wr)
+		       (unless (string-match wr str)
+			 (goto-char (1- end))
+			 (throw :skip t)))
+		     word-regexps)
+		    (goto-char beg)
+		    (setq marker (org-agenda-new-marker (point))
+			  category (org-get-category)
+			  tags (org-get-tags-at (point))
+			  txt (org-format-agenda-item
+			       ""
+			       (buffer-substring-no-properties
+				beg1 (point-at-eol))
+			       category tags))
+		    (org-add-props txt props
+		      'org-marker marker 'org-hd-marker marker
+		      'priority 1000 'org-category category
+		      'type "search")
+		    (push txt ee)
+		    (goto-char (1- end)))))))))
+      (setq rtn ee)
+      (setq rtnall (append rtnall rtn)))
+    (if org-agenda-overriding-header
+	(insert (org-add-props (copy-sequence org-agenda-overriding-header)
+		    nil 'face 'org-agenda-structure) "\n")
+      (insert "Search words: ")
+      (add-text-properties (point-min) (1- (point))
+			   (list 'face 'org-agenda-structure))
+      (setq pos (point))
+      (insert string "\n")
+      (add-text-properties pos (1- (point)) (list 'face 'org-warning))
+      (setq pos (point)))
+    (when rtnall
+      (insert (org-finalize-agenda-entries rtnall) "\n"))
+    (goto-char (point-min))
+    (org-fit-agenda-window)
+    (add-text-properties (point-min) (point-max) '(org-agenda-type search))
+    (org-finalize-agenda)
+    (setq buffer-read-only t)))
 
 ;;; Agenda TODO list
 
