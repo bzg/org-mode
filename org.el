@@ -1165,10 +1165,9 @@ Changing this variable requires a restart of Emacs to become effective."
   :group 'org-link
   :type '(set (const :tag "Double bracket links (new style)" bracket)
 	      (const :tag "Angular bracket links (old style)" angular)
-	      (const :tag "plain text links" plain)
+	      (const :tag "Plain text links" plain)
 	      (const :tag "Radio target matches" radio)
 	      (const :tag "Tags" tag)
-	      (const :tag "Tags" target)
 	      (const :tag "Timestamps" date)))
 
 (defgroup org-link-store nil
