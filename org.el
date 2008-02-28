@@ -169,8 +169,7 @@ will be autoloaded when needed, to preloading is not necessary."
 	(const :tag "<A> Publishing (org-publish.el)" org-publish)
 	(const :tag "<A> LaTeX export (org-export-latex.el)" org-export-latex)
 	(const :tag "    IRC/ERC links (org-irc.el)" org-irc)
-	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)
-))
+	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)))
 
 (defun org-load-default-extensions ()
   "Load all extensions that are listed in `org-default-extensions'."
@@ -1166,10 +1165,9 @@ Changing this variable requires a restart of Emacs to become effective."
   :group 'org-link
   :type '(set (const :tag "Double bracket links (new style)" bracket)
 	      (const :tag "Angular bracket links (old style)" angular)
-	      (const :tag "plain text links" plain)
+	      (const :tag "Plain text links" plain)
 	      (const :tag "Radio target matches" radio)
 	      (const :tag "Tags" tag)
-	      (const :tag "Tags" target)
 	      (const :tag "Timestamps" date)))
 
 (defgroup org-link-store nil
@@ -1257,9 +1255,9 @@ Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link t
+(defcustom org-mouse-1-follows-link mouse-1-click-follows-link
   "Non-nil means, mouse-1 on a link will follow the link.
-A longer mouse click will still set point.  Does not wortk on XEmacs.
+A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
@@ -1556,7 +1554,7 @@ Furthermore, the following %-escapes will be replaced with content:
               You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
-  %i          initial content, the region active.  If %i is indented, 
+  %i          initial content, the region active.  If %i is indented,
               the entire inserted text will be indented as well.
   %c          content of the clipboard, or current kill ring head
   %^g         prompt for tags, with completion on tags in target file
@@ -2598,7 +2596,7 @@ N days, just insert a special line indicating the size of the gap."
 
 (defcustom org-agenda-mouse-1-follows-link nil
   "Non-nil means, mouse-1 on a link will follow the link in the agenda.
-A longer mouse click will still set point.  Does not wortk on XEmacs.
+A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
@@ -4222,7 +4220,6 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
                   (date string specifier &optional marker globcolor literal))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
 (declare-function Info-find-node "info" (filename nodename &optional no-going-back))
-(declare-function Info-goto-node "info" (nodename &optional fork))
 (declare-function bbdb "ext:bbdb-com" (string elidep))
 (declare-function bbdb-company "ext:bbdb-com" (string elidep))
 (declare-function bbdb-current-record "ext:bbdb-com" (&optional planning-on-modifying))
@@ -7066,7 +7063,7 @@ Return t when things worked, nil when we are not in an item."
 	(open-line (if blank 2 1)))
        ((<= (point) eow)
 	(beginning-of-line 1))
-       (t 
+       (t
 	(unless (org-get-alist-option org-M-RET-may-split-line 'item)
 	  (end-of-line 1)
 	  (delete-horizontal-space))
@@ -12684,192 +12681,191 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
-  (catch 'abort
-    (move-marker org-open-link-marker (point))
-    (setq org-window-config-before-follow-link (current-window-configuration))
-    (org-remove-occur-highlights nil nil t)
-    (if (org-at-timestamp-p t)
-	(org-follow-timestamp-link)
-      (let (type path link line search (pos (point)))
-	(catch 'match
-	  (save-excursion
-	    (skip-chars-forward "^]\n\r")
-	    (when (org-in-regexp org-bracket-link-regexp)
-	      (setq link (org-link-unescape (org-match-string-no-properties 1)))
-	      (while (string-match " *\n *" link)
-		(setq link (replace-match " " t t link)))
-	      (setq link (org-link-expand-abbrev link))
-	      (if (string-match org-link-re-with-space2 link)
-		  (setq type (match-string 1 link) path (match-string 2 link))
-		(setq type "thisfile" path link))
-	      (throw 'match t)))
-
-	  (when (get-text-property (point) 'org-linked-text)
-	    (setq type "thisfile"
-		  pos (if (get-text-property (1+ (point)) 'org-linked-text)
-			  (1+ (point)) (point))
-		  path (buffer-substring
-			(previous-single-property-change pos 'org-linked-text)
-			(next-single-property-change pos 'org-linked-text)))
-	    (throw 'match t))
-
-	  (save-excursion
-	    (when (or (org-in-regexp org-angle-link-re)
-		      (org-in-regexp org-plain-link-re))
-	      (setq type (match-string 1) path (match-string 2))
-	      (throw 'match t)))
-	  (when (org-in-regexp "\\<\\([^><\n]+\\)\\>")
-	    (setq type "tree-match"
+  (move-marker org-open-link-marker (point))
+  (setq org-window-config-before-follow-link (current-window-configuration))
+  (org-remove-occur-highlights nil nil t)
+  (if (org-at-timestamp-p t)
+      (org-follow-timestamp-link)
+    (let (type path link line search (pos (point)))
+      (catch 'match
+	(save-excursion
+	  (skip-chars-forward "^]\n\r")
+	  (when (org-in-regexp org-bracket-link-regexp)
+	    (setq link (org-link-unescape (org-match-string-no-properties 1)))
+	    (while (string-match " *\n *" link)
+	      (setq link (replace-match " " t t link)))
+	    (setq link (org-link-expand-abbrev link))
+	    (if (string-match org-link-re-with-space2 link)
+		(setq type (match-string 1 link) path (match-string 2 link))
+	      (setq type "thisfile" path link))
+	    (throw 'match t)))
+	
+	(when (get-text-property (point) 'org-linked-text)
+	  (setq type "thisfile"
+		pos (if (get-text-property (1+ (point)) 'org-linked-text)
+			(1+ (point)) (point))
+		path (buffer-substring
+		      (previous-single-property-change pos 'org-linked-text)
+		      (next-single-property-change pos 'org-linked-text)))
+	  (throw 'match t))
+	
+	(save-excursion
+	  (when (or (org-in-regexp org-angle-link-re)
+		    (org-in-regexp org-plain-link-re))
+	    (setq type (match-string 1) path (match-string 2))
+	    (throw 'match t)))
+	(when (org-in-regexp "\\<\\([^><\n]+\\)\\>")
+	  (setq type "tree-match"
+		path (match-string 1))
+	  (throw 'match t))
+	(save-excursion
+	  (when (org-in-regexp (org-re "\\(:[[:alnum:]_@:]+\\):[ \t]*$"))
+	    (setq type "tags"
 		  path (match-string 1))
-	    (throw 'match t))
-	  (save-excursion
-	    (when (org-in-regexp (org-re "\\(:[[:alnum:]_@:]+\\):[ \t]*$"))
-	      (setq type "tags"
-		    path (match-string 1))
-	      (while (string-match ":" path)
-		(setq path (replace-match "+" t t path)))
-	      (throw 'match t))))
-	(unless path
-	  (error "No link found"))
-	;; Remove any trailing spaces in path
-	(if (string-match " +\\'" path)
-	    (setq path (replace-match "" t t path)))
-
-	(cond
-
-	 ((assoc type org-link-protocols)
-	  (funcall (nth 1 (assoc type org-link-protocols)) path))
-
-	 ((equal type "mailto")
-	  (let ((cmd (car org-link-mailto-program))
-		(args (cdr org-link-mailto-program)) args1
-		(address path) (subject "") a)
-	    (if (string-match "\\(.*\\)::\\(.*\\)" path)
-		(setq address (match-string 1 path)
-		      subject (org-link-escape (match-string 2 path))))
-	    (while args
-	      (cond
-	       ((not (stringp (car args))) (push (pop args) args1))
-	       (t (setq a (pop args))
-		  (if (string-match "%a" a)
-		      (setq a (replace-match address t t a)))
-		  (if (string-match "%s" a)
-		      (setq a (replace-match subject t t a)))
-		  (push a args1))))
-	    (apply cmd (nreverse args1))))
-
-	 ((member type '("http" "https" "ftp" "news"))
-	  (browse-url (concat type ":" (org-link-escape
-					path org-link-escape-chars-browser))))
-
-	 ((member type '("message"))
-	  (browse-url (concat type ":" path)))
-
-	 ((string= type "tags")
-	  (org-tags-view in-emacs path))
-	 ((string= type "thisfile")
-	  (if in-emacs
-	      (switch-to-buffer-other-window
-	       (org-get-buffer-for-internal-link (current-buffer)))
-	    (org-mark-ring-push))
-	  (let ((cmd `(org-link-search
-		       ,path
-		       ,(cond ((equal in-emacs '(4)) 'occur)
-			      ((equal in-emacs '(16)) 'org-occur)
-			      (t nil))
-		       ,pos)))
-	    (condition-case nil (eval cmd)
-	      (error (progn (widen) (eval cmd))))))
-
-	 ((string= type "tree-match")
-	  (org-occur (concat "\\[" (regexp-quote path) "\\]")))
-
-	 ((string= type "file")
-	  (if (string-match "::\\([0-9]+\\)\\'" path)
-	      (setq line (string-to-number (match-string 1 path))
-		    path (substring path 0 (match-beginning 0)))
-	    (if (string-match "::\\(.+\\)\\'" path)
-		(setq search (match-string 1 path)
-		      path (substring path 0 (match-beginning 0)))))
-	  (if (string-match "[*?{]" (file-name-nondirectory path))
-	      (dired path)
-	    (org-open-file path in-emacs line search)))
-
-	 ((string= type "news")
-	  (org-follow-gnus-link path))
-
-	 ((string= type "bbdb")
-	  (org-follow-bbdb-link path))
-
-	 ((string= type "info")
-	  (org-follow-info-link path))
-
-	 ((string= type "gnus")
-	  (let (group article)
-	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-		(error "Error in Gnus link"))
-	    (setq group (match-string 1 path)
-		  article (match-string 3 path))
-	    (org-follow-gnus-link group article)))
-
-	 ((string= type "vm")
-	  (let (folder article)
-	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-		(error "Error in VM link"))
-	    (setq folder (match-string 1 path)
-		  article (match-string 3 path))
-	    ;; in-emacs is the prefix arg, will be interpreted as read-only
-	    (org-follow-vm-link folder article in-emacs)))
-
-	 ((string= type "wl")
-	  (let (folder article)
-	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-		(error "Error in Wanderlust link"))
-	    (setq folder (match-string 1 path)
-		  article (match-string 3 path))
-	    (org-follow-wl-link folder article)))
-
-	 ((string= type "mhe")
-	  (let (folder article)
-	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-		(error "Error in MHE link"))
-	    (setq folder (match-string 1 path)
-		  article (match-string 3 path))
-	    (org-follow-mhe-link folder article)))
-
-	 ((string= type "rmail")
-	  (let (folder article)
-	    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-		(error "Error in RMAIL link"))
-	    (setq folder (match-string 1 path)
-		  article (match-string 3 path))
-	    (org-follow-rmail-link folder article)))
-
-	 ((string= type "shell")
-	  (let ((cmd path))
-	    (if (or (not org-confirm-shell-link-function)
-		    (funcall org-confirm-shell-link-function
-			     (format "Execute \"%s\" in shell? "
-				     (org-add-props cmd nil
-						    'face 'org-warning))))
-		(progn
-		  (message "Executing %s" cmd)
-		  (shell-command cmd))
-	      (error "Abort"))))
-
-	 ((string= type "elisp")
-	  (let ((cmd path))
-	    (if (or (not org-confirm-elisp-link-function)
-		    (funcall org-confirm-elisp-link-function
-			     (format "Execute \"%s\" as elisp? "
-				     (org-add-props cmd nil
-						    'face 'org-warning))))
-		(message "%s => %s" cmd (eval (read cmd)))
-	      (error "Abort"))))
-
-	 (t
-	  (browse-url-at-point)))))
-    (move-marker org-open-link-marker nil)))
+	    (while (string-match ":" path)
+	      (setq path (replace-match "+" t t path)))
+	    (throw 'match t))))
+      (unless path
+	(error "No link found"))
+      ;; Remove any trailing spaces in path
+      (if (string-match " +\\'" path)
+	  (setq path (replace-match "" t t path)))
+      
+      (cond
+       
+       ((assoc type org-link-protocols)
+	(funcall (nth 1 (assoc type org-link-protocols)) path))
+       
+       ((equal type "mailto")
+	(let ((cmd (car org-link-mailto-program))
+	      (args (cdr org-link-mailto-program)) args1
+	      (address path) (subject "") a)
+	  (if (string-match "\\(.*\\)::\\(.*\\)" path)
+	      (setq address (match-string 1 path)
+		    subject (org-link-escape (match-string 2 path))))
+	  (while args
+	    (cond
+	     ((not (stringp (car args))) (push (pop args) args1))
+	     (t (setq a (pop args))
+		(if (string-match "%a" a)
+		    (setq a (replace-match address t t a)))
+		(if (string-match "%s" a)
+		    (setq a (replace-match subject t t a)))
+		(push a args1))))
+	  (apply cmd (nreverse args1))))
+       
+       ((member type '("http" "https" "ftp" "news"))
+	(browse-url (concat type ":" (org-link-escape
+				      path org-link-escape-chars-browser))))
+       
+       ((member type '("message"))
+	(browse-url (concat type ":" path)))
+       
+       ((string= type "tags")
+	(org-tags-view in-emacs path))
+       ((string= type "thisfile")
+	(if in-emacs
+	    (switch-to-buffer-other-window
+	     (org-get-buffer-for-internal-link (current-buffer)))
+	  (org-mark-ring-push))
+	(let ((cmd `(org-link-search
+		     ,path
+		     ,(cond ((equal in-emacs '(4)) 'occur)
+			    ((equal in-emacs '(16)) 'org-occur)
+			    (t nil))
+		     ,pos)))
+	  (condition-case nil (eval cmd)
+	    (error (progn (widen) (eval cmd))))))
+       
+       ((string= type "tree-match")
+	(org-occur (concat "\\[" (regexp-quote path) "\\]")))
+       
+       ((string= type "file")
+	(if (string-match "::\\([0-9]+\\)\\'" path)
+	    (setq line (string-to-number (match-string 1 path))
+		  path (substring path 0 (match-beginning 0)))
+	  (if (string-match "::\\(.+\\)\\'" path)
+	      (setq search (match-string 1 path)
+		    path (substring path 0 (match-beginning 0)))))
+	(if (string-match "[*?{]" (file-name-nondirectory path))
+	    (dired path)
+	  (org-open-file path in-emacs line search)))
+       
+       ((string= type "news")
+	(org-follow-gnus-link path))
+       
+       ((string= type "bbdb")
+	(org-follow-bbdb-link path))
+       
+       ((string= type "info")
+	(org-follow-info-link path))
+       
+       ((string= type "gnus")
+	(let (group article)
+	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+	      (error "Error in Gnus link"))
+	  (setq group (match-string 1 path)
+		article (match-string 3 path))
+	  (org-follow-gnus-link group article)))
+       
+       ((string= type "vm")
+	(let (folder article)
+	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+	      (error "Error in VM link"))
+	  (setq folder (match-string 1 path)
+		article (match-string 3 path))
+	  ;; in-emacs is the prefix arg, will be interpreted as read-only
+	  (org-follow-vm-link folder article in-emacs)))
+       
+       ((string= type "wl")
+	(let (folder article)
+	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+	      (error "Error in Wanderlust link"))
+	  (setq folder (match-string 1 path)
+		article (match-string 3 path))
+	  (org-follow-wl-link folder article)))
+       
+       ((string= type "mhe")
+	(let (folder article)
+	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+	      (error "Error in MHE link"))
+	  (setq folder (match-string 1 path)
+		article (match-string 3 path))
+	  (org-follow-mhe-link folder article)))
+       
+       ((string= type "rmail")
+	(let (folder article)
+	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
+	      (error "Error in RMAIL link"))
+	  (setq folder (match-string 1 path)
+		article (match-string 3 path))
+	  (org-follow-rmail-link folder article)))
+       
+       ((string= type "shell")
+	(let ((cmd path))
+	  (if (or (not org-confirm-shell-link-function)
+		  (funcall org-confirm-shell-link-function
+			   (format "Execute \"%s\" in shell? "
+				   (org-add-props cmd nil
+				     'face 'org-warning))))
+	      (progn
+		(message "Executing %s" cmd)
+		(shell-command cmd))
+	    (error "Abort"))))
+       
+       ((string= type "elisp")
+	(let ((cmd path))
+	  (if (or (not org-confirm-elisp-link-function)
+		  (funcall org-confirm-elisp-link-function
+			   (format "Execute \"%s\" as elisp? "
+				   (org-add-props cmd nil
+				     'face 'org-warning))))
+	      (message "%s => %s" cmd (eval (read cmd)))
+	    (error "Abort"))))
+       
+       (t
+	(browse-url-at-point)))))
+  (move-marker org-open-link-marker nil))
 
 ;;; File search
 
@@ -13460,7 +13456,7 @@ If the file does not exist, an error is thrown."
       (while (string-match "['\"]%s['\"]" cmd)
 	(setq cmd (replace-match "%s" t t cmd)))
       (while (string-match "%s" cmd)
-	(setq cmd (replace-match 
+	(setq cmd (replace-match
 		   (save-match-data (shell-quote-argument file))
 		   t t cmd)))
       (save-window-excursion
@@ -16321,7 +16317,7 @@ formats in the current buffer."
 	      (unless (or (equal p "ITEM")
 			  (member p org-special-properties))
 		(add-to-list 'rtn (match-string 1 cfmt))))))))
-    
+
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
@@ -18609,7 +18605,7 @@ If there is already a time stamp at the cursor position, update it."
 (defun org-agenda-to-appt (&optional refresh filter)
   "Activate appointments found in `org-agenda-files'.
 With a \\[universal-argument] prefix, refresh the list of
-appointements. 
+appointements.
 
 If FILTER is t, interactively prompt the user for a regular
 expression, and filter out entries that don't match it.
@@ -18667,7 +18663,7 @@ belonging to the \"Work\" category."
 	   (appt-add tod evt)
 	   (setq cnt (1+ cnt))))) entries)
     (org-release-buffers org-agenda-new-buffers)
-    (if (eq cnt 0) 
+    (if (eq cnt 0)
 	(message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
@@ -19122,7 +19118,7 @@ the returned times will be formatted strings."
 		       (apply 'encode-time (org-parse-time-string te)))))
       (move-marker ins (point))
       (setq ipos (point))
-      
+
       ;; Get the right scope
       (setq pos (point))
       (save-restriction
@@ -19158,7 +19154,7 @@ the returned times will be formatted strings."
 		(setq total-time (+ (or total-time 0)
 				    org-clock-file-total-minutes)))))))
 	(goto-char pos)
-	
+
 	(unless (eq scope 'agenda)
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
@@ -27435,7 +27431,7 @@ See the individual commands for more information."
 With optional NODE, go directly to that node."
   (interactive)
   (require 'info)
-  (Info-goto-node (format "(org)%s" (or node ""))))
+  (info (format "(org)%s" (or node ""))))
 
 (defun org-install-agenda-files-menu ()
   (let ((bl (buffer-list)))
