@@ -11492,7 +11492,7 @@ to execute outside of tables."
 	 ["Move Row Down" org-metadown :active (org-at-table-p) :keys "M-<down>"]
 	 ["Delete Row" org-shiftmetaup :active (org-at-table-p) :keys "M-S-<up>"]
 	 ["Insert Row" org-shiftmetadown :active (org-at-table-p) :keys "M-S-<down>"]
-	 ["Sort lines in region" org-table-sort-lines (org-at-table-p) :keys "C-c ^"]
+	 ["Sort lines in region" org-table-sort-lines :active (org-at-table-p) :keys "C-c ^"]
 	 "--"
 	 ["Insert Hline" org-table-insert-hline :active (org-at-table-p) :keys "C-c -"])
 	("Rectangle"
