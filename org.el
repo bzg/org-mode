@@ -1257,7 +1257,7 @@ Needs to be set before org.el is loaded."
 
 (defcustom org-mouse-1-follows-link t
   "Non-nil means, mouse-1 on a link will follow the link.
-A longer mouse click will still set point.  Does not wortk on XEmacs.
+A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
@@ -2596,7 +2596,7 @@ N days, just insert a special line indicating the size of the gap."
 
 (defcustom org-agenda-mouse-1-follows-link nil
   "Non-nil means, mouse-1 on a link will follow the link in the agenda.
-A longer mouse click will still set point.  Does not wortk on XEmacs.
+A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
