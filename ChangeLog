@@ -1,6 +1,8 @@
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-activate-links): Fixed typo.
+	* org.el (org-mouse-1-follows-link): Use the value of
+	`mouse-1-click-follows-link' by default.
 
 2008-02-28  Glenn Morris <rgm@gnu.org>
 
