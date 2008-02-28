@@ -4195,7 +4195,7 @@ month and 365.24 days for a year)."
     ))
 
 (defcustom org-n-level-faces (length org-level-faces)
-  "The number different faces to be used for headlines.
+  "The number of different faces to be used for headlines.
 Org-mode defines 8 different headline faces, so this can be at most 8.
 If it is less than 8, the level-1 face gets re-used for level N+1 etc."
   :type 'number
