@@ -175,7 +175,6 @@ will be autoloaded when needed, to preloading is not necessary."
 (defun org-load-default-extensions ()
   "Load all extensions that are listed in `org-default-extensions'."
   (mapc 'require org-default-extensions))
-	  
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
@@ -14845,6 +14844,7 @@ This function is run automatically after each state change to a DONE state."
 	 (whata '(("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
 	 (org-log-done nil)
+	 (org-todo-log-states nil)
 	 re type n what ts)
     (when repeat
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))

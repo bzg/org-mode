@@ -232,7 +232,6 @@ clean:
 	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs
 	rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
 	rm -f orgcard_letter.tex orgcard_letter.pdf
-	rm -f org-install.el
 	rm -rf manual
 	rm -rf RELEASEDIR
 
