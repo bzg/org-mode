@@ -310,7 +310,7 @@ whether file should be published."
 	(if (not (file-exists-p org-publish-timestamp-directory))
 	    (make-directory org-publish-timestamp-directory)
 	  (if (not (file-directory-p org-publish-timestamp-directory))
-	      (error "org-publish-timestamp-directory must be a directory.")))
+	      (error "`org-publish-timestamp-directory' must be a directory")))
 	;;
 	;; check timestamp. ok if timestamp file doesn't exist
 	(let* ((timestamp (org-publish-timestamp-filename filename))
@@ -480,7 +480,7 @@ FILENAME is the filename of the file to be published."
 	 (plist (org-publish-get-plist-from-filename filename))
 	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html)))
     (if (not project-name)
-	(error "File %s is not part of any known project." filename))
+	(error "File %s is not part of any known project" filename))
     (when (org-publish-needed-p filename)
       (if (listp publishing-function)
 	  ;; allow chain of publishing functions
@@ -545,11 +545,6 @@ default is 'index.org'."
       (kill-buffer (current-buffer)))))
 
 
-;(defun org-publish-meta-index (meta-plist &optional index-filename)
-;  "Create an index for a metaproject."
-;  (let* ((plists (
-
-
 ;;;; Interactive publishing functions
 
 
@@ -572,11 +567,11 @@ default is 'index.org'."
 With prefix argument, force publishing all files in project."
   (interactive "P")
   (save-window-excursion
-    (let* ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
-	   (org-publish-use-timestamps-flag
-	    (if force nil org-publish-use-timestamps-flag)))
+    (let ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
+	  (org-publish-use-timestamps-flag
+	   (if force nil org-publish-use-timestamps-flag)))
       (if (not project-name)
-	  (error "File %s is not part of any known project." (buffer-file-name)))
+	  (error "File %s is not part of any known project" (buffer-file-name)))
       (org-publish project-name))))
 
 
