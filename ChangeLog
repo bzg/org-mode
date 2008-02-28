@@ -1,3 +1,7 @@
+2008-02-28  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-open-at-point): Deleted mismatching `catch' form.
+
 2008-02-28  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* org-irc.el (org-irc-erc-store-link): Long log entry descriptions
