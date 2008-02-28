@@ -1,3 +1,7 @@
+2008-02-28  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-bookmark.el: New file.
+
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-id.el: New file.
