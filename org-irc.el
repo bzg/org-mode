@@ -4,7 +4,7 @@
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
-;; Version: 1.1
+;; Version: 1.2
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -28,10 +28,9 @@
 ;; Link to an IRC session. Only ERC has been implemented at the
 ;; moment.
 ;;
-;; Place org-irc.el in your load path and add this to your
-;; .emacs:
-;;
-;; (require 'org-irc)
+;; This file is loaded by default whenever org.el is loaded.  Please
+;; customize the variable `org-default-extensions' to select extensions
+;; you would like to use, and to deselect those which you don't want.
 ;;
 ;; Please note that at the moment only ERC is supported. Other clients
 ;; shouldn't be diffficult to add though.
@@ -50,6 +49,8 @@
 ;; requested server then one will be created.
 ;;
 ;;; Code:
+
+(require 'org)
 
 (defvar org-irc-client 'erc
   "The IRC client to act on")
