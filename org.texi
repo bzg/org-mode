@@ -245,6 +245,7 @@ The built-in agenda views
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Keyword search::              Finding entries by keyword
 * Stuck projects::              Find projects you need to review
 
 Presentation and sorting
@@ -4729,7 +4730,7 @@ important for a particular date, this information must be collected,
 sorted and displayed in an organized way.
 
 Org-mode can select items based on various criteria, and display them
-in a separate buffer.  Six different view types are provided:
+in a separate buffer.  Seven different view types are provided:
 
 @itemize @bullet
 @item
@@ -4744,6 +4745,9 @@ the tags associated with them,
 @item
 a @emph{timeline view} that shows all events in a single Org-mode file,
 in time-sorted view,
+@item
+a @emph{keyword search view} that shows all entries from multiple files
+that contain specified keywords.
 @item
 a @emph{stuck projects view} showing projects that currently don't move
 along, and
@@ -4869,14 +4873,17 @@ Create a list of headlines matching a TAGS expression (@pxref{Matching
 tags and properties}).
 @item L
 Create the timeline view for the current buffer (@pxref{Timeline}).
-@item # @r{/} !
-Create a list of stuck projects (@pxref{Stuck projects}).
+@item s
+Create a list of entries selected by a boolean expression of keywords
+and/or regular expressions that must or must not occur in the entry.
 @item /
 Search for a regular expression in all agenda files and additionally in
 the files listed in @code{org-agenda-multi-occur-extra-files}.  This
 uses the Emacs command @code{multi-occur}.  A prefix argument can be
 used to specify the number of context lines for each match, default is
 1.
+@item # @r{/} !
+Create a list of stuck projects (@pxref{Stuck projects}).
 @item <
 Restrict an agenda command to the current buffer@footnote{For backward
 compatibility, you can also press @kbd{1} to restrict to the current
@@ -4906,6 +4913,7 @@ In this section we describe the built-in views.
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
+* Keyword search::              Finding entries by keyword
 * Stuck projects::              Find projects you need to review
 @end menu
 
@@ -5099,6 +5107,31 @@ When called with a @kbd{C-u} prefix, all unfinished TODO entries
 @noindent
 The commands available in the timeline buffer are listed in
 @ref{Agenda commands}.
+
+@node Keyword search, Stuck projects, Timeline, Built-in agenda views
+@subsection Keyword search
+@cindex keyword search
+@cindex searching, for keywords
+
+This agenda view is a general text search facility for Org-mode entries.
+It is particularly useful to find notes.
+
+@table @kbd
+@kindex C-c a s
+@item C-c a s
+This is a special search that lets you select entries by keywords or
+regular expression, using a boolean logic.  For example, the search
+string
+
+@example
++computer +wifi -ethernet -@{8\.11[bg]@}
+@end example
+
+Will search for note entries that contain the keywords @code{computer}
+and @code{wifi}, but not the keyword @code{ethernet}, and which are also
+not matched by the regular expression @code{8\.11[bg]}, meaning to
+exclude both 8.11b and 8.11g.
+@end table
 
 
 @node Stuck projects,  , Timeline, Built-in agenda views

@@ -20867,8 +20867,18 @@ given in `org-agenda-start-on-weekday'."
 
 ;;;###autoload
 (defun org-search-view (&optional arg string)
-  "Show all entries that contain the words given in the search string.
-If the search string starts with an asterisks, only search in headlines."
+  "Show all entries that contain words or regular expressions.
+If the first character of the search string is an asterisks,
+search only the headlines.
+
+The search string is broken into \"words\" by splitting at whitespace.
+The individual words are then interpreted as a boolean expression with
+logical AND.  Words prefixed with a minus must not occur in the entry.
+Words without a prefix or prefixed with a plus must occur in the entry.
+Matching is case-insensitive and the words are enclosed by word delimiters.
+
+Words enclosed by curly braces are interpreted as regular expressions
+that must or must not match in the entry."
   (interactive "P")
   (org-compile-prefix-format 'search)
   (org-set-sorting-strategy 'search)
@@ -20884,7 +20894,7 @@ If the search string starts with an asterisks, only search in headlines."
 	 (regexp (concat "^" org-outline-regexp))
 	 rtn rtnall files file pos
 	 marker priority category tags
-	 ee txt beg end words word-regexps hdl-only buffer beg1 str)
+	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
     (unless (and (stringp string)
 		 (string-match "\\S-" string))
       (setq string (read-string "Word Search: " nil
@@ -20897,10 +20907,19 @@ If the search string starts with an asterisks, only search in headlines."
 	(setq hdl-only t
 	      words (substring string 1))
       (setq words string))
-    (setq words (org-split-string words)
-	  word-regexps
-	  (mapcar (lambda (w) (concat "\\<" (regexp-quote (downcase w)) "\\>"))
-		  words))
+    (setq words (org-split-string words))
+    (mapc (lambda (w)
+	    (setq c (string-to-char w))
+	    (if (equal c ?-)
+		(setq neg t w (substring w 1))
+	      (if (equal c ?+)
+		  (setq neg nil w (substring w 1))
+		(setq neg nil)))
+	    (if (string-match "\\`{.*}\\'" w)
+		(setq re (substring w 1 -1))
+	      (setq re (concat "\\<" (regexp-quote (downcase w)) "\\>")))
+	    (if neg (push re regexps-) (push re regexps+)))
+	  words)
     (setq files (org-agenda-files)
 	  rtnall nil)
     (while (setq file (pop files))
@@ -20935,12 +20954,14 @@ If the search string starts with an asterisks, only search in headlines."
 		    (setq str (buffer-substring-no-properties
 			       (point-at-bol)
 			       (if hdl-only (point-at-eol) end)))
-		    (mapc
-		     (lambda (wr)
-		       (unless (string-match wr str)
-			 (goto-char (1- end))
-			 (throw :skip t)))
-		     word-regexps)
+		    (mapc (lambda (wr) (when (string-match wr str)
+					 (goto-char (1- end))
+					 (throw :skip t)))
+			  regexps-)
+		    (mapc (lambda (wr) (unless (string-match wr str)
+					 (goto-char (1- end))
+					 (throw :skip t)))
+			  regexps+)
 		    (goto-char beg)
 		    (setq marker (org-agenda-new-marker (point))
 			  category (org-get-category)
