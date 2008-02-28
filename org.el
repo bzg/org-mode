@@ -18945,7 +18945,7 @@ will be easy to remove."
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
 		     (org-add-props (format "%s %2d:%02d%s"
 					    (make-string l ?*) h m
-					    (make-string (- 10 l) ?\ ))
+					    (make-string (- 16 l) ?\ ))
 			 '(face secondary-selection))
 		     ""))
     (if (not (featurep 'xemacs))
