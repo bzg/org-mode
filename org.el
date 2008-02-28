@@ -1555,7 +1555,7 @@ Furthermore, the following %-escapes will be replaced with content:
               You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
-  %i          initial content, the region active.  If %i is indented, 
+  %i          initial content, the region active.  If %i is indented,
               the entire inserted text will be indented as well.
   %c          content of the clipboard, or current kill ring head
   %^g         prompt for tags, with completion on tags in target file
@@ -7064,7 +7064,7 @@ Return t when things worked, nil when we are not in an item."
 	(open-line (if blank 2 1)))
        ((<= (point) eow)
 	(beginning-of-line 1))
-       (t 
+       (t
 	(unless (org-get-alist-option org-M-RET-may-split-line 'item)
 	  (end-of-line 1)
 	  (delete-horizontal-space))
@@ -13458,7 +13458,7 @@ If the file does not exist, an error is thrown."
       (while (string-match "['\"]%s['\"]" cmd)
 	(setq cmd (replace-match "%s" t t cmd)))
       (while (string-match "%s" cmd)
-	(setq cmd (replace-match 
+	(setq cmd (replace-match
 		   (save-match-data (shell-quote-argument file))
 		   t t cmd)))
       (save-window-excursion
@@ -16319,7 +16319,7 @@ formats in the current buffer."
 	      (unless (or (equal p "ITEM")
 			  (member p org-special-properties))
 		(add-to-list 'rtn (match-string 1 cfmt))))))))
-    
+
     (sort rtn (lambda (a b) (string< (upcase a) (upcase b))))))
 
 (defun org-property-values (key)
@@ -18607,7 +18607,7 @@ If there is already a time stamp at the cursor position, update it."
 (defun org-agenda-to-appt (&optional refresh filter)
   "Activate appointments found in `org-agenda-files'.
 With a \\[universal-argument] prefix, refresh the list of
-appointements. 
+appointements.
 
 If FILTER is t, interactively prompt the user for a regular
 expression, and filter out entries that don't match it.
@@ -18665,7 +18665,7 @@ belonging to the \"Work\" category."
 	   (appt-add tod evt)
 	   (setq cnt (1+ cnt))))) entries)
     (org-release-buffers org-agenda-new-buffers)
-    (if (eq cnt 0) 
+    (if (eq cnt 0)
 	(message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
 
@@ -19120,7 +19120,7 @@ the returned times will be formatted strings."
 		       (apply 'encode-time (org-parse-time-string te)))))
       (move-marker ins (point))
       (setq ipos (point))
-      
+
       ;; Get the right scope
       (setq pos (point))
       (save-restriction
@@ -19156,7 +19156,7 @@ the returned times will be formatted strings."
 		(setq total-time (+ (or total-time 0)
 				    org-clock-file-total-minutes)))))))
 	(goto-char pos)
-	
+
 	(unless (eq scope 'agenda)
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
