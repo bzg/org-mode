@@ -1,10 +1,10 @@
 2008-02-29  Bastien Guerry  <bzg@altern.org>
 
-	* org-export-latex.el (org-export-as-latex): Kill buffer after
-	save when `to-buffer' is nil.
+	* org.el (org-export-as-html): Kill buffer after
+	export when `to-buffer' is nil.
 
-	* org.el (org-export-as-html): Kill buffer after save when
-	`to-buffer' is nil.
+	* org-export-latex.el (org-export-as-latex): Kill buffer after
+	export when `to-buffer' is nil.
 
 2008-02-29  Carsten Dominik  <dominik@science.uva.nl>
 
