@@ -55,6 +55,7 @@
 
 (require 'org)
 (require 'erc)
+(require 'erc-log)
 
 (defvar org-irc-client 'erc
   "The IRC client to act on")
