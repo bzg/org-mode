@@ -1255,7 +1255,8 @@ Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link mouse-1-click-follows-link
+(defcustom org-mouse-1-follows-link 
+  (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
   "Non-nil means, mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
 Needs to be set before org.el is loaded."

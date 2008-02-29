@@ -13,6 +13,7 @@
 	(org-agenda-get-deadlines): Pass wdays to
 	`org-agenda-deadline-face'.
 	(org-agenda-align-tags): Bug fix.
+	(org-mouse-1-follows-link): Backwards compatibility.
 
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
