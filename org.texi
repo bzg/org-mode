@@ -5127,12 +5127,15 @@ string
 +computer +wifi -ethernet -@{8\.11[bg]@}
 @end example
 
-Will search for note entries that contain the keywords @code{computer}
+@noindent
+will search for note entries that contain the keywords @code{computer}
 and @code{wifi}, but not the keyword @code{ethernet}, and which are also
 not matched by the regular expression @code{8\.11[bg]}, meaning to
 exclude both 8.11b and 8.11g.
-@end table
 
+Note that in addition to the agenda files, this command will also search
+the files listed in @code{org-agenda-text-search-extra-files}.
+@end table
 
 @node Stuck projects,  , Timeline, Built-in agenda views
 @subsection Stuck projects
@@ -5425,6 +5428,23 @@ Display the previous dates.
 @kindex .
 @item .
 Goto today.
+
+@tsubheading{Query editing}
+@cindex query editing, in agenda
+
+@kindex [
+@kindex ]
+@kindex @{
+@kindex @}
+@item [ ] @{ @}
+In the @i{search view} (@pxref{Keyword search}), these keys add new
+search words (@kbd{[} and @kbd{]}) or new regular expressions (@kbd{@{}
+and @kbd{@}}) to the query string.  The opening bracket/brace will add a
+positive search term prefixed by @samp{+}, indicating that this search
+term @i{must} occur/match in the entry.  Closing bracket/brace add a
+negative search term which @i{must not} occur/match in the entry for it
+to be selected.
+
 
 @tsubheading{Remote editing}
 @cindex remote editing, from agenda
@@ -5744,7 +5764,10 @@ right spot in @code{org-agenda-custom-commands}.  For example:
           (org-agenda-prefix-format "  Mixed: ")))
         ("U" tags-tree "+boss-urgent"
          ((org-show-following-heading nil)
-          (org-show-hierarchy-above nil)))))
+          (org-show-hierarchy-above nil)))
+        ("N" search ""
+         ((org-agenda-files '("~org/notes.org"))
+          (org-agenda-text-search-extra-files nil)))))          
 @end group
 @end lisp
 
@@ -5754,7 +5777,8 @@ priority, and the prefix format is modified to just say @samp{  Mixed: }
 instead of giving the category of the entry.  The sparse tags tree of
 @kbd{C-c a U} will now turn out ultra-compact, because neither the
 headline hierarchy above the match, nor the headline following the match
-will be shown.
+will be shown.  The command @kbd{C-c a N} will do a text search limited
+to only a single file.
 
 For command sets creating a block agenda,
 @code{org-agenda-custom-commands} has two separate spots for setting

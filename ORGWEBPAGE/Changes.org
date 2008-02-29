@@ -15,8 +15,9 @@
 
     `C-c a s' now invokes a special agenda view that can be used
     to search notes by keyword and regular expressions.  The
-    search knows the boundaries of an entry, and it can use
-    simple Boolean logic.  For example, the search string
+    search knows the boundaries of an entry, can use simple
+    Boolean logic and is reasonably fast.  For example, the
+    search string
 
     : +computer +wifi -ethernet -{8\.11[bg]}
 
@@ -29,12 +30,16 @@
     otherwise it will look at the headine and the text below it,
     up to the next (possibly sub-) heading.
 
-    If find it very useful to define a custom command to do such
+    The command searches all agenda files, and in addition the
+    files listed in `org-agenda-text-search-extra-files'.
+    
+    I find it very useful to define a custom command to do such
     a search only in a limited number of files (my notes files),
     like this:
 
     : ("N" "Search notes" search ""
-    :   ((org-agenda-files '("~/org/notes.org" "~/org/computer.org"))))    
+    :   ((org-agenda-files '("~/org/notes.org" "~/org/computer.org"))
+    :    (org-agenda-text-search-extra-files nil)))
 
 *** Many new extensions available in the CONTRIB directory
 

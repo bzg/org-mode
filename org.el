@@ -2262,11 +2262,20 @@ Nil means to remove them, after a query, from the list."
   :group 'org-agenda
   :type 'boolean)
 
-(defcustom org-agenda-multi-occur-extra-files nil
-  "List of extra files to be searched by `org-occur-in-agenda-files'.
-The files in `org-agenda-files' are always searched."
+(defcustom org-agenda-text-search-extra-files nil
+  "List of extra files to be searched by text search commands.
+These files will be search in addition to the agenda files bu the
+commands `org-search-view' (`C-c a s') and `org-occur-in-agenda-files'.
+Note that these files will only be searched for text search commands,
+not for the other agenda views like todo lists, tag earches or the weekly
+agenda.  This variable is intended to list notes and possibly archive files
+that should also be searched by these two commands."
   :group 'org-agenda
   :type '(repeat file))
+
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-agenda-multi-occur-extra-files
+      'org-agenda-text-search-extra-files))
 
 (defcustom org-agenda-confirm-kill 1
   "When set, remote killing from the agenda buffer needs confirmation.
@@ -2491,6 +2500,13 @@ should provide a description for the prefix, like
 	   (cons :tag "Prefix key documentation"
 		 (string :tag "Access Key(s)")
 		 (string :tag "Description  ")))))
+
+(defcustom org-agenda-query-register ?o
+  "The register holding the current query string.
+The prupose of this is that if you construct a query string interactively,
+you can then use it to define a custom command."
+  :group 'org-agenda-custom-commands
+  :type 'character)
 
 (defcustom org-stuck-projects
   '("+LEVEL=2/-DONE" ("TODO" "NEXT" "NEXTACTION") nil "")
@@ -19329,6 +19345,7 @@ FIXME: describe the elements."
 (defvar org-agenda-follow-mode nil)
 (defvar org-agenda-show-log nil)
 (defvar org-agenda-redo-command nil)
+(defvar org-agenda-query-string nil)
 (defvar org-agenda-mode-hook nil)
 (defvar org-agenda-type nil)
 (defvar org-agenda-force-single-file nil)
@@ -19464,6 +19481,11 @@ The following commands are available:
 (org-defkey org-agenda-mode-map [(right)] 'org-agenda-later)
 (org-defkey org-agenda-mode-map [(left)] 'org-agenda-earlier)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-c" 'org-agenda-columns)
+
+(org-defkey org-agenda-mode-map "[" 'org-agenda-manipulate-query-add)
+(org-defkey org-agenda-mode-map "]" 'org-agenda-manipulate-query-subtract)
+(org-defkey org-agenda-mode-map "{" 'org-agenda-manipulate-query-add-re)
+(org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
@@ -20878,7 +20900,10 @@ Words without a prefix or prefixed with a plus must occur in the entry.
 Matching is case-insensitive and the words are enclosed by word delimiters.
 
 Words enclosed by curly braces are interpreted as regular expressions
-that must or must not match in the entry."
+that must or must not match in the entry.
+
+This command searches the agenda files, and in addition the files listed
+in `org-agenda-text-search-extra-files'."
   (interactive "P")
   (org-compile-prefix-format 'search)
   (org-set-sorting-strategy 'search)
@@ -20890,18 +20915,20 @@ that must or must not match in the entry."
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo (format "mouse-2 or RET jump to location")))
-	 ;; FIXME: get rid of the \n at some point  but watch out
-	 (regexp (concat "^" org-outline-regexp))
-	 rtn rtnall files file pos
-	 marker priority category tags
+	 regexp rtn rtnall files file pos
+	 marker priority category tags c neg re
 	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
-    (unless (and (stringp string)
+    (unless (and (not arg)
+		 (stringp string)
 		 (string-match "\\S-" string))
-      (setq string (read-string "Word Search: " nil
+      (setq string (read-string "[+-]Word/{Regexp} ...: "
+				(cond
+				 ((integerp arg) (cons string arg))
+				 (arg string))
 				'org-agenda-search-history)))
-
     (setq org-agenda-redo-command
 	  (list 'org-search-view 'current-prefix-arg string))
+    (setq org-agenda-query-string string)
 
     (if (equal (string-to-char string) ?*)
 	(setq hdl-only t
@@ -20920,7 +20947,13 @@ that must or must not match in the entry."
 	      (setq re (concat "\\<" (regexp-quote (downcase w)) "\\>")))
 	    (if neg (push re regexps-) (push re regexps+)))
 	  words)
-    (setq files (org-agenda-files)
+    (setq regexps+ (sort regexps+ (lambda (a b) (> (length a) (length b)))))
+    (if (not regexps+)
+	(setq regexp (concat "^" org-outline-regexp))
+      (setq regexp (pop regexps+))
+      (if hdl-only (setq regexp (concat "^" org-outline-regexp ".*?"
+					regexp))))
+    (setq files (append (org-agenda-files) org-agenda-text-search-extra-files)
 	  rtnall nil)
     (while (setq file (pop files))
       (setq ee nil)
@@ -20944,11 +20977,17 @@ that must or must not match in the entry."
 				      org-agenda-restrict-end)
 		  (widen))
 		(goto-char (point-min))
+		(unless (or (org-on-heading-p)
+			    (outline-next-heading))
+		  (throw 'nextfile t))
+		(goto-char (max (point-min) (1- (point))))
 		(while (re-search-forward regexp nil t)
+		  (org-back-to-heading t)
+		  (skip-chars-forward "* ")
+		  (setq beg (point-at-bol)
+			beg1 (point)
+			end (progn (outline-next-heading) (point)))
 		  (catch :skip
-		    (setq beg (point-at-bol)
-			  beg1 (match-end 0)
-			  end (progn (outline-next-heading) (point)))
 		    (goto-char beg)
 		    (org-agenda-skip)
 		    (setq str (buffer-substring-no-properties
@@ -20977,7 +21016,7 @@ that must or must not match in the entry."
 		      'type "search")
 		    (push txt ee)
 		    (goto-char (1- end)))))))))
-      (setq rtn ee)
+      (setq rtn (nreverse ee))
       (setq rtnall (append rtnall rtn)))
     (if org-agenda-overriding-header
 	(insert (org-add-props (copy-sequence org-agenda-overriding-header)
@@ -20988,7 +21027,11 @@ that must or must not match in the entry."
       (setq pos (point))
       (insert string "\n")
       (add-text-properties pos (1- (point)) (list 'face 'org-warning))
-      (setq pos (point)))
+      (setq pos (point))
+      (unless org-agenda-multi
+	(insert "Press `[', `]' to add/sub word, `{', `}' to add/sub regexp, `C-u r' to edit\n")
+	(add-text-properties pos (1- (point))
+			     (list 'face 'org-agenda-structure))))
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
@@ -22439,6 +22482,46 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (message "Rebuilding agenda buffer...done")
     (goto-line line)
     (recenter window-line)))
+
+(defun org-agenda-manipulate-query-add ()
+  "Manipulate the query by adding a search term with positive selection.
+Positive selection means, the term must be matched for selection of an entry."
+  (interactive)
+  (org-agenda-manipulate-query ?\[))
+(defun org-agenda-manipulate-query-subtract ()
+  "Manipulate the query by adding a search term with negative selection.
+Negative selection means, term must not be matched for selection of an entry."
+  (interactive)
+  (org-agenda-manipulate-query ?\]))
+(defun org-agenda-manipulate-query-add-re ()
+  "Manipulate the query by adding a search regexp with positive selection.
+Positive selection means, the regexp must match for selection of an entry."
+  (interactive)
+  (org-agenda-manipulate-query ?\{))
+(defun org-agenda-manipulate-query-subtract-re ()
+  "Manipulate the query by adding a search regexp with negative selection.
+Negative selection means, regexp must not match for selection of an entry."
+  (interactive)
+  (org-agenda-manipulate-query ?\}))
+(defun org-agenda-manipulate-query (char)
+  (cond
+   ((eq org-agenda-type 'search)
+    (org-add-to-string
+     'org-agenda-query-string
+     (cdr (assoc char '((?\[ . " +") (?\] . " -")
+			(?\{ . " +{}") (?\} . " -{}")))))
+    (setq org-agenda-redo-command
+	  (list 'org-search-view
+		(+ (length org-agenda-query-string)
+		   (if (member char '(?\{ ?\})) 0 1))
+		org-agenda-query-string))
+    (set-register org-agenda-query-register org-agenda-query-string)
+    (org-agenda-redo))
+   (t (error "Canot manipulate query for %s-type agenda buffers"
+	     org-agenda-type))))
+
+(defun org-add-to-string (var string)
+  (set var (concat (symbol-value var) string)))
 
 (defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
@@ -27776,7 +27859,7 @@ really on, so that the block visually is on the match."
   (interactive "sOrg-files matching: \np")
   (let* ((files (org-agenda-files))
 	 (tnames (mapcar 'file-truename files))
-	 (extra org-agenda-multi-occur-extra-files)
+	 (extra org-agenda-text-search-extra-files)
 	 f)
     (while (setq f (pop extra))
       (unless (member (file-truename f) tnames)
