@@ -11,6 +11,49 @@
 
 ** Details
 
+*** New keyword search agenda view
+
+    `C-c a s' now invokes a special agenda view that can be used
+    to search notes by keyword and regular expressions.  The
+    search knows the boundaries of an entry, can use simple
+    Boolean logic and is reasonably fast.  For example, the
+    search string
+
+    : +computer +wifi -ethernet -{8\.11[bg]}
+
+    will search for note entries that contain the keywords
+    @code{computer} and @code{wifi}, but not the keyword
+    @code{ethernet}, and which are also not matched by the
+    regular expression @code{8\.11[bg]}, meaning to exclude both
+    8.11b and 8.11g.  If the first character of the search string
+    is an asteriks, the search will only look at headlines -
+    otherwise it will look at the headine and the text below it,
+    up to the next (possibly sub-) heading.
+
+    The command searches all agenda files, and in addition the
+    files listed in `org-agenda-text-search-extra-files'.
+    
+    I find it very useful to define a custom command to do such
+    a search only in a limited number of files (my notes files),
+    like this:
+
+    : ("N" "Search notes" search ""
+    :   ((org-agenda-files '("~/org/notes.org" "~/org/computer.org"))
+    :    (org-agenda-text-search-extra-files nil)))
+
+*** Many new extensions available in the CONTRIB directory
+
+    The new development model already starts to pay off, a number
+    of interesting extensions are now part of the distribution.
+    Check the file CONTRIB/README for a list.
+
+    Interesting for developers may be that there is a file
+    org-id.el which implements global ID's for org-mode entries.
+    These can be used in dependency implementations, for
+    example.
+
+*** Misc
+
    - M-RET can again be used to split a line so tha the rest of
      the line becomes the new heading.  However, if you do this
      in a heading containing tags, the tags will stay in the old
