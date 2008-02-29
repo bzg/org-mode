@@ -1,3 +1,8 @@
+2008-02-29  Tokuya Kameshima <kames@fa2.so-net.ne.jp>
+
+	* lisp/org-bookmark.el (org-bookmark-store-link): Use
+	`bookmark-all-names' instead of `bookmark-alist'.
+
 2008-02-29  Bastien Guerry  <bzg@altern.org>
 
 	* lisp/org-bookmark.el (org-bookmark-in-dired)
