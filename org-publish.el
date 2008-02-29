@@ -364,6 +364,8 @@ When argument is not given, return all property lists for all projects."
 	(plists nil)
 	(single nil)
 	(components nil))
+
+   ;;
    ;;
    (while (setq project (pop alist))
      ;; what kind of project is it?
@@ -384,38 +386,31 @@ When argument is not given, return all property lists for all projects."
    plists))
 
 
+
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
 If EXCLUDE-REGEXP is set, this will be used to filter out
 matching filenames."
-  (let* ((base-dir (file-name-as-directory (plist-get plist :base-directory)))
+  (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
 	 (include-list (plist-get plist :include))
-	 (recursive-p (plist-get plist :recursive))
 	 (extension (or (plist-get plist :base-extension) "org"))
 	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
-	 alldirs allfiles files dir)
-    ;; Get all files and directories in base-directory
-    (setq files (dired-files-attributes base-dir))
-    ;; Get all subdirectories if recursive-p
-    (setq alldirs 
-	  (if recursive-p
-	      (delete nil (mapcar (lambda(f) (if (caaddr f) (cadr f))) files))
-	    (list base-dir)))
-    (while (setq dir (pop alldirs))
-      (setq files (directory-files dir t regexp))
-      ;; Exclude files
-      (setq files
-	    (if (not exclude-regexp)
-		files
-	      (delq nil
-		    (mapcar (lambda (x)
-			      (if (string-match exclude-regexp x) nil x))
-			    files))))
-      ;; Include extra files
-      (let ((inc nil))
-	(while (setq inc (pop include-list))
-	  (setq files (cons (expand-file-name inc dir) files))))
-      (setq allfiles (append allfiles files)))
+	 (allfiles (directory-files dir t regexp)))
+    ;;
+    ;; exclude files
+    (setq allfiles
+	  (if (not exclude-regexp)
+	      allfiles
+	    (delq nil
+		  (mapcar (lambda (x)
+			    (if (string-match exclude-regexp x) nil x))
+			  allfiles))))
+    ;;
+    ;; include extra files
+    (let ((inc nil))
+      (while (setq inc (pop include-list))
+	(setq allfiles (cons (expand-file-name inc dir) allfiles))))
+
     allfiles))
 
 
@@ -437,6 +432,7 @@ nil if not found."
 	     (setq found plist))))
      (org-publish-get-plists))
     found))
+
 
 
 ;;;; Pluggable publishing back-end functions
@@ -477,21 +473,15 @@ FILENAME is the filename of the file to be published."
 
 ;;;; Publishing files, sets of files, and indices
 
-;; eshell mkdir ?
-;; IBM mkdir ?
-;; FIXME si le nom de fichier n'est pas dans le base-directory
-;; alors creer le répertoire intermédiaire
+
 (defun org-publish-file (filename)
   "Publish file FILENAME."
-  (let* ((base-dir (file-name-as-directory (plist-get plist :base-directory)))
-	 (project-name (org-publish-get-project-from-filename filename))
+  (let* ((project-name (org-publish-get-project-from-filename filename))
 	 (plist (org-publish-get-plist-from-filename filename))
-	 (publishing-function (or (plist-get plist :publishing-function) 
-				  'org-publish-org-to-html)))
+	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html)))
     (if (not project-name)
 	(error "File %s is not part of any known project" filename))
     (when (org-publish-needed-p filename)
-      ;;; FIXME create a directory, if required the required directory
       (if (listp publishing-function)
 	  ;; allow chain of publishing functions
 	  (mapc (lambda (f)
@@ -505,8 +495,7 @@ FILENAME is the filename of the file to be published."
   "Publish all files in set defined by PLIST.
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
-	 (publishing-function (or (plist-get plist :publishing-function)
-				  'org-publish-org-to-html))
+	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
@@ -607,6 +596,7 @@ With prefix argument, force publish all files."
 	   (if force nil org-publish-use-timestamps-flag))
 	  (plists (org-publish-get-plists)))
       (mapcar 'org-publish-plist plists))))
+
 
 
 (provide 'org-publish)
