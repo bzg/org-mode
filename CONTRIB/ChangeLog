@@ -1,3 +1,14 @@
+2008-02-29  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-bookmark.el (org-bookmark-in-dired)
+	(org-bookmark-when-visiting-a-file)
+	(org-bookmark-use-first-bookmark): New options.
+	(org-bookmark-store-link): Behave according to options.
+
+2008-02-29  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-mairix.el (org-mairix): Use `org-link' group.
+
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
 	* lisp/org-bookmark.el: New file.

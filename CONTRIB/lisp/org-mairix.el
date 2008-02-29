@@ -44,7 +44,7 @@
 (defgroup org-mairix nil
   "Mairix support/integration in org."
   :tag "Org Mairix"
-  :group 'org)
+  :group 'org-links)
 
 (defcustom org-mairix-threaded-links t
   "Should new links be created as threaded links?
