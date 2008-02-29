@@ -61,7 +61,7 @@ CP = cp -p
 
 # The following variables need to be defined by the maintainer
 LISPFILES0 = org.el org-publish.el org-mouse.el org-export-latex.el \
-	     org-mac-message.el
+	     org-mac-message.el org-irc.el
 LISPFILES  = $(LISPFILES0) org-install.el 
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
