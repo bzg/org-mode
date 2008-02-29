@@ -56,7 +56,7 @@ Otherwise prompt the user for the right bookmark to use."
 
 (defun org-bookmark-store-link ()
   "Store a link to the current line's bookmark in bookmark list."
-  (let (file bookmark)
+  (let (file bookmark bmks)
     (cond ((and org-bookmark-in-dired
 		(eq major-mode 'dired-mode))
 	   (setq file (abbreviate-file-name (dired-get-filename))))
@@ -68,12 +68,12 @@ Otherwise prompt the user for the right bookmark to use."
 	(when (eq major-mode 'bookmark-bmenu-mode)
 	  (setq bookmark (bookmark-bmenu-bookmark)))
       (when (and (setq bmks 
-		       (mapcar (lambda(bmk)
-				 (if (equal file 
-					    (abbreviate-file-name 
-					     (cdr (assoc 'filename (cadr bmk)))))
-				     (car bmk)))
-			       bookmark-alist))
+		       (mapcar (lambda (name)
+				 (if (equal file
+					    (abbreviate-file-name
+					     (bookmark-location name)))
+				     name))
+			       (bookmark-all-names)))
 		 (setq bmks (delete nil bmks)))
 	(setq bookmark 
 	      (if (or (eq 1 (length bmks)) org-bookmark-use-first-bookmark)
