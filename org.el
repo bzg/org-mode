@@ -21843,7 +21843,7 @@ the documentation of `org-diary'."
 				 head category tags timestr))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
-		(setq face (org-agenda-deadline-face dfrac))
+		(setq face (org-agenda-deadline-face dfrac wdays))
 		(org-add-props txt props
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
@@ -21857,9 +21857,10 @@ the documentation of `org-diary'."
 		(push txt ee))))))
     (nreverse ee)))
 
-(defun org-agenda-deadline-face (fraction)
+(defun org-agenda-deadline-face (fraction &optional wdays)
   "Return the face to displaying a deadline item.
 FRACTION is what fraction of the head-warning time has passed."
+  (if (equal wdays 0) (setq fraction 1.))
   (let ((faces org-agenda-deadline-faces) f)
     (catch 'exit
       (while (setq f (pop faces))

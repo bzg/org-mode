@@ -8,6 +8,10 @@
 	(org-agenda-manipulate-query-subtract-regexp)
 	(org-agenda-manipulate-query): New functions.
 	(org-agenda-query-register): New option.
+	(org-agenda-deadline-face): New argument wdays, to catch the
+	special case wdays=0.
+	(org-agenda-get-deadlines): Pass wdays to
+	`org-agenda-deadline-face'.
 
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
