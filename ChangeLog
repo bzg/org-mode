@@ -1,3 +1,9 @@
+2008-02-29  Bastien Guerry  <Bastien.Guerry@ens.fr>
+
+	* org-irc.el: Require 'cl and 'erc.  Added dynamically scoped
+	variables.
+	(org-irc-visit-erc): Bug fix: rename `chan' to `chan-name'.
+
 2008-02-29  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-export-as-html): Kill buffer after

@@ -50,12 +50,20 @@
 ;;
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (require 'org)
+(require 'erc)
 
 (defvar org-irc-client 'erc
   "The IRC client to act on")
 (defvar org-irc-link-to-logs nil
   "non-nil will store a link to the logs, nil will store an irc: style link")
+
+(defvar erc-default-port) ; dynamically scoped from erc.el
+(defvar erc-session-port) ; dynamically scoped form erc-backend.el
+(defvar erc-server-announced-name) ; dynamically scoped form erc-backend.el
 
 ;; Generic functions/config (extend these for other clients)
 
@@ -209,7 +217,7 @@ the session itself."
                               (progn
                                 (goto-char (point-max))
                                 (insert (concat nick ": ")))
-                              (error "%s not found in %s" nick chan)))))
+                              (error "%s not found in %s" nick chan-name)))))
                     (progn
                       (switch-to-buffer server-buffer)
                       (erc-cmd-JOIN chan-name))))
