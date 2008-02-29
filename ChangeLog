@@ -12,6 +12,7 @@
 	special case wdays=0.
 	(org-agenda-get-deadlines): Pass wdays to
 	`org-agenda-deadline-face'.
+	(org-agenda-align-tags): Bug fix.
 
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
