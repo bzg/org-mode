@@ -25890,7 +25890,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (insert (format "<span style=\"visibility:hidden;\">%s</span>"
 			  (make-string n ?x)))))
 
-      (or to-buffer (save-buffer))
+      (or to-buffer 
+	  (progn (save-buffer) 
+		 (kill-buffer (current-buffer))))
       (goto-char (point-min))
       (message "Exporting... done")
       (if (eq to-buffer 'string)

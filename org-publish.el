@@ -364,8 +364,6 @@ When argument is not given, return all property lists for all projects."
 	(plists nil)
 	(single nil)
 	(components nil))
-
-   ;;
    ;;
    (while (setq project (pop alist))
      ;; what kind of project is it?
@@ -386,32 +384,40 @@ When argument is not given, return all property lists for all projects."
    plists))
 
 
-
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
-If EXCLUDE-REGEXP is set, this will be used to filter out
-matching filenames."
-  (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
-	 (include-list (plist-get plist :include))
-	 (extension (or (plist-get plist :base-extension) "org"))
-	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
-	 (allfiles (directory-files dir t regexp)))
-    ;;
-    ;; exclude files
-    (setq allfiles
-	  (if (not exclude-regexp)
-	      allfiles
-	    (delq nil
-		  (mapcar (lambda (x)
-			    (if (string-match exclude-regexp x) nil x))
-			  allfiles))))
-    ;;
-    ;; include extra files
-    (let ((inc nil))
-      (while (setq inc (pop include-list))
-	(setq allfiles (cons (expand-file-name inc dir) allfiles))))
-
+ If EXCLUDE-REGEXP is set, this will be used to filter out
+ matching filenames."
+  (let* ((base-dir (file-name-as-directory (plist-get plist :base-directory)))
+ 	 (include-list (plist-get plist :include))
+ 	 (recursive-p (plist-get plist :recursive))
+ 	 (extension (or (plist-get plist :base-extension) "org"))
+ 	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
+ 	 alldirs allfiles files dir)
+    ;; Get all files and directories in base-directory
+    (setq files (dired-files-attributes base-dir))
+    ;; Get all subdirectories if recursive-p
+    (setq alldirs 
+ 	  (if recursive-p
+ 	      (delete nil (mapcar (lambda(f) (if (caaddr f) (cadr f))) files))
+ 	    (list base-dir)))
+    (while (setq dir (pop alldirs))
+      (setq files (directory-files dir t regexp))
+      ;; Exclude files
+      (setq files
+ 	    (if (not exclude-regexp)
+ 		files
+ 	      (delq nil
+ 		    (mapcar (lambda (x)
+ 			      (if (string-match exclude-regexp x) nil x))
+ 			    files))))
+      ;; Include extra files
+      (let ((inc nil))
+ 	(while (setq inc (pop include-list))
+ 	  (setq files (cons (expand-file-name inc dir) files))))
+      (setq allfiles (append allfiles files)))
     allfiles))
+
 
 
 (defun org-publish-get-project-from-filename (filename)
@@ -452,7 +458,7 @@ FILENAME is the filename of the org file to be published."
   (require 'org)
   (let* ((arg (plist-get plist :headline-levels)))
     (progn
-      (find-file filename)
+      (set-buffer (find-file-noselect filename))
       (funcall (intern (concat "org-export-as-" format))
 	       arg nil plist)
       (kill-buffer (current-buffer)))))
@@ -476,12 +482,17 @@ FILENAME is the filename of the file to be published."
 
 (defun org-publish-file (filename)
   "Publish file FILENAME."
-  (let* ((project-name (org-publish-get-project-from-filename filename))
+  (let* ((base-dir (plist-get plist :publishing-directory))
+	 (project-name (org-publish-get-project-from-filename filename))
 	 (plist (org-publish-get-plist-from-filename filename))
-	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html)))
+	 (publishing-function (or (plist-get plist :publishing-function) 
+				  'org-publish-org-to-html)))
     (if (not project-name)
 	(error "File %s is not part of any known project" filename))
     (when (org-publish-needed-p filename)
+      ;; take care of non-existents directories
+      (if (not (file-exists-p (file-name-as-directory filename)))
+	  (make-directory (file-name-directory filename) t))
       (if (listp publishing-function)
 	  ;; allow chain of publishing functions
 	  (mapc (lambda (f)

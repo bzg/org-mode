@@ -455,7 +455,7 @@ without even the \begin{document} and \end{document} commands."
 
     ;; finalization
     (unless body-only (insert "\n\\end{document}"))
-    (or to-buffer (save-buffer))
+    (or to-buffer (progn (save-buffer) (kill-buffer (current-buffer))))
     (goto-char (point-min))
     (message "Exporting to LaTeX...done")
     (prog1
