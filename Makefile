@@ -34,7 +34,6 @@ BATCH=$(EMACS) -batch -q -eval                             \
  "(progn (add-to-list (quote load-path) \".\")             \
         (add-to-list (quote load-path) \"$(lispdir)\"))"
 
-
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
 
