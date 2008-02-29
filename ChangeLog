@@ -1,3 +1,14 @@
+2008-02-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-text-search-extra-files): Renamed from
+	`org-agenda-multi-occur-extra-files'.
+	(org-agenda-manipulate-query-add)
+	(org-agenda-manipulate-query-subtract)
+	(org-agenda-manipulate-query-add-regexp)
+	(org-agenda-manipulate-query-subtract-regexp)
+	(org-agenda-manipulate-query): New functions.
+	(org-agenda-query-register): New option.
+
 2008-02-28  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-open-at-point): Deleted mismatching `catch' form.
@@ -22,8 +33,15 @@
 	* org.el (org-auto-repeat-maybe): Make sure that the repeat stuff
 	does not add another state note.
 	(orgtbl-setup): Fix menu bug.
+	(org-agenda-search-history): New variable.
+	(org-search-view): New command.
+	(org-agenda-prefix-format, org-agenda-sorting-strategy): New
+	setting for search.
+	(org-agenda-custom-commands, org-agenda)
+	(org-agenda-get-restriction-and-command, org-run-agenda-series):
+	Cater for new agenda view.
 
-2008-02-28  Bernt Hansen <bernt@norang.ca>  (tiny change)
+2008-02-28  Bernt Hansen <bernt@norang.ca>
 
 	* org.el (org-put-clock-overlay): increase the limit of allowed
 	levels to 8 when building the clock summary.

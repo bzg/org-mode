@@ -6,11 +6,111 @@ lang="en" xml:lang="en">
 <title>Org-mode list of User-visible changes</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2008/02/19 09:12:40"/>
+<meta name="generated" content="2008/02/28 17:49:40"/>
 <meta name="author" content="Carsten Dominik"/>
-<link rel=stylesheet href="freeshell2.css" type="text/css">
+<style type="text/css">
+  html {
+	font-family: Times, serif;
+	font-size: 12pt;
+  }
+  .title { text-align: center; }
+  .todo  { color: red; }
+  .done { color: green; }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  .tag { background-color:lightblue; font-weight:normal }
+  .target { background-color: lavender; }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+  }
+  table { border-collapse: collapse; }
+  td, th {
+	vertical-align: top;
+	<!--border: 1pt solid #ADB9CC;-->
+  }
+</style>
 </head><body>
 <h1 class="title">Org-mode list of User-visible changes</h1>
+
+<div class="outline-2">
+<h2>Version 5.23</h2>
+
+
+
+<div class="outline-3">
+<h3>Incompatible changes</h3>
+
+
+</div>
+
+<div class="outline-3">
+<h3>Details</h3>
+
+
+
+<div class="outline-4">
+<h4>New keyword search agenda view</h4>
+
+
+<p>
+This is a special search that lets you select entries by keywords or
+regular expression, using a boolean logic.  For example, the search
+string
+</p>
+<p>
+<pre>
+ +computer +wifi -ethernet -{8\.11[bg]}
+</pre>
+</p>
+<p>
+will search for note entries that contain the keywords @code{computer}
+and @code{wifi}, but not the keyword @code{ethernet}, and which are also
+not matched by the regular expression @code{8\.11[bg]}, meaning to
+exclude both 8.11b and 8.11g.  If the first character of the
+search string is an asteriks, the search will lonly look at
+headlines - otherwise it will look at the headine and the
+text below it, up to the next (possibly sub-) heading.
+</p>
+<p>
+The default key binding for this view is `C-c a s'.
+</p>
+<p>
+You can define a custom command to do such a search only in a
+limited number of files, like this:
+</p>
+<p>
+<pre>
+ ("S" "Search notes" search ""
+   ((org-agenda-files '("~/org/notes.org" "~/org/computer.org"))))    
+</pre>
+</p>
+</div>
+
+<div class="outline-4">
+<h4>Misc</h4>
+
+
+<ul>
+<li>
+M-RET can again be used to split a line so tha the rest of
+the line becomes the new heading.  However, if you do this
+in a heading containing tags, the tags will stay in the old
+line. 
+
+<p>
+Customize the variable `org-M-RET-may-split-line' if you
+don't want this command to split a line in the middle.  The
+same variable also influences line splitting in items and in
+tables.
+</p>
+
+</li>
+</ul></div>
+</div>
+</div>
 
 <div class="outline-2">
 <h2>Version 5.22</h2>
@@ -6602,6 +6702,6 @@ HTML exporter upgrade, in particular table of contents
 <div id="postamble"><p class="author"> Author: Carsten Dominik
 <a href="mailto:carsten at orgmode dot org">&lt;carsten at orgmode dot org&gt;</a>
 </p>
-<p class="date"> Date: 2008/02/19 09:12:40</p>
+<p class="date"> Date: 2008/02/28 17:49:40</p>
 </div></body>
 </html>
