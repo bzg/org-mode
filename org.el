@@ -1255,7 +1255,7 @@ Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-mouse-1-follows-link 
+(defcustom org-mouse-1-follows-link
   (if (boundp 'mouse-1-click-follows-link) mouse-1-click-follows-link t)
   "Non-nil means, mouse-1 on a link will follow the link.
 A longer mouse click will still set point.  Does not work on XEmacs.
@@ -12729,7 +12729,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		(setq type (match-string 1 link) path (match-string 2 link))
 	      (setq type "thisfile" path link))
 	    (throw 'match t)))
-	
+
 	(when (get-text-property (point) 'org-linked-text)
 	  (setq type "thisfile"
 		pos (if (get-text-property (1+ (point)) 'org-linked-text)
@@ -12738,7 +12738,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		      (previous-single-property-change pos 'org-linked-text)
 		      (next-single-property-change pos 'org-linked-text)))
 	  (throw 'match t))
-	
+
 	(save-excursion
 	  (when (or (org-in-regexp org-angle-link-re)
 		    (org-in-regexp org-plain-link-re))
@@ -12760,12 +12760,12 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
       ;; Remove any trailing spaces in path
       (if (string-match " +\\'" path)
 	  (setq path (replace-match "" t t path)))
-      
+
       (cond
-       
+
        ((assoc type org-link-protocols)
 	(funcall (nth 1 (assoc type org-link-protocols)) path))
-       
+
        ((equal type "mailto")
 	(let ((cmd (car org-link-mailto-program))
 	      (args (cdr org-link-mailto-program)) args1
@@ -12783,14 +12783,14 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		    (setq a (replace-match subject t t a)))
 		(push a args1))))
 	  (apply cmd (nreverse args1))))
-       
+
        ((member type '("http" "https" "ftp" "news"))
 	(browse-url (concat type ":" (org-link-escape
 				      path org-link-escape-chars-browser))))
-       
+
        ((member type '("message"))
 	(browse-url (concat type ":" path)))
-       
+
        ((string= type "tags")
 	(org-tags-view in-emacs path))
        ((string= type "thisfile")
@@ -12806,10 +12806,10 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		     ,pos)))
 	  (condition-case nil (eval cmd)
 	    (error (progn (widen) (eval cmd))))))
-       
+
        ((string= type "tree-match")
 	(org-occur (concat "\\[" (regexp-quote path) "\\]")))
-       
+
        ((string= type "file")
 	(if (string-match "::\\([0-9]+\\)\\'" path)
 	    (setq line (string-to-number (match-string 1 path))
@@ -12820,16 +12820,16 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	(if (string-match "[*?{]" (file-name-nondirectory path))
 	    (dired path)
 	  (org-open-file path in-emacs line search)))
-       
+
        ((string= type "news")
 	(org-follow-gnus-link path))
-       
+
        ((string= type "bbdb")
 	(org-follow-bbdb-link path))
-       
+
        ((string= type "info")
 	(org-follow-info-link path))
-       
+
        ((string= type "gnus")
 	(let (group article)
 	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
@@ -12837,7 +12837,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	  (setq group (match-string 1 path)
 		article (match-string 3 path))
 	  (org-follow-gnus-link group article)))
-       
+
        ((string= type "vm")
 	(let (folder article)
 	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
@@ -12846,7 +12846,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		article (match-string 3 path))
 	  ;; in-emacs is the prefix arg, will be interpreted as read-only
 	  (org-follow-vm-link folder article in-emacs)))
-       
+
        ((string= type "wl")
 	(let (folder article)
 	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
@@ -12854,7 +12854,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	  (setq folder (match-string 1 path)
 		article (match-string 3 path))
 	  (org-follow-wl-link folder article)))
-       
+
        ((string= type "mhe")
 	(let (folder article)
 	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
@@ -12862,7 +12862,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	  (setq folder (match-string 1 path)
 		article (match-string 3 path))
 	  (org-follow-mhe-link folder article)))
-       
+
        ((string= type "rmail")
 	(let (folder article)
 	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
@@ -12870,7 +12870,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	  (setq folder (match-string 1 path)
 		article (match-string 3 path))
 	  (org-follow-rmail-link folder article)))
-       
+
        ((string= type "shell")
 	(let ((cmd path))
 	  (if (or (not org-confirm-shell-link-function)
@@ -12882,7 +12882,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 		(message "Executing %s" cmd)
 		(shell-command cmd))
 	    (error "Abort"))))
-       
+
        ((string= type "elisp")
 	(let ((cmd path))
 	  (if (or (not org-confirm-elisp-link-function)
@@ -12892,7 +12892,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 				     'face 'org-warning))))
 	      (message "%s => %s" cmd (eval (read cmd)))
 	    (error "Abort"))))
-       
+
        (t
 	(browse-url-at-point)))))
   (move-marker org-open-link-marker nil))
@@ -17431,15 +17431,24 @@ printf       a printf format for computed values"
 
 ;;; Dynamic block for Column view
 
-(defun org-columns-capture-view ()
-  "Get the column view of the current buffer and return it as a list.
-The list will contains the title row and all other rows.  Each row is
-a list of fields."
+(defun org-columns-capture-view (&optional maxlevel skip-empty-rows)
+  "Get the column view of the current buffer or subtree.
+The first optional argument MAXLEVEL sets the level limit.  A
+second optional argument SKIP-EMPTY-ROWS tells whether to skip
+empty rows, an empty row being one where all the column view
+specifiers except ITEM are empty.  This function returns a list
+containing the title row and all other rows.  Each row is a list
+of fields."
   (save-excursion
     (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
 	   (n (length title)) row tbl)
       (goto-char (point-min))
-      (while (re-search-forward "^\\*+ " nil t)
+      (while (and (re-search-forward "^\\(\\*+\\) " nil t)
+		  (or (null maxlevel)
+		      (>= maxlevel
+			  (if org-odd-levels-only
+			      (/ (1+ (length (match-string 1))) 2)
+			    (length (match-string 1))))))
 	(when (get-char-property (match-beginning 0) 'org-columns-key)
 	  (setq row nil)
 	  (loop for i from 0 to (1- n) do
@@ -17448,7 +17457,9 @@ a list of fields."
 			  "")
 		      row))
 	  (setq row (nreverse row))
-	  (push row tbl)))
+	  (unless (and skip-empty-rows
+		       (eq 1 (length (delete "" (delete-dups row)))))
+	    (push row tbl))))
       (append (list title 'hline) (nreverse tbl)))))
 
 (defun org-dblock-write:columnview (params)
@@ -17463,10 +17474,15 @@ PARAMS is a property list of parameters:
           to column view).
 :hlines   When t, insert a hline before each item.  When a number, insert
           a hline before each level <= that number.
-:vlines   When t, make each column a colgroup to enforce vertical lines."
+:vlines   When t, make each column a colgroup to enforce vertical lines.
+:maxlevel When set to a number, don't capture headlines below this level.
+:skip-empty-rows
+          When t, skip rows where all specifiers other than ITEM are empty."
   (let ((pos (move-marker (make-marker) (point)))
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
+	(maxlevel (plist-get params :maxlevel))
+	(skip-empty-rows (plist-get params :skip-empty-rows))
 	tbl id idpos nfields tmp)
     (save-excursion
       (save-restriction
@@ -17478,7 +17494,7 @@ PARAMS is a property list of parameters:
 		 (goto-char idpos))
 		(t (error "Cannot find entry with :ID: %s" id))))
 	(org-columns)
-	(setq tbl (org-columns-capture-view))
+	(setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
 	(setq nfields (length (car tbl)))
 	(org-columns-quit)))
     (goto-char pos)
@@ -19831,7 +19847,7 @@ t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS query                  M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
 s   Search for keywords                 C   Configure custom agenda commands
-/   Multi-occur 
+/   Multi-occur
 ")
 			(start 0))
 		    (while (string-match

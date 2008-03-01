@@ -1,4 +1,15 @@
-2008-02-29  Bastien Guerry  <Bastien.Guerry@ens.fr>
+2008-03-01  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Capturing Column View): Documented new parameters for
+	the column view dynamic block: :maxlevel and :skip-empty-rows.
+
+2008-03-01  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-dblock-write:columnview, org-columns-capture-view):
+	Added support for :maxlevel and :skip-empty-rows as argument for
+	the columnview dynamic block.
+
+2008-02-29  Bastien Guerry  <bzg@altern.org>
 
 	* org-irc.el: Require 'cl and 'erc.  Added dynamically scoped
 	variables.
@@ -88,7 +99,7 @@
 	customizable.
 	(org-default-extensions): New option.
 
-2008-02-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
+2008-02-26  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-agenda-to-appt): New argument `refresh' let the user
 	delete previous appointments stored in `appt-time-msg-list'.
@@ -448,7 +459,7 @@ Installed as 5.19a
 	(Quoted examples): New section.
 	(Enhancing text): New verbatim environments.
 
-2007-11-04  Bastien Guerry  <Bastien.Guerry@ens.fr>
+2007-11-04  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-export-with-special-strings): New option.
 	(org-export-html-convert-special-strings): New function.
@@ -656,7 +667,7 @@ Installed as 5.11
 
 	* org.texi (Appointment reminders): New section.
 
-2007-10-05  Bastien Guerry  <Bastien.Guerry@ens.fr>
+2007-10-05  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-latex-protect-string): 
         Renaming of `org-latex-protect'.
@@ -700,7 +711,7 @@ Installed as 5.10
 	(org-indent-item): Fix bullet type before thinking about
 	renumbering.
 
-2007-09-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
+2007-09-26  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-latex-emphasis-alist): 
 	Each list of the alist now requires three elements.

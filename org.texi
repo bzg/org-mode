@@ -3774,8 +3774,8 @@ values.
 
 The first column, @samp{%25ITEM}, means the first 25 characters of the
 item itself, i.e. of the headline.  You probably always should start the
-column definition with the ITEM specifier.  The other specifiers create
-columns @samp{Owner} with a list of names as allowed values, for
+column definition with the @samp{ITEM} specifier.  The other specifiers
+create columns @samp{Owner} with a list of names as allowed values, for
 @samp{Status} with four different possible values, and for a checkbox
 field @samp{Approved}.  When no width is given after the @samp{%}
 character, the column will be exactly as wide as it needs to be in order
@@ -3859,8 +3859,8 @@ Delete the current column.
 
 Since column view is just an overlay over a buffer, it cannot be
 exported or printed directly.  If you want to capture a column view, use
-the dynamic block (@pxref{Dynamic blocks}).  The frame of this block
-looks like this:
+ths @code{columnview} dynamic block (@pxref{Dynamic blocks}).  The frame
+of this block looks like this:
 
 @example
 * The column view
@@ -3888,6 +3888,12 @@ When @code{t}, insert a hline after every line.  When a number N, insert
 a hline before each headline with level @code{<= N}.
 @item :vlines
 When set to @code{t}, enforce column groups to get vertical lines.
+@item :maxlevel
+When set to a number, don't capture entries below this level.
+@item :skip-empty-rows
+When set to @code{t}, skip row where the only non-empty specifier of the
+column view is @code{ITEM}.
+
 @end table
 
 @noindent
