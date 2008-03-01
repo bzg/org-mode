@@ -8052,6 +8052,7 @@ this heading."
 		   org-odd-levels-only
 		 tr-org-odd-levels-only)))
 	  (goto-char (point-min))
+	  (show-all)
 	  (if heading
 	      (progn
 		(if (re-search-forward
@@ -8094,8 +8095,9 @@ this heading."
 		  (setq n (concat "ARCHIVE_" (upcase (symbol-name e))))
 		  (org-entry-put (point) n v)))))
 
-	  ;; Save the buffer, if it is not the same buffer.
-	  (if (not (eq this-buffer buffer)) (save-buffer))))
+	  ;; Save and kill the buffer, if it is not the same buffer.
+	  (if (not (eq this-buffer buffer)) 
+	      (progn (save-buffer) (kill-buffer buffer)))))
       ;; Here we are back in the original buffer.  Everything seems to have
       ;; worked.  So now cut the tree and finish up.
       (let (this-command) (org-cut-subtree))

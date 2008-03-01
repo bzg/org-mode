@@ -1,27 +1,22 @@
 2008-03-01  Bastien Guerry  <bzg@altern.org>
 
-	* org.texi (Capturing Column View): Documented new parameters for
-	the column view dynamic block: :maxlevel and :skip-empty-rows.
-
-2008-03-01  Bastien Guerry  <bzg@altern.org>
-
 	* org.el (org-dblock-write:columnview, org-columns-capture-view):
 	Added support for :maxlevel and :skip-empty-rows as argument for
 	the columnview dynamic block.
+	(org-archive-subtree): Fixed a bug that prevented entries to get
+	marked DONE even when `org-archive-mark-done' was non-nil.  Also
+	kill archive buffer after archiving.
+	(org-export-as-html): Kill buffer after export when necessary.
 
-2008-02-29  Bastien Guerry  <bzg@altern.org>
+	* org-export-latex.el (org-export-as-latex): Kill buffer after
+	export when necessary.
+
+	* org.texi (Capturing Column View): Documented the new parameters
+	for the column view dynamic block: :maxlevel and :skip-empty-rows.
 
 	* org-irc.el: Require 'cl and 'erc.  Added dynamically scoped
 	variables.
 	(org-irc-visit-erc): Bug fix: rename `chan' to `chan-name'.
-
-2008-02-29  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-export-as-html): Kill buffer after
-	export when `to-buffer' is nil.
-
-	* org-export-latex.el (org-export-as-latex): Kill buffer after
-	export when `to-buffer' is nil.
 
 2008-02-29  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -90,7 +85,6 @@
 
 2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
 
-
 	* org-irc.el: Modified the installation instructions.
 
 	* org.el (org-store-link): Removed the (require 'org-irc), this is
@@ -106,7 +100,6 @@
 	(org-deadline-warning-days): Mention the fact that a value of zero
 	will be treated like negative values.
 	(org-show-todo-tree): Fix a small typo in the docstring.
-
 
 2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
 
