@@ -219,13 +219,13 @@ of output formats.
     :publishing-function     Function to publish file. The default is
                              org-publish-org-to-html, but other
                              values are possible. May also be a
-                             list of functions, in which case 
+                             list of functions, in which case
                              each function in the list is invoked
                              in turn.
 
 Another property allows you to insert code that prepares a
 project for publishing. For example, you could call GNU Make on a
-certain makefile, to ensure published files are built up to date. 
+certain makefile, to ensure published files are built up to date.
 
     :preparation-function   Function to be called before publishing
                               this project.
@@ -339,9 +339,8 @@ whether file should be published."
 ;;;; A hash mapping files to project names
 
 
-(defvar org-publish-files (make-hash-table :test 'equal) "Hash
-table mapping file names to project names.")
-
+(defvar org-publish-files (make-hash-table :test 'equal) 
+  "Hash table mapping file names to project names.")
 
 ;;;; Checking filenames against this hash
 
@@ -353,7 +352,6 @@ table mapping file names to project names.")
 
 ;;;; Getting project information out of org-publish-project-alist
 
-
 (defun org-publish-get-plists (&optional project-name)
  "Return a list of property lists for project PROJECT-NAME.
 When argument is not given, return all property lists for all projects."
@@ -364,8 +362,6 @@ When argument is not given, return all property lists for all projects."
 	(plists nil)
 	(single nil)
 	(components nil))
-
-   ;;
    ;;
    (while (setq project (pop alist))
      ;; what kind of project is it?
@@ -386,31 +382,38 @@ When argument is not given, return all property lists for all projects."
    plists))
 
 
-
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
-If EXCLUDE-REGEXP is set, this will be used to filter out
-matching filenames."
-  (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
-	 (include-list (plist-get plist :include))
-	 (extension (or (plist-get plist :base-extension) "org"))
-	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
-	 (allfiles (directory-files dir t regexp)))
-    ;;
-    ;; exclude files
-    (setq allfiles
-	  (if (not exclude-regexp)
-	      allfiles
-	    (delq nil
-		  (mapcar (lambda (x)
-			    (if (string-match exclude-regexp x) nil x))
-			  allfiles))))
-    ;;
-    ;; include extra files
-    (let ((inc nil))
-      (while (setq inc (pop include-list))
-	(setq allfiles (cons (expand-file-name inc dir) allfiles))))
-
+ If EXCLUDE-REGEXP is set, this will be used to filter out
+ matching filenames."
+  (let* ((base-dir (file-name-as-directory (plist-get plist :base-directory)))
+ 	 (include-list (plist-get plist :include))
+ 	 (recursive-p (plist-get plist :recursive))
+ 	 (extension (or (plist-get plist :base-extension) "org"))
+ 	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
+ 	 alldirs allfiles files dir)
+    ;; Get all files and directories in base-directory
+    (setq files (dired-files-attributes base-dir))
+    ;; Get all subdirectories if recursive-p
+    (setq alldirs
+ 	  (if recursive-p
+ 	      (delete nil (mapcar (lambda(f) (if (caaddr f) (cadr f))) files))
+ 	    (list base-dir)))
+    (while (setq dir (pop alldirs))
+      (setq files (directory-files dir t regexp))
+      ;; Exclude files
+      (setq files
+ 	    (if (not exclude-regexp)
+ 		files
+ 	      (delq nil
+ 		    (mapcar (lambda (x)
+ 			      (if (string-match exclude-regexp x) nil x))
+ 			    files))))
+      ;; Include extra files
+      (let ((inc nil))
+ 	(while (setq inc (pop include-list))
+ 	  (setq files (cons (expand-file-name inc dir) files))))
+      (setq allfiles (append allfiles files)))
     allfiles))
 
 
@@ -430,32 +433,33 @@ nil if not found."
        (let ((files (org-publish-get-base-files plist)))
  	 (if (member (expand-file-name filename) files)
 	     (setq found plist))))
+     org-publish-plists
      (org-publish-get-plists))
     found))
 
 
-
 ;;;; Pluggable publishing back-end functions
 
-(defun org-publish-org-to-latex (plist filename)
+(defun org-publish-org-to-latex (plist filename &optional tmp-pub-dir)
   "Publish an org file to LaTeX."
-  (org-publish-org-to "latex" plist filename))
+  (org-publish-org-to "latex" plist filename tmp-pub-dir))
 
-(defun org-publish-org-to-html (plist filename)
+(defun org-publish-org-to-html (plist filename &optional tmp-pub-dir)
   "Publish an org file to HTML."
-  (org-publish-org-to "html" plist filename))
+  (org-publish-org-to "html" plist filename tmp-pub-dir))
 
-(defun org-publish-org-to (format plist filename)
+(defun org-publish-org-to (format plist filename  &optional tmp-pub-dir)
   "Publish an org file to FORMAT.
 PLIST is the property list for the given project.
 FILENAME is the filename of the org file to be published."
   (require 'org)
-  (let* ((arg (plist-get plist :headline-levels)))
-    (progn
-      (find-file filename)
-      (funcall (intern (concat "org-export-as-" format))
-	       arg nil plist)
-      (kill-buffer (current-buffer)))))
+  (unless (file-exists-p tmp-pub-dir)
+    (make-directory tmp-pub-dir t))
+  (find-file filename)
+  (funcall (intern (concat "org-export-as-" format))
+	   (plist-get plist :headline-levels)
+	   nil plist nil nil tmp-pub-dir)
+  (kill-buffer (current-buffer)))
 
 
 (defun org-publish-attachment (plist filename)
@@ -463,11 +467,12 @@ FILENAME is the filename of the org file to be published."
 PLIST is the property list for the given project.
 FILENAME is the filename of the file to be published."
   ;; make sure eshell/cp code is loaded
-  (eval-and-compile 
+  (eval-and-compile
     (require 'eshell)
     (require 'esh-maint)
     (require 'em-unix))
-  (let ((destination (file-name-as-directory (plist-get plist :publishing-directory))))
+  (let ((destination (file-name-as-directory 
+		      (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
 
@@ -478,16 +483,25 @@ FILENAME is the filename of the file to be published."
   "Publish file FILENAME."
   (let* ((project-name (org-publish-get-project-from-filename filename))
 	 (plist (org-publish-get-plist-from-filename filename))
-	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html)))
+	 (publishing-function (or (plist-get plist :publishing-function) 
+				  'org-publish-org-to-html))
+	 (base-dir (file-truename (plist-get plist :base-directory)))
+	 (pub-dir (file-truename (plist-get plist :publishing-directory)))
+	 tmp-pub-dir)
     (if (not project-name)
 	(error "File %s is not part of any known project" filename))
     (when (org-publish-needed-p filename)
+      (setq tmp-pub-dir 
+	    (file-name-directory
+	     (concat pub-dir
+		     (and (string-match (regexp-quote base-dir) f)
+			  (substring f (match-end 0))))))
       (if (listp publishing-function)
 	  ;; allow chain of publishing functions
 	  (mapc (lambda (f)
-		  (funcall f plist filename)) 
+		  (funcall f plist filename))
 		publishing-function)
-	(funcall publishing-function plist filename))
+	(funcall publishing-function plist filename tmp-pub-dir))
       (org-publish-update-timestamp filename))))
 
 
@@ -495,7 +509,8 @@ FILENAME is the filename of the file to be published."
   "Publish all files in set defined by PLIST.
  If :auto-index is set, publish the index too."
   (let* ((exclude-regexp (plist-get plist :exclude))
-	 (publishing-function (or (plist-get plist :publishing-function) 'org-publish-org-to-html))
+	 (publishing-function (or (plist-get plist :publishing-function) 
+				  'org-publish-org-to-html))
 	 (index-p (plist-get plist :auto-index))
          (index-filename (or (plist-get plist :index-filename) "index.org"))
 	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
@@ -506,16 +521,26 @@ FILENAME is the filename of the file to be published."
       (funcall preparation-function))
     (if index-p
 	(funcall index-function plist index-filename))
-    (let ((files (org-publish-get-base-files plist exclude-regexp)))
+    (let ((files (org-publish-get-base-files plist exclude-regexp))
+	  (base-dir (file-truename (plist-get plist :base-directory)))
+	  (pub-dir (file-truename (plist-get plist :publishing-directory)))
+	  tmp-pub-dir)
+      ;;
       (while (setq f (pop files))
+	;; set the right :publishing-directory
+	(setq tmp-pub-dir 
+	      (file-name-directory
+	       (concat pub-dir
+		       (and (string-match (regexp-quote base-dir) f)
+			    (substring f (match-end 0))))))
 	;; check timestamps
 	(when (org-publish-needed-p f)
 	  (if (listp publishing-function)
 	      ;; allow chain of publishing functions
 	      (mapc (lambda (func)
-		      (funcall func plist f)) 
+		      (funcall func plist f))
 		    publishing-function)
-	    (funcall publishing-function plist f))
+	    (funcall publishing-function plist f tmp-pub-dir))
 	  (org-publish-update-timestamp f))))))
 
 
@@ -530,7 +555,6 @@ default is 'index.org'."
 	 (index-buffer (find-buffer-visiting index-filename))
 	 (ifn (file-name-nondirectory index-filename))
 	 (f nil))
-    ;;
     ;; if buffer is already open, kill it to prevent error message
     (if index-buffer
 	(kill-buffer index-buffer))
