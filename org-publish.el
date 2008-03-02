@@ -151,6 +151,12 @@
 
 ;;; Code:
 
+;; FIXME Mention this in the ChangeLog
+
+;; - removed org-publish-validate-link 
+;; - deleted org-publish-get-plists-from-filename
+;; - deleted org-publish-get-plists
+
 (eval-when-compile
   (require 'cl))
 
@@ -286,11 +292,7 @@ files."
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
 
-;; FIXME removed org-publish-validate-link 
-;; FIXME deleted org-publish-get-plists-from-filename
-;; FIXME deleted org-publish-get-plists
-
-;; FIXME deleted :parents 
+;; FIXME ChangeLog: deleted :parents 
 (defun org-publish-needed-p (filename)
   "Check whether file should be published.
 If org-publish-use-timestamps-flag is set to nil, this function always
@@ -330,14 +332,14 @@ whether file should be published."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mapping files to project names
 
-;; FIXME annonce renaming
+;; FIXME ChangeLog: renamed from org-publish-files
 (defvar org-publish-files-alist nil
   "Alist of files and their parent project.
 Each element of this alist is of the form:
 
   (file-name . project-name)")
 
-;; FIXME annonce this new defun
+;; FIXME ChangeLog: new defun
 (defun org-publish-initialize-files-alist (&optional refresh)
   "Set `org-publish-files-alist' if it is not set.
 Also set it if the optional argument REFRESH is non-nil."
@@ -349,7 +351,7 @@ Also set it if the optional argument REFRESH is non-nil."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
 
-;; FIXME annonce this new defun
+;; FIXME ChangeLog: new defun
 (defun org-publish-get-files (projects-alist &optional no-exclusion)
   "Return the list of all publishable files for PROJECTS-ALIST.
 If NO-EXCLUSION is non-nil, don't exclude files."
@@ -367,7 +369,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
      (org-publish-expand-projects projects-alist))
     all-files))
 
-;; ;; FIXME annonce this new defun
+;; ;; FIXME ChangeLog: new defun
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
@@ -381,7 +383,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
 			  with-component))))))
 
-;; FIXME annonce this new defun
+;; FIXME ChangeLog: new defun
 (defun org-publish-expand-components (project)
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
@@ -583,17 +585,12 @@ With prefix argument, force publish the file."
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-file (buffer-file-name)))))
 
-(defvar t1 nil)
-(defvar t2 nil)
-;; (format-time-string "%S" (subtract-time t2 t1))
-
 ;;;###autoload
 (defun org-publish-current-project (&optional force)
   "Publish the project associated with the current file.
 With a prefix argument, force publishing of all files in
 the project."
   (interactive "P")
-  (setq t1 (current-time))
   (org-publish-initialize-files-alist)
   (save-window-excursion
     (let ((project (org-publish-get-project-from-filename (buffer-file-name)))
@@ -601,8 +598,7 @@ the project."
 	   (if force nil org-publish-use-timestamps-flag)))
       (if (not project)
 	  (error "File %s is not part of any known project" (buffer-file-name)))
-      (org-publish project)))
-  (setq t2 (current-time)))
+      (org-publish project))))
 
 (provide 'org-publish)
 
