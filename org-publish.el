@@ -275,6 +275,8 @@ files."
   :group 'org-publish
   :type 'string)
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
 (defun org-publish-timestamp-filename (filename)
@@ -284,6 +286,11 @@ files."
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
 
+;; FIXME removed org-publish-validate-link 
+;; FIXME deleted org-publish-get-plists-from-filename
+;; FIXME deleted org-publish-get-plists
+
+;; FIXME deleted :parents 
 (defun org-publish-needed-p (filename)
   "Check whether file should be published.
 If org-publish-use-timestamps-flag is set to nil, this function always
@@ -291,13 +298,11 @@ returns t. Otherwise, check the timestamps folder to determine
 whether file should be published."
   (if org-publish-use-timestamps-flag
       (progn
-	;;
 	;; create folder if needed
 	(if (not (file-exists-p org-publish-timestamp-directory))
 	    (make-directory org-publish-timestamp-directory)
 	  (if (not (file-directory-p org-publish-timestamp-directory))
 	      (error "`org-publish-timestamp-directory' must be a directory")))
-	;;
 	;; check timestamp. ok if timestamp file doesn't exist
 	(let* ((timestamp (org-publish-timestamp-filename filename))
 	       (rtn (file-newer-than-file-p filename timestamp)))
@@ -306,10 +311,11 @@ whether file should be published."
 	      (if (not (file-exists-p timestamp))
 		  ;; create file
 		  (with-temp-buffer
-		    (make-directory (file-name-directory timestamp) :parents)
+		    (make-directory (file-name-directory timestamp) t)
 		    (write-file timestamp)
 		    (kill-buffer (current-buffer)))))
 	  rtn))
+    ;; always return `t' is we don't use timestamp
     t))
 
 (defun org-publish-update-timestamp (filename)
@@ -320,57 +326,79 @@ whether file should be published."
         (set-file-times timestamp)
       (call-process "touch" nil 0 nil timestamp))))
 
-;;; A hash mapping files to project names
 
-(defvar org-publish-files nil
-  "Alist of files and their parent project.")
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Mapping files to project names
 
-(defvar org-publish-all-files nil
-  "Alist of all files and their parent projects.")
+;; FIXME annonce renaming
+(defvar org-publish-files-alist nil
+  "Alist of files and their parent project.
+Each element of this alist is of the form:
 
-;;; Checking filenames against this hash
+  (file-name . project-name)")
 
-;; FIXME Is this used somewhere?
+;; FIXME annonce this new defun
+(defun org-publish-initialize-files-alist (&optional refresh)
+  "Set `org-publish-files-alist' if it is not set.
+Also set it if the optional argument REFRESH is non-nil."
+  (when (or (not org-publish-files-alist) refresh)
+    (setq org-publish-files-alist
+	  (org-publish-get-files org-publish-project-alist))))
 
-;; (defun org-publish-validate-link (link &optional directory)
-;;   (gethash (file-truename (expand-file-name link directory))
-;; 	   org-publish-files))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
 
-(defun org-publish-get-plists (&optional project-name)
- "Return a list of property lists for project PROJECT-NAME.
-When argument is not given, return all property lists for all projects."
- (let ((projects (if project-name
-		     (list (assoc project-name org-publish-project-alist))
-		   org-publish-project-alist))
-       project plists single components)
-   (while (setq project (pop projects))
-     ;; what kind of project is it?
-     (if (setq components (plist-get (cdr project) :components))
-	  ;; meta project. annotate each plist with name of enclosing project
-	  (setq single
-		(apply 'append
-		       (mapcar 'org-publish-get-plists components)))
-	;; normal project
-	(setq single (list (cdr project))))
-     (setq plists (append plists single))
-     (dolist (p single)
-	(let* ((exclude (plist-get p :exclude))
-	       (files (org-publish-get-base-files p exclude)))
-	  (dolist (f files)
-	    (add-to-list 'org-publish-files 
-			 (cons (file-truename f) (car project)) t)))))
-   plists))
+;; FIXME annonce this new defun
+(defun org-publish-get-files (projects-alist &optional no-exclusion)
+  "Return the list of all publishable files for PROJECTS-ALIST.
+If NO-EXCLUSION is non-nil, don't exclude files."
+  (let (all-files)
+    ;; add all projects
+    (mapc
+     (lambda(p)
+       (let* ((exclude (plist-get p :exclude))
+	      (files (org-publish-get-base-files p exclude)))
+	 ;; add all files from this project
+	 (mapc (lambda(f)
+		 (add-to-list 'all-files
+			      (cons (file-truename f) (car p))))
+	       files)))
+     (org-publish-expand-projects projects-alist))
+    all-files))
 
-(defun org-publish-get-base-files (plist &optional exclude-regexp)
-  "Return a list of all files in project defined by PLIST.
- If EXCLUDE-REGEXP is set, this will be used to filter out
- matching filenames."
-  (let* ((base-dir (file-name-as-directory (plist-get plist :base-directory)))
- 	 (include-list (plist-get plist :include))
- 	 (recursive-p (plist-get plist :recursive))
- 	 (extension (or (plist-get plist :base-extension) "org"))
+;; ;; FIXME annonce this new defun
+(defun org-publish-expand-projects (projects-alist)
+  "Expand projects contained in PROJECTS-ALIST."
+  (let (without-component with-component)
+    (mapcar (lambda(p) 
+	      (add-to-list
+	       (if (plist-get (cdr p) :components)
+		   'with-component 'without-component) p))
+	    projects-alist)
+    (delete-dups
+     (append without-component
+	     (car (mapcar (lambda(p) (org-publish-expand-components p))
+			  with-component))))))
+
+;; FIXME annonce this new defun
+(defun org-publish-expand-components (project)
+  "Expand PROJECT into an alist of its components."
+  (let* ((components (plist-get (cdr project) :components)))
+    (delete-dups 
+     (mapcar (lambda(c) (assoc c org-publish-project-alist))
+	     components))))
+
+(defun org-publish-get-base-files (project &optional exclude-regexp)
+  "Return a list of all files in PROJECT.
+If EXCLUDE-REGEXP is set, this will be used to filter out
+matching filenames."
+  (let* ((project-plist (cdr project))
+	 (base-dir (file-name-as-directory 
+		    (plist-get project-plist :base-directory)))
+ 	 (include-list (plist-get project-plist :include))
+ 	 (recursive-p (plist-get project-plist :recursive))
+ 	 (extension (or (plist-get project-plist :base-extension) "org"))
  	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
  	 alldirs allfiles files dir)
     ;; Get all files and directories in base-directory
@@ -378,7 +406,7 @@ When argument is not given, return all property lists for all projects."
     ;; Get all subdirectories if recursive-p
     (setq alldirs
  	  (if recursive-p
- 	      (delete nil (mapcar (lambda(f) (if (caaddr f) (cadr f))) files))
+ 	      (delq nil (mapcar (lambda(f) (if (caaddr f) (cadr f))) files))
  	    (list base-dir)))
     (while (setq dir (pop alldirs))
       (setq files (directory-files dir t regexp))
@@ -398,46 +426,38 @@ When argument is not given, return all property lists for all projects."
     allfiles))
 
 (defun org-publish-get-project-from-filename (filename)
-  "Figure out which project a given FILENAME belongs to, if any.
-Filename should contain full path. Returns name of project, or
-nil if not found."
-  (org-publish-get-plists)
-  (cadr (assoc (file-truename filename) org-publish-files)))
+  "Return the project FILENAME belongs."
+  (let* ((project-name (cdr (assoc (file-truename filename)
+				   org-publish-files-alist))))
+    (assoc project-name org-publish-project-alist)))
 
-(defun org-publish-get-plist-from-filename (filename)
-  "Return publishing configuration plist for file FILENAME."
-  (let (found)
-    (mapc
-     (lambda (plist)
-       (let ((files (org-publish-get-base-files plist)))
- 	 (if (member (expand-file-name filename) files)
-	     (setq found plist))))
-     org-publish-plists
-     (org-publish-get-plists))
-    found))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Pluggable publishing back-end functions
 
-(defun org-publish-org-to-latex (plist filename &optional tmp-pub-dir)
-  "Publish an org file to LaTeX."
-  (org-publish-org-to "latex" plist filename tmp-pub-dir))
-
-(defun org-publish-org-to-html (plist filename &optional tmp-pub-dir)
-  "Publish an org file to HTML."
-  (org-publish-org-to "html" plist filename tmp-pub-dir))
-
-(defun org-publish-org-to (format plist filename  &optional tmp-pub-dir)
+(defun org-publish-org-to (format plist filename pub-dir)
   "Publish an org file to FORMAT.
 PLIST is the property list for the given project.
-FILENAME is the filename of the org file to be published."
+FILENAME is the filename of the org file to be published.
+PUB-DIR is the publishing directory."
   (require 'org)
-  (unless (file-exists-p tmp-pub-dir)
-    (make-directory tmp-pub-dir t))
+  (unless (file-exists-p pub-dir)
+    (make-directory pub-dir t))
   (find-file filename)
   (funcall (intern (concat "org-export-as-" format))
 	   (plist-get plist :headline-levels)
-	   nil plist nil nil tmp-pub-dir)
+	   nil plist nil nil pub-dir)
   (kill-buffer (current-buffer)))
+
+(defun org-publish-org-to-latex (plist filename pub-dir)
+  "Publish an org file to LaTeX.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-org-to "latex" plist filename pub-dir))
+
+(defun org-publish-org-to-html (plist filename pub-dir)
+  "Publish an org file to HTML.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-org-to "html" plist filename pub-dir))
 
 (defun org-publish-attachment (plist filename)
   "Publish a file with no transformation of any kind.
@@ -452,79 +472,64 @@ FILENAME is the filename of the file to be published."
 		      (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
 
-(defun org-publish-file (filename)
-  "Publish file FILENAME."
-  (let* ((project-name (org-publish-get-project-from-filename filename))
-	 (plist (org-publish-get-plist-from-filename filename))
-	 (publishing-function (or (plist-get plist :publishing-function)
-				  'org-publish-org-to-html))
-	 (base-dir (file-truename (plist-get plist :base-directory)))
-	 (pub-dir (file-truename (plist-get plist :publishing-directory)))
-	 tmp-pub-dir)
-    (if (not project-name)
-	(error "File %s is not part of any known project" filename))
-    (when (org-publish-needed-p filename)
+(defun org-publish-file (filename &optional project)
+  "Publish file FILENAME from PROJECT."
+  (when (org-publish-needed-p filename)
+    (let* ((project (or project (org-publish-get-project-from-filename filename)))
+	   (project-plist (cdr project))
+	   (publishing-function (or (plist-get project-plist :publishing-function)
+				    'org-publish-org-to-html))
+	   (base-dir (file-truename (plist-get project-plist :base-directory)))
+	   (pub-dir (file-truename (plist-get project-plist :publishing-directory)))
+	   tmp-pub-dir)
+      (if (not project) (error "File %s is not part of any known project" filename))
       (setq tmp-pub-dir
 	    (file-name-directory
 	     (concat pub-dir
-		     (and (string-match (regexp-quote base-dir) f)
-			  (substring f (match-end 0))))))
+		     (and (string-match (regexp-quote base-dir) filename)
+			  (substring filename (match-end 0))))))
       (if (listp publishing-function)
 	  ;; allow chain of publishing functions
 	  (mapc (lambda (f)
-		  (funcall f plist filename))
+		  (funcall f project-plist filename tmp-pub-dir))
 		publishing-function)
-	(funcall publishing-function plist filename tmp-pub-dir))
+	(funcall publishing-function project-plist filename tmp-pub-dir))
       (org-publish-update-timestamp filename))))
 
-(defun org-publish-plist (plist)
-  "Publish all files in set defined by PLIST.
- If :auto-index is set, publish the index too."
-  (let* ((exclude-regexp (plist-get plist :exclude))
-	 (publishing-function (or (plist-get plist :publishing-function)
-				  'org-publish-org-to-html))
-	 (index-p (plist-get plist :auto-index))
-         (index-filename (or (plist-get plist :index-filename) "index.org"))
-	 (index-function (or (plist-get plist :index-function) 'org-publish-org-index))
-	 (preparation-function (plist-get plist :preparation-function))
-	 file)
-    (when preparation-function
-      (funcall preparation-function))
-    (if index-p
-	(funcall index-function plist index-filename))
-    (let ((files (org-publish-get-base-files plist exclude-regexp))
-	  (base-dir (file-truename (plist-get plist :base-directory)))
-	  (pub-dir (file-truename (plist-get plist :publishing-directory)))
-	  tmp-pub-dir)
-      (while (setq file (pop files))
-	;; set the right :publishing-directory
-	(setq tmp-pub-dir
-	      (file-name-directory
-	       (concat pub-dir
-		       (and (string-match (regexp-quote base-dir) file)
-			    (substring f (match-end 0))))))
-	;; check timestamps
-	(when (org-publish-needed-p file)
-	  (if (listp publishing-function)
-	      ;; allow chain of publishing functions
-	      (mapc (lambda (func)
-		      (funcall func plist file))
-		    publishing-function)
-	    (funcall publishing-function plist file tmp-pub-dir))
-	  (org-publish-update-timestamp file))))))
+(defun org-publish-projects (projects)
+  "Publish all files belonging to the PROJECTS alist.
+If :auto-index is set, publish the index too."
+  (mapc 
+   (lambda(project)
+     (let* ((project-plist (cdr project))
+	    (exclude-regexp (plist-get project-plist :exclude))
+	    (index-p (plist-get project-plist :auto-index))
+	    (index-filename (or (plist-get project-plist :index-filename) 
+				"index.org"))
+	    (index-function (or (plist-get project-plist :index-function) 
+				'org-publish-org-index))
+	    (preparation-function (plist-get project-plist :preparation-function))
+	    (files (org-publish-get-base-files project exclude-regexp)) file)
+       (when preparation-function (funcall preparation-function))
+       (if index-p (funcall index-function project-plist index-filename))
+       (while (setq file (pop files))
+	 (org-publish-file file project))))
+   (org-publish-expand-projects projects)))
 
-(defun org-publish-org-index (plist &optional index-filename)
-  "Create an index of pages in set defined by PLIST.
-Optionally set the filename of the index with INDEX-FILENAME;
-default is 'index.org'."
-  (let* ((dir (file-name-as-directory (plist-get plist :base-directory)))
-	 (exclude-regexp (plist-get plist :exclude))
-	 (files (org-publish-get-base-files plist exclude-regexp))
+(defun org-publish-org-index (project &optional index-filename)
+  "Create an index of pages in set defined by PROJECT.
+Optionally set the filename of the index with INDEX-FILENAME.
+Default for INDEX-FILENAME is 'index.org'."
+  (let* ((dir (file-name-as-directory (plist-get project-plist :base-directory)))
+	 (exclude-regexp (plist-get project-plist :exclude))
+	 (files (org-publish-get-base-files project exclude-regexp))
 	 (index-filename (concat dir (or index-filename "index.org")))
 	 (index-buffer (find-buffer-visiting index-filename))
-	 (ifn (file-name-nondirectory index-filename)) 
+	 (ifn (file-name-nondirectory index-filename))
 	 file)
     ;; if buffer is already open, kill it to prevent error message
     (if index-buffer
@@ -539,55 +544,62 @@ default is 'index.org'."
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
 
 ;;;###autoload
-(defun org-publish (project-name &optional force)
-  "Publish the project PROJECT-NAME."
-  (interactive (list (completing-read "Project name: " org-publish-project-alist
-				      nil t)
-		     current-prefix-arg))
-  (save-window-excursion
-    (let ((org-publish-use-timestamps-flag
-	   (if force nil org-publish-use-timestamps-flag))
-	  (plists (org-publish-get-plists project-name)))
-      (mapcar 'org-publish-plist plists))))
-
-;;;###autoload
-(defun org-publish-current-project (&optional force)
-  "Publish the project associated with the current file.
-With prefix argument, force publishing all files in project."
-  (interactive "P")
-  (save-window-excursion
-    (let ((project-name (org-publish-get-project-from-filename (buffer-file-name)))
-	  (org-publish-use-timestamps-flag
-	   (if force nil org-publish-use-timestamps-flag)))
-      (if (not project-name)
-	  (error "File %s is not part of any known project" (buffer-file-name)))
-      (org-publish project-name))))
-
-;;;###autoload
-(defun org-publish-current-file (&optional force)
-  "Publish the current file.
-With prefix argument, force publish the file."
-  (interactive "P")
+(defun org-publish (project &optional force)
+  "Publish the project named PROJECT-NAME."
+  (interactive 
+   (list (progn (completing-read 
+		 "Project name: " org-publish-project-alist nil t)
+		(assoc project-name org-publish-project-alist))
+	 current-prefix-arg))
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-file (buffer-file-name)))))
+      (org-publish-projects (list project)))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
   "Publish all projects.
 With prefix argument, force publish all files."
   (interactive "P")
+  (org-publish-initialize-files-alist)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
-	   (if force nil org-publish-use-timestamps-flag))
-	  (plists (org-publish-get-plists)))
-      (mapcar 'org-publish-plist plists))))
+	   (if force nil org-publish-use-timestamps-flag)))
+      (org-publish-projects org-publish-project-alist))))
+
+;;;###autoload
+(defun org-publish-current-file (&optional force)
+  "Publish the current file.
+With prefix argument, force publish the file."
+  (interactive "P")
+  (org-publish-initialize-files-alist)
+  (save-window-excursion
+    (let ((org-publish-use-timestamps-flag
+	   (if force nil org-publish-use-timestamps-flag)))
+      (org-publish-file (buffer-file-name)))))
+
+;;;###autoload
+(defun org-publish-current-project (&optional force)
+  "Publish the project associated with the current file.
+With a prefix argument, force publishing of all files in
+the project."
+  (interactive "P")
+  (org-publish-initialize-files-alist)
+  (save-window-excursion
+    (let ((project (org-publish-get-project-from-filename (buffer-file-name)))
+	  (org-publish-use-timestamps-flag
+	   (if force nil org-publish-use-timestamps-flag)))
+      (if (not project)
+	  (error "File %s is not part of any known project" (buffer-file-name)))
+      (org-publish project))))
 
 (provide 'org-publish)
+
 
 ;; arch-tag: 72807f3c-8af0-4a6b-8dca-c3376eb25adb
 ;;; org-publish.el ends here
