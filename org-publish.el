@@ -583,12 +583,17 @@ With prefix argument, force publish the file."
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-file (buffer-file-name)))))
 
+(defvar t1 nil)
+(defvar t2 nil)
+;; (format-time-string "%S" (subtract-time t2 t1))
+
 ;;;###autoload
 (defun org-publish-current-project (&optional force)
   "Publish the project associated with the current file.
 With a prefix argument, force publishing of all files in
 the project."
   (interactive "P")
+  (setq t1 (current-time))
   (org-publish-initialize-files-alist)
   (save-window-excursion
     (let ((project (org-publish-get-project-from-filename (buffer-file-name)))
@@ -596,7 +601,8 @@ the project."
 	   (if force nil org-publish-use-timestamps-flag)))
       (if (not project)
 	  (error "File %s is not part of any known project" (buffer-file-name)))
-      (org-publish project))))
+      (org-publish project)))
+  (setq t2 (current-time)))
 
 (provide 'org-publish)
 
