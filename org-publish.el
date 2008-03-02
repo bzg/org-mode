@@ -3,8 +3,9 @@
 ;; Copyright (C) 2006, 2007, 2008  Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
-;; Keywords: hypermedia, outlines
-;; Version: 1.80c
+;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
+;; Keywords: hypermedia, outlines, wp
+;; Version: 1.80c+
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -26,24 +27,17 @@
 ;;; Commentary:
 
 ;; Requires at least version 4.27 of org.el
-;;
-;; The official org-mode website:
-;; http://staff.science.uva.nl/~dominik/Tools/org/
-;;
-;; Home page for org-publish.el:
-;; http://dto.freeshell.org/notebook/OrgMode.html
 
-;; This program extends the HTML publishing support of Emacs Org-mode
-;; to allow configurable publishing of related sets of files as a
-;; complete website.
+;; This program allow configurable publishing of related sets of
+;; Org-mode files as a complete website.
 ;;
 ;; org-publish.el can do the following:
 ;;
-;; + Publish all one's org-files to html
-;; + Upload html, images, attachments and other files to a web server
+;; + Publish all one's org-files to HTML or LaTeX
+;; + Upload HTML, images, attachments and other files to a web server
 ;; + Exclude selected private pages from publishing
 ;; + Publish a clickable index of pages
-;; + Manage local timestamps, for publishing only changed files
+;; + Manage local timestamps for publishing only changed files
 ;; + Accept plugin functions to extend range of publishable content
 ;;
 ;; Special thanks to the org-mode maintainer Carsten Dominik for his
@@ -135,7 +129,6 @@
 ;; within emacs. You can always just publish to local folders, and
 ;; then use the synchronization/upload tool of your choice.
 
-
 ;;; List of user-visible changes since version 1.27
 
 ;; 1.78: Allow list-valued :publishing-function
@@ -158,16 +151,13 @@
 
 ;;; Code:
 
-
 (eval-when-compile
   (require 'cl))
-
 
 (defgroup org-publish nil
 	"Options for publishing a set of Org-mode and related files."
    :tag "Org Publishing"
    :group 'org)
-
 
 (defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
@@ -194,11 +184,11 @@ override everything.
 
 Most properties are optional, but some should always be set:
 
-    :base-directory        Directory containing publishing source files
-    :base-extension        Extension (without the dot!) of source files.
-                             This can be a regular expression.
-    :publishing-directory  Directory (possibly remote) where output
-                             files will be published
+  :base-directory        Directory containing publishing source files
+  :base-extension        Extension (without the dot!) of source files.
+                         This can be a regular expression.
+  :publishing-directory  Directory (possibly remote) where output
+                         files will be published
 
 The :exclude property may be used to prevent certain files from
 being published. Its value may be a string or regexp matching
@@ -216,64 +206,62 @@ publishing files in the project. This can be used to extend the
 set of file types publishable by org-publish, as well as the set
 of output formats.
 
-    :publishing-function     Function to publish file. The default is
-                             org-publish-org-to-html, but other
-                             values are possible. May also be a
-                             list of functions, in which case
-                             each function in the list is invoked
-                             in turn.
+  :publishing-function     Function to publish file. The default is
+                           org-publish-org-to-html, but other
+                           values are possible. May also be a
+                           list of functions, in which case 
+                           each function in the list is invoked
+                           in turn.
 
 Another property allows you to insert code that prepares a
 project for publishing. For example, you could call GNU Make on a
-certain makefile, to ensure published files are built up to date.
+certain makefile, to ensure published files are built up to date. 
 
-    :preparation-function   Function to be called before publishing
-                              this project.
+  :preparation-function   Function to be called before publishing
+                          this project.
 
 Some properties control details of the Org publishing process,
 and are equivalent to the corresponding user variables listed in
 the right column. See the documentation for those variables to
 learn more about their use and default values.
 
-    :language              org-export-default-language
-    :headline-levels       org-export-headline-levels
-    :section-numbers       org-export-with-section-numbers
-    :table-of-contents     org-export-with-toc
-    :emphasize             org-export-with-emphasize
-    :sub-superscript       org-export-with-sub-superscripts
-    :TeX-macros            org-export-with-TeX-macros
-    :fixed-width           org-export-with-fixed-width
-    :tables                org-export-with-tables
-    :table-auto-headline   org-export-highlight-first-table-line
-    :style                 org-export-html-style
-    :convert-org-links     org-export-html-link-org-files-as-html
-    :inline-images         org-export-html-inline-images
-    :expand-quoted-html    org-export-html-expand
-    :timestamp             org-export-html-with-timestamp
-    :publishing-directory  org-export-publishing-directory
-    :preamble              org-export-html-preamble
-    :postamble             org-export-html-postamble
-    :auto-preamble         org-export-html-auto-preamble
-    :auto-postamble        org-export-html-auto-postamble
-    :author                user-full-name
-    :email                 user-mail-address
+  :language              org-export-default-language
+  :headline-levels       org-export-headline-levels
+  :section-numbers       org-export-with-section-numbers
+  :table-of-contents     org-export-with-toc
+  :emphasize             org-export-with-emphasize
+  :sub-superscript       org-export-with-sub-superscripts
+  :TeX-macros            org-export-with-TeX-macros
+  :fixed-width           org-export-with-fixed-width
+  :tables                org-export-with-tables
+  :table-auto-headline   org-export-highlight-first-table-line
+  :style                 org-export-html-style
+  :convert-org-links     org-export-html-link-org-files-as-html
+  :inline-images         org-export-html-inline-images
+  :expand-quoted-html    org-export-html-expand
+  :timestamp             org-export-html-with-timestamp
+  :publishing-directory  org-export-publishing-directory
+  :preamble              org-export-html-preamble
+  :postamble             org-export-html-postamble
+  :auto-preamble         org-export-html-auto-preamble
+  :auto-postamble        org-export-html-auto-postamble
+  :author                user-full-name
+  :email                 user-mail-address
 
 The following properties may be used to control publishing of an
 index of files or summary page for a given project.
 
-    :auto-index            Whether to publish an index during
-                           org-publish-current-project or org-publish-all.
-    :index-filename        Filename for output of index. Defaults
-                           to 'index.org' (which becomes 'index.html')
-    :index-title           Title of index page. Defaults to name of file.
-    :index-function        Plugin function to use for generation of index.
-                           Defaults to 'org-publish-org-index', which
-                           generates a plain list of links to all files
-                           in the project.
-"
+  :auto-index            Whether to publish an index during
+                         org-publish-current-project or org-publish-all.
+  :index-filename        Filename for output of index. Defaults
+                         to 'index.org' (which becomes 'index.html')
+  :index-title           Title of index page. Defaults to name of file.
+  :index-function        Plugin function to use for generation of index.
+                         Defaults to 'org-publish-org-index', which
+                         generates a plain list of links to all files
+                         in the project."
   :group 'org-publish
   :type 'alist)
-
 
 (defcustom org-publish-use-timestamps-flag t
   "When non-nil, use timestamp checking to publish only changed files.
@@ -282,14 +270,12 @@ files."
   :group 'org-publish
   :type 'boolean)
 
-
 (defcustom org-publish-timestamp-directory "~/.org-timestamps/"
   "Name of directory in which to store publishing timestamps."
   :group 'org-publish
   :type 'string)
 
-
-;;;; Timestamp-related functions
+;;; Timestamp-related functions
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
@@ -326,7 +312,6 @@ whether file should be published."
 	  rtn))
     t))
 
-
 (defun org-publish-update-timestamp (filename)
   "Update publishing timestamp for file FILENAME."
   (let ((timestamp (org-publish-timestamp-filename filename)))
@@ -335,22 +320,24 @@ whether file should be published."
         (set-file-times timestamp)
       (call-process "touch" nil 0 nil timestamp))))
 
-
-;;;; A hash mapping files to project names
-
+;;; A hash mapping files to project names
 
 (defvar org-publish-files (make-hash-table :test 'equal) 
   "Hash table mapping file names to project names.")
 
-;;;; Checking filenames against this hash
+;; (defvar org-publish-files nil
+;;   "Alist of files and their parent project.")
 
+;; (defvar org-publish-all-files nil
+;;   "Alist of all files and their parent projects.")
+
+;;; Checking filenames against this hash
 
 (defun org-publish-validate-link (link &optional directory)
   (gethash (file-truename (expand-file-name link directory))
 	   org-publish-files))
 
-
-;;;; Getting project information out of org-publish-project-alist
+;;; Getting project information out of org-publish-project-alist
 
 (defun org-publish-get-plists (&optional project-name)
  "Return a list of property lists for project PROJECT-NAME.
@@ -380,7 +367,6 @@ When argument is not given, return all property lists for all projects."
 	  (dolist (f files)
 	    (puthash (file-truename f) (car project) org-publish-files)))))
    plists))
-
 
 (defun org-publish-get-base-files (plist &optional exclude-regexp)
   "Return a list of all files in project defined by PLIST.
@@ -416,14 +402,12 @@ When argument is not given, return all property lists for all projects."
       (setq allfiles (append allfiles files)))
     allfiles))
 
-
 (defun org-publish-get-project-from-filename (filename)
   "Figure out which project a given FILENAME belongs to, if any.
 Filename should contain full path. Returns name of project, or
 nil if not found."
   (org-publish-get-plists)
   (gethash (file-truename filename) org-publish-files))
-
 
 (defun org-publish-get-plist-from-filename (filename)
   "Return publishing configuration plist for file FILENAME."
@@ -437,8 +421,7 @@ nil if not found."
      (org-publish-get-plists))
     found))
 
-
-;;;; Pluggable publishing back-end functions
+;;; Pluggable publishing back-end functions
 
 (defun org-publish-org-to-latex (plist filename &optional tmp-pub-dir)
   "Publish an org file to LaTeX."
@@ -461,7 +444,6 @@ FILENAME is the filename of the org file to be published."
 	   nil plist nil nil tmp-pub-dir)
   (kill-buffer (current-buffer)))
 
-
 (defun org-publish-attachment (plist filename)
   "Publish a file with no transformation of any kind.
 PLIST is the property list for the given project.
@@ -475,9 +457,7 @@ FILENAME is the filename of the file to be published."
 		      (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
-
-;;;; Publishing files, sets of files, and indices
-
+;;; Publishing files, sets of files, and indices
 
 (defun org-publish-file (filename)
   "Publish file FILENAME."
@@ -503,7 +483,6 @@ FILENAME is the filename of the file to be published."
 		publishing-function)
 	(funcall publishing-function plist filename tmp-pub-dir))
       (org-publish-update-timestamp filename))))
-
 
 (defun org-publish-plist (plist)
   "Publish all files in set defined by PLIST.
@@ -543,7 +522,6 @@ FILENAME is the filename of the file to be published."
 	    (funcall publishing-function plist f tmp-pub-dir))
 	  (org-publish-update-timestamp f))))))
 
-
 (defun org-publish-org-index (plist &optional index-filename)
   "Create an index of pages in set defined by PLIST.
 Optionally set the filename of the index with INDEX-FILENAME;
@@ -568,9 +546,7 @@ default is 'index.org'."
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
 
-
-;;;; Interactive publishing functions
-
+;;; Interactive publishing functions
 
 ;;;###autoload
 (defun org-publish (project-name &optional force)
@@ -583,7 +559,6 @@ default is 'index.org'."
 	   (if force nil org-publish-use-timestamps-flag))
 	  (plists (org-publish-get-plists project-name)))
       (mapcar 'org-publish-plist plists))))
-
 
 ;;;###autoload
 (defun org-publish-current-project (&optional force)
@@ -598,7 +573,6 @@ With prefix argument, force publishing all files in project."
 	  (error "File %s is not part of any known project" (buffer-file-name)))
       (org-publish project-name))))
 
-
 ;;;###autoload
 (defun org-publish-current-file (&optional force)
   "Publish the current file.
@@ -608,7 +582,6 @@ With prefix argument, force publish the file."
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-file (buffer-file-name)))))
-
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
@@ -620,8 +593,6 @@ With prefix argument, force publish all files."
 	   (if force nil org-publish-use-timestamps-flag))
 	  (plists (org-publish-get-plists)))
       (mapcar 'org-publish-plist plists))))
-
-
 
 (provide 'org-publish)
 
