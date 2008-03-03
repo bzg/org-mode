@@ -1,5 +1,9 @@
-2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
+2008-03-03  Bastien Guerry  <bzg@altern.org>
 
+	* org-publish.el (org-publish-delete-duplicates)
+	(org-publish-dired-files-attributes): New aliases.
+
+2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-toggle-region-items): New function.
 	(org-toggle-region-headings): New function.
