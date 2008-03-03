@@ -329,7 +329,7 @@ in a window.  A non-interactive call will only retunr the buffer."
 
 ;;;###autoload
 (defun org-export-as-latex (arg &optional hidden ext-plist
-				to-buffer body-only)
+				to-buffer body-only pub-dir)
   "Export current buffer to a LaTeX file.
 If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
@@ -344,7 +344,8 @@ buffer.  If TO-BUFFER is the symbol `string', don't leave any
 buffer behind but just return the resulting LaTeX as a string.
 When BODY-ONLY is set, don't produce the file header and footer,
 simply return the content of \begin{document}...\end{document},
-without even the \begin{document} and \end{document} commands."
+without even the \begin{document} and \end{document} commands.
+when PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
   ;; Make sure we have a file name when we need it.
   (when (and (not (or to-buffer body-only))
@@ -375,7 +376,8 @@ without even the \begin{document} and \end{document} commands."
 		    (file-name-sans-extension
 		     (file-name-nondirectory buffer-file-name))))
 	 (filename (concat (file-name-as-directory
-			    (org-export-directory :LaTeX ext-plist))
+			    (or pub-dir
+				(org-export-directory :LaTeX ext-plist)))
 			   (file-name-sans-extension
 			    (file-name-nondirectory ;sans-extension
 			     buffer-file-name)) ".tex"))

@@ -25239,7 +25239,7 @@ in a window.  A non-interactive call will only retunr the buffer."
 
 (defvar html-table-tag nil) ; dynamically scoped into this.
 (defun org-export-as-html (arg &optional hidden ext-plist
-			       to-buffer body-only)
+			       to-buffer body-only pub-dir)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
@@ -25248,11 +25248,12 @@ lists.  When HIDDEN is non-nil, don't display the HTML buffer.
 EXT-PLIST is a property list with external parameters overriding
 org-mode's default settings, but still inferior to file-local
 settings.  When TO-BUFFER is non-nil, create a buffer with that
-name and export to that buffer.  If TO-BUFFER is the symbol `string',
-don't leave any buffer behind but just return the resulting HTML as
-a string.  When BODY-ONLY is set, don't produce the file header and footer,
-simply return the content of <body>...</body>, without even
-the body tags themselves."
+name and export to that buffer.  If TO-BUFFER is the symbol
+`string', don't leave any buffer behind but just return the
+resulting HTML as a string.  When BODY-ONLY is set, don't produce
+the file header and footer, simply return the content of
+<body>...</body>, without even the body tags themselves.  When
+PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
 
   ;; Make sure we have a file name when we need it.
@@ -25287,7 +25288,8 @@ the body tags themselves."
 		   (>= (org-end-of-subtree t t) (region-end))))))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
-	 (org-current-export-dir (org-export-directory :html opt-plist))
+	 (org-current-export-dir 
+	  (or pub-dir (org-export-directory :html opt-plist)))
 	 (org-current-export-file buffer-file-name)
          (level 0) (line "") (origline "") txt todo
          (umax nil)
@@ -25302,7 +25304,7 @@ the body tags themselves."
 			    (file-name-nondirectory buffer-file-name)))
 		       "." html-extension)
 		      (file-name-as-directory
-		       (org-export-directory :html opt-plist)))))
+		       (or pub-dir (org-export-directory :html opt-plist))))))
 	 (current-dir (if buffer-file-name
 			  (file-name-directory buffer-file-name)
 			default-directory))
