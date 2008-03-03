@@ -1,7 +1,35 @@
 2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
 
+
 	* org.el (org-toggle-region-items): New function.
 	(org-toggle-region-headings): New function.
+
+2008-03-03  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-load-default-extensions): Don't throw an error when
+	a feature cannot be loaded, send a message instead.
+
+	* org-publish.el (org-publish-org-to, org-publish-org-to-latex)
+	(org-publish-org-to-html): New argument `pub-dir' for temporary
+	publication directory.
+	(org-publish-projects): Renamed from `org-publish-plists'.
+	(org-publish, org-publish-all): Use `org-publish-projects'.
+	(org-publish-all, org-publish-current-file)
+	(org-publish-files-alist): Renamed from `org-publish-files'.
+	(org-publish-initialize-files-alist): New defun.
+	(org-publish-current-project): First initialize the list of
+	publishable files with`org-publish-initialize-files-alist'.
+	(org-publish-get-files): New defun.
+	(org-publish-expand-projects): New defun.
+	(org-publish-expand-components): New defun.
+	(org-publish-get-base-files): Get files recursively.
+	(org-publish-update-timestamp): Create the timestamp file.
+	(org-publish-needed-p): Removed the code about creating/updating
+	the timestamp file.
+	(org-publish-validate-link)
+	(org-publish-get-plists-from-filename, org-publish-get-plists):
+	Deleted.
+	(org-publish-timestamp-directory): Use directory type.
 
 2008-03-01  Bastien Guerry  <bzg@altern.org>
 
