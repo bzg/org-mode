@@ -66,8 +66,8 @@
 
 ;;;; Require other packages
 
+(require 'cl)
 (eval-when-compile
-  (require 'cl)
   (require 'gnus-sum)
   (require 'calendar))
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
@@ -18534,7 +18534,7 @@ The date will be changed by N times WHAT.  WHAT can be `day', `month',
 in the timestamp determines what will be changed."
   (let ((pos (point))
 	with-hm inactive
-	(dm (max (nth 1 org-time-stamp-rounding-minutes-when-changing) 1))
+	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
 	org-ts-what
 	extra rem
 	ts time time0)
