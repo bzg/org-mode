@@ -159,9 +159,9 @@ requiring something in this hook that does a (require 'org) is ok."
   :type 'hook)
 
 (defcustom org-default-extensions '(org-irc)
-  "Extensions that should always be loaded together with org.el
+  "Extensions that should always be loaded together with org.el.
 If the description starts with <A>, this means the extension
-will be autoloaded when needed, to preloading is not necessary."
+will be autoloaded when needed, preloading is not necessary."
   :group 'org
   :type
   '(set :greedy t
