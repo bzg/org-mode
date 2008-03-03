@@ -1958,14 +1958,24 @@ the time stamp will always be forced into the second line."
   "Formats for `format-time-string' which are used for time stamps.
 It is not recommended to change this constant.")
 
-(defcustom org-time-stamp-rounding-minutes 0
-  "Number of minutes to round time stamps to upon insertion.
-When zero, insert the time unmodified.  Useful rounding numbers
-should be factors of 60, so for example 5, 10, 15.
-When this is not zero, you can still force an exact time-stamp by using
-a double prefix argument to a time-stamp command like `C-c .' or `C-c !'."
+(defcustom org-time-stamp-rounding-minutes '(0 5)
+  "Number of minutes to round time stamps to.
+These are two values, the first applies when first creating a time stamp.
+The second applies when changing it with the commands `S-up' and `S-down'.
+When changing the time stamp, this means that it will change in steps
+of N minues, as given by the second value.
+
+When a setting is 0 or 1, insert the time unmodified.  Useful rounding
+numbers should be factors of 60, so for example 5, 10, 15.
+
+When this is larger than 1, you can still force an exact time-stamp by using
+a double prefix argument to a time-stamp command like `C-c .' or `C-c !',
+and by using a prefix arg to `S-up/down' to specify the exact number
+of minutes to shift."
   :group 'org-time
-  :type 'integer)
+  :type '(list
+	  (integer :tag "when inserting times")
+	  (integer :tag "when modifying times")))
 
 (defcustom org-display-custom-times nil
   "Non-nil means, overlay custom formats over all time stamps.
@@ -5076,8 +5086,8 @@ The following commands are available:
 
 (defun org-current-time ()
   "Current time, possibly rounded to `org-time-stamp-rounding-minutes'."
-  (if (> org-time-stamp-rounding-minutes 0)
-      (let ((r org-time-stamp-rounding-minutes)
+  (if (> (car org-time-stamp-rounding-minutes) 1)
+      (let ((r (car org-time-stamp-rounding-minutes))
 	    (time (decode-time)))
 	(apply 'encode-time
 	       (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
@@ -17704,7 +17714,7 @@ the time/date that is used for everything that is not specified by the
 user."
   (require 'parse-time)
   (let* ((org-time-stamp-rounding-minutes
-	  (if (equal with-time '(16)) 0 org-time-stamp-rounding-minutes))
+	  (if (equal with-time '(16)) '(0 0) org-time-stamp-rounding-minutes))
 	 (org-dcst org-display-custom-times)
 	 (ct (org-current-time))
 	 (def (or default-time ct))
@@ -18502,7 +18512,7 @@ With prefix ARG, change that many days."
     ans))
 
 (defun org-toggle-timestamp-type ()
-  ""
+  "Toggle the type (<active> or [inactive]) of a time stamp."
   (interactive)
   (when (org-at-timestamp-p t)
     (save-excursion
@@ -18520,8 +18530,9 @@ The date will be changed by N times WHAT.  WHAT can be `day', `month',
 in the timestamp determines what will be changed."
   (let ((pos (point))
 	with-hm inactive
+	(dm (max (nth 1 org-time-stamp-rounding-minutes-when-changing) 1))
 	org-ts-what
-	extra
+	extra rem
 	ts time time0)
     (if (not (org-at-timestamp-p t))
 	(error "Not at a timestamp"))
@@ -18543,6 +18554,12 @@ in the timestamp determines what will be changed."
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	  (setq with-hm t))
       (setq time0 (org-parse-time-string ts))
+      (when (and (eq org-ts-what 'minute)
+		 (eq current-prefix-arg nil))
+	(setq n (* dm (signum n)))
+	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
+	  (setcar (cdr time0) (+ (nth 1 time0)
+				 (if (> n 0) (- rem) (- dm rem))))))
       (setq time
 	    (encode-time (or (car time0) 0)
 			 (+ (if (eq org-ts-what 'minute) n 0) (nth 1 time0))

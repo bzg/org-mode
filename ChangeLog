@@ -3,6 +3,10 @@
 
 	* org.el (org-toggle-region-items): New function.
 	(org-toggle-region-headings): New function.
+	(org-time-stamp-rounding-minutes): This is now a list of two
+	values.
+	(org-current-time, org-read-date, org-timestamp-change): Use the
+	new structure of org-time-stamp-rounding-minutes.
 
 2008-03-03  Bastien Guerry  <bzg@altern.org>
 

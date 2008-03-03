@@ -9,15 +9,22 @@
 
 ** Incompatible changes
 
+   - The variable `org-time-stamp-rounding-minutes' is now a list
+     of two values - if you have configured this variable before,
+     please do it again.
+
 ** Details
 
 *** New keyword search agenda view
 
     `C-c a s' now invokes a special agenda view that can be used
-    to search notes by keyword and regular expressions.  The
-    search knows the boundaries of an entry, can use simple
-    Boolean logic and is reasonably fast.  For example, the
-    search string
+    to search notes by keyword and regular expressions.  In
+    particular, it does not require a single regular expression
+    or string to search for, but it can search for a number
+    keywords or regexps that can occur in arbitrary sequence in
+    the entry.  The search knows the boundaries of an entry, can
+    use simple Boolean logic and is reasonably fast.  For
+    example, the search string
 
     : +computer +wifi -ethernet -{8\.11[bg]}
 
@@ -43,16 +50,23 @@
 
 *** Many new extensions available in the CONTRIB directory
 
-    The new development model already starts to pay off, a number
-    of interesting extensions are now part of the distribution.
-    Check the file CONTRIB/README for a list.
+    - The new development model already starts to pay off, a
+      number of interesting extensions are now part of the
+      distribution.  Check the file CONTRIB/README for a list.
 
-    Interesting for developers may be that there is a file
-    org-id.el which implements global ID's for org-mode entries.
-    These can be used in dependency implementations, for
-    example.
+    - There is a new variable `org-default-extensions'.
+      Configuring this variable makes it *very* easy to load
+      these extensions.
+
+    - Interesting for developers may be that there is a file
+      org-id.el which implements global ID's for org-mode
+      entries.  These can be used in dependency implementations,
+      or to tie clock tables and column view tables to entries.
 
 *** Misc
+
+   - Phil Jackson's org-irc.el is now part of the Org-mode core,
+     which means it will become part of Emacs soon.
 
    - M-RET can again be used to split a line so tha the rest of
      the line becomes the new heading.  However, if you do this
@@ -63,6 +77,19 @@
      don't want this command to split a line in the middle.  The
      same variable also influences line splitting in items and in
      tables.
+
+   - The value variable `org-time-stamp-rounding-minutes' is now
+     a list of two values.  The first applies when creating a new
+     time stamp.  The second applies when modifying a timestamp
+     with S-up/down.  The default for this new task is 5 minutes,
+     but 15 may also be a very good value for many people.  If
+     S-up/down is used on a time stamp where the minute part is
+     not compatible with this granularity it will be made so.
+     You can bypass this by using a prefix argument to exactly
+     specify the number of minutes to shift.
+
+     This was a proposal by Adam Spiers.
+
 
    - `C-c -' has now more functions:
      + In a table, add a hline as before
@@ -85,7 +112,7 @@
 
      Based on proposals by Bastien.
 
-
+     
 
 
 * Version 5.22
