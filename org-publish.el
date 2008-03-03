@@ -335,6 +335,41 @@ Also set it if the optional argument REFRESH is non-nil."
     (setq org-publish-files-alist
 	  (org-publish-get-files org-publish-project-alist))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Compatibility aliases
+
+;; Looks like dired-files-attributes is not in Emacs 21.4a.
+;; FIXME: Check this twice
+(if (fboundp 'dired-files-attributes)
+    (defalias 'org-publish-dired-files-attributes 'dired-files-attributes)
+  ;; taken from dired-aux.el
+  (defun dired-files-attributes (dir)
+    "Return a list of all file names and attributes from DIR.
+List has a form of (file-name full-file-name (attribute-list))"
+    (mapcar
+     (lambda (file-name)
+       (let ((full-file-name (expand-file-name file-name dir)))
+	 (list file-name
+	       full-file-name
+	       (file-attributes full-file-name))))
+     (directory-files dir))))
+
+;; Delete-dups is not in Emacs <22
+(if (fboundp 'delete-dups)
+    (defalias 'org-publish-delete-duplicates 'delete-dups)
+  (defun org-publish-delete-duplicates (list)
+    "Destructively remove `equal' duplicates from LIST.
+Store the result in LIST and return it.  LIST must be a proper list.
+Of several `equal' occurrences of an element in LIST, the first
+one is kept.
+
+This is a compatibility function for Emacsen without `delete-dups'."
+    ;; Code from `subr.el' in Emacs 22:
+    (let ((tail list))
+      (while tail
+	(setcdr tail (delete (car tail) (cdr tail)))
+	(setq tail (cdr tail))))
+    list))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
@@ -355,22 +390,6 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	       files)))
      (org-publish-expand-projects projects-alist))
     all-files))
-
-(if (fboundp 'delete-dups)
-    (defalias 'org-publish-delete-duplicates 'delete-dups)
-  (defun org-publish-delete-duplicates (list)
-    "Destructively remove `equal' duplicates from LIST.
-Store the result in LIST and return it.  LIST must be a proper list.
-Of several `equal' occurrences of an element in LIST, the first
-one is kept.
-
-This is a compatibility function for Emacsen without `delete-dups'."
-    ;; Code from `subr.el' in Emacs 22:
-    (let ((tail list))
-      (while tail
-	(setcdr tail (delete (car tail) (cdr tail)))
-	(setq tail (cdr tail))))
-    list))
 
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
@@ -405,7 +424,7 @@ matching filenames."
  	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
  	 alldirs allfiles files dir)
     ;; Get all files and directories in base-directory
-    (setq files (dired-files-attributes base-dir))
+    (setq files (org-publish-dired-files-attributes base-dir))
     ;; Get all subdirectories if recursive-p
     (setq alldirs
  	  (if recursive-p
