@@ -172,8 +172,11 @@ will be autoloaded when needed, preloading is not necessary."
 	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)))
 
 (defun org-load-default-extensions ()
-  "Load all extensions that are listed in `org-default-extensions'."
-  (mapc 'require org-default-extensions))
+  "Load all extensions listed in `org-default-extensions'."
+  (mapc (lambda (ext) 
+	  (condition-case nil (require ext)
+	    (error (message "Feature `%s' is not known" ext))))
+	org-default-extensions))
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand

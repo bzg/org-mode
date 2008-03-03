@@ -1,5 +1,8 @@
 2008-03-03  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-load-default-extensions): Don't throw an error when
+	a feature cannot be loaded, send a message instead.
+
 	* org-publish.el (org-publish-org-to, org-publish-org-to-latex)
 	(org-publish-org-to-html): New argument `pub-dir' for temporary
 	publication directory.
