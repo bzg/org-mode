@@ -68,6 +68,7 @@
 
 (eval-when-compile
   (require 'cl)
+  (require 'cl-extra)
   (require 'gnus-sum)
   (require 'calendar))
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
@@ -18560,7 +18561,7 @@ in the timestamp determines what will be changed."
       (setq time0 (org-parse-time-string ts))
       (when (and (eq org-ts-what 'minute)
 		 (eq current-prefix-arg nil))
-	(setq n (* dm (signum n)))
+	(setq n (* dm (org-no-warnings (signum n))))
 	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
 	  (setcar (cdr time0) (+ (nth 1 time0)
 				 (if (> n 0) (- rem) (- dm rem))))))
