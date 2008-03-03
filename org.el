@@ -175,7 +175,7 @@ will be autoloaded when needed, preloading is not necessary."
   "Load all extensions listed in `org-default-extensions'."
   (mapc (lambda (ext) 
 	  (condition-case nil (require ext)
-	    (error (message "Feature `%s' is not known" ext))))
+	    (error (message "Problems while trying to load feature `%s'" ext))))
 	org-default-extensions))
 
 ;; FIXME: Needs a separate group...
