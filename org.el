@@ -66,8 +66,8 @@
 
 ;;;; Require other packages
 
-(require 'cl)
 (eval-when-compile
+  (require 'cl)
   (require 'gnus-sum)
   (require 'calendar))
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
