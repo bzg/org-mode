@@ -1973,6 +1973,10 @@ a double prefix argument to a time-stamp command like `C-c .' or `C-c !',
 and by using a prefix arg to `S-up/down' to specify the exact number
 of minutes to shift."
   :group 'org-time
+  :get '(lambda (var) ; Make sure all entries have 5 elements
+	  (if (integerp (default-value var))
+	      (list (default-value var) 5)
+	    (default-value var)))
   :type '(list
 	  (integer :tag "when inserting times")
 	  (integer :tag "when modifying times")))
