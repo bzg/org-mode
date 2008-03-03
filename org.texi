@@ -896,6 +896,13 @@ in each entry), by priority, and each of these in reverse order.  You
 can also supply your own function to extract the sorting key.  With a
 @kbd{C-u} prefix, sorting will be case-sensitive.  With two @kbd{C-u
 C-u} prefixes, duplicate entries will also be removed.
+@kindex C-c *
+@item C-c *
+Turn a normal line or plain list item into a headline (so that it
+becomes a subheading at its location).  Also turn a headline into a
+normal line by removing the stars.  If there is an active region, turn
+all lines in the region into headlines.  Or, if the first line is a
+headline, remove the stars from all headlines in the region.
 @end table
 
 @cindex region, active
@@ -1201,6 +1208,10 @@ an ordered list, make sure the numbering is ok.
 Cycle the entire list level through the different itemize/enumerate
 bullets (@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}).
 With prefix arg, select the nth bullet from this list.
+If there is an active region when calling this, all lines will be
+converted to list items.  If the first line already was a list item, any
+item markers will be removed from the list.  Finally, even without an
+active region, a normal line will be converted into a list item.
 @end table
 
 @node Drawers, orgstruct-mode, Plain lists, Document structure

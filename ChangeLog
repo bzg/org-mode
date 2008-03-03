@@ -1,3 +1,8 @@
+2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-toggle-region-items): New function.
+	(org-toggle-region-headings): New function.
+
 2008-03-01  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-dblock-write:columnview, org-columns-capture-view):

@@ -26936,6 +26936,7 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 (org-defkey org-mode-map "\C-c\C-x<" 'org-agenda-set-restriction-lock)
 (org-defkey org-mode-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
 (org-defkey org-mode-map "\C-c-"    'org-ctrl-c-minus)
+(org-defkey org-mode-map "\C-c*"    'org-ctrl-c-star)
 (org-defkey org-mode-map "\C-c^"    'org-sort)
 (org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
 (org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
@@ -26949,7 +26950,6 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 (org-defkey org-mode-map "\C-c'"    'org-table-edit-formulas)
 (org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
 (org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
-(org-defkey org-mode-map "\C-c*"    'org-table-recalculate)
 (org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
 (org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
 (org-defkey org-mode-map "\C-c\C-q" 'org-table-wrap-region)
@@ -27429,16 +27429,39 @@ See the individual commands for more information."
    (t (if indent (newline-and-indent) (newline)))))
 
 (defun org-return-indent ()
-  (interactive)
   "Goto next table row or insert a newline and indent.
 Calls `org-table-next-row' or `newline-and-indent', depending on
 context.  See the individual commands for more information."
+  (interactive)
   (org-return t))
 
+(defun org-ctrl-c-star ()
+  "Compute table, or change heading status of lines.
+Calls `org-table-recalculate' or `org-toggle-region-headlines',
+depending on context.  This will also turn a plain list item or a normal
+line into a subheading."
+  (interactive)
+  (cond
+   ((org-at-table-p)
+    (call-interactively 'org-table-recalculate))
+   ((org-region-active-p)
+    ;; Convert all lines in region to list items
+    (call-interactively 'org-toggle-region-headings))
+   ((org-on-heading-p)
+    (org-toggle-region-headings (point-at-bol)
+				(min (1+ (point-at-eol)) (point-max))))
+   ((org-at-item-p)
+    ;; Convert to heading
+    ;; FIXME: not yet implemented
+    )
+   (t (org-toggle-region-headings (point-at-bol)
+				  (min (1+ (point-at-eol)) (point-max))))))
+
 (defun org-ctrl-c-minus ()
-  "Insert separator line in table or modify bullet type in list.
-Calls `org-table-insert-hline' or `org-cycle-list-bullet',
-depending on context."
+  "Insert separator line in table or modify bullet status of line.
+Also turns a plain line or a region of lines into list items.
+Calls `org-table-insert-hline', `org-toggle-region-items', or
+`org-cycle-list-bullet', depending on context."
   (interactive)
   (cond
    ((org-at-table-p)
@@ -27449,10 +27472,69 @@ depending on context."
       (beginning-of-line 1)
       (if (looking-at "\\*+ ")
 	  (replace-match (concat (make-string (- (match-end 0) (point)) ?\ ) "- ")))))
+   ((org-region-active-p)
+    ;; Convert all lines in region to list items
+    (call-interactively 'org-toggle-region-items))
    ((org-in-item-p)
     (call-interactively 'org-cycle-list-bullet))
-   (t (error "`C-c -' does have no function here."))))
+   (t (org-toggle-region-items (point-at-bol)
+			       (min (1+ (point-at-eol)) (point-max))))))
 
+(defun org-toggle-region-items (beg end)
+  "Convert all lines in region to list items.
+If the first line is already an item, convert all list items in the region
+to normal lines."
+  (interactive "r")
+  (let (l2 l)
+    (save-excursion
+      (goto-char end)
+      (setq l2 (org-current-line))
+      (goto-char beg)
+      (beginning-of-line 1)
+      (setq l (1- (org-current-line)))
+      (if (org-at-item-p)
+	  ;; We already have items, de-itemize
+	  (while (< (setq l (1+ l)) l2)
+	    (when (org-at-item-p)
+	      (goto-char (match-beginning 2))
+	      (delete-region (match-beginning 2) (match-end 2))
+	      (and (looking-at "[ \t]+") (replace-match "")))
+	    (beginning-of-line 2))
+	(while (< (setq l (1+ l)) l2)
+	  (unless (org-at-item-p)
+	    (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		(replace-match "\\1- \\2")))
+	  (beginning-of-line 2))))))
+			
+(defun org-toggle-region-headings (beg end)
+  "Convert all lines in region to list items.
+If the first line is already an item, convert all list items in the region
+to normal lines."
+  (interactive "r")
+  (let (l2 l)
+    (save-excursion
+      (goto-char end)
+      (setq l2 (org-current-line))
+      (goto-char beg)
+      (beginning-of-line 1)
+      (setq l (1- (org-current-line)))
+      (if (org-on-heading-p)
+	  ;; We already have headlines, de-star them
+	  (while (< (setq l (1+ l)) l2)
+	    (when (org-on-heading-p t)
+	      (and (looking-at outline-regexp) (replace-match "")))
+	    (beginning-of-line 2))
+	(let* ((stars (save-excursion
+			(re-search-backward org-complex-heading-regexp nil t)
+			(or (match-string 1) "*")))
+	       (add-stars (if org-odd-levels-only "**" "*"))
+	       (rpl (concat stars add-stars " \\2")))
+	  (while (< (setq l (1+ l)) l2)
+	    (unless (org-on-heading-p)
+	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		  (replace-match rpl)))
+	    (beginning-of-line 2)))))))
+  
 (defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.
 Calls `org-insert-heading' or `org-table-wrap-region', depending on context.

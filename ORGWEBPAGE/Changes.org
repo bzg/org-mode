@@ -64,6 +64,29 @@
      same variable also influences line splitting in items and in
      tables.
 
+   - `C-c -' has now more functions:
+     + In a table, add a hline as before
+     + In an item list, cycle bullet type as before
+     + In a normal line, turn it into an item
+     + In a headline, turn it into an item
+     + If there is an active region, turn each line into an item.
+       But if the first region line is already an item, remove
+       item markers from all lines.
+
+     Based on proposals by Bastien.
+
+   - `C-c *' has now more functions
+     + in a table, recompute, as before
+     + in a normal line, convert it to a sub heading.
+     + at an item, convert it into a subheading
+     + if there is an active region, convert all lines in the
+       region to headlines.  However, if the first lie already is
+       a heading, remove the stars from all lines int he region.
+
+     Based on proposals by Bastien.
+
+
+
 
 * Version 5.22
 
