@@ -7013,14 +7013,16 @@ the two following forms:
 
 @end lisp
 
-In both cases, projects are configured by specifying property values.
-A project defines the set of files that will be published, as well as
-the publishing configuration to use when publishing those files.  When
-a project takes the second form listed above, the individual members
-of the ``components'' property are taken to be components of the
-project, which group together files requiring different publishing
-options. When you publish such a ``meta-project'' all the components
-will also publish.
+In both cases, projects are configured by specifying property values.  A
+project defines the set of files that will be published, as well as the
+publishing configuration to use when publishing those files.  When a
+project takes the second form listed above, the individual members of
+the ``components'' property are taken to be components of the project,
+which group together files requiring different publishing options.  When
+you publish such a ``meta-project'' all the components will also be
+published.
+
+For now, components are not allowed to have components themselves.
 
 @node Sources and destinations, Selecting files, Project alist, Configuration
 @subsection Sources and destinations for files
@@ -7061,6 +7063,10 @@ extension.
 @item @code{:include}
 @tab List of files to be included regardless of @code{:base-extension}
 and @code{:exclude}.
+
+@item @code{:recursive}
+@tab When non-@code{nil}, the @code{:base-directory} will be recursively
+published.
 @end multitable
 
 @node Publishing action, Publishing options, Selecting files, Configuration

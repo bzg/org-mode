@@ -5,7 +5,7 @@
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 1.80c+
+;; Version: 1.81
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -79,6 +79,7 @@
 ;; 		     :publishing-directory "~/public_html"
 ;;                   :with-section-numbers nil
 ;; 		     :table-of-contents nil
+;;                   :recursive t
 ;; 		     :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">")))
 
 ;;;; More complex example configuration:
@@ -110,12 +111,10 @@
 ;; 		       :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">"
 ;; 		       :auto-preamble t
 ;; 		       :auto-postamble nil)
-;;
 ;;         ("images" :base-directory "~/images/"
 ;; 	             :base-extension "jpg\\|gif\\|png"
 ;; 		     :publishing-directory "/ssh:user@host:~/html/images/"
 ;; 		     :publishing-function org-publish-attachment)
-;;
 ;;         ("other"  :base-directory "~/other/"
 ;; 	   	     :base-extension "css"
 ;; 		     :publishing-directory "/ssh:user@host:~/html/other/"
@@ -150,12 +149,6 @@
 ;; 1.30: Fixed startup error caused by (require 'em-unix)
 
 ;;; Code:
-
-;; FIXME Mention this in the ChangeLog
-
-;; - removed org-publish-validate-link 
-;; - deleted org-publish-get-plists-from-filename
-;; - deleted org-publish-get-plists
 
 (eval-when-compile
   (require 'cl))
@@ -279,7 +272,7 @@ files."
 (defcustom org-publish-timestamp-directory "~/.org-timestamps/"
   "Name of directory in which to store publishing timestamps."
   :group 'org-publish
-  :type 'string)
+  :type 'directory)
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -287,59 +280,52 @@ files."
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (while (string-match (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/")
-		       filename)
+  (while (string-match 
+	  (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/") filename)
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
 
-;; FIXME ChangeLog: deleted :parents 
 (defun org-publish-needed-p (filename)
-  "Check whether file should be published.
-If org-publish-use-timestamps-flag is set to nil, this function always
-returns t. Otherwise, check the timestamps folder to determine
-whether file should be published."
+  "Return `t' if FILENAME should be published."
   (if org-publish-use-timestamps-flag
-      (progn
-	;; create folder if needed
-	(if (not (file-exists-p org-publish-timestamp-directory))
-	    (make-directory org-publish-timestamp-directory)
+      (if (file-exists-p org-publish-timestamp-directory)
+	  ;; first handle possible wrong timestamp directory
 	  (if (not (file-directory-p org-publish-timestamp-directory))
-	      (error "`org-publish-timestamp-directory' must be a directory")))
-	;; check timestamp. ok if timestamp file doesn't exist
-	(let* ((timestamp (org-publish-timestamp-filename filename))
-	       (rtn (file-newer-than-file-p filename timestamp)))
-	  (if rtn
-	      ;; handle new timestamps
-	      (if (not (file-exists-p timestamp))
-		  ;; create file
-		  (with-temp-buffer
-		    (make-directory (file-name-directory timestamp) t)
-		    (write-file timestamp)
-		    (kill-buffer (current-buffer)))))
-	  rtn))
-    ;; always return `t' is we don't use timestamp
+	      (error "Org publish timestamp: %s is not a directory"
+		     org-publish-timestamp-directory)
+	    ;; there is a timestamp, check if FILENAME is newer
+	    (file-newer-than-file-p
+	     filename (org-publish-timestamp-filename filename))))
+    ;; don't use timestamps, always return t
     t))
 
 (defun org-publish-update-timestamp (filename)
-  "Update publishing timestamp for file FILENAME."
-  (let ((timestamp (org-publish-timestamp-filename filename)))
-    ;; Emacs 21 doesn't have set-file-times
-    (if (fboundp 'set-file-times)
-        (set-file-times timestamp)
-      (call-process "touch" nil 0 nil timestamp))))
+  "Update publishing timestamp for file FILENAME.
+If there is no timestamp, create one."
+  (let ((timestamp-file (org-publish-timestamp-filename filename))
+	newly-created-timestamp)
+    (if (not (file-exists-p timestamp-file))
+	;; create timestamp file if needed
+	(with-temp-buffer
+	  (make-directory (file-name-directory timestamp-file) t)
+	  (write-file timestamp-file)
+	  (setq newly-created-timestamp t)))
+    ;; Emacs 21 doesn't have `set-file-times'
+    (if (and (fboundp 'set-file-times)
+	     (not newly-created-timestamp))
+        (set-file-times timestamp-file)
+      (call-process "touch" nil 0 nil timestamp-file))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mapping files to project names
 
-;; FIXME ChangeLog: renamed from org-publish-files
 (defvar org-publish-files-alist nil
   "Alist of files and their parent project.
 Each element of this alist is of the form:
 
   (file-name . project-name)")
 
-;; FIXME ChangeLog: new defun
 (defun org-publish-initialize-files-alist (&optional refresh)
   "Set `org-publish-files-alist' if it is not set.
 Also set it if the optional argument REFRESH is non-nil."
@@ -351,7 +337,6 @@ Also set it if the optional argument REFRESH is non-nil."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
 
-;; FIXME ChangeLog: new defun
 (defun org-publish-get-files (projects-alist &optional no-exclusion)
   "Return the list of all publishable files for PROJECTS-ALIST.
 If NO-EXCLUSION is non-nil, don't exclude files."
@@ -369,7 +354,6 @@ If NO-EXCLUSION is non-nil, don't exclude files."
      (org-publish-expand-projects projects-alist))
     all-files))
 
-;; ;; FIXME ChangeLog: new defun
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
@@ -383,7 +367,6 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
 			  with-component))))))
 
-;; FIXME ChangeLog: new defun
 (defun org-publish-expand-components (project)
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
@@ -601,7 +584,6 @@ the project."
       (org-publish project))))
 
 (provide 'org-publish)
-
 
 ;; arch-tag: 72807f3c-8af0-4a6b-8dca-c3376eb25adb
 ;;; org-publish.el ends here
