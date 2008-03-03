@@ -5093,7 +5093,7 @@ together with a tags match is also possible, see @ref{Tag searches}.
 The commands available in the tags list are described in @ref{Agenda
 commands}.
 
-@node Timeline, Stuck projects, Matching tags and properties, Built-in agenda views
+@node Timeline, Keyword search, Matching tags and properties, Built-in agenda views
 @subsection Timeline for a single file
 @cindex timeline, single file
 @cindex time-sorted view
@@ -5143,7 +5143,7 @@ Note that in addition to the agenda files, this command will also search
 the files listed in @code{org-agenda-text-search-extra-files}.
 @end table
 
-@node Stuck projects,  , Timeline, Built-in agenda views
+@node Stuck projects,  , Keyword search, Built-in agenda views
 @subsection Stuck projects
 
 If you are following a system like David Allen's GTD to organize your
