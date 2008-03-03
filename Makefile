@@ -104,14 +104,11 @@ install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
 
-org-install.el: $(LISPFILES0)
+org-install.el: $(LISPFILES) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(generate-file-autoloads "org.el")' \
-		--eval '(generate-file-autoloads "org-mouse.el")' \
-		--eval '(generate-file-autoloads "org-publish.el")' \
-		--eval '(generate-file-autoloads "org-export-latex.el")' \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES))))' \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
 
