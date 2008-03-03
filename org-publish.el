@@ -153,6 +153,8 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'dired-aux)
+
 (defgroup org-publish nil
 	"Options for publishing a set of Org-mode and related files."
    :tag "Org Publishing"
@@ -357,11 +359,11 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
-    (mapcar (lambda(p) 
-	      (add-to-list
-	       (if (plist-get (cdr p) :components)
-		   'with-component 'without-component) p))
-	    projects-alist)
+    (mapc (lambda(p) 
+	    (add-to-list
+	     (if (plist-get (cdr p) :components)
+		 'with-component 'without-component) p))
+	  projects-alist)
     (delete-dups
      (append without-component
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
@@ -489,7 +491,7 @@ FILENAME is the filename of the file to be published."
   "Publish all files belonging to the PROJECTS alist.
 If :auto-index is set, publish the index too."
   (mapc 
-   (lambda(project)
+   (lambda (project)
      (let* ((project-plist (cdr project))
 	    (exclude-regexp (plist-get project-plist :exclude))
 	    (index-p (plist-get project-plist :auto-index))
@@ -500,7 +502,7 @@ If :auto-index is set, publish the index too."
 	    (preparation-function (plist-get project-plist :preparation-function))
 	    (files (org-publish-get-base-files project exclude-regexp)) file)
        (when preparation-function (funcall preparation-function))
-       (if index-p (funcall index-function project-plist index-filename))
+       (if index-p (funcall index-function project index-filename))
        (while (setq file (pop files))
 	 (org-publish-file file project))))
    (org-publish-expand-projects projects)))
@@ -509,7 +511,9 @@ If :auto-index is set, publish the index too."
   "Create an index of pages in set defined by PROJECT.
 Optionally set the filename of the index with INDEX-FILENAME.
 Default for INDEX-FILENAME is 'index.org'."
-  (let* ((dir (file-name-as-directory (plist-get project-plist :base-directory)))
+  (let* ((project-plist (cdr project))
+	 (dir (file-name-as-directory
+	       (plist-get project-plist :base-directory)))
 	 (exclude-regexp (plist-get project-plist :exclude))
 	 (files (org-publish-get-base-files project exclude-regexp))
 	 (index-filename (concat dir (or index-filename "index.org")))
@@ -534,17 +538,17 @@ Default for INDEX-FILENAME is 'index.org'."
 ;;; Interactive publishing functions
 
 ;;;###autoload
-(defun org-publish (project &optional force)
+(defun org-publish (project-name &optional force)
   "Publish the project named PROJECT-NAME."
   (interactive 
    (list (progn (completing-read 
-		 "Project name: " org-publish-project-alist nil t)
-		(assoc project-name org-publish-project-alist))
+		 "Project name: " org-publish-project-alist nil t))
 	 current-prefix-arg))
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-projects (list project)))))
+      (org-publish-projects 
+       (list (assoc project-name org-publish-project-alist))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
@@ -584,6 +588,7 @@ the project."
       (org-publish project))))
 
 (provide 'org-publish)
+
 
 ;; arch-tag: 72807f3c-8af0-4a6b-8dca-c3376eb25adb
 ;;; org-publish.el ends here
