@@ -356,6 +356,22 @@ If NO-EXCLUSION is non-nil, don't exclude files."
      (org-publish-expand-projects projects-alist))
     all-files))
 
+(if (fboundp 'delete-dups)
+    (defalias 'org-publish-delete-duplicates 'delete-dups)
+  (defun org-publish-delete-duplicates (list)
+    "Destructively remove `equal' duplicates from LIST.
+Store the result in LIST and return it.  LIST must be a proper list.
+Of several `equal' occurrences of an element in LIST, the first
+one is kept.
+
+This is a compatibility function for Emacsen without `delete-dups'."
+    ;; Code from `subr.el' in Emacs 22:
+    (let ((tail list))
+      (while tail
+	(setcdr tail (delete (car tail) (cdr tail)))
+	(setq tail (cdr tail))))
+    list))
+
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
@@ -364,7 +380,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	     (if (plist-get (cdr p) :components)
 		 'with-component 'without-component) p))
 	  projects-alist)
-    (delete-dups
+    (org-publish-delete-duplicates
      (append without-component
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
 			  with-component))))))
@@ -372,7 +388,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-components (project)
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
-    (delete-dups 
+    (org-publish-delete-duplicates
      (mapcar (lambda(c) (assoc c org-publish-project-alist))
 	     components))))
 
