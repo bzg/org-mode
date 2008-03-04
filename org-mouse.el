@@ -1,6 +1,6 @@
 ;;; org-mouse.el --- Better mouse support for org-mode
 
-;; Copyright (c) 2006 Piotr Zielinski, 2007, 2008 Free Software Foundation
+;; Copyright (c) 2006, 2007, 2008 Free Software Foundation
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
@@ -1106,3 +1106,5 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	    (:right (org-agenda-later 1)))))))
 
 (provide 'org-mouse)
+
+;; arch-tag: ff1ae557-3529-41a3-95c6-baaebdcc280f
