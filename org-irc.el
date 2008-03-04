@@ -50,7 +50,10 @@
 ;;
 ;;; Code:
 
-(require 'cl)
+
+(eval-when-compile
+  (require 'cl))
+
 (require 'org)
 (require 'erc)
 (require 'erc-log)

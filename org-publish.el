@@ -282,7 +282,7 @@ files."
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (while (string-match 
+  (while (string-match
 	  (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/") filename)
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
@@ -335,6 +335,25 @@ Also set it if the optional argument REFRESH is non-nil."
     (setq org-publish-files-alist
 	  (org-publish-get-files org-publish-project-alist))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; Compatibility aliases
+
+;; Delete-dups is not in Emacs <22
+(if (fboundp 'delete-dups)
+    (defalias 'org-publish-delete-dups 'delete-dups)
+  (defun org-publish-delete-dups (list)
+    "Destructively remove `equal' duplicates from LIST.
+Store the result in LIST and return it.  LIST must be a proper list.
+Of several `equal' occurrences of an element in LIST, the first
+one is kept.
+
+This is a compatibility function for Emacsen without `delete-dups'."
+    ;; Code from `subr.el' in Emacs 22:
+    (let ((tail list))
+      (while tail
+	(setcdr tail (delete (car tail) (cdr tail)))
+	(setq tail (cdr tail))))
+    list))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Getting project information out of org-publish-project-alist
@@ -346,12 +365,12 @@ If NO-EXCLUSION is non-nil, don't exclude files."
     ;; add all projects
     (mapc
      (lambda(p)
-       (let* ((exclude (plist-get p :exclude))
+       (let* ((exclude (plist-get (cdr p) :exclude))
 	      (files (org-publish-get-base-files p exclude)))
 	 ;; add all files from this project
 	 (mapc (lambda(f)
 		 (add-to-list 'all-files
-			      (cons (file-truename f) (car p))))
+			      (cons (expand-file-name f) (car p))))
 	       files)))
      (org-publish-expand-projects projects-alist))
     all-files))
@@ -359,12 +378,12 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
-    (mapc (lambda(p) 
+    (mapc (lambda(p)
 	    (add-to-list
 	     (if (plist-get (cdr p) :components)
 		 'with-component 'without-component) p))
 	  projects-alist)
-    (delete-dups
+    (org-publish-delete-dups
      (append without-component
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
 			  with-component))))))
@@ -372,7 +391,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-components (project)
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
-    (delete-dups 
+    (org-publish-delete-dups
      (mapcar (lambda(c) (assoc c org-publish-project-alist))
 	     components))))
 
@@ -381,7 +400,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 If EXCLUDE-REGEXP is set, this will be used to filter out
 matching filenames."
   (let* ((project-plist (cdr project))
-	 (base-dir (file-name-as-directory 
+	 (base-dir (file-name-as-directory
 		    (plist-get project-plist :base-directory)))
  	 (include-list (plist-get project-plist :include))
  	 (recursive-p (plist-get project-plist :recursive))
@@ -414,7 +433,7 @@ matching filenames."
 
 (defun org-publish-get-project-from-filename (filename)
   "Return the project FILENAME belongs."
-  (let* ((project-name (cdr (assoc (file-truename filename)
+  (let* ((project-name (cdr (assoc (expand-file-name filename)
 				   org-publish-files-alist))))
     (assoc project-name org-publish-project-alist)))
 
@@ -490,14 +509,14 @@ FILENAME is the filename of the file to be published."
 (defun org-publish-projects (projects)
   "Publish all files belonging to the PROJECTS alist.
 If :auto-index is set, publish the index too."
-  (mapc 
+  (mapc
    (lambda (project)
      (let* ((project-plist (cdr project))
 	    (exclude-regexp (plist-get project-plist :exclude))
 	    (index-p (plist-get project-plist :auto-index))
-	    (index-filename (or (plist-get project-plist :index-filename) 
+	    (index-filename (or (plist-get project-plist :index-filename)
 				"index.org"))
-	    (index-function (or (plist-get project-plist :index-function) 
+	    (index-function (or (plist-get project-plist :index-function)
 				'org-publish-org-index))
 	    (preparation-function (plist-get project-plist :preparation-function))
 	    (files (org-publish-get-base-files project exclude-regexp)) file)
@@ -538,17 +557,19 @@ Default for INDEX-FILENAME is 'index.org'."
 ;;; Interactive publishing functions
 
 ;;;###autoload
-(defun org-publish (project-name &optional force)
-  "Publish the project named PROJECT-NAME."
-  (interactive 
-   (list (progn (completing-read 
-		 "Project name: " org-publish-project-alist nil t))
-	 current-prefix-arg))
+(defun org-publish (project &optional force)
+  "Publish PROJECT."
+  (interactive "P")
   (save-window-excursion
-    (let ((org-publish-use-timestamps-flag
-	   (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-projects 
-       (list (assoc project-name org-publish-project-alist))))))
+    (let* ((force current-prefix-arg)
+	   (org-publish-use-timestamps-flag
+	    (if force nil org-publish-use-timestamps-flag)))
+      (org-publish-projects
+       (list (or project
+		 (assoc (completing-read
+			 "Publish project: "
+			 org-publish-project-alist nil t)
+			org-publish-project-alist)))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)

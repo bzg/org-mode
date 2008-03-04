@@ -1,5 +1,15 @@
-2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
+2008-03-04  Bastien Guerry  <bzg@altern.org>
 
+	* org-publish.el (org-publish-get-files): Bugfix.
+	(org-publish-get-files, org-publish-get-project-from-filename):
+	Use `expand-file-name' instead of `file-truename'.
+
+2008-03-03  Bastien Guerry  <bzg@altern.org>
+
+	* org-publish.el (org-publish-delete-dups): Aliases for
+	`delete-dups'.
+
+2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-toggle-region-items): New function.
 	(org-toggle-region-headings): New function.
