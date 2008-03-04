@@ -1,179 +1,7 @@
-2008-03-04  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-occur-parameters): New variable.
-	(org-remove-occur-highlights): Clear `org-occur-parameters'.
-
 2008-03-04  Bastien Guerry  <bzg@altern.org>
 
-	* org-publish.el (org-publish-get-files): Bugfix.
-	(org-publish-get-files, org-publish-get-project-from-filename):
-	Use `expand-file-name' instead of `file-truename'.
-
-2008-03-03  Bastien Guerry  <bzg@altern.org>
-
-	* org-publish.el (org-publish-delete-dups): Aliases for
-	`delete-dups'.
-
-2008-03-03  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-toggle-region-items): New function.
-	(org-toggle-region-headings): New function.
-	(org-time-stamp-rounding-minutes): This is now a list of two
-	values.
-	(org-current-time, org-read-date, org-timestamp-change): Use the
-	new structure of org-time-stamp-rounding-minutes.
-
-2008-03-03  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-load-default-extensions): Don't throw an error when
-	a feature cannot be loaded, send a message instead.
-
-	* org-publish.el (org-publish-org-to, org-publish-org-to-latex)
-	(org-publish-org-to-html): New argument `pub-dir' for temporary
-	publication directory.
-	(org-publish-projects): Renamed from `org-publish-plists'.
-	(org-publish, org-publish-all): Use `org-publish-projects'.
-	(org-publish-all, org-publish-current-file)
-	(org-publish-files-alist): Renamed from `org-publish-files'.
-	(org-publish-initialize-files-alist): New defun.
-	(org-publish-current-project): First initialize the list of
-	publishable files with`org-publish-initialize-files-alist'.
-	(org-publish-get-files): New defun.
-	(org-publish-expand-projects): New defun.
-	(org-publish-expand-components): New defun.
-	(org-publish-get-base-files): Get files recursively.
-	(org-publish-update-timestamp): Create the timestamp file.
-	(org-publish-needed-p): Removed the code about creating/updating
-	the timestamp file.
-	(org-publish-validate-link)
-	(org-publish-get-plists-from-filename, org-publish-get-plists):
-	Deleted.
-	(org-publish-timestamp-directory): Use directory type.
-
-2008-03-01  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-dblock-write:columnview, org-columns-capture-view):
-	Added support for :maxlevel and :skip-empty-rows as argument for
-	the columnview dynamic block.
-	(org-archive-subtree): Fixed a bug that prevented entries to get
-	marked DONE even when `org-archive-mark-done' was non-nil.  Also
-	kill archive buffer after archiving.
-	(org-export-as-html): Kill buffer after export when necessary.
-
-	* org-export-latex.el (org-export-as-latex): Kill buffer after
-	export when necessary.
-
-	* org.texi (Capturing Column View): Documented the new parameters
-	for the column view dynamic block: :maxlevel and :skip-empty-rows.
-
-	* org-irc.el: Require 'cl and 'erc.  Added dynamically scoped
-	variables.
-	(org-irc-visit-erc): Bug fix: rename `chan' to `chan-name'.
-
-2008-02-29  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-agenda-text-search-extra-files): Renamed from
-	`org-agenda-multi-occur-extra-files'.
-	(org-agenda-manipulate-query-add)
-	(org-agenda-manipulate-query-subtract)
-	(org-agenda-manipulate-query-add-regexp)
-	(org-agenda-manipulate-query-subtract-regexp)
-	(org-agenda-manipulate-query): New functions.
-	(org-agenda-query-register): New option.
-	(org-agenda-deadline-face): New argument wdays, to catch the
-	special case wdays=0.
-	(org-agenda-get-deadlines): Pass wdays to
-	`org-agenda-deadline-face'.
-	(org-agenda-align-tags): Bug fix.
-	(org-mouse-1-follows-link): Backwards compatibility.
-
-2008-02-28  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-open-at-point): Deleted mismatching `catch' form.
-
-2008-02-28  Phil Jackson  <phil@shellarchive.co.uk>
-
-	* org-irc.el (org-irc-erc-store-link): Long log entry descriptions
-	are now elipsified.
-
-2008-02-28  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-activate-links): Fixed typo.
-	* org.el (org-mouse-1-follows-link): Use the value of
-	`mouse-1-click-follows-link' by default.
-
-2008-02-28  Glenn Morris <rgm@gnu.org>
-
-	* org.el (org-info): Use `info' instead of `Info-goto-node'.
-
-2008-02-28  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-auto-repeat-maybe): Make sure that the repeat stuff
-	does not add another state note.
-	(orgtbl-setup): Fix menu bug.
-	(org-agenda-search-history): New variable.
-	(org-search-view): New command.
-	(org-agenda-prefix-format, org-agenda-sorting-strategy): New
-	setting for search.
-	(org-agenda-custom-commands, org-agenda)
-	(org-agenda-get-restriction-and-command, org-run-agenda-series):
-	Cater for new agenda view.
-
-2008-02-28  Bernt Hansen <bernt@norang.ca>
-
-	* org.el (org-put-clock-overlay): increase the limit of allowed
-	levels to 8 when building the clock summary.
-
-2008-02-27  Phil Jackson  <phil@shellarchive.co.uk>
-
-	* org-irc.el (org-irc-erc-store-link): Links now have
-	descriptions. The cpltxt and link variables are no longer directly
-	set.
-
-2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org-publish.el (org-publish-current-project): Fixed another
-	problem with the FORCE argument.
-
-2008-02-27  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org-irc.el: Modified the installation instructions.
-
-	* org.el (org-store-link): Removed the (require 'org-irc), this is
-	now handled by `org-default-extensions'.
-	(org-load-hook): This hok is now exlicitly defined and made
-	customizable.
-	(org-default-extensions): New option.
-
-2008-02-26  Bastien Guerry  <bzg@altern.org>
-
-	* org.el (org-agenda-to-appt): New argument `refresh' let the user
-	delete previous appointments stored in `appt-time-msg-list'.
-	(org-deadline-warning-days): Mention the fact that a value of zero
-	will be treated like negative values.
-	(org-show-todo-tree): Fix a small typo in the docstring.
-
-2008-02-26  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-agenda-to-appt): Set `org-deadline-warning-days' to
-	nil for the duration of the command.
-
-	* org-publish.el (org-publish, org-publish-current-file)
-	(org-publish-all): Do not overrule the default value of
-	`org-publish-use-timestamps-flag' with a nil value of FORCE.
-
-	* org.el (org-find-entry-with-id): Also find entry outside the
-	restriction.
-	(org-at-item-p, org-export-as-html): Fixed bug with
-	`org-plain-list-ordered-item-terminator' set to ?\).
-
-2008-02-22  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-insert-heading, org-insert-item): More intelligent
-	splitting of lines when creating a new headline or item.
-	(org-M-RET-may-split-line): New option.
-	(org-table-wrap-region): Respect the table setting in
-	org-M-RET-may-split-line'.
+	* org.el (org-agenda-schedule): Bugfix: don't display marker type
+	when it is `nil'.
 
 2008-02-19  Phil Jackson  <phil@shellarchive.co.uk>
 
@@ -504,7 +332,7 @@ Installed as 5.19a
 	(Quoted examples): New section.
 	(Enhancing text): New verbatim environments.
 
-2007-11-04  Bastien Guerry  <bzg@altern.org>
+2007-11-04  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
 	* org.el (org-export-with-special-strings): New option.
 	(org-export-html-convert-special-strings): New function.
@@ -712,7 +540,7 @@ Installed as 5.11
 
 	* org.texi (Appointment reminders): New section.
 
-2007-10-05  Bastien Guerry  <bzg@altern.org>
+2007-10-05  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
 	* org-export-latex.el (org-export-latex-protect-string): 
         Renaming of `org-latex-protect'.
@@ -756,7 +584,7 @@ Installed as 5.10
 	(org-indent-item): Fix bullet type before thinking about
 	renumbering.
 
-2007-09-26  Bastien Guerry  <bzg@altern.org>
+2007-09-26  Bastien Guerry  <Bastien.Guerry@ens.fr>
 
 	* org-export-latex.el (org-export-latex-emphasis-alist): 
 	Each list of the alist now requires three elements.

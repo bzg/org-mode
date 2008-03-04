@@ -151,7 +151,6 @@ With prefix arg HERE, insert it at point."
   :group 'hypermedia
   :group 'calendar)
 
-(eval-after-load "org" '(org-load-default-extensions))
 (defcustom org-load-hook nil
   "Hook that is run after org.el has been loaded."
   :group 'org
@@ -176,6 +175,8 @@ will be autoloaded when needed, preloading is not necessary."
 	  (condition-case nil (require ext)
 	    (error (message "Problems while trying to load feature `%s'" ext))))
 	org-default-extensions))
+
+(eval-after-load "org" '(org-load-default-extensions))
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
@@ -23374,11 +23375,12 @@ be used to request time specification in the time stamp."
   (org-agenda-check-no-diary)
   (let* ((marker (or (get-text-property (point) 'org-marker)
 		     (org-agenda-error)))
+	 (type (marker-insertion-type marker))
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
 	 (org-insert-labeled-timestamps-at-point nil)
 	 ts)
-    (message "%s" (marker-insertion-type marker)) (sit-for 3)
+    (when type (message "%s" type) (sit-for 3))
     (set-marker-insertion-type marker t)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
