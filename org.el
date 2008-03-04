@@ -66,10 +66,8 @@
 
 ;;;; Require other packages
 
-(require 'cl)
 (eval-when-compile
   (require 'cl)
-  (require 'cl-extra)
   (require 'gnus-sum)
   (require 'calendar))
 ;; For XEmacs, noutline is not yet provided by outline.el, so arrange for
@@ -153,10 +151,9 @@ With prefix arg HERE, insert it at point."
   :group 'hypermedia
   :group 'calendar)
 
-(defcustom org-load-hook '(org-load-default-extensions)
-  "Hook that is run after org.el has been loaded.
-This happens also after `org' has been provided, so
-requiring something in this hook that does a (require 'org) is ok."
+(eval-after-load "org" '(org-load-default-extensions))
+(defcustom org-load-hook nil
+  "Hook that is run after org.el has been loaded."
   :group 'org
   :type 'hook)
 
