@@ -27851,7 +27851,6 @@ See the individual commands for more information."
   "Read documentation for Org-mode in the info system.
 With optional NODE, go directly to that node."
   (interactive)
-  (require 'info)
   (info (format "(org)%s" (or node ""))))
 
 (defun org-install-agenda-files-menu ()
