@@ -63,6 +63,27 @@
       entries.  These can be used in dependency implementations,
       or to tie clock tables and column view tables to entries.
 
+*** New template option: pre-selection contexts
+
+    - Templates now allow six elements.  The last element defines
+      the contexts in which the template should be offered.  It
+      can be a list of major modes, a function, `t' or `nil'.  If
+      it is a list of major-mode, the template will be available
+      only when `org-remember' is called from a buffer in one of
+      these modes.  If it is a function, the template will be
+      offered only if the function returns `t' when called in the
+      current buffer.  A value of `t' for this element means
+      select this template in any context.  `nil' means use this
+      template by default, when other checks failed.
+
+      (setq org-remember-templates
+   	'(("Org" ?o "* %a\n\n%i%?" "~/org/bzg.org" "Org" my-defun)))
+
+      M-x org-remember RET will present this template only if
+      calling `my-defun' in the current buffer returns `nil'.
+
+      The (info "(org)Remember templates") for details.
+
 *** Misc
 
    - Phil Jackson's org-irc.el is now part of the Org-mode core,
@@ -89,7 +110,6 @@
      specify the number of minutes to shift.
 
      This was a proposal by Adam Spiers.
-
 
    - `C-c -' has now more functions:
      + In a table, add a hline as before
