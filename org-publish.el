@@ -356,8 +356,8 @@ List has a form of (file-name full-file-name (attribute-list))"
 
 ;; Delete-dups is not in Emacs <22
 (if (fboundp 'delete-dups)
-    (defalias 'org-publish-delete-duplicates 'delete-dups)
-  (defun org-publish-delete-duplicates (list)
+    (defalias 'org-publish-delete-dups 'delete-dups)
+  (defun org-publish-delete-dups (list)
     "Destructively remove `equal' duplicates from LIST.
 Store the result in LIST and return it.  LIST must be a proper list.
 Of several `equal' occurrences of an element in LIST, the first
@@ -399,7 +399,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	     (if (plist-get (cdr p) :components)
 		 'with-component 'without-component) p))
 	  projects-alist)
-    (org-publish-delete-duplicates
+    (org-publish-delete-dups
      (append without-component
 	     (car (mapcar (lambda(p) (org-publish-expand-components p))
 			  with-component))))))
@@ -407,7 +407,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-components (project)
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
-    (org-publish-delete-duplicates
+    (org-publish-delete-dups
      (mapcar (lambda(c) (assoc c org-publish-project-alist))
 	     components))))
 
@@ -573,17 +573,19 @@ Default for INDEX-FILENAME is 'index.org'."
 ;;; Interactive publishing functions
 
 ;;;###autoload
-(defun org-publish (project-name &optional force)
-  "Publish the project named PROJECT-NAME."
-  (interactive 
-   (list (progn (completing-read 
-		 "Project name: " org-publish-project-alist nil t))
-	 current-prefix-arg))
+(defun org-publish (project &optional force)
+  "Publish PROJECT."
+  (interactive "P")
   (save-window-excursion
-    (let ((org-publish-use-timestamps-flag
-	   (if force nil org-publish-use-timestamps-flag)))
+    (let* ((force current-prefix-arg)
+	   (org-publish-use-timestamps-flag
+	    (if force nil org-publish-use-timestamps-flag)))
       (org-publish-projects 
-       (list (assoc project-name org-publish-project-alist))))))
+       (list (or project
+		 (assoc (completing-read 
+			 "Publish project: "
+			 org-publish-project-alist nil t)
+			org-publish-project-alist)))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
