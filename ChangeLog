@@ -1,3 +1,8 @@
+2008-03-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-occur-parameters): New variable.
+	(org-remove-occur-highlights): Clear `org-occur-parameters'.
+
 2008-03-04  Bastien Guerry  <bzg@altern.org>
 
 	* org-publish.el (org-publish-get-files): Bugfix.

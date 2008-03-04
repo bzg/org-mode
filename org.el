@@ -15249,8 +15249,19 @@ d      Show deadlines due within `org-deadline-warning-days'."
       (call-interactively 'org-occur))
      (t (error "No such sparse tree command \"%c\"" ans)))))
 
-(defvar org-occur-highlights nil)
+(defvar org-occur-highlights nil
+  "List of overlays used for occur matches.")
 (make-variable-buffer-local 'org-occur-highlights)
+(defvar org-occur-parameters nil
+  "Parameters of the active org-occur calls.
+This is a list, each call to org-occur pushes as cons cell,
+containing the regular expression and the callback, onto the list.
+The list can contain several entries if `org-occur' has been called
+several time with the KEEP-PREVIOUS argument.  Otherwise, this list
+will only contain one set of parameters.  When the highlights are
+removed (for example with `C-c C-c', or with the next edit (depending
+on `org-remove-highlights-with-change'), this variable is emptied
+as well.")
 
 (defun org-occur (regexp &optional keep-previous callback)
   "Make a compact tree which shows all matches of REGEXP.
@@ -15265,6 +15276,7 @@ that the match should indeed be shown."
   (interactive "sRegexp: \nP")
   (unless keep-previous
     (org-remove-occur-highlights nil nil t))
+  (push (cons regexp callback) org-occur-parameters)
   (let ((cnt 0))
     (save-excursion
       (goto-char (point-min))
@@ -15350,6 +15362,7 @@ from the `before-change-functions' in the current buffer."
   (unless org-inhibit-highlight-removal
     (mapc 'org-delete-overlay org-occur-highlights)
     (setq org-occur-highlights nil)
+    (setq org-occur-parameters nil)
     (unless noremove
       (remove-hook 'before-change-functions
 		   'org-remove-occur-highlights 'local))))
