@@ -21,7 +21,7 @@ Installation:
 copy all *.el files into the org installation directory.
 add the following line to your .emacs
 
-(require org-export-freemind-install) 
+(require 'org-export-freemind-install) 
 
 This will define the following functions:
 
