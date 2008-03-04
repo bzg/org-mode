@@ -408,7 +408,7 @@ matching filenames."
  	 (regexp (concat "^[^\\.].*\\.\\(" extension "\\)$"))
  	 alldirs allfiles files dir)
     ;; Get all files and directories in base-directory
-    (setq files (org-publish-dired-files-attributes base-dir))
+    (setq files (dired-files-attributes base-dir))
     ;; Get all subdirectories if recursive-p
     (setq alldirs
  	  (if recursive-p
