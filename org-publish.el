@@ -338,22 +338,6 @@ Also set it if the optional argument REFRESH is non-nil."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Compatibility aliases
 
-;; Looks like dired-files-attributes is not in Emacs 21.4a.
-;; FIXME: Check this twice
-(if (fboundp 'dired-files-attributes)
-    (defalias 'org-publish-dired-files-attributes 'dired-files-attributes)
-  ;; taken from dired-aux.el
-  (defun org-publish-dired-files-attributes (dir)
-    "Return a list of all file names and attributes from DIR.
-List has a form of (file-name full-file-name (attribute-list))"
-    (mapcar
-     (lambda (file-name)
-       (let ((full-file-name (expand-file-name file-name dir)))
-	 (list file-name
-	       full-file-name
-	       (file-attributes full-file-name))))
-     (directory-files dir))))
-
 ;; Delete-dups is not in Emacs <22
 (if (fboundp 'delete-dups)
     (defalias 'org-publish-delete-dups 'delete-dups)
@@ -386,7 +370,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 	 ;; add all files from this project
 	 (mapc (lambda(f)
 		 (add-to-list 'all-files
-			      (cons (file-truename f) (car p))))
+			      (cons (expand-file-name f) (car p))))
 	       files)))
      (org-publish-expand-projects projects-alist))
     all-files))
@@ -449,7 +433,7 @@ matching filenames."
 
 (defun org-publish-get-project-from-filename (filename)
   "Return the project FILENAME belongs."
-  (let* ((project-name (cdr (assoc (file-truename filename)
+  (let* ((project-name (cdr (assoc (expand-file-name filename)
 				   org-publish-files-alist))))
     (assoc project-name org-publish-project-alist)))
 
