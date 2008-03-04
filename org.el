@@ -1716,7 +1716,9 @@ that the WAIT state can be selected with the \"w\" key. \"WAIT(w!)\"
 indicates to record a time stamp each time this state is selected.
 \"WAIT(w@)\" says that the user should in addition be prompted for a
 note, and \"WAIT(w@/@)\" says that a note should be taken both when
-entering and when leaving this state.
+entering and when leaving this state.  The last double-setting is
+only a backup, to force a note even if the target state has no
+logging configured.
 
 For backward compatibility, this variable may also be just a list
 of keywords - in this case the interptetation (sequence or type) will be
