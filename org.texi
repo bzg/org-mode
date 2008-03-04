@@ -90,8 +90,8 @@ Software Foundation raise funds for GNU development.''
 * Publishing::                  Create a web site of linked Org-mode files
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Extensions and Hacking::      It is possible to write add-on code
-* History and Acknowledgments::  How Org-mode came into being 
-* Main Index::                  
+* History and Acknowledgments::  How Org-mode came into being
+* Main Index::
 * Key Index::                   Key bindings and where they are described
 
 @detailmenu
@@ -126,7 +126,7 @@ Archiving
 Tables
 
 * Built-in table editor::       Simple tables
-* Narrow columns::              Stop wasting space in tables   
+* Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
@@ -211,7 +211,7 @@ Dates and Times
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Clocking work time::          
+* Clocking work time::
 
 Creating timestamps
 
@@ -260,7 +260,7 @@ Custom agenda views
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
 * Exporting Agenda Views::      Writing agendas to files.
-* Extracting Agenda Information for other programs::  
+* Extracting Agenda Information for other programs::
 
 Embedded LaTeX
 
@@ -291,14 +291,14 @@ LaTeX export
 
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
-* Sectioning structure::        
+* Sectioning structure::
 
 Text interpretation by the exporter
 
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chnuks of text            
+* Quoted examples::             Inserting quoted chnuks of text
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 
@@ -1145,7 +1145,7 @@ Org-mode supports these lists by tuning filling and wrapping commands to
 deal with them correctly@footnote{Org-mode only changes the filling
 settings for Emacs.  For XEmacs, you should use Kyle E. Jones'
 @file{filladapt.el}.  To turn this on,  put into @file{.emacs}:
-@code{(require 'filladapt)}}. 
+@code{(require 'filladapt)}}.
 
 The following commands act on items when the cursor is in the first line
 of an item (the line with the bullet or number).
@@ -1271,7 +1271,7 @@ silently in the shadow.
 
 Org-mode comes with a fast and intuitive table editor.  Spreadsheet-like
 calculations are supported in connection with the Emacs @file{calc}
-package 
+package
 @ifinfo
 (@pxref{Top,Calc,,calc,Gnu Emacs Calculator Manual}).
 @end ifinfo
@@ -1282,7 +1282,7 @@ calculator).
 
 @menu
 * Built-in table editor::       Simple tables
-* Narrow columns::              Stop wasting space in tables   
+* Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
 * orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
@@ -1341,7 +1341,7 @@ If not, lines are split at whitespace into fields.  You can use a prefix
 argument to force a specific separator: @kbd{C-u} forces CSV, @kbd{C-u
 C-u} forces TAB, and a numeric argument N indicates that at least N
 consequtive spaces, or alternatively a TAB will be the separator.
-@* 
+@*
 If there is no active region, this command creates an empty Org-mode
 table.  But it's easier just to start typing, like
 @kbd{|Name|Phone|Age @key{RET} |- @key{TAB}}.
@@ -1678,7 +1678,7 @@ the value directly at the hline is used.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
-row/column is implied. 
+row/column is implied.
 
 Org-mode's references with @emph{unsigned} numbers are fixed references
 in the sense that if you use the same reference in the formula for two
@@ -2195,7 +2195,7 @@ Org-mode will recognize plain URL-like links and activate them as
 clickable links.  The general link format, however, looks like this:
 
 @example
-[[link][description]]       @r{or alternatively}           [[link]]  
+[[link][description]]       @r{or alternatively}           [[link]]
 @end example
 
 Once a link in the buffer is complete (all brackets present), Org-mode
@@ -2568,7 +2568,7 @@ compatibility, line numbers can also follow a single colon.} colon. For
 example, when the command @kbd{C-c l} creates a link (@pxref{Handling
 links}) to a file, it encodes the words in the current line as a search
 string that can be used to find this line back later when following the
-link with @kbd{C-c C-o}. 
+link with @kbd{C-c C-o}.
 
 Here is the syntax of the different ways to attach a search to a file
 link, together with an explanation:
@@ -3514,10 +3514,10 @@ first, and the value after it.  Here is an example:
     :PROPERTIES:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
-    :Artist:    Glen Gould 
+    :Artist:    Glen Gould
     :Publisher: Deutsche Grammphon
     :NDisks:    1
-    :END:       
+    :END:
 @end example
 
 You may define the allowed values for a particular property @samp{:Xyz:}
@@ -3955,7 +3955,7 @@ is used in a much wider sense.
 * Time stamps::                 Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Clocking work time::          
+* Clocking work time::
 @end menu
 
 
@@ -4223,7 +4223,7 @@ format does not @emph{replace} the default format - instead it is put
 @emph{over} the default format using text properties.  This has the
 following consequences:
 @itemize @bullet
-@item 
+@item
 You cannot place the cursor onto a time stamp anymore, only before or
 after.
 @item
@@ -4493,7 +4493,7 @@ and to use a specific time range you could write@footnote{Note that all
 parameters must be specified in a single line - the line is broken here
 only to fit it onto the manual.}
 @example
-#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>" 
+#+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                     :tend "<2006-08-10 Thu 12:00>"
 
 #+END: clocktable
@@ -4584,6 +4584,29 @@ file (if not present or @code{nil}) defaults to
 @code{org-default-notes-file}, the heading to
 @code{org-remember-default-headline}.
 
+An optional sixth element can specify the context in which the user
+wants to be able to select this template.  This element can be a list
+of major modes, in case the template will be available while invoking
+@code{org-remember} from a buffer in one of these modes.  If it is a
+function, the template will only be selected if the function returns
+@code{t}.  If this element is @code{t}, then the template will be
+selected in any context and if it is @code{nil} the template will
+be selected by default -- i.e. when all contextual checks failed.
+
+So for example:
+
+@example
+(setq org-remember-templates
+ '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks" (emacs-lisp-mode))
+   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org" my-check)
+   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas" t)))
+@end example
+
+The first template will only be available when invoking @code{org-remember}
+from an buffer in @code{emacs-lisp-mode}.  The second template will only be
+available when the function @code{my-check} returns @code{t}.  The third
+template will be proposed in any context.
+
 When you call @kbd{M-x remember} (or @kbd{M-x org-remember}) to remember
 something, org will prompt for a key to select the template (if you have
 more than one template) and then prepare the buffer like
@@ -4635,7 +4658,7 @@ bbdb               |  %::server %:port %:nick
 vm, wl, mh, rmail  |  %:type %:subject %:message-id
                    |  %:from %:fromname %:fromaddress
                    |  %:to   %:toname   %:toaddress
-                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}       
+                   |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
 gnus               |  %:group, @r{for messages also all email fields}
 w3, w3m            |  %:url
 info               |  %:file %:node
@@ -4777,7 +4800,7 @@ combinations of different views.
 The extracted information is displayed in a special @emph{agenda
 buffer}.  This buffer is read-only, but provides commands to visit the
 corresponding locations in the original Org-mode files, and even to
-edit these files remotely.  
+edit these files remotely.
 
 Two variables control how the agenda buffer is displayed and whether the
 window configuration is restored when the agenda exits:
@@ -5310,7 +5333,7 @@ Within each category, items are sorted by priority (@pxref{Priorities}),
 which is composed of the base priority (2000 for priority @samp{A}, 1000
 for @samp{B}, and 0 for @samp{C}), plus additional increments for
 overdue scheduled or deadline items.
-@item 
+@item
 For the TODO list, items remain in the order of categories, but within
 each category, sorting takes place according to priority
 (@pxref{Priorities}).
@@ -5657,7 +5680,7 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
 * Exporting Agenda Views::      Writing agendas to files.
-* Extracting Agenda Information for other programs::  
+* Extracting Agenda Information for other programs::
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -5784,7 +5807,7 @@ right spot in @code{org-agenda-custom-commands}.  For example:
           (org-show-hierarchy-above nil)))
         ("N" search ""
          ((org-agenda-files '("~org/notes.org"))
-          (org-agenda-text-search-extra-files nil)))))          
+          (org-agenda-text-search-extra-files nil)))))
 @end group
 @end lisp
 
@@ -5952,7 +5975,7 @@ emacs -eval '(org-batch-store-agenda-views                      \
 @noindent
 which will create the agenda views restricted to the file
 @file{~/org/project.org}, without diary entries and with 30 days
-extent. 
+extent.
 
 @node Extracting Agenda Information for other programs,  , Exporting Agenda Views, Custom agenda views
 @subsection Extracting Agenda Information for other programs
@@ -5980,7 +6003,7 @@ tags/todo match string.  For example, to print your local shopping list
 @samp{NewYork}), you could use
 
 @example
-emacs -batch -l ~/.emacs                                      \       
+emacs -batch -l ~/.emacs                                      \
       -eval '(org-batch-agenda "+shop-NewYork")' | lpr
 @end example
 
@@ -6328,7 +6351,7 @@ warning.  If there is an active region, only the region will be
 exported. If the selected region is a single tree, the tree head will
 become the document title.  If the tree head entry has or inherits an
 @code{:EXPORT_FILE_NAME:} property, that name will be used for the
-export. 
+export.
 @kindex C-c C-e v a
 @item C-c C-e v a
 Export only the visible part of the document.
@@ -6540,7 +6563,7 @@ Org-mode contains a La@TeX{} exporter written by Bastien Guerry.
 @menu
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
-* Sectioning structure::        
+* Sectioning structure::
 @end menu
 
 @node LaTeX export commands, Quoting LaTeX code, LaTeX export, LaTeX export
@@ -6669,7 +6692,7 @@ Create a single large iCalendar file from all files in
 The export will honor SUMMARY, DESCRIPTION and LOCATION properties if
 the selected entries have them.  If not, the summary will be derived
 from the headline, and the description from the body (limited to
-@code{org-icalendar-include-body} characters).  
+@code{org-icalendar-include-body} characters).
 
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
@@ -6685,7 +6708,7 @@ in order to produce better output.
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chnuks of text            
+* Quoted examples::             Inserting quoted chnuks of text
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 @end menu
@@ -6785,7 +6808,7 @@ If a headline starts with the word @samp{QUOTE}, the text below the
 headline will be typeset as fixed-width, to allow quoting of computer
 codes etc.
 @item
-Lines starting with @samp{:} are also typeset in fixed-width font. 
+Lines starting with @samp{:} are also typeset in fixed-width font.
 @table @kbd
 @kindex C-c :
 @item C-c :
@@ -6853,7 +6876,7 @@ separator line will be formatted as table header fields.
 If a headline starts with the word @samp{QUOTE}, the text below the
 headline will be typeset as fixed-width, to allow quoting of computer
 codes etc.  Lines starting with @samp{:} are also typeset in fixed-width
-font. 
+font.
 @table @kbd
 @kindex C-c :
 @item C-c :
@@ -6868,7 +6891,7 @@ quoted text
 will also be exported in this way.
 
 @cindex linebreak, forced
-@item 
+@item
 A double backslash @emph{at the end of a line} enforces a line break at
 this position.
 
@@ -7018,22 +7041,20 @@ the two following forms:
 @lisp
 ("project-name" :property value :property value ...)
 
-@r{or} 
- 
+@r{or}
+
 ("project-name" :components ("project-name" "project-name" ...))
 
 @end lisp
 
-In both cases, projects are configured by specifying property values.  A
-project defines the set of files that will be published, as well as the
-publishing configuration to use when publishing those files.  When a
-project takes the second form listed above, the individual members of
-the ``components'' property are taken to be components of the project,
-which group together files requiring different publishing options.  When
-you publish such a ``meta-project'' all the components will also be
-published.
-
-For now, components are not allowed to have components themselves.
+In both cases, projects are configured by specifying property values.
+A project defines the set of files that will be published, as well as
+the publishing configuration to use when publishing those files.  When
+a project takes the second form listed above, the individual members
+of the ``components'' property are taken to be components of the
+project, which group together files requiring different publishing
+options. When you publish such a ``meta-project'' all the components
+will also publish.
 
 @node Sources and destinations, Selecting files, Project alist, Configuration
 @subsection Sources and destinations for files
@@ -7060,13 +7081,13 @@ run @code{make} for updating files to be published.
 
 By default, all files with extension @file{.org} in the base directory
 are considered part of the project.  This can be modified by setting the
-properties 
+properties
 @multitable @columnfractions 0.25 0.75
 @item @code{:base-extension}
 @tab Extension (without the dot!) of source files.  This actually is a
 regular expression.
 
-@item @code{:exclude} 
+@item @code{:exclude}
 @tab Regular expression to match file names that should not be
 published, even though they have been selected on the basis of their
 extension.
@@ -7074,10 +7095,6 @@ extension.
 @item @code{:include}
 @tab List of files to be included regardless of @code{:base-extension}
 and @code{:exclude}.
-
-@item @code{:recursive}
-@tab When non-@code{nil}, the @code{:base-directory} will be recursively
-published.
 @end multitable
 
 @node Publishing action, Publishing options, Selecting files, Configuration
@@ -7178,7 +7195,7 @@ too. @ref{Complex example} for an example of this usage.
 
 Sometime an Org-mode file to be published may contain links that are
 only valid in your production environment, but not in the publishing
-location.  In this case, use the property 
+location.  In this case, use the property
 
 @multitable @columnfractions 0.4 0.6
 @item @code{:link-validation-function}
@@ -7239,12 +7256,12 @@ directory on the local machine.
 
 @lisp
 (setq org-publish-project-alist
-      '(("org" 
+      '(("org"
          :base-directory "~/org/"
          :publishing-directory "~/public_html"
          :section-numbers nil
          :table-of-contents nil
-         :style "<link rel=stylesheet 
+         :style "<link rel=stylesheet
                 href=\"../other/mystyle.css\"
                 type=\"text/css\">")))
 @end lisp
@@ -7281,17 +7298,17 @@ right place on the webserver, and publishing images to it.
           :headline-levels 3
           :section-numbers nil
           :table-of-contents nil
-          :style "<link rel=stylesheet 
+          :style "<link rel=stylesheet
                   href=\"../other/mystyle.css\" type=\"text/css\">"
           :auto-preamble t
           :auto-postamble nil)
-         
+
          ("images"
           :base-directory "~/images/"
           :base-extension "jpg\\|gif\\|png"
           :publishing-directory "/ssh:user@@host:~/html/images/"
           :publishing-function org-publish-attachment)
- 
+
          ("other"
           :base-directory "~/other/"
           :base-extension "css\\|el"
@@ -7304,7 +7321,7 @@ right place on the webserver, and publishing images to it.
 @section Triggering publication
 
 Once org-publish is properly configured, you can publish with the
-following functions: 
+following functions:
 
 @table @kbd
 @item C-c C-e C
@@ -7470,7 +7487,7 @@ showall    @r{no folding at all, show everything}
 Then there are options for aligning tables upon visiting a file.  This
 is useful in files containing narrowed table columns.  The corresponding
 variable is @code{org-startup-align-all-tables}, with a default value
-@code{nil}. 
+@code{nil}.
 @cindex @code{align}, STARTUP keyword
 @cindex @code{noalign}, STARTUP keyword
 @example
@@ -7561,7 +7578,7 @@ tree, or from clock display, remove these highlights.
 @item
 If the cursor is in one of the special @code{#+KEYWORD} lines, this
 triggers scanning the buffer for these lines and updating the
-information. 
+information.
 @item
 If the cursor is inside a table, realign the table.  This command
 works even if the automatic table editor has been turned off.
@@ -7777,7 +7794,7 @@ La@TeX{} fragments into Org-mode files. See @ref{CDLaTeX mode}.
 Imenu allows menu access to an index of items in a file.  Org-mode
 supports imenu - all you need to do to get the index is the following:
 @lisp
-(add-hook 'org-mode-hook 
+(add-hook 'org-mode-hook
           (lambda () 'imenu-add-to-menubar "Imenu"))
 @end lisp
 By default the index is two levels deep - you can modify the depth using
@@ -8045,7 +8062,7 @@ You would activate this new link type in @file{.emacs} with
 @noindent
 Lets go through the file and see what it does.
 @enumerate
-@item 
+@item
 It does @code{(require 'org)} to make sure that @file{org.el} has been
 loaded.
 @item
@@ -8166,7 +8183,7 @@ number of different solutions:
 The table could be placed in a block comment if that is supported by the
 language.  For example, in C-mode you could wrap the table between
 @samp{/*} and @samp{*/} lines.
-@item 
+@item
 Sometimes it is possible to put the table after some kind of @i{END}
 statement, for example @samp{\bye} in TeX and @samp{\end@{document@}}
 in La@TeX{}.
@@ -8376,7 +8393,7 @@ Use @code{ORGLST} instead of @code{ORGTBL}.
 @item
 The available translation functions for radio lists don't take
 parameters.
-@item 
+@item
 `C-c C-c' will work when pressed on the first item of the list.
 @end itemize
 

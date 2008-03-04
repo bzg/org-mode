@@ -1544,6 +1544,14 @@ element can specify the headline in that file that should be offered
 first when the user is asked to file the entry.  The default headline is
 given in the variable `org-remember-default-headline'.
 
+An optional sixth element can specify the context in which the user should 
+be able to select this template.  If this element is a list of major modes, 
+the template will only be available while invoking `org-remember' from a 
+buffer in one of these modes.  If it is a function, the template will only
+be selected if the function returns `t'.  A value of `t' means select
+this template in any context.   When the element is `nil', the template 
+will be selected by default, i.e. when all contextual checks failed.
+
 The template specifies the structure of the remember buffer.  It should have
 a first line starting with a star, to act as the org-mode headline.
 Furthermore, the following %-escapes will be replaced with content:
@@ -1588,7 +1596,7 @@ w3, w3m            |  %:type %:url
 info               |  %:type %:file %:node
 calendar           |  %:type %:date"
   :group 'org-remember
-  :get (lambda (var) ; Make sure all entries have 5 elements
+  :get (lambda (var) ; Make sure all entries have at least 5 elements
 	 (mapcar (lambda (x)
 		   (if (not (stringp (car x))) (setq x (cons "" x)))
 		   (cond ((= (length x) 4) (append x '("")))
@@ -1597,7 +1605,7 @@ calendar           |  %:type %:date"
 		 (default-value var)))
   :type '(repeat
 	  :tag "enabled"
-	  (list :value ("" ?a "\n" nil nil)
+	  (list :value ("" ?a "\n" nil nil nil)
 		(string :tag "Name")
 		(character :tag "Selection Key")
 		(string :tag "Template")
@@ -1606,7 +1614,13 @@ calendar           |  %:type %:date"
 		 (const :tag "Prompt for file" nil))
 		(choice
 		 (string :tag "Destination headline")
-		 (const :tag "Selection interface for heading")))))
+		 (const :tag "Selection interface for heading"))
+		(choice
+		 (const :tag "Use by default" nil)
+		 (const :tag "Use in all contexts" t)
+		 (repeat :tag "Use only if in major mode"
+			 (symbol :tag "Major mode"))
+		 (function :tag "Perform a check against function")))))
 
 (defcustom org-reverse-note-order nil
   "Non-nil means, store new notes at the beginning of a file or entry.
@@ -8113,7 +8127,7 @@ this heading."
 		  (org-entry-put (point) n v)))))
 
 	  ;; Save and kill the buffer, if it is not the same buffer.
-	  (if (not (eq this-buffer buffer)) 
+	  (if (not (eq this-buffer buffer))
 	      (progn (save-buffer) (kill-buffer buffer)))))
       ;; Here we are back in the original buffer.  Everything seems to have
       ;; worked.  So now cut the tree and finish up.
@@ -13581,13 +13595,45 @@ RET at beg-of-buf -> Append to file as level 2 headline
 (defvar org-remember-previous-location nil)
 (defvar org-force-remember-template-char) ;; dynamically scoped
 
+;; Save the major mode of the buffer we called remember from
+(defvar org-select-template-temp-major-mode nil)
+
+;; Temporary store the buffer where remember was called from
+(defvar org-select-template-original-buffer nil)
+
 (defun org-select-remember-template (&optional use-char)
   (when org-remember-templates
-    (let* ((templates (mapcar (lambda (x)
+    (let* ((pre-selected-templates
+	    (mapcar
+	     (lambda (tpl)
+	       (let ((ctxt (nth 5 tpl))
+		     (mode org-select-template-temp-major-mode)
+		     (buf org-select-template-original-buffer))
+		 (if (or (and (functionp ctxt)
+			      (save-excursion
+				(set-buffer buf)
+				;; Protect the user-defined function from error
+				(condition-case nil (funcall ctxt) (error nil))))
+			 (and ctxt (listp ctxt)
+			      (delq nil (mapcar (lambda(x) (eq mode x)) ctxt))))
+		     tpl)))
+	     org-remember-templates))
+	   ;; If no template at this point, add the default templates:
+	   (pre-selected-templates1
+	    (if (not (delq nil pre-selected-templates))
+		(mapcar (lambda(x) (if (not (nth 5 x)) x)) 
+			org-remember-templates)
+	      pre-selected-templates))
+	   ;; Then unconditionnally add template for any contexts
+	   (pre-selected-templates2
+	    (append (mapcar (lambda(x) (if (eq (nth 5 x) t) x)) 
+			    org-remember-templates)
+		    (delq nil pre-selected-templates1)))
+	   (templates (mapcar (lambda (x)
 				(if (stringp (car x))
 				    (append (list (nth 1 x) (car x)) (cddr x))
 				  (append (list (car x) "") (cdr x))))
-			      org-remember-templates))
+			      (delq nil pre-selected-templates2)))
 	   (char (or use-char
 		     (cond
 		      ((= (length templates) 1)
@@ -13827,6 +13873,10 @@ associated with a template in `org-remember-templates'."
    ((equal goto '(4)) (org-go-to-remember-target))
    ((equal goto '(16)) (org-remember-goto-last-stored))
    (t
+    ;; set temporary variables that will be needed in
+    ;; `org-select-remember-template'
+    (setq org-select-template-temp-major-mode major-mode)
+    (setq org-select-template-original-buffer (current-buffer))
     (if (memq org-finish-function '(remember-buffer remember-finalize))
 	(progn
 	  (when (< (length org-remember-templates) 2)
@@ -13850,7 +13900,8 @@ associated with a template in `org-remember-templates'."
   "Go to the target location of a remember template.
 The user is queried for the template."
   (interactive)
-  (let* ((entry (org-select-remember-template template-key))
+  (let* (org-select-template-temp-major-mode
+	 (entry (org-select-remember-template template-key))
 	 (file (nth 1 entry))
 	 (heading (nth 2 entry))
 	 visiting)
