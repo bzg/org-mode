@@ -282,7 +282,7 @@ files."
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (while (string-match 
+  (while (string-match
 	  (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/") filename)
     (setq filename (replace-match "_" nil t filename)))
   (concat org-publish-timestamp-directory filename ".timestamp"))
@@ -343,7 +343,7 @@ Also set it if the optional argument REFRESH is non-nil."
 (if (fboundp 'dired-files-attributes)
     (defalias 'org-publish-dired-files-attributes 'dired-files-attributes)
   ;; taken from dired-aux.el
-  (defun dired-files-attributes (dir)
+  (defun org-publish-dired-files-attributes (dir)
     "Return a list of all file names and attributes from DIR.
 List has a form of (file-name full-file-name (attribute-list))"
     (mapcar
@@ -394,7 +394,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects contained in PROJECTS-ALIST."
   (let (without-component with-component)
-    (mapc (lambda(p) 
+    (mapc (lambda(p)
 	    (add-to-list
 	     (if (plist-get (cdr p) :components)
 		 'with-component 'without-component) p))
@@ -416,7 +416,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 If EXCLUDE-REGEXP is set, this will be used to filter out
 matching filenames."
   (let* ((project-plist (cdr project))
-	 (base-dir (file-name-as-directory 
+	 (base-dir (file-name-as-directory
 		    (plist-get project-plist :base-directory)))
  	 (include-list (plist-get project-plist :include))
  	 (recursive-p (plist-get project-plist :recursive))
@@ -525,14 +525,14 @@ FILENAME is the filename of the file to be published."
 (defun org-publish-projects (projects)
   "Publish all files belonging to the PROJECTS alist.
 If :auto-index is set, publish the index too."
-  (mapc 
+  (mapc
    (lambda (project)
      (let* ((project-plist (cdr project))
 	    (exclude-regexp (plist-get project-plist :exclude))
 	    (index-p (plist-get project-plist :auto-index))
-	    (index-filename (or (plist-get project-plist :index-filename) 
+	    (index-filename (or (plist-get project-plist :index-filename)
 				"index.org"))
-	    (index-function (or (plist-get project-plist :index-function) 
+	    (index-function (or (plist-get project-plist :index-function)
 				'org-publish-org-index))
 	    (preparation-function (plist-get project-plist :preparation-function))
 	    (files (org-publish-get-base-files project exclude-regexp)) file)
@@ -580,9 +580,9 @@ Default for INDEX-FILENAME is 'index.org'."
     (let* ((force current-prefix-arg)
 	   (org-publish-use-timestamps-flag
 	    (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-projects 
+      (org-publish-projects
        (list (or project
-		 (assoc (completing-read 
+		 (assoc (completing-read
 			 "Publish project: "
 			 org-publish-project-alist nil t)
 			org-publish-project-alist)))))))
