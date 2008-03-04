@@ -15263,7 +15263,8 @@ command.
 If CALLBACK is non-nil, it is a function which is called to confirm
 that the match should indeed be shown."
   (interactive "sRegexp: \nP")
-  (or keep-previous (org-remove-occur-highlights nil nil t))
+  (unless keep-previous
+    (org-remove-occur-highlights nil nil t))
   (let ((cnt 0))
     (save-excursion
       (goto-char (point-min))
