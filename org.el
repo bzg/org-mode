@@ -1246,6 +1246,11 @@ negates this setting for the duration of the command."
   :tag "Org Follow Link"
   :group 'org-link)
 
+(defcustom org-follow-link-hook nil
+  "Hook that is run after a link has been followed."
+  :group 'org-link-follow
+  :type 'hook)
+
 (defcustom org-tab-follows-link nil
   "Non-nil means, on links TAB will follow the link.
 Needs to be set before org.el is loaded."
@@ -2491,7 +2496,7 @@ should provide a description for the prefix, like
 	   (list :tag "Command series, all agenda files"
 		 (string :tag "Access Key(s)")
 		 (string :tag "Description  ")
-		 (repeat
+		 (repeat :tag "Component"
 		  (choice
 		   (const :tag "Agenda" (agenda))
 		   (const :tag "TODO list" (alltodo))
@@ -12935,7 +12940,8 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 
        (t
 	(browse-url-at-point)))))
-  (move-marker org-open-link-marker nil))
+  (move-marker org-open-link-marker nil)
+  (run-hook-with-args 'org-follow-link-hook))
 
 ;;; File search
 

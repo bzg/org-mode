@@ -1,3 +1,10 @@
+2008-03-05  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-follow-link-hook): New hook.
+	(org-agenda-custom-commands): Added "Component" as a tag for each
+	item in a command serie.
+	(org-open-at-point): Run `org-follow-link-hook'.
+
 2008-03-04  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-agenda-schedule): Bugfix: don't display marker type
