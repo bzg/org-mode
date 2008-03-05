@@ -51,7 +51,7 @@
 ;;
 ;; And a remember template like:
 ;;
-;; (setq org-remember-templates 
+;; (setq org-remember-templates
 ;;   '((?s "* DEBUG `%:name' (%:args)\n\n%?\n\nFixme: %:fixme\n  \
 ;;          Doc: \"%:doc\"\n\n%a")))
 ;;
@@ -65,7 +65,7 @@
 ;; Fixme: update the docstring
 ;; Doc: "Convert lists to LaTeX."
 ;;
-;; [[file:~/path/file.el::defun%20org-export-latex-lists][Function: org-export-latex-lists]]
+;; [[file:~/path/file.el::defun%20my-func][Function: my-func]]
 ;; =====================================================================
 ;;
 ;; Put this file into your load-path and the following into your ~/.emacs:
@@ -93,8 +93,8 @@
     (save-excursion
       (or (looking-at "^(") (beginning-of-defun))
       (looking-at "^(\\([a-z]+\\) \\([^)\n ]+\\) ?\n?[ \t]*\\(?:(\\(.*\\))\\)?")
-      (let* ((end (save-excursion 
-		    (save-match-data 
+      (let* ((end (save-excursion
+		    (save-match-data
 		      (end-of-defun) (point))))
 	     (def (match-string 1))
 	     (name (match-string 2))
@@ -107,12 +107,13 @@
 			  (t "Symbol")))
 	     (args (if (match-string 3)
 		       (mapconcat (lambda (a) (unless (string-match "^&" a) a))
-				  (split-string (match-string 3)) " ") 
+				  (split-string (match-string 3)) " ")
 		     "no arg"))
 	     (docstring (cond ((functionp sym-name)
-			       (documentation sym-name))
+			       (or (documentation sym-name)
+				   "[no documentation]"))
 			      ((string-match "[Vv]ariable" stype)
-			       (documentation-property sym-name 
+			       (documentation-property sym-name
 						       'variable-documentation))
 			      (t "no documentation")))
 	     (doc (and (string-match "^\\([^\n]+\\)$" docstring)
@@ -135,7 +136,7 @@
 	(setq description (concat stype ": " name))
 	(org-store-link-props
 	 :type "elisp-symbol"
-	 :link link 
+	 :link link
 	 :description description
 	 :def def
 	 :name name

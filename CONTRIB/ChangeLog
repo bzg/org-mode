@@ -1,3 +1,8 @@
+2008-03-05  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-elisp-symbol.el (org-elisp-symbol-store-link):
+	Correctly handle function with no documentation.
+
 2008-02-29  Tokuya Kameshima <kames@fa2.so-net.ne.jp>
 
 	* lisp/org-bookmark.el (org-bookmark-store-link): Use
