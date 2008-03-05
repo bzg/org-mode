@@ -21245,9 +21245,10 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (setq matcher (org-make-tags-matcher match)
 	  match (car matcher) matcher (cdr matcher))
     (org-prepare-agenda (concat "TAGS " match))
+    (setq org-agenda-query-string match)
     (setq org-agenda-redo-command
 	  (list 'org-tags-view (list 'quote todo-only)
-		(list 'if 'current-prefix-arg nil match)))
+		(list 'if 'current-prefix-arg nil 'org-agenda-query-string)))
     (setq files (org-agenda-files)
 	  rtnall nil)
     (while (setq file (pop files))
