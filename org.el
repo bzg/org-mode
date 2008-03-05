@@ -1715,11 +1715,16 @@ and specifiers for state change logging, using the same syntax
 that is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says
 that the WAIT state can be selected with the \"w\" key. \"WAIT(w!)\"
 indicates to record a time stamp each time this state is selected.
-\"WAIT(w@)\" says that the user should in addition be prompted for a
-note, and \"WAIT(w@/@)\" says that a note should be taken both when
-entering and when leaving this state.  The last double-setting is
-only a backup, to force a note even if the target state has no
-logging configured.
+
+Each keyword may also specify if a timestamp or a note should be
+recorded when entering or leaving the state, by adding additional
+characters in the parenthesis after the keyword.  This looks like this:
+\"WAIT(w@/!)\".  \"@\" means to add a note (with time), \"!\" means to
+record only the time of the state change.  With X and Y being either
+\"@\" or \"!\", \"X/Y\" means use X when entering the state, and use
+Y when leaving the state if and only if the *target* state does not
+define X.  You may omit any of the fast-selection key or X or /Y,
+so WAIT(w@), WAIT(w/@) and WAIT(@/@) are all valid.
 
 For backward compatibility, this variable may also be just a list
 of keywords - in this case the interptetation (sequence or type) will be

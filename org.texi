@@ -3015,12 +3015,12 @@ the @samp{Closing Note}.}, and that a note is recorded when switching to
 WAIT or CANCELED.  The setting for WAIT is even more special: The
 @samp{!} after the slash means that in addition to the note taken when
 entering the state, a time stamp should be recorded when @i{leaving} the
-WAIT state.  This second logging setting only comes into play when
-switching to a state that has no logging set up.  So it has no effect
-when switching from WAIT to DONE, because DONE is configured to record a
-timestamp only.  But when switching from WAIT back to TODO, the
-@samp{/!} in the WAIT setting now triggers a timestamp even though TODO
-has no logging configured.
+WAIT state, if and only if the @i{target} state does not configure
+logging for entering it.  So it has no effect when switching from WAIT
+to DONE, because DONE is configured to record a timestamp only.  But
+when switching from WAIT back to TODO, the @samp{/!} in the WAIT
+setting now triggers a timestamp even though TODO has no logging
+configured.
 
 You can use the exact same syntax for setting logging preferences local
 to a buffer:
