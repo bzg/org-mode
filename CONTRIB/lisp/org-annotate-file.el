@@ -68,15 +68,18 @@ location in the file")
   "non-nil means always expand the full tree when you visit
 `org-annotate-file-storage-file'.")
 
-(defun org-annotate-file-prettyfy-desc (string)
+(defun org-annotate-file-elipsify-desc (string &optional after)
   "Strip starting and ending whitespace and replace any chars
-after the 60th with '...'"
-  (let ((replace-map '(("^[ \t]*" . "")
-                       ("[ \t]*$" . "")
-                       ("^\\(.\\{60\\}\\).*" . "\\1..."))))
-    (dolist (replace replace-map)
-      (when (string-match (car replace) string)
-        (setq string (replace-match (cdr replace) nil nil string))))
+that appear after the value in `after' with '...'"
+  (let* ((after (number-to-string (or after 30)))
+         (replace-map (list (cons "^[ \t]*" "")
+                            (cons "[ \t]*$" "")
+                            (cons (concat "^\\(.\\{" after
+                                          "\\}\\).*") "\\1..."))))
+    (mapc (lambda (x)
+            (when (string-match (car x) string)
+              (setq string (replace-match (cdr x) nil nil string))))
+          replace-map)
     string))
 
 (defun org-annotate-file ()
@@ -91,10 +94,10 @@ after the 60th with '...'"
 show the relevant section"
   (let* ((filename (abbreviate-file-name (or buffer (buffer-file-name))))
          (line (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
-         (link (org-make-link-string (concat "file:" filename)))
+         (link (org-make-link-string (concat "file:" filename) filename))
          (search-link (org-make-link-string
                        (concat "file:" filename "::" line)
-                               (org-annotate-file-prettyfy-desc line))))
+                               (org-annotate-file-elipsify-desc line))))
     (with-current-buffer (find-file org-annotate-file-storage-file)
       (unless (org-mode-p)
         (org-mode))
