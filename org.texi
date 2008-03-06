@@ -5770,11 +5770,11 @@ matching commands discussed above: @code{todo}, @code{tags}, and
 @group
 (setq org-agenda-custom-commands
       '(("h" "Agenda and Home-related tasks"
-         ((agenda)
+         ((agenda "")
           (tags-todo "home")
           (tags "garden")))
         ("o" "Agenda and Office-related tasks"
-         ((agenda)
+         ((agenda "")
           (tags-todo "work")
           (tags "office")))))
 @end group
@@ -5786,7 +5786,6 @@ you need to attend to at home.  The resulting agenda buffer will contain
 your agenda for the current week, all TODO items that carry the tag
 @samp{home}, and also all lines tagged with @samp{garden}.  Finally the
 command @kbd{C-c a o} provides a similar view for office tasks.
-
 
 @node Setting Options, Exporting Agenda Views, Block agenda, Custom agenda views
 @subsection Setting Options for custom commands
@@ -5904,7 +5903,7 @@ or absolute.
       '(("X" agenda "" nil ("agenda.html" "agenda.ps"))
         ("Y" alltodo "" nil ("todo.html" "todo.txt" "todo.ps"))
         ("h" "Agenda and Home-related tasks"
-         ((agenda)
+         ((agenda "")
           (tags-todo "home")
           (tags "garden"))
          nil

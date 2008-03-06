@@ -1,8 +1,15 @@
+2008-03-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-custom-commands-local-options): New constant.
+	(org-agenda-custom-commands): Use
+	`org-agenda-custom-commands-local-options' to improve customize
+	type.
+
 2008-03-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el "htmlize"): Removed hack to fix face problem with
 	htmlize, it no longer seem necessary.
-	
+
 2008-03-05  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-follow-link-hook): New hook.
