@@ -23319,8 +23319,8 @@ the tags of the current headline come last."
 	(widen)
 	(goto-char (or pos (point)))
 	(save-match-data
-	  (org-back-to-heading t)
 	  (condition-case nil
+	      (org-back-to-heading t)
 	      (while (not (equal lastpos (point)))
 		(setq lastpos (point))
 		(if (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))

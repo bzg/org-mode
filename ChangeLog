@@ -1,7 +1,8 @@
-
 2008-03-06  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-get-legal-level): Aliased to `org-get-valid-level'.
+	* org.el (org-get-tags-at): Bugfix: prevent `org-back-to-heading'
+	from throwing an error when getting tags before headlines.
 
 2008-03-06  Carsten Dominik  <dominik@science.uva.nl>
 
