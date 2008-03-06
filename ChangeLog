@@ -1,8 +1,13 @@
+2008-03-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-timestamp-change, org-modify-ts-extra)
+	(org-ts-regexp1): Fix timestamp editing.
+
 2008-03-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el "htmlize"): Removed hack to fix face problem with
 	htmlize, it no longer seem necessary.
-	
+
 2008-03-05  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-follow-link-hook): New hook.
