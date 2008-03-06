@@ -2406,43 +2406,121 @@ you can \"misuse\" it to also add other text to the header.  However,
  :tag "Org Agenda Custom Commands"
  :group 'org-agenda)
 
+(defconst org-sorting-choice
+  '(choice
+    (const time-up) (const time-down)
+    (const category-keep) (const category-up) (const category-down)
+    (const tag-down) (const tag-up)
+    (const priority-up) (const priority-down))
+  "Sorting choices.")
+
+(defconst org-agenda-custom-commands-local-options
+  `(repeat :tag "Local settings for this command. Remember to quote values"
+	   (choice :tag "Setting"
+	    (list :tag "Any variable"
+		  (variable :tag "Variable")
+		  (sexp :tag "Value"))
+	    (list :tag "Files to be searched"
+		  (const org-agenda-files)
+		  (list
+		   (const :format "" quote)
+		   (repeat 
+			   (file))))
+	    (list :tag "Sorting strategy"
+		  (const org-agenda-sorting-strategy)
+		  (list
+		   (const :format "" quote)
+		   (repeat
+		    ,org-sorting-choice)))
+	    (list :tag "Prefix format"
+		  (const org-agenda-prefix-format :value "  %-12:c%?-12t% s")
+		  (string))
+	    (list :tag "Number of days in agenda"
+		  (const org-agenda-ndays)
+		  (integer :value 1))
+	    (list :tag "Fixed starting date"
+		  (const org-agenda-start-day)
+		  (string :value "2007-11-01"))
+	    (list :tag "Start on day of week"
+		  (const org-agenda-start-on-weekday)
+		  (choice :value 1
+			  (const :tag "Today" nil)
+			  (number :tag "Weekday No.")))
+	    (list :tag "Include data from diary"
+		  (const org-agenda-include-diary)
+		  (boolean))
+	    (list :tag "Deadline Warning days"
+		  (const org-deadline-warning-days)
+		  (integer :value 1))
+	    (list :tag "Standard skipping condition"
+		  :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
+		  (const org-agenda-skip-function)
+		  (list
+		   (const :format "" quote)
+		   (list
+		    (choice
+		     :tag "Skiping range"
+		     (const :tag "Skip entry" org-agenda-skip-entry-if)
+		     (const :tag "Skip subtree" org-agenda-skip-subtree-if))
+		    (repeat :inline t :tag "Conditions for skipping"
+			    (choice
+			     :tag "Condition type"
+			     (list :tag "Regexp matches" :inline t (const :format "" 'regexp) (regexp))
+			     (list :tag "Regexp does not match" :inline t (const :format "" 'notregexp) (regexp))
+			     (const :tag "scheduled" 'scheduled)
+			     (const :tag "not scheduled" 'notscheduled)
+			     (const :tag "deadline" 'deadline)
+			     (const :tag "no deadline" 'notdeadline))))))
+	    (list :tag "Non-standard skipping condition"
+		  :value (org-agenda-skip-function)
+		  (list
+		   (const org-agenda-skip-function)
+		   (sexp :tag "Function or form (quoted!)")))))
+  "Selection of examples for agenda command settings.
+This will be spliced into the custom type of
+`org-agenda-custom-commands'.")
+
+
 (defcustom org-agenda-custom-commands nil
   "Custom commands for the agenda.
 These commands will be offered on the splash screen displayed by the
 agenda dispatcher \\[org-agenda].  Each entry is a list like this:
 
-   (key desc type match options files)
+   (key desc type match settings files)
 
-key     The key (one or more characters as a string) to be associated
-        with the command.
-desc    A description of the commend, when omitted or nil, a default
-        description is built using MATCH.
-type    The command type, any of the following symbols:
-         agenda      The daily/weekly agenda.
-         todo        Entries with a specific TODO keyword, in all agenda files.
-         search      Entries containing search words entry or headline.
-         tags        Tags/Property/TODO match in all agenda files.
-         tags-todo   Tags/P/T match in all agenda files, TODO entries only.
-         todo-tree   Sparse tree of specific TODO keyword in *current* file.
-         tags-tree   Sparse tree with all tags matches in *current* file.
-         occur-tree  Occur sparse tree for *current* file.
-         ...         A user-defined function.
-match   What to search for:
-         - a single keyword for TODO keyword searches
-         - a tags match expression for tags searches
-         - a regular expression for occur searches
-options  A list of option settings, similar to that in a let form, so like
-         this: ((opt1 val1) (opt2 val2) ...)
-files    A list of files file to write the produced agenda buffer to
-         with the command `org-store-agenda-views'.
-         If a file name ends in \".html\", an HTML version of the buffer
-         is written out.  If it ends in \".ps\", a postscript version is
-         produced.  Otherwide, only the plain text is written to the file.
+key      The key (one or more characters as a string) to be associated
+         with the command.
+desc     A description of the command, when omitted or nil, a default
+         description is built using MATCH.
+type     The command type, any of the following symbols:
+          agenda      The daily/weekly agenda.
+          todo        Entries with a specific TODO keyword, in all agenda files.
+          search      Entries containing search words entry or headline.
+          tags        Tags/Property/TODO match in all agenda files.
+          tags-todo   Tags/P/T match in all agenda files, TODO entries only.
+          todo-tree   Sparse tree of specific TODO keyword in *current* file.
+          tags-tree   Sparse tree with all tags matches in *current* file.
+          occur-tree  Occur sparse tree for *current* file.
+          ...         A user-defined function.
+match    What to search for:
+          - a single keyword for TODO keyword searches
+          - a tags match expression for tags searches
+          - a word search expression for text searches.
+          - a regular expression for occur searches
+          For all other commands, this should be the empty string.
+settings  A list of option settings, similar to that in a let form, so like
+          this: ((opt1 val1) (opt2 val2) ...).   The values will be
+          evaluated at the moment of execution, so quote them when needed.
+files     A list of files file to write the produced agenda buffer to
+          with the command `org-store-agenda-views'.
+          If a file name ends in \".html\", an HTML version of the buffer
+          is written out.  If it ends in \".ps\", a postscript version is
+          produced.  Otherwide, only the plain text is written to the file.
 
 You can also define a set of commands, to create a composite agenda buffer.
 In this case, an entry looks like this:
 
-  (key desc (cmd1 cmd2 ...) general-options file)
+  (key desc (cmd1 cmd2 ...) general-settings-for-whole-set files)
 
 where
 
@@ -2450,13 +2528,13 @@ desc   A description string to be displayed in the dispatcher menu.
 cmd    An agenda command, similar to the above.  However, tree commands
        are no allowed, but instead you can get agenda and global todo list.
        So valid commands for a set are:
-       (agenda)
-       (alltodo)
-       (stuck)
-       (todo \"match\" options files)
-       (search \"match\" options files)
-       (tags \"match\" options files)
-       (tags-todo \"match\" options files)
+       (agenda \"\" settings)
+       (alltodo \"\" settings)
+       (stuck \"\" settings)
+       (todo \"match\" settings files)
+       (search \"match\" settings files)
+       (tags \"match\" settings files)
+       (tags-todo \"match\" settings files)
 
 Each command can carry a list of options, and another set of options can be
 given for the whole set of commands.  Individual command options take
@@ -2472,8 +2550,8 @@ should provide a description for the prefix, like
      (\"hp\" tags \"+HOME+Peter\")
      (\"hk\" tags \"+HOME+Kim\")))"
   :group 'org-agenda-custom-commands
-  :type '(repeat
-	  (choice :value ("a" "" tags "" nil)
+  :type `(repeat
+	  (choice :value ("x" "Describe command here" tags "" nil)
 	   (list :tag "Single command"
 		 (string :tag "Access Key(s) ")
 		 (option (string :tag "Description"))
@@ -2489,54 +2567,49 @@ should provide a description for the prefix, like
 		  (const :tag "TODO keyword tree (current buffer)" todo-tree)
 		  (const :tag "Occur tree (current buffer)" occur-tree)
 		  (sexp :tag "Other, user-defined function"))
-		 (string :tag "Match")
-		 (repeat :tag "Local options"
-			 (list (variable :tag "Option") (sexp :tag "Value")))
+		 (string :tag "Match (only for some commands)")
+		 ,org-agenda-custom-commands-local-options
 		 (option (repeat :tag "Export" (file :tag "Export to"))))
 	   (list :tag "Command series, all agenda files"
 		 (string :tag "Access Key(s)")
 		 (string :tag "Description  ")
 		 (repeat :tag "Component"
 		  (choice
-		   (const :tag "Agenda" (agenda))
-		   (const :tag "TODO list" (alltodo))
+		   (list :tag "Agenda"
+			 (const :format "" agenda)
+			 (const :tag "" :format "" "")
+			 ,org-agenda-custom-commands-local-options)
+		   (list :tag "TODO list (all keywords)"
+			 (const :format "" alltodo)
+			 (const :tag "" :format "" "")
+			 ,org-agenda-custom-commands-local-options)
 		   (list :tag "Search words"
 			 (const :format "" search)
 			 (string :tag "Match")
-			 (repeat :tag "Local options"
-				 (list (variable :tag "Option")
-				       (sexp :tag "Value"))))
-		   (const :tag "Stuck projects" (stuck))
+			 ,org-agenda-custom-commands-local-options)
+		   (list :tag "Stuck projects"
+			 (const :format "" stuck)
+			 (const :tag "" :format "" "")
+			 ,org-agenda-custom-commands-local-options)	   
 		   (list :tag "Tags search"
 			 (const :format "" tags)
 			 (string :tag "Match")
-			 (repeat :tag "Local options"
-				 (list (variable :tag "Option")
-				       (sexp :tag "Value"))))
-
+			 ,org-agenda-custom-commands-local-options)
 		   (list :tag "Tags search, TODO entries only"
 			 (const :format "" tags-todo)
 			 (string :tag "Match")
-			 (repeat :tag "Local options"
-				 (list (variable :tag "Option")
-				       (sexp :tag "Value"))))
-
+			 ,org-agenda-custom-commands-local-options)
 		   (list :tag "TODO keyword search"
 			 (const :format "" todo)
 			 (string :tag "Match")
-			 (repeat :tag "Local options"
-				 (list (variable :tag "Option")
-				       (sexp :tag "Value"))))
-
+			 ,org-agenda-custom-commands-local-options)
 		   (list :tag "Other, user-defined function"
 			 (symbol :tag "function")
 			 (string :tag "Match")
-			 (repeat :tag "Local options"
-				 (list (variable :tag "Option")
-				       (sexp :tag "Value"))))))
+			 ,org-agenda-custom-commands-local-options)))
 
-		 (repeat :tag "General options"
-			 (list (variable :tag "Option")
+		 (repeat :tag "Settings for entire command set"
+			 (list (variable :tag "Any variable")
 			       (sexp :tag "Value")))
 		 (option (repeat :tag "Export" (file :tag "Export to"))))
 	   (cons :tag "Prefix key documentation"
@@ -2866,14 +2939,6 @@ a grid line."
   "Options concerning sorting in the Org-mode Agenda."
   :tag "Org Agenda Sorting"
   :group 'org-agenda)
-
-(defconst org-sorting-choice
-  '(choice
-    (const time-up) (const time-down)
-    (const category-keep) (const category-up) (const category-down)
-    (const tag-down) (const tag-up)
-    (const priority-up) (const priority-down))
-  "Sorting choices.")
 
 (defcustom org-agenda-sorting-strategy
   '((agenda time-up category-keep priority-down)
@@ -20855,7 +20920,7 @@ When EMPTY is non-nil, also include days without any entries."
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-agenda-span nil) ; local variable in the agenda buffer
 (defvar org-include-all-loc nil) ; local variable
-(defvar org-agenda-remove-date nil) ; dynamically scoped
+(defvar org-agenda-remove-date nil) ; dynamically scoped FIXME: not used???
 
 ;;;###autoload
 (defun org-agenda-list (&optional include-all start-day ndays)
@@ -28757,13 +28822,6 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
 			   (org-invisible-p)))
        (org-show-context 'bookmark-jump)))
-
-;; Fix a bug in htmlize where there are text properties (face nil)
-(eval-after-load "htmlize"
-  '(progn
-     (defadvice htmlize-faces-in-buffer (after org-no-nil-faces activate)
-       "Make sure there are no nil faces"
-       (setq ad-return-value (delq nil ad-return-value)))))
 
 ;; Make session.el ignore our circular variable
 (eval-after-load "session"
