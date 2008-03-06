@@ -1,3 +1,7 @@
+2008-03-06  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-get-legal-level): Aliased to `org-get-valid-level'.
+
 2008-03-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el "htmlize"): Removed hack to fix face problem with
