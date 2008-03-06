@@ -19331,6 +19331,7 @@ the returned times will be formatted strings."
 	   (ts (plist-get params :tstart))
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
+	   (link (plist-get params :link))
 	   ipos time h m p level hlc hdl
 	   cc beg end pos tbl)
       (when step
@@ -19395,7 +19396,15 @@ the returned times will be formatted strings."
 					(- (match-end 1) (match-beginning 1))))
 			   (<= level maxlevel))
 		  (setq hlc (if emph (or (cdr (assoc level hlchars)) "") "")
-			hdl (match-string 2)
+			hdl (if (not link)
+				(match-string 2)
+			      (org-make-link-string
+			       (format "file:%s::%s"
+				       (buffer-file-name)
+				       (save-match-data
+					 (org-make-org-heading-search-string
+					  (match-string 2))))
+			       (match-string 2)))
 			h (/ time 60)
 			m (- time (* 60 h)))
 		  (if (and (not multifile) (= level 1)) (push "|-" tbl))
