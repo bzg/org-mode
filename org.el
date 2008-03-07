@@ -23329,15 +23329,16 @@ the tags of the current headline come last."
 	(goto-char (or pos (point)))
 	(save-match-data
 	  (condition-case nil
-	      (org-back-to-heading t)
-	      (while (not (equal lastpos (point)))
-		(setq lastpos (point))
-		(if (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
-		    (setq tags (append (org-split-string
-					(org-match-string-no-properties 1) ":")
-				       tags)))
-	      (or org-use-tag-inheritance (error ""))
-	      (org-up-heading-all 1))
+	      (progn
+		(org-back-to-heading t)
+		(while (not (equal lastpos (point)))
+		  (setq lastpos (point))
+		  (if (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
+		      (setq tags (append (org-split-string
+					  (org-match-string-no-properties 1) ":")
+					 tags)))
+		  (or org-use-tag-inheritance (error ""))
+		  (org-up-heading-all 1)))
 	    (error nil))))
       tags)))
 
@@ -26100,8 +26101,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (delete-region beg end)
 	  (insert (format "<span style=\"visibility:hidden;\">%s</span>"
 			  (make-string n ?x)))))
-
-      (or to-buffer (progn (save-buffer) (kill-buffer (current-buffer))))
+      (or to-buffer (save-buffer))
       (goto-char (point-min))
       (message "Exporting... done")
       (if (eq to-buffer 'string)

@@ -1,3 +1,9 @@
+2008-03-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-export-as-html): Revert the change that killed the
+	html buffer.  Side effects first need to be studied carefully.
+	(org-get-tags-at): Fix the structure of the condition-case statement.
+
 2008-03-06  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-get-legal-level): Aliased to `org-get-valid-level'.
