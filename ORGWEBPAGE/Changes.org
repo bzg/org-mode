@@ -86,6 +86,10 @@
 
 *** Misc
 
+   - There is a new :link parameter for the clocktable.  When
+     set, the headlines listed in the table will be links to the
+     original headlines.
+
    - Phil Jackson's org-irc.el is now part of the Org-mode core,
      which means it will become part of Emacs soon.
 

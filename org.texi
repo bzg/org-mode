@@ -4484,6 +4484,7 @@ new table.  The @samp{BEGIN} line can specify options:
 :tstart      @r{A time string specifying when to start considering times}
 :tend        @r{A time string specifying when to stop considering times}
 :step        @r{@code{week} or @code{day}, to split the table into chunks}
+:link        @r{Link the item headlines in the table to their origins}
 @end example
 So to get a clock summary of the current level 1 tree, for the current
 day, you could write
