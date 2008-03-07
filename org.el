@@ -2377,7 +2377,7 @@ the fonts used by the agenda, here is an example:
           font-weight: 600;
        }
        .org-todo {
-          color: #cc6666;Week-agenda:
+          color: #cc6666;
           font-weight: bold;
        }
        .org-done {
