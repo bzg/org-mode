@@ -1,7 +1,7 @@
 2008-03-07  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-as-latex): Revert the change
-	that killed the html buffer.
+	that killed the LaTeX buffer.
 
 	* org-publish.el (org-publish-file): If the publishing function
 	creates a new buffer, kill it after publishing.
