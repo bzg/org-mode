@@ -132,9 +132,23 @@
 
      Based on proposals by Bastien.
 
+
+   - New repeaters that shift a date relative to today, or that
+     make sure that the next date is in the future.  For example:
+
+     :** TODO Call Father
+     :   DEADLINE: <2008-02-10 Sun ++1w>
+     :   Marking this DONE will shift the date by at least one week,
+     :   but also by as many weeks as it takes to get this date into
+     :   the future.  However, it stays on a Sunday, even if you called
+     :   and marked it done on Saturday.
+     :** TODO Check the batteries in the smoke detectors
+     :   DEADLINE: <2005-11-01 Tue .+1m>
+     :   Marking this DONE will shift the date to one month after
+     :   today.
+
+     Proposed by Wanrong Lin and Rainer Stengle.
      
-
-
 * Version 5.22
 
 ** Incompatible changes

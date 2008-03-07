@@ -1,3 +1,10 @@
+2008-03-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-ts-regexp0, org-repeat-re, org-display-custom-time)
+	(org-timestamp-change): Fix regulear expressions to swallow the
+	extra character for repeat-shift control.
+	(org-auto-repeat-maybe): Implement the new repeater mechanisms.
+
 2008-03-06  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-get-legal-level): Aliased to `org-get-valid-level'.

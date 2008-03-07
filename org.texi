@@ -4397,6 +4397,29 @@ As a consequence of shifting the base date, this entry will no longer be
 visible in the agenda when checking past dates, but all future instances
 will be visible.
 
+With the @samp{+1m} cookie, the date shift will always be exactly one
+month.  So if you have not payed the rent for three months, marking this
+entry DONE will still keep it as an overdue deadline.  Depending on the
+task, this may not be the best way to handle it.  For example, if you
+forgot to call you father for 3 weeks, it does not make sense to call
+her 3 times in a single day to make up for it.  Finally, there are tasks
+like changing batteries which should always repeat a certain time
+@i{after} the last time you did it.  For these tasks, Org-mode has
+special repeaters markes with @samp{++} and samp{.+}.  For example:
+
+@example
+** TODO Call Father
+   DEADLINE: <2008-02-10 Sun ++1w>
+   Marking this DONE will shift the date by at least one week,
+   but also by as many weeks as it takes to get this date into
+   the future.  However, it stays on a Sunday, even if you called
+   and marked it done on Saturday.
+** TODO Check the batteries in the smoke detectors
+   DEADLINE: <2005-11-01 Tue .+1m>
+   Marking this DONE will shift the date to one month after
+   today.
+@end example
+
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
 
