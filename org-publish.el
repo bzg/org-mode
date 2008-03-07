@@ -503,7 +503,11 @@ FILENAME is the filename of the file to be published."
 	  (mapc (lambda (f)
 		  (funcall f project-plist filename tmp-pub-dir))
 		publishing-function)
-	(funcall publishing-function project-plist filename tmp-pub-dir))
+	(let ((last-buffer (current-buffer)))
+	  (funcall publishing-function project-plist filename tmp-pub-dir)
+	  ;; kill export buffers when publishing
+	  (if (not (eq last-buffer (current-buffer)))
+	      (kill-buffer (current-buffer)))))
       (org-publish-update-timestamp filename))))
 
 (defun org-publish-projects (projects)

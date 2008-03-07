@@ -42,7 +42,7 @@
 ;; M-x `org-export-as-latex-to-buffer'
 ;; M-x `org-export-region-as-latex'
 ;; M-x `org-replace-region-by-latex'
-;; 
+;;
 ;;; Code:
 
 (eval-when-compile
@@ -457,7 +457,7 @@ when PUB-DIR is set, use this as the publishing directory."
 
     ;; finalization
     (unless body-only (insert "\n\\end{document}"))
-    (or to-buffer (progn (save-buffer) (kill-buffer (current-buffer))))
+    (or to-buffer (save-buffer))
     (goto-char (point-min))
     (message "Exporting to LaTeX...done")
     (prog1
@@ -1143,7 +1143,7 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 	      (let ((end (save-excursion
 			   (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
 			       (match-beginning 0) (point-max)))))
-		(setq footnote (concat (org-trim (buffer-substring (point) end)) 
+		(setq footnote (concat (org-trim (buffer-substring (point) end))
 				       " ")) ; prevent last } being part of a link
 		(delete-region (point) end))
 	      (goto-char foot-beg)
