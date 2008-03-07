@@ -1,3 +1,9 @@
+2008-03-07  Glenn Morris  <rmg@gnu.org>
+
+	(org-agenda-sunrise-sunset): Require solar.
+	(calendar-longitude, calendar-latitude, calendar-location-name):
+	Declare for compiler.
+
 2008-03-07  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-as-latex): Revert the change
@@ -41,7 +47,7 @@
 
 2008-03-05  Carsten Dominik  <dominik@science.uva.nl>
 
-	* org.el "htmlize"): Removed hack to fix face problem with
+	* org.el "htmlize": Removed hack to fix face problem with
 	htmlize, it no longer seem necessary.
 
 2008-03-05  Bastien Guerry  <bzg@altern.org>
