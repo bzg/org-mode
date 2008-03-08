@@ -1,3 +1,8 @@
+2008-03-08  Glenn Morris  <rmg@gnu.org>
+
+	(list-diary-entries-hook): Declare for compiler.
+	(org-get-entries-from-diary): Require diary-lib.
+
 2008-03-07  Glenn Morris  <rmg@gnu.org>
 
 	(org-agenda-sunrise-sunset): Require solar.
