@@ -20396,6 +20396,9 @@ so the export commands can easily use it."
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
+If the extension is .ics, run icalendar export over all files used
+to construct the agenda and limit the export to entries listed in the
+agenda now.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
 the settings have already been scoped and we do not wish to overrule other,
@@ -20426,6 +20429,13 @@ higher priority settings."
 	  ((string-match "\\.ps\\'" file)
 	   (ps-print-buffer-with-faces file)
 	   (message "Postscript written to %s" file))
+	  ((string-match "\\.ics\\'" file)
+	   (let ((org-agenda-marker-table
+		  (org-create-marker-find-array
+		   (org-agenda-collect-markers)))
+		 (org-icalendar-verify-function 'org-check-agenda-marker-table)
+		 (org-combined-agenda-icalendar-file file))
+	     (apply 'org-export-icalendar 'combine (org-agenda-files))))
 	  (t
 	   (let ((bs (buffer-string)))
 	     (find-file file)
@@ -20434,6 +20444,43 @@ higher priority settings."
 	     (kill-buffer (current-buffer))
 	     (message "Plain text written to %s" file))))))
     (set-buffer org-agenda-buffer-name)))
+
+(defun org-agenda-collect-markers ()
+  "Collect the markers pointing to entries in the agenda buffer."
+  (let (m markers)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(when (setq m (or (get-text-property (point) 'org-hd-marker)
+			  (get-text-property (point) 'org-marker)))
+	  (push m markers))
+	(beginning-of-line 2)))
+    (nreverse markers)))
+
+(defun org-create-marker-find-array (marker-list)
+  "Create a alist of files names with all marker positions in that file."
+  (let (f tbl m a p)
+    (while (setq m (pop marker-list))
+      (setq p (marker-position m)
+	    f (buffer-file-name (or (buffer-base-buffer
+				     (marker-buffer m))
+				    (marker-buffer m))))
+      (if (setq a (assoc f tbl))
+	  (push (marker-position m) (cdr a))
+	(push (list f p) tbl)))
+    (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
+	    tbl)))
+
+(defvar org-agenda-marker-table nil) ; dyamically scoped parameter
+(defun org-check-agenda-marker-table ()
+  "Check of the current entry is on the marker list."
+  (let ((file (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
+	a)
+    (and (setq a (assoc file org-agenda-marker-table))
+	 (save-match-data
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (member (point) (cdr a)))))))
 
 (defmacro org-no-read-only (&rest body)
   "Inhibit read-only for BODY."
@@ -26687,7 +26734,6 @@ file and store it under the name `org-combined-agenda-icalendar-file'."
 		 :ical (list :publishing-directory
 			     org-export-publishing-directory)))
 	   file ical-file ical-buffer category started org-agenda-new-buffers)
-
       (and (get-buffer "*ical-tmp*") (kill-buffer "*ical-tmp*"))
       (when combine
 	(setq ical-file
@@ -26747,6 +26793,11 @@ When COMBINE is non nil, add the category to each line."
       (while (re-search-forward re1 nil t)
 	(catch :skip
 	  (org-agenda-skip)
+	  (when (boundp 'org-icalendar-verify-function)
+	    (unless (funcall org-icalendar-verify-function)
+	      (outline-next-heading)
+	      (backward-char 1)
+	      (throw :skip nil)))
 	  (setq pos (match-beginning 0)
 		ts (match-string 0)
 		inc t
@@ -26837,6 +26888,11 @@ END:VEVENT\n"
 	(while (re-search-forward org-todo-line-regexp nil t)
 	  (catch :skip
 	    (org-agenda-skip)
+	    (when (boundp 'org-icalendar-verify-function)
+	      (unless (funcall org-icalendar-verify-function)
+		(outline-next-heading)
+		(backward-char 1)
+		(throw :skip nil)))
 	    (setq state (match-string 2))
 	    (setq status (if (member state org-done-keywords)
 			     "COMPLETED" "NEEDS-ACTION"))
@@ -28883,6 +28939,7 @@ Still experimental, may disappear in the future."
                        (and (>= time time1) (<= time time2))))))
     ;; make tree, check each match with the callback
     (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
+
 
 ;;;; Finish up
 

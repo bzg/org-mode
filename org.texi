@@ -5888,8 +5888,8 @@ yourself.
 If you are away from your computer, it can be very useful to have a
 printed version of some agenda views to carry around.  Org-mode can
 export custom agenda views as plain text, HTML@footnote{You need to
-install Hrvoje Niksic' @file{htmlize.el}.} and postscript.  If you want
-to do this only occasionally, use the command
+install Hrvoje Niksic' @file{htmlize.el}.} postscript, and iCalendar
+files.  If you want to do this only occasionally, use the command
 
 @table @kbd
 @kindex C-x C-w
@@ -5898,10 +5898,12 @@ to do this only occasionally, use the command
 @cindex agenda views, exporting
 Write the agenda view to a file.  Depending on the extension of the
 selected file name, the view will be exported as HTML (extension
-@file{.html} or @file{.htm}), Postscript (extension @file{.ps}), or
-plain text (any other extension).  Use the variable
-@code{org-agenda-exporter-settings} to set options for @file{ps-print}
-and for @file{htmlize} to be used during export, for example
+@file{.html} or @file{.htm}), Postscript (extension @file{.ps}),
+iCalendar (extension @file{.ics}), or plain text (any other extension).
+Use the variable @code{org-agenda-exporter-settings} to
+set options for @file{ps-print} and for @file{htmlize} to be used during
+export, for example
+
 @lisp
 (setq org-agenda-exporter-settings
       '((ps-number-of-columns 2)
@@ -5914,10 +5916,10 @@ If you need to export certain agenda views frequently, you can associate
 any custom agenda command with a list of output file names
 @footnote{If you want to store standard views like the weekly agenda
 or the global TODO list as well, you need to define custom commands for
-them in order to be able to specify filenames.}.  Here is an example
+them in order to be able to specify file names.}.  Here is an example
 that first does define custom commands for the agenda and the global
 todo list, together with a number of files to which to export them.
-Then we define two block agenda commands and specify filenames for them
+Then we define two block agenda commands and specify file names for them
 as well.  File names can be relative to the current working directory,
 or absolute.
 
@@ -5937,7 +5939,7 @@ or absolute.
           (tags-todo "work")
           (tags "office"))
          nil
-         ("~/views/office.ps"))))
+         ("~/views/office.ps" "~/calendars/office.ics"))))
 @end group
 @end lisp
 
@@ -5945,16 +5947,20 @@ The extension of the file name determines the type of export.  If it is
 @file{.html}, Org-mode will use the @file{htmlize.el} package to convert
 the buffer to HTML and save it to this file name.  If the extension is
 @file{.ps}, @code{ps-print-buffer-with-faces} is used to produce
-postscript output.  Any other extension produces a plain ASCII file.
+postscript output.  If the extension is @file{.ics}, iCalendar export is
+run export over all files that were used to construct the agenda, and
+limit the export to entries listed in the agenda now.  Any other
+extension produces a plain ASCII file.
 
 The export files are @emph{not} created when you use one of those
-commands interactively.  Instead, there is a special command to produce
-@emph{all} specified files in one step:
+commands interactively because this might use too much overhead.
+Instead, there is a special command to produce @emph{all} specified
+files in one step:
 
 @table @kbd
 @kindex C-c a e
 @item C-c a e
-Export all agenda views that have export filenames associated with
+Export all agenda views that have export file names associated with
 them.
 @end table
 

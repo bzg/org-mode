@@ -1,3 +1,15 @@
+2008-03-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Exporting Agenda Views): Document agenda export to
+	iCalendar.
+
+	* org.el (org-write-agenda): New output type ".ics" files.
+	(org-write-agenda): Call `org-icalendar-verify-function', both for
+	time stamps and for TODO entries.
+	(org-agenda-collect-markers, org-create-marker-find-array)
+	(org-check-agenda-marker-table): New functions.
+	(org-agenda-marker-table): New variable.
+
 2008-03-07  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-as-latex): Revert the change
@@ -2742,9 +2754,6 @@ Release of 3.04 -------------------------------------------------------------
 
 	* org.el (org-version): Prefix arg removed, was not needed.
 
-
-
-	
 2005-01-11  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-show-following-heading): New option.
@@ -2755,8 +2764,8 @@ Release of 3.04 -------------------------------------------------------------
 	* org.el (orgtbl-optimized): New option
 	(orgtbl-mode): New command, a minor mode.
 	(orgtbl-mode-map): New variable.
-	(turn-on-orgtbl, orgtbl-mode, orgtbl-make-binding) 
-	(orgtbl-error, orgtbl-self-insert-command) 
+	(turn-on-orgtbl, orgtbl-mode, orgtbl-make-binding)
+	(orgtbl-error, orgtbl-self-insert-command)
 	(orgtbl-delete-backward-char, orgtbl-delete-char): New functions.
 
 2004-12-22  Carsten Dominik  <dominik@science.uva.nl>
