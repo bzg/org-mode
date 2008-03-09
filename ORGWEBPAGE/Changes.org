@@ -86,6 +86,12 @@
 
 *** Misc
 
+   - New way to limit iCalendar export to the entries captured in
+     an agenda view.  This is done by "writing" the agenda view
+     using `C-x C-w' to a file with extension .ics.
+
+     This was a request by Kyle Sexton.
+
    - There is a new :link parameter for the clocktable.  When
      set, the headlines listed in the table will be links to the
      original headlines.
