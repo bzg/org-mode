@@ -2377,7 +2377,7 @@ the fonts used by the agenda, here is an example:
           font-weight: 600;
        }
        .org-todo {
-          color: #cc6666;Week-agenda:
+          color: #cc6666;
           font-weight: bold;
        }
        .org-done {
@@ -21578,9 +21578,11 @@ MATCH is being ignored."
 ;;; Diary integration
 
 (defvar org-disable-agenda-to-diary nil)          ;Dynamically-scoped param.
+(defvar list-diary-entries-hook)
 
 (defun org-get-entries-from-diary (date)
   "Get the (Emacs Calendar) diary entries for DATE."
+  (require 'diary-lib)
   (let* ((fancy-diary-buffer "*temporary-fancy-diary-buffer*")
 	 (diary-display-hook '(fancy-diary-display))
 	 (pop-up-frames nil)
@@ -23695,12 +23697,17 @@ the cursor position."
   (interactive)
   (org-agenda-execute-calendar-command 'list-calendar-holidays))
 
+(defvar calendar-longitude)
+(defvar calendar-latitude)
+(defvar calendar-location-name)
+
 (defun org-agenda-sunrise-sunset (arg)
   "Display sunrise and sunset for the cursor date.
 Latitude and longitude can be specified with the variables
 `calendar-latitude' and `calendar-longitude'.  When called with prefix
 argument, latitude and longitude will be prompted for."
   (interactive "P")
+  (require 'solar)
   (let ((calendar-longitude (if arg nil calendar-longitude))
 	(calendar-latitude  (if arg nil calendar-latitude))
 	(calendar-location-name
