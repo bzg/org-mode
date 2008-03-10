@@ -1,3 +1,11 @@
+2008-03-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-html-level-start): Always have id's in HTML
+	headlines, even if there is no TOC to jump from.  Put extra <divs>
+	in.  One around the toc, one around the text between a headline
+	and its first subsection.  Insert ids into div's that surround
+	whole sections including subsections.
+
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-select-remember-template): Cleaned the code.
