@@ -156,27 +156,28 @@ With prefix arg HERE, insert it at point."
   :group 'org
   :type 'hook)
 
-(defcustom org-default-extensions '(org-irc)
-  "Extensions that should always be loaded together with org.el.
-If the description starts with <A>, this means the extension
-will be autoloaded when needed, preloading is not necessary."
-  :group 'org
-  :type
-  '(set :greedy t
-	(const :tag "    Mouse support (org-mouse.el)" org-mouse)
-	(const :tag "<A> Publishing (org-publish.el)" org-publish)
-	(const :tag "<A> LaTeX export (org-export-latex.el)" org-export-latex)
-	(const :tag "    IRC/ERC links (org-irc.el)" org-irc)
-	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)))
+;(defcustom org-default-extensions '(org-irc)
+;  "Extensions that should always be loaded together with org.el.
+;If the description starts with <A>, this means the extension
+;will be autoloaded when needed, preloading is not necessary.
+;FIXME: this does not ork correctly, ignore it for now."
+;  :group 'org
+;  :type
+;  '(set :greedy t
+;	(const :tag "    Mouse support (org-mouse.el)" org-mouse)
+;	(const :tag "<A> Publishing (org-publish.el)" org-publish)
+;	(const :tag "<A> LaTeX export (org-export-latex.el)" org-export-latex)
+;	(const :tag "    IRC/ERC links (org-irc.el)" org-irc)
+;	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)))
+;
+;(defun org-load-default-extensions ()
+;  "Load all extensions listed in `org-default-extensions'."
+;  (mapc (lambda (ext) 
+;	  (condition-case nil (require ext)
+;	    (error (message "Problems while trying to load feature `%s'" ext))))
+;	org-default-extensions))
 
-(defun org-load-default-extensions ()
-  "Load all extensions listed in `org-default-extensions'."
-  (mapc (lambda (ext) 
-	  (condition-case nil (require ext)
-	    (error (message "Problems while trying to load feature `%s'" ext))))
-	org-default-extensions))
-
-(eval-after-load "org" '(org-load-default-extensions))
+;(eval-after-load "org" '(org-load-default-extensions))
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
@@ -12173,6 +12174,7 @@ For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
+  (require 'org-irc)
   (setq org-store-link-plist nil)  ; reset
   (let (link cpltxt desc description search txt)
     (cond
@@ -12827,6 +12829,7 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
+  (require 'org-irc)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)
@@ -13696,9 +13699,9 @@ RET at beg-of-buf -> Append to file as level 2 headline
 		 (and (or (not ctxt) (eq ctxt t)
 			  (and (listp ctxt) (memq mode ctxt))
 			  (and (functionp ctxt)
-			       (if (with-current-buffer buf
-				     ;; Protect the user-defined function from error
-				     (condition-case nil (funcall ctxt) (error nil))))))
+			       (with-current-buffer buf
+				 ;; Protect the user-defined function from error
+				 (condition-case nil (funcall ctxt) (error nil)))))
 		      tpl)))
 	     org-remember-templates))
 	   ;; If no template at this point, add the default templates:
