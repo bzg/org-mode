@@ -1982,7 +1982,7 @@ the time stamp will always be forced into the second line."
   "Formats for `format-time-string' which are used for time stamps.
 It is not recommended to change this constant.")
 
-(defcustom org-time-stamp-rounding-minutes '(0 5)
+(defcustom org-time-stamp-rounding-minutes '(0 0)
   "Number of minutes to round time stamps to.
 These are two values, the first applies when first creating a time stamp.
 The second applies when changing it with the commands `S-up' and `S-down'.
@@ -2004,6 +2004,12 @@ of minutes to shift."
   :type '(list
 	  (integer :tag "when inserting times")
 	  (integer :tag "when modifying times")))
+
+;; Make sure old customizations of this variable don't lead to problems.
+(when (integerp org-time-stamp-rounding-minutes)
+  (setq org-time-stamp-rounding-minutes
+	(list org-time-stamp-rounding-minutes
+	      org-time-stamp-rounding-minutes)))
 
 (defcustom org-display-custom-times nil
   "Non-nil means, overlay custom formats over all time stamps.
