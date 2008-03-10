@@ -4405,7 +4405,7 @@ forgot to call you father for 3 weeks, it does not make sense to call
 her 3 times in a single day to make up for it.  Finally, there are tasks
 like changing batteries which should always repeat a certain time
 @i{after} the last time you did it.  For these tasks, Org-mode has
-special repeaters markes with @samp{++} and samp{.+}.  For example:
+special repeaters markes with @samp{++} and @samp{.+}.  For example:
 
 @example
 ** TODO Call Father
