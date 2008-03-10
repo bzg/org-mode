@@ -27739,8 +27739,15 @@ line into a subheading."
 				(min (1+ (point-at-eol)) (point-max))))
    ((org-at-item-p)
     ;; Convert to heading
-    ;; FIXME: not yet implemented
-    )
+    (let ((level (save-match-data
+		   (save-excursion
+		     (condition-case nil
+			 (progn
+			   (org-back-to-heading t)
+			   (funcall outline-level))
+		       (error 0))))))
+      (replace-match
+       (concat (make-string (org-get-valid-level level 1) ?*) " ") t t)))
    (t (org-toggle-region-headings (point-at-bol)
 				  (min (1+ (point-at-eol)) (point-max))))))
 

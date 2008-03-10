@@ -1,3 +1,8 @@
+2008-03-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-ctrl-c-star): Implement a missing branch in the
+	decision tree.
+
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
 	* org-publish.el (org-publish-file): Send an error when file is
