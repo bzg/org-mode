@@ -4611,14 +4611,11 @@ file (if not present or @code{nil}) defaults to
 @code{org-default-notes-file}, the heading to
 @code{org-remember-default-headline}.
 
-An optional sixth element can specify the context in which the user
-wants to be able to select this template.  This element can be a list
-of major modes, in case the template will be available while invoking
-@code{org-remember} from a buffer in one of these modes.  If it is a
-function, the template will only be selected if the function returns
-@code{t}.  If this element is @code{t}, then the template will be
-selected in any context and if it is @code{nil} the template will
-be selected by default -- i.e. when all contextual checks failed.
+An optional sixth element specifies the contexts in which the user can
+select the template.  This element can be either a list of major modes
+or a function.  @code{org-remember} will first check whether the function
+returns @code{t} or if we are in any of the listed major mode, and select 
+the template accordingly.
 
 So for example:
 
@@ -4626,7 +4623,7 @@ So for example:
 (setq org-remember-templates
  '(("Todo" ?t "* TODO %?\n  %i\n  %a" "~/org/TODO.org" "Tasks" (emacs-lisp-mode))
    ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org" my-check)
-   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas" t)))
+   ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
 @end example
 
 The first template will only be available when invoking @code{org-remember}

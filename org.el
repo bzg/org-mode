@@ -1547,13 +1547,11 @@ element can specify the headline in that file that should be offered
 first when the user is asked to file the entry.  The default headline is
 given in the variable `org-remember-default-headline'.
 
-An optional sixth element can specify the context in which the user should 
-be able to select this template.  If this element is a list of major modes, 
-the template will only be available while invoking `org-remember' from a 
-buffer in one of these modes.  If it is a function, the template will only
-be selected if the function returns `t'.  A value of `t' means select
-this template in any context.   When the element is `nil', the template 
-will be selected by default, i.e. when all contextual checks failed.
+An optional sixth element specifies the contexts in which the user can
+select the template.  This element can be either a list of major modes
+or a function.  `org-remember' will first check whether the function
+returns `t' or if we are in any of the listed major mode, and select 
+the template accordingly.
 
 The template specifies the structure of the remember buffer.  It should have
 a first line starting with a star, to act as the org-mode headline.
@@ -13695,14 +13693,13 @@ RET at beg-of-buf -> Append to file as level 2 headline
 	       (let ((ctxt (nth 5 tpl))
 		     (mode org-select-template-temp-major-mode)
 		     (buf org-select-template-original-buffer))
-		 (if (or (and (functionp ctxt)
-			      (save-excursion
-				(set-buffer buf)
-				;; Protect the user-defined function from error
-				(condition-case nil (funcall ctxt) (error nil))))
-			 (and ctxt (listp ctxt)
-			      (delq nil (mapcar (lambda(x) (eq mode x)) ctxt))))
-		     tpl)))
+		 (and (or (not ctxt) (eq ctxt t)
+			  (and (listp ctxt) (memq mode ctxt))
+			  (and (functionp ctxt)
+			       (if (with-current-buffer buf
+				     ;; Protect the user-defined function from error
+				     (condition-case nil (funcall ctxt) (error nil))))))
+		      tpl)))
 	     org-remember-templates))
 	   ;; If no template at this point, add the default templates:
 	   (pre-selected-templates1

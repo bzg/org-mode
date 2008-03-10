@@ -1,5 +1,7 @@
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-select-remember-template): Cleaned the code.
+
 	* org-publish.el (org-publish-before-export-hook)
 	(org-publish-after-export-hook): New hooks.
 	(org-publish-org-to): Use new hooks and kill buffers.
