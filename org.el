@@ -1987,7 +1987,7 @@ It is not recommended to change this constant.")
 These are two values, the first applies when first creating a time stamp.
 The second applies when changing it with the commands `S-up' and `S-down'.
 When changing the time stamp, this means that it will change in steps
-of N minues, as given by the second value.
+of N minues, as given by the second value. 
 
 When a setting is 0 or 1, insert the time unmodified.  Useful rounding
 numbers should be factors of 60, so for example 5, 10, 15.
