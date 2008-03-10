@@ -92,6 +92,10 @@
 
      This was a request by Kyle Sexton.
 
+   - There is a new extra parameter for dynamic block: :content
+     Use this parameter to pass the initial content of the block 
+     to the writer function.
+
    - There is a new :link parameter for the clocktable.  When
      set, the headlines listed in the table will be links to the
      original headlines.
@@ -142,7 +146,6 @@
 
      Based on proposals by Bastien.
 
-
    - New repeaters that shift a date relative to today, or that
      make sure that the next date is in the future.  For example:
 
@@ -158,6 +161,12 @@
      :   today.
 
      Proposed by Wanrong Lin and Rainer Stengle.
+
+   - There are three new hooks:
+
+     `org-follow-link-hook': run this hook after following a link
+     `org-publish-before-export-hook': run before export
+     `org-publish-after-export-hook': run after export
      
 * Version 5.22
 
