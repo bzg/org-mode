@@ -174,7 +174,7 @@ the session itself."
 (defun org-irc-get-erc-link ()
   "Return an org compatible irc:/ link from an ERC buffer"
   (let ((link (concat erc-server-announced-name ":"
-                      erc-session-port)))
+                      (number-to-string erc-session-port))))
     (concat link "/"
             (if (and (erc-default-target)
                      (erc-channel-p (erc-default-target))
