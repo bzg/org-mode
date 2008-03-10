@@ -516,7 +516,10 @@ FILENAME is the filename of the file to be published."
 (defun org-publish-file (filename &optional project)
   "Publish file FILENAME from PROJECT."
   (when (org-publish-needed-p filename)
-    (let* ((project (or project (org-publish-get-project-from-filename filename)))
+    (let* ((project (or project 
+			(or (org-publish-get-project-from-filename filename)
+			    (error "File %s is not part of any known project" 
+				   filename))))
 	   (project-plist (cdr project))
 	   (publishing-function (or (plist-get project-plist :publishing-function)
 				    'org-publish-org-to-html))
