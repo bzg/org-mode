@@ -1,5 +1,7 @@
 2008-03-10  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-get-files): Protect against empty p.
+
 	* org.el (org-ctrl-c-star): Implement a missing branch in the
 	decision tree.
 

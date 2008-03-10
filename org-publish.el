@@ -379,7 +379,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
     (mapc
      (lambda(p)
        (let* ((exclude (plist-get (cdr p) :exclude))
-	      (files (org-publish-get-base-files p exclude)))
+	      (files (and p (org-publish-get-base-files p exclude))))
 	 ;; add all files from this project
 	 (mapc (lambda(f)
 		 (add-to-list 'all-files
