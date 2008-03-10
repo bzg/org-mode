@@ -290,7 +290,6 @@ If functions in this hook modify the buffer, it will be saved."
   :group 'org-publish
   :type 'hook)
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
@@ -331,7 +330,6 @@ If there is no timestamp, create one."
 	     (not newly-created-timestamp))
         (set-file-times timestamp-file)
       (call-process "touch" nil 0 nil timestamp-file))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mapping files to project names
@@ -509,24 +507,30 @@ FILENAME is the filename of the file to be published."
 		      (plist-get plist :publishing-directory))))
     (eshell/cp filename destination)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
 
 (defun org-publish-file (filename &optional project)
   "Publish file FILENAME from PROJECT."
   (when (org-publish-needed-p filename)
-    (let* ((project (or project 
-			(or (org-publish-get-project-from-filename filename)
-			    (error "File %s is not part of any known project" 
-				   filename))))
+    (let* ((project
+	    (or project
+		(or (org-publish-get-project-from-filename filename)
+		    (if (y-or-n-p
+			 (format "%s is not in a project.  Re-read the list of projects files? "
+				 (abbreviate-file-name filename)))
+			;; If requested, re-initialize the list of projects files
+			(progn (org-publish-initialize-files-alist t)
+			       (or (org-publish-get-project-from-filename filename)
+				   (error "File %s not part of any known project"
+					  (abbreviate-file-name filename))))
+		      (error "Can't publish file outside of a project")))))
 	   (project-plist (cdr project))
 	   (publishing-function (or (plist-get project-plist :publishing-function)
 				    'org-publish-org-to-html))
 	   (base-dir (file-truename (plist-get project-plist :base-directory)))
 	   (pub-dir (file-truename (plist-get project-plist :publishing-directory)))
 	   tmp-pub-dir)
-      (if (not project) (error "File %s is not part of any known project" filename))
       (setq tmp-pub-dir
 	    (file-name-directory
 	     (concat pub-dir
@@ -580,13 +584,12 @@ Default for INDEX-FILENAME is 'index.org'."
       (while (setq file (pop files))
 	(let ((fn (file-name-nondirectory file)))
 	  ;; index shouldn't index itself
-	  (unless (string= fn ifn) 
+	  (unless (string= fn ifn)
 	    (insert (concat " + [[file:" fn "]["
 			    (file-name-sans-extension fn)
 			    "]]\n")))))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
