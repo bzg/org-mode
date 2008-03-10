@@ -7,6 +7,29 @@
 
 * Version 5.23
 
+** Overview
+
+   - New keyword search agenda view
+
+   - Many new extensions available in the CONTRIB directory
+
+   - New remember template option: pre-selection contexts
+
+   - Modifying list/headline status of a line
+ 
+   - Granularity while editing time stamps
+
+   - New repeaters mechanisms
+
+   - New parameters for dynamic blocks ad the clock table
+
+   - Limiting iCalendar export to fewer entries
+
+   - =M-RET= splits lines again
+
+   - New hooks
+
+
 ** Incompatible changes
 
    - The variable `org-time-stamp-rounding-minutes' is now a list
@@ -29,16 +52,16 @@
     : +computer +wifi -ethernet -{8\.11[bg]}
 
     will search for note entries that contain the keywords
-    @code{computer} and @code{wifi}, but not the keyword
-    @code{ethernet}, and which are also not matched by the
-    regular expression @code{8\.11[bg]}, meaning to exclude both
-    8.11b and 8.11g.  If the first character of the search string
-    is an asteriks, the search will only look at headlines -
-    otherwise it will look at the headine and the text below it,
-    up to the next (possibly sub-) heading.
+    =computer= and =wifi=, but not the keyword =ethernet=, and
+    which are also not matched by the regular expression
+    "8\.11[bg]", meaning to exclude both 8.11b and 8.11g.  If the
+    first character of the search string is an asterisk, the
+    search will only look at headlines - otherwise it will look
+    at the headine and the text below it, up to the next
+    (possibly sub-) heading.
 
     The command searches all agenda files, and in addition the
-    files listed in `org-agenda-text-search-extra-files'.
+    files listed in =org-agenda-text-search-extra-files=.
     
     I find it very useful to define a custom command to do such
     a search only in a limited number of files (my notes files),
@@ -50,123 +73,135 @@
 
 *** Many new extensions available in the CONTRIB directory
 
+    - Phil Jackson's /org-irc.el/ is now part of the Org-mode
+      core, which means it will become part of Emacs soon.
+
     - The new development model already starts to pay off, a
       number of interesting extensions are now part of the
       distribution.  Check the file CONTRIB/README for a list.
 
     - There is a new variable `org-default-extensions'.
       Configuring this variable makes it *very* easy to load
-      these extensions.
+      these default extensions - eventually this will be expanded
+      to cover contributed extensions as well.
 
-    - Interesting for developers may be that there is a file
-      org-id.el which implements global ID's for org-mode
-      entries.  These can be used in dependency implementations,
-      or to tie clock tables and column view tables to entries.
+*** New remember template option: pre-selection contexts
 
-*** New template option: pre-selection contexts
+    - Remember template definitions now allow six elements.  The
+      last element defines the contexts in which the template
+      should be offered.  It can be a list of major modes, a
+      function, =t= or =nil=.  If it is a list of major-mode, the
+      template will be available only when =org-remember= is
+      called from a buffer in one of these modes.  If it is a
+      function, the template will be offered only if the function
+      returns `t' when called in the current buffer.  A value of
+      =t= or =nil= for this element means select this template in
+      any context.
 
-    - Templates now allow six elements.  The last element defines
-      the contexts in which the template should be offered.  It
-      can be a list of major modes, a function, `t' or `nil'.  If
-      it is a list of major-mode, the template will be available
-      only when `org-remember' is called from a buffer in one of
-      these modes.  If it is a function, the template will be
-      offered only if the function returns `t' when called in the
-      current buffer.  A value of `t' for this element means
-      select this template in any context.  `nil' means use this
-      template by default, when other checks failed.
+      One possible application for this would be to have several
+      templates all using the same selection letter, and choosing
+      the right one based on context.  For example, think of
+      tasks describing a bug in a source code file.  With the
+      following configuration we make sure that the bug reports
+      are filed into the appropriate sections of the target file.
+      
+: (setq org-remember-templates
+:  '(("Elisp" ?b "* %a\n\n%i%?" "~/bugs.org" "Elisp bugs" (emacs-lisp-mode))
+:    ("C Bugs" ?b "* %a\n\n%i%?" "~/bugs.org" "C bugs" (cc-mode))))
+     
+      See (info "(org)Remember templates") for details.
 
-      (setq org-remember-templates
-   	'(("Org" ?o "* %a\n\n%i%?" "~/org/bzg.org" "Org" my-defun)))
+*** Modifying list/headline status of a line
 
-      M-x org-remember RET will present this template only if
-      calling `my-defun' in the current buffer returns `nil'.
+    - `C-c -' has now more functions:
+      + In a table, add a hline as before
+      + In an item list, cycle bullet type as before
+      + In a normal line, turn it into an item
+      + In a headline, turn it into an item
+      + If there is an active region, turn each line into an item.
+        But if the first region line is already an item, remove
+        item markers from all lines.
 
-      The (info "(org)Remember templates") for details.
+      Based on proposals by Bastien.
+
+    - `C-c *' has now more functions
+      + in a table, recompute, as before
+      + in a normal line, convert it to a sub heading.
+      + at an item, convert it into a subheading
+      + if there is an active region, convert all lines in the
+        region to headlines.  However, if the first lie already is
+        a heading, remove the stars from all lines int he region.
+
+      Based on proposals by Bastien.
+ 
+*** Changes related to time stamps
+
+    - The value variable =org-time-stamp-rounding-minutes= is now
+      a list of two values.  The first applies when creating a new
+      time stamp.  The second applies when modifying a timestamp
+      with S-up/down.  The default for this new task is 5 minutes,
+      but 15 may also be a very good value for many people.  If
+      S-up/down is used on a time stamp where the minute part is
+      not compatible with this granularity it will be made so.
+      You can bypass this by using a prefix argument to exactly
+      specify the number of minutes to shift.
+
+      This was a proposal by Adam Spiers.
+
+    - New repeaters that shift a date relative to today, or that
+      make sure that the next date is in the future.  For example:
+
+      :** TODO Call Father
+      :   DEADLINE: <2008-02-10 Sun ++1w>
+      :   Marking this DONE will shift the date by at least one week,
+      :   but also by as many weeks as it takes to get this date into
+      :   the future.  However, it stays on a Sunday, even if you called
+      :   and marked it done on Saturday.
+      :** TODO Check the batteries in the smoke detectors
+      :   DEADLINE: <2005-11-01 Tue .+1m>
+      :   Marking this DONE will shift the date to one month after
+      :   today.
+
+      Proposed by Wanrong Lin and Rainer Stengle.
+
+*** New parameters for dynamic blocks ad the clock table
+
+    - There is a new =:link= parameter for the clocktable.  When
+      set, the headlines listed in the table will be links to the
+      original headlines.
+
+    - There is a new =:content= parameter that is passed to the
+      writer function of the dynamic block.  Use this parameter
+      to pass the previous content of the block to the writer
+      function, in case you want to make the outcome dependent on
+      the previous content.
+
+*** Limiting iCalendar export to fewer entries
+
+    - New way to limit iCalendar export to the entries captured in
+      an agenda view.  This is done by "writing" the agenda view
+      using `C-x C-w' to a file with extension .ics.
+
+      This was a request by Kyle Sexton.
 
 *** Misc
 
-   - New way to limit iCalendar export to the entries captured in
-     an agenda view.  This is done by "writing" the agenda view
-     using `C-x C-w' to a file with extension .ics.
+   - Due to a popular revolt shortly after the 5.22 release,
+     =M-RET= can again be used to split a line so that the rest
+     of the line becomes the new heading.  However, if you do
+     this in a heading containing tags, the tags will stay in the
+     old line.
 
-     This was a request by Kyle Sexton.
-
-   - There is a new extra parameter for dynamic block: :content
-     Use this parameter to pass the initial content of the block 
-     to the writer function.
-
-   - There is a new :link parameter for the clocktable.  When
-     set, the headlines listed in the table will be links to the
-     original headlines.
-
-   - Phil Jackson's org-irc.el is now part of the Org-mode core,
-     which means it will become part of Emacs soon.
-
-   - M-RET can again be used to split a line so tha the rest of
-     the line becomes the new heading.  However, if you do this
-     in a heading containing tags, the tags will stay in the old
-     line. 
-
-     Customize the variable `org-M-RET-may-split-line' if you
+     Customize the variable =org-M-RET-may-split-line= if you
      don't want this command to split a line in the middle.  The
      same variable also influences line splitting in items and in
      tables.
 
-   - The value variable `org-time-stamp-rounding-minutes' is now
-     a list of two values.  The first applies when creating a new
-     time stamp.  The second applies when modifying a timestamp
-     with S-up/down.  The default for this new task is 5 minutes,
-     but 15 may also be a very good value for many people.  If
-     S-up/down is used on a time stamp where the minute part is
-     not compatible with this granularity it will be made so.
-     You can bypass this by using a prefix argument to exactly
-     specify the number of minutes to shift.
-
-     This was a proposal by Adam Spiers.
-
-   - `C-c -' has now more functions:
-     + In a table, add a hline as before
-     + In an item list, cycle bullet type as before
-     + In a normal line, turn it into an item
-     + In a headline, turn it into an item
-     + If there is an active region, turn each line into an item.
-       But if the first region line is already an item, remove
-       item markers from all lines.
-
-     Based on proposals by Bastien.
-
-   - `C-c *' has now more functions
-     + in a table, recompute, as before
-     + in a normal line, convert it to a sub heading.
-     + at an item, convert it into a subheading
-     + if there is an active region, convert all lines in the
-       region to headlines.  However, if the first lie already is
-       a heading, remove the stars from all lines int he region.
-
-     Based on proposals by Bastien.
-
-   - New repeaters that shift a date relative to today, or that
-     make sure that the next date is in the future.  For example:
-
-     :** TODO Call Father
-     :   DEADLINE: <2008-02-10 Sun ++1w>
-     :   Marking this DONE will shift the date by at least one week,
-     :   but also by as many weeks as it takes to get this date into
-     :   the future.  However, it stays on a Sunday, even if you called
-     :   and marked it done on Saturday.
-     :** TODO Check the batteries in the smoke detectors
-     :   DEADLINE: <2005-11-01 Tue .+1m>
-     :   Marking this DONE will shift the date to one month after
-     :   today.
-
-     Proposed by Wanrong Lin and Rainer Stengle.
-
    - There are three new hooks:
 
-     `org-follow-link-hook': run this hook after following a link
-     `org-publish-before-export-hook': run before export
-     `org-publish-after-export-hook': run after export
+     =org-follow-link-hook=: runs after following a link
+     =org-publish-before-export-hook=: runs before export
+     =org-publish-after-export-hook=: runs after export
      
 * Version 5.22
 
