@@ -1982,7 +1982,7 @@ the time stamp will always be forced into the second line."
   "Formats for `format-time-string' which are used for time stamps.
 It is not recommended to change this constant.")
 
-(defcustom org-time-stamp-rounding-minutes '(0 5)
+(defcustom org-time-stamp-rounding-minutes '(0 0)
   "Number of minutes to round time stamps to.
 These are two values, the first applies when first creating a time stamp.
 The second applies when changing it with the commands `S-up' and `S-down'.
