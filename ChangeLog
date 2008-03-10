@@ -7,6 +7,8 @@
 
 	* org-publish.el (org-publish-file): Send an error when file is
 	not part of any project.
+	(org-publish-file): Offer to refresh the list of files in known
+	project when the current file is not part of any project.
 
 	* org.el (org-select-remember-template): Cleaned the code.
 

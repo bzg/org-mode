@@ -29,7 +29,6 @@
 
    - New hooks
 
-
 ** Incompatible changes
 
    - The variable `org-time-stamp-rounding-minutes' is now a list
