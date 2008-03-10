@@ -276,6 +276,20 @@ files."
   :group 'org-publish
   :type 'directory)
 
+(defcustom org-publish-before-export-hook nil
+  "Hook run before export on the Org file.
+If the functions in this hook modify the original Org buffer, the
+modified buffer will be used for export, but the buffer will be
+restored and saved back to its initial state after export."
+  :group 'org-publish
+  :type 'hook)
+
+(defcustom org-publish-after-export-hook nil
+  "Hook run after export on the exported buffer.
+If functions in this hook modify the buffer, it will be saved."
+  :group 'org-publish
+  :type 'hook)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
@@ -331,7 +345,8 @@ Each element of this alist is of the form:
 (defun org-publish-initialize-files-alist (&optional refresh)
   "Set `org-publish-files-alist' if it is not set.
 Also set it if the optional argument REFRESH is non-nil."
-  (when (or (not org-publish-files-alist) refresh)
+  (interactive "P")
+  (when (or refresh (not org-publish-files-alist))
     (setq org-publish-files-alist
 	  (org-publish-get-files org-publish-project-alist))))
 
@@ -437,7 +452,6 @@ matching filenames."
 				   org-publish-files-alist))))
     (assoc project-name org-publish-project-alist)))
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Pluggable publishing back-end functions
 
@@ -450,10 +464,27 @@ PUB-DIR is the publishing directory."
   (unless (file-exists-p pub-dir)
     (make-directory pub-dir t))
   (find-file filename)
-  (funcall (intern (concat "org-export-as-" format))
-	   (plist-get plist :headline-levels)
-	   nil plist nil nil pub-dir)
-  (kill-buffer (current-buffer)))
+  (let ((init-buf (current-buffer))
+	(init-point (point))
+	(init-buf-string (buffer-string)) export-buf)
+    ;; run hooks before exporting
+    (run-hooks 'org-publish-before-export-hook)
+    ;; export the possibly modified buffer
+    (setq export-buf
+	  (funcall (intern (concat "org-export-as-" format))
+		   (plist-get plist :headline-levels)
+		   nil plist nil nil pub-dir))
+    (set-buffer export-buf)
+    ;; run hooks after export and save export
+    (and (run-hooks 'org-publish-after-export-hook)
+	 (if (buffer-modified-p) (save-buffer)))
+    ;; maybe restore buffer's content
+    (set-buffer init-buf)
+    (when (buffer-modified-p init-buf)
+      (erase-buffer)
+      (insert init-buf-string)
+      (save-buffer)
+      (goto-char init-point))))
 
 (defun org-publish-org-to-latex (plist filename pub-dir)
   "Publish an org file to LaTeX.
@@ -503,12 +534,8 @@ FILENAME is the filename of the file to be published."
 	  (mapc (lambda (f)
 		  (funcall f project-plist filename tmp-pub-dir))
 		publishing-function)
-	(let ((last-buffer (current-buffer)))
-	  (funcall publishing-function project-plist filename tmp-pub-dir)
-	  ;; kill export buffers when publishing
-	  (if (not (eq last-buffer (current-buffer)))
-	      (kill-buffer (current-buffer)))))
-      (org-publish-update-timestamp filename))))
+	(funcall publishing-function project-plist filename tmp-pub-dir)))
+    (org-publish-update-timestamp filename)))
 
 (defun org-publish-projects (projects)
   "Publish all files belonging to the PROJECTS alist.
@@ -549,7 +576,8 @@ Default for INDEX-FILENAME is 'index.org'."
     (with-temp-buffer
       (while (setq file (pop files))
 	(let ((fn (file-name-nondirectory file)))
-	  (unless (string= fn ifn) ;; index shouldn't index itself
+	  ;; index shouldn't index itself
+	  (unless (string= fn ifn) 
 	    (insert (concat " + [[file:" fn "]["
 			    (file-name-sans-extension fn)
 			    "]]\n")))))
