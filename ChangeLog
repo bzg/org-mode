@@ -1,5 +1,11 @@
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
+	* org-publish.el (org-publish-before-export-hook)
+	(org-publish-after-export-hook): New hooks.
+	(org-publish-org-to): Use new hooks and kill buffers.
+	(org-publish-file): Remove the code for killing buffers.
+	(org-publish-initialize-files-alist): Use interactive.
+
 	* org.el (org-prepare-dblock): Added the extra :content parameter.
 
 2008-03-09  Carsten Dominik  <dominik@science.uva.nl>
