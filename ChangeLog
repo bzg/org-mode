@@ -1,3 +1,14 @@
+2008-03-10  Bastien Guerry  <bzg@altern.org>
+
+	* org-publish.el (org-publish-expand-components): Remove null
+	projects from the list of components.
+	(org-publish-attachment): Bugfix: handle the mandatory argument
+	pub-dir.  Removed unused retrieval of the :publishing-directory
+	property.
+	(org-publish-file): Bugfix: when using a relative directory as
+	the publishing directory, convert it to a directory filename.
+	(org-publish-project): New alias.
+
 2008-03-10  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* org-irc.el (org-irc-get-erc-link): port now converted to a

@@ -405,8 +405,8 @@ If NO-EXCLUSION is non-nil, don't exclude files."
   "Expand PROJECT into an alist of its components."
   (let* ((components (plist-get (cdr project) :components)))
     (org-publish-delete-dups
-     (mapcar (lambda(c) (assoc c org-publish-project-alist))
-	     components))))
+     (delq nil (mapcar (lambda(c) (assoc c org-publish-project-alist))
+		       components)))))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -494,18 +494,15 @@ See `org-publish-org-to' to the list of arguments."
 See `org-publish-org-to' to the list of arguments."
   (org-publish-org-to "html" plist filename pub-dir))
 
-(defun org-publish-attachment (plist filename)
+(defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
-PLIST is the property list for the given project.
-FILENAME is the filename of the file to be published."
+See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
   (eval-and-compile
     (require 'eshell)
     (require 'esh-maint)
     (require 'em-unix))
-  (let ((destination (file-name-as-directory
-		      (plist-get plist :publishing-directory))))
-    (eshell/cp filename destination)))
+  (eshell/cp filename pub-dir))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
@@ -526,10 +523,13 @@ FILENAME is the filename of the file to be published."
 					  (abbreviate-file-name filename))))
 		      (error "Can't publish file outside of a project")))))
 	   (project-plist (cdr project))
-	   (publishing-function (or (plist-get project-plist :publishing-function)
-				    'org-publish-org-to-html))
-	   (base-dir (file-truename (plist-get project-plist :base-directory)))
-	   (pub-dir (file-truename (plist-get project-plist :publishing-directory)))
+	   (publishing-function 
+	    (or (plist-get project-plist :publishing-function)
+		'org-publish-org-to-html))
+	   (base-dir (file-name-as-directory
+		      (file-truename (plist-get project-plist :base-directory))))
+	   (pub-dir (file-name-as-directory
+		     (file-truename (plist-get project-plist :publishing-directory))))
 	   tmp-pub-dir)
       (setq tmp-pub-dir
 	    (file-name-directory
@@ -593,6 +593,8 @@ Default for INDEX-FILENAME is 'index.org'."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
+
+(defalias 'org-publish-project 'org-publish "Publish project.")
 
 ;;;###autoload
 (defun org-publish (project &optional force)
