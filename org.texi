@@ -8480,8 +8480,11 @@ Update all dynamic blocks in the current file.
 
 Updating a dynamic block means to remove all the text between BEGIN and
 END, parse the BEGIN line for parameters and then call the specific
-writer function for this block to insert the new content.  For a block
-with name @code{myblock}, the writer function is
+writer function for this block to insert the new content.  If you want
+to use the original content in the writer function, you can use the
+extra parameter @code{:content}.
+
+For a block with name @code{myblock}, the writer function is
 @code{org-dblock-write:myblock} with as only parameter a property list
 with the parameters given in the begin line.  Here is a trivial example
 of a block that keeps track of when the block update function was last

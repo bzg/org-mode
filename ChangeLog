@@ -1,3 +1,7 @@
+2008-03-10  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-prepare-dblock): Added the extra :content parameter.
+
 2008-03-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi (Exporting Agenda Views): Document agenda export to

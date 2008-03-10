@@ -14462,6 +14462,10 @@ the property list including an extra property :name with the block name."
 			 (read (concat "(" (match-string 3) ")")))))
     (unless (re-search-forward org-dblock-end-re nil t)
       (error "Dynamic block not terminated"))
+    (setq params
+	  (append params
+		  (list :content (buffer-substring 
+				  begdel (match-beginning 0)))))
     (delete-region begdel (match-beginning 0))
     (goto-char begdel)
     (open-line 1)
