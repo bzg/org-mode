@@ -1,3 +1,8 @@
+2008-03-11  Bastien Guerry  <bzg@altern.org>
+
+	* org-publish.el (org-publish-initial-buffer): New variable.
+	(org-publish-org-to, org-publish): Use it.
+
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
 	* org-publish.el (org-publish-expand-components): Remove null
