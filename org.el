@@ -6561,8 +6561,11 @@ even level numbers will become the next higher odd number."
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level change))))
 
-(define-obsolete-function-alias 'org-get-legal-level
-    'org-get-valid-level "23.1")
+(if (featurep 'xemacs)
+    (define-obsolete-function-alias 'org-get-legal-level
+      'org-get-valid-level)
+  (define-obsolete-function-alias 'org-get-legal-level
+    'org-get-valid-level "23.1"))
 
 (defun org-promote ()
   "Promote the current heading higher up the tree.
@@ -15151,8 +15154,27 @@ If non is given, the user is prompted for a date.
 REMOVE indicates what kind of entries to remove.  An old WHAT entry will also
 be removed."
   (interactive)
-  (let (org-time-was-given org-end-time-was-given)
-    (when what (setq time (or time (org-read-date nil 'to-time))))
+  (let (org-time-was-given org-end-time-was-given ts
+			   end default-time default-input)
+
+    (when (and (not time) (memq what '(scheduled deadline)))
+      ;; Try to get a default date/time from existing timestamp
+      (save-excursion
+	(org-back-to-heading t)
+	(setq end (save-excursion (outline-next-heading) (point)))
+	(when (re-search-forward (if (eq what 'scheduled)
+				     org-scheduled-time-regexp
+				   org-deadline-time-regexp)
+				 end t)
+	  (setq ts (match-string 1)
+		default-time
+		(apply 'encode-time (org-parse-time-string ts))
+		default-input (and ts (org-get-compact-tod ts))))))
+    (when what
+      ;; If necessary, get the time from the user
+      (setq time (or time (org-read-date nil 'to-time nil nil 
+					 default-time default-input))))
+
     (when (and org-insert-labeled-timestamps-at-point
 	       (member what '(scheduled deadline)))
       (insert

@@ -5,6 +5,20 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
+* Version 5.24
+
+** Details
+
+   - When an entry already has a scheduling or deadline time
+     stamp, calling `C-c C-s' or `C-c C-d', respectively, will no
+     use that old date as the default, and you can can use the
+     "++4d" syntax to invoke shifts relative to that default
+     date.  Simply pressing RET at the prompt will keep the
+     default date, not switch to today.
+
+     This was an omission in the earlier implementation, spotted
+     by Wanrong Lin.  Thanks!
+
 * Version 5.23
 
 ** Overview

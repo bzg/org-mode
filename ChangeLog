@@ -1,9 +1,14 @@
+2008-03-13  Carsten Dominik  <dominik@science.uva.nl>
+
 
 	* org.el (org-html-level-start): Always have id's in HTML
 	headlines, even if there is no TOC to jump from.  Put extra <divs>
 	in.  One around the toc, one around the text between a headline
 	and its first subsection.  Insert ids into div's that surround
 	whole sections including subsections.
+	(define-obsolete-function-alias): Make work with XEmacs.
+	(org-add-planning-info): Use old date as default when modifying an
+	existing deadline or scheduled item.
 
 2008-03-11  Bastien Guerry  <bzg@altern.org>
 
