@@ -340,6 +340,9 @@ Each element of this alist is of the form:
 
   (file-name . project-name)")
 
+(defvar org-publish-initial-buffer nil
+  "The buffer `org-publish' has been called from.")
+
 (defun org-publish-initialize-files-alist (&optional refresh)
   "Set `org-publish-files-alist' if it is not set.
 Also set it if the optional argument REFRESH is non-nil."
@@ -476,13 +479,16 @@ PUB-DIR is the publishing directory."
     ;; run hooks after export and save export
     (and (run-hooks 'org-publish-after-export-hook)
 	 (if (buffer-modified-p) (save-buffer)))
+    (kill-buffer export-buf)
     ;; maybe restore buffer's content
     (set-buffer init-buf)
     (when (buffer-modified-p init-buf)
       (erase-buffer)
       (insert init-buf-string)
       (save-buffer)
-      (goto-char init-point))))
+      (goto-char init-point))
+    (unless (eq init-buf org-publish-initial-buffer)
+      (kill-buffer init-buf))))
 
 (defun org-publish-org-to-latex (plist filename pub-dir)
   "Publish an org file to LaTeX.
@@ -600,6 +606,7 @@ Default for INDEX-FILENAME is 'index.org'."
 (defun org-publish (project &optional force)
   "Publish PROJECT."
   (interactive "P")
+  (setq org-publish-initial-buffer (current-buffer))
   (save-window-excursion
     (let* ((force current-prefix-arg)
 	   (org-publish-use-timestamps-flag

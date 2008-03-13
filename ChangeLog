@@ -1,10 +1,19 @@
-2008-03-10  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-html-level-start): Always have id's in HTML
 	headlines, even if there is no TOC to jump from.  Put extra <divs>
 	in.  One around the toc, one around the text between a headline
 	and its first subsection.  Insert ids into div's that surround
 	whole sections including subsections.
+
+2008-03-11  Bastien Guerry  <bzg@altern.org>
+
+	* org-publish.el (org-publish-initial-buffer): New variable.
+	(org-publish-org-to, org-publish): Use it.
+
+
+=====================================================================
+In Emacs CVS as 5.23
+
 
 2008-03-10  Bastien Guerry  <bzg@altern.org>
 
