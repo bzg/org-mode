@@ -9,7 +9,7 @@
 #     none
 #
 # usage:
-#     dir2org.bash [DIR]...
+#     dir2org.zsh [DIR]...
 #
 # author:
 #     Phil Jackson (phil@shellarchive.co.uk)
