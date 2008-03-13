@@ -63,9 +63,9 @@
 (defvar org-irc-link-to-logs nil
   "non-nil will store a link to the logs, nil will store an irc: style link")
 
-(defvar erc-default-port) ; dynamically scoped from erc.el
-(defvar erc-session-port) ; dynamically scoped form erc-backend.el
-(defvar erc-server-announced-name) ; dynamically scoped form erc-backend.el
+(defvar erc-default-port)   ; dynamically scoped from erc.el
+(defvar erc-session-port)   ; dynamically scoped form erc-backend.el
+(defvar erc-session-server) ; dynamically scoped form erc-backend.el
 
 ;; Generic functions/config (extend these for other clients)
 
@@ -173,7 +173,7 @@ the session itself."
 
 (defun org-irc-get-erc-link ()
   "Return an org compatible irc:/ link from an ERC buffer"
-  (let ((link (concat erc-server-announced-name ":"
+  (let ((link (concat erc-session-server ":"
                       (number-to-string erc-session-port))))
     (concat link "/"
             (if (and (erc-default-target)
@@ -187,7 +187,7 @@ the session itself."
 (defun org-irc-visit-erc (link)
   "Visit an ERC buffer based on criteria from the followed link"
   (let* ((server (car (car link)))
-         (port (or (cadr (pop link)) erc-default-port))
+         (port (or (string-to-number (cadr (pop link))) erc-default-port))
          (server-buffer)
          (buffer-list
           (erc-buffer-filter
@@ -196,8 +196,8 @@ the session itself."
                (and tmp-server-buf
                     (with-current-buffer tmp-server-buf
                       (and
-                       (string= erc-session-port port)
-                       (string= erc-server-announced-name server)
+                       (eq erc-session-port port)
+                       (string= erc-session-server server)
                        (setq server-buffer tmp-server-buf)))))))))
     (if buffer-list
         (let ((chan-name (pop link)))
