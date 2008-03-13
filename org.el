@@ -25654,6 +25654,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-buffer table-orig-buffer
 	 ind start-is-num starter didclose
 	 rpl path desc descp desc1 desc2 link
+	 snumber
 	 )
 
     (let ((inhibit-read-only t))
@@ -25730,6 +25731,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			  (nth 3 lang-words)
 			  org-export-html-toplevel-hlevel)
 		  thetoc)
+	    (push "<div id=\"text-table-of-contents\">\n" thetoc)
 	    (push "<ul>\n<li>" thetoc)
 	    (setq lines
 		  (mapcar '(lambda (line)
@@ -25758,9 +25760,9 @@ lang=\"%s\" xml:lang=\"%s\">
 			      (setq txt (replace-match  "&nbsp;&nbsp;&nbsp;<span class=\"tag\"> \\1</span>" t nil txt)))
 			  (if (string-match quote-re0 txt)
 			      (setq txt (replace-match "" t t txt)))
+			  (setq snumber (org-section-number level))
 			  (if org-export-with-section-numbers
-			      (setq txt (concat (org-section-number level)
-						" " txt)))
+			      (setq txt (concat snumber " " txt)))
 			  (if (<= level (max umax umax-toc))
 			      (setq head-count (+ head-count 1)))
 			  (if (<= level umax-toc)
@@ -25784,16 +25786,16 @@ lang=\"%s\" xml:lang=\"%s\">
 					      (concat "@<span class=\"target\">" tg "@</span> ")
 					      t t line))
 				  (push (cons (org-solidify-link-text tg)
-					      (format "sec-%d" head-count))
+					      (format "sec-%s" snumber))
 					target-alist))
 				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				  (setq txt (replace-match "" t t txt)))
 				(push
 				 (format
 				  (if todo
-				      "</li>\n<li><a href=\"#sec-%d\"><span class=\"todo\">%s</span></a>"
-				    "</li>\n<li><a href=\"#sec-%d\">%s</a>")
-				  head-count txt) thetoc)
+				      "</li>\n<li><a href=\"#sec-%s\"><span class=\"todo\">%s</span></a>"
+				    "</li>\n<li><a href=\"#sec-%s\">%s</a>")
+				  snumber txt) thetoc)
 
 				(setq org-last-level level))
 			    )))
@@ -25802,6 +25804,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (while (> org-last-level (1- org-min-level))
 	      (setq org-last-level (1- org-last-level))
 	      (push "</li>\n</ul>\n" thetoc))
+	    (push "</div>\n" thetoc)
 	    (setq thetoc (if have-headings (nreverse thetoc) nil))))
 
       (setq head-count 0)
@@ -26123,6 +26126,8 @@ lang=\"%s\" xml:lang=\"%s\">
       (org-html-level-start 1 nil umax
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
+      ;; the </div> to lose the last text-... div.
+      (insert "</div>\n")
 
       (unless body-only
 	(when (plist-get opt-plist :auto-postamble)
@@ -26668,7 +26673,7 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Insert a new level in HTML export.
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
-  (let ((l org-level-max))
+  (let ((l org-level-max) snumber)
     (while (>= l level)
       (if (aref org-levels-open (1- l))
 	  (progn
@@ -26700,13 +26705,13 @@ When TITLE is nil, just close all open levels."
 	      (org-close-par-maybe)
 	      (insert "<ul>\n<li>" title "<br/>\n")))
 	(aset org-levels-open (1- level) t)
+	(setq snumber (org-section-number level))
 	(if (and org-export-with-section-numbers (not body-only))
-	    (setq title (concat (org-section-number level) " " title)))
+	    (setq title (concat snumber " " title)))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
-	(if with-toc
-	    (insert (format "\n<div class=\"outline-%d\">\n<h%d id=\"sec-%d\">%s</h%d>\n"
-			    level level head-count title level))
-	  (insert (format "\n<div class=\"outline-%d\">\n<h%d>%s</h%d>\n" level level title level)))
+	(unless (= head-count 1) (insert "\n</div>\n"))
+	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s</h%d>\n<div id=\"text-%s\">\n"
+			snumber level level snumber title level snumber))
 	(org-open-par)))))
 
 (defun org-html-level-close (level max-outline-level)
