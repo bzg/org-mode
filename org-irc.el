@@ -166,15 +166,17 @@ the session itself."
                :link (org-make-link "irc:/" link-text)
                :description (concat "irc session '" link-text "'")
                :server (car (car link))
-               :port (or (cadr (pop link)) erc-default-port)
+               :port (or (string-to-number (cadr (pop link))) erc-default-port)
                :nick (pop link))
               t)
             (error "Failed to create ('irc:/' style) ERC link")))))
 
 (defun org-irc-get-erc-link ()
   "Return an org compatible irc:/ link from an ERC buffer"
-  (let ((link (concat erc-session-server ":"
-                      (number-to-string erc-session-port))))
+  (let* ((session-port (if (numberp erc-session-port)
+                           (number-to-string erc-session-port)
+                           erc-session-port))
+          (link (concat erc-session-server ":" session-port)))
     (concat link "/"
             (if (and (erc-default-target)
                      (erc-channel-p (erc-default-target))
@@ -183,6 +185,17 @@ the session itself."
                 (let ((nick (car (get-text-property (point) 'erc-data))))
                   (concat (erc-default-target) "/" nick))
                 (erc-default-target)))))
+
+(defun org-irc-get-current-erc-port ()
+  "Return the current port as a number. If there is not an
+explicit port set then return the erc default."
+  (cond
+    ((stringp erc-session-port)
+     (string-to-number erc-session-port))
+    ((numberp erc-session-port)
+     erc-session-port)
+    (t
+     erc-default-port)))
 
 (defun org-irc-visit-erc (link)
   "Visit an ERC buffer based on criteria from the followed link"
@@ -196,7 +209,7 @@ the session itself."
                (and tmp-server-buf
                     (with-current-buffer tmp-server-buf
                       (and
-                       (eq erc-session-port port)
+                       (eq (org-irc-get-current-erc-port) port)
                        (string= erc-session-server server)
                        (setq server-buffer tmp-server-buf)))))))))
     (if buffer-list

@@ -1,3 +1,8 @@
+2008-03-13  Phil Jackson  <phil@shellarchive.co.uk>
+
+	* org-irc.el: New function to ensure port number is always
+	numeric. Reports came in of it being a string /or/ a number.
+
 2008-03-13  Carsten Dominik  <dominik@science.uva.nl>
 
 
