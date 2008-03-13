@@ -12177,7 +12177,7 @@ For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
-  (require 'org-irc)
+  (condition-case nil (require 'org-irc) (error nil))
   (setq org-store-link-plist nil)  ; reset
   (let (link cpltxt desc description search txt)
     (cond
@@ -12832,7 +12832,7 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
-  (require 'org-irc)
+  (condition-case nil (require 'org-irc) (error nil))
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)
