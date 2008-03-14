@@ -17,8 +17,7 @@ org-depend.el        --- TODO dependencies for Org-mode
 org-elisp-symbol.el  --- Org links to emacs-lisp symbols
 org-expiry.el 	     --- expiry mechanism for Org entries
 org-id.el 	     --- Global id's for identifying entries
-org-iq.el 	     --- Interactive modification of tags query
-org-irc.el 	     --- Store links to IRC sessions.
+org-interactive-query.el --- Interactive modification of tags query
 org-iswitchb.el      --- use iswitchb to select Org buffer
 org-man.el 	     --- Support for links to manpages in Org-mode
 org-panel.el 	     --- Simple routines for us with bad memory

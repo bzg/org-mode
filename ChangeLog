@@ -1,3 +1,12 @@
+2008-03-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-modules-loaded): New variable.
+	(org-load-modules-maybe, org-set-modules): New function.
+	(org-modules): New option.
+	(org-mode, org-cycle, orgstruct-mode, org-run-like-in-org-mode)
+	(orgtbl-mode, org-store-link, org-insert-link-global)
+	(org-open-at-point): Call `org-load-modules-maybe'.
+
 2008-03-13  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* org-irc.el: New function to ensure port number is always

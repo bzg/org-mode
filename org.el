@@ -156,28 +156,56 @@ With prefix arg HERE, insert it at point."
   :group 'org
   :type 'hook)
 
-;(defcustom org-default-extensions '(org-irc)
-;  "Extensions that should always be loaded together with org.el.
-;If the description starts with <A>, this means the extension
-;will be autoloaded when needed, preloading is not necessary.
-;FIXME: this does not ork correctly, ignore it for now."
-;  :group 'org
-;  :type
-;  '(set :greedy t
-;	(const :tag "    Mouse support (org-mouse.el)" org-mouse)
-;	(const :tag "<A> Publishing (org-publish.el)" org-publish)
-;	(const :tag "<A> LaTeX export (org-export-latex.el)" org-export-latex)
-;	(const :tag "    IRC/ERC links (org-irc.el)" org-irc)
-;	(const :tag "    Apple Mail message links under OS X (org-mac-message.el)" org-mac-message)))
-;
-;(defun org-load-default-extensions ()
-;  "Load all extensions listed in `org-default-extensions'."
-;  (mapc (lambda (ext) 
-;	  (condition-case nil (require ext)
-;	    (error (message "Problems while trying to load feature `%s'" ext))))
-;	org-default-extensions))
+(defvar org-modules-loaded nil
+  "Have the modules been loaded already?")
 
-;(eval-after-load "org" '(org-load-default-extensions))
+(defun org-load-modules-maybe (&optional force)
+  "Load all extensions listed in `org-default-extensions'."
+  (when (or force (not org-modules-loaded))
+    (mapc (lambda (ext) 
+	    (condition-case nil (require ext)
+	      (error (message "Problems while trying to load feature `%s'" ext))))
+	  org-modules)
+    (setq org-modules-loaded t)))
+
+(defun org-set-modules (var value)
+  "Set VAR to VALUE and call `org-load-modules-maybe' with the force flag."
+  (set var value)
+  (when (featurep 'org)
+    (org-load-modules-maybe 'force)))
+
+(defcustom org-modules '(org-irc)
+  "Extensions that should always be loaded together with org.el.
+If the description starts with <A>, this means the extension
+will be autoloaded when needed, preloading is not necessary.
+If a description starts with <C>, the file is not part of emacs
+and loading it will require that you have downloaded and properly installed
+the org-mode distribution."
+  :group 'org
+  :set 'org-set-modules
+  :type
+  '(set :greedy t
+	(const :tag "A  export-latex:      LaTeX export" org-export-latex)
+	(const :tag "   irc:               IRC/ERC links" org-irc)
+	(const :tag "   mac-message:       Apple Mail message links under OS X" org-mac-message)
+	(const :tag "   mouse:             Mouse support" org-mouse)
+	(const :tag "A  publish:           Publishing" org-publish)
+	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
+	(const :tag "C  bibtex:            Org links to BibTeX entries" org-bibtex)
+	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
+	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
+	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
+	(const :tag "C  id:                Global id's for identifying entries" org-id)
+	(const :tag "C  interactive-query: Interactive modification of tags query" org-interactive-query)
+	(const :tag "C  iswitchb:          Use iswitchb to select Org buffer" org-iswitchb)
+	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
+	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
+	(const :tag "C  mew:               Support for links to messages in Mew" org-mew)
+	(const :tag "C  panel:             Simple routines for us with bad memory" org-panel)
+	(const :tag "C  registry:          A registry for Org links" org-registry)
+	(const :tag "C  org2rem:           Convert org appointments into reminders" org2rem)
+	(const :tag "C  screen:            Visit screen sessions through Org-mode links" org-screen)
+	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)))
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
@@ -5087,6 +5115,7 @@ The following commands are available:
     (define-key org-mode-map [menu-bar hide] 'undefined)
     (define-key org-mode-map [menu-bar show] 'undefined))
 
+  (org-load-modules-maybe)
   (easy-menu-add org-org-menu)
   (easy-menu-add org-tbl-menu)
   (org-install-agenda-files-menu)
@@ -5818,6 +5847,7 @@ If KWD is a number, get the corresponding match group."
   no headline in line 1, this function will act as if called with prefix arg.
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
+  (org-load-modules-maybe)
   (let* ((outline-regexp
 	  (if (and (org-mode-p) org-cycle-include-plain-lists)
 	      "\\(?:\\*+ \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"
@@ -7918,6 +7948,7 @@ M-RET       Insert new heading/item
 S-M-RET     Insert new TODO heading / Chekbox item
 C-c C-c     Set tags / toggle checkbox"
   nil " OrgStruct" nil
+  (org-load-modules-maybe)
   (and (orgstruct-setup) (defun orgstruct-setup () nil)))
 
 ;;;###autoload
@@ -8057,6 +8088,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 
 ;;;###autoload
 (defun org-run-like-in-org-mode (cmd)
+  (org-load-modules-maybe)
   (unless org-local-vars
     (setq org-local-vars (org-get-local-variables)))
   (eval (list 'let org-local-vars
@@ -11459,6 +11491,7 @@ table editor in arbitrary modes.")
 (defun orgtbl-mode (&optional arg)
   "The `org-mode' table editor as a minor mode for use in other modes."
   (interactive)
+  (org-load-modules-maybe)
   (if (org-mode-p)
       ;; Exit without error, in case some hook functions calls this
       ;; by accident in org-mode.
@@ -12177,7 +12210,7 @@ For some link types, a prefix arg is interpreted:
 For links to usenet articles, arg negates `org-usenet-links-prefer-google'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
-  (condition-case nil (require 'org-irc) (error nil))
+  (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
   (let (link cpltxt desc description search txt)
     (cond
@@ -12597,6 +12630,7 @@ This is the list that is used before handing over to the browser.")
   "Insert a link like Org-mode does.
 This command can be called in any mode to insert a link in Org-mode syntax."
   (interactive)
+  (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
 (defun org-insert-link (&optional complete-file)
@@ -12832,7 +12866,7 @@ the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file."
   (interactive "P")
-  (condition-case nil (require 'org-irc) (error nil))
+  (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)

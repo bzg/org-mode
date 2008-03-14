@@ -1,3 +1,11 @@
+2008-03-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-depend.el: Add `provide' for the module system.
+
+	* lisp/org-man.el: Add `provide' for the module system.
+
+	* lisp/org-interactive-query.el: Renamed from org-iq.el.
+
 2008-03-05  Bastien Guerry  <bzg@altern.org>
 
 	* lisp/org-elisp-symbol.el (org-elisp-symbol-store-link):

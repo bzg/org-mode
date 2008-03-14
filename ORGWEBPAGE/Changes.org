@@ -9,6 +9,19 @@
 
 ** Details
 
+*** Loading modules
+
+    Org-mode has now a system for loading modules by simply
+    configuring an option that lists all the modules you want to
+    use.  Customize the variable `org-modules'.  That variable
+    lists modules that are part of the Org-mode core (and in this
+    way part of Emacs), as well as contributed packages that will
+    only be available when you have installed them properly (most
+    likely by downloading the distribution and adding
+    CONTRIB/lisp to your load path.
+
+*** Misc
+
    - When an entry already has a scheduling or deadline time
      stamp, calling `C-c C-s' or `C-c C-d', respectively, will no
      use that old date as the default, and you can can use the
@@ -18,6 +31,8 @@
 
      This was an omission in the earlier implementation, spotted
      by Wanrong Lin.  Thanks!
+
+
 
 * Version 5.23
 

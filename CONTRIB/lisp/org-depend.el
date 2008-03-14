@@ -232,4 +232,6 @@ this ID property, that entry is also checked."
 (add-hook 'org-trigger-hook 'org-depend-trigger-todo)
 (add-hook 'org-blocker-hook 'org-depend-block-todo)
 
+(provide 'org-depend)
+
 ;;; org-depend.el ends here
