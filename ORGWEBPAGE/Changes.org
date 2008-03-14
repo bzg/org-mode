@@ -20,8 +20,16 @@
     likely by downloading the distribution and adding
     CONTRIB/lisp to your load path.
 
-*** Misc
+*** Improvements in Search View
+    
+    - Calling search view with a C-u prefix will makt it match
+      only in TODO entries.
 
+    - The single quote is no longer considered a word character
+      durin search, so that searching for the word "Nasim" will
+      also match in "Nasim's".
+
+*** Misc
    - When an entry already has a scheduling or deadline time
      stamp, calling `C-c C-s' or `C-c C-d', respectively, will no
      use that old date as the default, and you can can use the
@@ -31,8 +39,6 @@
 
      This was an omission in the earlier implementation, spotted
      by Wanrong Lin.  Thanks!
-
-
 
 * Version 5.23
 

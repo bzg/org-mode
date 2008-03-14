@@ -20046,7 +20046,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((eq type 'alltodo)
 		(org-let lprops '(org-todo-list current-prefix-arg)))
 	       ((eq type 'search)
-		(org-let lprops '(org-search-view current-prefix-arg match)))
+		(org-let lprops '(org-search-view current-prefix-arg match nil)))
 	       ((eq type 'stuck)
 		(org-let lprops '(org-agenda-list-stuck-projects
 				  current-prefix-arg)))
@@ -20274,7 +20274,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	  '(call-interactively 'org-todo-list)))
        ((eq type 'search)
 	(org-let2 gprops lprops
-		  '(org-search-view current-prefix-arg match)))
+		  '(org-search-view current-prefix-arg match nil)))
        ((eq type 'stuck)
 	(org-let2 gprops lprops
 	  '(call-interactively 'org-agenda-list-stuck-projects)))
@@ -21227,12 +21227,31 @@ given in `org-agenda-start-on-weekday'."
 ;;; Agenda word search
 
 (defvar org-agenda-search-history nil)
+(defvar org-todo-only nil)
+
+(defvar org-search-syntax-table nil
+  "Special syntax table for org-mode search.
+In this table, we have single quotes not as word constituents, to
+that when \"+Ameli\" is searchd as a work, it will also match \"Ameli's\"")
+
+(defun org-search-syntax-table ()
+  (unless org-search-syntax-table
+    (setq org-search-syntax-table (copy-syntax-table org-mode-syntax-table))
+    (modify-syntax-entry ?' "." org-search-syntax-table)
+    (modify-syntax-entry ?` "." org-search-syntax-table))
+  org-search-syntax-table)
 
 ;;;###autoload
-(defun org-search-view (&optional arg string)
+(defun org-search-view (&optional todo-only string edit-at)
   "Show all entries that contain words or regular expressions.
 If the first character of the search string is an asterisks,
 search only the headlines.
+
+With optional prefix argument TODO-ONLY, only consider entries that are
+TODO entries.  The argument STRING can be used to pass a default search
+string into this function.  If EDIT-AT is non-nil, it means that the
+user should get a chance to edit this string, with cursor at position
+EDIT-AT.
 
 The search string is broken into \"words\" by splitting at whitespace.
 The individual words are then interpreted as a boolean expression with
@@ -21242,6 +21261,11 @@ Matching is case-insensitive and the words are enclosed by word delimiters.
 
 Words enclosed by curly braces are interpreted as regular expressions
 that must or must not match in the entry.
+
+If the search string starts with an asterisk, search only in headlines.
+If (possibly after the leading star) the search string starts with an
+exclamation mark, this also means to look at TODO entries only, an effect
+that can also be achieved with a prefix argument.
 
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."
@@ -21259,22 +21283,27 @@ in `org-agenda-text-search-extra-files'."
 	 regexp rtn rtnall files file pos
 	 marker priority category tags c neg re
 	 ee txt beg end words regexps+ regexps- hdl-only buffer beg1 str)
-    (unless (and (not arg)
+    (unless (and (not edit-at)
 		 (stringp string)
 		 (string-match "\\S-" string))
       (setq string (read-string "[+-]Word/{Regexp} ...: "
 				(cond
-				 ((integerp arg) (cons string arg))
-				 (arg string))
+				 ((integerp edit-at) (cons string edit-at))
+				 (edit-at string))
 				'org-agenda-search-history)))
+    (org-set-local 'org-todo-only todo-only)
     (setq org-agenda-redo-command
-	  (list 'org-search-view 'current-prefix-arg string))
+	  (list 'org-search-view (if todo-only t nil) string
+		'(if current-prefix-arg 1 nil)))
     (setq org-agenda-query-string string)
 
     (if (equal (string-to-char string) ?*)
 	(setq hdl-only t
 	      words (substring string 1))
       (setq words string))
+    (when (equal (string-to-char words) ?!)
+      (setq todo-only t
+	    words (substring words 1)))
     (setq words (org-split-string words))
     (mapc (lambda (w)
 	    (setq c (string-to-char w))
@@ -21308,55 +21337,60 @@ in `org-agenda-text-search-extra-files'."
 	    (setq rtn (list (format "ORG-AGENDA-ERROR: No such org-file %s"
 				    file))))
 	(with-current-buffer buffer
-	  (unless (org-mode-p)
-	    (error "Agenda file %s is not in `org-mode'" file))
-	  (let ((case-fold-search t))
-	    (save-excursion
-	      (save-restriction
-		(if org-agenda-restrict
-		    (narrow-to-region org-agenda-restrict-begin
-				      org-agenda-restrict-end)
-		  (widen))
-		(goto-char (point-min))
-		(unless (or (org-on-heading-p)
-			    (outline-next-heading))
-		  (throw 'nextfile t))
-		(goto-char (max (point-min) (1- (point))))
-		(while (re-search-forward regexp nil t)
-		  (org-back-to-heading t)
-		  (skip-chars-forward "* ")
-		  (setq beg (point-at-bol)
-			beg1 (point)
-			end (progn (outline-next-heading) (point)))
-		  (catch :skip
-		    (goto-char beg)
-		    (org-agenda-skip)
-		    (setq str (buffer-substring-no-properties
-			       (point-at-bol)
-			       (if hdl-only (point-at-eol) end)))
-		    (mapc (lambda (wr) (when (string-match wr str)
-					 (goto-char (1- end))
-					 (throw :skip t)))
-			  regexps-)
-		    (mapc (lambda (wr) (unless (string-match wr str)
-					 (goto-char (1- end))
-					 (throw :skip t)))
-			  regexps+)
-		    (goto-char beg)
-		    (setq marker (org-agenda-new-marker (point))
-			  category (org-get-category)
-			  tags (org-get-tags-at (point))
-			  txt (org-format-agenda-item
-			       ""
-			       (buffer-substring-no-properties
-				beg1 (point-at-eol))
-			       category tags))
-		    (org-add-props txt props
-		      'org-marker marker 'org-hd-marker marker
-		      'priority 1000 'org-category category
-		      'type "search")
-		    (push txt ee)
-		    (goto-char (1- end)))))))))
+	  (with-syntax-table (org-search-syntax-table)
+	    (unless (org-mode-p)
+	      (error "Agenda file %s is not in `org-mode'" file))
+	    (let ((case-fold-search t))
+	      (save-excursion
+		(save-restriction
+		  (if org-agenda-restrict
+		      (narrow-to-region org-agenda-restrict-begin
+					org-agenda-restrict-end)
+		    (widen))
+		  (goto-char (point-min))
+		  (unless (or (org-on-heading-p)
+			      (outline-next-heading))
+		    (throw 'nextfile t))
+		  (goto-char (max (point-min) (1- (point))))
+		  (while (re-search-forward regexp nil t)
+		    (org-back-to-heading t)
+		    (skip-chars-forward "* ")
+		    (setq beg (point-at-bol)
+			  beg1 (point)
+			  end (progn (outline-next-heading) (point)))
+		    (catch :skip
+		      (goto-char beg)
+		      (org-agenda-skip)
+		      (setq str (buffer-substring-no-properties
+				 (point-at-bol)
+				 (if hdl-only (point-at-eol) end)))
+		      (mapc (lambda (wr) (when (string-match wr str)
+					   (goto-char (1- end))
+					   (throw :skip t)))
+			    regexps-)
+		      (mapc (lambda (wr) (unless (string-match wr str)
+					   (goto-char (1- end))
+					   (throw :skip t)))
+			    (if todo-only
+				(cons (concat "^\*+[ \t]+" org-not-done-regexp)
+				      regexps+)
+			      regexps+))
+		      (goto-char beg)
+		      (setq marker (org-agenda-new-marker (point))
+			    category (org-get-category)
+			    tags (org-get-tags-at (point))
+			    txt (org-format-agenda-item
+				 ""
+				 (buffer-substring-no-properties
+				  beg1 (point-at-eol))
+				 category tags))
+		      (org-add-props txt props
+			'org-marker marker 'org-hd-marker marker
+			'org-todo-regexp org-todo-regexp
+			'priority 1000 'org-category category
+			'type "search")
+		      (push txt ee)
+		      (goto-char (1- end))))))))))
       (setq rtn (nreverse ee))
       (setq rtnall (append rtnall rtn)))
     (if org-agenda-overriding-header
@@ -22857,9 +22891,10 @@ Negative selection means, regexp must not match for selection of an entry."
 			(?\{ . " +{}") (?\} . " -{}")))))
     (setq org-agenda-redo-command
 	  (list 'org-search-view
+		org-todo-only
+		org-agenda-query-string
 		(+ (length org-agenda-query-string)
-		   (if (member char '(?\{ ?\})) 0 1))
-		org-agenda-query-string))
+		   (if (member char '(?\{ ?\})) 0 1))))
     (set-register org-agenda-query-register org-agenda-query-string)
     (org-agenda-redo))
    (t (error "Canot manipulate query for %s-type agenda buffers"
@@ -23609,7 +23644,7 @@ be used to request time specification in the time stamp."
 (defun org-agenda-schedule (arg)
   "Schedule the item at point."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags)
+  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
   (let* ((marker (or (get-text-property (point) 'org-marker)
 		     (org-agenda-error)))
@@ -23631,7 +23666,7 @@ be used to request time specification in the time stamp."
 (defun org-agenda-deadline (arg)
   "Schedule the item at point."
   (interactive "P")
-  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags)
+  (org-agenda-check-type t 'agenda 'timeline 'todo 'tags 'search)
   (org-agenda-check-no-diary)
   (let* ((marker (or (get-text-property (point) 'org-marker)
 		     (org-agenda-error)))
