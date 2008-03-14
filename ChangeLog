@@ -1,3 +1,16 @@
+2008-03-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-search-view): Add more text properties.
+	(org-agenda-schedule, org-agenda-deadline): Allow also in
+	search-type agendas.
+	(org-search-view): Order of arguments has been changed.
+	Interpret prefix-arg as TODO-ONLY.
+	(org-agenda, org-run-agenda-series, org-agenda-manipulate-query):
+	Take new argument order of `org-search-view' into account.
+	(org-todo-only): New variable.
+	(org-search-syntax-table): New variable and function.
+	(org-search-view): Do the search with the special syntax table.
+
 2008-03-13  Phil Jackson  <phil@shellarchive.co.uk>
 
 	* org-irc.el: New function to ensure port number is always
