@@ -1,3 +1,10 @@
+2008-03-14  Bastien Guerry  <bzg@altern.org>
+
+	* org-publish.el (org-publish-get-base-files-1): New function.
+	(org-publish-get-base-files): Use it.
+	(org-publish-temp-files): New variable.
+	Don't require 'dired-aux anymore.
+
 2008-03-14  Glenn Morris  <rmg@gnu.org>
 
 	* org-publish.el (declare-function): Add compatibility stub.
