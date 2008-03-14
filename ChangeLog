@@ -1,3 +1,13 @@
+2008-03-14  Glenn Morris  <rmg@gnu.org>
+
+	* org-publish.el (declare-function): Add compatibility stub.
+	(org-publish-delete-dups): Declare as function.
+
+	* org-mac-message.el Fix commentary.
+
+	* org-irc.el (top-level): CL not required when compiling.
+	(org-irc-visit-erc): Replace runtime CL functions.
+
 2008-03-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-modules-loaded): New variable.
