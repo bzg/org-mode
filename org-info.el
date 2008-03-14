@@ -1,0 +1,78 @@
+;;; org-info.el - Support for links to Info nodes in Org-mode
+
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
+
+;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Keywords: outlines, hypermedia, calendar, wp
+;; Homepage: http://orgmode.org
+;; Version: 1.0
+;;
+;; This file is part of GNU Emacs.
+;;
+;; GNU Emacs is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;;; Commentary:
+
+;; This file implements links to Info nodes for Org-mode.
+;; Org-mode loads this module by default - if this is not what you want,
+;; configure the variable `org-modules'.
+
+(require 'org)
+
+;; Declare external functions and variables
+(declare-function Info-find-node "info" (filename nodename
+						  &optional no-going-back))
+(defvar Info-current-file)
+(defvar Info-current-node)
+
+;; Install the link type
+(org-add-link-type "info" 'org-info-open)
+(add-hook 'org-store-link-functions 'org-info-store-link)
+
+;; Implementation
+(defun org-info-store-link ()
+  "Store a link to an INFO folder or message."
+  (when (eq major-mode 'Info-mode)
+    (let (link desc)
+      (setq link (org-make-link "info:"
+				(file-name-nondirectory Info-current-file)
+				":" Info-current-node))
+      (setq desc (concat (file-name-nondirectory Info-current-file)
+			 ":" Info-current-node))
+    (org-store-link-props :type "info" :file Info-current-file
+			  :node Info-current-node
+			  :link link :desc desc))))
+
+(defun org-info-open (path)
+  "Follow an INFO message link."
+  (org-info-follow-link path))
+
+
+(defun org-info-follow-link (name)
+  "Follow an info file & node link  to NAME."
+  (if (or (string-match "\\(.*\\)::?\\(.*\\)" name)
+          (string-match "\\(.*\\)" name))
+      (progn
+	(require 'info)
+        (if (match-string 2 name) ; If there isn't a node, choose "Top"
+            (Info-find-node (match-string 1 name) (match-string 2 name))
+          (Info-find-node (match-string 1 name) "Top")))
+    (message "Could not open: %s" name)))
+
+(provide 'org-info)
+
+;;; org-info.el ends here

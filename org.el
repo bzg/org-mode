@@ -175,8 +175,8 @@ With prefix arg HERE, insert it at point."
   (when (featurep 'org)
     (org-load-modules-maybe 'force)))
 
-(defcustom org-modules '(org-irc)
-  "Extensions that should always be loaded together with org.el.
+(defcustom org-modules '(org-bbdb org-gnus org-info org-irc org-mhe org-rmail org-vm org-wl)
+  "Modules that should always be loaded together with org.el.
 If the description starts with <A>, this means the extension
 will be autoloaded when needed, preloading is not necessary.
 If a description starts with <C>, the file is not part of emacs
@@ -186,11 +186,19 @@ the org-mode distribution."
   :set 'org-set-modules
   :type
   '(set :greedy t
-	(const :tag "A  export-latex:      LaTeX export" org-export-latex)
-	(const :tag "   irc:               IRC/ERC links" org-irc)
-	(const :tag "   mac-message:       Apple Mail message links under OS X" org-mac-message)
-	(const :tag "   mouse:             Mouse support" org-mouse)
-	(const :tag "A  publish:           Publishing" org-publish)
+	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
+	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
+	(const :tag "   info:              Links to Info nodes" org-info)
+	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
+	(const :tag "   mac-message:       Links to messages in Apple Mail" org-mac-message)
+	(const :tag "   mhe:               Links to MHE folders/messages" org-mhe)
+	(const :tag "   rmail:             Links to RMAIL folders/messages" org-rmail)
+	(const :tag "   vm:                Links to VM folders/messages" org-vm)
+	(const :tag "   wl:                Links to Wanderlust folders/messages" org-wl)
+	(const :tag "   mouse:             Additional mouse support" org-mouse)
+;	(const :tag "A  export-latex:      LaTeX export" org-export-latex)
+;	(const :tag "A  publish:           Publishing" org-publish)
+
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bibtex:            Org links to BibTeX entries" org-bibtex)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
@@ -1261,14 +1269,6 @@ more efficient."
   :group 'org-link-store
   :type 'boolean)
 
-(defcustom org-usenet-links-prefer-google nil
-  "Non-nil means, `org-store-link' will create web links to Google groups.
-When nil, Gnus will be used for such links.
-Using a prefix arg to the command \\[org-store-link] (`org-store-link')
-negates this setting for the duration of the command."
-  :group 'org-link-store
-  :type 'boolean)
-
 (defgroup org-link-follow nil
   "Options concerning following links in Org-mode"
   :tag "Org Follow Link"
@@ -1484,14 +1484,6 @@ For more examples, see the system specific constants
 			(const :tag "Use system default" default)
 			(string :tag "Command")
 			(sexp :tag "Lisp form")))))
-
-(defcustom org-mhe-search-all-folders nil
-  "Non-nil means, that the search for the mh-message will be extended to
-all folders if the message cannot be found in the folder given in the link.
-Searching all folders is very efficient with one of the search engines
-supported by MH-E, but will be slow with pick."
-  :group 'org-link-follow
-  :type 'boolean)
 
 (defgroup org-remember nil
   "Options concerning interaction with remember.el."
@@ -4389,13 +4381,6 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (declare-function add-to-diary-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
-(declare-function Info-find-node "info" (filename nodename &optional no-going-back))
-(declare-function bbdb "ext:bbdb-com" (string elidep))
-(declare-function bbdb-company "ext:bbdb-com" (string elidep))
-(declare-function bbdb-current-record "ext:bbdb-com" (&optional planning-on-modifying))
-(declare-function bbdb-name "ext:bbdb-com" (string elidep))
-(declare-function bbdb-record-getprop "ext:bbdb" (record property))
-(declare-function bbdb-record-name "ext:bbdb" (record))
 (declare-function bibtex-beginning-of-entry "bibtex" ())
 (declare-function bibtex-generate-autokey "bibtex" ())
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
@@ -4422,39 +4407,9 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (defvar original-date) ; dynamically scoped in calendar.el does scope this
 (declare-function cdlatex-tab "ext:cdlatex" ())
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
-(declare-function elmo-folder-exists-p "ext:elmo" (folder) t)
-(declare-function elmo-message-entity-field "ext:elmo-msgdb" (entity field &optional type))
-(declare-function elmo-message-field "ext:elmo" (folder number field &optional type) t)
-(declare-function elmo-msgdb-overview-get-entity "ext:elmo" (&rest unknown) t)
 (defvar font-lock-unfontify-region-function)
-(declare-function gnus-article-show-summary "gnus-art" ())
-(declare-function gnus-summary-last-subject "gnus-sum" ())
-(defvar gnus-other-frame-object)
-(defvar gnus-group-name)
-(defvar gnus-article-current)
-(defvar Info-current-file)
-(defvar Info-current-node)
-(declare-function mh-display-msg "mh-show" (msg-num folder-name))
-(declare-function mh-find-path "mh-utils" ())
-(declare-function mh-get-header-field "mh-utils" (field))
-(declare-function mh-get-msg-num "mh-utils" (error-if-no-message))
-(declare-function mh-header-display "mh-show" ())
-(declare-function mh-index-previous-folder "mh-search" ())
-(declare-function mh-normalize-folder-name "mh-utils" (folder &optional empty-string-okay dont-remove-trailing-slash return-nil-if-folder-empty))
-(declare-function mh-search "mh-search" (folder search-regexp &optional redo-search-flag window-config))
-(declare-function mh-search-choose "mh-search" (&optional searcher))
-(declare-function mh-show "mh-show" (&optional message redisplay-flag))
-(declare-function mh-show-buffer-message-number "mh-comp" (&optional buffer))
-(declare-function mh-show-header-display "mh-show" t t)
-(declare-function mh-show-msg "mh-show" (msg))
-(declare-function mh-show-show "mh-show" t t)
-(declare-function mh-visit-folder "mh-folder" (folder &optional range index-data))
-(defvar mh-progs)
-(defvar mh-current-folder)
-(defvar mh-show-folder-buffer)
-(defvar mh-index-folder)
-(defvar mh-searcher)
 (declare-function org-export-latex-cleaned-string "org-export-latex" ())
+(declare-function org-gnus-follow-link "org-gnus" (&optional group article))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
@@ -4465,36 +4420,11 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (defvar remember-buffer)
 (defvar remember-handler-functions)
 (defvar remember-annotation-functions)
-(declare-function rmail-narrow-to-non-pruned-header "rmail" ())
-(declare-function rmail-show-message "rmail" (&optional n no-summary))
-(declare-function rmail-what-message "rmail" ())
-(defvar rmail-current-message)
 (defvar texmathp-why)
-(declare-function vm-beginning-of-message "ext:vm-page" ())
-(declare-function vm-follow-summary-cursor "ext:vm-motion" ())
-(declare-function vm-get-header-contents "ext:vm-summary" (message header-name-regexp &optional clump-sep))
-(declare-function vm-isearch-narrow "ext:vm-search" ())
-(declare-function vm-isearch-update "ext:vm-search" ())
-(declare-function vm-select-folder-buffer "ext:vm-macro" ())
-(declare-function vm-su-message-id "ext:vm-summary" (m))
-(declare-function vm-su-subject "ext:vm-summary" (m))
-(declare-function vm-summarize "ext:vm-summary" (&optional display raise))
-(defvar vm-message-pointer)
-(defvar vm-folder-directory)
+(declare-function speedbar-line-directory "speedbar" (&optional depth))
+
 (defvar w3m-current-url)
 (defvar w3m-current-title)
-;; backward compatibility to old version of wl
-(declare-function wl-summary-buffer-msgdb "ext:wl-folder" (&rest unknown) t)
-(declare-function wl-folder-get-elmo-folder "ext:wl-folder" (entity &optional no-cache))
-(declare-function wl-summary-goto-folder-subr "ext:wl-summary" (&optional name scan-type other-window sticky interactive scoring force-exit))
-(declare-function wl-summary-jump-to-msg-by-message-id "ext:wl-summary" (&optional id))
-(declare-function wl-summary-line-from "ext:wl-summary" ())
-(declare-function wl-summary-line-subject "ext:wl-summary" ())
-(declare-function wl-summary-message-number "ext:wl-summary" ())
-(declare-function wl-summary-redisplay "ext:wl-summary" (&optional arg))
-(defvar wl-summary-buffer-elmo-folder)
-(defvar wl-summary-buffer-folder-name)
-(declare-function speedbar-line-directory "speedbar" (&optional depth))
 
 (defvar org-latex-regexps)
 (defvar constants-unit-system)
@@ -5251,8 +5181,8 @@ that will be added to PLIST.  Returns the string that was modified."
 (require 'font-lock)
 
 (defconst org-non-link-chars "]\t\n\r<>")
-(defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news" "bbdb" "vm"
-			   "wl" "mhe" "rmail" "gnus" "shell" "info" "elisp" "message"))
+(defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news"
+			   "shell" "elisp"))
 (defvar org-link-re-with-space nil
    "Matches a link with spaces, optional angular brackets around it.")
 (defvar org-link-re-with-space2 nil
@@ -12177,20 +12107,35 @@ Special properties are:
 In addition to these, any additional properties can be specified
 and then used in remember templates.")
 
-(defun org-add-link-type (type &optional follow publish)
+(defun org-add-link-type (type &optional follow export)
   "Add TYPE to the list of `org-link-types'.
 Re-compute all regular expressions depending on `org-link-types'
-FOLLOW and PUBLISH are two functions.  Both take the link path as
-an argument.
-FOLLOW should do whatever is necessary to follow the link, for example
-to find a file or display a mail message.
 
-PUBLISH takes the path and retuns the string that should be used when
-this document is published. FIMXE: This is actually not yet implemented."
+FOLLOW and EXPORT are two functions.
+
+FOLLOW should take the link path as the single argument and do whatever
+is necessary to follow the link, for example find a file or display
+a mail message.
+
+EXPORT should format the link path for export to one of the export formats.
+It should be a function accepting three arguments:
+
+  path    the path of the link, the text after the prefix (like \"http:\")
+  desc    the description of the link, if any, nil if there was no descripton
+  format  the export format, a symbol like `html' or `latex'.
+
+The function may use the FORMAT information to return different values
+depending on the format.  The return value will be put literally into
+the exported file.
+Org-mode has a built-in default for exporting links.  If you are happy with
+this default, there is no need to define an export function for the link
+type.  For a simple example of an export function, see `org-bbdb.el'."
   (add-to-list 'org-link-types type t)
   (org-make-link-regexps)
-  (add-to-list 'org-link-protocols
-	       (list type follow publish)))
+  (if (assoc type org-link-protocols)
+      (setcdr (assoc type org-link-protocols) (list follow export))
+    (push (list type follow export) org-link-protocols)))
+	  
 
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
@@ -12220,22 +12165,6 @@ For file links, arg negates `org-context-in-file-links'."
       (setq link (plist-get org-store-link-plist :link)
 	    desc (or (plist-get org-store-link-plist :description) link)))
 
-     ((eq major-mode 'bbdb-mode)
-      (let ((name (bbdb-record-name (bbdb-current-record)))
-	    (company (bbdb-record-getprop (bbdb-current-record) 'company)))
-	(setq cpltxt (concat "bbdb:" (or name company))
-	      link (org-make-link cpltxt))
-	(org-store-link-props :type "bbdb" :name name :company company)))
-
-     ((eq major-mode 'Info-mode)
-      (setq link (org-make-link "info:"
-				(file-name-nondirectory Info-current-file)
-				":" Info-current-node))
-      (setq cpltxt (concat (file-name-nondirectory Info-current-file)
-			   ":" Info-current-node))
-      (org-store-link-props :type "info" :file Info-current-file
-			    :node Info-current-node))
-
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
 	(setq link
@@ -12245,117 +12174,6 @@ For file links, arg negates `org-context-in-file-links'."
 		      (list 0 0 0 (nth 1 cd) (nth 0 cd) (nth 2 cd)
 			    nil nil nil))))
 	(org-store-link-props :type "calendar" :date cd)))
-
-     ((or (eq major-mode 'vm-summary-mode)
-	  (eq major-mode 'vm-presentation-mode))
-      (and (eq major-mode 'vm-presentation-mode) (vm-summarize))
-      (vm-follow-summary-cursor)
-      (save-excursion
-       (vm-select-folder-buffer)
-       (let* ((message (car vm-message-pointer))
-	      (folder buffer-file-name)
-	      (subject (vm-su-subject message))
-	      (to (vm-get-header-contents message "To"))
-	      (from (vm-get-header-contents message "From"))
-	      (message-id (vm-su-message-id message)))
-	 (org-store-link-props :type "vm" :from from :to to :subject subject
-			       :message-id message-id)
-	 (setq message-id (org-remove-angle-brackets message-id))
-	 (setq folder (abbreviate-file-name folder))
-	 (if (string-match (concat "^" (regexp-quote vm-folder-directory))
-			   folder)
-	     (setq folder (replace-match "" t t folder)))
-	 (setq cpltxt (org-email-link-description))
-	 (setq link (org-make-link "vm:" folder "#" message-id)))))
-
-     ((eq major-mode 'wl-summary-mode)
-      (let* ((msgnum (wl-summary-message-number))
-	     (message-id (elmo-message-field wl-summary-buffer-elmo-folder
-					     msgnum 'message-id))
-	     (wl-message-entity
-	      (if (fboundp 'elmo-message-entity)
-		  (elmo-message-entity
-		   wl-summary-buffer-elmo-folder msgnum)
-		(elmo-msgdb-overview-get-entity
-		 msgnum (wl-summary-buffer-msgdb))))
-	     (from (wl-summary-line-from))
-	     (to (car (elmo-message-entity-field wl-message-entity 'to)))
-	     (subject (let (wl-thr-indent-string wl-parent-message-entity)
-			(wl-summary-line-subject))))
-	(org-store-link-props :type "wl" :from from :to to
-			      :subject subject :message-id message-id)
-	(setq message-id (org-remove-angle-brackets message-id))
-	(setq cpltxt (org-email-link-description))
-	(setq link (org-make-link "wl:" wl-summary-buffer-folder-name
-				  "#" message-id))))
-
-     ((or (equal major-mode 'mh-folder-mode)
-	  (equal major-mode 'mh-show-mode))
-      (let ((from (org-mhe-get-header "From:"))
-	    (to (org-mhe-get-header "To:"))
-	    (message-id (org-mhe-get-header "Message-Id:"))
-	    (subject (org-mhe-get-header "Subject:")))
-	(org-store-link-props :type "mh" :from from :to to
-			      :subject subject :message-id message-id)
-	(setq cpltxt (org-email-link-description))
-	(setq link (org-make-link "mhe:" (org-mhe-get-message-real-folder) "#"
-				  (org-remove-angle-brackets message-id)))))
-
-     ((or (eq major-mode 'rmail-mode)
-	  (eq major-mode 'rmail-summary-mode))
-      (save-window-excursion
-	(save-restriction
-	  (when (eq major-mode 'rmail-summary-mode)
-	    (rmail-show-message rmail-current-message))
-	  (rmail-narrow-to-non-pruned-header)
-	  (let ((folder buffer-file-name)
-		(message-id (mail-fetch-field "message-id"))
-		(from (mail-fetch-field "from"))
-		(to (mail-fetch-field "to"))
-		(subject (mail-fetch-field "subject")))
-	    (org-store-link-props
-	     :type "rmail" :from from :to to
-	     :subject subject :message-id message-id)
-	    (setq message-id (org-remove-angle-brackets message-id))
-	    (setq cpltxt (org-email-link-description))
-	    (setq link (org-make-link "rmail:" folder "#" message-id)))
-	  (rmail-show-message rmail-current-message))))
-
-     ((eq major-mode 'gnus-group-mode)
-      (let ((group (cond ((fboundp 'gnus-group-group-name) ; depending on Gnus
-			  (gnus-group-group-name))         ; version
-			 ((fboundp 'gnus-group-name)
-			  (gnus-group-name))
-			 (t "???"))))
-	(unless group (error "Not on a group"))
-	(org-store-link-props :type "gnus" :group group)
-	(setq cpltxt (concat
-		      (if (org-xor arg org-usenet-links-prefer-google)
-			  "http://groups.google.com/groups?group="
-			"gnus:")
-		      group)
-	      link (org-make-link cpltxt))))
-
-     ((memq major-mode '(gnus-summary-mode gnus-article-mode))
-      (and (eq major-mode 'gnus-article-mode) (gnus-article-show-summary))
-      (let* ((group gnus-newsgroup-name)
-	     (article (gnus-summary-article-number))
-	     (header (gnus-summary-article-header article))
-	     (from (mail-header-from header))
-	     (message-id (mail-header-id header))
-	     (date (mail-header-date header))
-	     (subject (gnus-summary-subject-string)))
-	(org-store-link-props :type "gnus" :from from :subject subject
-			      :message-id message-id :group group)
-	(setq cpltxt (org-email-link-description))
-	(if (org-xor arg org-usenet-links-prefer-google)
-	    (setq link
-		  (concat
-		   cpltxt "\n  "
-		   (format "http://groups.google.com/groups?as_umsgid=%s"
-			   (org-fixup-message-id-for-http message-id))))
-	  (setq link (org-make-link "gnus:" group
-				    "#" (number-to-string article))))))
 
      ((eq major-mode 'w3-mode)
       (setq cpltxt (url-view-url t)
@@ -12462,6 +12280,13 @@ For file links, arg negates `org-context-in-file-links'."
 		     (concat "to %t")
 		   (concat "from %f")))))
   (setq org-store-link-plist plist))
+
+(defun org-add-link-props (&rest plist)
+  "Add these properties to the link property list."
+  (let (key value)
+    (while plist
+      (setq key (pop plist) value (pop plist))
+      (plist-put org-store-link-plist key value))))
 
 (defun org-email-link-description (&optional fmt)
   "Return the description part of an email link.
@@ -12979,54 +12804,8 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	  (org-open-file path in-emacs line search)))
 
        ((string= type "news")
-	(org-follow-gnus-link path))
-
-       ((string= type "bbdb")
-	(org-follow-bbdb-link path))
-
-       ((string= type "info")
-	(org-follow-info-link path))
-
-       ((string= type "gnus")
-	(let (group article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in Gnus link"))
-	  (setq group (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-gnus-link group article)))
-
-       ((string= type "vm")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in VM link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  ;; in-emacs is the prefix arg, will be interpreted as read-only
-	  (org-follow-vm-link folder article in-emacs)))
-
-       ((string= type "wl")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in Wanderlust link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-wl-link folder article)))
-
-       ((string= type "mhe")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in MHE link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-mhe-link folder article)))
-
-       ((string= type "rmail")
-	(let (folder article)
-	  (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	      (error "Error in RMAIL link"))
-	  (setq folder (match-string 1 path)
-		article (match-string 3 path))
-	  (org-follow-rmail-link folder article)))
+	(require 'org-gnus)
+	(org-gnus-follow-link path))
 
        ((string= type "shell")
 	(let ((cmd path))
@@ -13310,231 +13089,6 @@ onto the ring."
 		     1))
    (t (error "This should not happen"))))
 
-
-(defun org-follow-bbdb-link (name)
-  "Follow a BBDB link to NAME."
-  (require 'bbdb)
-  (let ((inhibit-redisplay (not debug-on-error))
-	(bbdb-electric-p nil))
-    (catch 'exit
-      ;; Exact match on name
-      (bbdb-name (concat "\\`" name "\\'") nil)
-      (if (< 0 (buffer-size (get-buffer "*BBDB*"))) (throw 'exit nil))
-      ;; Exact match on name
-      (bbdb-company (concat "\\`" name "\\'") nil)
-      (if (< 0 (buffer-size (get-buffer "*BBDB*"))) (throw 'exit nil))
-      ;; Partial match on name
-      (bbdb-name name nil)
-      (if (< 0 (buffer-size (get-buffer "*BBDB*"))) (throw 'exit nil))
-      ;; Partial match on company
-      (bbdb-company name nil)
-      (if (< 0 (buffer-size (get-buffer "*BBDB*"))) (throw 'exit nil))
-      ;; General match including network address and notes
-      (bbdb name nil)
-      (when (= 0 (buffer-size (get-buffer "*BBDB*")))
-	(delete-window (get-buffer-window "*BBDB*"))
-	(error "No matching BBDB record")))))
-
-(defun org-follow-info-link (name)
-  "Follow an info file & node link  to NAME."
-  (if (or (string-match "\\(.*\\)::?\\(.*\\)" name)
-          (string-match "\\(.*\\)" name))
-      (progn
-	(require 'info)
-        (if (match-string 2 name) ; If there isn't a node, choose "Top"
-            (Info-find-node (match-string 1 name) (match-string 2 name))
-          (Info-find-node (match-string 1 name) "Top")))
-    (message "Could not open: %s" name)))
-
-(defun org-follow-gnus-link (&optional group article)
-  "Follow a Gnus link to GROUP and ARTICLE."
-  (require 'gnus)
-  (funcall (cdr (assq 'gnus org-link-frame-setup)))
-  (if gnus-other-frame-object (select-frame gnus-other-frame-object))
-  (cond ((and group article)
-	 (gnus-group-read-group 1 nil group)
-	 (gnus-summary-goto-article (string-to-number article) nil t))
-	(group (gnus-group-jump-to-group group))))
-
-(defun org-follow-vm-link (&optional folder article readonly)
-  "Follow a VM link to FOLDER and ARTICLE."
-  (require 'vm)
-  (setq article (org-add-angle-brackets article))
-  (if (string-match "^//\\([a-zA-Z]+@\\)?\\([^:]+\\):\\(.*\\)" folder)
-      ;; ange-ftp or efs or tramp access
-      (let ((user (or (match-string 1 folder) (user-login-name)))
-	    (host (match-string 2 folder))
-	    (file (match-string 3 folder)))
-	(cond
-	 ((featurep 'tramp)
-	  ;; use tramp to access the file
-	  (if (featurep 'xemacs)
-	      (setq folder (format "[%s@%s]%s" user host file))
-	    (setq folder (format "/%s@%s:%s" user host file))))
-	 (t
-	  ;; use ange-ftp or efs
-	  (require (if (featurep 'xemacs) 'efs 'ange-ftp))
-	  (setq folder (format "/%s@%s:%s" user host file))))))
-  (when folder
-    (funcall (cdr (assq 'vm org-link-frame-setup)) folder readonly)
-    (sit-for 0.1)
-    (when article
-      (vm-select-folder-buffer)
-      (widen)
-      (let ((case-fold-search t))
-	(goto-char (point-min))
-	(if (not (re-search-forward
-		  (concat "^" "message-id: *" (regexp-quote article))))
-	    (error "Could not find the specified message in this folder"))
-	(vm-isearch-update)
-	(vm-isearch-narrow)
-	(vm-beginning-of-message)
-	(vm-summarize)))))
-
-(defun org-follow-wl-link (folder article)
-  "Follow a Wanderlust link to FOLDER and ARTICLE."
-  (if (and (string= folder "%")
-	   article
-	   (string-match "^\\([^#]+\\)\\(#\\(.*\\)\\)?" article))
-      ;; XXX: imap-uw supports folders starting with '#' such as "#mh/inbox".
-      ;; Thus, we recompose folder and article ids.
-      (setq folder (format "%s#%s" folder (match-string 1 article))
-	    article (match-string 3 article)))
-  (if (not (elmo-folder-exists-p (wl-folder-get-elmo-folder folder)))
-      (error "No such folder: %s" folder))
-  (wl-summary-goto-folder-subr folder 'no-sync t nil t nil nil)
-  (and article
-       (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets article))
-       (wl-summary-redisplay)))
-
-(defun org-follow-rmail-link (folder article)
-  "Follow an RMAIL link to FOLDER and ARTICLE."
-  (setq article (org-add-angle-brackets article))
-  (let (message-number)
-    (save-excursion
-      (save-window-excursion
-	(rmail (if (string= folder "RMAIL") rmail-file-name folder))
-	(setq message-number
-	      (save-restriction
-		(widen)
-		(goto-char (point-max))
-		(if (re-search-backward
-		     (concat "^Message-ID:\\s-+" (regexp-quote
-						  (or article "")))
-		     nil t)
-		    (rmail-what-message))))))
-    (if message-number
-	(progn
-	  (rmail (if (string= folder "RMAIL") rmail-file-name folder))
-	  (rmail-show-message message-number)
-	  message-number)
-      (error "Message not found"))))
-
-;;; mh-e integration based on planner-mode
-(defun org-mhe-get-message-real-folder ()
-  "Return the name of the current message real folder, so if you use
-sequences, it will now work."
-  (save-excursion
-    (let* ((folder
-            (if (equal major-mode 'mh-folder-mode)
-                mh-current-folder
-              ;; Refer to the show buffer
-              mh-show-folder-buffer))
-           (end-index
-            (if (boundp 'mh-index-folder)
-                (min (length mh-index-folder) (length folder))))
-           )
-      ;; a simple test on mh-index-data does not work, because
-      ;; mh-index-data is always nil in a show buffer.
-      (if (and (boundp 'mh-index-folder)
-               (string= mh-index-folder (substring folder 0 end-index)))
-          (if (equal major-mode 'mh-show-mode)
-              (save-window-excursion
-		(let (pop-up-frames)
-		  (when (buffer-live-p (get-buffer folder))
-		    (progn
-		      (pop-to-buffer folder)
-		      (org-mhe-get-message-folder-from-index)
-		      )
-		    )))
-            (org-mhe-get-message-folder-from-index)
-            )
-        folder
-        )
-      )))
-
-(defun org-mhe-get-message-folder-from-index ()
-  "Returns the name of the message folder in a index folder buffer."
-  (save-excursion
-    (mh-index-previous-folder)
-    (re-search-forward "^\\(+.*\\)$" nil t)
-    (message "%s" (match-string 1))))
-
-(defun org-mhe-get-message-folder ()
-  "Return the name of the current message folder.  Be careful if you
-use sequences."
-  (save-excursion
-    (if (equal major-mode 'mh-folder-mode)
-        mh-current-folder
-      ;; Refer to the show buffer
-      mh-show-folder-buffer)))
-
-(defun org-mhe-get-message-num ()
-  "Return the number of the current message.  Be careful if you
-use sequences."
-  (save-excursion
-    (if (equal major-mode 'mh-folder-mode)
-        (mh-get-msg-num nil)
-      ;; Refer to the show buffer
-      (mh-show-buffer-message-number))))
-
-(defun org-mhe-get-header (header)
-  "Return a header of the message in folder mode.  This will create a
-show buffer for the corresponding message.  If you have a more clever
-idea..."
-  (let* ((folder (org-mhe-get-message-folder))
-         (num (org-mhe-get-message-num))
-         (buffer (get-buffer-create (concat "show-" folder)))
-         (header-field))
-  (with-current-buffer buffer
-    (mh-display-msg num folder)
-    (if (equal major-mode 'mh-folder-mode)
-        (mh-header-display)
-      (mh-show-header-display))
-    (set-buffer buffer)
-    (setq header-field (mh-get-header-field header))
-    (if (equal major-mode 'mh-folder-mode)
-        (mh-show)
-      (mh-show-show))
-    header-field)))
-
-(defun org-follow-mhe-link (folder article)
-  "Follow an MHE link to FOLDER and ARTICLE.
-If ARTICLE is nil FOLDER is shown.  If the configuration variable
-`org-mhe-search-all-folders' is t and `mh-searcher' is pick,
-ARTICLE is searched in all folders.  Indexed searches (swish++,
-namazu, and others supported by MH-E) will always search in all
-folders."
-  (require 'mh-e)
-  (require 'mh-search)
-  (require 'mh-utils)
-  (mh-find-path)
-  (if (not article)
-      (mh-visit-folder (mh-normalize-folder-name folder))
-    (setq article (org-add-angle-brackets article))
-    (mh-search-choose)
-    (if (equal mh-searcher 'pick)
-        (progn
-          (mh-search folder (list "--message-id" article))
-          (when (and org-mhe-search-all-folders
-                     (not (org-mhe-get-message-real-folder)))
-            (kill-this-buffer)
-            (mh-search "+" (list "--message-id" article))))
-      (mh-search "+" article))
-    (if (org-mhe-get-message-real-folder)
-        (mh-show-msg 1)
-      (kill-this-buffer)
-      (error "Message not found"))))
 
 ;;; BibTeX links
 
@@ -25746,7 +25300,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-buffer table-orig-buffer
 	 ind start-is-num starter didclose
 	 rpl path desc descp desc1 desc2 link
-	 snumber
+	 snumber fnc
 	 )
 
     (let ((inhibit-read-only t))
@@ -26053,13 +25607,20 @@ lang=\"%s\" xml:lang=\"%s\">
 			      (concat "<img src=\"" thefile "\"/>")
 			    (concat "<a href=\"" thefile "\">" desc "</a>")))
 		(if (not valid) (setq rpl desc))))
-	     ((member type '("bbdb" "vm" "wl" "mhe" "rmail" "gnus" "shell" "info" "elisp"))
+
+	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
+	      (setq rpl 
+		    (save-match-data
+		      (funcall fnc (org-link-unescape path) desc1 'html))))
+	     
+	     (t
+	      ;; just publish the path, as default
 	      (setq rpl (concat "<i>&lt;" type ":"
 				(save-match-data (org-link-unescape path))
 				"&gt;</i>"))))
 	    (setq line (replace-match rpl t t line)
 		  start (+ start (length rpl))))
-
+	  
 	  ;; TODO items
 	  (if (and (string-match org-todo-line-regexp line)
 		   (match-beginning 2))
