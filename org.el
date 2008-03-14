@@ -156,6 +156,7 @@ With prefix arg HERE, insert it at point."
   :group 'org
   :type 'hook)
 
+(defvar org-modules)  ; defined below
 (defvar org-modules-loaded nil
   "Have the modules been loaded already?")
 
