@@ -55,7 +55,8 @@
 	   (company (bbdb-record-getprop (bbdb-current-record) 'company))
 	   (link (org-make-link "bbdb:" name)))
       (org-store-link-props :type "bbdb" :name name :company company
-			    :link link :description name))))
+			    :link link :description name)
+      link)))
 
 (defun org-bbdb-export (path desc format)
   "Create the exprt verison of a bbdb link."

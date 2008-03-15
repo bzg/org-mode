@@ -76,7 +76,8 @@ negates this setting for the duration of the command."
 		    "gnus:")
 		  group)
 	    link (org-make-link desc))
-      (org-add-link-props :link link :description desc)))
+      (org-add-link-props :link link :description desc)
+      link))
 
    ((memq major-mode '(gnus-summary-mode gnus-article-mode))
     (and (eq major-mode 'gnus-article-mode) (gnus-article-show-summary))
@@ -99,7 +100,8 @@ negates this setting for the duration of the command."
 			 (org-fixup-message-id-for-http message-id))))
 	(setq link (org-make-link "gnus:" group
 				  "#" (number-to-string article))))
-      (org-add-link-props :link link :description desc)))))
+      (org-add-link-props :link link :description desc)
+      link))))
 
 (defun org-gnus-open (path)
   "Follow an GNUS message or folder link."

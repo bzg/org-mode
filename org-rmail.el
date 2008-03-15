@@ -65,8 +65,9 @@
 	  (setq message-id (org-remove-angle-brackets message-id))
 	  (setq desc (org-email-link-description))
 	  (setq link (org-make-link "rmail:" folder "#" message-id))
-	  (org-add-link-props :link link :description desc))
-	(rmail-show-message rmail-current-message)))))
+	  (org-add-link-props :link link :description desc)
+	  (rmail-show-message rmail-current-message)
+	  link)))))
 
 (defun org-rmail-open (path)
   "Follow an RMAIL message link."

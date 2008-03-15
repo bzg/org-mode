@@ -53,9 +53,10 @@
 				":" Info-current-node))
       (setq desc (concat (file-name-nondirectory Info-current-file)
 			 ":" Info-current-node))
-    (org-store-link-props :type "info" :file Info-current-file
-			  :node Info-current-node
-			  :link link :desc desc))))
+      (org-store-link-props :type "info" :file Info-current-file
+			    :node Info-current-node
+			    :link link :desc desc)
+      link)))
 
 (defun org-info-open (path)
   "Follow an INFO message link."

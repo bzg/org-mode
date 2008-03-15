@@ -76,7 +76,8 @@
 	    (setq folder (replace-match "" t t folder)))
 	(setq desc (org-email-link-description))
 	(setq link (org-make-link "vm:" folder "#" message-id))
-	(org-add-link-props :link link :description desc)))))
+	(org-add-link-props :link link :description desc)
+	link))))
 
 (defun org-vm-open (path)
   "Follow an VM message link."

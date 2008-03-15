@@ -88,7 +88,8 @@ supported by MH-E, but will be slow with pick."
       (setq desc (org-email-link-description))
       (setq link (org-make-link "mhe:" (org-mhe-get-message-real-folder) "#"
 				(org-remove-angle-brackets message-id)))
-      (org-add-link-props :link link :description desc))))
+      (org-add-link-props :link link :description desc)
+      link)))
 
 (defun org-mhe-open (path)
   "Follow an MHE message link."

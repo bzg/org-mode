@@ -84,7 +84,8 @@
       (setq desc (org-email-link-description))
       (setq link (org-make-link "wl:" wl-summary-buffer-folder-name
 				"#" message-id))
-      (org-add-link-props :link link :description desc))))
+      (org-add-link-props :link link :description desc)
+      link)))
 
 (defun org-wl-open (path)
   "Follow an WL message link."
