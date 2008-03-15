@@ -1,9 +1,42 @@
+
 2008-03-14  Bastien Guerry  <bzg@altern.org>
 
 	* org-publish.el (org-publish-get-base-files-1): New function.
 	(org-publish-get-base-files): Use it.
 	(org-publish-temp-files): New variable.
 	Don't require 'dired-aux anymore.
+
+2008-03-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-info.el: New file.
+	(org-info-follow-link): Renamed from `org-follow-info-link'.
+
+	* org-gnus.el: New file.
+	(org-gnus-follow-link): Renamed from `org-flow-gnus-link'.
+
+	* org-mhe.el: New file.
+	(org-mhe-follow-link): Renamed from `org-follow-mhe-link'
+
+	* org-wl.el: New file.
+	(org-wl-follow-link): Renamed from `org-follow-wl-link'.
+
+2008-03-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-vm.el: New file.
+	(org-vm-follow-link): Renamed from `org-follow-vm-link'.
+
+	* org-bbdb.el: New file.
+
+	* org-rmail.el: New file.
+	(org-rmail-follow-link): Renamed from `org-follow-rmail-link'.
+
+	* org.el (org-export-as-html): Use `org-link-protocols' to
+	retrieve the export form of the link.
+	(org-add-link-type): Final parameter renamed from PUBLISH.  Better
+	documentation of how it is to be used.  Avoid double entries for
+	the same link type.
+	(org-add-link-props): New function.
+>>>>>>> split-out-linking-code:ChangeLog
 
 2008-03-14  Glenn Morris  <rmg@gnu.org>
 
