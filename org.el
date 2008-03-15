@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.23a
+;; Version: 5.23a-test
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.23a"
+(defconst org-version "5.23a-test"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -12286,7 +12286,8 @@ For file links, arg negates `org-context-in-file-links'."
   (let (key value)
     (while plist
       (setq key (pop plist) value (pop plist))
-      (plist-put org-store-link-plist key value))))
+      (setq org-store-link-plist
+	    (plist-put org-store-link-plist key value)))))
 
 (defun org-email-link-description (&optional fmt)
   "Return the description part of an email link.
