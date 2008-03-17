@@ -1,3 +1,7 @@
+2008-03-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-scheduled-past-days): Respect
+	`org-scheduled-past-days'.
 
 2008-03-14  Bastien Guerry  <bzg@altern.org>
 

@@ -21834,6 +21834,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
 	(if (or (and (< diff 0)
+		     (< (abs diff) org-scheduled-past-days)
 		     (and todayp (not org-agenda-only-exact-dates)))
 		(= diff 0))
 	    (save-excursion
