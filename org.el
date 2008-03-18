@@ -18605,7 +18605,11 @@ If necessary, clock-out of the currently active clock."
   "Find the location where the next clock line should be inserted."
   (org-back-to-heading t)
   (catch 'exit
-    (let ((beg (point-at-bol 2)) (end (progn (outline-next-heading) (point)))
+    (let ((beg (save-excursion
+		 (beginning-of-line 2)
+		 (or (bolp) (newline))
+		 (point)))
+	  (end (progn (outline-next-heading) (point)))
 	  (re (concat "^[ \t]*" org-clock-string))
 	  (cnt 0)
 	  first last)
