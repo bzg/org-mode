@@ -1210,7 +1210,7 @@ Changing this variable requires a restart of Emacs to become effective."
 	      (const :tag "Timestamps" date)))
 
 (defgroup org-link-store nil
-  "Options concerning storing links in Org-mode"
+  "Options concerning storing links in Org-mode."
   :tag "Org Store Link"
   :group 'org-link)
 
@@ -1270,7 +1270,7 @@ more efficient."
   :type 'boolean)
 
 (defgroup org-link-follow nil
-  "Options concerning following links in Org-mode"
+  "Options concerning following links in Org-mode."
   :tag "Org Follow Link"
   :group 'org-link)
 
@@ -1572,7 +1572,7 @@ given in the variable `org-remember-default-headline'.
 An optional sixth element specifies the contexts in which the user can
 select the template.  This element can be either a list of major modes
 or a function.  `org-remember' will first check whether the function
-returns `t' or if we are in any of the listed major mode, and select 
+returns `t' or if we are in any of the listed major modes, and select
 the template accordingly.
 
 The template specifies the structure of the remember buffer.  It should have
@@ -2007,7 +2007,7 @@ It is not recommended to change this constant.")
 These are two values, the first applies when first creating a time stamp.
 The second applies when changing it with the commands `S-up' and `S-down'.
 When changing the time stamp, this means that it will change in steps
-of N minues, as given by the second value. 
+of N minutes, as given by the second value.
 
 When a setting is 0 or 1, insert the time unmodified.  Useful rounding
 numbers should be factors of 60, so for example 5, 10, 15.
@@ -3191,7 +3191,7 @@ a names face, or a list like `(:background \"Red\")'."
 			(sexp :tag "face")))))
 
 (defgroup org-latex nil
-  "Options for embedding LaTeX code into Org-mode"
+  "Options for embedding LaTeX code into Org-mode."
   :tag "Org LaTeX"
   :group 'org)
 
@@ -16852,7 +16852,7 @@ Where possible, use the standard interface for changing this line."
 	      cache)))))
 
 (defun org-columns-new (&optional prop title width op fmt &rest rest)
-  "Insert a new column, to the leeft o the current column."
+  "Insert a new column, to the left of the current column."
   (interactive)
   (let ((editp (and prop (assoc prop org-columns-current-fmt-compiled)))
 	cell)
@@ -27968,7 +27968,7 @@ really on, so that the block visually is on the match."
 
 (defun org-back-over-empty-lines ()
   "Move backwards over witespace, to the beginning of the first empty line.
-Returns the number o empty lines passed."
+Returns the number of empty lines passed."
   (let ((pos (point)))
     (skip-chars-backward " \t\n\r")
     (beginning-of-line 2)
@@ -28066,7 +28066,7 @@ Counting starts at 1."
 
 (defun org-find-base-buffer-visiting (file)
   "Like `find-buffer-visiting' but alway return the base buffer and
-not an indirect buffer"
+not an indirect buffer."
   (let ((buf (find-buffer-visiting file)))
     (if buf
 	(or (buffer-base-buffer buf) buf)
