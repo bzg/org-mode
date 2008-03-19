@@ -10523,7 +10523,7 @@ and TABLE is a vector with line types."
 		    t)))
       (setq n (1- n)))
     (if (or (< i 0) (>= i l))
-	(error "Row descriptior leads outside table")
+	(error "Row descriptor leads outside table")
       i)))
 
 (defun org-rewrite-old-row-references (s)
@@ -14131,7 +14131,7 @@ This function can be used in a hook."
 
 (defconst org-additional-option-like-keywords
   '("BEGIN_HTML" "BEGIN_LaTeX" "END_HTML" "END_LaTeX"
-    "ORGTBL" "HTML:" "LaTeX:" "BEGIN:" "END:" "DATE:" "TBLFM"
+    "ORGTBL" "HTML:" "LaTeX:" "BEGIN:" "END:" "TBLFM"
     "BEGIN_EXAMPLE" "END_EXAMPLE"))
 
 (defun org-complete (&optional arg)
@@ -14215,7 +14215,9 @@ At all other locations, this simply calls the value of
        (cond ((eq completion t)
 	      (if (not (assoc (upcase pattern) table))
 		  (message "Already complete")
-		(if (equal type :opt)
+		(if (and (equal type :opt)
+			 (not (member (car (assoc (upcase pattern) table))
+				      org-additional-option-like-keywords)))
 		    (insert (substring (cdr (assoc (upcase pattern) table))
 				       (length pattern)))
 		  (if (memq type '(:tag :prop)) (insert ":")))))
@@ -24678,9 +24680,9 @@ underlined headlines.  The default is 3."
 
     (cond
      ((and date (string-match "%" date))
-      (setq date (format-time-string date (current-time))))
+      (setq date (format-time-string date)))
      (date)
-     (t (setq date (format-time-string "%Y/%m/%d %X" (current-time)))))
+     (t (setq date (format-time-string "%Y/%m/%d %X"))))
 
     (if (and date org-export-time-stamp-file)
 	(insert (concat (nth 2 lang-words) ": " date"\n")))
@@ -24984,6 +24986,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    "#+TITLE:     %s
 #+AUTHOR:    %s
 #+EMAIL:     %s
+#+DATE:      %s
 #+LANGUAGE:  %s
 #+TEXT:      Some descriptive text to be emitted.  Several lines OK.
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s TeX:%s LaTeX:%s skip:%s d:%s tags:%s
@@ -24997,7 +25000,9 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+ARCHIVE:   %s
 #+LINK:      %s
 "
-   (buffer-name) (user-full-name) user-mail-address org-export-default-language
+   (buffer-name) (user-full-name) user-mail-address 
+   (format-time-string (car org-time-stamp-formats))
+   org-export-default-language
    org-export-headline-levels
    org-export-with-section-numbers
    org-export-with-toc
@@ -25322,9 +25327,9 @@ PUB-DIR is set, use this as the publishing directory."
 
     (cond
      ((and date (string-match "%" date))
-      (setq date (format-time-string date (current-time))))
+      (setq date (format-time-string date)))
      (date)
-     (t (setq date (format-time-string "%Y/%m/%d %X" (current-time)))))
+     (t (setq date (format-time-string "%Y/%m/%d %X"))))
 
     ;; Get the language-dependent settings
     (setq lang-words (or (assoc language org-export-language-setup)

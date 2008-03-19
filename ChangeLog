@@ -1,3 +1,13 @@
+2008-03-19  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-complete): Silently fail when trying to complete
+	keywords that don't have a default value.
+	(org-get-current-options): Added a #+DATE: option.
+	(org-additional-option-like-keywords): Removed "DATE:" from the
+	list of additional keywords.
+	(org-export-as-html): Removed (current-time) as unnecessary second
+	argument of `format-time-string'.
+
 2008-03-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-clock-find-position): Handle special case at end of
