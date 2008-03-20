@@ -33,6 +33,16 @@
 
 (require 'org)
 
+(defgroup org-wl nil
+ "Options concerning the Wanderlust link."
+ :tag "Org Startup"
+ :group 'org-link)
+
+(defcustom org-wl-link-to-refile-destination t
+ "Create a link to the refile destination if the message is marked as refile."
+ :group 'org-wl
+ :type 'boolean)
+
 ;; Declare external functions and variables
 (declare-function elmo-folder-exists-p "ext:elmo" (folder) t)
 (declare-function elmo-message-entity-field "ext:elmo-msgdb"
@@ -53,6 +63,7 @@
 (declare-function wl-summary-line-subject "ext:wl-summary" ())
 (declare-function wl-summary-message-number "ext:wl-summary" ())
 (declare-function wl-summary-redisplay "ext:wl-summary" (&optional arg))
+(declare-function wl-summary-registered-temp-mark "ext:wl-action" (number))
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
 
@@ -62,9 +73,16 @@
 
 ;; Implementation
 (defun org-wl-store-link ()
-  "Store a link to an WL folder or message."
-  (when (eq major-mode 'wl-summary-mode)
-    (let* ((msgnum (wl-summary-message-number))
+ "Store a link to an WL folder or message."
+ (when (eq major-mode 'wl-summary-mode)
+   (let* ((msgnum (wl-summary-message-number))
+	   (mark-info (wl-summary-registered-temp-mark msgnum))
+	   (folder-name
+	    (if (and org-wl-link-to-refile-destination
+		     mark-info
+		     (equal (nth 1 mark-info) "o")) ; marked as refile
+		(nth 2 mark-info)
+	      wl-summary-buffer-folder-name))
 	   (message-id (elmo-message-field wl-summary-buffer-elmo-folder
 					   msgnum 'message-id))
 	   (wl-message-entity
@@ -74,43 +92,45 @@
 	      (elmo-msgdb-overview-get-entity
 	       msgnum (wl-summary-buffer-msgdb))))
 	   (from (wl-summary-line-from))
-	   (to (car (elmo-message-entity-field wl-message-entity 'to)))
+	   (to (let ((to-field (elmo-message-entity-field wl-message-entity
+							  'to)))
+		 (if (listp to-field)
+		     (car to-field)
+		   to-field)))
 	   (subject (let (wl-thr-indent-string wl-parent-message-entity)
 		      (wl-summary-line-subject)))
 	   desc link)
-      (org-store-link-props :type "wl" :from from :to to
+     (org-store-link-props :type "wl" :from from :to to
 			    :subject subject :message-id message-id)
-      (setq message-id (org-remove-angle-brackets message-id))
-      (setq desc (org-email-link-description))
-      (setq link (org-make-link "wl:" wl-summary-buffer-folder-name
+     (setq message-id (org-remove-angle-brackets message-id))
+     (setq desc (org-email-link-description))
+     (setq link (org-make-link "wl:" folder-name
 				"#" message-id))
-      (org-add-link-props :link link :description desc)
-      link)))
+     (org-add-link-props :link link :description desc)
+     link)))
 
 (defun org-wl-open (path)
-  "Follow an WL message link."
-  (let (folder article)
-    (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	(error "Error in Wanderlust link"))
-    (setq folder (match-string 1 path)
-	  article (match-string 3 path))
-    (org-wl-follow-link folder article)))
-
-(defun org-wl-follow-link (folder article)
-  "Follow a Wanderlust link to FOLDER and ARTICLE."
-  (if (and (string= folder "%")
-	   article
-	   (string-match "^\\([^#]+\\)\\(#\\(.*\\)\\)?" article))
-      ;; XXX: imap-uw supports folders starting with '#' such as "#mh/inbox".
-      ;; Thus, we recompose folder and article ids.
-      (setq folder (format "%s#%s" folder (match-string 1 article))
-	    article (match-string 3 article)))
-  (if (not (elmo-folder-exists-p (wl-folder-get-elmo-folder folder)))
-      (error "No such folder: %s" folder))
-  (wl-summary-goto-folder-subr folder 'no-sync t nil t nil nil)
-  (and article
-       (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets article))
-       (wl-summary-redisplay)))
+ "Follow an WL message link."
+ ;; XXX: The imap-uw's MH folder names start with "%#".
+ (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
+     (error "Error in Wanderlust link"))
+ (let ((folder (match-string 1 path))
+	(article (match-string 3 path)))
+   (if (not (elmo-folder-exists-p (wl-folder-get-elmo-folder folder)))
+	(error "No such folder: %s" folder))
+   (let ((old-buf (current-buffer))
+	  (old-point (point-marker)))
+     (wl-folder-goto-folder-subr folder)
+     (save-excursion
+	;; XXX: `wl-folder-goto-folder-subr' moves point to the
+	;; beginning of the current line.  So, restore the point
+	;; in the old buffer.
+	(set-buffer old-buf)
+	(goto-char old-point))
+     (wl-thread-open-all)
+     (and (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
+						  article))
+	   (wl-summary-redisplay)))))
 
 (provide 'org-wl)
 
