@@ -12,6 +12,19 @@
 
 	* org.el (org-clock-find-position): Handle special case at end of
 	buffer.
+	(org-agenda-day-view): New argument DAY-OF-YEAR, pass it on to
+	`org-agenda-change-time-span'.
+	(org-agenda-week-view): New argument ISO-WEEK, pass it on to
+	`org-agenda-change-time-span'.
+	(org-agenda-month-view): New argument MONTH, pass it on to
+	`org-agenda-change-time-span'.
+	(org-agenda-year-view):  New argument YEAR, pass it on to
+	`org-agenda-change-time-span'.
+	(org-agenda-change-time-span): New optional argument N, pass it on
+	to `org-agenda-compute-time-span'.
+	(org-agenda-compute-time-span): New argument N, interpret it by
+	changing the starting day.
+	(org-small-year-to-year): New function.
 
 2008-03-17  Carsten Dominik  <dominik@science.uva.nl>
 

@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 5.23a-test
+;; Version: 5.23a++
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -84,7 +84,7 @@
 
 ;;; Version
 
-(defconst org-version "5.23a-test"
+(defconst org-version "5.23a++"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -163,7 +163,7 @@ With prefix arg HERE, insert it at point."
 (defun org-load-modules-maybe (&optional force)
   "Load all extensions listed in `org-default-extensions'."
   (when (or force (not org-modules-loaded))
-    (mapc (lambda (ext) 
+    (mapc (lambda (ext)
 	    (condition-case nil (require ext)
 	      (error (message "Problems while trying to load feature `%s'" ext))))
 	  org-modules)
@@ -2069,6 +2069,8 @@ This affects the following situations:
    For example, if it is april and you enter \"feb 2\", this will be read
    as feb 2, *next* year.  \"May 5\", however, will be this year.
 
+Currently this does not work for ISO week specifications.
+
 When this option is nil, the current month and year will always be used
 as defaults."
   :group 'org-time
@@ -2448,7 +2450,7 @@ you can \"misuse\" it to also add other text to the header.  However,
 		  (const org-agenda-files)
 		  (list
 		   (const :format "" quote)
-		   (repeat 
+		   (repeat
 			   (file))))
 	    (list :tag "Sorting strategy"
 		  (const org-agenda-sorting-strategy)
@@ -2614,7 +2616,7 @@ should provide a description for the prefix, like
 		   (list :tag "Stuck projects"
 			 (const :format "" stuck)
 			 (const :tag "" :format "" "")
-			 ,org-agenda-custom-commands-local-options)	   
+			 ,org-agenda-custom-commands-local-options)
 		   (list :tag "Tags search"
 			 (const :format "" tags)
 			 (string :tag "Match")
@@ -2870,11 +2872,30 @@ a calendar-style date list like (month day year)."
 (defun org-agenda-format-date-aligned (date)
   "Format a date string for display in the daily/weekly agenda, or timeline.
 This function makes sure that dates are aligned for easy reading."
-  (format "%-9s %2d %s %4d"
-	  (calendar-day-name date)
-	  (extract-calendar-day date)
-	  (calendar-month-name (extract-calendar-month date))
-	  (extract-calendar-year date)))
+  (let* ((dayname (calendar-day-name date))
+	 (day (extract-calendar-day date))
+	 (day-of-week0 (calendar-day-of-week date))
+	 (day-of-week (if (= day-of-week0 0) 7 day-of-week0))
+	 (month (extract-calendar-month date))
+	 (monthname (calendar-month-name month))
+	 (year (extract-calendar-year date))
+	 (iso-week (string-to-number
+		    (format-time-string
+		     "%V" (calendar-time-from-absolute
+			   (calendar-absolute-from-gregorian date) 1))))
+	 (weekyear (cond ((and (= month 1) (>= iso-week 52))
+			  (1- year))
+			 ((and (= month 12) (<= iso-week 1))
+			  (1+ year))
+			 (t year)))
+	 (weekstring (if (= year weekyear)
+			 (format "W%02d %d" iso-week day-of-week)
+		       (format "%4d-W%02d %d" weekyear iso-week day-of-week))))
+    (setq weekstring (concat (make-string (max 0 (- 12 (length monthname)))
+					  ?\ )
+			     weekstring))
+    (format "%-9s %2d %s %4d   %s"
+	    dayname day monthname year weekstring)))
 
 (defcustom org-agenda-include-diary nil
   "If non-nil, include in the agenda entries from the Emacs Calendar's diary."
@@ -12135,7 +12156,7 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
   (if (assoc type org-link-protocols)
       (setcdr (assoc type org-link-protocols) (list follow export))
     (push (list type follow export) org-link-protocols)))
-	  
+
 
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
@@ -13300,12 +13321,12 @@ RET at beg-of-buf -> Append to file as level 2 headline
 	   ;; If no template at this point, add the default templates:
 	   (pre-selected-templates1
 	    (if (not (delq nil pre-selected-templates))
-		(mapcar (lambda(x) (if (not (nth 5 x)) x)) 
+		(mapcar (lambda(x) (if (not (nth 5 x)) x))
 			org-remember-templates)
 	      pre-selected-templates))
 	   ;; Then unconditionnally add template for any contexts
 	   (pre-selected-templates2
-	    (append (mapcar (lambda(x) (if (eq (nth 5 x) t) x)) 
+	    (append (mapcar (lambda(x) (if (eq (nth 5 x) t) x))
 			    org-remember-templates)
 		    (delq nil pre-selected-templates1)))
 	   (templates (mapcar (lambda (x)
@@ -14057,7 +14078,7 @@ the property list including an extra property :name with the block name."
       (error "Dynamic block not terminated"))
     (setq params
 	  (append params
-		  (list :content (buffer-substring 
+		  (list :content (buffer-substring
 				  begdel (match-beginning 0)))))
     (delete-region begdel (match-beginning 0))
     (goto-char begdel)
@@ -14666,7 +14687,7 @@ This function is run automatically after each state change to a DONE state."
 	      (while (< (time-to-days time) (time-to-days (current-time)))
 		(when (= (incf nshift) nshiftmax)
 		  (or (y-or-n-p (message "%d repeater intervals were not enough to shift date past today.  Continue? " nshift))
-		      (error "Abort")))		      
+		      (error "Abort")))
 		(org-timestamp-change n (cdr (assoc what whata)))
 		(sit-for .0001) ;; so we can watch the date shifting
 		(org-at-timestamp-p t)
@@ -14764,7 +14785,7 @@ be removed."
 		default-input (and ts (org-get-compact-tod ts))))))
     (when what
       ;; If necessary, get the time from the user
-      (setq time (or time (org-read-date nil 'to-time nil nil 
+      (setq time (or time (org-read-date nil 'to-time nil nil
 					 default-time default-input))))
 
     (when (and org-insert-labeled-timestamps-at-point
@@ -17653,13 +17674,23 @@ user."
   "Analyze the combined answer of the date prompt."
   ;; FIXME: cleanup and comment
   (let (delta deltan deltaw deltadef year month day
-	      hour minute second wday pm h2 m2 tl wday1)
+	      hour minute second wday pm h2 m2 tl wday1
+	      iso-year iso-weekday iso-week iso-year)
 
     (when (setq delta (org-read-date-get-relative ans (current-time) def))
       (setq ans (replace-match "" t t ans)
 	    deltan (car delta)
 	    deltaw (nth 1 delta)
             deltadef (nth 2 delta)))
+
+    ;; Check if there is an iso week date in there
+    ;; If yes, sore the info and ostpone interpreting it until the rest
+    ;; of the parsing is done
+    (when (string-match "\\<\\(?:\\([0-9]+\\)-\\)?[wW]\\([0-9]\\{1,2\\}\\)\\(?:-\\([0-6]\\)\\)?\\([ \t]\\|$\\)" ans)
+      (setq iso-year (if (match-end 1) (org-small-year-to-year (string-to-number (match-string 1 ans))))
+	    iso-weekday (if (match-end 3) (string-to-number (match-string 3 ans)))
+	    iso-week (string-to-number (match-string 2 ans)))
+      (setq ans (replace-match "" t t ans)))
 
     ;; Help matching ISO dates with single digit month ot day, like 2006-8-11.
     (when (string-match
@@ -17695,9 +17726,11 @@ user."
       (setq hour (string-to-number (match-string 1 ans))
 	    h2 (+ hour (string-to-number (match-string 3 ans)))
 	    minute (string-to-number (match-string 2 ans))
-	    m2 (+ minute (if (match-end 5) (string-to-number (match-string 5 ans))0)))
+	    m2 (+ minute (if (match-end 5) (string-to-number
+					    (match-string 5 ans))0)))
       (if (>= m2 60) (setq h2 (1+ h2) m2 (- m2 60)))
-      (setq ans (replace-match (format "%02d:%02d-%02d:%02d" hour minute h2 m2) t t ans)))
+      (setq ans (replace-match (format "%02d:%02d-%02d:%02d" hour minute h2 m2)
+			       t t ans)))
 
     ;; Check if there is a time range
     (when (boundp 'org-end-time-was-given)
@@ -17724,7 +17757,30 @@ user."
 	  minute (or (nth 1 tl) (nth 1 defdecode))
 	  second (or (nth 0 tl) 0)
 	  wday (nth 6 tl))
-    (when deltan
+
+    ;; Special date definitions below
+    (cond
+     (iso-week
+      ;; There was an iso week
+      (setq year (or iso-year year)
+	    day (or iso-weekday wday 1)
+	    wday nil ; to make sure that the trigger below does not match
+	    iso-date (calendar-gregorian-from-absolute
+		      (calendar-absolute-from-iso
+		       (list iso-week day year))))
+; FIXME:  Should we also push ISO weeks into the future?
+;      (when (and org-read-date-prefer-future
+;		 (not iso-year)
+;		 (< (calendar-absolute-from-gregorian iso-date)
+;		    (time-to-days (current-time))))
+;	(setq year (1+ year)
+;	      iso-date (calendar-gregorian-from-absolute
+;			(calendar-absolute-from-iso
+;			 (list iso-week day year)))))
+      (setq month (car iso-date)
+	    year (nth 2 iso-date)
+	    day (nth 1 iso-date)))
+     (deltan
       (unless deltadef
 	(let ((now (decode-time (current-time))))
 	  (setq day (nth 3 now) month (nth 4 now) year (nth 5 now))))
@@ -17732,12 +17788,12 @@ user."
 	    ((equal deltaw "w") (setq day (+ day (* 7 deltan))))
 	    ((equal deltaw "m") (setq month (+ month deltan)))
 	    ((equal deltaw "y") (setq year (+ year deltan)))))
-    (when (and wday (not (nth 3 tl)))
+     ((and wday (not (nth 3 tl)))
       ;; Weekday was given, but no day, so pick that day in the week
       ;; on or after the derived date.
       (setq wday1 (nth 6 (decode-time (encode-time 0 0 0 day month year))))
       (unless (equal wday wday1)
-	(setq day (+ day (% (- wday wday1 -7) 7)))))
+	(setq day (+ day (% (- wday wday1 -7) 7))))))
     (if (and (boundp 'org-time-was-given)
 	     (nth 2 tl))
 	(setq org-time-was-given t))
@@ -18414,12 +18470,12 @@ in the timestamp determines what will be changed."
 	(setq ng 6 new (car (rassoc (+ n (cdr (assoc (match-string 6 s) idx))) idx))))
        ((org-pos-in-match-range pos 5)
 	(setq ng 5 new (format "%d" (max 1 (+ n (string-to-number (match-string 5 s)))))))
-       
+
        ((org-pos-in-match-range pos 9)
 	(setq ng 9 new (car (rassoc (+ n (cdr (assoc (match-string 9 s) idx))) idx))))
        ((org-pos-in-match-range pos 8)
 	(setq ng 8 new (format "%d" (max 0 (+ n (string-to-number (match-string 8 s))))))))
-      
+
       (when ng
 	(setq s (concat
 		 (substring s 0 (match-beginning ng))
@@ -22533,36 +22589,51 @@ With prefix ARG, go backward that many times the current span."
   (interactive "p")
   (org-agenda-later (- arg)))
 
-(defun org-agenda-day-view ()
-  "Switch to daily view for agenda."
-  (interactive)
+(defun org-agenda-day-view (&optional day-of-year)
+  "Switch to daily view for agenda.
+With argument DAY-OF-YEAR, switch to that day of the year."
+  (interactive "P")
   (setq org-agenda-ndays 1)
-  (org-agenda-change-time-span 'day))
-(defun org-agenda-week-view ()
-  "Switch to daily view for agenda."
-  (interactive)
+  (org-agenda-change-time-span 'day day-of-year))
+(defun org-agenda-week-view (&optional iso-week)
+  "Switch to daily view for agenda.
+With argument ISO-WEEK, switch to the corresponding ISO week.
+If ISO-WEEK has more then 2 digits, only the last two encode the
+week.  Any digits before this encode a year.  So 200712 means
+week 12 of year 2007.  Years in the range 1938-2037 can also be
+written as 2-digit years."
+  (interactive "P")
   (setq org-agenda-ndays 7)
-  (org-agenda-change-time-span 'week))
-(defun org-agenda-month-view ()
-  "Switch to daily view for agenda."
-  (interactive)
-  (org-agenda-change-time-span 'month))
-(defun org-agenda-year-view ()
-  "Switch to daily view for agenda."
-  (interactive)
+  (org-agenda-change-time-span 'week iso-week))
+(defun org-agenda-month-view (&optional month)
+  "Switch to daily view for agenda.
+With argument MONTH, switch to that month."
+  (interactive "P")
+  ;; FIXME: allow month like 812 to mean 2008 december
+  (org-agenda-change-time-span 'month month))
+(defun org-agenda-year-view (&optional year)
+  "Switch to daily view for agenda.
+With argument YEAR, switch to that year.
+If MONTH has more then 2 digits, only the last two encode the
+month.  Any digits before this encode a year.  So 200712 means
+December year 2007.  Years in the range 1938-2037 can also be
+written as 2-digit years."
+  (interactive "P")
+  (when year
+    (setq year (org-small-year-to-year year)))
   (if (y-or-n-p "Are you sure you want to compute the agenda for an entire year? ")
-      (org-agenda-change-time-span 'year)
+      (org-agenda-change-time-span 'year year)
     (error "Abort")))
 
-(defun org-agenda-change-time-span (span)
+(defun org-agenda-change-time-span (span &optional n)
   "Change the agenda view to SPAN.
 SPAN may be `day', `week', `month', `year'."
   (org-agenda-check-type t 'agenda)
-  (if (equal org-agenda-span span)
+  (if (and (not n) (equal org-agenda-span span))
       (error "Viewing span is already \"%s\"" span))
   (let* ((sd (or (get-text-property (point) 'day)
 		org-starting-day))
-	 (computed (org-agenda-compute-time-span sd span))
+	 (computed (org-agenda-compute-time-span sd span n))
 	 (org-agenda-overriding-arguments
 	  (list (car org-agenda-last-arguments)
 		(car computed) (cdr computed) t)))
@@ -22571,15 +22642,22 @@ SPAN may be `day', `week', `month', `year'."
   (org-agenda-set-mode-name)
   (message "Switched to %s view" span))
 
-(defun org-agenda-compute-time-span (sd span)
+(defun org-agenda-compute-time-span (sd span n)
   "Compute starting date and number of days for agenda.
 SPAN may be `day', `week', `month', `year'.  The return value
 is a cons cell with the starting date and the number of days,
 so that the date SD will be in that range."
   (let* ((greg (calendar-gregorian-from-absolute sd))
-	 nd)
+	 (dg (nth 1 greg))
+	 (mg (car greg))
+	 (yg (nth 2 greg))
+	 nd w1 y1 m1 thisweek)
     (cond
      ((eq span 'day)
+      (when n
+	(setq sd (+ (calendar-absolute-from-gregorian
+		     (list mg 1 yg))
+		    n -1)))
       (setq nd 1))
      ((eq span 'week)
       (let* ((nt (calendar-day-of-week
@@ -22588,20 +22666,44 @@ so that the date SD will be in that range."
 		    (- nt org-agenda-start-on-weekday)
 		  0)))
 	(setq sd (- sd (+ (if (< d 0) 7 0) d)))
+	(when n
+	  (require 'cal-iso)
+	  (setq thisweek (car (calendar-iso-from-absolute sd)))
+	  (when (> n 99)
+	    (setq y1 (org-small-year-to-year (/ n 100))
+		  n (mod n 100)))
+	  (setq sd
+		(calendar-absolute-from-iso
+		 (list n 1
+		       (or y1 (nth 2 (calendar-iso-from-absolute sd)))))))
 	(setq nd 7)))
      ((eq span 'month)
+      (when (and n (> n 99))
+	(setq y1 (org-small-year-to-year (/ n 100))
+	      n (mod n 100)))
       (setq sd (calendar-absolute-from-gregorian
-		(list (car greg) 1 (nth 2 greg)))
+		(list (or n mg) 1 (or y1 yg)))
 	    nd (- (calendar-absolute-from-gregorian
-		   (list (1+ (car greg)) 1 (nth 2 greg)))
+		   (list (1+ (or n mg)) 1 (or y1 yg)))
 		  sd)))
      ((eq span 'year)
       (setq sd (calendar-absolute-from-gregorian
-		(list 1 1 (nth 2 greg)))
+		(list 1 1 (or n yg)))
 	    nd (- (calendar-absolute-from-gregorian
-		   (list 1 1 (1+ (nth 2 greg))))
+		   (list 1 1 (1+ (or n yg))))
 		  sd))))
     (cons sd nd)))
+
+(defun org-small-year-to-year (year)
+  "Convert 2-digit years into 4-digit years.
+38-99 are mapped into 1938-1999.  1-37 are mapped into 2001-2007.
+The year 2000 cannot be abbreviated.  Any year lager than 99
+is retrned unchanged."
+  (if (< year 38)
+      (setq year (+ 2000 year))
+    (if (< year 100)
+	(setq year (+ 1900 year))))
+  year)
 
 ;; FIXME: does not work if user makes date format that starts with a blank
 (defun org-agenda-next-date-line (&optional arg)
@@ -25225,7 +25327,7 @@ PUB-DIR is set, use this as the publishing directory."
 		   (>= (org-end-of-subtree t t) (region-end))))))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
-	 (org-current-export-dir 
+	 (org-current-export-dir
 	  (or pub-dir (org-export-directory :html opt-plist)))
 	 (org-current-export-file buffer-file-name)
          (level 0) (line "") (origline "") txt todo
@@ -25620,10 +25722,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		(if (not valid) (setq rpl desc))))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
-	      (setq rpl 
+	      (setq rpl
 		    (save-match-data
 		      (funcall fnc (org-link-unescape path) desc1 'html))))
-	     
+
 	     (t
 	      ;; just publish the path, as default
 	      (setq rpl (concat "<i>&lt;" type ":"
@@ -25631,7 +25733,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				"&gt;</i>"))))
 	    (setq line (replace-match rpl t t line)
 		  start (+ start (length rpl))))
-	  
+
 	  ;; TODO items
 	  (if (and (string-match org-todo-line-regexp line)
 		   (match-beginning 2))
@@ -27471,7 +27573,7 @@ to normal lines."
 	    (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
 		(replace-match "\\1- \\2")))
 	  (beginning-of-line 2))))))
-			
+
 (defun org-toggle-region-headings (beg end)
   "Convert all lines in region to list items.
 If the first line is already an item, convert all list items in the region
@@ -27500,7 +27602,7 @@ to normal lines."
 	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
 		  (replace-match rpl)))
 	    (beginning-of-line 2)))))))
-  
+
 (defun org-meta-return (&optional arg)
   "Insert a new heading or wrap a region in a table.
 Calls `org-insert-heading' or `org-table-wrap-region', depending on context.

@@ -5451,7 +5451,14 @@ Delete other windows.
 @item d w m y
 Switch to day/week/month/year view.  When switching to day or week view,
 this setting becomes the default for subseqent agenda commands.  Since
-month and year views are slow to create, the do not become the default.
+month and year views are slow to create, they do not become the default.
+A numeric prefix argument may be used to jump directly to a specific day
+of the year, ISO week, month, or year, respectively.  For example,
+@kbd{32 d} jumps to February 1st, @kbd{9 w} to ISO week number 9.  When
+setting day, week, or month view, a year may be encoded in the prefix
+argument as well.  For example, @kbd{200712 w} will jump to week 12 in
+2007.  If such a year specification has only one or two digits, it will
+be mapped to the interval 1938-2037.
 @c
 @kindex D
 @item D
