@@ -9,6 +9,48 @@
 
 ** Details
 
+*** Suport for ISO week dates (RFC odder ISO number???)
+
+    Dates in the agenda now show the ISO week an day
+    specification, in the form =W08 2=, meaning Tuesday of
+    week 2.
+
+    The keys =d=, =w=, =m=, and =y= in the agenda view now accept
+    prefix arguments.  Remember that in the agenda, you can
+    directly type a prefix argument by typing a number, no need
+    to press =C-u= first.  The prefix argument may be used to
+    jump directly to a specific day of the year, ISO week, month,
+    or year, respectively.  For example, =32 d= jumps to February
+    1st, =9 w= to ISO week number 9.  When setting day, week, or
+    month view, a year may be encoded in the prefix argument as
+    well.  For example, =200712 w= will jump to week 12 in
+    2007.  If such a year specification has only one or two
+    digits, it will be mapped to the interval 1938-2037.
+
+    When entering a date at the date prompt, you may now also
+    specify an ISO week.  For example
+
+    : w4              Monday of week 4
+    : fri w4          Friday of week 4
+    : w4-5            Same as above
+    : 2012 w4 fri     Friday of week 4 in 2012.
+    : 2012-W04-5      Same as above
+
+    So far I have not implements the effect of
+    `org-read-date-prefer-future' on this functionality, because
+    it seemed too magic for me.  I'd appreciate comments on this
+    issue:  Should `org-read-date-prefer-future' also push dates
+    into the next year if the week you are entering has already
+    passed in the current year?  For consistency I guess this
+    should be the case, but I cannot quite wrap my head around
+    it.
+
+    I hope but am not entirely convinced that this will behave
+    sanely also during the first/last week of a year.  Please
+    test extensively and report back.
+
+    This was a request by Thomas Baumann.
+
 *** Loading modules
 
     Org-mode has now a system for loading modules by simply
