@@ -4609,7 +4609,8 @@ specifies the template.  Two more (optional) strings give the file in
 which, and the headline under which the new note should be stored.  The
 file (if not present or @code{nil}) defaults to
 @code{org-default-notes-file}, the heading to
-@code{org-remember-default-headline}.
+@code{org-remember-default-headline}.  If the file name is not an
+absolute path, it will be interpreted relative to @code{org-directory}.
 
 An optional sixth element specifies the contexts in which the user can
 select the template.  This element can be either a list of major modes

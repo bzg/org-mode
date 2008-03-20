@@ -6,7 +6,9 @@
 	list it at each date (only on Mondays).
 	(org-read-date-analyze): Define local variable `iso-date'.
 	(org-agenda-format-date-aligned): Remove dependency on
-	`calendar-time-from-absolute'. 
+	`calendar-time-from-absolute'.
+	(org-remember-apply-template, org-go-to-remember-target):
+	Interpret filenames relative to `org-directory'.
 
 2008-03-19  Bastien Guerry  <bzg@altern.org>
 

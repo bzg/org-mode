@@ -1562,12 +1562,16 @@ When nil, just let remember make the buffer.
 When not nil, this is a list of 5-element lists.  In each entry, the first
 element is the name of the template, which should be a single short word.
 The second element is a character, a unique key to select this template.
-The third element is the template.  The fourth element is optional and can
-specify a destination file for remember items created with this template.
-The default file is given by `org-default-notes-file'.  An optional fifth
-element can specify the headline in that file that should be offered
-first when the user is asked to file the entry.  The default headline is
-given in the variable `org-remember-default-headline'.
+The third element is the template.  
+
+The fourth element is optional and can specify a destination file for
+remember items created with this template.  The default file is given
+by `org-default-notes-file'.  If the file name is not an absolute path,
+it will be interpreted relative to `org-directory'.
+
+An optional fifth element can specify the headline in that file that should
+be offered first when the user is asked to file the entry.  The default
+headline is given in the variable `org-remember-default-headline'.
 
 An optional sixth element specifies the contexts in which the user can
 select the template.  This element can be either a list of major modes
@@ -13400,6 +13404,8 @@ to be run from that hook to function properly."
 	     (org-startup-folded nil)
 	     org-time-was-given org-end-time-was-given x
 	     prompt completions char time pos default histvar)
+	(when (and file (not (file-name-absolute-p file)))
+	  (setq file (expand-file-name file org-directory)))
 	(setq org-store-link-plist
 	      (append (list :annotation v-a :initial v-i)
 		      org-store-link-plist))
@@ -13604,6 +13610,8 @@ The user is queried for the template."
 	 visiting)
     (unless (and file (stringp file) (string-match "\\S-" file))
       (setq file org-default-notes-file))
+    (when (and file (not (file-name-absolute-p file)))
+      (setq file (expand-file-name file org-directory)))
     (unless (and heading (stringp heading) (string-match "\\S-" heading))
       (setq heading org-remember-default-headline))
     (setq visiting (org-find-base-buffer-visiting file))

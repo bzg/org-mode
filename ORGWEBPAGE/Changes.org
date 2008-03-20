@@ -72,6 +72,7 @@
       also match in "Nasim's".
 
 *** Misc
+
    - When an entry already has a scheduling or deadline time
      stamp, calling `C-c C-s' or `C-c C-d', respectively, will no
      use that old date as the default, and you can can use the
@@ -81,6 +82,9 @@
 
      This was an omission in the earlier implementation, spotted
      by Wanrong Lin.  Thanks!
+
+   - File names in remember templates can be relative, they will
+     be interpreted relative to =org-directory=.
 
 * Version 5.23
 
