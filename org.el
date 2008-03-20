@@ -2872,6 +2872,7 @@ a calendar-style date list like (month day year)."
 (defun org-agenda-format-date-aligned (date)
   "Format a date string for display in the daily/weekly agenda, or timeline.
 This function makes sure that dates are aligned for easy reading."
+  (require 'cal-iso)
   (let* ((dayname (calendar-day-name date))
 	 (day (extract-calendar-day date))
 	 (day-of-week0 (calendar-day-of-week date))
@@ -4421,6 +4422,8 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (declare-function calendar-hebrew-date-string   "cal-hebrew" (&optional date))
 (declare-function calendar-islamic-date-string  "cal-islam"  (&optional date))
 (declare-function calendar-iso-date-string      "cal-iso"    (&optional date))
+(declare-function calendar-iso-from-absolute    "cal-iso"    (&optional date))
+(declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
 (declare-function calendar-julian-date-string   "cal-julian" (&optional date))
 (declare-function calendar-mayan-date-string    "cal-mayan"  (&optional date))
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
@@ -22642,7 +22645,7 @@ SPAN may be `day', `week', `month', `year'."
   (org-agenda-set-mode-name)
   (message "Switched to %s view" span))
 
-(defun org-agenda-compute-time-span (sd span n)
+(defun org-agenda-compute-time-span (sd span &optional n)
   "Compute starting date and number of days for agenda.
 SPAN may be `day', `week', `month', `year'.  The return value
 is a cons cell with the starting date and the number of days,

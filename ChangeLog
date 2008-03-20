@@ -1,3 +1,8 @@
+2008-03-20  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-compute-time-span): Make argument N optional.
+	(org-agenda-format-date-aligned): Require `cal-iso'.
+
 2008-03-19  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-complete): Silently fail when trying to complete
