@@ -2875,8 +2875,7 @@ This function makes sure that dates are aligned for easy reading."
   (require 'cal-iso)
   (let* ((dayname (calendar-day-name date))
 	 (day (extract-calendar-day date))
-	 (day-of-week0 (calendar-day-of-week date))
-	 (day-of-week (if (= day-of-week0 0) 7 day-of-week0))
+	 (day-of-week (calendar-day-of-week date))
 	 (month (extract-calendar-month date))
 	 (monthname (calendar-month-name month))
 	 (year (extract-calendar-year date))
@@ -2889,13 +2888,10 @@ This function makes sure that dates are aligned for easy reading."
 			 ((and (= month 12) (<= iso-week 1))
 			  (1+ year))
 			 (t year)))
-	 (weekstring (if (= year weekyear)
-			 (format "W%02d %d" iso-week day-of-week)
-		       (format "%4d-W%02d %d" weekyear iso-week day-of-week))))
-    (setq weekstring (concat (make-string (max 0 (- 12 (length monthname)))
-					  ?\ )
-			     weekstring))
-    (format "%-9s %2d %s %4d   %s"
+	 (weekstring (if (= day-of-week 1)
+			 (format " W%02d" iso-week)
+		       "")))
+    (format "%-9s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
 (defcustom org-agenda-include-diary nil
@@ -20775,9 +20771,19 @@ given in `org-agenda-start-on-weekday'."
 			     (list 'face 'org-agenda-structure))
 	(insert (org-finalize-agenda-entries rtnall) "\n")))
     (unless org-agenda-compact-blocks
-      (setq s (point))
-      (insert (capitalize (symbol-name (org-agenda-ndays-to-span nd)))
-	      "-agenda:\n")
+      (let* ((d1 (car day-numbers))
+	     (d2 (org-last day-numbers))
+	     (w1 (org-days-to-iso-week d1))
+	     (w2 (org-days-to-iso-week d2)))
+	(setq s (point))
+	(insert (capitalize (symbol-name (org-agenda-ndays-to-span nd)))
+		"-agenda"
+		(if (< (- d2 d1) 350)
+		    (if (= w1 w2)
+			(format " (W%02d)" w1)
+		      (format " (W%02d-W%02d)" w1 w2))
+		  "")
+		":\n"))
       (add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
 						'org-date-line t)))
     (while (setq d (pop day-numbers))
@@ -22696,6 +22702,11 @@ so that the date SD will be in that range."
 		   (list 1 1 (1+ (or n yg))))
 		  sd))))
     (cons sd nd)))
+
+(defun org-days-to-iso-week (days)
+  "Return the iso week number."
+  (require 'cal-iso)
+  (car (calendar-iso-from-absolute days)))
 
 (defun org-small-year-to-year (year)
   "Convert 2-digit years into 4-digit years.

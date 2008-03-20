@@ -2,6 +2,8 @@
 
 	* org.el (org-agenda-compute-time-span): Make argument N optional.
 	(org-agenda-format-date-aligned): Require `cal-iso'.
+	(org-agenda-list): Include week into into agenda heading, don't
+	list it at each date (only on Mondays).
 
 2008-03-19  Bastien Guerry  <bzg@altern.org>
 
