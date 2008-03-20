@@ -4,6 +4,9 @@
 	(org-agenda-format-date-aligned): Require `cal-iso'.
 	(org-agenda-list): Include week into into agenda heading, don't
 	list it at each date (only on Mondays).
+	(org-read-date-analyze): Define local variable `iso-date'.
+	(org-agenda-format-date-aligned): Remove dependency on
+	`calendar-time-from-absolute'. 
 
 2008-03-19  Bastien Guerry  <bzg@altern.org>
 

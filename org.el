@@ -2879,10 +2879,8 @@ This function makes sure that dates are aligned for easy reading."
 	 (month (extract-calendar-month date))
 	 (monthname (calendar-month-name month))
 	 (year (extract-calendar-year date))
-	 (iso-week (string-to-number
-		    (format-time-string
-		     "%V" (calendar-time-from-absolute
-			   (calendar-absolute-from-gregorian date) 1))))
+	 (iso-week (org-days-to-iso-week
+		    (calendar-absolute-from-gregorian date)))
 	 (weekyear (cond ((and (= month 1) (>= iso-week 52))
 			  (1- year))
 			 ((and (= month 12) (<= iso-week 1))
@@ -17674,7 +17672,7 @@ user."
   ;; FIXME: cleanup and comment
   (let (delta deltan deltaw deltadef year month day
 	      hour minute second wday pm h2 m2 tl wday1
-	      iso-year iso-weekday iso-week iso-year)
+	      iso-year iso-weekday iso-week iso-year iso-date)
 
     (when (setq delta (org-read-date-get-relative ans (current-time) def))
       (setq ans (replace-match "" t t ans)
