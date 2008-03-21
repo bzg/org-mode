@@ -11,6 +11,8 @@
 	(org-entry-get): Respect value `selective' for the INHERIT
 	argument.
 	(org-tag-inherit-p, org-property-inherit-p): New functions.
+	(org-agenda-format-date-aligned): Allow 10 characters for
+	weekday, to acomodate German locale.
 
 	* org.texi (Property inheritance, Tag inheritance): Document
 	selective inheritance.

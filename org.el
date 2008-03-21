@@ -2932,7 +2932,7 @@ This function makes sure that dates are aligned for easy reading."
 	 (weekstring (if (= day-of-week 1)
 			 (format " W%02d" iso-week)
 		       "")))
-    (format "%-9s %2d %s %4d%s"
+    (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
 (defcustom org-agenda-include-diary nil
@@ -28399,7 +28399,6 @@ work correctly."
 	(t nil)))
 
 ;;;; Functions extending outline functionality
-
 
 (defun org-beginning-of-line (&optional arg)
   "Go to the beginning of the current line.  If that is invisible, continue
