@@ -2203,9 +2203,27 @@ the tags are again aligned to `org-tags-column'."
   "Non-nil means, tags in levels apply also for sublevels.
 When nil, only the tags directly given in a specific line apply there.
 If you turn off this option, you very likely want to turn on the
-companion option `org-tags-match-list-sublevels'."
+companion option `org-tags-match-list-sublevels'.
+
+This may also be a list of tags that should be inherited, or a regexp that
+matches tags that should be inherited."
   :group 'org-tags
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Not" nil)
+	  (const :tag "Always" t)
+	  (repeat :tag "Specific tags" (string :tag "Tag"))
+	  (regexp :tag "Tags matched by regexp")))
+
+(defun org-tag-inherit-p (tag)
+  "Check if TAG is one that should be inherited."
+  (cond
+   ((eq org-use-tag-inheritance t) t)
+   ((not org-use-tag-inheritance) nil)
+   ((stringp org-use-tag-inheritance)
+    (string-match org-use-tag-inheritance tag))
+   ((listp org-use-tag-inheritance)
+    (member tag org-use-tag-inheritance))
+   (t (error "Invalid setting of `org-use-tag-inheritance'"))))
 
 (defcustom org-tags-match-list-sublevels nil
   "Non-nil means list also sublevels of headlines matching tag search.
@@ -2244,23 +2262,44 @@ lined-up with respect to each other."
 
 (defcustom org-use-property-inheritance nil
   "Non-nil means, properties apply also for sublevels.
-This setting is only relevant during property searches, not when querying
-an entry with `org-entry-get'.  To retrieve a property with inheritance,
-you need to call `org-entry-get' with the inheritance flag.
-Turning this on can cause significant overhead when doing a search, so
-this is turned off by default.
+
+This setting is chiefly used during property searches. Turning it on can
+cause significant overhead when doing a search, which is why it is not
+on by default.
+
 When nil, only the properties directly given in the current entry count.
-The value may also be a list of properties that shouldhave inheritance.
+When t, every property is inherited.  The value may also be a list of
+properties that should have inheritance, or a regular expression matching
+properties that should be inherited.
 
 However, note that some special properties use inheritance under special
 circumstances (not in searches).  Examples are CATEGORY, ARCHIVE, COLUMNS,
 and the properties ending in \"_ALL\" when they are used as descriptor
-for valid values of a property."
+for valid values of a property.
+
+Note for programmers:
+When querying an entry with `org-entry-get',  you can control if inheritance
+should be used.  By default, `org-entry-get' looks only at the local
+properties.  You can request inheritance by setting the inherit argument
+to t (to force inheritance) or to `selective' (to respect the setting
+in this variable)."
   :group 'org-properties
   :type '(choice
 	  (const :tag "Not" nil)
-	  (const :tag "Always" nil)
-	  (repeat :tag "Specific properties" (string :tag "Property"))))
+	  (const :tag "Always" t)
+	  (repeat :tag "Specific properties" (string :tag "Property"))
+	  (regexp :tag "Properties matched by regexp")))
+
+(defun org-property-inherit-p (property)
+  "Check if PROPERTY is one that should be inherited."
+  (cond
+   ((eq org-use-property-inheritance t) t)
+   ((not org-use-property-inheritance) nil)
+   ((stringp org-use-property-inheritance)
+    (string-match org-use-property-inheritance property))
+   ((listp org-use-property-inheritance)
+    (member property org-use-property-inheritance))
+   (t (error "Invalid setting of `org-use-property-inheritance'"))))
 
 (defcustom org-columns-default-format "%25ITEM %TODO %3PRIORITY %TAGS"
   "The default column format, if no other format has been defined.
@@ -15253,7 +15292,7 @@ are included in the output."
 	    (when (setq entry (assoc i tags-alist))
 	      (setq tags-alist (delete entry tags-alist)))
 	    (setq i (1- i)))
-	  ;; add the nex tags
+	  ;; add the next tags
 	  (when tags
 	    (setq tags (mapcar 'downcase (org-split-string tags ":"))
 		  tags-alist
@@ -15263,6 +15302,11 @@ are included in the output."
 		(if org-use-tag-inheritance
 		    (apply 'append (mapcar 'cdr tags-alist))
 		  tags))
+	  (when (and tags org-use-tag-inheritance
+		     (not (eq t org-use-tag-inheritance)))
+	    ;; selective inheritance, remove uninherited ones
+	    (setcdr (car tags-alist)
+		    (org-remove-uniherited-tags (cdar tags-alist))))
 	  (when (and (or (not todo-only) (member todo org-not-done-keywords))
 		     (eval matcher)
 		     (or (not org-agenda-skip-archived-trees)
@@ -15298,6 +15342,18 @@ are included in the output."
       (org-hide-archived-subtrees (point-min) (point-max)))
     (nreverse rtn)))
 
+(defun org-remove-uniherited-tags (tags)
+  "Remove all tags that are not inherited from the list TAGS."
+  (cond
+   ((eq org-use-tag-inheritance t) tags)
+   ((not org-use-tag-inheritance) nil)
+   ((stringp org-use-tag-inheritance)
+    (delq nil (mapcar
+	       (lambda (x) (if (string-match org-use-tag-inheritance x) x nil))
+	       tags)))
+   ((listp org-use-tag-inheritance)
+    (org-delete-all org-use-tag-inheritance tags))))	   
+
 (defvar todo-only) ;; dynamically scoped
 
 (defun org-tags-sparse-tree (&optional todo-only match)
@@ -15313,7 +15369,10 @@ also TODO lines."
 (defvar org-cached-props nil)
 (defun org-cached-entry-get (pom property)
   (if (or (eq t org-use-property-inheritance)
-	  (member property org-use-property-inheritance))
+	  (and (stringp org-use-property-inheritance)
+	       (string-match org-use-property-inheritance property))
+	  (and (listp org-use-property-inheritance)
+	       (member property org-use-property-inheritance)))
       ;; Caching is not possible, check it directly
       (org-entry-get pom property 'inherit)
     ;; Get all properties, so that we can do complicated checks easily
@@ -16011,10 +16070,14 @@ If WHICH is nil or `all', get all properties.  If WHICH is
   "Get value of PROPERTY for entry at point-or-marker POM.
 If INHERIT is non-nil and the entry does not have the property,
 then also check higher levels of the hierarchy.
+If INHERIT is the symbol `selective', use inheritance only if the setting
+in `org-use-property-inheritance' selects PROPERTY for inheritance.
 If the property is present but empty, the return value is the empty string.
 If the property is not present at all, nil is returned."
   (org-with-point-at pom
-    (if inherit
+    (if (and inherit (if (eq inherit 'selective)
+			 (org-property-inherit-p property)
+		       t))
 	(org-entry-get-with-inheritance property)
       (if (member property org-special-properties)
 	  ;; We need a special property.  Use brute force, get all properties.
@@ -23180,9 +23243,9 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Get a list of all headline tags applicable at POS.
 POS defaults to point.  If tags are inherited, the list contains
 the targets in the same sequence as the headlines appear, i.e.
-the tags of the current headline come last."
+sthe tags of the current headline come last."
   (interactive)
-  (let (tags lastpos)
+  (let (tags ltags lastpos parent)
     (save-excursion
       (save-restriction
 	(widen)
@@ -23193,12 +23256,14 @@ the tags of the current headline come last."
 		(org-back-to-heading t)
 		(while (not (equal lastpos (point)))
 		  (setq lastpos (point))
-		  (if (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
-		      (setq tags (append (org-split-string
-					  (org-match-string-no-properties 1) ":")
-					 tags)))
+		  (when (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
+		    (setq ltags (org-split-string
+				 (org-match-string-no-properties 1) ":"))
+		    (setq tags (append (org-remove-uniherited-tags ltags)
+				       tags)))
 		  (or org-use-tag-inheritance (error ""))
-		  (org-up-heading-all 1)))
+		  (org-up-heading-all 1)
+		  (setq parent t)))
 	    (error nil))))
       tags)))
 

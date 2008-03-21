@@ -9,7 +9,27 @@
 
 ** Details
 
-*** Suport for ISO week dates (RFC odder ISO number???)
+*** Selective tag inheritance
+
+    Inheritance of tags can now be limited to a subset of all
+    tags, using the variable =org-use-tag-inheritance=.  This
+    variable may now be a regular expression or a list to select
+    the inherited tags.  Thanks to Michael Ekstrand for this
+    excellent proposal.
+
+    The regexp option is also inplemented for
+    =org-use-property-inheritance=, so that you can now select
+    properties for inheritance my name.
+
+*** Changes to property API
+
+    The INHERIT flag to the function =org-entry-get= can be set
+    to the symbol =selective=.  If this is the case, then the
+    value of the property will be retrived using inheritance if
+    and only if the setting in =org-use-property-inheritance=
+    selects the property for inheritance.
+
+*** Suport for ISO week dates (ISO 6801)
 
     Dates in the agenda now show the ISO week an day
     specification, in the form =W08 2=, meaning Tuesday of

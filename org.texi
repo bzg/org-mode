@@ -3246,8 +3246,9 @@ Org-mode finds that a certain headline matches the search criterion, it
 will not check any sublevel headline, assuming that these also match and
 that the list of matches could become very long because of that.  If you
 do want the subevels be tested and listed as well, you may set the
-variable @code{org-tags-match-list-sublevels}.  To turn off tag
-inheritance entirely, use the variable @code{org-use-tag-inheritance}.
+variable @code{org-tags-match-list-sublevels}.  To limit tag inheritance
+to specific tags, or to turn it off entirely, use the variable
+@code{org-use-tag-inheritance}.
 
 @node Setting tags, Tag searches, Tag inheritance, Tags
 @section Setting tags
@@ -3612,9 +3613,7 @@ CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}
 @node Property searches, Property inheritance, Special properties, Properties and columns
 @section Property searches
 @cindex properties, searching
-@cindex properties, inheritance
 @cindex searching, of properties
-@cindex inheritance, of properties
 
 To create sparse trees and special lists with selection based on
 properties, the same commands are used as for tag searches (@pxref{Tag
@@ -3649,6 +3648,8 @@ a regular expression and matched against the property values.
 
 @node Property inheritance, Column view, Property searches, Properties and columns
 @section Property Inheritance
+@cindex properties, inheritance
+@cindex inheritance, of properties
 
 The outline structure of Org-mode documents lends itself for an
 inheritance model of properties: If the parent in a tree has a certain
@@ -3657,8 +3658,9 @@ turn this on by default, because it can slow down property searches
 significantly and is often not needed.  However, if you find inheritance
 useful, you can turn it on by setting the variable
 @code{org-use-property-inheritance}.  It may be set to @code{t}, to make
-all properties inherited from the parent, or to a list of properties
-that should be inherited.
+all properties inherited from the parent, to a list of properties
+that should be inherited, or to a regular expression that matches
+inherited properties.
 
 Org-mode has a few properties for which inheritance is hard-coded, at
 least for the special applications for which they are used:
@@ -8612,11 +8614,12 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
 @end defun
 @defun org-entry-get pom property &optional inherit
-Get value of PROPERTY for entry at point-or-marker POM.
-If INHERIT is non-nil and the entry does not have the property,
-then also check higher levels of the hierarchy.  This function ignores
-the value of @code{org-use-property-inheritance} and requires the
-explicit INHERIT flag.
+Get value of PROPERTY for entry at point-or-marker POM.  By default,
+this only looks at properties defined locally in the entry.  If INHERIT
+is non-nil and the entry does not have the property, then also check
+higher levels of the hierarchy.  If INHERIT is the symbol
+@code{selective}, use inheritance if and only if the setting of
+@code{org-use-property-inheritance} selects PROPERTY for inheritance.
 @end defun
 
 @defun org-entry-delete pom property

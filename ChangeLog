@@ -1,3 +1,20 @@
+2008-03-21  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-cached-entry-get): Allow a regexp value for
+	`org-use-property-inheritance'.
+	(org-use-property-inheritance): Allow regexp value.  Fix bug in
+	customization type.
+	(org-use-tag-inheritance): Allow a list and a regexp value for
+	this variable.
+	(org-scan-tags, org-get-tags-at): Implement selective tag
+	inheritance.
+	(org-entry-get): Respect value `selective' for the INHERIT
+	argument.
+	(org-tag-inherit-p, org-property-inherit-p): New functions.
+
+	* org.texi (Property inheritance, Tag inheritance): Document
+	selective inheritance.
+
 2008-03-20  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-agenda-compute-time-span): Make argument N optional.
