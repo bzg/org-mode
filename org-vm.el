@@ -1,4 +1,4 @@
-;;; org-vm.el - Support for links to VM messages in Org-mode
+;;; org-vm.el --- Support for links to VM messages from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -26,10 +26,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
-
-;; This file implements links to VM messages and folders for Org-mode.
+;; This file implements links to VM messages and folders from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
@@ -53,7 +54,7 @@
 
 ;; Implementation
 (defun org-vm-store-link ()
-  "Store a link to an VM folder or message."
+  "Store a link to a VM folder or message."
   (when (or (eq major-mode 'vm-summary-mode)
 	    (eq major-mode 'vm-presentation-mode))
     (and (eq major-mode 'vm-presentation-mode) (vm-summarize))
@@ -80,13 +81,13 @@
 	link))))
 
 (defun org-vm-open (path)
-  "Follow an VM message link."
+  "Follow a VM message link specified by PATH."
   (let (folder article)
     (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
 	(error "Error in VM link"))
     (setq folder (match-string 1 path)
 	  article (match-string 3 path))
-    ;; The prefix arguemtn will be interpreted as read-only
+    ;; The prefix argument will be interpreted as read-only
     (org-vm-follow-link folder article current-prefix-arg)))
 
 (defun org-vm-follow-link (&optional folder article readonly)

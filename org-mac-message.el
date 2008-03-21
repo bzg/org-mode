@@ -1,4 +1,4 @@
-;;; org-mac-message.el --- Support for links to Apple Mail messages by Message-ID
+;;; org-mac-message.el --- Support for links to Apple Mail messages from within Org-mode
 
 ;; Copyright (C) 2008 Free Software Foundation, Inc.
 
@@ -23,6 +23,11 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Commentary:
+;; This file implements links to Apple Mail messages from within Org-mode.
+;; Org-mode does not load this module by default - if you would actually like
+;; this to happen then configure the variable `org-modules'.
+
 ;;; Code:
 
 (require 'org)
@@ -44,8 +49,8 @@
       (concat "\"" (org-trim return) "\""))))
 
 (defun org-mac-message-open (message-id)
-  "Visit the message with the given Message-ID.
-This will use the command `open' with the message url."
+  "Visit the message with the given MESSAGE-ID.
+This will use the command `open' with the message URL."
   (start-process (concat "open message:" message-id) nil
 		 "open" (concat "message://<" (substring message-id 2) ">")))
 

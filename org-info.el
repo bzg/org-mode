@@ -1,4 +1,4 @@
-;;; org-info.el - Support for links to Info nodes in Org-mode
+;;; org-info.el --- Support for links to Info nodes from within Org-Mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,13 +27,16 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to Info nodes for Org-mode.
+;; This file implements links to Info nodes from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
 ;; Declare external functions and variables
+
 (declare-function Info-find-node "info" (filename nodename
 						  &optional no-going-back))
 (defvar Info-current-file)
@@ -45,6 +48,7 @@
 
 ;; Implementation
 (defun org-info-store-link ()
+  "Store a link to an Info file and node."
   "Store a link to an INFO folder or message."
   (when (eq major-mode 'Info-mode)
     (let (link desc)
@@ -59,12 +63,12 @@
       link)))
 
 (defun org-info-open (path)
-  "Follow an INFO message link."
+  "Follow an Info file and node link specified by PATH."
   (org-info-follow-link path))
 
 
 (defun org-info-follow-link (name)
-  "Follow an info file & node link  to NAME."
+  "Follow an Info file and node link specified by NAME."
   (if (or (string-match "\\(.*\\)::?\\(.*\\)" name)
           (string-match "\\(.*\\)" name))
       (progn

@@ -1,4 +1,4 @@
-;;; org-wl.el - Support for links to Wanderlust messages in Org-mode
+;;; org-wl.el --- Support for links to Wanderlust messages from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,9 +27,11 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to Wanderlust messages for Org-mode.
+;; This file implements links to Wanderlust messages from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
@@ -73,7 +75,7 @@
 
 ;; Implementation
 (defun org-wl-store-link ()
- "Store a link to an WL folder or message."
+ "Store a link to a WL folder or message."
  (when (eq major-mode 'wl-summary-mode)
    (let* ((msgnum (wl-summary-message-number))
 	   (mark-info (wl-summary-registered-temp-mark msgnum))
@@ -110,7 +112,7 @@
      link)))
 
 (defun org-wl-open (path)
- "Follow an WL message link."
+ "Follow the WL message link specified by PATH."
  ;; XXX: The imap-uw's MH folder names start with "%#".
  (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
      (error "Error in Wanderlust link"))

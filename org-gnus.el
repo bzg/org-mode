@@ -1,4 +1,4 @@
-;;; org-gnus.el - Support for links to GNUS groups and messages in Org-mode
+;;; org-gnus.el --- Support for links to Gnus groups and messages from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,9 +27,11 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to GNUS groups and messages for Org-mode.
+;; This file implements links to Gnus groups and messages from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 (eval-when-compile
@@ -58,7 +60,7 @@ negates this setting for the duration of the command."
 
 ;; Implementation
 (defun org-gnus-store-link ()
-  "Store a link to an GNUS folder or message."
+  "Store a link to a Gnus folder or message."
   (cond
    ((eq major-mode 'gnus-group-mode)
     (let ((group (cond ((fboundp 'gnus-group-group-name) ; depending on Gnus
@@ -104,7 +106,7 @@ negates this setting for the duration of the command."
       link))))
 
 (defun org-gnus-open (path)
-  "Follow an GNUS message or folder link."
+  "Follow the Gnus message or folder link specified by PATH."
   (let (group article)
     (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
 	(error "Error in Gnus link"))

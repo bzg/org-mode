@@ -1,4 +1,4 @@
-;;; org-mhe.el - Support for links to MHE messages in Org-mode
+;;; org-mhe.el --- Support for links to MH-E messages from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,18 +27,23 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to MHE messages for Org-mode.
+;; This file implements links to MH-E messages from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
 ;; Customization variables
+
 (defcustom org-mhe-search-all-folders nil
-  "Non-nil means, that the search for the mh-message will be extended to
-all folders if the message cannot be found in the folder given in the link.
-Searching all folders is very efficient with one of the search engines
-supported by MH-E, but will be slow with pick."
+  "Non-nil means the search for the mh-message may extend to all folders.
+When non-nil, the search for a message will extend to all other
+folders if it cannot be found in the folder given in the link.
+Searching all folders may be slow with the default pick based
+search but is very efficient with one of the other search engines
+supported by MH-E."
   :group 'org-link-follow
   :type 'boolean)
 
@@ -75,7 +80,7 @@ supported by MH-E, but will be slow with pick."
 
 ;; Implementation
 (defun org-mhe-store-link ()
-  "Store a link to an MHE folder or message."
+  "Store a link to an MH-E folder or message."
   (when (or (equal major-mode 'mh-folder-mode)
 	    (equal major-mode 'mh-show-mode))
     (let ((from (org-mhe-get-header "From:"))
@@ -92,18 +97,18 @@ supported by MH-E, but will be slow with pick."
       link)))
 
 (defun org-mhe-open (path)
-  "Follow an MHE message link."
+  "Follow an MH-E message link specified by PATH."
   (let (folder article)
     (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	(error "Error in MHE link"))
+	(error "Error in MH-E link"))
     (setq folder (match-string 1 path)
 	  article (match-string 3 path))
     (org-mhe-follow-link folder article)))
 
 ;;; mh-e integration based on planner-mode
 (defun org-mhe-get-message-real-folder ()
-  "Return the name of the current message real folder, so if you use
-sequences, it will now work."
+  "Return the name of the real folder for the current message.
+So if you use sequences, it will now work."
   (save-excursion
     (let* ((folder
             (if (equal major-mode 'mh-folder-mode)
@@ -134,15 +139,15 @@ sequences, it will now work."
       )))
 
 (defun org-mhe-get-message-folder-from-index ()
-  "Returns the name of the message folder in a index folder buffer."
+  "Return the name of the message folder in a index folder buffer."
   (save-excursion
     (mh-index-previous-folder)
     (re-search-forward "^\\(+.*\\)$" nil t)
     (message "%s" (match-string 1))))
 
 (defun org-mhe-get-message-folder ()
-  "Return the name of the current message folder.  Be careful if you
-use sequences."
+  "Return the name of the current message folder.
+Be careful if you use sequences."
   (save-excursion
     (if (equal major-mode 'mh-folder-mode)
         mh-current-folder
@@ -150,8 +155,8 @@ use sequences."
       mh-show-folder-buffer)))
 
 (defun org-mhe-get-message-num ()
-  "Return the number of the current message.  Be careful if you
-use sequences."
+  "Return the number of the current message.
+Be careful if you use sequences."
   (save-excursion
     (if (equal major-mode 'mh-folder-mode)
         (mh-get-msg-num nil)
@@ -159,9 +164,9 @@ use sequences."
       (mh-show-buffer-message-number))))
 
 (defun org-mhe-get-header (header)
-  "Return a header of the message in folder mode.  This will create a
-show buffer for the corresponding message.  If you have a more clever
-idea..."
+  "Return the field for HEADER of the message in folder mode.
+This will create a show buffer for the corresponding message.  If
+you have a better idea of how to do this then please let us know."
   (let* ((folder (org-mhe-get-message-folder))
          (num (org-mhe-get-message-num))
          (buffer (get-buffer-create (concat "show-" folder)))
@@ -179,7 +184,7 @@ idea..."
     header-field)))
 
 (defun org-mhe-follow-link (folder article)
-  "Follow an MHE link to FOLDER and ARTICLE.
+  "Follow an MH-E link to FOLDER and ARTICLE.
 If ARTICLE is nil FOLDER is shown.  If the configuration variable
 `org-mhe-search-all-folders' is t and `mh-searcher' is pick,
 ARTICLE is searched in all folders.  Indexed searches (swish++,

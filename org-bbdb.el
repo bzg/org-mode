@@ -1,4 +1,4 @@
-;;; org-bbdb.el - Support for links to bbdb entries in Org-mode
+;;; org-bbdb.el --- Support for links to BBDB entries from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,16 +27,19 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to BBDB database entries for Org-mode.
+;; This file implements links to BBDB database entries from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
 ;; Declare external functions and variables
+
 (declare-function bbdb "ext:bbdb-com" (string elidep))
 (declare-function bbdb-company "ext:bbdb-com" (string elidep))
-(declare-function bbdb-current-record "ext:bbdb-com" 
+(declare-function bbdb-current-record "ext:bbdb-com"
 		  (&optional planning-on-modifying))
 (declare-function bbdb-name "ext:bbdb-com" (string elidep))
 (declare-function bbdb-record-getprop "ext:bbdb" (record property))
@@ -48,7 +51,7 @@
 
 ;; Implementation
 (defun org-bbdb-store-link ()
-  "Store a link to a README file."
+  "Store a link to a BBDB database entry."
   (when (eq major-mode 'bbdb-mode)
     ;; This is BBDB, we make this link!
     (let* ((name (bbdb-record-name (bbdb-current-record)))
@@ -59,6 +62,9 @@
       link)))
 
 (defun org-bbdb-export (path desc format)
+  "Create the export version of a BBDB link specified by PATH or DESC.
+If exporting to either HTML or LaTeX FORMAT the link will be
+italicised, in all other cases it is left unchanged."
   "Create the exprt verison of a bbdb link."
   (cond
    ((eq format 'html) (format "<i>%s</i>" (or desc path)))

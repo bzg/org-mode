@@ -1,4 +1,4 @@
-;;; org-rmail.el - Support for links to RMAIL messages in Org-mode
+;;; org-rmail.el --- Support for links to Rmail messages from within Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
@@ -27,9 +27,11 @@
 ;;
 ;;; Commentary:
 
-;; This file implements links to RMAIL messages for Org-mode.
+;; This file implements links to Rmail messages from within Org-mode.
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
+
+;;; Code:
 
 (require 'org)
 
@@ -45,7 +47,7 @@
 
 ;; Implementation
 (defun org-rmail-store-link ()
-  "Store a link to an RMAIL folder or message."
+  "Store a link to an Rmail folder or message."
   (when (or (eq major-mode 'rmail-mode)
 	    (eq major-mode 'rmail-summary-mode))
     (save-window-excursion
@@ -70,16 +72,16 @@
 	  link)))))
 
 (defun org-rmail-open (path)
-  "Follow an RMAIL message link."
+  "Follow an Rmail message link to the specified PATH."
   (let (folder article)
     (if (not (string-match "\\`\\([^#]+\\)\\(#\\(.*\\)\\)?" path))
-	(error "Error in RMAIL link"))
+	(error "Error in Rmail link"))
     (setq folder (match-string 1 path)
 	  article (match-string 3 path))
     (org-rmail-follow-link folder article)))
 
 (defun org-rmail-follow-link (folder article)
-  "Follow an RMAIL link to FOLDER and ARTICLE."
+  "Follow an Rmail link to FOLDER and ARTICLE."
   (require 'rmail)
   (setq article (org-add-angle-brackets article))
   (let (message-number)
