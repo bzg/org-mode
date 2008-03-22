@@ -142,6 +142,13 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(defvar org-agenda-allow-remote-undo)
+(defvar org-agenda-undo-list)
+(defvar org-agenda-custom-commands)
+(declare-function org-agenda-change-all-lines "org-agenda"
+		  (newhead hdmarker &optional fixface))
+(declare-function org-verify-change-for-undo "org-agenda" (l1 l2))
+
 (defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) "
   "Regular expression that matches a plain list.")
 (defvar org-mouse-direct t

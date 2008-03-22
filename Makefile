@@ -60,14 +60,19 @@ CP = cp -p
 ##----------------------------------------------------------------------
 
 # The following variables need to be defined by the maintainer
-LISPFILES0 = org.el org-publish.el org-mouse.el org-export-latex.el \
+LISPF      = org.el \
+	     org-compat.el org-macs.el \
+	     org-table.el org-exp.el org-remember.el org-agenda.el\
+	     org-publish.el org-mouse.el org-export-latex.el \
 	     org-bbdb.el org-gnus.el org-info.el org-irc.el \
              org-mac-message.el org-mhe.el org-rmail.el org-vm.el org-wl.el
-LISPFILES  = $(LISPFILES0) org-install.el 
+LISPFILES0 = $(LISPF:%=lisp/%)
+LISPFILES  = $(LISPFILES0) lisp/org-install.el
+ELCFILES0  = $(LISPFILES0:.el=.elc)
 ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
-CARDFILES  = orgcard.tex orgcard.pdf orgcard_letter.pdf
-TEXIFILES  = org.texi
+CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
+TEXIFILES  = doc/org.texi
 INFOFILES  = org
 HG_RELEASES = ../org-mode-all-releases-hg/
 
@@ -81,16 +86,17 @@ DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} \
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 all:	$(ELCFILES)
+compile: $(ELCFILES0)
 
 install: install-lisp
 
-doc: org.html org.pdf orgcard.pdf orgcard_letter.pdf
+doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf
 
 p:
-	make pdf && open org.pdf
+	make pdf && open doc/org.pdf
 
 c:
-	make card && gv orgcard.ps
+	make card && gv doc/orgcard.ps
 
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
@@ -105,49 +111,46 @@ install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
 
-org-install.el: $(LISPFILES0) Makefile
+autoloads: lisp/org-install.el
+
+lisp/org-install.el: $(LISPFILES0) Makefile
 	$(BATCH) --eval "(require 'autoload)" \
 		--eval '(find-file "org-install.el")'  \
 		--eval '(erase-buffer)' \
-		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES))))' \
+		--eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPFILES0))))' \
 		--eval '(insert "\n(provide (quote org-install))\n")' \
 		--eval '(save-buffer)'
-
-org.elc:		org.el
-
-org-publish.elc:	org-publish.el
-
-org-install.elc:	org-install.el
+	mv org-install.el lisp
 
 xemacs/noutline.elc: xemacs/noutline.el
 
-org:	org.texi
-	$(MAKEINFO) --no-split org.texi -o org
+doc/org: doc/org.texi
+	(cd doc; $(MAKEINFO) --no-split org.texi -o org)
 
-org.pdf: org.texi
-	$(TEXI2PDF) org.texi
+doc/org.pdf: doc/org.texi
+	(cd doc; $(TEXI2PDF) org.texi)
 
-org.html: org.texi
-	$(TEXI2HTML) --no-split -o org.html org.texi
+doc/org.html: doc/org.texi
+	(cd doc; $(TEXI2HTML) --no-split -o org.html org.texi)
 
-orgcard.dvi: orgcard.tex
-	tex orgcard.tex
+doc/orgcard.dvi: doc/orgcard.tex
+	(cd doc; tex orgcard.tex)
 
-orgcard.pdf: orgcard.dvi
-	dvips -q -f -t landscape orgcard.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=orgcard.pdf -c .setpdfwrite -
+doc/orgcard.pdf: doc/orgcard.dvi
+	dvips -q -f -t landscape doc/orgcard.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=doc/orgcard.pdf -c .setpdfwrite -
 
-orgcard.ps: orgcard.dvi
-	dvips -t landscape -o orgcard.ps orgcard.dvi 
+doc/orgcard.ps: doc/orgcard.dvi
+	dvips -t landscape -o doc/orgcard.ps doc/orgcard.dvi 
 
-orgcard_letter.dvi: orgcard.tex
-	perl -pe 's/letterpaper=0/letterpaper=1/' orgcard.tex > orgcard_letter.tex
-	tex orgcard_letter.tex
+doc/orgcard_letter.dvi: doc/orgcard.tex
+	perl -pe 's/letterpaper=0/letterpaper=1/' doc/orgcard.tex > doc/orgcard_letter.tex
+	(cd doc; tex orgcard_letter.tex)
 
-orgcard_letter.pdf: orgcard_letter.dvi
-	dvips -q -f -t landscape orgcard_letter.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=orgcard_letter.pdf -c .setpdfwrite -
+doc/orgcard_letter.pdf: doc/orgcard_letter.dvi
+	dvips -q -f -t landscape doc/orgcard_letter.dvi | gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=doc/orgcard_letter.pdf -c .setpdfwrite -
 
-orgcard_letter.ps: orgcard_letter.dvi
-	dvips -t landscape -o orgcard_letter.ps orgcard_letter.dvi 
+doc/orgcard_letter.ps: doc/orgcard_letter.dvi
+	dvips -t landscape -o doc/orgcard_letter.ps doc/orgcard_letter.dvi 
 
 # Below here are special targets for maintenance only
 
@@ -158,19 +161,18 @@ web:
 	make webfiles
 	(cd ORGWEBPAGE/tmp; lftp -f ../../../org-mode-proprietary/ftp_upload_website)
 
-html: org.html
+html: doc/org.html
 
-html_split: org.texi
-	rm -rf manual
-	mkdir manual
-	$(TEXI2HTML) -o manual org.texi
+html_split: doc/org.texi
+	rm -rf doc/manual
+	mkdir doc/manual
+	$(TEXI2HTML) -o doc/manual doc/org.texi
 
-info:	
-	$(MAKEINFO) --no-split org.texi -o org
+info:	doc/org
 
-pdf:	org.pdf
+pdf:	doc/org.pdf
 
-card:	orgcard.pdf orgcard.ps orgcard_letter.pdf orgcard_letter.ps
+card:	doc/orgcard.pdf doc/orgcard.ps doc/orgcard_letter.pdf doc/orgcard_letter.ps
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
@@ -224,12 +226,13 @@ relup:
 	make upload_manual
 
 clean:
-	rm -f $(ELCFILES) org.pdf org org.html orgcard.pdf orgcard.ps
+	rm -f $(ELCFILES)
+	(cd doc; rm -f org.pdf org org.html orgcard.pdf orgcard.ps)
 	rm -f *~ */*~ */*/*~
-	rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs
-	rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps
-	rm -f orgcard_letter.tex orgcard_letter.pdf
-	rm -rf manual
+	(cd doc; rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
+	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
+	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
+	rm -rf doc/manual
 	rm -rf RELEASEDIR
 
 .el.elc:

@@ -50,6 +50,7 @@
 
 (require 'footnote)
 (require 'org)
+(require 'org-exp)
 
 ;;; Variables:
 (defvar org-export-latex-class nil)
@@ -944,6 +945,9 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 				      (match-string 2)) t t)
 	       (forward-line))))))
 
+
+(defvar org-table-last-alignment) ; defined in org-table.el
+(declare-function orgtbl-to-latex "org-table" (table params) t)
 (defun org-export-latex-tables (insert)
   "Convert tables to LaTeX and INSERT it."
   (goto-char (point-min))
