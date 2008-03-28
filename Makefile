@@ -225,14 +225,18 @@ relup:
 	make upload_release
 	make upload_manual
 
-clean:
+cleanelc:
 	rm -f $(ELCFILES)
+cleandoc:
 	(cd doc; rm -f org.pdf org org.html orgcard.pdf orgcard.ps)
-	rm -f *~ */*~ */*/*~
 	(cd doc; rm -f *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs)
 	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
 	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
-	rm -rf doc/manual
+	(cd doc; rm -rf manual)
+clean:
+	make cleanelc
+	make cleandoc
+	rm -f *~ */*~ */*/*~
 	rm -rf RELEASEDIR
 
 .el.elc:

@@ -31,6 +31,7 @@
 
 ;;; Code:
 
+(require 'org)
 (eval-when-compile
 ;  (require 'cl)
 ;  (require 'gnus-sum)
@@ -38,6 +39,7 @@
 
 (declare-function add-to-diary-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
+(declare-function calendar-absolute-from-iso    "cal-iso"    (date))
 (declare-function calendar-astro-date-string    "cal-julian" (&optional date))
 (declare-function calendar-bahai-date-string    "cal-bahai"  (&optional date))
 (declare-function calendar-check-holidays       "holidays"   (date))
@@ -3395,46 +3397,6 @@ FRACTION is what fraction of the head-warning time has passed."
     (nreverse ee)))
 
 ;;; Agenda presentation and sorting
-
-(defconst org-plain-time-of-day-regexp
-  (concat
-   "\\(\\<[012]?[0-9]"
-   "\\(\\(:\\([0-5][0-9]\\([AaPp][Mm]\\)?\\)\\)\\|\\([AaPp][Mm]\\)\\)\\>\\)"
-   "\\(--?"
-   "\\(\\<[012]?[0-9]"
-   "\\(\\(:\\([0-5][0-9]\\([AaPp][Mm]\\)?\\)\\)\\|\\([AaPp][Mm]\\)\\)\\>\\)"
-   "\\)?")
-  "Regular expression to match a plain time or time range.
-Examples:  11:45 or 8am-13:15 or 2:45-2:45pm.  After a match, the following
-groups carry important information:
-0  the full match
-1  the first time, range or not
-8  the second time, if it is a range.")
-
-(defconst org-plain-time-extension-regexp
-  (concat
-   "\\(\\<[012]?[0-9]"
-   "\\(\\(:\\([0-5][0-9]\\([AaPp][Mm]\\)?\\)\\)\\|\\([AaPp][Mm]\\)\\)\\>\\)"
-   "\\+\\([0-9]+\\)\\(:\\([0-5][0-9]\\)\\)?")
-  "Regular expression to match a time range like 13:30+2:10 = 13:30-15:40.
-Examples:  11:45 or 8am-13:15 or 2:45-2:45pm.  After a match, the following
-groups carry important information:
-0  the full match
-7  hours of duration
-9  minutes of duration")
-
-(defconst org-stamp-time-of-day-regexp
-  (concat
-   "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} +\\sw+ +\\)"
-   "\\([012][0-9]:[0-5][0-9]\\(-\\([012][0-9]:[0-5][0-9]\\)\\)?[^\n\r>]*?\\)>"
-   "\\(--?"
-   "<\\1\\([012][0-9]:[0-5][0-9]\\)>\\)?")
-  "Regular expression to match a timestamp time or time range.
-After a match, the following groups carry important information:
-0  the full match
-1  date plus weekday, for backreferencing to make sure both times on same day
-2  the first time, range or not
-4  the second time, if it is a range.")
 
 (defvar org-prefix-has-time nil
   "A flag, set by `org-compile-prefix-format'.
