@@ -1,5 +1,9 @@
 2008-03-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-auto-repeat-maybe): Make sure that repeating
+	dates are pushed into the future, and that the shift is at least
+	one interval, never 0.
+
 	* lisp/org-agenda.el (org-agenda-deadline-leaders): Allow a
 	function value for the deadline leader.
 	(org-agenda-get-deadlines): Deal with new function value.
