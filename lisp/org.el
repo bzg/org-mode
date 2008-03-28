@@ -12452,7 +12452,7 @@ in the timestamp determines what will be changed."
       (setq time0 (org-parse-time-string ts))
       (when (and (eq org-ts-what 'minute)
 		 (eq current-prefix-arg nil))
-	(setq n (* dm (org-no-warnings (signum n))))
+	(setq n (* dm (cond ((> n 0) 1) ((< n 0) -1) (t 0))))
 	(when (not (= 0 (setq rem (% (nth 1 time0) dm))))
 	  (setcar (cdr time0) (+ (nth 1 time0)
 				 (if (> n 0) (- rem) (- dm rem))))))
