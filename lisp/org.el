@@ -1530,10 +1530,11 @@ When nil, only the date will be recorded."
   :type 'boolean)
 
 (defcustom org-log-note-headings
-  '((done . "CLOSING NOTE %t")
+  '((done .  "CLOSING NOTE %t")
     (state . "State %-12s %t")
+    (note .  "Note taken on %t")
     (clock-out . ""))
-  "Headings for notes added when clocking out or closing TODO items.
+  "Headings for notes added to entries.
 The value is an alist, with the car being a symbol indicating the note
 context, and the cdr is the heading to be used.  The heading may also be the
 empty string.
@@ -1548,7 +1549,11 @@ empty string.
 	  (cons (const :tag
 		       "Heading when changing todo state (todo sequence only)"
 		       state) string)
+	  (cons (const :tag "Heading when just taking a note" note) string)
 	  (cons (const :tag "Heading when clocking out" clock-out) string)))
+
+(unless (assq 'note org-log-note-headings)
+  (push '(note . "%t") org-log-note-headings))
 
 (defcustom org-log-states-order-reversed t
   "Non-nil means, the latest state change note will be directly after heading.
@@ -5552,7 +5557,7 @@ the whole buffer."
                (org-beginning-of-item)
                (setq curr-ind (org-get-indentation))
                (setq next-ind curr-ind)
-               (while (= curr-ind next-ind)
+               (while (and (org-at-item-p) (= curr-ind next-ind))
                  (save-excursion (end-of-line) (setq eline (point)))
                  (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
@@ -8490,10 +8495,10 @@ For calling through lisp, arg is also interpreted in the following way:
 	    ;; It is now done, and it was not done before
 	    (org-add-planning-info 'closed (org-current-time))
 	    (if (and (not dolog) (eq 'note org-log-done))
-		(org-add-log-maybe 'done state 'findpos 'note)))
+		(org-add-log-setup 'done state 'findpos 'note)))
 	  (when (and state dolog)
 	    ;; This is a non-nil state, and we need to log it
-	    (org-add-log-maybe 'state state 'findpos dolog)))
+	    (org-add-log-setup 'state state 'findpos dolog)))
 	;; Fixup tag positioning
 	(and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
 	(run-hooks 'org-after-todo-state-change-hook)
@@ -8674,7 +8679,7 @@ This function is run automatically after each state change to a DONE state."
 				(default-value 'post-command-hook)))
 		     (eq org-log-note-purpose 'done)))
 	;; Make sure a note is taken;
-	(org-add-log-maybe 'state (or done-word (car org-done-keywords))
+	(org-add-log-setup 'state (or done-word (car org-done-keywords))
 			   'findpos org-log-repeat))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
@@ -8875,7 +8880,13 @@ be removed."
   "Message to be displayed after a log note has been stored.
 The auto-repeater uses this.")
 
-(defun org-add-log-maybe (&optional purpose state findpos how)
+(defun org-add-note ()
+  "Add a note to the current entry.
+This is done in the same way as adding a state change note."
+  (interactive)
+  (org-add-log-setup 'note nil t nil))
+
+(defun org-add-log-setup (&optional purpose state findpos how)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in
@@ -8925,7 +8936,9 @@ the current entry.  If not, assume that it can be inserted at point."
 		     ((eq org-log-note-purpose 'done)  "closed todo item")
 		     ((eq org-log-note-purpose 'state)
 		      (format "state change to \"%s\"" org-log-note-state))
-		   (t (error "This should not happen")))))
+		     ((eq org-log-note-purpose 'note)
+		      "this entry")
+		     (t (error "This should not happen")))))
     (org-set-local 'org-finish-function 'org-store-log-note)))
 
 (defvar org-note-abort nil) ; dynamically scoped
@@ -12702,7 +12715,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
       (insert " => " (format "%2d:%02d" h m))
       (move-marker org-clock-marker nil)
       (when org-log-note-clock-out
-	(org-add-log-maybe 'clock-out))
+	(org-add-log-setup 'clock-out))
       (when org-mode-line-timer
 	(cancel-timer org-mode-line-timer)
 	(setq org-mode-line-timer nil))
@@ -13811,7 +13824,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
 (org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
 (org-defkey org-mode-map "\C-c&"    'org-mark-ring-goto)
-(org-defkey org-mode-map "\C-c\C-z" 'org-time-stamp)  ; Alternative binding
+(org-defkey org-mode-map "\C-c\C-z" 'org-add-note)  ; Alternative binding
 (org-defkey org-mode-map "\C-c."    'org-time-stamp)  ; Minor-mode reserved
 (org-defkey org-mode-map "\C-c!"    'org-time-stamp-inactive) ; Minor-mode r.
 (org-defkey org-mode-map "\C-c,"    'org-priority)    ; Minor-mode reserved

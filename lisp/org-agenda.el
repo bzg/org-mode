@@ -33,8 +33,6 @@
 
 (require 'org)
 (eval-when-compile
-;  (require 'cl)
-;  (require 'gnus-sum)
   (require 'calendar))
 
 (declare-function add-to-diary-list "diary-lib"
@@ -823,7 +821,9 @@ is (was)."
   :group 'org-agenda-line-format
   :type '(list
 	  (string :tag "Deadline today   ")
-	  (string :tag "Deadline relative")))
+	  (choice :tag "Deadline relative"
+		  (string :tag "Format string")
+		  (function))))
 
 (defcustom org-agenda-remove-times-when-in-prefix t
   "Non-nil means, remove duplicate time specifications in agenda items.
@@ -1001,6 +1001,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "w"        'org-agenda-week-view)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-month-view)
 (org-defkey org-agenda-mode-map "y"        'org-agenda-year-view)
+(org-defkey org-agenda-mode-map "\C-c\C-z" 'org-agenda-add-note)
+(org-defkey org-agenda-mode-map "z"        'org-agenda-add-note)
 (org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-date-later)
 (org-defkey org-agenda-mode-map [(shift left)] 'org-agenda-date-earlier)
 (org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-date-later)
@@ -1086,6 +1088,7 @@ The following commands are available:
     ["Cycle TODO" org-agenda-todo t]
     ["Archive subtree" org-agenda-archive t]
     ["Delete subtree" org-agenda-kill t]
+    ["Add note" org-agenda-add-note t]
     "--"
     ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda 'timeline)]
     ["Next Dates" org-agenda-later (org-agenda-check-type nil 'agenda)]
@@ -3239,8 +3242,10 @@ the documentation of `org-diary'."
 		      (setq txt (org-format-agenda-item
 				 (if (= diff 0)
 				     (car org-agenda-deadline-leaders)
-				   (format (nth 1 org-agenda-deadline-leaders)
-					   diff))
+				   (if (functionp (nth 1 org-agenda-deadline-leaders))
+				       (funcall (nth 1 org-agenda-deadline-leaders) diff date)
+				     (format (nth 1 org-agenda-deadline-leaders)
+					     diff)))
 				 head category tags timestr))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
@@ -4394,6 +4399,25 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (save-excursion
 	(org-agenda-change-all-lines newhead hdmarker 'fixface))
       (move-to-column col))))
+
+(defun org-agenda-add-note (&optional arg)
+  "Add a time-stamped note to the entry at point."
+  (interactive "P")
+  (org-agenda-check-no-diary)
+  (let* ((marker (or (get-text-property (point) 'org-marker)
+		     (org-agenda-error)))
+	 (buffer (marker-buffer marker))
+	 (pos (marker-position marker))
+	 (hdmarker (get-text-property (point) 'org-hd-marker))
+	 (inhibit-read-only t))
+    (with-current-buffer buffer
+      (widen)
+      (goto-char pos)
+      (org-show-context 'agenda)
+      (save-excursion
+	(and (outline-next-heading)
+	     (org-flag-heading nil)))   ; show the next heading
+      (org-add-note))))
 
 (defun org-agenda-change-all-lines (newhead hdmarker &optional fixface)
   "Change all lines in the agenda buffer which match HDMARKER.
