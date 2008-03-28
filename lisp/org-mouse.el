@@ -4,7 +4,7 @@
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
-;; Version: 5.23
+;; Version: 6.00pre-1
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -141,6 +141,13 @@
 
 (eval-when-compile (require 'cl))
 (require 'org)
+
+(defvar org-agenda-allow-remote-undo)
+(defvar org-agenda-undo-list)
+(defvar org-agenda-custom-commands)
+(declare-function org-agenda-change-all-lines "org-agenda"
+		  (newhead hdmarker &optional fixface))
+(declare-function org-verify-change-for-undo "org-agenda" (l1 l2))
 
 (defvar org-mouse-plain-list-regexp "\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) "
   "Regular expression that matches a plain list.")

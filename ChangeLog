@@ -1,3 +1,36 @@
+2008-03-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el: New file, split out from org.el.
+
+	* org-wl.el (org-wl-open): Initialize `wl' when not running yet.
+
+2008-03-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-remember.el: New file, split out from org.el.
+	(org-remember): Call `org-do-remember' as an intermediate to
+	`remember'.
+	(org-ignore-remember): New option.
+	(org-remember): Fix bug with re-applying template.
+
+	* org.el (org-get-org-file): Check for availability of
+	`remember-data-file'.
+
+	* org-exp.el: Add autoload to all entry points.
+	(org-skip-comments): Function removed.
+
+2008-03-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el: New file, split out from org.el.
+
+	* org-table.el: New file, split out from org.el.
+	(org-table-current-column): No longer interactive.
+
+2008-03-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-compat.el: New file, split out from org.el.
+
+	* org-macs.el: New file, split out from org.el.
+
 2008-03-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-cached-entry-get): Allow a regexp value for
@@ -99,7 +132,6 @@
 	documentation of how it is to be used.  Avoid double entries for
 	the same link type.
 	(org-add-link-props): New function.
->>>>>>> split-out-linking-code:ChangeLog
 
 2008-03-14  Glenn Morris  <rmg@gnu.org>
 

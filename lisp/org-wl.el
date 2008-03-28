@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 1.0
+;; Version: 6.00pre-1
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -53,6 +53,7 @@
 		  (folder number field &optional type) t)
 (declare-function elmo-msgdb-overview-get-entity "ext:elmo" (&rest unknown) t)
 ;; Backward compatibility to old version of wl
+(declare-function wl "ext:wl" () t)
 (declare-function wl-summary-buffer-msgdb "ext:wl-folder" (&rest unknown) t)
 (declare-function wl-folder-get-elmo-folder "ext:wl-folder"
 		  (entity &optional no-cache))
@@ -66,6 +67,10 @@
 (declare-function wl-summary-message-number "ext:wl-summary" ())
 (declare-function wl-summary-redisplay "ext:wl-summary" (&optional arg))
 (declare-function wl-summary-registered-temp-mark "ext:wl-action" (number))
+(declare-function wl-folder-goto-folder-subr "ext:wl-folder"
+		  (&optional folder sticky))
+(declare-function wl-thread-open-all "ext:wl-thread" ())
+(defvar wl-init)
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
 
@@ -113,6 +118,8 @@
 
 (defun org-wl-open (path)
  "Follow the WL message link specified by PATH."
+ (require 'wl)
+ (unless wl-init (wl))
  ;; XXX: The imap-uw's MH folder names start with "%#".
  (if (not (string-match "\\`\\(\\(?:%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path))
      (error "Error in Wanderlust link"))
