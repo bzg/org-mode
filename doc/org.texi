@@ -116,7 +116,7 @@ Document Structure
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
-* orgstruct-mode::              Structure editing outside Org-mode
+* Orgstruct-mode::              Structure editing outside Org-mode
 
 Archiving
 
@@ -128,7 +128,7 @@ Tables
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
-* orgtbl-mode::                 The table editor as minor mode
+* Orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 
 The spreadsheet
@@ -285,7 +285,7 @@ HTML export
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
-* CSS support::                 Changing the appearence of the output
+* CSS support::                 Changing the appearance of the output
 
 LaTeX export
 
@@ -298,7 +298,7 @@ Text interpretation by the exporter
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chnuks of text
+* Quoted examples::             Inserting quoted chunks of text
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 
@@ -390,7 +390,7 @@ Usenet messages, BBDB entries, and any files related to the projects.
 For printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, as HTML, or (TODO and agenda items only) as an
 iCalendar file.  It can also serve as a publishing tool for a set of
-linked webpages.
+linked web pages.
 
 An important design aspect that distinguishes Org-mode from for example
 Planner/Muse is that it encourages to store every piece of information
@@ -459,7 +459,7 @@ the following line to @file{.emacs}:
 @end example
 
 @b{XEmacs users now need to install the file @file{noutline.el} from
-the @file{xemacs} subdirectory of the Org-mode distribution.  Use the
+the @file{xemacs} sub-directory of the Org-mode distribution.  Use the
 command:}
 
 @example
@@ -491,8 +491,8 @@ make install-info
 @section Activation
 @cindex activation
 @cindex autoload
-@cindex global keybindings
-@cindex keybindings, global
+@cindex global key bindings
+@cindex key bindings, global
 
 @iftex
 @b{Important:} @i{If you use copy-and-paste to copy lisp code from the
@@ -631,7 +631,7 @@ edit the structure of the document.
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
-* orgstruct-mode::              Structure editing outside Org-mode
+* Orgstruct-mode::              Structure editing outside Org-mode
 @end menu
 
 @node Outlines, Headlines, Document structure, Document structure
@@ -964,7 +964,7 @@ The following commands help managing the ARCHIVE tag:
 @kindex C-c C-x C-a
 @item C-c C-x C-a
 Toggle the ARCHIVE tag for the current headline.  When the tag is set,
-the headline changes to a shadowish face, and the subtree below it is
+the headline changes to a shadowed face, and the subtree below it is
 hidden.
 @kindex C-u C-c C-x C-a
 @item C-u C-c C-x C-a
@@ -1160,7 +1160,7 @@ subordinate to real headlines, however; the hierarchies remain
 completely separated.
 
 If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
-fixes the indentation of the curent line in a heuristic way.
+fixes the indentation of the current line in a heuristic way.
 @kindex M-@key{RET}
 @item M-@key{RET}
 Insert new item at current level.  With prefix arg, force a new heading
@@ -1202,7 +1202,7 @@ the command chain with a cursor motion or so.
 If there is a checkbox (@pxref{Checkboxes}) in the item line, toggle the
 state of the checkbox.  If not, this command makes sure that all the
 items on this list level use the same bullet.  Furthermore, if this is
-an ordered list, make sure the numbering is ok.
+an ordered list, make sure the numbering is OK.
 @kindex C-c -
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate
@@ -1214,7 +1214,7 @@ item markers will be removed from the list.  Finally, even without an
 active region, a normal line will be converted into a list item.
 @end table
 
-@node Drawers, orgstruct-mode, Plain lists, Document structure
+@node Drawers, Orgstruct-mode, Plain lists, Document structure
 @section Drawers
 @cindex drawers
 @cindex visibility cycling, drawers
@@ -1241,9 +1241,9 @@ In order to look inside the drawer, you need to move the cursor to the
 drawer line and press @key{TAB} there.  Org-mode uses a drawer for
 storing properties (@pxref{Properties and columns}).
 
-@node orgstruct-mode,  , Drawers, Document structure
+@node Orgstruct-mode,  , Drawers, Document structure
 @section The Orgstruct minor mode
-@cindex orgstruct-mode
+@cindex Orgstruct-mode
 @cindex minor mode for structure editing
 
 If you like the intuitive way the Org-mode structure editing and list
@@ -1284,7 +1284,7 @@ calculator).
 * Built-in table editor::       Simple tables
 * Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
-* orgtbl-mode::                 The table editor as minor mode
+* Orgtbl-mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities.
 @end menu
 
@@ -1340,7 +1340,7 @@ If every line contains a comma, comma-separated values (CSV) are assumed.
 If not, lines are split at whitespace into fields.  You can use a prefix
 argument to force a specific separator: @kbd{C-u} forces CSV, @kbd{C-u
 C-u} forces TAB, and a numeric argument N indicates that at least N
-consequtive spaces, or alternatively a TAB will be the separator.
+consecutive spaces, or alternatively a TAB will be the separator.
 @*
 If there is no active region, this command creates an empty Org-mode
 table.  But it's easier just to start typing, like
@@ -1550,7 +1550,7 @@ on a per-file basis with:
 #+STARTUP: noalign
 @end example
 
-@node Column groups, orgtbl-mode, Narrow columns, Tables
+@node Column groups, Orgtbl-mode, Narrow columns, Tables
 @section Column groups
 @cindex grouping columns in tables
 
@@ -1562,7 +1562,7 @@ order to specify column groups, you can use a special row where the
 first field contains only @samp{/}.  The further fields can either
 contain @samp{<} to indicate that this column should start a group,
 @samp{>} to indicate the end of a column, or @samp{<>} to make a column
-a group of its own.  Boundaries between colum groups will upon export be
+a group of its own.  Boundaries between column groups will upon export be
 marked with vertical lines.  Here is an example:
 
 @example
@@ -1576,7 +1576,7 @@ marked with vertical lines.  Here is an example:
 #+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2))
 @end example
 
-It is also sufficient to just insert the colum group starters after
+It is also sufficient to just insert the column group starters after
 every vertical line you'd like to have:
 
 @example
@@ -1585,9 +1585,9 @@ every vertical line you'd like to have:
 | /  | <   |     |     | <       |            |
 @end example
 
-@node orgtbl-mode, The spreadsheet, Column groups, Tables
+@node Orgtbl-mode, The spreadsheet, Column groups, Tables
 @section The Orgtbl minor mode
-@cindex orgtbl-mode
+@cindex Orgtbl-mode
 @cindex minor mode for tables
 
 If you like the intuitive way the Org-mode table editor works, you
@@ -1606,7 +1606,7 @@ construct La@TeX{} tables with the underlying ease and power of
 Orgtbl-mode, including spreadsheet capabilities.  For details, see
 @ref{Tables in arbitrary syntax}.
 
-@node The spreadsheet,  , orgtbl-mode, Tables
+@node The spreadsheet,  , Orgtbl-mode, Tables
 @section The spreadsheet
 @cindex calculations, in tables
 @cindex spreadsheet capabilities
@@ -1828,7 +1828,7 @@ functionality is not enough.  If a formula starts with a single quote
 followed by an opening parenthesis, then it is evaluated as a lisp form.
 The evaluation should return either a string or a number.  Just as with
 @file{calc} formulas, you can specify modes and a printf format after a
-semicolon.  With Emacs Lisp forms, you need to be concious about the way
+semicolon.  With Emacs Lisp forms, you need to be conscious about the way
 field references are interpolated into the form.  By default, a
 reference will be interpolated as a Lisp string (in double quotes)
 containing the field.  If you provide the @samp{N} mode switch, all
@@ -1836,7 +1836,7 @@ referenced elements will be numbers (non-number fields will be zero) and
 interpolated as Lisp numbers, without quotes.  If you provide the
 @samp{L} flag, all fields will be interpolated literally, without quotes.
 I.e., if you want a reference to be interpreted as a string by the Lisp
-form, enclode the reference operator itself in double quotes, like
+form, enclose the reference operator itself in double quotes, like
 @code{"$3"}.  Ranges are inserted as space-separated fields, so you can
 embed them in list or vector syntax.  A few examples, note how the
 @samp{N} mode is used when we do computations in lisp.
@@ -2289,7 +2289,7 @@ cursor on or at a target.
 @cindex links, external
 @cindex external links
 @cindex links, external
-@cindex GNUS links
+@cindex Gnus links
 @cindex BBDB links
 @cindex IRC links
 @cindex URL links
@@ -2324,8 +2324,8 @@ mhe:folder                                @r{MH-E folder link}
 mhe:folder#id                             @r{MH-E message link}
 rmail:folder                              @r{RMAIL folder link}
 rmail:folder#id                           @r{RMAIL message link}
-gnus:group                                @r{GNUS group link}
-gnus:group#id                             @r{GNUS article link}
+gnus:group                                @r{Gnus group link}
+gnus:group#id                             @r{Gnus article link}
 bbdb:Richard Stallman                     @r{BBDB link}
 irc:/irc.com/#emacs/bob                   @r{IRC link}
 shell:ls *.org                            @r{A shell command}
@@ -2333,7 +2333,7 @@ elisp:(find-file-other-frame "Elisp.org") @r{An elisp form to evaluate}
 @end example
 
 A link should be enclosed in double brackets and may contain a
-descriptive text to be displayed instead of the url (@pxref{Link
+descriptive text to be displayed instead of the URL (@pxref{Link
 format}), for example:
 
 @example
@@ -2370,7 +2370,7 @@ which can be used in any buffer to create a link.  The link will be
 stored for later insertion into an Org-mode buffer (see below).  For
 Org-mode files, if there is a @samp{<<target>>} at the cursor, the
 link points to the target.  Otherwise it points to the current
-headline.  For VM, RMAIL, WANDERLUST, MH-E, GNUS and BBDB buffers, the
+headline.  For VM, Rmail, Wanderlust, MH-E, Gnus and BBDB buffers, the
 link will indicate the current article/entry.  For W3 and W3M buffers,
 the link goes to the current URL.  For IRC links, if you set the
 variable @code{org-irc-link-to-logs} to non-nil then @kbd{C-c l} will
@@ -2424,7 +2424,7 @@ When @kbd{C-c C-l} is called with a @kbd{C-u} prefix argument, a link to
 a file will be inserted and you may use file name completion to select
 the name of the file.  The path to the file is inserted relative to the
 directory of the current org file, if the linked file is in the current
-directory or in a subdirectory of it, or if the path is written relative
+directory or in a sub-directory of it, or if the path is written relative
 to the current directory using @samp{../}.  Otherwise an absolute path
 is used, if possible with @samp{~/} for your home directory.  You can
 force an absolute path with two @kbd{C-u} prefixes.
@@ -2437,7 +2437,7 @@ link and description parts of the link.
 @kindex C-c C-o
 @item C-c C-o
 Open link at point.  This will launch a web browser for URLs (using
-@command{browse-url-at-point}), run vm/mh-e/wanderlust/rmail/gnus/bbdb
+@command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
 for the corresponding links, and execute the command in a shell link.
 When the cursor is on an internal link, this commands runs the
 corresponding search.  When the cursor is on a TAG list in a headline,
@@ -3245,7 +3245,7 @@ explicitly marked with those tags.  When executing tag searches and
 Org-mode finds that a certain headline matches the search criterion, it
 will not check any sublevel headline, assuming that these also match and
 that the list of matches could become very long because of that.  If you
-do want the subevels be tested and listed as well, you may set the
+do want the sublevels be tested and listed as well, you may set the
 variable @code{org-tags-match-list-sublevels}.  To limit tag inheritance
 to specific tags, or to turn it off entirely, use the variable
 @code{org-use-tag-inheritance}.
@@ -3369,7 +3369,7 @@ alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
 @samp{Sarah} could be done with @kbd{C-c C-c @key{TAB} S a r a h
 @key{RET} @key{RET}}.
 
-If you find that most of the time, you need only a single keypress to
+If you find that most of the time, you need only a single key press to
 modify your list of tags, set the variable
 @code{org-fast-tag-selection-single-key}.  Then you no longer have to
 press @key{RET} to exit fast tag selection - it will immediately exit
@@ -3476,7 +3476,7 @@ you document bugs and plan releases of a piece of software.  Instead of
 using tags like @code{:release_1:}, @code{:release_2:}, one can use a
 property, say @code{:Release:}, that in different subtrees has different
 values, such as @code{1.0} or @code{2.0}.  For an example of the second
-application of properties, imagine keeping track of one's music CD's,
+application of properties, imagine keeping track of your music CD's,
 where properties could be things such as the album artist, date of
 release, number of tracks, and so on.
 
@@ -3819,7 +3819,7 @@ line or from the variable @code{org-columns-default-format}, and column
 view is established for the current entry and its subtree.
 @kindex r
 @item r
-Recreate the column view, to included hanges happening in the buffer.
+Recreate the column view, to include recent changes made in the buffer.
 @kindex g
 @item g
 Same as @kbd{r}.
@@ -3875,7 +3875,7 @@ Delete the current column.
 
 Since column view is just an overlay over a buffer, it cannot be
 exported or printed directly.  If you want to capture a column view, use
-ths @code{columnview} dynamic block (@pxref{Dynamic blocks}).  The frame
+this @code{columnview} dynamic block (@pxref{Dynamic blocks}).  The frame
 of this block looks like this:
 
 @example
@@ -3929,7 +3929,7 @@ Update dynamical block at point.  The cursor needs to be in the
 @kindex C-u C-c C-x C-u
 @item C-u C-c C-x C-u
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
-you have several clocktable blocks in a buffer.
+you have several clock table blocks in a buffer.
 @end table
 
 @node Property API,  , Column view, Properties and columns
@@ -4074,7 +4074,7 @@ Insert a time stamp corresponding to the cursor date in the Calendar.
 @kindex C-c >
 @item C-c >
 Access the Emacs calendar for the current date.  If there is a
-timestamp in the current line, goto the corresponding date
+timestamp in the current line, go to the corresponding date
 instead.
 @c
 @kindex C-c C-o
@@ -4198,7 +4198,7 @@ M-S-@key{right}/@key{left}   @r{One month forward/backward.}
 @key{RET}           @r{Choose date in calendar.}
 @end example
 
-The actions of the date/time prompt may seem complex, but I asure you
+The actions of the date/time prompt may seem complex, but I assure you
 they will grow on you.  To help you understand what is going on, the
 current interpretation of your input will be displayed live in the
 minibuffer@footnote{If you find this distracting, turn the display of
@@ -4407,7 +4407,7 @@ forgot to call you father for 3 weeks, it does not make sense to call
 her 3 times in a single day to make up for it.  Finally, there are tasks
 like changing batteries which should always repeat a certain time
 @i{after} the last time you did it.  For these tasks, Org-mode has
-special repeaters markes with @samp{++} and @samp{.+}.  For example:
+special repeaters markers with @samp{++} and @samp{.+}.  For example:
 
 @example
 ** TODO Call Father
@@ -4536,7 +4536,7 @@ Update dynamical block at point.  The cursor needs to be in the
 @kindex C-u C-c C-x C-u
 @item C-u C-c C-x C-u
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
-you have several clocktable blocks in a buffer.
+you have several clock table blocks in a buffer.
 @end table
 
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
@@ -4907,12 +4907,12 @@ Remove the permanent restriction created by @kbd{C-c C-x <}.
 
 @noindent
 When working with @file{Speedbar}, you can use the following commands in
-the speedbar frame:
+the Speedbar frame:
 @table @kbd
 @kindex <
 @item < @r{in the speedbar frame}
 Permanently restrict the agenda to the item at the cursor in the
-speedbar frame, either an Org-mode file or a subtree in such a file.
+Speedbar frame, either an Org-mode file or a subtree in such a file.
 If there is a window displaying an agenda view, the new restriction takes
 effect immediately.
 @kindex <
@@ -5396,7 +5396,7 @@ Next line (same as @key{up} and @kbd{C-p}).
 @kindex p
 @item p
 Previous line (same as @key{down} and @kbd{C-n}).
-@tsubheading{View/GoTo org file}
+@tsubheading{View/Go to org file}
 @kindex mouse-3
 @kindex @key{SPC}
 @item mouse-3
@@ -5453,7 +5453,7 @@ Delete other windows.
 @kindex y
 @item d w m y
 Switch to day/week/month/year view.  When switching to day or week view,
-this setting becomes the default for subseqent agenda commands.  Since
+this setting becomes the default for subsequent agenda commands.  Since
 month and year views are slow to create, they do not become the default.
 A numeric prefix argument may be used to jump directly to a specific day
 of the year, ISO week, month, or year, respectively.  For example,
@@ -5501,7 +5501,7 @@ Display the previous dates.
 @c
 @kindex .
 @item .
-Goto today.
+Go to today.
 
 @tsubheading{Query editing}
 @cindex query editing, in agenda
@@ -6283,10 +6283,10 @@ setting is active:
 CDLaTeX-mode is a minor mode that is normally used in combination with a
 major La@TeX{} mode like AUCTeX in order to speed-up insertion of
 environments and math templates.  Inside Org-mode, you can make use of
-some of the features of cdlatex-mode.  You need to install
+some of the features of CDLaTeX-mode.  You need to install
 @file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
 AUCTeX) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
-Don't turn cdlatex-mode itself under Org-mode, but use the light
+Don't turn CDLaTeX-mode itself under Org-mode, but use the light
 version @code{org-cdlatex-mode} that comes as part of Org-mode.  Turn it
 on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
 Org-mode files with
@@ -6296,7 +6296,7 @@ Org-mode files with
 @end lisp
 
 When this mode is enabled, the following features are present (for more
-details see the documentation of cdlatex-mode):
+details see the documentation of CDLaTeX-mode):
 @itemize @bullet
 @kindex C-c @{
 @item
@@ -6410,7 +6410,7 @@ at a different level, specify it with a prefix argument.  For example,
 creates only top level headlines and does the rest as items.  When
 headlines are converted to items, the indentation of the text following
 the headline is changed to fit nicely under the item.  This is done with
-the assumption that the first bodyline indicates the base indentation of
+the assumption that the first body line indicates the base indentation of
 the body text.  Any indentation larger than this is adjusted to preserve
 the layout relative to the first line.  Should there be lines with less
 indentation than the first, these are left alone.
@@ -6428,7 +6428,7 @@ language, but with additional support for tables.
 * Quoting HTML tags::           Using direct HTML in Org-mode
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
-* CSS support::                 Changing the appearence of the output
+* CSS support::                 Changing the appearance of the output
 @end menu
 
 @node HTML Export commands, Quoting HTML tags, HTML export, HTML export
@@ -6650,7 +6650,7 @@ creates two levels of headings and does the rest as items.
 @subsection Quoting LaTeX code
 
 Embedded La@TeX{} as described in @ref{Embedded LaTeX} will be correctly
-inserted into the La@TeX{} file.  Forthermore, you can add special code
+inserted into the La@TeX{} file.  Furthermore, you can add special code
 that should only be present in La@TeX{} export with the following
 constructs:
 
@@ -6747,7 +6747,7 @@ in order to produce better output.
 * Comment lines::               Some lines will not be exported
 * Initial text::                Text before the first headline
 * Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chnuks of text
+* Quoted examples::             Inserting quoted chunks of text
 * Enhancing text::              Subscripts, symbols and more
 * Export options::              How to influence the export settings
 @end menu
@@ -7270,7 +7270,7 @@ becomes @file{index.html}).
 @tab Title of index page. Defaults to name of file.
 
 @item @code{:index-function}
-@tab Plugin function to use for generation of index.
+@tab Plug-in function to use for generation of index.
 Defaults to @code{org-publish-org-index}, which generates a plain list
 of links to all files in the project.
 @end multitable
@@ -7310,7 +7310,7 @@ directory on the local machine.
 
 This more complicated example publishes an entire website, including
 org files converted to HTML, image files, emacs lisp source code, and
-stylesheets. The publishing-directory is remote and private files are
+style sheets. The publishing-directory is remote and private files are
 excluded.
 
 To ensure that links are preserved, care should be taken to replicate
@@ -7324,7 +7324,7 @@ file:../images/myimage.png
 @c
 On the web server, the relative path to the image should be the
 same. You can accomplish this by setting up an "images" folder in the
-right place on the webserver, and publishing images to it.
+right place on the web server, and publishing images to it.
 
 @lisp
 (setq org-publish-project-alist
@@ -7443,7 +7443,7 @@ will insert example settings for this keyword.
 In the line after @samp{#+STARTUP: }, complete startup keywords,
 i.e. valid keys for this line.
 @item
-Elsewhere, complete dictionary words using ispell.
+Elsewhere, complete dictionary words using Ispell.
 @end itemize
 @end table
 
@@ -7751,7 +7751,7 @@ org-convert-to-oddeven-levels}.
 
 @node TTY keys, Interaction, Clean view, Miscellaneous
 @section Using org-mode on a tty
-@cindex tty keybindings
+@cindex tty key bindings
 
 Because Org-mode contains a large number of commands, by default much of
 Org-mode's core commands are bound to keys that are generally not
@@ -7826,12 +7826,12 @@ setup.  See the installation instructions in the file
 @file{constants.el}.
 @item @file{cdlatex.el} by Carsten Dominik
 @cindex @file{cdlatex.el}
-Org-mode can make use of the cdlatex package to efficiently enter
+Org-mode can make use of the CDLaTeX package to efficiently enter
 La@TeX{} fragments into Org-mode files. See @ref{CDLaTeX mode}.
 @item @file{imenu.el} by Ake Stenhoff and Lars Lindberg
 @cindex @file{imenu.el}
 Imenu allows menu access to an index of items in a file.  Org-mode
-supports imenu - all you need to do to get the index is the following:
+supports Imenu - all you need to do to get the index is the following:
 @lisp
 (add-hook 'org-mode-hook
           (lambda () 'imenu-add-to-menubar "Imenu"))
@@ -7845,10 +7845,10 @@ Org mode cooperates with remember, see @ref{Remember}.
 @item @file{speedbar.el} by Eric M. Ludlam
 @cindex @file{speedbar.el}
 Speedbar is a package that creates a special frame displaying files and
-index items in files.  Org-mode supports speedbar and allows you to
-drill into Org-mode files directly from the speedbar.  It also allows to
+index items in files.  Org-mode supports Speedbar and allows you to
+drill into Org-mode files directly from the Speedbar.  It also allows to
 restrict the scope of agenda commands to a file or a subtree by using
-the command @kbd{<} in the speedbar frame.
+the command @kbd{<} in the Speedbar frame.
 @cindex @file{table.el}
 @item @file{table.el} by Takaaki Ota
 @kindex C-c C-c
@@ -7902,11 +7902,11 @@ is loaded @emph{before} @file{allout.el}, for example by putting
 
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm
-Keybindings in Org-mode conflict with the @kbd{S-<cursor>} keys used by
+Key bindings in Org-mode conflict with the @kbd{S-<cursor>} keys used by
 CUA-mode (as well as pc-select-mode and s-region-mode) to select and
 extend the region.  If you want to use one of these packages along with
 Org-mode, configure the variable @code{org-replace-disputed-keys}.  When
-set, Org-mode will move the following keybindings in Org-mode files, and
+set, Org-mode will move the following key bindings in Org-mode files, and
 in the agenda buffer (but not during date selection).
 
 @example
@@ -7998,7 +7998,7 @@ The following extensions for Org-mode have been written by other people:
 @cindex @file{org-publish.el}
 @item @file{org-publish.el} by David O'Toole
 This package provides facilities for publishing related sets of Org-mode
-files together with linked files like images as webpages.  It is
+files together with linked files like images as web pages.  It is
 highly configurable and can be used for other publishing purposes as
 well.  As of Org-mode version 4.30, @file{org-publish.el} is part of the
 Org-mode distribution.  It is not yet part of Emacs, however, a delay
@@ -8046,7 +8046,7 @@ Org-mode has a large number of hyperlink types built-in
 (@pxref{Hyperlinks}).  If you would like to add new link types, it
 provides an interface for doing so.  Lets look at an example file
 @file{org-man.el} that will add support for creating links like
-@samp{[[man:printf][The printf manpage]]} to show unix manual pages inside
+@samp{[[man:printf][The printf manpage]]} to show Unix manual pages inside
 emacs:
 
 @lisp
@@ -8116,7 +8116,7 @@ buffer displaying a man page.
 
 The rest of the file defines the necessary variables and functions.
 First there is a customization variable that determines which emacs
-command should be used to display manpages.  There are two options,
+command should be used to display man pages.  There are two options,
 @code{man} and @code{woman}.  Then the function to follow a link is
 defined.  It gets the link path as an argument - in this case the link
 path is just a topic for the manual command.  The function calls the
@@ -8127,8 +8127,8 @@ to store a link with @kbd{C-c l}, also this function will be called to
 try to make a link.  The function must first decide if it is supposed to
 create the link for this buffer type, we do this by checking the value
 of the variable @code{major-mode}.  If not, the function must exit and
-retunr the value @code{nil}.  If yes, the link is created by getting the
-manual tpoic from the buffer name and prefixing it with the string
+return the value @code{nil}.  If yes, the link is created by getting the
+manual topic from the buffer name and prefixing it with the string
 @samp{man:}.  Then it must call the command @code{org-store-link-props}
 and set the @code{:type} and @code{:link} properties.  Optionally you
 can also set the @code{:description} property to provide a default for
@@ -8139,7 +8139,7 @@ buffer with @kbd{C-c C-l}.
 @section Tables and Lists in arbitrary syntax
 @cindex tables, in other modes
 @cindex lists, in other modes
-@cindex orgtbl-mode
+@cindex Orgtbl-mode
 
 Since Orgtbl-mode can be used as a minor mode in arbitrary buffers, a
 frequent feature request has been to make it work with native tables in
@@ -8159,7 +8159,7 @@ for a very flexible system.
 Bastien added the ability to do the same with lists.  You can use Org's
 facilities to edit and structure lists by turning @code{orgstruct-mode}
 on, then locally exporting such lists in another format (HTML, La@TeX{}
-or TeXInfo.)
+or Texinfo.)
 
 
 @menu
@@ -8236,13 +8236,13 @@ key.
 
 @node A LaTeX example, Translator functions, Radio tables, Tables in arbitrary syntax
 @subsection A LaTeX example of radio tables
-@cindex LaTeX, and orgtbl-mode
+@cindex LaTeX, and Orgtbl-mode
 
 The best way to wrap the source table in La@TeX{} is to use the
 @code{comment} environment provided by @file{comment.sty}.  It has to be
 activated by placing @code{\usepackage@{comment@}} into the document
 header.  Orgtbl-mode can insert a radio table skeleton@footnote{By
-default this works only for La@TeX{}, HTML, and TeXInfo.  Configure the
+default this works only for La@TeX{}, HTML, and Texinfo.  Configure the
 variable @code{orgtbl-radio-tables} to install templates for other
 modes.}  with the command @kbd{M-x orgtbl-insert-radio-table}.  You will
 be prompted for a table name, lets say we use @samp{salesfigures}.  You
@@ -8258,7 +8258,7 @@ will then get the following template:
 @end example
 
 @noindent
-The @code{#+ORGTBL: SEND} line tells orgtbl-mode to use the function
+The @code{#+ORGTBL: SEND} line tells Orgtbl-mode to use the function
 @code{orgtbl-to-latex} to convert the table into La@TeX{} and to put it
 into the receiver location with name @code{salesfigures}.  You may now
 fill in the table, feel free to use the spreadsheet features@footnote{If
@@ -8341,7 +8341,7 @@ applied.
 
 @node Translator functions, Radio lists, A LaTeX example, Tables in arbitrary syntax
 @subsection Translator functions
-@cindex HTML, and orgtbl-mode
+@cindex HTML, and Orgtbl-mode
 @cindex translator function
 
 Orgtbl-mode has several translator functions built-in:
@@ -8421,7 +8421,7 @@ Sending and receiving radio lists works exactly the same way than
 sending and receiving radio tables (@pxref{Radio tables}) @footnote{You
 need to load the @code{org-export-latex.el} package to use radio lists
 since the relevant code is there for now.}.  As for radio tables, you
-can insert radio lists templates in HTML, La@TeX{} and TeXInfo modes by
+can insert radio lists templates in HTML, La@TeX{} and Texinfo modes by
 calling @code{org-list-insert-radio-list}.
 
 Here are the differences with radio tables:
@@ -8648,7 +8648,7 @@ Org-mode was borne in 2003, out of frustration over the user interface
 of the Emacs outline-mode.  I was trying to organize my notes and
 projects, and using Emacs seemed to be the natural way to go.  However,
 having to remember eleven different commands with two or three keys per
-command, only to hide and unhide parts of the outline tree, that seemed
+command, only to hide and show parts of the outline tree, that seemed
 entirely unacceptable to me.  Also, when using outlines to take notes, I
 constantly want to restructure the tree, organizing it parallel to my
 thoughts and plans.  @emph{Visibility cycling} and @emph{structure
@@ -8700,7 +8700,7 @@ them.
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
 @item
-@i{Christian Egli} converted the documentation into TeXInfo format,
+@i{Christian Egli} converted the documentation into Texinfo format,
 patched CSS formatting into the HTML exporter, and inspired the agenda.
 @item
 @i{David Emery} provided a patch for custom CSS support in exported
@@ -8773,7 +8773,7 @@ of feedback.
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
 @item
-Linking to VM/BBDB/GNUS was inspired by @i{Tom Shannon}'s
+Linking to VM/BBDB/Gnus was inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
 @i{Daniel Sinder} came up with the idea of internal archiving by locking
@@ -8805,9 +8805,9 @@ description is shown, and (ii) popping up a calendar to select a date.
 John has also contributed a number of great ideas directly to Org-mode.
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
-linking to GNUS.
+linking to Gnus.
 @item
-@i{Roland Winkler} requested additional keybindings to make Org-mode
+@i{Roland Winkler} requested additional key bindings to make Org-mode
 work on a tty.
 @item
 @i{Piotr Zielinski} wrote @file{org-mouse.el}, proposed agenda blocks
@@ -8828,6 +8828,11 @@ and contributed various ideas and code snippets.
 @bye
 
 @ignore
-   arch-tag: 7893d1fe-cc57-4d13-b5e5-f494a1bcc7ac
+        arch-tag: 7893d1Fe-cc57-4d13-b5e5-f494a1CBC7ac
 @end ignore
-)
+
+@c Local variables:
+@c ispell-local-dictionary: "en_US-w_accents"
+@c ispell-local-pdict: "./.aspell.org.pws"
+@c fill-column: 77
+@c End:
