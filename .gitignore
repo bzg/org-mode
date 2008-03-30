@@ -1,0 +1,37 @@
+# Don't bother tracking a bunch of stuff when building and installing
+# Org from the master git repository.
+
+# ...by ignoring everything created by 'make' and 'make doc'.
+
+*.aux
+*.cp
+*.cps
+*.fn
+*.fns
+*.html
+*.ky
+*.kys
+*.log
+*.pdf
+*.pg
+*.toc
+*.tp
+*.vr
+*.dvi
+orgcard_letter.tex
+
+# aspell word and replacement lists
+
+.aspell.org.pws
+.aspell.org.prepl
+*.bak
+
+# and collateral damage from Emacs
+
+*~
+
+#
+# Local variables:
+# fill-column: 72
+# mode: conf
+# End:
