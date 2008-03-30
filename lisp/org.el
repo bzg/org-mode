@@ -5557,7 +5557,7 @@ the whole buffer."
                (org-beginning-of-item)
                (setq curr-ind (org-get-indentation))
                (setq next-ind curr-ind)
-               (while (and (org-at-item-p) (= curr-ind next-ind))
+               (while (and (bolp) (org-at-item-p) (= curr-ind next-ind))
                  (save-excursion (end-of-line) (setq eline (point)))
                  (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
@@ -10582,6 +10582,8 @@ This is the compiled version of the format.")
 			  (min (point-max) (1+ (point-at-eol)))
 			  'read-only "Type `e' to edit property")))))
 
+(defvar org-columns-full-header-line-format nil
+  "Fthe full header line format, will be shifted by horizontal scrolling." )
 (defvar org-previous-header-line-format nil
   "The header line format before column view was turned on.")
 (defvar org-columns-inhibit-recalculation nil
@@ -10589,6 +10591,7 @@ This is the compiled version of the format.")
 
 
 (defvar header-line-format)
+(defvar org-columns-previous-hscroll 0)
 (defun org-columns-display-here-title ()
   "Overlay the newline before the current line with the table title."
   (interactive)
@@ -10607,10 +10610,24 @@ This is the compiled version of the format.")
 	    title (concat title string)))
     (setq title (concat
 		 (org-add-props " " nil 'display '(space :align-to 0))
-		 (org-add-props title nil 'face '(:weight bold :underline t))))
+		 (org-add-props title nil 'face '(:weight bold :underline t :inherit default))))
     (org-set-local 'org-previous-header-line-format header-line-format)
     (org-set-local 'org-columns-current-widths (nreverse widths))
-    (setq header-line-format title)))
+    (setq org-columns-full-header-line-format title)
+    (setq org-columns-previous-hscroll -1)
+;    (org-columns-hscoll-title)
+    (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
+
+(defun org-columns-hscoll-title ()
+  "Set the header-line-format so that it scrolls along with the table."
+  (sit-for .0001) ; need to force a redisplay to update window-hscroll
+  (when (not (= (window-hscroll) org-columns-previous-hscroll))
+    (setq header-line-format
+	  (concat (substring org-columns-full-header-line-format 0 1)
+		  (substring org-columns-full-header-line-format
+			     (1+ (window-hscroll))))
+	  org-columns-previous-hscroll (window-hscroll))
+    (force-mode-line-update)))
 
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
@@ -10619,7 +10636,8 @@ This is the compiled version of the format.")
     (with-current-buffer (marker-buffer org-columns-begin-marker)
       (when (local-variable-p 'org-previous-header-line-format)
 	(setq header-line-format org-previous-header-line-format)
-	(kill-local-variable 'org-previous-header-line-format))
+	(kill-local-variable 'org-previous-header-line-format)
+	(remove-hook 'post-command-hook 'org-columns-hscoll-title 'local))
       (move-marker org-columns-begin-marker nil)
       (move-marker org-columns-top-level-marker nil)
       (org-unmodified
@@ -14661,8 +14679,12 @@ See the individual commands for more information."
      ["Modify math symbol" org-cdlatex-math-modify
       (org-inside-LaTeX-fragment-p)]
      ["Export LaTeX fragments as images"
-      (setq org-export-with-LaTeX-fragments (not org-export-with-LaTeX-fragments))
-      :style toggle :selected org-export-with-LaTeX-fragments])
+      (if (featurep 'org-exp)
+	  (setq org-export-with-LaTeX-fragments
+		(not org-export-with-LaTeX-fragments))
+	(require 'org-exp))
+      :style toggle :selected (and (boundp 'org-export-with-LaTeX-fragments)
+				   org-export-with-LaTeX-fragments)])
     "--"
     ("Documentation"
      ["Show Version" org-version t]

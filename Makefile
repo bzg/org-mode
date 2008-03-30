@@ -73,7 +73,7 @@ ELCFILES   = $(LISPFILES:.el=.elc)
 DOCFILES   = org.texi org.pdf org
 CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES  = doc/org.texi
-INFOFILES  = org
+INFOFILES  = doc/org
 HG_RELEASES = ../org-mode-all-releases-hg/
 
 
@@ -85,7 +85,8 @@ DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} \
 	CONTRIB
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
-all:	$(ELCFILES)
+default: $(ELCFILES)
+all:	$(ELCFILES) $(INFOFILES)
 compile: $(ELCFILES0)
 
 install: install-lisp
