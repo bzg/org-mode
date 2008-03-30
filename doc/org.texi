@@ -728,9 +728,9 @@ argument (@kbd{C-u @key{TAB}}), global cycling is invoked.
 '--------------------------------------'
 @end example
 
-When @kbd{S-@key{TAB}} is called with a numerical prefix N, the CONTENTS
-view up to headlines of level N will be shown.
-Note that inside tables, @kbd{S-@key{TAB}} jumps to the previous field.
+When @kbd{S-@key{TAB}} is called with a numeric prefix argument N, the
+CONTENTS view up to headlines of level N will be shown.  Note that inside
+tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
 @kindex C-c C-a
@@ -738,12 +738,10 @@ Note that inside tables, @kbd{S-@key{TAB}} jumps to the previous field.
 Show all.
 @kindex C-c C-r
 @item C-c C-r
-Reveal context around point, showing the current entry, the following
-heading and the hierarchy above.  Useful for working near a location
-that has been exposed by a sparse tree command (@pxref{Sparse trees}) or
-an agenda command (@pxref{Agenda commands}).  With prefix arg show, on
-each
-
+Reveal context around point, showing the current entry, the following heading
+and the hierarchy above.  Useful for working near a location that has been
+exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
+(@pxref{Agenda commands}).  With a prefix argument show, on each
 level, all sibling headings.
 @kindex C-c C-x b
 @item C-c C-x b
@@ -757,9 +755,9 @@ buffer
 @end ifnotinfo
 will contain the entire buffer, but will be narrowed to the current
 tree.  Editing the indirect buffer will also change the original buffer,
-but without affecting visibility in that buffer.}.  With numerical
-prefix ARG, go up to this level and then take that tree.  If ARG is
-negative, go up that many levels.  With @kbd{C-u} prefix, do not remove
+but without affecting visibility in that buffer.}.  With a numeric
+prefix argument N, go up to level N and then take that tree.  If N is
+negative then go up that many levels.  With a @kbd{C-u} prefix, do not remove
 the previously used indirect buffer.
 @end table
 
@@ -831,7 +829,7 @@ u            @r{One level up.}
 @item M-@key{RET}
 Insert new heading with same level as current.  If the cursor is in a
 plain list item, a new item is created (@pxref{Plain lists}).  To force
-creation of a new headline, use a prefix arg, or first press @key{RET}
+creation of a new headline, use a prefix argument, or first press @key{RET}
 to get to the beginning of the next line.  When this command is used in
 the middle of a line, the line is split and the rest of the line becomes
 the new headline@footnote{If you do not want the line to be split,
@@ -873,15 +871,16 @@ Move subtree down (swap with next subtree of same level).
 @item C-c C-x C-w
 @itemx C-c C-x C-k
 Kill subtree, i.e. remove it from buffer but save in kill ring.
-With prefix arg, kill N sequential subtrees.
+With a numeric prefix argument N, kill N sequential subtrees.
 @kindex C-c C-x M-w
 @item C-c C-x M-w
-Copy subtree to kill ring.  With prefix arg, copy N sequential subtrees.
+Copy subtree to kill ring.  With a numeric prefix argument N, copy the N
+sequential subtrees.
 @kindex C-c C-x C-y
 @item C-c C-x C-y
 Yank subtree from kill ring.  This does modify the level of the subtree to
-make sure the tree fits in nicely at the yank position.  The yank
-level can also be specified with a prefix arg, or by yanking after a
+make sure the tree fits in nicely at the yank position.  The yank level can
+also be specified with a numeric prefix argument, or by yanking after a
 headline marker like @samp{****}.
 @kindex C-c C-w
 @item C-c C-w
@@ -1163,15 +1162,15 @@ If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
 fixes the indentation of the current line in a heuristic way.
 @kindex M-@key{RET}
 @item M-@key{RET}
-Insert new item at current level.  With prefix arg, force a new heading
-(@pxref{Structure editing}).  If this command is used in the middle of a
-line, the line is @emph{split} and the rest of the line becomes the new
-item@footnote{If you do not want the line to be split, customize the
-variable @code{org-M-RET-may-split-line}.}.  If this command is executed
-in the @emph{whitespace before a bullet or number}, the new item is
-created @emph{before} the current item.  If the command is executed in
-the white space before the text that is part of an item but does not
-contain the bullet, a bullet is added to the current line.
+Insert new item at current level.  With a prefix argument, force a new
+heading (@pxref{Structure editing}).  If this command is used in the middle
+of a line, the line is @emph{split} and the rest of the line becomes the new
+item@footnote{If you do not want the line to be split, customize the variable
+@code{org-M-RET-may-split-line}.}.  If this command is executed in the
+@emph{whitespace before a bullet or number}, the new item is created
+@emph{before} the current item.  If the command is executed in the white
+space before the text that is part of an item but does not contain the
+bullet, a bullet is added to the current line.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
@@ -1205,13 +1204,13 @@ items on this list level use the same bullet.  Furthermore, if this is
 an ordered list, make sure the numbering is OK.
 @kindex C-c -
 @item C-c -
-Cycle the entire list level through the different itemize/enumerate
-bullets (@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}).
-With prefix arg, select the nth bullet from this list.
-If there is an active region when calling this, all lines will be
-converted to list items.  If the first line already was a list item, any
-item markers will be removed from the list.  Finally, even without an
-active region, a normal line will be converted into a list item.
+Cycle the entire list level through the different itemize/enumerate bullets
+(@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}).  With a numeric prefix
+argument N, select the Nth bullet from this list.  If there is an active
+region when calling this, all lines will be converted to list items.  If the
+first line already was a list item, any item markers will be removed from the
+list.  Finally, even without an active region, a normal line will be
+converted into a list item.
 @end table
 
 @node Drawers, Orgstruct-mode, Plain lists, Document structure
@@ -1393,11 +1392,12 @@ Kill the current row or horizontal line.
 @c
 @kindex M-S-@key{down}
 @item M-S-@key{down}
-Insert a new row above (with arg: below) the current row.
+Insert a new row above the current row.  With a prefix argument, the line is
+created below the current one.
 @c
 @kindex C-c -
 @item C-c -
-Insert a horizontal line below current row. With prefix arg, the line
+Insert a horizontal line below current row. With a prefix argument, the line
 is created above the current line.
 @c
 @kindex C-c ^
@@ -1438,13 +1438,12 @@ lines.
 @itemx M-@kbd{RET}
 Wrap several fields in a column like a paragraph.  If there is an active
 region, and both point and mark are in the same column, the text in the
-column is wrapped to minimum width for the given number of lines.  A
-prefix ARG may be used to change the number of desired lines.  If there
-is no region, the current field is split at the cursor position and the
-text fragment to the right of the cursor is prepended to the field one
-line down. If there is no region, but you specify a prefix ARG, the
-current field is made blank, and the content is appended to the field
-above.
+column is wrapped to minimum width for the given number of lines.  A numeric
+prefix argument may be used to change the number of desired lines.  If there
+is no region, the current field is split at the cursor position and the text
+fragment to the right of the cursor is prepended to the field one line
+down. If there is no region, but you specify a prefix argument, the current
+field is made blank, and the content is appended to the field above.
 
 @tsubheading{Calculations}
 @cindex formula, in tables
@@ -1909,13 +1908,12 @@ following command:
 @table @kbd
 @kindex C-c =
 @item C-c =
-Install a new formula for the current column and replace current field
-with the result of the formula.  The command prompts for a formula, with
-default taken from the @samp{#+TBLFM} line, applies it to the current
-field and stores it.  With a numerical prefix (e.g. @kbd{C-5 C-c =})
+Install a new formula for the current column and replace current field with
+the result of the formula.  The command prompts for a formula, with default
+taken from the @samp{#+TBLFM} line, applies it to the current field and
+stores it.  With a numeric prefix argument(e.g. @kbd{C-5 C-c =}) the command
 will apply it to that many consecutive fields in the current column.
 @end table
-
 
 @node Editing and debugging formulas, Updating the table, Column formulas, The spreadsheet
 @subsection Editing and Debugging formulas
@@ -2391,25 +2389,24 @@ only a suggestion - see @ref{Installation}.
 @cindex completion, of links
 @cindex inserting links
 @item C-c C-l
-Insert a link.  This prompts for a link to be inserted into the buffer.
-You can just type a link, using text for an internal link, or one of the
-link type prefixes mentioned in the examples above.  All links stored
-during the current session are part of the history for this prompt, so
-you can access them with @key{up} and @key{down} (or @kbd{M-p/n}).
-Completion, on the other hand, will help you to insert valid link
-prefixes like @samp{http:} or @samp{ftp:}, including the prefixes
-defined through link abbreviations (@pxref{Link abbreviations}).  The
-link will be inserted into the buffer@footnote{After insertion of a
-stored link, the link will be removed from the list of stored links.  To
-keep it in the list later use, use a triple @kbd{C-u} prefix to @kbd{C-c
-C-l}, or configure the option
-@code{org-keep-stored-link-after-insertion}.}, along with a descriptive
-text.  If some text was selected when this command is called, the
-selected text becomes the default description.@* Note that you don't
-have to use this command to insert a link.  Links in Org-mode are plain
-text, and you can type or paste them straight into the buffer.  By using
-this command, the links are automatically enclosed in double brackets,
-and you will be asked for the optional descriptive text.
+Insert a link.  This prompts for a link to be inserted into the buffer.  You
+can just type a link, using text for an internal link, or one of the link
+type prefixes mentioned in the examples above.  All links stored during the
+current session are part of the history for this prompt, so you can access
+them with @key{up} and @key{down} (or @kbd{M-p/n}).  Completion, on the other
+hand, will help you to insert valid link prefixes like @samp{http:} or
+@samp{ftp:}, including the prefixes defined through link abbreviations
+(@pxref{Link abbreviations}).  The link will be inserted into the
+buffer@footnote{After insertion of a stored link, the link will be removed
+from the list of stored links.  To keep it in the list later use, use a
+triple @kbd{C-u} prefix argument to @kbd{C-c C-l}, or configure the option
+@code{org-keep-stored-link-after-insertion}.}, along with a descriptive text.
+If some text was selected when this command is called, the selected text
+becomes the default description.@* Note that you don't have to use this
+command to insert a link.  Links in Org-mode are plain text, and you can type
+or paste them straight into the buffer.  By using this command, the links are
+automatically enclosed in double brackets, and you will be asked for the
+optional descriptive text.
 @c
 @c  If the link is a @samp{file:} link and
 @c the linked file is located in the same directory as the current file or
@@ -2702,11 +2699,11 @@ extensions}).
 @itemx C-c / t
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
 the entire buffer, but shows all TODO items and the headings hierarchy
-above them.  With prefix arg, search for a specific TODO.  You will be
+above them.  With a prefix argument, search for a specific TODO.  You will be
 prompted for the keyword, and you can also give a list of keywords like
-@code{KWD1|KWD2|...}.  With numerical prefix N, show the tree for the
+@code{KWD1|KWD2|...}.  With numeric prefix argument N, show the tree for the
 Nth keyword in the variable @code{org-todo-keywords}.  With two prefix
-args, find all TODO and DONE entries.
+arguments, find all TODO and DONE entries.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  Collects the TODO items from all agenda
@@ -2763,7 +2760,7 @@ state.
 @cindex completion, of TODO keywords
 With this setup, the command @kbd{C-c C-t} will cycle an entry from TODO
 to FEEDBACK, then to VERIFY, and finally to DONE and DELEGATED.  You may
-also use a prefix argument to quickly select a specific state.  For
+also use a numeric prefix argument to quickly select a specific state.  For
 example @kbd{C-3 C-c C-t} will change the state immediately to VERIFY.
 Or you can use @kbd{S-left} to go backward through the sequence.  If you
 define many keywords, you can use in-buffer completion
@@ -2791,19 +2788,18 @@ be set up like this:
 
 In this case, different keywords do not indicate a sequence, but rather
 different types.  So the normal work flow would be to assign a task to a
-person, and later to mark it DONE.  Org-mode supports this style by
-adapting the workings of the command @kbd{C-c C-t}@footnote{This is also
-true for the @kbd{t} command in the timeline and agenda buffers.}.  When
-used several times in succession, it will still cycle through all names,
-in order to first select the right type for a task.  But when you return
-to the item after some time and execute @kbd{C-c C-t} again, it will
-switch from any name directly to DONE.  Use prefix arguments or
-completion to quickly select a specific name.  You can also review the
-items of a specific TODO type in a sparse tree by using a numeric prefix
-to @kbd{C-c C-v}.  For example, to see all things Lucy has to do, you
-would use @kbd{C-3 C-c C-v}.  To collect Lucy's items from all agenda
-files into a single buffer, you would use the prefix arg as well when
-creating the global TODO list: @kbd{C-3 C-c t}.
+person, and later to mark it DONE.  Org-mode supports this style by adapting
+the workings of the command @kbd{C-c C-t}@footnote{This is also true for the
+@kbd{t} command in the timeline and agenda buffers.}.  When used several
+times in succession, it will still cycle through all names, in order to first
+select the right type for a task.  But when you return to the item after some
+time and execute @kbd{C-c C-t} again, it will switch from any name directly
+to DONE.  Use prefix arguments or completion to quickly select a specific
+name.  You can also review the items of a specific TODO type in a sparse tree
+by using a numeric prefix to @kbd{C-c C-v}.  For example, to see all things
+Lucy has to do, you would use @kbd{C-3 C-c C-v}.  To collect Lucy's items
+from all agenda files into a single buffer, you would use the numeric prefix
+argument as well when creating the global TODO list: @kbd{C-3 C-c t}.
 
 @node Multiple sets in one file, Fast access to TODO states, TODO types, TODO extensions
 @subsection Multiple keyword sets in one file
@@ -3167,7 +3163,7 @@ percentage of checkboxes checked (in the above example, this would be
 @table @kbd
 @kindex C-c C-c
 @item C-c C-c
-Toggle checkbox at point.  With prefix argument, set it to @samp{[-]},
+Toggle checkbox at point.  With a prefix argument, set it to @samp{[-]},
 which is considered to be an intermediate state.
 @kindex C-c C-x C-b
 @item C-c C-x C-b
@@ -4102,9 +4098,9 @@ CUA-mode (@pxref{Conflicts}).
 @kindex C-c C-y
 @cindex evaluate time range
 @item C-c C-y
-Evaluate a time range by computing the difference between start and
-end.  With prefix arg, insert result after the time range (in a table:
-into the following column).
+Evaluate a time range by computing the difference between start and end.
+With a prefix argument, insert result after the time range (in a table: into
+the following column).
 @end table
 
 
@@ -4869,7 +4865,7 @@ the easiest way to maintain it is through the following commands
 @item C-c [
 Add current file to the list of agenda files.  The file is added to
 the front of the list.  If it was already in the list, it is moved to
-the front.  With prefix arg, file is added/moved to the end.
+the front.  With a prefix argument, file is added/moved to the end.
 @kindex C-c ]
 @item C-c ]
 Remove current file from the list of agenda files.
@@ -5430,10 +5426,10 @@ agenda buffers can be set with the variable
 @c
 @kindex b
 @item b
-Display the entire subtree of the current item in an indirect buffer.
-With numerical prefix ARG, go up to this level and then take that tree.
-If ARG is negative, go up that many levels.  With @kbd{C-u} prefix, do
-not remove the previously used indirect buffer.
+Display the entire subtree of the current item in an indirect buffer.  With a
+numeric prefix argument N, go up to level N and then take that tree.  If N is
+negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
+previously used indirect buffer.
 @c
 @kindex l
 @item l
@@ -5597,12 +5593,11 @@ Set a deadline for this item.
 @c
 @kindex S-@key{right}
 @item S-@key{right}
-Change the time stamp associated with the current line by one day into
-the future.  With prefix argument, change it by that many days.  For
-example, @kbd{3 6 5 S-@key{right}} will change it by a year.  The
-stamp is changed in the original org file, but the change is not
-directly reflected in the agenda buffer.  Use the
-@kbd{r} key to update the buffer.
+Change the time stamp associated with the current line by one day into the
+future.  With a numeric prefix argument, change it by that many days.  For
+example, @kbd{3 6 5 S-@key{right}} will change it by a year.  The stamp is
+changed in the original org file, but the change is not directly reflected in
+the agenda buffer.  Use the @kbd{r} key to update the buffer.
 @c
 @kindex S-@key{left}
 @item S-@key{left}
@@ -6455,9 +6450,9 @@ Export as HTML file and immediately open it with a browser.
 Export to a temporary buffer, do not create a file.
 @kindex C-c C-e R
 @item C-c C-e R
-Export the active region to a temporary buffer.  With prefix arg, do not
-produce file header and foot, but just the plain HTML section for the
-region.  This is good for cut-and-paste operations.
+Export the active region to a temporary buffer.  With a prefix argument, do
+not produce the file header and footer, but just the plain HTML section for
+the region.  This is good for cut-and-paste operations.
 @kindex C-c C-e v h
 @kindex C-c C-e v b
 @kindex C-c C-e v H
@@ -6477,10 +6472,10 @@ code.
 @end table
 
 @cindex headline levels, for exporting
-In the exported version, the first 3 outline levels will become
-headlines, defining a general document structure.  Additional levels
-will be exported as itemized lists.  If you want that transition to occur
-at a different level, specify it with a prefix argument.  For example,
+In the exported version, the first 3 outline levels will become headlines,
+defining a general document structure.  Additional levels will be exported as
+itemized lists.  If you want that transition to occur at a different level,
+specify it with a numeric prefix argument.  For example,
 
 @example
 @kbd{C-2 C-c C-e b}
@@ -6637,7 +6632,7 @@ convert them to a custom string depending on
 @code{org-latex-low-levels}.
 
 If you want that transition to occur at a different level, specify it
-with a prefix argument. For example,
+with a numeric prefix argument. For example,
 
 @example
 @kbd{C-2 C-c C-e l}
