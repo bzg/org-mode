@@ -991,7 +991,7 @@ file, the archive file.
 @item C-c C-x C-s
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.  Context information that could be
-lost like the file name, the category, inherited tags, and the todo
+lost like the file name, the category, inherited tags, and the TODO
 state will be store as properties in the entry.
 @kindex C-u C-c C-x C-s
 @item C-u C-c C-x C-s
@@ -2769,7 +2769,7 @@ Or you can use @kbd{S-left} to go backward through the sequence.  If you
 define many keywords, you can use in-buffer completion
 (@pxref{Completion}) or even a special one-key selection scheme
 (@pxref{Fast access to TODO states}) to insert these words into the
-buffer.  Changing a todo state can be logged with a timestamp, see
+buffer.  Changing a TODO state can be logged with a timestamp, see
 @ref{Tracking TODO state changes} for more information.
 
 @node TODO types, Multiple sets in one file, Workflow states, TODO extensions
@@ -2803,11 +2803,11 @@ items of a specific TODO type in a sparse tree by using a numeric prefix
 to @kbd{C-c C-v}.  For example, to see all things Lucy has to do, you
 would use @kbd{C-3 C-c C-v}.  To collect Lucy's items from all agenda
 files into a single buffer, you would use the prefix arg as well when
-creating the global todo list: @kbd{C-3 C-c t}.
+creating the global TODO list: @kbd{C-3 C-c t}.
 
 @node Multiple sets in one file, Fast access to TODO states, TODO types, TODO extensions
 @subsection Multiple keyword sets in one file
-@cindex todo keyword sets
+@cindex TODO keyword sets
 
 Sometimes you may want to use different sets of TODO keywords in
 parallel.  For example, you may want to have the basic
@@ -3434,7 +3434,7 @@ example, a positive selection on several TODO keywords can not
 meaningfully be combined with boolean AND.  However, @emph{negative
 selection} combined with AND can be meaningful.  To make sure that only
 lines are checked that actually have any TODO keyword, use @kbd{C-c a
-M}, or equivalently start the todo part after the slash with @samp{!}.
+M}, or equivalently start the TODO part after the slash with @samp{!}.
 Examples:
 
 @table @samp
@@ -3461,7 +3461,7 @@ You can also require a headline to be of a certain level or category, by
 writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{CATEGORY="work"}, respectively.  For example, a search
 @samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
-tag @samp{boss} and are @emph{not} marked with the todo keyword DONE.
+tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
 
 @node Properties and columns, Dates and times, Tags, Top
 @chapter Properties and Columns
@@ -4375,7 +4375,7 @@ warning period last: @code{DEADLINE: <2005-10-01 Sat +1m -3d>}.
 Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
 completed once you have done so.  When you mark a DEADLINE or a SCHEDULE
-with the todo keyword DONE, it will no longer produce entries in the
+with the TODO keyword DONE, it will no longer produce entries in the
 agenda.  The problem with this is, however, that then also the
 @emph{next} instance of the repeated entry will not be active.  Org-mode
 deals with this in the following way: When you try to mark such an entry
@@ -5108,8 +5108,8 @@ Remote editing of TODO items means that you can change the state of a
 TODO entry with a single key press.  The commands available in the
 TODO list are described in @ref{Agenda commands}.
 
-@cindex sublevels, inclusion into todo list
-Normally the global todo list simply shows all headlines with TODO
+@cindex sublevels, inclusion into TODO list
+Normally the global TODO list simply shows all headlines with TODO
 keywords.  This list can become very long.  There are two ways to keep
 it more compact:
 @itemize @minus
@@ -5147,7 +5147,7 @@ define a custom command for it (@pxref{Agenda dispatcher}).
 @item C-c a M
 Like @kbd{C-c a m}, but only select headlines that are also TODO items
 and force checking subitems (see variable
-@code{org-tags-match-list-sublevels}).  Matching specific todo keywords
+@code{org-tags-match-list-sublevels}).  Matching specific TODO keywords
 together with a tags match is also possible, see @ref{Tag searches}.
 @end table
 
@@ -5227,12 +5227,12 @@ project is and how to find it.
 You almost certainly will have to configure this view before it will
 work for you.  The built-in default assumes that all your projects are
 level-2 headlines, and that a project is not stuck if it has at least
-one entry marked with a todo keyword TODO or NEXT or NEXTACTION.
+one entry marked with a TODO keyword TODO or NEXT or NEXTACTION.
 
 Lets assume that you, in your own way of using Org-mode, identify
-projects with a tag PROJECT, and that you use a todo keyword MAYBE to
+projects with a tag PROJECT, and that you use a TODO keyword MAYBE to
 indicate a project that should not be considered yet.  Lets further
-assume that the todo keyword DONE marks finished projects, and that NEXT
+assume that the TODO keyword DONE marks finished projects, and that NEXT
 and TODO indicate next actions.  The tag @@SHOP indicates shopping and
 is a next action even without the NEXT tag.  Finally, if the project
 contains the special word IGNORE anywhere, it should not be listed
@@ -5476,7 +5476,7 @@ Toggle the time grid on and off.  See also the variables
 @item r
 Recreate the agenda buffer, for example to reflect the changes
 after modification of the time stamps of items with S-@key{left} and
-S-@key{right}.  When the buffer is the global todo list, a prefix
+S-@key{right}.  When the buffer is the global TODO list, a prefix
 argument is interpreted to create a selective list for a specific TODO
 keyword.
 @kindex g
@@ -5793,7 +5793,7 @@ Another possibility is the construction of agenda views that comprise
 the results of @emph{several} commands, each of which creates a block in
 the agenda buffer.  The available commands include @code{agenda} for the
 daily or weekly agenda (as created with @kbd{C-c a a}), @code{alltodo}
-for the global todo list (as constructed with @kbd{C-c a t}), and the
+for the global TODO list (as constructed with @kbd{C-c a t}), and the
 matching commands discussed above: @code{todo}, @code{tags}, and
 @code{tags-todo}.  Here are two examples:
 
@@ -6082,7 +6082,7 @@ type         @r{The type of the agenda entry, can be}
                 upcoming-deadline  @r{warning about nearing deadline}
                 past-scheduled     @r{forwarded scheduled item}
                 block              @r{entry has date block including date}
-todo         @r{The todo keyword, if any}
+todo         @r{The TODO keyword, if any}
 tags         @r{All tags including inherited ones, separated by colons}
 date         @r{The relevant date, like 2007-2-14}
 time         @r{The time, like 15:00-16:50}
@@ -8529,8 +8529,8 @@ of the agenda view, and if not, how much should be skipped.
 
 Let's say you want to produce a list of projects that contain a WAITING
 tag anywhere in the project tree.  Let's further assume that you have
-marked all tree headings that define a project with the todo keyword
-PROJECT.  In this case you would run a todo search for the keyword
+marked all tree headings that define a project with the TODO keyword
+PROJECT.  In this case you would run a TODO search for the keyword
 PROJECT, but skip the match unless there is a WAITING tag anywhere in
 the subtree belonging to the project line.
 
