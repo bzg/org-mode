@@ -176,7 +176,7 @@ from    accept as input, do not present for editing
 t:      accept as input and present for editing"
   :group 'org-table-calculation
   :type '(choice
-	  (const :tag "Never, don't even check unser input for them" nil)
+	  (const :tag "Never, don't even check user input for them" nil)
 	  (const :tag "Always, both as user input, and when editing" t)
 	  (const :tag "Convert user input, don't offer during editing" 'from)))
 
