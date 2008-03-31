@@ -430,7 +430,9 @@ matching the regexp SKIP-DIR when recursiing through BASE-DIR."
 		     (not (string-match "^\\.+$" fnd))
 		     (if skip-dir (not (string-match skip-dir fnd)) t))
 		(org-publish-get-base-files-1 f recurse match skip-file skip-dir)
-	      (unless (or fd-p (and skip-file (string-match skip-file fnd)))
+	      (unless (or fd-p ;; this is a directory
+			  (and skip-file (string-match skip-file fnd))
+			  (not (string-match match fnd)))
 		(pushnew f org-publish-temp-files)))))
 	(directory-files base-dir t (unless recurse match))))
 
