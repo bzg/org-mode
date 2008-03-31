@@ -1,0 +1,87 @@
+body {
+ margin: 10px 6% 10px 250px;
+ font-family: Verdana;
+ font-size: 11pt;
+ text-align: left;
+ background-image: url(img/nrocinu.jpg);
+ background-attachment: fixed;
+ background-repeat: no-repeat;
+ background-position: left top;
+}
+
+h1 {font-size: 14pt;}
+
+#table-of-contents {
+    font-size: 85%;
+    position: fixed;
+    display: bloc;
+    left: 10px;
+    top: 180px;
+    width: 200px;
+    line-height: 14pt;
+}
+
+#table-of-contents h2 {
+    display:none;
+}
+
+#table-of-contents ul {
+    list-style: none; 
+    margin: 7px 0px 7px 15px ; 
+    padding: 0px;
+}
+
+.title {
+    padding-bottom: 7px; 
+    margin-bottom: 20px; 
+    border-bottom: 1px solid #222;
+}
+
+h2 {
+  font-size: 12pt;
+  padding-bottom: 4px; 
+  margin-top: 5px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #DDD;
+}
+
+h3 {font-size: 11pt; color: #a34d32;}
+h4 {font-size: 9pt;}
+
+a {text-decoration: none; color: #537d7b}
+a:visited {text-decoration: none; color: #224444}
+a:hover {text-decoration: underline; color: #a34d32}
+
+.todo {color: #990000;}
+.done {color: #006666;}
+.timestamp-kwd {color: #444;}
+.tag {color: #DDD; font-size: 70%; font-weight: 500;}
+
+table {border: none;}
+td {border: none; padding: .1em .7em .1em .3em;}
+th {border: none;}
+
+code {font-size: 10pt;}
+
+pre {
+    border: 1px solid #555;
+    background: #EEEEEE;
+    font-size: 9pt;
+    padding: 1em;
+}
+
+img {
+    border: none;
+}
+
+.share img {
+    opacity: .4;
+    -moz-opacity: .4;
+    filter: alpha(opacity=40);
+}
+
+.share img:hover {
+    opacity: 1;
+    -moz-opacity: 1;
+    filter: alpha(opacity=100);
+}

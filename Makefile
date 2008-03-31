@@ -70,23 +70,23 @@ LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
 ELCFILES0  = $(LISPFILES0:.el=.elc)
 ELCFILES   = $(LISPFILES:.el=.elc)
-DOCFILES   = org.texi org.pdf org
+DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir
 CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES  = doc/org.texi
 INFOFILES  = doc/org
-HG_RELEASES = ../org-mode-all-releases-hg/
 
 
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh
 
-DISTFILES=  README ${LISPFILES} ${DOCFILES} ${CARDFILES} \
-	Makefile dir ChangeLog request-assign-future.txt \
-	CONTRIB
+# Additional distribution files
+DISTFILES_extra=  Makefile ChangeLog request-assign-future.txt CONTRIB
 DISTFILES_xemacs=  xemacs/noutline.el xemacs/ps-print-invisible.el xemacs/README
 
 default: $(ELCFILES)
+
 all:	$(ELCFILES) $(INFOFILES)
+
 compile: $(ELCFILES0)
 
 install: install-lisp
@@ -156,11 +156,12 @@ doc/orgcard_letter.ps: doc/orgcard_letter.dvi
 # Below here are special targets for maintenance only
 
 webfiles:
-	(cd ORGWEBPAGE; emacs -batch -l ~/.emacs index.org -f org-publish-current-project)
+	(cd ORGWEBPAGE; emacs -batch -l ~/.emacs index.org -eval '(org-publish (assoc "orgwebpage" org-publish-project-alist))')
+	(cd ORGWEBPAGE/tmp; rm *~)
 
 web:
 	make webfiles
-	(cd ORGWEBPAGE/tmp; lftp -f ../../../org-mode-proprietary/ftp_upload_website)
+	(cd ORGWEBPAGE/tmp; lftp -f ../../../org-mode-proprietary/ftp_upload_website_legito)
 
 html: doc/org.html
 
@@ -177,14 +178,20 @@ card:	doc/orgcard.pdf doc/orgcard.ps doc/orgcard_letter.pdf doc/orgcard_letter.p
 
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	touch org.texi orgcard.tex
+	touch doc/org.texi doc/orgcard.tex # force update
 	make info
 	make doc
-	make org-install.el
+	make lisp/org-install.el
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
 	$(MKDIR) org-$(TAG)/xemacs
-	cp -r $(DISTFILES) org-$(TAG)/
+	$(MKDIR) org-$(TAG)/doc
+	$(MKDIR) org-$(TAG)/lisp
+	cp -r $(LISPFILES) org-$(TAG)/lisp
+	cp -r $(DOCFILES) $(CARDFILES) org-$(TAG)/doc
+	cp -r $(DISTFILES_extra) org-$(TAG)/
+	cp -r README_DIST org-$(TAG)/README
+	cp -r ORGWEBPAGE/Changes.org org-$(TAG)/
 	cp -r $(DISTFILES_xemacs) org-$(TAG)/xemacs/
 	zip -r org-$(TAG).zip org-$(TAG)
 	gtar zcvf org-$(TAG).tar.gz org-$(TAG)
@@ -206,20 +213,12 @@ release:
 #	cp ORGWEBPAGE/tmp/*.jpg    RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
-	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
-	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
-
-trackrelease:
-	(cd $(HG_RELEASES); rm -rf $(DISTFILES) xemacs)
-	cp -r org-$(TAG)/* $(HG_RELEASES)
-	(cd $(HG_RELEASES); hg addremove; hg ci -m $(TAG); hg tag $(TAG))
 
 upload_release:
-	(cd RELEASEDIR; lftp -f ../../org-mode-proprietary/ftp_upload_release)
+	(cd RELEASEDIR; lftp -f ../../org-mode-proprietary/ftp_upload_release_legito)
 
 upload_manual:
-	lftp -f ../org-mode-proprietary/ftp_upload_manual
+	lftp -f ../org-mode-proprietary/ftp_upload_manual_legito
 
 relup:
 	make release
