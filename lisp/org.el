@@ -4790,7 +4790,7 @@ even level numbers will become the next higher odd number."
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level change))))
 
-(if (featurep 'xemacs)
+(if (or (featurep 'xemacs) (< emacs-major-version 23))
     (define-obsolete-function-alias 'org-get-legal-level
       'org-get-valid-level)
   (define-obsolete-function-alias 'org-get-legal-level
