@@ -76,22 +76,22 @@ Software Foundation raise funds for GNU development.''
 
 @menu
 * Introduction::                Getting started
-* Document structure::          A tree works like your brain
+* Document Structure::          A tree works like your brain
 * Tables::                      Pure magic for quick formatting
 * Hyperlinks::                  Notes in context
-* TODO items::                  Every tree branch can be a TODO item
+* TODO Items::                  Every tree branch can be a TODO item
 * Tags::                        Tagging headlines and matching sets of tags
-* Properties and columns::      Storing information about an entry
-* Dates and times::             Making items useful for planning
+* Properties and Columns::      Storing information about an entry
+* Dates and Times::             Making items useful for planning
 * Remember::                    Quickly adding nodes to the outline tree
-* Agenda views::                Collecting information into views
+* Agenda Views::                Collecting information into views
 * Embedded LaTeX::              LaTeX fragments and formulas
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
 * Extensions and Hacking::      It is possible to write add-on code
 * History and Acknowledgments::  How Org came into being
-* Main Index::
+* Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
 
 @detailmenu
@@ -101,7 +101,7 @@ Introduction
 
 * Summary::                     Brief summary of what Org does
 * Installation::                How to install a downloaded version of Org
-* Activation::                  How to activate Org for certain buffers.
+* Activation::                  How to activate Org for certain buffers
 * Feedback::                    Bug reports, ideas, patches etc.
 * Conventions::                 Type-setting conventions in the manual
 
@@ -129,7 +129,7 @@ Tables
 * Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
-* The spreadsheet::             The table editor has spreadsheet capabilities.
+* The spreadsheet::             The table editor has spreadsheet capabilities
 
 The spreadsheet
 
@@ -148,16 +148,16 @@ Hyperlinks
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Using links outside Org::  Linking from my C source code?
+* Using links outside Org::     Linking from my C source code?
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
 
 Internal links
 
-* Radio targets::               Make targets trigger links in plain text.
+* Radio targets::               Make targets trigger links in plain text
 
-TODO items
+TODO Items
 
 * TODO basics::                 Marking and displaying TODO entries
 * TODO extensions::             Workflow and assignments
@@ -175,7 +175,7 @@ Extended use of TODO keywords
 * Per-file keywords::           Different files, different requirements
 * Faces for TODO keywords::     Highlighting states
 
-Progress Logging
+Progress logging
 
 * Closing items::               When was this entry marked DONE?
 * Tracking TODO state changes::  When did the status change?
@@ -195,37 +195,37 @@ Properties and Columns
 * Column view::                 Tabular viewing and editing
 * Property API::                Properties for Lisp programmers
 
-Column View
+Column view
 
 * Defining columns::            The COLUMNS format property
 * Using column view::           How to create and use column view
-* Capturing Column View::       A dynamic block for column view
+* Capturing column view::       A dynamic block for column view
 
-Defining Columns
+Defining columns
 
 * Scope of column definitions::  Where defined, where valid?
 * Column attributes::           Appearance and content of a column
 
 Dates and Times
 
-* Time stamps::                 Assigning a time to a tree entry
+* Timestamps::                  Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Clocking work time::
+* Clocking work time::          Tracking how long you spend on a task
 
 Creating timestamps
 
-* The date/time prompt::        How Org helps you entering date and time
-* Custom time format::          Making dates look differently
+* The date/time prompt::        How Org mode helps you entering date and time
+* Custom time format::          Making dates look different
 
-Deadlines and Scheduling
+Deadlines and scheduling
 
 * Inserting deadline/schedule::  Planning items
 * Repeated tasks::              Items that show up again and again
 
 Remember
 
-* Setting up remember::         Some code for .emacs to get things going
+* Setting up Remember::         Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
@@ -241,7 +241,7 @@ Agenda Views
 
 The built-in agenda views
 
-* Weekly/Daily agenda::         The calendar page with current tasks
+* Weekly/daily agenda::         The calendar page with current tasks
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
@@ -259,13 +259,13 @@ Custom agenda views
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Exporting Agenda Views::      Writing agendas to files.
-* Extracting Agenda Information for other programs::
+* Exporting Agenda Views::      Writing agendas to files
+* Using the agenda elsewhere::  Using agenda information in other programs
 
 Embedded LaTeX
 
 * Math symbols::                TeX macros for symbols and Greek letters
-* Subscripts and Superscripts::  Simple syntax for raising/lowering text
+* Subscripts and superscripts::  Simple syntax for raising/lowering text
 * LaTeX fragments::             Complex formulas made easy
 * Processing LaTeX fragments::  Previewing LaTeX processing
 * CDLaTeX mode::                Speed up entering of formulas
@@ -291,7 +291,7 @@ LaTeX export
 
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
-* Sectioning structure::
+* Sectioning structure::        Changing sectioning in LaTeX output
 
 Text interpretation by the exporter
 
@@ -341,31 +341,31 @@ Interaction with other packages
 
 Extensions, Hooks and Hacking
 
-* Extensions::                  Existing 3rd-part extensions
+* Extensions::                  Existing 3rd-party extensions
 * Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Using the property API::      Writing programs that use entry properties
 
-Tables and Lists in arbitrary syntax
+Tables and lists in arbitrary syntax
 
 * Radio tables::                Sending and receiving
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists.
+* Radio lists::                 Doing the same for lists
 
 @end detailmenu
 @end menu
 
-@node Introduction, Document structure, Top, Top
+@node Introduction, Document Structure, Top, Top
 @chapter Introduction
 @cindex introduction
 
 @menu
 * Summary::                     Brief summary of what Org does
 * Installation::                How to install a downloaded version of Org
-* Activation::                  How to activate Org for certain buffers.
+* Activation::                  How to activate Org for certain buffers
 * Feedback::                    Bug reports, ideas, patches etc.
 * Conventions::                 Type-setting conventions in the manual
 @end menu
@@ -613,7 +613,7 @@ User-defined properties are capitalized; built-in properties with
 special meaning are written with all capitals.
 @end table
 
-@node Document structure, Tables, Introduction, Top
+@node Document Structure, Tables, Introduction, Top
 @chapter Document Structure
 @cindex document structure
 @cindex structure of document
@@ -623,7 +623,7 @@ edit the structure of the document.
 
 @menu
 * Outlines::                    Org is based on Outline mode
-* Headlines::                   How to typeset org-tree headlines
+* Headlines::                   How to typeset Org tree headlines
 * Visibility cycling::          Show and hide, much simplified
 * Motion::                      Jumping to other headlines
 * Structure editing::           Changing sequence and level of headlines
@@ -634,7 +634,7 @@ edit the structure of the document.
 * Orgstruct mode::              Structure editing outside Org
 @end menu
 
-@node Outlines, Headlines, Document structure, Document structure
+@node Outlines, Headlines, Document Structure, Document Structure
 @section Outlines
 @cindex outlines
 @cindex Outline mode
@@ -648,7 +648,7 @@ currently being worked on.  Org greatly simplifies the use of
 outlines by compressing the entire show/hide functionality into a single
 command @command{org-cycle}, which is bound to the @key{TAB} key.
 
-@node Headlines, Visibility cycling, Outlines, Document structure
+@node Headlines, Visibility cycling, Outlines, Document Structure
 @section Headlines
 @cindex headlines
 @cindex outline tree
@@ -679,7 +679,7 @@ least two empty lines, one empty line will remain visible after folding
 the subtree, in order to structure the collapsed view.  See the
 variable @code{org-cycle-separator-lines} to modify this behavior.
 
-@node Visibility cycling, Motion, Headlines, Document structure
+@node Visibility cycling, Motion, Headlines, Document Structure
 @section Visibility cycling
 @cindex cycling, visibility
 @cindex visibility cycling
@@ -773,7 +773,7 @@ buffer:
 #+STARTUP: showall
 @end example
 
-@node Motion, Structure editing, Visibility cycling, Document structure
+@node Motion, Structure editing, Visibility cycling, Document Structure
 @section Motion
 @cindex motion, between headlines
 @cindex jumping, to headlines
@@ -812,7 +812,7 @@ u            @r{One level up.}
 @end example
 @end table
 
-@node Structure editing, Archiving, Motion, Document structure
+@node Structure editing, Archiving, Motion, Document Structure
 @section Structure editing
 @cindex structure editing
 @cindex headline, promotion and demotion
@@ -915,7 +915,7 @@ just after the last headline to change.  Note that when the cursor is
 inside a table (@pxref{Tables}), the Meta-Cursor keys have different
 functionality.
 
-@node Archiving, Sparse trees, Structure editing, Document structure
+@node Archiving, Sparse trees, Structure editing, Document Structure
 @section Archiving
 @cindex archiving
 
@@ -948,7 +948,7 @@ During sparse tree construction (@pxref{Sparse trees}), matches in
 archived subtrees are not exposed, unless you configure the option
 @code{org-sparse-tree-open-archived-trees}.
 @item
-During agenda view construction (@pxref{Agenda views}), the content of
+During agenda view construction (@pxref{Agenda Views}), the content of
 archived trees is ignored unless you configure the option
 @code{org-agenda-skip-archived-trees}.
 @item
@@ -1022,7 +1022,7 @@ setting multiple archive locations in a buffer is using a property.}:
 @noindent
 If you would like to have a special ARCHIVE location for a single entry
 or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
-location as the value (@pxref{Properties and columns}).
+location as the value (@pxref{Properties and Columns}).
 
 When a subtree is moved, it receives a number of special properties that
 record context information like the file from where the entry came, it's
@@ -1030,7 +1030,7 @@ outline path the archiving time etc.  Configure the variable
 @code{org-archive-save-context-info} to adjust the amount of information
 added.
 
-@node Sparse trees, Plain lists, Archiving, Document structure
+@node Sparse trees, Plain lists, Archiving, Document Structure
 @section Sparse trees
 @cindex sparse trees
 @cindex trees, sparse
@@ -1094,7 +1094,7 @@ XEmacs uses selective display for outlining, not text properties.}.
 Or you can use the command @kbd{C-c C-e v} to export only the visible
 part of the document and print the resulting file.
 
-@node Plain lists, Drawers, Sparse trees, Document structure
+@node Plain lists, Drawers, Sparse trees, Document Structure
 @section Plain lists
 @cindex plain lists
 @cindex lists, plain
@@ -1213,7 +1213,7 @@ list.  Finally, even without an active region, a normal line will be
 converted into a list item.
 @end table
 
-@node Drawers, Orgstruct mode, Plain lists, Document structure
+@node Drawers, Orgstruct mode, Plain lists, Document Structure
 @section Drawers
 @cindex drawers
 @cindex visibility cycling, drawers
@@ -1238,9 +1238,9 @@ Visibility cycling (@pxref{Visibility cycling}) on the headline will
 hide and show the entry, but keep the drawer collapsed to a single line.
 In order to look inside the drawer, you need to move the cursor to the
 drawer line and press @key{TAB} there.  Org mode uses a drawer for
-storing properties (@pxref{Properties and columns}).
+storing properties (@pxref{Properties and Columns}).
 
-@node Orgstruct mode,  , Drawers, Document structure
+@node Orgstruct mode,  , Drawers, Document Structure
 @section The Orgstruct minor mode
 @cindex Orgstruct mode
 @cindex minor mode for structure editing
@@ -1263,7 +1263,7 @@ have different functionality in the major mode you are using.  If the
 cursor is not in one of those special lines, Orgstruct mode lurks
 silently in the shadow.
 
-@node Tables, Hyperlinks, Document structure, Top
+@node Tables, Hyperlinks, Document Structure, Top
 @chapter Tables
 @cindex tables
 @cindex editing tables
@@ -1284,7 +1284,7 @@ calculator).
 * Narrow columns::              Stop wasting space in tables
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
-* The spreadsheet::             The table editor has spreadsheet capabilities.
+* The spreadsheet::             The table editor has spreadsheet capabilities
 @end menu
 
 @node Built-in table editor, Narrow columns, Tables, Tables
@@ -1739,7 +1739,7 @@ line like
 @end example
 
 @noindent
-Also properties (@pxref{Properties and columns}) can be used as
+Also properties (@pxref{Properties and Columns}) can be used as
 constants in table formulas: For a property @samp{:Xyz:} use the name
 @samp{$PROP_Xyz}, and the property will be searched in the current
 outline entry and in the hierarchy above it.  If you have the
@@ -1916,7 +1916,7 @@ will apply it to that many consecutive fields in the current column.
 @end table
 
 @node Editing and debugging formulas, Updating the table, Column formulas, The spreadsheet
-@subsection Editing and Debugging formulas
+@subsection Editing and debugging formulas
 @cindex formula editing
 @cindex editing, of table formulas
 
@@ -2029,7 +2029,7 @@ calculation, for example by pressing @kbd{C-u C-u C-c = @key{RET}} in a
 field.  Detailed information will be displayed.
 
 @node Updating the table, Advanced features, Editing and debugging formulas, The spreadsheet
-@subsection Updating the Table
+@subsection Updating the table
 @cindex recomputing table fields
 @cindex updating, table
 
@@ -2166,7 +2166,7 @@ functions.
 @end group
 @end example
 
-@node Hyperlinks, TODO items, Tables, Top
+@node Hyperlinks, TODO Items, Tables, Top
 @chapter Hyperlinks
 @cindex hyperlinks
 
@@ -2178,7 +2178,7 @@ other files, Usenet articles, emails, and much more.
 * Internal links::              Links to other places in the current file
 * External links::              URL-like links to the world
 * Handling links::              Creating, inserting and following
-* Using links outside Org::  Linking from my C source code?
+* Using links outside Org::     Linking from my C source code?
 * Link abbreviations::          Shortcuts for writing complex links
 * Search options::              Linking to a specific location
 * Custom searches::             When the default search is not enough
@@ -2263,7 +2263,7 @@ several times in direct succession goes back to positions recorded
 earlier.
 
 @menu
-* Radio targets::               Make targets trigger links in plain text.
+* Radio targets::               Make targets trigger links in plain text
 @end menu
 
 @node Radio targets,  , Internal links, Internal links
@@ -2627,8 +2627,8 @@ file.
 
 
 
-@node TODO items, Tags, Hyperlinks, Top
-@chapter TODO items
+@node TODO Items, Tags, Hyperlinks, Top
+@chapter TODO Items
 @cindex TODO items
 
 Org mode does not maintain TODO lists as separate documents.  Instead,
@@ -2651,7 +2651,7 @@ methods to give you an overview of all the things that you have to do.
 * Checkboxes::                  Tick-off lists
 @end menu
 
-@node TODO basics, TODO extensions, TODO items, TODO items
+@node TODO basics, TODO extensions, TODO Items, TODO Items
 @section Basic TODO functionality
 
 Any headline becomes a TODO item when it starts with the word
@@ -2707,7 +2707,7 @@ arguments, find all TODO and DONE entries.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  Collects the TODO items from all agenda
-files (@pxref{Agenda views}) into a single buffer.  The new buffer will
+files (@pxref{Agenda Views}) into a single buffer.  The new buffer will
 be in @code{agenda-mode}, which provides commands to examine and
 manipulate the TODO entries from the new buffer (@pxref{Agenda
 commands}).  @xref{Global TODO list}, for more information.
@@ -2716,7 +2716,7 @@ commands}).  @xref{Global TODO list}, for more information.
 Insert a new TODO entry below the current one.
 @end table
 
-@node TODO extensions, Progress logging, TODO basics, TODO items
+@node TODO extensions, Progress logging, TODO basics, TODO Items
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
@@ -2935,8 +2935,8 @@ While using a list with face properties as shown for CANCELED
 necessary, define a special face and use that.
 
 @page
-@node Progress logging, Priorities, TODO extensions, TODO items
-@section Progress Logging
+@node Progress logging, Priorities, TODO extensions, TODO Items
+@section Progress logging
 @cindex progress logging
 @cindex logging, of progress
 
@@ -2980,7 +2980,7 @@ You will then be prompted for a note, and that note will be stored below
 the entry with a @samp{Closing Note} heading.
 
 In the timeline (@pxref{Timeline}) and in the agenda
-(@pxref{Weekly/Daily agenda}), you can then use the @kbd{l} key to
+(@pxref{Weekly/daily agenda}), you can then use the @kbd{l} key to
 display the TODO items with a @samp{CLOSED} timestamp on each day,
 giving you an overview of what has been done.
 
@@ -3047,7 +3047,7 @@ settings like @code{TODO(!)}.  For example
 @end example
 
 
-@node Priorities, Breaking down tasks, Progress logging, TODO items
+@node Priorities, Breaking down tasks, Progress logging, TODO Items
 @section Priorities
 @cindex priorities
 
@@ -3064,7 +3064,7 @@ this
 By default, Org mode supports three priorities: @samp{A}, @samp{B}, and
 @samp{C}.  @samp{A} is the highest priority.  An entry without a cookie
 is treated as priority @samp{B}.  Priorities make a difference only in
-the agenda (@pxref{Weekly/Daily agenda}); outside the agenda, they have
+the agenda (@pxref{Weekly/daily agenda}); outside the agenda, they have
 no inherent meaning to Org mode.
 
 Priorities can be attached to any outline tree entries; they do not need
@@ -3100,7 +3100,7 @@ priority):
 #+PRIORITIES: A C B
 @end example
 
-@node Breaking down tasks, Checkboxes, Priorities, TODO items
+@node Breaking down tasks, Checkboxes, Priorities, TODO Items
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
 
@@ -3113,13 +3113,13 @@ of checkboxes to identify (a hierarchy of) a large number of subtasks
 (@pxref{Checkboxes}).
 
 
-@node Checkboxes,  , Breaking down tasks, TODO items
+@node Checkboxes,  , Breaking down tasks, TODO Items
 @section Checkboxes
 @cindex checkboxes
 
 Every item in a plain list (@pxref{Plain lists}) can be made into a
 checkbox by starting it with the string @samp{[ ]}.  This feature is
-similar to TODO items (@pxref{TODO items}), but is more lightweight.
+similar to TODO items (@pxref{TODO Items}), but is more lightweight.
 Checkboxes are not included into the global TODO list, so they are often
 great to split a task into a number of simple steps.  Or you can use
 them in a shopping list.  To toggle a checkbox, use @kbd{C-c C-c}, or
@@ -3195,7 +3195,7 @@ delete boxes or add/change them by hand, use this command to get things
 back into synch.  Or simply toggle any checkbox twice with @kbd{C-c C-c}.
 @end table
 
-@node Tags, Properties and columns, TODO items, Top
+@node Tags, Properties and Columns, TODO Items, Top
 @chapter Tags
 @cindex tags
 @cindex headline tagging
@@ -3459,7 +3459,7 @@ writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
 tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
 
-@node Properties and columns, Dates and times, Tags, Top
+@node Properties and Columns, Dates and Times, Tags, Top
 @chapter Properties and Columns
 @cindex properties
 
@@ -3497,8 +3497,8 @@ conveniently in column view (@pxref{Column view}).
 * Property API::                Properties for Lisp programmers
 @end menu
 
-@node Property syntax, Special properties, Properties and columns, Properties and columns
-@section Property Syntax
+@node Property syntax, Special properties, Properties and Columns, Properties and Columns
+@section Property syntax
 @cindex property syntax
 @cindex drawer, for properties
 
@@ -3582,8 +3582,8 @@ Compute the property at point, using the operator and scope from the
 nearest column format definition.
 @end table
 
-@node Special properties, Property searches, Property syntax, Properties and columns
-@section Special Properties
+@node Special properties, Property searches, Property syntax, Properties and Columns
+@section Special properties
 @cindex properties, special
 
 Special properties provide alternative access method to Org mode
@@ -3606,7 +3606,7 @@ CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}
              @r{must be run first to compute the values.}
 @end example
 
-@node Property searches, Property inheritance, Special properties, Properties and columns
+@node Property searches, Property inheritance, Special properties, Properties and Columns
 @section Property searches
 @cindex properties, searching
 @cindex searching, of properties
@@ -3642,7 +3642,7 @@ value.  If you enclose the value into curly braces, it is interpreted as
 a regular expression and matched against the property values.
 @end table
 
-@node Property inheritance, Column view, Property searches, Properties and columns
+@node Property inheritance, Column view, Property searches, Properties and Columns
 @section Property Inheritance
 @cindex properties, inheritance
 @cindex inheritance, of properties
@@ -3679,8 +3679,8 @@ The LOGGING property may define logging settings for an entry or a
 subtree (@pxref{Tracking TODO state changes}).
 @end table
 
-@node Column view, Property API, Property inheritance, Properties and columns
-@section Column View
+@node Column view, Property API, Property inheritance, Properties and Columns
+@section Column view
 
 A great way to view and edit properties in an outline tree is
 @emph{column view}.  In column view, each outline item is turned into a
@@ -3693,17 +3693,17 @@ view (@kbd{S-@key{TAB} S-@key{TAB}}, or simply @kbd{c} while column view
 is active), but you can still open, read, and edit the entry below each
 headline.  Or, you can switch to column view after executing a sparse
 tree command and in this way get a table only for the selected items.
-Column view also works in agenda buffers (@pxref{Agenda views}) where
+Column view also works in agenda buffers (@pxref{Agenda Views}) where
 queries have collected selected items, possibly from a number of files.
 
 @menu
 * Defining columns::            The COLUMNS format property
 * Using column view::           How to create and use column view
-* Capturing Column View::       A dynamic block for column view
+* Capturing column view::       A dynamic block for column view
 @end menu
 
 @node Defining columns, Using column view, Column view, Column view
-@subsection Defining Columns
+@subsection Defining columns
 @cindex column view, for properties
 @cindex properties, column view
 
@@ -3799,8 +3799,8 @@ an @samp{[X]} status if all children have been checked.  The
 @samp{CLOCKSUM} column is special, it lists the sum of CLOCK intervals
 in the subtree.
 
-@node Using column view, Capturing Column View, Defining columns, Column view
-@subsection Using Column View
+@node Using column view, Capturing column view, Defining columns, Column view
+@subsection Using column view
 
 @table @kbd
 @tsubheading{Turning column view on and off}
@@ -3866,8 +3866,8 @@ Insert a new column, to the right of the current column.
 Delete the current column.
 @end table
 
-@node Capturing Column View,  , Using column view, Column view
-@subsection Capturing Column View
+@node Capturing column view,  , Using column view, Column view
+@subsection Capturing column view
 
 Since column view is just an overlay over a buffer, it cannot be
 exported or printed directly.  If you want to capture a column view, use
@@ -3928,7 +3928,7 @@ Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.
 @end table
 
-@node Property API,  , Column view, Properties and columns
+@node Property API,  , Column view, Properties and Columns
 @section The Property API
 @cindex properties, API
 @cindex API, for properties
@@ -3938,7 +3938,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Dates and times, Remember, Properties and columns, Top
+@node Dates and Times, Remember, Properties and Columns, Top
 @chapter Dates and Times
 @cindex dates
 @cindex times
@@ -3953,15 +3953,15 @@ something was created or last changed.  However, in Org mode this term
 is used in a much wider sense.
 
 @menu
-* Time stamps::                 Assigning a time to a tree entry
+* Timestamps::                  Assigning a time to a tree entry
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
-* Clocking work time::
+* Clocking work time::          Tracking how long you spend on a task
 @end menu
 
 
-@node Time stamps, Creating timestamps, Dates and times, Dates and times
-@section Time stamps, deadlines and scheduling
+@node Timestamps, Creating timestamps, Dates and Times, Dates and Times
+@section Timestamps, deadlines and scheduling
 @cindex time stamps
 @cindex ranges, time
 @cindex date stamps
@@ -3973,9 +3973,9 @@ of times) in a special format, either @samp{<2003-09-16 Tue>} or
 @samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16 Tue
 12:00-12:30>}@footnote{This is the standard ISO date/time format.  To
 use an alternative format, see @ref{Custom time format}.}.  A time stamp
-can appear anywhere in the headline or body of an org-tree entry.  Its
+can appear anywhere in the headline or body of an Org tree entry.  Its
 presence causes entries to be shown on specific dates in the agenda
-(@pxref{Weekly/Daily agenda}).  We distinguish:
+(@pxref{Weekly/daily agenda}).  We distinguish:
 
 @table @var
 @item Plain time stamp; Event; Appointment
@@ -4036,7 +4036,7 @@ angular ones.  These time stamps are inactive in the sense that they do
 
 @end table
 
-@node Creating timestamps, Deadlines and scheduling, Time stamps, Dates and times
+@node Creating timestamps, Deadlines and scheduling, Timestamps, Dates and Times
 @section Creating timestamps
 @cindex creating timestamps
 @cindex timestamps, creating
@@ -4076,7 +4076,7 @@ instead.
 @kindex C-c C-o
 @item C-c C-o
 Access the agenda for the date given by the time stamp or -range at
-point (@pxref{Weekly/Daily agenda}).
+point (@pxref{Weekly/daily agenda}).
 @c
 @kindex S-@key{left}
 @kindex S-@key{right}
@@ -4106,7 +4106,7 @@ the following column).
 
 @menu
 * The date/time prompt::        How Org mode helps you entering date and time
-* Custom time format::          Making dates look differently
+* Custom time format::          Making dates look different
 @end menu
 
 @node The date/time prompt, Custom time format, Creating timestamps, Creating timestamps
@@ -4247,8 +4247,8 @@ format is shorter, things do work as expected.
 @end itemize
 
 
-@node Deadlines and scheduling, Clocking work time, Creating timestamps, Dates and times
-@section Deadlines and Scheduling
+@node Deadlines and scheduling, Clocking work time, Creating timestamps, Dates and Times
+@section Deadlines and scheduling
 
 A time stamp may be preceded by special keywords to facilitate planning:
 
@@ -4321,7 +4321,7 @@ sexp entry matches.
 @end menu
 
 @node Inserting deadline/schedule, Repeated tasks, Deadlines and scheduling, Deadlines and scheduling
-@subsection Inserting deadline/schedule
+@subsection Inserting deadlines or schedules
 
 The following commands allow to quickly insert a deadline or to schedule
 an item:
@@ -4353,7 +4353,7 @@ the scheduling date from the entry.
 @end table
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
-@subsection Repeated Tasks
+@subsection Repeated tasks
 
 Some tasks need to be repeated again and again.  Org mode helps to
 organize such tasks using a so-called repeater in a DEADLINE, SCHEDULED,
@@ -4421,7 +4421,7 @@ special repeaters markers with @samp{++} and @samp{.+}.  For example:
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
 
-@node Clocking work time,  , Deadlines and scheduling, Dates and times
+@node Clocking work time,  , Deadlines and scheduling, Dates and Times
 @section Clocking work time
 
 Org mode allows you to clock the time you spent on specific tasks in a
@@ -4536,10 +4536,10 @@ you have several clock table blocks in a buffer.
 @end table
 
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
-the agenda (@pxref{Weekly/Daily agenda}) to show which tasks have been
+the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
-@node Remember, Agenda views, Dates and times, Top
+@node Remember, Agenda Views, Dates and Times, Top
 @chapter Remember
 @cindex @file{remember.el}
 
@@ -4554,14 +4554,14 @@ allows you to select the location where a note should be stored
 interactively, on the fly.
 
 @menu
-* Setting up remember::         Some code for .emacs to get things going
+* Setting up Remember::         Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
 @end menu
 
-@node Setting up remember, Remember templates, Remember, Remember
-@section Setting up remember
+@node Setting up Remember, Remember templates, Remember, Remember
+@section Setting up Remember
 
 The following customization will tell @i{remember} to use org files as
 target, and to create annotations compatible with Org links.
@@ -4583,7 +4583,7 @@ stored: Just call @code{org-remember} with a prefix argument.  If you
 use two prefix arguments, Org jumps to the location where the last
 remember note was stored.
 
-@node Remember templates, Storing notes, Setting up remember, Remember
+@node Remember templates, Storing notes, Setting up Remember, Remember
 @section Remember templates
 @cindex templates, for remember
 
@@ -4782,7 +4782,7 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Agenda views, Embedded LaTeX, Remember, Top
+@node Agenda Views, Embedded LaTeX, Remember, Top
 @chapter Agenda Views
 @cindex agenda views
 
@@ -4835,11 +4835,11 @@ window configuration is restored when the agenda exits:
 * Agenda dispatcher::           Keyboard access to agenda views
 * Built-in agenda views::       What is available out of the box?
 * Presentation and sorting::    How agenda items are prepared for display
-* Agenda commands::             Remote editing of org trees
+* Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
 @end menu
 
-@node Agenda files, Agenda dispatcher, Agenda views, Agenda views
+@node Agenda files, Agenda dispatcher, Agenda Views, Agenda Views
 @section Agenda files
 @cindex agenda files
 @cindex files for agenda
@@ -4916,7 +4916,7 @@ effect immediately.
 Lift the restriction again.
 @end table
 
-@node Agenda dispatcher, Built-in agenda views, Agenda files, Agenda views
+@node Agenda dispatcher, Built-in agenda views, Agenda files, Agenda Views
 @section The agenda dispatcher
 @cindex agenda dispatcher
 @cindex dispatching agenda commands
@@ -4928,7 +4928,7 @@ pressing @kbd{C-c a}, an additional letter is required to execute a
 command.  The dispatcher offers the following default commands:
 @table @kbd
 @item a
-Create the calendar-like agenda (@pxref{Weekly/Daily agenda}).
+Create the calendar-like agenda (@pxref{Weekly/daily agenda}).
 @item t @r{/} T
 Create a list of all TODO items (@pxref{Global TODO list}).
 @item m @r{/} M
@@ -4966,13 +4966,13 @@ possibility to create extended agenda buffers that contain several
 blocks together, for example the weekly agenda, the global TODO list and
 a number of special tags matches.  @xref{Custom agenda views}.
 
-@node Built-in agenda views, Presentation and sorting, Agenda dispatcher, Agenda views
+@node Built-in agenda views, Presentation and sorting, Agenda dispatcher, Agenda Views
 @section The built-in agenda views
 
 In this section we describe the built-in views.
 
 @menu
-* Weekly/Daily agenda::         The calendar page with current tasks
+* Weekly/daily agenda::         The calendar page with current tasks
 * Global TODO list::            All unfinished action items
 * Matching tags and properties::  Structured information with fine-tuned search
 * Timeline::                    Time-sorted view for single file
@@ -4980,7 +4980,7 @@ In this section we describe the built-in views.
 * Stuck projects::              Find projects you need to review
 @end menu
 
-@node Weekly/Daily agenda, Global TODO list, Built-in agenda views, Built-in agenda views
+@node Weekly/daily agenda, Global TODO list, Built-in agenda views, Built-in agenda views
 @subsection The weekly/daily agenda
 @cindex agenda
 @cindex weekly agenda
@@ -5067,7 +5067,7 @@ the list of your appointments and add only those belonging to a specific
 category or matching a regular expression. See the docstring for
 details.
 
-@node Global TODO list, Matching tags and properties, Weekly/Daily agenda, Built-in agenda views
+@node Global TODO list, Matching tags and properties, Weekly/daily agenda, Built-in agenda views
 @subsection The global TODO list
 @cindex global TODO list
 @cindex TODO list, global
@@ -5079,7 +5079,7 @@ collected into a single place.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  This collects the TODO items from all
-agenda files (@pxref{Agenda views}) into a single buffer.  The buffer is in
+agenda files (@pxref{Agenda Views}) into a single buffer.  The buffer is in
 @code{agenda-mode}, so there are commands to examine and manipulate
 the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @kindex C-c a T
@@ -5111,7 +5111,7 @@ it more compact:
 @itemize @minus
 @item
 Some people view a TODO item that has been @emph{scheduled} for
-execution (@pxref{Time stamps}) as no longer @emph{open}.  Configure the
+execution (@pxref{Timestamps}) as no longer @emph{open}.  Configure the
 variable @code{org-agenda-todo-ignore-scheduled} to exclude scheduled
 items from the global TODO list.
 @item
@@ -5122,7 +5122,7 @@ and omit the sublevels from the global list.  Configure the variable
 @end itemize
 
 @node Matching tags and properties, Timeline, Global TODO list, Built-in agenda views
-@subsection Matching Tags and Properties
+@subsection Matching tags and properties
 @cindex matching, of tags
 @cindex matching, of properties
 @cindex tags view
@@ -5244,7 +5244,7 @@ are not stuck.  The correct customization for this is
 @end lisp
 
 
-@node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda views
+@node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda Views
 @section Presentation and sorting
 @cindex presentation, of agenda items
 
@@ -5284,14 +5284,14 @@ property.}:
 @noindent
 If you would like to have a special CATEGORY for a single entry or a
 (sub)tree, give the entry a @code{:CATEGORY:} property with the location
-as the value (@pxref{Properties and columns}).
+as the value (@pxref{Properties and Columns}).
 
 @noindent
 The display in the agenda buffer looks best if the category is not
 longer than 10 characters.
 
 @node Time-of-day specifications, Sorting of agenda items, Categories, Presentation and sorting
-@subsection Time-of-Day Specifications
+@subsection Time-of-day specifications
 @cindex time-of-day specification
 
 Org mode checks each agenda item for a time-of-day specification.  The
@@ -5303,7 +5303,7 @@ ranges can be specified with two time stamps, like
 
 In the headline of the entry itself, a time(range) may also appear as
 plain text (like @samp{12:45} or a @samp{8:30-1pm}.  If the agenda
-integrates the Emacs diary (@pxref{Weekly/Daily agenda}), time
+integrates the Emacs diary (@pxref{Weekly/daily agenda}), time
 specifications in diary entries are recognized as well.
 
 For agenda display, Org mode extracts the time and displays it in a
@@ -5369,7 +5369,7 @@ Sorting can be customized using the variable
 @code{org-agenda-sorting-strategy}.
 
 
-@node Agenda commands, Custom agenda views, Presentation and sorting, Agenda views
+@node Agenda commands, Custom agenda views, Presentation and sorting, Agenda Views
 @section Commands in the agenda buffer
 @cindex commands, in agenda buffer
 
@@ -5461,7 +5461,7 @@ be mapped to the interval 1938-2037.
 @c
 @kindex D
 @item D
-Toggle the inclusion of diary entries.  See @ref{Weekly/Daily agenda}.
+Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
 @c
 @kindex G
 @item G
@@ -5694,7 +5694,7 @@ visit org files will not be removed.
 @end table
 
 
-@node Custom agenda views,  , Agenda commands, Agenda views
+@node Custom agenda views,  , Agenda commands, Agenda Views
 @section Custom agenda views
 @cindex custom agenda views
 @cindex agenda views, custom
@@ -5708,8 +5708,8 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Exporting Agenda Views::      Writing agendas to files.
-* Extracting Agenda Information for other programs::
+* Exporting Agenda Views::      Writing agendas to files
+* Using the agenda elsewhere::  Using agenda information in other programs
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -5814,7 +5814,7 @@ your agenda for the current week, all TODO items that carry the tag
 command @kbd{C-c a o} provides a similar view for office tasks.
 
 @node Setting Options, Exporting Agenda Views, Block agenda, Custom agenda views
-@subsection Setting Options for custom commands
+@subsection Setting options for custom commands
 @cindex options, for custom agenda views
 
 Org mode contains a number of variables regulating agenda construction
@@ -5883,7 +5883,7 @@ value is a string, you need to add the double quotes around the value
 yourself.
 
 
-@node Exporting Agenda Views, Extracting Agenda Information for other programs, Setting Options, Custom agenda views
+@node Exporting Agenda Views, Using the agenda elsewhere, Setting Options, Custom agenda views
 @subsection Exporting Agenda Views
 @cindex agenda views, exporting
 
@@ -6011,8 +6011,8 @@ which will create the agenda views restricted to the file
 @file{~/org/project.org}, without diary entries and with 30 days
 extent.
 
-@node Extracting Agenda Information for other programs,  , Exporting Agenda Views, Custom agenda views
-@subsection Extracting Agenda Information for other programs
+@node Using the agenda elsewhere,  , Exporting Agenda Views, Custom agenda views
+@subsection Using agenda information outside of Org
 @cindex agenda, pipe
 @cindex Scripts, for agenda processing
 
@@ -6117,7 +6117,7 @@ foreach $line (split(/\n/,$agenda)) @{
 @end group
 @end example
 
-@node Embedded LaTeX, Exporting, Agenda views, Top
+@node Embedded LaTeX, Exporting, Agenda Views, Top
 @chapter Embedded LaTeX
 @cindex @TeX{} interpretation
 @cindex La@TeX{} interpretation
@@ -6138,13 +6138,13 @@ to do with it.
 
 @menu
 * Math symbols::                TeX macros for symbols and Greek letters
-* Subscripts and Superscripts::  Simple syntax for raising/lowering text
+* Subscripts and superscripts::  Simple syntax for raising/lowering text
 * LaTeX fragments::             Complex formulas made easy
 * Processing LaTeX fragments::  Previewing LaTeX processing
 * CDLaTeX mode::                Speed up entering of formulas
 @end menu
 
-@node Math symbols, Subscripts and Superscripts, Embedded LaTeX, Embedded LaTeX
+@node Math symbols, Subscripts and superscripts, Embedded LaTeX, Embedded LaTeX
 @section Math symbols
 @cindex math symbols
 @cindex TeX macros
@@ -6164,8 +6164,8 @@ During HTML export (@pxref{HTML export}), these symbols are translated
 into the proper syntax for HTML, for the above examples this is
 @samp{&alpha;} and @samp{&rarr;}, respectively.
 
-@node Subscripts and Superscripts, LaTeX fragments, Math symbols, Embedded LaTeX
-@section Subscripts and Superscripts
+@node Subscripts and superscripts, LaTeX fragments, Math symbols, Embedded LaTeX
+@section Subscripts and superscripts
 @cindex subscript
 @cindex superscript
 
@@ -6186,7 +6186,7 @@ To avoid interpretation as raised or lowered text, you can quote
 During HTML export (@pxref{HTML export}), subscript and superscripts
 are surrounded with @code{<sub>} and @code{<sup>} tags, respectively.
 
-@node LaTeX fragments, Processing LaTeX fragments, Subscripts and Superscripts, Embedded LaTeX
+@node LaTeX fragments, Processing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
 @section LaTeX fragments
 @cindex LaTeX fragments
 
@@ -6596,7 +6596,7 @@ Org mode contains a La@TeX{} exporter written by Bastien Guerry.
 @menu
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
-* Sectioning structure::
+* Sectioning structure::        Changing sectioning in LaTeX output
 @end menu
 
 @node LaTeX export commands, Quoting LaTeX code, LaTeX export, LaTeX export
@@ -7131,7 +7131,7 @@ and @code{:exclude}.
 @end multitable
 
 @node Publishing action, Publishing options, Selecting files, Configuration
-@subsection Publishing Action
+@subsection Publishing action
 @cindex action, for publishing
 
 Publishing means that a file is copied to the destination directory and
@@ -7974,7 +7974,7 @@ It also covers some aspects where users can extend the functionality of
 Org.
 
 @menu
-* Extensions::                  Existing 3rd-part extensions
+* Extensions::                  Existing 3rd-party extensions
 * Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
@@ -8130,7 +8130,7 @@ the link description when the link is later inserted into an Org
 buffer with @kbd{C-c C-l}.
 
 @node Tables in arbitrary syntax, Dynamic blocks, Adding hyperlink types, Extensions and Hacking
-@section Tables and Lists in arbitrary syntax
+@section Tables and lists in arbitrary syntax
 @cindex tables, in other modes
 @cindex lists, in other modes
 @cindex Orgtbl mode
@@ -8160,7 +8160,7 @@ or Texinfo.)
 * Radio tables::                Sending and receiving
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists.
+* Radio lists::                 Doing the same for lists
 @end menu
 
 @node Radio tables, A LaTeX example, Tables in arbitrary syntax, Tables in arbitrary syntax
@@ -8513,7 +8513,7 @@ example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way that is does nothing in buffers that are not in Org.
 
 @node Special agenda views, Using the property API, Dynamic blocks, Extensions and Hacking
-@section Special Agenda Views
+@section Special agenda views
 @cindex agenda views, user-defined
 
 Org provides a special hook that can be used to narrow down the
