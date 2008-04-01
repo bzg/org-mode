@@ -3288,44 +3288,61 @@ in a specific file, add an empty TAGS option line to that file:
 #+TAGS:
 @end example
 
-The default support method for entering tags is minibuffer completion.
-However, Org mode also implements a much better method: @emph{fast tag
-selection}.  This method allows to select and deselect tags with a
-single key per tag.  To function efficiently, you should assign unique
-keys to most tags.  This can be done globally with
+By default Org mode uses the standard minibuffer completion facilities for
+entering tags.  However, it also implements another, quicker, tag completion
+method called @emph{fast tag selection}.  This allows you to select and
+deselect tags with just a single key press.  For this to work well you should
+assign unique letters to most of your commonly used tags.  You can do this
+globally by configuring the variable @code{org-tag-alist} in your
+@file{.emacs} file.  For example, you may find the need to tag many items in
+different files with @samp{:@@home:}.  In this case you can set something
+like:
 
 @lisp
 (setq org-tag-alist '(("@@work" . ?w) ("@@home" . ?h) ("laptop" . ?l)))
 @end lisp
 
-@noindent or on a per-file basis with
+@noindent If the tag is only relevant to the file you are working on then you
+can, instead, set the TAGS option line as:
 
 @example
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end example
 
 @noindent
-You can also group together tags that are mutually exclusive.  With
-curly braces@footnote{In @code{org-mode-alist} use
-@code{'(:startgroup)} and @code{'(:endgroup)}, respectively.  Several
-groups are allowed.}
+You can also group together tags that are mutually exclusive.  By using
+braces, as in:
 
 @example
 #+TAGS: @{ @@work(w)  @@home(h)  @@tennisclub(t) @}  laptop(l)  pc(p)
 @end example
 
 @noindent you indicate that at most one of @samp{@@work}, @samp{@@home},
-and @samp{@@tennisclub} should be selected.
+and @samp{@@tennisclub} should be selected.  Multiple such groups are allowed.
 
 @noindent Don't forget to press @kbd{C-c C-c} with the cursor in one of
 these lines to activate any changes.
 
-If at least one tag has a selection key, pressing @kbd{C-c C-c} will
-automatically present you with a special interface, listing inherited
-tags, the tags of the current headline, and a list of all valid tags
-with corresponding keys@footnote{Keys will automatically be assigned to
-tags which have no configured keys.}.  In this interface, you can use
-the following keys:
+@noindent
+To set these mutually exclusive groups in the variable @code{org-mode-alist}
+you must use the dummy tags @code{:startgroup} and @code{:endgroup} instead
+of the braces.  The previous example would be set globally by the following
+configuration:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil)
+                      ("@@work" . ?w) ("@@home" . ?h)
+                      ("@@tennisclub" . ?t)
+                      (:endgroup . nil)
+                      ("laptop" . ?l) ("pc" . ?p)))
+@end lisp
+
+If at least one tag has a selection key then pressing @kbd{C-c C-c} will
+automatically present you with a special interface, listing inherited tags,
+the tags of the current headline, and a list of all valid tags with
+corresponding keys@footnote{Keys will automatically be assigned to tags which
+have no configured keys.}.  In this interface, you can use the following
+keys:
 
 @table @kbd
 @item a-z...
