@@ -1,11 +1,14 @@
 # Don't bother tracking a bunch of stuff when building and installing
 # Org from the master git repository.
 
-# ...by ignoring everything created by 'make' and 'make doc'.
+# ...by ignoring everything created by 'make', 'make doc', `make info'
+#    `make html_manual', `make release'
 
 *.aux
+*.bak
 *.cp
 *.cps
+*.dvi
 *.fn
 *.fns
 *.html
@@ -19,16 +22,26 @@
 *.vr
 *.dvi
 orgcard_letter.tex
+org
+org-install.el
+org-*.tar.gz
+org-*.zip
+manual
 
 # aspell word and replacement lists
 
 .aspell.org.pws
 .aspell.org.prepl
-*.bak
+
+# allow tmp and test directories that will not be tracked
+
+test
+tmp
 
 # and collateral damage from Emacs
 
 *~
+.DS_Store
 
 #
 # Local variables:

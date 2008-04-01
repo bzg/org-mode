@@ -165,7 +165,7 @@ web:
 
 html: doc/org.html
 
-html_split: doc/org.texi
+html_manual: doc/org.texi
 	rm -rf doc/manual
 	mkdir doc/manual
 	$(TEXI2HTML) -o doc/manual doc/org.texi
@@ -201,7 +201,7 @@ release:
 	make webfiles
 	make distfile
 	make doc
-	make html_split
+	make html_manual
 	rm -rf RELEASEDIR
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR

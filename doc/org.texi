@@ -3289,7 +3289,7 @@ in a specific file, add an empty TAGS option line to that file:
 @end example
 
 By default Org mode uses the standard minibuffer completion facilities for
-entering tags.  However, it also implements another, quicker, tag completion
+entering tags.  However, it also implements another, quicker, tag selection
 method called @emph{fast tag selection}.  This allows you to select and
 deselect tags with just a single key press.  For this to work well you should
 assign unique letters to most of your commonly used tags.  You can do this
