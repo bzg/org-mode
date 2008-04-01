@@ -9,6 +9,15 @@
 
 ** Details
 
+*** The Org distribution has a new structure
+
+    In the distribution files, the lisp files are now located in
+    a subdirectory "lisp", and the documentation files are
+    located in a subdirectory "doc".  If you are running Org
+    directly from the unpacked distribtuion archive (zip or tar
+    file), you need to modify your settings for load-path
+    accordingly.
+
 *** Improvements to clocktable
 
     - The clocktable is now much more flexible and user friendly
