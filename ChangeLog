@@ -1,3 +1,17 @@
+2008-04-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-modules): Allow additional symbols for external
+	packages.
+	(org-ctrl-c-ctrl-c): Allow for `org-clock-overlays' to be
+	undefined.
+
+2008-03-31  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-clock-goto): Hide drawers after showing an
+	entry with `org-clock-goto.'
+	(org-shiftup, org-shiftdown, org-shiftright, org-shiftleft): Try
+	also a clocktable block shift.
+	(org-clocktable-try-shift): New function.
 
 2008-03-30  Carsten Dominik  <dominik@science.uva.nl>
 

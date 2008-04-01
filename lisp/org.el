@@ -141,11 +141,16 @@ With prefix arg HERE, insert it at point."
 
 (defcustom org-modules '(org-bbdb org-gnus org-info org-irc org-mhe org-rmail org-vm org-wl)
   "Modules that should always be loaded together with org.el.
-If the description starts with <A>, this means the extension
-will be autoloaded when needed, preloading is not necessary.
 If a description starts with <C>, the file is not part of emacs
 and loading it will require that you have downloaded and properly installed
-the org-mode distribution."
+the org-mode distribution.
+
+You can also use this system to load external packages (i.e. neither Org
+core modules, not modules from the CONTRIB directory).  Just add symbols
+to the end of the list.  If the package is called org-xyz.e, then you need
+to add the symbol `xyz', and the package must have a call to
+
+   (provide 'org-xyz)"
   :group 'org
   :set 'org-set-modules
   :type
@@ -160,11 +165,10 @@ the org-mode distribution."
 	(const :tag "   vm:                Links to VM folders/messages" org-vm)
 	(const :tag "   wl:                Links to Wanderlust folders/messages" org-wl)
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
-;	(const :tag "A  export-latex:      LaTeX export" org-export-latex)
-;	(const :tag "A  publish:           Publishing" org-publish)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bibtex:            Org links to BibTeX entries" org-bibtex)
+	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
@@ -178,7 +182,8 @@ the org-mode distribution."
 	(const :tag "C  registry:          A registry for Org links" org-registry)
 	(const :tag "C  org2rem:           Convert org appointments into reminders" org2rem)
 	(const :tag "C  screen:            Visit screen sessions through Org-mode links" org-screen)
-	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)))
+	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
+	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 ;; FIXME: Needs a separate group...
 (defcustom org-completion-fallback-command 'hippie-expand
@@ -12767,6 +12772,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (goto-char org-clock-marker)
   (org-show-entry)
   (org-back-to-heading)
+  (org-cycle-hide-drawers 'children)
   (recenter))
 
 (defvar org-clock-file-total-minutes nil
@@ -12981,38 +12987,125 @@ The range is determined relative to TIME.  TIME defaults to the current time.
 The return value is a cons cell with two internal times like the ones
 returned by `current time' or `encode-time'. if AS-STRINGS is non-nil,
 the returned times will be formatted strings."
+  (if (integerp key) (setq key (intern (number-to-string key))))
   (let* ((tm (decode-time (or time (current-time))))
 	 (s 0) (m (nth 1 tm)) (h (nth 2 tm))
 	 (d (nth 3 tm)) (month (nth 4 tm)) (y (nth 5 tm))
 	 (dow (nth 6 tm))
-	 s1 m1 h1 d1 month1 y1 diff ts te fm)
+	 (skey (symbol-name key))
+	 (shift 0)
+	 s1 m1 h1 d1 month1 y1 diff ts te fm txt w date)
     (cond
-     ((eq key 'today)
-      (setq h 0 m 0 h1 24 m1 0))
-     ((eq key 'yesterday)
-      (setq d (1- d) h 0 m 0 h1 24 m1 0))
-     ((eq key 'thisweek)
-      (setq diff (if (= dow 0) 6 (1- dow))
+     ((string-match "^[0-9]+$" skey)
+      (setq y (string-to-number skey) m 1 d 1 key 'year))
+     ((string-match "^\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)$" skey)
+      (setq y (string-to-number (match-string 1 skey))
+	    month (string-to-number (match-string 2 skey))
+	    d 1 key 'month))
+     ((string-match "^\\([0-9]+\\)-[wW]\\([0-9]\\{1,2\\}\\)$" skey)
+      (require 'cal-iso)
+      (setq y (string-to-number (match-string 1 skey))
+	    w (string-to-number (match-string 2 skey)))
+      (setq date (calendar-gregorian-from-absolute
+		  (calendar-absolute-from-iso (list w 1 y))))
+      (setq d (nth 1 date) month (car date) y (nth 2 date)
+	    key 'week))
+     ((string-match "^\\([0-9]+\\)-\\([0-9]\\{1,2\\}\\)-\\([0-9]\\{1,2\\}\\)$" skey)
+      (setq y (string-to-number (match-string 1 skey))
+	    month (string-to-number (match-string 2 skey))
+	    d (string-to-number (match-string 3 skey))
+	    key 'day))
+     ((string-match "\\([-+][0-9]+\\)$" skey)
+      (setq shift (string-to-number (match-string 1 skey))
+	    key (intern (substring skey 0 (match-beginning 1))))))
+    (unless shift
+      (cond ((eq key 'yesterday) (setq key 'today shift -1))
+	    ((eq key 'lastweek)  (setq key 'week  shift -1))
+	    ((eq key 'lastmonth) (setq key 'month shift -1))
+	    ((eq key 'lastyear)  (setq key 'year  shift -1))))
+    (cond
+     ((memq key '(day today))
+      (setq d (+ d shift) h 0 m 0 h1 24 m1 0))
+     ((memq key '(week thisweek))
+      (setq diff (+ (* -7 shift) (if (= dow 0) 6 (1- dow)))
 	    m 0 h 0 d (- d diff) d1 (+ 7 d)))
-     ((eq key 'lastweek)
-      (setq diff (+ 7 (if (= dow 0) 6 (1- dow)))
-	    m 0 h 0 d (- d diff) d1 (+ 7 d)))
-     ((eq key 'thismonth)
-      (setq d 1 h 0 m 0 d1 1 month1 (1+ month) h1 0 m1 0))
-     ((eq key 'lastmonth)
-      (setq d 1 h 0 m 0 d1 1 month (1- month) month1 (1+ month) h1 0 m1 0))
-     ((eq key 'thisyear)
-      (setq m 0 h 0 d 1 month 1 y1 (1+ y)))
-     ((eq key 'lastyear)
-      (setq m 0 h 0 d 1 month 1 y (1- y) y1 (1+ y)))
+     ((memq key '(month thismonth))
+      (setq d 1 h 0 m 0 d1 1 month (+ month shift) month1 (1+ month) h1 0 m1 0))
+     ((memq key '(year thisyear))
+      (setq m 0 h 0 d 1 month 1 y (+ y shift) y1 (1+ y)))
      (t (error "No such time block %s" key)))
     (setq ts (encode-time s m h d month y)
 	  te (encode-time (or s1 s) (or m1 m) (or h1 h)
 			  (or d1 d) (or month1 month) (or y1 y)))
     (setq fm (cdr org-time-stamp-formats))
+    (cond
+     ((memq key '(day today))
+      (setq txt (format-time-string "%A, %B %d, %Y" ts)))
+     ((memq key '(week thisweek))
+      (setq txt (format-time-string "week %G-W%V" ts)))
+     ((memq key '(month thismonth))
+      (setq txt (format-time-string "%B %Y" ts)))
+     ((memq key '(year thisyear))
+      (setq txt (format-time-string "the year %Y" ts))))
     (if as-strings
-	(cons (format-time-string fm ts) (format-time-string fm te))
-      (cons ts te))))
+	(list (format-time-string fm ts) (format-time-string fm te) txt)
+      (list ts te txt))))
+
+(defun org-clocktable-try-shift (dir n)
+  "Try to shift the :block date of the clocktable at point.
+Point must be in the #+BEGIN: line of a clocktable, or this function
+will throw an error.
+DIR is a direction, a symbol `left', `right', `up', or `down'.
+Both `left' and `down' shift the block toward the past, `up' and `right'
+push it toward the future.
+N is the number of shift steps to take.  The size of the step depends on
+the currently selected interval size."
+  (setq n (prefix-numeric-value n))
+  (and (memq dir '(left down)) (setq n (- n)))
+  (save-excursion
+    (goto-char (point-at-bol))
+    (when (looking-at "#\\+BEGIN: clocktable\\>.*?:block[ \t]+\\(\\S-+\\)")
+      (let* ((b (match-beginning 1)) (e (match-end 1))
+	     (s (match-string 1))
+	     block shift ins y mw d date)
+	(cond
+	 ((string-match "^\\(today\\|thisweek\\|thismonth\\|thisyear\\)\\([-+][0-9]+\\)?$" s)
+	  (setq block (match-string 1 s)
+		shift (if (match-end 2)
+			  (string-to-number (match-string 2 s))
+			0))
+	  (setq shift (+ shift n))
+	  (setq ins (if (= shift 0) block (format "%s%+d" block shift))))
+	 ((string-match "\\([0-9]+\\)\\(-\\([wW]?\\)\\([0-9]\\{1,2\\}\\)\\(-\\([0-9]\\{1,2\\}\\)\\)?\\)?" s)
+	  ;;               1        1  2   3       3  4                4  5   6                6  5   2
+	  (setq y (string-to-number (match-string 1 s))
+                wp (and (match-end 3) (match-string 3 s))
+		mw (and (match-end 4) (string-to-number (match-string 4 s)))
+		d (and (match-end 6) (string-to-number (match-string 6 s))))
+	  (cond
+	   (d (setq ins (format-time-string
+			 "%Y-%m-%d"
+			 (encode-time 0 0 0 (+ d n) m y))))
+	   ((and wp mw (> (length wp) 0))
+	    (require 'cal-iso)
+	    (setq date (calendar-gregorian-from-absolute (calendar-absolute-from-iso (list (+ mw n) 1 y))))
+	    (setq ins (format-time-string
+		       "%G-W%V"
+		       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
+	   (mw
+	    (setq ins (format-time-string
+		       "%Y-%m"
+		       (encode-time 0 0 0 1 (+ mw n) y))))
+	   (y
+	    (setq ins (number-to-string (+ y n))))))
+	 (t (error "Cannot shift clocktable block")))
+	(when ins
+	  (goto-char b)
+	  (insert ins)
+	  (delete-region (point) (+ (point) (- e b)))
+	  (beginning-of-line 1)
+	  (org-update-dblock)
+	  t)))))
 
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
@@ -13031,14 +13124,14 @@ the returned times will be formatted strings."
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
-	   ipos time h m p level hlc hdl
-	   cc beg end pos tbl)
+	   ipos time p level hlc hdl
+	   cc beg end pos tbl tbl1 range-text)
       (when step
 	(org-clocktable-steps params)
 	(throw 'exit nil))
       (when block
 	(setq cc (org-clock-special-range block nil t)
-	      ts (car cc) te (cdr cc)))
+	      ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
       (if ts (setq ts (time-to-seconds
 		       (apply 'encode-time (org-parse-time-string ts)))))
       (if te (setq te (time-to-seconds
@@ -13076,10 +13169,17 @@ the returned times will be formatted strings."
 	    (org-prepare-agenda-buffers files)
 	    (while (setq file (pop files))
 	      (with-current-buffer (find-buffer-visiting file)
-		(push (org-clocktable-add-file
-		       file (org-dblock-write:clocktable p1)) tbl)
-		(setq total-time (+ (or total-time 0)
-				    org-clock-file-total-minutes)))))))
+		(setq tbl1 (org-dblock-write:clocktable p1))
+		(when tbl1
+		  (push (org-clocktable-add-file
+			 file 
+			 (concat "| |*File time*|*"
+				 (org-minutes-to-hours
+				  org-clock-file-total-minutes)
+				 "*|\n"
+				 tbl1)) tbl)
+		  (setq total-time (+ (or total-time 0)
+				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
 	(unless (eq scope 'agenda)
@@ -13103,14 +13203,12 @@ the returned times will be formatted strings."
 				       (save-match-data
 					 (org-make-org-heading-search-string
 					  (match-string 2))))
-			       (match-string 2)))
-			h (/ time 60)
-			m (- time (* 60 h)))
+			       (match-string 2))))
 		  (if (and (not multifile) (= level 1)) (push "|-" tbl))
 		  (push (concat
 			 "| " (int-to-string level) "|" hlc hdl hlc " |"
 			 (make-string (1- level) ?|)
-			 hlc (format "%d:%02d" h m) hlc
+			 hlc (org-minutes-to-hours time) hlc
 			 " |") tbl))))))
 	(setq tbl (nreverse tbl))
 	(if tostring
@@ -13123,23 +13221,19 @@ the returned times will be formatted strings."
 		(substring
 		 (format-time-string (cdr org-time-stamp-formats))
 		 1 -1)
-		"]."
-		(if block
-		    (format "  Considered range is /%s/." block)
-		  "")
+		"]"
+		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
 	   (if (eq scope 'agenda) "|File" "")
 	   "|L|Headline|Time|\n")
-	  (setq total-time (or total-time org-clock-file-total-minutes)
-		h (/ total-time 60)
-		m (- total-time (* 60 h)))
+	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
 	   (if (eq scope 'agenda) "|" "")
 	   "|"
-	   "*Total time*| "
-	   (format "*%d:%02d*" h m)
-	   "|\n|-\n")
+	   "*Total time*| *"
+	   (org-minutes-to-hours total-time)
+	   "*|\n|-\n")
 	  (setq tbl (delq nil tbl))
 	  (if (and (stringp (car tbl)) (> (length (car tbl)) 1)
 		   (equal (substring (car tbl) 0 2) "|-"))
@@ -13152,6 +13246,11 @@ the returned times will be formatted strings."
 	  (skip-chars-forward "^|")
 	  (org-table-align))))))
 
+(defun org-minutes-to-hours (m)
+  (let ((h (/ m 60)))
+    (setq m (- m (* 60 h)))
+    (format "%d:%02d" h m)))
+
 (defun org-clocktable-steps (params)
   (let* ((p1 (copy-sequence params))
 	 (ts (plist-get p1 :tstart))
@@ -13159,10 +13258,10 @@ the returned times will be formatted strings."
 	 (step0 (plist-get p1 :step))
 	 (step (cdr (assoc step0 '((day . 86400) (week . 604800)))))
 	 (block (plist-get p1 :block))
-	 cc)
+	 cc range-text)
     (when block
       (setq cc (org-clock-special-range block nil t)
-	    ts (car cc) te (cdr cc)))
+	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
     (if ts (setq ts (time-to-seconds
 		     (apply 'encode-time (org-parse-time-string ts)))))
     (if te (setq te (time-to-seconds
@@ -14149,6 +14248,7 @@ depending on context.  See the individual commands for more information."
 			    'org-timestamp-down 'org-timestamp-up)))
    ((org-on-heading-p) (call-interactively 'org-priority-up))
    ((org-at-item-p) (call-interactively 'org-previous-item))
+   ((org-clocktable-try-shift 'up arg))
    (t (call-interactively 'org-beginning-of-item) (beginning-of-line 1))))
 
 (defun org-shiftdown (&optional arg)
@@ -14161,27 +14261,30 @@ depending on context.  See the individual commands for more information."
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-up 'org-timestamp-down)))
    ((org-on-heading-p) (call-interactively 'org-priority-down))
+   ((org-clocktable-try-shift 'down arg))
    (t (call-interactively 'org-next-item))))
 
-(defun org-shiftright ()
+(defun org-shiftright (&optional arg)
   "Next TODO keyword or timestamp one day later, depending on context."
-  (interactive)
+  (interactive "P")
   (cond
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
    ((org-on-heading-p) (org-call-with-arg 'org-todo 'right))
    ((org-at-item-p) (org-call-with-arg 'org-cycle-list-bullet nil))
    ((org-at-property-p) (call-interactively 'org-property-next-allowed-value))
+   ((org-clocktable-try-shift 'right arg))
    (t (org-shiftcursor-error))))
 
-(defun org-shiftleft ()
+(defun org-shiftleft (&optional arg)
   "Previous TODO keyword or timestamp one day earlier, depending on context."
-  (interactive)
+  (interactive "P")
   (cond
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
    ((org-on-heading-p) (org-call-with-arg 'org-todo 'left))
    ((org-at-item-p) (org-call-with-arg 'org-cycle-list-bullet 'previous))
    ((org-at-property-p)
     (call-interactively 'org-property-previous-allowed-value))
+   ((org-clocktable-try-shift 'left arg))
    (t (org-shiftcursor-error))))
 
 (defun org-shiftcontrolright ()
@@ -14268,10 +14371,10 @@ This command does many different things, depending on context:
   (interactive "P")
   (let  ((org-enable-table-editor t))
     (cond
-     ((or org-clock-overlays
+     ((or (and (boundp 'org-clock-overlays) org-clock-overlays)
 	  org-occur-highlights
 	  org-latex-fragment-image-overlays)
-      (org-remove-clock-overlays)
+      (and (boundp 'org-clock-overlays) (org-remove-clock-overlays))
       (org-remove-occur-highlights)
       (org-remove-latex-fragment-image-overlays)
       (message "Temporary highlights/overlays removed from current buffer"))

@@ -5,9 +5,44 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
-* Version 5.24
+* Version 6.00
 
 ** Details
+
+*** Improvements to clocktable
+
+    - The clocktable is now much more flexible and user friendly
+      when trying to specify the time block that should be
+      considered when constructing the table.
+
+      The =:block= parameter to the table can now look like any
+      of these:
+      
+      | :block       | meaning               |
+      |--------------+-----------------------|
+      | 2008         | The entire year 2008  |
+      | 2008-04      | The month April 2008  |
+      | 2008-04-02   | The day April 2, 2008 |
+      | 2008-W14     | ISO-Week 14 in 2008   |
+      | today        | Today                 |
+      | today-5      | The day five days ago |
+      | thisweek     | The current week      |
+      | thisweek-2   | Two weeks ago         |
+      | thismonth    | The current month     |
+      | thismonth-12 | Same month, last year |
+      | lastmonth    | Same as thismonth-1   |
+
+
+      What is more, you can now use the =S-left= and =S-right=
+      keys while the cursor is on the =#+BEGIN: clocktable= line
+      and the the time block around.  If the current block is
+      =today=, =S-left= with switch to yesterday.  If the current
+      block is =2008-W14=, =S-right= will switch to the following
+      week.
+
+    - When the clocktable is collecting from several files, the
+      total time for each file will now also be listed.  This was
+      a request from Bernt Hansen.
 
 *** Selective tag inheritance
 
@@ -17,7 +52,7 @@
     the inherited tags.  Thanks to Michael Ekstrand for this
     excellent proposal.
 
-    The regexp option is also inplemented for
+    The regexp option is also implemented for
     =org-use-property-inheritance=, so that you can now select
     properties for inheritance my name.
 
@@ -25,11 +60,11 @@
 
     The INHERIT flag to the function =org-entry-get= can be set
     to the symbol =selective=.  If this is the case, then the
-    value of the property will be retrived using inheritance if
+    value of the property will be retrieved using inheritance if
     and only if the setting in =org-use-property-inheritance=
     selects the property for inheritance.
 
-*** Suport for ISO week dates (ISO 6801)
+*** Support for ISO week dates (ISO 6801)
 
     Dates in the agenda now show the ISO week an day
     specification, in the form =W08 2=, meaning Tuesday of
@@ -43,8 +78,8 @@
     or year, respectively.  For example, =32 d= jumps to February
     1st, =9 w= to ISO week number 9.  When setting day, week, or
     month view, a year may be encoded in the prefix argument as
-    well.  For example, =200712 w= will jump to week 12 in
-    2007.  If such a year specification has only one or two
+    well.  For example, =200712 w= will jump to week 12 in the
+    year 2007.  If such a year specification has only one or two
     digits, it will be mapped to the interval 1938-2037.
 
     When entering a date at the date prompt, you may now also
@@ -56,7 +91,7 @@
     : 2012 w4 fri     Friday of week 4 in 2012.
     : 2012-W04-5      Same as above
 
-    So far I have not implements the effect of
+    So far I have not implemented the effect of
     `org-read-date-prefer-future' on this functionality, because
     it seemed too magic for me.  I'd appreciate comments on this
     issue:  Should `org-read-date-prefer-future' also push dates
@@ -84,19 +119,19 @@
 
 *** Improvements in Search View
     
-    - Calling search view with a C-u prefix will makt it match
+    - Calling search view with a C-u prefix will make it match
       only in TODO entries.
 
     - The single quote is no longer considered a word character
-      durin search, so that searching for the word "Nasim" will
+      during search, so that searching for the word "Nasim" will
       also match in "Nasim's".
 
 *** Misc
 
    - When an entry already has a scheduling or deadline time
-     stamp, calling `C-c C-s' or `C-c C-d', respectively, will no
-     use that old date as the default, and you can can use the
-     "++4d" syntax to invoke shifts relative to that default
+     stamp, calling `C-c C-s' or `C-c C-d', respectively, will
+     now use that old date as the default, and you can can use
+     the "++4d" syntax to invoke shifts relative to that default
      date.  Simply pressing RET at the prompt will keep the
      default date, not switch to today.
 
@@ -3775,3 +3810,4 @@ Version 4.00
 
 
 
+     
