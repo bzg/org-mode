@@ -428,11 +428,13 @@ matching the regexp SKIP-DIR when recursiing through BASE-DIR."
 		(fnd (file-name-nondirectory f)))
 	    (if (and fd-p recurse
 		     (not (string-match "^\\.+$" fnd))
-		     (if skip-dir (not (string-match match skip-dir fnd)) t))
-		(org-publish-get-base-files-1 f recurse skip-file skip-dir)
-	      (unless (or fd-p (and skip-file (string-match skip-file fnd)))
+		     (if skip-dir (not (string-match skip-dir fnd)) t))
+		(org-publish-get-base-files-1 f recurse match skip-file skip-dir)
+	      (unless (or fd-p ;; this is a directory
+			  (and skip-file (string-match skip-file fnd))
+			  (not (string-match match fnd)))
 		(pushnew f org-publish-temp-files)))))
-	(directory-files base-dir t match)))
+	(directory-files base-dir t (unless recurse match))))
 
 (defun org-publish-get-base-files (project &optional exclude-regexp)
   "Return a list of all files in PROJECT.
@@ -446,7 +448,10 @@ matching filenames."
  	 (extension (or (plist-get project-plist :base-extension) "org"))
  	 (match (concat "^[^\\.].*\\.\\(" extension "\\)$")))
     (setq org-publish-temp-files nil)
-    (org-publish-get-base-files-1 base-dir recurse match exclude-regexp)
+    (org-publish-get-base-files-1 base-dir recurse match 
+				  ;; FIXME distinguish exclude regexp
+				  ;; for skip-file and skip-dir?
+				  exclude-regexp exclude-regexp)
     org-publish-temp-files))
 
 (defun org-publish-get-project-from-filename (filename)
@@ -602,7 +607,7 @@ Default for INDEX-FILENAME is 'index.org'."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
 
-(defalias 'org-publish-project 'org-publish "Publish project.")
+(defalias 'org-publish-project 'org-publish)
 
 ;;;###autoload
 (defun org-publish (project &optional force)

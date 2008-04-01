@@ -1,3 +1,4 @@
+
 2008-04-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org.el (org-modules): Allow additional symbols for external
@@ -12,6 +13,14 @@
 	(org-shiftup, org-shiftdown, org-shiftright, org-shiftleft): Try
 	also a clocktable block shift.
 	(org-clocktable-try-shift): New function.
+
+2008-03-31  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-publish.el (org-publish-get-base-files-1): Bug fix: get
+	the proper list of files when recursing thru a directory.
+	(org-publish-get-base-files): Use the :exclude property to skip
+	both files and directories.
+	(org-publish-project): Removed third arg of defalias.
 
 2008-03-30  Carsten Dominik  <dominik@science.uva.nl>
 
