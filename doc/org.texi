@@ -444,18 +444,26 @@ questions (FAQ), links to tutorials etc.  This page is located at
 XEmacs package, please skip this section and go directly to
 @ref{Activation}.}
 
-If you have downloaded Org from the Web, you must take the
-following steps to install it: Go into the Org distribution
-directory and edit the top section of the file @file{Makefile}.  You
-must set the name of the Emacs binary (likely either @file{emacs} or
-@file{xemacs}), and the paths to the directories where local Lisp and
-Info files are kept.  If you don't have access to the system-wide
-directories, create your own two directories for these files, enter them
-into the Makefile, and make sure Emacs finds the Lisp files by adding
-the following line to @file{.emacs}:
+If you have downloaded Org from the Web, either as a distribution @file{.zip}
+or @file{.tar} file, or as a GIT archive, you must take the following steps
+to install it: Go into the unpacked Org distribution directory and edit the
+top section of the file @file{Makefile}.  You must set the name of the Emacs
+binary (likely either @file{emacs} or @file{xemacs}), and the paths to the
+directories where local Lisp and Info files are kept.  If you don't have
+access to the system-wide directories, you can simply run Org directly from
+the distribution directory by adding the @file{lisp} subdirectory to the
+Emacs load path.  To do this, add the following line to @file{.emacs}:
 
 @example
-(setq load-path (cons "~/path/to/lispdir" load-path))
+(setq load-path (cons "~/path/to/orgdir/lisp" load-path))
+@end example
+
+@noindent
+If you plan to use code from the @file{CONTRIB} subdirectory, do a similar
+step for this directory:
+
+@example
+(setq load-path (cons "~/path/to/orgdir/CONTRIB/lisp" load-path))
 @end example
 
 @b{XEmacs users now need to install the file @file{noutline.el} from
@@ -466,17 +474,17 @@ command:}
 @b{make install-noutline}
 @end example
 
-@noindent Now byte-compile and install the Lisp files with the shell
-commands:
+@noindent Now byte-compile the Lisp files with the shell command:
 
 @example
 make
-make install
 @end example
 
-@noindent If you want to install the info documentation, use this command:
+@noindent If you are running Org from the distribution directory, this is
+all.  If you want to install into the system directories, use
 
 @example
+make install
 make install-info
 @end example
 
@@ -486,6 +494,7 @@ make install-info
 ;; This line only if Org is not part of the X/Emacs distribution.
 (require 'org-install)
 @end lisp
+
 
 @node Activation, Feedback, Installation, Introduction
 @section Activation
@@ -4161,6 +4170,9 @@ feb 15        --> @b{2007}-02-15
 sep 12 9      --> 2009-09-12
 12:45         --> @b{2006}-@b{06}-@b{13} 12:45
 22 sept 0:34  --> @b{2006}-09-22 0:34
+w4            --> ISO week for of the current year @b{2006}
+2012 w4 fri   --> Friday of ISO week 4 in 2012
+2012-w04-5    --> Same as above
 @end example
 
 Furthermore you can specify a relative date by giving, as the
@@ -4498,7 +4510,6 @@ argument, jump to the first clock report in the current document and
 update it.
 @example
 #+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file
-
 #+END: clocktable
 @end example
 @noindent
@@ -4515,10 +4526,18 @@ new table.  The @samp{BEGIN} line can specify options:
              tree       @r{the surrounding level 1 tree}
              agenda     @r{all agenda files}
              ("file"..) @r{scan these files}
-:block       @r{The time block to consider.  This block is specified relative}
-             @r{to the current time and may be any of these keywords:}
-             @r{@code{today}, @code{yesterday}, @code{thisweek}, @code{lastweek},}
-             @r{@code{thismonth}, @code{lastmonth}, @code{thisyear}, or @code{lastyear}}.
+:block       @r{The time block to consider.  This block is specified either}
+             @r{absolute, or relative to the current time and may be any of}
+             @r{these formats:}
+             2007-12-31    @r{New year eve 2007}
+             2007-12       @r{December 2007}
+             2007-W50      @r{ISO-week 50 in 2007}
+             2007          @r{the year 2007}
+             today, yesterday, today-N          @r{a relative day}
+             thisweek, lastweek, thisweek-N     @r{a relative week}
+             thismonth, lastmonth, thismonth-N  @r{a relative month}
+             thisyear, lastyear, thisyear-N     @r{a relative year}
+             @r{Use @kbd{S-@key{left}/@key{right}} keys to shift the time interval.}
 :tstart      @r{A time string specifying when to start considering times}
 :tend        @r{A time string specifying when to stop considering times}
 :step        @r{@code{week} or @code{day}, to split the table into chunks}
@@ -4527,8 +4546,7 @@ new table.  The @samp{BEGIN} line can specify options:
 So to get a clock summary of the current level 1 tree, for the current
 day, you could write
 @example
-#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1
-
+#+BEGIN: clocktable :maxlevel 2 :block today :scope tree1 :link t
 #+END: clocktable
 @end example
 and to use a specific time range you could write@footnote{Note that all
@@ -4537,7 +4555,6 @@ only to fit it onto the manual.}
 @example
 #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                     :tend "<2006-08-10 Thu 12:00>"
-
 #+END: clocktable
 @end example
 @kindex C-c C-c
@@ -4550,6 +4567,13 @@ Update dynamical block at point.  The cursor needs to be in the
 @item C-u C-c C-x C-u
 Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.
+@kindex S-@key{left}
+@kindex S-@key{right}
+@item S-@key{left}
+@itemx S-@key{right}
+Shift the current @code{:block} interval and update the table.  The cursor
+needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
+@code{:block} is @code{today}, it will be shifted to @code{today-1} etc.
 @end table
 
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
