@@ -205,12 +205,7 @@ release:
 	rm -rf RELEASEDIR
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
-	cp org.pdf orgcard.pdf org.texi org.html RELEASEDIR
-	cp ORGWEBPAGE/tmp/*.html   RELEASEDIR
-#	cp ORGWEBPAGE/tmp/*.el     RELEASEDIR
-	cp ORGWEBPAGE/tmp/*.txt    RELEASEDIR
-	cp ORGWEBPAGE/tmp/*.css    RELEASEDIR
-#	cp ORGWEBPAGE/tmp/*.jpg    RELEASEDIR
+	cp doc/org.pdf doc/orgcard.pdf doc/org.texi doc/org.html RELEASEDIR
 	cp RELEASEDIR/org-$(TAG).zip    RELEASEDIR/org.zip
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
