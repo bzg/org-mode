@@ -464,7 +464,7 @@ you can \"misuse\" it to add arbitrary text to the header."
   :type 'string)
 
 (defcustom org-export-html-infojs-setup
-  "<script =\"text/javascript\" language=\"JavaScript\" src=\"org-info.js\"></script>
+  "<script type=\"text/javascript\" language=\"JavaScript\" src=\"org-info.js\"></script>
 <script type=\"text/javascript\" language=\"JavaScript\">
 /* <![CDATA[ */
 %MANAGER-OPTIONS
