@@ -1,5 +1,11 @@
 2008-04-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-modules): Add entry for org-bibtex.el.
+
+	* lisp/org-bibtex.el (org-create-file-search-in-bibtex): New file,
+	a combination of the BibTeX that used to be in org.el, and the
+	org-bibtex.el extension written by Bastien Guerry.
+
 	* lisp/org-exp.el (org-export-html-handle-js-options): New function.
 	(org-export-html-infojs-setup): New option.
 	(org-export-as-html): Call `org-export-html-handle-js-options'.

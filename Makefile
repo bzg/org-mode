@@ -64,7 +64,7 @@ LISPF      = org.el \
 	     org-compat.el org-macs.el \
 	     org-table.el org-exp.el org-remember.el org-agenda.el\
 	     org-publish.el org-mouse.el org-export-latex.el \
-	     org-bbdb.el org-gnus.el org-info.el org-irc.el \
+	     org-bbdb.el org-bibtex.el org-gnus.el org-info.el org-irc.el \
              org-mac-message.el org-mhe.el org-rmail.el org-vm.el org-wl.el
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el

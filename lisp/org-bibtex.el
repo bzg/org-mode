@@ -1,33 +1,39 @@
 ;;; org-bibtex.el --- Org links to BibTeX entries
 ;;
-;; Copyright 2007 Bastien Guerry
+;; Copyright 2007, 2008 Free Software Foundation, Inc.
 ;;
-;; Author: bzg AT altern DOT org
-;; Version: 0.2
+;; Author: Bastien Guerry <bzg at altern dot org>
+;;         Carsten Dominik <carsten dot dominik at gmail dot com>
 ;; Keywords: org, wp, remember
-;; URL: http://www.cognition.ens.fr/~guerry/u/org-bibtex.el
+;; Version: 6.00pre-2
 ;;
-;; This program is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+;;
+;; GNU Emacs is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 3, or (at your option)
 ;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
 ;;
 ;;; Commentary:
 ;;
-;; The Org mode already lets you store/insert links to BibTeX entries.
+;; This file implements links to database entries in BibTeX files.
+;; Instead of defining a special link prefix, it uses the normal file
+;; links combined with a custom search mechanism to find entries
+;; by reference key.  And it constucts a nice description tag for
+;; the link that contains the author name, the year and a short title.
 ;;
-;; But what if you want to insert the author or the title of a BibTeX
-;; item in a *remember* buffer?  This library lets you deal with this 
-;; by adding more properties to the BibTeX link.
+;; It also stores detailed information about the entry so that
+;; remember templates can access and enter this information easily.
 ;;
 ;; The available properties for each entry are listed here:
 ;;
@@ -70,19 +76,25 @@
 ;;
 ;;; History:
 ;; 
-;; This piece of code was inspired by a request of Austin Frank:
-;;   http://article.gmane.org/gmane.emacs.orgmode/4112
+;; The link creation part has been part of Org-mode for a long time.
+;; 
+;; Creating better remember template information was inspired by a request
+;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
+;; and then imlemented by Bastien Guerry.
 ;;
-;; Put this file into your load-path and the following into your ~/.emacs:
-;;   (require 'org-bibtex)
+;; Org-mode loads this module by default - if this is not what you want,
+;; configure the variable `org-modules'.
 
 ;;; Code:
 
-(provide 'org-bibtex)
-
 (require 'org)
 
-(defvar description nil) ; dynamically scoped in org.el
+(defvar description nil) ; dynamically scoped from org.el
+
+(declare-function bibtex-beginning-of-entry "bibtex" ())
+(declare-function bibtex-generate-autokey "bibtex" ())
+(declare-function bibtex-parse-entry "bibtex" (&optional content))
+(declare-function bibtex-url "bibtex" (&optional pos no-browse))
 
 (org-add-link-type "bibtex" 'org-bibtex-open)
 (add-hook 'org-store-link-functions 'org-bibtex-store-link)
@@ -108,8 +120,7 @@
 (defun org-bibtex-store-link ()
   "Store a link to a BibTeX entry."
   (when (eq major-mode 'bibtex-mode)
-    (let* ((search (run-hook-with-args-until-success
-		    'org-create-file-search-functions))
+    (let* ((search (org-create-file-search-in-bibtex))
 	   (link (concat "file:" (abbreviate-file-name buffer-file-name)
 			 "::" search))
 	   (entry (mapcar ; repair strings enclosed in "..." or {...}
@@ -143,12 +154,51 @@
        :link link
        :description description))))
 
+(defun org-create-file-search-in-bibtex ()
+  "Create the search string and description for a BibTeX database entry."
+  ;; Make a good description for this entry, using names, year and the title
+  ;; Put it into the `description' variable which is dynamically scoped.
+  (let ((bibtex-autokey-names 1)
+	(bibtex-autokey-names-stretch 1)
+	(bibtex-autokey-name-case-convert-function 'identity)
+	(bibtex-autokey-name-separator " & ")
+	(bibtex-autokey-additional-names " et al.")
+	(bibtex-autokey-year-length 4)
+	(bibtex-autokey-name-year-separator " ")
+	(bibtex-autokey-titlewords 3)
+	(bibtex-autokey-titleword-separator " ")
+	(bibtex-autokey-titleword-case-convert-function 'identity)
+	(bibtex-autokey-titleword-length 'infty)
+	(bibtex-autokey-year-title-separator ": "))
+    (setq description (bibtex-generate-autokey)))
+  ;; Now parse the entry, get the key and return it.
+  (save-excursion
+    (bibtex-beginning-of-entry)
+    (cdr (assoc "=key=" (bibtex-parse-entry)))))
+
+(defun org-execute-file-search-in-bibtex (s)
+  "Find the link search string S as a key for a database entry."
+  (when (eq major-mode 'bibtex-mode)
+    ;; Yes, we want to do the search in this file.
+    ;; We construct a regexp that searches for "@entrytype{" followed by the key
+    (goto-char (point-min))
+    (and (re-search-forward (concat "@[a-zA-Z]+[ \t\n]*{[ \t\n]*"
+				    (regexp-quote s) "[ \t\n]*,") nil t)
+	 (goto-char (match-beginning 0)))
+    (if (and (match-beginning 0) (equal current-prefix-arg '(16)))
+	;; Use double prefix to indicate that any web link should be browsed
+	(let ((b (current-buffer)) (p (point)))
+	  ;; Restore the window configuration because we just use the web link
+	  (set-window-configuration org-window-config-before-follow-link)
+	  (save-excursion (set-buffer b) (goto-char p)
+	    (bibtex-url)))
+      (recenter 0))  ; Move entry start to beginning of window
+  ;; return t to indicate that the search is done.
+    t))
+
+;; Finally add the link search function to the right hook.
+(add-hook 'org-execute-file-search-functions 'org-execute-file-search-in-bibtex)
+
 (provide 'org-bibtex)
-
-
-;;;;##########################################################################
-;;;;  User Options, Variables
-;;;;##########################################################################
-
 
 ;;; org-bibtex.el ends here

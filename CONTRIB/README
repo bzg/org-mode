@@ -11,7 +11,6 @@ LISP (emacs-lisp code)
 ======================
 
 org-annotate-file.el --- Annotate a file with org syntax
-org-bibtex.el        --- Org links to BibTeX entries
 org-bookmark.el      --- Org links to bookmarks
 org-depend.el        --- TODO dependencies for Org-mode
 org-elisp-symbol.el  --- Org links to emacs-lisp symbols

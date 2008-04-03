@@ -139,7 +139,7 @@ With prefix arg HERE, insert it at point."
   (when (featurep 'org)
     (org-load-modules-maybe 'force)))
 
-(defcustom org-modules '(org-bbdb org-gnus org-info org-irc org-mhe org-rmail org-vm org-wl)
+(defcustom org-modules '(org-bbdb org-bibtex org-gnus org-info org-irc org-mhe org-rmail org-vm org-wl)
   "Modules that should always be loaded together with org.el.
 If a description starts with <C>, the file is not part of emacs
 and loading it will require that you have downloaded and properly installed
@@ -156,6 +156,7 @@ to add the symbol `xyz', and the package must have a call to
   :type
   '(set :greedy t
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
+	(const :tag "   bibtex:            Links to BibTeX entries" org-bibtex)
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
 	(const :tag "   info:              Links to Info nodes" org-info)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
@@ -167,7 +168,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
-	(const :tag "C  bibtex:            Org links to BibTeX entries" org-bibtex)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
@@ -2680,10 +2680,6 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 
 ;; Various packages
 ;; FIXME: get the argument lists for the UNKNOWN stuff
-(declare-function bibtex-beginning-of-entry "bibtex" ())
-(declare-function bibtex-generate-autokey "bibtex" ())
-(declare-function bibtex-parse-entry "bibtex" (&optional content))
-(declare-function bibtex-url "bibtex" (&optional pos no-browse))
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
 (declare-function calendar-forward-day          "cal-move"   (arg))
 (declare-function calendar-goto-date            "cal-move"   (date))
@@ -7672,61 +7668,6 @@ onto the ring."
 		     1))
    (t (error "This should not happen"))))
 
-
-;;; BibTeX links
-
-;; Use the custom search meachnism to construct and use search strings for
-;; file links to BibTeX database entries.
-
-(defun org-create-file-search-in-bibtex ()
-  "Create the search string and description for a BibTeX database entry."
-  (when (eq major-mode 'bibtex-mode)
-    ;; yes, we want to construct this search string.
-    ;; Make a good description for this entry, using names, year and the title
-    ;; Put it into the `description' variable which is dynamically scoped.
-    (let ((bibtex-autokey-names 1)
-	  (bibtex-autokey-names-stretch 1)
-	  (bibtex-autokey-name-case-convert-function 'identity)
-	  (bibtex-autokey-name-separator " & ")
-	  (bibtex-autokey-additional-names " et al.")
-	  (bibtex-autokey-year-length 4)
-	  (bibtex-autokey-name-year-separator " ")
-	  (bibtex-autokey-titlewords 3)
-	  (bibtex-autokey-titleword-separator " ")
-	  (bibtex-autokey-titleword-case-convert-function 'identity)
-	  (bibtex-autokey-titleword-length 'infty)
-	  (bibtex-autokey-year-title-separator ": "))
-      (setq description (bibtex-generate-autokey)))
-    ;; Now parse the entry, get the key and return it.
-    (save-excursion
-      (bibtex-beginning-of-entry)
-      (cdr (assoc "=key=" (bibtex-parse-entry))))))
-
-(defun org-execute-file-search-in-bibtex (s)
-  "Find the link search string S as a key for a database entry."
-  (when (eq major-mode 'bibtex-mode)
-    ;; Yes, we want to do the search in this file.
-    ;; We construct a regexp that searches for "@entrytype{" followed by the key
-    (goto-char (point-min))
-    (and (re-search-forward (concat "@[a-zA-Z]+[ \t\n]*{[ \t\n]*"
-				    (regexp-quote s) "[ \t\n]*,") nil t)
-	 (goto-char (match-beginning 0)))
-    (if (and (match-beginning 0) (equal current-prefix-arg '(16)))
-	;; Use double prefix to indicate that any web link should be browsed
-	(let ((b (current-buffer)) (p (point)))
-	  ;; Restore the window configuration because we just use the web link
-	  (set-window-configuration org-window-config-before-follow-link)
-	  (save-excursion (set-buffer b) (goto-char p)
-	    (bibtex-url)))
-      (recenter 0))  ; Move entry start to beginning of window
-  ;; return t to indicate that the search is done.
-    t))
-
-;; Finally add the functions to the right hooks.
-(add-hook 'org-create-file-search-functions 'org-create-file-search-in-bibtex)
-(add-hook 'org-execute-file-search-functions 'org-execute-file-search-in-bibtex)
-
-;; end of Bibtex link setup
 
 ;;; Following file links
 
