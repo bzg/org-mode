@@ -1,3 +1,11 @@
+2008-04-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-export-html-handle-js-options): New function.
+	(org-export-html-infojs-setup): New option.
+	(org-export-as-html): Call `org-export-html-handle-js-options'.
+
+	* lisp/org.el (org-auto-repeat-maybe): Make sure that a note can
+	be enforces if `org-log-repeat' is `note'.
 
 2008-04-01  Carsten Dominik  <dominik@science.uva.nl>
 

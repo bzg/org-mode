@@ -405,7 +405,7 @@ Org-mode file."
   :group 'org-export)
 
 (defcustom org-export-html-coding-system nil
-  ""
+  "FIXME"
   :group 'org-export-html
   :type 'coding-system)
 
@@ -463,6 +463,17 @@ you can \"misuse\" it to add arbitrary text to the header."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-export-html-infojs-setup
+  "<script =\"text/javascript\" language=\"JavaScript\" src=\"org-info.js\"></script>
+<script type=\"text/javascript\" language=\"JavaScript\">
+/* <![CDATA[ */
+%MANAGER-OPTIONS
+/* ]]> */
+</script>"
+  "The template for the export style additions when org-info.js is used.
+Option settings will replace the %MANAGER-OPTIONS cookie."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-html-title-format "<h1 class=\"title\">%s</h1>\n"
   "Format for typesetting the document title in HTML export."
@@ -652,8 +663,9 @@ The text will be inserted into the DESCRIPTION field."
       (widen)
       (goto-char 0)
       (let ((re (org-make-options-regexp
-		 '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE")))
-	    p key val text options)
+		 '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
+		   "INFOJS_UP" "INFOJS_HOME" "INFOJS_OPT")))
+	    p key val text options js-up js-main js-css js-opt)
 	(while (re-search-forward re nil t)
 	  (setq key (org-match-string-no-properties 1)
 		val (org-match-string-no-properties 2))
@@ -665,7 +677,13 @@ The text will be inserted into the DESCRIPTION field."
 	   ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
 	   ((string-equal key "TEXT")
 	    (setq text (if text (concat text "\n" val) val)))
-	   ((string-equal key "OPTIONS") (setq options val))))
+	   ((string-equal key "OPTIONS") (setq options val))
+	   ((string-equal key "INFOJS_UP")
+	    (setq p (plist-put p :infojs-up val)))
+	   ((string-equal key "INFOJS_HOME")
+	    (setq p (plist-put p :infojs-home val)))
+	   ((string-equal key "INFOJS_OPT")
+	    (setq p (plist-put p :infojs-opt val)))))
 	(setq p (plist-put p :text text))
 	(when options
 	  (let ((op '(("H"     . :headline-levels)
@@ -702,6 +720,52 @@ The text will be inserted into the DESCRIPTION field."
 		  (or (cdr (assoc type val)) ".")
 		val)))
     dir))
+
+(defun org-export-html-handle-js-options (exp-plist)
+  "Analyze JavaScript options in INFO-PLIST and modify EXP-PLIST accordingly.
+Both P and PJ are property lists."
+  (let (p1 (s "") p v a1 tmp)
+    (setq p1 (plist-put p1 'TOC (if (not (plist-get exp-plist
+						    :table-of-contents))
+				    "0" "1")))
+    (when (setq v (plist-get exp-plist :infojs-opt))
+      (when (string-match "\\<view:\\(\\S-+\\)" v)
+	(setq tmp (match-string 1 v))
+	(unless (member tmp '("info" "overview" "content" "showall"))
+	  (error "Invalid value \"%s\" for `view' in #+INFOJS_OPT" tmp))
+	(setq p1 (plist-put p1 'VIEW tmp)))
+      (when (string-match "\\<mouse:\\(\\S-+\\)" v)
+	(setq tmp (match-string 1 v))
+	(unless (string-match "^underline$\\|^#[0-9a-fA-F]\\{6\\}" tmp)
+	  (error "Invalid value \"%s\" for `mouse' in #+INFOJS_OPT" tmp))
+	(setq p1 (plist-put p1 'MOUSE_HINT tmp)))
+      (when (string-match "\\<toc:\\(\\S-+\\)" v)
+	(setq p1 (plist-put p1 'TOC
+			    (if (equal (match-string 1 v) "nil") "0" "1"))))
+      (when (string-match "\\<runs:\\([0-9]+\\)" v)
+	(setq p1 (plist-put p1 'MAX_RUNS (match-string 1 v))))
+      (when (string-match "\\<buttons:\\(\\S-+\\)" v)
+	(setq p1 (plist-put p1 'VIEW_BUTTONS
+			    (if (equal (match-string 1 v) "nil") "0" "1")))))
+    (when (setq v (plist-get exp-plist :infojs-up))
+      (setq p1 (plist-put p1 'LINK_UP v)))
+    (when (setq v (plist-get exp-plist :infojs-home))
+      (setq p1 (plist-put p1 'LINK_HOME v)))
+    (while p1
+      (setq p (pop p1) v (pop p1))
+      (push (cons p v) a1))
+    (setq s (mapconcat
+	     (lambda (x) (format "org_html_manager.set(\"%s\", \"%s\");"
+				 (car x) (cdr x)))
+	     a1 "\n"))
+    (when (> (length s) 0)
+      (and (string-match "%MANAGER-OPTIONS" org-export-html-infojs-setup)
+	   (setq s (replace-match s t t org-export-html-infojs-setup))
+	   (setq exp-plist
+		 (plist-put
+		  exp-plist :style
+		  (concat (or (plist-get exp-plist :style) "") "\n" s)))))
+    exp-plist))
 
 ;;;###autoload
 (defun org-export (&optional arg)
@@ -1999,9 +2063,11 @@ PUB-DIR is set, use this as the publishing directory."
   (setq-default org-deadline-line-regexp org-deadline-line-regexp)
   (setq-default org-done-keywords org-done-keywords)
   (setq-default org-maybe-keyword-time-regexp org-maybe-keyword-time-regexp)
-  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
-					ext-plist
-					(org-infile-export-plist)))
+  (let* ((opt-plist
+	  (org-export-html-handle-js-options
+	   (org-combine-plists (org-default-export-plist)
+			       ext-plist
+			       (org-infile-export-plist))))
 
 	 (style (plist-get opt-plist :style))
 	 (html-extension (plist-get opt-plist :html-extension))

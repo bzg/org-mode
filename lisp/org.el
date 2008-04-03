@@ -8679,13 +8679,16 @@ This function is run automatically after each state change to a DONE state."
     (when repeat
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (org-todo (if (eq interpret 'type) last-state head))
-      (when (and org-log-repeat
-		 (or (not (memq 'org-add-log-note
-				(default-value 'post-command-hook)))
-		     (eq org-log-note-purpose 'done)))
-	;; Make sure a note is taken;
-	(org-add-log-setup 'state (or done-word (car org-done-keywords))
-			   'findpos org-log-repeat))
+      (when org-log-repeat
+	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
+		(memq 'org-add-log-note post-command-hook))
+	    ;; OK, we are already setup for some record
+	    (if (eq org-log-repeat 'note)
+		;; make sure we take a note, not only a time stamp
+		(setq org-log-note-how 'note))
+	  ;; Set up for taking a record
+	  (org-add-log-setup 'state (or done-word (car org-done-keywords))
+			     'findpos org-log-repeat)))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
       (setq re (concat "\\(" org-scheduled-time-regexp "\\)\\|\\("
@@ -13067,7 +13070,7 @@ the currently selected interval size."
     (when (looking-at "#\\+BEGIN: clocktable\\>.*?:block[ \t]+\\(\\S-+\\)")
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
-	     block shift ins y mw d date)
+	     block shift ins y mw d date wp m)
 	(cond
 	 ((string-match "^\\(today\\|thisweek\\|thismonth\\|thisyear\\)\\([-+][0-9]+\\)?$" s)
 	  (setq block (match-string 1 s)
