@@ -199,11 +199,18 @@ we turn off invisibility temporarily.  Use this in a `let' form."
 
 (defun org-autoload (file functions)
   "Establish autoload for all FUNCTIONS in FILE, if not boutd already."
+  (declare (indent 1) (debug t))
   (let ((d (format "Documentation will be available after `%s.el' is loaded."
 		   file))
 	f)
     (while (setq f (pop functions))
       (or (fboundp f) (autoload f file d t)))))
+
+(defmacro org-match-line (re)
+  "Looking-at at the beginning of the current line."
+  (save-excursion
+    (goto-char (point-at-bol))
+    (looking-at re)))
 
 (provide 'org-macs)
 

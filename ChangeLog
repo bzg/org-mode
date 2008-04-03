@@ -1,5 +1,7 @@
 2008-04-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-clock.el: New file, split off from org.el.
+
 	* doc/org.texi (Using the property API): Document the API for
 	multi-valued properties.
 
