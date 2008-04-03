@@ -8660,6 +8660,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 (defvar org-last-changed-timestamp)
 (defvar org-log-post-message)
 (defvar org-log-note-purpose)
+(defvar org-log-note-how)
 (defun org-auto-repeat-maybe (done-word)
   "Check if the current headline contains a repeated deadline/schedule.
 If yes, set TODO state back to what it was and change the base date
