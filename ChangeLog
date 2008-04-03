@@ -1,6 +1,12 @@
 2008-04-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* doc/org.texi (Using the property API): Document the API for
+	multi-valued properties.
+
 	* lisp/org.el (org-modules): Add entry for org-bibtex.el.
+	(org-completion-fallback-command): Moved into `org-completion'
+	group.
+	(org-clock-heading-function): Moved to `org-progress' group.
 
 	* lisp/org-bibtex.el (org-create-file-search-in-bibtex): New file,
 	a combination of the BibTeX that used to be in org.el, and the

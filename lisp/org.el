@@ -185,12 +185,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
-;; FIXME: Needs a separate group...
-(defcustom org-completion-fallback-command 'hippie-expand
-  "The expansion command called by \\[org-complete] in normal context.
-Normal means, no org-mode-specific context."
-  :group 'org
-  :type 'function)
 
 (defgroup org-startup nil
   "Options concerning startup of Org-mode."
@@ -1325,7 +1319,7 @@ are matched against file names, and values."
   "Targets for refiling entries with \\[org-refile].
 This is list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
-  or a symbol whose function or value fields will be used to retrieve
+  or a symbol whose function or variable value will be used to retrieve
   a file name or a list of file names.  Nil means, refile to a different
   heading in the current buffer.
 - A specification of how to find candidate refile targets.  This may be
@@ -1339,7 +1333,6 @@ This is list of cons cells.  Each cell contains:
     headlines that are refiling targets.
   - a cons cell (:level . N).  Any headline of level N is considered a target.
   - a cons cell (:maxlevel . N). Any headline with level <= N is a target."
-;; FIXME: what if there are a var and func with same name???
   :group 'org-remember
   :type '(repeat
 	  (cons
@@ -1516,7 +1509,6 @@ the following lines anywhere in the buffer:
  ((and (listp org-log-done) (memq 'done org-log-done))
   (setq org-log-done 'note)))
 
-;; FIXME: document
 (defcustom org-log-note-clock-out nil
   "Non-nil means, recored a note when clocking out of an item.
 This can also be configured on a per-file basis by adding one of
@@ -1624,6 +1616,14 @@ The value should be the state to which the entry should be switched."
 	  (const :tag "Don't force a state" nil)
 	  (string :tag "State")))
 
+(defcustom org-clock-heading-function nil
+  "When non-nil, should be a function to create `org-clock-heading'.
+This is the string shown in the mode line when a clock is running.
+The function is called with point at the beginning of the headline."
+  :group 'org-progress
+  :type 'function)
+
+
 (defgroup org-priorities nil
   "Priorities in Org-mode."
   :tag "Org Priorities"
@@ -1694,7 +1694,7 @@ of minutes to shift."
 	  (integer :tag "when inserting times")
 	  (integer :tag "when modifying times")))
 
-;; Make sure old customizations of this variable don't lead to problems.
+;; Normalize old customizations of this variable.
 (when (integerp org-time-stamp-rounding-minutes)
   (setq org-time-stamp-rounding-minutes
 	(list org-time-stamp-rounding-minutes
@@ -1797,13 +1797,6 @@ When a timestamp is modified and the calendar window is visible, it will be
 moved to the new date."
   :group 'org-time
   :type 'boolean)
-
-(defcustom org-clock-heading-function nil
-  "When non-nil, should be a function to create `org-clock-heading'.
-This is the string shown in the mode line when a clock is running.
-The function is called with point at the beginning of the headline."
-  :group 'org-time ; FIXME: Should we have a separate group????
-  :type 'function)
 
 (defgroup org-tags nil
   "Options concerning tags in Org-mode."
@@ -2283,6 +2276,19 @@ Use customize to modify this, or restart Emacs after changing it."
 	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
+;;; Miscellaneous options
+
+(defgroup org-completion nil
+  "Completion in Org-mode."
+  :tag "Org Completion"
+  :group 'org)
+
+(defcustom org-completion-fallback-command 'hippie-expand
+  "The expansion command called by \\[org-complete] in normal context.
+Normal means, no org-mode-specific context."
+  :group 'org-completion
+  :type 'function)
+
 ;;; The faces
 
 (defgroup org-faces nil
@@ -2634,7 +2640,6 @@ month and 365.24 days for a year)."
 	   (number :tag "Fraction of head-warning time passed")
 	   (sexp :tag "Face"))))
 
-;; FIXME: this is not a good face yet.
 (defface org-agenda-restriction-lock
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light)) (:background "yellow1"))
@@ -2679,7 +2684,6 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (defvar mark-active)
 
 ;; Various packages
-;; FIXME: get the argument lists for the UNKNOWN stuff
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
 (declare-function calendar-forward-day          "cal-move"   (arg))
 (declare-function calendar-goto-date            "cal-move"   (date))
@@ -3266,7 +3270,7 @@ Respect keys that are already there."
 	(push (cons k c) new))))
     (nreverse new)))
 
-;;; Some variables ujsed in various places
+;;; Some variables used in various places
 
 (defvar org-window-configuration nil
   "Used in various places to store a window configuration.")
@@ -4193,12 +4197,6 @@ If KWD is a number, get the corresponding match group."
 			(>= (match-end 0) pos))))
 	  t
 	(eq org-cycle-emulate-tab t))
-;      (if (and (looking-at "[ \n\r\t]")
-;	       (string-match "^[ \t]*$" (buffer-substring
-;					 (point-at-bol) (point))))
-;	  (progn
-;	    (beginning-of-line 1)
-;	    (and (looking-at "[ \t]+") (replace-match ""))))
       (call-interactively (global-key-binding "\t")))
 
      (t (save-excursion
@@ -4633,26 +4631,6 @@ but create the new hedline after the current line."
 	  ;; insert right here
 	  nil)
 	 (t
-;	  ;; in the middle of the line
-;	  (org-show-entry)
-;	  (if (org-get-alist-option org-M-RET-may-split-line 'headline)
-;	      (if (and
-;		   (org-on-heading-p)
-;		   (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \r\n]"))
-;		  ;; protect the tags
-;;		  (let ((tags (match-string 2)) pos)
-;		    (delete-region (match-beginning 1) (match-end 1))
-;		    (setq pos (point-at-bol))
-;		    (newline (if blank 2 1))
-;		    (save-excursion
-;		      (goto-char pos)
-;		      (end-of-line 1)
-;		      (insert " " tags)
-;		      (org-set-tags nil 'align)))
-;		(newline (if blank 2 1)))
-;	    (newline (if blank 2 1))))
-
-
 	  ;; in the middle of the line
 	  (org-show-entry)
 	  (let ((split
@@ -5102,9 +5080,9 @@ If optional TREE is given, use this text instead of the kill ring."
 	(delete-region (point-at-bol) (point)))
     ;; Paste
     (beginning-of-line 1)
-    (org-back-over-empty-lines)   ;; FIXME: correct fix????
+    (org-back-over-empty-lines)
     (setq beg (point))
-    (insert-before-markers txt)   ;; FIXME: correct fix????
+    (insert-before-markers txt)
     (unless (string-match "\n\\'" txt) (insert "\n"))
     (setq end (point))
     (goto-char beg)
@@ -7195,6 +7173,7 @@ With three \\[universal-argument] prefixes, negate the meaning of
     (apply 'completing-read args)))
 
 ;;; Opening/following a link
+
 (defvar org-link-search-failed nil)
 
 (defun org-next-link ()
@@ -7767,7 +7746,7 @@ on the system \"/user@host:\"."
         (t nil)))
 
 
-;;;; Hooks for remember.el, and refiling
+;;;; Refiling
 
 (defun org-get-org-file ()
   "Read a filename, with default directory `org-directory'."
@@ -7789,8 +7768,6 @@ on the system \"/user@host:\"."
 	    (if (string-match (car entry) buffer-file-name)
 		(throw 'exit (cdr entry))))
 	  nil)))))
-
-;;;; Refiling
 
 (defvar org-refile-target-table nil
   "The list of refile targets, created by `org-refile'.")
@@ -7883,9 +7860,8 @@ on the system \"/user@host:\"."
 (defun org-refile (&optional goto default-buffer)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
-`org-refile-targets', which see.  This list is created upon first use, and
-you can update it by calling this command with a double prefix (`C-u C-u').
-FIXME: Can we find a better way of updating?
+`org-refile-targets', which see.  This list is created before each use
+and will therefore always be up-to-date.
 
 At the target location, the entry is filed as a subitem of the target heading.
 Depending on `org-reverse-note-order', the new subitem will either be the
@@ -7894,10 +7870,7 @@ first of the last subitem.
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
 With a double prefix `C-c C-c', go to the location where the last refiling
-operation has put the subtree.
-
-With a double prefix argument, the command can be used to jump to any
-heading in the current buffer."
+operation has put the subtree."
   (interactive "P")
   (let* ((cbuf (current-buffer))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
@@ -8228,15 +8201,6 @@ If the last change removed the TODO tag or switched to DONE, then
 this is nil.")
 
 (defvar org-setting-tags nil) ; dynamically skiped
-
-;; FIXME: better place
-(defun org-property-or-variable-value (var &optional inherit)
-  "Check if there is a property fixing the value of VAR.
-If yes, return this value.  If not, return the current value of the variable."
-  (let ((prop (org-entry-get nil (symbol-name var) inherit)))
-    (if (and prop (stringp prop) (string-match "\\S-" prop))
-	(read prop)
-      (symbol-value var))))
 
 (defun org-parse-local-options (string var)
   "Parse STRING for startup setting relevant for variable VAR."
@@ -8876,7 +8840,7 @@ the current entry.  If not, assume that it can be inserted at point."
   (goto-char org-log-note-marker)
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
-  (if (memq org-log-note-how '(time state)) ; FIXME: time or state????????????
+  (if (memq org-log-note-how '(time state))
       (org-store-log-note)
     (let ((org-inhibit-startup t)) (org-mode))
     (insert (format "# Insert note for %s.
@@ -8939,10 +8903,6 @@ the current entry.  If not, assume that it can be inserted at point."
     (goto-char org-log-note-return-to))
   (move-marker org-log-note-return-to nil)
   (and org-log-post-message (message "%s" org-log-post-message)))
-
-;; FIXME: what else would be useful?
-;; - priority
-;; - date
 
 (defun org-sparse-tree (&optional arg)
   "Create a sparse tree, prompt for the details.
@@ -10021,6 +9981,14 @@ If the property is not present at all, nil is returned."
 		  (org-match-string-no-properties 1)
 		"")))))))
 
+(defun org-property-or-variable-value (var &optional inherit)
+  "Check if there is a property fixing the value of VAR.
+If yes, return this value.  If not, return the current value of the variable."
+  (let ((prop (org-entry-get nil (symbol-name var) inherit)))
+    (if (and prop (stringp prop) (string-match "\\S-" prop))
+	(read prop)
+      (symbol-value var))))
+
 (defun org-entry-delete (pom property)
   "Delete the property PROPERTY from entry at point-or-marker POM."
   (org-with-point-at pom
@@ -10504,7 +10472,6 @@ This is the compiled version of the format.")
        (setq ov (org-columns-new-overlay
 		 beg (setq beg (1+ beg)) string
 		 (list color 'org-column)))
-;;;       (list (get-text-property (point-at-bol) 'face) 'org-column)))
        (org-overlay-put ov 'keymap org-columns-map)
        (org-overlay-put ov 'org-columns-key property)
        (org-overlay-put ov 'org-columns-value (cdr ass))
@@ -10716,7 +10683,7 @@ Where possible, use the standard interface for changing this line."
 	     (nth 3 (assoc key org-columns-current-fmt-compiled)))
 	(org-columns-update key))))
 
-(defun org-edit-headline () ; FIXME: this is not columns specific
+(defun org-edit-headline () ; FIXME: this is not columns specific.  Make interactive?????  Use from agenda????
   "Edit the current headline, the part without TODO keyword, TAGS."
   (org-back-to-heading)
   (when (looking-at org-todo-line-regexp)
@@ -11453,8 +11420,7 @@ at the cursor, it will be modified."
       (org-insert-time-stamp time (or org-time-was-given arg)
 			     nil nil nil (list org-end-time-was-given))))))
 
-;; FIXME: can we use this for something else????
-;; like computing time differences?????
+;; FIXME: can we use this for something else, like computing time differences?
 (defun org-get-compact-tod (s)
   (when (string-match "\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\(-\\(\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)\\)?" s)
     (let* ((t1 (match-string 1 s))
@@ -12453,7 +12419,6 @@ in the timestamp determines what will be changed."
 	       (memq org-ts-what '(day month year)))
 	  (org-recenter-calendar (time-to-days time))))))
 
-;; FIXME: does not yet work for lead times
 (defun org-modify-ts-extra (s pos n dm)
   "Change the different parts of the lead-time and repeat fields in timestamp."
   (let ((idx '(("d" . 0) ("w" . 1) ("m" . 2) ("y" . 3) ("d" . -1) ("y" . 4)))
@@ -15699,6 +15664,7 @@ Show the heading too, if it is currently invisible."
   "Restrict future agenda commands to the location at point in speedbar.
 To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
   (interactive)
+  (require 'org-agenda)
   (let (p m tp np dir txt w)
     (cond
      ((setq p (text-property-any (point-at-bol) (point-at-eol)
@@ -15743,7 +15709,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	       (lambda () (org-show-context 'org-goto)))))
 
 
-;;; Fixes and Hacks
+;;; Fixes and Hacks for problems with other packages
 
 ;; Make flyspell not check words in links, to not mess up our keymap
 (defun org-mode-flyspell-verify ()

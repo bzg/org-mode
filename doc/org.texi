@@ -8673,6 +8673,21 @@ Get all property keys in the current buffer.
 Insert a property drawer at point.
 @end defun
 
+@defun org-entry-add-to-multivalued-property pom property value
+Treat the value of the property PROPERTY as a whitespace-separated list of
+values and make sure that VALUE is in this list.
+@end defun
+
+@defun org-entry-remove-from-multivalued-property pom property value
+Treat the value of the property PROPERTY as a whitespace-separated list of
+values and make sure that VALUE is @emph{not} in this list.
+@end defun
+
+@defun org-entry-member-in-multivalued-property pom property value
+Treat the value of the property PROPERTY as a whitespace-separated list of
+values and check if VALUE is in this list.
+@end defun
+
 @node History and Acknowledgments, Main Index, Extensions and Hacking, Top
 @appendix History and Acknowledgments
 @cindex acknowledgments

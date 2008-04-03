@@ -405,7 +405,7 @@ Org-mode file."
   :group 'org-export)
 
 (defcustom org-export-html-coding-system nil
-  "FIXME"
+  "Coding system for HTML export, defaults to buffer-file-coding-system."
   :group 'org-export-html
   :type 'coding-system)
 

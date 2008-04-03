@@ -2686,7 +2686,7 @@ of what a project is and how to check if it stuck, customize the variable
 MATCH is being ignored."
   (interactive)
   (let* ((org-agenda-skip-function 'org-agenda-skip-subtree-when-regexp-matches)
-	 ;; FIXME: we could have used org-agenda-skip-if here.
+	 ;; We could have used org-agenda-skip-if here.
 	 (org-agenda-overriding-header "List of stuck projects: ")
 	 (matcher (nth 0 org-stuck-projects))
 	 (todo (nth 1 org-stuck-projects))
@@ -2960,7 +2960,6 @@ the documentation of `org-diary'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 ;; FIXME: get rid of the \n at some point  but watch out
 	 (regexp (concat "^\\*+[ \t]+\\("
 			 (if org-select-this-todo-keyword
 			     (if (equal org-select-this-todo-keyword "*")
@@ -3967,7 +3966,6 @@ written as 2-digit years."
   "Switch to daily view for agenda.
 With argument MONTH, switch to that month."
   (interactive "P")
-  ;; FIXME: allow month like 812 to mean 2008 december
   (org-agenda-change-time-span 'month month))
 (defun org-agenda-year-view (&optional year)
   "Switch to daily view for agenda.
@@ -4052,12 +4050,12 @@ so that the date SD will be in that range."
 		  sd))))
     (cons sd nd)))
 
-;; FIXME: does not work if user makes date format that starts with a blank
 (defun org-agenda-next-date-line (&optional arg)
   "Jump to the next line indicating a date in agenda buffer."
   (interactive "p")
   (org-agenda-check-type t 'agenda 'timeline)
   (beginning-of-line 1)
+  ;; This does not work if user makes date format that starts with a blank
   (if (looking-at "^\\S-") (forward-char 1))
   (if (not (re-search-forward "^\\S-" nil t arg))
       (progn
@@ -4088,9 +4086,11 @@ so that the date SD will be in that range."
 
 ;; FIXME this is currently not used.
 (defun org-highlight-until-next-command (beg end &optional buffer)
+  "Move the highlight overlay to BEG/END, remove it before the next command."
   (org-highlight beg end buffer)
   (add-hook 'pre-command-hook 'org-unhighlight-once))
 (defun org-unhighlight-once ()
+  "Remove the highlight from its position, and this function from the hook."
   (remove-hook 'pre-command-hook 'org-unhighlight-once)
   (org-unhighlight))
 
@@ -4521,7 +4521,6 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(setq newhead (org-get-heading)))
       (org-agenda-change-all-lines newhead hdmarker)
       (beginning-of-line 1))))
-
 
 ;; FIXME: should fix the tags property of the agenda line.
 (defun org-agenda-set-tags ()
