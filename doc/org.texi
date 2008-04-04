@@ -5477,6 +5477,14 @@ previously used indirect buffer.
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
 logging was on (variable @code{org-log-done}) are shown in the agenda,
 as are entries that have been clocked on that day.
+@c
+@kindex R
+@item R
+Toggle Clockreport mode.  In clockreport mode, the daily/weekly agenda will
+always show a table with the clocked times for the timespan and file scope
+covered by the current agenda view.  The initial setting for this mode in new
+agenda buffers can be set with the variable
+@code{org-agenda-start-with-follow-mode}.
 
 @tsubheading{Change display}
 @cindex display changing, in agenda

@@ -27,11 +27,12 @@
 ;;
 ;;; Commentary:
 
-;; This file contains macro definitions, defsubst definitions, and
-;; oder stuff needed for compilation and top-level forms in Org-mode.
+;; This file contains macro definitions, defsubst definitions, other
+;; stuff needed for compilation and top-level forms in Org-mode, as well
+;; lots of small functions that are not org-mode specific but simply
+;; generally useful stuff.
 
 ;;; Code:
-
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
@@ -211,6 +212,16 @@ we turn off invisibility temporarily.  Use this in a `let' form."
   (save-excursion
     (goto-char (point-at-bol))
     (looking-at re)))
+
+(defun org-plist-delete (plist property)
+  "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+  (let (p)
+    (while plist
+      (if (not (eq property (car plist)))
+	  (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
 
 (provide 'org-macs)
 

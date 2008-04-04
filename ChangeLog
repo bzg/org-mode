@@ -1,4 +1,18 @@
+2008-04-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-agenda.el (org-agenda-start-with-clockreport-mode): New
+	option.
+
+	* lisp/org-clock.el (org-dblock-write:clocktable): Request the
+	unrestricted list of files.
+	(org-get-clocktable): New function.
+	(org-dblock-write:clocktable): Make sure :tstart and :tend can not
+	only be strings but also integers (an absolute day number) and
+	lists (m d y).
+
 2008-04-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-agenda.el (org-agenda-clocktable-mode): New variable.
 
 	* doc/org.texi (Agenda commands): Document columns view in the
 	agenda.

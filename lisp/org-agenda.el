@@ -486,6 +486,11 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
+(defcustom org-agenda-start-with-clockreport-mode nil
+  "The initial value of clockreport-mode in a newly created agenda window."
+  :group 'org-agenda-startup
+  :type 'boolean)
+
 (defgroup org-agenda-windows nil
   "Options concerning the windows used by the Agenda in Org Mode."
   :tag "Org Agenda Windows"
@@ -922,6 +927,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-follow-mode nil)
+(defvar org-agenda-clockreport-mode nil)
 (defvar org-agenda-show-log nil)
 (defvar org-agenda-redo-command nil)
 (defvar org-agenda-query-string nil)
@@ -956,6 +962,7 @@ The following commands are available:
 			 buffer-substring-filters)))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
+	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
 	  org-agenda-show-log nil))
   (easy-menu-change
    '("Agenda") "Agenda Files"
@@ -1016,6 +1023,7 @@ The following commands are available:
 	     (int-to-string (pop l)) 'digit-argument)))
 
 (org-defkey org-agenda-mode-map "f" 'org-agenda-follow-mode)
+(org-defkey org-agenda-mode-map "R" 'org-agenda-clockreport-mode)
 (org-defkey org-agenda-mode-map "l" 'org-agenda-log-mode)
 (org-defkey org-agenda-mode-map "D" 'org-agenda-toggle-diary)
 (org-defkey org-agenda-mode-map "G" 'org-agenda-toggle-time-grid)
@@ -1140,6 +1148,8 @@ The following commands are available:
      "--"
      ["Show Logbook entries" org-agenda-log-mode
       :style toggle :selected org-agenda-show-log :active (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Show clock report" org-agenda-clockreport-mode
+     :style toggle :selected org-agenda-clockreport-mode :active (org-agenda-check-type nil 'agenda)]
      ["Include Diary" org-agenda-toggle-diary
       :style toggle :selected org-agenda-include-diary :active (org-agenda-check-type nil 'agenda)]
      ["Use Time Grid" org-agenda-toggle-time-grid
@@ -2161,7 +2171,8 @@ given in `org-agenda-start-on-weekday'."
 	 (day-numbers (list start))
 	 (day-cnt 0)
 	 (inhibit-redisplay (not debug-on-error))
-	 s e rtn rtnall file date d start-pos end-pos todayp nd)
+	 s e rtn rtnall file date d start-pos end-pos todayp nd
+	 clocktable-start clocktable-end)
     (setq org-agenda-redo-command
 	  (list 'org-agenda-list (list 'quote include-all) start-day ndays))
     ;; Make the list of days
@@ -2171,6 +2182,8 @@ given in `org-agenda-start-on-weekday'."
       (push (1+ (car day-numbers)) day-numbers)
       (setq ndays (1- ndays)))
     (setq day-numbers (nreverse day-numbers))
+    (setq clocktable-start (car day-numbers)
+	  clocktable-end (1+ (or (org-last day-numbers) 0)))
     (org-prepare-agenda "Day/Week")
     (org-set-local 'org-starting-day (car day-numbers))
     (org-set-local 'org-include-all-loc include-all)
@@ -2254,6 +2267,11 @@ given in `org-agenda-start-on-weekday'."
 			"\n"))
 	    (put-text-property s (1- (point)) 'day d)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt))))
+    (when (and org-agenda-clockreport-mode clocktable-start)
+      (let ((org-agenda-files (org-agenda-files)))
+	;; the above line is to ensure the restricted range!
+	(insert (org-get-clocktable :tstart clocktable-start
+				    :tend clocktable-end :link t))))
     (goto-char (point-min))
     (org-fit-agenda-window)
     (unless (and (pos-visible-in-window-p (point-min))
@@ -4102,6 +4120,16 @@ so that the date SD will be in that range."
   (message "Follow mode is %s"
 	   (if org-agenda-follow-mode "on" "off")))
 
+(defun org-agenda-clockreport-mode ()
+  "Toggle clocktable mode in an agenda buffer."
+  (interactive)
+  (org-agenda-check-type t 'agenda)
+  (setq org-agenda-clockreport-mode (not org-agenda-clockreport-mode))
+  (org-agenda-set-mode-name)
+  (org-agenda-redo)
+  (message "Clocktable mode is %s"
+	   (if org-agenda-clockreport-mode "on" "off")))
+
 (defun org-agenda-log-mode ()
   "Toggle log mode in an agenda buffer."
   (interactive)
@@ -4141,7 +4169,8 @@ so that the date SD will be in that range."
 		(if org-agenda-follow-mode     " Follow" "")
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
-		(if org-agenda-show-log        " Log"    "")))
+		(if org-agenda-show-log        " Log"    "")
+		(if org-agenda-clockreport-mode " Clock"   "")))
   (force-mode-line-update))
 
 (defun org-agenda-post-command-hook ()

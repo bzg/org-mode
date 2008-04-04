@@ -2831,7 +2831,8 @@ org-remember-apply-template org-remember org-remember-handler)))
    '(org-clock-in org-clock-out org-clock-cancel
 		  org-clock-goto org-clock-sum org-clock-display
 		  org-remove-clock-overlays org-clock-report
-		  org-clocktable-shift org-dblock-write:clocktable)))
+		  org-clocktable-shift org-dblock-write:clocktable
+		  org-get-clocktable)))
 
 (defun org-clock-update-time-maybe ()
   "If this is a CLOCK line, update it and return t.
@@ -15119,3 +15120,12 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
 
+(defun org-plist-delete (plist property)
+  "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+  (let (p)
+    (while plist
+      (if (not (eq property (car plist)))
+	  (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
