@@ -468,6 +468,7 @@ you can \"misuse\" it to add arbitrary text to the header."
 <script type=\"text/javascript\" language=\"JavaScript\">
 /* <![CDATA[ */
 %MANAGER-OPTIONS
+org_html_manager.setup();  // activate after the parameterd are set
 /* ]]> */
 </script>"
   "The template for the export style additions when org-info.js is used.
