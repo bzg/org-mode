@@ -404,8 +404,6 @@ fontified, and then returned."
   (setq props (plist-put props :name "clocktable"))
   (unless (plist-member props :maxlevel)
     (setq props (plist-put props :maxlevel 2)))
-  (unless (plist-member props :link)
-    (setq props (plist-put props :link nil)))    
   (unless (plist-member props :scope)
     (setq props (plist-put props :scope 'agenda)))
   (with-temp-buffer

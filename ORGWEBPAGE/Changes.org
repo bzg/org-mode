@@ -59,7 +59,9 @@
     agenda, a clock table will be attached to the agenda, showing
     the clock report for the file scope and time interval of the
     agenda view.  To turn this on permanently, configure the
-    variable =org-agenda-start-with-clockreport-mode=.
+    variable =org-agenda-start-with-clockreport-mode=.  To modify
+    the properties of the table, in particula the =:maxlevel=
+    depth, configure =org-agenda-clockreport-parameter-plist=.
 
 *** Selective tag inheritance
 

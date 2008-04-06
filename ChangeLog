@@ -2,6 +2,7 @@
 
 	* lisp/org-agenda.el (org-agenda-start-with-clockreport-mode): New
 	option.
+	(org-agenda-clockreport-parameter-plist): New option.
 
 	* lisp/org-clock.el (org-dblock-write:clocktable): Request the
 	unrestricted list of files.

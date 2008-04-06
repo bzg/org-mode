@@ -486,11 +486,6 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
-(defcustom org-agenda-start-with-clockreport-mode nil
-  "The initial value of clockreport-mode in a newly created agenda window."
-  :group 'org-agenda-startup
-  :type 'boolean)
-
 (defgroup org-agenda-windows nil
   "Options concerning the windows used by the Agenda in Org Mode."
   :tag "Org Agenda Windows"
@@ -615,6 +610,24 @@ day and will be listed until it is marked done for the number of days
 given here."
   :group 'org-agenda-daily/weekly
   :type 'number)
+
+(defcustom org-agenda-start-with-clockreport-mode nil
+  "The initial value of clockreport-mode in a newly created agenda window."
+  :group 'org-agenda-startup
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
+(defcustom org-agenda-clockreport-parameter-plist '(:link t :maxlevel 2)
+  "Property list with parameters for the clocktable in clockreport mode.
+This is the display mode that shows a clock table in the daily/weekly
+agenda, the properties for this dynamic block can be set here.
+The usual clocktable parameters are allowed here, but you cannot set
+the properties :name, :tstart, :tend, :block, and :scope - these will
+be overwritten to make sure the content accurately reflects the
+current display in the agenda."
+  :group 'org-agenda-daily/weekly
+  :type 'plist)
+
 
 (defgroup org-agenda-time-grid nil
   "Options concerning the time grid in the Org-mode Agenda."
@@ -2268,10 +2281,16 @@ given in `org-agenda-start-on-weekday'."
 	    (put-text-property s (1- (point)) 'day d)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt))))
     (when (and org-agenda-clockreport-mode clocktable-start)
-      (let ((org-agenda-files (org-agenda-files)))
-	;; the above line is to ensure the restricted range!
-	(insert (org-get-clocktable :tstart clocktable-start
-				    :tend clocktable-end :link t))))
+      (let ((org-agenda-files (org-agenda-files))
+	    ;; the above line is to ensure the restricted range!
+	    (p org-agenda-clockreport-parameter-plist)
+	    tbl)
+	(setq p (org-plist-delete p :block))
+	(setq p (plist-put p :tstart clocktable-start))
+	(setq p (plist-put p :tend clocktable-end))
+	(setq p (plist-put p :scope 'agenda))
+	(setq tbl (apply 'org-get-clocktable p))
+	(insert tbl)))
     (goto-char (point-min))
     (org-fit-agenda-window)
     (unless (and (pos-visible-in-window-p (point-min))
