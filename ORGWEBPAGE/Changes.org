@@ -53,6 +53,14 @@
       total time for each file will now also be listed.  This was
       a request from Bernt Hansen.
 
+*** Clockreport in the daily/weekly arenda
+
+    If you turn on clockreport mode with the "R" key in the
+    agenda, a clock table will be attached to the agenda, showing
+    the clock report for the file scope and time interval of the
+    agenda view.  To turn this on permanently, configure the
+    variable =org-agenda-start-with-clockreport-mode=.
+
 *** Selective tag inheritance
 
     Inheritance of tags can now be limited to a subset of all

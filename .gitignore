@@ -42,6 +42,8 @@ tmp
 
 *~
 .DS_Store
+*#
+.#*
 
 #
 # Local variables:

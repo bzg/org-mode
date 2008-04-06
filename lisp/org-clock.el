@@ -395,6 +395,29 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 (add-hook 'org-after-todo-state-change-hook
 	  'org-clock-out-if-current)
 
+;;;###autoload
+(defun org-get-clocktable (&rest props)
+  "Get a formatted clocktable with parameters according to PROPS.
+The table is created in a temporary buffer, fully formatted and
+fontified, and then returned."
+  ;; Set the defaults
+  (setq props (plist-put props :name "clocktable"))
+  (unless (plist-member props :maxlevel)
+    (setq props (plist-put props :maxlevel 2)))
+  (unless (plist-member props :link)
+    (setq props (plist-put props :link nil)))    
+  (unless (plist-member props :scope)
+    (setq props (plist-put props :scope 'agenda)))
+  (with-temp-buffer
+    (org-mode)
+    (org-create-dblock props)
+    (org-update-dblock)
+    (font-lock-fontify-buffer)
+    (forward-line 2)
+    (buffer-substring (point) (progn
+				(re-search-forward "^#\\+END" nil t)
+				(point-at-bol)))))
+
 (defun org-clock-report (&optional arg)
   "Create a table containing a report about clocked time.
 If the cursor is inside an existing clocktable block, then the table
@@ -557,7 +580,7 @@ the currently selected interval size."
   (catch 'exit
     (let* ((hlchars '((1 . "*") (2 . "/")))
 	   (ins (make-marker))
-	   (total-time nil)
+	   (total-time 0)
 	   (scope (plist-get params :scope))
 	   (tostring (plist-get  params :tostring))
 	   (multifile (plist-get  params :multifile))
@@ -577,6 +600,13 @@ the currently selected interval size."
       (when block
 	(setq cc (org-clock-special-range block nil t)
 	      ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
+      (when (integerp ts) (setq ts (calendar-gregorian-from-absolute ts)))
+      (when (integerp te) (setq te (calendar-gregorian-from-absolute te)))
+      (when (and ts (listp ts))
+	(setq ts (format "%4d-%02d-%02d" (nth 2 ts) (car ts) (nth 1 ts))))
+      (when (and te (listp te))
+	(setq te (format "%4d-%02d-%02d" (nth 2 te) (car te) (nth 1 te))))
+      ;; Now the times are strings we can parse.
       (if ts (setq ts (time-to-seconds
 		       (apply 'encode-time (org-parse-time-string ts)))))
       (if te (setq te (time-to-seconds
@@ -604,7 +634,7 @@ the currently selected interval size."
 		  (throw 'exit nil))))
 	  (org-narrow-to-subtree))
 	 ((or (listp scope) (eq scope 'agenda))
-	  (let* ((files (if (listp scope) scope (org-agenda-files)))
+	  (let* ((files (if (listp scope) scope (org-agenda-files t)))
 		 (scope 'agenda)
 		 (p1 (copy-sequence params))
 		 file)
@@ -677,7 +707,7 @@ the currently selected interval size."
 	   (if (eq scope 'agenda) "|" "")
 	   "|"
 	   "*Total time*| *"
-	   (org-minutes-to-hours total-time)
+	   (org-minutes-to-hours (or total-time 0))
 	   "*|\n|-\n")
 	  (setq tbl (delq nil tbl))
 	  (if (and (stringp (car tbl)) (> (length (car tbl)) 1)
