@@ -51,10 +51,10 @@
 		  (entity field &optional type))
 (declare-function elmo-message-field "ext:elmo"
 		  (folder number field &optional type) t)
-(declare-function elmo-msgdb-overview-get-entity "ext:elmo" (&rest unknown) t)
+(declare-function elmo-msgdb-overview-get-entity "ext:elmo" (id msgdb) t)
 ;; Backward compatibility to old version of wl
 (declare-function wl "ext:wl" () t)
-(declare-function wl-summary-buffer-msgdb "ext:wl-folder" (&rest unknown) t)
+(declare-function wl-summary-buffer-msgdb "ext:wl-folder" () t)
 (declare-function wl-folder-get-elmo-folder "ext:wl-folder"
 		  (entity &optional no-cache))
 (declare-function wl-summary-goto-folder-subr "ext:wl-summary"
