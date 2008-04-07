@@ -1,5 +1,7 @@
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-irc.el: Add function declarations.
+
 	* lisp/org-exp.el (org-export-inbuffer-options-extra): New variable.
 	(org-export-options-filters): New hook.
 	(org-infile-export-plist): Find also the settings keywords in

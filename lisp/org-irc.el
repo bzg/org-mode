@@ -52,8 +52,16 @@
 ;;; Code:
 
 (require 'org)
-(require 'erc)
-(require 'erc-log)
+
+;; Declare the function fomr ERC that we use.
+(declare-function erc-current-logfile "erc-log" (&optional buffer))
+(declare-function erc-prompt "erc" ())
+(declare-function erc-default-target "erc" ())
+(declare-function erc-channel-p "erc" (channel))
+(declare-function erc-buffer-filter "erc" (predicate &optional proc))
+(declare-function erc-server-buffer "erc" ())
+(declare-function erc-get-server-nickname-list "erc" ())
+(declare-function erc-cmd-JOIN "erc" (channel &optional key))
 
 (defvar org-irc-client 'erc
   "The IRC client to act on.")
@@ -66,8 +74,7 @@
 
 ;; Generic functions/config (extend these for other clients)
 
-(add-to-list 'org-store-link-functions
-             'org-irc-store-link)
+(add-to-list 'org-store-link-functions 'org-irc-store-link)
 
 (org-add-link-type "irc" 'org-irc-visit nil)
 
@@ -122,6 +129,7 @@ If the user is on the ERC-prompt then search backward for the
 first non-blank line, otherwise return the current line.  The
 result is a cons of the filename and search string."
   (erc-save-buffer-in-logs)
+  (require 'erc-log)
   (with-current-buffer (find-file-noselect (erc-current-logfile))
     (goto-char (point-max))
     (list
@@ -142,6 +150,7 @@ result is a cons of the filename and search string."
 Depending on the variable `org-irc-link-to-logs' store either a
 link to the log file for the current session or an irc: link to
 the session itself."
+  (require 'erc-log)
   (if org-irc-link-to-logs
       (let* ((erc-line (buffer-substring-no-properties
                         (point-at-bol) (point-at-eol)))
@@ -200,6 +209,8 @@ default."
 
 (defun org-irc-visit-erc (link)
   "Visit an ERC buffer based on criteria found in LINK."
+  (require 'erc)
+  (require 'erc-log)
   (let* ((server (car (car link)))
          (port (or (string-to-number (cadr (pop link))) erc-default-port))
          (server-buffer)
