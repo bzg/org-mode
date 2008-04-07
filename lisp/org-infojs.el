@@ -71,6 +71,7 @@ line in the buffer.  See also the variable `org-infojs-options'."
     (mouse MOUSE_HINT "underline")
     (runs MAX_RUNS "5")
     (buttons VIEW_BUTTONS "0")
+    (ltoc LOCAL_TOC "1")
     (up LINK_UP :link-up)
     (home LINK_HOME :link-home))
   "JavaScript options, long form for script, default values.")
@@ -147,6 +148,12 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
 		 (plist-put
 		  exp-plist :style
 		  (concat (or (plist-get exp-plist :style) "") "\n" s)))))
+    ;; This script absolutely needs the table of contents, to we change that
+    ;; setting
+    (if (not (plist-get exp-plist :table-of-contents))
+	(setq exp-plist (plist-put exp-plist :table-of-contents t)))
+    
+    ;; Return the modified property list
     exp-plist)))
 
 (provide 'org-infojs)
