@@ -2713,27 +2713,27 @@ outside the table.")
 (eval-and-compile
   (org-autoload "org-table"
 		'(org-table-align org-table-begin org-table-blank-field
-org-table-convert org-table-convert-region org-table-copy-down
-org-table-copy-region org-table-create
-org-table-create-or-convert-from-region
-org-table-create-with-table.el org-table-current-dline
-org-table-cut-region org-table-delete-column org-table-edit-field
-org-table-edit-formulas org-table-end org-table-eval-formula
-org-table-export org-table-field-info
-org-table-get-stored-formulas org-table-goto-column
-org-table-hline-and-move org-table-import org-table-insert-column
-org-table-insert-hline org-table-insert-row org-table-iterate
-org-table-justify-field-maybe org-table-kill-row
-org-table-maybe-eval-formula org-table-maybe-recalculate-line
-org-table-move-column org-table-move-column-left
-org-table-move-column-right org-table-move-row
-org-table-move-row-down org-table-move-row-up
-org-table-next-field org-table-next-row org-table-paste-rectangle
-org-table-previous-field org-table-recalculate
-org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
-org-table-toggle-coordinate-overlays
-org-table-toggle-formula-debugger org-table-wrap-region
-orgtbl-mode turn-on-orgtbl)))
+   org-table-convert org-table-convert-region org-table-copy-down
+   org-table-copy-region org-table-create
+   org-table-create-or-convert-from-region
+   org-table-create-with-table.el org-table-current-dline
+   org-table-cut-region org-table-delete-column org-table-edit-field
+   org-table-edit-formulas org-table-end org-table-eval-formula
+   org-table-export org-table-field-info
+   org-table-get-stored-formulas org-table-goto-column
+   org-table-hline-and-move org-table-import org-table-insert-column
+   org-table-insert-hline org-table-insert-row org-table-iterate
+   org-table-justify-field-maybe org-table-kill-row
+   org-table-maybe-eval-formula org-table-maybe-recalculate-line
+   org-table-move-column org-table-move-column-left
+   org-table-move-column-right org-table-move-row
+   org-table-move-row-down org-table-move-row-up
+   org-table-next-field org-table-next-row org-table-paste-rectangle
+   org-table-previous-field org-table-recalculate
+   org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
+   org-table-toggle-coordinate-overlays
+   org-table-toggle-formula-debugger org-table-wrap-region
+   orgtbl-mode turn-on-orgtbl)))
 
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
@@ -2810,19 +2810,27 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (eval-and-compile
   (org-autoload "org-exp"
 		'(org-export org-export-as-ascii org-export-visible
-org-insert-export-options-template org-export-as-html-and-open
-org-export-as-html-batch org-export-as-html-to-buffer
-org-replace-region-by-html org-export-region-as-html
-org-export-as-html org-export-icalendar-this-file
-org-export-icalendar-all-agenda-files
-org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
+   org-insert-export-options-template org-export-as-html-and-open
+   org-export-as-html-batch org-export-as-html-to-buffer
+   org-replace-region-by-html org-export-region-as-html
+   org-export-as-html org-export-icalendar-this-file
+   org-export-icalendar-all-agenda-files
+   org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
+
+;; Declare and autoload functions from org-exp.el
+
+(eval-and-compile
+  (org-autoload "org-exp"
+		'(org-agenda org-agenda-list org-search-view
+   org-todo-list org-tags-view org-agenda-list-stuck-projects
+   org-diary org-agenda-to-appt)))
 
 ;; Autoload org-remember
 
 (eval-and-compile
   (org-autoload "org-remember"
 		'(org-remember-insinuate org-remember-annotation
-org-remember-apply-template org-remember org-remember-handler)))
+   org-remember-apply-template org-remember org-remember-handler)))
 
 ;; Autoload org-clock.el
 
@@ -11596,7 +11604,9 @@ user."
 		    (setq def (apply 'encode-time defdecode)
 			  defdecode (decode-time def)))))
 	 (calendar-move-hook nil)
+	 (calendar-view-diary-initially-flag nil)
 	 (view-diary-entries-initially nil)
+	 (calendar-view-holidays-initially-flag nil)
 	 (view-calendar-holidays-initially nil)
 	 (timestr (format-time-string
 		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") def))
@@ -12562,7 +12572,9 @@ A prefix ARG can be used to force the current date."
   (interactive "P")
   (let ((tsr org-ts-regexp) diff
 	(calendar-move-hook nil)
+	(calendar-view-holidays-initially-flag nil)
 	(view-calendar-holidays-initially nil)
+	(calendar-view-diary-initially-flag nil)
 	(view-diary-entries-initially nil))
     (if (or (org-at-timestamp-p)
 	    (save-excursion
