@@ -459,11 +459,11 @@ Emacs load path.  To do this, add the following line to @file{.emacs}:
 @end example
 
 @noindent
-If you plan to use code from the @file{CONTRIB} subdirectory, do a similar
+If you plan to use code from the @file{contrib} subdirectory, do a similar
 step for this directory:
 
 @example
-(setq load-path (cons "~/path/to/orgdir/CONTRIB/lisp" load-path))
+(setq load-path (cons "~/path/to/orgdir/contrib/lisp" load-path))
 @end example
 
 @b{XEmacs users now need to install the file @file{noutline.el} from
