@@ -75,6 +75,7 @@ LISPF      = 	org.el			\
 		org-bibtex.el		\
 		org-gnus.el		\
 		org-info.el		\
+		org-infojs.el		\
 		org-irc.el		\
 		org-mac-message.el	\
 		org-mhe.el		\

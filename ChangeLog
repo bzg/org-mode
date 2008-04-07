@@ -1,4 +1,16 @@
+2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-export-inbuffer-options-extra): New variable.
+	(org-export-options-filters): New hook.
+	(org-infile-export-plist): Find also the settings keywords in
+	`org-export-inbuffer-options-extra'.
+
+	* lisp/org-infojs.el: New file.
+
 2008-04-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-infile-export-plist): Allow multiple
+	#+OPTIONS lines and multiple #+INFOJS_OPT lines.
 
 	* lisp/org-agenda.el (org-agenda-start-with-clockreport-mode): New
 	option.

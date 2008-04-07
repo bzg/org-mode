@@ -9,6 +9,32 @@
 
 ** Details
 
+*** Support for Sebastian Rose's Javasript org-info.js.
+    This fascinating program allows and Org file (exported to
+    HTML) to be viewed different ways.  There is an Info-like
+    interface where you can jump through the sections of the
+    document with the `n' and `p' keys (and others).  And there
+    is a folding interface where you can fold the document much
+    like you can fold it in org-mode in Emacs.
+
+    To set this up, make sure the script is available in the same
+    location as your HTML file.  Make sure that `org-infojs' is
+    loaded in `org-modules'. Then add a line
+
+    : #+INFOJS_OPT: view:info
+
+    to the buffer, that is all.  The available views are:
+
+    - =info=: like the Info program
+    - =overview=: Folding interface, only top-level headings seen
+      at startup.
+    - =content=: Folding interface, all headlines but no text
+      visible at startup.
+    - =showall=: Entire file visible at startup.
+
+    For details see the documentation provided by Sebastian Rose
+    together with org-info.js.
+
 *** The Org distribution has a new structure
 
     In the distribution files, the lisp files are now located in
