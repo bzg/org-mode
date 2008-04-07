@@ -117,7 +117,7 @@ from there.
 
     - [[http://members.optusnet.com.au/charles57/Creative/][Charles Cave]] has written an [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][article/tutorial]] about the basic
       elements of GTD and how he implements them in Org-mode.  There
-      is also a [[http://129.199.80.1/~guerry/org-gtd.html][french translation]] of this document.
+      is also a [[http://www.legito.net/worg/org-tutorials/orgtutorial_dto-fr.php][french translation]] of this document.
 
     - There have been several threads on emacs-orgmode@gnu.org related
       to GTD, the most important ones are:
