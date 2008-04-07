@@ -175,7 +175,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
 	(const :tag "C  id:                Global id's for identifying entries" org-id)
 	(const :tag "C  interactive-query: Interactive modification of tags query" org-interactive-query)
-	(const :tag "C  iswitchb:          Use iswitchb to select Org buffer" org-iswitchb)
 	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
 	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
 	(const :tag "C  mew:               Support for links to messages in Mew" org-mew)
@@ -12598,6 +12597,60 @@ If there is already a time stamp at the cursor position, update it."
 
 ;;;; Agenda files
 
+;;;###autoload
+(defun org-iswitchb (&optional arg)
+  "Use `iswitchb-read-buffer' to prompt for an Org buffer to switch to.
+With a prefix argument, restrict available to files.
+With two prefix arguments, restrict available buffers to agenda files.
+
+Due to some yet unresolved reason, global function
+`iswitchb-mode' needs to be active for this function to work."
+  (interactive "P")
+  (eval-when-compile
+    (require 'iswitchb))
+  (let ((enabled iswitchb-mode) blist)
+    (or enabled (iswitchb-mode 1))
+    (setq blist (cond ((equal arg '(4)) (org-buffer-list 'files))
+		      ((equal arg '(16)) (org-buffer-list 'agenda))
+		      (t (org-buffer-list))))
+   (unwind-protect
+       (let ((iswitchb-make-buflist-hook
+	      (lambda ()
+		(setq iswitchb-temp-buflist
+		      (mapcar 'buffer-name blist)))))
+	 (switch-to-buffer
+	  (iswitchb-read-buffer
+	   "Switch-to: " nil t))
+	 (or enabled (iswitchb-mode -1))))))
+
+(defun org-buffer-list (&optional predicate tmp)
+  "Return a list of Org buffers.
+PREDICATE can be either 'export, 'files or 'agenda.
+
+'export restrict the list to Export buffers.
+'files  restrict the list to buffers visiting Org files.
+'agenda restrict the list to buffers visiting agenda files.
+
+If TMP is non-nil, don't include temporary buffers."
+  (let (filter blist)
+    (setq filter 
+	  (cond ((eq predicate 'files) "\.org$")
+		((eq predicate 'export) "\*Org .*Export")
+		(t "\*Org \\|\.org$")))
+    (setq blist
+	  (mapcar 
+	   (lambda(b)
+	     (let ((bname (buffer-name b))
+		   (bfile (buffer-file-name b)))
+	       (if (and (string-match filter bname)
+			(if (eq predicate 'agenda)
+			    (member bfile
+				    (mapcar (lambda(f) (file-truename f))
+					    org-agenda-files)) t)
+			(if tmp (not (string-match "tmp" bname)) t)) b)))
+	   (buffer-list)))
+    (delete nil blist)))
+
 (defun org-agenda-files (&optional unrestricted)
   "Get the list of agenda files.
 Optional UNRESTRICTED means return the full list even if a restriction
@@ -13840,7 +13893,7 @@ See the individual commands for more information."
 ;; Define the Org-mode menus
 (easy-menu-define org-tbl-menu org-mode-map "Tbl menu"
   '("Tbl"
-    ["Align" org-ctrl-c-ctrl-c (org-at-table-p)]
+    ["Align" org-ctrl-c-ctrl-c :active (org-at-table-p)]
     ["Next Field" org-cycle (org-at-table-p)]
     ["Previous Field" org-shifttab (org-at-table-p)]
     ["Next Row" org-return (org-at-table-p)]
@@ -13900,13 +13953,19 @@ See the individual commands for more information."
 (easy-menu-define org-org-menu org-mode-map "Org menu"
   '("Org"
     ("Show/Hide"
-     ["Cycle Visibility" org-cycle (or (bobp) (outline-on-heading-p))]
-     ["Cycle Global Visibility" org-shifttab (not (org-at-table-p))]
-     ["Sparse Tree" org-occur t]
-     ["Reveal Context" org-reveal t]
-     ["Show All" show-all t]
+     ["Cycle Visibility" org-cycle :active (or (bobp) (outline-on-heading-p))
+      :help "Cycle subtree visibility: folded->children->all->folded"]
+     ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))
+      :help "Cycle global visibility: overview->content->all"]
+     ["Sparse Tree..." org-sparse-tree
+      :help "Create sparse trees using different search criteria"]
+     ["Reveal Context" org-reveal :active t
+      :help "Show hidden context around point, including the outline hierarchy"]
+     ["Show All" show-all :active t
+      :help "Show all text in the buffer, including drawers"]
      "--"
-     ["Subtree to indirect buffer" org-tree-to-indirect-buffer t])
+     ["Subtree to indirect buffer" org-tree-to-indirect-buffer :active t
+      :help "Open the subtree at point in a separate window, using an indirect buffer"])
     "--"
     ["New Heading" org-insert-heading t]
     ("Navigate Headings"
@@ -14023,16 +14082,18 @@ See the individual commands for more information."
      ["Insert Link" org-insert-link t]
      ["Follow Link" org-open-at-point t]
      "--"
-     ["Next link" org-next-link t]
+     ["Next link" org-next-link :help "Move forward to next link in the buffer"]
      ["Previous link" org-previous-link t]
      "--"
      ["Descriptive Links"
       (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio :selected (member '(org-link) buffer-invisibility-spec)]
+      :style radio :help "Hide link part of links, only show the description"
+      :selected (member '(org-link) buffer-invisibility-spec)]
      ["Literal Links"
       (progn
 	(org-remove-from-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio :selected (not (member '(org-link) buffer-invisibility-spec))])
+      :style radio :help "Show full links without hiding anything"
+      :selected (not (member '(org-link) buffer-invisibility-spec))])
     "--"
     ["Export/Publish..." org-export t]
     ("LaTeX"

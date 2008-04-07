@@ -1,3 +1,8 @@
+2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-iswitchb.el: File removed, because the functionality is
+	now in org.el, in the core.
+
 2008-03-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-depend.el: Add `provide' for the module system.

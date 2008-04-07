@@ -1,5 +1,8 @@
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-iswitchb): New command.
+	(org-buffer-list): New function.
+
 	* lisp/org-irc.el: Add function declarations.
 
 	* lisp/org-exp.el (org-export-inbuffer-options-extra): New variable.
