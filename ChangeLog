@@ -1,5 +1,7 @@
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-mew.el: File added, moved here from contrib/lisp.
+
 	* lisp/org.el (org-iswitchb): New command.
 	(org-buffer-list): New function.
 

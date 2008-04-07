@@ -139,7 +139,7 @@ With prefix arg HERE, insert it at point."
   (when (featurep 'org)
     (org-load-modules-maybe 'force)))
 
-(defcustom org-modules '(org-bbdb org-bibtex org-gnus org-info org-infojs org-irc org-mhe org-rmail org-vm org-wl)
+(defcustom org-modules '(org-bbdb org-bibtex org-gnus org-info org-infojs org-irc org-mew org-mhe org-rmail org-vm org-wl)
   "Modules that should always be loaded together with org.el.
 If a description starts with <C>, the file is not part of emacs
 and loading it will require that you have downloaded and properly installed
@@ -162,6 +162,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   infojs:            Set up Sebastian Rose's JavaScript org-info.js" org-infojs)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
 	(const :tag "   mac-message:       Links to messages in Apple Mail" org-mac-message)
+	(const :tag "   mew                Links to Mew folders/messages" org-mew)
 	(const :tag "   mhe:               Links to MHE folders/messages" org-mhe)
 	(const :tag "   rmail:             Links to RMAIL folders/messages" org-rmail)
 	(const :tag "   vm:                Links to VM folders/messages" org-vm)
@@ -2657,6 +2658,9 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
 (declare-function cdlatex-tab "ext:cdlatex" ())
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
 (defvar font-lock-unfontify-region-function)
+(declare-function iswitchb-mode "iswitchb" (&optional arg)) 
+(declare-function iswitchb-read-buffer (prompt &optional default require-match start matches-set))
+(defvar iswitchb-temp-buflist)
 (declare-function org-gnus-follow-link "org-gnus" (&optional group article))
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-format-agenda-item "org-agenda"
@@ -12606,8 +12610,7 @@ With two prefix arguments, restrict available buffers to agenda files.
 Due to some yet unresolved reason, global function
 `iswitchb-mode' needs to be active for this function to work."
   (interactive "P")
-  (eval-when-compile
-    (require 'iswitchb))
+  (require 'iswitchb)
   (let ((enabled iswitchb-mode) blist)
     (or enabled (iswitchb-mode 1))
     (setq blist (cond ((equal arg '(4)) (org-buffer-list 'files))
@@ -14177,6 +14180,16 @@ With optional NODE, go directly to that node."
 
 ;;; Generally useful functions
 
+(defun org-plist-delete (plist property)
+  "Delete PROPERTY from PLIST.
+This is in contrast to merely setting it to 0."
+  (let (p)
+    (while plist
+      (if (not (eq property (car plist)))
+	  (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
+
 (defun org-force-self-insert (N)
   "Needed to enforce self-insert under remapping."
   (interactive "p")
@@ -15183,12 +15196,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
 
-(defun org-plist-delete (plist property)
-  "Delete PROPERTY from PLIST.
-This is in contrast to merely setting it to 0."
-  (let (p)
-    (while plist
-      (if (not (eq property (car plist)))
-	  (setq p (plist-put p (car plist) (nth 1 plist))))
-      (setq plist (cddr plist)))
-    p))
