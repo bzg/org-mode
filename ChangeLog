@@ -1,3 +1,14 @@
+2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-agenda.el (org-agenda-archive-to-attic-sibling): New
+	command.
+
+	* doc/org.texi (Moving subtrees): Document archiving to the attic
+	sibling.
+
+	* lisp/org.el (org-attic-heading): New option.
+	(org-archive-to-attic-sibling): New function.
+
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-mew.el: File added, moved here from contrib/lisp.

@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.00pre-3
+;; Version: 6.00pre-4
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -92,7 +92,7 @@
 
 ;;; Version
 
-(defconst org-version "6.00pre-3"
+(defconst org-version "6.00pre-4"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -753,6 +753,13 @@ get the proper fontification."
   :group 'org-keywords
   :type 'string)
 
+(defcustom org-attic-heading "Attic"
+  "Name of the local attic sibling that is used to archive entries locally.
+Locally means: in the tree, under a sibling.
+See `org-archive-to-attic-sibling' for more information."
+  :group 'org-archive
+  :type 'string)
+
 (defcustom org-agenda-skip-archived-trees t
   "Non-nil means, the agenda will skip any items located in archived trees.
 An archived tree is a tree marked with the tag ARCHIVE."
@@ -779,7 +786,9 @@ collapsed state."
 
 (defcustom org-archive-location "%s_archive::"
   "The location where subtrees should be archived.
-This string consists of two parts, separated by a double-colon.
+
+Otherwise, the value of this variable is a string, consisting of two
+parts, separated by a double-colon.
 
 The first part is a file name - when omitted, archiving happens in the same
 file.  %s will be replaced by the current file name (without directory part).
@@ -809,7 +818,11 @@ Here are a few examples:
 You may set this option on a per-file basis by adding to the buffer a
 line like
 
-#+ARCHIVE: basement::** Finished Tasks"
+#+ARCHIVE: basement::** Finished Tasks
+
+You may also define it locally for a subtree by setting an ARCHIVE property
+in the entry.  If such a property is found in an entry, or anywhere up
+the hierarchy, it will be used."
   :group 'org-archive
   :type 'string)
 
@@ -6380,7 +6393,7 @@ this heading."
       (if (string-match "\\(.*\\)::\\(.*\\)" org-archive-location)
 	  (progn
 	    (setq afile (format (match-string 1 org-archive-location)
-			       (file-name-nondirectory buffer-file-name))
+				(file-name-nondirectory buffer-file-name))
 		  heading (match-string 2 org-archive-location)))
 	(error "Invalid `org-archive-location'"))
       (if (> (length afile) 0)
@@ -6400,7 +6413,8 @@ this heading."
 	(setq category (org-get-category)
 	      todo (and (looking-at org-todo-line-regexp)
 			(match-string 2))
-	      priority (org-get-priority (if (match-end 3) (match-string 3) ""))
+	      priority (org-get-priority
+			(if (match-end 3) (match-string 3) ""))
 	      ltags (org-get-tags)
 	      itags (org-delete-all ltags (org-get-tags-at)))
 	(setq ltags (mapconcat 'identity ltags " ")
@@ -6455,7 +6469,7 @@ this heading."
 	    (goto-char (point-max)) (insert "\n"))
 	  ;; Paste
 	  (org-paste-subtree (org-get-valid-level level 1))
-
+	  
 	  ;; Mark the entry as done
 	  (when (and org-archive-mark-done
 		     (looking-at org-todo-line-regexp)
@@ -6465,7 +6479,7 @@ this heading."
 	      (org-todo
 	       (car (or (member org-archive-mark-done org-done-keywords)
 			org-done-keywords)))))
-
+	  
 	  ;; Add the context info
 	  (when org-archive-save-context-info
 	    (let ((l org-archive-save-context-info) e n v)
@@ -6474,7 +6488,7 @@ this heading."
 			   (stringp v) (string-match "\\S-" v))
 		  (setq n (concat "ARCHIVE_" (upcase (symbol-name e))))
 		  (org-entry-put (point) n v)))))
-
+	  
 	  ;; Save and kill the buffer, if it is not the same buffer.
 	  (if (not (eq this-buffer buffer))
 	      (progn (save-buffer) (kill-buffer buffer)))))
@@ -6486,6 +6500,55 @@ this heading."
 	       (if (eq this-buffer buffer)
 		   (concat "under heading: " heading)
 		 (concat "in file: " (abbreviate-file-name afile)))))))
+
+(defun org-archive-to-attic-sibling ()
+  "Archive the current heading by moving it under the attic sibling.
+The attic sibling is a sibling of the heading with the heading name
+`org-attic-heading and an `org-archive-tag' tag.  If this sibling does
+not exist, it will be created at the end of the subtree."
+  (interactive)
+  (save-restriction
+    (widen)
+    (let (b e pos leader level)
+      (org-back-to-heading t)
+      (looking-at outline-regexp)
+      (setq leader (match-string 0)
+	    level (funcall outline-level))
+      (setq pos (point))
+      (condition-case nil
+	  (outline-up-heading 1 t)
+	(error (goto-char (point-min))))
+      (setq b (point))
+      (condition-case nil
+	  (org-end-of-subtree t t)
+	(error (goto-char (point-max))))
+      (setq e (point))
+      (goto-char b)
+      (unless (re-search-forward
+	       (concat "^" (regexp-quote leader)
+		       "[ \t]*"
+		       org-attic-heading
+		       "[ \t]*:"
+		       org-archive-tag ":") e t)
+	(goto-char e)
+	(or (bolp) (newline))
+	(insert leader org-attic-heading "\n")
+	(beginning-of-line 0)
+	(org-toggle-tag org-archive-tag 'on))
+      (beginning-of-line 1)
+      (org-end-of-subtree t t)
+      (save-excursion
+	(goto-char pos)
+	(org-cut-subtree))
+      (org-paste-subtree (org-get-valid-level level 1))
+      (org-set-property
+       "ARCHIVE_TIME" 
+       (format-time-string
+	(substring (cdr org-time-stamp-formats) 1 -1)
+	(current-time)))
+      (outline-up-heading 1 t)
+      (hide-subtree)
+      (goto-char pos))))
 
 (defun org-get-category (&optional pos)
   "Get the category applying to position POS."
@@ -13251,6 +13314,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
+(org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
+(org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-attic-sibling)
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
 (org-defkey org-mode-map "\C-c\C-j" 'org-goto)
 (org-defkey org-mode-map "\C-c\C-t" 'org-todo)

@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.00pre-3
+@set VERSION 6.00pre-4
 @set DATE April 2008
 
 @dircategory Emacs
@@ -969,13 +969,13 @@ is.  Configure the details using the variable
 The following commands help managing the ARCHIVE tag:
 
 @table @kbd
-@kindex C-c C-x C-a
-@item C-c C-x C-a
+@kindex C-c C-x a
+@item C-c C-x a
 Toggle the ARCHIVE tag for the current headline.  When the tag is set,
 the headline changes to a shadowed face, and the subtree below it is
 hidden.
-@kindex C-u C-c C-x C-a
-@item C-u C-c C-x C-a
+@kindex C-u C-c C-x a
+@item C-u C-c C-x a
 Check if any direct children of the current headline should be archived.
 To do this, each subtree is checked for open TODO entries.  If none are
 found, the command offers to set the ARCHIVE tag for the child.  If the
@@ -990,11 +990,18 @@ Cycle a tree even if it is tagged with ARCHIVE.
 @subsection Moving subtrees
 @cindex external archiving
 
-Once an entire project is finished, you may want to move it to a
-different location, either in the current file, or even in a different
-file, the archive file.
+Once an entire project is finished, you may want to move it to a different
+location.  Org can move it to an @emph{Attic Sibling} in the same tree, to a
+different tree in the current file, or to a different file, the archive file.
 
 @table @kbd
+@kindex C-c C-x A
+@item C-c C-x A
+Move the curent entry to the @emph{Attic Sibling}.  This is a sibling of the
+entry with the heading @samp{Attic} and the tag @samp{ARCHIVE}
+(@pxref{ARCHIVE tag}).  The entry becomes a child of that sibling and in this
+way retains a lot of its original context, including inherited tags and
+approximate position in the outline.
 @kindex C-c C-x C-s
 @item C-c C-x C-s
 Archive the subtree starting at the cursor position to the location
@@ -5599,9 +5606,20 @@ to it in the original Org file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
 variable @code{org-agenda-confirm-kill}.
 @c
+@kindex a
+@item a
+Toggle the ARCHIVE tag for the current headline.
+@c
+@kindex A
+@item A
+Move the subtree correspoding to the current entry to its @emph{Attic
+Sibling}.
+@c
 @kindex $
 @item $
-Archive the subtree corresponding to the current headline.
+Archive the subtree corresponding to the current headline.  This means the
+entry will be moved to the configured archive locatin, most likely a
+different file.
 @c
 @kindex T
 @item T
@@ -5612,10 +5630,6 @@ inheritance, this may be more than the tags listed in the line itself.
 @item :
 Set tags for the current headline.  If there is an active region in the
 agenda, change a tag for all headings in the region.
-@c
-@kindex a
-@item a
-Toggle the ARCHIVE tag for the current headline.
 @c
 @kindex ,
 @item ,
@@ -8841,6 +8855,8 @@ other things.
 @item
 Linking to VM/BBDB/Gnus was inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
+@item
+@i{Ilya Shlyakhter} proposed the Attic Sibling.
 @item
 @i{Daniel Sinder} came up with the idea of internal archiving by locking
 subtrees.

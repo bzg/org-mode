@@ -9,6 +9,19 @@
 
 ** Details
 
+*** New archiving mechanism: The Attic Sibling
+
+    There is a new method to archive entries in the current file:
+    By moving it to a sibling called the Attic Sibling.  That
+    sibling has the heading "Attic" and also carries the ARCHIVE
+    tag.  It seems to me that this is a great way to do archiving
+    inside a project, to get parts of the project out of the way
+    and to wait with archiving the entire project until it is
+    truly done.  The key binding for the is "C-c C-x A", and
+    from the agenda buffer you can simply use "A".
+
+    Thanks to Ilya Shlyakhter for this brilliant idea.
+
 *** Support for Sebastian Rose's Javasript org-info.js.
     This fascinating program allows and Org file (exported to
     HTML) to be viewed different ways.  There is an Info-like

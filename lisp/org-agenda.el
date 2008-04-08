@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.00pre-3
+;; Version: 6.00pre-4
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -1003,6 +1003,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
+(org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-attic-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (org-defkey org-agenda-mode-map " "        'org-agenda-show)
 (org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
@@ -1107,7 +1108,10 @@ The following commands are available:
     ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
     "--"
     ["Cycle TODO" org-agenda-todo t]
-    ["Archive subtree" org-agenda-archive t]
+    ("Archive"
+     ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
+     ["Move to attic sibling" org-agenda-archive-to-attic-sibling t]
+     ["Archive subtree" org-agenda-archive t])
     ["Delete subtree" org-agenda-kill t]
     ["Add note" org-agenda-add-note t]
     "--"
@@ -4274,7 +4278,7 @@ Point is in the buffer where the item originated.")
      (message "Agenda item and source killed"))))
 
 (defun org-agenda-archive ()
-  "Kill the entry or subtree belonging to the current agenda entry."
+  "Archive the entry or subtree belonging to the current agenda entry."
   (interactive)
   (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
   (let* ((marker (or (get-text-property (point) 'org-marker)
@@ -4289,6 +4293,24 @@ Point is in the buffer where the item originated.")
 	      (org-remove-subtree-entries-from-agenda)
 	      (org-back-to-heading t)
 	      (org-archive-subtree))
+	  (error "Archiving works only in Org-mode files"))))))
+
+(defun org-agenda-archive-to-attic-sibling ()
+  "Move the entry to the attic sibling."
+  (interactive)
+  (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
+  (let* ((marker (or (get-text-property (point) 'org-marker)
+		     (org-agenda-error)))
+	 (buffer (marker-buffer marker))
+	 (pos (marker-position marker)))
+    (org-with-remote-undo buffer
+      (with-current-buffer buffer
+	(if (org-mode-p)
+	    (save-excursion
+	      (goto-char pos)
+	      (org-remove-subtree-entries-from-agenda)
+	      (org-back-to-heading t)
+	      (org-archive-to-attic-sibling))
 	  (error "Archiving works only in Org-mode files"))))))
 
 (defun org-remove-subtree-entries-from-agenda (&optional buf beg end)
