@@ -2563,6 +2563,28 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
   "Face used in agenda for captions and dates."
   :group 'org-faces)
 
+(defface org-agenda-date
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+      (t (:bold t))))
+  "Face used in agenda for captions and dates."
+  :group 'org-faces)
+
+(defface org-agenda-date-weekend
+  (org-compatible-face nil
+    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1" :weight bold))
+      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
+      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
+      (t (:bold t))))
+  "Face used in agenda for captions and dates."
+  :group 'org-faces)
+
 (defface org-scheduled-today
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light)) (:foreground "DarkGreen"))

@@ -1,7 +1,12 @@
 2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
 
-	* lisp/org-agenda.el (org-agenda-archive-to-attic-sibling): New
-	command.
+	* lisp/org-agenda.el (org-agenda-weekend-days): New variable.
+
+	* lisp/org.el (org-agenda-date, org-agenda-date-weekend): New faces.
+
+	* lisp/org-agenda.el (org-agenda-list, org-timeline): Use the
+	proper faces for dates in the agenda and timeline buffers.
+	(org-agenda-archive-to-attic-sibling): New command.
 
 	* doc/org.texi (Moving subtrees): Document archiving to the attic
 	sibling.

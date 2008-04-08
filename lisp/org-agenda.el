@@ -584,6 +584,20 @@ This function makes sure that dates are aligned for easy reading."
     (format "%-10s %2d %s %4d%s"
 	    dayname day monthname year weekstring)))
 
+(defcustom org-agenda-weekend-days '(6 0)
+  "Which days are weekend?
+These days get the special face `org-agenda-date-weekend' in the agenda
+and timeline buffers."
+  :group 'org-agenda-daily/weekly
+  :type '(set :greedy t
+	      (const :tag "Monday" 1)
+	      (const :tag "Tuesday" 2)
+	      (const :tag "Wednesday" 3)
+	      (const :tag "Thursday" 4)
+	      (const :tag "Friday" 5)
+	      (const :tag "Saturday" 6)
+	      (const :tag "Sunday" 0)))
+
 (defcustom org-agenda-include-diary nil
   "If non-nil, include in the agenda entries from the Emacs Calendar's diary."
   :group 'org-agenda-daily/weekly
@@ -913,16 +927,6 @@ a names face, or a list like `(:background \"Red\")'."
 (eval-when-compile
   (require 'cl))
 (require 'org)
-
-
-
-
-
-
-
-
-
-
 
 (defun org-add-agenda-custom-command (entry)
   "Replace or add a command in `org-agenda-custom-commands'.
@@ -2025,7 +2029,7 @@ dates."
 	 (today (time-to-days (current-time)))
 	 (past t)
 	 args
-	 s e rtn d emptyp)
+	 s e rtn d emptyp wd)
     (setq org-agenda-redo-command
 	  (list 'progn
 		(list 'org-switch-to-buffer-other-window (current-buffer))
@@ -2056,7 +2060,8 @@ dates."
 	    (progn
 	      (setq past nil)
 	      (insert (make-string 79 ?-) "\n")))
-	(setq date (calendar-gregorian-from-absolute d))
+	(setq date (calendar-gregorian-from-absolute d)
+	      wd (calendar-day-of-week date))
 	(setq s (point))
 	(setq rtn (and (not emptyp)
 		       (apply 'org-agenda-get-day-entries entry
@@ -2069,7 +2074,10 @@ dates."
 				       (org-time-from-absolute date))
 		 (funcall org-agenda-format-date date))
 	       "\n")
-	      (put-text-property s (1- (point)) 'face 'org-agenda-structure)
+	      (put-text-property s (1- (point)) 'face
+				 (if (member wd org-agenda-weekend-days)
+				     'org-agenda-date-weekend
+				   'org-agenda-date))
 	      (put-text-property s (1- (point)) 'org-date-line t)
 	      (if (equal d today)
 		  (put-text-property s (1- (point)) 'org-today t))
@@ -2188,7 +2196,7 @@ given in `org-agenda-start-on-weekday'."
 	 (day-numbers (list start))
 	 (day-cnt 0)
 	 (inhibit-redisplay (not debug-on-error))
-	 s e rtn rtnall file date d start-pos end-pos todayp nd
+	 s e rtn rtnall file date d start-pos end-pos todayp nd wd
 	 clocktable-start clocktable-end)
     (setq org-agenda-redo-command
 	  (list 'org-agenda-list (list 'quote include-all) start-day ndays))
@@ -2240,6 +2248,7 @@ given in `org-agenda-start-on-weekday'."
 						'org-date-line t)))
     (while (setq d (pop day-numbers))
       (setq date (calendar-gregorian-from-absolute d)
+	    wd (calendar-day-of-week date)
 	    s (point))
       (if (or (setq todayp (= d today))
 	      (and (not start-pos) (= d sd)))
@@ -2273,7 +2282,10 @@ given in `org-agenda-start-on-weekday'."
 				     (org-time-from-absolute date))
 	       (funcall org-agenda-format-date date))
 	     "\n")
-	    (put-text-property s (1- (point)) 'face 'org-agenda-structure)
+	    (put-text-property s (1- (point)) 'face
+			       (if (member wd org-agenda-weekend-days)
+				   'org-agenda-date-weekend
+				 'org-agenda-date))
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
 	    (if todayp (put-text-property s (1- (point)) 'org-today t))
