@@ -21,6 +21,7 @@
 *.tp
 *.vr
 *.dvi
+*.ps
 orgcard_letter.tex
 org
 org-install.el
@@ -36,6 +37,7 @@ manual
 # allow tmp and test directories that will not be tracked
 
 test
+auto
 tmp
 
 # and collateral damage from Emacs
