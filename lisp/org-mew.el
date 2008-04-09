@@ -55,7 +55,7 @@
 
 (defun org-mew-store-link ()
   "Store a link to a Mew message."
-  (when (mew-summary-p)
+  (when (and (fboundp 'mew-summary-p) (mew-summary-p))
     (let ((folder (mew-summary-folder-name))
 	  (number (mew-summary-message-number))
 	  (subject (mew-summary-get-subject)))
