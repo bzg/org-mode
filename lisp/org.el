@@ -2563,27 +2563,19 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
   "Face used in agenda for captions and dates."
   :group 'org-faces)
 
-(defface org-agenda-date
-  (org-compatible-face nil
-    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1"))
-      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
-      (t (:bold t))))
-  "Face used in agenda for captions and dates."
-  :group 'org-faces)
+(unless (facep 'org-agenda-date)
+  (copy-face 'org-agenda-structure 'org-agenda-date)
+  (set-face-doc-string 'org-agenda-date
+		       "Face used in agenda for normal days."))
 
-(defface org-agenda-date-weekend
-  (org-compatible-face nil
-    '((((class color) (min-colors 88) (background light)) (:foreground "Blue1" :weight bold))
-      (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue"))
-      (((class color) (min-colors 16) (background light)) (:foreground "Blue"))
-      (((class color) (min-colors 16) (background dark)) (:foreground "LightSkyBlue"))
-      (((class color) (min-colors 8)) (:foreground "blue" :bold t))
-      (t (:bold t))))
-  "Face used in agenda for captions and dates."
-  :group 'org-faces)
+(unless (facep 'org-agenda-date-weekend)
+  (copy-face 'org-agenda-date 'org-agenda-date-weekend)
+  (set-face-doc-string 'org-agenda-date-weekend
+		       "Face used in agenda for weekend days.
+See the variable `org-agenda-weekend-days' for a definition of which days
+belong to the weekend.")
+  (when (fboundp 'set-face-attribute)
+    (set-face-attribute 'org-agenda-date-weekend nil :weight 'bold)))
 
 (defface org-scheduled-today
   (org-compatible-face nil

@@ -65,7 +65,7 @@ line in the buffer.  See also the variable `org-infojs-options'."
 	  (const :tag "Always" t)))
   
 (defconst org-infojs-opts-table
-  '((path PATH "org-info.js")
+  '((path PATH "http://orgmode.org/org-info.js")
     (view VIEW "info")
     (toc TOC :table-of-contents)
     (mouse MOUSE_HINT "underline")
@@ -108,7 +108,9 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
   "Analyze JavaScript options in INFO-PLIST and modify EXP-PLIST accordingly."
   (if (or (not org-export-html-use-infojs)
 	  (and (eq org-export-html-use-infojs 'when-configured)
-	       (not (plist-get exp-plist :infojs-opt))))
+	       (or (not (plist-get exp-plist :infojs-opt))
+		   (string-match "\\<view:nil\\>"
+				 (plist-get exp-plist :infojs-opt)))))
       ;; We do not want to use the script
       exp-plist
     ;; We do want to use the script, set it up
@@ -155,6 +157,18 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
     
     ;; Return the modified property list
     exp-plist)))
+
+(defun org-infojs-options-inbuffer-template ()
+  (format "#+INFOJS_OPT: view:%s toc:%s ltoc:%s runs:%s mouse:%s buttons:%s path:%s"
+	  (if (eq t org-export-html-use-infojs) (cdr (assoc 'view org-infojs-options)) nil)
+	  (let ((a (cdr (assoc 'toc org-infojs-options))))
+	    (cond ((memq a '(nil t)) a)
+		  (t (plist-get (org-infile-export-plist) :table-of-contents))))
+	  (if (equal (cdr (assoc 'ltoc org-infojs-options)) "1") t nil)
+	  (cdr (assoc 'runs org-infojs-options))
+	  (cdr (assoc 'mouse org-infojs-options))
+	  (cdr (assoc 'buttons org-infojs-options))
+	  (cdr (assoc 'path org-infojs-options))))
 
 (provide 'org-infojs)
 

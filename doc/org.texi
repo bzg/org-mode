@@ -286,6 +286,7 @@ HTML export
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
 * CSS support::                 Changing the appearance of the output
+* Javascript support::          Info and Folding in a web browser
 
 LaTeX export
 
@@ -6494,6 +6495,7 @@ language, but with additional support for tables.
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
 * CSS support::                 Changing the appearance of the output
+* Javascript support::          Info and Folding in a web browser
 @end menu
 
 @node HTML Export commands, Quoting HTML tags, HTML export, HTML export
@@ -6617,8 +6619,10 @@ will link to a high resolution version of the image, you could use:
 @noindent
 and you could use @code{http} addresses just as well.
 
-@node CSS support,  , Images, HTML export
+@node CSS support, Javascript support, Images, HTML export
 @subsection CSS support
+@cindex CSS, for HTML export
+@cindex HTML export, CSS
 
 You can also give style information for the exported file.  The HTML
 exporter assigns the following CSS classes to appropriate parts of the
@@ -6657,6 +6661,59 @@ section in the buffer.
 
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
+
+@node Javascript support,  , CSS support, HTML export
+@subsection Javascript supported display of web pages
+
+@emph{Sebastian Rose} has written a JavaScript program especially designed to
+enhance the web viewing experience of HTML files created with Org.  This
+program allows to view large files in two different ways.  The first one is
+an @emph{Info}-like mode where each section is displayed separately and
+navigation can be done with the @kbd{n} and @kbd{p} keys (and some other keys
+as well, press @kbd{?} for an overview of the available keys).  The second
+view type is a @emph{folding} view much like Org provides it inside Emacs.
+The script is available at @url{http://orgmode.org/org-info.js} and you can
+find the documentation for it at @url{http://orgmode.org/org-infojs.html}.
+We are serving the script from our site, but if you use it a lot, you might
+not want to be dependent on @url{orgmode.org} and prefer to install a local
+copy on your own web server.
+
+To use the script, you need to make sure that the @file{org-infojs.el} module
+gets loaded.  It should be loaded by default, try @kbd{M-x customize-variable
+@key{RET} org-modules @key{RET}} to convince yourself that this is indeed the
+case.  All it then takes to make use of the program is adding a single line
+to the Org file:
+
+@example
+#+INFOSJ_OPT: view:info toc:nil
+@end example
+
+@noindent
+If this line is found, the HTML header will automatically contain the code
+needed to invoke the script.  Using the line above, you can set the following
+viewing options:
+
+@example
+view:    @r{Initial view when website is first shown.  Possible values are}
+         info      @r{Info-like interface with one section per page.}
+         overview  @r{Folding interface, initially showing only top-level.}
+         content   @r{Folding interface, starting with all headlines visible.}
+         showall   @r{Folding interface, all headlines and text visible.}
+toc:     @r{Should the table of content be visible as the first section?}
+         @r{Even when @code{nil}, you can always get to the toc with @kbd{i}.}
+ltoc:    @r{Should there be short contents in each section?}
+path:    @r{The path to the script.  The default is to grab the script from}
+         @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
+         @r{a local copy use a path like @samp{../scripts/org-info.js}.}
+mouse:   @r{Headings are highlighted when the mouse is over the.  Should be}
+         @r{@samp{underline} (default) or a background color like @samp{#cccccc}.}
+buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}
+         @r{default), only one such button will be present.}
+@end example
+
+You can choose default values for these options by customizing the variable
+@code{org-infojs-options}.  If you always want to apply the script to your
+pages, configure the variable @code{org-export-html-use-infojs}.
 
 @node LaTeX export, XOXO export, HTML export, Exporting
 @section LaTeX export
@@ -8741,6 +8798,11 @@ goals that Org still has today: To create a new, outline-based,
 plain text mode with innovative and intuitive editing features, and to
 incorporate project planning functionality directly into a notes file.
 
+A special thanks goes to @i{Bastien Guerry} who has not only writen a large
+number of extensions to Org (most of them integrated into the core by now),
+but has also helep the development and maintenance of Org so much that e
+should be considered co-author of this package.
+
 Since the first release, literally thousands of emails to me or on
 @code{emacs-orgmode@@gnu.org} have provided a constant stream of bug
 reports, feedback, new ideas, and sometimes patches and add-on code.
@@ -8800,6 +8862,10 @@ with patches, ideas, and bug reports.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
+@i{Bernt Hansen} has driven much of the support for auto-repeating tasks,
+task state change logging, and the clocktable.  His clear explanations have
+been critical when we started to adopt the GIT version control system.
+@item
 @i{Scott Jaderholm} proposed footnotes, control over whitespace between
 folded entries, and column view for properties.
 @item
@@ -8841,6 +8907,10 @@ provided frequent feedback.
 control.
 @item
 @i{Kevin Rogers} contributed code to access VM files on remote hosts.
+@item
+@i{Sebastian Rose} wrote @file{org-info.js}, a Java script for displaying
+webpages derived from Org using an Info-like, or a folding interface with
+single key navigation.
 @item
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
