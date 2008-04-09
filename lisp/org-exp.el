@@ -1851,9 +1851,11 @@ command."
 
 ;;; HTML export
 
+(defvar org-archive-location)  ;; gets loades with the org-archive require.
 (defun org-get-current-options ()
   "Return a string with current options as keyword options.
 Does include HTML export options as well as TODO and CATEGORY stuff."
+  (require 'org-archive)
   (format
    "#+TITLE:     %s
 #+AUTHOR:    %s
