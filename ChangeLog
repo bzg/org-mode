@@ -1,3 +1,9 @@
+2008-04-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-archive.el: New file.
+
+	* lisp/org-faces.el: New file.
+
 2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-exp.el (org-get-current-options): Incorporate LINK_UP,

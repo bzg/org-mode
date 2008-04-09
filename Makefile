@@ -61,11 +61,14 @@ CP = cp -p
 
 # The following variables need to be defined by the maintainer
 LISPF      = 	org.el			\
+	     	org-archive.el		\
+	     	org-colview.el		\
 	     	org-compat.el		\
 	     	org-macs.el		\
 	     	org-clock.el		\
 		org-table.el		\
 		org-exp.el		\
+		org-faces.el		\
 		org-remember.el		\
 		org-agenda.el		\
 		org-publish.el		\
