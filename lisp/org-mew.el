@@ -44,7 +44,7 @@
 (add-hook 'org-store-link-functions 'org-mew-store-link)
 
 (defun org-mew-open (mew-link)
-  "Visit the message MSG-NUMBER in FOLDER."
+  "Visit the message targetted at by MEW-LINK."
   (when (string-match "\\(+.*\\)+\\+\\([0-9]+\\)" mew-link)
     (let ((folder (match-string 1 mew-link))
 	  (msg-num (match-string 2 mew-link)))

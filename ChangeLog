@@ -1,3 +1,7 @@
+2008-04-09  Bastien Guerry  <bzg@altern.org>
+
+	* lisp/org-mew.el (org-mew-open): Fixed the docstring.
+
 2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-exp.el (org-get-current-options): Incorporate LINK_UP,
