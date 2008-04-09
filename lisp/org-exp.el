@@ -34,6 +34,7 @@
 
 (declare-function org-export-latex-cleaned-string "org-export-latex" ())
 (declare-function org-agenda-skip "org-agenda" ())
+(declare-function org-infojs-options-inbuffer-template "org-infojs" ())
 
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -1861,6 +1862,9 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+LANGUAGE:  %s
 #+TEXT:      Some descriptive text to be emitted.  Several lines OK.
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s TeX:%s LaTeX:%s skip:%s d:%s tags:%s
+%s
+#+LINK_UP:   %s
+#+LINK_HOME: %s
 #+CATEGORY:  %s
 #+SEQ_TODO:  %s
 #+TYP_TODO:  %s
@@ -1890,6 +1894,9 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-export-skip-text-before-1st-heading
    org-export-with-drawers
    org-export-with-tags
+   (if (featurep 'org-infojs) (org-infojs-options-inbuffer-template) "")
+   org-export-html-link-up
+   org-export-html-link-home
    (file-name-nondirectory buffer-file-name)
    "TODO FEEDBACK VERIFY DONE"
    "Me Jason Marie DONE"

@@ -1,5 +1,8 @@
 2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-exp.el (org-get-current-options): Incorporate LINK_UP,
+	LINK_HOME, and INFOJS.
+
 	* lisp/org-agenda.el (org-agenda-weekend-days): New variable.
 
 	* lisp/org.el (org-agenda-date, org-agenda-date-weekend): New faces.

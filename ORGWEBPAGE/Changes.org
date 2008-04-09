@@ -9,6 +9,13 @@
 
 ** Details
 
+*** Faces
+
+    There are now special faces for the date lines in the
+    agenda/timeline buffers, and another special face for days
+    that fall on a weekend: `org-agenda-date' and
+    `org-agenda-date-weekend'.
+
 *** New archiving mechanism: The Attic Sibling
 
     There is a new method to archive entries in the current file:
