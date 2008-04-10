@@ -30,13 +30,13 @@
 
 	* lisp/org-agenda.el (org-agenda-list, org-timeline): Use the
 	proper faces for dates in the agenda and timeline buffers.
-	(org-agenda-archive-to-attic-sibling): New command.
+	(org-agenda-archive-to-archive-sibling): New command.
 
-	* doc/org.texi (Moving subtrees): Document archiving to the attic
+	* doc/org.texi (Moving subtrees): Document archiving to the archive
 	sibling.
 
-	* lisp/org.el (org-attic-heading): New option.
-	(org-archive-to-attic-sibling): New function.
+	* lisp/org.el (org-archive-sibling-heading): New option.
+	(org-archive-to-archive-sibling): New function.
 
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 

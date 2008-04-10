@@ -75,10 +75,10 @@ the hierarchy, it will be used."
   :group 'org-archive
   :type 'string)
 
-(defcustom org-attic-heading "Attic"
-  "Name of the local attic sibling that is used to archive entries locally.
+(defcustom org-archive-sibling-heading "Archive"
+  "Name of the local archive sibling that is used to archive entries locally.
 Locally means: in the tree, under a sibling.
-See `org-archive-to-attic-sibling' for more information."
+See `org-archive-to-archive-sibling' for more information."
   :group 'org-archive
   :type 'string)
 
@@ -291,11 +291,11 @@ this heading."
 		   (concat "under heading: " heading)
 		 (concat "in file: " (abbreviate-file-name afile)))))))
 
-(defun org-archive-to-attic-sibling ()
-  "Archive the current heading by moving it under the attic sibling.
-The attic sibling is a sibling of the heading with the heading name
-`org-attic-heading and an `org-archive-tag' tag.  If this sibling does
-not exist, it will be created at the end of the subtree."
+(defun org-archive-to-archive-sibling ()
+  "Archive the current heading by moving it under the archive sibling.
+The archive sibling is a sibling of the heading with the heading name
+`org-archive-sibling-heading' and an `org-archive-tag' tag.  If this
+sibling does not exist, it will be created at the end of the subtree."
   (interactive)
   (save-restriction
     (widen)
@@ -317,12 +317,12 @@ not exist, it will be created at the end of the subtree."
       (unless (re-search-forward
 	       (concat "^" (regexp-quote leader)
 		       "[ \t]*"
-		       org-attic-heading
+		       org-archive-sibling-heading
 		       "[ \t]*:"
 		       org-archive-tag ":") e t)
 	(goto-char e)
 	(or (bolp) (newline))
-	(insert leader org-attic-heading "\n")
+	(insert leader org-archive-sibling-heading "\n")
 	(beginning-of-line 0)
 	(org-toggle-tag org-archive-tag 'on))
       (beginning-of-line 1)
