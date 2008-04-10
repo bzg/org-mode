@@ -207,7 +207,7 @@ we turn off invisibility temporarily.  Use this in a `let' form."
     (while (setq f (pop functions))
       (or (fboundp f) (autoload f file d t)))))
 
-(defmacro org-match-line (re)
+(defun org-match-line (re)
   "Looking-at at the beginning of the current line."
   (save-excursion
     (goto-char (point-at-bol))

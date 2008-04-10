@@ -7,16 +7,19 @@
 
 * Version 6.00
 
+This is a new major release, mostly because of structural changes
+in Org.  However, there are also monay bug fixes and new features.
+
 ** Details
 
 *** The Org distribution has a new structure
 
-    In the distribution files, the lisp files are now located in
-    a subdirectory "lisp", and the documentation files are
-    located in a subdirectory "doc".  If you are running Org
-    directly from the unpacked distribtuion archive (zip or tar
-    file), you need to modify your settings for load-path
-    accordingly.
+    In the distribution files as well as in the git repository,
+    the lisp files are now located in a subdirectory "lisp", and
+    the documentation files are located in a subdirectory "doc".
+    If you are running Org directly from the unpacked
+    distribtuion archive (zip or tar file, or git repository),
+    you need to modify your settings for load-path accordingly.
 
 *** Loading modules
 
@@ -27,45 +30,61 @@
     way part of Emacs), as well as contributed packages that will
     only be available when you have installed them properly (most
     likely by downloading the distribution and adding
-    /path/to/orgdir/contrib/lisp to your load path.
+    /path/to/orgdir/contrib/lisp to your load path).
 
 *** New archiving mechanism: The Archive Sibling
 
     There is a new method to archive entries in the current file:
     By moving it to a sibling called the /Archive Sibling/.  That
-    sibling has the heading "Archive" and also carries the ARCHIVE
-    tag.  It seems to me that this is a great way to do archiving
-    inside a project, to get parts of the project out of the way
-    and to wait with true archiving (moving to another file)
-    until the entire project done.  The key binding for the is
-    "C-c C-x A", and from the agenda buffer you can simply use
-    "A".
+    sibling has the heading "Archive" and also carries the
+    ARCHIVE tag.  It seems to me that this is a great way to do
+    archiving inside a project, to get parts of the project out
+    of the way and to wait with true archiving (moving to another
+    file) until the entire project done.  Archiving to a sibling
+    keep much of the context like inherited tags and approximate
+    tree position in tact, so Org is adding only a single
+    property, the ARCHIVE_TIME.
+
+    The key binding for the is "C-c C-x A", and from the agenda
+    buffer you can simply use "A".
 
     Thanks to Ilya Shlyakhter for this rather clever idea.
 
 *** Support for Sebastian Rose's Javasript org-info.js.
 
-    This fascinating program allows an Org file (exported to
-    HTML) to be viewed different ways.  There is an Info-like
-    interface where you can jump through the sections of the
-    document with the `n' and `p' keys (and others).  And there
-    is a folding interface where you can fold the document much
-    like you can fold it in org-mode in Emacs.
+    This fascinating program allows a completely new viewing
+    experience for web pages created from Org files, valuable in
+    particular for longish documents.  The same document can be
+    viewed in differnet ways, and switching between the views as
+    well as navigation uses single-key commands.
 
-    To set this up, make sure the script is available in the same
-    location as your HTML file.  Make sure that `org-infojs' is
-    loaded in `org-modules'. Then add a line
+    There is an Info-like interface where you can jump through
+    the sections of the document with the `n' and `p' keys (and
+    others).  And there is a folding interface where you can fold
+    the document much like you can fold it in org-mode in Emacs,
+    and cycle throught the visibility both locally and globally.
+
+    To set this up, all you need to do is to make sure that
+    org-infojs.el gets loaded (customize the variable org-modules
+    to check).  Then add this line to the buffer:
 
     : #+INFOJS_OPT: view:info
 
-    to the buffer, that is all.  The available views are:
+    In that line, you can configure the initial view and other
+    settings.  Available views are =info= for the info-lke
+    interface, and =overview=, =content=, and =showall= for the
+    folding interface.  See the manual for more details.  The
+    JavaScript program is currently being served from
+    orgmode.org, and your exported HTML files will automatically
+    get it from there.  However, you may want to be independent
+    of the existence and stability of orgmode.org and install a
+    copy locally.  Then you need to change the path from which
+    the script is loaded, either by using something like
 
-    - =info=: like the Info program
-    - =overview=: Folding interface, only top-level headings seen
-      at startup.
-    - =content=: Folding interface, all headlines but no text
-      visible at startup.
-    - =showall=: Entire file visible at startup.
+    : #+INFOJS_OPT: view:info path:../scripts/org-info.js
+
+    or by configuring the variable =org-infojs-options=.
+
 
     For details see the documentation provided by Sebastian Rose
     together with org-info.js.

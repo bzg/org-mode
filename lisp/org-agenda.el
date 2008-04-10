@@ -486,6 +486,9 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
+(defconst org-agenda-include-inactive-timestamps nil
+  "Non-nil means, include inactive time stamps in agenda and timeline.")
+
 (defgroup org-agenda-windows nil
   "Options concerning the windows used by the Agenda in Org Mode."
   :tag "Org Agenda Windows"
@@ -3082,17 +3085,18 @@ the documentation of `org-diary'."
 	   ".*?>"))
 	 (regexp
 	  (concat
+	   (if org-agenda-include-inactive-timestamps "[[<]" "<")
 	   (regexp-quote
 	    (substring
 	     (format-time-string
 	      (car org-time-stamp-formats)
 	      (apply 'encode-time  ; DATE bound by calendar
 		     (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
-	     0 11))
+	     1 11))
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
-	 marker hdmarker deadlinep scheduledp donep tmp priority category
-	 ee txt timestr tags b0 b3 e3 head)
+	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
+	 donep tmp priority category ee txt timestr tags b0 b3 e3 head)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (setq b0 (match-beginning 0)
@@ -3114,10 +3118,17 @@ the documentation of `org-diary'."
 					 (- b0 org-ds-keyword-length))
 				    b0)
 	      timestr (if b3 "" (buffer-substring b0 (point-at-eol)))
+	      inactivep (= (char-after b0) ?\[)
 	      deadlinep (string-match org-deadline-regexp tmp)
 	      scheduledp (string-match org-scheduled-regexp tmp)
+	      closedp (and org-agenda-include-inactive-timestamps
+			   (string-match org-closed-string tmp))
+	      clockp (and org-agenda-include-inactive-timestamps
+			  (or (string-match org-clock-string tmp)
+			      (string-match "]-+\\'" tmp)))
 	      donep (org-entry-is-done-p))
-	(if (or scheduledp deadlinep) (throw :skip t))
+	(if (or scheduledp deadlinep closedp clockp)
+	    (throw :skip t))
 	(if (string-match ">" timestr)
 	    ;; substring should only run to end of time stamp
 	    (setq timestr (substring timestr 0 (match-end 0))))
@@ -3131,7 +3142,8 @@ the documentation of `org-diary'."
 		(setq head (match-string 1))
 		(and org-agenda-skip-timestamp-if-done donep (throw :skip t))
 		(setq txt (org-format-agenda-item
-			   nil head category tags timestr nil
+			   (if inactivep "[" nil)
+			   head category tags timestr nil
 			   remove-re)))
 	    (setq txt org-agenda-no-heading-message))
 	  (setq priority (org-get-priority txt))
@@ -3914,6 +3926,11 @@ Negative selection means, regexp must not match for selection of an entry."
   (org-agenda-manipulate-query ?\}))
 (defun org-agenda-manipulate-query (char)
   (cond
+   ((memq org-agenda-type '(timeline agenda))
+    (if (y-or-n-p "Re-display with inactive time stamps included? ")
+	(let ((org-agenda-include-inactive-timestamps t))
+	  (org-agenda-redo))
+      (error "Abort")))
    ((eq org-agenda-type 'search)
     (org-add-to-string
      'org-agenda-query-string
@@ -3927,7 +3944,7 @@ Negative selection means, regexp must not match for selection of an entry."
 		   (if (member char '(?\{ ?\})) 0 1))))
     (set-register org-agenda-query-register org-agenda-query-string)
     (org-agenda-redo))
-   (t (error "Canot manipulate query for %s-type agenda buffers"
+   (t (error "Cannot manipulate query for %s-type agenda buffers"
 	     org-agenda-type))))
 
 (defun org-add-to-string (var string)
