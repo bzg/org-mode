@@ -22,9 +22,9 @@ messages, BBDB entries, and any files related to the projects.  For
 printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, HTML, and LaTeX.
 
-* Current Version (6.00pre-4) and Compatibility
+* Current Version (6.00pre-5) and Compatibility
 
-The current version is 6.00pre-4.  To see what has changed in recent
+The current version is 6.00pre-5.  To see what has changed in recent
 releases, check this [[file:Changes.html][list of user-visible changes]].  These descriptions
 are extensive, to avoid that people will be printing the manual after
 each incremental release.  If you have an older version of the manual,
