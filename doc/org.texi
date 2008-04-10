@@ -7960,7 +7960,7 @@ Imenu allows menu access to an index of items in a file.  Org mode
 supports Imenu - all you need to do to get the index is the following:
 @lisp
 (add-hook 'org-mode-hook
-          (lambda () 'imenu-add-to-menubar "Imenu"))
+          (lambda () (imenu-add-to-menubar "Imenu")))
 @end lisp
 By default the index is two levels deep - you can modify the depth using
 the option @code{org-imenu-depth}.
