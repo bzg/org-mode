@@ -2781,7 +2781,9 @@ means to push this value onto the list in the variable.")
     (if (not org-done-keywords)
 	(setq org-done-keywords (list (org-last org-todo-keywords-1))))
     (setq org-ds-keyword-length (+ 2 (max (length org-deadline-string)
-					  (length org-scheduled-string)))
+					  (length org-scheduled-string)
+					  (length org-clock-string)
+					  (length org-closed-string)))
 	  org-drawer-regexp
 	  (concat "^[ \t]*:\\("
 		  (mapconcat 'regexp-quote org-drawers "\\|")
