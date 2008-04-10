@@ -530,7 +530,8 @@ the currently selected interval size."
   (and (memq dir '(left down)) (setq n (- n)))
   (save-excursion
     (goto-char (point-at-bol))
-    (when (looking-at "#\\+BEGIN: clocktable\\>.*?:block[ \t]+\\(\\S-+\\)")
+    (if (not (looking-at "#\\+BEGIN: clocktable\\>.*?:block[ \t]+\\(\\S-+\\)"))
+	(error "Line needs a :block definition before this command works")
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
 	     block shift ins y mw d date wp m)
