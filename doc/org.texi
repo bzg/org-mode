@@ -897,14 +897,15 @@ headline marker like @samp{****}.
 Refile entry to a different location.  @xref{Refiling notes}.
 @kindex C-c ^
 @item C-c ^
-Sort same-level entries.  When there is an active region, all entries in
-the region will be sorted.  Otherwise the children of the current
-headline are sorted.  The command prompts for the sorting method, which
-can be alphabetically, numerically, by time (using the first time stamp
-in each entry), by priority, and each of these in reverse order.  You
-can also supply your own function to extract the sorting key.  With a
-@kbd{C-u} prefix, sorting will be case-sensitive.  With two @kbd{C-u
-C-u} prefixes, duplicate entries will also be removed.
+Sort same-level entries.  When there is an active region, all entries in the
+region will be sorted.  Otherwise the children of the current headline are
+sorted.  The command prompts for the sorting method, which can be
+alphabetically, numerically, by time (using the first time stamp in each
+entry), by priority, or by TODO keyword (in the sequence the keywords have
+been defined in the setup).  Reverse sorting is possible as well.  You can
+also supply your own function to extract the sorting key.  With a @kbd{C-u}
+prefix, sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes,
+duplicate entries will also be removed.
 @kindex C-c *
 @item C-c *
 Turn a normal line or plain list item into a headline (so that it
@@ -4705,7 +4706,10 @@ insertion of content:
 %A          @r{like @code{%a}, but prompt for the description part}
 %i          @r{initial content, the region when remember is called with C-u.}
             @r{The entire text will be indented like @code{%i} itself.}
-%c          @r{Content of the clipboard, or current kill ring head.}
+%c          @r{Current kill ring head.}
+%x          @r{Content of the X clipboard.}
+%^C         @r{Interactive selection of which kill or clip to use.}
+%^L         @r{Like @code{%^C}, but insert as link.}
 %^g         @r{prompt for tags, with completion on tags in target file.}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
 %:keyword   @r{specific information for certain link types, see below}
@@ -5613,7 +5617,7 @@ Toggle the ARCHIVE tag for the current headline.
 @c
 @kindex A
 @item A
-Move the subtree correspoding to the current entry to its @emph{Attic
+Move the subtree correspoding to the current entry to its @emph{Archive
 Sibling}.
 @c
 @kindex $
@@ -8926,7 +8930,7 @@ other things.
 Linking to VM/BBDB/Gnus was inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
-@i{Ilya Shlyakhter} proposed the Attic Sibling.
+@i{Ilya Shlyakhter} proposed the Archive Sibling.
 @item
 @i{Daniel Sinder} came up with the idea of internal archiving by locking
 subtrees.

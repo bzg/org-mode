@@ -578,7 +578,7 @@ the currently selected interval size."
   (catch 'exit
     (let* ((hlchars '((1 . "*") (2 . "/")))
 	   (ins (make-marker))
-	   (total-time 0)
+	   (total-time nil)
 	   (scope (plist-get params :scope))
 	   (tostring (plist-get  params :tostring))
 	   (multifile (plist-get  params :multifile))
@@ -592,6 +592,7 @@ the currently selected interval size."
 	   (link (plist-get params :link))
 	   ipos time p level hlc hdl
 	   cc beg end pos tbl tbl1 range-text)
+      (setq org-clock-file-total-minutes nil)
       (when step
 	(org-clocktable-steps params)
 	(throw 'exit nil))

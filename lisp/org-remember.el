@@ -275,8 +275,13 @@ RET at beg-of-buf -> Append to file as level 2 headline
 			 char0))))))
       (cddr (assoc char templates)))))
 
-(defvar x-last-selected-text)
-(defvar x-last-selected-text-primary)
+(defun org-get-x-clipboard (value)
+  "Get the value of the x clibboard, in a way that also works with XEmacs."
+  (if (eq window-system 'x)
+      (let ((x (if org-xemacs-p
+		   (org-no-warnings (get-selection-no-error value))
+		 (x-selection-value value))))
+	(and (> (length x) 0) (set-text-properties 0 (length x) nil x) x))))
 
 ;;;###autoload
 (defun org-remember-apply-template (&optional use-char skip-interactive)
@@ -292,12 +297,10 @@ to be run from that hook to function properly."
 		       (nth 1 entry)
 		     org-default-notes-file))
 	     (headline (nth 2 entry))
-	     (v-c (or (and (eq window-system 'x)
-			   (fboundp 'x-cut-buffer-or-selection-value)
-			   (x-cut-buffer-or-selection-value))
-		      (org-bound-and-true-p x-last-selected-text)
-		      (org-bound-and-true-p x-last-selected-text-primary)
-		      (and (> (length kill-ring) 0) (current-kill 0))))
+	     (v-c (and (> (length kill-ring) 0) (current-kill 0)))
+	     (v-x (or (org-get-x-clipboard 'PRIMARY)
+		      (org-get-x-clipboard 'CLIPBOARD)
+		      (org-get-x-clipboard 'SECONDARY)))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
@@ -307,6 +310,11 @@ to be run from that hook to function properly."
 	     (v-a (if (and (boundp 'annotation) annotation)
 		      (if (equal annotation "[[]]") "" annotation)
 		    ""))
+	     (clipboards (remove nil (list v-i
+					   (org-get-x-clipboard 'PRIMARY)
+					   (org-get-x-clipboard 'CLIPBOARD)
+					   (org-get-x-clipboard 'SECONDARY)
+					   v-c)))
 	     (v-A (if (and v-a
 			   (string-match "\\[\\(\\[.*?\\]\\)\\(\\[.*?\\]\\)?\\]" v-a))
 		      (replace-match "[\\1[%^{Link description}]]" nil nil v-a)
@@ -337,7 +345,7 @@ to be run from that hook to function properly."
 		  (or (cdr org-remember-previous-location) "???"))))
 	(insert tpl) (goto-char (point-min))
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUaiAc]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUaiAcx]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
@@ -391,7 +399,7 @@ to be run from that hook to function properly."
 	    (org-set-local 'org-remember-default-headline headline))
 	;; Interactive template entries
 	(goto-char (point-min))
-	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGuUtT]\\)?" nil t)
+	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGuUtTCL]\\)?" nil t)
 	  (setq char (if (match-end 3) (match-string 3))
 		prompt (if (match-end 2) (match-string 2)))
 	  (goto-char (match-beginning 0))
@@ -422,6 +430,20 @@ to be run from that hook to function properly."
 		(or (equal (char-before) ?:) (insert ":"))
 		(insert ins)
 		(or (equal (char-after) ?:) (insert ":")))))
+	   ((equal char "C")
+	    (cond ((= (length clipboards) 1) (insert (car clipboards)))
+		  ((> (length clipboards) 1)
+		   (insert (read-string "Clipboard/kill value: "
+					(car clipboards) '(clipboards . 1)
+					(car clipboards))))))
+	   ((equal char "L")
+	    (cond ((= (length clipboards) 1)
+		   (org-insert-link 0 (car clipboards)))
+		  ((> (length clipboards) 1)
+		   (org-insert-link 0 (read-string "Clipboard/kill value: "
+						   (car clipboards)
+						   '(clipboards . 1)
+						   (car clipboards))))))
 	   (char
 	    (setq org-time-was-given (equal (upcase char) char))
 	    (setq time (org-read-date (equal (upcase char) "U") t nil

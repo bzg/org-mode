@@ -9,28 +9,43 @@
 
 ** Details
 
-*** Faces
+*** The Org distribution has a new structure
 
-    There are now special faces for the date lines in the
-    agenda/timeline buffers, and another special face for days
-    that fall on a weekend: `org-agenda-date' and
-    `org-agenda-date-weekend'.
+    In the distribution files, the lisp files are now located in
+    a subdirectory "lisp", and the documentation files are
+    located in a subdirectory "doc".  If you are running Org
+    directly from the unpacked distribtuion archive (zip or tar
+    file), you need to modify your settings for load-path
+    accordingly.
 
-*** New archiving mechanism: The Attic Sibling
+*** Loading modules
+
+    Org-mode has now a system for loading modules by simply
+    configuring an option that lists all the modules you want to
+    use.  Customize the variable `org-modules'.  That variable
+    lists modules that are part of the Org-mode core (and in this
+    way part of Emacs), as well as contributed packages that will
+    only be available when you have installed them properly (most
+    likely by downloading the distribution and adding
+    /path/to/orgdir/contrib/lisp to your load path.
+
+*** New archiving mechanism: The Archive Sibling
 
     There is a new method to archive entries in the current file:
-    By moving it to a sibling called the Attic Sibling.  That
-    sibling has the heading "Attic" and also carries the ARCHIVE
+    By moving it to a sibling called the /Archive Sibling/.  That
+    sibling has the heading "Archive" and also carries the ARCHIVE
     tag.  It seems to me that this is a great way to do archiving
     inside a project, to get parts of the project out of the way
-    and to wait with archiving the entire project until it is
-    truly done.  The key binding for the is "C-c C-x A", and
-    from the agenda buffer you can simply use "A".
+    and to wait with true archiving (moving to another file)
+    until the entire project done.  The key binding for the is
+    "C-c C-x A", and from the agenda buffer you can simply use
+    "A".
 
-    Thanks to Ilya Shlyakhter for this brilliant idea.
+    Thanks to Ilya Shlyakhter for this rather clever idea.
 
 *** Support for Sebastian Rose's Javasript org-info.js.
-    This fascinating program allows and Org file (exported to
+
+    This fascinating program allows an Org file (exported to
     HTML) to be viewed different ways.  There is an Info-like
     interface where you can jump through the sections of the
     document with the `n' and `p' keys (and others).  And there
@@ -54,15 +69,6 @@
 
     For details see the documentation provided by Sebastian Rose
     together with org-info.js.
-
-*** The Org distribution has a new structure
-
-    In the distribution files, the lisp files are now located in
-    a subdirectory "lisp", and the documentation files are
-    located in a subdirectory "doc".  If you are running Org
-    directly from the unpacked distribtuion archive (zip or tar
-    file), you need to modify your settings for load-path
-    accordingly.
 
 *** Improvements to clocktable
 
@@ -99,35 +105,15 @@
       total time for each file will now also be listed.  This was
       a request from Bernt Hansen.
 
-*** Clockreport in the daily/weekly arenda
 
-    If you turn on clockreport mode with the "R" key in the
-    agenda, a clock table will be attached to the agenda, showing
-    the clock report for the file scope and time interval of the
-    agenda view.  To turn this on permanently, configure the
-    variable =org-agenda-start-with-clockreport-mode=.  To modify
-    the properties of the table, in particula the =:maxlevel=
-    depth, configure =org-agenda-clockreport-parameter-plist=.
-
-*** Selective tag inheritance
-
-    Inheritance of tags can now be limited to a subset of all
-    tags, using the variable =org-use-tag-inheritance=.  This
-    variable may now be a regular expression or a list to select
-    the inherited tags.  Thanks to Michael Ekstrand for this
-    excellent proposal.
-
-    The regexp option is also implemented for
-    =org-use-property-inheritance=, so that you can now select
-    properties for inheritance my name.
-
-*** Changes to property API
-
-    The INHERIT flag to the function =org-entry-get= can be set
-    to the symbol =selective=.  If this is the case, then the
-    value of the property will be retrieved using inheritance if
-    and only if the setting in =org-use-property-inheritance=
-    selects the property for inheritance.
+    - If you turn on the new clockreport mode with the "R" key in
+      the agenda, a clock table will be attached to the agenda,
+      showing the clock report for the file scope and time
+      interval of the agenda view.  To turn this on permanently,
+      configure the variable
+      =org-agenda-start-with-clockreport-mode=.  To modify the
+      properties of the table, in particula the =:maxlevel=
+      depth, configure =org-agenda-clockreport-parameter-plist=.
 
 *** Support for ISO week dates (ISO 6801)
 
@@ -171,17 +157,6 @@
 
     This was a request by Thomas Baumann.
 
-*** Loading modules
-
-    Org-mode has now a system for loading modules by simply
-    configuring an option that lists all the modules you want to
-    use.  Customize the variable `org-modules'.  That variable
-    lists modules that are part of the Org-mode core (and in this
-    way part of Emacs), as well as contributed packages that will
-    only be available when you have installed them properly (most
-    likely by downloading the distribution and adding
-    CONTRIB/lisp to your load path.
-
 *** Improvements in Search View
     
     - Calling search view with a C-u prefix will make it match
@@ -191,20 +166,87 @@
       during search, so that searching for the word "Nasim" will
       also match in "Nasim's".
 
+*** Changes to property API
+
+    The INHERIT flag to the function =org-entry-get= can be set
+    to the symbol =selective=.  If this is the case, then the
+    value of the property will be retrieved using inheritance if
+    and only if the setting in =org-use-property-inheritance=
+    selects the property for inheritance.
+
 *** Misc
+    
+    - Inheritance of tags can now be limited to a subset of all
+      tags, using the variable =org-use-tag-inheritance=.  This
+      variable may now be a regular expression or a list to
+      select the inherited tags.  Thanks to Michael Ekstrand for
+      this excellent proposal.
+      
+      The regexp option is also implemented for
+      =org-use-property-inheritance=, so that you can now select
+      properties for inheritance my name.
 
-   - When an entry already has a scheduling or deadline time
-     stamp, calling `C-c C-s' or `C-c C-d', respectively, will
-     now use that old date as the default, and you can can use
-     the "++4d" syntax to invoke shifts relative to that default
-     date.  Simply pressing RET at the prompt will keep the
-     default date, not switch to today.
+    - There are now special faces for the date lines in the
+      agenda/timeline buffers, and another special face for days
+      that fall on a weekend: `org-agenda-date' and
+      `org-agenda-date-weekend'.
+      
+    - When an entry already has a scheduling or deadline time
+      stamp, calling `C-c C-s' or `C-c C-d', respectively, will
+      now use that old date as the default, and you can can use
+      the "++4d" syntax to invoke shifts relative to that default
+      date.  Simply pressing RET at the prompt will keep the
+      default date, not switch to today.
+      
+      This was an omission in the earlier implementation, spotted
+      by Wanrong Lin.  Thanks!
+      
+    - File names in remember templates can be relative, they will
+      be interpreted relative to =org-directory=.
+      
+    - The handling of the cliboard when inserting into remember
+      templates is now much better, and gives more control on what
+      should be inserted with new %-escapes:
+      
+      - =%c= - Now always insert to head of the kill ring
+      - =%x= - Insert the content of the X clipboard. This is the
+	first non-empty value from the PRIMARY, SECONDARY and
+	CLIPBOARD X clipboards. 
+	
+      - =%^C= - This allows the user to choose between any of the
+	clipboard values available, the kill ring head, and the
+	initial region if set.  
+	
+      - =%^L= - Like =%^C=, but this inserts an org link using the
+	selected value.
+	
+      Thanks to James TD Smith for this patch.
+	
+    - Table export to an internal file can now use a format
+      specification, similar to the formats that are used by
+      orgtbl radio tables.  The default format is in the variable
+      =org-table-export-default-format=.  You can use properties
+      =TABLE_EXPORT_FILE= and =TABLE_EXPORT_FORMAT= to specify the
+      file name to which the export should go, and a local
+      format.  For example:
+     
+      : :PROPERTIES:
+      : :TABLE_EXPORT_FILE: ~/xx.txt
+      : :TABLE_EXPORT_FORMAT: orgtbl-to-generic :splice t :sep "\t"
+      : :END:
 
-     This was an omission in the earlier implementation, spotted
-     by Wanrong Lin.  Thanks!
+      Thanks to James TD Smith for this patch.
 
-   - File names in remember templates can be relative, they will
-     be interpreted relative to =org-directory=.
+    - Entries can be sorted by TODO keyword, and the orde is given
+      by the definition sequence of the TODO keywords in the
+      variable =org-todo-keywords=, or in the =#+TODO= line.  Use
+      the "o" key when sorting with =C-c ^=.
+      
+      Thanks to James TD Smith for this patch.
+
+
+
+
 
 * Version 5.23
 

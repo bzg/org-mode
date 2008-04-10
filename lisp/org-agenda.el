@@ -1007,7 +1007,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
-(org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-attic-sibling)
+(org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (org-defkey org-agenda-mode-map " "        'org-agenda-show)
 (org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
@@ -1114,7 +1114,7 @@ The following commands are available:
     ["Cycle TODO" org-agenda-todo t]
     ("Archive"
      ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
-     ["Move to attic sibling" org-agenda-archive-to-attic-sibling t]
+     ["Move to archive sibling" org-agenda-archive-to-archive-sibling t]
      ["Archive subtree" org-agenda-archive t])
     ["Delete subtree" org-agenda-kill t]
     ["Add note" org-agenda-add-note t]
@@ -4307,8 +4307,8 @@ Point is in the buffer where the item originated.")
 	      (org-archive-subtree))
 	  (error "Archiving works only in Org-mode files"))))))
 
-(defun org-agenda-archive-to-attic-sibling ()
-  "Move the entry to the attic sibling."
+(defun org-agenda-archive-to-archive-sibling ()
+  "Move the entry to the archive sibling."
   (interactive)
   (or (eq major-mode 'org-agenda-mode) (error "Not in agenda"))
   (let* ((marker (or (get-text-property (point) 'org-marker)
@@ -4322,7 +4322,7 @@ Point is in the buffer where the item originated.")
 	      (goto-char pos)
 	      (org-remove-subtree-entries-from-agenda)
 	      (org-back-to-heading t)
-	      (org-archive-to-attic-sibling))
+	      (org-archive-to-archive-sibling))
 	  (error "Archiving works only in Org-mode files"))))))
 
 (defun org-remove-subtree-entries-from-agenda (&optional buf beg end)

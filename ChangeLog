@@ -1,3 +1,11 @@
+2008-04-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-clock.el (org-dblock-write:clocktable): Fixed bug with
+	total time calculation.
+
+2008-04-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-make-link-description-function): New option.
 
 2008-04-09  Bastien Guerry  <bzg@altern.org>
 

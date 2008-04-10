@@ -41,6 +41,8 @@
   (require 'cl))
 (require 'org)
 
+(declare-function org-table-clean-before-export "org-exp" (lines))
+(declare-function org-format-org-table-html "org-exp" (lines &optional splice))
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
 
@@ -244,17 +246,19 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
+(defgroup org-table-import-export nil
+  "Options concerning table import and export in Org-mode."
+  :tag "Org Table Import Export"
+  :group 'org-table)
 
-
-
-
-
-
-
-
-
-
-
+(defcustom org-table-export-default-format
+  "orgtbl-to-generic :splice t :sep \"\t\""
+  "Default export parameters for org-table-export. These can be
+  overridden on for a specific table by setting the
+  TABLE_EXPORT_FORMAT parameter. See orgtbl-export for the
+  different export transforms and available parameters."
+  :group 'org-table-import-export
+  :type 'string)
 
 (defconst org-table-auto-recalculate-regexp "^[ \t]*| *# *\\(|\\|$\\)"
   "Detects a table line marked for automatic recalculation.")
@@ -422,41 +426,73 @@ are found, lines will be split on whitespace into fields."
     (insert-file-contents file)
     (org-table-convert-region beg (+ (point) (- (point-max) pm)) arg)))
 
-(defun org-table-export ()
+
+(defvar org-table-last-alignment)
+(defvar org-table-last-column-widths)
+(defun org-table-export (&optional file format)
   "Export table as a tab-separated file.
-Such a file can be imported into a spreadsheet program like Excel."
+Such a file can be imported into a spreadsheet program like Excel.
+FILE can be the output file name.  If not given, it will be taken from
+a TABLE_EXPORT_FILE property in the current entry or higher up in the
+hierarchy, or the user will be prompted for a file name.
+FORMAT can be an export format, of the same kind as it used when
+orgtbl-mode sends a table in a different format.  The default format can
+be found in the variable `org-table-export-default-format', but the function
+first checks if there is an export format specified in a TABLE_EXPORT_FORMAT
+property, locally or anywhere up in the hierarchy."
   (interactive)
+  (org-table-align) ;; make sure we have everything we need
   (let* ((beg (org-table-begin))
 	 (end (org-table-end))
-	 (table (buffer-substring beg end))
-	 (file (read-file-name "Export table to: "))
+	 (txt (buffer-substring-no-properties beg end))
+	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)
+		   (read-file-name "Export table to: ")))
+	 (format (or (org-entry-get beg "TABLE_EXPORT_FORMAT" t)
+		     org-table-export-default-format))
 	 buf)
     (unless (or (not (file-exists-p file))
 		(y-or-n-p (format "Overwrite file %s? " file)))
       (error "Abort"))
-    (with-current-buffer (find-file-noselect file)
-      (setq buf (current-buffer))
-      (erase-buffer)
-      (fundamental-mode)
-      (insert table)
-      (goto-char (point-min))
-      (while (re-search-forward "^[ \t]*|[ \t]*" nil t)
-	(replace-match "" t t)
-	(end-of-line 1))
-      (goto-char (point-min))
-      (while (re-search-forward "[ \t]*|[ \t]*$" nil t)
-	(replace-match "" t t)
-	(goto-char (min (1+ (point)) (point-max))))
-      (goto-char (point-min))
-      (while (re-search-forward "^-[-+]*$" nil t)
-	(replace-match "")
-	(if (looking-at "\n")
-	    (delete-char 1)))
-      (goto-char (point-min))
-      (while (re-search-forward "[ \t]*|[ \t]*" nil t)
-	(replace-match "\t" t t))
-      (save-buffer))
-    (kill-buffer buf)))
+    (message format)
+    
+    (if (string-match "\\([^ \t\r\n]+\\)\\( +.*\\)?" format)
+	(let* ((transform (intern (match-string 1 format)))
+	       (params (if (match-end 2)
+			   (read (concat "(" (match-string 2 format) ")"))))
+	       (skip (plist-get params :skip))
+	       (skipcols (plist-get params :skipcols))
+	       (lines (nthcdr (or skip 0) (org-split-string txt "[ \t]*\n[ \t]*")))
+	       (lines (org-table-clean-before-export lines))
+	       (i0 (if org-table-clean-did-remove-column 2 1))
+	       (table (mapcar
+		       (lambda (x)
+			 (if (string-match org-table-hline-regexp x)
+			     'hline
+			   (org-remove-by-index
+			    (org-split-string (org-trim x) "\\s-*|\\s-*")
+			    skipcols i0)))
+		       lines))
+	       (fun (if (= i0 2) 'cdr 'identity))
+	       (org-table-last-alignment
+		(org-remove-by-index (funcall fun org-table-last-alignment)
+				     skipcols i0))
+	       (org-table-last-column-widths
+		(org-remove-by-index (funcall fun org-table-last-column-widths)
+				     skipcols i0)))
+	  
+	  (unless (fboundp transform)
+	    (error "No such transformation function %s" transform))
+	  (setq txt (funcall transform table params))
+	  
+	  (with-current-buffer (find-file-noselect file)
+	    (setq buf (current-buffer))
+	    (erase-buffer)
+	    (fundamental-mode)
+	    (insert txt "\n")
+	    (save-buffer))
+	  (kill-buffer buf)
+	  (message "Export done."))
+      (error "TABLE_EXPORT_FORMAT invalid"))))
 
 (defvar org-table-aligned-begin-marker (make-marker)
   "Marker at the beginning of the table last aligned.
@@ -3431,8 +3467,6 @@ overwritten, and the table is not marked as requiring realignment."
 (defvar orgtbl-exp-regexp "^\\([-+]?[0-9][0-9.]*\\)[eE]\\([-+]?[0-9]+\\)$"
   "Regular expression matching exponentials as produced by calc.")
 
-(declare-function org-table-clean-before-export "org-exp" (lines))
-(declare-function org-format-org-table-html "org-exp" (lines &optional splice))
 (defun orgtbl-export (table target)
   (require 'org-exp)
   (let ((func (intern (concat "orgtbl-to-" (symbol-name target))))

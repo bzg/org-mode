@@ -876,6 +876,15 @@ Changing this variable requires a restart of Emacs to become effective."
 	      (const :tag "Tags" tag)
 	      (const :tag "Timestamps" date)))
 
+(defcustom org-make-link-description-function nil
+  "Function to use to generate link descriptions from links. If
+nil the link location will be used. This function must take two
+parameters; the first is the link and the second the description
+org-insert-link has generated, and should return the description
+to use."
+  :group 'org-link
+  :type 'function)
+
 (defgroup org-link-store nil
   "Options concerning storing links in Org-mode."
   :tag "Org Store Link"
@@ -2467,7 +2476,7 @@ collapsed state."
 	(org-end-of-subtree t)))))
 
 (org-autoload "org-archive"
-  '(org-archive-subtree org-archive-to-attic-sibling org-toggle-archive-tag))
+  '(org-archive-subtree org-archive-to-archive-sibling org-toggle-archive-tag))
 
 ;; Autoload Column View Code
 
@@ -4875,7 +4884,7 @@ WITH-CASE, the sorting considers case as well."
       (message
        (if plain-list-p
 	   "Sort %s: [a]lpha [n]umeric [t]ime [f]unc  A/N/T/F means reversed:"
-	 "Sort %s: [a]lpha [n]umeric [t]ime [p]riority p[r]operty [f]unc  A/N/T/P/F means reversed:")
+	 "Sort %s: [a]lpha [n]umeric [t]ime [p]riority p[r]operty todo[o]rder [f]unc  A/N/T/P/O/F means reversed:")
        what)
       (setq sorting-type (read-char-exclusive))
 
@@ -4966,6 +4975,10 @@ WITH-CASE, the sorting considers case as well."
 		 org-default-priority))
 	      ((= dcst ?r)
 	       (or (org-entry-get nil property) ""))
+	      ((= dcst ?o)
+	       (if (looking-at org-complex-heading-regexp)
+		   (- 9999 (length (member (match-string 2)
+					   org-todo-keywords-1)))))
 	      ((= dcst ?f)
 	       (if getkey-func
 		   (progn
@@ -6353,7 +6366,7 @@ This command can be called in any mode to insert a link in Org-mode syntax."
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
-(defun org-insert-link (&optional complete-file)
+(defun org-insert-link (&optional complete-file link-location)
   "Insert a link.  At the prompt, enter the link.
 
 Completion can be used to select a link previously stored with
@@ -6368,16 +6381,22 @@ be displayed in the buffer instead of the link.
 If there is already a link at point, this command will allow you to edit link
 and description parts.
 
-With a \\[universal-argument] prefix, prompts for a file to link to.  The file name can be
-selected using completion.  The path to the file will be relative to
-the current directory if the file is in the current directory or a
-subdirectory.  Otherwise, the link will be the absolute path as
-completed in the minibuffer (i.e. normally ~/path/to/file).
+With a \\[universal-argument] prefix, prompts for a file to link to. The file name can
+be selected using completion. The path to the file will be relative to the
+current directory if the file is in the current directory or a subdirectory.
+Otherwise, the link will be the absolute path as completed in the minibuffer
+\(i.e. normally ~/path/to/file).
 
-With two \\[universal-argument] prefixes, enforce an absolute path even if the file
-is in the current directory or below.
-With three \\[universal-argument] prefixes, negate the meaning of
-`org-keep-stored-link-after-insertion'."
+With two \\[universal-argument] prefixes, enforce an absolute path even if the file is in
+the current directory or below. With three \\[universal-argument] prefixes, negate the meaning
+of `org-keep-stored-link-after-insertion'.
+
+If `org-make-link-description-function' is non-nil, this function will be
+called with the link target, and the result will be the default
+link description.
+
+If the LINK-LOCATION parameter is non-nil, this value will be
+used as the link location instead of reading one interactively."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
 	 (region (if (org-region-active-p)
@@ -6385,8 +6404,10 @@ With three \\[universal-argument] prefixes, negate the meaning of
 	 (remove (and region (list (region-beginning) (region-end))))
 	 (desc region)
 	 tmphist ; byte-compile incorrectly complains about this
-	 link entry file)
+	 (link link-location)
+	 entry file)
     (cond
+     (link-location) ; specified by arg, just use it.
      ((org-in-regexp org-bracket-link-regexp 1)
       ;; We do have a link at point, and we are going to edit it.
       (setq remove (list (match-beginning 0) (match-end 0)))
@@ -6497,6 +6518,9 @@ With three \\[universal-argument] prefixes, negate the meaning of
 	(setq link (concat "file:" path))
 	(if (equal desc origpath)
 	    (setq desc path))))
+
+    (if org-make-link-description-function
+	(setq desc (funcall org-make-link-description-function link desc)))
 
     (setq desc (read-string "Description: " desc))
     (unless (string-match "\\S-" desc) (setq desc nil))
@@ -11545,7 +11569,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
 (org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
-(org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-attic-sibling)
+(org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-archive-sibling)
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
 (org-defkey org-mode-map "\C-c\C-j" 'org-goto)
 (org-defkey org-mode-map "\C-c\C-t" 'org-todo)
@@ -12460,14 +12484,25 @@ With optional NODE, go directly to that node."
 
 ;;;; Documentation
 
+(defun org-require-autoloaded-modules ()
+  (interactive)
+  (mapc 'require
+	'(org-agenda org-archive org-clock org-colview
+		     org-exp org-export-latex org-publish
+		     org-remember org-table)))
+
 (defun org-customize ()
   "Call the customize function with org as argument."
   (interactive)
+  (org-load-modules-maybe)
+  (org-require-autoloaded-modules)
   (customize-browse 'org))
 
 (defun org-create-customize-menu ()
   "Create a full customization menu for Org-mode, insert it into the menu."
   (interactive)
+  (org-load-modules-maybe)
+  (org-require-autoloaded-modules)
   (if (fboundp 'customize-menu-create)
       (progn
 	(easy-menu-change
