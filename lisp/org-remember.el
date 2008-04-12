@@ -704,7 +704,7 @@ See also the variable `org-reverse-note-order'."
 		(setq spos (org-refile-get-location "Heading: ")
 		      exitcmd 'return
 		      spos (nth 3 spos))))
-	     (t (error "this should not hapen")))
+	     (t (error "This should not happen")))
 	    (if (not spos) (throw 'quit nil)) ; return nil to show we did
 					; not handle this note
 	    (goto-char spos)
