@@ -1127,8 +1127,8 @@ on this string to produce the exported version."
 	 (exp-drawers (plist-get parameters :drawers))
 	 (outline-regexp "\\*+ ")
 	 target-alist tmp target level
-	 a b xx
-	 rtn p)
+	 a b xx rtn p)
+
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
       (insert string)
@@ -1181,16 +1181,17 @@ on this string to produce the exported version."
       ;; Find all headings and compute the targets for them
       (goto-char (point-min))
       (org-init-section-numbers)
-      (while (re-search-forward org-outline-regexp nil t)
-	(setq level (org-reduced-level
-		     (save-excursion (goto-char (point-at-bol))
-				     (org-outline-level))))
-	(setq target (org-solidify-link-text
-		      (format "sec-%s" (org-section-number level))))
-	(push (cons target target) target-alist)
-	(add-text-properties
-	 (point-at-bol) (point-at-eol)
-	 (list 'target target)))
+      (let ((re (concat "^" org-outline-regexp)))
+	(while (re-search-forward re nil t)
+	  (setq level (org-reduced-level
+		       (save-excursion (goto-char (point-at-bol))
+				       (org-outline-level))))
+	  (setq target (org-solidify-link-text
+			(format "sec-%s" (org-section-number level))))
+	  (push (cons target target) target-alist)
+	  (add-text-properties
+	   (point-at-bol) (point-at-eol)
+	   (list 'target target))))
 
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
