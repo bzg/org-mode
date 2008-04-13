@@ -3101,6 +3101,8 @@ The following commands are available:
 (defconst org-non-link-chars "]\t\n\r<>")
 (defvar org-link-types '("http" "https" "ftp" "mailto" "file" "news"
 			   "shell" "elisp"))
+(defvar org-link-types-re nil
+   "Matches a link that has a url-like prefix like \"http:\"")
 (defvar org-link-re-with-space nil
    "Matches a link with spaces, optional angular brackets around it.")
 (defvar org-link-re-with-space2 nil
@@ -3125,7 +3127,10 @@ Here is what the match groups contain after a match:
 (defun org-make-link-regexps ()
   "Update the link regular expressions.
 This should be called after the variable `org-link-types' has changed."
-  (setq org-link-re-with-space
+  (setq org-link-types-re
+	(concat
+	 "\\`\\(" (mapconcat 'identity org-link-types "\\|") "\\):")
+	org-link-re-with-space
 	(concat
 	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
@@ -6126,7 +6131,7 @@ For file links, arg negates `org-context-in-file-links'."
 		     ((org-on-heading-p) nil)
 		     ((org-region-active-p)
 		      (buffer-substring (region-beginning) (region-end)))
-		     (t (buffer-substring (point-at-bol) (point-at-eol)))))
+		     (t nil)))
 	  (when (or (null txt) (string-match "\\S-" txt))
 	    (setq cpltxt
 		  (concat cpltxt "::" (org-make-org-heading-search-string txt))
@@ -6815,8 +6820,8 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 						    org-emphasis-alist)
 					    "\\|") "\\)"))
 	(pos (point))
-	(pre "") (post "")
-	words re0 re1 re2 re3 re4 re5 re2a reall)
+	(pre nil) (post nil)
+	words re0 re1 re2 re3 re4_ re4 re5 re2a re2a_ reall)
     (cond
      ;; First check if there are any special
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
@@ -6826,7 +6831,8 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 	(and
 	 (re-search-forward
 	  (concat "<<" (regexp-quote s0) ">>") nil t)
-	 (setq pos (match-beginning 0))))
+	 (setq type 'dedicated
+	       pos (match-beginning 0))))
       ;; There is an exact target for this
       (goto-char pos))
      ((string-match "^/\\(.*\\)/$" s)
@@ -6849,17 +6855,21 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
        '(face nil mouse-face nil keymap nil fontified nil) s)
       ;; Make a series of regular expressions to find a match
       (setq words (org-split-string s "[ \n\r\t]+")
+
 	    re0 (concat "\\(<<" (regexp-quote s0) ">>\\)")
 	    re2 (concat markers "\\(" (mapconcat 'downcase words "[ \t]+")
 			"\\)" markers)
-	    re2a (concat "[ \t\r\n]\\(" (mapconcat 'downcase words "[ \t\r\n]+") "\\)[ \t\r\n]")
-	    re4 (concat "[^a-zA-Z_]\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
+	    re2a_ (concat "\\(" (mapconcat 'downcase words "[ \t\r\n]+") "\\)[ \t\r\n]")
+	    re2a (concat "[ \t\r\n]" re2a_)
+	    re4_ (concat "\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
+	    re4 (concat "[^a-zA-Z_]" re4_)
+
 	    re1 (concat pre re2 post)
-	    re3 (concat pre re4 post)
+	    re3 (concat pre (if pre re4_ re4) post)
 	    re5 (concat pre ".*" re4)
 	    re2 (concat pre re2)
-	    re2a (concat pre re2a)
-	    re4 (concat pre re4)
+	    re2a (concat pre (if pre re2a_ re2a))
+	    re4 (concat pre (if pre re4_ re4))
 	    reall (concat "\\(" re0 "\\)\\|\\(" re1 "\\)\\|\\(" re2
 			  "\\)\\|\\(" re3 "\\)\\|\\(" re4 "\\)\\|\\("
 			  re5 "\\)"
@@ -6868,7 +6878,8 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
        ((eq type 'org-occur) (org-occur reall))
        ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
        (t (goto-char (point-min))
-	  (if (or (org-search-not-self 1 re0 nil t)
+	  (setq type 'fuzzy)
+	  (if (or (and (org-search-not-self 1 re0 nil t) (setq type 'dedicated))
 		  (org-search-not-self 1 re1 nil t)
 		  (org-search-not-self 1 re2 nil t)
 		  (org-search-not-self 1 re2a nil t)
@@ -6885,7 +6896,8 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
       (if (search-forward s nil t)
 	  (goto-char (match-beginning 0))
 	(error "No match"))))
-    (and (org-mode-p) (org-show-context 'link-search))))
+    (and (org-mode-p) (org-show-context 'link-search))
+    type))
 
 (defun org-search-not-self (group &rest args)
   "Execute `re-search-forward', but only accept matches that do not

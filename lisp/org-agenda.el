@@ -486,7 +486,7 @@ Needs to be set before org.el is loaded."
   :group 'org-agenda-startup
   :type 'boolean)
 
-(defconst org-agenda-include-inactive-timestamps nil
+(defvar org-agenda-include-inactive-timestamps nil
   "Non-nil means, include inactive time stamps in agenda and timeline.")
 
 (defgroup org-agenda-windows nil
