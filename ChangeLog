@@ -1,5 +1,7 @@
 2008-04-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-mhe.el: Changed author name to Thomas Baumann.
+
 	* lisp/org-exp.el (org-export-preprocess-string): Renamed-from
 	`org-cleaned-string-for-export'.
 
