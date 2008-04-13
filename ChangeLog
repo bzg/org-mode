@@ -1,3 +1,28 @@
+2008-04-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-export-preprocess-string): Renamed-from
+	`org-cleaned-string-for-export'.
+
+	* lisp/org-export-latex.el (org-export-latex-preprocess): Renamed
+	from `org-export-latex-cleaned-string'.
+
+	* lisp/org-exp.el (org-export-html-style): Made target class look
+	like normal text.
+	(org-export-as-html): Make use of the better proprocessing in
+	`org-cleaned-string-for-export'.
+
+	* lisp/org.el (org-store-link): Link to headline when there is not
+	target and no region in an org-mode buffer when creating a link.
+
+	* lisp/org-exp.el (org-cleaned-string-for-export): Better
+	treatment of heuristic targets, many more internal links will now
+	work in HTML export.
+
+2008-04-12  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-link-types-re): New variable.
+	(org-make-link-regexps): Compute `org-link-types-re'.
+
 2008-04-10  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-clock.el (org-dblock-write:clocktable): Fixed bug with

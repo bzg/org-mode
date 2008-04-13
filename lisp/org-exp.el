@@ -32,7 +32,7 @@
 (eval-and-compile
   (require 'cl))
 
-(declare-function org-export-latex-cleaned-string "org-export-latex" ())
+(declare-function org-export-latex-preprocess "org-export-latex" ())
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-infojs" ())
 
@@ -437,7 +437,7 @@ Org-mode file."
   .timestamp { color: grey }
   .timestamp-kwd { color: CadetBlue }
   .tag { background-color:lightblue; font-weight:normal }
-  .target { background-color: lavender; }
+  .target { }
   pre {
 	border: 1pt solid #AEBDCC;
 	background-color: #F3F5F7;
@@ -1103,8 +1103,12 @@ translations.  There is currently no way for users to extend this.")
 
 ;;; General functions for all backends
 
-(defun org-cleaned-string-for-export (string &rest parameters)
-  "Cleanup a buffer STRING so that links can be created safely."
+(defun org-export-preprocess-string (string &rest parameters)
+  "Cleanup STRING so that that the true exported has a more consistent source.
+This function takes STRING, which should be a buffer-string of an org-file
+to export.  It then creates a temporary buffer where it does its job.
+The result is then again returned as a string, and the exporter works
+on this string to produce the exported version."
   (interactive)
   (let* ((re-radio (and org-target-link-regexp
 			(concat "\\([^<]\\)\\(" org-target-link-regexp "\\)")))
@@ -1122,12 +1126,15 @@ translations.  There is currently no way for users to extend this.")
 	 (drawers org-drawers)
 	 (exp-drawers (plist-get parameters :drawers))
 	 (outline-regexp "\\*+ ")
+	 target-alist tmp target level
 	 a b xx
 	 rtn p)
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
       (insert string)
       ;; Remove license-to-kill stuff
+      ;; The caller markes some stuff fo killing, stuff that has been
+      ;; used to create the page title, for example.
       (while (setq p (text-property-any (point-min) (point-max)
 					:org-license-to-kill t))
 	(delete-region p (next-single-property-change p :org-license-to-kill)))
@@ -1171,11 +1178,36 @@ translations.  There is currently no way for users to extend this.")
 		  b (org-end-of-subtree t))
 	    (if (> b a) (delete-region a b)))))
 
+      ;; Find all headings and compute the targets for them
+      (goto-char (point-min))
+      (org-init-section-numbers)
+      (while (re-search-forward org-outline-regexp nil t)
+	(setq level (org-reduced-level
+		     (save-excursion (goto-char (point-at-bol))
+				     (org-outline-level))))
+	(setq target (org-solidify-link-text
+		      (format "sec-%s" (org-section-number level))))
+	(push (cons target target) target-alist)
+	(add-text-properties
+	 (point-at-bol) (point-at-eol)
+	 (list 'target target)))
+
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
       (goto-char (point-min))
-      (while (re-search-forward "^#.*?\\(<<<?[^>\r\n]+>>>?\\).*" nil t)
-	(replace-match "\\1(INVISIBLE)"))
+      (while (re-search-forward "^#.*?\\(<<<?\\([^>\r\n]+\\)>>>?\\).*" nil t)
+	;; Check if the line before or after is a headline with a target
+	(if (setq target (or (get-text-property (point-at-bol 0) 'target)
+			     (get-text-property (point-at-bol 2) 'target)))
+	    (progn 
+	      ;; use the existing target in a neighboring line
+	      (setq tmp (match-string 2))
+	      (replace-match "")
+	      (and (looking-at "\n") (delete-char 1))
+	      (push (cons (org-solidify-link-text tmp) target)
+		    target-alist))
+	  ;; Make an invisible target
+	  (replace-match "\\1(INVISIBLE)")))
 
       ;; Protect backend specific stuff, throw away the others.
       (let ((formatters
@@ -1249,7 +1281,7 @@ translations.  There is currently no way for users to extend this.")
       ;; Specific LaTeX stuff
       (when latexp
 	(require 'org-export-latex nil)
-	(org-export-latex-cleaned-string))
+	(org-export-latex-preprocess))
 
       (when asciip
 	(org-export-ascii-clean-string))
@@ -1288,7 +1320,43 @@ translations.  There is currently no way for users to extend this.")
 	 (replace-match "\\1 \\3")
 	 (goto-char (match-beginning 0))))
 
+      ;; Find all internal links.  If they have a fuzzy match (i.e. not
+      ;; a *dedicated* target match, let the link  point to the
+      ;; correspinding section.
 
+      (goto-char (point-min))
+      (while (re-search-forward org-bracket-link-regexp nil t)
+	(org-if-unprotected
+	 (let* ((md (match-data))
+		(desc (match-end 2))
+		(link (org-link-unescape (match-string 1)))
+		(slink (org-solidify-link-text link))
+		found props pos
+		(target
+		 (or (cdr (assoc slink target-alist))
+		     (save-excursion
+		       (unless (string-match org-link-types-re link)
+			 (setq found (condition-case nil (org-link-search link) 
+				       (error nil)))
+			 (when (and found
+				    (or (org-on-heading-p)
+					(not (eq found 'dedicated))))
+			   (or (get-text-property (point) 'target)
+			       (get-text-property
+				(max (point-min)
+				     (1- (previous-single-property-change
+					  (point) 'target)))
+				'target))))))))
+	   (when target
+	     (set-match-data md)
+	     (goto-char (match-beginning 1))
+	     (setq props (text-properties-at (point)))
+	     (delete-region (match-beginning 1) (match-end 1))
+	     (setq pos (point))
+	     (insert target)
+	     (unless desc (insert "][" link))
+	     (add-text-properties pos (point) props)))))
+      
       ;; Normalize links: Convert angle and plain links into bracket links
       ;; Expand link abbreviations
       (goto-char (point-min))
@@ -1373,7 +1441,7 @@ translations.  There is currently no way for users to extend this.")
     (let* ((rtn
 	    (mapconcat
 	     'identity
-	     (org-split-string s "[ \t\r\n]+") "--"))
+	     (org-split-string s "[ \t\r\n]+") "=="))
 	   (a (assoc rtn alist)))
       (or (cdr a) rtn))))
 
@@ -1497,7 +1565,7 @@ underlined headlines.  The default is 3."
 	   (if (org-region-active-p) (region-beginning) (point-min))
 	   (if (org-region-active-p) (region-end) (point-max))))
 	 (lines (org-split-string
-		 (org-cleaned-string-for-export
+		 (org-export-preprocess-string
 		  region
 		  :for-ascii t
 		  :skip-before-1st-heading
@@ -2118,7 +2186,6 @@ PUB-DIR is set, use this as the publishing directory."
 	 (email       (plist-get opt-plist :email))
          (language    (plist-get opt-plist :language))
 	 (lang-words  nil)
-	 (target-alist nil) tg
 	 (head-count  0) cnt
 	 (start       0)
 	 (coding-system (and (boundp 'buffer-file-coding-system)
@@ -2137,7 +2204,7 @@ PUB-DIR is set, use this as the publishing directory."
            (if region-p (region-end) (point-max))))
          (lines
           (org-split-string
-	   (org-cleaned-string-for-export
+	   (org-export-preprocess-string
 	    region
 	    :emph-multiline t
 	    :for-html t
@@ -2281,14 +2348,10 @@ lang=\"%s\" xml:lang=\"%s\">
 					(push "</li>\n</ul>" thetoc))
 				      (push "\n" thetoc)))
 				;; Check for targets
-				(while (string-match org-target-regexp line)
-				  (setq tg (match-string 1 line)
-					line (replace-match
-					      (concat "@<span class=\"target\">" tg "@</span> ")
-					      t t line))
-				  (push (cons (org-solidify-link-text tg)
-					      (format "sec-%s" snumber))
-					target-alist))
+				(while (string-match org-any-target-regexp line)
+				  (setq line (replace-match
+					      (concat "@<span class=\"target\">" (match-string 1 line) "@</span> ")
+					      t t line)))
 				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				  (setq txt (replace-match "" t t txt)))
 				(push
@@ -2409,7 +2472,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (concat
 		     "<a href=\"#"
 		     (org-solidify-link-text
-		      (save-match-data (org-link-unescape path)) target-alist)
+		      (save-match-data (org-link-unescape path)) nil)
 		     "\">" desc "</a>")))
 	     ((member type '("http" "https"))
 	      ;; standard URL, just check if we need to inline an image
@@ -3184,7 +3247,9 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Insert a new level in HTML export.
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
-  (let ((l org-level-max) snumber)
+  (let ((target (and title (org-get-text-property-any 0 'target title)))
+	(l org-level-max)
+	snumber)
     (while (>= l level)
       (if (aref org-levels-open (1- l))
 	  (progn
@@ -3211,10 +3276,15 @@ When TITLE is nil, just close all open levels."
 	    (if (aref org-levels-open (1- level))
 		(progn
 		  (org-close-li)
-		  (insert "<li>" title "<br/>\n"))
+		  (if target
+		      (insert (format "<li id=\"%s\">" target) title "<br/>\n")
+		    (insert "<li>" title "<br/>\n")))
 	      (aset org-levels-open (1- level) t)
 	      (org-close-par-maybe)
-	      (insert "<ul>\n<li>" title "<br/>\n")))
+	      (if target
+		  (insert (format "<ul>\n<li id=\"%s\">" target)
+			  title "<br/>\n")
+		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
 	(setq snumber (org-section-number level))
 	(if (and org-export-with-section-numbers (not body-only))
@@ -3224,6 +3294,11 @@ When TITLE is nil, just close all open levels."
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s</h%d>\n<div id=\"text-%s\">\n"
 			snumber level level snumber title level snumber))
 	(org-open-par)))))
+
+(defun org-get-text-property-any (pos prop &optional object)
+  (or (get-text-property pos prop object)
+      (and (setq pos (next-single-property-change pos prop object))
+	   (get-text-property pos prop object))))
 
 (defun org-html-level-close (level max-outline-level)
   "Terminate one level in HTML export."

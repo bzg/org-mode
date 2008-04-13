@@ -89,6 +89,13 @@ in Org.  However, there are also monay bug fixes and new features.
     For details see the documentation provided by Sebastian Rose
     together with org-info.js.
 
+*** Export of internal links to HTML
+
+    The export of internal links to html now works a lot better.
+    Most internal links that work while editing an Org file
+    inside Emacs will now also work the the corresponding HTML
+    file.
+
 *** Improvements to clocktable
 
     - The clocktable is now much more flexible and user friendly
