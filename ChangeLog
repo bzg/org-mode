@@ -1,5 +1,9 @@
 2008-04-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-table.el (org-table-make-reference): Extra parenthesis
+	around single fields, to make sure that algebraic formulas get
+	correctly interpreted by calc.
+
 	* lisp/org-mhe.el: Changed author name to Thomas Baumann.
 
 	* lisp/org-exp.el (org-export-preprocess-string): Renamed-from

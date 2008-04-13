@@ -2298,7 +2298,8 @@ LISPP means to return something appropriate for a Lisp list."
 	      elements
 	    (prin1-to-string (if numbers (string-to-number elements) elements)))
 	(if (equal elements "") (setq elements "0"))
-	(if numbers (number-to-string (string-to-number elements)) elements))
+	(if numbers (setq elements (number-to-string (string-to-number elements))))
+	(concat "(" elements ")"))
     (unless keep-empty
       (setq elements
 	    (delq nil
