@@ -1,3 +1,13 @@
+2008-04-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-export-run-in-background): New option.
+
+	* lisp/org.el (org-open-file): Allow a batch process to trigger
+	waiting after executing a system command.
+
+	* lisp/org-exp.el (org-export-icalendar): Allow a batch process to
+	trigger waiting after executing a system command.
+
 2008-04-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-table.el (org-table-make-reference): Extra parenthesis

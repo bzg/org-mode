@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.01
+;; Version: 6.02pre-01
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -48,6 +48,21 @@
 
 ;; FIXME
 (defvar org-export-publishing-directory nil)
+
+(defcustom org-export-run-in-background nil
+  "Non-nil means export and publishing commands will run in background.
+This works by starting up a separate Emacs process visiting the same file
+and doing the export from there.
+Not all export commands are affected by this - only the ones which
+actually write to a file, and that do not depend on the buffer state.
+
+If this option is nil, you can still get background export by calling
+`org-export' with a double prefix arg: `C-u C-u C-c C-e'.
+
+If this option is t, the double prefix can be used to exceptionally
+force an export command into the current process."
+  :group 'org-export-general
+  :type 'boolean)
 
 (defcustom org-export-with-special-strings t
   "Non-nil means, interpret \"\-\", \"--\" and \"---\" for export.
@@ -747,9 +762,17 @@ modified) list.")
 
 ;;;###autoload
 (defun org-export (&optional arg)
-  "Export dispatcher for Org-mode."
+  "Export dispatcher for Org-mode.
+When `org-export-run-in-background' is non-nil, try to run the command
+in the background.  This will be done only for commands that write
+to a file.  For details see the docstring of `org-export-run-in-background'.
+
+The prefix argument ARG will be passed to the exporter.  However, if
+ARG is a double universal prefix `C-u C-u', that means to inverse the
+value of `org-export-run-in-background'."
   (interactive "P")
-  (let ((help "[t]   insert the export option template
+  (let* ((bg (org-xor (equal arg '(16)) org-export-run-in-background))
+	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
 
 \[a] export as ASCII
@@ -771,25 +794,25 @@ modified) list.")
 \[P] publish current project
 \[X] publish... (project will be prompted for)
 \[A] publish all projects")
-	(cmds
-	 '((?t org-insert-export-options-template nil)
-	   (?v org-export-visible nil)
-	   (?a org-export-as-ascii t)
-	   (?h org-export-as-html t)
-	   (?b org-export-as-html-and-open t)
-	   (?H org-export-as-html-to-buffer nil)
-	   (?R org-export-region-as-html t)
-	   (?x org-export-as-xoxo t)
-	   (?l org-export-as-latex t)
-	   (?L org-export-as-latex-to-buffer nil)
-	   (?i org-export-icalendar-this-file t)
-	   (?I org-export-icalendar-all-agenda-files t)
-	   (?c org-export-icalendar-combine-agenda-files t)
-	   (?F org-publish-current-file t)
-	   (?P org-publish-current-project t)
-	   (?X org-publish t)
-	   (?A org-publish-all t)))
-	r1 r2 ass)
+	 (cmds
+	  '((?t org-insert-export-options-template nil)
+	    (?v org-export-visible nil)
+	    (?a org-export-as-ascii t)
+	    (?h org-export-as-html t)
+	    (?b org-export-as-html-and-open t)
+	    (?H org-export-as-html-to-buffer nil)
+	    (?R org-export-region-as-html nil)
+	    (?x org-export-as-xoxo t)
+	    (?l org-export-as-latex t)
+	    (?L org-export-as-latex-to-buffer nil)
+	    (?i org-export-icalendar-this-file t)
+	    (?I org-export-icalendar-all-agenda-files t)
+	    (?c org-export-icalendar-combine-agenda-files t)
+	    (?F org-publish-current-file t)
+	    (?P org-publish-current-project t)
+	    (?X org-publish t)
+	    (?A org-publish-all t)))
+	 r1 r2 ass)
     (save-window-excursion
       (delete-other-windows)
       (with-output-to-temp-buffer "*Org Export/Publishing Help*"
@@ -799,29 +822,27 @@ modified) list.")
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))
       (error "No command associated with key %c" r1))
-    (cond
-     ((and (equal arg '(16)) (nth 2 ass))
-      (let ((p (start-process
-		(concat "Exporting " (file-name-nondirectory (buffer-file-name)))
-		"*Org Export Processes*"
-		"emacs" "-batch"
-		"-l" user-init-file
-		"--eval" "(require 'org-exp)"
-		(buffer-file-name)
-		(concat "Exporting " (file-name-nondirectory (buffer-file-name)))
-		"-f" (symbol-name (nth 1 ass)))))
-	(set-process-sentinel p 'org-export-process-sentinel)
-	(message "Process \"%s\": started in background" p)))
-     ((equal arg '(16))
-      (error "Background processing for export command `%c' is not allowed"
-	     (car ass)))
-     (t
-      (call-interactively (nth 1 ass))))))
+    (if (and bg (nth 2 ass))
+	;; execute in background
+	(let ((p (start-process
+		  (concat "Exporting " (file-name-nondirectory (buffer-file-name)))
+		  "*Org Processes*"
+		  (expand-file-name invocation-name invocation-directory)
+		  "-batch"
+		  "-l" user-init-file
+		  "--eval" "(require 'org-exp)"
+		  "--eval" "(setq org-wait .2)"
+		  (buffer-file-name)
+		  "-f" (symbol-name (nth 1 ass)))))
+	  (set-process-sentinel p 'org-export-process-sentinel)
+	  (message "Background process \"%s\": started" p))
+      ;; background processing not requested, or not possible
+      (call-interactively (nth 1 ass)))))
 
 (defun org-export-process-sentinel (process status)
   (if (string-match "\n+\\'" status)
       (setq status (substring status 0 -1)))
-  (message "Process \"%s\": %s" process status))
+  (message "Background process \"%s\": %s" process status))
 
 (defconst org-html-entities
   '(("nbsp")
@@ -2089,7 +2110,7 @@ a Lisp program could call this function in the following way:
   (setq html (org-export-region-as-html beg end t 'string))
 
 When called interactively, the output buffer is selected, and shown
-in a window.  A non-interactive call will only retunr the buffer."
+in a window.  A non-interactive call will only return the buffer."
   (interactive "r\nP")
   (when (interactive-p)
     (setq buffer "*Org HTML Export*"))
@@ -3398,7 +3419,9 @@ file and store it under the name `org-combined-agenda-icalendar-file'."
 	      (org-finish-icalendar-file)
 	      (set-buffer ical-buffer)
 	      (save-buffer)
-	      (run-hooks 'org-after-save-iCalendar-file-hook)))))
+	      (run-hooks 'org-after-save-iCalendar-file-hook)
+	      (and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
+	      ))))
       (org-release-buffers org-agenda-new-buffers))))
 
 (defvar org-after-save-iCalendar-file-hook nil

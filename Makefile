@@ -263,3 +263,34 @@ push:
 pushtag:
 	git-tag -m "Adding tag" -a $(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
+
+
+
+# Dependencies
+
+lisp/org.elc:           lisp/org-macs.elc lisp/org-compat.elc lisp/org-faces.elc
+lisp/org-agenda.elc:       lisp/org.elc
+lisp/org-archive.elc:      lisp/org.elc
+lisp/org-bbdb.elc:         lisp/org.elc
+lisp/org-bibtex.elc:       lisp/org.elc
+lisp/org-clock.elc:        lisp/org.elc
+lisp/org-colview.elc:      lisp/org.elc
+lisp/org-compat.elc:
+lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
+lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
+lisp/org-faces.elc:                    lisp/org-macs.elc lisp/org-compat.elc
+lisp/org-gnus.elc:         lisp/org.elc
+lisp/org-info.elc:         lisp/org.elc
+lisp/org-infojs.elc:       lisp/org.elc lisp/org-exp.elc
+lisp/org-irc.elc:          lisp/org.elc
+lisp/org-mac-message.elc:  lisp/org.elc
+lisp/org-macs.elc:
+lisp/org-mew.elc:          lisp/org.elc
+lisp/org-mhe.elc:          lisp/org.elc
+lisp/org-mouse.elc:        lisp/org.elc
+lisp/org-publish.elc:
+lisp/org-remember.elc:     lisp/org.elc
+lisp/org-rmail.elc:        lisp/org.elc
+lisp/org-table.elc:        lisp/org.elc
+lisp/org-vm.elc:           lisp/org.elc
+lisp/org-wl.elc:           lisp/org.elc

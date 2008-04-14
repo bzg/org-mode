@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.01
+;; Version: 6.02pre-01
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -93,7 +93,7 @@
 
 ;;; Version
 
-(defconst org-version "6.01"
+(defconst org-version "6.02pre-01"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -7024,7 +7024,7 @@ onto the ring."
 
 
 ;;; Following file links
-
+(defvar org-wait nil)
 (defun org-open-file (path &optional in-emacs line search)
   "Open the file at PATH.
 First, this expands any special file name abbreviations.  Then the
@@ -7080,7 +7080,9 @@ If the file does not exist, an error is thrown."
 		   (save-match-data (shell-quote-argument file))
 		   t t cmd)))
       (save-window-excursion
-	(start-process-shell-command cmd nil cmd)))
+	(start-process-shell-command cmd nil cmd)
+	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
+	))
      ((or (stringp cmd)
 	  (eq cmd 'emacs))
       (funcall (cdr (assq 'file org-link-frame-setup)) file)

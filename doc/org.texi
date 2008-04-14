@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.01
+@set VERSION 6.02pre-01
 @set DATE April 2008
 
 @dircategory Emacs
@@ -6439,11 +6439,15 @@ produced.  @xref{Text interpretation}, for more details.
 @item C-c C-e
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
-command.  The prefix arg is passed through to the exporter.
+command.  The prefix arg is passed through to the exporter.  If the option
+@code{org-export-run-in-background} is set, Org will run the command in the
+background if that seems useful for the specific command (i.e. commands that
+write to a file).
 @kindex C-u C-u C-c C-e
 @item C-u C-u C-c C-e
-Try to execute an export/publishing command in the background.  This is only
-allowed for commands that do not expect to use the output of the exporter.
+Call an the exporter, but reverse the setting of
+@code{org-export-run-in-background}, i.e. request background processing if
+not set, or force processing in the current Emacs process if st.
 @end table
 
 @menu
