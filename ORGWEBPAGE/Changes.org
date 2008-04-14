@@ -11,6 +11,21 @@ This is a new major release, mostly because of structural changes
 in Org.  However, since this took a while, there is also a long
 list of small improvements and some new significant features.
 
+** Overview
+
+   - The Org distribution has a new structure
+   - New system for selecting modules to load
+   - New archiving mechanism: The Archive Sibling
+   - Support for Sebastian Rose's JavaScript org-info.js.
+   - Internal links work now better in HTML export
+   - Export commands can be done in the background
+   - Flexible setting of the time block shown by the clock table
+   - Clock table can be included in the agenda
+   - Support for ISO week dates (ISO 6801)
+   - Tag inheritance can be limited to a subset of all tags
+   - Entries can be sorted by TODO keyword
+   - And some more small fixes and improvements
+
 ** Incompatible changes
 
 *** The Org distribution has a new structure
