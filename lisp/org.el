@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.01a
+;; Version: 6.01b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -93,7 +93,7 @@
 
 ;;; Version
 
-(defconst org-version "6.01a"
+(defconst org-version "6.01b"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -2474,6 +2474,8 @@ collapsed state."
       (while (re-search-forward re end t)
 	(and (org-on-heading-p) (hide-subtree))
 	(org-end-of-subtree t)))))
+
+(defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
 (org-autoload "org-archive"
   '(org-archive-subtree org-archive-to-archive-sibling org-toggle-archive-tag))

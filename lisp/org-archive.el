@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.01a
+;; Version: 6.01b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -128,8 +128,6 @@ information."
 	  (const :tag "Inherited tags" itags)
 	  (const :tag "Outline path" olpath)
 	  (const :tag "Local tags" ltags)))
-
-(defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
 (defun org-archive-subtree (&optional find-done)
   "Move the current subtree to the archive.
