@@ -234,6 +234,10 @@ upload_release:
 upload_manual:
 	lftp -f ../org-mode-proprietary/ftp_upload_manual_legito
 
+relup0:
+	make release
+	make upload_release
+
 relup:
 	make release
 	make upload_release
@@ -263,6 +267,10 @@ push:
 pushtag:
 	git-tag -m "Adding tag" -a $(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
+
+pushreleasetag:
+	git-tag -m "Adding tag" -a $(TAG)
+	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
 
 
 
