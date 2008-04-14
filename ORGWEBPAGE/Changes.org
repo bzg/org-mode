@@ -1,24 +1,36 @@
 #   -*- mode: org; org-export-publishing-directory: "tmp"; fill-column: 65 -*-
 
-#+TITLE: Org-mode list of User-visible changes
+#+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 
-* Version 6.00
+* Version 6.01
 
 This is a new major release, mostly because of structural changes
-in Org.  However, there are also monay bug fixes and new features.
+in Org.  However, since this took a while, there is also a long
+list of small improvements and some new significant features.
+
+** Incompatible changes
+
+*** The Org distribution has a new structure
+
+    In the distribution files as well as in the GIT repository,
+    the lisp files are now located in a subdirectory "lisp", and
+    the documentation files are located in a subdirectory "doc".
+    If you are running Org directly from the unpacked
+    distribution archive (zip or tar file, or GIT repository),
+    you need to modify your settings for load-path accordingly.
 
 ** Details
 
 *** The Org distribution has a new structure
 
-    In the distribution files as well as in the git repository,
+    In the distribution files as well as in the GIT repository,
     the lisp files are now located in a subdirectory "lisp", and
     the documentation files are located in a subdirectory "doc".
     If you are running Org directly from the unpacked
-    distribtuion archive (zip or tar file, or git repository),
+    distribution archive (zip or tar file, or GIT repository),
     you need to modify your settings for load-path accordingly.
 
 *** Loading modules
@@ -26,43 +38,44 @@ in Org.  However, there are also monay bug fixes and new features.
     Org-mode has now a system for loading modules by simply
     configuring an option that lists all the modules you want to
     use.  Customize the variable `org-modules'.  That variable
-    lists modules that are part of the Org-mode core (and in this
-    way part of Emacs), as well as contributed packages that will
-    only be available when you have installed them properly (most
-    likely by downloading the distribution and adding
-    /path/to/orgdir/contrib/lisp to your load path).
+    lists both modules that are part of the Org-mode core (and in
+    this way part of Emacs), and modules that are contributed
+    packages.  Contributed modules will only be available when
+    you have installed them properly (most likely by downloading
+    the distribution and adding /path/to/orgdir/contrib/lisp to
+    your load path).
 
 *** New archiving mechanism: The Archive Sibling
 
     There is a new method to archive entries in the current file:
     By moving it to a sibling called the /Archive Sibling/.  That
     sibling has the heading "Archive" and also carries the
-    ARCHIVE tag.  It seems to me that this is a great way to do
-    archiving inside a project, to get parts of the project out
-    of the way and to wait with true archiving (moving to another
-    file) until the entire project done.  Archiving to a sibling
-    keep much of the context like inherited tags and approximate
-    tree position in tact, so Org is adding only a single
-    property, the ARCHIVE_TIME.
+    ARCHIVE tag.  This can be a great way to do archiving inside
+    a project, to get parts of the project out of the way and to
+    wait with true archiving (moving to another file) until the
+    entire project is done.  Archiving to a sibling keeps much of
+    the context, for example inherited tags and approximate tree
+    position in tact.
 
     The key binding for the is "C-c C-x A", and from the agenda
     buffer you can simply use "A".
 
     Thanks to Ilya Shlyakhter for this rather clever idea.
 
-*** Support for Sebastian Rose's Javasript org-info.js.
+*** Support for Sebastian Rose's JavaScript org-info.js.
 
     This fascinating program allows a completely new viewing
-    experience for web pages created from Org files, valuable in
-    particular for longish documents.  The same document can be
-    viewed in differnet ways, and switching between the views as
-    well as navigation uses single-key commands.
+    experience for web pages created from Org files.  The same
+    document can be viewed in different ways, and switching
+    between the views as well as navigation uses single-key
+    commands.
 
-    There is an Info-like interface where you can jump through
-    the sections of the document with the `n' and `p' keys (and
-    others).  And there is a folding interface where you can fold
-    the document much like you can fold it in org-mode in Emacs,
-    and cycle throught the visibility both locally and globally.
+    One of the view types is an /Info-like/ interface where you
+    can jump through the sections of the document with the `n'
+    and `p' keys (and others).  There is also a /folding/
+    interface where you can fold the document much like you can
+    fold it in org-mode in Emacs, and cycle through the
+    visibility both locally and globally.
 
     To set this up, all you need to do is to make sure that
     org-infojs.el gets loaded (customize the variable org-modules
@@ -71,30 +84,38 @@ in Org.  However, there are also monay bug fixes and new features.
     : #+INFOJS_OPT: view:info
 
     In that line, you can configure the initial view and other
-    settings.  Available views are =info= for the info-lke
+    settings.  Available views are =info= for the info-like
     interface, and =overview=, =content=, and =showall= for the
     folding interface.  See the manual for more details.  The
-    JavaScript program is currently being served from
-    orgmode.org, and your exported HTML files will automatically
-    get it from there.  However, you may want to be independent
-    of the existence and stability of orgmode.org and install a
-    copy locally.  Then you need to change the path from which
-    the script is loaded, either by using something like
+    JavaScript program is served from
+    http://orgmode.org/org-info.js, and your exported HTML files
+    will automatically get it from there.  However, you may want
+    to be independent of the existence and stability of
+    orgmode.org and install a copy locally.  Then you need to
+    change the path from which the script is loaded, either by
+    using something like
 
     : #+INFOJS_OPT: view:info path:../scripts/org-info.js
 
     or by configuring the variable =org-infojs-options=.
 
-
     For details see the documentation provided by Sebastian Rose
     together with org-info.js.
 
-*** Export of internal links to HTML
+*** Export improvements
 
-    The export of internal links to html now works a lot better.
-    Most internal links that work while editing an Org file
-    inside Emacs will now also work the the corresponding HTML
-    file.
+    - The export of internal links to HTML now works a lot
+      better.  Most internal links that work while editing an Org
+      file inside Emacs will now also work the the corresponding
+      HTML file.
+
+    - You can run many of the export commands in the background
+      by using `C-c C-u C-c C-e' in order to start the process.
+      RIght now this will only work if "emacs" is the right
+      command to get to your Emacs executable - I hope to make
+      this less system dependent in the future.
+
+    Both these are based on requests by Ilya Shlyakhter.
 
 *** Improvements to clocktable
 
@@ -121,31 +142,29 @@ in Org.  However, there are also monay bug fixes and new features.
 
 
       What is more, you can now use the =S-left= and =S-right=
-      keys while the cursor is on the =#+BEGIN: clocktable= line
-      and the the time block around.  If the current block is
-      =today=, =S-left= with switch to yesterday.  If the current
-      block is =2008-W14=, =S-right= will switch to the following
-      week.
+      keys to shift the time block around.  The cursor needs to
+      be in the =#+BEGIN: clocktable= line for this to work.  If
+      the current block is =today=, =S-left= with switch to
+      yesterday.  If the current block is =2008-W14=, =S-right=
+      will switch to the following week.
 
     - When the clocktable is collecting from several files, the
       total time for each file will now also be listed.  This was
       a request from Bernt Hansen.
 
-
-    - If you turn on the new clockreport mode with the "R" key in
+    - If you turn on the new clock report mode with the "R" key in
       the agenda, a clock table will be attached to the agenda,
       showing the clock report for the file scope and time
       interval of the agenda view.  To turn this on permanently,
       configure the variable
-      =org-agenda-start-with-clockreport-mode=.  To modify the
-      properties of the table, in particula the =:maxlevel=
+      =org-agenda-start-with-clock report-mode=.  To modify the
+      properties of the table, in particular the =:maxlevel=
       depth, configure =org-agenda-clockreport-parameter-plist=.
 
 *** Support for ISO week dates (ISO 6801)
 
-    Dates in the agenda now show the ISO week an day
-    specification, in the form =W08 2=, meaning Tuesday of
-    week 2.
+    The agenda now shows the ISO week for the displayed dates, in
+    the form =W08= for week 8.
 
     The keys =d=, =w=, =m=, and =y= in the agenda view now accept
     prefix arguments.  Remember that in the agenda, you can
@@ -192,13 +211,6 @@ in Org.  However, there are also monay bug fixes and new features.
       during search, so that searching for the word "Nasim" will
       also match in "Nasim's".
 
-*** Changes to property API
-
-    The INHERIT flag to the function =org-entry-get= can be set
-    to the symbol =selective=.  If this is the case, then the
-    value of the property will be retrieved using inheritance if
-    and only if the setting in =org-use-property-inheritance=
-    selects the property for inheritance.
 
 *** Misc
     
@@ -212,11 +224,20 @@ in Org.  However, there are also monay bug fixes and new features.
       =org-use-property-inheritance=, so that you can now select
       properties for inheritance my name.
 
+    - The INHERIT flag to the function =org-entry-get= can be set
+      to the symbol =selective=.  If this is the case, then the
+      value of the property will be retrieved using inheritance
+      if and only if the setting in
+      =org-use-property-inheritance= selects the property for
+      inheritance.
+
     - There are now special faces for the date lines in the
       agenda/timeline buffers, and another special face for days
-      that fall on a weekend: `org-agenda-date' and
-      `org-agenda-date-weekend'.
-      
+      that fall on a weekend: =org-agenda-date= and
+      =org-agenda-date-weekend=.  Both these faces are initially
+      similar to the =org-agenda-structure= face, but you can
+      customize them freely.
+
     - When an entry already has a scheduling or deadline time
       stamp, calling `C-c C-s' or `C-c C-d', respectively, will
       now use that old date as the default, and you can can use
@@ -227,14 +248,16 @@ in Org.  However, there are also monay bug fixes and new features.
       This was an omission in the earlier implementation, spotted
       by Wanrong Lin.  Thanks!
       
-    - File names in remember templates can be relative, they will
-      be interpreted relative to =org-directory=.
-      
-    - The handling of the cliboard when inserting into remember
+    - File names in remember templates can be relative, if they
+      are, they will be interpreted relative to =org-directory=.
+
+    - The handling of the clipboard when inserting into remember
       templates is now much better, and gives more control on what
       should be inserted with new %-escapes:
       
-      - =%c= - Now always insert to head of the kill ring
+      - =%c= - Now always insert the head of the kill ring, never
+        the X clipboard.
+
       - =%x= - Insert the content of the X clipboard. This is the
 	first non-empty value from the PRIMARY, SECONDARY and
 	CLIPBOARD X clipboards. 
@@ -263,15 +286,12 @@ in Org.  However, there are also monay bug fixes and new features.
 
       Thanks to James TD Smith for this patch.
 
-    - Entries can be sorted by TODO keyword, and the orde is given
+    - Entries can be sorted by TODO keyword, and the order is given
       by the definition sequence of the TODO keywords in the
       variable =org-todo-keywords=, or in the =#+TODO= line.  Use
       the "o" key when sorting with =C-c ^=.
       
       Thanks to James TD Smith for this patch.
-
-
-
 
 
 * Version 5.23

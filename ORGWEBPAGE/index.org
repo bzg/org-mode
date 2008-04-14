@@ -89,10 +89,11 @@ More information on this page: http://repo.or.cz/w/org-mode.git
 ** Worg - user-driven knowledge-base about org-mode
 
 [[http://www.legito.net/worg/][Worg]], created by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]], is a setup to allow users to jointly
-edit a number of Org-mode files containing documentation about Org-mode.
-This is something like a wiki.  If you'd like to contribute your own
-setup, screenshots, tutorials etc, please go to [[http://www.legito.net/worg/][the Worg page]], and start
-from there.
+edit a number of Org-mode files containing documentation about
+Org-mode.  This is something like a wiki, but with the advantage that
+you do not have to be online to modify a file.  If you'd like to
+contribute your own setup, screenshots, tutorials etc, please go to
+[[http://www.legito.net/worg/][the Worg page]], and start from there.
 
 ** Tutorials
 

@@ -748,7 +748,7 @@ modified) list.")
 ;;;###autoload
 (defun org-export (&optional arg)
   "Export dispatcher for Org-mode."
-  (interactive)
+  (interactive "P")
   (let ((help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
 
@@ -772,23 +772,23 @@ modified) list.")
 \[X] publish... (project will be prompted for)
 \[A] publish all projects")
 	(cmds
-	 '((?t . org-insert-export-options-template)
-	   (?v . org-export-visible)
-	   (?a . org-export-as-ascii)
-	   (?h . org-export-as-html)
-	   (?b . org-export-as-html-and-open)
-	   (?H . org-export-as-html-to-buffer)
-	   (?R . org-export-region-as-html)
-	   (?x . org-export-as-xoxo)
-	   (?l . org-export-as-latex)
-	   (?L . org-export-as-latex-to-buffer)
-	   (?i . org-export-icalendar-this-file)
-	   (?I . org-export-icalendar-all-agenda-files)
-	   (?c . org-export-icalendar-combine-agenda-files)
-	   (?F . org-publish-current-file)
-	   (?P . org-publish-current-project)
-	   (?X . org-publish)
-	   (?A . org-publish-all)))
+	 '((?t org-insert-export-options-template nil)
+	   (?v org-export-visible nil)
+	   (?a org-export-as-ascii t)
+	   (?h org-export-as-html t)
+	   (?b org-export-as-html-and-open t)
+	   (?H org-export-as-html-to-buffer nil)
+	   (?R org-export-region-as-html t)
+	   (?x org-export-as-xoxo t)
+	   (?l org-export-as-latex t)
+	   (?L org-export-as-latex-to-buffer nil)
+	   (?i org-export-icalendar-this-file t)
+	   (?I org-export-icalendar-all-agenda-files t)
+	   (?c org-export-icalendar-combine-agenda-files t)
+	   (?F org-publish-current-file t)
+	   (?P org-publish-current-project t)
+	   (?X org-publish t)
+	   (?A org-publish-all t)))
 	r1 r2 ass)
     (save-window-excursion
       (delete-other-windows)
@@ -797,9 +797,31 @@ modified) list.")
       (message "Select command: ")
       (setq r1 (read-char-exclusive)))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
-    (if (setq ass (assq r2 cmds))
-	(call-interactively (cdr ass))
-      (error "No command associated with key %c" r1))))
+    (unless (setq ass (assq r2 cmds))
+      (error "No command associated with key %c" r1))
+    (cond
+     ((and (equal arg '(16)) (nth 2 ass))
+      (let ((p (start-process
+		(concat "Exporting " (file-name-nondirectory (buffer-file-name)))
+		"*Org Export Processes*"
+		"emacs" "-batch"
+		"-l" user-init-file
+		"--eval" "(require 'org-exp)"
+		(buffer-file-name)
+		(concat "Exporting " (file-name-nondirectory (buffer-file-name)))
+		"-f" (symbol-name (nth 1 ass)))))
+	(set-process-sentinel p 'org-export-process-sentinel)
+	(message "Process \"%s\": started in background" p)))
+     ((equal arg '(16))
+      (error "Background processing for export command `%c' is not allowed"
+	     (car ass)))
+     (t
+      (call-interactively (nth 1 ass))))))
+
+(defun org-export-process-sentinel (process status)
+  (if (string-match "\n+\\'" status)
+      (setq status (substring status 0 -1)))
+  (message "Process \"%s\": %s" process status))
 
 (defconst org-html-entities
   '(("nbsp")
