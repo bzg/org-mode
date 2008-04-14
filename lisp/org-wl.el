@@ -5,7 +5,7 @@
 ;; Author: Tokuya Kameshima <kames at fa2 dot so-net dot ne dot jp>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.00pre-6
+;; Version: 6.01
 ;;
 ;; This file is part of GNU Emacs.
 ;;

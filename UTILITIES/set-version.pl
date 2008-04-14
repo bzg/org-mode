@@ -1,5 +1,6 @@
 #!/usr/bin/perl
 $version = $ARGV[0];
+die "No version given" unless $version=~/\S/;
 $date = `date "+%B %Y"`; chomp $date;
 $year = `date "+%Y"` ; chomp $year;
 

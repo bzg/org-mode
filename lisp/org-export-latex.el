@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-export-latex.el
-;; Version: 6.00pre-6
+;; Version: 6.01
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: org, wp, tex
