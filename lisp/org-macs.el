@@ -90,7 +90,6 @@ We use a macro so that the test can happen at compilation time."
 
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
-  (declare (indent 1) (debug t))
   `(save-excursion
      (if (markerp pom) (set-buffer (marker-buffer pom)))
      (save-excursion
@@ -102,13 +101,11 @@ We use a macro so that the test can happen at compilation time."
 
 (defmacro org-if-unprotected (&rest body)
   "Execute BODY if there is no `org-protected' text property at point."
-  (declare (debug t))
   `(unless (get-text-property (point) 'org-protected)
      ,@body))
 
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."
-  (declare (indent 1) (debug t))
   `(let ((_cline (org-current-line))
 	 (_cmd this-command)
 	 (_buf1 (current-buffer))
@@ -200,7 +197,6 @@ we turn off invisibility temporarily.  Use this in a `let' form."
 
 (defun org-autoload (file functions)
   "Establish autoload for all FUNCTIONS in FILE, if not boutd already."
-  (declare (indent 1) (debug t))
   (let ((d (format "Documentation will be available after `%s.el' is loaded."
 		   file))
 	f)

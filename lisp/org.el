@@ -12303,19 +12303,13 @@ See the individual commands for more information."
 (easy-menu-define org-org-menu org-mode-map "Org menu"
   '("Org"
     ("Show/Hide"
-     ["Cycle Visibility" org-cycle :active (or (bobp) (outline-on-heading-p))
-      :help "Cycle subtree visibility: folded->children->all->folded"]
-     ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))
-      :help "Cycle global visibility: overview->content->all"]
-     ["Sparse Tree..." org-sparse-tree
-      :help "Create sparse trees using different search criteria"]
-     ["Reveal Context" org-reveal :active t
-      :help "Show hidden context around point, including the outline hierarchy"]
-     ["Show All" show-all :active t
-      :help "Show all text in the buffer, including drawers"]
+     ["Cycle Visibility" org-cycle :active (or (bobp) (outline-on-heading-p))]
+     ["Cycle Global Visibility" org-shifttab :active (not (org-at-table-p))]
+     ["Sparse Tree..." org-sparse-tree t]
+     ["Reveal Context" org-reveal t]
+     ["Show All" show-all t]
      "--"
-     ["Subtree to indirect buffer" org-tree-to-indirect-buffer :active t
-      :help "Open the subtree at point in a separate window, using an indirect buffer"])
+     ["Subtree to indirect buffer" org-tree-to-indirect-buffer t])
     "--"
     ["New Heading" org-insert-heading t]
     ("Navigate Headings"
@@ -12432,17 +12426,17 @@ See the individual commands for more information."
      ["Insert Link" org-insert-link t]
      ["Follow Link" org-open-at-point t]
      "--"
-     ["Next link" org-next-link :help "Move forward to next link in the buffer"]
+     ["Next link" org-next-link t]
      ["Previous link" org-previous-link t]
      "--"
      ["Descriptive Links"
       (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio :help "Hide link part of links, only show the description"
+      :style radio
       :selected (member '(org-link) buffer-invisibility-spec)]
      ["Literal Links"
       (progn
 	(org-remove-from-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio :help "Show full links without hiding anything"
+      :style radio
       :selected (not (member '(org-link) buffer-invisibility-spec))])
     "--"
     ["Export/Publish..." org-export t]
