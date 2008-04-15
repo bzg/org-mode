@@ -4429,11 +4429,11 @@ actually switch the date like this:
    DEADLINE: <2005-11-01 Tue +1m>
 @end example
 
-You will also be prompted for a note@footnote{You can change this using
-the option @code{org-log-repeat}, or the @code{#+STARTUP} options
-@code{logrepeat}, @code{lognoterepeat}, and @code{nologrepeat}.} that
-will be put under the DEADLINE line to keep a record that you actually
-acted on the previous instance of this deadline.
+A timestamp@footnote{You can change this using the option
+@code{org-log-repeat}, or the @code{#+STARTUP} options @code{logrepeat},
+@code{lognoterepeat}, and @code{nologrepeat}.  With @code{lognoterepeat}, you
+will aslo be prompted for a note.} will be added under the deadline, to keep
+a record that you actually acted on the previous instance of this deadline.
 
 As a consequence of shifting the base date, this entry will no longer be
 visible in the agenda when checking past dates, but all future instances
@@ -4444,7 +4444,7 @@ month.  So if you have not payed the rent for three months, marking this
 entry DONE will still keep it as an overdue deadline.  Depending on the
 task, this may not be the best way to handle it.  For example, if you
 forgot to call you father for 3 weeks, it does not make sense to call
-her 3 times in a single day to make up for it.  Finally, there are tasks
+him 3 times in a single day to make up for it.  Finally, there are tasks
 like changing batteries which should always repeat a certain time
 @i{after} the last time you did it.  For these tasks, Org mode has
 special repeaters markers with @samp{++} and @samp{.+}.  For example:
