@@ -1,5 +1,10 @@
 #!/usr/bin/perl
 $version = $ARGV[0];
+if ($version eq "--all" or $version eq "-a") {
+  $all = 1;
+  $version = $ARGV[1]
+}
+
 die "No version given" unless $version=~/\S/;
 $date = `date "+%B %Y"`; chomp $date;
 $year = `date "+%Y"` ; chomp $year;
@@ -26,7 +31,9 @@ $cmd = qq{s/^(The version of this release is:)\\s+(\\S+)[ \t]*\$/\$1 $version/;}
 $c1 = "perl -pi -e '$cmd' README_DIST";
 system($c1);
 
-print STDERR "ORGWEBPAGE/index.org\n";
-$cmd = qq{s/^(\\* Current Version )\\(\\S+?\\)/\$1($version)/;s/^(The current version is)\\s+(\\S+)\\. /\$1 $version. /;s/org-.*?\\.(zip|tar\\.gz)/org-$version.\$1/g};
-$c1 = "perl -pi -e '$cmd' ORGWEBPAGE/index.org";
-system($c1);
+if ($all) {
+  print STDERR "ORGWEBPAGE/index.org\n";
+  $cmd = qq{s/^(\\* Current Version )\\(\\S+?\\)/\$1($version)/;s/^(The current version is)\\s+(\\S+)\\. /\$1 $version. /;s/org-.*?\\.(zip|tar\\.gz)/org-$version.\$1/g};
+  $c1 = "perl -pi -e '$cmd' ORGWEBPAGE/index.org";
+  system($c1);
+}
