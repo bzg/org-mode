@@ -29,5 +29,4 @@ system($c1);
 print STDERR "ORGWEBPAGE/index.org\n";
 $cmd = qq{s/^(\\* Current Version )\\(\\S+?\\)/\$1($version)/;s/^(The current version is)\\s+(\\S+)\\. /\$1 $version. /;s/org-.*?\\.(zip|tar\\.gz)/org-$version.\$1/g};
 $c1 = "perl -pi -e '$cmd' ORGWEBPAGE/index.org";
-print STDERR $c1,"\n";
 system($c1);
