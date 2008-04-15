@@ -1,7 +1,14 @@
+2008-04-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-colview.el (org-columns-compute): Only write property
+	value if it has changed.  This avoids raising the
+	buffer-change-flag unnecessarily.
+
 2008-04-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-agenda.el (org-agenda-columns-show-summaries)
 	(org-agenda-columns-compute-summary-properties): New options.
+	(org-format-agenda-item): Compute the duration of the item.
 
 	* lisp/org-colview.el (org-agenda-colview-summarize)
 	(org-agenda-colview-compute): New functions.

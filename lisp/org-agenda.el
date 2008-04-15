@@ -3527,10 +3527,11 @@ Any match of REMOVE-RE will be removed from TXT."
 	   time    ; time and tag are needed for the eval of the prefix format
 	   (ts (if dotime (concat (if (stringp dotime) dotime "") txt)))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
-	   stamp plain s0 s1 s2 rtn srp)
+	   stamp plain s0 s1 s2 rtn srp
+	   duration)
       (and (org-mode-p) buffer-file-name
 	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
-      (when (and dotime time-of-day org-prefix-has-time)
+      (when (and dotime time-of-day)
 	;; Extract starting and ending time and move them to prefix
 	(when (or (setq stamp (string-match org-stamp-time-of-day-regexp ts))
 		  (setq plain (string-match org-plain-time-of-day-regexp ts)))
@@ -3542,7 +3543,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	  ;; If the times are in TXT (not in DOTIMES), and the prefix will list
 	  ;; them, we might want to remove them there to avoid duplication.
 	  ;; The user can turn this off with a variable.
-	  (if (and org-agenda-remove-times-when-in-prefix (or stamp plain)
+	  (if (and org-prefix-has-time
+		   org-agenda-remove-times-when-in-prefix (or stamp plain)
 		   (string-match (concat (regexp-quote s0) " *") txt)
 		   (not (equal ?\] (string-to-char (substring txt (match-end 0)))))
 		   (if (eq org-agenda-remove-times-when-in-prefix 'beg)
@@ -3551,7 +3553,18 @@ Any match of REMOVE-RE will be removed from TXT."
 	      (setq txt (replace-match "" nil nil txt))))
 	;; Normalize the time(s) to 24 hour
 	(if s1 (setq s1 (org-get-time-of-day s1 'string t)))
-	(if s2 (setq s2 (org-get-time-of-day s2 'string t))))
+	(if s2 (setq s2 (org-get-time-of-day s2 'string t)))
+	;; Compute the duration
+	(when s1
+	  (setq t1 (+ (* 60 (string-to-number (substring s1 0 2)))
+		      (string-to-number (substring s1 3)))
+		t2 (cond
+		    (s2 (+ (* 60 (string-to-number (substring s2 0 2)))
+			   (string-to-number (substring s2 3))))
+		    (org-agenda-default-appointment-duration
+		     (+ t1 org-agenda-default-appointment-duration))
+		    (t nil)))
+	  (setq duration (if t2 (- t2 t1)))))      
 
       (when (and s1 (not s2) org-agenda-default-appointment-duration
 		 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s1))
@@ -3597,6 +3610,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	'org-lowest-priority org-lowest-priority
 	'prefix-length (- (length rtn) (length txt))
 	'time-of-day time-of-day
+	'duration duration
 	'txt txt
 	'time time
 	'extra extra
@@ -3882,9 +3896,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   "Exit agenda by removing the window or the buffer."
   (interactive)
   (if org-agenda-columns-active
-      (progn
-	(setq org-agenda-columns-active nil)
-	(org-columns-quit))
+      (org-columns-quit)
     (let ((buf (current-buffer)))
       (if (not (one-window-p)) (delete-window))
       (kill-buffer buf)

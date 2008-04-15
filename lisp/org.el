@@ -6614,6 +6614,17 @@ Org-mode syntax."
   (interactive)
   (org-run-like-in-org-mode 'org-open-at-point))
 
+;;;###autoload
+(defun org-open-link-from-string (s &optional arg)
+  "Open a link in the string S, as if it was in Org-mode."
+  (interactive "sLink: \nP")
+  (with-temp-buffer
+    (let ((org-inhibit-startup t))
+      (org-mode)
+      (insert s)
+      (goto-char (point-min))
+      (org-open-at-point arg))))
+
 (defun org-open-at-point (&optional in-emacs)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
@@ -6762,6 +6773,9 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	(browse-url-at-point)))))
   (move-marker org-open-link-marker nil)
   (run-hook-with-args 'org-follow-link-hook))
+
+;;;; Time estimates
+
 
 ;;; File search
 
@@ -13554,13 +13568,68 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 ;;; org.el ends here
 
-(defun org-open-link-from-string (s &optional arg)
-  "Open a link in the string S, as if it was in Org-mode."
-  (interactive)
-  (with-temp-buffer
-    (let ((org-inhibit-startup t))
-      (org-mode)
-      (insert s)
-      (goto-char (point-min))
-      (org-open-at-point arg))))
 
+(defcustom org-time-estimates-property "Effort"
+  "The property that is being used to keep track of time estimates.
+
+- If an entry is queried for this property, the default is taken from the
+  time estimateion cookie in the headline.
+- In the agenda, the duration of appointments is treated as a time estimate
+  if the option `org-time-estimate-include-appointments' is set."
+  :group 'org-time-estimates
+  :type '(string :tag "Property"))
+
+(defcustom org-time-estimate-include-appointments t
+  "Non-nil means, the duration of an appointment will add to the time estimate."
+  :group 'org-time-estimates
+  :type 'boolean)
+
+(defcustom org-time-estimates '("5m" "10m" "15m" "30m" "45m" "1h" "1:30h" "2h" "3h" "4h" "5h" "6h" "7h" "8h")
+  "Discrete time estimates."
+  :group 'org-time-estimates
+  :type '(repeat (string)))
+
+(defun org-time-estimate-up ()
+  "Increate the time estimate."
+  (interactive)
+  (org-time-estimate-change 'up))
+
+(defun org-time-estimate-down ()
+  "Increate the time estimate."
+  (interactive)
+  (org-time-estimate-change 'down))
+
+(defun org-time-estimate-change (how)
+  ""
+  (save-excursion
+    (if (not (or (org-at-regexp-p org-time-estimate-regexp)
+		 (progn
+		   (goto-char (point-at-bol))
+		   (re-search-forward org-time-estimate-regexp
+				      (point-at-eol) t))))
+	(error "Don't know which time estimate to change here"))
+    (let* ((match (match-string 0))
+	   (rest (member match org-time-estimates))
+	   new)
+      (unless rest
+	(error "Not a standard value: %s" match))
+      (if (eq how 'up)
+	  (setq new (cadr rest))
+	(setq new (car (nthcdr (- (length org-time-estimates) (length rest) 1)
+			       org-time-estimates))))
+      (replace-match new t t))))
+
+(defconst org-time-estimate-regexp
+  "\\<[0-9]+m\\|\\([0-9]+:\\)?\\([0-9]+h\\)\\>"
+  "Regular expression matching time estimates.")
+
+(defun org-get-time-estimate (&optional string)
+  (setq string (or string (buffer-substring (point-at-bol) (point-at-eol))))
+  (if (string-match org-time-estimate-regexp string)
+      (cond ((match-end 1)
+	     (+ (* 60 (string-to-number (match-string 1 string)))
+		(string-to-number (match-string 2 string))))
+	    ((match-end 2)
+	     (* 60 (string-to-number (match-string 2 string))))
+	    (t (string-to-number (match-string 0 string))))
+    nil))

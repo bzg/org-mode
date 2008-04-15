@@ -2474,6 +2474,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				  "\">\\nbsp@</a>")
 			  t t line)))
 	     ((and org-export-with-toc (equal (string-to-char line) ?*))
+	      ;; FIXME: NOT DEPENDENT on TOC?????????????????????
 	      (setq line (replace-match
 			  (concat "@<span class=\"target\">" (match-string 1 line) "@</span> ")
 ;			  (concat "@<i>" (match-string 1 line) "@</i> ")
