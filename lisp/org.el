@@ -11062,6 +11062,8 @@ the buffer and restores the previous window configuration."
 
 (defun org-read-agenda-file-list ()
   "Read the list of agenda files from a file."
+  (when (file-directory-p org-agenda-files)
+    (error "`org-agenda-files' cannot be a single directory"))
   (when (stringp org-agenda-files)
     (with-temp-buffer
       (insert-file-contents org-agenda-files)
@@ -12289,10 +12291,11 @@ See the individual commands for more information."
      ["Which Column?" org-table-current-column (org-at-table-p)])
     ["Debug Formulas"
      org-table-toggle-formula-debugger
-     :style toggle :selected org-table-formula-debug]
+     :style toggle :selected (org-bound-and-true-p 'org-table-formula-debug)]
     ["Show Col/Row Numbers"
      org-table-toggle-coordinate-overlays
-     :style toggle :selected org-table-overlay-coordinates]
+     :style toggle
+     :selected (org-bound-and-true-p 'org-table-overlay-coordinates)]
     "--"
     ["Create" org-table-create (and (not (org-at-table-p))
 				    org-enable-table-editor)]

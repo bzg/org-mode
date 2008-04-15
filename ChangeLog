@@ -1,3 +1,10 @@
+2008-04-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-tbl-menu): Protect the use of variables that
+	are only available when org-table.el gets loaded.
+	(org-read-agenda-file-list): Error if `org-agenda-files' is a
+	single directory.
+
 2008-04-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-exp.el (org-export-run-in-background): New option.

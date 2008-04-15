@@ -506,6 +506,10 @@ This is being used to correctly align a single field after TAB or RET.")
 (defvar org-table-last-column-widths nil
   "List of max width of fields in each column.
 This is being used to correctly align a single field after TAB or RET.")
+(defvar org-table-formula-debug nil
+  "Non-nil means, debug table formulas.
+When nil, simply write \"#ERROR\" in corrupted fields.")
+(make-variable-buffer-local 'org-table-formula-debug)
 (defvar org-table-overlay-coordinates nil
   "Overlay coordinates after each align of a table.")
 (make-variable-buffer-local 'org-table-overlay-coordinates)
@@ -1962,11 +1966,6 @@ of the new mark."
        (save-excursion (beginning-of-line 1)
 		       (looking-at org-table-auto-recalculate-regexp))
        (org-table-recalculate) t))
-
-(defvar org-table-formula-debug nil
-  "Non-nil means, debug table formulas.
-When nil, simply write \"#ERROR\" in corrupted fields.")
-(make-variable-buffer-local 'org-table-formula-debug)
 
 (defvar modes)
 (defsubst org-set-calc-mode (var &optional value)
