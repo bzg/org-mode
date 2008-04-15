@@ -12291,11 +12291,11 @@ See the individual commands for more information."
      ["Which Column?" org-table-current-column (org-at-table-p)])
     ["Debug Formulas"
      org-table-toggle-formula-debugger
-     :style toggle :selected (org-bound-and-true-p 'org-table-formula-debug)]
+     :style toggle :selected (org-bound-and-true-p org-table-formula-debug)]
     ["Show Col/Row Numbers"
      org-table-toggle-coordinate-overlays
      :style toggle
-     :selected (org-bound-and-true-p 'org-table-overlay-coordinates)]
+     :selected (org-bound-and-true-p org-table-overlay-coordinates)]
     "--"
     ["Create" org-table-create (and (not (org-at-table-p))
 				    org-enable-table-editor)]
