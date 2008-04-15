@@ -41,13 +41,17 @@
 
 (defvar org-columns-current-fmt nil
   "Local variable, holds the currently active column format.")
+(make-variable-buffer-local 'org-columns-current-fmt)
 (defvar org-columns-current-fmt-compiled nil
   "Local variable, holds the currently active column format.
 This is the compiled version of the format.")
+(make-variable-buffer-local 'org-columns-current-fmt-compiled)
 (defvar org-columns-current-widths nil
   "Loval variable, holds the currently widths of fields.")
+(make-variable-buffer-local 'org-columns-current-widths)
 (defvar org-columns-current-maxwidths nil
   "Loval variable, holds the currently active maximum column widths.")
+(make-variable-buffer-local 'org-columns-current-maxwidths)
 (defvar org-columns-begin-marker (make-marker)
   "Points to the position where last a column creation command was called.")
 (defvar org-columns-top-level-marker (make-marker)
@@ -132,8 +136,13 @@ This is the compiled version of the format.")
 		       (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2))))
 	 (color (list :foreground
-		      (face-attribute (or level-face 'default) :foreground)))
-	 props pom property ass width f string ov column val modval)
+		      (face-attribute
+		       (or level-face
+			   (and (eq major-mode 'org-agenda-mode)
+				(get-text-property (point-at-bol) 'face))
+			   'default) :foreground)))
+	 (face (list color 'org-column))
+	 pom property ass width f string ov column val modval)
     ;; Check if the entry is in another buffer.
     (unless props
       (if (eq major-mode 'org-agenda-mode)
@@ -162,9 +171,7 @@ This is the compiled version of the format.")
 	    string (format f (or modval val)))
       ;; Create the overlay
       (org-unmodified
-       (setq ov (org-columns-new-overlay
-		 beg (setq beg (1+ beg)) string
-		 (list color 'org-column)))
+       (setq ov (org-columns-new-overlay beg (setq beg (1+ beg)) string face))
        (org-overlay-put ov 'keymap org-columns-map)
        (org-overlay-put ov 'org-columns-key property)
        (org-overlay-put ov 'org-columns-value (cdr ass))
@@ -397,17 +404,22 @@ Where possible, use the standard interface for changing this line."
 (defun org-columns-edit-allowed ()
   "Edit the list of allowed values for the current property."
   (interactive)
-  (let* ((key (get-char-property (point) 'org-columns-key))
+  (let* ((pom (or (get-text-property (point-at-bol) 'org-marker)
+		  (get-text-property (point-at-bol) 'org-hd-marker)
+		  (point)))
+	 (key (get-char-property (point) 'org-columns-key))
 	 (key1 (concat key "_ALL"))
-	 (allowed (org-entry-get (point) key1 t))
+	 (allowed (org-entry-get pom key1 t))
 	 nval)
     ;; FIXME: Cover editing TODO, TAGS etc in-buffer settings.????
+    ;; FIXME: Write back to #+PROPERTY setting if that is needed.
     (setq nval (read-string "Allowed: " allowed))
     (org-entry-put
      (cond ((marker-position org-entry-property-inherited-from)
 	    org-entry-property-inherited-from)
 	   ((marker-position org-columns-top-level-marker)
-	    org-columns-top-level-marker))
+	    org-columns-top-level-marker)
+	   (t pom))
      key1 nval)))
 
 (defun org-columns-eval (form)
@@ -658,6 +670,7 @@ display, or in the #+COLUMNS line of the current buffer."
 (defvar org-agenda-view-columns-initially nil
   "When set, switch to columns view immediately after creating the agenda.")
 
+(defvar org-agenda-columns-show-summaries) ; defined in org-agenda.el
 (defun org-agenda-columns ()
   "Turn on column view in the agenda."
   (interactive)
@@ -685,6 +698,7 @@ display, or in the #+COLUMNS line of the current buffer."
     (setq fmt (or fmt org-columns-default-format))
     (org-set-local 'org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
+    (org-agenda-colview-compute org-columns-current-fmt-compiled)
     (save-excursion
       ;; Get and cache the properties
       (goto-char (point-min))
@@ -700,7 +714,84 @@ display, or in the #+COLUMNS line of the current buffer."
 	(mapc (lambda (x)
 		(goto-line (car x))
 		(org-columns-display-here (cdr x)))
-	      cache)))))
+	      cache)
+	(when org-agenda-columns-show-summaries
+	  (org-agenda-colview-summarize cache))))))
+
+(defun org-agenda-colview-summarize (cache)
+  "Summarize the summarizable columns in column view in the agenda.
+This will add overlays to the date lines, to show the summary for each day."
+  (let* ((fmt (mapcar (lambda (x)
+			(list (car x) (if (equal (car x) "CLOCKSUM")
+					  'add_times (nth 4 x))))
+		      org-columns-current-fmt-compiled))
+	 line c c1 stype props lsum entries prop v)
+    (when (delq nil (mapcar 'cadr fmt))
+      ;; OK, at least one summation column, it makes sense to try this
+      (goto-char (point-max))
+      (while (not (bobp))
+	(if (not (or (get-text-property (point) 'org-date-line)
+		     (eq (get-text-property (point) 'face)
+			 'org-agenda-structure)))
+	    (beginning-of-line 0)
+	  ;; OK, this is a date line
+	  (setq line (org-current-line))
+	  (setq entries nil c cache cache nil)
+	  (while (setq c1 (pop c))
+	    (if (> (car c1) line)
+		(push c1 entries)
+	      (push c1 cache)))
+	  ;; now ENTRIES are the ones we want to use, CACHE is the rest
+	  ;; Compute the summaries for the properties we want,
+	  ;; set nil properties for the rest.
+	  (when (setq entries (mapcar 'cdr entries))
+	    (setq props
+		  (mapcar
+		   (lambda (f)
+		     (setq prop (car f) stype (nth 1 f))
+		     (cond
+		      ((equal prop "ITEM")
+		       (cons prop (buffer-substring (point-at-bol)
+						    (point-at-eol))))
+		      ((not stype) (cons prop ""))
+		      (t
+		       ;; do the summary
+		       (setq lsum 0)
+		       (mapc (lambda (x)
+			       (setq v (cdr (assoc prop x)))
+			       (if v (setq lsum (+ lsum
+						   (org-column-string-to-number
+						    v stype)))))
+			     entries)
+		       (cons prop (org-columns-number-to-string lsum stype)))))
+		   fmt))
+	    (org-columns-display-here props)
+	    (org-set-local 'org-agenda-columns-active t))
+	  (beginning-of-line 0))))))
+
+(defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
+(defun org-agenda-colview-compute (fmt)
+  "Compute the relevant columns in the contributing source buffers."
+  (when org-agenda-columns-compute-summary-properties
+    (let ((files org-agenda-contributing-files)
+	  (org-columns-begin-marker (make-marker))
+	  (org-columns-top-level-marker (make-marker))
+	  f fm a b)
+      (while (setq f (pop files))
+	(setq b (find-buffer-visiting f))
+	(with-current-buffer (or (buffer-base-buffer b) b)
+	  (save-excursion
+	    (save-restriction
+	      (goto-char (point-min))
+	      (org-columns-get-format-and-top-level)
+	      (while (setq fm (pop fmt))
+		(if (equal (car fm) "CLOCKSUM")
+		    (org-clock-sum)
+		  (when (and (nth 4 fm)
+			     (setq a (assoc (car fm)
+					    org-columns-current-fmt-compiled))
+			     (equal (nth 4 a) (nth 4 fm)))
+		    (org-columns-compute (car fm))))))))))))
 
 (defun org-columns-get-autowidth-alist (s cache)
   "Derive the maximum column widths from the format and the cache."
@@ -1056,3 +1147,4 @@ and tailing newline characters."
 (provide 'org-colview)
 
 ;;; org-colview.el ends here
+

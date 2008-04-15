@@ -927,6 +927,28 @@ a names face, or a list like `(:background \"Red\")'."
 			(sexp :tag "face")))))
 
 
+(defgroup org-agenda-column-view nil
+  "Options concerning column view in the agenda."
+  :tag "Org Agenda Column View"
+  :group 'org-agenda)
+
+(defcustom org-agenda-columns-show-summaries t
+  "Non-nil means, show summaries for columns displayed in the agenda view."
+  :group 'org-agenda-column-view
+  :type 'boolean)
+
+(defcustom org-agenda-columns-compute-summary-properties t
+  "Non-nil means, recompute all summary properties before column view.
+When column view in the agenda is listing properties that have a summary
+operator, it can go to all relevant buffers and recompute the summaries
+there.  This can mean overhead for the agenda column view, but is necessary
+to have thing up to date.
+As a special case, a CLOCKSUM property also makes sure that the clock
+computations are current."
+  :group 'org-agenda-column-view
+  :type 'boolean)
+
+
 (eval-when-compile
   (require 'cl))
 (require 'org)
@@ -1858,6 +1880,7 @@ higher priority settings."
 (defvar org-agenda-multi nil)  ; dynammically scoped
 (defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-pre-agenda-window-conf nil)
+(defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
@@ -1870,6 +1893,8 @@ higher priority settings."
 	  (insert "\n" (make-string (window-width) ?=) "\n"))
 	(narrow-to-region (point) (point-max)))
     (org-agenda-reset-markers)
+    (setq org-agenda-contributing-files nil)
+    (setq org-agenda-columns-active nil)
     (org-prepare-agenda-buffers (org-agenda-files))
     (setq org-todo-keywords-for-agenda
 	  (org-uniquify org-todo-keywords-for-agenda))
@@ -1891,7 +1916,7 @@ higher priority settings."
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window abuf))))
     (setq buffer-read-only nil)
-    (erase-buffer)
+    (let ((inhibit-read-only t)) (erase-buffer))
     (org-agenda-mode)
     (and name (not org-agenda-name)
 	 (org-set-local 'org-agenda-name name)))
@@ -3503,6 +3528,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	   (ts (if dotime (concat (if (stringp dotime) dotime "") txt)))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
 	   stamp plain s0 s1 s2 rtn srp)
+      (and (org-mode-p) buffer-file-name
+	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
       (when (and dotime time-of-day org-prefix-has-time)
 	;; Extract starting and ending time and move them to prefix
 	(when (or (setq stamp (string-match org-stamp-time-of-day-regexp ts))
@@ -3854,17 +3881,21 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 (defun org-agenda-quit ()
   "Exit agenda by removing the window or the buffer."
   (interactive)
-  (let ((buf (current-buffer)))
-    (if (not (one-window-p)) (delete-window))
-    (kill-buffer buf)
-    (org-agenda-reset-markers)
-    (org-columns-remove-overlays))
-  ;; Maybe restore the pre-agenda window configuration.
-  (and org-agenda-restore-windows-after-quit
-       (not (eq org-agenda-window-setup 'other-frame))
-       org-pre-agenda-window-conf
-       (set-window-configuration org-pre-agenda-window-conf)))
-
+  (if org-agenda-columns-active
+      (progn
+	(setq org-agenda-columns-active nil)
+	(org-columns-quit))
+    (let ((buf (current-buffer)))
+      (if (not (one-window-p)) (delete-window))
+      (kill-buffer buf)
+      (org-agenda-reset-markers)
+      (org-columns-remove-overlays))
+    ;; Maybe restore the pre-agenda window configuration.
+    (and org-agenda-restore-windows-after-quit
+	 (not (eq org-agenda-window-setup 'other-frame))
+	 org-pre-agenda-window-conf
+	 (set-window-configuration org-pre-agenda-window-conf))))
+  
 (defun org-agenda-exit ()
   "Exit agenda by removing the window or the buffer.
 Also kill all Org-mode buffers which have been loaded by `org-agenda'.
@@ -3893,14 +3924,17 @@ So this is just a shortcut for `\\[org-agenda]', available in the agenda."
 When this is the global TODO list, a prefix argument will be interpreted."
   (interactive)
   (let* ((org-agenda-keep-modes t)
+	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
 	 (lprops (get 'org-agenda-redo-command 'org-lprops)))
+    (and cols (org-columns-quit))
     (message "Rebuilding agenda buffer...")
     (org-let lprops '(eval org-agenda-redo-command))
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil)
     (message "Rebuilding agenda buffer...done")
+    (and cols (interactive-p) (org-agenda-columns))
     (goto-line line)
     (recenter window-line)))
 
@@ -4964,7 +4998,6 @@ This is a command that has to be installed in `calendar-mode-map'."
       (princ s))
     (if (fboundp 'fit-window-to-buffer)
 	(fit-window-to-buffer (get-buffer-window "*Dates*")))))
-
 
 ;;; Appointment reminders
 
