@@ -5,6 +5,8 @@
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 #+INFOJS_OPT: view:info toc:1 path:org-info.js
+#+LINK_UP: index.html
+#+LINK_HOME: http://orgmode.org
 
 * Version 6.01
 
