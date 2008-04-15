@@ -238,6 +238,7 @@ Agenda Views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
+* Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
 
@@ -4896,6 +4897,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
+* Agenda column view::          Using column view for collected entries
 @end menu
 
 @node Agenda files, Agenda dispatcher, Agenda Views, Agenda Views
@@ -5780,7 +5782,7 @@ visit org files will not be removed.
 @end table
 
 
-@node Custom agenda views,  , Agenda commands, Agenda Views
+@node Custom agenda views, Agenda column view, Agenda commands, Agenda Views
 @section Custom agenda views
 @cindex custom agenda views
 @cindex agenda views, custom
@@ -6202,6 +6204,60 @@ foreach $line (split(/\n/,$agenda)) @{
 @}
 @end group
 @end example
+
+@node Agenda column view,  , Custom agenda views, Agenda Views
+@section Using column view in the agenda
+@cindex column view, in agenda
+@cindex agenda, column view
+
+Column view (@pxref{Column view}) is normally used to view and edit
+properties embedded in the hierarchical structure of an Org file.  It can be
+quite useful to use column view also from the agenda, where entries are
+collected by certain criteria.
+
+@table @kbd
+@kindex C-c C-x C-c
+@item C-c C-x C-c
+Turn on column view in the agenda.
+@end table
+
+To understand how to use this properly, it is important to realize that the
+entries in the agenda are no longer in their proper outline environment.
+This causes the following issues:
+
+@enumerate
+@item
+Org needs to make a decision which @code{COLUMNS} format to use.  Since the
+entries in the agenda are collected from different files, and different files
+may have different @code{COLUMNS} formats, this is a non-trivial problem.
+Org first checks if the variable @code{org-overriding-columns-format} is
+currently set, and if yes takes the format from there.  Otherwise it takes
+the format associated with the first item in the agenda, or, if that item
+does not have a specific format (defined in a property, or in it's file), it
+uses @code{org-columns-default-format}.
+@item
+If any of the columns has a summary type defined (@pxref{Column attributes}),
+turning on column view in the agenda will visit all relevant agenda files and
+make sure that the computations of this property are up to date.  This is
+also true for the special @code{CLOCKSUM} property.  Org will then sum the
+values displayed in the agenda.  In the daily/weekly agenda, the sums will
+cover a single day, in all other views they cover the entire block.  It is
+vital to realize that the agenda may show the same entry @emph{twice} (for
+example as scheduled and as a deadline), and it may show two entries from the
+same hierarchy (for example a @emph{parent} and it's @emph{child}).  In these
+cases, the summation in the agenda will lead to incorrect results because
+some values will count double.
+@item
+When the column view in the agenda shows the @code{CLOCKSUM}, that is always
+the entire clocked time for this item.  So even in the daily/weekly agenda,
+the clocksum listed in column view may originate from times outside the
+current view.  This has the advantage that you can compare these values with
+a column listing the planned total effort for a task - one of the major
+applications for column view in the agenda.  If you want information about
+clocked time in the displayed period use clock table mode (press @kbd{R} in
+the agenda).
+@end enumerate
+
 
 @node Embedded LaTeX, Exporting, Agenda Views, Top
 @chapter Embedded LaTeX

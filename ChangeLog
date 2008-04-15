@@ -1,5 +1,14 @@
 2008-04-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-agenda.el (org-agenda-columns-show-summaries)
+	(org-agenda-columns-compute-summary-properties): New options.
+
+	* lisp/org-colview.el (org-agenda-colview-summarize)
+	(org-agenda-colview-compute): New functions.
+	(org-agenda-columns): Call `org-agenda-colview-summarize'.
+
+	* doc/org.texi (Agenda column view): New section.
+
 	* lisp/org.el (org-tbl-menu): Protect the use of variables that
 	are only available when org-table.el gets loaded.
 	(org-read-agenda-file-list): Error if `org-agenda-files' is a
