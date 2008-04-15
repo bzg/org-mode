@@ -147,6 +147,60 @@ something.
     Right now this is being done as part of `org-html-expand', which
     does not seem logically correct.
 
+
+** Publishing
+
+We need to simplify the publishing options.  Here are some of the
+options for publishing projects
+
+*** Publishing options
+
+:`:base-directory'       Directory containing publishing source files
+:
+:`:publishing-directory' Directory (possibly remote) where output files
+:                        will be published.
+:
+:`:preparation-function' Function called before starting publishing
+:                        process, for example to run `make' for updating
+:                        files to be published.
+:
+:`:base-extension'  Extension (without the dot!) of source files.  This
+:                   actually is a regular expression.
+:
+:`:exclude'         Regular expression to match file names that should
+:                   not be published, even though they have been selected
+:                   on the basis of their extension.
+:
+:`:include'         List of files to be included regardless of
+:                   `:base-extension' and `:exclude'.
+:
+:`:publishing-function' Function executing the publication of a file.
+:                       This may also be a list of functions, which will
+:                       all be called in turn.
+:
+:`:link-validation-function'   Function to validate links
+:
+:`:auto-index'      When non-nil, publish an index during
+:                   org-publish-current-project or org-publish-all.
+:
+:`:index-filename'  Filename for output of index. Defaults to `index.org'
+:                   (which becomes `index.html').
+:
+:`:index-title'     Title of index page. Defaults to name of file.
+:
+:`:index-function'  Plug-in function to use for generation of index.
+:                   Defaults to `org-publish-org-index', which generates
+:                   a plain list of links to all files in the project.
+
+*** TODO Document the :recursive option
+*** QUESTION Does anyone use the index related options
+*** QUESTION Remove :base-extension and only use :include
+*** WISH Simple interaction between :include :exclude :recursive
+*** QUESTION Use an export-directory option per file?
+
+For now we use publishing-directory but this is not consistent with the
+convention of using "publishing" when there is a _project_ to publish.
+
 ** Miscellaneous Stuff
 *** BUG Comments cannot be filled
 *** QUESTION Inlining of images in Org-mode files
