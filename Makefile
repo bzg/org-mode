@@ -174,13 +174,8 @@ doc/orgcard_letter.ps: doc/orgcard_letter.dvi
 
 # Below here are special targets for maintenance only
 
-webfiles:
-	(cd ORGWEBPAGE; emacs -batch -l ~/.emacs index.org -eval '(org-publish (assoc "orgwebpage" org-publish-project-alist))')
-	(cd ORGWEBPAGE/tmp; rm *~)
-
-web:
-	make webfiles
-	(cd ORGWEBPAGE/tmp; lftp -f ../../../org-mode-proprietary/ftp_upload_website_legito)
+updateweb:
+	ssh cdominik@caprisun.dreamhost.com 'pull-worg-org.sh && publish-worg-org.sh'
 
 html: doc/org.html
 
