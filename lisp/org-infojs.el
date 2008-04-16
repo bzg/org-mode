@@ -68,6 +68,8 @@ line in the buffer.  See also the variable `org-infojs-options'."
   '((path PATH "http://orgmode.org/org-info.js")
     (view VIEW "info")
     (toc TOC :table-of-contents)
+    (tdepth TOC_DEPTH "max")
+    (sdepth SECTION_DEPTH "max")
     (mouse MOUSE_HINT "underline")
     (runs MAX_RUNS "5")
     (buttons VIEW_BUTTONS "0")
@@ -83,13 +85,19 @@ line in the buffer.  See also the variable `org-infojs-options'."
 Each of the options must have an entry in `org-export-html/infojs-opts-table'.
 The value can either be a string that will be passed to the script, or
 a property.  This property is then assumed to be a property that is defined
-by the Export/Publishing setup of Org."
+by the Export/Publishing setup of Org.
+The `sdepth' and `tdepth' parameters can also be set to \"max\", which
+means to use the maximum value consistent with other options."
   :group 'org-infojs
   :type
-  '(repeat
-    (cons (symbol :tag "Option")
-	  (choice (symbol :tag "Publishing/Export property")
-		  (string :tag "Value")))))
+  `(set :greedy t :inline t
+	,@(mapcar
+	   (lambda (x)
+	     (list 'cons (list 'const (car x))
+		   '(choice
+			    (symbol :tag "Publishing/Export property")
+			    (string :tag "Value"))))
+	   org-infojs-opts-table)))
 
 (defcustom org-infojs-template
   "<script type=\"text/javascript\" language=\"JavaScript\" src=\"%SCRIPT_PATH\"></script>
@@ -114,8 +122,13 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
       ;; We do not want to use the script
       exp-plist
     ;; We do want to use the script, set it up
-  (let ((template org-infojs-template)
-	p1 s p v a1 tmp e opt var val table default)
+    (let ((template org-infojs-template)
+	(ptoc (plist-get exp-plist :table-of-contents))
+	(hlevels (plist-get exp-plist :headline-levels))
+	tdepth sdepth p1 s p v a1 tmp e opt var val table default)
+    (setq sdepth hlevels
+	  tdepth hlevels)
+    (if (integerp ptoc) (setq tdepth (min ptoc tdepth)))
     (setq v (plist-get exp-plist :infojs-opt)
 	  table org-infojs-opts-table)
     (while (setq e (pop table))
@@ -130,6 +143,12 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
        ((eq opt 'path)
 	(and (string-match "%SCRIPT_PATH" template)
 	     (setq template (replace-match val t t template))))
+       ((eq opt 'sdepth)
+	(if (integerp (read val))
+	    (setq sdepth (min (read val) hlevels))))
+       ((eq opt 'tdepth)
+	(if (integerp (read val))
+	    (setq tdepth (min (read val) hlevels))))
        (t
 	(setq val
 	      (cond
@@ -138,6 +157,15 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
 	       ((stringp val) val)
 	       (t (format "%s" val))))
 	(push (cons var val) s))))
+
+    ;; Now we set the depth of the *generated* TOC to SDEPTH, because the
+    ;; toc will actually determine the splitting.  How much of the toc will
+    ;; actually be displayed is governed by the TDEPTH option.
+    (setq exp-plist (plist-put exp-plist :table-of-contents sdepth))
+
+    ;; The table of contents should ot show more sections then we generate
+    (setq tdepth (min tdepth sdepth))
+    (push (cons "TOC_DEPTH" tdepth) s)
 
     (setq s (mapconcat
 	     (lambda (x) (format "org_html_manager.set(\"%s\", \"%s\");"
@@ -154,7 +182,6 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
     ;; setting
     (if (not (plist-get exp-plist :table-of-contents))
 	(setq exp-plist (plist-put exp-plist :table-of-contents t)))
-    
     ;; Return the modified property list
     exp-plist)))
 

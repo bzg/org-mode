@@ -6772,18 +6772,26 @@ needed to invoke the script.  Using the line above, you can set the following
 viewing options:
 
 @example
+path:    @r{The path to the script.  The default is to grab the script from}
+         @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
+         @r{a local copy and use a path like @samp{../scripts/org-info.js}.}
 view:    @r{Initial view when website is first shown.  Possible values are}
          info      @r{Info-like interface with one section per page.}
          overview  @r{Folding interface, initially showing only top-level.}
          content   @r{Folding interface, starting with all headlines visible.}
          showall   @r{Folding interface, all headlines and text visible.}
-toc:     @r{Should the table of content be visible as the first section?}
+sdepth:  @r{Maximum headline level that will still become an independent}
+         @r{section for info and folding modes.  The default is taken from}
+         @r{@code{org-headline-levels} (= the @code{H} @code{#+OPTIONS} switch).}
+         @r{If this is smaller than in @code{org-headline-levels}, each}
+         @r{info/folding section can still contain children headlines.}
+         @r{Default is @code{org-headline-levels} (= the @code{H} @code{#+OPTIONS} switch).}
+toc:     @r{Should the table of content @emph{initially} be visible?}
          @r{Even when @code{nil}, you can always get to the toc with @kbd{i}.}
-ltoc:    @r{Should there be short contents in each section?}
-path:    @r{The path to the script.  The default is to grab the script from}
-         @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
-         @r{a local copy use a path like @samp{../scripts/org-info.js}.}
-mouse:   @r{Headings are highlighted when the mouse is over the.  Should be}
+tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
+         @r{the variables @code{org-headline-levels} and @code{org-export-with-toc}.}
+ltoc:    @r{Should there be short contents (children) in each section?}
+mouse:   @r{Headings are highlighted when the mouse is over themq.  Should be}
          @r{@samp{underline} (default) or a background color like @samp{#cccccc}.}
 buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}
          @r{default), only one such button will be present.}
