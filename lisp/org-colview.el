@@ -1068,14 +1068,14 @@ and tailing newline characters."
 			  (get-text-property (point) 'org-marker)))
 	  (setq p (org-entry-properties m))
 
-	  (when (or (not (setq a (assoc org-time-estimates-property p)))
+	  (when (or (not (setq a (assoc org-time-estimate-property p)))
 			 (not (string-match "\\S-" (or (cdr a) ""))))
 	    ;; OK, no property gives us a value
 	    (when (and org-time-estimate-include-appointments
 		       (setq d (get-text-property (point) 'duration)))
 	      (setq d (org-minutes-to-hours d))
 	      (put-text-property 0 (length d) 'face 'org-warning d)
-	      (push (cons org-time-estimates-property d) p)))
+	      (push (cons org-time-estimate-property d) p)))
 	  (push (cons (org-current-line) p) cache))
 	(beginning-of-line 2))
       (when cache

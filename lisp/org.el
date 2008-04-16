@@ -13569,7 +13569,7 @@ Still experimental, may disappear in the future."
 ;;; org.el ends here
 
 
-(defcustom org-time-estimates-property "Effort"
+(defcustom org-time-estimate-property "Effort"
   "The property that is being used to keep track of time estimates.
 
 - If an entry is queried for this property, the default is taken from the
