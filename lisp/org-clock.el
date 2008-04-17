@@ -649,7 +649,7 @@ the currently selected interval size."
 		  (push (org-clocktable-add-file
 			 file 
 			 (concat "| |*File time*|*"
-				 (org-minutes-to-hours
+				 (org-minutes-to-hh:mm-string
 				  org-clock-file-total-minutes)
 				 "*|\n"
 				 tbl1)) tbl)
@@ -683,7 +683,7 @@ the currently selected interval size."
 		  (push (concat
 			 "| " (int-to-string level) "|" hlc hdl hlc " |"
 			 (make-string (1- level) ?|)
-			 hlc (org-minutes-to-hours time) hlc
+			 hlc (org-minutes-to-hh:mm-string time) hlc
 			 " |") tbl))))))
 	(setq tbl (nreverse tbl))
 	(if tostring
@@ -707,7 +707,7 @@ the currently selected interval size."
 	   (if (eq scope 'agenda) "|" "")
 	   "|"
 	   "*Total time*| *"
-	   (org-minutes-to-hours (or total-time 0))
+	   (org-minutes-to-hh:mm-string (or total-time 0))
 	   "*|\n|-\n")
 	  (setq tbl (delq nil tbl))
 	  (if (and (stringp (car tbl)) (> (length (car tbl)) 1)

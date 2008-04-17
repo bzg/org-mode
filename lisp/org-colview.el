@@ -228,7 +228,8 @@ This is the compiled version of the format.")
 	    title (concat title string)))
     (setq title (concat
 		 (org-add-props " " nil 'display '(space :align-to 0))
-		 (org-add-props title nil 'face '(:weight bold :underline t :inherit default))))
+		 ;;(org-add-props title nil 'face '(:weight bold :underline t :inherit default))))
+		 (org-add-props title nil 'face 'org-column-title)))
     (org-set-local 'org-previous-header-line-format header-line-format)
     (org-set-local 'org-columns-current-widths (nreverse widths))
     (setq org-columns-full-header-line-format title)
@@ -1031,6 +1032,7 @@ and tailing newline characters."
   "When set, switch to columns view immediately after creating the agenda.")
 
 (defvar org-agenda-columns-show-summaries) ; defined in org-agenda.el
+(defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
 
 (defun org-agenda-columns ()
   "Turn on column view in the agenda."
@@ -1059,7 +1061,8 @@ and tailing newline characters."
     (setq fmt (or fmt org-columns-default-format))
     (org-set-local 'org-columns-current-fmt fmt)
     (org-columns-compile-format fmt)
-    (org-agenda-colview-compute org-columns-current-fmt-compiled)
+    (when org-agenda-columns-compute-summary-properties
+      (org-agenda-colview-compute org-columns-current-fmt-compiled))
     (save-excursion
       ;; Get and cache the properties
       (goto-char (point-min))
@@ -1068,14 +1071,14 @@ and tailing newline characters."
 			  (get-text-property (point) 'org-marker)))
 	  (setq p (org-entry-properties m))
 
-	  (when (or (not (setq a (assoc org-time-estimate-property p)))
+	  (when (or (not (setq a (assoc org-effort-property p)))
 			 (not (string-match "\\S-" (or (cdr a) ""))))
-	    ;; OK, no property gives us a value
-	    (when (and org-time-estimate-include-appointments
+	    ;; OK, the property is not defined.  Use appointment duration?
+	    (when (and org-agenda-columns-add-appointments-to-effort-sum
 		       (setq d (get-text-property (point) 'duration)))
-	      (setq d (org-minutes-to-hours d))
+	      (setq d (org-minutes-to-hh:mm-string d))
 	      (put-text-property 0 (length d) 'face 'org-warning d)
-	      (push (cons org-time-estimate-property d) p)))
+	      (push (cons org-effort-property d) p)))
 	  (push (cons (org-current-line) p) cache))
 	(beginning-of-line 2))
       (when cache
@@ -1097,79 +1100,78 @@ This will add overlays to the date lines, to show the summary for each day."
 					  'add_times (nth 4 x))))
 		      org-columns-current-fmt-compiled))
 	 line c c1 stype props lsum entries prop v)
-    (when (delq nil (mapcar 'cadr fmt))
-      ;; OK, at least one summation column, it makes sense to try this
-      (goto-char (point-max))
-      (while (not (bobp))
-	(if (not (or (get-text-property (point) 'org-date-line)
-		     (eq (get-text-property (point) 'face)
-			 'org-agenda-structure)))
-	    (beginning-of-line 0)
-	  ;; OK, this is a date line
-	  (setq line (org-current-line))
-	  (setq entries nil c cache cache nil)
-	  (while (setq c1 (pop c))
-	    (if (> (car c1) line)
-		(push c1 entries)
-	      (push c1 cache)))
-	  ;; now ENTRIES are the ones we want to use, CACHE is the rest
-	  ;; Compute the summaries for the properties we want,
-	  ;; set nil properties for the rest.
-	  (when (setq entries (mapcar 'cdr entries))
-	    (setq props
-		  (mapcar
-		   (lambda (f)
-		     (setq prop (car f) stype (nth 1 f))
-		     (cond
-		      ((equal prop "ITEM")
-		       (cons prop (buffer-substring (point-at-bol)
-						    (point-at-eol))))
-		      ((not stype) (cons prop ""))
-		      (t
-		       ;; do the summary
-		       (setq lsum 0)
-		       (mapc (lambda (x)
-			       (setq v (cdr (assoc prop x)))
-			       (if v (setq lsum (+ lsum
-						   (org-column-string-to-number
-						    v stype)))))
-			     entries)
-		       (setq lsum (org-columns-number-to-string lsum stype))
-		       (put-text-property
-			0 (length lsum) 'face 'bold lsum)
-		       (cons prop lsum))))
-		   fmt))
-	    (org-columns-display-here props)
-	    (org-set-local 'org-agenda-columns-active t))
+    (catch 'exit
+      (when (delq nil (mapcar 'cadr fmt))
+	;; OK, at least one summation column, it makes sense to try this
+	(goto-char (point-max))
+	(while t
+	  (when (or (get-text-property (point) 'org-date-line)
+		    (eq (get-text-property (point) 'face)
+			'org-agenda-structure))
+	    ;; OK, this is a date line that should be used
+	    (setq line (org-current-line))
+	    (setq entries nil c cache cache nil)
+	    (while (setq c1 (pop c))
+	      (if (> (car c1) line)
+		  (push c1 entries)
+		(push c1 cache)))
+	    ;; now ENTRIES are the ones we want to use, CACHE is the rest
+	    ;; Compute the summaries for the properties we want,
+	    ;; set nil properties for the rest.
+	    (when (setq entries (mapcar 'cdr entries))
+	      (setq props
+		    (mapcar
+		     (lambda (f)
+		       (setq prop (car f) stype (nth 1 f))
+		       (cond
+			((equal prop "ITEM")
+			 (cons prop (buffer-substring (point-at-bol)
+						      (point-at-eol))))
+			((not stype) (cons prop ""))
+			(t
+			 ;; do the summary
+			 (setq lsum 0)
+			 (mapc (lambda (x)
+				 (setq v (cdr (assoc prop x)))
+				 (if v (setq lsum (+ lsum
+						     (org-column-string-to-number
+						      v stype)))))
+			       entries)
+			 (setq lsum (org-columns-number-to-string lsum stype))
+			 (put-text-property
+			  0 (length lsum) 'face 'bold lsum)
+			 (cons prop lsum))))
+		     fmt))
+	      (org-columns-display-here props)
+	      (org-set-local 'org-agenda-columns-active t)))
+	  (if (bobp) (throw 'exit t))
 	  (beginning-of-line 0))))))
 
-(defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
 (defun org-agenda-colview-compute (fmt)
   "Compute the relevant columns in the contributing source buffers."
-  (when org-agenda-columns-compute-summary-properties
-    (let ((files org-agenda-contributing-files)
-	  (org-columns-begin-marker (make-marker))
-	  (org-columns-top-level-marker (make-marker))
-	  f fm a b)
-      (while (setq f (pop files))
-	(setq b (find-buffer-visiting f))
-	(with-current-buffer (or (buffer-base-buffer b) b)
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (org-unmodified
-	       (remove-text-properties (point-min) (point-max)
-				       '(org-summaries t)))
-	      (goto-char (point-min))
-	      (org-columns-get-format-and-top-level)
-	      (while (setq fm (pop fmt))
-		(if (equal (car fm) "CLOCKSUM")
-		    (org-clock-sum)
-		  (when (and (nth 4 fm)
-			     (setq a (assoc (car fm)
-					    org-columns-current-fmt-compiled))
-			     (equal (nth 4 a) (nth 4 fm)))
-		    (org-columns-compute (car fm))))))))))))
+  (let ((files org-agenda-contributing-files)
+	(org-columns-begin-marker (make-marker))
+	(org-columns-top-level-marker (make-marker))
+	f fm a b)
+    (while (setq f (pop files))
+      (setq b (find-buffer-visiting f))
+      (with-current-buffer (or (buffer-base-buffer b) b)
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (org-unmodified
+	     (remove-text-properties (point-min) (point-max)
+				     '(org-summaries t)))
+	    (goto-char (point-min))
+	    (org-columns-get-format-and-top-level)
+	    (while (setq fm (pop fmt))
+	      (if (equal (car fm) "CLOCKSUM")
+		  (org-clock-sum)
+		(when (and (nth 4 fm)
+			   (setq a (assoc (car fm)
+					  org-columns-current-fmt-compiled))
+			   (equal (nth 4 a) (nth 4 fm)))
+		  (org-columns-compute (car fm)))))))))))
 
 (provide 'org-colview)
 

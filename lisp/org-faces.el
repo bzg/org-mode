@@ -159,6 +159,18 @@ color of the frame."
   "Face for column display of entry properties."
   :group 'org-faces)
 
+(defface org-column-title
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light))
+       (:background "grey90" :underline t :weight bold))
+      (((class color) (min-colors 16) (background dark))
+       (:background "grey30" :underline t :weight bold))
+      (((class color) (min-colors 8))
+       (:background "cyan" :foreground "black" :underline t :weight bold))
+      (t (:inverse-video t))))
+  "Face for column display of entry properties."
+  :group 'org-faces)
+
 (when (fboundp 'set-face-attribute)
   ;; Make sure that a fixed-width face is used when we have a column table.
   (set-face-attribute 'org-column nil

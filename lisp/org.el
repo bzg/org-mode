@@ -1836,6 +1836,13 @@ This variable can be set on the per-file basis by inserting a line
   :group 'org-properties
   :type 'string)
 
+(defcustom org-effort-property "Effort"
+  "The property that is being used to keep track of effort estimates.
+Effort estimates given in this property need to have the format H:MM."
+  :group 'org-properties
+  :group 'org-progress
+  :type '(string :tag "Property"))
+
 (defcustom org-global-properties nil
   "List of property/value pairs that can be inherited by any entry.
 You can set buffer-local values for this by adding lines like
@@ -6776,6 +6783,9 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 
 ;;;; Time estimates
 
+(defun org-get-effort (&optional pom)
+  "Get the effort estimate for the current entry."
+  (org-entry-get pom org-effort-property))
 
 ;;; File search
 
@@ -10954,12 +10964,18 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
-(defun org-minutes-to-hours (m)
+(defun org-minutes-to-hh:mm-string (m)
   "Compute H:MM from a number of minutes."
   (let ((h (/ m 60)))
     (setq m (- m (* 60 h)))
     (format "%d:%02d" h m)))
 
+(defun org-hh:mm-string-to-minutes (s)
+  "Convert a string H:MM to a number of minutes."
+  (if (string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
+      (+ (* (string-to-number (match-string 1 s)) 60)
+	 (string-to-number (match-string 2 s)))
+    0))
 
 ;;;; Agenda files
 
@@ -13569,67 +13585,3 @@ Still experimental, may disappear in the future."
 ;;; org.el ends here
 
 
-(defcustom org-time-estimate-property "Effort"
-  "The property that is being used to keep track of time estimates.
-
-- If an entry is queried for this property, the default is taken from the
-  time estimateion cookie in the headline.
-- In the agenda, the duration of appointments is treated as a time estimate
-  if the option `org-time-estimate-include-appointments' is set."
-  :group 'org-time-estimates
-  :type '(string :tag "Property"))
-
-(defcustom org-time-estimate-include-appointments t
-  "Non-nil means, the duration of an appointment will add to the time estimate."
-  :group 'org-time-estimates
-  :type 'boolean)
-
-(defcustom org-time-estimates '("5m" "10m" "15m" "30m" "45m" "1h" "1:30h" "2h" "3h" "4h" "5h" "6h" "7h" "8h")
-  "Discrete time estimates."
-  :group 'org-time-estimates
-  :type '(repeat (string)))
-
-(defun org-time-estimate-up ()
-  "Increate the time estimate."
-  (interactive)
-  (org-time-estimate-change 'up))
-
-(defun org-time-estimate-down ()
-  "Increate the time estimate."
-  (interactive)
-  (org-time-estimate-change 'down))
-
-(defun org-time-estimate-change (how)
-  ""
-  (save-excursion
-    (if (not (or (org-at-regexp-p org-time-estimate-regexp)
-		 (progn
-		   (goto-char (point-at-bol))
-		   (re-search-forward org-time-estimate-regexp
-				      (point-at-eol) t))))
-	(error "Don't know which time estimate to change here"))
-    (let* ((match (match-string 0))
-	   (rest (member match org-time-estimates))
-	   new)
-      (unless rest
-	(error "Not a standard value: %s" match))
-      (if (eq how 'up)
-	  (setq new (cadr rest))
-	(setq new (car (nthcdr (- (length org-time-estimates) (length rest) 1)
-			       org-time-estimates))))
-      (replace-match new t t))))
-
-(defconst org-time-estimate-regexp
-  "\\<[0-9]+m\\|\\([0-9]+:\\)?\\([0-9]+h\\)\\>"
-  "Regular expression matching time estimates.")
-
-(defun org-get-time-estimate (&optional string)
-  (setq string (or string (buffer-substring (point-at-bol) (point-at-eol))))
-  (if (string-match org-time-estimate-regexp string)
-      (cond ((match-end 1)
-	     (+ (* 60 (string-to-number (match-string 1 string)))
-		(string-to-number (match-string 2 string))))
-	    ((match-end 2)
-	     (* 60 (string-to-number (match-string 2 string))))
-	    (t (string-to-number (match-string 0 string))))
-    nil))

@@ -78,7 +78,7 @@ only needed when the text to be killed contains more than N non-white lines."
   "Non-nil means, make the block agenda more compact.
 This is done by leaving out unnecessary lines."
   :group 'org-agenda
-  :type nil)
+  :type 'boolean)
 
 (defgroup org-agenda-export nil
  "Options concerning exporting agenda views in Org-mode."
@@ -148,7 +148,8 @@ you can \"misuse\" it to also add other text to the header.  However,
     (const time-up) (const time-down)
     (const category-keep) (const category-up) (const category-down)
     (const tag-down) (const tag-up)
-    (const priority-up) (const priority-down))
+    (const priority-up) (const priority-down)
+    (const effort-up) (const effort-down))
   "Sorting choices.")
 
 (defconst org-agenda-custom-commands-local-options
@@ -718,6 +719,8 @@ tag-up          Sort alphabetically by last tag, A-Z.
 tag-down        Sort alphabetically by last tag, Z-A.
 priority-up     Sort numerically by priority, high priority last.
 priority-down   Sort numerically by priority, high priority first.
+effort-up       Sort numerically by estimated effort, high effort last.
+effort-down     Sort numerically by estimated effort, high effort first.
 
 The different possibilities will be tried in sequence, and testing stops
 if one comparison returns a \"not-equal\".  For example, the default
@@ -753,6 +756,12 @@ time like 15:30 will be considered as 99:01, i.e. later than any items which
 do have a time.  When nil, the default time is before 0:00.  You can use this
 option to decide if the schedule for today should come before or after timeless
 agenda entries."
+  :group 'org-agenda-sorting
+  :type 'boolean)
+
+(defcustom org-sort-agenda-noeffort-is-high t
+  "Non-nil means, items without effort estimate are sorted as high effort.
+When nil, such items are sorted as 0 minutes effort."
   :group 'org-agenda-sorting
   :type 'boolean)
 
@@ -948,6 +957,15 @@ computations are current."
   :group 'org-agenda-column-view
   :type 'boolean)
 
+(defcustom org-agenda-columns-add-appointments-to-effort-sum nil
+  "Non-nil means, the duration of an appointment will add to day effort.
+The property to which appointment durations will be added is the one given
+in the option `org-effort-property'.  If an appointment does not have
+an end time, `org-agenda-default-appointment-duration' will be used.  If that
+is not set, an appointment without end time will not contribute to the time
+estimate."
+  :group 'org-agenda-column-view
+  :type 'boolean)
 
 (eval-when-compile
   (require 'cl))
@@ -3499,6 +3517,9 @@ The flag is set if the currently compiled format contains a `%t'.")
 (defvar org-prefix-has-tag nil
   "A flag, set by `org-compile-prefix-format'.
 The flag is set if the currently compiled format contains a `%T'.")
+(defvar org-prefix-has-effort nil
+  "A flag, set by `org-compile-prefix-format'.
+The flag is set if the currently compiled format contains a `%e'.")
 
 (defun org-format-agenda-item (extra txt &optional category tags dotime
 				     noprefix remove-re)
@@ -3523,8 +3544,9 @@ Any match of REMOVE-RE will be removed from TXT."
 			     (file-name-sans-extension
 			      (file-name-nondirectory buffer-file-name))
 			   "")))
+	   ;; time, tag, effort are needed for the eval of the prefix format
 	   (tag (if tags (nth (1- (length tags)) tags) ""))
-	   time    ; time and tag are needed for the eval of the prefix format
+	   time effort neffort
 	   (ts (if dotime (concat (if (stringp dotime) dotime "") txt)))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
 	   stamp plain s0 s1 s2 rtn srp
@@ -3564,7 +3586,7 @@ Any match of REMOVE-RE will be removed from TXT."
 		    (org-agenda-default-appointment-duration
 		     (+ t1 org-agenda-default-appointment-duration))
 		    (t nil)))
-	  (setq duration (if t2 (- t2 t1)))))      
+	  (setq duration (if t2 (- t2 t1)))))
 
       (when (and s1 (not s2) org-agenda-default-appointment-duration
 		 (string-match "\\([0-9]+\\):\\([0-9]+\\)" s1))
@@ -3586,6 +3608,16 @@ Any match of REMOVE-RE will be removed from TXT."
 		     (concat (make-string (max (- 50 (length txt)) 1) ?\ )
 			     (match-string 2 txt))
 		     t t txt))))
+      (when (org-mode-p)
+	(setq effort
+	      (condition-case nil
+		  (org-get-effort
+		   (or (get-text-property 0 'org-hd-marker txt)
+		       (get-text-property 0 'org-marker txt)))
+		(error nil)))
+	(when effort
+	  (setq neffort (org-hh:mm-string-to-minutes effort)
+		effort (setq effort (concat "[" effort"]" )))))
 
       (when remove-re
 	(while (string-match remove-re txt)
@@ -3611,6 +3643,8 @@ Any match of REMOVE-RE will be removed from TXT."
 	'prefix-length (- (length rtn) (length txt))
 	'time-of-day time-of-day
 	'duration duration
+	'effort effort
+	'effort-minutes neffort
 	'txt txt
 	'time time
 	'extra extra
@@ -3654,7 +3688,8 @@ Any match of REMOVE-RE will be removed from TXT."
   "Compile the prefix format into a Lisp form that can be evaluated.
 The resulting form is returned and stored in the variable
 `org-prefix-format-compiled'."
-  (setq org-prefix-has-time nil org-prefix-has-tag nil)
+  (setq org-prefix-has-time nil org-prefix-has-tag nil
+	org-prefix-has-effort nil)
   (let ((s (cond
 	    ((stringp org-agenda-prefix-format)
 	     org-agenda-prefix-format)
@@ -3663,16 +3698,17 @@ The resulting form is returned and stored in the variable
 	    (t "  %-12:c%?-12t% s")))
 	(start 0)
 	varform vars var e c f opt)
-    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([cts]\\)"
+    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([ctse]\\)"
 			 s start)
       (setq var (cdr (assoc (match-string 4 s)
 			    '(("c" . category) ("t" . time) ("s" . extra)
-			      ("T" . tag))))
+			      ("T" . tag) ("e" . effort))))
 	    c (or (match-string 3 s) "")
 	    opt (match-beginning 1)
 	    start (1+ (match-beginning 0)))
       (if (equal var 'time) (setq org-prefix-has-time t))
       (if (equal var 'tag)  (setq org-prefix-has-tag  t))
+      (if (equal var 'effort) (setq org-prefix-has-effort t))
       (setq f (concat "%" (match-string 2 s) "s"))
       (if opt
 	  (setq varform
@@ -3765,6 +3801,15 @@ HH:MM."
 	  ((< pa pb) -1)
 	  (t nil))))
 
+(defsubst org-cmp-effort (a b)
+  "Compare the priorities of string A and B."
+  (let* ((def (if org-sort-agenda-noeffort-is-high 32767 -1))
+	 (ea (or (get-text-property 1 'effort-minutes a) def))
+	 (eb (or (get-text-property 1 'effort-minutes b) def)))
+    (cond ((> ea eb) +1)
+	  ((< ea eb) -1)
+	  (t nil))))
+
 (defsubst org-cmp-category (a b)
   "Compare the string values of categories of strings A and B."
   (let ((ca (or (get-text-property 1 'org-category a) ""))
@@ -3800,6 +3845,8 @@ HH:MM."
 	 (time-down (if time-up (- time-up) nil))
 	 (priority-up (org-cmp-priority a b))
 	 (priority-down (if priority-up (- priority-up) nil))
+	 (effort-up (org-cmp-effort a b))
+	 (effort-down (if effort-up (- effort-up) nil))
 	 (category-up (org-cmp-category a b))
 	 (category-down (if category-up (- category-up) nil))
 	 (category-keep (if category-up +1 nil))

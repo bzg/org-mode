@@ -1,3 +1,8 @@
+2008-04-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-agenda.el (org-prefix-has-effort): New variable.
+	(org-sort-agenda-noeffort-is-high): New option.
+
 2008-04-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-colview.el (org-columns-compute): Only write property
@@ -2125,7 +2130,7 @@ installed as 4.38
 
 ----------------------------------------------------------------------
 installed as 4.37
-	
+
 
 2006-06-10  Carsten Dominik  <dominik@science.uva.nl>
 

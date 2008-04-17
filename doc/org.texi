@@ -5431,7 +5431,9 @@ sequence in which they are found in the agenda files.
 @end itemize
 
 Sorting can be customized using the variable
-@code{org-agenda-sorting-strategy}.
+@code{org-agenda-sorting-strategy}, and may also include criteria based on
+the estimated effort of an entry.
+@c FIXME: link!!!!!!!!
 
 
 @node Agenda commands, Custom agenda views, Presentation and sorting, Agenda Views
@@ -5508,7 +5510,7 @@ Toggle Clockreport mode.  In clockreport mode, the daily/weekly agenda will
 always show a table with the clocked times for the timespan and file scope
 covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
-@code{org-agenda-start-with-follow-mode}.
+@code{org-agenda-start-with-clockreport-mode}.
 
 @tsubheading{Change display}
 @cindex display changing, in agenda
