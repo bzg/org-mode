@@ -1,5 +1,9 @@
 2008-04-18  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-colview.el (org-columns-next-allowed-value)
+	(org-columns-edit-value): Limit the effort for updatig in the
+	agenda to recomputing a single file.
+
 	* lisp/org.el (org-add-archive-files): New function.
 
 	* lisp/org-clock.el (org-dblock-write:clocktable): Allow a Lisp

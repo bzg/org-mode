@@ -126,7 +126,8 @@ archive file is."
 	(while (re-search-forward 
 		"^\\(#\\+\\|[ \t]*:\\)ARCHIVE:[ \t]+\\(.*\\)"
 		nil t)
-	  (setq file (org-extract-archive-file (match-string 2)))
+	  (setq file (org-extract-archive-file
+		      (org-match-string-no-properties 2)))
 	  (and file (> (length file) 0) (file-exists-p file)
 	       (add-to-list 'files file)))))
     (setq files (nreverse files))
@@ -138,7 +139,8 @@ archive file is."
 (defun org-extract-archive-file (&optional location)
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (format (match-string 1 location) buffer-file-name)))
+      (expand-file-name 
+       (format (match-string 1 location) buffer-file-name))))
 
 (defun org-extract-archive-heading (&optional location)
   (setq location (or location org-archive-location))

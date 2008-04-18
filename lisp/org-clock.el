@@ -592,7 +592,7 @@ the currently selected interval size."
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
 	   ipos time p level hlc hdl
-	   cc beg end pos tbl tbl1 range-text rm-file-column)
+	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list)
       (setq org-clock-file-total-minutes nil)
       (when step
 	(org-clocktable-steps params)
@@ -627,6 +627,7 @@ the currently selected interval size."
        ((eq scope 'file-with-archives)
 	(setq scope (org-add-archive-files (list (buffer-file-name)))
 	      rm-file-column t)))
+      (setq scope-is-list (and scope (listp scope)))
       (save-restriction
 	(cond
 	 ((not scope))
@@ -644,7 +645,7 @@ the currently selected interval size."
 	      (if (<= (org-reduced-level (funcall outline-level)) level)
 		  (throw 'exit nil))))
 	  (org-narrow-to-subtree))
-	 ((listp scope)
+	 (scope-is-list
 	  (let* ((files scope)
 		 (scope 'agenda)
 		 (p1 (copy-sequence params))
@@ -668,7 +669,7 @@ the currently selected interval size."
 				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
-	(unless (listp scope)
+	(unless scope-is-list
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
 	  (while (setq p (next-single-property-change (point) :org-clock-minutes))
@@ -710,12 +711,12 @@ the currently selected interval size."
 		"]"
 		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
-	   (if (listp scope) "|File" "")
+	   (if scope-is-list "|File" "")
 	   "|L|Headline|Time|\n")
 	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
-	   (if (listp scope) "|" "")
+	   (if scope-is-list "|" "")
 	   "|"
 	   "*Total time*| *"
 	   (org-minutes-to-hh:mm-string (or total-time 0))
@@ -726,7 +727,7 @@ the currently selected interval size."
 	      (pop tbl))
 	  (insert-before-markers (mapconcat
 				  'identity (delq nil tbl)
-				  (if (listp scope) "\n|-\n" "\n")))
+				  (if scope-is-list "\n|-\n" "\n")))
 	  (backward-delete-char 1)
 	  (goto-char ipos)
 	  (skip-chars-forward "^|")

@@ -373,20 +373,34 @@ Where possible, use the standard interface for changing this line."
       (when (not (equal nval value))
 	(setq eval '(org-entry-put pom key nval)))))
     (when eval
-      (let ((inhibit-read-only t))
-	(org-unmodified
-	 (remove-text-properties (max (point-min) (1- bol)) eol '(read-only t)))
-	(unwind-protect
-	    (progn
-	      (setq org-columns-overlays
-		    (org-delete-all line-overlays org-columns-overlays))
-	      (mapc 'org-delete-overlay line-overlays)
-	      (org-columns-eval eval))
-	  (org-columns-display-here))))
-    (move-to-column col)
-    (if (and (org-mode-p)
-	     (nth 3 (assoc key org-columns-current-fmt-compiled)))
-	(org-columns-update key))))
+
+      (cond
+       ((equal major-mode 'org-agenda-mode)
+	(org-columns-eval '(org-entry-put pom key nval))
+	;; The following let preserves the current format, and makes sure
+	;; that in only a single file things need to be upated.
+	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+	       (buffer (marker-buffer pom))
+	       (org-agenda-contributing-files
+		(list (with-current-buffer buffer
+			(buffer-file-name (buffer-base-buffer))))))
+	  (org-agenda-columns)))
+       (t
+	(let ((inhibit-read-only t))
+	  (org-unmodified
+	   (remove-text-properties
+	    (max (point-min) (1- bol)) eol '(read-only t)))
+	  (unwind-protect
+	      (progn
+		(setq org-columns-overlays
+		      (org-delete-all line-overlays org-columns-overlays))
+		(mapc 'org-delete-overlay line-overlays)
+		(org-columns-eval eval))
+	    (org-columns-display-here)))
+	(move-to-column col)
+	(if (and (org-mode-p)
+		 (nth 3 (assoc key org-columns-current-fmt-compiled)))
+	    (org-columns-update key)))))))
 
 (defun org-edit-headline () ; FIXME: this is not columns specific.  Make interactive?????  Use from agenda????
   "Edit the current headline, the part without TODO keyword, TAGS."
@@ -477,22 +491,30 @@ Where possible, use the standard interface for changing this line."
       (setq nval (or nval (car allowed)))
       (if (equal nval value)
 	  (error "Only one allowed value for this property")))
-    (let ((inhibit-read-only t))
-      (remove-text-properties (1- bol) eol '(read-only t))
-      (unwind-protect
-	  (progn
-	    (setq org-columns-overlays
-		  (org-delete-all line-overlays org-columns-overlays))
-	    (mapc 'org-delete-overlay line-overlays)
-	    (org-columns-eval '(org-entry-put pom key nval)))
-	(org-columns-display-here)))
-    (move-to-column col)
     (cond
      ((equal major-mode 'org-agenda-mode)
-      (org-agenda-columns))
-     ((and (org-mode-p)
-	   (nth 3 (assoc key org-columns-current-fmt-compiled)))
-      (org-columns-update key)))))
+      (org-columns-eval '(org-entry-put pom key nval))
+      ;; The following let preserves the current format, and makes sure
+      ;; that in only a single file things need to be upated.
+      (let* ((org-agenda-overriding-columns-format org-columns-current-fmt)
+	     (buffer (marker-buffer pom))
+	     (org-agenda-contributing-files
+	      (list (with-current-buffer buffer
+		      (buffer-file-name (buffer-base-buffer))))))
+	(org-agenda-columns)))
+     (t
+      (let ((inhibit-read-only t))
+	(remove-text-properties (1- bol) eol '(read-only t))
+	(unwind-protect
+	    (progn
+	      (setq org-columns-overlays
+		    (org-delete-all line-overlays org-columns-overlays))
+	      (mapc 'org-delete-overlay line-overlays)
+	      (org-columns-eval '(org-entry-put pom key nval)))
+	  (org-columns-display-here)))
+      (move-to-column col)
+      (and (nth 3 (assoc key org-columns-current-fmt-compiled))
+	   (org-columns-update key))))))
 
 (defun org-verify-version (task)
   (cond
@@ -673,8 +695,9 @@ display, or in the #+COLUMNS line of the current buffer."
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
 	    (org-set-local 'org-columns-default-format fmt))))))
 
-(defvar org-overriding-columns-format nil
-  "When set, overrides any other definition.")
+(defvar org-agenda-overriding-columns-format nil
+  "When set, overrides any other format definition for the agenda.
+Don't set this, this is meant for dynamic scoping.")
 
 (defun org-columns-get-autowidth-alist (s cache)
   "Derive the maximum column widths from the format and the cache."
@@ -1037,16 +1060,17 @@ and tailing newline characters."
 (defvar org-agenda-columns-add-appointments-to-effort-sum); as well
 
 (defun org-agenda-columns ()
-  "Turn on column view in the agenda."
+  "Turn on or update column view in the agenda."
   (interactive)
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let (fmt cache maxwidths m p a d)
     (cond
-     ((and (local-variable-p 'org-overriding-columns-format)
-	   org-overriding-columns-format)
-      (setq fmt org-overriding-columns-format))
+     ((and (boundp 'org-agenda-overriding-columns-format)
+	   org-agenda-overriding-columns-format)
+      (setq fmt org-agenda-overriding-columns-format)
+      (org-set-local 'org-agenda-overriding-columns-format fmt))
      ((setq m (get-text-property (point-at-bol) 'org-hd-marker))
       (setq fmt (or (org-entry-get m "COLUMNS" t)
 		    (with-current-buffer (marker-buffer m)
