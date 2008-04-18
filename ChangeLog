@@ -1,5 +1,12 @@
 2008-04-18  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-clock.el (org-clock): New customization group.
+	(org-clock-into-drawer, org-clock-out-when-done)
+	(org-clock-in-switch-to-state, org-clock-heading-function): Moved
+	into the new group.
+	(org-clock-out-remove-zero-time-clocks): New option.
+	(org-clock-out): Use `org-clock-out-remove-zero-time-clocks'.
+
 	* lisp/org-colview.el (org-columns-next-allowed-value)
 	(org-columns-edit-value): Limit the effort for updatig in the
 	agenda to recomputing a single file.

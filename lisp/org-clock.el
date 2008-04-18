@@ -36,6 +36,11 @@
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
 
+(defgroup org-clock nil
+  "Options concerning clocking working time in Org-mode."
+  :tag "Org Clock"
+  :group 'org-progress)
+
 (defcustom org-clock-into-drawer 2
   "Should clocking info be wrapped into a drawer?
 When t, clocking info will always be inserted into a :CLOCK: drawer.
@@ -44,7 +49,7 @@ When nil, the drawer will not be created, but used when present.
 When an integer and the number of clocking entries in an item
 reaches or exceeds this number, a drawer will be created."
   :group 'org-todo
-  :group 'org-progress
+  :group 'org-clock
   :type '(choice
 	  (const :tag "Always" t)
 	  (const :tag "Only when drawer exists" nil)
@@ -54,13 +59,18 @@ reaches or exceeds this number, a drawer will be created."
   "When t, the clock will be stopped when the relevant entry is marked DONE.
 Nil means, clock will keep running until stopped explicitly with
 `C-c C-x C-o', or until the clock is started in a different item."
-  :group 'org-progress
+  :group 'org-clock
+  :type 'boolean)
+
+(defcustom org-clock-out-remove-zero-time-clocks nil
+  "Non-nil means, remove the clock line when the resulting time is zero."
+  :group 'org-clock
   :type 'boolean)
 
 (defcustom org-clock-in-switch-to-state nil
   "Set task to a special todo state while clocking it.
 The value should be the state to which the entry should be switched."
-  :group 'org-progress
+  :group 'org-clock
   :group 'org-todo
   :type '(choice
 	  (const :tag "Don't force a state" nil)
@@ -70,13 +80,8 @@ The value should be the state to which the entry should be switched."
   "When non-nil, should be a function to create `org-clock-heading'.
 This is the string shown in the mode line when a clock is running.
 The function is called with point at the beginning of the headline."
-  :group 'org-progress
+  :group 'org-clock
   :type 'function)
-
-
-
-
-
 
 
 ;;; The clock for measuring work time.
@@ -199,36 +204,45 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (catch 'exit
   (if (not (marker-buffer org-clock-marker))
       (if fail-quietly (throw 'exit t) (error "No active clock")))
-  (let (ts te s h m)
+  (let (ts te s h m remove)
     (save-excursion
       (set-buffer (marker-buffer org-clock-marker))
-      (goto-char org-clock-marker)
-      (beginning-of-line 1)
-      (if (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
-	       (equal (match-string 1) org-clock-string))
-	  (setq ts (match-string 2))
-	(if fail-quietly (throw 'exit nil) (error "Clock start time is gone")))
-      (goto-char (match-end 0))
-      (delete-region (point) (point-at-eol))
-      (insert "--")
-      (setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
-      (setq s (- (time-to-seconds (apply 'encode-time (org-parse-time-string te)))
-		 (time-to-seconds (apply 'encode-time (org-parse-time-string ts))))
-	    h (floor (/ s 3600))
-	    s (- s (* 3600 h))
-	    m (floor (/ s 60))
-	    s (- s (* 60 s)))
-      (insert " => " (format "%2d:%02d" h m))
-      (move-marker org-clock-marker nil)
-      (when org-log-note-clock-out
-	(org-add-log-setup 'clock-out))
-      (when org-mode-line-timer
-	(cancel-timer org-mode-line-timer)
-	(setq org-mode-line-timer nil))
-      (setq global-mode-string
-	    (delq 'org-mode-line-string global-mode-string))
-      (force-mode-line-update)
-      (message "Clock stopped at %s after HH:MM = %d:%02d" te h m)))))
+      (save-restriction
+	(widen)
+	(goto-char org-clock-marker)
+	(beginning-of-line 1)
+	(if (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
+		 (equal (match-string 1) org-clock-string))
+	    (setq ts (match-string 2))
+	  (if fail-quietly (throw 'exit nil) (error "Clock start time is gone")))
+	(goto-char (match-end 0))
+	(delete-region (point) (point-at-eol))
+	(insert "--")
+	(setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
+	(setq s (- (time-to-seconds (apply 'encode-time (org-parse-time-string te)))
+		   (time-to-seconds (apply 'encode-time (org-parse-time-string ts))))
+	      h (floor (/ s 3600))
+	      s (- s (* 3600 h))
+	      m (floor (/ s 60))
+	      s (- s (* 60 s)))
+	(insert " => " (format "%2d:%02d" h m))
+	(setq remove (and (= (+ h m) 0) org-clock-out-remove-zero-time-clocks))
+	(move-marker org-clock-marker nil)
+	(when org-log-note-clock-out
+	  (org-add-log-setup 'clock-out))
+	(when org-mode-line-timer
+	  (cancel-timer org-mode-line-timer)
+	  (setq org-mode-line-timer nil))
+	(setq global-mode-string
+	      (delq 'org-mode-line-string global-mode-string))
+	(force-mode-line-update)
+	(message "Clock stopped at %s after HH:MM = %d:%02d%s" te h m
+		 (if remove " => REMOVING" ""))
+	(when remove
+	  (beginning-of-line 1)
+	  (let ((kill-whole-line t))
+	    (kill-line nil))
+	  (beginning-of-line 0)))))))
 
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
