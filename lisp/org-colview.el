@@ -284,6 +284,7 @@ This is the compiled version of the format.")
   (let ((value (get-char-property (point) 'org-columns-value)))
     (message "Value is: %s" (or value ""))))
 
+(defvar org-agenda-columns-active) ;; defined in org-agenda.el
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive)
@@ -1033,6 +1034,7 @@ and tailing newline characters."
 
 (defvar org-agenda-columns-show-summaries) ; defined in org-agenda.el
 (defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
+(defvar org-agenda-columns-add-appointments-to-effort-sum); as well
 
 (defun org-agenda-columns ()
   "Turn on column view in the agenda."
@@ -1040,7 +1042,7 @@ and tailing newline characters."
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
-  (let (fmt cache maxwidths m p a)
+  (let (fmt cache maxwidths m p a d)
     (cond
      ((and (local-variable-p 'org-overriding-columns-format)
 	   org-overriding-columns-format)

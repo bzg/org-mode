@@ -12899,7 +12899,7 @@ archive file is."
 	    (if (string-match "\\(.*\\)::\\(.*\\)" org-archive-location)
 		(setq afile (format (match-string 1 org-archive-location)
 				    buffer-file-name))
-	      (setq arch nil))
+	      (setq afile nil))
 	    (if (and afile (file-exists-p afile))
 		(list f afile)
 	      (list f)))))

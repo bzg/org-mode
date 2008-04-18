@@ -53,6 +53,7 @@
 (declare-function calendar-julian-date-string   "cal-julian" (&optional date))
 (declare-function calendar-mayan-date-string    "cal-mayan"  (&optional date))
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
+(declare-function org-columns-quit              "org-colview" ())
 (defvar calendar-mode-map)
 
 ;; Defined somewhere in this file, but used before definition.
@@ -3558,7 +3559,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	   time effort neffort
 	   (ts (if dotime (concat (if (stringp dotime) dotime "") txt)))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
-	   stamp plain s0 s1 s2 rtn srp
+	   stamp plain s0 s1 s2 t1 t2 rtn srp
 	   duration)
       (and (org-mode-p) buffer-file-name
 	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
