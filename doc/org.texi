@@ -4542,6 +4542,8 @@ new table.  The @samp{BEGIN} line can specify options:
              tree       @r{the surrounding level 1 tree}
              agenda     @r{all agenda files}
              ("file"..) @r{scan these files}
+             file-with-archives    @r{current file and its archives}
+             agenda-with-archives  @r{all agenda files, including archives}
 :block       @r{The time block to consider.  This block is specified either}
              @r{absolute, or relative to the current time and may be any of}
              @r{these formats:}

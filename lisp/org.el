@@ -2532,8 +2532,10 @@ collapsed state."
 
 (defalias 'org-advertized-archive-subtree 'org-archive-subtree)
 
-(org-autoload "org-archive"
-  '(org-archive-subtree org-archive-to-archive-sibling org-toggle-archive-tag))
+(eval-and-compile
+  (org-autoload "org-archive"
+   '(org-add-archive-files org-archive-subtree
+     org-archive-to-archive-sibling org-toggle-archive-tag)))
 
 ;; Autoload Column View Code
 
@@ -12881,29 +12883,6 @@ really on, so that the block visually is on the match."
     (multi-occur
      (mapcar (lambda (x) (or (get-file-buffer x) (find-file-noselect x))) files)
      regexp)))
-
-(defun org-add-archive-files (files)
-  "Splice the archive files into the list f files.
-This implies visiting all these files and finding out what the
-archive file is."
-  (let (afile)
-    (apply
-     'append
-     (mapcar
-      (lambda (f)
-	(if (not (file-exists-p f))
-	  nil
-	  (with-current-buffer (or (get-file-buffer f)
-				   (find-file-noselect f))
-
-	    (if (string-match "\\(.*\\)::\\(.*\\)" org-archive-location)
-		(setq afile (format (match-string 1 org-archive-location)
-				    buffer-file-name))
-	      (setq afile nil))
-	    (if (and afile (file-exists-p afile))
-		(list f afile)
-	      (list f)))))
-      files))))
 
 (if (boundp 'occur-mode-find-occurrence-hook)
     ;; Emacs 23

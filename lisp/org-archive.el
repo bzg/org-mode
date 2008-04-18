@@ -87,6 +87,64 @@ information."
 	  (const :tag "Outline path" olpath)
 	  (const :tag "Local tags" ltags)))
 
+(defun org-get-local-archive-location ()
+  "Get the archive location applicable at point."
+  (let ((re "^#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
+	prop)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(setq prop (org-entry-get nil "ARCHIVE" 'inherit))
+	(cond
+	 ((and prop (string-match "\\S-" prop))
+	  prop)
+	 ((or (re-search-backward re nil t)
+	      (re-search-forward re nil t))
+	  (match-string 1))
+	 (t org-archive-location (match-string 1)))))))
+
+(defun org-add-archive-files (files)
+  "Splice the archive files into the list f files.
+This implies visiting all these files and finding out what the
+archive file is."
+  (apply
+   'append
+   (mapcar
+    (lambda (f)
+      (if (not (file-exists-p f))
+	  nil
+	(with-current-buffer (org-get-agenda-file-buffer f)
+	  (cons f (org-all-archive-files)))))
+    files)))
+
+(defun org-all-archive-files ()
+  "Get a list of all archive files used in the current buffer."
+  (let (file files)
+    (save-excursion
+      (save-restriction
+	(goto-char (point-min))
+	(while (re-search-forward 
+		"^\\(#\\+\\|[ \t]*:\\)ARCHIVE:[ \t]+\\(.*\\)"
+		nil t)
+	  (setq file (org-extract-archive-file (match-string 2)))
+	  (and file (> (length file) 0) (file-exists-p file)
+	       (add-to-list 'files file)))))
+    (setq files (nreverse files))
+    (setq file (org-extract-archive-file))
+    (and file (> (length file) 0) (file-exists-p file)
+	 (add-to-list 'files file))
+    files))
+
+(defun org-extract-archive-file (&optional location)
+  (setq location (or location org-archive-location))
+  (if (string-match "\\(.*\\)::\\(.*\\)" location)
+      (format (match-string 1 location) buffer-file-name)))
+
+(defun org-extract-archive-heading (&optional location)
+  (setq location (or location org-archive-location))
+  (if (string-match "\\(.*\\)::\\(.*\\)" location)
+      (match-string 2 location)))
+
 (defun org-archive-subtree (&optional find-done)
   "Move the current subtree to the archive.
 The archive can be a certain top-level heading in the current file, or in
@@ -111,8 +169,6 @@ this heading."
 	  (tr-org-todo-line-regexp org-todo-line-regexp)
 	  (tr-org-odd-levels-only org-odd-levels-only)
 	  (this-buffer (current-buffer))
-	  (org-archive-location org-archive-location)
-	  (re "^#\\+ARCHIVE:[ \t]+\\(\\S-.*\\S-\\)[ \t]*$")
           ;; start of variables that will be used for saving context
 	  ;; The compiler complains about them - keep them anyway!
 	  (file (abbreviate-file-name (buffer-file-name)))
@@ -120,28 +176,17 @@ this heading."
 	  (time (format-time-string
 		 (substring (cdr org-time-stamp-formats) 1 -1)
 		 (current-time)))
-	  afile heading buffer level newfile-p
-	  category todo priority
-          ;; start of variables that will be used for savind context
-          ltags itags prop)
+	  category todo priority ltags itags
+          ;; end of variables that will be used for saving context
+	  location afile heading buffer level newfile-p)
 
-      ;; Try to find a local archive location
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (setq prop (org-entry-get nil "ARCHIVE" 'inherit))
-	  (if (and prop (string-match "\\S-" prop))
-	      (setq org-archive-location prop)
-	    (if (or (re-search-backward re nil t)
-		    (re-search-forward re nil t))
-		(setq org-archive-location (match-string 1))))))
-
-      (if (string-match "\\(.*\\)::\\(.*\\)" org-archive-location)
-	  (progn
-	    (setq afile (format (match-string 1 org-archive-location)
-				(file-name-nondirectory buffer-file-name))
-		  heading (match-string 2 org-archive-location)))
+      ;; Find the local archive location
+      (setq location (org-get-local-archive-location)
+	    afile (org-extract-archive-file location)
+	    heading (org-extract-archive-heading location))
+      (unless afile
 	(error "Invalid `org-archive-location'"))
+
       (if (> (length afile) 0)
 	  (setq newfile-p (not (file-exists-p afile))
 		buffer (find-file-noselect afile))

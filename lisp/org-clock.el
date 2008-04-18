@@ -592,7 +592,7 @@ the currently selected interval size."
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
 	   ipos time p level hlc hdl
-	   cc beg end pos tbl tbl1 range-text)
+	   cc beg end pos tbl tbl1 range-text rm-file-column)
       (setq org-clock-file-total-minutes nil)
       (when step
 	(org-clocktable-steps params)
@@ -616,8 +616,17 @@ the currently selected interval size."
 
       ;; Get the right scope
       (setq pos (point))
-      (if (and scope (listp scope) (symbolp (car scope)))
-	  (setq scope (eval scope)))
+      (cond
+       ((and scope (listp scope) (symbolp (car scope)))
+	(setq scope (eval scope)))
+       ((eq scope 'agenda)
+	(setq scope (org-agenda-files t)))
+       ((eq scope 'agenda-with-archives)
+	(setq scope (org-agenda-files t))
+	(setq scope (org-add-archive-files scope)))
+       ((eq scope 'file-with-archives)
+	(setq scope (org-add-archive-files (list (buffer-file-name)))
+	      rm-file-column t)))
       (save-restriction
 	(cond
 	 ((not scope))
@@ -635,8 +644,8 @@ the currently selected interval size."
 	      (if (<= (org-reduced-level (funcall outline-level)) level)
 		  (throw 'exit nil))))
 	  (org-narrow-to-subtree))
-	 ((or (listp scope) (eq scope 'agenda))
-	  (let* ((files (if (listp scope) scope (org-agenda-files t)))
+	 ((listp scope)
+	  (let* ((files scope)
 		 (scope 'agenda)
 		 (p1 (copy-sequence params))
 		 file)
@@ -649,7 +658,7 @@ the currently selected interval size."
 		(setq tbl1 (org-dblock-write:clocktable p1))
 		(when tbl1
 		  (push (org-clocktable-add-file
-			 file 
+			 file
 			 (concat "| |*File time*|*"
 				 (org-minutes-to-hh:mm-string
 				  org-clock-file-total-minutes)
@@ -659,7 +668,7 @@ the currently selected interval size."
 				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
-	(unless (or (eq scope 'agenda) (listp scope))
+	(unless (listp scope)
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
 	  (while (setq p (next-single-property-change (point) :org-clock-minutes))
@@ -701,12 +710,12 @@ the currently selected interval size."
 		"]"
 		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
-	   (if (or (eq scope 'agenda) (listp scope)) "|File" "")
+	   (if (listp scope) "|File" "")
 	   "|L|Headline|Time|\n")
 	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
-	   (if (or (eq scope 'agenda) (listp scope)) "|" "")
+	   (if (listp scope) "|" "")
 	   "|"
 	   "*Total time*| *"
 	   (org-minutes-to-hh:mm-string (or total-time 0))
@@ -717,11 +726,14 @@ the currently selected interval size."
 	      (pop tbl))
 	  (insert-before-markers (mapconcat
 				  'identity (delq nil tbl)
-				  (if (eq scope 'agenda) "\n|-\n" "\n")))
+				  (if (listp scope) "\n|-\n" "\n")))
 	  (backward-delete-char 1)
 	  (goto-char ipos)
 	  (skip-chars-forward "^|")
-	  (org-table-align))))))
+	  (org-table-align)
+	  (when rm-file-column
+	    (forward-char 1)
+	    (org-table-delete-column)))))))
 
 (defun org-clocktable-steps (params)
   (let* ((p1 (copy-sequence params))
