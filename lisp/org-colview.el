@@ -488,7 +488,7 @@ Where possible, use the standard interface for changing this line."
     (move-to-column col)
     (cond
      ((equal major-mode 'org-agenda-mode)
-      (org-agenda-redo))
+      (org-agenda-columns))
      ((and (org-mode-p)
 	   (nth 3 (assoc key org-columns-current-fmt-compiled)))
       (org-columns-update key)))))

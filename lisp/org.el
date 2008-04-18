@@ -1903,14 +1903,19 @@ regular expression will be included."
 
 (defcustom org-agenda-text-search-extra-files nil
   "List of extra files to be searched by text search commands.
-These files will be search in addition to the agenda files bu the
+These files will be search in addition to the agenda files by the
 commands `org-search-view' (`C-c a s') and `org-occur-in-agenda-files'.
 Note that these files will only be searched for text search commands,
-not for the other agenda views like todo lists, tag earches or the weekly
+not for the other agenda views like todo lists, tag searches or the weekly
 agenda.  This variable is intended to list notes and possibly archive files
-that should also be searched by these two commands."
+that should also be searched by these two commands.
+In fact, if the first element in the list is the symbol `agenda-archives',
+than all archive files of all agenda files will be added to the search
+scope."
   :group 'org-agenda
-  :type '(repeat file))
+  :type '(set :greedy t
+	   (const :tag "Agenda Archives" agenda-archives)
+	   (repeat :inline t (file))))
 
 (if (fboundp 'defvaralias)
     (defvaralias 'org-agenda-multi-occur-extra-files
@@ -2418,6 +2423,48 @@ If yes, offer to stop it and to save the buffer with the changes."
   "Options concerning archiving in Org-mode."
   :tag "Org Archive"
   :group 'org-structure)
+
+(defcustom org-archive-location "%s_archive::"
+  "The location where subtrees should be archived.
+
+Otherwise, the value of this variable is a string, consisting of two
+parts, separated by a double-colon.
+
+The first part is a file name - when omitted, archiving happens in the same
+file.  %s will be replaced by the current file name (without directory part).
+Archiving to a different file is useful to keep archived entries from
+contributing to the Org-mode Agenda.
+
+The part after the double colon is a headline.  The archived entries will be
+filed under that headline.  When omitted, the subtrees are simply filed away
+at the end of the file, as top-level entries.
+
+Here are a few examples:
+\"%s_archive::\"
+	If the current file is Projects.org, archive in file
+	Projects.org_archive, as top-level trees.  This is the default.
+
+\"::* Archived Tasks\"
+	Archive in the current file, under the top-level headline
+	\"* Archived Tasks\".
+
+\"~/org/archive.org::\"
+	Archive in file ~/org/archive.org (absolute path), as top-level trees.
+
+\"basement::** Finished Tasks\"
+	Archive in file ./basement (relative path), as level 3 trees
+	below the level 2 heading \"** Finished Tasks\".
+
+You may set this option on a per-file basis by adding to the buffer a
+line like
+
+#+ARCHIVE: basement::** Finished Tasks
+
+You may also define it locally for a subtree by setting an ARCHIVE property
+in the entry.  If such a property is found in an entry, or anywhere up
+the hierarchy, it will be used."
+  :group 'org-archive
+  :type 'string)
 
 (defcustom org-archive-tag "ARCHIVE"
   "The tag that marks a subtree as archived.
@@ -11032,10 +11079,14 @@ If TMP is non-nil, don't include temporary buffers."
 	   (buffer-list)))
     (delete nil blist)))
 
-(defun org-agenda-files (&optional unrestricted)
+(defun org-agenda-files (&optional unrestricted ext)
   "Get the list of agenda files.
 Optional UNRESTRICTED means return the full list even if a restriction
-is currently in place."
+is currently in place.
+When EXT is non-nil, try to add all files that are created by adding EXT
+to the file nemes.  Basically, this is a way to add the archive files
+to the list, by setting EXT to \"_archive\"  If EXT is non-nil, but not
+a string, \"_archive\" will be used."
   (let ((files
 	 (cond
 	  ((and (not unrestricted) (get 'org-agenda-files 'org-restrict)))
@@ -11045,17 +11096,27 @@ is currently in place."
     (setq files (apply 'append
 		       (mapcar (lambda (f)
 				 (if (file-directory-p f)
-				     (directory-files f t
-						      org-agenda-file-regexp)
+				     (directory-files
+				      f t org-agenda-file-regexp)
 				   (list f)))
 			       files)))
-    (if org-agenda-skip-unavailable-files
-	(delq nil
-	      (mapcar (function
-		       (lambda (file)
-			 (and (file-readable-p file) file)))
-		      files))
-      files))) ; `org-check-agenda-file' will remove them from the list
+    (when org-agenda-skip-unavailable-files
+      (setq files (delq nil
+			(mapcar (function
+				 (lambda (file)
+				   (and (file-readable-p file) file)))
+				files))))
+    (when ext
+      (setq ext (if (and (stringp ext) (string-match "\\S-" ext))
+		    ext "_archive"))
+      (setq files (apply 'append
+			 (mapcar
+			  (lambda (f)
+			    (if (file-exists-p (concat f ext))
+				(list f (concat f ext))
+			      (list f)))
+			  files))))
+    files))
 
 (defun org-edit-agenda-file-list ()
   "Edit the list of agenda files.
@@ -12810,6 +12871,9 @@ really on, so that the block visually is on the match."
 	 (tnames (mapcar 'file-truename files))
 	 (extra org-agenda-text-search-extra-files)
 	 f)
+    (when (eq (car extra) 'agenda-archives)
+      (setq extra (cdr extra))
+      (setq files (org-add-archive-files files)))
     (while (setq f (pop extra))
       (unless (member (file-truename f) tnames)
 	(add-to-list 'files f 'append)
@@ -12817,6 +12881,29 @@ really on, so that the block visually is on the match."
     (multi-occur
      (mapcar (lambda (x) (or (get-file-buffer x) (find-file-noselect x))) files)
      regexp)))
+
+(defun org-add-archive-files (files)
+  "Splice the archive files into the list f files.
+This implies visiting all these files and finding out what the
+archive file is."
+  (let (afile)
+    (apply
+     'append
+     (mapcar
+      (lambda (f)
+	(if (not (file-exists-p f))
+	  nil
+	  (with-current-buffer (or (get-file-buffer f)
+				   (find-file-noselect f))
+
+	    (if (string-match "\\(.*\\)::\\(.*\\)" org-archive-location)
+		(setq afile (format (match-string 1 org-archive-location)
+				    buffer-file-name))
+	      (setq arch nil))
+	    (if (and afile (file-exists-p afile))
+		(list f afile)
+	      (list f)))))
+      files))))
 
 (if (boundp 'occur-mode-find-occurrence-hook)
     ;; Emacs 23

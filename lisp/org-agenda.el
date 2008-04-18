@@ -2471,7 +2471,11 @@ in `org-agenda-text-search-extra-files'."
       (setq regexp (pop regexps+))
       (if hdl-only (setq regexp (concat "^" org-outline-regexp ".*?"
 					regexp))))
-    (setq files (append (org-agenda-files) org-agenda-text-search-extra-files)
+    (setq files (org-agenda-files))
+    (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
+      (pop org-agenda-text-search-extra-files)
+      (setq files (org-add-archive-files files)))
+    (setq files (append files org-agenda-text-search-extra-files)
 	  rtnall nil)
     (while (setq file (pop files))
       (setq ee nil)
@@ -2924,9 +2928,14 @@ Needed to avoid empty dates which mess up holiday display."
   ;; Catch the error if dealing with the new add-to-diary-alist
   (when org-disable-agenda-to-diary
     (condition-case nil
-	(add-to-diary-list original-date "Org-mode dummy" "")
+	(org-add-to-diary-list original-date "Org-mode dummy" "")
       (error
-       (add-to-diary-list original-date  "Org-mode dummy" "" nil)))))
+       (org-add-to-diary-list original-date  "Org-mode dummy" "" nil)))))
+
+(defun org-add-to-diary-list (&rest args)
+  (if (fboundp 'diary-add-to-list)
+      (apply 'diary-add-to-list args)
+    (apply 'add-to-diary-list args)))
 
 ;;;###autoload
 (defun org-diary (&rest args)

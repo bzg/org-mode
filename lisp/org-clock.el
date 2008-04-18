@@ -616,6 +616,8 @@ the currently selected interval size."
 
       ;; Get the right scope
       (setq pos (point))
+      (if (and scope (listp scope) (symbolp (car scope)))
+	  (setq scope (eval scope)))
       (save-restriction
 	(cond
 	 ((not scope))
@@ -657,7 +659,7 @@ the currently selected interval size."
 				      org-clock-file-total-minutes))))))))
 	(goto-char pos)
 
-	(unless (eq scope 'agenda)
+	(unless (or (eq scope 'agenda) (listp scope))
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
 	  (while (setq p (next-single-property-change (point) :org-clock-minutes))
@@ -699,12 +701,12 @@ the currently selected interval size."
 		"]"
 		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
-	   (if (eq scope 'agenda) "|File" "")
+	   (if (or (eq scope 'agenda) (listp scope)) "|File" "")
 	   "|L|Headline|Time|\n")
 	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
-	   (if (eq scope 'agenda) "|" "")
+	   (if (or (eq scope 'agenda) (listp scope)) "|" "")
 	   "|"
 	   "*Total time*| *"
 	   (org-minutes-to-hh:mm-string (or total-time 0))

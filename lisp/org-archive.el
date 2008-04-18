@@ -33,48 +33,6 @@
 
 (require 'org)
 
-(defcustom org-archive-location "%s_archive::"
-  "The location where subtrees should be archived.
-
-Otherwise, the value of this variable is a string, consisting of two
-parts, separated by a double-colon.
-
-The first part is a file name - when omitted, archiving happens in the same
-file.  %s will be replaced by the current file name (without directory part).
-Archiving to a different file is useful to keep archived entries from
-contributing to the Org-mode Agenda.
-
-The part after the double colon is a headline.  The archived entries will be
-filed under that headline.  When omitted, the subtrees are simply filed away
-at the end of the file, as top-level entries.
-
-Here are a few examples:
-\"%s_archive::\"
-	If the current file is Projects.org, archive in file
-	Projects.org_archive, as top-level trees.  This is the default.
-
-\"::* Archived Tasks\"
-	Archive in the current file, under the top-level headline
-	\"* Archived Tasks\".
-
-\"~/org/archive.org::\"
-	Archive in file ~/org/archive.org (absolute path), as top-level trees.
-
-\"basement::** Finished Tasks\"
-	Archive in file ./basement (relative path), as level 3 trees
-	below the level 2 heading \"** Finished Tasks\".
-
-You may set this option on a per-file basis by adding to the buffer a
-line like
-
-#+ARCHIVE: basement::** Finished Tasks
-
-You may also define it locally for a subtree by setting an ARCHIVE property
-in the entry.  If such a property is found in an entry, or anywhere up
-the hierarchy, it will be used."
-  :group 'org-archive
-  :type 'string)
-
 (defcustom org-archive-sibling-heading "Archive"
   "Name of the local archive sibling that is used to archive entries locally.
 Locally means: in the tree, under a sibling.

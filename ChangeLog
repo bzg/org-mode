@@ -1,4 +1,16 @@
+2008-04-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-add-archive-files): New function.
+
+	* lisp/org-clock.el (org-dblock-write:clocktable): Allow a Lisp
+	form for the scope parameter.
+
+	* lisp/org-agenda.el (org-add-to-diary-list): New function.
+
 2008-04-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-agenda-files): New argument `ext', to
+	get archive files as well.
 
 	* lisp/org-agenda.el (org-prefix-has-effort): New variable.
 	(org-sort-agenda-noeffort-is-high): New option.
