@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.02pre02
+@set VERSION 6.02pre-03
 @set DATE April 2008
 
 @dircategory Emacs
@@ -212,6 +212,7 @@ Dates and Times
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
+* Effort estimates::            Planning work effort in advance
 
 Creating timestamps
 
@@ -3999,6 +4000,7 @@ is used in a much wider sense.
 * Creating timestamps::         Commands which insert timestamps
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
+* Effort estimates::            Planning work effort in advance
 @end menu
 
 
@@ -4466,7 +4468,7 @@ special repeaters markers with @samp{++} and @samp{.+}.  For example:
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
 
-@node Clocking work time,  , Deadlines and scheduling, Dates and Times
+@node Clocking work time, Effort estimates, Deadlines and scheduling, Dates and Times
 @section Clocking work time
 
 Org mode allows you to clock the time you spent on specific tasks in a
@@ -4597,6 +4599,47 @@ needs to be in the @code{#+BEGIN: clocktable} line for this command.  If
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
+
+@node Effort estimates
+@section Effort estimates
+@cindex Effort estimates
+
+If you want to plan your work in a very detailed way, or if you need to
+produce offers with quotations of the estimated work effort, you may want to
+assign effort estimates to entries.  If you are also clocking your work, you
+may later want to compare the planned effort with the actual working time, a
+great way to improve planning estimates.  Effort estimates are stored in a
+special property @samp{Effort}@footnote{You may change the property being
+used with the variable @code{org-effort-property}.}.  Clearly the best way to
+work with effort estimates is through column view (@pxref{Column view}).  You
+should start by setting up discrete values for effort estimates, and a
+@code{COLUMNS} format that displays these values together with clock sums (if
+you want to clock your time).  For a specific buffer you can use
+
+@example
+#+PROPERTY: Effort_ALL 0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00 8:00
+#+COLUMNS: %40ITEM(Task) %17Effort(Estimated Effort){:} %CLOCKSUM
+@end example
+
+@noindent
+or you can set up these values globally by customizing the variables
+@code{org-global-properties} and @code{org-columns-default-format}.  In
+particular if you want to use this setup also in the agenda, a global setup
+may be advised.
+
+The way to assign estimates to individual items is then to switch to column
+mode, and to use @kbd{S-@key{right}} and @kbd{S-@key{left}} to change the
+value.  The values you enter will immediately be summed up in the hierarchy.
+In the column next to it, any clocked time will be displayed.
+
+If you switch to column view in the daily/weekly agenda, the effort column
+will summarize the estimated work effort for each day@footnote{Please note
+the pitfalls of summing hierarchical data in a flat list (@pxref{Agenda
+column view}.}, and you can use this to find space in your schedule.  To get
+an overview of the entire part of the day that is committed, you can set the
+option @code{org-agenda-columns-add-appointments-to-effort-sum}.  The
+appointments on a day that take place over a specified time interval will
+then also be added to the load estimate of the day.
 
 @node Remember, Agenda Views, Dates and Times, Top
 @chapter Remember
