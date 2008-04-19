@@ -416,7 +416,7 @@ at the end of the buffer."
 
 (defsubst outline-invisible-p (&optional pos)
   "Non-nil if the character after point is invisible."
-  (get-char-property (or pos (point)) 'invisible))
+  (eq 'outline (get-char-property (or pos (point)) 'invisible)))
 
 (defun outline-visible ()
   (not (outline-invisible-p)))

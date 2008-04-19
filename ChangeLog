@@ -1,3 +1,8 @@
+2008-04-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* xemacs/noutline.el (outline-invisible-p): Require that
+	invisibility is from outline.
+
 2008-04-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-clock.el (org-clock): New customization group.
