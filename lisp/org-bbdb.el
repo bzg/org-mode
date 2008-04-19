@@ -33,11 +33,12 @@
 ;; configure the variable `org-modules'.
 
 
-;; It also implements an interface for those org-mode users, who do
-;; not use the diary but who do want to include the anniversaries
-;; stored in the BBDB into the org-agenda.  If you already include the
-;; `diary' into the agenda, you'd better include the anniversaries in
-;; the diary using bbdb-anniv.el
+;; It also implements an interface (based on Ivar Rummelhoff's
+;; bbdb-anniv.el) for those org-mode users, who do not use the diary
+;; but who do want to include the anniversaries stored in the BBDB
+;; into the org-agenda.  If you already include the `diary' into the
+;; agenda, you might want to prefer to include the anniversaries in
+;; the diary using bbdb-anniv.el.
 ;; 
 ;; Put the following in /somewhere/at/home/diary.org and make sure
 ;; that this file is in `org-agenda-files`
@@ -98,13 +99,12 @@
           (&optional dont-check-disk already-in-db-buffer))
 (declare-function bbdb-split "ext:bbdb" (string separators))
 (declare-function bbdb-string-trim "ext:bbdb" (string))
-(declare-function calendar-extract-day "calendar" (date))
-(declare-function calendar-extract-month "calendar" (date))
-(declare-function calendar-extract-year "calendar" (date))
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 
 (defvar date)
+
+;; Customization
 
 (defgroup org-bbdb-anniversaries nil
   "Customizations for including anniversaries from BBDB into Agenda."
@@ -235,9 +235,9 @@ Argument STR is the anniversary field in BBDB."
 (defun org-bbdb-anniversaries ()
   "Extract anniversaries from BBDB for display in the agenda."
   (require 'diary-lib)
-  (let ((dates (list (cons (cons (calendar-extract-month date)
-                                 (calendar-extract-day date))
-                           (calendar-extract-year date))))
+  (let ((dates (list (cons (cons (car date)    ; month
+                                 (nth 1 date)) ; day
+                           (nth 2 date))))     ; year
         (text ())
         annivs date years
         split class form)
