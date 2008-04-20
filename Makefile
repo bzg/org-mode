@@ -63,6 +63,7 @@ CP = cp -p
 LISPF      = 	org.el			\
 	     	org-archive.el		\
 	     	org-colview.el		\
+	     	org-colview-xemacs.el	\
 	     	org-compat.el		\
 	     	org-macs.el		\
 	     	org-clock.el		\
