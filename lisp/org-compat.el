@@ -79,7 +79,7 @@ any other entries, and any resulting duplicates will be removed entirely."
       (make-extent beg end buffer)
     (make-overlay beg end buffer)))
 (defun org-delete-overlay (ovl)
-  (if (featurep 'xemacs) (delete-extent ovl) (delete-overlay ovl)))
+  (if (featurep 'xemacs) (progn (delete-extent ovl) nil) (delete-overlay ovl)))
 (defun org-detach-overlay (ovl)
   (if (featurep 'xemacs) (detach-extent ovl) (delete-overlay ovl)))
 (defun org-move-overlay (ovl beg end &optional buffer)
@@ -123,6 +123,8 @@ any other entries, and any resulting duplicates will be removed entirely."
   (if (featurep 'xemacs) (extent-start-position o) (overlay-start o)))
 (defun org-overlay-end (o)
   (if (featurep 'xemacs) (extent-end-position o) (overlay-end o)))
+(defun org-overlay-buffer (o)
+  (if (featurep 'xemacs) (extent-buffer o) (overlay-buffer o)))
 (defun org-find-overlays (prop &optional pos delete)
   "Find all overlays specifying PROP at POS or point.
 If DELETE is non-nil, delete all those overlays."

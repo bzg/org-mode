@@ -138,7 +138,7 @@ We use a macro so that the test can happen at compilation time."
 (defsubst org-match-string-no-properties (num &optional string)
   (if (featurep 'xemacs)
       (let ((s (match-string num string)))
-	(remove-text-properties 0 (length s) org-rm-props s)
+	(and s (remove-text-properties 0 (length s) org-rm-props s))
 	s)
     (match-string-no-properties num string)))
 
