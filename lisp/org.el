@@ -2543,7 +2543,7 @@ collapsed state."
 (declare-function org-columns-get-format-and-top-level "org-colview")
 (declare-function org-columns-compute "org-colview")
 
-(org-autoload "org-colview"
+(org-autoload (if (featurep 'xemacs) "org-colview-xemacs" "org-colview")
  '(org-columns-number-to-string org-columns-get-format-and-top-level
    org-columns-compute org-agenda-columns org-columns-remove-overlays
    org-columns org-insert-columns-dblock))
