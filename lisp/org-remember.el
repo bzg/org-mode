@@ -280,7 +280,8 @@ RET at beg-of-buf -> Append to file as level 2 headline
   (if (eq window-system 'x)
       (let ((x (if org-xemacs-p
 		   (org-no-warnings (get-selection-no-error value))
-		 (x-selection-value value))))
+		 (and (fboundp 'x-selection-value)
+		      (x-selection-value value)))))
 	(and (> (length x) 0) (set-text-properties 0 (length x) nil x) x))))
 
 ;;;###autoload

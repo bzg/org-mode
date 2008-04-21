@@ -1,3 +1,8 @@
+2008-04-21  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-remember.el (org-get-x-clipboard): Protect the call to
+	`x-selection-value'. 
+
 2008-04-16  Jason Riedy  <jason@acm.org>
 
 	* lisp/org-table.el (orgtbl-to-generic): Add a :remove-nil-lines
