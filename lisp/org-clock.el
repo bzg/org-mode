@@ -226,7 +226,12 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	      m (floor (/ s 60))
 	      s (- s (* 60 s)))
 	(insert " => " (format "%2d:%02d" h m))
-	(setq remove (and (= (+ h m) 0) org-clock-out-remove-zero-time-clocks))
+	(when (setq remove (and org-clock-out-remove-zero-time-clocks
+				(= (+ h m) 0)))
+	  (beginning-of-line 1)
+	  (delete-region (point) (point-at-eol))
+	  (and (looking-at "\n") (> (point-max) (1+ (point)))
+	       (delete-char 1)))
 	(move-marker org-clock-marker nil)
 	(when org-log-note-clock-out
 	  (org-add-log-setup 'clock-out))
@@ -237,12 +242,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	      (delq 'org-mode-line-string global-mode-string))
 	(force-mode-line-update)
 	(message "Clock stopped at %s after HH:MM = %d:%02d%s" te h m
-		 (if remove " => REMOVING" ""))
-	(when remove
-	  (beginning-of-line 1)
-	  (let ((kill-whole-line t))
-	    (kill-line nil))
-	  (beginning-of-line 0)))))))
+		 (if remove " => LINE REMOVED" "")))))))
 
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
