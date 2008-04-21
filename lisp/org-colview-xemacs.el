@@ -348,6 +348,14 @@ This is the compiled version of the format.")
        (org-overlay-put ov 'org-columns-pom pom)
        (org-overlay-put ov 'org-columns-format f)
        (when (featurep 'xemacs)
+	 (if (or (not (char-after beg))
+		 (equal (char-after beg) ?\n))
+	     (let ((inhibit-read-only t))
+	       (save-excursion
+		 (goto-char beg)
+		 (org-unmodified (insert " "))
+		 ;; FIXME: add props and remove later?
+		 )))
          (goto-char beg)
          (org-columns-new-overlay
           beg (1+ beg) nil 'org-columns-space)
