@@ -185,6 +185,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  org2rem:           Convert org appointments into reminders" org2rem)
 	(const :tag "C  screen:            Visit screen sessions through Org-mode links" org-screen)
 	(const :tag "C  toc:               Table of contents for Org-mode buffer" org-toc)
+	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
 

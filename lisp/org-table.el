@@ -3492,6 +3492,41 @@ overwritten, and the table is not marked as requiring realignment."
 	  (push (> (/ (apply '+ (mapcar (lambda (x) (if (string-match org-table-number-regexp x) 1 0)) column)) maxcol) org-table-number-fraction) org-table-last-alignment))
     (funcall func table nil)))
 
+(defun orgtbl-gather-send-defs ()
+  "Gathers a plist of :name, :transform, :params for each destination before
+a radio table."
+  (save-excursion
+    (goto-char (org-table-begin))
+    (let (rtn)
+      (beginning-of-line 0)
+      (while (looking-at "#\\+ORGTBL: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
+	(let ((name (org-no-properties (match-string 1)))
+	      (transform (intern (match-string 2)))
+	      (params (if (match-end 3)
+			  (read (concat "(" (match-string 3) ")")))))
+	  (push (list :name name :transform transform :params params)
+		rtn)
+	  (beginning-of-line 0)))
+      rtn)))
+
+(defun orgtbl-send-replace-tbl (name txt)
+  "Find and replace table NAME with TXT."
+  (save-excursion
+    (goto-char (point-min))
+    (unless (re-search-forward
+	     (concat "BEGIN RECEIVE ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
+      (error "Don't know where to insert translated table"))
+    (goto-char (match-beginning 0))
+    (beginning-of-line 2)
+    (save-excursion
+      (let ((beg (point)))
+	(unless (re-search-forward
+		 (concat "END RECEIVE ORGTBL +" name) nil t)
+	  (error "Cannot find end of insertion region"))
+	(beginning-of-line 1)
+	(delete-region beg (point))))
+    (insert txt "\n")))
+
 (defun orgtbl-send-table (&optional maybe)
   "Send a tranformed version of this table to the receiver position.
 With argument MAYBE, fail quietly if no transformation is defined for
@@ -3501,59 +3536,45 @@ this table."
     (unless (org-at-table-p) (error "Not at a table"))
     ;; when non-interactive, we assume align has just happened.
     (when (interactive-p) (org-table-align))
-    (save-excursion
-      (goto-char (org-table-begin))
-      (beginning-of-line 0)
-      (unless (looking-at "#\\+ORGTBL: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
-	(if maybe
-	    (throw 'exit nil)
-	  (error "Don't know how to transform this table."))))
-    (let* ((name (match-string 1))
-	   beg
-	   (transform (intern (match-string 2)))
-	   (params (if (match-end 3) (read (concat "(" (match-string 3) ")"))))
-	   (skip (plist-get params :skip))
-	   (skipcols (plist-get params :skipcols))
-	   (txt (buffer-substring-no-properties
-		 (org-table-begin) (org-table-end)))
-	   (lines (nthcdr (or skip 0) (org-split-string txt "[ \t]*\n[ \t]*")))
-	   (lines (org-table-clean-before-export lines))
-	   (i0 (if org-table-clean-did-remove-column 2 1))
-	   (table (mapcar
-		   (lambda (x)
-		     (if (string-match org-table-hline-regexp x)
-			 'hline
-		       (org-remove-by-index
-			(org-split-string (org-trim x) "\\s-*|\\s-*")
-			skipcols i0)))
-		   lines))
-	   (fun (if (= i0 2) 'cdr 'identity))
-	   (org-table-last-alignment
-	    (org-remove-by-index (funcall fun org-table-last-alignment)
-				 skipcols i0))
-	   (org-table-last-column-widths
-	    (org-remove-by-index (funcall fun org-table-last-column-widths)
-				 skipcols i0)))
-
-      (unless (fboundp transform)
-	(error "No such transformation function %s" transform))
-      (setq txt (funcall transform table params))
-      ;; Find the insertion place
-      (save-excursion
-	(goto-char (point-min))
-	(unless (re-search-forward
-		 (concat "BEGIN RECEIVE ORGTBL +" name "\\([ \t]\\|$\\)") nil t)
-	  (error "Don't know where to insert translated table"))
-	(goto-char (match-beginning 0))
-	(beginning-of-line 2)
-	(setq beg (point))
-	(unless (re-search-forward (concat "END RECEIVE ORGTBL +" name) nil t)
-	  (error "Cannot find end of insertion region"))
-	(beginning-of-line 1)
-	(delete-region beg (point))
-	(goto-char beg)
-	(insert txt "\n"))
-      (message "Table converted and installed at receiver location"))))
+    (let ((dests (orgtbl-gather-send-defs))
+	  (txt (buffer-substring-no-properties (org-table-begin)
+					       (org-table-end)))
+	  (ntbl 0))
+      (unless dests (if maybe (throw 'exit nil)
+		      (error "Don't know how to transform this table.")))
+      (dolist (dest dests)
+	(let* ((name (plist-get dest :name))
+	       (transform (plist-get dest :transform))
+	       (params (plist-get dest :params))
+	       (skip (plist-get params :skip))
+	       (skipcols (plist-get params :skipcols))
+	       beg
+	       (lines (org-table-clean-before-export
+		       (nthcdr (or skip 0)
+			       (org-split-string txt "[ \t]*\n[ \t]*"))))
+	       (i0 (if org-table-clean-did-remove-column 2 1))
+	       (table (mapcar
+		       (lambda (x)
+			 (if (string-match org-table-hline-regexp x)
+			     'hline
+			   (org-remove-by-index
+			    (org-split-string (org-trim x) "\\s-*|\\s-*")
+			    skipcols i0)))
+		       lines))
+	       (fun (if (= i0 2) 'cdr 'identity))
+	       (org-table-last-alignment
+		(org-remove-by-index (funcall fun org-table-last-alignment)
+				     skipcols i0))
+	       (org-table-last-column-widths
+		(org-remove-by-index (funcall fun org-table-last-column-widths)
+				     skipcols i0))
+	       (txt (if (fboundp transform)
+			(funcall transform table params)
+		      (error "No such transformation function %s" transform))))
+	  (orgtbl-send-replace-tbl name txt))
+	(setq ntbl (1+ ntbl)))
+      (message "Table converted and installed at %d receiver location%s"
+	       ntbl (if (> ntbl 1) "s" "")))))
 
 (defun org-remove-by-index (list indices &optional i0)
   "Remove the elements in LIST with indices in INDICES.
@@ -3602,15 +3623,75 @@ First element has index 0, or I0 if given."
     (insert txt)
     (goto-char pos)))
 
-(defun org-get-param (params header i sym &optional hsym)
-  "Get parameter value for symbol SYM.
-If this is a header line, actually get the value for the symbol with an
-additional \"h\" inserted after the colon.
-If the value is a protperty list, get the element for the current column.
-Assumes variables VAL, PARAMS, HEAD and I to be scoped into the function."
-  (let ((val (plist-get params sym)))
-    (and hsym header (setq val (or (plist-get params hsym) val)))
-    (if (consp val) (plist-get val i) val)))
+;; Dynamically bound input and output for table formatting.
+(defvar *orgtbl-table* nil
+  "Carries the current table through formatting routines.")
+(defvar *orgtbl-rtn* nil
+  "Formatting routines push the output lines here.")
+;; Formatting parameters for the current table section.
+(defvar *orgtbl-hline* nil "Text used for horizontal lines")
+(defvar *orgtbl-sep* nil "Text used as a column separator")
+(defvar *orgtbl-fmt* nil "Format for each entry")
+(defvar *orgtbl-efmt* nil "Format for numbers")
+(defvar *orgtbl-lfmt* nil "Format for an entire line, overrides fmt")
+(defvar *orgtbl-llfmt* nil "Specializes lfmt for the last row")
+(defvar *orgtbl-lstart* nil "Text starting a row")
+(defvar *orgtbl-llstart* nil "Specializes lstart for the last row")
+(defvar *orgtbl-lend* nil "Text ending a row")
+(defvar *orgtbl-llend* nil "Specializes lend for the last row")
+
+(defsubst orgtbl-get-fmt (fmt i)
+  "Retrieve the format from FMT corresponding to the Ith column."
+  (if (and (not (functionp fmt)) (consp fmt))
+      (plist-get fmt i)
+    fmt))
+
+(defsubst orgtbl-apply-fmt (fmt &rest args)
+  "Apply format FMT to the arguments.  NIL FMTs return the first argument."
+  (cond ((functionp fmt) (apply fmt args))
+	(fmt (apply 'format fmt args))
+	(args (car args))
+	(t args)))
+
+(defsubst orgtbl-eval-str (str)
+  "If STR is a function, evaluate it with no arguments."
+  (if (functionp str)
+      (funcall str)
+    str))
+
+(defun orgtbl-format-line (line)
+  "Format LINE as a table row."
+  (if (eq line 'hline) (if *orgtbl-hline* (push *orgtbl-hline* *orgtbl-rtn*))
+    (let* ((i 0)
+	   (line
+	    (mapcar
+	     (lambda (f)
+	       (setq i (1+ i))
+	       (let* ((efmt (orgtbl-get-fmt *orgtbl-efmt* i))
+		      (f (if (and efmt (string-match orgtbl-exp-regexp f))
+			     (orgtbl-apply-fmt efmt (match-string 1 f)
+					       (match-string 2 f))
+			   f)))
+		 (orgtbl-apply-fmt (orgtbl-get-fmt *orgtbl-fmt* i) f)))
+	     line)))
+      (push (if *orgtbl-lfmt*
+		(orgtbl-apply-fmt *orgtbl-lfmt* line)
+	      (concat (orgtbl-eval-str *orgtbl-lstart*)
+		      (mapconcat 'identity line *orgtbl-sep*)
+		      (orgtbl-eval-str *orgtbl-lend*)))
+	    *orgtbl-rtn*))))
+
+(defun orgtbl-format-section (section-stopper)
+  "Format lines until the first occurrence of SECTION-STOPPER."
+  (let (prevline)
+    (progn
+      (while (not (eq (car *orgtbl-table*) section-stopper))
+	(if prevline (orgtbl-format-line prevline))
+	(setq prevline (pop *orgtbl-table*)))
+      (if prevline (let ((*orgtbl-lstart* *orgtbl-llstart*)
+			 (*orgtbl-lend* *orgtbl-llend*)
+			 (*orgtbl-lfmt* *orgtbl-llfmt*))
+		     (orgtbl-format-line prevline))))))
 
 (defun orgtbl-to-generic (table params)
   "Convert the orgtbl-mode TABLE to some other format.
@@ -3624,31 +3705,43 @@ specify either :lfmt, or all of (:lstart :lend :sep).  If you do not use
 
 Valid parameters are
 
-:tstart     String to start the table.  Ignored when :splice is t.
-:tend       String to end the table.  Ignored when :splice is t.
-
 :splice     When set to t, return only table body lines, don't wrap
             them into :tstart and :tend.  Default is nil.
 
 :hline      String to be inserted on horizontal separation lines.
             May be nil to ignore hlines.
 
-:lstart     String to start a new table line.
-:lend       String to end a table line
 :sep        Separator between two fields
+:remove-nil-lines Do not include lines that evaluate to nil.
+
+
+  Each in the following group may be either a string or a function
+  of no arguments returning a string:
+:tstart     String to start the table.  Ignored when :splice is t.
+:tend       String to end the table.  Ignored when :splice is t.
+:lstart     String to start a new table line.
+:llstart    String to start the last table line, defaults to :lstart.
+:lend       String to end a table line
+:llend      String to end the last table line, defaults to :lend.
+
+  Each in the following group may be a string, a function of one
+  argument (the field or line) returning a string, or a plist
+  mapping columns to either of the above:
 :lfmt       Format for entire line, with enough %s to capture all fields.
             If this is present, :lstart, :lend, and :sep are ignored.
+:llfmt      Format for the entire last line, defaults to :lfmt.
 :fmt        A format to be used to wrap the field, should contain
             %s for the original field value.  For example, to wrap
             everything in dollars, you could use :fmt \"$%s$\".
             This may also be a property list with column numbers and
             formats. For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 
-:hlstart :hlend :hlsep :hlfmt :hfmt
+:hlstart :hllstart :hlend :hllend :hlsep :hlfmt :hllfmt :hfmt
             Same as above, specific for the header lines in the table.
             All lines before the first hline are treated as header.
             If any of these is not present, the data line value is used.
 
+  This may be either a string or a function of two arguments:
 :efmt       Use this format to print numbers with exponentials.
             The format should have %s twice for inserting mantissa
             and exponent, for example \"%s\\\\times10^{%s}\".  This
@@ -3658,51 +3751,58 @@ Valid parameters are
 In addition to this, the parameters :skip and :skipcols are always handled
 directly by `orgtbl-send-table'.  See manual."
   (interactive)
-  (let* ((p params)
-	 (splicep (plist-get p :splice))
-	 (hline (plist-get p :hline))
-	 rtn line i fm efm lfmt h)
 
-    ;; Do we have a header?
-    (if (and (not splicep) (listp (car table)) (memq 'hline table))
-	(setq h t))
+  (let* ((splicep (plist-get params :splice))
+	 (hline (plist-get params :hline))
+	 (remove-nil-linesp (plist-get params :remove-nil-lines))
+	 (*orgtbl-table* table)
+	 (*orgtbl-sep* (plist-get params :sep))
+	 (*orgtbl-efmt* (plist-get params :efmt))
+	 (*orgtbl-lstart* (plist-get params :lstart))
+	 (*orgtbl-llstart* (or (plist-get params :llstart) *orgtbl-lstart*))
+	 (*orgtbl-lend* (plist-get params :lend))
+	 (*orgtbl-llend* (or (plist-get params :llend) *orgtbl-lend*))
+	 (*orgtbl-lfmt* (plist-get params :lfmt))
+	 (*orgtbl-llfmt* (or (plist-get params :llfmt) *orgtbl-lfmt*))
+	 (*orgtbl-fmt* (plist-get params :fmt))
+	 *orgtbl-rtn*)
 
     ;; Put header
     (unless splicep
-      (push (or (plist-get p :tstart) "ERROR: no :tstart") rtn))
+      (push (or (orgtbl-eval-str (plist-get params :tstart))
+		"ERROR: no :tstart") *orgtbl-rtn*))
 
-    ;; Now loop over all lines
-    (while (setq line (pop table))
-      (if (eq line 'hline)
-	  ;; A horizontal separator line
-	  (progn (if hline (push hline rtn))
-		 (setq h nil))               ; no longer in header
-	;; A normal line.  Convert the fields, push line onto the result list
-	(setq i 0)
-	(setq line
-	      (mapcar
-	       (lambda (f)
-		 (setq i (1+ i)
-		       fm (org-get-param p h i :fmt :hfmt)
-		       efm (org-get-param p h i :efmt))
-		 (if (and efm (string-match orgtbl-exp-regexp f))
-		     (setq f (format
-			      efm (match-string 1 f) (match-string 2 f))))
-		 (if fm (setq f (format fm f)))
-		 f)
-	       line))
-	(if (setq lfmt (org-get-param p h i :lfmt :hlfmt))
-	    (push (apply 'format lfmt line) rtn)
-	  (push (concat
-		 (org-get-param p h i :lstart :hlstart)
-		 (mapconcat 'identity line (org-get-param p h i :sep :hsep))
-		 (org-get-param p h i :lend :hlend))
-		rtn))))
-
-    (unless splicep
-      (push (or (plist-get p :tend) "ERROR: no :tend") rtn))
-
-    (mapconcat 'identity (nreverse rtn) "\n")))
+    ;; Do we have a heading section?  If so, format it and handle the
+    ;; trailing hline.
+    (if (and (not splicep) (listp (car *orgtbl-table*))
+	     (memq 'hline *orgtbl-table*))
+	(progn
+	  (let* ((*orgtbl-lstart* (or (plist-get params :hlstart)
+				      *orgtbl-lstart*))
+		 (*orgtbl-llstart* (or (plist-get params :hllstart)
+				       *orgtbl-llstart*))
+		 (*orgtbl-lend* (or (plist-get params :hlend) *orgtbl-lend*))
+		 (*orgtbl-llend* (or (plist-get params :hllend)
+				     (plist-get params :hlend) *orgtbl-llend*))
+		 (*orgtbl-lfmt* (or (plist-get params :hlfmt) *orgtbl-lfmt*))
+		 (*orgtbl-llfmt* (or (plist-get params :hllfmt)
+				     (plist-get params :hlfmt) *orgtbl-llfmt*))
+		 (*orgtbl-sep* (or (plist-get params :hlsep) *orgtbl-sep*))
+		 (*orgtbl-fmt* (or (plist-get params :hfmt) *orgtbl-fmt*)))
+	    (orgtbl-format-section 'hline))
+	  (if hline (push hline *orgtbl-rtn*))
+	  (pop *orgtbl-table*)))
+    
+    ;; Now format the main section.
+    (orgtbl-format-section nil)
+    
+    (unless splicep 
+      (push (or (orgtbl-eval-str (plist-get params :tend))
+		"ERROR: no :tend") *orgtbl-rtn*))
+    
+    (mapconcat 'identity (nreverse (if remove-nil-linesp
+				       (remq nil *orgtbl-rtn*)
+				     *orgtbl-rtn*)) "\n")))
 
 (defun orgtbl-to-latex (table params)
   "Convert the orgtbl-mode TABLE to LaTeX.
@@ -3719,11 +3819,16 @@ LaTeX are:
            original field value.  For example, to wrap everything in dollars,
            use :fmt \"$%s$\".  This may also be a property list with column
            numbers and formats.  For example :fmt (2 \"$%s$\" 4 \"%s%%\")
+           The format may also be a function that formats its one argument.
 
 :efmt      Format for transforming numbers with exponentials.  The format
            should have %s twice for inserting mantissa and exponent, for
            example \"%s\\\\times10^{%s}\".  LaTeX default is \"%s\\\\,(%s)\".
            This may also be a property list with column numbers and formats.
+           The format may also be a function that formats its two arguments.
+
+:llend     If you find too much space below the last line of a table,
+           pass a value of \"\" for :llend to suppress the final \\\\.
 
 The general parameters :skip and :skipcols have already been applied when
 this function is called."
@@ -3782,6 +3887,8 @@ TeXInfo are:
                    everything in @kbd{}, you could use :fmt \"@kbd{%s}\".
                    This may also be a property list with column numbers and
                    formats.  For example :fmt (2 \"@kbd{%s}\" 4 \"@code{%s}\").
+                   Each format also may be a function that formats its one
+                   argument.
 
 :cf \"f1 f2..\"    The column fractions for the table.  By default these
                    are computed automatically from the width of the columns

@@ -8583,6 +8583,8 @@ A format to be used to wrap each field, should contain @code{%s} for the
 original field value.  For example, to wrap each field value in dollars,
 you could use @code{:fmt "$%s$"}.  This may also be a property list with
 column numbers and formats. for example @code{:fmt (2 "$%s$" 4 "%s\\%%")}.
+A function of one argument can be used in place of the strings; the
+function must return a formatted string.
 
 @item :efmt efmt
 Use this format to print numbers with exponentials.  The format should
@@ -8591,7 +8593,8 @@ have @code{%s} twice for inserting mantissa and exponent, for example
 may also be a property list with column numbers and formats, for example
 @code{:efmt (2 "$%s\\times10^@{%s@}$" 4 "$%s\\cdot10^@{%s@}$")}.  After
 @code{efmt} has been applied to a value, @code{fmt} will also be
-applied.
+applied.  Similar to @code{fmt}, functions of two arguments can be
+supplied instead of strings.
 @end table
 
 @node Translator functions, Radio lists, A LaTeX example, Tables in arbitrary syntax

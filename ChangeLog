@@ -1,3 +1,58 @@
+2008-04-16  Jason Riedy  <jason@acm.org>
+
+	* lisp/org-table.el (orgtbl-to-generic): Add a :remove-nil-lines
+	parameter that supresses lines that evaluate to NIL.
+
+
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* lisp/org-table.el (orgtbl-get-fmt): New inline function for
+	picking apart formats that may be lists.
+	(orgtbl-apply-fmt): New inline function for applying formats that
+	may be functions.
+	(orgtbl-eval-str): New inline function for strings that may be
+	functions.
+	(orgtbl-format-line, orgtbl-to-generic): Use and document.
+	(orgtbl-to-latex, orgtbl-to-texinfo): Document.
+
+	* doc/org.texi (A LaTeX example): Note that fmt may be a
+	one-argument function, and efmt may be a two-argument function.
+
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* lisp/org-table.el (*orgtbl-llfmt*, *orgtbl-llstart*)
+	(*orgtbl-llend*): Dynamic variables for last-line formatting.
+	(orgtbl-format-section): Shift formatting to support detecting the
+	last line and formatting it specially.
+	(orgtbl-to-generic): Document :ll* formats.  Set to the non-ll
+	formats unless overridden.
+	(orgtbl-to-latex): Suggest using :llend to suppress the final \\.
+
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* lisp/org-table.el (*orgtbl-table*, *orgtbl-rtn*): Dynamically
+	bound variables to hold the input collection of lines and output
+	formatted text.
+	(*orgtbl-hline*, *orgtbl-sep*, *orgtbl-fmt*, *orgtbl-efmt*,
+	(*orgtbl-lfmt*, *orgtbl-lstart*, *orgtbl-lend*): Dynamically bound
+	format parameters.
+	(orgtbl-format-line): New function encapsulating formatting for a
+	single line.
+	(orgtbl-format-section): Similar for each section.  Rebinding the
+	dynamic vars customizes the formatting for each section.
+	(orgtbl-to-generic): Use orgtbl-format-line and
+	orgtbl-format-section.
+	(org-get-param): Now unused, so delete.
+
+	* lisp/org-table.el (orgtbl-gather-send-defs): New function to
+	gather all the SEND definitions before a table.
+	(orgtbl-send-replace-tbl): New function to find the RECEIVE
+	corresponding to the current name.
+	(orgtbl-send-table): Use the previous two functions and implement
+	multiple destinations for each table.
+
+	* doc/org.texi (Radio tables): Document multiple destinations.
+
 2008-04-19  Carsten Dominik  <dominik@science.uva.nl>
 
 	* xemacs/noutline.el (outline-invisible-p): Require that

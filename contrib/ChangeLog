@@ -1,3 +1,8 @@
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* lisp/orgtbl-sqlinsert.el: New file.
+	* README: Add to list.
+
 2008-04-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-iswitchb.el: File removed, because the functionality is

@@ -24,6 +24,7 @@ org-registry.el      --- a registry for Org links
 org2rem.el           --- Convert org appointments into reminders
 org-screen.el        --- visit screen sessions through Org-mode links
 org-toc.el 	     --- Table of contents for Org-mode buffer
+orgtbl-sqlinsert.el  --- Convert Org-mode tables to SQL insertions.
 
 PACKAGES
 ========
