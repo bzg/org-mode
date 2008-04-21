@@ -3755,6 +3755,7 @@ directly by `orgtbl-send-table'.  See manual."
   (let* ((splicep (plist-get params :splice))
 	 (hline (plist-get params :hline))
 	 (remove-nil-linesp (plist-get params :remove-nil-lines))
+	 (*orgtbl-hline* hline)
 	 (*orgtbl-table* table)
 	 (*orgtbl-sep* (plist-get params :sep))
 	 (*orgtbl-efmt* (plist-get params :efmt))
