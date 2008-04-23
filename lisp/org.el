@@ -8831,7 +8831,6 @@ also TODO lines."
       (setq tagsmatcher (if (> (length orlist) 1) (cons 'or orlist) (car orlist)))
       (setq tagsmatcher
 	    (list 'progn '(setq org-cached-props nil) tagsmatcher)))
-    (debug)
     ;; Make the todo matcher
     (if (or (not todomatch) (not (string-match "\\S-" todomatch)))
 	(setq todomatcher t)
