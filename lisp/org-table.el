@@ -1767,7 +1767,7 @@ When NAMED is non-nil, look for a named equation."
       (when (looking-at "\\([ \t]*\n\\)*#\\+TBLFM: *\\(.*\\)")
 	(setq strings (org-split-string (match-string 2) " *:: *"))
 	(while (setq string (pop strings))
-	  (when (string-match "\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*[^ \t]\\)" string)
+	  (when (string-match "\\`\\(@[0-9]+\\$[0-9]+\\|\\$\\([a-zA-Z0-9]+\\)\\) *= *\\(.*[^ \t]\\)" string)
 	    (setq scol (if (match-end 2)
 			   (match-string 2 string)
 			 (match-string 1 string))
