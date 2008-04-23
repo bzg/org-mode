@@ -8,6 +8,97 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.02
+
+** Details
+
+*** Search commands can now include archive files.
+
+    If the value of the customization variable
+    =org-agenda-text-search-extra-files= contains the symbol
+    =agenda-archives= as the first element in the list, all
+    archive files of all agenda files will be added to the list
+    of files to search.  This is relevant for the search view
+    =C-c a s=, as well as for the agenda files multi-occur
+    command =C-c a /=.
+
+*** Clock tables can include the archive files
+
+    There are new values for the =:scope= parameter of a clock
+    table.  This can now be =file-with-archives= and
+    =agenda-with-archives=, in order to collect information not
+    only from the file org agenda files, but also all archive
+    files that are currently used by these files.
+
+*** New operators for property searches
+
+    Property searches can now choose a number of different
+    operators for comparing values.  These operators are `=',
+    `<>', `<', `<=', `>', and `>='.
+
+    When the search term uses the operator with plain number like
+    =+Effort>=2.7=, then the property value is converted to a
+    number and a numerical comparison takes place.
+
+    When the search term uses a string on the right hand side of
+    the operator, a string comparison is done: =+PRIORITY<"C".=
+
+    Finally, if the right hand side is enclosed in curly braces,
+    a regexp match is done: =aaa={regexp}=.  You should use only
+    the `=' operator in this case.
+
+    This was a simple change and should have been implemented a
+    long time ago - now it was finally triggered by a request
+    from Dan Davison.
+
+*** Orgtbl radio tables generalized.
+
+    The options available for radio tables using orgtbl-mode have
+    been expanded.  You may use several reception points and
+    formats for the same table, you may have special formatting
+    in the last line of the table,  and many table parameters may
+    be functions, so that more general transformations are
+    possible.  Jason Riedy provided a patch for this, and he will
+    hopefully come up with some examples.  Thanks!
+
+*** Column view works now in XEmacs
+
+    I had already given up on this, but Greg Chernev (who
+    implemented noutline.el for XEmacs and in this way kept Org
+    alive on XEmacs) has done it again and provided the patches
+    to make column view work under XEmacs.  There are still some
+    problems, but the basics work and we will iron out the
+    remaining issues, hopefully soon.
+
+*** Summaries for columns in the agenda
+
+    If any of the columns has a summary type defined, turning on
+    column view in the agenda will show summaries for these
+    columns.  Org will first visit all relevant agenda files and
+    make sure that the computations of this property are up to
+    date.  This is also true for the special =CLOCKSUM= property.
+    Org will then sum the values displayed in the agenda.  In the
+    daily/weekly agenda, the sums will cover a single day, in all
+    other views they cover the entire block.  It is vital to
+    realize that the agenda may show the same entry multiple
+    times (for example as scheduled and as a deadline), and it
+    may show two entries from the same hierarchy (for example a
+    /parent/ and it's /child/).  In these cases, the summation in
+    the agenda will lead to incorrect results because some values
+    will count double.
+
+*** The special property Effort can be used for effort estimates
+
+    If you want to plan your work in a very detailed way, or if
+    you need to produce offers with quotations of the estimated
+    work effort, you may want to assign effort estimates to
+    entries.  If you are also clocking your work, you may later
+    want to compare the planned effort with the actual working
+    time.  Effort estimates can now be stored in a special
+    property =Effort=, displayed side-to-side with clock sums,
+    and also be summed over a day, in order to show the planned
+    work load of a day.  See the manual for more details.
+
 * Version 6.01
 
 This is a new major release, mostly because of structural changes
