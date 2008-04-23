@@ -8764,10 +8764,11 @@ also TODO lines."
 
   ;; Parse the string and create a lisp form
   (let ((match0 match)
-	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL=\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)=\\({[^}]+}\\|\"[^\"]*\"\\)\\|[[:alnum:]_@]+\\)"))
+	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
-	orterms term orlist re-p level-p prop-p pn pv cat-p gv)
+	orterms term orlist re-p str-p level-p level-op 
+	prop-p pn pv po cat-p gv)
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
 	(progn
@@ -8792,24 +8793,32 @@ also TODO lines."
 			   (equal (match-string 1 term) "-"))
 		tag (match-string 2 term)
 		re-p (equal (string-to-char tag) ?{)
-		level-p (match-end 3)
-		prop-p (match-end 4)
+		level-p (match-end 4)
+		prop-p (match-end 5)
 		mm (cond
 		    (re-p `(org-match-any-p ,(substring tag 1 -1) tags-list))
-		    (level-p `(= level ,(string-to-number
-					 (match-string 3 term))))
+		    (level-p
+		     (setq level-op (org-op-to-function (match-string 3 term)))
+		     `(,level-op level ,(string-to-number
+					 (match-string 4 term))))
 		    (prop-p
-		     (setq pn (match-string 4 term)
-			   pv (match-string 5 term)
+		     (setq pn (match-string 5 term)
+			   po (match-string 6 term)
+			   pv (match-string 7 term)
 			   cat-p (equal pn "CATEGORY")
 			   re-p (equal (string-to-char pv) ?{)
-			   pv (substring pv 1 -1))
+			   str-p (equal (string-to-char pv) ?\")
+			   pv (if (or re-p str-p) (substring pv 1 -1) pv))
+		     (setq po (org-op-to-function po str-p))
 		     (if (equal pn "CATEGORY")
 			 (setq gv '(get-text-property (point) 'org-category))
 		       (setq gv `(org-cached-entry-get nil ,pn)))
 		     (if re-p
 			 `(string-match ,pv (or ,gv ""))
-		       `(equal ,pv (or ,gv ""))))
+		       (if str-p
+			   `(,po (or ,gv "") ,pv)
+			 `(,po (string-to-number (or ,gv ""))
+			       ,(string-to-number pv) ))))
 		    (t `(member ,(downcase tag) tags-list)))
 		mm (if minus (list 'not mm) mm)
 		term (substring term (match-end 0)))
@@ -8822,7 +8831,7 @@ also TODO lines."
       (setq tagsmatcher (if (> (length orlist) 1) (cons 'or orlist) (car orlist)))
       (setq tagsmatcher
 	    (list 'progn '(setq org-cached-props nil) tagsmatcher)))
-
+    (debug)
     ;; Make the todo matcher
     (if (or (not todomatch) (not (string-match "\\S-" todomatch)))
 	(setq todomatcher t)
@@ -8852,6 +8861,22 @@ also TODO lines."
 		      (list 'and tagsmatcher todomatcher)
 		    tagsmatcher))
     (cons match0 matcher)))
+
+(defun org-op-to-function (op &optional stringp)
+  (setq op
+	(cond
+	 ((equal  op   "<"       ) '(<     string<      ))
+	 ((equal  op   ">"       ) '(>     string>      ))
+	 ((member op '("<=" "=<")) '(<=    org-string<= ))
+	 ((member op '(">=" "=>")) '(>=    org-string>= ))
+	 ((member op '("="  "==")) '(=     string=      ))
+	 ((member op '("<>" "!=")) '(org<> org-string<> ))))
+  (nth (if stringp 1 0) op))
+
+(defun org<> (a b) (not (= a b)))
+(defun org-string<= (a b) (or (string= a b) (string< a b)))
+(defun org-string>= (a b) (or (string= a b) (string> a b)))
+(defun org-string<> (a b) (not (string= a b)))
 
 (defun org-match-any-p (re list)
   "Does re match any element of list?"

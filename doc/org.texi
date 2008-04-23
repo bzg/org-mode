@@ -3654,23 +3654,30 @@ CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}
 @cindex properties, searching
 @cindex searching, of properties
 
-To create sparse trees and special lists with selection based on
-properties, the same commands are used as for tag searches (@pxref{Tag
-searches}), and the same logic applies.  For example, a search string
+To create sparse trees and special lists with selection based on properties,
+the same commands are used as for tag searches (@pxref{Tag searches}), and
+the same logic applies.  For example, here is a search string:
 
 @example
-+work-boss+PRIORITY="A"+Coffee="unlimited"+Effort=""+With=@{Sarah\|Denny@}
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2+With=@{Sarah\|Denny@}
 @end example
 
 @noindent
-finds entries tagged @samp{:work:} but not @samp{:boss:}, which
-also have a priority value @samp{A}, a @samp{:Coffee:} property with the
-value @samp{unlimited}, an @samp{Effort} property that is undefined or
-empty, and a @samp{:With:} property that is matched by
-the regular expression @samp{Sarah\|Denny}.
+If the comparison value is a plain number, a numerical comparison is done,
+and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
+@samp{>=}, and @samp{<>}.  If the comparison value is enclosed in double
+quotes, a string comparison is done, and the same operators are allowed.  If
+the comparison value is enclosed in curly braces, a regexp match is
+performed.  So the search string in the example finds entries tagged
+@samp{:work:} but not @samp{:boss:}, which also have a priority value
+@samp{A}, a @samp{:Coffee:} property with the value @samp{unlimited}, an
+@samp{Effort} property that is numerically smaller than 2, and a
+@samp{:With:} property that is matched by the regular expression
+@samp{Sarah\|Denny}.
 
-You can configure Org mode to use property inheritance during a search,
-see @ref{Property inheritance} for details.
+You can configure Org mode to use property inheritance during a search, but
+beware that this can slow down searches considerably.  See @ref{Property
+inheritance} for details.
 
 There is also a special command for creating sparse trees based on a
 single property:
@@ -4241,11 +4248,12 @@ M-S-@key{right}/@key{left}   @r{One month forward/backward.}
 @key{RET}           @r{Choose date in calendar.}
 @end example
 
-The actions of the date/time prompt may seem complex, but I assure you
-they will grow on you.  To help you understand what is going on, the
-current interpretation of your input will be displayed live in the
-minibuffer@footnote{If you find this distracting, turn the display of
-with @code{org-read-date-display-live}.}.
+The actions of the date/time prompt may seem complex, but I assure you they
+will grow on you, and you will start getting annoyed by pretty much any other
+way of entering a date/time out there.  To help you understand what is going
+on, the current interpretation of your input will be displayed live in the
+minibuffer@footnote{If you find this distracting, turn the display of with
+@code{org-read-date-display-live}.}.
 
 @node Custom time format,  , The date/time prompt, Creating timestamps
 @subsection Custom time format
@@ -4883,7 +4891,7 @@ for details.
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.
 @kindex C-u C-u C-c C-w
-@item C- C-u C-c C-w
+@item C-u C-u C-c C-w
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
@@ -6469,7 +6477,7 @@ environments and math templates.  Inside Org mode, you can make use of
 some of the features of CDLaTeX mode.  You need to install
 @file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
 AUCTeX) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
-Don't turn CDLaTeX mode itself under Org mode, but use the light
+Don't use CDLaTeX mode itself under Org mode, but use the light
 version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
 on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
 Org files with
@@ -6829,16 +6837,15 @@ view:    @r{Initial view when website is first shown.  Possible values are}
          showall   @r{Folding interface, all headlines and text visible.}
 sdepth:  @r{Maximum headline level that will still become an independent}
          @r{section for info and folding modes.  The default is taken from}
-         @r{@code{org-headline-levels} (= the @code{H} @code{#+OPTIONS} switch).}
+         @r{@code{org-headline-levels} (= the @code{H} switch in @code{#+OPTIONS}).}
          @r{If this is smaller than in @code{org-headline-levels}, each}
          @r{info/folding section can still contain children headlines.}
-         @r{Default is @code{org-headline-levels} (= the @code{H} @code{#+OPTIONS} switch).}
 toc:     @r{Should the table of content @emph{initially} be visible?}
          @r{Even when @code{nil}, you can always get to the toc with @kbd{i}.}
 tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
          @r{the variables @code{org-headline-levels} and @code{org-export-with-toc}.}
 ltoc:    @r{Should there be short contents (children) in each section?}
-mouse:   @r{Headings are highlighted when the mouse is over themq.  Should be}
+mouse:   @r{Headings are highlighted when the mouse is over them.  Should be}
          @r{@samp{underline} (default) or a background color like @samp{#cccccc}.}
 buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}
          @r{default), only one such button will be present.}
@@ -8247,51 +8254,11 @@ Org.
 @section Third-party extensions for Org
 @cindex extension, third-party
 
-The following extensions for Org have been written by other people:
-
-@table @asis
-@cindex @file{org-publish.el}
-@item @file{org-publish.el} by David O'Toole
-This package provides facilities for publishing related sets of Org
-files together with linked files like images as web pages.  It is
-highly configurable and can be used for other publishing purposes as
-well.  As of Org version 4.30, @file{org-publish.el} is part of the
-Org distribution.  It is not yet part of Emacs, however, a delay
-caused by the preparations for the 22.1 release.  In the mean time,
-@file{org-publish.el} can be downloaded from David's site:
-@url{http://dto.freeshell.org/e/org-publish.el}.
-@cindex @file{org-mouse.el}
-@item @file{org-mouse.el} by Piotr Zielinski
-This package implements extended mouse functionality for Org.  It
-allows you to cycle visibility and to edit the document structure with
-the mouse.  Best of all, it provides a context-sensitive menu on
-@key{mouse-3} that changes depending on the context of a mouse-click.
-As of Org version 4.53, @file{org-mouse.el} is part of the
-Org distribution.  It is not yet part of Emacs, however, a delay
-caused by the preparations for the 22.1 release.  In the mean time,
-@file{org-mouse.el} can be downloaded from Piotr's site:
-@url{http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el}.
-@cindex @file{org-blog.el}
-@item @file{org-blog.el} by David O'Toole
-A blogging plug-in for @file{org-publish.el}.@*
-@url{http://dto.freeshell.org/notebook/OrgMode.html}.
-@cindex @file{blorg.el}
-@item @file{blorg.el} by Bastien Guerry
-Publish Org files as
-blogs. @url{http://www.cognition.ens.fr/~guerry/blorg.html}.
-@cindex @file{org2rem.el}
-@item @file{org2rem.el} by Bastien Guerry
-Translates Org files into something readable by
-Remind. @url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
-@item @file{org-toc.el} by Bastien Guerry
-Produces a simple table of contents of an Org file, for easy
-navigation. @url{http://www.cognition.ens.fr/~guerry/u/org-registry.el}.
-@item @file{org-registry.el} by Bastien Guerry
-Find which Org-file link to a certain document.
-@url{http://www.cognition.ens.fr/~guerry/u/org2rem.el}.
-@end table
-
-@page
+There are lots of extensions that have been written by other people.  Most of
+them have either been integrated into Org by now, or they can be found in the
+Org distribution, in the @file{contrib} directory.  The list has gotten too
+long to cover in any detail here, but there is a seaparate manual for these
+extensions.
 
 @node Adding hyperlink types, Tables in arbitrary syntax, Extensions, Extensions and Hacking
 @section Adding hyperlink types
@@ -8774,7 +8741,8 @@ The corresponding block writer function could look like this:
 If you want to make sure that all dynamic blocks are always up-to-date,
 you could add the function @code{org-update-all-dblocks} to a hook, for
 example @code{before-save-hook}.  @code{org-update-all-dblocks} is
-written in a way that is does nothing in buffers that are not in Org.
+written in a way that is does nothing in buffers that are not in
+@code{org-mode}.
 
 @node Special agenda views, Using the property API, Dynamic blocks, Extensions and Hacking
 @section Special agenda views
@@ -8820,6 +8788,12 @@ like this:
 Note that this also binds @code{org-agenda-overriding-header} to get a
 meaningful header in the agenda view.
 
+A general way to create custom searches is to base them on a search for
+entries with a certain level limit.  If you want to study all entries with
+your custom search function, simply do a search for @samp{LEVEL>0}, and then
+use @code{org-agenda-skip-function} to select the entries you really want to
+have.
+
 You may also put a Lisp form into @code{org-agenda-skip-function}.  In
 particular, you may use the functions @code{org-agenda-skip-entry-if}
 and @code{org-agenda-skip-subtree-if} in this form, for example:
@@ -8851,7 +8825,6 @@ like this, even without defining a special function:
                                 'regexp ":waiting:"))
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
-
 
 @node Using the property API,  , Special agenda views, Extensions and Hacking
 @section Using the property API
@@ -8936,7 +8909,7 @@ incorporate project planning functionality directly into a notes file.
 
 A special thanks goes to @i{Bastien Guerry} who has not only writen a large
 number of extensions to Org (most of them integrated into the core by now),
-but has also helep the development and maintenance of Org so much that e
+but has also helped the development and maintenance of Org so much that he
 should be considered co-author of this package.
 
 Since the first release, literally thousands of emails to me or on

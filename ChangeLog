@@ -1,3 +1,8 @@
+2008-04-23  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-op-to-function, org<>, org-string<=)
+	(org-string>=, org-string<>): New functions.
+
 2008-04-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-remember.el (org-get-x-clipboard): Protect the call to

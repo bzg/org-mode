@@ -61,31 +61,33 @@ CP = cp -p
 
 # The following variables need to be defined by the maintainer
 LISPF      = 	org.el			\
+		org-agenda.el		\
 	     	org-archive.el		\
+		org-bbdb.el		\
+		org-bibtex.el		\
+	     	org-clock.el		\
 	     	org-colview.el		\
 	     	org-colview-xemacs.el	\
 	     	org-compat.el		\
-	     	org-macs.el		\
-	     	org-clock.el		\
-		org-table.el		\
 		org-exp.el		\
-		org-faces.el		\
-		org-remember.el		\
-		org-agenda.el		\
-		org-publish.el		\
-		org-mouse.el		\
 		org-export-latex.el	\
-		org-bbdb.el		\
-		org-bibtex.el		\
+		org-faces.el		\
 		org-gnus.el		\
 		org-info.el		\
 		org-infojs.el		\
 		org-irc.el		\
 		org-mac-message.el	\
+	     	org-macs.el		\
+		org-mew.el              \
 		org-mhe.el		\
+		org-mouse.el		\
+		org-publish.el		\
+		org-remember.el		\
 		org-rmail.el		\
+		org-table.el		\
 		org-vm.el		\
 		org-wl.el
+
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
 ELCFILES0  = $(LISPFILES0:.el=.elc)
@@ -279,6 +281,7 @@ lisp/org-bbdb.elc:         lisp/org.elc
 lisp/org-bibtex.elc:       lisp/org.elc
 lisp/org-clock.elc:        lisp/org.elc
 lisp/org-colview.elc:      lisp/org.elc
+lisp/org-colview-xemacs.elc:      lisp/org.elc
 lisp/org-compat.elc:
 lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
 lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
