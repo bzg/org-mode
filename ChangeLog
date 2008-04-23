@@ -2,6 +2,8 @@
 
 	* lisp/org.el (org-op-to-function, org<>, org-string<=)
 	(org-string>=, org-string<>): New functions.
+	(org-property-re): Make sure the value contains a non-white
+	character. 
 
 2008-04-21  Carsten Dominik  <dominik@science.uva.nl>
 
