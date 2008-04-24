@@ -8814,7 +8814,9 @@ also TODO lines."
 			 (setq gv '(get-text-property (point) 'org-category))
 		       (setq gv `(org-cached-entry-get nil ,pn)))
 		     (if re-p
-			 `(string-match ,pv (or ,gv ""))
+			 (if (eq po 'org<>)
+			     `(not (string-match ,pv (or ,gv "")))
+			   `(string-match ,pv (or ,gv "")))
 		       (if str-p
 			   `(,po (or ,gv "") ,pv)
 			 `(,po (string-to-number (or ,gv ""))

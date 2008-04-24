@@ -27,8 +27,8 @@
     There are new values for the =:scope= parameter of a clock
     table.  This can now be =file-with-archives= and
     =agenda-with-archives=, in order to collect information not
-    only from the file org agenda files, but also all archive
-    files that are currently used by these files.
+    only from the current file or all agenda files, but also from
+    all archive files that are currently used by these files.
 
 *** New operators for property searches
 
@@ -44,12 +44,11 @@
     the operator, a string comparison is done: =+PRIORITY<"C".=
 
     Finally, if the right hand side is enclosed in curly braces,
-    a regexp match is done: =aaa={regexp}=.  You should use only
-    the `=' operator in this case.
+    a regexp match is done: =aaa={regexp}=.  In this case you
+    should use only the `=' or `<>' operators, meaning "does
+    match" or "does not match", respectively.
 
-    This was a simple change and should have been implemented a
-    long time ago - now it was finally triggered by a request
-    from Dan Davison.
+    This was a triggered with a request by Dan Davison.
 
 *** Orgtbl radio tables generalized.
 

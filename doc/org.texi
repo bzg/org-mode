@@ -3668,11 +3668,12 @@ and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
 @samp{>=}, and @samp{<>}.  If the comparison value is enclosed in double
 quotes, a string comparison is done, and the same operators are allowed.  If
 the comparison value is enclosed in curly braces, a regexp match is
-performed.  So the search string in the example finds entries tagged
-@samp{:work:} but not @samp{:boss:}, which also have a priority value
-@samp{A}, a @samp{:Coffee:} property with the value @samp{unlimited}, an
-@samp{Effort} property that is numerically smaller than 2, and a
-@samp{:With:} property that is matched by the regular expression
+performed, with @samp{=} meaning that the regexp matches the property value,
+and @samp{<>} meaning that it does not match.  So the search string in the
+example finds entries tagged @samp{:work:} but not @samp{:boss:}, which also
+have a priority value @samp{A}, a @samp{:Coffee:} property with the value
+@samp{unlimited}, an @samp{Effort} property that is numerically smaller than
+2, and a @samp{:With:} property that is matched by the regular expression
 @samp{Sarah\|Denny}.
 
 You can configure Org mode to use property inheritance during a search, but
