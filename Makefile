@@ -215,7 +215,6 @@ distfile:
 
 release:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	make webfiles
 	make distfile
 	make doc
 	make html_manual
@@ -267,7 +266,7 @@ pushtag:
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
 
 pushreleasetag:
-	git-tag -m "Adding tag" -a $(TAG)
+	git-tag -m "Adding tag" -a release_$(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
 
 
