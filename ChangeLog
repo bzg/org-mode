@@ -1,14 +1,26 @@
+2008-04-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-colview.el (org-columns, org-agenda-columns): Remember
+	is `flyspell-mode' was active when entering column display, and
+	turn it off if it is on.
+	(org-columns-remove-overlays): Turn `flyspell-mode' back on if it
+	was on before column view was entered.
+
+	* lisp/org-infojs.el (org-infojs-options-inbuffer-template)
+	(org-infojs-opts-table): Removed the `runs' parameter, it is no
+	longer needed.
+
 2008-04-23  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org.el (org-op-to-function, org<>, org-string<=)
 	(org-string>=, org-string<>): New functions.
 	(org-property-re): Make sure the value contains a non-white
-	character. 
+	character.
 
 2008-04-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-remember.el (org-get-x-clipboard): Protect the call to
-	`x-selection-value'. 
+	`x-selection-value'.
 
 2008-04-16  Jason Riedy  <jason@acm.org>
 

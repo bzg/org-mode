@@ -206,7 +206,10 @@ This is the compiled version of the format.")
   "The header line format before column view was turned on.")
 (defvar org-columns-inhibit-recalculation nil
   "Inhibit recomputing of columns on column view startup.")
-
+(defvar org-columns-flyspell-was-active nil
+  "Remember the state of `flyspell-mode' before column view.
+Flyspell-mode can cause problems in columns view, so it is turned off
+for the duration of the command."
 
 (defvar header-line-format)
 (defvar org-columns-previous-hscroll 0)
@@ -263,7 +266,9 @@ This is the compiled version of the format.")
        (mapc 'org-delete-overlay org-columns-overlays)
        (setq org-columns-overlays nil)
        (let ((inhibit-read-only t))
-	 (remove-text-properties (point-min) (point-max) '(read-only t)))))))
+	 (remove-text-properties (point-min) (point-max) '(read-only t))))
+      (when org-columns-flyspell-was-active
+	(flyspell-mode 1)))))
 
 (defun org-columns-cleanup-item (item fmt)
   "Remove from ITEM what is a column in the format FMT."
@@ -570,6 +575,9 @@ Where possible, use the standard interface for changing this line."
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
 	(org-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
+	(when (org-set-local 'org-columns-flyspell-was-active
+			     (org-bound-and-true-p flyspell-mode))
+	  (flyspell-mode 0))
 	(mapc (lambda (x)
 		(goto-line (car x))
 		(org-columns-display-here (cdr x)))
@@ -1111,6 +1119,9 @@ and tailing newline characters."
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
 	(org-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
+	(when (org-set-local 'org-columns-flyspell-was-active
+			     (org-bound-and-true-p flyspell-mode))
+	  (flyspell-mode 0))
 	(mapc (lambda (x)
 		(goto-line (car x))
 		(org-columns-display-here (cdr x)))
