@@ -253,6 +253,7 @@ clean:
 	make cleandoc
 	rm -f *~ */*~ */*/*~
 	rm -rf RELEASEDIR
+	rm -f lisp/org-install.el
 
 .el.elc:
 	$(ELC) $<
