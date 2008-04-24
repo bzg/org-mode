@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -123,7 +123,7 @@ archive file is."
     (save-excursion
       (save-restriction
 	(goto-char (point-min))
-	(while (re-search-forward 
+	(while (re-search-forward
 		"^\\(#\\+\\|[ \t]*:\\)ARCHIVE:[ \t]+\\(.*\\)"
 		nil t)
 	  (setq file (org-extract-archive-file
@@ -139,7 +139,7 @@ archive file is."
 (defun org-extract-archive-file (&optional location)
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (expand-file-name 
+      (expand-file-name
        (format (match-string 1 location) buffer-file-name))))
 
 (defun org-extract-archive-heading (&optional location)
@@ -262,7 +262,7 @@ this heading."
 	    (goto-char (point-max)) (insert "\n"))
 	  ;; Paste
 	  (org-paste-subtree (org-get-valid-level level 1))
-	  
+
 	  ;; Mark the entry as done
 	  (when (and org-archive-mark-done
 		     (looking-at org-todo-line-regexp)
@@ -272,7 +272,7 @@ this heading."
 	      (org-todo
 	       (car (or (member org-archive-mark-done org-done-keywords)
 			org-done-keywords)))))
-	  
+
 	  ;; Add the context info
 	  (when org-archive-save-context-info
 	    (let ((l org-archive-save-context-info) e n v)
@@ -281,7 +281,7 @@ this heading."
 			   (stringp v) (string-match "\\S-" v))
 		  (setq n (concat "ARCHIVE_" (upcase (symbol-name e))))
 		  (org-entry-put (point) n v)))))
-	  
+
 	  ;; Save and kill the buffer, if it is not the same buffer.
 	  (if (not (eq this-buffer buffer))
 	      (progn (save-buffer) (kill-buffer buffer)))))
@@ -335,7 +335,7 @@ sibling does not exist, it will be created at the end of the subtree."
 	(org-cut-subtree))
       (org-paste-subtree (org-get-valid-level level 1))
       (org-set-property
-       "ARCHIVE_TIME" 
+       "ARCHIVE_TIME"
        (format-time-string
 	(substring (cdr org-time-stamp-formats) 1 -1)
 	(current-time)))

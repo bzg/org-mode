@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -431,12 +431,12 @@ Org-mode file."
   :type 'string)
 
 (defcustom org-export-html-link-up ""
-  "Where should the \"UP\" link of exported HTML pages lead?" 
+  "Where should the \"UP\" link of exported HTML pages lead?"
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
 (defcustom org-export-html-link-home ""
-  "Where should the \"HOME\" link of exported HTML pages lead?" 
+  "Where should the \"HOME\" link of exported HTML pages lead?"
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
@@ -1243,7 +1243,7 @@ on this string to produce the exported version."
 	;; Check if the line before or after is a headline with a target
 	(if (setq target (or (get-text-property (point-at-bol 0) 'target)
 			     (get-text-property (point-at-bol 2) 'target)))
-	    (progn 
+	    (progn
 	      ;; use the existing target in a neighboring line
 	      (setq tmp (match-string 2))
 	      (replace-match "")
@@ -1380,7 +1380,7 @@ on this string to produce the exported version."
 		 (or (cdr (assoc slink target-alist))
 		     (save-excursion
 		       (unless (string-match org-link-types-re link)
-			 (setq found (condition-case nil (org-link-search link) 
+			 (setq found (condition-case nil (org-link-search link)
 				       (error nil)))
 			 (when (and found
 				    (or (org-on-heading-p)
@@ -1400,7 +1400,7 @@ on this string to produce the exported version."
 	     (insert target)
 	     (unless desc (insert "][" link))
 	     (add-text-properties pos (point) props)))))
-      
+
       ;; Normalize links: Convert angle and plain links into bracket links
       ;; Expand link abbreviations
       (goto-char (point-min))
@@ -1989,7 +1989,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+ARCHIVE:   %s
 #+LINK:      %s
 "
-   (buffer-name) (user-full-name) user-mail-address 
+   (buffer-name) (user-full-name) user-mail-address
    (format-time-string (car org-time-stamp-formats))
    org-export-default-language
    org-export-headline-levels

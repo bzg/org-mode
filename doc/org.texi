@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.02pre-06
+@set VERSION 6.02
 @set DATE April 2008
 
 @dircategory Emacs
@@ -4724,7 +4724,7 @@ absolute path, it will be interpreted relative to @code{org-directory}.
 An optional sixth element specifies the contexts in which the user can
 select the template.  This element can be either a list of major modes
 or a function.  @code{org-remember} will first check whether the function
-returns @code{t} or if we are in any of the listed major mode, and select 
+returns @code{t} or if we are in any of the listed major mode, and select
 the template accordingly.
 
 So for example:
@@ -8927,8 +8927,7 @@ let me know.
 @item
 @i{Russel Adams} came up with the idea for drawers.
 @item
-@i{Thomas Baumann} contributed the code for links to the MH-E email
-system.
+@i{Thomas Baumann} wrote @file{org-bbdb.el} and @file{org-mhe.el}.
 @item
 @i{Alex Bochannek} provided a patch for rounding time stamps.
 @item
@@ -8967,8 +8966,8 @@ around a match in a hidden outline tree.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
-@i{Bastien Guerry} wrote the La@TeX{} exporter and has been prolific
-with patches, ideas, and bug reports.
+@i{Bastien Guerry} wrote the La@TeX{} exporter and @file{org-bibtex.el}, and
+has been prolific with patches, ideas, and bug reports.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
@@ -8976,8 +8975,12 @@ with patches, ideas, and bug reports.
 task state change logging, and the clocktable.  His clear explanations have
 been critical when we started to adopt the GIT version control system.
 @item
+@i{Phil Jackson} wrote @file{org-irc.el}.
+@item
 @i{Scott Jaderholm} proposed footnotes, control over whitespace between
 folded entries, and column view for properties.
+@item
+@i{Tokuya Kameshima} wrote @file{org-wl.el} and @file{org-mew.el}.
 @item
 @i{Shidai Liu} ("Leo") asked for embedded La@TeX{} and tested it.  He also
 provided frequent feedback and some patches.
@@ -9059,12 +9062,13 @@ keyword.
 system.
 @item
 @i{John Wiegley} wrote @file{emacs-wiki.el} and @file{planner.el}.  The
-development of Org was fully independent, and both systems are
-really different beasts in their basic ideas and implementation details.
-I later looked at John's code, however, and learned from his
-implementation of (i) links where the link itself is hidden and only a
-description is shown, and (ii) popping up a calendar to select a date.
-John has also contributed a number of great ideas directly to Org.
+development of Org was fully independent, and both systems are really
+different beasts in their basic ideas and implementation details.  I later
+looked at John's code, however, and learned from his implementation of (i)
+links where the link itself is hidden and only a description is shown, and
+(ii) popping up a calendar to select a date.  John has also contributed a
+number of great ideas and patches directly to Org, including the file
+@code{org-mac-message.el}'
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.

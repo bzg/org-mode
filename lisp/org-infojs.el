@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -77,7 +77,8 @@ line in the buffer.  See also the variable `org-infojs-options'."
     (home LINK_HOME :link-home))
   "JavaScript options, long form for script, default values.")
 
-(when (and (boundp org-infojs-options)
+(defvar org-infojs-options)
+(when (and (boundp 'org-infojs-options)
 	   (assq 'runs org-infojs-options))
   (setq org-infojs-options (delq (assq 'runs org-infojs-options)
 				 org-infojs-options)))

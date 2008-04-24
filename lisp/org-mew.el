@@ -5,7 +5,7 @@
 ;; Author: Tokuya Kameshima <kames at fa2 dot so-net dot ne dot jp>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 
 ;; This file is part of GNU Emacs.
 
@@ -102,8 +102,8 @@
  "Follow the Mew message link specified by PATH."
  (let (folder msgnum)
    (cond ((string-match "\\`\\(+.*\\)+\\+\\([0-9]+\\)\\'" path) ; for Bastien's
-	   (setq folder (match-string 1 link))
-	   (setq msgnum (match-string 2 link)))
+	   (setq folder (match-string 1 path))
+	   (setq msgnum (match-string 2 path)))
 	  ((string-match "\\`\\(\\(%#\\)?[^#]+\\)\\(#\\(.*\\)\\)?" path)
 	   (setq folder (match-string 1 path))
 	   (setq msgnum (match-string 4 path)))

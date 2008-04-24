@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -454,7 +454,7 @@ property, locally or anywhere up in the hierarchy."
 		(y-or-n-p (format "Overwrite file %s? " file)))
       (error "Abort"))
     (message format)
-    
+
     (if (string-match "\\([^ \t\r\n]+\\)\\( +.*\\)?" format)
 	(let* ((transform (intern (match-string 1 format)))
 	       (params (if (match-end 2)
@@ -479,11 +479,11 @@ property, locally or anywhere up in the hierarchy."
 	       (org-table-last-column-widths
 		(org-remove-by-index (funcall fun org-table-last-column-widths)
 				     skipcols i0)))
-	  
+
 	  (unless (fboundp transform)
 	    (error "No such transformation function %s" transform))
 	  (setq txt (funcall transform table params))
-	  
+
 	  (with-current-buffer (find-file-noselect file)
 	    (setq buf (current-buffer))
 	    (erase-buffer)
@@ -3793,14 +3793,14 @@ directly by `orgtbl-send-table'.  See manual."
 	    (orgtbl-format-section 'hline))
 	  (if hline (push hline *orgtbl-rtn*))
 	  (pop *orgtbl-table*)))
-    
+
     ;; Now format the main section.
     (orgtbl-format-section nil)
-    
-    (unless splicep 
+
+    (unless splicep
       (push (or (orgtbl-eval-str (plist-get params :tend))
 		"ERROR: no :tend") *orgtbl-rtn*))
-    
+
     (mapconcat 'identity (nreverse (if remove-nil-linesp
 				       (remq nil *orgtbl-rtn*)
 				     *orgtbl-rtn*)) "\n")))

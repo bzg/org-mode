@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -39,7 +39,7 @@
 (when (featurep 'xemacs)
 
   (defface org-columns-level-1;; font-lock-function-name-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-1
       '((((class color) (min-colors 88) (background light)) (:foreground "Blue1" :background "grey90"))
         (((class color) (min-colors 88) (background dark)) (:foreground "LightSkyBlue" :background "grey30"))
@@ -49,9 +49,9 @@
         (t (:bold t))))
     "Face used for columns-level 1 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-2;; font-lock-variable-name-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-2
       '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod" :background "grey90"))
         (((class color) (min-colors 16) (background dark))  (:foreground "LightGoldenrod" :background "grey30"))
@@ -60,9 +60,9 @@
         (t (:bold t))))
     "Face used for columns-level 2 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-3;; font-lock-keyword-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-3
       '((((class color) (min-colors 88) (background light)) (:foreground "Purple" :background "grey90"))
         (((class color) (min-colors 88) (background dark))  (:foreground "Cyan1" :background "grey30"))
@@ -73,9 +73,9 @@
         (t (:bold t))))
     "Face used for columns-level 3 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-4;; font-lock-comment-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-4
       '((((class color) (min-colors 88) (background light)) (:foreground "Firebrick" :background "grey90"))
         (((class color) (min-colors 88) (background dark))  (:foreground "chocolate1" :background "grey30"))
@@ -86,27 +86,27 @@
         (t (:bold t))))
     "Face used for columns-level 4 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-5;; font-lock-type-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-5
       '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen" :background "grey90"))
         (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen" :background "grey30"))
         (((class color) (min-colors 8)) (:foreground "green"))))
     "Face used for columns-level 5 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-6;; font-lock-constant-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-6
       '((((class color) (min-colors 16) (background light)) (:foreground "CadetBlue" :background "grey90"))
         (((class color) (min-colors 16) (background dark)) (:foreground "Aquamarine" :background "grey30"))
         (((class color) (min-colors 8)) (:foreground "magenta"))))
     "Face used for columns-level 6 headlines."
     :group 'org-faces)
-    
+
   (defface org-columns-level-7;; font-lock-builtin-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-7
       '((((class color) (min-colors 16) (background light)) (:foreground "Orchid" :background "grey90"))
         (((class color) (min-colors 16) (background dark)) (:foreground "LightSteelBlue" :background "grey30"))
@@ -115,17 +115,17 @@
     :group 'org-faces)
 
   (defface org-columns-level-8;; font-lock-string-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-8
       '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown" :background "grey90"))
         (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon" :background "grey30"))
         (((class color) (min-colors 8)) (:foreground "green"))))
     "Face used for columns-level 8 headlines."
     :group 'org-faces)
-    
+
 
   (defface org-columns-space;; font-lock-function-name-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-1
       '((((class color) (min-colors 88) (background light)) (:background "grey90"))
         (((class color) (min-colors 88) (background dark))  (:background "grey30"))
@@ -136,7 +136,7 @@
     :group 'org-faces)
 
   (defface org-columns-space1;; font-lock-function-name-face
-    (org-compatible-face 
+    (org-compatible-face
         'outline-1
       '((((class color) (min-colors 88) (background light)) (:background "grey90"))
         (((class color) (min-colors 88) (background dark))  (:background "grey30"))
@@ -149,8 +149,8 @@
 
 (when (featurep 'xemacs)
   (defconst org-columns-level-faces
-    '(org-columns-level-1 
-      org-columns-level-2 org-columns-level-3 
+    '(org-columns-level-1
+      org-columns-level-2 org-columns-level-3
       org-columns-level-4 org-columns-level-5 org-columns-level-6
       org-columns-level-7 org-columns-level-8
       ))
@@ -445,8 +445,8 @@ This is the compiled version of the format.")
     (with-current-buffer (marker-buffer org-columns-begin-marker)
       (when (local-variable-p 'org-previous-header-line-format (current-buffer))
 	(if (featurep 'xemacs)
-	    (set-specifier top-gutter 
-			   (make-gutter-specifier 
+	    (set-specifier top-gutter
+			   (make-gutter-specifier
 			    (cons (current-buffer)
 				  (cdar org-previous-header-line-format))))
 	  (setq header-line-format org-previous-header-line-format)

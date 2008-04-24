@@ -5,7 +5,7 @@
 ;; Author: Bastien Guerry <bzg at altern dot org>
 ;;         Carsten Dominik <carsten dot dominik at gmail dot com>
 ;; Keywords: org, wp, remember
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -42,16 +42,16 @@
 ;; :title         :year           :series      :address
 ;; :booktitle     :month          :annote      :abstract
 ;; :key           :btype
-;; 
+;;
 ;; Here is an example of a remember template that use some of this
 ;; information (:author :year :title :journal :pages):
-;; 
-;; (setq org-remember-templates 
+;;
+;; (setq org-remember-templates
 ;;   '((?b "* READ %?\n\n%a\n\n%:author (%:year): %:title\n   \
 ;;          In %:journal, %:pages.")))
-;; 
+;;
 ;; Let's say you want to remember this BibTeX entry:
-;; 
+;;
 ;; @Article{dolev83,
 ;;   author = 	 {Danny Dolev and Andrew C. Yao},
 ;;   title = 	 {On the security of public-key protocols},
@@ -62,22 +62,22 @@
 ;;   pages =	 {198--208},
 ;;   month =	 {Mars}
 ;; }
-;; 
+;;
 ;; M-x `org-remember' on this entry will produce this buffer:
-;; 
+;;
 ;; =====================================================================
 ;; * READ <== [point here]
-;; 
+;;
 ;; [[file:/file.bib::dolev83][Dolev & Yao 1983: security of public key protocols]]
-;; 
+;;
 ;; Danny Dolev and Andrew C. Yao (1983): On the security of public-key protocols
 ;; In IEEE Transaction on Information Theory, 198--208.
 ;; =====================================================================
 ;;
 ;;; History:
-;; 
+;;
 ;; The link creation part has been part of Org-mode for a long time.
-;; 
+;;
 ;; Creating better remember template information was inspired by a request
 ;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
 ;; and then imlemented by Bastien Guerry.

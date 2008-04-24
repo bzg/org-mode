@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -209,7 +209,7 @@ This is the compiled version of the format.")
 (defvar org-columns-flyspell-was-active nil
   "Remember the state of `flyspell-mode' before column view.
 Flyspell-mode can cause problems in columns view, so it is turned off
-for the duration of the command."
+for the duration of the command.")
 
 (defvar header-line-format)
 (defvar org-columns-previous-hscroll 0)

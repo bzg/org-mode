@@ -4,7 +4,7 @@
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 6.02pre-06
+;; Version: 6.02
 
 ;; This file is part of GNU Emacs.
 ;;
@@ -423,7 +423,7 @@ non-nil, restrict this list to the files matching the regexp
 MATCH.  If SKIP-FILE is non-nil, skip file matching the regexp
 SKIP-FILE.  If SKIP-DIR is non-nil, don't check directories
 matching the regexp SKIP-DIR when recursiing through BASE-DIR."
-  (mapc (lambda (f) 
+  (mapc (lambda (f)
 	  (let ((fd-p (car (file-attributes f)))
 		(fnd (file-name-nondirectory f)))
 	    (if (and fd-p recurse
@@ -448,7 +448,7 @@ matching filenames."
  	 (extension (or (plist-get project-plist :base-extension) "org"))
  	 (match (concat "^[^\\.].*\\.\\(" extension "\\)$")))
     (setq org-publish-temp-files nil)
-    (org-publish-get-base-files-1 base-dir recurse match 
+    (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?
 				  exclude-regexp exclude-regexp)
@@ -536,7 +536,7 @@ See `org-publish-org-to' to the list of arguments."
 					  (abbreviate-file-name filename))))
 		      (error "Can't publish file outside of a project")))))
 	   (project-plist (cdr project))
-	   (publishing-function 
+	   (publishing-function
 	    (or (plist-get project-plist :publishing-function)
 		'org-publish-org-to-html))
 	   (base-dir (file-name-as-directory

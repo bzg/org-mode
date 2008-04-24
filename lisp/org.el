@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -93,7 +93,7 @@
 
 ;;; Version
 
-(defconst org-version "6.02pre-06"
+(defconst org-version "6.02"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -2185,7 +2185,7 @@ Normal means, no org-mode-specific context."
 (declare-function cdlatex-tab "ext:cdlatex" ())
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
 (defvar font-lock-unfontify-region-function)
-(declare-function iswitchb-mode "iswitchb" (&optional arg)) 
+(declare-function iswitchb-mode "iswitchb" (&optional arg))
 (declare-function iswitchb-read-buffer (prompt &optional default require-match start matches-set))
 (defvar iswitchb-temp-buflist)
 (declare-function org-gnus-follow-link "org-gnus" (&optional group article))
@@ -8705,7 +8705,7 @@ are included in the output."
 	       (lambda (x) (if (string-match org-use-tag-inheritance x) x nil))
 	       tags)))
    ((listp org-use-tag-inheritance)
-    (org-delete-all org-use-tag-inheritance tags))))	   
+    (org-delete-all org-use-tag-inheritance tags))))
 
 (defvar todo-only) ;; dynamically scoped
 
@@ -8767,7 +8767,7 @@ also TODO lines."
 	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
-	orterms term orlist re-p str-p level-p level-op 
+	orterms term orlist re-p str-p level-p level-op
 	prop-p pn pv po cat-p gv)
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
@@ -8867,7 +8867,7 @@ also TODO lines."
   (setq op
 	(cond
 	 ((equal  op   "<"       ) '(<     string<      ))
-	 ((equal  op   ">"       ) '(>     string>      ))
+	 ((equal  op   ">"       ) '(>     org-string>  ))
 	 ((member op '("<=" "=<")) '(<=    org-string<= ))
 	 ((member op '(">=" "=>")) '(>=    org-string>= ))
 	 ((member op '("="  "==")) '(=     string=      ))
@@ -8876,7 +8876,8 @@ also TODO lines."
 
 (defun org<> (a b) (not (= a b)))
 (defun org-string<= (a b) (or (string= a b) (string< a b)))
-(defun org-string>= (a b) (or (string= a b) (string> a b)))
+(defun org-string>= (a b) (not (string< a b)))
+(defun org-string>  (a b) (and (not (string= a b)) (not (string< a b))))
 (defun org-string<> (a b) (not (string= a b)))
 
 (defun org-match-any-p (re list)
@@ -11094,12 +11095,12 @@ PREDICATE can be either 'export, 'files or 'agenda.
 
 If TMP is non-nil, don't include temporary buffers."
   (let (filter blist)
-    (setq filter 
+    (setq filter
 	  (cond ((eq predicate 'files) "\.org$")
 		((eq predicate 'export) "\*Org .*Export")
 		(t "\*Org \\|\.org$")))
     (setq blist
-	  (mapcar 
+	  (mapcar
 	   (lambda(b)
 	     (let ((bname (buffer-name b))
 		   (bfile (buffer-file-name b)))
@@ -11588,7 +11589,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 (texfile (concat texfilebase ".tex"))
 	 (dvifile (concat texfilebase ".dvi"))
 	 (pngfile (concat texfilebase ".png"))
-	 (fnh (if (featurep 'xemacs) 
+	 (fnh (if (featurep 'xemacs)
                   (font-height (get-face-font 'default))
                 (face-attribute 'default :height nil)))
 	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))

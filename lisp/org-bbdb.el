@@ -6,7 +6,7 @@
 ;;         Thomas Baumann <thomas dot baumann at ch dot tum dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -39,7 +39,7 @@
 ;; into the org-agenda.  If you already include the `diary' into the
 ;; agenda, you might want to prefer to include the anniversaries in
 ;; the diary using bbdb-anniv.el.
-;; 
+;;
 ;; Put the following in /somewhere/at/home/diary.org and make sure
 ;; that this file is in `org-agenda-files`
 ;;
@@ -249,7 +249,7 @@ Argument STR is the anniversary field in BBDB."
           (setq split (org-bbdb-anniv-split (pop annivs)))
           (multiple-value-bind (m d y)
               (funcall org-bbdb-extract-date-fun (car split))
-            
+
             (when (and (or (setq date (assoc (cons m d) dates))
                            (and (= d 29)
                                 (= m 2)
@@ -274,7 +274,7 @@ Argument STR is the anniversary field in BBDB."
               )))))
     (when text
       (mapconcat 'identity text "; "))))
-  
+
 (provide 'org-bbdb)
 
 ;;; org-bbdb.el ends here

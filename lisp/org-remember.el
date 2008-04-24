@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -92,7 +92,7 @@ When nil, just let remember make the buffer.
 When not nil, this is a list of 5-element lists.  In each entry, the first
 element is the name of the template, which should be a single short word.
 The second element is a character, a unique key to select this template.
-The third element is the template.  
+The third element is the template.
 
 The fourth element is optional and can specify a destination file for
 remember items created with this template.  The default file is given

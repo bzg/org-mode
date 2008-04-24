@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.02pre-06
+;; Version: 6.02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -3964,7 +3964,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	 (not (eq org-agenda-window-setup 'other-frame))
 	 org-pre-agenda-window-conf
 	 (set-window-configuration org-pre-agenda-window-conf))))
-  
+
 (defun org-agenda-exit ()
   "Exit agenda by removing the window or the buffer.
 Also kill all Org-mode buffers which have been loaded by `org-agenda'.
