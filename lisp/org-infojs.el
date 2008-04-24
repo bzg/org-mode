@@ -63,7 +63,7 @@ line in the buffer.  See also the variable `org-infojs-options'."
 	  (const :tag "Never" nil)
 	  (const :tag "When configured in buffer" when-configured)
 	  (const :tag "Always" t)))
-  
+
 (defconst org-infojs-opts-table
   '((path PATH "http://orgmode.org/org-info.js")
     (view VIEW "info")
@@ -71,12 +71,16 @@ line in the buffer.  See also the variable `org-infojs-options'."
     (tdepth TOC_DEPTH "max")
     (sdepth SECTION_DEPTH "max")
     (mouse MOUSE_HINT "underline")
-    (runs MAX_RUNS "5")
     (buttons VIEW_BUTTONS "0")
     (ltoc LOCAL_TOC "1")
     (up LINK_UP :link-up)
     (home LINK_HOME :link-home))
   "JavaScript options, long form for script, default values.")
+
+(when (and (boundp org-infojs-options)
+	   (assq 'runs org-infojs-options))
+  (setq org-infojs-options (delq (assq 'runs org-infojs-options)
+				 org-infojs-options)))
 
 (defcustom org-infojs-options
   (mapcar (lambda (x) (cons (car x) (nth 2 x)))
@@ -186,13 +190,12 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
     exp-plist)))
 
 (defun org-infojs-options-inbuffer-template ()
-  (format "#+INFOJS_OPT: view:%s toc:%s ltoc:%s runs:%s mouse:%s buttons:%s path:%s"
+  (format "#+INFOJS_OPT: view:%s toc:%s ltoc:%s mouse:%s buttons:%s path:%s"
 	  (if (eq t org-export-html-use-infojs) (cdr (assoc 'view org-infojs-options)) nil)
 	  (let ((a (cdr (assoc 'toc org-infojs-options))))
 	    (cond ((memq a '(nil t)) a)
 		  (t (plist-get (org-infile-export-plist) :table-of-contents))))
 	  (if (equal (cdr (assoc 'ltoc org-infojs-options)) "1") t nil)
-	  (cdr (assoc 'runs org-infojs-options))
 	  (cdr (assoc 'mouse org-infojs-options))
 	  (cdr (assoc 'buttons org-infojs-options))
 	  (cdr (assoc 'path org-infojs-options))))
