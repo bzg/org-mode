@@ -61,7 +61,7 @@
      (unwind-protect
 	 (progn ,@body)
        (goto-line _line)
-       (move-to-column _col))))
+       (org-move-to-column _col))))
 
 (defmacro org-without-partial-completion (&rest body)
   `(let ((pc-mode (and (boundp 'partial-completion-mode)

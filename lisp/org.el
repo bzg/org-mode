@@ -5639,7 +5639,7 @@ with something like \"1.\" or \"2)\"."
 	  (goto-char (match-beginning 2))
 	  (insert (format fmt (setq n (1+ n)))))))
     (goto-line line)
-    (move-to-column col)))
+    (org-move-to-column col)))
 
 (defun org-fix-bullet-type ()
   "Make sure all items in this list have the same bullet as the firsst item."
@@ -5671,7 +5671,7 @@ with something like \"1.\" or \"2)\"."
 	  (looking-at "\\S-+")
 	  (replace-match bullet))))
     (goto-line line)
-    (move-to-column col)
+    (org-move-to-column col)
     (if (string-match "[0-9]" bullet)
 	(org-renumber-ordered-list 1))))
 
@@ -5761,7 +5761,7 @@ I.e. to the text after the last item."
 	(beginning-of-line 1)
 	(skip-chars-forward " \t") (setq ind1 (current-column))
 	(delete-region (point-at-bol) (point))
-	(or (eolp) (indent-to-column (+ ind1 delta)))
+	(or (eolp) (org-indent-to-column (+ ind1 delta)))
 	(beginning-of-line 2))))
   (org-fix-bullet-type)
   (org-maybe-renumber-ordered-list-safe)
@@ -8202,7 +8202,7 @@ be removed."
 	    (insert-before-markers "\n")
 	    (backward-char 1)
 	    (narrow-to-region (point) (point))
-	    (indent-to-column col))
+	    (org-indent-to-column col))
 	  ;; Check if we have to remove something.
 	  (setq list (cons what remove))
 	  (while list
@@ -8962,7 +8962,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (insert " ")
 	  (delete-region (point) (1+ (match-end 0)))
 	  (backward-char 1)
-	  (move-to-column
+	  (org-move-to-column
 	   (max (1+ (current-column))
 		(1+ col)
 		(if (> to-col 0)
@@ -8970,7 +8970,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 		  (- (abs to-col) (length tags))))
 	   t)
 	  (insert tags)
-	  (move-to-column (min (current-column) col) t))
+	  (org-move-to-column (min (current-column) col) t))
       (goto-char pos))))
 
 (defun org-set-tags (&optional arg just-align)
@@ -9041,7 +9041,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(and (not (featurep 'xemacs)) c0 indent-tabs-mode (tabify p0 (point)))
 	tags)
        (t (error "Tags alignment failed")))
-      (move-to-column col)
+      (org-move-to-column col)
       (unless just-align
 	(run-hooks 'org-after-tags-change-hook)))))
 
@@ -9124,7 +9124,7 @@ This works in the agenda, and also in an org-mode buffer."
 	(replace-match ""))
     (when flag
       (end-of-line 1)
-      (move-to-column (- (window-width) 19) t)
+      (org-move-to-column (- (window-width) 19) t)
       (insert (org-add-props " Next change exits" nil 'face 'org-warning)))))
 
 (defun org-set-current-tags-overlay (current prefix)
@@ -9729,9 +9729,9 @@ formats in the current buffer."
     (if (eq (char-before) ?*) (forward-char 1))
     (let ((inhibit-read-only t)) (insert "\n:PROPERTIES:\n:END:"))
     (beginning-of-line 0)
-    (indent-to-column indent)
+    (org-indent-to-column indent)
     (beginning-of-line 2)
-    (indent-to-column indent)
+    (org-indent-to-column indent)
     (beginning-of-line 0)
     (if hiddenp
 	(save-excursion
@@ -13008,7 +13008,7 @@ ones and overrule settings in the other lists."
     (setq pos (move-marker (make-marker) (point)))
     (insert (delete-and-extract-region beg end))
     (goto-char pos)
-    (move-to-column col)))
+    (org-move-to-column col)))
 
 (defun org-move-line-up (arg)
   "Move the current line up.  With prefix argument, move it past ARG lines."
@@ -13021,7 +13021,7 @@ ones and overrule settings in the other lists."
     (setq pos (move-marker (make-marker) (point)))
     (insert (delete-and-extract-region beg end))
     (goto-char pos)
-    (move-to-column col)))
+    (org-move-to-column col)))
 
 (defun org-replace-escapes (string table)
   "Replace %-escapes in STRING with values in TABLE.
@@ -13122,8 +13122,8 @@ not an indirect buffer."
        (t (setq column (org-get-indentation))))))
     (goto-char pos)
     (if (<= (current-column) (current-indentation))
-	(indent-line-to column)
-      (save-excursion (indent-line-to column)))
+	(org-indent-line-to column)
+      (save-excursion (org-indent-line-to column)))
     (setq column (current-column))
     (beginning-of-line 1)
     (if (looking-at
@@ -13131,7 +13131,7 @@ not an indirect buffer."
 	(replace-match (concat "\\1" (format org-property-format
 					     (match-string 2) (match-string 3)))
 		       t nil))
-    (move-to-column column)))
+    (org-move-to-column column)))
 
 (defun org-set-autofill-regexps ()
   (interactive)
@@ -13227,12 +13227,12 @@ this line is also exported in fixed-width font."
 	    (beginning-of-line 1)
 	    (cond
 	     (arg
-	      (move-to-column cc t)
+	      (org-move-to-column cc t)
 	      (insert ":\n")
 	      (forward-line -1))
 	     ((and off (looking-at re))
 	      (replace-match "" t t nil 1))
-	     ((not off) (move-to-column cc t) (insert ":")))
+	     ((not off) (org-move-to-column cc t) (insert ":")))
 	    (forward-line 1)))
       (save-excursion
 	(org-back-to-heading)

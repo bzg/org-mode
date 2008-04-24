@@ -4601,7 +4601,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (beginning-of-line 1)
       (save-excursion
 	(org-agenda-change-all-lines newhead hdmarker 'fixface))
-      (move-to-column col))))
+      (org-move-to-column col))))
 
 (defun org-agenda-add-note (&optional arg)
   "Add a time-stamped note to the entry at point."
@@ -4646,7 +4646,7 @@ the new TODO state."
 		pl (get-text-property (point) 'prefix-length)
 		undone-face (get-text-property (point) 'undone-face)
 		done-face (get-text-property (point) 'done-face))
-	  (move-to-column pl)
+	  (org-move-to-column pl)
 	  (cond
 	   ((equal new "")
 	    (beginning-of-line 1)
@@ -4813,7 +4813,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (get-text-property (point) 'org-marker))
-	  (move-to-column (- (window-width) (length stamp)) t)
+	  (org-move-to-column (- (window-width) (length stamp)) t)
           (if (featurep 'xemacs)
 	      ;; Use `duplicable' property to trigger undo recording
               (let ((ex (make-extent nil nil))

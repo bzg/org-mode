@@ -362,7 +362,7 @@ will be easy to remove."
 	 (l (if level (org-get-valid-level level 0) 0))
 	 (off 0)
 	 ov tx)
-    (move-to-column c)
+    (org-move-to-column c)
     (unless (eolp) (skip-chars-backward "^ \t"))
     (skip-chars-backward " \t")
     (setq ov (org-make-overlay (1- (point)) (point-at-eol))
@@ -609,6 +609,8 @@ the currently selected interval size."
 	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list)
       (setq org-clock-file-total-minutes nil)
       (when step
+	(unless (or block (and ts te))
+	  (error "Clocktable `:step' can only be used with `:block' or `:tstart,:end'"))
 	(org-clocktable-steps params)
 	(throw 'exit nil))
       (when block

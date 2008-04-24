@@ -867,12 +867,12 @@ in order to easily repeat the interval."
 		   (string-match "^[0-9]+$" txt))
 	      (setq txt (format "%d" (+ (string-to-number txt) 1))))
 	  (insert txt)
-	  (move-to-column col)
+	  (org-move-to-column col)
 	  (if (and org-table-copy-increment (org-at-timestamp-p t))
 	      (org-timestamp-up 1)
 	    (org-table-maybe-recalculate-line))
 	  (org-table-align)
-	  (move-to-column col))
+	  (org-move-to-column col))
       (error "No non-empty field found"))))
 
 (defun org-table-check-inside-data-field ()
@@ -1036,12 +1036,12 @@ However, when FORCE is non-nil, create new columns if necessary."
       t
     (let ((col (current-column))
 	  (end (org-table-end)))
-      (move-to-column col)
+      (org-move-to-column col)
       (while (and (< (point) end)
 		  (or (not (= (current-column) col))
 		      (org-at-table-hline-p)))
 	(beginning-of-line 2)
-	(move-to-column col))
+	(org-move-to-column col))
       (if (and (org-at-table-p)
 	       (not (org-at-table-hline-p)))
 	  t
@@ -1152,7 +1152,7 @@ However, when FORCE is non-nil, create new columns if necessary."
     (beginning-of-line tonew)
     (insert txt)
     (beginning-of-line 0)
-    (move-to-column col)
+    (org-move-to-column col)
     (unless (or hline1p hline2p)
       (org-table-fix-formulas
        "@" (list (cons (number-to-string dline1) (number-to-string dline2))
@@ -1194,7 +1194,7 @@ With prefix ABOVE, insert above the current line."
     (beginning-of-line (if above 1 2))
     (insert line "\n")
     (beginning-of-line (if above 1 -1))
-    (move-to-column col)
+    (org-move-to-column col)
     (and org-table-overlay-coordinates (org-table-align))))
 
 (defun org-table-hline-and-move (&optional same-column)
@@ -1232,7 +1232,7 @@ In particular, this does handle wide and invisible characters."
 	(dline (org-table-current-dline)))
     (kill-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
     (if (not (org-at-table-p)) (beginning-of-line 0))
-    (move-to-column col)
+    (org-move-to-column col)
     (org-table-fix-formulas "@" (list (cons (number-to-string dline) "INVALID"))
 			    dline -1 dline)))
 

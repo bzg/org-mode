@@ -595,7 +595,7 @@ Where possible, use the standard interface for changing this line."
 		(mapc 'org-delete-overlay line-overlays)
 		(org-columns-eval eval))
 	    (org-columns-display-here)))
-	(move-to-column col)
+	(org-move-to-column col)
 	(if (and (org-mode-p)
 		 (nth 3 (assoc key org-columns-current-fmt-compiled)))
 	    (org-columns-update key)))))))
@@ -710,7 +710,7 @@ Where possible, use the standard interface for changing this line."
 	      (mapc 'org-delete-overlay line-overlays)
 	      (org-columns-eval '(org-entry-put pom key nval)))
 	  (org-columns-display-here)))
-      (move-to-column col)
+      (org-move-to-column col)
       (and (nth 3 (assoc key org-columns-current-fmt-compiled))
 	   (org-columns-update key))))))
 

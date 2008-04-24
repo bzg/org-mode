@@ -1,5 +1,14 @@
 2008-04-24  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-indent-item, org-add-planning-info)
+	(org-insert-property-drawer): Use compatibility function
+	`org-indent-to-column'.
+	(org-indent-line-function): Use compatibility function
+	`org-indent-line-to'.
+
+	* lisp/org-compat.el (org-indent-to-column, org-indent-line-to):
+	New compatibility functions to work around an XEmacs bug.
+
 	* lisp/org-colview.el (org-columns, org-agenda-columns): Remember
 	is `flyspell-mode' was active when entering column display, and
 	turn it off if it is on.
