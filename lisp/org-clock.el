@@ -93,6 +93,82 @@ The function is called with point at the beginning of the headline."
 (defvar org-clock-heading "")
 (defvar org-clock-start-time "")
 
+(defvar org-clock-history
+  (list (make-marker) (make-marker) (make-marker) (make-marker) (make-marker))
+  "Marker pointing to the previous task teking clock time.
+This is used to find back to the previous task after interrupting work.
+When clocking into a task and the clock is currently running, this marker
+is moved to the position of the currently running task and continues
+to point there even after the task is clocked out.")
+
+(defun org-clock-history-push (&optional pos buffer)
+  (let ((m (org-last org-clock-history)))
+    (move-marker m (or pos (point)) buffer)
+    (setq org-clock-history
+	  (reverse (cdr (reverse org-clock-history))))
+    (while (member m org-clock-history)
+      (move-marker (car (member m org-clock-history)) nil))
+    (setq org-clock-history (cons m org-clock-history))))
+
+(defun org-clock-select-task (&optional prompt)
+  "Select a task that recently was associated with clocking."
+  (interactive)
+  (let (sel-list rpl file task (i 0))
+    (save-window-excursion
+      (org-switch-to-buffer-other-window
+       (get-buffer-create "*Clock Task Select*"))
+      (erase-buffer)
+      (when (marker-buffer org-clock-default-task)
+	(insert (org-add-props "Default Task\n" nil 'face 'bold))
+	(setq s (org-clock-insert-selection-line ?d org-clock-default-task))
+	(push s sel-list))
+      (when (marker-buffer org-clock-interrupted-task)
+	(insert (org-add-props "Interrupted Task\n" nil 'face 'bold))
+	(setq s (org-clock-insert-selection-line ?i org-clock-interrupted-task))
+	(push s sel-list))
+      (insert (org-add-props "Recent Tasks\n" nil 'face 'bold))
+      (mapc
+       (lambda (m)
+	 (when (marker-buffer m)
+	   (setq i (1+ i)
+		 s (org-clock-insert-selection-line
+		    (string-to-char (number-to-string i)) m))
+	   (push s sel-list)))
+       org-clock-history)
+      (shrink-window-if-larger-than-buffer)
+      (message (or prompt "Select task for clocking:"))
+      (setq rpl (read-char-exclusive))
+      (cond
+       ((eq rpl ?q) nil)
+       ((eq rpl ?x) nil)
+       ((assoc rpl sel-list) (cdr (assoc rpl sel-list)))
+       (t (error "Invalid task choice %c" rpl))))))
+
+(defun org-clock-insert-selection-line (i marker)
+  (when (marker-buffer marker)
+    (let (file cat task)
+      (with-current-buffer (marker-buffer marker)
+	(save-excursion
+	  (goto-char marker)
+	  (setq file (buffer-file-name (marker-buffer marker))
+		cat (or (org-get-category)
+			(progn (org-refresh-category-properties)
+			       (org-get-category)))
+		task (org-get-heading 'notags))))
+      (when (and cat task)
+	(insert (format "[%c] %-15s %s\n" i cat task))
+	(cons i marker)))))
+  
+(defvar org-clock-default-task (make-marker)
+  "Marker pointing to the default task that should clock time.
+The clock can be made to switch to this task after clocking out
+of a different task.")
+
+(defvar org-clock-interrupted-task (make-marker)
+  "Marker pointing to the default task that should clock time.
+The clock can be made to switch to this task after clocking out
+of a different task.")
+
 (defun org-update-mode-line ()
   (let* ((delta (- (time-to-seconds (current-time))
                    (time-to-seconds org-clock-start-time)))
@@ -106,14 +182,39 @@ The function is called with point at the beginning of the headline."
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
 
-(defun org-clock-in ()
+(defun org-clock-in (&optional select)
   "Start the clock on the current item.
-If necessary, clock-out of the currently active clock."
-  (interactive)
-  (org-clock-out t)
-  (let (ts)
+If necessary, clock-out of the currently active clock.
+With prefix arg SELECT, offer a list of recently clocked tasks to
+clock into.  When SELECT is `C-u C-u', clock into the current task and mark
+is as the default task, a special task that will always be offered in
+the clocking selection, associated with the letter `d'."
+  (interactive "P")
+  (let (ts selected-task)
+    ;; Are we interrupting the clocking of a differnt task?
+    (if (marker-buffer org-clock-marker)
+	(progn
+	  (move-marker org-clock-interrupted-task
+		       (marker-position org-clock-marker)
+		       (marker-buffer org-clock-marker))
+	  (let ((org-clock-inhibit-clock-restart t))
+	    (org-clock-out t)))
+      (move-marker org-clock-interrupted-task nil))
+    
+    (cond
+     ((equal select '(16))
+      (save-excursion
+	(org-back-to-heading t)
+	(move-marker org-clock-default-task (point))))
+     ((equal select '(4))
+      (setq selected-task (org-clock-select-task "Clock-in on task: "))))
+    
     (save-excursion
       (org-back-to-heading t)
+      (when (and selected-task (marker-buffer selected-task))
+	(set-buffer (marker-buffer selected-task))
+	(goto-char selected-task))
+      (org-clock-history-push)
       (when (and org-clock-in-switch-to-state
 		 (not (looking-at (concat outline-regexp "[ \t]*"
 					  org-clock-in-switch-to-state
@@ -127,7 +228,7 @@ If necessary, clock-out of the currently active clock."
 	  (setq org-clock-heading "???")))
       (setq org-clock-heading (propertize org-clock-heading 'face nil))
       (org-clock-find-position)
-
+      
       (insert "\n") (backward-char 1)
       (indent-relative)
       (insert org-clock-string " ")
@@ -258,19 +359,23 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (force-mode-line-update)
   (message "Clock canceled"))
 
-(defun org-clock-goto (&optional delete-windows)
-  "Go to the currently clocked-in entry."
+(defun org-clock-goto (&optional select)
+  "Go to the currently clocked-in entry.
+With prefix arg SELECT, offer recently clocked tasks."
   (interactive "P")
-  (if (not (marker-buffer org-clock-marker))
-      (error "No active clock"))
-  (switch-to-buffer-other-window
-   (marker-buffer org-clock-marker))
-  (if delete-windows (delete-other-windows))
-  (goto-char org-clock-marker)
-  (org-show-entry)
-  (org-back-to-heading)
-  (org-cycle-hide-drawers 'children)
-  (recenter))
+  (let ((m (if select
+	       (org-clock-select-task "Select task to go to: ")
+	     org-clock-marker)))
+    (if (not (marker-buffer m))
+	(if select
+	    (error "No task selected")
+	  (error "No active clock")))
+    (switch-to-buffer (marker-buffer m))
+    (goto-char m)
+    (org-show-entry)
+    (org-back-to-heading)
+    (org-cycle-hide-drawers 'children)
+    (recenter)))
 
 (defvar org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
@@ -666,9 +771,9 @@ the currently selected interval size."
 		 (scope 'agenda)
 		 (p1 (copy-sequence params))
 		 file)
-	    (plist-put p1 :tostring t)
-	    (plist-put p1 :multifile t)
-	    (plist-put p1 :scope 'file)
+	    (setq p1 (plist-put p1 :tostring t))
+	    (setq p1 (plist-put p1 :multifile t))
+	    (setq p1 (plist-put p1 :scope 'file))
 	    (org-prepare-agenda-buffers files)
 	    (while (setq file (pop files))
 	      (with-current-buffer (find-buffer-visiting file)
@@ -767,17 +872,17 @@ the currently selected interval size."
 		     (apply 'encode-time (org-parse-time-string ts)))))
     (if te (setq te (time-to-seconds
 		     (apply 'encode-time (org-parse-time-string te)))))
-    (plist-put p1 :header "")
-    (plist-put p1 :step nil)
-    (plist-put p1 :block nil)
+    (setq p1 (plist-put p1 :header ""))
+    (setq p1 (plist-put p1 :step nil))
+    (setq p1 (plist-put p1 :block nil))
     (while (< ts te)
       (or (bolp) (insert "\n"))
-      (plist-put p1 :tstart (format-time-string
-			     (car org-time-stamp-formats)
-			     (seconds-to-time ts)))
-      (plist-put p1 :tend (format-time-string
-			   (car org-time-stamp-formats)
-			   (seconds-to-time (setq ts (+ ts step)))))
+      (setq p1 (plist-put p1 :tstart (format-time-string
+				      (car org-time-stamp-formats)
+				      (seconds-to-time ts))))
+      (setq p1 (plist-put p1 :tend (format-time-string
+				    (car org-time-stamp-formats)
+				    (seconds-to-time (setq ts (+ ts step))))))
       (insert "\n" (if (eq step0 'day) "Daily report: " "Weekly report starting on: ")
 	      (plist-get p1 :tstart) "\n")
       (org-dblock-write:clocktable p1)

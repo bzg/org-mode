@@ -4493,7 +4493,11 @@ Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
 this item, the multiple CLOCK lines will be wrapped into a
 @code{:CLOCK:} drawer (see also the variable
-@code{org-clock-into-drawer}).
+@code{org-clock-into-drawer}).  When called with a @kbd{C-u} prefix argument,
+select the task from a list of recently clocked tasks.  With two @kbd{C-u
+C-u} prefixes, clock into the task at point and mark it as the default task.
+The default task will always be available when selecting a clocking task,
+with letter @kbd{d}.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 Stop the clock (clock-out).  The inserts another timestamp at the same
@@ -4518,8 +4522,9 @@ Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
 @kindex C-c C-x C-j
 @item C-c C-x C-j
-Jump to the entry that contains the currently running clock, an another
-window.
+Jump to the entry that contains the currently running clock.  With a
+@kbd{C-u} prefix arg, select the target task from a list of recently clocked
+tasks.
 @kindex C-c C-x C-d
 @item C-c C-x C-d
 Display time summaries for each subtree in the current buffer.  This

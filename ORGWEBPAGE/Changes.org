@@ -8,6 +8,21 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.02a
+** Details
+*** Clock task history
+    Org now remembers the last 5 tasks that you clocked into, to
+    make it easier to clock back into a task after interrupting
+    it for another task.
+    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) wil
+      clock into that task and mark it as current default task.
+    - `C-u C-c C-x C-i' (or `C-u I' from the agenda) will offer a
+      list of recently clocked tasks, including the default task,
+      for selection. `d' selects the default task, `i' selects
+      the task that was interrupted by the task that is currently
+      being clocked. `1',... selects a recent task.  When you
+      select a task, you will be clocked into it.
+
 * Version 6.02
 
 ** Overview
