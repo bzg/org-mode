@@ -135,13 +135,15 @@ This is the compiled version of the format.")
 		       (beginning-of-line 1)
 		       (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2))))
+	 (ref-face (or level-face
+		       (and (eq major-mode 'org-agenda-mode)
+			    (get-text-property (point-at-bol) 'face))
+		       'default))
 	 (color (list :foreground
-		      (face-attribute
-		       (or level-face
-			   (and (eq major-mode 'org-agenda-mode)
-				(get-text-property (point-at-bol) 'face))
-			   'default) :foreground)))
-	 (face (list color 'org-column))
+		      (face-attribute ref-face :foreground)
+		      :weight 'normal :strike-through nil
+		      :underline nil))
+	 (face (list color 'org-column level-face))
 	 pom property ass width f string ov column val modval)
     ;; Check if the entry is in another buffer.
     (unless props

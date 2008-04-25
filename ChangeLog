@@ -1,3 +1,13 @@
+2008-04-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* Makefile (BATCH): Fix the path to the local lisp files.
+
+	* lisp/org.el (org-emphasis-alist): Use a different face for
+	+word+ under XEmacs - it does not have strike-through.
+
+	* lisp/org-colview.el (org-columns-display-here): Shield more
+	properties of the background face.
+
 2008-04-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org.el (org-indent-item, org-add-planning-info)

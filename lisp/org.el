@@ -2124,12 +2124,13 @@ Use customize to modify this, or restart Emacs after changing it."
 	  (option (boolean :tag "Stacking (DISABLED)       "))))
 
 (defcustom org-emphasis-alist
-  '(("*" bold "<b>" "</b>")
+  `(("*" bold "<b>" "</b>")
     ("/" italic "<i>" "</i>")
     ("_" underline "<u>" "</u>")
     ("=" org-code "<code>" "</code>" verbatim)
     ("~" org-verbatim "" "" verbatim)
-    ("+" (:strike-through t) "<del>" "</del>")
+    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
+     "<del>" "</del>")
     )
   "Special syntax for emphasized text.
 Text starting and ending with a special character will be emphasized, for
@@ -8234,8 +8235,9 @@ be removed."
 	    (end-of-line 1))
 	  (goto-char (point-min))
 	  (widen)
-	  (if (looking-at "[ \t]+\r?\n")
-	      (replace-match ""))
+	  (if (and (looking-at "[ \t]+\n")
+		   (equal (char-before) ?\n))
+	      (backward-delete-char 1))
 	  ts)))))
 
 (defvar org-log-note-marker (make-marker))
