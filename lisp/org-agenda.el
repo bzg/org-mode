@@ -4890,19 +4890,20 @@ be used to request time specification in the time stamp."
       (org-agenda-show-new-time marker ts "S"))
 	(message "Deadline for this item set to %s" ts)))
 
-
 (defun org-agenda-clock-in (&optional arg)
   "Start the clock on the currently selected item."
   (interactive "P")
   (org-agenda-check-no-diary)
-  (let* ((marker (or (get-text-property (point) 'org-marker)
-		     (org-agenda-error)))
-	 (pos (marker-position marker)))
-    (org-with-remote-undo (marker-buffer marker)
-      (with-current-buffer (marker-buffer marker)
-	(widen)
-	(goto-char pos)
-	(org-clock-in arg)))))
+  (if (equal arg '(4))
+      (org-clock-in arg)
+    (let* ((marker (or (get-text-property (point) 'org-marker)
+		       (org-agenda-error)))
+	   (pos (marker-position marker)))
+      (org-with-remote-undo (marker-buffer marker)
+        (with-current-buffer (marker-buffer marker)
+	  (widen)
+	  (goto-char pos)
+	  (org-clock-in arg))))))
 
 (defun org-agenda-clock-out (&optional arg)
   "Stop the currently running clock."

@@ -76,6 +76,11 @@ The value should be the state to which the entry should be switched."
 	  (const :tag "Don't force a state" nil)
 	  (string :tag "State")))
 
+(defcustom org-clock-history-length 5
+  "Number of clock tasks to remember in history."
+  :group 'org-clock
+  :type 'integer)
+
 (defcustom org-clock-heading-function nil
   "When non-nil, should be a function to create `org-clock-heading'.
 This is the string shown in the mode line when a clock is running.
@@ -93,8 +98,7 @@ The function is called with point at the beginning of the headline."
 (defvar org-clock-heading "")
 (defvar org-clock-start-time "")
 
-(defvar org-clock-history
-  (list (make-marker) (make-marker) (make-marker) (make-marker) (make-marker))
+(defvar org-clock-history nil
   "Marker pointing to the previous task teking clock time.
 This is used to find back to the previous task after interrupting work.
 When clocking into a task and the clock is currently running, this marker
@@ -112,19 +116,26 @@ The clock can be made to switch to this task after clocking out
 of a different task.")
 
 (defun org-clock-history-push (&optional pos buffer)
-  (let ((m (org-last org-clock-history)))
-    (move-marker m (or pos (point)) buffer)
+  "Push a marker to the clock history."
+  (let ((m (move-marker (make-marker) (or pos (point)) buffer)) n l)
+    (while (setq n (member m org-clock-history))
+      (move-marker (car n) nil))
     (setq org-clock-history
-	  (reverse (cdr (reverse org-clock-history))))
-    (while (member m org-clock-history)
-      (move-marker (car (member m org-clock-history)) nil))
-    (setq org-clock-history (cons m org-clock-history))))
+	  (delq nil
+		(mapcar (lambda (x) (if (marker-buffer x) x nil))
+			org-clock-history)))
+    (when (>= (setq l (length org-clock-history)) org-clock-history-length)
+      (setq org-clock-history
+	    (nreverse
+	     (nthcdr (- l org-clock-history-length -1)
+		     (nreverse org-clock-history)))))
+    (push m org-clock-history)))
 
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)
   (let (sel-list rpl file task (i 0) s)
-    (save-window-excursion
+    (save-window-excursion 
       (org-switch-to-buffer-other-window
        (get-buffer-create "*Clock Task Select*"))
       (erase-buffer)
@@ -133,8 +144,12 @@ of a different task.")
 	(setq s (org-clock-insert-selection-line ?d org-clock-default-task))
 	(push s sel-list))
       (when (marker-buffer org-clock-interrupted-task)
-	(insert (org-add-props "Interrupted Task\n" nil 'face 'bold))
+	(insert (org-add-props "The task interrupted by starting the last one\n" nil 'face 'bold))
 	(setq s (org-clock-insert-selection-line ?i org-clock-interrupted-task))
+	(push s sel-list))
+      (when (marker-buffer org-clock-marker)
+	(insert (org-add-props "Current Clocking Task\n" nil 'face 'bold))
+	(setq s (org-clock-insert-selection-line ?c org-clock-marker))
 	(push s sel-list))
       (insert (org-add-props "Recent Tasks\n" nil 'face 'bold))
       (mapc
@@ -185,35 +200,37 @@ of a different task.")
 (defun org-clock-in (&optional select)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
-With prefix arg SELECT, offer a list of recently clocked tasks to
+With prefix arg SELECT, offer a list of recently clocked ta sks to
 clock into.  When SELECT is `C-u C-u', clock into the current task and mark
 is as the default task, a special task that will always be offered in
 the clocking selection, associated with the letter `d'."
   (interactive "P")
-  (let (ts selected-task)
+  (let ((interrupting (marker-buffer org-clock-marker))
+	ts selected-task)
+    (when (equal select '(4))
+      (setq selected-task (org-clock-select-task "Clock-in on task: "))
+      (or selected-task
+	  (error "Abort")))
     ;; Are we interrupting the clocking of a differnt task?
-    (if (marker-buffer org-clock-marker)
+    (if interrupting
 	(progn
 	  (move-marker org-clock-interrupted-task
 		       (marker-position org-clock-marker)
 		       (marker-buffer org-clock-marker))
 	  (let ((org-clock-inhibit-clock-restart t))
-	    (org-clock-out t)))
-      (move-marker org-clock-interrupted-task nil))
+	    (org-clock-out t))))
     
-    (cond
-     ((equal select '(16))
+    (when (equal select '(16))
       (save-excursion
 	(org-back-to-heading t)
 	(move-marker org-clock-default-task (point))))
-     ((equal select '(4))
-      (setq selected-task (org-clock-select-task "Clock-in on task: "))))
     
     (save-excursion
       (org-back-to-heading t)
       (when (and selected-task (marker-buffer selected-task))
 	(set-buffer (marker-buffer selected-task))
 	(goto-char selected-task))
+      (or interrupting (move-marker org-clock-interrupted-task nil))
       (org-clock-history-push)
       (when (and org-clock-in-switch-to-state
 		 (not (looking-at (concat outline-regexp "[ \t]*"
