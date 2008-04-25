@@ -31,7 +31,7 @@ infodir = $(prefix)/info
 # BATCH=$(EMACS) -batch -q -eval "(add-to-list (quote load-path) \".\")"
 
 BATCH=$(EMACS) -batch -q -eval                             \
- "(progn (add-to-list (quote load-path) \"./lisp\")             \
+ "(progn (add-to-list (quote load-path) (expand-file-name \"./lisp/\")) \
         (add-to-list (quote load-path) \"$(lispdir)\"))"
 
 # Specify the byte-compiler for compiling org-mode files
@@ -239,6 +239,9 @@ relup:
 	make release
 	make upload_release
 	make upload_manual
+
+db:
+	grep -e '(debug)' lisp/*el
 
 cleanelc:
 	rm -f $(ELCFILES)

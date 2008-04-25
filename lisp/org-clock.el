@@ -101,6 +101,16 @@ When clocking into a task and the clock is currently running, this marker
 is moved to the position of the currently running task and continues
 to point there even after the task is clocked out.")
 
+(defvar org-clock-default-task (make-marker)
+  "Marker pointing to the default task that should clock time.
+The clock can be made to switch to this task after clocking out
+of a different task.")
+
+(defvar org-clock-interrupted-task (make-marker)
+  "Marker pointing to the default task that should clock time.
+The clock can be made to switch to this task after clocking out
+of a different task.")
+
 (defun org-clock-history-push (&optional pos buffer)
   (let ((m (org-last org-clock-history)))
     (move-marker m (or pos (point)) buffer)
@@ -113,7 +123,7 @@ to point there even after the task is clocked out.")
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)
-  (let (sel-list rpl file task (i 0))
+  (let (sel-list rpl file task (i 0) s)
     (save-window-excursion
       (org-switch-to-buffer-other-window
        (get-buffer-create "*Clock Task Select*"))
@@ -159,16 +169,6 @@ to point there even after the task is clocked out.")
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))
   
-(defvar org-clock-default-task (make-marker)
-  "Marker pointing to the default task that should clock time.
-The clock can be made to switch to this task after clocking out
-of a different task.")
-
-(defvar org-clock-interrupted-task (make-marker)
-  "Marker pointing to the default task that should clock time.
-The clock can be made to switch to this task after clocking out
-of a different task.")
-
 (defun org-update-mode-line ()
   (let* ((delta (- (time-to-seconds (current-time))
                    (time-to-seconds org-clock-start-time)))

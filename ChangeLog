@@ -1,5 +1,8 @@
 2008-04-25  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-archive.el (org-extract-archive-file): Handle the
+	special case where the file name is the empty string.
+
 	* Makefile (BATCH): Fix the path to the local lisp files.
 
 	* lisp/org.el (org-emphasis-alist): Use a different face for

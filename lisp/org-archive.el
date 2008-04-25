@@ -139,8 +139,10 @@ archive file is."
 (defun org-extract-archive-file (&optional location)
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (expand-file-name
-       (format (match-string 1 location) buffer-file-name))))
+      (if (= (match-beginning 1) (match-end 1))
+	  (buffer-file-name)
+	(expand-file-name
+	 (format (match-string 1 location) buffer-file-name)))))
 
 (defun org-extract-archive-heading (&optional location)
   (setq location (or location org-archive-location))
