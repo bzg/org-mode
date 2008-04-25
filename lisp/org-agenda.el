@@ -4902,7 +4902,7 @@ be used to request time specification in the time stamp."
       (with-current-buffer (marker-buffer marker)
 	(widen)
 	(goto-char pos)
-	(org-clock-in)))))
+	(org-clock-in arg)))))
 
 (defun org-agenda-clock-out (&optional arg)
   "Stop the currently running clock."
