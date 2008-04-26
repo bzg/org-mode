@@ -209,16 +209,16 @@ the clocking selection, associated with the letter `d'."
 	ts selected-task)
     (when (equal select '(4))
       (setq selected-task (org-clock-select-task "Clock-in on task: "))
-      (or selected-task
-	  (error "Abort")))
+      (if selected-task
+	  (setq selected-task (copy-marker selected-task))
+	(error "Abort")))
     ;; Are we interrupting the clocking of a differnt task?
     (if interrupting
 	(progn
 	  (move-marker org-clock-interrupted-task
 		       (marker-position org-clock-marker)
 		       (marker-buffer org-clock-marker))
-	  (let ((org-clock-inhibit-clock-restart t))
-	    (org-clock-out t))))
+	  (org-clock-out t)))
     
     (when (equal select '(16))
       (save-excursion
@@ -229,7 +229,8 @@ the clocking selection, associated with the letter `d'."
       (org-back-to-heading t)
       (when (and selected-task (marker-buffer selected-task))
 	(set-buffer (marker-buffer selected-task))
-	(goto-char selected-task))
+	(goto-char selected-task)
+	(move-marker selected-task nil))
       (or interrupting (move-marker org-clock-interrupted-task nil))
       (org-clock-history-push)
       (when (and org-clock-in-switch-to-state
