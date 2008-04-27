@@ -1711,7 +1711,7 @@ displaying the tags menu is not even shown, until you press C-c again."
   "Non-nil means, fast tags selection interface will also offer TODO states.
 This is an undocumented feature, you should not rely on it.")
 
-(defcustom org-tags-column -80
+(defcustom org-tags-column (if (featurep 'xemacs) -79 -80)
   "The column to which tags should be indented in a headline.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,
@@ -8954,25 +8954,25 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 
 (defun org-align-tags-here (to-col)
   ;; Assumes that this is a headline
-  (let ((pos (point)) (col (current-column)) tags)
+  (let ((pos (point)) (col (current-column)) ncol tags-l p)
     (beginning-of-line 1)
     (if	(and (looking-at (org-re ".*?\\([ \t]+\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
 	     (< pos (match-beginning 2)))
 	(progn
-	  (setq tags (match-string 2))
+	  (setq tags-l (- (match-end 2) (match-beginning 2)))
 	  (goto-char (match-beginning 1))
 	  (insert " ")
-	  (delete-region (point) (1+ (match-end 0)))
-	  (backward-char 1)
-	  (org-move-to-column
-	   (max (1+ (current-column))
-		(1+ col)
-		(if (> to-col 0)
-		    to-col
-		  (- (abs to-col) (length tags))))
-	   t)
-	  (insert tags)
-	  (org-move-to-column (min (current-column) col) t))
+	  (delete-region (point) (1+ (match-beginning 2)))
+	  (setq ncol (max (1+ (current-column))
+			  (1+ col)
+			  (if (> to-col 0)
+			      to-col
+			    (- (abs to-col) tags-l))))
+	  (setq p (point))
+	  (insert (make-string (- ncol (current-column)) ?\ ))
+	  (setq ncol (current-column))
+	  (tabify p (point-at-eol))
+	  (org-move-to-column (min ncol col) t))
       (goto-char pos))))
 
 (defun org-set-tags (&optional arg just-align)
