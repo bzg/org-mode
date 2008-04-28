@@ -3584,11 +3584,19 @@ between words."
 (defconst org-property-re (org-re "^[ \t]*\\(:\\([[:alnum:]_]+\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
   "Regular expression matching a property line.")
 
+(defvar org-font-lock-hook nil
+  "Functions to be called for special font loch stuff.")
+
+(defun org-font-lock-hook (limit)
+  (run-hook-with-args 'org-font-lock-hook limit))
+
 (defun org-set-font-lock-defaults ()
   (let* ((em org-fontify-emphasized-text)
 	 (lk org-activate-links)
 	 (org-font-lock-extra-keywords
 	  (list
+	   ;; Call the hook
+	   '(org-font-lock-hook)
 	   ;; Headlines
 	   '("^\\(\\**\\)\\(\\* \\)\\(.*\\)" (1 (org-get-level-face 1))
 	     (2 (org-get-level-face 2)) (3 (org-get-level-face 3)))

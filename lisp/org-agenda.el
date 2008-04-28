@@ -677,7 +677,7 @@ symbols specifying conditions when the grid should be displayed:
  today         show grid on current date, independent of daily/weekly display
  require-timed show grid only if at least one item has a time specification
 
-The second item is a string which will be places behing the grid time.
+The second item is a string which will be placed behind the grid time.
 
 The third item is a list of integers, indicating the times that should have
 a grid line."

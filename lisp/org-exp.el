@@ -229,6 +229,10 @@ drawer names to export."
 	  (repeat :tag "Selected drawers"
 		  (string :tag "Drawer name"))))
 
+(defvar org-export-preprocess-hook nil
+  "Hook for preprocessing an export buffer.
+Pretty much the first thing when exporting is running this hook.")
+
 (defgroup org-export-translation nil
   "Options for translating special ascii sequences for the export backends."
   :tag "Org Export Translation"
@@ -1175,6 +1179,9 @@ on this string to produce the exported version."
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
       (insert string)
+      ;; Call the hook
+      (run-hooks 'org-export-preprocess-hook)
+
       ;; Remove license-to-kill stuff
       ;; The caller markes some stuff fo killing, stuff that has been
       ;; used to create the page title, for example.

@@ -1,3 +1,19 @@
+2008-04-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-exp.el (org-export-preprocess-hook): New hook.
+	(org-export-preprocess-string): Call
+	`org-export-preprocess-hook'.
+
+	* lisp/org.el (org-font-lock-hook): New variable.
+	(org-font-lock-hook): New function.
+	(org-set-font-lock-defaults): Call `org-font-lock-hook'.
+
+
+
+
+----------------------------------------------------------------------
+Installed in Emacs 23 as 6.02b
+
 2008-04-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-archive.el (org-extract-archive-file): Handle the
