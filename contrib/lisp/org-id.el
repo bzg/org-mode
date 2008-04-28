@@ -35,7 +35,7 @@
 ;; of the creation time of the ID, with microsecond accuracy.  This virtually
 ;; guarantees globally unique identifiers, even if several people are
 ;; creating ID's at the same time in files that will eventually be used
-;; together.  Even higher security can be acieved by using different
+;; together.  Even higher security can be achieved by using different
 ;; values for each collaborator or file.
 ;;
 ;; This file defines the following API:
@@ -140,9 +140,9 @@ In any case, the ID of the entry is returned."
 
 (defun org-id-get-with-outline-path-completion (&optional targets)
   "Use outline-path-completion to retrieve the ID of an entry.
-TARGETS may be a setting for `org-refile-targets' to define the elegible
+TARGETS may be a setting for `org-refile-targets' to define the eligible
 headlines.  When omitted, all headlines in all agenda files are
-elegible.
+eligible.
 It returns the ID of the entry.  If necessary, the ID is created."
   (let* ((org-refile-targets (or targets '((nil . (:maxlevel . 10)))))
 	 (org-refile-use-outline-path 
@@ -223,7 +223,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
    (t (error "Larger that 61"))))
 
 (defun org-id-b62-to-int-one-digit (i)
-  "Turn acharacter 0..9, A..Z, a..z into a number 0..61.
+  "Turn a character 0..9, A..Z, a..z into a number 0..61.
 The input I may be a character, or a single-letter string."
   (and (stringp i) (setq i (string-to-char i)))
   (cond
@@ -252,18 +252,18 @@ The input I may be a character, or a single-letter string."
     r))
 
 (defun org-id-time-to-b62 (&optional time)
-  "Envode TIME as a 10-digit string.
+  "Encode TIME as a 10-digit string.
 This string holds the time to micro-second accuracy, and can be decoded
 using `org-id-decode'."
   (setq time (or time (current-time)))
   (concat (org-id-int-to-b62 (nth 0 time) 3)
 	  (org-id-int-to-b62 (nth 1 time) 3)
-	  (org-id-int-to-b62 (nth 2 time) 4)))
+	  (org-id-int-to-b62 (or (nth 2 time) 0) 4)))
 
 (defun org-id-decode (id)
   "Split ID into the prefix and the time value that was used to create it.
 The return value is (prefix . time) where PREFIX is nil or a string,
-and time is the usual three-integer represenation of time."
+and time is the usual three-integer representation of time."
   (let (prefix time parts)
     (setq parts (org-split-string id ":"))
     (if (= 2 (length parts))
@@ -326,7 +326,6 @@ Store the relation between files and corresponding ID's."
 
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID loations."
-  (debug)
   (unless org-id-locations (org-id-locations-load))
   (catch 'exit
     (let ((locs org-id-locations) list)
