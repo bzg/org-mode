@@ -4,7 +4,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 0.02
 ;;
 ;; This file is not yet part of GNU Emacs.
 ;;
@@ -27,13 +27,18 @@
 ;;; Commentary:
 
 ;; This file implements globally unique identifiers for Org-mode entries.
-;; Identifiers are stored in the entry as an :ID: property.  This file
-;; provides functions to create and retrieve such identifiers.
+;; Identifiers are stored in the entry as an :ID: property.  Functions
+;; are provided that create and retrieve such identifiers, and that find
+;; entries based on the identifier.
 
-;; It provides the following API:
+;; Identifiers consist of a prefix (default "Org") and a compact encoding
+;; of the creation time of the ID, with microsecond accuracy.  This virtually
+;; guarantees globally unique identifiers, even if several people are
+;; creating ID's at the same time in files that will eventually be used
+;; together.  Even higher security can be acieved by using different
+;; values for each collaborator or file.
 ;;
-;;
-;; Higer-level-functions
+;; This file defines the following API:
 ;;
 ;; org-id-create
 ;;        Create an ID for the entry at point if it does not yet have one.
@@ -60,11 +65,8 @@
 ;; org-id-find
 ;;        Find the location of an entry with specific id.
 ;;
-;; TODO:
-;; - get/create id at current entry, safe in kill or so.
 
 (require 'org)
-
 
 ;;; Customization
 
@@ -73,34 +75,16 @@
   :tag "Org ID"
   :group 'org)
 
-(defcustom org-id-structure (list "Org" (user-login-name) t 4)
-  "Components of globaly unique id's created by Org-mode.
-An Org-mode ID has 4 components:
+(defcustom org-id-prefix "Org"
+  "The prefix for IDs.
 
-prefix       A prefix to identify the ID type (default \"Org\".
-creator      The creator of the ID, defaults to the users login name.
-incremental  An incremental number, specific for the creator.
-random       A random sequence of characters, to make sure ID created
-             in distributed development will still be unique.
-             This may be a short random sequence, or an md5 sum created
-             based on the current time, the current computer, and the user."
+This may be a string, or it can be nil to indicate that no prefix is required.
+When a string, the string should have no space characters as IDs are expected
+to have no space characters in them."
   :group 'org-id
-  :type '(list
-	  (string :tag "Prefix")
-	  (string :tag "Creator")
-	  (boolean :tag "Incremental")
-	  (choice :tag "Random part"
-		  (const :tag "No random part" nil)
-		  (integer :tag "N characters")
-		  (const :tag "MD5 digest" md5))))
-
-(defcustom org-id-tracking-file "~/.org-id"
-  "The file for remembering the last ID number generated, for each type."
-  :group 'org-id
-  :type 'file)
-
-(defvar org-id-values nil
-  "Association list of ID types+creator with largest index used so far.")
+  :type '(choice
+	  (const :tag "No prefix")
+	  (string :tag "Prefix")))
 
 (defcustom org-id-locations-file "~/.org-id-locations"
   "The file for remembering the last ID number generated."
@@ -110,7 +94,7 @@ random       A random sequence of characters, to make sure ID created
 (defvar org-id-locations nil
   "List of files with ID's in those files.")
 
-(defcustom org-id-extra-files 'org-agenda-multi-occur-extra-files
+(defcustom org-id-extra-files 'org-agenda-text-search-extra-files
   "Files to be searched for ID's, besides the agenda files."
   :group 'org-id
   :type
@@ -118,7 +102,6 @@ random       A random sequence of characters, to make sure ID created
     (symbol :tag "Variable")
     (repeat :tag "List of files"
 	    (file))))
-
 
 ;;; The API functions
 
@@ -137,19 +120,19 @@ Create an ID if necessary."
   (interactive)
   (kill-new (org-id-get nil 'create)))  
 
-(defun org-id-get (&optional pom create type nrandom)
+(defun org-id-get (&optional pom create prefix)
   "Get the ID property of the entry at point-or-marker POM.
 If POM is nil, refer to the entry at point.
 If the entry does not have an ID, the function returns nil.
 However, when CREATE is non nil, create an ID if none is present already.
-TYPE and NRANDOM will be passed through to `org-id-new'.
+PREFIX will be passed through to `org-id-new'.
 In any case, the ID of the entry is returned."
   (let ((id (org-entry-get pom "ID")))
     (cond
      ((and id (stringp id) (string-match "\\S-" id))
       id)
      (create
-      (setq id (org-id-new type nrandom))
+      (setq id (org-id-new prefix))
       (org-entry-put pom "ID" id)
       (org-id-add-location id (buffer-file-name (buffer-base-buffer)))
       id)
@@ -167,8 +150,8 @@ It returns the ID of the entry.  If necessary, the ID is created."
 	 (spos (org-refile-get-location "Entry: "))
 	 (pom (and spos (move-marker (make-marker) (nth 3 spos) 
 				     (get-file-buffer (nth 1 spos))))))
-    (org-id-get pom 'create)
-    (move-marker pom nil)))
+    (prog1 (org-id-get pom 'create)
+      (move-marker pom nil))))
 
 (defun org-id-get-with-outline-drilling (&optional targets)
   "Use an outline-cycling interface to retrieve the ID of an entry.
@@ -176,8 +159,8 @@ This only finds entries in the current buffer, using `org-get-location'.
 It returns the ID of the entry.  If necessary, the ID is created."
   (let* ((spos (org-get-location (current-buffer) org-goto-help))
 	 (pom (and spos (move-marker (make-marker) (car spos)))))
-    (org-id-get pom 'create)
-    (move-marker pom nil)))
+    (prog1 (org-id-get pom 'create)
+      (move-marker pom nil))))
 
 (defun org-id-goto (id)
   "Switch to the buffer containing the entry with id ID.
@@ -188,13 +171,14 @@ Move the cursor to that entry in that buffer."
       (error "Cannot find entry with ID \"%s\"" id))
     (switch-to-buffer (marker-buffer m))
     (goto-char m)
+    (move-marker m nil)
     (org-show-context)))    
 
 (defun org-id-find (id &optional markerp)
   "Return the location of the entry with the id ID.
 The return value is a cons cell (file-name . position), or nil
 if there is no entry with that ID.
-With optional argument MARKERP, return the position as a markerp."
+With optional argument MARKERP, return the position as a new marker."
   (let ((file (org-id-find-id-file id))
 	org-agenda-new-buffers where)
     (when file
@@ -208,96 +192,87 @@ With optional argument MARKERP, return the position as a markerp."
 
 ;;; Internal functions
 
-;; Creating new ids
+;; Creating new IDs
 
-(defun org-id-new (&optional type creator n xrandom)
+(defun org-id-new (&optional prefix)
   "Create a new globally unique ID.
-The ID is a string with four colon-separated parts:
 
-1. The type or prefix, given by the argument TYPE, or by the first element
+An ID consists of two parts separated by a colon:
+- a prefix
+- an encoding of the current time to micro-second accuracy
 
-2. The creator, given by the argument CREATOR, or by the second element
-   of `org-id-structure' (default is the user's login name).
-3. An incremental number linked to the ID type.  This is a number that
-   runs for each ID type from 1 up, each time a new ID is created.
-   Org-mode keeps track of these numbers in the file `org-id-tracking-file',
-   so if you only work on a single computer or synchronize this file,
-   this is enough as a unique identifier.  If you work with other people,
-   or on different computers, the uniqueness of this number is not certain.
-   A specific value for N can be forces by passing it into the function.
-4. An extra string guaranteeing the uniqueness of the ID.
-   This is either a random string of XRANDOM characters if XRANDOM is an
-   integer.  If XRANDOM is the symbol `md5', the extra string is a MD5 digest
-   of a string consisting of ID info, the current time, and a random number.
-   If you are sure the sequence number (component 3) is unique in your
-   setting, the random part can be omitted from the ID.
+PREFIX can specify the prefix, the default is given by the variable
+`org-id-prefix'.  However, if PREFIX is the symbol `none', don't use any
+prefix even if `org-id-prefix' specifies one.
 
-So a typical ID could look like \"Org:dominik:105:2HtZ\"."
-  (unless n (org-id-load))
-  (let* ((type (or type (car org-id-structure)))
-	 (creator (or creator (nth 1 org-id-structure)))
-	 (n-p n)
-	 (key (concat type ":" creator))
-	 (ass (and (not n-p) (assoc key org-id-values)))
-	 (n (or n (1+ (or (cdr ass) 0))))
-	 (xrandom (or xrandom (nth 3 org-id-structure)))
-	 (random
-	  (cond
-	   ((not xrandom) nil)
-	   ((eq xrandom 'none) nil)
-	   ((integerp xrandom) (org-id-random-string xrandom))
-	   ((eq xrandom 'md5) (org-id-md5 type creator n))
-	   (t nil))))
-    (unless n-p
-      (if ass
-	  (setcdr ass n)
-	(push (cons key n) org-id-values))
-      (org-id-save))
-    (concat type
-	    ":" creator
-	    ":" (number-to-string n)
-	    (if random (concat ":" random)))))
+So a typical ID could look like \"Org:4nd91V40HI\"."
+  (let* ((prefix (if (eq prefix 'none)
+		     nil
+		   (or prefix org-id-prefix)))
+	 (etime (org-id-time-to-b62)))
+    (if prefix
+	(concat prefix ":" etime)
+      etime)))
 
-(defun org-id-random-string (n)
-  "Return a string of N random characters."
-  (let ((rtn "") x)
-    (while (>= (setq n (1- n)) 0)
-      (setq x (random 62))
-      (setq rtn (concat rtn (cond
-			     ((< x 10) (char-to-string (+ ?0 x)))
-			     ((< x 36) (char-to-string (+ ?A x -10)))
-			     ((< x 62) (char-to-string (+ ?a x -36)))
-			     (t (error "xxx"))))))
-    rtn))
+(defun org-id-int-to-b62-one-digit (i)
+  "Turn an integer between 0 and 61 into a single character 0..9, A..Z, a..z."
+  (cond
+   ((< i 10) (+ ?0 i))
+   ((< i 36) (+ ?A i -10))
+   ((< i 62) (+ ?a i -36))
+   (t (error "Larger that 61"))))
 
-(defun org-id-md5 (type creator n)
-  "Return the md5 digest of a string.
-This function concatenates ID info with random stuff like the time
-and then computes the md5 digest.  The result should be unique."
-  (md5 (concat type ":" creator ":" (number-to-string (or n 0)) ":"
-	       (system-name) ":"
-	       (prin1-to-string (current-time)) ":"
-	       (number-to-string (random)))))
+(defun org-id-b62-to-int-one-digit (i)
+  "Turn acharacter 0..9, A..Z, a..z into a number 0..61.
+The input I may be a character, or a single-letter string."
+  (and (stringp i) (setq i (string-to-char i)))
+  (cond
+   ((and (>= i ?0) (<= i ?9)) (- i ?0))
+   ((and (>= i ?A) (<= i ?Z)) (+ (- i ?A) 10))
+   ((and (>= i ?a) (<= i ?z)) (+ (- i ?a) 36))
+   (t (error "Invalid b62 letter"))))
 
-;; Storing id indices
+(defun org-id-int-to-b62 (i &optional length)
+  "Convert an integer to a base-62 number represented as a string."
+  (let ((s ""))
+    (while (> i 0)
+      (setq s (concat (char-to-string
+		       (org-id-int-to-b62-one-digit (mod i 62))) s)
+	    i (/ i 62)))
+    (setq length (max 1 (or length 1)))
+    (if (< (length s) length)
+	(setq s (concat (make-string (- length (length s)) ?0) s)))
+    s))
 
-(defun org-id-save ()
-  "Save `org-id-values' in `org-id-tracking-file'."
-  (with-temp-file org-id-tracking-file
-    (print org-id-values (current-buffer))))
+(defun org-id-b62-to-int (s)
+  "Convert a base-62 string into the corresponding integer."
+  (let ((r 0))
+    (mapc (lambda (i) (setq r (+ (* r 62) (org-id-b62-to-int-one-digit i))))
+	  s)
+    r))
 
-(defun org-id-load ()
-  "Read the data from `org-id-tracking-file'."
-  (setq org-id-values nil)
-  (with-temp-buffer
-    (condition-case nil
-        (progn
-          (insert-file-contents-literally org-id-tracking-file)
-          (goto-char (point-min))
-          (setq org-id-values (read (current-buffer))))
-      (error
-       (message "Could not read org-id-values from %s. Setting it to nil."
-                org-id-tracking-file)))))
+(defun org-id-time-to-b62 (&optional time)
+  "Envode TIME as a 10-digit string.
+This string holds the time to micro-second accuracy, and can be decoded
+using `org-id-decode'."
+  (setq time (or time (current-time)))
+  (concat (org-id-int-to-b62 (nth 0 time) 3)
+	  (org-id-int-to-b62 (nth 1 time) 3)
+	  (org-id-int-to-b62 (nth 2 time) 4)))
+
+(defun org-id-decode (id)
+  "Split ID into the prefix and the time value that was used to create it.
+The return value is (prefix . time) where PREFIX is nil or a string,
+and time is the usual three-integer represenation of time."
+  (let (prefix time parts)
+    (setq parts (org-split-string id ":"))
+    (if (= 2 (length parts))
+	(setq prefix (car parts) time (nth 1 parts))
+      (setq prefix nil time (nth 0 parts)))
+    (setq time (list (org-id-b62-to-int (substring time 0 3))
+		     (org-id-b62-to-int (substring time 3 6))
+		     (org-id-b62-to-int (substring time 6 10))))
+    (cons prefix time)))
 
 ;; Storing ID locations (files)
 
@@ -351,15 +326,16 @@ Store the relation between files and corresponding ID's."
 
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID loations."
+  (debug)
   (unless org-id-locations (org-id-locations-load))
   (catch 'exit
     (let ((locs org-id-locations) list)
       (while (setq list (pop locs))
 	(when (equal (file-truename file) (file-truename (car list)))
 	  (setcdr list (cons id (cdr list)))
-	  (throw 'exit t)))
-      (push (list file id) org-id-locations))
-    (org-id-locations-save)))
+	  (throw 'exit t))))
+    (push (list file id) org-id-locations))
+  (org-id-locations-save))
 
 ;; Finding entries with specified id
 
@@ -377,7 +353,7 @@ Store the relation between files and corresponding ID's."
 If that files does not exist, or if it does not contain this ID,
 return nil.
 The position is returned as a cons cell (file-name . position).  With
-optional argument MARKERP, return the position as a marker."
+optional argument MARKERP, return the position as a new marker."
   (let (org-agenda-new-buffers m buf pos)
     (cond
      ((not file) nil)
@@ -388,7 +364,6 @@ optional argument MARKERP, return the position as a marker."
 	    (if markerp
 		(move-marker (make-marker) pos buf)
 	      (cons file pos))))))))
-
 
 (provide 'org-id)
 
