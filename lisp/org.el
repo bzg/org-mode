@@ -12712,6 +12712,12 @@ upon the next fontification round."
       (setq l (- l (get-text-property b 'org-dwidth-n s))))
     l))
 
+(defun org-base-buffer (buffer)
+  "Return the base buffer of BUFFER, if it has one.  Else return the buffer."
+  (if (not buffer)
+      buffer
+    (or (buffer-base-buffer buffer)
+	buffer)))
 
 (defun org-trim (s)
   "Remove whitespace at beginning and end of string."

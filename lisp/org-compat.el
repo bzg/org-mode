@@ -248,7 +248,6 @@ that can be added."
 			      (cadr ext-inv-spec))))
    (move-to-column column force)))
  
-
 (provide 'org-compat)
 
 ;; arch-tag: a0a0579f-e68c-4bdf-9e55-93768b846bbe

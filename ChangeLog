@@ -1,5 +1,13 @@
 2008-04-29  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-clock.el (org-clock-goto): Widen buffer if necessary.
+	(org-clock-in): Make sure that also tasks outside the narrowed
+	region will be clocked in correctly.
+	(org-clock-insert-selection-line): Widen the buffer so that we can
+	find the correct task heading.
+
+	* lisp/org.el (org-base-buffer): New function.
+
 	* lisp/org-exp.el (org-icalendar-cleanup-string): Make sure ',"
 	and ";" are escaped.
 	(org-print-icalendar-entries): Also apply
