@@ -3471,7 +3471,9 @@ When COMBINE is non nil, add the category to each line."
 	  (setq pos (match-beginning 0)
 		ts (match-string 0)
 		inc t
-		hd (condition-case nil (org-get-heading)
+		hd (condition-case nil
+		       (org-icalendar-cleanup-string
+			(org-get-heading))
 		     (error (throw :skip nil)))
 		summary (org-icalendar-cleanup-string
 			 (org-entry-get nil "SUMMARY"))
@@ -3622,7 +3624,7 @@ characters."
 	(while (string-match re s) (setq s (replace-match "" t t s)))
 	(while (string-match re2 s) (setq s (replace-match "" t t s)))))
     (let ((start 0))
-      (while (string-match "\\([,;\\]\\)" s start)
+      (while (string-match "\\([,;]\\)" s start)
 	(setq start (+ (match-beginning 0) 2)
 	      s (replace-match "\\\\\\1" nil nil s))))
     (when is-body
