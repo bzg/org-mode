@@ -1540,4 +1540,5 @@ Valid parameters are
 (provide 'org-export-latex)
 
 ;; arch-tag: 23c2b87d-da04-4c2d-ad2d-1eb6487bc3ad
+
 ;;; org-export-latex.el ends here

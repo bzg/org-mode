@@ -1441,5 +1441,5 @@ This will add overlays to the date lines, to show the summary for each day."
 (provide 'org-colview)
 (provide 'org-colview-xemacs)
 
-;;; org-colview.el ends here
+;;; org-colview-xemacs.el ends here
 

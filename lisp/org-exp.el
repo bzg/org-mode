@@ -764,6 +764,12 @@ modified) list.")
 		val)))
     dir))
 
+(defun org-export-process-option-filters (plist)
+  (let ((functions org-export-options-filters) f)
+    (while (setq f (pop functions))
+      (setq plist (funcall f plist))))
+  plist)
+
 ;;;###autoload
 (defun org-export (&optional arg)
   "Export dispatcher for Org-mode.
@@ -3765,11 +3771,6 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 
 (provide 'org-exp)
 
+;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
+
 ;;; org-exp.el ends here
-
-
-(defun org-export-process-option-filters (plist)
-  (let ((functions org-export-options-filters) f)
-    (while (setq f (pop functions))
-      (setq plist (funcall f plist))))
-  plist)

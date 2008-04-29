@@ -49,7 +49,7 @@
 (declare-function calendar-hebrew-date-string   "cal-hebrew" (&optional date))
 (declare-function calendar-islamic-date-string  "cal-islam"  (&optional date))
 (declare-function calendar-iso-date-string      "cal-iso"    (&optional date))
-(declare-function calendar-iso-from-absolute    "cal-iso"    (&optional date))
+(declare-function calendar-iso-from-absolute    "cal-iso"    (date))
 (declare-function calendar-julian-date-string   "cal-julian" (&optional date))
 (declare-function calendar-mayan-date-string    "cal-mayan"  (&optional date))
 (declare-function calendar-persian-date-string  "cal-persia" (&optional date))
@@ -5141,5 +5141,6 @@ belonging to the \"Work\" category."
 
 (provide 'org-agenda)
 
-;;; org-agenda.el ends here
+;; arch-tag: 77f7565d-7c4b-44af-a2df-9f6f7070cff1
 
+;;; org-agenda.el ends here
