@@ -295,7 +295,6 @@ the clocking selection, associated with the letter `d'."
 	;; Wrap current entries into a new drawer
 	(goto-char last)
 	(beginning-of-line 2)
-	(if (org-at-item-p) (org-end-of-item))
 	(insert ":END:\n")
 	(beginning-of-line 0)
 	(org-indent-line-function)

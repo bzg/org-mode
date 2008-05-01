@@ -1,5 +1,8 @@
 2008-05-01  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-clock.el (org-clock-find-position): Don't include notes
+	into clock drawer.
+
 	* lisp/org-archive.el (org-archive-subtree): No longer remove an
 	extra line after cutting the subtree.  `org-cut-subtree' already
 	takes care of this.
