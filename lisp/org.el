@@ -174,6 +174,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
+	(const :tag "C  eval:              Include command output as text" org-eval)
 	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
 	(const :tag "C  id:                Global id's for identifying entries" org-id)
 	(const :tag "C  interactive-query: Interactive modification of tags query" org-interactive-query)
