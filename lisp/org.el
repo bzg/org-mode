@@ -4671,10 +4671,14 @@ is signaled in this case."
     (setq ne-ins (org-back-over-empty-lines))
     (move-marker ins-point (point))
     (setq txt (buffer-substring beg end))
+    (org-save-markers-in-region beg end)
     (delete-region beg end)
     (outline-flag-region (1- beg) beg nil)
     (outline-flag-region (1- (point)) (point) nil)
-    (insert txt)
+    (let ((bbb (point)))
+      (insert-before-markers txt)
+      (org-reinstall-markers-in-region bbb)
+      (move-marker ins-point bbb))
     (or (bolp) (insert "\n"))
     (setq ins-end (point))
     (goto-char ins-point)
@@ -4736,6 +4740,8 @@ If CUT is non-nil, actually cut the subtree."
     (goto-char beg0)
     (when (> end beg)
       (setq org-subtree-clip-folded folded)
+      (when (or cut (eq org-markers-to-move 'force))
+	(org-save-markers-in-region beg end))
       (if cut (kill-region beg end) (copy-region-as-kill beg end))
       (setq org-subtree-clip (current-kill 0))
       (message "%s: Subtree(s) with %d characters"
@@ -4812,6 +4818,7 @@ If optional TREE is given, use this text instead of the kill ring."
     (org-back-over-empty-lines)
     (setq beg (point))
     (insert-before-markers txt)
+    (org-reinstall-markers-in-region beg)
     (unless (string-match "\n\\'" txt) (insert "\n"))
     (setq end (point))
     (goto-char beg)
@@ -4856,6 +4863,41 @@ If optional TXT is given, check this string instead of the current kill."
 	  (when (< (- (match-end 0) (match-beginning 0) 1) start-level)
 	    (throw 'exit nil)))
 	t))))
+
+(defvar org-markers-to-move nil)
+
+(defun org-save-markers-in-region (beg end)
+  "Check markers in region.
+If these markers are between BEG and END, record their position relative
+to BEG, so that after moving the block of text, we can put the markers back
+into place.
+This function gets called just before an entry or tree gets cut from the
+buffer.  After re-insertion, `org-reinstall-markers-in-region' must be
+called immediately, to move the markers with the entries."
+  (setq org-markers-to-move nil)
+  (when (featurep 'org-clock)
+    (org-check-and-save-marker org-clock-marker beg end)
+    (org-check-and-save-marker org-clock-default-task beg end)
+    (org-check-and-save-marker org-clock-interrupted-task beg end)
+    (mapc (lambda (m) (org-check-and-save-marker m beg end))
+	  org-clock-history))
+  (when (featurep 'org-agenda)
+    (mapc (lambda (m) (org-check-and-save-marker m beg end))
+	  org-agenda-markers)))
+
+(defun org-check-and-save-marker (marker bed end)
+  "Check if MARKER is between BEG and END.
+If yes, remember the marker and the distance to BEG."
+  (when (and (marker-buffer marker)
+	     (equal (marker-buffer marker) (current-buffer)))
+    (if (and (>= marker beg) (< marker end))
+      (push (cons marker (- marker beg)) org-markers-to-move))))
+
+(defun org-reinstall-markers-in-region (beg)
+  "Move all remembered markers to their position relative to BEG."
+  (mapc (lambda (x) (move-marker (car x) (+ beg (cdr x))))
+	org-markers-to-move)
+  (setq org-markers-to-move nil))
 
 (defun org-narrow-to-subtree ()
   "Narrow buffer to the current subtree."
@@ -7352,7 +7394,8 @@ operation has put the subtree."
 	      (switch-to-buffer nbuf)
 	      (goto-char pos)
 	      (org-show-context 'org-goto))
-	  (org-copy-special)
+	  (let ((org-markers-to-move 'force))
+	    (org-copy-special))
 	  (save-excursion
 	    (set-buffer (setq nbuf (or (find-buffer-visiting file)
 				       (find-file-noselect file))))
@@ -13700,5 +13743,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
-
-

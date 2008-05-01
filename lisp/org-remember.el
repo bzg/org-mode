@@ -179,6 +179,19 @@ calendar           |  %:type %:date"
 			 (symbol :tag "Major mode"))
 		 (function :tag "Perform a check against function")))))
 
+(defcustom org-remember-clock-out-on-exit 'query
+  "Non-nil means, stop the clock when exiting a clocking remember buffer.
+This only applies of the clock is running in the remember buffer.  If the
+clock is not stopped, it continues to run in the storage location.
+Instead of nil or t, this may also be the symbol `query' to prompt the
+user each time a remember buffer with a running clock is filed away.  "
+  :group 'org-remember
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)
+	  (const :tag "Query user" query)))
+
+
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
 
@@ -478,15 +491,19 @@ from that hook."
   (when org-finish-function
     (funcall org-finish-function)))
 
-(defvar org-clock-marker) ; Defined below
+(defvar org-clock-marker) ; Defined in org.el
 (defun org-remember-finalize ()
   "Finalize the remember process."
   (unless (fboundp 'remember-finalize)
     (defalias 'remember-finalize 'remember-buffer))
   (when (and org-clock-marker
 	     (equal (marker-buffer org-clock-marker) (current-buffer)))
-    ;; FIXME: test this, this is w/o notetaking!
-    (let (org-log-note-clock-out) (org-clock-out)))
+    ;; the clock is running in this buffer.
+    (when (and (equal (marker-buffer org-clock-marker) (current-buffer))
+	       (or (eq org-remember-clock-out-on-exit t)
+		   (and org-remember-clock-out-on-exit
+			(y-or-n-p "The clock is running in this buffer.  Clock out now? "))))
+      (let (org-log-note-clock-out) (org-clock-out))))
   (when buffer-file-name
     (save-buffer)
     (setq buffer-file-name nil))
@@ -606,8 +623,7 @@ See also the variable `org-reverse-note-order'."
     (beginning-of-line 1))
   (catch 'quit
     (if org-note-abort (throw 'quit nil))
-    (let* ((txt (buffer-substring (point-min) (point-max)))
-	   (fastp (org-xor (equal current-prefix-arg '(4))
+    (let* ((fastp (org-xor (equal current-prefix-arg '(4))
 			   org-remember-store-without-prompt))
 	   (file (cond
 		  (fastp org-default-notes-file)
@@ -622,43 +638,35 @@ See also the variable `org-reverse-note-order'."
 	   (org-startup-folded nil)
 	   (org-startup-align-all-tables nil)
 	   (org-goto-start-pos 1)
-	   spos exitcmd level indent reversed)
+	   spos exitcmd level reversed txt)
       (if (and (equal current-prefix-arg '(16)) org-remember-previous-location)
 	  (setq file (car org-remember-previous-location)
 		heading (cdr org-remember-previous-location)
 		fastp t))
       (setq current-prefix-arg nil)
-      (if (string-match "[ \t\n]+\\'" txt)
-	  (setq txt (replace-match "" t t txt)))
       ;; Modify text so that it becomes a nice subtree which can be inserted
       ;; into an org tree.
-      (let* ((lines (split-string txt "\n"))
-	     first)
-	(setq first (car lines) lines (cdr lines))
-	(if (string-match "^\\*+ " first)
-	    ;; Is already a headline
-	    (setq indent nil)
-	  ;; We need to add a headline:  Use time and first buffer line
-	  (setq lines (cons first lines)
-		first (concat "* " (current-time-string)
-			      " (" (remember-buffer-desc) ")")
-		indent "  "))
-	(if (and org-adapt-indentation indent)
-	    (setq lines (mapcar
-			 (lambda (x)
-			   (if (string-match "\\S-" x)
-			       (concat indent x) x))
-			 lines)))
-	(setq txt (concat first "\n"
-			  (mapconcat 'identity lines "\n"))))
-      (if (string-match "\n[ \t]*\n[ \t\n]*\\'" txt)
-	  (setq txt (replace-match "\n\n" t t txt))
-	(if (string-match "[ \t\n]*\\'" txt)
-	    (setq txt (replace-match "\n" t t txt))))
-      ;; Put the modified text back into the remember buffer, for refile.
-      (erase-buffer)
-      (insert txt)
       (goto-char (point-min))
+      (if (re-search-forward "[ \t\n]+\\'" nil t)
+	  ;; remove empty lines at end
+	  (replace-match ""))
+      (goto-char (point-min))
+      (unless (looking-at org-outline-regexp)
+	;; add a headline
+	(insert (concat "* " (current-time-string)
+			" (" (remember-buffer-desc) ")\n"))
+	(backward-char 1)
+	(when org-adapt-indentation
+	  (while (re-search-forward "^" nil t)
+	    (insert "  "))))
+      (goto-char (point-min))
+      (if (re-search-forward "\n[ \t]*\n[ \t\n]*\\'" nil t)
+	  (replace-match "\n\n")
+	(if (re-search-forward "[ \t\n]*\\'")
+	    (replace-match "\n")))
+      (goto-char (point-min))
+      (setq txt (buffer-string))
+      (org-save-markers-in-region (point-min) (point-max))
       (when (and (eq org-remember-interactive-interface 'refile)
 		 (not fastp))
 	(org-refile nil (or visiting (find-file-noselect file)))
@@ -766,7 +774,10 @@ See also the variable `org-reverse-note-order'."
 		    txt)))
 	    (when remember-save-after-remembering
 	      (save-buffer)
-	      (if (not visiting) (kill-buffer (current-buffer)))))))))
+	      (if (and (not visiting)
+		       (not (equal (marker-buffer org-clock-marker)
+				   (current-buffer))))
+		  (kill-buffer (current-buffer)))))))))
 
   t)    ;; return t to indicate that we took care of this note.
 

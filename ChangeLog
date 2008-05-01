@@ -1,3 +1,26 @@
+2008-05-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-archive.el (org-archive-subtree): No longer remove an
+	extra line after cutting the subtree.  `org-cut-subtree' already
+	takes care of this.
+
+	* lisp/org-remember.el (org-remember-handler): Only kill the target
+	buffer if it does not contain the running clock.
+
+	* lisp/org.el (org-markers-to-move): New variable.
+	(org-save-markers-in-region, org-check-and-save-marker)
+	(org-reinstall-markers-in-region): New function.
+	(org-move-subtree-down, org-copy-subtree): Remember relative
+	marker positions before cutting.
+	(org-move-subtree-down, org-paste-subtree): Restore relative
+	marker positions after pasting.
+
+	* lisp/org-remember.el (org-remember-clock-out-on-exit): New option.
+	(org-remember-finalize): Clock out only if the setting in
+	`org-remember-clock-out-on-exit' requires it.
+	(org-remember-handler): Do the cleanup in the buffer, to make sure
+	that the clock marker remains in tact.
+
 2008-04-29  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-clock.el (org-clock-goto): Widen buffer if necessary.

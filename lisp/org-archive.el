@@ -182,7 +182,7 @@ this heading."
 		 (current-time)))
 	  category todo priority ltags itags
           ;; end of variables that will be used for saving context
-	  location afile heading buffer level newfile-p)
+	  location afile heading buffer level newfile-p visiting)
 
       ;; Find the local archive location
       (setq location (org-get-local-archive-location)
@@ -193,7 +193,8 @@ this heading."
 
       (if (> (length afile) 0)
 	  (setq newfile-p (not (file-exists-p afile))
-		buffer (find-file-noselect afile))
+		visiting (find-buffer-visiting afile)
+		buffer (or visiting (find-file-noselect afile)))
 	(setq buffer (current-buffer)))
       (unless buffer
 	(error "Cannot access file \"%s\"" afile))
@@ -215,9 +216,11 @@ this heading."
 	(setq ltags (mapconcat 'identity ltags " ")
 	      itags (mapconcat 'identity itags " "))
 	;; We first only copy, in case something goes wrong
-	;; we need to protect this-command, to avoid kill-region sets it,
+	;; we need to protect `this-command', to avoid kill-region sets it,
 	;; which would lead to duplication of subtrees
-	(let (this-command) (org-copy-subtree))
+	(let ((org-markers-to-move 'force)
+	      this-command)
+	  (org-copy-subtree))
 	(set-buffer buffer)
 	;; Enforce org-mode for the archive buffer
 	(if (not (org-mode-p))
@@ -285,12 +288,17 @@ this heading."
 		  (org-entry-put (point) n v)))))
 
 	  ;; Save and kill the buffer, if it is not the same buffer.
-	  (if (not (eq this-buffer buffer))
-	      (progn (save-buffer) (kill-buffer buffer)))))
+	  (when (not (eq this-buffer buffer))
+	    (save-buffer)
+	    ;; Check if it is OK to kill the buffer
+	    (unless
+		(or visiting
+		    (equal (marker-buffer org-clock-marker) (current-buffer)))
+	      (kill-buffer buffer)))
+	  ))
       ;; Here we are back in the original buffer.  Everything seems to have
       ;; worked.  So now cut the tree and finish up.
       (let (this-command) (org-cut-subtree))
-      (if (and (not (eobp)) (looking-at "[ \t]*$")) (kill-line))
       (message "Subtree archived %s"
 	       (if (eq this-buffer buffer)
 		   (concat "under heading: " heading)

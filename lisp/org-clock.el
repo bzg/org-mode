@@ -99,11 +99,7 @@ The function is called with point at the beginning of the headline."
 (defvar org-clock-start-time "")
 
 (defvar org-clock-history nil
-  "Marker pointing to the previous task teking clock time.
-This is used to find back to the previous task after interrupting work.
-When clocking into a task and the clock is currently running, this marker
-is moved to the position of the currently running task and continues
-to point there even after the task is clocked out.")
+  "List of marker pointing to recent clocked tasks.")
 
 (defvar org-clock-default-task (make-marker)
   "Marker pointing to the default task that should clock time.
@@ -111,9 +107,7 @@ The clock can be made to switch to this task after clocking out
 of a different task.")
 
 (defvar org-clock-interrupted-task (make-marker)
-  "Marker pointing to the default task that should clock time.
-The clock can be made to switch to this task after clocking out
-of a different task.")
+  "Marker pointing to the task that has been interrupted by the current clock.")
 
 (defun org-clock-history-push (&optional pos buffer)
   "Push a marker to the clock history."

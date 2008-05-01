@@ -5691,13 +5691,13 @@ Toggle the ARCHIVE tag for the current headline.
 @c
 @kindex A
 @item A
-Move the subtree correspoding to the current entry to its @emph{Archive
+Move the subtree corresponding to the current entry to its @emph{Archive
 Sibling}.
 @c
 @kindex $
 @item $
 Archive the subtree corresponding to the current headline.  This means the
-entry will be moved to the configured archive locatin, most likely a
+entry will be moved to the configured archive location, most likely a
 different file.
 @c
 @kindex T
