@@ -139,11 +139,8 @@ This is the compiled version of the format.")
 		       (and (eq major-mode 'org-agenda-mode)
 			    (get-text-property (point-at-bol) 'face))
 		       'default))
-	 (color (list :foreground
-		      (face-attribute ref-face :foreground)
-		      :weight 'normal :strike-through nil
-		      :underline nil))
-	 (face (list color 'org-column level-face))
+	 (color (list :foreground (face-attribute ref-face :foreground)))
+	 (face (list color 'org-column ref-face))
 	 pom property ass width f string ov column val modval)
     ;; Check if the entry is in another buffer.
     (unless props

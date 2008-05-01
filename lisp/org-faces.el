@@ -150,11 +150,12 @@ color of the frame."
 (defface org-column
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light))
-       (:background "grey90"))
+       (:background "grey90" :weight normal :strike-through nil :underline nil))
       (((class color) (min-colors 16) (background dark))
-       (:background "grey30"))
+       (:background "grey30" :weight normal :strike-through nil :underline nil))
       (((class color) (min-colors 8))
-       (:background "cyan" :foreground "black"))
+       (:background "cyan" :foreground "black"
+		    :weight normal :strike-through nil :underline nil))
       (t (:inverse-video t))))
   "Face for column display of entry properties."
   :group 'org-faces)
