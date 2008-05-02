@@ -1462,8 +1462,8 @@ When nil, the notes will be orderer according to time."
   "Non-nil means, record moving through the DONE state when triggering repeat.
 An auto-repeating tasks  is immediately switched back to TODO when marked
 done.  If you are not logging state changes (by adding \"@\" or \"!\" to
-the TODO keyword definition, or recording a cloing note by setting
-`org-log-done', there will be no record of the task moving trhough DONE.
+the TODO keyword definition, or recording a closing note by setting
+`org-log-done', there will be no record of the task moving through DONE.
 This variable forces taking a note anyway.  Possible values are:
 
 nil     Don't force a record
