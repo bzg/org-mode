@@ -125,6 +125,14 @@ of a different task.")
 		     (nreverse org-clock-history)))))
     (push m org-clock-history)))
 
+(defun org-clock-save-markers-for-cut-and-paste (beg end)
+  "Save relative positions of markers in region."
+  (org-check-and-save-marker org-clock-marker beg end)
+  (org-check-and-save-marker org-clock-default-task beg end)
+  (org-check-and-save-marker org-clock-interrupted-task beg end)
+  (mapc (lambda (m) (org-check-and-save-marker m beg end))
+	org-clock-history))
+
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)

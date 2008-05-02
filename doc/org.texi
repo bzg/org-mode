@@ -4747,8 +4747,8 @@ from an buffer in @code{emacs-lisp-mode}.  The second template will only be
 available when the function @code{my-check} returns @code{t}.  The third
 template will be proposed in any context.
 
-When you call @kbd{M-x remember} (or @kbd{M-x org-remember}) to remember
-something, org will prompt for a key to select the template (if you have
+When you call @kbd{M-x org-remember} (or @kbd{M-x remember}) to remember
+something, Org will prompt for a key to select the template (if you have
 more than one template) and then prepare the buffer like
 @example
 * TODO
@@ -4823,14 +4823,20 @@ template that will be filled with the previous context information.
 @node Storing notes, Refiling notes, Remember templates, Remember
 @section Storing notes
 
-When you are finished preparing a note with @i{remember}, you have to
-press @kbd{C-c C-c} to file the note away.  The handler will store the
-note in the file and under the headline specified in the template, or it
-will use the default file and headlines.  The window configuration will
-be restored, sending you back to the working context before the call to
-@code{remember}.  To re-use the location found during the last call to
-@code{remember}, exit the remember buffer with @kbd{C-u C-u C-c C-c},
-i.e. specify a double prefix argument to @kbd{C-c C-c}.
+When you are finished preparing a note with @i{remember}, you have to press
+@kbd{C-c C-c} to file the note away.  If you have started the clock in the
+remember buffer, you will first be asked if you want to clock out
+now@footnote{To avoid this query, configure the variable
+@code{org-remember-clock-out-on-exit}.}.  If you answer @kbd{n}, the clock
+will continue to run after the note is filed away.
+
+The handler will then store the note in the file and under the headline
+specified in the template, or it will use the default file and headlines.
+The window configuration will be restored, sending you back to the working
+context before the call to @code{remember}.  To re-use the location found
+during the last call to @code{remember}, exit the remember buffer with
+@kbd{C-u C-u C-c C-c}, i.e. specify a double prefix argument to @kbd{C-c
+C-c}.
 
 If you want to store the note directly to a different place, use
 @kbd{C-u C-c C-c} instead to exit remember@footnote{Configure the

@@ -2046,6 +2046,11 @@ no longer in use."
   (while org-agenda-markers
     (move-marker (pop org-agenda-markers) nil)))
 
+(defun org-agenda-save-markers-for-cut-and-paste (beg end)
+  "Save relative positions of markers in region."
+  (mapc (lambda (m) (org-check-and-save-marker m beg end))
+	org-agenda-markers))
+
 ;;; Agenda timeline
 
 (defvar org-agenda-only-exact-dates nil) ; dynamically scoped

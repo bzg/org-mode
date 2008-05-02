@@ -218,9 +218,7 @@ this heading."
 	;; We first only copy, in case something goes wrong
 	;; we need to protect `this-command', to avoid kill-region sets it,
 	;; which would lead to duplication of subtrees
-	(let ((org-markers-to-move 'force)
-	      this-command)
-	  (org-copy-subtree))
+	(let (this-command) (org-copy-subtree 1 nil t))
 	(set-buffer buffer)
 	;; Enforce org-mode for the archive buffer
 	(if (not (org-mode-p))
@@ -299,6 +297,7 @@ this heading."
       ;; Here we are back in the original buffer.  Everything seems to have
       ;; worked.  So now cut the tree and finish up.
       (let (this-command) (org-cut-subtree))
+      (setq org-markers-to-move nil)
       (message "Subtree archived %s"
 	       (if (eq this-buffer buffer)
 		   (concat "under heading: " heading)

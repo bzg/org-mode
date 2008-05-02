@@ -1,3 +1,11 @@
+2008-05-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-clock.el (org-clock-save-markers-for-cut-and-paste):
+	New function.
+
+	* lisp/org-agenda.el (org-agenda-save-markers-for-cut-and-paste):
+	New function.
+
 2008-05-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-clock.el (org-clock-find-position): Don't include notes

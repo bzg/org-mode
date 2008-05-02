@@ -2199,6 +2199,7 @@ Normal means, no org-mode-specific context."
 		  (newhead hdmarker &optional fixface))
 (declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
 (declare-function org-agenda-maybe-redo "org-agenda" ())
+(declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda" nil)
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
@@ -2363,6 +2364,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 
 ;; Autoload org-clock.el
 
+
+(declare-function org-clock-save-markers-for-cut-and-paste "org-clock")
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
 
@@ -4716,11 +4719,14 @@ This is a short-hand for marking the subtree and then cutting it."
   (interactive "p")
   (org-copy-subtree n 'cut))
 
-(defun org-copy-subtree (&optional n cut)
+(defun org-copy-subtree (&optional n cut force-store-markers)
   "Cut the current subtree into the clipboard.
 With prefix arg N, cut this many sequential subtrees.
 This is a short-hand for marking the subtree and then copying it.
-If CUT is non-nil, actually cut the subtree."
+If CUT is non-nil, actually cut the subtree.
+If FORCE-STORE-MARKERS is non-nil, store the relative locations
+of some markers in the region, even if CUT is non-nil.  This is
+useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
   (interactive "p")
   (let (beg end folded (beg0 (point)))
     (if (interactive-p)
@@ -4741,7 +4747,7 @@ If CUT is non-nil, actually cut the subtree."
     (goto-char beg0)
     (when (> end beg)
       (setq org-subtree-clip-folded folded)
-      (when (or cut (eq org-markers-to-move 'force))
+      (when (or cut force-store-markers)
 	(org-save-markers-in-region beg end))
       (if cut (kill-region beg end) (copy-region-as-kill beg end))
       (setq org-subtree-clip (current-kill 0))
@@ -4819,8 +4825,8 @@ If optional TREE is given, use this text instead of the kill ring."
     (org-back-over-empty-lines)
     (setq beg (point))
     (insert-before-markers txt)
-    (org-reinstall-markers-in-region beg)
     (unless (string-match "\n\\'" txt) (insert "\n"))
+    (org-reinstall-markers-in-region beg)
     (setq end (point))
     (goto-char beg)
     (skip-chars-forward " \t\n\r")
@@ -4865,7 +4871,10 @@ If optional TXT is given, check this string instead of the current kill."
 	    (throw 'exit nil)))
 	t))))
 
-(defvar org-markers-to-move nil)
+(defvar org-markers-to-move nil
+  "Markers that should be moved with a cut-and-paste operation.
+Those markers are stored together with their positions relative to
+the start of the region.")
 
 (defun org-save-markers-in-region (beg end)
   "Check markers in region.
@@ -4877,26 +4886,22 @@ buffer.  After re-insertion, `org-reinstall-markers-in-region' must be
 called immediately, to move the markers with the entries."
   (setq org-markers-to-move nil)
   (when (featurep 'org-clock)
-    (org-check-and-save-marker org-clock-marker beg end)
-    (org-check-and-save-marker org-clock-default-task beg end)
-    (org-check-and-save-marker org-clock-interrupted-task beg end)
-    (mapc (lambda (m) (org-check-and-save-marker m beg end))
-	  org-clock-history))
+    (org-clock-save-markers-for-cut-and-paste))
   (when (featurep 'org-agenda)
-    (mapc (lambda (m) (org-check-and-save-marker m beg end))
-	  org-agenda-markers)))
+    (org-agenda-save-markers-for-cut-and-paste)))
 
-(defun org-check-and-save-marker (marker bed end)
+(defun org-check-and-save-marker (marker beg end)
   "Check if MARKER is between BEG and END.
 If yes, remember the marker and the distance to BEG."
   (when (and (marker-buffer marker)
 	     (equal (marker-buffer marker) (current-buffer)))
     (if (and (>= marker beg) (< marker end))
-      (push (cons marker (- marker beg)) org-markers-to-move))))
+	(push (cons marker (- marker beg)) org-markers-to-move))))
 
 (defun org-reinstall-markers-in-region (beg)
   "Move all remembered markers to their position relative to BEG."
-  (mapc (lambda (x) (move-marker (car x) (+ beg (cdr x))))
+  (mapc (lambda (x)
+	  (move-marker (car x) (+ beg (cdr x))))
 	org-markers-to-move)
   (setq org-markers-to-move nil))
 
@@ -6246,7 +6251,10 @@ For file links, arg negates `org-context-in-file-links'."
 		     (t nil)))
 	  (when (or (null txt) (string-match "\\S-" txt))
 	    (setq cpltxt
-		  (concat cpltxt "::" (org-make-org-heading-search-string txt))
+		  (concat cpltxt "::"
+			  (condition-case nil
+			      (org-make-org-heading-search-string txt)
+			    (error "")))
 		  desc "NONE"))))
       (if (string-match "::\\'" cpltxt)
 	  (setq cpltxt (substring cpltxt 0 -2)))
@@ -7395,8 +7403,7 @@ operation has put the subtree."
 	      (switch-to-buffer nbuf)
 	      (goto-char pos)
 	      (org-show-context 'org-goto))
-	  (let ((org-markers-to-move 'force))
-	    (org-copy-special))
+	  (org-copy-subtree 1 nil t)
 	  (save-excursion
 	    (set-buffer (setq nbuf (or (find-buffer-visiting file)
 				       (find-file-noselect file))))
@@ -7415,7 +7422,8 @@ operation has put the subtree."
 		       (point-max))))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
-	  (org-cut-special)
+	  (org-cut-subtree)
+	  (setq org-markers-to-move nil)
 	  (message "Entry refiled to \"%s\"" (car it)))))))
 
 (defun org-refile-goto-last-stored ()
@@ -10473,7 +10481,7 @@ The command returns the inserted time stamp."
     (message "Time stamp overlays removed")))
 
 (defun org-display-custom-time (beg end)
-  "Overlay modified time stamp format over timestamp between BED and END."
+  "Overlay modified time stamp format over timestamp between BEG and END."
   (let* ((ts (buffer-substring beg end))
 	 t1 w1 with-hm tf time str w2 (off 0))
     (save-match-data
