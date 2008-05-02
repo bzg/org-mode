@@ -10241,6 +10241,9 @@ user."
 	      hour minute second wday pm h2 m2 tl wday1
 	      iso-year iso-weekday iso-week iso-year iso-date)
 
+    (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
+      (setq ans "+0"))
+
     (when (setq delta (org-read-date-get-relative ans (current-time) def))
       (setq ans (replace-match "" t t ans)
 	    deltan (car delta)

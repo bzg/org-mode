@@ -4210,6 +4210,8 @@ a single letter, you use the abbreviation of day name, the date will be
 the nth such day.  E.g.
 
 @example
++0            --> today
+.             --> today
 +4d           --> four days from today
 +4            --> same as above
 +2w           --> two weeks from today

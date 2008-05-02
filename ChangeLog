@@ -1,5 +1,8 @@
 2008-05-02  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-read-date-analyze): "." as an alias for "+0" in
+	read date.
+
 	* lisp/org-clock.el (org-clock-save-markers-for-cut-and-paste):
 	New function.
 
