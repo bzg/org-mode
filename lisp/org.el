@@ -2199,7 +2199,8 @@ Normal means, no org-mode-specific context."
 		  (newhead hdmarker &optional fixface))
 (declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
 (declare-function org-agenda-maybe-redo "org-agenda" ())
-(declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda" nil)
+(declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda"
+		  (beg end))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
@@ -2365,7 +2366,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 ;; Autoload org-clock.el
 
 
-(declare-function org-clock-save-markers-for-cut-and-paste "org-clock")
+(declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
+		  (beg end))
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
 
@@ -4886,9 +4888,9 @@ buffer.  After re-insertion, `org-reinstall-markers-in-region' must be
 called immediately, to move the markers with the entries."
   (setq org-markers-to-move nil)
   (when (featurep 'org-clock)
-    (org-clock-save-markers-for-cut-and-paste))
+    (org-clock-save-markers-for-cut-and-paste beg end))
   (when (featurep 'org-agenda)
-    (org-agenda-save-markers-for-cut-and-paste)))
+    (org-agenda-save-markers-for-cut-and-paste beg end)))
 
 (defun org-check-and-save-marker (marker beg end)
   "Check if MARKER is between BEG and END.
