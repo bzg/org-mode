@@ -1586,20 +1586,20 @@ When LEVEL is non-nil, increase section numbers on that level."
   "Format CODE from language LANG and return it formatted for export.
 Currently, this only does something for HTML export, for all other
 backends, it converts the segment into an EXAMPLE segment."
-  (cond
-   (htmlp
-    ;; We are exporting to HTML
-    (condition-case nil (require 'htmlize) (nil t))
-    (if (not (fboundp 'htmlize-region-for-paste))
-	(progn
-	  ;; we do not have htmlize.el, or an old version of it
-	  (message
-	   "htmlize.el 1.34 or later is needed for source code formatting")
-	  (concat "#+BEGIN_EXAMPLE\n" code
-		  (if (string-match "\n\\'" code) "" "\n")
-		  "#+END_EXAMPLE\n"))
-      ;; ok, we are good to go
-      (save-match-data
+  (save-match-data
+    (cond
+     (htmlp
+      ;; We are exporting to HTML
+      (condition-case nil (require 'htmlize) (nil t))
+      (if (not (fboundp 'htmlize-region-for-paste))
+	  (progn
+	    ;; we do not have htmlize.el, or an old version of it
+	    (message
+	     "htmlize.el 1.34 or later is needed for source code formatting")
+	    (concat "#+BEGIN_EXAMPLE\n" code
+		    (if (string-match "\n\\'" code) "" "\n")
+		    "#+END_EXAMPLE\n"))
+	;; ok, we are good to go
 	(let* ((mode (and lang (intern (concat lang "-mode"))))
 	       (org-startup-folded nil)
 	       (htmltext
@@ -1622,13 +1622,13 @@ backends, it converts the segment into an EXAMPLE segment."
 	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
 	      (setq htmltext (replace-match "<pre class=\"src\">"
 					    t t htmltext)))
-	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n")))))
-   (t
-    ;; This is not HTML, so just make it an example.
-    (concat "#+BEGIN_EXAMPLE\n" code
-	    (if (string-match "\n\\'" code) "" "\n")
-	    "#+END_EXAMPLE\n"))))
-
+	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n"))))
+     (t
+      ;; This is not HTML, so just make it an example.
+      (concat "#+BEGIN_EXAMPLE\n" code
+	      (if (string-match "\n\\'" code) "" "\n")
+	      "#+END_EXAMPLE\n")))))
+  
 ;;; ASCII export
 
 (defvar org-last-level nil) ; dynamically scoped variable

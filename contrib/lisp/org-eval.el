@@ -4,7 +4,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 0.03
 ;;
 ;; This file is not yet part of GNU Emacs.
 ;;
@@ -25,46 +25,97 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
+;;
+;; This modules allows to include output from various commands into an
+;; Org-mode buffer.  This technique has been copied from Emacs-Muse, and
+;; we try to make it work here in a way as simila as possible to
+;; Muse.
 
 (require 'org)
 
 ;;; Customization
 
 (defgroup org-eval nil
-  "Options concerning global entry identifiers in Org-mode."
-  :tag "Org ID"
+  "Options concerning including output from commands into the Org-mode buffer."
+  :tag "Org Eval"
   :group 'org)
 
 (defface org-eval
   (org-compatible-face nil
     '((((class color grayscale) (min-colors 88) (background light))
-       (:foreground "grey20"))
+       (:foreground "grey40"))
       (((class color grayscale) (min-colors 88) (background dark))
-       (:foreground "grey80"))
+       (:foreground "grey60"))
       (((class color) (min-colors 8) (background light))
        (:foreground "green"))
       (((class color) (min-colors 8) (background dark))
        (:foreground "yellow"))))
-  "Face for fixed-with text like code snippets."
+  "Face for command output that is included into an Org-mode buffer."
   :group 'org-eval
   :group 'org-faces
   :version "22.1")
 
+(defvar org-eval-regexp nil)
+
+(defun org-eval-set-interpreters (var value)
+  (set-default var value)
+  (setq org-eval-regexp
+	(concat "<\\("
+		(mapconcat 'regexp-quote value "\\|")
+		"\\)"
+		"\\([^>]\\{0,50\\}?\\)>"
+		"\\([^\000]+?\\)</\\1>")))
+
+(defcustom org-eval-interpreters '("lisp")
+  "Interpreters allows for evaluation tags.
+This is a list of program names (as strings) that can evaluate code and
+insert the output into an Org-mode buffer.  Valid choices are 
+
+lisp    Interpret Emacs Lisp code and display the result
+shell   Pass command to the shell and display the result
+perl    The perl interpreter
+python  Thy python interpreter
+ruby    The ruby interpreter"
+  :group 'org-eval
+  :set 'org-eval-set-interpreters
+  :type '(set :greedy t
+	      (const "lisp")
+	      (const "perl")
+	      (const "python")
+	      (const "ruby")
+	      (const "shell")))
+  
 (defun org-eval-handle-snippets (limit &optional replace)
+  "Evaluate code nisppets and display the results as display property.
+When REPLACE is non-nil, replace the code region with the result (used
+for export)."
   (let (a)
     (while (setq a (text-property-any (point) (or limit (point-max))
 				      'org-eval t))
       (remove-text-properties
        a (next-single-property-change a 'org-eval nil limit)
        '(display t intangible t org-eval t))))
-  (while (re-search-forward "<\\(lisp\\)>\\([^\000]+?\\)</\\1>" limit t)
+  (while (re-search-forward org-eval-regexp limit t)
     (let* ((beg (match-beginning 0))
 	   (end (match-end 0))
 	   (kind (match-string 1))
-	   (code (match-string 2))
-	   (value (org-eval-code kind code)))
+	   (attr (match-string 2))
+	   (code (match-string 3))
+	   (value (org-eval-code kind code))
+	   markup lang)
       (if replace
-	  (replace-match value t t)
+	  (progn
+	    (setq attr (save-match-data (org-eval-get-attributes attr))
+		  markup (cdr (assoc "markup" attr))
+		  lang  (cdr (assoc "lang" attr)))
+	    (replace-match
+	     (concat (if markup (format "#+BEGIN_%s" (upcase markup)))
+		     (if (and markup (equal (downcase markup) "src"))
+			 (concat " " (or lang "fundamental")))
+		     "\n"
+		     value
+		     (if markup (format "\n#+END_%s\n" (upcase markup))))
+	     t t))
 	(add-text-properties
 	 beg end
 	 (list 'display value 'intangible t 'font-lock-multiline t
@@ -80,10 +131,23 @@ This should go into the `org-export-preprocess-hook'."
 (add-hook 'org-export-preprocess-hook 'org-eval-replace-snippts)
 (add-hook 'org-font-lock-hook 'org-eval-handle-snippets)
 
+(defun org-eval-get-attributes (str)
+  (let ((start 0) key value rtn)
+    (while (string-match "\\<\\([a-zA-Z]+\\)\\>=\"\\([^\"]+\\)\"" str start)
+      (setq key (match-string 1 str)
+	    value (match-string 2 str)
+	    start (match-end 0))
+      (push (cons key value) rtn))
+    rtn))
+
 (defun org-eval-code (interpreter code)
   (cond
    ((equal interpreter "lisp")
     (org-eval-lisp (concat "(progn\n" code "\n)")))
+   ((equal interpreter "shell")
+    (shell-command-to-string code))
+   ((member interpreter '("perl" "python" "ruby"))
+    (org-eval-run (executable-find interpreter) code))
    (t (error "Cannot evaluate code type %s" interpreter))))
 
 (defun org-eval-lisp (form)
@@ -108,21 +172,11 @@ This should go into the `org-export-preprocess-hook'."
                                      "???" form err))
        "; INVALID LISP CODE"))))
 
-(defun org-display-warning (message)
-  "Display the given MESSAGE as a warning."
-  (if (fboundp 'display-warning)
-      (display-warning 'org message
-                       (if (featurep 'xemacs)
-                           'warning
-                         :warning))
-    (let ((buf (get-buffer-create "*Org warnings*")))
-      (with-current-buffer buf
-        (goto-char (point-max))
-        (insert "Warning (Org): " message)
-        (unless (bolp)
-          (newline)))
-      (display-buffer buf)
-      (sit-for 0))))
+(defun org-eval-run (cmd code)
+  (with-temp-buffer
+    (insert code)
+    (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
+    (buffer-string)))  
 
 (provide 'org-eval)
 

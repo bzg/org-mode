@@ -181,7 +181,7 @@ calendar           |  %:type %:date"
 
 (defcustom org-remember-clock-out-on-exit 'query
   "Non-nil means, stop the clock when exiting a clocking remember buffer.
-This only applies of the clock is running in the remember buffer.  If the
+This only applies if the clock is running in the remember buffer.  If the
 clock is not stopped, it continues to run in the storage location.
 Instead of nil or t, this may also be the symbol `query' to prompt the
 user each time a remember buffer with a running clock is filed away.  "
