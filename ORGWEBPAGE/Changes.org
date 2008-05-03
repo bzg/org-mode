@@ -12,6 +12,15 @@
 
 ** Details
 
+*** Blockquotes for export
+
+    For quoting an entire paragraph as a citation, use
+
+    : #+BEGIN_BLOCKQUOTE
+    : Everything shound be made as simple as possible,
+    : but not any simpler -- Albert Einstein
+    : #+BEGIN_BLOCKQUOTE
+
 *** Clock task history, and moving entries with the running clock
 
     Org now remembers the last 5 tasks that you clocked into, to
