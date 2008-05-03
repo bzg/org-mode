@@ -1324,7 +1324,7 @@ on this string to produce the exported version."
       (goto-char (point-min))
       (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)quote\\>.*" nil t)
 	(replace-match (if (equal (downcase (match-string 1)) "end")
-			   "ORG-BLOCKUQUOTE-END" "ORG-BLOCKUQUOTE-START")
+			   "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
 			 t t))
 
       ;; Remove subtrees that are commented
@@ -2551,10 +2551,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (throw 'nextline nil))
 
 	  ;; Blockquotes
-	  (when (equal "ORG-BLOCKUQUOTE-START" line)
+	  (when (equal "ORG-BLOCKQUOTE-START" line)
 	    (insert "<blockquote>\n<p>\n")
 	    (throw 'nextline nil))
-	  (when (equal "ORG-BLOCKUQUOTE-END" line)
+	  (when (equal "ORG-BLOCKQUOTE-END" line)
 	    (insert "</p>\n</blockquote>\n")
 	    (throw 'nextline nil))
 
