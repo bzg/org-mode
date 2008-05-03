@@ -8,13 +8,16 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.02a
+* Version 6.03
+
 ** Details
-*** Clock task history
+
+*** Clock task history, and moving entries with the running clock
+
     Org now remembers the last 5 tasks that you clocked into, to
     make it easier to clock back into a task after interrupting
     it for another task.
-    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) wil
+    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) will
       clock into that task and mark it as current default task.
     - `C-u C-c C-x C-i' (or `C-u I' from the agenda) will offer a
       list of recently clocked tasks, including the default task,
@@ -22,6 +25,34 @@
       the task that was interrupted by the task that is currently
       being clocked. `1',... selects a recent task.  When you
       select a task, you will be clocked into it.
+
+    When moving an entry using structure editing commands,
+    archiving commands, or the special subtree cut-and-paste
+    commands =C-c C-x C-w= and =C-c C-x C-y=, the running clock
+    marker and all clock history markers will be moved with the
+    subtree.  Now you can start a clock in a remember buffer and
+    keep the clock running while filing the note away.  See also
+    the variable `org-remember-clock-out-on-exit'.
+
+*** Fontified code examples in HTML export
+
+    You can now get code examples fontified like they would be
+    fontified in an emacs buffer, and export the result to HTML.
+    To do so, wrap the code examples into the following
+    structure:
+
+    : #+BEGIN_SRC emacs-lisp
+    : (defun org-xor (a b)
+    :   "Exclusive or."
+    :   (if a (not b) b))
+    : #+END_SRC
+
+    The string after the BEGIN_SRC is the name of the major emacs
+    mode that should be used to fontify the code example.
+
+    Currently this works only for HTML export, and requires the
+    /htmlize.el/ package.  For other backends, such structures are
+    exported as EXAMPLE.
 
 * Version 6.02
 

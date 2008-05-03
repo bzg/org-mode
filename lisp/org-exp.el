@@ -1198,6 +1198,9 @@ on this string to produce the exported version."
       (let ((org-inhibit-startup t)) (org-mode))
       (untabify (point-min) (point-max))
 
+      ;; Handle source code snippets
+      (org-export-replace-src-segments)
+
       ;; Get rid of drawers
       (unless (eq t exp-drawers)
 	(goto-char (point-min))
@@ -1316,6 +1319,13 @@ on this string to produce the exported version."
 	(add-text-properties (match-beginning 4) (match-end 4)
 			     '(org-protected t))
 	(goto-char (1+ (match-end 4))))
+
+      ;; Blockquotes
+      (goto-char (point-min))
+      (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)quote\\>.*" nil t)
+	(replace-match (if (equal (downcase (match-string 1)) "end")
+			   "ORG-BLOCKUQUOTE-END" "ORG-BLOCKUQUOTE-START")
+			 t t))
 
       ;; Remove subtrees that are commented
       (goto-char (point-min))
@@ -1556,6 +1566,68 @@ When LEVEL is non-nil, increase section numbers on that level."
       (if (string-match "\\(\\.0\\)+\\'" string)
 	  (setq string (replace-match "" t nil string))))
     string))
+
+;;; Fontification of code
+;; Currently only for th HTML backend, but who knows....
+(defun org-export-replace-src-segments ()
+  "Replace source code segments with special code for export."
+  (let (lang code trans)
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "^#\\+BEGIN_SRC[ \t]+\\([^ \t\n]+\\)[ \t]*\n\\([^\000]+?\n\\)#\\+END_SRC.*"
+	    nil t)
+      (setq lang (match-string 1) code (match-string 2)
+	    trans (org-export-format-source-code lang code))
+      (replace-match trans t t))))
+
+(defvar htmlp)  ;; dynamically scoped from org-exp.el
+
+(defun org-export-format-source-code (lang code)
+  "Format CODE from language LANG and return it formatted for export.
+Currently, this only does something for HTML export, for all other
+backends, it converts the segment into an EXAMPLE segment."
+  (cond
+   (htmlp
+    ;; We are exporting to HTML
+    (condition-case nil (require 'htmlize) (nil t))
+    (if (not (fboundp 'htmlize-region-for-paste))
+	(progn
+	  ;; we do not have htmlize.el, or an old version of it
+	  (message
+	   "htmlize.el 1.34 or later is needed for source code formatting")
+	  (concat "#+BEGIN_EXAMPLE\n" code
+		  (if (string-match "\n\\'" code) "" "\n")
+		  "#+END_EXAMPLE\n"))
+      ;; ok, we are good to go
+      (save-match-data
+	(let* ((mode (and lang (intern (concat lang "-mode"))))
+	       (org-startup-folded nil)
+	       (htmltext
+		(with-temp-buffer
+		  (insert code)
+		  (if (functionp mode)
+		      (funcall mode)
+		    (fundamental-mode))
+		  (when (eq major-mode 'org-mode)
+		    ;; Free up the protected stuff
+		    (goto-char (point-min))
+		    (while (re-search-forward "^@\\([*#]\\|[ \t]*:\\)" nil t)
+		      (replace-match "\\1"))
+		    (org-mode))
+		  (font-lock-fontify-buffer)
+		  ;; silence the byte-compiler
+		  (when (fboundp 'htmlize-region-for-paste)
+		    ;; transform the region to HTML
+		    (htmlize-region-for-paste (point-min) (point-max))))))
+	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
+	      (setq htmltext (replace-match "<pre class=\"src\">"
+					    t t htmltext)))
+	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n")))))
+   (t
+    ;; This is not HTML, so just make it an example.
+    (concat "#+BEGIN_EXAMPLE\n" code
+	    (if (string-match "\n\\'" code) "" "\n")
+	    "#+END_EXAMPLE\n"))))
 
 ;;; ASCII export
 
@@ -2466,6 +2538,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		(replace-match "\\2\n"))
 	      (insert line "\n")
 	      (while (and lines
+			  (not (string-match "^[ \t]*:" (car lines)))
 			  (or (= (length (car lines)) 0)
 			      (get-text-property 0 'org-protected (car lines))))
 		(insert (pop lines) "\n"))
@@ -2475,6 +2548,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; Horizontal line
 	  (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
 	    (insert "\n<hr/>\n")
+	    (throw 'nextline nil))
+
+	  ;; Blockquotes
+	  (when (equal "ORG-BLOCKUQUOTE-START" line)
+	    (insert "<blockquote>\n<p>\n")
+	    (throw 'nextline nil))
+	  (when (equal "ORG-BLOCKUQUOTE-END" line)
+	    (insert "</p>\n</blockquote>\n")
 	    (throw 'nextline nil))
 
 	  ;; make targets to anchors

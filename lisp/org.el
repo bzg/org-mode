@@ -4036,8 +4036,6 @@ are at least `org-cycle-separator-lines' empty lines before the headeline."
 	    (outline-flag-region b (point-at-eol) flag)
 	  (error ":END: line missing"))))))
 
-
-
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
   (pos-visible-in-window-p
@@ -12731,6 +12729,22 @@ With optional NODE, go directly to that node."
 ;;;; Miscellaneous stuff
 
 ;;; Generally useful functions
+
+(defun org-display-warning (message) ;; Copied from Emacs-Muse
+  "Display the given MESSAGE as a warning."
+  (if (fboundp 'display-warning)
+      (display-warning 'org message
+                       (if (featurep 'xemacs)
+                           'warning
+                         :warning))
+    (let ((buf (get-buffer-create "*Org warnings*")))
+      (with-current-buffer buf
+        (goto-char (point-max))
+        (insert "Warning (Org): " message)
+        (unless (bolp)
+          (newline)))
+      (display-buffer buf)
+      (sit-for 0))))
 
 (defun org-plist-delete (plist property)
   "Delete PROPERTY from PLIST.
