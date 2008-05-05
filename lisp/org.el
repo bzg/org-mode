@@ -3659,6 +3659,9 @@ between words."
 	   (if org-provide-checkbox-statistics
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 		 (0 (org-get-checkbox-statistics-face) t)))
+	   ;; Description list items
+	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(.*?\\) ::"
+	     2 'bold prepend)
 	   (list (concat "^\\*+ \\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
 	   ;; Specials

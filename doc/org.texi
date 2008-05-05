@@ -1128,24 +1128,34 @@ additional structure.  They also provide a way to create lists of
 checkboxes (@pxref{Checkboxes}).  Org supports editing such lists,
 and the HTML exporter (@pxref{Exporting}) parses and formats them.
 
-Org knows ordered and unordered lists.  Unordered list items start
-with @samp{-}, @samp{+}, or @samp{*}@footnote{When using @samp{*} as a
-bullet, lines must be indented or they will be seen as top-level
-headlines.  Also, when you are hiding leading stars to get a clean
-outline view, plain list items starting with a star are visually
-indistinguishable from true headlines.  In short: even though @samp{*}
-is supported, it may be better to not use it for plain list items.} as
-bullets.  Ordered list items start with a numeral followed by either a
-period or a right parenthesis, such as @samp{1.} or @samp{1)}.  Items
-belonging to the same list must have the same indentation on the first
-line.  In particular, if an ordered list reaches number @samp{10.}, then
-the 2--digit numbers must be written left-aligned with the other numbers
-in the list.  Indentation also determines the end of a list item.  It
-ends before the next line that is indented like the bullet/number, or
-less.  Empty lines are part of the previous item, so you can have
-several paragraphs in one item.  If you would like an empty line to
-terminate all currently open plain lists, configure the variable
-@code{org-empty-line-terminates-plain-lists}.  Here is an example:
+Org knows ordered lists, unordered lists, and description lists.
+@itemize @bullet
+@item
+@emph{Unordered} list items start with @samp{-}, @samp{+}, or
+@samp{*}@footnote{When using @samp{*} as a bullet, lines must be indented or
+they will be seen as top-level headlines.  Also, when you are hiding leading
+stars to get a clean outline view, plain list items starting with a star are
+visually indistinguishable from true headlines.  In short: even though
+@samp{*} is supported, it may be better to not use it for plain list items.}
+as bullets.
+@item
+@emph{Ordered} list items start with a numeral followed by either a period or
+a right parenthesis, such as @samp{1.} or @samp{1)}.
+@item
+@emph{Description} list items are like unordered list items, but contain the
+separator @samp{ :: } to separate the description @emph{term} from the
+desciption.
+@end itemize
+
+Items belonging to the same list must have the same indentation on the first
+line.  In particular, if an ordered list reaches number @samp{10.}, then the
+2--digit numbers must be written left-aligned with the other numbers in the
+list.  Indentation also determines the end of a list item.  It ends before
+the next line that is indented like the bullet/number, or less.  Empty lines
+are part of the previous item, so you can have several paragraphs in one
+item.  If you would like an empty line to terminate all currently open plain
+lists, configure the variable @code{org-empty-line-terminates-plain-lists}.
+Here is an example:
 
 @example
 @group
@@ -1159,6 +1169,10 @@ terminate all currently open plain lists, configure the variable
        - on DVD only
       He makes a really funny face when it happens.
    But in the end, not individual scenes matter but the film as a whole.
+   Important actors in this film are:
+   - @b{Elijah Wood} :: He plays the Frodo
+   - @b{Sean Austin} :: He plays the Sam, Frodos friend.  I still remember
+     him very well from his role as Mikey Walsh a in the Goonies.
 @end group
 @end example
 
@@ -1166,7 +1180,8 @@ Org supports these lists by tuning filling and wrapping commands to
 deal with them correctly@footnote{Org only changes the filling
 settings for Emacs.  For XEmacs, you should use Kyle E. Jones'
 @file{filladapt.el}.  To turn this on,  put into @file{.emacs}:
-@code{(require 'filladapt)}}.
+@code{(require 'filladapt)}}, and by exporting them properly
+(@pxref{Exporting}).
 
 The following commands act on items when the cursor is in the first line
 of an item (the line with the bullet or number).
@@ -1260,7 +1275,8 @@ Visibility cycling (@pxref{Visibility cycling}) on the headline will
 hide and show the entry, but keep the drawer collapsed to a single line.
 In order to look inside the drawer, you need to move the cursor to the
 drawer line and press @key{TAB} there.  Org mode uses a drawer for
-storing properties (@pxref{Properties and Columns}).
+storing properties (@pxref{Properties and Columns}), and another one for
+storing clock times (@pxref{Clocking work time}).
 
 @node Orgstruct mode,  , Drawers, Document Structure
 @section The Orgstruct minor mode
@@ -9042,15 +9058,17 @@ single key navigation.
 @i{Frank Ruell} solved the mystery of the @code{keymapp nil} bug, a
 conflict with @file{allout.el}.
 @item
-@i{Jason Riedy} sent a patch to fix a bug with export of TODO keywords.
+@i{Jason Riedy} generalized the send-receive mechanism for orgtbl tables with
+extensive patches.
 @item
-@i{Philip Rooke} created the Org reference card and provided lots
-of feedback.
+@i{Philip Rooke} created the Org reference card, provided lots
+of feedback, developed and applied standards to the Org documentation and
+wrote the manual for the contributed packages.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
 @item
-Linking to VM/BBDB/Gnus was inspired by @i{Tom Shannon}'s
+Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
 @i{Ilya Shlyakhter} proposed the Archive Sibling.
@@ -9075,14 +9093,12 @@ keyword.
 @i{David Wainberg} suggested archiving, and improvements to the linking
 system.
 @item
-@i{John Wiegley} wrote @file{emacs-wiki.el} and @file{planner.el}.  The
-development of Org was fully independent, and both systems are really
-different beasts in their basic ideas and implementation details.  I later
-looked at John's code, however, and learned from his implementation of (i)
-links where the link itself is hidden and only a description is shown, and
-(ii) popping up a calendar to select a date.  John has also contributed a
-number of great ideas and patches directly to Org, including the file
-@code{org-mac-message.el}'
+@i{John Wiegley} wrote @file{emacs-wiki.el}, @file{planner.el}, and
+@file{muse.el}, which have similar goals as Org.  Initially the development
+of Org was fully independent because I was not aware of the existence of
+these packages.  But with time I have accasionally looked at John's code and
+learned a lot from it.  John has also contributed a number of great ideas and
+patches directly to Org, including the file @code{org-mac-message.el}'
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.

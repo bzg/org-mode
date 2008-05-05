@@ -12,6 +12,30 @@
 
 ** Details
 
+*** Description lists are now supported natively
+
+    A plain list will be exported as a description list if the
+    first item in the list has a /term/ and the /description/,
+    separated by " :: ".  For example
+
+    : Free software by Carsten Dominik
+    : - RefTeX    :: Support for LaTeX Labels, References, Citations
+    : - CDLaTeX   :: more LaTeX functionality for Emacs
+    : - TeXmathp  :: checking LaTeX buffers for Math mode.
+    : - ORG       :: An Emacs mode for notes and projet planning.
+    : - CONSTANTS :: An Emacs package for inserting the definition of
+    :                natural constants and units into a buffer.
+    : - IDLWAVE   :: The Emacs modes for editing and
+    :                running IDL and WAVE CL files.
+    : - CHAIN     :: A tool for running a code with
+    :                different sets of parameters
+    : - MPP       :: A preprocessor tool for creating MPEG
+    :                and other movie streams
+    : - Dirabbrev :: Using abbreviations for directories
+    :                in the shell
+    : - PSFIXBB   :: fixing the BoundingBox in postscript files
+    : - TFMT      :: A table formatting tool
+
 *** Blockquotes for export
 
     For quoting an entire paragraph as a citation, use

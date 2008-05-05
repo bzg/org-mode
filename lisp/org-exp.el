@@ -468,6 +468,7 @@ Org-mode file."
 	vertical-align: top;
 	<!--border: 1pt solid #ADB9CC;-->
   }
+  dt { font-weight: bold; }
 </style>"
   "The default style specification for exported HTML files.
 Since there are different ways of setting style information, this variable
@@ -2309,7 +2310,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 (inquote     nil)
 	 (infixed     nil)
 	 (in-local-list nil)
-	 (local-list-num nil)
+	 (local-list-type nil)
 	 (local-list-indent nil)
 	 (llt org-plain-list-ordered-item-terminator)
 	 (email       (plist-get opt-plist :email))
@@ -2349,7 +2350,7 @@ PUB-DIR is set, use this as the publishing directory."
 	   "[\r\n]"))
 	 table-open type
 	 table-buffer table-orig-buffer
-	 ind start-is-num starter didclose
+	 ind item-type starter didclose
 	 rpl path desc descp desc1 desc2 link
 	 snumber fnc
 	 )
@@ -2716,10 +2717,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		(setq head-count (+ head-count 1)))
 	    (when in-local-list
 	      ;; Close any local lists before inserting a new header line
-	      (while local-list-num
-		(org-close-li)
-		(insert (if (car local-list-num) "</ol>\n" "</ul>"))
-		(pop local-list-num))
+	      (while local-list-type
+		(org-close-li (car local-list-type))
+		(insert (format "</%sl>\n" (car local-list-type)))
+		(pop local-list-type))
 	      (setq local-list-indent nil
 		    in-local-list nil))
 	    (setq first-heading-pos (or first-heading-pos (point)))
@@ -2757,10 +2758,15 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))
 		   line)
 	      (setq ind (org-get-string-indentation line)
-		    start-is-num (match-beginning 4)
+		    item-type (if (match-beginning 4) "o" "u")
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
-		    line (substring line (match-beginning 5)))
+		    line (substring line (match-beginning 5))
+		    item-tag)
+	      (if (string-match "\\(.*?\\) ::[ \t]*" line)
+		  (setq item-type "d"
+			item-tag (match-string 1 line)
+			line (substring line (match-end 0))))
 	      (unless (string-match "[^ \t]" line)
 		;; empty line.  Pretend indentation is large.
 		(setq ind (if org-empty-line-terminates-plain-lists
@@ -2772,9 +2778,9 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (not starter))
 			      (< ind (car local-list-indent))))
 		(setq didclose t)
-		(org-close-li)
-		(insert (if (car local-list-num) "</ol>\n" "</ul>"))
-		(pop local-list-num) (pop local-list-indent)
+		(org-close-li (car local-list-type))
+		(insert (format "</%sl>\n" (car local-list-type)))
+		(pop local-list-type) (pop local-list-indent)
 		(setq in-local-list local-list-indent))
 	      (cond
 	       ((and starter
@@ -2782,14 +2788,21 @@ lang=\"%s\" xml:lang=\"%s\">
 			 (> ind (car local-list-indent))))
 		;; Start new (level of) list
 		(org-close-par-maybe)
-		(insert (if start-is-num "<ol>\n<li>\n" "<ul>\n<li>\n"))
-		(push start-is-num local-list-num)
+		(insert (cond
+			 ((equal item-type "u") "<ul>\n<li>\n")
+			 ((equal item-type "o") "<ol>\n<li>\n")
+			 ((equal item-type "d") 
+			  (format "<dl>\n<dt>%s</dt><dd>\n" item-tag))))
+		(push item-type local-list-type)
 		(push ind local-list-indent)
 		(setq in-local-list t))
 	       (starter
 		;; continue current list
-		(org-close-li)
-		(insert "<li>\n"))
+		(org-close-li (car local-list-type))
+		(insert (cond
+			 ((equal (car local-list-type) "d")
+			  (format "<dt>%s</dt><dd>\n" (or item-tag "???")))
+			 (t "<li>\n"))))
 	       (didclose
 		;; we did close a list, normal text follows: need <p>
 		(org-open-par)))
@@ -2827,10 +2840,10 @@ lang=\"%s\" xml:lang=\"%s\">
       (when inquote (insert "</pre>\n"))
       (when in-local-list
 	;; Close any local lists before inserting a new header line
-	(while local-list-num
-	  (org-close-li)
-	  (insert (if (car local-list-num) "</ol>\n" "</ul>\n"))
-	  (pop local-list-num))
+	(while local-list-type
+	  (org-close-li (car local-list-type))
+	  (insert (format "</%sl>\n" (car local-list-type)))
+	  (pop local-list-type))
 	(setq local-list-indent nil
 	      in-local-list nil))
       (org-html-level-start 1 nil umax
@@ -3376,10 +3389,10 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   (when org-par-open
     (insert "</p>")
     (setq org-par-open nil)))
-(defun org-close-li ()
+(defun org-close-li (&optional type)
   "Close <li> if necessary."
   (org-close-par-maybe)
-  (insert "</li>\n"))
+  (insert (if (equal type "d") "</dd>\n" "</li>\n")))
 
 (defvar body-only) ; dynamically scoped into this.
 (defun org-html-level-start (level title umax with-toc head-count)

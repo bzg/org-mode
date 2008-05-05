@@ -1,3 +1,11 @@
+2008-05-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-set-font-lock-defaults): Make the description
+	tag bold.
+
+	* lisp/org-exp.el (org-export-as-html, org-close-li): Implement
+	description lists.
+
 2008-05-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org.el (org-read-date-analyze): "." as an alias for "+0" in
