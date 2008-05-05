@@ -64,6 +64,8 @@ this function is called."
 			       org-table-last-alignment ""))
 	 (nowebname (plist-get params :nowebname))
 	 (breakvals (plist-get params :breakvals))
+         (firstheader t)
+         (*orgtbl-default-fmt* 'orgtbl-sql-strip-and-quote)
 	 (params2
 	  (list
 	   :sqlname name
@@ -72,12 +74,10 @@ this function is called."
 					"")
 				      "BEGIN TRANSACTION;"))
 	   :tend (lambda () (concat "COMMIT;" (if nowebname "\n@ " "")))
-	   :fmt (lambda (str) (orgtbl-sql-strip-and-quote str))
-;	   :hfmt (lambda (f) (push (concat "[" f "]") hdrlist) "")
-	   :hfmt (lambda (f) (push f hdrlist) "")
-	   :hlfmt (lambda (lst) nil)
+	   :hfmt (lambda (f) (progn (if firstheader (push f hdrlist)) ""))
+	   :hlfmt (lambda (lst) (setq firstheader nil))
 	   :lstart (lambda () (concat "INSERT INTO "
-				      (plist-get params :sqlname) "( "
+				      sqlname "( "
 				      (mapconcat 'identity (reverse hdrlist)
 						 ", ")
 				      " )" (if breakvals "\n" " ")
@@ -86,7 +86,8 @@ this function is called."
 	   :sep " , "
 	   :hline nil
 	   :remove-nil-lines t))
-	 (params (org-combine-plists params2 params)))
+	 (params (org-combine-plists params2 params))
+         (sqlname (plist-get params :sqlname)))
     (orgtbl-to-generic table params)))
 
 (defun orgtbl-sql-quote (str)

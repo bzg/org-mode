@@ -1,3 +1,10 @@
+2008-05-04  Jason Riedy  <jason@acm.org>
+
+	* lisp/orgtbl-sqlinsert.el (orgtbl-to-sqlinsert): Use the
+	default fmt function, collect only the first header line for
+	field names, and don't call plist-get for the table name on
+	every line.
+
 2008-04-15  Jason Riedy  <jason@acm.org>
 
 	* lisp/orgtbl-sqlinsert.el: New file.
