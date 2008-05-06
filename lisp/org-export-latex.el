@@ -1096,6 +1096,14 @@ Regexps are those from `org-export-latex-special-string-regexps'."
     (replace-match (org-export-latex-protect-string
 		    (concat (match-string 1) "\\LaTeX{}")) t t)))
 
+  ;; Convert blockquotes
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+BEGIN_QUOTE" nil t)
+    (replace-match "\\begin{quote}" t t))
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+END_QUOTE" nil t)
+    (replace-match "\\end{quote}" t t))
+
   ;; Convert horizontal rules
   (goto-char (point-min))
   (while (re-search-forward "^----+.$" nil t)
