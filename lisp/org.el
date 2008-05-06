@@ -178,7 +178,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  interactive-query: Interactive modification of tags query" org-interactive-query)
 	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
 	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
-	(const :tag "C  mew:               Support for links to messages in Mew" org-mew)
 	(const :tag "C  panel:             Simple routines for us with bad memory" org-panel)
 	(const :tag "C  registry:          A registry for Org links" org-registry)
 	(const :tag "C  org2rem:           Convert org appointments into reminders" org2rem)
