@@ -3631,6 +3631,7 @@ First element has index 0, or I0 if given."
 ;; Formatting parameters for the current table section.
 (defvar *orgtbl-hline* nil "Text used for horizontal lines")
 (defvar *orgtbl-sep* nil "Text used as a column separator")
+(defvar *orgtbl-default-fmt* nil "Default format for each entry")
 (defvar *orgtbl-fmt* nil "Format for each entry")
 (defvar *orgtbl-efmt* nil "Format for numbers")
 (defvar *orgtbl-lfmt* nil "Format for an entire line, overrides fmt")
@@ -3672,7 +3673,9 @@ First element has index 0, or I0 if given."
 			     (orgtbl-apply-fmt efmt (match-string 1 f)
 					       (match-string 2 f))
 			   f)))
-		 (orgtbl-apply-fmt (orgtbl-get-fmt *orgtbl-fmt* i) f)))
+                 (orgtbl-apply-fmt (or (orgtbl-get-fmt *orgtbl-fmt* i)
+                                       *orgtbl-default-fmt*)
+                                   f)))
 	     line)))
       (push (if *orgtbl-lfmt*
 		(orgtbl-apply-fmt *orgtbl-lfmt* line)
