@@ -1,10 +1,10 @@
-;;; org-eval.el --- Display result of evaluating code in various languanges
+;;; org-eval.el --- Display result of evaluating code in various languages
 ;; Copyright (C) 2008 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.03
+;; Version: 0.04
 ;;
 ;; This file is not yet part of GNU Emacs.
 ;;
@@ -27,10 +27,44 @@
 ;;; Commentary:
 ;;
 ;; This modules allows to include output from various commands into an
-;; Org-mode buffer.  This technique has been copied from Emacs-Muse, and
-;; we try to make it work here in a way as simila as possible to
-;; Muse.
-
+;; Org-mode buffer, both for live display, and for export.
+;; This technique has been copied from emacs-wiki and Emacs Muse, and
+;; we try to make it work here in a way as similar as possible to
+;; Muse, so that people who move between both worlds don't need to learn
+;; new syntax.
+;;
+;; Basically it works like this:
+;;
+;;    <lisp>(concat "aaa" "bbb")</lisp>
+;;
+;; will display "aaabbb" in the buffer and export like that as well.
+;; The leading lisp tag will also accept the attributes "markup" and
+;; "lang", to specify how the text should be formatted during export.
+;; For example,
+;;
+;;    <lisp markup="src" lang="emacs-lisp"> .... </lisp>
+;;
+;; will format the result of the lisp form as if it was lisp source
+;; code.  Internally, it will wrap the text into a
+;;
+;;    #+begin_src emacs-lisp
+;;    #+end_src
+;;
+;; structure so that the right things happen when the exporter is running.
+;;
+;; By default, only the <lisp> tag is turned on, but you can configure
+;; the variable `org-eval-interpreters' to add more interpreters like
+;; `perl', `python', or the `shell'.
+;;
+;; Please note that this mechanism is potentially dangerous, because it
+;; executes code that you don't even see.  This gives you great power,
+;; but also enough rope to hang yourself.  And, it gives your friends
+;; who send you Org files plenty of opportunity for good and bad jokes.
+;; This is also why this module is not turned on by default, but only
+;; available as a contributed package.
+;;
+;;
+;;
 (require 'org)
 
 ;;; Customization
