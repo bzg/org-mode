@@ -107,7 +107,7 @@ This should have an association in `org-export-language-setup'."
   :group 'org-export-general
   :type 'string)
 
-(defcustom org-export-skip-text-before-1st-heading t
+(defcustom org-export-skip-text-before-1st-heading nil
   "Non-nil means, skip all text before the first headline when exporting.
 When nil, that text is exported as well."
   :group 'org-export-general
