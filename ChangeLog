@@ -17,6 +17,14 @@
 	* lisp/org-exp.el (org-export-as-html, org-close-li): Implement
 	description lists.
 
+	* lisp/org-table.el (*orgtbl-default-fmt*): New variable.
+	(orgtbl-format-line): Use the value of *orgtbl-default-fmt*
+	when there is no other fmt available.
+	(orgtbl-to-generic): Allow an explicitly nil :tstart or
+	:tend to suppress the appropriate string.
+	(orgtbl-to-orgtbl): New function for translating to another orgtbl
+	table.
+
 2008-05-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org.el (org-read-date-analyze): "." as an alias for "+0" in

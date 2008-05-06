@@ -3910,6 +3910,22 @@ this function is called."
 	   :hlstart "@headitem ")))
     (orgtbl-to-generic table (org-combine-plists params2 params))))
 
+(defun orgtbl-to-orgtbl (table params)
+  "Convert the orgtbl-mode TABLE into another orgtbl-mode table.
+Useful when slicing one table into many.  The :hline, :sep,
+:lstart, and :lend provide orgtbl framing.  The default nil :tstart
+and :tend suppress strings without splicing; they can be set to
+provide ORGTBL directives for the generated table."
+  (let* ((params2
+	  (list
+           :tstart nil :tend nil
+           :hline "|---"
+           :sep " | "
+           :lstart "| "
+           :lend " |"))
+	 (params (org-combine-plists params2 params)))
+    (orgtbl-to-generic table params)))
+
 (provide 'org-table)
 
 ;; arch-tag: 4d21cfdd-0268-440a-84b0-09237a0fe0ef
