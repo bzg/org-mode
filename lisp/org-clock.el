@@ -109,6 +109,7 @@ of a different task.")
 
 (defun org-clock-history-push (&optional pos buffer)
   "Push a marker to the clock history."
+  (setq org-clock-history-length (max 1 (min 42 org-clock-history-length)))
   (let ((m (move-marker (make-marker) (or pos (point)) buffer)) n l)
     (while (setq n (member m org-clock-history))
       (move-marker (car n) nil))
@@ -157,10 +158,12 @@ of a different task.")
 	 (when (marker-buffer m)
 	   (setq i (1+ i)
 		 s (org-clock-insert-selection-line
-		    (string-to-char (number-to-string i)) m))
+		    (+ i ?0) m))
 	   (push s sel-list)))
        org-clock-history)
-      (shrink-window-if-larger-than-buffer)
+      (if (fboundp 'fit-window-to-buffer)
+	  (fit-window-to-buffer)
+	(shrink-window-if-larger-than-buffer))
       (message (or prompt "Select task for clocking:"))
       (setq rpl (read-char-exclusive))
       (cond
