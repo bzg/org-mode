@@ -7579,6 +7579,38 @@ This function can be used in a hook."
     "ORGTBL" "HTML:" "LaTeX:" "BEGIN:" "END:" "TBLFM"
     "BEGIN_EXAMPLE" "END_EXAMPLE"))
 
+(defcustom org-structure-template-alist
+  '(
+    ("s" "#+begin_src ?\n\n#+end_src" "#+<src lang=\"?\">\n\n</src>")
+    ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
+    ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
+    ("v" "#+begin_verse\n?\n#+end_verse" "<verse>\n?\n</verse>")
+    ("l" "#+begin_latex\n?\n#+end_latex" "<literal style=\"latex\">\n?\n</literal>")
+    ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
+    ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"latex\">\n?\n</literal>")
+    ("H" "#+html: " "<literal style=\"latex\">?</literal>")
+    ("a" "#+begin_ascii\n?\n#+end_ascii")
+    ("A" "#+ascii: ")
+    ("i" "#+include: " "<include file=\"?\">")
+    )
+  "FIXME"
+  :group 'org ;?????????????????
+  :type 'sexp)
+
+(defun org-complete-expand-structure-template (start cell)
+  (let ((rpl (cdr cell)))
+    (delete-region start (point))
+    (when (string-match "\\`#\\+" rpl)
+      (cond
+       ((bolp))
+       ((not (string-match "\\S-" (buffer-substring (point-at-bol) (point))))
+	(delete-region (point-at-bol) (point)))
+       (t (newline))))
+    (setq start (point))
+    (insert rpl)
+    (if (re-search-backward "\\?" start t) (delete-char 1))))
+    
+
 (defun org-complete (&optional arg)
   "Perform completion on word at point.
 At the beginning of a headline, this completes TODO keywords as given in
@@ -7593,7 +7625,8 @@ At all other locations, this simply calls the value of
   (interactive "P")
   (org-without-partial-completion
    (catch 'exit
-     (let* ((end (point))
+     (let* ((a nil)
+	    (end (point))
 	    (beg1 (save-excursion
 		    (skip-chars-backward (org-re "[:alnum:]_@"))
 		    (point)))
@@ -7602,6 +7635,12 @@ At all other locations, this simply calls the value of
 		   (point)))
 	    (confirm (lambda (x) (stringp (car x))))
 	    (searchhead (equal (char-before beg) ?*))
+	    (struct
+	     (when (and (equal (char-before beg1) ?.)
+			(setq a (assoc (buffer-substring beg1 (point))
+				       org-structure-template-alist)))
+	       (org-complete-expand-structure-template (1- beg1) a)
+	       (throw 'exit t)))
 	    (tag (and (equal (char-before beg1) ?:)
 		      (equal (char-after (point-at-bol)) ?*)))
 	    (prop (and (equal (char-before beg1) ?:)

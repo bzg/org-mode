@@ -7301,8 +7301,6 @@ All lines between these markers are exported literally
 #+END_LaTeX
 @end example
 
-
-
 @node   Sectioning structure,  , Quoting LaTeX code, LaTeX export
 @subsection Sectioning structure
 @cindex LaTeX class
