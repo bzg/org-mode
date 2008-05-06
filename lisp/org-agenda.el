@@ -35,7 +35,7 @@
 (eval-when-compile
   (require 'calendar))
 
-(declare-function add-to-diary-list "diary-lib"
+(declare-function diary-add-to-list "diary-lib"
                   (date string specifier &optional marker globcolor literal))
 (declare-function calendar-absolute-from-iso    "cal-iso"    (date))
 (declare-function calendar-astro-date-string    "cal-julian" (&optional date))
