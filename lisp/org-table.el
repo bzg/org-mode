@@ -3770,8 +3770,10 @@ directly by `orgtbl-send-table'.  See manual."
 
     ;; Put header
     (unless splicep
-      (push (or (orgtbl-eval-str (plist-get params :tstart))
-		"ERROR: no :tstart") *orgtbl-rtn*))
+      (if (not (plist-member params :tstart))
+          (push "ERROR: no :tstart" *orgtbl-rtn*)
+        (let ((tstart (orgtbl-eval-str (plist-get params :tstart))))
+          (if tstart (push tstart *orgtbl-rtn*)))))
 
     ;; Do we have a heading section?  If so, format it and handle the
     ;; trailing hline.
@@ -3798,8 +3800,10 @@ directly by `orgtbl-send-table'.  See manual."
     (orgtbl-format-section nil)
 
     (unless splicep
-      (push (or (orgtbl-eval-str (plist-get params :tend))
-		"ERROR: no :tend") *orgtbl-rtn*))
+      (if (not (plist-member params :tend))
+          (push "ERROR: no :tend" *orgtbl-rtn*)
+        (let ((tend (orgtbl-eval-str (plist-get params :tend))))
+          (if tend (push tend *orgtbl-rtn*)))))
 
     (mapconcat 'identity (nreverse (if remove-nil-linesp
 				       (remq nil *orgtbl-rtn*)

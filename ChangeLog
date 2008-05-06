@@ -22,6 +22,7 @@
 	when there is no other fmt available.
 	(orgtbl-to-generic): Allow an explicitly nil :tstart or
 	:tend to suppress the appropriate string.
+
 	(orgtbl-to-orgtbl): New function for translating to another orgtbl
 	table.
 
