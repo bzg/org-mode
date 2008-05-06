@@ -10,6 +10,18 @@
 
 * Version 6.03
 
+** Incompatible changes
+
+*** The text before the first headline is now exported by default
+
+    Previously, the default was to not include this text, but for
+    publishing oriented files it is better to include it.  If you
+    like the old default better, customize the variable
+    =org-export-skip-text-before-1st-heading= or set the value on
+    a per-file basis with
+
+    : #+OPTIONS: skip:t
+
 ** Details
 
 *** Description lists are now supported natively

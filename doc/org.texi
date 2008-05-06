@@ -274,16 +274,34 @@ Embedded LaTeX
 
 Exporting
 
+* Markup rules::                Which structures are recognized?
+* Export options::              Per-file export settings
+* The export dispatcher::       How to access exporter commands
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
 * LaTeX export::                Exporting to LaTeX
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
-* Text interpretation::         How the exporter looks at the file
+
+Markup rules
+
+* Document title::              How the document title is determined
+* Headings and sections::       The main structure of the exported document
+* Table of contents::           If, where, how to create a table of contents
+* Initial text::                Text before the first headline
+* Lists::                       Plain lists are exported
+* Paragraphs::                  What determines beginning and ending
+* Literal examples::            Source code and other examples
+* Tables exported::             Tables are exported richly
+* Footnotes::                   Numbers like [1]
+* Emphasis and monospace::      To bold or not to bold
+* TeX macros and LaTeX fragments::  Create special, rich export.
+* Horizontal rules::            A line across the page
+* Comment lines::               Some lines will not be exported
 
 HTML export
 
-* HTML Export commands::        How to invoke LaTeX export
+* HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
@@ -295,15 +313,6 @@ LaTeX export
 * LaTeX export commands::       How to invoke LaTeX export
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
-
-Text interpretation by the exporter
-
-* Comment lines::               Some lines will not be exported
-* Initial text::                Text before the first headline
-* Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chunks of text
-* Enhancing text::              Subscripts, symbols and more
-* Export options::              How to influence the export settings
 
 Publishing
 
@@ -2667,8 +2676,6 @@ for Bib@TeX{} database files, and you can use the corresponding code as
 an implementation example.  Search for @samp{BibTeX links} in the source
 file.
 
-
-
 @node TODO Items, Tags, Hyperlinks, Top
 @chapter TODO Items
 @cindex TODO items
@@ -4633,7 +4640,7 @@ The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
-@node Effort estimates
+@node Effort estimates,  , Clocking work time, Dates and Times
 @section Effort estimates
 @cindex Effort estimates
 
@@ -6573,8 +6580,348 @@ deadlines or appointments into a desktop calendar program like iCal,
 Org mode can also produce extracts in the iCalendar format.  Currently
 Org mode only supports export, not import of these different formats.
 
-When exporting, Org mode uses special conventions to enrich the output
-produced.  @xref{Text interpretation}, for more details.
+@menu
+* Markup rules::                Which structures are recognized?
+* Export options::              Per-file export settings
+* The export dispatcher::       How to access exporter commands
+* ASCII export::                Exporting to plain ASCII
+* HTML export::                 Exporting to HTML
+* LaTeX export::                Exporting to LaTeX
+* XOXO export::                 Exporting to XOXO
+* iCalendar export::            Exporting in iCalendar format
+@end menu
+
+@node Markup rules, Export options, Exporting, Exporting
+@section Markup rules
+
+When exporting Org mode documents,  the exporter tries to reflect the
+structure of the document as accurately as possible in the back-end.  Since
+export targets like HTML or La@TeX{} allow much richer formatting, Org mode
+has rules how to prepare text for rich export.  This section summarizes the
+markup rule used in an Org mode buffer.
+
+@menu
+* Document title::              How the document title is determined
+* Headings and sections::       The main structure of the exported document
+* Table of contents::           If, where, how to create a table of contents
+* Initial text::                Text before the first headline
+* Lists::                       Plain lists are exported
+* Paragraphs::                  What determines beginning and ending
+* Literal examples::            Source code and other examples
+* Tables exported::             Tables are exported richly
+* Footnotes::                   Numbers like [1]
+* Emphasis and monospace::      To bold or not to bold
+* TeX macros and LaTeX fragments::  Create special, rich export.
+* Horizontal rules::            A line across the page
+* Comment lines::               Some lines will not be exported
+@end menu
+
+@node Document title, Headings and sections, Markup rules, Markup rules
+@subheading Document title
+
+@noindent
+The title of the exported document is taken from the special line
+
+@example
+#+TITLE: This is the title of the document
+@end example
+
+@noindent
+If this line does not exist, the title is derived from the first non-empty,
+non-comment line in the buffer.  If no such line exists, or if you have
+turned off exporting of the text before the first headline (see below), the
+title will be the file name without extension.
+
+If you are exporting only a subtree by marking is as the region, the heading
+of the subtree will become the title of the document.
+
+@node Headings and sections, Table of contents, Document title, Markup rules
+@subheading Headings and sections
+
+The outline structure of the document as described in @ref{Document
+Structure} forms the basis for defining sections of the exported document.
+However, since the outline structure is also used for (for example) lists of
+tasks, only the first three outline levels will be used as headings.  Deeper
+levels will become itemized lists.  You can change the location of this
+switch, globally by setting the variable @code{org-headline-levels}, or on a
+per file basis with a line
+
+@example
+#+OPTIONS: H:4
+@end example
+
+@node Table of contents, Initial text, Headings and sections, Markup rules
+@subheading Table of contents
+
+The table of contents is normally inserted directly before the first headline
+of the file.  If you would like to get it to a different location, insert the
+string @code{[TABLE-OF-CONTENTS]} on a line by itself at the desired
+location.  The depth of the table of contents is by default the same as the
+number of headline levels, but you can choose a smaller number or turn off
+the table of contents entirely by configuring the variable
+@code{org-export-with-toc}, or on a per-file basis with a line like
+
+@example
+#+OPTIONS: toc:2          (only to two levels in TOC)
+#+OPTIONS: toc:nil        (no TOC at all)
+@end example
+
+@node Initial text, Lists, Table of contents, Markup rules
+@subheading Text before the first headline
+
+Org mode normally exports the text before the first headline, and even uses
+the first line as the document title.  The text will be fully marked up.  If
+you need to include literal HTML or La@TeX{} code, use the special constructs
+described below in the sections for the individual exporters.
+
+Some people like to use the space before the first headline for setup and
+internal links and therefore would like to control the exported text before
+the first headline in a different way.  You can do so by setting the variable
+@code{org-export-skip-text-before-1st-heading} to @code{t}.  On a per-file
+basis, you can get the same effect with @samp{#+OPTIONS: skip:t}.
+
+@noindent
+If you still want to have some text before the first headline, use the
+@code{#+TEXT} construct:
+
+@example
+#+OPTIONS: skip:t
+#+TEXT: This text will go before the *first* headline.
+#+TEXT: [TABLE-OF-CONTENTS]
+#+TEXT: This goes between the table of contents and the first headline
+@end example
+
+@node Lists, Paragraphs, Initial text, Markup rules
+@subheading Lists
+
+Plain lists as described in @ref{Plain lists} are translated to the back-ends
+syntax for such lists.  Most back-ends support unordered, ordered, and
+description lists.
+
+@node Paragraphs, Literal examples, Lists, Markup rules
+@subheading Paragraphs, line breaks, and quoting
+
+Paragraphs are separated by at least one empty line.  If you need to enforce
+a line break within a paragraph, use @samp{\\} at the end of a line.
+
+When quoting a passage from another document, it is customary to format this
+as a paragraph that is indented on both the left and the right margin.  You
+can include quotations in Org mode documents like this:
+
+@example
+#+begin_quote
+Everything should be made as simple as possible,
+but not any simpler -- Albert Einstein
+#+end_quote
+@end example
+
+@node Literal examples, Tables exported, Paragraphs, Markup rules
+@subheading Literal examples
+
+You can include literal examples that should not be subjected to
+markup.  Such examples will be typeset in monospace, so this is well suited
+for source code and similar examples.
+
+@example
+#+begin_example
+Some example from a text file.
+#+end_example
+@end example
+
+For simplicity when using small examples, you can also start the example
+lines with a colon:
+
+@example
+: Some example from a text file.
+@end example
+
+If the example is source code from a programming language, or any other text
+that can be marked up by font-lock in Emacs, you can ask for the example to
+look like the fontified Emacs buffer@footnote{Currently this works only for
+the HTML back-end, and requires the @file{htmlize.el} package version 1.34 or
+later.}.  This is done with the @samp{src} block, where you also need to
+specify the name of the major mode that should be used to fontify the
+example:
+
+@example
+#+begin_src emacs-lisp
+(defun org-xor (a b)
+   "Exclusive or."
+   (if a (not b) b))
+#+end_src
+@end example
+
+@node Tables exported, Footnotes, Literal examples, Markup rules
+@subheading Tables
+
+Both the native Org mode tables (@pxref{Tables}) and tables formatted with
+the @file{table.el} package will be exported properly.  For Org mode tables,
+the lines before the first horizontal separator line will become table header
+lines.
+
+@node Footnotes, Emphasis and monospace, Tables exported, Markup rules
+@subheading Footnotes
+@cindex footnotes
+@cindex @file{footnote.el}
+
+@kindex C-c !
+Numbers in square brackets are treated as footnote markers, and lines
+starting with such a marker are interpreted as the footnote itself.  You can
+use the Emacs package @file{footnote.el} to create footnotes@footnote{The
+@file{footnote} package uses @kbd{C-c !} to invoke its commands.  This
+binding conflicts with the Org mode command for inserting inactive time
+stamps.  You could use the variable @code{footnote-prefix} to switch
+footnotes commands to another key.  Or, if you are too used to this binding,
+you could use @code{org-replace-disputed-keys} and @code{org-disputed-keys}
+to change the settings in Org.}.  For example:
+
+@example
+The Org homepage[1] now looks a lot better than it used to.
+
+[1] The link is: http://orgmode.org
+@end example
+
+@node Emphasis and monospace, TeX macros and LaTeX fragments, Footnotes, Markup rules
+@subheading Emphasis and monospace
+
+@cindex underlined text
+@cindex bold text
+@cindex italic text
+@cindex verbatim text
+You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
+and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
+in the code and verbatim string is not processed for Org mode specific
+syntax, it is exported verbatim.
+
+@node TeX macros and LaTeX fragments, Horizontal rules, Emphasis and monospace, Markup rules
+@subheading @TeX{} macros and La@TeX{} fragments
+@cindex LaTeX fragments, export
+@cindex TeX macros, export
+@cindex HTML entities
+@cindex LaTeX entities
+
+A @TeX{}-like syntax is used to specify special characters.  Where possible,
+these will be transformed into the native format of the exporter back-end.
+Strings like @code{\alpha} will be exported as @code{&alpha;} in the HTML
+output, and as @code{$\alpha$} in the La@TeX{} output.  Similarly,
+@code{\nbsp} will become @code{&nbsp;} in HTML and @code{~} in La@TeX{}.
+This applies for a large number of entities, with names taken from both HTML
+and La@TeX{}, see the variable @code{org-html-entities} for the complete
+list.  If you are unsure about a name, use @kbd{M-@key{TAB}} for completion
+after having types the backslash and maybe a few characters
+(@pxref{Completion}).
+
+La@TeX{} fragments are converted into images for HTML export, and they are
+written literally into the La@TeX{} export.  See also @ref{Embedded LaTeX}.
+
+Finally, @samp{\-} is treated as a shy hyphen, and @samp{--}, @samp{---}, and
+@samp{...} are all converted into special commands creating hyphens of
+different lengths or a compact set of dots.
+
+@node Horizontal rules, Comment lines, TeX macros and LaTeX fragments, Markup rules
+@subheading  Horizontal rules
+@cindex horizontal rules, in exported files
+A line consisting of only dashes, and at least 5 of them, will be
+exported as a horizontal line (@samp{<hr/>} in HTML).
+
+@node Comment lines,  , Horizontal rules, Markup rules
+@subheading Comment lines
+@cindex comment lines
+@cindex exporting, not
+
+Lines starting with @samp{#} in column zero are treated as comments
+and will never be exported.  Also entire subtrees starting with the
+word @samp{COMMENT} will never be exported.
+
+@table @kbd
+@kindex C-c ;
+@item C-c ;
+Toggle the COMMENT keyword at the beginning of an entry.
+@end table
+
+@node Export options, The export dispatcher, Markup rules, Exporting
+@section Export options
+@cindex options, for export
+
+@cindex completion, of option keywords
+The exporter recognizes special lines in the buffer which provide
+additional information.  These lines may be put anywhere in the file.
+The whole set of lines can be inserted into the buffer with @kbd{C-c
+C-e t}.  For individual lines, a good way to make sure the keyword is
+correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
+(@pxref{Completion}).
+
+@table @kbd
+@kindex C-c C-e t
+@item C-c C-e t
+Insert template with export options, see example below.
+@end table
+
+@example
+#+TITLE:     the title to be shown (default is the buffer name)
+#+AUTHOR:    the author (default taken from @code{user-full-name})
+#+DATE:      A date, fixed, of a format string for @code{format-time-string}
+#+EMAIL:     his/her email address (default from @code{user-mail-address})
+#+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
+#+TEXT:      Some descriptive text to be inserted at the beginning.
+#+TEXT:      Several lines may be given.
+#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
+@end example
+
+@noindent
+The OPTIONS line is a compact@footnote{If you want to configure many options
+this way, you can use several OPTIONS lines.} form to specify export settings.  Here
+you can:
+@cindex headline levels
+@cindex section-numbers
+@cindex table of contents
+@cindex line-break preservation
+@cindex quoted HTML tags
+@cindex fixed-width sections
+@cindex tables
+@cindex @TeX{}-like syntax for sub- and superscripts
+@cindex footnotes
+@cindex special strings
+@cindex emphasized text
+@cindex @TeX{} macros
+@cindex La@TeX{} fragments
+@cindex author info, in export
+@cindex time info, in export
+@example
+H:         @r{set the number of headline levels for export}
+num:       @r{turn on/off section-numbers}
+toc:       @r{turn on/off table of contents, or set level limit (integer)}
+\n:        @r{turn on/off line-break-preservation}
+@@:         @r{turn on/off quoted HTML tags}
+::         @r{turn on/off fixed-width sections}
+|:         @r{turn on/off tables}
+^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
+           @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
+           @r{the simple @code{a_b} will be left as it is.}
+-:         @r{turn on/off conversion of special strings.}
+f:         @r{turn on/off footnotes like this[1].}
+*:         @r{turn on/off emphasized text (bold, italic, underlined)}
+TeX:       @r{turn on/off simple @TeX{} macros in plain text}
+LaTeX:     @r{turn on/off La@TeX{} fragments}
+skip:      @r{turn on/off skipping the text before the first heading}
+author:    @r{turn on/off inclusion of author name/email into exported file}
+timestamp: @r{turn on/off inclusion creation time into exported file}
+d:         @r{turn on/off inclusion of drawers}
+@end example
+
+These options take effect in both the HTML and La@TeX{} export, except
+for @code{TeX} and @code{LaTeX}, which are respectively @code{t} and
+@code{nil} for the La@TeX{} export.
+
+
+@node The export dispatcher, ASCII export, Export options, Exporting
+@section The export dispatcher
+
+All export commands can be reached using the export dispatcher, which is a
+prefix key that prompts for an additional key specifying the command.
+Normally the entire file is exported, but if there is an active region that
+contains one outline tree, the first heading is used as document title and
+the subtrees are exported.
 
 @table @kbd
 @kindex C-c C-e
@@ -6585,6 +6932,10 @@ command.  The prefix arg is passed through to the exporter.  If the option
 @code{org-export-run-in-background} is set, Org will run the command in the
 background if that seems useful for the specific command (i.e. commands that
 write to a file).
+@kindex C-c C-e v
+@item C-c C-e v
+Like @kbd{C-c C-e}, but only export the text that is currently visible
+(i.e. not hidden by outline visibility).
 @kindex C-u C-u C-c C-e
 @item C-u C-u C-c C-e
 Call an the exporter, but reverse the setting of
@@ -6592,16 +6943,7 @@ Call an the exporter, but reverse the setting of
 not set, or force processing in the current Emacs process if st.
 @end table
 
-@menu
-* ASCII export::                Exporting to plain ASCII
-* HTML export::                 Exporting to HTML
-* LaTeX export::                Exporting to LaTeX
-* XOXO export::                 Exporting to XOXO
-* iCalendar export::            Exporting in iCalendar format
-* Text interpretation::         How the exporter looks at the file
-@end menu
-
-@node ASCII export, HTML export, Exporting, Exporting
+@node ASCII export, HTML export, The export dispatcher, Exporting
 @section ASCII export
 @cindex ASCII export
 
@@ -6654,7 +6996,7 @@ HTML formatting, in ways similar to John Grubers @emph{markdown}
 language, but with additional support for tables.
 
 @menu
-* HTML Export commands::        How to invoke LaTeX export
+* HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
 * Images::                      How to include images
@@ -6992,7 +7334,7 @@ Export as XOXO file @file{myfile.html}.
 Export only the visible part of the document.
 @end table
 
-@node iCalendar export, Text interpretation, XOXO export, Exporting
+@node iCalendar export,  , XOXO export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
@@ -7028,294 +7370,6 @@ from the headline, and the description from the body (limited to
 
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
-
-
-@node Text interpretation,  , iCalendar export, Exporting
-@section Text interpretation by the exporter
-
-The exporter backends interpret additional structure in the Org file
-in order to produce better output.
-
-@menu
-* Comment lines::               Some lines will not be exported
-* Initial text::                Text before the first headline
-* Footnotes::                   Numbers like [1]
-* Quoted examples::             Inserting quoted chunks of text
-* Enhancing text::              Subscripts, symbols and more
-* Export options::              How to influence the export settings
-@end menu
-
-@node Comment lines, Initial text, Text interpretation, Text interpretation
-@subsection Comment lines
-@cindex comment lines
-@cindex exporting, not
-
-Lines starting with @samp{#} in column zero are treated as comments
-and will never be exported.  Also entire subtrees starting with the
-word @samp{COMMENT} will never be exported.
-
-@table @kbd
-@kindex C-c ;
-@item C-c ;
-Toggle the COMMENT keyword at the beginning of an entry.
-@end table
-
-@node Initial text, Footnotes, Comment lines, Text interpretation
-@subsection Text before the first headline
-
-Org mode normally ignores any text before the first headline when
-exporting, leaving this region for internal links to speed up navigation
-etc.  However, in publishing-oriented files, you might want to have some
-text before the first headline, like a small introduction, special HTML
-code with a navigation bar, etc.  You can ask to have this part of the
-file exported as well by setting the variable
-@code{org-export-skip-text-before-1st-heading} to @code{nil}.  On a
-per-file basis, you can get the same effect with
-
-@example
-#+OPTIONS: skip:nil
-@end example
-
-The text before the first headline will be fully processed
-(@pxref{Enhancing text}), and the first non-comment line becomes the
-title of the exported document.  If you need to include literal HTML,
-use the special constructs described in @ref{Quoting HTML tags}.  The
-table of contents is normally inserted directly before the first
-headline of the file.  If you would like to get it to a different
-location, insert the string @code{[TABLE-OF-CONTENTS]} on a line by
-itself at the desired location.
-
-Finally, if you want to use the space before the first headline for
-internal purposes, but @emph{still} want to place something before the
-first headline when exporting the file, you can use the @code{#+TEXT}
-construct:
-
-@example
-#+OPTIONS: skip:t
-#+TEXT: This text will go before the *first* headline.
-#+TEXT: We place the table of contents here:
-#+TEXT: [TABLE-OF-CONTENTS]
-#+TEXT: This goes between the table of contents and the first headline
-@end example
-
-@node Footnotes, Quoted examples, Initial text, Text interpretation
-@subsection Footnotes
-@cindex footnotes
-@cindex @file{footnote.el}
-
-Numbers in square brackets are treated as footnotes, so that you can use
-the Emacs package @file{footnote.el} to create footnotes.  For example:
-
-@example
-The Org homepage[1] clearly needs help from
-a good web designer.
-
-[1] The link is: http://orgmode.org
-@end example
-
-@noindent
-@kindex C-c !
-Note that the @file{footnote} package uses @kbd{C-c !} to invoke its
-commands.  This binding conflicts with the Org mode command for
-inserting inactive time stamps.  You could use the variable
-@code{footnote-prefix} to switch footnotes commands to another key.  Or,
-if you are too used to this binding, you could use
-@code{org-replace-disputed-keys} and @code{org-disputed-keys} to change
-the settings in Org.
-
-@node Quoted examples, Enhancing text, Footnotes, Text interpretation
-@subsection Quoted examples
-@cindex quoted examples
-@cindex examples, quoted
-@cindex text, fixed width
-@cindex fixed width text
-
-When writing technical documents, you often need to insert examples that
-are not further interpreted by Org mode.  For historical reasons, there
-are several ways to do this:
-
-@itemize @bullet
-@item
-If a headline starts with the word @samp{QUOTE}, the text below the
-headline will be typeset as fixed-width, to allow quoting of computer
-codes etc.
-@item
-Lines starting with @samp{:} are also typeset in fixed-width font.
-@table @kbd
-@kindex C-c :
-@item C-c :
-Toggle fixed-width for entry (QUOTE) or region, see below.
-@end table
-@item
-Finally, text between
-@example
-#+BEGIN_EXAMPLE
-quoted text
-#+END_EXAMPLE
-@end example
-will also be exported in this way.
-@end itemize
-
-
-@node Enhancing text, Export options, Quoted examples, Text interpretation
-@subsection Enhancing text for export
-@cindex enhancing text
-@cindex richer text
-
-Some of the export backends of Org mode allow for sophisticated text
-formatting, this is true in particular for the HTML and La@TeX{}
-backends.  Org mode has a number of typing conventions that allow to
-produce a richly formatted output.
-
-@itemize @bullet
-
-@cindex hand-formatted lists
-@cindex lists, hand-formatted
-@item
-Plain lists @samp{-}, @samp{*} or @samp{+} as bullet, or with @samp{1.}
-or @samp{2)} as enumerator will be recognized and transformed if the
-backend supports lists.  See @xref{Plain lists}.
-
-@cindex underlined text
-@cindex bold text
-@cindex italic text
-@cindex verbatim text
-@item
-You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
-and @code{~verbatim~}, and, if you must, @samp{+strikethrough+}.  Text
-in the code and verbatim string is not processed for Org mode specific
-syntax, it is exported verbatim.
-
-@cindex horizontal rules, in exported files
-@item
-A line consisting of only dashes, and at least 5 of them, will be
-exported as a horizontal line (@samp{<hr/>} in HTML).
-
-@cindex LaTeX fragments, export
-@cindex TeX macros, export
-@item
-Many @TeX{} macros and entire La@TeX{} fragments are converted into HTML
-entities or images (@pxref{Embedded LaTeX}).
-
-@cindex tables, export
-@item
-Tables are transformed into native tables under the exporter, if the
-export backend supports this. Data fields before the first horizontal
-separator line will be formatted as table header fields.
-
-@cindex fixed width
-@item
-If a headline starts with the word @samp{QUOTE}, the text below the
-headline will be typeset as fixed-width, to allow quoting of computer
-codes etc.  Lines starting with @samp{:} are also typeset in fixed-width
-font.
-@table @kbd
-@kindex C-c :
-@item C-c :
-Toggle fixed-width for entry (QUOTE) or region, see below.
-@end table
-Finally, text between
-@example
-#+BEGIN_EXAMPLE
-quoted text
-#+END_EXAMPLE
-@end example
-will also be exported in this way.
-
-@cindex linebreak, forced
-@item
-A double backslash @emph{at the end of a line} enforces a line break at
-this position.
-
-@cindex HTML entities, LaTeX entities
-@item
-Strings like @code{\alpha} will be exported as @code{&alpha;}, in the
-HTML output.  These strings are exported as @code{$\alpha$} in the
-La@TeX{} output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in
-HTML and in La@TeX{}.  This applies for a long list of entities, see
-the variable @code{org-html-entities} for the complete list.
-@c FIXME
-@end itemize
-
-If these conversions conflict with your habits of typing ASCII text,
-they can all be turned off with corresponding variables.  See the
-customization group @code{org-export-general}, and the following section
-which explains how to set export options with special lines in a
-buffer.
-
-
-@node Export options,  , Enhancing text, Text interpretation
-@subsection Export options
-@cindex options, for export
-
-@cindex completion, of option keywords
-The exporter recognizes special lines in the buffer which provide
-additional information.  These lines may be put anywhere in the file.
-The whole set of lines can be inserted into the buffer with @kbd{C-c
-C-e t}.  For individual lines, a good way to make sure the keyword is
-correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
-(@pxref{Completion}).
-
-@table @kbd
-@kindex C-c C-e t
-@item C-c C-e t
-Insert template with export options, see example below.
-@end table
-
-@example
-#+TITLE:     the title to be shown (default is the buffer name)
-#+AUTHOR:    the author (default taken from @code{user-full-name})
-#+DATE:      A date, fixed, of a format string for @code{format-time-string}
-#+EMAIL:     his/her email address (default from @code{user-mail-address})
-#+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
-#+TEXT:      Some descriptive text to be inserted at the beginning.
-#+TEXT:      Several lines may be given.
-#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-@end example
-
-@noindent
-The OPTIONS line is a compact form to specify export settings.  Here
-you can:
-@cindex headline levels
-@cindex section-numbers
-@cindex table of contents
-@cindex linebreak preservation
-@cindex quoted HTML tags
-@cindex fixed-width sections
-@cindex tables
-@cindex @TeX{}-like syntax for sub- and superscripts
-@cindex footnotes
-@cindex special strings
-@cindex emphasized text
-@cindex @TeX{} macros
-@cindex La@TeX{} fragments
-@cindex author info, in export
-@cindex time info, in export
-@example
-H:         @r{set the number of headline levels for export}
-num:       @r{turn on/off section-numbers}
-toc:       @r{turn on/off table of contents, or set level limit (integer)}
-\n:        @r{turn on/off linebreak-preservation}
-@@:         @r{turn on/off quoted HTML tags}
-::         @r{turn on/off fixed-width sections}
-|:         @r{turn on/off tables}
-^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
-           @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
-           @r{the simple @code{a_b} will be left as it is.}
--:         @r{turn on/off conversion of special strings.}
-f:         @r{turn on/off foototes like this[1].}
-*:         @r{turn on/off emphasized text (bold, italic, underlined)}
-TeX:       @r{turn on/off simple @TeX{} macros in plain text}
-LaTeX:     @r{turn on/off La@TeX{} fragments}
-skip:      @r{turn on/off skipping the text before the first heading}
-author:    @r{turn on/off inclusion of author name/email into exported file}
-timestamp: @r{turn on/off inclusion creation time into exported file}
-d:         @r{turn on/off inclusion of drawers}
-@end example
-
-These options take effect in both the HTML and La@TeX{} export, except
-for @code{TeX} and @code{LaTeX}, which are respectively @code{t} and
-@code{nil} for the La@TeX{} export.
 
 @node Publishing, Miscellaneous, Exporting, Top
 @chapter Publishing
