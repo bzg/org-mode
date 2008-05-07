@@ -1,3 +1,9 @@
+2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org.el (org-complete-expand-structure-template): New,
+	experimental function.
+	(org-structure-template-alist): New, experimental option.
+	(org-complete): Call `org-complete-expand-structure-template'.
 
 2008-05-06  Bastien Guerry  <bzg@altern.org>
 

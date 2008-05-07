@@ -2350,7 +2350,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-buffer table-orig-buffer
 	 ind item-type starter didclose
 	 rpl path desc descp desc1 desc2 link
-	 snumber fnc
+	 snumber fnc item-tag
 	 )
 
     (let ((inhibit-read-only t))
@@ -2760,7 +2760,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
-		    item-tag)
+		    item-tag nil)
 	      (if (string-match "\\(.*?\\) ::[ \t]*" line)
 		  (setq item-type "d"
 			item-tag (match-string 1 line)

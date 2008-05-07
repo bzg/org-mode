@@ -7581,24 +7581,31 @@ This function can be used in a hook."
 
 (defcustom org-structure-template-alist
   '(
-    ("s" "#+begin_src ?\n\n#+end_src" "#+<src lang=\"?\">\n\n</src>")
-    ("e" "#+begin_example\n?\n#+end_example" "<example>\n?\n</example>")
-    ("q" "#+begin_quote\n?\n#+end_quote" "<quote>\n?\n</quote>")
-    ("v" "#+begin_verse\n?\n#+end_verse" "<verse>\n?\n</verse>")
-    ("l" "#+begin_latex\n?\n#+end_latex" "<literal style=\"latex\">\n?\n</literal>")
-    ("L" "#+latex: " "<literal style=\"latex\">?</literal>")
-    ("h" "#+begin_html\n?\n#+end_html" "<literal style=\"latex\">\n?\n</literal>")
-    ("H" "#+html: " "<literal style=\"latex\">?</literal>")
+    ("s" "#+begin_src ?\n\n#+end_src")
+    ("e" "#+begin_example\n?\n#+end_example")
+    ("q" "#+begin_quote\n?\n#+end_quote")
+    ("v" "#+begin_verse\n?\n#+end_verse")
+    ("l" "#+begin_latex\n?\n#+end_latex")
+    ("L" "#+latex: ")
+    ("h" "#+begin_html\n?\n#+end_html")
+    ("H" "#+html: ")
     ("a" "#+begin_ascii\n?\n#+end_ascii")
     ("A" "#+ascii: ")
-    ("i" "#+include: " "<include file=\"?\">")
+    ("i" "#+include: %file ?")
     )
-  "FIXME"
-  :group 'org ;?????????????????
-  :type 'sexp)
+  "Structure completion elements.
+This is a list of abbreviation keys and values.  The value gets inserted
+it you type @samp{.} followed by the key and then the completion key,
+usually `M-TAB'.  %file will be replaced by a file name after prompting
+for the file uning completion.
+This is an experimental feature, it is undecided if it is going to stay in."
+  :group 'org-completion
+  :type '(repeat
+	  (string :tag "Key") (string :tag "Template")))
 
 (defun org-complete-expand-structure-template (start cell)
-  (let ((rpl (cdr cell)))
+  "Expand a structure template."
+  (let ((rpl (nth 1 cell)))
     (delete-region start (point))
     (when (string-match "\\`#\\+" rpl)
       (cond
@@ -7607,6 +7614,14 @@ This function can be used in a hook."
 	(delete-region (point-at-bol) (point)))
        (t (newline))))
     (setq start (point))
+    (if (string-match "%file" rpl)
+	(setq rpl (replace-match 
+		   (concat
+		    "\""
+		    (save-match-data
+		      (abbreviate-file-name (read-file-name "Include file: ")))
+		    "\"")
+		   t t rpl)))
     (insert rpl)
     (if (re-search-backward "\\?" start t) (delete-char 1))))
     
