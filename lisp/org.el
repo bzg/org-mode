@@ -9809,14 +9809,21 @@ for a value, offering competion either on allowed values (via an inherited
 xxx_ALL property) or on existing values in other instances of this property
 in the current file."
   (interactive
-   (let* ((prop	(completing-read
-		 "Property: " (mapcar 'list (org-buffer-property-keys nil t t))))
+   (let* ((completion-ignore-case t)
+	  (keys (org-buffer-property-keys nil t t))
+	  (prop0 (completing-read "Property: " (mapcar 'list keys)))
+	  (prop (if (member prop0 keys)
+		    prop0
+		  (or (cdr (assoc (downcase prop0)
+				  (mapcar (lambda (x) (cons (downcase x) x))
+					  keys)))
+		      prop0)))
 	  (cur (org-entry-get nil prop))
 	  (allowed (org-property-get-allowed-values nil prop 'table))
 	  (existing (mapcar 'list (org-property-values prop)))
 	  (val (if allowed
-		   (completing-read "Value: " allowed nil 'req-match)
-		 (completing-read
+		   (org-completing-read "Value: " allowed nil 'req-match)
+		 (org-completing-read
 		  (concat "Value" (if (and cur (string-match "\\S-" cur))
 				      (concat "[" cur "]") "")
 			  ": ")
@@ -9828,7 +9835,8 @@ in the current file."
 (defun org-delete-property (property)
   "In the current entry, delete PROPERTY."
   (interactive
-   (let* ((prop (completing-read
+   (let* ((completion-ignore-case t)
+	  (prop (completing-read
 		 "Property: " (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
@@ -9839,7 +9847,8 @@ in the current file."
 (defun org-delete-property-globally (property)
   "Remove PROPERTY globally, from all entries."
   (interactive
-   (let* ((prop (completing-read
+   (let* ((completion-ignore-case t)
+	  (prop (completing-read
 		 "Globally remove property: "
 		 (mapcar 'list (org-buffer-property-keys)))))
      (list prop)))
