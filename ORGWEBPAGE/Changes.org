@@ -70,6 +70,8 @@
       the task that was interrupted by the task that is currently
       being clocked. `1',... selects a recent task.  When you
       select a task, you will be clocked into it.
+    - You can use `C-u C-c C-x C-j' to jump to any of these
+      tasks.
 
     When moving an entry using structure editing commands,
     archiving commands, or the special subtree cut-and-paste
@@ -82,7 +84,7 @@
 *** Fontified code examples in HTML export
 
     You can now get code examples fontified like they would be
-    fontified in an emacs buffer, and export the result to HTML.
+    fontified in an emacs Buffer, and export the result to HTML.
     To do so, wrap the code examples into the following
     structure:
 
@@ -96,8 +98,17 @@
     mode that should be used to fontify the code example.
 
     Currently this works only for HTML export, and requires the
-    /htmlize.el/ package.  For other backends, such structures are
-    exported as EXAMPLE.
+    /htmlize.el/ package, version 1.34 or later.  For other
+    backends, such structures are simply exported as EXAMPLE.
+
+*** BBDB anniversaries much faster
+    `bbdb-anniversaries' is now much faster, thanks to a new
+    approach using a hash for birthdays.  Thanks to Thomas
+    Baumann for a patch to this effect.
+
+*** org-eval.el
+
+*** Bug fixes...
 
 * Version 6.02
 
