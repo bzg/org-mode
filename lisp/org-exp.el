@@ -707,7 +707,7 @@ modified) list.")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options js-up js-main js-css js-opt a pr)
 	(while (re-search-forward re nil t)
-	  (setq key (org-match-string-no-properties 1)
+	  (setq key (upcase (org-match-string-no-properties 1))
 		val (org-match-string-no-properties 2))
 	  (cond
 	   ((setq a (assoc key org-export-inbuffer-options-extra))
@@ -1197,6 +1197,9 @@ on this string to produce the exported version."
       (let ((org-inhibit-startup t)) (org-mode))
       (untabify (point-min) (point-max))
 
+      ;; Handle incude files
+      (org-export-handle-include-files)
+
       ;; Handle source code snippets
       (org-export-replace-src-segments)
 
@@ -1321,7 +1324,7 @@ on this string to produce the exported version."
 
       ;; Blockquotes
       (goto-char (point-min))
-      (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)quote\\>.*" nil t)
+      (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*" nil t)
 	(replace-match (if (equal (downcase (match-string 1)) "end")
 			   "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
 			 t t))
@@ -1565,6 +1568,38 @@ When LEVEL is non-nil, increase section numbers on that level."
       (if (string-match "\\(\\.0\\)+\\'" string)
 	  (setq string (replace-match "" t nil string))))
     string))
+
+;;; Include files
+
+(defun org-export-handle-include-files ()
+  "Include the contents of include files, with proper formatting."
+  (let (params file markup lang start end)
+    (goto-char (point-min))
+    (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
+      (setq params (read (concat "(" (match-string 1) ")"))
+	    file (org-symname-or-string (pop params))
+	    markup (org-symname-or-string (pop params))
+	    lang (org-symname-or-string (pop params)))
+      (delete-region (match-beginning 0) (match-end 0))
+      (if (or (not file)
+	      (not (file-exists-p file))
+	      (not (file-readable-p file)))
+	  (insert (format "CANNOT INCLUDE FILE %s" file))
+	(when markup
+	  (if (equal (downcase markup) "src")
+	      (setq start (format "#+begin_src %s\n" (or lang "fundamental"))
+		    end "#+end_src")
+	    (setq start (format "#+begin_%s\n" markup)
+		  end  (format "#+end_%s" markup))))
+	(insert (or start ""))
+	(forward-char (nth 1 (insert-file-contents (expand-file-name file))))
+	(or (bolp) (newline))
+	(insert (or end ""))))))
+
+(defun org-symname-or-string (s)
+  (if (symbolp s)
+      (if s (symbol-name s) s)
+    s))
 
 ;;; Fontification of code
 ;; Currently only for th HTML backend, but who knows....

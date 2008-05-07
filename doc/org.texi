@@ -292,6 +292,7 @@ Markup rules
 * Lists::                       Plain lists are exported
 * Paragraphs::                  What determines beginning and ending
 * Literal examples::            Source code and other examples
+* Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
 * Footnotes::                   Numbers like [1]
 * Emphasis and monospace::      To bold or not to bold
@@ -6608,6 +6609,7 @@ markup rule used in an Org mode buffer.
 * Lists::                       Plain lists are exported
 * Paragraphs::                  What determines beginning and ending
 * Literal examples::            Source code and other examples
+* Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
 * Footnotes::                   Numbers like [1]
 * Emphasis and monospace::      To bold or not to bold
@@ -6715,7 +6717,7 @@ but not any simpler -- Albert Einstein
 #+end_quote
 @end example
 
-@node Literal examples, Tables exported, Paragraphs, Markup rules
+@node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples
 
 You can include literal examples that should not be subjected to
@@ -6751,7 +6753,23 @@ example:
 #+end_src
 @end example
 
-@node Tables exported, Footnotes, Literal examples, Markup rules
+@node Include files, Tables exported, Literal examples, Markup rules
+@subheading Include files
+
+During export, you can include the content of another file.  For example, to
+include your .emacs file, you could use:
+
+@example
+#+include "~/.emacs" src emacs-lisp
+@end example
+
+The optional second and third parameter are the markup (@samp{quote},
+@samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
+language for formatting the contents.  The markup is optional, if it is not
+given, the text will be assumed to be in Org mode format and will be
+processed normally.
+
+@node Tables exported, Footnotes, Include files, Markup rules
 @subheading Tables
 
 Both the native Org mode tables (@pxref{Tables}) and tables formatted with

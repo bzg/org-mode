@@ -10,7 +10,14 @@
 
 * Version 6.03
 
+** Overview
+
 ** Incompatible changes
+
+*** The in-buffer settings keywords may now be upper or lower case
+    
+    From now on, it makes no difference is you write =#+STARTUP=
+    or =#+startup=, similarly for all the in-buffer keywords.
 
 *** The text before the first headline is now exported by default
 
@@ -52,10 +59,10 @@
 
     For quoting an entire paragraph as a citation, use
 
-    : #+BEGIN_BLOCKQUOTE
+    : #+BEGIN_QUOTE
     : Everything shound be made as simple as possible,
     : but not any simpler -- Albert Einstein
-    : #+BEGIN_BLOCKQUOTE
+    : #+BEGIN_QUOTE
 
 *** Clock task history, and moving entries with the running clock
 
@@ -94,6 +101,17 @@
     :   (if a (not b) b))
     : #+END_SRC
 
+    In the export, this will then look like this (if you are now
+    looking at the ASCII export and do not see anything
+    interesting, go and check out the HTML version at
+    http://orgmode.org/Changes.html).
+
+#+BEGIN_SRC emacs-lisp
+(defun org-xor (a b)
+  "Exclusive or."
+  (if a (not b) b))
+#+END_SRC
+
     The string after the BEGIN_SRC is the name of the major emacs
     mode that should be used to fontify the code example.
 
@@ -101,12 +119,34 @@
     /htmlize.el/ package, version 1.34 or later.  For other
     backends, such structures are simply exported as EXAMPLE.
 
+*** Include files for export
+
+    A line like
+
+    : #+INCLUDE: "file" markup lang
+
+    will lead to the inclusion of the contents of FILE at the
+    moment of publishing.  FILE ahould be surrounded by double
+    quotes, this is obligatory it if contains space characters.
+    The parameters MARKUP and LANG are optional.  MARKUP can be
+    "example", "quote", or "src".  If it is "src", LANG should be
+    the name of the Emacs mode that should be used for fontifying
+    the code.  For example:
+
+    : Here is my /.emacs/ file:
+    : #+include "~/.emacs" src emacs-lisp
+
 *** BBDB anniversaries much faster
+
     `bbdb-anniversaries' is now much faster, thanks to a new
     approach using a hash for birthdays.  Thanks to Thomas
     Baumann for a patch to this effect.
 
-*** org-eval.el
+*** New file in the contrib directory: org-eval.el
+
+    This module allowes to include the result of the evaluation
+    of Lisp code into the buffer.  This is similar to the Muse
+    <lisp> tag.
 
 *** Bug fixes...
 

@@ -1,5 +1,9 @@
 2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org-exp.el (org-export-handle-include-files): New function.
+	(org-export-preprocess-string): Call
+	`org-export-handle-include-files'.
+
 	* lisp/org.el (org-delete-property-globally)
 	(org-delete-property, org-set-property): Ignore case during
 	completion.
