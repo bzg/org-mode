@@ -10,6 +10,11 @@
 	(org-set-property): Use `org-completing-read' instead of
 	`completing-read'.
 
+	* lisp/org.el (org-complete-expand-structure-template): New,
+	experimental function.
+	(org-structure-template-alist): New, experimental option.
+	(org-complete): Call `org-complete-expand-structure-template'.
+
 2008-05-06  Bastien Guerry  <bzg@altern.org>
 
 	* lisp/org-export-latex.el (org-export-latex-preprocess): Added
