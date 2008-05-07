@@ -2703,17 +2703,22 @@ means to push this value onto the list in the variable.")
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "TAGS" "LINK" "PRIORITIES"
-		 "CONSTANTS" "PROPERTY" "DRAWERS")))
+		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")))
 	  (splitre "[ \t]+")
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
-	  tail sep kws1 prio props drawers)
+	  tail sep kws1 prio props drawers
+	  ext-setup-or-nil setup-contents (start 0))
       (save-excursion
 	(save-restriction
 	  (widen)
 	  (goto-char (point-min))
-	  (while (re-search-forward re nil t)
-	    (setq key (upcase (match-string 1))
-		  value (org-match-string-no-properties 2))
+	  (while (or (and ext-setup-or-nil
+			  (string-match re ext-setup-or-nil start)
+			  (setq start (match-end 0)))
+		     (and (setq ext-setup-or-nil nil start 0)
+			  (re-search-forward re nil t)))
+	    (setq key (upcase (match-string 1 ext-setup-or-nil))
+		  value (org-match-string-no-properties 2 ext-setup-or-nil))
 	    (cond
 	     ((equal key "CATEGORY")
 	      (if (string-match "[ \t]+$" value)
@@ -2758,8 +2763,19 @@ means to push this value onto the list in the variable.")
 	      (string-match " *$" value)
 	      (setq arch (replace-match "" t t value))
 	      (remove-text-properties 0 (length arch)
-				      '(face t fontified t) arch)))
-	    )))
+				      '(face t fontified t) arch))
+	     ((equal key "SETUPFILE")
+	      (setq setup-contents (org-file-contents
+				    (expand-file-name
+				     (org-remove-double-quotes value))
+				    'noerror))
+	      (if (not ext-setup-or-nil)
+		  (setq ext-setup-or-nil setup-contents start 0)
+		(setq ext-setup-or-nil
+		      (concat (substring ext-setup-or-nil 0 start)
+			      "\n" setup-contents "\n"
+			      (substring ext-setup-or-nil start)))))
+	     ))))
       (when cat
 	(org-set-local 'org-category (intern cat))
 	(push (cons "CATEGORY" cat) props))
@@ -2921,6 +2937,20 @@ means to push this value onto the list in the variable.")
 	  )
     (org-compute-latex-and-specials-regexp)
     (org-set-font-lock-defaults)))
+
+(defun org-file-contents (file &optional noerror)
+  "Return the contents of FILE, as a string."
+  (if (or (not file)
+	  (not (file-readable-p file)))
+      (if noerror
+	  (progn
+	    (message "Cannot read file %s" file)
+	    (ding) (sit-for 2)
+	    "")
+	(error "Cannot read file %s" file))
+    (with-temp-buffer
+      (insert-file-contents file)
+      (buffer-string))))
 
 (defun org-extract-log-state-settings (x)
   "Extract the log state setting from a TODO keyword string.
@@ -7141,6 +7171,10 @@ onto the ring."
 (defun org-add-angle-brackets (s)
   (if (equal (substring s 0 1) "<") nil (setq s (concat "<" s)))
   (if (equal (substring s -1) ">") nil (setq s (concat s ">")))
+  s)
+(defun org-remove-double-quotes (s)
+  (if (equal (substring s 0 1) "\"") (setq s (substring s 1)))
+  (if (equal (substring s -1) "\"") (setq s (substring s 0 -1)))
   s)
 
 ;;; Following specific links

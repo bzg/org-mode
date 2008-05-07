@@ -699,16 +699,21 @@ modified) list.")
   (save-excursion
     (save-restriction
       (widen)
-      (goto-char 0)
+      (goto-char (point-min))
       (let ((re (org-make-options-regexp
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
-		    "LINK_UP" "LINK_HOME")
+		    "LINK_UP" "LINK_HOME" "SETUPFILE")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
-	    p key val text options js-up js-main js-css js-opt a pr)
-	(while (re-search-forward re nil t)
-	  (setq key (upcase (org-match-string-no-properties 1))
-		val (org-match-string-no-properties 2))
+	    p key val text options js-up js-main js-css js-opt a pr
+	    ext-setup-or-nil setup-contents (start 0))
+	(while (or (and ext-setup-or-nil
+			(string-match re ext-setup-or-nil start)
+			(setq start (match-end 0)))
+		   (and (setq ext-setup-or-nil nil start 0)
+			(re-search-forward re nil t)))
+	  (setq key (upcase (org-match-string-no-properties 1 ext-setup-or-nil))
+		val (org-match-string-no-properties 2 ext-setup-or-nil))
 	  (cond
 	   ((setq a (assoc key org-export-inbuffer-options-extra))
 	    (setq pr (nth 1 a))
@@ -721,11 +726,23 @@ modified) list.")
 	   ((string-equal key "TEXT")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")
-	    (setq options (concat options " " val)))
+	    (setq options (concat val " " options)))
 	   ((string-equal key "LINK_UP")
 	    (setq p (plist-put p :link-up val)))
 	   ((string-equal key "LINK_HOME")
-	    (setq p (plist-put p :link-home val)))))
+	    (setq p (plist-put p :link-home val)))
+	   ((equal key "SETUPFILE")
+	    (setq setup-contents (org-file-contents
+				  (expand-file-name
+				   (org-remove-double-quotes
+				    (org-trim val)))
+				  'noerror))
+	    (if (not ext-setup-or-nil)
+		(setq ext-setup-or-nil setup-contents start 0)
+	      (setq ext-setup-or-nil
+		    (concat (substring ext-setup-or-nil 0 start)
+			    "\n" setup-contents "\n"
+			    (substring ext-setup-or-nil start)))))))
 	(setq p (plist-put p :text text))
 	(when options
 	  (let ((op '(("H"     . :headline-levels)

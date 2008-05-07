@@ -14,11 +14,6 @@
 
 ** Incompatible changes
 
-*** The in-buffer settings keywords may now be upper or lower case
-    
-    From now on, it makes no difference is you write =#+STARTUP=
-    or =#+startup=, similarly for all the in-buffer keywords.
-
 *** The text before the first headline is now exported by default
 
     Previously, the default was to not include this text, but for
@@ -30,6 +25,23 @@
     : #+OPTIONS: skip:t
 
 ** Details
+
+*** In-buffer options may now be included from an external file.
+
+    If you would like to share the Org setup between a number of
+    files, you can now store in-buffer setup in a file and simply
+    point to that file from each buffer that should read it.  If
+    you write in a buffer
+
+    : #+SETUPFILE: "path/to/setup.org"
+
+    then this file will be scanned as well for in-buffer options
+    like =#+STARTUP=, =#+TITLE=, or =#+OPTIONS=.
+
+*** The in-buffer settings keywords may now be upper or lower case
+    
+    From now on, it makes no difference is you write =#+STARTUP=
+    or =#+startup=, similarly for all the in-buffer keywords.
 
 *** Description lists are now supported natively
 

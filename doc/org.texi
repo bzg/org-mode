@@ -7872,6 +7872,13 @@ have a lower ASCII number that the lowest priority.
 @item #+PROPERTY: Property_Name Value
 This line sets a default inheritance value for entries in the current
 buffer, most useful for specifying the allowed values of a property.
+@item #+SETUPFILE: file
+This line defines a file that holds more in-buffer setup.  Normally this is
+entirely ignored.  Only when the buffer is parsed for option-setting lines
+(i.e. when starting Org mode for a file, when pressing @kbd{C-c C-c} in a
+settings line, or when exporting), then the contents of this file are parsed
+as if they had been included in the buffer.  In particlar, the file can be
+any other Org mode file with internal setup.
 @item #+STARTUP:
 This line sets options to be used at startup of Org mode, when an
 Org file is being visited.  The first set of options deals with the

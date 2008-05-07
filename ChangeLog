@@ -1,5 +1,14 @@
 2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* lisp/org.el (org-remove-double-quotes, org-file-contents): New
+	functions.
+
+	* lisp/org-exp.el (org-infile-export-plist): Also parse the
+	contents of #+SETUPFILE files, recursively.
+
+	* lisp/org.el (org-set-regexps-and-options): Also parse the
+	contents of #+SETUPFILE files, recursively.
+
 	* lisp/org-exp.el (org-export-handle-include-files): New function.
 	(org-export-preprocess-string): Call
 	`org-export-handle-include-files'.
