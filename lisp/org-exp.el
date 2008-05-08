@@ -32,7 +32,7 @@
 
 (declare-function org-export-latex-preprocess "org-export-latex" ())
 (declare-function org-agenda-skip "org-agenda" ())
-(declare-function org-infojs-options-inbuffer-template "org-infojs" ())
+(declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -2144,7 +2144,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-export-skip-text-before-1st-heading
    org-export-with-drawers
    org-export-with-tags
-   (if (featurep 'org-infojs) (org-infojs-options-inbuffer-template) "")
+   (if (featurep 'org-jsinfo) (org-infojs-options-inbuffer-template) "")
    org-export-html-link-up
    org-export-html-link-home
    (file-name-nondirectory buffer-file-name)
