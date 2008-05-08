@@ -9,6 +9,13 @@
 	without the path into the format, to allow the location format to
 	contain a subdirectory.
 
+	* org-agenda.el (org-agenda-post-command-hook): If point is at end
+	of buffer, and the `org-agenda-type' property undefined, use the
+	value from the character before.
+
+	* org.el (org-add-planning-info): Don't let indentation for
+	would-be timestamp become extra whitespace at the end of headline.
+
 2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-remove-double-quotes, org-file-contents): New

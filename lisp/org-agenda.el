@@ -4334,7 +4334,10 @@ so that the date SD will be in that range."
 
 (defun org-agenda-post-command-hook ()
   (and (eolp) (not (bolp)) (backward-char 1))
-  (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
+  (setq org-agenda-type
+	(or (get-text-property (point) 'org-agenda-type)
+	    (get-text-property (max (point-min) (1- (point)))
+			       'org-agenda-type)))
   (if (and org-agenda-follow-mode
 	   (get-text-property (point) 'org-marker))
       (org-agenda-show)))

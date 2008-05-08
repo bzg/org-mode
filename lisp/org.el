@@ -8448,7 +8448,7 @@ be removed."
 	  (widen)
 	  (if (and (looking-at "[ \t]+\n")
 		   (equal (char-before) ?\n))
-	      (backward-delete-char 1))
+	      (delete-region (1- (point)) (point-at-eol)))
 	  ts)))))
 
 (defvar org-log-note-marker (make-marker))
