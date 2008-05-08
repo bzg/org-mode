@@ -1,0 +1,26 @@
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* org.texi (A LaTeX example): Note that fmt may be a one-argument
+	function, and efmt may be a two-argument function.
+
+2008-04-15  Jason Riedy  <jason@acm.org>
+
+	* org.texi (Radio tables): Document multiple destinations.
+
+2008-04-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Agenda column view): New section.
+
+2008-04-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Moving subtrees): Document archiving to the archive
+	sibling.
+
+2008-04-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Agenda commands): Document columns view in the agenda.
+
+2008-04-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Using the property API): Document the API for
+	multi-valued properties.

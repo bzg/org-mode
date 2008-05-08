@@ -1,0 +1,119 @@
+2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-remove-double-quotes, org-file-contents): New
+	functions.
+
+	* org-exp.el (org-infile-export-plist): Also parse the
+	contents of #+SETUPFILE files, recursively.
+
+	* org.el (org-set-regexps-and-options): Also parse the
+	contents of #+SETUPFILE files, recursively.
+
+	* org-exp.el (org-export-handle-include-files): New function.
+	(org-export-preprocess-string): Call
+	`org-export-handle-include-files'.
+
+	* org.el (org-delete-property-globally)
+	(org-delete-property, org-set-property): Ignore case during
+	completion.
+	(org-set-property): Use `org-completing-read' instead of
+	`completing-read'.
+
+	* org.el (org-complete-expand-structure-template): New,
+	experimental function.
+	(org-structure-template-alist): New, experimental option.
+	(org-complete): Call `org-complete-expand-structure-template'.
+
+2008-05-06  Bastien Guerry  <bzg@altern.org>
+
+	* org-export-latex.el (org-export-latex-preprocess): Added
+	support for blockquotes.
+
+2008-05-05  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-read-date-analyze): Catch the case where only a
+	weekday is given.
+
+2008-05-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-set-font-lock-defaults): Make the description
+	tag bold.
+
+	* org-exp.el (org-export-as-html, org-close-li): Implement
+	description lists.
+
+2008-05-04  Jason Riedy  <jason@acm.org>
+
+	* org-table.el (*orgtbl-default-fmt*): New variable.
+	(orgtbl-format-line): Use the value of *orgtbl-default-fmt*
+	when there is no other fmt available.
+
+	(orgtbl-to-generic): Allow an explicitly nil :tstart or
+	:tend to suppress the appropriate string.
+
+	(orgtbl-to-orgtbl): New function for translating to another orgtbl
+	table.
+
+2008-05-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-read-date-analyze): "." as an alias for "+0" in
+	read date.
+
+	* org-clock.el (org-clock-save-markers-for-cut-and-paste):
+	New function.
+
+	* org-agenda.el (org-agenda-save-markers-for-cut-and-paste):
+	New function.
+
+2008-05-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-find-position): Don't include notes
+	into clock drawer.
+
+	* org-archive.el (org-archive-subtree): No longer remove an
+	extra line after cutting the subtree.  `org-cut-subtree' already
+	takes care of this.
+
+	* org-remember.el (org-remember-handler): Only kill the target
+	buffer if it does not contain the running clock.
+
+	* org.el (org-markers-to-move): New variable.
+	(org-save-markers-in-region, org-check-and-save-marker)
+	(org-reinstall-markers-in-region): New function.
+	(org-move-subtree-down, org-copy-subtree): Remember relative
+	marker positions before cutting.
+	(org-move-subtree-down, org-paste-subtree): Restore relative
+	marker positions after pasting.
+
+	* org-remember.el (org-remember-clock-out-on-exit): New option.
+	(org-remember-finalize): Clock out only if the setting in
+	`org-remember-clock-out-on-exit' requires it.
+	(org-remember-handler): Do the cleanup in the buffer, to make sure
+	that the clock marker remains in tact.
+
+2008-04-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-goto): Widen buffer if necessary.
+	(org-clock-in): Make sure that also tasks outside the narrowed
+	region will be clocked in correctly.
+	(org-clock-insert-selection-line): Widen the buffer so that we can
+	find the correct task heading.
+
+	* org.el (org-base-buffer): New function.
+
+	* org-exp.el (org-icalendar-cleanup-string): Make sure ',"
+	and ";" are escaped.
+	(org-print-icalendar-entries): Also apply
+	`org-icalendar-cleanup-string' to the headline, not only to the
+	summary property.
+
+2008-04-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-preprocess-hook): New hook.
+	(org-export-preprocess-string): Call
+	`org-export-preprocess-hook'.
+
+	* org.el (org-font-lock-hook): New variable.
+	(org-font-lock-hook): New function.
+	(org-set-font-lock-defaults): Call `org-font-lock-hook'.
+
