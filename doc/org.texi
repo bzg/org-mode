@@ -797,6 +797,19 @@ buffer:
 #+STARTUP: showall
 @end example
 
+@noindent
+Forthermore, any entries with a @samp{VISIBILITY} property (@pxref{Properties
+and Columns}) will get their visibility adapted accordingly.  Allowed values
+for this property are @code{folded}, @code{children}, @code{content}, and
+@code{all}.
+@table @kbd
+@kindex C-u C-u @key{TAB}
+@item C-u C-u @key{TAB}
+Switch back to the startup visibility of the buffer, i.e. whatever is
+requested by startup options and @samp{VISIBILITY} properties in individual
+entries.
+@end table
+
 @node Motion, Structure editing, Visibility cycling, Document Structure
 @section Motion
 @cindex motion, between headlines

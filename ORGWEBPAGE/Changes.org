@@ -3,7 +3,7 @@
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
 #+EMAIL:  carsten at orgmode dot org
-#+OPTIONS: H:3 num:nil toc:t \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
+#+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
 #+INFOJS_OPT: view:info toc:1 path:org-info.js
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
@@ -25,6 +25,29 @@
     : #+OPTIONS: skip:t
 
 ** Details
+
+*** Startup visibility can now be influenced by properties
+
+    When Emacs opens an Org mode buffer, the outline visibility
+    is set to a startup value that is taken from the variable
+    =org-startup-folded=, or from a =#+STARTUP= setting in the
+    buffer.  After this has happened, the buffer will now also be
+    scanned for entries with a =VISIBILITY= property.  Wherever
+    such a property is found, the corresponding subtree will get
+    its visibility adjusted.  Allowed values for the property
+    are:
+
+    - folded   :: Fold the subtree
+    - children :: show the text after the headline, and the
+      headlines of all direct children
+    - content  :: show all headlines in the tree, but no text
+      below any headline
+    - all  :: Show the entire subtree
+
+    This was a proposal by Ben Alexander.
+
+    The command =C-u C-u TAB= will switch back to the startup
+    visibility of the buffer.
 
 *** In-buffer options may now be included from an external file.
 

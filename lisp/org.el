@@ -1842,6 +1842,12 @@ Effort estimates given in this property need to have the format H:MM."
   :group 'org-progress
   :type '(string :tag "Property"))
 
+(defconst org-global-properties-fixed
+  '(("VISIBILITY_ALL" . "folded children content all"))
+  "List of property/value pairs that can be inherited by any entry.
+These are fixed values, for the preset properties.")
+
+
 (defcustom org-global-properties nil
   "List of property/value pairs that can be inherited by any entry.
 You can set buffer-local values for this by adding lines like
@@ -3155,13 +3161,7 @@ The following commands are available:
       (let ((bmp (buffer-modified-p)))
 	(org-table-map-tables 'org-table-align)
 	(set-buffer-modified-p bmp)))
-    (org-cycle-hide-drawers 'all)
-    (cond
-     ((eq org-startup-folded t)
-      (org-cycle '(4)))
-     ((eq org-startup-folded 'content)
-      (let ((this-command 'org-cycle) (last-command 'org-cycle))
-	(org-cycle '(4)) (org-cycle '(4)))))))
+    (org-set-startup-visibility)))
 
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
 
@@ -3615,7 +3615,7 @@ between words."
 
 (defvar org-font-lock-keywords nil)
 
-(defconst org-property-re (org-re "^[ \t]*\\(:\\([[:alnum:]_]+\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
+(defconst org-property-re (org-re "^[ \t]*\\(:\\([-[:alnum:]_]+\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
   "Regular expression matching a property line.")
 
 (defvar org-font-lock-hook nil
@@ -3759,6 +3759,9 @@ If KWD is a number, get the corresponding match group."
   1. OVERVIEW: Show only top-level headlines.
   2. CONTENTS: Show all headlines of all levels, but no body text.
   3. SHOW ALL: Show everything.
+  When called with two C-c C-u prefixes, switch to the startup visibility,
+  determined by the variable `org-startup-folded', and by any VISIBILITY
+  properties in the buffer.
 
 - When point is at the beginning of a headline, rotate the subtree started
   by this line through 3 different states (local cycling)
@@ -3772,8 +3775,8 @@ If KWD is a number, get the corresponding match group."
   a `show-subtree' and return to the previous cursor position.  If ARG
   is negative, go up that many levels.
 
-- When point is not at the beginning of a headline, execute
-  `indent-relative', like TAB normally does.  See the option
+- When point is not at the beginning of a headline, execute the global
+  binding for TAB, which is re-indenting the line.  See the option
   `org-cycle-emulate-tab' for details.
 
 - Special case: if point is at the beginning of the buffer and there is
@@ -3799,6 +3802,10 @@ If KWD is a number, get the corresponding match group."
 	(setq arg t))
 
     (cond
+
+     ((equal arg '(16))
+      (org-set-startup-visibility)
+      (message "Startup visibility, plus VISIBILITY properties."))
 
      ((org-at-table-p 'any)
       ;; Enter the table or move to the next field in the table
@@ -3934,16 +3941,67 @@ If KWD is a number, get the corresponding match group."
 
 ;;;###autoload
 (defun org-global-cycle (&optional arg)
-  "Cycle the global visibility.  For details see `org-cycle'."
+  "Cycle the global visibility.  For details see `org-cycle'.
+With C-u prefix arg, switch to startup visibility.
+With a numeric prefix, show all headlines up to that level."
   (interactive "P")
   (let ((org-cycle-include-plain-lists
 	 (if (org-mode-p) org-cycle-include-plain-lists nil)))
-    (if (integerp arg)
-	(progn
-	  (show-all)
-	  (hide-sublevels arg)
-	  (setq org-cycle-global-status 'contents))
-      (org-cycle '(4)))))
+    (cond
+     ((integerp arg)
+      (show-all)
+      (hide-sublevels arg)
+      (setq org-cycle-global-status 'contents))
+     ((equal arg '(4))
+      (org-set-startup-visibility)
+      (message "Startup visibility, plus VISIBILITY properties."))
+     (t
+      (org-cycle '(4))))))
+
+(defun org-set-startup-visibility ()
+  "Set the visibility required by startup options and properties."
+  (cond
+   ((eq org-startup-folded t)
+    (org-cycle '(4)))
+   ((eq org-startup-folded 'content)
+    (let ((this-command 'org-cycle) (last-command 'org-cycle))
+      (org-cycle '(4)) (org-cycle '(4)))))
+  (org-set-visibility-according-to-property 'no-cleanup)
+  (org-cycle-hide-archived-subtrees 'all)
+  (org-cycle-hide-drawers 'all)
+  (org-cycle-show-empty-lines 'all))
+
+(defun org-set-visibility-according-to-property (&optional no-cleanup)
+  "Switch subtree visibilities according to :VISIBILITY: property."
+  (interactive)
+  (let (state)
+    (save-excursion
+      (goto-char (point-min))
+      (while (re-search-forward
+	      "^[ \t]*:VISIBILITY:[ \t]+\\([a-z]+\\)"
+	      nil t)
+	(setq state (match-string 1))
+	(save-excursion
+	  (org-back-to-heading t)
+	  (hide-subtree)
+	  (org-reveal)
+	  (cond
+	   ((equal state '("fold" "folded"))
+	    (hide-subtree))
+	   ((equal state "children")
+	    (org-show-hidden-entry)
+	    (show-children))
+	   ((equal state "content")
+	    (save-excursion
+	      (save-restriction
+		(org-narrow-to-subtree)
+		(org-content))))
+	   ((member state '("all" "showall"))
+	    (show-subtree)))))
+      (unless no-cleanup
+	(org-cycle-hide-archived-subtrees 'all)
+	(org-cycle-hide-drawers 'all)
+	(org-cycle-show-empty-lines 'all)))))
 
 (defun org-overview ()
   "Switch to overview mode, shoing only top-level headlines.
@@ -9513,7 +9571,7 @@ but in some other way.")
 
 (defconst org-default-properties
   '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION"
-    "LOCATION" "LOGGING" "COLUMNS")
+    "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
@@ -9741,8 +9799,10 @@ If yes, return this value.  If not, return the current value of the variable."
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (or tmp (cdr (assoc property org-local-properties))
-	  (cdr (assoc property org-global-properties))))))
+      (or tmp 
+	  (cdr (assoc property org-local-properties))
+	  (cdr (assoc property org-global-properties))
+	  (cdr (assoc property org-global-properties-fixed))))))
 
 (defun org-entry-put (pom property value)
   "Set PROPERTY to VALUE for entry at point-or-marker POM."
@@ -12096,9 +12156,10 @@ See the individual commands for more information."
   (interactive "P")
   (cond
    ((org-at-table-p) (call-interactively 'org-table-previous-field))
-   (arg (message  "Content view to level: ")
-	(org-content (prefix-numeric-value arg))
-	(setq org-cycle-global-status 'overview))
+   ((integerp arg)
+    (message  "Content view to level: " arg)
+    (org-content (prefix-numeric-value arg))
+    (setq org-cycle-global-status 'overview))
    (t (call-interactively 'org-global-cycle))))
 
 (defun org-shiftmetaleft ()
@@ -12375,15 +12436,17 @@ This command does many different things, depending on context:
 	  (if (org-at-table-p)
 	      (org-call-with-arg 'org-table-recalculate t))))
        (t
-	(call-interactively 'org-mode-restart))))
+	(org-set-regexps-and-options)
+	(org-restart-font-lock)
+	(message "Local setup has been refreshed"))))
      (t (error "C-c C-c can do nothing useful at this location.")))))
 
 (defun org-mode-restart ()
   "Restart Org-mode, to scan again for special lines.
 Also updates the keyword regular expressions."
   (interactive)
-  (let ((org-inhibit-startup t)) (org-mode))
-  (message "Org-mode restarted to refresh keyword and special line setup"))
+  (org-mode)
+  (message "Org-mode restarted"))
 
 (defun org-kill-note-or-show-branches ()
   "If this is a Note buffer, abort storing the note.  Else call `show-branches'."

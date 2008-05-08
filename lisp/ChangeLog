@@ -1,5 +1,10 @@
 2008-05-08  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-set-visibility-according-to-property): New function.
+	(org-ctrl-c-ctrl-c): Do not restart org-mode, just get the options
+	and compute the regular expressions, and update font-lock.
+	(org-property-re): Allow a dash in property names.
+
 	* org-archive.el (org-extract-archive-file): Insert the file name
 	without the path into the format, to allow the location format to
 	contain a subdirectory.
