@@ -74,7 +74,7 @@ LISPF      = 	org.el			\
 		org-faces.el		\
 		org-gnus.el		\
 		org-info.el		\
-		org-infojs.el		\
+		org-jsinfo.el		\
 		org-irc.el		\
 		org-mac-message.el	\
 	     	org-macs.el		\
@@ -291,7 +291,7 @@ lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
 lisp/org-faces.elc:                    lisp/org-macs.elc lisp/org-compat.elc
 lisp/org-gnus.elc:         lisp/org.elc
 lisp/org-info.elc:         lisp/org.elc
-lisp/org-infojs.elc:       lisp/org.elc lisp/org-exp.elc
+lisp/org-jsinfo.elc:       lisp/org.elc lisp/org-exp.elc
 lisp/org-irc.elc:          lisp/org.elc
 lisp/org-mac-message.elc:  lisp/org.elc
 lisp/org-macs.elc:
