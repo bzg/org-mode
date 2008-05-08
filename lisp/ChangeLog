@@ -1,3 +1,9 @@
+2008-05-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-archive.el (org-extract-archive-file): Insert the file name
+	without the path into the format, to allow the location format to
+	contain a subdirectory.
+
 2008-05-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-remove-double-quotes, org-file-contents): New
