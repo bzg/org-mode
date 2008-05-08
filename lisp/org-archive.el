@@ -135,14 +135,19 @@ archive file is."
     files))
 
 (defun org-extract-archive-file (&optional location)
+  "Extract and expand the file name from archive LOCATION.
+if LOCATION is not given, the value of `org-archive-location' is used."
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
       (if (= (match-beginning 1) (match-end 1))
 	  (buffer-file-name)
 	(expand-file-name
-	 (format (match-string 1 location) buffer-file-name)))))
+	 (format (match-string 1 location)
+		 (file-name-nondirectory buffer-file-name))))))
 
 (defun org-extract-archive-heading (&optional location)
+  "Extract the heading from archive LOCATION.
+if LOCATION is not given, the value of `org-archive-location' is used."
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
       (match-string 2 location)))
