@@ -1652,19 +1652,18 @@ backends, it converts the segment into an EXAMPLE segment."
 		    "#+END_EXAMPLE\n"))
 	;; ok, we are good to go
 	(let* ((mode (and lang (intern (concat lang "-mode"))))
+	       (org-inhibit-startup t)
 	       (org-startup-folded nil)
 	       (htmltext
 		(with-temp-buffer
 		  (insert code)
+		  ;; Free up the protected stuff
+		  (goto-char (point-min))
+		  (while (re-search-forward "^," nil t)
+		    (replace-match ""))
 		  (if (functionp mode)
 		      (funcall mode)
 		    (fundamental-mode))
-		  (when (eq major-mode 'org-mode)
-		    ;; Free up the protected stuff
-		    (goto-char (point-min))
-		    (while (re-search-forward "^@\\([*#]\\|[ \t]*:\\)" nil t)
-		      (replace-match "\\1"))
-		    (org-mode))
 		  (font-lock-fontify-buffer)
 		  ;; silence the byte-compiler
 		  (when (fboundp 'htmlize-region-for-paste)

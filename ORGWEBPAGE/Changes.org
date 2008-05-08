@@ -9,6 +9,9 @@
 #+LINK_HOME: http://orgmode.org
 
 * Version 6.03
+  :PROPERTIES:
+  :VISIBILITY: content
+  :END:
 
 ** Overview
 
@@ -16,55 +19,15 @@
 
 *** The text before the first headline is now exported by default
 
-    Previously, the default was to not include this text, but for
-    publishing oriented files it is better to include it.  If you
-    like the old default better, customize the variable
-    =org-export-skip-text-before-1st-heading= or set the value on
-    a per-file basis with
+    Previously, the default was to not include text in an org-mode
+    buffer before the first headine.  From now on, the default it to
+    include it.  If you like the old default better, customize the
+    variable =org-export-skip-text-before-1st-heading= or set the
+    value on a per-file basis with
 
     : #+OPTIONS: skip:t
 
 ** Details
-
-*** Startup visibility can now be influenced by properties
-
-    When Emacs opens an Org mode buffer, the outline visibility
-    is set to a startup value that is taken from the variable
-    =org-startup-folded=, or from a =#+STARTUP= setting in the
-    buffer.  After this has happened, the buffer will now also be
-    scanned for entries with a =VISIBILITY= property.  Wherever
-    such a property is found, the corresponding subtree will get
-    its visibility adjusted.  Allowed values for the property
-    are:
-
-    - folded   :: Fold the subtree
-    - children :: show the text after the headline, and the
-      headlines of all direct children
-    - content  :: show all headlines in the tree, but no text
-      below any headline
-    - all  :: Show the entire subtree
-
-    This was a proposal by Ben Alexander.
-
-    The command =C-u C-u TAB= will switch back to the startup
-    visibility of the buffer.
-
-*** In-buffer options may now be included from an external file.
-
-    If you would like to share the Org setup between a number of
-    files, you can now store in-buffer setup in a file and simply
-    point to that file from each buffer that should read it.  If
-    you write in a buffer
-
-    : #+SETUPFILE: "path/to/setup.org"
-
-    then this file will be scanned as well for in-buffer options
-    like =#+STARTUP=, =#+TITLE=, or =#+OPTIONS=.
-
-*** The in-buffer settings keywords may now be upper or lower case
-    
-    From now on, it makes no difference is you write =#+STARTUP=
-    or =#+startup=, similarly for all the in-buffer keywords.
 
 *** Description lists are now supported natively
 
@@ -72,7 +35,7 @@
     first item in the list has a /term/ and the /description/,
     separated by " :: ".  For example
 
-    : Free software by Carsten Dominik
+    : Emacs software by Carsten Dominik
     : - RefTeX    :: Support for LaTeX Labels, References, Citations
     : - CDLaTeX   :: more LaTeX functionality for Emacs
     : - TeXmathp  :: checking LaTeX buffers for Math mode.
@@ -81,14 +44,6 @@
     :                natural constants and units into a buffer.
     : - IDLWAVE   :: The Emacs modes for editing and
     :                running IDL and WAVE CL files.
-    : - CHAIN     :: A tool for running a code with
-    :                different sets of parameters
-    : - MPP       :: A preprocessor tool for creating MPEG
-    :                and other movie streams
-    : - Dirabbrev :: Using abbreviations for directories
-    :                in the shell
-    : - PSFIXBB   :: fixing the BoundingBox in postscript files
-    : - TFMT      :: A table formatting tool
 
 *** Blockquotes for export
 
@@ -98,30 +53,6 @@
     : Everything shound be made as simple as possible,
     : but not any simpler -- Albert Einstein
     : #+BEGIN_QUOTE
-
-*** Clock task history, and moving entries with the running clock
-
-    Org now remembers the last 5 tasks that you clocked into, to
-    make it easier to clock back into a task after interrupting
-    it for another task.
-    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) will
-      clock into that task and mark it as current default task.
-    - `C-u C-c C-x C-i' (or `C-u I' from the agenda) will offer a
-      list of recently clocked tasks, including the default task,
-      for selection. `d' selects the default task, `i' selects
-      the task that was interrupted by the task that is currently
-      being clocked. `1',... selects a recent task.  When you
-      select a task, you will be clocked into it.
-    - You can use `C-u C-c C-x C-j' to jump to any of these
-      tasks.
-
-    When moving an entry using structure editing commands,
-    archiving commands, or the special subtree cut-and-paste
-    commands =C-c C-x C-w= and =C-c C-x C-y=, the running clock
-    marker and all clock history markers will be moved with the
-    subtree.  Now you can start a clock in a remember buffer and
-    keep the clock running while filing the note away.  See also
-    the variable `org-remember-clock-out-on-exit'.
 
 *** Fontified code examples in HTML export
 
@@ -148,7 +79,10 @@
 #+END_SRC
 
     The string after the BEGIN_SRC is the name of the major emacs
-    mode that should be used to fontify the code example.
+    mode that should be used to fontify the code example, without the
+    "-mode" at the end of the mode name.  For example, if you are
+    writing an Org tutorial with Org examples included, you would use
+    "org" as the language identifier.
 
     Currently this works only for HTML export, and requires the
     /htmlize.el/ package, version 1.34 or later.  For other
@@ -160,16 +94,105 @@
 
     : #+INCLUDE: "file" markup lang
 
-    will lead to the inclusion of the contents of FILE at the
-    moment of publishing.  FILE ahould be surrounded by double
-    quotes, this is obligatory it if contains space characters.
-    The parameters MARKUP and LANG are optional.  MARKUP can be
-    "example", "quote", or "src".  If it is "src", LANG should be
-    the name of the Emacs mode that should be used for fontifying
-    the code.  For example:
+    will lead to the inclusion of the contents of FILE at the moment
+    of publishing.  FILE ahould be surrounded by double quotes, this
+    is obligatory if it contains space characters.  The parameters
+    MARKUP and LANG are optional.  MARKUP can be "example", "quote",
+    or "src".  If it is "src", LANG should be the name of the Emacs
+    mode to be used for fontifying the code.  For example:
 
     : Here is my /.emacs/ file:
     : #+include "~/.emacs" src emacs-lisp
+
+*** The text before the first headline is now exported by default
+
+    Previously, the default was to not include text in an org-mode
+    buffer before the first headine.  From now on, the default it to
+    include it.  If you like the old default better, customize the
+    variable =org-export-skip-text-before-1st-heading= or set the
+    value on a per-file basis with
+
+    : #+OPTIONS: skip:t
+
+
+*** In-buffer options may now be collected in an external file
+
+    If you would like to share the Org setup between a number of
+    files, you can now store in-buffer setup in a file and simply
+    point to that file from each file that should read it.  If
+    you write in a buffer
+
+    : #+SETUPFILE: "path/to/setup.org"
+
+    then this file will be scanned in-buffer options like =#+STARTUP=,
+    =#+TITLE=, or =#+OPTIONS=.
+
+*** The in-buffer settings keywords may now be upper or lower case
+    
+    From now on, it makes no difference is you write =#+STARTUP= or
+    =#+startup=, to make these lines less imposing.  Similarly for all
+    other in-buffer keywords.
+
+*** Startup visibility can now be influenced by properties
+
+    When Emacs opens an Org mode buffer, the outline visibility
+    is set to a startup value that is taken from the variable
+    =org-startup-folded=, or from a =#+STARTUP= setting in the
+    buffer.  After this has happened, the buffer will now also be
+    scanned for entries with a =VISIBILITY= property.  Wherever
+    such a property is found, the corresponding subtree will get
+    its visibility adjusted.  Allowed values for the property
+    are:
+
+    - folded   :: Fold the subtree
+    - children :: Show the text after the headline, and the
+      headlines of all direct children
+    - content :: Show all headlines in the tree, but no text below any
+      headline
+    - all :: Show the entire subtree
+
+    For example, I am using this for the huge /Changes.org/ file that
+    is the source for the list of visible changes you are reading
+    right now.  The top-most entry in this file always describes the
+    changes in my current working version.  The start of this section
+    currently looks like this:
+
+#+begin_src org
+,* Version 6.03
+,  :PROPERTIES:
+,    :VISIBILITY: content
+,  :END:
+** Overview
+#+end_src
+
+    This was a proposal by Ben Alexander.
+
+    The command =C-u C-u TAB= will switch back to the startup
+    visibility of the buffer.
+
+*** Clock task history, and moving entries with the running clock
+
+    Org now remembers the last 5 tasks that you clocked into, to
+    make it easier to clock back into a task after interrupting
+    it for another task.
+    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) will
+      clock into that task and mark it as current default task.
+    - `C-u C-c C-x C-i' (or `C-u I' from the agenda) will offer a
+      list of recently clocked tasks, including the default task,
+      for selection. `d' selects the default task, `i' selects
+      the task that was interrupted by the task that is currently
+      being clocked. `1',... selects a recent task.  When you
+      select a task, you will be clocked into it.
+    - You can use `C-u C-c C-x C-j' to jump to any of these
+      tasks.
+
+    When moving an entry using structure editing commands,
+    archiving commands, or the special subtree cut-and-paste
+    commands =C-c C-x C-w= and =C-c C-x C-y=, the running clock
+    marker and all clock history markers will be moved with the
+    subtree.  Now you can start a clock in a remember buffer and
+    keep the clock running while filing the note away.  See also
+    the variable `org-remember-clock-out-on-exit'.
 
 *** BBDB anniversaries much faster
 
@@ -180,10 +203,10 @@
 *** New file in the contrib directory: org-eval.el
 
     This module allowes to include the result of the evaluation
-    of Lisp code into the buffer.  This is similar to the Muse
-    <lisp> tag.
+    of Lisp code into the buffer, similar to the Muse <lisp> tag.
 
 *** Bug fixes...
+    Will this ever stop??????
 
 * Version 6.02
 
