@@ -1,3 +1,7 @@
+2008-05-09  Bernt Hansen  <bernt@norang.ca>
+
+	* org-clock.el (org-clock-select-task): Make sure the selection
+	letters are 1-9 and A-Z, no special characters.
 
 2008-05-09  Carsten Dominik  <dominik@science.uva.nl>
 
