@@ -1,3 +1,11 @@
+2008-05-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-htmlize): New group.
+	(org-export-htmlize-output-type)
+	(org-export-htmlize-css-font-prefix): New options.
+	(org-export-htmlize-region-for-paste): New function.
+	(org-export-htmlize-generate-css): New command.
+
 2008-05-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-set-visibility-according-to-property): New function.

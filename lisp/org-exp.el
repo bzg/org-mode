@@ -33,6 +33,8 @@
 (declare-function org-export-latex-preprocess "org-export-latex" ())
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
+(declare-function htmlize-region "ext:htmlize" (beg end))
+(defvar htmlize-buffer-places)  ; from htmlize.el
 
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -567,6 +569,24 @@ to a file."
   "<br/><br/><hr><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
   "The HTML tag used as timestamp delimiter for HTML-helper-mode."
   :group 'org-export-html
+  :type 'string)
+
+(defgroup org-export-htmlize nil
+  "Options for processing examples with htmlize.el."
+  :tag "Org Export Htmlize"
+  :group 'org-export-html)
+
+(defcustom org-export-htmlize-output-type 'inline-css
+  "Output type to be used by htmlize when formatting code snippets.
+Normally this is `inline-css', but if you have defined to appropriate
+classes in your css style file, setting this to `css' means that the
+fontification will use appropriate class names."
+  :group 'org-export-htmlize
+  :type '(choice (const css) (const inline-css)))
+
+(defcustom org-export-htmlize-css-font-prefix "org-"
+  "The prefix for CSS class names for htmlize font specifications."
+  :group 'org-export-htmlize
   :type 'string)
 
 (defgroup org-export-icalendar nil
@@ -1665,10 +1685,8 @@ backends, it converts the segment into an EXAMPLE segment."
 		      (funcall mode)
 		    (fundamental-mode))
 		  (font-lock-fontify-buffer)
-		  ;; silence the byte-compiler
-		  (when (fboundp 'htmlize-region-for-paste)
-		    ;; transform the region to HTML
-		    (htmlize-region-for-paste (point-min) (point-max))))))
+		  (org-export-htmlize-region-for-paste
+		   (point-min) (point-max)))))
 	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
 	      (setq htmltext (replace-match "<pre class=\"src\">"
 					    t t htmltext)))
@@ -1678,7 +1696,7 @@ backends, it converts the segment into an EXAMPLE segment."
       (concat "#+BEGIN_EXAMPLE\n" code
 	      (if (string-match "\n\\'" code) "" "\n")
 	      "#+END_EXAMPLE\n")))))
-  
+
 ;;; ASCII export
 
 (defvar org-last-level nil) ; dynamically scoped variable
@@ -3264,6 +3282,52 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
 	  (setq r (concat r "@<br/>")))
 	r))))
 
+(defun org-export-htmlize-region-for-paste (beg end)
+  "Convert the region to HTML, using htmlize.el.
+This is much like `htmlize-region-for-paste', only that it uses
+the settings define in the org-... variables."
+  (let* ((htmlize-output-type 'css)
+	 (htmlize-css-name-prefix org-export-htmlize-css-font-prefix)
+	 (htmlbuf (htmlize-region beg end)))
+    (unwind-protect
+	(with-current-buffer htmlbuf
+	  (buffer-substring (plist-get htmlize-buffer-places 'content-start)
+			    (plist-get htmlize-buffer-places 'content-end)))
+      (kill-buffer htmlbuf))))
+
+(defun org-export-htmlize-generate-css ()
+  "Create the CSS for all font definitions in the current Emacs session.
+Use this to create face definitions in your CSS style file that can then
+be used by code snippets transformed by htmlize.
+This command just produces a buffer that contains class definitions for all
+faces used in the current Emacs session.  You can copy and paste the ones you
+need into your CSS file.
+
+If you then set `org-export-htmlize-output-type' to `css', calls to
+the function `org-export-htmlize-region-for-paste' will produce code
+that uses these same face definitions."
+  (interactive)
+  (and (get-buffer "*html*") (kill-buffer "*html*"))
+  (with-temp-buffer
+    (let ((fl (face-list))
+	  (htmlize-css-name-prefix "org-")
+	  (htmlize-output-type 'css)
+	  f i)
+      (while (setq f (pop fl)
+		   i (and f (face-attribute f :inherit)))
+	(when (and (symbolp f) (or (not i) (not (listp i))))
+	  (insert (org-add-props (copy-sequence "1") nil 'face f))))
+      (htmlize-region (point-min) (point-max))))
+  (switch-to-buffer "*html*")
+  (goto-char (point-min))
+  (if (re-search-forward "<style" nil t)
+      (delete-region (point-min) (match-beginning 0)))
+  (if (re-search-forward "</style>" nil t)
+      (delete-region (1+ (match-end 0)) (point-max)))
+  (beginning-of-line 1)
+  (if (looking-at " +") (replace-match ""))
+  (goto-char (point-min)))
+
 (defun org-html-protect (s)
   ;; convert & to &amp;, < to &lt; and > to &gt;
   (let ((start 0))
@@ -3919,3 +3983,5 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
+
+
