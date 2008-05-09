@@ -8359,8 +8359,13 @@ With argument REMOVE, remove any scheduling date from the item."
       (org-end-of-subtree t t)
       (while (re-search-backward re beg t)
 	(replace-match "")
-	(unless (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
-	  (delete-region (point-at-bol) (min (1+ (point)) (point-max))))))))
+	(if (and (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
+		 (equal (char-before) ?\ ))
+	    (backward-delete-char 1)
+	  (if (string-match "^[ \t]*$" (buffer-substring
+					(point-at-bol) (point-at-eol)))
+	      (delete-region (point-at-bol)
+			     (min (point-max) (1+ (point-at-eol))))))))))
 
 (defun org-add-planning-info (what &optional time &rest remove)
   "Insert new timestamp with keyword in the line directly after the headline.
@@ -12440,8 +12445,9 @@ This command does many different things, depending on context:
 	  (if (org-at-table-p)
 	      (org-call-with-arg 'org-table-recalculate t))))
        (t
-	(org-set-regexps-and-options)
-	(org-restart-font-lock)
+;	(org-set-regexps-and-options)
+;	(org-restart-font-lock)
+	(let ((org-inhibit-startup t)) (org-mode-restart))
 	(message "Local setup has been refreshed"))))
      (t (error "C-c C-c can do nothing useful at this location.")))))
 
