@@ -3295,6 +3295,7 @@ the settings define in the org-... variables."
 			    (plist-get htmlize-buffer-places 'content-end)))
       (kill-buffer htmlbuf))))
 
+;;;###autoload
 (defun org-export-htmlize-generate-css ()
   "Create the CSS for all font definitions in the current Emacs session.
 Use this to create face definitions in your CSS style file that can then
