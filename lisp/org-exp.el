@@ -3307,6 +3307,7 @@ If you then set `org-export-htmlize-output-type' to `css', calls to
 the function `org-export-htmlize-region-for-paste' will produce code
 that uses these same face definitions."
   (interactive)
+  (require 'htmlize)
   (and (get-buffer "*html*") (kill-buffer "*html*"))
   (with-temp-buffer
     (let ((fl (face-list))
