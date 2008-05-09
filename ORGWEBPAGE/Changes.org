@@ -102,7 +102,7 @@
     mode to be used for fontifying the code.  For example:
 
     : Here is my /.emacs/ file:
-    : #+include "~/.emacs" src emacs-lisp
+    : #+INCLUDE "~/.emacs" src emacs-lisp
 
 *** The text before the first headline is now exported by default
 
