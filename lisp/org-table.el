@@ -249,12 +249,11 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :tag "Org Table Import Export"
   :group 'org-table)
 
-(defcustom org-table-export-default-format
-  "orgtbl-to-generic :splice t :sep \"\t\""
+(defcustom org-table-export-default-format "orgtbl-to-generic :sep \"\t\""
   "Default export parameters for org-table-export. These can be
-  overridden on for a specific table by setting the
-  TABLE_EXPORT_FORMAT parameter. See orgtbl-export for the
-  different export transforms and available parameters."
+overridden on for a specific table by setting the TABLE_EXPORT_FORMAT
+property.  See the manual section on orgtbl radio tables for the different
+export transformations and available parameters."
   :group 'org-table-import-export
   :type 'string)
 
@@ -428,7 +427,7 @@ are found, lines will be split on whitespace into fields."
 (defvar org-table-last-alignment)
 (defvar org-table-last-column-widths)
 (defun org-table-export (&optional file format)
-  "Export table as a tab-separated file.
+  "Export table to a file, with configurable format.
 Such a file can be imported into a spreadsheet program like Excel.
 FILE can be the output file name.  If not given, it will be taken from
 a TABLE_EXPORT_FILE property in the current entry or higher up in the
@@ -439,19 +438,31 @@ be found in the variable `org-table-export-default-format', but the function
 first checks if there is an export format specified in a TABLE_EXPORT_FORMAT
 property, locally or anywhere up in the hierarchy."
   (interactive)
+  (require 'org-exp)
   (org-table-align) ;; make sure we have everything we need
   (let* ((beg (org-table-begin))
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
-	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)
-		   (read-file-name "Export table to: ")))
-	 (format (or (org-entry-get beg "TABLE_EXPORT_FORMAT" t)
-		     org-table-export-default-format))
-	 buf)
-    (unless (or (not (file-exists-p file))
-		(y-or-n-p (format "Overwrite file %s? " file)))
-      (error "Abort"))
-    (message format)
+	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
+	 (format (or format (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
+	 buf deffmt-readable)
+    (unless file
+      (setq file (read-file-name "Export table to: "))
+      (unless (or (not (file-exists-p file))
+		  (y-or-n-p (format "Overwrite file %s? " file)))
+	(error "Abort")))
+    (if (file-directory-p file)
+	(error "This is a directory path, not a file"))
+    (if (equal (file-truename file)
+	       (file-truename (buffer-file-name)))
+	(error "Please specify a file name that is different from current"))
+    (unless format
+      (setq deffmt-readable org-table-export-default-format)
+      (while (string-match "\t" deffmt-readable)
+	(setq deffmt-readable (replace-match "\\t" t t deffmt-readable)))
+      (while (string-match "\n" deffmt-readable)
+	(setq deffmt-readable (replace-match "\\n" t t deffmt-readable)))
+      (setq format (read-string "Format: " deffmt-readable)))
 
     (if (string-match "\\([^ \t\r\n]+\\)\\( +.*\\)?" format)
 	(let* ((transform (intern (match-string 1 format)))
@@ -3701,8 +3712,7 @@ TABLE is a list, each entry either the symbol `hline' for a horizontal
 separator line, or a list of fields for that line.
 PARAMS is a property list of parameters that can influence the conversion.
 For the generic converter, some parameters are obligatory:  You need to
-specify either :lfmt, or all of (:lstart :lend :sep).  If you do not use
-:splice, you must have :tstart and :tend.
+specify either :lfmt, or all of (:lstart :lend :sep).
 
 Valid parameters are
 
@@ -3771,10 +3781,9 @@ directly by `orgtbl-send-table'.  See manual."
 
     ;; Put header
     (unless splicep
-      (if (not (plist-member params :tstart))
-          (push "ERROR: no :tstart" *orgtbl-rtn*)
-        (let ((tstart (orgtbl-eval-str (plist-get params :tstart))))
-          (if tstart (push tstart *orgtbl-rtn*)))))
+      (when (plist-member params :tstart)
+	(let ((tstart (orgtbl-eval-str (plist-get params :tstart))))
+	  (if tstart (push tstart *orgtbl-rtn*)))))
 
     ;; Do we have a heading section?  If so, format it and handle the
     ;; trailing hline.
@@ -3801,8 +3810,7 @@ directly by `orgtbl-send-table'.  See manual."
     (orgtbl-format-section nil)
 
     (unless splicep
-      (if (not (plist-member params :tend))
-          (push "ERROR: no :tend" *orgtbl-rtn*)
+      (when (plist-member params :tend)
         (let ((tend (orgtbl-eval-str (plist-get params :tend))))
           (if tend (push tend *orgtbl-rtn*)))))
 

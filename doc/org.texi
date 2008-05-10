@@ -1554,7 +1554,8 @@ exchange with, for example, spreadsheet or database programs.  The format
 used to export the file can be configured in the variable
 @code{org-table-export-default-format}.  You may also use properties
 @code{TABLE_EXPORT_FILE} and @code{TABLE_EXPORT_FORMAT} to specify the file
-name and the format for table export in a subtree.
+name and the format for table export in a subtree.  For the possible export
+transformations, see @ref{Translator functions}.
 @end table
 
 If you don't like the automatic table editor because it gets in your

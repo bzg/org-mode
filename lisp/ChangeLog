@@ -1,3 +1,14 @@
+2008-05-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-table.el (org-table-export-default-format): Remove :splice
+	from default format, we get the same effect by not specifying
+	:tstart and :tend.
+	(org-table-export): Improve setup, distinguish better between
+	interactive and non-interactive use, allow specifying the format
+	on the fly, better protection against wrong file names.
+	(orgtbl-to-generic): Fix documentation.  Do not require :tstart
+	and :tend when :splice is omitted.
+
 2008-05-09  Bernt Hansen  <bernt@norang.ca>
 
 	* org-clock.el (org-clock-select-task): Make sure the selection

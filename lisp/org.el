@@ -9580,7 +9580,8 @@ but in some other way.")
 
 (defconst org-default-properties
   '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION"
-    "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY")
+    "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
+    "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
