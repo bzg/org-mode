@@ -12920,6 +12920,12 @@ With optional NODE, go directly to that node."
       (display-buffer buf)
       (sit-for 0))))
 
+(defun org-quote-csv-field (s)
+  "Quote field for inclusion in CSV material."
+  (if (string-match "[\",]" s)
+      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
+    s))
+
 (defun org-plist-delete (plist property)
   "Delete PROPERTY from PLIST.
 This is in contrast to merely setting it to 0."

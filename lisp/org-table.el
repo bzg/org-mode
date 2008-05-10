@@ -438,6 +438,8 @@ be found in the variable `org-table-export-default-format', but the function
 first checks if there is an export format specified in a TABLE_EXPORT_FORMAT
 property, locally or anywhere up in the hierarchy."
   (interactive)
+  (unless (org-at-table-p)
+    (error "No table at point"))
   (require 'org-exp)
   (org-table-align) ;; make sure we have everything we need
   (let* ((beg (org-table-begin))
@@ -3817,6 +3819,16 @@ directly by `orgtbl-send-table'.  See manual."
     (mapconcat 'identity (nreverse (if remove-nil-linesp
 				       (remq nil *orgtbl-rtn*)
 				     *orgtbl-rtn*)) "\n")))
+
+(defun orgtbl-to-tsv (table params)
+  "Convert the orgtbl-mode table to TAB separated material."
+  (orgtbl-to-generic table (org-combine-plists '(:sep "\t") params)))
+(defun orgtbl-to-csv (table params)
+  "Convert the orgtbl-mode table to CSV material.
+This does take care of the proper quoting of fields with comma or quotes."
+  (orgtbl-to-generic table (org-combine-plists
+			    '(:sep "," :fmt org-quote-csv-field)
+			    params)))
 
 (defun orgtbl-to-latex (table params)
   "Convert the orgtbl-mode TABLE to LaTeX.
