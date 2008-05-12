@@ -249,7 +249,7 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :tag "Org Table Import Export"
   :group 'org-table)
 
-(defcustom org-table-export-default-format "orgtbl-to-generic :sep \"\t\""
+(defcustom org-table-export-default-format "orgtbl-to-tsv"
   "Default export parameters for org-table-export. These can be
 overridden on for a specific table by setting the TABLE_EXPORT_FORMAT
 property.  See the manual section on orgtbl radio tables for the different
@@ -3719,7 +3719,9 @@ specify either :lfmt, or all of (:lstart :lend :sep).
 Valid parameters are
 
 :splice     When set to t, return only table body lines, don't wrap
-            them into :tstart and :tend.  Default is nil.
+            them into :tstart and :tend.  Default is nil.  When :splice
+            is non-nil, this also means that the exporter should not look
+            for and interpret header and footer sections.
 
 :hline      String to be inserted on horizontal separation lines.
             May be nil to ignore hlines.
@@ -3728,8 +3730,8 @@ Valid parameters are
 :remove-nil-lines Do not include lines that evaluate to nil.
 
 
-  Each in the following group may be either a string or a function
-  of no arguments returning a string:
+Each in the following group may be either a string or a function
+of no arguments returning a string:
 :tstart     String to start the table.  Ignored when :splice is t.
 :tend       String to end the table.  Ignored when :splice is t.
 :lstart     String to start a new table line.
@@ -3737,9 +3739,9 @@ Valid parameters are
 :lend       String to end a table line
 :llend      String to end the last table line, defaults to :lend.
 
-  Each in the following group may be a string, a function of one
-  argument (the field or line) returning a string, or a plist
-  mapping columns to either of the above:
+Each in the following group may be a string, a function of one
+argument (the field or line) returning a string, or a plist
+mapping columns to either of the above:
 :lfmt       Format for entire line, with enough %s to capture all fields.
             If this is present, :lstart, :lend, and :sep are ignored.
 :llfmt      Format for the entire last line, defaults to :lfmt.
@@ -3754,7 +3756,7 @@ Valid parameters are
             All lines before the first hline are treated as header.
             If any of these is not present, the data line value is used.
 
-  This may be either a string or a function of two arguments:
+This may be either a string or a function of two arguments:
 :efmt       Use this format to print numbers with exponentials.
             The format should have %s twice for inserting mantissa
             and exponent, for example \"%s\\\\times10^{%s}\".  This
