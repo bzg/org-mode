@@ -17,15 +17,17 @@
 
 ** Incompatible changes
 
-*** The text before the first headline is now exported by default
+- The text before the first headline is now exported by default
 
-    Previously, the default was to not include text in an org-mode
-    buffer before the first headine.  From now on, the default it to
-    include it.  If you like the old default better, customize the
-    variable =org-export-skip-text-before-1st-heading= or set the
-    value on a per-file basis with
+  Previously, the default was to not include text in an org-mode
+  buffer before the first headine.  From now on, the default it to
+  include it.  If you like the old default better, customize the
+  variable =org-export-skip-text-before-1st-heading= or set the
+  value on a per-file basis with
 
-    : #+OPTIONS: skip:t
+#+begin_src org
+#+OPTIONS: skip:t
+#+end_src
 
 ** Details
 
@@ -63,7 +65,7 @@
 
 #+begin_src org
 ,#+BEGIN_QUOTE
-Everything shound be made as simple as possible,
+Everything should be made as simple as possible,
 but not any simpler -- Albert Einstein
 ,#+BEGIN_QUOTE
 #+end_src
@@ -71,7 +73,7 @@ but not any simpler -- Albert Einstein
     which will render as
 
 #+BEGIN_QUOTE
-Everything shound be made as simple as possible,
+Everything should be made as simple as possible,
 but not any simpler -- Albert Einstein
 #+BEGIN_QUOTE
 
@@ -105,8 +107,8 @@ but not any simpler -- Albert Einstein
     mode that should be used to fontify the code example, without the
     "-mode" at the end of the mode name.  For example, if you are
     writing an Org tutorial with Org examples included, you would use
-    "org" as the language identifier - in face, I have used just
-    that in the examples above.
+    "org" as the language identifier - in fact, I have used just
+    that in the example above.
 
     Currently this works only for HTML export, and requires the
     /htmlize.el/ package, version 1.34 or later.  For other
@@ -148,8 +150,8 @@ but not any simpler -- Albert Einstein
 
     : #+SETUPFILE: "path/to/setup.org"
 
-    then this file will be scanned in-buffer options like =#+STARTUP=,
-    =#+TITLE=, or =#+OPTIONS=.
+    then this file will be scanned for in-buffer options like
+    =#+STARTUP=, =#+TITLE=, or =#+OPTIONS=.
 
 *** The in-buffer settings keywords may now be upper or lower case
     
@@ -186,7 +188,7 @@ but not any simpler -- Albert Einstein
 ,  :PROPERTIES:
 ,    :VISIBILITY: content
 ,  :END:
-** Overview
+,** Overview
 #+end_src
 
     This was a proposal by Ben Alexander.
@@ -226,12 +228,13 @@ but not any simpler -- Albert Einstein
 
 *** New file in the contrib directory: org-eval.el
 
-    This module allowes to include the result of the evaluation
-    of Lisp code into the buffer, similar to the Muse =<lisp>=
-    tag.
+    The new module module /org-eval.el/ allowes to include the
+    result of the evaluation of Lisp code (and other scripting
+    languages) into the buffer, similar to the =<lisp>= tag of
+    [[http://mwolson.org/static/doc/emacs-wiki.html#Lisp-Tricks][Emacs Wiki]] and [[http://mwolson.org/static/doc/muse/Embedded-Lisp.html#Embedded-Lisp][Muse]].
 
-*** Bug fixes...
-    Will this ever stop??????
+*** Bug fixes
+    Many bug fixes again.  Will this ever stop?
 
 * Version 6.02
 
