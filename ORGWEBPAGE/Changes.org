@@ -61,10 +61,19 @@
 
     For quoting an entire paragraph as a citation, use
 
-    : #+BEGIN_QUOTE
-    : Everything shound be made as simple as possible,
-    : but not any simpler -- Albert Einstein
-    : #+BEGIN_QUOTE
+#+begin_src org
+,#+BEGIN_QUOTE
+Everything shound be made as simple as possible,
+but not any simpler -- Albert Einstein
+,#+BEGIN_QUOTE
+#+end_src
+
+    which will render as
+
+#+BEGIN_QUOTE
+Everything shound be made as simple as possible,
+but not any simpler -- Albert Einstein
+#+BEGIN_QUOTE
 
 *** Fontified code examples in HTML export
 
@@ -73,11 +82,13 @@
     To do so, wrap the code examples into the following
     structure:
 
-    : #+BEGIN_SRC emacs-lisp
-    : (defun org-xor (a b)
-    :   "Exclusive or."
-    :   (if a (not b) b))
-    : #+END_SRC
+#+begin_src org
+,#+BEGIN_SRC emacs-lisp
+(defun org-xor (a b)
+  "Exclusive or."
+  (if a (not b) b))
+,#+END_SRC
+#+end_src
 
     In the export, this will then look like this (if you are now
     looking at the ASCII export and do not see anything
@@ -90,11 +101,12 @@
   (if a (not b) b))
 #+END_SRC
 
-    The string after the BEGIN_SRC is the name of the major emacs
+    The string after the =BEGIN_SRC= is the name of the major emacs
     mode that should be used to fontify the code example, without the
     "-mode" at the end of the mode name.  For example, if you are
     writing an Org tutorial with Org examples included, you would use
-    "org" as the language identifier.
+    "org" as the language identifier - in face, I have used just
+    that in the examples above.
 
     Currently this works only for HTML export, and requires the
     /htmlize.el/ package, version 1.34 or later.  For other
@@ -187,15 +199,15 @@
     Org now remembers the last 5 tasks that you clocked into, to
     make it easier to clock back into a task after interrupting
     it for another task.
-    - `C-u C-u C-c C-x C-i' (or `C-u C-u I' from the agenda) will
+    - =C-u C-u C-c C-x C-i= (or =C-u C-u I= from the agenda) will
       clock into that task and mark it as current default task.
-    - `C-u C-c C-x C-i' (or `C-u I' from the agenda) will offer a
+    - =C-u C-c C-x C-i= (or =C-u I= from the agenda) will offer a
       list of recently clocked tasks, including the default task,
-      for selection. `d' selects the default task, `i' selects
+      for selection. =d= selects the default task, =i= selects
       the task that was interrupted by the task that is currently
-      being clocked. `1',... selects a recent task.  When you
+      being clocked. =1=,... selects a recent task.  When you
       select a task, you will be clocked into it.
-    - You can use `C-u C-c C-x C-j' to jump to any of these
+    - You can use =C-u C-c C-x C-j= to jump to any of these
       tasks.
 
     When moving an entry using structure editing commands,
@@ -208,14 +220,15 @@
 
 *** BBDB anniversaries much faster
 
-    `bbdb-anniversaries' is now much faster, thanks to a new
+    =bbdb-anniversaries= is now much faster, thanks to a new
     approach using a hash for birthdays.  Thanks to Thomas
     Baumann for a patch to this effect.
 
 *** New file in the contrib directory: org-eval.el
 
     This module allowes to include the result of the evaluation
-    of Lisp code into the buffer, similar to the Muse <lisp> tag.
+    of Lisp code into the buffer, similar to the Muse =<lisp>=
+    tag.
 
 *** Bug fixes...
     Will this ever stop??????
