@@ -580,7 +580,8 @@ to a file."
   "Output type to be used by htmlize when formatting code snippets.
 Normally this is `inline-css', but if you have defined to appropriate
 classes in your css style file, setting this to `css' means that the
-fontification will use appropriate class names."
+fontification will use the class names.
+See also the function `org-export-htmlize-generate-css'."
   :group 'org-export-htmlize
   :type '(choice (const css) (const inline-css)))
 
@@ -2830,7 +2831,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				(substring (match-string 2 line) 0 -1))
 		    line (substring line (match-beginning 5))
 		    item-tag nil)
-	      (if (string-match "\\(.*?\\) ::[ \t]*" line)
+	      (if (and starter (string-match "\\(.*?\\) ::[ \t]*" line))
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
 			line (substring line (match-end 0))))
@@ -3286,7 +3287,7 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
   "Convert the region to HTML, using htmlize.el.
 This is much like `htmlize-region-for-paste', only that it uses
 the settings define in the org-... variables."
-  (let* ((htmlize-output-type 'css)
+  (let* ((htmlize-output-type org-export-htmlize-output-type)
 	 (htmlize-css-name-prefix org-export-htmlize-css-font-prefix)
 	 (htmlbuf (htmlize-region beg end)))
     (unwind-protect
