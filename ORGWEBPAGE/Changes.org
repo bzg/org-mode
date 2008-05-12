@@ -4,7 +4,7 @@
 #+AUTHOR:  Carsten Dominik
 #+EMAIL:  carsten at orgmode dot org
 #+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
-#+INFOJS_OPT: view:info toc:1 path:org-info.js
+#+INFOJS_OPT: view:info toc:1 path:org-info.js tdepth:2 ftoc:t
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
@@ -44,6 +44,18 @@
     :                natural constants and units into a buffer.
     : - IDLWAVE   :: The Emacs modes for editing and
     :                running IDL and WAVE CL files.
+
+    will be rendered as
+
+    Emacs software by Carsten Dominik
+     - RefTeX    :: Support for LaTeX Labels, References, Citations
+     - CDLaTeX   :: more LaTeX functionality for Emacs
+     - TeXmathp  :: checking LaTeX buffers for Math mode.
+     - ORG       :: An Emacs mode for notes and projet planning.
+     - CONSTANTS :: An Emacs package for inserting the definition of
+                    natural constants and units into a buffer.
+     - IDLWAVE   :: The Emacs modes for editing and
+                    running IDL and WAVE CL files.
 
 *** Blockquotes for export
 
