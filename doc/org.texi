@@ -1554,8 +1554,10 @@ exchange with, for example, spreadsheet or database programs.  The format
 used to export the file can be configured in the variable
 @code{org-table-export-default-format}.  You may also use properties
 @code{TABLE_EXPORT_FILE} and @code{TABLE_EXPORT_FORMAT} to specify the file
-name and the format for table export in a subtree.  For the possible export
-transformations, see @ref{Translator functions}.
+name and the format for table export in a subtree.  Org supports quite
+general formats for exported tables.  The exporter format is the same as the
+format used by Orgtbl radio tables, see @ref{Translator functions} for a
+detailed description.
 @end table
 
 If you don't like the automatic table editor because it gets in your
@@ -7241,10 +7243,11 @@ navigation can be done with the @kbd{n} and @kbd{p} keys (and some other keys
 as well, press @kbd{?} for an overview of the available keys).  The second
 view type is a @emph{folding} view much like Org provides it inside Emacs.
 The script is available at @url{http://orgmode.org/org-info.js} and you can
-find the documentation for it at @url{http://orgmode.org/org-infojs.html}.
-We are serving the script from our site, but if you use it a lot, you might
-not want to be dependent on @url{orgmode.org} and prefer to install a local
-copy on your own web server.
+find the documentation for it at
+@url{http://orgmode.org/worg/code/org-info-js/org-info.js.html}.  We are
+serving the script from our site, but if you use it a lot, you might not want
+to be dependent on @url{orgmode.org} and prefer to install a local copy on
+your own web server.
 
 To use the script, you need to make sure that the @file{org-infojs.el} module
 gets loaded.  It should be loaded by default, try @kbd{M-x customize-variable
@@ -7265,7 +7268,7 @@ viewing options:
 path:    @r{The path to the script.  The default is to grab the script from}
          @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
          @r{a local copy and use a path like @samp{../scripts/org-info.js}.}
-view:    @r{Initial view when website is first shown.  Possible values are}
+view:    @r{Initial view when website is first shown.  Possible values are:}
          info      @r{Info-like interface with one section per page.}
          overview  @r{Folding interface, initially showing only top-level.}
          content   @r{Folding interface, starting with all headlines visible.}
@@ -7279,6 +7282,8 @@ toc:     @r{Should the table of content @emph{initially} be visible?}
          @r{Even when @code{nil}, you can always get to the toc with @kbd{i}.}
 tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
          @r{the variables @code{org-headline-levels} and @code{org-export-with-toc}.}
+ftoc:    @r{Does the css of the page specify a fixed position for the toc?}
+         @r{If yes, the toc will never be displayed as a section.}
 ltoc:    @r{Should there be short contents (children) in each section?}
 mouse:   @r{Headings are highlighted when the mouse is over them.  Should be}
          @r{@samp{underline} (default) or a background color like @samp{#cccccc}.}
@@ -8577,7 +8582,9 @@ acted upon before the translation function is called:
 
 @table @code
 @item :skip N
-Skip the first N lines of the table. Hlines do count!
+Skip the first N lines of the table.  Hlines do count as separate lines for
+this parameter!
+
 @item :skipcols (n1 n2 ...)
 List of columns that should be skipped.  If the table has a column with
 calculation marks, that column is automatically discarded as well.
@@ -8692,7 +8699,7 @@ Month & \multicolumn@{1@}@{c@}@{Days@} & Nr.\ sold & per day\\
 The La@TeX{} translator function @code{orgtbl-to-latex} is already part of
 Orgtbl mode.  It uses a @code{tabular} environment to typeset the table
 and marks horizontal lines with @code{\hline}.  Furthermore, it
-interprets the following parameters:
+interprets the following parameters (see also @ref{Translator functions}):
 
 @table @code
 @item :splice nil/t
@@ -8723,15 +8730,15 @@ supplied instead of strings.
 @cindex HTML, and Orgtbl mode
 @cindex translator function
 
-Orgtbl mode has several translator functions built-in:
-@code{orgtbl-to-latex}, @code{orgtbl-to-html}, and
-@code{orgtbl-to-texinfo}.  Except for @code{orgtbl-to-html}@footnote{The
-HTML translator uses the same code that produces tables during HTML
-export.}, these all use a generic translator, @code{orgtbl-to-generic}.
-For example, @code{orgtbl-to-latex} itself is a very short function that
-computes the column definitions for the @code{tabular} environment,
-defines a few field and line separators and then hands over to the
-generic translator.  Here is the entire code:
+Orgtbl mode has several translator functions built-in: @code{orgtbl-to-csv}
+(comma-separated values), @code{orgtbl-to-tsv} (TAB-separated values)
+@code{orgtbl-to-latex}, @code{orgtbl-to-html}, and @code{orgtbl-to-texinfo}.
+Except for @code{orgtbl-to-html}@footnote{The HTML translator uses the same
+code that produces tables during HTML export.}, these all use a generic
+translator, @code{orgtbl-to-generic}.  For example, @code{orgtbl-to-latex}
+itself is a very short function that computes the column definitions for the
+@code{tabular} environment, defines a few field and line separators and then
+hands over to the generic translator.  Here is the entire code:
 
 @lisp
 @group

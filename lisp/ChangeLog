@@ -1,3 +1,8 @@
+2008-05-12  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-jsinfo.el (org-infojs-opts-table): Add entry for FIXED_TOC
+	option.
+
 2008-05-10  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (orgtbl-to-tsv, orgtbl-to-csv): New functions.

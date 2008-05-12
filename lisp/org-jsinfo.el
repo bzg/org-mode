@@ -66,6 +66,7 @@ line in the buffer.  See also the variable `org-infojs-options'."
   '((path PATH "http://orgmode.org/org-info.js")
     (view VIEW "info")
     (toc TOC :table-of-contents)
+    (ftoc FIXED_TOC "0")
     (tdepth TOC_DEPTH "max")
     (sdepth SECTION_DEPTH "max")
     (mouse MOUSE_HINT "underline")
