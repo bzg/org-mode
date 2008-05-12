@@ -15,6 +15,18 @@
 
 ** Overview
 
+   - Description lists are now supported natively
+   - Blockquotes for export
+   - Fontified code examples in HTML export
+   - Include files for export
+   - The text before the first headline is now exported by default
+   - In-buffer options may now be collected in an external file
+   - The in-buffer settings keywords may now be upper or lower case
+   - Startup visibility can now be influenced by properties
+   - Clock task history, and moving entries with the running clock
+   - BBDB anniversaries much faster
+   - New file in the contrib directory: org-eval.el
+
 ** Incompatible changes
 
 - The text before the first headline is now exported by default
@@ -1249,7 +1261,7 @@ list of small improvements and some new significant features.
 
     When making a new restriction and an agenda window is
     currently visible, it will immediately be updated to reflect
-    the new scope.  TO if you like you can display an agenda view
+    the new scope.  If you like you can display an agenda view
     and then watch it change in various scopes.
 
     To get rid of the restriction, use the command "C-c C-x >".
