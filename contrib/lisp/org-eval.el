@@ -120,7 +120,7 @@ ruby    The ruby interpreter"
 	      (const "shell")))
   
 (defun org-eval-handle-snippets (limit &optional replace)
-  "Evaluate code nisppets and display the results as display property.
+  "Evaluate code snippets and display the results as display property.
 When REPLACE is non-nil, replace the code region with the result (used
 for export)."
   (let (a)

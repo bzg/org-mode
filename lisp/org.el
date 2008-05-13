@@ -3630,7 +3630,7 @@ between words."
   "Regular expression matching a property line.")
 
 (defvar org-font-lock-hook nil
-  "Functions to be called for special font loch stuff.")
+  "Functions to be called for special font lock stuff.")
 
 (defun org-font-lock-hook (limit)
   (run-hook-with-args 'org-font-lock-hook limit))
