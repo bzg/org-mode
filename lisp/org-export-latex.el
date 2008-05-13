@@ -1102,6 +1102,14 @@ Regexps are those from `org-export-latex-special-string-regexps'."
   (while (re-search-forward "^#\\+END_QUOTE" nil t)
     (replace-match "\\end{quote}" t t))
 
+  ;; Convert verse
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+BEGIN_VERSE" nil t)
+    (replace-match "\\begin{verse}" t t))
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+END_VERSE" nil t)
+    (replace-match "\\end{verse}" t t))
+
   ;; Convert horizontal rules
   (goto-char (point-min))
   (while (re-search-forward "^----+.$" nil t)

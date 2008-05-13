@@ -1366,6 +1366,18 @@ on this string to produce the exported version."
 	(replace-match (if (equal (downcase (match-string 1)) "end")
 			   "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
 			 t t))
+      ;; Verse
+      (goto-char (point-min))
+      (while (re-search-forward "^#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
+	(replace-match (if (equal (downcase (match-string 1)) "end")
+			   "ORG-VERSE-END" "ORG-VERSE-START")
+			 t t))
+
+      ;; Remove comment environment
+      (goto-char (point-min))
+      (while (re-search-forward
+	      "^#\\+BEGIN_COMMENT[ \t]*\n[^\000]*?^#\\+END_COMMENT\\>.*" nil t)
+	(replace-match "" t t))
 
       ;; Remove subtrees that are commented
       (goto-char (point-min))
@@ -2619,12 +2631,18 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert "\n<hr/>\n")
 	    (throw 'nextline nil))
 
-	  ;; Blockquotes
+	  ;; Blockquotes and verse
 	  (when (equal "ORG-BLOCKQUOTE-START" line)
 	    (insert "<blockquote>\n<p>\n")
 	    (throw 'nextline nil))
 	  (when (equal "ORG-BLOCKQUOTE-END" line)
 	    (insert "</p>\n</blockquote>\n")
+	    (throw 'nextline nil))
+	  (when (equal "ORG-VERSE-START" line)
+	    (insert "<verse>\n<p>\n")
+	    (throw 'nextline nil))
+	  (when (equal "ORG-VERSE-END" line)
+	    (insert "</p>\n</verse>\n")
 	    (throw 'nextline nil))
 
 	  ;; make targets to anchors

@@ -1,3 +1,13 @@
+2008-05-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-as-html, org-export-preprocess-string):
+	Implement VERSE environment.
+	(org-export-preprocess-string): Implement the COMMENT
+	environment.
+
+	* org-export-latex.el (org-export-latex-preprocess): Implement
+	VERSE environment.
+
 2008-05-12  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-jsinfo.el (org-infojs-opts-table): Add entry for FIXED_TOC

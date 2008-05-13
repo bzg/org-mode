@@ -6731,6 +6731,16 @@ description lists.
 Paragraphs are separated by at least one empty line.  If you need to enforce
 a line break within a paragraph, use @samp{\\} at the end of a line.
 
+To keep the line breaks in a region, but otherwise use normal formatting, you
+can use this construct, which can also be used to format poetry.
+
+@example
+#+begin_verse
+Everything should be made as simple as possible,
+but not any simpler -- Albert Einstein
+#+end_verse
+@end example
+
 When quoting a passage from another document, it is customary to format this
 as a paragraph that is indented on both the left and the right margin.  You
 can include quotations in Org mode documents like this:
@@ -6741,6 +6751,7 @@ Everything should be made as simple as possible,
 but not any simpler -- Albert Einstein
 #+end_quote
 @end example
+
 
 @node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples
@@ -6881,9 +6892,10 @@ exported as a horizontal line (@samp{<hr/>} in HTML).
 @cindex comment lines
 @cindex exporting, not
 
-Lines starting with @samp{#} in column zero are treated as comments
-and will never be exported.  Also entire subtrees starting with the
-word @samp{COMMENT} will never be exported.
+Lines starting with @samp{#} in column zero are treated as comments and will
+never be exported.  Also entire subtrees starting with the word
+@samp{COMMENT} will never be exported.  Finally, regions surrounded by
+@samp{#+BEGIN_COMMENT} ... @samp{END_COMMENT} will not be exported.
 
 @table @kbd
 @kindex C-c ;
