@@ -1,5 +1,11 @@
 2008-05-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-set-font-lock-defaults): Improve fontification of
+	description lists.
+	(org-insert-item): Handle description lists.
+	(org-adaptive-fill-function): Improve auto indentation in
+	description lists.
+
 	* org-exp.el (org-export-as-html, org-export-preprocess-string):
 	Implement VERSE environment.
 	(org-export-preprocess-string): Implement the COMMENT

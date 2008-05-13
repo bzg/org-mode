@@ -749,6 +749,12 @@ with \\[org-ctrl-c-ctrl-c\\]."
   :group 'org-plain-lists
   :type 'boolean)
 
+(defcustom org-description-max-indent 20
+  "Maximum indentation for the second line of a description list.
+When the indentation would be larger than this, it will become
+5 characters instead."
+  :group 'org-plain-lists
+  :type 'integer)
 
 (defgroup org-imenu-and-speedbar nil
   "Options concerning imenu and speedbar in Org-mode."
@@ -3693,7 +3699,7 @@ between words."
 	       '("\\[\\([0-9]*%\\)\\]\\|\\[\\([0-9]*\\)/\\([0-9]*\\)\\]"
 		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; Description list items
-	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(.*?\\) ::"
+	   '("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(.*? ::\\)"
 	     2 'bold prepend)
 	   (list (concat "^\\*+ \\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
@@ -5291,10 +5297,15 @@ Return t when things worked, nil when we are not in an item."
 		t)
 	    (error nil)))
     (let* ((bul (match-string 0))
+	   (descp (save-excursion (goto-char (match-beginning 0))
+				  (beginning-of-line 1)
+				  (save-match-data
+				    (looking-at "[ \t]*.*? ::"))))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
 	   (blank (cdr (assq 'plain-list-item org-blank-before-new-entry)))
 	   pos)
+      (if descp (setq checkbox nil))
       (cond
        ((and (org-at-item-p) (<= (point) eow))
 	;; before the bullet
@@ -5307,7 +5318,10 @@ Return t when things worked, nil when we are not in an item."
 	  (end-of-line 1)
 	  (delete-horizontal-space))
 	(newline (if blank 2 1))))
-      (insert bul (if checkbox "[ ]" ""))
+      (insert bul
+	      (if checkbox "[ ]" "")
+	      (if descp (concat (if checkbox " " "")
+				(read-string "Term: ") " :: ") ""))
       (just-one-space)
       (setq pos (point))
       (end-of-line 1)
@@ -13370,12 +13384,14 @@ not an indirect buffer."
        ((org-in-item-p)
 	(org-beginning-of-item)
 ;	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
-	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\)?")
+	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
 	(setq bpos (match-beginning 1) tpos (match-end 0)
 	      bcol (progn (goto-char bpos) (current-column))
 	      tcol (progn (goto-char tpos) (current-column))
 	      bullet (match-string 1)
 	      bullet-type (if (string-match "[0-9]" bullet) "n" bullet))
+	(if (> tcol (+ bcol org-description-max-indent))
+	    (setq tcol (+ bcol 5)))
 	(if (not itemp)
 	    (setq column tcol)
 	  (goto-char pos)
@@ -13459,6 +13475,13 @@ In particular, this makes sure hanging paragraphs for hand-formatted lists
 work correctly."
   (cond ((looking-at "#[ \t]+")
 	 (match-string 0))
+	((looking-at "[ \t]*\\([-*+] .*? :: \\)")
+	 (save-excursion
+	   (if (> (match-end 1) (+ (match-beginning 1)
+				   org-description-max-indent))
+	       (goto-char (+ (match-beginning 1) 5))
+	     (goto-char (match-end 0)))
+	   (make-string (current-column) ?\ )))
 	((looking-at "[ \t]*\\([-*+] \\|[0-9]+[.)] \\)?")
 	 (save-excursion
 	   (goto-char (match-end 0))
