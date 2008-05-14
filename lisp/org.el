@@ -7713,7 +7713,7 @@ This function can be used in a hook."
          "<literal style=\"html\">?</literal>")
     ("a" "#+begin_ascii\n?\n#+end_ascii")
     ("A" "#+ascii: ")
-    ("i" "#+include: %file ?"
+    ("i" "#+include %file ?"
          "<include file=%file markup=\"?\">")
     )
   "Structure completion elements.
