@@ -3926,8 +3926,10 @@ If KWD is a number, get the corresponding match group."
 	  (setq org-cycle-subtree-status 'folded)
 	  (run-hook-with-args 'org-cycle-hook 'folded)))))
 
-     ;; TAB emulation
+     ;; TAB emulation and template completion
      (buffer-read-only (org-back-to-heading))
+
+     ((org-try-structure-completion))
 
      ((org-try-cdlatex-tab))
 
@@ -7693,31 +7695,60 @@ This function can be used in a hook."
 
 (defcustom org-structure-template-alist
   '(
-    ("s" "#+begin_src ?\n\n#+end_src")
-    ("e" "#+begin_example\n?\n#+end_example")
-    ("q" "#+begin_quote\n?\n#+end_quote")
-    ("v" "#+begin_verse\n?\n#+end_verse")
-    ("l" "#+begin_latex\n?\n#+end_latex")
-    ("L" "#+latex: ")
-    ("h" "#+begin_html\n?\n#+end_html")
-    ("H" "#+html: ")
+    ("s" "#+begin_src ?\n\n#+end_src" 
+         "<src lang=\"?\">\n\n</src>")
+    ("e" "#+begin_example\n?\n#+end_example"
+         "<example>\n?\n</example>")
+    ("q" "#+begin_quote\n?\n#+end_quote"
+         "<quote>\n?\n</quote>")
+    ("v" "#+begin_verse\n?\n#+end_verse"
+         "<verse>\n?\n/verse>")
+    ("l" "#+begin_latex\n?\n#+end_latex"
+         "<literal style=\"latex\">\n?\n</literal>")
+    ("L" "#+latex: "
+         "<literal style=\"latex\">?</literal>")
+    ("h" "#+begin_html\n?\n#+end_html"
+         "<literal style=\"html\">\n?\n</literal>")
+    ("H" "#+html: "
+         "<literal style=\"html\">?</literal>")
     ("a" "#+begin_ascii\n?\n#+end_ascii")
     ("A" "#+ascii: ")
-    ("i" "#+include: %file ?")
+    ("i" "#+include: %file ?"
+         "<include file=%file markup=\"?\">")
     )
   "Structure completion elements.
 This is a list of abbreviation keys and values.  The value gets inserted
 it you type @samp{.} followed by the key and then the completion key,
 usually `M-TAB'.  %file will be replaced by a file name after prompting
 for the file uning completion.
+There are two templates for each key, the first uses the original Org syntax,
+the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
+the default when the /org-mtags.el/ module has been loaded. See also the
+variable `org-mtags-prefere-muse-templates'.
 This is an experimental feature, it is undecided if it is going to stay in."
   :group 'org-completion
   :type '(repeat
-	  (string :tag "Key") (string :tag "Template")))
+	  (string :tag "Key")
+	  (string :tag "Template")
+	  (string :tag "Muse Template")))
+
+(defun org-try-structure-completion ()
+  "Try to complete a structure template before point.
+This looks for strings like \"<e\" on an otherwise empty line and
+expands them."
+  (let ((l (buffer-substring (point-at-bol) (point)))
+	a)
+    (when (and (looking-at "[ \t]*$")
+	       (string-match "^[ \t]*<\\([a-z]+\\)$"l)
+	       (setq a (assoc (match-string 1 l) org-structure-template-alist)))
+      (org-complete-expand-structure-template (+ -1 (point-at-bol)
+						 (match-beginning 1)) a)
+      t)))
 
 (defun org-complete-expand-structure-template (start cell)
   "Expand a structure template."
-  (let ((rpl (nth 1 cell)))
+  (let* ((musep (org-bound-and-true-p org-mtags-prefere-muse-templates))
+	 (rpl (nth (if musep 2 1) cell)))
     (delete-region start (point))
     (when (string-match "\\`#\\+" rpl)
       (cond
@@ -7763,7 +7794,7 @@ At all other locations, this simply calls the value of
 	    (confirm (lambda (x) (stringp (car x))))
 	    (searchhead (equal (char-before beg) ?*))
 	    (struct
-	     (when (and (equal (char-before beg1) ?.)
+	     (when (and (member (char-before beg1) '(?. ?<))
 			(setq a (assoc (buffer-substring beg1 (point))
 				       org-structure-template-alist)))
 	       (org-complete-expand-structure-template (1- beg1) a)

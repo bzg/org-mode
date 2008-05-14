@@ -27,158 +27,195 @@
 ;;; Commentary:
 ;;
 ;; This modules implements some of the formatting tags available in
-;; Emacs Muse.  The goal of this devellopment is to  make it easier for
-;; people to move between both worlds, and eventually to allow Org files
-;; to be published as parts of the Muse environment.
+;; Emacs Muse.  This is not a way if adding new functionality, but just
+;; a different way to write some formatting directives.  The advantage is
+;; that files written in this way can be read by Muse reasonably well,
+;; and that this provides an alternative way of writing formatting
+;; directives in Org, a way that some might find more pleasant to type
+;; and look at that the Org's #+BEGIN..#+END notation.
+
+;; The goal of this development is to make it easier for people to
+;; move between both worlds as they see fit for different tasks.
+
+;; The following muse tags will be translated during export into their
+;; native Org equivalents:
+;;
+;;   <br>
+;;        Needs to be at the end of a line.  Will be translated to "\\".
+;;
+;;   <example>
+;;        Needs to be on a line by itself, similarly the </example> tag.
+;;        Will be translated into Org's #+BEGIN_EXAMPLE construct.
+;;
+;;   <quote>
+;;        Needs to be on a line by itself, similarly the </quote> tag.
+;;        Will be translated into Org's #+BEGIN_QUOTE construct.
+;;
+;;   <comment>
+;;        Needs to be on a line by itself, similarly the </comment> tag.
+;;        Will be translated into Org's #+BEGIN_COMMENT construct.
+;;
+;;   <verse>
+;;        Needs to be on a line by itself, similarly the </verse> tag.
+;;        Will be translated into Org's #+BEGIN_VERSE construct.
+;;
+;;   <content>
+;;        This gets translated into "[TABLE-OF-CONTENTS]".  It will not
+;;        trigger the production of a table of contents - that is done
+;;        in Org with the "#+OPTIONS: toc:t" setting.  But it will define
+;;        the location where the TOC will be placed.
+;;
+;;   <literal style="STYLE">    ;; only latex and html supported in Org
+;;        Needs to be on a line by itself, similarly the </literal> tag.
+;;
+;;   <src lang="LANG">
+;;        Needs to be on a line by itself, similarly the </src> tag.
+;;        Will be translated into Org's BEGIN_SRC construct.
+;;
+;;   <include file="FILE" markup="MARKUP" lang="LANG">
+;;        Needs to be on a line by itself.
+;;        Will be translated into Org's #+INCLUDE construct.
+;;
+;; The lisp/perl/ruby/python tags can be implemented using the
+;; `org-eval.el' module, which see.
 
 (require 'org)
 
 ;;; Customization
 
-(defgroup org-eval nil
-  "Options concerning including output from commands into the Org-mode buffer."
-  :tag "Org Eval"
+(defgroup org-mtags nil
+  "Options concerning Muse tags in Org mode."
+  :tag "Org Muse Tags"
   :group 'org)
 
-(defface org-eval
-  (org-compatible-face nil
-    '((((class color grayscale) (min-colors 88) (background light))
-       (:foreground "grey40"))
-      (((class color grayscale) (min-colors 88) (background dark))
-       (:foreground "grey60"))
-      (((class color) (min-colors 8) (background light))
-       (:foreground "green"))
-      (((class color) (min-colors 8) (background dark))
-       (:foreground "yellow"))))
-  "Face for command output that is included into an Org-mode buffer."
-  :group 'org-eval
-  :group 'org-faces
-  :version "22.1")
+(defcustom org-mtags-prefere-muse-templates t
+  "Non-nil means, prefere Muse tags for structure elements.
+This is relevane when expanding the templates defined in the variable
+`org-structure-templates'."
+  :group 'org-mtags
+  :type 'boolean)
 
-(defvar org-eval-regexp nil)
+(defconst org-mtags-supported-tags
+  '("example" "quote" "comment" "verse" "content" "literal" "src" "include")
+  "The tags that are supported by org-mtags.el for conversion.
+In addition to this list, the <br> tag is supported as well.")
 
-(defun org-eval-set-interpreters (var value)
-  (set-default var value)
-  (setq org-eval-regexp
-	(concat "<\\("
-		(mapconcat 'regexp-quote value "\\|")
-		"\\)"
-		"\\([^>]\\{0,50\\}?\\)>"
-		"\\([^\000]+?\\)</\\1>")))
+(defconst org-mtags-fontification-re
+  (concat 
+   "^[ \t]*</?\\("
+   (mapconcat 'identity org-mtags-supported-tags "\\|")
+   "\\)\\>[^>]*>\\|<br>[ \t]*$")
+  "Regular expression used for fontifying muse tags.")
 
-(defcustom org-eval-interpreters '("lisp")
-  "Interpreters allows for evaluation tags.
-This is a list of program names (as strings) that can evaluate code and
-insert the output into an Org-mode buffer.  Valid choices are 
+(defun org-mtags-replace ()
+  "Replace Muse-like tags with the appropriate Org constructs.
+The is done in the entire buffer."
+  (interactive) ;; FIXME
+  (let ((re (concat "^[ \t]*\\(</?\\("
+		    (mapconcat 'identity org-mtags-supported-tags "\\|")
+		    "\\)\\)"))
+	info tag rpl style markup lang file)
+    ;; First, do the <br> tag
+    (goto-char (point-min))
+    (while (re-search-forward "<br>[ \t]*$" nil t)
+      (replace-match "\\\\" t t))
+    ;; Now, all the other tags
+    (goto-char (point-min))
+    (while (re-search-forward re nil t)
+      (goto-char (match-beginning 1))
+      (setq info (org-mtags-get-tag-and-attributes))
+      (if (not info)
+	  (end-of-line 1)
+	(setq tag (plist-get info :tag))
+	(cond
+	 ((equal tag "content")
+	  (setq rpl "[TABLE-OF-CONTENTS]")
+	  ;; FIXME: also trigger TOC in options-plist?????
+	  )
+	 ((member tag '("example" "quote" "comment" "verse"))
+	  (if (plist-get info :closing)
+	      (setq rpl (format "#+END_%s" (upcase tag)))
+	    (setq rpl (format "#+BEGIN_%s" (upcase tag)))))
+	 ((equal tag "literal")
+	  (setq style (plist-get info :style))
+	  (and style (setq style (downcase style)))
+	  (if (plist-get info :closing)
+	      (setq rpl (cond
+			 ((member style '("latex"))
+			  "#+END_LaTeX")
+			 ((member style '("html"))
+			  "#+END_HTML")
+			 ((member style '("ascii"))
+			  "#+END_ASCII")))
+	    (setq rpl (cond
+		       ((member style '("latex"))
+			"#+BEGIN_LaTeX")
+		       ((member style '("html"))
+			"#+BEGIN_HTML")
+		       ((member style '("ascii"))
+			"#+BEGIN_ASCII")))))
+	 ((equal tag "src")
+	  (if (plist-get info :closing)
+	      (setq rpl "#+END_SRC")
+	    (setq rpl "#+BEGIN_SRC")
+	    (when (setq lang (plist-get info :lang))
+	      (setq rpl (concat rpl " " lang)))))
+	 ((equal tag "include")
+	  (setq file (plist-get info :file)
+		markup (downcase (plist-get info :markup))
+		lang (plist-get info :lang))
+	  (setq rpl "#+INCLUDE")
+	  (when markup
+	    (setq rpl (concat rpl " " markup))
+	    (when (and (equal markup "src") lang)
+	      (setq rpl (concat rpl " " lang))))))
+	(when rpl
+	  (goto-char (plist-get info :match-beginning))
+	  (delete-region (point-at-bol) (plist-get info :match-end))
+	  (insert rpl))))))
 
-lisp    Interpret Emacs Lisp code and display the result
-shell   Pass command to the shell and display the result
-perl    The perl interpreter
-python  Thy python interpreter
-ruby    The ruby interpreter"
-  :group 'org-eval
-  :set 'org-eval-set-interpreters
-  :type '(set :greedy t
-	      (const "lisp")
-	      (const "perl")
-	      (const "python")
-	      (const "ruby")
-	      (const "shell")))
-  
-(defun org-eval-handle-snippets (limit &optional replace)
-  "Evaluate code nisppets and display the results as display property.
-When REPLACE is non-nil, replace the code region with the result (used
-for export)."
-  (let (a)
-    (while (setq a (text-property-any (point) (or limit (point-max))
-				      'org-eval t))
-      (remove-text-properties
-       a (next-single-property-change a 'org-eval nil limit)
-       '(display t intangible t org-eval t))))
-  (while (re-search-forward org-eval-regexp limit t)
-    (let* ((beg (match-beginning 0))
-	   (end (match-end 0))
-	   (kind (match-string 1))
-	   (attr (match-string 2))
-	   (code (match-string 3))
-	   (value (org-eval-code kind code))
-	   markup lang)
-      (if replace
-	  (progn
-	    (setq attr (save-match-data (org-eval-get-attributes attr))
-		  markup (cdr (assoc "markup" attr))
-		  lang  (cdr (assoc "lang" attr)))
-	    (replace-match
-	     (concat (if markup (format "#+BEGIN_%s" (upcase markup)))
-		     (if (and markup (equal (downcase markup) "src"))
-			 (concat " " (or lang "fundamental")))
-		     "\n"
-		     value
-		     (if markup (format "\n#+END_%s\n" (upcase markup))))
-	     t t))
-	(add-text-properties
-	 beg end
-	 (list 'display value 'intangible t 'font-lock-multiline t
-	       'face 'org-eval
-	       'org-eval t))))))
+(defun org-mtags-get-tag-and-attributes ()
+  "Parse a Muse-like tag at point ant rturn the information about it.
+The return value is a property list which contains all the attributes
+with string values.  In addition, it reutnrs the following properties:
 
-(defun org-eval-replace-snippts ()
-  "Replace EVAL snippets in the entire buffer.
-This should go into the `org-export-preprocess-hook'."
-  (goto-char (point-min))
-  (org-eval-handle-snippets nil 'replace))
+:tag              The tag as a string.
+:match-beginning  The beginning of the match, just before \"<\".
+:match-end        The end of the match, just after \">\".
+:closing          t when the tag starts with \"</\"."
+  (when (looking-at "<\\(/\\)?\\([a-zA-Z]+\\>\\)\\([^>]*\\)>")
+    (let ((start 0)
+	  tag rest prop attributes)
+      (setq tag (org-match-string-no-properties 2)
+	    endp (match-end 1)
+	    rest (and (match-end 3)
+		      (org-match-string-no-properties 3))
+	    attributes (list :tag tag
+			     :match-beginning (match-beginning 0)
+			     :match-end (match-end 0)
+			     :closing endp))
+      (when rest
+	(while (string-match "\\([a-zA-Z]+\\)=\\([^ \t\n>]+\\|\"[^>]+\"\\)"
+			     rest start)
+	  (setq start (match-end 0)
+		prop (org-match-string-no-properties 1 rest)
+		val (org-remove-double-quotes
+		     (org-match-string-no-properties 2 rest)))
+	  (setq attributes (plist-put attributes
+				      (intern (concat ":" prop)) val))))
+      attributes)))
 
-(add-hook 'org-export-preprocess-hook 'org-eval-replace-snippts)
-(add-hook 'org-font-lock-hook 'org-eval-handle-snippets)
+(defun org-mtags-fontify-tags (limit)
+  "Fontify the muse-like tags."
+  (while (re-search-forward org-mtags-fontification-re limit t)
+    (add-text-properties (match-beginning 0) (match-end 0)
+			 '(face shadow font-lock-multiline t
+				font-lock-fontified t))))
 
-(defun org-eval-get-attributes (str)
-  (let ((start 0) key value rtn)
-    (while (string-match "\\<\\([a-zA-Z]+\\)\\>=\"\\([^\"]+\\)\"" str start)
-      (setq key (match-string 1 str)
-	    value (match-string 2 str)
-	    start (match-end 0))
-      (push (cons key value) rtn))
-    rtn))
+(add-hook 'org-export-preprocess-hook 'org-mtags-replace)
+(add-hook 'org-font-lock-hook 'org-mtags-fontify-tags)
 
-(defun org-eval-code (interpreter code)
-  (cond
-   ((equal interpreter "lisp")
-    (org-eval-lisp (concat "(progn\n" code "\n)")))
-   ((equal interpreter "shell")
-    (shell-command-to-string code))
-   ((member interpreter '("perl" "python" "ruby"))
-    (org-eval-run (executable-find interpreter) code))
-   (t (error "Cannot evaluate code type %s" interpreter))))
+(provide 'org-mtags)
 
-(defun org-eval-lisp (form)
-  "Evaluate the given form and return the result as a string."
-  (require 'pp)
-  (save-match-data
-    (condition-case err
-        (let ((object (eval (read form))))
-          (cond
-           ((stringp object) object)
-           ((and (listp object)
-                 (not (eq object nil)))
-            (let ((string (pp-to-string object)))
-              (substring string 0 (1- (length string)))))
-           ((numberp object)
-            (number-to-string object))
-           ((eq object nil) "")
-           (t
-            (pp-to-string object))))
-      (error
-       (org-display-warning (format "%s: Error evaluating %s: %s"
-                                     "???" form err))
-       "; INVALID LISP CODE"))))
-
-(defun org-eval-run (cmd code)
-  (with-temp-buffer
-    (insert code)
-    (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-    (buffer-string)))  
-
-(provide 'org-eval)
-
-;;; org-eval.el ends here
+;;; org-mtags.el ends here
 

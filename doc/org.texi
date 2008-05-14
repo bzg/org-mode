@@ -7268,7 +7268,7 @@ case.  All it then takes to make use of the program is adding a single line
 to the Org file:
 
 @example
-#+INFOSJ_OPT: view:info toc:nil
+#+INFOJS_OPT: view:info toc:nil
 @end example
 
 @noindent

@@ -16,23 +16,24 @@
 ** Overview
 
    - Description lists are now supported natively
-   - Blockquotes for export
+   - Block quotes for export
    - Fontified code examples in HTML export
    - Include files for export
-   - The text before the first headline is now exported by default
+   - Text before the first headline is now exported by default
    - In-buffer options may now be collected in an external file
-   - The in-buffer settings keywords may now be upper or lower case
+   - The in-buffer settings keywords may now be lower case
+   - Completion of structure elements
    - Startup visibility can now be influenced by properties
-   - Clock task history, and moving entries with the running clock
+   - Clock task history, moving entries with the running clock
    - BBDB anniversaries much faster
-   - New file in the contrib directory: org-eval.el
+   - New contrib files: org-eval.el and org-mtags.el
 
 ** Incompatible changes
 
 - The text before the first headline is now exported by default
 
   Previously, the default was to not include text in an org-mode
-  buffer before the first headine.  From now on, the default it to
+  buffer before the first headline.  From now on, the default it to
   include it.  If you like the old default better, customize the
   variable =org-export-skip-text-before-1st-heading= or set the
   value on a per-file basis with
@@ -71,7 +72,7 @@
      - IDLWAVE   :: The Emacs modes for editing and
                     running IDL and WAVE CL files.
 
-*** Blockquotes for export
+*** Block quotes for export
 
     For quoting an entire paragraph as a citation, use
 
@@ -92,7 +93,7 @@ but not any simpler -- Albert Einstein
 *** Fontified code examples in HTML export
 
     You can now get code examples fontified like they would be
-    fontified in an emacs Buffer, and export the result to HTML.
+    fontified in an Emacs Buffer, and export the result to HTML.
     To do so, wrap the code examples into the following
     structure:
 
@@ -133,7 +134,7 @@ but not any simpler -- Albert Einstein
     : #+INCLUDE: "file" markup lang
 
     will lead to the inclusion of the contents of FILE at the moment
-    of publishing.  FILE ahould be surrounded by double quotes, this
+    of publishing.  FILE should be surrounded by double quotes, this
     is obligatory if it contains space characters.  The parameters
     MARKUP and LANG are optional.  MARKUP can be "example", "quote",
     or "src".  If it is "src", LANG should be the name of the Emacs
@@ -145,7 +146,7 @@ but not any simpler -- Albert Einstein
 *** The text before the first headline is now exported by default
 
     Previously, the default was to not include text in an org-mode
-    buffer before the first headine.  From now on, the default it to
+    buffer before the first headline.  From now on, the default it to
     include it.  If you like the old default better, customize the
     variable =org-export-skip-text-before-1st-heading= or set the
     value on a per-file basis with
@@ -170,6 +171,28 @@ but not any simpler -- Albert Einstein
     From now on, it makes no difference is you write =#+STARTUP= or
     =#+startup=, to make these lines less imposing.  Similarly for all
     other in-buffer keywords.
+
+*** Completion of structure elements
+    As a new experimental feature, Org now supports completion of
+    structural elements like =#+BEGIN_EXAMPLE= in a special way.
+    It work by typing, for example "<e" and then pressing TAB, on
+    an otherwise empty line.  "<e" will expand into a complete
+    EXAMPLE template, with the cursor positioned in the middle.
+    Currently supported templates are:
+
+    : <s   #+begin_src
+    : <e   #+begin_example
+    : <q   #+begin_quote
+    : <v   #+begin_verse
+    : <l   #+begin_latex
+    : <L   #+latex:
+    : <h   #+begin_html
+    : <H   #+html:
+    : <a   #+begin_ascii
+    : <i   #+include:
+
+    This is an experimental feature, please comment!  See also
+    below under /org-mtags.el/.
 
 *** Startup visibility can now be influenced by properties
 
@@ -238,12 +261,33 @@ but not any simpler -- Albert Einstein
     approach using a hash for birthdays.  Thanks to Thomas
     Baumann for a patch to this effect.
 
-*** New file in the contrib directory: org-eval.el
+*** New files in the contrib directory
 
-    The new module module /org-eval.el/ allowes to include the
-    result of the evaluation of Lisp code (and other scripting
-    languages) into the buffer, similar to the =<lisp>= tag of
-    [[http://mwolson.org/static/doc/emacs-wiki.html#Lisp-Tricks][Emacs Wiki]] and [[http://mwolson.org/static/doc/muse/Embedded-Lisp.html#Embedded-Lisp][Muse]].
+    Do people think any of these should become core?
+
+    - org-eval.el :: This new module allows to include the result
+         of the evaluation of Lisp code (and other scripting
+         languages) into the buffer, similar to the =<lisp>= tag
+         of [[http://mwolson.org/static/doc/emacs-wiki.html#Lisp-Tricks][Emacs Wiki]] and [[http://mwolson.org/static/doc/muse/Embedded-Lisp.html#Embedded-Lisp][Muse]].
+    - org-mtags.el :: This new modules allows you to use
+         Muse-like tags for some structure definitions in Org.
+         For example, you can use
+         :<example>
+	 :...
+	 :</example>
+         instead of
+	 :#+BEGIN_EXAMPLE
+	 :...
+	 :#+END_EXAMPLE
+	 In fact, I myself find these easier to type and to look
+         at.  Also, it will allow you to more easily move text
+         and files back and forth between Org and Muse.  For a
+         list of supported structure elements, see the commentary
+         in the file /org-mtags.el/.
+
+	 If you load this module and use the "<i" etc completion
+         described above, the Muse form will automatically be
+         inserted.
 
 *** Bug fixes
     Many bug fixes again.  Will this ever stop?

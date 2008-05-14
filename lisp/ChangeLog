@@ -1,3 +1,7 @@
+2008-05-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-try-structure-completion): New function.
+
 2008-05-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-set-font-lock-defaults): Improve fontification of

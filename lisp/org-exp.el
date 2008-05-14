@@ -2853,7 +2853,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq item-type "d"
 			item-tag (match-string 1 line)
 			line (substring line (match-end 0))))
-	      (unless (string-match "[^ \t]" line)
+	      (when (and (not (equal item-type "d"))
+			 (not (string-match "[^ \t]" line)))
 		;; empty line.  Pretend indentation is large.
 		(setq ind (if org-empty-line-terminates-plain-lists
 			      0
