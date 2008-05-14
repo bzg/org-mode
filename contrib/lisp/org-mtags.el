@@ -88,6 +88,20 @@
   :tag "Org Muse Tags"
   :group 'org)
 
+(defface org-mtags    ; similar to shadow
+  (org-compatible-face 'shadow
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50"))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70"))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green"))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow"))))
+  "Face for Muse-like tags in Org."
+  :group 'org-mtags
+  :group 'org-faces)
+
 (defcustom org-mtags-prefere-muse-templates t
   "Non-nil means, prefere Muse tags for structure elements.
 This is relevane when expanding the templates defined in the variable
@@ -209,7 +223,7 @@ with string values.  In addition, it reutnrs the following properties:
   "Fontify the muse-like tags."
   (while (re-search-forward org-mtags-fontification-re limit t)
     (add-text-properties (match-beginning 0) (match-end 0)
-			 '(face shadow font-lock-multiline t
+			 '(face org-mtags font-lock-multiline t
 				font-lock-fontified t))))
 
 (add-hook 'org-export-preprocess-hook 'org-mtags-replace)
