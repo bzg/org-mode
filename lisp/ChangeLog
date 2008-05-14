@@ -1,5 +1,9 @@
 2008-05-14  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-print-icalendar-entries): Make sure DTEND is
+	shifted by one day if theere is a date range without an end
+	time.
+
 	* org.el (org-try-structure-completion): New function.
 
 2008-05-13  Carsten Dominik  <dominik@science.uva.nl>

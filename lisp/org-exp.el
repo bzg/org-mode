@@ -3716,7 +3716,8 @@ When COMBINE is non nil, add the category to each line."
 	  (if (looking-at re2)
 	      (progn
 		(goto-char (match-end 0))
-		(setq ts2 (match-string 1) inc nil))
+		(setq ts2 (match-string 1)
+		      inc (not (string-match "[0-9]\\{1,2\\}:[0-9][0-9]" ts2))))
 	    (setq tmp (buffer-substring (max (point-min)
 					     (- pos org-ds-keyword-length))
 					pos)

@@ -131,7 +131,7 @@ but not any simpler -- Albert Einstein
 
     A line like
 
-    : #+INCLUDE: "file" markup lang
+    : #+INCLUDE "file" markup lang
 
     will lead to the inclusion of the contents of FILE at the moment
     of publishing.  FILE should be surrounded by double quotes, this
@@ -189,7 +189,7 @@ but not any simpler -- Albert Einstein
     : <h   #+begin_html
     : <H   #+html:
     : <a   #+begin_ascii
-    : <i   #+include:
+    : <i   #+include
 
     This is an experimental feature, please comment!  See also
     below under /org-mtags.el/.
