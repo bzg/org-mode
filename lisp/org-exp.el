@@ -1222,6 +1222,7 @@ on this string to produce the exported version."
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
       (insert string)
+      (setq case-fold-search t)
       ;; Call the hook
       (run-hooks 'org-export-preprocess-hook)
 
@@ -1233,6 +1234,7 @@ on this string to produce the exported version."
 	(delete-region p (next-single-property-change p :org-license-to-kill)))
 
       (let ((org-inhibit-startup t)) (org-mode))
+      (setq case-fold-search t)
       (untabify (point-min) (point-max))
 
       ;; Handle incude files
@@ -1623,7 +1625,8 @@ When LEVEL is non-nil, increase section numbers on that level."
 
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
-  (let (params file markup lang start end)
+  (let ((case-fold-search t)
+	params file markup lang start end)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
@@ -1655,10 +1658,11 @@ When LEVEL is non-nil, increase section numbers on that level."
 ;; Currently only for th HTML backend, but who knows....
 (defun org-export-replace-src-segments ()
   "Replace source code segments with special code for export."
-  (let (lang code trans)
+  (let ((case-fold-search t)
+	lang code trans)
     (goto-char (point-min))
     (while (re-search-forward
-	    "^#\\+BEGIN_SRC[ \t]+\\([^ \t\n]+\\)[ \t]*\n\\([^\000]+?\n\\)#\\+END_SRC.*"
+	    "^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)[ \t]*\n\\([^\000]+?\n\\)#\\+END_SRC.*"
 	    nil t)
       (setq lang (match-string 1) code (match-string 2)
 	    trans (org-export-format-source-code lang code))
