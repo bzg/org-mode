@@ -6735,10 +6735,10 @@ To keep the line breaks in a region, but otherwise use normal formatting, you
 can use this construct, which can also be used to format poetry.
 
 @example
-#+begin_verse
+#+BEGIN_VERSE
 Everything should be made as simple as possible,
 but not any simpler -- Albert Einstein
-#+end_verse
+#+END_VERSE
 @end example
 
 When quoting a passage from another document, it is customary to format this
@@ -6746,10 +6746,10 @@ as a paragraph that is indented on both the left and the right margin.  You
 can include quotations in Org mode documents like this:
 
 @example
-#+begin_quote
+#+BEGIN_QUOTE
 Everything should be made as simple as possible,
 but not any simpler -- Albert Einstein
-#+end_quote
+#+END_QUOTE
 @end example
 
 
@@ -6763,9 +6763,9 @@ for source code and similar examples.
 @cindex #+BEGIN_EXAMPLE
 
 @example
-#+begin_example
+#+BEGIN_EXAMPLE
 Some example from a text file.
-#+end_example
+#+END_EXAMPLE
 @end example
 
 For simplicity when using small examples, you can also start the example
@@ -6786,11 +6786,11 @@ example:
 @cindex #+BEGIN_SRC
 
 @example
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
 (defun org-xor (a b)
    "Exclusive or."
    (if a (not b) b))
-#+end_src
+#+END_SRC
 @end example
 
 @node Include files, Tables exported, Literal examples, Markup rules
@@ -6802,7 +6802,7 @@ include your .emacs file, you could use:
 @cindex #+INCLUDE
 
 @example
-#+include "~/.emacs" src emacs-lisp
+#+INCLUDE: "~/.emacs" src emacs-lisp
 @end example
 
 The optional second and third parameter are the markup (@samp{quote},
