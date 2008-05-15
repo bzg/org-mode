@@ -632,6 +632,12 @@ The text will be inserted into the DESCRIPTION field."
   :group 'org-export-icalendar
   :type 'string)
 
+(defcustom org-icalendar-force-UID nil
+  "Non-nil means, each exported entry must have a UID.
+If not present, that UID will be created."
+  :group 'org-export-icalendar
+  :type 'boolean)
+
 ;;;; Exporting
 
 ;;; Variables, constants, and parameter plists

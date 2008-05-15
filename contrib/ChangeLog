@@ -1,3 +1,9 @@
+2008-05-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-id.el (org-id-include-domain): New option.
+	(org-id-new): Add the domain name to an ID if
+	`org-id-include-domain' is set.
+
 2008-05-04  Jason Riedy  <jason@acm.org>
 
 	* lisp/orgtbl-sqlinsert.el (orgtbl-to-sqlinsert): Use the

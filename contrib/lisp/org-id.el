@@ -86,6 +86,13 @@ to have no space characters in them."
 	  (const :tag "No prefix")
 	  (string :tag "Prefix")))
 
+(defcustom org-id-include-domain t
+  "Non-nil means, add the domain name to new IDs.
+This ensures global uniqueness of ID's, and is also suggested by
+RFC 2445 in combination with RFC 822."
+  :group 'org-id
+  :type 'boolean)
+
 (defcustom org-id-locations-file "~/.org-id-locations"
   "The file for remembering the last ID number generated."
   :group 'org-id
@@ -209,10 +216,14 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
   (let* ((prefix (if (eq prefix 'none)
 		     nil
 		   (or prefix org-id-prefix)))
-	 (etime (org-id-time-to-b62)))
+	 (etime (org-id-time-to-b62))
+	 (postfix (if org-id-include-domain
+		      (progn
+			(require 'message)
+			(concat "@" (message-make-fqdn))))))
     (if prefix
-	(concat prefix ":" etime)
-      etime)))
+	(concat prefix ":" etime postfix)
+      (concat etime postfix))))
 
 (defun org-id-int-to-b62-one-digit (i)
   "Turn an integer between 0 and 61 into a single character 0..9, A..Z, a..z."

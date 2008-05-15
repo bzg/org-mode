@@ -1,3 +1,7 @@
+2008-05-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-icalendar-force-UID): New option.
+
 2008-05-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-print-icalendar-entries): Make sure DTEND is
