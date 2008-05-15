@@ -2403,15 +2403,26 @@ Otherwise, return nil."
     (skip-chars-forward " \t")
     (when (looking-at org-clock-string)
       (let ((re (concat "[ \t]*" org-clock-string
-			" *[[<]\\([^]>]+\\)[]>]-+[[<]\\([^]>]+\\)[]>]"
-			"\\([ \t]*=>.*\\)?"))
+			" *[[<]\\([^]>]+\\)[]>]\\(-+[[<]\\([^]>]+\\)[]>]"
+			"\\([ \t]*=>.*\\)?\\)?"))
 	    ts te h m s)
-	(if (not (looking-at re))
-	    nil
-	  (and (match-end 3) (delete-region (match-beginning 3) (match-end 3)))
+	(cond
+	 ((not (looking-at re))
+	  nil)
+	 ((not (match-end 2))
+	  (when (and (equal (marker-buffer org-clock-marker) (current-buffer))
+		     (> org-clock-marker (point))
+		     (<= org-clock-marker (point-at-eol)))
+	    ;; The clock is running here
+	    (setq org-clock-start-time
+		  (apply 'encode-time 
+			 (org-parse-time-string (match-string 1))))
+	    (org-update-mode-line)))
+	 (t
+	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
 	  (end-of-line 1)
 	  (setq ts (match-string 1)
-		te (match-string 2))
+		te (match-string 3))
 	  (setq s (- (time-to-seconds
 		      (apply 'encode-time (org-parse-time-string te)))
 		     (time-to-seconds
@@ -2421,7 +2432,7 @@ Otherwise, return nil."
 		m (floor (/ s 60))
 		s (- s (* 60 s)))
 	  (insert " => " (format "%2d:%02d" h m))
-	  t)))))
+	  t))))))
 
 (defun org-check-running-clock ()
   "Check if the current buffer contains the running clock.
