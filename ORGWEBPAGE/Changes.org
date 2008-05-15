@@ -72,6 +72,9 @@
      - IDLWAVE   :: The Emacs modes for editing and
                     running IDL and WAVE CL files.
 
+    This works now in the HTML exporter, we still need to supoort
+    it with the LaTeX and ASCII exporters.
+
 *** Block quotes for export
 
     For quoting an entire paragraph as a citation, use
@@ -271,19 +274,19 @@ but not any simpler -- Albert Einstein
          of [[http://mwolson.org/static/doc/emacs-wiki.html#Lisp-Tricks][Emacs Wiki]] and [[http://mwolson.org/static/doc/muse/Embedded-Lisp.html#Embedded-Lisp][Muse]].
     - org-mtags.el :: This new modules allows you to use
          Muse-like tags for some structure definitions in Org.
-         For example, you can use
-         :<example>
-	 :...
-	 :</example>
-         instead of
+         For example, instead of 
 	 :#+BEGIN_EXAMPLE
 	 :...
 	 :#+END_EXAMPLE
+	 you can write
+         :<example>
+	 :...
+	 :</example>
 	 In fact, I myself find these easier to type and to look
          at.  Also, it will allow you to more easily move text
          and files back and forth between Org and Muse.  For a
          list of supported structure elements, see the commentary
-         in the file /org-mtags.el/.
+         in the file [[http://repo.or.cz/w/org-mode.git?a=blob_plain;f=contrib/lisp/org-mtags.el;hb=HEAD][commentary in the file org-mtags.el]].
 
 	 If you load this module and use the "<i" etc completion
          described above, the Muse form will automatically be
