@@ -270,7 +270,7 @@ pushtag:
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git $(TAG)
 
 pushreleasetag:
-	git-tag -m "Adding tag" -a release_$(TAG)
+	git-tag -m "Adding release tag" -a release_$(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
 
 
