@@ -161,6 +161,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
 	(const :tag "   bibtex:            Links to BibTeX entries" org-bibtex)
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
+	(const :tag "   id:                Global id's for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
 	(const :tag "   jsinfo:            Set up Sebastian Rose's JavaScript org-info.js" org-jsinfo)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
@@ -2382,6 +2383,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
 		  (beg end))
+(declare-function org-update-mode-line "org-clock" ())
+(defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
 
@@ -2580,6 +2583,14 @@ collapsed state."
  '(org-columns-number-to-string org-columns-get-format-and-top-level
    org-columns-compute org-agenda-columns org-columns-remove-overlays
    org-columns org-insert-columns-dblock))
+
+;; Autoload ID code
+
+(org-autoload "org-id"
+ '(org-id-get-create org-id-copy org-id-get 
+   org-id-get-with-outline-path-completion 
+   org-id-get-with-outline-drilling
+   org-id-goto org-id-find))
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 

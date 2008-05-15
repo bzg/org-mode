@@ -1,5 +1,7 @@
 2008-05-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-id.el: New file, move from contrib to core.
+
 	* org-exp.el (org-icalendar-force-UID): New option.
 
 2008-05-14  Carsten Dominik  <dominik@science.uva.nl>

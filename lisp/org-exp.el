@@ -3694,7 +3694,7 @@ When COMBINE is non nil, add the category to each line."
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
-	scheduledp deadlinep tmp pri category entry location summary desc
+	scheduledp deadlinep tmp pri category entry location summary desc uid
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
     (save-excursion
@@ -3722,6 +3722,9 @@ When COMBINE is non nil, add the category to each line."
 		      t org-icalendar-include-body)
 		location (org-icalendar-cleanup-string
 			  (org-entry-get nil "LOCATION"))
+		uid (if org-icalendar-force-UID
+			(org-id-get-create)
+		      (org-id-get))
 		category (org-get-category))
 	  (if (looking-at re2)
 	      (progn
@@ -3768,7 +3771,7 @@ When COMBINE is non nil, add the category to each line."
 %s
 %s%s
 SUMMARY:%s%s%s
-CATEGORIES:%s
+CATEGORIES:%s%s
 END:VEVENT\n"
 			   (org-ical-ts-to-string ts "DTSTART")
 			   (org-ical-ts-to-string ts2 "DTEND" inc)
@@ -3777,8 +3780,8 @@ END:VEVENT\n"
 			       (concat "\nDESCRIPTION: " desc) "")
 			   (if (and location (string-match "\\S-" location))
 			       (concat "\nLOCATION: " location) "")
-			   category)))))
-
+			   category
+			   (if uid (concat "\nUID: " uid) ""))))))
       (when (and org-icalendar-include-sexps
 		 (condition-case nil (require 'icalendar) (error nil))
 		 (fboundp 'icalendar-export-region))

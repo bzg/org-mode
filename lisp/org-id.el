@@ -4,14 +4,14 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.02
+;; Version: 0.03
 ;;
-;; This file is not yet part of GNU Emacs.
+;; This file is part of GNU Emacs.
 ;;
-;; GNU Emacs is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,9 +19,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
@@ -36,11 +34,11 @@
 ;; guarantees globally unique identifiers, even if several people are
 ;; creating ID's at the same time in files that will eventually be used
 ;; together.  Even higher security can be achieved by using different
-;; values for each collaborator or file.
+;; prefix values for each collaborator or file.
 ;;
 ;; This file defines the following API:
 ;;
-;; org-id-create
+;; org-id-get-create
 ;;        Create an ID for the entry at point if it does not yet have one.
 ;;        Returns the ID (old or new).  This function can be used
 ;;        interactively, with prefix argument the creation of a new ID is
@@ -67,6 +65,8 @@
 ;;
 
 (require 'org)
+
+(declare-function message-make-fqdn "message" ())
 
 ;;; Customization
 
@@ -112,7 +112,8 @@ RFC 2445 in combination with RFC 822."
 
 ;;; The API functions
 
-(defun org-id-create (&optional force)
+;;;###autoload
+(defun org-id-get-create (&optional force)
   "Create an ID for the current entry and return it.
 If the entry already has an ID, just return it.
 With optional argument FORCE, force the creation of a new ID."
@@ -121,12 +122,14 @@ With optional argument FORCE, force the creation of a new ID."
     (org-entry-put (point) "ID" nil))
   (org-id-get (point) 'create))
   
+;;;###autoload
 (defun org-id-copy ()
   "Copy the ID of the entry at point to the kill ring.
 Create an ID if necessary."
   (interactive)
   (kill-new (org-id-get nil 'create)))  
 
+;;;###autoload
 (defun org-id-get (&optional pom create prefix)
   "Get the ID property of the entry at point-or-marker POM.
 If POM is nil, refer to the entry at point.
@@ -145,6 +148,7 @@ In any case, the ID of the entry is returned."
       id)
      (t nil))))
 
+;;;###autoload
 (defun org-id-get-with-outline-path-completion (&optional targets)
   "Use outline-path-completion to retrieve the ID of an entry.
 TARGETS may be a setting for `org-refile-targets' to define the eligible
@@ -160,6 +164,7 @@ It returns the ID of the entry.  If necessary, the ID is created."
     (prog1 (org-id-get pom 'create)
       (move-marker pom nil))))
 
+;;;###autoload
 (defun org-id-get-with-outline-drilling (&optional targets)
   "Use an outline-cycling interface to retrieve the ID of an entry.
 This only finds entries in the current buffer, using `org-get-location'.
@@ -169,6 +174,7 @@ It returns the ID of the entry.  If necessary, the ID is created."
     (prog1 (org-id-get pom 'create)
       (move-marker pom nil))))
 
+;;;###autoload
 (defun org-id-goto (id)
   "Switch to the buffer containing the entry with id ID.
 Move the cursor to that entry in that buffer."
@@ -181,6 +187,7 @@ Move the cursor to that entry in that buffer."
     (move-marker m nil)
     (org-show-context)))    
 
+;;;###autoload
 (defun org-id-find (id &optional markerp)
   "Return the location of the entry with the id ID.
 The return value is a cons cell (file-name . position), or nil
