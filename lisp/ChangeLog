@@ -1,5 +1,8 @@
 2008-05-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-attachment): Create publishing
+	directory if it does not yet exist.
+
 	* org-table.el (org-calc-default-modes): Change default number
 	format to (float 8).
 

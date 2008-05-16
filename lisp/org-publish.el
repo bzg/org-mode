@@ -512,6 +512,8 @@ See `org-publish-org-to' to the list of arguments."
     (require 'eshell)
     (require 'esh-maint)
     (require 'em-unix))
+  (unless (file-directory-p pub-dir)
+    (make-directory pub-dir t))
   (eshell/cp filename pub-dir))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
