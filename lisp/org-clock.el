@@ -197,7 +197,7 @@ of a different task.")
 	 (h (floor delta 3600))
 	 (m (floor (- delta (* 3600 h)) 60)))
     (setq org-mode-line-string
-	  (propertize (format "-[%d:%02d (%s)]" h m org-clock-heading)
+	  (propertize (format (concat "-[" org-time-clocksum-format " (%s)]") h m org-clock-heading)
 		      'help-echo "Org-mode clock is running"))
     (force-mode-line-update)))
 
@@ -375,7 +375,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	(setq global-mode-string
 	      (delq 'org-mode-line-string global-mode-string))
 	(force-mode-line-update)
-	(message "Clock stopped at %s after HH:MM = %d:%02d%s" te h m
+	(message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
 		 (if remove " => LINE REMOVED" "")))))))
 
 (defun org-clock-cancel ()
@@ -487,7 +487,7 @@ in the echo area."
 	(when org-remove-highlights-with-change
 	  (org-add-hook 'before-change-functions 'org-remove-clock-overlays
 			nil 'local))))
-    (message "Total file time: %d:%02d (%d hours and %d minutes)" h m h m)))
+    (message (concat "Total file time: " org-time-clocksum-format " (%d hours and %d minutes)") h m h m)))
 
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)

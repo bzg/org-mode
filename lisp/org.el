@@ -1598,6 +1598,12 @@ end of the second format."
 	(concat "[" (substring f 1 -1) "]")
       f)))
 
+(defcustom org-time-clocksum-format "%d:%02d"
+  "The format string used when creating CLOCKSUM lines, or when
+org-mode generates a time duration."
+  :group 'org-time
+  :type 'string)
+  
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
@@ -11387,7 +11393,7 @@ If there is already a time stamp at the cursor position, update it."
   "Compute H:MM from a number of minutes."
   (let ((h (/ m 60)))
     (setq m (- m (* 60 h)))
-    (format "%d:%02d" h m)))
+    (format org-time-clocksum-format h m)))
 
 (defun org-hh:mm-string-to-minutes (s)
   "Convert a string H:MM to a number of minutes."

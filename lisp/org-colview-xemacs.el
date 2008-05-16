@@ -1042,7 +1042,7 @@ Don't set this, this is meant for dynamic scoping.")
   (cond
    ((eq fmt 'add_times)
     (let* ((h (floor n)) (m (floor (+ 0.5 (* 60 (- n h))))))
-      (format "%d:%02d" h m)))
+      (format org-time-clocksum-format h m)))
    ((eq fmt 'checkbox)
     (cond ((= n (floor n)) "[X]")
 	  ((> n 1.) "[-]")
