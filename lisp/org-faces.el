@@ -148,14 +148,41 @@ color of the frame."
 (defface org-column
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light))
-       (:background "grey90" :weight normal :strike-through nil :underline nil))
+       (:background "grey90" :weight normal :slant normal :strike-through nil
+		    :underline nil))
       (((class color) (min-colors 16) (background dark))
-       (:background "grey30" :weight normal :strike-through nil :underline nil))
+       (:background "grey30" :weight normal :slant normal :strike-through nil
+		    :underline nil))
       (((class color) (min-colors 8))
        (:background "cyan" :foreground "black"
-		    :weight normal :strike-through nil :underline nil))
+		    :weight normal :slant normal :strike-through nil
+		    :underline nil))
       (t (:inverse-video t))))
-  "Face for column display of entry properties."
+  "Face for column display of entry properties.
+This is actually only part of the face definition for the text in column view.
+The following faces apply, with this priority.
+
+1. The color of the reference face.  This is normally the level fact that
+   is used in the outline.  In agenda-mode, it will be the face of the 
+   first character in the line.  The color is explicitly retained to
+   make sure that the column line still looks a bit like the structure
+   line it is masking.
+
+2. The `org-column' face.
+
+3. The remaining properties of the reference face.
+
+Since column view works by putting overlays with a display property
+over individual characters in the buffer, the face of the underlining
+character (this might for example be the a TODO keyword) might still
+shine through in some properties.  So when your column view looks
+funny, with \"random\" colors, weight, strike-through, try to explicitly
+set the properties in the `org-column' face.  For example, set
+:underline to nil, or the :slant to `normal'.
+
+Under XEmacs, the rules are simpler, because the XEmacs version of
+column view defines special faces for each outline level.  See the file
+`org-colview-xemacs.el' for details."
   :group 'org-faces)
 
 (defface org-column-title

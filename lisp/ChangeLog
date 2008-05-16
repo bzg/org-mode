@@ -1,5 +1,8 @@
 2008-05-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-faces.el (org-column): Document how this face is being used
+	and why sometimes the background faces shine through.
+
 	* org-mhe.el (org-mhe-follow-link): Improve handling of searches.
 
 	* org-publish.el (org-publish-attachment): Create publishing
