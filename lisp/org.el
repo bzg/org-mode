@@ -7607,7 +7607,7 @@ operation has put the subtree."
     (apply 
      'completing-read prompt
      (lambda (string predicate &optional flag)
-       (let (rtn r s (l (length string)))
+       (let (rtn r s f (l (length string)))
 	 (cond
 	  ((eq flag nil)
 	   ;; try completion
