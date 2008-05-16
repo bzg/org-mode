@@ -4217,6 +4217,7 @@ RET=jump to location             [Q]uit and return to previous location
 
 (defvar org-goto-start-pos) ; dynamically scoped parameter
 
+;; FIXME: Docstring doe not mention both interfaces
 (defun org-goto (&optional alternative-interface)
   "Look up a different location in the current file, keeping current visibility.
 
@@ -7576,19 +7577,53 @@ operation has put the subtree."
   (unless org-refile-target-table
     (error "No refile targets"))
   (let* ((cbuf (current-buffer))
+	 (cfunc (if org-refile-use-outline-path
+		    'org-olpath-completing-read
+		  'completing-read))
+	 (extra (if org-refile-use-outline-path "/" ""))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	 (fname (and filename (file-truename filename)))
 	 (tbl (mapcar
 	       (lambda (x)
 		 (if (not (equal fname (file-truename (nth 1 x))))
-		     (cons (concat (car x) " (" (file-name-nondirectory
-						 (nth 1 x)) ")")
+		     (cons (concat (car x) extra " ("
+				   (file-name-nondirectory (nth 1 x)) ")")
 			   (cdr x))
-		   x))
+		   (cons (concat (car x) extra) (cdr x))))
 	       org-refile-target-table))
 	 (completion-ignore-case t))
-    (assoc (completing-read prompt tbl nil t nil 'org-refile-history)
+    (assoc (funcall cfunc prompt tbl nil t nil 'org-refile-history)
 	   tbl)))
+
+(defun org-olpath-completing-read (prompt collection &rest args)
+  "Read an outline path like a file name."
+  (let ((thetable collection))
+    (apply 
+     'completing-read prompt
+     (lambda (string predicate &optional flag)
+       (let (rtn r s (l (length string)))
+	 (cond
+	  ((eq flag nil)
+	   ;; try completion
+	   (try-completion string thetable))
+	  ((eq flag t)
+	   ;; all-completions
+	   (setq rtn (all-completions string thetable predicate))
+	   (mapcar
+	    (lambda (x)
+	      (setq r (substring x l))
+	      (if (string-match " ([^)]*)$" x)
+		  (setq f (match-string 0 x))
+		(setq f ""))
+	      (if (string-match "/" r)
+		  (concat string (substring r 0 (match-end 0)) f)
+		x))
+	    rtn))
+	  ((eq flag 'lambda)
+	   ;; exact match?
+	   (assoc string thetable)))
+	 ))
+     args)))
 
 ;;;; Dynamic blocks
 
@@ -14028,3 +14063,4 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
+
