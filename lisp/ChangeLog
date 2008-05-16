@@ -1,5 +1,8 @@
 2008-05-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-calc-default-modes): Change default number
+	format to (float 8).
+
 	* org.el (org-olpath-completing-read): New function.
 	(org-time-clocksum-format): New option.
 	(org-minutes-to-hh:mm-string): Use `org-time-clocksum-format'.

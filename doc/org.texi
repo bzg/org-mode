@@ -4943,7 +4943,9 @@ filed below the target heading as a subitem.  Depending on
 subitem.@* By default, all level 1 headlines in the current buffer are
 considered to be targets, but you can have more complex definitions
 across a number of files.  See the variable @code{org-refile-targets}
-for details.
+for details.  If you would like to select a location via a file-pathlike
+completion along the outline path, see the variable
+@code{org-refile-use-outline-path}.
 @kindex C-u C-c C-w
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.

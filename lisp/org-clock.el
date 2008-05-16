@@ -499,6 +499,7 @@ This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
 	 (l (if level (org-get-valid-level level 0) 0))
+	 (fmt (concat "%s " org-time-clocksum-format "%s"))
 	 (off 0)
 	 ov tx)
     (org-move-to-column c)
@@ -507,7 +508,7 @@ will be easy to remove."
     (setq ov (org-make-overlay (1- (point)) (point-at-eol))
 	  tx (concat (buffer-substring (1- (point)) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
-		     (org-add-props (format "%s %2d:%02d%s"
+		     (org-add-props (format fmt
 					    (make-string l ?*) h m
 					    (make-string (- 16 l) ?\ ))
 			 '(face secondary-selection))

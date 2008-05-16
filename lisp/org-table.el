@@ -187,7 +187,7 @@ t:      accept as input and present for editing"
 
 (defcustom org-calc-default-modes
   '(calc-internal-prec 12
-    calc-float-format  (float 5)
+    calc-float-format  (float 8)
     calc-angle-mode    deg
     calc-prefer-frac   nil
     calc-symbolic-mode nil
