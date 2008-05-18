@@ -1,3 +1,7 @@
+2008-05-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-mhe.el (org-mhe-follow-link): Fix bug in mhe searches.
+
 2008-05-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-faces.el (org-column): Document how this face is being used

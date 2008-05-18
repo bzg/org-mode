@@ -204,8 +204,10 @@ folders."
                      (not (org-mhe-get-message-real-folder)))
             (kill-this-buffer)
             (mh-search "+" (list "--message-id" article))))
-      (mh-search "+" (funcall mh-search-regexp-builder
-			      (list (cons 'message-id article)))))
+      (if mh-search-regexp-builder
+          (mh-search "+" (funcall mh-search-regexp-builder
+				  (list (cons 'message-id article))))
+        (mh-search "+" article)))
     (if (org-mhe-get-message-real-folder)
         (mh-show-msg 1)
       (kill-this-buffer)
