@@ -4694,7 +4694,7 @@ In the column next to it, any clocked time will be displayed.
 If you switch to column view in the daily/weekly agenda, the effort column
 will summarize the estimated work effort for each day@footnote{Please note
 the pitfalls of summing hierarchical data in a flat list (@pxref{Agenda
-column view}.}, and you can use this to find space in your schedule.  To get
+column view}).}, and you can use this to find space in your schedule.  To get
 an overview of the entire part of the day that is committed, you can set the
 option @code{org-agenda-columns-add-appointments-to-effort-sum}.  The
 appointments on a day that take place over a specified time interval will
@@ -6897,7 +6897,7 @@ exported as a horizontal line (@samp{<hr/>} in HTML).
 Lines starting with @samp{#} in column zero are treated as comments and will
 never be exported.  Also entire subtrees starting with the word
 @samp{COMMENT} will never be exported.  Finally, regions surrounded by
-@samp{#+BEGIN_COMMENT} ... @samp{END_COMMENT} will not be exported.
+@samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will not be exported.
 
 @table @kbd
 @kindex C-c ;
@@ -7263,7 +7263,7 @@ serving the script from our site, but if you use it a lot, you might not want
 to be dependent on @url{orgmode.org} and prefer to install a local copy on
 your own web server.
 
-To use the script, you need to make sure that the @file{org-infojs.el} module
+To use the script, you need to make sure that the @file{org-jsinfo.el} module
 gets loaded.  It should be loaded by default, try @kbd{M-x customize-variable
 @key{RET} org-modules @key{RET}} to convince yourself that this is indeed the
 case.  All it then takes to make use of the program is adding a single line
@@ -8399,8 +8399,6 @@ If a formula uses @emph{calculated} fields further down the row,
 multiple recalculation may be needed to get all fields consistent.  You
 may use the command @code{org-table-iterate} (@kbd{C-u C-c *}) to
 recalculate until convergence.
-@item
-A single letter cannot be made bold, for example @samp{*a*}.
 @item
 The exporters work well, but could be made more efficient.
 @end itemize
