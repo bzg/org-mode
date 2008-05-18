@@ -1,3 +1,7 @@
+2008-05-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-annotation-helper.el: New file.
+
 2008-05-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-id.el (org-id-include-domain): New option.

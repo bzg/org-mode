@@ -10,22 +10,22 @@ Please put your contribution in one of these three directories:
 LISP (emacs-lisp code)
 ======================
 
-org-annotate-file.el --- Annotate a file with org syntax
-org-bookmark.el      --- Org links to bookmarks
-org-depend.el        --- TODO dependencies for Org-mode
-org-elisp-symbol.el  --- Org links to emacs-lisp symbols
-org-eval.el          --- The <lisp> tag, adapted from Muse
-org-expiry.el 	     --- expiry mechanism for Org entries
+org-annotate-file.el     --- Annotate a file with org syntax
+org-annotation-helper.el --- Call remember directly from Firefox/Opera
+org-depend.el            --- TODO dependencies for Org-mode
+org-elisp-symbol.el      --- Org links to emacs-lisp symbols
+org-eval.el              --- The <lisp> tag, adapted from Muse
+org-expiry.el 	         --- expiry mechanism for Org entries
 org-interactive-query.el --- Interactive modification of tags query
-org-mairix.el 	     --- Hook mairix search into Org for different MUAs
-org-man.el 	     --- Support for links to manpages in Org-mode
-org-mtags.el 	     --- Support for some Muse-like tags in Org-mode
-org-panel.el 	     --- Simple routines for us with bad memory
-org-registry.el      --- a registry for Org links
-org2rem.el           --- Convert org appointments into reminders
-org-screen.el        --- visit screen sessions through Org-mode links
-org-toc.el 	     --- Table of contents for Org-mode buffer
-orgtbl-sqlinsert.el  --- Convert Org-mode tables to SQL insertions.
+org-mairix.el 	         --- Hook mairix search into Org for different MUAs
+org-man.el 	         --- Support for links to manpages in Org-mode
+org-mtags.el 	         --- Support for some Muse-like tags in Org-mode
+org-panel.el 	         --- Simple routines for us with bad memory
+org-registry.el          --- a registry for Org links
+org2rem.el               --- Convert org appointments into reminders
+org-screen.el            --- visit screen sessions through Org-mode links
+org-toc.el 	         --- Table of contents for Org-mode buffer
+orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions.
 
 PACKAGES
 ========
