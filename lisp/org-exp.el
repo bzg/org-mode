@@ -88,7 +88,9 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("fr"  "Auteur"          "Date"  "Table des mati\xe8res")
     ("it"  "Autore"          "Data"  "Indice")
     ("nl"  "Auteur"          "Datum" "Inhoudsopgave")
-    ("nn"  "Forfattar"       "Dato"  "Innhold")  ;; nn = Norsk (nynorsk)
+    ("no"  "Forfatter"       "Dato"  "Innhold")
+    ("nb"  "Forfatter"       "Dato"  "Innhold")  ;; nb = Norsk (bokm.l)
+    ("nn"  "Forfattar"       "Dato"  "Innhald")  ;; nn = Norsk (nynorsk)
     ("sv"  "F\xf6rfattarens" "Datum" "Inneh\xe5ll"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
