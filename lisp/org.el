@@ -174,6 +174,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
+	(const :tag "C  annotation-helper: Call Remeber directly from Browser" org-annotation-helper)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
@@ -1388,6 +1389,13 @@ by a letter in parenthesis, like TODO(t)."
 	  (const :tag "By default" t)
 	  (const :tag "Only with C-u C-c C-t" prefix)))
 
+(defcustom org-provide-todo-statistics t
+  "Non-nil means, update todo statistics after insert and toggle.
+When this is set, todo statistics is updated in the parent of the current
+entry each time a todo state is changed."
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-after-todo-state-change-hook nil
   "Hook which is run after the state of a TODO item was changed.
 The new state (a string with a TODO keyword, or nil) is available in the
@@ -2367,6 +2375,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
    org-replace-region-by-html org-export-region-as-html
    org-export-as-html org-export-icalendar-this-file
    org-export-icalendar-all-agenda-files
+   org-table-clean-before-export
    org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
 
 ;; Declare and autoload functions from org-exp.el
@@ -4546,7 +4555,9 @@ state (TODO by default).  Also with prefix arg, force first state."
 	    (not (match-beginning 2))
 	    (member (match-string 2) org-done-keywords))
 	(insert (car org-todo-keywords-1) " ")
-      (insert (match-string 2) " "))))
+      (insert (match-string 2) " "))
+    (when org-provide-todo-statistics
+      (org-update-parent-todo-statistics))))
 
 (defun org-insert-subheading (arg)
   "Insert a new subheading and demote it.
@@ -8186,6 +8197,8 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (org-add-log-setup 'state state 'findpos dolog)))
 	;; Fixup tag positioning
 	(and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
+	(when org-provide-todo-statistics
+	  (org-update-parent-todo-statistics))
 	(run-hooks 'org-after-todo-state-change-hook)
 	(if (and arg (not (member state org-done-keywords)))
 	    (setq head (org-get-todo-sequence-head state)))
@@ -8205,6 +8218,51 @@ For calling through lisp, arg is also interpreted in the following way:
 	  (save-excursion
 	    (run-hook-with-args 'org-trigger-hook change-plist)))))))
 
+(defun org-update-parent-todo-statistics ()
+  "Update any statistics cookie in the parent of the current headline."
+  (interactive)
+  (let ((box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	level (cnt-all 0) (cnt-done 0) is-percent kwd)
+    (catch 'exit
+      (save-excursion
+	(setq level (org-up-heading-safe))
+	(unless (and level
+		     (re-search-forward box-re (point-at-eol) t))
+	  (throw 'exit nil))
+	(setq is-percent (match-end 2))
+	(save-match-data
+	  (unless (outline-next-heading) (throw 'exit nil))
+	  (while (looking-at org-todo-line-regexp)
+	    (setq kwd (match-string 2))
+	    (and kwd (setq cnt-all (1+ cnt-all)))
+	    (and (member kwd org-done-keywords)
+		 (setq cnt-done (1+ cnt-done)))
+	    (condition-case nil
+		(outline-forward-same-level 1)
+	      (error (end-of-line 1)))))
+	(replace-match 
+	 (if is-percent
+	     (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
+	   (format "[%d/%d]" cnt-done cnt-all)))
+	(run-hook-with-args 'org-after-todo-statistics-hook
+			    cnt-done (- cnt-all cnt-done))))))
+
+(defvar org-after-todo-statistics-hook nil
+  "Hook that is called after a TODO statistics cookie has been updated.
+Each function is called with two arguments: the number of not-done entries
+and the number of done entries.
+
+For example, the following function, when added to this hook, will switch
+an entry to DONE when all children are done, and back to TODO when new
+entries are set to a TODO status.  Note that this hook is only called
+when there is a statistics cookie in the headline!
+
+ (defun org-summary-todo (n-done n-not-done)
+   \"Switch entry to DONE when all subentries are done, to TODO otherwise.\"
+   (let (org-log-done org-log-states)   ; turn off logging
+     (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
+")
+	 
 (defun org-local-logging (value)
   "Get logging settings from a property VALUE."
   (let* (words w a)

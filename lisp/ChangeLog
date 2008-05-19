@@ -1,5 +1,7 @@
 2008-05-19  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-update-parent-todo-statistics): New function.
+
 	* org-exp.el (org-icalendar-store-UID): New option.
 	(org-icalendar-force-UID): Option removed.
 	(org-print-icalendar-entries): IMplement UIDs.

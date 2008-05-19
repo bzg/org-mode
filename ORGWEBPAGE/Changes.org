@@ -9,8 +9,39 @@
 #+LINK_HOME: http://orgmode.org
 
 * Version 6.04
+  :PROPERTIES:
+  :VISIBILITY: content
+  :END:
 
 ** Details
+
+*** Statistics for TODO entries
+
+The [/] and [%] cookies have already provided statistics for
+checkboxes.  Now they do the same also for TODO entries.  So if a
+headline contains either cookie, changing the TODO state of any
+direct child will trigger an update of this cookie.  Children
+that are neither TODO nor DONE are ignored.
+
+There have already been requests to automatically switch the
+parent headline to DONE when all children are done.  I am not
+makeing this a default feature, because one needs to make many
+decisions about which keyword to use etc.  Instead of a complex
+customization variable, I am providing a hook that can be used.
+This hook will be called each time a TODO statistics cookie is
+updated, with the cursor in the corresponding line.  Each
+function in the hook will receive two arguments, the number of
+done entries, and the number of not-done entries.  Here is a
+example implementation:
+
+#+begin_src emacs-lisp
+(defun org-summary-todo (n-done n-not-done)
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  (let (org-log-done org-log-states)   ; turn off logging
+    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+
+(add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+#+end_src
 
 *** iCalendar now defines proper UIDs for entries
 
@@ -36,9 +67,6 @@ but a synchronization program can still figure out from which
 entry all the different instances originate.
 
 * Version 6.03
-  :PROPERTIES:
-  :VISIBILITY: content
-  :END:
 
 ** Overview
 

@@ -3171,12 +3171,37 @@ priority):
 @cindex tasks, breaking down
 
 It is often advisable to break down large tasks into smaller, manageable
-subtasks.  You can do this by creating an outline tree below a TODO
-item, with detailed subtasks on the tree@footnote{To keep subtasks out
-of the global TODO list, see the
-@code{org-agenda-todo-list-sublevels}.}.  Another possibility is the use
-of checkboxes to identify (a hierarchy of) a large number of subtasks
-(@pxref{Checkboxes}).
+subtasks.  You can do this by creating an outline tree below a TODO item,
+with detailed subtasks on the tree@footnote{To keep subtasks out of the
+global TODO list, see the @code{org-agenda-todo-list-sublevels}.}.  To keep
+the overview over the fraction of subtasks that are already completed, insert
+either @samp{[/]} or @samp{[%]} anywhere in the headline.  These cookies will
+be updates each time the todo status of a child changes.  For example:
+
+@example
+* Organize Party [33%]
+** TODO Call people [1/2]
+*** TODO Peter
+*** DONE Sarah
+** TODO Buy food
+** DONE Talk to neighbor
+@end example
+
+If you would like a TODO entry to automatically change to DONE when all
+chilrden are done, you can use the following setup:
+
+@example
+(defun org-summary-todo (n-done n-not-done)
+  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  (let (org-log-done org-log-states)   ; turn off logging
+    (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+
+(add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+@end example
+
+
+Another possibility is the use of checkboxes to identify (a hierarchy of) a
+large number of subtasks (@pxref{Checkboxes}).
 
 
 @node Checkboxes,  , Breaking down tasks, TODO Items
