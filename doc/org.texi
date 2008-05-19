@@ -3328,14 +3328,24 @@ well.  For example, in the list
 @noindent
 the final heading will have the tags @samp{:work:}, @samp{:boss:},
 @samp{:notes:}, and @samp{:action:} even though the final heading is not
-explicitly marked with those tags.  When executing tag searches and
-Org mode finds that a certain headline matches the search criterion, it
-will not check any sublevel headline, assuming that these also match and
-that the list of matches could become very long because of that.  If you
-do want the sublevels be tested and listed as well, you may set the
-variable @code{org-tags-match-list-sublevels}.  To limit tag inheritance
-to specific tags, or to turn it off entirely, use the variable
-@code{org-use-tag-inheritance}.
+explicitly marked with those tags.  You can also set tags that all entries in
+a file should inherit as if these tags would be defined in a hypothetical
+level zero that surounds the entire file.
+
+@example
+#+FILETAGS: :Peter:Boss:Secret:
+@end example
+
+@noindent
+To limit tag inheritance to specific tags, or to turn it off entirely, use
+the variable @code{org-use-tag-inheritance}.
+
+When a headline matches during a tags search while tag inheritance is turned
+on, all the sublevels in the same tree will match as well@footnote{This is
+only true if the the search does not involve more complex tests including
+properties (@pxref{Property searches}).}.  The list of matches may then
+become very long.  If you only want to see the first tags match in a subtree,
+configure the variable @code{org-tags-match-list-sublevels}.
 
 @node Setting tags, Tag searches, Tag inheritance, Tags
 @section Setting tags
@@ -7959,6 +7969,9 @@ Set file-local values for constants to be used in table formulas.  This
 line set the local variable @code{org-table-formula-constants-local}.
 The global version of this variable is
 @code{org-table-formula-constants}.
+@item #+FILETAGS: :tag1:tag2:tag3:
+Set tags that can be inherited by any entry in the file, including the
+top-level entries.
 @item #+DRAWERS: NAME1 .....
 Set the file-local set of drawers.  The corresponding global variable is
 @code{org-drawers}.

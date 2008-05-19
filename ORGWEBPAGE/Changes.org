@@ -15,6 +15,9 @@
 
 ** Details
 
+*** The default of the variable `org-tags-match-list-sublevels' is now `t'.
+    The main reason for this is that it is easier to explain in
+    the manual and will lead to fewer surprises.
 *** Statistics for TODO entries
 
 The [/] and [%] cookies have already provided statistics for

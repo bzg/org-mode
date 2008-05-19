@@ -1,5 +1,9 @@
 2008-05-19  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-file-properties): Renamed from `org-local-properties'.
+	(org-scan-tags): Take file tags into account.
+	(org-tags-match-list-sublevels): Default changed to t.
+
 	* org-exp.el (org-export-as-html): Close paragraph after a
 	footnote.
 

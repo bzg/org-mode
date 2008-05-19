@@ -1704,6 +1704,12 @@ See the manual for details."
 	   (const :tag "Start radio group" (:startgroup))
 	   (const :tag "End radio group" (:endgroup)))))
 
+(defvar org-file-tags nil
+  "List of tags that can be inherited by all entries in the file.
+The tags will be inherited if the variable `org-use-tag-inheritance'
+says they should be.
+This variable is populated from #+TAG lines.")
+
 (defcustom org-use-fast-tag-selection 'auto
   "Non-nil means, use fast tag selection scheme.
 This is a special interface to select and deselect tags with single keys.
@@ -1754,8 +1760,10 @@ the tags are again aligned to `org-tags-column'."
 (defcustom org-use-tag-inheritance t
   "Non-nil means, tags in levels apply also for sublevels.
 When nil, only the tags directly given in a specific line apply there.
-If you turn off this option, you very likely want to turn on the
-companion option `org-tags-match-list-sublevels'.
+If this option is t, a match early-on in a tree can lead to a large
+number of matches in the subtree.  If you only want to see the first
+match in a tree during a search, check out the variable
+`org-tags-match-list-sublevels'.
 
 This may also be a list of tags that should be inherited, or a regexp that
 matches tags that should be inherited."
@@ -1777,7 +1785,7 @@ matches tags that should be inherited."
     (member tag org-use-tag-inheritance))
    (t (error "Invalid setting of `org-use-tag-inheritance'"))))
 
-(defcustom org-tags-match-list-sublevels nil
+(defcustom org-tags-match-list-sublevels t
   "Non-nil means list also sublevels of headlines matching tag search.
 Because of tag inheritance (see variable `org-use-tag-inheritance'),
 the sublevels of a headline matching a tag search often also match
@@ -1884,7 +1892,7 @@ You can set buffer-local values for this by adding lines like
 	  (cons (string :tag "Property")
 		(string :tag "Value"))))
 
-(defvar org-local-properties nil
+(defvar org-file-properties nil
   "List of property/value pairs that can be inherited by any entry.
 Valid for the current buffer.
 This variable is populated from #+PROPERTY lines.")
@@ -2756,11 +2764,11 @@ means to push this value onto the list in the variable.")
     (org-set-local 'org-todo-log-states nil)
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "COLUMNS"
-		 "STARTUP" "ARCHIVE" "TAGS" "LINK" "PRIORITIES"
+		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
 		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")))
 	  (splitre "[ \t]+")
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
-	  tail sep kws1 prio props drawers
+	  tail sep kws1 prio props ftags drawers
 	  ext-setup-or-nil setup-contents (start 0))
       (save-excursion
 	(save-restriction
@@ -2797,6 +2805,14 @@ means to push this value onto the list in the variable.")
 	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
 		(push (cons (match-string 1 value) (match-string 2 value))
 		      props)))
+	     ((equal key "FILETAGS")
+	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
+		(setq ftags
+		      (append
+		       ftags
+		       (apply 'append
+			      (mapcar (lambda (x) (org-split-string x ":"))
+				      (org-split-string value)))))))
 	     ((equal key "DRAWERS")
 	      (setq drawers (org-split-string value splitre)))
 	     ((equal key "CONSTANTS")
@@ -2839,7 +2855,8 @@ means to push this value onto the list in the variable.")
 	(org-set-local 'org-highest-priority (nth 0 prio))
 	(org-set-local 'org-lowest-priority  (nth 1 prio))
 	(org-set-local 'org-default-priority (nth 2 prio)))
-      (and props (org-set-local 'org-local-properties (nreverse props)))
+      (and props (org-set-local 'org-file-properties (nreverse props)))
+      (and ftags (org-set-local 'org-file-tags ftags))
       (and drawers (org-set-local 'org-drawers drawers))
       (and arch (org-set-local 'org-archive-location arch))
       (and links (setq org-link-abbrev-alist-local (nreverse links)))
@@ -9009,8 +9026,9 @@ are included in the output."
 			       (or (buffer-file-name (buffer-base-buffer))
 				   (buffer-name (buffer-base-buffer)))))))
 	 (case-fold-search nil)
-         lspos
-	 tags tags-list tags-alist (llast 0) rtn level category i txt
+         lspos tags tags-list
+	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
+	 (llast 0) rtn level category i txt
 	 todo marker entry priority)
     (save-excursion
       (goto-char (point-min))
@@ -9977,7 +9995,7 @@ If yes, return this value.  If not, return the current value of the variable."
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
       (or tmp 
-	  (cdr (assoc property org-local-properties))
+	  (cdr (assoc property org-file-properties))
 	  (cdr (assoc property org-global-properties))
 	  (cdr (assoc property org-global-properties-fixed))))))
 
