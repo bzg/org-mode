@@ -634,9 +634,17 @@ The text will be inserted into the DESCRIPTION field."
   :group 'org-export-icalendar
   :type 'string)
 
-(defcustom org-icalendar-force-UID nil
-  "Non-nil means, each exported entry must have a UID.
-If not present, that UID will be created."
+(defcustom org-icalendar-store-UID nil
+  "Non-nil means, store any created UIDs in properties.
+The iCalendar standard requires that all entries have a unique identifyer.
+Org will create these identifiers as needed.  When this variable is non-nil,
+the created UIDs will be stored in the ID property of the entry.  Then the
+next time this entry is exported, it will be exported with the same UID,
+superceeding the previous form of it.  This is essential for
+synchronization services.
+This variable is not turned on by default because we want to avoid creating
+a property drawer in every entry if people are only playing with this feature,
+or if they are only using it locally."
   :group 'org-export-icalendar
   :type 'boolean)
 
@@ -3696,7 +3704,8 @@ When COMBINE is non nil, add the category to each line."
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
-	scheduledp deadlinep tmp pri category entry location summary desc uid
+	scheduledp deadlinep prefix
+	tmp pri category entry location summary desc uid
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
     (save-excursion
@@ -3724,10 +3733,11 @@ When COMBINE is non nil, add the category to each line."
 		      t org-icalendar-include-body)
 		location (org-icalendar-cleanup-string
 			  (org-entry-get nil "LOCATION"))
-		uid (if org-icalendar-force-UID
+		uid (if org-icalendar-store-UID
 			(org-id-get-create)
-		      (org-id-get))
-		category (org-get-category))
+		      (or (org-id-get) (org-id-new)))
+		category (org-get-category)
+		deadlinep nil scheduledp nil)
 	  (if (looking-at re2)
 	      (progn
 		(goto-char (match-end 0))
@@ -3745,6 +3755,7 @@ When COMBINE is non nil, add the category to each line."
 		  scheduledp (string-match org-scheduled-regexp tmp)
 		  ;; donep (org-entry-is-done-p)
 		  ))
+	  (setq prefix (if deadlinep "DL-" (if scheduledp "SC-" "TS-")))
 	  (if (or (string-match org-tr-regexp hd)
 		  (string-match org-ts-regexp hd))
 	      (setq hd (replace-match "" t t hd)))
@@ -3762,19 +3773,21 @@ When COMBINE is non nil, add the category to each line."
 	      (setq summary
 		    (replace-match (if (match-end 3)
 				       (match-string 3 summary)
-					(match-string 1 summary))
-				      t t summary)))
+				     (match-string 1 summary))
+				   t t summary)))
 	  (if deadlinep (setq summary (concat "DL: " summary)))
 	  (if scheduledp (setq summary (concat "S: " summary)))
 	  (if (string-match "\\`<%%" ts)
 	      (with-current-buffer sexp-buffer
 		(insert (substring ts 1 -1) " " summary "\n"))
 	    (princ (format "BEGIN:VEVENT
+UID: %s
 %s
 %s%s
 SUMMARY:%s%s%s
-CATEGORIES:%s%s
+CATEGORIES:%s
 END:VEVENT\n"
+			   (concat prefix uid)
 			   (org-ical-ts-to-string ts "DTSTART")
 			   (org-ical-ts-to-string ts2 "DTEND" inc)
 			   rrule summary
@@ -3782,8 +3795,7 @@ END:VEVENT\n"
 			       (concat "\nDESCRIPTION: " desc) "")
 			   (if (and location (string-match "\\S-" location))
 			       (concat "\nLOCATION: " location) "")
-			   category
-			   (if uid (concat "\nUID: " uid) ""))))))
+			   category)))))
       (when (and org-icalendar-include-sexps
 		 (condition-case nil (require 'icalendar) (error nil))
 		 (fboundp 'icalendar-export-region))
@@ -3800,8 +3812,9 @@ END:VEVENT\n"
 	    (with-current-buffer sexp-buffer
 	      (insert sexp "\n"))
 	    (princ (org-diary-to-ical-string sexp-buffer)))))
-
+      
       (when org-icalendar-include-todo
+	(setq prefix "TODO-")
 	(goto-char (point-min))
 	(while (re-search-forward org-todo-line-regexp nil t)
 	  (catch :skip
@@ -3827,7 +3840,10 @@ END:VEVENT\n"
 			      (and org-icalendar-include-body (org-get-entry)))
 			  t org-icalendar-include-body)
 		    location (org-icalendar-cleanup-string
-			      (org-entry-get nil "LOCATION")))
+			      (org-entry-get nil "LOCATION"))
+		    uid (if org-icalendar-store-UID
+			    (org-id-get-create)
+			  (or (org-id-get) (orgg-id-new))))
 	      (if (string-match org-bracket-link-regexp hd)
 		  (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
 					    (match-string 1 hd))
@@ -3841,20 +3857,23 @@ END:VEVENT\n"
 					    (- org-lowest-priority org-highest-priority))))))
 
 	      (princ (format "BEGIN:VTODO
+UID: %s
 %s
 SUMMARY:%s%s%s
-CATEGORIES:%s
+CATEGORIES:%s%s
 SEQUENCE:1
 PRIORITY:%d
 STATUS:%s
 END:VTODO\n"
+			     (concat prefix uid)
 			     dts
 			     (or summary hd)
 			     (if (and location (string-match "\\S-" location))
 				 (concat "\nLOCATION: " location) "")
 			     (if (and desc (string-match "\\S-" desc))
 				 (concat "\nDESCRIPTION: " desc) "")
-			     category pri status)))))))))
+			     category
+			     pri status)))))))))
 
 (defun org-icalendar-cleanup-string (s &optional is-body maxlength)
   "Take out stuff and quote what needs to be quoted.
@@ -4021,5 +4040,4 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
-
 

@@ -8,6 +8,33 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.04
+
+** Details
+
+*** iCalendar now defines proper UIDs for entries
+
+This is necessary for synchronization services.  The UIDs are
+created using the the org-id.el module.  If you set the variable 
+
+: (setq org-icalendar-store-UID t)
+
+then all created UIDs will be stored in the entry as an =:ID:=
+property.  You should definitely do this if you plan to use
+synchronization.
+
+Diary sexp entries do not yet receive proper persistent UIDs,
+because they are transformed to iCalendar format by icalendar.el
+which creates fresh UIDs each time, based on the current time.
+
+A single entry can give rise to multiple iCalendar entries (as a
+timestamp, a deadline, a scheduled item, and as a TODO
+item). Therefore, Org adds prefixes "TS-", "DL-" "CS-", and "TD-"
+to the UID during iCalendar export, depending on what triggered
+the inclusion of the entry.  In this way the UID remains unique,
+but a synchronization program can still figure out from which
+entry all the different instances originate.
+
 * Version 6.03
   :PROPERTIES:
   :VISIBILITY: content

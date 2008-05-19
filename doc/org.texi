@@ -3984,8 +3984,10 @@ capture, you can use 3 values:
 @example
 local     @r{use the tree in which the capture block is located}
 global    @r{make a global view, including all headings in the file}
-"label"   @r{call column view in the tree that has and @code{:ID:}}
-          @r{property with the value @i{label}}
+"label"   @r{call column view in the tree that has an @code{:ID:}}
+          @r{property with the value @i{label}.  You can use}
+          @r{@kbd{M-x org-id-copy} to create a globally unique ID for}
+          @r{the current entry and copy it to the kill-ring.}
 @end example
 @item :hlines
 When @code{t}, insert a hline after every line.  When a number N, insert
@@ -7425,6 +7427,16 @@ other time-stamped items in Org files show up in the calendar
 application.  Org mode can export calendar information in the standard
 iCalendar format.  If you also want to have TODO entries included in the
 export, configure the variable @code{org-icalendar-include-todo}.
+
+The iCalendar standard requires each entry to have a globally unique
+identifier (UID).  Org creates these identifiers during export.  If you set
+the variable @code{org-icalendar-store-UID}, the UID will be stored in the
+@code{:ID:} property of the entry and re-used next time you report this
+entry.  Since a single entry can give rise to multiple iCalendar entries (as
+a timestamp, a deadline, a scheduled item, and as a TODO item), Org adds
+prefixes to the UID, depending on what triggered the inclusion of the entry.
+In this way the UID remains unique, but a synchronization program can still
+figure out from which entry all the different instances originate.
 
 @table @kbd
 @kindex C-c C-e i
