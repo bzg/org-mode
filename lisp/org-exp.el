@@ -2932,7 +2932,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		(org-close-par-maybe)
 		(let ((n (match-string 1 line)))
 		  (setq line (replace-match
-			      (format "<p class=\"footnote\"><sup><a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a></sup>" n n n) t t line)))))
+			      (format "<p class=\"footnote\"><sup><a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a></sup>" n n n) t t line))
+		  (setq line (concat line "</p>")))))
 
 	    ;; Check if the line break needs to be conserved
 	    (cond
