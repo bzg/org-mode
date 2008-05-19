@@ -1,3 +1,8 @@
+2008-05-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-annotation-helper.el: Remove John Rakestraw from author
+	list, upon his request.
+
 2008-05-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-annotation-helper.el: New file.

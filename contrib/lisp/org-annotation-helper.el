@@ -1,12 +1,11 @@
 ;;; org-annotation-helper.el --- start remember from a web browser
 ;;
 ;; Author: bzg AT altern DOT org
-;; Author: John Rakestraw 
 ;; Author: dmg AT uvic   DOT org
 ;;
 ;; Keywords: org remember
 ;; 
-;; Version 0.2,  May 16, 2008
+;; Version 0.3,  May 19, 2008
 ;;
 ;;; Commentary:
 ;;
