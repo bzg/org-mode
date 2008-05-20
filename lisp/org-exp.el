@@ -1558,18 +1558,19 @@ on this string to produce the exported version."
 
 (defun org-export-get-title-from-subtree ()
   "Return subtree title and exclude it from export."
-  (let (title (m (mark)))
+  (let (title (m (mark)) (rbeg (region-beginning)) (rend (region-end)))
     (save-excursion
-      (goto-char (region-beginning))
+      (goto-char rbeg)
       (when (and (org-at-heading-p)
-		 (>= (org-end-of-subtree t t) (region-end)))
+		 (>= (org-end-of-subtree t t) rend))
 	;; This is a subtree, we take the title from the first heading
-	(goto-char (region-beginning))
+	(goto-char rbeg)
 	(looking-at org-todo-line-regexp)
 	(setq title (match-string 3))
 	(org-unmodified
 	 (add-text-properties (point) (1+ (point-at-eol))
-			      (list :org-license-to-kill t)))))
+			      (list :org-license-to-kill t)))
+	(setq title (or (org-entry-get nil "EXPORT_TITLE") title))))
     title))
 
 (defun org-solidify-link-text (s &optional alist)
@@ -1748,12 +1749,14 @@ underlined headlines.  The default is 3."
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
 					(org-infile-export-plist)))
 	 (region-p (org-region-active-p))
+	 (rbeg (and region-p (region-beginning)))
+	 (rend (and region-p (region-end)))
 	 (subtree-p
 	  (when region-p
 	    (save-excursion
-	      (goto-char (region-beginning))
+	      (goto-char rbeg)
 	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) (region-end))))))
+		   (>= (org-end-of-subtree t t) rend)))))
 	 (custom-times org-display-custom-times)
 	 (org-ascii-current-indentation '(0 . 0))
 	 (level 0) line txt
@@ -2359,12 +2362,14 @@ PUB-DIR is set, use this as the publishing directory."
 	 valid thetoc have-headings first-heading-pos
 	 (odd org-odd-levels-only)
 	 (region-p (org-region-active-p))
+	 (rbeg (and region-p (region-beginning)))
+	 (rend (and region-p (region-end)))
 	 (subtree-p
 	  (when region-p
 	    (save-excursion
-	      (goto-char (region-beginning))
+	      (goto-char rbeg)
 	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) (region-end))))))
+		   (>= (org-end-of-subtree t t) rend)))))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
 	 (org-current-export-dir
@@ -3844,7 +3849,7 @@ END:VEVENT\n"
 			      (org-entry-get nil "LOCATION"))
 		    uid (if org-icalendar-store-UID
 			    (org-id-get-create)
-			  (or (org-id-get) (orgg-id-new))))
+			  (or (org-id-get) (org-id-new))))
 	      (if (string-match org-bracket-link-regexp hd)
 		  (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
 					    (match-string 1 hd))

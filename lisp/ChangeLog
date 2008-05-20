@@ -1,5 +1,15 @@
 2008-05-20  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-default-properties): Add EXPORT_FILE_NAME and
+	EXPORT_TITLE.
+
+	* org-exp.el (org-export-get-title-from-subtree)
+	(org-export-as-ascii, org-export-as-html): Make sure the original
+	region-beginning and region-end are used, even after moving
+	point.
+	(org-export-get-title-from-subtree): Also try the EXPORT_TITLE
+	property.
+
 	* org-remember.el (org-remember-last-stored-marker): New variable.
 	(org-remember-goto-last-stored): Use `org-goto-marker-or-bmk'.
 	(org-remember-handler): Also use marker to remember

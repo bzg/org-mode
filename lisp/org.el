@@ -2610,7 +2610,7 @@ collapsed state."
 ;; Autoload ID code
 
 (org-autoload "org-id"
- '(org-id-get-create org-id-copy org-id-get 
+ '(org-id-get-create org-id-new org-id-copy org-id-get 
    org-id-get-with-outline-path-completion 
    org-id-get-with-outline-drilling
    org-id-goto org-id-find))
@@ -9766,7 +9766,8 @@ but in some other way.")
 (defconst org-default-properties
   '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION"
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
-    "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE")
+    "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
+    "EXPORT_FILE_NAME" "EXPORT_TITLE")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
@@ -13114,8 +13115,8 @@ With optional NODE, go directly to that node."
 	(if (or (> marker (point-max)) (< marker (point-min)))
 	    (widen))
 	(goto-char marker))
-    (if bookmark.
-	(bookmark-jump bookmark-jump)
+    (if bookmark
+	(bookmark-jump bookmark)
       (error "Cannot find location"))))
 
 (defun org-quote-csv-field (s)
