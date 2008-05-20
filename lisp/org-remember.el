@@ -542,10 +542,14 @@ associated with a template in `org-remember-templates'."
 	  (org-do-remember (buffer-substring (point) (mark)))
 	(org-do-remember))))))
 
+(defvar org-remember-last-stored-marker (make-marker)
+  "Marker pointing to the entry most recently stored with `org-remember'.")
+
 (defun org-remember-goto-last-stored ()
   "Go to the location where the last remember note was stored."
   (interactive)
-  (bookmark-jump "org-remember-last-stored")
+  (org-goto-marker-or-bmk org-remember-last-stored-marker
+			  "org-remember-last-stored")
   (message "This is the last note stored by remember"))
 
 (defun org-go-to-remember-target (&optional template-key)
@@ -732,17 +736,20 @@ See also the variable `org-reverse-note-order'."
 			       (beginning-of-line 2)
 			     (end-of-line 1)
 			     (insert "\n"))))
+		     (org-paste-subtree (org-get-valid-level level 1) txt)
 		     (bookmark-set "org-remember-last-stored")
-		     (org-paste-subtree (org-get-valid-level level 1) txt))
+		     (move-marker org-remember-last-stored-marker (point)))
 		    ((eq exitcmd 'left)
 		     ;; before current
+		     (org-paste-subtree level txt)
 		     (bookmark-set "org-remember-last-stored")
-		     (org-paste-subtree level txt))
+		     (move-marker org-remember-last-stored-marker (point)))
 		    ((eq exitcmd 'right)
 		     ;; after current
 		     (org-end-of-subtree t)
+		     (org-paste-subtree level txt)
 		     (bookmark-set "org-remember-last-stored")
-		     (org-paste-subtree level txt))
+		     (move-marker org-remember-last-stored-marker (point)))
 		    (t (error "This should not happen"))))
 
 		  ((and (bobp) (not reversed))
@@ -751,8 +758,9 @@ See also the variable `org-reverse-note-order'."
 		     (widen)
 		     (goto-char (point-max))
 		     (if (not (bolp)) (newline))
+		     (org-paste-subtree (org-get-valid-level 1 1) txt)
 		     (bookmark-set "org-remember-last-stored")
-		     (org-paste-subtree (org-get-valid-level 1 1) txt)))
+		     (move-marker org-remember-last-stored-marker (point))))
 
 		  ((and (bobp) reversed)
 		   ;; Put it at the start, as level 1
@@ -761,15 +769,18 @@ See also the variable `org-reverse-note-order'."
 		     (goto-char (point-min))
 		     (re-search-forward "^\\*+ " nil t)
 		     (beginning-of-line 1)
+		     (org-paste-subtree 1 txt)
 		     (bookmark-set "org-remember-last-stored")
-		     (org-paste-subtree 1 txt)))
+		     (move-marker org-remember-last-stored-marker (point))))
 		  (t
 		   ;; Put it right there, with automatic level determined by
 		   ;; org-paste-subtree or from prefix arg
-		   (bookmark-set "org-remember-last-stored")
 		   (org-paste-subtree
 		    (if (numberp current-prefix-arg) current-prefix-arg)
-		    txt)))
+		    txt)
+		   (bookmark-set "org-remember-last-stored")
+		   (move-marker org-remember-last-stored-marker (point))))
+
 	    (when remember-save-after-remembering
 	      (save-buffer)
 	      (if (and (not visiting)

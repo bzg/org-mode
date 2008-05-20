@@ -13105,6 +13105,19 @@ With optional NODE, go directly to that node."
       (display-buffer buf)
       (sit-for 0))))
 
+(defun org-goto-marker-or-bmk (marker &optional bookmark)
+  "Go to MARKER, widen if necesary.  When marker is not live, try BOOKMARK."
+  (if (and marker (marker-buffer marker)
+	   (buffer-live-p (marker-buffer marker)))
+      (progn
+	(switch-to-buffer (marker-buffer marker))
+	(if (or (> marker (point-max)) (< marker (point-min)))
+	    (widen))
+	(goto-char marker))
+    (if bookmark.
+	(bookmark-jump bookmark-jump)
+      (error "Cannot find location"))))
+
 (defun org-quote-csv-field (s)
   "Quote field for inclusion in CSV material."
   (if (string-match "[\",]" s)
