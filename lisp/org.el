@@ -12680,7 +12680,7 @@ context.  See the individual commands for more information."
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
-Calls `org-table-recalculate' or `org-toggle-region-headlines',
+Calls `org-table-recalculate' or `org-toggle-region-headings',
 depending on context.  This will also turn a plain list item or a normal
 line into a subheading."
   (interactive)

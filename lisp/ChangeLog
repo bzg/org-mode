@@ -1,3 +1,11 @@
+2008-05-21  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-export-latex.el (org-export-as-latex): Make sure region
+	bounds are correct.  Parse subtree properties relating to export.
+
+	* org-exp.el (org-export-add-options-to-plist): New function.
+	(org-infile-export-plist): Use `org-export-add-options-to-plist'.
+
 2008-05-20  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-default-properties): Add EXPORT_FILE_NAME and

@@ -7028,6 +7028,11 @@ These options take effect in both the HTML and La@TeX{} export, except
 for @code{TeX} and @code{LaTeX}, which are respectively @code{t} and
 @code{nil} for the La@TeX{} export.
 
+When exporting only a single subtree by selecting it with @kbd{C-c @@} before
+calling an export command, the subtree can overrule some of the file's export
+settings with properties @code{EXPORT_FILE_NAME}, @code{EXPORT_TITLE},
+@code{EXPORT_TEXT}, and @code{EXPORT_OPTIONS}.
+
 @node The export dispatcher, ASCII export, Export options, Exporting
 @section The export dispatcher
 @cindex dispatcher, for export commands
@@ -7074,9 +7079,10 @@ file.
 Export as ASCII file.  For an org file @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
 warning.  If there is an active region, only the region will be
-exported. If the selected region is a single tree, the tree head will
+exported. If the selected region is a single tree@footnote{To select the
+current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
-@code{:EXPORT_FILE_NAME:} property, that name will be used for the
+@code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
 @kindex C-c C-e v a
 @item C-c C-e v a
@@ -7128,13 +7134,13 @@ language, but with additional support for tables.
 @table @kbd
 @kindex C-c C-e h
 @item C-c C-e h
-Export as HTML file @file{myfile.html}.  For an org file
-@file{myfile.org}, the ASCII file will be @file{myfile.html}.  The file
-will be overwritten without warning.  If there is an active region, only
-the region will be exported. If the selected region is a single tree,
-the tree head will become the document title.  If the tree head entry
-has or inherits an @code{:EXPORT_FILE_NAME:} property, that name will be
-used for the export.
+Export as HTML file @file{myfile.html}.  For an org file @file{myfile.org},
+the ASCII file will be @file{myfile.html}.  The file will be overwritten
+without warning.  If there is an active region, only the region will be
+exported. If the selected region is a single tree@footnote{To select the
+current subtree, use @kbd{C-c @@}.}, the tree head will become the document
+title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
+property, that name will be used for the export.
 @kindex C-c C-e b
 @item C-c C-e b
 Export as HTML file and immediately open it with a browser.
@@ -7365,7 +7371,13 @@ Org mode contains a La@TeX{} exporter written by Bastien Guerry.
 @table @kbd
 @kindex C-c C-e l
 @item C-c C-e l
-Export as La@TeX{} file @file{myfile.tex}.
+Export as La@TeX{} file @file{myfile.tex}.  For an org file
+@file{myfile.org}, the ASCII file will be @file{myfile.tex}.  The file will
+be overwritten without warning.  If there is an active region, only the
+region will be exported. If the selected region is a single tree@footnote{To
+select the current subtree, use @kbd{C-c @@}.}, the tree head will become the
+document title.  If the tree head entry has or inherits an
+@code{EXPORT_FILE_NAME} property, that name will be used for the export.
 @kindex C-c C-e L
 @item C-c C-e L
 Export to a temporary buffer, do not create a file.

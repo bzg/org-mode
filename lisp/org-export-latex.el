@@ -361,12 +361,19 @@ when PUB-DIR is set, use this as the publishing directory."
   (let* ((wcf (current-window-configuration))
 	 (opt-plist org-export-latex-options-plist)
 	 (region-p (org-region-active-p))
+	 (rbeg (and region-p (region-beginning)))
+	 (rend (and region-p (region-end)))
 	 (subtree-p
 	  (when region-p
 	    (save-excursion
-	      (goto-char (region-beginning))
+	      (goto-char rbeg)
 	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) (region-end))))))
+		   (>= (org-end-of-subtree t t) rend)))))
+	 (opt-plist (if subtree-p 
+			(org-export-add-subtree-options opt-plist rbeg)
+		      opt-plist))
+	 ;; Make sure the variable contains the updated values.
+	 (org-export-latex-options-plist opt-plist)
 	 (title (or (and subtree-p (org-export-get-title-from-subtree))
 		    (plist-get opt-plist :title)
 		    (and (not
@@ -378,8 +385,11 @@ when PUB-DIR is set, use this as the publishing directory."
 			    (or pub-dir
 				(org-export-directory :LaTeX ext-plist)))
 			   (file-name-sans-extension
-			    (file-name-nondirectory ;sans-extension
-			     buffer-file-name)) ".tex"))
+			    (or (and subtree-p
+				     (org-entry-get rbeg "EXPORT_FILE_NAME" t))
+				(file-name-nondirectory ;sans-extension
+				 buffer-file-name)))
+			   ".tex"))
 	 (filename (if (equal (file-truename filename)
 			      (file-truename buffer-file-name))
 		       (concat filename ".tex")
