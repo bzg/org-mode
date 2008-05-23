@@ -179,7 +179,7 @@ annotation://   similar to `org-annotation-as-kill'."
 	       (set-buffer b)
 	       (set-mark (point))
 	       (insert region)
-               (org-remember ?w))
+               (org-remember nil ?w))
               ((equal proto "annotation")
                (message "Copied '%s' to the kill-ring." orglink)
                (kill-new orglink))
