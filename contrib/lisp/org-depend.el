@@ -1,5 +1,11 @@
 ;;; org-depend.el --- TODO dependencies for Org-mode
-
+;; Copyright (C) 2008 Free Software Foundation, Inc.
+;;
+;; Author: Carsten Dominik <carsten at orgmode dot org>
+;; Keywords: outlines, hypermedia, calendar, wp
+;; Homepage: http://orgmode.org
+;; Version: 0.07
+;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;; This file is free software; you can redistribute it and/or modify
