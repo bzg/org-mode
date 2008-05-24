@@ -1,3 +1,9 @@
+2008-05-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-project-alist): Fix typo in
+	docstring.
+	(org-publish-project-alist): Handle :index-title property.
+
 2008-05-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-export-latex.el (org-export-as-latex): Make sure region
