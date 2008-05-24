@@ -1,5 +1,7 @@
 #   -*- mode: org; org-export-publishing-directory: "tmp"; fill-column: 65 -*-
 
+#+STARTUP: localindent hidestars
+
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
 #+EMAIL:  carsten at orgmode dot org
@@ -9,12 +11,17 @@
 #+LINK_HOME: http://orgmode.org
 
 * Version 6.04
-  :PROPERTIES:
-  :VISIBILITY: content
-  :END:
+:PROPERTIES:
+:VISIBILITY: content
+:END:
+
+** Incompatible changes
+  
+- The default of the variable `org-tags-match-list-sublevels' is
+  now `t'.  The main reason for this is that it is easier to
+  explain in the manual and will lead to fewer surprises.
 
 ** Details
-
 *** New properties for customizing subtree export.
 When exporting a subtree by selecting it before calling the
 export command, you can now use the properties =EXPORT_TITLE=,
@@ -36,9 +43,6 @@ overwritten.  For example:
 ,  :END:
 #+end_src
  
-*** The default of the variable `org-tags-match-list-sublevels' is now `t'.
-    The main reason for this is that it is easier to explain in
-    the manual and will lead to fewer surprises.
 *** Statistics for TODO entries
 
 The [/] and [%] cookies have already provided statistics for

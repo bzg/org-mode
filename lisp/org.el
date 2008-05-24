@@ -220,6 +220,20 @@ uninteresting.  Also tables look terrible when wrapped."
   :group 'org-startup
   :type 'boolean)
 
+(defcustom org-startup-indented nil
+  "Non-nil means, turn on `org-indent-mode' on startup.
+This can also be configured on a per-file basis by adding one of
+the following lines anywhere in the buffer:
+
+   #+STARTUP: localindent
+   #+STARTUP: indent
+   #+STARTUP: noindent"
+  :group 'org-structure
+  :type '(choice
+	  (const :tag "Not" nil)
+	  (const :tag "Locally" local)
+	  (const :tag "Globally (slow on startup in large files)" t)))
+
 (defcustom org-startup-align-all-tables nil
   "Non-nil means, align all tables when visiting a file.
 This is useful when the column width in tables is forced with <N> cookies
@@ -2730,6 +2744,8 @@ After a match, the following groups carry important information:
     ("content" org-startup-folded content)
     ("hidestars" org-hide-leading-stars t)
     ("showstars" org-hide-leading-stars nil)
+    ("indent" org-adapt-indentation t)
+    ("noindent" org-adapt-indentation nil)
     ("odd" org-odd-levels-only t)
     ("oddeven" org-odd-levels-only nil)
     ("align" org-startup-align-all-tables t)
@@ -2927,87 +2943,87 @@ means to push this value onto the list in the variable.")
 	  (while (setq e (pop tgs))
 	    (or (and (stringp (car e))
 		     (assoc (car e) org-tag-alist))
-		(push e org-tag-alist))))))
+		(push e org-tag-alist)))))
 
-    ;; Compute the regular expressions and other local variables
-    (if (not org-done-keywords)
-	(setq org-done-keywords (list (org-last org-todo-keywords-1))))
-    (setq org-ds-keyword-length (+ 2 (max (length org-deadline-string)
-					  (length org-scheduled-string)
-					  (length org-clock-string)
-					  (length org-closed-string)))
-	  org-drawer-regexp
-	  (concat "^[ \t]*:\\("
-		  (mapconcat 'regexp-quote org-drawers "\\|")
-		  "\\):[ \t]*$")
-	  org-not-done-keywords
-	  (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
-	  org-todo-regexp
-	  (concat "\\<\\(" (mapconcat 'regexp-quote org-todo-keywords-1
-				      "\\|") "\\)\\>")
-	  org-not-done-regexp
-	  (concat "\\<\\("
-		  (mapconcat 'regexp-quote org-not-done-keywords "\\|")
-		  "\\)\\>")
-	  org-todo-line-regexp
-	  (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		  (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		  "\\)\\>\\)?[ \t]*\\(.*\\)")
-	  org-complex-heading-regexp
-	  (concat "^\\(\\*+\\)\\(?:[ \t]+\\("
-		  (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		  "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(.*?\\)"
-		  "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
-	  org-nl-done-regexp
-	  (concat "\n\\*+[ \t]+"
-		  "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
-		  "\\)" "\\>")
-	  org-todo-line-tags-regexp
-	  (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
-		  (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
-		  (org-re
-		   "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@]+:[ \t]*\\)?$\\)"))
-	  org-looking-at-done-regexp
-	  (concat "^" "\\(?:"
-		  (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
-		  "\\>")
-	  org-deadline-regexp (concat "\\<" org-deadline-string)
-	  org-deadline-time-regexp
-	  (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
-	  org-deadline-line-regexp
-	  (concat "\\<\\(" org-deadline-string "\\).*")
-	  org-scheduled-regexp
-	  (concat "\\<" org-scheduled-string)
-	  org-scheduled-time-regexp
-	  (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
-	  org-closed-time-regexp
-	  (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
-	  org-keyword-time-regexp
-	  (concat "\\<\\(" org-scheduled-string
-		  "\\|" org-deadline-string
-		  "\\|" org-closed-string
-		  "\\|" org-clock-string "\\)"
-		  " *[[<]\\([^]>]+\\)[]>]")
-	  org-keyword-time-not-clock-regexp
-	  (concat "\\<\\(" org-scheduled-string
-		  "\\|" org-deadline-string
-		  "\\|" org-closed-string
-		  "\\)"
-		  " *[[<]\\([^]>]+\\)[]>]")
-	  org-maybe-keyword-time-regexp
-	  (concat "\\(\\<\\(" org-scheduled-string
-		  "\\|" org-deadline-string
-		  "\\|" org-closed-string
-		  "\\|" org-clock-string "\\)\\)?"
-		  " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^]\r\n>]*?[]>]\\|<%%([^\r\n>]*>\\)")
-	  org-planning-or-clock-line-re
-	  (concat "\\(?:^[ \t]*\\(" org-scheduled-string
-		  "\\|" org-deadline-string
-		  "\\|" org-closed-string "\\|" org-clock-string
-		  "\\)\\>\\)")
-	  )
-    (org-compute-latex-and-specials-regexp)
-    (org-set-font-lock-defaults)))
+      ;; Compute the regular expressions and other local variables
+      (if (not org-done-keywords)
+	  (setq org-done-keywords (list (org-last org-todo-keywords-1))))
+      (setq org-ds-keyword-length (+ 2 (max (length org-deadline-string)
+					    (length org-scheduled-string)
+					    (length org-clock-string)
+					    (length org-closed-string)))
+	    org-drawer-regexp
+	    (concat "^[ \t]*:\\("
+		    (mapconcat 'regexp-quote org-drawers "\\|")
+		    "\\):[ \t]*$")
+	    org-not-done-keywords
+	    (org-delete-all org-done-keywords (copy-sequence org-todo-keywords-1))
+	    org-todo-regexp
+	    (concat "\\<\\(" (mapconcat 'regexp-quote org-todo-keywords-1
+					"\\|") "\\)\\>")
+	    org-not-done-regexp
+	    (concat "\\<\\("
+		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
+		    "\\)\\>")
+	    org-todo-line-regexp
+	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
+		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		    "\\)\\>\\)?[ \t]*\\(.*\\)")
+	    org-complex-heading-regexp
+	    (concat "^\\(\\*+\\)\\(?:[ \t]+\\("
+		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		    "\\)\\>\\)?\\(?:[ \t]*\\(\\[#.\\]\\)\\)?[ \t]*\\(.*?\\)"
+		    "\\(?:[ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+	    org-nl-done-regexp
+	    (concat "\n\\*+[ \t]+"
+		    "\\(?:" (mapconcat 'regexp-quote org-done-keywords "\\|")
+		    "\\)" "\\>")
+	    org-todo-line-tags-regexp
+	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
+		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
+		    (org-re
+		     "\\)\\>\\)? *\\(.*?\\([ \t]:[[:alnum:]:_@]+:[ \t]*\\)?$\\)"))
+	    org-looking-at-done-regexp
+	    (concat "^" "\\(?:"
+		    (mapconcat 'regexp-quote org-done-keywords "\\|") "\\)"
+		    "\\>")
+	    org-deadline-regexp (concat "\\<" org-deadline-string)
+	    org-deadline-time-regexp
+	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
+	    org-deadline-line-regexp
+	    (concat "\\<\\(" org-deadline-string "\\).*")
+	    org-scheduled-regexp
+	    (concat "\\<" org-scheduled-string)
+	    org-scheduled-time-regexp
+	    (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
+	    org-closed-time-regexp
+	    (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
+	    org-keyword-time-regexp
+	    (concat "\\<\\(" org-scheduled-string
+		    "\\|" org-deadline-string
+		    "\\|" org-closed-string
+		    "\\|" org-clock-string "\\)"
+		    " *[[<]\\([^]>]+\\)[]>]")
+	    org-keyword-time-not-clock-regexp
+	    (concat "\\<\\(" org-scheduled-string
+		    "\\|" org-deadline-string
+		    "\\|" org-closed-string
+		    "\\)"
+		    " *[[<]\\([^]>]+\\)[]>]")
+	    org-maybe-keyword-time-regexp
+	    (concat "\\(\\<\\(" org-scheduled-string
+		    "\\|" org-deadline-string
+		    "\\|" org-closed-string
+		    "\\|" org-clock-string "\\)\\)?"
+		    " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} [^]\r\n>]*?[]>]\\|<%%([^\r\n>]*>\\)")
+	    org-planning-or-clock-line-re
+	    (concat "\\(?:^[ \t]*\\(" org-scheduled-string
+		    "\\|" org-deadline-string
+		    "\\|" org-closed-string "\\|" org-clock-string
+		    "\\)\\>\\)")
+	    )
+      (org-compute-latex-and-specials-regexp)
+      (org-set-font-lock-defaults))))
 
 (defun org-file-contents (file &optional noerror)
   "Return the contents of FILE, as a string."
@@ -7385,7 +7401,9 @@ If the file does not exist, an error is thrown."
 	(setq cmd (replace-match "%s" t t cmd)))
       (while (string-match "%s" cmd)
 	(setq cmd (replace-match
-		   (save-match-data (shell-quote-argument file))
+		   (save-match-data
+		     (shell-quote-argument
+		      (convert-standard-filename file)))
 		   t t cmd)))
       (save-window-excursion
 	(start-process-shell-command cmd nil cmd)
@@ -7398,7 +7416,8 @@ If the file does not exist, an error is thrown."
       (if line (goto-line line)
 	(if search (org-link-search search))))
      ((consp cmd)
-      (eval cmd))
+      (let ((file (convert-standard-filename file)))
+	(eval cmd)))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
     (and (org-mode-p) (eq old-mode 'org-mode)
 	 (or (not (equal old-buffer (current-buffer)))
@@ -8603,7 +8622,7 @@ be removed."
 	    (insert-before-markers "\n")
 	    (backward-char 1)
 	    (narrow-to-region (point) (point))
-	    (org-indent-to-column col))
+	    (and org-adapt-indentation (org-indent-to-column col)))
 	  ;; Check if we have to remove something.
 	  (setq list (cons what remove))
 	  (while list
@@ -8621,7 +8640,7 @@ be removed."
 	  (goto-char (point-max))
 	  (when what
 	    (insert
-	     (if (not (equal (char-before) ?\ )) " " "")
+	     (if (not (or (bolp) (eq (char-before) ?\ ))) " " "")
 	     (cond ((eq what 'scheduled) org-scheduled-string)
 		   ((eq what 'deadline) org-deadline-string)
 		   ((eq what 'closed) org-closed-string))
@@ -13563,8 +13582,10 @@ not an indirect buffer."
 	(beginning-of-line 0))
       (cond
        ((looking-at "\\*+[ \t]+")
-	(goto-char (match-end 0))
-	(setq column (current-column)))
+	(if (not org-adapt-indentation)
+	    (setq column 0)
+	  (goto-char (match-end 0))
+	  (setq column (current-column))))
        ((org-in-item-p)
 	(org-beginning-of-item)
 ;	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*")
