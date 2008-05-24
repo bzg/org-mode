@@ -1,4 +1,4 @@
-;;; org-depend.el --- TODO dependencies for Org-mode
+;;; org-indent.el --- Dynamic indentation for  Org-mode
 ;; Copyright (C) 2008 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -207,6 +207,6 @@ Point is assumed to be at the beginning of the line for this."
 	(org-indent-remove-overlays beg end)
 	(org-indent-add-overlays beg end)))))
 
-(provide 'org-depend)
+(provide 'org-indent)
 
-;;; org-depend.el ends here
+;;; org-indent.el ends here

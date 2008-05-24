@@ -1,6 +1,6 @@
 #   -*- mode: org; org-export-publishing-directory: "tmp"; fill-column: 65 -*-
 
-#+STARTUP: localindent hidestars
+#+STARTUP: 
 
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
