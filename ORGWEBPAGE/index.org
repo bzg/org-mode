@@ -30,11 +30,12 @@ are extensive, to avoid that people will be printing the manual after
 each incremental release.  If you have an older version of the manual,
 just check the release notes and you will be up-to-date.
 
-This package works on Emacs 22, and (with minor restrictions) on Emacs
-21 and XEmacs 21 (where you must also use /noutline.el/ shipped with
-Org-mode).  The Emacs 22.1 release ships with Org-mode version 4.67c.
-The latest CVS emacs trunk usually contains a fairly recent version,
-but may lag a bit behind the website release.
+This package works on Emacs 23 and 22, and (with minor restrictions)
+on Emacs 21 and XEmacs 21 (where you must also use
+/xemacs/noutline.el/ shipped with Org-mode).  The Emacs 22.2 release
+ships with Org-mode version 4.67d.  The latest CVS emacs trunk usually
+contains a fairly recent version, but may lag a bit behind the website
+release.
 
 * Downloads
 

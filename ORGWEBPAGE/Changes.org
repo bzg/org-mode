@@ -21,27 +21,11 @@
   now `t'.  The main reason for this is that it is easier to
   explain in the manual and will lead to fewer surprises.
 
-** Details
-*** New properties for customizing subtree export.
-When exporting a subtree by selecting it before calling the
-export command, you can now use the properties =EXPORT_TITLE=,
-=EXPORT_TEXT=, and =EXPORT_OPTIONS= to overrule the global
-=#+TITLE=, =#+TEXT=, and =#+OPTIONS= settings.  You can also the
-an export file name with =EXPORT_FILE_NAME= that will overrule
-the file name derived from the buffers file name.  As far as the
-options are concerned, the global =#+OPTIONS= will still be read,
-and only the options you give in the property will be
-overwritten.  For example:
+- The former CONTRIB directory is now called "contrib".  This was
+  already the case in the git distribution, but the tar and zip
+  archives still did this wrong.
 
-#+begin_src org
-,#+OPTIONS: skip:nil
-,* Computer Tricks
-,  :PROPERTIES:
-,  :EXPORT_FILE_NAME: ct.html
-,  :EXPORT_TITLE: Steve's collected computer tricks
-,  :EXPORT_OPTIONS: h:2 toc:nil
-,  :END:
-#+end_src
+** Details
  
 *** Statistics for TODO entries
 
@@ -53,18 +37,19 @@ that are neither TODO nor DONE are ignored.
 
 There have already been requests to automatically switch the
 parent headline to DONE when all children are done.  I am not
-makeing this a default feature, because one needs to make many
+making this a default feature, because one needs to make many
 decisions about which keyword to use etc.  Instead of a complex
 customization variable, I am providing a hook that can be used.
 This hook will be called each time a TODO statistics cookie is
 updated, with the cursor in the corresponding line.  Each
 function in the hook will receive two arguments, the number of
-done entries, and the number of not-done entries.  Here is a
-example implementation:
+done entries, and the number of not-done entries, and you can use
+the hook to change the state of the headline.  Here is an example
+implementation:
 
 #+begin_src emacs-lisp
 (defun org-summary-todo (n-done n-not-done)
-  "Switch entry to DONE when all subentries are done, to TODO otherwise."
+  "Switch entry to DONE when all sub-entries are done, to TODO otherwise."
   (let (org-log-done org-log-states)   ; turn off logging
     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
@@ -93,6 +78,28 @@ to the UID during iCalendar export, depending on what triggered
 the inclusion of the entry.  In this way the UID remains unique,
 but a synchronization program can still figure out from which
 entry all the different instances originate.
+
+*** New properties for customizing subtree export.
+
+When exporting a subtree by selecting it before calling the
+export command, you can now use the properties =EXPORT_TITLE=,
+=EXPORT_TEXT=, and =EXPORT_OPTIONS= to overrule the global
+=#+TITLE=, =#+TEXT=, and =#+OPTIONS= settings.  You can also set
+an export file name with =EXPORT_FILE_NAME= that will overrule
+the file name derived from the buffer's file name.  As far as the
+options are concerned, the global =#+OPTIONS= will still be read,
+and only the options you give in the property will be
+overwritten.  For example:
+
+#+begin_src org
+,#+OPTIONS: skip:nil
+,* Computer Tricks
+,  :PROPERTIES:
+,  :EXPORT_FILE_NAME: ct.html
+,  :EXPORT_TITLE: Steve's collected computer tricks
+,  :EXPORT_OPTIONS: h:2 toc:nil
+,  :END:
+#+end_src
 
 * Version 6.03
 
