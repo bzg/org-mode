@@ -1,5 +1,11 @@
 2008-05-25  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-edit-src-exit): New function.
+	(org-exit-edit-mode): New minor mode.
+
+	* org-exp.el (org-export-preprocess-string): Fix bug with removing
+	comment-like lines from protected examples.
+
 	* org.el (org-edit-src-example, org-find-src-example-start)
 	(org-protect-source-example, org-edit-special): New functions.
 

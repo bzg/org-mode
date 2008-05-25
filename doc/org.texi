@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.04
+@set VERSION 6.04a
 @set DATE May 2008
 
 @dircategory Emacs
@@ -6838,8 +6838,7 @@ example:
 @item C-c '
 Edit the source code example at point in its native mode.  This works by
 switching to an indirect buffer, narrowing the buffer and switching to the
-other mode.  You need to exit by killing the indirect buffer using @kbd{C-x
-k}.
+other mode.  You need to exit by pressing @kbd{C-c '} again.
 @end table
 
 

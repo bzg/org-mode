@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.04
+;; Version: 6.04a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -91,7 +91,7 @@
 
 ;;; Version
 
-(defconst org-version "6.04"
+(defconst org-version "6.04a"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -5333,6 +5333,12 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 
 ;;; Editing source examples
 
+(defvar org-exit-edit-mode-map (make-sparse-keymap))
+(define-key org-exit-edit-mode-map "\C-c'" 'org-edit-src-exit)
+
+(define-minor-mode org-exit-edit-mode
+  "Minor mode installing a single key binding, \"C-c '\" to exit special edit.")
+
 (defun org-edit-src-example ()
   "Edit the source code example at point.
 An indirect buffer is created, and that buffer is then narrowed to the
@@ -5343,7 +5349,7 @@ in this way because some Org quoting of the example will take place."
   (let ((line (org-current-line))
 	(case-fold-search t)
 	(msg (substitute-command-keys
-	      "Edit, then kill this indirect buffer with \\[kill-buffer]"))
+	      "Edit, then kill this indirect buffer with C-c ' (C-c and single quote)"))
 	beg end)
     (if (not (org-find-src-example-start))
 	;; not at an example
@@ -5367,13 +5373,14 @@ in this way because some Org quoting of the example will take place."
       (switch-to-buffer (make-indirect-buffer (current-buffer)
 					      "*Org Edit Src Example*"))
       (narrow-to-region beg end)
-      (funcall lang-f)
+      (let ((org-inhibit-startup t))
+	(funcall lang-f))
       (goto-char (point-min))
       (while (re-search-forward "^," nil t)
 	(replace-match ""))
       (goto-char (point-min))
       (goto-line line)
-      (org-add-hook 'kill-buffer-hook 'org-protect-source-example nil 'loc)
+      (org-exit-edit-mode)
       (org-set-local 'header-line-format msg)
       (message "%s" msg)
       t)))
@@ -5394,13 +5401,18 @@ If not, just return nil."
 	(goto-char pos)
 	nil))))
 
-(defun org-protect-source-example ()
-  "Protect example lines with Org syntax."
+(defun org-edit-src-exit ()
+  "Exit special edit and protect problematic lines."
+  (interactive)
   (unless (> (point-min) 1)
     (error "This buffer is not narrowed, something is wrong..."))
   (goto-char (point-min))
   (while (re-search-forward (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\)") nil t)
-    (replace-match ",\\1")))
+    (replace-match ",\\1"))
+  (when font-lock-mode
+    (font-lock-unfontify-region (point-min) (point-max)))
+  (put-text-property (point-min) (point-max) 'font-lock-fontified t)
+  (kill-buffer (current-buffer)))
 
 ;;;; Plain list items, including checkboxes
 

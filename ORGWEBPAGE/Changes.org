@@ -74,12 +74,9 @@ Org mode examples.  You can now use the key "C-c '" (that is C-c
 followed by the single quote) to edit the example in its native
 mode.  This works by creating an indirect buffer, narrowing it to
 the example and setting the appropriate mode.  You need to exit
-editing by killing that indirect buffer, with =C-x k=.  This is
-important, because lines that have syntactic meaning in Org will
-be quoted when the indirect buffer is killed.
-
-I guess it would be nice to exit with =C-c C-c=, but who knows
-what this key is supposed to do in a random mode.
+editing by pressing "C-c '" again.  This is important, because
+lines that have syntactic meaning in Org will be quoted by
+calling this command.
 
 *** iCalendar now defines proper UIDs for entries
 
