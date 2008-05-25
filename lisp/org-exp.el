@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.04a
+;; Version: 6.04b
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -1459,12 +1459,15 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (goto-char (point-min))
       (while (re-search-forward "^#\\(.*\n?\\)" nil t)
+	(setq pos (match-beginning 0))
 	(if commentsp
 	    (progn (add-text-properties
 		    (match-beginning 0) (match-end 0) '(org-protected t))
 		   (replace-match (format commentsp (match-string 1)) t t))
-	  (goto-char (1+ (match-beginning 0)))
-	  (org-if-unprotected (replace-match ""))
+	  (goto-char (1+ pos))
+	  (org-if-unprotected
+	   (replace-match "")
+	   (goto-char (max (point-min) (1- pos))))
 	  (end-of-line 1)))
 
       ;; Find matches for radio targets and turn them into internal links
