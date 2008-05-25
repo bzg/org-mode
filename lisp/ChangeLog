@@ -1,3 +1,8 @@
+2008-05-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-edit-src-example, org-find-src-example-start)
+	(org-protect-source-example, org-edit-special): New functions.
+
 2008-05-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-project-alist): Fix typo in

@@ -1736,7 +1736,8 @@ backends, it converts the segment into an EXAMPLE segment."
 		  ;; Free up the protected stuff
 		  (goto-char (point-min))
 		  (while (re-search-forward "^," nil t)
-		    (replace-match ""))
+		    (replace-match "")
+		    (end-of-line 1))
 		  (if (functionp mode)
 		      (funcall mode)
 		    (fundamental-mode))

@@ -6833,6 +6833,16 @@ example:
 #+END_SRC
 @end example
 
+@table @kbd
+@kindex C-c '
+@item C-c '
+Edit the source code example at point in its native mode.  This works by
+switching to an indirect buffer, narrowing the buffer and switching to the
+other mode.  You need to exit by killing the indirect buffer using @kbd{C-x
+k}.
+@end table
+
+
 @node Include files, Tables exported, Literal examples, Markup rules
 @subheading Include files
 @cindex include files, markup rules

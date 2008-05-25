@@ -2744,8 +2744,6 @@ After a match, the following groups carry important information:
     ("content" org-startup-folded content)
     ("hidestars" org-hide-leading-stars t)
     ("showstars" org-hide-leading-stars nil)
-    ("indent" org-adapt-indentation t)
-    ("noindent" org-adapt-indentation nil)
     ("odd" org-odd-levels-only t)
     ("oddeven" org-odd-levels-only nil)
     ("align" org-startup-align-all-tables t)
@@ -5332,6 +5330,77 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
     (sort (mapcar (lambda (x) (cons (funcall extractfun (car x)) (cdr x)))
 		  table)
 	  (lambda (a b) (funcall comparefun (car a) (car b))))))
+
+;;; Editing source examples
+
+(defun org-edit-src-example ()
+  "Edit the source code example at point.
+An indirect buffer is created, and that buffer is then narrowed to the
+example at point and switched to the correct language mode.  When done,
+exit by killing the buffer with \\[kill-buffer].  It is important to exit
+in this way because some Org quoting of the example will take place."
+  (interactive)
+  (let ((line (org-current-line))
+	(case-fold-search t)
+	(msg (substitute-command-keys
+	      "Edit, then kill this indirect buffer with \\[kill-buffer]"))
+	beg end)
+    (if (not (org-find-src-example-start))
+	;; not at an example
+	nil
+      (if (not (save-excursion
+		 (goto-char (point-at-bol))
+		 (or (looking-at "#\\+begin_src[ \t]+\\([^ \t\n]+\\)")
+		     (looking-at "[ \t]*<src .*?lang=\"\\(.*?\\)\""))))
+	  (error "This should not happen"))	
+      (setq beg (point-at-bol 2)
+	    lang (match-string 1)
+	    lang-f (intern (concat lang "-mode")))
+      (unless (functionp lang-f)
+	"No such language mode: %s" lang-f)
+      (unless (re-search-forward "^\\(#\\+end_src\\|[ \t]*</src>\\)" nil t)
+	(error "Cannot find end of src"))
+      (setq end (match-beginning 0))
+      (goto-line line)
+      (if (get-buffer "*Org Edit Src Example*")
+	  (kill-buffer "*Org Edit Src Example*"))
+      (switch-to-buffer (make-indirect-buffer (current-buffer)
+					      "*Org Edit Src Example*"))
+      (narrow-to-region beg end)
+      (funcall lang-f)
+      (goto-char (point-min))
+      (while (re-search-forward "^," nil t)
+	(replace-match ""))
+      (goto-char (point-min))
+      (goto-line line)
+      (org-add-hook 'kill-buffer-hook 'org-protect-source-example nil 'loc)
+      (org-set-local 'header-line-format msg)
+      (message "%s" msg)
+      t)))
+
+(defun org-find-src-example-start ()
+  "If point is in a src example, move to the beginning of it.
+If not, just return nil."
+  (let ((re "^\\(#\\+begin_src\\|[ \t]*<src\\)")
+	(pos (point))
+	     p1)
+    (beginning-of-line 1)
+    (if (looking-at re)
+	(point)
+      (if (and (setq p1 (re-search-backward re nil t))
+	       (re-search-forward "^\\(#\\+end_src\\|[ \t]*</src\\)" nil t)
+	       (>= (point-at-eol) pos))
+	  (goto-char p1)
+	(goto-char pos)
+	nil))))
+
+(defun org-protect-source-example ()
+  "Protect example lines with Org syntax."
+  (unless (> (point-min) 1)
+    (error "This buffer is not narrowed, something is wrong..."))
+  (goto-char (point-min))
+  (while (re-search-forward (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\)") nil t)
+    (replace-match ",\\1")))
 
 ;;;; Plain list items, including checkboxes
 
@@ -12202,7 +12271,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c "    'org-table-blank-field)
 (org-defkey org-mode-map "\C-c+"    'org-table-sum)
 (org-defkey org-mode-map "\C-c="    'org-table-eval-formula)
-(org-defkey org-mode-map "\C-c'"    'org-table-edit-formulas)
+(org-defkey org-mode-map "\C-c'"    'org-edit-special)
 (org-defkey org-mode-map "\C-c`"    'org-table-edit-field)
 (org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
 (org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
@@ -12570,6 +12639,18 @@ See the individual commands for more information."
       (org-table-paste-rectangle)
     (org-paste-subtree arg)))
 
+(defun org-edit-special ()
+  "Call a special editor for the stuff at point.
+When at a table, call the formula editor with `org-table-edit-formulas'.
+When at the first line of an src example, call `org-edit-src-example'."
+  (interactive)
+  (if (org-at-table-p)
+      (call-interactively 'org-table-edit-formulas)
+    (or (org-edit-src-example)
+	(error "%s"
+	       (substitute-command-keys
+		"\\[org-edit-special] can do nothing useful here.")))))
+
 (defun org-ctrl-c-ctrl-c (&optional arg)
   "Set tags in headline, or update according to changed information at point.
 
@@ -12850,7 +12931,7 @@ See the individual commands for more information."
     ("Calculate"
      ["Set Column Formula" org-table-eval-formula (org-at-table-p)]
      ["Set Field Formula" (org-table-eval-formula '(4)) :active (org-at-table-p) :keys "C-u C-c ="]
-     ["Edit Formulas" org-table-edit-formulas (org-at-table-p)]
+     ["Edit Formulas" org-edit-special (org-at-table-p)]
      "--"
      ["Recalculate line" org-table-recalculate (org-at-table-p)]
      ["Recalculate all" (lambda () (interactive) (org-table-recalculate '(4))) :active (org-at-table-p) :keys "C-u C-c *"]
@@ -12915,7 +12996,8 @@ See the individual commands for more information."
      ["Convert to odd levels" org-convert-to-odd-levels t]
      ["Convert to odd/even levels" org-convert-to-oddeven-levels t])
     ("Editing"
-     ["Emphasis..." org-emphasize t])
+     ["Emphasis..." org-emphasize t]
+     ["Edit Source Example" org-edit-special t])
     ("Archive"
      ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
 ;     ["Check and Tag Children" (org-toggle-archive-tag (4))

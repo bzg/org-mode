@@ -15,6 +15,13 @@
 :VISIBILITY: content
 :END:
 
+** Overview
+
+- Statistics cookies [/] and [%] for TODO entries
+- Editing source code example in the proper mode
+- iCalendar now defines proper UIDs for entries
+- New properties for customizing subtree export
+
 ** Incompatible changes
   
 - The default of the variable `org-tags-match-list-sublevels' is
@@ -30,7 +37,7 @@
 *** Statistics for TODO entries
 
 The [/] and [%] cookies have already provided statistics for
-checkboxes.  Now they do the same also for TODO entries.  So if a
+checkboxes.  Now they do the same also for TODO entries.  If a
 headline contains either cookie, changing the TODO state of any
 direct child will trigger an update of this cookie.  Children
 that are neither TODO nor DONE are ignored.
@@ -38,7 +45,7 @@ that are neither TODO nor DONE are ignored.
 There have already been requests to automatically switch the
 parent headline to DONE when all children are done.  I am not
 making this a default feature, because one needs to make many
-decisions about which keyword to use etc.  Instead of a complex
+decisions about which keyword to use, etc.  Instead of a complex
 customization variable, I am providing a hook that can be used.
 This hook will be called each time a TODO statistics cookie is
 updated, with the cursor in the corresponding line.  Each
@@ -56,28 +63,50 @@ implementation:
 (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
 #+end_src
 
+*** Editing source code example in the proper mode
+
+If you are writing a document with source code examples, you can
+include these examples into a =#+BEGIN_SRC lang ... #+END_SRC= or
+(with the org-mtags module loaded) a =<src...= structure.  =lang=
+stands for the Emacs mode used for editing the language, this
+could be =emacs-lisp= for Emacs Lisp mode examples, or =org= for
+Org mode examples.  You can now use the key "C-c '" (that is C-c
+followed by the single quote) to edit the example in its native
+mode.  This works by creating an indirect buffer, narrowing it to
+the example and setting the appropriate mode.  You need to exit
+editing by killing that indirect buffer, with =C-x k=.  This is
+important, because lines that have syntactic meaning in Org will
+be quoted when the indirect buffer is killed.
+
+I guess it would be nice to exit with =C-c C-c=, but who knows
+what this key is supposed to do in a random mode.
+
 *** iCalendar now defines proper UIDs for entries
 
 This is necessary for synchronization services.  The UIDs are
-created using the the org-id.el module.  If you set the variable 
+created using the the org-id.el module which is now part of the
+Or core.  If you set the variable
 
 : (setq org-icalendar-store-UID t)
 
 then all created UIDs will be stored in the entry as an =:ID:=
-property.  You should definitely do this if you plan to use
-synchronization.
+property.  This is off by default because it creates lots of
+property drawers even if you only play with iCalendar export.
+But if you plan to use synchronization, you really need to turn
+this on.
 
 Diary sexp entries do not yet receive proper persistent UIDs,
 because they are transformed to iCalendar format by icalendar.el
 which creates fresh UIDs each time, based on the current time.
 
-A single entry can give rise to multiple iCalendar entries (as a
-timestamp, a deadline, a scheduled item, and as a TODO
-item). Therefore, Org adds prefixes "TS-", "DL-" "CS-", and "TD-"
-to the UID during iCalendar export, depending on what triggered
-the inclusion of the entry.  In this way the UID remains unique,
-but a synchronization program can still figure out from which
-entry all the different instances originate.
+An interesting aspect of Org is that a single outline node can
+give rise to multiple iCalendar entries (as a timestamp, a
+deadline, a scheduled item, and as a TODO item). Therefore, Org
+adds prefixes "TS-", "DL-" "CS-", and "TD-" to the UID during
+iCalendar export, depending on what triggered the inclusion of
+the entry.  In this way the UID remains unique, but a
+synchronization program can still figure out from which entry all
+the different instances originate.
 
 *** New properties for customizing subtree export.
 
