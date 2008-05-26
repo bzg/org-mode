@@ -10,6 +10,39 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.05
+
+** Details
+*** Source code example editing expanded.
+
+The editing of source code in the proper major mode has been
+expanded.  It works now inside all kinds of constructs, for
+example
+
+#+begin_src org
+,#+HTML: this code can be edited in html-mode
+
+,#+BEGIN_HTML
+,Same here
+,#+BEGIN_HTML
+
+,#+LaTeX: this code can be edited in latex-mode
+
+,#+BEGIN_LaTeX
+,Same here
+,#+BEGIN_LaTeX
+
+,#+BEGIN_SRC fortran
+,Here we can edit in fortran-mode
+,#+END_SRC
+#+end_src
+
+In addition to that, the syntax that is used by Emacs Muse (<src>
+or <example> tags, even <literal> and <lisp>) works as well - in
+fact, I think you can call `org-edit-src-code' directly from
+Muse.  Hey, if you guys bind it to "C-c '" in Muse mode as well,
+this could be a nice convergence.
+
 * Version 6.04
 :PROPERTIES:
 :VISIBILITY: content

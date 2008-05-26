@@ -5339,79 +5339,135 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 (define-minor-mode org-exit-edit-mode
   "Minor mode installing a single key binding, \"C-c '\" to exit special edit.")
 
-(defun org-edit-src-example ()
+(defun org-edit-src-code ()
   "Edit the source code example at point.
 An indirect buffer is created, and that buffer is then narrowed to the
 example at point and switched to the correct language mode.  When done,
-exit by killing the buffer with \\[kill-buffer].  It is important to exit
-in this way because some Org quoting of the example will take place."
+exit by killing the buffer with \\[org-edit-src-exit]."
   (interactive)
   (let ((line (org-current-line))
 	(case-fold-search t)
 	(msg (substitute-command-keys
-	      "Edit, then kill this indirect buffer with C-c ' (C-c and single quote)"))
-	beg end)
-    (if (not (org-find-src-example-start))
-	;; not at an example
+	      "Edit, then exit with C-c ' (C-c and single quote)"))
+	(info (org-edit-src-find-region-and-lang))
+	(org-mode-p (eq major-mode 'org-mode))
+	beg end lang single)
+    (if (not info)
 	nil
-      (if (not (save-excursion
-		 (goto-char (point-at-bol))
-		 (or (looking-at "#\\+begin_src[ \t]+\\([^ \t\n]+\\)")
-		     (looking-at "[ \t]*<src .*?lang=\"\\(.*?\\)\""))))
-	  (error "This should not happen"))	
-      (setq beg (point-at-bol 2)
-	    lang (match-string 1)
+      (setq beg (nth 0 info)
+	    end (nth 1 info)
+	    lang (nth 2 info)
+	    single (nth 3 info)
 	    lang-f (intern (concat lang "-mode")))
       (unless (functionp lang-f)
-	"No such language mode: %s" lang-f)
-      (unless (re-search-forward "^\\(#\\+end_src\\|[ \t]*</src>\\)" nil t)
-	(error "Cannot find end of src"))
-      (setq end (match-beginning 0))
+	(error "No such language mode: %s" lang-f))
       (goto-line line)
       (if (get-buffer "*Org Edit Src Example*")
 	  (kill-buffer "*Org Edit Src Example*"))
       (switch-to-buffer (make-indirect-buffer (current-buffer)
 					      "*Org Edit Src Example*"))
       (narrow-to-region beg end)
+      (remove-text-properties beg end '(display nil invisible nil
+						intangible nil))
       (let ((org-inhibit-startup t))
 	(funcall lang-f))
-      (goto-char (point-min))
-      (while (re-search-forward "^," nil t)
-	(replace-match ""))
-      (goto-char (point-min))
+      (set (make-local-variable 'org-edit-src-force-single-line) single)
+      (set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
+      (when org-mode-p
+	(goto-char (point-min))
+	(while (re-search-forward "^," nil t)
+	  (replace-match "")))
       (goto-line line)
       (org-exit-edit-mode)
       (org-set-local 'header-line-format msg)
       (message "%s" msg)
       t)))
 
-(defun org-find-src-example-start ()
-  "If point is in a src example, move to the beginning of it.
-If not, just return nil."
-  (let ((re "^\\(#\\+begin_src\\|[ \t]*<src\\)")
+(defun org-edit-src-find-region-and-lang ()
+  "Find the region and language for a local edit.
+Return a list with beginning and end of the region, a string representing
+the language, a switch telling of the content should be in a single line."
+  (let ((re-list
+	 '(
+	   ("<src\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</src>" lang)
+	   ("<literal\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</literal>" style)
+	   ("<example>[ \t]*\n?" "\n?[ \t]*</example>" "fundamental")
+	   ("<lisp>[ \t]*\n?" "\n?[ \t]*</lisp>" "emacs-lisp")
+	   ("<perl>[ \t]*\n?" "\n?[ \t]*</perl>" "perl")
+	   ("<python>[ \t]*\n?" "\n?[ \t]*</python>" "python")
+	   ("<ruby>[ \t]*\n?" "\n?[ \t]*</ruby>" "ruby")
+	   ("^#\\+begin_src\\( \\([^ \t\n]+\\)\\)?.*\n" "\n#\\+end_src" 2)
+	   ("^#\\+begin_example.*\n" "^#\\+end_example" "fundamental")
+	   ("^#\\+html:" "\n" "html" single-line)
+	   ("^#\\+begin_html.*\n" "\n#\\+end_html" "html")
+	   ("^#\\+begin_latex.*\n" "\n#\\+end_latex" "latex")
+	   ("^#\\+latex:" "\n" "latex" single-line)
+	   ("^#\\+begin_ascii.*\n" "\n#\\+end_ascii" "fundamental")
+	   ("^#\\+ascii:" "\n" "ascii" single-line)
+	 ))
 	(pos (point))
-	     p1)
-    (beginning-of-line 1)
-    (if (looking-at re)
-	(point)
-      (if (and (setq p1 (re-search-backward re nil t))
-	       (re-search-forward "^\\(#\\+end_src\\|[ \t]*</src\\)" nil t)
-	       (>= (point-at-eol) pos))
-	  (goto-char p1)
-	(goto-char pos)
-	nil))))
+	re beg end lang)
+    (catch 'exit
+      (while (setq entry (pop re-list))
+	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)
+	      single (nth 3 entry))
+	(save-excursion
+	  (if (or (looking-at re1)
+		  (re-search-backward re1 nil t))
+	      (progn
+		(setq beg (match-end 0) lang (org-edit-src-get-lang lang))
+		(if (and (re-search-forward re2 nil t)
+			 (>= (match-end 0) pos))
+		    (throw 'exit (list beg (match-beginning 0) lang single))))
+	    (if (or (looking-at re2)
+		    (re-search-forward re2 nil t))
+		(progn
+		  (setq end (match-beginning 0))
+		  (if (and (re-search-backward re1 nil t)
+			   (<= (match-beginning 0) pos))
+		      (throw 'exit
+			     (list (match-end 0) end
+				   (org-edit-src-get-lang lang) single)))))))))))
 
+(defun org-edit-src-get-lang (lang)
+  "Extract the src language."
+  (let ((m (match-string 0)))
+    (cond
+     ((stringp lang) lang)
+     ((integerp lang) (match-string lang))
+     ((and (eq lang lang)
+	   (string-match "\\<lang=\"\\([^ \t\n\"]+\\)\"" m))
+      (match-string 1 m))
+     ((and (eq lang lang)
+	   (string-match "\\<style=\"\\([^ \t\n\"]+\\)\"" m))
+      (match-string 1 m))
+     (t "fundamental"))))
+      
 (defun org-edit-src-exit ()
   "Exit special edit and protect problematic lines."
   (interactive)
+  (unless (buffer-base-buffer (current-buffer))
+    (error "This is not an indirect buffer, something is wrong..."))
   (unless (> (point-min) 1)
     (error "This buffer is not narrowed, something is wrong..."))
   (goto-char (point-min))
-  (while (re-search-forward (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\)") nil t)
-    (replace-match ",\\1"))
-  (when font-lock-mode
-    (font-lock-unfontify-region (point-min) (point-max)))
-  (put-text-property (point-min) (point-max) 'font-lock-fontified t)
+  (if (looking-at "[ \t\n]*\n") (replace-match ""))
+  (if (re-search-forward "\n[ \t\n]*\\'" nil t) (replace-match ""))
+  (when (org-bound-and-true-p org-edit-src-force-single-line)
+    (goto-char (point-min))
+    (while (re-search-forward "\n" nil t)
+      (replace-match " "))
+    (goto-char (point-min))
+    (if (looking-at "\\s-*") (replace-match " "))
+    (if (re-search-forward "\\s-+\\'" nil t)
+	(replace-match "")))
+  (when (org-bound-and-true-p org-edit-src-from-org-mode)
+    (goto-char (point-min))
+    (while (re-search-forward (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\)") nil t)
+      (replace-match ",\\1"))
+    (when font-lock-mode
+      (font-lock-unfontify-region (point-min) (point-max)))
+    (put-text-property (point-min) (point-max) 'font-lock-fontified t))
   (kill-buffer (current-buffer)))
 
 ;;;; Plain list items, including checkboxes
@@ -12654,11 +12710,11 @@ See the individual commands for more information."
 (defun org-edit-special ()
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
-When at the first line of an src example, call `org-edit-src-example'."
+When at the first line of an src example, call `org-edit-src-code'."
   (interactive)
   (if (org-at-table-p)
       (call-interactively 'org-table-edit-formulas)
-    (or (org-edit-src-example)
+    (or (org-edit-src-code)
 	(error "%s"
 	       (substitute-command-keys
 		"\\[org-edit-special] can do nothing useful here.")))))

@@ -1,3 +1,8 @@
+2008-05-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-find-src-example-start): Function removed.
+	(org-edit-src-find-region-and-lang): New function.
+
 2008-05-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-edit-src-exit): New function.
