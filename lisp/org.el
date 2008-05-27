@@ -12710,14 +12710,19 @@ See the individual commands for more information."
 (defun org-edit-special ()
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
-When at the first line of an src example, call `org-edit-src-code'."
+When at the first line of an src example, call `org-edit-src-code'.
+When in an #+include line, visit the include file.  Otherwise call
+`ffap' to visit the file at point."
   (interactive)
-  (if (org-at-table-p)
-      (call-interactively 'org-table-edit-formulas)
-    (or (org-edit-src-code)
-	(error "%s"
-	       (substitute-command-keys
-		"\\[org-edit-special] can do nothing useful here.")))))
+  (cond
+   ((org-at-table-p)
+    (call-interactively 'org-table-edit-formulas))
+   ((save-excursion
+      (beginning-of-line 1)
+      (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
+    (find-file (org-trim (match-string 1))))
+   ((org-edit-src-code))
+   (t (call-interactively 'ffap))))
 
 (defun org-ctrl-c-ctrl-c (&optional arg)
   "Set tags in headline, or update according to changed information at point.

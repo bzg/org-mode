@@ -56,6 +56,8 @@
 ;; the variable `org-eval-interpreters' to add more interpreters like
 ;; `perl', `python', or the `shell'.
 ;;
+;; You can edit the code snippets with "C-c '" (org-edit-src-code).
+;;
 ;; Please note that this mechanism is potentially dangerous, because it
 ;; executes code that you don't even see.  This gives you great power,
 ;; but also enough rope to hang yourself.  And, it gives your friends

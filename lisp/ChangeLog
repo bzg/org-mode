@@ -1,3 +1,8 @@
+2008-05-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-html-style): Changed the size of in the
+	<pre> element to 90%.
+
 2008-05-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-find-src-example-start): Function removed.

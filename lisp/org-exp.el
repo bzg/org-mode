@@ -464,6 +464,7 @@ Org-mode file."
 	background-color: #F3F5F7;
 	padding: 5pt;
 	font-family: courier, monospace;
+        font-size: 90%;
   }
   table { border-collapse: collapse; }
   td, th {
@@ -1359,7 +1360,7 @@ on this string to produce the exported version."
 	(while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
 	  (goto-char (match-end 0))
 	  (while (not (looking-at "#\\+END_EXAMPLE"))
-	    (insert ": ")
+	    (insert ":  ")
 	    (beginning-of-line 2)))
 	(goto-char (point-min))
 	(while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)
@@ -1755,6 +1756,9 @@ backends, it converts the segment into an EXAMPLE segment."
 	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n"))))
      (t
       ;; This is not HTML, so just make it an example.
+      (when (equal lang "org")
+	(while (string-match "^," code)
+	  (setq code (replace-match "" t t code))))
       (concat "#+BEGIN_EXAMPLE\n" code
 	      (if (string-match "\n\\'" code) "" "\n")
 	      "#+END_EXAMPLE\n")))))
