@@ -64,8 +64,8 @@ This variable can be a list of any of the following symbols:
 
 time       The time of archiving.
 file       The file where the entry originates.
-itags      The local tags, in the headline of the subtree.
-ltags      The tags the subtree inherits from further up the hierarchy.
+ltags      The local tags, in the headline of the subtree.
+itags      The tags the subtree inherits from further up the hierarchy.
 todo       The pre-archive TODO state.
 category   The category, taken from file name or #+CATEGORY lines.
 olpath     The outline path to the item.  These are all headlines above
@@ -80,7 +80,7 @@ information."
 	  (const :tag "File" file)
 	  (const :tag "Category" category)
 	  (const :tag "TODO state" todo)
-	  (const :tag "TODO state" priority)
+	  (const :tag "Priority" priority)
 	  (const :tag "Inherited tags" itags)
 	  (const :tag "Outline path" olpath)
 	  (const :tag "Local tags" ltags)))

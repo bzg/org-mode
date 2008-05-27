@@ -1,5 +1,8 @@
 2008-05-27  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-archive.el (org-archive-save-context-info): Fix bugs in
+	customization setup and docstring.
+
 	* org-exp.el (org-export-html-style): Changed the size of in the
 	<pre> element to 90%.
 
