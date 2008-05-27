@@ -13226,13 +13226,15 @@ With optional NODE, go directly to that node."
 
 ;;;; Documentation
 
+;;;###autoload
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-clock org-colview
-		     org-exp org-export-latex org-publish
+		     org-exp org-id org-export-latex org-publish
 		     org-remember org-table)))
 
+;;;###autoload
 (defun org-customize ()
   "Call the customize function with org as argument."
   (interactive)
