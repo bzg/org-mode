@@ -61,6 +61,12 @@ something.
     However, I could also have a TODO keyword criterion that could be
     used in the day entries, as one of the minor criteria.
 
+    Right now we can already sort an outline tree according to
+    children, this is nice already.  However, sorting in the agenda
+    would be nice too.  The problem is, that i the agenda we may have
+    todo lists from a number of different buffers, so the sorting
+    relation may not be clear.....
+
 ** Links
 *** WISH Variable of standard links for completion with C-c C-l
     Or something like that, to make standard links fast.
@@ -98,13 +104,8 @@ something.
 *** WISH Row formulas
     @4=.....
 
-*** TODO Write a tutorial
-    Demonstrate running averages.
-
 *** WISH Make a variable that current line should be recomputed always
    in each table, skipping headers of course.
-
-*** WISH Interactive way to get a converted table?
 
 *** BUG When computing in a narrowed column, this may go wrong.
     Computing changes fields and does not yet see correctly if the column
@@ -118,35 +119,10 @@ something.
      Declined, because I don't know how to do this.  Too many
      problems.
 *** XEmacs compatibility
-**** QUESTION Is there an issue with the coding system of HTML exported files?
-     In the code I used to have a comment saying that
-     :  (and (fboundp 'coding-system-get)
-     :       (boundp 'buffer-file-coding-system)
-     :                 buffer-file-coding-system))
-     always returns nil, implicating that setting the coding system for
-     the export buffer would not work correctly.  however, I have never
-     followed up on this and never had a bug report - so I am wondering
-     if there is an issue at all.
-  
-**** DECLINED Column view does not yet work for XEmacs.
-     Declined, because I don't know how to do this.  Too many
-     problems.
-**** DECLINED Rewrite the `format' function
-     To make narrowing work under XEmacs, I would need to write a
-     version of /format/ that does transport text properties, or I
-     would have to rework narrowing entirely.  Unlikely that this will
-     happen, mainly because it is working in Emacs and so does not
-     bother me personally so much.  Anyway, I don't know if people are
-     actually using narrowing very much at all.
-
 
 ** Exporting
 *** IDEA Convert links to footnotes for ASCII export.
-
-*** INCONSISTENCY Find a better place for formatting checkboxes
-    Right now this is being done as part of `org-html-expand', which
-    does not seem logically correct.
-
+    But the question is:  where should these footnotes be placed?
 
 ** Publishing
 
