@@ -103,7 +103,7 @@ line, and all those little foreign snippets like:
 
 This is necessary for synchronization services.  The UIDs are
 created using the the org-id.el module which is now part of the
-Or core.  If you set the variable
+Org core.  If you set the variable
 
 : (setq org-icalendar-store-UID t)
 

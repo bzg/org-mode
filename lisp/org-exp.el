@@ -1241,11 +1241,6 @@ on this string to produce the exported version."
   (interactive)
   (let* ((re-radio (and org-target-link-regexp
 			(concat "\\([^<]\\)\\(" org-target-link-regexp "\\)")))
-	 (re-plain-link (concat "\\([^[<]\\)" org-plain-link-re))
-	 (re-angle-link (concat "\\([^[]\\)" org-angle-link-re))
-	 (re-archive (concat ":" org-archive-tag ":"))
-	 (re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>"))
-	 (re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>"))
 	 (htmlp (plist-get parameters :for-html))
 	 (asciip (plist-get parameters :for-ascii))
 	 (latexp (plist-get parameters :for-LaTeX))
@@ -1253,10 +1248,9 @@ on this string to produce the exported version."
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
-	 (exp-drawers (plist-get parameters :drawers))
 	 (outline-regexp "\\*+ ")
 	 target-alist tmp target level
-	 a b xx rtn p)
+	 a b rtn p)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
@@ -1268,9 +1262,7 @@ on this string to produce the exported version."
       ;; Remove license-to-kill stuff
       ;; The caller markes some stuff fo killing, stuff that has been
       ;; used to create the page title, for example.
-      (while (setq p (text-property-any (point-min) (point-max)
-					:org-license-to-kill t))
-	(delete-region p (next-single-property-change p :org-license-to-kill)))
+      (org-export-kill-licensed-text)
 
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
@@ -1283,17 +1275,8 @@ on this string to produce the exported version."
       (org-export-replace-src-segments)
 
       ;; Get rid of drawers
-      (unless (eq t exp-drawers)
-	(goto-char (point-min))
-	(let ((re (concat "^[ \t]*:\\("
-			  (mapconcat
-			   'identity
-			   (org-delete-all exp-drawers
-					   (copy-sequence drawers))
-			   "\\|")
-			  "\\):[ \t]*\n\\([^@]*?\n\\)?[ \t]*:END:[ \t]*\n")))
-	  (while (re-search-forward re nil t)
-	    (replace-match ""))))
+      (org-export-remove-or-extract-drawers drawers
+					    (plist-get parameters :drawers))
 
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
@@ -1307,16 +1290,7 @@ on this string to produce the exported version."
 	(insert (plist-get parameters :add-text) "\n"))
 
       ;; Get rid of archived trees
-      (when (not (eq archived-trees t))
-	(goto-char (point-min))
-	(while (re-search-forward re-archive nil t)
-	  (if (not (org-on-heading-p t))
-	      (org-end-of-subtree t)
-	    (beginning-of-line 1)
-	    (setq a (if archived-trees
-			(1+ (point-at-eol)) (point))
-		  b (org-end-of-subtree t))
-	    (if (> b a) (delete-region a b)))))
+      (org-export-remove-archived-trees archived-trees)
 
       ;; Find all headings and compute the targets for them
       (goto-char (point-min))
@@ -1387,56 +1361,20 @@ on this string to produce the exported version."
 	      (delete-region (match-beginning 0) (match-end 0))))))
 
       ;; Protect quoted subtrees
-      (goto-char (point-min))
-      (while (re-search-forward re-quote nil t)
-	(goto-char (match-beginning 0))
-	(end-of-line 1)
-	(add-text-properties (point) (org-end-of-subtree t)
-			     '(org-protected t)))
+      (org-export-protect-quoted-subtrees)
 
       ;; Protect verbatim elements
-      (goto-char (point-min))
-      (while (re-search-forward org-verbatim-re nil t)
-	(add-text-properties (match-beginning 4) (match-end 4)
-			     '(org-protected t))
-	(goto-char (1+ (match-end 4))))
+      (org-export-protect-verbatim)
 
-      ;; Blockquotes
-      (goto-char (point-min))
-      (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*" nil t)
-	(replace-match (if (equal (downcase (match-string 1)) "end")
-			   "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
-			 t t))
-      ;; Verse
-      (goto-char (point-min))
-      (while (re-search-forward "^#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
-	(replace-match (if (equal (downcase (match-string 1)) "end")
-			   "ORG-VERSE-END" "ORG-VERSE-START")
-			 t t))
+      ;; Blockquotes and verse
+      (org-export-mark-blockquote-and-verse)
 
-      ;; Remove comment environment
-      (goto-char (point-min))
-      (while (re-search-forward
-	      "^#\\+BEGIN_COMMENT[ \t]*\n[^\000]*?^#\\+END_COMMENT\\>.*" nil t)
-	(replace-match "" t t))
-
-      ;; Remove subtrees that are commented
-      (goto-char (point-min))
-      (while (re-search-forward re-commented nil t)
-	(goto-char (match-beginning 0))
-	(delete-region (point) (org-end-of-subtree t)))
+      ;; Remove comment environment and comment subtrees
+      (org-export-remove-comment-blocks-and-subtrees)
 
       ;; Remove special table lines
       (when org-export-table-remove-special-lines
-	(goto-char (point-min))
-	(while (re-search-forward "^[ \t]*|" nil t)
-	  (beginning-of-line 1)
-	  (if (or (looking-at "[ \t]*| *[!_^] *|")
-		  (and (looking-at ".*?| *<[0-9]+> *|")
-		       (not (looking-at ".*?| *[^ <|]"))))
-	      (delete-region (max (point-min) (1- (point-at-bol)))
-			     (point-at-eol))
-	    (end-of-line 1))))
+	(org-export-remove-special-table-lines))
 
       ;; Specific LaTeX stuff
       (when latexp
@@ -1479,15 +1417,11 @@ on this string to produce the exported version."
 	   (replace-match "\\1[[\\2]]"))))
 
       ;; Find all links that contain a newline and put them into a single line
-      (goto-char (point-min))
-      (while (re-search-forward "\\(\\(\\[\\|\\]\\)\\[[^]]*?\\)[ \t]*\n[ \t]*\\([^]]*\\]\\(\\[\\|\\]\\)\\)" nil t)
-	(org-if-unprotected
-	 (replace-match "\\1 \\3")
-	 (goto-char (match-beginning 0))))
+      (org-export-concatenate-multiline-links)
 
       ;; Find all internal links.  If they have a fuzzy match (i.e. not
       ;; a *dedicated* target match, let the link  point to the
-      ;; correspinding section.
+      ;; corresponding section.
 
       (goto-char (point-min))
       (while (re-search-forward org-bracket-link-regexp nil t)
@@ -1524,51 +1458,178 @@ on this string to produce the exported version."
 
       ;; Normalize links: Convert angle and plain links into bracket links
       ;; Expand link abbreviations
-      (goto-char (point-min))
-      (while (re-search-forward re-plain-link nil t)
-	(goto-char (1- (match-end 0)))
-	(org-if-unprotected
-	 (let* ((s (concat (match-string 1) "[[" (match-string 2)
-			   ":" (match-string 3) "]]")))
-	   ;; added 'org-link face to links
-	   (put-text-property 0 (length s) 'face 'org-link s)
-	   (replace-match s t t))))
-      (goto-char (point-min))
-      (while (re-search-forward re-angle-link nil t)
-	(goto-char (1- (match-end 0)))
-	(org-if-unprotected
-	 (let* ((s (concat (match-string 1) "[[" (match-string 2)
-			   ":" (match-string 3) "]]")))
-	   (put-text-property 0 (length s) 'face 'org-link s)
-	   (replace-match s t t))))
-      (goto-char (point-min))
-      (while (re-search-forward org-bracket-link-regexp nil t)
-	(org-if-unprotected
-	 (let* ((s (concat "[[" (setq xx (save-match-data
-					   (org-link-expand-abbrev (match-string 1))))
-			   "]"
-			   (if (match-end 3)
-			       (match-string 2)
-			     (concat "[" xx "]"))
-			   "]")))
-	   (put-text-property 0 (length s) 'face 'org-link s)
-	   (replace-match s t t))))
+      (org-export-normalize-links)
 
       ;; Find multiline emphasis and put them into single line
-      (when (plist-get  parameters :emph-multiline)
-	(goto-char (point-min))
-	(while (re-search-forward org-emph-re nil t)
-	  (if (not (= (char-after (match-beginning 3))
-		      (char-after (match-beginning 4))))
-	      (org-if-unprotected
-	       (subst-char-in-region (match-beginning 0) (match-end 0)
-				     ?\n ?\  t)
-	       (goto-char (1- (match-end 0))))
-	    (goto-char (1+ (match-beginning 0))))))
+      (when (plist-get parameters :emph-multiline)
+	(org-export-concatenate-multiline-emphasis))
 
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
     rtn))
+
+(defun org-export-kill-licensed-text ()
+  "Remove all text that is marked with a :org-license-to-kill property."
+  (while (setq p (text-property-any (point-min) (point-max)
+				    :org-license-to-kill t))
+    (delete-region p (next-single-property-change p :org-license-to-kill))))
+
+(defun org-export-remove-or-extract-drawers (all-drawers exp-drawers)
+  "Remove drawers, or extract the content.
+ALL-DRAWERS is a list of all drawer names valid in the current buffer.
+EXP-DRAWERS can be t to keep all drawer contents, or a list of drawers
+whose content to keep."
+  (unless (eq t exp-drawers)
+    (goto-char (point-min))
+    (let ((re (concat "^[ \t]*:\\("
+		      (mapconcat
+		       'identity
+		       (org-delete-all exp-drawers
+				       (copy-sequence all-drawers))
+		       "\\|")
+		      "\\):[ \t]*\n\\([^@]*?\n\\)?[ \t]*:END:[ \t]*\n")))
+      (while (re-search-forward re nil t)
+	(replace-match "")))))
+
+(defun org-export-remove-archived-trees (export-archived-trees)
+  "Remove archived trees.
+When EXPORT-ARCHIVED-TREES is `headline;, only the headline will be exported.
+When it is t, the entire archived tree will be exported.
+When it is nil the entire tree including the headline will be removed
+from the buffer."
+  (let ((re-archive (concat ":" org-archive-tag ":"))
+	a b)
+    (when (not (eq archived-trees t))
+      (goto-char (point-min))
+      (while (re-search-forward re-archive nil t)
+	(if (not (org-on-heading-p t))
+	    (org-end-of-subtree t)
+	  (beginning-of-line 1)
+	  (setq a (if archived-trees
+		      (1+ (point-at-eol)) (point))
+		b (org-end-of-subtree t))
+	  (if (> b a) (delete-region a b)))))))
+
+(defun org-export-protect-quoted-subtrees ()
+  "Mark quoted subtrees with the protection property."
+  (let ((re-quote (concat "^\\*+[ \t]+" org-quote-string "\\>")))
+    (goto-char (point-min))
+    (while (re-search-forward re-quote nil t)
+      (goto-char (match-beginning 0))
+      (end-of-line 1)
+      (add-text-properties (point) (org-end-of-subtree t)
+			   '(org-protected t)))))
+
+(defun org-export-protect-verbatim ()
+  "Mark verbatim snippets with the protection property."
+  (goto-char (point-min))
+  (while (re-search-forward org-verbatim-re nil t)
+    (add-text-properties (match-beginning 4) (match-end 4)
+			 '(org-protected t))
+    (goto-char (1+ (match-end 4)))))
+
+(defun org-export-mark-blockquote-and-verse ()
+  "Mark block quote and verse environments with special cookies.
+These special cookies will later be interpreted by the backend."
+  ;; Blockquotes
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*"
+			    nil t)
+    (replace-match (if (equal (downcase (match-string 1)) "end")
+		       "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
+		   t t))
+  ;; Verse
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
+    (replace-match (if (equal (downcase (match-string 1)) "end")
+		       "ORG-VERSE-END" "ORG-VERSE-START")
+		   t t)))
+
+(defun org-export-remove-comment-blocks-and-subtrees ()
+  "Remove the comment environment, and also commented subtrees."
+  (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>")))
+    ;; Remove comment environment
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "^#\\+BEGIN_COMMENT[ \t]*\n[^\000]*?^#\\+END_COMMENT\\>.*" nil t)
+      (replace-match "" t t))
+    ;; Remove subtrees that are commented
+    (goto-char (point-min))
+    (while (re-search-forward re-commented nil t)
+      (goto-char (match-beginning 0))
+      (delete-region (point) (org-end-of-subtree t)))))
+
+(defun org-export-remove-special-table-lines ()
+  "Remove tables lines that are used for internal purposes."
+  (goto-char (point-min))
+  (while (re-search-forward "^[ \t]*|" nil t)
+    (beginning-of-line 1)
+    (if (or (looking-at "[ \t]*| *[!_^] *|")
+	    (and (looking-at ".*?| *<[0-9]+> *|")
+		 (not (looking-at ".*?| *[^ <|]"))))
+	(delete-region (max (point-min) (1- (point-at-bol)))
+		       (point-at-eol))
+      (end-of-line 1))))
+
+(defun org-export-normalize-links ()
+  "Convert all links to bracket links, and expand link abbreviations."
+  (let ((re-plain-link (concat "\\([^[<]\\)" org-plain-link-re))
+	(re-angle-link (concat "\\([^[]\\)" org-angle-link-re)))
+    (goto-char (point-min))
+    (while (re-search-forward re-plain-link nil t)
+      (goto-char (1- (match-end 0)))
+      (org-if-unprotected
+       (let* ((s (concat (match-string 1) "[[" (match-string 2)
+			 ":" (match-string 3) "]]")))
+	 ;; added 'org-link face to links
+	 (put-text-property 0 (length s) 'face 'org-link s)
+	 (replace-match s t t))))
+    (goto-char (point-min))
+    (while (re-search-forward re-angle-link nil t)
+      (goto-char (1- (match-end 0)))
+      (org-if-unprotected
+       (let* ((s (concat (match-string 1) "[[" (match-string 2)
+			 ":" (match-string 3) "]]")))
+	 (put-text-property 0 (length s) 'face 'org-link s)
+	 (replace-match s t t))))
+    (goto-char (point-min))
+    (while (re-search-forward org-bracket-link-regexp nil t)
+      (org-if-unprotected
+       (let* ((xx (save-match-data
+		    (org-link-expand-abbrev (match-string 1))))
+	      (s (concat
+		  "[[" xx "]"
+		  (if (match-end 3)
+		      (match-string 2)
+		    (concat "[" xx "]"))
+		  "]")))
+	 (put-text-property 0 (length s) 'face 'org-link s)
+	 (replace-match s t t))))))
+  
+(defun org-export-concatenate-multiline-links ()
+  "Find multi-line links and put it all into a single line.
+This is to make sure that the line-processing export backends
+can work correctly."
+  (goto-char (point-min))
+  (while (re-search-forward "\\(\\(\\[\\|\\]\\)\\[[^]]*?\\)[ \t]*\n[ \t]*\\([^]]*\\]\\(\\[\\|\\]\\)\\)" nil t)
+    (org-if-unprotected
+     (replace-match "\\1 \\3")
+     (goto-char (match-beginning 0)))))
+
+
+(defun org-export-concatenate-multiline-emphasis ()
+  "Find multi-line emphasis and put it all into a single line.
+This is to make sure that the line-processing export backends
+can work correctly."
+  (goto-char (point-min))
+  (while (re-search-forward org-emph-re nil t)
+    (if (not (= (char-after (match-beginning 3))
+		(char-after (match-beginning 4))))
+	(org-if-unprotected
+	 (subst-char-in-region (match-beginning 0) (match-end 0)
+			       ?\n ?\  t)
+	 (goto-char (1- (match-end 0))))
+      (goto-char (1+ (match-beginning 0))))))
 
 (defun org-export-grab-title-from-buffer ()
   "Get a title for the current document, from looking at the buffer."
@@ -2666,9 +2727,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (setq infixed t)
 	      (insert "<pre>\n"))
 	    (insert (org-html-protect (match-string 1 line)) "\n")
-	    (when (and lines
-		       (not (string-match "^[ \t]*\\(:.*\\)"
-					  (car lines))))
+	    (when (or (not lines)
+		      (not (string-match "^[ \t]*\\(:.*\\)"
+					 (car lines))))
 	      (setq infixed nil)
 	      (insert "</pre>\n"))
 	    (throw 'nextline nil))
