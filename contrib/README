@@ -12,10 +12,12 @@ LISP (emacs-lisp code)
 
 org-annotate-file.el     --- Annotate a file with org syntax
 org-annotation-helper.el --- Call remember directly from Firefox/Opera
+org-bookmark.el          --- Links to bookmarks
 org-depend.el            --- TODO dependencies for Org-mode
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval.el              --- The <lisp> tag, adapted from Muse
 org-expiry.el 	         --- expiry mechanism for Org entries
+org-indent.el            --- Dynamic outline indentation (does not really work)
 org-interactive-query.el --- Interactive modification of tags query
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
 org-man.el 	         --- Support for links to manpages in Org-mode

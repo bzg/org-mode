@@ -89,7 +89,8 @@ Software Foundation raise funds for GNU development.''
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
-* Extensions and Hacking::      It is possible to write add-on code
+* Extionsions::                 
+* Hacking::                     
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
@@ -352,9 +353,13 @@ Interaction with other packages
 * Cooperation::                 Packages Org cooperates with
 * Conflicts::                   Packages that lead to conflicts
 
-Extensions, Hooks and Hacking
+Extensions
 
-* Extensions::                  Existing 3rd-party extensions
+* Extensions in the contrib directory::  These come with the Org distro
+* Other extensions::            These you have to find on the web.
+
+Hacking
+
 * Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
@@ -7879,7 +7884,7 @@ Org uses timestamps to track when a file has changed. The above
 functions normally only publish changed files. You can override this and
 force publishing of all files by giving a prefix argument.
 
-@node Miscellaneous, Extensions and Hacking, Publishing, Top
+@node Miscellaneous, Extionsions, Publishing, Top
 @chapter Miscellaneous
 
 @menu
@@ -8485,15 +8490,95 @@ The exporters work well, but could be made more efficient.
 @end itemize
 
 
-@node Extensions and Hacking, History and Acknowledgments, Miscellaneous, Top
-@appendix Extensions, Hooks and Hacking
+@node Extionsions, Hacking, Miscellaneous, Top
+@appendix Extensions
 
-This appendix lists extensions for Org written by other authors.
-It also covers some aspects where users can extend the functionality of
+This appendix lists the extension modules that have been written for Org.
+Many of these extensions live in the @file{contrib} directory of the Org
+distribution, others are available somewhere on the web.
+
+@menu
+* Extensions in the contrib directory::  These come with the Org distro
+* Other extensions::            These you have to find on the web.
+@end menu
+
+@node Extensions in the contrib directory, Other extensions, Extionsions, Extionsions
+@section Extensions in the @file{contrib} directory
+
+@table @asis
+@item @file{org-annotate-file.el} by @i{Philip Jackson}
+      Annotate a file with org syntax, in a separate file, with links back to
+      the annotated file.
+@item @file{org-annotation-helper.el} by @i{Bastien Guerry and Daniel E. German} 
+      Call @i{remember} directly from Firefox/Opera, or from Adobe Reader.
+      When activating a special link or bookmark, Emacs receives a trigger to
+      create a note with a link back to the website.  Requires some setup, a
+      detailes description is in
+      @file{contrib/packages/org-annotation-helper}.
+@item @file{org-bookmark.el} by @i{Tokuya Kameshima}
+      Support for links to Emacs bookmarks.
+@item @file{org-depend.el} by @i{Carsten Dominik}
+      TODO dependencies for Org-mode.  Make TODO state changes in one entry
+      trigger changes in another, or be blocked by the state of another
+      entry.  Also, easily create chains of TODO items with exactly one
+      active item at any time.
+@item @file{org-elisp-symbol.el} by @i{Bastien Guerry}
+      Org links to emacs-lisp symbols.  This can create annotated links that
+      exactly point to the definition location of a variable of function.
+@item @file{org-eval.el} by @i{Carsten Dominik}
+      The @code{<lisp>} tag, adapted from Emacs Wiki and Emacs Muse, allows
+      to include text in a document that is the result of evaluating some
+      code.  Other scripting languages like @code{perl} can be supported with
+      this package as well.
+@item @file{org-expiry.el} by @i{Bastien Guerry}
+      Expiry mechanism for Org entries.
+@item @file{org-indent.el} by @i{Carsten Dominik}
+      Dynamic indentation of Org outlines.  The plan is to indent an outline
+      according to level, but so far this is too hard for a proper and stable
+      implementation.  Still, it works somewhat.
+@item @file{org-interactive-query.el} by @i{Christopher League}
+      Interactive modification of tags queries.  After running a general
+      query in Org, this package allows to narrow down the results by adding
+      more tags or keywords.
+@item @file{org-mairix.el} by @i{Georg C. F. Greve}
+      Hook mairix search into Org for different MUAs.
+@item @file{org-man.el} by @i{Carsten Dominik}
+      Support for links to manpages in Org-mode.
+@item @file{org-mtags.el} by @i{Carsten Dominik}
+      Support for some Muse-like tags in Org-mode.  This package allows you
+      to write @code{<example>} and @code{<src>} and other syntax copied from
+      Emacs Muse, right inside an Org file.  The goal here is to make it easy
+      to publish the same file using either org-publish or Muse.
+@item @file{org-panel.el} by @i{Lennard Borgman}
+      Simplified and display-aided access to some Org commands.
+@item @file{org-registry.el} by @i{Bastien Guerry}
+      A registry for Org links, to find out from where links point to a given
+      file or location.
+@item @file{org2rem.el} by @i{Bastien Guerry}
+      Convert org appointments into reminders for the @file{remind} program.
+@item @file{org-screen.el} by @i{Andrew Hyatt}
+      Visit screen sessions through Org-mode links.
+@item @file{org-toc.el} by @i{Bastien Guerry}
+      Table of contents in a separate buffer, with fast access to sections
+      and easy visibility cycling.
+@item @file{orgtbl-sqlinsert.el} by @i{Jason Riedy}
+      Convert Org-mode tables to SQL insertions.  Documentation for this can
+      be found on the Worg pages.
+@end table
+
+
+@node Other extensions,  , Extensions in the contrib directory, Extionsions
+@section Other extensions
+
+@i{TO BE DONE}
+
+@node Hacking, History and Acknowledgments, Extionsions, Top
+@appendix Hacking
+
+This appendix covers some aspects where users can extend the functionality of
 Org.
 
 @menu
-* Extensions::                  Existing 3rd-party extensions
 * Adding hyperlink types::      New custom link types
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
@@ -8501,17 +8586,7 @@ Org.
 * Using the property API::      Writing programs that use entry properties
 @end menu
 
-@node Extensions, Adding hyperlink types, Extensions and Hacking, Extensions and Hacking
-@section Third-party extensions for Org
-@cindex extension, third-party
-
-There are lots of extensions that have been written by other people.  Most of
-them have either been integrated into Org by now, or they can be found in the
-Org distribution, in the @file{contrib} directory.  The list has gotten too
-long to cover in any detail here, but there is a seaparate manual for these
-extensions.
-
-@node Adding hyperlink types, Tables in arbitrary syntax, Extensions, Extensions and Hacking
+@node Adding hyperlink types, Tables in arbitrary syntax, Hacking, Hacking
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
@@ -8608,7 +8683,7 @@ can also set the @code{:description} property to provide a default for
 the link description when the link is later inserted into an Org
 buffer with @kbd{C-c C-l}.
 
-@node Tables in arbitrary syntax, Dynamic blocks, Adding hyperlink types, Extensions and Hacking
+@node Tables in arbitrary syntax, Dynamic blocks, Adding hyperlink types, Hacking
 @section Tables and lists in arbitrary syntax
 @cindex tables, in other modes
 @cindex lists, in other modes
@@ -8934,7 +9009,7 @@ La@TeX{} file:
 Pressing `C-c C-c' on @code{a new house} and will insert the converted
 La@TeX{} list between the two marker lines.
 
-@node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Extensions and Hacking
+@node Dynamic blocks, Special agenda views, Tables in arbitrary syntax, Hacking
 @section Dynamic blocks
 @cindex dynamic blocks
 
@@ -8999,7 +9074,7 @@ example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way that is does nothing in buffers that are not in
 @code{org-mode}.
 
-@node Special agenda views, Using the property API, Dynamic blocks, Extensions and Hacking
+@node Special agenda views, Using the property API, Dynamic blocks, Hacking
 @section Special agenda views
 @cindex agenda views, user-defined
 
@@ -9081,7 +9156,7 @@ like this, even without defining a special function:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
-@node Using the property API,  , Special agenda views, Extensions and Hacking
+@node Using the property API,  , Special agenda views, Hacking
 @section Using the property API
 @cindex API, for properties
 @cindex properties, API
@@ -9139,7 +9214,7 @@ Treat the value of the property PROPERTY as a whitespace-separated list of
 values and check if VALUE is in this list.
 @end defun
 
-@node History and Acknowledgments, Main Index, Extensions and Hacking, Top
+@node History and Acknowledgments, Main Index, Hacking, Top
 @appendix History and Acknowledgments
 @cindex acknowledgments
 @cindex history
