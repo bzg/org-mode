@@ -1,5 +1,25 @@
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-ascii-preprocess): Renamed from
+	`org-export-ascii-clean-string'.
+	(org-export-kill-licensed-text)
+	(org-export-define-heading-targets)
+	(org-export-handle-invisible-targets)
+	(org-export-target-internal-links)
+	(org-export-remove-or-extract-drawers)
+	(org-export-remove-archived-trees)
+	(org-export-protect-quoted-subtrees)
+	(org-export-protect-verbatim, org-export-protect-examples)
+	(org-export-select-backend-specific-text)
+	(org-export-mark-blockquote-and-verse)
+	(org-export-remove-comment-blocks-and-subtrees)
+	(org-export-handle-comments, org-export-mark-radio-links)
+	(org-export-remove-special-table-lines)
+	(org-export-normalize-links)
+	(org-export-concatenate-multiline-links)
+	(org-export-concatenate-multiline-emphasis): New functions,
+	obtained from spliiting the export preprocessor.
+
 	* org-table.el (org-table-recalculate): Improve error message if
 	the row number is invalid.
 

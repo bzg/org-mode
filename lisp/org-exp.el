@@ -1239,18 +1239,14 @@ to export.  It then creates a temporary buffer where it does its job.
 The result is then again returned as a string, and the exporter works
 on this string to produce the exported version."
   (interactive)
-  (let* ((re-radio (and org-target-link-regexp
-			(concat "\\([^<]\\)\\(" org-target-link-regexp "\\)")))
-	 (htmlp (plist-get parameters :for-html))
+  (let* ((htmlp (plist-get parameters :for-html))
 	 (asciip (plist-get parameters :for-ascii))
 	 (latexp (plist-get parameters :for-LaTeX))
-	 (commentsp (plist-get parameters :comments))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
 	 (outline-regexp "\\*+ ")
-	 target-alist tmp target level
-	 a b rtn p)
+	 target-alist rtn)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
@@ -1263,21 +1259,21 @@ on this string to produce the exported version."
       ;; The caller markes some stuff fo killing, stuff that has been
       ;; used to create the page title, for example.
       (org-export-kill-licensed-text)
-
+      
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
       (untabify (point-min) (point-max))
-
+      
       ;; Handle incude files
       (org-export-handle-include-files)
-
+      
       ;; Handle source code snippets
       (org-export-replace-src-segments)
-
+      
       ;; Get rid of drawers
       (org-export-remove-or-extract-drawers drawers
 					    (plist-get parameters :drawers))
-
+      
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
 	(goto-char (point-min))
@@ -1288,77 +1284,23 @@ on this string to produce the exported version."
       (when (plist-get parameters :add-text)
 	(goto-char (point-min))
 	(insert (plist-get parameters :add-text) "\n"))
-
+      
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
-
+      
       ;; Find all headings and compute the targets for them
-      (goto-char (point-min))
-      (org-init-section-numbers)
-      (let ((re (concat "^" org-outline-regexp)))
-	(while (re-search-forward re nil t)
-	  (setq level (org-reduced-level
-		       (save-excursion (goto-char (point-at-bol))
-				       (org-outline-level))))
-	  (setq target (org-solidify-link-text
-			(format "sec-%s" (org-section-number level))))
-	  (push (cons target target) target-alist)
-	  (add-text-properties
-	   (point-at-bol) (point-at-eol)
-	   (list 'target target))))
+      (setq target-alist (org-export-define-heading-targets target-alist))
 
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
-      (goto-char (point-min))
-      (while (re-search-forward "^#.*?\\(<<<?\\([^>\r\n]+\\)>>>?\\).*" nil t)
-	;; Check if the line before or after is a headline with a target
-	(if (setq target (or (get-text-property (point-at-bol 0) 'target)
-			     (get-text-property (point-at-bol 2) 'target)))
-	    (progn
-	      ;; use the existing target in a neighboring line
-	      (setq tmp (match-string 2))
-	      (replace-match "")
-	      (and (looking-at "\n") (delete-char 1))
-	      (push (cons (org-solidify-link-text tmp) target)
-		    target-alist))
-	  ;; Make an invisible target
-	  (replace-match "\\1(INVISIBLE)")))
+      (setq target-alist (org-export-handle-invisible-targets target-alist))
+
+      ;; Protect examples
+      (org-export-protect-examples)
 
       ;; Protect backend specific stuff, throw away the others.
-      (let ((formatters
-	     `((,htmlp "HTML" "BEGIN_HTML" "END_HTML")
-	       (,asciip "ASCII" "BEGIN_ASCII" "END_ASCII")
-	       (,latexp "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
-	    fmt)
-	(goto-char (point-min))
-	(while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
-	  (goto-char (match-end 0))
-	  (while (not (looking-at "#\\+END_EXAMPLE"))
-	    (insert ":  ")
-	    (beginning-of-line 2)))
-	(goto-char (point-min))
-	(while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)
-	  (add-text-properties (match-beginning 0) (match-end 0)
-			       '(org-protected t)))
-	(while formatters
-	  (setq fmt (pop formatters))
-	  (when (car fmt)
-	    (goto-char (point-min))
-	    (while (re-search-forward (concat "^#\\+" (cadr fmt)
-					      ":[ \t]*\\(.*\\)") nil t)
-	      (replace-match "\\1" t)
-	      (add-text-properties
-	       (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	       '(org-protected t))))
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  (concat "^#\\+"
-			  (caddr fmt) "\\>.*\\(\\(\n.*\\)*?\n\\)#\\+"
-			  (cadddr fmt) "\\>.*\n?") nil t)
-	    (if (car fmt)
-		(add-text-properties (match-beginning 1) (1+ (match-end 1))
-				     '(org-protected t))
-	      (delete-region (match-beginning 0) (match-end 0))))))
+      (org-export-select-backend-specific-text
+       (cond (htmlp 'html) (latexp 'latex) (asciip 'ascii)))
 
       ;; Protect quoted subtrees
       (org-export-protect-quoted-subtrees)
@@ -1381,40 +1323,19 @@ on this string to produce the exported version."
 	(require 'org-export-latex nil)
 	(org-export-latex-preprocess))
 
+      ;; Specific ASCII stuff
       (when asciip
-	(org-export-ascii-clean-string))
+	(org-export-ascii-preprocess))
 
       ;; Specific HTML stuff
       (when htmlp
-	;; Convert LaTeX fragments to images
-	(when (plist-get parameters :LaTeX-fragments)
-	  (org-format-latex
-	   (concat "ltxpng/" (file-name-sans-extension
-			      (file-name-nondirectory
-			       org-current-export-file)))
-	   org-current-export-dir nil "Creating LaTeX image %s"))
-	(message "Exporting..."))
+	(org-export-html-preprocess parameters))
 
       ;; Remove or replace comments
-      (goto-char (point-min))
-      (while (re-search-forward "^#\\(.*\n?\\)" nil t)
-	(setq pos (match-beginning 0))
-	(if commentsp
-	    (progn (add-text-properties
-		    (match-beginning 0) (match-end 0) '(org-protected t))
-		   (replace-match (format commentsp (match-string 1)) t t))
-	  (goto-char (1+ pos))
-	  (org-if-unprotected
-	   (replace-match "")
-	   (goto-char (max (point-min) (1- pos))))
-	  (end-of-line 1)))
+      (org-export-handle-comments (plist-get parameters :comments))
 
       ;; Find matches for radio targets and turn them into internal links
-      (goto-char (point-min))
-      (when re-radio
-	(while (re-search-forward re-radio nil t)
-	  (org-if-unprotected
-	   (replace-match "\\1[[\\2]]"))))
+      (org-export-mark-radio-links)
 
       ;; Find all links that contain a newline and put them into a single line
       (org-export-concatenate-multiline-links)
@@ -1422,42 +1343,10 @@ on this string to produce the exported version."
       ;; Find all internal links.  If they have a fuzzy match (i.e. not
       ;; a *dedicated* target match, let the link  point to the
       ;; corresponding section.
-
-      (goto-char (point-min))
-      (while (re-search-forward org-bracket-link-regexp nil t)
-	(org-if-unprotected
-	 (let* ((md (match-data))
-		(desc (match-end 2))
-		(link (org-link-unescape (match-string 1)))
-		(slink (org-solidify-link-text link))
-		found props pos
-		(target
-		 (or (cdr (assoc slink target-alist))
-		     (save-excursion
-		       (unless (string-match org-link-types-re link)
-			 (setq found (condition-case nil (org-link-search link)
-				       (error nil)))
-			 (when (and found
-				    (or (org-on-heading-p)
-					(not (eq found 'dedicated))))
-			   (or (get-text-property (point) 'target)
-			       (get-text-property
-				(max (point-min)
-				     (1- (previous-single-property-change
-					  (point) 'target)))
-				'target))))))))
-	   (when target
-	     (set-match-data md)
-	     (goto-char (match-beginning 1))
-	     (setq props (text-properties-at (point)))
-	     (delete-region (match-beginning 1) (match-end 1))
-	     (setq pos (point))
-	     (insert target)
-	     (unless desc (insert "][" link))
-	     (add-text-properties pos (point) props)))))
+      (org-export-target-internal-links target-alist)
 
       ;; Normalize links: Convert angle and plain links into bracket links
-      ;; Expand link abbreviations
+      ;; and expand link abbreviations
       (org-export-normalize-links)
 
       ;; Find multiline emphasis and put them into single line
@@ -1470,9 +1359,86 @@ on this string to produce the exported version."
 
 (defun org-export-kill-licensed-text ()
   "Remove all text that is marked with a :org-license-to-kill property."
-  (while (setq p (text-property-any (point-min) (point-max)
-				    :org-license-to-kill t))
-    (delete-region p (next-single-property-change p :org-license-to-kill))))
+  (let (p)
+    (while (setq p (text-property-any (point-min) (point-max)
+				      :org-license-to-kill t))
+      (delete-region p (next-single-property-change p :org-license-to-kill)))))
+
+(defun org-export-define-heading-targets (target-alist)
+  "Find all headings and define the targets for them.
+The new targets are added to TARGET-ALIST, which is also returned."
+  (goto-char (point-min))
+  (org-init-section-numbers)
+  (let ((re (concat "^" org-outline-regexp))
+	level target)
+    (while (re-search-forward re nil t)
+      (setq level (org-reduced-level
+		   (save-excursion (goto-char (point-at-bol))
+				   (org-outline-level))))
+      (setq target (org-solidify-link-text
+		    (format "sec-%s" (org-section-number level))))
+      (push (cons target target) target-alist)
+      (add-text-properties
+       (point-at-bol) (point-at-eol)
+       (list 'target target))))
+  target-alist)
+
+(defun org-export-handle-invisible-targets (target-alist)
+  "Find targets in comments and move them out of comments.
+Mark them as invisible targets."
+  (let (target tmp)
+    (goto-char (point-min))
+    (while (re-search-forward "^#.*?\\(<<<?\\([^>\r\n]+\\)>>>?\\).*" nil t)
+      ;; Check if the line before or after is a headline with a target
+      (if (setq target (or (get-text-property (point-at-bol 0) 'target)
+			   (get-text-property (point-at-bol 2) 'target)))
+	  (progn
+	    ;; use the existing target in a neighboring line
+	    (setq tmp (match-string 2))
+	    (replace-match "")
+	    (and (looking-at "\n") (delete-char 1))
+	    (push (cons (org-solidify-link-text tmp) target)
+		  target-alist))
+	;; Make an invisible target
+	(replace-match "\\1(INVISIBLE)"))))
+  target-alist)
+
+(defun org-export-target-internal-links (target-alist)
+  "Find all internal links and assign target to them.
+If a link has a fuzzy match (i.e. not a *dedicated* target match),
+let the link  point to the corresponding section."
+  (goto-char (point-min))
+  (while (re-search-forward org-bracket-link-regexp nil t)
+    (org-if-unprotected
+     (let* ((md (match-data))
+	    (desc (match-end 2))
+	    (link (org-link-unescape (match-string 1)))
+	    (slink (org-solidify-link-text link))
+	    found props pos
+	    (target
+	     (or (cdr (assoc slink target-alist))
+		 (save-excursion
+		   (unless (string-match org-link-types-re link)
+		     (setq found (condition-case nil (org-link-search link)
+				   (error nil)))
+		     (when (and found
+				(or (org-on-heading-p)
+				    (not (eq found 'dedicated))))
+		       (or (get-text-property (point) 'target)
+			   (get-text-property
+			    (max (point-min)
+				 (1- (previous-single-property-change
+				      (point) 'target)))
+			    'target))))))))
+       (when target
+	 (set-match-data md)
+	 (goto-char (match-beginning 1))
+	 (setq props (text-properties-at (point)))
+	 (delete-region (match-beginning 1) (match-end 1))
+	 (setq pos (point))
+	 (insert target)
+	 (unless desc (insert "][" link))
+	 (add-text-properties pos (point) props))))))
 
 (defun org-export-remove-or-extract-drawers (all-drawers exp-drawers)
   "Remove drawers, or extract the content.
@@ -1499,13 +1465,13 @@ When it is nil the entire tree including the headline will be removed
 from the buffer."
   (let ((re-archive (concat ":" org-archive-tag ":"))
 	a b)
-    (when (not (eq archived-trees t))
+    (when (not (eq export-archived-trees t))
       (goto-char (point-min))
       (while (re-search-forward re-archive nil t)
 	(if (not (org-on-heading-p t))
 	    (org-end-of-subtree t)
 	  (beginning-of-line 1)
-	  (setq a (if archived-trees
+	  (setq a (if export-archived-trees
 		      (1+ (point-at-eol)) (point))
 		b (org-end-of-subtree t))
 	  (if (> b a) (delete-region a b)))))))
@@ -1527,6 +1493,49 @@ from the buffer."
     (add-text-properties (match-beginning 4) (match-end 4)
 			 '(org-protected t))
     (goto-char (1+ (match-end 4)))))
+
+(defun org-export-protect-examples ()
+  "Protect code that should be exported as monospaced examples."
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
+    (goto-char (match-end 0))
+    (while (not (looking-at "#\\+END_EXAMPLE"))
+      (insert ":  ")
+      (beginning-of-line 2)))
+  (goto-char (point-min))
+  (while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)
+    (add-text-properties (match-beginning 0) (match-end 0)
+			 '(org-protected t))))
+
+(defun org-export-select-backend-specific-text (backend)
+  (let ((formatters
+	 '((html "HTML" "BEGIN_HTML" "END_HTML")
+	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
+	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
+	fmt)
+
+    (while formatters
+      (setq fmt (pop formatters))
+      (when (eq (car fmt) backend)
+	;; This is selected code, put it into the file for real
+	(goto-char (point-min))
+	(while (re-search-forward (concat "^#\\+" (cadr fmt)
+					  ":[ \t]*\\(.*\\)") nil t)
+	  (replace-match "\\1" t)
+	  (add-text-properties
+	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
+	   '(org-protected t))))
+      (goto-char (point-min))
+      (while (re-search-forward
+	      (concat "^#\\+"
+		      (caddr fmt) "\\>.*\\(\\(\n.*\\)*?\n\\)#\\+"
+		      (cadddr fmt) "\\>.*\n?") nil t)
+	(if (eq (car fmt) backend)
+	    ;; yes, keep this
+	    (add-text-properties (match-beginning 1) (1+ (match-end 1))
+				 '(org-protected t))
+	  ;; No, this is for a different backend, kill it
+	  (delete-region (match-beginning 0) (match-end 0)))))))
 
 (defun org-export-mark-blockquote-and-verse ()
   "Mark block quote and verse environments with special cookies.
@@ -1558,6 +1567,34 @@ These special cookies will later be interpreted by the backend."
     (while (re-search-forward re-commented nil t)
       (goto-char (match-beginning 0))
       (delete-region (point) (org-end-of-subtree t)))))
+
+(defun org-export-handle-comments (commentsp)
+  "Remove comments, or convert to backend-specific format.
+COMMENTSP can be a format string for publishing comments.
+When it is nit, all comments will be removed."
+  (let (pos)
+    (goto-char (point-min))
+    (while (re-search-forward "^#\\(.*\n?\\)" nil t)
+      (setq pos (match-beginning 0))
+      (if commentsp
+	  (progn (add-text-properties
+		  (match-beginning 0) (match-end 0) '(org-protected t))
+		 (replace-match (format commentsp (match-string 1)) t t))
+	(goto-char (1+ pos))
+	(org-if-unprotected
+	 (replace-match "")
+	 (goto-char (max (point-min) (1- pos))))
+	(end-of-line 1)))))
+
+(defun org-export-mark-radio-links ()
+  "Find all matches for radio targets and turn them into internal links."
+  (let ((re-radio (and org-target-link-regexp
+		       (concat "\\([^<]\\)\\(" org-target-link-regexp "\\)"))))
+    (goto-char (point-min))
+    (when re-radio
+      (while (re-search-forward re-radio nil t)
+	(org-if-unprotected
+	 (replace-match "\\1[[\\2]]"))))))
 
 (defun org-export-remove-special-table-lines ()
   "Remove tables lines that are used for internal purposes."
@@ -1615,7 +1652,6 @@ can work correctly."
     (org-if-unprotected
      (replace-match "\\1 \\3")
      (goto-char (match-beginning 0)))))
-
 
 (defun org-export-concatenate-multiline-emphasis ()
   "Find multi-line emphasis and put it all into a single line.
@@ -2097,7 +2133,7 @@ underlined headlines.  The default is 3."
 	(goto-char beg)))
     (goto-char (point-min))))
 
-(defun org-export-ascii-clean-string ()
+(defun org-export-ascii-preprocess ()
   "Do extra work for ASCII export"
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
@@ -2319,6 +2355,16 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-archive-location
    "org file:~/org/%s.org"
    ))
+
+(defun org-export-html-preprocess (parameters)
+  ;; Convert LaTeX fragments to images
+  (when (plist-get parameters :LaTeX-fragments)
+    (org-format-latex
+     (concat "ltxpng/" (file-name-sans-extension
+			(file-name-nondirectory
+			 org-current-export-file)))
+     org-current-export-dir nil "Creating LaTeX image %s"))
+  (message "Exporting..."))
 
 ;;;###autoload
 (defun org-insert-export-options-template ()

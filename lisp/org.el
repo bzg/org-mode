@@ -5335,6 +5335,8 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 
 (defvar org-exit-edit-mode-map (make-sparse-keymap))
 (define-key org-exit-edit-mode-map "\C-c'" 'org-edit-src-exit)
+(defvar org-edit-src-force-single-line nil)
+(defvar org-edit-src-from-org-mode nil)
 
 (define-minor-mode org-exit-edit-mode
   "Minor mode installing a single key binding, \"C-c '\" to exit special edit.")
@@ -5351,7 +5353,7 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
 	(info (org-edit-src-find-region-and-lang))
 	(org-mode-p (eq major-mode 'org-mode))
-	beg end lang single)
+	beg end lang lang-f single)
     (if (not info)
 	nil
       (setq beg (nth 0 info)
@@ -5406,7 +5408,7 @@ the language, a switch telling of the content should be in a single line."
 	   ("^#\\+ascii:" "\n" "ascii" single-line)
 	 ))
 	(pos (point))
-	re beg end lang)
+	re re1 re2 single beg end lang)
     (catch 'exit
       (while (setq entry (pop re-list))
 	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)
