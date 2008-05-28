@@ -1,3 +1,8 @@
+2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-table.el (org-table-recalculate): Improve error message if
+	the row number is invalid.
+
 2008-05-27  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-archive.el (org-archive-save-context-info): Fix bugs in

@@ -2376,7 +2376,7 @@ With prefix arg ALL, do this for all lines in the table."
       (goto-char beg)
       (and all (message "Re-applying formulas to full table..."))
 
-      ;; First find the named fields, and mark them untouchanble
+      ;; First find the named fields, and mark them untouchable
       (remove-text-properties beg end '(org-untouchable t))
       (while (setq eq (pop eqlname))
 	(setq name (car eq)
@@ -2384,8 +2384,11 @@ With prefix arg ALL, do this for all lines in the table."
 	(and (not a)
 	     (string-match "@\\([0-9]+\\)\\$\\([0-9]+\\)" name)
 	     (setq a (list name
-			   (aref org-table-dlines
-				 (string-to-number (match-string 1 name)))
+			   (condition-case nil
+			       (aref org-table-dlines
+				     (string-to-number (match-string 1 name)))
+			     (error (error "Invalid row number in %s"
+					   name)))
 			   (string-to-number (match-string 2 name)))))
 	(when (and a (or all (equal (nth 1 a) thisline)))
 	  (message "Re-applying formula to field: %s" name)
