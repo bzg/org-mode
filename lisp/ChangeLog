@@ -1,5 +1,10 @@
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-columns-remove-prefix-from-item): New
+	option.
+
+	* org-colview.el (org-agenda-columns-cleanu-item): New function.
+
 	* org-exp.el (org-export-ascii-preprocess): Renamed from
 	`org-export-ascii-clean-string'.
 	(org-export-kill-licensed-text)

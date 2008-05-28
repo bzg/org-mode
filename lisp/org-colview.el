@@ -139,6 +139,8 @@ This is the compiled version of the format.")
 		       'default))
 	 (color (list :foreground (face-attribute ref-face :foreground)))
 	 (face (list color 'org-column ref-face))
+	 (pl (get-text-property (point-at-bol) 'prefix-length))
+	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
 	 pom property ass width f string ov column val modval)
     ;; Check if the entry is in another buffer.
     (unless props
@@ -164,7 +166,11 @@ This is the compiled version of the format.")
 	    f (format "%%-%d.%ds | " width width)
 	    val (or (cdr ass) "")
 	    modval (if (equal property "ITEM")
-		       (org-columns-cleanup-item val org-columns-current-fmt-compiled))
+		       (if (org-mode-p)
+			   (org-columns-cleanup-item
+			    val org-columns-current-fmt-compiled)
+			 (org-agenda-columns-cleanu-item
+			  val pl cphr org-columns-current-fmt-compiled)))
 	    string (format f (or modval val)))
       ;; Create the overlay
       (org-unmodified
@@ -279,6 +285,18 @@ for the duration of the command.")
        (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
        " " (match-string 4 item)
        (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))))
+
+(defun org-agenda-columns-cleanu-item (item pl cphr fmt)
+  "Cleanup the tiem property for agenda column view.
+See also the variable `org-agenda-columns-remove-prefix'."
+  (let* ((org-complex-heading-regexp cphr)
+	 (prefix (substring item 0 pl))
+	 (rest (substring item pl))
+	 (fake (concat "* " rest))
+	 (cleaned (substring (org-columns-cleanup-item fake fmt) 1)))
+    (if org-agenda-columns-remove-prefix-from-item
+	cleaned
+      (concat prefix cleaned))))
 
 (defun org-columns-show-value ()
   "Show the full value of the property."

@@ -10,10 +10,16 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.04
+* Version 6.05
 :PROPERTIES:
 :VISIBILITY: content
 :END:
+** Details
+*** Column view in the agenda now cleans the ITEM field
+    See the new variable
+    =org-agenda-columns-remove-prefix-from-item=.
+
+* Version 6.04
 
 ** Overview
 

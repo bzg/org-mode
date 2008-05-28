@@ -945,6 +945,16 @@ a names face, or a list like `(:background \"Red\")'."
   :group 'org-agenda-column-view
   :type 'boolean)
 
+(defcustom org-agenda-columns-remove-prefix-from-item t
+  "Non-nil means, remove the prefix from a headline for agenda column view.
+The special ITEM field in the columns format contains the current line, with
+all information shown in other columns (like the TODO state or a tag).
+When this variable is non-nil, also the agenda prefix will be removed from
+the content of the ITEM field, to make sure as much as possible of the
+headline can be shown in the limited width of the field."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defcustom org-agenda-columns-compute-summary-properties t
   "Non-nil means, recompute all summary properties before column view.
 When column view in the agenda is listing properties that have a summary
@@ -2429,6 +2439,7 @@ in `org-agenda-text-search-extra-files'."
 		      'done-face 'org-done
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo (format "mouse-2 or RET jump to location")))
@@ -2543,6 +2554,7 @@ in `org-agenda-text-search-extra-files'."
 		      (org-add-props txt props
 			'org-marker marker 'org-hd-marker marker
 			'org-todo-regexp org-todo-regexp
+			'org-complex-heading-regexp org-complex-heading-regexp
 			'priority 1000 'org-category category
 			'type "search")
 		      (push txt ee)
@@ -3068,6 +3080,7 @@ the documentation of `org-diary'."
 		      'done-face 'org-done
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo
@@ -3126,6 +3139,7 @@ the documentation of `org-diary'."
   (let* ((props (list 'face nil
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo
@@ -3258,6 +3272,7 @@ the documentation of `org-diary'."
   (let* ((props (list 'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
@@ -3312,6 +3327,7 @@ the documentation of `org-diary'."
   (let* ((props (list 'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'keymap org-agenda-keymap
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
@@ -3397,6 +3413,7 @@ FRACTION is what fraction of the head-warning time has passed."
   "Return the scheduled information for agenda display."
   (let* ((props (list 'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'done-face 'org-done
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
@@ -3472,6 +3489,7 @@ FRACTION is what fraction of the head-warning time has passed."
   (let* ((props (list 'face nil
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
+		      'org-complex-heading-regexp org-complex-heading-regexp
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo
