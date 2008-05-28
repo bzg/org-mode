@@ -1,3 +1,10 @@
+2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* lisp/org-mtags.el (org-mtags-replace)
+	(org-mtags-supported-tags): Fixed typo in contents tag.
+	(org-mtags-replace): Fix but that could lead to an infinite loop
+	for a partial tag.
+
 2008-05-19  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-annotation-helper.el: Remove John Rakestraw from author

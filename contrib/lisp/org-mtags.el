@@ -59,7 +59,7 @@
 ;;        Needs to be on a line by itself, similarly the </verse> tag.
 ;;        Will be translated into Org's #+BEGIN_VERSE construct.
 ;;
-;;   <content>
+;;   <contents>
 ;;        This gets translated into "[TABLE-OF-CONTENTS]".  It will not
 ;;        trigger the production of a table of contents - that is done
 ;;        in Org with the "#+OPTIONS: toc:t" setting.  But it will define
@@ -110,7 +110,7 @@ This is relevane when expanding the templates defined in the variable
   :type 'boolean)
 
 (defconst org-mtags-supported-tags
-  '("example" "quote" "comment" "verse" "content" "literal" "src" "include")
+  '("example" "quote" "comment" "verse" "contents" "literal" "src" "include")
   "The tags that are supported by org-mtags.el for conversion.
 In addition to this list, the <br> tag is supported as well.")
 
@@ -127,7 +127,7 @@ The is done in the entire buffer."
   (interactive) ;; FIXME
   (let ((re (concat "^[ \t]*\\(</?\\("
 		    (mapconcat 'identity org-mtags-supported-tags "\\|")
-		    "\\)\\)"))
+		    "\\)\\>\\)"))
 	info tag rpl style markup lang file)
     ;; First, do the <br> tag
     (goto-char (point-min))
@@ -142,7 +142,7 @@ The is done in the entire buffer."
 	  (end-of-line 1)
 	(setq tag (plist-get info :tag))
 	(cond
-	 ((equal tag "content")
+	 ((equal tag "contents")
 	  (setq rpl "[TABLE-OF-CONTENTS]")
 	  ;; FIXME: also trigger TOC in options-plist?????
 	  )
