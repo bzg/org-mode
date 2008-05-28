@@ -571,9 +571,10 @@ the file's name is.  See also the variable
 @cindex maintainer
 @cindex author
 
-If you find problems with Org, or if you have questions, remarks,
-or ideas about it, please contact the maintainer @value{MAINTAINER} at
-@value{MAINTAINEREMAIL}.
+If you find problems with Org, or if you have questions, remarks, or ideas
+about it, please mail to the Org mailing list @code{emacs-orgmode@gnu.org}.
+If you are not a member of the mailing list, your mail will be reviewed by a
+moderator and then passed through to the list.
 
 For bug reports, please provide as much information as possible,
 including the version information of Emacs (@kbd{C-h v emacs-version
