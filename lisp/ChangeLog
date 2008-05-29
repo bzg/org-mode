@@ -7,6 +7,7 @@
 	when in agenda.
 	(org-columns-edit-value): Fixed bug with editing values from
 	agenda column view.
+	(org-columns-redo): Also redo the agenda itself.
 
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
