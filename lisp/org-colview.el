@@ -141,7 +141,7 @@ This is the compiled version of the format.")
 	 (face (list color 'org-column ref-face))
 	 (pl (get-text-property (point-at-bol) 'prefix-length))
 	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
-	 pom property ass width f string ov column val modval)
+	 pom property ass width f string ov column val modval s1 s2)
     ;; Check if the entry is in another buffer.
     (unless props
       (if (eq major-mode 'org-agenda-mode)
@@ -169,9 +169,10 @@ This is the compiled version of the format.")
 		       (if (org-mode-p)
 			   (org-columns-cleanup-item
 			    val org-columns-current-fmt-compiled)
-			 (org-agenda-columns-cleanu-item
-			  val pl cphr org-columns-current-fmt-compiled)))
-	    string (format f (or modval val)))
+			 (org-agenda-columns-cleanup-item
+			  val pl cphr org-columns-current-fmt-compiled))))
+      (setq s2 (org-columns-add-ellipses (or modval val) width))
+      (setq string (format f s2))
       ;; Create the overlay
       (org-unmodified
        (setq ov (org-columns-new-overlay
@@ -202,6 +203,14 @@ This is the compiled version of the format.")
        (put-text-property (max (point-min) (1- (point-at-bol)))
 			  (min (point-max) (1+ (point-at-eol)))
 			  'read-only "Type `e' to edit property")))))
+
+(defun org-columns-add-ellipses (string width)
+  "Truncate STRING with WIDTH characters, with ellipses."
+  (cond 
+   ((<= (length string) width) string)
+   ((= width 1) ".")
+   ((= width 2) "..")
+   (t (concat (substring string 0 (- width 2)) ".."))))
 
 (defvar org-columns-full-header-line-format nil
   "Fthe full header line format, will be shifted by horizontal scrolling." )
@@ -283,17 +292,26 @@ for the duration of the command.")
 	 'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
        (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
        (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
-       " " (match-string 4 item)
+       " " (save-match-data (org-columns-compact-links (match-string 4 item)))
        (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))))
 
-(defun org-agenda-columns-cleanu-item (item pl cphr fmt)
+(defun org-columns-compact-links (s)
+  "Replace [[link][desc]] with [desc] or [link]."
+  (while (string-match org-bracket-link-regexp s)
+    (setq s (replace-match
+	     (concat "[" (match-string (if (match-end 3) 3 1) s) "]")
+	     t t s)))
+  s)
+
+(defvar org-agenda-columns-remove-prefix-from-item)
+(defun org-agenda-columns-cleanup-item (item pl cphr fmt)
   "Cleanup the tiem property for agenda column view.
-See also the variable `org-agenda-columns-remove-prefix'."
+See also the variable `org-agenda-columns-remove-prefix-from-item'."
   (let* ((org-complex-heading-regexp cphr)
 	 (prefix (substring item 0 pl))
 	 (rest (substring item pl))
 	 (fake (concat "* " rest))
-	 (cleaned (substring (org-columns-cleanup-item fake fmt) 1)))
+	 (cleaned (org-trim (substring (org-columns-cleanup-item fake fmt) 1))))
     (if org-agenda-columns-remove-prefix-from-item
 	cleaned
       (concat prefix cleaned))))

@@ -1,9 +1,17 @@
+2008-05-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-colview.el (org-columns-add-ellipses): New function.
+	(org-columns-compact-links): New function.
+	(org-columns-cleanup-item): Call `org-columns-compact-links'.
+	(org-columns-display-here): Call `org-agenda-columns-cleanup-item'
+	when in agenda.
+
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-columns-remove-prefix-from-item): New
 	option.
 
-	* org-colview.el (org-agenda-columns-cleanu-item): New function.
+	* org-colview.el (org-agenda-columns-cleanup-item): New function.
 
 	* org-exp.el (org-export-ascii-preprocess): Renamed from
 	`org-export-ascii-clean-string'.
