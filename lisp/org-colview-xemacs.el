@@ -611,7 +611,7 @@ Where possible, use the standard interface for changing this line."
 
       (cond
        ((equal major-mode 'org-agenda-mode)
-	(org-columns-eval '(org-entry-put pom key nval))
+	(org-columns-eval eval)
 	;; The following let preserves the current format, and makes sure
 	;; that in only a single file things need to be upated.
 	(let* ((org-agenda-overriding-columns-format org-columns-current-fmt)

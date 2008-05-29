@@ -5,6 +5,8 @@
 	(org-columns-cleanup-item): Call `org-columns-compact-links'.
 	(org-columns-display-here): Call `org-agenda-columns-cleanup-item'
 	when in agenda.
+	(org-columns-edit-value): Fixed bug with editing values from
+	agenda column view.
 
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
