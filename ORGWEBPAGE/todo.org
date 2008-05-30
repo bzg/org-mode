@@ -1,7 +1,7 @@
          -*- mode:org -*-
 
 #+STARTUP:   align
-#+TYP_TODO:  TODO IDEA WISH QUESTION DECLINED INCONSISTENCY BUG DONE
+#+TYP_TODO:  TODO IDEA WISH QUESTION INCONSISTENCY BUG | DONE DECLINED 
 #+TAGS:      NEW(n)
 #+OPTIONS:   H:2 num:t toc:t \n:nil @:t ::t |:t ^:t *:t TeX:t
 #+ARCHIVE:   ::** Archived Tasks
@@ -40,7 +40,6 @@ something.
 * Tasks
 
 ** Structure
-*** TODO Definition lists, like in Muse
 *** TODO Get rid of all the \r instances, which were used only for XEmacs.
 *** TODO proper visibility cycling for items
     Make them not hide the text after the final list item.
@@ -81,7 +80,7 @@ something.
     question is, is this URL going to be stable so that it makes sense
     to actually put this into org.el?
 
-*** IDEA Make news HTML links work, using Google.
+*** IDEA Make News HTML links work, using Google.
     I can use Google groups with a message id to find a USENET message,
     even if the original link points to gnus.
 
@@ -115,9 +114,7 @@ something.
 *** Emacs 21 compatibility
     This is being phased out.  Almost everything works under Emacs 21,
     but in the future I will make little effort to support it.
-**** DECLINED Column view does not yet work for Emacs 21s.
-     Declined, because I don't know how to do this.  Too many
-     problems.
+
 *** XEmacs compatibility
 
 ** Exporting
@@ -175,12 +172,13 @@ options for publishing projects
 *** QUESTION Use an export-directory option per file?
 
 For now we use publishing-directory but this is not consistent with the
-convention of using "publishing" when there is a _project_ to publish.
+convention of using "publishing" when there is a /project/ to publish.
 
 ** Miscellaneous Stuff
 *** BUG Comments cannot be filled
 *** QUESTION Inlining of images in Org-mode files
 *** TODO Fixup outline-magic.el, so that it can be used.
+    
 *** TODO Use the new argument of bibtex-url
     Roland Winkler was kind enough to implement a new argument to the
     `bibtex-url' command that allows me to retrieve the corresponding
@@ -195,7 +193,7 @@ convention of using "publishing" when there is a _project_ to publish.
 
 *** Priorities
     Here is some information about priorities, which is not yet
-    documented.
+    documented.  Actually, I am not sur if the list here is correct
 **** QUOTE Priorities
     TODO entries: 1 or 1,2,...
     DEADLINE is 10-ddays, i.e. it is 10 on the due day
@@ -230,6 +228,14 @@ convention of using "publishing" when there is a _project_ to publish.
 
 * Archive
 ** Archived Tasks
+*** DONE Definition lists, like in Muse
+    :PROPERTIES:
+    :ARCHIVE_TIME: 2008-05-29 Thu 17:01
+    :ARCHIVE_FILE: ~/lib/emacs/work/org-mode/ORGWEBPAGE/todo.org
+    :ARCHIVE_OLPATH: Tasks/Structure
+    :ARCHIVE_CATEGORY: todo
+    :ARCHIVE_TODO: DONE
+    :END:
 
 * COMMENT HTML style specifications
 
