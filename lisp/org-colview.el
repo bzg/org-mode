@@ -32,6 +32,8 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(declare-function org-agenda-redo "org-agenda" ())
+
 ;;; Column View
 
 (defvar org-columns-overlays nil
@@ -203,6 +205,15 @@ This is the compiled version of the format.")
        (put-text-property (max (point-min) (1- (point-at-bol)))
 			  (min (point-max) (1+ (point-at-eol)))
 			  'read-only "Type `e' to edit property")))))
+
+(defun org-columns-add-ellipses (string width)
+  "Truncate STRING with WIDTH characters, with ellipses."
+  (cond 
+   ((<= (length string) width) string)
+   ((<= width (length org-columns-ellipses))
+    (substring org-columns-ellipses 0 width))
+   (t (concat (substring string 0 (- width (length org-columns-ellipses)))
+	      org-columns-ellipses))))
 
 (defvar org-columns-full-header-line-format nil
   "Fthe full header line format, will be shifted by horizontal scrolling." )

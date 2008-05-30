@@ -34,6 +34,9 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(declare-function org-agenda-redo "org-agenda" ())
+
+
 ;;; Definie additional faces for column view
 
 (when (featurep 'xemacs)
@@ -1060,6 +1063,7 @@ Don't set this, this is meant for dynamic scoping.")
     (org-columns-remove-overlays)
     (if (org-mode-p)
 	(call-interactively 'org-columns)
+      (org-agenda-redo)
       (call-interactively 'org-agenda-columns)))
   (when (featurep 'xemacs)
     (while (not (or (eolp)
