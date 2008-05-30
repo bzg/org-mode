@@ -1,3 +1,7 @@
+2008-05-30  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-columns-ellipses): New option.
+
 2008-05-29  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-colview.el (org-columns-add-ellipses): New function.

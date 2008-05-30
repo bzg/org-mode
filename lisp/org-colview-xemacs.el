@@ -314,7 +314,7 @@ This is the compiled version of the format.")
 				  (get-text-property (point-at-bol) 'face))
 			     'default) :foreground))))
 	 (face (if (featurep 'xemacs) color (list color 'org-column)))
-	 (pl (get-text-property (point-at-bol) 'prefix-length))
+	 (pl (or (get-text-property (point-at-bol) 'prefix-length) 0))
 	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
 	 pom property ass width f string ov column val modval s1 s2)
     ;; Check if the entry is in another buffer.
@@ -394,9 +394,10 @@ This is the compiled version of the format.")
   "Truncate STRING with WIDTH characters, with ellipses."
   (cond 
    ((<= (length string) width) string)
-   ((= width 1) ".")
-   ((= width 2) "..")
-   (t (concat (substring string 0 (- width 2)) ".."))))
+   ((<= width (length org-columns-ellipses))
+    (substring org-columns-ellipses 0 width))
+   (t (concat (substring string 0 (- width (length org-columns-ellipses)))
+	      org-columns-ellipses))))
 
 (defvar org-columns-full-header-line-format nil
   "Fthe full header line format, will be shifted by horizontal scrolling." )
@@ -480,14 +481,19 @@ This is the compiled version of the format.")
   (if (not org-complex-heading-regexp)
       item
     (when (string-match org-complex-heading-regexp item)
-      (concat
-       (org-add-props (concat (match-string 1 item) " ") nil
-	 'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
-       (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
-       (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
-       " " (save-match-data (org-columns-compact-links (match-string 4 item)))
-       (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))))
-
+      (setq item
+	    (concat
+	     (org-add-props (match-string 1 item) nil
+	       'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
+	     (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
+	     (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
+	     " " (save-match-data (org-columns-compact-links (match-string 4 item)))
+	     (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))
+      (add-text-properties
+       0 (1+ (match-end 1))
+       (list 'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
+       item)
+      item)))
 
 (defun org-columns-compact-links (s)
   "Replace [[link][desc]] with [desc] or [link]."
@@ -641,7 +647,8 @@ Where possible, use the standard interface for changing this line."
   "Edit the current headline, the part without TODO keyword, TAGS."
   (org-back-to-heading)
   (when (looking-at org-todo-line-regexp)
-    (let ((pre (buffer-substring (match-beginning 0) (match-beginning 3)))
+    (let ((pos (point))
+	  (pre (buffer-substring (match-beginning 0) (match-beginning 3)))
 	  (txt (match-string 3))
 	  (post "")
 	  txt2)
@@ -650,7 +657,7 @@ Where possible, use the standard interface for changing this line."
 		txt (substring txt 0 (match-beginning 0))))
       (setq txt2 (read-string "Edit: " txt))
       (when (not (equal txt txt2))
-	(beginning-of-line 1)
+	(goto-char pos)
 	(insert pre txt2 post)
 	(delete-region (point) (point-at-eol))
 	(org-set-tags nil t)))))

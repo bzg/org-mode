@@ -1883,6 +1883,17 @@ This variable can be set on the per-file basis by inserting a line
   :group 'org-properties
   :type 'string)
 
+(defcustom org-columns-ellipses ".."
+  "The ellipses to be used when a field in column view is truncated.
+When this is the empty string, as many characters as possible are shown,
+but then there will be no visual indication that the field has been truncated.
+When this is a string of length N, the last N characters of a truncated
+field are replaced by this string.  If the column is narrower than the
+ellipses string, only part of the ellipses string will be shown."
+  :group 'org-properties
+  :type 'string)
+
+
 (defcustom org-effort-property "Effort"
   "The property that is being used to keep track of effort estimates.
 Effort estimates given in this property need to have the format H:MM."
