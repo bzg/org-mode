@@ -848,8 +848,10 @@ to occupy a fixed space in the agenda display."
   "Text preceeding scheduled items in the agenda view.
 This is a list with two strings.  The first applies when the item is
 scheduled on the current day.  The second applies when it has been scheduled
-previously, it may contain a %d to capture how many days ago the item was
-scheduled."
+previously, it may contain a %d indicating that this is the nth time that
+this item is scheduled, due to automatic rescheduling of unfinished items
+for the following day.  So this number is one larger than the number of days
+that passed since this item was scheduled first."
   :group 'org-agenda-line-format
   :type '(list
 	  (string :tag "Scheduled today     ")

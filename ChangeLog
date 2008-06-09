@@ -1,3 +1,6 @@
+2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* Makefile: Allow prefix to be set on the command line.
 
 2008-04-25  Carsten Dominik  <dominik@science.uva.nl>
 

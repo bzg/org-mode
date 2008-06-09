@@ -1,3 +1,7 @@
+2008-06-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-scheduled-leaders): Fix docstring.
+
 2008-05-30  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-columns-ellipses): New option.
