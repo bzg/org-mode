@@ -1,5 +1,8 @@
 2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-protect-examples): Catch the case of a
+	missing end_example line.
+
 	* org.el (org-set-regexps-and-options): Set `org-file-properties' and
 	`org-file-tags' to nil.
 

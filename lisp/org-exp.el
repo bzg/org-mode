@@ -1499,7 +1499,7 @@ from the buffer."
   (goto-char (point-min))
   (while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
     (goto-char (match-end 0))
-    (while (not (looking-at "#\\+END_EXAMPLE"))
+    (while (and (not (looking-at "#\\+END_EXAMPLE")) (not (eobp)))
       (insert ":  ")
       (beginning-of-line 2)))
   (goto-char (point-min))
