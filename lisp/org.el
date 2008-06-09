@@ -1921,6 +1921,7 @@ You can set buffer-local values for this by adding lines like
   "List of property/value pairs that can be inherited by any entry.
 Valid for the current buffer.
 This variable is populated from #+PROPERTY lines.")
+(make-variable-buffer-local 'org-file-properties)
 
 (defgroup org-agenda nil
   "Options concerning agenda views in Org-mode."
@@ -2787,6 +2788,8 @@ means to push this value onto the list in the variable.")
     (org-set-local 'org-todo-heads nil)
     (org-set-local 'org-todo-sets nil)
     (org-set-local 'org-todo-log-states nil)
+    (org-set-local 'org-file-properties nil)
+    (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp
 	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"

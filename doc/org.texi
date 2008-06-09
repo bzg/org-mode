@@ -3962,6 +3962,8 @@ Move through the column view from field to field.
 @item  S-@key{left}/@key{right}
 Switch to the next/previous allowed value of the field.  For this, you
 have to have specified allowed values for a property.
+@item 1..9,0
+Directly select the nth allowed value, @kbd{0} selects the 10th value.
 @kindex n
 @kindex p
 @itemx  n / p

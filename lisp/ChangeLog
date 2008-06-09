@@ -1,3 +1,14 @@
+2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-set-regexps-and-options): Set `org-file-properties' and
+	`org-file-tags' to nil.
+
+	* org-colview.el (org-columns-next-allowed-value): Handle next
+	argument NTH to directly select a value.
+
+	* org-colview-xemacs.el (org-columns-next-allowed-value): Handle next
+	argument NTH to directly select a value.
+
 2008-06-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-scheduled-leaders): Fix docstring.

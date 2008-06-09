@@ -228,6 +228,10 @@ This is the compiled version of the format.")
 (org-defkey org-columns-map [(meta left)] 'org-columns-move-left)
 (org-defkey org-columns-map [(shift meta right)] 'org-columns-new)
 (org-defkey org-columns-map [(shift meta left)] 'org-columns-delete)
+(dotimes (i 10)
+  (org-defkey org-columns-map (number-to-string i)
+              `(lambda () (interactive)
+                 (org-columns-next-allowed-value nil ,i))))
 
 (easy-menu-define org-columns-menu org-columns-map "Org Column Menu"
   '("Column"
@@ -701,8 +705,10 @@ Where possible, use the standard interface for changing this line."
   (interactive)
   (org-columns-next-allowed-value t))
 
-(defun org-columns-next-allowed-value (&optional previous)
-  "Switch to the next allowed value for this column."
+(defun org-columns-next-allowed-value (&optional previous nth)
+  "Switch to the next allowed value for this column.
+When PREVIOUS is set, go to the previous value.  When NTH is
+an integer, select that value."
   (interactive)
   (org-columns-check-computed)
   (let* ((col (current-column))
@@ -724,6 +730,9 @@ Where possible, use the standard interface for changing this line."
 			    '(checkbox checkbox-n-of-m checkbox-percent))
 			   '("[ ]" "[X]"))))
 	 nval)
+    (when (integerp nth)
+      (setq nth (1- nth))
+      (if (= nth -1) (setq nth 9)))
     (when (equal key "ITEM")
       (error "Cannot edit item headline from here"))
     (unless (or allowed (member key '("SCHEDULED" "DEADLINE")))
@@ -731,11 +740,17 @@ Where possible, use the standard interface for changing this line."
     (if (member key '("SCHEDULED" "DEADLINE"))
 	(setq nval (if previous 'earlier 'later))
       (if previous (setq allowed (reverse allowed)))
-      (if (member value allowed)
-	  (setq nval (car (cdr (member value allowed)))))
-      (setq nval (or nval (car allowed)))
-      (if (equal nval value)
-	  (error "Only one allowed value for this property")))
+      (cond
+       (nth
+	(setq nval (nth nth allowed))
+	(if (not nval)
+	    (error "There are only %d allowed values for property `%s'"
+		   (length allowed) key)))
+       ((member value allowed)
+	(setq nval (or (car (cdr (member value allowed)))
+		       (car allowed)))
+	(if (equal nval value)
+	    (error "Only one allowed value for this property")))))
     (cond
      ((equal major-mode 'org-agenda-mode)
       (org-columns-eval '(org-entry-put pom key nval))
