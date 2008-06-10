@@ -1,3 +1,8 @@
+2008-06-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-handle-comments): Fix bug with several
+	comment lines after each other.
+
 2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-protect-examples): Catch the case of a

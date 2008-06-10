@@ -1571,10 +1571,12 @@ These special cookies will later be interpreted by the backend."
 (defun org-export-handle-comments (commentsp)
   "Remove comments, or convert to backend-specific format.
 COMMENTSP can be a format string for publishing comments.
-When it is nit, all comments will be removed."
-  (let (pos)
+When it is nil, all comments will be removed."
+  (let ((re "^#\\(.*\n?\\)")
+	pos)
     (goto-char (point-min))
-    (while (re-search-forward "^#\\(.*\n?\\)" nil t)
+    (while (or (looking-at re)
+	       (re-search-forward re nil t))
       (setq pos (match-beginning 0))
       (if commentsp
 	  (progn (add-text-properties
@@ -1583,8 +1585,7 @@ When it is nit, all comments will be removed."
 	(goto-char (1+ pos))
 	(org-if-unprotected
 	 (replace-match "")
-	 (goto-char (max (point-min) (1- pos))))
-	(end-of-line 1)))))
+	 (goto-char (max (point-min) (1- pos))))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
