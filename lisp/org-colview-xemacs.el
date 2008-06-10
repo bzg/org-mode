@@ -1,4 +1,4 @@
-;;; org-colview.el --- Column View in Org-mode
+;;; org-colview-xemacs.el --- Column View in Org-mode, XEmacs-specific version
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 

@@ -1,4 +1,4 @@
-;;; org-agenda.el --- The table editor for Org-mode
+;;; org-agenda.el --- Dynamic task and appointment lists for Org
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
