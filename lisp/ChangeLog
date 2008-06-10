@@ -2,6 +2,8 @@
 
 	* org-exp.el (org-export-handle-comments): Fix bug with several
 	comment lines after each other.
+	(org-number-to-roman, org-number-to-counter): New functions.
+	(org-export-section-number-format): New option.
 
 2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
 

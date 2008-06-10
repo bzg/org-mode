@@ -132,6 +132,26 @@ This option can also be set with the +OPTIONS line, e.g. \"num:t\"."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-section-number-format '((("1" ".")) . "")
+  "Format of section numbers for export.
+The variable has two components.
+1. A list of lists, each indicating a counter type and a separator.
+   The counter type can be any of \"1\", \"A\", \"a\", \"I\", or \"a\".
+   It causes causes numeric, alphabetic, or roman counters, respectively.
+   The separator is only used if another counter for a subsection is being
+   added.
+   If there are more numbered section levels than entries in this lists,
+   then the last entry will be reused.
+2. A terminator string that will be added after the entire
+   section number."
+  :group 'org-export-general
+  :type '(cons
+	  (repeat
+	   (list
+	    (string :tag "Counter Type")
+	    (string :tag "Separator   ")))
+	  (string :tag "Terminator")))
+
 (defcustom org-export-with-toc t
   "Non-nil means, create a table of contents in exported files.
 The TOC contains headlines with levels up to`org-export-headline-levels'.
@@ -673,6 +693,7 @@ or if they are only using it locally."
     (:customtime           . org-display-custom-times)
     (:headline-levels      . org-export-headline-levels)
     (:section-numbers      . org-export-with-section-numbers)
+    (:section-number-format . org-export-section-number-format)
     (:table-of-contents    . org-export-with-toc)
     (:preserve-breaks      . org-export-preserve-breaks)
     (:archived-trees       . org-export-with-archived-trees)
@@ -1741,7 +1762,12 @@ can work correctly."
 (defun org-section-number (&optional level)
   "Return a string with the current section number.
 When LEVEL is non-nil, increase section numbers on that level."
-  (let* ((depth (1- (length org-section-numbers))) idx n (string ""))
+  (let* ((depth (1- (length org-section-numbers)))
+	 (string "")
+	 (fmts (car org-export-section-number-format))
+	 (term (cdr org-export-section-number-format))
+	 (sep "")
+	 ctype fmt idx n)
     (when level
       (when (> level -1)
 	(aset org-section-numbers
@@ -1753,16 +1779,56 @@ When LEVEL is non-nil, increase section numbers on that level."
 	(setq idx (1+ idx))))
     (setq idx 0)
     (while (<= idx depth)
-      (setq n (aref org-section-numbers idx))
-      (setq string (concat string (if (not (string= string "")) "." "")
-			   (int-to-string n)))
+      (when (> (aref org-section-numbers idx) 0)
+	(setq fmt (or (pop fmts) fmt)
+	      ctype (car fmt)
+	      n (aref org-section-numbers idx)
+	      string (if (> n 0)
+			 (concat string sep (org-number-to-counter n ctype))
+		       (concat string (if ".0")))
+	      sep (nth 1 fmt)))
       (setq idx (1+ idx)))
     (save-match-data
       (if (string-match "\\`\\([@0]\\.\\)+" string)
 	  (setq string (replace-match "" t nil string)))
       (if (string-match "\\(\\.0\\)+\\'" string)
 	  (setq string (replace-match "" t nil string))))
-    string))
+    (concat string term)))
+
+(defun org-number-to-counter (n type)
+  "Concert number N to a string counter, according to TYPE.
+TYPE must be a string, any of:
+ 1  number
+ A  A,B,....
+ a  a,b,....
+ I  uppper case roman numeral
+ i  lower case roman numeral"
+  (cond
+   ((equal type "1") (number-to-string n))
+   ((equal type "A") (char-to-string (+ ?A n -1)))
+   ((equal type "a") (char-to-string (+ ?a n -1)))
+   ((equal type "I") (org-number-to-roman n))
+   ((equal type "i") (downcase (org-number-to-roman n)))
+   (t (error "Invalid counter type `%s'" type))))
+
+(defun org-number-to-roman (n)
+  "Convert integer N into a roman numeral."
+  (let ((roman '((1000 . "M") (900 . "CM") (500 . "D") (400 . "CD")
+		 ( 100 . "C") ( 90 . "XC") ( 50 . "L") ( 40 . "XL")
+		 (  10 . "X") (  9 . "IX") (  5 . "V") (  4 . "IV")
+		 (   1 . "I")))
+	(res ""))
+    (if (<= n 0)
+	(number-to-string n)
+      (while roman
+	(if (>= n (caar roman))
+	    (setq n (- n (caar roman))
+		  res (concat res (cdar roman)))
+	  (pop roman)))
+      res)))
+
+(org-number-to-roman 1961)
+   
 
 ;;; Include files
 
