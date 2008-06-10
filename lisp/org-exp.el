@@ -2374,6 +2374,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+DRAWERS:   %s
 #+STARTUP:   %s %s %s %s %s
 #+TAGS:      %s
+#+FILETAGS:  %s
 #+ARCHIVE:   %s
 #+LINK:      %s
 "
@@ -2419,6 +2420,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 		     ((cdr x) (format "%s(%c)" (car x) (cdr x)))
 		     (t (car x))))
 		  (or org-tag-alist (org-get-buffer-tags)) " ") "")
+   (mapconcat 'identity org-file-tags " ")
    org-archive-location
    "org file:~/org/%s.org"
    ))

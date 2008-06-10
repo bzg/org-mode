@@ -1,5 +1,11 @@
 2008-06-10  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-get-current-options): Add the FILETAGS setting.
+
+	* org.el (org-set-regexps-and-options): Fix bug with parsing of
+	file tags.
+	(org-get-tags-at): Add the content of `org-file-tags'.
+
 	* org-exp.el (org-export-handle-comments): Fix bug with several
 	comment lines after each other.
 	(org-number-to-roman, org-number-to-counter): New functions.

@@ -2185,7 +2185,7 @@ Use customize to modify this, or restart Emacs after changing it."
 	  (sexp    :tag "Forbidden chars in border ")
 	  (sexp    :tag "Regexp for body           ")
 	  (integer :tag "number of newlines allowed")
-	  (option (boolean :tag "Stacking (DISABLED)       "))))
+	  (option (boolean :tag "Please ignore this button"))))
 
 (defcustom org-emphasis-alist
   `(("*" bold "<b>" "</b>")
@@ -2834,7 +2834,7 @@ means to push this value onto the list in the variable.")
 		(push (cons (match-string 1 value) (match-string 2 value))
 		      props)))
 	     ((equal key "FILETAGS")
-	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
+	      (when (string-match "\\S-" value)
 		(setq ftags
 		      (append
 		       ftags
@@ -9468,7 +9468,7 @@ also TODO lines."
   "Get a list of all headline tags applicable at POS.
 POS defaults to point.  If tags are inherited, the list contains
 the targets in the same sequence as the headlines appear, i.e.
-sthe tags of the current headline come last."
+the tags of the current headline come last."
   (interactive)
   (let (tags ltags lastpos parent)
     (save-excursion
@@ -9490,7 +9490,7 @@ sthe tags of the current headline come last."
 		  (org-up-heading-all 1)
 		  (setq parent t)))
 	    (error nil))))
-      tags)))
+      (append (org-remove-uniherited-tags org-file-tags) tags))))
 
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
