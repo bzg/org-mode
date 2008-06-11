@@ -170,7 +170,7 @@ calendar           |  %:type %:date"
 		 (const :tag "Prompt for file" nil))
 		(choice
 		 (string :tag "Destination headline")
-		 (const :tag "Selection interface for heading"))
+		 (const :tag "Selection interface for heading" nil))
 		(choice
 		 (const :tag "Use by default" nil)
 		 (const :tag "Use in all contexts" t)

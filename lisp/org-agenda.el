@@ -391,6 +391,12 @@ or `C-c a #' to produce the list."
  :tag "Org Agenda Skip"
  :group 'org-agenda)
 
+(defcustom org-agenda-skip-comment-trees t
+  "Non-nil means, skip trees that start with teh COMMENT keyword.
+When nil, these trees are also scand by agenda commands."
+  :group 'org-agenda-skip
+  :type 'boolean)
+
 (defcustom org-agenda-todo-list-sublevels t
   "Non-nil means, check also the sublevels of a TODO entry for TODO entries.
 When nil, the sublevels of a TODO entry are not checked, resulting in
@@ -462,7 +468,6 @@ N days, just insert a special line indicating the size of the gap."
 	  (const :tag "None" nil)
 	  (const :tag "All" t)
 	  (number :tag "at most")))
-
 
 (defgroup org-agenda-startup nil
   "Options concerning initial settings in the Agenda in Org Mode."
@@ -2023,7 +2028,8 @@ continue from there."
 	 (get-text-property p :org-archived)
 	 (org-end-of-subtree t)
 	 (throw :skip t))
-    (and (get-text-property p :org-comment)
+    (and org-agenda-skip-comment-trees
+	 (get-text-property p :org-comment)
 	 (org-end-of-subtree t)
 	 (throw :skip t))
     (if (equal (char-after p) ?#) (throw :skip t))

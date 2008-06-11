@@ -9177,10 +9177,11 @@ ACTION can be `set', `up', `down', or a character."
 
 (defun org-scan-tags (action matcher &optional todo-only)
   "Scan headline tags with inheritance and produce output ACTION.
-ACTION can be `sparse-tree' or `agenda'.  MATCHER is a Lisp form to be
-evaluated, testing if a given set of tags qualifies a headline for
-inclusion.  When TODO-ONLY is non-nil, only lines with a TODO keyword
-are included in the output."
+ACTION can be `sparse-tree' or `agenda'.  It can also be a Lisp form
+or a function that should be called at each matched headline.
+MATCHER is a Lisp form to be evaluated, testing if a given set of tags
+qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
+only lines with a TODO keyword are included in the output."
   (let* ((re (concat "[\n\r]" outline-regexp " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
@@ -9202,6 +9203,7 @@ are included in the output."
 	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
 	 (llast 0) rtn level category i txt
 	 todo marker entry priority)
+    (when (listp action) (setq action (list 'lambda nil action)))
     (save-excursion
       (goto-char (point-min))
       (when (eq action 'sparse-tree)
@@ -9239,16 +9241,18 @@ are included in the output."
 		     (eval matcher)
 		     (or (not org-agenda-skip-archived-trees)
 			 (not (member org-archive-tag tags-list))))
-	    (and (eq action 'agenda) (org-agenda-skip))
-	    ;; list this headline
+	    (unless (eq action 'sparse-tree) (org-agenda-skip))
 
-	    (if (eq action 'sparse-tree)
-		(progn
-		  (and org-highlight-sparse-tree-matches
-		       (org-get-heading) (match-end 0)
-		       (org-highlight-new-match
-			(match-beginning 0) (match-beginning 1)))
-		  (org-show-context 'tags-tree))
+	    ;; select this headline
+
+	    (cond
+	     ((eq action 'sparse-tree)
+	      (and org-highlight-sparse-tree-matches
+		   (org-get-heading) (match-end 0)
+		   (org-highlight-new-match
+		    (match-beginning 0) (match-beginning 1)))
+	      (org-show-context 'tags-tree))
+	     ((eq action 'agenda)
 	      (setq txt (org-format-agenda-item
 			 ""
 			 (concat
@@ -9263,6 +9267,11 @@ are included in the output."
 		'org-marker marker 'org-hd-marker marker 'org-category category
 		'priority priority 'type "tagsmatch")
 	      (push txt rtn))
+	     ((functionp action)
+	      (save-excursion (push (funcall action) rtn))
+	      (goto-char (point-at-eol)))
+	     (t (error "Invalid action")))
+
 	    ;; if we are to skip sublevels, jump to end of subtree
 	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))))
     (when (and (eq action 'sparse-tree)
@@ -9922,6 +9931,85 @@ Returns the new tags string, or nil to not change the current settings."
 		(org-split-string (org-match-string-no-properties 1) ":")))))
     (mapcar 'list tags)))
 
+;;;; The mapping API
+
+;;;###autoload
+(defun org-map-entries (func &optional match scope &rest skip)
+  "Call FUNC at each headline selected by MATCH in SCOPE.
+FUNC is a function or a lisp form.  The function will be called without
+arguments.
+MATCH is a tags/property/todo match as it is used in the agenda tags view.
+Only headlines that are matched by this query will be considered during
+the iteration.  When MATCH is nil or t, all headlines will be
+visited by the iteration.
+SCOPE determines the scope of this command.  It can be any of:
+
+tree    The subtree started with the entry at point
+nil     The current buffer, respecting the restriction if any
+file    The current buffer, without restriction
+file-with-archives
+        The current buffer, and any archives associated with it
+agenda  All agenda files
+agenda-with-archives
+        All agenda files with any archive files associated with them
+list of files
+        If this is a list, all files in the list will be scanned
+
+SKIP is a list of symbols that can select the skipping facilities of the
+agenda to skip certain entries and trees.  The following items are allowed
+here:
+
+  the symbol `archive':   skip trees with the archive tag.
+  the symbol `comment':   skip trees with the COMMENT keyword
+  function or Lisp form:  will be used as value for `org-agenda-skip-function',
+                          so whenever the the function returns t, FUNC
+                          will not be called for that entry and search will
+                          continue from the point where the function leaves it."
+  (let* ((org-agenda-skip-archived-trees (memq 'archive skip))
+	 (org-agenda-skip-comment-trees (memq 'comment skip))
+	 (org-agenda-skip-function
+	  (car (org-delete-all '(comment archive) skip)))
+	 (org-tags-match-list-sublevels t)
+	 matcher)
+
+    (cond
+     ((eq match t)   (setq matcher t))
+     ((eq match nil) (setq matcher t))
+     (t (setq matcher (if match (org-make-tags-matcher match) t))))
+    
+    (when (eq scope 'tree)
+      (org-back-to-heading t)
+      (org-narrow-to-subtree)
+      (setq scope nil))
+    
+    (if (not scope)
+	(progn
+	  (org-prepare-agenda-buffers
+	   (list (buffer-file-name (current-buffer))))
+	  (org-scan-tags func matcher))
+      ;; Get the right scope
+      (setq pos (point))
+      (cond
+       ((and scope (listp scope) (symbolp (car scope)))
+	(setq scope (eval scope)))
+       ((eq scope 'agenda)
+	(setq scope (org-agenda-files t)))
+       ((eq scope 'agenda-with-archives)
+	(setq scope (org-agenda-files t))
+	(setq scope (org-add-archive-files scope)))
+       ((eq scope 'file)
+	(setq scope (list (buffer-file-name))))
+       ((eq scope 'file-with-archives)
+	(setq scope (org-add-archive-files (list (buffer-file-name)))
+	      rm-file-column t)))
+      (org-prepare-agenda-buffers scope)
+      (while (setq file (pop scope))
+	(with-current-buffer (org-find-base-buffer-visiting file)
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+	      (org-scan-tags func matcher))))))))
 
 ;;;; Properties
 
