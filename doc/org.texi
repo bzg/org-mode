@@ -365,6 +365,7 @@ Hacking
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Using the property API::      Writing programs that use entry properties
+* Using the mapping API::       Mapping over all or selected entries
 
 Tables and lists in arbitrary syntax
 
@@ -8588,6 +8589,7 @@ Org.
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Using the property API::      Writing programs that use entry properties
+* Using the mapping API::       Mapping over all or selected entries
 @end menu
 
 @node Adding hyperlink types, Tables in arbitrary syntax, Hacking, Hacking
@@ -9160,7 +9162,7 @@ like this, even without defining a special function:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
-@node Using the property API,  , Special agenda views, Hacking
+@node Using the property API, Using the mapping API, Special agenda views, Hacking
 @section Using the property API
 @cindex API, for properties
 @cindex properties, API
@@ -9217,6 +9219,104 @@ values and make sure that VALUE is @emph{not} in this list.
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and check if VALUE is in this list.
 @end defun
+
+@node Using the mapping API,  , Using the property API, Hacking
+@section Using the mapping API
+@cindex API, for mapping
+@cindex mapping entries, API
+
+Org has sophisticated mapping capabilities to find all entries satisfying
+certain criteria.  Internally, this functionality is used to produce agenda
+views, but there is also an API that can be used to execute arbitrary
+functions for each or selected entries.  The main entry point for this API
+is: 
+
+@defun org-map-entries func &optional match scope &rest skip
+Call FUNC at each headline selected by MATCH in SCOPE.
+
+FUNC is a function or a lisp form.  The function will be called without
+arguments, with the cursor positioned at the beginning of the headline.
+The return values of all calls to the function will be collected and
+returned as a list.
+
+MATCH is a tags/property/todo match as it is used in the agenda tags view.
+Only headlines that are matched by this query will be considered during
+the iteration.  When MATCH is nil or t, all headlines will be
+visited by the iteration.
+
+SCOPE determines the scope of this command.  It can be any of:
+
+@example
+nil     @r{the current buffer, respecting the restriction if any}
+tree    @r{the subtree started with the entry at point}
+file    @r{the current buffer, without restriction}
+file-with-archives
+        @r{the current buffer, and any archives associated with it}
+agenda  @r{all agenda files}
+agenda-with-archives
+        @r{all agenda files with any archive files associated with them}
+(file1 file2 ...)
+        @r{if this is a list, all files in the list will be scanned}
+@end example
+
+The remaining args are treated as settings for the skipping facilities of
+the scanner.  The following items can be given here:
+
+@example
+archive   @r{skip trees with the archive tag}
+comment   @r{skip trees with the COMMENT keyword}
+function or Lisp form
+          @r{will be used as value for @code{org-agenda-skip-function},}
+          @r{so whenever the the function returns t, FUNC}
+          @r{will not be called for that entry and search will}
+          @r{continue from the point where the function leaves it}
+@end example
+@end defun
+
+The function given to that mapping routine can really do anything you like.
+It can uce the property API (@pxref{Using the property API}) to gather more
+information about the entry, or in order to change metadate in the entry.
+Here are a couple of functions that might be handy:
+ 
+@defun org-todo &optional arg
+Change the TODO state of the entry, see the docstring of the functions for
+the many possible values for the argument ARG.
+@end defun
+
+@defun org-priority &optional action
+Change the priority of the entry, see the docstring of this function for the
+possible values for ACTION.
+@end defun
+
+@defun org-toggle-tag tag &optional onoff
+Toggle the tag TAG in the current entry.  Setting ONOFF to either @code{on}
+or @code{off} will not toggle tag, but ensure that it is either on or off.
+@end defun
+
+@defun org-promote
+Promote the current entry.
+@end defun
+
+@defun org-demote
+Demote the current entry.
+@end defun
+
+Here is a simple example that will turn all entries in the current file with
+a tag @code{TOMORROW} into TODO entries with the keyword @code{UPCOMING}
+Entries in comment trees and in archive trees will be ignored.
+
+@lisp
+(org-map-entries
+   '(org-todo "UPCOMING")
+   "+TOMORROW" 'file 'archive 'comment)
+@end lisp
+
+The following example counts the number of entries with TODO keyword
+@code{WAITING}, in all agenda files.
+
+@lisp
+(length (org-map-entries t nil 'agenda))
+@end lisp
 
 @node History and Acknowledgments, Main Index, Hacking, Top
 @appendix History and Acknowledgments
@@ -9381,8 +9481,8 @@ subtrees.
 @item
 @i{Dale Smith} proposed link abbreviations.
 @item
-@i{Adam Spiers} asked for global linking commands and inspired the link
-extension system.  support mairix.
+@i{Adam Spiers} asked for global linking commands, inspired the link
+extension system, added support for mairix, and proposed the mapping API.
 @item
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.

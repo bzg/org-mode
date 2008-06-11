@@ -1,5 +1,7 @@
 2008-06-11  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-scan-tags): Allow new values for ACTION parameter.
+
 	* org-remember.el (org-remember-templates): Fix bug in
 	customization type definition.
 

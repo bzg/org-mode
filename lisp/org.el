@@ -9177,8 +9177,12 @@ ACTION can be `set', `up', `down', or a character."
 
 (defun org-scan-tags (action matcher &optional todo-only)
   "Scan headline tags with inheritance and produce output ACTION.
-ACTION can be `sparse-tree' or `agenda'.  It can also be a Lisp form
-or a function that should be called at each matched headline.
+
+ACTION can be `sparse-tree' to produce a sparse tree in the current buffer,
+or `agenda' to produce an entry list for an agenda view.  It can also be
+a Lisp form or a function that should be called at each matched headline, in
+this case the return value is a list of all return values from these calls.
+
 MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
 only lines with a TODO keyword are included in the output."
@@ -9203,7 +9207,8 @@ only lines with a TODO keyword are included in the output."
 	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
 	 (llast 0) rtn level category i txt
 	 todo marker entry priority)
-    (when (listp action) (setq action (list 'lambda nil action)))
+    (when (not (member action '(agenda sparse-tree)))
+      (setq action (list 'lambda nil action)))
     (save-excursion
       (goto-char (point-min))
       (when (eq action 'sparse-tree)
@@ -9268,7 +9273,8 @@ only lines with a TODO keyword are included in the output."
 		'priority priority 'type "tagsmatch")
 	      (push txt rtn))
 	     ((functionp action)
-	      (save-excursion (push (funcall action) rtn))
+	      (save-excursion
+		(push (let (post-command-hook) (funcall action) rtn)))
 	      (goto-char (point-at-eol)))
 	     (t (error "Invalid action")))
 
@@ -9936,35 +9942,40 @@ Returns the new tags string, or nil to not change the current settings."
 ;;;###autoload
 (defun org-map-entries (func &optional match scope &rest skip)
   "Call FUNC at each headline selected by MATCH in SCOPE.
+
 FUNC is a function or a lisp form.  The function will be called without
-arguments.
+arguments, with the cursor positioned at the beginning of the headline.
+The return values of all calls to the function will be collected and
+returned as a list.
+
 MATCH is a tags/property/todo match as it is used in the agenda tags view.
 Only headlines that are matched by this query will be considered during
 the iteration.  When MATCH is nil or t, all headlines will be
 visited by the iteration.
+
 SCOPE determines the scope of this command.  It can be any of:
 
-tree    The subtree started with the entry at point
 nil     The current buffer, respecting the restriction if any
+tree    The subtree started with the entry at point
 file    The current buffer, without restriction
 file-with-archives
         The current buffer, and any archives associated with it
 agenda  All agenda files
 agenda-with-archives
         All agenda files with any archive files associated with them
-list of files
+\(file1 file2 ...)
         If this is a list, all files in the list will be scanned
 
-SKIP is a list of symbols that can select the skipping facilities of the
-agenda to skip certain entries and trees.  The following items are allowed
-here:
+The remaining args are treated as settings for the skipping facilities of
+the scanner.  The following items can be given here:
 
-  the symbol `archive':   skip trees with the archive tag.
-  the symbol `comment':   skip trees with the COMMENT keyword
-  function or Lisp form:  will be used as value for `org-agenda-skip-function',
-                          so whenever the the function returns t, FUNC
-                          will not be called for that entry and search will
-                          continue from the point where the function leaves it."
+  archive    skip trees with the archive tag.
+  comment    skip trees with the COMMENT keyword
+  function or Emacs Lisp form:
+             will be used as value for `org-agenda-skip-function', so whenever
+             the the function returns t, FUNC will not be called for that
+             entry and search will continue from the point where the
+             function leaves it."
   (let* ((org-agenda-skip-archived-trees (memq 'archive skip))
 	 (org-agenda-skip-comment-trees (memq 'comment skip))
 	 (org-agenda-skip-function

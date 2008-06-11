@@ -1,3 +1,7 @@
+2008-06-11  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Using the mapping API): New section.
+
 2008-04-15  Jason Riedy  <jason@acm.org>
 
 	* org.texi (A LaTeX example): Note that fmt may be a one-argument
