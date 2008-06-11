@@ -1,5 +1,11 @@
 2008-06-10  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-remember.el (org-jump-to-target-location): New variable.
+	(org-remember-apply-template): Set `org-remember-apply-template'
+	if requested by template.
+	(org-remember-handler): Start an idle timer to jump to remember
+	location.
+
 	* org-exp.el (org-get-current-options): Add the FILETAGS setting.
 
 	* org.el (org-set-regexps-and-options): Fix bug with parsing of

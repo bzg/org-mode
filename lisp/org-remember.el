@@ -130,6 +130,7 @@ Furthermore, the following %-escapes will be replaced with content:
   %[pathname] insert the contents of the file given by `pathname'
   %(sexp)     evaluate elisp `(sexp)' and replace with the result
   %!          Store this note immediately after filling the template
+  %&          Visit note immediately after storing it
 
   %?          After completing the template, position cursor here.
 
@@ -216,6 +217,7 @@ RET on headline   -> Store as sublevel entry to current headline
 RET at beg-of-buf -> Append to file as level 2 headline
 <left>/<right>    -> before/after current headline, same headings level")
 
+(defvar org-jump-to-target-location nil)
 (defvar org-remember-previous-location nil)
 (defvar org-force-remember-template-char) ;; dynamically scoped
 
@@ -477,6 +479,11 @@ to be run from that hook to function properly."
     (org-set-local 'org-finish-function 'org-remember-finalize))
   (when (save-excursion
 	  (goto-char (point-min))
+	  (re-search-forward "%&" nil t))
+    (replace-match "")
+    (org-set-local 'org-jump-to-target-location t))
+  (when (save-excursion
+	  (goto-char (point-min))
 	  (re-search-forward "%!" nil t))
     (replace-match "")
     (add-hook 'post-command-hook 'org-remember-finish-immediately 'append)))
@@ -488,6 +495,17 @@ from that hook."
   (remove-hook 'post-command-hook 'org-remember-finish-immediately)
   (when org-finish-function
     (funcall org-finish-function)))
+
+(defun org-remember-visit-immediately ()
+  "File remember note immediately.
+This should be run in `post-command-hook' and will remove itself
+from that hook."
+  (org-remember '(16))
+  (message "%s"
+	   (format
+	    (substitute-command-keys 
+	     "Restore window configuration with \\[jump-to-register] %c")
+	    remember-register)))
 
 (defvar org-clock-marker) ; Defined in org.el
 (defun org-remember-finalize ()
@@ -625,7 +643,8 @@ See also the variable `org-reverse-note-order'."
     (beginning-of-line 1))
   (catch 'quit
     (if org-note-abort (throw 'quit nil))
-    (let* ((fastp (org-xor (equal current-prefix-arg '(4))
+    (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
+	   (fastp (org-xor (equal current-prefix-arg '(4))
 			   org-remember-store-without-prompt))
 	   (file (cond
 		  (fastp org-default-notes-file)
@@ -672,6 +691,7 @@ See also the variable `org-reverse-note-order'."
       (when (and (eq org-remember-interactive-interface 'refile)
 		 (not fastp))
 	(org-refile nil (or visiting (find-file-noselect file)))
+	(and visitp (run-with-idle-timer 0.01 nil 'org-remember-visit-immediately))
 	(throw 'quit t))
       ;; Find the file
       (if (not visiting) (find-file-noselect file))
@@ -718,6 +738,7 @@ See also the variable `org-reverse-note-order'."
 	     (t (error "This should not happen")))
 	    (if (not spos) (throw 'quit nil)) ; return nil to show we did
 					; not handle this note
+	    (and visitp (run-with-idle-timer 0.01 nil 'org-remember-visit-immediately))
 	    (goto-char spos)
 	    (cond ((org-on-heading-p t)
 		   (org-back-to-heading t)
