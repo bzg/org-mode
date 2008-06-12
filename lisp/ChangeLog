@@ -1,5 +1,15 @@
 2008-06-12  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-bbdb.el (org-bbdb-follow-anniversary-link): New function.
+
+	* org-agenda.el (org-agenda-open-link): If there is an
+	org-bbdb-name property in the current line, jump to that bbdb
+	entry.
+
+	* org-bbdb.el (org-bbdb-anniversaries): Add the bbdb-name as a
+	text property, so that the agenda knows where this entry comes
+	from.
+
 	* org-agenda.el (org-agenda-clock-in): Fixed bug in the
 	interaction between clocking-in from the agenda, and  automatic
 	task state switching.

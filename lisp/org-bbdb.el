@@ -30,7 +30,6 @@
 ;; Org-mode loads this module by default - if this is not what you want,
 ;; configure the variable `org-modules'.
 
-
 ;; It also implements an interface (based on Ivar Rummelhoff's
 ;; bbdb-anniv.el) for those org-mode users, who do not use the diary
 ;; but who do want to include the anniversaries stored in the BBDB
@@ -77,7 +76,10 @@
 ;;       1973-06-22
 ;;       20??-??-?? wedding
 ;;       1998-03-12 %s created bbdb-anniv.el %d years ago
-
+;;
+;; From Org's agenda, you can use `C-c C-o' to jump to the BBDB
+;; link from which the entry at point originates.
+;;
 ;;; Code:
 
 (require 'org)
@@ -302,12 +304,35 @@ This is used by Org to re-create the anniversary hash table."
                         (funcall form name years suffix))
                        ((listp form) (eval form))
                        (t (format form name years suffix)))))
+	    (org-add-props tmp nil 'org-bbdb-name name)
             (if text
                 (setq text (append text (list tmp)))
               (setq text (list tmp)))))
         ))
     (when text
       (mapconcat 'identity text "; "))))
+
+(defun org-bbdb-follow-anniversary-link (arg)
+  "Check if there is a BBDB anniversary link in current line and follow it."
+  (let ((n (prefix-numeric-value arg))
+	end name names last)
+    (setq name (get-text-property (point) 'org-bbdb-name))
+    (save-excursion
+      (beginning-of-line 1)
+      (setq end (1- (point-at-eol)))
+      (setq last (1- (point)))
+      (while (and (setq next (next-single-property-change
+			      (point) 'org-bbdb-name nil end))
+		  (> next last))
+	(goto-char next)
+	(setq last next)
+	(setq names (cons (get-text-property (point) 'org-bbdb-name) names))))
+    (setq names (nreverse (delq nil names)))
+    (if (setq name (or (and arg (nth (1- n) names))
+		       name
+		       (car names)))
+	(progn (bbdb-name name nil) t)
+      nil)))
 
 (provide 'org-bbdb)
 
