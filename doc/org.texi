@@ -1113,15 +1113,16 @@ commands can be accessed through a dispatcher:
 This prompts for an extra key to select a sparse-tree creating command.
 @kindex C-c / r
 @item C-c / r
-Occur.  Prompts for a regexp and shows a sparse tree with all matches.
-If the match is in a headline, the headline is made visible.  If the
-match is in the body of an entry, headline and body are made visible.
-In order to provide minimal context, also the full hierarchy of
-headlines above the match is shown, as well as the headline following
-the match.  Each match is also highlighted; the highlights disappear
-when the buffer is changed by an editing command, or by pressing
-@kbd{C-c C-c}.  When called with a @kbd{C-u} prefix argument, previous
-highlights are kept, so several calls to this command can be stacked.
+Occur.  Prompts for a regexp and shows a sparse tree with all matches.  If
+the match is in a headline, the headline is made visible.  If the match is in
+the body of an entry, headline and body are made visible.  In order to
+provide minimal context, also the full hierarchy of headlines above the match
+is shown, as well as the headline following the match.  Each match is also
+highlighted; the highlights disappear when the buffer is changed by an
+editing command@footnote{depending on the option
+@code{org-remove-highlights-with-change}}, or by pressing @kbd{C-c C-c}.
+When called with a @kbd{C-u} prefix argument, previous highlights are kept,
+so several calls to this command can be stacked.
 @end table
 
 @noindent
