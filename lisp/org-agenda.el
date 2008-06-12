@@ -4502,20 +4502,14 @@ If this information is not given, the function uses the tree at point."
 	      (delete-region (point-at-bol) (1+ (point-at-eol)))))
 	  (beginning-of-line 0))))))
 
-(declare-function org-bbdb-follow-anniversary-link "org-bbdb" (&optional arg))
-
-(defun org-agenda-open-link (&optional arg)
+(defun org-agenda-open-link ()
   "Follow the link in the current line, if any."
-  (interactive "P")
-  (if (and (fboundp 'org-bbdb-follow-anniversary-link)
-	   (org-bbdb-follow-anniversary-link arg))
-      nil ; ok, there was a link, we followed it
-    ;; There was no link
-    (org-agenda-copy-local-variable 'org-link-abbrev-alist-local)
-    (save-excursion
-      (save-restriction
-	(narrow-to-region (point-at-bol) (point-at-eol))
-	(org-open-at-point)))))
+  (interactive)
+  (org-agenda-copy-local-variable 'org-link-abbrev-alist-local)
+  (save-excursion
+    (save-restriction
+      (narrow-to-region (point-at-bol) (point-at-eol))
+      (org-open-at-point))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."

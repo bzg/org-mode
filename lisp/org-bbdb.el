@@ -117,8 +117,16 @@
   :require 'bbdb)
 
 (defcustom org-bbdb-anniversary-format-alist
-  '( ("birthday" . "Birthday: %s (%d%s)")
-     ("wedding"  . "%s's %d%s wedding anniversary") )
+  '(("birthday" lambda
+     (name years suffix)
+     (concat "Birthday: [[bbdb:" name "][" name " ("
+	     (number-to-string years)
+	     suffix ")]]"))
+    ("wedding" lambda
+     (name years suffix)
+     (concat "[[bbdb:" name "][" name "'s "
+	     (number-to-string years)
+	     suffix " wedding anniversary]]")))
   "How different types of anniversaries should be formatted.
 An alist of elements (STRING . FORMAT) where STRING is the name of an
 anniversary class and format is either:
@@ -311,28 +319,6 @@ This is used by Org to re-create the anniversary hash table."
         ))
     (when text
       (mapconcat 'identity text "; "))))
-
-(defun org-bbdb-follow-anniversary-link (arg)
-  "Check if there is a BBDB anniversary link in current line and follow it."
-  (let ((n (prefix-numeric-value arg))
-	end name names last)
-    (setq name (get-text-property (point) 'org-bbdb-name))
-    (save-excursion
-      (beginning-of-line 1)
-      (setq end (1- (point-at-eol)))
-      (setq last (1- (point)))
-      (while (and (setq next (next-single-property-change
-			      (point) 'org-bbdb-name nil end))
-		  (> next last))
-	(goto-char next)
-	(setq last next)
-	(setq names (cons (get-text-property (point) 'org-bbdb-name) names))))
-    (setq names (nreverse (delq nil names)))
-    (if (setq name (or (and arg (nth (1- n) names))
-		       name
-		       (car names)))
-	(progn (bbdb-name name nil) t)
-      nil)))
 
 (provide 'org-bbdb)
 
