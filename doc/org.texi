@@ -89,7 +89,7 @@ Software Foundation raise funds for GNU development.''
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
-* Extionsions::                 
+* Extensions::                 
 * Hacking::                     
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
@@ -7895,7 +7895,7 @@ Org uses timestamps to track when a file has changed. The above
 functions normally only publish changed files. You can override this and
 force publishing of all files by giving a prefix argument.
 
-@node Miscellaneous, Extionsions, Publishing, Top
+@node Miscellaneous, Extensions, Publishing, Top
 @chapter Miscellaneous
 
 @menu
@@ -8501,7 +8501,7 @@ The exporters work well, but could be made more efficient.
 @end itemize
 
 
-@node Extionsions, Hacking, Miscellaneous, Top
+@node Extensions, Hacking, Miscellaneous, Top
 @appendix Extensions
 
 This appendix lists the extension modules that have been written for Org.
@@ -8513,7 +8513,7 @@ distribution, others are available somewhere on the web.
 * Other extensions::            These you have to find on the web.
 @end menu
 
-@node Extensions in the contrib directory, Other extensions, Extionsions, Extionsions
+@node Extensions in the contrib directory, Other extensions, Extensions, Extensions
 @section Extensions in the @file{contrib} directory
 
 @table @asis
@@ -8578,12 +8578,12 @@ distribution, others are available somewhere on the web.
 @end table
 
 
-@node Other extensions,  , Extensions in the contrib directory, Extionsions
+@node Other extensions,  , Extensions in the contrib directory, Extensions
 @section Other extensions
 
 @i{TO BE DONE}
 
-@node Hacking, History and Acknowledgments, Extionsions, Top
+@node Hacking, History and Acknowledgments, Extensions, Top
 @appendix Hacking
 
 This appendix covers some aspects where users can extend the functionality of
