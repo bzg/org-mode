@@ -14051,7 +14051,9 @@ beyond the end of the headline."
 		   (t (point)))
 	   (cond ((> pos (point)) (point))
 		 ((not (eq last-command this-command)) (point))
-		 (t (match-end 4))))))))))
+		 (t (match-end 4))))))))
+    (org-no-warnings
+     (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
 (defun org-end-of-line (&optional arg)
   "Go to the end of the line.
@@ -14073,7 +14075,10 @@ beyond the end of the headline."
 	    (if (or (< pos (match-end 0)) (not (eq this-command last-command)))
 		(goto-char (match-end 0))
 	      (goto-char (match-beginning 1))))
-	(end-of-line arg)))))
+	(end-of-line arg))))
+  (org-no-warnings
+   (and (featurep 'xemacs) (setq zmacs-region-stays t))))
+
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)

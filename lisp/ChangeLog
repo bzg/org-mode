@@ -1,3 +1,8 @@
+2008-06-12  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-beginning-of-line, org-end-of-line): Make sure the
+	zmacs-region stays after this command in XEmacs.
+
 2008-06-11  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-scan-tags): Allow new values for ACTION parameter.
