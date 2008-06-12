@@ -9205,7 +9205,7 @@ only lines with a TODO keyword are included in the output."
 	 (case-fold-search nil)
          lspos tags tags-list
 	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
-	 (llast 0) rtn level category i txt
+	 (llast 0) rtn rtn1 level category i txt
 	 todo marker entry priority)
     (when (not (member action '(agenda sparse-tree)))
       (setq action (list 'lambda nil action)))
@@ -9274,7 +9274,8 @@ only lines with a TODO keyword are included in the output."
 	      (push txt rtn))
 	     ((functionp action)
 	      (save-excursion
-		(push (let (post-command-hook) (funcall action) rtn)))
+		(setq rtn1 (funcall action))
+		(push rtn1 rtn))
 	      (goto-char (point-at-eol)))
 	     (t (error "Invalid action")))
 
@@ -9981,7 +9982,7 @@ the scanner.  The following items can be given here:
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
 	 (org-tags-match-list-sublevels t)
-	 matcher)
+	 matcher pos)
 
     (cond
      ((eq match t)   (setq matcher t))
@@ -10011,8 +10012,7 @@ the scanner.  The following items can be given here:
        ((eq scope 'file)
 	(setq scope (list (buffer-file-name))))
        ((eq scope 'file-with-archives)
-	(setq scope (org-add-archive-files (list (buffer-file-name)))
-	      rm-file-column t)))
+	(setq scope (org-add-archive-files (list (buffer-file-name))))))
       (org-prepare-agenda-buffers scope)
       (while (setq file (pop scope))
 	(with-current-buffer (org-find-base-buffer-visiting file)

@@ -89,9 +89,9 @@ We use a macro so that the test can happen at compilation time."
 (defmacro org-with-point-at (pom &rest body)
   "Move to buffer and point of point-or-marker POM for the duration of BODY."
   `(save-excursion
-     (if (markerp pom) (set-buffer (marker-buffer pom)))
+     (if (markerp ,pom) (set-buffer (marker-buffer ,pom)))
      (save-excursion
-       (goto-char (or pom (point)))
+       (goto-char (or ,pom (point)))
        ,@body)))
 
 (defmacro org-no-warnings (&rest body)

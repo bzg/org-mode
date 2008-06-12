@@ -1755,7 +1755,7 @@ can work correctly."
 	(if (string-match "\\`[A-Z]\\'" number-string)
 	    (aset org-section-numbers i
 		  (- (string-to-char number-string) ?A -1))
-	    (aset org-section-numbers i (string-to-number number-string)))
+	  (aset org-section-numbers i (string-to-number number-string)))
 	(pop numbers))
       (setq i (1- i)))))
 
@@ -1785,7 +1785,7 @@ When LEVEL is non-nil, increase section numbers on that level."
 	      n (aref org-section-numbers idx)
 	      string (if (> n 0)
 			 (concat string sep (org-number-to-counter n ctype))
-		       (concat string (if ".0")))
+		       (concat string ".0"))
 	      sep (nth 1 fmt)))
       (setq idx (1+ idx)))
     (save-match-data
