@@ -1,5 +1,9 @@
 2008-06-12  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-clock-in): Fixed bug in the
+	interaction between clocking-in from the agenda, and  automatic
+	task state switching.
+
 	* org-macs.el (org-with-point-at): Bug fix in macro defintion.
 
 	* org.el (org-beginning-of-line, org-end-of-line): Make sure the
