@@ -940,6 +940,12 @@ been defined in the setup).  Reverse sorting is possible as well.  You can
 also supply your own function to extract the sorting key.  With a @kbd{C-u}
 prefix, sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes,
 duplicate entries will also be removed.
+@kindex C-x n s
+@item C-x n s
+Narrow buffer to current subtree.
+@kindex C-x n w
+@item C-x n w
+Widen buffer to remove a narrowing.
 @kindex C-c *
 @item C-c *
 Turn a normal line or plain list item into a headline (so that it
