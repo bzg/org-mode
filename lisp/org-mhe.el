@@ -138,11 +138,11 @@ So if you use sequences, it will now work."
       )))
 
 (defun org-mhe-get-message-folder-from-index ()
-  "Return the name of the message folder in a index folder buffer."
+  "Return the name of the message folder in an index folder buffer."
   (save-excursion
     (mh-index-previous-folder)
-    (re-search-forward "^\\(+.*\\)$" nil t)
-    (message "%s" (match-string 1))))
+    (if (re-search-forward "^\\(+.*\\)$" nil t)
+	(message "%s" (match-string 1)))))
 
 (defun org-mhe-get-message-folder ()
   "Return the name of the current message folder.
