@@ -11410,7 +11410,6 @@ This uses the icalendar.el library."
 	  (setq e (match-end 0)))
       (setq rtn (if (and b e) (concat (buffer-substring b e) "\n") "")))
     (kill-buffer buf)
-    (kill-buffer frombuf)
     (delete-file tmpfile)
     rtn))
 

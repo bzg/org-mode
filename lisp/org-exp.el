@@ -4030,8 +4030,9 @@ END:VEVENT\n"
 	    (end-of-line 1)
 	    (setq sexp (buffer-substring b (point)))
 	    (with-current-buffer sexp-buffer
-	      (insert sexp "\n"))
-	    (princ (org-diary-to-ical-string sexp-buffer)))))
+	      (insert sexp "\n"))))
+	(princ (org-diary-to-ical-string sexp-buffer))
+	(kill-buffer sexp-buffer))
       
       (when org-icalendar-include-todo
 	(setq prefix "TODO-")

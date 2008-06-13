@@ -1,5 +1,12 @@
 2008-06-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-diary-to-ical-string): No longer kill buffer
+	FROMBUF, this is now done by the caller.
+
+	* org-exp.el (org-print-icalendar-entries): Move the call to
+	`org-diary-to-ical-string' out of the loop, and kill the buffer
+	afterwords.
+
 	* org-remember.el (org-remember-visit-immediately): Position
 	cursor after moving to the note.
 	(org-remember-apply-template): Use a text property to record the
