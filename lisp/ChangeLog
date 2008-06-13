@@ -1,3 +1,11 @@
+2008-06-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-remember.el (org-remember-visit-immediately): Position
+	cursor after moving to the note.
+	(org-remember-apply-template): Use a text property to record the
+	cursor position.
+	(org-remember-handler): Align tags after pasting the note.
+
 2008-06-12  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-bbdb.el (org-bbdb-follow-anniversary-link): New function.
