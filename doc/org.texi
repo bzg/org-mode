@@ -40,15 +40,7 @@ Copyright @copyright{} 2004, 2005, 2006, 2007, 2008 Free Software Foundation
 @quotation
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.  A copy of the
-license is included in the section entitled ``GNU Free Documentation
-License.''
-
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
+any later version published by the Free Software Foundation.
 @end quotation
 @end copying
 
@@ -4816,26 +4808,29 @@ use:
 
 @noindent In these entries, the first string is just a name, and the
 character specifies how to select the template.  It is useful if the
-character is also the first letter of the name.  The next string
-specifies the template.  Two more (optional) strings give the file in
-which, and the headline under which the new note should be stored.  The
-file (if not present or @code{nil}) defaults to
-@code{org-default-notes-file}, the heading to
-@code{org-remember-default-headline}.  If the file name is not an
-absolute path, it will be interpreted relative to @code{org-directory}.
+character is also the first letter of the name.  The next string specifies
+the template.  Two more (optional) strings give the file in which, and the
+headline under which the new note should be stored.  The file (if not present
+or @code{nil}) defaults to @code{org-default-notes-file}, the heading to
+@code{org-remember-default-headline}.  If the file name is not an absolute
+path, it will be interpreted relative to @code{org-directory}.  The heading
+can also be the symbols @code{top} or @code{bottom} to send note as level 1
+entries to the beginning or end of the file, respectively.
 
-An optional sixth element specifies the contexts in which the user can
-select the template.  This element can be either a list of major modes
-or a function.  @code{org-remember} will first check whether the function
-returns @code{t} or if we are in any of the listed major mode, and select
-the template accordingly.
+An optional sixth element specifies the contexts in which the user can select
+the template.  This element can be a list of major modes or a function.
+@code{org-remember} will first check whether the function returns @code{t} or
+if we are in any of the listed major mode, and exclude templates fo which
+this condition is not fulfilled.  Templates that do not specify this element
+at all, or that use @code{nil} or @code{t} as a value will always be
+selectable.
 
 So for example:
 
 @example
 (setq org-remember-templates
  '(("Bug" ?b "* BUG %?\n  %i\n  %a" "~/org/BUGS.org" "Bugs" (emacs-lisp-mode))
-   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org" my-check)
+   ("Journal" ?j "* %U %?\n\n  %i\n  %a" "~/org/JOURNAL.org" "X" my-check)
    ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
 @end example
 
