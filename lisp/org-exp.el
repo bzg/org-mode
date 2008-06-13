@@ -3901,11 +3901,16 @@ file and store it under the name `org-combined-agenda-icalendar-file'."
 	    (when (or (and combine (not files)) (not combine))
 	      (org-finish-icalendar-file)
 	      (set-buffer ical-buffer)
+	      (run-hooks 'org-before-save-iCalendar-file-hook)
 	      (save-buffer)
 	      (run-hooks 'org-after-save-iCalendar-file-hook)
 	      (and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
 	      ))))
       (org-release-buffers org-agenda-new-buffers))))
+
+(defvar org-before-save-iCalendar-file-hook nil
+  "Hook run before  an iCalendar file has been saved.
+This can be used to modify the result of the export.")
 
 (defvar org-after-save-iCalendar-file-hook nil
   "Hook run after an iCalendar file has been saved.
