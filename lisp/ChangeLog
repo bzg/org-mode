@@ -1,5 +1,12 @@
 2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-remember.el (org-remember-apply-template): Access the
+	default time stored by `org-store-link'.
+
+	* org.el (org-store-link-set-default-date): New function.
+
+2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
+
 	* org.el (org-beginning-of-line): Cater for the case when there
 	are toags but no headline text.
 	(org-align-tags-here): Convert to tabs only when indent-tabs-mode

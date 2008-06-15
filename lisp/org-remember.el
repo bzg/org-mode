@@ -314,6 +314,7 @@ to be run from that hook to function properly."
       (let* ((entry (org-select-remember-template use-char))
 	     (tpl (car entry))
 	     (plist-p (if org-store-link-plist t nil))
+	     (default-time (plist-get org-store-link-plist :default-time))
 	     (file (if (and (nth 1 entry) (stringp (nth 1 entry))
 			    (string-match "\\S-" (nth 1 entry)))
 		       (nth 1 entry)
@@ -469,7 +470,7 @@ to be run from that hook to function properly."
 	   (char
 	    (setq org-time-was-given (equal (upcase char) char))
 	    (setq time (org-read-date (equal (upcase char) "U") t nil
-				      prompt))
+				      prompt default-time))
 	    (org-insert-time-stamp time org-time-was-given
 				   (member char '("u" "U"))
 				   nil nil (list org-end-time-was-given)))
