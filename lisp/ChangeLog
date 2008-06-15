@@ -1,4 +1,19 @@
+2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-beginning-of-line): Cater for the case when there
+	are toags but no headline text.
+	(org-align-tags-here): Convert to tabs only when indent-tabs-mode
+	it set.
+
 2008-06-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-mhe.el (org-mhe-get-message-folder-from-index): Make sure
+	the return value is nil instead of "nil" when there is no match.
+
+	* org-exp.el (org-insert-centered): Use fill-column instead of
+	80.
+	(org-export-as-ascii): Use string-width to measure the width of
+	the heading.
 
 	* org.el (org-diary-to-ical-string): No longer kill buffer
 	FROMBUF, this is now done by the caller.

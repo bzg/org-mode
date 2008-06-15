@@ -9560,7 +9560,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (setq p (point))
 	  (insert (make-string (- ncol (current-column)) ?\ ))
 	  (setq ncol (current-column))
-	  (tabify p (point-at-eol))
+	  (when indent-tabs-mode (tabify p (point-at-eol)))
 	  (org-move-to-column (min ncol col) t))
       (goto-char pos))))
 
@@ -14020,7 +14020,7 @@ If this is a headline, and `org-special-ctrl-a/e' is set, ignore tags on the
 first attempt, and only move to after the tags when the cursor is already
 beyond the end of the headline."
   (interactive "P")
-  (let ((pos (point)))
+  (let ((pos (point)) refpos)
     (beginning-of-line 1)
     (if (bobp)
 	nil
@@ -14032,16 +14032,18 @@ beyond the end of the headline."
 	(forward-char 1)))
     (when org-special-ctrl-a/e
       (cond
-       ((and (looking-at org-todo-line-regexp)
+       ((and (looking-at org-complex-heading-regexp)
 	     (= (char-after (match-end 1)) ?\ ))
+	(setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
+			  (point-at-eol)))
 	(goto-char
 	 (if (eq org-special-ctrl-a/e t)
-	     (cond ((> pos (match-beginning 3)) (match-beginning 3))
-		   ((= pos (point)) (match-beginning 3))
+	     (cond ((> pos refpos) refpos)
+		   ((= pos (point)) refpos)
 		   (t (point)))
 	   (cond ((> pos (point)) (point))
 		 ((not (eq last-command this-command)) (point))
-		 (t (match-beginning 3))))))
+		 (t refpos)))))
        ((org-at-item-p)
 	(goto-char
 	 (if (eq org-special-ctrl-a/e t)
