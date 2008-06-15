@@ -155,9 +155,9 @@
     (defmacro declare-function (fn file &optional arglist fileonly))))
 
 (defgroup org-publish nil
-	"Options for publishing a set of Org-mode and related files."
-   :tag "Org Publishing"
-   :group 'org)
+  "Options for publishing a set of Org-mode and related files."
+  :tag "Org Publishing"
+  :group 'org)
 
 (defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
@@ -218,6 +218,8 @@ project for publishing. For example, you could call GNU Make on a
 certain makefile, to ensure published files are built up to date.
 
   :preparation-function   Function to be called before publishing
+                          this project.
+  :completion-function    Function to be called after publishing
                           this project.
 
 Some properties control details of the Org publishing process,
@@ -449,6 +451,11 @@ matching filenames."
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?
 				  exclude-regexp exclude-regexp)
+    (mapc (lambda (f)
+	    (pushnew 
+	     (expand-file-name (concat base-dir f))
+	     org-publish-temp-files))
+	  include-list)
     org-publish-temp-files))
 
 (defun org-publish-get-project-from-filename (filename)
@@ -561,19 +568,22 @@ See `org-publish-org-to' to the list of arguments."
 If :auto-index is set, publish the index too."
   (mapc
    (lambda (project)
-     (let* ((project-plist (cdr project))
-	    (exclude-regexp (plist-get project-plist :exclude))
-	    (index-p (plist-get project-plist :auto-index))
-	    (index-filename (or (plist-get project-plist :index-filename)
-				"index.org"))
-	    (index-function (or (plist-get project-plist :index-function)
-				'org-publish-org-index))
-	    (preparation-function (plist-get project-plist :preparation-function))
-	    (files (org-publish-get-base-files project exclude-regexp)) file)
+     (let*
+	 ((project-plist (cdr project))
+	  (exclude-regexp (plist-get project-plist :exclude))
+	  (index-p (plist-get project-plist :auto-index))
+	  (index-filename (or (plist-get project-plist :index-filename)
+			      "index.org"))
+	  (index-function (or (plist-get project-plist :index-function)
+			      'org-publish-org-index))
+	  (preparation-function (plist-get project-plist :preparation-function))
+	  (completion-function (plist-get project-plist :completion-function))
+	  (files (org-publish-get-base-files project exclude-regexp)) file)
        (when preparation-function (funcall preparation-function))
        (if index-p (funcall index-function project index-filename))
        (while (setq file (pop files))
-	 (org-publish-file file project))))
+	 (org-publish-file file project))
+       (when completion-function (funcall completion-function))))
    (org-publish-expand-projects projects)))
 
 (defun org-publish-org-index (project &optional index-filename)
@@ -586,8 +596,8 @@ Default for INDEX-FILENAME is 'index.org'."
 	 (exclude-regexp (plist-get project-plist :exclude))
 	 (files (org-publish-get-base-files project exclude-regexp))
 	 (index-filename (concat dir (or index-filename "index.org")))
- 	 (index-title (or (plist-get project-plist :index-title)
- 			  (concat "Index for project " (car project))))
+	 (index-title (or (plist-get project-plist :index-title)
+			  (concat "Index for project " (car project))))
 	 (index-buffer (find-buffer-visiting index-filename))
 	 (ifn (file-name-nondirectory index-filename))
 	 file)
@@ -597,14 +607,27 @@ Default for INDEX-FILENAME is 'index.org'."
     (with-temp-buffer
       (insert (concat index-title "\n\n"))
       (while (setq file (pop files))
-	(let ((fn (file-name-nondirectory file)))
+ 	(let ((fn (substring (expand-file-name file) 
+			     (length (expand-file-name dir)))))
 	  ;; index shouldn't index itself
 	  (unless (string= fn ifn)
 	    (insert (concat " + [[file:" fn "]["
-			    (file-name-sans-extension fn)
+			    (org-publish-find-title (concat dir fn))
 			    "]]\n")))))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
+
+(defun org-publish-find-title (file)
+  "Find the title of file in project."
+  (save-excursion
+    (set-buffer (find-file-noselect file))
+    (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+ 					  (org-infile-export-plist))))
+      (or (plist-get opt-plist :title)
+ 	  (and (not
+ 		(plist-get opt-plist :skip-before-1st-heading))
+ 	       (org-export-grab-title-from-buffer))
+ 	  (file-name-sans-extension file)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions

@@ -7633,8 +7633,11 @@ and where to put published files.
 @item @code{:publishing-directory}
 @tab Directory (possibly remote) where output files will be published.
 @item @code{:preparation-function}
-@tab Function called before starting publishing process, for example to
+@tab Function called before starting the publishing process, for example to
 run @code{make} for updating files to be published.
+@item @code{:completion-function}
+@tab Function called after finishing the publishing process, for example to
+change permissions of the resulting files.
 @end multitable
 @noindent
 
