@@ -149,6 +149,8 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'org)
+(require 'org-exp)
 
 (eval-and-compile
   (unless (fboundp 'declare-function)
