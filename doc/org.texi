@@ -3,8 +3,8 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.04c
-@set DATE May 2008
+@set VERSION 6.05pre01
+@set DATE June 2008
 
 @dircategory Emacs
 @direntry
@@ -9317,7 +9317,7 @@ Demote the current entry.
 @end defun
 
 Here is a simple example that will turn all entries in the current file with
-a tag @code{TOMORROW} into TODO entries with the keyword @code{UPCOMING}
+a tag @code{TOMORROW} into TODO entries with the keyword @code{UPCOMING}.
 Entries in comment trees and in archive trees will be ignored.
 
 @lisp
@@ -9330,7 +9330,7 @@ The following example counts the number of entries with TODO keyword
 @code{WAITING}, in all agenda files.
 
 @lisp
-(length (org-map-entries t nil 'agenda))
+(length (org-map-entries t "/+WAITING" nil 'agenda))
 @end lisp
 
 @node History and Acknowledgments, Main Index, Hacking, Top

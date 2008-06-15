@@ -14,10 +14,129 @@
 :PROPERTIES:
 :VISIBILITY: content
 :END:
+
+If I were to name my releases, this one would be called "Adam".
+Adam, you definitely owe me a beer :-).  And I owe you one, too -
+thanks for all the great ideas.
+
+** Overview
+
+   - New API for mapping a function over all or selected entries
+   - Remember templates can now use the cursor date in the agenda
+   - Remember templates can be filed to beginning/end of a file
+   - Visiting a filed remember buffer immediately
+   - BBDB anniversaries are now links
+   - Column view in the agenda now cleans the ITEM field
+   - The format of section numbers in exported files is configurable
+   - Direct, single key access to allowed values in column view
+   - New hook to hack exported iCalendar files
+
 ** Details
+*** New API for mapping a function over all or selected entries
+
+    Org has sophisticated mapping capabilities to find all
+    entries satisfying certain criteria.  Internally, this
+    functionality is used to produce agenda views, but there is
+    also an API that can be used to execute arbitrary functions
+    for each or selected entries.  The main entry point for this
+    API is:
+
+#+begin_example
+-- Function: org-map-entries func &optional match scope &rest skip
+     Call FUNC at each headline selected by MATCH in SCOPE.
+
+     FUNC is a function or a lisp form.  The function will be
+     called without arguments, with the cursor positioned at
+     the beginning of the headline.  The return values of all
+     calls to the function will be collected and returned as
+     a list.
+
+     MATCH is a tags/property/todo match as it is used in the
+     agenda tags view.  Only headlines that are matched by
+     this query will be considered during the iteration.
+     When MATCH is nil or t, all headlines will be visited by
+     the iteration.
+
+     SCOPE determines the scope of this command, it can
+     specify a file, all agenda files, the current tree and
+     much more.
+ 
+     The remaining args are treated as settings for the
+     skipping facilities of the scanner.
+#+end_example
+
+The function given to that mapping routine can really do anything
+you like.  Here is a simple example that will turn all entries in
+the current file with a tag =TOMORROW= into TODO entries with the
+keyword =UPCOMING=.  Entries in comment trees and in archive
+trees will be ignored.
+
+#+begin_src emacs-lisp
+(org-map-entries
+   '(org-todo "UPCOMING")
+   "+TOMORROW" 'file 'archive 'comment)
+#+end_src
+
+   The following example counts the number of entries with TODO
+keyword =WAITING=, in all agenda files.
+
+#+begin_src emacs-lisp
+(length (org-map-entries t "/+WAITING" nil 'agenda))
+#+end_src
+
+*** Changes in Remember templates
+
+**** Remember templates can now use the cursor date in the agenda
+     Two new escapes in remember templates, %v and %V, act like %t
+     and %T.  The only difference is that if the remember process
+     is started from the agenda or from the calendar, the date at
+     the cursor becomes the default for the date inserted, or (in
+     interactive use like %^V), the default date for the date/time
+     prompt.  Thanks to Thomas Baumann for this idea.
+
+**** Filing remember templates to the beginning or end of a file
+     You may now set the heading part of a remember template
+     definition to `top' or `bottom'.  The template will then be
+     filed as a level 1 entry to the beginning or end of the
+     target file, respectively.  Thanks to Adam Spiers for this
+     proposal.
+
+**** You can jump to the location of a note immediately after filing it
+     Just include the =%&= escape anywhere in the template.  An
+     interesting combination now is to use =%!%&=, which will
+     immediately file and visit the note, which is equivalent to
+     generating the note directly in the target location.  Thanks
+     to Adam Spiers for this proposal.
+
+*** BBDB anniversaries are now links.
+    If you are using =%%(bbdb-anniversaries)= to list
+    anniversaries in the agenda, you can now directly access the
+    entry that triggered a listed anniversary from the agenda.
+    Just click the anniversary - it is a link now.  Thanks to
+    Thomas Baumann for a patch to this effect.
+
 *** Column view in the agenda now cleans the ITEM field
     See the new variable
-    =org-agenda-columns-remove-prefix-from-item=.
+    =org-agenda-columns-remove-prefix-from-item=.  Thanks to Adam
+    Spiers for this proposal.
+
+*** The format of section number in exported files is configurable
+
+    See the new variable `org-export-section-number-format'.
+    Thanks to Adam Spiers for this proposal.
+
+*** Direct access to allowed values in column view
+
+    In column view, if you press a key 1-9 or 0, the
+    corresponding values from the list of allowed values for that
+    field at point will be directly selected.  Thanks to Levin Du
+    for this proposal and a patch to this effect.
+
+*** New hook to hack exported iCalendar files
+    The new hook `org-before-save-iCalendar-file-hook' runs just
+    before the buffer with a created iCalendar export is saved.
+    This is what I settled for after a long discussion with Adam
+    Spiers about doing some special filtering automatically.
 
 * Version 6.04
 

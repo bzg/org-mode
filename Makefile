@@ -14,7 +14,7 @@
 EMACS=emacs
 
 # Where local software is found
-prefix?=/usr/local
+prefix=/usr/local
 
 # Where local lisp files go.
 lispdir = $(prefix)/share/emacs/site-lisp
@@ -274,7 +274,8 @@ pushreleasetag:
 	git-tag -m "Adding release tag" -a release_$(TAG)
 	git-push git+ssh://repo.or.cz/srv/git/org-mode.git release_$(TAG)
 
-
+dummy:
+	echo ${prefix}
 
 # Dependencies
 
