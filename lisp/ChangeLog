@@ -1,5 +1,9 @@
 2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-schedule, org-deadline): Protect scheduled and
+	deadline tasks against changes that accidently remove the
+	repeater.
+
 	* org-remember.el (org-remember-apply-template): Access the
 	default time stored by `org-store-link'.
 

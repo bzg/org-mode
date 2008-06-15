@@ -8712,7 +8712,9 @@ With argument REMOVE, remove any deadline from the item."
       (progn
 	(org-remove-timestamp-with-keyword org-deadline-string)
 	(message "Item no longer has a deadline."))
-    (org-add-planning-info 'deadline nil 'closed)))
+    (if (org-get-repeat)
+	(error "Cannot change deadline on task with repeater, please do that by hand")
+      (org-add-planning-info 'deadline nil 'closed))))
 
 (defun org-schedule (&optional remove)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
@@ -8722,7 +8724,9 @@ With argument REMOVE, remove any scheduling date from the item."
       (progn
 	(org-remove-timestamp-with-keyword org-scheduled-string)
 	(message "Item is no longer scheduled."))
-    (org-add-planning-info 'scheduled nil 'closed)))
+    (if (org-get-repeat)
+	(error "Cannot reschedule task with repeater, please do that by hand")
+      (org-add-planning-info 'scheduled nil 'closed))))
 
 (defun org-remove-timestamp-with-keyword (keyword)
   "Remove all time stamps with KEYWORD in the current entry."
