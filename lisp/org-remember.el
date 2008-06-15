@@ -123,7 +123,8 @@ Furthermore, the following %-escapes will be replaced with content:
   %t          time stamp, date only
   %T          time stamp with date and time
   %u, %U      like the above, but inactive time stamps
-  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U
+  %v, %V      like %t,%T, but use agenda/calendar date as default.
+  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U, %^v %^V
               You may define a prompt like %^{Please specify birthday}t
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
@@ -326,6 +327,8 @@ to be run from that hook to function properly."
 		      (org-get-x-clipboard 'SECONDARY)))
 	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
 	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
+	     (v-v (format-time-string (car org-time-stamp-formats) (or default-time (org-current-time))))
+	     (v-V (format-time-string (cdr org-time-stamp-formats) (or default-time (org-current-time))))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
 	     (v-U (concat "[" (substring v-T 1 -1) "]"))
 	     ;; `initial' and `annotation' are bound in `remember'
@@ -368,7 +371,7 @@ to be run from that hook to function properly."
 		  (or (cdr org-remember-previous-location) "???"))))
 	(insert tpl) (goto-char (point-min))
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUaiAcx]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUvVaiAcx]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
@@ -422,7 +425,7 @@ to be run from that hook to function properly."
 	    (org-set-local 'org-remember-default-headline headline))
 	;; Interactive template entries
 	(goto-char (point-min))
-	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGuUtTCL]\\)?" nil t)
+	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGuUtTvVCL]\\)?" nil t)
 	  (setq char (if (match-end 3) (match-string 3))
 		prompt (if (match-end 2) (match-string 2)))
 	  (goto-char (match-beginning 0))
@@ -470,7 +473,10 @@ to be run from that hook to function properly."
 	   (char
 	    (setq org-time-was-given (equal (upcase char) char))
 	    (setq time (org-read-date (equal (upcase char) "U") t nil
-				      prompt default-time))
+				      prompt
+				      (if (equal (upcase char) "V")
+					  default-time
+					nil)))
 	    (org-insert-time-stamp time org-time-was-given
 				   (member char '("u" "U"))
 				   nil nil (list org-end-time-was-given)))

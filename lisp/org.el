@@ -6663,19 +6663,19 @@ For file links, arg negates `org-context-in-file-links'."
   "Store the date at the cursor so that remember templates can access it.
 This works in the calendar, and in the Org Agenda.  It is a no-op in
 any other modes."
-  (cond
-   ((eq major-mode 'calendar-mode)
-    (let ((date (calendar-cursor-to-date)) day defd)
-      (setq defd (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date)))))
-   ((eq major-mode 'org-agenda-mode)
-    (let* ((day (get-text-property (point) 'day))
-	   date)
+  (let (date day defd)
+    (cond
+     ((eq major-mode 'calendar-mode)
+      (setq date (calendar-cursor-to-date)
+	    defd (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
+     ((eq major-mode 'org-agenda-mode)
+      (setq day (get-text-property (point) 'day))
       (if day
 	  (setq date (calendar-gregorian-from-absolute day)
 		defd (encode-time 0 0 0 (nth 1 date) (nth 0 date)
-				  (nth 2 date)))))))
-  (when defd
-    (org-store-link-props :default-time defd)))
+				  (nth 2 date))))))
+    (when defd
+      (org-store-link-props :default-time defd))))
 
 (defun org-email-link-description (&optional fmt)
   "Return the description part of an email link.

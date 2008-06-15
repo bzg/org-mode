@@ -4863,16 +4863,18 @@ insertion of content:
             @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}}
             @r{The arrow keys access a prompt-specific history.}
-%t          @r{time stamp, date only}
-%T          @r{time stamp with date and time}
-%u, %U      @r{like the above, but inactive time stamps}
-%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
-            @r{You may define a prompt like @code{%^@{Birthday@}t}}
-%n          @r{user name (taken from @code{user-full-name})}
 %a          @r{annotation, normally the link created with @code{org-store-link}}
 %A          @r{like @code{%a}, but prompt for the description part}
 %i          @r{initial content, the region when remember is called with C-u.}
             @r{The entire text will be indented like @code{%i} itself.}
+%t          @r{time stamp, date only}
+%T          @r{time stamp with date and time}
+%u, %U      @r{like the above, but inactive time stamps}
+%v, %V      @r{like %t,%T, but when called from agenda or calendar, use the}
+            @r{cursor date as the default date.}
+%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
+            @r{You may define a prompt like @code{%^@{Birthday@}t}}
+%n          @r{user name (taken from @code{user-full-name})}
 %c          @r{Current kill ring head.}
 %x          @r{Content of the X clipboard.}
 %^C         @r{Interactive selection of which kill or clip to use.}
