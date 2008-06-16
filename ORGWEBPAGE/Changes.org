@@ -1,6 +1,6 @@
 #   -*- mode: org; org-export-publishing-directory: "tmp"; fill-column: 65 -*-
 
-#+STARTUP: 
+#+STARTUP: hidestars
 
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
@@ -30,6 +30,7 @@ thanks for all the great ideas.
    - The format of section numbers in exported files is configurable
    - Direct, single key access to allowed values in column view
    - New hook to hack exported iCalendar files
+   - Log mode in agenda now shows end time for CLOCK line
 
 ** Incompatible changes
 
@@ -128,9 +129,9 @@ keyword =WAITING=, in all agenda files.
 *** Changes in Remember templates
 
 **** Remember templates can now use the cursor date in the agenda
-
-     Thanks to Thomas Baumann for starting up a thread
-     that let to this idea.
+     Use =k r= to start remember from the agenda, with enforcing
+     the cursor date as default for any time stamps created by
+     the template.
 
 **** Filing remember templates to the beginning or end of a file
      You may now set the heading part of a remember template
@@ -176,6 +177,10 @@ keyword =WAITING=, in all agenda files.
     This is what I settled for after a long discussion with Adam
     Spiers about doing some special filtering automatically.
 
+*** Log mode in agenda now shows start end time for CLOCK lines
+    When turning on log mode in the agenda with =l=, clock lines
+    will now also list the end time, not only the starting time.
+    Thanks to Tian Qiu for bringing this up again.
 * Version 6.04
 
 ** Overview

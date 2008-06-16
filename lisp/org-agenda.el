@@ -3302,7 +3302,7 @@ the documentation of `org-diary'."
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
 	 marker hdmarker priority category tags closedp
-	 ee txt timestr)
+	 ee txt timestr rest)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3313,9 +3313,15 @@ the documentation of `org-diary'."
 	      timestr (buffer-substring (match-beginning 0) (point-at-eol))
 	      ;; donep (org-entry-is-done-p)
 	      )
-	(if (string-match "\\]" timestr)
-	    ;; substring should only run to end of time stamp
-	    (setq timestr (substring timestr 0 (match-end 0))))
+	(when (string-match "\\]" timestr)
+	  ;; substring should only run to end of time stamp
+	  (setq rest (substring timestr (match-end 0))
+		timestr (substring timestr 0 (match-end 0)))
+	  (if (and (not closedp)
+		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\]" rest))
+	      (setq timestr (concat (substring timestr 0 -1)
+				    "-" (match-string 1 rest) "]"))))
+		
 	(save-excursion
 	  (if (re-search-backward "^\\*+ " nil t)
 	      (progn

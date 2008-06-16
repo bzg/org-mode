@@ -8595,6 +8595,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	  (match-string 1)))))
 
 (defvar org-last-changed-timestamp)
+(defvar org-last-inserted-timestamp)
 (defvar org-log-post-message)
 (defvar org-log-note-purpose)
 (defvar org-log-note-how)

@@ -1,5 +1,8 @@
 2008-06-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-get-closed): Get the end time into the
+	agenda prefix as well.
+
 	* org-publish.el (org-publish-org-index): Make a properly indented
 	list.
 
