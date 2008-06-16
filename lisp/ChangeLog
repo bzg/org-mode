@@ -1,5 +1,9 @@
 2008-06-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-colview.el (org-columns-next-allowed-value): Bug fix.
+
+	* org-colview-xemacs.el (org-columns-next-allowed-value): Bug fix.
+
 	* org-agenda.el (org-agenda-get-closed): Get the end time into the
 	agenda prefix as well.
 

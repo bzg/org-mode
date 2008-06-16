@@ -553,7 +553,8 @@ an integer, select that value."
 	(setq nval (or (car (cdr (member value allowed)))
 		       (car allowed)))
 	(if (equal nval value)
-	    (error "Only one allowed value for this property")))))
+	    (error "Only one allowed value for this property")))
+       (t (setq nval (car allowed)))))
     (cond
      ((equal major-mode 'org-agenda-mode)
       (org-columns-eval '(org-entry-put pom key nval))
