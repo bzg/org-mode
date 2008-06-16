@@ -595,8 +595,10 @@ Default for INDEX-FILENAME is 'index.org'."
   (let* ((project-plist (cdr project))
 	 (dir (file-name-as-directory
 	       (plist-get project-plist :base-directory)))
+	 (localdir (file-name-directory dir))
+	 (indent-str (make-string 2 ?\ ))
 	 (exclude-regexp (plist-get project-plist :exclude))
-	 (files (org-publish-get-base-files project exclude-regexp))
+	 (files (nreverse (org-publish-get-base-files project exclude-regexp)))
 	 (index-filename (concat dir (or index-filename "index.org")))
 	 (index-title (or (plist-get project-plist :index-title)
 			  (concat "Index for project " (car project))))
@@ -609,12 +611,29 @@ Default for INDEX-FILENAME is 'index.org'."
     (with-temp-buffer
       (insert (concat index-title "\n\n"))
       (while (setq file (pop files))
- 	(let ((fn (substring (expand-file-name file) 
-			     (length (expand-file-name dir)))))
+	(let ((fn (file-name-nondirectory file))
+	      (link (file-relative-name file dir))
+	      (oldlocal localdir))
 	  ;; index shouldn't index itself
 	  (unless (string= fn ifn)
-	    (insert (concat " + [[file:" fn "]["
-			    (org-publish-find-title (concat dir fn))
+	    (setq localdir (concat (file-name-as-directory dir)
+				   (file-name-directory link)))
+	    (unless (string= localdir oldlocal)
+	      (if (string= localdir dir)
+		  (setq indent-str (make-string 2 ?\ ))
+		(let ((subdirs
+		       (split-string
+			(directory-file-name
+			 (file-name-directory
+			  (file-relative-name localdir dir))) "/"))
+		      (subdir ""))
+		  (setq indent-str (make-string 2 ?\ ))
+		  (dolist (d subdirs)
+		    (setq subdir (concat subdir d "/"))
+		    (insert (concat indent-str " + [[file:" subdir "][" d "/]]\n"))
+		    (setq indent-str (make-string (+ (length indent-str) 2) ?\ ))))))
+	    (insert (concat indent-str " + [[file:" link "]["
+			    (file-name-sans-extension fn)
 			    "]]\n")))))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))

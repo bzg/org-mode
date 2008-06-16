@@ -1,5 +1,8 @@
 2008-06-16  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-org-index): Make a properly indented
+	list.
+
 	* org.el (org-calendar-agenda-action-key): New option.
 	(org-get-cursor-date): New function.
 	(org-mark-entry-for-agenda-action): New command.
