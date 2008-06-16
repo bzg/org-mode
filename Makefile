@@ -218,6 +218,7 @@ release:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	make distfile
 	make doc
+	UTILITIES/gplmanual.pl
 	make html_manual
 	rm -rf RELEASEDIR
 	$(MKDIR) RELEASEDIR

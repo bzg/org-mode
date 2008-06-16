@@ -29,6 +29,7 @@ org-install.el
 org-*.tar.gz
 org-*.zip
 manual
+org_dual_license.texi
 
 # aspell word and replacement lists
 
