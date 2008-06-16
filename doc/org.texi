@@ -42,9 +42,9 @@ Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.1 or
 any later version published by the Free Software Foundation; with no
 Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
-and with the Back-Cover Texts as in (a) below.  A copy of the
-license is included in the section entitled ``GNU Free Documentation
-License.
+and with the Back-Cover Texts as in (a) below.  You should have received a
+copy of the ``GNU Free Documentation License'' with GNU Emacs.  If not, see
+@url{http://www.gnu.org/licenses/}.
 
 (a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
 this GNU Manual, like GNU software.  Copies published by the Free
@@ -4502,6 +4502,15 @@ Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
 happen in the line directly following the headline.  Any CLOSED
 timestamp will be removed.  When called with a prefix argument, remove
 the scheduling date from the entry.
+@c
+@kindex C-c C-x C-k
+@kindex k a
+@kindex k s
+@item C-c C-x C-k
+Mark the current entry for agenda action.  After you have marked the entry
+like this, you can open the agenda or the calendar to find an appropriate
+date.  With the cursor on the selected date, press @kbd{k s} or @kbd{k d} to
+schedule the marked item.
 @end table
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
@@ -4797,6 +4806,11 @@ stored: Just call @code{org-remember} with a prefix argument.  If you
 use two prefix arguments, Org jumps to the location where the last
 remember note was stored.
 
+You can also call @code{org-remember} in a special way from the agenda,
+using the @kbd{k r} key combination.  With this access, any time stamps
+inserted by the selected remember template (see below) will default to
+the cursor date in the agenda, rather than to the current date.
+
 @node Remember templates, Storing notes, Setting up Remember, Remember
 @section Remember templates
 @cindex templates, for remember
@@ -4870,8 +4884,6 @@ insertion of content:
 %t          @r{time stamp, date only}
 %T          @r{time stamp with date and time}
 %u, %U      @r{like the above, but inactive time stamps}
-%v, %V      @r{like %t,%T, but when called from agenda or calendar, use the}
-            @r{cursor date as the default date.}
 %^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}}
             @r{You may define a prompt like @code{%^@{Birthday@}t}}
 %n          @r{user name (taken from @code{user-full-name})}
@@ -5852,6 +5864,21 @@ Schedule this item
 @kindex C-c C-d
 @item C-c C-d
 Set a deadline for this item.
+@c
+@kindex k
+@item k
+Agenda actions, to set dates for selected items to the cursor date.
+This command also works in the calendar!  The command prompts for an
+additonal key:
+@example
+m   @r{Mark the entry at point for action.  You can also make entries}
+    @r{in Org files with @kbd{C-c C-x C-k}.}
+d   @r{Set the deadline of the marked entry to the date at point.}
+s   @r{Schedule the marked entry at the date at point.}
+r   @r{Call @code{org-remember} with the cursor date as default date.}
+@end example
+Press @kbd{r} afterwards to refresh the agenda and see the effect of the
+command.
 @c
 @kindex S-@key{right}
 @item S-@key{right}
@@ -9377,6 +9404,9 @@ let me know.
 @item
 @i{Thomas Baumann} wrote @file{org-bbdb.el} and @file{org-mhe.el}.
 @item
+@i{Christophe Bataillon} created the great unicorn logo that we use on the
+Org-mode website.
+@item
 @i{Alex Bochannek} provided a patch for rounding time stamps.
 @item
 @i{Charles Cave}'s suggestion sparked the implementation of templates
@@ -9512,11 +9542,12 @@ keyword.
 system.
 @item
 @i{John Wiegley} wrote @file{emacs-wiki.el}, @file{planner.el}, and
-@file{muse.el}, which have similar goals as Org.  Initially the development
-of Org was fully independent because I was not aware of the existence of
-these packages.  But with time I have accasionally looked at John's code and
-learned a lot from it.  John has also contributed a number of great ideas and
-patches directly to Org, including the file @code{org-mac-message.el}'
+@file{muse.el}, which have similar goals as Org.  Initially the
+development of Org was fully independent because I was not aware of the
+existence of these packages.  But with time I have accasionally looked
+at John's code and learned a lot from it.  John has also contributed a
+number of great ideas and patches directly to Org, including the file
+@code{org-mac-message.el}'
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.

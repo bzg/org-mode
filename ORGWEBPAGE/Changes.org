@@ -21,8 +21,8 @@ thanks for all the great ideas.
 
 ** Overview
 
+   - Use cursor position in agenda for remember, scheduling and deadlines
    - New API for mapping a function over all or selected entries
-   - Remember templates can now use the cursor date in the agenda
    - Remember templates can be filed to beginning/end of a file
    - Visiting a filed remember buffer immediately
    - BBDB anniversaries are now links
@@ -31,7 +31,48 @@ thanks for all the great ideas.
    - Direct, single key access to allowed values in column view
    - New hook to hack exported iCalendar files
 
+** Incompatible changes
+
+*** `C-c C-x C-k' now calls `org-mark-entry-for-agenda-action'
+    It used to call =org-cut-special=, but that is also at bound
+    to the key =C-c C-x C-w=.
 ** Details
+
+*** Making use of the cursor position in the agenda
+
+    The date at the cursor in the agenda (and also in the
+    calendar) can now be used to schedule entries, or to set the
+    date in a remember template correctly.  It is also designed
+    to make it easier to move an entry to a date picked in the
+    agenda.  Thanks to Thomas Baumann for starting the thread
+    that led to this development.
+
+**** Calling remember with the cursor date in the agenda
+
+     If you want to use the date at the agenda cursor in a
+     remember template, start remember from the agenda with the
+     keys =k r=.  While the template is being filled in, the
+     default date for all time stamps, and also for all
+     interactive escapes like =%^t= is now the date at the cursor
+     in the agenda.  The exact same command can also be used from
+     the calendar if you prefer that.
+
+**** Picking a date for scheduling/deadline in the agenda
+
+     You may now pick the date for scheduling an item or for
+     setting a deadline in the agenda, where you have the best
+     overview over free time slots.  This is a two step process.
+     
+     1. First you pick the entry that should be acted upon.  In
+        the agenda, you use the keys =k m=.  In an org-mode file,
+        this is on =C-c C-x C-k=.
+
+     2. Then you find the agenda date you want to apply.  When the
+        cursor is anywhere in the block belonging to that date,
+        press =k s= to schedule, or =k d= to put a deadline.  The
+        agenda is not updated immediately, press =r= if you want
+        it to show the affected entry in the right place.
+
 *** New API for mapping a function over all or selected entries
 
     Org has sophisticated mapping capabilities to find all
@@ -87,12 +128,9 @@ keyword =WAITING=, in all agenda files.
 *** Changes in Remember templates
 
 **** Remember templates can now use the cursor date in the agenda
-     Two new escapes in remember templates, %v and %V, act like %t
-     and %T.  The only difference is that if the remember process
-     is started from the agenda or from the calendar, the date at
-     the cursor becomes the default for the date inserted, or (in
-     interactive use like %^V), the default date for the date/time
-     prompt.  Thanks to Thomas Baumann for this idea.
+
+     Thanks to Thomas Baumann for starting up a thread
+     that let to this idea.
 
 **** Filing remember templates to the beginning or end of a file
      You may now set the heading part of a remember template

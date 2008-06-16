@@ -1087,6 +1087,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "y"        'org-agenda-year-view)
 (org-defkey org-agenda-mode-map "\C-c\C-z" 'org-agenda-add-note)
 (org-defkey org-agenda-mode-map "z"        'org-agenda-add-note)
+(org-defkey org-agenda-mode-map "k"        'org-agenda-action)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-k" 'org-agenda-action)
 (org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-date-later)
 (org-defkey org-agenda-mode-map [(shift left)] 'org-agenda-date-earlier)
 (org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-date-later)
@@ -1192,6 +1194,11 @@ The following commands are available:
     ("Date/Schedule"
      ["Schedule" org-agenda-schedule t]
      ["Set Deadline" org-agenda-deadline t]
+     "--"
+     ["Mark item" org-agenda-action :active t :keys "k m"]
+     ["Show mark item" org-agenda-action :active t :keys "k v"]
+     ["Schedule marked item" org-agenda-action :active t :keys "k s"]
+     ["Set Deadline for marked item" org-agenda-action :active t :keys "k d"]
      "--"
      ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
      ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
@@ -4166,12 +4173,12 @@ written as 2-digit years."
   (setq org-agenda-ndays 7)
   (org-agenda-change-time-span 'week iso-week))
 (defun org-agenda-month-view (&optional month)
-  "Switch to daily view for agenda.
+  "Switch to monthly view for agenda.
 With argument MONTH, switch to that month."
   (interactive "P")
   (org-agenda-change-time-span 'month month))
 (defun org-agenda-year-view (&optional year)
-  "Switch to daily view for agenda.
+  "Switch to yearly view for agenda.
 With argument YEAR, switch to that year.
 If MONTH has more then 2 digits, only the last two encode the
 month.  Any digits before this encode a year.  So 200712 means
@@ -4922,6 +4929,69 @@ be used to request time specification in the time stamp."
       (org-agenda-show-new-time marker ts "S"))
 	(message "Deadline for this item set to %s" ts)))
 
+(defun org-agenda-action ()
+  "Select entry for agenda action, or execute an agenda action.
+This command prompts for another letter.  Valid inputs are:
+
+m     Mark the entry at point for an agenda action
+s     Schedule the marked entry to the date at the cursor
+d     Set the deadline of the marked entry to the date at the cursor
+r     Call `org-remember' with cursor date as the default date
+SPC   Show marked entry in other window
+TAB   Visit marked entry in other window
+
+The cursor may be at a date in the calendar, or in the Org agenda."
+  (interactive)
+  (let (pos ans)
+    (message "Select action: [m]ark | [s]chedule [d]eadline [r]emember [ ]show")
+    (setq ans (read-char-exclusive))
+    (cond
+     ((equal ans ?m)
+      ;; Mark this entry
+      (if (eq major-mode 'org-agenda-mode)
+	  (let ((m (or (get-text-property (point) 'org-hd-marker)
+		       (get-text-property (point) 'org-marker))))
+	    (if m
+		(progn
+		  (move-marker org-agenda-action-marker
+			       (marker-position m) (marker-buffer m))
+		  (message "Entry marked for action; press `k' at desired date in agenda or calendar"))
+	      (error "Don't know which entry to mark")))
+	(error "This command works only in the agenda")))
+     ((equal ans ?s)
+      (org-agenda-do-action '(org-schedule nil org-overriding-default-time)))
+     ((equal ans ?d)
+      (org-agenda-do-action '(org-deadline nil org-overriding-default-time)))
+     ((equal ans ?r)
+      (org-agenda-do-action '(org-remember) t))
+     ((equal ans ?\ )
+      (let ((cw (selected-window)))
+	(org-switch-to-buffer-other-window
+	 (marker-buffer org-agenda-action-marker))
+	(goto-char org-agenda-action-marker)
+	(org-show-context 'agenda)
+	(select-window cw)))
+     ((equal ans ?\C-i)
+      (org-switch-to-buffer-other-window
+       (marker-buffer org-agenda-action-marker))
+      (goto-char org-agenda-action-marker)
+      (org-show-context 'agenda))
+     (t (error "Invalid agenda action %c" ans)))))
+
+(defun org-agenda-do-action (form &optional current-buffer)
+  "Evaluate FORM at the entry pointed to by `org-agenda-action-marker'."
+  (let ((org-overriding-default-time (org-get-cursor-date)))
+    (if current-buffer
+	(eval form)
+      (if (not (marker-buffer org-agenda-action-marker))
+	  (error "No entry has bee selected for agenda action")
+	(with-current-buffer (marker-buffer org-agenda-action-marker)
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char org-agenda-action-marker)
+	      (eval form))))))))
+  
 (defun org-agenda-clock-in (&optional arg)
   "Start the clock on the currently selected item."
   (interactive "P")
@@ -5184,3 +5254,5 @@ belonging to the \"Work\" category."
 ;; arch-tag: 77f7565d-7c4b-44af-a2df-9f6f7070cff1
 
 ;;; org-agenda.el ends here
+
+

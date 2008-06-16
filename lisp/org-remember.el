@@ -123,14 +123,16 @@ Furthermore, the following %-escapes will be replaced with content:
   %t          time stamp, date only
   %T          time stamp with date and time
   %u, %U      like the above, but inactive time stamps
-  %v, %V      like %t,%T, but use agenda/calendar date as default.
-  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U, %^v %^V
-              You may define a prompt like %^{Please specify birthday}t
+  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
+              You may define a prompt like %^{Please specify birthday
   %n          user name (taken from `user-full-name')
   %a          annotation, normally the link created with org-store-link
   %i          initial content, the region active.  If %i is indented,
               the entire inserted text will be indented as well.
-  %c          content of the clipboard, or current kill ring head
+  %c          current kill ring head
+  %x          content of the X clipboard
+  %^C         Interactive selection of which kill or clip to use
+  %^L         Like %^C, but insert as link
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion all tags in all agenda files
   %:keyword   specific information for certain link types, see below
@@ -313,9 +315,9 @@ This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to function properly."
   (if org-remember-templates
       (let* ((entry (org-select-remember-template use-char))
+	     (ct (or org-overriding-default-time (org-current-time)))
 	     (tpl (car entry))
 	     (plist-p (if org-store-link-plist t nil))
-	     (default-time (plist-get org-store-link-plist :default-time))
 	     (file (if (and (nth 1 entry) (stringp (nth 1 entry))
 			    (string-match "\\S-" (nth 1 entry)))
 		       (nth 1 entry)
@@ -325,10 +327,8 @@ to be run from that hook to function properly."
 	     (v-x (or (org-get-x-clipboard 'PRIMARY)
 		      (org-get-x-clipboard 'CLIPBOARD)
 		      (org-get-x-clipboard 'SECONDARY)))
-	     (v-t (format-time-string (car org-time-stamp-formats) (org-current-time)))
-	     (v-T (format-time-string (cdr org-time-stamp-formats) (org-current-time)))
-	     (v-v (format-time-string (car org-time-stamp-formats) (or default-time (org-current-time))))
-	     (v-V (format-time-string (cdr org-time-stamp-formats) (or default-time (org-current-time))))
+	     (v-t (format-time-string (car org-time-stamp-formats) ct))
+	     (v-T (format-time-string (cdr org-time-stamp-formats) ct))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
 	     (v-U (concat "[" (substring v-T 1 -1) "]"))
 	     ;; `initial' and `annotation' are bound in `remember'
@@ -371,7 +371,7 @@ to be run from that hook to function properly."
 		  (or (cdr org-remember-previous-location) "???"))))
 	(insert tpl) (goto-char (point-min))
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUvVaiAcx]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUaiAcx]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
@@ -425,7 +425,7 @@ to be run from that hook to function properly."
 	    (org-set-local 'org-remember-default-headline headline))
 	;; Interactive template entries
 	(goto-char (point-min))
-	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGuUtTvVCL]\\)?" nil t)
+	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCL]\\)?" nil t)
 	  (setq char (if (match-end 3) (match-string 3))
 		prompt (if (match-end 2) (match-string 2)))
 	  (goto-char (match-beginning 0))
@@ -471,12 +471,10 @@ to be run from that hook to function properly."
 						   '(clipboards . 1)
 						   (car clipboards))))))
 	   (char
+	    ;; These are the date/time related ones
 	    (setq org-time-was-given (equal (upcase char) char))
 	    (setq time (org-read-date (equal (upcase char) "U") t nil
-				      prompt
-				      (if (equal (upcase char) "V")
-					  default-time
-					nil)))
+				      prompt))
 	    (org-insert-time-stamp time org-time-was-given
 				   (member char '("u" "U"))
 				   nil nil (list org-end-time-was-given)))

@@ -1,18 +1,28 @@
+2008-06-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-calendar-agenda-action-key): New option.
+	(org-get-cursor-date): New function.
+	(org-mark-entry-for-agenda-action): New command.
+	(org-overriding-default-time): New variable.
+	(org-read-date): Respect `org-overriding-default-time'.
+
+	* org-remember.el (org-remember-apply-template): Respect the
+	ovverriding default time.
+
+	* org-agenda.el (org-agenda-action-marker): New variable.
+	(org-agenda-action): New command.
+	(org-agenda-do-action): New function.
+
 2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-schedule, org-deadline): Protect scheduled and
 	deadline tasks against changes that accidently remove the
-	repeater.
-
-	* org-remember.el (org-remember-apply-template): Access the
-	default time stored by `org-store-link'.
-
-	* org.el (org-store-link-set-default-date): New function.
+	repeater.  Also show a message with the new date when done.
 
 2008-06-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-beginning-of-line): Cater for the case when there
-	are toags but no headline text.
+	are tags but no headline text.
 	(org-align-tags-here): Convert to tabs only when indent-tabs-mode
 	it set.
 

@@ -2000,9 +2000,19 @@ forth between agenda and calendar."
   :group 'org-agenda
   :type 'sexp)
 
+(defcustom org-calendar-agenda-action-key [?k]
+  "The key to be installed in `calendar-mode-map' for agenda-action.
+The command `org-agenda-action' will be bound to this key.  The
+default is the character `k' because we use the same key in the agenda."
+  :group 'org-agenda
+  :type 'sexp)
+
 (eval-after-load "calendar"
-  '(org-defkey calendar-mode-map org-calendar-to-agenda-key
-     'org-calendar-goto-agenda))
+  '(progn
+     (org-defkey calendar-mode-map org-calendar-to-agenda-key
+		 'org-calendar-goto-agenda)
+     (org-defkey calendar-mode-map org-calendar-agenda-action-key
+		 'org-agenda-action)))
 
 (defgroup org-latex nil
   "Options for embedding LaTeX code into Org-mode."
@@ -6524,7 +6534,6 @@ For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
-  (org-store-link-set-default-date)
   (let (link cpltxt desc description search txt)
     (cond
 
@@ -6658,24 +6667,6 @@ For file links, arg negates `org-context-in-file-links'."
       (setq key (pop plist) value (pop plist))
       (setq org-store-link-plist
 	    (plist-put org-store-link-plist key value)))))
-
-(defun org-store-link-set-default-date ()
-  "Store the date at the cursor so that remember templates can access it.
-This works in the calendar, and in the Org Agenda.  It is a no-op in
-any other modes."
-  (let (date day defd)
-    (cond
-     ((eq major-mode 'calendar-mode)
-      (setq date (calendar-cursor-to-date)
-	    defd (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
-     ((eq major-mode 'org-agenda-mode)
-      (setq day (get-text-property (point) 'day))
-      (if day
-	  (setq date (calendar-gregorian-from-absolute day)
-		defd (encode-time 0 0 0 (nth 1 date) (nth 0 date)
-				  (nth 2 date))))))
-    (when defd
-      (org-store-link-props :default-time defd))))
 
 (defun org-email-link-description (&optional fmt)
   "Return the description part of an email link.
@@ -8704,9 +8695,11 @@ of `org-todo-keywords-1'."
     (message "%d TODO entries found"
 	     (org-occur (concat "^" outline-regexp " *" kwd-re )))))
 
-(defun org-deadline (&optional remove)
+(defun org-deadline (&optional remove time)
   "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
-With argument REMOVE, remove any deadline from the item."
+With argument REMOVE, remove any deadline from the item.
+When TIME is set, it should be an internal time specification, and the
+scheduling will use the corresponding date."
   (interactive "P")
   (if remove
       (progn
@@ -8714,11 +8707,14 @@ With argument REMOVE, remove any deadline from the item."
 	(message "Item no longer has a deadline."))
     (if (org-get-repeat)
 	(error "Cannot change deadline on task with repeater, please do that by hand")
-      (org-add-planning-info 'deadline nil 'closed))))
+      (org-add-planning-info 'deadline time 'closed)
+      (message "Deadline on %s" org-last-inserted-timestamp))))
 
-(defun org-schedule (&optional remove)
+(defun org-schedule (&optional remove time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
-With argument REMOVE, remove any scheduling date from the item."
+With argument REMOVE, remove any scheduling date from the item.
+When TIME is set, it should be an internal time specification, and the
+scheduling will use the corresponding date."
   (interactive "P")
   (if remove
       (progn
@@ -8726,7 +8722,8 @@ With argument REMOVE, remove any scheduling date from the item."
 	(message "Item is no longer scheduled."))
     (if (org-get-repeat)
 	(error "Cannot reschedule task with repeater, please do that by hand")
-      (org-add-planning-info 'scheduled nil 'closed))))
+      (org-add-planning-info 'scheduled time 'closed)
+      (message "Scheduled to %s" org-last-inserted-timestamp))))
 
 (defun org-remove-timestamp-with-keyword (keyword)
   "Remove all time stamps with KEYWORD in the current entry."
@@ -10600,6 +10597,8 @@ Return the position where this entry starts, or nil if there is no such entry."
 ;;;; Timestamps
 
 (defvar org-last-changed-timestamp nil)
+(defvar org-last-inserted-timestamp nil
+  "The last time stamp inserted with `org-insert-time-stamp'.")
 (defvar org-time-was-given) ; dynamically scoped parameter
 (defvar org-end-time-was-given) ; dynamically scoped parameter
 (defvar org-ts-what) ; dynamically scoped parameter
@@ -10689,6 +10688,7 @@ So these are more for recording a certain time/date."
 
 (defvar org-plain-time-of-day-regexp) ; defined below
 
+(defvar org-overriding-default-time nil) ; dynamically scoped
 (defvar org-read-date-overlay nil)
 (defvar org-dcst nil) ; dynamically scoped
 
@@ -10746,7 +10746,7 @@ user."
 	  (if (equal with-time '(16)) '(0 0) org-time-stamp-rounding-minutes))
 	 (org-dcst org-display-custom-times)
 	 (ct (org-current-time))
-	 (def (or default-time ct))
+	 (def (or org-overriding-default-time default-time ct))
 	 (defdecode (decode-time def))
 	 (dummy (progn
 		  (when (< (nth 2 defdecode) org-extend-today-until)
@@ -11110,7 +11110,7 @@ The command returns the inserted time stamp."
       (insert-before-markers extra)
       (forward-char 1))
     (insert-before-markers (or post ""))
-    stamp))
+    (setq org-last-inserted-timestamp stamp)))
 
 (defun org-toggle-time-stamp-overlays ()
   "Toggle the use of custom time stamp formats."
@@ -12488,7 +12488,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 
-(org-defkey org-mode-map "\C-c\C-x\C-k" 'org-cut-special)
+(org-defkey org-mode-map "\C-c\C-x\C-k" 'org-mark-entry-for-agenda-action)
 (org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
 (org-defkey org-mode-map "\C-c\C-x\M-w" 'org-copy-special)
 (org-defkey org-mode-map "\C-c\C-x\C-y" 'org-paste-special)
@@ -13855,6 +13855,37 @@ not an indirect buffer."
   "Return non-nil if FILE is an image."
   (save-match-data
     (string-match (org-image-file-name-regexp) file)))
+
+(defun org-get-cursor-date ()
+  "Return the date at cursor in as a time.
+This works in the calendar and in the agenda, anywhere else it just
+returns the current time."
+  (let (date day defd)
+    (cond
+     ((eq major-mode 'calendar-mode)
+      (setq date (calendar-cursor-to-date)
+	    defd (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
+     ((eq major-mode 'org-agenda-mode)
+      (setq day (get-text-property (point) 'day))
+      (if day
+	  (setq date (calendar-gregorian-from-absolute day)
+		defd (encode-time 0 0 0 (nth 1 date) (nth 0 date)
+				  (nth 2 date))))))
+    (or defd (current-time))))
+
+(defvar org-agenda-action-marker (make-marker)
+  "Marker pointing to the entry for the next agenda action.")
+
+(defun org-mark-entry-for-agenda-action ()
+  "Mark the current entry as target of an agenda action.
+Agenda actions are actions executed from the agenda with the key `k',
+which make use of the date at the cursor."
+  (interactive)
+  (move-marker org-agenda-action-marker
+	       (save-excursion (org-back-to-heading t) (point))
+	       (current-buffer))
+  (message
+   "Entry marked for action; press `k' at desired date in agenda or calendar"))
 
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.
