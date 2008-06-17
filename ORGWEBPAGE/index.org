@@ -124,7 +124,7 @@ contribute your own setup, screenshots, tutorials etc, please go to
 ** Org-mode, GTD and other task management systems 
     Org-mode is flexible enough to implement many different ways of
     organizing your projects.  For links and pointers in this area,
-    see the [[http://orgmode.org/worg/org-gtd-etc.org][Worg page dedicated to task management systems]].
+    see the [[http://orgmode.org/worg/org-gtd-etc.php][Worg page dedicated to task management systems]].
 
 ** Contributing to Org-mode
 
