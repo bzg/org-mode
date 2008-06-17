@@ -123,42 +123,8 @@ contribute your own setup, screenshots, tutorials etc, please go to
 
 ** Org-mode, GTD and other task management systems 
     Org-mode is flexible enough to implement many different ways of
-    organizing your projects.  A frequently discusses scheme is [[http://www.davidco.com/][David
-    Allen's]] strategy for [[http://en.wikipedia.org/wiki/GTD][Getting Things Done]].  But it is clearly not
-    the only way to us Org-mode for planning.  Here are a couple of
-    links related to this topic.
-
-    - [[http://johnwiegley.com][John Wiegley]] has written an excellent document describing his
-      way of using Org-mode as a [[http://johnwiegley.com/org.mode.day.planner.html][day planner]]. See also some later
-      messages for enhancements of his setup:
-      [[http://article.gmane.org/gmane.emacs.orgmode/2963][emacs-orgmode-2962]], [[http://article.gmane.org/gmane.emacs.orgmode/3629][emacs-orgmode-3629]]
-
-    - [[http://members.optusnet.com.au/charles57/Creative/][Charles Cave]] has written an [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][article/tutorial]] about the basic
-      elements of GTD and how he implements them in Org-mode.  There
-      is also a [[http://www.legito.net/worg/org-tutorials/orgtutorial_dto-fr.php][french translation]] of this document.
-
-    - There have been several threads on emacs-orgmode@gnu.org related
-      to GTD, the most important ones are:
-
-      + [[http://thread.gmane.org/gmane.emacs.orgmode/683][Another GTD question]], which contains a discussion about basic
-        GTD aspects.  It also contains this
-      + [[http://article.gmane.org/gmane.emacs.orgmode/715][Post by Carsten]] summarizing several options for implementing
-        GTD in org-mode.
-      + [[http://thread.gmane.org/gmane.emacs.orgmode/523][GTD, Projects and Next Actions in org-mode]] is a thread where
-        several people describe their personal setup is 
-      + The [[http://thread.gmane.org/gmane.emacs.orgmode/4915][SOMEDAY/MAYBE vs. low priorities]] thread contains a
-        discussion about priorities that is quite instructive.
-      + Here is a [[http://thread.gmane.org/gmane.emacs.orgmode/4832/focus%3D4854][very instructive post]] by Pete Phillips explaining
-        why David Allens book is where you should start to learn GTD,
-        and that the Internet and Org-mode only come into the game
-        later, when thinking about the implementation.  And since
-        doing GTD the right way will give you lots of free time, don't
-        forget to listen to [[http://www.detox-jazz.co.uk/][Pete's music]]!
-
-    - Also on the web you can find information about how people are
-      setting up Org-mode to fit their habits.  A few examples:
-
-      + This [[http://www.brool.com/?p=82][blog post]] shows a very simple and clear GTD setup.
+    organizing your projects.  For links and pointers in this area,
+    see the [[http://orgmode.org/worg/org-gtd-etc.org][Worg page dedicated to task management systems]].
 
 ** Contributing to Org-mode
 
@@ -177,13 +143,16 @@ contribute your own setup, screenshots, tutorials etc, please go to
 
    Org-mode is still developing fast.  The best way to stay up-to-date
    is to join the mailing list where the changes are developed and
-   discusssed.
+   discussed.
 
    Here is a loose [[file:todo.org][list of ideas]] that are still to be processed
    somehow, when I get to it...
 
-* Related Software
+** Related Software
 
+
+  Make an interesting list here!!!!
+   
   [[http://sachachua.com/wp/][Sacha Chua]] about [[http://sachachua.com/wp/2007/12/26/emacs-choosing-between-org-and-planner/][Choosing between Planner and Org]].
  
   
