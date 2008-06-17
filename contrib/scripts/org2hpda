@@ -25,6 +25,7 @@
 
 EMACS = emacs -batch -l ~/.emacs
 LATEX = latex
+DIARY = ~/TODO/diary
 
 hipsterFiles =  weekCalendar.pdf yearCalendar.pdf monthCalendar3.pdf monthCalendar2.pdf monthCalendar1.pdf
 pocketModFiles =  weekCalendar.pdf yearCalendar-rotated.pdf \
@@ -51,19 +52,19 @@ all: pocketMod.pdf hipsterPDA.pdf
 		pdf90 --outfile tmp.pdf $@; mv tmp.pdf $@; \
 	done
 
-weekCalendar.tex: ~/diary
+weekCalendar.tex: $(DIARY)
 	$(EMACS) -eval "(progn (calendar) (cal-tex-cursor-week-iso 4) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
-monthCalendar1.tex: ~/diary
+monthCalendar1.tex: $(DIARY)
 	 $(EMACS) -eval "(progn (calendar) (cal-tex-cursor-month-landscape 1) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
-monthCalendar2.tex: ~/diary
+monthCalendar2.tex: $(DIARY)
 	 $(EMACS) -eval "(progn (calendar) (calendar-forward-month 1) (cal-tex-cursor-month-landscape 1) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
-monthCalendar3.tex: ~/diary
+monthCalendar3.tex: $(DIARY)
 	 $(EMACS) -eval "(progn (calendar) (calendar-forward-month 2) (cal-tex-cursor-month-landscape 1) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
-yearCalendar.tex: ~/diary
+yearCalendar.tex: $(DIARY)
 	 $(EMACS) -eval "(progn (calendar) (calendar-forward-month 2) (cal-tex-cursor-year-landscape 1) (with-current-buffer cal-tex-buffer (write-file \"$@\")))"
 
 pocketMod.pdf: $(pocketModFiles)

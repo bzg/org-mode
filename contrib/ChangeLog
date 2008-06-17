@@ -1,3 +1,8 @@
+2008-06-18  Christian Egli  <christian.egli@alumni.ethz.ch>
+
+	* scripts/org2hpda (DIARY): Make the location of the diary file
+	configurable.
+
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* lisp/org-mtags.el (org-mtags-replace)
