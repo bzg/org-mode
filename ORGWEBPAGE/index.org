@@ -40,18 +40,27 @@ release.
 
 * Downloads
 
-**** Distribution
+** The standard distribution
 
 Download as [[file:org-6.05.zip][zip file]] or [[file:org-6.05.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  A shell script to simplify upgrading to the newest release
 has been posted [[http://www.philfam.co.uk/pete/GTD/org-mode/update-org.sh][here]].
 
-**** Get the development version
+** The development version
 
 You can check out the latest Org development version (along with every
 release we ever had) by using git.  More information on this page:
 http://repo.or.cz/w/org-mode.git
+
+** Alternative distributions
+
+   There are several alternative distrbutions of Org:
+
+   - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
+   - The Debian packages are planned.
+   - Mark A. Hershberger has made some [[https://launchpad.net/~hexmode/+archive][Ubuntu packages]] for Org, but
+     these seem to be out of date.
 
 * Documentation
 ** Manual and Reference card
@@ -150,56 +159,6 @@ contribute your own setup, screenshots, tutorials etc, please go to
       setting up Org-mode to fit their habits.  A few examples:
 
       + This [[http://www.brool.com/?p=82][blog post]] shows a very simple and clear GTD setup.
-
-** Add-Ons
-
-   - [[http://www.cl.cam.ac.uk/~pz215/][Piotr Zielinski]] wrote [[http://www.cl.cam.ac.uk/~pz215/files/org-mouse.el][org-mouse.el]] which is now distributed with
-     Org-mode. It implements great mouse support for many functions in
-     org-mode.
-
-   - [[http://dto.freeshell.org/notebook/][David O'Toole]] is the author of [[http://dto.freeshell.org/e/org-publish.el][org-publish.el]]. While this is
-     now part of the Org-mode distribution, you might find the newest
-     bug fixes and developments at his [[http://dto.freeshell.org/notebook/OrgMode.html][Org-mode page]], along with
-     several other projects like /org-blog.el/ and
-     /org-publish-escript.el/.
-
-   - [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]] has been really prolific in writing interesting
-     add-ons, all available at his [[http://www.cognition.ens.fr/~guerry/bastien-org-mode.html][org-mode page]]:
-     + a package for using Org-mode as the basis for blogging
-     + a LaTeX exporter that is now distributed together with
-       org-mode
-     + a special table-of-contents buffer that simplifies navigation
-     + a registry to find locations that link a specific document.
-
-   - George C.F. Greve wrote [[http://www.emacswiki.org/emacs/org-mairix.el][org-mairix.el]] to add links that trigger a
-     mairix search.
-
-** Translators
-   
-   I know about the following attempts to translate from and to
-   Org-mode files:
-
-*** Org-mode to XXX
-
-    - [[http://www.cognition.ens.fr/~guerry/u/org2rem.el][From Org-mode to remind]] by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]].
-      
-    - From Org-mode to Freemind by Marco Vezzoli, this is available in
-      the contrib directory of the distribution.
-
-*** XXX to Org-mode
-
-    - [[http://www.olafdietsche.de/palm/palm2orgmode.pl][From Palm TODO database to Orgmode]].  This Translator was
-      written by [[http://www.olafdietsche.de/][Olaf Dietsche]].
-
-    - From [[http://thread.gmane.org/gmane.emacs.orgmode/5073][Remind to Org]] by Detlef Steuer.
-
-*** Bi-directional
-    
-    Unfortunately nothing so far.
-
-** Alternative distributions
-
-   - Mark A. Hershberger has made some [[https://launchpad.net/~hexmode/+archive][Ubuntu packages]] for org-mode.
 
 ** Contributing to Org-mode
 
