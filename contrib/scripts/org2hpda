@@ -35,11 +35,14 @@ all: pocketMod.pdf hipsterPDA.pdf
 
 %.dvi: %.tex
 	# Quick hack to massage the LaTeX produced by cal-tex
-	# quote '@', then increase font size of week calendars and 
-	# finaly increase font of diary entries in moth calendar
+	# quote '@', then increase font size of week calendars,
+	# increase font of diary entries in moth calendar and 
+	# finally reduce links to their destination, i.e. 
+	# change '[[http://foo][bar]]' to 'bar'
 	sed 	-e 's/\\verb|@|/\@/g' \
 		-e 's/documentclass\[11pt\]/documentclass[12pt]/g' \
 		-e 's/{\\tiny \\raggedright #3}/{\\small \\raggedright #3}/g' \
+		-e 's/\[\[[^]]\+\]\[\([^]]\+\)\]\]/\1/g' \
 		< $< > /tmp/temp-org-file.$$$$; mv /tmp/temp-org-file.$$$$ $<
 	$(LATEX) $^
 

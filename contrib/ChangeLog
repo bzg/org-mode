@@ -2,6 +2,8 @@
 
 	* scripts/org2hpda (DIARY): Make the location of the diary file
 	configurable.
+	(all): reduce links to their destination, i.e. change
+	'[[http://foo][bar]]' to 'bar'
 
 2008-05-28  Carsten Dominik  <dominik@science.uva.nl>
 
