@@ -119,33 +119,22 @@ available at [[http://www.astro.uva.nl/~dominik/Tools/OutlineMagic][Outline Magi
   Yes.  See [[http://article.gmane.org/gmane.emacs.orgmode/6112][this thread]] on the list.
 
 * Errors
-** =(wrong-type-argument keymapp nil)=
- *When I try to use Org-mode, I always get the error message
-@code{(wrong-type-argument keymapp nil)}*
+** When I try to use Org-mode, I always get the error message =(wrong-type-argument keymapp nil)=
 
 This is a conflict with an outdated version of the /allout.el/, see
 the [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section in the manual
 
-** CUA mode does not work with Org-mode
-
- *Org-mode takes over the S-cursor keys.  I also want to use CUA-mode,
-is there a way to fix this conflict?*
+** Org-mode takes over the S-cursor keys.  I also want to use CUA-mode, is there a way to fix this conflict?
 
 Yes, see the  [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section of the manual.
 
-** =winddmove.el= does not work with Org-mode.
-
- *Org-mode takes over the S-cursor keys.  I also want to use windmove.el,
-is there a way to fix this conflict?*
+** Org-mode takes over the S-cursor keys.  I also want to use windmove.el, is there a way to fix this conflict?
 
 Yes, see the [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Conflicts][Conflicts]] section of the manual.
 
 * Setup and Structure
-** Org-mode as default mode
 
- *Org-mode seems to be a useful default mode for the various README
-files I have scattered through my directories*.  *How do I turn it on
-for all README files?*
+** Can I use Org-mode as the default mode for all README files?
 
 Add the following to your .emacs file:
 
@@ -156,25 +145,16 @@ mode using
 
 : (setq default-major-mode 'org-mode)
 
-** Get rid of extra stars in outline
-
- *All these stars are driving me mad, I just find the Emacs outlines
-unreadable.  Can't you just put white space and a single star as a
-starter for headlines?* 
+** Emacs outlines are unreadable.  Can I get rid of all those stars?
 
 See the section  [[http://staff.science.uva.nl/~dominik/Tools/org/org.html#Clean%20outline%20view][Clean outline view]] in the manual.
 
-** Two windows on same Org-mode file
- *I would like to have two windows on the same Org-mode file, but with
-different outline visibility.  Is that possible?* 
+** Can I have two windows on the same Org-mode file, with different outline visibilities?
 
 You may use /indirect buffers/ which do exactly this.  See the
 documentation on the command =make-indirect-buffer=.
 
-** Insert empty lines before new headings and plain list items
-
- *I would like to have an empty line before each newly inserted
-headline, but not before each newly inserted plain-list item*.
+** How can I insert an empty line before each newly inserted headline, but not before each newly inserted plain-list item?
 
 : (setq org-blank-before-new-entry
 :       '((heading . t) (plain-list-item . nil))
@@ -189,11 +169,7 @@ headline, but not before each newly inserted plain-list item*.
 Take a look at the variables =org-show-hierarchy-above= and
 =org-show-following-headline=.
 
-** Stacking calls to org-occur
-
- *Each call to org-occur starts again from OVERVIEW and exposes only
- the matches of the current call.  I'd like to combine the effect of
- several calls*.
+** How can I combine the results of two calls to =org-occur=?
 
 You can construct a regular expression that matches all targets you
 want.  Alternatively, use a =C-u= prefix with the second and any
@@ -202,11 +178,7 @@ highlighting in addition to the new ones.
 
 * Hyperlinks
 
-** Confirmation for shell and elisp links
-
- *When I am executing shell/elisp links I always get a confirmation
-prompt and need to type "yes RET", that's 4 key presses!  Can I get
-rid of this?* 
+** Why do I have to confirm the execution of each shell/elisp link?
 
 The confirmation is there to protect you from unwantingly execute
 potentially dangerous commands.  For example, imagine a link
@@ -223,20 +195,14 @@ Then a single keypress will be enough to confirm those links.  It is
 also possible to turn off this check entirely, but I strongly recommend
 against this.  Be warned.
 
-** Use RET or TAB to follow a link
+** Can I use RET or TAB to follow a link?
 
- *From other packages like Emacs-wiki, I am used to follow links with
- =RET= when the cursor is on the link.  Is this also possible in org-mode?*
-
-Yes, and you may also use TAB.
+Yes, this is how:
 
 : (setq org-return-follows-link t)
 : (setq org-tab-follows-link t)
 
-** Clicking on a link without activating it
-
- *Each time I click inside a link in order to set point to this
- location, Org-mode actually follows the link*
+** Can I keep mouse-1 clicks from following a link?
 
 Activating links with =mouse-1= is a new feature in Emacs 22, to make
 link behavior similar to other applications like web browsers.  If you
@@ -249,7 +215,7 @@ link activation for =mouse-1= with
 
 * Remember
 
- *Can I automatically start the clock when opening a remember template?*
+** Can I automatically start the clock when opening a remember template?
 
 Yes, this is possible.  Use the following code and make sure that
 after executing it, `my-start-clock-if-needed' is in
@@ -268,11 +234,8 @@ be started.  Starting with Org-mode version 5.20, the clock will
 automatically be stopped when storing the remember buffer.
 
 * Export
-** Make TODO entries items, not headlines in HTML export
 
- *When I export my TODO list, every TODO item becomes a separate
-section.  How do I enforce these items to be exported as an itemized
-list?* 
+** Can I get TODO items exported to HTML as lists, rather than as headlines?
 
 If you plan to use ASCII or HTML export, make sure things you want to
 be exported as item lists are level 4 at least, even if that does mean
@@ -289,22 +252,16 @@ configure the H switch.
 
 : #+OPTIONS:   H:2; ...
 
-** Export only a subtree
-
- *I would like to export only a subtree of my file to HTML. How?*
+** Can I export only a single subtree?
 
 If you want to export a subtree, mark the subtree as region and then
 export.  Marking can be done with =C-c @ C-x C-x=, for example.
 
-** How to import org-mode calendar data into Mac OSX ical
+** How can I get Mac OSX 10.3 iCal to import my Org-exported .ics files?
 
- *I would like my iCal program on Mac OSX to import the iCalendar file
-  produced by Org-mode. How?*
-
- /This is for OSX 10.3, see below for 10.4:/ When using iCal under
-Apple MacOS X, you can create a new calendar /OrgMode/ (the default
-name for the calendar created by =C-c C-e c=, see the variables
-=org-icalendar-combined-name= and
+When using iCal under Apple MacOS X Tiger, you can create a new calendar
+/OrgMode/ (the default name for the calendar created by =C-c C-e c=,
+see the variables =org-icalendar-combined-name= and
 =org-combined-agenda-icalendar-file=).  Then set Org-mode to overwrite
 the corresponding file /~/Library/Calendars/OrgMode.ics/.  You may
 even use AppleScript to make iCal re-read the calendar files each time
@@ -319,36 +276,34 @@ for this:
 :    "osascript -e 'tell application \"iCal\" to reload calendars'")))
 
 
+** How can I get Mac OSX 10.4 or later iCal to import my Org-exported .ics files?
+
 For Mac OS X 10.4, you need to write the ics file to
 =/Library/WebServer/Documents/= and then subscribe iCalendar to
 =http: //localhost/orgmode.ics=
 
 * Tables
-** #ERROR fields in tables
 
- *One of my table columns has started to fill up with =#ERROR=.  What
-is going on?*
+** Why does my able column get filled with #ERROR?
 
 Org-mode tried to compute the column from other fields using a
 formula stored in the =#+TBLFM:= line just below the table, and
 the evaluation of the formula fails.  Fix the fields used in the
 formula, or fix the formula, or remove it!
 
-** Unwanted new lines in table
+** How can I stop the table editor from creating new lines?
 
- *When I am in the last column of a table and just above a horizontal
+When I am in the last column of a table and just above a horizontal
 line in the table, pressing TAB creates a new table line before the
-horizontal line*.  *How can I quickly move to the line below the
-horizontal line instead?* 
+horizontal line.  To move to the line below the
+horizontal line instead, do this:
 
 Press =down= (to get on the separator line) and then =TAB=.
 Or configure the variable
 
 : (setq org-table-tab-jumps-over-hlines t)
 
-** Automatic detection of formulas
- *I need to use fields in my table that start with "=", and each time
- I enter such a field, Org-mode thinks this is a formula*.
+** How can I get tabe fields starting with "="?
 
 With the setting
 
@@ -358,16 +313,12 @@ this will no longer happen.  You can still use formulas using the
 commands @<tt>C-c =@</tt> and @<tt>C-u C-c =@</tt>
 
 
-** Change indentation of a table
- *How can I change the indentation of an entire table without fixing
-every line by hand?*
+** How can I change the indentation of an entire table without fixing every line by hand?
 
 The indentation of a table is set by the first line.  So just fix the
 indentation of the first line and realign with =TAB=.
 
-** Performance issues with table alignment
- *I have a huge table in a file, and the automatic realign of tables
- is just taking too long.  What can I do?*
+** In my huge table the realigning after each TAB takes too long.  What can I do?
 
 Either split the table into several by inserting an empty line every
 100 lines or so.  Or turn off the automatic re-align with
@@ -378,9 +329,7 @@ After this the only way to realign a table is to press =C-c C-c=.  It
 will no longer happen automatically, removing the corresponding delays
 during editing.
 
-** Performance issues with table calculation
- *I have a complex table with lots of formulas, and recomputing the
- table takes rather long.  What can I do?*
+** Recalculation of my table takes too long.  What can I do?
 
 Nothing, really.  The spreadsheet in org is mostly done to make
 calculations possible, not so much to make them fast.  Since Org-mode
@@ -401,10 +350,7 @@ have been thinking about moving a bit further down this line.
 However, for my applications this has so far not been an issue at all.
 If you have a good case,you could try to convince me.
 
-** Incrementing numbers
- *When I press =S-RET= in a table field to copy its value down, the
- content is not copied as is, but it is increased by one.
- Is that a bug or a feature*
+** =S-RET= in a table keeps increasing the copied numbers.  How can I stop this?
 
 Well, it is /supposed/ to be a feature, to make it easy to create a
 column with increasing numbers.  If this gets into your way, turn it
@@ -413,9 +359,8 @@ off with
 : (setq org-org-table-copy-increment nil)
 
 * Agenda
-** Include Org-mode agenda into Emacs diary
- *Is it possible to include entries from org-mode files into my emacs
-diary?* 
+
+** Is it possible to include entries from org-mode files into my emacs diary?
 
 Since the org-mode agenda is much more powerful and can contain the
 diary, you should think twice before deciding to do this.  If you
@@ -446,6 +391,3 @@ the agenda buffer.
 
 * COMMENT HTML style specifications
 
-# Local Variables: 
-# org-export-html-style: "<link rel=stylesheet href=\"freeshell2.css\" type=\"text/css\"> <style type=\"text/css\"> .tag { color: red; font-weight:bold}</style>" 
-# End:
