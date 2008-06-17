@@ -6,19 +6,14 @@
 #+TITLE:     Org-mode Frequently Asked Questions
 
 * General
-** Use features in other modes
- *I would like to use editing features of org-mode in other modes, is
- this possible?* 
+** Can I use editing features of org-mode in other modes?
 
 Not really.  For tables there is =orgtbl-mode= which implements the
 table editor as a minor mode.  For other features you need to switch to
 Org-mode temporarily, or prepare text in a different buffer.
 
 
-** Visibility cycling in Outline-mode and Outline-minor-mode
-
- *Can I get the visibility-cycling features in outline-mode and
-outline-minor-mode?* 
+** Can I get the visibility-cycling features in outline-mode and outline-minor-mode?
 
    Yes, these functions are written in a way that they are independent of
    the outline setup.  The following setup provides standard Org-mode
@@ -26,18 +21,102 @@ outline-minor-mode?*
    outline-minor-mode, we use =C-TAB= instead of =TAB=,
    because =TAB= usually has mode-specific tasks.
 
-:(add-hook 'outline-minor-mode-hook
-:  (lambda ()
-:    (define-key outline-minor-mode-map [(control tab)] 'org-cycle)
-:    (define-key outline-minor-mode-map [(shift tab)] 'org-global-cycle)))
-:(add-hook 'outline-mode-hook
-:  (lambda ()
-:    (define-key outline-mode-map [(tab)] 'org-cycle)
-:    (define-key outline-mode-map [(shift tab)] 'org-global-cycle)))
+#+begin_src emacs-lisp
+(add-hook 'outline-minor-mode-hook
+  (lambda ()
+    (define-key outline-minor-mode-map [(control tab)] 'org-cycle)
+    (define-key outline-minor-mode-map [(shift tab)] 'org-global-cycle)))
+(add-hook 'outline-mode-hook
+  (lambda ()
+    (define-key outline-mode-map [(tab)] 'org-cycle)
+    (define-key outline-mode-map [(shift tab)] 'org-global-cycle)))
+#+end_src
 
 Or check out /outline-magic.el/, which does this and also provides
 promotion and demotion functionality.  /outline-magic.el/ is
 available at [[http://www.astro.uva.nl/~dominik/Tools/OutlineMagic][Outline Magic]].
+
+** How can I keep track of changes in my Org files?
+
+  Use git to track the history of the files, use a cronjob to check in
+  changes regularly.  Such a setup is described by Bernt Bernt Hansen
+  in [[http://article.gmane.org/gmane.emacs.orgmode/6233][this message]] on [[http://dir.gmane.org/gmane.emacs.orgmode][emacs-orgmode]].
+
+
+** What is the difference between Org and TaskPaper?
+
+  There is really no difference.  Org is as /simple/ as [[http://hogbaysoftware.com/products/taskpaper][TaskPaper]].  It
+  is just that, when using Org within Emacs, it lets you do many things
+  that you wouldn't be able to do with TaskPaper.  Yes, TaskPaper is
+  fiddle-proof and people using Emacs tends to like fiddling (which is
+  orthogonal to the idea of using todo-list efficiently), but this is
+  just a matter of discipline and common sense, not one of Org's design.
+
+  Read [[http://article.gmane.org/gmane.emacs.orgmode/6224][Carsten's enlightening statement]] on this.
+
+** Can I use the remember buffer to clock a customer phone call?
+
+  Yes, you can.  Take a look at the [[http://thread.gmane.org/gmane.emacs.orgmode/5482][setup described by Bernt Hansen]]
+  and check out (in the same thread) what Nick Docos had to fix to
+  make Bernt's set-up work for him.
+
+** Can I implement a GTD workflow with Org-mode?
+
+  Yes, you can.  Check for discussions and pointers [[http://orgmode.org/worg/org-gtd-etc.org][here]].
+
+** How can I cycle through the TODO keyword of an entry?
+
+  =C-c C-t= or =S-<left/right>= is what you need.
+
+** How can I quickly set the tag of an entry?
+
+   Use =C-c C-c= on the headline.
+
+** Can I select the TODO keywords with a tag-like interface?
+
+  Yes.  Use =(setq org-use-fast-todo-selection t)=
+
+** Isearch does not find string hidden in links.  What can I do?
+
+  M-x =visible-mode= will display the full link, making them searchable.
+
+** C-k is killing whole subtrees!  I lost my work!
+
+  =(setq org-special-ctrl-k t)= before losing your work. 
+
+** How can I set up automatic reminders based on Org information?
+
+  See [[http://article.gmane.org/gmane.emacs.orgmode/5271][this post]] by N. Dokos on the list.
+
+** Is there a good way to create a description list?
+
+  Yes, thes are now built-in:
+
+#+begin_example
+- item1 :: Description of this item 1
+- item2 :: Description of this item 2
+- item1 :: Description of this item 3
+      also in multiple lines
+#+end_example
+
+** I want to add my Org scheoduled/deadlined entries in my diary!
+
+  Put this in your ~/.diary:
+  
+  :&%%(org-diary :scheduled :timestamp :deadline)
+
+** How can I make =appt= notice my Org appointments?
+
+  :M-x org-agenda-to-appt RET
+
+** How do I track state changes for tasks in Org?
+
+  Take a look at the [[http://thread.gmane.org/gmane.emacs.orgmode/6082][post by Bernt Hansen]] for setting up TODO keyword
+  states and logging timestamps for task state changes.
+
+** Can I send myself an email containing tasks or other agenda info?
+
+  Yes.  See [[http://article.gmane.org/gmane.emacs.orgmode/6112][this thread]] on the list.
 
 * Errors
 ** =(wrong-type-argument keymapp nil)=
