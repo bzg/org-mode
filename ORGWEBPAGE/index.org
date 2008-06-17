@@ -72,8 +72,8 @@ http://repo.or.cz/w/org-mode.git
      [[file:orgcard.txt][text version]] of the reference card
    - There is also a [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60),
      produced by Takeshi Okano.
-   - The [[file:faq.org][FAQ]] is not very up-to-date, but may still answer some of your
-     questions.  Please have a look before posting to emacs-orgmode@gnu.org.
+   - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is
+     maintained by the Worg project.
    - The Org manual is a GNU Manual released under the GFDL.  If you
      want to redistribute Org with a distribution that does not allow
      the GFDL to be used, and if you see no other way to resolve this
