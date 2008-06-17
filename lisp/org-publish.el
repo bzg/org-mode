@@ -164,7 +164,7 @@
 (defcustom org-publish-project-alist nil
   "Association list to control publishing behavior.
 Each element of the alist is a publishing 'project.'  The CAR of
-each element is a string, uniquely identifying the project. The
+each element is a string, uniquely identifying the project.  The
 CDR of each element is in one of the following forms:
 
   (:property value :property value ... )
@@ -176,7 +176,7 @@ OR,
 When the CDR of an element of org-publish-project-alist is in
 this second form, the elements of the list after :components are
 taken to be components of the project, which group together files
-requiring different publishing options. When you publish such a
+requiring different publishing options.  When you publish such a
 project with \\[org-publish], the components all publish.
 
 When a property is given a value in org-publish-project-alist, its
@@ -193,10 +193,10 @@ Most properties are optional, but some should always be set:
                          files will be published
 
 The :exclude property may be used to prevent certain files from
-being published. Its value may be a string or regexp matching
+being published.  Its value may be a string or regexp matching
 file names you don't want to be published.
 
-The :include property may be used to include extra files. Its
+The :include property may be used to include extra files.  Its
 value may be a list of filenames to include. The filenames are
 considered relative to the base directory.
 
@@ -204,19 +204,19 @@ When both :include and :exclude properties are given values, the
 exclusion step happens first.
 
 One special property controls which back-end function to use for
-publishing files in the project. This can be used to extend the
+publishing files in the project.  This can be used to extend the
 set of file types publishable by org-publish, as well as the set
 of output formats.
 
-  :publishing-function     Function to publish file. The default is
+  :publishing-function     Function to publish file.  The default is
                            `org-publish-org-to-html', but other
-                           values are possible. May also be a
+                           values are possible.  May also be a
                            list of functions, in which case
                            each function in the list is invoked
                            in turn.
 
 Another property allows you to insert code that prepares a
-project for publishing. For example, you could call GNU Make on a
+project for publishing.  For example, you could call GNU Make on a
 certain makefile, to ensure published files are built up to date.
 
   :preparation-function   Function to be called before publishing
@@ -226,7 +226,7 @@ certain makefile, to ensure published files are built up to date.
 
 Some properties control details of the Org publishing process,
 and are equivalent to the corresponding user variables listed in
-the right column. See the documentation for those variables to
+the right column.  See the documentation for those variables to
 learn more about their use and default values.
 
   :language              `org-export-default-language'
@@ -257,9 +257,9 @@ index of files or summary page for a given project.
 
   :auto-index            Whether to publish an index during
                          `org-publish-current-project' or `org-publish-all'.
-  :index-filename        Filename for output of index. Defaults
+  :index-filename        Filename for output of index.  Defaults
                          to 'index.org' (which becomes 'index.html').
-  :index-title           Title of index page. Defaults to name of file.
+  :index-title           Title of index page.  Defaults to name of file.
   :index-function        Plugin function to use for generation of index.
                          Defaults to `org-publish-org-index', which
                          generates a plain list of links to all files
