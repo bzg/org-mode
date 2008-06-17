@@ -9517,8 +9517,7 @@ conflict with @file{allout.el}.
 extensive patches.
 @item
 @i{Philip Rooke} created the Org reference card, provided lots
-of feedback, developed and applied standards to the Org documentation and
-wrote the manual for the contributed packages.
+of feedback, developed and applied standards to the Org documentation.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.

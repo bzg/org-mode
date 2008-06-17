@@ -177,7 +177,7 @@ keyword =WAITING=, in all agenda files.
     This is what I settled for after a long discussion with Adam
     Spiers about doing some special filtering automatically.
 
-*** Log mode in agenda now shows start end time for CLOCK lines
+*** Log mode in agenda now shows end time for CLOCK lines
     When turning on log mode in the agenda with =l=, clock lines
     will now also list the end time, not only the starting time.
     Thanks to Tian Qiu for bringing this up again.

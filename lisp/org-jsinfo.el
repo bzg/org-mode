@@ -200,6 +200,7 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
 	  (cdr (assoc 'buttons org-infojs-options))
 	  (cdr (assoc 'path org-infojs-options))))
 
+(provide 'org-infojs)
 (provide 'org-jsinfo)
 
 ;; arch-tag: c71d1d85-3337-4817-a066-725e74ac9eac
