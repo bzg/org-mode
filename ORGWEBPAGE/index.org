@@ -81,7 +81,8 @@ http://repo.or.cz/w/org-mode.git
    - Kyle Sherman has created a [[file:orgcard.txt][text version]] of the reference card
      (Org version 4.79).
 ** The FAQ
-   - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg project]].
+   - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg
+     project]]. 
 
 * Links
 
@@ -153,9 +154,13 @@ contribute your own setup, screenshots, tutorials etc, please go to
 
 ** Related Software
 
-
-  Make an interesting list here!!!!
-   
-  [[http://sachachua.com/wp/][Sacha Chua]] about [[http://sachachua.com/wp/2007/12/26/emacs-choosing-between-org-and-planner/][Choosing between Planner and Org]].
- 
-  
+   [[http://www.emacswiki.org/cgi-bin/wiki][The Emacs Wiki]] has extensive lists of related software in the
+   categories
+   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryOutline][Outline]]
+   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryHypermedia][Hypermedia]]
+   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTables][Tables]]
+   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryPersonalInformationManager][Personal Information Manager]]
+   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryCalendar][Calendar]]
+   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTodo][Todo]]
+   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTimeTracking][Time tracking]]
+   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryJournaling][Journaling]]
