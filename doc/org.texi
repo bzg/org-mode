@@ -529,7 +529,7 @@ make install-info
 
 @iftex
 @b{Important:} @i{If you use copy-and-paste to copy lisp code from the
-PDF documentation as viewed by Acrobat reader to your .emacs file, the
+PDF documentation as viewed by some PDF viewers to your .emacs file, the
 single quote character comes out incorrectly and the code will not work.
 You need to fix the single quotes by hand, or copy from Info
 documentation.}
@@ -1038,14 +1038,14 @@ Cycle a tree even if it is tagged with ARCHIVE.
 @cindex external archiving
 
 Once an entire project is finished, you may want to move it to a different
-location.  Org can move it to an @emph{Attic Sibling} in the same tree, to a
+location.  Org can move it to an @emph{Archive Sibling} in the same tree, to a
 different tree in the current file, or to a different file, the archive file.
 
 @table @kbd
 @kindex C-c C-x A
 @item C-c C-x A
-Move the current entry to the @emph{Attic Sibling}.  This is a sibling of the
-entry with the heading @samp{Attic} and the tag @samp{ARCHIVE}
+Move the current entry to the @emph{Archive Sibling}.  This is a sibling of
+the entry with the heading @samp{Archive} and the tag @samp{ARCHIVE}
 (@pxref{ARCHIVE tag}).  The entry becomes a child of that sibling and in this
 way retains a lot of its original context, including inherited tags and
 approximate position in the outline.
@@ -2399,10 +2399,10 @@ http://www.astro.uva.nl/~dominik          @r{on the web}
 file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
 file:papers/last.pdf                      @r{file, relative path}
 news:comp.emacs                           @r{Usenet link}
-mailto:adent@@galaxy.net                  @r{Mail link}
+mailto:adent@@galaxy.net                 @r{Mail link}
 vm:folder                                 @r{VM folder link}
 vm:folder#id                              @r{VM message link}
-vm://myself@@some.where.org/folder#id     @r{VM on remote machine}
+vm://myself@@some.where.org/folder#id    @r{VM on remote machine}
 wl:folder                                 @r{WANDERLUST folder link}
 wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
@@ -2709,19 +2709,19 @@ to be added to the hook variables
 @code{org-execute-file-search-functions}.  See the docstring for these
 variables for more information.  Org actually uses this mechanism
 for Bib@TeX{} database files, and you can use the corresponding code as
-an implementation example.  Search for @samp{BibTeX links} in the source
-file.
+an implementation example.  See the file @file{org-bibtex.el}.
 
 @node TODO Items, Tags, Hyperlinks, Top
 @chapter TODO Items
 @cindex TODO items
 
-Org mode does not maintain TODO lists as separate documents.  Instead,
-TODO items are an integral part of the notes file, because TODO items
-usually come up while taking notes!  With Org mode, simply mark any
-entry in a tree as being a TODO item.  In this way, information is not
-duplicated, and the entire context from which the TODO item emerged is
-always present.
+Org mode does not maintain TODO lists as separate documents@footnote{Of
+course, you can make a document that contains inly long lists of TODO items,
+but this is not required.}.  Instead, TODO items are an integral part of the
+notes file, because TODO items usually come up while taking notes!  With Org
+mode, simply mark any entry in a tree as being a TODO item.  In this way,
+information is not duplicated, and the entire context from which the TODO
+item emerged is always present.
 
 Of course, this technique for managing TODO items scatters them
 throughout your notes file.  Org mode compensates for this by providing
