@@ -1,4 +1,4 @@
-         -*- mode:org -*-
+#         -*- mode:org -*-
 
 #+STARTUP:   align
 #+TYP_TODO:  TODO IDEA WISH QUESTION INCONSISTENCY BUG | DONE DECLINED 
