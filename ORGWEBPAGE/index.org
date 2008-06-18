@@ -126,6 +126,10 @@ contribute your own setup, screenshots, tutorials etc, please go to
    users.  The answers given in this survey can be found [[file:survey.html][here]].
 
 ** GTD & Co
+
+   [[http://orgmode.org/worg/][Worg]] also has a list of links related to using Org for [[http://orgmode.org/worg/org-gtd-etc.php][GTD and
+   other task management systems]].
+
 ** Contributing to Org-mode
 
    You can always contribute with ideas and bug reports on the mailing
