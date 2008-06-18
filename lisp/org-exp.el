@@ -2993,6 +2993,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		(if (not valid) (setq rpl desc))))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
+	      ;; The link protocol has a function for format the link
 	      (setq rpl
 		    (save-match-data
 		      (funcall fnc (org-link-unescape path) desc1 'html))))

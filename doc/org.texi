@@ -4948,7 +4948,7 @@ When you are finished preparing a note with @i{remember}, you have to press
 remember buffer, you will first be asked if you want to clock out
 now@footnote{To avoid this query, configure the variable
 @code{org-remember-clock-out-on-exit}.}.  If you answer @kbd{n}, the clock
-will continue to run after the note is filed away.
+will continue to run after the note was filed away.
 
 The handler will then store the note in the file and under the headline
 specified in the template, or it will use the default file and headlines.
