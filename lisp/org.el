@@ -4206,6 +4206,12 @@ are at least `org-cycle-separator-lines' empty lines before the headeline."
 	     (= (match-end 0) (point-max)))
 	(outline-flag-region (point) (match-end 0) nil))))
 
+(defun org-show-empty-lines-in-parent ()
+  "Move to the parent and re-show empty lines before visible headlines."
+  (save-excursion
+    (let ((context (if (org-up-heading-safe) 'children 'overview)))
+      (org-cycle-show-empty-lines context))))
+
 (defun org-cycle-hide-drawers (state)
   "Re-hide all drawers after a visibility state change."
   (when (and (org-mode-p)
@@ -4895,6 +4901,7 @@ is signaled in this case."
       (insert (make-string (- ne-ins ne-beg) ?\n)))
     (move-marker ins-point nil)
     (org-compact-display-after-subtree-move)
+    (org-show-empty-lines-in-parent)
     (unless folded
       (org-show-entry)
       (show-children)
@@ -4974,7 +4981,8 @@ If optional TREE is given, use this text instead of the kill ring."
     (error "%s"
      (substitute-command-keys
       "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
-  (let* ((txt (or tree (and kill-ring (current-kill 0))))
+  (let* ((visp (not (org-invisible-p)))
+	 (txt (or tree (and kill-ring (current-kill 0))))
 	 (^re (concat "^\\(" outline-regexp "\\)"))
 	 (re  (concat "\\(" outline-regexp "\\)"))
 	 (^re_ (concat "\\(\\*+\\)[  \t]*"))
@@ -5028,6 +5036,8 @@ If optional TREE is given, use this text instead of the kill ring."
     (goto-char beg)
     (skip-chars-forward " \t\n\r")
     (setq beg (point))
+    (if (and (org-invisible-p) visp)
+	(save-excursion (outline-show-heading)))
     ;; Shift if necessary
     (unless (= shift 0)
       (save-restriction
@@ -5908,6 +5918,7 @@ so this really moves item trees."
       (setq beg (point)))
     (goto-char beg0)
     (org-end-of-item)
+    (org-back-over-empty-lines)
     (setq end (point))
     (goto-char beg0)
     (catch 'exit
@@ -5923,7 +5934,7 @@ so this really moves item trees."
 	      (throw 'exit t)))))
     (condition-case nil
 	(org-beginning-of-item)
-      (error (goto-char beg)
+      (error (goto-char beg0)
 	     (error "Cannot move this item further up")))
     (setq ind1 (org-get-indentation))
     (if (and (org-at-item-p) (= ind ind1))

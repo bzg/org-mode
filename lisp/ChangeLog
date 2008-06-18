@@ -1,3 +1,11 @@
+2008-06-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-paste-subtree): Make sure the yanked headline is
+	visible if it was yanked at a visible point.
+	(org-move-item-up): Fix the bug with moving white space at the end
+	of the item.
+	(org-show-empty-lines-in-parent): New function.
+
 2008-06-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-colview.el (org-columns-next-allowed-value): Bug fix.
