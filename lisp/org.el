@@ -2573,7 +2573,9 @@ get the proper fontification."
 
 (defcustom org-agenda-skip-archived-trees t
   "Non-nil means, the agenda will skip any items located in archived trees.
-An archived tree is a tree marked with the tag ARCHIVE."
+An archived tree is a tree marked with the tag ARCHIVE.  The use of this
+variable is no longer recommended, you should leave it at the value t.
+Instead, use the key `v' to cycle the archives-mode in the agenda."
   :group 'org-archive
   :group 'org-agenda-skip
   :type 'boolean)
@@ -9207,6 +9209,7 @@ ACTION can be `set', `up', `down', or a character."
 
 ;;;; Tags
 
+(defvar org-agenda-archives-mode)
 (defun org-scan-tags (action matcher &optional todo-only)
   "Scan headline tags with inheritance and produce output ACTION.
 
@@ -9276,8 +9279,11 @@ only lines with a TODO keyword are included in the output."
 		    (org-remove-uniherited-tags (cdar tags-alist))))
 	  (when (and (or (not todo-only) (member todo org-not-done-keywords))
 		     (eval matcher)
-		     (or (not org-agenda-skip-archived-trees)
-			 (not (member org-archive-tag tags-list))))
+		     (or
+		      (not (member org-archive-tag tags-list))
+		      ;; we have an archive tag, should we use this anyway?
+		      (or (not org-agenda-skip-archived-trees)
+			  (and (eq action 'agenda) org-agenda-archives-mode))))
 	    (unless (eq action 'sparse-tree) (org-agenda-skip))
 
 	    ;; select this headline
@@ -10009,12 +10015,13 @@ the scanner.  The following items can be given here:
              the the function returns t, FUNC will not be called for that
              entry and search will continue from the point where the
              function leaves it."
-  (let* ((org-agenda-skip-archived-trees (memq 'archive skip))
+  (let* ((org-agenda-archives-mode nil) ; just to make sure
+	 (org-agenda-skip-archived-trees (memq 'archive skip))
 	 (org-agenda-skip-comment-trees (memq 'comment skip))
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
 	 (org-tags-match-list-sublevels t)
-	 matcher pos)
+	 matcher pos file)
 
     (cond
      ((eq match t)   (setq matcher t))
@@ -11839,14 +11846,13 @@ If TMP is non-nil, don't include temporary buffers."
 	   (buffer-list)))
     (delete nil blist)))
 
-(defun org-agenda-files (&optional unrestricted ext)
+(defun org-agenda-files (&optional unrestricted archives)
   "Get the list of agenda files.
 Optional UNRESTRICTED means return the full list even if a restriction
 is currently in place.
-When EXT is non-nil, try to add all files that are created by adding EXT
-to the file nemes.  Basically, this is a way to add the archive files
-to the list, by setting EXT to \"_archive\"  If EXT is non-nil, but not
-a string, \"_archive\" will be used."
+When ARCHIVES is t, include all archive files hat are really being
+used by the agenda files.  If ARCHIVE is `ifmode', do this only if
+`org-agenda-archives-mode' is t."
   (let ((files
 	 (cond
 	  ((and (not unrestricted) (get 'org-agenda-files 'org-restrict)))
@@ -11866,16 +11872,9 @@ a string, \"_archive\" will be used."
 				 (lambda (file)
 				   (and (file-readable-p file) file)))
 				files))))
-    (when ext
-      (setq ext (if (and (stringp ext) (string-match "\\S-" ext))
-		    ext "_archive"))
-      (setq files (apply 'append
-			 (mapcar
-			  (lambda (f)
-			    (if (file-exists-p (concat f ext))
-				(list f (concat f ext))
-			      (list f)))
-			  files))))
+    (when (or (eq archives t)
+	      (and (eq archives 'ifmode) (eq org-agenda-archives-mode t)))
+      (setq files (org-add-archive-files files)))
     files))
 
 (defun org-edit-agenda-file-list ()
@@ -13231,9 +13230,6 @@ See the individual commands for more information."
      ["Cycling opens ARCHIVE trees"
       (setq org-cycle-open-archived-trees (not org-cycle-open-archived-trees))
       :style toggle :selected org-cycle-open-archived-trees]
-     ["Agenda includes ARCHIVE trees"
-      (setq org-agenda-skip-archived-trees (not org-agenda-skip-archived-trees))
-      :style toggle :selected (not org-agenda-skip-archived-trees)]
      "--"
      ["Move Subtree to Archive" org-advertized-archive-subtree t]
  ;    ["Check and Move Children" (org-archive-subtree '(4))

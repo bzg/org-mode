@@ -1006,7 +1006,9 @@ archived subtrees are not exposed, unless you configure the option
 @item
 During agenda view construction (@pxref{Agenda Views}), the content of
 archived trees is ignored unless you configure the option
-@code{org-agenda-skip-archived-trees}.
+@code{org-agenda-skip-archived-trees}, in which case these trees will always
+be included.  In the agenda you can press the @kbd{v} key to get archives
+temporarily included.
 @item
 Archived trees are not exported (@pxref{Exporting}), only the headline
 is.  Configure the details using the variable
@@ -5691,6 +5693,13 @@ previously used indirect buffer.
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
 logging was on (variable @code{org-log-done}) are shown in the agenda,
 as are entries that have been clocked on that day.
+@c
+@kindex v
+@item v
+Toggle Archives mode.  In archives mode, trees that are marked are also
+scanned when producing the agenda.  When you call this command with a
+@kbd{C-u} prefix argument, even all archive files are included.  To exit
+archives mode, press @kbd{v} again.
 @c
 @kindex R
 @item R

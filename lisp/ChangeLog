@@ -1,3 +1,20 @@
+2008-06-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-agenda-skip-archived-trees): Docstring now
+	discourages using this.
+	(org-scan-tags): Check for org-agenda-archives-mode.
+	(org-map-entries): Make sure org-agenda-archives-mode is nil.
+	(org-agenda-files): Functionality of second arg changed.
+
+	* org-agenda.el (org-agenda-archives-mode): New variable
+	(org-write-agenda, org-prepare-agenda, org-agenda-list)
+	(org-search-view, org-todo-list, org-tags-view)
+	(org-agenda-list-stuck-projects): Call `org-agenda-files' with
+	`ifmode' argument.
+	(org-agenda-quit): Reset the archives mode.
+	(org-agenda-archives-mode): New command.
+	(org-agenda-set-mode-name): Include archives info.
+
 2008-06-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-paste-subtree): Make sure the yanked headline is
