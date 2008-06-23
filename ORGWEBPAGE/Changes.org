@@ -40,7 +40,7 @@
     Of course this would not be Emacs if you could not configure
     exactly what you want.  Take a look at the variables
     =org-icalendar-use-deadlines= and
-    =org-icalendar-use-deadlines= if you want to go back to the
+    =org-icalendar-use-scheduled= if you want to go back to the
     old behavior or even do something completely different.
 
     Thanks to Karen Cooke for triggering this change.
