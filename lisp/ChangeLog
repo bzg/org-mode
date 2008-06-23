@@ -1,5 +1,11 @@
 2008-06-23  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-icalendar-use-deadline)
+	(org-icalendar-use-scheduled): New options.
+	(org-icalendar-include-todo): Default changed to t.
+	(org-print-icalendar-entries): Implement better utilization of
+	scheduling and deadline time stamps.
+
 	* org-clock.el (org-clocktable-shift): Also undertand yesterday,
 	lastweek etc.
 	(org-clock-special-range): Also undertand yesterday, lastweek etc.

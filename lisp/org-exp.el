@@ -625,6 +625,46 @@ The file name should be absolute, the file will be overwritten without warning."
   :group 'org-export-icalendar
   :type 'file)
 
+(defcustom org-icalendar-combined-name "OrgMode"
+  "Calendar name for the combined iCalendar representing all agenda files."
+  :group 'org-export-icalendar
+  :type 'string)
+
+(defcustom org-icalendar-use-deadline '(event-if-not-todo todo-due)
+  "Contexts where iCalendar export should use a deadline time stamp.
+This is a list with several symbols in it.  Valid symbol are:
+
+event-if-todo       Deadlines in TODO entries become calendar events.
+event-if-not-todo   Deadlines in non-TODO entries become calendar events.
+todo-due            Use deadlines in TODO entries as due-dates"
+  :group 'org-export-icalendar
+  :type '(set :greedy t
+	      (const :tag "Deadlines in non-TODO entries become events"
+		     event-if-not-todo)
+	      (const :tag "Deadline in TODO entries become events"
+		     event-if-todo)
+	      (const :tag "Deadlines in TODO entries become due-dates"
+		     todo-due)))
+
+(defcustom org-icalendar-use-scheduled '(todo-start)
+  "Contexts where iCalendar export should use a scheduling time stamp.
+This is a list with several symbols in it.  Valid symbol are:
+
+event-if-todo       Scheduling time stamps in TODO entries become an event.
+event-if-not-todo   Scheduling time stamps in non-TODO entries become an event.
+todo-start          Scheduling time stamps in TODO entries become start date.
+                    Some calendar applications show TODO entries only after
+                    that date."
+  :group 'org-export-icalendar
+  :type '(set :greedy t
+	      (const :tag
+		     "SCHEDULED timestamps in non-TODO entries become events"
+		     event-if-not-todo)
+	      (const :tag "SCHEDULED timestamps in TODO entries become events"
+		     event-if-todo)
+	      (const :tag "SCHEDULED in TODO entries become start date"
+		     todo-start)))
+
 (defcustom org-icalendar-include-todo nil
   "Non-nil means, export to iCalendar files should also cover TODO items."
   :group 'org-export-icalendar
@@ -649,11 +689,6 @@ The text will be inserted into the DESCRIPTION field."
 	  (const :tag "Nothing" nil)
 	  (const :tag "Everything" t)
 	  (integer :tag "Max characters")))
-
-(defcustom org-icalendar-combined-name "OrgMode"
-  "Calendar name for the combined iCalendar representing all agenda files."
-  :group 'org-export-icalendar
-  :type 'string)
 
 (defcustom org-icalendar-store-UID nil
   "Non-nil means, store any created UIDs in properties.
@@ -3933,7 +3968,7 @@ When COMBINE is non nil, add the category to each line."
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
-	scheduledp deadlinep prefix
+	scheduledp deadlinep todo prefix due start
 	tmp pri category entry location summary desc uid
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
@@ -3982,8 +4017,21 @@ When COMBINE is non nil, add the category to each line."
 			ts)
 		  deadlinep (string-match org-deadline-regexp tmp)
 		  scheduledp (string-match org-scheduled-regexp tmp)
+		  todo (org-get-todo-state)
 		  ;; donep (org-entry-is-done-p)
 		  ))
+	  (when (and
+		 deadlinep
+		 (if todo
+		     (not (memq 'event-if-todo org-icalendar-use-deadline))
+		   (not (memq 'event-if-not-todo org-icalendar-use-deadline))))
+	    (throw :skip t))
+	  (when (and
+		 scheduledp
+		 (if todo
+		     (not (memq 'event-if-todo org-icalendar-use-scheduled))
+		   (not (memq 'event-if-not-todo org-icalendar-use-scheduled))))
+	    (throw :skip t))
 	  (setq prefix (if deadlinep "DL-" (if scheduledp "SC-" "TS-")))
 	  (if (or (string-match org-tr-regexp hd)
 		  (string-match org-ts-regexp hd))
@@ -4071,9 +4119,16 @@ END:VEVENT\n"
 			  t org-icalendar-include-body)
 		    location (org-icalendar-cleanup-string
 			      (org-entry-get nil "LOCATION"))
+		    due (and (member 'todo-due org-icalendar-use-deadline)
+			     (org-entry-get nil "DEADLINE"))
+		    start (and (member 'todo-start org-icalendar-use-scheduled)
+			     (org-entry-get nil "SCHEDULED"))
 		    uid (if org-icalendar-store-UID
 			    (org-id-get-create)
 			  (or (org-id-get) (org-id-new))))
+	      (and due (setq due (org-ical-ts-to-string due "DUE")))
+	      (and start (setq start (org-ical-ts-to-string start "DTSTART")))
+
 	      (if (string-match org-bracket-link-regexp hd)
 		  (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
 					    (match-string 1 hd))
@@ -4089,19 +4144,20 @@ END:VEVENT\n"
 	      (princ (format "BEGIN:VTODO
 UID: %s
 %s
-SUMMARY:%s%s%s
+SUMMARY:%s%s%s%s
 CATEGORIES:%s
 SEQUENCE:1
 PRIORITY:%d
 STATUS:%s
 END:VTODO\n"
 			     (concat prefix uid)
-			     dts
+			     (or start dts)
 			     (or summary hd)
 			     (if (and location (string-match "\\S-" location))
 				 (concat "\nLOCATION: " location) "")
 			     (if (and desc (string-match "\\S-" desc))
 				 (concat "\nDESCRIPTION: " desc) "")
+			     (if due (concat "\n" due) "")
 			     category
 			     pri status)))))))))
 

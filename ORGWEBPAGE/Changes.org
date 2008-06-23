@@ -10,10 +10,42 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.05
+* Version 6.06
 :PROPERTIES:
 :VISIBILITY: content
 :END:
+
+** Overview
+** Details
+*** Changes in iCalendar export
+    Deadline and scheduling time stamps are now treated
+    differently in iCalendar export.  The default behavior is now
+    the following:
+
+    - a DEADLINE that appears in an entry that is a TODO item is
+      used as the item's DUE date.  Therefore, such a deadline
+      will no longer show up in the calendar.
+
+    - a DEADLINE that appears in an item that is *not* a TODO
+      item is exported as an EVENT and will show up in the
+      calendar.
+
+    - a SCHEDULED timestamp in a TODO item will be used as the
+      items DTSTART.  Therefore, such a timestamp will not show
+      up in the calendar.
+
+    - a SCHEDULED timestamp in an item that is not a TODO has no
+      effect on iCalendar export at all.  It will be ignored.
+
+    Of course this would not be Emacs if you could not configure
+    exactly what you want.  Take a look at the variables
+    =org-icalendar-use-deadlines= and
+    =org-icalendar-use-deadlines= if you want to go back to the
+    old behavior or even do something completely different.
+
+    Thanks to Karen Cooke for triggering this change.
+
+* Version 6.05
 
 If I were to name my releases, this one would be called "Adam".
 Adam, you definitely owe me a beer :-).  And I owe you one, too -
