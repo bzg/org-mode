@@ -58,9 +58,9 @@ http://repo.or.cz/w/org-mode.git
    There are several alternative distrbutions of Org:
 
    - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
-   - The Debian packages are planned.
-   - Mark A. Hershberger has made some [[https://launchpad.net/~hexmode/+archive][Ubuntu packages]] for Org, but
-     these seem to be out of date.
+   - There is a  [[http://packages.qa.debian.org/o/org-mode.html][Debian package]] by Sebastien Delafond
+   - Mark A. Hershberger has made an [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] for Org, but
+     that seems to be out of date.
 
 * Documentation
 ** The Org manual
