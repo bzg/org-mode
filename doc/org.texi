@@ -94,8 +94,8 @@ license to the document, as described in section 6 of the license.
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
-* Extensions::                 
-* Hacking::                     
+* Extensions::                  Add-ons for Org mode
+* Hacking::                     How hack your way around
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
@@ -1567,7 +1567,7 @@ separator.
 @item C-c |
 Tables can also be imported by pasting tabular text into the Org
 buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
-@kbd{C-c |} command (see above under @i{Creation and conversion}.
+@kbd{C-c |} command (see above under @i{Creation and conversion}).
 @c
 @item M-x org-table-export
 Export the table, by default as a TAB-separated file.  Useful for data
@@ -1661,7 +1661,7 @@ marked with vertical lines.  Here is an example:
 | # |  2 |   4 |   8 |  16 |  1.4142 |     1.1892 |
 | # |  3 |   9 |  27 |  81 |  1.7321 |     1.3161 |
 |---+----+-----+-----+-----+---------+------------|
-#+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2))
+#+TBLFM: $3=$2^2::$4=$2^3::$5=$2^4::$6=sqrt($2)::$7=sqrt(sqrt(($2)))
 @end example
 
 It is also sufficient to just insert the column group starters after
@@ -1867,7 +1867,7 @@ like @samp{vmean} and @samp{vsum}.
 A formula can contain an optional mode string after a semicolon.  This
 string consists of flags to influence Calc and other modes during
 execution.  By default, Org uses the standard Calc modes (precision
-12, angular units degrees, fraction and symbolic modes off.  The display
+12, angular units degrees, fraction and symbolic modes off).  The display
 format, however, has been changed to @code{(float 5)} to keep tables
 compact.  The default settings can be configured using the variable
 @code{org-calc-default-modes}.
@@ -2841,7 +2841,7 @@ buffer.}:
 @end lisp
 
 The vertical bar separates the TODO keywords (states that @emph{need
-action}) from the DONE states (which need @emph{no further action}.  If
+action}) from the DONE states (which need @emph{no further action}).  If
 you don't provide the separator bar, the last state is used as the DONE
 state.
 @cindex completion, of TODO keywords
@@ -3321,8 +3321,8 @@ support for tags.
 Every headline can contain a list of tags; they occur at the end of the
 headline.  Tags are normal words containing letters, numbers, @samp{_},
 and @samp{@@}.  Tags must be preceded and followed by a single colon,
-e.g., @samp{:WORK:}.  Several tags can be specified, as in
-@samp{:work:URGENT:}.
+e.g., @samp{:work:}.  Several tags can be specified, as in
+@samp{:work:urgent:}.
 
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
@@ -5557,7 +5557,7 @@ ranges can be specified with two time stamps, like
 @w{@samp{<2005-05-10 Tue 20:30>--<2005-05-10 Tue 22:15>}}.
 
 In the headline of the entry itself, a time(range) may also appear as
-plain text (like @samp{12:45} or a @samp{8:30-1pm}.  If the agenda
+plain text (like @samp{12:45} or a @samp{8:30-1pm}).  If the agenda
 integrates the Emacs diary (@pxref{Weekly/daily agenda}), time
 specifications in diary entries are recognized as well.
 
@@ -9594,3 +9594,4 @@ and contributed various ideas and code snippets.
 @c ispell-local-pdict: "./.aspell.org.pws"
 @c fill-column: 77
 @c End:
+
