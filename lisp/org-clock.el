@@ -638,7 +638,7 @@ the returned times will be formatted strings."
      ((string-match "\\([-+][0-9]+\\)$" skey)
       (setq shift (string-to-number (match-string 1 skey))
 	    key (intern (substring skey 0 (match-beginning 1))))))
-    (unless shift
+    (when (= shift 0)
       (cond ((eq key 'yesterday) (setq key 'today shift -1))
 	    ((eq key 'lastweek)  (setq key 'week  shift -1))
 	    ((eq key 'lastmonth) (setq key 'month shift -1))
@@ -689,6 +689,11 @@ the currently selected interval size."
       (let* ((b (match-beginning 1)) (e (match-end 1))
 	     (s (match-string 1))
 	     block shift ins y mw d date wp m)
+	(cond
+	 ((equal s "yesterday") (setq s "today-1"))
+	 ((equal s "lastweek") (setq s "thisweek-1"))
+	 ((equal s "lastmonth") (setq s "thismonth-1"))
+	 ((equal s "lastyear") (setq s "thisyear-1")))
 	(cond
 	 ((string-match "^\\(today\\|thisweek\\|thismonth\\|thisyear\\)\\([-+][0-9]+\\)?$" s)
 	  (setq block (match-string 1 s)
