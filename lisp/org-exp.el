@@ -1415,10 +1415,12 @@ on this string to produce the exported version."
 
 (defun org-export-kill-licensed-text ()
   "Remove all text that is marked with a :org-license-to-kill property."
-  (let (p)
+  (let (p q)
     (while (setq p (text-property-any (point-min) (point-max)
 				      :org-license-to-kill t))
-      (delete-region p (next-single-property-change p :org-license-to-kill)))))
+      (delete-region
+       p (or (next-single-property-change p :org-license-to-kill)
+	     (point-max))))))
 
 (defun org-export-define-heading-targets (target-alist)
   "Find all headings and define the targets for them.
@@ -1472,20 +1474,25 @@ let the link  point to the corresponding section."
 	    (slink (org-solidify-link-text link))
 	    found props pos
 	    (target
-	     (or (cdr (assoc slink target-alist))
-		 (save-excursion
-		   (unless (string-match org-link-types-re link)
-		     (setq found (condition-case nil (org-link-search link)
-				   (error nil)))
-		     (when (and found
-				(or (org-on-heading-p)
-				    (not (eq found 'dedicated))))
-		       (or (get-text-property (point) 'target)
-			   (get-text-property
-			    (max (point-min)
-				 (1- (previous-single-property-change
-				      (point) 'target)))
-			    'target))))))))
+	     (cond
+	      ((cdr (assoc slink target-alist)))
+	      ((string-match org-link-types-re link) nil)
+	      ((or (file-name-absolute-p link)
+		   (string-match "^\\." link))
+	       nil)
+	      (t
+	       (save-excursion
+		 (setq found (condition-case nil (org-link-search link)
+			       (error nil)))
+		 (when (and found
+			    (or (org-on-heading-p)
+				(not (eq found 'dedicated))))
+		   (or (get-text-property (point) 'target)
+		       (get-text-property
+			(max (point-min)
+			     (1- (previous-single-property-change
+				  (point) 'target)))
+			'target))))))))
        (when target
 	 (set-match-data md)
 	 (goto-char (match-beginning 1))
@@ -2954,8 +2961,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (setq start 0)
 	  (while (string-match org-bracket-link-analytic-regexp line start)
 	    (setq start (match-beginning 0))
-	    (setq type (if (match-end 2) (match-string 2 line) "internal"))
 	    (setq path (match-string 3 line))
+	    (setq type (cond
+			((match-end 2) (match-string 2 line))
+			((save-match-data
+			   (or (file-name-absolute-p path)
+			       (string-match "^\\.\\.?/" path)))
+			 "file")
+			(t "internal")))
 	    (setq desc1 (if (match-end 5) (match-string 5 line))
 		  desc2 (if (match-end 2) (concat type ":" path) path)
 		  descp (and desc1 (not (equal desc1 desc2)))
@@ -2987,6 +3000,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	      ;; standard URL
 	      (setq link (concat type ":" path))
 	      (setq rpl (concat "<a href=\"" link "\">" desc "</a>")))
+
+	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
+	      ;; The link protocol has a function for format the link
+	      (setq rpl
+		    (save-match-data
+		      (funcall fnc (org-link-unescape path) desc1 'html))))
+
 	     ((string= type "file")
 	      ;; FILE link
 	      (let* ((filename path)
@@ -3026,12 +3046,6 @@ lang=\"%s\" xml:lang=\"%s\">
 			      (concat "<img src=\"" thefile "\"/>")
 			    (concat "<a href=\"" thefile "\">" desc "</a>")))
 		(if (not valid) (setq rpl desc))))
-
-	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
-	      ;; The link protocol has a function for format the link
-	      (setq rpl
-		    (save-match-data
-		      (funcall fnc (org-link-unescape path) desc1 'html))))
 
 	     (t
 	      ;; just publish the path, as default

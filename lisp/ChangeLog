@@ -5,6 +5,9 @@
 	(org-icalendar-include-todo): Default changed to t.
 	(org-print-icalendar-entries): Implement better utilization of
 	scheduling and deadline time stamps.
+	(org-export-target-internal-links, org-export-as-html): Allow file
+	lines without the "file:" prefix if the file path is an absolute
+	path or starts with ".".
 
 	* org-clock.el (org-clocktable-shift): Also undertand yesterday,
 	lastweek etc.

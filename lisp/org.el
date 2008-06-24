@@ -7123,9 +7123,13 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	    (while (string-match " *\n *" link)
 	      (setq link (replace-match " " t t link)))
 	    (setq link (org-link-expand-abbrev link))
-	    (if (string-match org-link-re-with-space2 link)
-		(setq type (match-string 1 link) path (match-string 2 link))
-	      (setq type "thisfile" path link))
+	    (cond
+	     ((or (file-name-absolute-p link)
+		  (string-match "^\\.\\.?/" link))
+	      (setq type "file" path link))
+	     ((string-match org-link-re-with-space2 link)
+	      (setq type (match-string 1 link) path (match-string 2 link)))
+	     (t (setq type "thisfile" path link)))
 	    (throw 'match t)))
 
 	(when (get-text-property (point) 'org-linked-text)

@@ -2399,7 +2399,9 @@ the colon.  The following list shows examples for each link type.
 @example
 http://www.astro.uva.nl/~dominik          @r{on the web}
 file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
+/home/dominik/images/jupiter.jpg          @r{same as above}
 file:papers/last.pdf                      @r{file, relative path}
+./papers/last.pdf                         @r{same as above}
 news:comp.emacs                           @r{Usenet link}
 mailto:adent@@galaxy.net                 @r{Mail link}
 vm:folder                                 @r{VM folder link}

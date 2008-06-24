@@ -17,6 +17,23 @@
 
 ** Overview
 ** Details
+
+*** Simplified way to specify file links
+
+    In a link, you can now leave uout the "file:" prefix if you
+    write an absolute file name like =/Users/dominik/.emacs= or
+    =~/.emacs=, or if you write a relative file name by using
+    =./= or =../= to start the file path.  You cannot write a
+    plain file name, because plain text is interpreted as an
+    internal link.
+
+    So for example, a link to an image /A.jpg/ with a thumbnail
+    /B.jpg/ can now be written like
+
+#+begin_src org
+[[./A.jpg][./B.jpg] ]
+#+end_src
+
 *** Changes in iCalendar export
     Deadline and scheduling time stamps are now treated
     differently in iCalendar export.  The default behavior is now
