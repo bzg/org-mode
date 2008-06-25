@@ -11497,7 +11497,7 @@ When SHOW-ALL is nil, only return the current occurence of a time stamp."
 	      date2 (list m d (+ y1 (* (if (< n1 cday) 1 -1) dn)))
 	      n2 (calendar-absolute-from-gregorian date2)))
        ((eq dw 'month)
-	;; approx number of month between the tow dates
+	;; approx number of month between the two dates
 	(setq nmonths (floor (/ (- cday sday) 30.436875)))
 	;; How often does dn fit in there?
 	(setq d (nth 1 start) m (car start) y (nth 2 start)
@@ -11511,12 +11511,11 @@ When SHOW-ALL is nil, only return the current occurence of a time stamp."
 	(setq m2 (+ m dn) y2 y)
 	(if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
 	(setq n2 (calendar-absolute-from-gregorian (list m2 d y2)))
-	(while (< n2 cday)
+	(while (<= n2 cday)
 	  (setq n1 n2 m m2 y y2)
 	  (setq m2 (+ m dn) y2 y)
 	  (if (> m2 12) (setq y2 (1+ y2) m2 (- m2 12)))
 	  (setq n2 (calendar-absolute-from-gregorian (list m2 d y2))))))
-
       (if show-all
 	  (cond
 	   ((eq prefer 'past) n1)
