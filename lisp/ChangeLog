@@ -1,3 +1,8 @@
+2008-06-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-clock-drawer-start-re, org-clock-drawer-end-re)
+	(org-property-drawer-re, org-clock-drawer-re): New constants.
+
 2008-06-23  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-icalendar-use-deadline)

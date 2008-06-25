@@ -10091,6 +10091,22 @@ Being in this list makes sure that they are offered for completion.")
 (defconst org-property-end-re "^[ \t]*:END:[ \t]*$"
   "Regular expression matching the first line of a property drawer.")
 
+(defconst org-clock-drawer-start-re "^[ \t]*:CLOCK:[ \t]*$"
+  "Regular expression matching the first line of a property drawer.")
+
+(defconst org-clock-drawer-end-re "^[ \t]*:END:[ \t]*$"
+  "Regular expression matching the first line of a property drawer.")
+
+(defconst org-property-drawer-re
+  (concat "\\(" org-property-start-re "\\)[^\000]*\\("
+	  org-property-end-re "\\)\n?")
+  "Matches an entire property drawer.")
+
+(defconst org-clock-drawer-re
+  (concat "\\(" org-clock-drawer-start-re "\\)[^\000]*\\("
+	  org-property-end-re "\\)\n?")
+  "Matches an entire clock drawer.")
+
 (defun org-property-action ()
   "Do an action on properties."
   (interactive)
