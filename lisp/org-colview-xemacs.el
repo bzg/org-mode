@@ -1216,13 +1216,14 @@ of fields."
         (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
                (n (length title)) row tbl)
           (goto-char (point-min))
-          (while (and (re-search-forward "^\\(\\*+\\) " nil t)
-                      (or (null maxlevel)
-                          (>= maxlevel
-                              (if org-odd-levels-only
-                                  (/ (1+ (length (match-string 1))) 2)
-                                (length (match-string 1))))))
-            (when (get-char-property (match-beginning 0) 'org-columns-key)
+
+	  (while (re-search-forward "^\\(\\*+\\) " nil t)
+	    (when (and (or (null maxlevel)
+			   (>= maxlevel
+			       (if org-odd-levels-only
+				   (/ (1+ (length (match-string 1))) 2)
+				 (length (match-string 1)))))
+		       (get-char-property (match-beginning 0) 'org-columns-key))
               (goto-char (match-beginning 0))
               (setq row nil)
               (loop for i from 0 to (1- n) do
