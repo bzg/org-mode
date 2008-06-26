@@ -7761,8 +7761,10 @@ respective variable for details.
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
-@item @code{:timestamps}           .@tab @code{org-export-with-timestamps}
-@item @code{:tags}                 .@tab @code{org-export-with-tags}
+@item @code{:timestamps}            @tab @code{org-export-with-timestamps}
+@item @code{:author-info}           @tab @code{org-export-author-info}
+@item @code{:creator-info}          @tab @code{org-export-creator-info}
+@item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
 @item @code{:style}                 @tab @code{org-export-html-style}

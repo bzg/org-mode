@@ -1,3 +1,9 @@
+2008-06-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-plist-vars, org-export-as-html):
+	Implement `org-export-creator-info'.
+	(org-export-creator-info): New option.
+
 2008-06-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-clock-drawer-start-re, org-clock-drawer-end-re)
