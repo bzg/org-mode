@@ -7345,20 +7345,21 @@ document - your style specifications may change these:
 @end example
 
 The default style specification can be configured through the option
-@code{org-export-html-style}.  If you want to use a file-local style,
-you may use file variables, best wrapped into a COMMENT section at the
-end of the outline tree.  For example@footnote{Under Emacs 21, the
-continuation lines for a variable value should have no @samp{#} at the
-start of the line.}:
+@code{org-export-html-style}.  You can also just @emph{add} to the default
+(instead of overwriting it) by using the option
+@code{org-export-html-style-extra}. If you want to use a file-local style,
+you may use file variables, best wrapped into a COMMENT section at the end of
+the outline tree.  For example@footnote{Under Emacs 21, the continuation
+lines for a variable value should have no @samp{#} at the start of the
+line.}:
 
 @example
 * COMMENT html style specifications
 
 # Local Variables:
-# org-export-html-style: "   <style type=\"text/css\">
-#       p @{font-weight: normal; color: gray; @}
-#       h1 @{color: black; @}
-#   </style>"
+# org-export-html-style-extra: 
+#  "p  @{font-weight: normal; color: gray; @}
+#   h1 @{color: black; @}"
 # End:
 @end example
 
@@ -7768,6 +7769,7 @@ respective variable for details.
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
 @item @code{:style}                 @tab @code{org-export-html-style}
+@item @code{:style-extra}           @tab @code{org-export-html-style-extra}
 @item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
 @item @code{:inline-images}         @tab @code{org-export-html-inline-images}
 @item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}

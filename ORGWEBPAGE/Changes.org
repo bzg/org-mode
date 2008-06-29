@@ -10,13 +10,21 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.06
+* Version 6.06 (in preparation)
 :PROPERTIES:
 :VISIBILITY: content
 :END:
 
 ** Overview
 ** Details
+
+*** New variable =org-export-html-style-extra=
+
+    This variable can be used to just /add/ to the default style
+    in =org-export-html-style=.  So if you want only small
+    modifications to the default style, you no longer need to to
+    copy the entire default style to your customization.
+    This follows a proposal by Rustom Mody.
 
 *** Simplified way to specify file links
 

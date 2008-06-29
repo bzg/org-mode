@@ -1,3 +1,8 @@
+2008-06-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-html-style-extra): New variable.
+	(org-export-splice-style): New function.
+
 2008-06-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-plist-vars, org-export-as-html):

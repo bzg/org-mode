@@ -519,10 +519,22 @@ or, if you want to keep the style in a file,
    <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
 
 As the value of this option simply gets inserted into the HTML <head> header,
-you can \"misuse\" it to add arbitrary text to the header."
+you can \"misuse\" it to add arbitrary text to the header.
+See also the variable `org-export-html-style-extra'."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-export-html-style-extra ""
+  "Additional style information that is spliced into `org-export-html-style'.
+This can be used to add or overwrite information given in the variable
+`org-export-html-style'.  Use this if you are satisfied with the default
+style but would like to add to it instead of completely overwriting it.
+The value of this variable is spliced into `org-export-html-style', directly
+before the </style> tag.  Note that this will only work if the default
+style does indeed contain this tag.  In particular, if the default is to
+refer to a CSS style file, this option will be completely ignored."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-html-title-format "<h1 class=\"title\">%s</h1>\n"
   "Format for typesetting the document title in HTML export."
@@ -755,6 +767,7 @@ or if they are only using it locally."
     (:tables               . org-export-with-tables)
     (:table-auto-headline  . org-export-highlight-first-table-line)
     (:style                . org-export-html-style)
+    (:style-extra          . org-export-html-style-extra)
     (:agenda-style         . org-agenda-export-html-style)
     (:convert-org-links    . org-export-html-link-org-files-as-html)
     (:inline-images        . org-export-html-inline-images)
@@ -2617,7 +2630,8 @@ PUB-DIR is set, use this as the publishing directory."
 			       ext-plist
 			       (org-infile-export-plist))))
 
-	 (style (plist-get opt-plist :style))
+	 (style (org-export-splice-style (plist-get opt-plist :style)
+					 (plist-get opt-plist :style-extra)))
 	 (html-extension (plist-get opt-plist :html-extension))
 	 (link-validate (plist-get opt-plist :link-validation-function))
 	 valid thetoc have-headings first-heading-pos
@@ -3573,6 +3587,16 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
     (table-generate-source 'html " org-tmp2 ")
     (set-buffer " org-tmp2 ")
     (buffer-substring (point-min) (point-max))))
+
+(defun org-export-splice-style (style extra)
+  "Splice EXTRA into STYLE, just before \"</style>\"."
+  (if (and (stringp extra)
+	   (string-match "\\S-" extra)
+	   (string-match "</style>" style))
+      (concat (substring style 0 (match-beginning 0))
+	      "\n" extra "\n"
+	      (substring style (match-beginning 0)))
+    style))
 
 (defun org-html-handle-time-stamps (s)
   "Format time stamps in string S, or remove them."
