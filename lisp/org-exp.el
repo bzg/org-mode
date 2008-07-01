@@ -472,19 +472,16 @@ Org-mode file."
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
-(defcustom org-export-html-style
+(defconst org-export-html-style-default
 "<style type=\"text/css\">
-  html {
-	font-family: Times, serif;
-	font-size: 12pt;
-  }
-  .title { text-align: center; }
-  .todo  { color: red; }
-  .done { color: green; }
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
   .timestamp { color: grey }
   .timestamp-kwd { color: CadetBlue }
-  .tag { background-color:lightblue; font-weight:normal }
-  .target { }
   pre {
 	border: 1pt solid #AEBDCC;
 	background-color: #F3F5F7;
@@ -493,28 +490,32 @@ Org-mode file."
         font-size: 90%;
   }
   table { border-collapse: collapse; }
-  td, th {
-	vertical-align: top;
-	<!--border: 1pt solid #ADB9CC;-->
-  }
+  td, th { vertical-align: top; }
   dt { font-weight: bold; }
 </style>"
   "The default style specification for exported HTML files.
-Since there are different ways of setting style information, this variable
-needs to contain the full HTML structure to provide a style, including the
-surrounding HTML tags.  The style specifications should include definitions
-for new classes todo, done, title, and deadline.  For example, valid values
-would be:
+Please use the variables `org-export-html-stye' and
+`org-export-html-style-extra' to add to this style.")
+
+(defcustom org-export-html-style ""
+  "Org-wide style definitions for exported HTML files.
+
+This variable needs to contain the full HTML structure to provide a style,
+including the surrounding HTML tags.  If you set the value of this variable,
+you should consider to include definitions for the following classes:
+ title, todo, done, timestamp, timestamp-kwd, tag, target.
+
+For example, a valid value would be:
 
    <style type=\"text/css\">
        p { font-weight: normal; color: gray; }
        h1 { color: black; }
       .title { text-align: center; }
-      .todo, .deadline { color: red; }
+      .todo, .timestamp-kwd { color: red; }
       .done { color: green; }
    </style>
 
-or, if you want to keep the style in a file,
+If you'd like to refer to en external style file, use something like
 
    <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
 
@@ -525,14 +526,11 @@ See also the variable `org-export-html-style-extra'."
   :type 'string)
 
 (defcustom org-export-html-style-extra ""
-  "Additional style information that is spliced into `org-export-html-style'.
-This can be used to add or overwrite information given in the variable
-`org-export-html-style'.  Use this if you are satisfied with the default
-style but would like to add to it instead of completely overwriting it.
-The value of this variable is spliced into `org-export-html-style', directly
-before the </style> tag.  Note that this will only work if the default
-style does indeed contain this tag.  In particular, if the default is to
-refer to a CSS style file, this option will be completely ignored."
+  "Additional style information for HTML export.
+The value of this variable is inserted into the HTML buffer right after
+the value of `org-export-html-style'.  Use this variable for per-file
+settings of style information, and do not forget to surround the style
+settings with <style>...</style> tags."
   :group 'org-export-html
   :type 'string)
 
@@ -2630,8 +2628,9 @@ PUB-DIR is set, use this as the publishing directory."
 			       ext-plist
 			       (org-infile-export-plist))))
 
-	 (style (org-export-splice-style (plist-get opt-plist :style)
-					 (plist-get opt-plist :style-extra)))
+	 (style (concat org-export-html-style-default
+			(plist-get opt-plist :style)
+			(plist-get opt-plist :style-extra)))
 	 (html-extension (plist-get opt-plist :html-extension))
 	 (link-validate (plist-get opt-plist :link-validation-function))
 	 valid thetoc have-headings first-heading-pos
