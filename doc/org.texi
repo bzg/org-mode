@@ -3757,22 +3757,40 @@ the same commands are used as for tag searches (@pxref{Tag searches}), and
 the same logic applies.  For example, here is a search string:
 
 @example
-+work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2+With=@{Sarah\|Denny@}
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2         \
+         +With=@{Sarah\|Denny@}+SCHEDULED>="<2008-10-11>"
 @end example
 
 @noindent
+The type of comparison will depend on how the comparison value is written:
+@itemize @minus
+@item
 If the comparison value is a plain number, a numerical comparison is done,
 and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
-@samp{>=}, and @samp{<>}.  If the comparison value is enclosed in double
-quotes, a string comparison is done, and the same operators are allowed.  If
-the comparison value is enclosed in curly braces, a regexp match is
-performed, with @samp{=} meaning that the regexp matches the property value,
-and @samp{<>} meaning that it does not match.  So the search string in the
-example finds entries tagged @samp{:work:} but not @samp{:boss:}, which also
-have a priority value @samp{A}, a @samp{:Coffee:} property with the value
-@samp{unlimited}, an @samp{Effort} property that is numerically smaller than
-2, and a @samp{:With:} property that is matched by the regular expression
-@samp{Sarah\|Denny}.
+@samp{>=}, and @samp{<>}.
+@item
+If the comparison value is enclosed in double
+quotes, a string comparison is done, and the same operators are allowed.  
+@item
+If the comparison value is enclosed in double quotes @emph{and} angular
+brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
+assumed to be date/time specifications in the standard Org way@footnote{The
+only special values that will be recognized are @samp{"<now>"} for now, and
+@samp{"<today"} today at 0:00 hours, i.e. without a time specification.}, and
+the comparison will be done accordingly.
+@item
+If the comparison value is enclosed
+in curly braces, a regexp match is performed, with @samp{=} meaning that the
+regexp matches the property value, and @samp{<>} meaning that it does not
+match.  
+@end itemize
+
+So the search string in the example finds entries tagged @samp{:work:} but
+not @samp{:boss:}, which also have a priority value @samp{A}, a
+@samp{:Coffee:} property with the value @samp{unlimited}, an @samp{Effort}
+property that is numerically smaller than 2, a @samp{:With:} property that is
+matched by the regular expression @samp{Sarah\|Denny}, and that are scheduled
+on or after December 24, 2008.
 
 You can configure Org mode to use property inheritance during a search, but
 beware that this can slow down searches considerably.  See @ref{Property
@@ -7344,29 +7362,31 @@ document - your style specifications may change these:
 .target         @r{target for links}
 @end example
 
-The default style specification can be configured through the option
-@code{org-export-html-style}.  You can also just @emph{add} to the default
-(instead of overwriting it) by using the option
-@code{org-export-html-style-extra}. If you want to use a file-local style,
-you may use file variables, best wrapped into a COMMENT section at the end of
-the outline tree.  For example@footnote{Under Emacs 21, the continuation
-lines for a variable value should have no @samp{#} at the start of the
-line.}:
+Each exported files contains a compact default style that defines these
+classes in a basic way.  You may overwrite these settings, or add to them by
+using the variables @code{org-export-html-style} (for Org-wide settings) and
+@code{org-export-html-style-extra} (for more granular settings, like
+file-local settings).  If you want to use a file-local style, you may use
+file variables, best wrapped into a COMMENT section at the end of the outline
+tree.  For example@footnote{Under Emacs 21, the continuation lines for a
+variable value should have no @samp{#} at the start of the line.}:
 
 @example
 * COMMENT html style specifications
 
 # Local Variables:
 # org-export-html-style-extra: 
-#  "p  @{font-weight: normal; color: gray; @}
-#   h1 @{color: black; @}"
+#  "<style>
+#   p  @{font-weight: normal; color: gray; @}
+#   h1 @{color: black; @}
+#   </style>"
 # End:
 @end example
 
-Remember to execute @kbd{M-x normal-mode} after changing this to make
-the new style visible to Emacs.  This command restarts Org mode for the
-current buffer and forces Emacs to re-evaluate the local variables
-section in the buffer.
+Remember to execute @kbd{M-x normal-mode} after changing this to make the new
+style immediately visible to Emacs.  This command restarts Org mode for the
+current buffer and forces Emacs to re-evaluate the local variables section in
+the buffer.
 
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.

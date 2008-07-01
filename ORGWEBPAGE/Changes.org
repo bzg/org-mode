@@ -18,13 +18,42 @@
 ** Overview
 ** Details
 
-*** New variable =org-export-html-style-extra=
+*** New setup for HTML style information
+    In order to create a more CSS-like setup of the HTML style
+    information, the following changes have been made:
+    - The default style has moved to a constant,
+      =org-export-html-style-default= and should not be changed
+      anymore.
+    - The default of the variable =org-export-html-style= is now
+      just the empty string.  This variable should receive
+      settings that are Org-wide.  When using org-publish, this
+      variable is associated with the =:style= property and can
+      be used to establish project-wide settings.
+    - There is a new variable =org-export-html-style-extra= that
+      should be used for file-local setings.  Org-publish can, if
+      necessary, access this variable with the =:style-extra=
+      property.
+    - When a file is published, the values of 
+      - org-export-html-style-default
+      - org-export-html-style
+      - org-export-html-style-extra
+      are all inserted into the HTML header, in the given
+      sequence.
 
-    This variable can be used to just /add/ to the default style
-    in =org-export-html-style=.  So if you want only small
-    modifications to the default style, you no longer need to to
-    copy the entire default style to your customization.
     This follows a proposal by Rustom Mody.
+
+*** A way to compare times during a property search
+    If the comparison value in a property search is a string that
+    is enclosed in angular brackets, a time comparison will be
+    done.  For example
+
+    : +DEADLINE>="<2008-12-24 15:20>"
+
+    looks for entries with a deadline on or after that time.
+    Special allowed values are "<now>" (with time) and "<today>"
+    (date only).
+
+    This is based on a request by Manish.
 
 *** Simplified way to specify file links
 

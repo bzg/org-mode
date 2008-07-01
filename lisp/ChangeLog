@@ -1,3 +1,13 @@
+2008-07-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-time=, org-time<, org-time<=, org-time>)
+	(org-time>=, org-time<>, org-2ft): New functions.
+	(org-op-to-function): Also provide for the time testing fucntions.
+
+2008-06-30  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-html-style-default): New constant.
+
 2008-06-29  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-html-style-extra): New variable.

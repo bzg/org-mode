@@ -9441,8 +9441,10 @@ also TODO lines."
 			   cat-p (equal pn "CATEGORY")
 			   re-p (equal (string-to-char pv) ?{)
 			   str-p (equal (string-to-char pv) ?\")
+			   time-p (save-match-data (string-match "^\"<.*>\"$" pv))
 			   pv (if (or re-p str-p) (substring pv 1 -1) pv))
-		     (setq po (org-op-to-function po str-p))
+		     (if time-p (setq pv (org-matcher-time pv)))
+		     (setq po (org-op-to-function po (if time-p 'time str-p)))
 		     (if (equal pn "CATEGORY")
 			 (setq gv '(get-text-property (point) 'org-category))
 		       (setq gv `(org-cached-entry-get nil ,pn)))
@@ -9497,21 +9499,46 @@ also TODO lines."
     (cons match0 matcher)))
 
 (defun org-op-to-function (op &optional stringp)
+  "Turn an operator into the appropriate function."
   (setq op
 	(cond
-	 ((equal  op   "<"       ) '(<     string<      ))
-	 ((equal  op   ">"       ) '(>     org-string>  ))
-	 ((member op '("<=" "=<")) '(<=    org-string<= ))
-	 ((member op '(">=" "=>")) '(>=    org-string>= ))
-	 ((member op '("="  "==")) '(=     string=      ))
-	 ((member op '("<>" "!=")) '(org<> org-string<> ))))
-  (nth (if stringp 1 0) op))
+	 ((equal  op   "<"       ) '(<     string<      org-time<))
+	 ((equal  op   ">"       ) '(>     org-string>  org-time>))
+	 ((member op '("<=" "=<")) '(<=    org-string<= org-time<=))
+	 ((member op '(">=" "=>")) '(>=    org-string>= org-time>=))
+	 ((member op '("="  "==")) '(=     string=      org-time=))
+	 ((member op '("<>" "!=")) '(org<> org-string<> org-time<>))))
+  (nth (if (eq stringp 'time) 2 (if stringp 1 0)) op))
 
 (defun org<> (a b) (not (= a b)))
 (defun org-string<= (a b) (or (string= a b) (string< a b)))
 (defun org-string>= (a b) (not (string< a b)))
 (defun org-string>  (a b) (and (not (string= a b)) (not (string< a b))))
 (defun org-string<> (a b) (not (string= a b)))
+(defun org-time=  (a b) (=     (org-2ft a) (org-2ft b)))
+(defun org-time<  (a b) (<     (org-2ft a) (org-2ft b)))
+(defun org-time<= (a b) (<=    (org-2ft a) (org-2ft b)))
+(defun org-time>  (a b) (>     (org-2ft a) (org-2ft b)))
+(defun org-time>= (a b) (>=    (org-2ft a) (org-2ft b)))
+(defun org-time<> (a b) (org<> (org-2ft a) (org-2ft b)))
+(defun org-2ft (s)
+  "Convert S to a floating point time.
+If S is already a number, just return it.  If it is a string, parse
+it as a time string and apply `float-time' to it.  f S is nil, just return 0."
+  (cond
+   ((numberp s) s)
+   ((stringp s)
+    (condition-case nil
+	(float-time (apply 'encode-time (org-parse-time-string s)))
+      (error 0.)))
+   (t 0.)))
+
+(defun org-matcher-time (s)
+  (cond
+   ((equal s "<now>") (float-time))
+   ((equal s "<today>")
+    (float-time (append '(0 0 0) (nthcdr 3 (decode-time)))))
+   (t (org-2ft s))))
 
 (defun org-match-any-p (re list)
   "Does re match any element of list?"
@@ -14539,4 +14566,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
-
