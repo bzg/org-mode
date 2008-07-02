@@ -8603,7 +8603,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
       nil)))
 
 (defun org-get-repeat ()
-  "Check if tere is a deadline/schedule with repeater in this entry."
+  "Check if there is a deadline/schedule with repeater in this entry."
   (save-match-data
     (save-excursion
       (org-back-to-heading t)

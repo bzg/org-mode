@@ -482,6 +482,7 @@ Org-mode file."
   .target { }
   .timestamp { color: grey }
   .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
   pre {
 	border: 1pt solid #AEBDCC;
 	background-color: #F3F5F7;
@@ -2721,6 +2722,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]+" org-quote-string "\\>\\)"))
 	 (inquote     nil)
 	 (infixed     nil)
+	 (inverse     nil)
 	 (in-local-list nil)
 	 (local-list-type nil)
 	 (local-list-indent nil)
@@ -2971,11 +2973,20 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert "</p>\n</blockquote>\n")
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-START" line)
-	    (insert "<verse>\n<p>\n")
+	    (insert "\n<p class=\"verse\">\n")
+	    (setq inverse t)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-END" line)
-	    (insert "</p>\n</verse>\n")
+	    (insert "</p>\n")
+	    (setq inverse nil)
 	    (throw 'nextline nil))
+	  (when inverse
+	    (setq i (org-get-string-indentation line))
+	    (if (> i 0)
+		(setq line (concat (mapconcat 'identity
+					      (make-list (* 2 i) "\\nbsp") "")
+				   " " (org-trim line))))
+	    (setq line (concat line " \\\\")))
 
 	  ;; make targets to anchors
 	  (while (string-match "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)

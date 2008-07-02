@@ -3,6 +3,7 @@
 	* org-exp.el (org-get-file-contents)
 	(org-get-and-remove-property): New functions.
 	(org-export-handle-include-files): Handle the new prefix options.
+	(org-export-as-html): Fix the verse environment.
 
 2008-07-01  Carsten Dominik  <dominik@science.uva.nl>
 
