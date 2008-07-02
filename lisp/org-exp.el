@@ -1895,10 +1895,12 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end)
+	params file markup lang start end prefix prefix1)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
+	    prefix (org-get-and-remove-property 'params :prefix)
+	    prefix1 (org-get-and-remove-property 'params :prefix1)
 	    file (org-symname-or-string (pop params))
 	    markup (org-symname-or-string (pop params))
 	    lang (org-symname-or-string (pop params)))
@@ -1914,9 +1916,37 @@ TYPE must be a string, any of:
 	    (setq start (format "#+begin_%s\n" markup)
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
-	(forward-char (nth 1 (insert-file-contents (expand-file-name file))))
+	(insert (org-get-file-contents (expand-file-name file) prefix prefix1))
 	(or (bolp) (newline))
 	(insert (or end ""))))))
+
+(defun org-get-file-contents (file &optional prefix prefix1)
+  "Get the contents of FILE and return them as a string.
+If PREFIX is a string, prepend it to each line.  If PREFIX1
+is a string, prepend it to the first line instead of PREFIX."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (when (or prefix prefix1)
+      (goto-char (point-min))
+      (while (not (eobp))
+	(insert (or prefix1 prefix))
+	(setq prefix1 nil)
+	(beginning-of-line 2)))
+    (buffer-string)))
+
+(defun org-get-and-remove-property (listvar prop)
+  "Check if the value of LISTVAR contains PROP as a property.
+If yes, return the value of that property (i.e. the element following
+in the list) and remove property and value from the list in LISTVAR."
+  (let ((list (symbol-value listvar)) m v)
+    (when (setq m (member prop list))
+      (setq v (nth 1 m))
+      (if (equal (car list) prop)
+	  (set listvar (cddr list))
+	(setcdr (nthcdr (- (length list) (length m) 1) list)
+		(cddr m))
+	(set listvar list)))
+    v))
 
 (defun org-symname-or-string (s)
   (if (symbolp s)
@@ -1924,7 +1954,7 @@ TYPE must be a string, any of:
     s))
 
 ;;; Fontification of code
-;; Currently only for th HTML backend, but who knows....
+;; Currently only for the HTML backend, but who knows....
 (defun org-export-replace-src-segments ()
   "Replace source code segments with special code for export."
   (let ((case-fold-search t)
@@ -4371,4 +4401,3 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
-

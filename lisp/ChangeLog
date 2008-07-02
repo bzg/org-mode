@@ -1,3 +1,9 @@
+2008-07-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-get-file-contents)
+	(org-get-and-remove-property): New functions.
+	(org-export-handle-include-files): Handle the new prefix options.
+
 2008-07-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-time=, org-time<, org-time<=, org-time>)

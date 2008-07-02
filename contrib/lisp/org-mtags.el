@@ -72,7 +72,7 @@
 ;;        Needs to be on a line by itself, similarly the </src> tag.
 ;;        Will be translated into Org's BEGIN_SRC construct.
 ;;
-;;   <include file="FILE" markup="MARKUP" lang="LANG">
+;;   <include file="FILE" markup="MARKUP" lang="LANG" prefix="str" prefix1="str">
 ;;        Needs to be on a line by itself.
 ;;        Will be translated into Org's #+INCLUDE construct.
 ;;
@@ -128,7 +128,7 @@ The is done in the entire buffer."
   (let ((re (concat "^[ \t]*\\(</?\\("
 		    (mapconcat 'identity org-mtags-supported-tags "\\|")
 		    "\\)\\>\\)"))
-	info tag rpl style markup lang file)
+	info tag rpl style markup lang file prefix prefix1)
     ;; First, do the <br> tag
     (goto-char (point-min))
     (while (re-search-forward "<br>[ \t]*$" nil t)
@@ -177,12 +177,17 @@ The is done in the entire buffer."
 	 ((equal tag "include")
 	  (setq file (plist-get info :file)
 		markup (downcase (plist-get info :markup))
-		lang (plist-get info :lang))
+		lang (plist-get info :lang)
+		prefix (plist-get info :prefix)
+		prefix1 (plist-get info :prefix1))
 	  (setq rpl "#+INCLUDE")
 	  (when markup
 	    (setq rpl (concat rpl " " markup))
 	    (when (and (equal markup "src") lang)
-	      (setq rpl (concat rpl " " lang))))))
+	      (setq rpl (concat rpl " " lang))))
+	  (setq rpl (concat rpl
+			    " :prefix " prin1-to-string prefix
+			    " :prefix1 " prin1-to-string prefix1))))
 	(when rpl
 	  (goto-char (plist-get info :match-beginning))
 	  (delete-region (point-at-bol) (plist-get info :match-end))

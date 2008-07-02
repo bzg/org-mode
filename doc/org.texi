@@ -6941,7 +6941,14 @@ The optional second and third parameter are the markup (@samp{quote},
 @samp{example}, or @samp{src}), and, if the markup is @samp{src}, the
 language for formatting the contents.  The markup is optional, if it is not
 given, the text will be assumed to be in Org mode format and will be
-processed normally.
+processed normally.  The include line will also allow additional keyword
+parameters @code{:prefix1} and @code{:prefix} to specify prefixes for the
+first line and for each following line.  For example, to include a file as an
+item, use
+
+@example
+#+INCLUDE: "~/snippets/xx" :prefix1 "   + " :prefix "     "
+@end example
 
 @table @kbd
 @kindex C-c '
