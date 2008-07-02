@@ -18,6 +18,11 @@
 ** Overview
 ** Details
 
+*** New parameters :prefix and :prefix1 for include files
+    These parameters specify prefixes for each line of included
+    text.  :prefix1 is only for the first line, :prefix for all
+    other lines.
+
 *** New setup for HTML style information
     In order to create a more CSS-like setup of the HTML style
     information, the following changes have been made:
