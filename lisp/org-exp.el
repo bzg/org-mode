@@ -494,7 +494,7 @@ Org-mode file."
   dt { font-weight: bold; }
 </style>"
   "The default style specification for exported HTML files.
-Please use the variables `org-export-html-stye' and
+Please use the variables `org-export-html-style' and
 `org-export-html-style-extra' to add to this style.")
 
 (defcustom org-export-html-style ""

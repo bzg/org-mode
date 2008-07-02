@@ -3790,7 +3790,7 @@ not @samp{:boss:}, which also have a priority value @samp{A}, a
 @samp{:Coffee:} property with the value @samp{unlimited}, an @samp{Effort}
 property that is numerically smaller than 2, a @samp{:With:} property that is
 matched by the regular expression @samp{Sarah\|Denny}, and that are scheduled
-on or after December 24, 2008.
+on or after October 11, 2008.
 
 You can configure Org mode to use property inheritance during a search, but
 beware that this can slow down searches considerably.  See @ref{Property
