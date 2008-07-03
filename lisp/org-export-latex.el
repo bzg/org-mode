@@ -762,11 +762,22 @@ org-protect property."
 	  (replace-match "")
 	(replace-match (format "\\texttt{%s}" (match-string 0)) t t)))
     ;; convert tags
-    (when (re-search-forward "\\(:[a-zA-Z0-9]+\\)+:" nil t)
+    (when (re-search-forward "\\(:[a-zA-Z0-9_@]+\\)+:" nil t)
       (if (or (not org-export-with-tags)
 	      (plist-get remove-list :tags))
 	  (replace-match "")
-	(replace-match (format "\\texttt{%s}" (match-string 0)) t t)))))
+	(replace-match 
+	 (org-export-latex-protect-string
+	  (format "\\texttt{%s}" (save-match-data
+				   (org-quote-chars (match-string 0)))))
+	 t t)))))
+
+(defun org-quote-chars (s)
+  (let ((start 0))
+    (while (string-match "_" s start)
+      (setq start (+ 2 (match-beginning 0))
+	    s (replace-match "\\_" t t s))))
+  s)
 
 (defun org-export-latex-fontify-headline (string)
   "Fontify special words in string."
@@ -777,10 +788,10 @@ org-protect property."
     (goto-char (point-min))
     (when (plist-get org-export-latex-options-plist :emphasize)
       (org-export-latex-fontify))
-    (org-export-latex-special-chars
-     (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-keywords-maybe
      org-export-latex-remove-from-headlines)
+    (org-export-latex-special-chars
+     (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-links)
     (org-trim (buffer-substring-no-properties (point-min) (point-max)))))
 
