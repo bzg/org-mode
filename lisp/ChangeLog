@@ -1,3 +1,12 @@
+2008-07-04  Bastien Guerry  <bzg@altern.org>
+
+	* org-clock.el (org-clock-out-when-done): Doc fix.
+
+	* org.el (org-agenda-skip-unavailable-files): Doc fix.
+
+	* org-exp.el (org-export-remove-comment-blocks-and-subtrees):
+	Ignore case when searching for the COMMENT cookie at export time.
+
 2008-07-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-get-file-contents)
