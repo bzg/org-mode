@@ -312,7 +312,9 @@ If functions in this hook modify the buffer, it will be saved."
 		     org-publish-timestamp-directory)
 	    ;; there is a timestamp, check if FILENAME is newer
 	    (file-newer-than-file-p
-	     filename (org-publish-timestamp-filename filename))))
+	     filename (org-publish-timestamp-filename filename)))
+	(make-directory org-publish-timestamp-directory)
+	t)
     ;; don't use timestamps, always return t
     t))
 
