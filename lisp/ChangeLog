@@ -1,3 +1,8 @@
+2008-07-05  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-needed-p): Create timestamp
+	directory when it does not exist.
+
 2008-07-04  Bastien Guerry  <bzg@altern.org>
 
 	* org-clock.el (org-clock-out-when-done): Doc fix.
