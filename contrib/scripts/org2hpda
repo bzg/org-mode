@@ -1,7 +1,7 @@
 # org2hpda - a small utility to generate hipster pda style printouts from org mode 
 # Copyright (C) 2007  Christian Egli
 # 
-# Version: 0.4
+# Version: 0.5
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 EMACS = emacs -batch -l ~/.emacs
 LATEX = latex
-DIARY = ~/TODO/diary
+DIARY = ~/diary
 
 hipsterFiles =  weekCalendar.pdf yearCalendar.pdf monthCalendar3.pdf monthCalendar2.pdf monthCalendar1.pdf
 pocketModFiles =  weekCalendar.pdf yearCalendar-rotated.pdf \

@@ -1638,7 +1638,8 @@ These special cookies will later be interpreted by the backend."
 
 (defun org-export-remove-comment-blocks-and-subtrees ()
   "Remove the comment environment, and also commented subtrees."
-  (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>")))
+  (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>"))
+        (case-fold-search nil))
     ;; Remove comment environment
     (goto-char (point-min))
     (while (re-search-forward

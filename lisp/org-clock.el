@@ -54,8 +54,8 @@ reaches or exceeds this number, a drawer will be created."
 	  (integer :tag "When at least N clock entries")))
 
 (defcustom org-clock-out-when-done t
-  "When t, the clock will be stopped when the relevant entry is marked DONE.
-Nil means, clock will keep running until stopped explicitly with
+  "When non-nil, the clock will be stopped when the relevant entry is marked DONE.
+A nil value means, clock will keep running until stopped explicitly with
 `C-c C-x C-o', or until the clock is started in a different item."
   :group 'org-clock
   :type 'boolean)
