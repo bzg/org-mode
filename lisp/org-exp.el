@@ -1415,14 +1415,14 @@ on this string to produce the exported version."
       ;; Find all links that contain a newline and put them into a single line
       (org-export-concatenate-multiline-links)
 
+      ;; Normalize links: Convert angle and plain links into bracket links
+      ;; and expand link abbreviations
+      (org-export-normalize-links)
+
       ;; Find all internal links.  If they have a fuzzy match (i.e. not
       ;; a *dedicated* target match, let the link  point to the
       ;; corresponding section.
       (org-export-target-internal-links target-alist)
-
-      ;; Normalize links: Convert angle and plain links into bracket links
-      ;; and expand link abbreviations
-      (org-export-normalize-links)
 
       ;; Find multiline emphasis and put them into single line
       (when (plist-get parameters :emph-multiline)

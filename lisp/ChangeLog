@@ -1,5 +1,8 @@
 2008-07-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-preprocess-string): Swap link
+	normalization and inernal link targeting.
+
 	* org-publish.el (org-publish-needed-p): Create timestamp
 	directory when it does not exist.
 
