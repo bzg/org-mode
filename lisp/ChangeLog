@@ -1,5 +1,8 @@
 2008-07-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-needed-p): Be verbose about files
+	published and files skipped.
+
 	* org-exp.el (org-export-preprocess-string): Swap link
 	normalization and inernal link targeting.
 

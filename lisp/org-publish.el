@@ -304,19 +304,24 @@ If functions in this hook modify the buffer, it will be saved."
 
 (defun org-publish-needed-p (filename)
   "Return `t' if FILENAME should be published."
-  (if org-publish-use-timestamps-flag
-      (if (file-exists-p org-publish-timestamp-directory)
-	  ;; first handle possible wrong timestamp directory
-	  (if (not (file-directory-p org-publish-timestamp-directory))
-	      (error "Org publish timestamp: %s is not a directory"
-		     org-publish-timestamp-directory)
-	    ;; there is a timestamp, check if FILENAME is newer
-	    (file-newer-than-file-p
-	     filename (org-publish-timestamp-filename filename)))
-	(make-directory org-publish-timestamp-directory)
-	t)
-    ;; don't use timestamps, always return t
-    t))
+  (let ((rtn
+	 (if org-publish-use-timestamps-flag
+	     (if (file-exists-p org-publish-timestamp-directory)
+		 ;; first handle possible wrong timestamp directory
+		 (if (not (file-directory-p org-publish-timestamp-directory))
+		     (error "Org publish timestamp: %s is not a directory"
+			    org-publish-timestamp-directory)
+		   ;; there is a timestamp, check if FILENAME is newer
+		   (file-newer-than-file-p
+		    filename (org-publish-timestamp-filename filename)))
+	       (make-directory org-publish-timestamp-directory)
+	       t)
+	   ;; don't use timestamps, always return t
+	   t)))
+    (if rtn
+	(message "Publishing file %s" filename)
+      (message   "Skipping unmodified file %s" filename))
+    rtn))
 
 (defun org-publish-update-timestamp (filename)
   "Update publishing timestamp for file FILENAME.
