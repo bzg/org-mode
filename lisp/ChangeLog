@@ -1,3 +1,8 @@
+2008-07-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-timestamp-filename): Use
+	SHA1-encoded file names in the timestamp directory.
+
 2008-07-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-needed-p): Be verbose about files

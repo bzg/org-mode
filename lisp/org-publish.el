@@ -297,10 +297,8 @@ If functions in this hook modify the buffer, it will be saved."
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (while (string-match
-	  (if (eq system-type 'windows-nt) "~\\|/\\|:" "~\\|/") filename)
-    (setq filename (replace-match "_" nil t filename)))
-  (concat org-publish-timestamp-directory filename ".timestamp"))
+  (concat (file-name-as-direcory org-publish-timestamp-directory)
+         "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
 (defun org-publish-needed-p (filename)
   "Return `t' if FILENAME should be published."

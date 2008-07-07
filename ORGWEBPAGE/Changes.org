@@ -16,6 +16,15 @@
 :END:
 
 ** Overview
+** Incompatible changes
+*** New structure for the timestamp directory for org-publish.
+    The timestamp directory now uses SHA1 hashed versions of the
+    path to each publishing file.  This should be a consistent
+    and system-independent way to handle things.  The change
+    means that your next publishing command will publish each and
+    every file again, but just once, until the timestamps are
+    updated.
+
 ** Details
 
 *** New parameters :prefix and :prefix1 for include files
