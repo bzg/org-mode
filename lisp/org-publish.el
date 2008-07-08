@@ -297,7 +297,7 @@ If functions in this hook modify the buffer, it will be saved."
 
 (defun org-publish-timestamp-filename (filename)
   "Return path to timestamp file for filename FILENAME."
-  (concat (file-name-as-direcory org-publish-timestamp-directory)
+  (concat (file-name-as-directory org-publish-timestamp-directory)
          "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
 (defun org-publish-needed-p (filename)
