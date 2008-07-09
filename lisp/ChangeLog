@@ -1,6 +1,7 @@
 2008-07-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-find-title): Bug fix.
+	(org-publish-org-index): Implement new :index-style option.
 
 2008-07-07  Carsten Dominik  <dominik@science.uva.nl>
 

@@ -263,7 +263,12 @@ index of files or summary page for a given project.
   :index-function        Plugin function to use for generation of index.
                          Defaults to `org-publish-org-index', which
                          generates a plain list of links to all files
-                         in the project."
+                         in the project.
+  :index-style           Can be `list' (index is just an itemized list
+                         of the titles of the files involved) or 
+                         `tree' (the directory structure of the source
+                         files is reflected in the index).  Defaults to
+                         `tree'."
   :group 'org-publish
   :type 'alist)
 
@@ -607,6 +612,8 @@ Default for INDEX-FILENAME is 'index.org'."
 	 (index-filename (concat dir (or index-filename "index.org")))
 	 (index-title (or (plist-get project-plist :index-title)
 			  (concat "Index for project " (car project))))
+	 (index-style (or (plist-get project-plist :index-style)
+			  'tree))
 	 (index-buffer (find-buffer-visiting index-filename))
 	 (ifn (file-name-nondirectory index-filename))
 	 file)
@@ -621,25 +628,32 @@ Default for INDEX-FILENAME is 'index.org'."
 	      (oldlocal localdir))
 	  ;; index shouldn't index itself
 	  (unless (string= fn ifn)
-	    (setq localdir (concat (file-name-as-directory dir)
-				   (file-name-directory link)))
-	    (unless (string= localdir oldlocal)
-	      (if (string= localdir dir)
-		  (setq indent-str (make-string 2 ?\ ))
-		(let ((subdirs
-		       (split-string
-			(directory-file-name
-			 (file-name-directory
-			  (file-relative-name localdir dir))) "/"))
-		      (subdir ""))
-		  (setq indent-str (make-string 2 ?\ ))
-		  (dolist (d subdirs)
-		    (setq subdir (concat subdir d "/"))
-		    (insert (concat indent-str " + [[file:" subdir "][" d "/]]\n"))
-		    (setq indent-str (make-string (+ (length indent-str) 2) ?\ ))))))
+	    (if (eq index-style 'list)
+		(message "Generating list-style index for %s" index-title)
+	      (message "Generating tree-style index for %s" index-title)
+	      (setq localdir (concat (file-name-as-directory dir)
+				     (file-name-directory link)))
+	      (unless (string= localdir oldlocal)
+		(if (string= localdir dir)
+		    (setq indent-str (make-string 2 ?\ ))
+		  (let ((subdirs
+			 (split-string
+			  (directory-file-name
+			   (file-name-directory
+			    (file-relative-name localdir dir))) "/"))
+			(subdir ""))
+		    (setq indent-str (make-string 2 ?\ ))
+		    (dolist (d subdirs)
+		      (setq subdir (concat subdir d "/"))
+		      (insert (concat indent-str " + [[file:" 
+				      subdir "][" d "/]]\n"))
+		      (setq indent-str (make-string 
+					(+ (length indent-str) 2) ?\ )))))))
+	    ;; This is common to 'flat and 'tree
 	    (insert (concat indent-str " + [[file:" link "]["
 			    (org-publish-find-title file)
-			    "]]\n")))))
+			    "]]\n"))
+	    )))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
 
