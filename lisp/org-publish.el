@@ -638,7 +638,7 @@ Default for INDEX-FILENAME is 'index.org'."
 		    (insert (concat indent-str " + [[file:" subdir "][" d "/]]\n"))
 		    (setq indent-str (make-string (+ (length indent-str) 2) ?\ ))))))
 	    (insert (concat indent-str " + [[file:" link "]["
-			    (file-name-sans-extension fn)
+			    (org-publish-find-title file)
 			    "]]\n")))))
       (write-file index-filename)
       (kill-buffer (current-buffer)))))
@@ -653,7 +653,8 @@ Default for INDEX-FILENAME is 'index.org'."
  	  (and (not
  		(plist-get opt-plist :skip-before-1st-heading))
  	       (org-export-grab-title-from-buffer))
- 	  (file-name-sans-extension file)))))
+	  (file-name-nondirectory (file-name-sans-extension file))))))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
