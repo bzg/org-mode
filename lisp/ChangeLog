@@ -1,5 +1,8 @@
 2008-07-14  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-html-style-default): Automatic overflow
+	handling for pre fields.
+
 	* org-table.el (org-table-export): Offer completion for translator
 	functions, and do not require a heading above the table.
 

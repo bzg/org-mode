@@ -489,6 +489,7 @@ Org-mode file."
 	padding: 5pt;
 	font-family: courier, monospace;
         font-size: 90%;
+        overflow:auto;
   }
   table { border-collapse: collapse; }
   td, th { vertical-align: top; }
