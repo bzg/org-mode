@@ -1,5 +1,8 @@
 2008-07-14  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-table-export): Offer completion for translator
+	functions, and do not require a heading above the table.
+
 	* org.el (org-renumber-ordered-list, org-beginning-of-item-list):
 	Cater for the case of a list starting in the first line of the
 	buffer.

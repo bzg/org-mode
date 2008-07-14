@@ -445,8 +445,14 @@ property, locally or anywhere up in the hierarchy."
   (let* ((beg (org-table-begin))
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
-	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
-	 (format (or format (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
+	 (file (or file
+		   (condition-case nil
+		       (org-entry-get beg "TABLE_EXPORT_FILE" t)
+		     (error nil))))
+	 (format (or format
+		     (condition-case nil
+			 (org-entry-get beg "TABLE_EXPORT_FORMAT" t)
+		       (error nil))))
 	 buf deffmt-readable)
     (unless file
       (setq file (read-file-name "Export table to: "))
@@ -464,8 +470,13 @@ property, locally or anywhere up in the hierarchy."
 	(setq deffmt-readable (replace-match "\\t" t t deffmt-readable)))
       (while (string-match "\n" deffmt-readable)
 	(setq deffmt-readable (replace-match "\\n" t t deffmt-readable)))
-      (setq format (read-string "Format: " deffmt-readable)))
-
+      (setq format (org-completing-read
+		    "Format: "
+		    '("orgtbl-to-tsv" "orgtbl-to-csv"
+		      "orgtbl-to-latex" "orgtbl-to-html"
+		      "orgtbl-to-generic" "orgtbl-to-texinfo"
+		      "orgtbl-to-orgtbl") nil nil
+		      deffmt-readable)))
     (if (string-match "\\([^ \t\r\n]+\\)\\( +.*\\)?" format)
 	(let* ((transform (intern (match-string 1 format)))
 	       (params (if (match-end 2)
