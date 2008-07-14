@@ -6034,9 +6034,10 @@ with something like \"1.\" or \"2)\"."
 	      (buffer-substring (point-at-bol) (match-beginning 3))))
 	;; (term (substring (match-string 3) -1))
 	ind1 (n (1- arg))
-	fmt)
+	fmt bob)
     ;; find where this list begins
     (org-beginning-of-item-list)
+    (setq bobp (bobp))
     (looking-at "[ \t]*[0-9]+\\([.)]\\)")
     (setq fmt (concat "%d" (match-string 1)))
     (beginning-of-line 0)
@@ -6044,7 +6045,7 @@ with something like \"1.\" or \"2)\"."
     (catch 'exit
       (while t
 	(catch 'next
-	  (beginning-of-line 2)
+	  (if bobp (setq bobp nil) (beginning-of-line 2))
 	  (if (eobp) (throw 'exit nil))
 	  (if (looking-at "[ \t]*$") (throw 'next nil))
 	  (skip-chars-forward " \t") (setq ind1 (current-column))
@@ -6110,7 +6111,8 @@ I.e. to the first item in this list."
 	  (if (or (< ind1 ind)
 		  (and (= ind1 ind)
 		       (not (org-at-item-p)))
-		  (bobp))
+		  (and (= (point-at-bol) (point-min))
+		       (setq pos (point-min))))
 	      (throw 'exit t)
 	    (when (org-at-item-p) (setq pos (point-at-bol)))))))
     (goto-char pos)))
