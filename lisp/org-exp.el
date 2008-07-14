@@ -2146,7 +2146,7 @@ underlined headlines.  The default is 3."
      ((and date (string-match "%" date))
       (setq date (format-time-string date)))
      (date)
-     (t (setq date (format-time-string "%Y/%m/%d %X"))))
+     (t (setq date (format-time-string "%Y-%m-%d %T %Z"))))
 
     (if (and date org-export-time-stamp-file)
 	(insert (concat (nth 2 lang-words) ": " date"\n")))
@@ -2786,7 +2786,7 @@ PUB-DIR is set, use this as the publishing directory."
      ((and date (string-match "%" date))
       (setq date (format-time-string date)))
      (date)
-     (t (setq date (format-time-string "%Y/%m/%d %X"))))
+     (t (setq date (format-time-string "%Y-%m-%d %T %Z"))))
 
     ;; Get the language-dependent settings
     (setq lang-words (or (assoc language org-export-language-setup)

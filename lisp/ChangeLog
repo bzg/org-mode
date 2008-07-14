@@ -2,6 +2,8 @@
 
 	* org-exp.el (org-export-html-style-default): Automatic overflow
 	handling for pre fields.
+	(org-export-as-ascii, org-export-as-html): Change default format
+	for time stamp.
 
 	* org-table.el (org-table-export): Offer completion for translator
 	functions, and do not require a heading above the table.
