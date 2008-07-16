@@ -113,6 +113,10 @@
 
     Thanks to Karen Cooke for triggering this change.
 
+*** New option :index-style for org-publish
+    This option can be used to switch the style of the index
+    produced by org-publish.
+
 * Version 6.05
 
 If I were to name my releases, this one would be called "Adam".
