@@ -14445,7 +14445,9 @@ Show the heading too, if it is currently invisible."
 (eval-after-load "imenu"
   '(progn
      (add-hook 'imenu-after-jump-hook
-	       (lambda () (org-show-context 'org-goto)))))
+	       (lambda ()
+		 (if (eq major-mode 'org-mode)
+		     (org-show-context 'org-goto))))))
 
 ;; Speedbar support
 
