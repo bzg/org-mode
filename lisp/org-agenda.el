@@ -1494,7 +1494,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(insert (eval-when-compile
 		  (let ((header
 "
-Press key for an agenda command:        <   Buffer,subtree/region restriction
+Press key for an agenda command:        <   Buffer, subtree/region restriction
 --------------------------------        >   Remove restriction
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd

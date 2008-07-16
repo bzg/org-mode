@@ -1,3 +1,7 @@
+2008-07-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-get-restriction-and-command): Fixed typo.
+
 2008-07-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-html-style-default): Automatic overflow
