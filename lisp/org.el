@@ -5121,7 +5121,7 @@ If yes, remember the marker and the distance to BEG."
     (save-match-data
       (narrow-to-region
        (progn (org-back-to-heading) (point))
-       (progn (org-end-of-subtree t t) (point))))))
+       (progn (org-end-of-subtree t) (point))))))
 
 
 ;;; Outline Sorting
