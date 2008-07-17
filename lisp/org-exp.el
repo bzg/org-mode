@@ -2008,8 +2008,9 @@ backends, it converts the segment into an EXAMPLE segment."
 		  (org-export-htmlize-region-for-paste
 		   (point-min) (point-max)))))
 	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
-	      (setq htmltext (replace-match "<pre class=\"src\">"
-					    t t htmltext)))
+	      (setq htmltext (replace-match
+			      (format "<pre class=\"src src-%s\">" lang)
+			      t t htmltext)))
 	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n"))))
      (t
       ;; This is not HTML, so just make it an example.
@@ -2937,7 +2938,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		     (string-match "^[ \t]*:\\(.*\\)" line))
 	    (when (not infixed)
 	      (setq infixed t)
-	      (insert "<pre>\n"))
+	      (insert "<pre class=\"example\">\n"))
 	    (insert (org-html-protect (match-string 1 line)) "\n")
 	    (when (or (not lines)
 		      (not (string-match "^[ \t]*\\(:.*\\)"
