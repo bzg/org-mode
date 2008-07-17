@@ -1,3 +1,8 @@
+2008-07-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-custom-commands-local-options): Fixed
+	bug with user-define skipping condition.
+
 2008-07-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-get-restriction-and-command): Fixed typo.

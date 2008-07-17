@@ -211,9 +211,8 @@ you can \"misuse\" it to also add other text to the header.  However,
 			     (const :tag "no deadline" 'notdeadline))))))
 	    (list :tag "Non-standard skipping condition"
 		  :value (org-agenda-skip-function)
-		  (list
-		   (const org-agenda-skip-function)
-		   (sexp :tag "Function or form (quoted!)")))))
+		  (const org-agenda-skip-function)
+		  (sexp :tag "Function or form (quoted!)"))))
   "Selection of examples for agenda command settings.
 This will be spliced into the custom type of
 `org-agenda-custom-commands'.")
