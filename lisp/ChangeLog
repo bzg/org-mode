@@ -1,5 +1,7 @@
 2008-07-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-table-to-lisp): New function.
+
 	* org.el (org-narrow-to-subtree): Do not include the final newline
 	into the narrowed region.
 

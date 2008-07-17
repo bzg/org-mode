@@ -3552,6 +3552,26 @@ a radio table."
 	(delete-region beg (point))))
     (insert txt "\n")))
 
+(defun org-table-to-lisp (&optional txt)
+  "Convert the table at point to a Lisp structure.
+The structure will be a list.  Each item is either the symbol `hline'
+for a horizontal separator line, or a list of field values as strings.
+The table is taken from the parameter TXT, or from the buffer at point."
+  (unless txt
+    (unless (org-at-table-p)
+      (error "No table at point")))
+  (let* ((txt (or txt 
+		  (buffer-substring-no-properties (org-table-begin)
+						  (org-table-end))))
+	 (lines (org-split-string txt "[ \t]*\n[ \t]*")))
+
+    (mapcar
+     (lambda (x)
+       (if (string-match org-table-hline-regexp x)
+	   'hline
+	 (org-split-string (org-trim x) "\\s-*|\\s-*")))
+     lines)))
+
 (defun orgtbl-send-table (&optional maybe)
   "Send a tranformed version of this table to the receiver position.
 With argument MAYBE, fail quietly if no transformation is defined for
