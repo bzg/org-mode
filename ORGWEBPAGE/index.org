@@ -23,6 +23,10 @@ messages, BBDB entries, and any files related to the projects.  For
 printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, HTML, and LaTeX.
 
+* News
+
+Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
+
 * Current Version (6.05b) and Compatibility
 
 The current version is 6.05b.  To see what has changed in recent
@@ -64,8 +68,6 @@ http://repo.or.cz/w/org-mode.git
      that seems to be out of date.
 
 * Documentation
-** Google Tech Talk
-   Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 ** The Org manual
    - Read the documentation [[file:manual/index.html][online]].  This is a version consisting of many
      small files, to save bandwidth.  
@@ -88,6 +90,9 @@ http://repo.or.cz/w/org-mode.git
      project]]. 
 
 * Links
+
+** Google Tech Talk
+   Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 
 ** Mailing list
 
