@@ -2768,7 +2768,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 table-open type
 	 table-buffer table-orig-buffer
 	 ind item-type starter didclose
-	 rpl path desc descp desc1 desc2 link
+	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc item-tag
 	 )
 
@@ -3025,7 +3025,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (setq start 0)
 	  (while (string-match org-bracket-link-analytic-regexp line start)
 	    (setq start (match-beginning 0))
-	    (setq path (match-string 3 line))
+	    (setq path (save-match-data (org-link-unescape
+					 (match-string 3 line))))
 	    (setq type (cond
 			((match-end 2) (match-string 2 line))
 			((save-match-data
@@ -3033,6 +3034,9 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (string-match "^\\.\\.?/" path)))
 			 "file")
 			(t "internal")))
+	    (setq path (org-extract-attributes path))
+	    (setq attr (org-attributes-to-string
+			(get-text-property 0 'org-attributes path)))
 	    (setq desc1 (if (match-end 5) (match-string 5 line))
 		  desc2 (if (match-end 2) (concat type ":" path) path)
 		  descp (and desc1 (not (equal desc1 desc2)))
@@ -3051,15 +3055,16 @@ lang=\"%s\" xml:lang=\"%s\">
 		     "<a href=\"#"
 		     (org-solidify-link-text
 		      (save-match-data (org-link-unescape path)) nil)
-		     "\">" desc "</a>")))
+		     "\"" attr ">" desc "</a>")))
 	     ((member type '("http" "https"))
 	      ;; standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-html-inline-images)
 			   (and org-export-html-inline-images (not descp)))
 		       (org-file-image-p path))
-		  (setq rpl (concat "<img src=\"" type ":" path "\"/>"))
+		  (setq rpl (concat "<img src=\"" type ":" path "\"" attr "/>"))
 		(setq link (concat type ":" path))
-		(setq rpl (concat "<a href=\"" link "\">" desc "</a>"))))
+		(setq rpl (concat "<a href=\"" link "\"" attr ">"
+				  desc "</a>"))))
 	     ((member type '("ftp" "mailto" "news"))
 	      ;; standard URL
 	      (setq link (concat type ":" path))
@@ -3107,8 +3112,9 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (or (eq t org-export-html-inline-images)
 				       (and org-export-html-inline-images
 					    (not descp))))
-			      (concat "<img src=\"" thefile "\"/>")
-			    (concat "<a href=\"" thefile "\">" desc "</a>")))
+			      (concat "<img src=\"" thefile "\"" attr "/>")
+			    (concat "<a href=\"" thefile "\"" attr ">"
+				    desc "</a>")))
 		(if (not valid) (setq rpl desc))))
 
 	     (t
@@ -3370,6 +3376,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
+
 
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)

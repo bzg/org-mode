@@ -6748,7 +6748,7 @@ according to FMT (default from `org-email-link-description-format')."
     (setq description nil))
   (when (and (not description)
 	     (not (equal link (org-link-escape link))))
-    (setq description link))
+    (setq description (org-extract-attributes link)))
   (concat "[[" (org-link-escape link) "]"
 	  (if description (concat "[" description "]") "")
 	  "]"))
@@ -7021,6 +7021,27 @@ used as the link location instead of reading one interactively."
     (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
     (apply 'completing-read args)))
 
+(defun org-extract-attributes (s)
+  "Extract the attributes cookie from a string and set as text property."
+  (let (a attr (start 0))
+    (save-match-data
+      (when (string-match "{{\\([^}]+\\)}}$" s)
+	(setq a (match-string 1 s) s (substring s 0 (match-beginning 0)))
+	(while (string-match "\\([a-zA-Z]+\\)=\"\\([^\"]*\\)\"" a start)
+	  (setq key (match-string 1 a) value (match-string 2 a)
+		start (match-end 0)
+		attr (plist-put attr (intern key) value))))
+      (org-add-props s nil 'org-attributes attr))
+    s))
+
+(defun org-attributes-to-string (plist)
+  "Format a property list into an HTML attribute list."
+  (let ((s "") key value)
+    (while plist
+      (setq key (pop plist) value (pop plist))
+      (setq s (concat s " "(symbol-name key) "=\"" value "\"")))
+    s))
+
 ;;; Opening/following a link
 
 (defvar org-link-search-failed nil)
@@ -7121,7 +7142,8 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file."
 	(save-excursion
 	  (skip-chars-forward "^]\n\r")
 	  (when (org-in-regexp org-bracket-link-regexp)
-	    (setq link (org-link-unescape (org-match-string-no-properties 1)))
+	    (setq link (org-extract-attributes
+			(org-link-unescape (org-match-string-no-properties 1))))
 	    (while (string-match " *\n *" link)
 	      (setq link (replace-match " " t t link)))
 	    (setq link (org-link-expand-abbrev link))

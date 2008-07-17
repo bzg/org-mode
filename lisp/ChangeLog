@@ -1,5 +1,13 @@
 2008-07-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-make-link-string): Remove link attributes from
+	description.
+	(org-open-at-point): Remove link attributes bevore using the path.
+
+	* org-exp.el (org-export-as-html): Handle link attributes.
+
+	* org.el (org-extract-attributes, org-attributes-to-string): New functions.
+
 	* org-table.el (org-table-to-lisp): New function.
 
 	* org.el (org-narrow-to-subtree): Do not include the final newline
