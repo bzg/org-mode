@@ -2933,7 +2933,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert (org-html-protect line) "\n")
 	    (throw 'nextline nil))
 
-	  ;; verbatim lines
+	  ;; Fixed-width, verbatim lines (examples)
 	  (when (and org-export-with-fixed-width
 		     (string-match "^[ \t]*:\\(.*\\)" line))
 	    (when (not infixed)
