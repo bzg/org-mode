@@ -1062,7 +1062,7 @@ Regexps are those from `org-export-latex-special-string-regexps'."
      (let* ((re-radio org-export-latex-all-targets-re)
 	    (remove (list (match-beginning 0) (match-end 0)))
 	    (type (match-string 2))
-	    (raw-path (match-string 3))
+	    (raw-path (org-extract-attributes (match-string 3)))
 	    (full-raw-path (concat (match-string 1) raw-path))
 	    (desc (match-string 5))
 	    imgp radiop
