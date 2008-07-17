@@ -10,7 +10,7 @@
 Here it the video of the Google Tech Talk about Org-mode that I gave on July 15th, 2008 on the Google campus in Mountain View, California.
 
 #+BEGIN_HTML
-<object width="425" height="349"><param name="movie" value="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1"></param><param name="allowFullScreen" value="true"></param><embed $
+<object width="425" height="349"><param name="movie" value="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="349"></embed></object>
 #+END_HTML
 
 You can also just download the slides as a [[file:Google-Tech-Talk-Org-mode.pdf][PDF file]] file or as a [[file:Google-Tech-Talk-Org-mode.swf][flash movie]].
