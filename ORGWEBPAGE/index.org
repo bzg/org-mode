@@ -64,7 +64,7 @@ http://repo.or.cz/w/org-mode.git
      that seems to be out of date.
 
 * Documentation
-** Google Tech Talk about Org-mode
+** Google Tech Talk
    Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 ** The Org manual
    - Read the documentation [[file:manual/index.html][online]].  This is a version consisting of many
