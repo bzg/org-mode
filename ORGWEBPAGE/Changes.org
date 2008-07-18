@@ -117,6 +117,11 @@
     This option can be used to switch the style of the index
     produced by org-publish.
 
+*** New option `org-open-directory-means-index'
+    When set, a link pointing to a directory will actually open
+    the index.org file in that directory.  This is a good setting
+    inside a publishing project.
+
 * Version 6.05
 
 If I were to name my releases, this one would be called "Adam".

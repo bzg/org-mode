@@ -1062,6 +1062,13 @@ When nil, an error will be generated."
   :group 'org-link-follow
   :type 'boolean)
 
+(defcustom org-open-directory-means-index-dot-org nil
+  "Non-nil means, a link to a directory really means to index.org.
+When nil, following a directory link will run dired or open a finder/explorer
+window on that directory."
+  :group 'org-link-follow
+  :type 'boolean)
+
 (defcustom org-link-mailto-program '(browse-url "mailto:%a?subject=%s")
   "Function and arguments to call for following mailto links.
 This is a list with the first element being a lisp function, and the
@@ -7571,6 +7578,9 @@ If the file does not exist, an error is thrown."
 	 (apps (append org-file-apps (org-default-apps)))
 	 (remp (and (assq 'remote apps) (org-file-remote-p file)))
 	 (dirp (if remp nil (file-directory-p file)))
+	 (file (if (and dirp org-open-directory-means-index-dot-org)
+		   (concat (file-name-as-directory file) "index.org")
+		 file))
 	 (dfile (downcase file))
 	 (old-buffer (current-buffer))
 	 (old-pos (point))

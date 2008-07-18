@@ -1,3 +1,9 @@
+2008-07-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-open-file): Use
+	`org-open-directory-means-index-dot-org'.
+	(org-open-directory-means-index-dot-org): New option.
+
 2008-07-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-make-link-string): Remove link attributes from
