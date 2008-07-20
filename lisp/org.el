@@ -9263,9 +9263,9 @@ only lines with a TODO keyword are included in the output."
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
 		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*$")))
-	 (props (list 'face nil
+	 (props (list 'face 'default
 		      'done-face 'org-done
-		      'undone-face nil
+		      'undone-face 'default
 		      'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
@@ -12517,7 +12517,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 
 (org-defkey org-mode-map "\C-c\C-a" 'show-all)  ; in case allout messed up.
 (org-defkey org-mode-map "\C-c\C-r" 'org-reveal)
-(org-defkey narrow-map "s" 'org-narrow-to-subtree)
+(if (boundp 'narrow-map)
+    (org-defkey narrow-map "s" 'org-narrow-to-subtree)
+  (org-defkey org-mode-map "\C-xns" 'org-narrow-to-subtree))
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-toggle-archive-tag)
