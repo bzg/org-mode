@@ -8,6 +8,18 @@
 
 #+HTML:  <BASE href="http://orgmode.org/index.html">
 
+#+BEGIN_HTML
+<form action="http://www.google.com/cse" id="cse-search-box">
+  <div>
+    <input type="hidden" name="cx" value="002987994228320350715:2gaddxoioh4" />
+    <input type="hidden" name="ie" value="UTF-8" />
+    <input type="text" name="q" size="31" />
+    <input type="submit" name="sa" value="Search this website" />
+  </div>
+</form>
+<script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script>
+#+END_HTML
+
 Org-mode is a mode for keeping notes, maintaining ToDo lists, and doing
 project planning with a fast and effective plain-text system.
 
@@ -22,20 +34,6 @@ Plain text URL-like links connect to websites, emails, Usenet
 messages, BBDB entries, and any files related to the projects.  For
 printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, HTML, and LaTeX.
-
-* Search through this website
-
-#+BEGIN_HTML
-<form action="http://www.google.com/cse" id="cse-search-box">
-  <div>
-    <input type="hidden" name="cx" value="002987994228320350715:2gaddxoioh4" />
-    <input type="hidden" name="ie" value="UTF-8" />
-    <input type="text" name="q" size="31" />
-    <input type="submit" name="sa" value="Search this website" />
-  </div>
-</form>
-<script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script>
-#+END_HTML
 
 * News
 
