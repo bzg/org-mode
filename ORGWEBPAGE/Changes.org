@@ -44,7 +44,7 @@
       variable is associated with the =:style= property and can
       be used to establish project-wide settings.
     - There is a new variable =org-export-html-style-extra= that
-      should be used for file-local setings.  Org-publish can, if
+      should be used for file-local settings.  Org-publish can, if
       necessary, access this variable with the =:style-extra=
       property.
     - When a file is published, the values of 
@@ -55,6 +55,18 @@
       sequence.
 
     This follows a proposal by Rustom Mody.
+
+*** Attributes in hyperlinks
+    You can now set attributes in hyperlinks that will be used
+    when publishing to HTML.  For example, if you want to use the
+    ALT and TITLE attributes of an inlined image, here is who to
+    do this:
+
+    : [[./img/a.jpg{{alt="This is image A" title="Image with no action"}}] ]
+
+**** TODO Fix link export in examples.
+     For some reason these are processed even though they are in
+     an exmple region. 
 
 *** A way to compare times during a property search
     If the comparison value in a property search is a string that
@@ -71,7 +83,7 @@
 
 *** Simplified way to specify file links
 
-    In a link, you can now leave uout the "file:" prefix if you
+    In a link, you can now leave out the "file:" prefix if you
     write an absolute file name like =/Users/dominik/.emacs= or
     =~/.emacs=, or if you write a relative file name by using
     =./= or =../= to start the file path.  You cannot write a
@@ -115,12 +127,17 @@
 
 *** New option :index-style for org-publish
     This option can be used to switch the style of the index
-    produced by org-publish.
+    produced by org-publish.  Can be `list' (index is just an
+    itemized list of the titles of the files involved) or `tree'
+    (the directory structure of the source files is reflected in
+    the index).  Defaults to `tree'.
 
 *** New option `org-open-directory-means-index'
     When set, a link pointing to a directory will actually open
     the index.org file in that directory.  This is a good setting
-    inside a publishing project.
+    inside a publishing project.  When not set, you get a
+    finder/explorer window for that directory, or dired,
+    depending on system and setup.
 
 * Version 6.05
 
