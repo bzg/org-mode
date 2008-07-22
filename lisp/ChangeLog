@@ -1,3 +1,7 @@
+2008-07-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-batch-store-agenda-views): Fix parsing bug.
+
 2008-07-20  Juri Linkov <juri@jurta.org>
 
 	* org.el (narrow-map): Bind `org-narrow-to-subtree' to "s" on the

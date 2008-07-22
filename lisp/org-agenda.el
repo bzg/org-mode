@@ -1808,7 +1808,7 @@ so the export commands can easily use it."
   (let ((cmds (org-agenda-normalize-custom-commands org-agenda-custom-commands))
 	(pop-up-frames nil)
 	(dir default-directory)
-	pars cmd thiscmdkey files opts)
+	pars cmd thiscmdkey files opts cmd-or-set)
     (while parameters
       (push (list (pop parameters) (if parameters (pop parameters))) pars))
     (setq pars (reverse pars))
@@ -1816,8 +1816,9 @@ so the export commands can easily use it."
       (while cmds
 	(setq cmd (pop cmds)
 	      thiscmdkey (car cmd)
-	      opts (nth 4 cmd)
-	      files (nth 5 cmd))
+	      cmd-or-set (nth 2 cmd)
+	      opts (nth (if (listp cmd-or-set) 3 4) cmd)
+	      files (nth (if (listp cmd-or-set) 4 5) cmd))
 	(if (stringp files) (setq files (list files)))
 	(when files
 	  (eval (list 'let (append org-agenda-exporter-settings opts pars)
