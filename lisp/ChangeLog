@@ -1,3 +1,9 @@
+2008-07-23  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-region-as-html, org-export-as-html): Make
+	sure that calls from `org-export-region-as-html' do not do the
+	special check for a subtree.
+
 2008-07-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-batch-store-agenda-views): Fix parsing bug.

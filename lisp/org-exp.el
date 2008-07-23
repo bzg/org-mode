@@ -2610,12 +2610,13 @@ in a window.  A non-interactive call will only return the buffer."
   (when (interactive-p)
     (setq buffer "*Org HTML Export*"))
   (let ((transient-mark-mode t) (zmacs-regions t)
-	rtn)
+	ext-plist rtn)
+    (setq ext-plist (plist-put ext-plist :ignore-subree-p t))
     (goto-char end)
     (set-mark (point)) ;; to activate the region
     (goto-char beg)
     (setq rtn (org-export-as-html
-	       nil nil nil
+	       nil nil ext-plist
 	       buffer body-only))
     (if (fboundp 'deactivate-mark) (deactivate-mark))
     (if (and (interactive-p) (bufferp rtn))
@@ -2673,11 +2674,13 @@ PUB-DIR is set, use this as the publishing directory."
 	 (rbeg (and region-p (region-beginning)))
 	 (rend (and region-p (region-end)))
 	 (subtree-p
-	  (when region-p
-	    (save-excursion
-	      (goto-char rbeg)
-	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) rend)))))
+	  (if (plist-get opt-plist :ignore-subree-p)
+	      nil
+	    (when region-p
+	      (save-excursion
+		(goto-char rbeg)
+		(and (org-at-heading-p)
+		     (>= (org-end-of-subtree t t) rend))))))
 	 (opt-plist (if subtree-p 
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
