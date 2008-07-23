@@ -12417,13 +12417,15 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
       (cd dir))
     (if (not (file-exists-p dvifile))
 	(progn (message "Failed to create dvi file from %s" texfile) nil)
-      (call-process "dvipng" nil nil nil
-		    "-E" "-fg" fg "-bg" bg
-                    "-D" dpi
-		    ;;"-x" scale "-y" scale
-		    "-T" "tight"
-		    "-o" pngfile
-		    dvifile)
+      (condition-case nil
+	  (call-process "dvipng" nil nil nil
+			"-E" "-fg" fg "-bg" bg
+			"-D" dpi
+			;;"-x" scale "-y" scale
+			"-T" "tight"
+			"-o" pngfile
+			dvifile)
+	(error nil))
       (if (not (file-exists-p pngfile))
 	  (progn (message "Failed to create png file from %s" texfile) nil)
 	;; Use the requested file name and clean up
