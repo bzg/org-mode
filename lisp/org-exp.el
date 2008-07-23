@@ -1716,6 +1716,7 @@ When it is nil, all comments will be removed."
 	 (replace-match s t t))))
     (goto-char (point-min))
     (while (re-search-forward org-bracket-link-regexp nil t)
+      (goto-char (1- (match-end 0)))
       (org-if-unprotected
        (let* ((xx (save-match-data
 		    (org-link-expand-abbrev (match-string 1))))

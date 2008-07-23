@@ -64,10 +64,6 @@
 
     : [[./img/a.jpg{{alt="This is image A" title="Image with no action"}}] ]
 
-**** TODO Fix link export in examples.
-     For some reason these are processed even though they are in
-     an exmple region. 
-
 *** A way to compare times during a property search
     If the comparison value in a property search is a string that
     is enclosed in angular brackets, a time comparison will be
