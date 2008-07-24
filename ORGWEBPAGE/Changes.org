@@ -10,29 +10,38 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.06 (in preparation)
+* Version 6.06
 :PROPERTIES:
 :VISIBILITY: content
 :END:
 
 ** Overview
+
+   - New, more CSS-like setup for HTML style information
+   - Attributes in hyperlinks, for example alt and title for images
+   - Simplified way to specify file links
+   - Modified behavior of time stamps in iCalendar export
+   - New way to compare times during a property search
+   - New option `org-open-directory-means-index'
+   - New parameters :prefix and :prefix1 for include files
+   - New option :index-style for org-publish
+   - New structure for the timestamp directory for org-publish.
+
 ** Incompatible changes
+
 *** New structure for the timestamp directory for org-publish.
+
     The timestamp directory now uses SHA1 hashed versions of the
     path to each publishing file.  This should be a consistent
     and system-independent way to handle things.  The change
     means that your next publishing command will publish each and
-    every file again, but just once, until the timestamps are
-    updated.
+    every file again, but just once, until new time stamps are in
+    place.
 
 ** Details
 
-*** New parameters :prefix and :prefix1 for include files
-    These parameters specify prefixes for each line of included
-    text.  :prefix1 is only for the first line, :prefix for all
-    other lines.
-
 *** New setup for HTML style information
+
     In order to create a more CSS-like setup of the HTML style
     information, the following changes have been made:
     - The default style has moved to a constant,
@@ -57,6 +66,7 @@
     This follows a proposal by Rustom Mody.
 
 *** Attributes in hyperlinks
+
     You can now set attributes in hyperlinks that will be used
     when publishing to HTML.  For example, if you want to use the
     ALT and TITLE attributes of an inlined image, here is who to
@@ -64,18 +74,7 @@
 
     : [[./img/a.jpg{{alt="This is image A" title="Image with no action"}}] ]
 
-*** A way to compare times during a property search
-    If the comparison value in a property search is a string that
-    is enclosed in angular brackets, a time comparison will be
-    done.  For example
-
-    : +DEADLINE>="<2008-12-24 15:20>"
-
-    looks for entries with a deadline on or after that time.
-    Special allowed values are "<now>" (with time) and "<today>"
-    (date only).
-
-    This is based on a request by Manish.
+    Thanks to Charles Chen for this idea.
 
 *** Simplified way to specify file links
 
@@ -94,6 +93,7 @@
 #+end_src
 
 *** Changes in iCalendar export
+
     Deadline and scheduling time stamps are now treated
     differently in iCalendar export.  The default behavior is now
     the following:
@@ -121,19 +121,47 @@
 
     Thanks to Karen Cooke for triggering this change.
 
-*** New option :index-style for org-publish
-    This option can be used to switch the style of the index
-    produced by org-publish.  Can be `list' (index is just an
-    itemized list of the titles of the files involved) or `tree'
-    (the directory structure of the source files is reflected in
-    the index).  Defaults to `tree'.
+*** New way to compare times during a property search
+
+    If the comparison value in a property search is a string that
+    is enclosed in angular brackets, a time comparison will be
+    done.  For example
+
+    : +DEADLINE>="<2008-12-24 15:20>"
+
+    looks for entries with a deadline on or after that time.
+    Special allowed values are "<now>" (with time) and "<today>"
+    (date only).
+
+    This is based on a request by Manish.
 
 *** New option `org-open-directory-means-index'
+
     When set, a link pointing to a directory will actually open
     the index.org file in that directory.  This is a good setting
     inside a publishing project.  When not set, you get a
     finder/explorer window for that directory, or dired,
     depending on system and setup.
+
+    This follows a request by Richard Riley.
+
+*** New parameters :prefix and :prefix1 for include files
+
+    These parameters specify prefixes for each line of included
+    text.  :prefix1 is only for the first line, :prefix for all
+    other lines.
+
+    This follows a proposal by Richard Riley.
+
+*** New option :index-style for org-publish
+
+    This option can be used to switch the style of the index
+    produced by org-publish.  Can be `list' (index is just an
+    itemized list of the titles of the files involved) or `tree'
+    (the directory structure of the source files is reflected in
+    the index).  The default is `tree'.
+
+    Thanks to Sebastian Rose for the patch.
 
 * Version 6.05
 
