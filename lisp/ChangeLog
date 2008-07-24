@@ -1,5 +1,8 @@
 2008-07-24  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-as-html): Add attributes also in mailto
+	and ftp links.
+
 	* org.el (org-autoload): Add `org-dblock-write:columnview'.
 
 
@@ -7,7 +10,7 @@
 
 
 
-	
+
 
 2008-07-23  Carsten Dominik  <dominik@science.uva.nl>
 

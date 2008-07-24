@@ -3072,7 +3072,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	     ((member type '("ftp" "mailto" "news"))
 	      ;; standard URL
 	      (setq link (concat type ":" path))
-	      (setq rpl (concat "<a href=\"" link "\">" desc "</a>")))
+	      (setq rpl (concat "<a href=\"" link "\"" attr ">" desc "</a>")))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for format the link
