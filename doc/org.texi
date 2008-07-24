@@ -7333,7 +7333,7 @@ syntax.  Here is an example that sets @code{alt} and @code{title} attributes
 for an inlined image:
 
 @example
-[[./img/a.jpg{{alt="This is image A" title="Image with no action"}}]]
+[[./img/a.jpg@{@{alt="This is image A" title="Image with no action"@}@}]]
 @end example
 
 @node Images, CSS support, Links, HTML export
