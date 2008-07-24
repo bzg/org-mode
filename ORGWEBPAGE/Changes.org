@@ -72,7 +72,7 @@
     ALT and TITLE attributes of an inlined image, here is who to
     do this:
 
-    : [[./img/a.jpg{{alt="This is image A" title="Image with no action"}}] ]
+    : [[./img/a.jpg{{alt="This is image A" title="Image with no action"}}]]
 
     Thanks to Charles Chen for this idea.
 

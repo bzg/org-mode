@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.06
+@set VERSION 6.06a
 @set DATE July 2008
 
 @dircategory Emacs
@@ -7327,6 +7327,14 @@ files will be translated into HTML links under the assumption that an
 HTML version also exists of the linked file.  For information related to
 linking files while publishing them to a publishing directory see
 @ref{Publishing links}.
+
+If you want to specify attributes for links, you can do so using a special
+syntax.  Here is an example that sets @code{alt} and @code{title} attributes
+for an inlined image:
+
+@example
+[[./img/a.jpg{{alt="This is image A" title="Image with no action"}}]]
+@end example
 
 @node Images, CSS support, Links, HTML export
 @subsection Images
