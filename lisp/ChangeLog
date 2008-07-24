@@ -1,3 +1,14 @@
+2008-07-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-autoload): Add `org-dblock-write:columnview'.
+
+
+
+
+
+
+	
+
 2008-07-23  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-region-as-html, org-export-as-html): Make

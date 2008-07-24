@@ -2650,7 +2650,7 @@ collapsed state."
 (org-autoload (if (featurep 'xemacs) "org-colview-xemacs" "org-colview")
  '(org-columns-number-to-string org-columns-get-format-and-top-level
    org-columns-compute org-agenda-columns org-columns-remove-overlays
-   org-columns org-insert-columns-dblock))
+   org-columns org-insert-columns-dblock org-dblock-write:columnview))
 
 ;; Autoload ID code
 
