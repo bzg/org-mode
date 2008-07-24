@@ -180,8 +180,8 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
 	   (setq s (replace-match s t t template))
 	   (setq exp-plist
 		 (plist-put
-		  exp-plist :style
-		  (concat (or (plist-get exp-plist :style) "") "\n" s)))))
+		  exp-plist :style-extra
+		  (concat (or (plist-get exp-plist :style-extra) "") "\n" s)))))
     ;; This script absolutely needs the table of contents, to we change that
     ;; setting
     (if (not (plist-get exp-plist :table-of-contents))
