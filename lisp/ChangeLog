@@ -1,5 +1,8 @@
 2008-07-25  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-file): Make sure the directory match
+	for the publishing directory works correctly.
+
 	* org-agenda.el (org-agenda-execute-calendar-command)
 	(org-agenda-diary-entry): Additional optional argument.
 

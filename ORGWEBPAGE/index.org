@@ -72,6 +72,9 @@ the command line....):
 
 : git clone git://repo.or.cz/org-mode.git
 
+Some more information about this can be found in the FAQ, under
+/How can I keep track of changes in my Org files?/.
+
 ** Alternative distributions
 
    There are several alternative distrbutions of Org:

@@ -161,7 +161,7 @@
     (the directory structure of the source files is reflected in
     the index).  The default is `tree'.
 
-    Thanks to Sebastian Rose for the patch.
+    Thanks to Manuel Hermenegildo for the patch.
 
 * Version 6.05
 
