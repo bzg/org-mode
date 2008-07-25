@@ -7,13 +7,18 @@
 
 * Google Tech Talk about Org-mode
 
-Here it the video of the Google Tech Talk about Org-mode that I gave on July 15th, 2008 on the Google campus in Mountain View, California.
+Here it the video of the [[http://research.google.com/video.html][Google Tech Talk]] about [[http://orgmode.org][Org-mode]] that I
+(Carsten Dominik) gave on July 15th, 2008 on the Google campus in
+Mountain View, California.  Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://www.linkedin.com/in/andrewhyatt][Andrew Hyatt]] for
+being my hosts during my stay.
 
 #+BEGIN_HTML
 <object width="425" height="349"><param name="movie" value="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="349"></embed></object>
 #+END_HTML
 
-For projection purposes you can also download the slides as a [[file:Google-Tech-Talk-Org-mode.pdf][PDF
-file]] file or as a [[file:Google-Tech-Talk-Org-mode.swf][flash movie]].  If you'd like to prepare your own talk
-about Org-mode and want to use some of my slides, here are the
-[[file:Google-Tech-Talk-Org-mode-keynote.zip][Apple keynote]] and [[file:Google-Tech-Talk-Org-mode.ppt][Microsoft Powerpoint]] versions of the talk.
+For projection purposes you can also download the slides as a [[file:Google-Tech-Talk-Org-mode.pdf][PDF file]]
+file or as a [[file:Google-Tech-Talk-Org-mode.swf][flash movie]].  If you'd like to prepare your own talk
+about Org-mode and want to use some of my slides, here are the [[file:Google-Tech-Talk-Org-mode-keynote.zip][Apple
+keynote]] and [[file:Google-Tech-Talk-Org-mode.ppt][Microsoft Powerpoint]] versions of the talk.  I am making
+all these files available under the [[http://creativecommons.org/licenses/by/3.0/][creative commons license]]
+(attribution).
