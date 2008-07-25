@@ -554,7 +554,7 @@ See `org-publish-org-to' to the list of arguments."
 					  (abbreviate-file-name filename))))
 		      (error "Can't publish file outside of a project")))))
 	   (project-plist (cdr project))
-	   (ftname (file-truename file-name))
+	   (ftname (file-truename filename))
 	   (publishing-function
 	    (or (plist-get project-plist :publishing-function)
 		'org-publish-org-to-html))
@@ -564,7 +564,7 @@ See `org-publish-org-to' to the list of arguments."
 		     (file-truename (plist-get project-plist :publishing-directory))))
 	   tmp-pub-dir)
       (setq tmp-pub-dir
-	    (file-name-directory
+	    (file-name-dirqctory
 	     (concat pub-dir
 		     (and (string-match (regexp-quote base-dir) ftname)
 			  (substring ftname (match-end 0))))))
