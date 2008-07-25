@@ -5513,7 +5513,8 @@ the language, a switch telling of the content should be in a single line."
     (when font-lock-mode
       (font-lock-unfontify-region (point-min) (point-max)))
     (put-text-property (point-min) (point-max) 'font-lock-fontified t))
-  (kill-buffer (current-buffer)))
+  (kill-buffer (current-buffer))
+  (and (org-mode-p) (org-restart-font-lock)))
 
 ;;;; Plain list items, including checkboxes
 
