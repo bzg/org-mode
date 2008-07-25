@@ -564,7 +564,7 @@ See `org-publish-org-to' to the list of arguments."
 		     (file-truename (plist-get project-plist :publishing-directory))))
 	   tmp-pub-dir)
       (setq tmp-pub-dir
-	    (file-name-dirqctory
+	    (file-name-directory
 	     (concat pub-dir
 		     (and (string-match (regexp-quote base-dir) ftname)
 			  (substring ftname (match-end 0))))))
