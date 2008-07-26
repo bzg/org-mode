@@ -4768,8 +4768,12 @@ the new TODO state."
 				(if line (point-at-eol) nil) t)
 	(add-text-properties
 	 (match-beginning 2) (match-end 2)
-	 (list 'face (delq nil (list 'org-tag (get-text-property
-					       (match-beginning 2) 'face)))))
+	 (list 'face (delq nil (adjoin 'org-tag
+                                       (let ((prop (get-text-property
+                                                    (match-beginning 2) 'face)))
+                                         (if (listp prop)
+                                             prop
+                                           (list prop)))))))
 	(setq l (- (match-end 2) (match-beginning 2))
 	      c (if (< org-agenda-tags-column 0)
 		    (- (abs org-agenda-tags-column) l)

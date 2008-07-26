@@ -1,5 +1,8 @@
 2008-07-26  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-align-tags): Fix bug with malformed
+	face property.
+
 	* org-colview.el (org-columns-display-here): Use
 	`org-columns-modify-value-for-display-function'.
 
