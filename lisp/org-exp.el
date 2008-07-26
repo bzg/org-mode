@@ -494,6 +494,13 @@ Org-mode file."
   table { border-collapse: collapse; }
   td, th { vertical-align: top; }
   dt { font-weight: bold; }
+
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and
