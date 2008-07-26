@@ -526,6 +526,8 @@ you can \"misuse\" it to add arbitrary text to the header.
 See also the variable `org-export-html-style-extra'."
   :group 'org-export-html
   :type 'string)
+;;;###autoload
+(put 'org-export-html-style 'safe-local-variable 'stringp)
 
 (defcustom org-export-html-style-extra ""
   "Additional style information for HTML export.
@@ -535,6 +537,9 @@ settings of style information, and do not forget to surround the style
 settings with <style>...</style> tags."
   :group 'org-export-html
   :type 'string)
+;;;###autoload
+(put 'org-export-html-style-extra 'safe-local-variable 'stringp)
+
 
 (defcustom org-export-html-title-format "<h1 class=\"title\">%s</h1>\n"
   "Format for typesetting the document title in HTML export."
@@ -817,7 +822,7 @@ modified) list.")
       (let ((re (org-make-options-regexp
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
-		    "LINK_UP" "LINK_HOME" "SETUPFILE")
+		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options js-up js-main js-css js-opt a pr
 	    ext-setup-or-nil setup-contents (start 0))
@@ -837,6 +842,7 @@ modified) list.")
 	   ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
 	   ((string-equal key "DATE") (setq p (plist-put p :date val)))
 	   ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
+	   ((string-equal key "STYLE") (setq p (plist-put p :style-extra val)))
 	   ((string-equal key "TEXT")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")

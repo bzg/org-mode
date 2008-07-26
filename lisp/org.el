@@ -220,20 +220,6 @@ uninteresting.  Also tables look terrible when wrapped."
   :group 'org-startup
   :type 'boolean)
 
-(defcustom org-startup-indented nil
-  "Non-nil means, turn on `org-indent-mode' on startup.
-This can also be configured on a per-file basis by adding one of
-the following lines anywhere in the buffer:
-
-   #+STARTUP: localindent
-   #+STARTUP: indent
-   #+STARTUP: noindent"
-  :group 'org-structure
-  :type '(choice
-	  (const :tag "Not" nil)
-	  (const :tag "Locally" local)
-	  (const :tag "Globally (slow on startup in large files)" t)))
-
 (defcustom org-startup-align-all-tables nil
   "Non-nil means, align all tables when visiting a file.
 This is useful when the column width in tables is forced with <N> cookies
@@ -554,6 +540,7 @@ following headline.
 Special case: when 0, never leave empty lines in collapsed view."
   :group 'org-cycle
   :type 'integer)
+(put 'org-cycle-separator-lines 'safe-local-variable 'integerp)
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
 			    org-cycle-hide-drawers

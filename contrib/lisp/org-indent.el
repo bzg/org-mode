@@ -38,6 +38,20 @@
 
 ;;; Indentation
 
+(defcustom org-startup-indented nil
+  "Non-nil means, turn on `org-indent-mode' on startup.
+This can also be configured on a per-file basis by adding one of
+the following lines anywhere in the buffer:
+
+   #+STARTUP: localindent
+   #+STARTUP: indent
+   #+STARTUP: noindent"
+  :group 'org-structure
+  :type '(choice
+	  (const :tag "Not" nil)
+	  (const :tag "Locally" local)
+	  (const :tag "Globally (slow on startup in large files)" t)))
+
 (defconst org-indent-max 80
   "Maximum indentation in characters")
 (defconst org-indent-strings nil
