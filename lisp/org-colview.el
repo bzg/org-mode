@@ -147,7 +147,7 @@ This is the compiled version of the format.")
 	 (face (list color 'org-column ref-face))
 	 (pl (or (get-text-property (point-at-bol) 'prefix-length) 0))
 	 (cphr (get-text-property (point-at-bol) 'org-complex-heading-regexp))
-	 pom property ass width f string ov column val modval s1 s2)
+	 pom property ass width f string ov column val modval s1 s2 title)
     ;; Check if the entry is in another buffer.
     (unless props
       (if (eq major-mode 'org-agenda-mode)
@@ -158,6 +158,7 @@ This is the compiled version of the format.")
     ;; Walk the format
     (while (setq column (pop fmt))
       (setq property (car column)
+	    title (nth 1 column)
 	    ass (if (equal property "ITEM")
 		    (cons "ITEM"
 			  (save-match-data
@@ -171,12 +172,18 @@ This is the compiled version of the format.")
 		      (length property))
 	    f (format "%%-%d.%ds | " width width)
 	    val (or (cdr ass) "")
-	    modval (if (equal property "ITEM")
-		       (if (org-mode-p)
-			   (org-columns-cleanup-item
-			    val org-columns-current-fmt-compiled)
-			 (org-agenda-columns-cleanup-item
-			  val pl cphr org-columns-current-fmt-compiled))))
+	    modval (or (and org-columns-modify-value-for-display-function
+			    (functionp
+			     org-columns-modify-value-for-display-function)
+			    (funcall
+			     org-columns-modify-value-for-display-function
+			     title val))
+		       (if (equal property "ITEM")
+			   (if (org-mode-p)
+			       (org-columns-cleanup-item
+				val org-columns-current-fmt-compiled)
+			     (org-agenda-columns-cleanup-item
+			      val pl cphr org-columns-current-fmt-compiled)))))
       (setq s2 (org-columns-add-ellipses (or modval val) width))
       (setq string (format f s2))
       ;; Create the overlay

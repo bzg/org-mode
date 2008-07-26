@@ -1,4 +1,24 @@
+2008-07-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-colview.el (org-columns-display-here): Use
+	`org-columns-modify-value-for-display-function'.
+
+	* org-colview-xemacs.el (org-columns-display-here): Use
+	`org-columns-modify-value-for-display-function'.
+
 2008-07-25  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-columns-modify-value-for-display-function): New option.
+
+
+
+
+
+
+
+
+
+
 
 	* org-publish.el (org-publish-file): Make sure the directory match
 	for the publishing directory works correctly.

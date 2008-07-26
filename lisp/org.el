@@ -1900,6 +1900,18 @@ ellipses string, only part of the ellipses string will be shown."
   :group 'org-properties
   :type 'string)
 
+(defcustom org-columns-modify-value-for-display-function nil
+  "Function that modifies values for display in column view.
+For example, it can be used to cut out a certain part from a time stamp.
+The function must take 2 argments:
+
+column-title    The tite of the column (*not* the property name)
+value           The value that should be modified.
+
+The function should return the value that should be displayed,
+or nil if the normal value should be used."
+  :group 'org-properties
+  :type 'function)
 
 (defcustom org-effort-property "Effort"
   "The property that is being used to keep track of effort estimates.
