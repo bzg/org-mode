@@ -173,6 +173,15 @@
 
     Thanks to Manuel Hermenegildo for the patch.
 
+*** In the Agenda, inclusion of archives can now be toggled
+    - Pressing =v= will toggle inclusion of trees with the
+      ARCHIVE tag, this includes obviously the archive sibling.
+    - Pressing `C-u v'  will include trees with ARCHIVE tag, and
+      will also include all archive files that are currently
+      associated with your agenda files.
+
+    This was triggered by a proposal by Manuel Hermenegildo.
+
 * Version 6.05
 
 If I were to name my releases, this one would be called "Adam".
@@ -341,6 +350,15 @@ keyword =WAITING=, in all agenda files.
     When turning on log mode in the agenda with =l=, clock lines
     will now also list the end time, not only the starting time.
     Thanks to Tian Qiu for bringing this up again.
+*** Fixes and additions for org-publish
+    - the :include and :index-title properties in org-publish
+      work now as advertized
+    - the #+TITLE of a page will be used in the index
+    - new :completion-function property can define a hook to be
+      run after publishing a file.
+
+    Thanks to Manuel Hermenegildo for a patch to this effect.
+
 * Version 6.04
 
 ** Overview
@@ -475,6 +493,14 @@ overwritten.  For example:
 ,  :EXPORT_OPTIONS: h:2 toc:nil
 ,  :END:
 #+end_src
+
+*** New way to define tags for an entire file.
+
+    Tags that are defined in a line like
+    : #+FILETAGS: work urgent
+    are inherited by all entries in the file.
+
+    Thanks to Manuel Hermenegildo for this proposal.
 
 * Version 6.03
 

@@ -9514,6 +9514,9 @@ has been prolific with patches, ideas, and bug reports.
 task state change logging, and the clocktable.  His clear explanations have
 been critical when we started to adopt the GIT version control system.
 @item
+@i{Manuel Hermenegildo} has contributed various ideas, small fixed and
+patches.
+@item
 @i{Phil Jackson} wrote @file{org-irc.el}.
 @item
 @i{Scott Jaderholm} proposed footnotes, control over whitespace between
@@ -9585,6 +9588,9 @@ Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 subtrees.
 @item
 @i{Dale Smith} proposed link abbreviations.
+@item
+@i{James TD Smith} has contributed a large number of patches for useful
+tweaks and features.
 @item
 @i{Adam Spiers} asked for global linking commands, inspired the link
 extension system, added support for mairix, and proposed the mapping API.
