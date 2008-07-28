@@ -12,6 +12,10 @@ Here it the video of the [[http://research.google.com/video.html][Google Tech Ta
 Mountain View, California.  Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://www.linkedin.com/in/andrewhyatt][Andrew Hyatt]] for
 being my hosts during my stay.
 
+If you'd like to see the video in higher quality, you can do so at the
+[[http://youtube.com/watch%3Fv%3DoJTwQvgfgMM][youtube page]].  Click the "watch in high resolution" linkt directly
+below the video frame.
+
 #+BEGIN_HTML
 <object width="425" height="349"><param name="movie" value="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1"></param><param name="allowFullScreen" value="true"></param><embed src="http://www.youtube.com/v/oJTwQvgfgMM&hl=en&fs=1&rel=0&border=1" type="application/x-shockwave-flash" allowfullscreen="true" width="425" height="349"></embed></object>
 #+END_HTML

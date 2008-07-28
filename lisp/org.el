@@ -1947,6 +1947,7 @@ or contain a special line
 If the file does not specify a category, then file's base name
 is used instead.")
 (make-variable-buffer-local 'org-category)
+(put 'org-category 'safe-local-variable '(lambda (x) (or (symbolp x) (stringp x))))
 
 (defcustom org-agenda-files nil
   "The files to be used for agenda display.
@@ -10977,7 +10978,7 @@ user."
 			  org-end-time-was-given
 			  (substring txt (match-end 0)))))
       (setq org-read-date-overlay
-	    (make-overlay (1- (point-at-eol)) (point-at-eol)))
+	    (org-make-overlay (1- (point-at-eol)) (point-at-eol)))
       (org-overlay-display org-read-date-overlay txt 'secondary-selection))))
 
 (defun org-read-date-analyze (ans def defdecode)
