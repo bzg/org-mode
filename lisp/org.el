@@ -11880,7 +11880,7 @@ If there is already a time stamp at the cursor position, update it."
 With a prefix argument, restrict available to files.
 With two prefix arguments, restrict available buffers to agenda files.
 
-Due to some yet unresolved reason, global function
+Due to some yet unresolved reason, the global function
 `iswitchb-mode' needs to be active for this function to work."
   (interactive "P")
   (require 'iswitchb)
@@ -11899,33 +11899,43 @@ Due to some yet unresolved reason, global function
 	   "Switch-to: " nil t))
 	 (or enabled (iswitchb-mode -1))))))
 
-(defun org-buffer-list (&optional predicate tmp)
+(defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
-PREDICATE can be either 'export, 'files or 'agenda.
+PREDICATE can be `export', `files' or `agenda'.
 
-'export restrict the list to Export buffers.
-'files  restrict the list to buffers visiting Org files.
-'agenda restrict the list to buffers visiting agenda files.
+export   restrict the list to Export buffers.
+files    restrict the list to buffers visiting Org files.
+agenda   restrict the list to buffers visiting agenda files.
 
-If TMP is non-nil, don't include temporary buffers."
-  (let (filter blist)
-    (setq filter
-	  (cond ((eq predicate 'files) "\.org$")
-		((eq predicate 'export) "\*Org .*Export")
-		(t "\*Org \\|\.org$")))
-    (setq blist
+If EXCLUDE-TMP is non-nil, ignore temporary buffers."
+  (let* ((bfn nil)
+	 (agenda-files (and (eq predicate 'agenda)
+			    (mapcar 'file-truename (org-agenda-files t))))
+	 (filter
+	  (cond
+	   ((eq predicate 'files)
+	    (lambda (b) (with-current-buffer b (eq major-mode 'org-mode))))
+	   ((eq predicate 'export)
+	    (lambda (b) (string-match "\*Org .*Export" (buffer-name b))))
+	   ((eq predicate 'agenda)
+	    (lambda (b)
+	      (with-current-buffer b 
+		(and (eq major-mode 'org-mode)
+		     (setq bfn (buffer-file-name b))
+		     (member (file-truename bfn) agenda-files)))))
+	   (t (lambda (b) (with-current-buffer b 
+			    (or (eq major-mode 'org-mode)
+				(string-match "\*Org .*Export"
+					      (buffer-name b)))))))))
+    (delq nil
 	  (mapcar
 	   (lambda(b)
-	     (let ((bname (buffer-name b))
-		   (bfile (buffer-file-name b)))
-	       (if (and (string-match filter bname)
-			(if (eq predicate 'agenda)
-			    (member bfile
-				    (mapcar (lambda(f) (file-truename f))
-					    org-agenda-files)) t)
-			(if tmp (not (string-match "tmp" bname)) t)) b)))
-	   (buffer-list)))
-    (delete nil blist)))
+	     (if (and (funcall filter b)
+		      (or (not exclude-tmp)
+			  (not (string-match "tmp" (buffer-name b)))))
+		 b
+	       nil))
+	   (buffer-list)))))
 
 (defun org-agenda-files (&optional unrestricted archives)
   "Get the list of agenda files.

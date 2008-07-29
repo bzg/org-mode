@@ -1,3 +1,8 @@
+2008-07-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-buffer-list): Select buffers based on major mode,
+	not on file name.
+
 2008-07-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-align-tags): Fix bug with malformed
