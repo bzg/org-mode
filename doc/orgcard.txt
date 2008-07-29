@@ -1,5 +1,5 @@
 ================================================================================
-Org-Mode Reference Card (for version 4.79)
+Org-Mode Reference Card (for version 6.06)
 ================================================================================
 
 ================================================================================
@@ -38,16 +38,17 @@ Structure Editing
 ================================================================================
 
 insert new heading/item at current level          M-RET
+insert new heading after subtree                  C-RET
 insert new TODO entry/checkbox item               M-S-RET
-promote current heading up one level              M-LEFT
-demote current heading down one level             M-RIGHT
-promote current subtree up one level              M-S-LEFT
-demote current subtree down one level             M-S-RIGHT
+promote/demote current heading up one level       M-LEFT/RIGHT
+promote/demote current subtree up one level       M-S-LEFT/RIGHT
 move subtree/list item up/down                    M-S-UP/DOWN
+refile subtree                                    C-c C-w
 kill subtree                                      C-c C-x C-w
 copy subtree                                      C-c C-x M-w
 yank subtree                                      C-c C-x C-y
 narrow buffer to current subtree                  C-x n s
+widen restriction to full buffer                  C-x n w
 
 ================================================================================
 Archiving
@@ -61,10 +62,9 @@ move subtree to archive file                      C-c C-x C-s
 Filtering and Sparse Trees
 ================================================================================
 
-show sparse tree for all matches of a regexp      C-c /
+construct a sparse tree by various criteria       C-c /
 view TODO's in sparse tree                        C-c C-v
-global TODO list in agenda mode                   C-c t [1]
-create sparse tree with all deadlines due         C-c C-w
+global TODO list in agenda mode                   C-c a t [1]
 time sorted view of current org file              C-c a L
 
 ================================================================================
@@ -190,6 +190,7 @@ record a position in mark ring                    C-c %
 jump back to last followed link(s)                C-c &
 find next link                                    C-c C-x C-n
 find previous link                                C-c C-x C-p
+edit code snippet of file at point                C-c '
 
 --------------------------------------------------------------------------------
 Internal Links
@@ -259,6 +260,27 @@ realign tags in all headings                      C-u C-c C-c
 create sparse tree with matching tags             C-c \
 globally (agenda) match tags at cursor            C-c C-o
 
+\section{Properties and Column View}
+
+\key{set property}{C-c C-x p}
+\key{special commands in property lines}{C-c C-c}
+\key{next/previous allowed value}{S-left/right}
+\key{turn on column view}{C-c C-x C-c}
+\key{capture columns view in dynamic block}{C-c C-x r}
+
+\key{quit column view}{q}
+\key{next/previous allowed value}{S-left/right}
+\key{next/previous allowed value}{n / p}
+\key{edit value}{e}
+\key{edit allowed values list}{a}
+\key{show value}{v}
+\key{make column wider/narrower}{> / <}
+\key{move column left/right}{M-left/right}
+\key{add new column}{M-S-right}
+\key{Delete current column}{M-S-left}
+
+
+
 ================================================================================
 Timestamps
 ================================================================================
@@ -290,14 +312,6 @@ remove displayed times                            C-c C-c
 insert/update table with clock report             C-c C-x C-r
 
 ================================================================================
-LaTeX and cdlatex-mode
-================================================================================
-
-preview LaTeX fragment                            C-c C-x C-l
-expand abbreviation (cdlatex-mode)                TAB
-insert/modify math symbol (cdlatex-mode)          ` / '
-
-================================================================================
 Agenda Views
 ================================================================================
 
@@ -307,8 +321,8 @@ cycle through agenda file list                    C-'
 compile agenda for the current week               C-c a a [1]
 compile global TODO list                          C-c a t [1]
 compile TODO list for specific keyword            C-c a T [1]
-match tags in agenda files                        C-c a m [1]
-match tags in TODO entries                        C-c a M [1]
+match tags, todo kwds and properties              C-c a m [1]
+match only in TODO entries                        C-c a M [1]
 find stuck projects                               C-c a # [1]
 show timeline of current org file                 C-c a L [1]
 configure custom commands                         C-c a C [1]
@@ -338,14 +352,14 @@ Change display
 --------------------------------------------------------------------------------
 
 delete other windows                              o
-switch to daily / weekly view                     d / w
+switch to day/week/month/year view                d/w/m/y
 toggle inclusion of diary entries                 D
-toggle time grid for daily schedule               g
+toggle time grid for daily schedule               G
 toggle display of logbook entries                 l
-refresh agenda buffer with any changes            r
+toggle inclusion of archived trees/files          v / C-u v}
+refresh agenda buffer with any changes            r / g
 save all org-mode buffers                         s
-display the following org-agenda-ndays            RIGHT
-display the previous org-agenda-ndays             LEFT
+display the next/previous day, week,...           RIGHT/LEFT
 goto today                                        .
 
 --------------------------------------------------------------------------------
@@ -355,7 +369,7 @@ Remote editing
 digit argument                                    0-9
 change state of current TODO item                 t
 kill item and source                              C-k
-archive the subtree                               $
+archive the subtree                               $ / a / A
 show tags of current headline                     T
 set tags for current headline                     :
 toggle ARCHIVE tag                                a
@@ -366,9 +380,9 @@ schedule/set deadline for this item               C-c C-s/d
 change timestamp to one day earlier/later         S-LEFT/RIGHT [3]
 change timestamp to today                         >
 insert new entry into diary                       i
-start the clock on current item (clock-in)        I
-stop the clock (clock-out)                        O
-cancel current clock                              X
+start/stop/cancel the clock in current item       I / O / X
+jump to running clock entry                       J
+
 
 --------------------------------------------------------------------------------
 Misc
@@ -402,6 +416,14 @@ Include Emacs diary entries into Org-mode agenda with:
 (setq org-agenda-include-diary t)
 
 ================================================================================
+LaTeX and cdlatex-mode
+================================================================================
+
+preview LaTeX fragment                            C-c C-x C-l
+expand abbreviation (cdlatex-mode)                TAB
+insert/modify math symbol (cdlatex-mode)          ` / '
+
+================================================================================
 Exporting and Publishing
 ================================================================================
 
@@ -412,20 +434,6 @@ export/publish dispatcher                         C-c C-e
 export visible part only                          C-c C-e v
 insert template of export options                 C-c C-x t
 toggle fixed width for entry or region            C-c :
-
---------------------------------------------------------------------------------
-HTML formatting
---------------------------------------------------------------------------------
-
-make words bold                                   *bold*
-make words italic                                 /italic/
-make words underlined                             _underlined_
-sub- and superscripts                             x^3, J_dust
-TeX-like macros                                   \alpha, \to
-typeset lines in fixed width font                 start with :
-tables are exported as HTML tables                start with |
-links become HTML links                           http:... etc
-include html tags                                 @<b>...@</b>
 
 --------------------------------------------------------------------------------
 Comments: Text not being exported
