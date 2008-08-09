@@ -6859,8 +6859,11 @@ can use this construct, which can also be used to format poetry.
 
 @example
 #+BEGIN_VERSE
-Everything should be made as simple as possible,
-but not any simpler -- Albert Einstein
+ Great clouds overhead
+ Tiny black birds rise and fall
+ Snow covers Emacs
+ 
+     -- AlexSchroeder
 #+END_VERSE
 @end example
 
