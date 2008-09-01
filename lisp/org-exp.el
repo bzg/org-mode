@@ -3798,7 +3798,8 @@ If there are links in the string, don't modify these."
       (setq s (org-export-html-convert-sub-super s)))
   (if org-export-with-TeX-macros
       (let ((start 0) wd ass)
-	(while (setq start (string-match "\\\\\\([a-zA-Z]+\\)" s start))
+	(while (setq start (string-match "\\\\\\([a-zA-Z]+\\)\\({}\\)?"
+					 s start))
 	  (if (get-text-property (match-beginning 0) 'org-protected s)
 	      (setq start (match-end 0))
 	    (setq wd (match-string 1 s))
