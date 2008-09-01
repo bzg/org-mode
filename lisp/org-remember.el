@@ -207,7 +207,7 @@ user each time a remember buffer with a running clock is filed away.  "
 
 ;;;###autoload
 (defun org-remember-insinuate ()
-  "Setup remember.el for use wiht Org-mode."
+  "Setup remember.el for use with Org-mode."
   (require 'remember)
   (setq remember-annotation-functions '(org-remember-annotation))
   (setq remember-handler-functions '(org-remember-handler))

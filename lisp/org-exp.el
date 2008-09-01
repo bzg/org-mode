@@ -1354,7 +1354,7 @@ on this string to produce the exported version."
       (setq case-fold-search t)
       (untabify (point-min) (point-max))
       
-      ;; Handle incude files
+      ;; Handle include files
       (org-export-handle-include-files)
       
       ;; Handle source code snippets
