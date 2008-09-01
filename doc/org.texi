@@ -6538,7 +6538,8 @@ Angles are written as Greek letters \alpha, \beta and \gamma.
 
 During HTML export (@pxref{HTML export}), these symbols are translated
 into the proper syntax for HTML, for the above examples this is
-@samp{&alpha;} and @samp{&rarr;}, respectively.
+@samp{&alpha;} and @samp{&rarr;}, respectively.  If you need such a symbol
+inside a word, terminate it like this: @samp{\Aacute@{@}stor}.
 
 @node Subscripts and superscripts, LaTeX fragments, Math symbols, Embedded LaTeX
 @section Subscripts and superscripts
