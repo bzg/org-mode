@@ -1879,6 +1879,7 @@ higher priority settings."
 	  (t
 	   (let ((bs (buffer-string)))
 	     (find-file file)
+	     (erase-buffer)
 	     (insert bs)
 	     (save-buffer 0)
 	     (kill-buffer (current-buffer))
