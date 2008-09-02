@@ -1,3 +1,8 @@
+2008-09-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-html-do-expand): Allow {} to terminate
+	tex macro
+
 2008-07-29  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-buffer-list): Select buffers based on major mode,
