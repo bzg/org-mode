@@ -53,8 +53,8 @@
 ;; Backward compatibility to old version of wl
 (declare-function wl "ext:wl" () t)
 (declare-function wl-summary-buffer-msgdb "ext:wl-folder" () t)
-(declare-function wl-folder-get-elmo-folder "ext:wl-folder"
-		  (entity &optional no-cache))
+;(declare-function wl-folder-get-elmo-folder "ext:wl-folder"
+;		  (entity &optional no-cache))
 (declare-function wl-summary-goto-folder-subr "ext:wl-summary"
 		  (&optional name scan-type other-window sticky interactive
 			     scoring force-exit))
@@ -123,7 +123,8 @@
      (error "Error in Wanderlust link"))
  (let ((folder (match-string 1 path))
 	(article (match-string 3 path)))
-   (if (not (elmo-folder-exists-p (wl-folder-get-elmo-folder folder)))
+   (if (not (elmo-folder-exists-p (org-no-warnings
+				   (wl-folder-get-elmo-folder folder))))
 	(error "No such folder: %s" folder))
    (let ((old-buf (current-buffer))
 	  (old-point (point-marker)))

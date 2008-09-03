@@ -1,5 +1,7 @@
 2008-09-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-wl.el (org-wl-open): Remove incorrect declaration.
+
 	* org-gnus.el (org-gnus-store-link): Support for :to information
 	in gnus links.
 
