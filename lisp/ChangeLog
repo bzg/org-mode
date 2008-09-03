@@ -1,5 +1,8 @@
 2008-09-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-gnus.el (org-gnus-store-link): Support for :to information
+	in gnus links.
+
 	* org-exp.el (org-export-as-html): Fixed typo in creator
 	information.
 	(org-export-protect-examples): New parameter indent.  Insert extra

@@ -16,7 +16,8 @@
 :END:
 
 ** Details
-
+*** Remember templates for gnus links can now use the :to escape.
+    Thanks to Tommy Lindgren for a patch to this effect.
 *** The file specification in a remember template may now be a function
     Thanks to Gregory Sullivan for a patch to this effect.
 
