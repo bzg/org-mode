@@ -16,6 +16,8 @@
 :END:
 
 ** Details
+*** New face =org-scheduled= for entries that at some time in the future.
+    This was a request by Richard G Rigley.
 *** Remember templates for gnus links can now use the :to escape.
     Thanks to Tommy Lindgren for a patch to this effect.
 *** The file specification in a remember template may now be a function

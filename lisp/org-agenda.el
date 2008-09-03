@@ -3514,9 +3514,11 @@ FRACTION is what fraction of the head-warning time has passed."
 				 head category tags timestr))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
-		(setq face (if pastschedp
-			       'org-scheduled-previously
-			     'org-scheduled-today))
+		(setq face
+		      (cond
+		       (pastschedp 'org-scheduled-previously)
+		       (todayp 'org-scheduled-today)
+		       (t 'org-schduled)))
 		(org-add-props txt props
 		  'undone-face face
 		  'face (if donep 'org-done face)
