@@ -4351,7 +4351,7 @@ or nil."
   (let ((isearch-mode-map org-goto-local-auto-isearch-map)
 	(isearch-hide-immediately nil)
 	(isearch-search-fun-function
-	 (lambda () 'org-goto-local-search-forward-headings))
+	 (lambda () 'org-goto-local-search-headings))
 	(org-goto-selected-point org-goto-exit-command))
     (save-excursion
       (save-window-excursion
@@ -4392,10 +4392,12 @@ or nil."
 (define-key org-goto-local-auto-isearch-map "\C-i" 'isearch-other-control-char)
 (define-key org-goto-local-auto-isearch-map "\C-m" 'isearch-other-control-char)
 
-(defun org-goto-local-search-forward-headings (string bound noerror)
-  "Search and make sure that anu matches are in headlines."
+(defun org-goto-local-search-headings (string bound noerror)
+  "Search and make sure that any matches are in headlines."
   (catch 'return
-    (while (search-forward string bound noerror)
+    (while (if isearch-forward
+               (search-forward string bound noerror)
+             (search-backward string bound noerror))
       (when (let ((context (mapcar 'car (save-match-data (org-context)))))
 	      (and (member :headline context)
 		   (not (member :tags context))))
