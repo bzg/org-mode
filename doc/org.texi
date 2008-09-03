@@ -8337,9 +8337,11 @@ the variable @code{org-hide-leading-stars} or change this on a per-file basis
 with
 
 @example
-#+STARTUP: showstars
 #+STARTUP: hidestars
 @end example
+
+@noindent
+Note that the opposite behavior is selected with @code{showstars}.
 
 With hidden stars, the tree becomes:
 
