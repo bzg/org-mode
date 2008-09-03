@@ -1,5 +1,10 @@
 2008-09-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-get-scheduled): Use new
+	`org-scheduled' face.
+
+	* org-faces.el (org-scheduled): New face.
+
 	* org-wl.el (org-wl-open): Remove incorrect declaration.
 
 	* org-gnus.el (org-gnus-store-link): Support for :to information
