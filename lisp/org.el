@@ -6385,7 +6385,7 @@ to execute outside of tables."
 				   '('orgstruct-error))))))))
 
 (defun org-context-p (&rest contexts)
-  "Check if local context is and of CONTEXTS.
+  "Check if local context is any of CONTEXTS.
 Possible values in the list of contexts are `table', `headline', and `item'."
   (let ((pos (point)))
     (goto-char (point-at-bol))
