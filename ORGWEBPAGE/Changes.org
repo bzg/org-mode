@@ -17,11 +17,14 @@
 
 ** Details
 
-** It is now possible to define filters for column view
-   The filter can modify the value that will be displayed in a
-   column, for example it can cut out a part of a time stamp.
-   For more information, look at the variable
-   =org-columns-modify-value-for-display-function=.
+*** The file specification in a remember template may now be a function
+    Thanks to Gregory Sullivan for a patch to this effect.
+
+*** It is now possible to define filters for column view
+    The filter can modify the value that will be displayed in a
+    column, for example it can cut out a part of a time stamp.
+    For more information, look at the variable
+    =org-columns-modify-value-for-display-function=.
 
 * Version 6.06
 

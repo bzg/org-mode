@@ -1,5 +1,12 @@
 2008-09-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-as-html): Fixed typo in creator
+	information.
+
+	* org-remember.el (org-remember-templates)
+	(org-remember-apply-template): Allow the file component to be a
+	function.
+
 	* org.el (org-goto-local-search-headings): Renamed from
 	`org-goto-local-search-forward-headings'.  Added the possibility
 	to search backwards.

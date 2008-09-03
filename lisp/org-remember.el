@@ -176,6 +176,7 @@ calendar           |  %:type %:date"
 		(string :tag "Template")
 		(choice :tag "Destination file"
 		 (file :tag "Specify")
+		 (function :tag "Function")
 		 (const :tag "Use `org-default-notes-file'" nil))
 		(choice :tag "Destin. headline"
 		 (string :tag "Specify")
@@ -318,8 +319,10 @@ to be run from that hook to function properly."
 	     (ct (or org-overriding-default-time (org-current-time)))
 	     (tpl (car entry))
 	     (plist-p (if org-store-link-plist t nil))
-	     (file (if (and (nth 1 entry) (stringp (nth 1 entry))
-			    (string-match "\\S-" (nth 1 entry)))
+	     (file (if (and (nth 1 entry) 
+			    (or (and (stringp (nth 1 entry))
+				     (string-match "\\S-" (nth 1 entry)))
+				(functionp (nth 1 entry))))
 		       (nth 1 entry)
 		     org-default-notes-file))
 	     (headline (nth 2 entry))
@@ -349,6 +352,9 @@ to be run from that hook to function properly."
 	     (org-startup-folded nil)
 	     org-time-was-given org-end-time-was-given x
 	     prompt completions char time pos default histvar)
+
+	(when (functionp file)
+	  (setq file (funcall file)))
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
 	(setq org-store-link-plist
