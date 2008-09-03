@@ -1386,7 +1386,7 @@ on this string to produce the exported version."
       (setq target-alist (org-export-handle-invisible-targets target-alist))
 
       ;; Protect examples
-      (org-export-protect-examples)
+      (org-export-protect-examples (if asciip 'indent nil))
 
       ;; Protect backend specific stuff, throw away the others.
       (org-export-select-backend-specific-text
@@ -1591,13 +1591,13 @@ from the buffer."
 			 '(org-protected t))
     (goto-char (1+ (match-end 4)))))
 
-(defun org-export-protect-examples ()
+(defun org-export-protect-examples (&optional indent)
   "Protect code that should be exported as monospaced examples."
   (goto-char (point-min))
   (while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
     (goto-char (match-end 0))
     (while (and (not (looking-at "#\\+END_EXAMPLE")) (not (eobp)))
-      (insert ":  ")
+      (insert (if indent ":  " ":"))
       (beginning-of-line 2)))
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)

@@ -2,6 +2,10 @@
 
 	* org-exp.el (org-export-as-html): Fixed typo in creator
 	information.
+	(org-export-protect-examples): New parameter indent.  Insert extra
+	spaces only when this parameter is specified.
+	(org-export-preprocess-string): Call `org-export-protect-examples'
+	with an indentation parameter when exporting to ASCII.
 
 	* org-remember.el (org-remember-templates)
 	(org-remember-apply-template): Allow the file component to be a
