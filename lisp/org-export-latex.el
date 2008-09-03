@@ -76,6 +76,11 @@
 
 ;;; User variables:
 
+(defgroup org-export-latex nil
+  "Options for exporting Org-mode files to LaTeX."
+  :tag "Org Export LaTeX"
+  :group 'org-export)
+
 (defcustom org-export-latex-default-class "article"
   "The default LaTeX class."
   :group 'org-export-latex

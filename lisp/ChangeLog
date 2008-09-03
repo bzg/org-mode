@@ -1,5 +1,8 @@
 2008-09-02  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-export-latex.el (org-export-latex): New customization
+	group.
+
 	* org-agenda.el (org-write-agenda): Erase buffer for txt export.
 
 2008-09-01  Carsten Dominik  <dominik@science.uva.nl>

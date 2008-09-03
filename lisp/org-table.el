@@ -3552,6 +3552,7 @@ a radio table."
 	(delete-region beg (point))))
     (insert txt "\n")))
 
+;;;###autoload
 (defun org-table-to-lisp (&optional txt)
   "Convert the table at point to a Lisp structure.
 The structure will be a list.  Each item is either the symbol `hline'

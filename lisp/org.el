@@ -2344,7 +2344,7 @@ outside the table.")
    org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
    org-table-toggle-coordinate-overlays
    org-table-toggle-formula-debugger org-table-wrap-region
-   orgtbl-mode turn-on-orgtbl)))
+   orgtbl-mode turn-on-orgtbl org-table-to-lisp)))
 
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
