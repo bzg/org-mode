@@ -1248,7 +1248,10 @@ This is list of cons cells.  Each cell contains:
   - a cons cell (:regexp . \"REGEXP\") with a regular expression matching
     headlines that are refiling targets.
   - a cons cell (:level . N).  Any headline of level N is considered a target.
-  - a cons cell (:maxlevel . N). Any headline with level <= N is a target."
+  - a cons cell (:maxlevel . N). Any headline with level <= N is a target.
+
+When this variable is nil, all top-level headlines in the current buffer
+are used, equivalent to the vlaue `((nil . (:level . 1))'."
   :group 'org-remember
   :type '(repeat
 	  (cons
