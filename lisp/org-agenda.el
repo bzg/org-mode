@@ -3428,7 +3428,8 @@ the documentation of `org-diary'."
 				       (funcall (nth 1 org-agenda-deadline-leaders) diff date)
 				     (format (nth 1 org-agenda-deadline-leaders)
 					     diff)))
-				 head category tags timestr))))
+				 head category tags
+				 (if (not (= diff 0)) nil timestr)))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
 		(setq face (org-agenda-deadline-face dfrac wdays))
@@ -3511,7 +3512,8 @@ FRACTION is what fraction of the head-warning time has passed."
 				     (car org-agenda-scheduled-leaders)
 				   (format (nth 1 org-agenda-scheduled-leaders)
 					   (- 1 diff)))
-				 head category tags timestr))))
+				 head category tags
+				 (if (not (= diff 0)) nil timestr)))))
 		(setq txt org-agenda-no-heading-message))
 	      (when txt
 		(setq face

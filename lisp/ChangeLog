@@ -1,5 +1,9 @@
 2008-09-04  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-get-deadlines)
+	(org-agenda-get-scheduled): Avoid `time-of-day' extraction for
+	entries that are pre-warnings of deadlines or reminders.
+
 	* org.el (org-sort-entries-or-items): Make numeric and alpha
 	comparisons ignore any TODO keyword and priority cookie.
 
