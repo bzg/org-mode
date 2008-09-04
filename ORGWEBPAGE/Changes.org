@@ -15,18 +15,19 @@
 :VISIBILITY: content
 :END:
 
-* Incompatible changes
-*** Prefix interpretation when storing remember notes
-    The prefix argument to the `C-c C-c' command that finishes a
-    remember process is not interpetred differently:
+** Incompatible changes
 
-    :C-c C-c       Store the note to predefined file and headline
-    :C-1 C-c C-c   Select the storage location interactively
-    :C-0 C-c C-c   Re-use the last used location
-    :C-u C-c C-c   Like C-c C-c, but immediately visit the note
-    :              in its new location.
+**** Prefix interpretation when storing remember notes
+     The prefix argument to the `C-c C-c' command that finishes a
+     remember process is not interpetred differently:
 
-    This was requested by John Wiegley.
+     :C-c C-c       Store the note to predefined file and headline
+     :C-1 C-c C-c   Select the storage location interactively
+     :C-0 C-c C-c   Re-use the last used location
+     :C-u C-c C-c   Like C-c C-c, but immediately visit the note
+     :              in its new location.
+
+     This was requested by John Wiegley.
 
 
 ** Details
@@ -43,6 +44,10 @@
 
     This was requested by John Wiegley.
 
+*** Sorting entries now ignores the TODO keyword and the priority
+    Numerical and alphanumerical sorting now skips any TODO
+    keyword or priority cookie when constructing the comparison
+    string.  This was a request by Wanrong Lin.
 
 *** New face =org-scheduled= for entries that at some time in the future.
     This was a request by Richard G Rigley.

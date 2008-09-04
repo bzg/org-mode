@@ -5300,13 +5300,13 @@ WITH-CASE, the sorting considers case as well."
 	   (lambda nil
 	     (cond
 	      ((= dcst ?n)
-	       (if (looking-at outline-regexp)
-		   (string-to-number (buffer-substring (match-end 0)
-						       (point-at-eol)))
+	       (if (looking-at org-complex-heading-regexp)
+		   (string-to-number (match-string 4))
 		 nil))
 	      ((= dcst ?a)
-	       (funcall case-func (buffer-substring (point-at-bol)
-						    (point-at-eol))))
+	       (if (looking-at org-complex-heading-regexp)
+		   (funcall case-func (match-string 4))
+		 nil))
 	      ((= dcst ?t)
 	       (if (re-search-forward org-ts-regexp
 				      (save-excursion

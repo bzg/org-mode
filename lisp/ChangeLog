@@ -1,3 +1,11 @@
+2008-09-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-sort-entries-or-items): Make numeric and alpha
+	comparisons ignore any TODO keyword and priority cookie.
+
+	* org-remember.el (org-remember-handler): Reinterpretation of the
+	prefix argument.
+
 2008-09-03  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-get-scheduled): Use new
