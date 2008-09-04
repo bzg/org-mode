@@ -4396,7 +4396,7 @@ or nil."
 (define-key org-goto-local-auto-isearch-map "\C-m" 'isearch-other-control-char)
 
 (defun org-goto-local-search-headings (string bound noerror)
-  "Search and make sure that anyq matches are in headlines."
+  "Search and make sure that any matches are in headlines."
   (catch 'return
     (while (if isearch-forward
                (search-forward string bound noerror)
