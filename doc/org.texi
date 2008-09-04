@@ -4977,11 +4977,10 @@ specified in the template, or it will use the default file and headlines.
 The window configuration will be restored, sending you back to the working
 context before the call to @code{remember}.  To re-use the location found
 during the last call to @code{remember}, exit the remember buffer with
-@kbd{C-u C-u C-c C-c}, i.e. specify a double prefix argument to @kbd{C-c
-C-c}.
+@kbd{C-0 C-c C-c}, i.e. specify a zero prefix argument to @kbd{C-c C-c}.
 
 If you want to store the note directly to a different place, use
-@kbd{C-u C-c C-c} instead to exit remember@footnote{Configure the
+@kbd{C-1 C-c C-c} instead to exit remember@footnote{Configure the
 variable @code{org-remember-store-without-prompt} to make this behavior
 the default.}.  The handler will then first prompt for a target file -
 if you press @key{RET}, the value specified for the template is used.

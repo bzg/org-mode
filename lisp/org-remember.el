@@ -367,10 +367,11 @@ to be run from that hook to function properly."
 "## Filing location: Select interactively, default, or last used:
 ## %s  to select file and header location interactively.
 ## %s  \"%s\" -> \"* %s\"
-## C-u C-u C-c C-c  \"%s\" -> \"* %s\"
+## C-0 C-c C-c  \"%s\" -> \"* %s\"
+## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
 ## To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
-		  (if org-remember-store-without-prompt "    C-u C-c C-c" "        C-c C-c")
-		  (if org-remember-store-without-prompt "        C-c C-c" "    C-u C-c C-c")
+		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c")
+		  (if org-remember-store-without-prompt "    C-c C-c" "    C-1 C-c C-c")
 		  (abbreviate-file-name (or file org-default-notes-file))
 		  (or headline "")
 		  (or (car org-remember-previous-location) "???")
@@ -623,33 +624,25 @@ The user is queried for the template."
 ;;;###autoload
 (defun org-remember-handler ()
   "Store stuff from remember.el into an org file.
-First prompts for an org file.  If the user just presses return, the value
-of `org-default-notes-file' is used.
-Then the command offers the headings tree of the selected file in order to
-file the text at a specific location.
-You can either immediately press RET to get the note appended to the
-file, or you can use vertical cursor motion and visibility cycling (TAB) to
-find a better place.  Then press RET or <left> or <right> in insert the note.
+When the template has specified a file and a headline, the entry is filed
+there, or in the location defined by `org-default-notes-file' and
+`org-remember-default-headline'.
 
-Key      Cursor position   Note gets inserted
------------------------------------------------------------------------------
-RET      buffer-start      as level 1 heading at end of file
-RET      on headline       as sublevel of the heading at cursor
-RET      no heading        at cursor position, level taken from context.
-			   Or use prefix arg to specify level manually.
-<left>   on headline       as same level, before current heading
-<right>  on headline       as same level, after current heading
+If no defaults have been defined, or if the current prefix argument
+is 1 (so you must use `C-1 C-c C-c' to exit remember), an interactive
+process is used to select the target location.
 
-So the fastest way to store the note is to press RET RET to append it to
-the default file.  This way your current train of thought is not
-interrupted, in accordance with the principles of remember.el.
-You can also get the fast execution without prompting by using
-C-u C-c C-c to exit the remember buffer.  See also the variable
-`org-remember-store-without-prompt'.
+When the prefix is 0 (i.e. when remember is exited with `C-0 C-c C-c'),
+the entry is filed to the same location as the previous note.
 
-Before being stored away, the function ensures that the text has a
-headline, i.e. a first line that starts with a \"*\".  If not, a headline
-is constructed from the current date and some additional data.
+When `C-u' has been used as prefix argument, the note is stored and emacs
+moves point to the new location of the note, so that editing can be
+continued there (smilar to inserting \"%&\" into the tempate).
+
+Before storing the note, the function ensures that the text has an
+org-mode-style headline, i.e. a first line that starts with
+a \"*\".  If not, a headline is constructed from the current date and
+some additional data.
 
 If the variable `org-adapt-indentation' is non-nil, the entire text is
 also indented so that it starts in the same column as the headline
@@ -672,15 +665,16 @@ See also the variable `org-reverse-note-order'."
   (catch 'quit
     (if org-note-abort (throw 'quit nil))
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
-	   (fastp (org-xor (equal current-prefix-arg '(4))
+	   (previousp (and (member current-prefix-arg '((16) 0))
+			   org-remember-previous-location))
+	   (fastp (org-xor (equal current-prefix-arg 1)
 			   org-remember-store-without-prompt))
 	   (file (cond
 		  (fastp org-default-notes-file)
 		  ((and (eq org-remember-interactive-interface 'refile)
 			org-refile-targets)
 		   org-default-notes-file)
-		  ((not (and (equal current-prefix-arg '(16))
-			     org-remember-previous-location))
+		  ((not previousp)
 		   (org-get-org-file))))
 	   (heading org-remember-default-headline)
 	   (visiting (and file (org-find-base-buffer-visiting file)))
@@ -688,10 +682,12 @@ See also the variable `org-reverse-note-order'."
 	   (org-startup-align-all-tables nil)
 	   (org-goto-start-pos 1)
 	   spos exitcmd level reversed txt)
-      (if (and (equal current-prefix-arg '(16)) org-remember-previous-location)
-	  (setq file (car org-remember-previous-location)
-		heading (cdr org-remember-previous-location)
-		fastp t))
+      (when (equal current-prefix-arg '(4))
+	(setq visitp t))
+      (when previousp
+	(setq file (car org-remember-previous-location)
+	      heading (cdr org-remember-previous-location)
+	      fastp t))
       (setq current-prefix-arg nil)
       ;; Modify text so that it becomes a nice subtree which can be inserted
       ;; into an org tree.
