@@ -4221,9 +4221,10 @@ format.
 @table @kbd
 @kindex C-c .
 @item C-c .
-Prompt for a date and insert a corresponding time stamp.  When the
-cursor is at a previously used time stamp, it is updated to NOW.  When
-this command is used twice in succession, a time range is inserted.
+Prompt for a date and insert a corresponding time stamp.  When the cursor is
+at an existing time stamp in the buffer, the command is used to modify this
+timestamp instead of inserting a new one.  When this command is used twice in
+succession, a time range is inserted.
 @c
 @kindex C-u C-c .
 @item C-u C-c .

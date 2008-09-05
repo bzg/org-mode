@@ -1,3 +1,8 @@
+2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Creating timestamps): Fix documentation of the "C-c ."
+	command.
+
 2008-06-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi: Modify license to no longer include back- and front
