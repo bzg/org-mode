@@ -191,7 +191,7 @@ t:      accept as input and present for editing"
     calc-angle-mode    deg
     calc-prefer-frac   nil
     calc-symbolic-mode nil
-    calc-date-format (YYYY "-" MM "-" DD " " Www (" " HH ":" mm))
+    calc-date-format (YYYY "-" MM "-" DD " " Www (" " hh ":" mm))
     calc-display-working-message t
     )
   "List with Calc mode settings for use in calc-eval for table formulas.
