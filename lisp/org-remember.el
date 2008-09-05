@@ -164,8 +164,8 @@ calendar           |  %:type %:date"
   :get (lambda (var) ; Make sure all entries have at least 5 elements
 	 (mapcar (lambda (x)
 		   (if (not (stringp (car x))) (setq x (cons "" x)))
-		   (cond ((= (length x) 4) (append x '("")))
-			 ((= (length x) 3) (append x '("" "")))
+		   (cond ((= (length x) 4) (append x '(nil)))
+			 ((= (length x) 3) (append x '(nil nil)))
 			 (t x)))
 		 (default-value var)))
   :type '(repeat

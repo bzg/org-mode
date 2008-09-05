@@ -1,5 +1,8 @@
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-remember.el (org-remember-templates): Add nil instead of
+	empty strings to fix the length of remember templates.
+
 	* org-table.el (org-calc-default-modes): Fix the time format for
 	calc, from 12 hour to 24 hour clock.
 
