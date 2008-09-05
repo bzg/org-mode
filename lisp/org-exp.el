@@ -2489,7 +2489,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+LINK:      %s
 "
    (buffer-name) (user-full-name) user-mail-address
-   (format-time-string (car org-time-stamp-formats))
+   (format-time-string (substring (car org-time-stamp-formats) 1 -1))
    org-export-default-language
    org-export-headline-levels
    org-export-with-section-numbers

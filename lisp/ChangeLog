@@ -1,5 +1,8 @@
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-get-current-options): Remove angular brackets
+	from the date entry.
+
 	* org.el (org-edit-fixed-width-region): New function.
 	(org-edit-fixed-width-region): Also try
 	`org-edit-fixed-width-region'.
