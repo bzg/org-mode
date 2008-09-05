@@ -1,3 +1,11 @@
+2008-09-05  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-additional-option-like-keywords): Added keywords for
+	the _QUOTE, _VERSE and _SRC environments.
+
+	* org-export-latex.el (org-export-latex-preprocess): Fix bug when
+	exporting _QUOTE and _VERSE environments.
+
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-remember.el (org-remember-templates): Add nil instead of

@@ -1122,18 +1122,18 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 
   ;; Convert blockquotes
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+BEGIN_QUOTE" nil t)
+  (while (search-forward "ORG-BLOCKQUOTE-START" nil t)
     (replace-match "\\begin{quote}" t t))
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+END_QUOTE" nil t)
+  (while (search-forward "ORG-BLOCKQUOTE-END" nil t)
     (replace-match "\\end{quote}" t t))
 
   ;; Convert verse
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+BEGIN_VERSE" nil t)
+  (while (search-forward "ORG-VERSE-START" nil t)
     (replace-match "\\begin{verse}" t t))
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+END_VERSE" nil t)
+  (while (search-forward "ORG-VERSE-END" nil t)
     (replace-match "\\end{verse}" t t))
 
   ;; Convert horizontal rules
