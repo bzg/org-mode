@@ -8095,7 +8095,10 @@ This function can be used in a hook."
 (defconst org-additional-option-like-keywords
   '("BEGIN_HTML" "BEGIN_LaTeX" "END_HTML" "END_LaTeX"
     "ORGTBL" "HTML:" "LaTeX:" "BEGIN:" "END:" "TBLFM"
-    "BEGIN_EXAMPLE" "END_EXAMPLE"))
+    "BEGIN_EXAMPLE" "END_EXAMPLE"
+    "BEGIN_QUOTE" "END_QUOTE"
+    "BEGIN_VERSE" "END_VERSE"
+    "BEGIN_SRC" "END_SRC"))
 
 (defcustom org-structure-template-alist
   '(
