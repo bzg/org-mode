@@ -669,6 +669,16 @@ See also the QUOTE keyword."
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-edit-fixed-width-region-mode 'artist-mode
+  "The mode that should be used to edit fixed-width regions.
+These are the regions where each line starts with a colon."
+  :group 'org-edit-structure
+  :type '(choice
+	  (const artist-mode)
+	  (const picture-mode)
+	  (const fundamental-mode)
+	  (function :tag "Other (specify)")))
+
 (defcustom org-goto-auto-isearch t
   "Non-nil means, typing characters in org-goto starts incremental search."
   :group 'org-edit-structure
@@ -3502,8 +3512,8 @@ will be prompted for."
 	  (throw 'exit t))))))
 
 (defun org-activate-code (limit)
-  (if (re-search-forward "^[ \t]*\\(:.*\\)" limit t)
-      (unless (get-text-property (match-beginning 1) 'face)
+  (if (re-search-forward "^[ \t]*\\(: .*\n?\\)" limit t)
+      (progn
 	(remove-text-properties (match-beginning 0) (match-end 0)
 				'(display t invisible t intangible t))
 	t)))
@@ -5433,6 +5443,60 @@ exit by killing the buffer with \\[org-edit-src-exit]."
       (message "%s" msg)
       t)))
 
+(defun org-edit-fixed-width-region ()
+  "Edit the fixed-width ascii drawing at point.
+This must be a region where each line starts with ca colon followed by
+a space character.
+An indirect buffer is created, and that buffer is then narrowed to the
+example at point and switched to artist-mode.  When done,
+exit by killing the buffer with \\[org-edit-src-exit]."
+  (interactive)
+  (let ((line (org-current-line))
+	(case-fold-search t)
+	(msg (substitute-command-keys
+	      "Edit, then exit with C-c ' (C-c and single quote)"))
+	(org-mode-p (eq major-mode 'org-mode))
+	beg end lang lang-f)
+    (beginning-of-line 1)
+    (if (looking-at "[ \t]*[^:\n \t]")
+	nil
+      (if (looking-at "[ \t]*\\(\n\\|\\'\\)]")
+	  (setq beg (point) end (match-end 0))
+	(save-excursion
+	  (if (re-search-backward "^[ \t]*[^:]" nil 'move)
+	      (setq beg (point-at-bol 2))
+	    (setq beg (point))))
+	(save-excursion
+	  (if (re-search-forward "^[ \t]*[^:]" nil 'move)
+	      (setq end (match-beginning 0))
+	    (setq end (point))))
+	(goto-line line)
+	(if (get-buffer "*Org Edit Picture*")
+	    (kill-buffer "*Org Edit Picture*"))
+	(switch-to-buffer (make-indirect-buffer (current-buffer)
+						"*Org Edit Picture*"))
+	(narrow-to-region beg end)
+	(remove-text-properties beg end '(display nil invisible nil
+						  intangible nil))
+	(when (fboundp 'font-lock-unfontify-region)
+	  (font-lock-unfontify-region (point-min) (point-max)))
+	(cond
+	 ((eq org-edit-fixed-width-region-mode 'artist-mode)
+	  (fundamental-mode)
+	  (artist-mode 1))
+	 (t (funcall org-edit-fixed-width-region-mode)))
+	(set (make-local-variable 'org-edit-src-force-single-line) nil)
+	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
+	(set (make-local-variable 'org-edit-src-picture) t)
+	(goto-char (point-min))
+	(while (re-search-forward "^[ \t]*: " nil t)
+	  (replace-match ""))
+	(goto-line line)
+	(org-exit-edit-mode)
+	(org-set-local 'header-line-format msg)
+	(message "%s" msg)
+	t))))
+
 (defun org-edit-src-find-region-and-lang ()
   "Find the region and language for a local edit.
 Return a list with beginning and end of the region, a string representing
@@ -5515,6 +5579,13 @@ the language, a switch telling of the content should be in a single line."
     (goto-char (point-min))
     (while (re-search-forward (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\)") nil t)
       (replace-match ",\\1"))
+    (when font-lock-mode
+      (font-lock-unfontify-region (point-min) (point-max)))
+    (put-text-property (point-min) (point-max) 'font-lock-fontified t))
+  (when (org-bound-and-true-p org-edit-src-picture)
+    (goto-char (point-min))
+    (while (re-search-forward "^" nil t)
+      (replace-match ": "))
     (when font-lock-mode
       (font-lock-unfontify-region (point-min) (point-max)))
     (put-text-property (point-min) (point-max) 'font-lock-fontified t))
@@ -12971,6 +13042,7 @@ When in an #+include line, visit the include file.  Otherwise call
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
     (find-file (org-trim (match-string 1))))
    ((org-edit-src-code))
+   ((org-edit-fixed-width-region))
    (t (call-interactively 'ffap))))
 
 (defun org-ctrl-c-ctrl-c (&optional arg)

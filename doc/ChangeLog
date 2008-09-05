@@ -2,6 +2,8 @@
 
 	* org.texi (Creating timestamps): Fix documentation of the "C-c ."
 	command.
+	(Literal examples): Document using artist-mode for ASCII
+	drawings.
 
 2008-06-13  Carsten Dominik  <dominik@science.uva.nl>
 

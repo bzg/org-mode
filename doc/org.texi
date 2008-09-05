@@ -6925,7 +6925,12 @@ example:
 @item C-c '
 Edit the source code example at point in its native mode.  This works by
 switching to an indirect buffer, narrowing the buffer and switching to the
-other mode.  You need to exit by pressing @kbd{C-c '} again.
+other mode.  You need to exit by pressing @kbd{C-c '} again.  Fixed-width
+regions (where each line starts with a colon followed by a space) will be
+edited using @code{artist-mode}@footnote{You may select a different-mode with
+the variable @code{org-edit-fixed-width-region-mode}.} to allow creating
+ASCII drawings easily.  Using this command in an empty line will create a new
+fixed-width region.
 @end table
 
 

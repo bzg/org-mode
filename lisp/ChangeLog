@@ -1,5 +1,12 @@
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-edit-fixed-width-region): New function.
+	(org-edit-fixed-width-region): Also try
+	`org-edit-fixed-width-region'.
+	(org-edit-fixed-width-region-mode): New option.
+	(org-activate-code): Only interprete lines starting with colon
+	plus a space as example lines.
+
 	* org-remember.el (org-remember-templates): Add nil instead of
 	empty strings to fix the length of remember templates.
 

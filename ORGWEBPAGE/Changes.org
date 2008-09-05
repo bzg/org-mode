@@ -32,6 +32,25 @@
 
 ** Details
 
+*** Editing fixed-width regions with picture or artist mode
+
+    The command @<code>C-c '@</code> (that is =C-c= followed by a
+    single quote) can now also be used to switch to a special
+    editing mode for fixed-width sections.  The default mode is
+    =artist-mode= which allows you to create ASCII drawings.
+
+    It works like this: Enter the editing mode with
+    @<code>C-c '@</code>.  An indirect buffer will be created and
+    narrowed to the fixed-width region.  Edit the drawing, and
+    press @<code>C-c '@</code> again to exit.
+
+    Lines in a fixed-width region should be preceded by a colon
+    followed by at least one space.  These will be removed during
+    editing, and then added back when you exit the editing mode.
+
+    Using the command in an empty line will create a new
+    fixed-width region.
+
 *** New interpretation of prefix arguments when exiting remember
     The prefix argument to the `C-c C-c' command that finishes a
     remember process is not interpetred differently:
