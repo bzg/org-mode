@@ -1,5 +1,7 @@
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-filter-by-tag): New command.
+
 	* org-exp.el (org-get-current-options): Remove angular brackets
 	from the date entry.
 

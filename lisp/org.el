@@ -1357,6 +1357,8 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 (make-variable-buffer-local 'org-todo-keywords-1)
 (defvar org-todo-keywords-for-agenda nil)
 (defvar org-done-keywords-for-agenda nil)
+(defvar org-todo-keyword-alist-for-agenda nil)
+(defvar org-tag-alist-for-agenda nil)
 (defvar org-agenda-contributing-files nil)
 (defvar org-not-done-keywords nil)
 (make-variable-buffer-local 'org-not-done-keywords)
@@ -12216,6 +12218,11 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		(append org-todo-keywords-for-agenda org-todo-keywords-1))
 	  (setq org-done-keywords-for-agenda
 		(append org-done-keywords-for-agenda org-done-keywords))
+	  (setq org-todo-keyword-alist-for-agenda
+		(append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+	  (setq org-tag-alist-for-agenda 
+		(append org-tag-alist-for-agenda org-tag-alist))
+
 	  (save-excursion
 	    (remove-text-properties (point-min) (point-max) pall)
 	    (when org-agenda-skip-archived-trees
@@ -12228,7 +12235,11 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (while (re-search-forward re nil t)
 	      (add-text-properties
 	       (match-beginning 0) (org-end-of-subtree t) pc)))
-	  (set-buffer-modified-p bmp))))))
+	  (set-buffer-modified-p bmp))))
+    (setq debug-on-error t)
+    (setq org-todo-keyword-alist-for-agenda
+	  (org-uniquify org-todo-keyword-alist-for-agenda)
+	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))
 
 ;;;; Embedded LaTeX
 

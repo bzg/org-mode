@@ -32,6 +32,27 @@
 
 ** Details
 
+*** Secondary filtering of agenda views.
+
+    You can now easily and interactively filter an existing
+    agenda view with respect to a tag.  This command is executed
+    with the =/= key in the agenda.  You will be prompted for a
+    tag selection key, and all entries that do not contain or
+    inherit the corresponding tag will be removed from the agenda
+    view.  With a prefix argument, the complementary filter is
+    applied: entries that do have the tag will be removed.
+    Narrowing the search results down with several successive
+    filtering operations is possible.
+
+    Note that this only removes the entries from the agenda
+    buffer, but it does not modify the query.  Therefore, the =r=
+    and =g= keys will restore the original agenda buffer.
+
+    This functionality was John Wiegleys idea and is a simpler
+    implementation of some of the query-editing features proposed
+    and implemented some time ago by Christopher League (see the
+    file contrib/lisp/org-interactive-query.el).
+
 *** Editing fixed-width regions with picture or artist mode
 
     The command @<code>C-c '@</code> (that is =C-c= followed by a

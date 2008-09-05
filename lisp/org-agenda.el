@@ -1159,6 +1159,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "]" 'org-agenda-manipulate-query-subtract)
 (org-defkey org-agenda-mode-map "{" 'org-agenda-manipulate-query-add-re)
 (org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
+(org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
@@ -4078,6 +4079,32 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (goto-line line)
     (recenter window-line)))
 
+(defun org-agenda-filter-by-tag (strip &optional char)
+  "Keep only those lines in the agenda buffer that have a specific tag.
+The tag is selected with its fast selection letter, as configured.
+With prefix argument STRIP, remove all lines that do have the tag."
+  (interactive "P")
+  (let (char a tag (inhibit-read-only t))
+    (message "Tag selection character [%s]"
+	     (mapconcat
+	      (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+	      org-tag-alist-for-agenda ""))
+    (setq char (read-char-exclusive))
+    (unless (setq a (rassoc char org-tag-alist-for-agenda))
+      (error "invalid tag selection character %c" char))
+    (setq tag (car a))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(if (get-text-property (point) 'org-marker)
+	    (progn
+	      (setq tags (get-text-property (point) 'tags))
+	      (if (or (and (member tag tags) strip)
+		      (and (not (member tag tags)) (not strip)))
+		  (delete-region (point) (1+ (point-at-eol)))
+		(beginning-of-line 2)))
+	  (beginning-of-line 2))))))
+
 (defun org-agenda-manipulate-query-add ()
   "Manipulate the query by adding a search term with positive selection.
 Positive selection means, the term must be matched for selection of an entry."
@@ -5315,5 +5342,4 @@ belonging to the \"Work\" category."
 ;; arch-tag: 77f7565d-7c4b-44af-a2df-9f6f7070cff1
 
 ;;; org-agenda.el ends here
-
 
