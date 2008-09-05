@@ -6395,7 +6395,8 @@ Possible values in the list of contexts are `table', `headline', and `item'."
     (prog1 (or (and (memq 'table contexts)
 		    (looking-at "[ \t]*|"))
 	       (and (memq 'headline contexts)
-		    (looking-at "\\*+"))
+;;?????????		    (looking-at "\\*+"))
+		    (looking-at outline-regexp))
 	       (and (memq 'item contexts)
 		    (looking-at "[ \t]*\\([-+*] \\|[0-9]+[.)] \\)")))
       (goto-char pos))))
@@ -7793,7 +7794,7 @@ first of the last subitem.
 
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
-With a double prefix `C-c C-c', go to the location where the last refiling
+With a double prefix `C-u C-u', go to the location where the last refiling
 operation has put the subtree."
   (interactive "P")
   (let* ((cbuf (current-buffer))
@@ -13528,7 +13529,7 @@ With optional NODE, go directly to that node."
       (sit-for 0))))
 
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
-  "Go to MARKER, widen if necesary.  When marker is not live, try BOOKMARK."
+  "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
   (if (and marker (marker-buffer marker)
 	   (buffer-live-p (marker-buffer marker)))
       (progn
