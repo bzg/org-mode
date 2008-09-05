@@ -23,7 +23,7 @@
 ;;; Commentary:
 ;;
 
-;; This ibrary implements interactive modification of a tags/todo query
+;; This library implements interactive modification of a tags/todo query
 ;; in the org-agenda.  It adds 4 keys to the agenda
 ;;
 ;; /   add a keyword as a positive selection criterion
