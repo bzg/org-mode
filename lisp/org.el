@@ -12239,7 +12239,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (add-text-properties
 	       (match-beginning 0) (org-end-of-subtree t) pc)))
 	  (set-buffer-modified-p bmp))))
-    (setq debug-on-error t)
     (setq org-todo-keyword-alist-for-agenda
 	  (org-uniquify org-todo-keyword-alist-for-agenda)
 	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))

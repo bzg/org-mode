@@ -3521,7 +3521,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		      (cond
 		       (pastschedp 'org-scheduled-previously)
 		       (todayp 'org-scheduled-today)
-		       (t 'org-schduled)))
+		       (t 'org-scheduled)))
 		(org-add-props txt props
 		  'undone-face face
 		  'face (if donep 'org-done face)
