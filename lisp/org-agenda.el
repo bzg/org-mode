@@ -4085,25 +4085,49 @@ The tag is selected with its fast selection letter, as configured.
 With prefix argument STRIP, remove all lines that do have the tag."
   (interactive "P")
   (let (char a tag (inhibit-read-only t))
-    (message "Tag selection character [%s]"
-	     (mapconcat
-	      (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
-	      org-tag-alist-for-agenda ""))
-    (setq char (read-char-exclusive))
-    (unless (setq a (rassoc char org-tag-alist-for-agenda))
-      (error "invalid tag selection character %c" char))
-    (setq tag (car a))
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(if (get-text-property (point) 'org-marker)
-	    (progn
-	      (setq tags (get-text-property (point) 'tags))
-	      (if (or (and (member tag tags) strip)
-		      (and (not (member tag tags)) (not strip)))
-		  (delete-region (point) (1+ (point-at-eol)))
-		(beginning-of-line 2)))
-	  (beginning-of-line 2))))))
+      (message "Select tag [%s], [TAB] to complete, [/] to restore: "
+	       (mapconcat
+		(lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+		org-tag-alist-for-agenda ""))
+      (setq char (read-char))
+      (when (equal char ?\t)
+	(unless (local-variable-p 'org-global-tags-completion-table)
+	  (org-set-local 'org-global-tags-completion-table
+			 (org-global-tags-completion-table)))
+	(let ((completion-ignore-case t))
+	  (setq tag (completing-read
+		     "Tag: " org-global-tags-completion-table))))
+      (cond
+       ((equal char ?/) (org-agenda-filter-by-tag-show-all))
+       ((or (setq a (rassoc char org-tag-alist-for-agenda))
+	    (and tag (setq a (cons tag nil))))
+	(org-agenda-filter-by-tag-show-all)
+	(setq tag (car a))
+	(save-excursion
+	  (goto-char (point-min))
+	  (while (not (eobp))
+	    (if (get-text-property (point) 'org-marker)
+		(progn
+		  (setq tags (get-text-property (point) 'tags))
+		  (if (or (and (member tag tags) strip)
+			  (and (not (member tag tags)) (not strip)))
+		      (org-agenda-filter-by-tag-hide-line))
+		  (beginning-of-line 2))
+	      (beginning-of-line 2)))))
+       (t (error "Invalid tag selection character %c" char)))))
+
+(defvar org-agenda-filter-overlays nil)
+
+(defun org-agenda-filter-by-tag-hide-line ()
+  (let (ov)
+    (setq ov (org-make-overlay (point-at-bol) (1+ (point-at-eol))))
+    (org-overlay-put ov 'invisible t)
+    (org-overlay-put ov 'type 'tags-filter)
+    (push ov org-agenda-filter-overlays)))
+
+(defun org-agenda-filter-by-tag-show-all ()
+  (mapc 'org-delete-overlay org-agenda-filter-overlays)
+  (setq org-agenda-filter-overlays nil))
 
 (defun org-agenda-manipulate-query-add ()
   "Manipulate the query by adding a search term with positive selection.

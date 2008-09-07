@@ -5806,9 +5806,12 @@ that entry would be in the original buffer (taken from a property, from a
 @kindex /
 @item /
 Filter the current agenda view with respect to a tag.  You will be prompted
-for a tag selection letter and all entries that do not contain this tag will
-be removed from the agenda display.  When called with prefix arg, remove the
-entries that @emph{do} have the tag.
+for a tag selection letter.  Pressing @key{TAB} at that prompt will offer use
+completion to select a tag (including any tags that do not have a selection
+character).  The command then hides all entries that do not contain or
+inherit this tag.  When called with prefix arg, remove the entries that
+@emph{do} have the tag.  A second @kbd{/} at the prompt will unhide any
+hidden entries.
 
 @kindex [
 @kindex ]

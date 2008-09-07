@@ -1,5 +1,5 @@
 ================================================================================
-Org-Mode Reference Card (for version 6.06)
+Org-Mode Reference Card (for version 6.07)
 ================================================================================
 
 ================================================================================
@@ -358,6 +358,7 @@ toggle time grid for daily schedule               G
 toggle display of logbook entries                 l
 toggle inclusion of archived trees/files          v / C-u v}
 refresh agenda buffer with any changes            r / g
+filter agenda with repect to a tag                /
 save all org-mode buffers                         s
 display the next/previous day, week,...           RIGHT/LEFT
 goto today                                        .

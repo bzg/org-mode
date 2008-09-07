@@ -102,7 +102,7 @@ Some more information about this can be found in the [[http://orgmode.org/worg/o
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode
    - Kyle Sherman has created a [[file:orgcard.txt][text version]] of the reference card
-     (Org version 6.06).
+     (Org version 6.07).
 ** The FAQ
    - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg
      project]]. 

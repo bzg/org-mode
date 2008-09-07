@@ -38,17 +38,22 @@
     agenda view with respect to a tag.  This command is executed
     with the =/= key in the agenda.  You will be prompted for a
     tag selection key, and all entries that do not contain or
-    inherit the corresponding tag will be removed from the agenda
-    view.  With a prefix argument, the complementary filter is
-    applied: entries that do have the tag will be removed.
-    Narrowing the search results down with several successive
-    filtering operations is possible.
+    inherit the corresponding tag will be hidden.  With a prefix
+    argument, the complementary filter is applied: entries that
+    do have the tag will be hidden.
 
-    Note that this only removes the entries from the agenda
-    buffer, but it does not modify the query.  Therefore, the =r=
-    and =g= keys will restore the original agenda buffer.
+    This operation only hides lines in the agenda buffer.  It
+    does not initiate a new search and therefore is very fast.
 
-    This functionality was John Wiegleys idea and is a simpler
+    If you press TAB at the tag selection prompt, you will be
+    switched to a completion interface to select a tag.  This is
+    useful in particular when you want to select a tag that does
+    not have a direct access character.
+
+    A double =/ /= will restore the original agenda view by
+    unhiding any hidden lines.
+
+    This functionality was John Wiegley's idea.  It is a simpler
     implementation of some of the query-editing features proposed
     and implemented some time ago by Christopher League (see the
     file contrib/lisp/org-interactive-query.el).
