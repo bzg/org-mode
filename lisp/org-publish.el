@@ -487,10 +487,11 @@ PUB-DIR is the publishing directory."
   (require 'org)
   (unless (file-exists-p pub-dir)
     (make-directory pub-dir t))
-  (find-file filename)
-  (let ((init-buf (current-buffer))
-	(init-point (point))
-	(init-buf-string (buffer-string)) export-buf)
+  (let* ((visiting (find-buffer-visiting))
+	 (plist (cons :buffer-will-be-killed (cons t plist)))
+	 (init-buf (or visiting (find-file filename)))
+	 (init-point (point))
+	 (init-buf-string (buffer-string)) export-buf)
     ;; run hooks before exporting
     (run-hooks 'org-publish-before-export-hook)
     ;; export the possibly modified buffer
@@ -510,7 +511,7 @@ PUB-DIR is the publishing directory."
       (insert init-buf-string)
       (save-buffer)
       (goto-char init-point))
-    (unless (eq init-buf org-publish-initial-buffer)
+    (unless visiting
       (kill-buffer init-buf))))
 
 (defun org-publish-org-to-latex (plist filename pub-dir)

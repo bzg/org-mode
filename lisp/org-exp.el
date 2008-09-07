@@ -3347,8 +3347,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	(insert (or (plist-get opt-plist :postamble) ""))
 	(insert "</body>\n</html>\n"))
 
-      (normal-mode)
-      (if (eq major-mode default-major-mode) (html-mode))
+      (unless (plist-get opt-plist :buffer-will-be-killed)
+	(normal-mode)
+	(if (eq major-mode default-major-mode) (html-mode)))
 
       ;; insert the table of contents
       (goto-char (point-min))
