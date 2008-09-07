@@ -2938,6 +2938,8 @@ lang=\"%s\" xml:lang=\"%s\">
       (setq head-count 0)
       (org-init-section-numbers)
 
+      (org-open-par)
+
       (while (setq line (pop lines) origline line)
 	(catch 'nextline
 

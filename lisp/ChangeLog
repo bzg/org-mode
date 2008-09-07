@@ -3,6 +3,8 @@
 	* org-exp.el (org-export-as-html): Do not turn on the major mode
 	if the buffer will be killed anyway.
 	(org-get-current-options): Exclude the #+TEXT field.
+	(org-export-as-html): Make sure text before the first headline is
+	a paragraph.
 
 	* org-publish.el (org-publish-org-to): Tell the exporter that this
 	buffer will be killed, so it is not necessary to do major mode
