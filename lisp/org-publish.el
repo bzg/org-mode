@@ -487,7 +487,7 @@ PUB-DIR is the publishing directory."
   (require 'org)
   (unless (file-exists-p pub-dir)
     (make-directory pub-dir t))
-  (let* ((visiting (find-buffer-visiting))
+  (let* ((visiting (find-buffer-visiting filename))
 	 (plist (cons :buffer-will-be-killed (cons t plist)))
 	 (init-buf (or visiting (find-file filename)))
 	 (init-point (point))
