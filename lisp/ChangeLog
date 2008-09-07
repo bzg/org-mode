@@ -1,5 +1,8 @@
 2008-09-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-archive.el (org-archive-to-archive-sibling): Show empty
+	lines after folding the archive sibling.
+
 	* org.el (org-log-note-extra): New variable.
 
 2008-09-05  Bastien Guerry  <bzg@altern.org>

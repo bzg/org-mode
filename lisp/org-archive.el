@@ -353,6 +353,7 @@ sibling does not exist, it will be created at the end of the subtree."
 	(current-time)))
       (outline-up-heading 1 t)
       (hide-subtree)
+      (org-cycle-show-empty-lines 'folded)
       (goto-char pos))))
 
 (defun org-archive-all-done (&optional tag)
