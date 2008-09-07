@@ -256,6 +256,19 @@ become effective."
   :group 'org-startup
   :type 'boolean)
 
+(defcustom org-use-extra-keys nil
+  "Non-nil means use extra key sequence definitions for certain
+commands.  This happens automatically if you run XEmacs or if
+window-system is nil.  This variable lets you do the same
+manually.  You must set it before loading org.
+
+Example: on Carbon Emacs 22 running graphically, with an external
+keyboard on a Powerbook, the default way of setting M-left might
+not work for either Alt or ESC.  Setting this variable will make
+it work for ESC."
+  :group 'org-startup
+  :type 'boolean)
+
 (if (fboundp 'defvaralias)
     (defvaralias 'org-CUA-compatible 'org-replace-disputed-keys))
 
@@ -5397,6 +5410,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 (define-key org-exit-edit-mode-map "\C-c'" 'org-edit-src-exit)
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
+(defvar org-edit-src-picture nil)
 
 (define-minor-mode org-exit-edit-mode
   "Minor mode installing a single key binding, \"C-c '\" to exit special edit.")
@@ -6120,7 +6134,7 @@ with something like \"1.\" or \"2)\"."
 	      (buffer-substring (point-at-bol) (match-beginning 3))))
 	;; (term (substring (match-string 3) -1))
 	ind1 (n (1- arg))
-	fmt bob)
+	fmt bobp)
     ;; find where this list begins
     (org-beginning-of-item-list)
     (setq bobp (bobp))
@@ -7110,7 +7124,7 @@ used as the link location instead of reading one interactively."
 
 (defun org-extract-attributes (s)
   "Extract the attributes cookie from a string and set as text property."
-  (let (a attr (start 0))
+  (let (a attr (start 0) key value)
     (save-match-data
       (when (string-match "{{\\([^}]+\\)}}$" s)
 	(setq a (match-string 1 s) s (substring s 0 (match-beginning 0)))
@@ -9517,7 +9531,7 @@ also TODO lines."
 	(re (org-re "^&?\\([-+:]\\)?\\({[^}]+}\\|LEVEL\\([<=>]\\{1,2\\}\\)\\([0-9]+\\)\\|\\([[:alnum:]_]+\\)\\([<>=]\\{1,2\\}\\)\\({[^}]+}\\|\"[^\"]*\"\\|-?[.0-9]+\\(?:[eE][-+]?[0-9]+\\)?\\)\\|[[:alnum:]_@]+\\)"))
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
-	orterms term orlist re-p str-p level-p level-op
+	orterms term orlist re-p str-p level-p level-op time-p
 	prop-p pn pv po cat-p gv)
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
@@ -12591,7 +12605,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 ;;  We only set them when really needed because otherwise the
 ;;  menus don't show the simple keys
 
-(when (or (featurep 'xemacs)   ;; because XEmacs supports multi-device stuff
+(when (or org-use-extra-keys
+	  (featurep 'xemacs)   ;; because XEmacs supports multi-device stuff
 	  (not window-system))
   (org-defkey org-mode-map "\C-c\C-xc"    'org-table-copy-down)
   (org-defkey org-mode-map "\C-c\C-xM"    'org-insert-todo-heading)
