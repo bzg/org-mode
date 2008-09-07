@@ -8747,6 +8747,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
 (defvar org-log-post-message)
 (defvar org-log-note-purpose)
 (defvar org-log-note-how)
+(defvar org-log-note-extra)
 (defun org-auto-repeat-maybe (done-word)
   "Check if the current headline contains a repeated deadline/schedule.
 If yes, set TODO state back to what it was and change the base date
@@ -8985,6 +8986,7 @@ be removed."
 (defvar org-log-note-purpose nil)
 (defvar org-log-note-state nil)
 (defvar org-log-note-how nil)
+(defvar org-log-note-extra nil)
 (defvar org-log-note-window-configuration nil)
 (defvar org-log-note-return-to (make-marker))
 (defvar org-log-post-message nil
@@ -8997,11 +8999,13 @@ This is done in the same way as adding a state change note."
   (interactive)
   (org-add-log-setup 'note nil t nil))
 
-(defun org-add-log-setup (&optional purpose state findpos how)
+(defun org-add-log-setup (&optional purpose state findpos how extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in
-the current entry.  If not, assume that it can be inserted at point."
+the current entry.  If not, assume that it can be inserted at point.
+HOW is an indicator what kind of note should be created.
+EXTRA is additional text that will be inserted into the notes buffer."
   (save-excursion
     (when findpos
       (org-back-to-heading t)
@@ -9016,7 +9020,8 @@ the current entry.  If not, assume that it can be inserted at point."
     (move-marker org-log-note-marker (point))
     (setq org-log-note-purpose purpose
 	  org-log-note-state state
-	  org-log-note-how how)
+	  org-log-note-how how
+	  org-log-note-extra extra)
     (add-hook 'post-command-hook 'org-add-log-note 'append)))
 
 (defun org-skip-over-state-notes ()
@@ -9050,6 +9055,7 @@ the current entry.  If not, assume that it can be inserted at point."
 		     ((eq org-log-note-purpose 'note)
 		      "this entry")
 		     (t (error "This should not happen")))))
+    (if org-log-note-extra (insert org-log-note-extra))
     (org-set-local 'org-finish-function 'org-store-log-note)))
 
 (defvar org-note-abort nil) ; dynamically scoped

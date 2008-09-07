@@ -32,6 +32,10 @@
 
 ** Details
 
+*** The note buffer for clocking out now mentions the task
+    
+    This was a request by Peter Frings.
+
 *** Secondary filtering of agenda views.
 
     You can now easily and interactively filter an existing

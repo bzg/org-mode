@@ -368,7 +368,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	       (delete-char 1)))
 	(move-marker org-clock-marker nil)
 	(when org-log-note-clock-out
-	  (org-add-log-setup 'clock-out))
+	  (org-add-log-setup 'clock-out nil nil nil
+			     (concat "# Task: " (org-get-heading t) "\n\n")))
 	(when org-mode-line-timer
 	  (cancel-timer org-mode-line-timer)
 	  (setq org-mode-line-timer nil))
