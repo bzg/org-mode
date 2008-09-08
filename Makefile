@@ -49,10 +49,7 @@ MAKEINFO = makeinfo
 # How to create the HTML file
 TEXI2HTML = makeinfo --html --number-sections
 
-# How to move the byte compiled files to their destination.  
-MV = mv
-
-# How to copy the lisp files to their distination.
+# How to copy the lisp files and elc files to their distination.
 CP = cp -p
 
 ##----------------------------------------------------------------------

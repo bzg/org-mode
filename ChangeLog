@@ -1,3 +1,7 @@
+2008-09-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* Makefile: Remove the unused MV macro.
+
 2008-06-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* Makefile: Allow prefix to be set on the command line.
