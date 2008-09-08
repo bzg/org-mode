@@ -32,6 +32,8 @@
 
 ** Details
 
+*** Prefix arg 0 to S-RET disabled integer increment during copy
+    This was a request by Chris Randle.
 *** Column view capture tables can have formulas and plotting instructions
     If you attach formulas and plotting instructions to a table
     capturing column view, these extra lines will now survive an

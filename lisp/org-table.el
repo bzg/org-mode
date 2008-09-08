@@ -865,6 +865,7 @@ in order to easily repeat the interval."
 	 (field (org-table-get-field))
 	 (non-empty (string-match "[^ \t]" field))
 	 (beg (org-table-begin))
+	 (orig-n n)
 	 txt)
     (org-table-check-inside-data-field)
     (if non-empty
@@ -881,12 +882,14 @@ in order to easily repeat the interval."
 		  (org-table-goto-column colpos t)
 		  (if (and (looking-at
 			    "|[ \t]*\\([^| \t][^|]*?\\)[ \t]*|")
-			   (= (setq n (1- n)) 0))
+			   (<= (setq n (1- n)) 0))
 		      (throw 'exit (match-string 1))))))))
     (if txt
 	(progn
 	  (if (and org-table-copy-increment
-		   (string-match "^[0-9]+$" txt))
+		   (not (equal orig-n 0))
+		   (string-match "^[0-9]+$" txt)
+		   (< (string-to-number txt) 100000000))
 	      (setq txt (format "%d" (+ (string-to-number txt) 1))))
 	  (insert txt)
 	  (org-move-to-column col)

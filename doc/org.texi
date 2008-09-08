@@ -1541,12 +1541,12 @@ be inserted with @kbd{C-y}.
 @c
 @kindex S-@key{RET}
 @item S-@key{RET}
-When current field is empty, copy from first non-empty field above.
-When not empty, copy current field down to next row and move cursor
-along with it.  Depending on the variable
-@code{org-table-copy-increment}, integer field values will be
-incremented during copy.  This key is also used by CUA mode
-(@pxref{Cooperation}).
+When current field is empty, copy from first non-empty field above.  When not
+empty, copy current field down to next row and move cursor along with it.
+Depending on the variable @code{org-table-copy-increment}, integer field
+values will be incremented during copy.  Integers that are too large will not
+be incremented.  Also, a @code{0} prefix argument temporarily dispables the
+increment.  This key is also used by CUA mode (@pxref{Cooperation}).
 
 @tsubheading{Miscellaneous}
 @kindex C-c `

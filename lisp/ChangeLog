@@ -1,3 +1,9 @@
+2008-09-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-table.el (org-table-copy-down): Avoid overflow during
+	increment.  Use prefix argument 0 to temporarily disable the
+	increment.
+
 2008-09-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-as-html): Do not turn on the major mode
