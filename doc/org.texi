@@ -4100,6 +4100,11 @@ Update all dynamic blocks (@pxref{Dynamic blocks}).  This is useful if
 you have several clock table blocks in a buffer.
 @end table
 
+You can add formulas to the column view table and you may add plotting
+instructions in front of the table - these will survive an update of the
+block.  If there is a @code{#+TBLFM:} after the table, the table will actually
+be recalculated automatically after an update.
+
 @node Property API,  , Column view, Properties and Columns
 @section The Property API
 @cindex properties, API

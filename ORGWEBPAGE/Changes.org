@@ -32,6 +32,13 @@
 
 ** Details
 
+*** Column view capture tables can have formulas and plotting instructions
+    If you attach formulas and plotting instructions to a table
+    capturing column view, these extra lines will now survive an
+    update of the coloumn view capture, and any formulas will be
+    re-applied to the captured table.  This works be keeping any
+    continuous block of comments bfore an after the actual table.
+
 *** The note buffer for clocking out now mentions the task
     
     This was a request by Peter Frings.

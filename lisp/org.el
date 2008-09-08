@@ -13149,7 +13149,7 @@ This command does many different things, depending on context:
      ((save-excursion (beginning-of-line 1) (looking-at "#\\+BEGIN:"))
       ;; Dynamic block
       (beginning-of-line 1)
-      (org-update-dblock))
+      (save-excursion (org-update-dblock)))
      ((save-excursion (beginning-of-line 1) (looking-at "#\\+\\([A-Z]+\\)"))
       (cond
        ((equal (match-string 1) "TBLFM")

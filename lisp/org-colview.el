@@ -1059,8 +1059,9 @@ PARAMS is a property list of parameters:
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
+	(content-lines (org-split-string (plist-get params :content) "\n"))
 	(skip-empty-rows (plist-get params :skip-empty-rows))
-	tbl id idpos nfields tmp)
+	tbl id idpos nfields tmp recalc line)
     (save-excursion
       (save-restriction
 	(when (setq id (plist-get params :id))
@@ -1095,12 +1096,22 @@ PARAMS is a property list of parameters:
 			  tbl))
 	(setq tbl (append tbl (list (cons "/" (make-list nfields "<>"))))))
       (setq pos (point))
+      (when content-lines
+	(while (string-match "^#" (car content-lines))
+	  (insert (pop content-lines) "\n")))
       (insert (org-listtable-to-string tbl))
       (when (plist-get params :width)
 	(insert "\n|" (mapconcat (lambda (x) (format "<%d>" (max 3 x)))
 				 org-columns-current-widths "|")))
-      (goto-char pos)
-      (org-table-align))))
+      (while (setq line (pop content-lines))
+	(when (string-match "^#" line)
+	  (insert "\n" line)
+	  (when (string-match "^#\\+TBLFM" line)
+	    (setq recalc t))))
+      (if recalc
+	  (progn (goto-char pos) (org-table-recalculate 'all))
+	(goto-char pos)
+	(org-table-align)))))
 
 (defun org-listtable-to-string (tbl)
   "Convert a listtable TBL to a string that contains the Org-mode table.
