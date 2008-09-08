@@ -13438,6 +13438,7 @@ See the individual commands for more information."
       (setq org-cycle-open-archived-trees (not org-cycle-open-archived-trees))
       :style toggle :selected org-cycle-open-archived-trees]
      "--"
+     ["Move subtree to archive sibling" org-archive-to-archive-sibling t]
      ["Move Subtree to Archive" org-advertized-archive-subtree t]
  ;    ["Check and Move Children" (org-archive-subtree '(4))
  ;     :active t :keys "C-u C-c C-x C-s"]
