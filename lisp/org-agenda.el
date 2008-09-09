@@ -4085,7 +4085,7 @@ The tag is selected with its fast selection letter, as configured.
 With prefix argument STRIP, remove all lines that do have the tag."
   (interactive "P")
   (let (char a tag (inhibit-read-only t))
-      (message "Select tag [%s], [TAB] to complete, [/] to restore: "
+      (message "Select tag [%s] or no tag [ ], [TAB] to complete, [/] to restore: "
 	       (mapconcat
 		(lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
 		org-tag-alist-for-agenda ""))
@@ -4099,7 +4099,8 @@ With prefix argument STRIP, remove all lines that do have the tag."
 		     "Tag: " org-global-tags-completion-table))))
       (cond
        ((equal char ?/) (org-agenda-filter-by-tag-show-all))
-       ((or (setq a (rassoc char org-tag-alist-for-agenda))
+       ((or (equal char ?\ )
+	    (setq a (rassoc char org-tag-alist-for-agenda))
 	    (and tag (setq a (cons tag nil))))
 	(org-agenda-filter-by-tag-show-all)
 	(setq tag (car a))
@@ -4109,9 +4110,13 @@ With prefix argument STRIP, remove all lines that do have the tag."
 	    (if (get-text-property (point) 'org-marker)
 		(progn
 		  (setq tags (get-text-property (point) 'tags))
-		  (if (or (and (member tag tags) strip)
-			  (and (not (member tag tags)) (not strip)))
-		      (org-agenda-filter-by-tag-hide-line))
+		  (if (not tag)
+		      (if (or (and strip (not tags))
+			      (and (not strip) tags))
+			  (org-agenda-filter-by-tag-hide-line))
+		    (if (or (and (member tag tags) strip)
+			    (and (not (member tag tags)) (not strip)))
+			(org-agenda-filter-by-tag-hide-line)))
 		  (beginning-of-line 2))
 	      (beginning-of-line 2)))))
        (t (error "Invalid tag selection character %c" char)))))
