@@ -1693,16 +1693,17 @@ When nil, only the minibuffer will be available."
       'org-read-date-popup-calendar))
 
 (defcustom org-extend-today-until 0
-  "The hour when your day really ends.
+  "The hour when your day really ends.  Must be an integer.
 This has influence for the following applications:
 - When switching the agenda to \"today\".  It it is still earlier than
   the time given here, the day recognized as TODAY is actually yesterday.
 - When a date is read from the user and it is still before the time given
   here, the current date and time will be assumed to be yesterday, 23:59.
+  Also, timestamps inserted in remember templates follow this rule.
 
-FIXME:
-IMPORTANT:  This is still a very experimental feature, it may disappear
-again or it may be extended to mean more things."
+IMPORTANT:  This is a feature whose implementation is and likely will
+remain incomplete.  Really, it is only here because past midnight seems to
+ne the favorite working time of John Wiegley :-)"
   :group 'org-time
   :type 'number)
 
@@ -14368,6 +14369,26 @@ beyond the end of the headline."
    (t (kill-region (point) (point-at-eol)))))
 
 (define-key org-mode-map "\C-k" 'org-kill-line)
+
+(defun org-yank (&optional arg)
+  (interactive "*P")
+  (let ((fold (get-text-property 0 :org-folded-kill
+				 (current-kill (cond ((listp arg) 0)
+						     ((eq arg '-) -2)
+						     (t (1- arg))))))
+	(fold t)
+	(yank-excluded-properties
+	 (cons :org-folded-kill yank-excluded-properties))
+	(pos (point)) p1)
+    (call-interactively 'yank)
+    (setq p1 (point))
+    (goto-char pos)
+    (when (and (bolp) (looking-at outline-regexp) fold)
+      (save-restriction
+	(narrow-to-region pos p1)
+	(hide-subtree)
+	(org-cycle-show-empty-lines 'folded))
+      (goto-char p1))))
 
 (defun org-invisible-p ()
   "Check if point is at a character currently not visible."
