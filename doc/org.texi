@@ -4083,8 +4083,8 @@ column view is @code{ITEM}.
 The following commands insert or update the dynamic block:
 
 @table @kbd
-@kindex C-c C-x r
-@item C-c C-x r
+@kindex C-c C-x i
+@item C-c C-x i
 Insert a dynamic block capturing a column view.  You will be prompted
 for the scope or id of the view.
 @kindex C-c C-c

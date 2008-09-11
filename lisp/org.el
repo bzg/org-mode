@@ -12722,7 +12722,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
-(org-defkey org-mode-map "\C-c\C-xr"    'org-insert-columns-dblock)
+(org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
 
