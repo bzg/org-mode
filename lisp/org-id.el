@@ -29,12 +29,15 @@
 ;; are provided that create and retrieve such identifiers, and that find
 ;; entries based on the identifier.
 
-;; Identifiers consist of a prefix (default "Org") and a compact encoding
-;; of the creation time of the ID, with microsecond accuracy.  This virtually
+;; Identifiers consist of a prefix (default "Org" given by the variable
+;; `org-id-prefix') and a unique part that can be created by a number
+;; of different methods, see the variable `org-id-method'.
+;; Org has a builtin method that uses a compact encoding of the creation
+;; time of the ID, with microsecond accuracy.  This virtually
 ;; guarantees globally unique identifiers, even if several people are
 ;; creating ID's at the same time in files that will eventually be used
-;; together.  Even higher security can be achieved by using different
-;; prefix values for each collaborator or file.
+;; together.  As an exernal method `uuidgen' is supported, if installed
+;; on the system.
 ;;
 ;; This file defines the following API:
 ;;
@@ -75,6 +78,24 @@
   :tag "Org ID"
   :group 'org)
 
+(defcustom org-id-method 'org
+  "The method that should be used to create new ID's.
+
+An ID will consist of the prefix specified in `org-id-prefix', and a unique
+part created by the method this variable specifies.
+
+Allowed values are:
+
+org        Org's own internal method, using an encoding of the current time,
+           and the current domain of the computer.  This method will
+           honor the variable `org-id-include-domain'.
+
+uuidgen    Call the external command uuidgen."
+  :group 'org-id
+  :type '(choice
+	  (const :tag "Org's internal method" org)
+	  (const :tag "external: uuidgen" uuidgen)))
+
 (defcustom org-id-prefix "Org"
   "The prefix for IDs.
 
@@ -89,7 +110,9 @@ to have no space characters in them."
 (defcustom org-id-include-domain t
   "Non-nil means, add the domain name to new IDs.
 This ensures global uniqueness of ID's, and is also suggested by
-RFC 2445 in combination with RFC 822."
+RFC 2445 in combination with RFC 822.  This is only relevant if
+`org-id-method' is `org'.  When uuidgen is used, the domain will never
+be added."
   :group 'org-id
   :type 'boolean)
 
@@ -213,7 +236,7 @@ With optional argument MARKERP, return the position as a new marker."
 
 An ID consists of two parts separated by a colon:
 - a prefix
-- an encoding of the current time to micro-second accuracy
+- a unique part that will be created according to `org-id-method'.
 
 PREFIX can specify the prefix, the default is given by the variable
 `org-id-prefix'.  However, if PREFIX is the symbol `none', don't use any
@@ -221,16 +244,22 @@ prefix even if `org-id-prefix' specifies one.
 
 So a typical ID could look like \"Org:4nd91V40HI\"."
   (let* ((prefix (if (eq prefix 'none)
-		     nil
-		   (or prefix org-id-prefix)))
-	 (etime (org-id-time-to-b62))
-	 (postfix (if org-id-include-domain
-		      (progn
-			(require 'message)
-			(concat "@" (message-make-fqdn))))))
-    (if prefix
-	(concat prefix ":" etime postfix)
-      (concat etime postfix))))
+		     ""
+		   (concat (or prefix org-id-prefix) ":")))
+	 unique)
+    (if (equal prefix ":") (setq prefix ""))
+    (cond
+     ((eq org-id-method 'uuidgen)
+      (setq unique (substring (shell-command-to-string "uuidgen") 1 -1)))
+     ((eq org-id-method 'org)
+      (let* ((etime (org-id-time-to-b62))
+	     (postfix (if org-id-include-domain
+			  (progn
+			    (require 'message)
+			    (concat "@" (message-make-fqdn))))))
+	(setq unique (concat etime postfix))))
+     (t (error "Invalid `org-id-method'")))
+    (concat prefix unique)))
 
 (defun org-id-int-to-b62-one-digit (i)
   "Turn an integer between 0 and 61 into a single character 0..9, A..Z, a..z."

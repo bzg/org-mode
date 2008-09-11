@@ -1,3 +1,7 @@
+2008-09-11  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-id.el (org-id-new): New option.
+
 2008-09-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (org-table-copy-down): Avoid overflow during
