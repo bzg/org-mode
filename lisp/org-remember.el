@@ -317,6 +317,11 @@ to be run from that hook to function properly."
   (if org-remember-templates
       (let* ((entry (org-select-remember-template use-char))
 	     (ct (or org-overriding-default-time (org-current-time)))
+	     (dct (decode-time ct))
+	     (ct1
+	      (if (< (nth 2 dct) org-extend-today-until)
+		  (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
+		ct))
 	     (tpl (car entry))
 	     (plist-p (if org-store-link-plist t nil))
 	     (file (if (and (nth 1 entry) 
@@ -350,6 +355,7 @@ to be run from that hook to function properly."
 		    v-a))
 	     (v-n user-full-name)
 	     (org-startup-folded nil)
+	     (org-inhibit-startup t)
 	     org-time-was-given org-end-time-was-given x
 	     prompt completions char time pos default histvar)
 
@@ -495,7 +501,7 @@ to be run from that hook to function properly."
 	(if (re-search-forward "%\\?" nil t)
 	    (replace-match "")
 	  (and (re-search-forward "^[^#\n]" nil t) (backward-char 1))))
-    (org-mode)
+    (let ((org-inhibit-startup t)) (org-mode))
     (org-set-local 'org-finish-function 'org-remember-finalize))
   (when (save-excursion
 	  (goto-char (point-min))
