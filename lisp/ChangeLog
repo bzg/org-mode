@@ -2,6 +2,7 @@
 
 	* org.el (org-indent-line-function): Do not indent in regions that
 	are external source code.
+	(org-yank-and-fold-if-subtree): New function.
 
 	* org-agenda.el (org-agenda-todayp): New function.
 	(org-agenda-get-deadlines, org-agenda-get-scheduled): Use

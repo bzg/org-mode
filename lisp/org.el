@@ -14392,27 +14392,23 @@ beyond the end of the headline."
     (org-set-tags nil t))
    (t (kill-region (point) (point-at-eol)))))
 
+
 (define-key org-mode-map "\C-k" 'org-kill-line)
 
-(defun org-yank (&optional arg)
-  (interactive "*P")
-  (let ((fold (get-text-property 0 :org-folded-kill
-				 (current-kill (cond ((listp arg) 0)
-						     ((eq arg '-) -2)
-						     (t (1- arg))))))
-	(fold t)
-	(yank-excluded-properties
-	 (cons :org-folded-kill yank-excluded-properties))
-	(pos (point)) p1)
+(defun org-yank-and-fold-if-subtree ()
+  "Yank, and if the yanked text is a single subtree, fold it."
+  (interactive)
+  (let ((pos (point)) p1)
     (call-interactively 'yank)
     (setq p1 (point))
     (goto-char pos)
-    (when (and (bolp) (looking-at outline-regexp) fold)
-      (save-restriction
-	(narrow-to-region pos p1)
-	(hide-subtree)
-	(org-cycle-show-empty-lines 'folded))
-      (goto-char p1))))
+    (when (and (bolp)
+	       (looking-at outline-regexp)
+	       (org-kill-is-subtree-p))
+      (hide-subtree)
+      (org-cycle-show-empty-lines 'folded))
+    (goto-char p1)
+    (skip-chars-forward " \t\n\r")))
 
 (defun org-invisible-p ()
   "Check if point is at a character currently not visible."
@@ -14775,3 +14771,4 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
+
