@@ -1,5 +1,8 @@
 2008-09-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-indent-line-function): Do not indent in regions that
+	are external source code.
+
 	* org-agenda.el (org-agenda-todayp): New function.
 	(org-agenda-get-deadlines, org-agenda-get-scheduled): Use
 	`org-agenda-todayp'.
