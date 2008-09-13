@@ -3379,7 +3379,7 @@ the documentation of `org-diary'."
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-deadline-time-regexp)
-	 (todayp (equal date (calendar-current-date))) ; DATE bound by calendar
+	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category tags
 	 ee txt head face s upcomingp donep timestr)
@@ -3468,7 +3468,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-scheduled-time-regexp)
-	 (todayp (equal date (calendar-current-date))) ; DATE bound by calendar
+	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff pos pos1 category tags
 	 ee txt head pastschedp donep face timestr s)
@@ -5365,6 +5365,17 @@ belonging to the \"Work\" category."
     (if (eq cnt 0)
 	(message "No event to add")
       (message "Added %d event%s for today" cnt (if (> cnt 1) "s" "")))))
+
+(defun org-agenda-todayp (date)
+  "Does DATE mean today, when considering `org-extend-today-until'?"
+  (let (today h)
+    (if (listp date) (setq date (calendar-absolute-from-gregorian date)))
+    (setq today (calendar-absolute-from-gregorian (calendar-current-date)))
+    (setq h (nth 2 (decode-time (current-time))))
+    (or (and (>= h org-extend-today-until)
+	     (= date today))
+	(and (< h org-extend-today-until)
+	     (= date (1- today))))))
 
 (provide 'org-agenda)
 

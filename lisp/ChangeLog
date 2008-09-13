@@ -1,5 +1,9 @@
 2008-09-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-todayp): New function.
+	(org-agenda-get-deadlines, org-agenda-get-scheduled): Use
+	`org-agenda-todayp'.
+
 	* org.el (org-insert-heading-respect-content)
 	(org-insert-todo-heading-respect-content): New commands.
 	(org-insert-heading-respect-content): New option.
