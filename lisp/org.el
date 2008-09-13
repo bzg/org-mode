@@ -9000,7 +9000,7 @@ This is done in the same way as adding a state change note."
   (interactive)
   (org-add-log-setup 'note nil t nil))
 
-(defun org-add-log-setup (&optional purpose state findpos how extra)
+(defun org-add-log-setup (&optional purpose state findpos how &optional extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in

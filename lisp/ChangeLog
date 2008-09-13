@@ -1,3 +1,8 @@
+2008-09-13  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-find-position): Make sure the note after
+	the clock line gets moved into the new clock drawer.
+
 2008-09-11  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-id.el (org-id-new): New option.
