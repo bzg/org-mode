@@ -890,11 +890,16 @@ of a headline), then a headline like the current one will be inserted
 after the end of the subtree.
 @kindex C-@key{RET}
 @item C-@key{RET}
-Insert a new heading after the current subtree, same level as the
-current headline.  This command works from anywhere in the entry.
+Just like @kbd{M-@key{RET}, but if the heading is inserted after the current,
+insert it actually after the entire subtree.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert new TODO entry with same level as current heading.
+@kindex C-S-@key{RET}
+@item C-S-@key{RET}
+Insert new TODO entry with same level as current heading.  Like
+@kbd{C-@key{RET}}, the new headline will be inserted after the current
+subtree.
 @kindex M-@key{left}
 @item M-@key{left}
 Promote current heading by one level.

@@ -659,6 +659,15 @@ default   the value to be used for all contexts not explicitly
 		   (boolean)))))
 
 
+(defcustom org-insert-heading-respect-content nil
+  "Non-nil means, insert new headings after the current subtree.
+When nil, the new heading is created directly after the current line.
+The commands \\[org-insert-heading-respect-content] and
+\\[org-insert-todo-heading-respect-content] turn this variable on
+for the duration of the command."
+  :group 'org-structure
+  :type 'boolean)
+
 (defcustom org-blank-before-new-entry '((heading . nil)
 					(plain-list-item . nil))
   "Should `org-insert-heading' leave a blank line before new heading/item?
@@ -4599,24 +4608,28 @@ but create the new hedline after the current line."
 	  (let ((split
 		 (org-get-alist-option org-M-RET-may-split-line 'headline))
 		tags pos)
-	    (if (org-on-heading-p)
-		(progn
-		  (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
-		  (setq tags (and (match-end 2) (match-string 2)))
-		  (and (match-end 1)
-		       (delete-region (match-beginning 1) (match-end 1)))
-		  (setq pos (point-at-bol))
-		  (or split (end-of-line 1))
-		  (delete-horizontal-space)
-		  (newline (if blank 2 1))
-		  (when tags
-		    (save-excursion
-		      (goto-char pos)
-		      (end-of-line 1)
-		      (insert " " tags)
-		      (org-set-tags nil 'align))))
+	    (cond
+	     (org-insert-heading-respect-content
+	      (org-end-of-subtree nil t)
+	      (open-line 1))
+	     ((org-on-heading-p)
+	      (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
+	      (setq tags (and (match-end 2) (match-string 2)))
+	      (and (match-end 1)
+		   (delete-region (match-beginning 1) (match-end 1)))
+	      (setq pos (point-at-bol))
 	      (or split (end-of-line 1))
-	      (newline (if blank 2 1))))))
+	      (delete-horizontal-space)
+	      (newline (if blank 2 1))
+	      (when tags
+		(save-excursion
+		  (goto-char pos)
+		  (end-of-line 1)
+		  (insert " " tags)
+		  (org-set-tags nil 'align))))
+	     (t
+	      (or split (end-of-line 1))
+	      (newline (if blank 2 1)))))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
@@ -4640,6 +4653,16 @@ but create the new hedline after the current line."
   (org-insert-heading)
   (org-move-subtree-down)
   (end-of-line 1))
+
+(defun org-insert-heading-respect-content ()
+  (interactive)
+  (let ((org-insert-heading-respect-content t))
+    (call-interactively 'org-insert-heading)))
+
+(defun org-insert-todo-heading-respect-content ()
+  (interactive)
+  (let ((org-insert-heading-respect-content t))
+    (call-interactively 'org-insert-todo-todo-heading)))
 
 (defun org-insert-todo-heading (arg)
   "Insert a new heading with the same level and TODO state as current heading.
@@ -12662,7 +12685,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\\"   'org-tags-sparse-tree) ; Minor-mode res.
 (org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
 (org-defkey org-mode-map "\M-\C-m"  'org-insert-heading)
-(org-defkey org-mode-map [(control return)] 'org-insert-heading-after-current)
+(org-defkey org-mode-map [(control return)] 'org-insert-heading-respect-content)
+(org-defkey org-mode-map [(shift control return)] 'org-insert-todo-heading-respect-content)
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
 (org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
 (org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)

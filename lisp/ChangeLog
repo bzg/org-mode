@@ -1,5 +1,10 @@
 2008-09-13  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-insert-heading-respect-content)
+	(org-insert-todo-heading-respect-content): New commands.
+	(org-insert-heading-respect-content): New option.
+	(org-insert-heading): Respect `org-insert-heading-respect-content'.
+
 	* org-clock.el (org-clock-find-position): Make sure the note after
 	the clock line gets moved into the new clock drawer.
 
