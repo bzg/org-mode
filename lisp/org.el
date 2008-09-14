@@ -632,6 +632,14 @@ When t, the following will happen while the cursor is in the headline:
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-yank-folded-subtrees t
+  "Non-nil means, when yanking subtrees, fold them.
+If the kill is a single subtree, or a sequence of subtrees, i.e. if
+it starts with a heading and all other headings in it are either children
+or siblings, then fold all the subtrees."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-M-RET-may-split-line '((default . t))
   "Non-nil means, M-RET will split the line at the cursor position.
 When nil, it will go to the end of the line before making a
@@ -5131,7 +5139,7 @@ If optional TXT is given, check this string instead of the current kill."
 					 kill)
 			   (- (match-end 2) (match-beginning 2) 1)))
 	 (re (concat "^" org-outline-regexp))
-	 (start (1+ (match-beginning 2))))
+	 (start (1+ (or (match-beginning 2) -1))))
     (if (not start-level)
 	(progn
 	  nil)  ;; does not even start with a heading
@@ -14395,20 +14403,28 @@ beyond the end of the headline."
 
 (define-key org-mode-map "\C-k" 'org-kill-line)
 
-(defun org-yank-and-fold-if-subtree ()
-  "Yank, and if the yanked text is a single subtree, fold it."
+(defun org-yank ()
+  "Yank, and if the yanked text is a single subtree, fold it.
+In fact, if the yanked text is a sequence of subtrees, fold all of them."
   (interactive)
-  (let ((pos (point)) p1)
-    (call-interactively 'yank)
-    (setq p1 (point))
-    (goto-char pos)
-    (when (and (bolp)
-	       (looking-at outline-regexp)
-	       (org-kill-is-subtree-p))
-      (hide-subtree)
-      (org-cycle-show-empty-lines 'folded))
-    (goto-char p1)
-    (skip-chars-forward " \t\n\r")))
+  (if org-yank-folded-subtrees
+      (let ((beg (point)) end)
+	(call-interactively 'yank)
+	(setq end (point))
+	(goto-char beg)
+	(when (and (bolp)
+		   (org-kill-is-subtree-p))
+	  (or (looking-at outline-regexp)
+	      (re-search-forward (concat "^" outline-regexp) end t))
+	  (while (and (< (point) end) (looking-at outline-regexp))
+	    (hide-subtree)
+	    (org-cycle-show-empty-lines 'folded)
+	    (outline-forward-same-level 1)))
+	(goto-char end)
+	(skip-chars-forward " \t\n\r"))
+    (call-interactively 'yank)))
+
+(define-key org-mode-map "\C-y" 'org-yank)
 
 (defun org-invisible-p ()
   "Check if point is at a character currently not visible."

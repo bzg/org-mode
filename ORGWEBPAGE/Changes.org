@@ -35,6 +35,21 @@
     as a tty key replacement.
 ** Details
 
+*** Yanking inserts folded subtrees
+
+    If the kill is a subtree or a sequence of subtrees, yanking
+    them with =C-y= will leave all the subtrees in a folded
+    state.  This basically means, that kill and yank are now
+    much more useful in moving stuff around in your outline.  If
+    you do not like this, customize the variable
+    =org-yank-folded-subtrees=.
+
+    Right now, I am only binding =C-y= to this new function,
+    should I modify all bindings of yank?  Do we need to amend
+    =yank-pop= as well?
+
+    This feature was requested by John Wiegley.
+
 *** Prefix arg 0 to S-RET disabled integer increment during copy
     This was a request by Chris Randle.
 *** Column view capture tables can have formulas and plotting instructions
