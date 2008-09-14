@@ -9,7 +9,7 @@
 
 Here it the video of the [[http://research.google.com/video.html][Google Tech Talk]] about [[http://orgmode.org][Org-mode]] that I
 (Carsten Dominik) gave on July 15th, 2008 on the Google campus in
-Mountain View, California.  Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://www.linkedin.com/in/andrewhyatt][Andrew Hyatt]] for
+Mountain View, California.  Thanks to [[http://emacspeak.sourceforge.net/raman/][T.V. Raman]] and [[http://technical-dresese.blogspot.com/][Andrew Hyatt]] for
 being my hosts during my stay.
 
 If you'd like to see the video in higher quality, you can do so at the
