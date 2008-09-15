@@ -430,7 +430,7 @@ to be run from that hook to function properly."
 		 (replace-match x t t))))
 
 	;; Turn on org-mode in the remember buffer, set local variables
-	(org-mode)
+	(let ((org-inhibit-startup t)) (org-mode))
 	(org-set-local 'org-finish-function 'org-remember-finalize)
 	(if (and file (string-match "\\S-" file) (not (file-directory-p file)))
 	    (org-set-local 'org-default-notes-file file))
