@@ -280,6 +280,7 @@ Embedded LaTeX
 Exporting
 
 * Markup rules::                Which structures are recognized?
+* Selective export::            Using tags to select and exclude trees
 * Export options::              Per-file export settings
 * The export dispatcher::       How to access exporter commands
 * ASCII export::                Exporting to plain ASCII
@@ -4106,8 +4107,8 @@ you have several clock table blocks in a buffer.
 
 You can add formulas to the column view table and you may add plotting
 instructions in front of the table - these will survive an update of the
-block.  If there is a @code{#+TBLFM:} after the table, the table will actually
-be recalculated automatically after an update.
+block.  If there is a @code{#+TBLFM:} after the table, the table will
+actually be recalculated automatically after an update.
 
 @node Property API,  , Column view, Properties and Columns
 @section The Property API
@@ -6743,6 +6744,7 @@ Org mode only supports export, not import of these different formats.
 
 @menu
 * Markup rules::                Which structures are recognized?
+* Selective export::            Using tags to select and exclude trees
 * Export options::              Per-file export settings
 * The export dispatcher::       How to access exporter commands
 * ASCII export::                Exporting to plain ASCII
@@ -6752,7 +6754,7 @@ Org mode only supports export, not import of these different formats.
 * iCalendar export::            Exporting in iCalendar format
 @end menu
 
-@node Markup rules, Export options, Exporting, Exporting
+@node Markup rules, Selective export, Exporting, Exporting
 @section Markup rules
 
 When exporting Org mode documents,  the exporter tries to reflect the
@@ -7076,7 +7078,28 @@ never be exported.  Also entire subtrees starting with the word
 Toggle the COMMENT keyword at the beginning of an entry.
 @end table
 
-@node Export options, The export dispatcher, Markup rules, Exporting
+@node Selective export, Export options, Markup rules, Exporting
+@section Selective export
+@cindex export, selective by tags
+
+You may use tags to select the parts of a document that should be exported,
+or to exclude parts from export.  This behavior is governed by two variables:
+@code{org-export-select-tags} and @code{org-export-exclude-tags}.
+
+Org first checks if any of the @emph{select} tags is present in the buffer.
+If yes, all trees that do not carry one of these tags will be excluded.  If a
+selected tree is a subtree, the heading hierarchy above it will also be
+selected for export, but not the text below those headings.
+
+@noindent
+If none of the select tags is found, the whole buffer will be selected for
+export.
+
+@noindent
+Finally, all subtrees that are marked by any of the @emph{exclude} tags will
+be removed from the export buffer.
+
+@node Export options, The export dispatcher, Selective export, Exporting
 @section Export options
 @cindex options, for export
 
@@ -7103,6 +7126,8 @@ Insert template with export options, see example below.
 @cindex #+OPTIONS:
 @cindex #+LINK_UP:
 @cindex #+LINK_HOME:
+@cindex #+EXPORT_SELECT_TAGS:
+@cindex #+EXPORT_EXCLUDE_TAGS:
 @example
 #+TITLE:     the title to be shown (default is the buffer name)
 #+AUTHOR:    the author (default taken from @code{user-full-name})
@@ -7114,6 +7139,8 @@ Insert template with export options, see example below.
 #+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+LINK_UP:   the ``up'' link of an exported page
 #+LINK_HOME: the ``home'' link of an exported page
+#+EXPORT_SELECT_TAGS:   Tags that select a tree for export
+#+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
 @end example
 
 @noindent
@@ -7845,6 +7872,8 @@ respective variable for details.
 @item @code{:auto-postamble}        @tab @code{org-export-html-auto-postamble}
 @item @code{:author}                @tab @code{user-full-name}
 @item @code{:email}                 @tab @code{user-mail-address}
+@item @code{:select-tags}           @tab @code{org-export-select-tags}
+@item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
 @end multitable
 
 If you use several email addresses, separate them by a semi-column.
@@ -8689,6 +8718,8 @@ distribution, others are available somewhere on the web.
       to publish the same file using either org-publish or Muse.
 @item @file{org-panel.el} by @i{Lennard Borgman}
       Simplified and display-aided access to some Org commands.
+@c @item @file{org-plot.el} by @i{Eric Schulte}
+@c      Plotting Org tables with Gnuplot.
 @item @file{org-registry.el} by @i{Bastien Guerry}
       A registry for Org links, to find out from where links point to a given
       file or location.
@@ -9608,6 +9639,8 @@ of feedback, developed and applied standards to the Org documentation.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
+@item
+@i{Eric Schulte} wrote @file{org-plot.el}.
 @item
 Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.

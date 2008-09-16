@@ -793,7 +793,9 @@ or if they are only using it locally."
     (:auto-preamble        . org-export-html-auto-preamble)
     (:auto-postamble       . org-export-html-auto-postamble)
     (:author               . user-full-name)
-    (:email                . user-mail-address)))
+    (:email                . user-mail-address)
+    (:select-tags          . org-export-select-tags)
+    (:exclude-tags         . org-export-exclude-tags)))
 
 (defun org-default-export-plist ()
   "Return the property list with default settings for the export variables."
@@ -829,7 +831,8 @@ modified) list.")
       (let ((re (org-make-options-regexp
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
-		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE")
+		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
+		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options js-up js-main js-css js-opt a pr
 	    ext-setup-or-nil setup-contents (start 0))
@@ -858,6 +861,10 @@ modified) list.")
 	    (setq p (plist-put p :link-up val)))
 	   ((string-equal key "LINK_HOME")
 	    (setq p (plist-put p :link-home val)))
+	   ((string-equal key "EXPORT_SELECT_TAGS")
+	    (setq p (plist-put p :select-tags (org-split-string val))))
+	   ((string-equal key "EXPORT_EXCLUDE_TAGS")
+	    (setq p (plist-put p :exclude-tags (org-split-string val))))
 	   ((equal key "SETUPFILE")
 	    (setq setup-contents (org-file-contents
 				  (expand-file-name
@@ -1357,6 +1364,10 @@ on this string to produce the exported version."
       ;; Handle include files
       (org-export-handle-include-files)
       
+      ;; Get rid of excluded trees
+      (org-export-handle-export-tags (plist-get parameters :select-tags)
+				     (plist-get parameters :exclude-tags))
+
       ;; Handle source code snippets
       (org-export-replace-src-segments)
       
@@ -2113,6 +2124,8 @@ underlined headlines.  The default is 3."
 		  (plist-get opt-plist :skip-before-1st-heading)
 		  :drawers (plist-get opt-plist :drawers)
 		  :verbatim-multiline t
+		  :select-tags (plist-get opt-plist :select-tags)
+		  :exclude-tags (plist-get opt-plist :exclude-tags)
 		  :archived-trees
 		  (plist-get opt-plist :archived-trees)
 		  :add-text (plist-get opt-plist :text))
@@ -2474,6 +2487,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+LANGUAGE:  %s
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s TeX:%s LaTeX:%s skip:%s d:%s tags:%s
 %s
+#+EXPORT_SELECT_TAGS: %s
+#+EXPORT_EXCUDE_TAGS: %s
 #+LINK_UP:   %s
 #+LINK_HOME: %s
 #+CATEGORY:  %s
@@ -2507,6 +2522,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-export-with-drawers
    org-export-with-tags
    (if (featurep 'org-jsinfo) (org-infojs-options-inbuffer-template) "")
+   (mapconcat 'identity org-export-select-tags " ")
+   (mapconcat 'identity org-export-exclude-tags " ")
    org-export-html-link-up
    org-export-html-link-home
    (file-name-nondirectory buffer-file-name)
@@ -2777,6 +2794,8 @@ PUB-DIR is set, use this as the publishing directory."
 	    :drawers (plist-get opt-plist :drawers)
 	    :archived-trees
 	    (plist-get opt-plist :archived-trees)
+	    :select-tags (plist-get opt-plist :select-tags)
+	    :exclude-tags (plist-get opt-plist :exclude-tags)
 	    :add-text
 	    (plist-get opt-plist :text)
 	    :LaTeX-fragments
@@ -3316,7 +3335,7 @@ lang=\"%s\" xml:lang=\"%s\">
       (org-html-level-start 1 nil umax
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
-      ;; the </div> to lose the last text-... div.
+      ;; the </div> to close the last text-... div.
       (insert "</div>\n")
 
       (unless body-only
@@ -4439,6 +4458,74 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
       )))
 
 (provide 'org-exp)
+
+
+(defcustom org-export-select-tags '("export")
+  "Tags that select a tree for export.
+If any such tag is found in a buffer, all trees that do not carry one
+of these tags will be deleted before export.
+Inside trees that are selected like this, you can still deselect a
+subtree by tagging it with one of the `org-export-excude-tags'."
+  :group 'org-export
+  :type '(repeat (string :tag "Tag")))
+
+(defcustom org-export-exclude-tags '("noexport")
+  "Tags that exclude a tree from export.
+All trees carrying any of these tags will be excluded from export.
+This is without contition, so even subtrees inside that carry one of the
+`org-export-select-tags' will be removed."
+  :group 'org-export
+  :type '(repeat (string :tag "Tag")))
+
+(defun org-export-handle-export-tags (select-tags exclude-tags)
+  (interactive)
+  (debug)
+  (remove-text-properties (point-min) (point-max) '(:org-delete t))
+  (let* ((re-sel (concat ":\\(" (mapconcat 'regexp-quote
+					   select-tags "\\|")
+			 "\\):"))
+	 (re-excl (concat ":\\(" (mapconcat 'regexp-quote
+					   exclude-tags "\\|")
+			"\\):"))
+	 beg end)
+    (goto-char (point-min))
+    (when (and select-tags
+	       (re-search-forward
+		(concat "^\\*+[ \t].*" re-sel "[^ \t\n]*[ \t]*$") nil t))
+      ;; At least one tree is marked for export, this means
+      ;; all the unmarked stuff needs to go.
+      ;; Dig out the trees that should be exported
+      (goto-char (point-min))
+      (outline-next-heading)
+      (setq beg (point))
+      (put-text-property beg (point-max) :org-delete t)
+      (while (re-search-forward re-sel nil t)
+	(when (org-on-heading-p)
+	  (org-back-to-heading)
+	  (remove-text-properties
+	   (max (1- (point)) (point-min))
+	   (setq cont (save-excursion (org-end-of-subtree t t)))
+	   '(:org-delete t))
+	  (while (and (org-up-heading-safe)
+		      (get-text-property (point) :org-delete))
+	    (remove-text-properties (max (1- (point)) (point-min))
+				    (point-at-eol) '(:org-delete t)))
+	  (goto-char cont))))
+    ;; Remove the trees explicitly marked for noexport
+    (when exclude-tags
+      (goto-char (point-min))
+      (while (re-search-forward re-excl nil t)
+	(when (org-at-heading-p)
+	  (org-back-to-heading t)
+	  (setq beg (point))
+	  (org-end-of-subtree t)
+	  (delete-region beg (point)))))
+    ;; Remove everything that is now still marked for deletion
+    (goto-char (point-min))
+    (while (setq beg (text-property-any (point-min) (point-max) :org-delete t))
+      (setq end (or (next-single-property-change beg :org-delete)
+		    (point-max)))
+      (delete-region beg end))))
 
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 

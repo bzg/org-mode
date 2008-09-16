@@ -18,8 +18,9 @@
 ** Incompatible changes
 
 *** Prefix interpretation when storing remember notes
+
     The prefix argument to the `C-c C-c' command that finishes a
-    remember process is not interpetred differently:
+    remember process is now interpreted differently:
 
     :C-c C-c       Store the note to predefined file and headline
     :C-1 C-c C-c   Select the storage location interactively
@@ -31,9 +32,34 @@
 
 
 *** Capturing column view is now on `C-c C-x i'
+
     The reason for this change was that `C-c C-x r' is also used
     as a tty key replacement.
+
 ** Details
+
+*** Tags can be used to select the export part of a document
+
+    You may now use tags to select parts of a document for
+    inclusion into the export, and to exclude other parts.  This
+    behavior is governed by two new variables:
+    =org-export-select-tags= and =org-export-exclude-tags=.
+    These default to =("export")= and =("noexport")=, but can be
+    changed, even to include a list of several tags.
+
+    Org first checks if any of the /select/ tags is present in
+    the buffer.  All trees that do not carry one of these tags
+    will be excluded.  If a selected tree is a subtree, the
+    heading hierarchy above it will also be selected for export,
+    but not the text below those headings.  If none of the select
+    tags is found, the whole buffer will be selected for export.
+    Finally, all subtrees that are marked by any of the /exclude/
+    tags will be removed from the export buffer.
+
+    You may set these tags with inbuffer-options
+    =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
+
+    This useful feature was a request by Richard G Rigley.
 
 *** Yanking inserts folded subtrees
 
@@ -50,14 +76,18 @@
 
     This feature was requested by John Wiegley.
 
-*** Prefix arg 0 to S-RET disabled integer increment during copy
+*** Prefix arg 0 to S-RET disables integer increment during copy
+
     This was a request by Chris Randle.
-*** Column view capture tables can have formulas and plotting instructions
+
+*** Column view capture tables can have formulas, plotting info
+
     If you attach formulas and plotting instructions to a table
     capturing column view, these extra lines will now survive an
-    update of the coloumn view capture, and any formulas will be
+    update of the column view capture, and any formulas will be
     re-applied to the captured table.  This works be keeping any
-    continuous block of comments bfore an after the actual table.
+    continuous block of comments before and after the actual
+    table.
 
 *** The note buffer for clocking out now mentions the task
     
@@ -70,7 +100,7 @@
     with the =/= key in the agenda.  You will be prompted for a
     tag selection key, and all entries that do not contain or
     inherit the corresponding tag will be hidden.  With a prefix
-    argument, the complementary filter is applied: entries that
+    argument, the opposite filter is applied: entries that
     do have the tag will be hidden.
 
     This operation only hides lines in the agenda buffer.  It
@@ -78,8 +108,8 @@
 
     If you press TAB at the tag selection prompt, you will be
     switched to a completion interface to select a tag.  This is
-    useful in particular when you want to select a tag that does
-    not have a direct access character.
+    useful when you want to select a tag that does not have a
+    direct access character.
 
     A double =/ /= will restore the original agenda view by
     unhiding any hidden lines.
@@ -108,9 +138,13 @@
     Using the command in an empty line will create a new
     fixed-width region.
 
+    This exciting new feature arose from a discussion involving
+    Scott Otterson, Sebastian Rose and Will Henney.
+
 *** New interpretation of prefix arguments when exiting remember
+
     The prefix argument to the `C-c C-c' command that finishes a
-    remember process is not interpetred differently:
+    remember process is now interpreted differently:
 
     :C-c C-c       Store the note to predefined file and headline
     :C-1 C-c C-c   Select the storage location interactively
@@ -121,18 +155,25 @@
     This was requested by John Wiegley.
 
 *** Sorting entries now ignores the TODO keyword and the priority
+
     Numerical and alphanumerical sorting now skips any TODO
     keyword or priority cookie when constructing the comparison
     string.  This was a request by Wanrong Lin.
 
-*** New face =org-scheduled= for entries that at some time in the future.
+*** New face =org-scheduled= for entries scheduled in the future.
+
     This was a request by Richard G Rigley.
+
 *** Remember templates for gnus links can now use the :to escape.
+
     Thanks to Tommy Lindgren for a patch to this effect.
+
 *** The file specification in a remember template may now be a function
+
     Thanks to Gregory Sullivan for a patch to this effect.
 
 *** It is now possible to define filters for column view
+
     The filter can modify the value that will be displayed in a
     column, for example it can cut out a part of a time stamp.
     For more information, look at the variable

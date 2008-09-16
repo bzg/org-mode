@@ -429,6 +429,8 @@ when PUB-DIR is set, use this as the publishing directory."
 		  :comments nil
 		  :add-text (if (eq to-buffer 'string) nil text)
 		  :skip-before-1st-heading skip
+		  :select-tags (plist-get opt-plist :select-tags)
+		  :exclude-tags (plist-get opt-plist :exclude-tags)
 		  :LaTeX-fragments nil)))
 
     (set-buffer buffer)
