@@ -408,25 +408,18 @@ If NO-EXCLUSION is non-nil, don't exclude files."
     all-files))
 
 (defun org-publish-expand-projects (projects-alist)
-  "Expand projects contained in PROJECTS-ALIST."
-  (let (without-component with-component)
-    (mapc (lambda(p)
-	    (add-to-list
-	     (if (plist-get (cdr p) :components)
-		 'with-component 'without-component) p))
-	  projects-alist)
-    (org-publish-delete-dups
-     (append without-component
-	     (car (mapcar (lambda(p) (org-publish-expand-components p))
-			  with-component))))))
-
-(defun org-publish-expand-components (project)
-  "Expand PROJECT into an alist of its components."
-  (let* ((components (plist-get (cdr project) :components)))
-    (org-publish-delete-dups
-     (delq nil (mapcar (lambda(c) (assoc c org-publish-project-alist))
-		       components)))))
-
+  "Expand projects in PROJECTS-ALIST.
+This splices all the components into the list."
+  (let ((rest projects-alist) rtn p c)
+    (while (setq p (pop rest))
+      (if (setq components (plist-get (cdr p) :components))
+	  (setq rest (append
+		      (mapcar (lambda (x) (assoc x org-publish-project-alist))
+			      components)
+		      rest))
+	(push p rtn)))
+    (nreverse (org-publish-delete-dups (delq nil rtn)))))
+	
 (defun org-publish-get-base-files-1 (base-dir &optional recurse match skip-file skip-dir)
   "Set `org-publish-temp-files' with files from BASE-DIR directory.
 If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is

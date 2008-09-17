@@ -1,3 +1,8 @@
+2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-expand-components): Function removed.
+	(org-publish-expand-projects): Allow components to have components.
+
 2008-09-13  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-indent-line-function): Do not indent in regions that
