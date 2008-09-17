@@ -4079,12 +4079,13 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (goto-line line)
     (recenter window-line)))
 
+(defvar org-global-tags-completion-table nil)
 (defun org-agenda-filter-by-tag (strip &optional char)
   "Keep only those lines in the agenda buffer that have a specific tag.
 The tag is selected with its fast selection letter, as configured.
 With prefix argument STRIP, remove all lines that do have the tag."
   (interactive "P")
-  (let (char a tag (inhibit-read-only t))
+  (let (char a tag tags (inhibit-read-only t))
       (message "Select tag [%s] or no tag [ ], [TAB] to complete, [/] to restore: "
 	       (mapconcat
 		(lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))

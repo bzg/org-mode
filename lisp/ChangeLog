@@ -1,5 +1,7 @@
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-global-tags-completion-table): New variable.
+
 	* org-exp.el (org-export-handle-export-tags): New function.
 	(org-export-preprocess-string): Call
 	`org-export-handle-export-tags'.

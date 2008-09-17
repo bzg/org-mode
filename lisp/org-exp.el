@@ -64,6 +64,24 @@ force an export command into the current process."
   :group 'org-export-general
   :type 'boolean)
 
+
+(defcustom org-export-select-tags '("export")
+  "Tags that select a tree for export.
+If any such tag is found in a buffer, all trees that do not carry one
+of these tags will be deleted before export.
+Inside trees that are selected like this, you can still deselect a
+subtree by tagging it with one of the `org-export-excude-tags'."
+  :group 'org-export-general
+  :type '(repeat (string :tag "Tag")))
+
+(defcustom org-export-exclude-tags '("noexport")
+  "Tags that exclude a tree from export.
+All trees carrying any of these tags will be excluded from export.
+This is without contition, so even subtrees inside that carry one of the
+`org-export-select-tags' will be removed."
+  :group 'org-export-general
+  :type '(repeat (string :tag "Tag")))
+
 (defcustom org-export-with-special-strings t
   "Non-nil means, interpret \"\-\", \"--\" and \"---\" for export.
 When this option is turned on, these strings will be exported as:
@@ -1579,7 +1597,7 @@ removed as well."
 	 (re-excl (concat ":\\(" (mapconcat 'regexp-quote
 					   exclude-tags "\\|")
 			"\\):"))
-	 beg end)
+	 beg end cont)
     (goto-char (point-min))
     (when (and select-tags
 	       (re-search-forward
@@ -4512,24 +4530,6 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
       )))
 
 (provide 'org-exp)
-
-
-(defcustom org-export-select-tags '("export")
-  "Tags that select a tree for export.
-If any such tag is found in a buffer, all trees that do not carry one
-of these tags will be deleted before export.
-Inside trees that are selected like this, you can still deselect a
-subtree by tagging it with one of the `org-export-excude-tags'."
-  :group 'org-export
-  :type '(repeat (string :tag "Tag")))
-
-(defcustom org-export-exclude-tags '("noexport")
-  "Tags that exclude a tree from export.
-All trees carrying any of these tags will be excluded from export.
-This is without contition, so even subtrees inside that carry one of the
-`org-export-select-tags' will be removed."
-  :group 'org-export
-  :type '(repeat (string :tag "Tag")))
 
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 

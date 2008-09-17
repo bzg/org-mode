@@ -410,7 +410,7 @@ If NO-EXCLUSION is non-nil, don't exclude files."
 (defun org-publish-expand-projects (projects-alist)
   "Expand projects in PROJECTS-ALIST.
 This splices all the components into the list."
-  (let ((rest projects-alist) rtn p c)
+  (let ((rest projects-alist) rtn p components)
     (while (setq p (pop rest))
       (if (setq components (plist-get (cdr p) :components))
 	  (setq rest (append
