@@ -37,69 +37,6 @@
     as a tty key replacement.
 
 ** Details
-*** org-plot.el is now part of Org.
-
-    You can run it by simple calling org-plot/gnuplot.
-    Documentation is not yet included with Org, please refer to
-    http://github.com/eschulte/org-plot/tree/master until we have
-    moved the docs into Org or Worg.
-
-    Thanks to Eric Schulte for this great contribution.
-
-*** Tags can be used to select the export part of a document
-
-    You may now use tags to select parts of a document for
-    inclusion into the export, and to exclude other parts.  This
-    behavior is governed by two new variables:
-    =org-export-select-tags= and =org-export-exclude-tags=.
-    These default to =("export")= and =("noexport")=, but can be
-    changed, even to include a list of several tags.
-
-    Org first checks if any of the /select/ tags is present in
-    the buffer.  All trees that do not carry one of these tags
-    will be excluded.  If a selected tree is a subtree, the
-    heading hierarchy above it will also be selected for export,
-    but not the text below those headings.  If none of the select
-    tags is found, the whole buffer will be selected for export.
-    Finally, all subtrees that are marked by any of the /exclude/
-    tags will be removed from the export buffer.
-
-    You may set these tags with inbuffer-options
-    =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
-
-    This useful feature was a request by Richard G Rigley.
-
-*** Yanking inserts folded subtrees
-
-    If the kill is a subtree or a sequence of subtrees, yanking
-    them with =C-y= will leave all the subtrees in a folded
-    state.  This basically means, that kill and yank are now
-    much more useful in moving stuff around in your outline.  If
-    you do not like this, customize the variable
-    =org-yank-folded-subtrees=.
-
-    Right now, I am only binding =C-y= to this new function,
-    should I modify all bindings of yank?  Do we need to amend
-    =yank-pop= as well?
-
-    This feature was requested by John Wiegley.
-
-*** Prefix arg 0 to S-RET disables integer increment during copy
-
-    This was a request by Chris Randle.
-
-*** Column view capture tables can have formulas, plotting info
-
-    If you attach formulas and plotting instructions to a table
-    capturing column view, these extra lines will now survive an
-    update of the column view capture, and any formulas will be
-    re-applied to the captured table.  This works be keeping any
-    continuous block of comments before and after the actual
-    table.
-
-*** The note buffer for clocking out now mentions the task
-    
-    This was a request by Peter Frings.
 
 *** Secondary filtering of agenda views.
 
@@ -148,6 +85,37 @@
 
     This exciting new feature arose from a discussion involving
     Scott Otterson, Sebastian Rose and Will Henney.
+*** /org-plot.el/ is now part of Org.
+
+    You can run it by simple calling org-plot/gnuplot.
+    Documentation is not yet included with Org, please refer to
+    http://github.com/eschulte/org-plot/tree/master until we have
+    moved the docs into Org or Worg.
+
+    Thanks to Eric Schulte for this great contribution.
+
+*** Tags can be used to select the export part of a document
+
+    You may now use tags to select parts of a document for
+    inclusion into the export, and to exclude other parts.  This
+    behavior is governed by two new variables:
+    =org-export-select-tags= and =org-export-exclude-tags=.
+    These default to =("export")= and =("noexport")=, but can be
+    changed, even to include a list of several tags.
+
+    Org first checks if any of the /select/ tags is present in
+    the buffer.  All trees that do not carry one of these tags
+    will be excluded.  If a selected tree is a subtree, the
+    heading hierarchy above it will also be selected for export,
+    but not the text below those headings.  If none of the select
+    tags is found, the whole buffer will be selected for export.
+    Finally, all subtrees that are marked by any of the /exclude/
+    tags will be removed from the export buffer.
+
+    You may set these tags with inbuffer-options
+    =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
+
+    This useful feature was a request by Richard G Rigley.
 
 *** New interpretation of prefix arguments when exiting remember
 
@@ -161,6 +129,38 @@
     :              in its new location.
 
     This was requested by John Wiegley.
+
+*** Yanking inserts folded subtrees
+
+    If the kill is a subtree or a sequence of subtrees, yanking
+    them with =C-y= will leave all the subtrees in a folded
+    state.  This basically means, that kill and yank are now
+    much more useful in moving stuff around in your outline.  If
+    you do not like this, customize the variable
+    =org-yank-folded-subtrees=.
+
+    Right now, I am only binding =C-y= to this new function,
+    should I modify all bindings of yank?  Do we need to amend
+    =yank-pop= as well?
+
+    This feature was requested by John Wiegley.
+
+*** Prefix arg 0 to S-RET disables integer increment during copy
+
+    This was a request by Chris Randle.
+
+*** Column view capture tables can have formulas, plotting info
+
+    If you attach formulas and plotting instructions to a table
+    capturing column view, these extra lines will now survive an
+    update of the column view capture, and any formulas will be
+    re-applied to the captured table.  This works be keeping any
+    continuous block of comments before and after the actual
+    table.
+
+*** The note buffer for clocking out now mentions the task
+    
+    This was a request by Peter Frings.
 
 *** Sorting entries now ignores the TODO keyword and the priority
 

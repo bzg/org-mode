@@ -1565,6 +1565,60 @@ whose content to keep."
       (while (re-search-forward re nil t)
 	(replace-match "")))))
 
+(defun org-export-handle-export-tags (select-tags exclude-tags)
+  "Modify the buffer, honoring SELECT-TAGS and EXCLUDE-TAGS.
+Both arguments are lists of tags.
+If any of SELECT-TAGS is found, all trees not marked by a SELECT-TAG
+will be removed.
+After that, all subtrees that are marked by EXCLUDE-TAGS will be
+removed as well."
+  (remove-text-properties (point-min) (point-max) '(:org-delete t))
+  (let* ((re-sel (concat ":\\(" (mapconcat 'regexp-quote
+					   select-tags "\\|")
+			 "\\):"))
+	 (re-excl (concat ":\\(" (mapconcat 'regexp-quote
+					   exclude-tags "\\|")
+			"\\):"))
+	 beg end)
+    (goto-char (point-min))
+    (when (and select-tags
+	       (re-search-forward
+		(concat "^\\*+[ \t].*" re-sel "[^ \t\n]*[ \t]*$") nil t))
+      ;; At least one tree is marked for export, this means
+      ;; all the unmarked stuff needs to go.
+      ;; Dig out the trees that should be exported
+      (goto-char (point-min))
+      (outline-next-heading)
+      (setq beg (point))
+      (put-text-property beg (point-max) :org-delete t)
+      (while (re-search-forward re-sel nil t)
+	(when (org-on-heading-p)
+	  (org-back-to-heading)
+	  (remove-text-properties
+	   (max (1- (point)) (point-min))
+	   (setq cont (save-excursion (org-end-of-subtree t t)))
+	   '(:org-delete t))
+	  (while (and (org-up-heading-safe)
+		      (get-text-property (point) :org-delete))
+	    (remove-text-properties (max (1- (point)) (point-min))
+				    (point-at-eol) '(:org-delete t)))
+	  (goto-char cont))))
+    ;; Remove the trees explicitly marked for noexport
+    (when exclude-tags
+      (goto-char (point-min))
+      (while (re-search-forward re-excl nil t)
+	(when (org-at-heading-p)
+	  (org-back-to-heading t)
+	  (setq beg (point))
+	  (org-end-of-subtree t)
+	  (delete-region beg (point)))))
+    ;; Remove everything that is now still marked for deletion
+    (goto-char (point-min))
+    (while (setq beg (text-property-any (point-min) (point-max) :org-delete t))
+      (setq end (or (next-single-property-change beg :org-delete)
+		    (point-max)))
+      (delete-region beg end))))
+
 (defun org-export-remove-archived-trees (export-archived-trees)
   "Remove archived trees.
 When EXPORT-ARCHIVED-TREES is `headline;, only the headline will be exported.
@@ -4476,56 +4530,6 @@ This is without contition, so even subtrees inside that carry one of the
 `org-export-select-tags' will be removed."
   :group 'org-export
   :type '(repeat (string :tag "Tag")))
-
-(defun org-export-handle-export-tags (select-tags exclude-tags)
-  (interactive)
-  (debug)
-  (remove-text-properties (point-min) (point-max) '(:org-delete t))
-  (let* ((re-sel (concat ":\\(" (mapconcat 'regexp-quote
-					   select-tags "\\|")
-			 "\\):"))
-	 (re-excl (concat ":\\(" (mapconcat 'regexp-quote
-					   exclude-tags "\\|")
-			"\\):"))
-	 beg end)
-    (goto-char (point-min))
-    (when (and select-tags
-	       (re-search-forward
-		(concat "^\\*+[ \t].*" re-sel "[^ \t\n]*[ \t]*$") nil t))
-      ;; At least one tree is marked for export, this means
-      ;; all the unmarked stuff needs to go.
-      ;; Dig out the trees that should be exported
-      (goto-char (point-min))
-      (outline-next-heading)
-      (setq beg (point))
-      (put-text-property beg (point-max) :org-delete t)
-      (while (re-search-forward re-sel nil t)
-	(when (org-on-heading-p)
-	  (org-back-to-heading)
-	  (remove-text-properties
-	   (max (1- (point)) (point-min))
-	   (setq cont (save-excursion (org-end-of-subtree t t)))
-	   '(:org-delete t))
-	  (while (and (org-up-heading-safe)
-		      (get-text-property (point) :org-delete))
-	    (remove-text-properties (max (1- (point)) (point-min))
-				    (point-at-eol) '(:org-delete t)))
-	  (goto-char cont))))
-    ;; Remove the trees explicitly marked for noexport
-    (when exclude-tags
-      (goto-char (point-min))
-      (while (re-search-forward re-excl nil t)
-	(when (org-at-heading-p)
-	  (org-back-to-heading t)
-	  (setq beg (point))
-	  (org-end-of-subtree t)
-	  (delete-region beg (point)))))
-    ;; Remove everything that is now still marked for deletion
-    (goto-char (point-min))
-    (while (setq beg (text-property-any (point-min) (point-max) :org-delete t))
-      (setq end (or (next-single-property-change beg :org-delete)
-		    (point-max)))
-      (delete-region beg end))))
 
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 

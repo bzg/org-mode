@@ -1,5 +1,9 @@
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-handle-export-tags): New function.
+	(org-export-preprocess-string): Call
+	`org-export-handle-export-tags'.
+
 	* org-plot.el: New file.
 
 	* org-publish.el (org-publish-expand-components): Function removed.
