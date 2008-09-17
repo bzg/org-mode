@@ -80,6 +80,7 @@ LISPF      = 	org.el			\
 		org-mhe.el		\
 		org-mouse.el		\
 		org-publish.el		\
+		org-plot.el		\
 		org-remember.el		\
 		org-rmail.el		\
 		org-table.el		\

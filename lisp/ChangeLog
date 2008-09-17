@@ -1,5 +1,7 @@
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-plot.el: New file.
+
 	* org-publish.el (org-publish-expand-components): Function removed.
 	(org-publish-expand-projects): Allow components to have components.
 

@@ -37,6 +37,14 @@
     as a tty key replacement.
 
 ** Details
+*** org-plot.el is now part of Org.
+
+    You can run it by simple calling org-plot/gnuplot.
+    Documentation is not yet included with Org, please refer to
+    http://github.com/eschulte/org-plot/tree/master until we have
+    moved the docs into Org or Worg.
+
+    Thanks to Eric Schulte for this great contribution.
 
 *** Tags can be used to select the export part of a document
 
