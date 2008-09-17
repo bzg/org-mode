@@ -112,7 +112,7 @@
     Finally, all subtrees that are marked by any of the /exclude/
     tags will be removed from the export buffer.
 
-    You may set these tags with inbuffer-options
+    You may set these tags with in-buffer options
     =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
 
     This useful feature was a request by Richard G Rigley.
