@@ -1498,7 +1498,7 @@ Press key for an agenda command:        <   Buffer, subtree/region restriction
 --------------------------------        >   Remove restriction
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
-m   Match a TAGS query                  M   Like m, but only TODO entries
+m   Match a TAGS/PROP/TODO query        M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
 s   Search for keywords                 C   Configure custom agenda commands
 /   Multi-occur

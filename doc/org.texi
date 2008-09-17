@@ -5083,8 +5083,8 @@ for specific dates,
 a @emph{TODO list} that covers all unfinished
 action items,
 @item
-a @emph{tags view}, showings headlines based on
-the tags associated with them,
+a @emph{match view}, showings headlines based on the tags, properties and
+TODO state associated with them,
 @item
 a @emph{timeline view} that shows all events in a single Org file,
 in time-sorted view,
@@ -5411,6 +5411,7 @@ and omit the sublevels from the global list.  Configure the variable
 @cindex matching, of tags
 @cindex matching, of properties
 @cindex tags view
+@cindex match view
 
 If headlines in the agenda files are marked with @emph{tags}
 (@pxref{Tags}), you can select headlines based on the tags that apply
@@ -9403,7 +9404,7 @@ arguments, with the cursor positioned at the beginning of the headline.
 The return values of all calls to the function will be collected and
 returned as a list.
 
-MATCH is a tags/property/todo match as it is used in the agenda tags view.
+MATCH is a tags/property/todo match as it is used in the agenda match view.
 Only headlines that are matched by this query will be considered during
 the iteration.  When MATCH is nil or t, all headlines will be
 visited by the iteration.
