@@ -1,5 +1,8 @@
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-protect-slash): New function.
+	(org-get-refile-targets): Use `org-protect-slash'.
+
 	* org-agenda.el (org-global-tags-completion-table): New variable.
 
 	* org-exp.el (org-export-handle-export-tags): New function.

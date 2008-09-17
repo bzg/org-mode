@@ -7875,7 +7875,7 @@ on the system \"/user@host:\"."
 							(match-string 5)))))
 		    (setq re (concat re "[ \t]*$"))
 		    (when org-refile-use-outline-path
-		      (setq txt (mapconcat 'identity
+		      (setq txt (mapconcat 'org-protect-slash
 					   (append
 					    (if (eq org-refile-use-outline-path 'file)
 						(list (file-name-nondirectory
@@ -7889,6 +7889,11 @@ on the system \"/user@host:\"."
 		  (goto-char (point-at-eol))))))))
       (nreverse targets))))
 
+(defun org-protect-slash (s)
+  (while (string-match "/" s)
+    (setq s (replace-match "\\" t t s)))
+  s)
+    
 (defun org-get-outline-path ()
   "Return the outline path to the current entry, as a list."
   (let (rtn)
@@ -14419,7 +14424,9 @@ In fact, if the yanked text is a sequence of subtrees, fold all of them."
 	  (while (and (< (point) end) (looking-at outline-regexp))
 	    (hide-subtree)
 	    (org-cycle-show-empty-lines 'folded)
-	    (outline-forward-same-level 1)))
+	    (condition-case nil
+		(outline-forward-same-level 1)
+	      (error (goto-char end)))))
 	(goto-char end)
 	(skip-chars-forward " \t\n\r"))
     (call-interactively 'yank)))
