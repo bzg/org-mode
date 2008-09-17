@@ -4126,7 +4126,8 @@ With prefix argument STRIP, remove all lines that do have the tag."
 
 (defun org-agenda-filter-by-tag-hide-line ()
   (let (ov)
-    (setq ov (org-make-overlay (point-at-bol) (1+ (point-at-eol))))
+    (setq ov (org-make-overlay (max (point-min) (1- (point-at-bol)))
+			       (point-at-eol)))
     (org-overlay-put ov 'invisible t)
     (org-overlay-put ov 'type 'tags-filter)
     (push ov org-agenda-filter-overlays)))
