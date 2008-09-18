@@ -1,5 +1,10 @@
 2008-09-18  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-get-local-tags-at): New function.
+	(org-get-local-tags): New function.
+
+	* org-exp.el (org-export-get-categories): New function.
+
 	* org-agenda.el (org-sorting-choice)
 	(org-agenda-sorting-strategy, org-agenda-get-todos)
 	(org-agenda-get-timestamps, org-agenda-get-deadlines)

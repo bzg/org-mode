@@ -9723,11 +9723,21 @@ it as a time string and apply `float-time' to it.  f S is nil, just return 0."
 (defvar org-tags-overlay (org-make-overlay 1 1))
 (org-detach-overlay org-tags-overlay)
 
-(defun org-get-tags-at (&optional pos)
+(defun org-get-local-tags-at (&optional pos)
+  "Get a list of tags defined in the current headline."
+  (org-get-tags-at pos 'local))
+
+(defun org-get-local-tags ()
+  "Get a list of tags defined in the current headline."
+  (org-get-tags-at nil 'local))
+
+(defun org-get-tags-at (&optional pos local)
   "Get a list of all headline tags applicable at POS.
 POS defaults to point.  If tags are inherited, the list contains
 the targets in the same sequence as the headlines appear, i.e.
-the tags of the current headline come last."
+the tags of the current headline come last.
+When LOCAL is non-nil, only return tags from the current headline,
+ignore inherited ones."
   (interactive)
   (let (tags ltags lastpos parent)
     (save-excursion
@@ -9746,7 +9756,9 @@ the tags of the current headline come last."
 		    (setq tags (append (org-remove-uniherited-tags ltags)
 				       tags)))
 		  (or org-use-tag-inheritance (error ""))
-		  (org-up-heading-all 1)
+		  (if local
+		      (setq lastpos (point)) ; stop here
+		    (org-up-heading-all 1))
 		  (setq parent t)))
 	    (error nil))))
       (append (org-remove-uniherited-tags org-file-tags) tags))))

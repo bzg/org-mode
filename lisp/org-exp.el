@@ -713,6 +713,22 @@ todo-start          Scheduling time stamps in TODO entries become start date.
 	      (const :tag "SCHEDULED in TODO entries become start date"
 		     todo-start)))
 
+(defcustom org-icalendar-categories '(local-tags category)
+  "Items that should be entered into the categories field.
+This is a list of symbols, the following are valid:
+
+category    The Org-mode category of the current file or tree
+todo-state  The todo state, if any
+local-tags  The tags, defined in the current line
+all-tags    All tags, including inherited ones."
+  :group 'org-export-icalendar
+  :type '(repeat
+	  (choice
+	   (const :tag "The file or tree category" category)
+	   (const :tag "The TODO state" todo-state)
+	   (const :tag "Tags defined in current line" local-tags)
+	   (const :tag "All tags, including inherited ones" all-tags))))
+
 (defcustom org-icalendar-include-todo nil
   "Non-nil means, export to iCalendar files should also cover TODO items."
   :group 'org-export-icalendar
@@ -4177,7 +4193,7 @@ When COMBINE is non nil, add the category to each line."
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
 	scheduledp deadlinep todo prefix due start
-	tmp pri category entry location summary desc uid
+	tmp pri categories entry location summary desc uid
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
     (save-excursion
@@ -4208,7 +4224,7 @@ When COMBINE is non nil, add the category to each line."
 		uid (if org-icalendar-store-UID
 			(org-id-get-create)
 		      (or (org-id-get) (org-id-new)))
-		category (org-get-category)
+		categories (org-export-get-categories)
 		deadlinep nil scheduledp nil)
 	  (if (looking-at re2)
 	      (progn
@@ -4280,7 +4296,7 @@ END:VEVENT\n"
 			       (concat "\nDESCRIPTION: " desc) "")
 			   (if (and location (string-match "\\S-" location))
 			       (concat "\nLOCATION: " location) "")
-			   category)))))
+			   categories)))))
       (when (and org-icalendar-include-sexps
 		 (condition-case nil (require 'icalendar) (error nil))
 		 (fboundp 'icalendar-export-region))
@@ -4331,6 +4347,7 @@ END:VEVENT\n"
 			     (org-entry-get nil "DEADLINE"))
 		    start (and (member 'todo-start org-icalendar-use-scheduled)
 			     (org-entry-get nil "SCHEDULED"))
+		    categories (org-export-get-categories)
 		    uid (if org-icalendar-store-UID
 			    (org-id-get-create)
 			  (or (org-id-get) (org-id-new))))
@@ -4366,8 +4383,23 @@ END:VTODO\n"
 			     (if (and desc (string-match "\\S-" desc))
 				 (concat "\nDESCRIPTION: " desc) "")
 			     (if due (concat "\n" due) "")
-			     category
+			     categories
 			     pri status)))))))))
+
+(defun org-export-get-categories ()
+  "Get categories according to `org-icalendar-categories'."
+  (let ((cs org-icalendar-categories) c rtn tmp)
+    (while (setq c (pop cs))
+      (cond
+       ((eq c 'category) (push (org-get-category) rtn))
+       ((eq c 'todo-state)
+	(setq tmp (org-get-todo-state))
+	(and tmp (push tmp rtn)))
+       ((eq c 'local-tags)
+	(setq rtn (append (nreverse (org-get-local-tags-at (point))) rtn)))
+       ((eq c 'all-tags)
+	(setq rtn (append (nreverse (org-get-tags-at (point))) rtn)))))
+    (mapconcat 'identity (nreverse rtn) ",")))
 
 (defun org-icalendar-cleanup-string (s &optional is-body maxlength)
   "Take out stuff and quote what needs to be quoted.

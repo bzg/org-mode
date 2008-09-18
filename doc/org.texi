@@ -7643,7 +7643,10 @@ stamps as VEVENT, and TODO items as VTODO.  It will also create events from
 deadlines that are in non-TODO items.  Deadlines and scheduling dates in TODO
 items will be used to set the start and due dates for the todo
 entry@footnote{See the variables @code{org-icalendar-use-deadline} and
-@code{org-icalendar-use-scheduled}.}.
+@code{org-icalendar-use-scheduled}.}.  As categories, it will use the tags
+locally defined in the heading, and the file/tree category@footnote{To add
+inherited tags or the TODO state, configure the variable
+@code{org-icalendar-categories}.}. 
 
 The iCalendar standard requires each entry to have a globally unique
 identifier (UID).  Org creates these identifiers during export.  If you set
