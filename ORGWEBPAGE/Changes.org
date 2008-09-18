@@ -187,7 +187,7 @@
     For more information, look at the variable
     =org-columns-modify-value-for-display-function=.
 
-*** In column view, date stamps now always have allowed values defined.
+*** In column view, date stamps can be changed with S-cursor keys
 
     If a property value is a time stamp, S-left and S-right can
     now be used to shift this date around.
