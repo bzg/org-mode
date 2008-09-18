@@ -713,7 +713,7 @@ a grid line."
 
 (defcustom org-agenda-sorting-strategy
   '((agenda time-up category-keep priority-down)
-    (todo todo-state-down category-keep priority-down)
+    (todo category-keep priority-down)
     (tags category-keep priority-down)
     (search category-keep))
   "Sorting structure for the agenda items of a single day.

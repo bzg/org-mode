@@ -22,11 +22,11 @@
     The prefix argument to the `C-c C-c' command that finishes a
     remember process is now interpreted differently:
 
-    :C-c C-c       Store the note to predefined file and headline
-    :C-1 C-c C-c   Select the storage location interactively
-    :C-0 C-c C-c   Re-use the last used location
-    :C-u C-c C-c   Like C-c C-c, but immediately visit the note
-    :              in its new location.
+    : C-c C-c       Store the note to predefined file and headline
+    : C-u C-c C-c   Like C-c C-c, but immediately visit the note
+    :               in its new location.
+    : C-1 C-c C-c   Select the storage location interactively
+    : C-0 C-c C-c   Re-use the last used location
 
     This was requested by John Wiegley.
 
@@ -35,6 +35,16 @@
 
     The reason for this change was that `C-c C-x r' is also used
     as a tty key replacement.
+
+*** Categories in iCalendar export now include local tags
+
+    The locally defined tags are now listed as categories when
+    exporting to iCalendar format.  Org's traditional file/tree
+    category is now the last category in this list.  Configure
+    the variable =org-icalendar-categories= to modify or revert
+    this behavior.
+
+    This was a request by Charles Philip Chan.
 
 ** Details
 
@@ -49,9 +59,8 @@
     do have the tag will be hidden.
 
     This operation only /hides/ lines in the agenda buffer, it
-    des not remove them.  Therefore, changing the secondary
-    filtering does not require a new search and is therefore very
-    fast.
+    does not remove them.  Changing the secondary filtering does
+    not require a new search and is very fast.
 
     If you press TAB at the tag selection prompt, you will be
     switched to a completion interface to select a tag.  This is
@@ -85,8 +94,9 @@
     Using the command in an empty line will create a new
     fixed-width region.
 
-    This exciting new feature arose from a discussion involving
-    Scott Otterson, Sebastian Rose and Will Henney.
+    This new feature arose from a discussion involving Scott
+    Otterson, Sebastian Rose and Will Henney.
+
 *** /org-plot.el/ is now part of Org.
 
     You can run it by simple calling org-plot/gnuplot.
@@ -106,18 +116,20 @@
     changed, even to include a list of several tags.
 
     Org first checks if any of the /select/ tags is present in
-    the buffer.  All trees that do not carry one of these tags
-    will be excluded.  If a selected tree is a subtree, the
+    the buffer.  If yes, all trees that do not carry one of these
+    tags will be excluded.  If a selected tree is a subtree, the
     heading hierarchy above it will also be selected for export,
     but not the text below those headings.  If none of the select
-    tags is found, the whole buffer will be selected for export.
-    Finally, all subtrees that are marked by any of the /exclude/
-    tags will be removed from the export buffer.
+    tags is found anywhere in the buffer, the whole buffer will
+    be selected for export.  Finally, all subtrees that are
+    marked by any of the /exclude/ tags will be removed from the
+    export buffer.
 
     You may set these tags with in-buffer options
     =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
 
-    This useful feature was a request by Richard G Rigley.
+    I love this feature.  Thanks to Richard G Rigley for coming
+    up with the idea.
 
 *** New interpretation of prefix arguments when exiting remember
 
@@ -147,23 +159,19 @@
 
     This feature was requested by John Wiegley.
 
-*** Prefix arg 0 to S-RET disables integer increment during copy
-
-    This was a request by Chris Randle.
-
 *** Column view capture tables can have formulas, plotting info
 
     If you attach formulas and plotting instructions to a table
     capturing column view, these extra lines will now survive an
     update of the column view capture, and any formulas will be
-    re-applied to the captured table.  This works be keeping any
+    re-applied to the captured table.  This works by keeping any
     continuous block of comments before and after the actual
     table.
 
 *** In column view, date stamps can be changed with S-cursor keys
 
     If a property value is a time stamp, S-left and S-right can
-    now be used to shift this date around.
+    now be used to shift this date around while in column view.
 
     This was a request by Chris Randle.
 
@@ -208,6 +216,12 @@
     column, for example it can cut out a part of a time stamp.
     For more information, look at the variable
     =org-columns-modify-value-for-display-function=.
+
+*** Disabling integer increment during table fild copy
+
+    Prefix arg 0 to S-RET does the trick.
+
+    This was a request by Chris Randle.
 
 * Version 6.06
 
