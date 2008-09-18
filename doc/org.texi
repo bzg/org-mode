@@ -3625,15 +3625,6 @@ release, number of tracks, and so on.
 Properties can be conveniently edited and viewed in column view
 (@pxref{Column view}).
 
-Properties are like tags, but with a value.  For example, in a file
-where you document bugs and plan releases of a piece of software,
-instead of using tags like @code{:release_1:}, @code{:release_2:}, it
-can be more efficient to use a property @code{:Release:} with a value
-@code{1.0} or @code{2.0}.  Second, you can use properties to implement
-(very basic) database capabilities in an Org buffer, for example to
-create a list of Music CD's you own.  You can edit and view properties
-conveniently in column view (@pxref{Column view}).
-
 @menu
 * Property syntax::             How properties are spelled out
 * Special properties::          Access to other Org mode features
@@ -4034,7 +4025,7 @@ current column view.
 Make the column narrower/wider by one character.
 @kindex S-M-@key{right}
 @item S-M-@key{right}
-Insert a new column, to the right of the current column.
+Insert a new column, to the left of the current column.
 @kindex S-M-@key{left}
 @item S-M-@key{left}
 Delete the current column.

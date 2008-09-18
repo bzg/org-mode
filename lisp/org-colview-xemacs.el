@@ -735,7 +735,8 @@ an integer, select that value."
 		      (and (memq
 			    (nth 4 (assoc key org-columns-current-fmt-compiled))
 			    '(checkbox checkbox-n-of-m checkbox-percent))
-			   '("[ ]" "[X]"))))
+			   '("[ ]" "[X]"))
+		      (org-colview-construct-allowed-dates value)))
 	 nval)
     (when (integerp nth)
       (setq nth (1- nth))
@@ -783,6 +784,26 @@ an integer, select that value."
       (org-move-to-column col)
       (and (nth 3 (assoc key org-columns-current-fmt-compiled))
 	   (org-columns-update key))))))
+
+(defun org-colview-construct-allowed-dates (s)
+  "Construct a list of three dates around the date in S.
+This respects the format of the time stamp in S, active or non-active,
+and also including time or not.  S must be just a time stamp, no text
+around it."
+  (when (string-match (concat "^" org-ts-regexp3 "$") s)
+    (let* ((time (org-parse-time-string s 'nodefaults))
+	   (active (equal (string-to-char s) ?<))
+	   (fmt (funcall (if (nth 1 time) 'cdr 'car) org-time-stamp-formats)))
+      (unless active (setq fmt (concat "[" (substring fmt 1 -1) "]")))
+      (setf (car time) (or (car time) 0))
+      (setf (nth 1 time) (or (nth 1 time) 0))
+      (setf (nth 2 time) (or (nth 2 time) 0))
+      (setq time-before (copy-sequence time))
+      (setq time-after (copy-sequence time))
+      (setf (nth 3 time-before) (1- (nth 3 time)))
+      (setf (nth 3 time-after) (1+ (nth 3 time)))
+      (mapcar (lambda (x) (format-time-string fmt (apply 'encode-time x)))
+	      (list time-before time time-after)))))
 
 (defun org-verify-version (task)
   (cond

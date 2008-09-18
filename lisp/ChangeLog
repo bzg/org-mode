@@ -1,3 +1,15 @@
+2008-09-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-colview.el (org-colview-construct-allowed-dates): New
+	function. 
+	(org-columns-next-allowed-value): Use
+	`org-colview-construct-allowed-dates'.
+
+	* org-colview-xemacs.el (org-colview-construct-allowed-dates): New
+	function.
+	(org-columns-next-allowed-value): Use
+	`org-colview-construct-allowed-dates'.
+
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-protect-slash): New function.
