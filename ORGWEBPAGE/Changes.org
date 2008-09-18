@@ -48,8 +48,10 @@
     argument, the opposite filter is applied: entries that
     do have the tag will be hidden.
 
-    This operation only hides lines in the agenda buffer.  It
-    does not initiate a new search and therefore is very fast.
+    This operation only /hides/ lines in the agenda buffer, it
+    des not remove them.  Therefore, changing the secondary
+    filtering does not require a new search and is therefore very
+    fast.
 
     If you press TAB at the tag selection prompt, you will be
     switched to a completion interface to select a tag.  This is
@@ -158,15 +160,35 @@
     continuous block of comments before and after the actual
     table.
 
+*** In column view, date stamps can be changed with S-cursor keys
+
+    If a property value is a time stamp, S-left and S-right can
+    now be used to shift this date around.
+
+    This was a request by Chris Randle.
+
 *** The note buffer for clocking out now mentions the task
     
     This was a request by Peter Frings.
 
-*** Sorting entries now ignores the TODO keyword and the priority
+*** Sorting entries alphabetically ignores TODO keyword and priority
 
     Numerical and alphanumerical sorting now skips any TODO
     keyword or priority cookie when constructing the comparison
     string.  This was a request by Wanrong Lin.
+
+*** Agenda views can sort entries by TODO state
+
+    You can now define a sorting strategy for agenda entries that
+    does look at the TODO state of the entries.  Sorting by TODO
+    entry does first separate the non-done from the done states.
+    Within each class, the entries are sorted not alphabetically,
+    but in definition order.  So if you have a sequence of TODO
+    entries defined, the entries will be sorted according to the
+    position of the keyword in this sequence.
+
+    This follows an idea and sample implementation by Christian
+    Egli.
 
 *** New face =org-scheduled= for entries scheduled in the future.
 
@@ -186,23 +208,6 @@
     column, for example it can cut out a part of a time stamp.
     For more information, look at the variable
     =org-columns-modify-value-for-display-function=.
-
-*** In column view, date stamps can be changed with S-cursor keys
-
-    If a property value is a time stamp, S-left and S-right can
-    now be used to shift this date around.
-
-    This was a request by Chris Randle.
-
-*** Agenda views can sort entries by TODO state
-
-    You can now define a sorting strategy for agenda entries that
-    does look at the TODO state of the entries.  Sorting by TODO
-    entry does first separate the non-done from the done states.
-    Within each class, the entries are sorted not alphabetically,
-    but in definition order.  So if you have a sequence of TODO
-    entries defined, the entries will be sorted according to the
-    position of the keyword in this sequence.
 
 * Version 6.06
 
