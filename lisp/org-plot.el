@@ -43,10 +43,12 @@
 (defvar org-plot/gnuplot-default-options
   '((:plot-type . 2d)
     (:with . lines)
-    (:ind . 0)))
+    (:ind . 0))
+  "Default options to gnuplot used by `org-plot/gnuplot'")
 
 (defun org-plot/add-options-to-plist (p options)
-  "Parse an OPTONS line and set values in the property list P."
+  "Parse an OPTONS line and set values in the property list P.
+Returns the resulting property list."
   (let (o)
     (when options
       (let ((op '(("type"   . :plot-type)
@@ -83,14 +85,16 @@
   p)
 
 (defun org-plot/goto-nearest-table ()
-  "Move the point to the beginning of nearest table.  First look
-back until hitting an empty line, then forward until a table is
-found."
+  "Move the point forward to the beginning of nearest table.
+Return value is the point at the beginning of the table."
   (interactive) (move-beginning-of-line 1)
   (while (not (or (org-at-table-p) (< 0 (forward-line 1)))))
   (goto-char (org-table-begin)))
 
 (defun org-plot/collect-options (&optional params)
+  "Collect options from an org-plot '#+Plot:' line.  Accepts an
+optional property list PARAMS, to which the options will be
+added.  Returns the resulting property list."
   (interactive)
   (let ((line (thing-at-point 'line)))
     (if (string-match "#\\+PLOT: +\\(.*\\)$" line)
@@ -98,11 +102,13 @@ found."
       params)))
 
 (defun org-plot-quote-tsv-field (s)
-  "Quote field for export to gnuplot."
+  "Quote field S for export to gnuplot."
   (if (string-match org-table-number-regexp s) s
     (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")))
 
 (defun org-plot/gnuplot-to-data (table data-file params)
+  "Export TABLE to DATA-FILE in a format readable by gnuplot.
+Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (with-temp-file
       data-file (insert (orgtbl-to-generic
 			 table
@@ -112,6 +118,9 @@ found."
   nil)
 
 (defun org-plot/gnuplot-to-grid-data (table data-file params)
+  "Export the data in TABLE to DATA-FILE in a format appropriate
+for grid plotting by gnuplot.  PARAMS specifies which columns of
+TABLE should be plotted as independant and dependant variables."
   (interactive)
   (let* ((ind (- (plist-get params :ind) 1))
 	 (deps (if (plist-member params :deps)
@@ -158,6 +167,9 @@ found."
     row-vals))
 
 (defun org-plot/gnuplot-script (data-file num-cols params)
+  "Write a gnuplot script to DATA-FILE respecting the options set
+in PARAMS.  NUM-COLS controls the number of columns plotted in a
+2-d plot."
   (let* ((type (plist-get params :plot-type))
 	 (with (if (equal type 'grid)
 		   'pm3d
@@ -284,7 +296,7 @@ line directly before or after the table."
       ;; write script
       (with-temp-buffer
 	(if (plist-get params :script) ;; user script
-	    (progn (insert-file-contents)
+	    (progn (insert-file-contents (plist-get params :script))
 		   (goto-char (point-min))
 		   (while (re-search-forward "$datafile" nil t)
 		     (replace-match data-file nil nil)))
