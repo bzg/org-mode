@@ -47,7 +47,7 @@
   "Default options to gnuplot used by `org-plot/gnuplot'")
 
 (defun org-plot/add-options-to-plist (p options)
-  "Parse an OPTONS line and set values in the property list P.
+  "Parse an OPTIONS line and set values in the property list P.
 Returns the resulting property list."
   (let (o)
     (when options
@@ -92,9 +92,9 @@ Return value is the point at the beginning of the table."
   (goto-char (org-table-begin)))
 
 (defun org-plot/collect-options (&optional params)
-  "Collect options from an org-plot '#+Plot:' line.  Accepts an
-optional property list PARAMS, to which the options will be
-added.  Returns the resulting property list."
+  "Collect options from an org-plot '#+Plot:' line.
+Accepts an optional property list PARAMS, to which the options
+will be added.  Returns the resulting property list."
   (interactive)
   (let ((line (thing-at-point 'line)))
     (if (string-match "#\\+PLOT: +\\(.*\\)$" line)
@@ -118,9 +118,10 @@ Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   nil)
 
 (defun org-plot/gnuplot-to-grid-data (table data-file params)
-  "Export the data in TABLE to DATA-FILE in a format appropriate
-for grid plotting by gnuplot.  PARAMS specifies which columns of
-TABLE should be plotted as independant and dependant variables."
+  "Export the data in TABLE to DATA-FILE for gnuplot.
+This means, in a format appropriate for grid plotting by gnuplot.
+PARAMS specifies which columns of TABLE should be plotted as independant
+and dependant variables."
   (interactive)
   (let* ((ind (- (plist-get params :ind) 1))
 	 (deps (if (plist-member params :deps)
@@ -167,9 +168,8 @@ TABLE should be plotted as independant and dependant variables."
     row-vals))
 
 (defun org-plot/gnuplot-script (data-file num-cols params)
-  "Write a gnuplot script to DATA-FILE respecting the options set
-in PARAMS.  NUM-COLS controls the number of columns plotted in a
-2-d plot."
+  "Write a gnuplot script to DATA-FILE respecting the options set in PARAMS.
+NUM-COLS controls the number of columns plotted in a 2-d plot."
   (let* ((type (plist-get params :plot-type))
 	 (with (if (equal type 'grid)
 		   'pm3d
@@ -246,8 +246,8 @@ in PARAMS.  NUM-COLS controls the number of columns plotted in a
 ;; facad functions
 ;;;###autoload
 (defun org-plot/gnuplot (&optional params)
-  "Plot table using gnuplot. Gnuplot options can be specified
-with PARAMS.  If not given options will be taken from the +PLOT
+  "Plot table using gnuplot. Gnuplot options can be specified with PARAMS.
+If not given options will be taken from the +PLOT
 line directly before or after the table."
   (interactive)
   (require 'gnuplot)
