@@ -149,6 +149,7 @@ you can \"misuse\" it to also add other text to the header.  However,
     (const category-keep) (const category-up) (const category-down)
     (const tag-down) (const tag-up)
     (const priority-up) (const priority-down)
+    (const todo-state-up) (const todo-state-down)
     (const effort-up) (const effort-down))
   "Sorting choices.")
 
@@ -712,7 +713,7 @@ a grid line."
 
 (defcustom org-agenda-sorting-strategy
   '((agenda time-up category-keep priority-down)
-    (todo category-keep priority-down)
+    (todo todo-state-down category-keep priority-down)
     (tags category-keep priority-down)
     (search category-keep))
   "Sorting structure for the agenda items of a single day.
@@ -730,6 +731,8 @@ tag-up          Sort alphabetically by last tag, A-Z.
 tag-down        Sort alphabetically by last tag, Z-A.
 priority-up     Sort numerically by priority, high priority last.
 priority-down   Sort numerically by priority, high priority first.
+todo-state-up   Sort by todo state, tasks that are done last.
+todo-state-down Sort by todo state, tasks that are done first.
 effort-up       Sort numerically by estimated effort, high effort last.
 effort-down     Sort numerically by estimated effort, high effort first.
 
@@ -3135,7 +3138,7 @@ the documentation of `org-diary'."
 				     "\\)\\>"))
 			   org-not-done-regexp)
 			 "[^\n\r]*\\)"))
-	 marker priority category tags
+	 marker priority category tags todo-state
 	 ee txt beg end)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -3160,11 +3163,12 @@ the documentation of `org-diary'."
 	      category (org-get-category)
 	      tags (org-get-tags-at (point))
 	      txt (org-format-agenda-item "" (match-string 1) category tags)
-	      priority (1+ (org-get-priority txt)))
+	      priority (1+ (org-get-priority txt))
+	      todo-state (org-get-todo-state))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority 'org-category category
-	  'type "todo")
+	  'type "todo" 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
 	    (goto-char (match-end 1))
@@ -3206,7 +3210,8 @@ the documentation of `org-diary'."
 	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
-	 donep tmp priority category ee txt timestr tags b0 b3 e3 head)
+	 donep tmp priority category ee txt timestr tags b0 b3 e3 head
+	 todo-state)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (setq b0 (match-beginning 0)
@@ -3236,7 +3241,8 @@ the documentation of `org-diary'."
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
-	      donep (org-entry-is-done-p))
+	      todo-state (org-get-todo-state)
+	      donep (member todo-state org-done-keywords))
 	(if (or scheduledp deadlinep closedp clockp)
 	    (throw :skip t))
 	(if (string-match ">" timestr)
@@ -3261,6 +3267,7 @@ the documentation of `org-diary'."
 	    'org-marker marker 'org-hd-marker hdmarker)
 	  (org-add-props txt nil 'priority priority
 			 'org-category category 'date date
+			 'todo-state todo-state
 			 'type "timestamp")
 	  (push txt ee))
 	(outline-next-heading)))
@@ -3382,7 +3389,7 @@ the documentation of `org-diary'."
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category tags
-	 ee txt head face s upcomingp donep timestr)
+	 ee txt head face s todo-state upcomingp donep timestr)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3404,6 +3411,7 @@ the documentation of `org-diary'."
 		(= diff 0))
 	    (save-excursion
 	      (setq category (org-get-category))
+	      (setq todo-state (org-get-todo-state))
 	      (if (re-search-backward "^\\*+[ \t]+" nil t)
 		  (progn
 		    (goto-char (match-end 0))
@@ -3413,7 +3421,7 @@ the documentation of `org-diary'."
 				(point)
 				(progn (skip-chars-forward "^\r\n")
 				       (point))))
-		    (setq donep (string-match org-looking-at-done-regexp head))
+		    (setq donep (member todo-state org-done-keywords))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
 			(setq timestr
 			      (concat (substring s (match-beginning 1)) " "))
@@ -3440,6 +3448,7 @@ the documentation of `org-diary'."
 		  'priority (+ (- diff)
 			       (org-get-priority txt))
 		  'org-category category
+		  'todo-state todo-state
 		  'type (if upcomingp "upcoming-deadline" "deadline")
 		  'date (if upcomingp date d2)
 		  'face (if donep 'org-done face)
@@ -3471,7 +3480,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff pos pos1 category tags
-	 ee txt head pastschedp donep face timestr s)
+	 ee txt head pastschedp todo-state face timestr s)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3491,6 +3500,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		(= diff 0))
 	    (save-excursion
 	      (setq category (org-get-category))
+	      (setq todo-state (org-get-todo-state))
 	      (if (re-search-backward "^\\*+[ \t]+" nil t)
 		  (progn
 		    (goto-char (match-end 0))
@@ -3499,7 +3509,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (setq head (buffer-substring-no-properties
 				(point)
 				(progn (skip-chars-forward "^\r\n") (point))))
-		    (setq donep (string-match org-looking-at-done-regexp head))
+		    (setq donep (member todo-state org-done-keywords))
 		    (if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
 			(setq timestr
 			      (concat (substring s (match-beginning 1)) " "))
@@ -3530,7 +3540,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		  'type (if pastschedp "past-scheduled" "scheduled")
 		  'date (if pastschedp d2 date)
 		  'priority (+ 94 (- 5 diff) (org-get-priority txt))
-		  'org-category category)
+		  'org-category category
+		  'todo-state todo-state)
 		(push txt ee))))))
     (nreverse ee)))
 
@@ -3547,7 +3558,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-tr-regexp)
 	 (d0 (calendar-absolute-from-gregorian date))
-	 marker hdmarker ee txt d1 d2 s1 s2 timestr category tags pos
+	 marker hdmarker ee txt d1 d2 s1 s2 timestr category todo-state tags pos
 	 donep head)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -3565,6 +3576,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	    (save-excursion
 	      (setq marker (org-agenda-new-marker (point)))
 	      (setq category (org-get-category))
+	      (setq todo-state (org-get-todo-state))
 	      (if (re-search-backward "^\\*+ " nil t)
 		  (progn
 		    (goto-char (match-beginning 0))
@@ -3584,6 +3596,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	      (org-add-props txt props
 		'org-marker marker 'org-hd-marker hdmarker
 		'type "block" 'date date
+		'todo-state todo-state
 		'priority (org-get-priority txt) 'org-category category)
 	      (push txt ee)))
 	(goto-char pos)))
@@ -3899,6 +3912,20 @@ HH:MM."
 	  ((string-lessp cb ca) +1)
 	  (t nil))))
 
+(defsubst org-cmp-todo-state (a b)
+  "Compare the todo states of strings A and B."
+  (let* ((ta (or (get-text-property 1 'todo-state a) ""))
+	 (tb (or (get-text-property 1 'todo-state b) ""))
+	 (la (- (length (member ta org-todo-keywords-for-agenda))))
+	 (lb (- (length (member tb org-todo-keywords-for-agenda))))
+	 (donepa (member ta org-done-keywords-for-agenda)) 
+	 (donepb (member tb org-done-keywords-for-agenda)))
+    (cond ((and donepa (not donepb)) -1)
+	  ((and (not donepa) donepb) +1)
+	  ((< la lb) -1)
+	  ((< lb la) +1)
+	  (t nil))))
+
 (defsubst org-cmp-tag (a b)
   "Compare the string values of categories of strings A and B."
   (let ((ta (car (last (get-text-property 1 'tags a))))
@@ -3932,7 +3959,9 @@ HH:MM."
 	 (category-down (if category-up (- category-up) nil))
 	 (category-keep (if category-up +1 nil))
 	 (tag-up (org-cmp-tag a b))
-	 (tag-down (if tag-up (- tag-up) nil)))
+	 (tag-down (if tag-up (- tag-up) nil))
+	 (todo-state-up (org-cmp-todo-state a b))
+	 (todo-state-down (if todo-state-up (- todo-state-up) nil)))
     (cdr (assoc
 	  (eval (cons 'or org-agenda-sorting-strategy-selected))
 	  '((-1 . t) (1 . nil) (nil . nil))))))

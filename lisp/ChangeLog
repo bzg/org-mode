@@ -1,7 +1,14 @@
 2008-09-18  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-sorting-choice)
+	(org-agenda-sorting-strategy, org-agenda-get-todos)
+	(org-agenda-get-timestamps, org-agenda-get-deadlines)
+	(org-agenda-get-scheduled, org-agenda-get-blocks)
+	(org-entries-lessp): Implement sorting by TODO state.
+	(org-cmp-todo-state): New defsubst.
+
 	* org-colview.el (org-colview-construct-allowed-dates): New
-	function. 
+	function.
 	(org-columns-next-allowed-value): Use
 	`org-colview-construct-allowed-dates'.
 

@@ -194,6 +194,16 @@
 
     This was a request by Chris Randle.
 
+*** Agenda views can sort entries by TODO state
+
+    You can now define a sorting strategy for agenda entries that
+    does look at the TODO state of the entries.  Sorting by TODO
+    entry does first separate the non-done from the done states.
+    Within each class, the entries are sorted not alphabetically,
+    but in definition order.  So if you have a sequence of TODO
+    entries defined, the entries will be sorted according to the
+    position of the keyword in this sequence.
+
 * Version 6.06
 
 ** Overview
