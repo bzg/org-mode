@@ -23,8 +23,6 @@
 
 ;;; Commentary:
 
-;; Requires at least version 4.27 of org.el
-
 ;; This program allow configurable publishing of related sets of
 ;; Org-mode files as a complete website.
 ;;
