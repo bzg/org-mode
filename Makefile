@@ -289,12 +289,13 @@ lisp/org-colview-xemacs.elc:      lisp/org.elc
 lisp/org-compat.elc:
 lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
 lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
-lisp/org-faces.elc:                    lisp/org-macs.elc lisp/org-compat.elc
+lisp/org-faces.elc:        lisp/org-macs.elc lisp/org-compat.elc
 lisp/org-gnus.elc:         lisp/org.elc
 lisp/org-id.elc:           lisp/org.elc
 lisp/org-info.elc:         lisp/org.elc
-lisp/org-jsinfo.elc:       lisp/org.elc lisp/org-exp.elc
 lisp/org-irc.elc:          lisp/org.elc
+lisp/org-jsinfo.elc:       lisp/org.elc lisp/org-exp.elc
+lisp/org-plot.elc:         lisp/org.elc lisp/org-exp.elc lisp/org-table.elc
 lisp/org-mac-message.elc:  lisp/org.elc
 lisp/org-macs.elc:
 lisp/org-mew.elc:          lisp/org.elc
