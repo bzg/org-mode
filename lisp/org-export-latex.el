@@ -61,7 +61,7 @@
 (defvar org-export-latex-sectioning "")
 (defvar org-export-latex-sectioning-depth 0)
 (defvar org-export-latex-list-beginning-re
-  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +?")
+  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +\\(.*\\)$")
 
 (defvar org-export-latex-special-string-regexps
   '(org-ts-regexp
@@ -988,7 +988,7 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 	  (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
 			      "\\end{verbatim}\n")))
 	    (apply 'delete-region (list beg end))
-	    (insert tbl))
+	    (insert (org-export-latex-protect-string tbl)))
 	(progn
 	  (setq lines (split-string raw-table "\n" t))
 	  (apply 'delete-region (list beg end))
@@ -1035,8 +1035,9 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 		       (split-string (org-trim elem) "|" t)))
 		 lines))
     	  (when insert
-	    (insert (orgtbl-to-latex
-		     lines `(:tstart ,(concat "\\begin{tabular}{" align "}")))
+	    (insert (org-export-latex-protect-string 
+                     (orgtbl-to-latex
+                      lines `(:tstart ,(concat "\\begin{tabular}{" align "}"))))
 		    "\n\n")))))))
 
 (defun org-export-latex-fontify ()
@@ -1114,6 +1115,15 @@ Regexps are those from `org-export-latex-special-string-regexps'."
   (while (re-search-forward "\\\\\\\\" nil t)
     (add-text-properties (match-beginning 0) (match-end 0)
 			 '(org-protected t)))
+
+  ;; Preserve latex environments
+  (goto-char (point-min))
+  (while (search-forward "\\begin{" nil t)
+    (let ((start (progn (beginning-of-line) (point)))
+          (end (or (and (search-forward "\\end{" nil t)
+                        (end-of-line) (point))
+                   (point-max))))
+      (add-text-properties start end '(org-protected t))))
 
   ;; Convert LaTeX to \LaTeX{}
   (goto-char (point-min))
@@ -1224,11 +1234,16 @@ Return a list containing first level items as strings and
 sublevels as a list of strings."
   (let ((start (org-list-item-begin))
 	(end (org-list-end))
-	output itemsep)
+	output itemsep ltype)
     (while (re-search-forward org-export-latex-list-beginning-re end t)
-      (setq itemsep (if (save-match-data
-			  (string-match "^[0-9]" (match-string 2)))
-			"[0-9]+\\(?:\\.\\|)\\)" "[-+]"))
+      (goto-char (match-beginning 3))
+      (save-match-data
+        (cond ((string-match "[0-9]" (match-string 2))
+               (setq itemsep "[0-9]+\\(?:\\.\\|)\\)"
+                     ltype 'ordered))
+              ((string-match "^.*::" (match-string 0))
+               (setq itemsep "[-+]" ltype 'descriptive))
+              (t (setq itemsep "[-+]" ltype 'unordered))))
       (let* ((indent1 (match-string 1))
 	     (nextitem (save-excursion
 			 (save-match-data
@@ -1254,8 +1269,7 @@ sublevels as a list of strings."
 	  (widen))))
     (when delete (delete-region start end))
     (setq output (nreverse output))
-    (push (if (string-match "^\\[0" itemsep)
-	      'ordered 'unordered) output)))
+    (push ltype output)))
 
 (defun org-list-item-begin ()
   "Find the beginning of the list item and return its position."
@@ -1343,6 +1357,13 @@ Valid parameters are
 :ostart     String to start an ordered list
 :oend       String to end an ordered list
 
+:dstart     String to start a descriptive list
+:dend       String to end a descriptive list
+:dtstart    String to start a descriptive term
+:dtend      String to end a descriptive term
+:ddstart    String to start a description
+:ddend      String to end a description
+
 :splice     When set to t, return only list body lines, don't wrap
             them into :[u/o]start and :[u/o]end.  Default is nil.
 
@@ -1357,6 +1378,12 @@ Valid parameters are
 	 (oend  (plist-get p :oend))
 	 (ustart  (plist-get p :ustart))
 	 (uend  (plist-get p :uend))
+	 (dstart  (plist-get p :dstart))
+	 (dend  (plist-get p :dend))
+	 (dtstart  (plist-get p :dtstart))
+	 (dtend  (plist-get p :dtend))
+	 (ddstart  (plist-get p :ddstart))
+	 (ddend  (plist-get p :ddend))
 	 (istart  (plist-get p :istart))
 	 (iend  (plist-get p :iend))
 	 (isep  (plist-get p :isep))
@@ -1365,18 +1392,24 @@ Valid parameters are
 	   (cond ((eq (car list) 'ordered)
 		  (concat ostart "\n%s" oend "\n"))
 		 ((eq (car list) 'unordered)
-		  (concat ustart "\n%s" uend "\n"))))
-	  rtn)
+		  (concat ustart "\n%s" uend "\n"))
+		 ((eq (car list) 'descriptive)
+		  (concat dstart "\n%s" dend "\n"))))
+	  rtn term defstart defend)
       (while (setq sublist (pop list))
 	(cond ((symbolp sublist) nil)
 	      ((stringp sublist)
-	       (setq rtn (concat rtn istart sublist iend isep)))
-	      (t
-	       (setq rtn (concat rtn   ;; previous list
-				 lsep  ;; list separator
-				 (org-list-to-generic sublist p)
-				 lsep  ;; list separator
-				 )))))
+               (when (string-match "^\\(.*\\) ::" sublist)
+                 (setq term (org-trim (format (concat dtstart "%s" dtend)
+                                              (match-string 1 sublist))))
+                 (setq sublist (substring sublist (1+ (length term)))))
+               (setq rtn (concat rtn istart term ddstart
+                                 sublist ddend iend isep)))
+              (t (setq rtn (concat rtn   ;; previous list
+                                   lsep  ;; list separator
+                                   (org-list-to-generic sublist p)
+                                   lsep  ;; list separator
+                                   )))))
       (format wrapper rtn))))
 
 (defun org-list-to-latex (list)
@@ -1384,6 +1417,9 @@ Valid parameters are
   (org-list-to-generic
    list '(:splicep nil :ostart "\\begin{enumerate}" :oend "\\end{enumerate}"
                        :ustart "\\begin{itemize}" :uend "\\end{itemize}"
+                       :dstart "\\begin{description}" :dend "\\end{description}"
+                       :dtstart "[" :dtend "]"
+                       :ddstart "" :ddend ""
                        :istart "\\item " :iend ""
                        :isep "\n" :lsep "\n")))
 
@@ -1392,6 +1428,9 @@ Valid parameters are
   (org-list-to-generic
    list '(:splicep nil :ostart "<ol>" :oend "</ol>"
                        :ustart "<ul>" :uend "</ul>"
+                       :dstart "<dl>" :dend "</dl>"
+                       :dtstart "<dt>" :dtend "</dt>"
+                       :ddstart "<dd>" :ddend "</dd>"
                        :istart "<li>" :iend "</li>"
                        :isep "\n" :lsep "\n")))
 
@@ -1400,6 +1439,9 @@ Valid parameters are
   (org-list-to-generic
    list '(:splicep nil :ostart "@itemize @minus" :oend "@end itemize"
                        :ustart "@enumerate" :uend "@end enumerate"
+                       :dstart "@table" :dend "@end table"
+                       :dtstart "@item " :dtend "\n"
+                       :ddstart "" :ddend ""
                        :istart "@item\n" :iend ""
                        :isep "\n" :lsep "\n")))
 
