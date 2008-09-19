@@ -150,7 +150,7 @@
     You may set these tags with in-buffer options
     =EXPORT_SELECT_TAGS= and =EXPORT_EXCLUDE_TAGS=.
 
-    I love this feature.  Thanks to Richard G Rigley for coming
+    I love this feature.  Thanks to Richard G Riley for coming
     up with the idea.
 
 *** Prefix interpretation when storing remember notes
@@ -222,7 +222,7 @@
 
 *** New face =org-scheduled= for entries scheduled in the future.
 
-    This was a request by Richard G Rigley.
+    This was a request by Richard G Riley.
 
 *** Remember templates for gnus links can now use the :to escape.
 
