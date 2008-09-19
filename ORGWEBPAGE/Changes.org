@@ -10,14 +10,37 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.07 (in preparation)
+* Version 6.07
 :PROPERTIES:
 :VISIBILITY: content
 :END:
 
+** Overview
+
+   - Filtering existing agenda views with respect to a tag
+   - Editing fixed-width regions with picture or artist mode
+   - /org-plot.el/ is now part of Org
+   - Tags can be used to select the export part of a document
+   - Prefix interpretation when storing remember notes
+   - Yanking inserts folded subtrees
+   - Column view capture tables can have formulas, plotting info
+   - In column view, date stamps can be changed with S-cursor keys
+   - The note buffer for clocking out now mentions the task
+   - Sorting entries alphabetically ignores TODO keyword and priority
+   - Agenda views can sort entries by TODO state
+   - New face =org-scheduled= for entries scheduled in the future.
+   - Remember templates for gnus links can use the :to escape.
+   - The file specification in a remember template may be a function
+   - Categories in iCalendar export include local tags
+   - It is possible to define filters for column view
+   - Disabling integer increment during table Field copy
+   - Capturing column view is on `C-c C-x i'
+   - And tons of bugs fixed.  
+
+
 ** Incompatible changes
 
-*** Prefix interpretation when storing remember notes
+*** Prefix interpretation when storing remember notes has changed
 
     The prefix argument to the `C-c C-c' command that finishes a
     remember process is now interpreted differently:
@@ -29,7 +52,6 @@
     : C-0 C-c C-c   Re-use the last used location
 
     This was requested by John Wiegley.
-
 
 *** Capturing column view is now on `C-c C-x i'
 
@@ -131,16 +153,16 @@
     I love this feature.  Thanks to Richard G Rigley for coming
     up with the idea.
 
-*** New interpretation of prefix arguments when exiting remember
+*** Prefix interpretation when storing remember notes
 
     The prefix argument to the `C-c C-c' command that finishes a
     remember process is now interpreted differently:
 
-    :C-c C-c       Store the note to predefined file and headline
-    :C-1 C-c C-c   Select the storage location interactively
-    :C-0 C-c C-c   Re-use the last used location
-    :C-u C-c C-c   Like C-c C-c, but immediately visit the note
-    :              in its new location.
+    : C-c C-c       Store the note to predefined file and headline
+    : C-u C-c C-c   Like C-c C-c, but immediately visit the note
+    :               in its new location.
+    : C-1 C-c C-c   Select the storage location interactively
+    : C-0 C-c C-c   Re-use the last used location
 
     This was requested by John Wiegley.
 
@@ -205,10 +227,19 @@
 *** Remember templates for gnus links can now use the :to escape.
 
     Thanks to Tommy Lindgren for a patch to this effect.
-
 *** The file specification in a remember template may now be a function
 
     Thanks to Gregory Sullivan for a patch to this effect.
+
+*** Categories in iCalendar export now include local tags
+
+    The locally defined tags are now listed as categories when
+    exporting to iCalendar format.  Org's traditional file/tree
+    category is now the last category in this list.  Configure
+    the variable =org-icalendar-categories= to modify or revert
+    this behavior.
+
+    This was a request by Charles Philip Chan.
 
 *** It is now possible to define filters for column view
 
@@ -217,11 +248,12 @@
     For more information, look at the variable
     =org-columns-modify-value-for-display-function=.
 
-*** Disabling integer increment during table fild copy
+*** Disabling integer increment during table field copy
 
     Prefix arg 0 to S-RET does the trick.
 
     This was a request by Chris Randle.
+
 
 * Version 6.06
 
