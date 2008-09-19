@@ -9456,7 +9456,7 @@ only lines with a TODO keyword are included in the output."
 	    (setcdr (car tags-alist)
 		    (org-remove-uniherited-tags (cdar tags-alist))))
 	  (when (and (or (not todo-only) (member todo org-not-done-keywords))
-		     (eval matcher)
+		     (let ((case-fold-search t)) (eval matcher))
 		     (or
 		      (not (member org-archive-tag tags-list))
 		      ;; we have an archive tag, should we use this anyway?

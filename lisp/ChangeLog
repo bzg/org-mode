@@ -1,3 +1,10 @@
+2008-09-19  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-scan-tags): Make sure that tags matching is not case
+	sensitive.  TODO keyword matching is case sensitive, however, to
+	avoid confusion with similar words that are not meant to be
+	keywords.
+
 2008-09-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-get-local-tags-at): New function.
