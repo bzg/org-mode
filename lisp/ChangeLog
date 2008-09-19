@@ -1,5 +1,8 @@
 2008-09-19  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-indent-line-function): No longer check for src
+	regions, this is too much overhead.
+
 	* org-agenda.el (org-agenda-highlight-todo): Fix bugs with keyword
 	matching.
 
