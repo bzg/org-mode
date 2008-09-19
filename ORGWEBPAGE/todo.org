@@ -55,16 +55,6 @@ something.
     - org-agenda-todo-list-sublevels
     - org-tags-match-list-sublevels
     - org-agenda-todo-ignore-scheduled
-*** IDEA Sort TODO entries according to type?
-    This would apply for the list collection, not in the day entries.
-    However, I could also have a TODO keyword criterion that could be
-    used in the day entries, as one of the minor criteria.
-
-    Right now we can already sort an outline tree according to
-    children, this is nice already.  However, sorting in the agenda
-    would be nice too.  The problem is, that i the agenda we may have
-    todo lists from a number of different buffers, so the sorting
-    relation may not be clear.....
 
 ** Links
 *** WISH Variable of standard links for completion with C-c C-l
@@ -104,9 +94,9 @@ something.
     @4=.....
 
 *** WISH Make a variable that current line should be recomputed always
-   in each table, skipping headers of course.
+    in each table, skipping headers of course.
 
-*** BUG When computing in a narrowed column, this may go wrong.
+*** BUG When computing in a narrowed column, aligning may go wrong.
     Computing changes fields and does not yet see correctly if the column
     width has changed, in the case of a narrowed column.
 
@@ -236,6 +226,23 @@ convention of using "publishing" when there is a /project/ to publish.
     :ARCHIVE_CATEGORY: todo
     :ARCHIVE_TODO: DONE
     :END:
+*** DONE Sort TODO entries according to type?
+    :PROPERTIES:
+    :ARCHIVE_TIME: 2008-09-19 Fri 13:16
+    :ARCHIVE_FILE: ~/lib/emacs/work/org-mode/ORGWEBPAGE/todo.org
+    :ARCHIVE_OLPATH: Tasks/Agenda issues
+    :ARCHIVE_CATEGORY: todo
+    :ARCHIVE_TODO: DONE
+    :END:
+    This would apply for the list collection, not in the day entries.
+    However, I could also have a TODO keyword criterion that could be
+    used in the day entries, as one of the minor criteria.
+
+    Right now we can already sort an outline tree according to
+    children, this is nice already.  However, sorting in the agenda
+    would be nice too.  The problem is, that i the agenda we may have
+    todo lists from a number of different buffers, so the sorting
+    relation may not be clear.....
 
 * COMMENT HTML style specifications
 
