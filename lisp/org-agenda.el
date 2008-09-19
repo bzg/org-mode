@@ -941,8 +941,11 @@ it means that the tags should be flushright to that column.  For example,
 (defcustom org-agenda-fontify-priorities t
   "Non-nil means, highlight low and high priorities in agenda.
 When t, the highest priority entries are bold, lowest priority italic.
-This may also be an association list of priority faces.  The face may be
-a names face, or a list like `(:background \"Red\")'."
+This may also be an association list of priority faces, whose
+keys are the character values of `org-highest-priority',
+`org-default-priority', and `org-lowest-priority' (the default values
+are ?A, ?B, and ?C, respectively). The face may be a names face,
+or a list like `(:background \"Red\")'."
   :group 'org-agenda-line-format
   :type '(choice
 	  (const :tag "Never" nil)
