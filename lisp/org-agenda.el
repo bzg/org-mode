@@ -3479,7 +3479,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	 (regexp org-scheduled-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
-	 d2 diff pos pos1 category tags
+	 d2 diff pos pos1 category tags donep
 	 ee txt head pastschedp todo-state face timestr s)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
