@@ -7951,10 +7951,11 @@ operation has put the subtree."
 		(setq level (org-get-valid-level (funcall outline-level) 1))
 		(goto-char
 		 (if reversed
-		     (outline-next-heading)
+		     (or (outline-next-heading) (point-max))
 		   (or (save-excursion (outline-get-next-sibling))
 		       (org-end-of-subtree t t)
 		       (point-max))))
+		(if (not (bolp)) (newline))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
 	  (org-cut-subtree)

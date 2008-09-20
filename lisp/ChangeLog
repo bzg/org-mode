@@ -1,3 +1,8 @@
+2008-09-20  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-refile): Allow refiling to the last entry in the
+	buffer.
+
 2008-09-19  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-indent-line-function): No longer check for src
