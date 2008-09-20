@@ -6,6 +6,11 @@
 	(org-list-parse-list): Parse descriptive lists.
 	(org-list-to-generic, org-list-to-latex, org-list-to-html)
 	(org-list-to-texinfo): Export descriptive lists.
+	(org-quote-chars): Remove.
+	(org-export-latex-keywords-maybe): Use `replace-regexp-in-string'.
+	(org-export-latex-list-beginning-re): Rename to
+	`org-list-beginning-re'
+	(org-list-item-begin): Rename to `org-list-item-beginning'
 
 2008-09-20  Carsten Dominik  <dominik@science.uva.nl>
 
