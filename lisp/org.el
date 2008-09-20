@@ -9746,22 +9746,25 @@ ignore inherited ones."
 	(widen)
 	(goto-char (or pos (point)))
 	(save-match-data
-	  (condition-case nil
-	      (progn
-		(org-back-to-heading t)
-		(while (not (equal lastpos (point)))
-		  (setq lastpos (point))
-		  (when (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
-		    (setq ltags (org-split-string
-				 (org-match-string-no-properties 1) ":"))
-		    (setq tags (append (org-remove-uniherited-tags ltags)
-				       tags)))
-		  (or org-use-tag-inheritance (error ""))
-		  (if local
-		      (setq lastpos (point)) ; stop here
-		    (org-up-heading-all 1))
-		  (setq parent t)))
-	    (error nil))))
+	  (catch 'done
+	    (condition-case nil
+		(progn
+		  (org-back-to-heading t)
+		  (while (not (equal lastpos (point)))
+		    (setq lastpos (point))
+		    (when (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
+		      (setq ltags (org-split-string
+				   (org-match-string-no-properties 1) ":"))
+		      (setq tags (append
+				  (if parent
+				      (org-remove-uniherited-tags ltags)
+				    ltags)
+				  tags)))
+		    (or org-use-tag-inheritance (throw 'done t))
+		    (if local (throw 'done t))
+		    (org-up-heading-all 1)
+		    (setq parent t)))
+	      (error nil)))))
       (append (org-remove-uniherited-tags org-file-tags) tags))))
 
 (defun org-toggle-tag (tag &optional onoff)
