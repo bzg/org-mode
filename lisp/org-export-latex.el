@@ -60,15 +60,15 @@
 (defvar org-export-latex-add-level 0)
 (defvar org-export-latex-sectioning "")
 (defvar org-export-latex-sectioning-depth 0)
-(defvar org-export-latex-list-beginning-re
-  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +\\(.*\\)$")
-
 (defvar org-export-latex-special-string-regexps
   '(org-ts-regexp
     org-scheduled-string
     org-deadline-string
     org-clock-string)
   "A list of regexps to convert as special keywords.")
+
+(defvar org-list-beginning-re
+  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +\\(.*\\)$")
 
 (defvar latexp)    ; dynamically scoped from org.el
 (defvar re-quote)  ; dynamically scoped from org.el
@@ -179,13 +179,12 @@ argument."
   :type 'string)
 
 (defcustom org-export-latex-tables-verbatim nil
-  "When non-nil, export tables as verbatim."
+  "When non-nil, tables are exported verbatim."
   :group 'org-export-latex
   :type 'boolean)
 
 (defcustom org-export-latex-tables-column-borders nil
-  "When non-nil, group of columns are surrounded with borders,
-XSeven if these borders are the outside borders of the table."
+  "When non-nil, group of columns are surrounded with borders."
   :group 'org-export-latex
   :type 'boolean)
 
@@ -196,9 +195,9 @@ Each cell is of the forma \( \"option\" . \"package\" \)."
   :type 'alist)
 
 (defcustom org-export-latex-low-levels 'description
-  "How to convert sections below the current level of sectioning,
-as specified by `org-export-headline-levels' or the value of \"H:\"
-in Org's #+OPTION line.
+  "How to convert sections below the current level of sectioning.
+This is specified by the `org-export-headline-levels' option or the
+value of \"H:\" in Org's #+OPTION line.
 
 This can be either nil (skip the sections), 'description (convert
 the sections as descriptive lists) or a string to be used instead
@@ -259,7 +258,9 @@ list, obtained by prompting the user."
 
 ;;;###autoload
 (defun org-export-as-latex-batch ()
-  "Call `org-export-as-latex', may be used in batch processing as
+  "Call `org-export-as-latex', may be used in batch processing.
+For example:
+
 emacs 	--batch
 	--load=$HOME/lib/emacs/org.el
 	--eval \"(setq org-export-headline-levels 2)\"
@@ -374,7 +375,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	      (goto-char rbeg)
 	      (and (org-at-heading-p)
 		   (>= (org-end-of-subtree t t) rend)))))
-	 (opt-plist (if subtree-p 
+	 (opt-plist (if subtree-p
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
 	 ;; Make sure the variable contains the updated values.
@@ -570,7 +571,8 @@ and its content."
     (mapc (lambda(x) (org-export-latex-subcontent x num)) subcontent)))
 
 (defun org-export-latex-subcontent (subcontent num)
-  "Export each cell of SUBCONTENT to LaTeX."
+  "Export each cell of SUBCONTENT to LaTeX.
+If NUM, export sections as numerical sections."
   (let ((heading (org-export-latex-fontify-headline
 		  (cdr (assoc 'heading subcontent))))
 	(level (- (cdr (assoc 'level subcontent))
@@ -738,8 +740,7 @@ links, keywords, lists, tables, fixed-width"
    (buffer-substring (point-min) (point-max))))
 
 (defun org-export-latex-protect-string (s)
-  "Prevent further conversion for string S by adding the
-org-protect property."
+  "Add the org-protected property to string S."
   (add-text-properties 0 (length s) '(org-protected t) s) s)
 
 (defun org-export-latex-protect-char-in-string (char-list string)
@@ -773,21 +774,17 @@ org-protect property."
       (if (or (not org-export-with-tags)
 	      (plist-get remove-list :tags))
 	  (replace-match "")
-	(replace-match 
+	(replace-match
 	 (org-export-latex-protect-string
-	  (format "\\texttt{%s}" (save-match-data
-				   (org-quote-chars (match-string 0)))))
-	 t t)))))
-
-(defun org-quote-chars (s)
-  (let ((start 0))
-    (while (string-match "_" s start)
-      (setq start (+ 2 (match-beginning 0))
-	    s (replace-match "\\_" t t s))))
-  s)
+	  (format "\\texttt{%s}"
+                  (save-match-data
+                    (org-quote-chars
+                     (replace-regexp-in-string
+                      "_" "\\\\_" (match-string 0))))))
+         t t)))))
 
 (defun org-export-latex-fontify-headline (string)
-  "Fontify special words in string."
+  "Fontify special words in STRING."
   (with-temp-buffer
     ;; FIXME: org-inside-LaTeX-fragment-p doesn't work when the $...$ is at
     ;; the beginning of the buffer - inserting "\n" is safe here though.
@@ -803,11 +800,11 @@ org-protect property."
     (org-trim (buffer-substring-no-properties (point-min) (point-max)))))
 
 (defun org-export-latex-quotation-marks ()
-  "Export question marks depending on language conventions."
+  "Export quotation marks depending on language conventions."
   (let* ((lang (plist-get org-export-latex-options-plist :language))
 	 (quote-rpl (if (equal lang "fr")
-			'(("\\(\\s-\\)\"" "Â«~")
-			  ("\\(\\S-\\)\"" "~Â»")
+			'(("\\(\\s-\\)\"" "«~")
+			  ("\\(\\S-\\)\"" "~»")
 			  ("\\(\\s-\\)'" "`"))
 		      '(("\\(\\s-\\)\"" "``")
 			("\\(\\S-\\)\"" "''")
@@ -868,8 +865,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 		       (replace-match (or (save-match-data
 					    (org-export-latex-treat-sub-super-char
 					     sub-superscript
-					     (match-string 1)
 					     (match-string 2)
+					     (match-string 1)
 					     (match-string 3))) "") t t)))))))
 	'("^\\([^\n$]*?\\|^\\)\\(\\\\?\\$\\)\\([^\n$]*\\)$"
  	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\([a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
@@ -886,7 +883,7 @@ See the `org-export-latex.el' code for a complete conversion table."
 	  )))
 
 (defun org-export-latex-treat-sub-super-char
-  (subsup string-before char string-after)
+  (subsup char string-before string-after)
   "Convert the \"_\" and \"^\" characters to LaTeX.
 SUBSUP corresponds to the ^: option in the #+OPTIONS line.
 Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
@@ -944,7 +941,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
 (defun org-export-latex-keywords (timestamps)
   "Convert special keywords to LaTeX.
-Regexps are those from `org-export-latex-special-string-regexps'."
+Regexps are those from `org-export-latex-special-string-regexps'.
+If TIMESTAMPS, convert timestamps, otherwise delete them."
   (let ((rg org-export-latex-special-string-regexps) r)
     (while (setq r (pop rg))
       (goto-char (point-min))
@@ -1035,7 +1033,7 @@ Regexps are those from `org-export-latex-special-string-regexps'."
 		       (split-string (org-trim elem) "|" t)))
 		 lines))
     	  (when insert
-	    (insert (org-export-latex-protect-string 
+	    (insert (org-export-latex-protect-string
                      (orgtbl-to-latex
                       lines `(:tstart ,(concat "\\begin{tabular}{" align "}"))))
 		    "\n\n")))))))
@@ -1224,18 +1222,19 @@ Regexps are those from `org-export-latex-special-string-regexps'."
   "Replace plain text lists in current buffer into LaTeX lists."
   "Convert lists to LaTeX."
   (goto-char (point-min))
-  (while (re-search-forward org-export-latex-list-beginning-re nil t)
+  (while (re-search-forward org-list-beginning-re nil t)
     (beginning-of-line)
     (insert (org-list-to-latex (org-list-parse-list t)) "\n")))
 
 (defun org-list-parse-list (&optional delete)
-  "Parse the list at point.
+  "Parse the list at point and maybe DELETE it.
 Return a list containing first level items as strings and
 sublevels as a list of strings."
-  (let ((start (org-list-item-begin))
-	(end (org-list-end))
-	output itemsep ltype)
-    (while (re-search-forward org-export-latex-list-beginning-re end t)
+  (let* ((item-beginning (org-list-item-beginning))
+         (start (car item-beginning))
+         (end (org-list-end (cdr item-beginning)))
+         output itemsep ltype)
+    (while (re-search-forward org-list-beginning-re end t)
       (goto-char (match-beginning 3))
       (save-match-data
         (cond ((string-match "[0-9]" (match-string 2))
@@ -1253,7 +1252,7 @@ sublevels as a list of strings."
 	     (item (buffer-substring
 		    (point)
 		    (or (and (re-search-forward
-			      org-export-latex-list-beginning-re end t)
+			      org-list-beginning-re end t)
 			     (goto-char (match-beginning 0)))
 			(goto-char end))))
 	     (nextindent (match-string 1))
@@ -1271,21 +1270,24 @@ sublevels as a list of strings."
     (setq output (nreverse output))
     (push ltype output)))
 
-(defun org-list-item-begin ()
-  "Find the beginning of the list item and return its position."
+(defun org-list-item-beginning ()
+  "Find the beginning of the list item.
+Return a cons which car is the beginning position of the item and
+cdr is the indentation string."
   (save-excursion
-    (if (not (or (looking-at org-export-latex-list-beginning-re)
+    (if (not (or (looking-at org-list-beginning-re)
 		 (re-search-backward
-		  org-export-latex-list-beginning-re nil t)))
+		  org-list-beginning-re nil t)))
 	(progn (goto-char (point-min)) (point))
-      (match-beginning 0))))
+      (cons (match-beginning 0) (match-string 1)))))
 
-(defun org-list-end ()
-  "Find the end of the list and return its position."
+(defun org-list-end (indent)
+  "Return the position of the end of the list.
+INDENT is the indentation of the list."
   (save-excursion
     (catch 'exit
-      (while (or (looking-at org-export-latex-list-beginning-re)
-		 (looking-at "^[ \t]+\\|^$"))
+      (while (or (looking-at org-list-beginning-re)
+		 (looking-at (concat "^" indent "[ \t]+\\|^$")))
 	(if (eq (point) (point-max))
 	    (throw 'exit (point-max)))
 	(forward-line 1))) (point)))
@@ -1313,19 +1315,20 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      (goto-char (org-list-item-begin))
+      (goto-char (car (org-list-item-beginning)))
       (beginning-of-line 0)
       (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
 	(if maybe
 	    (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
-	   beg
+           (item-beginning (org-list-item-beginning))
 	   (transform (intern (match-string 2)))
 	   (txt (buffer-substring-no-properties
-		 (org-list-item-begin)
-		 (org-list-end)))
-	   (list (org-list-parse-list)))
+                 (car item-beginning)
+		 (org-list-end (cdr item-beginning))))
+	   (list (org-list-parse-list))
+           beg)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
       (setq txt (funcall transform list))
@@ -1349,7 +1352,7 @@ this list."
 (defun org-list-to-generic (list params)
   "Convert a LIST parsed through `org-list-parse-list' to other formats.
 
-Valid parameters are
+Valid parameters PARAMS are
 
 :ustart     String to start an unordered list
 :uend       String to end an unordered list
