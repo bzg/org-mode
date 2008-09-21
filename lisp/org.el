@@ -9035,7 +9035,7 @@ The auto-repeater uses this.")
   "Add a note to the current entry.
 This is done in the same way as adding a state change note."
   (interactive)
-  (org-add-log-setup 'note nil t nil))
+  (org-add-log-setup 'note nil 'findpos nil))
 
 (defun org-add-log-setup (&optional purpose state findpos how &optional extra)
   "Set up the post command hook to take a note.
@@ -9044,23 +9044,28 @@ When FINDPOS is non-nil, find the correct position for the note in
 the current entry.  If not, assume that it can be inserted at point.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
-  (save-excursion
-    (when findpos
-      (org-back-to-heading t)
-      (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
-			  "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
-			  "[^\r\n]*\\)?"))
-      (goto-char (match-end 0))
-      (unless org-log-states-order-reversed
-	(and (= (char-after) ?\n) (forward-char 1))
-	(org-skip-over-state-notes)
-	(skip-chars-backward " \t\n\r")))
-    (move-marker org-log-note-marker (point))
-    (setq org-log-note-purpose purpose
-	  org-log-note-state state
-	  org-log-note-how how
-	  org-log-note-extra extra)
-    (add-hook 'post-command-hook 'org-add-log-note 'append)))
+  (save-restriction
+    (save-excursion
+      (when findpos
+	(org-back-to-heading t)
+	(org-narrow-to-subtree)
+	(while (re-search-forward
+		(concat "\\(" org-drawer-regexp "\\|" org-property-end-re "\\)")
+		(point-max) t) (forward-line))
+	(looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
+			    "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
+			    "[^\r\n]*\\)?"))
+	(goto-char (match-end 0))
+	(unless org-log-states-order-reversed
+	  (and (= (char-after) ?\n) (forward-char 1))
+	  (org-skip-over-state-notes)
+	  (skip-chars-backward " \t\n\r")))
+      (move-marker org-log-note-marker (point))
+      (setq org-log-note-purpose purpose
+	    org-log-note-state state
+	    org-log-note-how how
+	    org-log-note-extra extra)
+      (add-hook 'post-command-hook 'org-add-log-note 'append))))
 
 (defun org-skip-over-state-notes ()
   "Skip past the list of State notes in an entry."

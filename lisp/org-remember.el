@@ -135,6 +135,7 @@ Furthermore, the following %-escapes will be replaced with content:
   %^L         Like %^C, but insert as link
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion all tags in all agenda files
+  %^{prop}p   Prompt the user for a value for property `prop'
   %:keyword   specific information for certain link types, see below
   %[pathname] insert the contents of the file given by `pathname'
   %(sexp)     evaluate elisp `(sexp)' and replace with the result
@@ -301,13 +302,10 @@ RET at beg-of-buf -> Append to file as level 2 headline
       (cddr (assoc char templates)))))
 
 (defun org-get-x-clipboard (value)
-  "Get the value of the x clibboard, in a way that also works with XEmacs."
+  "Get the value of the x clibboard, compatible with XEmacs, and GNU Emacs 21."
   (if (eq window-system 'x)
-      (let ((x (if org-xemacs-p
-		   (org-no-warnings (get-selection-no-error value))
-		 (and (fboundp 'x-selection-value)
-		      (x-selection-value value)))))
-	(and (> (length x) 0) (set-text-properties 0 (length x) nil x) x))))
+      (let ((x (org-get-x-clipboard-compat value)))
+	(if x (org-no-properties x)))))
 
 ;;;###autoload
 (defun org-remember-apply-template (&optional use-char skip-interactive)
@@ -438,7 +436,7 @@ to be run from that hook to function properly."
 	    (org-set-local 'org-remember-default-headline headline))
 	;; Interactive template entries
 	(goto-char (point-min))
-	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCL]\\)?" nil t)
+	(while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
 	  (setq char (if (match-end 3) (match-string 3))
 		prompt (if (match-end 2) (match-string 2)))
 	  (goto-char (match-beginning 0))
@@ -483,6 +481,22 @@ to be run from that hook to function properly."
 						   (car clipboards)
 						   '(clipboards . 1)
 						   (car clipboards))))))
+	   ((equal char "p")
+	    (let*
+		((prop (substring-no-properties prompt))
+		 (allowed (with-current-buffer
+			      (get-buffer (file-name-nondirectory file))
+			    (org-property-get-allowed-values nil prop 'table)))
+		 (existing (with-current-buffer
+			       (get-buffer (file-name-nondirectory file))
+			     (mapcar 'list (org-property-values prop))))
+		 (propprompt (concat "Value for " prop ": "))
+		 (val (if allowed
+			  (org-completing-read propprompt allowed nil
+					       'req-match)
+			(org-completing-read propprompt existing nil nil
+					     "" nil ""))))
+	      (org-set-property prop val)))
 	   (char
 	    ;; These are the date/time related ones
 	    (setq org-time-was-given (equal (upcase char) char))

@@ -1,3 +1,35 @@
+2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-remember.el (org-remember-apply-template): Add a new
+	expansion for adding properties to remember items.
+
+	* org.el (org-add-log-setup): Skip over drawers (properties,
+	clocks etc) when adding notes.
+
+	* org-agenda.el (org-agenda-get-closed): show durations of clocked
+	items as well as the start and end times.
+
+	* org-compat.el (org-get-x-clipboard-compat): Add a compat
+	function for fetching the X clipboard on XEmacs and GNU Emacs 21.
+
+	* org-remember.el (org-get-x-clipboard): Use the compat
+	function to get clipboard values when x-selection-value is
+	unavailable. Use substring-no-properties instead of
+	set-text-properties to remove text properties from the clipboard
+	value.
+
+	* lisp/org-clock.el (org-update-mode-line): Support limiting the
+	modeline clock string, and display the full todo value in the
+	tooltip. Set a local keymap so mouse-3 on the clock string goes to
+	the currently clocked task.
+	(org-clock-string-limit): Add a custom value for the maximum
+	length of the clock string in the modeline.
+	(org-clock-mode-map): Add a keymap for the modeline string
+
+2008-09-21  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-compat.el (org-propertize): New function.
+
 2008-09-20  Bastien Guerry  <bzg@altern.org>
 
 	* org-export-latex.el (org-export-latex-tables): protect exported
@@ -255,7 +287,7 @@
 
 	* org-agenda.el (org-batch-store-agenda-views): Fix parsing bug.
 
-2008-07-20  Juri Linkov <juri@jurta.org>
+2008-07-20  Juri Linkov  <juri@jurta.org>
 
 	* org.el (narrow-map): Bind `org-narrow-to-subtree' to "s" on the
 	new keymap `narrow-map' instead of binding "\C-xns".

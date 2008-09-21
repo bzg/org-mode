@@ -10,6 +10,20 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.08 (in preparation)
+:PROPERTIES:
+:VISIBILITY: content
+:END:
+
+** Details
+
+*** New remember template escape to add a property
+    Thanks to James TD Smith for a patch to this effect.
+*** Clicking with mouse-2 on clock info in mode-line visits the clock.
+    Thanks to James TD Smith for a patch to this effect.
+*** New file in contrib: lisp/org-checklist.el
+    Thanks to James TD Smith for a patch to this effect.
+
 * Version 6.07
 :PROPERTIES:
 :VISIBILITY: content
