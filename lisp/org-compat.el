@@ -30,6 +30,8 @@
 
 ;;; Code:
 
+(require 'org-macs)
+
 (defconst org-xemacs-p (featurep 'xemacs)) ; not used by org.el itself
 (defconst org-format-transports-properties-p
   (let ((x "a"))

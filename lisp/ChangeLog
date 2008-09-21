@@ -1,5 +1,9 @@
 2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
 
+	* org.el (org-get-refile-targets): Replace links with their
+	descriptions
+	(org-imenu-get-tree): Replace links with their descriptions.
+
 	* org-remember.el (org-remember-apply-template): Add a new
 	expansion for adding properties to remember items.
 

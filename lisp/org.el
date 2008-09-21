@@ -7866,7 +7866,7 @@ on the system \"/user@host:\"."
 		(while (re-search-forward descre nil t)
 		  (goto-char (point-at-bol))
 		  (when (looking-at org-complex-heading-regexp)
-		    (setq txt (match-string 4)
+		    (setq txt (org-link-display-format (match-string 4))
 			  re (concat "^" (regexp-quote
 					  (buffer-substring (match-beginning 1)
 							    (match-end 4)))))
@@ -9037,6 +9037,7 @@ This is done in the same way as adding a state change note."
   (interactive)
   (org-add-log-setup 'note nil 'findpos nil))
 
+(defvar org-property-end-re)
 (defun org-add-log-setup (&optional purpose state findpos how &optional extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
@@ -14676,7 +14677,8 @@ Show the heading too, if it is currently invisible."
 	  (setq level (org-reduced-level (funcall outline-level)))
 	  (when (<= level n)
 	    (looking-at org-complex-heading-regexp)
-	    (setq head (org-match-string-no-properties 4)
+	    (setq head (org-link-display-format
+			(org-match-string-no-properties 4))
 		  m (org-imenu-new-marker))
 	    (org-add-props head nil 'org-imenu-marker m 'org-imenu t)
 	    (if (>= level last-level)
@@ -14692,6 +14694,17 @@ Show the heading too, if it is currently invisible."
 	       (lambda ()
 		 (if (eq major-mode 'org-mode)
 		     (org-show-context 'org-goto))))))
+
+(defun org-link-display-format (link)
+  "Replace a link with either the description, or the link target
+if no description is present"
+  (save-match-data
+    (if (string-match org-bracket-link-analytic-regexp link)
+	(replace-match (or (match-string 5 link)
+			   (concat (match-string 1 link)
+				   (match-string 3 link)))
+		       nil nil link)
+      link)))
 
 ;; Speedbar support
 
