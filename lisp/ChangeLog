@@ -1,5 +1,8 @@
 2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
 
+	* org-agenda.el (org-agenda-get-closed): show durations of clocked
+	items as well as the start and end times.
+
 	* org-compat.el (org-get-x-clipboard-compat): Add a compat
 	function for fetching the X clipboard on XEmacs and GNU Emacs 21.
 

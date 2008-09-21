@@ -3337,7 +3337,7 @@ the documentation of `org-diary'."
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
 	 marker hdmarker priority category tags closedp
-	 ee txt timestr rest)
+	 ee txt timestr rest clocked)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3353,10 +3353,11 @@ the documentation of `org-diary'."
 	  (setq rest (substring timestr (match-end 0))
 		timestr (substring timestr 0 (match-end 0)))
 	  (if (and (not closedp)
-		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\]" rest))
-	      (setq timestr (concat (substring timestr 0 -1)
-				    "-" (match-string 1 rest) "]"))))
-		
+		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" rest))
+	      (progn (setq timestr (concat (substring timestr 0 -1)
+					   "-" (match-string 1 rest) "]"))
+		     (setq clocked (match-string 2 rest)))
+	    (setq clocked "-")))
 	(save-excursion
 	  (if (re-search-backward "^\\*+ " nil t)
 	      (progn
@@ -3365,7 +3366,8 @@ the documentation of `org-diary'."
 		      tags (org-get-tags-at))
 		(looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 		(setq txt (org-format-agenda-item
-			   (if closedp "Closed:    " "Clocked:   ")
+			   (if closedp "Closed:    "
+			     (concat "Clocked:   (" clocked  ")"))
 			   (match-string 1) category tags timestr)))
 	    (setq txt org-agenda-no-heading-message))
 	  (setq priority 100000)
