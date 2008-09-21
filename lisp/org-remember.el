@@ -301,13 +301,10 @@ RET at beg-of-buf -> Append to file as level 2 headline
       (cddr (assoc char templates)))))
 
 (defun org-get-x-clipboard (value)
-  "Get the value of the x clibboard, in a way that also works with XEmacs."
+  "Get the value of the x clibboard, compatible with XEmacs, and GNU Emacs 21."
   (if (eq window-system 'x)
-      (let ((x (if org-xemacs-p
-		   (org-no-warnings (get-selection-no-error value))
-		 (and (fboundp 'x-selection-value)
-		      (x-selection-value value)))))
-	(and (> (length x) 0) (set-text-properties 0 (length x) nil x) x))))
+      (let ((x (org-get-x-clipboard-compat value)))
+	(if x (org-no-properties x)))))
 
 ;;;###autoload
 (defun org-remember-apply-template (&optional use-char skip-interactive)
