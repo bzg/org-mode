@@ -1,5 +1,8 @@
 2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
 
+	* org.el (org-add-log-setup): Skip over drawers (properties,
+	clocks etc) when adding notes.
+
 	* org-agenda.el (org-agenda-get-closed): show durations of clocked
 	items as well as the start and end times.
 
