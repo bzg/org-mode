@@ -4922,6 +4922,7 @@ insertion of content:
 %^L         @r{Like @code{%^C}, but insert as link.}
 %^g         @r{prompt for tags, with completion on tags in target file.}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
+%^{prop}p   @r{Prompt the user for a value for property @code{prop}}
 %:keyword   @r{specific information for certain link types, see below}
 %[pathname] @r{insert the contents of the file given by @code{pathname}}
 %(sexp)     @r{evaluate elisp @code{(sexp)} and replace with the result}
