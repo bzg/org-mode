@@ -1,3 +1,10 @@
+2008-09-22  James TA Smith  <ahktenzero@mohorovi.cc>
+
+	* org-plot.el (org-plot/gnuplot): Make tables starting with a
+	hline work correctly.
+	(org-plot/gnuplot-script): Put commas at the end of each script
+	line.
+
 2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-get-refile-targets): Replace links with their

@@ -218,7 +218,7 @@ NUM-COLS controls the number of columns plotted in a 2-d plot."
 			      (format "\"%s\" %d" (cdr pair) (car pair)))
 			    y-labels ", "))))
       (case type ;; plot command
-	('2d (dotimes (col num-cols) 
+	('2d (dotimes (col num-cols)
 	       (unless (and (equal type '2d)
 			    (or (and ind (equal (+ 1 col) ind))
 				(and deps (not (member (+ 1 col) deps)))))
@@ -239,11 +239,11 @@ NUM-COLS controls the number of columns plotted in a 2-d plot."
 	 (setq plot-lines (list (format "'%s' with %s title ''"
 					data-file with)))))
       (add-to-script
-       (concat plot-cmd " " (mapconcat 'identity (reverse plot-lines) "\\\n    ,")))
+       (concat plot-cmd " " (mapconcat 'identity (reverse plot-lines) ",\\\n    ")))
       script)))
 
 ;;-----------------------------------------------------------------------------
-;; facad functions
+;; facade functions
 ;;;###autoload
 (defun org-plot/gnuplot (&optional params)
   "Plot table using gnuplot. Gnuplot options can be specified with PARAMS.
@@ -255,11 +255,11 @@ line directly before or after the table."
     (delete-other-windows)
     (when (get-buffer "*gnuplot*") ;; reset *gnuplot* if it already running
       (save-excursion
-	(set-buffer "*gnuplot*") (goto-char (point-max)) 
+	(set-buffer "*gnuplot*") (goto-char (point-max))
 	(gnuplot-delchar-or-maybe-eof nil)))
     (org-plot/goto-nearest-table)
     ;; set default options
-    (mapc 
+    (mapc
      (lambda (pair)
        (unless (plist-member params (car pair))
 	 (setf params (plist-put params (car pair) (cdr pair)))))
@@ -267,7 +267,8 @@ line directly before or after the table."
     ;; collect table and table information
     (let* ((data-file (make-temp-file "org-plot"))
 	   (table (org-table-to-lisp))
-	   (num-cols (length (first table))))
+	   (num-cols (length (if (eq (first table) 'hline) (second table)
+			       (first table)))))
       (while (equal 'hline (first table)) (setf table (cdr table)))
       (when (equal (second table) 'hline)
 	(setf params (plist-put params :labels (first table))) ;; headers to labels
