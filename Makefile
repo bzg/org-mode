@@ -195,6 +195,7 @@ card:	doc/orgcard.pdf doc/orgcard.ps doc/orgcard_letter.pdf doc/orgcard_letter.p
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	touch doc/org.texi doc/orgcard.tex # force update
+	make cleancontrib
 	make info
 	make doc
 	make lisp/org-install.el
@@ -242,6 +243,9 @@ relup:
 
 db:
 	grep -e '(debug)' lisp/*el
+
+cleancontrib:
+	find contrib -name \*~ -exec rm {} \;
 
 cleanelc:
 	rm -f $(ELCFILES)
