@@ -1,3 +1,7 @@
+2008-09-22  Bastien Guerry  <bzg@altern.org>
+
+	* org-export-latex.el (org-export-latex-keywords-maybe): Bug fix.
+
 2008-09-22  James TA Smith  <ahktenzero@mohorovi.cc>
 
 	* org-plot.el (org-plot/gnuplot): Make tables starting with a
