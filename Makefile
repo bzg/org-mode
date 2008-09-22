@@ -286,7 +286,7 @@ lisp/org-bibtex.elc:       lisp/org.elc
 lisp/org-clock.elc:        lisp/org.elc
 lisp/org-colview.elc:      lisp/org.elc
 lisp/org-colview-xemacs.elc:      lisp/org.elc
-lisp/org-compat.elc:
+lisp/org-compat.elc:       lisp/org-macs.elc
 lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
 lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
 lisp/org-faces.elc:        lisp/org-macs.elc lisp/org-compat.elc
