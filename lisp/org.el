@@ -2475,10 +2475,10 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
    org-table-clean-before-export
    org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
 
-;; Declare and autoload functions from org-exp.el
+;; Declare and autoload functions from org-agenda.el
 
 (eval-and-compile
-  (org-autoload "org-exp"
+  (org-autoload "org-agenda"
 		'(org-agenda org-agenda-list org-search-view
    org-todo-list org-tags-view org-agenda-list-stuck-projects
    org-diary org-agenda-to-appt)))
