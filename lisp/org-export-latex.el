@@ -778,9 +778,8 @@ links, keywords, lists, tables, fixed-width"
 	 (org-export-latex-protect-string
 	  (format "\\texttt{%s}"
                   (save-match-data
-                    (org-quote-chars
-                     (replace-regexp-in-string
-                      "_" "\\\\_" (match-string 0))))))
+                    (replace-regexp-in-string
+                     "_" "\\\\_" (match-string 0)))))
          t t)))))
 
 (defun org-export-latex-fontify-headline (string)
