@@ -5378,7 +5378,7 @@ belonging to the \"Work\" category."
     ;; Map thru entries and find if we should filter them out
     (mapc
      (lambda(x)
-       (let* ((evt (org-trim (get-text-property 1 'txt x)))
+       (let* ((evt (org-trim (or (get-text-property 1 'txt x) "")))
 	      (cat (get-text-property 1 'org-category x))
 	      (tod (get-text-property 1 'time-of-day x))
 	      (ok (or (null filter)
@@ -5391,9 +5391,9 @@ belonging to the \"Work\" category."
 	 ;; FIXME: Shall we remove text-properties for the appt text?
 	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
 	 (when (and ok tod)
-	   (setq tod (number-to-string tod)
+	   (setq tod (concat "00" (number-to-string tod))
 		 tod (when (string-match
-			    "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)" tod)
+			    "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
 		       (concat (match-string 1 tod) ":"
 			       (match-string 2 tod))))
 	   (appt-add tod evt)

@@ -1,3 +1,8 @@
+2008-09-22  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-to-appt): Fix bug with appointment
+	time before 1am.
+
 2008-09-22  James TA Smith  <ahktenzero@mohorovi.cc>
 
 	* org-plot.el (org-plot/gnuplot): Make tables starting with a
