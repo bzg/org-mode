@@ -1,5 +1,8 @@
 2008-09-23  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-list.el: New file, aggregating list functions from org.el
+	and org-export-latex.el.
+
 	* org.el (org-edit-src-region-extra): New option.
 
 2008-09-22  Carsten Dominik  <dominik@science.uva.nl>

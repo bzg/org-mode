@@ -74,6 +74,7 @@ LISPF      = 	org.el			\
 		org-info.el		\
 		org-jsinfo.el		\
 		org-irc.el		\
+		org-list.el		\
 		org-mac-message.el	\
 	     	org-macs.el		\
 		org-mew.el              \
@@ -299,12 +300,13 @@ lisp/org-id.elc:           lisp/org.elc
 lisp/org-info.elc:         lisp/org.elc
 lisp/org-irc.elc:          lisp/org.elc
 lisp/org-jsinfo.elc:       lisp/org.elc lisp/org-exp.elc
-lisp/org-plot.elc:         lisp/org.elc lisp/org-exp.elc lisp/org-table.elc
+lisp/org-list.elc:         lisp/org-macs.elc lisp/org-compat.elc
 lisp/org-mac-message.elc:  lisp/org.elc
 lisp/org-macs.elc:
 lisp/org-mew.elc:          lisp/org.elc
 lisp/org-mhe.elc:          lisp/org.elc
 lisp/org-mouse.elc:        lisp/org.elc
+lisp/org-plot.elc:         lisp/org.elc lisp/org-exp.elc lisp/org-table.elc
 lisp/org-publish.elc:
 lisp/org-remember.elc:     lisp/org.elc
 lisp/org-rmail.elc:        lisp/org.elc
