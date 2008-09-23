@@ -1,3 +1,7 @@
+2008-09-23  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-edit-src-region-extra): New option.
+
 2008-09-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-to-appt): Fix bug with appointment

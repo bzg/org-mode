@@ -699,6 +699,23 @@ See also the QUOTE keyword."
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-edit-src-region-extra nil
+  "Additional regexps to identify regions for editing with `org-edit-src-code'.
+For examples see the function `org-edit-src-find-region-and-lang'.
+The regular expression identifying the begin marker should end with a newline,
+and the regexp marking the end line should start with a newline, to make sure
+there are kept outside the narrowed region."
+  :group 'org-edit-structure
+  :type '(repeat
+	  (list
+	   (regexp :tag "begin regexp")
+	   (regexp :tag "end regexp")
+	   (choice :tag "language"
+		   (string :tag "specify")
+		   (integer :tag "from match group")
+		   (const :tag "from `lang' element")
+		   (const :tag "from `style' element")))))
+
 (defcustom org-edit-fixed-width-region-mode 'artist-mode
   "The mode that should be used to edit fixed-width regions.
 These are the regions where each line starts with a colon."
@@ -5545,28 +5562,31 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	(message "%s" msg)
 	t))))
 
+
 (defun org-edit-src-find-region-and-lang ()
   "Find the region and language for a local edit.
 Return a list with beginning and end of the region, a string representing
 the language, a switch telling of the content should be in a single line."
   (let ((re-list
-	 '(
-	   ("<src\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</src>" lang)
-	   ("<literal\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</literal>" style)
-	   ("<example>[ \t]*\n?" "\n?[ \t]*</example>" "fundamental")
-	   ("<lisp>[ \t]*\n?" "\n?[ \t]*</lisp>" "emacs-lisp")
-	   ("<perl>[ \t]*\n?" "\n?[ \t]*</perl>" "perl")
-	   ("<python>[ \t]*\n?" "\n?[ \t]*</python>" "python")
-	   ("<ruby>[ \t]*\n?" "\n?[ \t]*</ruby>" "ruby")
-	   ("^#\\+begin_src\\( \\([^ \t\n]+\\)\\)?.*\n" "\n#\\+end_src" 2)
-	   ("^#\\+begin_example.*\n" "^#\\+end_example" "fundamental")
-	   ("^#\\+html:" "\n" "html" single-line)
-	   ("^#\\+begin_html.*\n" "\n#\\+end_html" "html")
-	   ("^#\\+begin_latex.*\n" "\n#\\+end_latex" "latex")
-	   ("^#\\+latex:" "\n" "latex" single-line)
-	   ("^#\\+begin_ascii.*\n" "\n#\\+end_ascii" "fundamental")
-	   ("^#\\+ascii:" "\n" "ascii" single-line)
-	 ))
+	 (append
+	  org-edit-src-region-extra
+	  '(
+	    ("<src\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</src>" lang)
+	    ("<literal\\>[^<]*>[ \t]*\n?" "\n?[ \t]*</literal>" style)
+	    ("<example>[ \t]*\n?" "\n?[ \t]*</example>" "fundamental")
+	    ("<lisp>[ \t]*\n?" "\n?[ \t]*</lisp>" "emacs-lisp")
+	    ("<perl>[ \t]*\n?" "\n?[ \t]*</perl>" "perl")
+	    ("<python>[ \t]*\n?" "\n?[ \t]*</python>" "python")
+	    ("<ruby>[ \t]*\n?" "\n?[ \t]*</ruby>" "ruby")
+	    ("^#\\+begin_src\\( \\([^ \t\n]+\\)\\)?.*\n" "\n#\\+end_src" 2)
+	    ("^#\\+begin_example.*\n" "\n#\\+end_example" "fundamental")
+	    ("^#\\+html:" "\n" "html" single-line)
+	    ("^#\\+begin_html.*\n" "\n#\\+end_html" "html")
+	    ("^#\\+begin_latex.*\n" "\n#\\+end_latex" "latex")
+	    ("^#\\+latex:" "\n" "latex" single-line)
+	    ("^#\\+begin_ascii.*\n" "\n#\\+end_ascii" "fundamental")
+	    ("^#\\+ascii:" "\n" "ascii" single-line)
+	    )))
 	(pos (point))
 	re re1 re2 single beg end lang)
     (catch 'exit
@@ -5597,10 +5617,10 @@ the language, a switch telling of the content should be in a single line."
     (cond
      ((stringp lang) lang)
      ((integerp lang) (match-string lang))
-     ((and (eq lang lang)
+     ((and (eq lang 'lang)
 	   (string-match "\\<lang=\"\\([^ \t\n\"]+\\)\"" m))
       (match-string 1 m))
-     ((and (eq lang lang)
+     ((and (eq lang 'style)
 	   (string-match "\\<style=\"\\([^ \t\n\"]+\\)\"" m))
       (match-string 1 m))
      (t "fundamental"))))
