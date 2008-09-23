@@ -34,11 +34,11 @@
   (require 'cl))
 (require 'org)
 
+(declare-function remember-mode "remember" ())
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
 (declare-function remember-finalize "remember" ())
 (defvar remember-save-after-remembering)
-(defvar remember-data-file)
 (defvar remember-register)
 (defvar remember-buffer)
 (defvar remember-handler-functions)
@@ -210,7 +210,7 @@ user each time a remember buffer with a running clock is filed away.  "
 ;;;###autoload
 (defun org-remember-insinuate ()
   "Setup remember.el for use with Org-mode."
-  (require 'remember)
+  (org-require-remember)
   (setq remember-annotation-functions '(org-remember-annotation))
   (setq remember-handler-functions '(org-remember-handler))
   (add-hook 'remember-mode-hook 'org-remember-apply-template))
@@ -583,6 +583,7 @@ note stored by remember.
 Lisp programs can set ORG-FORCE-REMEMBER-TEMPLATE-CHAR to a character
 associated with a template in `org-remember-templates'."
   (interactive "P")
+  (org-require-remember)
   (cond
    ((equal goto '(4)) (org-go-to-remember-target))
    ((equal goto '(16)) (org-remember-goto-last-stored))
@@ -879,10 +880,40 @@ See also the variable `org-reverse-note-order'."
 
   t)    ;; return t to indicate that we took care of this note.
 
-
 (defun org-do-remember (&optional initial)
   "Call remember."
   (remember initial))
+
+(defun org-require-remember ()
+  "Make sure remember is loaded, or install our own emergency version of it."
+  (condition-case nil
+      (require 'remember22)
+    (error
+     ;; Lets install our own micro version of remember
+     (defvar remember-register ?R)
+     (defvar remember-mode-hook nil)
+     (defvar remember-handler-functions nil)
+     (defvar remember-buffer "*Remember*")
+     (defvar remember-save-after-remembering t)
+     (defvar remember-annotation-functions '(buffer-file-name))
+     (defun remember-finalize ()
+       (run-hook-with-args-until-success 'remember-handler-functions)
+       (when (equal remember-buffer (buffer-name))
+	 (kill-buffer (current-buffer))
+	 (jump-to-register remember-register)))
+     (defun remember-mode ()
+       (fundamental-mode)
+       (setq mode-name "Remember")
+       (run-hooks 'remember-mode-hook))
+     (defun remember (&optional initial)
+       (window-configuration-to-register remember-register)
+       (let* ((annotation (run-hook-with-args-until-success
+			   'remember-annotation-functions)))
+	 (switch-to-buffer-other-window (get-buffer-create remember-buffer))
+	 (remember-mode)))
+     (defun remember-buffer-desc ()
+       (buffer-substring (point-min) (save-excursion (goto-char (point-min))
+						     (point-at-eol)))))))
 
 (provide 'org-remember)
 
