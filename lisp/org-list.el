@@ -805,12 +805,7 @@ Assumes cursor in item line."
     (list ind ind-up ind-down)))
 
 
-
-
-
-
-
-
+;;; Send and receive lists
 
 (defun org-list-parse-list (&optional delete)
   "Parse the list at point and maybe DELETE it.

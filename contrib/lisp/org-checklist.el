@@ -1,7 +1,7 @@
 ;;; org-checklist.el --- org functions for checklist handling
-;;
+
 ;; Copyright (C) 2008 James TD Smith
-;;
+
 ;; Author: James TD Smith (@ ahktenzero (. mohorovi cc))
 ;; Version: 1.0
 ;; Keywords: org, checklists
@@ -19,8 +19,9 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-;;
+
 ;;; Commentary:
+
 ;; This file provides some functions for handing repeated tasks which involve
 ;; checking off a list of items. By setting the RESET_CHECK_BOXES property in an
 ;; item, when the TODO state is set to done all checkboxes under that item are
