@@ -1,5 +1,8 @@
 2008-09-24  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-table-sum): Do not format the result with %g,
+	it does rounding when there are too many digits.
+
 	* org.el (org-map-entries): Protect the keyword-selecting variables.
 
 2008-09-23  Bastien Guerry  <bzg@altern.org>

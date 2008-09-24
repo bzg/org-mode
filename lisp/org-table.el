@@ -1644,7 +1644,7 @@ If NLAST is a number, only the NLAST fields will actually be summed."
 					items1)))
 	     (res (apply '+ numbers))
 	     (sres (if (= org-timecnt 0)
-		       (format "%g" res)
+		       (number-to-string res)
 		     (setq diff (* 3600 res)
 			   h (floor (/ diff 3600)) diff (mod diff 3600)
 			   m (floor (/ diff 60)) diff (mod diff 60)
