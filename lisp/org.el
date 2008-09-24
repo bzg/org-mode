@@ -8685,7 +8685,7 @@ only lines with a TODO keyword are included in the output."
 	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
 	 (llast 0) rtn rtn1 level category i txt
 	 todo marker entry priority)
-    (when (not (member action '(agenda sparse-tree)))
+    (when (not (or (member action '(agenda sparse-tree)) (functionp action)))
       (setq action (list 'lambda nil action)))
     (save-excursion
       (goto-char (point-min))
@@ -9506,9 +9506,12 @@ the scanner.  The following items can be given here:
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
 	 (org-tags-match-list-sublevels t)
-	 matcher pos file)
+	 matcher pos file
+	 org-todo-keywords-for-agenda
+	 org-done-keywords-for-agenda
+	 org-todo-keyword-alist-for-agenda
+	 org-tag-alist-for-agenda)
 
-    (cond
      ((eq match t)   (setq matcher t))
      ((eq match nil) (setq matcher t))
      (t (setq matcher (if match (org-make-tags-matcher match) t))))
