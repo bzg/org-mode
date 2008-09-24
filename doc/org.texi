@@ -135,6 +135,7 @@ Tables
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities
+* Org Plot::                    Plotting from org tables
 
 The spreadsheet
 
@@ -1372,6 +1373,7 @@ calculator).
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities
+* Org Plot::                    Plotting from org tables
 @end menu
 
 @node Built-in table editor, Narrow columns, Tables, Tables
@@ -1699,7 +1701,7 @@ construct La@TeX{} tables with the underlying ease and power of
 Orgtbl mode, including spreadsheet capabilities.  For details, see
 @ref{Tables in arbitrary syntax}.
 
-@node The spreadsheet,  , Orgtbl mode, Tables
+@node The spreadsheet, Org Plot, Orgtbl mode, Tables
 @section The spreadsheet
 @cindex calculations, in tables
 @cindex spreadsheet capabilities
@@ -2166,9 +2168,8 @@ to reserve the first column of the table for special marking characters.
 @kindex C-#
 @item C-#
 Rotate the calculation mark in first column through the states @samp{},
-@samp{#}, @samp{*}, @samp{!}, @samp{$}.  The meaning of these characters
-is discussed below.  When there is an active region, change all marks in
-the region.
+@samp{#}, @samp{*}, @samp{!}, @samp{$}.  When there is an active region,
+change all marks in the region.
 @end table
 
 Here is an example of a table that collects exam results of students and
@@ -2184,7 +2185,6 @@ makes use of these features:
 | ^ |         |     m1 |     m2 |     m3 |    mt |      |
 |---+---------+--------+--------+--------+-------+------|
 | # | Peter   |     10 |      8 |     23 |    41 |  8.2 |
-| # | Sara    |      6 |     14 |     19 |    39 |  7.8 |
 | # | Sam     |      2 |      4 |      3 |     9 |  1.8 |
 |---+---------+--------+--------+--------+-------+------|
 |   | Average |        |        |        |  29.7 |      |
@@ -2259,6 +2259,87 @@ functions.
 #+TBLFM: $5=taylor($2,$4,$3);n3
 @end group
 @end example
+
+@page
+@node Org Plot,  , The spreadsheet, Tables
+@section Org Plot
+@cindex graph, in tables
+@cindex plot tables using gnuplot
+
+Org Plot can produce 2D and 3D graphs of information stored in org tables
+using @file{Gnuplot} (see @uref{http://www.gnuplot.info/, the Gnuplot
+website}) and @file{gnuplot-mode} (see
+@uref{http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html, the
+gnuplot-mode website}).  To see this in action ensure that you have both
+Gnuplot and Gnuplot-mode installed on your system, then call
+@code{org-plot/gnuplot} on the following table.
+
+@example
+@group
+#+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
+| Sede      | Max cites | H-index |
+|-----------+-----------+---------|
+| Chile     |    257.72 |   21.39 |
+| Leeds     |    165.77 |   19.68 |
+| Sao Paolo |     71.00 |   11.50 |
+| Stockholm |    134.19 |   14.33 |
+| Morelia   |    257.56 |   17.67 |
+@end group
+@end example
+
+Notice that Org Plot is smart enough to apply the tables headers as labels.
+Further control over the labels, type, content, and appearance of plots can
+be exercised through the @code{#+Plot:} lines preceding a table.  See below
+for a complete list of Org plot options.  For more information and examples
+@uref{http://orgmode.org/worg/org-tutorials/org-plot.php, the org-plot
+tutorial}.
+
+@subsubheading Plot Options
+
+@table @code
+@item set
+Specify any @file{gnuplot} option to be set when graphing.
+
+@item title
+Specify the title of the plot.
+
+@item ind
+Specify which column of the table to use as the @code{x} axis.
+
+@item deps
+Specify (as a comma seperated list with no spaces) which columns of the table
+to graph against the ind (defaults to all other columns).
+
+@item type
+Specify whether the plot will be @code{2d}, @code{3d}, or @code{grid}.
+
+@item with
+Specify a @code{with} option to be inserted for every col being plotted
+(e.g. @code{lines}, @code{points}, @code{boxes}, @code{impulses}, etc...).
+Defaults to 'lines'.
+
+@item file
+If you want to plot to a file specify the @code{"path/to/desired/output-file"}.
+
+@item labels
+List of labels to be used for the deps (defaults to column headers if they
+exist).
+
+@item line
+Specify an entire line to be inserted in the gnuplot script.
+
+@item map
+When plotting @code{3d} or @code{grid} types, set this to @code{t} to graph a
+flat mapping rather than a @code{3d} slope.
+
+@item script
+If you want total control you can specify a script file (place the file name
+between double quotes) which will be used to plot.  Before plotting, every
+instance of @code{$datafile} in the specified script will be replaced with
+the path to the generated data file.  Note even if you set this option you
+may still want to specify the plot type, as that can impact the content of
+the data file.
+@end table
 
 @node Hyperlinks, TODO Items, Tables, Top
 @chapter Hyperlinks
