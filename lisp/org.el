@@ -9512,6 +9512,7 @@ the scanner.  The following items can be given here:
 	 org-todo-keyword-alist-for-agenda
 	 org-tag-alist-for-agenda)
 
+    (cond
      ((eq match t)   (setq matcher t))
      ((eq match nil) (setq matcher t))
      (t (setq matcher (if match (org-make-tags-matcher match) t))))
