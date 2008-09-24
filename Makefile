@@ -52,6 +52,9 @@ TEXI2HTML = makeinfo --html --number-sections
 # How to copy the lisp files and elc files to their distination.
 CP = cp -p
 
+# Name of the program to install info files
+INSTALL_INFO=install-info
+
 ##----------------------------------------------------------------------
 ##  BELOW THIS LINE ON YOUR OWN RISK!
 ##----------------------------------------------------------------------
@@ -127,8 +130,7 @@ install-lisp: $(LISPFILES) $(ELCFILES)
 	$(CP) $(ELCFILES)  $(lispdir)
 
 install-info: $(INFOFILES)
-	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
-	$(CP) $(INFOFILES) $(infodir)
+	$(INSTALL_INFO) --info-file=$(INFOFILES) --info-dir=$(infodir)
 
 install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;

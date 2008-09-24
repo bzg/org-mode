@@ -1,3 +1,7 @@
+2008-09-24  Carsten Dominik  <dominik@science.uva.nl>
+
+	* Makefile (install-info): Use the install-info program.
+
 2008-09-17  Carsten Dominik  <dominik@science.uva.nl>
 
 	* Makefile: Handle new file org-plot.el.
