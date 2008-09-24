@@ -887,7 +887,7 @@ See also the variable `org-reverse-note-order'."
 (defun org-require-remember ()
   "Make sure remember is loaded, or install our own emergency version of it."
   (condition-case nil
-      (require 'remember22)
+      (require 'remember)
     (error
      ;; Lets install our own micro version of remember
      (defvar remember-register ?R)
