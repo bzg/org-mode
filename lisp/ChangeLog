@@ -1,3 +1,8 @@
+2008-09-25  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-auto-repeat-maybe): Insert a space between
+	the timestamp's type and the timestamp itself.
+
 2008-09-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (org-table-sum): Do not format the result with %g,
