@@ -8113,7 +8113,7 @@ This function is run automatically after each state change to a DONE state."
 	      (setq ts (match-string 1))
 	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([dwmy]\\)" ts))))
 	  (org-timestamp-change n (cdr (assoc what whata)))
-	  (setq msg (concat msg type org-last-changed-timestamp " "))))
+	  (setq msg (concat msg type " " org-last-changed-timestamp " "))))
       (setq org-log-post-message msg)
       (message "%s" msg))))
 
