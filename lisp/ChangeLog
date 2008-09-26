@@ -1,3 +1,9 @@
+2008-09-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-get-next-sibling, org-forward-same-level): New
+	functions, similar to the outline versions, but invisible headings
+	are OK.
+
 2008-09-24  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (org-table-sum): Do not format the result with %g,

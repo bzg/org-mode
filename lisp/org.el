@@ -7881,7 +7881,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (and (member kwd org-done-keywords)
 		 (setq cnt-done (1+ cnt-done)))
 	    (condition-case nil
-		(outline-forward-same-level 1)
+		(org-forward-same-level 1)
 	      (error (end-of-line 1)))))
 	(replace-match 
 	 (if is-percent
@@ -13863,6 +13863,35 @@ When ENTRY is non-nil, show the entire entry."
       (outline-flag-region (max (point-min) (1- (point)))
 			   (save-excursion (outline-end-of-heading) (point))
 			   flag))))
+
+(defun org-forward-same-level (arg)
+  "Move forward to the ARG'th subheading at same level as this one.
+Stop at the first and last subheadings of a superior heading.
+This is like outline-forward-same-level, but invisible headings are ok."
+  (interactive "p")
+  (outline-back-to-heading t)
+  (while (> arg 0)
+    (let ((point-to-move-to (save-excursion
+			      (org-get-next-sibling))))
+      (if point-to-move-to
+	  (progn
+	    (goto-char point-to-move-to)
+	    (setq arg (1- arg)))
+	(progn
+	  (setq arg 0)
+	  (error "No following same-level heading"))))))
+
+(defun org-get-next-sibling ()
+  "Move to next heading of the same level, and return point.
+If there is no such heading, return nil.
+This is like outline-next-sibling, but invisible headings are ok."
+  (let ((level (funcall outline-level)))
+    (outline-next-heading)
+    (while (and (not (eobp)) (> (funcall outline-level) level))
+      (outline-next-heading))
+    (if (or (eobp) (< (funcall outline-level) level))
+	nil
+      (point))))
 
 (defun org-end-of-subtree (&optional invisible-OK to-heading)
   ;; This is an exact copy of the original function, but it uses
