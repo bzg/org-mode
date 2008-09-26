@@ -276,6 +276,7 @@ This is used by Org to re-create the anniversary hash table."
 ;;;###autoload
 (defun org-bbdb-anniversaries()
   "Extract anniversaries from BBDB for display in the agenda."
+  (require 'bbdb)
   (require 'diary-lib)
   (unless (hash-table-p org-bbdb-anniv-hash)
     (setq org-bbdb-anniv-hash
