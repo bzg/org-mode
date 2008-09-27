@@ -1516,7 +1516,7 @@ blank all fields in the rectangle.  So this is the ``cut'' operation.
 @kindex C-c C-x C-y
 @item C-c C-x C-y
 Paste a rectangular region into a table.
-The upper right corner ends up in the current field.  All involved fields
+The upper left corner ends up in the current field.  All involved fields
 will be overwritten.  If the rectangle does not fit into the present table,
 the table is enlarged as needed.  The process ignores horizontal separator
 lines.
