@@ -783,7 +783,7 @@ See also the variable `org-reverse-note-order'."
 	    (cond
 	     ((and fastp (memq heading '(top bottom)))
 	      (setq spos org-goto-start-pos
-			  exitcmd (if (eq heading 'top) 'left 'right)))
+			  exitcmd (if (eq heading 'top) 'left nil)))
 	     (fastp (setq spos org-goto-start-pos
 			  exitcmd 'return))
 	     ((eq org-remember-interactive-interface 'outline)
@@ -837,6 +837,12 @@ See also the variable `org-reverse-note-order'."
 		     (bookmark-set "org-remember-last-stored")
 		     (move-marker org-remember-last-stored-marker (point)))
 		    (t (error "This should not happen"))))
+
+		  ((eq heading 'bottom)
+		   (org-paste-subtree 1 txt)
+		   (and org-auto-align-tags (org-set-tags nil t))
+		   (bookmark-set "org-remember-last-stored")
+		   (move-marker org-remember-last-stored-marker (point)))
 
 		  ((and (bobp) (not reversed))
 		   ;; Put it at the end, one level below level 1
