@@ -762,7 +762,6 @@ See also the variable `org-reverse-note-order'."
 		(setq org-goto-start-pos (or (match-beginning 0) (point-min))))
 	       ((eq heading 'bottom)
 		(goto-char (point-max))
-		(re-search-backward "^\\* " nil t)
 		(or (bolp) (newline))
 		(setq org-goto-start-pos (point)))
 	       ((and (stringp heading) (string-match "\\S-" heading))

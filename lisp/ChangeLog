@@ -1,3 +1,8 @@
+2008-09-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-remember.el (org-remember-handler): Fix bug with `bottom'
+	location.
+
 2008-09-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-bbdb.el (org-bbdb-anniversaries): Require bbdb in
