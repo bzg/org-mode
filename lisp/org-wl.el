@@ -67,7 +67,6 @@
 (declare-function wl-summary-registered-temp-mark "ext:wl-action" (number))
 (declare-function wl-folder-goto-folder-subr "ext:wl-folder"
 		  (&optional folder sticky))
-(declare-function wl-thread-open-all "ext:wl-thread" ())
 (defvar wl-init)
 (defvar wl-summary-buffer-elmo-folder)
 (defvar wl-summary-buffer-folder-name)
@@ -135,7 +134,6 @@
 	;; in the old buffer.
 	(set-buffer old-buf)
 	(goto-char old-point))
-     (wl-thread-open-all)
      (and (wl-summary-jump-to-msg-by-message-id (org-add-angle-brackets
 						  article))
 	   (wl-summary-redisplay)))))

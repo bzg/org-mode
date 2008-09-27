@@ -1,5 +1,8 @@
 2008-09-27  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-wl.el (org-wl-open): Remove useless call to
+	`wl-thread-open-all'.
+
 	* org-remember.el (org-remember-handler): Fix bug with `bottom'
 	location.
 
