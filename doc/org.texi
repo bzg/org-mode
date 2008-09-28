@@ -3853,7 +3853,7 @@ If the comparison value is enclosed in double quotes @emph{and} angular
 brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
 assumed to be date/time specifications in the standard Org way@footnote{The
 only special values that will be recognized are @samp{"<now>"} for now, and
-@samp{"<today"} today at 0:00 hours, i.e. without a time specification.}, and
+@samp{"<today>"} today at 0:00 hours, i.e. without a time specification.}, and
 the comparison will be done accordingly.
 @item
 If the comparison value is enclosed
