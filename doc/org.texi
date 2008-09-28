@@ -7511,10 +7511,20 @@ Each exported files contains a compact default style that defines these
 classes in a basic way.  You may overwrite these settings, or add to them by
 using the variables @code{org-export-html-style} (for Org-wide settings) and
 @code{org-export-html-style-extra} (for more granular settings, like
-file-local settings).  If you want to use a file-local style, you may use
-file variables, best wrapped into a COMMENT section at the end of the outline
-tree.  For example@footnote{Under Emacs 21, the continuation lines for a
-variable value should have no @samp{#} at the start of the line.}:
+file-local settings).  There are two ways to set the latter variable
+individually for each file.  First, you can use
+
+@example
+#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+@end example
+
+@noindent
+a setup that also works in an external setup file (@pxref{In-buffer
+settings}).  An alternative method, also suitable for extensive definitions
+is using file variables, best wrapped into a COMMENT section at the end of
+the outline tree.  For example@footnote{Under Emacs 21, the continuation
+lines for a variable value should have no @samp{#} at the start of the
+line.}:
 
 @example
 * COMMENT html style specifications
