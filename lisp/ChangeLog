@@ -1,5 +1,8 @@
 2008-09-29  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-list.el (org-move-item-down, org-move-item-up): Remember and
+	restore the column of the cursor position.
+
 	* org-remember.el (org-remember-apply-template): Remove properties
 	from `initial'.
 

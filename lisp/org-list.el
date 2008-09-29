@@ -457,7 +457,9 @@ Error if not at a plain list, or if this is the first item in the list."
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive)
-  (let (beg beg0 end end0 ind ind1 (pos (point)) txt ne-end ne-beg)
+  (let ((col (current-column))
+	(pos (point))
+	beg beg0 end end0 ind ind1  txt ne-end ne-beg)
     (org-beginning-of-item)
     (setq beg0 (point))
     (save-excursion
@@ -488,8 +490,10 @@ so this really moves item trees."
 	  (setq pos (point))
 	  (insert txt)
 	  (goto-char pos) (org-skip-whitespace)
-	  (org-maybe-renumber-ordered-list))
+	  (org-maybe-renumber-ordered-list)
+	  (move-to-column col))
       (goto-char pos)
+      (move-to-column col)
       (error "Cannot move this item further down"))))
 
 (defun org-move-item-up (arg)
@@ -497,8 +501,9 @@ so this really moves item trees."
 Subitems (items with larger indentation) are considered part of the item,
 so this really moves item trees."
   (interactive "p")
-  (let (beg beg0 end ind ind1 (pos (point)) txt
-	    ne-beg ne-ins ins-end)
+  (let ((col (current-column)) (pos (point))
+	beg beg0 end ind ind1  txt
+	ne-beg ne-ins ins-end)
     (org-beginning-of-item)
     (setq beg0 (point))
     (setq ind (org-get-indentation))
@@ -524,6 +529,7 @@ so this really moves item trees."
     (condition-case nil
 	(org-beginning-of-item)
       (error (goto-char beg0)
+	     (move-to-column col)
 	     (error "Cannot move this item further up")))
     (setq ind1 (org-get-indentation))
     (if (and (org-at-item-p) (= ind ind1))
@@ -545,8 +551,10 @@ so this really moves item trees."
 		(kill-line (- ne-ins ne-beg)) (point)))
 	    (insert (make-string (- ne-ins ne-beg) ?\n)))
 
-	  (org-maybe-renumber-ordered-list))
+	  (org-maybe-renumber-ordered-list)
+	  (move-to-column col))
       (goto-char pos)
+      (move-to-column col)
       (error "Cannot move this item further up"))))
 
 (defun org-maybe-renumber-ordered-list ()
