@@ -22,7 +22,7 @@
 *** Clicking with mouse-2 on clock info in mode-line visits the clock.
     Thanks to James TD Smith for a patch to this effect.
 *** New file in contrib: lisp/org-checklist.el
-    Thanks to James TD Smith for a patch to this effect.
+    Thanks to James TD Smith for this contribution.
 
 * Version 6.07
 :PROPERTIES:
