@@ -312,6 +312,9 @@ RET at beg-of-buf -> Append to file as level 2 headline
   "Initialize *remember* buffer with template, invoke `org-mode'.
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to function properly."
+  (when (and (boundp 'initial) (stringp initial))
+    (setq initial (org-no-properties initial))
+    (remove-text-properties 0 (length initial) '(read-only t) initial))
   (if org-remember-templates
       (let* ((entry (org-select-remember-template use-char))
 	     (ct (or org-overriding-default-time (org-current-time)))

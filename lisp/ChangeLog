@@ -1,3 +1,8 @@
+2008-09-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-remember.el (org-remember-apply-template): Remove properties
+	from `initial'.
+
 2008-09-27  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-wl.el (org-wl-open): Remove useless call to
