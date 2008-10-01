@@ -1,5 +1,15 @@
 2008-10-01  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-colview.el (org-columns-get-format-and-top-level): Remove
+	resetting the marker.
+
+	* org-colview-xemacs.el (org-columns-get-format-and-top-level):
+	Remove resetting the marker.
+
+	* org.el (org-entry-property-inherited-from): Improve docstring.
+	(org-entry-get-with-inheritance): Reset marker before starting the
+	search.
+
 	* org-exp.el (org-infile-export-plist): Allow multiple STYLE lines.
 
 2008-09-30  Carsten Dominik  <dominik@science.uva.nl>

@@ -9835,10 +9835,17 @@ VALUES should be a list of strings.  Spaces will be protected."
     (setq s (replace-match "\n" t t s)))
   s)
 
-(defvar org-entry-property-inherited-from (make-marker))
+(defvar org-entry-property-inherited-from (make-marker)
+  "Marker pointing to the entry from where a proerty was inherited.
+Each call to `org-entry-get-with-inheritance' will set this marker to the
+location of the entry where the inheriance search matched.  If there was
+no match, the marker will point nowhere.
+Note that also `org-entry-get' calls this function, if the INHERIT flag
+is set.")
 
 (defun org-entry-get-with-inheritance (property)
   "Get entry property, and search higher levels if not present."
+  (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
     (save-excursion
       (save-restriction

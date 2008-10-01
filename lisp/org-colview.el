@@ -624,7 +624,6 @@ around it."
 (defun org-columns-get-format-and-top-level ()
   (let (fmt)
     (when (condition-case nil (org-back-to-heading) (error nil))
-      (move-marker org-entry-property-inherited-from nil)
       (setq fmt (org-entry-get nil "COLUMNS" t)))
     (setq fmt (or fmt org-columns-default-format))
     (org-set-local 'org-columns-current-fmt fmt)
