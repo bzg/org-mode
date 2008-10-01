@@ -290,10 +290,9 @@ are preserved on all copies.
 
 \key{rotate current subtree between states}{TAB}
 \key{rotate entire buffer between states}{S-TAB}
-\key{show the whole file}{C-c C-a}
+\key{restore property-dependent startup visibility}{C-u C-u TAB}
+\metax{show the whole file, including drawers}{C-u C-u C-u TAB}
 \key{reveal context around point}{C-c C-r}
-\key{show subtree in indirect buffer, ded.\ frame}{C-c C-k}
-%\key{show branches}{C-c C-k}
 
 \section{Motion}
 
@@ -648,13 +647,13 @@ after  ``{\tt :}'', and dictionary words elsewhere.
 \key{digit argument}{0-9}
 \key{change state of current TODO item}{t}
 \key{kill item and source}{C-k}
-\key{archive the subtree}{\$ / a / A}
+\key{archive the subtree (file/tag/sibling)}{\$ / a / A}
 \key{show tags of current headline}{T}
 \key{set tags for current headline/region}{:}
-\key{toggle ARCHIVE tag}{a}
 \key{set priority of current item}{p}
 \key{raise/lower priority of current item}{S-UP/DOWN$^3$}
 \key{display weighted priority of current item}{P}
+\key{run an attachment command}{C-c C-a}
 \key{schedule/set deadline for this item}{C-c C-s/d}
 \key{change timestamp to one day earlier/later}{S-LEFT/RIGHT$^3$}
 \key{change timestamp to today}{>}

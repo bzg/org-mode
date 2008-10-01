@@ -1115,9 +1115,7 @@ See `org-file-apps'.")
 (defconst org-file-apps-defaults-macosx
   '((remote . emacs)
     (t . "open %s")
-    ("ps"     . "gv %s")
     ("ps.gz"  . "gv %s")
-    ("eps"    . "gv %s")
     ("eps.gz" . "gv %s")
     ("dvi"    . "xdvi %s")
     ("fig"    . "xfig %s"))
@@ -3880,9 +3878,11 @@ If KWD is a number, get the corresponding match group."
   1. OVERVIEW: Show only top-level headlines.
   2. CONTENTS: Show all headlines of all levels, but no body text.
   3. SHOW ALL: Show everything.
-  When called with two C-c C-u prefixes, switch to the startup visibility,
+  When called with two C-u C-u prefixes, switch to the startup visibility,
   determined by the variable `org-startup-folded', and by any VISIBILITY
   properties in the buffer.
+  When called with three C-u C-u C-u prefixed, show the entire buffer,
+  including drawers.
 
 - When point is at the beginning of a headline, rotate the subtree started
   by this line through 3 different states (local cycling)
@@ -3926,7 +3926,11 @@ If KWD is a number, get the corresponding match group."
 
      ((equal arg '(16))
       (org-set-startup-visibility)
-      (message "Startup visibility, plus VISIBILITY properties."))
+      (message "Startup visibility, plus VISIBILITY properties"))
+
+     ((equal arg '(64))
+      (show-all)
+      (message "Entire buffer visible, including drawers"))
 
      ((org-at-table-p 'any)
       ;; Enter the table or move to the next field in the table
@@ -6980,6 +6984,8 @@ If the file does not exist, an error is thrown."
 		    (and dirp (cdr (assoc 'directory apps)))
 		    (cdr (assoc ext apps))
 		    (cdr (assoc t apps)))))
+    (when (eq cmd 'default)
+      (setq cmd (cdr (assoc t apps))))
     (when (eq cmd 'mailcap)
       (require 'mailcap)
       (mailcap-parse-mailcaps)
@@ -9775,6 +9781,7 @@ If yes, return this value.  If not, return the current value of the variable."
   "Add VALUE to the words in the PROPERTY in entry at point-or-marker POM."
   (let* ((old (org-entry-get pom property))
 	 (values (and old (org-split-string old "[ \t]"))))
+    (setq value (org-entry-protect-space value))
     (unless (member value values)
       (setq values (cons value values))
       (org-entry-put pom property
@@ -9784,6 +9791,7 @@ If yes, return this value.  If not, return the current value of the variable."
   "Remove VALUE from words in the PROPERTY in entry at point-or-marker POM."
   (let* ((old (org-entry-get pom property))
 	 (values (and old (org-split-string old "[ \t]"))))
+    (setq value (org-entry-protect-space value))
     (when (member value values)
       (setq values (delete value values))
       (org-entry-put pom property
@@ -9793,7 +9801,39 @@ If yes, return this value.  If not, return the current value of the variable."
   "Is VALUE one of the words in the PROPERTY in entry at point-or-marker POM?"
   (let* ((old (org-entry-get pom property))
 	 (values (and old (org-split-string old "[ \t]"))))
+    (setq value (org-entry-protect-space value))
     (member value values)))
+
+(defun org-entry-get-multivalued-property (pom property)
+  "Return a list of values in a multivalued property."
+  (let* ((value (org-entry-get pom property))
+	 (values (and value (org-split-string value "[ \t]"))))
+    (mapcar 'org-entry-restore-space values)))
+
+(defun org-entry-put-multivalued-property (pom property &rest values)
+  "Set multivalued PROPERTY at point-or-marker POM to VALUES.
+VALUES should be a list of strings.  Spaces will be protected."
+  (org-entry-put pom property
+		 (mapconcat 'org-entry-protect-space values " "))
+  (let* ((value (org-entry-get pom property))
+	 (values (and old (org-split-string value "[ \t]"))))
+    (mapcar 'org-entry-restore-space values)))
+
+(defun org-entry-protect-space (s)
+  "Protect spaces and newline in string S."
+  (while (string-match " " s)
+    (setq s (replace-match "%20" t t s)))
+  (while (string-match "\n" s)
+    (setq s (replace-match "%0A" t t s)))
+  s)
+
+(defun org-entry-restore-space (s)
+  "Restore spaces and newline in string S."
+  (while (string-match "%20" s)
+    (setq s (replace-match " " t t s)))
+  (while (string-match "%0A" s)
+    (setq s (replace-match "\n" t t s)))
+  s)
 
 (defvar org-entry-property-inherited-from (make-marker))
 
@@ -10127,7 +10167,7 @@ Return the position where this entry starts, or nil if there is no such entry."
 (defvar org-end-time-was-given) ; dynamically scoped parameter
 (defvar org-ts-what) ; dynamically scoped parameter
 
-(defun org-time-stamp (arg)
+(defun org-time-stamp (arg &optional inactive)
   "Prompt for a date/time and insert a time stamp.
 If the user specifies a time like HH:MM, or if this command is called
 with a prefix argument, the time stamp will contain date and time.
@@ -10151,28 +10191,30 @@ at the cursor, it will be modified."
 	 (default-input (and ts (org-get-compact-tod ts)))
 	 org-time-was-given org-end-time-was-given time)
     (cond
-     ((and (org-at-timestamp-p)
-	   (eq last-command 'org-time-stamp)
-	   (eq this-command 'org-time-stamp))
+     ((and (org-at-timestamp-p t)
+	   (memq last-command '(org-time-stamp org-time-stamp-inactive))
+	   (memq this-command '(org-time-stamp org-time-stamp-inactive)))
       (insert "--")
       (setq time (let ((this-command this-command))
-		  (org-read-date arg 'totime nil nil default-time default-input)))
-      (org-insert-time-stamp time (or org-time-was-given arg)))
-     ((org-at-timestamp-p)
+		  (org-read-date arg 'totime nil nil
+				 default-time default-input)))
+      (org-insert-time-stamp time (or org-time-was-given arg) inactive))
+     ((org-at-timestamp-p t)
       (setq time (let ((this-command this-command))
 		   (org-read-date arg 'totime nil nil default-time default-input)))
-      (when (org-at-timestamp-p) ; just to get the match data
+      (when (org-at-timestamp-p t) ; just to get the match data
+;	(setq inactive (eq (char-after (match-beginning 0)) ?\[))
 	(replace-match "")
 	(setq org-last-changed-timestamp
 	      (org-insert-time-stamp
 	       time (or org-time-was-given arg)
-	       nil nil nil (list org-end-time-was-given))))
+	       inactive nil nil (list org-end-time-was-given))))
       (message "Timestamp updated"))
      (t
       (setq time (let ((this-command this-command))
 		   (org-read-date arg 'totime nil nil default-time default-input)))
-      (org-insert-time-stamp time (or org-time-was-given arg)
-			     nil nil nil (list org-end-time-was-given))))))
+      (org-insert-time-stamp time (or org-time-was-given arg) inactive
+			     nil nil (list org-end-time-was-given))))))
 
 ;; FIXME: can we use this for something else, like computing time differences?
 (defun org-get-compact-tod (s)
@@ -10198,10 +10240,7 @@ brackets.  It is inactive in the sense that it does not trigger agenda entries,
 does not link to the calendar and cannot be changed with the S-cursor keys.
 So these are more for recording a certain time/date."
   (interactive "P")
-  (let (org-time-was-given org-end-time-was-given time)
-    (setq time (org-read-date arg 'totime))
-    (org-insert-time-stamp time (or org-time-was-given arg) 'inactive
-			   nil nil (list org-end-time-was-given))))
+  (org-time-stamp arg 'inactive))
 
 (defvar org-date-ovl (org-make-overlay 1 1))
 (org-overlay-put org-date-ovl 'face 'org-warning)
@@ -10586,17 +10625,6 @@ Also, store the cursor date in variable org-ans2."
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
     (org-move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))
     (select-window sw)))
-
-;    ;; Update the prompt to show new default date
-;    (save-excursion
-;      (goto-char (point-min))
-;      (when (and org-ans2
-;		 (re-search-forward "\\[[-0-9]+\\]" nil t)
-;		 (get-text-property (match-end 0) 'field))
-;	(let ((inhibit-read-only t))
-;	  (replace-match (concat "[" org-ans2 "]") t t)
-;	  (add-text-properties (point-min) (1+ (match-end 0))
-;			       (text-properties-at (1+ (point-min)))))))))
 
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.
@@ -12020,7 +12048,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c|"    'org-table-create-or-convert-from-region)
 (org-defkey org-mode-map [(control ?#)] 'org-table-rotate-recalc-marks)
 (org-defkey org-mode-map "\C-c~"    'org-table-create-with-table.el)
-(org-defkey org-mode-map "\C-c\C-q" 'org-table-wrap-region)
+(org-defkey org-mode-map "\C-c\C-a" 'org-attach)
 (org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
 (org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
 (org-defkey org-mode-map "\C-c\C-e" 'org-export)

@@ -15,14 +15,52 @@
 :VISIBILITY: content
 :END:
 
+
+** Incompatible changes
+
+*** The default structure of IDs has changed
+
+    IDs created by Org have changed a bit:
+    - By default, there is no prefix on the ID.  There used to be
+      an "Org" prefix, but I now think this is not necesary.
+    - IDs use only lower-case letters, no upper-case letters
+      anymore.  The reason for this is that IDs are now also used
+      as directory names for org-attach, and some systems do not
+      distinguish upper and lower case in the file system.
+    - The ID string derived from the current time is now /reversed/
+      to become an ID.  This assures that the first two letters
+      of the ID change fast, so hat it makes sense to split them
+      off to create subdirectories to balance load.
+    - You can now set the `org-id-method' to `uuidgen' on systems
+      which support it. 
+
 ** Details
+
+*** New attachment system
+
+    You can now attach files to each node in the outline tree.
+    This works by creating special directories based on the ID of
+    an entry, and storing files in these directories.  Org can
+    keep track of changes to the attachments by automatically
+    committing changes to git.  See the manual for more
+    information.
+
+    Thanks to John Wiegley who contributed this fantastic new
+    concept and wrote org-attach.el to implement it.
 
 *** New remember template escape to add a property
     Thanks to James TD Smith for a patch to this effect.
+
 *** Clicking with mouse-2 on clock info in mode-line visits the clock.
     Thanks to James TD Smith for a patch to this effect.
+
 *** New file in contrib: lisp/org-checklist.el
     Thanks to James TD Smith for this contribution.
+
+*** New in-buffer seting #+STYLE
+    It can be used to locally set the variable
+    `org-expor-html-style-extra'.  See the [[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php][publishing tutorial]]
+    for an example on how tu use it.
 
 * Version 6.07
 :PROPERTIES:

@@ -3315,7 +3315,6 @@ to execute outside of tables."
 	  '("\C-c{"              org-table-toggle-formula-debugger)
 	  '("\C-m"               org-table-next-row)
 	  '([(shift return)]     org-table-copy-down)
-	  '("\C-c\C-q"           org-table-wrap-region)
 	  '("\C-c?"              org-table-field-info)
 	  '("\C-c "              org-table-blank-field)
 	  '("\C-c+"              org-table-sum)

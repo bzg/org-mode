@@ -1,4 +1,4 @@
-925\input texinfo
+\input texinfo
 @c %**start of header
 @setfilename ../../info/org
 @settitle The Org Manual
@@ -87,7 +87,7 @@ license to the document, as described in section 6 of the license.
 * Tags::                        Tagging headlines and matching sets of tags
 * Properties and Columns::      Storing information about an entry
 * Dates and Times::             Making items useful for planning
-* Remember::                    Quickly adding nodes to the outline tree
+* Capture::                     Creating tasks and attaching files
 * Agenda Views::                Collecting information into views
 * Embedded LaTeX::              LaTeX fragments and formulas
 * Exporting::                   Sharing and publishing of notes
@@ -229,6 +229,11 @@ Deadlines and scheduling
 
 * Inserting deadline/schedule::  Planning items
 * Repeated tasks::              Items that show up again and again
+
+Capture
+
+* Remember::                    Capture new tasks/ideas with little interruption
+* Attachments::                 Add files to tasks.
 
 Remember
 
@@ -770,8 +775,8 @@ CONTENTS view up to headlines of level N will be shown.  Note that inside
 tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
-@kindex C-c C-a
-@item C-c C-a
+@kindex C-c C-a C-a
+@item C-c C-a C-a
 Show all.
 @kindex C-c C-r
 @item C-c C-r
@@ -4192,7 +4197,7 @@ be used by Emacs Lisp programs to work with properties and to implement
 features based on them.  For more information see @ref{Using the
 property API}.
 
-@node Dates and Times, Remember, Properties and Columns, Top
+@node Dates and Times, Capture, Properties and Columns, Top
 @chapter Dates and Times
 @cindex dates
 @cindex times
@@ -4872,8 +4877,23 @@ option @code{org-agenda-columns-add-appointments-to-effort-sum}.  The
 appointments on a day that take place over a specified time interval will
 then also be added to the load estimate of the day.
 
-@node Remember, Agenda Views, Dates and Times, Top
-@chapter Remember
+
+@node Capture, Agenda Views, Dates and Times, Top
+@chapter Capture
+@cindex capture
+
+An important part of any organization system is the ability to quickly
+capture new ideas and tasks, and to associate reference material with them.
+Org uses the @file{remember} package to create tasks, and stores files
+related to a task (@i{attachments}) in a special directory.
+
+@menu
+* Remember::                    Capture new tasks/ideas with little interruption
+* Attachments::                 Add files to tasks.
+@end menu
+
+@node Remember, Attachments, Capture, Capture
+@section Remember
 @cindex @file{remember.el}
 
 The @i{Remember} package by John Wiegley lets you store quick notes with
@@ -4894,7 +4914,7 @@ interactively, on the fly.
 @end menu
 
 @node Setting up Remember, Remember templates, Remember, Remember
-@section Setting up Remember
+@subsection Setting up Remember
 
 The following customization will tell @i{remember} to use org files as
 target, and to create annotations compatible with Org links.
@@ -4922,7 +4942,7 @@ inserted by the selected remember template (see below) will default to
 the cursor date in the agenda, rather than to the current date.
 
 @node Remember templates, Storing notes, Setting up Remember, Remember
-@section Remember templates
+@subsection Remember templates
 @cindex templates, for remember
 
 In combination with Org, you can use templates to generate
@@ -5047,7 +5067,7 @@ If you change your mind about which template to use, call
 template that will be filled with the previous context information.
 
 @node Storing notes, Refiling notes, Remember templates, Remember
-@section Storing notes
+@subsection Storing notes
 
 When you are finished preparing a note with @i{remember}, you have to press
 @kbd{C-c C-c} to file the note away.  If you have started the clock in the
@@ -5096,15 +5116,14 @@ then leads to the following result.
       @tab at cursor position, level taken from context.
 @end multitable
 
-Before inserting the text into a tree, the function ensures that the
-text has a headline, i.e. a first line that starts with a @samp{*}.  If
-not, a headline is constructed from the current date and some additional
-data.  If you have indented the text of the note below the headline, the
-indentation will be adapted if inserting the note into the tree requires
-demotion from level 1.
+Before inserting the text into a tree, the function ensures that the text has
+a headline, i.e. a first line that starts with a @samp{*}.  If not, a
+headline is constructed from the current date.  If you have indented the text
+of the note below the headline, the indentation will be adapted if inserting
+the note into the tree requires demotion from level 1.
 
 @node Refiling notes,  , Storing notes, Remember
-@section Refiling notes
+@subsection Refiling notes
 @cindex refiling notes
 
 Remember is usually used to quickly capture notes and tasks into one or
@@ -5135,7 +5154,76 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Agenda Views, Embedded LaTeX, Remember, Top
+@node Attachments,  , Remember, Capture
+@section Attachments
+@cindex attachments
+
+It is often useful to associate reference material with an outline node/task.
+Small chunks of plain text can simply be stored in the subtree of a project.
+Hyperlinks (@pxref{Hyperlinks}) can be used to establish associations with
+files that live elsewhere on your computer or in the cloud, like emails or
+source code files belonging to a project.  However, you may also have files
+that only belong to a given project and that you would like to store in a
+directory belonging to an outline node.
+
+Org allows to associate an arbitary number of files with each indivdual task.
+These files are moved to special directories named by the unique ID of each
+entry.  These directories are located in the @file{data} directory which
+lives in the same directory where your org-file lives@footnote{If you move
+entries or Org-files from one directory to the next, you may want to
+configure @code{org-attach-directory} to contain an absolute path.}.  If you
+initilize this directory with @code{git-init}, Org will automaically commit
+changes when it see them.  The attachment system has been contributed to Org
+by John Wiegley.
+
+The following commands deal with attachments.
+
+@table @kbd
+
+@kindex C-c C-a
+@item C-c C-a
+The dispatcher for commands related to the attachment system.  After these
+keys, a list of commands is displayed and you need to press an additional key
+to select a command:
+
+@table @kbd
+@kindex C-c C-a a 
+@item a 
+Select a file and move it into the task's attachment directory.
+
+@kindex C-c C-a c
+@item c
+Create a new attachment as an Emacs buffer.
+
+@kindex C-c C-a z
+@item z
+Synchronize the current task with its attachment directory, in case you added
+attachments yourself.
+
+@kindex C-c C-a o
+@item o
+Open current task's attachment, if there is only one.
+
+@kindex C-c C-a O
+@item O
+Also open the attachment, but using the Finder.
+
+@kindex C-c C-a f
+@item f
+Open current task's attachment directory in dired.
+
+@kindex C-c C-a F
+@item F
+Also open the directory, but using the Finder.
+
+@kindex C-c C-a D
+@item D
+Delete all of a task's attachments.  A safer way is to open the directory in
+dired and delete from there.
+@end table
+@end table
+
+@node Agenda Views, Embedded LaTeX, Capture, Top
 @chapter Agenda Views
 @cindex agenda views
 
@@ -5984,6 +6072,10 @@ key for this.
 @item -
 @itemx S-@key{down}
 Decrease the priority of the current item.
+@c
+@kindex C-c C-a
+@item C-c C-a
+Dispatcher for all command related to attachments.
 @c
 @kindex C-c C-s
 @item C-c C-s
@@ -9456,6 +9548,16 @@ Get all property keys in the current buffer.
 Insert a property drawer at point.
 @end defun
 
+@defun org-entry-put-multivalued-property pom property &rest values
+Set PROPERTY at point-or-marker POM to VALUES.  VALUES should be a list of
+strings.  They will be concatenated, with spaces as separators.
+@end defun
+
+@defun org-entry-get-multivalued-property pom property
+Treat the value of the property PROPERTY as a whitespace-separated list of
+values and return the values as a list of strings.
+@end defun
+
 @defun org-entry-add-to-multivalued-property pom property value
 Treat the value of the property PROPERTY as a whitespace-separated list of
 values and make sure that VALUE is in this list.
@@ -9762,8 +9864,9 @@ system.
 development of Org was fully independent because I was not aware of the
 existence of these packages.  But with time I have accasionally looked
 at John's code and learned a lot from it.  John has also contributed a
-number of great ideas and patches directly to Org, including the file
-@code{org-mac-message.el}'
+number of great ideas and patches directly to Org, including the attachment
+system (@file{org-attach.el}) and integration with Apple Mail
+(@code{org-mac-message.el}).
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.

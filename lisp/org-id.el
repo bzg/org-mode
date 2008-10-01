@@ -96,7 +96,7 @@ uuidgen    Call the external command uuidgen."
 	  (const :tag "Org's internal method" org)
 	  (const :tag "external: uuidgen" uuidgen)))
 
-(defcustom org-id-prefix "Org"
+(defcustom org-id-prefix nil
   "The prefix for IDs.
 
 This may be a string, or it can be nil to indicate that no prefix is required.
@@ -252,7 +252,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
      ((eq org-id-method 'uuidgen)
       (setq unique (substring (shell-command-to-string "uuidgen") 1 -1)))
      ((eq org-id-method 'org)
-      (let* ((etime (org-id-time-to-b62))
+      (let* ((etime (org-id-reverse-string (org-id-time-to-b36)))
 	     (postfix (if org-id-include-domain
 			  (progn
 			    (require 'message)
@@ -261,51 +261,53 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
      (t (error "Invalid `org-id-method'")))
     (concat prefix unique)))
 
-(defun org-id-int-to-b62-one-digit (i)
+(defun org-id-reverse-string (s)
+  (mapconcat 'char-to-string (nreverse (string-to-list s)) ""))
+
+(defun org-id-int-to-b36-one-digit (i)
   "Turn an integer between 0 and 61 into a single character 0..9, A..Z, a..z."
   (cond
    ((< i 10) (+ ?0 i))
-   ((< i 36) (+ ?A i -10))
-   ((< i 62) (+ ?a i -36))
-   (t (error "Larger that 61"))))
+   ((< i 36) (+ ?a i -10))
+   (t (error "Larger that 35"))))
 
-(defun org-id-b62-to-int-one-digit (i)
+(defun org-id-b36-to-int-one-digit (i)
   "Turn a character 0..9, A..Z, a..z into a number 0..61.
 The input I may be a character, or a single-letter string."
   (and (stringp i) (setq i (string-to-char i)))
   (cond
    ((and (>= i ?0) (<= i ?9)) (- i ?0))
-   ((and (>= i ?A) (<= i ?Z)) (+ (- i ?A) 10))
-   ((and (>= i ?a) (<= i ?z)) (+ (- i ?a) 36))
-   (t (error "Invalid b62 letter"))))
+   ((and (>= i ?a) (<= i ?z)) (+ (- i ?a) 10))
+   (t (error "Invalid b36 letter"))))
 
-(defun org-id-int-to-b62 (i &optional length)
-  "Convert an integer to a base-62 number represented as a string."
+(defun org-id-int-to-b36 (i &optional length)
+  "Convert an integer to a base-36 number represented as a string."
   (let ((s ""))
     (while (> i 0)
       (setq s (concat (char-to-string
-		       (org-id-int-to-b62-one-digit (mod i 62))) s)
-	    i (/ i 62)))
+		       (org-id-int-to-b36-one-digit (mod i 36))) s)
+	    i (/ i 36)))
     (setq length (max 1 (or length 1)))
     (if (< (length s) length)
 	(setq s (concat (make-string (- length (length s)) ?0) s)))
     s))
 
-(defun org-id-b62-to-int (s)
-  "Convert a base-62 string into the corresponding integer."
+(defun org-id-b36-to-int (s)
+  "Convert a base-36 string into the corresponding integer."
   (let ((r 0))
-    (mapc (lambda (i) (setq r (+ (* r 62) (org-id-b62-to-int-one-digit i))))
+    (mapc (lambda (i) (setq r (+ (* r 36) (org-id-b36-to-int-one-digit i))))
 	  s)
     r))
 
-(defun org-id-time-to-b62 (&optional time)
+(defun org-id-time-to-b36 (&optional time)
   "Encode TIME as a 10-digit string.
 This string holds the time to micro-second accuracy, and can be decoded
 using `org-id-decode'."
+  (debug)
   (setq time (or time (current-time)))
-  (concat (org-id-int-to-b62 (nth 0 time) 3)
-	  (org-id-int-to-b62 (nth 1 time) 3)
-	  (org-id-int-to-b62 (or (nth 2 time) 0) 4)))
+  (concat (org-id-int-to-b36 (nth 0 time) 4)
+	  (org-id-int-to-b36 (nth 1 time) 4)
+	  (org-id-int-to-b36 (or (nth 2 time) 0) 4)))
 
 (defun org-id-decode (id)
   "Split ID into the prefix and the time value that was used to create it.
@@ -316,9 +318,10 @@ and time is the usual three-integer representation of time."
     (if (= 2 (length parts))
 	(setq prefix (car parts) time (nth 1 parts))
       (setq prefix nil time (nth 0 parts)))
-    (setq time (list (org-id-b62-to-int (substring time 0 3))
-		     (org-id-b62-to-int (substring time 3 6))
-		     (org-id-b62-to-int (substring time 6 10))))
+    (setq time (org-id-reverse-string time))
+    (setq time (list (org-id-b36-to-int (substring time 0 4))
+		     (org-id-b36-to-int (substring time 4 8))
+		     (org-id-b36-to-int (substring time 8 12))))
     (cons prefix time)))
 
 ;; Storing ID locations (files)

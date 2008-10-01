@@ -1,4 +1,28 @@
+2008-09-30  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-entry-get-multivalued-property)
+	(org-entry-protect-space, org-entry-restore-space): New
+	functions.
+	(org-file-apps-defaults-macosx): Let postscript files be opened by
+	preview.
+	(org-time-stamp-inactive): Call `org-time-stamp'.
+	(org-time-stamp): New argument `inactive'.  Also edit inacive
+	stamps. Convert time stamp type.
+	(org-open-file): Interpret the `default' value for the `command'
+	in `org-file-apps'.
+
+	* org-id.el (org-id-int-to-b36-one-digit)
+	(org-id-b36-to-int-one-digit, org-id-int-to-b36)
+	(org-id-b36-to-int, org-id-time-to-b36): Modified from b62 to
+	b36.
+
 2008-09-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-id.el (org-id-reverse-string): New function.
+	(org-id-new): Use `org-id-reverse-string' to make sure the
+	beginning chars of the ID are mutating fast.  This allows to use a
+	directory structure to spread things better.
+	(org-id-prefix): Changed default to nil.
 
 	* org-list.el (org-move-item-down, org-move-item-up): Remember and
 	restore the column of the cursor position.
