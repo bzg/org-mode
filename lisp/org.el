@@ -9816,7 +9816,7 @@ VALUES should be a list of strings.  Spaces will be protected."
   (org-entry-put pom property
 		 (mapconcat 'org-entry-protect-space values " "))
   (let* ((value (org-entry-get pom property))
-	 (values (and old (org-split-string value "[ \t]"))))
+	 (values (and value (org-split-string value "[ \t]"))))
     (mapcar 'org-entry-restore-space values)))
 
 (defun org-entry-protect-space (s)
