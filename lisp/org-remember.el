@@ -135,12 +135,15 @@ Furthermore, the following %-escapes will be replaced with content:
   %^L         Like %^C, but insert as link
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion all tags in all agenda files
+  %k          title of currently clocked task
+  %K          link to currently clocked task
   %^{prop}p   Prompt the user for a value for property `prop'
   %:keyword   specific information for certain link types, see below
   %[pathname] insert the contents of the file given by `pathname'
   %(sexp)     evaluate elisp `(sexp)' and replace with the result
   %!          Store this note immediately after filling the template
   %&          Visit note immediately after storing it
+  %<          File note as child of currently clocked task
 
   %?          After completing the template, position cursor here.
 
@@ -355,6 +358,13 @@ to be run from that hook to function properly."
 		      (replace-match "[\\1[%^{Link description}]]" nil nil v-a)
 		    v-a))
 	     (v-n user-full-name)
+	     (v-k (if (marker-buffer org-clock-marker)
+		      (substring-no-properties org-clock-heading)))
+	     (v-K (if (marker-buffer org-clock-marker)
+		      (org-make-link-string
+		       (buffer-file-name (marker-buffer org-clock-marker))
+		       org-clock-heading)))
+	     v-I
 	     (org-startup-folded nil)
 	     (org-inhibit-startup t)
 	     org-time-was-given org-end-time-was-given x
@@ -364,6 +374,21 @@ to be run from that hook to function properly."
 	  (setq file (funcall file)))
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
+
+	;;handle the %^K file to clocked task indicator
+	(if (and v-k (string-match "%<" tpl))
+	    (setq file (buffer-file-name (marker-buffer org-clock-marker))
+		  headline (with-current-buffer
+			       (get-buffer (marker-buffer org-clock-marker))
+			     (goto-char (marker-position org-clock-marker))
+			     (org-back-to-heading t)
+			     (if (looking-at org-complex-heading-regexp)
+				 (concat (match-string 2)
+					 (if (match-string 2) " ")
+					 (match-string 3)
+					 (if (match-string 3) " ")
+					 (match-string 4))))))
+
 	(setq org-store-link-plist
 	      (append (list :annotation v-a :initial v-i)
 		      org-store-link-plist))
@@ -383,9 +408,15 @@ to be run from that hook to function properly."
 		  (or headline "")
 		  (or (car org-remember-previous-location) "???")
 		  (or (cdr org-remember-previous-location) "???"))))
-	(insert tpl) (goto-char (point-min))
+	(insert tpl)
+	(goto-char (point-min))
+	;;Get rid of %< if present
+	(while (re-search-forward "%<" nil t)
+	  (replace-match ""))
+	(goto-char (point-min))
+
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUaiAcx]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
