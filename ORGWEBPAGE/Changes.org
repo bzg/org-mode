@@ -15,7 +15,6 @@
 :VISIBILITY: content
 :END:
 
-
 ** Incompatible changes
 
 *** The default structure of IDs has changed
@@ -49,15 +48,22 @@
     concept and wrote org-attach.el to implement it.
 
 *** New remember template escape to add a property
+
     Thanks to James TD Smith for a patch to this effect.
 
 *** Clicking with mouse-2 on clock info in mode-line visits the clock.
+    
     Thanks to James TD Smith for a patch to this effect.
 
 *** New file in contrib: lisp/org-checklist.el
+
+    This module deals with repeated tasks that have checkbox
+    lists below them.
+
     Thanks to James TD Smith for this contribution.
 
 *** New in-buffer setting #+STYLE
+
     It can be used to locally set the variable
     `org-export-html-style-extra'.  Several such lines are
     allowed-, they will all be concatenated.  For an example on

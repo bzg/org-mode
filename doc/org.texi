@@ -7603,37 +7603,15 @@ Each exported files contains a compact default style that defines these
 classes in a basic way.  You may overwrite these settings, or add to them by
 using the variables @code{org-export-html-style} (for Org-wide settings) and
 @code{org-export-html-style-extra} (for more granular settings, like
-file-local settings).  There are two ways to set the latter variable
-individually for each file.  First, you can use
+file-local settings).  To set the latter variable individually for each
+file, you can use
 
 @example
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 @end example
 
 @noindent
-a setup that also works in an external setup file (@pxref{In-buffer
-settings}).  An alternative method, also suitable for extensive definitions
-is using file variables, best wrapped into a COMMENT section at the end of
-the outline tree.  For example@footnote{Under Emacs 21, the continuation
-lines for a variable value should have no @samp{#} at the start of the
-line.}:
-
-@example
-* COMMENT html style specifications
-
-# Local Variables:
-# org-export-html-style-extra: 
-#  "<style>
-#   p  @{font-weight: normal; color: gray; @}
-#   h1 @{color: black; @}
-#   </style>"
-# End:
-@end example
-
-Remember to execute @kbd{M-x normal-mode} after changing this to make the new
-style immediately visible to Emacs.  This command restarts Org mode for the
-current buffer and forces Emacs to re-evaluate the local variables section in
-the buffer.
+For longer style definitions, you can use several such lines.
 
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
@@ -9866,7 +9844,7 @@ existence of these packages.  But with time I have accasionally looked
 at John's code and learned a lot from it.  John has also contributed a
 number of great ideas and patches directly to Org, including the attachment
 system (@file{org-attach.el}) and integration with Apple Mail
-(@code{org-mac-message.el}).
+(@file{org-mac-message.el}).
 @item
 @i{Carsten Wimmer} suggested some changes and helped fix a bug in
 linking to Gnus.
