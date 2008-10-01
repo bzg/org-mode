@@ -22,7 +22,7 @@
 
     IDs created by Org have changed a bit:
     - By default, there is no prefix on the ID.  There used to be
-      an "Org" prefix, but I now think this is not necesary.
+      an "Org" prefix, but I now think this is not necessary.
     - IDs use only lower-case letters, no upper-case letters
       anymore.  The reason for this is that IDs are now also used
       as directory names for org-attach, and some systems do not
@@ -57,10 +57,11 @@
 *** New file in contrib: lisp/org-checklist.el
     Thanks to James TD Smith for this contribution.
 
-*** New in-buffer seting #+STYLE
+*** New in-buffer setting #+STYLE
     It can be used to locally set the variable
-    `org-expor-html-style-extra'.  See the [[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php][publishing tutorial]]
-    for an example on how tu use it.
+    `org-export-html-style-extra'.  Several such lines are
+    allowed-, they will all be concatenated.  For an example on
+    how to use it, see the [[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php][publishing tutorial]].
 
 * Version 6.07
 :PROPERTIES:

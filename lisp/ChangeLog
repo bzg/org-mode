@@ -1,3 +1,7 @@
+2008-10-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-infile-export-plist): Allow multiple STYLE lines.
+
 2008-09-30  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-entry-get-multivalued-property)
