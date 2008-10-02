@@ -43,6 +43,8 @@
 (defvar remember-buffer)
 (defvar remember-handler-functions)
 (defvar remember-annotation-functions)
+(defvar org-clock-heading)
+(defvar org-clock-heading-for-remember)
 
 (defgroup org-remember nil
   "Options concerning interaction with remember.el."
@@ -133,6 +135,8 @@ Furthermore, the following %-escapes will be replaced with content:
   %x          content of the X clipboard
   %^C         Interactive selection of which kill or clip to use
   %^L         Like %^C, but insert as link
+  %k          title of currently clocked task
+  %K          link to currently clocked task
   %^g         prompt for tags, with completion on tags in target file
   %^G         prompt for tags, with completion all tags in all agenda files
   %^{prop}p   Prompt the user for a value for property `prop'
@@ -355,6 +359,13 @@ to be run from that hook to function properly."
 		      (replace-match "[\\1[%^{Link description}]]" nil nil v-a)
 		    v-a))
 	     (v-n user-full-name)
+	     (v-k (if (marker-buffer org-clock-marker)
+		      (substring-no-properties org-clock-heading)))
+	     (v-K (if (marker-buffer org-clock-marker)
+		      (org-make-link-string
+		       (buffer-file-name (marker-buffer org-clock-marker))
+		       org-clock-heading)))
+	     v-I
 	     (org-startup-folded nil)
 	     (org-inhibit-startup t)
 	     org-time-was-given org-end-time-was-given x
@@ -364,6 +375,8 @@ to be run from that hook to function properly."
 	  (setq file (funcall file)))
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
+
+
 	(setq org-store-link-plist
 	      (append (list :annotation v-a :initial v-i)
 		      org-store-link-plist))
@@ -371,21 +384,23 @@ to be run from that hook to function properly."
 	(erase-buffer)
 	(insert (substitute-command-keys
 		 (format
-"## Filing location: Select interactively, default, or last used:
-## %s  to select file and header location interactively.
-## %s  \"%s\" -> \"* %s\"
-## C-0 C-c C-c  \"%s\" -> \"* %s\"
+"## %s  \"%s\" -> \"* %s\"
 ## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
+## C-0 C-c C-c  \"%s\" -> \"* %s\"
+## %s  to select file and header location interactively.
+## C-2 C-c C-c  as child of the currently clocked item
 ## To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
-		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c")
 		  (if org-remember-store-without-prompt "    C-c C-c" "    C-1 C-c C-c")
 		  (abbreviate-file-name (or file org-default-notes-file))
 		  (or headline "")
 		  (or (car org-remember-previous-location) "???")
-		  (or (cdr org-remember-previous-location) "???"))))
-	(insert tpl) (goto-char (point-min))
+		  (or (cdr org-remember-previous-location) "???")
+		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c"))))
+	(insert tpl)
+	(goto-char (point-min))
+
 	;; Simple %-escapes
-	(while (re-search-forward "%\\([tTuUaiAcx]\\)" nil t)
+	(while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
 	      (let* ((lead (buffer-substring
@@ -659,6 +674,10 @@ process is used to select the target location.
 When the prefix is 0 (i.e. when remember is exited with `C-0 C-c C-c'),
 the entry is filed to the same location as the previous note.
 
+When the prefix is 2 (i.e. when remember is exited with `C-2 C-c C-c'),
+the entry is fild as a subentry of the entry where the clock is
+currently running.
+
 When `C-u' has been used as prefix argument, the note is stored and emacs
 moves point to the new location of the note, so that editing can be
 continued there (smilar to inserting \"%&\" into the tempate).
@@ -673,6 +692,9 @@ also indented so that it starts in the same column as the headline
 \(i.e. after the stars).
 
 See also the variable `org-reverse-note-order'."
+  (when (and (equal current-prefix-arg 2)
+	     (not (marker-buffer org-clock-marker)))
+    (error "No runing clock"))
   (when (org-bound-and-true-p org-jump-to-target-location)
     (let* ((end (min (point-max) (1+ (point))))
 	   (beg (point)))
@@ -691,6 +713,7 @@ See also the variable `org-reverse-note-order'."
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
+	   (clockp (equal current-prefix-arg 2))
 	   (fastp (org-xor (equal current-prefix-arg 1)
 			   org-remember-store-without-prompt))
 	   (file (cond
@@ -711,6 +734,10 @@ See also the variable `org-reverse-note-order'."
       (when previousp
 	(setq file (car org-remember-previous-location)
 	      heading (cdr org-remember-previous-location)
+	      fastp t))
+      (when clockp
+	(setq file (buffer-file-name (marker-buffer org-clock-marker))
+	      heading org-clock-heading-for-remember
 	      fastp t))
       (setq current-prefix-arg nil)
       ;; Modify text so that it becomes a nice subtree which can be inserted

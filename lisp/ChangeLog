@@ -1,3 +1,15 @@
+2008-10-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-heading-for-remember): New variable.
+	(org-clock-in): Set `org-clock-heading-for-remember'.
+
+2008-10-01 James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-remember.el (org-remember-apply-template): Add new
+	expansions: %k, %K for currently clocked task and a link to the
+	currently clocked task, and %< to file notes in the currently
+	clocked task.
+
 2008-10-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-colview.el (org-columns-get-format-and-top-level): Remove

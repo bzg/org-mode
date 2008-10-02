@@ -47,7 +47,18 @@
     Thanks to John Wiegley who contributed this fantastic new
     concept and wrote org-attach.el to implement it.
 
-*** New remember template escape to add a property
+*** New remember template escapes
+
+    : %^{prop}p   to insert a property
+    : %k          the heading of the item currently being clocked
+    : %K          a link to the heading of the item currently being clocked
+
+    Also, when you exit remember with =C-2 C-c C-c=, the item
+    will be filed as a child of the item currently being
+    clocked.  So the idea is, if you are working on something and
+    think of a new task related to this or a new note to be
+    added, you can use this to quickly add information to that
+    task.
 
     Thanks to James TD Smith for a patch to this effect.
 
