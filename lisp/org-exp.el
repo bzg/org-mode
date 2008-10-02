@@ -865,10 +865,11 @@ modified) list.")
       (let ((re (org-make-options-regexp
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
-		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
+		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options js-up js-main js-css js-opt a pr style
+	    latex-header
 	    ext-setup-or-nil setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
@@ -888,6 +889,8 @@ modified) list.")
 	   ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
 	   ((string-equal key "STYLE")
 	    (setq style (concat style "\n" val)))
+	   ((string-equal key "LATEX_HEADER")
+	    (setq latex-header (concat latex-header "\n" val)))
 	   ((string-equal key "TEXT")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")
@@ -913,7 +916,9 @@ modified) list.")
 			    "\n" setup-contents "\n"
 			    (substring ext-setup-or-nil start)))))))
 	(setq p (plist-put p :text text))
-	(if style (setq p (plist-put p :style-extra style)))
+	(when style (setq p (plist-put p :style-extra style)))
+	(when latex-header
+	  (setq p (plist-put p :latex-header-extra (substring latex-header 1))))
 	(when options
 	  (setq p (org-export-add-options-to-plist p options)))
 	p))))
