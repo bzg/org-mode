@@ -8313,7 +8313,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
     (save-excursion
       (when findpos
 	(org-back-to-heading t)
-	(org-narrow-to-subtree)
+	(narrow-to-region (point) (save-excursion 
+				    (outline-next-heading) (point)))
 	(while (re-search-forward
 		(concat "\\(" org-drawer-regexp "\\|" org-property-end-re "\\)")
 		(point-max) t) (forward-line))
@@ -14189,4 +14190,3 @@ Still experimental, may disappear in the future."
 ;; arch-tag: e77da1a7-acc7-4336-b19e-efa25af3f9fd
 
 ;;; org.el ends here
-

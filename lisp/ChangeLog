@@ -1,5 +1,8 @@
 2008-10-02  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-add-log-setup): Limit searc for drawers to entry
+	text, not to subtree.
+
 	* org-clock.el (org-clock-heading-for-remember): New variable.
 	(org-clock-in): Set `org-clock-heading-for-remember'.
 
