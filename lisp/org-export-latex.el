@@ -622,6 +622,7 @@ OPT-PLIST is the options plist for current buffer."
 			      (car p) (cadr p))))
 		  org-export-latex-packages-alist "\n"))
      ;; insert additional commands in the header
+     (plist-get opt-plist :latex-header-extra)
      org-export-latex-append-header
      ;; insert the title
      (format
