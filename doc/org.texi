@@ -5022,6 +5022,8 @@ insertion of content:
 %^C         @r{Interactive selection of which kill or clip to use.}
 %^L         @r{Like @code{%^C}, but insert as link.}
 %^g         @r{prompt for tags, with completion on tags in target file.}
+%k          @r{title of currently clocked task}
+%K          @r{link to currently clocked task}
 %^G         @r{prompt for tags, with completion all tags in all agenda files.}
 %^@{prop@}p   @r{Prompt the user for a value for property @code{prop}}
 %:keyword   @r{specific information for certain link types, see below}
@@ -5082,6 +5084,8 @@ The window configuration will be restored, sending you back to the working
 context before the call to @code{remember}.  To re-use the location found
 during the last call to @code{remember}, exit the remember buffer with
 @kbd{C-0 C-c C-c}, i.e. specify a zero prefix argument to @kbd{C-c C-c}.
+Another special case is @kbd{C-2 C-c C-c} which files the note as a child of
+the currently clocked item.
 
 If you want to store the note directly to a different place, use
 @kbd{C-1 C-c C-c} instead to exit remember@footnote{Configure the

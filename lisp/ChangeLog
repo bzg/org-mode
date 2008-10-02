@@ -1,3 +1,8 @@
+2008-10-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-heading-for-remember): New variable.
+	(org-clock-in): Set `org-clock-heading-for-remember'.
+
 2008-10-01 James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org-remember.el (org-remember-apply-template): Add new

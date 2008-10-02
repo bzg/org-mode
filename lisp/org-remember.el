@@ -43,6 +43,8 @@
 (defvar remember-buffer)
 (defvar remember-handler-functions)
 (defvar remember-annotation-functions)
+(defvar org-clock-heading)
+(defvar org-clock-heading-for-remember)
 
 (defgroup org-remember nil
   "Options concerning interaction with remember.el."
@@ -133,17 +135,16 @@ Furthermore, the following %-escapes will be replaced with content:
   %x          content of the X clipboard
   %^C         Interactive selection of which kill or clip to use
   %^L         Like %^C, but insert as link
-  %^g         prompt for tags, with completion on tags in target file
-  %^G         prompt for tags, with completion all tags in all agenda files
   %k          title of currently clocked task
   %K          link to currently clocked task
+  %^g         prompt for tags, with completion on tags in target file
+  %^G         prompt for tags, with completion all tags in all agenda files
   %^{prop}p   Prompt the user for a value for property `prop'
   %:keyword   specific information for certain link types, see below
   %[pathname] insert the contents of the file given by `pathname'
   %(sexp)     evaluate elisp `(sexp)' and replace with the result
   %!          Store this note immediately after filling the template
   %&          Visit note immediately after storing it
-  %<          File note as child of currently clocked task
 
   %?          After completing the template, position cursor here.
 
@@ -375,19 +376,6 @@ to be run from that hook to function properly."
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
 
-	;;handle the %^K file to clocked task indicator
-	(if (and v-k (string-match "%<" tpl))
-	    (setq file (buffer-file-name (marker-buffer org-clock-marker))
-		  headline (with-current-buffer
-			       (get-buffer (marker-buffer org-clock-marker))
-			     (goto-char (marker-position org-clock-marker))
-			     (org-back-to-heading t)
-			     (if (looking-at org-complex-heading-regexp)
-				 (concat (match-string 2)
-					 (if (match-string 2) " ")
-					 (match-string 3)
-					 (if (match-string 3) " ")
-					 (match-string 4))))))
 
 	(setq org-store-link-plist
 	      (append (list :annotation v-a :initial v-i)
@@ -396,23 +384,19 @@ to be run from that hook to function properly."
 	(erase-buffer)
 	(insert (substitute-command-keys
 		 (format
-"## Filing location: Select interactively, default, or last used:
-## %s  to select file and header location interactively.
-## %s  \"%s\" -> \"* %s\"
-## C-0 C-c C-c  \"%s\" -> \"* %s\"
+"## %s  \"%s\" -> \"* %s\"
 ## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
+## C-0 C-c C-c  \"%s\" -> \"* %s\"
+## %s  to select file and header location interactively.
+## C-2 C-c C-c  as child of the currently clocked item
 ## To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
-		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c")
 		  (if org-remember-store-without-prompt "    C-c C-c" "    C-1 C-c C-c")
 		  (abbreviate-file-name (or file org-default-notes-file))
 		  (or headline "")
 		  (or (car org-remember-previous-location) "???")
-		  (or (cdr org-remember-previous-location) "???"))))
+		  (or (cdr org-remember-previous-location) "???")
+		  (if org-remember-store-without-prompt "C-1 C-c C-c" "        C-c C-c"))))
 	(insert tpl)
-	(goto-char (point-min))
-	;;Get rid of %< if present
-	(while (re-search-forward "%<" nil t)
-	  (replace-match ""))
 	(goto-char (point-min))
 
 	;; Simple %-escapes
@@ -690,6 +674,10 @@ process is used to select the target location.
 When the prefix is 0 (i.e. when remember is exited with `C-0 C-c C-c'),
 the entry is filed to the same location as the previous note.
 
+When the prefix is 2 (i.e. when remember is exited with `C-2 C-c C-c'),
+the entry is fild as a subentry of the entry where the clock is
+currently running.
+
 When `C-u' has been used as prefix argument, the note is stored and emacs
 moves point to the new location of the note, so that editing can be
 continued there (smilar to inserting \"%&\" into the tempate).
@@ -704,6 +692,9 @@ also indented so that it starts in the same column as the headline
 \(i.e. after the stars).
 
 See also the variable `org-reverse-note-order'."
+  (when (and (equal current-prefix-arg 2)
+	     (not (marker-buffer org-clock-marker)))
+    (error "No runing clock"))
   (when (org-bound-and-true-p org-jump-to-target-location)
     (let* ((end (min (point-max) (1+ (point))))
 	   (beg (point)))
@@ -722,6 +713,7 @@ See also the variable `org-reverse-note-order'."
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
+	   (clockp (equal current-prefix-arg 2))
 	   (fastp (org-xor (equal current-prefix-arg 1)
 			   org-remember-store-without-prompt))
 	   (file (cond
@@ -742,6 +734,10 @@ See also the variable `org-reverse-note-order'."
       (when previousp
 	(setq file (car org-remember-previous-location)
 	      heading (cdr org-remember-previous-location)
+	      fastp t))
+      (when clockp
+	(setq file (buffer-file-name (marker-buffer org-clock-marker))
+	      heading org-clock-heading-for-remember
 	      fastp t))
       (setq current-prefix-arg nil)
       ;; Modify text so that it becomes a nice subtree which can be inserted

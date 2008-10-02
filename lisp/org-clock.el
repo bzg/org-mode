@@ -98,6 +98,7 @@ The function is called with point at the beginning of the headline."
 
 (defvar org-mode-line-timer nil)
 (defvar org-clock-heading "")
+(defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
 (defvar org-clock-history nil
@@ -269,6 +270,10 @@ the clocking selection, associated with the letter `d'."
 					      org-clock-in-switch-to-state
 					      "\\>"))))
 	    (org-todo org-clock-in-switch-to-state))
+	  (setq org-clock-heading-for-remember 
+		(and (looking-at org-complex-heading-regexp)
+		     (match-end 4)
+		     (org-trim (buffer-substring (match-end 1) (match-end 4)))))
 	  (setq org-clock-heading
 		(cond ((and org-clock-heading-function
 			    (functionp org-clock-heading-function))
