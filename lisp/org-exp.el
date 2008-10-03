@@ -1878,7 +1878,9 @@ can work correctly."
   (let ((inhibit-read-only t))
     (save-excursion
       (goto-char (point-min))
-      (let ((end (save-excursion (outline-next-heading) (point))))
+      (let ((end (if (looking-at org-outline-regexp)
+		     (point)
+		   (save-excursion (outline-next-heading) (point)))))
 	(when (re-search-forward "^[ \t]*[^|# \t\r\n].*\n" end t)
 	  ;; Mark the line so that it will not be exported as normal text.
 	  (org-unmodified
