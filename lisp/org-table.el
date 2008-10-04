@@ -3488,8 +3488,13 @@ overwritten, and the table is not marked as requiring realignment."
 	(goto-char (match-beginning 0))
 	(self-insert-command N))
     (setq org-table-may-need-update t)
-    (let (orgtbl-mode)
-      (call-interactively (key-binding (vector last-input-event))))))
+    (let (orgtbl-mode a)
+      (call-interactively 
+       (key-binding
+	(or (and (listp function-key-map)
+		 (setq a (assoc last-input-event function-key-map))
+		 (cdr a))
+	    (vector last-input-event)))))))
 
 (defvar orgtbl-exp-regexp "^\\([-+]?[0-9][0-9.]*\\)[eE]\\([-+]?[0-9]+\\)$"
   "Regular expression matching exponentials as produced by calc.")

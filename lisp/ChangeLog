@@ -1,3 +1,8 @@
+2008-10-04  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-table.el (orgtbl-self-insert-command): Make this work for
+	the keypad as well.
+
 2008-10-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-add-log-setup): Limit searc for drawers to entry
