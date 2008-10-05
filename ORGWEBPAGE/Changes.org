@@ -33,6 +33,12 @@
     - You can now set the `org-id-method' to `uuidgen' on systems
       which support it. 
 
+*** =C-c C-a= no longer calls `show-all'
+
+    The reason for this is that =C-c C-a= is now used for the
+    attachment system.  On the rare occasions that this command
+    is needed, use =M-x show-all=, or =C-u C-u C-u TAB=.
+
 ** Details
 
 *** New attachment system
