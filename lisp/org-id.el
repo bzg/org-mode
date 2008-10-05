@@ -303,7 +303,6 @@ The input I may be a character, or a single-letter string."
   "Encode TIME as a 10-digit string.
 This string holds the time to micro-second accuracy, and can be decoded
 using `org-id-decode'."
-  (debug)
   (setq time (or time (current-time)))
   (concat (org-id-int-to-b36 (nth 0 time) 4)
 	  (org-id-int-to-b36 (nth 1 time) 4)
