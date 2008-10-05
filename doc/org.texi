@@ -5206,19 +5206,20 @@ attachments yourself.
 
 @kindex C-c C-a o
 @item o
-Open current task's attachment, if there is only one.
+Open current task's attachment.  If there are more than one, prompt for a
+file name first.
 
 @kindex C-c C-a O
 @item O
-Also open the attachment, but using the Finder.
+Also open the attachment, but force opening the file in Emacs.
 
 @kindex C-c C-a f
 @item f
-Open current task's attachment directory in dired.
+Open the current task's attachment directory.
 
 @kindex C-c C-a F
 @item F
-Also open the directory, but using the Finder.
+Also open the directory, but force using @code{dired} in Emacs.
 
 @kindex C-c C-a D
 @item D
@@ -7116,7 +7117,11 @@ example:
 @item C-c '
 Edit the source code example at point in its native mode.  This works by
 switching to an indirect buffer, narrowing the buffer and switching to the
-other mode.  You need to exit by pressing @kbd{C-c '} again.  Fixed-width
+other mode.  You need to exit by pressing @kbd{C-c '} again@footnote{Upon
+exit, lines starting with @samp{*} or @samp{#} will get a comma prepended, to
+keep them from being interpreted by Org as outline nodes or special
+comments.  These commas will be striped for editing with @kbd{C-c '}, and
+also for export.}.  Fixed-width
 regions (where each line starts with a colon followed by a space) will be
 edited using @code{artist-mode}@footnote{You may select a different-mode with
 the variable @code{org-edit-fixed-width-region-mode}.} to allow creating
