@@ -17,6 +17,12 @@
 
 ** Incompatible changes
 
+   - Changes in the structure of IDs, see [[*The%20default%20structure%20of%20IDs%20has%20changed][here]] for details.
+
+   - C-c C-a has been redefined, see [[*%20C%20c%20C%20a%20no%20longer%20calls%20show%20all][here]] for details.
+
+** Details
+
 *** The default structure of IDs has changed
 
     IDs created by Org have changed a bit:
@@ -26,20 +32,18 @@
       anymore.  The reason for this is that IDs are now also used
       as directory names for org-attach, and some systems do not
       distinguish upper and lower case in the file system.
-    - The ID string derived from the current time is now /reversed/
-      to become an ID.  This assures that the first two letters
-      of the ID change fast, so hat it makes sense to split them
-      off to create subdirectories to balance load.
+    - The ID string derived from the current time is now
+      /reversed/ to become an ID.  This assures that the first
+      two letters of the ID change fast, so hat it makes sense to
+      split them off to create subdirectories to balance load.
     - You can now set the `org-id-method' to `uuidgen' on systems
-      which support it. 
+      which support it.
 
 *** =C-c C-a= no longer calls `show-all'
 
     The reason for this is that =C-c C-a= is now used for the
     attachment system.  On the rare occasions that this command
     is needed, use =M-x show-all=, or =C-u C-u C-u TAB=.
-
-** Details
 
 *** New attachment system
 
