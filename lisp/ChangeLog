@@ -1,5 +1,8 @@
 2008-10-06  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-remove-uniherited-tags): Fix reverse interpretation
+	of the list value o `org-use-tag-inheritance'.
+
 	* org-attach.el (org-attach-auto-tag): New option.
 	(org-attach-tag, org-attach-untag): New functions.
 	(org-attach-attach, org-attach-new, org-attach-sync): Call

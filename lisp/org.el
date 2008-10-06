@@ -8784,7 +8784,9 @@ only lines with a TODO keyword are included in the output."
 	       (lambda (x) (if (string-match org-use-tag-inheritance x) x nil))
 	       tags)))
    ((listp org-use-tag-inheritance)
-    (org-delete-all org-use-tag-inheritance tags))))
+    (delq nil (mapcar
+	       (lambda (x) (if (member x org-use-tag-inheritance) x nil))
+	       tags)))))
 
 (defvar todo-only) ;; dynamically scoped
 
