@@ -1,3 +1,11 @@
+2008-10-06  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-attach.el (org-attach-auto-tag): New option.
+	(org-attach-tag, org-attach-untag): New functions.
+	(org-attach-attach, org-attach-new, org-attach-sync): Call
+	`org-attach-tag'.
+	(org-attach-delete): Call `org-attach-untag'.
+
 2008-10-04  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (orgtbl-self-insert-command): Make this work for

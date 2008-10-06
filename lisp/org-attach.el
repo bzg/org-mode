@@ -56,6 +56,13 @@ where the Org file lives."
   :group 'org-attach
   :type 'direcory)
 
+(defcustom org-attach-auto-tag "ATTACH"
+  "Tag that will be triggered automatically when an entry has an attachment."
+  :group 'org-attach
+  :type '(choice
+	  (const :tag "None" nil)
+	  (string :tag "Tag")))
+
 (defcustom org-attach-expert nil
   "Non-nil means do not show the splash buffer with the attach dispatcher."
   :group 'org-attach
@@ -143,6 +150,17 @@ the directory and the corresponding ID will be created."
 		 " git ls-files --deleted -z | xargs -0 git rm; "
 		 " git commit -m 'Synchronized attachments')")))))
   
+(defun org-attach-tag (&optional off)
+  "Turn the autotag on."
+  (when org-attach-auto-tag
+    (save-excursion
+      (org-back-to-heading t)
+      (org-toggle-tag org-attach-auto-tag (if off 'off 'on)))))
+
+(defun org-attach-untag ()
+  "Turn the autotag off."
+  (org-attach-tag 'off))
+
 (defun org-attach-attach (file &optional visit-dir)
   "Move FILE into the attachment directory of the current task.
 If VISIT-DIR is non-nil, visit the direcory with dired."
@@ -153,6 +171,7 @@ If VISIT-DIR is non-nil, visit the direcory with dired."
     (let ((attach-dir (org-attach-dir t)))
       (rename-file file (expand-file-name basename attach-dir))
       (org-attach-commit)
+      (org-attach-tag)
       (if visit-dir
 	  (dired attach-dir)
 	(message "File \"%s\" is now a task attachment." basename)))))
@@ -164,6 +183,7 @@ The attachment is created as an Emacs buffer."
   (org-entry-add-to-multivalued-property (point) "Attachments"
 					 file)
   (let ((attach-dir (org-attach-dir t)))
+    (org-attach-tag)
     (find-file (expand-file-name file attach-dir))
     (message "New attachment %s" file)))
 
@@ -175,7 +195,8 @@ A safer way is to open the directory in dired and delete from there."
   (let ((attach-dir (org-attach-dir)))
     (if attach-dir
 	(shell-command (format "rm -fr %s" attach-dir))))
-  (org-attach-commit))
+  (org-attach-commit)
+  (org-attach-untag))
 
 (defun org-attach-sync ()
   "Synchonize the current tasks with its attachments.
@@ -186,6 +207,7 @@ This can be used after files have been added externally."
   (let ((attach-dir (org-attach-dir)))
     (when attach-dir
       (let ((files (directory-files attach-dir)))
+	(and files (org-attach-tag))
 	(dolist (file files)
 	  (unless (string-match "^\\." file)
 	    (org-entry-add-to-multivalued-property
