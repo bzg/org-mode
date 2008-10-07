@@ -131,6 +131,8 @@ install-lisp: $(LISPFILES) $(ELCFILES)
 	$(CP) $(ELCFILES)  $(lispdir)
 
 install-info: $(INFOFILES)
+	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
+	$(CP) $(INFOFILES) $(infodir)
 	$(INSTALL_INFO) --info-file=$(INFOFILES) --info-dir=$(infodir)
 
 install-noutline: xemacs/noutline.elc
