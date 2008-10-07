@@ -1,8 +1,13 @@
+2008-10-07  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-attach.el (org-attach): Support the new keys.
+	(org-attach-method): New option.
+
 2008-10-06  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-bbdb.el (org-bbdb-anniversaries): Fix but with 29 Feb/1
 	March.
-	
+
 	* org.el (org-remove-uniherited-tags): Fix reverse interpretation
 	of the list value o `org-use-tag-inheritance'.
 

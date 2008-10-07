@@ -63,6 +63,19 @@ where the Org file lives."
 	  (const :tag "None" nil)
 	  (string :tag "Tag")))
 
+(defcustom org-attach-method 'cp
+  "Preferred method to attach a file.
+Allowed values are:
+
+mv    rename the file to move it into the attachment directory
+cp    copy the file
+mv    create a hard link when possible.  If not, fall back to copy."
+  :group 'org-attach
+  :type '(choice
+	  (const :tag "Copy" cp)
+	  (const :tag "Move/Rename" mv)
+	  (const :tag "Link" ln)))
+
 (defcustom org-attach-expert nil
   "Non-nil means do not show the splash buffer with the attach dispatcher."
   :group 'org-attach
@@ -90,31 +103,39 @@ Shows a list of commands and prompts for another key to execute a command."
 	    (with-output-to-temp-buffer "*Org Attach*"
 	      (princ "Select an Attachment Command:
 
-a    Select a file and move it into the task's attachment  directory.
-c    Create a new attachment, as an Emacs buffer.
-z    Synchronize the current task with its attachment
-     directory, in case you added attachments yourself.
+a       Select a file and attach it to the task, using `org-attach-method'.
+c/m/l   Attach a file using copy/move/link method.
+n       Create a new attachment, as an Emacs buffer.
+z       Synchronize the current task with its attachment
+        directory, in case you added attachments yourself.
 
-o    Open current task's attachments.
-O    Like \"o\", but force opening in Emacs.
-f    Open current task's attachment directory.
-F    Like \"f\", but force using dired in Emacs.
+o       Open current task's attachments.
+O       Like \"o\", but force opening in Emacs.
+f       Open current task's attachment directory.
+F       Like \"f\", but force using dired in Emacs.
 
-D    Delete all of a task's attachments.  A safer way is
-     to open the directory in dired and delete from there.")))
+D       Delete all of a task's attachments.  A safer way is
+        to open the directory in dired and delete from there.")))
 	  (shrink-window-if-larger-than-buffer (get-buffer-window "*Org Attach*"))
 	  (message "Select command: [azoOfFD^a]")
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
       (cond
        ((memq c '(?a ?\C-a)) (call-interactively 'org-attach-attach))
-       ((memq c '(?c ?\C-c)) (call-interactively 'org-attach-new))
+       ((memq c '(?c ?\C-c))
+	(let ((org-attach-method 'cp)) (call-interactively 'org-attach-attach)))
+       ((memq c '(?m ?\C-m))
+	(let ((org-attach-method 'mv)) (call-interactively 'org-attach-attach)))
+       ((memq c '(?l ?\C-l))
+	(let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
+       ((memq c '(?n ?\C-n)) (call-interactively 'org-attach-new))
        ((memq c '(?z ?\C-z)) (call-interactively 'org-attach-sync))
        ((memq c '(?o ?\C-o)) (call-interactively 'org-attach-open))
        ((eq c ?O)            (call-interactively 'org-attach-open-in-emacs))
        ((memq c '(?f ?\C-f)) (call-interactively 'org-attach-reveal))
        ((memq c '(?F))       (call-interactively 'org-attach-reveal-in-emacs))
        ((eq c ?D)            (call-interactively 'org-attach-delete))
+       ((eq c ?q)            ((message "Abort")))
        (t (error "No such attachment command %c" c))))))
 
 (defun org-attach-dir (&optional create-if-not-exists-p)
@@ -161,20 +182,38 @@ the directory and the corresponding ID will be created."
   "Turn the autotag off."
   (org-attach-tag 'off))
 
-(defun org-attach-attach (file &optional visit-dir)
+(defun org-attach-attach (file &optional visit-dir method)
   "Move FILE into the attachment directory of the current task.
 If VISIT-DIR is non-nil, visit the direcory with dired."
   (interactive "fFile to keep as an attachment: \nP")
+  (setq method (or method org-attach-method))
   (let ((basename (file-name-nondirectory file)))
     (org-entry-add-to-multivalued-property (point) "Attachments"
 					   basename)
-    (let ((attach-dir (org-attach-dir t)))
-      (rename-file file (expand-file-name basename attach-dir))
+    (let* ((attach-dir (org-attach-dir t))
+	   (fname (expand-file-name basename attach-dir)))
+      (cond
+       ((eq method 'mv)	(rename-file file fname))
+       ((eq method 'cp)	(copy-file file fname))
+       ((eq method 'ln) 
+	(require 'eshell)
+	(require 'esh-opt)
+	(require 'em-unix)
+	(eshell/ln file fname)))
       (org-attach-commit)
       (org-attach-tag)
       (if visit-dir
 	  (dired attach-dir)
 	(message "File \"%s\" is now a task attachment." basename)))))
+
+(defun org-attach-attach-cp ()
+  (interactive)
+  (let ((org-attach-method 'cp)) (call-interactively 'org-attach-attach)))
+(defun org-attach-attach-mv ()
+  (interactive)
+  (let ((org-attach-method 'mv)) (call-interactively 'org-attach-attach)))
+(defun org-attach-attach-ln ()
+  (let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
 
 (defun org-attach-new (file)
   "Create a new attachment FILE for the current task.
@@ -243,6 +282,7 @@ If IN-EMACS is non-nil, force opening in Emacs."
 (defun org-attach-open-in-emacs ()
   "Open attachment, force opening in Emacs.
 See `org-attach-open'."
+  (interactive)
   (org-attach-open 'in-emacs))
 
 
@@ -251,7 +291,6 @@ See `org-attach-open'."
   (let* ((attach-dir (org-attach-dir t))
 	 (file (read-file-name "Attachment: " attach-dir nil t)))
     (org-open-file file in-emacs)))
-  
 
 (provide 'org-attach)
 

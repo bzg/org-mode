@@ -10,10 +10,27 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.08
+
+* Version 6.09 (in preparation)
 :PROPERTIES:
 :VISIBILITY: content
 :END:
+
+** Details
+*** Changes to the attachment system
+
+    - The default method to attach a file is now to copy it
+      instead of moving it.
+    - You can modify the default method using the variable
+      `org-attach-method'.  I believe that most Unix people want
+      to set it to `ln' to create hard links.
+    - The keys =c=, =m=, and =l= specifically select =copy=,
+      =move=, or =link=, respectively, as the attachment method
+      for a file, overruling  `org-attach-method'.
+    - To create a new attachment as an Emacs buffer, you have not
+      now use =n= instead of =c=.
+
+* Version 6.08
 
 ** Incompatible changes
 

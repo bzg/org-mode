@@ -775,9 +775,9 @@ CONTENTS view up to headlines of level N will be shown.  Note that inside
 tables, @kbd{S-@key{TAB}} jumps to the previous field.
 
 @cindex show all, command
-@kindex C-c C-a C-a
-@item C-c C-a C-a
-Show all.
+@kindex C-u C-u C-u @key{TAB}
+@item C-u C-u C-u @key{TAB}
+Show all, including drawers.
 @kindex C-c C-r
 @item C-c C-r
 Reveal context around point, showing the current entry, the following heading
@@ -5166,21 +5166,17 @@ It is often useful to associate reference material with an outline node/task.
 Small chunks of plain text can simply be stored in the subtree of a project.
 Hyperlinks (@pxref{Hyperlinks}) can be used to establish associations with
 files that live elsewhere on your computer or in the cloud, like emails or
-source code files belonging to a project.  However, you may also have files
-that only belong to a given project and that you would like to store in a
-directory belonging to an outline node.
+source code files belonging to a project.  Another method is @i{attachments},
+which are files located in a directory belonging to an outline node.  Org
+uses directories named by the unique ID of each entry.  These directories are
+located in the @file{data} directory which lives in the same directory where
+your org-file lives@footnote{If you move entries or Org-files from one
+directory to the next, you may want to configure @code{org-attach-directory}
+to contain an absolute path.}.  If you initilize this directory with
+@code{git-init}, Org will automaically commit changes when it sees them.  The
+attachment system has been contributed to Org by John Wiegley.
 
-Org allows to associate an arbitary number of files with each indivdual task.
-These files are moved to special directories named by the unique ID of each
-entry.  These directories are located in the @file{data} directory which
-lives in the same directory where your org-file lives@footnote{If you move
-entries or Org-files from one directory to the next, you may want to
-configure @code{org-attach-directory} to contain an absolute path.}.  If you
-initilize this directory with @code{git-init}, Org will automaically commit
-changes when it see them.  The attachment system has been contributed to Org
-by John Wiegley.
-
-The following commands deal with attachments.
+@noindent The following commands deal with attachments.
 
 @table @kbd
 
@@ -5193,10 +5189,17 @@ to select a command:
 @table @kbd
 @kindex C-c C-a a 
 @item a 
-Select a file and move it into the task's attachment directory.
+Select a file and move it into the task's attachment directory.  The file
+will be copied, moved, or linked, depending on @code{org-attach-method}.
 
 @kindex C-c C-a c
-@item c
+@kindex C-c C-a m 
+@kindex C-c C-a l 
+@item c/m/l
+Attach a file using the copy/move/link method.
+
+@kindex C-c C-a n
+@item n
 Create a new attachment as an Emacs buffer.
 
 @kindex C-c C-a z
@@ -5207,7 +5210,7 @@ attachments yourself.
 @kindex C-c C-a o
 @item o
 Open current task's attachment.  If there are more than one, prompt for a
-file name first.
+file name first.  Opening will follow the rules set by @code{org-file-apps}.
 
 @kindex C-c C-a O
 @item O
@@ -5220,6 +5223,10 @@ Open the current task's attachment directory.
 @kindex C-c C-a F
 @item F
 Also open the directory, but force using @code{dired} in Emacs.
+
+@kindex C-c C-a d
+@item d
+Select and delete a single attachment.
 
 @kindex C-c C-a D
 @item D
