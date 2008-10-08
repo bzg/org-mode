@@ -1144,6 +1144,7 @@ See `org-file-apps'.")
     ("org" . emacs)
     ("el"  . emacs)
     ("bib" . emacs)
+    (auto-mode . emacs)
     )
   "External applications for opening `file:path' items in a document.
 Org-mode uses system defaults for different file types, but
@@ -1156,11 +1157,16 @@ file identifier are
  `remote'      Matches a remote file, accessible through tramp or efs.
                Remote files most likely should be visited through Emacs
                because external applications cannot handle such paths.
- t             Default for all remaining files
+`auto-mode'    Matches files that are mached by any entry in `auto-mode-alist',
+               so all files Emacs knows how to handle.  Useing this with
+               command `emacs' will open most files in Emacs.
+ t             Default for files not matched by any of the other options.
 
 Possible values for the command are:
  `emacs'       The file will be visited by the current Emacs process.
  `default'     Use the default application for this file type.
+               This can be used to overrule an unwanted seting in the
+               system-specific variable.
  string        A command to be executed by a shell; %s will be replaced
 	       by the path to the file.
  sexp          A Lisp form which will be evaluated.  The file path will
@@ -1175,7 +1181,9 @@ For more examples, see the system specific constants
 			(string :tag "Extension")
 			(const :tag "Default for unrecognized files" t)
 			(const :tag "Remote file" remote)
-			(const :tag "Links to a directory" directory))
+			(const :tag "Links to a directory" directory)
+			(const :tag "Any files that have Emacs modes"
+			       auto-mode))
 		(choice :value ""
 			(const :tag "Visit with Emacs" emacs)
 			(const :tag "Use system default" default)
@@ -6969,6 +6977,7 @@ If the file does not exist, an error is thrown."
 	 (file (if (and dirp org-open-directory-means-index-dot-org)
 		   (concat (file-name-as-directory file) "index.org")
 		 file))
+	 (a-m-a-p (assq 'auto-mode apps))
 	 (dfile (downcase file))
 	 (old-buffer (current-buffer))
 	 (old-pos (point))
@@ -6982,6 +6991,8 @@ If the file does not exist, an error is thrown."
 	(setq cmd 'emacs)
       (setq cmd (or (and remp (cdr (assoc 'remote apps)))
 		    (and dirp (cdr (assoc 'directory apps)))
+		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
+				   'string-match)
 		    (cdr (assoc ext apps))
 		    (cdr (assoc t apps)))))
     (when (eq cmd 'default)
@@ -7036,6 +7047,25 @@ If the file does not exist, an error is thrown."
    ((eq system-type 'windows-nt)
     org-file-apps-defaults-windowsnt)
    (t org-file-apps-defaults-gnu)))
+
+(defun org-apps-regexp-alist (list &optional add-auto-mode)
+  "Convert extensions to regular expressions in the cars of LIST.
+Also, weed out any non-string entries, because the return value is used
+only for regexp matching.
+When ADD-AUTO-MODE is set, make all matches in `auto-mode-alist'
+point to the symbol `emacs', indicating that the file should
+be opened in Emacs."
+  (append
+   (delq nil
+	 (mapcar (lambda (x)
+		   (if (not (stringp (car x)))
+		       nil
+		     (if (string-match "\\W" (car x))
+			 x
+		       (cons (concat "\\." (car x) "\\'") (cdr x)))))
+		 list))
+   (if add-auto-mode
+       (mapcar (lambda (x) (cons (car x) 'emacs)) auto-mode-alist))))
 
 (defvar ange-ftp-name-format) ; to silence the XEmacs compiler.
 (defun org-file-remote-p (file)

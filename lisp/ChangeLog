@@ -1,5 +1,9 @@
 2008-10-07  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-apps-regexp-alist): New function.
+	(org-file-apps): Add auto-mode to the default value.
+	(org-open-file): Use the new structure of org-file-apps.
+
 	* org-attach.el (org-attach): Support the new keys.
 	(org-attach-method): New option.
 
@@ -36,13 +40,14 @@
 	expansions: %k, %K for currently clocked task and a link to the
 	currently clocked task, and %< to file notes in the currently
 	clocked task.
+
+2008-10-01  Carsten Dominik  <dominik@science.uva.nl>
+
 	* org-export-latex.el (org-export-latex-make-header): Also insert
 	the content of the property :latex-header-extra.
 
 	* org-exp.el (org-infile-export-plist): Put the content of
 	#+LATEX_HEADER: into the property :latex-header-extra.
-
-2008-10-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-colview.el (org-columns-get-format-and-top-level): Remove
 	resetting the marker.
