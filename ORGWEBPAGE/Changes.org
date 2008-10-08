@@ -16,7 +16,24 @@
 :VISIBILITY: content
 :END:
 
+** Incompatible
+*** =org-file-apps= now uses regular expressions, see [[*%20org%20file%20apps%20now%20uses%20regular%20repressions%20instead%20of%20extensions][below]]
+
 ** Details
+
+*** =org-file-apps= now uses regular repressions instead of extensions
+    Just like in =auto-mode-alist=, car's in the variable
+    =org-file-apps= that are strings are now interpreted as
+    regular expressions that are matched against a file name.  So
+    instead of "txt", you should now write "\\.txt\\'" to make
+    sure the matching is done correctly (even though "txt" will
+    be recognized and still be interpreted as an extension).
+
+    There is now a shortcurt to get many file types visited by
+    Emacs.  If org-file-apps contains `(auto-mode . emacs)', then
+    any files that are matched by `auto-mode-alist' will be
+    visited in emacs.
+
 *** Changes to the attachment system
 
     - The default method to attach a file is now to copy it
@@ -29,6 +46,9 @@
       for a file, overruling  `org-attach-method'.
     - To create a new attachment as an Emacs buffer, you have not
       now use =n= instead of =c=.
+    - The file list is now always retrieved from the directory
+      itself, not from the "Attachments" property.  We still
+      keep, as a kind o backup info.
 
 * Version 6.08
 

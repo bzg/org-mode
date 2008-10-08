@@ -2616,17 +2616,16 @@ link and description parts of the link.
 @kindex C-c C-o
 @item C-c C-o
 Open link at point.  This will launch a web browser for URLs (using
-@command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB
-for the corresponding links, and execute the command in a shell link.
-When the cursor is on an internal link, this commands runs the
-corresponding search.  When the cursor is on a TAG list in a headline,
-it creates the corresponding TAGS view.  If the cursor is on a time
-stamp, it compiles the agenda for that date.  Furthermore, it will visit
-text and remote files in @samp{file:} links with Emacs and select a
-suitable application for local non-text files.  Classification of files
-is based on file extension only.  See option @code{org-file-apps}.  If
-you want to override the default application and visit the file with
-Emacs, use a @kbd{C-u} prefix.
+@command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
+the corresponding links, and execute the command in a shell link.  When the
+cursor is on an internal link, this commands runs the corresponding search.
+When the cursor is on a TAG list in a headline, it creates the corresponding
+TAGS view.  If the cursor is on a time stamp, it compiles the agenda for that
+date.  Furthermore, it will visit text and remote files in @samp{file:} links
+with Emacs and select a suitable application for local non-text files.
+Classification of files is based on file extension only.  See option
+@code{org-file-apps}.  If you want to override the default application and
+visit the file with Emacs, use a @kbd{C-u} prefix.
 @c
 @kindex mouse-2
 @kindex mouse-1
@@ -5172,9 +5171,9 @@ uses directories named by the unique ID of each entry.  These directories are
 located in the @file{data} directory which lives in the same directory where
 your org-file lives@footnote{If you move entries or Org-files from one
 directory to the next, you may want to configure @code{org-attach-directory}
-to contain an absolute path.}.  If you initilize this directory with
-@code{git-init}, Org will automaically commit changes when it sees them.  The
-attachment system has been contributed to Org by John Wiegley.
+to contain an absolute path.}.  If you initialize this directory with
+@code{git-init}, Org will automatically commit changes when it sees them.
+The attachment system has been contributed to Org by John Wiegley.
 
 @noindent The following commands deal with attachments.
 
@@ -5211,6 +5210,8 @@ attachments yourself.
 @item o
 Open current task's attachment.  If there are more than one, prompt for a
 file name first.  Opening will follow the rules set by @code{org-file-apps}.
+For more details, see the information on following hyperlings
+(@pxref{Handling links}).
 
 @kindex C-c C-a O
 @item O
