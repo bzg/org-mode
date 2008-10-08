@@ -1,3 +1,7 @@
+2008-10-08  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-attach.el (org-attach-file-list): Fix bug with directory.
+
 2008-10-07  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-apps-regexp-alist): New function.

@@ -270,7 +270,7 @@ This can be used after files have been added externally."
 This ignores files starting with a \".\", and files ending in \"~\"."
   (delq nil
 	(mapcar (lambda (x) (if (string-match "^\\." x) nil x))
-		(directory-files "." nil "[^~]\\'"))))
+		(directory-files dir nil "[^~]\\'"))))
 
 (defun org-attach-reveal ()
   "Show the attachment directory of the current task in dired."
