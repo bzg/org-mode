@@ -63,6 +63,14 @@ where the Org file lives."
 	  (const :tag "None" nil)
 	  (string :tag "Tag")))
 
+(defcustom org-attach-file-list-property "Attachments"
+  "The property used to keep a list of attachment belonging to this entry.
+This is not really needed, so you may set this to nil if you don't want it."
+  :group 'org-attach
+  :type '(choice
+	  (const :tag "None" nil)
+	  (string :tag "Tag")))
+
 (defcustom org-attach-method 'cp
   "Preferred method to attach a file.
 Allowed values are:
@@ -188,8 +196,9 @@ If VISIT-DIR is non-nil, visit the direcory with dired."
   (interactive "fFile to keep as an attachment: \nP")
   (setq method (or method org-attach-method))
   (let ((basename (file-name-nondirectory file)))
-    (org-entry-add-to-multivalued-property (point) "Attachments"
-					   basename)
+    (when org-attach-file-list-property
+      (org-entry-add-to-multivalued-property
+       (point) org-attach-file-list-property basename))
     (let* ((attach-dir (org-attach-dir t))
 	   (fname (expand-file-name basename attach-dir)))
       (cond
@@ -219,8 +228,9 @@ If VISIT-DIR is non-nil, visit the direcory with dired."
   "Create a new attachment FILE for the current task.
 The attachment is created as an Emacs buffer."
   (interactive "sCreate attachment named: ")
-  (org-entry-add-to-multivalued-property (point) "Attachments"
-					 file)
+  (when org-attach-file-list-property
+    (org-entry-add-to-multivalued-property
+     (point) org-attach-file-list-property file))
   (let ((attach-dir (org-attach-dir t)))
     (org-attach-tag)
     (find-file (expand-file-name file attach-dir))
@@ -230,7 +240,8 @@ The attachment is created as an Emacs buffer."
   "Delete all attachments from the current task.
 A safer way is to open the directory in dired and delete from there."
   (interactive)
-  (org-entry-delete (point) "Attachments")
+  (when org-attach-file-list-property
+    (org-entry-delete (point) org-attach-file-list-property))
   (let ((attach-dir (org-attach-dir)))
     (if attach-dir
 	(shell-command (format "rm -fr %s" attach-dir))))
@@ -242,15 +253,24 @@ A safer way is to open the directory in dired and delete from there."
 This can be used after files have been added externally."
   (interactive)
   (org-attach-commit)
-  (org-entry-delete (point) "Attachments")
+  (when org-attach-file-list-property
+    (org-entry-delete (point) org-attach-file-list-property))
   (let ((attach-dir (org-attach-dir)))
     (when attach-dir
-      (let ((files (directory-files attach-dir)))
+      (let ((files (org-attach-file-list attach-dir)))
 	(and files (org-attach-tag))
-	(dolist (file files)
-	  (unless (string-match "^\\." file)
-	    (org-entry-add-to-multivalued-property
-	     (point) "Attachments" file)))))))
+	(when org-attach-file-list-property
+	  (dolist (file files)
+	    (unless (string-match "^\\." file)
+	      (org-entry-add-to-multivalued-property
+	       (point) org-attach-file-list-property file))))))))
+
+(defun org-attach-file-list (dir)
+  "Return a list of files in the attachment directory.
+This ignores files starting with a \".\", and files ending in \"~\"."
+  (delq nil
+	(mapcar (lambda (x) (if (string-match "^\\." x) nil x))
+		(directory-files "." nil "[^~]\\'"))))
 
 (defun org-attach-reveal ()
   "Show the attachment directory of the current task in dired."
@@ -273,10 +293,11 @@ and in the system-specific variants of this variable.
 If IN-EMACS is non-nil, force opening in Emacs."
   (interactive "P")
   (let* ((attach-dir (org-attach-dir t))
-	 (files (org-entry-get-multivalued-property (point) "Attachments"))
+	 (files (org-attach-file-list attach-dir))
 	 (file (if (= (length files) 1)
 		   (car files)
-		 (completing-read "Attachment: " (mapcar 'list files) nil t))))
+		 (completing-read "Open attachment: "
+				  (mapcar 'list files) nil t))))
     (org-open-file (expand-file-name file attach-dir) in-emacs)))
 
 (defun org-attach-open-in-emacs ()
@@ -285,11 +306,10 @@ See `org-attach-open'."
   (interactive)
   (org-attach-open 'in-emacs))
 
-
 (defun org-attach-open-single-attachment (&optional in-emacs)
   (interactive)
   (let* ((attach-dir (org-attach-dir t))
-	 (file (read-file-name "Attachment: " attach-dir nil t)))
+	 (file (read-file-name "Open attachment: " attach-dir nil t)))
     (org-open-file file in-emacs)))
 
 (provide 'org-attach)
