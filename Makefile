@@ -20,7 +20,7 @@ prefix=/usr/local
 lispdir = $(prefix)/share/emacs/site-lisp
 
 # Where info files go.
-infodir = $(prefix)/info
+infodir = $(prefix)/share/info
 
 ##----------------------------------------------------------------------
 ## YOU MAY NEED TO EDIT THESE
