@@ -11,7 +11,7 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.09 (in preparation)
+* Version 6.09
 :PROPERTIES:
 :VISIBILITY: content
 :END:
@@ -29,7 +29,7 @@
     sure the matching is done correctly (even though "txt" will
     be recognized and still be interpreted as an extension).
 
-    There is now a shortcurt to get many file types visited by
+    There is now a shortcut to get many file types visited by
     Emacs.  If org-file-apps contains `(auto-mode . emacs)', then
     any files that are matched by `auto-mode-alist' will be
     visited in emacs.
@@ -48,7 +48,8 @@
       now use =n= instead of =c=.
     - The file list is now always retrieved from the directory
       itself, not from the "Attachments" property.  We still
-      keep, as a kind o backup info.
+      keep this property by default, but you can turn it off, by
+      customizing the variable =org-attach-file-list-property=.
 
 * Version 6.08
 
