@@ -1,3 +1,11 @@
+2008-10-09  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-attach.el (org-attach-delete-all): Renamed from
+	`org-attch-delete'.  Add a security query before deleting the
+	entire directory.  New optional argument FORCE can overrule the
+	security query.
+	(org-attach-delete-one): New command.
+
 2008-10-08  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-attach.el (org-attach-file-list): Fix bug with directory.

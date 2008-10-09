@@ -5190,12 +5190,14 @@ to select a command:
 @item a 
 Select a file and move it into the task's attachment directory.  The file
 will be copied, moved, or linked, depending on @code{org-attach-method}.
+Note that hard links are not supported on all systems.
 
 @kindex C-c C-a c
 @kindex C-c C-a m 
 @kindex C-c C-a l 
 @item c/m/l
 Attach a file using the copy/move/link method.
+Note that hard links are not supported on all systems.
 
 @kindex C-c C-a n
 @item n
