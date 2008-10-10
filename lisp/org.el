@@ -1147,7 +1147,9 @@ you can use this variable to set the application for a given file
 extension.  The entries in this list are cons cells where the car identifies
 files and the cdr the corresponding command.  Possible values for the
 file identifier are
- \"ext\"         A string identifying an extension
+ \"regex\"     Regular expression matched against the file name.  For backward
+               compatibility, this can also be a string with only alphanumeric
+               characters, which is then interpreted as an extension.
  `directory'   Matches a directory
  `remote'      Matches a remote file, accessible through tramp or efs.
                Remote files most likely should be visited through Emacs
