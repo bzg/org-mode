@@ -5491,7 +5491,7 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	    (setq beg (point))))
 	(save-excursion
 	  (if (re-search-forward "^[ \t]*[^:]" nil 'move)
-	      (setq end (match-beginning 0))
+	      (setq end (1- (match-beginning 0)))
 	    (setq end (point))))
 	(goto-line line)
 	(if (get-buffer "*Org Edit Picture*")

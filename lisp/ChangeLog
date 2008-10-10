@@ -1,3 +1,8 @@
+2008-10-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-edit-fixed-width-region): Exclude final newline from
+	picture area.
+
 2008-10-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-attach.el (org-attach-delete-all): Renamed from
