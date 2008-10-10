@@ -1,3 +1,15 @@
+2008-10-10  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-export-latex.el (org-export-latex-subcontent): Add labels to
+	sections, to make internal links work.
+	(org-export-latex-fontify-headline): Do not remove all text
+	properties, to make sure that target properties survive this
+	process.
+
+	* org-exp.el (org-export-preprocess-string): Change sequence of
+	modifications, to make sure links are prepared before the LaTeX
+	conversions do happen.
+
 2008-10-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-attach.el (org-attach-delete-all): Renamed from

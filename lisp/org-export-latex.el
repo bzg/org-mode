@@ -543,31 +543,36 @@ and its content."
 (defun org-export-latex-subcontent (subcontent num)
   "Export each cell of SUBCONTENT to LaTeX.
 If NUM, export sections as numerical sections."
-  (let ((heading (org-export-latex-fontify-headline
-		  (cdr (assoc 'heading subcontent))))
-	(level (- (cdr (assoc 'level subcontent))
-		  org-export-latex-add-level))
-	(occur (number-to-string (cdr (assoc 'occur subcontent))))
-	(content (cdr (assoc 'content subcontent)))
-	(subcontent (cadr (assoc 'subcontent subcontent))))
+  (let* ((heading (org-export-latex-fontify-headline
+		   (cdr (assoc 'heading subcontent))))
+	 (level (- (cdr (assoc 'level subcontent))
+		   org-export-latex-add-level))
+	 (occur (number-to-string (cdr (assoc 'occur subcontent))))
+	 (content (cdr (assoc 'content subcontent)))
+	 (subcontent (cadr (assoc 'subcontent subcontent)))
+	 (label (org-get-text-property-any 0 'target heading)))
     (cond
      ;; Normal conversion
      ((<= level org-export-latex-sectioning-depth)
       (let ((sec (nth (1- level) org-export-latex-sectioning)))
 	(insert (format (if num (car sec) (cdr sec)) heading) "\n"))
+      (when label (insert (format "\\label{%s}\n" label)))
       (insert (org-export-latex-content content))
       (cond ((stringp subcontent) (insert subcontent))
 	    ((listp subcontent) (org-export-latex-sub subcontent))))
      ;; At a level under the hl option: we can drop this subsection
      ((> level org-export-latex-sectioning-depth)
       (cond ((eq org-export-latex-low-levels 'description)
-	     (insert (format "\\begin{description}\n\n\\item[%s]\n\n" heading))
+	     (insert (format "\\begin{description}\n\n\\item[%s]%s\n\n"
+			     heading
+			     (if label (format "\\label{%s}" label) "")))
 	     (insert (org-export-latex-content content))
 	     (cond ((stringp subcontent) (insert subcontent))
 		   ((listp subcontent) (org-export-latex-sub subcontent)))
 	     (insert "\\end{description}\n"))
 	    ((stringp org-export-latex-low-levels)
 	     (insert (format org-export-latex-low-levels heading) "\n")
+	     (when label (insert (format "\\label{%s}\n" label)))
 	     (insert (org-export-latex-content content))
 	     (cond ((stringp subcontent) (insert subcontent))
 		   ((listp subcontent) (org-export-latex-sub subcontent)))))))))
@@ -767,7 +772,8 @@ links, keywords, lists, tables, fixed-width"
     (org-export-latex-special-chars
      (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-links)
-    (org-trim (buffer-substring-no-properties (point-min) (point-max)))))
+;    (org-trim (buffer-substring-no-properties (point-min) (point-max)))))
+    (org-trim (buffer-string))))
 
 (defun org-export-latex-quotation-marks ()
   "Export quotation marks depending on language conventions."
@@ -1071,6 +1077,9 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 			      (expand-file-name raw-path))))
 	     (radiop (insert (format "\\hyperref[%s]{%s}"
 				     (org-solidify-link-text raw-path) desc)))
+	     ((not type)
+	      (insert (format "\\hyperref[%s]{%s}"
+			      (org-solidify-link-text raw-path) desc)))
 	     (path (insert (format "\\href{%s}{%s}" path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
 

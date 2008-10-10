@@ -1457,10 +1457,6 @@ on this string to produce the exported version."
       (org-export-remove-comment-blocks-and-subtrees)
 
 
-
-
-
-
       ;; Find matches for radio targets and turn them into internal links
       (org-export-mark-radio-links)
 
@@ -1479,15 +1475,6 @@ on this string to produce the exported version."
       ;; Find multiline emphasis and put them into single line
       (when (plist-get parameters :emph-multiline)
 	(org-export-concatenate-multiline-emphasis))
-
-
-
-
-
-
-
-
-
 
 
       ;; Remove special table lines
