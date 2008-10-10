@@ -1456,6 +1456,27 @@ on this string to produce the exported version."
       ;; Remove comment environment and comment subtrees
       (org-export-remove-comment-blocks-and-subtrees)
 
+
+      ;; Find matches for radio targets and turn them into internal links
+      (org-export-mark-radio-links)
+
+      ;; Find all links that contain a newline and put them into a single line
+      (org-export-concatenate-multiline-links)
+
+      ;; Normalize links: Convert angle and plain links into bracket links
+      ;; and expand link abbreviations
+      (org-export-normalize-links)
+
+      ;; Find all internal links.  If they have a fuzzy match (i.e. not
+      ;; a *dedicated* target match, let the link  point to the
+      ;; corresponding section.
+      (org-export-target-internal-links target-alist)
+
+      ;; Find multiline emphasis and put them into single line
+      (when (plist-get parameters :emph-multiline)
+	(org-export-concatenate-multiline-emphasis))
+
+
       ;; Remove special table lines
       (when org-export-table-remove-special-lines
 	(org-export-remove-special-table-lines))
@@ -1476,24 +1497,6 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
-      ;; Find matches for radio targets and turn them into internal links
-      (org-export-mark-radio-links)
-
-      ;; Find all links that contain a newline and put them into a single line
-      (org-export-concatenate-multiline-links)
-
-      ;; Normalize links: Convert angle and plain links into bracket links
-      ;; and expand link abbreviations
-      (org-export-normalize-links)
-
-      ;; Find all internal links.  If they have a fuzzy match (i.e. not
-      ;; a *dedicated* target match, let the link  point to the
-      ;; corresponding section.
-      (org-export-target-internal-links target-alist)
-
-      ;; Find multiline emphasis and put them into single line
-      (when (plist-get parameters :emph-multiline)
-	(org-export-concatenate-multiline-emphasis))
 
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
