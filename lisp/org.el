@@ -1138,13 +1138,8 @@ See `org-file-apps'.")
 
 (defcustom org-file-apps
   '(
-    ("txt" . emacs)
-    ("tex" . emacs)
-    ("ltx" . emacs)
-    ("org" . emacs)
-    ("el"  . emacs)
-    ("bib" . emacs)
     (auto-mode . emacs)
+    ("\\.x?html?\\'" . default)
     )
   "External applications for opening `file:path' items in a document.
 Org-mode uses system defaults for different file types, but
@@ -1159,12 +1154,16 @@ file identifier are
                because external applications cannot handle such paths.
 `auto-mode'    Matches files that are mached by any entry in `auto-mode-alist',
                so all files Emacs knows how to handle.  Useing this with
-               command `emacs' will open most files in Emacs.
+               command `emacs' will open most files in Emacs.  Beware that this
+               will also open html files insite Emacs, unless you add
+               (\"html\" . default) to the list as well.
  t             Default for files not matched by any of the other options.
 
 Possible values for the command are:
  `emacs'       The file will be visited by the current Emacs process.
- `default'     Use the default application for this file type.
+ `default'     Use the default application for this file type, which is the
+               association for t in the list, most likely in the system-specific
+               part.
                This can be used to overrule an unwanted seting in the
                system-specific variable.
  string        A command to be executed by a shell; %s will be replaced

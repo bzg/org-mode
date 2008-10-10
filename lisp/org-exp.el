@@ -1476,7 +1476,6 @@ on this string to produce the exported version."
       (when (plist-get parameters :emph-multiline)
 	(org-export-concatenate-multiline-emphasis))
 
-
       ;; Remove special table lines
       (when org-export-table-remove-special-lines
 	(org-export-remove-special-table-lines))
