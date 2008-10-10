@@ -1069,7 +1069,8 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 			      ;; image option should be set be a comment line
 			      org-export-latex-image-default-option
 			      (expand-file-name raw-path))))
-	     (radiop (insert (format "\\hyperref[%s]{%s}" raw-path desc)))
+	     (radiop (insert (format "\\hyperref[%s]{%s}"
+				     (org-solidify-link-text raw-path) desc)))
 	     (path (insert (format "\\href{%s}{%s}" path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
 
@@ -1140,7 +1141,8 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		  ">>>?\\((INVISIBLE)\\)?") nil t)
     (replace-match
      (org-export-latex-protect-string
-      (format "\\label{%s}%s"(match-string 1)
+      (format "\\label{%s}%s" (save-match-data (org-solidify-link-text
+						(match-string 1)))
 	      (if (match-string 2) "" (match-string 1)))) t t))
 
   ;; Delete @<...> constructs
