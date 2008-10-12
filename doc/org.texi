@@ -5454,13 +5454,13 @@ paper agenda, showing all the tasks for the current week or day.
 @cindex org-agenda, command
 @kindex C-c a a
 @item C-c a a
-Compile an agenda for the current week from a list of org files.  The
-agenda shows the entries for each day.  With a numeric
-prefix@footnote{For backward compatibility, the universal prefix
-@kbd{C-u} causes all TODO entries to be listed before the agenda.  This
-feature is deprecated, use the dedicated TODO list, or a block agenda
-instead.}  (like @kbd{C-u 2 1 C-c a a}) you may set the number of days
-to be displayed (see also the variable @code{org-agenda-ndays})
+Compile an agenda for the current week from a list of org files.  The agenda
+shows the entries for each day.  With a numeric prefix@footnote{For backward
+compatibility, the universal prefix @kbd{C-u} causes all TODO entries to be
+listed before the agenda.  This feature is deprecated, use the dedicated TODO
+list, or a block agenda instead (@pxref{Block agenda}).}  (like @kbd{C-u 2 1
+C-c a a}) you may set the number of days to be displayed (see also the
+variable @code{org-agenda-ndays})
 @end table
 
 Remote editing from the agenda buffer means, for example, that you can
@@ -5687,9 +5687,9 @@ work for you.  The built-in default assumes that all your projects are
 level-2 headlines, and that a project is not stuck if it has at least
 one entry marked with a TODO keyword TODO or NEXT or NEXTACTION.
 
-Lets assume that you, in your own way of using Org mode, identify
+Let's assume that you, in your own way of using Org mode, identify
 projects with a tag PROJECT, and that you use a TODO keyword MAYBE to
-indicate a project that should not be considered yet.  Lets further
+indicate a project that should not be considered yet.  Let's further
 assume that the TODO keyword DONE marks finished projects, and that NEXT
 and TODO indicate next actions.  The tag @@SHOP indicates shopping and
 is a next action even without the NEXT tag.  Finally, if the project
@@ -8938,7 +8938,7 @@ Org.
 
 Org has a large number of hyperlink types built-in
 (@pxref{Hyperlinks}).  If you would like to add new link types, it
-provides an interface for doing so.  Lets look at an example file
+provides an interface for doing so.  Let's look at an example file
 @file{org-man.el} that will add support for creating links like
 @samp{[[man:printf][The printf manpage]]} to show Unix manual pages inside
 emacs:
@@ -8993,7 +8993,7 @@ You would activate this new link type in @file{.emacs} with
 @end lisp
 
 @noindent
-Lets go through the file and see what it does.
+Let's go through the file and see what it does.
 @enumerate
 @item
 It does @code{(require 'org)} to make sure that @file{org.el} has been
