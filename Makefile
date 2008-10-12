@@ -261,11 +261,20 @@ cleandoc:
 	(cd doc; rm -f *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps)
 	(cd doc; rm -f orgcard_letter.tex orgcard_letter.pdf)
 	(cd doc; rm -rf manual)
+
+cleanrel:
+	rm -rf RELEASEDIR
+	rm -rf org-6.*
+	rm -f org-6*zip org-6*tar.gz
+
 clean:
 	make cleanelc
 	make cleandoc
+	make cleanrel
 	rm -f *~ */*~ */*/*~
-	rm -rf RELEASEDIR
+
+cleanall:
+	make clean
 	rm -f lisp/org-install.el
 
 .el.elc:
