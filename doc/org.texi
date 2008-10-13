@@ -7786,10 +7786,10 @@ All lines between these markers are exported literally
 By default, the La@TeX{} output uses the class @code{article}.
 
 You can change this globally by setting a different value for
-@code{org-export-latex-default-class} or locally by adding an option
-like @code{#+LaTeX_CLASS: myclass} in your file.  The class should be
-listed in @code{org-export-latex-classes}, where you can also define the
-sectioning structure for each class.
+@code{org-export-latex-default-class} or locally by adding an option like
+@code{#+LaTeX_CLASS: myclass} in your file.  The class should be listed in
+@code{org-export-latex-classes}, where you can also define the sectioning
+structure for each class, as well as defining additonal classes.
 
 
 @node XOXO export, iCalendar export, LaTeX export, Exporting

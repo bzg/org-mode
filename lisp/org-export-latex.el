@@ -120,30 +120,38 @@ associated information.  Here is the structure of each cell:
 
   \(class-name
     header-string
-    (unnumbered-section numbered-section\)
+    (numbered-section . unnumbered-section\)
     ...\)
 
 A %s formatter is mandatory in each section string and will be
-replaced by the title of the section."
+replaced by the title of the section.
+
+Instead of a cons cell (numbered . unnumbered), you can also provide a list
+of 2-4 elements,
+
+  (numbered-open numbered-close)
+
+or
+
+  (numbered-open numbered-close unnumbered-open unnumbered-close)
+
+providing opening and closing strings for an environment that should
+represent the document section.  The opening clause should have a %s
+to represent the section title."
   :group 'org-export-latex
-  :type '(repeat
+  :type '(repeat 
 	  (list (string :tag "LaTeX class")
 		(string :tag "LaTeX header")
-		(cons :tag "Level 1"
-		      (string :tag "Numbered")
-		      (string :tag "Unnumbered"))
-		(cons :tag "Level 2"
-		      (string :tag "Numbered")
-		      (string :tag "Unnumbered"))
-		(cons :tag "Level 3"
-		      (string :tag "Numbered")
-		      (string :tag "Unnumbered"))
-		(cons :tag "Level 4"
-		      (string :tag "Numbered")
-		      (string :tag "Unnumbered"))
-		(cons :tag "Level 5"
-		      (string :tag "Numbered")
-		      (string :tag "Unnumbered")))))
+		(repeat :tag "Levels" :inline t
+			(choice
+			 (cons :tag "Heading"
+			       (string :tag "numbered")
+			       (string :tag "unnumbered)"))
+			 (list :tag "Environment"
+			       (string :tag "Opening (numbered)  ")
+			       (string :tag "Closing (numbered)  ")
+			       (string :tag "Opening (unnumbered)")
+			       (string :tag "Closing (unnumbered)")))))))
 
 (defcustom org-export-latex-emphasis-alist
   '(("*" "\\textbf{%s}" nil)
@@ -554,12 +562,18 @@ If NUM, export sections as numerical sections."
     (cond
      ;; Normal conversion
      ((<= level org-export-latex-sectioning-depth)
-      (let ((sec (nth (1- level) org-export-latex-sectioning)))
-	(insert (format (if num (car sec) (cdr sec)) heading) "\n"))
-      (when label (insert (format "\\label{%s}\n" label)))
-      (insert (org-export-latex-content content))
-      (cond ((stringp subcontent) (insert subcontent))
-	    ((listp subcontent) (org-export-latex-sub subcontent))))
+      (let* ((sec (nth (1- level) org-export-latex-sectioning))
+	     start end)
+	(if (consp (cdr sec))
+	    (setq start (nth (if num 0 2) sec)
+		  end (nth (if num 1 3) sec))
+	  (setq start (if num (car sec) (cdr sec))))
+	(insert (format start heading) "\n")
+	(when label (insert (format "\\label{%s}\n" label)))
+	(insert (org-export-latex-content content))
+	(cond ((stringp subcontent) (insert subcontent))
+	      ((listp subcontent) (org-export-latex-sub subcontent)))
+	(if end (insert end "\n"))))
      ;; At a level under the hl option: we can drop this subsection
      ((> level org-export-latex-sectioning-depth)
       (cond ((eq org-export-latex-low-levels 'description)
