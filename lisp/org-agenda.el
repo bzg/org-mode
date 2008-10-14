@@ -4128,7 +4128,7 @@ With prefix argument STRIP, remove all lines that do have the tag."
 		org-tag-alist-for-agenda ""))
       (setq char (read-char))
       (when (equal char ?\t)
-	(unless (local-variable-p 'org-global-tags-completion-table)
+	(unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
 	  (org-set-local 'org-global-tags-completion-table
 			 (org-global-tags-completion-table)))
 	(let ((completion-ignore-case t))
@@ -4167,6 +4167,17 @@ With prefix argument STRIP, remove all lines that do have the tag."
     (org-overlay-put ov 'invisible t)
     (org-overlay-put ov 'type 'tags-filter)
     (push ov org-agenda-filter-overlays)))
+
+(defun org-agenda-fix-tags-filter-overlays-at (&optional pos)
+  (setq pos (or pos (point)))
+  (save-excursion
+    (dolist (ov (org-overlays-at pos))
+      (when (and (org-overlay-get ov 'invisible)
+		 (eq (org-overlay-get ov 'type) 'tags-filter))
+	(goto-char pos)
+	(if (< (org-overlay-start ov) (point-at-eol))
+	    (org-move-overlay ov (point-at-eol)
+			      (org-overlay-end ov)))))))
 
 (defun org-agenda-filter-by-tag-show-all ()
   (mapc 'org-delete-overlay org-agenda-filter-overlays)
@@ -5002,13 +5013,15 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 (defun org-agenda-show-new-time (marker stamp &optional prefix)
   "Show new date stamp via text properties."
   ;; We use text properties to make this undoable
-  (let ((inhibit-read-only t))
+  (let ((inhibit-read-only t)
+	(buffer-invisibility-spec))
     (setq stamp (concat " " prefix " => " stamp))
     (save-excursion
       (goto-char (point-max))
       (while (not (bobp))
 	(when (equal marker (get-text-property (point) 'org-marker))
 	  (org-move-to-column (- (window-width) (length stamp)) t)
+	  (org-agenda-fix-tags-filter-overlays-at (point))
           (if (featurep 'xemacs)
 	      ;; Use `duplicable' property to trigger undo recording
               (let ((ex (make-extent nil nil))
