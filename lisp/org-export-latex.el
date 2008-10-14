@@ -1110,11 +1110,12 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 
   ;; Preserve latex environments
   (goto-char (point-min))
-  (while (search-forward "\\begin{" nil t)
-    (let ((start (progn (beginning-of-line) (point)))
-          (end (or (and (search-forward "\\end{" nil t)
-                        (end-of-line) (point))
-                   (point-max))))
+  (while (re-search-forward "^[ \t]*\\begin{\\([a-zA-Z]+\\)}" nil t)
+    (let* ((start (progn (beginning-of-line) (point)))
+	   (end (or (and (re-search-forward 
+			  (concat "^[ \t]*\\end{" (match-string 1) "}" nil t)
+			  (point-at-eol)))
+		    (point-max))))
       (add-text-properties start end '(org-protected t))))
 
   ;; Convert LaTeX to \LaTeX{}

@@ -1,3 +1,8 @@
+2008-10-14  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-export-latex.el (org-export-latex-preprocess): Improve
+	quoting of LaTeX environments.
+
 2008-10-10  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-edit-fixed-width-region): Exclude final newline from

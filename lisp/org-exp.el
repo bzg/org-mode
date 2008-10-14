@@ -1496,7 +1496,6 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
-
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
     rtn))
