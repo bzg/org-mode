@@ -856,6 +856,7 @@ in this hook gets a chance to modify this property list.  Each function
 must accept the property list as an argument, and must return the (possibly
 modified) list.")
 
+;; FIXME: should we fold case here?
 (defun org-infile-export-plist ()
   "Return the property list with file-local settings for export."
   (save-excursion
