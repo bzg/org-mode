@@ -32,6 +32,7 @@
 
 (require 'org)
 (eval-when-compile
+  (require 'cl)
   (require 'calendar))
 
 (declare-function diary-add-to-list "diary-lib"
