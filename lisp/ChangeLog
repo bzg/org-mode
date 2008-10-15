@@ -1,5 +1,12 @@
 2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-org-to): Handle case when
+	org-export-to-pdf does return a file name, not a buffer.
+	(org-publish-org-to-pdf): New function.
+
+	* org-export-latex.el (org-export-as-pdf)
+	(org-export-as-pdf-and-open): New commands.
+
 	* org-table.el (org-table-eval-formula): Avoid parsing Calc's HMS
 	forms as ranges.
 

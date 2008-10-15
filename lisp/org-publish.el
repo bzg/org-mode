@@ -482,19 +482,20 @@ PUB-DIR is the publishing directory."
 	 (plist (cons :buffer-will-be-killed (cons t plist)))
 	 (init-buf (or visiting (find-file filename)))
 	 (init-point (point))
-	 (init-buf-string (buffer-string)) export-buf)
+	 (init-buf-string (buffer-string)) export-buf-or-file)
     ;; run hooks before exporting
     (run-hooks 'org-publish-before-export-hook)
     ;; export the possibly modified buffer
-    (setq export-buf
+    (setq export-buf-or-file
 	  (funcall (intern (concat "org-export-as-" format))
 		   (plist-get plist :headline-levels)
 		   nil plist nil nil pub-dir))
-    (set-buffer export-buf)
-    ;; run hooks after export and save export
-    (and (run-hooks 'org-publish-after-export-hook)
-	 (if (buffer-modified-p) (save-buffer)))
-    (kill-buffer export-buf)
+    (when (and (bufferp export-buf-or-file) (buffer-live-p export-buf-or-file))
+      (set-buffer export-buf-or-file)
+      ;; run hooks after export and save export
+      (and (run-hooks 'org-publish-after-export-hook)
+	   (if (buffer-modified-p) (save-buffer)))
+      (kill-buffer export-buf-or-file))
     ;; maybe restore buffer's content
     (set-buffer init-buf)
     (when (buffer-modified-p init-buf)
@@ -509,6 +510,11 @@ PUB-DIR is the publishing directory."
   "Publish an org file to LaTeX.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-org-to "latex" plist filename pub-dir))
+
+(defun org-publish-org-to-pdf (plist filename pub-dir)
+  "Publish an org file to PDF (via LaTeX).
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-org-to "pdf" plist filename pub-dir))
 
 (defun org-publish-org-to-html (plist filename pub-dir)
   "Publish an org file to HTML.

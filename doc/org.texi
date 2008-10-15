@@ -291,7 +291,7 @@ Exporting
 * The export dispatcher::       How to access exporter commands
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
-* LaTeX export::                Exporting to LaTeX
+* LaTeX and PDF export::        Exporting to LaTeX, and processing to PDF
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 
@@ -321,9 +321,9 @@ HTML export
 * CSS support::                 Changing the appearance of the output
 * Javascript support::          Info and Folding in a web browser
 
-LaTeX export
+LaTeX and PDF export
 
-* LaTeX export commands::       How to invoke LaTeX export
+* LaTeX/PDF export commands::   
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
 
@@ -6930,7 +6930,7 @@ Org mode only supports export, not import of these different formats.
 * The export dispatcher::       How to access exporter commands
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
-* LaTeX export::                Exporting to LaTeX
+* LaTeX and PDF export::        Exporting to LaTeX, and processing to PDF
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 @end menu
@@ -7454,7 +7454,7 @@ the body text.  Any indentation larger than this is adjusted to preserve
 the layout relative to the first line.  Should there be lines with less
 indentation than the first, these are left alone.
 
-@node HTML export, LaTeX export, ASCII export, Exporting
+@node HTML export, LaTeX and PDF export, ASCII export, Exporting
 @section HTML export
 @cindex HTML export
 
@@ -7698,19 +7698,23 @@ You can choose default values for these options by customizing the variable
 @code{org-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-export-html-use-infojs}.
 
-@node LaTeX export, XOXO export, HTML export, Exporting
-@section LaTeX export
+@node LaTeX and PDF export, XOXO export, HTML export, Exporting
+@section LaTeX and PDF export
 @cindex LaTeX export
+@cindex PDF export
 
-Org mode contains a La@TeX{} exporter written by Bastien Guerry.
+Org mode contains a La@TeX{} exporter written by Bastien Guerry.  With
+further processing, this backend is also used to produce PDF output.  Since
+the LaTeX output uses @file{hyperref} to implement links and cross
+references, the PDF output file will be fully linked.
 
 @menu
-* LaTeX export commands::       How to invoke LaTeX export
+* LaTeX/PDF export commands::   
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
 @end menu
 
-@node LaTeX export commands, Quoting LaTeX code, LaTeX export, LaTeX export
+@node LaTeX/PDF export commands, Quoting LaTeX code, LaTeX and PDF export, LaTeX and PDF export
 @subsection LaTeX export commands
 
 @table @kbd
@@ -7738,6 +7742,12 @@ buffer.
 @item M-x org-replace-region-by-latex
 Replace the active region (assumed to be in Org mode syntax) by La@TeX{}
 code.
+@kindex C-c C-e p
+@item C-c C-e p
+Export as LaTeX and then process to PDF.
+@kindex C-c C-e d
+@item C-c C-e d
+Export as LaTeX and then process to PDF, then open the resulting PDF file.
 @end table
 
 @cindex headline levels, for exporting
@@ -7757,7 +7767,7 @@ with a numeric prefix argument. For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
-@node Quoting LaTeX code, Sectioning structure, LaTeX export commands, LaTeX export
+@node Quoting LaTeX code, Sectioning structure, LaTeX/PDF export commands, LaTeX and PDF export
 @subsection Quoting LaTeX code
 
 Embedded La@TeX{} as described in @ref{Embedded LaTeX} will be correctly
@@ -7778,7 +7788,7 @@ All lines between these markers are exported literally
 #+END_LaTeX
 @end example
 
-@node   Sectioning structure,  , Quoting LaTeX code, LaTeX export
+@node   Sectioning structure,  , Quoting LaTeX code, LaTeX and PDF export
 @subsection Sectioning structure
 @cindex LaTeX class
 @cindex LaTeX sectioning structure
@@ -7792,7 +7802,7 @@ You can change this globally by setting a different value for
 structure for each class, as well as defining additonal classes.
 
 
-@node XOXO export, iCalendar export, LaTeX export, Exporting
+@node XOXO export, iCalendar export, LaTeX and PDF export, Exporting
 @section XOXO export
 @cindex XOXO export
 
@@ -7984,14 +7994,14 @@ and @code{:exclude}.
 @cindex action, for publishing
 
 Publishing means that a file is copied to the destination directory and
-possibly transformed in the process.  The default transformation is to
-export Org files as HTML files, and this is done by the function
-@code{org-publish-org-to-html} which calls the HTML exporter
-(@pxref{HTML export}). But you also can publish your files in La@TeX{} by
-using the function @code{org-publish-org-to-latex} instead. Other files
-like images only need to be copied to the publishing destination. For
-non-Org files, you need to specify the publishing function.
-
+possibly transformed in the process.  The default transformation is to export
+Org files as HTML files, and this is done by the function
+@code{org-publish-org-to-html} which calls the HTML exporter (@pxref{HTML
+export}). But you also can publish your files in La@TeX{} by using the
+function @code{org-publish-org-to-latex} instead, or as PDF files using
+@code{org-publish-org-to-pdf}.  Other files like images only need to be
+copied to the publishing destination. For non-Org files, you need to provide
+your own publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}

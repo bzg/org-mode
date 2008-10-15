@@ -1009,6 +1009,8 @@ value of `org-export-run-in-background'."
 \[x] export as XOXO
 
 \[l] export as LaTeX
+\[p] export as LaTeX and process to PDF
+\[d] export as LaTeX, process to PDF, and open the resulting PDF document
 \[L] export as LaTeX to temporary buffer
 
 \[i] export current file as iCalendar file
@@ -1029,6 +1031,8 @@ value of `org-export-run-in-background'."
 	    (?R org-export-region-as-html nil)
 	    (?x org-export-as-xoxo t)
 	    (?l org-export-as-latex t)
+	    (?p org-export-as-pdf t)
+	    (?d org-export-as-pdf-and-open t)
 	    (?L org-export-as-latex-to-buffer nil)
 	    (?i org-export-icalendar-this-file t)
 	    (?I org-export-icalendar-all-agenda-files t)
@@ -1042,6 +1046,9 @@ value of `org-export-run-in-background'."
       (delete-other-windows)
       (with-output-to-temp-buffer "*Org Export/Publishing Help*"
 	(princ help))
+      (if (fboundp 'fit-window-to-buffer)
+	  (fit-window-to-buffer (get-buffer-window
+				 "*Org Export/Publishing Help*")))
       (message "Select command: ")
       (setq r1 (read-char-exclusive)))
     (setq r2 (if (< r1 27) (+ r1 96) r1))

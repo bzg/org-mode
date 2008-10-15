@@ -36,6 +36,8 @@
 ;; The interactive functions are similar to those of the HTML exporter:
 ;;
 ;; M-x `org-export-as-latex'
+;; M-x `org-export-as-pdf'
+;; M-x `org-export-as-pdf-and-open'
 ;; M-x `org-export-as-latex-batch'
 ;; M-x `org-export-as-latex-to-buffer'
 ;; M-x `org-export-region-as-latex'
@@ -231,6 +233,18 @@ Don't remove the keys, just change their values."
   "Coding system for the exported LaTex file."
   :group 'org-export-latex
   :type 'coding-system)
+
+(defgroup org-export-pdf nil
+  "Options for exporting Org-mode files to PDF, via LaTeX."
+  :tag "Org Export LaTeX"
+  :group 'org-export-latex
+  :group 'org-export)
+
+(defcustom org-export-pdf-remove-logfiles t
+  "Non-nil means, remove the logfiles produced by PDF production.
+These are the .aux, .log, .out, and .toc files."
+  :group 'org-export-latex
+  :type 'boolean)
 
 ;;; Autoload functions:
 
@@ -461,6 +475,39 @@ when PUB-DIR is set, use this as the publishing directory."
 	      (kill-buffer (current-buffer)))
 	  (current-buffer))
       (set-window-configuration wcf))))
+
+(defun org-export-as-pdf (arg &optional hidden ext-plist
+			      to-buffer body-only pub-dir)
+  "Export as LaTeX, then process through to PDF."
+  (interactive "P")
+  (message "Exporting to PDF...")
+  (let* ((wconfig (current-window-configuration))
+	 (lbuf (org-export-as-latex arg hidden ext-plist
+				    to-buffer body-only pub-dir))
+	 (file (buffer-file-name lbuf))
+	 (base (file-name-sans-extension (buffer-file-name lbuf)))
+	 (pdffile (concat base ".pdf")))
+    (and (file-exists-p pdffile) (delete-file pdffile))
+    (message "Processing LaTeX file...")
+    (shell-command (format "pdflatex -interaction nonstopmode %s;pdflatex -interaction nonstopmode %s" file file))
+    (message "Processing LaTeX file...done")
+    (if (not (file-exists-p pdffile))
+	(error "PDF file was not produced")
+      (set-window-configuration wconfig)
+      (when org-export-pdf-remove-logfiles
+	(dolist (ext '("aux" "log" "out" "toc"))
+	  (setq file (concat base "." ext))
+	  (and (file-exists-p file) (delete-file file))))
+      (message "Exporting to PDF...done")
+      pdffile)))
+
+(defun org-export-as-pdf-and-open (arg)
+  "Export as LaTeX, then process through to PDF, and open."
+  (interactive "P")
+  (let ((pdffile (org-export-as-pdf arg)))
+    (if pdffile
+	(org-open-file pdffile)
+      (error "PDF file was not produced"))))
 
 ;;; Parsing functions:
 

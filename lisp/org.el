@@ -1140,6 +1140,7 @@ See `org-file-apps'.")
   '(
     (auto-mode . emacs)
     ("\\.x?html?\\'" . default)
+    ("\\.pdf\\'" . default)
     )
   "External applications for opening `file:path' items in a document.
 Org-mode uses system defaults for different file types, but
