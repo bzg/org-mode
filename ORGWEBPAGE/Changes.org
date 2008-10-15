@@ -11,11 +11,21 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.09
+* Version 6.10
 :PROPERTIES:
 :VISIBILITY: content
 :END:
 
+** Details
+
+*** New commands for export to PDF
+    This is using LaTeX export, and then processes it to PDF
+    using pdflatex.
+
+    : C-c C-e p     process to PDF.
+    : C-c C-e d     process to PDF, and open the file.
+
+* Version 6.09
 ** Incompatible
 *** =org-file-apps= now uses regular expressions, see [[*%20org%20file%20apps%20now%20uses%20regular%20repressions%20instead%20of%20extensions][below]]
 
