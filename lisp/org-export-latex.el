@@ -1219,8 +1219,9 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
   "Convert lists to LaTeX."
   (goto-char (point-min))
   (while (re-search-forward org-list-beginning-re nil t)
-    (beginning-of-line)
-    (insert (org-list-to-latex (org-list-parse-list t)) "\n")))
+    (org-if-unprotected
+     (beginning-of-line)
+     (insert (org-list-to-latex (org-list-parse-list t)) "\n"))))
 
 (defconst org-latex-entities
  '("\\!"
