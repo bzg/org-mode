@@ -1,3 +1,8 @@
+2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-export-latex.el (org-export-latex-lists): Ignore lists-like
+	things in protexted regions.
+
 2008-10-14  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-export-latex.el (org-export-latex-preprocess): Improve
