@@ -1,5 +1,8 @@
 2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-table-eval-formula): Avoid parsing Calc's HMS
+	forms as ranges.
+
 	* org-export-latex.el (org-export-latex-lists): Ignore lists-like
 	things in protexted regions.
 

@@ -2116,7 +2116,8 @@ not overwrite the stored one."
 	;; Check for old vertical references
 	(setq form (org-rewrite-old-row-references form))
 	;; Insert complex ranges
-	(while (string-match org-table-range-regexp form)
+	(while (and (string-match org-table-range-regexp form)
+		    (> (length (match-string 0 form)) 1))
 	  (setq form
 		(replace-match
 		 (save-match-data
