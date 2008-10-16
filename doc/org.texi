@@ -2895,6 +2895,10 @@ commands}).  @xref{Global TODO list}, for more information.
 Insert a new TODO entry below the current one.
 @end table
 
+@noindent
+Changing a TODO state can also trigger tag changes.  See the docstring of the
+option @code{org-todo-state-tags-triggers} for details.
+
 @node TODO extensions, Progress logging, TODO basics, TODO Items
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
@@ -3224,7 +3228,6 @@ settings like @code{TODO(!)}.  For example
   :LOGGING: nil
   :END:
 @end example
-
 
 @node Priorities, Breaking down tasks, Progress logging, TODO Items
 @section Priorities

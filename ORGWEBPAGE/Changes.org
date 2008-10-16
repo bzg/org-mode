@@ -29,6 +29,19 @@
     : C-c C-e p     process to PDF.
     : C-c C-e d     process to PDF, and open the file.
 
+*** TODO state changes can trigger tag changes
+    The new option =org-todo-state-tags-triggers= can be used to
+    define automatic changes to tags when a TODO state changes.
+    For example, the setting
+
+    : (setq org-todo-state-tags-triggers
+    :       '((done ("Today" . nil) ("NEXT" . nil))
+    :         ("WAITING" ("Today" . t))))    
+
+    will make sure that any change to a DONE state will remove
+    tags "Today" and "NEXT", while switching to the "WAITING"
+    state will also trigger the tag "Today".
+
 * Version 6.09
 ** Incompatible
 *** =org-file-apps= now uses regular expressions, see [[*%20org%20file%20apps%20now%20uses%20regular%20repressions%20instead%20of%20extensions][below]]

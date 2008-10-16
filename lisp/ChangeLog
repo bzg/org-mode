@@ -3,6 +3,8 @@
 	* org.el (org-add-log-setup): Respect
 	`org-log-state-notes-insert-after-drawers'.
 	(org-log-state-notes-insert-after-drawers): New option.
+	(org-todo-trigger-tag-changes): New function.
+	(org-todo): Call `org-todo-trigger-tag-changes'.
 
 2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
 

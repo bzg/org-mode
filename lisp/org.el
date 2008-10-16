@@ -1427,6 +1427,27 @@ Lisp variable `state'."
   :group 'org-todo
   :type 'hook)
 
+(defcustom org-todo-state-tags-triggers nil
+  "Tag changes that should be triggered by TODO state changes.
+This is a list.  Each entry is
+
+  (state-change (tag . flag) .......)
+
+State-change can be a string with a state, and empty string to indicate the
+state that has no TODO keyword, or it can be one of the symbols `todo'
+or `done', meaning any not-done or done state, respectively."
+  :group 'org-todo
+  :group 'org-tags
+  :type '(repeat
+	  (cons (choice :tag "When changing to"
+		 (const :tag "Not-done state" todo)
+		 (const :tag "Done state" done)
+		 (string :tag "State"))
+		(repeat
+		 (cons :tag "Tag action"
+		       (string :tag "Tag")
+		       (choice (const :tag "Add" t) (const :tag "Remove" nil)))))))
+
 (defcustom org-log-done nil
   "Non-nil means, record a CLOSED timestamp when moving an entry to DONE.
 When equal to the list (done), also prompt for a closing note.
@@ -7885,6 +7906,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    ;; This is a non-nil state, and we need to log it
 	    (org-add-log-setup 'state state 'findpos dolog)))
 	;; Fixup tag positioning
+	(org-todo-trigger-tag-changes state)
 	(and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
 	(when org-provide-todo-statistics
 	  (org-update-parent-todo-statistics))
@@ -7951,6 +7973,21 @@ when there is a statistics cookie in the headline!
    (let (org-log-done org-log-states)   ; turn off logging
      (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
 ")
+
+(defun org-todo-trigger-tag-changes (state)
+  "Apply the changes defined in `org-todo-state-tags-triggers'."
+  (let ((l org-todo-state-tags-triggers)
+	changes)
+    (when (or (not state) (equal state ""))
+      (setq changes (append changes (cdr (assoc "" l)))))
+    (when (and (stringp state) (> (length state) 0))
+      (setq changes (append changes (cdr (assoc state l)))))
+    (when (member state org-not-done-keywords)
+      (setq changes (append changes (cdr (assoc 'todo l)))))
+    (when (member state org-done-keywords)
+      (setq changes (append changes (cdr (assoc 'done l)))))
+    (dolist (c changes)
+      (org-toggle-tag (car c) (if (cdr c) 'on 'off)))))
 	 
 (defun org-local-logging (value)
   "Get logging settings from a property VALUE."

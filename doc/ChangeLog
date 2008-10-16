@@ -1,3 +1,7 @@
+2008-10-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (TODO basics): Add documentation for tag triggers.
+
 2008-09-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.texi (Creating timestamps): Fix documentation of the "C-c ."
