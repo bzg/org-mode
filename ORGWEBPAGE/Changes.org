@@ -17,27 +17,29 @@
 :END:
 
 ** Details
-
+   
 *** Setting tags has now its own binding, =C-c C-q=
 
     You can still use =C-c C-c= on a headline, but the new
     binding should be considered as the main binding for this
-    command.  Reasons:
+    command.  The reasons for this change are:
 
     - Using =C-c C-c= for tags is really out of line with other
-      use of =C-c C-c=.
+      uses of =C-c C-c=.
 
     - I hate it in Remember buffers when I try to set tags and I
       cannot, because =C-c C-c= exits the buffer :-(
 
-    - =C-c C-q= wll also work when the cursor is somewhere down
+    - =C-c C-q= will also work when the cursor is somewhere down
       in the entry, it does not have to be on the headline.
 
 *** New option `org-log-state-notes-insert-after-drawers'
+
     Set this to t if you want state change notes to be inserted
     after any drawers.
 
 *** New commands for export to PDF
+
     This is using LaTeX export, and then processes it to PDF
     using pdflatex.
 
@@ -45,6 +47,7 @@
     : C-c C-e d     process to PDF, and open the file.
 
 *** TODO state changes can trigger tag changes
+
     The new option =org-todo-state-tags-triggers= can be used to
     define automatic changes to tags when a TODO state changes.
     For example, the setting
@@ -53,9 +56,9 @@
     :       '((done ("Today" . nil) ("NEXT" . nil))
     :         ("WAITING" ("Today" . t))))    
 
-    will make sure that any change to a DONE state will remove
-    tags "Today" and "NEXT", while switching to the "WAITING"
-    state will also trigger the tag "Today".
+    will make sure that any change to any of the DONE states will
+    remove tags "Today" and "NEXT", while switching to the
+    "WAITING" state will trigger the tag "Today" to be added.
 
 * Version 6.09
 ** Incompatible
