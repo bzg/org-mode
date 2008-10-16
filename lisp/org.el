@@ -4676,7 +4676,7 @@ but create the new hedline after the current line."
 (defun org-insert-todo-heading-respect-content ()
   (interactive)
   (let ((org-insert-heading-respect-content t))
-    (call-interactively 'org-insert-todo-todo-heading)))
+    (call-interactively 'org-insert-todo-heading)))
 
 (defun org-insert-todo-heading (arg)
   "Insert a new heading with the same level and TODO state as current heading.
