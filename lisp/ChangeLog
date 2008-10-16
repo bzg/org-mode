@@ -1,3 +1,13 @@
+2008-10-15  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-clock.el (org-clock-in-switch-to-state): Allow this to be a
+	function
+	(org-clock-in): If `org-clock-in-switch-to-state' is a function,
+	call it with the current todo state to get the state to switch to
+	when clocking in.
+	(org-clock-in): Use org-indent-line-function to indent clock lines.
+	(org-clock-find-position): Fix indentation of empty clock drawers.
+
 2008-10-16  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-add-log-setup): Respect
