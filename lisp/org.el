@@ -9175,6 +9175,15 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 	  (org-move-to-column (min ncol col) t))
       (goto-char pos))))
 
+(defun org-set-tags-command (&optional arg just-align)
+  "Call the set-tags command for the current entry."
+  (interactive "P")
+  (if (org-on-heading-p)
+      (org-set-tags arg just-align)
+    (save-excursion
+      (org-back-to-heading t)
+      (org-set-tags arg just-align))))
+
 (defun org-set-tags (&optional arg just-align)
   "Set the tags for the current headline.
 With prefix ARG, realign all tags in headings in the current buffer."
@@ -12090,6 +12099,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
 (org-defkey org-mode-map "\C-c\C-j" 'org-goto)
 (org-defkey org-mode-map "\C-c\C-t" 'org-todo)
+(org-defkey org-mode-map "\C-c\C-q" 'org-set-tags-command)
 (org-defkey org-mode-map "\C-c\C-s" 'org-schedule)
 (org-defkey org-mode-map "\C-c\C-d" 'org-deadline)
 (org-defkey org-mode-map "\C-c;"    'org-toggle-comment)
@@ -12898,7 +12908,7 @@ See the individual commands for more information."
      ["Priority Up" org-shiftup t]
      ["Priority Down" org-shiftdown t])
     ("TAGS and Properties"
-     ["Set Tags" 'org-ctrl-c-ctrl-c (org-at-heading-p)]
+     ["Set Tags" 'org-set-tags-command t]
      ["Change tag in region" 'org-change-tag-in-region (org-region-active-p)]
      "--"
      ["Set property" 'org-set-property t]

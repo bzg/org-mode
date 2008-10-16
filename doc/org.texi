@@ -3474,8 +3474,8 @@ After a colon, @kbd{M-@key{TAB}} offers completion on tags.  There is
 also a special command for inserting tags:
 
 @table @kbd
-@kindex C-c C-c
-@item C-c C-c
+@kindex C-c C-q
+@item C-c C-q
 @cindex completion, of tags
 Enter new tags for the current headline.  Org mode will either offer
 completion or a special single-key interface for setting tags, see
@@ -3484,6 +3484,9 @@ to @code{org-tags-column}.  When called with a @kbd{C-u} prefix, all
 tags in the current buffer will be aligned to that column, just to make
 things look nice.  TAGS are automatically realigned after promotion,
 demotion, and TODO state changes (@pxref{TODO basics}).
+@kindex C-c C-c
+@item C-c C-c
+When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
 
 Org will support tag insertion based on a @emph{list of tags}.  By

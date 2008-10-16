@@ -1093,6 +1093,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "t"        'org-agenda-todo)
 (org-defkey org-agenda-mode-map "a"        'org-agenda-toggle-archive-tag)
 (org-defkey org-agenda-mode-map ":"        'org-agenda-set-tags)
+(org-defkey org-agenda-mode-map "\C-c\C-q" 'org-agenda-set-tags)
 (org-defkey org-agenda-mode-map "."        'org-agenda-goto-today)
 (org-defkey org-agenda-mode-map "j"        'org-agenda-goto-date)
 (org-defkey org-agenda-mode-map "d"        'org-agenda-day-view)
