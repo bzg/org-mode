@@ -1,3 +1,9 @@
+2008-10-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-add-log-setup): Respect
+	`org-log-state-notes-insert-after-drawers'.
+	(org-log-state-notes-insert-after-drawers): New option.
+
 2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-org-to): Handle case when

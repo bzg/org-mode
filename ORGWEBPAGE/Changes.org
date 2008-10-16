@@ -18,6 +18,10 @@
 
 ** Details
 
+*** New option `org-log-state-notes-insert-after-drawers'
+    Set this to t if you want state change notes to be inserted
+    after any drawers.
+
 *** New commands for export to PDF
     This is using LaTeX export, and then processes it to PDF
     using pdflatex.

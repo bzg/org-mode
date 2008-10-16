@@ -1492,6 +1492,14 @@ empty string.
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
 
+(defcustom org-log-state-notes-insert-after-drawers nil
+  "Non-nil means, insert state change notes after any drawers in entry.
+When nil, insert them right after the heading and perhaps the line
+with deadline/scheduling if present."
+  :group 'org-todo
+  :group 'org-progress
+  :type 'boolean)
+
 (defcustom org-log-states-order-reversed t
   "Non-nil means, the latest state change note will be directly after heading.
 When nil, the notes will be orderer according to time."
@@ -8347,9 +8355,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	(org-back-to-heading t)
 	(narrow-to-region (point) (save-excursion 
 				    (outline-next-heading) (point)))
-	(while (re-search-forward
-		(concat "\\(" org-drawer-regexp "\\|" org-property-end-re "\\)")
-		(point-max) t) (forward-line))
+	(when org-log-state-notes-insert-after-drawers
+	  (while (re-search-forward
+		  (concat "\\(" org-drawer-regexp
+			  "\\|" org-property-end-re "\\)")
+		  (point-max) t) (forward-line)))
 	(looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
 			    "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
 			    "[^\r\n]*\\)?"))
