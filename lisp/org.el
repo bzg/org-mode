@@ -1515,7 +1515,9 @@ empty string.
 
 (defcustom org-log-state-notes-insert-after-drawers nil
   "Non-nil means, insert state change notes after any drawers in entry.
-When nil, insert them right after the heading and perhaps the line
+Only the drawers that *immediately* follow the headline and the
+deadline/scheduled line are skipped.
+When nil, insert notes right after the heading and perhaps the line
 with deadline/scheduling if present."
   :group 'org-todo
   :group 'org-progress
@@ -8392,15 +8394,18 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	(org-back-to-heading t)
 	(narrow-to-region (point) (save-excursion 
 				    (outline-next-heading) (point)))
-	(when org-log-state-notes-insert-after-drawers
-	  (while (re-search-forward
-		  (concat "\\(" org-drawer-regexp
-			  "\\|" org-property-end-re "\\)")
-		  (point-max) t) (forward-line)))
 	(looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
 			    "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
 			    "[^\r\n]*\\)?"))
 	(goto-char (match-end 0))
+	(when (and org-log-state-notes-insert-after-drawers
+		   (save-excursion
+		     (forward-line) (looking-at org-drawer-regexp)))
+	    (progn (forward-line)
+		   (while (looking-at org-drawer-regexp)
+		     (goto-char (match-end 0))
+		     (re-search-forward org-property-end-re (point-max) t)
+		     (forward-line))))
 	(unless org-log-states-order-reversed
 	  (and (= (char-after) ?\n) (forward-char 1))
 	  (org-skip-over-state-notes)

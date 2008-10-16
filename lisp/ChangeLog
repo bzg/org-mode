@@ -1,5 +1,8 @@
 2008-10-15  James TD Smith  <ahktenzero@mohorovi.cc>
 
+	* org.el (org-add-log-setup): Only skip drawers if the are
+	immediately after the scheduling keywords.
+
 	* org-clock.el (org-clock-in-switch-to-state): Allow this to be a
 	function
 	(org-clock-in): If `org-clock-in-switch-to-state' is a function,
