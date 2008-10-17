@@ -476,6 +476,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	  (current-buffer))
       (set-window-configuration wcf))))
 
+;;;###autoload
 (defun org-export-as-pdf (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)
   "Export as LaTeX, then process through to PDF."
@@ -501,6 +502,7 @@ when PUB-DIR is set, use this as the publishing directory."
       (message "Exporting to PDF...done")
       pdffile)))
 
+;;;###autoload
 (defun org-export-as-pdf-and-open (arg)
   "Export as LaTeX, then process through to PDF, and open."
   (interactive "P")
