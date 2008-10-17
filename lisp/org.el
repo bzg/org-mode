@@ -2544,11 +2544,13 @@ Otherwise, return nil."
 		      (apply 'encode-time (org-parse-time-string te)))
 		     (time-to-seconds
 		      (apply 'encode-time (org-parse-time-string ts))))
+		sign (if (< s 0) "-" "")
+		s (abs s)
 		h (floor (/ s 3600))
 		s (- s (* 3600 h))
 		m (floor (/ s 60))
 		s (- s (* 60 s)))
-	  (insert " => " (format "%2d:%02d" h m))
+	  (insert " => " (format "%s%2d:%02d" sign h m))
 	  t))))))
 
 (defun org-check-running-clock ()

@@ -1,3 +1,8 @@
+2008-10-17  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-clock-update-time-maybe): Compute negative clock
+	intervals correctly.
+
 2008-10-15  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-add-log-setup): Only skip drawers if the are
