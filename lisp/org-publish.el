@@ -672,6 +672,7 @@ Default for INDEX-FILENAME is 'index.org'."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
 
+;;;###autoload
 (defalias 'org-publish-project 'org-publish)
 
 ;;;###autoload
