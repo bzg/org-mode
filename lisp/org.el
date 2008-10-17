@@ -2522,7 +2522,7 @@ Otherwise, return nil."
       (let ((re (concat "[ \t]*" org-clock-string
 			" *[[<]\\([^]>]+\\)[]>]\\(-+[[<]\\([^]>]+\\)[]>]"
 			"\\([ \t]*=>.*\\)?\\)?"))
-	    ts te h m s)
+	    ts te h m s sign)
 	(cond
 	 ((not (looking-at re))
 	  nil)
