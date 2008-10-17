@@ -2522,7 +2522,7 @@ Otherwise, return nil."
       (let ((re (concat "[ \t]*" org-clock-string
 			" *[[<]\\([^]>]+\\)[]>]\\(-+[[<]\\([^]>]+\\)[]>]"
 			"\\([ \t]*=>.*\\)?\\)?"))
-	    ts te h m s sign)
+	    ts te h m s neg)
 	(cond
 	 ((not (looking-at re))
 	  nil)
@@ -2544,13 +2544,13 @@ Otherwise, return nil."
 		      (apply 'encode-time (org-parse-time-string te)))
 		     (time-to-seconds
 		      (apply 'encode-time (org-parse-time-string ts))))
-		sign (if (< s 0) "-" "")
+		neg (< s 0)
 		s (abs s)
 		h (floor (/ s 3600))
 		s (- s (* 3600 h))
 		m (floor (/ s 60))
 		s (- s (* 60 s)))
-	  (insert " => " (format "%s%2d:%02d" sign h m))
+	  (insert " => " (format (if neg "-%d:%02d" "%2d:%02d") h m))
 	  t))))))
 
 (defun org-check-running-clock ()
