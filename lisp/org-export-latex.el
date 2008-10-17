@@ -940,12 +940,15 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 			  ((string-match "[({]?\\([^)}]+\\)[)}]?" string-after)
 			   (format "%s%s{%s}" string-before char
 				   (match-string 1 string-after))))))
-	       ((and subsup
-		     (> (length string-after) 1)
+	       ((and (> (length string-after) 1)
+		     (or (eq subsup t)
+			 (and (equal subsup '{}) (eq (string-to-char string-after) ?\{)))
 		     (string-match "[({]?\\([^)}]+\\)[)}]?" string-after))
-		(format "$%s%s{%s}$" string-before char
-			(match-string 1 string-after)))
-	       (subsup (concat "$" string-before char string-after "$"))
+		(format "%s$%s{%s}$" string-before char
+			(if (> (match-end 1) (1+ (match-beginning 1)))
+			    (concat "\\mathrm{" (match-string 1 string-after) "}")
+			(match-string 1 string-after))))
+	       ((eq subsup t) (concat string-before "$" char string-after "$"))
 	       (t (org-export-latex-protect-string
 		   (concat string-before "\\" char "{}" string-after)))))
 	(t (org-export-latex-protect-string

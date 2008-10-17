@@ -1,5 +1,9 @@
 2008-10-17  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-export-latex.el (org-export-latex-treat-sub-super-char):
+	Honor the {} value of the subsuperscript setting.  Make sure that
+	longer subsuperscripts are typeset in a roman font.
+
 	* org.el (org-clock-update-time-maybe): Compute negative clock
 	intervals correctly.
 
