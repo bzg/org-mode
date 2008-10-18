@@ -1,6 +1,7 @@
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-export-latex.el (org-latex-entities-regexp): New constant.
+	(org-export-as-pdf): Use two calls to `shell-command'.
 
 2008-10-17  Carsten Dominik  <dominik@science.uva.nl>
 

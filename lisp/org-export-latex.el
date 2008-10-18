@@ -490,7 +490,10 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (pdffile (concat base ".pdf")))
     (and (file-exists-p pdffile) (delete-file pdffile))
     (message "Processing LaTeX file...")
-    (shell-command (format "pdflatex -interaction nonstopmode %s;pdflatex -interaction nonstopmode %s" file file))
+    (shell-command (format "pdflatex -interaction nonstopmode %s"
+			   (shell-quote-argument file)))
+    (shell-command (format "pdflatex -interaction nonstopmode %s"
+			   (shell-quote-argument file)))
     (message "Processing LaTeX file...done")
     (if (not (file-exists-p pdffile))
 	(error "PDF file was not produced")
