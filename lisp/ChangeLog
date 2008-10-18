@@ -1,5 +1,8 @@
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (orgtbl-to-html): Bind `html-table-tag' for the
+	formatter.
+
 	* org-export-latex.el (org-latex-entities-regexp): New constant.
 	(org-export-as-pdf): Use two calls to `shell-command'.
 

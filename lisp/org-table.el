@@ -3927,6 +3927,7 @@ The general parameters :skip and :skipcols have already been applied when
 this function is called.  The function does *not* use `orgtbl-to-generic',
 so you cannot specify parameters for it."
   (let* ((splicep (plist-get params :splice))
+	 (html-table-tag org-export-html-table-tag)
 	 html)
     ;; Just call the formatter we already have
     ;; We need to make text lines for it, so put the fields back together.
