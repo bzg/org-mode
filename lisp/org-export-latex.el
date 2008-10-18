@@ -1206,7 +1206,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 
   ;; Protect LaTeX entities
   (goto-char (point-min))
-  (while (re-search-forward (regexp-opt org-latex-entities) nil t)
+  (while (re-search-forward org-latex-entities-regexp nil t)
     (add-text-properties (match-beginning 0) (match-end 0)
 			 '(org-protected t)))
 
@@ -1450,6 +1450,15 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
    "\\vline"
    "\\vspace")
  "A list of LaTeX commands to be protected when performing conversion.")
+
+(defconst org-latex-entities-regexp
+  (let (names rest)
+    (dolist (x org-latex-entities)
+      (if (string-match "[a-z][A-Z]$" x)
+	  (push x names)
+	(push x rest)))
+    (concat "\\(" (regexp-opt (nreverse names)) "\\>\\)"
+	    "\\|\\(" (regexp-opt (nreverse rest)) "\\)")))
 
 (provide 'org-export-latex)
 
