@@ -6526,7 +6526,8 @@ From the command line you may also use
 emacs -f org-batch-store-agenda-views -kill
 @end example
 @noindent
-or, if you need to modify some parameters
+or, if you need to modify some parameters@footnote{Quoting may depend on the
+system you use, please check th FAQ for examples.}
 @example
 emacs -eval '(org-batch-store-agenda-views                      \
               org-agenda-ndays 30                               \
