@@ -5,6 +5,9 @@
 	(org-add-log-note): Mask prefix argument when immediately storing
 	the note.
 
+	* org-agenda.el (org-agenda-filter-effort-default-operator): New
+	option.
+
 2008-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-add-log-setup): Bugfix; code to find insertion point
@@ -12,6 +15,12 @@
 	inserted after the first note instead of before it.
 
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-filter-tags,org-agenda-filter-form):
+	New variables.
+	(org-prepare-agenda): Reset the filter tags.
+	(org-agenda-filter-by-tag, org-agenda-filter-by-tag-show-all):
+	Show filter tags in mode line.
 
 	* org-table.el (orgtbl-to-html): Bind `html-table-tag' for the
 	formatter.

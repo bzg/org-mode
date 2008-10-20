@@ -17,6 +17,52 @@
 :END:
 
 ** Details
+
+*** Enhancements to secondary agenda filtering
+
+**** You can now refining the current filter by an additional criterion
+      When filtering an existing agenda view with =/=, you can
+      now narrow down the existing selection by an additional
+      condition.  Do do this, use =\= instead of =/= to add the
+      aditional criterion.  You can also press =+= or =-= after
+      =/= to add a positive or negative condition.  A condition
+      can be a TAG, or an effort estimate limit, see below.
+
+**** It is now possible to filter for effort estimates
+     This means to filter the agenda for the value of the Effort
+     property.  For this you should best set up global allowed
+     values for effort estimates, with
+
+#+begin_src emacs-lisp
+(setq org-global-properties
+      '(("Effort_ALL" . "0 0:10 0:30 1:00 2:00 3:00 4:00")))
+#+end_src
+      
+     You may then select effort limits with single keys in the
+     filter.  It works like this:  After =/= or =\=, first select
+     the operater which you want to use to compare effort
+     estimates:
+
+     : <   Select entries with effort smaller than or equal to the limit
+     : >   Select entries with effort larger than or equal to the limit
+     : =   Select entries with effort equal to the limit
+
+     After that, you can press a single digit number which is
+     used as an index to the allowed effort estimates.
+
+     If you do not use digits to fast-select tags, you can even
+     skip the operator, which will then default to
+     `org-agenda-filter-effort-default-operator', which is by
+     default =<=.
+
+     Thanks to Manish for the great idea to include fast effort
+     filtering into the agenda filtering process.
+
+**** The mode line will show the active filter
+     For example, if there is a filter in place that does select
+     for HOME tags, against EMAILtags, and for tasks with an
+     estimated effort smaller than 30 minutes, the mode-line with
+     show =+HOME-EMAIL+<0:30=
    
 *** Setting tags has now its own binding, =C-c C-q=
 

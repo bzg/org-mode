@@ -4863,10 +4863,10 @@ you want to clock your time).  For a specific buffer you can use
 @end example
 
 @noindent
-or you can set up these values globally by customizing the variables
-@code{org-global-properties} and @code{org-columns-default-format}.  In
-particular if you want to use this setup also in the agenda, a global setup
-may be advised.
+or, even better, you can set up these values globally by customizing the
+variables @code{org-global-properties} and @code{org-columns-default-format}.
+In particular if you want to use this setup also in the agenda, a global
+setup may be advised.
 
 The way to assign estimates to individual items is then to switch to column
 mode, and to use @kbd{S-@key{right}} and @kbd{S-@key{left}} to change the
@@ -4882,6 +4882,10 @@ option @code{org-agenda-columns-add-appointments-to-effort-sum}.  The
 appointments on a day that take place over a specified time interval will
 then also be added to the load estimate of the day.
 
+Effort estimates can be used in secondary agenda filtering that is triggered
+with the @kbd{/} key in the agenda (@pxref{Agenda commands}).  If you have
+these estimates defined consistently, two or three key presses will narrow
+down the list to stuff that fits into an available time slot.
 
 @node Capture, Agenda Views, Dates and Times, Top
 @chapter Capture
@@ -5835,9 +5839,7 @@ sequence in which they are found in the agenda files.
 
 Sorting can be customized using the variable
 @code{org-agenda-sorting-strategy}, and may also include criteria based on
-the estimated effort of an entry.
-@c FIXME: link!!!!!!!!
-
+the estimated effort of an entry (@pxref{Effort estimates}).
 
 @node Agenda commands, Custom agenda views, Presentation and sorting, Agenda Views
 @section Commands in the agenda buffer
@@ -5994,17 +5996,48 @@ that entry would be in the original buffer (taken from a property, from a
 @code{org-columns-default-format}), will be used in the agenda.
 
 @tsubheading{Secondary filtering and query editing}
+@cindex filtering, by tag and effort, in agenda
+@cindex tag filtering, in agenda
+@cindex effort filtering, in agenda
 @cindex query editing, in agenda
 
 @kindex /
 @item /
-Filter the current agenda view with respect to a tag.  You will be prompted
-for a tag selection letter.  Pressing @key{TAB} at that prompt will offer use
-completion to select a tag (including any tags that do not have a selection
-character).  The command then hides all entries that do not contain or
-inherit this tag.  When called with prefix arg, remove the entries that
-@emph{do} have the tag.  A second @kbd{/} at the prompt will unhide any
-hidden entries.
+Filter the current agenda view with respect to a tag and/or effort estimates.
+The difference between this and a custom agenda commands is that filtering is
+very fast, so that you can switch quickly between different filters without
+having to recreate the agenda.
+
+You will be prompted for a tag selection letter.  Pressing @key{TAB} at that
+prompt will offer use completion to select a tag (including any tags that do
+not have a selection character).  The command then hides all entries that do
+not contain or inherit this tag.  When called with prefix arg, remove the
+entries that @emph{do} have the tag.  A second @kbd{/} at the prompt will
+turn off the filter and unhide any hidden entries.  If the first key you
+press is either @kbd{+} or @kbd{-}, the previous filter will be narrowed by
+requiring or forbidding the selected additional tag.  Instead of pressing
+@kbd{+} or {-}, you can also use the @kbd{\} command.
+
+In order to filter for effort estimates, you should set-up allowed
+efforts globally, for example
+@lisp
+(setq org-global-properties
+    '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
+@end lisp
+You can then filter for an effort by first typing an operator, one of @kbd{<},
+@kbd{>}, and @kbd{=}, and then the one-digit index of an effort estimate in
+your array of allowed values, where @kbd{0} means the 10th value.  The filter
+will then restrict to entries with effort smaller-or-equal, equal, or
+larger-or-equal than the selected value.  If the digits 0-9 are not used as
+fast access keys to tags, you can also simply press the index digit directly
+without an operator.  In this case, @kbd{<} will be assumed.
+
+@kindex \
+@item \
+Narrow the current agenda filter by an additional condition.  When called with
+prefix arg, remove the entries that @emph{do} have the tag, or that do match
+the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
+@kbd{-} as the first key after the @kbd{/} command.
 
 @kindex [
 @kindex ]
