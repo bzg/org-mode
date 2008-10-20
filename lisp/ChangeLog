@@ -1,3 +1,8 @@
+2008-10-20  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-entry-properties): Add CATEGORY property, iven if it
+	is not defined as a property in this entry.
+
 2008-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-add-log-setup): Bugfix; code to find insertion point

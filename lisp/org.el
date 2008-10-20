@@ -9821,6 +9821,11 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 			  (org-columns-number-to-string (/ (float clocksum) 60.)
 						       'add_times))
 		    props))
+	  (unless (assoc "CATEGORY" props)
+	    (setq value (or (org-get-category)
+			    (progn (org-refresh-category-properties)
+				   (org-get-category))))
+	    (push (cons "CATEGORY" value) props))
 	  (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit)
