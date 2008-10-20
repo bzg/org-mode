@@ -8407,7 +8407,8 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		   (while (looking-at org-drawer-regexp)
 		     (goto-char (match-end 0))
 		     (re-search-forward org-property-end-re (point-max) t)
-		     (forward-line))))
+		     (forward-line))
+		   (forward-line -1)))
 	(unless org-log-states-order-reversed
 	  (and (= (char-after) ?\n) (forward-char 1))
 	  (org-skip-over-state-notes)

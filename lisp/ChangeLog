@@ -1,3 +1,9 @@
+2008-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org.el (org-add-log-setup): Bugfix; code to find insertion point
+	after drawers was skipping ahead one line too many, so notes were
+	inserted after the first note instead of before it.
+
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-table.el (orgtbl-to-html): Bind `html-table-tag' for the
