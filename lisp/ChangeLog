@@ -2,6 +2,8 @@
 
 	* org.el (org-entry-properties): Add CATEGORY property, iven if it
 	is not defined as a property in this entry.
+	(org-add-log-note): Mask prefix argument when immediately storing
+	the note.
 
 2008-10-19  James TD Smith  <ahktenzero@mohorovi.cc>
 
