@@ -1,3 +1,7 @@
+2008-10-20  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-filter-effort-default-operator): New
+	option.
 
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
 

@@ -387,6 +387,14 @@ or `C-c a #' to produce the list."
 	  (repeat :tag "Projects are *not* stuck if they have an entry with TAG being any of" (string))
 	  (regexp :tag "Projects are *not* stuck if this regexp matches\ninside the subtree")))
 
+(defcustom org-agenda-filter-effort-default-operator "<"
+  "The default operator for effort estimate filtering.
+If you select an effort estimate limit with first pressing an operator,
+this one will be used."
+  :group 'org-agenda-custom-commands
+  :type '(choice (const :tag "less or equal" "<")
+		 (const :tag "greater or equal"">")
+		 (const :tag "equal" "=")))
 
 (defgroup org-agenda-skip nil
  "Options concerning skipping parts of agenda files."
@@ -4119,6 +4127,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (goto-line line)
     (recenter window-line)))
 
+
 (defvar org-global-tags-completion-table nil)
 (defvar org-agenda-filter-tags nil)
 (defvar org-agenda-filter-form nil)
@@ -4130,20 +4139,45 @@ A lisp caller can specify CHAR.  NARROW means that the new tag should be
 used to narrow the search - the interactive user can also press `-' or `+'
 to switch to narrowing."
   (interactive "P")
-  (let ((tag-chars (mapconcat (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
-			      org-tag-alist-for-agenda ""))
-	char a tag tags (inhibit-read-only t) (current org-agenda-filter-tags))
+  (let* ((alist org-tag-alist-for-agenda)
+	(tag-chars (mapconcat 
+		    (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+		    alist ""))
+	(efforts (org-split-string
+		  (or (cdr (assoc (concat org-effort-property "_ALL")
+				  org-global-properties))
+		      "0 0:10 0:30 1:00 2:00 3:00 4:00 5:00 6:00 7:00 8:00"		      "")))
+	(effort-op org-agenda-filter-effort-default-operator)
+	(effort-prompt "")
+	(inhibit-read-only t)
+	(current org-agenda-filter-tags)
+	char a tag tags)
     (unless char
       (message 
-       "%s by tag [%s ], [TAB] to complete, [/]:restore, [+-]:narrow, [>=<]:effort: "
-       (if narrow "Filter" "Narrow") tag-chars)
+       "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<]:effort: "
+       (if narrow "Narrow" "Filter") tag-chars)
       (setq char (read-char)))
     (when (member char '(?+ ?-))
+      ;; Narrowing down
       (cond ((equal char ?-) (setq strip t narrow t))
 	    ((equal char ?+) (setq strip nil narrow t)))
       (message 
-       "Narrow by tag [%s ], [TAB] to complete, [/]:restore, [>=<]:effort: " tag-chars)
+       "Narrow by tag [%s ], [TAB], [/]:off, [>=<]:effort: " tag-chars)
       (setq char (read-char)))
+    (when (member char '(?< ?> ?=))
+      ;; An effort operator
+      (setq effort-op (char-to-string char))
+      (loop for i from 0 to 9 do
+	    (setq effort-prompt
+		  (concat
+		   effort-prompt " ["
+		   (if (= i 9) "0" (int-to-string (1+ i)))
+		   "]" (nth i efforts))))
+      (setq alist nil) ; to make sure it will be interpreted as effort.
+      (message "Effort%s: %s " effort-op effort-prompt)
+      (setq char (read-char))
+      (when (or (< char ?0) (> char ?9))
+	(error "Need 1-9,0 to select effort" )))
     (when (equal char ?\t)
       (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
 	(org-set-local 'org-global-tags-completion-table
@@ -4154,7 +4188,11 @@ to switch to narrowing."
     (cond
      ((equal char ?/) (org-agenda-filter-by-tag-show-all))
      ((or (equal char ?\ )
-	  (setq a (rassoc char org-tag-alist-for-agenda))
+	  (setq a (rassoc char alist))
+	  (and (>= char ?0) (<= char ?9)
+	       (setq n (if (= char ?0) 9 (- char ?0 1))
+		     tag (concat effort-op (nth n efforts))
+		     a (cons tag nil)))
 	  (and tag (setq a (cons tag nil))))
       (org-agenda-filter-by-tag-show-all)
       (setq tag (car a))
@@ -4185,11 +4223,29 @@ to switch to narrowing."
     (dolist (x org-agenda-filter-tags)
       (if (member x '("-" "+"))
 	  (setq f1 '(not tags))
-	(setq f1 (list 'member (substring x 1) 'tags))
+	(if (string-match "[<=>]" x)
+	    (setq f1 (org-agenda-filter-effort-form x))
+	  (setq f1 (list 'member (substring x 1) 'tags)))
 	(if (equal (string-to-char x) ?-)
 	    (setq f1 (list 'not f1))))
       (push f1 f))
     (cons 'and (nreverse f))))
+
+(defun org-agenda-filter-effort-form (e)
+  "Return the form to compare the effort of the current line with what E says.
+E looks line \"+<2:25\"."
+  (let (op)
+    (setq e (substring e 1))
+    (setq op (string-to-char e) e (substring e 1))
+    (setq op (if (equal op ?<) '<= (if (equal op ?>) '>= '=)))
+    (list 'org-agenda-compare-effort (list 'quote op)
+	  (org-hh:mm-string-to-minutes e))))
+
+(defun org-agenda-compare-effort (op value)
+  (let ((eff (get-text-property 'effort-minutes)))
+    (if (not eff)
+	nil ; we don't have an effort defined
+      (funcall op eff value))))
 
 (defvar org-agenda-filter-overlays nil)
 
