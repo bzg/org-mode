@@ -5994,6 +5994,9 @@ that entry would be in the original buffer (taken from a property, from a
 @code{org-columns-default-format}), will be used in the agenda.
 
 @tsubheading{Secondary filtering and query editing}
+@cindex filtering, by tag and effort, in agenda
+@cindex tag filtering, in agenda
+@cindex effort filtering, in agenda
 @cindex query editing, in agenda
 
 @kindex /
@@ -6004,7 +6007,17 @@ completion to select a tag (including any tags that do not have a selection
 character).  The command then hides all entries that do not contain or
 inherit this tag.  When called with prefix arg, remove the entries that
 @emph{do} have the tag.  A second @kbd{/} at the prompt will unhide any
-hidden entries.
+hidden entries.  If the first key you press is either @kbd{+} or @kbd{-}, the
+previous filter will be narrowed by requiring or forbidding the selected
+additional tag.  Instead of pressing @kbd{+} or {-}, you can also use the
+following command.
+
+@kindex \
+@item \
+Narrow the curent agenda fiter by an additional condition.  When called with
+prefix arg, remove the entries that @emph{do} have the tag.  You can achive
+the same effect by pressing @kbd{+} or @kbd{-} as the first key after the
+@kbd{/} command.
 
 @kindex [
 @kindex ]

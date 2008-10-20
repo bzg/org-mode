@@ -1169,6 +1169,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "{" 'org-agenda-manipulate-query-add-re)
 (org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
 (org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
+(org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")
@@ -1958,6 +1959,7 @@ higher priority settings."
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
+  (setq org-agenda-filter-tags nil)
   (if org-agenda-multi
       (progn
 	(setq buffer-read-only nil)
@@ -4118,47 +4120,76 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (recenter window-line)))
 
 (defvar org-global-tags-completion-table nil)
-(defun org-agenda-filter-by-tag (strip &optional char)
+(defvar org-agenda-filter-tags nil)
+(defvar org-agenda-filter-form nil)
+(defun org-agenda-filter-by-tag (strip &optional char narrow)
   "Keep only those lines in the agenda buffer that have a specific tag.
 The tag is selected with its fast selection letter, as configured.
-With prefix argument STRIP, remove all lines that do have the tag."
+With prefix argument STRIP, remove all lines that do have the tag.
+A lisp caller can specify CHAR.  NARROW means that the new tag should be
+used to narrow the search - the interactive user can also press `-' or `+'
+to switch to narrowing."
   (interactive "P")
-  (let (char a tag tags (inhibit-read-only t))
-      (message "Select tag [%s] or no tag [ ], [TAB] to complete, [/] to restore: "
-	       (mapconcat
-		(lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
-		org-tag-alist-for-agenda ""))
-      (setq char (read-char))
-      (when (equal char ?\t)
-	(unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
-	  (org-set-local 'org-global-tags-completion-table
-			 (org-global-tags-completion-table)))
-	(let ((completion-ignore-case t))
-	  (setq tag (completing-read
-		     "Tag: " org-global-tags-completion-table))))
-      (cond
-       ((equal char ?/) (org-agenda-filter-by-tag-show-all))
-       ((or (equal char ?\ )
-	    (setq a (rassoc char org-tag-alist-for-agenda))
-	    (and tag (setq a (cons tag nil))))
-	(org-agenda-filter-by-tag-show-all)
-	(setq tag (car a))
-	(save-excursion
-	  (goto-char (point-min))
-	  (while (not (eobp))
-	    (if (get-text-property (point) 'org-marker)
-		(progn
-		  (setq tags (get-text-property (point) 'tags))
-		  (if (not tag)
-		      (if (or (and strip (not tags))
-			      (and (not strip) tags))
-			  (org-agenda-filter-by-tag-hide-line))
-		    (if (or (and (member tag tags) strip)
-			    (and (not (member tag tags)) (not strip)))
-			(org-agenda-filter-by-tag-hide-line)))
-		  (beginning-of-line 2))
-	      (beginning-of-line 2)))))
-       (t (error "Invalid tag selection character %c" char)))))
+  (let ((tag-chars (mapconcat (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
+			      org-tag-alist-for-agenda ""))
+	char a tag tags (inhibit-read-only t) (current org-agenda-filter-tags))
+    (unless char
+      (message 
+       "%s by tag [%s ], [TAB] to complete, [/]:restore, [+-]:narrow, [>=<]:effort: "
+       (if narrow "Filter" "Narrow") tag-chars)
+      (setq char (read-char)))
+    (when (member char '(?+ ?-))
+      (cond ((equal char ?-) (setq strip t narrow t))
+	    ((equal char ?+) (setq strip nil narrow t)))
+      (message 
+       "Narrow by tag [%s ], [TAB] to complete, [/]:restore, [>=<]:effort: " tag-chars)
+      (setq char (read-char)))
+    (when (equal char ?\t)
+      (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
+	(org-set-local 'org-global-tags-completion-table
+		       (org-global-tags-completion-table)))
+      (let ((completion-ignore-case t))
+	(setq tag (completing-read
+		   "Tag: " org-global-tags-completion-table))))
+    (cond
+     ((equal char ?/) (org-agenda-filter-by-tag-show-all))
+     ((or (equal char ?\ )
+	  (setq a (rassoc char org-tag-alist-for-agenda))
+	  (and tag (setq a (cons tag nil))))
+      (org-agenda-filter-by-tag-show-all)
+      (setq tag (car a))
+      (setq org-agenda-filter-tags
+	    (cons (concat (if strip "-" "+") tag)
+		  (if narrow current nil)))
+      (setq org-agenda-filter-form (org-agenda-filter-make-matcher))
+      (org-agenda-set-mode-name)
+      (save-excursion
+	(goto-char (point-min))
+	(while (not (eobp))
+	  (if (get-text-property (point) 'org-marker)
+	      (progn
+		(setq tags (get-text-property (point) 'tags))
+		(if (not (eval org-agenda-filter-form))
+		    (org-agenda-filter-by-tag-hide-line))
+		(beginning-of-line 2))
+	    (beginning-of-line 2)))))
+     (t (error "Invalid tag selection character %c" char)))))
+
+(defun org-agenda-filter-by-tag-refine (strip &optional char)
+  "Refine the current filter.  See `org-agenda-filter-by-tag."
+  (interactive "P")
+  (org-agenda-filter-by-tag strip char 'refine))
+
+(defun org-agenda-filter-make-matcher ()
+  (let (f f1)
+    (dolist (x org-agenda-filter-tags)
+      (if (member x '("-" "+"))
+	  (setq f1 '(not tags))
+	(setq f1 (list 'member (substring x 1) 'tags))
+	(if (equal (string-to-char x) ?-)
+	    (setq f1 (list 'not f1))))
+      (push f1 f))
+    (cons 'and (nreverse f))))
 
 (defvar org-agenda-filter-overlays nil)
 
@@ -4183,7 +4214,10 @@ With prefix argument STRIP, remove all lines that do have the tag."
 
 (defun org-agenda-filter-by-tag-show-all ()
   (mapc 'org-delete-overlay org-agenda-filter-overlays)
-  (setq org-agenda-filter-overlays nil))
+  (setq org-agenda-filter-overlays nil)
+  (setq org-agenda-filter-tags nil)
+  (setq org-agenda-filter-form nil)
+  (org-agenda-set-mode-name))
 
 (defun org-agenda-manipulate-query-add ()
   "Manipulate the query by adding a search term with positive selection.
@@ -4522,6 +4556,9 @@ so that the date SD will be in that range."
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if org-agenda-show-log        " Log"    "")
+		(if org-agenda-filter-tags
+		    (concat " {" (mapconcat 'identity org-agenda-filter-tags "") "}")
+		  "")
 		(if org-agenda-archives-mode
 		    (if (eq org-agenda-archives-mode t)
 			" Archives"

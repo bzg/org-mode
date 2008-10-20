@@ -1,4 +1,11 @@
+
 2008-10-18  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-filter-tags,org-agenda-filter-form):
+	New variables.
+	(org-prepare-agenda): Reset the filter tags.
+	(org-agenda-filter-by-tag, org-agenda-filter-by-tag-show-all):
+	Show filter tags in mode line.
 
 	* org-table.el (orgtbl-to-html): Bind `html-table-tag' for the
 	formatter.
