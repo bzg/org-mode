@@ -481,7 +481,7 @@ PUB-DIR is the publishing directory."
     (make-directory pub-dir t))
   (let ((visiting (find-buffer-visiting filename)))
     (save-excursion
-      (switch-to-buffer (or visiting (find-file visiting)))
+      (switch-to-buffer (or visiting (find-file filename)))
       (let* ((plist (cons :buffer-will-be-killed (cons t plist)))
 	     (init-buf (current-buffer))
 	     (init-point (point))
