@@ -479,31 +479,35 @@ PUB-DIR is the publishing directory."
   (require 'org)
   (unless (file-exists-p pub-dir)
     (make-directory pub-dir t))
-  (let* ((visiting (find-buffer-visiting filename))
-	 (plist (cons :buffer-will-be-killed (cons t plist)))
-	 (init-buf (or visiting (find-file filename)))
-	 (init-point (point))
-	 (init-buf-string (buffer-string)) export-buf-or-file)
-    ;; run hooks before exporting
-    (run-hooks 'org-publish-before-export-hook)
-    ;; export the possibly modified buffer
-    (setq export-buf-or-file
-	  (funcall (intern (concat "org-export-as-" format))
-		   (plist-get plist :headline-levels)
-		   nil plist nil nil pub-dir))
-    (when (and (bufferp export-buf-or-file) (buffer-live-p export-buf-or-file))
-      (set-buffer export-buf-or-file)
-      ;; run hooks after export and save export
-      (and (run-hooks 'org-publish-after-export-hook)
-	   (if (buffer-modified-p) (save-buffer)))
-      (kill-buffer export-buf-or-file))
-    ;; maybe restore buffer's content
-    (set-buffer init-buf)
-    (when (buffer-modified-p init-buf)
-      (erase-buffer)
-      (insert init-buf-string)
-      (save-buffer)
-      (goto-char init-point))
+  (let ((visiting (find-buffer-visiting filename)))
+    (save-excursion
+      (switch-to-buffer (or visiting (find-file visiting)))
+      (let* ((plist (cons :buffer-will-be-killed (cons t plist)))
+	     (init-buf (current-buffer))
+	     (init-point (point))
+	     (init-buf-string (buffer-string))
+	     export-buf-or-file)
+	;; run hooks before exporting
+	(run-hooks 'org-publish-before-export-hook)
+	;; export the possibly modified buffer
+	(setq export-buf-or-file
+	      (funcall (intern (concat "org-export-as-" format))
+		       (plist-get plist :headline-levels)
+		       nil plist nil nil pub-dir))
+	(when (and (bufferp export-buf-or-file)
+		   (buffer-live-p export-buf-or-file))
+	  (set-buffer export-buf-or-file)
+	  ;; run hooks after export and save export
+	  (and (run-hooks 'org-publish-after-export-hook)
+	       (if (buffer-modified-p) (save-buffer)))
+	  (kill-buffer export-buf-or-file))
+	;; maybe restore buffer's content
+	(set-buffer init-buf)
+	(when (buffer-modified-p init-buf)
+	  (erase-buffer)
+	  (insert init-buf-string)
+	  (save-buffer)
+	  (goto-char init-point))))
     (unless visiting
       (kill-buffer init-buf))))
 

@@ -1054,7 +1054,9 @@ value of `org-export-run-in-background'."
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))
       (error "No command associated with key %c" r1))
-    (if (and bg (nth 2 ass))
+    (if (and bg (nth 2 ass)
+	     (not (buffer-base-buffer))
+	     (not (org-region-active-p)))
 	;; execute in background
 	(let ((p (start-process
 		  (concat "Exporting " (file-name-nondirectory (buffer-file-name)))
