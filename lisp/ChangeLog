@@ -1,3 +1,8 @@
+2008-10-21  Bastien Guerry  <bzg@altern.org>
+
+	* org-export-latex.el (org-export-latex-classes): Added
+	\usepackage{graphicx} to the default list of packages.
+
 2008-10-21  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-filter): Renamed from
