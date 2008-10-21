@@ -507,9 +507,9 @@ PUB-DIR is the publishing directory."
 	  (erase-buffer)
 	  (insert init-buf-string)
 	  (save-buffer)
-	  (goto-char init-point))))
-    (unless visiting
-      (kill-buffer init-buf))))
+	  (goto-char init-point))
+	(unless visiting
+	  (kill-buffer init-buf))))))
 
 (defun org-publish-org-to-latex (plist filename pub-dir)
   "Publish an org file to LaTeX.
