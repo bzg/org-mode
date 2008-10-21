@@ -1153,6 +1153,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 	     (t (insert "\\texttt{" desc "}")))))))
 
 (defvar org-latex-entities)   ; defined below
+(defvar org-latex-entities-regexp)   ; defined below
 
 (defun org-export-latex-preprocess ()
   "Clean stuff in the LaTeX export."

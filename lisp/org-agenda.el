@@ -1964,6 +1964,7 @@ higher priority settings."
 (defvar org-pre-agenda-window-conf nil)
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
+(defvar org-agenda-filter nil)
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
@@ -4131,7 +4132,6 @@ When this is the global TODO list, a prefix argument will be interpreted."
 
 
 (defvar org-global-tags-completion-table nil)
-(defvar org-agenda-filter nil)
 (defvar org-agenda-filter-form nil)
 (defun org-agenda-filter-by-tag (strip &optional char narrow)
   "Keep only those lines in the agenda buffer that have a specific tag.
@@ -4153,7 +4153,7 @@ to switch to narrowing."
 	(effort-prompt "")
 	(inhibit-read-only t)
 	(current org-agenda-filter)
-	char a tag tags)
+	char a n tag tags)
     (unless char
       (message 
        "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<]:effort: "

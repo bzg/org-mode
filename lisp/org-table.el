@@ -43,7 +43,7 @@
 (declare-function org-format-org-table-html "org-exp" (lines &optional splice))
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
-
+(defvar org-export-html-table-tag) ; defined in org-exp.el
 (defvar constants-unit-system)
 
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
