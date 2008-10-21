@@ -1967,7 +1967,7 @@ higher priority settings."
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
-  (setq org-agenda-filter-tags nil)
+  (setq org-agenda-filter nil)
   (if org-agenda-multi
       (progn
 	(setq buffer-read-only nil)
@@ -4113,6 +4113,7 @@ So this is just a shortcut for `\\[org-agenda]', available in the agenda."
 When this is the global TODO list, a prefix argument will be interpreted."
   (interactive)
   (let* ((org-agenda-keep-modes t)
+	 (filter org-agenda-filter)
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
@@ -4123,13 +4124,14 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil)
     (message "Rebuilding agenda buffer...done")
+    (and filter (org-agenda-filter-apply filter))
     (and cols (interactive-p) (org-agenda-columns))
     (goto-line line)
     (recenter window-line)))
 
 
 (defvar org-global-tags-completion-table nil)
-(defvar org-agenda-filter-tags nil)
+(defvar org-agenda-filter nil)
 (defvar org-agenda-filter-form nil)
 (defun org-agenda-filter-by-tag (strip &optional char narrow)
   "Keep only those lines in the agenda buffer that have a specific tag.
@@ -4150,7 +4152,7 @@ to switch to narrowing."
 	(effort-op org-agenda-filter-effort-default-operator)
 	(effort-prompt "")
 	(inhibit-read-only t)
-	(current org-agenda-filter-tags)
+	(current org-agenda-filter)
 	char a tag tags)
     (unless char
       (message 
@@ -4196,21 +4198,10 @@ to switch to narrowing."
 	  (and tag (setq a (cons tag nil))))
       (org-agenda-filter-by-tag-show-all)
       (setq tag (car a))
-      (setq org-agenda-filter-tags
+      (setq org-agenda-filter
 	    (cons (concat (if strip "-" "+") tag)
 		  (if narrow current nil)))
-      (setq org-agenda-filter-form (org-agenda-filter-make-matcher))
-      (org-agenda-set-mode-name)
-      (save-excursion
-	(goto-char (point-min))
-	(while (not (eobp))
-	  (if (get-text-property (point) 'org-marker)
-	      (progn
-		(setq tags (get-text-property (point) 'tags))
-		(if (not (eval org-agenda-filter-form))
-		    (org-agenda-filter-by-tag-hide-line))
-		(beginning-of-line 2))
-	    (beginning-of-line 2)))))
+      (org-agenda-filter-apply org-agenda-filter))
      (t (error "Invalid tag selection character %c" char)))))
 
 (defun org-agenda-filter-by-tag-refine (strip &optional char)
@@ -4219,8 +4210,9 @@ to switch to narrowing."
   (org-agenda-filter-by-tag strip char 'refine))
 
 (defun org-agenda-filter-make-matcher ()
+  "Create the form that tests a line for the agenda filter."
   (let (f f1)
-    (dolist (x org-agenda-filter-tags)
+    (dolist (x org-agenda-filter)
       (if (member x '("-" "+"))
 	  (setq f1 '(not tags))
 	(if (string-match "[<=>]" x)
@@ -4242,10 +4234,29 @@ E looks line \"+<2:25\"."
 	  (org-hh:mm-string-to-minutes e))))
 
 (defun org-agenda-compare-effort (op value)
-  (let ((eff (get-text-property 'effort-minutes)))
+  "Compare the effort of the current line with VALUE, using OP.
+If the line does not have an effort defined, return nil."
+  (let ((eff (get-text-property (point) 'effort-minutes)))
     (if (not eff)
 	nil ; we don't have an effort defined
       (funcall op eff value))))
+
+(defun org-agenda-filter-apply (filter)
+  "Set FILTER as the new agenda filter and apply it."
+  (let (tags)
+    (setq org-agenda-filter filter
+	  org-agenda-filter-form (org-agenda-filter-make-matcher))
+    (org-agenda-set-mode-name)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(if (get-text-property (point) 'org-marker)
+	    (progn
+	      (setq tags (get-text-property (point) 'tags))
+	      (if (not (eval org-agenda-filter-form))
+		  (org-agenda-filter-by-tag-hide-line))
+	      (beginning-of-line 2))
+	  (beginning-of-line 2))))))
 
 (defvar org-agenda-filter-overlays nil)
 
@@ -4271,7 +4282,7 @@ E looks line \"+<2:25\"."
 (defun org-agenda-filter-by-tag-show-all ()
   (mapc 'org-delete-overlay org-agenda-filter-overlays)
   (setq org-agenda-filter-overlays nil)
-  (setq org-agenda-filter-tags nil)
+  (setq org-agenda-filter nil)
   (setq org-agenda-filter-form nil)
   (org-agenda-set-mode-name))
 
@@ -4612,8 +4623,8 @@ so that the date SD will be in that range."
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if org-agenda-show-log        " Log"    "")
-		(if org-agenda-filter-tags
-		    (concat " {" (mapconcat 'identity org-agenda-filter-tags "") "}")
+		(if org-agenda-filter
+		    (concat " {" (mapconcat 'identity org-agenda-filter "") "}")
 		  "")
 		(if org-agenda-archives-mode
 		    (if (eq org-agenda-archives-mode t)

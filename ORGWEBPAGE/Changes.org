@@ -63,6 +63,12 @@
      for HOME tags, against EMAILtags, and for tasks with an
      estimated effort smaller than 30 minutes, the mode-line with
      show =+HOME-EMAIL+<0:30=
+
+**** The filter now persists when the agenda view is refreshed
+     You need to press =/ /= to turn off the filter.  However,
+     when you run a new agenda command, for example going from
+     the weekly agenda to the TODO list, the filter will be
+     switched off.
    
 *** Setting tags has now its own binding, =C-c C-q=
 
