@@ -322,12 +322,13 @@ sibling does not exist, it will be created at the end of the subtree."
       (setq pos (point))
       (condition-case nil
 	  (outline-up-heading 1 t)
-	(error (goto-char (point-min))))
+	(error (setq e (point-max)) (goto-char (point-min))))
       (setq b (point))
-      (condition-case nil
-	  (org-end-of-subtree t t)
-	(error (goto-char (point-max))))
-      (setq e (point))
+      (unless e
+	(condition-case nil
+	    (org-end-of-subtree t t)
+	  (error (goto-char (point-max))))
+	(setq e (point)))
       (goto-char b)
       (unless (re-search-forward
 	       (concat "^" (regexp-quote leader)
