@@ -2190,16 +2190,17 @@ underlined headlines.  The default is 3."
 	 (umax nil)
 	 (umax-toc nil)
 	 (case-fold-search nil)
+	 (bfname (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
          (filename (concat (file-name-as-directory
 			    (org-export-directory :ascii opt-plist))
 			   (file-name-sans-extension
 			    (or (and subtree-p
 				     (org-entry-get (region-beginning)
 						    "EXPORT_FILE_NAME" t))
-				(file-name-nondirectory buffer-file-name)))
+				(file-name-nondirectory bfname)))
 			   ".txt"))
 	 (filename (if (equal (file-truename filename)
-			      (file-truename buffer-file-name))
+			      (file-truename bfname))
 		       (concat filename ".txt")
 		     filename))
 	 (buffer (find-file-noselect filename))
@@ -2213,7 +2214,7 @@ underlined headlines.  The default is 3."
 				(plist-get opt-plist :skip-before-1st-heading))
 			       (org-export-grab-title-from-buffer))
 			  (file-name-sans-extension
-			   (file-name-nondirectory buffer-file-name))))
+			   (file-name-nondirectory bfname))))
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
 	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
