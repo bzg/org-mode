@@ -4607,7 +4607,7 @@ but create the new hedline after the current line."
 			   (match-string 0))
 		       (error "*"))))
 	     (blank (cdr (assq 'heading org-blank-before-new-entry)))
-	     pos)
+	     pos hide-previous)
 	(cond
 	 ((and (org-on-heading-p) (bolp)
 	       (or (bobp)
@@ -4622,6 +4622,9 @@ but create the new hedline after the current line."
 	  nil)
 	 (t
 	  ;; in the middle of the line
+          (save-excursion
+            (end-of-line)
+            (setq hide-previous (org-invisible-p)))
 	  (org-show-entry)
 	  (let ((split
 		 (org-get-alist-option org-M-RET-may-split-line 'headline))
@@ -4652,6 +4655,10 @@ but create the new hedline after the current line."
 	(setq pos (point))
 	(end-of-line 1)
 	(unless (= (point) pos) (just-one-space) (backward-delete-char 1))
+        (when (and org-insert-heading-respect-content hide-previous)
+	  (save-excursion
+	    (outline-previous-visible-heading 1)
+	    (hide-entry)))
 	(run-hooks 'org-insert-heading-hook)))))
 
 (defun org-get-heading (&optional no-tags)
@@ -4675,20 +4682,20 @@ but create the new hedline after the current line."
 (defun org-insert-heading-respect-content ()
   (interactive)
   (let ((org-insert-heading-respect-content t))
-    (call-interactively 'org-insert-heading)))
+    (org-insert-heading t)))
 
-(defun org-insert-todo-heading-respect-content ()
-  (interactive)
+(defun org-insert-todo-heading-respect-content (&optional force-state)
+  (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (call-interactively 'org-insert-todo-heading)))
+    (org-insert-todo-heading force-state t)))
 
-(defun org-insert-todo-heading (arg)
+(defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
 If the heading has no TODO state, or if the state is DONE, use the first
 state (TODO by default).  Also with prefix arg, force first state."
   (interactive "P")
   (when (not (org-insert-item 'checkbox))
-    (org-insert-heading)
+    (org-insert-heading force-heading)
     (save-excursion
       (org-back-to-heading)
       (outline-previous-heading)
