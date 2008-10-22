@@ -894,7 +894,7 @@ in order to easily repeat the interval."
 	  (insert txt)
 	  (org-move-to-column col)
 	  (if (and org-table-copy-increment (org-at-timestamp-p t))
-	      (org-timestamp-up 1)
+	      (org-timestamp-up-day)
 	    (org-table-maybe-recalculate-line))
 	  (org-table-align)
 	  (org-move-to-column col))

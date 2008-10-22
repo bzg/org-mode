@@ -1,5 +1,8 @@
 2008-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-table.el (org-table-copy-down): Fix bug with time stamp
+	increment.
+
 	* org-mouse.el (org-mouse-features): New option.
 	(org-mode-hook): Turn on features depending on
 	`org-mouse-features'.
