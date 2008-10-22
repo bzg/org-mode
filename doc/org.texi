@@ -2313,8 +2313,10 @@ Specify the title of the plot.
 Specify which column of the table to use as the @code{x} axis.
 
 @item deps
-Specify (as a comma seperated list with no spaces) which columns of the table
-to graph against the ind (defaults to all other columns).
+Specify the columns to graph as a lisp style list, surrounded by parenthesis
+and separated by spaces for example @code{dep:(3 4)} to graph the third and
+fourth columns (defaults to graphing all other columns aside from the ind
+column).
 
 @item type
 Specify whether the plot will be @code{2d}, @code{3d}, or @code{grid}.
