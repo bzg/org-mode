@@ -1,5 +1,9 @@
 2008-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-mouse.el (org-mouse-features): New option.
+	(org-mode-hook): Turn on features depending on
+	`org-mouse-features'.
+
 	* org.el (org-insert-heading-respect-content): Force heading
 	creation.
 	(org-insert-heading): keep the folding state of the heading before

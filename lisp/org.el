@@ -1722,7 +1722,7 @@ This has influence for the following applications:
 
 IMPORTANT:  This is a feature whose implementation is and likely will
 remain incomplete.  Really, it is only here because past midnight seems to
-ne the favorite working time of John Wiegley :-)"
+be the favorite working time of John Wiegley :-)"
   :group 'org-time
   :type 'number)
 
