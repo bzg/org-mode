@@ -31,6 +31,22 @@
 	(org-clock-in): When clocking in to an entry, if
 	`org-clock-in-resume' is set, check if the first clock line is
 	open and if so, start the clock from the time in the clock line.
+	(org-clock-persist): Add a custom option to toggle clock
+	persistence.
+	(org-clock-persist-query-save): Add a custom option to toggle
+	asking the user if they want to save the running clock when
+	exiting.
+	(org-clock-persist-query-resume): Add a custom option to toggle
+	asking the user if they want to resume the saved clock when Emacs
+	is restarted.
+	(org-clock-save): Add a function to save clock data.
+	This includes the contents of `org-clock-history' and the buffer
+	and position of the currently clocked task, if any.
+	(org-clock-load): Add a function to load clock data.
+	This populates `org-clock-history', and resumes the saved clocked
+	task if there is one.
+	(org-clock-persistence-insinuate): Add a method to set up the
+	hooks for clock persistence.
 
 2008-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -317,6 +333,7 @@
 	* org-export-latex.el (org-export-latex-keywords-maybe): Bug fix.
 
 2008-09-22  James TD Smith  <ahktenzero@mohorovi.cc>
+
 	* org-plot.el (org-plot/gnuplot): Make tables starting with a
 	hline work correctly.
 	(org-plot/gnuplot-script): Put commas at the end of each script

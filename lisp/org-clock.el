@@ -101,6 +101,28 @@ has not been closed, resume the clock from that point"
   :group 'org-clock
   :type 'boolean)
 
+(defcustom org-clock-persist nil
+  "When non-nil, save the running clock when emacs is closed, and
+  resume it next time emacs is started."
+  :group 'org-clock
+  :type 'boolean)
+
+(defcustom org-clock-persist-file "~/.emacs.d/org-clock-save.el"
+  "File to save clock data to"
+  :group 'org-clock
+  :type 'string)
+
+(defcustom org-clock-persist-query-save nil
+  "When non-nil, ask before saving the current clock on exit"
+  :group 'org-clock
+  :type 'boolean)
+
+(defcustom org-clock-persist-query-resume t
+  "When non-nil, ask before resuming any stored clock during
+load."
+  :group 'org-clock
+  :type 'boolean)
+
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -988,6 +1010,76 @@ the currently selected interval size."
 			       x))
 			   lines)
 		   "\n"))))
+
+(defun org-clock-save ()
+  "Persist various clock-related data to disk"
+  (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
+    (progn (delete-region (point-min) (point-max))
+	   ;;Store clock
+	   (insert (format ";; org-persist.el - %s at %s\n" system-name (time-stamp-string)))
+	   (if (and org-clock-persist (marker-buffer org-clock-marker)
+		    (or (not org-clock-persist-query-save)
+			(y-or-n-p (concat "Save current clock ("
+					  (substring-no-properties org-clock-heading)
+					  ")"))))
+	       (insert "(setq resume-clock '(\""
+		       (buffer-file-name (marker-buffer org-clock-marker))
+		       "\" . " (int-to-string (marker-position org-clock-marker))
+		       "))\n"))
+	   ;;Store clocked task history. Tasks are stored reversed to make
+	   ;;reading simpler
+	   (if org-clock-history
+	       (insert "(setq stored-clock-history '("
+		       (mapconcat
+			(lambda (m)
+			  (when (marker-buffer m)
+			    (concat "(\"" (buffer-file-name (marker-buffer m))
+				    "\" . " (int-to-string (marker-position m))
+				")")))
+			(reverse org-clock-history) " ") "))\n"))
+	   (save-buffer)
+	   (kill-buffer (current-buffer)))))
+
+(defvar org-clock-loaded nil)
+
+(require 'timestamp)
+
+(defun org-clock-load ()
+  "Load various clock-related data from disk, optionally resuming
+a stored clock"
+  (if (not org-clock-loaded)
+      (let ((filename (expand-file-name org-clock-persist-file))
+	    (org-clock-in-resume t))
+	(if (file-readable-p filename)
+	    (progn
+	      (message "%s" "Restoring clock data")
+	      (setq org-clock-loaded t)
+	      (load-file filename)
+	      ;; load history
+	      (if (boundp 'stored-clock-history)
+		  (save-window-excursion
+		    (mapc (lambda (task)
+			    (org-clock-history-push (cdr task)
+						    (find-file (car task))))
+			  stored-clock-history)))
+	      ;; resume clock
+	      (if (and (boundp 'resume-clock) org-clock-persist
+		       (or (not org-clock-persist-query-resume)
+			   (y-or-n-p "Resume clock ("
+				     (with-current-buffer (find-file (car resume-clock))
+				       (progn (goto-char (cdr resume-clock))
+					      (looking-at org-complex-heading-regexp)
+					      (match-string 4))) ")")))
+		  (with-current-buffer (find-file (car resume-clock))
+		    (progn (goto-char (cdr resume-clock))
+			   (org-clock-in)))))
+	  (message "Not restoring clock data; %s not found"
+		   org-clock-persist-file)))))
+
+(defun org-clock-persistence-insinuate ()
+  "Set up hooks for clock persistence"
+  (add-hook 'org-mode-hook 'org-clock-load)
+  (add-hook 'kill-emacs-hook 'org-clock-save))
 
 (provide 'org-clock)
 
