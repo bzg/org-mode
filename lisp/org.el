@@ -7250,7 +7250,7 @@ and will therefore always be up-to-date.
 
 At the target location, the entry is filed as a subitem of the target heading.
 Depending on `org-reverse-note-order', the new subitem will either be the
-first of the last subitem.
+first or the last subitem.
 
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
