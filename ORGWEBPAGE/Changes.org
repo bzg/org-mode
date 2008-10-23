@@ -16,15 +16,33 @@
 :VISIBILITY: content
 :END:
 
+** Overview
+
+   - Secondary agenda filtering is becoming a killer feature
+   - Setting tags has now its own binding, =C-c C-q=
+   - Todo state changes can trigger tag changes
+   - C-RET will now always insert a new headline, never an item.
+   - Customize org-mouse.el feature set to free up mouse events
+   - New commands for export all the way to PDF (through LaTeX)
+   - Some bug fixed for LaTeX export, more bugs remain.
+
 ** Details
 
 *** Enhancements to secondary agenda filtering
+
+    This is, I believe, becoming a killer feature.  It allows you
+    to define fewer and more general custom agenda commands, and
+    then to do the final narrowing to specific tasks you are
+    looking for very quickly, much faster than calling a new
+    agenda command.
+
+    If you have not tries this yet, you should!
 
 **** You can now refining the current filter by an additional criterion
       When filtering an existing agenda view with =/=, you can
       now narrow down the existing selection by an additional
       condition.  Do do this, use =\= instead of =/= to add the
-      aditional criterion.  You can also press =+= or =-= after
+      additional criterion.  You can also press =+= or =-= after
       =/= to add a positive or negative condition.  A condition
       can be a TAG, or an effort estimate limit, see below.
 
@@ -40,7 +58,7 @@
       
      You may then select effort limits with single keys in the
      filter.  It works like this:  After =/= or =\=, first select
-     the operater which you want to use to compare effort
+     the operator which you want to use to compare effort
      estimates:
 
      : <   Select entries with effort smaller than or equal to the limit
@@ -60,11 +78,15 @@
 
 **** The mode line will show the active filter
      For example, if there is a filter in place that does select
-     for HOME tags, against EMAILtags, and for tasks with an
+     for HOME tags, against EMAIL tags, and for tasks with an
      estimated effort smaller than 30 minutes, the mode-line with
      show =+HOME-EMAIL+<0:30=
 
 **** The filter now persists when the agenda view is refreshed
+     All normal refresh commands, including those that move the
+     weekly agenda from one week to the next, now keep the
+     current filter in place.
+
      You need to press =/ /= to turn off the filter.  However,
      when you run a new agenda command, for example going from
      the weekly agenda to the TODO list, the filter will be
@@ -85,20 +107,7 @@
     - =C-c C-q= will also work when the cursor is somewhere down
       in the entry, it does not have to be on the headline.
 
-*** New option `org-log-state-notes-insert-after-drawers'
-
-    Set this to t if you want state change notes to be inserted
-    after any drawers.
-
-*** New commands for export to PDF
-
-    This is using LaTeX export, and then processes it to PDF
-    using pdflatex.
-
-    : C-c C-e p     process to PDF.
-    : C-c C-e d     process to PDF, and open the file.
-
-*** TODO state changes can trigger tag changes
+*** Todo state changes can trigger tag changes
 
     The new option =org-todo-state-tags-triggers= can be used to
     define automatic changes to tags when a TODO state changes.
@@ -111,6 +120,47 @@
     will make sure that any change to any of the DONE states will
     remove tags "Today" and "NEXT", while switching to the
     "WAITING" state will trigger the tag "Today" to be added.
+
+    I use this mostly to get rid of TODAY and NEXT tags which I
+    apply to select an entry for execution in the near future,
+    which I often prefer to specific time scheduling.
+
+*** C-RET will now always insert a new headline, never an item.
+    The new headline is inserted after the current subtree.
+
+    Thanks to Peter Jones for patches to fine-tune this behavior.
+
+*** Customize org-mouse.el feature set
+    There is a new variable =org-mouse-features= which gives you
+    some control about what features of org-mouse you want to
+    use.  Turning off some of the feature will free up the
+    corresponding mouse events, or will avoid activating special
+    regions for mouse clicks.  By default I have urned off the
+    feature to use drag mouse events to move or promote/demote
+    entries.  You can of course turn them back on if you wish.
+
+    This variable may still change in the future, allowing more
+    fine-grained control.
+
+*** New commands for export to PDF
+
+    This is using LaTeX export, and then processes it to PDF
+    using pdflatex.
+
+    : C-c C-e p     process to PDF.
+    : C-c C-e d     process to PDF, and open the file.
+
+*** LaTeX export
+    - \usepackage{graphicx} is now part of the standard class
+      definitions.
+    - Several bugs fixed, but definitely not all of them :-(
+
+*** New option `org-log-state-notes-insert-after-drawers'
+
+    Set this to =t= if you want state change notes to be inserted
+    after any initial drawers, i.e drawers the immediately follow
+    the headline and the planning line (the one with
+    DEADLINE/SCHEDULED/CLOSED information).
 
 * Version 6.09
 ** Incompatible
