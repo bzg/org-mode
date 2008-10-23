@@ -4694,7 +4694,7 @@ but create the new hedline after the current line."
 If the heading has no TODO state, or if the state is DONE, use the first
 state (TODO by default).  Also with prefix arg, force first state."
   (interactive "P")
-  (when (not (org-insert-item 'checkbox))
+  (when (or force-heading (not (org-insert-item 'checkbox)))
     (org-insert-heading force-heading)
     (save-excursion
       (org-back-to-heading)
