@@ -1,5 +1,5 @@
 ================================================================================
-Org-Mode Reference Card (for version 6.07)
+Org-Mode Reference Card (for version 6.10)
 ================================================================================
 
 ================================================================================
@@ -19,9 +19,9 @@ Visibility Cycling
 
 rotate current subtree between states             TAB
 rotate entire buffer between states               S-TAB
-show the whole file                               C-c C-a
+restore property-dependent startup visibility     C-u C-u TAB
+show the whole file, including drawers            C-u C-u C-u TAB
 reveal context around point                       C-c C-r
-show subtree in indirect buffer, ded. frame       C-c C-k
 
 ================================================================================
 Motion
@@ -40,6 +40,7 @@ Structure Editing
 insert new heading/item at current level          M-RET
 insert new heading after subtree                  C-RET
 insert new TODO entry/checkbox item               M-S-RET
+insert TODO entry/ckbx after subtree              C-S-RET
 promote/demote current heading up one level       M-LEFT/RIGHT
 promote/demote current subtree up one level       M-S-LEFT/RIGHT
 move subtree/list item up/down                    M-S-UP/DOWN
@@ -255,8 +256,8 @@ update checkbox statistics (C-u : whole file)     C-c #
 Tags
 ================================================================================
 
-set tags for current heading                      C-c C-c
-realign tags in all headings                      C-u C-c C-c
+set tags for current heading                      C-c C-q
+realign tags in all headings                      C-u C-c C-q
 create sparse tree with matching tags             C-c \
 globally (agenda) match tags at cursor            C-c C-o
 
@@ -266,7 +267,7 @@ globally (agenda) match tags at cursor            C-c C-o
 \key{special commands in property lines}{C-c C-c}
 \key{next/previous allowed value}{S-left/right}
 \key{turn on column view}{C-c C-x C-c}
-\key{capture columns view in dynamic block}{C-c C-x r}
+\key{capture columns view in dynamic block}{C-c C-x i}
 
 \key{quit column view}{q}
 \key{next/previous allowed value}{S-left/right}
@@ -321,7 +322,7 @@ cycle through agenda file list                    C-'
 compile agenda for the current week               C-c a a [1]
 compile global TODO list                          C-c a t [1]
 compile TODO list for specific keyword            C-c a T [1]
-match tags, todo kwds and properties              C-c a m [1]
+match tags, TODO kwds and properties              C-c a m [1]
 match only in TODO entries                        C-c a M [1]
 find stuck projects                               C-c a # [1]
 show timeline of current org file                 C-c a L [1]
@@ -370,13 +371,13 @@ Remote editing
 digit argument                                    0-9
 change state of current TODO item                 t
 kill item and source                              C-k
-archive the subtree                               $ / a / A
+archive the subtree (file/tag/sibling)            $ / a / A
 show tags of current headline                     T
 set tags for current headline                     :
-toggle ARCHIVE tag                                a
 set priority of current item                      p
 raise/lower priority of current item              S-UP/DOWN [3]
 display weighted priority of current item         P
+run an attachment command                         C-c C-a
 schedule/set deadline for this item               C-c C-s/d
 change timestamp to one day earlier/later         S-LEFT/RIGHT [3]
 change timestamp to today                         >
