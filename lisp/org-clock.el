@@ -95,6 +95,12 @@ The function is called with point at the beginning of the headline."
   :group 'org-clock
   :type 'integer)
 
+(defcustom org-clock-in-resume nil
+  "If non-nil, when clocking into a task with a clock entry which
+has not been closed, resume the clock from that point"
+  :group 'org-clock
+  :type 'boolean)
+
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -291,12 +297,21 @@ the clocking selection, associated with the letter `d'."
 		      (t "???")))
 	  (setq org-clock-heading (org-propertize org-clock-heading 'face nil))
 	  (org-clock-find-position)
-
-	  (insert "\n") (backward-char 1)
-	  (org-indent-line-function)
-	  (insert org-clock-string " ")
-	  (setq org-clock-start-time (current-time))
-	  (setq ts (org-insert-time-stamp (current-time) 'with-hm 'inactive))
+	  (if (and org-clock-in-resume
+		   (looking-at (concat "^[ \\t]* " org-clock-string
+				       " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+				       " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\]$")))
+	      (progn (message "Matched %s" (match-string 1))
+		     (setq ts (concat "[" (match-string 1) "]"))
+		     (goto-char (match-end 1))
+		     (setq org-clock-start-time
+			   (apply 'encode-time (org-parse-time-string (match-string 1)))))
+	    (progn
+	      (insert "\n") (backward-char 1)
+	      (org-indent-line-function)
+	      (insert org-clock-string " ")
+	      (setq org-clock-start-time (current-time))
+	      (setq ts (org-insert-time-stamp org-clock-start-time 'with-hm 'inactive))))
 	  (move-marker org-clock-marker (point) (buffer-base-buffer))
 	  (or global-mode-string (setq global-mode-string '("")))
 	  (or (memq 'org-mode-line-string global-mode-string)
@@ -961,7 +976,6 @@ the currently selected interval size."
       (org-dblock-write:clocktable p1)
       (re-search-forward "#\\+END:")
       (end-of-line 0))))
-
 
 (defun org-clocktable-add-file (file table)
   (if table

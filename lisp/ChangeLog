@@ -24,6 +24,14 @@
 	* org.el (org-insert-todo-heading): Fix bug with force-heading
 	argument.
 
+2008-10-23  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-clock.el (org-clock-in-resume): Add a custom option to
+	toggle starting the clock from an open clock line.
+	(org-clock-in): When clocking in to an entry, if
+	`org-clock-in-resume' is set, check if the first clock line is
+	open and if so, start the clock from the time in the clock line.
+
 2008-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-as-ascii): Handle the case that we are
