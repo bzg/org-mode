@@ -11,7 +11,7 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.10 (in preparation)
+* Version 6.10
 :PROPERTIES:
 :VISIBILITY: content
 :END:
