@@ -859,11 +859,14 @@ you can use the following keys to find your destination:
 @example
 @key{TAB}         @r{Cycle visibility.}
 @key{down} / @key{up}   @r{Next/previous visible headline.}
+@key{RET}         @r{Select this location.}
+@kbd{/}           @r{Do a Sparse-tree search}
+@r{The following keys work if you turn off @code{org-goto-auto-isearch}}
 n / p        @r{Next/previous visible headline.}
 f / b        @r{Next/previous headline same level.}
 u            @r{One level up.}
 0-9          @r{Digit argument.}
-@key{RET}         @r{Select this location.}
+q            @r{Quit}
 @end example
 @end table
 
