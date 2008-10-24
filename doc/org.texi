@@ -928,9 +928,7 @@ level).
 @item M-S-@key{down}
 Move subtree down (swap with next subtree of same level).
 @kindex C-c C-x C-w
-@kindex C-c C-x C-k
 @item C-c C-x C-w
-@itemx C-c C-x C-k
 Kill subtree, i.e. remove it from buffer but save in kill ring.
 With a numeric prefix argument N, kill N sequential subtrees.
 @kindex C-c C-x M-w
