@@ -2273,12 +2273,10 @@ functions.
 @cindex plot tables using gnuplot
 
 Org Plot can produce 2D and 3D graphs of information stored in org tables
-using @file{Gnuplot} (see @uref{http://www.gnuplot.info/, the Gnuplot
-website}) and @file{gnuplot-mode} (see
-@uref{http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html, the
-gnuplot-mode website}).  To see this in action ensure that you have both
-Gnuplot and Gnuplot-mode installed on your system, then call
-@code{org-plot/gnuplot} on the following table.
+using @file{Gnuplot} @uref{http://www.gnuplot.info/} and @file{gnuplot-mode}
+@uref{http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html}.  To see
+this in action ensure that you have both Gnuplot and Gnuplot-mode installed
+on your system, then call @code{org-plot/gnuplot} on the following table.
 
 @example
 @group
@@ -2297,8 +2295,8 @@ Notice that Org Plot is smart enough to apply the tables headers as labels.
 Further control over the labels, type, content, and appearance of plots can
 be exercised through the @code{#+Plot:} lines preceding a table.  See below
 for a complete list of Org plot options.  For more information and examples
-@uref{http://orgmode.org/worg/org-tutorials/org-plot.php, the org-plot
-tutorial}.
+see the org-plot tutorial at
+@uref{http://legito.org/worg/org-tutorials/org-plot.php}.
 
 @subsubheading Plot Options
 
