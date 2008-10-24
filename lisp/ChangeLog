@@ -74,6 +74,14 @@
 	* org.el (org-clock-update-time-maybe): Compute negative clock
 	intervals correctly.
 
+2008-10-16  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-add-log-setup): Respect
+	`org-log-state-notes-insert-after-drawers'.
+	(org-log-state-notes-insert-after-drawers): New option.
+	(org-todo-trigger-tag-changes): New function.
+	(org-todo): Call `org-todo-trigger-tag-changes'.
+
 2008-10-15  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org.el (org-add-log-setup): Only skip drawers if the are
@@ -86,14 +94,6 @@
 	when clocking in.
 	(org-clock-in): Use org-indent-line-function to indent clock lines.
 	(org-clock-find-position): Fix indentation of empty clock drawers.
-
-2008-10-16  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org.el (org-add-log-setup): Respect
-	`org-log-state-notes-insert-after-drawers'.
-	(org-log-state-notes-insert-after-drawers): New option.
-	(org-todo-trigger-tag-changes): New function.
-	(org-todo): Call `org-todo-trigger-tag-changes'.
 
 2008-10-15  Carsten Dominik  <dominik@science.uva.nl>
 
@@ -178,7 +178,7 @@
 	* org-clock.el (org-clock-heading-for-remember): New variable.
 	(org-clock-in): Set `org-clock-heading-for-remember'.
 
-2008-10-01 James TD Smith  <ahktenzero@mohorovi.cc>
+2008-10-01  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* org-remember.el (org-remember-apply-template): Add new
 	expansions: %k, %K for currently clocked task and a link to the
@@ -287,8 +287,7 @@
 
 	* org-export-latex.el (org-export-latex-keywords-maybe): Bug fix.
 
-2008-09-22  James TA Smith  <ahktenzero@mohorovi.cc>
-
+2008-09-22  James TD Smith  <ahktenzero@mohorovi.cc>
 	* org-plot.el (org-plot/gnuplot): Make tables starting with a
 	hline work correctly.
 	(org-plot/gnuplot-script): Put commas at the end of each script
