@@ -3750,7 +3750,7 @@ Any match of REMOVE-RE will be removed from TXT."
 
       ;; And finally add the text properties
       (org-add-props rtn nil
-	'org-category (downcase category) 'tags tags
+	'org-category (downcase category) 'tags (mapcar 'downcase tags)
 	'org-highest-priority org-highest-priority
 	'org-lowest-priority org-lowest-priority
 	'prefix-length (- (length rtn) (length txt))
@@ -3947,7 +3947,7 @@ HH:MM."
 	  (t nil))))
 
 (defsubst org-cmp-tag (a b)
-  "Compare the string values of categories of strings A and B."
+  "Compare the string values of the first tags of A and B."
   (let ((ta (car (last (get-text-property 1 'tags a))))
 	(tb (car (last (get-text-property 1 'tags b)))))
     (cond ((not ta) +1)
@@ -4217,7 +4217,7 @@ to switch to narrowing."
 	  (setq f1 '(not tags))
 	(if (string-match "[<=>]" x)
 	    (setq f1 (org-agenda-filter-effort-form x))
-	  (setq f1 (list 'member (substring x 1) 'tags)))
+	  (setq f1 (list 'member (downcase (substring x 1)) 'tags)))
 	(if (equal (string-to-char x) ?-)
 	    (setq f1 (list 'not f1))))
       (push f1 f))
