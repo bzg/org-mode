@@ -50,6 +50,8 @@
 
 2008-10-25  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-compat.el (org-fit-window-to-buffer): New function.
+
 	* org-agenda.el (org-format-agenda-item)
 	(org-agenda-filter-make-matcher): Make sure tags are stored and
 	compared donwcased.

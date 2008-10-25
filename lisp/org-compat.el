@@ -150,6 +150,16 @@ that will be added to PLIST.  Returns the string that was modified."
   string)
 (put 'org-add-props 'lisp-indent-function 2)
 
+(defun org-fit-window-to-buffer (&optional window)
+  "Fit the window to the buffer, but only if it is not a side-by-side window."
+  (cond ((> (frame-width) (window-width window))
+	 ;; do nothing if another window would suffer
+	 )
+	((fboundp 'fit-window-to-buffer)
+	 (fit-window-to-buffer window))
+	((fboundp 'shrink-window-if-larger-than-buffer)
+	 (shrink-window-if-larger-than-buffer window))))
+
 ;; Region compatibility
 
 (defvar org-ignore-region nil
