@@ -645,8 +645,14 @@ Default for INDEX-FILENAME is 'index.org'."
 			  (directory-file-name
 			   (file-name-directory
 			    (file-relative-name localdir dir))) "/"))
-			(subdir ""))
+			(subdir "")
+			(old-subdirs (split-string
+				      (file-relative-name oldlocal dir) "/")))
 		    (setq indent-str (make-string 2 ?\ ))
+		    (while (string= (car old-subdirs) (car subdirs))
+		      (setq indent-str (concat indent-str (make-string 2 ?\ )))
+		      (pop old-subdirs)
+		      (pop subdirs))
 		    (dolist (d subdirs)
 		      (setq subdir (concat subdir d "/"))
 		      (insert (concat indent-str " + [[file:" 

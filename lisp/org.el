@@ -13879,12 +13879,13 @@ beyond the end of the headline."
 In fact, if the yanked text is a sequence of subtrees, fold all of them."
   (interactive)
   (if org-yank-folded-subtrees
-      (let ((beg (point)) end)
+      (let ((beg (point))
+	    (subtreep (org-kill-is-subtree-p))
+	    end)
 	(call-interactively 'yank)
 	(setq end (point))
 	(goto-char beg)
-	(when (and (bolp)
-		   (org-kill-is-subtree-p))
+	(when (and (bolp) subtreep)
 	  (or (looking-at outline-regexp)
 	      (re-search-forward (concat "^" outline-regexp) end t))
 	  (while (and (< (point) end) (looking-at outline-regexp))

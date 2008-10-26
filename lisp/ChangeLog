@@ -17,7 +17,7 @@
 2008-10-22  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-as-ascii): Handle the case that we are
-	bulishing from an indirect buffer.
+	publishing from an indirect buffer.
 
 	* org-table.el (org-table-copy-down): Fix bug with time stamp
 	increment.
