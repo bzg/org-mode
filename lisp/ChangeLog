@@ -1,3 +1,8 @@
+2008-10-26  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-exp.el (org-export-select-tags, org-get-current-options):
+	Fix typo.
+
 2008-10-25  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-format-agenda-item)

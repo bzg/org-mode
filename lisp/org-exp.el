@@ -70,7 +70,7 @@ force an export command into the current process."
 If any such tag is found in a buffer, all trees that do not carry one
 of these tags will be deleted before export.
 Inside trees that are selected like this, you can still deselect a
-subtree by tagging it with one of the `org-export-excude-tags'."
+subtree by tagging it with one of the `org-export-exclude-tags'."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
 
@@ -2597,7 +2597,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s TeX:%s LaTeX:%s skip:%s d:%s tags:%s
 %s
 #+EXPORT_SELECT_TAGS: %s
-#+EXPORT_EXCUDE_TAGS: %s
+#+EXPORT_EXCLUDE_TAGS: %s
 #+LINK_UP:   %s
 #+LINK_HOME: %s
 #+CATEGORY:  %s
