@@ -427,7 +427,7 @@ MATCH.  If SKIP-FILE is non-nil, skip file matching the regexp
 SKIP-FILE.  If SKIP-DIR is non-nil, don't check directories
 matching the regexp SKIP-DIR when recursiing through BASE-DIR."
   (mapc (lambda (f)
-	  (let ((fd-p (car (file-attributes f)))
+	  (let ((fd-p (file-directory-p f))
 		(fnd (file-name-nondirectory f)))
 	    (if (and fd-p recurse
 		     (not (string-match "^\\.+$" fnd))
@@ -435,6 +435,7 @@ matching the regexp SKIP-DIR when recursiing through BASE-DIR."
 		(org-publish-get-base-files-1 f recurse match skip-file skip-dir)
 	      (unless (or fd-p ;; this is a directory
 			  (and skip-file (string-match skip-file fnd))
+			  (not (file-exists-p (file-truename f)))
 			  (not (string-match match fnd)))
 		(pushnew f org-publish-temp-files)))))
 	(directory-files base-dir t (unless recurse match))))

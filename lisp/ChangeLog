@@ -1,3 +1,8 @@
+2008-10-27  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-get-base-files-1): Deal correctly
+	with broken symlinks
+
 2008-10-26  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-exp.el (org-export-select-tags, org-get-current-options):
