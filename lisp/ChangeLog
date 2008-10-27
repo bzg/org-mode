@@ -2,6 +2,8 @@
 
 	* org.el ("saveplace"): If saveplace puts point into an invisible
 	location, make it visible.
+	(org-make-tags-matcher): Allow inactive time stamps in time
+	comparisons.
 
 	* org-publish.el (org-publish-get-base-files-1): Deal correctly
 	with broken symlinks

@@ -8983,7 +8983,8 @@ also TODO lines."
 			   cat-p (equal pn "CATEGORY")
 			   re-p (equal (string-to-char pv) ?{)
 			   str-p (equal (string-to-char pv) ?\")
-			   time-p (save-match-data (string-match "^\"<.*>\"$" pv))
+			   time-p (save-match-data
+				    (string-match "^\"[[<].*[]>]\"$" pv))
 			   pv (if (or re-p str-p) (substring pv 1 -1) pv))
 		     (if time-p (setq pv (org-matcher-time pv)))
 		     (setq po (org-op-to-function po (if time-p 'time str-p)))
