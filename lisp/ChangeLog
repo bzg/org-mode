@@ -1,5 +1,8 @@
 2008-10-27  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el ("saveplace"): If saveplace puts point into an invisible
+	location, make it visible.
+
 	* org-publish.el (org-publish-get-base-files-1): Deal correctly
 	with broken symlinks
 

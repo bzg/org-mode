@@ -14257,6 +14257,12 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
        "Make the position visible."
        (org-bookmark-jump-unhide))))
 
+;; Make sure saveplace show the location if it was hidden
+(eval-after-load "saveplace"
+  '(defadvice save-place-find-file-hook (after org-make-visible activate)
+     "Make the position visible."
+     (org-bookmark-jump-unhide)))
+
 (defun org-bookmark-jump-unhide ()
   "Unhide the current position, to show the bookmark location."
   (and (org-mode-p)
