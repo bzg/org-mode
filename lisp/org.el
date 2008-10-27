@@ -641,6 +641,13 @@ or siblings, then fold all the subtrees."
   :group 'org-edit-structure
   :type 'boolean)
 
+(defcustom org-yank-adjusted-subtrees t
+  "Non-nil means, when yanking subtrees, adjust the level.
+With this setting, `org-paste-subtree' is used to insert the subtree, see
+this function for details."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-M-RET-may-split-line '((default . t))
   "Non-nil means, M-RET will split the line at the cursor position.
 When nil, it will go to the end of the line before making a
@@ -5047,10 +5054,10 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 	       (if cut "Cut" "Copied")
 	       (length org-subtree-clip)))))
 
-(defun org-paste-subtree (&optional level tree)
+(defun org-paste-subtree (&optional level tree for-yank)
   "Paste the clipboard as a subtree, with modification of headline level.
 The entire subtree is promoted or demoted in order to match a new headline
-level.  By default, the new level is derived from the visible headings
+level.  By default, the new level is derived from the *visible* headings
 before and after the insertion point, and taken to be the inferior headline
 level of the two.  So if the previous visible heading is level 3 and the
 next is level 4 (or vice versa), level 4 will be used for insertion.
@@ -5063,7 +5070,11 @@ cursor is after \"*****\", then the tree will be shifted to level 5.
 
 If you want to insert the tree as is, just use \\[yank].
 
-If optional TREE is given, use this text instead of the kill ring."
+If optional TREE is given, use this text instead of the kill ring.
+
+When FOR-YANK is set, this is called by `org-yank'.  In this case, do not
+move back over whitespace before inserting, and move point to the end of
+the inserted text when done."
   (interactive "P")
   (unless (org-kill-is-subtree-p tree)
     (error "%s"
@@ -5109,16 +5120,17 @@ If optional TREE is given, use this text instead of the kill ring."
 	 (delta (if (> shift 0) -1 1))
 	 (func (if (> shift 0) 'org-demote 'org-promote))
 	 (org-odd-levels-only nil)
-	 beg end)
+	 beg end newend)
     ;; Remove the forced level indicator
     (if force-level
 	(delete-region (point-at-bol) (point)))
     ;; Paste
     (beginning-of-line 1)
-    (org-back-over-empty-lines)
+    (unless for-yank (org-back-over-empty-lines))
     (setq beg (point))
     (insert-before-markers txt)
     (unless (string-match "\n\\'" txt) (insert "\n"))
+    (setq newend (point))
     (org-reinstall-markers-in-region beg)
     (setq end (point))
     (goto-char beg)
@@ -5133,14 +5145,16 @@ If optional TREE is given, use this text instead of the kill ring."
 	(while (not (= shift 0))
 	  (org-map-region func (point-min) (point-max))
 	  (setq shift (+ delta shift)))
-	(goto-char (point-min))))
+	(goto-char (point-min))
+	(setq newend (point-max))))
     (when (interactive-p)
       (message "Clipboard pasted as level %d subtree" new-level))
     (if (and kill-ring
 	     (eq org-subtree-clip (current-kill 0))
 	     org-subtree-clip-folded)
 	;; The tree was folded before it was killed/copied
-	(hide-subtree))))
+	(hide-subtree))
+    (and for-yank (goto-char newend))))
 
 (defun org-kill-is-subtree-p (&optional txt)
   "Check if the current kill is an outline subtree, or a set of trees.
@@ -13872,18 +13886,33 @@ beyond the end of the headline."
     (org-set-tags nil t))
    (t (kill-region (point) (point-at-eol)))))
 
-
 (define-key org-mode-map "\C-k" 'org-kill-line)
 
 (defun org-yank ()
-  "Yank, and if the yanked text is a single subtree, fold it.
-In fact, if the yanked text is a sequence of subtrees, fold all of them."
+  "Yank.  If the kill is a subtree, treat it specially.
+This command will look at the current kill and check it is a single
+subtree, or a series of subtrees[1].  If it passes the test, it is
+treated specially, depending on the value of the following variables, both
+set by default.
+
+org-yank-folded-subtrees
+    When set, the subree(s) wiil be folded after insertion.
+
+org-yank-adjusted-subtrees
+    When set, the subtree will be promoted or demoted in order to
+    fit into the local outline tree structure.
+
+
+\[1] Basically, the test checks if the first non-white line is a heading
+    and if there are no other headings with fewer stars."
   (interactive)
   (if org-yank-folded-subtrees
       (let ((beg (point))
 	    (subtreep (org-kill-is-subtree-p))
 	    end)
-	(call-interactively 'yank)
+	(if (and subtreep org-yank-adjusted-subtrees)
+	    (org-paste-subtree nil nil 'for-yank)
+	  (call-interactively 'yank))
 	(setq end (point))
 	(goto-char beg)
 	(when (and (bolp) subtreep)
@@ -13897,7 +13926,9 @@ In fact, if the yanked text is a sequence of subtrees, fold all of them."
 	      (error (goto-char end)))))
 	(goto-char end)
 	(skip-chars-forward " \t\n\r"))
-    (call-interactively 'yank)))
+    (if (and subtreep org-yank-adjusted-subtrees)
+	(org-paste-subtree nil nil 'for-yank)
+      (call-interactively 'yank))))
 
 (define-key org-mode-map "\C-y" 'org-yank)
 

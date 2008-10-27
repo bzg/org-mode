@@ -4,6 +4,11 @@
 	location, make it visible.
 	(org-make-tags-matcher): Allow inactive time stamps in time
 	comparisons.
+	(org-yank-adjusted-subtrees): New option.
+	(org-yank): Incorporate adjusting trees.
+	(org-paste-subtree): New argument FOR-YANK which will cause
+	insertion at point without backing up over white lines, and leave
+	point at the end of the inserted text.
 
 	* org-publish.el (org-publish-get-base-files-1): Deal correctly
 	with broken symlinks
