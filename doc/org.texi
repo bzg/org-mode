@@ -944,6 +944,12 @@ Yank subtree from kill ring.  This does modify the level of the subtree to
 make sure the tree fits in nicely at the yank position.  The yank level can
 also be specified with a numeric prefix argument, or by yanking after a
 headline marker like @samp{****}.
+@kindex C-y 
+@item C-y
+Depending on the variables @code{org-yank-adjusted-subtrees} and
+@code{org-yank-folded-subtrees}, Org's internal @code{yank} command will
+paste subtrees folded and in a clever way, using the same command as @kbd{C-c
+C-x C-y}.
 @kindex C-c C-w
 @item C-c C-w
 Refile entry to a different location.  @xref{Refiling notes}.

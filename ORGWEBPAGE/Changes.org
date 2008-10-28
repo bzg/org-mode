@@ -45,6 +45,37 @@
 
     Thanks to James JD Smith for a patch to this effect.
 
+*** Yanking subtree with =C-y= now adjusts the tree level
+    When yanking a cut/copied subtree or a series of trees, even
+    the nomal yank key =C-y= does now adjust the level of the tree
+    to make it fit into the current outline position, without
+    loosing its identity, and without swallowing other subtrees.
+
+    This uses the command =org-past-subtree=.  An additional
+    change in that command has been implemented:  Normally, this
+    command picks the right outline level from the surrounding
+    *visible* headlines, and uses the smaller on.  So it the
+    cursor is between a level 4 and a level 3 headline, the tree
+    will be pasted as level 3.  Now, if the cursor is actually
+    *at* the beginning of a headline, the level of that headline
+    will be used.  So lets say you have a tree like this:
+
+#+begin_src org
+,* Level one
+,** Level two
+,(1)
+,(2)* Level one again
+#+end_src
+
+    with (1) and (2) indicating possible cursor positions for the
+    insertion.  When at (1), the tree will be pasted as level 2.
+    When at (2), it will be pasted as level 1.
+
+    If you do not like =C-y= to behave like this, configure the
+    variable =org-yank-adjusted-subtrees=.
+
+    Thanks to Samuel Wales for this idea and a partial implementation.
+
 * Version 6.10
 
 ** Overview

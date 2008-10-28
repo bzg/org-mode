@@ -1,9 +1,17 @@
+
 2008-10-27  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el ("saveplace"): If saveplace puts point into an invisible
 	location, make it visible.
 	(org-make-tags-matcher): Allow inactive time stamps in time
 	comparisons.
+	(org-yank-adjusted-subtrees): New option.
+	(org-yank): Incorporate adjusting trees.
+	(org-paste-subtree): New argument FOR-YANK which will cause
+	insertion at point without backing up over white lines, and leave
+	point at the end of the inserted text.  Also if the cursor is
+	at the beginning of a headline, use the same level or the inserted
+	tree.
 
 	* org-publish.el (org-publish-get-base-files-1): Deal correctly
 	with broken symlinks
