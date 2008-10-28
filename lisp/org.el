@@ -5057,7 +5057,12 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 (defun org-paste-subtree (&optional level tree for-yank)
   "Paste the clipboard as a subtree, with modification of headline level.
 The entire subtree is promoted or demoted in order to match a new headline
-level.  By default, the new level is derived from the *visible* headings
+level.  
+
+If the cursor is at the beginning of a headline, the same level as
+that headline is used to paste the tree
+
+If not, the new level is derived from the *visible* headings
 before and after the insertion point, and taken to be the inferior headline
 level of the two.  So if the previous visible heading is level 3 and the
 next is level 4 (or vice versa), level 4 will be used for insertion.
@@ -5067,8 +5072,6 @@ not swallow low level entries.
 You can also force a different level, either by using a numeric prefix
 argument, or by inserting the heading marker by hand.  For example, if the
 cursor is after \"*****\", then the tree will be shifted to level 5.
-
-If you want to insert the tree as is, just use \\[yank].
 
 If optional TREE is given, use this text instead of the kill ring.
 
@@ -5090,9 +5093,14 @@ the inserted text when done."
 			(- (match-end 0) (match-beginning 0) 1)
 		      -1))
 	 (force-level (cond (level (prefix-numeric-value level))
-			    ((string-match
-			      ^re_ (buffer-substring (point-at-bol) (point)))
+			    ((and (looking-at "[ \t]*$")
+				  (string-match
+				   ^re_ (buffer-substring
+					 (point-at-bol) (point))))
 			     (- (match-end 1) (match-beginning 1)))
+			    ((and (bolp)
+				  (looking-at org-outline-regexp))
+			     (- (match-end 0) (point) 1))
 			    (t nil)))
 	 (previous-level (save-excursion
 			   (condition-case nil
@@ -5147,9 +5155,10 @@ the inserted text when done."
 	  (setq shift (+ delta shift)))
 	(goto-char (point-min))
 	(setq newend (point-max))))
-    (when (interactive-p)
+    (when (or (interactive-p) for-yank)
       (message "Clipboard pasted as level %d subtree" new-level))
-    (if (and kill-ring
+    (if (and (not for-yank) ; in this case, org-yank will decide about folding
+	     kill-ring
 	     (eq org-subtree-clip (current-kill 0))
 	     org-subtree-clip-folded)
 	;; The tree was folded before it was killed/copied
