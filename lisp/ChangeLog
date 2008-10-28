@@ -1,5 +1,8 @@
 2008-10-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-remember.el (org-remember-handler): Fix bug with
+	prefix-related changing of the note storage target.
+
 	* org-exp.el (org-print-icalendar-entries): Make the exported
 	priorities compatible with RFC 2445.
 

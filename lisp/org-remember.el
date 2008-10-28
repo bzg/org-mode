@@ -733,10 +733,12 @@ See also the variable `org-reverse-note-order'."
 	(setq visitp t))
       (when previousp
 	(setq file (car org-remember-previous-location)
+	      visiting (and file (org-find-base-buffer-visiting file))
 	      heading (cdr org-remember-previous-location)
 	      fastp t))
       (when clockp
 	(setq file (buffer-file-name (marker-buffer org-clock-marker))
+	      visiting (and file (org-find-base-buffer-visiting file))
 	      heading org-clock-heading-for-remember
 	      fastp t))
       (setq current-prefix-arg nil)
