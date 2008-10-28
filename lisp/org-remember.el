@@ -694,7 +694,7 @@ also indented so that it starts in the same column as the headline
 See also the variable `org-reverse-note-order'."
   (when (and (equal current-prefix-arg 2)
 	     (not (marker-buffer org-clock-marker)))
-    (error "No runing clock"))
+    (error "No running clock"))
   (when (org-bound-and-true-p org-jump-to-target-location)
     (let* ((end (min (point-max) (1+ (point))))
 	   (beg (point)))
