@@ -1,5 +1,9 @@
 2008-10-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org.el (org-emphasize): Reverse the selection array.
+	(org-emphasis-alist): Set <code> tags for the verbatim
+	environment.
+
 	* org-remember.el (org-remember-handler): Fix bug with
 	prefix-related changing of the note storage target.
 

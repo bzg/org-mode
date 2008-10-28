@@ -2264,7 +2264,7 @@ Use customize to modify this, or restart Emacs after changing it."
     ("/" italic "<i>" "</i>")
     ("_" underline "<u>" "</u>")
     ("=" org-code "<code>" "</code>" verbatim)
-    ("~" org-verbatim "" "" verbatim)
+    ("~" org-verbatim "<code>" "</code>" verbatim)
     ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
      "<del>" "</del>")
     )
@@ -3495,6 +3495,7 @@ to remove the emphasis of the selected region.
 If char is not given (for example in an interactive call) it
 will be prompted for."
   (interactive)
+  (debug)
   (let ((eal org-emphasis-alist) e det
 	(erc org-emphasis-regexp-components)
 	(prompt "")
@@ -3510,6 +3511,7 @@ will be prompted for."
       (push (cons c (string-to-char (car e))) det)
       (setq prompt (concat prompt (format " [%s%c]%s" (car e) c
 					  (substring tag 1)))))
+    (setq det (nreverse det))
     (unless char
       (message "%s" (concat "Emphasis marker or tag:" prompt))
       (setq char (read-char-exclusive)))
