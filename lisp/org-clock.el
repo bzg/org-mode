@@ -1076,6 +1076,7 @@ a stored clock"
 	  (message "Not restoring clock data; %s not found"
 		   org-clock-persist-file)))))
 
+;;;###autoload
 (defun org-clock-persistence-insinuate ()
   "Set up hooks for clock persistence"
   (add-hook 'org-mode-hook 'org-clock-load)

@@ -11,10 +11,41 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.10
+* Version 6.11 (in preparation)
 :PROPERTIES:
 :VISIBILITY: content
 :END:
+
+** Overview
+
+** Incompatible Changes
+
+** Details
+
+*** The clock can be now resumed after exiting and re-starting Emacs
+
+    If the option =org-clock-resume= is t, and the first clock
+    line in an entry is unclosed, clocking into that task resumes
+    the clock from that time.
+
+    Thanks to James JD Smith for a patch to this effect.
+
+*** Clock-related data can be saved and resumed accross Emacs sessions
+    
+    The data saved include the contents of =org-clock-history=,
+    and the running clock, if there is one.
+    
+    To use this, you will need to add to your .emacs
+
+#+begin_src emacs-lisp
+(setq org-clock-persist t)
+(setq org-clock-in-resume t)
+(org-clock-persistence-insinuate)
+#+end_src
+
+    Thanks to James JD Smith for a patch to this effect.
+
+* Version 6.10
 
 ** Overview
 
