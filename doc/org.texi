@@ -7667,18 +7667,23 @@ document - your style specifications may change these:
 @end example
 
 Each exported files contains a compact default style that defines these
-classes in a basic way.  You may overwrite these settings, or add to them by
-using the variables @code{org-export-html-style} (for Org-wide settings) and
-@code{org-export-html-style-extra} (for more granular settings, like
-file-local settings).  To set the latter variable individually for each
-file, you can use
+classes in a basic way@footnote{This style is defined in the constant
+@code{org-export-html-style-default}, which you should not modify.  To turn
+inclusion of these defaults off, customize
+@code{org-export-html-style-include-default}}.  You may overwrite these
+settings, or add to them by using the variables @code{org-export-html-style}
+(for Org-wide settings) and @code{org-export-html-style-extra} (for more
+granular settings, like file-local settings).  To set the latter variable
+individually for each file, you can use
 
 @example
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 @end example
 
 @noindent
-For longer style definitions, you can use several such lines.
+For longer style definitions, you can use several such lines.  You could also
+directly write a @code{<style>} @code{</style>} section in this way, without
+referring to an external file.
 
 @c FIXME: More about header and footer styles
 @c FIXME: Talk about links and targets.
@@ -8093,6 +8098,7 @@ respective variable for details.
 @item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
+@item @code{:style-include-default} @tab @code{org-export-html-style-include-default}
 @item @code{:style}                 @tab @code{org-export-html-style}
 @item @code{:style-extra}           @tab @code{org-export-html-style-extra}
 @item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}

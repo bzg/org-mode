@@ -522,7 +522,19 @@ Org-mode file."
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and
-`org-export-html-style-extra' to add to this style.")
+`org-export-html-style-extra' to add to this style.  If you wish to not
+have the default style included, customize the variable
+`org-export-html-style-include-default'.")
+
+(defcustom org-export-html-style-include-default t
+  "Non-nil means, include the default style in exported HTML files.
+The actualy style is defined in `org-export-html-style-default' and should
+not be modified.  Use the variables `org-export-html-style' to add
+your own style information."
+  :group 'org-export-html
+  :type 'boolean)
+;;;###autoload
+(put 'org-export-html-style 'safe-local-variable 'booleanp)
 
 (defcustom org-export-html-style ""
   "Org-wide style definitions for exported HTML files.
@@ -812,6 +824,7 @@ or if they are only using it locally."
     (:time-stamp-file      . org-export-time-stamp-file)
     (:tables               . org-export-with-tables)
     (:table-auto-headline  . org-export-highlight-first-table-line)
+    (:style-include-default . org-export-html-style-include-default)
     (:style                . org-export-html-style)
     (:style-extra          . org-export-html-style-extra)
     (:agenda-style         . org-agenda-export-html-style)
@@ -2802,8 +2815,8 @@ PUB-DIR is set, use this as the publishing directory."
 	   (org-combine-plists (org-default-export-plist)
 			       ext-plist
 			       (org-infile-export-plist))))
-
-	 (style (concat org-export-html-style-default
+	 (style (concat (if (plist-get opt-plist :style-include-default)
+			    org-export-html-style-default)
 			(plist-get opt-plist :style)
 			(plist-get opt-plist :style-extra)))
 	 (html-extension (plist-get opt-plist :html-extension))
