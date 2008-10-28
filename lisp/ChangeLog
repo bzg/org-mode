@@ -1,5 +1,8 @@
 2008-10-28  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-print-icalendar-entries): Make the exported
+	priorities compatible with RFC 2445.
+
 	* org-clock.el (org-clock-save): Insert time stamp without
 	dependence on time-stamp.el.
 

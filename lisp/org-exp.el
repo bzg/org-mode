@@ -4384,9 +4384,9 @@ END:VEVENT\n"
 			hd (concat (substring hd 0 (match-beginning 1))
 				   (substring hd (match-end 1))))
 		(setq pri org-default-priority))
-	      (setq pri (floor (1+ (* 8. (/ (float (- org-lowest-priority pri))
-					    (- org-lowest-priority org-highest-priority))))))
-
+	      (setq pri (floor (- 9 (* 8. (/ (float (- org-lowest-priority pri))
+					     (- org-lowest-priority org-highest-priority))))))
+	      
 	      (princ (format "BEGIN:VTODO
 UID: %s
 %s
