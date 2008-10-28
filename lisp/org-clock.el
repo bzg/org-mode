@@ -33,6 +33,7 @@
   (require 'calendar))
 
 (declare-function calendar-absolute-from-iso    "cal-iso"    (&optional date))
+(defvar org-time-stamp-formats)
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org-mode."
@@ -1018,7 +1019,7 @@ the currently selected interval size."
 	   ;;Store clock
 	   (insert (format ";; org-persist.el - %s at %s\n"
 			   system-name (format-time-string
-					(cdr (org-time-stamp-formats)))))
+					(cdr org-time-stamp-formats))))
 	   (if (and org-clock-persist (marker-buffer org-clock-marker)
 		    (or (not org-clock-persist-query-save)
 			(y-or-n-p (concat "Save current clock ("
@@ -1065,11 +1066,13 @@ a stored clock"
 	      ;; resume clock
 	      (if (and (boundp 'resume-clock) org-clock-persist
 		       (or (not org-clock-persist-query-resume)
-			   (y-or-n-p "Resume clock ("
-				     (with-current-buffer (find-file (car resume-clock))
-				       (progn (goto-char (cdr resume-clock))
-					      (looking-at org-complex-heading-regexp)
-					      (match-string 4))) ")")))
+			   (y-or-n-p 
+			    (concat
+			     "Resume clock ("
+			     (with-current-buffer (find-file (car resume-clock))
+			       (progn (goto-char (cdr resume-clock))
+				      (looking-at org-complex-heading-regexp)
+				      (match-string 4))) ")"))))
 		  (with-current-buffer (find-file (car resume-clock))
 		    (progn (goto-char (cdr resume-clock))
 			   (org-clock-in)))))
