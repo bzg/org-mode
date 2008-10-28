@@ -12596,9 +12596,10 @@ This command does many different things, depending on context:
 - If the cursor is inside a table created by the table.el package,
   activate that table.
 
-- If the current buffer is a remember buffer, close note and file it.
-  with a prefix argument, file it without further interaction to the default
-  location.
+- If the current buffer is a remember buffer, close note and file
+  it.  A prefix argument of 1 files to the default location
+  without further interaction.  A prefix argument of 2 files to
+  the currently clocking task.
 
 - If the cursor is on a <<<target>>>, update radio targets and corresponding
   links in this buffer.
