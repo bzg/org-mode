@@ -1,3 +1,7 @@
+2008-10-28  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-clock.el (org-clock-save): Insert time stamp without
+	dependence on time-stamp.el.
 
 2008-10-27  Carsten Dominik  <dominik@science.uva.nl>
 

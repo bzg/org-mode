@@ -1016,7 +1016,9 @@ the currently selected interval size."
   (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
     (progn (delete-region (point-min) (point-max))
 	   ;;Store clock
-	   (insert (format ";; org-persist.el - %s at %s\n" system-name (time-stamp-string)))
+	   (insert (format ";; org-persist.el - %s at %s\n"
+			   system-name (format-time-string
+					(cdr (org-time-stamp-formats)))))
 	   (if (and org-clock-persist (marker-buffer org-clock-marker)
 		    (or (not org-clock-persist-query-save)
 			(y-or-n-p (concat "Save current clock ("
@@ -1041,8 +1043,6 @@ the currently selected interval size."
 	   (kill-buffer (current-buffer)))))
 
 (defvar org-clock-loaded nil)
-
-(require 'timestamp)
 
 (defun org-clock-load ()
   "Load various clock-related data from disk, optionally resuming
