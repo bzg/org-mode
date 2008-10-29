@@ -1,3 +1,16 @@
+2008-10-29  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.el (org-link-frame-setup): Add `org-gnus-no-new-news' as an
+	option.
+	(org-store-link-props): Make sure adding to the plist works
+	correctly.
+
+	* org-gnus.el (org-gnus-no-new-news): New function.
+	(org-gnus-follow-link): Allow the article ID to be a message-id,
+	in addition to allowing article numbers.  Message IDs make much
+	more roubust links.
+	(org-gnus-store-link): Use message-id to create link.
+
 2008-10-28  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-emphasize): Reverse the selection array.
