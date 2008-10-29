@@ -3497,7 +3497,6 @@ to remove the emphasis of the selected region.
 If char is not given (for example in an interactive call) it
 will be prompted for."
   (interactive)
-  (debug)
   (let ((eal org-emphasis-alist) e det
 	(erc org-emphasis-regexp-components)
 	(prompt "")
@@ -8971,7 +8970,7 @@ also TODO lines."
 	minus tag mm
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p str-p level-p level-op time-p
-	prop-p pn pv po cat-p gv)
+	prop-p pn pv po cat-p gv rest)
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
 	(progn
@@ -8992,7 +8991,8 @@ also TODO lines."
 	(while (and (equal (substring term -1) "\\") orterms)
 	  (setq term (concat term "|" (pop orterms)))) ; repair bad split
 	(while (string-match re term)
-	  (setq minus (and (match-end 1)
+	  (setq rest (substring term (match-end 0))
+		minus (and (match-end 1)
 			   (equal (match-string 1 term) "-"))
 		tag (match-string 2 term)
 		re-p (equal (string-to-char tag) ?{)
@@ -9029,7 +9029,7 @@ also TODO lines."
 			       ,(string-to-number pv) ))))
 		    (t `(member ,(downcase tag) tags-list)))
 		mm (if minus (list 'not mm) mm)
-		term (substring term (match-end 0)))
+		term rest)
 	  (push mm tagsmatcher))
 	(push (if (> (length tagsmatcher) 1)
 		  (cons 'and tagsmatcher)
@@ -9696,7 +9696,7 @@ the scanner.  The following items can be given here:
 ;;; Setting and retrieving properties
 
 (defconst org-special-properties
-  '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "PRIORITY"
+  '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "CLOSED" "PRIORITY"
     "TIMESTAMP" "TIMESTAMP_IA")
   "The special properties valid in Org-mode.
 
