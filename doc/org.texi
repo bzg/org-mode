@@ -2345,6 +2345,10 @@ Specify an entire line to be inserted in the gnuplot script.
 When plotting @code{3d} or @code{grid} types, set this to @code{t} to graph a
 flat mapping rather than a @code{3d} slope.
 
+@item timefmt
+Specify format of org-mode timestamps as they will be parsed by gnuplot.
+Defaults to '%Y-%m-%d-%H:%M:%S'.
+
 @item script
 If you want total control you can specify a script file (place the file name
 between double quotes) which will be used to plot.  Before plotting, every

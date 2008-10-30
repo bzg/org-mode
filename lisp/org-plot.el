@@ -51,17 +51,18 @@
 Returns the resulting property list."
   (let (o)
     (when options
-      (let ((op '(("type"   . :plot-type)
-		  ("script" . :script)
-		  ("line"   . :line)
-		  ("set"    . :set)
-		  ("title"  . :title)
-		  ("ind"    . :ind)
-		  ("deps"   . :deps)
-		  ("with"   . :with)
-		  ("file"   . :file)
-		  ("labels" . :labels)
-		  ("map"    . :map)))
+      (let ((op '(("type"    . :plot-type)
+		  ("script"  . :script)
+		  ("line"    . :line)
+		  ("set"     . :set)
+		  ("title"   . :title)
+		  ("ind"     . :ind)
+		  ("deps"    . :deps)
+		  ("with"    . :with)
+		  ("file"    . :file)
+		  ("labels"  . :labels)
+		  ("map"     . :map)
+                  ("timefmt" . :timefmt)))
 	    (multiples '("set" "line"))
 	    (regexp ":\\([\"][^\"]+?[\"]\\|[(][^)]+?[)]\\|[^ \t\n\r;,.]*\\)")
 	    (start 0)
@@ -101,20 +102,31 @@ will be added.  Returns the resulting property list."
 	(org-plot/add-options-to-plist params (match-string 1 line))
       params)))
 
+(defun org-plot-quote-timestamp-field (s)
+  "Convert field S from timestamp to Unix time and export to gnuplot."
+  (format-time-string org-plot-timestamp-fmt (org-time-string-to-time s)))
+
 (defun org-plot-quote-tsv-field (s)
   "Quote field S for export to gnuplot."
   (if (string-match org-table-number-regexp s) s
-    (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")))
+    (if (string-match org-ts-regexp3 s)
+        (org-plot-quote-timestamp-field s)
+      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))))
 
 (defun org-plot/gnuplot-to-data (table data-file params)
   "Export TABLE to DATA-FILE in a format readable by gnuplot.
 Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (with-temp-file
-      data-file (insert (orgtbl-to-generic
-			 table
-			 (org-combine-plists
-			  '(:sep "\t" :fmt org-plot-quote-tsv-field)
-			  params))))
+      data-file 
+    (make-local-variable 'org-plot-timestamp-fmt)
+    (setq org-plot-timestamp-fmt (or
+                                  (plist-get params :timefmt)
+                                  "%Y-%m-%d-%H:%M:%S"))
+    (insert (orgtbl-to-generic
+             table
+             (org-combine-plists
+              '(:sep "\t" :fmt org-plot-quote-tsv-field)
+              params))))
   nil)
 
 (defun org-plot/gnuplot-to-grid-data (table data-file params)
@@ -180,6 +192,8 @@ NUM-COLS controls the number of columns plotted in a 2-d plot."
 	 (title (plist-get params :title))
 	 (file (plist-get params :file))
 	 (ind (plist-get params :ind))
+         (time-ind (plist-get params :timeind))
+         (timefmt (plist-get params :timefmt))
 	 (text-ind (plist-get params :textind))
 	 (deps (if (plist-member params :deps) (plist-get params :deps)))
 	 (col-labels (plist-get params :labels))
@@ -217,6 +231,11 @@ NUM-COLS controls the number of columns plotted in a 2-d plot."
 		 (mapconcat (lambda (pair)
 			      (format "\"%s\" %d" (cdr pair) (car pair)))
 			    y-labels ", "))))
+      (when time-ind ;; timestamp index
+        (add-to-script "set xdata time")
+        (add-to-script (concat "set timefmt \""
+                               (or timefmt ;; timefmt passed to gnuplot
+                                   "%Y-%m-%d-%H:%M:%S") "\"")))
       (case type ;; plot command
 	('2d (dotimes (col num-cols)
 	       (unless (and (equal type '2d)
@@ -284,16 +303,24 @@ line directly before or after the table."
 	('grid (let ((y-labels (org-plot/gnuplot-to-grid-data
 				table data-file params)))
 		 (when y-labels (plist-put params :ylabels y-labels)))))
-      ;; check for text ind column
+      ;; check for timestamp ind column
       (let ((ind (- (plist-get params :ind) 1)))
-	(when (and (>= ind 0) (equal '2d (plist-get params :plot-type)))
-	  (if (> (length
-		  (delq 0 (mapcar
+        (when (and (>= ind 0) (equal '2d (plist-get params :plot-type)))
+          (if (= (length
+                  (delq 0 (mapcar
 			   (lambda (el)
-			     (if (string-match org-table-number-regexp el)
+			     (if (string-match org-ts-regexp3 el)
 				 0 1))
 			   (mapcar (lambda (row) (nth ind row)) table)))) 0)
-	      (plist-put params :textind t))))
+	      (plist-put params :timeind t)
+            ;; check for text ind column
+            (if (> (length
+                    (delq 0 (mapcar
+                             (lambda (el)
+                               (if (string-match org-table-number-regexp el)
+                                   0 1))
+                             (mapcar (lambda (row) (nth ind row)) table)))) 0)
+                (plist-put params :textind t)))))
       ;; write script
       (with-temp-buffer
 	(if (plist-get params :script) ;; user script
@@ -307,7 +334,8 @@ line directly before or after the table."
 	(gnuplot-mode)
 	(gnuplot-send-buffer-to-gnuplot))
       ;; cleanup
-      (bury-buffer (get-buffer "*gnuplot*"))(delete-file data-file))))
+      (bury-buffer (get-buffer "*gnuplot*"))
+      (delete-file data-file))))
 
 (provide 'org-plot)
 
