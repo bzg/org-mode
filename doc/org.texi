@@ -3667,25 +3667,34 @@ Like before, but require the @samp{:laptop:} lines to be tagged also
 @end table
 
 @cindex TODO keyword matching, with tags search
-If you are using multi-state TODO keywords (@pxref{TODO extensions}), it
-can be useful to also match on the TODO keyword.  This can be done by
-adding a condition after a slash to a tags match.  The syntax is similar
-to the tag matches, but should be applied with consideration: For
-example, a positive selection on several TODO keywords can not
-meaningfully be combined with boolean AND.  However, @emph{negative
-selection} combined with AND can be meaningful.  To make sure that only
-lines are checked that actually have any TODO keyword, use @kbd{C-c a
-M}, or equivalently start the TODO part after the slash with @samp{!}.
-Examples:
+You may also test for TODO keywords (@pxref{TODO extensions}) and properties
+(@pxref{Properties and Columns}) at the same time as matching tags.  For a
+guide on how to match properties, see @ref{Property searches}.  To match a
+specific TODO keyword, include an expression like @samp{+TODO="NEXT"} as one
+of the terms in a tags search.
+
+There is also the possibility to end the tags part of the match (which may
+include several terms connected with @samp{|}) with a @samp{/} and then
+specify a Boolean expression just for TODO keywords.  The syntax is then
+similar to the tag matches, but should be applied with consideration: For
+example, a positive selection on several TODO keywords can not meaningfully
+be combined with boolean AND.  However, @emph{negative selection} combined
+with AND can be meaningful.  To make sure that only lines are checked that
+actually have any TODO keyword (resulting in a speed-up), use @kbd{C-c a M},
+or equivalently start the TODO part after the slash with @samp{!}.  Examples:
 
 @table @samp
-@item work/WAITING
+@item work+TODO="WAITING"
 Select @samp{:work:}-tagged TODO lines with the specific TODO
 keyword @samp{WAITING}.
+@item work+TODO="WAITING"|home+TODO="WAITING"
+Waiting tasks both at work and at home.
+@item work/WAITING
+Same as the first example.
 @item work/!-WAITING-NEXT
 Select @samp{:work:}-tagged TODO lines that are neither @samp{WAITING}
 nor @samp{NEXT}
-@item work/+WAITING|+NEXT
+@item work/!+WAITING|+NEXT
 Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 @samp{NEXT}.
 @end table
@@ -3694,7 +3703,9 @@ Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
 Any element of the tag/todo match can be a regular expression - in this
 case it must be enclosed in curly braces.  For example,
 @samp{work+@{^boss.*@}} matches headlines that contain the tag
-@samp{:work:} and any tag @i{starting} with @samp{boss}.
+@samp{:work:} and any tag @i{starting} with @samp{boss}.  You may also use a
+regular expression in @samp{TODO=@{^W@}} which would match TODO keywords
+starting with the letter @samp{W}.
 
 @cindex level, require for tags/property match
 @cindex category, require for tags/property match
@@ -3703,6 +3714,9 @@ writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{CATEGORY="work"}, respectively.  For example, a search
 @samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
 tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
+
+Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
+other properties will slow down the search.
 
 @node Properties and Columns, Dates and Times, Tags, Top
 @chapter Properties and Columns

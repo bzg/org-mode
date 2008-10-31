@@ -9016,9 +9016,13 @@ also TODO lines."
 			   pv (if (or re-p str-p) (substring pv 1 -1) pv))
 		     (if time-p (setq pv (org-matcher-time pv)))
 		     (setq po (org-op-to-function po (if time-p 'time str-p)))
-		     (if (equal pn "CATEGORY")
-			 (setq gv '(get-text-property (point) 'org-category))
-		       (setq gv `(org-cached-entry-get nil ,pn)))
+		     (cond
+		      ((equal pn "CATEGORY")
+		       (setq gv '(get-text-property (point) 'org-category)))
+		      ((equal pn "TODO")
+		       (setq gv 'todo))
+		      (t
+		       (setq gv `(org-cached-entry-get nil ,pn))))
 		     (if re-p
 			 (if (eq po 'org<>)
 			     `(not (string-match ,pv (or ,gv "")))
