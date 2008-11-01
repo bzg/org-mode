@@ -1870,40 +1870,77 @@ higher priority settings."
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
        (save-window-excursion
-	 (cond
-	  ((string-match "\\.html?\\'" file)
-	   (set-buffer (htmlize-buffer (current-buffer)))
-
-	   (when (and org-agenda-export-html-style
-		      (string-match "<style>" org-agenda-export-html-style))
-	     ;; replace <style> section with org-agenda-export-html-style
-	     (goto-char (point-min))
-	     (kill-region (- (search-forward "<style") 6)
-			  (search-forward "</style>"))
-	     (insert org-agenda-export-html-style))
-	   (write-file file)
-	   (kill-buffer (current-buffer))
-	   (message "HTML written to %s" file))
-	  ((string-match "\\.ps\\'" file)
-	   (ps-print-buffer-with-faces file)
-	   (message "Postscript written to %s" file))
-	  ((string-match "\\.ics\\'" file)
-	   (let ((org-agenda-marker-table
-		  (org-create-marker-find-array
-		   (org-agenda-collect-markers)))
-		 (org-icalendar-verify-function 'org-check-agenda-marker-table)
-		 (org-combined-agenda-icalendar-file file))
-	     (apply 'org-export-icalendar 'combine
-		    (org-agenda-files nil 'ifmode))))
-	  (t
-	   (let ((bs (buffer-string)))
-	     (find-file file)
-	     (erase-buffer)
+	 (org-agenda-mark-filtered-text)
+	 (let ((bs (copy-sequence (buffer-string))) beg)
+	   (org-agenda-unmark-filtered-text)
+	   (with-temp-buffer
 	     (insert bs)
-	     (save-buffer 0)
-	     (kill-buffer (current-buffer))
-	     (message "Plain text written to %s" file))))))
+	     (org-agenda-remove-marked-text 'org-filtered)
+	     (while (setq beg (text-property-any (point-min) (point-max)
+						 'org-filtered t))
+	       (delete-region
+		beg (or (next-single-property-change beg 'org-filtered)
+			(point-max))))
+	     (cond
+	      ((string-match "\\.html?\\'" file)
+	       (set-buffer (htmlize-buffer (current-buffer)))
+	       
+	       (when (and org-agenda-export-html-style
+			  (string-match "<style>" org-agenda-export-html-style))
+		 ;; replace <style> section with org-agenda-export-html-style
+		 (goto-char (point-min))
+		 (kill-region (- (search-forward "<style") 6)
+			      (search-forward "</style>"))
+		 (insert org-agenda-export-html-style))
+	       (write-file file)
+	       (kill-buffer (current-buffer))
+	       (message "HTML written to %s" file))
+	      ((string-match "\\.ps\\'" file)
+	       (ps-print-buffer-with-faces file)
+	       (message "Postscript written to %s" file))
+	      ((string-match "\\.ics\\'" file)
+	       (let ((org-agenda-marker-table
+		      (org-create-marker-find-array
+		       (org-agenda-collect-markers)))
+		     (org-icalendar-verify-function 'org-check-agenda-marker-table)
+		     (org-combined-agenda-icalendar-file file))
+		 (apply 'org-export-icalendar 'combine
+			(org-agenda-files nil 'ifmode))))
+	      (t
+	       (let ((bs (buffer-string)))
+		 (find-file file)
+		 (erase-buffer)
+		 (insert bs)
+		 (save-buffer 0)
+		 (kill-buffer (current-buffer))
+		 (message "Plain text written to %s" file))))))))
     (set-buffer org-agenda-buffer-name)))
+
+(defun org-agenda-mark-filtered-text ()
+  "Mark all text hidden by filtering with a text property."
+  (let ((inhibit-read-only t))
+    (mapc
+     (lambda (o)
+       (when (equal (org-overlay-buffer o) (current-buffer))
+	 (put-text-property
+	  (org-overlay-start o) (org-overlay-end o)
+	  'org-filtered t)))
+     org-agenda-filter-overlays)))
+
+(defun org-agenda-unmark-filtered-text ()
+  "Remove the filtering text property."
+  (let ((inhibit-read-only t))
+    (remove-text-properties (point-min) (point-max) '(org-filtered t))))
+
+(defun org-agenda-remove-marked-text (property &optional value)
+  "Delete all text marked with VALUE of PROPERTY.
+VALUE defaults to t."
+  (setq value (or value t))
+  (while (setq beg (text-property-any (point-min) (point-max)
+				      property value))
+    (delete-region
+     beg (or (next-single-property-change beg 'org-filtered)
+	     (point-max)))))
 
 (defun org-agenda-collect-markers ()
   "Collect the markers pointing to entries in the agenda buffer."

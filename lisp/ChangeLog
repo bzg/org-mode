@@ -1,4 +1,9 @@
-2008-10-31  Carsten Dominik  <dominik@science.uva.nl>
+2008-11-01  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-remove-marked-text): New function.
+	(org-agenda-mark-filtered-text)
+	(org-agenda-unmark-filtered-text): New functions.
+	(org-write-agenda): Remove fltered text.
 
 	* org.el (org-make-tags-matcher): Give access to TODO "property"
 	without speed penalty.
