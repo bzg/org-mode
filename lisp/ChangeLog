@@ -1,3 +1,8 @@
+2008-11-01  Sebastian Rose  <sebastian_rose@gmx.de>
+
+	* org-jsinfo.el (org-infojs-template): Remove language attribute
+	from script tag.
+
 2008-11-01  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-agenda.el (org-agenda-remove-marked-text): New function.
