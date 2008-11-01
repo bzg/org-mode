@@ -11300,13 +11300,15 @@ With prefix ARG, change that many days."
   "Toggle the type (<active> or [inactive]) of a time stamp."
   (interactive)
   (when (org-at-timestamp-p t)
-    (save-excursion
-      (goto-char (match-beginning 0))
-      (insert (if (equal (char-after) ?<) "[" "<")) (delete-char 1)
-      (goto-char (1- (match-end 0)))
-      (insert (if (equal (char-after) ?>) "]" ">")) (delete-char 1))
-    (message "Timestamp is now %sactive"
-	     (if (equal (char-before) ?>) "in" ""))))
+    (let ((beg (match-beginning 0)) (end (match-end 0))
+	  (map '((?\[ . "<") (?\] . ">") (?< . "[") (?> . "]"))))
+      (save-excursion
+	(goto-char beg)
+	(while (re-search-forward "[][<>]" end t)
+	  (replace-match (cdr (assoc (char-after (match-beginning 0)) map))
+			 t t)))
+      (message "Timestamp is now %sactive"
+	       (if (equal (char-after beg) ?<) "" "in")))))
 
 (defun org-timestamp-change (n &optional what)
   "Change the date in the time stamp at point.
