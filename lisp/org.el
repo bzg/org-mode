@@ -4605,7 +4605,7 @@ frame is not changed."
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
 If point is at the beginning of a headline, insert a sibling before the
 current headline.  If point is not at the beginning, do not split the line,
-but create the new hedline after the current line."
+but create the new headline after the current line."
   (interactive "P")
   (if (= (buffer-size) 0)
       (insert "\n* ")
@@ -4617,7 +4617,7 @@ but create the new hedline after the current line."
 			   (match-string 0))
 		       (error "*"))))
 	     (blank (cdr (assq 'heading org-blank-before-new-entry)))
-	     pos hide-previous)
+	     pos hide-previous previous-pos)
 	(cond
 	 ((and (org-on-heading-p) (bolp)
 	       (or (bobp)
@@ -4631,19 +4631,28 @@ but create the new hedline after the current line."
 	  ;; insert right here
 	  nil)
 	 (t
-	  ;; in the middle of the line
+	  ;; somewhere in the line
           (save-excursion
+	    (setq previous-pos (point-at-bol))
             (end-of-line)
             (setq hide-previous (org-invisible-p)))
-	  (org-show-entry)
+	  (and org-insert-heading-respect-content (org-show-subtree))
 	  (let ((split
-		 (org-get-alist-option org-M-RET-may-split-line 'headline))
+		 (and (org-get-alist-option org-M-RET-may-split-line 'headline)
+		      (save-excursion
+			(let ((p (point)))
+			  (goto-char (point-at-bol))
+			  (and (looking-at org-complex-heading-regexp)
+			       (> p (match-beginning 4)))))))
 		tags pos)
 	    (cond
 	     (org-insert-heading-respect-content
 	      (org-end-of-subtree nil t)
 	      (open-line 1))
 	     ((org-on-heading-p)
+	      (when hide-previous
+		(show-children)
+		(org-show-entry))
 	      (looking-at ".*?\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)?[ \t]*$")
 	      (setq tags (and (match-end 2) (match-string 2)))
 	      (and (match-end 1)
@@ -4667,8 +4676,8 @@ but create the new hedline after the current line."
 	(unless (= (point) pos) (just-one-space) (backward-delete-char 1))
         (when (and org-insert-heading-respect-content hide-previous)
 	  (save-excursion
-	    (outline-previous-visible-heading 1)
-	    (hide-entry)))
+	    (goto-char previous-pos)
+	    (hide-subtree)))
 	(run-hooks 'org-insert-heading-hook)))))
 
 (defun org-get-heading (&optional no-tags)
