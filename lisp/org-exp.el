@@ -3098,6 +3098,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		     (string-match "^[ \t]*:\\(.*\\)" line))
 	    (when (not infixed)
 	      (setq infixed t)
+	      (org-close-par-maybe)
 	      (insert "<pre class=\"example\">\n"))
 	    (insert (org-html-protect (match-string 1 line)) "\n")
 	    (when (or (not lines)
@@ -3335,6 +3336,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				  head-count)
 	    ;; QUOTES
 	    (when (string-match quote-re line)
+	      (org-close-par-maybe)
 	      (insert "<pre>")
 	      (setq inquote t)))
 
@@ -3445,7 +3447,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert line "\n")))))
 
       ;; Properly close all local lists and other lists
-      (when inquote (insert "</pre>\n"))
+      (when inquote
+	(insert "</pre>\n")
+	(org-open-par))
       (when in-local-list
 	;; Close any local lists before inserting a new header line
 	(while local-list-type

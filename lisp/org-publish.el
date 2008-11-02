@@ -75,7 +75,7 @@
 ;;                   :with-section-numbers nil
 ;; 		     :table-of-contents nil
 ;;                   :recursive t
-;; 		     :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">")))
+;; 		     :style "<link rel="stylesheet" href=\"../other/mystyle.css\" type=\"text/css\">")))
 
 ;;;; More complex example configuration:
 
@@ -103,7 +103,7 @@
 ;; 		       :headline-levels 3
 ;;                     :with-section-numbers nil
 ;; 		       :table-of-contents nil
-;; 		       :style "<link rel=stylesheet href=\"../other/mystyle.css\" type=\"text/css\">"
+;; 		       :style "<link rel="stylesheet" href=\"../other/mystyle.css\" type=\"text/css\">"
 ;; 		       :auto-preamble t
 ;; 		       :auto-postamble nil)
 ;;         ("images" :base-directory "~/images/"
@@ -626,7 +626,7 @@ Default for INDEX-FILENAME is 'index.org'."
     (if index-buffer
 	(kill-buffer index-buffer))
     (with-temp-buffer
-      (insert (concat index-title "\n\n"))
+      (insert (concat "* " index-title "\n\n"))
       (while (setq file (pop files))
 	(let ((fn (file-name-nondirectory file))
 	      (link (file-relative-name file dir))

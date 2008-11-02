@@ -1,3 +1,14 @@
+2008-11-02  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-publish.el (org-publish-org-index): Create a section in the
+	index file.
+
+	* org.el (org-emphasis-alist): Use span instead of <u> to
+	underline text.
+
+	* org-exp.el (org-export-as-html): Make sure <p> is closed before
+	<pre> sections.
+
 2008-11-01  Sebastian Rose  <sebastian_rose@gmx.de>
 
 	* org-jsinfo.el (org-infojs-template): Remove language attribute

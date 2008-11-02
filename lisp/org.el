@@ -2264,7 +2264,7 @@ Use customize to modify this, or restart Emacs after changing it."
 (defcustom org-emphasis-alist
   `(("*" bold "<b>" "</b>")
     ("/" italic "<i>" "</i>")
-    ("_" underline "<u>" "</u>")
+    ("_" underline "<span style=\"text-decoration:underline;\">" "</span>")
     ("=" org-code "<code>" "</code>" verbatim)
     ("~" org-verbatim "<code>" "</code>" verbatim)
     ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
