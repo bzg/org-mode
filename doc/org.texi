@@ -8230,7 +8230,7 @@ directory on the local machine.
          :publishing-directory "~/public_html"
          :section-numbers nil
          :table-of-contents nil
-         :style "<link rel="stylesheet"
+         :style "<link rel=\"stylesheet\"
                 href=\"../other/mystyle.css\"
                 type=\"text/css\">")))
 @end lisp
@@ -8267,7 +8267,7 @@ right place on the web server, and publishing images to it.
           :headline-levels 3
           :section-numbers nil
           :table-of-contents nil
-          :style "<link rel="stylesheet"
+          :style "<link rel=\"stylesheet\"
                   href=\"../other/mystyle.css\" type=\"text/css\">"
           :auto-preamble t
           :auto-postamble nil)

@@ -492,6 +492,7 @@ Org-mode file."
 
 (defconst org-export-html-style-default
 "<style type=\"text/css\">
+ <![CDATA[
   html { font-family: Times, serif; font-size: 12pt; }
   .title  { text-align: center; }
   .todo   { color: red; }
@@ -518,7 +519,7 @@ Org-mode file."
                                white-space:nowrap; }
   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
                                  font-weight:bold; }
-
+ ]]>
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and
@@ -547,11 +548,13 @@ you should consider to include definitions for the following classes:
 For example, a valid value would be:
 
    <style type=\"text/css\">
+    <![CDATA[
        p { font-weight: normal; color: gray; }
        h1 { color: black; }
       .title { text-align: center; }
       .todo, .timestamp-kwd { color: red; }
       .done { color: green; }
+    ]]>
    </style>
 
 If you'd like to refer to en external style file, use something like

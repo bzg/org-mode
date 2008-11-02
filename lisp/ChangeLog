@@ -1,5 +1,9 @@
 2008-11-02  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-html-style)
+	(org-export-html-style-default): Mark style definitions as
+	unparsed CDATA.
+
 	* org-publish.el (org-publish-validate-link): Function
 	re-introduced.
 
