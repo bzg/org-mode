@@ -364,6 +364,10 @@ Also set it if the optional argument REFRESH is non-nil."
     (setq org-publish-files-alist
 	  (org-publish-get-files org-publish-project-alist))))
 
+(defun org-publish-validate-link (link &optional directory)
+  "Check if LINK points to a file in the current project."
+  (assoc (expand-file-name link directory) org-publish-files-alist))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Compatibility aliases
 
