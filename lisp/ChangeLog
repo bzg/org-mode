@@ -1,3 +1,16 @@
+
+2008-11-02  Charles Sebold  <csebold@gmail.com>
+
+	* org-plot.el (org-plot/add-options-to-plist): Supports timefmt
+	property.
+	(org-plot-quote-timestamp-field): New function.
+	(org-plot-quote-tsv-field): Call timestamp field function when
+	necessary rather than just quoting as a string.
+	(org-plot/gnuplot-to-data): Pass in timefmt property.
+	(org-plot/gnuplot-script): Supports timefmt property.
+	(org-plot/gnuplot): Checks for timestamp column before checking
+	for text index column.
+
 2008-11-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-insert-heading): Improve behavior with hidden subtrees.
