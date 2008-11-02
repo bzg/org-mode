@@ -1,5 +1,8 @@
 2008-11-02  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-publish.el (org-publish-find-title): Remove buffers visited
+	only for extracting the title.
+
 	* org-exp.el (org-export-html-style)
 	(org-export-html-style-default): Mark style definitions as
 	unparsed CDATA.
