@@ -2,6 +2,7 @@
 
 	* org-publish.el (org-publish-org-index): Create a section in the
 	index file.
+	(org-publish-org-index): Stop linking to directories.
 
 	* org.el (org-emphasis-alist): Use span instead of <u> to
 	underline text.

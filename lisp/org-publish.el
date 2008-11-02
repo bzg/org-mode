@@ -656,9 +656,8 @@ Default for INDEX-FILENAME is 'index.org'."
 		      (pop subdirs))
 		    (dolist (d subdirs)
 		      (setq subdir (concat subdir d "/"))
-		      (insert (concat indent-str " + [[file:" 
-				      subdir "][" d "/]]\n"))
-		      (setq indent-str (make-string 
+		      (insert (concat indent-str " + " d "\n"))
+		      (setq indent-str (make-string
 					(+ (length indent-str) 2) ?\ )))))))
 	    ;; This is common to 'flat and 'tree
 	    (insert (concat indent-str " + [[file:" link "]["
