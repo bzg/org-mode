@@ -1,5 +1,8 @@
 2008-11-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-agenda.el (org-agenda-remove-marked-text): Bind variable
+	BEG.
+
 	* org-compat.el (org-fit-window-to-buffer): New function (not
 	really, a preliminary and incomplete version was present earlier,
 	but not used).

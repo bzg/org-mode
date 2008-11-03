@@ -1914,6 +1914,7 @@ higher priority settings."
 		 (kill-buffer (current-buffer))
 		 (message "Plain text written to %s" file))))))))
     (set-buffer org-agenda-buffer-name)))
+(defvar org-agenda-filter-overlays nil)
 
 (defun org-agenda-mark-filtered-text ()
   "Mark all text hidden by filtering with a text property."
@@ -1934,12 +1935,13 @@ higher priority settings."
 (defun org-agenda-remove-marked-text (property &optional value)
   "Delete all text marked with VALUE of PROPERTY.
 VALUE defaults to t."
-  (setq value (or value t))
-  (while (setq beg (text-property-any (point-min) (point-max)
-				      property value))
-    (delete-region
-     beg (or (next-single-property-change beg 'org-filtered)
-	     (point-max)))))
+  (let (beg)
+    (setq value (or value t))
+    (while (setq beg (text-property-any (point-min) (point-max)
+					property value))
+      (delete-region
+       beg (or (next-single-property-change beg 'org-filtered)
+	       (point-max))))))
 
 (defun org-agenda-collect-markers ()
   "Collect the markers pointing to entries in the agenda buffer."
@@ -4293,8 +4295,6 @@ If the line does not have an effort defined, return nil."
 		  (org-agenda-filter-by-tag-hide-line))
 	      (beginning-of-line 2))
 	  (beginning-of-line 2))))))
-
-(defvar org-agenda-filter-overlays nil)
 
 (defun org-agenda-filter-by-tag-hide-line ()
   (let (ov)

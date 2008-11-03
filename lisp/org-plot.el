@@ -46,6 +46,8 @@
     (:ind . 0))
   "Default options to gnuplot used by `org-plot/gnuplot'")
 
+(defvar org-plot-timestamp-fmt nil)
+
 (defun org-plot/add-options-to-plist (p options)
   "Parse an OPTIONS line and set values in the property list P.
 Returns the resulting property list."
