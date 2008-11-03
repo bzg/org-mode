@@ -2779,6 +2779,7 @@ in a window.  A non-interactive call will only return the buffer."
       rtn)))
 
 (defvar html-table-tag nil) ; dynamically scoped into this.
+(defvar org-par-open nil)
 ;;;###autoload
 (defun org-export-as-html (arg &optional hidden ext-plist
 			       to-buffer body-only pub-dir)
@@ -2930,6 +2931,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 ind item-type starter didclose
 	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc item-tag
+	 footnotes
 	 )
 
     (let ((inhibit-read-only t))
@@ -3445,9 +3447,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (when (string-match "^[ \t]*\\[\\([0-9]+\\)\\]" line)
 		(org-close-par-maybe)
 		(let ((n (match-string 1 line)))
-		  (setq line (replace-match
-			      (format "<p class=\"footnote\"><sup><a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a></sup>" n n n) t t line))
-		  (setq line (concat line "</p>")))))
+		  (setq org-par-open t
+			line (replace-match
+			      (format "<p class=\"footnote\"><sup><a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a></sup>" n n n) t t line)))))
 
 	    ;; Check if the line break needs to be conserved
 	    (cond
@@ -3475,6 +3477,16 @@ lang=\"%s\" xml:lang=\"%s\">
 			    head-count)
       ;; the </div> to close the last text-... div.
       (insert "</div>\n")
+
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "<p class=\"footnote\">[^\000]*?\\(</p>\\|\\'\\)" nil t)
+	  (push (match-string 0) footnotes)
+	  (replace-match "" t t)))
+      (when footnotes
+	(insert "<div id=\"footnotes\">\n"
+		(mapconcat 'identity (nreverse footnotes) "\n")
+		"\n</div>\n"))
 
       (unless body-only
 	(when (plist-get opt-plist :auto-postamble)
@@ -4083,7 +4095,6 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 	(setq s (1+ s))))
     string))
 
-(defvar org-par-open nil)
 (defun org-open-par ()
   "Insert <p>, but first close previous paragraph if any."
   (org-close-par-maybe)
