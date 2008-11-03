@@ -7794,7 +7794,7 @@ TODO state changes
 :from  previous state (keyword as a string), or nil
 :to    new state (keyword as a string), or nil")
 
-
+(defvar org-agenda-headline-snapshot-before-repeat)
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -7962,7 +7962,13 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (setq head (org-get-todo-sequence-head state)))
 	(put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
 	;; Do we need to trigger a repeat?
-	(when now-done-p (org-auto-repeat-maybe state))
+	(when now-done-p
+	  (when (boundp org-agenda-headline-snapshot-before-repeat)
+	    ;; This is for the agenda, take a snapshot of the headline.
+	    (save-match-data
+	      (setq org-agenda-headline-snapshot-before-repeat
+		    (org-get-heading))))
+	  (org-auto-repeat-maybe state))
 	;; Fixup cursor location if close to the keyword
 	(if (and (outline-on-heading-p)
 		 (not (bolp))

@@ -1,3 +1,13 @@
+2008-11-03  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org-agenda.el (org-agenda-todo): Update only the current
+	headline if this is a repeated TODO, marked done for today.
+	(org-agenda-change-all-lines): New argument JUST-THIS, to change
+	only the current line.
+
+	* org.el (org-todo): Take a snapshot of the headline if the
+	repeater might change it.
+
 2008-11-02  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org-publish.el (org-publish-find-title): Remove buffers visited

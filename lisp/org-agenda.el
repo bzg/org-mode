@@ -4927,8 +4927,10 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	 (buffer (marker-buffer marker))
 	 (pos (marker-position marker))
 	 (hdmarker (get-text-property (point) 'org-hd-marker))
+	 (todayp (equal (get-text-property (point) 'day)
+			(time-to-days (current-time))))
 	 (inhibit-read-only t)
-	 newhead)
+	 org-agenda-headline-snapshot-before-repeat newhead just-one)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
 	(widen)
@@ -4940,12 +4942,19 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(org-todo arg)
 	(and (bolp) (forward-char 1))
 	(setq newhead (org-get-heading))
+	(when (and (org-bound-and-true-p
+		    org-agenda-headline-snapshot-before-repeat)
+		   (not (equal org-agenda-headline-snapshot-before-repeat
+			       newhead))
+		   todayp)
+	  (setq newhead org-agenda-headline-snapshot-before-repeat
+		just-one t))
 	(save-excursion
 	  (org-back-to-heading)
 	  (move-marker org-last-heading-marker (point))))
       (beginning-of-line 1)
       (save-excursion
-	(org-agenda-change-all-lines newhead hdmarker 'fixface))
+	(org-agenda-change-all-lines newhead hdmarker 'fixface just-one))
       (org-move-to-column col))))
 
 (defun org-agenda-add-note (&optional arg)
@@ -4967,7 +4976,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	     (org-flag-heading nil)))   ; show the next heading
       (org-add-note))))
 
-(defun org-agenda-change-all-lines (newhead hdmarker &optional fixface)
+(defun org-agenda-change-all-lines (newhead hdmarker &optional fixface just-this)
   "Change all lines in the agenda buffer which match HDMARKER.
 The new content of the line will be NEWHEAD (as modified by
 `org-format-agenda-item').  HDMARKER is checked with
@@ -4975,6 +4984,7 @@ The new content of the line will be NEWHEAD (as modified by
 If FIXFACE is non-nil, the face of each item is modified acording to
 the new TODO state."
   (let* ((inhibit-read-only t)
+	 (line (org-current-line))
 	 props m pl undone-face done-face finish new dotime cat tags)
     (save-excursion
       (goto-char (point-max))
@@ -4982,6 +4992,7 @@ the new TODO state."
       (while (not finish)
 	(setq finish (bobp))
 	(when (and (setq m (get-text-property (point) 'org-hd-marker))
+		   (or (not just-this) (= (org-current-line) line))
 		   (equal m hdmarker))
 	  (setq props (text-properties-at (point))
 		dotime (get-text-property (point) 'dotime)
