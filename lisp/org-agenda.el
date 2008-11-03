@@ -409,7 +409,7 @@ t, also all archive files associated with the current selection of agenda
 files will be included.")
 
 (defcustom org-agenda-skip-comment-trees t
-  "Non-nil means, skip trees that start with teh COMMENT keyword.
+  "Non-nil means, skip trees that start with the COMMENT keyword.
 When nil, these trees are also scand by agenda commands."
   :group 'org-agenda-skip
   :type 'boolean)
