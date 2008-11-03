@@ -3130,7 +3130,9 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Horizontal line
 	  (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
-	    (insert "\n<hr/>\n")
+	    (if org-par-open
+		(insert "\n</p>\n<hr/>\n<p>\n")
+	      (insert "\n<hr/>\n"))
 	    (throw 'nextline nil))
 
 	  ;; Blockquotes and verse
