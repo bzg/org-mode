@@ -3227,12 +3227,16 @@ lang=\"%s\" xml:lang=\"%s\">
 		       (org-file-image-p path))
 		  (setq rpl (concat "<img src=\"" type ":" path "\"" attr "/>"))
 		(setq link (concat type ":" path))
-		(setq rpl (concat "<a href=\"" link "\"" attr ">"
+		(setq rpl (concat "<a href=\"" 
+				  (org-export-html-format-href link)
+				  "\"" attr ">"
 				  desc "</a>"))))
 	     ((member type '("ftp" "mailto" "news"))
 	      ;; standard URL
 	      (setq link (concat type ":" path))
-	      (setq rpl (concat "<a href=\"" link "\"" attr ">" desc "</a>")))
+	      (setq rpl (concat "<a href=\""
+				(org-export-html-format-href link)
+				"\"" attr ">" desc "</a>")))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for format the link
@@ -4607,3 +4611,16 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
+
+
+(defun org-export-html-format-href (s)
+  (save-match-data
+    (setq s (org-link-escape s org-link-escape-chars-browser))
+    (let ((start 0))
+      (while (string-match "&" s start)
+	(setq start (+ (match-beginning 0) 3)
+	      s (replace-match "&amp;" t t s)))))
+  s)
+
+(defun org-export-html-format-description (s)
+  s)
