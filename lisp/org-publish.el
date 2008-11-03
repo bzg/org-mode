@@ -674,18 +674,21 @@ Default for INDEX-FILENAME is 'index.org'."
 (defun org-publish-find-title (file)
   "Find the title of file in project."
   (let* ((visiting (find-buffer-visiting file))
-	 (buffer (or visiting (find-file-noselect file))))
+	 (buffer (or visiting (find-file-noselect file)))
+	 title)
     (save-excursion
       (set-buffer buffer)
       (let* ((opt-plist (org-combine-plists (org-default-export-plist)
 					    (org-infile-export-plist))))
-	(or (plist-get opt-plist :title)
-	    (and (not
-		  (plist-get opt-plist :skip-before-1st-heading))
-		 (org-export-grab-title-from-buffer))
-	    (file-name-nondirectory (file-name-sans-extension file)))))
+	(setq title
+	      (or (plist-get opt-plist :title)
+		  (and (not
+			(plist-get opt-plist :skip-before-1st-heading))
+		       (org-export-grab-title-from-buffer))
+		  (file-name-nondirectory (file-name-sans-extension file))))))
     (unless visiting
-      (kill-buffer buffer))))
+      (kill-buffer buffer))
+    title))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
