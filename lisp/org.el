@@ -4648,6 +4648,7 @@ but create the new headline after the current line."
 	    (cond
 	     (org-insert-heading-respect-content
 	      (org-end-of-subtree nil t)
+	      (or (bolp) (newline))
 	      (open-line 1))
 	     ((org-on-heading-p)
 	      (when hide-previous
