@@ -3218,7 +3218,9 @@ lang=\"%s\" xml:lang=\"%s\">
 		     "<a href=\"#"
 		     (org-solidify-link-text
 		      (save-match-data (org-link-unescape path)) nil)
-		     "\"" attr ">" desc "</a>")))
+		     "\"" attr ">" 
+		     (org-export-html-format-desc desc)
+		     "</a>")))
 	     ((member type '("http" "https"))
 	      ;; standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-html-inline-images)
@@ -3229,13 +3231,16 @@ lang=\"%s\" xml:lang=\"%s\">
 		(setq rpl (concat "<a href=\"" 
 				  (org-export-html-format-href link)
 				  "\"" attr ">"
-				  desc "</a>"))))
+				  (org-export-html-format-desc desc)
+				  "</a>"))))
 	     ((member type '("ftp" "mailto" "news"))
 	      ;; standard URL
 	      (setq link (concat type ":" path))
 	      (setq rpl (concat "<a href=\""
 				(org-export-html-format-href link)
-				"\"" attr ">" desc "</a>")))
+				"\"" attr ">" 
+				(org-export-html-format-desc desc)
+				"</a>")))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for format the link
@@ -3281,7 +3286,8 @@ lang=\"%s\" xml:lang=\"%s\">
 					    (not descp))))
 			      (concat "<img src=\"" thefile "\"" attr "/>")
 			    (concat "<a href=\"" thefile "\"" attr ">"
-				    desc "</a>")))
+				    (org-export-html-format-desc desc)
+				    "</a>")))
 		(if (not valid) (setq rpl desc))))
 
 	     (t
@@ -3556,6 +3562,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	(setq start (+ (match-beginning 0) 3)
 	      s (replace-match "&amp;" t t s)))))
   s)
+
+(defun org-export-html-format-desc (s)
+  "Make sure the S is valid as a description in a link."
+  (if s
+      (save-match-data
+	(org-html-do-expand s))
+    s))
 
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)
@@ -3913,7 +3926,9 @@ that uses these same face definitions."
     (while (string-match "<" s)
       (setq s (replace-match "&lt;" t t s)))
     (while (string-match ">" s)
-      (setq s (replace-match "&gt;" t t s))))
+      (setq s (replace-match "&gt;" t t s)))
+    (while (string-match "\"" s)
+      (setq s (replace-match "&quot;" t t s))))
   s)
 
 (defun org-export-cleanup-toc-line (s)
