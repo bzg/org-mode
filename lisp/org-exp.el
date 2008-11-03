@@ -3939,8 +3939,9 @@ that uses these same face definitions."
       (setq s (replace-match "&lt;" t t s)))
     (while (string-match ">" s)
       (setq s (replace-match "&gt;" t t s)))
-    (while (string-match "\"" s)
-      (setq s (replace-match "&quot;" t t s))))
+;    (while (string-match "\"" s)
+;      (setq s (replace-match "&quot;" t t s)))
+    )
   s)
 
 (defun org-export-cleanup-toc-line (s)

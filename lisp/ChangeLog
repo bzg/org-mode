@@ -3,6 +3,8 @@
 	* org-exp.el (org-export-as-html): Fully process link descriptions.
 	(org-export-html-format-desc): New function.
 	(org-export-as-html): Collect footnotes into the correct basket.
+	(org-html-protect): No longer protect quotations marks here, this
+	goes wrong.
 
 	* org-agenda.el (org-agenda-remove-marked-text): Bind variable
 	BEG.
