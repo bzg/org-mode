@@ -1,5 +1,9 @@
 2008-11-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-exp.el (org-export-as-html): Process href links through
+	`org-export-html-format-href'.
+	(org-export-html-format-href): New function.
+
 	* org-agenda.el (org-agenda-todo): Update only the current
 	headline if this is a repeated TODO, marked done for today.
 	(org-agenda-change-all-lines): New argument JUST-THIS, to change

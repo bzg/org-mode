@@ -3549,6 +3549,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
 
+(defun org-export-html-format-href (s)
+  "Make sure the S is valid as a href reference in an XHTML document."
+  (save-match-data
+    (let ((start 0))
+      (while (string-match "&" s start)
+	(setq start (+ (match-beginning 0) 3)
+	      s (replace-match "&amp;" t t s)))))
+  s)
 
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)
@@ -4611,16 +4619,3 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
 ;; arch-tag: 65985fe9-095c-49c7-a7b6-cb4ee15c0a95
 
 ;;; org-exp.el ends here
-
-
-(defun org-export-html-format-href (s)
-  (save-match-data
-    (setq s (org-link-escape s org-link-escape-chars-browser))
-    (let ((start 0))
-      (while (string-match "&" s start)
-	(setq start (+ (match-beginning 0) 3)
-	      s (replace-match "&amp;" t t s)))))
-  s)
-
-(defun org-export-html-format-description (s)
-  s)
