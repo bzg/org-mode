@@ -7963,7 +7963,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	(put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
 	;; Do we need to trigger a repeat?
 	(when now-done-p
-	  (when (boundp org-agenda-headline-snapshot-before-repeat)
+	  (when (boundp 'org-agenda-headline-snapshot-before-repeat)
 	    ;; This is for the agenda, take a snapshot of the headline.
 	    (save-match-data
 	      (setq org-agenda-headline-snapshot-before-repeat
