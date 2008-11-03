@@ -1585,12 +1585,11 @@ s   Search for keywords                 C   Configure custom agenda commands
 				 "Prefix key"))))
 		  prefixes))
 	  (goto-char (point-min))
-	  (when (fboundp 'fit-window-to-buffer)
-	    (if second-time
-		(if (not (pos-visible-in-window-p (point-max)))
-		    (fit-window-to-buffer))
-	      (setq second-time t)
-	      (fit-window-to-buffer)))
+	  (if second-time
+	      (if (not (pos-visible-in-window-p (point-max)))
+		  (org-fit-window-to-buffer))
+	    (setq second-time t)
+	    (org-fit-window-to-buffer))
 	  (message "Press key for agenda command%s:"
 		   (if (or restrict-ok org-agenda-overriding-restriction)
 		       (if org-agenda-overriding-restriction
@@ -1989,7 +1988,7 @@ VALUE defaults to t."
   "Fit the window to the buffer size."
   (and (memq org-agenda-window-setup '(reorganize-frame))
        (fboundp 'fit-window-to-buffer)
-       (fit-window-to-buffer
+       (org-fit-window-to-buffer
 	nil
 	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
 	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
@@ -5498,8 +5497,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 	     "Chinese:    " (calendar-chinese-date-string date) "\n"))
     (with-output-to-temp-buffer "*Dates*"
       (princ s))
-    (if (fboundp 'fit-window-to-buffer)
-	(fit-window-to-buffer (get-buffer-window "*Dates*")))))
+    (org-fit-window-to-buffer (get-buffer-window "*Dates*"))))
 
 ;;; Appointment reminders
 

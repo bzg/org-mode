@@ -1,5 +1,18 @@
 2008-11-03  Carsten Dominik  <dominik@science.uva.nl>
 
+	* org-compat.el (org-fit-window-to-buffer): New function (not
+	really, a preliminary and incomplete version was present earlier,
+	but not used).
+
+	* org.el (org-fast-todo-selection, org-fast-tag-selection): Use
+	`org-fit-window-to-buffer'.
+
+	* org-exp.el (org-export): Use `org-fit-window-to-buffer'.
+
+	* org-agenda.el (org-agenda-get-restriction-and-command)
+	(org-fit-agenda-window, org-agenda-convert-date): Use
+	`org-fit-window-to-buffer'.
+
 	* org-exp.el (org-export-as-html): Process href links through
 	`org-export-html-format-href'.
 	(org-export-html-format-href): New function.
@@ -116,8 +129,6 @@
 	Fix typo.
 
 2008-10-25  Carsten Dominik  <dominik@science.uva.nl>
-
-	* org-compat.el (org-fit-window-to-buffer): New function.
 
 	* org-agenda.el (org-format-agenda-item)
 	(org-agenda-filter-make-matcher): Make sure tags are stored and

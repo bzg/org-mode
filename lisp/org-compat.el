@@ -150,15 +150,21 @@ that will be added to PLIST.  Returns the string that was modified."
   string)
 (put 'org-add-props 'lisp-indent-function 2)
 
-(defun org-fit-window-to-buffer (&optional window)
-  "Fit the window to the buffer, but only if it is not a side-by-side window."
+(defun org-fit-window-to-buffer (&optional window max-height min-height
+					   shrink-only)
+  "Fit WINDOW to the buffer, but only if it is not a side-by-side window.
+WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
+passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
+`shrink-window-if-larger-than-buffer' instead, the hight limit are
+ignored in this case."
   (cond ((> (frame-width) (window-width window))
 	 ;; do nothing if another window would suffer
 	 )
-	((fboundp 'fit-window-to-buffer)
-	 (fit-window-to-buffer window))
+	((and (fboundp 'fit-window-to-buffer) (not shrink-only))
+	 (fit-window-to-buffer window max-height min-height))
 	((fboundp 'shrink-window-if-larger-than-buffer)
-	 (shrink-window-if-larger-than-buffer window))))
+	 (shrink-window-if-larger-than-buffer window)))
+  (or window (selected-window)))
 
 ;; Region compatibility
 

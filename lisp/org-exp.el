@@ -1062,9 +1062,8 @@ value of `org-export-run-in-background'."
       (delete-other-windows)
       (with-output-to-temp-buffer "*Org Export/Publishing Help*"
 	(princ help))
-      (if (fboundp 'fit-window-to-buffer)
-	  (fit-window-to-buffer (get-buffer-window
-				 "*Org Export/Publishing Help*")))
+      (org-fit-window-to-buffer (get-buffer-window
+				 "*Org Export/Publishing Help*"))
       (message "Select command: ")
       (setq r1 (read-char-exclusive)))
     (setq r2 (if (< r1 27) (+ r1 96) r1))

@@ -125,7 +125,7 @@ F       Like \"f\", but force using dired in Emacs.
 d       Delete one attachment, you will be prompted for a file name.
 D       Delete all of a task's attachments.  A safer way is
         to open the directory in dired and delete from there.")))
-	  (shrink-window-if-larger-than-buffer (get-buffer-window "*Org Attach*"))
+	  (org-fit-window-to-buffer (get-buffer-window "*Org Attach*"))
 	  (message "Select command: [acmlzoOfFdD]")
 	  (setq c (read-char-exclusive))
 	  (and (get-buffer "*Org Attach*") (kill-buffer "*Org Attach*"))))
