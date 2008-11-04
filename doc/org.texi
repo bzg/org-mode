@@ -9539,7 +9539,7 @@ like this:
 @lisp
 (org-add-agenda-custom-command
  '("b" todo "PROJECT"
-   ((org-agenda-skip-function 'my-org-waiting-projects)
+   ((org-agenda-skip-function 'my-skip-unless-waiting)
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
