@@ -1117,6 +1117,7 @@ single keystroke rather than having to type \"yes\"."
 
 (defconst org-file-apps-defaults-gnu
   '((remote . emacs)
+    (system . mailcap)
     (t . mailcap))
   "Default file applications on a UNIX or GNU/Linux system.
 See `org-file-apps'.")
@@ -1124,6 +1125,7 @@ See `org-file-apps'.")
 (defconst org-file-apps-defaults-macosx
   '((remote . emacs)
     (t . "open %s")
+    (system . "open %s")
     ("ps.gz"  . "gv %s")
     ("eps.gz" . "gv %s")
     ("dvi"    . "xdvi %s")
@@ -1137,6 +1139,11 @@ See `org-file-apps'.")
   (list
    '(remote . emacs)
    (cons t
+	 (list (if (featurep 'xemacs)
+		   'mswindows-shell-execute
+		 'w32-shell-execute)
+	       "open" 'file))
+   (cons 'system
 	 (list (if (featurep 'xemacs)
 		   'mswindows-shell-execute
 		 'w32-shell-execute)
@@ -1165,11 +1172,15 @@ file identifier are
                Remote files most likely should be visited through Emacs
                because external applications cannot handle such paths.
 `auto-mode'    Matches files that are mached by any entry in `auto-mode-alist',
-               so all files Emacs knows how to handle.  Useing this with
+               so all files Emacs knows how to handle.  Using this with
                command `emacs' will open most files in Emacs.  Beware that this
                will also open html files insite Emacs, unless you add
                (\"html\" . default) to the list as well.
  t             Default for files not matched by any of the other options.
+ `system'      The system command to open files, like `open' on Windows
+               and Mac OS X, and mailcap under GNU/Linux.  This is the command
+               that will be selected if you call `C-c C-o' with a double
+               `C-u C-u' prefix.
 
 Possible values for the command are:
  `emacs'       The file will be visited by the current Emacs process.
@@ -1178,6 +1189,11 @@ Possible values for the command are:
                part.
                This can be used to overrule an unwanted seting in the
                system-specific variable.
+ `system'      Use the system command for opening files, like \"open\".
+               This command is specified by the entry whose car is `system'.
+               Most likely, the system-specific version of this variable
+               does define this command, but you can overrule/replace it
+               here.
  string        A command to be executed by a shell; %s will be replaced
 	       by the path to the file.
  sexp          A Lisp form which will be evaluated.  The file path will
@@ -1190,6 +1206,7 @@ For more examples, see the system specific constants
   :type '(repeat
 	  (cons (choice :value ""
 			(string :tag "Extension")
+			(const :tag "System command to open files" system)
 			(const :tag "Default for unrecognized files" t)
 			(const :tag "Remote file" remote)
 			(const :tag "Links to a directory" directory)
@@ -1197,7 +1214,8 @@ For more examples, see the system specific constants
 			       auto-mode))
 		(choice :value ""
 			(const :tag "Visit with Emacs" emacs)
-			(const :tag "Use system default" default)
+			(const :tag "Use default" default)
+			(const :tag "Use the system command" system)
 			(string :tag "Command")
 			(sexp :tag "Lisp form")))))
 
@@ -6619,7 +6637,9 @@ Org-mode syntax."
 If there is no link at point, this function will search forward up to
 the end of the current subtree.
 Normally, files will be opened by an appropriate application.  If the
-optional argument IN-EMACS is non-nil, Emacs will visit the file."
+optional argument IN-EMACS is non-nil, Emacs will visit the file.
+With a double prefix argument, try to open outside of Emacs, in the
+application the system uses for this file type."
   (interactive "P")
   (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
@@ -7048,8 +7068,13 @@ onto the ring."
 First, this expands any special file name abbreviations.  Then the
 configuration variable `org-file-apps' is checked if it contains an
 entry for this file type, and if yes, the corresponding command is launched.
+
 If no application is found, Emacs simply visits the file.
-With optional argument IN-EMACS, Emacs will visit the file.
+
+With optional prefix argument IN-EMACS, Emacs will visit the file.
+With a double C-c C-u prefix arg, Org tries to avoid opening in Emacs
+and o use an external application to visit the file.
+
 Optional LINE specifies a line to go to, optional SEARCH a string to
 search for.  If LINE or SEARCH is given, the file will always be
 opened in Emacs.
@@ -7074,14 +7099,19 @@ If the file does not exist, an error is thrown."
 	(setq ext (match-string 1 dfile))
       (if (string-match "^.*\\.\\([a-zA-Z0-9]+\\)$" dfile)
 	  (setq ext (match-string 1 dfile))))
-    (if in-emacs
-	(setq cmd 'emacs)
+    (cond
+     ((equal in-emacs '(16))
+      (setq cmd (cdr (assoc 'system apps))))
+     (in-emacs (setq cmd 'emacs))
+     (t
       (setq cmd (or (and remp (cdr (assoc 'remote apps)))
 		    (and dirp (cdr (assoc 'directory apps)))
 		    (assoc-default dfile (org-apps-regexp-alist apps a-m-a-p)
 				   'string-match)
 		    (cdr (assoc ext apps))
-		    (cdr (assoc t apps)))))
+		    (cdr (assoc t apps))))))
+    (when (eq cmd 'system)
+      (setq cmd (cdr (assoc 'system apps))))
     (when (eq cmd 'default)
       (setq cmd (cdr (assoc t apps))))
     (when (eq cmd 'mailcap)

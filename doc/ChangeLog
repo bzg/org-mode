@@ -1,3 +1,9 @@
+
+2008-11-05  Carsten Dominik  <dominik@science.uva.nl>
+
+	* org.texi (Handling links): Explain the effect of a double prefix
+	arg to `C-c C-o'.
+
 2008-11-02  Charles Sebold  <csebold@gmail.com>
 
 	* org.texi (Org Plot): Add documentation for timefmt option.

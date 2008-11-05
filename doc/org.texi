@@ -2637,7 +2637,8 @@ date.  Furthermore, it will visit text and remote files in @samp{file:} links
 with Emacs and select a suitable application for local non-text files.
 Classification of files is based on file extension only.  See option
 @code{org-file-apps}.  If you want to override the default application and
-visit the file with Emacs, use a @kbd{C-u} prefix.
+visit the file with Emacs, use a @kbd{C-u} prefix.  If you want to avoid
+opening in Emacs, use a @kbd{C-u C-u} prefix.
 @c
 @kindex mouse-2
 @kindex mouse-1
