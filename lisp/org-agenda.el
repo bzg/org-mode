@@ -650,6 +650,16 @@ given here."
   :group 'org-agenda-daily/weekly
   :type 'number)
 
+(defcustom org-agenda-log-mode-items '(closed clock)
+  "List of items that should be shown in agenda log mode.
+This list may contain the following symbols:
+
+  closed    Show entries that have been closed on that day.
+  clock     Show entries that have received clocked time on that day.
+  state     Show all logged state changes."
+  :group 'org-agenda-daily/weekly
+  :type '(set :greedy t (const closed) (const clock) (const state)))
+
 (defcustom org-agenda-start-with-clockreport-mode nil
   "The initial value of clockreport-mode in a newly created agenda window."
   :group 'org-agenda-startup
@@ -3165,7 +3175,7 @@ the documentation of `org-diary'."
 		  (setq rtn (org-agenda-get-scheduled))
 		  (setq results (append results rtn)))
 		 ((eq arg :closed)
-		  (setq rtn (org-agenda-get-closed))
+		  (setq rtn (org-agenda-get-progress))
 		  (setq results (append results rtn)))
 		 ((eq arg :deadline)
 		  (setq rtn (org-agenda-get-deadlines))
@@ -3369,7 +3379,8 @@ the documentation of `org-diary'."
 	  (push txt ee))))
     (nreverse ee)))
 
-(defun org-agenda-get-closed ()
+(defalias 'org-get-closed 'org-get-progress)
+(defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
   (let* ((props (list 'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
@@ -3379,8 +3390,20 @@ the documentation of `org-diary'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
+	 (items (if (consp org-agenda-show-log)
+		    org-agenda-show-log
+		  org-agenda-log-mode-items))
+	 (parts 
+	  (delq nil
+		(list
+		 (if (memq 'closed items) (concat "\\<" org-closed-string))
+		 (if (memq 'clock items) (concat "\\<" org-clock-string))
+		 (if (memq 'state items) "- State \"\\([a-zA-Z0-9]+\\)\""))))
+	 (parts-re (if parts (mapconcat 'identity parts "\\|")
+		     (error "`org-agenda-log-mode-items' is empty")))
 	 (regexp (concat
-		  "\\<\\(" org-closed-string "\\|" org-clock-string "\\) *\\["
+		  "\\(" parts-re "\\)"
+		  " *\\["
 		  (regexp-quote
 		   (substring
 		    (format-time-string
@@ -3388,7 +3411,7 @@ the documentation of `org-diary'."
 		     (apply 'encode-time  ; DATE bound by calendar
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
-	 marker hdmarker priority category tags closedp
+	 marker hdmarker priority category tags closedp statep state
 	 ee txt timestr rest clocked)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -3396,6 +3419,8 @@ the documentation of `org-diary'."
 	(org-agenda-skip)
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      closedp (equal (match-string 1) org-closed-string)
+	      statep (equal (string-to-char (match-string 1)) ?-)
+	      state (and statep (match-string 2))
 	      category (org-get-category (match-beginning 0))
 	      timestr (buffer-substring (match-beginning 0) (point-at-eol))
 	      ;; donep (org-entry-is-done-p)
@@ -3404,7 +3429,7 @@ the documentation of `org-diary'."
 	  ;; substring should only run to end of time stamp
 	  (setq rest (substring timestr (match-end 0))
 		timestr (substring timestr 0 (match-end 0)))
-	  (if (and (not closedp)
+	  (if (and (not closedp) (not statep)
 		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" rest))
 	      (progn (setq timestr (concat (substring timestr 0 -1)
 					   "-" (match-string 1 rest) "]"))
@@ -3418,8 +3443,10 @@ the documentation of `org-diary'."
 		      tags (org-get-tags-at))
 		(looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 		(setq txt (org-format-agenda-item
-			   (if closedp "Closed:    "
-			     (concat "Clocked:   (" clocked  ")"))
+			   (cond
+			    (closedp "Closed:    ")
+			    (statep (concat "State:     (" state ")"))
+			    (t (concat "Clocked:   (" clocked  ")")))
 			   (match-string 1) category tags timestr)))
 	    (setq txt org-agenda-no-heading-message))
 	  (setq priority 100000)
@@ -4601,11 +4628,13 @@ so that the date SD will be in that range."
   (message "Clocktable mode is %s"
 	   (if org-agenda-clockreport-mode "on" "off")))
 
-(defun org-agenda-log-mode ()
+(defun org-agenda-log-mode (&optional with-states)
   "Toggle log mode in an agenda buffer."
-  (interactive)
+  (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline)
-  (setq org-agenda-show-log (not org-agenda-show-log))
+  (setq org-agenda-show-log
+	(if with-states '(closed clock state)
+	  (not org-agenda-show-log)))
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Log mode is %s"
@@ -4658,7 +4687,8 @@ so that the date SD will be in that range."
 		(if org-agenda-follow-mode     " Follow" "")
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
-		(if org-agenda-show-log        " Log"    "")
+		(if (consp org-agenda-show-log) " LogAll"
+		    (if org-agenda-show-log " Log" ""))
 		(if org-agenda-filter
 		    (concat " {" (mapconcat 'identity org-agenda-filter "") "}")
 		  "")

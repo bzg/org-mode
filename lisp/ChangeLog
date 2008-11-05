@@ -1,3 +1,16 @@
+2008-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-get-progress): Renamed from
+	`org-get-closed'.  Implement searching for state changes as well.
+	(org-agenda-log-mode-items): New option.
+	(org-agenda-log-mode): New option prefix argument, interpreted as
+	request to show all possible progress info.
+	(org-agenda-get-day-entries): Call `org-get-progress' instead of
+	`org-get-closed'.
+	(org-agenda-set-mode-name): Handle the more complex log mode
+	settings.
+	(org-get-closed): New alias, pointing to `org-get-progress'.
+
 2008-11-05  Carsten Dominik  <dominik@science.uva.nl>
 
 	* org.el (org-file-apps-defaults-gnu)

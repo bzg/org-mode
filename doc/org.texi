@@ -5933,8 +5933,11 @@ previously used indirect buffer.
 @kindex l
 @item l
 Toggle Logbook mode.  In Logbook mode, entries that where marked DONE while
-logging was on (variable @code{org-log-done}) are shown in the agenda,
-as are entries that have been clocked on that day.
+logging was on (variable @code{org-log-done}) are shown in the agenda, as are
+entries that have been clocked on that day.  You can configure the entry
+types that should be included in log mode using the variable
+@code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
+all possible logbook entries, including state changes.
 @c
 @kindex v
 @item v
