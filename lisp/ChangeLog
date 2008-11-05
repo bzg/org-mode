@@ -1,5 +1,11 @@
 2008-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-attach.el (org-attach-dir): Remove duplicate ID creation
+	code.
+
+	* org-id.el (org-id-new): Use `org-trim' to extract the uuid from
+	shell output.
+
 	* org.el (org-link-abbrev-alist): Improve customization type.
 
 	* org-attach.el (org-attach-expand-link, org-attach-expand): New

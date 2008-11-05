@@ -156,11 +156,7 @@ the directory and the corresponding ID will be created."
   (let ((uuid (org-id-get (point) create-if-not-exists-p)))
     (when (or uuid create-if-not-exists-p)
       (unless uuid
-	(let ((uuid-string (shell-command-to-string "uuidgen")))
-	  (setf uuid-string
-		(substring uuid-string 0 (1- (length uuid-string))))
-	  (org-entry-put (point) "ID" uuid-string)
-	  (setf uuid uuid-string)))
+	(error "ID retrieval/creation failed"))
       (let ((attach-dir (expand-file-name
 			 (format "%s/%s"
 				 (substring uuid 0 2)
