@@ -22,29 +22,6 @@
 
 ** Details
 
-*** The clock can be now resumed after exiting and re-starting Emacs
-
-    If the option =org-clock-resume= is t, and the first clock
-    line in an entry is unclosed, clocking into that task resumes
-    the clock from that time.
-
-    Thanks to James JD Smith for a patch to this effect.
-
-*** Clock-related data can be saved and resumed accross Emacs sessions
-    
-    The data saved include the contents of =org-clock-history=,
-    and the running clock, if there is one.
-    
-    To use this, you will need to add to your .emacs
-
-#+begin_src emacs-lisp
-(setq org-clock-persist t)
-(setq org-clock-in-resume t)
-(org-clock-persistence-insinuate)
-#+end_src
-
-    Thanks to James JD Smith for a patch to this effect.
-
 *** Yanking subtree with =C-y= now adjusts the tree level
     When yanking a cut/copied subtree or a series of trees, even
     the nomal yank key =C-y= does now adjust the level of the tree
@@ -76,6 +53,94 @@
 
     Thanks to Samuel Wales for this idea and a partial implementation.
 
+*** State changes can now be shown in the log mode in the agenda
+
+    If you configure the variable =org-agenda-log-mode-items=,
+    you can now request that all logged state changes should also
+    show up in the agenda when log mode is active.  If you find
+    this too much for normal applications, you can also
+    temporarily request the inclusion of state changes by
+    pressing =C-u l= in the agenda.
+    
+    This was a request by Hsiu-Khuern Tang.
+
+*** Footnote in HTML export are now collected at the end of the document
+    Previously, footnotes would be left in the document where
+    they are defined, bow that are all collected and put into a
+    special =<div>= at the end of the document.
+
+    Thanks to Sebastian Rose for this request.
+
+*** HTML export now validates again as XHTML.
+
+    Thanks to Sebastian Rose for pushing this cleanup.
+
+*** The clock can be now resumed after exiting and re-starting Emacs
+
+    If the option =org-clock-resume= is t, and the first clock
+    line in an entry is unclosed, clocking into that task resumes
+    the clock from that time.
+
+    Thanks to James JD Smith for a patch to this effect.
+
+*** Clock-related data can be saved and resumed accross Emacs sessions
+    
+    The data saved include the contents of =org-clock-history=,
+    and the running clock, if there is one.
+    
+    To use this, you will need to add to your .emacs
+
+#+begin_src emacs-lisp
+(setq org-clock-persist t)
+(setq org-clock-in-resume t)
+(org-clock-persistence-insinuate)
+#+end_src
+
+    Thanks to James JD Smith for a patch to this effect.
+
+*** Following file links can now use C-u C-u to force use of an external app.
+
+    So far you could only bypass your setup in `org-file-apps'
+    and force opening a file link in Emacs by using a =C-u= prefix arg
+    with =C-c C-o=.  Now you can call =C-u C-u C-c C-o= to force
+    an external application.  Which external application depends
+    on your system.  On Mac OS X and Windows, =open= is used.  On
+    a GNU/Linux system, the mailcap settings are used.
+
+    This was a proposal by Samuel Wales.
+
+*** Inserting absolute files names now abbreviates links with "~".
+
+    Inserting file links with =C-u C-c C-l= was buggy if the
+    setting of `org-link-file-path-type' was `adaptive' (the
+    default).  Absolute file path's were not abbreviated relative
+    to the users home directory.  This bug has been fixed.
+
+    Thanks to Matt Lundin for the report.
+
+*** Links to attachment files
+
+    Even though one of the purposes of entry attachments was to
+    reduce the number of links in an entry, one might still want
+    to have the occasional link to one of those files.  You can
+    now use link abbreviations to set up a special link type that
+    points to attachments in the current entry.  Note that such
+    links will only work from within the same entry that has the
+    attachment, because the directory path is entry specific.
+    Here is the setup you need:
+
+#+begin_src emacs-lisp
+(setq org-ling-abbrev-alist '(("att" . org-attach-expand-link)))
+#+end_src
+
+    After this, a link like this will work
+
+    : [[att:some-attached-file.txt]]
+
+    This was a proposal by Lindsay Todd.
+
+*** Completed repeated tasks FIXME
+*** Remove buffers created during publishing FIXME
 * Version 6.10
 
 ** Overview
