@@ -334,6 +334,17 @@ See `org-attach-open'."
   (interactive)
   (org-attach-open 'in-emacs))
 
+(defun org-attach-expand (file)
+  "Return the full path to the current entry's attachment file FILE.
+Basically, this adds the path to the attachment directory."
+  (expand-file-name file (org-attach-dir)))
+
+(defun org-attach-expand-link (file)
+  "Return a file link pointing to the current entry's attachment file FILE.
+Basically, this adds the path to the attachment directory, and a \"file:\"
+prefix."
+  (concat "file:" (org-attach-expand file)))
+
 (provide 'org-attach)
 
 ;; arch-tag: fce93c2e-fe07-4fa3-a905-e10dcc7a6248

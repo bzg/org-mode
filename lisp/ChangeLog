@@ -1,5 +1,10 @@
 2008-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-link-abbrev-alist): Improve customization type.
+
+	* org-attach.el (org-attach-expand-link, org-attach-expand): New
+	functions.
+
 	* org-agenda.el (org-agenda-get-progress): Renamed from
 	`org-get-closed'.  Implement searching for state changes as well.
 	(org-agenda-log-mode-items): New option.
