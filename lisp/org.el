@@ -6646,7 +6646,6 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file.
 With a double prefix argument, try to open outside of Emacs, in the
 application the system uses for this file type."
   (interactive "P")
-  (debug)
   (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
