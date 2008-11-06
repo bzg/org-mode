@@ -1,3 +1,8 @@
+2008-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-make-link-regexps): Make sure that links to gnus can
+	contain brackets.
+
 2008-11-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-attach.el (org-attach-dir): Remove duplicate ID creation

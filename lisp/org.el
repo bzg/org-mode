@@ -3429,7 +3429,7 @@ This should be called after the variable `org-link-types' has changed."
 	(concat
 	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
 	 "\\([^" org-non-link-chars " ]"
-	 "[^]\t\n\r]*"
+	 "[^\t\n\r]*"
 	 "[^" org-non-link-chars " ]\\)>?")
 	org-angle-link-re
 	(concat
@@ -5962,7 +5962,6 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 
 (defun org-link-expand-abbrev (link)
   "Apply replacements as defined in `org-link-abbrev-alist."
-  (debug)
   (if (string-match "^\\([a-zA-Z][-_a-zA-Z0-9]*\\)\\(::?\\(.*\\)\\)?$" link)
       (let* ((key (match-string 1 link))
 	     (as (or (assoc key org-link-abbrev-alist-local)
@@ -6647,6 +6646,7 @@ optional argument IN-EMACS is non-nil, Emacs will visit the file.
 With a double prefix argument, try to open outside of Emacs, in the
 application the system uses for this file type."
   (interactive "P")
+  (debug)
   (org-load-modules-maybe)
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
