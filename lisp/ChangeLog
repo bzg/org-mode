@@ -1,3 +1,7 @@
+2008-11-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-yank): Fix bug when not inserting a subtree.
+
 2008-11-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-vm.el (org-vm-follow-link): Call `vm-preview-current-message'

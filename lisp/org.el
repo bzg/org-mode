@@ -13967,10 +13967,11 @@ beyond the end of the headline."
 
 (defun org-yank ()
   "Yank.  If the kill is a subtree, treat it specially.
-This command will look at the current kill and check it is a single
-subtree, or a series of subtrees[1].  If it passes the test, it is
-treated specially, depending on the value of the following variables, both
-set by default.
+This command will look at the current kill and check if is a single
+subtree, or a series of subtrees[1].  If it passes the test, and if the
+cursor is at the beginning of a line or after the stars of a currently
+empty headline, then the yank is handeled specially.  How exactly depends
+on the value of the following variables, both set by default.
 
 org-yank-folded-subtrees
     When set, the subree(s) wiil be folded after insertion.
@@ -13979,33 +13980,39 @@ org-yank-adjusted-subtrees
     When set, the subtree will be promoted or demoted in order to
     fit into the local outline tree structure.
 
-
 \[1] Basically, the test checks if the first non-white line is a heading
     and if there are no other headings with fewer stars."
   (interactive)
-  (let ((subtreep (org-kill-is-subtree-p)))
-    (if org-yank-folded-subtrees
-	(let ((beg (point))
-	      end)
-	  (if (and subtreep org-yank-adjusted-subtrees)
-	      (org-paste-subtree nil nil 'for-yank)
-	    (call-interactively 'yank))
-	  (setq end (point))
-	  (goto-char beg)
-	  (when (and (bolp) subtreep)
-	    (or (looking-at outline-regexp)
-		(re-search-forward (concat "^" outline-regexp) end t))
-	    (while (and (< (point) end) (looking-at outline-regexp))
-	      (hide-subtree)
-	      (org-cycle-show-empty-lines 'folded)
-	      (condition-case nil
-		  (outline-forward-same-level 1)
-		(error (goto-char end)))))
-	  (goto-char end)
-	  (skip-chars-forward " \t\n\r"))
-      (if (and subtreep org-yank-adjusted-subtrees)
-	  (org-paste-subtree nil nil 'for-yank)
-	(call-interactively 'yank)))))
+  (let ((subtreep ; is kill a subtree, and the yank position appropriate?
+	 (and (org-kill-is-subtree-p)
+	      (or (bolp)
+		  (and (looking-at "[ \t]*$")
+		       (string-match 
+			"\\`\\*+\\'"
+			(buffer-substring (point-at-bol) (point))))))))
+    (cond
+     ((and subtreep org-yank-folded-subtrees)
+      (let ((beg (point))
+	    end)
+	(if (and subtreep org-yank-adjusted-subtrees)
+	    (org-paste-subtree nil nil 'for-yank)
+	  (call-interactively 'yank))
+	(setq end (point))
+	(goto-char beg)
+	(when (and (bolp) subtreep)
+	  (or (looking-at outline-regexp)
+	      (re-search-forward (concat "^" outline-regexp) end t))
+	  (while (and (< (point) end) (looking-at outline-regexp))
+	    (hide-subtree)
+	    (org-cycle-show-empty-lines 'folded)
+	    (condition-case nil
+		(outline-forward-same-level 1)
+	      (error (goto-char end)))))
+	(goto-char end)
+	(skip-chars-forward " \t\n\r")))
+     ((and subtreep org-yank-adjusted-subtrees)
+      (org-paste-subtree nil nil 'for-yank))
+     (t	(call-interactively 'yank)))))
   
 (define-key org-mode-map "\C-y" 'org-yank)
 
