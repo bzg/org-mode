@@ -23,19 +23,19 @@
 ** Details
 
 *** Yanking subtree with =C-y= now adjusts the tree level
-    When yanking a cut/copied subtree or a series of trees, even
-    the nomal yank key =C-y= does now adjust the level of the tree
-    to make it fit into the current outline position, without
-    loosing its identity, and without swallowing other subtrees.
+    When yanking a cut/copied subtree or a series of trees, the
+    normal yank key =C-y= now adjusts the level of the tree to
+    make it fit into the current outline position, without losing
+    its identity, and without swallowing other subtrees.
 
     This uses the command =org-past-subtree=.  An additional
-    change in that command has been implemented:  Normally, this
+    change in that command has been implemented: Normally, this
     command picks the right outline level from the surrounding
-    *visible* headlines, and uses the smaller on.  So it the
+    *visible* headlines, and uses the smaller one.  So if the
     cursor is between a level 4 and a level 3 headline, the tree
-    will be pasted as level 3.  Now, if the cursor is actually
-    *at* the beginning of a headline, the level of that headline
-    will be used.  So lets say you have a tree like this:
+    will be pasted as level 3.  If the cursor is actually *at*
+    the beginning of a headline, the level of that headline will
+    be used.  For example, lets say you have a tree like this:
 
 #+begin_src org
 ,* Level one
@@ -48,7 +48,7 @@
     insertion.  When at (1), the tree will be pasted as level 2.
     When at (2), it will be pasted as level 1.
 
-    If you do not like =C-y= to behave like this, configure the
+    If you do not want =C-y= to behave like this, configure the
     variable =org-yank-adjusted-subtrees=.
 
     Thanks to Samuel Wales for this idea and a partial implementation.
@@ -56,17 +56,17 @@
 *** State changes can now be shown in the log mode in the agenda
 
     If you configure the variable =org-agenda-log-mode-items=,
-    you can now request that all logged state changes should also
-    show up in the agenda when log mode is active.  If you find
-    this too much for normal applications, you can also
-    temporarily request the inclusion of state changes by
-    pressing =C-u l= in the agenda.
+    you can now request that all logged state changes be included
+    in the agenda when log mode is active.  If you find this too
+    much for normal applications, you can also temporarily
+    request the inclusion of state changes by pressing =C-u l= in
+    the agenda.
     
     This was a request by Hsiu-Khuern Tang.
 
 *** Footnote in HTML export are now collected at the end of the document
     Previously, footnotes would be left in the document where
-    they are defined, bow that are all collected and put into a
+    they are defined, now they are all collected and put into a
     special =<div>= at the end of the document.
 
     Thanks to Sebastian Rose for this request.
@@ -75,15 +75,15 @@
 
     Thanks to Sebastian Rose for pushing this cleanup.
 
-*** The clock can be now resumed after exiting and re-starting Emacs
+*** The clock can now be resumed after exiting and re-starting Emacs
 
-    If the option =org-clock-resume= is t, and the first clock
+    If the option =org-clock-in-resume= is t, and the first clock
     line in an entry is unclosed, clocking into that task resumes
     the clock from that time.
 
     Thanks to James JD Smith for a patch to this effect.
 
-*** Clock-related data can be saved and resumed accross Emacs sessions
+*** Clock-related data can be saved and resumed across Emacs sessions
     
     The data saved include the contents of =org-clock-history=,
     and the running clock, if there is one.
@@ -113,7 +113,7 @@
 
     Inserting file links with =C-u C-c C-l= was buggy if the
     setting of `org-link-file-path-type' was `adaptive' (the
-    default).  Absolute file path's were not abbreviated relative
+    default).  Absolute file paths were not abbreviated relative
     to the users home directory.  This bug has been fixed.
 
     Thanks to Matt Lundin for the report.
@@ -130,7 +130,7 @@
     Here is the setup you need:
 
 #+begin_src emacs-lisp
-(setq org-ling-abbrev-alist '(("att" . org-attach-expand-link)))
+(setq org-link-abbrev-alist '(("att" . org-attach-expand-link)))
 #+end_src
 
     After this, a link like this will work
