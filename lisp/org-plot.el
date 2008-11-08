@@ -5,7 +5,7 @@
 ;; Author: Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: tables, plotting
 ;; Homepage: http://orgmode.org
-;; Version: 6.11
+;; Version: 6.11a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
