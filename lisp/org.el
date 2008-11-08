@@ -1970,7 +1970,7 @@ ellipses string, only part of the ellipses string will be shown."
 (defcustom org-columns-modify-value-for-display-function nil
   "Function that modifies values for display in column view.
 For example, it can be used to cut out a certain part from a time stamp.
-The function must take 2 argments:
+The function must take 2 arguments:
 
 column-title    The tite of the column (*not* the property name)
 value           The value that should be modified.

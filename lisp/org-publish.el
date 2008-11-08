@@ -537,7 +537,7 @@ See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
   (eval-and-compile
     (require 'eshell)
-    (require 'esh-maint)
+;    (require 'esh-maint)
     (require 'em-unix))
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))

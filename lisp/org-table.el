@@ -379,7 +379,7 @@ nil      When nil, the command tries to be smart and figure out the
          separator in the following way:
          - when each line contains a TAB, assume TAB-separated material
          - when each line contains a comme, assume CSV material
-         - else, assume one or more SPACE charcters as separator."
+         - else, assume one or more SPACE characters as separator."
   (interactive "rP")
   (let* ((beg (min beg0 end0))
 	 (end (max beg0 end0))
