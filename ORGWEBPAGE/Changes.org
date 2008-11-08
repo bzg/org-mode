@@ -90,7 +90,7 @@
     line in an entry is unclosed, clocking into that task resumes
     the clock from that time.
 
-    Thanks to James JD Smith for a patch to this effect.
+    Thanks to James TD Smith for a patch to this effect.
 
 *** Clock-related data can be saved and resumed across Emacs sessions
     
@@ -105,7 +105,7 @@
 (org-clock-persistence-insinuate)
 #+end_src
 
-    Thanks to James JD Smith for a patch to this effect.
+    Thanks to James TD Smith for a patch to this effect.
 
 *** Following file links can now use C-u C-u to force use of an external app.
 
@@ -4185,9 +4185,9 @@ list of small improvements and some new significant features.
 
 ** Details
 
-   - Footnotes like[1] are now exported to HTML
+   - Footnotes like =here[1]= are now exported to HTML
 
-        [1]This is a footnote
+     :   [1]This is a footnote
 
      Thanks to Scott Jaderholm for this proposal and a detailed
      HTML example on how the exported text should look like.
