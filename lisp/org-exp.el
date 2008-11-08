@@ -100,7 +100,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
 (defcustom org-export-language-setup
   '(("en"  "Author"     "Date"  "Table of Contents" "Footnotes")
     ("cs"  "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
-    ("da"  "Ophavsmand" "Dato"  "Indhold" "Note under teksten")
+    ("da"  "Ophavsmand" "Dato"  "Indhold" "Fodnoter")
     ("de"  "Autor"      "Datum" "Inhaltsverzeichnis" "Fussnoten")
     ("es"  "Autor"      "Fecha" "\xcdndice" "Notas al pie de la p\xe1gina")
     ("fr"  "Auteur"     "Date"  "Table des mati\xe8res" "Notes de bas de page")
@@ -109,7 +109,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("no"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")
     ("nb"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
     ("nn"  "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
-    ("sv"  "F\xf6rfattarens" "Datum" "Inneh\xe5ll"))
+    ("sv"  "F\xf6rfattarens" "Datum" "Inneh\xe5ll" "Fotnoter"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."
