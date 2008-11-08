@@ -5,7 +5,7 @@
 ;; Author: Bastien Guerry <bzg at altern dot org>
 ;;         Carsten Dominik <carsten dot dominik at gmail dot com>
 ;; Keywords: org, wp, remember
-;; Version: 6.11pre01
+;; Version: 6.11
 ;;
 ;; This file is part of GNU Emacs.
 ;;
