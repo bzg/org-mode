@@ -15,10 +15,19 @@
 :PROPERTIES:
 :VISIBILITY: content
 :END:
-
 ** Overview
 
-** Incompatible Changes
+   - Yanking subtree with =C-y= now adjusts the tree level
+   - State changes can now be shown in the log mode in the agenda
+   - Footnote in HTML export are now collected at the end of the document
+   - HTML export now validates again as XHTML
+   - The clock can now be resumed after exiting and re-starting Emacs
+   - Clock-related data can be saved and resumed across Emacs sessions
+   - Following file links can now use C-u C-u to force use of an external app
+   - Inserting absolute files names now abbreviates links with "~"
+   - Links to attachment files
+   - Completed repeated tasks listed briefly in agenda
+   - Remove buffers created during publishing are removed
 
 ** Details
 
@@ -139,8 +148,19 @@
 
     This was a proposal by Lindsay Todd.
 
-*** Completed repeated tasks FIXME
-*** Remove buffers created during publishing FIXME
+*** Completed repeated tasks listed briefly in agenda
+
+    When a repeating task, listed in the daily/weekly agenda under
+    today's date, is completed from the agenda, it is listed as
+    DONE in the agenda until the next update happens.  After the
+    next update, the task will have disappeared, of course,
+    because the new date is no longer today.
+    
+*** Remove buffers created during publishing are removed
+
+    Buffers that are created during publishing are now deleted
+    when the publishing is over.  At least I hope it works like this.
+
 * Version 6.10
 
 ** Overview
@@ -403,9 +423,6 @@
     how to use it, see the [[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php][publishing tutorial]].
 
 * Version 6.07
-:PROPERTIES:
-:VISIBILITY: content
-:END:
 
 ** Overview
 
