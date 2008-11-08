@@ -98,17 +98,17 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
   :type 'boolean)
 
 (defcustom org-export-language-setup
-  '(("en"  "Author"          "Date"  "Table of Contents")
-    ("cs"  "Autor"           "Datum" "Obsah")
-    ("da"  "Ophavsmand"      "Dato"  "Indhold")
-    ("de"  "Autor"           "Datum" "Inhaltsverzeichnis")
-    ("es"  "Autor"           "Fecha" "\xcdndice")
-    ("fr"  "Auteur"          "Date"  "Table des mati\xe8res")
-    ("it"  "Autore"          "Data"  "Indice")
-    ("nl"  "Auteur"          "Datum" "Inhoudsopgave")
-    ("no"  "Forfatter"       "Dato"  "Innhold")
-    ("nb"  "Forfatter"       "Dato"  "Innhold")  ;; nb = Norsk (bokm.l)
-    ("nn"  "Forfattar"       "Dato"  "Innhald")  ;; nn = Norsk (nynorsk)
+  '(("en"  "Author"     "Date"  "Table of Contents" "Footnotes")
+    ("cs"  "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
+    ("da"  "Ophavsmand" "Dato"  "Indhold" "Note under teksten")
+    ("de"  "Autor"      "Datum" "Inhaltsverzeichnis" "Fussnoten")
+    ("es"  "Autor"      "Fecha" "\xcdndice" "Notas al pie de la p\xe1gina")
+    ("fr"  "Auteur"     "Date"  "Table des mati\xe8res" "Notes de bas de page")
+    ("it"  "Autore"     "Data"  "Indice" "Note a pi\xe8 di pagina")
+    ("nl"  "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
+    ("no"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")
+    ("nb"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
+    ("nn"  "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
     ("sv"  "F\xf6rfattarens" "Datum" "Inneh\xe5ll"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
@@ -119,7 +119,8 @@ or use the +OPTION lines for a per-file setting."
 	   (string :tag "HTML language tag")
 	   (string :tag "Author")
 	   (string :tag "Date")
-	   (string :tag "Table of Contents"))))
+	   (string :tag "Table of Contents")
+	   (string :tag "Footnotes"))))
 
 (defcustom org-export-default-language "en"
   "The default language of HTML export, as a string.
@@ -302,6 +303,19 @@ Lines starting with [1] will be formatted as footnotes.
 This option can also be set with the +OPTIONS line, e.g. \"f:nil\"."
   :group 'org-export-translation
   :type 'boolean)
+
+(defcustom org-export-html-footnotes-section "<div id=\"footnotes\">
+<h2 class=\"footnotes\">%s: </h2>
+<div id=\"footnotes-text\">
+%s
+</div> 
+</div>"
+  "Format for the footnotes section.
+Should contain a two instances of %s.  The first will be replaced with the
+language-specific word for \"Footnotes\", the second one will be replaced
+by the footnotes themselves."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-with-sub-superscripts t
   "Non-nil means, interpret \"_\" and \"^\" for export.
@@ -3446,6 +3460,11 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	    ;; Is this the start of a footnote?
 	    (when org-export-with-footnotes
+	      (when (and (boundp 'footnote-section-tag-regexp)
+			 (string-match (concat "^" footnote-section-tag-regexp)
+				       line))
+		;; ignore this line
+		(throw 'nextline nil))
 	      (when (string-match "^[ \t]*\\[\\([0-9]+\\)\\]" line)
 		(org-close-par-maybe)
 		(let ((n (match-string 1 line)))
@@ -3486,10 +3505,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (push (match-string 0) footnotes)
 	  (replace-match "" t t)))
       (when footnotes
-	(insert "<div id=\"footnotes\">\n"
-		(mapconcat 'identity (nreverse footnotes) "\n")
-		"\n</div>\n"))
-
+	(insert (format org-export-html-footnotes-section
+			(or (nth 4 lang-words) "Footnotes")
+			(mapconcat 'identity (nreverse footnotes) "\n"))
+		"\n"))
       (unless body-only
 	(when (plist-get opt-plist :auto-postamble)
 	  (insert "<div id=\"postamble\">")
