@@ -535,13 +535,9 @@ See `org-publish-org-to' to the list of arguments."
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
   ;; make sure eshell/cp code is loaded
-  (eval-and-compile
-    (require 'eshell)
-;    (require 'esh-maint)
-    (require 'em-unix))
   (unless (file-directory-p pub-dir)
     (make-directory pub-dir t))
-  (eshell/cp filename pub-dir))
+  (copy-file filename pub-dir))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
