@@ -102,7 +102,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("cs"  "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
     ("da"  "Ophavsmand" "Dato"  "Indhold" "Fodnoter")
     ("de"  "Autor"      "Datum" "Inhaltsverzeichnis" "Fu\xdfnoten")
-    ("es"  "Autor"      "Fecha" "\xcdndice" "Notas al pie de la p\xe1gina")
+    ("es"  "Autor"      "Fecha" "\xcdndice" "Pies de p\xe1gina")
     ("fr"  "Auteur"     "Date"  "Table des mati\xe8res" "Notes de bas de page")
     ("it"  "Autore"     "Data"  "Indice" "Note a pi\xe8 di pagina")
     ("nl"  "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
