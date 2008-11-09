@@ -5937,7 +5937,8 @@ logging was on (variable @code{org-log-done}) are shown in the agenda, as are
 entries that have been clocked on that day.  You can configure the entry
 types that should be included in log mode using the variable
 @code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
-all possible logbook entries, including state changes.
+all possible logbook entries, including state changes.  When called with two
+prefix args @kbd{C-u C-u}, show only logging information, nothing else.
 @c
 @kindex v
 @item v

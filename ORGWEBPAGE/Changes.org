@@ -70,8 +70,11 @@
     much for normal applications, you can also temporarily
     request the inclusion of state changes by pressing =C-u l= in
     the agenda.
-    
+
     This was a request by Hsiu-Khuern Tang.
+
+    You can also press `C-u C-u l' to get *only* log items in the
+    agenda, withour any timestamps/deadlines etc.
 
 *** Footnote in HTML export are now collected at the end of the document
     Previously, footnotes would be left in the document where

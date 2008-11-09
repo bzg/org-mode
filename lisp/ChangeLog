@@ -1,3 +1,9 @@
+2008-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-list): Handle the value `only' of
+	org-agenda-show-log'.
+	(org-agenda-log-mode): Interpret a double prefix arg.
+
 2008-11-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-html-footnotes-section): New variable.

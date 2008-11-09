@@ -2426,13 +2426,18 @@ given in `org-agenda-start-on-weekday'."
       (while (setq file (pop files))
 	(catch 'nextfile
 	  (org-check-agenda-file file)
-	  (if org-agenda-show-log
-	      (setq rtn (org-agenda-get-day-entries
-			 file date
-			 :deadline :scheduled :timestamp :sexp :closed))
+	  (cond
+	   ((eq org-agenda-show-log 'only)
+	    (setq rtn (org-agenda-get-day-entries
+		       file date :closed)))
+	   (org-agenda-show-log
 	    (setq rtn (org-agenda-get-day-entries
 		       file date
-		       :deadline :scheduled :sexp :timestamp)))
+		       :deadline :scheduled :timestamp :sexp :closed)))
+	   (t
+	    (setq rtn (org-agenda-get-day-entries
+		       file date
+		       :deadline :scheduled :sexp :timestamp))))
 	  (setq rtnall (append rtnall rtn))))
       (if org-agenda-include-diary
 	  (progn
@@ -4628,13 +4633,18 @@ so that the date SD will be in that range."
   (message "Clocktable mode is %s"
 	   (if org-agenda-clockreport-mode "on" "off")))
 
-(defun org-agenda-log-mode (&optional with-states)
-  "Toggle log mode in an agenda buffer."
+(defun org-agenda-log-mode (&optional special)
+  "Toggle log mode in an agenda buffer.
+With argument SPECIAL, show all possible log items, not only the ones
+configured in `org-agenda-log-mode-items'.
+With a double `C-u' prefix arg, show *only* log items, nothing else."
   (interactive "P")
   (org-agenda-check-type t 'agenda 'timeline)
   (setq org-agenda-show-log
-	(if with-states '(closed clock state)
-	  (not org-agenda-show-log)))
+	(if (equal special '(16))
+	    'only
+	  (if special '(closed clock state)
+	    (not org-agenda-show-log))))
   (org-agenda-set-mode-name)
   (org-agenda-redo)
   (message "Log mode is %s"

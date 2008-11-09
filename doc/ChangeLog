@@ -1,3 +1,7 @@
+2008-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Agenda commands): Document the double-prefix version
+	of the `l' command in the agenda.
 
 2008-11-05  Carsten Dominik  <dominik@science.uva.nl>
 
