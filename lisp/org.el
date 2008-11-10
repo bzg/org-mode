@@ -6529,6 +6529,7 @@ used as the link location instead of reading one interactively."
     (insert (org-make-link-string link desc))))
 
 (defun org-completing-read (&rest args)
+  "Completing-read with SPACE being a normal character."
   (let ((minibuffer-local-completion-map
 	 (copy-keymap minibuffer-local-completion-map)))
     (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
