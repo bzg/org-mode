@@ -1,3 +1,8 @@
+2008-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-entry-get, org-entry-delete): Use safer regexps to
+	retrieve property values.
+
 2008-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-list): Handle the value `only' of
