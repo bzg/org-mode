@@ -2,6 +2,7 @@
 
 	* org.texi (Clocking work time): Document the :formula property of
 	clock tables.
+	(Structure editing, Refiling notes): Document refiling regions.
 
 2008-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 

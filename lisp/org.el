@@ -1294,7 +1294,7 @@ This is list of cons cells.  Each cell contains:
   - a cons cell (:maxlevel . N). Any headline with level <= N is a target.
 
 When this variable is nil, all top-level headlines in the current buffer
-are used, equivalent to the vlaue `((nil . (:level . 1))'."
+are used, equivalent to the value `((nil . (:level . 1))'."
   :group 'org-remember
   :type '(repeat
 	  (cons
@@ -7333,14 +7333,27 @@ At the target location, the entry is filed as a subitem of the target heading.
 Depending on `org-reverse-note-order', the new subitem will either be the
 first or the last subitem.
 
+If there is an active region, all entries in that region will be moved.
+However, the region must fulfil the requirement that the first heading
+is the first one sets the top-level of the moved text - at most siblings
+below it are allowed.
+
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
 With a double prefix `C-u C-u', go to the location where the last refiling
 operation has put the subtree."
   (interactive "P")
   (let* ((cbuf (current-buffer))
+	 (regionp (org-region-active-p))
+	 (region-start (and regionp (region-beginning)))
+	 (region-end (and regionp (region-end)))
+	 (region-length (and regionp (- region-end region-start)))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	 pos it nbuf file re level reversed)
+    (when regionp (goto-char region-start)
+	  (unless (org-kill-is-subtree-p
+		   (buffer-substring region-start region-end))
+	    (error "The region is not a (sequence of) subtree(s)")))
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (setq it (org-refile-get-location
@@ -7355,7 +7368,11 @@ operation has put the subtree."
 	      (switch-to-buffer nbuf)
 	      (goto-char pos)
 	      (org-show-context 'org-goto))
-	  (org-copy-subtree 1 nil t)
+	  (if regionp
+	      (progn
+		(kill-new (buffer-substring region-start region-end))
+		(org-save-markers-in-region region-start region-end))
+	    (org-copy-subtree 1 nil t))
 	  (save-excursion
 	    (set-buffer (setq nbuf (or (find-buffer-visiting file)
 				       (find-file-noselect file))))
@@ -7375,9 +7392,11 @@ operation has put the subtree."
 		(if (not (bolp)) (newline))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
-	  (org-cut-subtree)
+	  (if regionp
+	      (delete-region (point) (+ (point) region-length))
+	    (org-cut-subtree))
 	  (setq org-markers-to-move nil)
-	  (message "Entry refiled to \"%s\"" (car it)))))))
+	  (message "Refiled to \"%s\"" (car it)))))))
 
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."

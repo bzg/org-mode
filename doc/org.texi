@@ -952,7 +952,7 @@ paste subtrees folded and in a clever way, using the same command as @kbd{C-c
 C-x C-y}.
 @kindex C-c C-w
 @item C-c C-w
-Refile entry to a different location.  @xref{Refiling notes}.
+Refile entry or region to a different location.  @xref{Refiling notes}.
 @kindex C-c ^
 @item C-c ^
 Sort same-level entries.  When there is an active region, all entries in the
@@ -5185,16 +5185,16 @@ special command:
 @table @kbd
 @kindex C-c C-w
 @item C-c C-w
-Refile the entry at point.  This command offers possible locations for
-refiling the entry and lets you select one with completion.  The item is
-filed below the target heading as a subitem.  Depending on
-@code{org-reverse-note-order}, it will be either the first of last
-subitem.@* By default, all level 1 headlines in the current buffer are
-considered to be targets, but you can have more complex definitions
-across a number of files.  See the variable @code{org-refile-targets}
-for details.  If you would like to select a location via a file-pathlike
-completion along the outline path, see the variable
-@code{org-refile-use-outline-path}.
+Refile the entry or region at point.  This command offers possible locations
+for refiling the entry and lets you select one with completion.  The item (or
+all items in the region) is filed below the target heading as a subitem.
+Depending on @code{org-reverse-note-order}, it will be either the first of
+last subitem.@*
+By default, all level 1 headlines in the current buffer are considered to be
+targets, but you can have more complex definitions across a number of files.
+See the variable @code{org-refile-targets} for details.  If you would like to
+select a location via a file-pathlike completion along the outline path, see
+the variable @code{org-refile-use-outline-path}.
 @kindex C-u C-c C-w
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.
