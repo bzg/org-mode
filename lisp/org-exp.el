@@ -98,18 +98,21 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
   :type 'boolean)
 
 (defcustom org-export-language-setup
-  '(("en"  "Author"     "Date"  "Table of Contents" "Footnotes")
-    ("cs"  "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
-    ("da"  "Ophavsmand" "Dato"  "Indhold" "Fodnoter")
-    ("de"  "Autor"      "Datum" "Inhaltsverzeichnis" "Fu\xdfnoten")
-    ("es"  "Autor"      "Fecha" "\xcdndice" "Pies de p\xe1gina")
-    ("fr"  "Auteur"     "Date"  "Table des mati\xe8res" "Notes de bas de page")
-    ("it"  "Autore"     "Data"  "Indice" "Note a pi\xe8 di pagina")
-    ("nl"  "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
-    ("no"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")
-    ("nb"  "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
-    ("nn"  "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
-    ("sv"  "F\xf6rfattare" "Datum" "Inneh\xe5ll" "Fotnoter"))
+  '(("en" "Author"     "Date"  "Table of Contents" "Footnotes")
+    ("cs" "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
+    ("da" "Ophavsmand" "Dato"  "Indhold" "Fodnoter")
+    ("de" "Autor"      "Datum" "Inhaltsverzeichnis" "Fu&szlig;noten")
+    ("es" "Autor"      "Fecha" "&Iacute;ndice" "Pies de p&aacute;gina")
+    ("fi" "Tekij&auml;"     "P&auml;iv&auml;m&auml;&auml;r&auml;"   "Sis&auml;llysluettelo"  "Alaviitteet")
+    ("fr" "Auteur"     "Date"  "Table des mati&egrave;res" "Notes de bas de page")
+    ("hu" "Szerz&otilde;" "D&aacute;tum" "Tartalomjegyz&eacute;k" "L&aacute;bjegyzet")
+    ("it" "Autore"     "Data"  "Indice" "Note a pi&egrave; di pagina")
+    ("nl" "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
+    ("no" "Forfatter"  "Dato"  "Innhold" "Fotnoter")
+    ("nb" "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
+    ("nn" "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
+    ("pl" "Autor"      "Data" "Spis tre&sacute;ci"  "Przypis")
+    ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."
