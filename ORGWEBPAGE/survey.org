@@ -9,9 +9,9 @@
 
 * Survey introduction
 
-A survey was conducted of org-mode users duing November 2007.  An
+A survey was conducted of org-mode users during November 2007.  An
 invitation was sent to the org-mode users list as well as announced on
-the http://orgmode.org web site.  About 80 people resonded.  This file
+the http://orgmode.org web site.  About 80 people responded.  This file
 contains a complete list of the answers, as the base of further
 discussion.
 
@@ -39,7 +39,7 @@ The different Linux distributions:
 | MagicLinux   |  1 | *              |
 | OpenBSD      |  1 | *              |
 | RedHat       |  2 | **             |
-| Solarus      |  2 | **             |
+| Solaris      |  2 | **             |
 | Suse         |  7 | *******        |
 | Ubuntu       |  9 | *********      |
 | Unspecified  |  2 | **             |
@@ -68,7 +68,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
   from johnh's notebook mode. Finally switched from planner after a
   friend did the same.
 - October 2007
-- about the begining of 2007. Heard about it on the internet I guess.
+- about the beginning of 2007. Heard about it on the Internet I guess.
 - I found it by way of emacswiki.org. I was an avid user of outline
   mode, and found somebody's screencast (Scott Jaderholm's, I think)
   showing off org mode. I've been using it for probably about six
@@ -80,7 +80,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
 - 2007-Nov. Google.
 - July 2007 after I saw the entry in Emacswiki
 - april 2007
-- 2007-06 thrrough Sacha Chua's blog
+- 2007-06 through Sacha Chua's blog
 - Oldest entry in my archive file is June 2005, but I think I was
   using org for a while before that. I don't remember when I heard
   about it.
@@ -98,7 +98,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
   it out.
 - August 2007. I heard it about it on the planner mode mailing list.	
 - 6-12 months ago!
-- I read about org-mail from an email of a maillist ... dnon't know
+- I read about org-mail from an email of a maillist ... don't know
   which one
 - A year ago because someone mentioned it in #emacs on freenode as a
   better planner-el solution	
@@ -130,7 +130,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
   me to ask me what I thought. It thought it was pretty good, and I've
   been using it almost every day since.
 - October 2006. Saw orgmode mentioned in comments on 43folders.com
-- 2007 july, emacs wiki	
+- 2007 July, emacs wiki	
 - Around September 2007. I first knew it from planner-mode mailing
   list. I used to use planner-mode.
 - Oct 2007
@@ -156,7 +156,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
 - April 2006 (ca org-mode 4.25) Switching from Planner after numerous
   mentions of org on the planner mailing list.
 - October 2006	
-- In june 2006. By reading the tutorial here:
+- In June 2006. By reading the tutorial here:
   http://dto.freeshell.org/notebook/OrgTutorial.html
 - Aug 2005 After trying out Sacha's planning mode i knew it was close,
   but not quite right for me. Googling around I found org mode.
@@ -199,7 +199,7 @@ The raw replies can be found [[Raw Emacs versions][here]].
 - TODO list management
 - Task list and note taking
 - Todo-list administration - Time tracking - Creating outlines
-- write lists to keep track of projects and infomation
+- write lists to keep track of projects and information
 - I mostly use it as an extended version of outline mode, as well as
   the agenda mode. Managing TODO lists and the like. I also really
   like the integration with remember mode.
@@ -284,13 +284,13 @@ The raw replies can be found [[Raw Emacs versions][here]].
   pages, ...) - Support a bit the process of writing an article
   (TODOs, deadlines, sections, ...)
 - documentation todo list management complete daily work organisation
-  private and at work planing of schedules for church and sports
-  crÅÈate customer visit protocols (html for colleagues) I have access
+  private and at work planning of schedules for church and sports
+  create customer visit protocols (html for colleagues) I have access
   to my org files via svn world-wide
 - all aspects of GTD except calendar
 - Outlining and Organising.
 - Day to day planning. Constantly switching between gtd and John
-  Wiegly's setup to find out what suits me best.
+  Wiegley's setup to find out what suits me best.
 - Todo List management. Task Scheduling. Note taking. Blogging
   (Blorg). Simple Bug Tracking.	
 - Organizing my work.
@@ -337,7 +337,7 @@ Original question:
 What new features (if any) would you like to see in org-mode or do you
 think the product has reached maturity?
 
-- case sensitive search in tag completition - multilingual day name
+- case sensitive search in tag completion - multilingual day name
   input product has reached maturity in my opinion	
 - nothing (for now)	 
 - A way to make it more Gnome friendly would be nice. In the case that
@@ -389,7 +389,7 @@ think the product has reached maturity?
   important: Keeping root to leaf tree structure when archiving part
   of a subtree. Simple dependent todos (i.e. dependent todo moves into
   "NEXT" state when previous todo is marked "DONE"). Exporting entries
-  in HTML in monospaced font by default (i.e. without specially
+  in HTML in mono-spaced font by default (i.e. without specially
   marking individual entries). Auto-sorting of entries within a single
   parent node (e.g. when a node is marked "DONE", move it lower in the
   parent's list of todos). Integration with project management
@@ -406,11 +406,11 @@ think the product has reached maturity?
   maturity.
 - This product has reached maturity since long! In my point of view
   this is. Excellent work!	
-- depending tasks - integrated pdf-generation (especially for
-  windows) - visualisation for tasks (like gantt) - a minor mode for
+- depending tasks - integrated PDF-generation (especially for
+  windows) - visualisation for tasks (like Gantt) - a minor mode for
   contacts like vcard.el
 - I think it reached maturity. It would be nice to have some minor
-  things, like a posibility to insert todo's right inside your project
+  things, like a possibility to insert todo's right inside your project
   source code and then have them added in agenda automatically.	
 - Instead of new features, I'd much prefer keeping XEmacs
   compatibility	
@@ -430,7 +430,7 @@ think the product has reached maturity?
 - I'm quite content as it is. I guess I could probably think of one or
   two things, but I wouldn't want to spoil its power/simplicity
   balance.
--  planing times for tasks and compare them to actuel used times (and
+-  planing times for tasks and compare them to actual used times (and
   also give out a warning if to many hours are planed for one day) -
   agenda export to latex - simple project management
 - a gtd framework would be a killer feature!! more visual effects with
@@ -441,8 +441,8 @@ think the product has reached maturity?
   minor mode so I can turn it on/off in other buffers (mainly
   muse). For example I would love to use todo list editing features in
   emails. 
-- I don't understant all the features yet :)	
-- export facilitie
+- I don't understand all the features yet :)	
+- export facilities
 - New features, in order of importance to me: 1.) A way to select a
   chunk of text in firefox and paste it into org-mode, along with a
   nicely formatted URL link. I would use this many times a day. MS
@@ -463,7 +463,7 @@ think the product has reached maturity?
   underline/bold/italic stuff (if that is a new feature) 6.) Better
   formatted html table export
 - Better support for working with others.	
-- I would like to see different way to view or summarize ageda. Like
+- I would like to see different way to view or summarize agenda. Like
   progress, next possible todo
 - I think org-mode is quite mature now except there may be still some
   bugs in it and some features may need more polish
@@ -485,7 +485,7 @@ think the product has reached maturity?
   formatting text, which doesn't require memorizing use cases or
   exceptions (ex: *a* isn't bold)
 - syncing with my palm would be the greatest need. (syncing with
-  outlook would do the job as outlook is snced with the palm)
+  outlook would do the job as outlook is synced with the palm)
 - mostly small things like an isearch mode that only matches headlines
   (and doesn't auto expand), an allout-copy-exposed-to-buffer
   equivalent, hipster pda publishing
@@ -504,7 +504,7 @@ think the product has reached maturity?
   is already there - just need to find the time to sort it out). Other
   than that I am very content!
 -  I always wanted to be able to schedule a task for a specific week
-  (as oposed to a date) - I would like to improve the hipsterPDA
+  (as opposed to a date) - I would like to improve the hipsterPDA
   generation (export the agenda view as nice LaTeX, improve the
   cal-tex output, etc)
 - Org grows faster than I can learn all those nice features. One
@@ -599,7 +599,7 @@ documentation or as a tutorial or screencast?
 - Different usages of org-mode. From GTD to other ways ...	
 - I find the manual well written and sufficient.
 - Use of drawers and properties.
-- HOw to organize multiple projects; auto-archival.
+- How to organize multiple projects; auto-archival.
 - org spreadsheet	
 - Since Org-mode is (to me) a collection of "orthogonal" features, but
   doesn't much impose structure, I'd be interested in seeing how
@@ -607,7 +607,7 @@ documentation or as a tutorial or screencast?
   features.
 - none
 - more documentation for org's lisp functions (in fact more examples
-  with org's lisp funtions!!)
+  with org's lisp functions!!)
 - remember mode integration
 - I prefer the documentation and experimentation. Need drives my
   learning.
@@ -648,20 +648,20 @@ documentation or as a tutorial or screencast?
 - The spreadsheet.
 - None that I would be interested in, although I accept that new users
   would benefit from them.
-- I think column-view is a great feature. Bastiens tutorial is good,
+- I think column-view is a great feature. Bastien's tutorial is good,
   but I'm thinking a tutorial focused more on the use case as opposed
   to the config option might be better. If I find time :-)
 - I don't know if it's just me, but currently I make no use of
   tags. So any how-to or screencasts of how to use categories and tags
   together in a senseful way would be nice. Most usages of tags I've
-  seen so far where tags like :phonecall: or :appoitment:, but when I
-  have a TODO "Call Jim" or "Meet Jim" those are superluous...	
-- I would welcome such how-to's and offer to help. The drawback of
+  seen so far where tags like :phonecall: or :appointment:, but when I
+  have a TODO "Call Jim" or "Meet Jim" those are superfluous...	
+- I would welcome such howtos and offer to help. The drawback of
   screencasts is they take a long time, and there is no way a viewer
-  can tell it will be usefull to sit it all out. A guide giving
+  can tell it will be useful to sit it all out. A guide giving
   examples (and using short screencasts, if necessary) gives the
   reader an overview, he/she can skip sections and browse to a
-  chapter/paragraph deemed usefull. I would like to learn howto tweak
+  chapter/paragraph deemed useful. I would like to learn howto tweak
   my custom built todo-lists so that some of the statuses show up in
   the agenda, and others don't. Example WRITE should be on the agenda,
   but INVOICE not really. But the intermediate VERIFY should.
@@ -692,7 +692,7 @@ documentation or as a tutorial or screencast?
 - LaTeX, Remember	
 - Use the agenda/tags views heavily. Tables, but not really
   spreadsheets.
-- Rememeber	
+- Remember	
 - remember, agenda views.	
 - I'm sure I will use everything at some point. I've finally started
   using remember recently, about to start using HTML for blogging I
@@ -709,9 +709,9 @@ documentation or as a tutorial or screencast?
   priorities, export to HTML/ics, tables, archiving, remember, custom
   agenda commands	
 - Still exploring.. starting out with fundamentals as described in
-  John Weigly's excellent write-up.
+  John Wiegley's excellent write-up.
 - HTML, Remember
-- Basic planning, some html export, Wannt to use more features of org
+- Basic planning, some html export, Want to use more features of org
   but lack of time
 - Remember, html
 - Much use of Remember, agenda, agenda todo lists. Some use of HTML
@@ -896,10 +896,10 @@ documentation or as a tutorial or screencast?
 - It's changing very fast, and I'm worried that my muscle memory will
   start to fight against the changes. Still, it's good to see an Emacs
   package with such active interest and support.	
-- I'm a happy user. Thanks to Carten and all contributors
+- I'm a happy user. Thanks to Carsten and all contributors
 - great guys on the mailinglist, great spirit, excellent product :-)
 - Carsten, many thanks for this great piece of software! Keep it
-  simple and usuable - not everybody follows the power user discussion
+  simple and usable - not everybody follows the power user discussion
   in gmane
 - Keep up the great work! :)
 - Thanks to Carsten and to people on emacs-orgmode !!
@@ -950,7 +950,7 @@ documentation or as a tutorial or screencast?
   helpful. Thank you very, very much.
 - Well done	
 - Yes: org-mode progresses very well and improves with each version
-- for me its the greatest found treasure since I "dicovered" Emacs.
+- for me its the greatest found treasure since I "discovered" Emacs.
 - Great work! Wish I had time to contribute more.
 - Keep up the good work :)
 - It's a great software project and community. Thanks again to
@@ -975,7 +975,7 @@ documentation or as a tutorial or screencast?
   like him to do. Other heavy users and scripters are great as well.
 - I started using Org-mode as an outliner. It is the best outliner
   I've used an much more. The community is valuable but Carsten's
-  skill and judgment has made org-mode what it is.
+  skill and judgement has made org-mode what it is.
 - It's a killer tool that I could not live without.
 - org-mode is great, I hope it can keep clean text file when adding
   functions.
