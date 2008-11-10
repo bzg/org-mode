@@ -4830,6 +4830,10 @@ new table.  The @samp{BEGIN} line can specify options:
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
 :link        @r{Link the item headlines in the table to their origins}
+:formula     @r{Content of a @code{#+TBLFM} line to be added and evaluated.}
+             @r{As a special case, @samp{:formula %} adds column with % time.}
+             @r{If you do not specify a formula here, any existing formula}
+             @r{below the clock table will survive updates and be evaluated.}
 @end example
 So to get a clock summary of the current level 1 tree, for the current
 day, you could write
@@ -4843,6 +4847,11 @@ only to fit it onto the manual.}
 @example
 #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                     :tend "<2006-08-10 Thu 12:00>"
+#+END: clocktable
+@end example
+A summary of the current subtree with % times would be
+@example
+#+BEGIN: clocktable :scope subtree :link t :formula %
 #+END: clocktable
 @end example
 @kindex C-c C-c

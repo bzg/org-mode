@@ -819,7 +819,7 @@ the currently selected interval size."
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
-	   ipos time p level hlc hdl
+	   ipos time p level hlc hdl content recalc formula pcol
 	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list)
       (setq org-clock-file-total-minutes nil)
       (when step
@@ -959,9 +959,37 @@ the currently selected interval size."
 				  'identity (delq nil tbl)
 				  (if scope-is-list "\n|-\n" "\n")))
 	  (backward-delete-char 1)
+	  (if (setq formula (plist-get params :formula))
+	      (cond
+	       ((eq formula '%)
+		(setq pcol (+ (if scope-is-list 1 0) maxlevel 3))
+		(insert 
+		 (format 
+		  "\n#+TBLFM: $%d='(org-clock-time%% @%d$%d $%d..$%d);%%.1f"
+		  pcol
+		  2
+		  (+ 3 (if scope-is-list 1 0))
+		  (+ (if scope-is-list 1 0) 3)
+		  (1- pcol)))
+		(setq recalc t))
+	       ((stringp formula)
+		(insert "\n#+TBLFM: " formula)
+		(setq recalc t))
+	       (t (error "invalid formula in clocktable")))
+	    ;; Should we rescue an old formula?
+	    (when (stringp (setq content (plist-get params :content)))
+	      (when (string-match "^\\(#\\+TBLFM:.*\\)" content)
+		(setq recalc t)
+		(insert "\n" (match-string 1 (plist-get params :content)))
+		(beginning-of-line 0))))
 	  (goto-char ipos)
 	  (skip-chars-forward "^|")
 	  (org-table-align)
+	  (when recalc
+	    (if (eq formula '%)
+		(save-excursion (org-table-goto-column pcol nil 'force)
+				(insert "%")))
+	    (org-table-recalculate 'all))
 	  (when rm-file-column
 	    (forward-char 1)
 	    (org-table-delete-column)))))))
@@ -1009,6 +1037,29 @@ the currently selected interval size."
 			       x))
 			   lines)
 		   "\n"))))
+
+(defun org-clock-time% (total &rest strings)
+  "Compute a time fraction in percent.
+TOTAL s a time string like 10:21 specifying the total times.
+STRINGS is a list of strings that should be checked for a time.
+The first string that does have a time will be used.
+This function is made for clock tables."
+  (let ((re "\\([0-9]+\\):\\([0-9]+\\)")
+	tot s)
+    (save-match-data
+      (catch 'exit
+	(if (not (string-match re total))
+	    (throw 'exit 0.)
+	  (setq tot (+ (string-to-number (match-string 2 total))
+		       (* 60 (string-to-number (match-string 1 total)))))
+	  (if (= tot 0.) (throw 'exit 0.)))
+	(while (setq s (pop strings))
+	  (if (string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
+	      (throw 'exit
+		     (/ (* 100.0 (+ (string-to-number (match-string 2 s))
+				    (* 60 (string-to-number (match-string 1 s)))))
+			tot))))
+	0))))
 
 (defun org-clock-save ()
   "Persist various clock-related data to disk"

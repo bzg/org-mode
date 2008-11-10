@@ -1,3 +1,8 @@
+2008-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clocking work time): Document the :formula property of
+	clock tables.
+
 2008-11-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document the double-prefix version

@@ -1,5 +1,7 @@
 2008-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-time%): New function.
+
 	* org.el (org-entry-get, org-entry-delete): Use safer regexps to
 	retrieve property values.
 
