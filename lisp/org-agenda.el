@@ -389,7 +389,7 @@ or `C-c a #' to produce the list."
 
 (defcustom org-agenda-filter-effort-default-operator "<"
   "The default operator for effort estimate filtering.
-If you select an effort estimate limit with first pressing an operator,
+If you select an effort estimate limit without first pressing an operator,
 this one will be used."
   :group 'org-agenda-custom-commands
   :type '(choice (const :tag "less or equal" "<")
