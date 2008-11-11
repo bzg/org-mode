@@ -11,10 +11,69 @@
 #+LINK_HOME: http://orgmode.org
 
 
+* Version 6.12 (in preparation)
+  :PROPERTIES:
+  :VISIBILITY: content
+  :END:
+
+** Overview
+
+** Details
+
+*** A region of entries can now be refiled with a single command
+    
+    With =transient-make-mode= active (=zmacs-regions= under
+    XEmacs), you can now select a region of entries and refile
+    them all with a single =C-c C-w= command.
+
+    Thanks to Samuel Wales for this useful proposal.
+
+*** Fine-tuning the behavior of =org-yank=
+
+    The behavior of Org's yanking command has been further
+    fine-tuned in order to avoid some of the small annoyances
+    this command caused.
+
+    - Calling =org-yank= with a prefix arg will stop any special
+      treatment and directly pass through to the normal =yank=
+      command.  Therefore, you can now force a normal yank with
+      =C-u C-y=.
+
+    - Subtrees will only be folded after a yank if doing so will
+      now swallow any non-white characters after the yanked text.
+      This is, I think a really important change to make the
+      command work more sanely.
+
+*** Formulas for clocktables
+
+    You can now add formulas to a clock table, either by hand, or
+    with a =:formula= parameter.  These formulas can be used to
+    create additional columns with further analysis of the
+    measured times.
+
+    Thanks to Jurgen Defurne for triggering this addition.
+
+*** Better implementation of footnotes for HTML export
+    
+    The footnote export in 6.11 really was not good enough.  Now
+    it works fine.  If you have customized
+    =footnote-section-tag=, make sure that your customization is
+    matched by =footnote-section-tag-regexp=.
+
+    Thanks to Sebastian Rose for pushing this change.
+
+*** More languages for HTML export.
+
+    More languages are supported during HTML export.  This is
+    only relevant for the few special words Org inserts, like
+    "Table of Contents", or "Footnotes".  Also the encoding
+    issues with this feature seem to be solved now.
+
+    Thanks to Sebastian Rose for pushing me to fix the encoding
+    problems.
+
 * Version 6.11
-:PROPERTIES:
-:VISIBILITY: content
-:END:
+
 ** Overview
 
    - Yanking subtree with =C-y= now adjusts the tree level
