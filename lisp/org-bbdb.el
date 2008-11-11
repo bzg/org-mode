@@ -6,7 +6,7 @@
 ;;         Thomas Baumann <thomas dot baumann at ch dot tum dot de>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.11c
+;; Version: 6.12
 ;;
 ;; This file is part of GNU Emacs.
 ;;

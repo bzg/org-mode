@@ -11,12 +11,18 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.12 (in preparation)
+* Version 6.12
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 
 ** Overview
+
+   - A region of entries can now be refiled with a single command
+   - Fine-tuning the behavior of `org-yank'
+   - Formulas for clocktables
+   - Better implementation of footnotes for HTML export
+   - More languages for HTML export.
 
 ** Details
 

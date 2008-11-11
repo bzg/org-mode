@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.11c
+;; Version: 6.12
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -108,6 +108,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("fi" "Tekij&auml;"     "P&auml;iv&auml;m&auml;&auml;r&auml;"   "Sis&auml;llysluettelo"  "Alaviitteet")
     ("fr" "Auteur"     "Date"  "Table des mati&egrave;res" "Notes de bas de page")
     ("hu" "Szerz&otilde;" "D&aacute;tum" "Tartalomjegyz&eacute;k" "L&aacute;bjegyzet")
+    ("is" "H&ouml;fundur" "Dagsetning" "Efnisyfirlit" "Aftanm&aacute;lsgreinar")
     ("it" "Autore"     "Data"  "Indice" "Note a pi&egrave; di pagina")
     ("nl" "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
     ("no" "Forfatter"  "Dato"  "Innhold" "Fotnoter")
