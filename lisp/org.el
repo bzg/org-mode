@@ -637,7 +637,8 @@ When t, the following will happen while the cursor is in the headline:
   "Non-nil means, when yanking subtrees, fold them.
 If the kill is a single subtree, or a sequence of subtrees, i.e. if
 it starts with a heading and all other headings in it are either children
-or siblings, then fold all the subtrees."
+or siblings, then fold all the subtrees.  However, do this only if no
+text after the yank would be swallowed into a folded tree by this action."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -13985,7 +13986,7 @@ beyond the end of the headline."
 
 (define-key org-mode-map "\C-k" 'org-kill-line)
 
-(defun org-yank ()
+(defun org-yank (&optional arg)
   "Yank.  If the kill is a subtree, treat it specially.
 This command will look at the current kill and check if is a single
 subtree, or a series of subtrees[1].  If it passes the test, and if the
@@ -13994,46 +13995,79 @@ empty headline, then the yank is handeled specially.  How exactly depends
 on the value of the following variables, both set by default.
 
 org-yank-folded-subtrees
-    When set, the subree(s) wiil be folded after insertion.
+    When set, the subree(s) will be folded after insertion, but only
+    if doing so would now swallow text after the yanked text.
 
 org-yank-adjusted-subtrees
     When set, the subtree will be promoted or demoted in order to
-    fit into the local outline tree structure.
+    fit into the local outline tree structure, which means that the level
+    will be adjusted so that it becomes the smaller of the two *visible*
+    surrounding headings.
+
+Any prefix to this command will cause `yank' to be caalled directly with
+no special treatment.  In particular, a simple `C-u' prefix will just
+plainly yank the text as it is.
 
 \[1] Basically, the test checks if the first non-white line is a heading
     and if there are no other headings with fewer stars."
-  (interactive)
-  (let ((subtreep ; is kill a subtree, and the yank position appropriate?
-	 (and (org-kill-is-subtree-p)
-	      (or (bolp)
-		  (and (looking-at "[ \t]*$")
-		       (string-match 
-			"\\`\\*+\\'"
-			(buffer-substring (point-at-bol) (point))))))))
-    (cond
-     ((and subtreep org-yank-folded-subtrees)
-      (let ((beg (point))
-	    end)
-	(if (and subtreep org-yank-adjusted-subtrees)
-	    (org-paste-subtree nil nil 'for-yank)
-	  (call-interactively 'yank))
-	(setq end (point))
-	(goto-char beg)
-	(when (and (bolp) subtreep)
-	  (or (looking-at outline-regexp)
-	      (re-search-forward (concat "^" outline-regexp) end t))
-	  (while (and (< (point) end) (looking-at outline-regexp))
-	    (hide-subtree)
-	    (org-cycle-show-empty-lines 'folded)
-	    (condition-case nil
-		(outline-forward-same-level 1)
-	      (error (goto-char end)))))
-	(goto-char end)
-	(skip-chars-forward " \t\n\r")))
-     ((and subtreep org-yank-adjusted-subtrees)
-      (org-paste-subtree nil nil 'for-yank))
-     (t	(call-interactively 'yank)))))
+  (interactive "P")
+  (if arg
+      (call-interactively 'yank)
+    (let ((subtreep ; is kill a subtree, and the yank position appropriate?
+	   (and (org-kill-is-subtree-p)
+		(or (bolp)
+		    (and (looking-at "[ \t]*$")
+			 (string-match 
+			  "\\`\\*+\\'"
+			  (buffer-substring (point-at-bol) (point)))))))
+	  swallowp)
+      (cond
+       ((and subtreep org-yank-folded-subtrees)
+	(let ((beg (point))
+	      end)
+	  (if (and subtreep org-yank-adjusted-subtrees)
+	      (org-paste-subtree nil nil 'for-yank)
+	    (call-interactively 'yank))
+	  (setq end (point))
+	  (goto-char beg)
+	  (when (and (bolp) subtreep
+		     (not (setq swallowp
+				(org-yank-folding-would-swallow-text beg end))))
+	    (or (looking-at outline-regexp)
+		(re-search-forward (concat "^" outline-regexp) end t))
+	    (while (and (< (point) end) (looking-at outline-regexp))
+	      (hide-subtree)
+	      (org-cycle-show-empty-lines 'folded)
+	      (condition-case nil
+		  (outline-forward-same-level 1)
+		(error (goto-char end)))))
+	  (when swallowp
+	    (message
+	     "Yanked text not folded because that would swallow text"))
+	  (goto-char end)
+	  (skip-chars-forward " \t\n\r")
+	  (beginning-of-line 1)))
+       ((and subtreep org-yank-adjusted-subtrees)
+	(org-paste-subtree nil nil 'for-yank))
+       (t
+	(call-interactively 'yank))))))
   
+(defun org-yank-folding-would-swallow-text (beg end)
+  "Would hide-subtree at BEG swallow any text after END?"
+  (let (level)
+    (save-excursion
+      (goto-char beg)
+      (when (or (looking-at outline-regexp)
+		(re-search-forward (concat "^" outline-regexp) end t))
+	(setq level (org-outline-level)))
+      (goto-char end)
+      (skip-chars-forward " \t\r\n\v\f")
+      (if (or (eobp)
+	      (and (bolp) (looking-at org-outline-regexp)
+		   (<= (org-outline-level) level)))
+	  nil ; Nothing would be swallowed
+	t)))) ; something would swallow
+
 (define-key org-mode-map "\C-y" 'org-yank)
 
 (defun org-invisible-p ()

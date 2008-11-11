@@ -1,5 +1,10 @@
 2008-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-yank): Make any prefix force normal yanking.
+	Suppress folding if text would be swallowed into a folded
+	subtree.
+	(org-yank-folded-subtrees, org-yank): Docstring updates.
+
 	* org-agenda.el (org-agenda-compare-effort): Treat no effort
 	defined as 0.
 

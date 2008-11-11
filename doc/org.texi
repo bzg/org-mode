@@ -949,7 +949,11 @@ headline marker like @samp{****}.
 Depending on the variables @code{org-yank-adjusted-subtrees} and
 @code{org-yank-folded-subtrees}, Org's internal @code{yank} command will
 paste subtrees folded and in a clever way, using the same command as @kbd{C-c
-C-x C-y}.
+C-x C-y}.  With the default settings, level adjustment will take place and
+yanked trees will be folded unless doing so would swallow text previously
+visible.  Any prefix argument to this command will force a normal @code{yank}
+to be executed, with the prefix passed along.  A good way to force a normal
+yank is @kbd{C-u C-y}.
 @kindex C-c C-w
 @item C-c C-w
 Refile entry or region to a different location.  @xref{Refiling notes}.
