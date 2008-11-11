@@ -14001,10 +14001,10 @@ org-yank-folded-subtrees
 org-yank-adjusted-subtrees
     When set, the subtree will be promoted or demoted in order to
     fit into the local outline tree structure, which means that the level
-    will be adjusted so that it becomes the smaller of the two *visible*
-    surrounding headings.
+    will be adjusted so that it becomes the smaller one of the two
+    *visible* surrounding headings.
 
-Any prefix to this command will cause `yank' to be caalled directly with
+Any prefix to this command will cause `yank' to be called directly with
 no special treatment.  In particular, a simple `C-u' prefix will just
 plainly yank the text as it is.
 
