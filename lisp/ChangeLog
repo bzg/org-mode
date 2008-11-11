@@ -1,5 +1,8 @@
 2008-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-compare-effort): Treat no effort
+	defined as 0.
+
 	* org-exp.el (org-export-language-setup): Add Catalan and
 	Esperanto language entries.
 

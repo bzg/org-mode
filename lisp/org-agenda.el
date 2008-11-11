@@ -4308,7 +4308,7 @@ E looks line \"+<2:25\"."
 If the line does not have an effort defined, return nil."
   (let ((eff (get-text-property (point) 'effort-minutes)))
     (if (not eff)
-	nil ; we don't have an effort defined
+	0 ; we don't have an effort defined, treat as 0
       (funcall op eff value))))
 
 (defun org-agenda-filter-apply (filter)
