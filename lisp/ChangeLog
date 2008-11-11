@@ -1,3 +1,8 @@
+2008-11-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-language-setup): Add Catalan and
+	Esperanto language entries.
+
 2008-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-refile): Allow refiling of entire regions.

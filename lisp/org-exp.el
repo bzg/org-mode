@@ -99,9 +99,11 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
 
 (defcustom org-export-language-setup
   '(("en" "Author"     "Date"  "Table of Contents" "Footnotes")
+    ("ca"  "Autor"      "Data" "&Iacute;ndex" "Peus de p&agrave;gina")
     ("cs" "Autor"      "Datum" "Obsah" "Pozn\xe1mky pod carou")
     ("da" "Ophavsmand" "Dato"  "Indhold" "Fodnoter")
     ("de" "Autor"      "Datum" "Inhaltsverzeichnis" "Fu&szlig;noten")
+    ("eo"  "A&#365;toro"      "Dato" "Enhavo" "Piednotoj")
     ("es" "Autor"      "Fecha" "&Iacute;ndice" "Pies de p&aacute;gina")
     ("fi" "Tekij&auml;"     "P&auml;iv&auml;m&auml;&auml;r&auml;"   "Sis&auml;llysluettelo"  "Alaviitteet")
     ("fr" "Auteur"     "Date"  "Table des mati&egrave;res" "Notes de bas de page")
