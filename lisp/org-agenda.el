@@ -878,6 +878,20 @@ to occupy a fixed space in the agenda display."
   :group 'org-agenda-line-format
   :type 'string)
 
+(defcustom org-agenda-timerange-leaders '("" "(%d/%d): ")
+  "Text preceding timerange entries in the agenda view.
+This is a list with two strings.  The first applies when the range
+is entirely on one day.  The second applies if the range spans several days.
+The strings may have two \"%d\" format specifiers which will be filled
+with the sequence number of the days, and the total number of days in the
+range, respectively."
+  :group 'org-agenda-line-format
+  :type '(list
+	  (string :tag "Deadline today   ")
+	  (choice :tag "Deadline relative"
+		  (string :tag "Format string")
+		  (function))))
+
 (defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%2dx: ")
   "Text preceeding scheduled items in the agenda view.
 This is a list with two strings.  The first applies when the item is
@@ -3677,8 +3691,10 @@ FRACTION is what fraction of the head-warning time has passed."
 			 (org-entry-is-done-p)
 			 (throw :skip t))
 		    (setq txt (org-format-agenda-item
-			       (format (if (= d1 d2) "" "(%d/%d): ")
-				       (1+ (- d0 d1)) (1+ (- d2 d1)))
+			       (format
+				(nth (if (= d1 d2) 0 1)
+				     org-agenda-timerange-leaders)
+				(1+ (- d0 d1)) (1+ (- d2 d1)))
 			       head category tags
 			       (if (= d0 d1) timestr))))
 		(setq txt org-agenda-no-heading-message))
