@@ -82,7 +82,7 @@ Some more information about this can be found in the [[http://orgmode.org/worg/o
    - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
    - There is also a package on [[http://aur.archlinux.org/packages.php?do_Details&ID=18206][Archlinux]], by Jiyunatori.
    - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintainned by Sebastien Delafond
-   - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jese Alama
+   - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jesse Alama
    - Mark A. Hershberger has made an [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] for Org, but
      that seems to be out of date.
 
