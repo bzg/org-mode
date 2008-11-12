@@ -5711,6 +5711,7 @@ the language, a switch telling of the content should be in a single line."
       (font-lock-unfontify-region (point-min) (point-max)))
     (put-text-property (point-min) (point-max) 'font-lock-fontified t))
   (when (org-bound-and-true-p org-edit-src-picture)
+    (untabify (point-min) (point-max))
     (goto-char (point-min))
     (while (re-search-forward "^" nil t)
       (replace-match ": "))
