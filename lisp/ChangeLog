@@ -1,5 +1,8 @@
 2008-11-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-attachment): Allow publishing to
+	overwrite attachment files.
+
 	* org-agenda.el (org-agenda-timerange-leaders): New option.
 	(org-agenda-get-blocks): Use `org-agenda-timerange-leaders'.
 
