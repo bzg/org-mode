@@ -3791,7 +3791,7 @@ publishers and the number of disks in a box like this:
 * CD collection
   :PROPERTIES:
   :NDisks_ALL:  1 2 3 4
-  :Publisher_ALL: "Deutsche Grammophon" Phillips EMI
+  :Publisher_ALL: "Deutsche Grammophon" Philips EMI
   :END:
 @end example
 
