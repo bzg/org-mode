@@ -1,5 +1,7 @@
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-vm.el (org-vm-follow-link): Require `vm-search'.
+
 	* org.el (org-up-heading-safe, org-forward-same-level): Always
 	call `org-back-to-heading' instead of `outline-back-to-heading'.
 	(org-back-to-heading): New wrapper around outline-back-to-heading,

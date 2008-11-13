@@ -111,6 +111,7 @@
     (funcall (cdr (assq 'vm org-link-frame-setup)) folder readonly)
     (sit-for 0.1)
     (when article
+      (require 'vm-search)
       (vm-select-folder-buffer)
       (widen)
       (let ((case-fold-search t))
