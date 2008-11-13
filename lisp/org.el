@@ -14087,7 +14087,7 @@ plainly yank the text as it is.
 	(outline-invisible-p)
       (get-char-property (point) 'invisible))))
 
-(defun org-back-to-heading (invisible-ok)
+(defun org-back-to-heading (&optional invisible-ok)
   "Call `outline-back-to-heading', but provide a better error message."
   (condition-case nil
       (outline-back-to-heading invisible-ok)
