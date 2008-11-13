@@ -1,3 +1,8 @@
+2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-html): Make sure that each <img> tag
+	has an `alt' attribute, to ensure XHTML validation.
+
 2008-11-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-attachment): Allow publishing to

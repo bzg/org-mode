@@ -3250,7 +3250,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (if (and (or (eq t org-export-html-inline-images)
 			   (and org-export-html-inline-images (not descp)))
 		       (org-file-image-p path))
-		  (setq rpl (concat "<img src=\"" type ":" path "\"" attr "/>"))
+		  (setq rpl (concat "<img src=\"" type ":" path "\""
+				    (if (string-match "\\<alt=" attr)
+					attr (concat attr " alt=\"" path "\""))
+				    "/>"))
 		(setq link (concat type ":" path))
 		(setq rpl (concat "<a href=\"" 
 				  (org-export-html-format-href link)
@@ -3308,7 +3311,11 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (or (eq t org-export-html-inline-images)
 				       (and org-export-html-inline-images
 					    (not descp))))
-			      (concat "<img src=\"" thefile "\"" attr "/>")
+			      (concat "<img src=\"" thefile "\""
+				      (if (string-match "alt=" attr)
+					  attr
+					(concat attr " alt=\""
+						thefile "\"")) "/>")
 			    (concat "<a href=\"" thefile "\"" attr ">"
 				    (org-export-html-format-desc desc)
 				    "</a>")))
