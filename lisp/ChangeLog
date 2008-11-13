@@ -1,5 +1,8 @@
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-icalendar-cleanup-string): Improve RFC2455
+	compliance as far as quoting is concerned.
+
 	* org.el (org-link-expand-abbrev): Implement %h as an escape for a
 	hexified version of the tag.
 
