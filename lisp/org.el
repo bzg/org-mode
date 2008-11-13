@@ -843,7 +843,9 @@ links in Org-mode buffers can have an optional tag after a double colon, e.g.
      [[linkkey:tag][description]]
 
 If REPLACE is a string, the tag will simply be appended to create the link.
-If the string contains \"%s\", the tag will be inserted there.
+If the string contains \"%s\", the tag will be inserted there.  Alternatively,
+the placeholder \"%h\" will cause a url-encoded version of the tag to
+be inserted at that point (see the function `url-hexify-string').
 
 REPLACE may also be a function that will be called with the tag as the
 only argument to create the link, which should be returned as a string.
@@ -5976,6 +5978,8 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 	  (cond
 	   ((symbolp rpl) (funcall rpl tag))
 	   ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
+	   ((string-match "%h" rpl)
+	    (replace-match (url-hexify-string (or tag "")) t t rpl))
 	   (t (concat rpl tag)))))
     link))
 

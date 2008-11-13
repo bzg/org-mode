@@ -1,5 +1,8 @@
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-link-expand-abbrev): Implement %h as an escape for a
+	hexified version of the tag.
+
 	* org-vm.el (org-vm-follow-link): Require `vm-search'.
 
 	* org.el (org-up-heading-safe, org-forward-same-level): Always
