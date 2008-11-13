@@ -125,7 +125,7 @@ With prefix arg HERE, insert it at point."
   "Have the modules been loaded already?")
 
 (defun org-load-modules-maybe (&optional force)
-  "Load all extensions listed in `org-default-extensions'."
+  "Load all extensions listed in `org-modules'."
   (when (or force (not org-modules-loaded))
     (mapc (lambda (ext)
 	    (condition-case nil (require ext)
