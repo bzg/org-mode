@@ -259,7 +259,7 @@ the whole buffer."
  (save-excursion
    (let* ((buffer-invisibility-spec (org-inhibit-invisibility)) ; Emacs 21
 	  (beg (condition-case nil
-		   (progn (outline-back-to-heading) (point))
+		   (progn (org-back-to-heading) (point))
 		 (error (point-min))))
 	  (end (move-marker (make-marker)
 			    (progn (outline-next-heading) (point))))

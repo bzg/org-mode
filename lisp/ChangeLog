@@ -1,5 +1,13 @@
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-up-heading-safe, org-forward-same-level): Always
+	call `org-back-to-heading' instead of `outline-back-to-heading'.
+	(org-back-to-heading): New wrapper around outline-back-to-heading,
+	with a useful error message telling where the error happened.
+
+	* org-list.el (org-update-checkbox-count): Always call
+	`org-back-to-heading' instead of `outline-back-to-heading'.
+
 	* org-exp.el (org-export-as-html): Make sure that each <img> tag
 	has an `alt' attribute, to ensure XHTML validation.
 

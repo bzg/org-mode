@@ -14087,7 +14087,13 @@ plainly yank the text as it is.
 	(outline-invisible-p)
       (get-char-property (point) 'invisible))))
 
-(defalias 'org-back-to-heading 'outline-back-to-heading)
+(defun org-back-to-heading (invisible-ok)
+  "Call `outline-back-to-heading', but provide a better error message."
+  (condition-case nil
+      (outline-back-to-heading invisible-ok)
+    (error (error "Before first headline at position %d in buffer %s"
+		  (point) (current-buffer)))))
+
 (defalias 'org-on-heading-p 'outline-on-heading-p)
 (defalias 'org-at-heading-p 'outline-on-heading-p)
 (defun org-at-heading-or-item-p ()
@@ -14112,7 +14118,7 @@ headline found, or nil if no higher level is found."
   (let ((pos (point)) start-level level
 	(re (concat "^" outline-regexp)))
     (catch 'exit
-      (outline-back-to-heading t)
+      (org-back-to-heading t)
       (setq start-level (funcall outline-level))
       (if (equal start-level 1) (throw 'exit nil))
       (while (re-search-backward re nil t)
@@ -14188,7 +14194,7 @@ When ENTRY is non-nil, show the entire entry."
 Stop at the first and last subheadings of a superior heading.
 This is like outline-forward-same-level, but invisible headings are ok."
   (interactive "p")
-  (outline-back-to-heading t)
+  (org-back-to-heading t)
   (while (> arg 0)
     (let ((point-to-move-to (save-excursion
 			      (org-get-next-sibling))))
