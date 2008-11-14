@@ -4521,6 +4521,35 @@ whitespace, newlines, drawers, and timestamps, and cut it down to MAXLENGTH
 characters."
   (if (not s)
       nil
+    (when is-body
+      (let ((re (concat "\\(" org-drawer-regexp "\\)[^\000]*?:END:.*\n?"))
+	    (re2 (concat "^[ \t]*" org-keyword-time-regexp ".*\n?")))
+	(while (string-match re s) (setq s (replace-match "" t t s)))
+	(while (string-match re2 s) (setq s (replace-match "" t t s)))))
+    (let ((start 0))
+      (while (string-match "\\([,;]\\)" s start)
+	(setq start (+ (match-beginning 0) 2)
+	      s (replace-match "\\\\\\1" nil nil s))))
+    (setq s (org-trim s))
+    (when is-body
+      (while (string-match "[ \t]*\n[ \t]*" s)
+	(setq s (replace-match "\\n" t t s))))
+    (if is-body
+	(if maxlength
+	    (if (and (numberp maxlength)
+		     (> (length s) maxlength))
+		(setq s (substring s 0 maxlength)))))
+    s))
+
+(defun org-icalendar-cleanup-string-rfc2455 (s &optional is-body maxlength)
+  "Take out stuff and quote what needs to be quoted.
+When IS-BODY is non-nil, assume that this is the body of an item, clean up
+whitespace, newlines, drawers, and timestamps, and cut it down to MAXLENGTH
+characters.
+This seems to be more like RFC 2455, but it causes problems, so it is
+not used right now."
+  (if (not s)
+      nil
     (if is-body
 	(let ((re (concat "\\(" org-drawer-regexp "\\)[^\000]*?:END:.*\n?"))
 	      (re2 (concat "^[ \t]*" org-keyword-time-regexp ".*\n?")))
