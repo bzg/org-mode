@@ -1,3 +1,8 @@
+2008-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (External links): Document that bbdb links can use a
+	regular expression.
+
 2008-11-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Clocking work time): Document the :formula property of
