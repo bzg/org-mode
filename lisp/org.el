@@ -981,6 +981,20 @@ more efficient."
   :tag "Org Follow Link"
   :group 'org-link)
 
+(defcustom org-link-translation-function nil
+  "Function to translate links with different syntax to Org syntax.
+This can be used to translate links created for example by the Planner
+or emacs-wiki packages to Org syntax.
+The function must accept two parameters, a TYPE containing the link
+protocol name like \"rmail\" or \"gnus\" as a string, and the linked path,
+which is everything after the link protocol.  It should return a cons
+with possibly modifed values of type and path.
+Org contains a function for this, so if you set this variable to
+`org-translate-link-from-planner', you should be able follow many
+links created by planner."
+  :group 'org-link-follow
+  :type 'function)
+
 (defcustom org-follow-link-hook nil
   "Hook that is run after a link has been followed."
   :group 'org-link-follow
@@ -3399,6 +3413,8 @@ The following commands are available:
    "Matches a link with spaces, optional angular brackets around it.")
 (defvar org-link-re-with-space2 nil
    "Matches a link with spaces, optional angular brackets around it.")
+(defvar org-link-re-with-space3 nil
+   "Matches a link with spaces, only for internal part in bracket links.")
 (defvar org-angle-link-re nil
    "Matches link with angular brackets, spaces are allowed.")
 (defvar org-plain-link-re nil
@@ -3434,6 +3450,11 @@ This should be called after the variable `org-link-types' has changed."
 	 "\\([^" org-non-link-chars " ]"
 	 "[^\t\n\r]*"
 	 "[^" org-non-link-chars " ]\\)>?")
+	org-link-re-with-space3
+	(concat
+	 "<?\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
+	 "\\([^" org-non-link-chars " ]"
+	 "[^\t\n\r]*\\)")
 	org-angle-link-re
 	(concat
 	 "<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
@@ -6606,6 +6627,39 @@ If the link is in hidden text, expose it."
       (setq org-link-search-failed t)
       (error "No further link found"))))
 
+(defun org-translate-link (s)
+  "Translate a link string if a translation function has been defined."
+  (if (and org-link-translation-function
+	   (fboundp org-link-translation-function)
+	   (string-match "\\([a-zA-Z0-9]+\\):\\(.*\\)"))
+      (progn
+	(setq s (funcall org-link-translation-function
+			 (match-string 1) (match-string 2)))
+	(concat (car s) ":" (cdr s)))
+    s))
+
+(defun org-translate-link-from-planner (type path)
+  "Translate a link from Emacs Planner syntax so that Org can follow it.
+This is still an experimental function, your mileage may vary."
+ (cond
+  ((member type '("http" "https" "news" "ftp"))
+   ;; standard Internet links are the same.
+   nil)
+  ((and (equal type "irc") (string-match "^//" path))
+   ;; Planner has two / at the beginning of an irc link, we have 1.
+   ;; We should have zero, actually....
+   (setq path (substring path 1)))
+  ((and (equal type "lisp") (string-match "^/" path))
+   ;; Planner has a slash, we do not.
+   (setq type elisp path (substring path 1)))
+  ((string-match "^//\\(.?*\\)/\\(<.*>\\)$" path)
+   ;; A typical message link.  Planner has the id after the fina slash,
+   ;; we separate it with a hash mark
+   (setq path (concat (match-string 1 path) "#"
+		      (org-remove-angle-brackets (match-string 2 path)))))
+  )
+ (cons type path))
+
 (defun org-find-file-at-mouse (ev)
   "Open file link or URL at mouse."
   (interactive "e")
@@ -6673,7 +6727,7 @@ application the system uses for this file type."
 	     ((or (file-name-absolute-p link)
 		  (string-match "^\\.\\.?/" link))
 	      (setq type "file" path link))
-	     ((string-match org-link-re-with-space2 link)
+	     ((string-match org-link-re-with-space3 link)
 	      (setq type (match-string 1 link) path (match-string 2 link)))
 	     (t (setq type "thisfile" path link)))
 	    (throw 'match t)))
@@ -6708,6 +6762,11 @@ application the system uses for this file type."
       ;; Remove any trailing spaces in path
       (if (string-match " +\\'" path)
 	  (setq path (replace-match "" t t path)))
+      (if (and org-link-translation-function
+	       (fboundp org-link-translation-function))
+	  ;; Check if we need to translate the link
+	  (let ((tmp (funcall org-link-translation-function type path)))
+	    (setq type (car tmp) path (cdr tmp))))
 
       (cond
 
@@ -6792,7 +6851,10 @@ application the system uses for this file type."
 			   (format "Execute \"%s\" as elisp? "
 				   (org-add-props cmd nil
 				     'face 'org-warning))))
-	      (message "%s => %s" cmd (eval (read cmd)))
+	      (message "%s => %s" cmd 
+		       (if (equal (string-to-char cmd) ?\()
+			   (call-interactively (read cmd))
+			 (eval (read cmd))))
 	    (error "Abort"))))
 
        (t

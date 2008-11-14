@@ -1885,7 +1885,8 @@ When it is nil, all comments will be removed."
       (goto-char (1- (match-end 0)))
       (org-if-unprotected
        (let* ((xx (save-match-data
-		    (org-link-expand-abbrev (match-string 1))))
+		    (org-translate-link
+		     (org-link-expand-abbrev (match-string 1)))))
 	      (s (concat
 		  "[[" xx "]"
 		  (if (match-end 3)

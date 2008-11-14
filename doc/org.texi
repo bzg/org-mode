@@ -2526,7 +2526,8 @@ gnus:group#id                             @r{Gnus article link}
 bbdb:R.*Stallman                          @r{BBDB link (with regexp)}
 irc:/irc.com/#emacs/bob                   @r{IRC link}
 shell:ls *.org                            @r{A shell command}
-elisp:(find-file-other-frame "Elisp.org") @r{An elisp form to evaluate}
+elisp:org-agenda                          @r{Interactive elisp command}
+elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
 @end example
 
 A link should be enclosed in double brackets and may contain a
