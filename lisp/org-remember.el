@@ -54,7 +54,7 @@
 (defcustom org-remember-store-without-prompt t
   "Non-nil means, `C-c C-c' stores remember note without further prompts.
 It then uses the file and headline specified by the template or (if the
-themplate does not specify them) by the variables `org-default-notes-file'
+template does not specify them) by the variables `org-default-notes-file'
 and `org-remember-default-headline'.  To force prompting anyway, use 
 `C-u C-c C-c' to file the note.
 
