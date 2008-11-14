@@ -769,6 +769,10 @@ See also the variable `org-reverse-note-order'."
 		 (not fastp))
 	(org-refile nil (or visiting (find-file-noselect file)))
 	(and visitp (run-with-idle-timer 0.01 nil 'org-remember-visit-immediately))
+	(save-excursion
+	  (bookmark-jump "org-refile-last-stored")
+	  (bookmark-set "org-remember-last-stored")
+	  (move-marker org-remember-last-stored-marker (point)))
 	(throw 'quit t))
       ;; Find the file
       (if (not visiting) (find-file-noselect file))
