@@ -1701,7 +1701,7 @@ end of the second format."
 org-mode generates a time duration."
   :group 'org-time
   :type 'string)
-  
+
 (defcustom org-deadline-warning-days 14
   "No. of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
@@ -2567,7 +2567,7 @@ Otherwise, return nil."
 		     (<= org-clock-marker (point-at-eol)))
 	    ;; The clock is running here
 	    (setq org-clock-start-time
-		  (apply 'encode-time 
+		  (apply 'encode-time
 			 (org-parse-time-string (match-string 1))))
 	    (org-update-mode-line)))
 	 (t
@@ -2740,8 +2740,8 @@ collapsed state."
 ;; Autoload ID code
 
 (org-autoload "org-id"
- '(org-id-get-create org-id-new org-id-copy org-id-get 
-   org-id-get-with-outline-path-completion 
+ '(org-id-get-create org-id-new org-id-copy org-id-get
+   org-id-get-with-outline-path-completion
    org-id-get-with-outline-drilling
    org-id-goto org-id-find))
 
@@ -5096,7 +5096,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 (defun org-paste-subtree (&optional level tree for-yank)
   "Paste the clipboard as a subtree, with modification of headline level.
 The entire subtree is promoted or demoted in order to match a new headline
-level.  
+level.
 
 If the cursor is at the beginning of a headline, the same level as
 that headline is used to paste the tree
@@ -5686,7 +5686,7 @@ the language, a switch telling of the content should be in a single line."
 	   (string-match "\\<style=\"\\([^ \t\n\"]+\\)\"" m))
       (match-string 1 m))
      (t "fundamental"))))
-      
+
 (defun org-edit-src-exit ()
   "Exit special edit and protect problematic lines."
   (interactive)
@@ -7316,7 +7316,7 @@ on the system \"/user@host:\"."
   (while (string-match "/" s)
     (setq s (replace-match "\\" t t s)))
   s)
-    
+
 (defun org-get-outline-path ()
   "Return the outline path to the current entry, as a list."
   (let (rtn)
@@ -7439,7 +7439,7 @@ operation has put the subtree."
 (defun org-olpath-completing-read (prompt collection &rest args)
   "Read an outline path like a file name."
   (let ((thetable collection))
-    (apply 
+    (apply
      'completing-read prompt
      (lambda (string predicate &optional flag)
        (let (rtn r s f (l (length string)))
@@ -7596,7 +7596,7 @@ This function can be used in a hook."
 
 (defcustom org-structure-template-alist
   '(
-    ("s" "#+begin_src ?\n\n#+end_src" 
+    ("s" "#+begin_src ?\n\n#+end_src"
          "<src lang=\"?\">\n\n</src>")
     ("e" "#+begin_example\n?\n#+end_example"
          "<example>\n?\n</example>")
@@ -7659,7 +7659,7 @@ expands them."
        (t (newline))))
     (setq start (point))
     (if (string-match "%file" rpl)
-	(setq rpl (replace-match 
+	(setq rpl (replace-match
 		   (concat
 		    "\""
 		    (save-match-data
@@ -7668,7 +7668,7 @@ expands them."
 		   t t rpl)))
     (insert rpl)
     (if (re-search-backward "\\?" start t) (delete-char 1))))
-    
+
 
 (defun org-complete (&optional arg)
   "Perform completion on word at point.
@@ -8074,7 +8074,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (condition-case nil
 		(org-forward-same-level 1)
 	      (error (end-of-line 1)))))
-	(replace-match 
+	(replace-match
 	 (if is-percent
 	     (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
 	   (format "[%d/%d]" cnt-done cnt-all)))
@@ -8111,7 +8111,7 @@ when there is a statistics cookie in the headline!
       (setq changes (append changes (cdr (assoc 'done l)))))
     (dolist (c changes)
       (org-toggle-tag (car c) (if (cdr c) 'on 'off)))))
-	 
+
 (defun org-local-logging (value)
   "Get logging settings from a property VALUE."
   (let* (words w a)
@@ -8512,7 +8512,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
     (save-excursion
       (when findpos
 	(org-back-to-heading t)
-	(narrow-to-region (point) (save-excursion 
+	(narrow-to-region (point) (save-excursion
 				    (outline-next-heading) (point)))
 	(looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"
 			    "\\(\n[^\r\n]*?" org-keyword-time-not-clock-regexp
@@ -9743,12 +9743,12 @@ the scanner.  The following items can be given here:
      ((eq match t)   (setq matcher t))
      ((eq match nil) (setq matcher t))
      (t (setq matcher (if match (org-make-tags-matcher match) t))))
-    
+
     (when (eq scope 'tree)
       (org-back-to-heading t)
       (org-narrow-to-subtree)
       (setq scope nil))
-    
+
     (if (not scope)
 	(progn
 	  (org-prepare-agenda-buffers
@@ -10083,7 +10083,7 @@ is set.")
 	      (move-marker org-entry-property-inherited-from (point))
 	      (throw 'ex tmp))
 	    (or (org-up-heading-safe) (throw 'ex nil)))))
-      (or tmp 
+      (or tmp
 	  (cdr (assoc property org-file-properties))
 	  (cdr (assoc property org-global-properties))
 	  (cdr (assoc property org-global-properties-fixed))))))
@@ -11605,11 +11605,11 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 	    (lambda (b) (string-match "\*Org .*Export" (buffer-name b))))
 	   ((eq predicate 'agenda)
 	    (lambda (b)
-	      (with-current-buffer b 
+	      (with-current-buffer b
 		(and (eq major-mode 'org-mode)
 		     (setq bfn (buffer-file-name b))
 		     (member (file-truename bfn) agenda-files)))))
-	   (t (lambda (b) (with-current-buffer b 
+	   (t (lambda (b) (with-current-buffer b
 			    (or (eq major-mode 'org-mode)
 				(string-match "\*Org .*Export"
 					      (buffer-name b)))))))))
@@ -11827,7 +11827,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		(append org-done-keywords-for-agenda org-done-keywords))
 	  (setq org-todo-keyword-alist-for-agenda
 		(append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	  (setq org-tag-alist-for-agenda 
+	  (setq org-tag-alist-for-agenda
 		(append org-tag-alist-for-agenda org-tag-alist))
 
 	  (save-excursion
@@ -14016,13 +14016,14 @@ plainly yank the text as it is.
 \[1] Basically, the test checks if the first non-white line is a heading
     and if there are no other headings with fewer stars."
   (interactive "P")
+  (setq this-command 'yank)
   (if arg
       (call-interactively 'yank)
     (let ((subtreep ; is kill a subtree, and the yank position appropriate?
 	   (and (org-kill-is-subtree-p)
 		(or (bolp)
 		    (and (looking-at "[ \t]*$")
-			 (string-match 
+			 (string-match
 			  "\\`\\*+\\'"
 			  (buffer-substring (point-at-bol) (point)))))))
 	  swallowp)
@@ -14051,12 +14052,15 @@ plainly yank the text as it is.
 	     "Yanked text not folded because that would swallow text"))
 	  (goto-char end)
 	  (skip-chars-forward " \t\n\r")
-	  (beginning-of-line 1)))
+	  (beginning-of-line 1)
+	  (push-mark beg 'nomsg)))
        ((and subtreep org-yank-adjusted-subtrees)
-	(org-paste-subtree nil nil 'for-yank))
+	(let ((beg (point-at-bol)))
+	  (org-paste-subtree nil nil 'for-yank)
+	  (push-mark beg 'nomsg)))
        (t
 	(call-interactively 'yank))))))
-  
+
 (defun org-yank-folding-would-swallow-text (beg end)
   "Would hide-subtree at BEG swallow any text after END?"
   (let (level)

@@ -1,3 +1,8 @@
+2008-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-yank): Set `this-command' to `yank', so that
+	`yank-pop' will work.
+
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-icalendar-cleanup-string): Improve RFC2455
