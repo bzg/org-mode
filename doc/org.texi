@@ -9935,6 +9935,9 @@ Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @item
 @i{Ilya Shlyakhter} proposed the Archive Sibling.
 @item
+@i{Stathis Sideris} wrote the @file{ditaa.jar} ASCII to PNG converter that is
+now packaged into Org's @file{contrib} directory.
+@item
 @i{Daniel Sinder} came up with the idea of internal archiving by locking
 subtrees.
 @item
