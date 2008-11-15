@@ -3511,7 +3511,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			    (and org-export-with-toc (<= level umax))
 			    head-count)
       ;; the </div> to close the last text-... div.
-      (insert "</div>\n")
+      (when (and (> umax 0) first-heading-pos) (insert "</div>\n"))
 
       (save-excursion
 	(goto-char (point-min))

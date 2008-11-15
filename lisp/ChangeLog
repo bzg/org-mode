@@ -1,3 +1,8 @@
+2008-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-html): Avoid lone </div> when no
+	headlines are created.
+
 2008-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-link-translation-function): New option.
