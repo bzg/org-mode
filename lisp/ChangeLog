@@ -1,5 +1,8 @@
 2008-11-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-open-at-mouse): Ensure correct link abbreviations
+	when following a link with the mouse from the agenda.
+
 	* org-exp.el (org-export-as-html): Avoid lone </div> when no
 	headlines are created.
 

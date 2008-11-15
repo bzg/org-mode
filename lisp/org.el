@@ -6670,6 +6670,8 @@ This is still an experimental function, your mileage may vary."
   "Open file link or URL at mouse."
   (interactive "e")
   (mouse-set-point ev)
+  (if (eq major-mode 'org-agenda-mode)
+      (org-agenda-copy-local-variable 'org-link-abbrev-alist-local))
   (org-open-at-point))
 
 (defvar org-window-config-before-follow-link nil
