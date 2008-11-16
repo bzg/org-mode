@@ -1415,6 +1415,9 @@ translations.  There is currently no way for users to extend this.")
 
 ;;; General functions for all backends
 
+(defvar org-export-target-aliases nil
+  "Alist of targets with invisible aliases.")
+
 (defun org-export-preprocess-string (string &rest parameters)
   "Cleanup STRING so that that the true exported has a more consistent source.
 This function takes STRING, which should be a buffer-string of an org-file
@@ -1430,6 +1433,8 @@ on this string to produce the exported version."
 	 (drawers org-drawers)
 	 (outline-regexp "\\*+ ")
 	 target-alist rtn)
+
+    (setq org-export-target-aliases nil)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
@@ -1576,7 +1581,7 @@ The new targets are added to TARGET-ALIST, which is also returned."
 (defun org-export-handle-invisible-targets (target-alist)
   "Find targets in comments and move them out of comments.
 Mark them as invisible targets."
-  (let (target tmp)
+  (let (target tmp a)
     (goto-char (point-min))
     (while (re-search-forward "^#.*?\\(<<<?\\([^>\r\n]+\\)>>>?\\).*" nil t)
       ;; Check if the line before or after is a headline with a target
@@ -1587,8 +1592,13 @@ Mark them as invisible targets."
 	    (setq tmp (match-string 2))
 	    (replace-match "")
 	    (and (looking-at "\n") (delete-char 1))
-	    (push (cons (org-solidify-link-text tmp) target)
-		  target-alist))
+	    (push (cons (setq tmp (org-solidify-link-text tmp)) target)
+		  target-alist)
+	    (setq a (or (assoc target org-export-target-aliases)
+			(progn
+			  (push (list target) org-export-target-aliases)
+			  (car org-export-target-aliases))))
+	    (push tmp (cdr a)))
 	;; Make an invisible target
 	(replace-match "\\1(INVISIBLE)"))))
   target-alist)
@@ -3184,9 +3194,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (cond
 	     ((match-end 2)
 	      (setq line (replace-match
-			  (concat "@<a name=\""
-				  (org-solidify-link-text (match-string 1 line))
-				  "\">\\nbsp@</a>")
+			  (format
+			   "@<a name=\"%s\" id=\"%s\">@</a>"
+			   (org-solidify-link-text (match-string 1 line))
+			   (org-solidify-link-text (match-string 1 line)))
 			  t t line)))
 	     ((and org-export-with-toc (equal (string-to-char line) ?*))
 	      ;; FIXME: NOT DEPENDENT on TOC?????????????????????
@@ -4151,9 +4162,15 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Insert a new level in HTML export.
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
-  (let ((target (and title (org-get-text-property-any 0 'target title)))
-	(l org-level-max)
-	snumber)
+  (let* ((target (and title (org-get-text-property-any 0 'target title)))
+	 (extra-targets
+	  (mapconcat (lambda (x)
+		       (format "<a name=\"%s\" id=\"%s\"></a>"
+			       x x))
+		     (cdr (assoc target org-export-target-aliases))
+		     ""))
+	 (l org-level-max)
+	 snumber)
     (while (>= l level)
       (if (aref org-levels-open (1- l))
 	  (progn
@@ -4181,13 +4198,13 @@ When TITLE is nil, just close all open levels."
 		(progn
 		  (org-close-li)
 		  (if target
-		      (insert (format "<li id=\"%s\">" target) title "<br/>\n")
+		      (insert (format "<li id=\"%s\">" target) extra-targets title "<br/>\n")
 		    (insert "<li>" title "<br/>\n")))
 	      (aset org-levels-open (1- level) t)
 	      (org-close-par-maybe)
 	      (if target
 		  (insert (format "<ul>\n<li id=\"%s\">" target)
-			  title "<br/>\n")
+			  extra-targets title "<br/>\n")
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
 	(setq snumber (org-section-number level))
@@ -4195,8 +4212,8 @@ When TITLE is nil, just close all open levels."
 	    (setq title (concat snumber " " title)))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
 	(unless (= head-count 1) (insert "\n</div>\n"))
-	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s</h%d>\n<div id=\"text-%s\">\n"
-			snumber level level snumber title level snumber))
+	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s%s</h%d>\n<div id=\"text-%s\">\n"
+			snumber level level snumber extra-targets title level snumber))
 	(org-open-par)))))
 
 (defun org-get-text-property-any (pos prop &optional object)

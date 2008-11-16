@@ -1,5 +1,16 @@
 2008-11-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-subcontent): Interprete
+	target aliases as additonal labels.
+
+	* org-exp.el (org-export-target-aliases): New variable.
+	(org-export-preprocess-string)
+	(org-export-handle-invisible-targets): Fill the alias alist.
+	(org-export-as-html): Remove the &nbsp; from the anchor, and also
+	assign an id.
+	(org-html-level-start): Insert the target aliases as additonal
+	anchors.
+
 	* org.el (org-edit-fixed-width-region): Fix bug when sarting a new
 	picture area.
 
