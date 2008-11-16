@@ -6631,7 +6631,7 @@ If the link is in hidden text, expose it."
   "Translate a link string if a translation function has been defined."
   (if (and org-link-translation-function
 	   (fboundp org-link-translation-function)
-	   (string-match "\\([a-zA-Z0-9]+\\):\\(.*\\)"))
+	   (string-match "\\([a-zA-Z0-9]+\\):\\(.*\\)" s))
       (progn
 	(setq s (funcall org-link-translation-function
 			 (match-string 1) (match-string 2)))
@@ -6651,7 +6651,7 @@ This is still an experimental function, your mileage may vary."
    (setq path (substring path 1)))
   ((and (equal type "lisp") (string-match "^/" path))
    ;; Planner has a slash, we do not.
-   (setq type elisp path (substring path 1)))
+   (setq type "elisp" path (substring path 1)))
   ((string-match "^//\\(.?*\\)/\\(<.*>\\)$" path)
    ;; A typical message link.  Planner has the id after the fina slash,
    ;; we separate it with a hash mark
