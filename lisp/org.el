@@ -2383,6 +2383,7 @@ Normal means, no org-mode-specific context."
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda"
 		  (beg end))
+(declare-function org-agenda-copy-local-variable "org-agenda" (var))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
