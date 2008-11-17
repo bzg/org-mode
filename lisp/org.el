@@ -9256,11 +9256,19 @@ it as a time string and apply `float-time' to it.  f S is nil, just return 0."
       (error 0.)))
    (t 0.)))
 
+(defun org-time-today ()
+  "Time in seconds today at 0:00.
+Returns the float number of seconds since the beginning of the
+epoch to the beginning of today (00:00)."
+  (float-time (apply 'encode-time
+		     (append '(0 0 0) (nthcdr 3 (decode-time))))))
+
 (defun org-matcher-time (s)
   (cond
-   ((equal s "<now>") (float-time))
-   ((equal s "<today>")
-    (float-time (append '(0 0 0) (nthcdr 3 (decode-time)))))
+   ((string= s "<now>") (float-time))
+   ((string= s "<today>") (org-time-today))
+   ((string= s "<tomorrow>") (+ 86400.0 (org-time-today)))
+   ((string= s "<yesterday>") (- (org-time-today) 86400.0))
    (t (org-2ft s))))
 
 (defun org-match-any-p (re list)
