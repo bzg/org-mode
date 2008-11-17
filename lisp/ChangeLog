@@ -1,8 +1,35 @@
 2008-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-sort-entries-or-items, org-completing-read)
+	(org-refile-get-location, org-olpath-completing-read, org-todo)
+	(org-show-todo-tree, org-sparse-tree, org-make-tags-matcher)
+	(org-set-tags, org-change-tag-in-region, org-fast-tag-selection)
+	(org-set-property, org-delete-property)
+	(org-delete-property-globally): Use `org-ido-completing-read'.
+
+	* org-remember.el (org-remember-apply-template): Use
+	`org-ido-completing-read'.
+
+	* org-publish.el (org-publish): Use `org-ido-completing-read'.
+
+	* org-colview.el (org-columns-edit-value, org-columns-new)
+	(org-insert-columns-dblock): Use `org-ido-completing-read'.
+
+	* org-colview-xemacs.el (org-columns-edit-value)
+	(org-columns-new, org-insert-columns-dblock): Use
+	`org-ido-completing-read'.
+
+	* org-attach.el (org-attach-delete-one, org-attach-open): Use
+	`org-ido-completing-read'.
+
+	* org-agenda.el (org-todo-list, org-agenda-filter-by-tag): Use
+	`org-ido-completing-read'.
+
 	* org.el (org-time-today): New function.
 	(org-matcher-time): Use `org-time-today'.  Add special treatment
 	for "<tomorrow>" and "<yesterday>".
+	(org-ido-completing-read): New function.
+	(org-completion-use-ido): New option.
 
 	* org-exp.el (org-export-format-source-code): Fix bug in require
 	htmlize code.

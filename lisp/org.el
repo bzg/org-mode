@@ -2335,6 +2335,11 @@ Use customize to modify this, or restart Emacs after changing it."
   :tag "Org Completion"
   :group 'org)
 
+(defcustom org-completion-use-ido nil
+  "Non-ni means, use ido completion wherever possible."
+  :group 'org
+  :type 'boolean)  
+
 (defcustom org-completion-fallback-command 'hippie-expand
   "The expansion command called by \\[org-complete] in normal context.
 Normal means, no org-mode-specific context."
@@ -5392,13 +5397,13 @@ WITH-CASE, the sorting considers case as well."
 
       (and (= (downcase sorting-type) ?f)
            (setq getkey-func
-                 (completing-read "Sort using function: "
+                 (org-ido-completing-read "Sort using function: "
                                   obarray 'fboundp t nil nil))
            (setq getkey-func (intern getkey-func)))
 
       (and (= (downcase sorting-type) ?r)
            (setq property
-                 (completing-read "Property: "
+                 (org-ido-completing-read "Property: "
 				  (mapcar 'list (org-buffer-property-keys t))
                                   nil t))))
 
@@ -6560,6 +6565,15 @@ used as the link location instead of reading one interactively."
   (let ((minibuffer-local-completion-map
 	 (copy-keymap minibuffer-local-completion-map)))
     (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
+    (apply 'org-ido-completing-read args)))
+
+(defun org-ido-completing-read (&rest args)
+  "Completing-read using `ido-mode' speedups if available"
+  (if (and org-completion-use-ido
+	   (fboundp 'ido-completing-read)
+	   (boundp 'ido-mode) ido-mode
+	   (listp (second args)))
+      (apply 'ido-completing-read (concat "i:" (car args)) (cdr args))
     (apply 'completing-read args)))
 
 (defun org-extract-attributes (s)
@@ -7484,7 +7498,7 @@ operation has put the subtree."
   (let* ((cbuf (current-buffer))
 	 (cfunc (if org-refile-use-outline-path
 		    'org-olpath-completing-read
-		  'completing-read))
+		  'org-ido-completing-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	 (fname (and filename (file-truename filename)))
@@ -7504,7 +7518,7 @@ operation has put the subtree."
   "Read an outline path like a file name."
   (let ((thetable collection))
     (apply
-     'completing-read prompt
+     'org-ido-completing-read prompt
      (lambda (string predicate &optional flag)
        (let (rtn r s f (l (length string)))
 	 (cond
@@ -7988,7 +8002,7 @@ For calling through lisp, arg is also interpreted in the following way:
 			   (or (not org-use-fast-todo-selection)
 			       (not org-todo-key-trigger)))
 		      ;; Read a state with completion
-		      (completing-read "State: " (mapcar (lambda(x) (list x))
+		      (org-ido-completing-read "State: " (mapcar (lambda(x) (list x))
 							 org-todo-keywords-1)
 				       nil t))
 		     ((eq arg 'right)
@@ -8398,7 +8412,7 @@ of `org-todo-keywords-1'."
 	(kwd-re
 	 (cond ((null arg) org-not-done-regexp)
 	       ((equal arg '(4))
-		(let ((kwd (completing-read "Keyword (or KWD1|KWD2|...): "
+		(let ((kwd (org-ido-completing-read "Keyword (or KWD1|KWD2|...): "
 					    (mapcar 'list org-todo-keywords-1))))
 		  (concat "\\("
 			  (mapconcat 'identity (org-split-string kwd "|") "\\|")
@@ -8710,9 +8724,9 @@ d      Show deadlines due within `org-deadline-warning-days'."
      ((equal ans ?T)
       (call-interactively 'org-tags-sparse-tree))
      ((member ans '(?p ?P))
-      (setq kwd (completing-read "Property: "
+      (setq kwd (org-ido-completing-read "Property: "
 				 (mapcar 'list (org-buffer-property-keys))))
-      (setq value (completing-read "Value: "
+      (setq value (org-ido-completing-read "Value: "
 				   (mapcar 'list (org-property-values kwd))))
       (unless (string-match "\\`{.*}\\'" value)
 	(setq value (concat "\"" value "\"")))
@@ -9108,7 +9122,7 @@ also TODO lines."
     ;; Get a new match request, with completion
     (let ((org-last-tags-completion-table
 	   (org-global-tags-completion-table)))
-      (setq match (completing-read
+      (setq match (org-ido-completing-read
 		   "Match: " 'org-tags-completion-function nil nil nil
 		   'org-tags-history))))
 
@@ -9426,7 +9440,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 		  (let ((org-add-colon-after-tag-completion t))
 		    (org-trim
 		     (org-without-partial-completion
-		      (completing-read "Tags: " 'org-tags-completion-function
+		      (org-ido-completing-read "Tags: " 'org-tags-completion-function
 				       nil nil current 'org-tags-history)))))))
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
@@ -9469,7 +9483,7 @@ This works in the agenda, and also in an org-mode buffer."
 		(if (org-mode-p)
 		    (org-get-buffer-tags)
 		  (org-global-tags-completion-table))))
-	   (completing-read
+	   (org-ido-completing-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
 	    'org-tags-history))
 	 (progn
@@ -9680,7 +9694,7 @@ Returns the new tags string, or nil to not change the current settings."
 		  (if exit-after-next (setq exit-after-next 'now)))
 		 ((= c ?\t)
 		  (condition-case nil
-		      (setq tg (completing-read
+		      (setq tg (org-ido-completing-read
 				"Tag: "
 				(or buffer-tags
 				    (with-current-buffer buf
@@ -10316,7 +10330,7 @@ in the current file."
   (interactive
    (let* ((completion-ignore-case t)
 	  (keys (org-buffer-property-keys nil t t))
-	  (prop0 (completing-read "Property: " (mapcar 'list keys)))
+	  (prop0 (org-ido-completing-read "Property: " (mapcar 'list keys)))
 	  (prop (if (member prop0 keys)
 		    prop0
 		  (or (cdr (assoc (downcase prop0)
@@ -10341,7 +10355,7 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (completing-read
+	  (prop (org-ido-completing-read
 		 "Property: " (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
@@ -10353,7 +10367,7 @@ in the current file."
   "Remove PROPERTY globally, from all entries."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (completing-read
+	  (prop (org-ido-completing-read
 		 "Globally remove property: "
 		 (mapcar 'list (org-buffer-property-keys)))))
      (list prop)))

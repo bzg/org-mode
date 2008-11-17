@@ -2736,7 +2736,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	 rtn rtnall files file pos)
     (when (equal arg '(4))
       (setq org-select-this-todo-keyword
-	    (completing-read "Keyword (or KWD1|K2D2|...): "
+	    (org-ido-completing-read "Keyword (or KWD1|K2D2|...): "
 			     (mapcar 'list kwds) nil nil)))
     (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
     (org-set-local 'org-last-arg arg)
@@ -4271,7 +4271,7 @@ to switch to narrowing."
 	(org-set-local 'org-global-tags-completion-table
 		       (org-global-tags-completion-table)))
       (let ((completion-ignore-case t))
-	(setq tag (completing-read
+	(setq tag (org-ido-completing-read
 		   "Tag: " org-global-tags-completion-table))))
     (cond
      ((equal char ?/) (org-agenda-filter-by-tag-show-all))

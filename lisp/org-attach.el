@@ -245,7 +245,7 @@ The attachment is created as an Emacs buffer."
   (let* ((attach-dir (org-attach-dir t))
 	 (files (org-attach-file-list attach-dir))
 	 (file (or file
-		   (completing-read
+		   (org-ido-completing-read
 		    "Delete attachment: "
 		    (mapcar (lambda (f)
 			      (list (file-name-nondirectory f)))
@@ -320,7 +320,7 @@ If IN-EMACS is non-nil, force opening in Emacs."
 	 (files (org-attach-file-list attach-dir))
 	 (file (if (= (length files) 1)
 		   (car files)
-		 (completing-read "Open attachment: "
+		 (org-ido-completing-read "Open attachment: "
 				  (mapcar 'list files) nil t))))
     (org-open-file (expand-file-name file attach-dir) in-emacs)))
 

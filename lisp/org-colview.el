@@ -425,7 +425,7 @@ Where possible, use the standard interface for changing this line."
      (t
       (setq allowed (org-property-get-allowed-values pom key 'table))
       (if allowed
-	  (setq nval (completing-read "Value: " allowed nil t))
+	  (setq nval (org-ido-completing-read "Value: " allowed nil t))
 	(setq nval (read-string "Edit: " value)))
       (setq nval (org-trim nval))
       (when (not (equal nval value))
@@ -675,7 +675,7 @@ around it."
   (interactive)
   (let ((editp (and prop (assoc prop org-columns-current-fmt-compiled)))
 	cell)
-    (setq prop (completing-read
+    (setq prop (org-ido-completing-read
 		"Property: " (mapcar 'list (org-buffer-property-keys t nil t))
 		nil nil prop))
     (setq title (read-string (concat "Column title [" prop "]: ") (or title prop)))
@@ -683,7 +683,7 @@ around it."
     (if (string-match "\\S-" width)
 	(setq width (string-to-number width))
       (setq width nil))
-    (setq fmt (completing-read "Summary [none]: "
+    (setq fmt (org-ido-completing-read "Summary [none]: "
 			       '(("none") ("add_numbers") ("currency") ("add_times") ("checkbox") ("checkbox-n-of-m") ("checkbox-percent"))
 			       nil t))
     (if (string-match "\\S-" fmt)
@@ -1151,7 +1151,7 @@ and tailing newline characters."
   "Create a dynamic block capturing a column view table."
   (interactive)
   (let ((defaults '(:name "columnview" :hlines 1))
-	(id (completing-read
+	(id (org-ido-completing-read
 	     "Capture columns (local, global, entry with :ID: property) [local]: "
 	     (append '(("global") ("local"))
 		     (mapcar 'list (org-property-values "ID"))))))

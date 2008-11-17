@@ -703,7 +703,7 @@ Default for INDEX-FILENAME is 'index.org'."
 	    (if force nil org-publish-use-timestamps-flag)))
       (org-publish-projects
        (list (or project
-		 (assoc (completing-read
+		 (assoc (org-ido-completing-read
 			 "Publish project: "
 			 org-publish-project-alist nil t)
 			org-publish-project-alist)))))))
