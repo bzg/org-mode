@@ -1,5 +1,10 @@
 2008-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-html-format-desc): Respect the
+	org-protect property.
+	(org-export-as-html): Protect image specifiers that are in the
+	description part of a link.
+
 	* org.el (org-sort-entries-or-items, org-completing-read)
 	(org-refile-get-location, org-olpath-completing-read, org-todo)
 	(org-show-todo-tree, org-sparse-tree, org-make-tags-matcher)

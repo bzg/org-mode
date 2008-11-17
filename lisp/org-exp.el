@@ -3245,7 +3245,9 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (save-match-data
 		(if (string-match "^file:" desc)
 		    (setq desc (substring desc (match-end 0)))))
-	      (setq desc (concat "<img src=\"" desc "\"/>")))
+	      (setq desc (org-add-props
+			     (concat "<img src=\"" desc "\"/>")
+			     '(org-protected t))))
 	    ;; FIXME: do we need to unescape here somewhere?
 	    (cond
 	     ((equal type "internal")
@@ -3623,7 +3625,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 (defun org-export-html-format-desc (s)
   "Make sure the S is valid as a description in a link."
-  (if s
+  (if (and s (not (get-text-property 1 'org-protected s)))
       (save-match-data
 	(org-html-do-expand s))
     s))
