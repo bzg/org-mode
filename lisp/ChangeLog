@@ -2,6 +2,8 @@
 
 	* org-exp.el (org-export-format-source-code): Fix bug in require
 	htmlize code.
+	(org-export-target-internal-links): Fix bug in search for text
+	property.
 
 2008-11-16  Carsten Dominik  <carsten.dominik@gmail.com>
 

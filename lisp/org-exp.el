@@ -1632,8 +1632,8 @@ let the link  point to the corresponding section."
 		   (or (get-text-property (point) 'target)
 		       (get-text-property
 			(max (point-min)
-			     (1- (previous-single-property-change
-				  (point) 'target)))
+			     (1- (or (previous-single-property-change
+				      (point) 'target) 0)))
 			'target))))))))
        (when target
 	 (set-match-data md)
