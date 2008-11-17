@@ -203,6 +203,12 @@ column view defines special faces for each outline level.  See the file
 		      :height (face-attribute 'default :height)
 		      :family (face-attribute 'default :family)))
 
+(defface org-agenda-column-dateline
+  (org-compatible-face 'org-column
+    '((t nil)))
+  "Face used in agenda column view for datelines with summaries."
+  :group 'org-faces)
+
 (defface org-warning
   (org-compatible-face 'font-lock-warning-face
     '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))

@@ -1,5 +1,12 @@
 2008-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview.el (org-columns-display-here): New argument
+	DATELINE, to trigger using the new face.
+	(org-agenda-colview-summarize): Call `org-columns-display-here'
+	with the new argument.
+
+	* org-faces.el (org-agenda-column-dateline): New face.
+
 	* org-publish.el (org-publish-org-index): Use index-title at page
 	title, not as section.
 
