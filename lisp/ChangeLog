@@ -1,5 +1,8 @@
 2008-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-org-index): Use index-title at page
+	title, not as section.
+
 	* org-exp.el (org-export-html-format-desc): Respect the
 	org-protect property.
 	(org-export-as-html): Protect image specifiers that are in the
