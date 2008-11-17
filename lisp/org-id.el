@@ -134,6 +134,14 @@ be added."
     (repeat :tag "List of files"
 	    (file))))
 
+(defcustom org-id-search-archives t
+  "Non-nil means, search also the archive files of agenda files for entries.
+It is possible that id searches might become too slow if a user has
+used org-mode and ids for many years.  This is why it is possibl to turn this
+off."
+  :group 'org-id
+  :type 'boolean)
+
 ;;; The API functions
 
 ;;;###autoload
@@ -326,31 +334,43 @@ and time is the usual three-integer representation of time."
 
 ;; Storing ID locations (files)
 
-(defun org-id-update-id-locations ()
+(defun org-id-update-id-locations (&optional files)
   "Scan relevant files for ID's.
-Store the relation between files and corresponding ID's."
+Store the relation between files and corresponding ID's.
+This will scan all agenda files, all associated archives, and all
+files currently mentioned in `org-id-locations'.
+When FILES is given, scan these files instead."
   (interactive)
-  (let ((files (append (org-agenda-files)
-		       (if (symbolp org-id-extra-files)
-			   (symbol-value org-id-extra-files)
-			 org-id-extra-files)))
+  (let ((files
+	 (or files
+	     (append (org-agenda-files t org-id-search-archives)
+		     (if (symbolp org-id-extra-files)
+			 (symbol-value org-id-extra-files)
+		       org-id-extra-files)
+		     (mapcar 'car org-id-locations))))
 	org-agenda-new-buffers
-	file ids reg found id)
+	file nfiles tfile ids reg found id seen)
+    (setq nfiles (length files))
     (while (setq file (pop files))
-      (setq ids nil)
-      (with-current-buffer (org-get-agenda-file-buffer file)
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char (point-min))
-	    (while (re-search-forward "^[ \t]*:ID:[ \t]+\\(\\S-+\\)[ \t]*$"
-				      nil t)
-	      (setq id (org-match-string-no-properties 1))
-	      (if (member id found)
-		  (error "Duplicate ID \"%s\"" id))
-	      (push id found)
-	      (push id ids))
-	    (push (cons file ids) reg)))))
+      (message "Finding ID locations (%d/%d files)"
+	       (- nfiles (length files)) nfiles)
+      (setq tfile (file-truename file))
+      (when (and (file-exists-p file) (not (member tfile seen)))
+	(push tfile seen)
+	(setq ids nil)
+	(with-current-buffer (org-get-agenda-file-buffer file)
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char (point-min))
+	      (while (re-search-forward "^[ \t]*:ID:[ \t]+\\(\\S-+\\)[ \t]*$"
+					nil t)
+		(setq id (org-match-string-no-properties 1))
+		(if (member id found)
+		    (error "Duplicate ID \"%s\"" id))
+		(push id found)
+		(push id ids))
+	      (push (cons file ids) reg))))))
     (org-release-buffers org-agenda-new-buffers)
     (setq org-agenda-new-buffers nil)
     (setq org-id-locations reg)
@@ -415,8 +435,29 @@ optional argument MARKERP, return the position as a new marker."
 		(move-marker (make-marker) pos buf)
 	      (cons file pos))))))))
 
+(org-add-link-type "id" 'org-id-open)
+
+(defun org-id-store-link ()
+  "Store a link to the current entry, using it's ID."
+  (interactive)
+  (let* ((link (org-make-link "id:" (org-id-get-create)))
+	 (desc (save-excursion
+		 (org-back-to-heading t)
+		 (or (and (looking-at org-complex-heading-regexp)
+			  (if (match-end 4) (match-string 4) (match-string 0)))
+		     link))))
+    (org-store-link-props :link link :description desc :type "id")
+    link))
+
+(defun org-id-open (id)
+  "Go to the entry with id ID."
+  (org-mark-ring-push)
+  (switch-to-buffer-other-window (current-buffer))
+  (org-id-goto id))
+
 (provide 'org-id)
 
 ;;; org-id.el ends here
 
 ;; arch-tag: e5abaca4-e16f-4b25-832a-540cfb63a712
+

@@ -345,6 +345,10 @@
 
 2008-11-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-string): Reorder so that we
+	can still see ID properties when we collect targets.
+	(org-export-target-internal-links): Also store targets for ID's.
+
 	* org.el (org-link-translation-function): New option.
 	(org-open-at-point): Call `org-link-translation-function' if
 	non-nil.
@@ -361,11 +365,19 @@
 
 2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* org-exp.el (org-icalendar-cleanup-string): Improve RFC2455
-	compliance as far as quoting is concerned.
+	* org-id.el (org-id-search-archives): New option.
+
+	* org.el (org-link-to-org-use-id): New option.
+	(org-store-link): Use `org-link-to-org-use-id'.
+	(org-id): Make org-id.el a standard component.
+
+2008-11-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-link-expand-abbrev): Implement %h as an escape for a
 	hexified version of the tag.
+
+	* org-exp.el (org-icalendar-cleanup-string): Improve RFC2455
+	compliance as far as quoting is concerned.
 
 	* org-vm.el (org-vm-follow-link): Require `vm-search'.
 
