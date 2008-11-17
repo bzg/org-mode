@@ -2160,7 +2160,7 @@ backends, it converts the segment into an EXAMPLE segment."
     (cond
      (htmlp
       ;; We are exporting to HTML
-      (condition-case nil (require 'htmlize) (nil t))
+      (require 'htmlize nit t)
       (if (not (fboundp 'htmlize-region-for-paste))
 	  (progn
 	    ;; we do not have htmlize.el, or an old version of it
