@@ -376,15 +376,16 @@ Store the relation between files and corresponding ID's."
 
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID loations."
-  (unless org-id-locations (org-id-locations-load))
-  (catch 'exit
-    (let ((locs org-id-locations) list)
-      (while (setq list (pop locs))
-	(when (equal (file-truename file) (file-truename (car list)))
-	  (setcdr list (cons id (cdr list)))
-	  (throw 'exit t))))
-    (push (list file id) org-id-locations))
-  (org-id-locations-save))
+  (when (and id file) ; don't error when called from a buffer with no file
+    (unless org-id-locations (org-id-locations-load))
+    (catch 'exit
+      (let ((locs org-id-locations) list)
+	(while (setq list (pop locs))
+	  (when (equal (file-truename file) (file-truename (car list)))
+	    (setcdr list (cons id (cdr list)))
+	    (throw 'exit t))))
+      (push (list file id) org-id-locations))
+    (org-id-locations-save)))
 
 ;; Finding entries with specified id
 
