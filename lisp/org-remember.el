@@ -530,11 +530,12 @@ to be run from that hook to function properly."
 				   (member char '("u" "U"))
 				   nil nil (list org-end-time-was-given)))
 	   (t
-	    (insert (org-completing-read
-		     (concat (if prompt prompt "Enter string")
-			     (if default (concat " [" default "]"))
-			     ": ")
-		     completions nil nil nil histvar default)))))
+	    (let (org-completion-use-ido)
+	      (insert (org-completing-read
+		       (concat (if prompt prompt "Enter string")
+			       (if default (concat " [" default "]"))
+			       ": ")
+		       completions nil nil nil histvar default))))))
 	(goto-char (point-min))
 	(if (re-search-forward "%\\?" nil t)
 	    (replace-match "")
