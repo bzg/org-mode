@@ -2012,7 +2012,8 @@ These are fixed values, for the preset properties.")
 
 (defcustom org-global-properties nil
   "List of property/value pairs that can be inherited by any entry.
-You can set buffer-local values for this by adding lines like
+You can set buffer-local values for the same purpose in the variable
+`org-file-properties' this by adding lines like
 
 #+PROPERTY: NAME VALUE"
   :group 'org-properties

@@ -502,16 +502,22 @@ to be run from that hook to function properly."
 	   ((equal char "p")
 	    (let*
 		((prop (substring-no-properties prompt))
-		 (allowed (with-current-buffer
-			      (get-buffer (file-name-nondirectory file))
-			    (org-property-get-allowed-values nil prop 'table)))
+		 (pall (concat prop "_ALL"))
+		 (allowed
+		  (with-current-buffer
+		      (get-buffer (file-name-nondirectory file))
+		    (or (cdr (assoc pall org-file-properties))
+			(cdr (assoc pall org-global-properties))
+			(cdr (assoc pall org-global-properties-fixed)))))
 		 (existing (with-current-buffer
 			       (get-buffer (file-name-nondirectory file))
 			     (mapcar 'list (org-property-values prop))))
 		 (propprompt (concat "Value for " prop ": "))
 		 (val (if allowed
-			  (org-completing-read propprompt allowed nil
-					       'req-match)
+			  (org-completing-read
+			   propprompt
+			   (mapcar 'list (org-split-string allowed "[ \t]+"))
+			   nil 'req-match)
 			(org-completing-read propprompt existing nil nil
 					     "" nil ""))))
 	      (org-set-property prop val)))
