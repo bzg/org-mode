@@ -4988,6 +4988,12 @@ stored: Just call @code{org-remember} with a prefix argument.  If you
 use two prefix arguments, Org jumps to the location where the last
 remember note was stored.
 
+The remember buffer will actually use @code{org-mode} as its major mode, so
+that all editing features of Org-mode are available.  In addition to this, a
+minor mode @code{org-remember-mode} is turned on, for the single purpose that
+you can use its keymap @code{org-remember-mode-map} to overwrite some of
+Org-mode's key bindings.
+
 You can also call @code{org-remember} in a special way from the agenda,
 using the @kbd{k r} key combination.  With this access, any time stamps
 inserted by the selected remember template (see below) will default to

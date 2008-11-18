@@ -195,6 +195,21 @@ calendar           |  %:type %:date"
 			 (symbol :tag "Major mode"))
 		 (function :tag "Perform a check against function")))))
 
+(defcustom org-remember-before-finalize-hook nil
+  "Hook that is run right before a remember process is finalized.
+The remember buffer is still current when this hook runs."
+  :group 'org-remember
+  :type 'hook)
+
+(defvar org-remember-mode-map (make-sparse-keymap)
+  "Keymap for org-remember-mode, a minor mode.
+Use this map to set additional keybindings for when Org-mode is used
+for a Remember buffer.")
+
+(define-minor-mode org-remember-mode
+  "Minor mode for special key bindings in a remember buffer."
+  nil "Rem" org-remember-mode-map)
+
 (defcustom org-remember-clock-out-on-exit 'query
   "Non-nil means, stop the clock when exiting a clocking remember buffer.
 This only applies if the clock is running in the remember buffer.  If the
@@ -446,7 +461,7 @@ to be run from that hook to function properly."
 		 (replace-match x t t))))
 
 	;; Turn on org-mode in the remember buffer, set local variables
-	(let ((org-inhibit-startup t)) (org-mode))
+	(let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1))
 	(org-set-local 'org-finish-function 'org-remember-finalize)
 	(if (and file (string-match "\\S-" file) (not (file-directory-p file)))
 	    (org-set-local 'org-default-notes-file file))
@@ -540,7 +555,7 @@ to be run from that hook to function properly."
 	(if (re-search-forward "%\\?" nil t)
 	    (replace-match "")
 	  (and (re-search-forward "^[^#\n]" nil t) (backward-char 1))))
-    (let ((org-inhibit-startup t)) (org-mode))
+    (let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1))
     (org-set-local 'org-finish-function 'org-remember-finalize))
   (when (save-excursion
 	  (goto-char (point-min))
@@ -579,6 +594,7 @@ from that hook."
 (defvar org-clock-marker) ; Defined in org.el
 (defun org-remember-finalize ()
   "Finalize the remember process."
+  (run-hooks 'org-remember-before-finalize-hook)
   (unless (fboundp 'remember-finalize)
     (defalias 'remember-finalize 'remember-buffer))
   (when (and org-clock-marker

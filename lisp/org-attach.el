@@ -153,6 +153,9 @@ D       Delete all of a task's attachments.  A safer way is
   "Return the directory associated with the current entry.
 If the directory does not exist and CREATE-IF-NOT-EXISTS-P is non-nil,
 the directory and the corresponding ID will be created."
+  (when (and (not (buffer-file-name (buffer-base-buffer)))
+	     (not (file-name-absolute-p org-attach-directory)))
+    (error "Need absolute `org-attach-directory' to attach in bufers without filename."))
   (let ((uuid (org-id-get (point) create-if-not-exists-p)))
     (when (or uuid create-if-not-exists-p)
       (unless uuid
