@@ -6517,7 +6517,7 @@ used as the link location instead of reading one interactively."
     ;; Check if we are linking to the current file with a search option
     ;; If yes, simplify the link by using only the search option.
     (when (and buffer-file-name
-	       (string-match "\\<file:\\(.+?\\)::\\([^>]+\\)" link))
+	       (string-match "^file:\\(.+?\\)::\\([^>]+\\)" link))
       (let* ((path (match-string 1 link))
 	     (case-fold-search nil)
 	     (search (match-string 2 link)))
@@ -6527,7 +6527,7 @@ used as the link location instead of reading one interactively."
 	      (setq link search)))))
 
     ;; Check if we can/should use a relative path.  If yes, simplify the link
-    (when (string-match "\\<file:\\(.*\\)" link)
+    (when (string-match "^file:\\(.*\\)" link)
       (let* ((path (match-string 1 link))
 	     (origpath path)
 	     (case-fold-search nil))

@@ -1,3 +1,7 @@
+2008-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-insert-link): Improve file link matching.
+
 2008-11-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-colview.el (org-columns-display-here): New argument
