@@ -205,10 +205,13 @@ The remember buffer is still current when this hook runs."
   "Keymap for org-remember-mode, a minor mode.
 Use this map to set additional keybindings for when Org-mode is used
 for a Remember buffer.")
+(defvar org-remember-mode-hook nil
+  "Hook for the minor `org-remember-mode'.")
 
 (define-minor-mode org-remember-mode
   "Minor mode for special key bindings in a remember buffer."
-  nil "Rem" org-remember-mode-map)
+  nil "Rem" org-remember-mode-map
+  (run-hooks 'org-remember-mode-hook))
 
 (defcustom org-remember-clock-out-on-exit 'query
   "Non-nil means, stop the clock when exiting a clocking remember buffer.
