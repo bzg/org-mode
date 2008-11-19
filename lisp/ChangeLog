@@ -80,7 +80,7 @@
 	(org-html-level-start): Insert the target aliases as additonal
 	anchors.
 
-	* org.el (org-edit-fixed-width-region): Fix bug when sarting a new
+	* org.el (org-edit-fixed-width-region): Fix bug when starting a new
 	picture area.
 
 2008-11-15  Carsten Dominik  <carsten.dominik@gmail.com>

@@ -210,7 +210,7 @@ for a Remember buffer.")
 
 (define-minor-mode org-remember-mode
   "Minor mode for special key bindings in a remember buffer."
-  nil "Rem" org-remember-mode-map
+  nil " Rem" org-remember-mode-map
   (run-hooks 'org-remember-mode-hook))
 
 (defcustom org-remember-clock-out-on-exit 'query
