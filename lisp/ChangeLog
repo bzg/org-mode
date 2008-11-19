@@ -4,6 +4,8 @@
 	(org-remember-kill): New command.
 	(org-remember-finish-immediately): Call `org-remember-finalize'
 	directly.
+	(org-remember-finalize): Make `org-remember-finalize' an interactive
+	function. 
 
 2008-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 

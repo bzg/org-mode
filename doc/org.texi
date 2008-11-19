@@ -8982,6 +8982,10 @@ distribution, others are available somewhere on the web.
       to include text in a document that is the result of evaluating some
       code.  Other scripting languages like @code{perl} can be supported with
       this package as well.
+@item @file{org-eval-light.el} by @i{Eric Schulte}
+      User-controlled evaluation of Lisp code in an Org buffer.
+@item @file{org-exp-blocks.el} by @i{Eric Schulte}
+      Preprocess user-defined blocks for export.
 @item @file{org-expiry.el} by @i{Bastien Guerry}
       Expiry mechanism for Org entries.
 @item @file{org-indent.el} by @i{Carsten Dominik}
@@ -9003,8 +9007,6 @@ distribution, others are available somewhere on the web.
       to publish the same file using either org-publish or Muse.
 @item @file{org-panel.el} by @i{Lennard Borgman}
       Simplified and display-aided access to some Org commands.
-@c @item @file{org-plot.el} by @i{Eric Schulte}
-@c      Plotting Org tables with Gnuplot.
 @item @file{org-registry.el} by @i{Bastien Guerry}
       A registry for Org links, to find out from where links point to a given
       file or location.
@@ -9019,7 +9021,6 @@ distribution, others are available somewhere on the web.
       Convert Org-mode tables to SQL insertions.  Documentation for this can
       be found on the Worg pages.
 @end table
-
 
 @node Other extensions,  , Extensions in the contrib directory, Extensions
 @section Other extensions
