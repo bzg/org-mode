@@ -2637,17 +2637,19 @@ If yes, offer to stop it and to save the buffer with the changes."
 (defcustom org-archive-location "%s_archive::"
   "The location where subtrees should be archived.
 
-Otherwise, the value of this variable is a string, consisting of two
-parts, separated by a double-colon.
+The value of this variable is a string, consisting of two parts,
+separated by a double-colon.  The first part is a filename and
+the second part is a headline.
 
-The first part is a file name - when omitted, archiving happens in the same
-file.  %s will be replaced by the current file name (without directory part).
-Archiving to a different file is useful to keep archived entries from
-contributing to the Org-mode Agenda.
+When the filename is omitted, archiving happens in the same file.
+%s in the filename will be replaced by the current file
+name (without the directory part).  Archiving to a different file
+is useful to keep archived entries from contributing to the
+Org-mode Agenda.
 
-The part after the double colon is a headline.  The archived entries will be
-filed under that headline.  When omitted, the subtrees are simply filed away
-at the end of the file, as top-level entries.
+The archived entries will be filed as subtrees of the specified
+headline.  When the headline is omitted, the subtrees are simply
+filed away at the end of the file, as top-level entries.
 
 Here are a few examples:
 \"%s_archive::\"
