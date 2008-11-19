@@ -11,11 +11,34 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.12
+* Version 6.13
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 
+** Overview
+** Details
+
+*** Keybinding in Remember buffers can be configured
+    Remember buffers are normally in Org-mode, which makes it
+    hard to configure key bindings without modifying the Org-mode
+    keymap.  There is now a minor mode active in these buffers,
+    `org-remember-mode', and its keymap org-remember-mode-map can
+    be used for key bindings.  By default, this map only contains
+    the bindings for =C-c C-c= to store the note, and =C-c C-k=
+    to abort it.  Use `org-remember-mode-hook' to define your own
+    bindings like
+
+#+begin_src emacs-lisp
+(add-hook
+ 'org-remember-mode-hook
+ (lambda ()
+   (define-key org-remember-mode-map "\C-x\C-s" 'org-remember-finalize)))
+
+#+end_src
+   
+
+* Version 6.12
 ** Overview
 
    - A region of entries can now be refiled with a single command
