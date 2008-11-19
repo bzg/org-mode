@@ -618,8 +618,7 @@ from that hook."
   "Abort the current remember process."
   (interactive)
   (let ((org-note-abort t))
-    (funcall org-remember-finalize)))
-
+    (org-remember-finalize)))
 
 ;;;###autoload
 (defun org-remember (&optional goto org-force-remember-template-char)
