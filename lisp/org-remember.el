@@ -596,6 +596,7 @@ from that hook."
 (defvar org-clock-marker) ; Defined in org.el
 (defun org-remember-finalize ()
   "Finalize the remember process."
+  (interactive)
   (unless org-remember-mode
     (error "This does not seem to be a remember buffer for Org-mode"))
   (run-hooks 'org-remember-before-finalize-hook)
