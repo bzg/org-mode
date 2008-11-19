@@ -11,7 +11,7 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.13
+* Version 6.13 (in preparation)
   :PROPERTIES:
   :VISIBILITY: content
   :END:
@@ -19,7 +19,7 @@
 ** Overview
 ** Details
 
-*** Keybinding in Remember buffers can be configured
+*** Keybindings in Remember buffers can be configured
     Remember buffers are normally in Org-mode, which makes it
     hard to configure key bindings without modifying the Org-mode
     keymap.  There is now a minor mode active in these buffers,
@@ -34,9 +34,82 @@
  'org-remember-mode-hook
  (lambda ()
    (define-key org-remember-mode-map "\C-x\C-s" 'org-remember-finalize)))
-
 #+end_src
-   
+
+   You can also use this to free the =C-c C-c= binding (by
+   binding this key to nil in the minor mode map), so that you
+   can use =C-c C-c= again to set tags.
+
+*** Support for ido completion
+    You can not get the completion interface from /ido.el/ for
+    many of Org's internal completion commands by turning on the
+    variable `org-completion-use-ido'. =ido=mode= must also be
+    active before you can use this.
+*** New face for datelines in agenda column view
+    When column view is active in the agenda, and when you have
+    summarizing properties, the date lines become normal column
+    lines and the separation between different days becomes
+    harder to see.  If this bothers you, you can now customize
+    the face =org-agenda-column-dateline=.
+*** Invisible targets become now anchors in headlines.
+    These anchors can be used to jump to a directly with an HTML
+    link, just like the =sec-xxx= ids.  For example, the
+    following will make a http link
+    =//domain/path-to-my-file#dummy= work:
+
+#+begin_src org
+,# <<dummy>>
+,*** a headline
+#+end_src
+
+*** New contributed file org-exp-blocks.el
+
+    This new file implements special export behavior of
+    user-defined blocks, and it has some defaults to export
+    commends and ASCII graphics.
+
+    For ASCII art, it needs the java program ditaa.jar by Stathis
+    Sideris.  Thanks to Stathis for this excellent program, and
+    for allowing us to bundle it with Org-mode.
+
+    Kudos to Eric Schulte for this new functionality, after
+    org-plot.el already his second major contribution.
+
+*** Link translation
+
+    You can now configure Org to understand many links created
+    with the Emacs Planner package, so you can cut text from
+    planner pages and paste them into Org-mode files without
+    having to re-write the links.  The following customization es
+    needed to make this work
+
+#+begin_src emacs-lisp
+(setq org-link-translation-function
+      'org-translate-link-from-planner)
+#+end_src
+
+   This will work for pretty much all links where Org does
+   support the same or a similar protocol.  However, the
+   translator is a quick hack, and maybe we need to refine it.
+
+   I guess a similar translator could be written and integrated
+   into Planner.
+
+*** BBDB links may use regular expressions.
+
+    This did work all along, but only now I have documented it.
+
+*** =yank-pop= works again after yanking an outline tree
+
+*** Link abbreviations can use %h to insert a url-encoded target value
+
+    Thanks to Steve Purcell for a patch to this effect.
+
+*** Improved XHTML compliance
+
+    Thanks to Sebastian Rose for pushing this.
+
+*** Many bug fixes again.
 
 * Version 6.12
 ** Overview
