@@ -212,6 +212,8 @@ for a Remember buffer.")
   "Minor mode for special key bindings in a remember buffer."
   nil " Rem" org-remember-mode-map
   (run-hooks 'org-remember-mode-hook))
+(define-key org-remember-mode-map "\C-c\C-c" 'org-remember-finalize)
+(define-key org-remember-mode-map "\C-c\C-k" 'org-remember-kill)
 
 (defcustom org-remember-clock-out-on-exit 'query
   "Non-nil means, stop the clock when exiting a clocking remember buffer.
@@ -465,7 +467,6 @@ to be run from that hook to function properly."
 
 	;; Turn on org-mode in the remember buffer, set local variables
 	(let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1))
-	(org-set-local 'org-finish-function 'org-remember-finalize)
 	(if (and file (string-match "\\S-" file) (not (file-directory-p file)))
 	    (org-set-local 'org-default-notes-file file))
 	(if headline
@@ -558,8 +559,7 @@ to be run from that hook to function properly."
 	(if (re-search-forward "%\\?" nil t)
 	    (replace-match "")
 	  (and (re-search-forward "^[^#\n]" nil t) (backward-char 1))))
-    (let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1))
-    (org-set-local 'org-finish-function 'org-remember-finalize))
+    (let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1)))
   (when (save-excursion
 	  (goto-char (point-min))
 	  (re-search-forward "%&" nil t))
@@ -576,8 +576,7 @@ to be run from that hook to function properly."
 This should be run in `post-command-hook' and will remove itself
 from that hook."
   (remove-hook 'post-command-hook 'org-remember-finish-immediately)
-  (when org-finish-function
-    (funcall org-finish-function)))
+  (org-remember-finalize))
 
 (defun org-remember-visit-immediately ()
   "File remember note immediately.
@@ -597,6 +596,8 @@ from that hook."
 (defvar org-clock-marker) ; Defined in org.el
 (defun org-remember-finalize ()
   "Finalize the remember process."
+  (unless org-remember-mode
+    (error "This does not seem to be a remember buffer for Org-mode"))
   (run-hooks 'org-remember-before-finalize-hook)
   (unless (fboundp 'remember-finalize)
     (defalias 'remember-finalize 'remember-buffer))
@@ -612,6 +613,13 @@ from that hook."
     (save-buffer)
     (setq buffer-file-name nil))
   (remember-finalize))
+
+(defun org-remember-kill ()
+  "Abort the current remember process."
+  (interactive)
+  (let ((org-note-abort t))
+    (funcall org-remember-finalize)))
+
 
 ;;;###autoload
 (defun org-remember (&optional goto org-force-remember-template-char)
@@ -636,7 +644,7 @@ associated with a template in `org-remember-templates'."
     ;; `org-select-remember-template'
     (setq org-select-template-temp-major-mode major-mode)
     (setq org-select-template-original-buffer (current-buffer))
-    (if (eq org-finish-function 'org-remember-finalize)
+    (if org-remember-mode
 	(progn
 	  (when (< (length org-remember-templates) 2)
 	    (error "No other template available"))

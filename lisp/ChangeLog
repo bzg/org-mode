@@ -1,3 +1,10 @@
+2008-11-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-finalize): Make interactive.
+	(org-remember-kill): New command.
+	(org-remember-finish-immediately): Call `org-remember-finalize'
+	directly.
+
 2008-11-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-apply-template): No ido completion
