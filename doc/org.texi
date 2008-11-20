@@ -1316,6 +1316,10 @@ region when calling this, all lines will be converted to list items.  If the
 first line already was a list item, any item markers will be removed from the
 list.  Finally, even without an active region, a normal line will be
 converted into a list item.
+@kindex S-@key{left}
+@kindex S-@key{right}
+@item S-@key{left}/@key{right}
+Also cycle bullet styles when in the first line of an item.
 @end table
 
 @node Drawers, Orgstruct mode, Plain lists, Document Structure
@@ -7488,7 +7492,7 @@ the subtrees are exported.
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
 command.  The prefix arg is passed through to the exporter.  A double prefix
-@kbd{C-u C-u} causes most commands} to be executed in the background, in a
+@kbd{C-u C-u} causes most commands to be executed in the background, in a
 separate emacs process@footnote{To make this behavior the default, customize
 the variable @code{org-export-run-in-background}.}.
 @kindex C-c C-e v
@@ -8956,6 +8960,11 @@ distribution, others are available somewhere on the web.
 
 @node Extensions in the contrib directory, Other extensions, Extensions, Extensions
 @section Extensions in the @file{contrib} directory
+
+A number of extension are distributed with Org when you download it from its
+homepage.  Please note that these extensions are @emph{not} distributed as
+part of Emacs, so if you use Org as delivered with Emacs, you still need to
+go to @url{http://orgmode.org} to get access to these modules.
 
 @table @asis
 @item @file{org-annotate-file.el} by @i{Philip Jackson}
