@@ -8983,7 +8983,7 @@ distribution, others are available somewhere on the web.
       code.  Other scripting languages like @code{perl} can be supported with
       this package as well.
 @item @file{org-eval-light.el} by @i{Eric Schulte}
-      User-controlled evaluation of Lisp code in an Org buffer.
+      User-controlled evaluation of code in an Org buffer.
 @item @file{org-exp-blocks.el} by @i{Eric Schulte}
       Preprocess user-defined blocks for export.
 @item @file{org-expiry.el} by @i{Bastien Guerry}

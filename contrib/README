@@ -16,7 +16,7 @@ org-bookmark.el          --- Links to bookmarks
 org-depend.el            --- TODO dependencies for Org-mode
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval.el              --- The <lisp> tag, adapted from Muse
-org-eval-light.el        --- Evaluate List code on demand
+org-eval-light.el        --- Evaluate in-buffer code on demand
 org-expiry.el 	         --- Expiry mechanism for Org entries
 org-exp-blocks	         --- Pre-process blocks when exporting org files
 org-indent.el            --- Dynamic outline indentation (does not really work)
