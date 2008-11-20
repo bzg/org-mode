@@ -64,8 +64,6 @@ negates this setting for the duration of the command."
 ;; Implementation
 
 (defun org-gnus-group-link (group)
-  (debug)
-
   (let ((unprefixed-group (replace-regexp-in-string "^[^:]+:" "" group)))
     (if (and (string-match "^nntp" group) ;; Only for nntp groups
 	     (org-xor current-prefix-arg
@@ -107,7 +105,6 @@ negates this setting for the duration of the command."
    ((memq major-mode '(gnus-summary-mode gnus-article-mode))
     (and (eq major-mode 'gnus-summary-mode) (gnus-summary-show-article))
     (let* ((group gnus-newsgroup-name)
-
 	   (header (with-current-buffer gnus-article-buffer
 		     (gnus-summary-toggle-header 1)
 		     (goto-char (point-min))
@@ -118,7 +115,6 @@ negates this setting for the duration of the command."
 	   (to (mail-header 'to header))
 	   (newsgroups (mail-header 'newsgroups header))
 	   (x-no-archive (mail-header 'x-no-archive header))
-
 	   (subject (gnus-summary-subject-string))
 	   desc link)
       (org-store-link-props :type "gnus" :from from :subject subject
