@@ -104,9 +104,19 @@ has not been closed, resume the clock from that point"
 
 (defcustom org-clock-persist nil
   "When non-nil, save the running clock when emacs is closed, and
-  resume it next time emacs is started."
+  resume it next time emacs is started.
+When this is t, both the running clock, and the entire clock
+history are saved.  When this is the symbol `clock', only the
+running clock is saved.
+
+When Emacs restarts with saved clock information, the file containing the
+running clock as well as all files mentioned in the clock history will
+be visited."
   :group 'org-clock
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Just the running clock" clock)
+	  (const :tag "Clock and history" t)
+	  (const :tag "No persistence" nil)))
 
 (defcustom org-clock-persist-file "~/.emacs.d/org-clock-save.el"
   "File to save clock data to"
@@ -1062,71 +1072,89 @@ This function is made for clock tables."
 	0))))
 
 (defun org-clock-save ()
-  "Persist various clock-related data to disk"
-  (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
-    (progn (delete-region (point-min) (point-max))
-	   ;;Store clock
-	   (insert (format ";; org-persist.el - %s at %s\n"
-			   system-name (format-time-string
-					(cdr org-time-stamp-formats))))
-	   (if (and org-clock-persist (marker-buffer org-clock-marker)
-		    (or (not org-clock-persist-query-save)
-			(y-or-n-p (concat "Save current clock ("
-					  (substring-no-properties org-clock-heading)
-					  ")"))))
-	       (insert "(setq resume-clock '(\""
-		       (buffer-file-name (marker-buffer org-clock-marker))
-		       "\" . " (int-to-string (marker-position org-clock-marker))
-		       "))\n"))
-	   ;;Store clocked task history. Tasks are stored reversed to make
-	   ;;reading simpler
-	   (if org-clock-history
-	       (insert "(setq stored-clock-history '("
-		       (mapconcat
-			(lambda (m)
-			  (when (marker-buffer m)
-			    (concat "(\"" (buffer-file-name (marker-buffer m))
-				    "\" . " (int-to-string (marker-position m))
-				")")))
-			(reverse org-clock-history) " ") "))\n"))
-	   (save-buffer)
-	   (kill-buffer (current-buffer)))))
+  "Persist various clock-related data to disk.
+The details of what will be saved are regulated by the variable
+`org-clock-persist'."
+  (when org-clock-persist
+    (let (b)
+      (with-current-buffer (find-file (expand-file-name org-clock-persist-file))
+	(progn
+	  (delete-region (point-min) (point-max))
+	  ;;Store clock
+	  (insert (format ";; org-persist.el - %s at %s\n"
+			  system-name (format-time-string
+				       (cdr org-time-stamp-formats))))
+	  (if (and (setq b (marker-buffer org-clock-marker))
+		   (setq b (or (buffer-base-buffer b) b))
+		   (buffer-live-p b)
+		   (buffer-file-name b)
+		   (or (not org-clock-persist-query-save)
+		       (y-or-n-p (concat "Save current clock ("
+					 (substring-no-properties org-clock-heading)
+					 ") "))))
+	      (insert "(setq resume-clock '(\""
+		      (buffer-file-name (marker-buffer org-clock-marker))
+		      "\" . " (int-to-string (marker-position org-clock-marker))
+		      "))\n"))
+	  ;; Store clocked task history. Tasks are stored reversed to make
+	  ;; reading simpler
+	  (when (and org-clock-history (eq org-clock-persist t))
+	    (insert
+	     "(setq stored-clock-history '("
+	     (mapconcat
+	      (lambda (m)
+		(when (and (setq b (marker-buffer m))
+			   (setq b (or (buffer-base-buffer b) b))
+			   (buffer-live-p b)
+			   (buffer-file-name b))
+		  (concat "(\"" (buffer-file-name b)
+			  "\" . " (int-to-string (marker-position m))
+			  ")")))
+	      (reverse org-clock-history) " ") "))\n"))
+	  (save-buffer)
+	  (kill-buffer (current-buffer)))))))
 
-(defvar org-clock-loaded nil)
+(defvar org-clock-loaded nil
+  "Was the clock file loaded?")
 
 (defun org-clock-load ()
   "Load various clock-related data from disk, optionally resuming
 a stored clock"
-  (if (not org-clock-loaded)
-      (let ((filename (expand-file-name org-clock-persist-file))
-	    (org-clock-in-resume t))
-	(if (file-readable-p filename)
-	    (progn
-	      (message "%s" "Restoring clock data")
-	      (setq org-clock-loaded t)
-	      (load-file filename)
-	      ;; load history
-	      (if (boundp 'stored-clock-history)
-		  (save-window-excursion
-		    (mapc (lambda (task)
-			    (org-clock-history-push (cdr task)
-						    (find-file (car task))))
-			  stored-clock-history)))
-	      ;; resume clock
-	      (if (and (boundp 'resume-clock) org-clock-persist
-		       (or (not org-clock-persist-query-resume)
-			   (y-or-n-p 
-			    (concat
-			     "Resume clock ("
-			     (with-current-buffer (find-file (car resume-clock))
-			       (progn (goto-char (cdr resume-clock))
-				      (looking-at org-complex-heading-regexp)
-				      (match-string 4))) ")"))))
+  (when (and org-clock-persist (not org-clock-loaded))
+    (let ((filename (expand-file-name org-clock-persist-file))
+	  (org-clock-in-resume t)
+	  resume-clock)
+      (if (file-readable-p filename)
+	  (progn
+	    (message "%s" "Restoring clock data")
+	    (setq org-clock-loaded t)
+	    (load-file filename)
+	    ;; load history
+	    (if (boundp 'stored-clock-history)
+		(save-window-excursion
+		  (mapc (lambda (task)
+			  (if (file-exists-p (car task))
+			      (org-clock-history-push (cdr task)
+						      (find-file (car task)))))
+			stored-clock-history)))
+	    ;; resume clock
+	    (if (and resume-clock org-clock-persist
+		     (file-exists-p (car resume-clock))
+		     (or (not org-clock-persist-query-resume)
+			 (y-or-n-p 
+			  (concat
+			   "Resume clock ("
+			   (with-current-buffer (find-file (car resume-clock))
+			     (progn (goto-char (cdr resume-clock))
+				    (org-back-to-heading t)
+				    (looking-at org-complex-heading-regexp)
+				    (match-string 4))) ") "))))
+		(when (file-exists-p (car resume-clock))
 		  (with-current-buffer (find-file (car resume-clock))
 		    (progn (goto-char (cdr resume-clock))
-			   (org-clock-in)))))
-	  (message "Not restoring clock data; %s not found"
-		   org-clock-persist-file)))))
+			   (org-clock-in))))))
+	(message "Not restoring clock data; %s not found"
+		 org-clock-persist-file)))))
 
 ;;;###autoload
 (defun org-clock-persistence-insinuate ()

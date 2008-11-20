@@ -1,5 +1,11 @@
 2008-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-save, org-clock-load): Check for
+	live buffers, existing files, and buffer file names to ensure
+	consistent information.
+	(org-clock-persist): Make `clock' a special value of this
+	variable, and improve docstring.
+
 	* org-list.el (org-cycle-list-bullet, org-fix-bullet-type)
 	(org-get-string-indentation): Adapt indentation when the bullet
 	width changes.
