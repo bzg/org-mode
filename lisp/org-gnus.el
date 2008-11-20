@@ -64,6 +64,13 @@ negates this setting for the duration of the command."
 ;; Implementation
 
 (defun org-gnus-group-link (group)
+  "Create a link to the Gnus group GROUP.
+If GROUP is a newsgroup and `org-gnus-prefer-web-links' is
+non-nil, create a link to groups.google.com or gmane.org.
+Otherwise create a link to the group inside Gnus.
+
+If `org-store-link' was called with a prefix arg the meaning of
+`org-gnus-prefer-web-links' is reversed."
   (let ((unprefixed-group (replace-regexp-in-string "^[^:]+:" "" group)))
     (if (and (string-match "^nntp" group) ;; Only for nntp groups
 	     (org-xor current-prefix-arg
@@ -75,6 +82,17 @@ negates this setting for the duration of the command."
       (concat "gnus:" group))))
 
 (defun org-gnus-article-link (group newsgroups message-id x-no-archive)
+  "Create a link to a Gnus article.
+The article is specified by its MESSAGE-ID.  Additional
+parameters are the Gnus GROUP, the NEWSGROUPS the article was
+posted to and the X-NO-ARCHIVE header value of that article.
+
+If GROUP is a newsgroup and `org-gnus-prefer-web-links' is
+non-nil, create a link to groups.google.com or gmane.org.
+Otherwise create a link to the article inside Gnus.
+
+If `org-store-link' was called with a prefix arg the meaning of
+`org-gnus-prefer-web-links' is reversed."
   (if (and (org-xor current-prefix-arg org-gnus-prefer-web-links)
 	   newsgroups	  ;; Make web links only for nntp groups
 	   (not x-no-archive)) ;; and if X-No-Archive isn't set.
