@@ -102,7 +102,7 @@
   :group 'org-mtags
   :group 'org-faces)
 
-(defcustom org-mtags-prefere-muse-templates t
+(defcustom org-mtags-prefer-muse-templates t
   "Non-nil means, prefere Muse tags for structure elements.
 This is relevane when expanding the templates defined in the variable
 `org-structure-templates'."

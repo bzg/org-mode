@@ -6086,7 +6086,7 @@ This link is added to `org-stored-links' and can later be inserted
 into an org-buffer with \\[org-insert-link].
 
 For some link types, a prefix arg is interpreted:
-For links to usenet articles, arg negates `org-gnus-prefere-web-links'.
+For links to usenet articles, arg negates `org-gnus-prefer-web-links'.
 For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
@@ -7709,7 +7709,7 @@ for the file uning completion.
 There are two templates for each key, the first uses the original Org syntax,
 the second uses Emacs Muse-like syntax tags.  These Muse-like tags become
 the default when the /org-mtags.el/ module has been loaded. See also the
-variable `org-mtags-prefere-muse-templates'.
+variable `org-mtags-prefer-muse-templates'.
 This is an experimental feature, it is undecided if it is going to stay in."
   :group 'org-completion
   :type '(repeat
@@ -7732,7 +7732,7 @@ expands them."
 
 (defun org-complete-expand-structure-template (start cell)
   "Expand a structure template."
-  (let* ((musep (org-bound-and-true-p org-mtags-prefere-muse-templates))
+  (let* ((musep (org-bound-and-true-p org-mtags-prefer-muse-templates))
 	 (rpl (nth (if musep 2 1) cell)))
     (delete-region start (point))
     (when (string-match "\\`#\\+" rpl)
@@ -12671,7 +12671,14 @@ depending on context.  See the individual commands for more information."
    (t (call-interactively 'org-next-item))))
 
 (defun org-shiftright (&optional arg)
-  "Next TODO keyword or timestamp one day later, depending on context."
+  "Cycle the thing at point or in the current line, depending on context.
+Depending on context, this does one of the following:
+
+- switch a timestamp at point one day into the future
+- on a headline, switch to the next TODO keyword.
+- on an item, switch entire list to the next bullet type
+- on a property line, switch to the next allowed value
+- on a clocktable definition line, move time block into the future"
   (interactive "P")
   (cond
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
@@ -12682,7 +12689,14 @@ depending on context.  See the individual commands for more information."
    (t (org-shiftcursor-error))))
 
 (defun org-shiftleft (&optional arg)
-  "Previous TODO keyword or timestamp one day earlier, depending on context."
+  "Cycle the thing at point or in the current line, depending on context.
+Depending on context, this does one of the following:
+
+- switch a timestamp at point one day into the past
+- on a headline, switch to the previous TODO keyword.
+- on an item, switch entire list to the previous bullet type
+- on a property line, switch to the previous allowed value
+- on a clocktable definition line, move time block into the past"
   (interactive "P")
   (cond
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
