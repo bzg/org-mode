@@ -5854,6 +5854,8 @@ off orgstruct-mode will *not* remove these additional settings."
 	  '([(meta shift right)]  org-shiftmetaright)
 	  '([(shift up)]          org-shiftup)
 	  '([(shift down)]        org-shiftdown)
+	  '([(shift left)]        org-shiftleft)
+	  '([(shift right)]       org-shiftright)
 	  '("\C-c\C-c"            org-ctrl-c-ctrl-c)
 	  '("\M-q"                fill-paragraph)
 	  '("\C-c^"               org-sort)
