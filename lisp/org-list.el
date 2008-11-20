@@ -589,7 +589,7 @@ If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
    (beginning-of-line 1)
    (let ((current (match-string 0))
 	 (prevp (eq which 'previous))
-	 new)
+	 new old)
      (setq new (cond
 		((and (numberp which)
 		      (nth (1- which) '("-" "+" "*" "1." "1)"))))
@@ -597,10 +597,14 @@ If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
 		((string-match "\\+" current)
 		 (if prevp "-" (if (looking-at "\\S-") "1." "*")))
 		((string-match "\\*" current) (if prevp "+" "1."))
-		((string-match "\\." current) (if prevp "*" "1)"))
+		((string-match "\\." current)
+		 (if prevp (if (looking-at "\\S-") "+" "*") "1)"))
 		((string-match ")" current) (if prevp "1." "-"))
 		(t (error "This should not happen"))))
-     (and (looking-at "\\([ \t]*\\)\\S-+") (replace-match (concat "\\1" new)))
+     (and (looking-at "\\([ \t]*\\)\\(\\S-+\\)")
+	  (setq old (match-string 2))
+	  (replace-match (concat "\\1" new)))
+     (org-shift-item-indentation (- (length new) (length old)))
      (org-fix-bullet-type)
      (org-maybe-renumber-ordered-list))))
 
@@ -629,7 +633,7 @@ with something like \"1.\" or \"2)\"."
 	      (buffer-substring (point-at-bol) (match-beginning 3))))
 	;; (term (substring (match-string 3) -1))
 	ind1 (n (1- arg))
-	fmt bobp)
+	fmt bobp old new)
     ;; find where this list begins
     (org-beginning-of-item-list)
     (setq bobp (bobp))
@@ -647,20 +651,23 @@ with something like \"1.\" or \"2)\"."
 	  (if (> ind1 ind) (throw 'next t))
 	  (if (< ind1 ind) (throw 'exit t))
 	  (if (not (org-at-item-p)) (throw 'exit nil))
+	  (setq old (match-string 2))
 	  (delete-region (match-beginning 2) (match-end 2))
 	  (goto-char (match-beginning 2))
-	  (insert (format fmt (setq n (1+ n)))))))
+	  (insert (setq new (format fmt (setq n (1+ n)))))
+	  (org-shift-item-indentation (- (length new) (length old))))))
     (goto-line line)
     (org-move-to-column col)))
 
 (defun org-fix-bullet-type ()
-  "Make sure all items in this list have the same bullet as the firsst item."
+  "Make sure all items in this list have the same bullet as the first item.
+Also, fix the indentation."
   (interactive)
   (unless (org-at-item-p) (error "This is not a list"))
   (let ((line (org-current-line))
 	(col (current-column))
 	(ind (current-indentation))
-	ind1 bullet)
+	ind1 bullet oldbullet)
     ;; find where this list begins
     (org-beginning-of-item-list)
     (beginning-of-line 1)
@@ -681,11 +688,27 @@ with something like \"1.\" or \"2)\"."
 	  (if (not (org-at-item-p)) (throw 'exit nil))
 	  (skip-chars-forward " \t")
 	  (looking-at "\\S-+")
-	  (replace-match bullet))))
+	  (setq oldbullet (match-string 0))
+	  (replace-match bullet)
+	  (org-shift-item-indentation (- (length bullet) (length oldbullet))))))
     (goto-line line)
     (org-move-to-column col)
     (if (string-match "[0-9]" bullet)
 	(org-renumber-ordered-list 1))))
+
+(defun org-shift-item-indentation (delta)
+  "Shift the indentation in current item by DELTA."
+  (save-excursion
+    (let ((beg (point-at-bol)) (end (progn (org-end-of-item) (point))))
+      (goto-char end)
+      (beginning-of-line 0)
+      (while (> (point) beg)
+	(when (looking-at "[ \t]*\\S-")
+	  ;; this is not an empty line
+	  (setq i (org-get-indentation))
+	  (if (and (> i 0) (> (setq i (+ i delta)) 0))
+	      (indent-line-to i)))
+	(beginning-of-line 0)))))
 
 (defun org-beginning-of-item-list ()
   "Go to the beginning of the current item list.
