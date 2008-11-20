@@ -699,7 +699,9 @@ Also, fix the indentation."
 (defun org-shift-item-indentation (delta)
   "Shift the indentation in current item by DELTA."
   (save-excursion
-    (let ((beg (point-at-bol)) (end (progn (org-end-of-item) (point))))
+    (let ((beg (point-at-bol))
+	  (end (progn (org-end-of-item) (point)))
+	  i)
       (goto-char end)
       (beginning-of-line 0)
       (while (> (point) beg)
