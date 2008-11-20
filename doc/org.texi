@@ -7487,10 +7487,10 @@ the subtrees are exported.
 @item C-c C-e
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
-command.  The prefix arg is passed through to the exporter.  If the option
-@code{org-export-run-in-background} is set, Org will run the command in the
-background if that seems useful for the specific command (i.e. commands that
-write to a file).
+command.  The prefix arg is passed through to the exporter.  A double prefix
+@kbd{C-u C-u} causes most commands} to be executed in the background, in a
+separate emacs process@footnote{To make this behavior the default, customize
+the variable @code{org-export-run-in-background}.}.
 @kindex C-c C-e v
 @item C-c C-e v
 Like @kbd{C-c C-e}, but only export the text that is currently visible
