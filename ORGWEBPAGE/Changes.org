@@ -23,7 +23,7 @@
 
     The remember buffers created with Org's extensions are in
     Org-mode, which is nice to prepare snippets that will
-    actually be sotred in Org-mode files.  However, this makes it
+    actually be stored in Org-mode files.  However, this makes it
     hard to configure key bindings without modifying the Org-mode
     keymap.  There is now a minor mode active in these buffers,
     `org-remember-mode', and its keymap org-remember-mode-map can
@@ -44,12 +44,16 @@
     binding (by binding this key to nil in the minor mode map),
     so that you can use =C-c C-c= again to set tags.
 
+    This modification is based on a request by Tim O'Callaghan.
+
 *** Support for ido completion
 
     You can now get the completion interface from /ido.el/ for
     many of Org's internal completion commands by turning on the
     variable =org-completion-use-ido=. =ido=mode= must also be
     active before you can use this.
+
+    This change is based upon a request by Samuel Wales.
 
 *** New face for date lines in agenda column view
 
@@ -58,6 +62,8 @@
     lines and the separation between different days becomes
     harder to see.  If this bothers you, you can now customize
     the face =org-agenda-column-dateline=.
+
+    This is based on a request by George Pearson.
 
 *** Invisible targets become now anchors in headlines.
 
@@ -70,6 +76,8 @@
 ,# <<dummy>>
 ,*** a headline
 #+end_src
+
+    This is based on a request by Matt Lundin.
 
 *** New contributed file /org-exp-blocks.el/
 
@@ -86,11 +94,12 @@
     /org-exp-blocks.el/.
 
     Kudos to Eric Schulte for this new functionality, after
-    org-plot.el already his second major contribution.  Thanks to
-    Stathis for this excellent program, and for allowing us to
+    /org-plot.el/ already his second major contribution.  Thanks
+    to Stathis for this excellent program, and for allowing us to
     bundle it with Org-mode.
 
 *** New contributed file /org-eval-light.el/
+
     This module gives contrib over execution Emacs Lisp code
     blocks included in a file.
 
@@ -113,11 +122,7 @@
       'org-translate-link-from-planner)
 #+end_src
 
-   This will work for pretty much all links where Org does
-   support the same or a similar protocol.  However, the
-   translator is a quick hack, and maybe we need to refine it.
-
-   I guess a similar translator could be written and integrated
+   I guess an inverse translator could be written and integrated
    into Planner.
 
 *** BBDB links may use regular expressions.
@@ -125,6 +130,11 @@
     This did work all along, but only now I have documented it.
 
 *** =yank-pop= works again after yanking an outline tree
+
+    Samuel Wales had noticed that org-yank did mess up this
+    functionality.  Now you can use =yank-pop= again, the only
+    restriction is that the so-yanked text will not be
+    pro/demoted or folded.
 
 *** Link abbreviations can use %h to insert a url-encoded target value
 
@@ -135,7 +145,7 @@
     Thanks to Sebastian Rose for pushing this.
 
 *** Many bug fixes again.
-
+    
 * Version 6.12
 ** Overview
 

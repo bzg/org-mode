@@ -6,7 +6,7 @@
 ;;         Tassilo Horn <tassilo at member dot fsf dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.13pre01
+;; Version: 6.13pre02
 ;;
 ;; This file is part of GNU Emacs.
 ;;
