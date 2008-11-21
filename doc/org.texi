@@ -6073,7 +6073,8 @@ entries that @emph{do} have the tag.  A second @kbd{/} at the prompt will
 turn off the filter and unhide any hidden entries.  If the first key you
 press is either @kbd{+} or @kbd{-}, the previous filter will be narrowed by
 requiring or forbidding the selected additional tag.  Instead of pressing
-@kbd{+} or @kbd{-}, you can also use the @kbd{\} command.
+@kbd{+} or @kbd{-} after @kbd{/}, you can also immediately use the @kbd{\}
+command.
 
 In order to filter for effort estimates, you should set-up allowed
 efforts globally, for example
