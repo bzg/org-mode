@@ -1,5 +1,9 @@
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-string): Allow one comment
+	line before the first headline to always be included.  This is
+	to not miss a commented target.
+
 	* org-mouse.el (org-mouse-insert-item): Call
 	`org-indent-to-column' instead of `indent-to', for XEmacs
 	compatibility.

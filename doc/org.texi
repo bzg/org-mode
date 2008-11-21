@@ -2435,9 +2435,10 @@ convenient to put them into a comment line. For example
 @end example
 
 @noindent In HTML export (@pxref{HTML export}), such targets will become
-named anchors for direct access through @samp{http} links@footnote{Note
-that text before the first headline is usually not exported, so the
-first such target should be after the first headline.}.
+named anchors for direct access through @samp{http} links@footnote{Note that
+text before the first headline is usually not exported, so the first such
+target should be after the first headline, or in the line directly before the
+first headline.}.
 
 If no dedicated target exists, Org will search for the words in the
 link.  In the above example the search would be for @samp{my target}.
