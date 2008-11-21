@@ -380,7 +380,7 @@ to be run from that hook to function properly."
 		    v-a))
 	     (v-n user-full-name)
 	     (v-k (if (marker-buffer org-clock-marker)
-		      (substring-no-properties org-clock-heading)))
+		      (org-substring-no-properties org-clock-heading)))
 	     (v-K (if (marker-buffer org-clock-marker)
 		      (org-make-link-string
 		       (buffer-file-name (marker-buffer org-clock-marker))
@@ -520,7 +520,7 @@ to be run from that hook to function properly."
 						   (car clipboards))))))
 	   ((equal char "p")
 	    (let*
-		((prop (substring-no-properties prompt))
+		((prop (org-substring-no-properties prompt))
 		 (pall (concat prop "_ALL"))
 		 (allowed
 		  (with-current-buffer

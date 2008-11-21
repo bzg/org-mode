@@ -256,7 +256,7 @@ of a different task.")
 			     'help-echo (concat help-text ": " org-clock-heading))
 	       (org-propertize clock-string 'help-echo help-text)))
 	   'local-map org-clock-mode-map
-	   'mouse-face '(face mode-line-highlight)))
+	   'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
     (force-mode-line-update)))
 
 (defvar org-clock-mode-line-entry nil

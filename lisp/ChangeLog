@@ -1,4 +1,13 @@
+
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-apply-template): Use
+	`org-substring-no-properties'.
+
+	* org-compat.el (org-substring-no-properties): New function.
+
+	* org-remember.el (org-remember-apply-template): Use
+	`org-substring-no-properties' for compatibility.
 
 	* org-list.el (org-list-two-spaces-after-bullet-regexp): New
 	option.

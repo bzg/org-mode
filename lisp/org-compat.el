@@ -277,8 +277,15 @@ that can be added."
 
 (defun org-propertize (string &rest properties)
   (if (featurep 'xemacs)
-      (add-text-properties 0 (length string) properties string)
+      (progn
+	(add-text-properties 0 (length string) properties string)
+	string)
     (apply 'propertize string properties)))
+
+(defun org-substring-no-properties (string &optional from to)
+  (if (featurep 'xemacs)
+      (org-no-properties (substring string from to))
+    (substring-no-properties string from to)))
 
 (provide 'org-compat)
 
