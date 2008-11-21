@@ -2434,6 +2434,9 @@ underlined headlines.  The default is 3."
 		   "\n") "\n")))
        (t
 	(setq line (org-fix-indentation line org-ascii-current-indentation))
+	;; Remove forced line breaks
+	(if (string-match "\\\\\\\\[ \t]*$" line)
+	    (setq line (replace-match "" t t line)))
 	(if (and org-export-with-fixed-width
 		 (string-match "^\\([ \t]*\\)\\(:\\)" line))
 	    (setq line (replace-match "\\1" nil nil line)))

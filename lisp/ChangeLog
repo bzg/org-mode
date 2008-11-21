@@ -1,5 +1,8 @@
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-ascii): Remove the "\\" forced
+	line break indicators.
+
 	* org.el (org-ido-completing-read): Remove the "i:" prefix for
 	ido-completion propts.
 
