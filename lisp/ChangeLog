@@ -1,3 +1,7 @@
+2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-refile-targets): Fix customize definition so
+	that it works also in XEmacs.
 
 2008-11-21  Tokuya Kameshima  <kames@fa2.so-net.ne.jp>
 

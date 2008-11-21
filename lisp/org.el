@@ -1322,11 +1322,11 @@ are used, equivalent to the value `((nil . (:level . 1))'."
 		   (const :tag "Current buffer" nil)
 		   (function) (variable) (file))
 	   (choice :tag "Identify target headline by"
-	    (cons :tag "Specific tag" (const :tag) (string))
-	    (cons :tag "TODO keyword" (const :todo) (string))
-	    (cons :tag "Regular expression" (const :regexp) (regexp))
-	    (cons :tag "Level number" (const :level) (integer))
-	    (cons :tag "Max Level number" (const :maxlevel) (integer))))))
+	    (cons :tag "Specific tag" (const :value :tag) (string))
+	    (cons :tag "TODO keyword" (const :value :todo) (string))
+	    (cons :tag "Regular expression" (const :value :regexp) (regexp))
+	    (cons :tag "Level number" (const :value :level) (integer))
+	    (cons :tag "Max Level number" (const :value :maxlevel) (integer))))))
 
 (defcustom org-refile-use-outline-path nil
   "Non-nil means, provide refile targets as paths.
