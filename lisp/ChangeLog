@@ -1,3 +1,8 @@
+2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-adaptive-fill-function): Allow two spaces after
+	"1." as a list bullet.
+
 2008-11-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-save, org-clock-load): Check for
