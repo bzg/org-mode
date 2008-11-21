@@ -1123,38 +1123,41 @@ a stored clock"
   (when (and org-clock-persist (not org-clock-loaded))
     (let ((filename (expand-file-name org-clock-persist-file))
 	  (org-clock-in-resume t)
-	  resume-clock)
-      (if (file-readable-p filename)
-	  (progn
-	    (message "%s" "Restoring clock data")
-	    (setq org-clock-loaded t)
-	    (load-file filename)
-	    ;; load history
-	    (if (boundp 'stored-clock-history)
-		(save-window-excursion
-		  (mapc (lambda (task)
-			  (if (file-exists-p (car task))
-			      (org-clock-history-push (cdr task)
-						      (find-file (car task)))))
-			stored-clock-history)))
-	    ;; resume clock
-	    (if (and resume-clock org-clock-persist
-		     (file-exists-p (car resume-clock))
-		     (or (not org-clock-persist-query-resume)
-			 (y-or-n-p 
-			  (concat
-			   "Resume clock ("
-			   (with-current-buffer (find-file (car resume-clock))
-			     (progn (goto-char (cdr resume-clock))
-				    (org-back-to-heading t)
-				    (looking-at org-complex-heading-regexp)
-				    (match-string 4))) ") "))))
-		(when (file-exists-p (car resume-clock))
-		  (with-current-buffer (find-file (car resume-clock))
-		    (progn (goto-char (cdr resume-clock))
-			   (org-clock-in))))))
-	(message "Not restoring clock data; %s not found"
-		 org-clock-persist-file)))))
+	  resume-clock stored-clock-history)
+      (if (not (file-readable-p filename))
+	  (message "Not restoring clock data; %s not found"
+		   org-clock-persist-file)
+	(message "%s" "Restoring clock data")
+	(setq org-clock-loaded t)
+	(load-file filename)
+	;; load history
+	(when stored-clock-history
+	  (save-window-excursion
+	    (mapc (lambda (task)
+		    (if (file-exists-p (car task))
+			(org-clock-history-push (cdr task)
+						(find-file (car task)))))
+		  stored-clock-history)))
+	;; resume clock
+	(when (and resume-clock org-clock-persist
+		   (file-exists-p (car resume-clock))
+		   (or (not org-clock-persist-query-resume)
+		       (y-or-n-p 
+			(concat
+			 "Resume clock ("
+			 (with-current-buffer (find-file (car resume-clock))
+			   (save-excursion
+			     (goto-char (cdr resume-clock))
+			     (org-back-to-heading t)
+			     (and (looking-at org-complex-heading-regexp)
+				  (match-string 4))))
+			 ") "))))
+	  (when (file-exists-p (car resume-clock))
+	    (with-current-buffer (find-file (car resume-clock))
+	      (goto-char (cdr resume-clock))
+	      (org-clock-in)
+	      (if (org-invisible-p)
+		  (org-show-context)))))))))
 
 ;;;###autoload
 (defun org-clock-persistence-insinuate ()
