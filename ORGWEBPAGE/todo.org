@@ -70,10 +70,6 @@ something.
     question is, is this URL going to be stable so that it makes sense
     to actually put this into org.el?
 
-*** IDEA Make News HTML links work, using Google.
-    I can use Google groups with a message id to find a USENET message,
-    even if the original link points to gnus.
-
 *** TODO Remove irretrievable links from /published/ HTML output
     This is on David's table, and he will hopefully integrate a
     mechanism for this into org-publish.el.  The discussion about this
@@ -166,7 +162,7 @@ convention of using "publishing" when there is a /project/ to publish.
 
 ** Miscellaneous Stuff
 *** BUG Comments cannot be filled
-*** QUESTION Inlining of images in Org-mode files
+*** WISH Inlining of images in Org-mode files
 *** TODO Fixup outline-magic.el, so that it can be used.
     
 *** TODO Use the new argument of bibtex-url
@@ -208,42 +204,13 @@ convention of using "publishing" when there is a /project/ to publish.
     convention is better?  Should this be consistent between trees and
     plain lists?
 
-*** INCONSISTENCY: M-TAB does not work on plain lists.  Why???
-
 *** QUESTION grep on directory does not yet work.
     I am actually not sure, I might have addressed this already, but
     my memory is failing me.  Needs some checking.
 
-*** DECLINED Inlining of external files
 
 * Archive
 ** Archived Tasks
-*** DONE Definition lists, like in Muse
-    :PROPERTIES:
-    :ARCHIVE_TIME: 2008-05-29 Thu 17:01
-    :ARCHIVE_FILE: ~/lib/emacs/work/org-mode/ORGWEBPAGE/todo.org
-    :ARCHIVE_OLPATH: Tasks/Structure
-    :ARCHIVE_CATEGORY: todo
-    :ARCHIVE_TODO: DONE
-    :END:
-*** DONE Sort TODO entries according to type?
-    :PROPERTIES:
-    :ARCHIVE_TIME: 2008-09-19 Fri 13:16
-    :ARCHIVE_FILE: ~/lib/emacs/work/org-mode/ORGWEBPAGE/todo.org
-    :ARCHIVE_OLPATH: Tasks/Agenda issues
-    :ARCHIVE_CATEGORY: todo
-    :ARCHIVE_TODO: DONE
-    :END:
-    This would apply for the list collection, not in the day entries.
-    However, I could also have a TODO keyword criterion that could be
-    used in the day entries, as one of the minor criteria.
-
-    Right now we can already sort an outline tree according to
-    children, this is nice already.  However, sorting in the agenda
-    would be nice too.  The problem is, that i the agenda we may have
-    todo lists from a number of different buffers, so the sorting
-    relation may not be clear.....
-
 * COMMENT HTML style specifications
 
 # Local Variables: 
