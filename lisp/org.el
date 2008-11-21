@@ -6581,7 +6581,7 @@ used as the link location instead of reading one interactively."
 	   (fboundp 'ido-completing-read)
 	   (boundp 'ido-mode) ido-mode
 	   (listp (second args)))
-      (apply 'ido-completing-read (concat "i:" (car args)) (cdr args))
+      (apply 'ido-completing-read (concat (car args)) (cdr args))
     (apply 'completing-read args)))
 
 (defun org-extract-attributes (s)
