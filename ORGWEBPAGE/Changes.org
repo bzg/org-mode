@@ -17,6 +17,18 @@
   :END:
 
 ** Overview
+
+   - Keybindings in Remember buffers can be configured
+   - Support for ido completion
+   - New face for date lines in agenda column view
+   - Invisible targets become now anchors in headlines.
+   - New contributed file /org-exp-blocks.el/
+   - New contributed file /org-eval-light.el/
+   - Link translation
+   - BBDB links may use regular expressions.
+   - Link abbreviations can use %h to insert a url-encoded target value
+   - Improved XHTML compliance
+
 ** Details
 
 *** Keybindings in Remember buffers can be configured
