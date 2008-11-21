@@ -72,6 +72,18 @@ the safe choice."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tab "both" t)))
 
+(defcustom org-list-two-spaces-after-bullet-regexp nil
+  "A regular expression matching bullets that should have 2 spaces after them.
+When nil, no bullet will have two spaces after them.
+When a string, it will be used as a regular expression.  When the bullet
+type of a list is changed, the new bullet type will be matched against this
+regexp.  If it matches, there will be two spaces instead of one after
+the bullet in each item of he list."
+  :group 'org-plain-list
+  :type '(choice
+	  (const :tag "never" nil)
+	  (regexp)))
+
 (defcustom org-empty-line-terminates-plain-lists nil
   "Non-nil means, an empty line ends all plain list levels.
 When nil, empty lines are part of the preceeding item."
@@ -673,7 +685,10 @@ Also, fix the indentation."
     (beginning-of-line 1)
     ;; find out what the bullet type is
     (looking-at "[ \t]*\\(\\S-+\\)")
-    (setq bullet (match-string 1))
+    (setq bullet (concat (match-string 1) " "))
+    (if (and org-list-two-spaces-after-bullet-regexp
+	     (string-match org-list-two-spaces-after-bullet-regexp bullet))
+	(setq bullet (concat bullet " ")))
     ;; walk forward and replace these numbers
     (beginning-of-line 0)
     (catch 'exit
@@ -687,7 +702,7 @@ Also, fix the indentation."
 	  (if (< ind1 ind) (throw 'exit t))
 	  (if (not (org-at-item-p)) (throw 'exit nil))
 	  (skip-chars-forward " \t")
-	  (looking-at "\\S-+")
+	  (looking-at "\\S-+ *")
 	  (setq oldbullet (match-string 0))
 	  (replace-match bullet)
 	  (org-shift-item-indentation (- (length bullet) (length oldbullet))))))

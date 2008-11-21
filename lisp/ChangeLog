@@ -1,5 +1,10 @@
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-list-two-spaces-after-bullet-regexp): New
+	option.
+	(org-fix-bullet-type): respect
+	`org-list-two-spaces-after-bullet-regexp'. 
+
 	* org-clock.el (org-clock-load): Clean up the code.
 
 	* org.el (org-adaptive-fill-function): Allow two spaces after
