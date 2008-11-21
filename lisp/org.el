@@ -4949,7 +4949,7 @@ would end up with no indentation after the change, nothing at all is done."
 	  (goto-char (match-end 0))
 	  (setq col (current-column))
 	  (if (< diff 0) (replace-match ""))
-	  (indent-to (+ diff col))))
+	  (org-indent-to-column (+ diff col))))
       (move-marker end nil))))
 
 (defun org-convert-to-odd-levels ()

@@ -584,7 +584,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      (beginning-of-line)
      (looking-at "[ \t]*")
      (open-line 1)
-     (indent-to (- (match-end 0) (match-beginning 0)))
+     (org-indent-to-column (- (match-end 0) (match-beginning 0)))
      (insert "+ "))
 
     (:middle			; insert after

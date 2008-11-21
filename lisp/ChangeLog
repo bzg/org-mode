@@ -1,7 +1,13 @@
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mouse.el (org-mouse-insert-item): Call
+	`org-indent-to-column' instead of `indent-to', for XEmacs
+	compatibility.
+
 	* org.el (org-refile-targets): Fix customize definition so
 	that it works also in XEmacs.
+	(org-fixup-indentation): Call `org-indent-to-column' instead
+	of `indent-to', for XEmacs compatibility.
 
 2008-11-21  Tokuya Kameshima  <kames@fa2.so-net.ne.jp>
 
