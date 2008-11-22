@@ -6877,8 +6877,8 @@ application the system uses for this file type."
 				     'face 'org-warning))))
 	      (message "%s => %s" cmd 
 		       (if (equal (string-to-char cmd) ?\()
-			   (call-interactively (read cmd))
-			 (eval (read cmd))))
+			   (eval (read cmd))
+			 (call-interactively (read cmd))))
 	    (error "Abort"))))
 
        (t

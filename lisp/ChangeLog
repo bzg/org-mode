@@ -1,3 +1,8 @@
+2008-11-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-at-point): Fix mixup about interactive and
+	non-interactive elisp links.
+
 2008-11-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-string): Allow one comment
