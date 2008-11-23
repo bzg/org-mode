@@ -1,3 +1,8 @@
+2008-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-dblock-write:clocktable): Make sure the
+	clocktable sees the first line.
+
 2008-11-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-open-at-point): Fix mixup about interactive and

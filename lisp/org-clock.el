@@ -830,7 +830,7 @@ the currently selected interval size."
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
 	   ipos time p level hlc hdl content recalc formula pcol
-	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list)
+	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list st)
       (setq org-clock-file-total-minutes nil)
       (when step
 	(unless (or block (and ts te))
@@ -912,7 +912,11 @@ the currently selected interval size."
 	(unless scope-is-list
 	  (org-clock-sum ts te)
 	  (goto-char (point-min))
-	  (while (setq p (next-single-property-change (point) :org-clock-minutes))
+	  (setq st t)
+	  (while (or (and (bobp) (prog1 st (setq st nil))
+			  (get-text-property (point) :org-clock-minutes)
+			  (setq p (point-min)))
+		     (setq p (next-single-property-change (point) :org-clock-minutes)))
 	    (goto-char p)
 	    (when (setq time (get-text-property p :org-clock-minutes))
 	      (save-excursion
