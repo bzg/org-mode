@@ -270,88 +270,102 @@ clock into.  When SELECT is `C-u C-u', clock into the current task and mark
 is as the default task, a special task that will always be offered in
 the clocking selection, associated with the letter `d'."
   (interactive "P")
-  (let ((interrupting (marker-buffer org-clock-marker))
-	ts selected-task target-pos)
-    (when (equal select '(4))
-      (setq selected-task (org-clock-select-task "Clock-in on task: "))
-      (if selected-task
-	  (setq selected-task (copy-marker selected-task))
-	(error "Abort")))
-    (when interrupting
-      ;; We are interrupting the clocking of a differnt task.
-      ;; Save a marker to this task, so that we can go back.
-      (move-marker org-clock-interrupted-task
-		   (marker-position org-clock-marker)
-		   (marker-buffer org-clock-marker))
-      (org-clock-out t))
-    
-    (when (equal select '(16))
-      ;; Mark as default clocking task
-      (save-excursion
-	(org-back-to-heading t)
-	(move-marker org-clock-default-task (point))))
-    
-    (setq target-pos (point))  ;; we want to clock in at this location
-    (save-excursion
-      (when (and selected-task (marker-buffer selected-task))
-	;; There is a selected task, move to the correct buffer
-	;; and set the new target position.
-	(set-buffer (org-base-buffer (marker-buffer selected-task)))
-	(setq target-pos (marker-position selected-task))
-	(move-marker selected-task nil))
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char target-pos)
+  (catch 'abort
+    (let ((interrupting (marker-buffer org-clock-marker))
+	  ts selected-task target-pos)
+      (when (equal select '(4))
+	(setq selected-task (org-clock-select-task "Clock-in on task: "))
+	(if selected-task
+	    (setq selected-task (copy-marker selected-task))
+	  (error "Abort")))
+      (when interrupting
+	;; We are interrupting the clocking of a differnt task.
+	;; Save a marker to this task, so that we can go back.
+	(move-marker org-clock-interrupted-task
+		     (marker-position org-clock-marker)
+		     (marker-buffer org-clock-marker))
+	(org-clock-out t))
+      
+      (when (equal select '(16))
+	;; Mark as default clocking task
+	(save-excursion
 	  (org-back-to-heading t)
-	  (or interrupting (move-marker org-clock-interrupted-task nil))
-	  (org-clock-history-push)
-	  (cond ((functionp org-clock-in-switch-to-state)
-		 (looking-at org-complex-heading-regexp)
-		 (let ((newstate (funcall org-clock-in-switch-to-state (match-string 2))))
-		   (if newstate (org-todo newstate))))
-		((and org-clock-in-switch-to-state
-		      (not (looking-at (concat outline-regexp "[ \t]*"
-					       org-clock-in-switch-to-state
-					       "\\>"))))
-		 (org-todo org-clock-in-switch-to-state)))
-	  (setq org-clock-heading-for-remember
-		(and (looking-at org-complex-heading-regexp)
-		     (match-end 4)
-		     (org-trim (buffer-substring (match-end 1) (match-end 4)))))
-	  (setq org-clock-heading
-		(cond ((and org-clock-heading-function
-			    (functionp org-clock-heading-function))
-		       (funcall org-clock-heading-function))
-		      ((looking-at org-complex-heading-regexp)
-		       (match-string 4))
-		      (t "???")))
-	  (setq org-clock-heading (org-propertize org-clock-heading 'face nil))
-	  (org-clock-find-position)
-	  (if (and org-clock-in-resume
-		   (looking-at (concat "^[ \\t]* " org-clock-string
-				       " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-				       " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\]$")))
-	      (progn (message "Matched %s" (match-string 1))
-		     (setq ts (concat "[" (match-string 1) "]"))
-		     (goto-char (match-end 1))
-		     (setq org-clock-start-time
-			   (apply 'encode-time (org-parse-time-string (match-string 1)))))
-	    (progn
+	  (move-marker org-clock-default-task (point))))
+      
+      (setq target-pos (point))  ;; we want to clock in at this location
+      (save-excursion
+	(when (and selected-task (marker-buffer selected-task))
+	  ;; There is a selected task, move to the correct buffer
+	  ;; and set the new target position.
+	  (set-buffer (org-base-buffer (marker-buffer selected-task)))
+	  (setq target-pos (marker-position selected-task))
+	  (move-marker selected-task nil))
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char target-pos)
+	    (org-back-to-heading t)
+	    (or interrupting (move-marker org-clock-interrupted-task nil))
+	    (org-clock-history-push)
+	    (cond ((functionp org-clock-in-switch-to-state)
+		   (looking-at org-complex-heading-regexp)
+		   (let ((newstate (funcall org-clock-in-switch-to-state
+					    (match-string 2))))
+		     (if newstate (org-todo newstate))))
+		  ((and org-clock-in-switch-to-state
+			(not (looking-at (concat outline-regexp "[ \t]*"
+						 org-clock-in-switch-to-state
+						 "\\>"))))
+		   (org-todo org-clock-in-switch-to-state)))
+	    (setq org-clock-heading-for-remember
+		  (and (looking-at org-complex-heading-regexp)
+		       (match-end 4)
+		       (org-trim (buffer-substring (match-end 1)
+						   (match-end 4)))))
+	    (setq org-clock-heading
+		  (cond ((and org-clock-heading-function
+			      (functionp org-clock-heading-function))
+			 (funcall org-clock-heading-function))
+			((looking-at org-complex-heading-regexp)
+			 (match-string 4))
+			(t "???")))
+	    (setq org-clock-heading (org-propertize org-clock-heading
+						    'face nil))
+	    (org-clock-find-position)
+	    (cond
+	     ((and org-clock-in-resume
+		   (looking-at
+		    (concat "^[ \\t]* " org-clock-string
+			    " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+			    " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
+	      (message "Matched %s" (match-string 1))
+	      (setq ts (concat "[" (match-string 1) "]"))
+	      (goto-char (match-end 1))
+	      (setq org-clock-start-time
+		    (apply 'encode-time
+			   (org-parse-time-string (match-string 1)))))
+	     ((eq org-clock-in-resume 'auto-restart)
+	      ;; called from org-clock-load during startup,
+	      ;; do not interrupt, but warn!
+	      (message "Cannot restart clock because task does not contain unfinished clock")
+	      (ding)
+	      (sit-for 2)
+	      (throw 'abort nil))
+	     (t
 	      (insert "\n") (backward-char 1)
 	      (org-indent-line-function)
 	      (insert org-clock-string " ")
 	      (setq org-clock-start-time (current-time))
 	      (setq ts (org-insert-time-stamp org-clock-start-time 'with-hm 'inactive))))
-	  (move-marker org-clock-marker (point) (buffer-base-buffer))
-	  (or global-mode-string (setq global-mode-string '("")))
-	  (or (memq 'org-mode-line-string global-mode-string)
-	      (setq global-mode-string
-		    (append global-mode-string '(org-mode-line-string))))
-	  (org-update-mode-line)
-	  (setq org-mode-line-timer
-		(run-with-timer 60 60 'org-update-mode-line))
-	  (message "Clock started at %s" ts))))))
+	    (move-marker org-clock-marker (point) (buffer-base-buffer))
+	    (or global-mode-string (setq global-mode-string '("")))
+	    (or (memq 'org-mode-line-string global-mode-string)
+		(setq global-mode-string
+		      (append global-mode-string '(org-mode-line-string))))
+	    (org-update-mode-line)
+	    (setq org-mode-line-timer
+		  (run-with-timer 60 60 'org-update-mode-line))
+	    (message "Clock started at %s" ts)))))))
 
 (defun org-clock-find-position ()
   "Find the location where the next clock line should be inserted."
@@ -1126,7 +1140,7 @@ The details of what will be saved are regulated by the variable
 a stored clock"
   (when (and org-clock-persist (not org-clock-loaded))
     (let ((filename (expand-file-name org-clock-persist-file))
-	  (org-clock-in-resume t)
+	  (org-clock-in-resume 'auto-restart)
 	  resume-clock stored-clock-history)
       (if (not (file-readable-p filename))
 	  (message "Not restoring clock data; %s not found"
