@@ -30,6 +30,7 @@ org-*.tar.gz
 org-*.zip
 manual
 org_dual_license.texi
+ORGWEBPAGE/Changes.txt
 
 # aspell word and replacement lists
 

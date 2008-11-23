@@ -62,7 +62,7 @@
 
     You can now get the completion interface from /ido.el/ for
     many of Org's internal completion commands by turning on the
-    variable =org-completion-use-ido=. =ido=mode= must also be
+    variable =org-completion-use-ido=. =ido-mode= must also be
     active before you can use this.
 
     This change is based upon a request by Samuel Wales.
@@ -112,7 +112,7 @@
 
 *** New contributed file /org-eval-light.el/
 
-    This module gives contrib over execution Emacs Lisp code
+    This module gives control over execution Emacs Lisp code
     blocks included in a file.
 
     Thanks to Eric Schulte also for this file.
@@ -143,7 +143,7 @@
 
 *** =yank-pop= works again after yanking an outline tree
 
-    Samuel Wales had noticed that org-yank did mess up this
+    Samuel Wales had noticed that =org-yank= did mess up this
     functionality.  Now you can use =yank-pop= again, the only
     restriction is that the so-yanked text will not be
     pro/demoted or folded.
