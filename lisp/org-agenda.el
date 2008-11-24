@@ -3398,7 +3398,7 @@ the documentation of `org-diary'."
 	  (push txt ee))))
     (nreverse ee)))
 
-(defalias 'org-get-closed 'org-get-progress)
+(defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
   (let* ((props (list 'mouse-face 'highlight

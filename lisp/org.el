@@ -2395,7 +2395,7 @@ Normal means, no org-mode-specific context."
 		  (extra txt &optional category tags dotime noprefix remove-re))
 (declare-function org-agenda-new-marker "org-agenda" (&optional pos))
 (declare-function org-agenda-change-all-lines "org-agenda"
-		  (newhead hdmarker &optional fixface))
+		  (newhead hdmarker &optional fixface just-this))
 (declare-function org-agenda-set-restriction-lock "org-agenda" (&optional type))
 (declare-function org-agenda-maybe-redo "org-agenda" ())
 (declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda"
@@ -6340,7 +6340,7 @@ This is the list that is used for internal purposes.")
 This is the list that is used before handing over to the browser.")
 
 (defun org-link-escape (text &optional table)
-  "Escape charaters in TEXT that are problematic for links."
+  "Escape characters in TEXT that are problematic for links."
   (setq table (or table org-link-escape-chars))
   (when text
     (let ((re (mapconcat (lambda (x) (regexp-quote
@@ -9097,10 +9097,10 @@ only lines with a TODO keyword are included in the output."
 (defvar todo-only) ;; dynamically scoped
 
 (defun org-tags-sparse-tree (&optional todo-only match)
-  "Create a sparse tree according to tags  string MATCH.
+  "Create a sparse tree according to tags string MATCH.
 MATCH can contain positive and negative selection of tags, like
 \"+WORK+URGENT-WITHBOSS\".
-If optional argument TODO_ONLY is non-nil, only select lines that are
+If optional argument TODO-ONLY is non-nil, only select lines that are
 also TODO lines."
   (interactive "P")
   (org-prepare-agenda-buffers (list (current-buffer)))
@@ -11243,7 +11243,7 @@ days in order to avoid rounding problems."
   "Convert a time stamp to an absolute day number.
 If there is a specifyer for a cyclic time stamp, get the closest date to
 DAYNR.
-PREFER and SHOW_ALL are passed through to `org-closest-date'."
+PREFER and SHOW-ALL are passed through to `org-closest-date'."
   (cond
    ((and daynr (string-match "\\`%%\\((.*)\\)" s))
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
@@ -11263,8 +11263,8 @@ PREFER and SHOW_ALL are passed through to `org-closest-date'."
 (defun org-small-year-to-year (year)
   "Convert 2-digit years into 4-digit years.
 38-99 are mapped into 1938-1999.  1-37 are mapped into 2001-2007.
-The year 2000 cannot be abbreviated.  Any year lager than 99
-is retrned unchanged."
+The year 2000 cannot be abbreviated.  Any year larger than 99
+is returned unchanged."
   (if (< year 38)
       (setq year (+ 2000 year))
     (if (< year 100)
