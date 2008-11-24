@@ -8992,7 +8992,7 @@ go to @url{http://orgmode.org} to get access to these modules.
       exactly point to the definition location of a variable of function.
 @item @file{org-eval.el} by @i{Carsten Dominik}
       The @code{<lisp>} tag, adapted from Emacs Wiki and Emacs Muse, allows
-      to include text in a document that is the result of evaluating some
+      text to be included in a document that is the result of evaluating some
       code.  Other scripting languages like @code{perl} can be supported with
       this package as well.
 @item @file{org-eval-light.el} by @i{Eric Schulte}
