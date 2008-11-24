@@ -619,13 +619,12 @@ Default for INDEX-FILENAME is 'index.org'."
 			  (concat "Index for project " (car project))))
 	 (index-style (or (plist-get project-plist :index-style)
 			  'tree))
-	 (index-buffer (find-buffer-visiting index-filename))
+	 (visiting (find-buffer-visiting index-filename))
 	 (ifn (file-name-nondirectory index-filename))
-	 file)
-    ;; if buffer is already open, kill it to prevent error message
-    (if index-buffer
-	(kill-buffer index-buffer))
-    (with-temp-buffer
+	 file index-buffer)
+    (with-current-buffer (setq index-buffer
+			       (or visiting (find-file index-filename)))
+      (erase-buffer)
       (insert (concat "#+TITLE: " index-title "\n\n"))
       (while (setq file (pop files))
 	(let ((fn (file-name-nondirectory file))
@@ -662,10 +661,9 @@ Default for INDEX-FILENAME is 'index.org'."
 	    ;; This is common to 'flat and 'tree
 	    (insert (concat indent-str " + [[file:" link "]["
 			    (org-publish-find-title file)
-			    "]]\n"))
-	    )))
-      (write-file index-filename)
-      (kill-buffer (current-buffer)))))
+			    "]]\n")))))
+      (save-buffer))
+    (or visiting (kill-buffer index-buffer))))
 
 (defun org-publish-find-title (file)
   "Find the title of file in project."

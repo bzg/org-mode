@@ -126,7 +126,7 @@
     that the command =org-open-at-point-global= which follows
     links not only in Org-mode, but in arbitrary files like
     source code files etc, will work also with links created by
-    planner. The following customization es needed to make all of
+    planner. The following customization is needed to make all of
     this work
 
 #+begin_src emacs-lisp

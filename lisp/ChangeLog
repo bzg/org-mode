@@ -1,5 +1,8 @@
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-org-index): Improve removal of
+	temporary buffers.
+
 	* org-agenda.el (org-get-closed): Re-apply changes
 	accidentially overwritten by last commit to Emacs.
 
