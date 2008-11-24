@@ -3461,8 +3461,10 @@ With prefix arg, also recompute table."
 (defun orgtbl-ret ()
   "Justification and field motion for `orgtbl-mode'."
   (interactive)
-  (org-table-justify-field-maybe)
-  (org-table-next-row))
+  (if (bobp)
+      (newline)
+    (org-table-justify-field-maybe)
+    (org-table-next-row)))
 
 (defun orgtbl-self-insert-command (N)
   "Like `self-insert-command', use overwrite-mode for whitespace in tables.

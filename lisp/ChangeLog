@@ -1,5 +1,7 @@
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (orgtbl-ret): Fix RET at beginning-of-buffer.
+
 	* org-publish.el (org-publish-org-index): Improve removal of
 	temporary buffers.
 
