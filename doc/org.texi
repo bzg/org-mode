@@ -868,6 +868,7 @@ u            @r{One level up.}
 0-9          @r{Digit argument.}
 q            @r{Quit}
 @end example
+See also the variable@code{org-goto-interface}.
 @end table
 
 @node Structure editing, Archiving, Motion, Document Structure
@@ -5206,13 +5207,14 @@ special command:
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
-Depending on @code{org-reverse-note-order}, it will be either the first of
+Depending on @code{org-reverse-note-order}, it will be either the first or
 last subitem.@*
 By default, all level 1 headlines in the current buffer are considered to be
 targets, but you can have more complex definitions across a number of files.
 See the variable @code{org-refile-targets} for details.  If you would like to
-select a location via a file-pathlike completion along the outline path, see
-the variable @code{org-refile-use-outline-path}.
+select a location via a file-path-like completion along the outline path, see
+the variables @code{org-refile-use-outline-path} and
+@code{org-outline-path-complete-in-steps}.
 @kindex C-u C-c C-w
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.

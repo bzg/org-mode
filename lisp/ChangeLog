@@ -1,3 +1,9 @@
+2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-outline-path-complete-in-steps): New option.
+	(org-refile-get-location): Honor
+	`org-outline-path-complete-in-steps'.
+
 2008-11-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-dblock-write:clocktable): Make sure the

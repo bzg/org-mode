@@ -1245,7 +1245,7 @@ For more examples, see the system specific constants
 
 (defgroup org-refile nil
   "Options concerning refiling entries in Org-mode."
-  :tag "Org Remember"
+  :tag "Org Refile"
   :group 'org)
 
 (defcustom org-directory "~/org"
@@ -1275,7 +1275,8 @@ outline                  The interface shows an outline of the relevant file
                          and the correct heading is found by moving through
                          the outline or by searching with incremental search.
 outline-path-completion  Headlines in the current buffer are offered via
-                         completion."
+                         completion.  This is the interface also used by
+                         the refile command."
   :group 'org-refile
   :type '(choice
 	  (const :tag "Outline" outline)
@@ -1287,6 +1288,7 @@ When nil, new notes will be filed to the end of a file or entry.
 This can also be a list with cons cells of regular expressions that
 are matched against file names, and values."
   :group 'org-remember
+  :group 'org-refile
   :type '(choice
 	  (const :tag "Reverse always" t)
 	  (const :tag "Reverse never" nil)
@@ -1314,7 +1316,7 @@ This is list of cons cells.  Each cell contains:
 
 When this variable is nil, all top-level headlines in the current buffer
 are used, equivalent to the value `((nil . (:level . 1))'."
-  :group 'org-remember
+  :group 'org-refile
   :type '(repeat
 	  (cons
 	   (choice :value org-agenda-files
@@ -1333,12 +1335,24 @@ are used, equivalent to the value `((nil . (:level . 1))'."
 So a level 3 headline will be available as level1/level2/level3.
 When the value is `file', also include the file name (without directory)
 into the path.  When `full-file-path', include the full file path."
-  :group 'org-remember
+  :group 'org-refile
   :type '(choice
 	  (const :tag "Not" nil)
 	  (const :tag "Yes" t)
 	  (const :tag "Start with file name" file)
 	  (const :tag "Start with full file path" full-file-path)))
+
+(defcustom org-outline-path-complete-in-steps t
+  "Non-nil means, complete the outline path in hierarchical steps.
+When Org-mode uses the refile interface to select an outline path
+\(see variable `org-refile-use-outline-path'), the completion of
+the path can be done is a single go, or if can be done in steps down
+the headline hierarchy.  Going in steps is probably the best if you
+do not use a special completion package like `ido' or `icicles'.
+However, when using these packages, going in one step can be very
+fast, while still showing the whole path to the entry."
+  :group 'org-refile
+  :type 'boolean)
 
 (defgroup org-todo nil
   "Options concerning TODO items in Org-mode."
@@ -7504,7 +7518,8 @@ operation has put the subtree."
   (unless org-refile-target-table
     (error "No refile targets"))
   (let* ((cbuf (current-buffer))
-	 (cfunc (if org-refile-use-outline-path
+	 (cfunc (if (and org-refile-use-outline-path
+			 org-outline-path-complete-in-steps)
 		    'org-olpath-completing-read
 		  'org-ido-completing-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
