@@ -90,7 +90,7 @@ that was not started at the correct moment."
 	   (org-timer-secs-to-hms
 	    (floor
 	     (- (time-to-seconds (current-time))
-		(time-to-seconds org-timer-start-time))))))))
+		(time-to-seconds org-timer-start-time)))))))
 
 ;;;###autoload
 (defun org-timer-change-times-in-region (beg end delta)
