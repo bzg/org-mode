@@ -2353,7 +2353,7 @@ Use customize to modify this, or restart Emacs after changing it."
   :group 'org)
 
 (defcustom org-completion-use-ido nil
-  "Non-ni means, use ido completion wherever possible."
+  "Non-nil means, use ido completion wherever possible."
   :group 'org-completion
   :type 'boolean)  
 
