@@ -1,5 +1,11 @@
 2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer-start-time): Define this variable.
+	(org-timer-item): Make argument optional.
+
+	* org-list.el (org-insert-item): Automatically insert a timer item
+	if the current list is a timer list.
+
 	* org-timer.el: New file.
 
 	* org-publish.el (org-publish-org-index): Only exclude the index

@@ -34,6 +34,10 @@
       Insert a description list item with the current relative
       time.  With a prefix argument, first reset the timer to 0.
 
+    - =M-RET= ::
+      Once the time list has been initiated, you can also use the
+      normal item-creating command to insert the next timer item.
+
     - =C-c C-x 0= :: 
       Reset the timer without inserting anything into the buffer.
       By default, the timer is reset to 0.  When called with a

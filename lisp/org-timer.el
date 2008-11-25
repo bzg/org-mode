@@ -27,6 +27,9 @@
 
 ;; This file contains the relative timer code for Org-mode
 
+(defvar org-timer-start-time nil
+  "t=0 for the running timer.")
+
 (defconst org-timer-re "\\([-+]?[0-9]+\\):\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)"
   "Regular expression used to match timer stamps.")
 
@@ -119,7 +122,7 @@ that was not started at the correct moment."
 	(goto-char p)))))
 
 ;;;###autoload
-(defun org-timer-item (arg)
+(defun org-timer-item (&optional arg)
   "Insert a description-type item with the curren timer value."
   (interactive "P")
   (let ((ind 0))

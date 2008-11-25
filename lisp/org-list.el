@@ -185,35 +185,42 @@ Return t when things worked, nil when we are not in an item."
 	   (descp (save-excursion (goto-char (match-beginning 0))
 				  (beginning-of-line 1)
 				  (save-match-data
-				    (looking-at "[ \t]*.*? ::"))))
+				    (and (looking-at "[ \t]*\\(.*?\\) ::")
+					 (match-string 1)))))
+	   (timerp (and descp 
+			(save-match-data
+			  (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$"
+					descp))))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
 	   (blank (cdr (assq 'plain-list-item org-blank-before-new-entry)))
 	   pos)
       (if descp (setq checkbox nil))
-      (cond
-       ((and (org-at-item-p) (<= (point) eow))
-	;; before the bullet
-	(beginning-of-line 1)
-	(open-line (if blank 2 1)))
-       ((<= (point) eow)
-	(beginning-of-line 1))
-       (t
-	(unless (org-get-alist-option org-M-RET-may-split-line 'item)
-	  (end-of-line 1)
-	  (delete-horizontal-space))
-	(newline (if blank 2 1))))
-      (insert bul
-	      (if checkbox "[ ]" "")
-	      (if descp (concat (if checkbox " " "")
-				(read-string "Term: ") " :: ") ""))
-      (just-one-space)
-      (setq pos (point))
-      (end-of-line 1)
-      (unless (= (point) pos) (just-one-space) (backward-delete-char 1)))
-    (org-maybe-renumber-ordered-list)
-    (and checkbox (org-update-checkbox-count-maybe))
-    t))
+      (if timerp
+	  (progn (org-timer-item) t)
+	(cond
+	 ((and (org-at-item-p) (<= (point) eow))
+	  ;; before the bullet
+	  (beginning-of-line 1)
+	  (open-line (if blank 2 1)))
+	 ((<= (point) eow)
+	  (beginning-of-line 1))
+	 (t
+	  (unless (org-get-alist-option org-M-RET-may-split-line 'item)
+	    (end-of-line 1)
+	    (delete-horizontal-space))
+	  (newline (if blank 2 1))))
+	(insert bul
+		(if checkbox "[ ]" "")
+		(if descp (concat (if checkbox " " "")
+				  (read-string "Term: ") " :: ") ""))
+	(just-one-space)
+	(setq pos (point))
+	(end-of-line 1)
+	(unless (= (point) pos) (just-one-space) (backward-delete-char 1)))
+      (org-maybe-renumber-ordered-list)
+      (and checkbox (org-update-checkbox-count-maybe))
+      t)))
 
 ;;; Checkboxes
 
