@@ -140,6 +140,7 @@ If `org-store-link' was called with a prefix arg the meaning of
       (setq desc (org-email-link-description)
 	    link (org-gnus-article-link group newsgroups message-id x-no-archive))
       (org-add-link-props :link link :description desc)
+      (gnus-summary-toggle-header -1)
       link))))
 
 (defun org-gnus-open (path)
