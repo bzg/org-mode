@@ -1,3 +1,17 @@
+2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Project alist): Add info about the publishing sequence
+	of components.
+
+
+
+
+
+
+
+
+
+
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi: Re-apply the change to FDL 1.3.

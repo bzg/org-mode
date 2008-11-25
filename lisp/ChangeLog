@@ -2,6 +2,8 @@
 
 	* org-publish.el (org-publish-org-index): Only exclude the index
 	file in the main directory from being added to the site-map.
+	(org-publish-get-project-from-filename): If the current project is
+	a component, start publishing from the parent project.
 
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 

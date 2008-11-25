@@ -470,7 +470,10 @@ matching filenames."
 (defun org-publish-get-project-from-filename (filename)
   "Return the project FILENAME belongs."
   (let* ((project-name (cdr (assoc (expand-file-name filename)
-				   org-publish-files-alist))))
+                                   org-publish-files-alist))))
+    (dolist (prj org-publish-project-alist)
+      (if (member project-name (plist-get (cdr prj) :components))
+          (setq project-name (car prj))))
     (assoc project-name org-publish-project-alist)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

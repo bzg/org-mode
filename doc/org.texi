@@ -8049,7 +8049,8 @@ a project takes the second form listed above, the individual members
 of the ``components'' property are taken to be components of the
 project, which group together files requiring different publishing
 options. When you publish such a ``meta-project'' all the components
-will also publish.
+will also publish.  The @code{:components} are published in the sequence
+provided.
 
 @node Sources and destinations, Selecting files, Project alist, Configuration
 @subsection Sources and destinations for files
