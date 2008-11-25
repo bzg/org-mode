@@ -45,6 +45,7 @@
 (declare-function org-skip-whitespace "org" ())
 (declare-function org-trim "org" (s))
 (declare-function org-get-indentation "org" (&optional line))
+(declare-function org-timer-item "org-timer" (&optional arg))
 
 (defgroup org-plain-lists nil
   "Options concerning plain lists in Org-mode."

@@ -2642,9 +2642,7 @@ If yes, offer to stop it and to save the buffer with the changes."
 
 ;; Autoload org-timer.el
 
-(declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
-		  (beg end))
-(declare-function org-update-mode-line "org-clock" ())
+;(declare-function org-timer "org-timer")
 
 (eval-and-compile
   (org-autoload

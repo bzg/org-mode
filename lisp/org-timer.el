@@ -27,6 +27,8 @@
 
 ;; This file contains the relative timer code for Org-mode
 
+(require 'org)
+
 (defvar org-timer-start-time nil
   "t=0 for the running timer.")
 
@@ -54,7 +56,7 @@ the region 0:00:00."
   (interactive "P")
   (if (equal offset '(16))
       (call-interactively 'org-timer-change-times-in-region)
-    (let (delta des s)
+    (let (delta def s)
       (if (not offset)
 	  (setq org-timer-start-time (current-time))
 	(cond
@@ -109,7 +111,7 @@ that was not started at the correct moment."
 	  (if (equal (string-to-char delta) ?-)
 	      (setq delta (substring delta 1))
 	    (setq delta (concat "-" delta))))))
-    (setq delta (my-hms-to-secs (org-timer-fix-incomplete delta)))
+    (setq delta (org-timer-hms-to-secs (org-timer-fix-incomplete delta)))
     (when (= delta 0) (error "No change"))
     (save-excursion
       (goto-char end)
@@ -144,9 +146,9 @@ that was not started at the correct moment."
   (if (string-match "\\(?:\\([0-9]+:\\)?\\([0-9]+:\\)\\)?\\([0-9]+\\)" hms)
       (replace-match
        (format "%d:%02d:%02d"
-	       (if (match-end 1) (string-to-int (match-string 1 hms)) 0)
-	       (if (match-end 2) (string-to-int (match-string 2 hms)) 0)
-	       (string-to-int (match-string 3 hms)))
+	       (if (match-end 1) (string-to-number (match-string 1 hms)) 0)
+	       (if (match-end 2) (string-to-number (match-string 2 hms)) 0)
+	       (string-to-number (match-string 3 hms)))
        t t hms)
     (error "Canot parse HMS string \"%s\"" hms)))
 
@@ -157,9 +159,9 @@ If the string starts with a minus sign, the integer will be negative."
 	    "\\([-+]?[0-9]+\\):\\([0-9]\\{2\\}\\):\\([0-9]\\{2\\}\\)"
 	    hms))
       0
-    (let* ((h (string-to-int (match-string 1 hms)))
-	   (m (string-to-int (match-string 2 hms)))
-	   (s (string-to-int (match-string 3 hms)))
+    (let* ((h (string-to-number (match-string 1 hms)))
+	   (m (string-to-number (match-string 2 hms)))
+	   (s (string-to-number (match-string 3 hms)))
 	   (sign (equal (substring (match-string 1 hms) 0 1) "-")))
       (setq h (abs h))
       (* (if sign -1 1) (+ s (* 60 (+ m (* 60 h))))))))

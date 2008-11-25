@@ -89,6 +89,7 @@ LISPF      = 	org.el			\
 		org-remember.el		\
 		org-rmail.el		\
 		org-table.el		\
+		org-timer.el		\
 		org-vm.el		\
 		org-wl.el
 
@@ -326,5 +327,6 @@ lisp/org-publish.elc:
 lisp/org-remember.elc:     lisp/org.elc
 lisp/org-rmail.elc:        lisp/org.elc
 lisp/org-table.elc:        lisp/org.elc
+lisp/org-timer.el:         lisp/org.elc
 lisp/org-vm.elc:           lisp/org.elc
 lisp/org-wl.elc:           lisp/org.elc
