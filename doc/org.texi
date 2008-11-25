@@ -219,6 +219,7 @@ Dates and Times
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
 * Effort estimates::            Planning work effort in advance
+* Relative timer::              Notes with a running timer
 
 Creating timestamps
 
@@ -4262,6 +4263,7 @@ is used in a much wider sense.
 * Deadlines and scheduling::    Planning your work
 * Clocking work time::          Tracking how long you spend on a task
 * Effort estimates::            Planning work effort in advance
+* Relative timer::              Notes with a running timer
 @end menu
 
 
@@ -4890,9 +4892,9 @@ The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
 
-@node Effort estimates,  , Clocking work time, Dates and Times
+@node Effort estimates, Relative timer, Clocking work time, Dates and Times
 @section Effort estimates
-@cindex Effort estimates
+@cindex effort estimates
 
 If you want to plan your work in a very detailed way, or if you need to
 produce offers with quotations of the estimated work effort, you may want to
@@ -4935,6 +4937,36 @@ Effort estimates can be used in secondary agenda filtering that is triggered
 with the @kbd{/} key in the agenda (@pxref{Agenda commands}).  If you have
 these estimates defined consistently, two or three key presses will narrow
 down the list to stuff that fits into an available time slot.
+
+@node Relative timer,  , Effort estimates, Dates and Times
+@section Taking notes with a relative timer
+@cindex relative timer
+
+When taking notes during, for example, a meeting or a video viewing, it can
+be useful to have access to times relative to a starting time.  Org provides
+such a relative timer and make it easy to create timed notes.
+
+@table @kbd
+@kindex C-c C-x .
+@item C-c C-x .
+Insert a relative time into the buffer.  The first time you use this, the
+timer will be started.  When called with a prefix argument, the timer is
+restarted. 
+@kindex C-c C-x -
+@item C-c C-x -
+Insert a description list item with the current relative time.  With a prefix
+argument, first reset the timer to 0.
+@kindex C-c C-x 0
+@item C-c C-x 0
+Reset the timer without inserting anything into the buffer.  By default, the
+timer is reset to 0.  When called with a @kbd{C-u} prefix, reset the timer to
+specific starting offset.  The user is prompted for the offset, with a
+default taken from a timer string at point, if any, So this can be used to
+restart taking notes after a break in the process.  When called with a double
+prefix argument @kbd{C-c C-u}, change all timer strings in the active region
+by a certain amount.  This can be used to fix timer strings if the timer was
+not started at exactly the right moment.
+@end table
 
 @node Capture, Agenda Views, Dates and Times, Top
 @chapter Capture

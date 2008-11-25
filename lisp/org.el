@@ -2640,6 +2640,19 @@ If yes, offer to stop it and to save the buffer with the changes."
   (when (org-match-line "#\\+BEGIN: clocktable\\>")
     (org-clocktable-shift dir n)))
 
+;; Autoload org-timer.el
+
+(declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
+		  (beg end))
+(declare-function org-update-mode-line "org-clock" ())
+
+(eval-and-compile
+  (org-autoload
+   "org-timer"
+   '(org-timer-start org-timer org-timer-item
+		     org-timer-change-times-in-region)))
+
+
 ;; Autoload archiving code
 ;; The stuff that is needed for cycling and tags has to be defined here.
 
@@ -12418,6 +12431,10 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 
+(org-defkey org-mode-map "\C-c\C-x."    'org-timer)
+(org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
+(org-defkey org-mode-map "\C-c\C-x0"    'org-timer-start)
+
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
 
 (when (featurep 'xemacs)
@@ -13191,7 +13208,11 @@ See the individual commands for more information."
       :style radio :selected org-display-custom-times]
      "--"
      ["Goto Calendar" org-goto-calendar t]
-     ["Date from Calendar" org-date-from-calendar t])
+     ["Date from Calendar" org-date-from-calendar t]
+     "--"
+     ["Start/restart timer" org-timer-start t]
+     ["Insert timer string" org-timer t]
+     ["Insert timer item" org-timer-item t])
     ("Logging work"
      ["Clock in" org-clock-in t]
      ["Clock out" org-clock-out t]

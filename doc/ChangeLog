@@ -2,15 +2,7 @@
 
 	* org.texi (Project alist): Add info about the publishing sequence
 	of components.
-
-
-
-
-
-
-
-
-
+	(Effort estimates): Document the new relativer timer.
 
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 

@@ -11,10 +11,46 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.13
+* Version 6.14 (in preparation)
   :PROPERTIES:
   :VISIBILITY: content
   :END:
+
+** Overview
+
+** Details
+
+*** New relative timer to support timed notes
+
+    Org now supports taking timed notes, useful for example while
+    watching a video, or during a meeting which is also recorded.
+
+    - =C-c C-x .= :: 
+      Insert a relative time into the buffer.  The first time
+      you use this, the timer will be started.  When called
+      with a prefix argument, the timer is reset to 0.
+
+    - =C-c C-x -= :: 
+      Insert a description list item with the current relative
+      time.  With a prefix argument, first reset the timer to 0.
+
+    - =C-c C-x 0= :: 
+      Reset the timer without inserting anything into the buffer.
+      By default, the timer is reset to 0.  When called with a
+      =C-u= prefix, reset the timer to specific starting
+      offset.  The user is prompted for the offset, with a
+      default taken from a timer string at point, if any, So this
+      can be used to restart taking notes after a break in the
+      process.  When called with a double prefix argument
+      =C-c C-u=, change all timer strings in the active
+      region by a certain amount.  This can be used to fix timer
+      strings if the timer was not started at exactly the right
+      moment.
+
+    Thanks to Alan Dove, Adam Spiers, and Alan Davis for
+    contributions to this idea.
+
+* Version 6.13
 
 ** Overview
 

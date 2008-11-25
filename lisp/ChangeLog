@@ -1,5 +1,7 @@
 2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el: New file.
+
 	* org-publish.el (org-publish-org-index): Only exclude the index
 	file in the main directory from being added to the site-map.
 	(org-publish-get-project-from-filename): If the current project is
