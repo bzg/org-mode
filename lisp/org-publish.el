@@ -631,7 +631,8 @@ Default for INDEX-FILENAME is 'index.org'."
 	      (link (file-relative-name file dir))
 	      (oldlocal localdir))
 	  ;; index shouldn't index itself
-	  (unless (string= fn ifn)
+	  (unless (equal (file-truename index-filename)
+			 (file-truename file))
 	    (if (eq index-style 'list)
 		(message "Generating list-style index for %s" index-title)
 	      (message "Generating tree-style index for %s" index-title)

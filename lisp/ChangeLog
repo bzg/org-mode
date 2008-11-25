@@ -1,3 +1,8 @@
+2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-publish.el (org-publish-org-index): Only exclude the index
+	file in the main directory from being added to the site-map.
+
 2008-11-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (orgtbl-ret): Fix RET at beginning-of-buffer.
