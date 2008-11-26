@@ -2,6 +2,7 @@
 
 	* org-table.el (orgtbl-self-insert-command): Make S-SPC work in
 	orgtbl-mode.
+	(orgtabl-create-or-convert-from-region): New command.
 
 	* org-exp.el (org-export-as-ascii): Remove the handling of
 	targets.

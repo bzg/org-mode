@@ -3323,7 +3323,6 @@ to execute outside of tables."
 	  '("\C-c'"              org-table-edit-formulas)
 	  '("\C-c`"              org-table-edit-field)
 	  '("\C-c*"              org-table-recalculate)
-	  '("\C-c|"              org-table-create-or-convert-from-region)
 	  '("\C-c^"              org-table-sort-lines)
 	  '([(control ?#)]       org-table-rotate-recalc-marks)))
 	elt key fun cmd)
@@ -3357,6 +3356,8 @@ to execute outside of tables."
 			   [(meta return)] "\M-\C-m"))
 
     (org-defkey orgtbl-mode-map "\C-c\C-c" 'orgtbl-ctrl-c-ctrl-c)
+    (org-defkey orgtbl-mode-map "\C-c|" 'orgtbl-create-or-convert-from-region)
+
     (when orgtbl-optimized
       ;; If the user wants maximum table support, we need to hijack
       ;; some standard editing functions
@@ -3367,6 +3368,9 @@ to execute outside of tables."
       (org-defkey orgtbl-mode-map "|" 'org-force-self-insert))
     (easy-menu-define orgtbl-mode-menu orgtbl-mode-map "OrgTbl menu"
       '("OrgTbl"
+	["Create or convert" org-table-create-or-convert-from-region
+	 :active (not (org-at-table-p)) :keys "C-c |" ]
+	"--"
 	["Align" org-ctrl-c-ctrl-c :active (org-at-table-p) :keys "C-c C-c"]
 	["Next Field" org-cycle :active (org-at-table-p) :keys "TAB"]
 	["Previous Field" org-shifttab :active (org-at-table-p) :keys "S-TAB"]
@@ -3451,6 +3455,16 @@ With prefix arg, also recompute table."
      (t (let (orgtbl-mode)
 	  (call-interactively (key-binding "\C-c\C-c")))))))
 
+(defun orgtbl-create-or-convert-from-region (arg)
+  "Create table or convert region to table, if no conflicting binding.
+This installs the table binding `C-c |', but only if there is no
+conflicting binding to this key outside orgtbl-mode."
+  (interactive "P")
+  (let* (orgtbl-mode (cmd (key-binding "\C-c|")))
+    (if cmd
+	(call-interactively cmd)
+      (call-interactively 'org-table-create-or-convert-from-region))))
+ 
 (defun orgtbl-tab (arg)
   "Justification and field motion for `orgtbl-mode'."
   (interactive "P")
