@@ -1,3 +1,10 @@
+2008-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-ascii): Remove the handling of
+	targets.
+	(org-export-ascii-preprocess): Handle targets already in this
+	function.
+
 2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-timer.el (org-timer-start-time): Define this variable.

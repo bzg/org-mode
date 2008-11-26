@@ -2397,10 +2397,7 @@ underlined headlines.  The default is 3."
     (while (setq line (pop lines))
       ;; Remove the quoted HTML tags.
       (setq line (org-html-expand-for-ascii line))
-      ;; Remove targets
-      (while (string-match "<<<?[^<>]*>>>?[ \t]*\n?" line)
-	(setq line (replace-match "" t t line)))
-      ;; Replace internal links
+      ;; Replace links with the description when possible
       (while (string-match org-bracket-link-regexp line)
 	(setq line (replace-match
 		    (if (match-end 3) "[\\3]" "[\\1]")
@@ -2483,13 +2480,18 @@ underlined headlines.  The default is 3."
 
 (defun org-export-ascii-preprocess ()
   "Do extra work for ASCII export"
+  ;; Put quotes around verbatim text
   (goto-char (point-min))
   (while (re-search-forward org-verbatim-re nil t)
     (goto-char (match-end 2))
     (backward-delete-char 1) (insert "'")
     (goto-char (match-beginning 2))
     (delete-char 1) (insert "`")
-    (goto-char (match-end 2))))
+    (goto-char (match-end 2)))
+  (goto-char (point-min))
+  ;; Remove target markers
+  (while (re-search-forward  "<<<?\\([^<>]*\\)>>>?\\([ \t]*\\)" nil t)
+    (replace-match "\\1\\2")))
 
 (defun org-search-todo-below (line lines level)
   "Search the subtree below LINE for any TODO entries."
