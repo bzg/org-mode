@@ -1,5 +1,8 @@
 2008-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (orgtbl-self-insert-command): Make S-SPC work in
+	orgtbl-mode.
+
 	* org-exp.el (org-export-as-ascii): Remove the handling of
 	targets.
 	(org-export-ascii-preprocess): Handle targets already in this
