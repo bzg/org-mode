@@ -10007,6 +10007,9 @@ tweaks and features.
 @i{Adam Spiers} asked for global linking commands, inspired the link
 extension system, added support for mairix, and proposed the mapping API.
 @item
+@i{Andy Stewart} contributed code to @file{org-w3m.el}, to copy HTML content
+with links transformation to Org syntax.
+@item
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
 @item

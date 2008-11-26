@@ -91,6 +91,7 @@ LISPF      = 	org.el			\
 		org-table.el		\
 		org-timer.el		\
 		org-vm.el		\
+		org-w3m.el              \
 		org-wl.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
@@ -329,4 +330,5 @@ lisp/org-rmail.elc:        lisp/org.elc
 lisp/org-table.elc:        lisp/org.elc
 lisp/org-timer.el:         lisp/org.elc
 lisp/org-vm.elc:           lisp/org.elc
+lisp/org-w3m.elc:          lisp/org.elc
 lisp/org-wl.elc:           lisp/org.elc

@@ -54,6 +54,21 @@
     Thanks to Alan Dove, Adam Spiers, and Alan Davis for
     contributions to this idea.
 
+*** Cut and Paste with hot links from w3m to Org
+
+    You can now use the key =C-c C-x M-w= in a w3m buffer with
+    HTML content to copy either the region or the entire file in
+    a special way.  When you yank this text back into an Org-mode
+    buffer, all links from the w3m buffer will continue to work
+    under Org-mode.
+
+    For this to work you need to load the new file /org-w3m.el./
+    Please check your org-modules variable to make sure that this
+    is turned on.
+
+    Thanks for Richard Riley for the idea and to Andy Stewart for
+    the implementation.
+
 * Version 6.13
 
 ** Overview

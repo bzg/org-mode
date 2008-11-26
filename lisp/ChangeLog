@@ -1,5 +1,7 @@
 2008-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-modules): Add org-w3m to the default modules.
+
 	* org-table.el (orgtbl-self-insert-command): Make S-SPC work in
 	orgtbl-mode.
 	(orgtabl-create-or-convert-from-region): New command.
