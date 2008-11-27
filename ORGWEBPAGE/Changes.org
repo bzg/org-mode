@@ -69,6 +69,14 @@
     Thanks for Richard Riley for the idea and to Andy Stewart for
     the implementation.
 
+*** The agenda shows now all tags, including inherited ones.
+
+    This request has come up often, most recently it was
+    formulated by Tassilo Horn.
+
+    If you prefer the old behavior of only showing the local
+    tags, customize the variable =org-agenda-show-inherited-tags=.
+
 * Version 6.13
 
 ** Overview

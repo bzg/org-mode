@@ -6192,8 +6192,9 @@ different file.
 @c
 @kindex T
 @item T
-Show all tags associated with the current item.  Because of
-inheritance, this may be more than the tags listed in the line itself.
+Show all tags associated with the current item.  This is useful if you have
+turned off @code{org-agenda-show-inherited-tags}, but still want to see all
+tags of a headline occasionally.
 @c
 @kindex :
 @item :

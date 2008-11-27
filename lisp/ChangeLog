@@ -1,3 +1,20 @@
+2008-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-show-inherited-tags): New option.
+	(org-format-agenda-item): Add inherited tags to the agenda line
+	string, and make sure that properties are kept when downcasing the
+	tags list.
+	(org-agenda-add-inherited-tags): New function.
+	(org-downcase-keep-props): New function.
+
+	* org.el (org-scan-tags): Mark inherited tags with a text
+	property.
+	(org-get-tags-at): Mark inherited tags with a text property.
+	(org-add-prop-inherited): New function.
+
+	* org-agenda.el (org-agenda-add-inherited-tags): New function.
+	(org-agenda-show-inherited-tags): New option.
+
 2008-11-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-modules): Add org-w3m to the default modules.

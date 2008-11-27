@@ -9038,8 +9038,14 @@ only lines with a TODO keyword are included in the output."
 	  ;; compile tags for current headline
 	  (setq tags-list
 		(if org-use-tag-inheritance
-		    (apply 'append (mapcar 'cdr tags-alist))
+		    (apply 'append (mapcar 'cdr (reverse tags-alist)))
 		  tags))
+	  (when org-use-tag-inheritance
+	    (setcdr (car tags-alist)
+		    (mapcar (lambda (x)
+			      (setq x (copy-sequence x))
+			      (org-add-prop-inherited x))
+			    (cdar tags-alist))))
 	  (when (and tags org-use-tag-inheritance
 		     (not (eq t org-use-tag-inheritance)))
 	    ;; selective inheritance, remove uninherited ones
@@ -9360,6 +9366,8 @@ ignore inherited ones."
 		    (when (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
 		      (setq ltags (org-split-string
 				   (org-match-string-no-properties 1) ":"))
+		      (when parent
+			(setq ltags (mapcar 'org-add-prop-inherited ltags)))
 		      (setq tags (append
 				  (if parent
 				      (org-remove-uniherited-tags ltags)
@@ -9371,6 +9379,10 @@ ignore inherited ones."
 		    (setq parent t)))
 	      (error nil)))))
       (append (org-remove-uniherited-tags org-file-tags) tags))))
+
+(defun org-add-prop-inherited (s)
+  (add-text-properties 0 (length s) '(inherited t) s)
+  s)
 
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
