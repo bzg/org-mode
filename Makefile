@@ -163,6 +163,7 @@ doc/org.pdf: doc/org.texi
 
 doc/org.html: doc/org.texi
 	(cd doc; $(TEXI2HTML) --no-split -o org.html org.texi)
+	UTILITIES/manfull.pl doc/org.html
 
 doc/orgcard.dvi: doc/orgcard.tex
 	(cd doc; tex orgcard.tex)
@@ -194,6 +195,7 @@ html_manual: doc/org.texi
 	rm -rf doc/manual
 	mkdir doc/manual
 	$(TEXI2HTML) -o doc/manual doc/org.texi
+	UTILITIES/mansplit.pl doc/manual/*.html
 
 info:	doc/org
 
