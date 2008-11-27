@@ -3480,14 +3480,16 @@ level zero that surounds the entire file.
 
 @noindent
 To limit tag inheritance to specific tags, or to turn it off entirely, use
-the variable @code{org-use-tag-inheritance}.
+the variables @code{org-use-tag-inheritance} and
+@code{org-tags-exclude-from-inheritance}.
 
 When a headline matches during a tags search while tag inheritance is turned
-on, all the sublevels in the same tree will match as well@footnote{This is
-only true if the the search does not involve more complex tests including
-properties (@pxref{Property searches}).}.  The list of matches may then
-become very long.  If you only want to see the first tags match in a subtree,
-configure the variable @code{org-tags-match-list-sublevels}.
+on, all the sublevels in the same tree will (for a simple match form) match
+as well@footnote{This is only true if the the search does not involve more
+complex tests including properties (@pxref{Property searches}).}.  The list
+of matches may then become very long.  If you only want to see the first tags
+match in a subtree, configure the variable
+@code{org-tags-match-list-sublevels} (not recommended).
 
 @node Setting tags, Tag searches, Tag inheritance, Tags
 @section Setting tags

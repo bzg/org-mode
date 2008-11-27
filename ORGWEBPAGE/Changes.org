@@ -77,6 +77,18 @@
     If you prefer the old behavior of only showing the local
     tags, customize the variable =org-agenda-show-inherited-tags=.
 
+*** Exclude some tags from inheritance.
+
+    So far, the only way to select tags for inheritance was to
+    allow it for all tags, or to do a positive selection using
+    one of the more complex settings for
+    `org-use-tag-inheritance'.  It may actually be better to
+    allow inheritance for all but a few tags, which was difficult
+    to achieve with this methodology.
+
+    A new option, `org-tags-exclude-from-inheritance', allows to
+    specify an exclusion list for inherited tags.
+
 * Version 6.13
 
 ** Overview

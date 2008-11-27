@@ -1882,13 +1882,16 @@ the tags are again aligned to `org-tags-column'."
 (defcustom org-use-tag-inheritance t
   "Non-nil means, tags in levels apply also for sublevels.
 When nil, only the tags directly given in a specific line apply there.
-If this option is t, a match early-on in a tree can lead to a large
-number of matches in the subtree.  If you only want to see the first
-match in a tree during a search, check out the variable
-`org-tags-match-list-sublevels'.
-
 This may also be a list of tags that should be inherited, or a regexp that
-matches tags that should be inherited."
+matches tags that should be inherited.  Additional control is possible
+with the variable  `org-tags-exclude-from-inheritance' which gives an
+explicit list of tags to be excluded from inheritance., even if the value of
+`org-use-tag-inheritance' would select it for inheritance.
+
+If this option is t, a match early-on in a tree can lead to a large
+number of matches in the subtree when constructing the agenda or creating
+a sparse tree.  If you only want to see the first match in a tree during
+a search, check out the variable `org-tags-match-list-sublevels'."
   :group 'org-tags
   :type '(choice
 	  (const :tag "Not" nil)
@@ -1896,9 +1899,18 @@ matches tags that should be inherited."
 	  (repeat :tag "Specific tags" (string :tag "Tag"))
 	  (regexp :tag "Tags matched by regexp")))
 
+(defcustom org-tags-exclude-from-inheritance nil
+  "List of tags that should never be inherited.
+This is a way to exclude a few tags from inheritance.  For way to do
+the opposite, to actively allow inheritance for selected tags,
+see the variable `org-use-tag-inheritance'."
+  :group 'org-tags
+  :type '(repeat (string :tag "Tag")))
+
 (defun org-tag-inherit-p (tag)
   "Check if TAG is one that should be inherited."
   (cond
+   ((member tag org-tags-exclude-from-inheritance) nil)
    ((eq org-use-tag-inheritance t) t)
    ((not org-use-tag-inheritance) nil)
    ((stringp org-use-tag-inheritance)
@@ -1918,7 +1930,11 @@ inheritance off, you very likely want to turn this option on.
 
 As a special case, if the tag search is restricted to TODO items, the
 value of this variable is ignored and sublevels are always checked, to
-make sure all corresponding TODO items find their way into the list."
+make sure all corresponding TODO items find their way into the list.
+
+This variable is semi-obsolete and probably should always be true.  It
+is better to limit inheritance to certain tags using the variables
+`org-use-tag-inheritanc'e and `org-tags-exclude-from-inheritance'."
   :group 'org-tags
   :type 'boolean)
 
@@ -9101,15 +9117,22 @@ only lines with a TODO keyword are included in the output."
 (defun org-remove-uniherited-tags (tags)
   "Remove all tags that are not inherited from the list TAGS."
   (cond
-   ((eq org-use-tag-inheritance t) tags)
+   ((eq org-use-tag-inheritance t)
+    (if org-tags-exclude-from-inheritance
+	(org-delete-all org-tags-exclude-from-inheritance tags)
+      tags))
    ((not org-use-tag-inheritance) nil)
    ((stringp org-use-tag-inheritance)
     (delq nil (mapcar
-	       (lambda (x) (if (string-match org-use-tag-inheritance x) x nil))
+	       (lambda (x)
+		 (if (and (string-match org-use-tag-inheritance x)
+			  (not (member x org-tags-exclude-from-inheritance)))
+		     x nil))
 	       tags)))
    ((listp org-use-tag-inheritance)
     (delq nil (mapcar
-	       (lambda (x) (if (member x org-use-tag-inheritance) x nil))
+	       (lambda (x)
+		 (if (member x org-use-tag-inheritance) x nil))
 	       tags)))))
 
 (defvar todo-only) ;; dynamically scoped

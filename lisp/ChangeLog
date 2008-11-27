@@ -1,5 +1,9 @@
 2008-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-tags-exclude-from-inheritance): New option.
+	(org-tag-inherit-p, org-remove-uniherited-tags): Respect
+	`org-tags-exclude-from-inheritance'.
+
 	* org-agenda.el (org-agenda-show-inherited-tags): New option.
 	(org-format-agenda-item): Add inherited tags to the agenda line
 	string, and make sure that properties are kept when downcasing the

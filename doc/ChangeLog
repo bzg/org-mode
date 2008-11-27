@@ -1,3 +1,8 @@
+2008-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Tag inheritance): Refine the description of tag
+	inheritance.
+
 2008-11-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Project alist): Add info about the publishing sequence
