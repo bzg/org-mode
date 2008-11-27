@@ -136,6 +136,7 @@ Otherwise, return nil."
     (equal (point) (org-w3m-get-prev-link-start))))
 
 ;; Install keys into the w3m keymap
+(defvar w3m-mode-map)
 (when (and (boundp 'w3m-mode-map)
 	   (keymapp w3m-mode-map))
   (define-key w3m-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
