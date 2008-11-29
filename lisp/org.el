@@ -9342,12 +9342,20 @@ epoch to the beginning of today (00:00)."
 		     (append '(0 0 0) (nthcdr 3 (decode-time))))))
 
 (defun org-matcher-time (s)
-  (cond
-   ((string= s "<now>") (float-time))
-   ((string= s "<today>") (org-time-today))
-   ((string= s "<tomorrow>") (+ 86400.0 (org-time-today)))
-   ((string= s "<yesterday>") (- (org-time-today) 86400.0))
-   (t (org-2ft s))))
+  "Interprete a time comparison value."
+  (save-match-data
+    (cond
+     ((string= s "<now>") (float-time))
+     ((string= s "<today>") (org-time-today))
+     ((string= s "<tomorrow>")   (+ 86400.0 (org-time-today)))
+     ((string= s "<yesterday>")  (- (org-time-today) 86400.0))
+     ((string-match "^<\\([-+][0-9]+\\)\\([dwmy]\\)>$" s)
+      (+ (org-time-today)
+	 (* (string-to-number (match-string 1 s))
+	    (cdr (assoc (match-string 2 s)
+			'(("d" . 86400.0)   ("w" . 604800.0)
+			  ("m" . 2678400.0) ("y" . 31557600.0)))))))
+     (t (org-2ft s)))))
 
 (defun org-match-any-p (re list)
   "Does re match any element of list?"

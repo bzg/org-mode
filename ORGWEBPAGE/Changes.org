@@ -89,6 +89,16 @@
     A new option, `org-tags-exclude-from-inheritance', allows to
     specify an exclusion list for inherited tags.
 
+*** More special values for time comparisons in property searches
+
+    In addition to =<now>=, =<today>=, =<yesterday>=, and
+    =<tomorrow>=, there are more special values accepted now in
+    time comparisons in property searches:  You may use strings
+    like =<+3d>= or =<-2w>=, with units d, w, m, and y for day,
+    week, month, and year, respectively
+
+    Thanks to Linday Todd for this proposal.
+
 * Version 6.13
 
 ** Overview

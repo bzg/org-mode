@@ -3903,11 +3903,13 @@ quotes, a string comparison is done, and the same operators are allowed.
 @item
 If the comparison value is enclosed in double quotes @emph{and} angular
 brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
-assumed to be date/time specifications in the standard Org way@footnote{The
-only special values that will be recognized are @samp{"<now>"} for now
-(including time), and @samp{"<today>"}, @samp{<tomorrow>}, and
-@samp{<yesterday>} for these days at 0:00 hours, i.e. without a time
-specification.}, and the comparison will be done accordingly.
+assumed to be date/time specifications in the standard Org way, and the
+comparison will be done accordingly.  Special values that will be recognized
+are @code{"<now>"} for now (including time), and @code{"<today>"}, and
+@code{"<tomorrow>"} for these days at 0:00 hours, i.e. without a time
+specification.  Also strings like @code{"<+5d>"} or @code{"<-2m>"} with units
+@code{d}, @code{w}, @code{m}, and @code{y} for day, week, month, and year,
+respectively, can be used.
 @item
 If the comparison value is enclosed
 in curly braces, a regexp match is performed, with @samp{=} meaning that the
