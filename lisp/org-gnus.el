@@ -39,8 +39,7 @@
 ;; Customization variables
 
 (when (fboundp 'defvaralias)
-  (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links
-    "Deprecated name for `org-gnus-prefer-web-links'."))
+  (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links))
 
 (defcustom org-gnus-prefer-web-links nil
   "Non-nil means, `org-store-link' will create web links to Google groups.

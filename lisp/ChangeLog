@@ -1,3 +1,7 @@
+2008-11-29  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-gnus.el (fboundp): Fix defvaralias for XEmacs.
+
 2008-11-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-tags-exclude-from-inheritance): New option.
