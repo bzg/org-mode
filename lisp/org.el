@@ -9897,7 +9897,7 @@ the scanner.  The following items can be given here:
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
 	 (org-tags-match-list-sublevels t)
-	 matcher pos file
+	 matcher pos file res
 	 org-todo-keywords-for-agenda
 	 org-done-keywords-for-agenda
 	 org-todo-keyword-alist-for-agenda
@@ -9906,7 +9906,7 @@ the scanner.  The following items can be given here:
     (cond
      ((eq match t)   (setq matcher t))
      ((eq match nil) (setq matcher t))
-     (t (setq matcher (if match (org-make-tags-matcher match) t))))
+     (t (setq matcher (if match (cdr (org-make-tags-matcher match)) t))))
 
     (when (eq scope 'tree)
       (org-back-to-heading t)
@@ -9939,7 +9939,8 @@ the scanner.  The following items can be given here:
 	    (save-restriction
 	      (widen)
 	      (goto-char (point-min))
-	      (org-scan-tags func matcher))))))))
+	      (setq res (append res (org-scan-tags func matcher)))))))
+      res)))
 
 ;;;; Properties
 

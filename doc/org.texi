@@ -9830,7 +9830,7 @@ The following example counts the number of entries with TODO keyword
 @code{WAITING}, in all agenda files.
 
 @lisp
-(length (org-map-entries t "/+WAITING" nil 'agenda))
+(length (org-map-entries t "/+WAITING" 'agenda))
 @end lisp
 
 @node History and Acknowledgments, Main Index, Hacking, Top
