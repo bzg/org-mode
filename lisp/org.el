@@ -8336,7 +8336,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	      (delete-region (point) (+ (point) region-length))
 	    (org-cut-subtree))
 	  (setq org-markers-to-move nil)
-	  (message "Refiled to \"%s\"" (car it)))))))
+	  (message "Refiled to \"%s\"" (car it))))))
+  (org-reveal))
 
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."
