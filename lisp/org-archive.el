@@ -345,7 +345,7 @@ sibling does not exist, it will be created at the end of the subtree."
       (org-end-of-subtree t t)
       (save-excursion
 	(goto-char pos)
-	(org-cut-subtree))
+	(let ((this-command this-command)) (org-cut-subtree)))
       (org-paste-subtree (org-get-valid-level level 1))
       (org-set-property
        "ARCHIVE_TIME"
