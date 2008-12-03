@@ -3,6 +3,8 @@
 	* org-exp.el (org-export-with-priority): New variable.
 	(org-export-add-options-to-plist): Use `org-export-plist-vars'
 	instead of internal list of strings and properties.
+	(org-print-icalendar-entries): Retrieve the location property with
+	inheritance.
 
 2008-12-02  Carsten Dominik  <carsten.dominik@gmail.com>
 

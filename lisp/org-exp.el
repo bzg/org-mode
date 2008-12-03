@@ -4391,7 +4391,7 @@ When COMBINE is non nil, add the category to each line."
 			  (and org-icalendar-include-body (org-get-entry)))
 		      t org-icalendar-include-body)
 		location (org-icalendar-cleanup-string
-			  (org-entry-get nil "LOCATION"))
+			  (org-entry-get nil "LOCATION" 'selective))
 		uid (if org-icalendar-store-UID
 			(org-id-get-create)
 		      (or (org-id-get) (org-id-new)))
@@ -4513,7 +4513,7 @@ END:VEVENT\n"
 			      (and org-icalendar-include-body (org-get-entry)))
 			  t org-icalendar-include-body)
 		    location (org-icalendar-cleanup-string
-			      (org-entry-get nil "LOCATION"))
+			      (org-entry-get nil "LOCATION" 'selective))
 		    due (and (member 'todo-due org-icalendar-use-deadline)
 			     (org-entry-get nil "DEADLINE"))
 		    start (and (member 'todo-start org-icalendar-use-scheduled)

@@ -110,6 +110,16 @@
     | org-export-with-tags          | :tags               | tags:          |
     | org-export-with-priority      | :priority           | pri:           |
 
+*** LOCATION can be inherited for iCalendar export
+
+    The LOCATION property can now be inherited during iCalendar
+    export if you configure =org-use-property-inheritance= like
+    this:
+
+#+begin_src emacs-lisp
+(setq org-use-property-inheritance '("LOCATION"))
+#+end_src
+
 * Version 6.13
 
 ** Overview

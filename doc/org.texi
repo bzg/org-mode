@@ -8017,9 +8017,11 @@ Create a single large iCalendar file from all files in
 @code{org-combined-agenda-icalendar-file}.
 @end table
 
-The export will honor SUMMARY, DESCRIPTION and LOCATION properties if
-the selected entries have them.  If not, the summary will be derived
-from the headline, and the description from the body (limited to
+The export will honor SUMMARY, DESCRIPTION and LOCATION@footnote{The LOCATION
+property can be inherited from higher in the hierarchy if you configure
+@code{org-use-property-inheritance} accordingly.} properties if the selected
+entries have them.  If not, the summary will be derived from the headline,
+and the description from the body (limited to
 @code{org-icalendar-include-body} characters).
 
 How this calendar is best read and updated, that depends on the application
