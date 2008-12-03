@@ -1,5 +1,8 @@
 2008-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-w3m.el (w3m-minor-mode-hook): Also add the special copy
+	command to the `w3m-minor-mode-map'.
+
 	* org-archive.el (org-archive-to-archive-sibling): Protect
 	`this-command' to avoid appending kills during archiving.
 

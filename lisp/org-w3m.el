@@ -27,7 +27,8 @@
 
 ;; This file implements copying HTML content from a w3m buffer and
 ;; transfomring the text on the fly so that it can be pasted into
-;; an org-mode buffer with hot links.
+;; an org-mode buffer with hot links.  It will also work for regions
+;; in gnus buffers that have ben washed with w3m.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
@@ -141,11 +142,20 @@ Otherwise, return nil."
 	   (keymapp w3m-mode-map))
   (define-key w3m-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
   (define-key w3m-mode-map "\C-c\C-x\C-w" 'org-w3m-copy-for-org-mode))
+(when (and (boundp 'w3m-minor-mode-map)
+	   (keymapp w3m-minor-mode-map))
+  (define-key w3m-minor-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
+  (define-key w3m-minor-mode-map "\C-c\C-x\C-w" 'org-w3m-copy-for-org-mode))
 (add-hook
  'w3m-mode-hook
  (lambda ()
    (define-key w3m-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
    (define-key w3m-mode-map "\C-c\C-x\C-w" 'org-w3m-copy-for-org-mode)))
+(add-hook
+ 'w3m-minor-mode-hook
+ (lambda ()
+   (define-key w3m-minor-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
+   (define-key w3m-minor-mode-map "\C-c\C-x\C-w" 'org-w3m-copy-for-org-mode)))
 
 (provide 'org-w3m)
 
