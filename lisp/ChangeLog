@@ -1,5 +1,10 @@
 2008-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-html-style-default): Implement new
+	quoting.
+
+	* org-jsinfo.el (org-infojs-template): Implement new quoting.
+
 	* org-w3m.el (w3m-minor-mode-hook): Also add the special copy
 	command to the `w3m-minor-mode-map'.
 
