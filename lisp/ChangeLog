@@ -1,4 +1,17 @@
+2008-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-with-priority): New variable.
+	(org-export-add-options-to-plist): Use `org-export-plist-vars'
+	instead of internal list of strings and properties.
+
 2008-12-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-with-todo-keywords): New option.
+	(org-export-plist-vars): Include also the keys for the #+OPTIONS
+	line.
+	(org-default-export-plist, org-export-add-options-to-plist)
+	(org-export-as-ascii, org-export-as-html): Use the new structure
+	of `org-export-plist-vars'.
 
 	* org.el (org-map-entries): Return all values.
 

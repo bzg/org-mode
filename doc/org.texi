@@ -7502,6 +7502,10 @@ toc:       @r{turn on/off table of contents, or set level limit (integer)}
            @r{the simple @code{a_b} will be left as it is.}
 -:         @r{turn on/off conversion of special strings.}
 f:         @r{turn on/off footnotes like this[1].}
+todo:      @r{turn on/off inclusion of TODO keywords into exported text}
+pri:       @r{turn on/off priority cookies}
+tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
+<:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
 *:         @r{turn on/off emphasized text (bold, italic, underlined)}
 TeX:       @r{turn on/off simple @TeX{} macros in plain text}
 LaTeX:     @r{turn on/off La@TeX{} fragments}
@@ -8175,22 +8179,32 @@ variables in Org.  The table below lists these properties along
 with the variable they belong to.  See the documentation string for the
 respective variable for details.
 
-@multitable @columnfractions 0.3 0.7
+@multitable @columnfractions 0.32 0.68
+@item @code{:link-up}               @tab @code{org-export-html-link-up}
+@item @code{:link-home}             @tab @code{org-export-html-link-home}
 @item @code{:language}              @tab @code{org-export-default-language}
+@item @code{:customtime}            @tab @code{org-display-custom-times}
 @item @code{:headline-levels}       @tab @code{org-export-headline-levels}
 @item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
+@item @code{:section-number-format} @tab @code{org-export-section-number-format}
 @item @code{:table-of-contents}     @tab @code{org-export-with-toc}
+@item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
 @item @code{:emphasize}             @tab @code{org-export-with-emphasize}
 @item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
 @item @code{:special-strings}       @tab @code{org-export-with-special-strings}
+@item @code{:footnotes}             @tab @code{org-export-with-footnotes}
+@item @code{:drawers}               @tab @code{org-export-with-drawers}
+@item @code{:tags}                  @tab @code{org-export-with-tags}
+@item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
+@item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
+@item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
 @item @code{:timestamps}            @tab @code{org-export-with-timestamps}
 @item @code{:author-info}           @tab @code{org-export-author-info}
 @item @code{:creator-info}          @tab @code{org-export-creator-info}
-@item @code{:tags}                  @tab @code{org-export-with-tags}
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
 @item @code{:style-include-default} @tab @code{org-export-html-style-include-default}
@@ -8198,6 +8212,8 @@ respective variable for details.
 @item @code{:style-extra}           @tab @code{org-export-html-style-extra}
 @item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
 @item @code{:inline-images}         @tab @code{org-export-html-inline-images}
+@item @code{:html-extension}        @tab @code{org-export-html-extension}
+@item @code{:html-table-tag}        @tab @code{org-export-html-table-tag}
 @item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}
 @item @code{:timestamp}             @tab @code{org-export-html-with-timestamp}
 @item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}

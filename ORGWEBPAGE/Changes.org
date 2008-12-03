@@ -19,7 +19,6 @@
 ** Overview
 
 ** Details
-
 *** New relative timer to support timed notes
 
     Org now supports taking timed notes, useful for example while
@@ -98,6 +97,18 @@
     week, month, and year, respectively
 
     Thanks to Linday Todd for this proposal.
+
+*** Control for exporting meta data
+
+    All the metadata in a headline, i.e. the TODO keyword, the
+    priority cookie, and the tags, can now be excluded from
+    export with appropriate options:
+
+    | Variable                      | Publishing property | OPTIONS switch |
+    |-------------------------------+---------------------+----------------|
+    | org-export-with-todo-keywords | :todo-keywords      | todo:          |
+    | org-export-with-tags          | :tags               | tags:          |
+    | org-export-with-priority      | :priority           | pri:           |
 
 * Version 6.13
 

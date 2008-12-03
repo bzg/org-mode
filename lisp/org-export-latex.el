@@ -423,6 +423,9 @@ when PUB-DIR is set, use this as the publishing directory."
 	   region :emph-multiline t
 		  :for-LaTeX t
 		  :comments nil
+		  :tags (plist-get opt-plist :tags)
+		  :priority (plist-get opt-plist :priority)
+		  :todo-keywords (plist-get opt-plist :todo-keywords)
 		  :add-text (if (eq to-buffer 'string) nil text)
 		  :skip-before-1st-heading skip
 		  :select-tags (plist-get opt-plist :select-tags)
