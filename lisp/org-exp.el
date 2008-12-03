@@ -524,7 +524,7 @@ Org-mode file."
 
 (defconst org-export-html-style-default
 "<style type=\"text/css\">
- <![CDATA[
+/* <![CDATA[ */
   html { font-family: Times, serif; font-size: 12pt; }
   .title  { text-align: center; }
   .todo   { color: red; }
@@ -551,7 +551,7 @@ Org-mode file."
                                white-space:nowrap; }
   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
                                  font-weight:bold; }
- ]]>
+/* ]]> */
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and
@@ -1743,7 +1743,7 @@ from the buffer."
 	  (if (> b a) (delete-region a b)))))))
 
 (defun org-export-remove-headline-metadata (opts)
-  (debug)
+  "Remove meta data from the headline, according to user options."
   (let ((re org-complex-heading-regexp)
 	(todo (plist-get opts :todo-keywords))
 	(tags (plist-get opts :tags))
