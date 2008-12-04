@@ -120,6 +120,14 @@
 (setq org-use-property-inheritance '("LOCATION"))
 #+end_src
 
+*** Special faces can be set for individual tags
+
+    You may now use the variable =org-tag-faces= to define the
+    face used for specific tags, much in the same way as you can
+    do for TODO keywords.
+
+    Thanks to Samuel Wales for this proposal.
+
 * Version 6.13
 
 ** Overview

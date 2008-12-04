@@ -3943,6 +3943,8 @@ between words."
 	     nil)
 	   ;; Priorities
 	   (list (concat "\\[#[A-Z0-9]\\]") '(0 'org-special-keyword t))
+	   ;; Tags
+	   '(org-font-lock-add-tag-faces)
 	   ;; Special keywords
 	   (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-scheduled-string) '(0 'org-special-keyword t))
@@ -4001,6 +4003,22 @@ If KWD is a number, get the corresponding match group."
   (or (cdr (assoc kwd org-todo-keyword-faces))
       (and (member kwd org-done-keywords) 'org-done)
       'org-todo))
+
+(defun org-font-lock-add-tag-faces (limit)
+  "Add the special tag faces."
+  (when (and org-tag-faces org-tags-special-faces-re)
+    (while (re-search-forward org-tags-special-faces-re limit t)
+      (add-text-properties (match-beginning 1) (match-end 1)
+			   (list 'face (org-get-tag-face 1)
+				 'font-lock-fontified t))
+      (backward-char 1))))
+
+(defun org-get-tag-face (kwd)
+  "Get the right face for a TODO keyword KWD.
+If KWD is a number, get the corresponding match group."
+  (if (numberp kwd) (setq kwd (match-string kwd)))
+  (or (cdr (assoc kwd org-tag-faces))
+      'org-tag))
 
 (defun org-unfontify-region (beg end &optional maybe_loudly)
   "Remove fontification and activation overlays from links."

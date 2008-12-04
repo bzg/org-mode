@@ -3440,10 +3440,13 @@ information is to assign @i{tags} to headlines.  Org mode has extensive
 support for tags.
 
 Every headline can contain a list of tags; they occur at the end of the
-headline.  Tags are normal words containing letters, numbers, @samp{_},
-and @samp{@@}.  Tags must be preceded and followed by a single colon,
-e.g., @samp{:work:}.  Several tags can be specified, as in
-@samp{:work:urgent:}.
+headline.  Tags are normal words containing letters, numbers, @samp{_}, and
+@samp{@@}.  Tags must be preceded and followed by a single colon, e.g.,
+@samp{:work:}.  Several tags can be specified, as in @samp{:work:urgent:}.
+Tags will by default get a bold face with the same color as the headline.
+You may specify special faces for specific tags using the variable
+@code{org-tag-faces}, much in the same way as you can do for TODO keywords
+(@pxref{Faces for TODO keywords}).
 
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline

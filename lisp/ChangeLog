@@ -1,3 +1,13 @@
+2008-12-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-faces.el (org-set-tag-faces): New function.
+	(org-tags-special-faces-re): New variable.
+
+	* org.el (org-font-lock-add-tag-faces, org-get-tag-face): New functions.
+
+	* org-faces.el (org-tag-faces): New option.
+	(org-tag): Mention `org-tag-faces' in the docstring.
+
 2008-12-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-html-style-default): Implement new

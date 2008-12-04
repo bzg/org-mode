@@ -115,7 +115,7 @@ This is relevane when expanding the templates defined in the variable
 In addition to this list, the <br> tag is supported as well.")
 
 (defconst org-mtags-fontification-re
-  (concat 
+  (concat
    "^[ \t]*</?\\("
    (mapconcat 'identity org-mtags-supported-tags "\\|")
    "\\)\\>[^>]*>\\|<br>[ \t]*$")

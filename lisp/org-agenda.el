@@ -5137,7 +5137,9 @@ the new TODO state."
 	(goto-char (match-beginning 1))
 	(insert (org-add-props
 		    (make-string (max 1 (- c (current-column))) ?\ )
-		    (text-properties-at (point))))))))
+		    (text-properties-at (point)))))
+      (goto-char (point-min))
+      (org-font-lock-add-tag-faces (point-max)))))
 
 (defun org-agenda-priority-up ()
   "Increase the priority of line at point, also in Org-mode file."
