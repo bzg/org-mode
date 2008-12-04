@@ -145,13 +145,13 @@ With optional argument FORCE, force the creation of a new ID."
   (when force
     (org-entry-put (point) "ID" nil))
   (org-id-get (point) 'create))
-  
+
 ;;;###autoload
 (defun org-id-copy ()
   "Copy the ID of the entry at point to the kill ring.
 Create an ID if necessary."
   (interactive)
-  (kill-new (org-id-get nil 'create)))  
+  (kill-new (org-id-get nil 'create)))
 
 ;;;###autoload
 (defun org-id-get (&optional pom create prefix)
@@ -180,10 +180,10 @@ headlines.  When omitted, all headlines in all agenda files are
 eligible.
 It returns the ID of the entry.  If necessary, the ID is created."
   (let* ((org-refile-targets (or targets '((nil . (:maxlevel . 10)))))
-	 (org-refile-use-outline-path 
+	 (org-refile-use-outline-path
 	  (if (caar org-refile-targets) 'file t))
 	 (spos (org-refile-get-location "Entry: "))
-	 (pom (and spos (move-marker (make-marker) (nth 3 spos) 
+	 (pom (and spos (move-marker (make-marker) (nth 3 spos)
 				     (get-file-buffer (nth 1 spos))))))
     (prog1 (org-id-get pom 'create)
       (move-marker pom nil))))
@@ -209,7 +209,7 @@ Move the cursor to that entry in that buffer."
     (switch-to-buffer (marker-buffer m))
     (goto-char m)
     (move-marker m nil)
-    (org-show-context)))    
+    (org-show-context)))
 
 ;;;###autoload
 (defun org-id-find (id &optional markerp)

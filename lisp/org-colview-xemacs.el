@@ -406,7 +406,7 @@ This is the compiled version of the format.")
 
 (defun org-columns-add-ellipses (string width)
   "Truncate STRING with WIDTH characters, with ellipses."
-  (cond 
+  (cond
    ((<= (length string) width) string)
    ((<= width (length org-columns-ellipses))
     (substring org-columns-ellipses 0 width))

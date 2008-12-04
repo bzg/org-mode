@@ -1302,7 +1302,7 @@ The following commands are available:
      ["Show Logbook entries" org-agenda-log-mode
       :style toggle :selected org-agenda-show-log
       :active (org-agenda-check-type nil 'agenda 'timeline)]
-     ["Include archived trees" org-agenda-archives-mode 
+     ["Include archived trees" org-agenda-archives-mode
       :style toggle :selected org-agenda-archives-mode :active t]
      ["Include archive files" (org-agenda-archives-mode t)
       :style toggle :selected (eq org-agenda-archives-mode t) :active t
@@ -1911,7 +1911,7 @@ higher priority settings."
 	     (cond
 	      ((string-match "\\.html?\\'" file)
 	       (set-buffer (htmlize-buffer (current-buffer)))
-	       
+
 	       (when (and org-agenda-export-html-style
 			  (string-match "<style>" org-agenda-export-html-style))
 		 ;; replace <style> section with org-agenda-export-html-style
@@ -3416,7 +3416,7 @@ the documentation of `org-diary'."
 	 (items (if (consp org-agenda-show-log)
 		    org-agenda-show-log
 		  org-agenda-log-mode-items))
-	 (parts 
+	 (parts
 	  (delq nil
 		(list
 		 (if (memq 'closed items) (concat "\\<" org-closed-string))
@@ -4060,7 +4060,7 @@ HH:MM."
 	 (tb (or (get-text-property 1 'todo-state b) ""))
 	 (la (- (length (member ta org-todo-keywords-for-agenda))))
 	 (lb (- (length (member tb org-todo-keywords-for-agenda))))
-	 (donepa (member ta org-done-keywords-for-agenda)) 
+	 (donepa (member ta org-done-keywords-for-agenda))
 	 (donepb (member tb org-done-keywords-for-agenda)))
     (cond ((and donepa (not donepb)) -1)
 	  ((and (not donepa) donepb) +1)
@@ -4264,7 +4264,7 @@ used to narrow the search - the interactive user can also press `-' or `+'
 to switch to narrowing."
   (interactive "P")
   (let* ((alist org-tag-alist-for-agenda)
-	(tag-chars (mapconcat 
+	(tag-chars (mapconcat
 		    (lambda (x) (if (cdr x) (char-to-string (cdr x)) ""))
 		    alist ""))
 	(efforts (org-split-string
@@ -4277,7 +4277,7 @@ to switch to narrowing."
 	(current org-agenda-filter)
 	char a n tag tags)
     (unless char
-      (message 
+      (message
        "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<]:effort: "
        (if narrow "Narrow" "Filter") tag-chars)
       (setq char (read-char)))
@@ -4285,7 +4285,7 @@ to switch to narrowing."
       ;; Narrowing down
       (cond ((equal char ?-) (setq strip t narrow t))
 	    ((equal char ?+) (setq strip nil narrow t)))
-      (message 
+      (message
        "Narrow by tag [%s ], [TAB], [/]:off, [>=<]:effort: " tag-chars)
       (setq char (read-char)))
     (when (member char '(?< ?> ?=))
@@ -5407,7 +5407,7 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	      (widen)
 	      (goto-char org-agenda-action-marker)
 	      (eval form))))))))
-  
+
 (defun org-agenda-clock-in (&optional arg)
   "Start the clock on the currently selected item."
   (interactive "P")

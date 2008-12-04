@@ -3464,7 +3464,7 @@ conflicting binding to this key outside orgtbl-mode."
     (if cmd
 	(call-interactively cmd)
       (call-interactively 'org-table-create-or-convert-from-region))))
- 
+
 (defun orgtbl-tab (arg)
   "Justification and field motion for `orgtbl-mode'."
   (interactive "P")
@@ -3586,7 +3586,7 @@ The table is taken from the parameter TXT, or from the buffer at point."
   (unless txt
     (unless (org-at-table-p)
       (error "No table at point")))
-  (let* ((txt (or txt 
+  (let* ((txt (or txt
 		  (buffer-substring-no-properties (org-table-begin)
 						  (org-table-end))))
 	 (lines (org-split-string txt "[ \t]*\n[ \t]*")))

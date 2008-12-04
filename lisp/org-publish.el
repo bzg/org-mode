@@ -263,7 +263,7 @@ index of files or summary page for a given project.
                          generates a plain list of links to all files
                          in the project.
   :index-style           Can be `list' (index is just an itemized list
-                         of the titles of the files involved) or 
+                         of the titles of the files involved) or
                          `tree' (the directory structure of the source
                          files is reflected in the index).  Defaults to
                          `tree'."
@@ -276,7 +276,7 @@ When nil, do no timestamp checking and always publish all files."
   :group 'org-publish
   :type 'boolean)
 
-(defcustom org-publish-timestamp-directory (convert-standard-filename 
+(defcustom org-publish-timestamp-directory (convert-standard-filename
 					    "~/.org-timestamps/")
   "Name of directory in which to store publishing timestamps."
   :group 'org-publish
@@ -422,7 +422,7 @@ This splices all the components into the list."
 		      rest))
 	(push p rtn)))
     (nreverse (org-publish-delete-dups (delq nil rtn)))))
-	
+
 (defun org-publish-get-base-files-1 (base-dir &optional recurse match skip-file skip-dir)
   "Set `org-publish-temp-files' with files from BASE-DIR directory.
 If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is
@@ -461,7 +461,7 @@ matching filenames."
 				  ;; for skip-file and skip-dir?
 				  exclude-regexp exclude-regexp)
     (mapc (lambda (f)
-	    (pushnew 
+	    (pushnew
 	     (expand-file-name (concat base-dir f))
 	     org-publish-temp-files))
 	  include-list)

@@ -946,7 +946,7 @@ Yank subtree from kill ring.  This does modify the level of the subtree to
 make sure the tree fits in nicely at the yank position.  The yank level can
 also be specified with a numeric prefix argument, or by yanking after a
 headline marker like @samp{****}.
-@kindex C-y 
+@kindex C-y
 @item C-y
 Depending on the variables @code{org-yank-adjusted-subtrees} and
 @code{org-yank-folded-subtrees}, Org's internal @code{yank} command will
@@ -3904,7 +3904,7 @@ and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
 @samp{>=}, and @samp{<>}.
 @item
 If the comparison value is enclosed in double
-quotes, a string comparison is done, and the same operators are allowed.  
+quotes, a string comparison is done, and the same operators are allowed.
 @item
 If the comparison value is enclosed in double quotes @emph{and} angular
 brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
@@ -3919,7 +3919,7 @@ respectively, can be used.
 If the comparison value is enclosed
 in curly braces, a regexp match is performed, with @samp{=} meaning that the
 regexp matches the property value, and @samp{<>} meaning that it does not
-match.  
+match.
 @end itemize
 
 So the search string in the example finds entries tagged @samp{:work:} but
@@ -4960,7 +4960,7 @@ such a relative timer and make it easy to create timed notes.
 @item C-c C-x .
 Insert a relative time into the buffer.  The first time you use this, the
 timer will be started.  When called with a prefix argument, the timer is
-restarted. 
+restarted.
 @kindex C-c C-x -
 @item C-c C-x -
 Insert a description list item with the current relative time.  With a prefix
@@ -5297,15 +5297,15 @@ keys, a list of commands is displayed and you need to press an additional key
 to select a command:
 
 @table @kbd
-@kindex C-c C-a a 
-@item a 
+@kindex C-c C-a a
+@item a
 Select a file and move it into the task's attachment directory.  The file
 will be copied, moved, or linked, depending on @code{org-attach-method}.
 Note that hard links are not supported on all systems.
 
 @kindex C-c C-a c
-@kindex C-c C-a m 
-@kindex C-c C-a l 
+@kindex C-c C-a m
+@kindex C-c C-a l
 @item c/m/l
 Attach a file using the copy/move/link method.
 Note that hard links are not supported on all systems.
@@ -7212,7 +7212,7 @@ can use this construct, which can also be used to format poetry.
  Great clouds overhead
  Tiny black birds rise and fall
  Snow covers Emacs
- 
+
      -- AlexSchroeder
 #+END_VERSE
 @end example
@@ -7993,7 +7993,7 @@ entry@footnote{See the variables @code{org-icalendar-use-deadline} and
 @code{org-icalendar-use-scheduled}.}.  As categories, it will use the tags
 locally defined in the heading, and the file/tree category@footnote{To add
 inherited tags or the TODO state, configure the variable
-@code{org-icalendar-categories}.}. 
+@code{org-icalendar-categories}.}.
 
 The iCalendar standard requires each entry to have a globally unique
 identifier (UID).  Org creates these identifiers during export.  If you set
@@ -8704,7 +8704,7 @@ is not indented.  This is not really a problem when you are writing a book
 where the outline headings are really section headlines.  However, in a more
 list-oriented outline, it is clear that an indented structure is a lot
 cleaner, as can be seen by comparing the two columns in the following
-example: 
+example:
 
 @example
 @group
@@ -8723,7 +8723,7 @@ It is non-trivial to make such a look work in Emacs, but Org contains three
 separate features that, combined, achieve just that.
 
 @enumerate
-@item 
+@item
 @emph{Indentation of text below headlines}@*
 You may indent text below each headline to make the left boundary line up
 with the headline, like
@@ -9039,7 +9039,7 @@ go to @url{http://orgmode.org} to get access to these modules.
 @item @file{org-annotate-file.el} by @i{Philip Jackson}
       Annotate a file with org syntax, in a separate file, with links back to
       the annotated file.
-@item @file{org-annotation-helper.el} by @i{Bastien Guerry and Daniel E. German} 
+@item @file{org-annotation-helper.el} by @i{Bastien Guerry and Daniel E. German}
       Call @i{remember} directly from Firefox/Opera, or from Adobe Reader.
       When activating a special link or bookmark, Emacs receives a trigger to
       create a note with a link back to the website.  Requires some setup, a
@@ -9767,7 +9767,7 @@ Org has sophisticated mapping capabilities to find all entries satisfying
 certain criteria.  Internally, this functionality is used to produce agenda
 views, but there is also an API that can be used to execute arbitrary
 functions for each or selected entries.  The main entry point for this API
-is: 
+is:
 
 @defun org-map-entries func &optional match scope &rest skip
 Call FUNC at each headline selected by MATCH in SCOPE.
@@ -9815,7 +9815,7 @@ The function given to that mapping routine can really do anything you like.
 It can uce the property API (@pxref{Using the property API}) to gather more
 information about the entry, or in order to change metadate in the entry.
 Here are a couple of functions that might be handy:
- 
+
 @defun org-todo &optional arg
 Change the TODO state of the entry, see the docstring of the functions for
 the many possible values for the argument ARG.

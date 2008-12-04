@@ -326,7 +326,7 @@ This option can also be set with the +OPTIONS line, e.g. \"f:nil\"."
 <h2 class=\"footnotes\">%s: </h2>
 <div id=\"footnotes-text\">
 %s
-</div> 
+</div>
 </div>"
   "Format for the footnotes section.
 Should contain a two instances of %s.  The first will be replaced with the
@@ -996,7 +996,7 @@ modified) list.")
 				 (car (read-from-string
 				       (match-string 1 options))))))))))
   p)
-  
+
 (defun org-export-add-subtree-options (p pos)
   "Add options in subtree at position POS to property list P."
   (save-excursion
@@ -1451,25 +1451,25 @@ on this string to produce the exported version."
       ;; The caller markes some stuff fo killing, stuff that has been
       ;; used to create the page title, for example.
       (org-export-kill-licensed-text)
-      
+
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
       (untabify (point-min) (point-max))
-      
+
       ;; Handle include files
       (org-export-handle-include-files)
-      
+
       ;; Get rid of excluded trees
       (org-export-handle-export-tags (plist-get parameters :select-tags)
 				     (plist-get parameters :exclude-tags))
 
       ;; Handle source code snippets
       (org-export-replace-src-segments)
-      
+
       ;; Get rid of drawers
       (org-export-remove-or-extract-drawers drawers
 					    (plist-get parameters :drawers))
-      
+
       ;; Get the correct stuff before the first headline
       (when (plist-get parameters :skip-before-1st-heading)
 	(goto-char (point-min))
@@ -1480,10 +1480,10 @@ on this string to produce the exported version."
       (when (plist-get parameters :add-text)
 	(goto-char (point-min))
 	(insert (plist-get parameters :add-text) "\n"))
-      
+
       ;; Get rid of archived trees
       (org-export-remove-archived-trees archived-trees)
-      
+
       ;; Remove todo-keywords before exporting, if the user has requested so
       (org-export-remove-headline-metadata parameters)
 
@@ -1930,7 +1930,7 @@ When it is nil, all comments will be removed."
 		  "]")))
 	 (put-text-property 0 (length s) 'face 'org-link s)
 	 (replace-match s t t))))))
-  
+
 (defun org-export-concatenate-multiline-links ()
   "Find multi-line links and put it all into a single line.
 This is to make sure that the line-processing export backends
@@ -2096,7 +2096,7 @@ TYPE must be a string, any of:
       res)))
 
 (org-number-to-roman 1961)
-   
+
 
 ;;; Include files
 
@@ -2252,7 +2252,7 @@ underlined headlines.  The default is 3."
 	      (goto-char rbeg)
 	      (and (org-at-heading-p)
 		   (>= (org-end-of-subtree t t) rend)))))
-	 (opt-plist (if subtree-p 
+	 (opt-plist (if subtree-p
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
 	 (custom-times org-display-custom-times)
@@ -2903,7 +2903,7 @@ PUB-DIR is set, use this as the publishing directory."
 		(goto-char rbeg)
 		(and (org-at-heading-p)
 		     (>= (org-end-of-subtree t t) rend))))))
-	 (opt-plist (if subtree-p 
+	 (opt-plist (if subtree-p
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
 	 ;; The following two are dynamically scoped into other
@@ -3294,7 +3294,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		     "<a href=\"#"
 		     (org-solidify-link-text
 		      (save-match-data (org-link-unescape path)) nil)
-		     "\"" attr ">" 
+		     "\"" attr ">"
 		     (org-export-html-format-desc desc)
 		     "</a>")))
 	     ((member type '("http" "https"))
@@ -3307,7 +3307,7 @@ lang=\"%s\" xml:lang=\"%s\">
 					attr (concat attr " alt=\"" path "\""))
 				    "/>"))
 		(setq link (concat type ":" path))
-		(setq rpl (concat "<a href=\"" 
+		(setq rpl (concat "<a href=\""
 				  (org-export-html-format-href link)
 				  "\"" attr ">"
 				  (org-export-html-format-desc desc)
@@ -3317,7 +3317,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (setq link (concat type ":" path))
 	      (setq rpl (concat "<a href=\""
 				(org-export-html-format-href link)
-				"\"" attr ">" 
+				"\"" attr ">"
 				(org-export-html-format-desc desc)
 				"</a>")))
 
@@ -3495,7 +3495,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		(insert (cond
 			 ((equal item-type "u") "<ul>\n<li>\n")
 			 ((equal item-type "o") "<ol>\n<li>\n")
-			 ((equal item-type "d") 
+			 ((equal item-type "d")
 			  (format "<dl>\n<dt>%s</dt><dd>\n" item-tag))))
 		(push item-type local-list-type)
 		(push ind local-list-indent)
@@ -4485,7 +4485,7 @@ END:VEVENT\n"
 	      (insert sexp "\n"))))
 	(princ (org-diary-to-ical-string sexp-buffer))
 	(kill-buffer sexp-buffer))
-      
+
       (when org-icalendar-include-todo
 	(setq prefix "TODO-")
 	(goto-char (point-min))
@@ -4536,7 +4536,7 @@ END:VEVENT\n"
 		(setq pri org-default-priority))
 	      (setq pri (floor (- 9 (* 8. (/ (float (- org-lowest-priority pri))
 					     (- org-lowest-priority org-highest-priority))))))
-	      
+
 	      (princ (format "BEGIN:VTODO
 UID: %s
 %s

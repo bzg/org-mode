@@ -163,7 +163,7 @@ This is actually only part of the face definition for the text in column view.
 The following faces apply, with this priority.
 
 1. The color of the reference face.  This is normally the level fact that
-   is used in the outline.  In agenda-mode, it will be the face of the 
+   is used in the outline.  In agenda-mode, it will be the face of the
    first character in the line.  The color is explicitly retained to
    make sure that the column line still looks a bit like the structure
    line it is masking.

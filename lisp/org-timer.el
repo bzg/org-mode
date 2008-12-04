@@ -66,7 +66,7 @@ the region 0:00:00."
 	  (setq def (if (org-in-regexp org-timer-re)
 			(match-string 0)
 		      "0:00:00")
-		s (read-string 
+		s (read-string
 		   (format "Restart timer with offset [%s]: " def)))
 	  (unless (string-match "\\S-" s) (setq s def))
 	  (setq delta (org-timer-hms-to-secs (org-timer-fix-incomplete s)))))

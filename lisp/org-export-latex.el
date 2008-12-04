@@ -144,7 +144,7 @@ providing opening and closing strings for an environment that should
 represent the document section.  The opening clause should have a %s
 to represent the section title."
   :group 'org-export-latex
-  :type '(repeat 
+  :type '(repeat
 	  (list (string :tag "LaTeX class")
 		(string :tag "LaTeX header")
 		(repeat :tag "Levels" :inline t
@@ -1178,7 +1178,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*\\begin{\\([a-zA-Z]+\\)}" nil t)
     (let* ((start (progn (beginning-of-line) (point)))
-	   (end (or (and (re-search-forward 
+	   (end (or (and (re-search-forward
 			  (concat "^[ \t]*\\end{" (match-string 1) "}" nil t)
 			  (point-at-eol)))
 		    (point-max))))

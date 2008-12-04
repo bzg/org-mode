@@ -122,7 +122,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
     (while (previous-single-property-change (point) 'w3m-anchor-sequence)
       ;; jump to previous anchor
       (goto-char (previous-single-property-change (point) 'w3m-anchor-sequence))
-      (when (w3m-anchor (point)) 
+      (when (w3m-anchor (point))
 	;; return point when current is valid link
 	(throw 'reach nil))))
   (point))

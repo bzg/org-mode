@@ -188,7 +188,7 @@ Return t when things worked, nil when we are not in an item."
 				  (save-match-data
 				    (and (looking-at "[ \t]*\\(.*?\\) ::")
 					 (match-string 1)))))
-	   (timerp (and descp 
+	   (timerp (and descp
 			(save-match-data
 			  (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$"
 					descp))))

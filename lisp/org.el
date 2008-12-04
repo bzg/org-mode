@@ -2372,7 +2372,7 @@ Use customize to modify this, or restart Emacs after changing it."
 (defcustom org-completion-use-ido nil
   "Non-nil means, use ido completion wherever possible."
   :group 'org-completion
-  :type 'boolean)  
+  :type 'boolean)
 
 (defcustom org-completion-fallback-command 'hippie-expand
   "The expansion command called by \\[org-complete] in normal context.
@@ -6935,7 +6935,7 @@ application the system uses for this file type."
 			   (format "Execute \"%s\" as elisp? "
 				   (org-add-props cmd nil
 				     'face 'org-warning))))
-	      (message "%s => %s" cmd 
+	      (message "%s => %s" cmd
 		       (if (equal (string-to-char cmd) ?\()
 			   (eval (read cmd))
 			 (call-interactively (read cmd))))
