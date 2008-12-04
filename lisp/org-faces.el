@@ -321,7 +321,7 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
   (if (not value)
       (setq org-tags-special-faces-re nil)
     (setq org-tags-special-faces-re
-	  (concat ":\\(" (mapconcat 'car org-tag-faces "\\|") "\\):"))))
+	  (concat ":\\(" (mapconcat 'car value "\\|") "\\):"))))
 
 (defcustom org-tag-faces nil
   "Faces for specific tags.

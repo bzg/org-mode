@@ -3133,10 +3133,12 @@ special faces for some of them.  This can be done using the variable
 @code{org-todo-keyword-faces}.  For example:
 
 @lisp
+@group
 (setq org-todo-keyword-faces
       '(("TODO"      . org-warning)
         ("DEFERRED"  . shadow)
         ("CANCELED"  . (:foreground "blue" :weight bold))))
+@end group
 @end lisp
 
 While using a list with face properties as shown for CANCELED

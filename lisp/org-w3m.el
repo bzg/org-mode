@@ -40,6 +40,9 @@
 ;;      proposed by Richard, i'm just code it.
 ;;
 
+(require 'org)
+(declare-function w3m-anchor "ext:w3m-util" (position))
+
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
@@ -138,6 +141,7 @@ Otherwise, return nil."
 
 ;; Install keys into the w3m keymap
 (defvar w3m-mode-map)
+(defvar w3m-minor-mode-map)
 (when (and (boundp 'w3m-mode-map)
 	   (keymapp w3m-mode-map))
   (define-key w3m-mode-map "\C-c\C-x\M-w" 'org-w3m-copy-for-org-mode)
