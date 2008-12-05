@@ -3721,6 +3721,7 @@ will be prompted for."
 
 (defvar org-target-link-regexp nil
   "Regular expression matching radio targets in plain text.")
+(make-variable-buffer-local 'org-target-link-regexp)
 (defvar org-target-regexp "<<\\([^<>\n\r]+\\)>>"
   "Regular expression matching a link target.")
 (defvar org-radio-target-regexp "<<<\\([^<>\n\r]+\\)>>>"

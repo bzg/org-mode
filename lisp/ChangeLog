@@ -1,3 +1,7 @@
+2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-target-link-regexp): Make buffer-local.
+
 2008-12-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-faces.el (org-set-tag-faces): New function.
