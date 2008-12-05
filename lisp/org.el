@@ -162,7 +162,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
 	(const :tag "   bibtex:            Links to BibTeX entries" org-bibtex)
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
-	(const :tag "   id:                Global id's for identifying entries" org-id)
+	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
 	(const :tag "   jsinfo:            Set up Sebastian Rose's JavaScript org-info.js" org-jsinfo)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
@@ -957,7 +957,11 @@ It should match if the message is from the user him/herself."
   :type 'regexp)
 
 (defcustom org-link-to-org-use-id 'create-if-interactive
-  "Non-nil means, storing a link to an Org file will use entry ID's.
+  "Non-nil means, storing a link to an Org file will use entry IDs.
+
+Note that before this variable is even considered, org-id must be loaded,
+to please customize `org-modules' and turn it on.
+
 The variable can have the following values:
 
 t     Create an ID if needed to make a link to the current entry.
@@ -967,7 +971,7 @@ create-if-interactive
       command), do create an ID to support the link.  But when doing the
       job for remember, only use the ID if it already exists.  The
       purpose of this setting is to avoid proliferation of unwanted
-      ID's, just because you happen to be in an Org file when you
+      IDs, just because you happen to be in an Org file when you
       call `org-remember' that automatically and preemptively
       creates a link.  If you do want to get an ID link in a remember
       template to an entry not having an ID, create it first by
@@ -5299,6 +5303,7 @@ the inserted text when done."
     (beginning-of-line 1)
     (unless for-yank (org-back-over-empty-lines))
     (setq beg (point))
+    (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
     (insert-before-markers txt)
     (unless (string-match "\n\\'" txt) (insert "\n"))
     (setq newend (point))
@@ -6172,7 +6177,6 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
       (setcdr (assoc type org-link-protocols) (list follow export))
     (push (list type follow export) org-link-protocols)))
 
-
 ;;;###autoload
 (defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
@@ -6234,11 +6238,20 @@ For file links, arg negates `org-context-in-file-links'."
 
      ((and buffer-file-name (org-mode-p))
       (cond
-       ((or (eq org-link-to-org-use-id t)
-	    (and (eq org-link-to-org-use-id 'create-if-interactive)
-		 (interactive-p))
-	    (and org-link-to-org-use-id
-		 (condition-case nil (org-entry-get nil "ID") (error nil))))
+       ((org-in-regexp "<<\\(.*?\\)>>")
+	(setq cpltxt
+	      (concat "file:"
+		      (abbreviate-file-name buffer-file-name)
+		      "::" (match-string 1))
+	      link (org-make-link cpltxt)))
+       ((and (featurep 'org-id)
+	     (or (eq org-link-to-org-use-id t)
+		 (and (eq org-link-to-org-use-id 'create-if-interactive)
+		      (interactive-p))
+		 (and org-link-to-org-use-id
+		      (condition-case nil
+			  (org-entry-get nil "ID")
+			(error nil)))))
 	;; We can make a link using the ID.
 	(setq link (condition-case nil
 		       (org-id-store-link)
@@ -6252,24 +6265,21 @@ For file links, arg negates `org-context-in-file-links'."
 			     (abbreviate-file-name buffer-file-name)))
 	;; Add a context search string
 	(when (org-xor org-context-in-file-links arg)
-	  ;; Check if we are on a target
-	  (if (org-in-regexp "<<\\(.*?\\)>>")
-	      (setq cpltxt (concat cpltxt "::" (match-string 1)))
-	    (setq txt (cond
-		       ((org-on-heading-p) nil)
-		       ((org-region-active-p)
-			(buffer-substring (region-beginning) (region-end)))
-		       (t nil)))
-	    (when (or (null txt) (string-match "\\S-" txt))
-	      (setq cpltxt
-		    (concat cpltxt "::"
-			    (condition-case nil
-				(org-make-org-heading-search-string txt)
-			      (error "")))
-		    desc "NONE")))))
-       (if (string-match "::\\'" cpltxt)
-	   (setq cpltxt (substring cpltxt 0 -2)))
-       (setq link (org-make-link cpltxt))))
+	  (setq txt (cond
+		     ((org-on-heading-p) nil)
+		     ((org-region-active-p)
+		      (buffer-substring (region-beginning) (region-end)))
+		     (t nil)))
+	  (when (or (null txt) (string-match "\\S-" txt))
+	    (setq cpltxt
+		  (concat cpltxt "::"
+			  (condition-case nil
+			      (org-make-org-heading-search-string txt)
+			    (error "")))
+		  desc "NONE")))
+	(if (string-match "::\\'" cpltxt)
+	    (setq cpltxt (substring cpltxt 0 -2)))
+	(setq link (org-make-link cpltxt)))))
 
      ((buffer-file-name (buffer-base-buffer))
       ;; Just link to this file here.
@@ -10606,6 +10616,7 @@ completion."
 IDENT can be a string, a symbol or a number, this function will search for
 the string representation of it.
 Return the position where this entry starts, or nil if there is no such entry."
+  (interactive "sID: ")
   (let ((id (cond
 	     ((stringp ident) ident)
 	     ((symbol-name ident) (symbol-name ident))

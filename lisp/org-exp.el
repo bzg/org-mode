@@ -1761,17 +1761,15 @@ from the buffer."
 	(todo (plist-get opts :todo-keywords))
 	(tags (plist-get opts :tags))
 	(pri  (plist-get opts :priority))
-	rpl)
+	(elts '(1 2 3 4 5))
+	rpl props)
+    (setq elts (delq nil (list 1 (if todo 2) (if pri 3) 4 (if tags 5))))
     (when (or (not todo) (not tags) (not pri))
-      ;; OK, something needs to be removed
-      (setq rpl (concat "\\1"
-			(if todo " \\2" "")
-			(if pri  " \\3" "")
-			" \\4"
-			(if tags " \\5" "")))
       (goto-char (point-min))
       (while (re-search-forward re nil t)
-	(replace-match rpl t nil)))))
+	(setq rpl (mapconcat (lambda (i) (if (match-end i) (match-string i) ""))
+			     elts " "))
+	(replace-match rpl t t)))))
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."

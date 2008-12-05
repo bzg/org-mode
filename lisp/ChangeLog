@@ -32,6 +32,24 @@
 	(org-export-as-html): Close paragraph before blockquote and verse
 	tags.
 
+2008-12-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-id.el (org-id-locations-file): Wrap file name with
+	`convert-standard-filename'.
+	(org-id-files): New variable.
+	(org-id-use-hash): New option.
+	(org-id-update-id-locations): Also search in all files current
+	listed in `org-id-files'.  Convert the resulting alist to a hash
+	if the user customation says so.
+	(org-id-locations-save): Handle he case if `org-id-locations' is a
+	hash.
+	(org-id-locations-load): Convert the alist to a hash.
+	(org-id-add-location): Handle the hast case.
+	(kill-emacs-hook): Make sure id locations are saved when Emacs is
+	exited.
+	(org-id-hash-to-alist, org-id-alist-to-hash)
+	(org-id-paste-tracker): New functions.
+
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-goto-calendar): Remove duplicate let

@@ -10,14 +10,13 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-
 * Version 6.15 (in preparation)
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 ** Overview
 ** Incompatible changes
-*** Old syntax for link attributes disbandoned
+*** Old syntax for link attributes abandoned
     There used to be a syntax for settint link attributes for
     HTML export by enclosing the attributes into double braces
     and adding them to the link itself, like
@@ -50,7 +49,7 @@ link.
        ID for the ~<div class="figure">~ element that encapsulates
        the image tag and the caption.  For LaTeX export, this
        string will be used as the argument of a ~\label{...}~
-       macro.  These lables will be available for internal links
+       macro.  These labels will be available for internal links
        like ~[[label][Table] ]~.
   - #+ATTR_HTML: :: Attributes for HTML export of image, to be
        added as attributes into the ~<img...>~ tag.  This string
@@ -66,6 +65,66 @@ link.
 For LaTeX export, if either a caption or a label is given, the
 element will be exported as a float, i.e. wrapped into a figure
 or table environment.
+
+*** Better implementation for entry IDs
+    
+Unique identifiers for entries can now be used more efficiently.
+Internally, a hash array has replaced the alist used so far to
+keep track of the files in which an ID is defined.  This makes it
+quite fast to find an entry by ID.
+
+There is now a new link type which looks like this:
+
+#+begin_example
+id:GLOBALLY-UNIQUE-IDENTIFIER
+#+end_example
+
+This link points to a specific entry.  When you move the entry to
+a different file, for example if you move it to an archive
+file, this link will continue to work.
+
+The file /org-id.el/ contains an API that can be used to write
+code using these identifiers, including creating IDs and finding
+them wherever they are.
+
+Org has its own method to create unique identifiers, but if the
+system has /uuidgen/ command installed (Mac's and Linux systems
+generally do), it will be used by default.  You an also select
+the method by hand, using the variable =org-id-method=.
+
+If the ID system ever gets confused about where a certain ID is,
+it initiates a global scan of all agenda files with associated
+archives, all files previously known containing any IDs, and all
+currently visited Org-mode files to rebuild the hash.  You can
+also initiate this by hand: =M-x org-id-update-id-locations=.
+Running this command will also dump into the =*Messages*= buffer
+information about any duplicate IDs.  These should not exist, but
+if you /copy/ an entry with its properties, duplicate IDs will
+inevitably be produced.  This is unavoidable in a plain text
+system that allows you to edit the text in arbitrary ways, and a
+portion of care on your side is needed to keep this system clean.
+
+The hash is stored in the file =~/.emacs.d/.org-id-locations=.
+This is also a change from previous versions where the file was
+=~/.org=id-locations=.  Therefore, you can remove this old file
+if you have it.  I am not sure what will happen if the =.emacs.d=
+directory does not exists in your setup, but in modern Emacsen, I
+believe it should exist.  If you do not want to use IDs across
+files, you can avoid the overhead with tracking IDs by
+customizing the variable =org-id-track-globally=.  IDs can then
+still be used for links inside a single file.
+
+IDs will also be used when you create a new link to an Org-mode
+buffer.  If you use =org-store-link= (normally at =C-c l=) inside
+en entry in an Org-mode buffer, and ID property will be created
+if it does not exist, and the stored link will be an =id:= link.
+If you prefer the much less secure linking to headline text, you
+can configure the variable =org-link-to-org-use-id=.  The default
+setting for this variable is =create-if-interactive=, meaning
+that an ID will be created when you store a link interactively,
+but not if you happen to be in an Org-mode file while you create
+a remember note (which usually has a link to the place where you
+were when starting remember).
 
 * Version 6.14
 ** Overview
@@ -275,7 +334,7 @@ or table environment.
 *** Invisible targets become now anchors in headlines.
 
     These anchors can be used to jump to a directly with an HTML
-    link, just like the =sec-xxx= ids.  For example, the
+    link, just like the =sec-xxx= IDs.  For example, the
     following will make a http link
     =//domain/path-to-my-file.html#dummy= work:
 

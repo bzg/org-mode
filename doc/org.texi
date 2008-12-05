@@ -2572,26 +2572,25 @@ insert it into an Org file, and to follow the link.
 @kindex C-c l
 @cindex storing links
 @item C-c l
-Store a link to the current location.  This is a @emph{global} command
-which can be used in any buffer to create a link.  The link will be
-stored for later insertion into an Org buffer (see below).  For
-Org files, if there is a @samp{<<target>>} at the cursor, the
-link points to the target.  Otherwise it points to the current
-headline.  For VM, Rmail, Wanderlust, MH-E, Gnus and BBDB buffers, the
-link will indicate the current article/entry.  For W3 and W3M buffers,
-the link goes to the current URL.  For IRC links, if you set the
-variable @code{org-irc-link-to-logs} to non-nil then @kbd{C-c l} will
-store a @samp{file:/} style link to the relevant point in the logs for
-the current conversation. Otherwise an @samp{irc:/} style link to the
-user/channel/server under the point will be stored.  For any other
-files, the link will point to the file, with a search string
-(@pxref{Search options}) pointing to the contents of the current line.
-If there is an active region, the selected words will form the basis
-of the search string.  If the automatically created link is not
-working correctly or accurately enough, you can write custom functions
-to select the search string and to do the search for particular file
-types - see @ref{Custom searches}.  The key binding @kbd{C-c l} is
-only a suggestion - see @ref{Installation}.
+Store a link to the current location.  This is a @emph{global} command which
+can be used in any buffer to create a link.  The link will be stored for
+later insertion into an Org buffer (see below).  For Org files, if there is a
+@samp{<<target>>} at the cursor, the link points to the target.  Otherwise it
+points to the current headline, either by text, or, if @file{org-id.el} is
+loaded, by ID property.  For VM, Rmail, Wanderlust, MH-E, Gnus and BBDB
+buffers, the link will indicate the current article/entry.  For W3 and W3M
+buffers, the link goes to the current URL.  For IRC links, if you set the
+variable @code{org-irc-link-to-logs} to non-nil then @kbd{C-c l} will store a
+@samp{file:/} style link to the relevant point in the logs for the current
+conversation. Otherwise an @samp{irc:/} style link to the user/channel/server
+under the point will be stored.  For any other files, the link will point to
+the file, with a search string (@pxref{Search options}) pointing to the
+contents of the current line.  If there is an active region, the selected
+words will form the basis of the search string.  If the automatically created
+link is not working correctly or accurately enough, you can write custom
+functions to select the search string and to do the search for particular
+file types - see @ref{Custom searches}.  The key binding @kbd{C-c l} is only
+a suggestion - see @ref{Installation}.
 @c
 @kindex C-c C-l
 @cindex link completion
