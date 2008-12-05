@@ -1,6 +1,8 @@
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-target-link-regexp): Make buffer-local.
+	(org-move-subtree-down): Fix bug with trees at beginning of
+	buffer.
 
 2008-12-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
