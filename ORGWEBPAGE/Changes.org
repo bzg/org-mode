@@ -18,6 +18,23 @@
 
 ** Overview
 
+** Incompatible Changes
+*** Relative row references crossing hlines now throw an error
+    
+    Relative row references in tables look like this: "@-4" which
+    means the forth row above this one.  These row references are
+    not allowed to cross horizontal separator lines (hlines).  So
+    far, when a row reference violates this policy, Org would
+    silently choose the field just next to the hline.
+
+    Tassilo Horn pointed out that this kind of hidden magic is
+    actually confusing and may cause incorrect formulas, and I do
+    agree.  Therefore, trying to cross a hline with a relative
+    reference will now throw an error.
+    
+    If you need the old behavior, customize the variable
+    `org-table-error-on-row-ref-crossing-hline'.
+
 ** Details
 *** New relative timer to support timed notes
 

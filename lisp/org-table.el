@@ -244,6 +244,14 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :group 'org-table-calculation
   :type 'boolean)
 
+(defcustom org-table-error-on-row-ref-crossing-hline t
+  "Non-nil means, a relative row reference that tries to cross a hline errors.
+When nil, the reference will silently be to the field just next to the hline.
+Coming from below, it will be the field below the hline, coming from
+above, it will be the field above the hline."
+  :group 'org-table
+  :type 'boolean)
+
 (defgroup org-table-import-export nil
   "Options concerning table import and export in Org-mode."
   :tag "Org Table Import Export"
@@ -2288,23 +2296,29 @@ and TABLE is a vector with line types."
       (if (and (not hn) on (not odir))
 	  (error "should never happen");;(aref org-table-dlines on)
 	(if (and hn (> hn 0))
-	    (setq i (org-find-row-type table i 'hline (equal hdir "-") nil hn)))
+	    (setq i (org-find-row-type table i 'hline (equal hdir "-") nil hn
+				       cline desc)))
 	(if on
-	    (setq i (org-find-row-type table i 'dline (equal odir "-") rel on)))
+	    (setq i (org-find-row-type table i 'dline (equal odir "-") rel on
+				       cline desc)))
 	(+ bline i)))))
 
-(defun org-find-row-type (table i type backwards relative n)
+(defun org-find-row-type (table i type backwards relative n cline desc)
+  "FIXME: Needs more documentation."
   (let ((l (length table)))
     (while (> n 0)
       (while (and (setq i (+ i (if backwards -1 1)))
 		  (>= i 0) (< i l)
 		  (not (eq (aref table i) type))
 		  (if (and relative (eq (aref table i) 'hline))
-		      (progn (setq i (- i (if backwards -1 1)) n 1) nil)
+		      (if org-table-error-on-row-ref-crossing-hline
+			  (error "Row descriptor %s used in line %d crosses hline" desc cline)
+			(progn (setq i (- i (if backwards -1 1)) n 1) nil))
 		    t)))
       (setq n (1- n)))
     (if (or (< i 0) (>= i l))
-	(error "Row descriptor leads outside table")
+	(error "Row descriptor %s used in line %d leads outside table"
+	       desc cline)
       i)))
 
 (defun org-rewrite-old-row-references (s)

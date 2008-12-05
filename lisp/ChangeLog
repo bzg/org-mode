@@ -1,5 +1,11 @@
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-find-row-type): New arguments DESC and CLINE,
+	for better error messages.
+	(org-table-get-descriptor-line): Supply the new arguments to
+	`org-find-row-type'.
+	(org-table-error-on-row-ref-crossing-hline): New option.
+
 	* org.el (org-target-link-regexp): Make buffer-local.
 	(org-move-subtree-down): Fix bug with trees at beginning of
 	buffer.
