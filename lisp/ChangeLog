@@ -1,5 +1,8 @@
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-goto-calendar): Remove duplicate let
+	bindings of calendar variables.
+
 	* org-table.el (org-table-find-row-type): Renamed from
 	`org-find-row-type'.
 	(org-table-rewrite-old-row-references): Renamed from

@@ -2982,7 +2982,7 @@ MATCH is being ignored."
   "Get the (Emacs Calendar) diary entries for DATE."
   (require 'diary-lib)
   (let* ((diary-fancy-buffer "*temporary-fancy-diary-buffer*")
-         (fancy-diary-buffer diary-fancy-buffer)
+	 (fancy-diary-buffer diary-fancy-buffer)
 	 (diary-display-hook '(fancy-diary-display))
 	 (diary-display-function 'fancy-diary-display)
 	 (pop-up-frames nil)
@@ -5550,8 +5550,6 @@ argument, latitude and longitude will be prompted for."
 	 (calendar-view-holidays-initially-flag nil)
 	 (calendar-view-diary-initially-flag nil)
 	 (view-calendar-holidays-initially nil)
-	 (calendar-view-diary-initially-flag nil)
-	 (calendar-view-holidays-initially-flag nil)
 	 (view-diary-entries-initially nil))
     (calendar)
     (calendar-goto-date date)))
