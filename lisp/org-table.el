@@ -2122,7 +2122,7 @@ not overwrite the stored one."
 	      lispp (and (> (length form) 2)(equal (substring form 0 2) "'(")))
 	(if (and lispp literal) (setq lispp 'literal))
 	;; Check for old vertical references
-	(setq form (org-rewrite-old-row-references form))
+	(setq form (org-table-rewrite-old-row-references form))
 	;; Insert complex ranges
 	(while (and (string-match org-table-range-regexp form)
 		    (> (length (match-string 0 form)) 1))
@@ -2296,14 +2296,14 @@ and TABLE is a vector with line types."
       (if (and (not hn) on (not odir))
 	  (error "should never happen");;(aref org-table-dlines on)
 	(if (and hn (> hn 0))
-	    (setq i (org-find-row-type table i 'hline (equal hdir "-") nil hn
-				       cline desc)))
+	    (setq i (org-table-find-row-type table i 'hline (equal hdir "-")
+					     nil hn cline desc)))
 	(if on
-	    (setq i (org-find-row-type table i 'dline (equal odir "-") rel on
-				       cline desc)))
+	    (setq i (org-table-find-row-type table i 'dline (equal odir "-")
+					     rel on cline desc)))
 	(+ bline i)))))
 
-(defun org-find-row-type (table i type backwards relative n cline desc)
+(defun org-table-find-row-type (table i type backwards relative n cline desc)
   "FIXME: Needs more documentation."
   (let ((l (length table)))
     (while (> n 0)
@@ -2321,7 +2321,7 @@ and TABLE is a vector with line types."
 	       desc cline)
       i)))
 
-(defun org-rewrite-old-row-references (s)
+(defun org-table-rewrite-old-row-references (s)
   (if (string-match "&[-+0-9I]" s)
       (error "Formula contains old &row reference, please rewrite using @-syntax")
     s))
@@ -2760,10 +2760,10 @@ For example:  28 -> AB."
   (or (match-end n) (error "Cannot shift reference in this direction"))
   (goto-char (match-beginning n))
   (and (looking-at (regexp-quote (match-string n)))
-       (replace-match (org-shift-refpart (match-string 0) decr hline)
+       (replace-match (org-table-shift-refpart (match-string 0) decr hline)
 		      t t)))
 
-(defun org-shift-refpart (ref &optional decr hline)
+(defun org-table-shift-refpart (ref &optional decr hline)
   "Shift a refrence part REF.
 If DECR is set, decrease the references row/column, else increase.
 If HLINE is set, this may be a hline reference, it certainly is not
@@ -3252,7 +3252,7 @@ table editor in arbitrary modes.")
 	  (easy-menu-add orgtbl-mode-menu)
 	  (run-hooks 'orgtbl-mode-hook))
       (setq auto-fill-inhibit-regexp org-old-auto-fill-inhibit-regexp)
-      (org-cleanup-narrow-column-properties)
+      (org-table-cleanup-narrow-column-properties)
       (org-remove-from-invisibility-spec '(org-cwidth))
       (remove-hook 'before-change-functions 'org-before-change-function t)
       (when (fboundp 'font-lock-remove-keywords)
@@ -3261,7 +3261,7 @@ table editor in arbitrary modes.")
       (easy-menu-remove orgtbl-mode-menu)
       (force-mode-line-update 'all))))
 
-(defun org-cleanup-narrow-column-properties ()
+(defun org-table-cleanup-narrow-column-properties ()
   "Remove all properties related to narrow-column invisibility."
   (let ((s 1))
     (while (setq s (text-property-any s (point-max)
