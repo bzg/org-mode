@@ -11,14 +11,25 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.14 (in preparation)
+* Version 6.14
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 
 ** Overview
 
+   - New relative timer to support timed notes 
+   - Special faces can be set for individual tags 
+   - The agenda shows now all tags, including inherited ones. 
+   - Exclude some tags from inheritance. 
+   - More special values for time comparisons in property searches 
+   - Control for exporting meta data 
+   - Cut and Paste with hot links from w3m to Org 
+   - LOCATION can be inherited for iCalendar export 
+   - Relative row references crossing hlines now throw an error 
+
 ** Incompatible Changes
+
 *** Relative row references crossing hlines now throw an error
     
     Relative row references in tables look like this: "@-4" which
@@ -36,6 +47,7 @@
     `org-table-error-on-row-ref-crossing-hline'.
 
 ** Details
+
 *** New relative timer to support timed notes
 
     Org now supports taking timed notes, useful for example while
@@ -70,20 +82,13 @@
     Thanks to Alan Dove, Adam Spiers, and Alan Davis for
     contributions to this idea.
 
-*** Cut and Paste with hot links from w3m to Org
+*** Special faces can be set for individual tags
 
-    You can now use the key =C-c C-x M-w= in a w3m buffer with
-    HTML content to copy either the region or the entire file in
-    a special way.  When you yank this text back into an Org-mode
-    buffer, all links from the w3m buffer will continue to work
-    under Org-mode.
+    You may now use the variable =org-tag-faces= to define the
+    face used for specific tags, much in the same way as you can
+    do for TODO keywords.
 
-    For this to work you need to load the new file /org-w3m.el./
-    Please check your org-modules variable to make sure that this
-    is turned on.
-
-    Thanks for Richard Riley for the idea and to Andy Stewart for
-    the implementation.
+    Thanks to Samuel Wales for this proposal.
 
 *** The agenda shows now all tags, including inherited ones.
 
@@ -127,6 +132,21 @@
     | org-export-with-tags          | :tags               | tags:          |
     | org-export-with-priority      | :priority           | pri:           |
 
+*** Cut and Paste with hot links from w3m to Org
+
+    You can now use the key =C-c C-x M-w= in a w3m buffer with
+    HTML content to copy either the region or the entire file in
+    a special way.  When you yank this text back into an Org-mode
+    buffer, all links from the w3m buffer will continue to work
+    under Org-mode.
+
+    For this to work you need to load the new file /org-w3m.el./
+    Please check your org-modules variable to make sure that this
+    is turned on.
+
+    Thanks for Richard Riley for the idea and to Andy Stewart for
+    the implementation.
+
 *** LOCATION can be inherited for iCalendar export
 
     The LOCATION property can now be inherited during iCalendar
@@ -136,14 +156,6 @@
 #+begin_src emacs-lisp
 (setq org-use-property-inheritance '("LOCATION"))
 #+end_src
-
-*** Special faces can be set for individual tags
-
-    You may now use the variable =org-tag-faces= to define the
-    face used for specific tags, much in the same way as you can
-    do for TODO keywords.
-
-    Thanks to Samuel Wales for this proposal.
 
 * Version 6.13
 
