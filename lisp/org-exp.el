@@ -3206,12 +3206,14 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Blockquotes and verse
 	  (when (equal "ORG-BLOCKQUOTE-START" line)
+	    (org-close-par-maybe)
 	    (insert "<blockquote>\n<p>\n")
 	    (throw 'nextline nil))
 	  (when (equal "ORG-BLOCKQUOTE-END" line)
 	    (insert "</p>\n</blockquote>\n")
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-START" line)
+	    (org-close-par-maybe)
 	    (insert "\n<p class=\"verse\">\n")
 	    (setq inverse t)
 	    (throw 'nextline nil))
@@ -3225,7 +3227,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq line (concat (mapconcat 'identity
 						(make-list (* 2 i) "\\nbsp") "")
 				     " " (org-trim line))))
-	      (setq line (concat line " \\\\"))))
+	      (setq line (concat line "\\\\"))))
 
 	  ;; make targets to anchors
 	  (while (string-match "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)

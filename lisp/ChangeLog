@@ -1,3 +1,10 @@
+2008-12-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-html): Do not add a space before
+	enforces line breaks.
+	(org-export-as-html): Close paragraph before blockquote and verse
+	tags.
+
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-goto-calendar): Remove duplicate let
