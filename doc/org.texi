@@ -7710,15 +7710,14 @@ All lines between these markers are exported literally
 @cindex links, in HTML export
 @cindex internal links, in HTML export
 @cindex external links, in HTML export
-Internal links (@pxref{Internal links}) will continue to work in HTML
-files only if they match a dedicated @samp{<<target>>}.  Automatic links
-created by radio targets (@pxref{Radio targets}) will also work in the
-HTML file.  Links to external files will still work if the HTML file is
-in the same directory as the Org file.  Links to other @file{.org}
-files will be translated into HTML links under the assumption that an
-HTML version also exists of the linked file.  For information related to
-linking files while publishing them to a publishing directory see
-@ref{Publishing links}.
+Internal links (@pxref{Internal links}) will continue to work in HTML.
+Automatic links created by radio targets (@pxref{Radio targets}) will also
+work in the HTML file.  Links to external files will still work if the HTML
+file is in the same directory as the Org file.  Links to other @file{.org}
+files will be translated into HTML links under the assumption that an HTML
+version also exists of the linked file.  For information related to linking
+files while publishing them to a publishing directory see @ref{Publishing
+links}.
 
 If you want to specify attributes for links, you can do so using a special
 syntax.  Here is an example that sets @code{alt} and @code{title} attributes
