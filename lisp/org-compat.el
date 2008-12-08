@@ -284,7 +284,7 @@ that can be added."
 
 (defun org-substring-no-properties (string &optional from to)
   (if (featurep 'xemacs)
-      (org-no-properties (substring string from to))
+      (org-no-properties (substring string (or from 0) to))
     (substring-no-properties string from to)))
 
 (provide 'org-compat)
