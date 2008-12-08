@@ -1,3 +1,11 @@
+2008-12-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-browser-url.el: New file.
+
+	* lisp/org-registry.el (org-registry-before-first-heading-p):
+	Function renamed to `org-before-first-heading-p', and moved to
+	org.el.
+
 2008-09-20  James TD Smith  <ahktenzero@mohorovi.cc>
 
 	* lisp/org-checklist.el: New file.
