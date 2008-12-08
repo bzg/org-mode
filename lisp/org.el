@@ -178,13 +178,13 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  annotation-helper: Call Remeber directly from Browser" org-annotation-helper)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
+	(const :tag "C  browser-url:       Store link, directly from Browser" org-browser-url)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  eval:              Include command output as text" org-eval)
 	(const :tag "C  eval-light:        Evaluate inbuffer-code on demand" org-eval-light)
 	(const :tag "C  expiry:            Expiry mechanism for Org entries" org-expiry)
 	(const :tag "C  exp-blocks:        Pre-process blocks for export" org-exp-blocks)
-	(const :tag "C  id:                Global id's for identifying entries" org-id)
 	(const :tag "C  interactive-query: Interactive modification of tags query" org-interactive-query)
 	(const :tag "C  mairix:            Hook mairix search into Org for different MUAs" org-mairix)
 	(const :tag "C  man:               Support for links to manpages in Org-mode" org-man)
@@ -14307,6 +14307,11 @@ plainly yank the text as it is.
       (outline-back-to-heading invisible-ok)
     (error (error "Before first headline at position %d in buffer %s"
 		  (point) (current-buffer)))))
+
+(defun org-before-first-heading-p ()
+  "Before first heading?"
+  (save-excursion
+    (null (re-search-backward "^\\*+ " nil t))))
 
 (defalias 'org-on-heading-p 'outline-on-heading-p)
 (defalias 'org-at-heading-p 'outline-on-heading-p)

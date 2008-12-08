@@ -1,6 +1,6 @@
 ;;; org-registry.el --- a registry for Org links
 ;;
-;; Copyright 2007 2008 Bastien Guerry
+;; Copyright 2007, 2008 Bastien Guerry
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-registry.el
@@ -83,12 +83,6 @@
 (defvar org-registry-alist nil
   "An alist containing the Org registry.")
 
-;; FIXME name this org-before-first-heading-p?
-(defun org-registry-before-first-heading-p ()
-  "Before first heading?"
-  (save-excursion
-    (null (re-search-backward "^\\*+ " nil t))))
-
 ;;;###autoload
 (defun org-registry-show (&optional visit)
   "Show Org files where there are links pointing to the current
@@ -123,7 +117,7 @@ buffer."
 	   ;; visit the (selected) file
 	   (funcall org-registry-find-file file)
 	   (goto-char point)
-	   (unless (org-registry-before-first-heading-p)
+	   (unless (org-before-first-heading-p)
 	     (org-show-context)))
 	  ((and files (not visit))
 	   ;; result(s) to display
