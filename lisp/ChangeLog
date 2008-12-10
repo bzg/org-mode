@@ -1,5 +1,7 @@
 2008-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-html-format-image): Fix bugs.
+
 	* org-export-latex.el (org-export-latex-tables)
 	(org-export-latex-links): Implement attribute, label, and caption
 	handling.
