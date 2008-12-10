@@ -1,3 +1,23 @@
+2008-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-tables)
+	(org-export-latex-links): Implement attribute, label, and caption
+	handling.
+
+	* org-exp.el (org-export-html-style-default): Add style
+	definitions for the figure div.
+	(org-export-preprocess-string, org-export-as-html): Implement
+	attribute, label, and caption handling.
+	(org-export-attach-captions-and-attributes): New function.
+	(org-export-html-format-image): New function.
+	(org-format-org-table-html): Implement attribute, label, and
+	caption handling.
+
+	* org.el (org-find-text-property-in-string): New function.
+	(org-extract-attributes): Use the property org-attr instead of
+	org-attrobutes, because this property is now set with the #+ATTR
+	lines.
+
 2008-12-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-substring-no-properties): Fix for XEmacs, for

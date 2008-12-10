@@ -855,8 +855,8 @@ links, keywords, lists, tables, fixed-width"
   "Export quotation marks depending on language conventions."
   (let* ((lang (plist-get org-export-latex-options-plist :language))
 	 (quote-rpl (if (equal lang "fr")
-			'(("\\(\\s-\\)\"" "«~")
-			  ("\\(\\S-\\)\"" "~»")
+			'(("\\(\\s-\\)\"" "Â«~")
+			  ("\\(\\S-\\)\"" "~Â»")
 			  ("\\(\\s-\\)'" "`"))
 		      '(("\\(\\s-\\)\"" "``")
 			("\\(\\S-\\)\"" "''")
@@ -1035,14 +1035,22 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
     (save-excursion (org-table-align))
     (let* ((beg (org-table-begin))
 	   (end (org-table-end))
-	   (raw-table (buffer-substring-no-properties beg end))
-	   fnum fields line lines olines gr colgropen line-fmt align)
+	   (raw-table (buffer-substring beg end))
+	   fnum fields line lines olines gr colgropen line-fmt align
+	   caption label attr floatp)
       (if org-export-latex-tables-verbatim
 	  (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
 			      "\\end{verbatim}\n")))
 	    (apply 'delete-region (list beg end))
 	    (insert (org-export-latex-protect-string tbl)))
 	(progn
+	  (setq caption (org-find-text-property-in-string
+			 'org-caption raw-table)
+		attr (org-find-text-property-in-string
+		      'org-attributes raw-table)
+		label (org-find-text-property-in-string
+		       'org-attributes raw-table)
+		floatp (or caption label))
 	  (setq lines (split-string raw-table "\n" t))
 	  (apply 'delete-region (list beg end))
  	  (when org-export-table-remove-special-lines
@@ -1089,8 +1097,17 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		 lines))
     	  (when insert
 	    (insert (org-export-latex-protect-string
-                     (orgtbl-to-latex
-                      lines `(:tstart ,(concat "\\begin{tabular}{" align "}"))))
+		     (concat
+		      (if floatp "\\begin{table}[htb]\n")
+		      (if floatp (format
+				  "\\caption{%s%s}\n"
+				  (if label (concat "\\\label{" label "}"))
+				  (or caption "")))
+		      "\\begin{center}\n"
+		      (orgtbl-to-latex
+		       lines `(:tstart ,(concat "\\begin{tabular}{" align "}")))
+		      "\n\\end{center}\n"
+		      (if floatp "\\end{table}")))
 		    "\n\n")))))))
 
 (defun org-export-latex-fontify ()
@@ -1122,10 +1139,17 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
      (goto-char (match-beginning 0))
      (let* ((re-radio org-export-latex-all-targets-re)
 	    (remove (list (match-beginning 0) (match-end 0)))
-	    (type (match-string 2))
 	    (raw-path (org-extract-attributes (match-string 3)))
 	    (full-raw-path (concat (match-string 1) raw-path))
 	    (desc (match-string 5))
+	    (type (or (match-string 2)
+		      (if (or (file-name-absolute-p raw-path)
+			      (string-match "^\\.\\.?/" raw-path))
+			  "file")))
+	    (caption (org-find-text-property-in-string 'org-caption raw-path))
+	    (attr (org-find-text-property-in-string 'org-attributes raw-path))
+	    (label (org-find-text-property-in-string 'org-label raw-path))
+	    (floatp (or label caption))
 	    imgp radiop
 	    ;; define the path of the link
 	    (path (cond
@@ -1137,7 +1161,8 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		    (concat type ":" raw-path))
 		   ((equal type "file")
 		    (if (and (or (org-file-image-p (expand-file-name raw-path))
-				 (string-match "\\.eps$" raw-path))
+				 (string-match "\\.\\(pdf\\|jpg\\|ps\\|eps\\)$"
+					       raw-path))
 			     (equal desc full-raw-path))
 			(setq imgp t)
 		      (progn (when (string-match "\\(.+\\)::.+" raw-path)
@@ -1150,10 +1175,17 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
        ;; process with link inserting
        (apply 'delete-region remove)
        (cond ((and imgp (plist-get org-export-latex-options-plist :inline-images))
-	      (insert (format "\\includegraphics[%s]{%s}"
-			      ;; image option should be set be a comment line
-			      org-export-latex-image-default-option
-			      (expand-file-name raw-path))))
+	      (insert
+	       (concat
+		(if floatp "\\begin{figure}[htb]\n")
+		(format "\\centerline{\\includegraphics[%s]{%s}}\n"
+			(or attr org-export-latex-image-default-option)
+			(expand-file-name raw-path))
+		(if floatp
+		    (format "\\caption{%s%s}\n"
+			    (if label (concat "\\label{" label "}"))
+			    (or caption "")))
+		(if floatp "\\end{figure}\n"))))
 	     (radiop (insert (format "\\hyperref[%s]{%s}"
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)

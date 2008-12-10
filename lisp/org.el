@@ -6655,7 +6655,7 @@ used as the link location instead of reading one interactively."
 	  (setq key (match-string 1 a) value (match-string 2 a)
 		start (match-end 0)
 		attr (plist-put attr (intern key) value))))
-      (org-add-props s nil 'org-attributes attr))
+      (org-add-props s nil 'org-attr attr))
     s))
 
 (defun org-attributes-to-string (plist)
@@ -6663,7 +6663,8 @@ used as the link location instead of reading one interactively."
   (let ((s "") key value)
     (while plist
       (setq key (pop plist) value (pop plist))
-      (setq s (concat s " "(symbol-name key) "=\"" value "\"")))
+      (and value
+	   (setq s (concat s " " (symbol-name key) "=\"" value "\""))))
     s))
 
 ;;; Opening/following a link
@@ -7740,7 +7741,8 @@ This function can be used in a hook."
     "BEGIN_EXAMPLE" "END_EXAMPLE"
     "BEGIN_QUOTE" "END_QUOTE"
     "BEGIN_VERSE" "END_VERSE"
-    "BEGIN_SRC" "END_SRC"))
+    "BEGIN_SRC" "END_SRC"
+    "CAPTION" "LABEL" "ATTR_HTML" "ATTR_LaTeX"))
 
 (defcustom org-structure-template-alist
   '(
@@ -13411,6 +13413,12 @@ With optional NODE, go directly to that node."
 ;;;; Miscellaneous stuff
 
 ;;; Generally useful functions
+
+(defun org-find-text-property-in-string (prop s)
+  "Return the first non-nil value of property PROP in string S."
+  (or (get-text-property 0 prop s)
+      (get-text-property (or (next-single-property-change 0 prop s) 0)
+			 prop s)))
 
 (defun org-display-warning (message) ;; Copied from Emacs-Muse
   "Display the given MESSAGE as a warning."

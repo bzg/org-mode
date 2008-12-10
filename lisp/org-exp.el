@@ -545,7 +545,8 @@ Org-mode file."
   table { border-collapse: collapse; }
   td, th { vertical-align: top; }
   dt { font-weight: bold; }
-
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
   .org-info-js_info-navigation { border-style:none; }
   #org-info-js_console-label { font-size:10px; font-weight:bold;
                                white-space:nowrap; }
@@ -1432,6 +1433,8 @@ on this string to produce the exported version."
   (let* ((htmlp (plist-get parameters :for-html))
 	 (asciip (plist-get parameters :for-ascii))
 	 (latexp (plist-get parameters :for-LaTeX))
+	 (backend (cond (htmlp 'html) (latexp 'latex) (asciip 'ascii)))
+
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1498,8 +1501,7 @@ on this string to produce the exported version."
       (org-export-protect-examples (if asciip 'indent nil))
 
       ;; Protect backend specific stuff, throw away the others.
-      (org-export-select-backend-specific-text
-       (cond (htmlp 'html) (latexp 'latex) (asciip 'ascii)))
+      (org-export-select-backend-specific-text backend)
 
       ;; Protect quoted subtrees
       (org-export-protect-quoted-subtrees)
@@ -1509,6 +1511,10 @@ on this string to produce the exported version."
 
       ;; Blockquotes and verse
       (org-export-mark-blockquote-and-verse)
+
+      ;; Attach captions to the correct opject
+      (setq target-alist (org-export-attach-captions-and-attributes
+			  backend target-alist))
 
       ;; Remove comment environment and comment subtrees
       (org-export-remove-comment-blocks-and-subtrees)
@@ -1837,6 +1843,41 @@ These special cookies will later be interpreted by the backend."
     (replace-match (if (equal (downcase (match-string 1)) "end")
 		       "ORG-VERSE-END" "ORG-VERSE-START")
 		   t t)))
+
+(defun org-export-attach-captions-and-attributes (backend target-alist)
+  "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.
+If the next thing following is a table, add the text properties to the first
+table line.  If it is a link, add it to the line containing the link."
+  (goto-char (point-min))
+  (remove-text-properties (point-min) (point-max)
+			  '(org-caption nil org-attributes nil))
+  (let ((case-fold-search t)
+	(re (concat "^#\\+caption:[ \t]+\\(.*\\)"
+		    "\\|"
+		    "^#\\+attr_" (symbol-name backend) ":[ \t]+\\(.*\\)"
+		    "\\|"
+		    "^#\\+label:[ \t]+\\(.*\\)"
+		    "\\|"
+		    "^[ \t]*|[^-]"
+		    "\\|"
+		    "^[ \t]*\\[\\[.*\\]\\][ \t]*$"))
+	cap attr label)
+    (while (re-search-forward re nil t)
+      (cond
+       ((match-end 1)
+	(setq cap (concat cap (if cap " " "") (org-trim (match-string 1)))))
+       ((match-end 2)
+	(setq attr (concat attr (if attr " " "") (org-trim (match-string 2)))))
+       ((match-end 3)
+	(setq label (org-trim (match-string 3))))
+       (t
+	(add-text-properties (point-at-bol) (point-at-eol)
+			     (list 'org-caption cap
+				   'org-attributes attr
+				   'org-label label))
+	(if label (push (cons label label) target-alist))
+	(setq cap nil attr nil label nil)))))
+  target-alist)
 
 (defun org-export-remove-comment-blocks-and-subtrees ()
   "Remove the comment environment, and also commented subtrees."
@@ -3273,9 +3314,8 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (string-match "^\\.\\.?/" path)))
 			 "file")
 			(t "internal")))
-	    (setq path (org-extract-attributes path))
-	    (setq attr (org-attributes-to-string
-			(get-text-property 0 'org-attributes path)))
+	    (setq path (org-extract-attributes (org-link-unescape path)))
+	    (setq attr (get-text-property 0 'org-attributes path))
 	    (setq desc1 (if (match-end 5) (match-string 5 line))
 		  desc2 (if (match-end 2) (concat type ":" path) path)
 		  descp (and desc1 (not (equal desc1 desc2)))
@@ -3304,10 +3344,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (if (and (or (eq t org-export-html-inline-images)
 			   (and org-export-html-inline-images (not descp)))
 		       (org-file-image-p path))
-		  (setq rpl (concat "<img src=\"" type ":" path "\""
-				    (if (string-match "\\<alt=" attr)
-					attr (concat attr " alt=\"" path "\""))
-				    "/>"))
+		  (setq rpl (org-export-html-format-image
+			     (concat type ":" path)))
 		(setq link (concat type ":" path))
 		(setq rpl (concat "<a href=\""
 				  (org-export-html-format-href link)
@@ -3365,11 +3403,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				   (or (eq t org-export-html-inline-images)
 				       (and org-export-html-inline-images
 					    (not descp))))
-			      (concat "<img src=\"" thefile "\""
-				      (if (string-match "alt=" attr)
-					  attr
-					(concat attr " alt=\""
-						thefile "\"")) "/>")
+			      (org-export-html-format-image thefile)
 			    (concat "<a href=\"" thefile "\"" attr ">"
 				    (org-export-html-format-desc desc)
 				    "</a>")))
@@ -3670,6 +3704,23 @@ lang=\"%s\" xml:lang=\"%s\">
 	(org-html-do-expand s))
     s))
 
+(defun org-export-html-format-image (src)
+  "Create image tag with source and attributes."
+  (save-match-data
+    (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (attr (org-find-text-property-in-string 'org-attributes src))
+	   (label (org-find-text-property-in-string 'org-label src)))
+      (format "<div %sclass=\"figure\">
+<p><img src=\"%s\"%s>
+%s
+</div>"
+	      (if label (format "id=\"%s\" " label) "")
+	      src
+	      (if (string-match "\\<alt=" (or attr ""))
+		  (concat " " attr )
+		(concat " " attr " alt=\"" src "\""))
+	      (if caption (concat "<p>" caption))))))
+
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)
   "Format a table for ascii export."
@@ -3756,10 +3807,16 @@ lang=\"%s\" xml:lang=\"%s\">
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
 
-  (let ((head (and org-export-highlight-first-table-line
+  (let ((caption (or (get-text-property 0 'org-caption (car lines))
+		     (get-text-property (or (next-single-property-change
+					     0 'org-caption (car lines))
+					    0)
+					'org-caption (car lines))))
+	(head (and org-export-highlight-first-table-line
 		   (delq nil (mapcar
 			      (lambda (x) (string-match "^[ \t]*|-" x))
 			      (cdr lines)))))
+	
 	(nlines 0) fnum i
 	tbopen line fields html gr colgropen)
     (if splice (setq head nil))
@@ -3816,6 +3873,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	     fnum "")
 	    html)
       (if colgropen (setq html (cons (car html) (cons "</colgroup>" (cdr html)))))
+      (if caption (push (format "<caption>%s</caption>" caption) html))
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
 

@@ -307,6 +307,7 @@ Markup rules
 * Literal examples::            Source code and other examples
 * Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
+* Inlined images::              How to inline images during export
 * Footnotes::                   Numbers like [1]
 * Emphasis and monospace::      To bold or not to bold
 * TeX macros and LaTeX fragments::  Create special, rich export.
@@ -318,15 +319,16 @@ HTML export
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
-* Images::                      How to include images
+* Images in HTML export::       
 * CSS support::                 Changing the appearance of the output
 * Javascript support::          Info and Folding in a web browser
 
 LaTeX and PDF export
 
-* LaTeX/PDF export commands::   
+* LaTeX/PDF export commands::   Which key invode which commands
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
+* Images in LaTeX export::      How to insert figures into LaTeX output
 
 Publishing
 
@@ -7101,6 +7103,7 @@ markup rule used in an Org mode buffer.
 * Literal examples::            Source code and other examples
 * Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
+* Inlined images::              How to inline images during export
 * Footnotes::                   Numbers like [1]
 * Emphasis and monospace::      To bold or not to bold
 * TeX macros and LaTeX fragments::  Create special, rich export.
@@ -7318,16 +7321,41 @@ item, use
 Visit the include file at point.
 @end table
 
-@node Tables exported, Footnotes, Include files, Markup rules
+@node Tables exported, Inlined images, Include files, Markup rules
 @subheading Tables
 @cindex tables, markup rules
 
 Both the native Org mode tables (@pxref{Tables}) and tables formatted with
 the @file{table.el} package will be exported properly.  For Org mode tables,
 the lines before the first horizontal separator line will become table header
-lines.
+lines.  You can use the following lines somewhere before the table to asssign
+a caption and a label for cross references:
 
-@node Footnotes, Emphasis and monospace, Tables exported, Markup rules
+@example
+#+CAPTION: This is the caption for the next table (or link)
+#+LABEL:   tbl:basic-data
+@end example
+
+@node Inlined images, Footnotes, Tables exported, Markup rules
+@subheading Inlined Images
+@cindex inlined images, markup rules
+
+Some backends (HTML and LaTeX) allow to directly include images into the
+exported document.  Org does this, if a link to an image files does not have
+a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+define a caption for the image and maybe a label for internal cross
+references, you can use (before, but close to the link)
+
+@example
+#+CAPTION: This is the caption for the next figure link (or table)
+#+LABEL:   fig:SED-HR4049
+@end example
+
+You may also define additional attributes for the figure.  As this is
+backend-specific, see the sections about the individual backends for more
+information.
+
+@node Footnotes, Emphasis and monospace, Inlined images, Markup rules
 @subheading Footnotes
 @cindex footnotes, markup rules
 @cindex @file{footnote.el}
@@ -7617,7 +7645,7 @@ language, but with additional support for tables.
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
-* Images::                      How to include images
+* Images in HTML export::       
 * CSS support::                 Changing the appearance of the output
 * Javascript support::          Info and Folding in a web browser
 @end menu
@@ -7704,7 +7732,7 @@ All lines between these markers are exported literally
 @end example
 
 
-@node Links, Images, Quoting HTML tags, HTML export
+@node Links, Images in HTML export, Quoting HTML tags, HTML export
 @subsection Links
 
 @cindex links, in HTML export
@@ -7720,14 +7748,16 @@ files while publishing them to a publishing directory see @ref{Publishing
 links}.
 
 If you want to specify attributes for links, you can do so using a special
-syntax.  Here is an example that sets @code{alt} and @code{title} attributes
-for an inlined image:
+@code{#+ATTR_HTML} line to defin attributes that wil be added to the
+@code{<a>} or @code{<img>} tags.  Here is an example that sets @code{alt} and
+@code{title} attributes for an inlined image:
 
 @example
-[[./img/a.jpg@{@{alt="This is image A" title="Image with no action"@}@}]]
+#+ATTR_HTML: alt="This is image A" title="Image with no action"
+[[./img/a.jpg]]
 @end example
 
-@node Images, CSS support, Links, HTML export
+@node Images in HTML export, CSS support, Links, HTML export
 @subsection Images
 
 @cindex images, inline in HTML
@@ -7751,7 +7781,7 @@ will link to a high resolution version of the image, you could use:
 @noindent
 and you could use @code{http} addresses just as well.
 
-@node CSS support, Javascript support, Images, HTML export
+@node CSS support, Javascript support, Images in HTML export, HTML export
 @subsection CSS support
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
@@ -7864,9 +7894,10 @@ the LaTeX output uses @file{hyperref} to implement links and cross
 references, the PDF output file will be fully linked.
 
 @menu
-* LaTeX/PDF export commands::   
+* LaTeX/PDF export commands::   Which key invode which commands
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
+* Images in LaTeX export::      How to insert figures into LaTeX output
 @end menu
 
 @node LaTeX/PDF export commands, Quoting LaTeX code, LaTeX and PDF export, LaTeX and PDF export
@@ -7943,7 +7974,7 @@ All lines between these markers are exported literally
 #+END_LaTeX
 @end example
 
-@node   Sectioning structure,  , Quoting LaTeX code, LaTeX and PDF export
+@node   Sectioning structure, Images in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
 @subsection Sectioning structure
 @cindex LaTeX class
 @cindex LaTeX sectioning structure
@@ -7955,6 +7986,29 @@ You can change this globally by setting a different value for
 @code{#+LaTeX_CLASS: myclass} in your file.  The class should be listed in
 @code{org-export-latex-classes}, where you can also define the sectioning
 structure for each class, as well as defining additonal classes.
+
+
+@node Images in LaTeX export,  , Sectioning structure, LaTeX and PDF export
+@subsection Images in LaTeX export
+@cindex images, inline in LaTeX
+@cindex inlining images in LaTeX
+
+Images that are linked to without a description part in the link, like
+@samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
+output files resulting from LaTeX output.  Org will use an
+@code{\includegraphics} macro to insert the image.  If you have specified a
+caption and/or a label as described in @ref{Inlined images}, the figure will
+be wrappend into a @code{figure} environment and thus become a floating
+element.  Finally, you can use an @code{#+ATTR_LaTeX:} line to specify the
+options that can be used in the optional argument of the
+@code{\includegraphics} macro.
+
+@example
+#+CAPTION:    The black-body emission of the disk around HR 4049
+#+LABEL:      fig:SED-HR4049
+#+ATTR_LaTeX: width=5cm,angle=90
+[[./img/sed-hr4049.pdf]]
+@end example
 
 
 @node XOXO export, iCalendar export, LaTeX and PDF export, Exporting
