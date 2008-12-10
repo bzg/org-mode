@@ -17,6 +17,22 @@
   :END:
 ** Overview
 ** Incompatible changes
+*** Old syntax for link attributes disbandoned
+    There used to be a syntax for settint link attributes for
+    HTML export by enclosing the attributes into double braces
+    and adding them to the link itself, like
+#+begin_example
+[[./img/a.jpg{{alt="an image"}}] ]
+#+end_example
+
+This syntax is not longer supported, use instead
+
+#+begin_example
+#+ATTR_HTML: alt="an image"
+[[./img/a.jpg] ]
+#+end_example
+
+
 ** Details
 *** Captions and attributes for figures and tables.
 
