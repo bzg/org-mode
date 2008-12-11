@@ -56,7 +56,7 @@ This package works on Emacs 23 and 22, and (with minor restrictions)
 on Emacs 21 and XEmacs 21 (where you must also use
 /xemacs/noutline.el/ shipped with Org-mode).  The Emacs 22.2 release
 ships with Org-mode version 4.67d.  The Emacs 23 release is expected
-to ship with 6.13. The latest CVS emacs trunk usually contains a
+to ship with 6.14. The latest CVS emacs trunk usually contains a
 fairly recent version, but may lag a bit behind the website release.
 
 * Downloads
