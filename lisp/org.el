@@ -1549,14 +1549,22 @@ or `done', meaning any not-done or done state, respectively."
 		       (choice (const :tag "Add" t) (const :tag "Remove" nil)))))))
 
 (defcustom org-log-done nil
-  "Non-nil means, record a CLOSED timestamp when moving an entry to DONE.
-When equal to the list (done), also prompt for a closing note.
-This can also be configured on a per-file basis by adding one of
-the following lines anywhere in the buffer:
+  "Information to record when a task moves to the DONE state.
 
+Possible values are:
+
+nil     Don't add anything, just change the keyword
+time    Add a time stamp to the task
+note    Prompt a closing note and add it with template `org-log-note-headings'
+
+This option can also be set with on a per-file-basis with
+
+   #+STARTUP: nologdone
    #+STARTUP: logdone
    #+STARTUP: lognotedone
-   #+STARTUP: nologdone"
+
+You can have local logging settings for a subtree by setting the LOGGING
+property to one or more of these keywords."
   :group 'org-todo
   :group 'org-progress
   :type '(choice

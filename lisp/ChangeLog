@@ -1,3 +1,7 @@
+2008-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-log-done): Fix docstring.
+
 2008-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-html-format-image): Fix bugs.
