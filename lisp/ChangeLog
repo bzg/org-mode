@@ -1,3 +1,8 @@
+2008-12-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-get-specials): Make @0 reference the
+	last line in a table.
+
 2008-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-log-done): Fix docstring.
