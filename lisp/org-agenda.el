@@ -5627,6 +5627,7 @@ belonging to the \"Work\" category."
 		 (time-to-days (current-time))))
 	 (files (org-agenda-files 'unrestricted)) entries file)
     ;; Get all entries which may contain an appt
+    (org-prepare-agenda-buffers files)
     (while (setq file (pop files))
       (setq entries
 	    (append entries
