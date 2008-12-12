@@ -5470,8 +5470,8 @@ the agenda scope is set to the entire file.  This restriction remains in
 effect until removed with @kbd{C-c C-x >}, or by typing either @kbd{<}
 or @kbd{>} in the agenda dispatcher.  If there is a window displaying an
 agenda view, the new restriction takes effect immediately.
-@kindex C-c C-x <
-@item C-c C-x <
+@kindex C-c C-x >
+@item C-c C-x >
 Remove the permanent restriction created by @kbd{C-c C-x <}.
 @end table
 
@@ -5485,7 +5485,7 @@ Permanently restrict the agenda to the item at the cursor in the
 Speedbar frame, either an Org file or a subtree in such a file.
 If there is a window displaying an agenda view, the new restriction takes
 effect immediately.
-@kindex <
+@kindex >
 @item > @r{in the speedbar frame}
 Lift the restriction again.
 @end table
