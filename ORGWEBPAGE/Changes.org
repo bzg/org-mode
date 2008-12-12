@@ -126,6 +126,13 @@ but not if you happen to be in an Org-mode file while you create
 a remember note (which usually has a link to the place where you
 were when starting remember).
 
+*** Spredsheet references to the last table line.
+
+You may now use =@0= to reference the ast dataline in a table
+in a stable way.  This is useful in particular for automatically
+generated tables like the ones using /org-collector.el/ by Eric
+Schulte.
+
 * Version 6.14
 ** Overview
 
