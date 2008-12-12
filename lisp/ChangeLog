@@ -1,3 +1,11 @@
+2008-12-12  Tassilo Horn  <tassilo@member.fsf.org>
+
+	* org-gnus.el (org-gnus-article-link, org-gnus-article-link):
+	Strip angle brackets from message-ids in the former and don't do
+	it in the latter.
+	(org-gnus-follow-link): Open summary reliable, even if the last
+	messages were deleted, and handle empty groups, too.
+
 2008-12-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-emphasis-alist): Use \verb
