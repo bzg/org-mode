@@ -2,6 +2,7 @@
 
 	* org-table.el (org-table-get-specials): Make @0 reference the
 	last line in a table.
+	(org-table-recalculate): Improve docstring.
 
 2008-12-11  Carsten Dominik  <carsten.dominik@gmail.com>
 

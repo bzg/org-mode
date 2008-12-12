@@ -2361,12 +2361,17 @@ LISPP means to return something appropriate for a Lisp list."
 
 (defun org-table-recalculate (&optional all noalign)
   "Recalculate the current table line by applying all stored formulas.
-With prefix arg ALL, do this for all lines in the table."
+With prefix arg ALL, do this for all lines in the table.
+With the prefix argument ALL is `(16)' (a double `C-c C-u' prefix), or if
+it is the symbol `iterate', recompute the table until it no longer changes.
+If NOALIGN is not nil, do not re-align the table after the computations
+are done.  This is typically used internally to save time, if it is
+known that the table will be realigned a little later anyway."
   (interactive "P")
   (or (memq this-command org-recalc-commands)
       (setq org-recalc-commands (cons this-command org-recalc-commands)))
   (unless (org-at-table-p) (error "Not at a table"))
-  (if (equal all '(16))
+  (if (or (eq all 'iterate) (equal all '(16)))
       (org-table-iterate)
     (org-table-get-specials)
     (let* ((eqlist (sort (org-table-get-stored-formulas)
