@@ -7,6 +7,14 @@
 
 2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-classes): Add longable as
+	a default package to all classes.
+	(org-export-latex-tables): Handle the longtable attribute and the
+	align attribute.
+
+	* org-table.el (orgtbl-to-generic): Handle tables that start with
+	a hline.
+
 	* org-export-latex.el (org-export-latex-emphasis-alist): Switch to
 	\verb for colde-like snippets.
 	(org-export-as-latex): Fix issues with region export.

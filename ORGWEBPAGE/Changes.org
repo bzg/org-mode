@@ -44,6 +44,7 @@ link.
   - #+CAPTION: :: The caption of the image or table.  This string
        should be processed according to the export backend, but
        this is not yet done.
+
   - #+LABEL: :: A label to identify the figure/table for cross
        references.  For HTML export, this string will become the
        ID for the ~<div class="figure">~ element that encapsulates
@@ -51,16 +52,23 @@ link.
        string will be used as the argument of a ~\label{...}~
        macro.  These labels will be available for internal links
        like ~[[label][Table] ]~.
+
   - #+ATTR_HTML: :: Attributes for HTML export of image, to be
        added as attributes into the ~<img...>~ tag.  This string
        will not be processed, so it should have immediately the
        right format.
-  - #+ATTR_LaTeX: :: Attributes for LaTeX export of images, to
-       be inserted into the optional argument of the
-       ~\includegraphics[...]{file}~ command, to specify scaling,
-       clipping and other options.  This string will not be
-       processed, so it should have immediately the right
-       format, like =width=5cm,angle=90=
+
+  - #+ATTR_LaTeX: :: Attributes for LaTeX export of images and
+       tables.\\
+       For /images/, this string is directly inserted into
+       the optional argument of the ~\includegraphics[...]{file}~
+       command, to specify scaling, clipping and other options.
+       This string will not be processed, so it should have
+       immediately the right format, like =width=5cm,angle=90=.\\       
+       For /tables/, this can currently only be the keyword
+       =longtable=, to request typesetting of the table using the
+       longtable package.  This LaTeX package will automatically
+       distribute the table over several pages if needed.
 
 For LaTeX export, if either a caption or a label is given, the
 element will be exported as a float, i.e. wrapped into a figure

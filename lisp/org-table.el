@@ -3871,9 +3871,15 @@ directly by `orgtbl-send-table'.  See manual."
 
     ;; Do we have a heading section?  If so, format it and handle the
     ;; trailing hline.
-    (if (and (not splicep) (listp (car *orgtbl-table*))
-	     (memq 'hline *orgtbl-table*))
+    (if (and (not splicep)
+	     (or (consp (car *orgtbl-table*))
+		 (consp (nth 1 *orgtbl-table*)))
+	     (memq 'hline (cdr *orgtbl-table*)))
 	(progn
+	  (when (eq 'hline (car *orgtbl-table*))
+	    ;; there is a hline before the first data line
+	    (and hline (push hline *orgtbl-rtn*))
+	    (pop *orgtbl-table*))
 	  (let* ((*orgtbl-lstart* (or (plist-get params :hlstart)
 				      *orgtbl-lstart*))
 		 (*orgtbl-llstart* (or (plist-get params :hllstart)

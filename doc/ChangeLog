@@ -1,3 +1,7 @@
+2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Tables in LaTeX export): New section.
+
 2008-12-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Images in LaTeX export): New section.

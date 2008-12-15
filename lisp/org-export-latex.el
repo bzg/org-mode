@@ -91,6 +91,7 @@
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
+\\usepackage{longtable}
 \\usepackage{hyperref}"
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -102,6 +103,7 @@
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
+\\usepackage{longtable}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -113,6 +115,7 @@
 \\usepackage[utf8]{inputenc}
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
+\\usepackage{longtable}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -1034,7 +1037,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 	   (end (org-table-end))
 	   (raw-table (buffer-substring beg end))
 	   fnum fields line lines olines gr colgropen line-fmt align
-	   caption label attr floatp)
+	   caption label attr floatp longtblp)
       (if org-export-latex-tables-verbatim
 	  (let* ((tbl (concat "\\begin{verbatim}\n" raw-table
 			      "\\end{verbatim}\n")))
@@ -1046,7 +1049,12 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		attr (org-find-text-property-in-string
 		      'org-attributes raw-table)
 		label (org-find-text-property-in-string
-		       'org-attributes raw-table)
+		       'org-label raw-table)
+		longtblp (and attr (stringp attr)
+			      (string-match "\\<longtable\\>" attr))
+		align (and attr (stringp attr)
+			   (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
+			   (match-string 1 attr))
 		floatp (or caption label))
 	  (setq lines (split-string raw-table "\n" t))
 	  (apply 'delete-region (list beg end))
@@ -1081,10 +1089,11 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		     (string-match "^\\(|\\)?\\(.+\\)|$" line-fmt))
 	    (setq line-fmt (match-string 2 line-fmt)))
 	  ;; format alignment
-	  (setq align (apply 'format
-			     (cons line-fmt
-				   (mapcar (lambda (x) (if x "r" "l"))
-					   org-table-last-alignment))))
+	  (unless align
+	    (setq align (apply 'format
+			       (cons line-fmt
+				     (mapcar (lambda (x) (if x "r" "l"))
+					     org-table-last-alignment)))))
 	  ;; prepare the table to send to orgtbl-to-latex
 	  (setq lines
 		(mapcar
@@ -1095,16 +1104,33 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
     	  (when insert
 	    (insert (org-export-latex-protect-string
 		     (concat
-		      (if floatp "\\begin{table}[htb]\n")
-		      (if floatp (format
-				  "\\caption{%s%s}\n"
-				  (if label (concat "\\\label{" label "}"))
-				  (or caption "")))
-		      "\\begin{center}\n"
-		      (orgtbl-to-latex
-		       lines `(:tstart ,(concat "\\begin{tabular}{" align "}")))
-		      "\n\\end{center}\n"
-		      (if floatp "\\end{table}")))
+		      (if longtblp
+			  (concat "\\begin{longtable}{" align "}\n")
+			(if floatp "\\begin{table}[htb]\n"))
+		      (if (or floatp longtblp)
+			  (format
+			   "\\caption{%s%s}"
+			   (if label (concat "\\\label{" label "}") "")
+			   (or caption "")))
+		      (if longtblp "\\\\\n" "\n")
+		      (if (not longtblp) "\\begin{center}\n")
+		      (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
+		      (orgtbl-to-latex 
+		       lines
+		       `(:tstart nil :tend nil
+				 :hlend ,(if longtblp
+					     (format "\\\\
+\\hline
+\\endhead
+\\hline\\multicolumn{%d}{r}{Continued on next page}\\
+\\endfoot
+\\endlastfoot" (length org-table-last-alignment))
+					   nil)))
+		      (if (not longtblp) (concat "\n\\end{tabular}"))
+		      (if longtblp "\n" "\n\\end{center}\n")
+		      (if longtblp
+			  "\\end{longtable}"
+			(if floatp "\\end{table}"))))
 		    "\n\n")))))))
 
 (defun org-export-latex-fontify ()

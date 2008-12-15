@@ -328,6 +328,7 @@ LaTeX and PDF export
 * LaTeX/PDF export commands::   Which key invode which commands
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
+* Tables in LaTeX export::      Options for exporting tables to LaTeX
 * Images in LaTeX export::      How to insert figures into LaTeX output
 
 Publishing
@@ -7748,7 +7749,7 @@ files while publishing them to a publishing directory see @ref{Publishing
 links}.
 
 If you want to specify attributes for links, you can do so using a special
-@code{#+ATTR_HTML} line to defin attributes that wil be added to the
+@code{#+ATTR_HTML} line to define attributes that wil be added to the
 @code{<a>} or @code{<img>} tags.  Here is an example that sets @code{alt} and
 @code{title} attributes for an inlined image:
 
@@ -7897,6 +7898,7 @@ references, the PDF output file will be fully linked.
 * LaTeX/PDF export commands::   Which key invode which commands
 * Quoting LaTeX code::          Incorporating literal LaTeX code
 * Sectioning structure::        Changing sectioning in LaTeX output
+* Tables in LaTeX export::      Options for exporting tables to LaTeX
 * Images in LaTeX export::      How to insert figures into LaTeX output
 @end menu
 
@@ -7974,7 +7976,7 @@ All lines between these markers are exported literally
 #+END_LaTeX
 @end example
 
-@node   Sectioning structure, Images in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
+@node   Sectioning structure, Tables in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
 @subsection Sectioning structure
 @cindex LaTeX class
 @cindex LaTeX sectioning structure
@@ -7988,7 +7990,25 @@ You can change this globally by setting a different value for
 structure for each class, as well as defining additonal classes.
 
 
-@node Images in LaTeX export,  , Sectioning structure, LaTeX and PDF export
+@node Tables in LaTeX export, Images in LaTeX export, Sectioning structure, LaTeX and PDF export
+@subsection Tables in LaTeX export
+@cindex tables, in LaTeX export
+
+For LaTeX export of a table, you can specify a label and a caption
+(@pxref{Tables exported}).  You can also use the @code{ATTR_LaTeX} line to
+request a longtable environment for the table, so that it may span several
+pages:
+
+@example
+#+CAPTION: A long table
+#+LABEL: tbl:long
+#+ATTR_LaTeX: longtable
+| ..... | ..... |
+| ..... | ..... |
+@end example
+
+
+@node Images in LaTeX export,  , Tables in LaTeX export, LaTeX and PDF export
 @subsection Images in LaTeX export
 @cindex images, inline in LaTeX
 @cindex inlining images in LaTeX
@@ -7997,7 +8017,7 @@ Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
 output files resulting from LaTeX output.  Org will use an
 @code{\includegraphics} macro to insert the image.  If you have specified a
-caption and/or a label as described in @ref{Inlined images}, the figure will
+caption and/or a label as described in @ref{Markup rules}, the figure will
 be wrappend into a @code{figure} environment and thus become a floating
 element.  Finally, you can use an @code{#+ATTR_LaTeX:} line to specify the
 options that can be used in the optional argument of the
