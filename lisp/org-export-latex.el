@@ -357,6 +357,8 @@ when PUB-DIR is set, use this as the publishing directory."
       (error "Need a file name to be able to export")))
 
   (message "Exporting to LaTeX...")
+  (remove-text-properties (point-min) (point-max)
+			  '(:org-license-to-kill nil))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
   (let* ((wcf (current-window-configuration))
@@ -404,11 +406,10 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (odd org-odd-levels-only)
 	 (header (org-export-latex-make-header title opt-plist))
 	 (skip (cond (subtree-p nil)
-		     (region-p t)
-		 ;; never skip first lines when exporting a subtree
+		     (region-p nil)
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
 	 (text (plist-get opt-plist :text))
-	 (first-lines (if skip "" (org-export-latex-first-lines)))
+	 (first-lines (if skip "" (org-export-latex-first-lines rbeg)))
 	 (coding-system (and (boundp 'buffer-file-coding-system)
 			     buffer-file-coding-system))
 	 (coding-system-for-write (or org-export-latex-coding-system
@@ -420,17 +421,18 @@ when PUB-DIR is set, use this as the publishing directory."
 		  (if region-p (region-end) (point-max))))
 	 (string-for-export
 	  (org-export-preprocess-string
-	   region :emph-multiline t
-		  :for-LaTeX t
-		  :comments nil
-		  :tags (plist-get opt-plist :tags)
-		  :priority (plist-get opt-plist :priority)
-		  :todo-keywords (plist-get opt-plist :todo-keywords)
-		  :add-text (if (eq to-buffer 'string) nil text)
-		  :skip-before-1st-heading skip
-		  :select-tags (plist-get opt-plist :select-tags)
-		  :exclude-tags (plist-get opt-plist :exclude-tags)
-		  :LaTeX-fragments nil)))
+	   region
+	   :emph-multiline t
+	   :for-LaTeX t
+	   :comments nil
+	   :tags (plist-get opt-plist :tags)
+	   :priority (plist-get opt-plist :priority)
+	   :todo-keywords (plist-get opt-plist :todo-keywords)
+	   :add-text (if (eq to-buffer 'string) nil text)
+	   :skip-before-1st-heading skip
+	   :select-tags (plist-get opt-plist :select-tags)
+	   :exclude-tags (plist-get opt-plist :exclude-tags)
+	   :LaTeX-fragments nil)))
 
     (set-buffer buffer)
     (erase-buffer)
@@ -451,12 +453,6 @@ when PUB-DIR is set, use this as the publishing directory."
     ;; insert lines before the first headline
     (unless (or skip (eq to-buffer 'string))
       (insert first-lines))
-
-    ;; handle the case where the region does not begin with a section
-    (when region-p
-      (insert (with-temp-buffer
-		(insert string-for-export)
-		(org-export-latex-first-lines))))
 
     ;; export the content of headlines
     (org-export-latex-global
@@ -733,32 +729,33 @@ OPT-PLIST is the options plist for current buffer."
      (when (and org-export-with-toc
 		(plist-get opt-plist :section-numbers))
        (cond ((numberp toc)
-	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\n"
+	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
 		      (min toc (plist-get opt-plist :headline-levels))))
-	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\n"
+	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
 			  (plist-get opt-plist :headline-levels))))))))
 
-(defun org-export-latex-first-lines (&optional comments)
+(defun org-export-latex-first-lines (&optional beg)
   "Export the first lines before first headline.
-COMMENTS is either nil to replace them with the empty string or a
-formatting string like %%%%s if we want to comment them out."
+If BEG is non-nil, the is the beginning of he region."
   (save-excursion
-    (goto-char (point-min))
+    (goto-char (or beg (point-min)))
     (if (org-at-heading-p) (beginning-of-line 2))
     (let* ((pt (point))
-	   (end (if (and (re-search-forward "^\\* " nil t)
-			 (not (eq pt (match-beginning 0))))
+	   (end (if (re-search-forward "^\\*+ " nil t)
 		    (goto-char (match-beginning 0))
 		  (goto-char (point-max)))))
-      (org-export-latex-content
-       (org-export-preprocess-string
-	(buffer-substring (point-min) end)
-	:for-LaTeX t
-	:emph-multiline t
-	:add-text nil
-	:comments nil
-	:skip-before-1st-heading nil
-	:LaTeX-fragments nil)))))
+      (prog1
+	  (org-export-latex-content
+	   (org-export-preprocess-string
+	    (buffer-substring pt end)
+	    :for-LaTeX t
+	    :emph-multiline t
+	    :add-text nil
+	    :comments nil
+	    :skip-before-1st-heading nil
+	    :LaTeX-fragments nil))
+	(add-text-properties pt (max pt (1- end))
+			     '(:org-license-to-kill t))))))
 
 (defun org-export-latex-content (content &optional exclude-list)
   "Convert CONTENT string to LaTeX.
@@ -1199,7 +1196,6 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 
 (defun org-export-latex-preprocess ()
   "Clean stuff in the LaTeX export."
-
   ;; Preserve line breaks
   (goto-char (point-min))
   (while (re-search-forward "\\\\\\\\" nil t)
