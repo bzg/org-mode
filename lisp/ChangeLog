@@ -1,5 +1,8 @@
 2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-emphasis-alist): Switch to
+	\verb for colde-like snippets.
+
 	* org.el (org-up-heading-safe): Speed up function by using a
 	direct regexp search.
 	(org-olpa): New variable.
