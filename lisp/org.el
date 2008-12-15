@@ -1317,6 +1317,11 @@ outline-path-completion  Headlines in the current buffer are offered via
 	  (const :tag "Outline" outline)
 	  (const :tag "Outline-path-completion" outline-path-completion)))
 
+(defcustom org-goto-max-level 5
+  "Maximum level to be considered when running org-goto with refile interface."
+  :group 'org-refile
+  :type 'number)
+
 (defcustom org-reverse-note-order nil
   "Non-nil means, store new notes at the beginning of a file or entry.
 When nil, new notes will be filed to the end of a file or entry.
@@ -4547,7 +4552,7 @@ which the visibility is still unchanged.  After RET is will also jump to
 the location selected in the indirect buffer and expose the
 the headline hierarchy above."
   (interactive "P")
-  (let* ((org-refile-targets '((nil . (:maxlevel . 10))))
+  (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
 	 (org-refile-use-outline-path t)
 	 (interface
 	  (if (not alternative-interface)
