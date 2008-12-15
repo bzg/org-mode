@@ -163,8 +163,8 @@ to represent the section title."
     ("/" "\\emph{%s}" nil)
     ("_" "\\underline{%s}" nil)
     ("+" "\\texttt{%s}" nil)
-    ("=" "\\verb|%s|" nil)
-    ("~" "\\verb|%s|" t))
+    ("=" "\\texttt{%s}" nil)
+    ("~" "\\texttt{%s}" t))
   "Alist of LaTeX expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
@@ -357,8 +357,6 @@ when PUB-DIR is set, use this as the publishing directory."
       (error "Need a file name to be able to export")))
 
   (message "Exporting to LaTeX...")
-  (remove-text-properties (point-min) (point-max)
-			  '(:org-license-to-kill nil))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
   (let* ((wcf (current-window-configuration))
@@ -407,10 +405,10 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (header (org-export-latex-make-header title opt-plist))
 	 (skip (cond (subtree-p nil)
 		     (region-p t)
-		     ;; never skip first lines when exporting a subtree
+		 ;; never skip first lines when exporting a subtree
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
 	 (text (plist-get opt-plist :text))
-	 (first-lines (if skip "" (org-export-latex-first-lines rbeg)))
+	 (first-lines (if skip "" (org-export-latex-first-lines)))
 	 (coding-system (and (boundp 'buffer-file-coding-system)
 			     buffer-file-coding-system))
 	 (coding-system-for-write (or org-export-latex-coding-system
@@ -422,18 +420,17 @@ when PUB-DIR is set, use this as the publishing directory."
 		  (if region-p (region-end) (point-max))))
 	 (string-for-export
 	  (org-export-preprocess-string
-	   region
-	   :emph-multiline t
-	   :for-LaTeX t
-	   :comments nil
-	   :tags (plist-get opt-plist :tags)
-	   :priority (plist-get opt-plist :priority)
-	   :todo-keywords (plist-get opt-plist :todo-keywords)
-	   :add-text (if (eq to-buffer 'string) nil text)
-	   :skip-before-1st-heading skip
-	   :select-tags (plist-get opt-plist :select-tags)
-	   :exclude-tags (plist-get opt-plist :exclude-tags)
-	   :LaTeX-fragments nil)))
+	   region :emph-multiline t
+		  :for-LaTeX t
+		  :comments nil
+		  :tags (plist-get opt-plist :tags)
+		  :priority (plist-get opt-plist :priority)
+		  :todo-keywords (plist-get opt-plist :todo-keywords)
+		  :add-text (if (eq to-buffer 'string) nil text)
+		  :skip-before-1st-heading skip
+		  :select-tags (plist-get opt-plist :select-tags)
+		  :exclude-tags (plist-get opt-plist :exclude-tags)
+		  :LaTeX-fragments nil)))
 
     (set-buffer buffer)
     (erase-buffer)
@@ -736,35 +733,32 @@ OPT-PLIST is the options plist for current buffer."
      (when (and org-export-with-toc
 		(plist-get opt-plist :section-numbers))
        (cond ((numberp toc)
-	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
+	      (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\n"
 		      (min toc (plist-get opt-plist :headline-levels))))
-	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
+	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\n"
 			  (plist-get opt-plist :headline-levels))))))))
 
-(defun org-export-latex-first-lines (&optional beg)
+(defun org-export-latex-first-lines (&optional comments)
   "Export the first lines before first headline.
 COMMENTS is either nil to replace them with the empty string or a
 formatting string like %%%%s if we want to comment them out."
   (save-excursion
-    (goto-char (or beg (point-min)))
+    (goto-char (point-min))
     (if (org-at-heading-p) (beginning-of-line 2))
     (let* ((pt (point))
-	   (end (if (and (re-search-forward "^\\*+ " nil t)
+	   (end (if (and (re-search-forward "^\\* " nil t)
 			 (not (eq pt (match-beginning 0))))
 		    (goto-char (match-beginning 0))
 		  (goto-char (point-max)))))
-      (prog1
-	  (org-export-latex-content
-	   (org-export-preprocess-string
-	    (buffer-substring (point-min) end)
-	    :for-LaTeX t
-	    :emph-multiline t
-	    :add-text nil
-	    :comments nil
-	    :skip-before-1st-heading nil
-	    :LaTeX-fragments nil))
-	(add-text-properties (point-min) (max (point-min) (1- end))
-			     '(:org-license-to-kill t))))))
+      (org-export-latex-content
+       (org-export-preprocess-string
+	(buffer-substring (point-min) end)
+	:for-LaTeX t
+	:emph-multiline t
+	:add-text nil
+	:comments nil
+	:skip-before-1st-heading nil
+	:LaTeX-fragments nil)))))
 
 (defun org-export-latex-content (content &optional exclude-list)
   "Convert CONTENT string to LaTeX.
@@ -1205,6 +1199,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 
 (defun org-export-latex-preprocess ()
   "Clean stuff in the LaTeX export."
+
   ;; Preserve line breaks
   (goto-char (point-min))
   (while (re-search-forward "\\\\\\\\" nil t)
