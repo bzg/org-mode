@@ -7456,10 +7456,12 @@ on the system \"/user@host:\"."
 (defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
-	targets txt re files f desc descre)
+	targets txt re files f desc descre fast-path-p)
+    (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
       (while (setq entry (pop entries))
 	(setq files (car entry) desc (cdr entry))
+	(setq fast-path-p nil)
 	(cond
 	 ((null files) (setq files (list (current-buffer))))
 	 ((eq files 'org-agenda-files)
@@ -7483,6 +7485,7 @@ on the system \"/user@host:\"."
 					    (cdr desc)))
 			       "\\}[ \t]")))
 	 ((eq (car desc) :maxlevel)
+	  (setq fast-path-p t)
 	  (setq descre (concat "^\\*\\{1," (number-to-string
 					    (if org-odd-levels-only
 						(1- (* 2 (cdr desc)))
@@ -7500,7 +7503,8 @@ on the system \"/user@host:\"."
 		(while (re-search-forward descre nil t)
 		  (goto-char (point-at-bol))
 		  (when (looking-at org-complex-heading-regexp)
-		    (setq txt (org-link-display-format (match-string 4))
+		    (setq level (org-reduced-level (- (match-end 1) (match-beginning 1)))
+			  txt (org-link-display-format (match-string 4))
 			  re (concat "^" (regexp-quote
 					  (buffer-substring (match-beginning 1)
 							    (match-end 4)))))
@@ -7516,26 +7520,37 @@ on the system \"/user@host:\"."
 						       (buffer-file-name (buffer-base-buffer))))
 					      (if (eq org-refile-use-outline-path 'full-file-path)
 						  (list (buffer-file-name (buffer-base-buffer)))))
-					    (org-get-outline-path)
+					    (org-get-outline-path fast-path-p level txt)
 					    (list txt))
 					   "/")))
 		    (push (list txt f re (point)) targets))
 		  (goto-char (point-at-eol))))))))
-      (nreverse targets))))
+    (message "Getting targets...done")
+    (nreverse targets))))
 
 (defun org-protect-slash (s)
   (while (string-match "/" s)
     (setq s (replace-match "\\" t t s)))
   s)
 
-(defun org-get-outline-path ()
+(defvar org-olpa (make-vector 20 nil))
+
+(defun org-get-outline-path (&optional fastp level heading)
   "Return the outline path to the current entry, as a list."
-  (let (rtn)
-    (save-excursion
-      (while (org-up-heading-safe)
-	(when (looking-at org-complex-heading-regexp)
-	  (push (org-match-string-no-properties 4) rtn)))
-      rtn)))
+  (if (> level 19) (error "Outline path failure, more than 19 levels."))
+  (if fastp
+      (progn
+	(loop for i from level upto 19 do
+	      (aset org-olpa i nil))
+	(prog1
+	    (delq nil (append org-olpa nil))
+	  (aset org-olpa level heading)))
+    (let (rtn)
+      (save-excursion
+	(while (org-up-heading-safe)
+	  (when (looking-at org-complex-heading-regexp)
+	    (push (org-match-string-no-properties 4) rtn)))
+	rtn))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
@@ -7635,10 +7650,9 @@ operation has put the subtree."
 		  'org-ido-completing-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
-	 (fname (and filename (file-truename filename)))
 	 (tbl (mapcar
 	       (lambda (x)
-		 (if (not (equal fname (file-truename (nth 1 x))))
+		 (if (not (equal filename (nth 1 x)))
 		     (cons (concat (car x) extra " ("
 				   (file-name-nondirectory (nth 1 x)) ")")
 			   (cdr x))
@@ -9502,10 +9516,9 @@ ignore inherited ones."
 (defun org-toggle-tag (tag &optional onoff)
   "Toggle the tag TAG for the current line.
 If ONOFF is `on' or `off', don't toggle but set to this state."
-  (unless (org-on-heading-p t) (error "Not on headling"))
   (let (res current)
     (save-excursion
-      (beginning-of-line)
+      (org-back-to-heading t)
       (if (re-search-forward (org-re "[ \t]:\\([[:alnum:]_@:]+\\):[ \t]*$")
 			     (point-at-eol) t)
 	  (progn
@@ -14406,16 +14419,14 @@ With argument, move up ARG levels."
   "Move to the heading line of which the present line is a subheading.
 This version will not throw an error.  It will return the level of the
 headline found, or nil if no higher level is found."
-  (let ((pos (point)) start-level level
-	(re (concat "^" outline-regexp)))
-    (catch 'exit
-      (org-back-to-heading t)
-      (setq start-level (funcall outline-level))
-      (if (equal start-level 1) (throw 'exit nil))
-      (while (re-search-backward re nil t)
-	(setq level (funcall outline-level))
-	(if (< level start-level) (throw 'exit level)))
-      nil)))
+  (let (start-level re)
+    (org-back-to-heading t)
+    (setq start-level (funcall outline-level))
+    (if (equal start-level 1)
+	nil
+      (setq re (concat "^\\*\\{1," (number-to-string (1- start-level)) "\\} "))
+      (if (re-search-backward re nil t)
+	  (funcall outline-level)))))
 
 (defun org-first-sibling-p ()
   "Is this heading the first child of its parents?"

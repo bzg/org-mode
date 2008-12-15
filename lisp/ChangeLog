@@ -1,3 +1,13 @@
+2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-up-heading-safe): Speed up function by using a
+	direct regexp search.
+	(org-olpa): New variable.
+	(org-get-outline-path): Speed-up path constructions in cases where
+	this is possible because the entire hierarchy is scanned anyway.
+	(org-refile-get-location): Don't compare the truenames of files,
+	this is too slow.
+
 2008-12-12  Tassilo Horn  <tassilo@member.fsf.org>
 
 	* org-gnus.el (org-gnus-article-link, org-gnus-article-link):
