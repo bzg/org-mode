@@ -1,6 +1,6 @@
 #   -*- mode: org; fill-column: 65 -*-
 
-#+STARTUP: hidestars
+#+STARTUP: showstars
 
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
@@ -10,29 +10,46 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.15 (in preparation)
+* Version 6.15
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 ** Overview
+
+- All known LaTeX export issues fixed 
+- Captions and attributes for figures and tables. 
+- Better implementation for entry IDs 
+- Spreadsheet references to the last table line. 
+- Old syntax for link attributes abandoned 
+
 ** Incompatible changes
 *** Old syntax for link attributes abandoned
-    There used to be a syntax for settint link attributes for
-    HTML export by enclosing the attributes into double braces
-    and adding them to the link itself, like
+
+There used to be a syntax for setting link attributes for
+HTML export by enclosing the attributes into double braces
+and adding them to the link itself, like
+
 #+begin_example
 [[./img/a.jpg{{alt="an image"}}] ]
 #+end_example
 
 This syntax is not longer supported, use instead
 
-#+begin_example
-#+ATTR_HTML: alt="an image"
+#+begin_src org
+,#+ATTR_HTML: alt="an image"
 [[./img/a.jpg] ]
-#+end_example
-
+#+end_src
 
 ** Details
+
+*** All known LaTeX export issues fixed
+
+All the remaining issues with the LaTeX exporter have hopefully
+been addressed in this release.  In particular, this covers
+quoting of special characters in tables and problems with
+exporting files where the headline is in the first line, or with
+an active region.
+
 *** Captions and attributes for figures and tables.
 
 Tables, and Hyperlinks that represent inlined images, can now be
@@ -41,38 +58,40 @@ export.  The information will be taken from the following special
 lines in the buffer and apply to the first following table or
 link.
 
-  - #+CAPTION: :: The caption of the image or table.  This string
-       should be processed according to the export backend, but
-       this is not yet done.
+- #+CAPTION: :: The caption of the image or table.  This string
+     should be processed according to the export backend, but
+     this is not yet done.
 
-  - #+LABEL: :: A label to identify the figure/table for cross
-       references.  For HTML export, this string will become the
-       ID for the ~<div class="figure">~ element that encapsulates
-       the image tag and the caption.  For LaTeX export, this
-       string will be used as the argument of a ~\label{...}~
-       macro.  These labels will be available for internal links
-       like ~[[label][Table] ]~.
+- #+LABEL: :: A label to identify the figure/table for cross
+     references.  For HTML export, this string will become the
+     ID for the ~<div class="figure">~ element that encapsulates
+     the image tag and the caption.  For LaTeX export, this
+     string will be used as the argument of a ~\label{...}~
+     macro.  These labels will be available for internal links
+     like ~[[label][Table] ]~.
 
-  - #+ATTR_HTML: :: Attributes for HTML export of image, to be
-       added as attributes into the ~<img...>~ tag.  This string
-       will not be processed, so it should have immediately the
-       right format.
+- #+ATTR_HTML: :: Attributes for HTML export of image, to be
+     added as attributes into the ~<img...>~ tag.  This string
+     will not be processed, so it should have immediately the
+     right format.
 
-  - #+ATTR_LaTeX: :: Attributes for LaTeX export of images and
-       tables.\\
-       For /images/, this string is directly inserted into
-       the optional argument of the ~\includegraphics[...]{file}~
-       command, to specify scaling, clipping and other options.
-       This string will not be processed, so it should have
-       immediately the right format, like =width=5cm,angle=90=.\\       
-       For /tables/, this can currently only be the keyword
-       =longtable=, to request typesetting of the table using the
-       longtable package.  This LaTeX package will automatically
-       distribute the table over several pages if needed.
+- #+ATTR_LaTeX: :: Attributes for LaTeX export of images and
+     tables.\\
+     For /images/, this string is directly inserted into
+     the optional argument of the ~\includegraphics[...]{file}~
+     command, to specify scaling, clipping and other options.
+     This string will not be processed, so it should have
+     immediately the right format, like =width=5cm,angle=90=.\\       
+     For /tables/, this can currently contain the keyword
+     =longtable=, to request typesetting of the table using the
+     longtable package, which automatically distributes the table
+     over several pages if needed.  Also, the attributes line may
+     contain an alignment string for the tabular environment, like
+     =longtable,align=l|lrl=
 
-For LaTeX export, if either a caption or a label is given, the
-element will be exported as a float, i.e. wrapped into a figure
-or table environment.
+For LaTeX export, if either a caption or a label is given, the element
+will be exported as a float, i.e. wrapped into a figure or table
+environment.
 
 *** Better implementation for entry IDs
     
@@ -81,7 +100,7 @@ Internally, a hash array has replaced the alist used so far to
 keep track of the files in which an ID is defined.  This makes it
 quite fast to find an entry by ID.
 
-There is now a new link type which looks like this:
+There is a new link type which looks like this:
 
 #+begin_example
 id:GLOBALLY-UNIQUE-IDENTIFIER
@@ -89,28 +108,30 @@ id:GLOBALLY-UNIQUE-IDENTIFIER
 
 This link points to a specific entry.  When you move the entry to
 a different file, for example if you move it to an archive
-file, this link will continue to work.
+file, the link will continue to work.
 
 The file /org-id.el/ contains an API that can be used to write
 code using these identifiers, including creating IDs and finding
 them wherever they are.
 
-Org has its own method to create unique identifiers, but if the
-system has /uuidgen/ command installed (Mac's and Linux systems
-generally do), it will be used by default.  You an also select
-the method by hand, using the variable =org-id-method=.
+Org has its own method to create unique identifiers, but if the system
+has /uuidgen/ command installed (Mac's and Linux systems generally
+do), it will be used by default (a change compared to the earlier
+implmentation, where you explicitdly had to opt for uuidgen).  You can
+also select the method by hand, using the variable =org-id-method=.
 
-If the ID system ever gets confused about where a certain ID is,
-it initiates a global scan of all agenda files with associated
-archives, all files previously known containing any IDs, and all
-currently visited Org-mode files to rebuild the hash.  You can
-also initiate this by hand: =M-x org-id-update-id-locations=.
-Running this command will also dump into the =*Messages*= buffer
-information about any duplicate IDs.  These should not exist, but
-if you /copy/ an entry with its properties, duplicate IDs will
-inevitably be produced.  This is unavoidable in a plain text
-system that allows you to edit the text in arbitrary ways, and a
-portion of care on your side is needed to keep this system clean.
+If the ID system ever gets confused about where a certain ID is, it
+initiates a global scan of all agenda files with associated archives,
+all files previously known containing any IDs, and all currently
+visited Org-mode files to rebuild the hash.  You can also initiate
+this by hand: =M-x org-id-update-id-locations=.  Running this command
+will also dump into the =*Messages*= buffer information about any
+duplicate IDs.  These should not exist, and Org will never /make/ the
+same ID twice, but if you /copy/ an entry with its properties,
+duplicate IDs will inevitably be produced.  Unfortunately, this is
+unavoidable in a plain text system that allows you to edit the text in
+arbitrary ways, and a portion of care on your side is needed to keep
+this system clean.
 
 The hash is stored in the file =~/.emacs.d/.org-id-locations=.
 This is also a change from previous versions where the file was
@@ -134,9 +155,9 @@ but not if you happen to be in an Org-mode file while you create
 a remember note (which usually has a link to the place where you
 were when starting remember).
 
-*** Spredsheet references to the last table line.
+*** Spreadsheet references to the last table line.
 
-You may now use =@0= to reference the ast dataline in a table
+You may now use =@0= to reference the last dataline in a table
 in a stable way.  This is useful in particular for automatically
 generated tables like the ones using /org-collector.el/ by Eric
 Schulte.
