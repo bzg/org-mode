@@ -485,7 +485,7 @@ When CHECK is given, prepare detailed iinformation about duplicate IDs."
     (maphash
      (lambda (k v)
        (if (setq x (member v res))
-	   (push k (cdr x))
+	   (setcdr x (cons k (cdr x)))
 	 (push (list v k) res)))
      hash)
     res))
