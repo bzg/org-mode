@@ -429,7 +429,7 @@ If RECURSE is non-nil, check BASE-DIR recursively.  If MATCH is
 non-nil, restrict this list to the files matching the regexp
 MATCH.  If SKIP-FILE is non-nil, skip file matching the regexp
 SKIP-FILE.  If SKIP-DIR is non-nil, don't check directories
-matching the regexp SKIP-DIR when recursiing through BASE-DIR."
+matching the regexp SKIP-DIR when recursing through BASE-DIR."
   (mapc (lambda (f)
 	  (let ((fd-p (file-directory-p f))
 		(fnd (file-name-nondirectory f)))
