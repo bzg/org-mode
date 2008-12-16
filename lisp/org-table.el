@@ -1676,14 +1676,14 @@ If NLAST is a number, only the NLAST fields will actually be summed."
     (cond
      ((and (string-match "0" s)
 	   (string-match "\\`[-+ \t0.edED]+\\'" s)) 0)
-     ((string-match "\\`[ \t]+\\'" s)         nil)
+     ((string-match "\\`[ \t]+\\'" s) nil)
      ((string-match "\\`\\([0-9]+\\):\\([0-9]+\\)\\(:\\([0-9]+\\)\\)?\\'" s)
       (let ((h (string-to-number (or (match-string 1 s) "0")))
 	    (m (string-to-number (or (match-string 2 s) "0")))
 	    (s (string-to-number (or (match-string 4 s) "0"))))
 	(if (boundp 'org-timecnt) (setq org-timecnt (1+ org-timecnt)))
 	(* 1.0 (+ h (/ m 60.0) (/ s 3600.0)))))
-     ((equal n 0)                             nil)
+     ((equal n 0) nil)
      (t n))))
 
 (defun org-table-current-field-formula (&optional key noerror)
@@ -1807,12 +1807,12 @@ When NAMED is non-nil, look for a named equation."
 		  eq (match-string 3 string)
 		  eq-alist (cons (cons scol eq) eq-alist))
 	    (if (member scol seen)
-                (if noerror
-                    (progn
-                      (message "Double definition `$%s=' in TBLFM line, please fix by hand" scol)
-                      (ding)
-                      (sit-for 2))
-                  (error "Double definition `$%s=' in TBLFM line, please fix by hand" scol))
+		(if noerror
+		    (progn
+		      (message "Double definition `$%s=' in TBLFM line, please fix by hand" scol)
+		      (ding)
+		      (sit-for 2))
+		  (error "Double definition `$%s=' in TBLFM line, please fix by hand" scol))
 	      (push scol seen))))))
     (nreverse eq-alist)))
 
@@ -2527,7 +2527,7 @@ Parameters get priority."
     (org-defkey map "\C-c\C-s"      'org-table-fedit-finish)
     (org-defkey map "\C-c\C-c"      'org-table-fedit-finish)
     (org-defkey map "\C-c\C-q"      'org-table-fedit-abort)
-    (org-defkey map "\C-c?"         'org-table-show-reference)
+    (org-defkey map "\C-c?"	    'org-table-show-reference)
     (org-defkey map [(meta shift up)]    'org-table-fedit-line-up)
     (org-defkey map [(meta shift down)]  'org-table-fedit-line-down)
     (org-defkey map [(shift up)]    'org-table-fedit-ref-up)
@@ -2538,8 +2538,8 @@ Parameters get priority."
     (org-defkey map [(meta down)]   'org-table-fedit-scroll)
     (org-defkey map [(meta tab)]    'lisp-complete-symbol)
     (org-defkey map "\M-\C-i"       'lisp-complete-symbol)
-    (org-defkey map [(tab)]         'org-table-fedit-lisp-indent)
-    (org-defkey map "\C-i"          'org-table-fedit-lisp-indent)
+    (org-defkey map [(tab)]	    'org-table-fedit-lisp-indent)
+    (org-defkey map "\C-i"	    'org-table-fedit-lisp-indent)
     (org-defkey map "\C-c\C-r" 'org-table-fedit-toggle-ref-type)
     (org-defkey map "\C-c}"    'org-table-fedit-toggle-coordinates)
     map))
@@ -2583,7 +2583,7 @@ Parameters get priority."
   (org-table-get-specials)
   (let ((key (org-table-current-field-formula 'key 'noerror))
 	(eql (sort (org-table-get-stored-formulas 'noerror)
-                   'org-table-formula-less-p))
+		   'org-table-formula-less-p))
 	(pos (move-marker (make-marker) (point)))
 	(startline 1)
 	(wc (current-window-configuration))
@@ -2904,8 +2904,8 @@ With prefix ARG, apply the new formulas to the table."
   (org-table-remove-rectangle-highlight)
   (catch 'exit
     (let ((pos (if local (point) org-pos))
-          (face2 'highlight)
-          (org-inhibit-highlight-removal t)
+	  (face2 'highlight)
+	  (org-inhibit-highlight-removal t)
 	  (win (selected-window))
 	  (org-show-positions nil)
 	  var name e what match dest)
@@ -3017,15 +3017,15 @@ With prefix ARG, apply the new formulas to the table."
 	 (t (error "Undefined name $%s" var)))))
       (goto-char pos)
       (when (and org-show-positions
-                 (not (memq this-command '(org-table-fedit-scroll
-                                           org-table-fedit-scroll-down))))
+		 (not (memq this-command '(org-table-fedit-scroll
+					   org-table-fedit-scroll-down))))
 	(push pos org-show-positions)
 	(push org-table-current-begin-pos org-show-positions)
 	(let ((min (apply 'min org-show-positions))
 	      (max (apply 'max org-show-positions)))
-          (goto-char min) (recenter 0)
-          (goto-char max)
-          (or (pos-visible-in-window-p max) (recenter -1))))
+	  (goto-char min) (recenter 0)
+	  (goto-char max)
+	  (or (pos-visible-in-window-p max) (recenter -1))))
       (select-window win))))
 
 (defun org-table-force-dataline ()
@@ -3321,29 +3321,29 @@ to execute outside of tables."
 	(bindings
 	 (list
 	  '([(meta shift left)]  org-table-delete-column)
-	  '([(meta left)]        org-table-move-column-left)
+	  '([(meta left)]	 org-table-move-column-left)
 	  '([(meta right)]       org-table-move-column-right)
 	  '([(meta shift right)] org-table-insert-column)
 	  '([(meta shift up)]    org-table-kill-row)
 	  '([(meta shift down)]  org-table-insert-row)
-	  '([(meta up)]          org-table-move-row-up)
-	  '([(meta down)]        org-table-move-row-down)
-	  '("\C-c\C-w"           org-table-cut-region)
-	  '("\C-c\M-w"           org-table-copy-region)
-	  '("\C-c\C-y"           org-table-paste-rectangle)
-	  '("\C-c-"              org-table-insert-hline)
-	  '("\C-c}"              org-table-toggle-coordinate-overlays)
-	  '("\C-c{"              org-table-toggle-formula-debugger)
-	  '("\C-m"               org-table-next-row)
-	  '([(shift return)]     org-table-copy-down)
-	  '("\C-c?"              org-table-field-info)
-	  '("\C-c "              org-table-blank-field)
-	  '("\C-c+"              org-table-sum)
-	  '("\C-c="              org-table-eval-formula)
-	  '("\C-c'"              org-table-edit-formulas)
-	  '("\C-c`"              org-table-edit-field)
-	  '("\C-c*"              org-table-recalculate)
-	  '("\C-c^"              org-table-sort-lines)
+	  '([(meta up)]		 org-table-move-row-up)
+	  '([(meta down)]	 org-table-move-row-down)
+	  '("\C-c\C-w"		 org-table-cut-region)
+	  '("\C-c\M-w"		 org-table-copy-region)
+	  '("\C-c\C-y"		 org-table-paste-rectangle)
+	  '("\C-c-"		 org-table-insert-hline)
+	  '("\C-c}"		 org-table-toggle-coordinate-overlays)
+	  '("\C-c{"		 org-table-toggle-formula-debugger)
+	  '("\C-m"		 org-table-next-row)
+	  '([(shift return)]	 org-table-copy-down)
+	  '("\C-c?"		 org-table-field-info)
+	  '("\C-c "		 org-table-blank-field)
+	  '("\C-c+"		 org-table-sum)
+	  '("\C-c="		 org-table-eval-formula)
+	  '("\C-c'"		 org-table-edit-formulas)
+	  '("\C-c`"		 org-table-edit-field)
+	  '("\C-c*"		 org-table-recalculate)
+	  '("\C-c^"		 org-table-sort-lines)
 	  '([(control ?#)]       org-table-rotate-recalc-marks)))
 	elt key fun cmd)
     (while (setq elt (pop bindings))
@@ -3764,9 +3764,9 @@ First element has index 0, or I0 if given."
 			     (orgtbl-apply-fmt efmt (match-string 1 f)
 					       (match-string 2 f))
 			   f)))
-                 (orgtbl-apply-fmt (or (orgtbl-get-fmt *orgtbl-fmt* i)
-                                       *orgtbl-default-fmt*)
-                                   f)))
+		 (orgtbl-apply-fmt (or (orgtbl-get-fmt *orgtbl-fmt* i)
+				       *orgtbl-default-fmt*)
+				   f)))
 	     line)))
       (push (if *orgtbl-lfmt*
 		(orgtbl-apply-fmt *orgtbl-lfmt* line)
@@ -3901,8 +3901,8 @@ directly by `orgtbl-send-table'.  See manual."
 
     (unless splicep
       (when (plist-member params :tend)
-        (let ((tend (orgtbl-eval-str (plist-get params :tend))))
-          (if tend (push tend *orgtbl-rtn*)))))
+	(let ((tend (orgtbl-eval-str (plist-get params :tend))))
+	  (if tend (push tend *orgtbl-rtn*)))))
 
     (mapconcat 'identity (nreverse (if remove-nil-linesp
 				       (remq nil *orgtbl-rtn*)
@@ -4032,11 +4032,11 @@ and :tend suppress strings without splicing; they can be set to
 provide ORGTBL directives for the generated table."
   (let* ((params2
 	  (list
-           :tstart nil :tend nil
-           :hline "|---"
-           :sep " | "
-           :lstart "| "
-           :lend " |"))
+	   :tstart nil :tend nil
+	   :hline "|---"
+	   :sep " | "
+	   :lstart "| "
+	   :lend " |"))
 	 (params (org-combine-plists params2 params)))
     (orgtbl-to-generic table params)))
 
