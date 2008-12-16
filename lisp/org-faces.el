@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the face definitons for Org.
+;; This file contains the face definitions for Org.
 
 ;;; Code:
 
