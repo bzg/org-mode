@@ -267,7 +267,7 @@ emacs	--batch
 
 ;;;###autoload
 (defun org-export-as-latex-to-buffer (arg)
-  "Call `org-exort-as-latex` with output to a temporary buffer.
+  "Call `org-export-as-latex` with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to `org-export-as-latex'."
   (interactive "P")
   (org-export-as-latex arg nil nil "*Org LaTeX Export*")
@@ -1267,7 +1267,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
   (while (re-search-forward "^----+.$" nil t)
     (replace-match (org-export-latex-protect-string "\\hrule") t t))
 
-  ;; Protect LaTeX commands like \commad[...]{...} or \command{...}
+  ;; Protect LaTeX commands like \command[...]{...} or \command{...}
   (goto-char (point-min))
   (while (re-search-forward "\\\\[a-zA-Z]+\\(?:\\[.*\\]\\)?{.*}" nil t)
     (add-text-properties (match-beginning 0) (match-end 0)
