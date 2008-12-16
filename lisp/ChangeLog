@@ -1,3 +1,10 @@
+2008-12-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-change-all-lines): New argument
+	FORCE-TAGS.
+	(org-agenda-set-tags): Cet the new tags and pas them to
+	`org-format-agenda-item'.
+
 2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-emphasis-alist): Switch to
