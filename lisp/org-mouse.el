@@ -50,7 +50,7 @@
 ;;    (require 'org-mouse)
 ;;
 
-;; Fixme:
+;; FIXME:
 ;; + deal with folding / unfolding issues
 
 ;; TODO (This list is only theoretical, if you'd like to have some
@@ -68,7 +68,7 @@
 
 ;; History:
 ;;
-;; SInce version 5.10: Changes are listed in the general org-mode docs.
+;; Since version 5.10: Changes are listed in the general org-mode docs.
 ;;
 ;; Version 5.09
 ;; + Version number synchronization with Org-mode.
@@ -331,7 +331,7 @@ Returns a menu fragment consisting of KEYWORDS.  When a keyword
 is selected, group GROUP of the current match is replaced by the
 keyword.  The method ensures that both ends of the replacement
 are separated from the rest of the text in the buffer by
-individual spaces (unless NOSURROND is non-nil).
+individual spaces (unless NOSURROUND is non-nil).
 
 The final entry of the menu is always \"None\", which removes the
 match.
