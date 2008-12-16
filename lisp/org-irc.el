@@ -51,7 +51,7 @@
 
 (require 'org)
 
-;; Declare the function fomr ERC that we use.
+;; Declare the function form ERC that we use.
 (declare-function erc-current-logfile "erc-log" (&optional buffer))
 (declare-function erc-prompt "erc" ())
 (declare-function erc-default-target "erc" ())
