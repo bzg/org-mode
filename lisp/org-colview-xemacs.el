@@ -27,7 +27,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the face definitons for Org.
+;; This file contains the face definitions for Org.
 
 ;;; Code:
 
@@ -37,7 +37,7 @@
 (declare-function org-agenda-redo "org-agenda" ())
 
 
-;;; Definie additional faces for column view
+;;; Define additional faces for column view
 
 (when (featurep 'xemacs)
 
@@ -159,7 +159,7 @@
       ))
 
   (defun org-get-columns-level-face (n)
-    "Get the right face for match N in font-lock matching of healdines."
+    "Get the right face for match N in font-lock matching of headlines."
     (setq org-l (- (match-end 2) (match-beginning 1) 1))
     (if org-odd-levels-only (setq org-l (1+ (/ org-l 2))))
     (setq org-f (nth (% (1- org-l) org-n-level-faces) org-columns-level-faces))
@@ -414,7 +414,7 @@ This is the compiled version of the format.")
 	      org-columns-ellipses))))
 
 (defvar org-columns-full-header-line-format nil
-  "Fthe full header line format, will be shifted by horizontal scrolling." )
+  "The full header line format, will be shifted by horizontal scrolling." )
 (defvar org-previous-header-line-format nil
   "The header line format before column view was turned on.")
 (defvar org-columns-inhibit-recalculation nil
@@ -519,7 +519,7 @@ This is the compiled version of the format.")
 
 (defvar org-agenda-columns-remove-prefix-from-item)
 (defun org-agenda-columns-cleanup-item (item pl cphr fmt)
-  "Cleanup the tiem property for agenda column view.
+  "Cleanup the time property for agenda column view.
 See also the variable `org-agenda-columns-remove-prefix-from-item'."
   (let* ((org-complex-heading-regexp cphr)
 	 (prefix (substring item 0 pl))
@@ -934,7 +934,7 @@ around it."
     (org-columns-redo)))
 
 (defun org-columns-narrow (arg)
-  "Make the column nrrower by ARG characters."
+  "Make the column narrower by ARG characters."
   (interactive "p")
   (org-columns-widen (- arg)))
 
