@@ -75,7 +75,7 @@
     (defmacro declare-function (fn file &optional arglist fileonly))))
 
 (defmacro org-maybe-intangible (props)
-  "Add '(intangigble t) to PROPS if Emacs version is earlier than Emacs 22.
+  "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
 In emacs 21, invisible text is not avoided by the command loop, so the
 intangible property is needed to make sure point skips this text.
 In Emacs 22, this is not necessary.  The intangible text property has
