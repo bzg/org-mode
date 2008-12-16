@@ -35,6 +35,9 @@ messages, BBDB entries, and any files related to the projects.  For
 printing and sharing of notes, an Org-mode file can be exported as a
 structured ASCII file, HTML, and LaTeX.
 
+If you'd like to know what other people have said about Org-mode, take
+a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
+
 * News
 
 - Check out [[http://article.gmane.org/gmane.emacs.orgmode/8547][Russel Adams' presentations]] with the Houston Linux User
