@@ -834,53 +834,53 @@ or if they are only using it locally."
 (defvar org-current-export-dir nil) ; dynamically scoped parameter
 
 (defconst org-export-plist-vars
-  '((:link-up                 nil         org-export-html-link-up)
-    (:link-home               nil         org-export-html-link-home)
-    (:language                nil         org-export-default-language)
-    (:customtime              nil         org-display-custom-times)
-    (:headline-levels         "H"         org-export-headline-levels)
-    (:section-numbers         "num"       org-export-with-section-numbers)
-    (:section-number-format   nil         org-export-section-number-format)
-    (:table-of-contents       "toc"       org-export-with-toc)
-    (:preserve-breaks         "\\n"       org-export-preserve-breaks)
-    (:archived-trees          nil         org-export-with-archived-trees)
-    (:emphasize               "*"         org-export-with-emphasize)
-    (:sub-superscript         "^"         org-export-with-sub-superscripts)
-    (:special-strings         "-"         org-export-with-special-strings)
-    (:footnotes               "f"         org-export-with-footnotes)
-    (:drawers                 "d"         org-export-with-drawers)
-    (:tags                    "tags"      org-export-with-tags)
-    (:todo-keywords           "todo"      org-export-with-todo-keywords)
-    (:priority                "pri"       org-export-with-priority)
-    (:TeX-macros              "TeX"       org-export-with-TeX-macros)
-    (:LaTeX-fragments         "LaTeX"     org-export-with-LaTeX-fragments)
-    (:skip-before-1st-heading "skip"      org-export-skip-text-before-1st-heading)
-    (:fixed-width             ":"         org-export-with-fixed-width)
-    (:timestamps              "<"         org-export-with-timestamps)
-    (:author-info             "author"    org-export-author-info)
-    (:creator-info            "creator"   org-export-creator-info)
-    (:time-stamp-file         "timestamp" org-export-time-stamp-file)
-    (:tables                  "|"         org-export-with-tables)
-    (:table-auto-headline     nil         org-export-highlight-first-table-line)
-    (:style-include-default   nil         org-export-html-style-include-default)
-    (:style                   nil         org-export-html-style)
-    (:style-extra             nil         org-export-html-style-extra)
-    (:agenda-style            nil         org-agenda-export-html-style)
-    (:convert-org-links       nil         org-export-html-link-org-files-as-html)
-    (:inline-images           nil         org-export-html-inline-images)
-    (:html-extension          nil         org-export-html-extension)
-    (:html-table-tag          nil         org-export-html-table-tag)
-    (:expand-quoted-html      "@"         org-export-html-expand)
-    (:timestamp               nil         org-export-html-with-timestamp)
-    (:publishing-directory    nil         org-export-publishing-directory)
-    (:preamble                nil         org-export-html-preamble)
-    (:postamble               nil         org-export-html-postamble)
-    (:auto-preamble           nil         org-export-html-auto-preamble)
-    (:auto-postamble          nil         org-export-html-auto-postamble)
-    (:author                  nil         user-full-name)
-    (:email                   nil         user-mail-address)
-    (:select-tags             nil         org-export-select-tags)
-    (:exclude-tags            nil         org-export-exclude-tags))
+  '((:link-up		      nil	  org-export-html-link-up)
+    (:link-home		      nil	  org-export-html-link-home)
+    (:language		      nil	  org-export-default-language)
+    (:customtime	      nil	  org-display-custom-times)
+    (:headline-levels	      "H"	  org-export-headline-levels)
+    (:section-numbers	      "num"	  org-export-with-section-numbers)
+    (:section-number-format   nil	  org-export-section-number-format)
+    (:table-of-contents	      "toc"	  org-export-with-toc)
+    (:preserve-breaks	      "\\n"	  org-export-preserve-breaks)
+    (:archived-trees	      nil	  org-export-with-archived-trees)
+    (:emphasize		      "*"	  org-export-with-emphasize)
+    (:sub-superscript	      "^"	  org-export-with-sub-superscripts)
+    (:special-strings	      "-"	  org-export-with-special-strings)
+    (:footnotes		      "f"	  org-export-with-footnotes)
+    (:drawers		      "d"	  org-export-with-drawers)
+    (:tags		      "tags"	  org-export-with-tags)
+    (:todo-keywords	      "todo"	  org-export-with-todo-keywords)
+    (:priority		      "pri"	  org-export-with-priority)
+    (:TeX-macros	      "TeX"	  org-export-with-TeX-macros)
+    (:LaTeX-fragments	      "LaTeX"	  org-export-with-LaTeX-fragments)
+    (:skip-before-1st-heading "skip"	  org-export-skip-text-before-1st-heading)
+    (:fixed-width	      ":"	  org-export-with-fixed-width)
+    (:timestamps	      "<"	  org-export-with-timestamps)
+    (:author-info	      "author"	  org-export-author-info)
+    (:creator-info	      "creator"	  org-export-creator-info)
+    (:time-stamp-file	      "timestamp" org-export-time-stamp-file)
+    (:tables		      "|"	  org-export-with-tables)
+    (:table-auto-headline     nil	  org-export-highlight-first-table-line)
+    (:style-include-default   nil	  org-export-html-style-include-default)
+    (:style		      nil	  org-export-html-style)
+    (:style-extra	      nil	  org-export-html-style-extra)
+    (:agenda-style	      nil	  org-agenda-export-html-style)
+    (:convert-org-links	      nil	  org-export-html-link-org-files-as-html)
+    (:inline-images	      nil	  org-export-html-inline-images)
+    (:html-extension	      nil	  org-export-html-extension)
+    (:html-table-tag	      nil	  org-export-html-table-tag)
+    (:expand-quoted-html      "@"	  org-export-html-expand)
+    (:timestamp		      nil	  org-export-html-with-timestamp)
+    (:publishing-directory    nil	  org-export-publishing-directory)
+    (:preamble		      nil	  org-export-html-preamble)
+    (:postamble		      nil	  org-export-html-postamble)
+    (:auto-preamble	      nil	  org-export-html-auto-preamble)
+    (:auto-postamble	      nil	  org-export-html-auto-postamble)
+    (:author		      nil	  user-full-name)
+    (:email		      nil	  user-mail-address)
+    (:select-tags	      nil	  org-export-select-tags)
+    (:exclude-tags	      nil	  org-export-exclude-tags))
   "List of properties that represent export/publishing variables.
 Each element is a list of 3 items:
 1. The property that is used internally, and also for org-publish-project-alist
@@ -1468,7 +1468,7 @@ on this string to produce the exported version."
 
       ;; Handle source code snippets
       (org-export-replace-src-segments)
-      
+
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
 
@@ -1887,7 +1887,7 @@ table line.  If it is a link, add it to the line containing the link."
 (defun org-export-remove-comment-blocks-and-subtrees ()
   "Remove the comment environment, and also commented subtrees."
   (let ((re-commented (concat "^\\*+[ \t]+" org-comment-string "\\>"))
-        (case-fold-search nil))
+	(case-fold-search nil))
     ;; Remove comment environment
     (goto-char (point-min))
     (while (re-search-forward
@@ -2308,7 +2308,7 @@ underlined headlines.  The default is 3."
 	 (umax-toc nil)
 	 (case-fold-search nil)
 	 (bfname (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
-         (filename (concat (file-name-as-directory
+	 (filename (concat (file-name-as-directory
 			    (org-export-directory :ascii opt-plist))
 			   (file-name-sans-extension
 			    (or (and subtree-p
@@ -2820,7 +2820,7 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 ;;;###autoload
 (defun org-export-as-html-batch ()
   "Call `org-export-as-html', may be used in batch processing as
-emacs 	--batch
+emacs	--batch
 	--load=$HOME/lib/emacs/org.el
 	--eval \"(setq org-export-headline-levels 2)\"
 	--visit=MyFile --funcall org-export-as-html-batch"
@@ -2957,10 +2957,10 @@ PUB-DIR is set, use this as the publishing directory."
 	 (org-current-export-dir
 	  (or pub-dir (org-export-directory :html opt-plist)))
 	 (org-current-export-file buffer-file-name)
-         (level 0) (line "") (origline "") txt todo
-         (umax nil)
-         (umax-toc nil)
-         (filename (if to-buffer nil
+	 (level 0) (line "") (origline "") txt todo
+	 (umax nil)
+	 (umax-toc nil)
+	 (filename (if to-buffer nil
 		     (expand-file-name
 		      (concat
 		       (file-name-sans-extension
@@ -2979,9 +2979,9 @@ PUB-DIR is set, use this as the publishing directory."
 		      ((eq to-buffer 'string) (get-buffer-create "*Org HTML Export*"))
 		      (t (get-buffer-create to-buffer)))
 		   (find-file-noselect filename)))
-         (org-levels-open (make-vector org-level-max nil))
+	 (org-levels-open (make-vector org-level-max nil))
 	 (date (plist-get opt-plist :date))
-         (author      (plist-get opt-plist :author))
+	 (author      (plist-get opt-plist :author))
 	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
 			  (plist-get opt-plist :title)
 			  (and (not
@@ -3002,7 +3002,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 (local-list-indent nil)
 	 (llt org-plain-list-ordered-item-terminator)
 	 (email       (plist-get opt-plist :email))
-         (language    (plist-get opt-plist :language))
+	 (language    (plist-get opt-plist :language))
 	 (lang-words  nil)
 	 (head-count  0) cnt
 	 (start       0)
@@ -3016,12 +3016,12 @@ PUB-DIR is set, use this as the publishing directory."
 		       (fboundp 'coding-system-get)
 		       (coding-system-get coding-system-for-write
 					  'mime-charset)))
-         (region
-          (buffer-substring
-           (if region-p (region-beginning) (point-min))
-           (if region-p (region-end) (point-max))))
-         (lines
-          (org-split-string
+	 (region
+	  (buffer-substring
+	   (if region-p (region-beginning) (point-min))
+	   (if region-p (region-end) (point-max))))
+	 (lines
+	  (org-split-string
 	   (org-export-preprocess-string
 	    region
 	    :emph-multiline t
@@ -3068,7 +3068,7 @@ PUB-DIR is set, use this as the publishing directory."
 
     ;; Get the language-dependent settings
     (setq lang-words (or (assoc language org-export-language-setup)
-                         (assoc "en" org-export-language-setup)))
+			 (assoc "en" org-export-language-setup)))
 
     ;; Switch to the output buffer
     (set-buffer buffer)
@@ -3087,7 +3087,7 @@ PUB-DIR is set, use this as the publishing directory."
 		   (plist-get opt-plist (car x))))
 	    org-export-plist-vars)
       (setq umax (if arg (prefix-numeric-value arg)
-                   org-export-headline-levels))
+		   org-export-headline-levels))
       (setq umax-toc (if (integerp org-export-with-toc)
 			 (min org-export-with-toc umax)
 		       umax))
@@ -3204,7 +3204,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(catch 'nextline
 
 	  ;; end of quote section?
- 	  (when (and inquote (string-match "^\\*+ " line))
+	  (when (and inquote (string-match "^\\*+ " line))
 	    (insert "</pre>\n")
 	    (setq inquote nil))
 	  ;; inside a quote section?
@@ -3426,14 +3426,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (if (and (string-match org-todo-line-regexp line)
 		   (match-beginning 2))
 
-              (setq line
-                    (concat (substring line 0 (match-beginning 2))
-                            "<span class=\""
-                            (if (member (match-string 2 line)
-                                        org-done-keywords)
-                                "done" "todo")
-                            "\">" (match-string 2 line)
-                            "</span>" (substring line (match-end 2)))))
+	      (setq line
+		    (concat (substring line 0 (match-beginning 2))
+			    "<span class=\""
+			    (if (member (match-string 2 line)
+					org-done-keywords)
+				"done" "todo")
+			    "\">" (match-string 2 line)
+			    "</span>" (substring line (match-end 2)))))
 
 	  ;; Does this contain a reference to a footnote?
 	  (when org-export-with-footnotes
@@ -3820,7 +3820,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		   (delq nil (mapcar
 			      (lambda (x) (string-match "^[ \t]*|-" x))
 			      (cdr lines)))))
-	
+
 	(nlines 0) fnum i
 	tbopen line fields html gr colgropen)
     (if splice (setq head nil))
@@ -4767,52 +4767,52 @@ The XOXO buffer is named *xoxo-<source buffer name>*"
       ;; Kick off the output
       (org-export-as-xoxo-insert-into out "<ol class='xoxo'>\n")
       (while (re-search-forward "^\\(\\*+\\)[ \t]+\\(.+\\)" (point-max) 't)
-        (let* ((hd (match-string-no-properties 1))
-               (level (length hd))
-               (text (concat
-                      (match-string-no-properties 2)
-                      (save-excursion
-                        (goto-char (match-end 0))
-                        (let ((str ""))
-                          (catch 'loop
-                            (while 't
-                              (forward-line)
-                              (if (looking-at "^[ \t]\\(.*\\)")
-                                  (setq str (concat str (match-string-no-properties 1)))
-                                (throw 'loop str)))))))))
+	(let* ((hd (match-string-no-properties 1))
+	       (level (length hd))
+	       (text (concat
+		      (match-string-no-properties 2)
+		      (save-excursion
+			(goto-char (match-end 0))
+			(let ((str ""))
+			  (catch 'loop
+			    (while 't
+			      (forward-line)
+			      (if (looking-at "^[ \t]\\(.*\\)")
+				  (setq str (concat str (match-string-no-properties 1)))
+				(throw 'loop str)))))))))
 
-          ;; Handle level rendering
-          (cond
-           ((> level last-level)
-            (org-export-as-xoxo-insert-into out "\n<ol>\n"))
+	  ;; Handle level rendering
+	  (cond
+	   ((> level last-level)
+	    (org-export-as-xoxo-insert-into out "\n<ol>\n"))
 
-           ((< level last-level)
-            (dotimes (- (- last-level level) 1)
-              (if hanging-li
-                  (org-export-as-xoxo-insert-into out "</li>\n"))
-              (org-export-as-xoxo-insert-into out "</ol>\n"))
-            (when hanging-li
-              (org-export-as-xoxo-insert-into out "</li>\n")
-              (setq hanging-li nil)))
+	   ((< level last-level)
+	    (dotimes (- (- last-level level) 1)
+	      (if hanging-li
+		  (org-export-as-xoxo-insert-into out "</li>\n"))
+	      (org-export-as-xoxo-insert-into out "</ol>\n"))
+	    (when hanging-li
+	      (org-export-as-xoxo-insert-into out "</li>\n")
+	      (setq hanging-li nil)))
 
-           ((equal level last-level)
-            (if hanging-li
-                (org-export-as-xoxo-insert-into out "</li>\n")))
-           )
+	   ((equal level last-level)
+	    (if hanging-li
+		(org-export-as-xoxo-insert-into out "</li>\n")))
+	   )
 
-          (setq last-level level)
+	  (setq last-level level)
 
-          ;; And output the new li
-          (setq hanging-li 't)
-          (if (equal ?+ (elt text 0))
-              (org-export-as-xoxo-insert-into out "<li class='" (substring text 1) "'>")
-            (org-export-as-xoxo-insert-into out "<li>" text))))
+	  ;; And output the new li
+	  (setq hanging-li 't)
+	  (if (equal ?+ (elt text 0))
+	      (org-export-as-xoxo-insert-into out "<li class='" (substring text 1) "'>")
+	    (org-export-as-xoxo-insert-into out "<li>" text))))
 
       ;; Finally finish off the ol
       (dotimes (- last-level 1)
-        (if hanging-li
-            (org-export-as-xoxo-insert-into out "</li>\n"))
-        (org-export-as-xoxo-insert-into out "</ol>\n"))
+	(if hanging-li
+	    (org-export-as-xoxo-insert-into out "</li>\n"))
+	(org-export-as-xoxo-insert-into out "</ol>\n"))
 
       (goto-char pos)
       ;; Finish the buffer off and clean it up.
