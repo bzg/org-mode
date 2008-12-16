@@ -1061,7 +1061,7 @@ Needs to be set before org.el is loaded."
   "Number of different positions to be recorded in the ring
 Changing this requires a restart of Emacs to work correctly."
   :group 'org-link-follow
-  :type 'interger)
+  :type 'integer)
 
 (defcustom org-link-frame-setup
   '((vm . vm-visit-folder-other-frame)
@@ -12693,7 +12693,7 @@ because, in this case the deletion might narrow the column."
 
 ;; Make pabbrev-mode expand after org-mode commands
 (put 'org-self-insert-command 'pabbrev-expand-after-command t)
-(put 'orgybl-self-insert-command 'pabbrev-expand-after-command t)
+(put 'orgtbl-self-insert-command 'pabbrev-expand-after-command t)
 
 ;; How to do this: Measure non-white length of current string
 ;; If equal to column width, we should realign.
