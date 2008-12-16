@@ -7598,6 +7598,15 @@ operation has put the subtree."
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
+	(if (and (equal (buffer-file-name) file)
+		 (if regionp
+		     (and (>= pos region-start)
+			  (<= pos region-end))
+		   (and (>= pos (point))
+			(< pos (save-excursion
+				 (org-end-of-subtree t t))))))
+	    (error "Cannot refile to position inside the tree or region"))
+		 
 	(setq nbuf (or (find-buffer-visiting file)
 		       (find-file-noselect file)))
 	(if goto
