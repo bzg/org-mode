@@ -117,6 +117,8 @@
 	(org-id-hash-to-alist, org-id-alist-to-hash)
 	(org-id-paste-tracker): New functions.
 
+-------------------------------------------------------------------------
+
 2008-12-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-goto-calendar): Remove duplicate let
