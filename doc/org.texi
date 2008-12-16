@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.15
+@set VERSION 6.15a
 @set DATE December 2008
 
 @dircategory Emacs
