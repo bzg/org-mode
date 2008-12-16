@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the table editor and spreadsheed for Org-mode.
+;; This file contains the table editor and spreadsheet for Org-mode.
 
 ;; Watch out:  Here we are talking about two different kind of tables.
 ;; Most of the code is for the tables created with the Org-mode table editor.
@@ -169,7 +169,7 @@ this line."
   :group 'org-table)
 
 (defcustom org-table-use-standard-references t
-  "Should org-mode work with table refrences like B3 instead of @3$2?
+  "Should org-mode work with table references like B3 instead of @3$2?
 Possible values are:
 nil     never use them
 from    accept as input, do not present for editing
@@ -386,7 +386,7 @@ integer  When a number, use that many spaces as field separator
 nil      When nil, the command tries to be smart and figure out the
          separator in the following way:
          - when each line contains a TAB, assume TAB-separated material
-         - when each line contains a comme, assume CSV material
+         - when each line contains a comma, assume CSV material
          - else, assume one or more SPACE characters as separator."
   (interactive "rP")
   (let* ((beg (min beg0 end0))
@@ -1001,7 +1001,7 @@ is always the old value."
 
 (defun org-table-current-dline ()
   "Find out what table data line we are in.
-Only datalins count for this."
+Only datalines count for this."
   (interactive)
   (if (interactive-p) (org-table-check-inside-data-field))
   (save-excursion
@@ -2206,7 +2206,7 @@ $1->    %s\n" orig formula form0 form))
 		       prop value)))
 
 (defun org-table-get-range (desc &optional tbeg col highlight)
-  "Get a calc vector from a column, accorting to descriptor DESC.
+  "Get a calc vector from a column, according to descriptor DESC.
 Optional arguments TBEG and COL can give the beginning of the table and
 the current column, to avoid unnecessary parsing.
 HIGHLIGHT means, just highlight the range."
@@ -2707,7 +2707,7 @@ For example:  28 -> AB."
     s))
 
 (defun org-table-fedit-convert-buffer (function)
-  "Convert all references in this buffer, using FUNTION."
+  "Convert all references in this buffer, using FUNCTION."
   (let ((line (org-current-line)))
     (goto-char (point-min))
     (while (not (eobp))
@@ -2802,7 +2802,7 @@ a translation reference."
        (t (error "Cannot shift reference"))))))
 
 (defun org-table-fedit-toggle-coordinates ()
-  "Toggle the display of coordinates in the refrenced table."
+  "Toggle the display of coordinates in the referenced table."
   (interactive)
   (let ((pos (marker-position org-pos)))
     (with-current-buffer (marker-buffer org-pos)
@@ -3053,7 +3053,7 @@ With prefix ARG, apply the new formulas to the table."
   (org-table-fedit-move 'next-line))
 
 (defun org-table-fedit-move (command)
-  "Move the cursor in the window shoinw the table.
+  "Move the cursor in the window showing the table.
 Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   (let ((org-table-allow-automatic-line-recalculation nil)
 	(pos org-pos) (win (selected-window)) p)
@@ -3120,7 +3120,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
     (setq org-table-rectangle-overlays nil)))
 
 (defvar org-table-coordinate-overlays nil
-  "Collects the cooordinate grid overlays, so that they can be removed.")
+  "Collects the coordinate grid overlays, so that they can be removed.")
 (make-variable-buffer-local 'org-table-coordinate-overlays)
 
 (defun org-table-overlay-coordinates ()
@@ -3619,7 +3619,7 @@ The table is taken from the parameter TXT, or from the buffer at point."
      lines)))
 
 (defun orgtbl-send-table (&optional maybe)
-  "Send a tranformed version of this table to the receiver position.
+  "Send a transformed version of this table to the receiver position.
 With argument MAYBE, fail quietly if no transformation is defined for
 this table."
   (interactive)
