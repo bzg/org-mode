@@ -353,7 +353,7 @@ the whole buffer."
 	     )))
        (goto-char continue-from))
      (when (interactive-p)
-       (message "Checkbox satistics updated %s (%d places)"
+       (message "Checkbox statistics updated %s (%d places)"
 		(if all "in entire file" "in current outline entry") cstat)))))
 
 (defun org-get-checkbox-statistics-face ()
@@ -601,7 +601,7 @@ This cycle the entire list level through the sequence:
    `-'	->  `+'	 ->  `*'  ->  `1.'  ->	`1)'
 
 If WHICH is a string, use that as the new bullet.  If WHICH is an integer,
-0 meand `-', 1 means `+' etc."
+0 means `-', 1 means `+' etc."
   (interactive "P")
   (org-preserve-lc
    (org-beginning-of-item-list)
@@ -834,7 +834,7 @@ I.e. to the text after the last item."
 (defun org-item-indent-positions ()
   "Return indentation for plain list items.
 This returns a list with three values:	The current indentation, the
-parent indentation and the indentation a child should habe.
+parent indentation and the indentation a child should have.
 Assumes cursor in item line."
   (let* ((bolpos (point-at-bol))
 	 (ind (org-get-indentation))
