@@ -79,7 +79,7 @@
   :group 'org)
 
 
-(defcustom org-id-method 
+(defcustom org-id-method
   (condition-case nil
       (if (string-match "\\`[-0-9a-fA-F]\\{36\\}\\'"
 			(org-trim (shell-command-to-string "uuidgen")))
@@ -472,7 +472,7 @@ When CHECK is given, prepare detailed iinformation about duplicate IDs."
 (defun org-id-add-location (id file)
   "Add the ID with location FILE to the database of ID loations."
   ;; Only if global tracking is on, and when the buffer has a file
-  (when (and org-id-track-globally id file) 
+  (when (and org-id-track-globally id file)
     (unless org-id-locations (org-id-locations-load))
     (puthash id (abbreviate-file-name file) org-id-locations)
     (add-to-list 'org-id-files (abbreviate-file-name file))))
