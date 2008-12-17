@@ -2084,10 +2084,10 @@ VALUE defaults to t."
 	(org-agenda-align-tags)
 	(unless org-agenda-with-colors
 	  (remove-text-properties (point-min) (point-max) '(face nil))))
-      (if (and (boundp 'org-overriding-columns-format)
-	       org-overriding-columns-format)
-	  (org-set-local 'org-overriding-columns-format
-			 org-overriding-columns-format))
+      (if (and (boundp 'org-agenda-overriding-columns-format)
+	       org-agenda-overriding-columns-format)
+	  (org-set-local 'org-agenda-overriding-columns-format
+			 org-agenda-overriding-columns-format))
       (if (and (boundp 'org-agenda-view-columns-initially)
 	       org-agenda-view-columns-initially)
 	  (org-agenda-columns))
