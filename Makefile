@@ -98,7 +98,7 @@ LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
 ELCFILES0  = $(LISPFILES0:.el=.elc)
 ELCFILES   = $(LISPFILES:.el=.elc)
-DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir
+DOCFILES   = doc/org.texi doc/org.pdf doc/org doc/dir doc/.nosearch
 CARDFILES  = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES  = doc/org.texi
 INFOFILES  = doc/org
