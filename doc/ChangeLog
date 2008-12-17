@@ -1,3 +1,7 @@
+2008-12-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi: Fix typos and grammatical issues.
+
 2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Tables in LaTeX export): New section.

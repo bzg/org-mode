@@ -7639,7 +7639,7 @@ indentation than the first, these are left alone.
 @cindex HTML export
 
 Org mode contains an HTML (XHTML 1.0 strict) exporter with extensive
-HTML formatting, in ways similar to John Grubers @emph{markdown}
+HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
 @menu
@@ -7665,7 +7665,7 @@ the ASCII file will be @file{myfile.html}.  The file will be overwritten
 without warning.  If there is an active region, only the region will be
 exported. If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
+title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
 @kindex C-c C-e b
 @item C-c C-e b
@@ -7826,11 +7826,11 @@ referring to an external file.
 
 @emph{Sebastian Rose} has written a JavaScript program especially designed to
 enhance the web viewing experience of HTML files created with Org.  This
-program allows to view large files in two different ways.  The first one is
+program allows you to view large files in two different ways.  The first one is
 an @emph{Info}-like mode where each section is displayed separately and
 navigation can be done with the @kbd{n} and @kbd{p} keys (and some other keys
 as well, press @kbd{?} for an overview of the available keys).  The second
-view type is a @emph{folding} view much like Org provides it inside Emacs.
+view type is a @emph{folding} view much like Org provides inside Emacs.
 The script is available at @url{http://orgmode.org/org-info.js} and you can
 find the documentation for it at
 @url{http://orgmode.org/worg/code/org-info-js/org-info.js.html}.  We are
@@ -7839,10 +7839,10 @@ to be dependent on @url{orgmode.org} and prefer to install a local copy on
 your own web server.
 
 To use the script, you need to make sure that the @file{org-jsinfo.el} module
-gets loaded.  It should be loaded by default, try @kbd{M-x customize-variable
-@key{RET} org-modules @key{RET}} to convince yourself that this is indeed the
-case.  All it then takes to make use of the program is adding a single line
-to the Org file:
+gets loaded.  It should be loaded by default, but you can try @kbd{M-x
+customize-variable @key{RET} org-modules @key{RET}} to convince yourself that
+this is indeed the case.  All it then takes to make use of the program is
+adding a single line to the Org file:
 
 @example
 #+INFOJS_OPT: view:info toc:nil
@@ -8333,7 +8333,7 @@ you publish them to HTML.
 You may also link to related files, such as images. Provided you are
 careful with relative pathnames, and provided you have also configured
 @code{org-publish} to upload the related files, these links will work
-too. @ref{Complex example} for an example of this usage.
+too. See @ref{Complex example} for an example of this usage.
 
 Sometime an Org file to be published may contain links that are
 only valid in your production environment, but not in the publishing
