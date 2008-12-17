@@ -5,7 +5,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.15c
+;; Version: 6.15d
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -92,7 +92,7 @@
 
 ;;; Version
 
-(defconst org-version "6.15c"
+(defconst org-version "6.15d"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -7542,9 +7542,10 @@ on the system \"/user@host:\"."
 
 (defun org-get-outline-path (&optional fastp level heading)
   "Return the outline path to the current entry, as a list."
-  (if (> level 19) (error "Outline path failure, more than 19 levels."))
   (if fastp
       (progn
+	(if (> level 19)
+	    (error "Outline path failure, more than 19 levels."))
 	(loop for i from level upto 19 do
 	      (aset org-olpa i nil))
 	(prog1

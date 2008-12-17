@@ -1,5 +1,7 @@
 2008-12-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-get-outline-path): Fix bug if level is not given.
+
 	* org-agenda.el (org-finalize-agenda): Fix typo with variable
 	name.
 
