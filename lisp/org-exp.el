@@ -2820,10 +2820,10 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
 ;;;###autoload
 (defun org-export-as-html-batch ()
   "Call `org-export-as-html', may be used in batch processing as
-emacs	--batch
-	--load=$HOME/lib/emacs/org.el
-	--eval \"(setq org-export-headline-levels 2)\"
-	--visit=MyFile --funcall org-export-as-html-batch"
+emacs   --batch
+        --load=$HOME/lib/emacs/org.el
+        --eval \"(setq org-export-headline-levels 2)\"
+        --visit=MyFile --funcall org-export-as-html-batch"
   (org-export-as-html org-export-headline-levels 'hidden))
 
 ;;;###autoload

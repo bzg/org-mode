@@ -27,7 +27,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the face definitions for Org.
+;; This file contains the column view for Org.
 
 ;;; Code:
 
@@ -1356,7 +1356,7 @@ PARAMS is a property list of parameters:
 
 (defun org-listtable-to-string (tbl)
   "Convert a listtable TBL to a string that contains the Org-mode table.
-The table still need to be alligned.  The resulting string has no leading
+The table still need to be aligned.  The resulting string has no leading
 and tailing newline characters."
   (mapconcat
    (lambda (x)

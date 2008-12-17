@@ -25,7 +25,7 @@
 ;;
 ;;; Commentary:
 
-;; This file contains the face definitions for Org.
+;; This file contains the column view for Org.
 
 ;;; Code:
 

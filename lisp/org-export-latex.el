@@ -259,10 +259,10 @@ These are the .aux, .log, .out, and .toc files."
   "Call `org-export-as-latex', may be used in batch processing.
 For example:
 
-emacs	--batch
-	--load=$HOME/lib/emacs/org.el
-	--eval \"(setq org-export-headline-levels 2)\"
-	--visit=MyFile --funcall org-export-as-latex-batch"
+emacs   --batch
+        --load=$HOME/lib/emacs/org.el
+        --eval \"(setq org-export-headline-levels 2)\"
+        --visit=MyFile --funcall org-export-as-latex-batch"
   (org-export-as-latex org-export-headline-levels 'hidden))
 
 ;;;###autoload
