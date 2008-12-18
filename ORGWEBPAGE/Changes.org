@@ -10,10 +10,16 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.15
+* Version 6.16
   :PROPERTIES:
   :VISIBILITY: content
   :END:
+
+  This version reverses the introduction of @0 as a reference to
+  the last rwo in a table, because of a conflict with the use of
+  @0 for the current row.
+
+* Version 6.15
 ** Overview
 
 - All known LaTeX export issues fixed 
