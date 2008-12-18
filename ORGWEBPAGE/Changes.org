@@ -10,10 +10,12 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.16
+* Version 6.16 (in preparation)
   :PROPERTIES:
   :VISIBILITY: content
   :END:
+
+* Version 6.15f
 
   This version reverses the introduction of @0 as a reference to
   the last rwo in a table, because of a conflict with the use of
