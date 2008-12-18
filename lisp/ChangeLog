@@ -1,5 +1,8 @@
 2008-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-show): New prefix argument
+	FULL-ENTRY.
+
 	* org.el (org-sort-entries-or-items): Add a COMPARE-FUNC
 	argument.
 

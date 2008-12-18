@@ -5974,6 +5974,8 @@ Previous line (same as @key{down} and @kbd{C-n}).
 @item mouse-3
 @itemx @key{SPC}
 Display the original location of the item in another window.
+With prefix arg, make sure that the entire entry is made visible in the
+outline, not only the heading.
 @c
 @kindex L
 @item L
