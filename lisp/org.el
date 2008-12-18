@@ -1340,10 +1340,11 @@ are matched against file names, and values."
 This is list of cons cells.  Each cell contains:
 - a specification of the files to be considered, either a list of files,
   or a symbol whose function or variable value will be used to retrieve
-  a file name or a list of file names.  Nil means, refile to a different
-  heading in the current buffer.
-- A specification of how to find candidate refile targets.  This may be
-  any of
+  a file name or a list of file names.  If you use `org-agenda-files' for
+  that, all agenda files will be scanned for targets.  Nil means, consider
+  headings in the current buffer.
+- A specification of how to select find candidate refile targets.  This
+  may be any of
   - a cons cell (:tag . \"TAG\") to identify refile targets by a tag.
     This tag has to be present in all target headlines, inheritance will
     not be considered.
