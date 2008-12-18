@@ -5434,7 +5434,8 @@ Optional argument WITH-CASE means sort case-sensitively."
 
 (defvar org-priority-regexp) ; defined later in the file
 
-(defun org-sort-entries-or-items (&optional with-case sorting-type getkey-func property)
+(defun org-sort-entries-or-items
+  (&optional with-case sorting-type getkey-func compare-func property)
   "Sort entries on a certain level of an outline tree.
 If there is an active region, the entries in the region are sorted.
 Else, if the cursor is before the first entry, sort the top-level items.
@@ -5614,6 +5615,7 @@ WITH-CASE, the sorting considers case as well."
          (cond
           ((= dcst ?a) 'string<)
           ((= dcst ?t) 'time-less-p)
+          ((= dcst ?f) compare-func)
           (t nil)))))
     (message "Sorting entries...done")))
 

@@ -1,5 +1,8 @@
 2008-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-sort-entries-or-items): Add a COMPARE-FUNC
+	argument.
+
 	* org-agenda.el (org-agenda-set-tags): Leave getting the tags to
 	`org-agenda-change-all-lines'.
 	(org-agenda-change-all-lines): Removed FORCE-TAGS argument, the
