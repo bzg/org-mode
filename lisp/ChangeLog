@@ -1,3 +1,10 @@
+2008-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-set-tags): Leave getting the tags to
+	`org-agenda-change-all-lines'.
+	(org-agenda-change-all-lines): Removed FORCE-TAGS argument, the
+	tags are now retrieved locally.
+
 2008-12-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-get-outline-path): Fix bug if level is not given.
