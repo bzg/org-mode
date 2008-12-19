@@ -6270,7 +6270,9 @@ For file links, arg negates `org-context-in-file-links'."
 			(error nil)))))
 	;; We can make a link using the ID.
 	(setq link (condition-case nil
-		       (org-id-store-link)
+		       (prog1 (org-id-store-link)
+			 (setq desc (plist-get org-store-link-plist
+					       :description)))
 		     (error
 		      ;; probably before first headline, link to file only
 		      (concat "file:"

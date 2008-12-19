@@ -1,5 +1,8 @@
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-store-link): Capture link description from
+	`org-id-store-link'.
+
 	* org-exp.el (org-export-html-format-image): Add the / to the end
 	of the <img> tag.
 	(org-export-format-source-code): Surround example by empty lines,
