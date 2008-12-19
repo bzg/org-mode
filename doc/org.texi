@@ -580,6 +580,15 @@ MY PROJECTS    -*- mode: org; -*-
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
+Many commands in Org work on the region is he region is active.  To make use
+of this, you need to have @code{transient-mark-mode} (@code{zmacs-regions} in
+XEmacs) turned on.  In Emacs 23 this is the default, in Emacs 22 you need to
+do this yourself with
+
+@lisp
+(transient-mark-mode 1)
+@end lisp
+
 @node Feedback, Conventions, Activation, Introduction
 @section Feedback
 @cindex feedback
@@ -7074,6 +7083,9 @@ deadlines or appointments into a desktop calendar program like iCal,
 Org mode can also produce extracts in the iCalendar format.  Currently
 Org mode only supports export, not import of these different formats.
 
+Org supports export of selected regions when @code{transient-mark-mode} is
+enabled (default in Emacs 23).
+
 @menu
 * Markup rules::                Which structures are recognized?
 * Selective export::            Using tags to select and exclude trees
@@ -7599,13 +7611,14 @@ file.
 
 @cindex region, active
 @cindex active region
-@cindex Transient mark mode
+@cindex transient-mark-mode
 @table @kbd
 @kindex C-c C-e a
 @item C-c C-e a
 Export as ASCII file.  For an org file @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
-warning.  If there is an active region, only the region will be
+warning.  If there is an active region@footnote{this requires
+@code{transient-mark-mode} to be turned on}, only the region will be
 exported. If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
@@ -7657,13 +7670,14 @@ language, but with additional support for tables.
 
 @cindex region, active
 @cindex active region
-@cindex Transient mark mode
+@cindex transient-mark-mode
 @table @kbd
 @kindex C-c C-e h
 @item C-c C-e h
 Export as HTML file @file{myfile.html}.  For an org file @file{myfile.org},
 the ASCII file will be @file{myfile.html}.  The file will be overwritten
-without warning.  If there is an active region, only the region will be
+without warning.  If there is an active region@footnote{this requires
+@code{transient-mark-mode} to be turned on}, only the region will be
 exported. If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
@@ -7906,16 +7920,20 @@ references, the PDF output file will be fully linked.
 @node LaTeX/PDF export commands, Quoting LaTeX code, LaTeX and PDF export, LaTeX and PDF export
 @subsection LaTeX export commands
 
+@cindex region, active
+@cindex active region
+@cindex transient-mark-mode
 @table @kbd
 @kindex C-c C-e l
 @item C-c C-e l
 Export as La@TeX{} file @file{myfile.tex}.  For an org file
 @file{myfile.org}, the ASCII file will be @file{myfile.tex}.  The file will
-be overwritten without warning.  If there is an active region, only the
-region will be exported. If the selected region is a single tree@footnote{To
-select the current subtree, use @kbd{C-c @@}.}, the tree head will become the
-document title.  If the tree head entry has or inherits an
-@code{EXPORT_FILE_NAME} property, that name will be used for the export.
+be overwritten without warning.  If there is an active region@footnote{this
+requires @code{transient-mark-mode} to be turned on}, only the region will be
+exported. If the selected region is a single tree@footnote{To select the
+current subtree, use @kbd{C-c @@}.}, the tree head will become the document
+title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
+property, that name will be used for the export.
 @kindex C-c C-e L
 @item C-c C-e L
 Export to a temporary buffer, do not create a file.
