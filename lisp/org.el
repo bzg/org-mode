@@ -11866,6 +11866,20 @@ Due to some yet unresolved reason, the global function
 	   "Switch-to: " nil t))
 	 (or enabled (iswitchb-mode -1))))))
 
+;;;###autoload
+(defun org-ido-switchb (&optional arg)
+  "Use `org-ido-completing-read' to prompt for an Org buffer to switch to.
+With a prefix argument, restrict available to files.
+With two prefix arguments, restrict available buffers to agenda files."
+  (interactive "P")
+  (let ((blist (cond ((equal arg '(4))  (org-buffer-list 'files))
+                     ((equal arg '(16)) (org-buffer-list 'agenda))
+                     (t                 (org-buffer-list)))))
+    (switch-to-buffer
+     (org-ido-completing-read "Org buffer: "
+                              (mapcar 'buffer-name blist)
+                              nil t))))
+
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
 PREDICATE can be `export', `files' or `agenda'.

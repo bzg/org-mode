@@ -1,3 +1,7 @@
+2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-ido-switchb): New function.
+
 2008-12-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-show): New prefix argument
