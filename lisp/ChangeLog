@@ -1,5 +1,15 @@
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-get-specials): Set
+	`org-table-current-last-data-line'.
+	(org-table-current-last-data-line): New variable.
+	(org-table-insert-column, org-table-delete-column)
+	(org-table-move-column, org-table-fix-formulas): Call
+	`org-table-fix-formulas' a second time to fix the $LR references.
+	(org-table-get-specials): Add the $LR references to the tables.
+	(org-table-get-formula): Do not offer last-row names as LHS of
+	formulas.
+
 	* org.el (org-store-link): Capture link description from
 	`org-id-store-link'.
 

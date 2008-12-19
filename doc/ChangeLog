@@ -1,3 +1,7 @@
+2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (References): Document special last-row references.
+
 2008-12-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi: Fix typos and grammatical issues.
