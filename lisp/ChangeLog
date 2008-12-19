@@ -2,6 +2,8 @@
 
 	* org-exp.el (org-export-html-format-image): Add the / to the end
 	of the <img> tag.
+	(org-export-format-source-code): Surround example by empty lines,
+	to make sure it will not be inside a paragraph.
 
 	* org.el (org-ido-switchb): New function.
 

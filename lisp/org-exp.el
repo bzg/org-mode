@@ -2260,9 +2260,9 @@ backends, it converts the segment into an EXAMPLE segment."
 		   (point-min) (point-max)))))
 	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
 	      (setq htmltext (replace-match
-			      (format "<pre class=\"src src-%s\">" lang)
+			      (format "<pre class=\"src src-%s\">\n" lang)
 			      t t htmltext)))
-	  (concat "#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n"))))
+	  (concat "\n#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n\n"))))
      (t
       ;; This is not HTML, so just make it an example.
       (when (equal lang "org")
