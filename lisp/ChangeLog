@@ -1,5 +1,9 @@
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-scan-tags): Rescan for tags, to get the correct
+	upcase/downcase stuff.  This slows things down for now, but it
+	works.
+
 	* org-export-latex.el (org-export-latex-links): Fix bug with
 	undefined label.
 
