@@ -1,5 +1,8 @@
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-html-format-image): Add the / to the end
+	of the <img> tag.
+
 	* org.el (org-ido-switchb): New function.
 
 2008-12-18  Carsten Dominik  <carsten.dominik@gmail.com>

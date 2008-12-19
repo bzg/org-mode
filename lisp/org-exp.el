@@ -3716,7 +3716,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src)))
       (format "<div %sclass=\"figure\">
-<p><img src=\"%s\"%s></p>%s
+<p><img src=\"%s\"%s /></p>%s
 </div>"
 	      (if label (format "id=\"%s\" " label) "")
 	      src
