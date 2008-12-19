@@ -3281,7 +3281,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	     ((match-end 2)
 	      (setq line (replace-match
 			  (format
-			   "@<a id=\"%s\">@</a>"
+			   "@<a name=\"%s\" id=\"%s\">@</a>"
 			   (org-solidify-link-text (match-string 1 line))
 			   (org-solidify-link-text (match-string 1 line)))
 			  t t line)))
