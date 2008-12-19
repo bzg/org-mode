@@ -1,5 +1,8 @@
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-links): Fix bug with
+	undefined label.
+
 	* org-table.el (org-table-get-specials): Set
 	`org-table-current-last-data-line'.
 	(org-table-current-last-data-line): New variable.

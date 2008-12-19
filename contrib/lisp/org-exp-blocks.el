@@ -183,7 +183,7 @@ passed to the ditaa utility as command line arguments."
       (error (format "Could not find ditaa.jar at %s" org-ditaa-jar-path)))
     (setq body (if (string-match "^\\([^:\\|:[^ ]\\)" body)
 		   body
-		 (mapconcat (lambda (x) (substring x (> (length x) 1) 2 1))
+		 (mapconcat (lambda (x) (substring x (if (> (length x) 1) 2 1)))
 			    (org-split-string body "\n")
 			    "\n")))
     (cond 

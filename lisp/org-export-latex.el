@@ -1207,7 +1207,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 			(expand-file-name raw-path))
 		(if floatp
 		    (format "\\caption{%s%s}\n"
-			    (if label (concat "\\label{" label "}"))
+			    (if label (concat "\\label{" label "}") "")
 			    (or caption "")))
 		(if floatp "\\end{figure}\n"))))
 	     (radiop (insert (format "\\hyperref[%s]{%s}"
