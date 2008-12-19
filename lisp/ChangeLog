@@ -4,6 +4,8 @@
 	of the <img> tag.
 	(org-export-format-source-code): Surround example by empty lines,
 	to make sure it will not be inside a paragraph.
+	(org-export-as-html): Remove the name attribute from anchors that
+	do not need it.
 
 	* org.el (org-ido-switchb): New function.
 
