@@ -3,6 +3,7 @@
 	* org.el (org-scan-tags): Rescan for tags, to get the correct
 	upcase/downcase stuff.  This slows things down for now, but it
 	works.
+	(org-mode): Make sure the tag-faces regexp is initialized.
 
 	* org-export-latex.el (org-export-latex-links): Fix bug with
 	undefined label.

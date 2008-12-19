@@ -3421,6 +3421,9 @@ The following commands are available:
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
   (org-set-regexps-and-options)
+  (when (and org-tag-faces (not org-tags-special-faces-re))
+    ;; tag faces set outside customize.... force initialization.
+    (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
   (modify-syntax-entry ?# "<")
