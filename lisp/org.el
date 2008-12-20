@@ -7509,6 +7509,7 @@ on the system \"/user@host:\"."
 	  (save-excursion
 	    (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
 	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
+	    (setq f (expand-file-name f))
 	    (save-excursion
 	      (save-restriction
 		(widen)
@@ -7672,7 +7673,8 @@ operation has put the subtree."
 		    'org-olpath-completing-read
 		  'org-ido-completing-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
-	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
+	 (filename (expand-file-name
+		    (buffer-file-name (buffer-base-buffer cbuf))))
 	 (tbl (mapcar
 	       (lambda (x)
 		 (if (not (equal filename (nth 1 x)))
