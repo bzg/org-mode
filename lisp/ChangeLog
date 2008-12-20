@@ -59,7 +59,7 @@
 
 	* org-agenda.el (org-agenda-change-all-lines): New argument
 	FORCE-TAGS.
-	(org-agenda-set-tags): Cet the new tags and pas them to
+	(org-agenda-set-tags): Cet the new tags and pass them to
 	`org-format-agenda-item'.
 
 2008-12-15  Carsten Dominik  <carsten.dominik@gmail.com>
