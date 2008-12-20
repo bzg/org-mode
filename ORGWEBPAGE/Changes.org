@@ -10,10 +10,19 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.16 (in preparation)
+* Version 6.16
   :PROPERTIES:
   :VISIBILITY: content
   :END:
+  Cleanup of many small bugs, and one new feature.
+
+** Details
+
+*** References to last table row with special names
+
+    Fields in the last row of a table can now be referenced with
+    $LR1, $LR2, etc.  These references can appear both on the
+    left hand side and right hand side of a formula.
 
 * Version 6.15f
 
