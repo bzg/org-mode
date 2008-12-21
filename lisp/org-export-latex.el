@@ -689,7 +689,7 @@ OPT-PLIST is the options plist for current buffer."
 	(author (plist-get opt-plist :author)))
     (concat
      (if (plist-get opt-plist :time-stamp-file)
-	 (format-time-string "% Created %Y-%m-%d %a %H:%M\n"))
+	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; insert LaTeX custom header
      org-export-latex-header
      "\n"
@@ -913,7 +913,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 		       (replace-match (or (save-match-data
 					    (org-export-latex-treat-backslash-char
 					     (match-string 1)
-					     (match-string 3))) "") t t))
+					     (or (match-string 3) "")))
+					  "") t t))
 		      ((member (match-string 2) '("_" "^"))
 		       (replace-match (or (save-match-data
 					    (org-export-latex-treat-sub-super-char
