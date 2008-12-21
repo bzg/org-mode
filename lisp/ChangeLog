@@ -1,5 +1,8 @@
 2008-12-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-completion-use-ido): Enhance docstring of
+	`org-completion-use-ido'.
+
 	* org-export-latex.el (org-export-latex-make-header): Double the %
 	in the time stamp format.
 	(org-export-latex-special-chars): Handle case where there is no

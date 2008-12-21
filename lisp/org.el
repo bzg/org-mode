@@ -2418,7 +2418,10 @@ Use customize to modify this, or restart Emacs after changing it."
   :group 'org)
 
 (defcustom org-completion-use-ido nil
-  "Non-nil means, use ido completion wherever possible."
+  "Non-nil means, use ido completion wherever possible.
+Note that `ido-mode' must be active for this variable to be relevant.
+If you decide to turn this variable on, you might well want to turn off
+`org-outline-path-complete-in-steps'."
   :group 'org-completion
   :type 'boolean)
 
