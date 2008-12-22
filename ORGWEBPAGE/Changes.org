@@ -10,6 +10,20 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.17 (in preparation)
+
+** Details
+
+*** Capture column view into a different file.
+
+    The :id parameter for the dynamic block capturing column view
+    can now truly be an ID that will also be found in a
+    different file.  Also, it can be like =file:path/to/file=, to
+    capture the global column view from a different file.
+
+    Thanks to Francois Lagarde for his report that IDs outside
+    the current file would not work.
+
 * Version 6.16
   :PROPERTIES:
   :VISIBILITY: content

@@ -1297,10 +1297,12 @@ PARAMS is a property list of parameters:
 
 :width    enforce same column widths with <N> specifiers.
 :id       the :ID: property of the entry where the columns view
-          should be built, as a string.  When `local', call locally.
+          should be built.  When the symbol `local', call locally.
           When `global' call column view with the cursor at the beginning
           of the buffer (usually this means that the whole buffer switches
-          to column view).
+          to column view).  When \"file:path/to/file.org\", invoke column
+          view at the start of that file.  Otherwise, the ID is located
+          using `org-id-find'.
 :hlines   When t, insert a hline before each item.  When a number, insert
           a hline before each level <= that number.
 :vlines   When t, make each column a colgroup to enforce vertical lines.
@@ -1311,21 +1313,40 @@ PARAMS is a property list of parameters:
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
+	(content-lines (org-split-string (plist-get params :content) "\n"))
 	(skip-empty-rows (plist-get params :skip-empty-rows))
-	tbl id idpos nfields tmp)
-    (save-excursion
-      (save-restriction
-	(when (setq id (plist-get params :id))
-	  (cond ((not id) nil)
-		((eq id 'global) (goto-char (point-min)))
-		((eq id 'local)  nil)
-		((setq idpos (org-find-entry-with-id id))
-		 (goto-char idpos))
-		(t (error "Cannot find entry with :ID: %s" id))))
-	(org-columns)
-	(setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
-	(setq nfields (length (car tbl)))
-	(org-columns-quit)))
+	tbl id idpos nfields tmp recalc line
+	id-as-string view-file view-pos)
+    (when (setq id (plist-get params :id))
+      (setq id-as-string (cond ((numberp id) (number-to-string id))
+			       ((symbolp id) (symbol-name id))
+			       ((stringp id) id)
+			       (t "")))
+      (cond ((not id) nil)
+	    ((eq id 'global) (setq view-pos (point-min)))
+	    ((eq id 'local))
+	    ((string-match "^file:\\(.*\\)" id-as-string)
+	     (setq view-file (match-string 1 id-as-string)
+		   view-pos 1)
+	     (unless (file-exists-p view-file)
+	       (error "No such file: \"%s\"" id-as-string)))
+	    ((setq idpos (org-find-entry-with-id id))
+	     (setq view-pos idpos))
+	    ((setq idpos (org-id-find id))
+	     (setq view-file (car idpos))
+	     (setq view-pos (cdr idpos)))
+	    (t (error "Cannot find entry with :ID: %s" id))))
+    (with-current-buffer (if view-file
+			     (get-file-buffer view-file)
+			   (current-buffer))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (or view-pos (point)))
+	  (org-columns)
+	  (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
+	  (setq nfields (length (car tbl)))
+	  (org-columns-quit))))
     (goto-char pos)
     (move-marker pos nil)
     (when tbl
@@ -1337,7 +1358,9 @@ PARAMS is a property list of parameters:
 	    (if (string-match "\\` *\\(\\*+\\)" (caar tbl))
 		(if (and (not (eq (car tmp) 'hline))
 			 (or (eq hlines t)
-			     (and (numberp hlines) (<= (- (match-end 1) (match-beginning 1)) hlines))))
+			     (and (numberp hlines)
+				  (<= (- (match-end 1) (match-beginning 1))
+				      hlines))))
 		    (push 'hline tmp)))
 	    (push (pop tbl) tmp)))
 	(setq tbl (nreverse tmp)))
@@ -1347,12 +1370,22 @@ PARAMS is a property list of parameters:
 			  tbl))
 	(setq tbl (append tbl (list (cons "/" (make-list nfields "<>"))))))
       (setq pos (point))
+      (when content-lines
+	(while (string-match "^#" (car content-lines))
+	  (insert (pop content-lines) "\n")))
       (insert (org-listtable-to-string tbl))
       (when (plist-get params :width)
 	(insert "\n|" (mapconcat (lambda (x) (format "<%d>" (max 3 x)))
 				 org-columns-current-widths "|")))
-      (goto-char pos)
-      (org-table-align))))
+      (while (setq line (pop content-lines))
+	(when (string-match "^#" line)
+	  (insert "\n" line)
+	  (when (string-match "^#\\+TBLFM" line)
+	    (setq recalc t))))
+      (if recalc
+	  (progn (goto-char pos) (org-table-recalculate 'all))
+	(goto-char pos)
+	(org-table-align)))))
 
 (defun org-listtable-to-string (tbl)
   "Convert a listtable TBL to a string that contains the Org-mode table.

@@ -4216,7 +4216,9 @@ capture, you can use 3 values:
 @example
 local     @r{use the tree in which the capture block is located}
 global    @r{make a global view, including all headings in the file}
-"label"   @r{call column view in the tree that has an @code{:ID:}}
+"file:path-to-file"
+          @r{run column view at the top of this file}
+"ID"      @r{call column view in the tree that has an @code{:ID:}}
           @r{property with the value @i{label}.  You can use}
           @r{@kbd{M-x org-id-copy} to create a globally unique ID for}
           @r{the current entry and copy it to the kill-ring.}

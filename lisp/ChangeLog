@@ -1,3 +1,14 @@
+2008-12-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-id.el (org-id-find): Allow the ID to be a symbol or a
+	number, by converting these to a string.
+
+	* org-colview.el (org-dblock-write:columnview): Allow ID to be
+	located in a different file.
+
+	* org-colview-xemacs.el (org-dblock-write:columnview): Copy from
+	org-colview.el.
+
 2008-12-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-completion-use-ido): Enhance docstring of

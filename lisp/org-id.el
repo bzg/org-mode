@@ -262,6 +262,9 @@ Move the cursor to that entry in that buffer."
 The return value is a cons cell (file-name . position), or nil
 if there is no entry with that ID.
 With optional argument MARKERP, return the position as a new marker."
+  (cond
+   ((symbolp id) (setq id (symbol-name id)))
+   ((numberp id) (setq id (number-to-string id))))
   (let ((file (org-id-find-id-file id))
 	org-agenda-new-buffers where)
     (when file

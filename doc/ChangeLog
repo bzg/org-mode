@@ -1,3 +1,9 @@
+2008-12-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Capturing column view): Document
+	"file:path/to/file.org" as an allowed value for the ID property of
+	a dynamic block copying column view.
+
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (References): Document special last-row references.
