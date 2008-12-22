@@ -1,5 +1,8 @@
 2008-12-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-get-formula): Only ask to overwrite
+	field formula if there really is one.
+
 	* org-id.el (org-id-find): Allow the ID to be a symbol or a
 	number, by converting these to a string.
 
