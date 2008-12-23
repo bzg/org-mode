@@ -1,3 +1,8 @@
+2008-12-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-refile-get-location): Handle case of current buffer
+	not having a file associated with it.
+
 2008-12-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-get-formula): Only ask to overwrite
