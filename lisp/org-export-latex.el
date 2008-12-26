@@ -1159,7 +1159,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
   ;; or send some warnings.
   "Convert links to LaTeX."
   (goto-char (point-min))
-  (while (re-search-forward org-bracket-link-analytic-regexp nil t)
+  (while (re-search-forward org-bracket-link-analytic-regexp++ nil t)
     (org-if-unprotected
      (goto-char (match-beginning 0))
      (let* ((re-radio org-export-latex-all-targets-re)
@@ -1171,6 +1171,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 		      (if (or (file-name-absolute-p raw-path)
 			      (string-match "^\\.\\.?/" raw-path))
 			  "file")))
+	    (coderefp (equal type "coderef"))
 	    (caption (org-find-text-property-in-string 'org-caption raw-path))
 	    (attr (org-find-text-property-in-string 'org-attributes raw-path))
 	    (label (org-find-text-property-in-string 'org-label raw-path))
@@ -1178,6 +1179,8 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 	    imgp radiop
 	    ;; define the path of the link
 	    (path (cond
+		   ((member type '("coderef"))
+		    raw-path)
 		   ((member type '("http" "https" "ftp"))
 		    (concat type ":" raw-path))
 		   ((and re-radio (string-match re-radio raw-path))
@@ -1211,6 +1214,10 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 			    (if label (concat "\\label{" label "}") "")
 			    (or caption "")))
 		(if floatp "\\end{figure}\n"))))
+	     (coderefp
+	      (insert (format
+		       (org-export-get-coderef-format path desc)
+		       (cdr (assoc path org-export-code-refs)))))
 	     (radiop (insert (format "\\hyperref[%s]{%s}"
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)

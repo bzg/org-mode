@@ -3537,6 +3537,8 @@ Here is what the match groups contain after a match:
 3: path
 4: [desc]
 5: desc")
+(defvar org-bracket-link-analytic-regexp++ nil
+  "Like org-bracket-link-analytic-regexp, but include coderef internal type.")
 (defvar org-any-link-re nil
   "Regular expression matching any link.")
 
@@ -3579,6 +3581,14 @@ This should be called after the variable `org-link-types' has changed."
 	(concat
 	 "\\[\\["
 	 "\\(\\(" (mapconcat 'identity org-link-types "\\|") "\\):\\)?"
+	 "\\([^]]+\\)"
+	 "\\]"
+	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"
+	 "\\]")
+	org-bracket-link-analytic-regexp++
+	(concat
+	 "\\[\\["
+	 "\\(\\(" (mapconcat 'identity (cons "coderef" org-link-types) "\\|") "\\):\\)?"
 	 "\\([^]]+\\)"
 	 "\\]"
 	 "\\(\\[" "\\([^]]+\\)" "\\]\\)?"

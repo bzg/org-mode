@@ -1659,12 +1659,15 @@ the current file."
 	    (desc (match-end 2))
 	    (link (org-link-unescape (match-string 1)))
 	    (slink (org-solidify-link-text link))
-	    found props pos
+	    found props pos cref
 	    (target
 	     (cond
 	      ((cdr (assoc slink target-alist)))
 	      ((and (string-match "^id:" link)
 		    (cdr (assoc (substring link 3) target-alist))))
+	      ((string-match "^((\\(.*\\)))$" link)
+	       (setq cref (match-string 1 link))
+	       (concat "coderef:" cref))
 	      ((string-match org-link-types-re link) nil)
 	      ((or (file-name-absolute-p link)
 		   (string-match "^\\." link))
@@ -1834,6 +1837,7 @@ from the buffer."
 	 '((html "HTML" "BEGIN_HTML" "END_HTML")
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
+	(case-fold-search t)
 	fmt)
 
     (while formatters
@@ -2246,7 +2250,7 @@ in the list) and remove property and value from the list in LISTVAR."
 	lang code trans opts)
     (goto-char (point-min))
     (while (re-search-forward
-	    "\\(^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_SRC.*\\)\\|\\(^#\\+BEGIN_EXAMPLE:?[ \t]+\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_EXAMPLE.*\\)"
+	    "\\(^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_SRC.*\\)\\|\\(^#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)#\\+END_EXAMPLE.*\\)"
 	    nil t)
       (if (match-end 1)
 	  ;; src segments
@@ -2276,7 +2280,9 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
     (let (num cont rtn named rpllbl keepp)
       (setq num (string-match "[-+]n\\>" (or opts ""))
 	    cont (string-match "\\+n\\>" (or opts ""))
-	    rpllbl (string-match "-r\\>" (or opts "")))
+	    rpllbl (string-match "-r\\>" (or opts ""))
+	    keepp (string-match "-k\\>" (or opts "")))
+      (if keepp (setq rpllbl 'keep))
       (setq rtn code)
       (when (equal lang "org")
 	(setq rtn (with-temp-buffer
@@ -2335,7 +2341,8 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 (defun org-export-number-lines (text backend
 				     &optional skip1 skip2 number cont
 				     replace-labels)
-  (if (not number) (setq replace-labels nil)) ;; must use names if no numbers
+  (if (and (not number) (not (eq replace-labels 'keep)))
+      (setq replace-labels nil)) ;; must use names if no numbers
   (setq skip1 (or skip1 0) skip2 (or skip2 0))
   (if (not cont) (setq org-export-last-code-line-counter-value 0))
   (with-temp-buffer
@@ -2362,7 +2369,8 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	(if number
 	    (insert (format fm (incf n)))
 	  (forward-char 1))
-	(when (looking-at ".*?\\([ \t]+\\(((\\(.*?\\)))\\)\\)")
+	(when (and (not (eq replace-labels 'keep))
+		   (looking-at ".*?\\([ \t]+\\(((\\(.*?\\)))\\)\\)"))
 	  (setq ref (match-string 3))
 	  (if replace-labels
 	      (progn
@@ -2472,7 +2480,7 @@ underlined headlines.  The default is 3."
 		  :add-text (plist-get opt-plist :text))
 		 "\n"))
 	 thetoc have-headings first-heading-pos
-	 table-open table-buffer)
+	 table-open table-buffer link desc)
 
     (let ((inhibit-read-only t))
       (org-unmodified
@@ -2585,9 +2593,19 @@ underlined headlines.  The default is 3."
       (setq line (org-html-expand-for-ascii line))
       ;; Replace links with the description when possible
       (while (string-match org-bracket-link-regexp line)
-	(setq line (replace-match
-		    (if (match-end 3) "[\\3]" "[\\1]")
-		    t nil line)))
+	(setq link (match-string 1 line)
+	      desc (match-string (if (match-end 3) 3 1) line))
+	(if (and (> (length link) 8)
+		 (equal (substring link 0 8) "coderef:"))
+	    (setq line (replace-match
+			(format (org-export-get-coderef-format (substring link 8) desc)
+				(cdr (assoc
+				      (substring link 8)
+				      org-export-code-refs)))
+			t t line))
+	  (setq line (replace-match
+		      (if (match-end 3) "[\\3]" "[\\1]")
+		      t nil line))))
       (when custom-times
 	(setq line (org-translate-time line)))
       (cond
@@ -3421,7 +3439,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Format the links
 	  (setq start 0)
-	  (while (string-match org-bracket-link-analytic-regexp line start)
+	  (while (string-match org-bracket-link-analytic-regexp++ line start)
 	    (setq start (match-beginning 0))
 	    (setq path (save-match-data (org-link-unescape
 					 (match-string 3 line))))
@@ -3478,6 +3496,13 @@ lang=\"%s\" xml:lang=\"%s\">
 				"\"" attr ">"
 				(org-export-html-format-desc desc)
 				"</a>")))
+
+	     ((string= type "coderef")
+
+	      (setq rpl (format "<a href=\"#coderef-%s\" class=\"coderef\" onmouseover=\"CodeHighlightOn(this, 'coderef-%s');\" onmouseout=\"CodeHighlightOff(this, 'coderef-%s');\">%s</a>"
+				path path path
+				(format (org-export-get-coderef-format path (and descp desc))
+					(cdr (assoc path org-export-code-refs))))))
 
 	     ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	      ;; The link protocol has a function for format the link
@@ -3805,6 +3830,15 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
+
+(defun org-export-get-coderef-format (path desc)
+  (save-match-data
+    (if (and desc (string-match
+		   (regexp-quote (concat "((" path "))"))
+		   desc))
+	(replace-match "%s" t t desc)
+      "%s")))
+
 
 (defun org-export-html-format-href (s)
   "Make sure the S is valid as a href reference in an XHTML document."
