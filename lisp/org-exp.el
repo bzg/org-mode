@@ -522,6 +522,31 @@ Org-mode file."
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
+(defconst org-export-html-scripts
+"<script language=\"javascript\" type=\"text/javascript\">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = \"code-highlighted\";
+     elem.className   = \"code-highlighted\";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*/-->
+</script>"
+"Basic javascript that is needed by HTML files produced by Org-mode.")
+
 (defconst org-export-html-style-default
 "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
@@ -547,6 +572,8 @@ Org-mode file."
   dt { font-weight: bold; }
   div.figure { padding: 0.5em; }
   div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
   .org-info-js_info-navigation { border-style:none; }
   #org-info-js_console-label { font-size:10px; font-weight:bold;
                                white-space:nowrap; }
@@ -2933,7 +2960,8 @@ PUB-DIR is set, use this as the publishing directory."
 	 (style (concat (if (plist-get opt-plist :style-include-default)
 			    org-export-html-style-default)
 			(plist-get opt-plist :style)
-			(plist-get opt-plist :style-extra)))
+			(plist-get opt-plist :style-extra)
+			"\n" org-export-html-scripts))
 	 (html-extension (plist-get opt-plist :html-extension))
 	 (link-validate (plist-get opt-plist :link-validation-function))
 	 valid thetoc have-headings first-heading-pos
