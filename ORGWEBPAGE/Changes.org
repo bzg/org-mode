@@ -65,6 +65,9 @@ When exported, this is translated to:
 [[((def))][Line ((def))]] contains the macro name.  Later at line [[((back))]],
 backquoting is used.
 
+Thanks to Ilya Shlyakhter for proposing this feature set.  Thanks
+to Sebastian Rose for the key Javascript element that made the
+remote highlighting possible.
 
 *** Capture column view into a different file.
 

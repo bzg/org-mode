@@ -10152,7 +10152,8 @@ other things.
 Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
-@i{Ilya Shlyakhter} proposed the Archive Sibling.
+@i{Ilya Shlyakhter} proposed the Archive Sibling, line numbering in literal
+examples, adn remote highlighting for referenced code lines.
 @item
 @i{Stathis Sideris} wrote the @file{ditaa.jar} ASCII to PNG converter that is
 now packaged into Org's @file{contrib} directory.
