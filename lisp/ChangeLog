@@ -1,3 +1,31 @@
+2008-12-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-links): Handle coderef
+	links.
+
+	* org.el (org-bracket-link-analytic-regexp++): New variable.
+	(org-make-link-regexps): Initialize
+	`org-bracket-link-analytic-regexp++'.
+	(org-store-link): Implement special case in edit-src buffer.
+	(org-insert-link): No use of ide to insert stored links.
+	(org-link-search): Implement special case for coderefs.
+
+	* org-exp.el (org-export-html-scripts): New constant.
+	(org-export-html-style-default): Add a new style for highlighted
+	code.
+	(org-export-code-refs): New variable.
+	(org-export-preprocess-string): Initialize `org-export-code-refs'.
+	Call `org-export-replace-src-segments-and-examples'
+	No longer call `org-export-protect-examples'.
+	(org-export-target-internal-links): Take care of coderef targets.
+	(org-export-last-code-line-counter-value): New variable.
+	(org-export-replace-src-segments-and-examples): Renamed from
+	`org-export-replace-src-segments', and modified.
+	(org-export-format-source-code-or-example): Renamed from
+	`org-export-format-source-code'.
+	(org-export-number-lines): New function.
+	(org-export-as-ascii, org-export-as-html): Handle coderef links.
+
 2008-12-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-handler): Safer way to get a new
