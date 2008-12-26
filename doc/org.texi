@@ -7257,6 +7257,7 @@ but not any simpler -- Albert Einstein
 @node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples
 @cindex literal examples, markup rules
+@cindex code line refenences, markup rules
 
 You can include literal examples that should not be subjected to
 markup.  Such examples will be typeset in monospace, so this is well suited
@@ -7297,17 +7298,24 @@ example:
 Both in @code{example} and in @code{src} snippets, you can add a @code{-n}
 switch to the end of the @code{BEGIN} line, to get the lines of the example
 numbered.  If you use a @code{+n} switch, the numbering from the previous
-numbered snippet will be continued in the current one.  When Org finds a
-cookie like @samp{((name))} is a numbered example, it will remove it, and
-replace links like
+numbered snippet will be continued in the current one.  In literal examples,
+Org will interpret strings like @samp{((name))} as labels, and use them as
+targets for hyperlinks like @code{[[((name))]]}.  In HTML, hoovering the
+mouse over such a link will remote-highlight the corresponding code line,
+which is kind of cool.  If the example/src snippet is numbered, you can also
+add a @code{-r} switch.  Then labels will be @i{removed} from the source code
+and the links will be @i{replaced}@footnote{If you want to explain the use of
+such labels themelves in an example, you can use the @code{-k} switch to make
+sure they are not touched.} with line numbers from the code listing.  Here is
+an exmmple:
 
 @example
-In line [[((name))]] ...
+#+BEGIN_SRC emacs-lisp -n -r
+(save-excursion
+   (goto-char (point-min))       ((jump))
+#+END SRC
+In [[((jump))][line ((jump))]] we go to .....
 @end example
-
-with the line number.  In HTML export, if you hoover over the link with the
-mouse, the corresponding code line will be highlighted according to the CSS
-class @code{code-highlighted}.
 
 @table @kbd
 @kindex C-c '
@@ -7324,8 +7332,14 @@ edited using @code{artist-mode}@footnote{You may select a different-mode with
 the variable @code{org-edit-fixed-width-region-mode}.} to allow creating
 ASCII drawings easily.  Using this command in an empty line will create a new
 fixed-width region.
+@kindex C-c l
+@item C-c l
+Calling @code{org-store-link} while editing a source code example in a
+temporary buffer created with @kbd{C-c '} will prompt for a label, make sure
+that it is unique in the current buffer, and insert it as @samp{((label))} at
+the end of the current line.  Then the label is stored as a link, for
+retrieval with @kbd{C-c C-l}.
 @end table
-
 
 @node Include files, Tables exported, Literal examples, Markup rules
 @subheading Include files
@@ -7825,16 +7839,20 @@ and you could use @code{http} addresses just as well.
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
 
-You can also give style information for the exported file.  The HTML
-exporter assigns the following CSS classes to appropriate parts of the
-document - your style specifications may change these:
+You can also give style information for the exported file.  The HTML exporter
+assigns the following special CSS classes to appropriate parts of the
+document - your style specifications may change these, in addition to any of
+the standard classes like for headlines, tables etc.
 @example
-.todo           @r{TODO keywords}
-.done           @r{the DONE keyword}
-.timestamp      @r{time stamp}
-.timestamp-kwd  @r{keyword associated with a time stamp, like SCHEDULED}
-.tag            @r{tag in a headline}
-.target         @r{target for links}
+.todo              @r{TODO keywords}
+.done              @r{the DONE keyword}
+.timestamp         @r{time stamp}
+.timestamp-kwd     @r{keyword associated with a time stamp, like SCHEDULED}
+.tag               @r{tag in a headline}
+.target            @r{target for links}
+div.figure         @r{how to format an inlined image}
+.linenr            @r{the line number in a code example}
+.code-highlighted  @r{for highlighting referenced code lines}
 @end example
 
 Each exported files contains a compact default style that defines these

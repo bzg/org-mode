@@ -14,6 +14,58 @@
 
 ** Details
 
+*** Line numbers and references in literal examples
+
+Literal examples introduced with =#+BEGIN_EXAMPLE= or =#+BEGIN_SRC=
+do now allow optional line numbering in the example.
+Furthermore, links to specific code lines are supported, greatly
+increasing Org-mode utility for writing tutorials and other
+similar documents.
+
+Code references use special labels embedded directly into the
+source code.  Such labels look like "((name))" and must be unique
+within a document.  Org-mode links with the coderef cookie in the
+link part will be correctly interpreted, both while working with
+an Org file (internal links), and while exporting to the
+different backends.  Line numbering and code references are
+supported for all three major backends, HTML, LaTeX, and ASCII.
+In the HTML backend, hovering the mouse over a link to a source
+line will remote-highlight the referenced code line.
+
+The options for the BEGIN lines are:
+
+ - -n :: Number the lines in the example
+ - +n :: Like -n, but continue numbering from where the previous
+         example left off.
+ - -r :: Remove the coderef cookies from the example, and replace
+         links to this reference with line numbers.  This option
+         takes only effect if either -n or +n are given as well.
+         If -r is not given, coderefs simply use the label name.
+	 
+Here is an example:
+
+#+begin_example -k
+#+begin_src emacs-lisp -n -r
+(defmacro org-unmodified (&rest body)                   ((def))
+  "Execute body without changing `buffer-modified-p'."
+  `(set-buffer-modified-p                               ((back))
+    (prog1 (buffer-modified-p) ,@body)))
+#+end_src
+[[((def))][Line ((def))]] contains the macro name.  Later at line [[((back))]],
+backquoting is used.
+#+end_example
+
+When exported, this is translated to:
+#+begin_src emacs-lisp -n -r
+(defmacro org-unmodified (&rest body)                   ((def))
+  "Execute body without changing `buffer-modified-p'."
+  `(set-buffer-modified-p                               ((back))
+    (prog1 (buffer-modified-p) ,@body)))
+#+end_src
+[[((def))][Line ((def))]] contains the macro name.  Later at line [[((back))]],
+backquoting is used.
+
+
 *** Capture column view into a different file.
 
     The :id parameter for the dynamic block capturing column view
@@ -676,8 +728,9 @@ Schulte.
 
     After this, a link like this will work
 
-    : [[att:some-attached-file.txt]]
-
+#+BEGIN_EXAMPLE
+     [[att:some-attached-file.txt]]
+#+END_EXAMPLE
     This was a proposal by Lindsay Todd.
 
 *** Completed repeated tasks listed briefly in agenda
