@@ -1449,6 +1449,8 @@ translations.  There is currently no way for users to extend this.")
 
 (defvar org-export-target-aliases nil
   "Alist of targets with invisible aliases.")
+(defvar org-export-code-refs nil
+  "Alist of code references and line numbers")
 
 (defun org-export-preprocess-string (string &rest parameters)
   "Cleanup STRING so that that the true exported has a more consistent source.
@@ -1469,6 +1471,7 @@ on this string to produce the exported version."
 	 target-alist rtn)
 
     (setq org-export-target-aliases nil)
+    (setq org-export-code-refs nil)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")
       (erase-buffer)
@@ -1494,7 +1497,7 @@ on this string to produce the exported version."
 				     (plist-get parameters :exclude-tags))
 
       ;; Handle source code snippets
-      (org-export-replace-src-segments)
+      (org-export-replace-src-segments-and-examples backend)
 
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
@@ -1523,9 +1526,6 @@ on this string to produce the exported version."
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
       (setq target-alist (org-export-handle-invisible-targets target-alist))
-
-      ;; Protect examples
-      (org-export-protect-examples (if asciip 'indent nil))
 
       ;; Protect backend specific stuff, throw away the others.
       (org-export-select-backend-specific-text backend)
@@ -2234,70 +2234,155 @@ in the list) and remove property and value from the list in LISTVAR."
       (if s (symbol-name s) s)
     s))
 
-;;; Fontification of code
+;;; Fontification and line numbers for code examples
+
+(defvar org-export-last-code-line-counter-value 0)
+
 ;; Currently only for the HTML backend, but who knows....
-(defun org-export-replace-src-segments ()
+(defun org-export-replace-src-segments-and-examples (backend)
   "Replace source code segments with special code for export."
+  (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
-	lang code trans)
+	lang code trans opts)
     (goto-char (point-min))
     (while (re-search-forward
-	    "^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)[ \t]*\n\\([^\000]+?\n\\)#\\+END_SRC.*"
+	    "\\(^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_SRC.*\\)\\|\\(^#\\+BEGIN_EXAMPLE:?[ \t]+\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_EXAMPLE.*\\)"
 	    nil t)
-      (setq lang (match-string 1) code (match-string 2)
-	    trans (org-export-format-source-code lang code))
+      (if (match-end 1)
+	  ;; src segments
+	  (setq lang (match-string 2)
+		opts (match-string 3)
+		code (match-string 4))
+	(setq lang nil
+	      opts (match-string 6)
+	      code (match-string 7)))
+
+      (setq trans (org-export-format-source-code-or-example
+		   backend lang code opts))
       (replace-match trans t t))))
 
-(defvar htmlp)  ;; dynamically scoped from org-exp.el
+(defvar htmlp)  ;; dynamically scoped
+(defvar latexp)  ;; dynamically scoped
 
-(defun org-export-format-source-code (lang code)
+(defun org-export-format-source-code-or-example (backend
+						 lang code &optional opts)
   "Format CODE from language LANG and return it formatted for export.
-Currently, this only does something for HTML export, for all other
-backends, it converts the segment into an EXAMPLE segment."
+If LANG is nil, do not add any fontification.
+OPTS contains formatting optons, like `-n' for triggering numbering lines,
+and `+n' for continuing previous numering.
+Code formatting according to language currently only works for HTML.
+Numbering lines works for all three major backends (html, latex, and ascii)."
   (save-match-data
-    (cond
-     (htmlp
-      ;; We are exporting to HTML
-      (require 'htmlize nil t)
-      (if (not (fboundp 'htmlize-region-for-paste))
-	  (progn
+    (let (num cont rtn named rpllbl keepp)
+      (setq num (string-match "[-+]n\\>" (or opts ""))
+	    cont (string-match "\\+n\\>" (or opts ""))
+	    rpllbl (string-match "-r\\>" (or opts "")))
+      (setq rtn code)
+      (when (equal lang "org")
+	(setq rtn (with-temp-buffer
+		    (insert rtn)
+		    ;; Free up the protected lines
+		    (goto-char (point-min))
+		    (while (re-search-forward "^," nil t)
+		      (replace-match "")
+		      (end-of-line 1))
+		    (buffer-string))))
+      ;; Now backend-specific coding
+      (cond
+       ((eq backend 'html)
+	;; We are exporting to HTML
+	(when lang
+	  (require 'htmlize nil t)
+	  (when (not (fboundp 'htmlize-region-for-paste))
 	    ;; we do not have htmlize.el, or an old version of it
 	    (message
-	     "htmlize.el 1.34 or later is needed for source code formatting")
-	    (concat "#+BEGIN_EXAMPLE\n" code
-		    (if (string-match "\n\\'" code) "" "\n")
-		    "#+END_EXAMPLE\n"))
-	;; ok, we are good to go
-	(let* ((mode (and lang (intern (concat lang "-mode"))))
-	       (org-inhibit-startup t)
-	       (org-startup-folded nil)
-	       (htmltext
-		(with-temp-buffer
-		  (insert code)
-		  ;; Free up the protected stuff
-		  (goto-char (point-min))
-		  (while (re-search-forward "^," nil t)
-		    (replace-match "")
-		    (end-of-line 1))
-		  (if (functionp mode)
-		      (funcall mode)
-		    (fundamental-mode))
-		  (font-lock-fontify-buffer)
-		  (org-export-htmlize-region-for-paste
-		   (point-min) (point-max)))))
-	  (if (string-match "<pre\\([^>]*\\)>\n?" htmltext)
-	      (setq htmltext (replace-match
-			      (format "<pre class=\"src src-%s\">\n" lang)
-			      t t htmltext)))
-	  (concat "\n#+BEGIN_HTML\n" htmltext "\n#+END_HTML\n\n"))))
-     (t
-      ;; This is not HTML, so just make it an example.
-      (when (equal lang "org")
-	(while (string-match "^," code)
-	  (setq code (replace-match "" t t code))))
-      (concat "#+BEGIN_EXAMPLE\n" code
-	      (if (string-match "\n\\'" code) "" "\n")
-	      "#+END_EXAMPLE\n")))))
+	     "htmlize.el 1.34 or later is needed for source code formatting")))
+
+	(if lang
+	    (let* ((mode (and lang (intern (concat lang "-mode"))))
+		   (org-inhibit-startup t)
+		   (org-startup-folded nil))
+	      (setq rtn
+		    (with-temp-buffer
+		      (insert rtn)
+		      (if (functionp mode)
+			  (funcall mode)
+			(fundamental-mode))
+		      (font-lock-fontify-buffer)
+		      (org-export-htmlize-region-for-paste
+		       (point-min) (point-max))))
+	      (if (string-match "<pre\\([^>]*\\)>\n?" rtn)
+		  (setq rtn (replace-match
+			     (format "<pre class=\"src src-%s\">\n" lang)
+			     t t rtn))))
+	  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n")))
+	(setq rtn (org-export-number-lines rtn 'html 1 1 num cont rpllbl))
+	(concat "\n#+BEGIN_HTML\n" rtn "\n#+END_HTML\n\n"))
+       ((eq backend 'latex)
+	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl))
+	(concat "\n#+BEGIN_LaTeX\n\\begin{verbatim}\n" rtn
+		"\n\\end{verbatim}\n#+END_LaTeX\n\n"))
+       ((eq backend 'ascii)
+	;; This is not HTML or LaTeX, so just make it an example.
+	(setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl))
+	(concat "#+BEGIN_ASCII\n"
+		(mapconcat
+		 (lambda (l) (concat "  " l))
+		 (org-split-string rtn "\n")
+		 "\n")
+		"\n#+END_ASCII\n"))))))
+
+(defun org-export-number-lines (text backend
+				     &optional skip1 skip2 number cont
+				     replace-labels)
+  (if (not number) (setq replace-labels nil)) ;; must use names if no numbers
+  (setq skip1 (or skip1 0) skip2 (or skip2 0))
+  (if (not cont) (setq org-export-last-code-line-counter-value 0))
+  (with-temp-buffer
+    (insert text)
+    (goto-char (point-max))
+    (skip-chars-backward " \t\n\r")
+    (delete-region (point) (point-max))
+    (beginning-of-line (- 1 skip2))
+    (let* ((last (org-current-line))
+	   (n org-export-last-code-line-counter-value)
+	   (nmax (+ n (- last skip1)))
+	   (fmt (format "%%%dd:  " (length (number-to-string nmax))))
+	   (fm
+	    (cond
+	     ((eq backend 'html) (format "<span class=\"linenr\">%s</span>"
+					 fmt))
+	     ((eq backend 'ascii) fmt)
+	     ((eq backend 'latex) fmt)
+	     (t "")))
+	   ref)
+
+      (goto-line (1+ skip1))
+      (while (and (re-search-forward "^" nil t) (not (eobp)) (< n nmax))
+	(if number
+	    (insert (format fm (incf n)))
+	  (forward-char 1))
+	(when (looking-at ".*?\\([ \t]+\\(((\\(.*?\\)))\\)\\)")
+	  (setq ref (match-string 3))
+	  (if replace-labels
+	      (progn
+		(delete-region (match-beginning 1) (match-end 1))
+		(push (cons ref n) org-export-code-refs))
+	    (goto-char (match-beginning 2))
+	    (delete-region (match-beginning 2) (match-end 2))
+	    (insert "(" ref ")")
+	    (push (cons ref (concat "(" ref ")")) org-export-code-refs))
+	  (when (eq backend 'html)
+	    (save-excursion
+	      (beginning-of-line 1)
+	      (insert (format "<span id=\"coderef-%s\" class=\"coderef-off\">"
+			      ref))
+	      (end-of-line 1)
+	      (insert "</span>")))))
+      (setq org-export-last-code-line-counter-value n)
+      (goto-char (point-max))
+      (newline)
+      (buffer-string))))
 
 ;;; ASCII export
 
