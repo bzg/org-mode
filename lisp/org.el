@@ -6228,6 +6228,23 @@ For file links, arg negates `org-context-in-file-links'."
       (setq link (plist-get org-store-link-plist :link)
 	    desc (or (plist-get org-store-link-plist :description) link)))
 
+     ((equal (buffer-name) "*Org Edit Src Example*")
+      (let (label gc)
+	(while (or (not label)
+		   (save-excursion
+		     (save-restriction
+		       (widen)
+		       (goto-char (point-min))
+		       (re-search-forward (concat "((" label "))") nil t))))
+	  (when label (message "Label exists already") (sit-for 2))
+	  (setq label (read-string "Code line label: " label)))
+	(end-of-line 1)
+	(setq link (format "((%s))" label))
+	(setq gc (- 79 (length link)))
+	(if (< (current-column) gc) (org-move-to-column gc t) (insert " "))
+	(insert link)
+	(setq desc nil)))
+
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
 	(setq link
@@ -6640,23 +6657,25 @@ used as the link location instead of reading one interactively."
 		  (reverse org-stored-links) "\n"))))
       (let ((cw (selected-window)))
 	(select-window (get-buffer-window "*Org Links*"))
-	(org-fit-window-to-buffer)
 	(setq truncate-lines t)
+	(org-fit-window-to-buffer)
 	(select-window cw))
       ;; Fake a link history, containing the stored links.
       (setq tmphist (append (mapcar 'car org-stored-links)
 			    org-insert-link-history))
       (unwind-protect
-	  (setq link (org-completing-read
-		      "Link: "
-		      (append
-		       (mapcar (lambda (x) (list (concat (car x) ":")))
-			       (append org-link-abbrev-alist-local org-link-abbrev-alist))
-		       (mapcar (lambda (x) (list (concat x ":")))
-			       org-link-types))
-		      nil nil nil
-		      'tmphist
-		      (or (car (car org-stored-links)))))
+	  (setq link
+		(let ((org-completion-use-ido nil))
+		  (org-completing-read
+		   "Link: "
+		   (append
+		    (mapcar (lambda (x) (list (concat (car x) ":")))
+			    (append org-link-abbrev-alist-local org-link-abbrev-alist))
+		    (mapcar (lambda (x) (list (concat x ":")))
+			    org-link-types))
+		   nil nil nil
+		   'tmphist
+		   (or (car (car org-stored-links))))))
 	(set-window-configuration wcf)
 	(kill-buffer "*Org Links*"))
       (setq entry (assoc link org-stored-links))
@@ -7117,6 +7136,15 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 	 (setq type 'dedicated
 	       pos (match-beginning 0))))
       ;; There is an exact target for this
+      (goto-char pos))
+     ((and (string-match "^((.*))$" s0)
+	   (save-excursion
+	     (goto-char (point-min))
+	     (and
+	      (re-search-forward (concat "[^[]" (regexp-quote s0)) nil t)
+	      (setq type 'dedicated
+		    pos (1+ (match-beginning 0))))))
+      ;; There is a coderef target for this
       (goto-char pos))
      ((string-match "^/\\(.*\\)/$" s)
       ;; A regular expression
