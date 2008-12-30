@@ -1499,6 +1499,10 @@ on this string to produce the exported version."
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
 
+      ;; Normalize footnotes
+      (when (plist-get parameters :footnotes)
+	(org-footnote-normalize nil t))
+
       ;; Find all headings and compute the targets for them
       (setq target-alist (org-export-define-heading-targets target-alist))
 
