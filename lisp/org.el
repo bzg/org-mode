@@ -87,6 +87,7 @@
 (require 'org-compat)
 (require 'org-faces)
 (require 'org-list)
+(require 'org-footnote)
 
 ;;;; Customization variables
 
@@ -12492,7 +12493,6 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   "Return string to be used as color value for an RGB component."
   (format "%g" (/ value 65535.0)))
 
-
 ;;;; Key bindings
 
 ;; Make `C-c C-x' a prefix key
@@ -12633,6 +12633,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-e" 'org-export)
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
+(org-defkey org-mode-map "\C-c\C-xf" 'org-footnote-action)
 
 (org-defkey org-mode-map "\C-c\C-x\C-k" 'org-mark-entry-for-agenda-action)
 (org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
@@ -13045,6 +13046,9 @@ This command does many different things, depending on context:
 - If the cursor is on a #+TBLFM line, re-apply the formulas to
   the entire table.
 
+- If the cursor is at a footnote reference or definition, jump to
+  the corresponding definition or references, respectively.
+
 - If the cursor is a the beginning of a dynamic block, update it.
 
 - If the cursor is inside a table created by the table.el package,
@@ -13090,6 +13094,9 @@ This command does many different things, depending on context:
 	  (call-interactively 'org-table-recalculate)
 	(org-table-maybe-recalculate-line))
       (call-interactively 'org-table-align))
+     ((or (org-footnote-at-reference-p)
+	  (org-footnote-at-definition-p))
+      (call-interactively 'org-footnote-action))
      ((org-at-item-checkbox-p)
       (call-interactively 'org-toggle-checkbox))
      ((org-at-item-p)
@@ -13373,7 +13380,10 @@ See the individual commands for more information."
      ["Convert to odd/even levels" org-convert-to-oddeven-levels t])
     ("Editing"
      ["Emphasis..." org-emphasize t]
-     ["Edit Source Example" org-edit-special t])
+     ["Edit Source Example" org-edit-special t]
+     "--"
+     ["Footnote new/jump" org-footnote-action t]
+     ["Footnote extra" (org-footnote-action t) :active t :keys "C-u C-c C-x f"])
     ("Archive"
      ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
 ;     ["Check and Tag Children" (org-toggle-archive-tag (4))
