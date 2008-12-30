@@ -121,6 +121,7 @@ Document Structure
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
+* Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
 
 Archiving
@@ -308,7 +309,7 @@ Markup rules
 * Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
 * Inlined images::              How to inline images during export
-* Footnotes::                   Numbers like [1]
+* Footnote markup::             
 * Emphasis and monospace::      To bold or not to bold
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
@@ -686,6 +687,7 @@ edit the structure of the document.
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
+* Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
 @end menu
 
@@ -1336,7 +1338,7 @@ converted into a list item.
 Also cycle bullet styles when in the first line of an item.
 @end table
 
-@node Drawers, Orgstruct mode, Plain lists, Document Structure
+@node Drawers, Footnotes, Plain lists, Document Structure
 @section Drawers
 @cindex drawers
 @cindex visibility cycling, drawers
@@ -1364,7 +1366,78 @@ drawer line and press @key{TAB} there.  Org mode uses a drawer for
 storing properties (@pxref{Properties and Columns}), and another one for
 storing clock times (@pxref{Clocking work time}).
 
-@node Orgstruct mode,  , Drawers, Document Structure
+@node Footnotes, Orgstruct mode, Drawers, Document Structure
+@section Footnotes
+@cindex footnotes
+
+Org-mode supports the creation of footnotes.  In contrast to the
+@file{footnote.el} package, Org-mode's footnotes are designed for work on a
+larger document, not only for one-off documents like emails.  The basic
+syntax is similar to the one used by @file{footnote.el}, i.e. a footnote is
+defined in a paragraph that is started by a footnote marker in square
+brackets in column 0.  The footnote reference is simply the marker in square
+brackets inside text.  For example:
+
+@example
+The Org homepage[1] now looks a lot better than it used to.
+...
+[1] The link is: http://orgmode.org
+@end example
+
+Org-mode extends the number-based syntax to @emph{named} footnotes and
+optional inline definition.  Using numbers as markers is supported for
+backward compatibility.  Here are the valid references:
+
+@table @code
+@item [1]
+A numeric footnote marker.
+@item [fn:name]
+A named footnote reference, where @code{name} is a unique label word.
+@item [fn:: This is the inline definition of this footnote]
+A LaTeX-like anonymous footnote where the definition is given directly at the
+reference point.
+@item [fn:name: a definition]
+An inline definition of a footnote, which also specifies a name for the note.
+Since Org allows multiple references to the same note, you can then use use
+@code{[fn:name]} to create additional references.
+@end table
+
+@noindent The following command handles footnotes:
+
+@table @kbd
+@kindex C-c C-x f
+@item C-c C-x f
+The footnote action command.  When the cursor is on a footnote reference,
+jump to the definition.  When it is at a definition, jump to the reference.
+Otherwise, create a new footnote.  Depending on the variable
+@code{org-footnote-define-inline}@footnote{The corresponding in-buffer
+setting is: @code{#+STARTUP: fninline} or @code{#+STARTUP: nofninline}}, the
+definitions will be placed locally, or into the nearest outline section with
+the heading @samp{Footnotes}.  If no such section is found after the
+reference point, one will be created at the end of the file.@* When this
+command is called with a prefix argument, a menu of additional options is
+offered:
+@example
+s   @r{Sort the footnote definitions by reference sequence.  During editing,}
+    @r{Org makes no effort to sort footnote definitions into a particular}
+    @r{sequence.  If you want them sorted, use this command.}
+n   @r{Normalize the footnotes by collecting all definitions (including}
+    @r{inline definitions) into a special section, and then numbering them}
+    @r{in sequence.  The references will then also be numbers.  This is}
+    @r{meant to be the final step before finishing a document (e.g. sending}
+    @r{off an email).  The exporters do this automatically, and so could}
+    @r{something like @code{message-send-hook}.}
+d   @r{Delete the footnote at point, and all definitions of and references}
+    @r{to it.}
+@end example
+@kindex C-c C-c
+@item C-c C-c
+If the cursor is on a footnote reference, jump to the definition.  If it is a
+the definition, jump back to the reference.  When called at a footnote
+location with a prefix argument, offer the same menu as @kbd{C-c C-x f}.
+@end table
+
+@node Orgstruct mode,  , Footnotes, Document Structure
 @section The Orgstruct minor mode
 @cindex Orgstruct mode
 @cindex minor mode for structure editing
@@ -7126,7 +7199,7 @@ markup rule used in an Org mode buffer.
 * Include files::               Include the contents of a file during export
 * Tables exported::             Tables are exported richly
 * Inlined images::              How to inline images during export
-* Footnotes::                   Numbers like [1]
+* Footnote markup::             
 * Emphasis and monospace::      To bold or not to bold
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
@@ -7387,7 +7460,7 @@ a caption and a label for cross references:
 #+LABEL:   tbl:basic-data
 @end example
 
-@node Inlined images, Footnotes, Tables exported, Markup rules
+@node Inlined images, Footnote markup, Tables exported, Markup rules
 @subheading Inlined Images
 @cindex inlined images, markup rules
 
@@ -7406,29 +7479,16 @@ You may also define additional attributes for the figure.  As this is
 backend-specific, see the sections about the individual backends for more
 information.
 
-@node Footnotes, Emphasis and monospace, Inlined images, Markup rules
-@subheading Footnotes
+@node Footnote markup, Emphasis and monospace, Inlined images, Markup rules
+@subheading Footnote markup
 @cindex footnotes, markup rules
 @cindex @file{footnote.el}
 
-@kindex C-c !
-Numbers in square brackets are treated as footnote markers, and lines
-starting with such a marker are interpreted as the footnote itself.  You can
-use the Emacs package @file{footnote.el} to create footnotes@footnote{The
-@file{footnote} package uses @kbd{C-c !} to invoke its commands.  This
-binding conflicts with the Org mode command for inserting inactive time
-stamps.  You could use the variable @code{footnote-prefix} to switch
-footnotes commands to another key.  Or, if you are too used to this binding,
-you could use @code{org-replace-disputed-keys} and @code{org-disputed-keys}
-to change the settings in Org.}.  For example:
+Footnotes defined in the way descriped in @ref{Footnotes} will be exported by
+all backends.  Org does allow multiple references to the same note, and
+different backends support this to varying degree.
 
-@example
-The Org homepage[1] now looks a lot better than it used to.
-
-[1] The link is: http://orgmode.org
-@end example
-
-@node Emphasis and monospace, TeX macros and LaTeX fragments, Footnotes, Markup rules
+@node Emphasis and monospace, TeX macros and LaTeX fragments, Footnote markup, Markup rules
 @subheading Emphasis and monospace
 
 @cindex underlined text, markup rules
@@ -8813,6 +8873,9 @@ corresponding links in this buffer.
 @item
 If the cursor is in a property line or at the start or end of a property
 drawer, offer property commands.
+@item
+If the cursor is at a footnote reference, go to the corresponding
+definition, and vice versa.
 @item
 If the cursor is in a plain list item with a checkbox, toggle the status
 of the checkbox.

@@ -5,7 +5,7 @@
 #+TITLE: Org-mode list of user-visible changes
 #+AUTHOR:  Carsten Dominik
 #+EMAIL:  carsten at orgmode dot org
-#+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil
+#+OPTIONS: H:3 num:nil toc:nil \n:nil @:t ::t |:t ^:{} *:t TeX:t LaTeX:nil f:nil
 #+INFOJS_OPT: view:info toc:1 path:org-info.js tdepth:2 ftoc:t
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
@@ -13,6 +13,80 @@
 * Version 6.17 (in preparation)
 
 ** Details
+
+*** Built-in footnote support
+
+Org-mode now supports the creation of footnotes.  In contrast to the
+`footnote.el' package, Org-mode's footnotes are designed for work on a
+larger document, not only for one-off documents like emails.  The basic
+syntax is similar to the one used by `footnote.el', i.e. a footnote is
+defined in a paragraph that is started by a footnote marker in square
+brackets in column 0.  The footnote reference is simply the marker in
+square brackets inside text.  For example:
+
+#+begin_src org
+ The Org homepage[1] now looks a lot better than it used to.
+ ...
+ [1] The link is: http://orgmode.org
+#+end_src
+
+   Org-mode extends the number-based syntax to _named_ footnotes and
+optional inline definition.  Using numbers as markers is supported for
+backward compatibility.  Here are the valid references:
+
+- [1] ::  A numeric footnote marker.
+	 
+- [fn:name] :: A named footnote reference, where `name' is a
+     unique label word. 
+     
+- [fn:: This is the inline definition of this footnote] ::
+     A LaTeX-like anonymous footnote where the definition is given
+     directly at the reference point.
+
+- [fn:name: a definition] ::
+     An inline definition of a footnote, which also specifies a name
+     for the note.  Since Org allows multiple references to the same
+     note, you can then use use `[fn:name]' to create additional
+     references.
+
+The following command handles footnotes:
+
+- C-c C-x f ::
+     The footnote action command.  When the cursor is on a footnote
+     reference, jump to the definition.  When it is at a definition,
+     jump to the reference.  Otherwise, create a new footnote.
+     Depending on the variable `org-footnote-define-inline' (with
+     associated #+STARTUP options fninline and nofninline), the
+     definitions will be placed locally, or into the nearest outline
+     section with the heading `Footnotes'.  If no such section is found
+     after the reference point, one will be created at the end of the
+     file.
+     When this command is called with a prefix argument, a menu of
+     additional options is offered:
+     - s :: Sort the footnote definitions by reference sequence.
+            During editing, Org makes no effort to sort
+            footnote definitions into a particular sequence.
+            If you want them sorted, use this command. 
+     - n :: Normalize the footnotes by collecting all
+            definitions (including inline definitions) into a
+            special section, and then numbering them in
+            sequence.  The references will then also be
+            numbers.  This is meant to be the final step before
+            finishing a document (e.g. sending off an email).
+            The exporters do this automatically, and so could 
+            something like `message-send-hook'.
+     - d :: Delete the footnote at point, and all references to it.
+     
+- C-c C-c ::
+     If the cursor is on a footnote reference, jump to the definition.
+     If it is a the definition, jump back to the reference.  When
+     called with a prefix argument at either location, offer the
+     same menu as `C-u C-c C-x f'.
+
+Org-mode's footnote support is designed so that it should also
+work in buffers that are not in Org-mode, for example in email
+messages.  Just bind =org-footnote-action= to a global key like
+=C-c f=.
 
 *** Line numbers and references in literal examples
 
