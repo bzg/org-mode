@@ -2993,6 +2993,8 @@ After a match, the following groups carry important information:
     ("logrepeat" org-log-repeat state)
     ("lognoterepeat" org-log-repeat note)
     ("nologrepeat" org-log-repeat nil)
+    ("fninline" org-footnote-define-inline t)
+    ("nofninline" org-footnote-define-inline nil)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI))
   "Variable associated with STARTUP options for org-mode.

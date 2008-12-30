@@ -430,6 +430,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :comments nil
 	   :tags (plist-get opt-plist :tags)
 	   :priority (plist-get opt-plist :priority)
+	   :footnotes (plist-get opt-plist :footnotes)
 	   :todo-keywords (plist-get opt-plist :todo-keywords)
 	   :add-text (if (eq to-buffer 'string) nil text)
 	   :skip-before-1st-heading skip
@@ -1308,7 +1309,7 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
   ;; FIXME: don't protect footnotes from conversion
   (when (plist-get org-export-latex-options-plist :footnotes)
     (goto-char (point-min))
-    (while (re-search-forward "\\[[0-9]+\\]" nil t)
+    (while (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
       (when (save-match-data
 	      (save-excursion (beginning-of-line)
 			      (looking-at "[^:|#]")))
@@ -1317,7 +1318,9 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 	      (foot-prefix (match-string 0))
 	      footnote footnote-rpl)
 	  (save-excursion
-	    (when (search-forward foot-prefix nil t)
+	    (if (not (re-search-forward (concat "^" (regexp-quote foot-prefix))
+					nil t))
+		(replace-match "$^{\\1}$")
 	      (replace-match "")
 	      (let ((end (save-excursion
 			   (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
@@ -1326,16 +1329,17 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 				       " ")) ; prevent last } being part of a link
 		(delete-region (point) end))
 	      (goto-char foot-beg)
-	    (delete-region foot-beg foot-end)
-	    (unless (null footnote)
-	      (setq footnote-rpl (format "\\footnote{%s}" footnote))
-	      (add-text-properties 0 10 '(org-protected t) footnote-rpl)
-	      (add-text-properties (1- (length footnote-rpl))
-				   (length footnote-rpl)
-				   '(org-protected t) footnote-rpl)
-	      (insert footnote-rpl)))))))
+	      (delete-region foot-beg foot-end)
+	      (unless (null footnote)
+		(setq footnote-rpl (format "\\footnote{%s}" footnote))
+		(add-text-properties 0 10 '(org-protected t) footnote-rpl)
+		(add-text-properties (1- (length footnote-rpl))
+				     (length footnote-rpl)
+				     '(org-protected t) footnote-rpl)
+		(insert footnote-rpl)))
+	    ))))
 
-    ;; Replace footnote section tag for LaTeX
+    ;; Remove footnote section tag for LaTeX
     (goto-char (point-min))
     (while (re-search-forward
 	    (concat "^" footnote-section-tag-regexp) nil t)

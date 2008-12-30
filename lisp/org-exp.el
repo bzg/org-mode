@@ -2475,6 +2475,7 @@ underlined headlines.  The default is 3."
 		  :drawers (plist-get opt-plist :drawers)
 		  :tags (plist-get opt-plist :tags)
 		  :priority (plist-get opt-plist :priority)
+		  :footnotes (plist-get opt-plist :footnotes)
 		  :todo-keywords (plist-get opt-plist :todo-keywords)
 		  :verbatim-multiline t
 		  :select-tags (plist-get opt-plist :select-tags)
@@ -3167,6 +3168,7 @@ PUB-DIR is set, use this as the publishing directory."
 	    :todo-keywords (plist-get opt-plist :todo-keywords)
 	    :tags (plist-get opt-plist :tags)
 	    :priority (plist-get opt-plist :priority)
+	    :footnotes (plist-get opt-plist :footnotes)
 	    :archived-trees
 	    (plist-get opt-plist :archived-trees)
 	    :select-tags (plist-get opt-plist :select-tags)
