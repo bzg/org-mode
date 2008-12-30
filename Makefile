@@ -73,6 +73,7 @@ LISPF      = 	org.el			\
 		org-exp.el		\
 		org-export-latex.el	\
 		org-faces.el		\
+		org-footnote.el		\
 		org-gnus.el		\
 		org-id.el		\
 		org-info.el		\
@@ -312,6 +313,7 @@ lisp/org-compat.elc:       lisp/org-macs.elc
 lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
 lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
 lisp/org-faces.elc:        lisp/org-macs.elc lisp/org-compat.elc
+lisp/org-footnotes.elc:    lisp/org-macs.elc lisp/org-compat.elc
 lisp/org-gnus.elc:         lisp/org.elc
 lisp/org-id.elc:           lisp/org.elc
 lisp/org-info.elc:         lisp/org.elc
