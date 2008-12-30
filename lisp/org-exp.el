@@ -3181,7 +3181,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 ind item-type starter didclose
 	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc item-tag
-	 footnotes
+	 footnotes footref-seen
 	 )
 
     (let ((inhibit-read-only t))
@@ -3583,12 +3583,18 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (while (string-match "\\([^* \t].*?\\)\\[\\([0-9]+\\)\\]" line start)
 	      (if (get-text-property (match-beginning 2) 'org-protected line)
 		  (setq start (match-end 2))
-		(let ((n (match-string 2 line)))
+		(let ((n (match-string 2 line)) extra a)
+		  (if (setq a (assoc n footref-seen))
+		      (progn
+			(setcdr a (1+ (cdr a)))
+			(setq extra (format ".%d" (cdr a))))
+		    (setq extra "")
+		    (push (cons n 1) footref-seen))
 		  (setq line
 			(replace-match
 			 (format
-			  "%s<sup><a class=\"footref\" name=\"fnr.%s\" href=\"#fn.%s\">%s</a></sup>"
-			  (match-string 1 line) n n n)
+			  "%s<sup><a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a></sup>"
+			  (match-string 1 line) n extra n n)
 			 t t line))))))
 
 	  (cond
