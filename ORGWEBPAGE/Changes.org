@@ -21,8 +21,9 @@ Org-mode now supports the creation of footnotes.  In contrast to the
 larger document, not only for one-off documents like emails.  The basic
 syntax is similar to the one used by `footnote.el', i.e. a footnote is
 defined in a paragraph that is started by a footnote marker in square
-brackets in column 0.  The footnote reference is simply the marker in
-square brackets inside text.  For example:
+brackets in column 0, no indentation allowed.  The footnote
+reference is simply the marker in square brackets inside text.
+For example:
 
 #+begin_src org
  The Org homepage[1] now looks a lot better than it used to.
@@ -54,7 +55,7 @@ The following command handles footnotes:
 - C-c C-x f ::
      The footnote action command.  When the cursor is on a footnote
      reference, jump to the definition.  When it is at a definition,
-     jump to the reference.  Otherwise, create a new footnote.
+     jump to the (first) reference.  Otherwise, create a new footnote.
      Depending on the variable `org-footnote-define-inline' (with
      associated #+STARTUP options fninline and nofninline), the
      definitions will be placed locally, or into the nearest outline

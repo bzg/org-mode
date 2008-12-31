@@ -1375,8 +1375,8 @@ Org-mode supports the creation of footnotes.  In contrast to the
 larger document, not only for one-off documents like emails.  The basic
 syntax is similar to the one used by @file{footnote.el}, i.e. a footnote is
 defined in a paragraph that is started by a footnote marker in square
-brackets in column 0.  The footnote reference is simply the marker in square
-brackets inside text.  For example:
+brackets in column 0, no indentation allowed.  The footnote reference is
+simply the marker in square brackets, inside text.  For example:
 
 @example
 The Org homepage[1] now looks a lot better than it used to.
@@ -1408,8 +1408,8 @@ Since Org allows multiple references to the same note, you can then use use
 @kindex C-c C-x f
 @item C-c C-x f
 The footnote action command.  When the cursor is on a footnote reference,
-jump to the definition.  When it is at a definition, jump to the reference.
-Otherwise, create a new footnote.  Depending on the variable
+jump to the definition.  When it is at a definition, jump to the (first)
+reference.  Otherwise, create a new footnote.  Depending on the variable
 @code{org-footnote-define-inline}@footnote{The corresponding in-buffer
 setting is: @code{#+STARTUP: fninline} or @code{#+STARTUP: nofninline}}, the
 definitions will be placed locally, or into the nearest outline section with
@@ -10158,6 +10158,9 @@ folded entries, and column view for properties.
 @i{Shidai Liu} ("Leo") asked for embedded La@TeX{} and tested it.  He also
 provided frequent feedback and some patches.
 @item
+@i{Matt Lundin} has proposed last-row references for table formulas and named
+invisible anchors.  He has also worked a lot on the FAQ.
+@item
 @i{Jason F. McBrayer} suggested agenda export to CSV format.
 @item
 @i{Max Mikhanosha} came up with the idea of refiling.
@@ -10218,7 +10221,7 @@ Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
 @item
 @i{Ilya Shlyakhter} proposed the Archive Sibling, line numbering in literal
-examples, adn remote highlighting for referenced code lines.
+examples, and remote highlighting for referenced code lines.
 @item
 @i{Stathis Sideris} wrote the @file{ditaa.jar} ASCII to PNG converter that is
 now packaged into Org's @file{contrib} directory.
