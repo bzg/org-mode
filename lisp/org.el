@@ -13206,7 +13206,10 @@ Calls `org-table-insert-hline', `org-toggle-region-items', or
     (save-excursion
       (beginning-of-line 1)
       (if (looking-at "\\*+ ")
-	  (replace-match (concat (make-string (- (match-end 0) (point) 1) ?\ ) "- ")))))
+	  (replace-match
+	   (concat (make-string
+		    (- (match-end 0) (point) (if org-odd-levels-only 2 1)) ?\ )
+		   "- ")))))
    ((org-region-active-p)
     ;; Convert all lines in region to list items
     (call-interactively 'org-toggle-region-items))

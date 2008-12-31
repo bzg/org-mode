@@ -1,5 +1,7 @@
 2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-ctrl-c-minus): Fix indentation for new items.
+
 	* org-footnote.el: New file.
 
 	* org.el (org-footnote): Require footnote code.
