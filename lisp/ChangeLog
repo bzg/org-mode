@@ -1,3 +1,24 @@
+2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-footnote.el: New file.
+
+	* org.el (org-footnote): Require footnote code.
+	(org-startup-options): Add new footnote options.
+	(org-mode-map): New keybindig for footnotes.
+	(org-ctrl-c-ctrl-c): Add function at footnotes.
+	(org-org-menu): New menu entries for footnotes.
+
+	* org-export-latex.el (org-export-as-latex): Pass footnote
+	variable to preprocessor.
+	(org-export-latex-preprocess): Treat multiple references to a
+	footnote.
+
+	* org-exp.el (org-export-preprocess-string): Call
+	`org-footnote-normalize'.
+	(org-export-as-ascii, org-export-as-html): Pass footnote variable
+	to preprocessor.
+	(org-export-as-html): Treat multiple references to a footnote.
+
 2008-12-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-links): Handle coderef

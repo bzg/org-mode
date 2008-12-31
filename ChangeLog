@@ -1,3 +1,9 @@
+2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* 
+
+	* Makefile (LISPF): Add org-footnote.el
+
 2008-10-09  Carsten Dominik  <dominik@science.uva.nl>
 
 	* Makefile (infodir): Change default path for info.

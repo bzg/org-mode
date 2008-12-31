@@ -1,3 +1,9 @@
+2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Footnotes): New section.
+	(Footnote markup): Shorten section and refer to new Footnote
+	section.
+
 2008-12-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Literal examples): Add documentation for line
