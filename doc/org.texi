@@ -10192,6 +10192,8 @@ provided frequent feedback.
 @i{Matthias Rempe} (Oelde) provided ideas, Windows support, and quality
 control.
 @item
+@i{Paul Rivier} provided the basic implementation of named footnotes.
+@item
 @i{Kevin Rogers} contributed code to access VM files on remote hosts.
 @item
 @i{Sebastian Rose} wrote @file{org-info.js}, a Java script for displaying

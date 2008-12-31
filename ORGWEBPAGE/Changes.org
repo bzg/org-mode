@@ -88,6 +88,10 @@ work in buffers that are not in Org-mode, for example in email
 messages.  Just bind =org-footnote-action= to a global key like
 =C-c f=.
 
+The main trigger for this development came from a hook function
+written by Paul Rivier, to implement named footnotes and to
+convert them to numbered ones before export.  Thanks, Paul!
+
 *** Line numbers and references in literal examples
 
 Literal examples introduced with =#+BEGIN_EXAMPLE= or =#+BEGIN_SRC=
