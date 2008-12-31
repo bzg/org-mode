@@ -148,6 +148,30 @@ Thanks to Ilya Shlyakhter for proposing this feature set.  Thanks
 to Sebastian Rose for the key Javascript element that made the
 remote highlighting possible.
 
+*** New hooks for export preprocessing
+    The export preprocessor now runs more hooks, to allow
+    better-timed tweaking by user functions:
+
+- =org-export-preprocess-hook= ::
+  Pretty much the first thing in the preprocessor.  But org-mode
+  is already active in the preprocessing buffer.
+
+- =org-export-preprocess-after-include-files-hook= ::
+  This is run after the contents of included files have been inserted.
+
+- =org-export-preprocess-after-tree-selection-hook= ::
+  This is run after selection of trees to be exported has
+  happened.  This selection includes tags-based selection, as
+  well as removal of commented and archived trees.
+
+- =org-export-preprocess-before-backend-specifics-hook= ::
+  Hook run before backend-specific functions are called during preprocessing.
+
+- =org-export-preprocess-final-hook= ::
+  Hook for preprocessing an export buffer.  This is run as the
+  last thing in the preprocessing buffer, just before returning
+  the buffer string to the backend.
+
 *** Capture column view into a different file.
 
     The :id parameter for the dynamic block capturing column view

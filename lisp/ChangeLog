@@ -1,5 +1,13 @@
 2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-string): Move the preprocess
+	hook to after turning on Org-mode.
+	(org-export-preprocess-after-include-files-hook)
+	(org-export-preprocess-after-tree-selection-hook)
+	(org-export-preprocess-before-backend-specifics-hook)
+	(org-export-preprocess-final-hook): New hooks.
+	(org-export-preprocess-string): Run the new hooks.
+
 	* org.el (org-ctrl-c-minus): Fix indentation for new items.
 
 	* org-footnote.el: New file.

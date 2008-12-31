@@ -298,6 +298,24 @@ drawer names to export."
   "Hook for preprocessing an export buffer.
 Pretty much the first thing when exporting is running this hook.")
 
+(defvar org-export-preprocess-after-include-files-hook nil
+  "Hook for preprocessing an export buffer.
+This is run after the contents of included files have been inserted.")
+
+(defvar org-export-preprocess-after-tree-selection-hook nil
+  "Hook for preprocessing an export buffer.
+This is run after selection of trees to be exported has happened.
+This selection includes tags-based selection, as well as removal
+of commented and archived trees.")
+
+(defvar org-export-preprocess-before-backend-specifics-hook nil
+  "Hook run before backend-specific functions are called during preprocessing.")
+
+(defvar org-export-preprocess-final-hook nil
+  "Hook for preprocessing an export buffer.
+This is run as the last thing in the preprocessing buffer, just before
+returning the buffer string to the backend.")
+
 (defgroup org-export-translation nil
   "Options for translating special ascii sequences for the export backends."
   :tag "Org Export Translation"
@@ -1477,8 +1495,6 @@ on this string to produce the exported version."
       (erase-buffer)
       (insert string)
       (setq case-fold-search t)
-      ;; Call the hook
-      (run-hooks 'org-export-preprocess-hook)
 
       ;; Remove license-to-kill stuff
       ;; The caller marks some stuff for killing, stuff that has been
@@ -1487,14 +1503,26 @@ on this string to produce the exported version."
 
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
+
+      ;; Call the hook
+      (run-hooks 'org-export-preprocess-hook)
+
       (untabify (point-min) (point-max))
 
-      ;; Handle include files
+      ;; Handle include files, and call a hook
       (org-export-handle-include-files)
+      (run-hooks 'org-export-preprocess-after-include-files-hook)
 
-      ;; Get rid of excluded trees
+      ;; Get rid of archived trees
+      (org-export-remove-archived-trees archived-trees)
+
+      ;; Remove comment environment and comment subtrees
+      (org-export-remove-comment-blocks-and-subtrees)
+
+      ;; Get rid of excluded trees, and call a hook
       (org-export-handle-export-tags (plist-get parameters :select-tags)
 				     (plist-get parameters :exclude-tags))
+      (run-hooks 'org-export-preprocess-after-tree-selection-hook)
 
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
@@ -1521,9 +1549,6 @@ on this string to produce the exported version."
 	(goto-char (point-min))
 	(insert (plist-get parameters :add-text) "\n"))
 
-      ;; Get rid of archived trees
-      (org-export-remove-archived-trees archived-trees)
-
       ;; Remove todo-keywords before exporting, if the user has requested so
       (org-export-remove-headline-metadata parameters)
 
@@ -1546,9 +1571,6 @@ on this string to produce the exported version."
       ;; Attach captions to the correct object
       (setq target-alist (org-export-attach-captions-and-attributes
 			  backend target-alist))
-
-      ;; Remove comment environment and comment subtrees
-      (org-export-remove-comment-blocks-and-subtrees)
 
       ;; Find matches for radio targets and turn them into internal links
       (org-export-mark-radio-links)
@@ -1573,6 +1595,9 @@ on this string to produce the exported version."
       (when org-export-table-remove-special-lines
 	(org-export-remove-special-table-lines))
 
+      ;; Another hook
+      (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
+
       ;; Specific LaTeX stuff
       (when latexp
 	(require 'org-export-latex nil)
@@ -1588,6 +1613,9 @@ on this string to produce the exported version."
 
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
+
+      ;; Run the final hook
+      (run-hooks 'org-export-preprocess-final-hook)
 
       (setq rtn (buffer-string)))
     (kill-buffer " org-mode-tmp")
