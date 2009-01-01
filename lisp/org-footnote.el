@@ -286,6 +286,7 @@ referenced sequence."
 	 (setq def (match-string 4)
 	       ref (or (match-string 1) (match-string 2))
 	       before (char-to-string (char-after (match-beginning 0))))
+	 (if (equal ref "fn:") (setq ref nil))
 	 (if (and ref (setq a (assoc ref ref-table)))
 	     (setq marker (nth 1 a))
 	   (setq marker (number-to-string (incf count))))
