@@ -51,12 +51,13 @@
 	  "\\(?:"
 	  "\\([0-9]+\\)"
 	  "\\|"
-	  "\\(fn:\\(\\sw+?\\)?\\)\\(?::\\([^\]]*?\\)\\)?"
+	  (org-re "\\(fn:\\([-_[:word:]]+?\\)?\\)\\(?::\\([^\]]*?\\)\\)?")
 	  "\\)"
 	  "\\]")
   "Regular expression for matching footnotes.")
 
-(defconst org-footnote-definition-re "^\\(\\[\\([0-9]+\\|fn:\\sw+\\)\\]\\)"
+(defconst org-footnote-definition-re 
+  (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
 
 (defcustom org-footnote-section "Footnotes"
@@ -108,10 +109,7 @@ with start and label of the footnote if there is a definition at point."
   (save-excursion
     (end-of-line 1)
     (let ((lim (save-excursion (re-search-backward "^\\*+ \\|^[ \t]*$" nil t))))
-      (when (re-search-backward
-	     org-footnote-definition-re
-	     (save-excursion (re-search-backward "^\\*+ \\|^[ \t]*$" nil t))
-	     t)
+      (when (re-search-backward org-footnote-definition-re lim t)
 	(list (match-beginning 0) (match-string 2))))))
 
 (defun org-footnote-goto-definition (label)
@@ -288,13 +286,15 @@ referenced sequence."
 	   (if def
 	       (setq def (org-trim def))
 	     (save-excursion
-	       (if (not (re-search-forward (concat "^\\[" ref "\\]") nil t))
+	       (if (not (re-search-forward (concat "^\\[" (regexp-quote ref)
+						   "\\]") nil t))
 		   (setq def
 			 (format "FOOTNOTE DEFINITION NOT FOUND: %s" ref))
 		 (setq beg (match-beginning 0))
 		 (setq beg1 (match-end 0))
-		 (re-search-forward "^[ \t]*$\\|^\\[\\([0-9]+\\|fn:\\sw+\\)\\]"
-				    nil 'move)
+		 (re-search-forward
+		  (org-re "^[ \t]*$\\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
+		  nil 'move)
 		 (setq def (buffer-substring beg1 (match-beginning 0)))
 		 (delete-region beg (match-beginning 0))))))
 	 (unless sort-only (replace-match (concat before "[" marker "]")))

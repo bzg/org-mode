@@ -1,5 +1,7 @@
 2009-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-re): Handle the [:word:] class.
+
 	* org-exp.el (org-export-preprocess-string): Call
 	`org-export-protect-colon-examples'.
 	(org-export-protect-colon-examples): Renamed from

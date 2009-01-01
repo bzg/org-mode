@@ -48,6 +48,8 @@
 	(save-match-data
 	  (while (string-match "\\[:alnum:\\]" ss)
 	    (setq ss (replace-match "a-zA-Z0-9" t t ss)))
+	  (while (string-match "\\[:word:\\]" ss)
+	    (setq ss (replace-match "a-zA-Z0-9" t t ss)))
 	  (while (string-match "\\[:alpha:\\]" ss)
 	    (setq ss (replace-match "a-zA-Z" t t ss)))
 	  ss))
