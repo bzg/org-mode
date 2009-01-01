@@ -62,15 +62,17 @@
 
 (defcustom org-footnote-section "Footnotes"
   "Outline heading containing footnote definitions before export.
-During editing, Org-mode places footnote definitions under this
-special outline heading.  You can have several such sections in a buffer,
-Org-mode will always use the nearest.  So, for example, each top-level
-heading could have its own level-2 child for footnotes.
-This is the heading where Org places the definition automatically.  However,
-by hand you may place definitions *anywhere*.
-During export, all subtrees starting with this heading will be removed."
+This can be nil, to place footnotes locally at the end of the current
+outline node.  If can also be the name of a special outline heading
+under which footnotes should be put.
+This variable defines the place where Org puts the definition
+automatically.  However, by hand you may place definitions *anywhere*.
+If this is a string, during export, all subtrees starting with this
+heading will be removed after extracting footnote definitions."
   :group 'org-footnotes
-  :type 'string)
+  :type '(choice
+	  (string :tag "Special outline node name")
+	  (const :tag "Define footnotes in the current outline node" nil)))
 
 (defcustom org-footnote-tag-for-non-org-mode-files "Footnotes:"
   "Tag marking the beginning of footnote section.
@@ -205,12 +207,17 @@ or new, let the user edit the definition of the footnote."
   (let (re p)
     (cond
      ((org-mode-p)
-      (setq re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$"))
-      (unless (or (re-search-forward re nil t)
-		  (and (progn (widen) t)
-		       (re-search-forward re nil t)))
-	(goto-char (point-max))
-	(insert "\n\n* " org-footnote-section))
+      (if (not org-footnote-section)
+	  ;; No section, put foornote into the curren outline node
+	  nil
+	;; Try to find or make the special node
+	(setq re (concat "^\\*+[ \t]+" org-footnote-section "[ \t]*$"))
+	(unless (or (re-search-forward re nil t)
+		    (and (progn (widen) t)
+			 (re-search-forward re nil t)))
+	  (goto-char (point-max))
+	  (insert "\n\n* " org-footnote-section)))
+      ;; Now go to the end of this entry and insert there.
       (outline-next-heading)
       (setq p (point))
       (skip-chars-backward " \t\n\r")
@@ -304,10 +311,11 @@ referenced sequence."
       (goto-char (point-min))
       (cond
        ((org-mode-p)
-	(if (re-search-forward
-	     (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
-		     "[ \t]*$")
-	     nil t)
+	(if (and org-footnote-section
+		 (re-search-forward
+		  (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
+			  "[ \t]*$")
+		  nil t))
 	    (if for-preprocessor
 		(replace-match "")
 	      (org-back-to-heading t)
@@ -316,8 +324,9 @@ referenced sequence."
 	      (delete-region (point) (org-end-of-subtree t)))
 	  (goto-char (point-max))
 	  (unless for-preprocessor
-	    (insert "* " org-footnote-section "\n")
-	    (setq ins-point (point)))))
+	    (when org-footnote-section
+	      (insert "* " org-footnote-section "\n")
+	      (setq ins-point (point))))))
        (t
 	(if (re-search-forward 
 	     (concat "^"

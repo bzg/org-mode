@@ -98,7 +98,7 @@ convert them to numbered ones before export.  Thanks, Paul!
 Literal examples introduced with =#+BEGIN_EXAMPLE= or =#+BEGIN_SRC=
 do now allow optional line numbering in the example.
 Furthermore, links to specific code lines are supported, greatly
-increasing Org-mode utility for writing tutorials and other
+increasing Org-mode's utility for writing tutorials and other
 similar documents.
 
 Code references use special labels embedded directly into the
