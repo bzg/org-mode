@@ -1057,7 +1057,8 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-show-log nil)
 (defvar org-agenda-redo-command nil)
 (defvar org-agenda-query-string nil)
-(defvar org-agenda-mode-hook nil)
+(defvar org-agenda-mode-hook nil
+  "Hook for org-agenda-mode, run after the mode is turned on.")
 (defvar org-agenda-type nil)
 (defvar org-agenda-force-single-file nil)
 
