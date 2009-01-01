@@ -1556,6 +1556,9 @@ on this string to produce the exported version."
       ;; but mark them as targets that should be invisible
       (setq target-alist (org-export-handle-invisible-targets target-alist))
 
+      ;; Protect short examples
+      (org-export-protect-colon-examples)
+
       ;; Protect backend specific stuff, throw away the others.
       (org-export-select-backend-specific-text backend)
 
@@ -1851,14 +1854,8 @@ from the buffer."
 			 '(org-protected t))
     (goto-char (1+ (match-end 4)))))
 
-(defun org-export-protect-examples (&optional indent)
-  "Protect code that should be exported as monospaced examples."
-  (goto-char (point-min))
-  (while (re-search-forward "^#\\+BEGIN_EXAMPLE[ \t]*\n" nil t)
-    (goto-char (match-end 0))
-    (while (and (not (looking-at "#\\+END_EXAMPLE")) (not (eobp)))
-      (insert (if indent ":  " ":"))
-      (beginning-of-line 2)))
+(defun org-export-protect-colon-examples ()
+  "Protect lines starting with a colon."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)
     (add-text-properties (match-beginning 0) (match-end 0)
@@ -3401,7 +3398,6 @@ lang=\"%s\" xml:lang=\"%s\">
 		(replace-match "\\2\n"))
 	      (insert line "\n")
 	      (while (and lines
-			  (not (string-match "^[ \t]*:" (car lines)))
 			  (or (= (length (car lines)) 0)
 			      (get-text-property 0 'org-protected (car lines))))
 		(insert (pop lines) "\n"))

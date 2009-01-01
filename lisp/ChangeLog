@@ -1,3 +1,11 @@
+2009-01-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-preprocess-string): Call
+	`org-export-protect-colon-examples'.
+	(org-export-protect-colon-examples): Renamed from
+	`org-export-protect-examples', and scope limited to lines starting
+	with a colon.
+
 2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-string): Move the preprocess
