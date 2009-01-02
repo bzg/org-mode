@@ -888,7 +888,7 @@ adaptive  Use relative path for files in the current directory and sub-
 	  (const noabbrev)
 	  (const adaptive)))
 
-(defcustom org-activate-links '(bracket angle plain radio tag date)
+(defcustom org-activate-links '(bracket angle plain radio tag date footnote)
   "Types of links that should be activated in Org-mode files.
 This is a list of symbols, each leading to the activation of a certain link
 type.  In principle, it does not hurt to turn on most link types - there may
@@ -901,15 +901,18 @@ plain     Plain links in normal text, no whitespace, like http://google.com.
 radio     Text that is matched by a radio target, see manual for details.
 tag       Tag settings in a headline (link to tag search).
 date      Time stamps (link to calendar).
+footnote  Footnote labels.
 
 Changing this variable requires a restart of Emacs to become effective."
   :group 'org-link
-  :type '(set (const :tag "Double bracket links (new style)" bracket)
+  :type '(set :greedy t
+	      (const :tag "Double bracket links (new style)" bracket)
 	      (const :tag "Angular bracket links (old style)" angular)
 	      (const :tag "Plain text links" plain)
 	      (const :tag "Radio target matches" radio)
 	      (const :tag "Tags" tag)
-	      (const :tag "Timestamps" date)))
+	      (const :tag "Timestamps" date)
+	      (const :tag "Footnotes" footnote)))
 
 (defcustom org-make-link-description-function nil
   "Function to use to generate link descriptions from links. If
@@ -3749,6 +3752,22 @@ will be prompted for."
 				   ))
 	t)))
 
+(defun org-activate-footnote-links (limit)
+  "Run through the buffer and add overlays to links."
+  (if (re-search-forward "\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)" 
+			 limit t)
+      (progn
+	(add-text-properties (match-beginning 0) (match-end 0)
+			     (list 'mouse-face 'highlight
+				   'rear-nonsticky org-nonsticky-props
+				   'keymap org-mouse-map
+				   'help-echo
+				   (if (= (point-at-bol) (match-beginning 0))
+				       "Footnote definition"
+				     "Footnote reference")
+				   ))
+	t)))
+
 (defun org-activate-bracket-links (limit)
   "Run through the buffer and add overlays to bracketed links."
   (if (re-search-forward org-bracket-link-regexp limit t)
@@ -4003,6 +4022,8 @@ between words."
 	   (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+	   (if (memq 'footnote lk) '(org-activate-footnote-links
+				     (0 'org-footnote t)))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines
@@ -6913,8 +6934,11 @@ application the system uses for this file type."
   (move-marker org-open-link-marker (point))
   (setq org-window-config-before-follow-link (current-window-configuration))
   (org-remove-occur-highlights nil nil t)
-  (if (org-at-timestamp-p t)
-      (org-follow-timestamp-link)
+  (cond
+   ((org-at-timestamp-p t) (org-follow-timestamp-link))
+   ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
+    (org-footnote-action))
+   (t 
     (let (type path link line search (pos (point)))
       (catch 'match
 	(save-excursion
@@ -7060,7 +7084,7 @@ application the system uses for this file type."
 	    (error "Abort"))))
 
        (t
-	(browse-url-at-point)))))
+	(browse-url-at-point))))))
   (move-marker org-open-link-marker nil)
   (run-hook-with-args 'org-follow-link-hook))
 

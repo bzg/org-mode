@@ -1443,6 +1443,12 @@ d   @r{Delete the footnote at point, and all definitions of and references}
 If the cursor is on a footnote reference, jump to the definition.  If it is a
 the definition, jump back to the reference.  When called at a footnote
 location with a prefix argument, offer the same menu as @kbd{C-c C-x f}.
+@kindex C-c C-o
+@kindex mouse-1
+@kindex mouse-2
+@item C-c C-c  @r{or} mouse-1/2
+Footnote labels are also links to the corresponding definition/reference, and
+you can use the usual commands to follow these links.
 @end table
 
 @node Orgstruct mode,  , Footnotes, Document Structure

@@ -148,6 +148,7 @@ with start and label of the footnote if there is a definition at point."
     (if (not pos)
 	(error "Cannot find definition of footnote %s" label)
       (goto-char pos)
+      (org-show-context 'link-search)
       (message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
 (defun org-footnote-goto-next-reference (label)
@@ -166,7 +167,10 @@ with start and label of the footnote if there is a definition at point."
 			 (re-search-forward re nil t))
 		    (and (goto-char (point-min))
 			 (re-search-forward re nil t)))))
-    (if pos (goto-char pos)
+    (if pos
+	(progn
+	  (goto-char pos)
+	  (org-show-context 'link-search))
       (error "Cannot find reference of footnote %s" label))))
 
 (defun org-footnote-normalize-label (label)
