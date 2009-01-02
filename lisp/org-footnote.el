@@ -92,6 +92,23 @@ will be used to define the footnote at the reference position."
   :group 'org-footnote
   :type 'boolean)
 
+(defcustom org-footnote-auto-label t
+  "Non-nil means, define automatically new labels for footnotes.
+Possible values are:
+
+nil        prompt the user for each label
+t          create unique labels of the form [fn:1], [fn:2], ...
+confirm    like t, but let the user edit the created value.  In particular,
+           the label can be removed from the minibuffer, to create
+           an anonymous footnote.
+plain      Automatically create plain number labels like [1]"
+  :group 'org-footnote
+  :type '(choice
+	  (const :tag "Frompt for label" nil)
+	  (const :tag "Create automatic [fn:N]" t)
+	  (const :tag "Offer automatic [fn:N] for editing" confirm)
+	  (const :tag "Create automatic [N]" plain)))
+
 (defun org-footnote-at-reference-p ()
   "Is the cursor at a footnote reference?
 If yes, return the beginning position, the label, and the definition, if local."
@@ -175,6 +192,20 @@ with start and label of the footnote if there is a definition at point."
 	  (and l (not (equal l "fn:")) (add-to-list 'rtn l)))))
     rtn))
 
+(defun org-footnote-unique-label (&optional current)
+  "Return a new unique footnote label.
+The returns the firsts fn:N labels that is currently not used."
+  (unless current (setq current (org-footnote-all-labels)))
+  (let ((fmt (if (eq org-footnote-auto-label 'plain) "%d" "fn:%d"))
+	(cnt 1))
+    (while (member (format fmt cnt) current)
+      (incf cnt))
+    (format fmt cnt)))
+
+(defvar org-footnote-label-history nil
+  "History of footnote labels entered in current buffer.")
+(make-variable-buffer-local 'org-footnote-label-history)
+
 (defun org-footnote-new ()
   "Insert a new footnote.
 This command prompts for a label.  If this is a label referencing an
@@ -182,9 +213,15 @@ existing label, only insert the label.  If the footnote label is empty
 or new, let the user edit the definition of the footnote."
   (interactive)
   (let* ((labels (org-footnote-all-labels))
-	 (label (completing-read
-		 "Label (leave empty for anonymous): "
-		 (mapcar 'list labels))))
+	 (propose (org-footnote-unique-label labels))
+	 (label
+	  (if (member org-footnote-auto-label '(t plain))
+	      propose
+	    (completing-read
+	     "Label (leave empty for anonymous): "
+	     (mapcar 'list labels) nil nil
+	     (if (eq org-footnote-auto-label 'confirm) propose nil)
+	     'org-footnote-label-history))))
     (setq label (org-footnote-normalize-label label))
     (cond
      ((equal label "")

@@ -1379,20 +1379,23 @@ brackets in column 0, no indentation allowed.  The footnote reference is
 simply the marker in square brackets, inside text.  For example:
 
 @example
-The Org homepage[1] now looks a lot better than it used to.
+The Org homepage[fn:1] now looks a lot better than it used to.
 ...
-[1] The link is: http://orgmode.org
+[fn:1] The link is: http://orgmode.org
 @end example
 
 Org-mode extends the number-based syntax to @emph{named} footnotes and
-optional inline definition.  Using numbers as markers is supported for
-backward compatibility.  Here are the valid references:
+optional inline definition.  Using plain numbers as markers (as
+@file{footnote.el} does) is supported for backward compatibility, but not
+encouraged because of possible conflicts with LaTeX snippets @pxref{Embedded
+LaTeX}.  Here are the valid references:
 
 @table @code
 @item [1]
-A numeric footnote marker.
+A plain numeric footnote marker.
 @item [fn:name]
-A named footnote reference, where @code{name} is a unique label word.
+A named footnote reference, where @code{name} is a unique label word, or, for
+simplicity of automatic creation, a number.
 @item [fn:: This is the inline definition of this footnote]
 A LaTeX-like anonymous footnote where the definition is given directly at the
 reference point.
@@ -1401,6 +1404,11 @@ An inline definition of a footnote, which also specifies a name for the note.
 Since Org allows multiple references to the same note, you can then use use
 @code{[fn:name]} to create additional references.
 @end table
+
+Footnote labels can be created automatically, or you create names yourself.
+This is handled by the variable @code{org-footnote-auto-label} and its
+corresponding @code{#+STARTUP} keywords, see the docstring of that variable
+for details.
 
 @noindent The following command handles footnotes:
 
@@ -8818,6 +8826,23 @@ The following options influence the table spreadsheet (variable
 @example
 constcgs   @r{@file{constants.el} should use the c-g-s unit system}
 constSI    @r{@file{constants.el} should use the SI unit system}
+@end example
+To influence footnote settings, use the following keywords.  The
+corresponding variables are @code{org-footnote-define-inline} and
+@code{org-footnote-auto-label}.
+@cindex @code{fninline}, STARTUP keyword
+@cindex @code{fnnoinline}, STARTUP keyword
+@cindex @code{fnprompt}, STARTUP keyword
+@cindex @code{fnauto}, STARTUP keyword
+@cindex @code{fnconfirm}, STARTUP keyword
+@cindex @code{fnplain}, STARTUP keyword
+@example
+fninline    @r{define footnotes inline}
+fnnoinline  @r{define footnotes in separate section}
+fnprompt    @r{prompt for footnote labels}
+fnauto      @r{create [fn:1]-like labels automatically (default)}
+fnconfirm   @r{offer automatic label for editing or confirmation}
+fnplain     @r{create [1]-like labels automatically}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
 These lines (several such lines are allowed) specify the valid tags in

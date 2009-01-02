@@ -31,14 +31,17 @@ For example:
  [1] The link is: http://orgmode.org
 #+end_src
 
-   Org-mode extends the number-based syntax to _named_ footnotes and
-optional inline definition.  Using numbers as markers is supported for
-backward compatibility.  Here are the valid references:
+Org-mode extends the number-based syntax to /named/ footnotes and
+optional inline definition.  Using numbers as markers is
+supported for backward compatibility, but not encouraged because
+of possible conflicts with LaTeX syntax.  Here are the valid
+references:
 
-- [1] ::  A numeric footnote marker.
+- [1] ::  A plain numeric footnote marker.
 	 
 - [fn:name] :: A named footnote reference, where `name' is a
-     unique label word. 
+     unique label word or, for simplicity of automatic creation,
+     a number. 
      
 - [fn:: This is the inline definition of this footnote] ::
      A LaTeX-like anonymous footnote where the definition is given
@@ -50,17 +53,23 @@ backward compatibility.  Here are the valid references:
      note, you can then use use `[fn:name]' to create additional
      references.
 
+Footnote labels can be created automatically, or you create names
+yourself.  This is handled by the variable
+=org-footnote-auto-label= and its corresponding =#+STARTUP=
+keywords, see the docstring of that variable for details.
+
 The following command handles footnotes:
 
 - C-c C-x f ::
-     The footnote action command.  When the cursor is on a footnote
-     reference, jump to the definition.  When it is at a definition,
-     jump to the (first) reference.  Otherwise, create a new footnote.
-     Depending on the variable `org-footnote-define-inline' (with
-     associated #+STARTUP options fninline and nofninline), the
-     definitions will be placed locally, or into the nearest outline
-     section with the heading `Footnotes'.  If no such section is found
-     after the reference point, one will be created at the end of the
+     The footnote action command.  When the cursor is on a
+     footnote reference, jump to the definition.  When it is at a
+     definition, jump to the (first) reference.  Otherwise,
+     create a new footnote.  Depending on the variable
+     `org-footnote-define-inline' (with associated =#+STARTUP=
+     options =fninline= and =nofninline=), the definitions will
+     be placed locally, or into the nearest outline section with
+     the heading `Footnotes'.  If no such section is found after
+     the reference point, one will be created at the end of the
      file.
      When this command is called with a prefix argument, a menu of
      additional options is offered:
