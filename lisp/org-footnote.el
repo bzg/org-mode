@@ -343,16 +343,19 @@ referenced sequence."
 	   (if def
 	       (setq def (org-trim def))
 	     (save-excursion
+	       (goto-char (point-min))
 	       (if (not (re-search-forward (concat "^\\[" (regexp-quote ref)
 						   "\\]") nil t))
 		   (setq def nil)
 		 (setq beg (match-beginning 0))
 		 (setq beg1 (match-end 0))
 		 (re-search-forward
-		  (org-re "^[ \t]*$\\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
+		  (org-re "^[ \t]*$\\|^\\*+ \\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
 		  nil 'move)
 		 (setq def (buffer-substring beg1 (match-beginning 0)))
-		 (delete-region beg (match-beginning 0))))))
+		 (goto-char beg)
+		 (skip-chars-backward " \t\n\t")
+		 (delete-region (1+ (point)) (match-beginning 0))))))
 	 (unless sort-only
 	   (replace-match (concat before "[" marker "]"))
 	   (and idef
@@ -452,6 +455,7 @@ ENTRY is (fn-label num-mark definition)."
   (while (and (not (bobp)) (= (char-after) ?#))
     (beginning-of-line 0))
   (if (looking-at "#\\+TBLFM:") (beginning-of-line 2))
+  (end-of-line 1)
   (skip-chars-backward "\n\r\t "))
 
 (defun org-footnote-delete (&optional label)

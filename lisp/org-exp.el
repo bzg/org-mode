@@ -2271,7 +2271,6 @@ in the list) and remove property and value from the list in LISTVAR."
 
 (defvar org-export-last-code-line-counter-value 0)
 
-;; Currently only for the HTML backend, but who knows....
 (defun org-export-replace-src-segments-and-examples (backend)
   "Replace source code segments with special code for export."
   (setq org-export-last-code-line-counter-value 0)
