@@ -1,3 +1,10 @@
+2009-01-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-mtags.el (org-mtags-replace): Extend muse tags syntax
+	to cater for the new export switched in src and example tags.
+	(org-mtags-replace): Fix bugs in prefix processing.
+	(org-mtags-get-tag-and-attributes): Add local variable bindings.
+
 2008-12-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-exp-blocks.el (org-export-blocks-format-ditaa): Catch

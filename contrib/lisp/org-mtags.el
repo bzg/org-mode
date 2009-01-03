@@ -43,7 +43,7 @@
 ;;   <br>
 ;;        Needs to be at the end of a line.  Will be translated to "\\".
 ;;
-;;   <example>
+;;   <example switches="-n -r">
 ;;        Needs to be on a line by itself, similarly the </example> tag.
 ;;        Will be translated into Org's #+BEGIN_EXAMPLE construct.
 ;;
@@ -68,7 +68,7 @@
 ;;   <literal style="STYLE">    ;; only latex and html supported in Org
 ;;        Needs to be on a line by itself, similarly the </literal> tag.
 ;;
-;;   <src lang="LANG">
+;;   <src lang="LANG" switches="-n -r">
 ;;        Needs to be on a line by itself, similarly the </src> tag.
 ;;        Will be translated into Org's BEGIN_SRC construct.
 ;;
@@ -128,7 +128,7 @@ The is done in the entire buffer."
   (let ((re (concat "^[ \t]*\\(</?\\("
 		    (mapconcat 'identity org-mtags-supported-tags "\\|")
 		    "\\)\\>\\)"))
-	info tag rpl style markup lang file prefix prefix1)
+	info tag rpl style markup lang file prefix prefix1 switches)
     ;; First, do the <br> tag
     (goto-char (point-min))
     (while (re-search-forward "<br>[ \t]*$" nil t)
@@ -146,7 +146,7 @@ The is done in the entire buffer."
 	  (setq rpl "[TABLE-OF-CONTENTS]")
 	  ;; FIXME: also trigger TOC in options-plist?????
 	  )
-	 ((member tag '("example" "quote" "comment" "verse"))
+	 ((member tag '("quote" "comment" "verse"))
 	  (if (plist-get info :closing)
 	      (setq rpl (format "#+END_%s" (upcase tag)))
 	    (setq rpl (format "#+BEGIN_%s" (upcase tag)))))
@@ -168,12 +168,20 @@ The is done in the entire buffer."
 			"#+BEGIN_HTML")
 		       ((member style '("ascii"))
 			"#+BEGIN_ASCII")))))
+	 ((equal tag "example")
+	  (if (plist-get info :closing)
+	      (setq rpl "#+END_EXAMPLE")
+	    (setq rpl "#+BEGIN_EXAMPLE")
+	    (when (setq switches (plist-get info :switches))
+	      (setq rpl (concat rpl " " switches)))))
 	 ((equal tag "src")
 	  (if (plist-get info :closing)
 	      (setq rpl "#+END_SRC")
 	    (setq rpl "#+BEGIN_SRC")
 	    (when (setq lang (plist-get info :lang))
-	      (setq rpl (concat rpl " " lang)))))
+	      (setq rpl (concat rpl " " lang))
+	      (when (setq switches (plist-get info :switches))
+		(setq rpl (concat rpl " " switches))))))
 	 ((equal tag "include")
 	  (setq file (plist-get info :file)
 		markup (downcase (plist-get info :markup))
@@ -185,9 +193,10 @@ The is done in the entire buffer."
 	    (setq rpl (concat rpl " " markup))
 	    (when (and (equal markup "src") lang)
 	      (setq rpl (concat rpl " " lang))))
-	  (setq rpl (concat rpl
-			    " :prefix " prin1-to-string prefix
-			    " :prefix1 " prin1-to-string prefix1))))
+	  (when prefix
+	    (setq rpl (concat rpl " :prefix " (prin1-to-string prefix))))
+	  (when prefix1
+	    (setq rpl (concat rpl " :prefix1 " (prin1-to-string prefix1))))))
 	(when rpl
 	  (goto-char (plist-get info :match-beginning))
 	  (delete-region (point-at-bol) (plist-get info :match-end))
@@ -204,7 +213,7 @@ with string values.  In addition, it reutnrs the following properties:
 :closing          t when the tag starts with \"</\"."
   (when (looking-at "<\\(/\\)?\\([a-zA-Z]+\\>\\)\\([^>]*\\)>")
     (let ((start 0)
-	  tag rest prop attributes)
+	  tag rest prop attributes endp val)
       (setq tag (org-match-string-no-properties 2)
 	    endp (match-end 1)
 	    rest (and (match-end 3)
