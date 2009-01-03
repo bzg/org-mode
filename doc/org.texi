@@ -1415,20 +1415,25 @@ for details.
 @table @kbd
 @kindex C-c C-x f
 @item C-c C-x f
-The footnote action command.  When the cursor is on a footnote reference,
-jump to the definition.  When it is at a definition, jump to the (first)
-reference.  Otherwise, create a new footnote.  Depending on the variable
+The footnote action command.
+
+When the cursor is on a footnote reference, jump to the definition.  When it
+is at a definition, jump to the (first) reference.
+
+Otherwise, create a new footnote.  Depending on the variable
 @code{org-footnote-define-inline}@footnote{The corresponding in-buffer
 setting is: @code{#+STARTUP: fninline} or @code{#+STARTUP: nofninline}}, the
-definitions will be placed locally, or into the nearest outline section with
-the heading @samp{Footnotes}.  If no such section is found after the
-reference point, one will be created at the end of the file.@* When this
-command is called with a prefix argument, a menu of additional options is
-offered:
+definition will be placed right into the text as part of the reference, or
+separately into the location determined by the variable
+@code{org-footnote-section}.
+
+When this command is called with a prefix argument, a menu of additional
+options is offered:
 @example
 s   @r{Sort the footnote definitions by reference sequence.  During editing,}
     @r{Org makes no effort to sort footnote definitions into a particular}
-    @r{sequence.  If you want them sorted, use this command.}
+    @r{sequence.  If you want them sorted, use this command, which will}
+    @r{also move entries according to @code{org-footnote-section}.}
 n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
