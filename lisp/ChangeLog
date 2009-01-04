@@ -1,3 +1,10 @@
+2009-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-w3m.el (org-w3m): New customization group.
+	(org-w3m-deactivate-mark): New option.
+	(org-w3m-copy-for-org-mode): Deactivate region, unless the user
+	option say not to.
+
 2009-01-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-font-lock-defaults): Trigger footnote
