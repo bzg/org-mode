@@ -10,29 +10,36 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.17 (in preparation)
+* Version 6.17
+
+** Overview
+
+- Footnote support
+- Line numbers and references in literal examples 
+- New hooks for export preprocessing 
+- Capture column view into a different file
 
 ** Details
 
-*** Built-in footnote support
+*** Footnote support
 
-Org-mode now supports the creation of footnotes.  In contrast to the
-`footnote.el' package, Org-mode's footnotes are designed for work on a
-larger document, not only for one-off documents like emails.  The basic
-syntax is similar to the one used by `footnote.el', i.e. a footnote is
-defined in a paragraph that is started by a footnote marker in square
-brackets in column 0, no indentation allowed.  The footnote
-reference is simply the marker in square brackets inside text.
-For example:
+Org-mode now directly supports the creation of footnotes.  In
+contrast to the /footnote.el/ package, Org-mode's footnotes are
+designed for work on a larger document, not only for one-off
+documents like emails.  The basic syntax is similar to the one
+used by /footnote.el/, i.e. a footnote is defined in a paragraph
+that is started by a footnote marker in square brackets in column
+0, no indentation allowed.  The footnote reference is simply the
+marker in square brackets inside text.  For example:
 
 #+begin_src org
- The Org homepage[fn:1] now looks a lot better than it used to.
- ...
- [fn:1] The link is: http://orgmode.org
+The Org homepage[fn:1] now looks a lot better than it used to.
+...
+[fn:1] The link is: http://orgmode.org
 #+end_src
 
 Org-mode extends the number-based syntax to /named/ footnotes and
-optional inline definition.  Using numbers as markers is
+optional inline definition.  Using plain numbers as markers is
 supported for backward compatibility, but not encouraged because
 of possible conflicts with LaTeX syntax.  Here are the valid
 references:
@@ -65,15 +72,16 @@ The following command handles footnotes:
      create a new footnote.  Depending on the variable
      `org-footnote-define-inline' (with associated =#+STARTUP=
      options =fninline= and =nofninline=), the definitions will
-     be placed locally, or into the nearest outline section with
-     the heading `Footnotes'.  If no such section is found after
-     the reference point, one will be created at the end of the
-     file.  When this command is called with a prefix argument, a
-     menu of additional options is offered:
+     be placed right into the text as part of the reference, or
+     separately into the location determined by the variable
+     =org-footnote-section=.
+     When this command is called with a prefix argument, a menu
+     of additional options is offered:
      - s :: Sort the footnote definitions by reference sequence.
-            During editing, Org makes no effort to sort
-            footnote definitions into a particular sequence.
-            If you want them sorted, use this command. 
+            During editing, Org makes no effort to sort footnote
+            definitions into a particular sequence.  If you want
+            them sorted, use this command, which will also move
+            entries according to =org-footnote-section=.
      - n :: Normalize the footnotes by collecting all
             definitions (including inline definitions) into a
             special section, and then numbering them in
@@ -83,7 +91,7 @@ The following command handles footnotes:
             The exporters do this automatically, and so could 
             something like `message-send-hook'.
      - d :: Delete the footnote at point, and all references to it.
-     
+	    
 - C-c C-c :: If the cursor is on a footnote reference, jump to
      the definition.  If it is a the definition, jump back to the
      reference.  When called with a prefix argument at either
@@ -101,6 +109,11 @@ messages.  Just bind =org-footnote-action= to a global key like
 The main trigger for this development came from a hook function
 written by Paul Rivier, to implement named footnotes and to
 convert them to numbered ones before export.  Thanks, Paul!
+
+Thanks also to Scot Becker for a thoughtful post bringing this
+subject back onto the discussion table, and to Matt Lundin for
+the idea of named footnotes and his prompt testing of the new
+features.
 
 *** Line numbers and references in literal examples
 
@@ -181,7 +194,7 @@ remote highlighting possible.
   last thing in the preprocessing buffer, just before returning
   the buffer string to the backend.
 
-*** Capture column view into a different file.
+*** Capture column view into a different file
 
     The :id parameter for the dynamic block capturing column view
     can now truly be an ID that will also be found in a
