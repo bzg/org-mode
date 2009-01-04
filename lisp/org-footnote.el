@@ -381,6 +381,7 @@ referenced sequence."
 	  (goto-char (point-max))
 	  (unless for-preprocessor
 	    (when org-footnote-section
+	      (or (bolp) (insert "\n"))
 	      (insert "* " org-footnote-section "\n")
 	      (setq ins-point (point))))))
        (t
