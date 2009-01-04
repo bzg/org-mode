@@ -2998,6 +2998,7 @@ After a match, the following groups carry important information:
     ("nologrepeat" org-log-repeat nil)
     ("fninline" org-footnote-define-inline t)
     ("nofninline" org-footnote-define-inline nil)
+    ("fnlocal" org-footnote-section nil)
     ("fnauto" org-footnote-auto-label t)
     ("fnprompt" org-footnote-auto-label nil)
     ("fnconfirm" org-footnote-auto-label confirm)

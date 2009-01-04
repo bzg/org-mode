@@ -8843,6 +8843,7 @@ corresponding variables are @code{org-footnote-define-inline} and
 @code{org-footnote-auto-label}.
 @cindex @code{fninline}, STARTUP keyword
 @cindex @code{fnnoinline}, STARTUP keyword
+@cindex @code{fnlocal}, STARTUP keyword
 @cindex @code{fnprompt}, STARTUP keyword
 @cindex @code{fnauto}, STARTUP keyword
 @cindex @code{fnconfirm}, STARTUP keyword
@@ -8850,6 +8851,7 @@ corresponding variables are @code{org-footnote-define-inline} and
 @example
 fninline    @r{define footnotes inline}
 fnnoinline  @r{define footnotes in separate section}
+fnlocal     @r{define footnotes near first reference, but not inline}
 fnprompt    @r{prompt for footnote labels}
 fnauto      @r{create [fn:1]-like labels automatically (default)}
 fnconfirm   @r{offer automatic label for editing or confirmation}
