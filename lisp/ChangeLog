@@ -1,3 +1,10 @@
+2009-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-footnote.el (org-footnote-create-definition)
+	(org-footnote-goto-local-insertion-point): Make footnote insertion
+	work correctly when the "Footnotes" headline is the last line in
+	the buffer.
+
 2009-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-w3m.el (org-w3m): New customization group.

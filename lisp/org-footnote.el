@@ -267,7 +267,7 @@ or new, let the user edit the definition of the footnote."
 		    (and (progn (widen) t)
 			 (re-search-forward re nil t)))
 	  (goto-char (point-max))
-	  (insert "\n\n* " org-footnote-section)))
+	  (insert "\n\n* " org-footnote-section "\n")))
       ;; Now go to the end of this entry and insert there.
       (org-footnote-goto-local-insertion-point))
      (t
@@ -452,6 +452,7 @@ ENTRY is (fn-label num-mark definition)."
 (defun org-footnote-goto-local-insertion-point ()
   "Find insertion point for footnote, just before next outline heading."
   (outline-next-heading)
+  (or (bolp) (newline))
   (beginning-of-line 0)
   (while (and (not (bobp)) (= (char-after) ?#))
     (beginning-of-line 0))
