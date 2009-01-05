@@ -5,6 +5,9 @@
 	work correctly when the "Footnotes" headline is the last line in
 	the buffer.
 
+	* org.el (org-goto-marker-or-bmk): Expose context after jumping to
+	the location.
+
 2009-01-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-w3m.el (org-w3m): New customization group.

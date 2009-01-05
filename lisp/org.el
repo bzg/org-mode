@@ -13646,7 +13646,8 @@ With optional NODE, go directly to that node."
 	(switch-to-buffer (marker-buffer marker))
 	(if (or (> marker (point-max)) (< marker (point-min)))
 	    (widen))
-	(goto-char marker))
+	(goto-char marker)
+	(org-show-context 'org-goto))
     (if bookmark
 	(bookmark-jump bookmark)
       (error "Cannot find location"))))
