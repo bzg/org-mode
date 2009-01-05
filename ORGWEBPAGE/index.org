@@ -47,9 +47,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 
 - Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 
-* Current Version (6.17) and Compatibility
+* Current Version (6.17a) and Compatibility
 
-The current version is 6.17.  To see what has changed in recent
+The current version is 6.17a.  To see what has changed in recent
 releases, check this [[file:Changes.html][list of user-visible changes]].  These descriptions
 are extensive, to avoid that people will be printing the manual after
 each incremental release.  If you have an older version of the manual,
@@ -66,7 +66,7 @@ fairly recent version, but may lag a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-6.17.zip][zip file]] or [[file:org-6.17.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-6.17a.zip][zip file]] or [[file:org-6.17a.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  A shell script to simplify upgrading to the newest release
 has been posted [[http://www.philfam.co.uk/pete/GTD/org-mode/update-org.sh][here]].
