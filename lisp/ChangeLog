@@ -1,5 +1,14 @@
 2009-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-edit-src-get-label-format): New function.
+	(org-coderef-label-format): New option.
+	(org-edit-src-code, org-edit-src-find-region-and-lang): Parse for
+	a label format specification and make sure it is used in the edit
+	buffer.
+	(org-edit-src-get-label-format): New function.
+	(org-store-link): Handle new coderef formats.
+	(org-link-search): Handle new coderef formats.
+
 	* org-footnote.el (org-footnote-create-definition)
 	(org-footnote-goto-local-insertion-point): Make footnote insertion
 	work correctly when the "Footnotes" headline is the last line in

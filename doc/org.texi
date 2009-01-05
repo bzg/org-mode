@@ -7391,23 +7391,29 @@ Both in @code{example} and in @code{src} snippets, you can add a @code{-n}
 switch to the end of the @code{BEGIN} line, to get the lines of the example
 numbered.  If you use a @code{+n} switch, the numbering from the previous
 numbered snippet will be continued in the current one.  In literal examples,
-Org will interpret strings like @samp{((name))} as labels, and use them as
-targets for hyperlinks like @code{[[((name))]]}.  In HTML, hoovering the
-mouse over such a link will remote-highlight the corresponding code line,
-which is kind of cool.  If the example/src snippet is numbered, you can also
-add a @code{-r} switch.  Then labels will be @i{removed} from the source code
-and the links will be @i{replaced}@footnote{If you want to explain the use of
-such labels themelves in an example, you can use the @code{-k} switch to make
+Org will interpret strings like @samp{(ref:name)} as labels, and use them as
+targets for special hyperlinks like @code{[[(name)]]} (i.e. the reference
+name enclosed in single parenthesis).  In HTML, hoovering the mouse over such
+a link will remote-highlight the corresponding code line, which is kind of
+cool.  If the example/src snippet is numbered, you can also add a @code{-r}
+switch.  Then labels will be @i{removed} from the source code and the links
+will be @i{replaced}@footnote{If you want to explain the use of such labels
+themelves in org-mode example code, you can use the @code{-k} switch to make
 sure they are not touched.} with line numbers from the code listing.  Here is
-an exmmple:
+an example:
 
 @example
 #+BEGIN_SRC emacs-lisp -n -r
-(save-excursion
-   (goto-char (point-min))       ((jump))
+(save-excursion                  (ref:sc)
+   (goto-char (point-min))       (ref:jump)
 #+END SRC
-In [[((jump))][line ((jump))]] we go to .....
+In line [[(sc)]] we remember the current positon.  [[(jump)][Line (jump)]]
+jumps to point-min.
 @end example
+
+If the syntax for the label format conflicts with the language syntax, use a
+@code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
+-n -r -l "((%s))"}.  See also the variable @code{org-coderef-label-format}.
 
 @table @kbd
 @kindex C-c '
@@ -7428,9 +7434,9 @@ fixed-width region.
 @item C-c l
 Calling @code{org-store-link} while editing a source code example in a
 temporary buffer created with @kbd{C-c '} will prompt for a label, make sure
-that it is unique in the current buffer, and insert it as @samp{((label))} at
-the end of the current line.  Then the label is stored as a link, for
-retrieval with @kbd{C-c C-l}.
+that it is unique in the current buffer, and insert it with the proper
+formatting like @samp{(ref:label)} at the end of the current line.  Then the
+label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
 @node Include files, Tables exported, Literal examples, Markup rules

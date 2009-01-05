@@ -729,6 +729,23 @@ there are kept outside the narrowed region."
 		   (const :tag "from `lang' element")
 		   (const :tag "from `style' element")))))
 
+(defcustom org-coderef-label-format "(ref:%s)"
+  "The default coderef format.
+This format string will be used to search for coderef labels in literal
+examples (EXAMPLE and SRC blocks).  The format can be overwritten
+an individual literal example with the -f option, like
+
+#+BEGIN_SRC pascal +n -r -l \"((%s))\"
+...
+#+END_SRC
+
+If you want to use this for HTML export, make sure that the format does
+not introduce special font-locking, and avoid the HTML special
+characters `<', `>', and `&'.  The reason for this restriction is that
+the labels are searched for only after htmlize has done its job."
+  :group 'org-edit-structure ; FIXME this is not in the right group
+  :type 'string)
+
 (defcustom org-edit-fixed-width-region-mode 'artist-mode
   "The mode that should be used to edit fixed-width regions.
 These are the regions where each line starts with a colon."
@@ -5729,13 +5746,14 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
 	(info (org-edit-src-find-region-and-lang))
 	(org-mode-p (eq major-mode 'org-mode))
-	beg end lang lang-f single)
+	beg end lang lang-f single lfmt)
     (if (not info)
 	nil
       (setq beg (nth 0 info)
 	    end (nth 1 info)
 	    lang (nth 2 info)
 	    single (nth 3 info)
+	    lfmt (nth 4 info)
 	    lang-f (intern (concat lang "-mode")))
       (unless (functionp lang-f)
 	(error "No such language mode: %s" lang-f))
@@ -5751,6 +5769,8 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	(funcall lang-f))
       (set (make-local-variable 'org-edit-src-force-single-line) single)
       (set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
+      (when lfmt
+	(set (make-local-variable 'org-coderef-label-format) lfmt))
       (when org-mode-p
 	(goto-char (point-min))
 	(while (re-search-forward "^," nil t)
@@ -5841,7 +5861,7 @@ the language, a switch telling of the content should be in a single line."
 	    ("^#\\+ascii:" "\n" "ascii" single-line)
 	    )))
 	(pos (point))
-	re re1 re2 single beg end lang)
+	re re1 re2 single beg end lang lfmt match-re1)
     (catch 'exit
       (while (setq entry (pop re-list))
 	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)
@@ -5850,19 +5870,27 @@ the language, a switch telling of the content should be in a single line."
 	  (if (or (looking-at re1)
 		  (re-search-backward re1 nil t))
 	      (progn
-		(setq beg (match-end 0) lang (org-edit-src-get-lang lang))
+		(setq match-re1 (match-string 0))
+		(setq beg (match-end 0)
+		      lang (org-edit-src-get-lang lang)
+		      lfmt (org-edit-src-get-label-format match-re1))
 		(if (and (re-search-forward re2 nil t)
 			 (>= (match-end 0) pos))
-		    (throw 'exit (list beg (match-beginning 0) lang single))))
+		    (throw 'exit (list beg (match-beginning 0)
+				       lang single lfmt))))
 	    (if (or (looking-at re2)
 		    (re-search-forward re2 nil t))
 		(progn
 		  (setq end (match-beginning 0))
 		  (if (and (re-search-backward re1 nil t)
 			   (<= (match-beginning 0) pos))
-		      (throw 'exit
-			     (list (match-end 0) end
-				   (org-edit-src-get-lang lang) single)))))))))))
+		      (progn
+			(setq lfmt (org-edit-src-get-label-format
+				    (match-string 0)))
+			(throw 'exit
+			       (list (match-end 0) end
+				     (org-edit-src-get-lang lang)
+				     single lfmt))))))))))))
 
 (defun org-edit-src-get-lang (lang)
   "Extract the src language."
@@ -5877,6 +5905,12 @@ the language, a switch telling of the content should be in a single line."
 	   (string-match "\\<style=\"\\([^ \t\n\"]+\\)\"" m))
       (match-string 1 m))
      (t "fundamental"))))
+
+(defun org-edit-src-get-label-format (s)
+  "Extract the label format."
+  (save-match-data
+    (if (string-match "-l[ \t]+\\\\?\"\\([^\t\r\n\"]+\\)\\\\?\"" s)
+	(match-string 1 s))))
 
 (defun org-edit-src-exit ()
   "Exit special edit and protect problematic lines."
@@ -6265,15 +6299,17 @@ For file links, arg negates `org-context-in-file-links'."
 		     (save-restriction
 		       (widen)
 		       (goto-char (point-min))
-		       (re-search-forward (concat "((" label "))") nil t))))
+		       (re-search-forward
+			(regexp-quote (format org-coderef-label-format label))
+			nil t))))
 	  (when label (message "Label exists already") (sit-for 2))
 	  (setq label (read-string "Code line label: " label)))
 	(end-of-line 1)
-	(setq link (format "((%s))" label))
+	(setq link (format org-coderef-label-format label))
 	(setq gc (- 79 (length link)))
 	(if (< (current-column) gc) (org-move-to-column gc t) (insert " "))
 	(insert link)
-	(setq desc nil)))
+	(setq link (concat "(" label ")") desc nil)))
 
      ((eq major-mode 'calendar-mode)
       (let ((cd (calendar-cursor-to-date)))
@@ -7170,11 +7206,15 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
 	       pos (match-beginning 0))))
       ;; There is an exact target for this
       (goto-char pos))
-     ((and (string-match "^((.*))$" s0)
+     ((and (string-match "^(\\(.*\\))$" s0)
 	   (save-excursion
 	     (goto-char (point-min))
 	     (and
-	      (re-search-forward (concat "[^[]" (regexp-quote s0)) nil t)
+	      (re-search-forward
+	       (concat "[^[]" (regexp-quote
+			       (format org-coderef-label-format
+				       (match-string 1 s0))))
+	       nil t)
 	      (setq type 'dedicated
 		    pos (1+ (match-beginning 0))))))
       ;; There is a coderef target for this

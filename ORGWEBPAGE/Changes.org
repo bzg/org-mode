@@ -124,8 +124,8 @@ increasing Org-mode's utility for writing tutorials and other
 similar documents.
 
 Code references use special labels embedded directly into the
-source code.  Such labels look like "((name))" and must be unique
-within a document.  Org-mode links with the coderef cookie in the
+source code.  Such labels look like "(ref:name)" and must be
+unique within a document.  Org-mode links with "(name)" in the
 link part will be correctly interpreted, both while working with
 an Org file (internal links), and while exporting to the
 different backends.  Line numbering and code references are
@@ -142,28 +142,32 @@ The options for the BEGIN lines are:
          links to this reference with line numbers.  This option
          takes only effect if either -n or +n are given as well.
          If -r is not given, coderefs simply use the label name.
-	 
+ - -l "fmt" :: Define a local format for coderef labels, see the
+      variable =org-coderef-label-format= for details.  Use this
+      of the default syntax causes conflicts with the code in the
+      code snippet you are using.
+
 Here is an example:
 
 #+begin_example -k
 #+begin_src emacs-lisp -n -r
-(defmacro org-unmodified (&rest body)                   ((def))
+(defmacro org-unmodified (&rest body)                   (ref:def)
   "Execute body without changing `buffer-modified-p'."
-  `(set-buffer-modified-p                               ((back))
+  `(set-buffer-modified-p                              (ref:back)
     (prog1 (buffer-modified-p) ,@body)))
 #+end_src
-[[((def))][Line ((def))]] contains the macro name.  Later at line [[((back))]],
+[[(def)][Line (def)]] contains the macro name.  Later at line [[(back)]],
 backquoting is used.
 #+end_example
 
 When exported, this is translated to:
 #+begin_src emacs-lisp -n -r
-(defmacro org-unmodified (&rest body)                   ((def))
+(defmacro org-unmodified (&rest body)                   (ref:def)
   "Execute body without changing `buffer-modified-p'."
-  `(set-buffer-modified-p                               ((back))
+  `(set-buffer-modified-p                              (ref:back)
     (prog1 (buffer-modified-p) ,@body)))
 #+end_src
-[[((def))][Line ((def))]] contains the macro name.  Later at line [[((back))]],
+[[(def)][Line (def)]] contains the macro name.  Later at line [[(back)]],
 backquoting is used.
 
 Thanks to Ilya Shlyakhter for proposing this feature set.  Thanks

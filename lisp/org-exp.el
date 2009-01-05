@@ -1700,7 +1700,7 @@ the current file."
 	      ((cdr (assoc slink target-alist)))
 	      ((and (string-match "^id:" link)
 		    (cdr (assoc (substring link 3) target-alist))))
-	      ((string-match "^((\\(.*\\)))$" link)
+	      ((string-match "^(\\(.*\\))$" link)
 	       (setq cref (match-string 1 link))
 	       (concat "coderef:" cref))
 	      ((string-match org-link-types-re link) nil)
@@ -2305,11 +2305,14 @@ and `+n' for continuing previous numering.
 Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii)."
   (save-match-data
-    (let (num cont rtn named rpllbl keepp)
-      (setq num (string-match "[-+]n\\>" (or opts ""))
-	    cont (string-match "\\+n\\>" (or opts ""))
-	    rpllbl (string-match "-r\\>" (or opts ""))
-	    keepp (string-match "-k\\>" (or opts "")))
+    (let (num cont rtn named rpllbl keepp fmt)
+      (setq opts (or opts "")
+	    num (string-match "[-+]n\\>" opts)
+	    cont (string-match "\\+n\\>" opts)
+	    rpllbl (string-match "-r\\>" opts)
+	    keepp (string-match "-k\\>" opts)
+	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
+		    (match-string 1 opts)))
       (if keepp (setq rpllbl 'keep))
       (setq rtn code)
       (when (equal lang "org")
@@ -2350,15 +2353,15 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 			     (format "<pre class=\"src src-%s\">\n" lang)
 			     t t rtn))))
 	  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n")))
-	(setq rtn (org-export-number-lines rtn 'html 1 1 num cont rpllbl))
+	(setq rtn (org-export-number-lines rtn 'html 1 1 num cont rpllbl fmt))
 	(concat "\n#+BEGIN_HTML\n" rtn "\n#+END_HTML\n\n"))
        ((eq backend 'latex)
-	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl))
+	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
 	(concat "\n#+BEGIN_LaTeX\n\\begin{verbatim}\n" rtn
 		"\n\\end{verbatim}\n#+END_LaTeX\n\n"))
        ((eq backend 'ascii)
 	;; This is not HTML or LaTeX, so just make it an example.
-	(setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl))
+	(setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
 	(concat "#+BEGIN_ASCII\n"
 		(mapconcat
 		 (lambda (l) (concat "  " l))
@@ -2368,7 +2371,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 
 (defun org-export-number-lines (text backend
 				     &optional skip1 skip2 number cont
-				     replace-labels)
+				     replace-labels label-format)
   (if (and (not number) (not (eq replace-labels 'keep)))
       (setq replace-labels nil)) ;; must use names if no numbers
   (setq skip1 (or skip1 0) skip2 (or skip2 0))
@@ -2390,6 +2393,20 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	     ((eq backend 'ascii) fmt)
 	     ((eq backend 'latex) fmt)
 	     (t "")))
+	   (label-format (or label-format org-coderef-label-format))
+	   (label-pre (if (string-match "%s" label-format)
+			  (substring label-format 0 (match-beginning 0))
+			label-format))
+	   (label-post (if (string-match "%s" label-format)
+			   (substring label-format (match-end 0))
+			 ""))
+	   (lbl-re
+	    (concat 
+	     ".*?\\S-.*?\\([ \t]*\\("
+	     (regexp-quote label-pre)
+	     "\\([-a-zA-Z0-9_]+\\)"
+	     (regexp-quote label-post)
+	     "\\)\\)"))
 	   ref)
 
       (goto-line (1+ skip1))
@@ -2398,7 +2415,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	    (insert (format fm (incf n)))
 	  (forward-char 1))
 	(when (and (not (eq replace-labels 'keep))
-		   (looking-at ".*?\\([ \t]+\\(((\\(.*?\\)))\\)\\)"))
+		   (looking-at lbl-re))
 	  (setq ref (match-string 3))
 	  (if replace-labels
 	      (progn
@@ -3869,7 +3886,7 @@ lang=\"%s\" xml:lang=\"%s\">
 (defun org-export-get-coderef-format (path desc)
   (save-match-data
     (if (and desc (string-match
-		   (regexp-quote (concat "((" path "))"))
+		   (regexp-quote (concat "(" path ")"))
 		   desc))
 	(replace-match "%s" t t desc)
       "%s")))
