@@ -1,3 +1,8 @@
+2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-set-regexps-and-options): Fix the regexp
+	`org-complex-heading-regexp'.
+
 2009-01-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-edit-src-get-label-format): New function.
