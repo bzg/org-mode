@@ -1822,7 +1822,6 @@ from the buffer."
 
 (defun org-export-remove-headline-metadata (opts)
   "Remove meta data from the headline, according to user options."
-  (debug)
   (let ((re org-complex-heading-regexp)
 	(todo (plist-get opts :todo-keywords))
 	(tags (plist-get opts :tags))
@@ -2275,7 +2274,6 @@ in the list) and remove property and value from the list in LISTVAR."
 
 (defun org-export-replace-src-segments-and-examples (backend)
   "Replace source code segments with special code for export."
-  (debug)
   (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
 	lang code trans opts)
