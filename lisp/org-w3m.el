@@ -43,16 +43,6 @@
 (require 'org)
 (declare-function w3m-anchor "ext:w3m-util" (position))
 
-(defgroup org-w3m nil
-  "Transforming the HTML content in w3m buffer with org-mode style."
-  :group 'org)
-
-(defcustom org-w3m-deactivate-mark t
-  "Non-nil means, deactivate mark after copying and region in Org-mode style.
-When nil, keep the region active."
-  :type 'boolean
-  :group 'org-w3m)
-
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
@@ -69,8 +59,7 @@ so that it can be yanked into an Org-mode buffer with links working correctly."
       (setq transform-start (region-beginning))
       (setq transform-end (region-end))
       ;; Deactivate mark if current mark is activate.
-      (if org-w3m-deactivate-mark
-          (deactivate-mark)))
+      (if (fboundp 'deactivate-mark) (deactivate-mark)))
     (message "Transforming links...")
     (save-excursion
       (goto-char transform-start)
