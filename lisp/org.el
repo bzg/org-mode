@@ -10291,7 +10291,9 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY"))
 	  beg end range props sum-props key value string clocksum)
       (save-excursion
-	(when (condition-case nil (org-back-to-heading t) (error nil))
+	(when (condition-case nil
+		  (and (org-mode-p) (org-back-to-heading t))
+		(error nil))
 	  (setq beg (point))
 	  (setq sum-props (get-text-property (point) 'org-summaries))
 	  (setq clocksum (get-text-property (point) :org-clock-minutes))
