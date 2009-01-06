@@ -1,5 +1,9 @@
 2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-closest-date): Fix bug with yearly repeats, in
+	combination with preference of the past as it is used for deadline
+	and scheduling search.
+
 	* org-exp.el (org-html-handle-time-stamps): No longer check for
 	the `org-export-with-timestamps' option, because the preprocesser
 	has taken care of this already.
