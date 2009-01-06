@@ -1,5 +1,42 @@
 2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-html-handle-time-stamps): No longer check for
+	the `org-export-with-timestamps' option, because the preprocesser
+	has taken care of this already.
+
+	* org.el (org-entry-properties): Catch the case when this is
+	called in a non-org-mode file.
+
+	* org-export-latex.el (org-export-latex-remove-from-headlines):
+	Variable made obsolete, also LaTeX export now uses the standard
+	variables.
+	(org-export-as-latex): Add the timestamps parameter to the
+	preprocessor parameter list.
+	(org-export-latex-content): Export the remaining keywords without
+	considering to remove them.
+	(org-export-latex-keywords-maybe): Make the REMOVE-LIST optional.
+	Use bold font instead of tt font for the keywords.
+	(org-export-latex-fontify-headline): Format headlines, assuming
+	that all keywords still present should be published.
+	(org-export-latex-keywords): Remove argument TIMESTAMPS and just
+	publish what ever remains of the time stamps.
+	(org-export-latex-list-parameters): New option.
+	(org-export-latex-lists): Pass additional parameters to the list
+	converter.
+
+	* org-exp.el (org-export-preprocess-string): Remove clock lines
+	and timestamps already in the preprocesor.
+	(org-export-remove-timestamps, org-export-remove-clock-lines): New
+	functions.
+	(org-export-as-ascii, org-export-as-html): Add the timestamps
+	parameter to the preprocessor parameter list.
+
+	* org-list.el (org-list-parse-list): Parse for checkboxes.
+	(org-list-to-generic): Introduce and handle new parameters :cbon
+	and :cboff.
+	(org-list-to-latex, org-list-to-html, org-list-to-texinfo): Add
+	optional parameter PARAMS.
+
 	* org-export-latex.el (org-export-latex-special-chars): Fix
 	problems with interpreting dollar signs.
 	(org-inside-latex-math-p): New function.

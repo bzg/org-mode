@@ -1552,6 +1552,11 @@ on this string to produce the exported version."
       ;; Remove todo-keywords before exporting, if the user has requested so
       (org-export-remove-headline-metadata parameters)
 
+      ;; Remove timestamps, if the user has requested so
+      (org-export-remove-clock-lines)
+      (unless (plist-get parameters :timestamps)
+	(org-export-remove-timestamps))
+
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
       (setq target-alist (org-export-handle-invisible-targets target-alist))
@@ -1836,6 +1841,22 @@ from the buffer."
 	 (setq rpl (mapconcat (lambda (i) (if (match-end i) (match-string i) ""))
 			      elts " "))
 	 (replace-match rpl t t))))))
+
+(defun org-export-remove-timestamps ()
+  "Remove timestamps and keywords for export."
+  (while (re-search-forward org-maybe-keyword-time-regexp nil t)
+    (org-if-unprotected
+     (replace-match "")
+     (beginning-of-line 1)
+     (if (looking-at "[- \t]*\\(=>[- \t0-9:]*\\)?[ \t]*\n")
+	 (replace-match "")))))
+
+(defun org-export-remove-clock-lines ()
+  "Remove timestamps and keywords for export."
+  (let ((re (concat "^[ \t]*" org-clock-string ".*\n?")))
+    (while (re-search-forward re nil t)
+      (org-if-unprotected
+       (replace-match "")))))
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
@@ -2524,6 +2545,7 @@ underlined headlines.  The default is 3."
 		  :tags (plist-get opt-plist :tags)
 		  :priority (plist-get opt-plist :priority)
 		  :footnotes (plist-get opt-plist :footnotes)
+		  :timestamps (plist-get opt-plist :timestamps)
 		  :todo-keywords (plist-get opt-plist :todo-keywords)
 		  :verbatim-multiline t
 		  :select-tags (plist-get opt-plist :select-tags)
@@ -3217,6 +3239,7 @@ PUB-DIR is set, use this as the publishing directory."
 	    :tags (plist-get opt-plist :tags)
 	    :priority (plist-get opt-plist :priority)
 	    :footnotes (plist-get opt-plist :footnotes)
+	    :timestamps (plist-get opt-plist :timestamps)
 	    :archived-trees
 	    (plist-get opt-plist :archived-trees)
 	    :select-tags (plist-get opt-plist :select-tags)
@@ -4213,22 +4236,16 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
   (catch 'exit
     (let (r b)
       (while (string-match org-maybe-keyword-time-regexp s)
-	(if (and (match-end 1) (equal (match-string 1 s) org-clock-string))
-	    ;; never export CLOCK
-	    (throw 'exit ""))
 	(or b (setq b (substring s 0 (match-beginning 0))))
-	(if (not org-export-with-timestamps)
-	    (setq r (concat r (substring s 0 (match-beginning 0)))
-		  s (substring s (match-end 0)))
-	  (setq r (concat
-		   r (substring s 0 (match-beginning 0))
-		   (if (match-end 1)
-		       (format "@<span class=\"timestamp-kwd\">%s @</span>"
-			       (match-string 1 s)))
-		   (format " @<span class=\"timestamp\">%s@</span>"
-			   (substring
-			    (org-translate-time (match-string 3 s)) 1 -1)))
-		s (substring s (match-end 0)))))
+	(setq r (concat
+		 r (substring s 0 (match-beginning 0))
+		 (if (match-end 1)
+		     (format "@<span class=\"timestamp-kwd\">%s @</span>"
+			     (match-string 1 s)))
+		 (format " @<span class=\"timestamp\">%s@</span>"
+			 (substring
+			  (org-translate-time (match-string 3 s)) 1 -1)))
+	      s (substring s (match-end 0))))
       ;; Line break if line started and ended with time stamp stuff
       (if (not r)
 	  s

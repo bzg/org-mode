@@ -221,12 +221,25 @@ inserted headline and is mandatory."
 		 (symbol :tag "Convert as descriptive list" description)
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
+(defcustom org-export-latex-list-parameters
+  '(:cbon "\\texttt{[ ]}" :cboff "\\texttt{[ ]}")
+  "Parameters for the LaTeX list exporter.
+These parameters will be passed on to `org-list-to-latex', which in turn
+will pass them (combined with the LaTeX default list parameters) to
+`org-list-to-generic'."
+  :group 'org-export-latex
+  :type 'plist)
+
 (defcustom org-export-latex-remove-from-headlines
-  '(:todo t :priority t :tags t)
-  "A plist of keywords to remove from headlines.
+  '(:todo nil :priority nil :tags nil)
+  "A plist of keywords to remove from headlines. OBSOLETE.
 Non-nil means remove this keyword type from the headline.
 
-Don't remove the keys, just change their values."
+Don't remove the keys, just change their values.
+
+Obsolete, this variable is no longer used.  Use the separate
+variables `org-export-with-todo-keywords', `org-export-with-priority',
+and `org-export-with-tags' instead."
   :type 'plist
   :group 'org-export-latex)
 
@@ -431,6 +444,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :tags (plist-get opt-plist :tags)
 	   :priority (plist-get opt-plist :priority)
 	   :footnotes (plist-get opt-plist :footnotes)
+	   :timestamps (plist-get opt-plist :timestamps)
 	   :todo-keywords (plist-get opt-plist :todo-keywords)
 	   :add-text (if (eq to-buffer 'string) nil text)
 	   :skip-before-1st-heading skip
@@ -779,8 +793,7 @@ links, keywords, lists, tables, fixed-width"
    (unless (memq 'links exclude-list)
      (org-export-latex-links))
    (unless (memq 'keywords exclude-list)
-     (org-export-latex-keywords
-      (plist-get org-export-latex-options-plist :timestamps)))
+     (org-export-latex-keywords))
    (unless (memq 'lists exclude-list)
      (org-export-latex-lists))
    (unless (memq 'tables exclude-list)
@@ -807,7 +820,7 @@ links, keywords, lists, tables, fixed-width"
 			     (match-end 0) '(org-protected t)))
       (buffer-string))))
 
-(defun org-export-latex-keywords-maybe (remove-list)
+(defun org-export-latex-keywords-maybe (&optional remove-list)
   "Maybe remove keywords depending on rules in REMOVE-LIST."
   (goto-char (point-min))
   (let ((re-todo (mapconcat 'identity org-export-latex-todo-keywords-1 "\\|"))
@@ -816,12 +829,12 @@ links, keywords, lists, tables, fixed-width"
     (when (re-search-forward (concat "^\\(" re-todo "\\)") nil t)
       (if (plist-get remove-list :todo)
 	  (replace-match "")
-	(replace-match (format "\\texttt{%s}" (match-string 1)) t t)))
+	(replace-match (format "\\textbf{%s}" (match-string 1)) t t)))
     ;; convert priority string
     (when (re-search-forward "\\[\\\\#.\\]" nil t)
       (if (plist-get remove-list :priority)
 	  (replace-match "")
-	(replace-match (format "\\texttt{%s}" (match-string 0)) t t)))
+	(replace-match (format "\\textbf{%s}" (match-string 0)) t t)))
     ;; convert tags
     (when (re-search-forward "\\(:[a-zA-Z0-9_@]+\\)+:" nil t)
       (if (or (not org-export-with-tags)
@@ -829,7 +842,7 @@ links, keywords, lists, tables, fixed-width"
 	  (replace-match "")
 	(replace-match
 	 (org-export-latex-protect-string
-	  (format "\\texttt{%s}"
+	  (format "\\textbf{%s}"
 		  (save-match-data
 		    (replace-regexp-in-string
 		     "_" "\\\\_" (match-string 0)))))
@@ -844,8 +857,7 @@ links, keywords, lists, tables, fixed-width"
     (goto-char (point-min))
     (when (plist-get org-export-latex-options-plist :emphasize)
       (org-export-latex-fontify))
-    (org-export-latex-keywords-maybe
-     org-export-latex-remove-from-headlines)
+    (org-export-latex-keywords-maybe)
     (org-export-latex-special-chars
      (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-links)
@@ -999,17 +1011,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(t (org-export-latex-protect-string
 	    (concat string-before "\\textbackslash{}" string-after)))))
 
-(defun org-export-latex-keywords (timestamps)
+(defun org-export-latex-keywords ()
   "Convert special keywords to LaTeX.
 Regexps are those from `org-export-latex-special-string-regexps'.
 If TIMESTAMPS, convert timestamps, otherwise delete them."
-  (let ((rg org-export-latex-special-string-regexps) r)
-    (while (setq r (pop rg))
-      (goto-char (point-min))
-      (while (re-search-forward (eval r) nil t)
-	(if (not timestamps)
-	    (replace-match (format "\\\\texttt{%s}" (match-string 0)) t)
-	  (replace-match ""))))))
+  (goto-char (point-min))
+  (let ((re (concat org-maybe-keyword-time-regexp ".*")))
+    (while (re-search-forward re nil t)
+      (replace-match (format "\\\\texttt{%s}" (match-string 0)) t))))
 
 (defun org-export-latex-fixed-width (opt)
   "When OPT is non-nil convert fixed-width sections to LaTeX."
@@ -1366,13 +1375,14 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 ;;; List handling:
 
 (defun org-export-latex-lists ()
-  "Replace plain text lists in current buffer into LaTeX lists."
-  "Convert lists to LaTeX."
+  "Convert plain text lists in current buffer into LaTeX lists."
   (goto-char (point-min))
   (while (re-search-forward org-list-beginning-re nil t)
     (org-if-unprotected
      (beginning-of-line)
-     (insert (org-list-to-latex (org-list-parse-list t)) "\n"))))
+     (insert (org-list-to-latex (org-list-parse-list t)
+				org-export-latex-list-parameters))
+     "\n")))
 
 (defconst org-latex-entities
  '("\\!"
