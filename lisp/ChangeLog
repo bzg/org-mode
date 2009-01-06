@@ -1,7 +1,16 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer-pause-or-continue): Implement stopping
+	and mode line display.
+	(org-timer-stop): New command.
+	(org-timer-seconds): Return correct time when timer is paused.
+	(org-timer-mode-line-timer): New variable.
+	(org-timer-set-mode-line, org-timer-update-mode-line): New
+	functions.
+
 	* org.el (org-insert-heading):  Handle new value `auto' for
 	`org-blank-before-new-entry'.
+	(org-org-menu): Add new items for timer functions.
 
 	* org-list.el (org-insert-item): Handle new value `auto' for
 	`org-blank-before-new-entry'.

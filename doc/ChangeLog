@@ -1,3 +1,7 @@
+2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Relative timer): Document `org-timer-stop'.
+
 2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Footnotes): New section.

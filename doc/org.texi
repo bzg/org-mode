@@ -5078,8 +5078,16 @@ Insert a description list item with the current relative time.  With a prefix
 argument, first reset the timer to 0.
 @kindex M-@key{RET}
 @item M-@key{RET}
-One the timer list is started, you can also use @kbd{M-@key{RET}} to insert
+Once the timer list is started, you can also use @kbd{M-@key{RET}} to insert
 new timer items.
+@kindex C-c C-x ,
+@item C-c C-x ,
+Pause the timer, or continue it if it is already paused.  With prefix
+argument, stop it entirely.
+@kindex C-u C-c C-x ,
+@item C-u C-c C-x ,
+Stop the timer.  After this, you can only start a new timer, not continue the
+old one.  This command also removes the timer from the mode line.
 @kindex C-c C-x 0
 @item C-c C-x 0
 Reset the timer without inserting anything into the buffer.  By default, the

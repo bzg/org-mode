@@ -10,6 +10,22 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
+* Version 6.18 (in preparation)
+  :PROPERTIES:
+  :VISIBILITY: content
+  :END:
+
+** Details
+
+*** The relative timer can be paused
+
+    The new command `C-c C-x ,' will pause the relative timer.
+    When the relative timer is running, its value will be shown
+    in the mode line.  To get rid of this display, you need to
+    really stop the timer with `C-u C-c C-x ,'.
+
+    Thanks to Alan Davis for driving this change.
+
 * Version 6.17
 
 ** Overview
@@ -209,9 +225,6 @@ remote highlighting possible.
     the current file would not work.
 
 * Version 6.16
-  :PROPERTIES:
-  :VISIBILITY: content
-  :END:
   Cleanup of many small bugs, and one new feature.
 
 ** Details

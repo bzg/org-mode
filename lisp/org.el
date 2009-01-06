@@ -12750,6 +12750,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
 (org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
 (org-defkey org-mode-map "\C-c\C-x0"    'org-timer-start)
+(org-defkey org-mode-map "\C-c\C-x,"    'org-timer-pause-or-continue)
 
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
 
@@ -13538,9 +13539,11 @@ See the individual commands for more information."
      ["Goto Calendar" org-goto-calendar t]
      ["Date from Calendar" org-date-from-calendar t]
      "--"
-     ["Start/restart timer" org-timer-start t]
-     ["Insert timer string" org-timer t]
-     ["Insert timer item" org-timer-item t])
+     ["Start/Restart Timer" org-timer-start t]
+     ["Pause/Continue Timer" org-timer-pause-or-continue t]
+     ["Stop Timer" org-timer-pause-or-continue :active t :keys "C-u C-c C-x ,"]
+     ["Insert Timer String" org-timer t]
+     ["Insert Timer Item" org-timer-item t])
     ("Logging work"
      ["Clock in" org-clock-in t]
      ["Clock out" org-clock-out t]
