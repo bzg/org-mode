@@ -1822,6 +1822,7 @@ from the buffer."
 
 (defun org-export-remove-headline-metadata (opts)
   "Remove meta data from the headline, according to user options."
+  (debug)
   (let ((re org-complex-heading-regexp)
 	(todo (plist-get opts :todo-keywords))
 	(tags (plist-get opts :tags))
@@ -1832,9 +1833,10 @@ from the buffer."
     (when (or (not todo) (not tags) (not pri))
       (goto-char (point-min))
       (while (re-search-forward re nil t)
-	(setq rpl (mapconcat (lambda (i) (if (match-end i) (match-string i) ""))
-			     elts " "))
-	(replace-match rpl t t)))))
+	(org-if-unprotected
+	 (setq rpl (mapconcat (lambda (i) (if (match-end i) (match-string i) ""))
+			      elts " "))
+	 (replace-match rpl t t))))))
 
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
@@ -2273,6 +2275,7 @@ in the list) and remove property and value from the list in LISTVAR."
 
 (defun org-export-replace-src-segments-and-examples (backend)
   "Replace source code segments with special code for export."
+  (debug)
   (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
 	lang code trans opts)
@@ -2354,20 +2357,26 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 			     t t rtn))))
 	  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n")))
 	(setq rtn (org-export-number-lines rtn 'html 1 1 num cont rpllbl fmt))
-	(concat "\n#+BEGIN_HTML\n" rtn "\n#+END_HTML\n\n"))
+	(concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
        ((eq backend 'latex)
 	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
-	(concat "\n#+BEGIN_LaTeX\n\\begin{verbatim}\n" rtn
-		"\n\\end{verbatim}\n#+END_LaTeX\n\n"))
+	(concat "\n#+BEGIN_LaTeX\n"
+		(org-add-props (concat "\\begin{verbatim}\n" rtn "\n\\end{verbatim}\n")
+		    '(org-protected t))
+		"#+END_LaTeX\n\n"))
        ((eq backend 'ascii)
 	;; This is not HTML or LaTeX, so just make it an example.
 	(setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
 	(concat "#+BEGIN_ASCII\n"
-		(mapconcat
-		 (lambda (l) (concat "  " l))
-		 (org-split-string rtn "\n")
-		 "\n")
-		"\n#+END_ASCII\n"))))))
+		(org-add-props
+		    (concat
+		     (mapconcat
+		      (lambda (l) (concat "  " l))
+		      (org-split-string rtn "\n")
+		      "\n")
+		     "\n")
+		    '(org-protected t))
+		"#+END_ASCII\n"))))))
 
 (defun org-export-number-lines (text backend
 				     &optional skip1 skip2 number cont
