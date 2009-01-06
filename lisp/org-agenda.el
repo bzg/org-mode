@@ -1713,7 +1713,7 @@ s   Search for keywords                 C   Configure custom agenda commands
     (widen)
     (setq org-agenda-redo-command redo)
     (goto-char (point-min)))
-  (org-finalize-agenda))
+  (org-let (nth 1 series) '(org-finalize-agenda)))
 
 ;;;###autoload
 (defmacro org-batch-agenda (cmd-key &rest parameters)
