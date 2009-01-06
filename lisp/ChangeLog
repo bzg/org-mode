@@ -1,5 +1,12 @@
 2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-special-chars): Fix
+	problems with interpreting dollar signs.
+	(org-inside-latex-math-p): New function.
+	(org-export-latex-preprocess): Protect all the math fragments.
+
+	* org.el (org-latex-regexps): Allow a dash after a dollar.
+
 	* org-w3m.el (org-w3m-copy-for-org-mode): Always deactivate the
 	mark after copying.
 

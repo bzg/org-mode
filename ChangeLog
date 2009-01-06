@@ -1,6 +1,4 @@
-2008-12-31  Carsten Dominik  <carsten.dominik@gmail.com>
-
-	* 
+2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* Makefile (LISPF): Add org-footnote.el
 

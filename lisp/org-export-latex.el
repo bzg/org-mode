@@ -883,10 +883,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 	    (unless (get-text-property (match-beginning 2) 'org-protected)
 	      (cond ((member (match-string 2) '("\\$" "$"))
 		     (if (equal (match-string 2) "\\$")
-			 (replace-match (concat (match-string 1) "$"
-						(match-string 3)) t t)
-		       (replace-match (concat (match-string 1) "\\$"
-					      (match-string 3)) t t)))
+			 nil
+		       (replace-match "\\$" t t)))
 		    ((member (match-string 2) '("&" "%" "#"))
 		     (if (equal (match-string 1) "\\")
 			 (replace-match (match-string 2) t t)
@@ -904,12 +902,12 @@ See the `org-export-latex.el' code for a complete conversion table."
 			       (org-export-latex-protect-string
 				(concat (match-string 1) "\\~{}")) t t))))
 		    ((member (match-string 2) '("{" "}"))
-		     (unless (save-match-data (org-inside-LaTeX-fragment-p))
+		     (unless (save-match-data (org-inside-latex-math-p))
 		       (if (equal (match-string 1) "\\")
 			   (replace-match (match-string 2) t t)
 			 (replace-match (concat (match-string 1) "\\"
 						(match-string 2)) t t)))))
-	      (unless (save-match-data (org-inside-LaTeX-fragment-p))
+	      (unless (save-match-data (org-inside-latex-math-p))
 		(cond ((equal (match-string 2) "\\")
 		       (replace-match (or (save-match-data
 					    (org-export-latex-treat-backslash-char
@@ -923,7 +921,8 @@ See the `org-export-latex.el' code for a complete conversion table."
 					     (match-string 2)
 					     (match-string 1)
 					     (match-string 3))) "") t t)))))))
-	'("^\\([^\n$]*?\\|^\\)\\(\\\\?\\$\\)\\([^\n$]*\\)$"
+	'(;"^\\([^\n$]*?\\|^\\)\\(\\\\?\\$\\)\\([^\n$]*\\)$"
+	  "\\(\\(\\\\?\\$\\)\\)"
 	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\([a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
 	  "\\(.\\|^\\)\\(\\\\\\)\\([ \t\n]\\|[a-zA-Z&#%{}\"]+\\)"
 	  "\\(.\\|^\\)\\(&\\)"
@@ -937,6 +936,9 @@ See the `org-export-latex.el' code for a complete conversion table."
 	  ;; (?\> . "\\textgreater{}")
 	  )))
 
+(defun org-inside-latex-math-p ()
+  (get-text-property (point) 'org-latex-math))
+
 (defun org-export-latex-treat-sub-super-char
   (subsup char string-before string-after)
   "Convert the \"_\" and \"^\" characters to LaTeX.
@@ -949,7 +951,7 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 	      (string-match "\\S-+" string-after))
 	 (cond ((eq 'org-link (get-text-property 0 'face char))
 		(concat string-before "\\" char string-after))
-	       ((save-match-data (org-inside-LaTeX-fragment-p))
+	       ((save-match-data (org-inside-latex-math-p))
 		(if subsup
 		    (cond ((eq 1 (length string-after))
 			   (concat string-before char string-after))
@@ -1247,6 +1249,22 @@ If TIMESTAMPS, convert timestamps, otherwise delete them."
 			  (point-at-eol)))
 		    (point-max))))
       (add-text-properties start end '(org-protected t))))
+
+  ;; Preserve math snippets
+
+  (let* ((matchers (plist-get org-format-latex-options :matchers))
+	 (re-list org-latex-regexps)
+	 beg end re e m n block off)
+    ;; Check the different regular expressions
+    (while (setq e (pop re-list))
+      (setq m (car e) re (nth 1 e) n (nth 2 e)
+	    block (if (nth 3 e) "\n\n" ""))
+      (setq off (if (equal m "$") 1 0))
+      (when (and (member m matchers) (not (equal m "begin")))
+	(goto-char (point-min))
+	(while (re-search-forward re nil t)
+	  (setq beg (+ (match-beginning 0) off) end (- (match-end 0) off))
+	  (add-text-properties beg end '(org-protected t org-latex-math t))))))
 
   ;; Convert LaTeX to \LaTeX{}
   (goto-char (point-min))
