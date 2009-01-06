@@ -7542,7 +7542,7 @@ output, and as @code{$\alpha$} in the La@TeX{} output.  Similarly,
 This applies for a large number of entities, with names taken from both HTML
 and La@TeX{}, see the variable @code{org-html-entities} for the complete
 list.  If you are unsure about a name, use @kbd{M-@key{TAB}} for completion
-after having types the backslash and maybe a few characters
+after having typed the backslash and maybe a few characters
 (@pxref{Completion}).
 
 La@TeX{} fragments are converted into images for HTML export, and they are
