@@ -33,17 +33,18 @@ system.
      management. You can learn basic use in five minutes.  Some never
      move any further than that, and Org-mode will never impose
      complexity.
-- Depth :: As needs arise, Org-mode will show it's amazingly broad and
-     deep feature set.  The typical answer to "/Can I do X?/" is
-     "/Yes!/".
 - Portability :: Org files are plain text.  You can view and edit them
      in any editor.  Your data is yours forever.  Org-mode runs in
      [[http://www.gnu.org/software/emacs/][Emacs]], which is available for nearly every platform.
-- Flexibility :: Org-mode is a tool like a swiss army knife.  People
+- Depth :: As needs arise, Org-mode will show it's amazingly broad and
+     deep feature set.  Simple as it is initially, it will not let you
+     down when you need more.  The typical [[http://orgmode.org/worg/org-faq.php][answer]] to "/Can I do X?/" is
+     "/Yes!/".
+- Flexibility :: Org-mode is a tool like a Swiss army knife.  People
      use it for [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][Getting Things Done (GTD)]], as a [[http://www.newartisans.com/blog_files/org.mode.day.planner.php][Day Planner]], as a
      [[http://sachachua.com/wp/2008/01/18/outlining-your-notes-with-org/][Notebook]], for Web and PDF [[http://orgmode.org][Authoring]], and much more.
 - Support :: Org-mode is supported by an active [[id:0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26][mailing list]] where
-     questions are usually answered within hours.
+     questions are answered quickly and effectively.
 - It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is free, like Emacs.
 
 If you'd like to know what other people have said about Org-mode, take
@@ -66,7 +67,7 @@ releases, check this detailed list of [[file:Changes.html][user-visible changes]
 This package works on Emacs 23 and 22, and (with minor restrictions)
 on Emacs 21 and XEmacs 21.  Emacs 22.2 ships with Org-mode version
 4.67d.  Emacs 23.1 release is expected to ship with 6.16.  The latest
-CVS emacs trunk usually contains a fairly recent version, but may lag
+CVS Emacs trunk usually contains a fairly recent version, but may lag
 a bit behind the website release.
 
 * Downloads
@@ -95,7 +96,7 @@ I keep current with Org mode development?]]
 
    - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
    - There is also a package on [[http://aur.archlinux.org/packages.php?do_Details&ID=18206][Archlinux]], by Jiyunatori.
-   - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintainned by Sebastien Delafond
+   - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintained by Sebastien Delafond
    - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jesse Alama
    - The [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] by Mark A. Hershberger.
 
