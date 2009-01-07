@@ -1,3 +1,8 @@
+2009-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-normalize-links): If the link is also
+	used as the description, protect the description.
+
 2009-01-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-closest-date): Fix bug with yearly repeats, in

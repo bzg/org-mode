@@ -2054,7 +2054,10 @@ When it is nil, all comments will be removed."
 		  "[[" xx "]"
 		  (if (match-end 3)
 		      (match-string 2)
-		    (concat "[" xx "]"))
+		    (concat "[" (org-add-props
+				    (copy-sequence xx)
+				    '(org-protected t))
+			    "]"))
 		  "]")))
 	 (put-text-property 0 (length s) 'face 'org-link s)
 	 (replace-match s t t))))))
