@@ -1,16 +1,16 @@
 
-#+TITLE:     Org-Mode Homepage
+#+TITLE:     Org-Mode: Your Life in Plain Text
 #+LANGUAGE:  en
 #+EMAIL:     carsten at orgmode dot org
-#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t
+#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil
+#+STYLE: </style><link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
-* Org - an Emacs Mode for Notes and Project Planning
+#+HTML:  <BASE href="http://orgmode.org/index1.html">
 
-#+HTML:  <BASE href="http://orgmode.org/index.html">
 
 #+BEGIN_HTML
 <form action="http://www.google.com/cse" id="cse-search-box">
-  <div>
+  <div align="right">
     <input type="hidden" name="cx" value="002987994228320350715:2gaddxoioh4" />
     <input type="hidden" name="ie" value="UTF-8" />
     <input type="text" name="q" size="31" />
@@ -20,20 +20,31 @@
 <script type="text/javascript" src="http://www.google.com/coop/cse/brand?form=cse-search-box&lang=en"></script>
 #+END_HTML
 
-Org-mode is a mode for keeping notes, maintaining ToDo lists, and doing
-project planning with a fast and effective plain-text system.
+*Org - an Emacs Mode for Notes, Project Planning, and Authoring*
 
-Org-mode develops organizational tasks around NOTES files that contain
-information about projects as plain text.  Org-mode is implemented on
-top of outline-mode, which makes it possible to keep the content of
-large files well structured.  Visibility cycling and structure editing
-help to work with the tree.  Tables are easily created with a built-in
-table editor.  Org-mode supports ToDo items, deadlines, time stamps,
-and scheduling.  It dynamically compiles entries into an agenda.
-Plain text URL-like links connect to websites, emails, Usenet
-messages, BBDB entries, and any files related to the projects.  For
-printing and sharing of notes, an Org-mode file can be exported as a
-structured ASCII file, HTML, and LaTeX.
+Org-mode is for keeping notes, maintaining ToDo lists, doing project
+planning, and authoring with a fast and effective plain-text
+system.
+
+#+ATTR_HTML: style="border:1px solid black;"
+[[http://orgmode.org/tasks.png]]
+
+- Simplicity :: Org-mode it a simple outliner for note taking and list
+     management. You can learn basic use in five minutes.  Some never
+     move any further than that, and Org-mode will never impose
+     complexity.
+- Depth :: As needs arise, Org-mode will show it's amazingly broad and
+     deep feature set.  The typical answer to "/Can I do X?/" is
+     "/Yes!/".
+- Portability :: Org files are plain text.  You can view and edit them
+     in any editor.  Your data is yours forever.  Org-mode runs in
+     [[http://www.gnu.org/software/emacs/][Emacs]], which is available for nearly every platform.
+- Flexibility :: Org-mode is a tool like a swiss army knife.  People
+     use it for [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][Getting Things Done (GTD)]], as a [[http://www.newartisans.com/blog_files/org.mode.day.planner.php][Day Planner]], as a
+     [[http://sachachua.com/wp/2008/01/18/outlining-your-notes-with-org/][Notebook]], for Web and PDF [[http://orgmode.org][Authoring]], and much more.
+- Support :: Org-mode is supported by an active [[id:0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26][mailing list]] where
+     questions are usually answered within hours.
+- It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is free, like Emacs.
 
 If you'd like to know what other people have said about Org-mode, take
 a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
@@ -47,20 +58,16 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 
 - Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 
-* Current Version (6.17c) and Compatibility
+* Current Version (6.17c)
 
 The current version is 6.17c.  To see what has changed in recent
-releases, check this [[file:Changes.html][list of user-visible changes]].  These descriptions
-are extensive, to avoid that people will be printing the manual after
-each incremental release.  If you have an older version of the manual,
-just check the release notes and you will be up-to-date.
+releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
-on Emacs 21 and XEmacs 21 (where you must also use
-/xemacs/noutline.el/ shipped with Org-mode).  The Emacs 22.2 release
-ships with Org-mode version 4.67d.  The Emacs 23.1 release is expected
-to ship with 6.16.  The latest CVS emacs trunk usually contains a
-fairly recent version, but may lag a bit behind the website release.
+on Emacs 21 and XEmacs 21.  Emacs 22.2 ships with Org-mode version
+4.67d.  Emacs 23.1 release is expected to ship with 6.16.  The latest
+CVS emacs trunk usually contains a fairly recent version, but may lag
+a bit behind the website release.
 
 * Downloads
 
@@ -68,8 +75,7 @@ fairly recent version, but may lag a bit behind the website release.
 
 Download as [[file:org-6.17c.zip][zip file]] or [[file:org-6.17c.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
-formats.  A shell script to simplify upgrading to the newest release
-has been posted [[http://www.philfam.co.uk/pete/GTD/org-mode/update-org.sh][here]].
+formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 
 ** The development version
 
@@ -80,34 +86,27 @@ the command line....):
 
 : git clone git://repo.or.cz/org-mode.git
 
-Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under
-/How can I keep current with Org mode development?/.
+Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under [[http://orgmode.org/worg/org-faq.php#keeping-current-with-Org-mode-development][How do
+I keep current with Org mode development?]]
 
 ** Alternative distributions
 
-   There are several alternative distrbutions of Org:
+   There are several alternative distributions of Org:
 
    - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
    - There is also a package on [[http://aur.archlinux.org/packages.php?do_Details&ID=18206][Archlinux]], by Jiyunatori.
    - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintainned by Sebastien Delafond
    - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jesse Alama
-   - Mark A. Hershberger has made an [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] for Org, but
-     that seems to be out of date.
+   - The [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] by Mark A. Hershberger.
 
 * Documentation
 ** The Org manual
-   - Read the documentation [[file:manual/index.html][online]].  This is a version consisting of many
-     small files, to save bandwidth.  
-   - If you really need it, you can also have the entire manual in a
-     [[file:org.html][single monolithic file]].
+   - Read the documentation [[file:manual/index.html][online]].
+   - You can also have the entire manual in a [[file:org.html][single monolithic file]].
    - Download the documentation as a  [[file:org.pdf][PDF document]].
-   - There is also a [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60),
-     produced by Takeshi Okano.
-   - The Org manual is a GNU Manual released under the GFDL.  If you
-     want to redistribute Org with a distribution that does not allow
-     the GFDL to be used, and if you see no other way to resolve this
-     licensing conflict, you must use the special [[file:org_dual_license.texi][dual-license version]]
-     of the manual.
+   - A [[http://hpcgi1.nifty.com/spen/index.cgi?OrgMode%2fManual][Japanese translation]] of the manual (version 4.60), by Takeshi
+     Okano.
+
 ** Reference card
    - Download the [[file:orgcard.pdf][Refcard]] for org-mode
    - Kyle Sherman has created a [[file:orgcard.txt][text version]] of the reference card
@@ -116,21 +115,26 @@ Some more information about this can be found in the [[http://orgmode.org/worg/o
    - The [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] is user-editable and is maintained by the [[http://orgmode.org/worg/][Worg
      project]]. 
 
+** Tutorials
+   - A complete list of [[http://orgmode.org/worg/org-tutorials/index.php][Tutorials and screencasts]] is maintained by the
+     [[http://orgmode.org/worg][Worg project]].
+
 * Links
 
 ** Google Tech Talk
    Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 
 ** Mailing list
+   :PROPERTIES:
+   :ID:       0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26
+   :END:
 
    There is a mailing list for discussion about org-mode.
 
    - Subscribe to it at [[http://lists.gnu.org/mailman/listinfo/emacs-orgmode][this webpage]].
    - Directly [[mailto:emacs-orgmode@gnu.org][send mail to it]].  If you are not subscribed, a moderator
      will look at the message before passing it through to the
-     list.  If that has happened once, future messages from your email
-     address will get through immediately, even if you remain
-     unsubscribed.
+     list.
    - Read the list on [[http://www.gmane.org][Gmane]] through a [[http://news.gmane.org/gmane.emacs.orgmode][web interface]] or with a
      [[news://news.gmane.org/gmane.emacs.orgmode][newsreader]].
 
@@ -142,62 +146,24 @@ Some more information about this can be found in the [[http://orgmode.org/worg/o
 </form>
 #+END_HTML
 
-** Worg - User-edited content
+** Worg
 
 [[http://orgmode.org/worg/][Worg]], created by [[http://www.cognition.ens.fr/~guerry/][Bastien Guerry]], is a setup to allow users to jointly
 edit a number of Org-mode files containing documentation about
 Org-mode, including the [[http://orgmode.org/worg/org-faq.php][Org Mode FAQ]] and [[http://orgmode.org/worg/org-tutorials/index.php][Tutorials]].  Worg is similar
 to a wiki in that allows community to edit the contents.  However,
 since it uses a distributed version control system, you do not have to
-be online while editing it.  If you'd like to contribute to Worg by
-posting your own special setup, screenshots, tutorials etc, please go
-to [[http://orgmode.org/worg/][the Worg page]], and start from there.
-
-** Tutorials
-
-   [[http://orgmode.org/worg/org-tutorials/index.php][Tutorials and screencasts]] are maintained by the [[http://orgmode.org/worg][Worg project]].
-
-** Survey
-
-   In November 2007, Charles Cave organized a survey among Org-mode
-   users.  The answers given in this survey can be found [[file:survey.html][here]].
-
-** GTD & Co
-
-   [[http://orgmode.org/worg/][Worg]] also has a list of links related to using Org for [[http://orgmode.org/worg/org-gtd-etc.php][GTD and
-   other task management systems]].
+be online while editing it.  If you'd like to contribute to Worg,
+please go to [[http://orgmode.org/worg/][the Worg page]], and start from there.
 
 ** Contributing to Org-mode
 
-   You can always contribute with ideas and bug reports on the mailing
-   list.  If you want to contribute a patch, code snippets, or a full
-   add-on, this is very welcome too!  However, I can only make it an
-   official part of Org-mode if you have signed the papers with the
-   Free Software Foundation.  Org-mode is distributed as part of Emacs
-   and must therefore adhere to strict rules about the copyright of
-   all included material.  If this is what you want to do, [[file:request-assign-future.txt][here]] is the
-   form that you have to fill in and send to the FSF.  After you
-   received the final copy with signatures, please scan it and send
-   the scan to the maintainer.
+You can always contribute with ideas and bug reports on the mailing
+list.  If you want to contribute a patch, code snippets, or a full
+add-on, this is very welcome too!  However, we can only make it an
+official part of Org-mode if you have signed a copyright assignment
+with the Free Software Foundation, because Org-mode is distributed as
+part of Emacs.  If this is what you want to do, [[file:request-assign-future.txt][here]] is the form that
+you have to fill in and [[mailto:assign@gnu.org][send]] to the [[http://www.fsf.org/][FSF]] with CC to the Org-mode
+maintainer.
 
-** Future Development
-
-   Org-mode is still developing fast.  The best way to stay up-to-date
-   is to join the mailing list where the changes are developed and
-   discussed.
-
-   Here is a loose [[file:todo.org][list of ideas]] that are still to be processed
-   somehow, when I get to it...
-
-** Related Software
-
-   [[http://www.emacswiki.org/cgi-bin/wiki][The Emacs Wiki]] has extensive lists of related software in the
-   categories
-   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryOutline][Outline]]
-   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryHypermedia][Hypermedia]]
-   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTables][Tables]]
-   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryPersonalInformationManager][Personal Information Manager]]
-   - [[http://www.emacswiki.org/cgi-bin/emacs-en/CategoryCalendar][Calendar]]
-   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTodo][Todo]]
-   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryTimeTracking][Time tracking]]
-   - [[http://www.emacswiki.org/cgi-bin/wiki/CategoryJournaling][Journaling]]
