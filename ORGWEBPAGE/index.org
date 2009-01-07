@@ -29,20 +29,19 @@ system.
 #+ATTR_HTML: style="border:1px solid black;"
 [[http://orgmode.org/tasks.png]]
 
-- Simplicity :: Org-mode it a simple outliner for note taking and list
-     management. You can learn basic use in five minutes.  Some never
-     move any further than that, and Org-mode will never impose
-     complexity.
+- Simplicity :: Org-mode is a simple outliner for note-taking and list
+     management. You can learn the basics for using it use in five
+     minutes.  This may be all you need, and Org-mode will not impose
+     more complex features on you.
 - Portability :: Org files are plain text.  You can view and edit them
      in any editor.  Your data is yours forever.  Org-mode runs in
      [[http://www.gnu.org/software/emacs/][Emacs]], which is available for nearly every platform.
-- Depth :: As needs arise, Org-mode will show it's amazingly broad and
-     deep feature set.  Simple as it is initially, it will not let you
-     down when you need more.  The typical [[http://orgmode.org/worg/org-faq.php][answer]] to "/Can I do X?/" is
-     "/Yes!/".
-- Flexibility :: Org-mode is a tool like a Swiss army knife.  People
-     use it for [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][Getting Things Done (GTD)]], as a [[http://www.newartisans.com/blog_files/org.mode.day.planner.php][Day Planner]], as a
-     [[http://sachachua.com/wp/2008/01/18/outlining-your-notes-with-org/][Notebook]], for Web and PDF [[http://orgmode.org][Authoring]], and much more.
+- Depth :: Org-mode will not let you down when you need more than a
+     simple outline.  The full feature set is both braod and deep.
+     The typical [[http://orgmode.org/worg/org-faq.php][answer]] to "/Can it do X?/" is "/Yes!/".
+- Flexibility :: Org-mode is like a Swiss army knife.  People use it
+     for [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][Getting Things Done (GTD)]], as a [[http://www.newartisans.com/blog_files/org.mode.day.planner.php][Day Planner]], as a [[http://sachachua.com/wp/2008/01/18/outlining-your-notes-with-org/][Notebook]],
+     for Web and PDF [[http://orgmode.org][Authoring]], and much more.
 - Support :: Org-mode is supported by an active [[id:0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26][mailing list]] where
      questions are answered quickly and effectively.
 - It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is free, like Emacs.
