@@ -2,6 +2,8 @@
 
 	* org.el (org-format-latex-options): Add new matcher for single
 	letters between dollars.
+	(org-get-header): Function removed.
+	(org-heading-components): New function.
 
 	* org-exp.el (org-export-define-heading-targets): Record ID's also
 	as alternative targets.

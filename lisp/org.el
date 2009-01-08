@@ -4941,6 +4941,25 @@ but create the new headline after the current line."
 	   "\\*+[ \t]+\\([^\r\n]*\\)"))
 	(match-string 1) "")))
 
+(defun org-heading-components ()
+  "Return the components of the current heading.
+This is a list with the following elements:
+- the level as an integer
+- the reduced level, different if `org-odd-levels-only' is set.
+- the TODO keyword, or nil
+- the priority character, like ?A, or nil if no priority is given
+- the headline text itself, or the tags string if no headline text
+- the tags string, or nil."
+  (save-excursion
+    (org-back-to-heading t)
+    (if (looking-at org-complex-heading-regexp)
+	(list (length (match-string 1))
+	      (org-reduced-level (length (match-string 1)))
+	      (org-match-string-no-properties 2)
+	      (and (match-end 3) (aref (match-string 3) 2))
+	      (org-match-string-no-properties 4)
+	      (org-match-string-no-properties 5)))))
+
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
   (interactive)
@@ -5049,6 +5068,8 @@ in the region."
 	    ((equal (char-after) ?\ ) (forward-char 1))))))
 
 (defun org-reduced-level (l)
+  "Compute the effective level of a heading.
+This takes into account the setting of `org-odd-levels-only'."
   (if org-odd-levels-only (1+ (floor (/ l 2))) l))
 
 (defun org-get-valid-level (level &optional change)
@@ -6608,30 +6629,6 @@ This is the list that is used before handing over to the browser.")
 (defun org-xor (a b)
   "Exclusive or."
   (if a (not b) b))
-
-(defun org-get-header (header)
-  "Find a header field in the current buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((case-fold-search t) s)
-      (cond
-       ((eq header 'from)
-	(if (re-search-forward "^From:\\s-+\\(.*\\)" nil t)
-	    (setq s (match-string 1)))
-	(while (string-match "\"" s)
-	  (setq s (replace-match "" t t s)))
-	(if (string-match "[<(].*" s)
-	    (setq s (replace-match "" t t s))))
-       ((eq header 'message-id)
-	(if (re-search-forward "^message-id:\\s-+\\(.*\\)" nil t)
-	    (setq s (match-string 1))))
-       ((eq header 'subject)
-	(if (re-search-forward "^subject:\\s-+\\(.*\\)" nil t)
-	    (setq s (match-string 1)))))
-      (if (string-match "\\`[ \t\]+" s) (setq s (replace-match "" t t s)))
-      (if (string-match "[ \t\]+\\'" s) (setq s (replace-match "" t t s)))
-      s)))
-
 
 (defun org-fixup-message-id-for-http (s)
   "Replace special characters in a message id, so it can be used in an http query."
