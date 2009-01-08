@@ -2674,7 +2674,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
    "org-clock"
    '(org-clock-in org-clock-out org-clock-cancel
 		  org-clock-goto org-clock-sum org-clock-display
-		  org-remove-clock-overlays org-clock-report
+		  org-clock-remove-overlays org-clock-report
 		  org-clocktable-shift org-dblock-write:clocktable
 		  org-get-clocktable)))
 
@@ -13167,7 +13167,7 @@ This command does many different things, depending on context:
      ((or (and (boundp 'org-clock-overlays) org-clock-overlays)
 	  org-occur-highlights
 	  org-latex-fragment-image-overlays)
-      (and (boundp 'org-clock-overlays) (org-remove-clock-overlays))
+      (and (boundp 'org-clock-overlays) (org-clock-remove-overlays))
       (org-remove-occur-highlights)
       (org-remove-latex-fragment-image-overlays)
       (message "Temporary highlights/overlays removed from current buffer"))

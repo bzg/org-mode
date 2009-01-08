@@ -1,5 +1,15 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer-mode-line-string): New variable.
+
+	* org-clock.el (org-clock-mode-line-map): Renamed from
+	`org-clock-mode-map'.
+	(org-clock-mode-line-timer): Renamed from `org-mode-line-timer'.
+	(org-clock-update-mode-line): Renamed from `org-update-mode-line'.
+	(org-clock-put-overlay): Renamed from `org-put-clock-overlay'.
+	(org-clock-remove-overlays): Renamed from
+	`org-remove-clock-overlays'.
+
 	* org-timer.el (org-timer-pause-or-continue): Implement stopping
 	and mode line display.
 	(org-timer-stop): New command.
