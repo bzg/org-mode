@@ -689,15 +689,21 @@ for the duration of the command."
   :group 'org-structure
   :type 'boolean)
 
-(defcustom org-blank-before-new-entry '((heading . nil)
-					(plain-list-item . nil))
+(defcustom org-blank-before-new-entry '((heading . auto)
+					(plain-list-item . auto))
   "Should `org-insert-heading' leave a blank line before new heading/item?
 The value is an alist, with `heading' and `plain-list-item' as car,
 and a boolean flag as cdr."
   :group 'org-edit-structure
   :type '(list
-	  (cons (const heading) (boolean))
-	  (cons (const plain-list-item) (boolean))))
+	  (cons (const heading)
+		(choice (const :tag "Never" nil)
+			(const :tag "Always" t)
+			(const :tag "Auto" auto)))
+	  (cons (const plain-list-item)
+		(choice (const :tag "Never" nil)
+			(const :tag "Always" t)
+			(const :tag "Auto" auto)))))
 
 (defcustom org-insert-heading-hook nil
   "Hook being run after inserting a new heading."
@@ -4831,6 +4837,13 @@ frame is not changed."
 
 ;;; Inserting headlines
 
+(defun org-previous-line-empty-p ()
+  (save-excursion
+    (and (not (bobp))
+	 (or (beginning-of-line 0) t)
+	 (save-match-data
+	   (looking-at "[ \t]*$")))))
+    
 (defun org-insert-heading (&optional force-heading)
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
@@ -4841,13 +4854,16 @@ but create the new headline after the current line."
   (if (= (buffer-size) 0)
       (insert "\n* ")
     (when (or force-heading (not (org-insert-item)))
-      (let* ((head (save-excursion
+      (let* ((empty-line-p nil)
+	     (head (save-excursion
 		     (condition-case nil
 			 (progn
 			   (org-back-to-heading)
+			   (setq empty-line-p (org-previous-line-empty-p))
 			   (match-string 0))
 		       (error "*"))))
-	     (blank (cdr (assq 'heading org-blank-before-new-entry)))
+	     (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
+	     (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	     pos hide-previous previous-pos)
 	(cond
 	 ((and (org-on-heading-p) (bolp)
@@ -4880,6 +4896,8 @@ but create the new headline after the current line."
 	     (org-insert-heading-respect-content
 	      (org-end-of-subtree nil t)
 	      (or (bolp) (newline))
+	      (or (org-previous-line-empty-p)
+		  (and blank (newline)))
 	      (open-line 1))
 	     ((org-on-heading-p)
 	      (when hide-previous

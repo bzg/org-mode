@@ -1,3 +1,14 @@
+2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-insert-heading):  Handle new value `auto' for
+	`org-blank-before-new-entry'.
+
+	* org-list.el (org-insert-item): Handle new value `auto' for
+	`org-blank-before-new-entry'.
+
+	* org.el (org-blank-before-new-entry): New value `auto', made
+	default.
+
 2009-01-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-normalize-links): If the link is also

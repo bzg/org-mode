@@ -189,13 +189,20 @@ Return t when things worked, nil when we are not in an item."
 				  (save-match-data
 				    (and (looking-at "[ \t]*\\(.*?\\) ::")
 					 (match-string 1)))))
+	   (empty-line-p (save-excursion
+			   (goto-char (match-beginning 0))
+			   (and (not (bobp))
+				(or (beginning-of-line 0) t)
+				(save-match-data
+				  (looking-at "[ \t]*$")))))
 	   (timerp (and descp
 			(save-match-data
 			  (string-match "^[-+*][ \t]+[0-9]+:[0-9]+:[0-9]+$"
 					descp))))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
-	   (blank (cdr (assq 'plain-list-item org-blank-before-new-entry)))
+	   (blank-a (cdr (assq 'plain-list-item org-blank-before-new-entry)))
+	   (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	   pos)
       (if descp (setq checkbox nil))
       (if timerp
