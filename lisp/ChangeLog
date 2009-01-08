@@ -1,5 +1,8 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-handle-include-files): Fetch switches and
+	put them into the BEGIN statement.
+
 	* org-timer.el (org-timer-mode-line-string): New variable.
 
 	* org-clock.el (org-clock-mode-line-map): Renamed from

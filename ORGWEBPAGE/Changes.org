@@ -26,6 +26,13 @@
 
     Thanks to Alan Davis for driving this change.
 
+*** Include files can now also process switches
+
+    The example and src switches like =-n= can now also be added
+    to inlcude file statements:
+
+: #+INCLUDE "~/.emacs" erc emacs-lisp -n -r
+
 * Version 6.17
 
 ** Overview

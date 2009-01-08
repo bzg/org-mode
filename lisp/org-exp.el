@@ -2234,7 +2234,7 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end prefix prefix1)
+	params file markup lang start end prefix prefix1 switches)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
@@ -2242,7 +2242,9 @@ TYPE must be a string, any of:
 	    prefix1 (org-get-and-remove-property 'params :prefix1)
 	    file (org-symname-or-string (pop params))
 	    markup (org-symname-or-string (pop params))
-	    lang (org-symname-or-string (pop params)))
+	    lang (and (member markup '("src" "SRC"))
+		      (org-symname-or-string (pop params)))
+	    switches (mapconcat '(lambda (x) (format "%s" x)) params " "))
       (delete-region (match-beginning 0) (match-end 0))
       (if (or (not file)
 	      (not (file-exists-p file))
@@ -2250,9 +2252,11 @@ TYPE must be a string, any of:
 	  (insert (format "CANNOT INCLUDE FILE %s" file))
 	(when markup
 	  (if (equal (downcase markup) "src")
-	      (setq start (format "#+begin_src %s\n" (or lang "fundamental"))
+	      (setq start (format "#+begin_src %s %s\n"
+				  (or lang "fundamental")
+				  (or switches ""))
 		    end "#+end_src")
-	    (setq start (format "#+begin_%s\n" markup)
+	    (setq start (format "#+begin_%s %s\n" markup switches)
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
 	(insert (org-get-file-contents (expand-file-name file) prefix prefix1))

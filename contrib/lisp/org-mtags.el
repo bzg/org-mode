@@ -72,7 +72,8 @@
 ;;        Needs to be on a line by itself, similarly the </src> tag.
 ;;        Will be translated into Org's BEGIN_SRC construct.
 ;;
-;;   <include file="FILE" markup="MARKUP" lang="LANG" prefix="str" prefix1="str">
+;;   <include file="FILE" markup="MARKUP" lang="LANG"
+;;            prefix="str" prefix1="str" switches="-n -r">
 ;;        Needs to be on a line by itself.
 ;;        Will be translated into Org's #+INCLUDE construct.
 ;;
@@ -187,8 +188,10 @@ The is done in the entire buffer."
 		markup (downcase (plist-get info :markup))
 		lang (plist-get info :lang)
 		prefix (plist-get info :prefix)
-		prefix1 (plist-get info :prefix1))
+		prefix1 (plist-get info :prefix1)
+		switches (plist-get info :switches))
 	  (setq rpl "#+INCLUDE")
+	  (setq rpl (concat rpl " " (prin1-to-string file)))
 	  (when markup
 	    (setq rpl (concat rpl " " markup))
 	    (when (and (equal markup "src") lang)
@@ -196,7 +199,9 @@ The is done in the entire buffer."
 	  (when prefix
 	    (setq rpl (concat rpl " :prefix " (prin1-to-string prefix))))
 	  (when prefix1
-	    (setq rpl (concat rpl " :prefix1 " (prin1-to-string prefix1))))))
+	    (setq rpl (concat rpl " :prefix1 " (prin1-to-string prefix1))))
+	  (when switches
+	    (setq rpl (concat rpl " " switches)))))
 	(when rpl
 	  (goto-char (plist-get info :match-beginning))
 	  (delete-region (point-at-bol) (plist-get info :match-end))
