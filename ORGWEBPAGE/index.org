@@ -37,7 +37,7 @@ system.
      in any editor.  Your data is yours forever.  Org-mode runs in
      [[http://www.gnu.org/software/emacs/][Emacs]], which is available for nearly every platform.
 - Depth :: Org-mode will not let you down when you need more than a
-     simple outline.  The full feature set is both braod and deep.
+     simple outline.  The full feature set is both [[http://orgmode.org/manual/Main-Index.html#Main-Index][broad]] and [[http://orgmode.org/manual/index.html][deep]].
      The typical [[http://orgmode.org/worg/org-faq.php][answer]] to "/Can it do X?/" is "/Yes!/".
 - Flexibility :: Org-mode is like a Swiss army knife.  People use it
      for [[http://members.optusnet.com.au/~charles57/GTD/orgmode.html][Getting Things Done (GTD)]], as a [[http://www.newartisans.com/blog_files/org.mode.day.planner.php][Day Planner]], as a [[http://sachachua.com/wp/2008/01/18/outlining-your-notes-with-org/][Notebook]],
