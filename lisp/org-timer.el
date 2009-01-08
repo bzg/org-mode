@@ -213,6 +213,7 @@ If the integer is negative, the string will start with \"-\"."
     (format "%s%d:%02d:%02d" sign h m s)))
 
 (defvar org-timer-mode-line-timer nil)
+(defvar org-timer-mode-line-string nil)
 
 (defun org-timer-set-mode-line (value)
   "Set the mode-line dispay of the relative timer.
