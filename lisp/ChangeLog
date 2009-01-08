@@ -1,5 +1,8 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-jsinfo.el (org-infojs-handle-options): Catch the case if v
+	is nil.
+
 	* org-exp.el (org-export-normalize-links): Protect the main link,
 	to avoid special character processing.
 
