@@ -62,12 +62,11 @@
 (defvar org-export-latex-add-level 0)
 (defvar org-export-latex-sectioning "")
 (defvar org-export-latex-sectioning-depth 0)
-(defvar org-export-latex-special-string-regexps
-  '(org-ts-regexp
-    org-scheduled-string
-    org-deadline-string
-    org-clock-string)
-  "A list of regexps to convert as special keywords.")
+(defvar org-export-latex-special-keyword-regexp
+  (concat "\\<\\(" org-scheduled-string "\\|"
+	  org-deadline-string "\\|"
+	  org-closed-string"\\)")
+  "Regexp matching special time planning keywords plus the time after it.")
 
 (defvar latexp)    ; dynamically scoped from org.el
 (defvar re-quote)  ; dynamically scoped from org.el
@@ -1012,11 +1011,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    (concat string-before "\\textbackslash{}" string-after)))))
 
 (defun org-export-latex-keywords ()
-  "Convert special keywords to LaTeX.
-Regexps are those from `org-export-latex-special-string-regexps'.
-If TIMESTAMPS, convert timestamps, otherwise delete them."
+  "Convert special keywords to LaTeX."
   (goto-char (point-min))
-  (let ((re (concat org-maybe-keyword-time-regexp ".*")))
+  (let ((re (concat org-export-latex-special-keyword-regexp
+		    ".*" ; including the time stamp....
+		    )))
     (while (re-search-forward re nil t)
       (replace-match (format "\\\\texttt{%s}" (match-string 0)) t))))
 

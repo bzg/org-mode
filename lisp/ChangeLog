@@ -1,5 +1,13 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-normalize-links): Protect the main link,
+	to avoid special character processing.
+
+	* org-export-latex.el (org-export-latex-special-keyword-regexp):
+	New variable.
+	(org-export-latex-special-string-regexps): Variable removed.
+	(org-export-latex-keywords): Use the new regexp.
+
 	* org-exp.el (org-export-handle-include-files): Fetch switches and
 	put them into the BEGIN statement.
 

@@ -2051,7 +2051,9 @@ When it is nil, all comments will be removed."
 		    (org-translate-link
 		     (org-link-expand-abbrev (match-string 1)))))
 	      (s (concat
-		  "[[" xx "]"
+		  "[[" (org-add-props (copy-sequence xx)
+			   nil 'org-protected t)
+		  "]"
 		  (if (match-end 3)
 		      (match-string 2)
 		    (concat "[" (org-add-props
