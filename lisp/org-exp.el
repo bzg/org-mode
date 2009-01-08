@@ -399,7 +399,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
 (defcustom org-export-with-TeX-macros t
   "Non-nil means, interpret simple TeX-like macros when exporting.
 For example, HTML export converts \\alpha to &alpha; and \\AA to &Aring;.
-No only real TeX macros will work here, but the standard HTML entities
+Not only real TeX macros will work here, but the standard HTML entities
 for math can be used as macro names as well.  For a list of supported
 names in HTML export, see the constant `org-html-entities'.
 Not all export backends support this.
