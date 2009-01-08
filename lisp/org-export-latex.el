@@ -1267,11 +1267,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     (while (setq e (pop re-list))
       (setq m (car e) re (nth 1 e) n (nth 2 e)
 	    block (if (nth 3 e) "\n\n" ""))
-      (setq off (if (equal m "$") 1 0))
+      (setq off (if (member m '("$" "$1")) 1 0))
       (when (and (member m matchers) (not (equal m "begin")))
 	(goto-char (point-min))
 	(while (re-search-forward re nil t)
-	  (setq beg (+ (match-beginning 0) off) end (- (match-end 0) off))
+	  (setq beg (+ (match-beginning 0) off) end (- (match-end 0) 0))
 	  (add-text-properties beg end '(org-protected t org-latex-math t))))))
 
   ;; Convert LaTeX to \LaTeX{}

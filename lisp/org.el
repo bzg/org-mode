@@ -2235,7 +2235,7 @@ default is the character `k' because we use the same key in the agenda."
 (defcustom org-format-latex-options
   '(:foreground default :background default :scale 1.0
     :html-foreground "Black" :html-background "Transparent" :html-scale 1.0
-    :matchers ("begin" "$" "$$" "\\(" "\\["))
+    :matchers ("begin" "$1" "$" "$$" "\\(" "\\["))
   "Options for creating images from LaTeX fragments.
 This is a property list with the following properties:
 :foreground  the foreground color for images embedded in Emacs, e.g. \"Black\".
@@ -2248,6 +2248,7 @@ This is a property list with the following properties:
 :matchers    a list indicating which matchers should be used to
              find LaTeX fragments.  Valid members of this list are:
              \"begin\"  find environments
+             \"$1\"     find single characters surrounded by $.$
              \"$\"      find math expressions surrounded by $...$
              \"$$\"     find math expressions surrounded by $$....$$
              \"\\(\"     find math expressions surrounded by \\(...\\)
@@ -12466,6 +12467,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   '(("begin" "^[ \t]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^\000]+?\\\\end{\\2}\\)" 1 t)
     ;; ("$" "\\([ 	(]\\|^\\)\\(\\(\\([$]\\)\\([^ 	\r\n,.$].*?\\(\n.*?\\)\\{0,5\\}[^ 	\r\n,.$]\\)\\4\\)\\)\\([ 	.,?;:'\")]\\|$\\)" 2 nil)
     ;; \000 in the following regex is needed for org-inside-LaTeX-fragment-p
+    ("$1" "\\([^$]\\)\\(\\$[^ 	\r\n,;.$]\\$\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
     ("$" "\\([^$]\\)\\(\\(\\$\\([^ 	\r\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ 	\r\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
     ("\\(" "\\\\([^\000]*?\\\\)" 0 nil)
     ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 t)
