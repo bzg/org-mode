@@ -1,5 +1,13 @@
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-format-latex-options): Add new matcher for single
+	letters between dollars.
+
+	* org-exp.el (org-export-define-heading-targets): Record ID's also
+	as alternative targets.
+	(org-export-as-html): Interpret "id:" links to other files by
+	preserving the relative path.
+
 	* org-jsinfo.el (org-infojs-handle-options): Catch the case if v
 	is nil.
 

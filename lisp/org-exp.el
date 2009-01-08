@@ -1645,16 +1645,24 @@ The new targets are added to TARGET-ALIST, which is also returned."
   (org-init-section-numbers)
   (let ((re (concat "^" org-outline-regexp
 		    "\\| [ \t]*:ID:[ \t]*\\([^ \t\r\n]+\\)"))
-	level target)
+	level target last-section-target a)
     (while (re-search-forward re nil t)
       (if (match-end 1)
-	  (push (cons (org-match-string-no-properties 1)
-		      target) target-alist)
+	  (progn
+	    (push (cons (org-match-string-no-properties 1)
+			target) target-alist)
+	    (setq a (or (assoc last-section-target org-export-target-aliases)
+			(progn
+			  (push (list last-section-target)
+				org-export-target-aliases)
+			  (car org-export-target-aliases))))
+	    (push (caar target-alist) (cdr a)))
 	(setq level (org-reduced-level
 		     (save-excursion (goto-char (point-at-bol))
 				     (org-outline-level))))
 	(setq target (org-solidify-link-text
 		      (format "sec-%s" (org-section-number level))))
+	(setq last-section-target target)
 	(push (cons target target) target-alist)
 	(add-text-properties
 	 (point-at-bol) (point-at-eol)
@@ -3264,6 +3272,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc item-tag
 	 footnotes footref-seen
+	 id-file
 	 )
 
     (let ((inhibit-read-only t))
@@ -3560,6 +3569,18 @@ lang=\"%s\" xml:lang=\"%s\">
 		     "\"" attr ">"
 		     (org-export-html-format-desc desc)
 		     "</a>")))
+	     ((and (equal type "id")
+		   (setq id-file (org-id-find-id-file path)))
+	      ;; This is an id: link to another file (if it was the same file,
+	      ;; it would have become an internal link...)
+	      (setq id-file (file-relative-name
+			     id-file (file-name-directory org-current-export-file)))
+	      (setq id-file (concat (file-name-sans-extension id-file)
+				    "." html-extension))
+	      (setq rpl (concat "<a href=\"" id-file "#" path "\""
+				attr ">"
+				(org-export-html-format-desc desc)
+				"</a>")))
 	     ((member type '("http" "https"))
 	      ;; standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-html-inline-images)
