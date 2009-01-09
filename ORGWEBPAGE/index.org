@@ -160,9 +160,11 @@ please go to [[http://orgmode.org/worg/][the Worg page]], and start from there.
 
 You can always contribute with ideas and bug reports on the mailing
 list.  If you want to contribute a patch, code snippets, or a full
-add-on, this is very welcome too!  However, we can only make it an
-official part of Org-mode if you have signed a copyright assignment
-with the [[http://www.fsf.org/][Free Software Foundation]], because Org-mode is distributed as
-part of Emacs.  If this is what you want to do, use [[file:request-assign-future.txt][this form]], fill it
-in and [[mailto:assign@gnu.org,carsten.dominik@gmail.com][send]] it to the FSF with a copy to the Org-mode maintainer.
+add-on, this is very welcome too!  We do distribute good add-ons as
+contributed packages.  However, to integrate additions into the
+Org-mode core, the author needs to assign the copyright to the [[http://www.fsf.org/][Free
+Software Foundation]].  This is because Org-mode is part of Emacs, which
+adheres to very strict rules.  If you would like to sign the papers,
+use [[file:request-assign-future.txt][this form]], fill it in and [[mailto:assign@gnu.org,carsten.dominik@gmail.com][send]] it to the FSF with a copy to the
+Org-mode maintainer.
 
