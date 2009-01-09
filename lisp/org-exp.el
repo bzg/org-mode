@@ -2097,8 +2097,10 @@ This is to make sure that the line-processing export backends
 can work correctly."
   (goto-char (point-min))
   (while (re-search-forward org-emph-re nil t)
-    (if (not (= (char-after (match-beginning 3))
-		(char-after (match-beginning 4))))
+    (if (and (not (= (char-after (match-beginning 3))
+		     (char-after (match-beginning 4))))
+	     (save-excursion (goto-char (match-beginning 0))
+			     (save-match-data (not (org-at-table-p)))))
 	(org-if-unprotected
 	 (subst-char-in-region (match-beginning 0) (match-end 0)
 			       ?\n ?\  t)

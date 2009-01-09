@@ -1153,8 +1153,16 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
     ;; The match goes one char after the *string*
     (let ((emph (assoc (match-string 3)
 		       org-export-latex-emphasis-alist))
+	  (beg (match-beginning 0))
+	  (end (match-end 0))
 	  rpl)
-      (unless (get-text-property (1- (point)) 'org-protected)
+      (unless (or (get-text-property (1- (point)) 'org-protected)
+		  (save-excursion
+		    (goto-char (match-beginning 1))
+		    (save-match-data
+		      (and (org-at-table-p)
+			   (string-match
+			    "[|\n]" (buffer-substring beg end))))))
 	(setq rpl (concat (match-string 1)
 			  (format (org-export-latex-protect-char-in-string
 				   '("\\" "{" "}") (cadr emph))
