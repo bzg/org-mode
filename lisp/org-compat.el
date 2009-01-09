@@ -157,7 +157,9 @@ WINDOW defaults to the selected window.  MAX-HEIGHT and MIN-HEIGHT are
 passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
 `shrink-window-if-larger-than-buffer' instead, the hight limit are
 ignored in this case."
-  (cond ((> (frame-width) (window-width window))
+  (cond ((if (fboundp 'window-full-width-p)
+	     (window-full-width-p window)
+	   (> (frame-width) (window-width window)))
 	 ;; do nothing if another window would suffer
 	 )
 	((and (fboundp 'fit-window-to-buffer) (not shrink-only))
