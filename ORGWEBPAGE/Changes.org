@@ -15,7 +15,6 @@
   :VISIBILITY: content
   :END:
 
-
 ** Incompatible changes
 
 *** Short examples must have a space after the colon
@@ -43,6 +42,12 @@
     to inlcude file statements:
 
 : #+INCLUDE "~/.emacs" erc emacs-lisp -n -r
+
+*** Links by ID now continue to work in HTML exported files
+
+    If you make links by ID, these links will now still work in
+    HTML exported files, provided that you keep the relative path
+    from link to target file the same.
 
 * Version 6.17
 
