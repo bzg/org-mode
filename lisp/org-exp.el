@@ -1854,6 +1854,7 @@ from the buffer."
 (defun org-export-remove-timestamps ()
   "Remove timestamps and keywords for export."
   (while (re-search-forward org-maybe-keyword-time-regexp nil t)
+    (backward-char 1)
     (org-if-unprotected
      (replace-match "")
      (beginning-of-line 1)
