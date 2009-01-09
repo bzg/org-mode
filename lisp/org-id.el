@@ -525,6 +525,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 
 ;; Finding entries with specified id
 
+;;;###autoload
 (defun org-id-find-id-file (id)
   "Query the id database for the file in which this ID is located."
   (unless org-id-locations (org-id-locations-load))

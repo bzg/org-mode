@@ -34,6 +34,7 @@
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 (declare-function htmlize-region "ext:htmlize" (beg end))
+(declare-function org-id-find-id-file "org-id" (id))
 (defvar htmlize-buffer-places)  ; from htmlize.el
 
 (defgroup org-export nil
