@@ -1,3 +1,18 @@
+2009-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-fixed-width): Enforce the
+	space after the colon in short examples.
+
+	* org-exp.el (org-export-protect-colon-examples): Rewritten, to
+	enforce a space after the colon.  However, we also allow lines
+	that are *only* a colon.
+	(org-export-as-html): Enforce the space after the colon in short
+	examples.
+	(org-export-preprocess-string): Do the colon example protection
+	earlier.
+	(org-export-remove-timestamps): Do not check for protection at the
+	end of the line.
+
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-format-latex-options): Add new matcher for single

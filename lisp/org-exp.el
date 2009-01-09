@@ -1527,6 +1527,9 @@ on this string to produce the exported version."
       ;; Handle source code snippets
       (org-export-replace-src-segments-and-examples backend)
 
+      ;; Protect short examples marked by a leading colon
+      (org-export-protect-colon-examples)
+
       ;; Normalize footnotes
       (when (plist-get parameters :footnotes)
 	(org-footnote-normalize nil t))
@@ -1552,19 +1555,12 @@ on this string to produce the exported version."
       ;; Remove todo-keywords before exporting, if the user has requested so
       (org-export-remove-headline-metadata parameters)
 
-      ;; Remove timestamps, if the user has requested so
-      (org-export-remove-clock-lines)
-      (unless (plist-get parameters :timestamps)
-	(org-export-remove-timestamps))
-
       ;; Find targets in comments and move them out of comments,
       ;; but mark them as targets that should be invisible
       (setq target-alist (org-export-handle-invisible-targets target-alist))
 
-      ;; Protect short examples
-      (org-export-protect-colon-examples)
-
-      ;; Protect backend specific stuff, throw away the others.
+      ;; Select and protect backend specific stuff, throw away stuff
+      ;; that is specific for other backends
       (org-export-select-backend-specific-text backend)
 
       ;; Protect quoted subtrees
@@ -1575,6 +1571,11 @@ on this string to produce the exported version."
 
       ;; Blockquotes and verse
       (org-export-mark-blockquote-and-verse)
+
+      ;; Remove timestamps, if the user has requested so
+      (org-export-remove-clock-lines)
+      (unless (plist-get parameters :timestamps)
+	(org-export-remove-timestamps))
 
       ;; Attach captions to the correct object
       (setq target-alist (org-export-attach-captions-and-attributes
@@ -1606,16 +1607,16 @@ on this string to produce the exported version."
       ;; Another hook
       (run-hooks 'org-export-preprocess-before-backend-specifics-hook)
 
-      ;; Specific LaTeX stuff
+      ;; LaTeX-specific preprocessing
       (when latexp
 	(require 'org-export-latex nil)
 	(org-export-latex-preprocess))
 
-      ;; Specific ASCII stuff
+      ;; ASCII-specific preprocessing
       (when asciip
 	(org-export-ascii-preprocess))
 
-      ;; Specific HTML stuff
+      ;; HTML-specific preprocessing
       (when htmlp
 	(org-export-html-preprocess parameters))
 
@@ -1887,9 +1888,15 @@ from the buffer."
 (defun org-export-protect-colon-examples ()
   "Protect lines starting with a colon."
   (goto-char (point-min))
-  (while (re-search-forward "^[ \t]*:.*\\(\n[ \t]*:.*\\)*" nil t)
-    (add-text-properties (match-beginning 0) (match-end 0)
-			 '(org-protected t))))
+  (let ((re "^[ \t]*:\\([ \t]\\|$\\)") beg end)
+    (while (re-search-forward re nil t)
+      (beginning-of-line 1)
+      (setq beg (point))
+      (while (looking-at re)
+	(end-of-line 1)
+	(or (eobp) (forward-char 1)))
+      (add-text-properties beg (if (bolp) (1- (point)) (point))
+			   '(org-protected t)))))
 
 (defun org-export-select-backend-specific-text (backend)
   (let ((formatters
@@ -3440,7 +3447,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Fixed-width, verbatim lines (examples)
 	  (when (and org-export-with-fixed-width
-		     (string-match "^[ \t]*:\\(.*\\)" line))
+		     (string-match "^[ \t]*:\\(\\([ \t]\\|$\\).*\\)" line))
 	    (when (not infixed)
 	      (setq infixed t)
 	      (org-close-par-maybe)

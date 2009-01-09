@@ -15,6 +15,17 @@
   :VISIBILITY: content
   :END:
 
+
+** Incompatible changes
+
+*** Short examples must have a space after the colon
+
+    Short literal examples can be created by preceeding lines
+    with a colon.  Such lines must now have a space after the
+    colon.  I believe this is already general practice, but now
+    it must be like this.  The only exception are lines what are
+    empty except for the colon.    
+
 ** Details
 
 *** The relative timer can be paused

@@ -7376,10 +7376,12 @@ Some example from a text file.
 @end example
 
 For simplicity when using small examples, you can also start the example
-lines with a colon:
+lines with a colon followed by a space.  There may also be additional
+whitespace before the colon:
 
 @example
-: Some example from a text file.
+Here is an example
+   : Some example from a text file.
 @end example
 
 @cindex formatting source code, markup rules

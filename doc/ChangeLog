@@ -1,3 +1,8 @@
+2009-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Literal examples): Document that a space must follow
+	the colon in short examples.
+
 2009-01-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Relative timer): Document `org-timer-stop'.
