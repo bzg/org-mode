@@ -1,3 +1,8 @@
+2009-01-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-archive.el (org-add-archive-files): Uniquify the list before
+	returning it.
+
 2009-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-fit-window-to-buffer): Use

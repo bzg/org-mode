@@ -102,18 +102,19 @@ information."
 	 (t org-archive-location (match-string 1)))))))
 
 (defun org-add-archive-files (files)
-  "Splice the archive files into the list f files.
+  "Splice the archive files into the list of files.
 This implies visiting all these files and finding out what the
 archive file is."
-  (apply
-   'append
-   (mapcar
-    (lambda (f)
-      (if (not (file-exists-p f))
-	  nil
-	(with-current-buffer (org-get-agenda-file-buffer f)
-	  (cons f (org-all-archive-files)))))
-    files)))
+  (org-uniquify
+   (apply
+    'append
+    (mapcar
+     (lambda (f)
+       (if (not (file-exists-p f))
+	   nil
+	 (with-current-buffer (org-get-agenda-file-buffer f)
+	   (cons f (org-all-archive-files)))))
+     files))))
 
 (defun org-all-archive-files ()
   "Get a list of all archive files used in the current buffer."
