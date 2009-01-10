@@ -41,7 +41,7 @@
     The example and src switches like =-n= can now also be added
     to inlcude file statements:
 
-: #+INCLUDE "~/.emacs" erc emacs-lisp -n -r
+: #+INCLUDE "~/.emacs" src emacs-lisp -n -r
 
 *** Links by ID now continue to work in HTML exported files
 
