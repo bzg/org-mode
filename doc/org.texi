@@ -1118,7 +1118,7 @@ each specifies the archive location for the text below it.  The first
 such line also applies to any text before its definition.  However,
 using this method is @emph{strongly} deprecated as it is incompatible
 with the outline structure of the document.  The correct method for
-setting multiple archive locations in a buffer is using a property.}:
+setting multiple archive locations in a buffer is using properties.}:
 
 @example
 #+ARCHIVE: %s_done::

@@ -151,7 +151,8 @@ if LOCATION is not given, the value of `org-archive-location' is used."
 if LOCATION is not given, the value of `org-archive-location' is used."
   (setq location (or location org-archive-location))
   (if (string-match "\\(.*\\)::\\(.*\\)" location)
-      (match-string 2 location)))
+      (format (match-string 2 location)
+	      (file-name-nondirectory buffer-file-name))))
 
 (defun org-archive-subtree (&optional find-done)
   "Move the current subtree to the archive.

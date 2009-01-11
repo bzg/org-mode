@@ -2770,7 +2770,9 @@ Org-mode Agenda.
 
 The archived entries will be filed as subtrees of the specified
 headline.  When the headline is omitted, the subtrees are simply
-filed away at the end of the file, as top-level entries.
+filed away at the end of the file, as top-level entries.  Also in
+the heading you can use %s to represent the file name, this can be
+useful when using the same archive for a number of different files.
 
 Here are a few examples:
 \"%s_archive::\"
@@ -2783,6 +2785,10 @@ Here are a few examples:
 
 \"~/org/archive.org::\"
 	Archive in file ~/org/archive.org (absolute path), as top-level trees.
+
+\"~/org/archive.org::From %s\"
+	Archive in file ~/org/archive.org (absolute path), und headlines
+        \"From FILENAME\" where file name is the current file name.
 
 \"basement::** Finished Tasks\"
 	Archive in file ./basement (relative path), as level 3 trees

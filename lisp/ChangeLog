@@ -1,3 +1,8 @@
+2009-01-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-archive.el (org-extract-archive-heading): Allow %s for file
+	name also in achive location heading.
+
 2009-01-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-archive.el (org-add-archive-files): Uniquify the list before
