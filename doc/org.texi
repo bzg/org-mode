@@ -3604,7 +3604,7 @@ the variables @code{org-use-tag-inheritance} and
 
 When a headline matches during a tags search while tag inheritance is turned
 on, all the sublevels in the same tree will (for a simple match form) match
-as well@footnote{This is only true if the the search does not involve more
+as well@footnote{This is only true if the search does not involve more
 complex tests including properties (@pxref{Property searches}).}.  The list
 of matches may then become very long.  If you only want to see the first tags
 match in a subtree, configure the variable
