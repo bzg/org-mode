@@ -2665,7 +2665,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 
 (declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
 		  (beg end))
-(declare-function org-update-mode-line "org-clock" ())
+(declare-function org-clock-update-mode-line "org-clock" ())
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
@@ -2702,7 +2702,7 @@ Otherwise, return nil."
 	    (setq org-clock-start-time
 		  (apply 'encode-time
 			 (org-parse-time-string (match-string 1))))
-	    (org-update-mode-line)))
+	    (org-clock-update-mode-line)))
 	 (t
 	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
 	  (end-of-line 1)
