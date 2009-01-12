@@ -9585,7 +9585,7 @@ header.  Orgtbl mode can insert a radio table skeleton@footnote{By
 default this works only for La@TeX{}, HTML, and Texinfo.  Configure the
 variable @code{orgtbl-radio-tables} to install templates for other
 modes.}  with the command @kbd{M-x orgtbl-insert-radio-table}.  You will
-be prompted for a table name, lets say we use @samp{salesfigures}.  You
+be prompted for a table name, let's say we use @samp{salesfigures}.  You
 will then get the following template:
 
 @cindex #+ORGTBL: SEND
@@ -9630,7 +9630,7 @@ variable @code{LaTeX-verbatim-environments}.}:
 When you are done, press @kbd{C-c C-c} in the table to get the converted
 table inserted between the two marker lines.
 
-Now lets assume you want to make the table header by hand, because you
+Now let's assume you want to make the table header by hand, because you
 want to control how columns are aligned etc.  In this case we make sure
 that the table translator does skip the first 2 lines of the source
 table, and tell the command to work as a @i{splice}, i.e. to not produce
