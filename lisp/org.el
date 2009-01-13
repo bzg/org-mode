@@ -9575,16 +9575,16 @@ also TODO lines."
 (defun org-string>= (a b) (not (string< a b)))
 (defun org-string>  (a b) (and (not (string= a b)) (not (string< a b))))
 (defun org-string<> (a b) (not (string= a b)))
-(defun org-time=  (a b) (=     (org-2ft a) (org-2ft b)))
-(defun org-time<  (a b) (<     (org-2ft a) (org-2ft b)))
-(defun org-time<= (a b) (<=    (org-2ft a) (org-2ft b)))
-(defun org-time>  (a b) (>     (org-2ft a) (org-2ft b)))
-(defun org-time>= (a b) (>=    (org-2ft a) (org-2ft b)))
-(defun org-time<> (a b) (org<> (org-2ft a) (org-2ft b)))
+(defun org-time=  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (=     a b)))
+(defun org-time<  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (<     a b)))
+(defun org-time<= (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (<=    a b)))
+(defun org-time>  (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (>     a b)))
+(defun org-time>= (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (>=    a b)))
+(defun org-time<> (a b) (setq a (org-2ft a) b (org-2ft b)) (and (> a 0) (> b 0) (org<> a b)))
 (defun org-2ft (s)
   "Convert S to a floating point time.
 If S is already a number, just return it.  If it is a string, parse
-it as a time string and apply `float-time' to it.  f S is nil, just return 0."
+it as a time string and apply `float-time' to it.  If S is nil, just return 0."
   (cond
    ((numberp s) s)
    ((stringp s)

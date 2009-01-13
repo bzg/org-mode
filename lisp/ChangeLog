@@ -1,3 +1,8 @@
+2009-01-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-time=, org-time<, org-time<=, org-time>)
+	(org-time>=, org-time<>): Make sure both values are dates.
+
 2009-01-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-archive.el (org-extract-archive-heading): Allow %s for file
