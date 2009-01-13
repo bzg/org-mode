@@ -3604,7 +3604,7 @@ the variables @code{org-use-tag-inheritance} and
 
 When a headline matches during a tags search while tag inheritance is turned
 on, all the sublevels in the same tree will (for a simple match form) match
-as well@footnote{This is only true if the the search does not involve more
+as well@footnote{This is only true if the search does not involve more
 complex tests including properties (@pxref{Property searches}).}.  The list
 of matches may then become very long.  If you only want to see the first tags
 match in a subtree, configure the variable
@@ -4572,7 +4572,7 @@ in @b{bold}.
 14            --> @b{2006}-@b{06}-14
 12            --> @b{2006}-@b{07}-12
 Fri           --> nearest Friday (defaultdate or later)
-sep 15        --> @b{2006}-11-15
+sep 15        --> @b{2006}-09-15
 feb 15        --> @b{2007}-02-15
 sep 12 9      --> 2009-09-12
 12:45         --> @b{2006}-@b{06}-@b{13} 12:45
@@ -9585,7 +9585,7 @@ header.  Orgtbl mode can insert a radio table skeleton@footnote{By
 default this works only for La@TeX{}, HTML, and Texinfo.  Configure the
 variable @code{orgtbl-radio-tables} to install templates for other
 modes.}  with the command @kbd{M-x orgtbl-insert-radio-table}.  You will
-be prompted for a table name, lets say we use @samp{salesfigures}.  You
+be prompted for a table name, let's say we use @samp{salesfigures}.  You
 will then get the following template:
 
 @cindex #+ORGTBL: SEND
@@ -9630,7 +9630,7 @@ variable @code{LaTeX-verbatim-environments}.}:
 When you are done, press @kbd{C-c C-c} in the table to get the converted
 table inserted between the two marker lines.
 
-Now lets assume you want to make the table header by hand, because you
+Now let's assume you want to make the table header by hand, because you
 want to control how columns are aligned etc.  In this case we make sure
 that the table translator does skip the first 2 lines of the source
 table, and tell the command to work as a @i{splice}, i.e. to not produce
