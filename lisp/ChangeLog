@@ -1,3 +1,8 @@
+2009-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-map-entries): Restore point and restriction after
+	`org-map-entries'.
+
 2009-01-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-time=, org-time<, org-time<=, org-time>)

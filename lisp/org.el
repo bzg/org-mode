@@ -10166,39 +10166,41 @@ the scanner.  The following items can be given here:
      ((eq match nil) (setq matcher t))
      (t (setq matcher (if match (cdr (org-make-tags-matcher match)) t))))
 
-    (when (eq scope 'tree)
-      (org-back-to-heading t)
-      (org-narrow-to-subtree)
-      (setq scope nil))
+    (save-excursion
+      (save-restriction
+	(when (eq scope 'tree)
+	  (org-back-to-heading t)
+	  (org-narrow-to-subtree)
+	  (setq scope nil))
 
-    (if (not scope)
-	(progn
-	  (org-prepare-agenda-buffers
-	   (list (buffer-file-name (current-buffer))))
-	  (org-scan-tags func matcher))
-      ;; Get the right scope
-      (setq pos (point))
-      (cond
-       ((and scope (listp scope) (symbolp (car scope)))
-	(setq scope (eval scope)))
-       ((eq scope 'agenda)
-	(setq scope (org-agenda-files t)))
-       ((eq scope 'agenda-with-archives)
-	(setq scope (org-agenda-files t))
-	(setq scope (org-add-archive-files scope)))
-       ((eq scope 'file)
-	(setq scope (list (buffer-file-name))))
-       ((eq scope 'file-with-archives)
-	(setq scope (org-add-archive-files (list (buffer-file-name))))))
-      (org-prepare-agenda-buffers scope)
-      (while (setq file (pop scope))
-	(with-current-buffer (org-find-base-buffer-visiting file)
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char (point-min))
-	      (setq res (append res (org-scan-tags func matcher)))))))
-      res)))
+	(if (not scope)
+	    (progn
+	      (org-prepare-agenda-buffers
+	       (list (buffer-file-name (current-buffer))))
+	      (setq res (org-scan-tags func matcher)))
+	  ;; Get the right scope
+	  (setq pos (point))
+	  (cond
+	   ((and scope (listp scope) (symbolp (car scope)))
+	    (setq scope (eval scope)))
+	   ((eq scope 'agenda)
+	    (setq scope (org-agenda-files t)))
+	   ((eq scope 'agenda-with-archives)
+	    (setq scope (org-agenda-files t))
+	    (setq scope (org-add-archive-files scope)))
+	   ((eq scope 'file)
+	    (setq scope (list (buffer-file-name))))
+	   ((eq scope 'file-with-archives)
+	    (setq scope (org-add-archive-files (list (buffer-file-name))))))
+	  (org-prepare-agenda-buffers scope)
+	  (while (setq file (pop scope))
+	    (with-current-buffer (org-find-base-buffer-visiting file)
+	      (save-excursion
+		(save-restriction
+		  (widen)
+		  (goto-char (point-min))
+		  (setq res (append res (org-scan-tags func matcher))))))))))
+    res))
 
 ;;;; Properties
 
