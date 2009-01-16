@@ -594,7 +594,7 @@ an integer, select that value."
 This respects the format of the time stamp in S, active or non-active,
 and also including time or not.  S must be just a time stamp, no text
 around it."
-  (when (string-match (concat "^" org-ts-regexp3 "$") s)
+  (when (and s (string-match (concat "^" org-ts-regexp3 "$") s))
     (let* ((time (org-parse-time-string s 'nodefaults))
 	   (active (equal (string-to-char s) ?<))
 	   (fmt (funcall (if (nth 1 time) 'cdr 'car) org-time-stamp-formats))

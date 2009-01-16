@@ -1,3 +1,13 @@
+2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-colview.el (org-colview-construct-allowed-dates): Better
+	error catching when a date/time property does not have allowed
+	values defined.
+
+	* org-colview-xemacs.el (org-colview-construct-allowed-dates):
+	Better error catching when a date/time property does not have
+	allowed values defined.
+
 2009-01-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-map-entries): Restore point and restriction after
