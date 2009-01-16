@@ -530,6 +530,7 @@ make install-info
 (require 'org-install)
 @end lisp
 
+Do not forget to activate Org as described in the following section.
 
 @node Activation, Feedback, Installation, Introduction
 @section Activation
