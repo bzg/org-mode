@@ -1,5 +1,8 @@
 2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-plot.el (org-plot/gnuplot): Fix text-ind parameter for
+	histograms.
+
 	* org-colview.el (org-colview-construct-allowed-dates): Better
 	error catching when a date/time property does not have allowed
 	values defined.

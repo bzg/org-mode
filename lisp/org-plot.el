@@ -316,12 +316,14 @@ line directly before or after the table."
 			   (mapcar (lambda (row) (nth ind row)) table)))) 0)
 	      (plist-put params :timeind t)
 	    ;; check for text ind column
-	    (if (> (length
-		    (delq 0 (mapcar
-			     (lambda (el)
-			       (if (string-match org-table-number-regexp el)
-				   0 1))
-			     (mapcar (lambda (row) (nth ind row)) table)))) 0)
+
+	    (if (or (string= (plist-get params :with) "hist")
+		    (> (length
+			(delq 0 (mapcar
+				 (lambda (el)
+				   (if (string-match org-table-number-regexp el)
+				       0 1))
+				 (mapcar (lambda (row) (nth ind row)) table)))) 0))
 		(plist-put params :textind t)))))
       ;; write script
       (with-temp-buffer
