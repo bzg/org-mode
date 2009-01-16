@@ -1,3 +1,8 @@
+2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Built-in table editor): Remove the descriptio of `C-c
+	C-q', it not longer works.
+
 2009-01-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Literal examples): Document that a space must follow

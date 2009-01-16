@@ -1649,9 +1649,7 @@ will be overwritten.  If the rectangle does not fit into the present table,
 the table is enlarged as needed.  The process ignores horizontal separator
 lines.
 @c
-@kindex C-c C-q
 @kindex M-@key{RET}
-@item C-c C-q
 @itemx M-@kbd{RET}
 Wrap several fields in a column like a paragraph.  If there is an active
 region, and both point and mark are in the same column, the text in the
