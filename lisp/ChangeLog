@@ -1,3 +1,12 @@
+2009-01-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-tables): Call
+	`org-table-clean-before-export' with the new optional argument.
+
+	* org-exp.el (org-table-clean-before-export): New optional
+	parameter MAYBE-QUOTED, allows for quoted characters like \# in
+	first column.
+
 2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-plot.el (org-plot/gnuplot): Fix text-ind parameter for

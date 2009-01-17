@@ -1072,7 +1072,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	  (setq lines (split-string raw-table "\n" t))
 	  (apply 'delete-region (list beg end))
 	  (when org-export-table-remove-special-lines
-	    (setq lines (org-table-clean-before-export lines)))
+	    (setq lines (org-table-clean-before-export lines 'maybe-quoted)))
 	  ;; make a formatting string to reflect aligment
 	  (setq olines lines)
 	  (while (and (not line-fmt) (setq line (pop olines)))

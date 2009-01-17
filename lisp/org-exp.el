@@ -4151,14 +4151,18 @@ lang=\"%s\" xml:lang=\"%s\">
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
 
-(defun org-table-clean-before-export (lines)
+(defun org-table-clean-before-export (lines &optional maybe-quoted)
   "Check if the table has a marking column.
 If yes remove the column and the special lines."
   (setq org-table-colgroup-info nil)
   (if (memq nil
 	    (mapcar
 	     (lambda (x) (or (string-match "^[ \t]*|-" x)
-			     (string-match "^[ \t]*| *\\([#!$*_^ /]\\) *|" x)))
+			     (string-match
+			      (if maybe-quoted
+				  "^[ \t]*| *\\\\?\\([\#!$*_^ /]\\) *|"
+				"^[ \t]*| *\\([\#!$*_^ /]\\) *|")
+			      x)))
 	     lines))
       (progn
 	(setq org-table-clean-did-remove-column nil)
