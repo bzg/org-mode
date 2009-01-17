@@ -1,3 +1,9 @@
+2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-depend.el (org-depend-block-todo): Set a tag when a
+	state change is blocked.
+	(org-depend-tag-blocked): New option.
+
 2009-01-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-mtags.el (org-mtags-replace): Extend muse tags syntax

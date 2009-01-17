@@ -4,7 +4,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.07
+;; Version: 0.08
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -113,6 +113,11 @@
 
 (require 'org)
 
+(defcustom org-depend-tag-blocked t
+  "Whether to indicate blocked TODO items by a special tag."
+  :group 'org
+  :type 'boolean)
+
 (defun org-depend-trigger-todo (change-plist)
   "Trigger new TODO entries after the current is switched to DONE.
 This does two different kinds of triggers:
@@ -191,49 +196,54 @@ this ID property, that entry is also checked."
 	 (from (plist-get change-plist :from))
 	 (to (plist-get change-plist :to))
 	 (org-log-done nil) ; IMPROTANT!: no logging during automatic trigger
-	 blocker blockers bl p1)
-    (catch 'return
-      (unless (eq type 'todo-state-change)
-	;; We are not handling this kind of change
-	(throw 'return t))
-      (unless (and (not from) (member to org-not-done-keywords))
-	;; This is not a change from nothing to TODO, ignore it
-	(throw 'return t))
+	 blocker blockers bl p1
+	 (proceed-p
+	  (catch 'return
+	    (unless (eq type 'todo-state-change)
+	      ;; We are not handling this kind of change
+	      (throw 'return t))
+	    (unless (and (not from) (member to org-not-done-keywords))
+	      ;; This is not a change from nothing to TODO, ignore it
+	      (throw 'return t))
 
-      ;; OK, the plan is to switch from nothing to TODO
-      ;; Lets see if we will allow it.  Find the BLOCKER property
-      ;; and split it on whitespace.
-      (setq blocker (org-entry-get pos "BLOCKER")
-	    blockers (and blocker (org-split-string blocker "[ \t]+")))
+	    ;; OK, the plan is to switch from nothing to TODO
+	    ;; Lets see if we will allow it.  Find the BLOCKER property
+	    ;; and split it on whitespace.
+	    (setq blocker (org-entry-get pos "BLOCKER")
+		  blockers (and blocker (org-split-string blocker "[ \t]+")))
+	    
+	    ;; go through all the blockers
+	    (while (setq bl (pop blockers))
+	      (cond
+	       ((equal bl "previous-sibling")
+		;; the sibling is required to be DONE.
+		(catch 'ignore
+		  (save-excursion
+		    (goto-char pos)
+		    ;; find the older sibling, exit if no more siblings
+		    (condition-case nil
+			(outline-backward-same-level 1)
+		      (error (throw 'ignore t)))
+		    ;; Check if this entry is not yet done and block
+		    (unless (org-entry-is-done-p)
+		      ;; return nil, to indicate that we block the change!
+		      (org-mark-ring-push)
+		      (throw 'return nil)))))
 
-      ;; go through all the blockers
-      (while (setq bl (pop blockers))
-	(cond
-	 ((equal bl "previous-sibling")
-	  ;; the sibling is required to be DONE.
-	  (catch 'ignore
-	    (save-excursion
-	      (goto-char pos)
-	      ;; find the older sibling, exit if no more siblings
-	      (condition-case nil
-		  (outline-backward-same-level 1)
-		(error (throw 'ignore t)))
-	      ;; Check if this entry is not yet done and block
-	      (unless (org-entry-is-done-p)
-		;; return nil, to indicate that we block the change!
-		(org-mark-ring-push)
-		(throw 'return nil)))))
-
-	 ((setq p1 (org-find-entry-with-id bl))
-	  ;; there is an entry with this ID, check it out
-	  (save-excursion
-	    (goto-char p1)
-	    (unless (org-entry-is-done-p)
-	      ;; return nil, to indicate that we block the change!
-	      (org-mark-ring-push)
-	      (throw 'return nil))))))
-      t ; return t to indicate that we are not blocking
-      )))
+	       ((setq p1 (org-find-entry-with-id bl))
+		;; there is an entry with this ID, check it out
+		(save-excursion
+		  (goto-char p1)
+		  (unless (org-entry-is-done-p)
+		    ;; return nil, to indicate that we block the change!
+		    (org-mark-ring-push)
+		    (throw 'return nil))))))
+	    t ; return t to indicate that we are not blocking
+	    )))
+    (when org-depend-tag-blocked
+      (org-toggle-tag "blocked" (if proceed-p 'off 'on)))
+    
+    proceed-p))
 
 (add-hook 'org-trigger-hook 'org-depend-trigger-todo)
 (add-hook 'org-blocker-hook 'org-depend-block-todo)
