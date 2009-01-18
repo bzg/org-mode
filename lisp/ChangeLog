@@ -1,5 +1,14 @@
 2009-01-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-html): Only check for images files
+	that really can be inlined
+
+	* org.el (org-image-file-name-regexp, org-file-image-p): Allow the
+	list of extensions to be a parameter.
+
+	* org-exp.el (org-export-html-inline-image-extensions): New
+	variable.
+
 	* org-agenda.el (org-prepare-agenda): Use
 	`org-agenda-block-separator'.
 	(org-agenda-block-separator): New option.

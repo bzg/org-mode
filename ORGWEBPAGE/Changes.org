@@ -27,6 +27,22 @@
 
 ** Details
 
+*** Better handling of inlined images in different backends
+
+    Two new variables govern which kind of files can be inlined
+    during export.  These are
+    =org-export-html-inline-image-extensions= and
+    =org-export-latex-inline-image-extensions=.  Remember that
+    links are turned into an inline image if they are a pure link
+    with no description.  HTML files can inline /.png/, /.jpg/,
+    and /.gif/ files, while LaTeX files, when processed with
+    /pdflatex/, can inline /.png/, /.jpg/, and /.pdf/ files.
+    These also represent the default settings for the new
+    variables.  Note that this means that pure links to /.pdf/
+    files will be inlined - to avoid this for a particular link,
+    make sure that the link has a description part which is not
+    equal to the link part.
+
 *** The relative timer can be paused
 
     The new command `C-c C-x ,' will pause the relative timer.
@@ -43,11 +59,17 @@
 
 : #+INCLUDE "~/.emacs" src emacs-lisp -n -r
 
+    Thanks to Manish for pointing out that this was not yet
+    supported.
+
 *** Links by ID now continue to work in HTML exported files
 
     If you make links by ID, these links will now still work in
     HTML exported files, provided that you keep the relative path
     from link to target file the same.
+
+    Thanks to Friedrich Delgado Friedrichs for pushing this over
+    the line.
 
 * Version 6.17
 

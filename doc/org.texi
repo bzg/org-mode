@@ -8190,6 +8190,10 @@ options that can be used in the optional argument of the
 [[./img/sed-hr4049.pdf]]
 @end example
 
+The default settings will recognize files types that can be included as
+images during processing by pdflatex (@file{png}, @file{jpg}, and @file{pdf}
+files).  If you process your files in a different way, you may need to
+customize the variable @code{org-export-latex-inline-image-extensions}.
 
 @node XOXO export, iCalendar export, LaTeX and PDF export, Exporting
 @section XOXO export

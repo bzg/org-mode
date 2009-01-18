@@ -693,6 +693,12 @@ be linked only."
 		 (const :tag "Always" t)
 		 (const :tag "When there is no description" maybe)))
 
+(defcustom org-export-html-inline-image-extensions
+  '("png" "jpeg" "jpg" "gif")
+  "Extensions of image files that can be inlined into HTML."
+  :group 'org-export-html
+  :type '(repeat (string :tag "Extension")))
+
 ;; FIXME: rename
 (defcustom org-export-html-expand t
   "Non-nil means, for HTML export, treat @<...> as HTML tag.
@@ -3562,7 +3568,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		  descp (and desc1 (not (equal desc1 desc2)))
 		  desc (or desc1 desc2))
 	    ;; Make an image out of the description if that is so wanted
-	    (when (and descp (org-file-image-p desc))
+	    (when (and descp (org-file-image-p
+			      desc org-export-html-inline-image-extensions))
 	      (save-match-data
 		(if (string-match "^file:" desc)
 		    (setq desc (substring desc (match-end 0)))))
@@ -3596,7 +3603,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	      ;; standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-html-inline-images)
 			   (and org-export-html-inline-images (not descp)))
-		       (org-file-image-p path))
+		       (org-file-image-p
+			path org-export-html-inline-image-extensions))
 		  (setq rpl (org-export-html-format-image
 			     (concat type ":" path)))
 		(setq link (concat type ":" path))
@@ -3640,7 +3648,9 @@ lang=\"%s\" xml:lang=\"%s\">
 			(if (functionp link-validate)
 			    (funcall link-validate filename current-dir)
 			  t))
-		  (setq file-is-image-p (org-file-image-p filename))
+		  (setq file-is-image-p
+			(org-file-image-p
+			 filename org-export-html-inline-image-extensions))
 		  (setq thefile (if abs-p (expand-file-name filename) filename))
 		  (when (and org-export-html-link-org-files-as-html
 			     (string-match "\\.org$" thefile))

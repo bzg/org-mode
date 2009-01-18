@@ -247,6 +247,16 @@ and `org-export-with-tags' instead."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-inline-image-extensions
+  '("pdf" "jpeg" "jpg" "png")
+  "Extensions of image files that can be inlined into LaTeX.
+Note that this depends on the way the LaTeX file is processed.
+The default setting (pdf and jpg) assumes that pdflatex is doing the
+processing.  If you are using latex and dvips or something similar,
+only postscript files can be included."
+  :group 'org-export-html
+  :type '(repeat (string :tag "Extension")))
+
 (defcustom org-export-latex-coding-system nil
   "Coding system for the exported LaTex file."
   :group 'org-export-latex
@@ -1207,9 +1217,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		   ((equal type "mailto")
 		    (concat type ":" raw-path))
 		   ((equal type "file")
-		    (if (and (or (org-file-image-p (expand-file-name raw-path))
-				 (string-match "\\.\\(pdf\\|jpg\\|ps\\|eps\\)$"
-					       raw-path))
+		    (if (and (org-file-image-p
+			      (expand-file-name
+			       raw-path)
+			      org-export-latex-inline-image-extensions)
 			     (equal desc full-raw-path))
 			(setq imgp t)
 		      (progn (when (string-match "\\(.+\\)::.+" raw-path)
