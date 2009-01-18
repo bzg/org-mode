@@ -1,5 +1,8 @@
 2009-01-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-fit-window-to-buffer): Fix bug with using
+	`window-full-width-p'.
+
 	* org-exp.el (org-export-as-html): Only check for images files
 	that really can be inlined
 

@@ -158,7 +158,7 @@ passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
 `shrink-window-if-larger-than-buffer' instead, the hight limit are
 ignored in this case."
   (cond ((if (fboundp 'window-full-width-p)
-	     (window-full-width-p window)
+	     (not (window-full-width-p window))
 	   (> (frame-width) (window-width window)))
 	 ;; do nothing if another window would suffer
 	 )
