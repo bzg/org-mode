@@ -217,10 +217,12 @@ this function is called.  Otherwise, the current major mode menu is used."
 	    (sit-for 0)))
 	(if (functionp org-mouse-context-menu-function)
 	    (funcall org-mouse-context-menu-function event)
-	  (mouse-major-mode-menu event prefix)))
+	  (if (fboundp 'mouse-menu-major-mode-map)
+	      (popup-menu (mouse-menu-major-mode-map) event prefix)
+	    (with-no-warnings ; don't warn about fallback, obsolete since 23.1
+	      (mouse-major-mode-menu event prefix)))))
     (setq this-command 'mouse-save-then-kill)
     (mouse-save-then-kill event)))
-
 
 (defun org-mouse-line-position ()
   "Returns `:beginning' or `:middle' or `:end', depending on the point position.
