@@ -5980,8 +5980,8 @@ property.}:
 
 @noindent
 If you would like to have a special CATEGORY for a single entry or a
-(sub)tree, give the entry a @code{:CATEGORY:} property with the location
-as the value (@pxref{Properties and Columns}).
+(sub)tree, give the entry a @code{:CATEGORY:} property with the
+special category you want to apply as the value.
 
 @noindent
 The display in the agenda buffer looks best if the category is not
