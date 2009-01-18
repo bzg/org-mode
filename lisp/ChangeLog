@@ -1,3 +1,9 @@
+2009-01-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-prepare-agenda): Use
+	`org-agenda-block-separator'.
+	(org-agenda-block-separator): New option.
+
 2009-01-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-tables): Call
