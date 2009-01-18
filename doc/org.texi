@@ -2679,9 +2679,10 @@ insert it into an Org file, and to follow the link.
 @kindex C-c l
 @cindex storing links
 @item C-c l
-Store a link to the current location.  This is a @emph{global} command which
-can be used in any buffer to create a link.  The link will be stored for
-later insertion into an Org buffer (see below).
+Store a link to the current location.  This is a @emph{global} command (you
+must create the key binding yourself) which can be used in any buffer to
+create a link.  The link will be stored for later insertion into an Org
+buffer (see below).
 
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
 to the target.  Otherwise it points to the current headline, either by text
