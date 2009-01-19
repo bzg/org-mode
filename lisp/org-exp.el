@@ -542,7 +542,7 @@ Org-mode file."
   :type '(string :tag "File or URL"))
 
 (defconst org-export-html-scripts
-"<script language=\"javascript\" type=\"text/javascript\">
+"<script type=\"text/javascript\">
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
  {

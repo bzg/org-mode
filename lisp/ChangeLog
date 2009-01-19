@@ -1,5 +1,7 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-html-scripts): Fix HTML snippet.
+
 	* org.el (org-make-tags-matcher): Never use IDO for completing the
 	tags matcher match string.
 	(org-completing-read): Also remove the special biding for "?".
