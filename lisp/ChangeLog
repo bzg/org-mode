@@ -1,5 +1,9 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-make-tags-matcher): Never use IDO for completing the
+	tags matcher match string.
+	(org-completing-read): Also remove the special biding for "?".
+
 	* org-attach.el (org-attach-allow-inheritance): New option.
 	(org-attach-inherited): New variable.
 	(org-attach-dir): Handle properties related to the attachment
