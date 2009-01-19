@@ -47,7 +47,7 @@
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
 
 (defconst org-footnote-re
-  (concat "."   ; to make sure it is not at the beginning of a line
+  (concat "[^][\n]"   ; to make sure it is not at the beginning of a line
 	  "\\["
 	  "\\(?:"
 	  "\\([0-9]+\\)"

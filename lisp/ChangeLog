@@ -1,5 +1,10 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-activate-footnote-links): Don't allow match inside a
+	link.
+
+	* org-footnote.el (org-footnote-re): Don't allow match inside a link.
+
 	* org-export-latex.el (org-export-latex-links): Keep a relative
 	path relative also after export.
 

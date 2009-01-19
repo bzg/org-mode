@@ -3785,15 +3785,15 @@ will be prompted for."
 
 (defun org-activate-footnote-links (limit)
   "Run through the buffer and add overlays to links."
-  (if (re-search-forward "\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)" 
+  (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)" 
 			 limit t)
       (progn
-	(add-text-properties (match-beginning 0) (match-end 0)
+	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
 				   'rear-nonsticky org-nonsticky-props
 				   'keymap org-mouse-map
 				   'help-echo
-				   (if (= (point-at-bol) (match-beginning 0))
+				   (if (= (point-at-bol) (match-beginning 1))
 				       "Footnote definition"
 				     "Footnote reference")
 				   ))
