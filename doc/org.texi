@@ -321,6 +321,7 @@ HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
 * Images in HTML export::       How to insert figures into HTML output
+* Text areas in HTML export::   An alternative way to show an example
 * CSS support::                 Changing the appearance of the output
 * Javascript support::          Info and Folding in a web browser
 
@@ -7445,6 +7446,9 @@ If the syntax for the label format conflicts with the language syntax, use a
 @code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
 -n -r -l "((%s))"}.  See also the variable @code{org-coderef-label-format}.
 
+HTML export also allows examples to be publishes as text areas, @pxref{Text
+areas in HTML export}
+
 @table @kbd
 @kindex C-c '
 @item C-c '
@@ -7469,6 +7473,7 @@ formatting like @samp{(ref:label)} at the end of the current line.  Then the
 label is stored as a link @samp{(label)}, for retrieval with @kbd{C-c C-l}.
 @end table
 
+
 @node Include files, Tables exported, Literal examples, Markup rules
 @subheading Include files
 @cindex include files, markup rules
@@ -7487,8 +7492,8 @@ language for formatting the contents.  The markup is optional, if it is not
 given, the text will be assumed to be in Org mode format and will be
 processed normally.  The include line will also allow additional keyword
 parameters @code{:prefix1} and @code{:prefix} to specify prefixes for the
-first line and for each following line.  For example, to include a file as an
-item, use
+first line and for each following line, as well as any options accepted by
+the selected markup.  For example, to include a file as an item, use
 
 @example
 #+INCLUDE: "~/snippets/xx" :prefix1 "   + " :prefix "     "
@@ -7813,6 +7818,7 @@ language, but with additional support for tables.
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
 * Images in HTML export::       How to insert figures into HTML output
+* Text areas in HTML export::   An alternative way to show an example
 * CSS support::                 Changing the appearance of the output
 * Javascript support::          Info and Folding in a web browser
 @end menu
@@ -7926,7 +7932,7 @@ If you want to specify attributes for links, you can do so using a special
 [[./img/a.jpg]]
 @end example
 
-@node Images in HTML export, CSS support, Links, HTML export
+@node Images in HTML export, Text areas in HTML export, Links, HTML export
 @subsection Images
 
 @cindex images, inline in HTML
@@ -7950,7 +7956,29 @@ will link to a high resolution version of the image, you could use:
 @noindent
 and you could use @code{http} addresses just as well.
 
-@node CSS support, Javascript support, Images in HTML export, HTML export
+@node Text areas in HTML export, CSS support, Images in HTML export, HTML export
+@subsection Text areas
+
+@cindex text areas, in HTML
+An alternative way to publish literal code examples in HTML is to use text
+areas, where the example can even be edited before pasting it into an
+application.  It is triggered by a @code{-t} switch at an @code{example} or
+@code{src} block.  Using this switch disables any options for syntax and
+label highlighting, and line numbering, which may be present.  You may also
+use @code{-h} and @code{-w} switches to specify the height and width of the
+text area, which default to the number of lines in the example, and 80,
+respectively.  For example
+
+@example
+#+BEGIN_EXAMPLE -t -w 40
+(defun org-xor (a b)
+   "Exclusive or."
+   (if a (not b) b))
+#+END_EXAMPLE
+@end example
+
+
+@node CSS support, Javascript support, Text areas in HTML export, HTML export
 @subsection CSS support
 @cindex CSS, for HTML export
 @cindex HTML export, CSS

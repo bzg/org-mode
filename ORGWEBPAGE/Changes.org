@@ -26,6 +26,15 @@
     empty except for the colon.    
 
 ** Details
+*** Examples can be exported to HTML as text areas
+    
+    You can now specify a =-t= switch to an example or src block,
+    to make it export to HTML as a text area.  To change the
+    defaults for height (number of lines in the example) and
+    width of this area (80), use the =-h= and =-w= switches.
+
+    Thanks to Ulf Stegemann for driving this development.
+
 *** The attachment directory may now be chosen by the user
 
     Instead of using the automatic, unique directory related to

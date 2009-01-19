@@ -289,6 +289,15 @@ that can be added."
       (org-no-properties (substring string (or from 0) to))
     (substring-no-properties string from to)))
 
+(defun org-count-lines (s)
+  "How many lines in string S?"
+  (let ((start 0) (n 1))
+    (while (string-match "\n" s start)
+      (setq start (match-end 0) n (1+ n)))
+    (if (and (> (length s) 0) (= (aref s (1- (length s))) ?\n))
+	(setq n (1- n)))
+    n))
+
 (provide 'org-compat)
 
 ;; arch-tag: a0a0579f-e68c-4bdf-9e55-93768b846bbe

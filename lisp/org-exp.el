@@ -2361,14 +2361,24 @@ and `+n' for continuing previous numering.
 Code formatting according to language currently only works for HTML.
 Numbering lines works for all three major backends (html, latex, and ascii)."
   (save-match-data
-    (let (num cont rtn named rpllbl keepp fmt)
+    (let (num cont rtn named rpllbl keepp textareap cols rows fmt)
       (setq opts (or opts "")
 	    num (string-match "[-+]n\\>" opts)
 	    cont (string-match "\\+n\\>" opts)
 	    rpllbl (string-match "-r\\>" opts)
 	    keepp (string-match "-k\\>" opts)
+	    textareap (string-match "-t\\>" opts)
+	    cols (if (string-match "-w[ \t]+\\([0-9]+\\)" opts)
+		     (string-to-number (match-string 1 opts))
+		   80)
+	    rows (if (string-match "-h[ \t]+\\([0-9]+\\)" opts)
+		     (string-to-number (match-string 1 opts))
+		   (org-count-lines code))
 	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
 		    (match-string 1 opts)))
+      (when (and textareap (eq backend 'html))
+	;; we cannot use numbering or highlighting.
+	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
       (setq rtn code)
       (when (equal lang "org")
@@ -2408,8 +2418,15 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 		  (setq rtn (replace-match
 			     (format "<pre class=\"src src-%s\">\n" lang)
 			     t t rtn))))
-	  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n")))
-	(setq rtn (org-export-number-lines rtn 'html 1 1 num cont rpllbl fmt))
+	  (if textareap
+	      (setq rtn (concat
+			 (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
+				 cols rows)
+			 rtn "</textarea>\n</p>\n"))
+	    (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
+	(unless textareap
+	  (setq rtn (org-export-number-lines rtn 'html 1 1 num
+					     cont rpllbl fmt)))
 	(concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
        ((eq backend 'latex)
 	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))

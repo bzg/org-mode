@@ -1,5 +1,10 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-count-lines): New function.
+
+	* org-exp.el (org-export-format-source-code-or-example): Handle
+	switches related to text areas.
+
 	* org.el (org-activate-footnote-links): Don't allow match inside a
 	link.
 

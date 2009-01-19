@@ -1,3 +1,7 @@
+2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Text areas in HTML export): New section.
+
 2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Built-in table editor): Remove the descriptio of `C-c
