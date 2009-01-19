@@ -1,6 +1,7 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Text areas in HTML export): New section.
+	(External links): Add examples for text search and ID links.
 
 2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
 

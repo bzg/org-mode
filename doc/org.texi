@@ -2627,11 +2627,15 @@ file:/home/dominik/images/jupiter.jpg     @r{file, absolute path}
 /home/dominik/images/jupiter.jpg          @r{same as above}
 file:papers/last.pdf                      @r{file, relative path}
 ./papers/last.pdf                         @r{same as above}
+file:projects.org                         @r{another org file}
+file:projects.org::some words             @r{text search in org file}
+file:projects.org::*task title            @r{heading search in org file}
+id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
 news:comp.emacs                           @r{Usenet link}
-mailto:adent@@galaxy.net                 @r{Mail link}
+mailto:adent@@galaxy.net                   @r{Mail link}
 vm:folder                                 @r{VM folder link}
 vm:folder#id                              @r{VM message link}
-vm://myself@@some.where.org/folder#id    @r{VM on remote machine}
+vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
 wl:folder                                 @r{WANDERLUST folder link}
 wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
