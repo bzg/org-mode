@@ -26,6 +26,21 @@
     empty except for the colon.    
 
 ** Details
+*** The attachment directory may now be chosen by the user
+
+    Instead of using the automatic, unique directory related to
+    the entry ID, you can also use a chosen directory for the
+    attachments of an entry.  This directory is specified by the
+    ATTACH_DIR property.  You can use `C-c C-a s' to set this
+    property.
+
+*** You can use a single attachment directory for a subtree
+
+    By setting the property ATTACH_DIR_INHERIT, you can now tell
+    Org that children of the entry should use the same directory
+    for attachments, unless a child explicitly defines its own
+    directory with the ATTACH_DIR property.  You can use the
+    command `C-c C-a i' to set this property in an entry.
 
 *** Better handling of inlined images in different backends
 

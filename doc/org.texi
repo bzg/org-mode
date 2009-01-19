@@ -5410,6 +5410,11 @@ to contain an absolute path.}.  If you initialize this directory with
 @code{git-init}, Org will automatically commit changes when it sees them.
 The attachment system has been contributed to Org by John Wiegley.
 
+In cases where this seems better, you can also attach a directory of your
+choice to an entry.  You can also make children inherit the attachment
+directory from a parent, so that an entire subtree uses the same attached
+directory.
+
 @noindent The following commands deal with attachments.
 
 @table @kbd
@@ -5470,6 +5475,16 @@ Select and delete a single attachment.
 @item D
 Delete all of a task's attachments.  A safer way is to open the directory in
 dired and delete from there.
+
+@kindex C-c C-a s
+@item C-c C-a s
+Set a specific directory as the entry's attachment directory.  This works by
+putting the directory path into the @code{ATTACH_DIR} property.
+
+@kindex C-c C-a i
+@item C-c C-a i
+Set the @code{ATTACH_DIR_INHERIT} property, so that children will use the
+same directory for attachments as the parent.
 @end table
 @end table
 

@@ -1,3 +1,13 @@
+2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-attach.el (org-attach-allow-inheritance): New option.
+	(org-attach-inherited): New variable.
+	(org-attach-dir): Handle properties related to the attachment
+	directory.
+	(org-attach-check-absolute-path): New function.
+	(org-attach-set-directory, org-attach-set-inherit): New commands.
+	(org-attach): Accommodate the new commands in the dispatcher.
+
 2009-01-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-fit-window-to-buffer): Fix bug with using
