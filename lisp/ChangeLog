@@ -1,5 +1,8 @@
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-links): Keep a relative
+	path relative also after export.
+
 	* org-exp.el (org-export-html-scripts): Fix HTML snippet.
 
 	* org.el (org-make-tags-matcher): Never use IDO for completing the

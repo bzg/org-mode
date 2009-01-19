@@ -1238,7 +1238,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		(if floatp "\\begin{figure}[htb]\n")
 		(format "\\centerline{\\includegraphics[%s]{%s}}\n"
 			(or attr org-export-latex-image-default-option)
-			(expand-file-name raw-path))
+			(if (file-name-absolute-p raw-path)
+			    (expand-file-name raw-path)
+			  raw-path))
 		(if floatp
 		    (format "\\caption{%s%s}\n"
 			    (if label (concat "\\label{" label "}") "")
