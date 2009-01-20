@@ -96,6 +96,8 @@
     ATTACH_DIR property.  You can use `C-c C-a s' to set this
     property.
 
+    Thanks to Jason Jackson for this proposal.
+
 *** You can use a single attachment directory for a subtree
 
     By setting the property ATTACH_DIR_INHERIT, you can now tell
