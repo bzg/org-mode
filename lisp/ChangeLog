@@ -1,3 +1,10 @@
+2009-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-quotation-marks): Use
+	`org-if-unprotected-1'.
+
+	* org-macs.el (org-if-unprotected-1): New macro.
+
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-count-lines): New function.

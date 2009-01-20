@@ -104,6 +104,11 @@ We use a macro so that the test can happen at compilation time."
   `(unless (get-text-property (point) 'org-protected)
      ,@body))
 
+(defmacro org-if-unprotected-1 (&rest body)
+  "Execute BODY if there is no `org-protected' text property at point-1."
+  `(unless (get-text-property (1- (point)) 'org-protected)
+     ,@body))
+
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."
   `(let ((_cline (org-current-line))

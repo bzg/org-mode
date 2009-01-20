@@ -887,7 +887,7 @@ links, keywords, lists, tables, fixed-width"
 	    (while (re-search-forward (car l) nil t)
 	      (let ((rpl (concat (match-string 1) (cadr l))))
 		(org-export-latex-protect-string rpl)
-		(org-if-unprotected
+		(org-if-unprotected-1
 		 (replace-match rpl t t))))) quote-rpl)))
 
 (defun org-export-latex-special-chars (sub-superscript)
