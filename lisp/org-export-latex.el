@@ -880,7 +880,6 @@ links, keywords, lists, tables, fixed-width"
     (org-export-latex-special-chars
      (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-links)
-;    (org-trim (buffer-substring-no-properties (point-min) (point-max)))))
     (org-trim (buffer-string))))
 
 (defun org-export-latex-quotation-marks ()
@@ -909,8 +908,6 @@ See the `org-export-latex.el' code for a complete conversion table."
 	  (goto-char (point-min))
 	  (while (re-search-forward c nil t)
 	    ;; Put the point where to check for org-protected
-;	    (unless (or (get-text-property (match-beginning 2) 'org-protected);
-;			(org-at-table-p))
 	    (unless (get-text-property (match-beginning 2) 'org-protected)
 	      (cond ((member (match-string 2) '("\\$" "$"))
 		     (if (equal (match-string 2) "\\$")
