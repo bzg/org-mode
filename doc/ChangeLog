@@ -4,6 +4,8 @@
 	LaTeX macros survive LaTeX export.
 	(Images in LaTeX export): Show how to create a reference to a
 	figure.
+	(Sectioning structure): Document that the LaTeX class can be
+	specified in a property.
 
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 

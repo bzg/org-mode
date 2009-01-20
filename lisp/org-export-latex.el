@@ -688,12 +688,22 @@ LEVEL indicates the default depth for export."
 	(org-combine-plists (org-default-export-plist) ext-plist
 			    (org-infile-export-plist))
 	org-export-latex-class
-	(save-excursion
-	  (goto-char (point-min))
-	  (if (and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\([a-zA-Z]+\\)" nil t)
-		   (assoc (match-string 1) org-export-latex-classes))
-	      (match-string 1)
-	    org-export-latex-default-class))
+	(or (and (org-region-active-p)
+		 (save-excursion
+		   (goto-char (region-beginning))
+		   (and (looking-at org-complex-heading-regexp)
+			(org-entry-get nil "LaTeX_CLASS" 'selective))))
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char (point-min))
+		(and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\([a-zA-Z]+\\)" nil t)
+		     (match-string 1))))
+	    org-export-latex-default-class)
+	org-export-latex-class
+	(or (car (assoc org-export-latex-class org-export-latex-classes))
+	    (error "No definition for class `%s' in `org-export-latex-classes'"
+		   org-export-latex-class))
 	org-export-latex-header
 	(cadr (assoc org-export-latex-class org-export-latex-classes))
 	org-export-latex-sectioning

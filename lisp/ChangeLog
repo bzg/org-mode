@@ -2,6 +2,8 @@
 
 	* org-export-latex.el (org-export-latex-quotation-marks): Use
 	`org-if-unprotected-1'.
+	(org-export-latex-set-initial-vars): Check for class definition in
+	property.
 
 	* org-macs.el (org-if-unprotected-1): New macro.
 

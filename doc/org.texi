@@ -8193,9 +8193,11 @@ By default, the La@TeX{} output uses the class @code{article}.
 
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
-@code{#+LaTeX_CLASS: myclass} in your file.  The class should be listed in
-@code{org-export-latex-classes}, where you can also define the sectioning
-structure for each class, as well as defining additional classes.
+@code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
+property that applies when exporting a region containing only this (sub)tree.
+The class should be listed in @code{org-export-latex-classes}, where you can
+also define the sectioning structure for each class, as well as defining
+additional classes.
 
 @node Tables in LaTeX export, Images in LaTeX export, Sectioning structure, LaTeX and PDF export
 @subsection Tables in LaTeX export
