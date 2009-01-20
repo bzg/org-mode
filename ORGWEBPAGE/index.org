@@ -51,12 +51,7 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 
 * News
 
-- Check out [[http://article.gmane.org/gmane.emacs.orgmode/8547][Russel Adams' presentations]] with the Houston Linux User
-  Group.  This is a two part video with much of the first part about
-  other stuff, but the end of the first part and all of the second is
-  really about Org-mode.
-
-- Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
+- <2009-01-20 Tue>: Release 6.18
 
 * Current Version (6.18)
 
