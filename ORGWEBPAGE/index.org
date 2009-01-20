@@ -58,9 +58,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 
 - Check out the [[file:GoogleTech.org][Google Tech Talk]] about Org-mode.
 
-* Current Version (6.17c)
+* Current Version (6.18)
 
-The current version is 6.17c.  To see what has changed in recent
+The current version is 6.18.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
@@ -73,7 +73,7 @@ a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-6.17c.zip][zip file]] or [[file:org-6.17c.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-6.18.zip][zip file]] or [[file:org-6.18.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 

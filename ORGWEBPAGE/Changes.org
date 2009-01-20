@@ -10,7 +10,7 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.18 (in preparation)
+* Version 6.18
   :PROPERTIES:
   :VISIBILITY: content
   :END:
@@ -19,7 +19,7 @@
 
 *** Short examples must have a space after the colon
 
-    Short literal examples can be created by preceeding lines
+    Short literal examples can be created by preceding lines
     with a colon.  Such lines must now have a space after the
     colon.  I believe this is already general practice, but now
     it must be like this.  The only exception are lines what are
@@ -30,7 +30,7 @@
 *** Include files can now also process switches
 
     The example and src switches like =-n= can now also be added
-    to inlcude file statements:
+    to include file statements:
 
 : #+INCLUDE "~/.emacs" src emacs-lisp -n -r
 
@@ -48,7 +48,7 @@
 
 *** LaTeX_CLASS can be given as a property
 
-    When exporting a single subtree by selectiong it as a region
+    When exporting a single subtree by selecting it as a region
     before export, the LaTeX class for the export will be taken
     from the =LaTeX_CLASS= property of the entry if present.
 
