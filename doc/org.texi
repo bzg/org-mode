@@ -7019,12 +7019,12 @@ to do with it.
 @cindex math symbols
 @cindex TeX macros
 
-You can use La@TeX{} macros to insert special symbols like @samp{\alpha}
-to indicate the Greek letter, or @samp{\to} to indicate an arrow.
-Completion for these macros is available, just type @samp{\} and maybe a
-few letters, and press @kbd{M-@key{TAB}} to see possible completions.
-Unlike La@TeX{} code, Org mode allows these macros to be present
-without surrounding math delimiters, for example:
+You can use La@TeX{} macros to insert special symbols like @samp{\alpha} to
+indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
+for these macros is available, just type @samp{\} and maybe a few letters,
+and press @kbd{M-@key{TAB}} to see possible completions.  Unlike La@TeX{}
+code, Org mode allows these macros to be present without surrounding math
+delimiters, for example:
 
 @example
 Angles are written as Greek letters \alpha, \beta and \gamma.
@@ -8166,9 +8166,10 @@ creates two levels of headings and does the rest as items.
 @subsection Quoting LaTeX code
 
 Embedded La@TeX{} as described in @ref{Embedded LaTeX} will be correctly
-inserted into the La@TeX{} file.  Furthermore, you can add special code
-that should only be present in La@TeX{} export with the following
-constructs:
+inserted into the La@TeX{} file.  This includes simple macros like
+@samp{\ref@{LABEL@}} to create a cross reference to a figure.  Furthermore,
+you can add special code that should only be present in La@TeX{} export with
+the following constructs:
 
 @example
 #+LaTeX: Literal LaTeX code for export
@@ -8183,7 +8184,7 @@ All lines between these markers are exported literally
 #+END_LaTeX
 @end example
 
-@node   Sectioning structure, Tables in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
+@node  Sectioning structure, Tables in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
 @subsection Sectioning structure
 @cindex LaTeX class
 @cindex LaTeX sectioning structure
@@ -8195,7 +8196,6 @@ You can change this globally by setting a different value for
 @code{#+LaTeX_CLASS: myclass} in your file.  The class should be listed in
 @code{org-export-latex-classes}, where you can also define the sectioning
 structure for each class, as well as defining additional classes.
-
 
 @node Tables in LaTeX export, Images in LaTeX export, Sectioning structure, LaTeX and PDF export
 @subsection Tables in LaTeX export
@@ -8237,10 +8237,12 @@ options that can be used in the optional argument of the
 [[./img/sed-hr4049.pdf]]
 @end example
 
-The default settings will recognize files types that can be included as
-images during processing by pdflatex (@file{png}, @file{jpg}, and @file{pdf}
-files).  If you process your files in a different way, you may need to
-customize the variable @code{org-export-latex-inline-image-extensions}.
+If you need references to a label created in this way, write
+@samp{\ref@{fig:SED-HR4049@}} just like in LaTeX.  The default settings will
+recognize files types that can be included as images during processing by
+pdflatex (@file{png}, @file{jpg}, and @file{pdf} files).  If you process your
+files in a different way, you may need to customize the variable
+@code{org-export-latex-inline-image-extensions}.
 
 @node XOXO export, iCalendar export, LaTeX and PDF export, Exporting
 @section XOXO export

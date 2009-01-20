@@ -1,3 +1,10 @@
+2009-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Math symbols, Quoting LaTeX code): Mention that simple
+	LaTeX macros survive LaTeX export.
+	(Images in LaTeX export): Show how to create a reference to a
+	figure.
+
 2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Text areas in HTML export): New section.
