@@ -5,7 +5,7 @@
 #+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t
 #+STYLE: </style><link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
-#+HTML:  <BASE href="http://orgmode.org/index1.html">
+#+HTML:  <BASE href="http://orgmode.org/index.html">
 
 
 #+BEGIN_HTML
