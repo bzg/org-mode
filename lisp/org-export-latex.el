@@ -1278,11 +1278,11 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
   ;; Preserve latex environments
   (goto-char (point-min))
-  (while (re-search-forward "^[ \t]*\\begin{\\([a-zA-Z]+\\)}" nil t)
+  (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\)}" nil t)
     (let* ((start (progn (beginning-of-line) (point)))
 	   (end (or (and (re-search-forward
-			  (concat "^[ \t]*\\end{" (match-string 1) "}" nil t)
-			  (point-at-eol)))
+			  (concat "^[ \t]*\\\\end{" (match-string 1) "}") nil t)
+			 (point-at-eol))
 		    (point-max))))
       (add-text-properties start end '(org-protected t))))
 
@@ -1306,8 +1306,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (goto-char (point-min))
   (let ((case-fold-search nil) rpl)
     (while (re-search-forward "\\([^+_]\\)LaTeX" nil t)
-    (replace-match (org-export-latex-protect-string
-		    (concat (match-string 1) "\\LaTeX{}")) t t)))
+      (org-if-unprotected
+       (replace-match (org-export-latex-protect-string
+		       (concat (match-string 1) "\\LaTeX{}")) t t))))
 
   ;; Convert blockquotes
   (goto-char (point-min))
@@ -1328,7 +1329,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Convert horizontal rules
   (goto-char (point-min))
   (while (re-search-forward "^----+.$" nil t)
-    (replace-match (org-export-latex-protect-string "\\hrule") t t))
+    (org-if-unprotected
+     (replace-match (org-export-latex-protect-string "\\hrule") t t)))
 
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
   (goto-char (point-min))
@@ -1347,57 +1349,61 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (while (re-search-forward
 	  (concat "<<<?" org-export-latex-all-targets-re
 		  ">>>?\\((INVISIBLE)\\)?") nil t)
-    (replace-match
-     (org-export-latex-protect-string
-      (format "\\label{%s}%s" (save-match-data (org-solidify-link-text
-						(match-string 1)))
-	      (if (match-string 2) "" (match-string 1)))) t t))
+    (org-if-unprotected
+     (replace-match
+      (org-export-latex-protect-string
+       (format "\\label{%s}%s" (save-match-data (org-solidify-link-text
+						 (match-string 1)))
+	       (if (match-string 2) "" (match-string 1)))) t t)))
 
   ;; Delete @<...> constructs
   ;; Thanks to Daniel Clemente for this regexp
   (goto-char (point-min))
   (while (re-search-forward "@<\\(?:[^\"\n]\\|\".*\"\\)*?>" nil t)
-    (replace-match ""))
+    (org-if-unprotected
+     (replace-match "")))
 
   ;; When converting to LaTeX, replace footnotes
   ;; FIXME: don't protect footnotes from conversion
   (when (plist-get org-export-latex-options-plist :footnotes)
     (goto-char (point-min))
     (while (re-search-forward "\\[\\([0-9]+\\)\\]" nil t)
-      (when (save-match-data
-	      (save-excursion (beginning-of-line)
-			      (looking-at "[^:|#]")))
-	(let ((foot-beg (match-beginning 0))
-	      (foot-end (match-end 0))
-	      (foot-prefix (match-string 0))
-	      footnote footnote-rpl)
-	  (save-excursion
-	    (if (not (re-search-forward (concat "^" (regexp-quote foot-prefix))
-					nil t))
-		(replace-match "$^{\\1}$")
-	      (replace-match "")
-	      (let ((end (save-excursion
-			   (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
-			       (match-beginning 0) (point-max)))))
-		(setq footnote (concat (org-trim (buffer-substring (point) end))
-				       " ")) ; prevent last } being part of a link
-		(delete-region (point) end))
-	      (goto-char foot-beg)
-	      (delete-region foot-beg foot-end)
-	      (unless (null footnote)
-		(setq footnote-rpl (format "\\footnote{%s}" footnote))
-		(add-text-properties 0 10 '(org-protected t) footnote-rpl)
-		(add-text-properties (1- (length footnote-rpl))
-				     (length footnote-rpl)
-				     '(org-protected t) footnote-rpl)
-		(insert footnote-rpl)))
-	    ))))
+      (org-if-unprotected
+       (when (save-match-data
+	       (save-excursion (beginning-of-line)
+			       (looking-at "[^:|#]")))
+	 (let ((foot-beg (match-beginning 0))
+	       (foot-end (match-end 0))
+	       (foot-prefix (match-string 0))
+	       footnote footnote-rpl)
+	   (save-excursion
+	     (if (not (re-search-forward (concat "^" (regexp-quote foot-prefix))
+					 nil t))
+		 (replace-match "$^{\\1}$")
+	       (replace-match "")
+	       (let ((end (save-excursion
+			    (if (re-search-forward "^$\\|^#.*$\\|\\[[0-9]+\\]" nil t)
+				(match-beginning 0) (point-max)))))
+		 (setq footnote (concat (org-trim (buffer-substring (point) end))
+					" ")) ; prevent last } being part of a link
+		 (delete-region (point) end))
+	       (goto-char foot-beg)
+	       (delete-region foot-beg foot-end)
+	       (unless (null footnote)
+		 (setq footnote-rpl (format "\\footnote{%s}" footnote))
+		 (add-text-properties 0 10 '(org-protected t) footnote-rpl)
+		 (add-text-properties (1- (length footnote-rpl))
+				      (length footnote-rpl)
+				      '(org-protected t) footnote-rpl)
+		 (insert footnote-rpl)))
+	     )))))
 
     ;; Remove footnote section tag for LaTeX
     (goto-char (point-min))
     (while (re-search-forward
 	    (concat "^" footnote-section-tag-regexp) nil t)
-      (replace-match ""))))
+      (org-if-unprotected
+       (replace-match "")))))
 
 ;;; List handling:
 
