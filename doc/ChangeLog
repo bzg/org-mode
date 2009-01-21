@@ -1,3 +1,9 @@
+2009-01-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document `C-c RET' in tables.
+
+	* org.texi (Built-in table editor): Document `C-c RET' in tables.
+
 2009-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Math symbols, Quoting LaTeX code): Mention that simple

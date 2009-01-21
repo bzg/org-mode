@@ -1537,7 +1537,8 @@ create the above table, you would only type
 @end example
 
 @noindent and then press @key{TAB} to align the table and start filling in
-fields.
+fields.  Even faster would be to type @code{|Name|Phone|Age} followed by
+@kbd{C-c @key{RET}}.
 
 When typing text into a field, Org treats @key{DEL},
 @key{Backspace}, and all character keys in a special way, so that
@@ -1618,6 +1619,11 @@ created below the current one.
 @item C-c -
 Insert a horizontal line below current row. With a prefix argument, the line
 is created above the current line.
+@c
+@kindex C-c @key{RET}
+@item C-c @key{RET}
+Insert a horizontal line below current row. and mode the cursor into the row
+below that line.
 @c
 @kindex C-c ^
 @item C-c ^

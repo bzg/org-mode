@@ -195,6 +195,9 @@ we turn off invisibility temporarily.  Use this in a `let' form."
     ;; works also in narrowed buffer, because we start at 1, not point-min
     (+ (if (bolp) 1 0) (count-lines 1 (point)))))
 
+(defsubst org-current-line-string (&optional to-here)
+  (buffer-substring (point-at-bol) (if to-here (point) (point-at-eol))))
+
 (defsubst org-pos-in-match-range (pos n)
   (and (match-beginning n)
        (<= (match-beginning n) pos)
