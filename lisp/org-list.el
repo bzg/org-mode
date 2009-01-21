@@ -6,7 +6,7 @@
 ;;	   Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.18
+;; Version: TAG=6.18a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
