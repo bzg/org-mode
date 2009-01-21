@@ -9242,8 +9242,9 @@ possible.
 @file{table.el} is part of Emacs 22.
 @cindex @file{footnote.el}
 @item @file{footnote.el} by Steven L. Baur
-Org mode recognizes numerical footnotes as provided by this package
-(@pxref{Footnotes}).
+Org mode recognizes numerical footnotes as provided by this package.
+However, Org-mode also has its own footnote support (@pxref{Footnotes}),
+which makes using @file{footnote.el} unnecessary.
 @end table
 
 @node Conflicts,  , Cooperation, Interaction
@@ -9282,15 +9283,6 @@ to have other replacement keys, look at the variable
 @cindex @file{windmove.el}
 Also this package uses the @kbd{S-<cursor>} keys, so everything written
 in the paragraph above about CUA mode also applies here.
-
-@cindex @file{footnote.el}
-@item @file{footnote.el} by Steven L. Baur
-Org supports the syntax of the footnote package, but only the
-numerical footnote markers.  Also, the default key for footnote
-commands, @kbd{C-c !} is already used by Org.  You could use the
-variable @code{footnote-prefix} to switch footnotes commands to another
-key.  Or, you could use @code{org-replace-disputed-keys} and
-@code{org-disputed-keys} to change the settings in Org.
 
 @end table
 
