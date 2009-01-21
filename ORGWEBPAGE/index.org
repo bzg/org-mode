@@ -2,7 +2,7 @@
 #+TITLE:     Org-Mode: Your Life in Plain Text
 #+LANGUAGE:  en
 #+EMAIL:     carsten at orgmode dot org
-#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil
+#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t
 #+STYLE: </style><link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
 #+HTML:  <BASE href="http://orgmode.org/index1.html">
@@ -51,6 +51,7 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 
 * News
 
+- <2009-01-21 Wed>: Release 6.18c
 - <2009-01-20 Tue>: Release 6.18
 
 * Current Version (6.18c)
