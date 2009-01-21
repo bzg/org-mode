@@ -17,7 +17,6 @@
 	environment detection.  Also, do real changes only in unprotected
 	places.
 
-
 2009-01-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-quotation-marks): Use
