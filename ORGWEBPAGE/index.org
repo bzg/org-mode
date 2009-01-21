@@ -27,7 +27,7 @@ planning, and authoring with a fast and effective plain-text
 system.
 
 #+ATTR_HTML: style="border:1px solid black;"
-[[http://orgmode.org/tasks.png]]
+[[http://orgmode.org/img/tasks.png]]
 
 - Simplicity :: Org-mode is a simple outliner for note-taking and list
      management. You can learn the basics for using it in five
