@@ -13266,65 +13266,47 @@ context.  See the individual commands for more information."
 
 (defun org-ctrl-c-star ()
   "Compute table, or change heading status of lines.
-Calls `org-table-recalculate' or `org-toggle-region-headings',
-depending on context.  This will also turn a plain list item or a normal
-line into a subheading."
+Calls `org-table-recalculate' or `org-toggle-heading',
+depending on context."
   (interactive)
   (cond
    ((org-at-table-p)
     (call-interactively 'org-table-recalculate))
-   ((org-region-active-p)
+   (t
     ;; Convert all lines in region to list items
-    (call-interactively 'org-toggle-region-headings))
-   ((org-on-heading-p)
-    (org-toggle-region-headings (point-at-bol)
-				(min (1+ (point-at-eol)) (point-max))))
-   ((org-at-item-p)
-    ;; Convert to heading
-    (let ((level (save-match-data
-		   (save-excursion
-		     (condition-case nil
-			 (progn
-			   (org-back-to-heading t)
-			   (funcall outline-level))
-		       (error 0))))))
-      (replace-match
-       (concat (make-string (org-get-valid-level level 1) ?*) " ") t t)))
-   (t (org-toggle-region-headings (point-at-bol)
-				  (min (1+ (point-at-eol)) (point-max))))))
+    (call-interactively 'org-toggle-heading))))
 
 (defun org-ctrl-c-minus ()
   "Insert separator line in table or modify bullet status of line.
 Also turns a plain line or a region of lines into list items.
-Calls `org-table-insert-hline', `org-toggle-region-items', or
+Calls `org-table-insert-hline', `org-toggle-item', or
 `org-cycle-list-bullet', depending on context."
   (interactive)
   (cond
    ((org-at-table-p)
     (call-interactively 'org-table-insert-hline))
-   ((org-on-heading-p)
-    ;; Convert to item
-    (save-excursion
-      (beginning-of-line 1)
-      (if (looking-at "\\*+ ")
-	  (replace-match
-	   (concat (make-string
-		    (- (match-end 0) (point) (if org-odd-levels-only 2 1)) ?\ )
-		   "- ")))))
    ((org-region-active-p)
-    ;; Convert all lines in region to list items
-    (call-interactively 'org-toggle-region-items))
+    (call-interactively 'org-toggle-item))
    ((org-in-item-p)
     (call-interactively 'org-cycle-list-bullet))
-   (t (org-toggle-region-items (point-at-bol)
-			       (min (1+ (point-at-eol)) (point-max))))))
+   (t
+    (call-interactively 'org-toggle-item))))
 
-(defun org-toggle-region-items (beg end)
-  "Convert all lines in region to list items.
-If the first line is already an item, convert all list items in the region
-to normal lines."
-  (interactive "r")
-  (let (l2 l)
+(defun org-toggle-item ()
+  "Convert headings or normal lines to items, items to normal lines.
+If there is no active region, only the current line is considered.
+
+If the first line in the region is a headline, convert all headlines to items.
+
+If the first line in the region is an item, convert all items to normal lines.
+
+If the first line is normal text, add an item bullet to each line."
+  (interactive)
+  (let (l2 l beg end)
+    (if (org-region-active-p)
+	(setq beg (region-beginning) end (region-end))
+      (setq beg (point-at-bol)
+	    end (min (1+ (point-at-eol)) (point-max))))
     (save-excursion
       (goto-char end)
       (setq l2 (org-current-line))
@@ -13339,18 +13321,41 @@ to normal lines."
 	      (delete-region (match-beginning 2) (match-end 2))
 	      (and (looking-at "[ \t]+") (replace-match "")))
 	    (beginning-of-line 2))
-	(while (< (setq l (1+ l)) l2)
-	  (unless (org-at-item-p)
-	    (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		(replace-match "\\1- \\2")))
-	  (beginning-of-line 2))))))
+	(if (org-on-heading-p)
+	    ;; Headings, convert to items
+	    (while (< (setq l (1+ l)) l2)
+	      (if (looking-at org-outline-regexp)
+		  (replace-match "- " t t))
+	      (beginning-of-line 2))
+	  ;; normal lines, turn them into items
+	  (while (< (setq l (1+ l)) l2)
+	    (unless (org-at-item-p)
+	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		  (replace-match "\\1- \\2")))
+	    (beginning-of-line 2)))))))
 
-(defun org-toggle-region-headings (beg end)
-  "Convert all lines in region to list items.
-If the first line is already an item, convert all list items in the region
-to normal lines."
-  (interactive "r")
-  (let (l2 l)
+(defun org-toggle-heading (&optional nstars)
+  "Convert headings to normal text, or items or text to headings.
+If there is no active region, only the current line is considered.
+
+If the first line is a heading, remove the stars from all headlines
+in the region.
+
+If the first line is a plain list item, turn all plain list items into
+headings.
+
+If the first line is a normal line, turn each and every line in the region
+into a heading.
+
+When converting a line into a heading, the number of stars is chosen
+such that the lines become children of the current entry.  However, when
+a prefix argument is given, its value determines the number of stars to add."
+  (interactive "P")
+  (let (l2 l itemp beg end)
+    (if (org-region-active-p)
+	(setq beg (region-beginning) end (region-end))
+      (setq beg (point-at-bol)
+	    end (min (1+ (point-at-eol)) (point-max))))
     (save-excursion
       (goto-char end)
       (setq l2 (org-current-line))
@@ -13363,15 +13368,22 @@ to normal lines."
 	    (when (org-on-heading-p t)
 	      (and (looking-at outline-regexp) (replace-match "")))
 	    (beginning-of-line 2))
-	(let* ((stars (save-excursion
-			(re-search-backward org-complex-heading-regexp nil t)
-			(or (match-string 1) "*")))
-	       (add-stars (if org-odd-levels-only "**" "*"))
-	       (rpl (concat stars add-stars " \\2")))
+	(setq itemp (org-at-item-p))
+	(let* ((stars
+		(if nstars
+		    (make-string (prefix-numeric-value current-prefix-arg)
+				 ?*)
+		  (save-excursion
+		    (re-search-backward org-complex-heading-regexp nil t)
+		    (or (match-string 1) "*"))))
+	       (add-stars (if nstars "" (if org-odd-levels-only "**" "*")))
+	       (rpl (concat stars add-stars " ")))
 	  (while (< (setq l (1+ l)) l2)
-	    (unless (org-on-heading-p)
-	      (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		  (replace-match rpl)))
+	    (if itemp
+		(and (org-at-item-p) (replace-match rpl t t))
+	      (unless (org-on-heading-p)
+		(if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		    (replace-match (concat rpl (match-string 2))))))
 	    (beginning-of-line 2)))))))
 
 (defun org-meta-return (&optional arg)

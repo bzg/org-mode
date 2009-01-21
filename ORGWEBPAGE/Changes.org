@@ -10,11 +10,45 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.18
+* Version 6.19 (in preparation)
+
   :PROPERTIES:
   :VISIBILITY: content
   :END:
 
+** Details
+   
+*** Improved behavior of conversion commands =C-c -= and =C-c *=
+
+    The conversion commands =C-c -= and =C-c *= are now better
+    behaved and therefore more useful, I hope.
+
+    If there is an active region, these commands will act on the
+    region, otherwise on the current line.
+
+    - C-c - :: This command turns headings or normal lines into
+         items, or items into normal lines.  When there is a
+         region, everything depends on the first line of the
+         region:
+	 - if it is a item, turn all items in the region into
+	   normal lines.
+         - if it is a headline, turn all headlines in the region
+	   into items. 
+	 - if it is a normal line, turn all lines into items.
+	 - special case: if there is no active region and the
+	   current line is an item, cycle the bullet type of the
+           current list.
+    - C-c * :: This command turns items and normal lines into
+         headings, or headings into normal lines.  When there is
+         a region, everything depends on the first line of the
+         region:
+	 - if it is a item, turn all items in the region into
+	   headlines.
+         - if it is a headline, turn all headlines in the region
+	   into normal lines. 
+	 - if it is a normal line, turn all lines into headlines.
+
+* Version 6.18
 ** Incompatible changes
 
 *** Short examples must have a space after the colon

@@ -1,5 +1,15 @@
 2009-01-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-toggle-heading): Renamed from
+	`org-toggel-region-headings'.
+	No longer needs a region defined, but will use it if there is one.
+	(org-ctrl-c-star): Simplified, relying more on the internal
+	workings of `org-toggle-heading'.
+	(org-toggle-item): Renamed from `org-toggle-region-items'.
+	No longer needs a region defined, but will use it if there is one.
+	(org-ctrl-c-minus): Simplified, relying more on the inernal
+	workings of `org-toggle-item'.
+
 	* org-export-latex.el (org-export-latex-preprocess): Fix bug in
 	environment detection.  Also, do real changes only in unprotected
 	places.

@@ -41,6 +41,9 @@ insert new heading/item at current level          M-RET
 insert new heading after subtree                  C-RET
 insert new TODO entry/checkbox item               M-S-RET
 insert TODO entry/ckbx after subtree              C-S-RET
+turn (head)line into item, cycle bullet type      C-c -
+turn item/line into headline, and back into line  C-c *
+
 promote/demote current heading up one level       M-LEFT/RIGHT
 promote/demote current subtree up one level       M-S-LEFT/RIGHT
 move subtree/list item up/down                    M-S-UP/DOWN
