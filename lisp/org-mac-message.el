@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw@gnu.org>
-;; Version: TAG=6.18a
+;; Version: 6.18c
 ;; Keywords: outlines, hypermedia, calendar, wp
 
 ;; This file is part of GNU Emacs.

@@ -4,7 +4,7 @@
 
 ;; Author: John Wiegley <johnw@newartisans.com>
 ;; Keywords: org data task
-;; Version: TAG=6.18a
+;; Version: 6.18c
 
 ;; This file is part of GNU Emacs.
 ;;

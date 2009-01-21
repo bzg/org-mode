@@ -4,7 +4,7 @@
 ;;
 ;; Author: Piotr Zielinski <piotr dot zielinski at gmail dot com>
 ;; Maintainer: Carsten Dominik <carsten at orgmode dot org>
-;; Version: TAG=6.18a
+;; Version: 6.18c
 ;;
 ;; This file is part of GNU Emacs.
 ;;
