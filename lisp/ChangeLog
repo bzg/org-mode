@@ -1,5 +1,8 @@
 2009-01-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-get-current-options): Include the option for
+	publishing time stamps.
+
 	* org.el (org-toggle-heading): Renamed from
 	`org-toggel-region-headings'.
 	No longer needs a region defined, but will use it if there is one.

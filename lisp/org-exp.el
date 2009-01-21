@@ -2975,7 +2975,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+EMAIL:     %s
 #+DATE:      %s
 #+LANGUAGE:  %s
-#+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s TeX:%s LaTeX:%s skip:%s d:%s todo:%s pri:%s tags:%s
+#+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s <:%s
+#+OPTIONS:   TeX:%s LaTeX:%s skip:%s d:%s todo:%s pri:%s tags:%s
 %s
 #+EXPORT_SELECT_TAGS: %s
 #+EXPORT_EXCLUDE_TAGS: %s
@@ -3006,6 +3007,7 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-export-with-special-strings
    org-export-with-footnotes
    org-export-with-emphasize
+   org-export-with-timestamps
    org-export-with-TeX-macros
    org-export-with-LaTeX-fragments
    org-export-skip-text-before-1st-heading
