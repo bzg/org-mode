@@ -605,7 +605,7 @@ will be easy to remove."
 		     (org-add-props (format fmt
 					    (make-string l ?*) h m
 					    (make-string (- 16 l) ?\ ))
-			 '(face secondary-selection))
+			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
 	(org-overlay-put ov 'display tx)
