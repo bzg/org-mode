@@ -1,5 +1,7 @@
 2009-01-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-faces.el (org-clock-overlay): Fix bug in face definition.
+
 	* org-clock.el (org-clock-put-overlay): Use new face instead of
 	`secondary-selection'.
 
