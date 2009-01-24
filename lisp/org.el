@@ -3788,12 +3788,12 @@ will be prompted for."
   (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)" 
 			 limit t)
       (progn
-	(add-text-properties (match-beginning 1) (match-end 1)
+	(add-text-properties (match-beginning 2) (match-end 2)
 			     (list 'mouse-face 'highlight
 				   'rear-nonsticky org-nonsticky-props
 				   'keymap org-mouse-map
 				   'help-echo
-				   (if (= (point-at-bol) (match-beginning 1))
+				   (if (= (point-at-bol) (match-beginning 2))
 				       "Footnote definition"
 				     "Footnote reference")
 				   ))
@@ -4054,7 +4054,7 @@ between words."
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
 	   (if (memq 'footnote lk) '(org-activate-footnote-links
-				     (0 'org-footnote t)))
+				     (2 'org-footnote t)))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines

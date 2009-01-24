@@ -1,5 +1,11 @@
 2009-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-activate-footnote-links): Improve footnote link
+	highlighting.
+
+	* org-footnote.el (org-footnote-normalize): Fix finding the end of
+	a footnote definition at the end of the file.
+
 	* org-table.el (org-table-get-specials): Add an imagined hline at
 	the end of the table.  This can be useful for references that want
 	to go to the end of the table.  Also fix bug when computing last

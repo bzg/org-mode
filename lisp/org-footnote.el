@@ -352,7 +352,8 @@ referenced sequence."
 		 (re-search-forward
 		  (org-re "^[ \t]*$\\|^\\*+ \\|^\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]")
 		  nil 'move)
-		 (setq def (buffer-substring beg1 (match-beginning 0)))
+		 (setq def (buffer-substring beg1 (or (match-beginning 0)
+						      (point-max))))
 		 (goto-char beg)
 		 (skip-chars-backward " \t\n\t")
 		 (delete-region (1+ (point)) (match-beginning 0))))))
