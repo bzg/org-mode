@@ -1,3 +1,7 @@
+2009-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (References): Add information about remote references.
+
 2009-01-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* orgcard.tex: Document `C-c RET' in tables.

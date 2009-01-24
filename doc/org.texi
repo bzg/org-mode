@@ -1990,6 +1990,27 @@ lines.  These are described below, see @ref{Advanced features}.  All
 names must start with a letter, and further consist of letters and
 numbers.
 
+@subsubheading Remote references
+@cindex remote references
+@cindex references, remote
+@cindex references, to a different table
+@cindex name, of column or field
+@cindex constants, in calculations
+
+You may also reference constants, fields and ranges from a different table,
+either in the current file or even in a different file.  The syntax is
+
+@example
+remote(NAME-OR-ID,REF)
+@end example
+
+@noindent
+where NAME can be the name of a table in the current file as set by a
+@code{#+TBLNAME: NAME} line before the table.  It can also be the ID of an
+entry, even in a different file, and the reference then refers to the first
+table in that entry.  REF is an absolute field or range reference as
+described above, valid in the referenced table.
+
 @node Formula syntax for Calc, Formula syntax for Lisp, References, The spreadsheet
 @subsection Formula syntax for Calc
 @cindex formula syntax, Calc

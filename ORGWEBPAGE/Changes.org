@@ -48,6 +48,23 @@
 	   into normal lines. 
 	 - if it is a normal line, turn all lines into headlines.
 
+*** Table formulas may now reference fields in other tables
+
+
+You may also reference constants, fields and ranges from a different table,
+either in the current file or even in a different file.  The syntax is
+
+: remote(NAME-OR-ID,REF)
+
+where /NAME/ can be the name of a table in the current file as
+set by a =#+TBLNAME: NAME= line before the table.  It can also be
+the ID of an entry, even in a different file, and the reference
+then refers to the first table in that entry.  /REF/ is an
+absolute field or range reference, valid in the referenced
+table.  Note that since there is no "current filed" for the
+cursor, all row and column references must be absolute, not
+relative.
+
 * Version 6.18
 ** Incompatible changes
 
