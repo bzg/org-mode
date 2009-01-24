@@ -8232,7 +8232,7 @@ additional classes.
 @cindex tables, in LaTeX export
 
 For LaTeX export of a table, you can specify a label and a caption
-(@pxref{Tables exported}).  You can also use the @code{ATTR_LaTeX} line to
+(@pxref{Markup rules}).  You can also use the @code{ATTR_LaTeX} line to
 request a longtable environment for the table, so that it may span several
 pages:
 
