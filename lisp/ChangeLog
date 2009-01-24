@@ -1,5 +1,7 @@
 2009-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-rmail.el: Fix copyright notice.
+
 	* org.el (org-activate-footnote-links): Improve footnote link
 	highlighting.
 
