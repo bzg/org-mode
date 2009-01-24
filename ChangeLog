@@ -1,6 +1,5 @@
-2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	*  (Changes): 
+2009-01-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* Makefile (html_manual): Process the split html manual with the
 	new script.
