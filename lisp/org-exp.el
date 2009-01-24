@@ -2398,6 +2398,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	  (require 'htmlize nil t)
 	  (when (not (fboundp 'htmlize-region-for-paste))
 	    ;; we do not have htmlize.el, or an old version of it
+	    (setq lang nil)
 	    (message
 	     "htmlize.el 1.34 or later is needed for source code formatting")))
 
@@ -2423,6 +2424,14 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 			 (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
 				 cols rows)
 			 rtn "</textarea>\n</p>\n"))
+	    (with-temp-buffer
+	      (insert rtn)
+	      (goto-char (point-min))
+	      (while (re-search-forward "[<>&]" nil t)
+		(replace-match (cdr (assq (char-before)
+					  '((?&."&amp;")(?<."&lt;")(?>."&gt;"))))
+			       t t))
+	      (setq rtn (buffer-string)))
 	    (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
 	(unless textareap
 	  (setq rtn (org-export-number-lines rtn 'html 1 1 num

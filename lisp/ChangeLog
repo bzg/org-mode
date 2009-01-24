@@ -1,5 +1,10 @@
 2009-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example): Escape
+	HTML characters also in examples that anre not treated with
+	htmlize.  Also, just switch to EXAMPLE processing if we do not
+	have a good version of htmlize.
+
 	* org-rmail.el: Fix copyright notice.
 
 	* org.el (org-activate-footnote-links): Improve footnote link
