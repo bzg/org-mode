@@ -420,6 +420,8 @@
 	(org-export-number-lines): New function.
 	(org-export-as-ascii, org-export-as-html): Handle coderef links.
 
+--------------------------------------------------------------------------
+
 2008-12-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-handler): Safer way to get a new
