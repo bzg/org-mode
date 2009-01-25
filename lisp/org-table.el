@@ -1222,7 +1222,7 @@ With prefix ABOVE, insert above the current line."
   (interactive "P")
   (if (not (org-at-table-p))
       (error "Not at a table"))
-  (when (eobp) (insert "\n") (backward-character 1))
+  (when (eobp) (insert "\n") (backward-char 1))
   (if (not (string-match "|[ \t]*$" (org-current-line-string)))
       (org-table-align))
   (let ((line (org-table-clean-line

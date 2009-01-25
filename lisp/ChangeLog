@@ -1,5 +1,11 @@
 2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-agenda-tags-todo-honor-ignore-options): Declare
+	variable.
+
+	* org-table.el (org-table-insert-hline): Fix typo in fuction call
+	to `backward-char'.
+
 	* org-exp.el (org-export-as-html): Remove the initial space from
 	colon examples.
 
