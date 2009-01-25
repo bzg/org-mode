@@ -3884,6 +3884,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	     (org-export-preserve-breaks
 	      (setq line (concat line "<br/>"))))
 
+	    ;; Check if a paragraph should be started
+	    (while (and org-par-open
+			(string-match "\\\\par\\>" line))
+	      ;; Leave a space in the </p> so that the footnote matcher
+	      ;; does not see this.
+	      (setq line (replace-match "</p ><p >" t t line)))
+
 	    (insert line "\n")))))
 
       ;; Properly close all local lists and other lists

@@ -1378,8 +1378,9 @@ Org-mode supports the creation of footnotes.  In contrast to the
 larger document, not only for one-off documents like emails.  The basic
 syntax is similar to the one used by @file{footnote.el}, i.e. a footnote is
 defined in a paragraph that is started by a footnote marker in square
-brackets in column 0, no indentation allowed.  The footnote reference is
-simply the marker in square brackets, inside text.  For example:
+brackets in column 0, no indentation allowed.  If you need a paragraph break
+inside a footnote, use the LaTeX idiom @samp{\par}.  The footnote reference
+is simply the marker in square brackets, inside text.  For example:
 
 @example
 The Org homepage[fn:1] now looks a lot better than it used to.
