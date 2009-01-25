@@ -238,10 +238,10 @@ release:
 	cp RELEASEDIR/org-$(TAG).tar.gz RELEASEDIR/org.tar.gz
 
 upload_release:
-	(cd RELEASEDIR; lftp -f ../../org-mode-proprietary/ftp_upload_release_legito)
+	rsync -avuz RELEASEDIR/ cdominik@orgmode.org:orgmode.org/
 
 upload_manual:
-	lftp -f ../org-mode-proprietary/ftp_upload_manual_legito
+	rsync -avuz doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
 
 relup0:
 	make release
