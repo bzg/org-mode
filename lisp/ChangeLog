@@ -1,5 +1,8 @@
 2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-html): Remove the initial space from
+	colon examples.
+
 	* org.el (org-scan-tags): Call
 	`org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item'.
 

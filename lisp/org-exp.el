@@ -3485,12 +3485,12 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Fixed-width, verbatim lines (examples)
 	  (when (and org-export-with-fixed-width
-		     (string-match "^[ \t]*:\\(\\([ \t]\\|$\\).*\\)" line))
+		     (string-match "^[ \t]*:\\(\\([ \t]\\|$\\)\\(.*\\)\\)" line))
 	    (when (not infixed)
 	      (setq infixed t)
 	      (org-close-par-maybe)
 	      (insert "<pre class=\"example\">\n"))
-	    (insert (org-html-protect (match-string 1 line)) "\n")
+	    (insert (org-html-protect (match-string 3 line)) "\n")
 	    (when (or (not lines)
 		      (not (string-match "^[ \t]*\\(:.*\\)"
 					 (car lines))))
