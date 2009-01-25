@@ -408,7 +408,7 @@ changes."
        :background "SkyBlue4")
       (((class color) (min-colors 8))
        :background "cyan" :foreground "black")
-      (t :inverse-video t)))
+      (t (:inverse-video t))))
     "Basic face for displaying the secondary selection."
     :group 'org-faces)
 

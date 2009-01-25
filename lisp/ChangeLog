@@ -1,5 +1,8 @@
 2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-faces.el (org-clock-overlay): Make face compatible with
+	XEmacs.
+
 	* org.el (org-yank): Add property for delete-selection mode.
 
 	* org-exp.el (org-export-as-html): Turn \par into a paragraph.
