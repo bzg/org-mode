@@ -1,5 +1,7 @@
 2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-yank): Add property for delete-selection mode.
+
 	* org-exp.el (org-export-as-html): Turn \par into a paragraph.
 
 	* org.el (org-agenda-tags-todo-honor-ignore-options): Declare

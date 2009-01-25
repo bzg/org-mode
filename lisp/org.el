@@ -12863,6 +12863,7 @@ because, in this case the deletion might narrow the column."
 (put 'orgtbl-self-insert-command 'delete-selection t)
 (put 'org-delete-char 'delete-selection 'supersede)
 (put 'org-delete-backward-char 'delete-selection 'supersede)
+(put 'org-yank 'delete-selection 'yank)
 
 ;; Make `flyspell-mode' delay after some commands
 (put 'org-self-insert-command 'flyspell-delayed t)
