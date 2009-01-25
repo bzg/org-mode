@@ -65,6 +65,21 @@ table.  Note that since there is no "current filed" for the
 cursor, all row and column references must be absolute, not
 relative.
 
+*** A tags-todo search can now ignore timestamped items
+    The variables =org-agenda-todo-ignore-with-date=,
+    =org-agenda-todo-ignore-with-date=, and
+    =org-agenda-todo-ignore-with-date= make it possible to
+    exclude TODO entries which have this kind of planning info
+    associated with them.  This is most useful for people who
+    schedule everything, and who use the TODO list mainly to find
+    things that are not yet scheduled.  Thomas Morgan pointed out
+    that also the tags-todo search may serve exactly this
+    purpose, and that it might be good to have a way to make
+    these variables also apply to the tags-todo search.  I can
+    see than, but could not convince myself to make this the
+    default.  A new variable must be set to make this happen:
+    =org-agenda-tags-todo-honor-ignore-options=.
+
 * Version 6.18
 ** Incompatible changes
 

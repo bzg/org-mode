@@ -2497,6 +2497,9 @@ Normal means, no org-mode-specific context."
 (declare-function org-agenda-save-markers-for-cut-and-paste "org-agenda"
 		  (beg end))
 (declare-function org-agenda-copy-local-variable "org-agenda" (var))
+(declare-function org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
+		  "org-agenda" (&optional end))
+
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())
@@ -2651,7 +2654,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
   (org-autoload "org-agenda"
 		'(org-agenda org-agenda-list org-search-view
    org-todo-list org-tags-view org-agenda-list-stuck-projects
-   org-diary org-agenda-to-appt)))
+   org-diary org-agenda-to-appt
+   org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))
 
 ;; Autoload org-remember
 
@@ -9327,7 +9331,10 @@ only lines with a TODO keyword are included in the output."
 	    ;; selective inheritance, remove uninherited ones
 	    (setcdr (car tags-alist)
 		    (org-remove-uniherited-tags (cdar tags-alist))))
-	  (when (and (or (not todo-only) (member todo org-not-done-keywords))
+	  (when (and (or (not todo-only)
+			 (and (member todo org-not-done-keywords)
+			      (or (not org-agenda-tags-todo-honor-ignore-options)
+				  (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))))
 		     (let ((case-fold-search t)) (eval matcher))
 		     (or
 		      (not (member org-archive-tag tags-list))

@@ -1,3 +1,16 @@
+2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-scan-tags): Call
+	`org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item'.
+
+	* org-agenda.el (org-agenda-todo-list, org-agenda-match-view): New
+	customization groups.
+	(org-agenda-tags-todo-honor-ignore-options): New option.
+	(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item):
+	New function.
+	(org-agenda-get-todos): Use
+	`org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item'.
+
 2009-01-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example): Escape

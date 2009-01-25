@@ -409,6 +409,18 @@ this one will be used."
  "Options concerning skipping parts of agenda files."
  :tag "Org Agenda Skip"
  :group 'org-agenda)
+(defgroup org-agenda-daily/weekly nil
+  "Options concerning the daily/weekly agenda."
+  :tag "Org Agenda Daily/Weekly"
+  :group 'org-agenda)
+(defgroup org-agenda-todo-list nil
+  "Options concerning the global todo list agenda view."
+  :tag "Org Agenda Todo List"
+  :group 'org-agenda)
+(defgroup org-agenda-match-view nil
+  "Options concerning the general tags/property/todo match agenda view."
+  :tag "Org Agenda Match View"
+  :group 'org-agenda)
 
 (defvar org-agenda-archives-mode nil
   "Non-nil means, the agenda will include archived items.
@@ -428,7 +440,7 @@ When nil, these trees are also scanned by agenda commands."
 When nil, the sublevels of a TODO entry are not checked, resulting in
 potentially much shorter TODO lists."
   :group 'org-agenda-skip
-  :group 'org-todo
+  :group 'org-agenda-todo-list
   :type 'boolean)
 
 (defcustom org-agenda-todo-ignore-with-date nil
@@ -439,7 +451,7 @@ When this is set, it also covers deadlines and scheduled items, the settings
 of `org-agenda-todo-ignore-scheduled' and `org-agenda-todo-ignore-deadlines'
 will be ignored."
   :group 'org-agenda-skip
-  :group 'org-todo
+  :group 'org-agenda-todo-list
   :type 'boolean)
 
 (defcustom org-agenda-todo-ignore-scheduled nil
@@ -448,7 +460,7 @@ The idea behind this is that by scheduling it, you have already taken care
 of this item.
 See also `org-agenda-todo-ignore-with-date'."
   :group 'org-agenda-skip
-  :group 'org-todo
+  :group 'org-agenda-todo-list
   :type 'boolean)
 
 (defcustom org-agenda-todo-ignore-deadlines nil
@@ -457,7 +469,22 @@ Near means closer than `org-deadline-warning-days' days.
 The idea behind this is that such items will appear in the agenda anyway.
 See also `org-agenda-todo-ignore-with-date'."
   :group 'org-agenda-skip
-  :group 'org-todo
+  :group 'org-agenda-todo-list
+  :type 'boolean)
+
+(defcustom org-agenda-tags-todo-honor-ignore-options nil
+  "Non-nil means, honor todo-list ...ignore options also in tags-todo search.
+The variables
+   `org-agenda-todo-ignore-with-date',
+   `org-agenda-todo-ignore-scheduled' 
+   `org-agenda-todo-ignore-deadlines'
+make the global TODO list skip entries that have time stamps of certain
+kinds.  If this option is set, the same options will also apply for the
+tags-todo search, which is the general tags/property matcher
+restricted to unfinished TODO entries only."
+  :group 'org-agenda-skip
+  :group 'org-agenda-todo-list
+  :group 'org-agenda-match-view
   :type 'boolean)
 
 (defcustom org-agenda-skip-scheduled-if-done nil
@@ -467,6 +494,7 @@ it applies only to the actual date of the scheduling.  Warnings about
 an item with a past scheduling dates are always turned off when the item
 is DONE."
   :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
   :type 'boolean)
 
 (defcustom org-agenda-skip-deadline-if-done nil
@@ -476,11 +504,13 @@ This is relevant for the daily/weekly agenda.  And it applied only to the
 actually date of the deadline.  Warnings about approaching and past-due
 deadlines are always turned off when the item is DONE."
   :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
   :type 'boolean)
 
 (defcustom org-agenda-skip-timestamp-if-done nil
   "Non-nil means don't select item by timestamp or -range if it is DONE."
   :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
   :type 'boolean)
 
 (defcustom org-timeline-show-empty-dates 3
@@ -559,11 +589,6 @@ option will be ignored.."
   :group 'org-agenda-windows
   :type 'boolean)
 
-(defgroup org-agenda-daily/weekly nil
-  "Options concerning the daily/weekly agenda."
-  :tag "Org Agenda Daily/Weekly"
-  :group 'org-agenda)
-
 (defcustom org-agenda-ndays 7
   "Number of days to include in overview display.
 Should be 1 or 7."
@@ -640,7 +665,8 @@ and timeline buffers."
 (defcustom org-agenda-include-all-todo nil
   "Set  means weekly/daily agenda will always contain all TODO entries.
 The TODO entries will be listed at the top of the agenda, before
-the entries for specific days."
+the entries for specific days.
+This option is deprecated, it is better to define a block agenda instead."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
@@ -999,7 +1025,6 @@ or a list like `(:background \"Red\")'."
 	  (repeat :tag "Specify"
 		  (list (character :tag "Priority" :value ?A)
 			(sexp :tag "face")))))
-
 
 (defgroup org-agenda-column-view nil
   "Options concerning column view in the agenda."
@@ -3248,13 +3273,7 @@ the documentation of `org-diary'."
 	(save-match-data
 	  (beginning-of-line)
 	  (setq beg (point) end (progn (outline-next-heading) (point)))
-	  (when (or (and org-agenda-todo-ignore-with-date (goto-char beg)
-			 (re-search-forward org-ts-regexp end t))
-		    (and org-agenda-todo-ignore-scheduled (goto-char beg)
-			 (re-search-forward org-scheduled-time-regexp end t))
-		    (and org-agenda-todo-ignore-deadlines (goto-char beg)
-			 (re-search-forward org-deadline-time-regexp end t)
-			 (org-deadline-close (match-string 1))))
+	  (when (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item end)
 	    (goto-char (1+ beg))
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))
 	    (throw :skip nil)))
@@ -3276,6 +3295,22 @@ the documentation of `org-diary'."
 	    (goto-char (match-end 1))
 	  (org-end-of-subtree 'invisible))))
     (nreverse ee)))
+
+;;;###autoload
+(defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item (&optional end)
+  "Do we have a reason to ignore this todo entry because it has a time stamp?"
+  (when (or org-agenda-todo-ignore-with-date
+	    org-agenda-todo-ignore-scheduled
+	    org-agenda-todo-ignore-deadlines)
+    (setq end (or end (save-excursion (outline-next-heading) (point))))
+    (save-excursion
+      (or (and org-agenda-todo-ignore-with-date
+	       (re-search-forward org-ts-regexp end t))
+	  (and org-agenda-todo-ignore-scheduled
+	       (re-search-forward org-scheduled-time-regexp end t))
+	  (and org-agenda-todo-ignore-deadlines
+	       (re-search-forward org-deadline-time-regexp end t)
+	       (org-deadline-close (match-string 1)))))))
 
 (defconst org-agenda-no-heading-message
   "No heading for this item in buffer or region.")
