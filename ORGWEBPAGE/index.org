@@ -50,7 +50,7 @@ If you'd like to know what other people have said about Org-mode, take
 a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
 
 * News
-
+- <2009-01-25 Sun>: Release 6.19
 - <2009-01-21 Wed>: Release 6.18c
 - <2009-01-20 Tue>: Release 6.18
 

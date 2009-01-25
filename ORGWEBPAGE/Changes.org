@@ -16,8 +16,18 @@
   :VISIBILITY: content
   :END:
 
+
+** Overview
+   
+- Improved behavior of conversion commands =C-c -= and =C-c *=
+- Table formulas may now reference fields in other tables
+- A final hline is imagined in each table, for the sake of references
+- A tags-todo search can now ignore timestamped items
+- =\par= can be used to force a paragraph break, also in footnotes
+
 ** Details
    
+
 *** Improved behavior of conversion commands =C-c -= and =C-c *=
 
     The conversion commands =C-c -= and =C-c *= are now better
