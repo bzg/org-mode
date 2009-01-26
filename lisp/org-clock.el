@@ -1,6 +1,7 @@
 ;;; org-clock.el --- The time clocking code for Org-mode
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+;;   Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -187,7 +188,7 @@ of a different task.")
 (defun org-clock-select-task (&optional prompt)
   "Select a task that recently was associated with clocking."
   (interactive)
-  (let (sel-list rpl file task (i 0) s)
+  (let (sel-list rpl (i 0) s)
     (save-window-excursion
       (org-switch-to-buffer-other-window
        (get-buffer-create "*Clock Task Select*"))

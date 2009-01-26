@@ -1,6 +1,7 @@
 ;;; org.el --- Outline-based notes management and organizer
 ;; Carstens outline-mode for keeping track of everything.
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -2340,7 +2341,6 @@ Changing this variable requires a restart of Emacs to take effect."
 	   (border (nth 2 e))
 	   (body (nth 3 e))
 	   (nl (nth 4 e))
-	   (stacked (and nil (nth 5 e))) ; stacked is no longer allowed, forced to nil
 	   (body1 (concat body "*?"))
 	   (markers (mapconcat 'car org-emphasis-alist ""))
 	   (vmarkers (mapconcat
@@ -2360,17 +2360,17 @@ Changing this variable requires a restart of Emacs to take effect."
                               (int-to-string nl) "\\}")))
       ;; Make the regexp
       (setq org-emph-re
-	    (concat "\\([" pre (if (and nil stacked) markers) "]\\|^\\)"
+	    (concat "\\([" pre "]\\|^\\)"
 		    "\\("
 		    "\\([" markers "]\\)"
 		    "\\("
 		    "[^" border "]\\|"
-		    "[^" border (if (and nil stacked) markers) "]"
+		    "[^" border "]"
 		    body1
-		    "[^" border (if (and nil stacked) markers) "]"
+		    "[^" border "]"
 		    "\\)"
 		    "\\3\\)"
-		    "\\([" post (if (and nil stacked) markers) "]\\|$\\)"))
+		    "\\([" post "]\\|$\\)"))
       (setq org-verbatim-re
 	    (concat "\\([" pre "]\\|^\\)"
 		    "\\("
@@ -4481,16 +4481,16 @@ This function is the default value of the hook `org-cycle-hook'."
      ((eq state 'subtree)  (or (org-subtree-end-visible-p) (recenter 1))))))
 
 (defun org-compact-display-after-subtree-move ()
-  (let (beg end)
-    (save-excursion
-      (if (org-up-heading-safe)
-	  (progn
-	    (hide-subtree)
-	    (show-entry)
-	    (show-children)
-	    (org-cycle-show-empty-lines 'children)
-	    (org-cycle-hide-drawers 'children))
-	(org-overview)))))
+  "Show a compacter version of the tree of the entry's parent."
+  (save-excursion
+    (if (org-up-heading-safe)
+	(progn
+	  (hide-subtree)
+	  (show-entry)
+	  (show-children)
+	  (org-cycle-show-empty-lines 'children)
+	  (org-cycle-hide-drawers 'children))
+      (org-overview))))
 
 (defun org-cycle-show-empty-lines (state)
   "Show empty lines above all visible headlines.
@@ -5845,7 +5845,7 @@ exit by killing the buffer with \\[org-edit-src-exit]."
 	(msg (substitute-command-keys
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
 	(org-mode-p (eq major-mode 'org-mode))
-	beg end lang lang-f)
+	beg end)
     (beginning-of-line 1)
     (if (looking-at "[ \t]*[^:\n \t]")
 	nil
@@ -5912,7 +5912,7 @@ the language, a switch telling of the content should be in a single line."
 	    ("^#\\+ascii:" "\n" "ascii" single-line)
 	    )))
 	(pos (point))
-	re re1 re2 single beg end lang lfmt match-re1)
+	re1 re2 single beg end lang lfmt match-re1)
     (catch 'exit
       (while (setq entry (pop re-list))
 	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)
@@ -7835,7 +7835,7 @@ operation has put the subtree."
     (apply
      'org-ido-completing-read prompt
      (lambda (string predicate &optional flag)
-       (let (rtn r s f (l (length string)))
+       (let (rtn r f (l (length string)))
 	 (cond
 	  ((eq flag nil)
 	   ;; try completion
@@ -8658,7 +8658,7 @@ This function is run automatically after each state change to a DONE state."
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
 	 (nshiftmax 10) (nshift 0)
-	 re type n what ts mb0 time)
+	 re type n what ts time)
     (when repeat
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (org-todo (if (eq interpret 'type) last-state head))
@@ -8681,8 +8681,7 @@ This function is run automatically after each state change to a DONE state."
 	      re (save-excursion (outline-next-heading) (point)) t)
 	(setq type (if (match-end 1) org-scheduled-string
 		     (if (match-end 3) org-deadline-string "Plain:"))
-	      ts (match-string (if (match-end 2) 2 (if (match-end 4) 4 0)))
-	      mb0 (match-beginning 0))
+	      ts (match-string (if (match-end 2) 2 (if (match-end 4) 4 0))))
 	(when (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([dwmy]\\)" ts)
 	  (setq	n (string-to-number (match-string 2 ts))
 		what (match-string 3 ts))
@@ -10165,7 +10164,7 @@ the scanner.  The following items can be given here:
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
 	 (org-tags-match-list-sublevels t)
-	 matcher pos file res
+	 matcher file res
 	 org-todo-keywords-for-agenda
 	 org-done-keywords-for-agenda
 	 org-todo-keyword-alist-for-agenda
@@ -10189,7 +10188,6 @@ the scanner.  The following items can be given here:
 	       (list (buffer-file-name (current-buffer))))
 	      (setq res (org-scan-tags func matcher)))
 	  ;; Get the right scope
-	  (setq pos (point))
 	  (cond
 	   ((and scope (listp scope) (symbolp (car scope)))
 	    (setq scope (eval scope)))
@@ -10587,7 +10585,7 @@ With INCLUDE-DEFAULTS, also include properties that has special meaning
 internally: ARCHIVE, CATEGORY, SUMMARY, DESCRIPTION, LOCATION, and LOGGING.
 With INCLUDE-COLUMNS, also include property names given in COLUMN
 formats in the current buffer."
-  (let (rtn range cfmt cols s p)
+  (let (rtn range cfmt s p)
     (save-excursion
       (save-restriction
 	(widen)
@@ -14845,7 +14843,7 @@ Show the heading too, if it is currently invisible."
 	 (re (concat "^" outline-regexp))
 	 (subs (make-vector (1+ n) nil))
 	 (last-level 0)
-	 m tree level head)
+	 m level head)
     (save-excursion
       (save-restriction
 	(widen)
@@ -14898,7 +14896,7 @@ if no description is present"
 To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
   (interactive)
   (require 'org-agenda)
-  (let (p m tp np dir txt w)
+  (let (p m tp np dir txt)
     (cond
      ((setq p (text-property-any (point-at-bol) (point-at-eol)
 				 'org-imenu t))

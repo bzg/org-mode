@@ -1,6 +1,7 @@
 ;;; org-jsinfo.el --- Support for org-info.js Javascript in Org HTML export
 
-;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Free Software Foundation, Inc.
+;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
+;;   Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -129,7 +130,7 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
     (let ((template org-infojs-template)
 	(ptoc (plist-get exp-plist :table-of-contents))
 	(hlevels (plist-get exp-plist :headline-levels))
-	tdepth sdepth p1 s p v a1 tmp e opt var val table default)
+	tdepth sdepth s v e opt var val table default)
     (setq sdepth hlevels
 	  tdepth hlevels)
     (if (integerp ptoc) (setq tdepth (min ptoc tdepth)))

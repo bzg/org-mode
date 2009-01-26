@@ -499,7 +499,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
   (let ((res (make-hash-table
 	      :test 'equal
 	      :size (apply '+ (mapcar 'length list))))
-	f i)
+	f)
     (mapc
      (lambda (x)
        (setq f (car x))
@@ -540,7 +540,7 @@ If that files does not exist, or if it does not contain this ID,
 return nil.
 The position is returned as a cons cell (file-name . position).  With
 optional argument MARKERP, return the position as a new marker."
-  (let (org-agenda-new-buffers m buf pos)
+  (let (org-agenda-new-buffers buf pos)
     (cond
      ((not file) nil)
      ((not (file-exists-p file)) nil)

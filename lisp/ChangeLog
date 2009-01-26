@@ -1,5 +1,55 @@
 2009-01-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-jsinfo.el (org-infojs-handle-options): Remove unnecessary
+	variables.
+
+	* org-footnote.el (org-footnote-normalize): Remove unnecessary
+	variable.
+	(org-insert-footnote-reference-near-definition): Remove
+	unnecessary let form.
+
+	* org-export-latex.el (org-export-latex-first-lines): Add
+	OPT-PLIST parameter.
+	(org-export-as-latex): Call `org-export-latex-first-lines' with
+	opt-plits parameter.
+	(org-export-latex-preprocess): Remove unnecessary variables.
+
+	* org-exp.el (org-infile-export-plist)
+	(org-export-add-options-to-plist, org-export-kill-licensed-text)
+	(org-export-remove-headline-metadata)
+	(org-export-get-title-from-subtree, org-get-min-level)
+	(org-html-do-expand): Remove innecessary let form.
+
+	* org-colview-xemacs.el (org-columns-display-here): Remove
+	unnecessary variables.
+
+	* org-colview.el (org-columns-display-here): Remove unnecessary
+	variables.
+
+	* org-bbdb.el (org-bbdb-anniversaries): Remove unnecessary
+	variables.
+
+	* org-id.el (org-id-alist-to-hash, org-id-find-id-in-file): Remove
+	unnecessary variables.
+
+	* org-agenda.el (org-search-view, org-agenda-get-blocks)
+	(org-agenda-filter-by-tag, org-agenda-action): Remove unnecessary
+	variables.
+
+	* org.el (org-set-emph-re): Clean-up the STACKED stuff.
+	(org-compact-display-after-subtree-move): Remove unnecessary
+	variables.
+	(org-edit-fixed-width-region): Remove unnecessary variables.
+	(org-edit-src-find-region-and-lang): Remove unnecessary variables.
+	(org-olpath-completing-read): Remove unnecessary variable.
+	(org-auto-repeat-maybe): Remove unnecessary variable.
+	(org-map-entries): Remove unnecessary variable.
+	(org-buffer-property-keys, org-imenu-get-tree)
+	(org-speedbar-set-agenda-restriction): Remove unnecessary variables.
+
+-----------------------------------------------------------------
+
+2009-01-26  Carsten Dominik  <carsten.dominik@gmail.com>
 	* org-exp.el (org-export-remove-timestamps): Never remove
 	timestamps from tables.
 

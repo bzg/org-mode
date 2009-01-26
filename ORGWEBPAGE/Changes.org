@@ -108,8 +108,8 @@ a reference like =@I$1..@II$2= will now work.
 
 The LaTeX idiom =\par= will insert a paragraph break at that
 location.  Normally you would simply leave an empty line to get
-such a break, but this is useful for footnotes whose definitions
-may not contain empty lines.
+such a break, but this is useful for footnotes whose
+definitions may not contain empty lines.
 
 * Version 6.18
 ** Incompatible changes

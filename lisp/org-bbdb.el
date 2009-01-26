@@ -292,7 +292,7 @@ This is used by Org to re-create the anniversary hash table."
          (y (nth 2 date))  ; year
          (annivs (gethash (list m d) org-bbdb-anniv-hash))
          (text ())
-         split class form rec recs)
+         rec recs)
 
     ;; we don't want to miss people born on Feb. 29th
     (when (and (= m 3) (= d 1)
