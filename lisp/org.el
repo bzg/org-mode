@@ -199,6 +199,41 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  sqlinsert:         Convert Org-mode tables to SQL insertions" orgtbl-sqlinsert)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
 
+(defcustom org-support-shift-select
+  (and (boundp 'shift-select-mode) shift-select-mode t)
+  "Non-nil means, make shift-cursor commands select text when possible.
+
+In Emacs 23, when `shift-select-mode' is on, shifted cursor keys start
+selecting a region, or enlarge thusly started regions.  In Org-mode,
+in special contexts, these same keys are used for other purposes, important
+enough to compete with shift selection.  Org tries to balance these needs
+by supporting `shift-select-mode' outside these special contexts, under
+control of this variable.
+
+When this variable is t and the cursor is not in a special context,
+Org-mode will support shift-selection for making and enlarging regions.
+
+Shift-cursor keys have special meanings at the following locations:
+- on a headline (changing TODO state and priority)
+- on a plain list item bullet (cycling the bullet type)
+- on a time stamp (changing the time)
+- in the BEGIN line of a clock table (changing the time block).
+
+If you set this variable to the symbol `even-in-headlines', then the
+keys will not change TODO states and priorities in headlines, to
+make shift selection work there as well.  This is not really a problem,
+because there are alternative commands `C-c C-t' and `C-c ,' to change
+TODO state and priority.
+
+However, when the cursor is on a timestamp, headline or not, shift-cursor
+commands will still edit the time stamp - this is just too good to give up.
+
+XEmacs user should have this variable set to nil."
+  :group 'org
+  :type '(choice
+	  (const :tag "Not at all" nil)
+	  (const :tag "When context allows" t)
+	  (const :tag "Even in headlines" even-in-headlines)))
 
 (defgroup org-startup nil
   "Options concerning startup of Org-mode."
@@ -13016,12 +13051,21 @@ Calls `org-timestamp-up' or `org-priority-up', or `org-previous-item',
 depending on context.  See the individual commands for more information."
   (interactive "P")
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'previous-line)))
    ((org-at-timestamp-p t)
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-down 'org-timestamp-up)))
-   ((org-on-heading-p) (call-interactively 'org-priority-up))
-   ((org-at-item-p) (call-interactively 'org-previous-item))
+   ((and (not (eq org-support-shift-select 'even-in-headlines))
+	 (org-on-heading-p))
+    (call-interactively 'org-priority-up))
+   ((and (not org-support-shift-select) (org-at-item-p))
+    (call-interactively 'org-previous-item))
    ((org-clocktable-try-shift 'up arg))
+   (org-support-shift-select
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'previous-line)))
    (t (call-interactively 'org-beginning-of-item) (beginning-of-line 1))))
 
 (defun org-shiftdown (&optional arg)
@@ -13030,11 +13074,21 @@ Calls `org-timestamp-down' or `org-priority-down', or `org-next-item'
 depending on context.  See the individual commands for more information."
   (interactive "P")
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'next-line)))
    ((org-at-timestamp-p t)
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-up 'org-timestamp-down)))
-   ((org-on-heading-p) (call-interactively 'org-priority-down))
+   ((and (not (eq org-support-shift-select 'even-in-headlines))
+	 (org-on-heading-p))
+    (call-interactively 'org-priority-down))
+   ((and (not org-support-shift-select) (org-at-item-p))
+    (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
+   (org-support-shift-select 
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'next-line)))
    (t (call-interactively 'org-next-item))))
 
 (defun org-shiftright (&optional arg)
@@ -13048,11 +13102,21 @@ Depending on context, this does one of the following:
 - on a clocktable definition line, move time block into the future"
   (interactive "P")
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'forward-char)))
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
-   ((org-on-heading-p) (org-call-with-arg 'org-todo 'right))
-   ((org-at-item-p) (org-call-with-arg 'org-cycle-list-bullet nil))
+   ((and (not (eq org-support-shift-select 'even-in-headlines))
+	 (org-on-heading-p))
+    (org-call-with-arg 'org-todo 'right))
+   ((or (and org-support-shift-select (org-at-item-bullet-p))
+	(and (not org-support-shift-select) (org-at-item-p)))
+    (org-call-with-arg 'org-cycle-list-bullet nil))
    ((org-at-property-p) (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
+   (org-support-shift-select 
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'forward-char)))
    (t (org-shiftcursor-error))))
 
 (defun org-shiftleft (&optional arg)
@@ -13066,26 +13130,48 @@ Depending on context, this does one of the following:
 - on a clocktable definition line, move time block into the past"
   (interactive "P")
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'backward-char)))
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
-   ((org-on-heading-p) (org-call-with-arg 'org-todo 'left))
-   ((org-at-item-p) (org-call-with-arg 'org-cycle-list-bullet 'previous))
+   ((and (not (eq org-support-shift-select 'even-in-headlines))
+	 (org-on-heading-p))
+    (org-call-with-arg 'org-todo 'left))
+   ((or (and org-support-shift-select (org-at-item-bullet-p))
+	(and (not org-support-shift-select) (org-at-item-p)))
+    (org-call-with-arg 'org-cycle-list-bullet 'previous))
    ((org-at-property-p)
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
+   (org-support-shift-select 
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'backward-char)))
    (t (org-shiftcursor-error))))
 
 (defun org-shiftcontrolright ()
   "Switch to next TODO set."
   (interactive)
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'forward-word)))
    ((org-on-heading-p) (org-call-with-arg 'org-todo 'nextset))
+   (org-support-shift-select 
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'forward-word)))
    (t (org-shiftcursor-error))))
 
 (defun org-shiftcontrolleft ()
   "Switch to previous TODO set."
   (interactive)
   (cond
+   ((and org-support-shift-select (org-region-active-p))
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'backward-word)))
    ((org-on-heading-p) (org-call-with-arg 'org-todo 'previousset))
+   (org-support-shift-select 
+    (let ((this-command-keys-shift-translated t))
+      (call-interactively 'backward-word)))
    (t (org-shiftcursor-error))))
 
 (defun org-ctrl-c-ret ()

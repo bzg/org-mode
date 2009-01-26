@@ -162,6 +162,12 @@ list, obtained by prompting the user."
 	((= llt ?\)) "\\([ \t]*\\([-+]\\|\\([0-9]+))\\)\\|[ \t]+\\*\\)\\( \\|$\\)")
 	(t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))))))
 
+(defun org-at-item-bullet-p ()
+  "Is point at the bullet of a plain list item?"
+  (and (org-at-item-p)
+       (not (member (char-after) '(?\  ?\t)))
+       (< (point) (match-end 0))))
+
 (defun org-in-item-p ()
   "It the cursor inside a plain list item.
 Does not have to be the first line."

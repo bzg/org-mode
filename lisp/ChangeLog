@@ -1,5 +1,12 @@
 2009-01-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-support-shift-select): New option.
+	(org-shiftup, org-shiftdown, org-shiftright, org-shiftleft)
+	(org-shiftcontrolright, org-shiftcontrolleft): Support for shift
+	selection outside contexts.
+
+	* org-list.el (org-at-item-bullet-p): New function.
+
 	* org-jsinfo.el (org-infojs-handle-options): Remove unnecessary
 	variables.
 
