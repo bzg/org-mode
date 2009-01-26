@@ -1,3 +1,12 @@
+2009-01-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-remove-timestamps): Never remove
+	timestamps from tables.
+
+	* org-export-latex.el (org-export-latex-first-lines): Add more
+	options to the preprocessing of the text before the first
+	headline.
+
 2009-01-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-faces.el (org-clock-overlay): Make face compatible with
