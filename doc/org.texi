@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.19c
+@set VERSION 6.19d
 @set DATE January 2009
 
 @dircategory Emacs
@@ -1304,7 +1304,7 @@ Insert a new item with a checkbox (@pxref{Checkboxes}).
 @itemx S-@key{down}
 @cindex shift-selection-mode
 Jump to the previous/next item in the current list, but only if
-@code{shift-selection-mode} is off.  If not, you can still use paragraph
+@code{org-support-shift-select} is off.  If not, you can still use paragraph
 jumping commands like @kbd{C-@key{up}} and @kbd{C-@key{down}} to quite
 similar effect.
 @kindex M-S-@key{up}
@@ -1343,8 +1343,8 @@ converted into a list item.
 @kindex S-@key{right}
 @item S-@key{left}/@key{right}
 This command also cycles bullet styles when the cursor in on the bullet or
-(when @code{org-support-shift-select} is @code{nil}) even when anywhere in
-the item line.
+anywhere in an item line, details depending on
+@code{org-support-shift-select}.
 @end table
 
 @node Drawers, Footnotes, Plain lists, Document Structure
@@ -9294,12 +9294,12 @@ In Emacs 23, @code{shift-selection-mode} is on by default, meaning that
 cursor motions combined with the shift key should start or enlarge regions.
 This conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
 timestamps, TODO keywords, priorities, and item bullet types if the cursor is
-at such a location.  Org-mode tries to accommodate shift selection by (i)
-using it outside of the special contexts where special commands apply, and by
-(ii) extending an existing active region even if the cursor moves across a
-special context.  See the variable @code{org-support-shift-select} for more
-information, and for a way to control in which contexts shift selection
-should be overruled.
+at such a location.  By default, @kbd{S-@key{cursor}} commands outside
+special contexts don't do anything, but you can customize the variable
+@code{org-support-shift-select}.  Org-mode then tries to accommodate shift
+selection by (i) using it outside of the special contexts where special
+commands apply, and by (ii) extending an existing active region even if the
+cursor moves across a special context.
 
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm

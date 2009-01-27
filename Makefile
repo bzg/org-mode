@@ -241,7 +241,7 @@ upload_release:
 	rsync -avuz RELEASEDIR/ cdominik@orgmode.org:orgmode.org/
 
 upload_manual:
-	rsync -avuz doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
+	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
 
 relup0:
 	make release
