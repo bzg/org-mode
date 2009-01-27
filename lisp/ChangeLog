@@ -2,6 +2,9 @@
 
 	* org.el (org-shiftselect-error, org-call-for-shift-select): New
 	functions.
+	(org-set-visibility-according-to-property): Turn off the setting
+	of `org-show-entry-below', to avoid overruling a FOLDED visibility
+	property.
 
 2009-01-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
