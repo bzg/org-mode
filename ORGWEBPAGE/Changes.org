@@ -10,8 +10,44 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.19
+** Version 6.20
 
+** Details
+*** Support for simple TODO dependencies
+
+John Wiegley's code for enforcing simple TODO dependencies has
+been integrated into Org-mode.  Thanks John!
+
+The structure of Org files (hierarchy and lists) makes it easy to
+define TODO dependencies.  A parent TODO task should not be
+marked DONE until all subtasks (defined as children tasks) are
+marked as DONE.  And sometimes there is a logical sequence to a
+number of (sub)tasks, so that one task cannot be acted upon
+before all siblings above it are done.  If you customize the
+variable =org-enforce-todo-dependencies=, Org will block entries
+from changing state while they have children that are not DONE.
+Furthermore, if an entry has a property =ORDERED=, each of its
+children will be blocked until all earlier siblings are marked
+DONE.  Here is an example:
+
+#+begin_src org
+,* TODO Blocked until (two) is done
+,** DONE one
+,** TODO two
+
+,* Parent
+,  :PROPERTIES:
+,    :ORDERED: t
+,  :END:
+,** TODO a
+,** TODO b, needs to wait for (a)
+,** TODO c, needs to wait for (a) and (b)
+#+end_src
+The variable =org-agenda-dim-blocked-tasks= controls how blocked
+entries should appear in the agenda, where they can be dimmed or
+even made invisible.
+
+** Version 6.19
   :PROPERTIES:
   :VISIBILITY: content
   :END:

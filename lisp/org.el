@@ -1603,6 +1603,49 @@ Lisp variable `state'."
   :group 'org-todo
   :type 'hook)
 
+(defvar org-blocker-hook nil
+  "Hook for functions that are allowed to block a state change.
+
+Each function gets as its single argument a property list, see
+`org-trigger-hook' for more information about this list.
+
+If any of the functions in this hook returns nil, the state change
+is blocked.")
+
+(defvar org-trigger-hook nil
+  "Hook for functions that are triggered by a state change.
+
+Each function gets as its single argument a property list with at least
+the following elements:
+
+ (:type type-of-change :position pos-at-entry-start
+  :from old-state :to new-state)
+
+Depending on the type, more properties may be present.
+
+This mechanism is currently implemented for:
+
+TODO state changes
+------------------
+:type  todo-state-change
+:from  previous state (keyword as a string), or nil, or a symbol
+       'todo' or 'done', to indicate the general type of state.
+:to    new state, like in :from")
+
+(defcustom org-enforce-todo-dependencies nil
+  "Non-nil means, undone TODO entries will block switching the parent to DONE.
+Also, if a parent has an :ORDERED: property, switching an entry to DONE will
+be blocked if any prior sibling is not yet done.
+You need to set this variable through the customize interface, or to
+restart emacs after changing the value."
+  :set (lambda (var val)
+	 (set var val)
+	 (if val
+	     (add-hook 'org-blocker-hook 'org-block-todo-from-children-or-siblings)
+	   (remove-hook 'org-blocker-hook 'org-block-todo-from-children-or-siblings)))
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-todo-state-tags-triggers nil
   "Tag changes that should be triggered by TODO state changes.
 This is a list.  Each entry is
@@ -8272,34 +8315,6 @@ this is nil.")
 	      (push (nth 2 e) rtn)))
 	  rtn)))))
 
-(defvar org-blocker-hook nil
-  "Hook for functions that are allowed to block a state change.
-
-Each function gets as its single argument a property list, see
-`org-trigger-hook' for more information about this list.
-
-If any of the functions in this hook returns nil, the state change
-is blocked.")
-
-(defvar org-trigger-hook nil
-  "Hook for functions that are triggered by a state change.
-
-Each function gets as its single argument a property list with at least
-the following elements:
-
- (:type type-of-change :position pos-at-entry-start
-  :from old-state :to new-state)
-
-Depending on the type, more properties may be present.
-
-This mechanism is currently implemented for:
-
-TODO state changes
-------------------
-:type  todo-state-change
-:from  previous state (keyword as a string), or nil
-:to    new state (keyword as a string), or nil")
-
 (defvar org-agenda-headline-snapshot-before-repeat)
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
@@ -8491,6 +8506,60 @@ For calling through lisp, arg is also interpreted in the following way:
 	(when org-trigger-hook
 	  (save-excursion
 	    (run-hook-with-args 'org-trigger-hook change-plist)))))))
+
+(defun org-block-todo-from-children-or-siblings (change-plist)
+  "Block turning an entry into a TODO, using the hierarchy.
+This checks whether the current task should be blocked from state
+changes.  Such blocking occurs when:
+
+  1. The task has children which are not all in a completed state.
+
+  2. A task has a parent with the property :ORDERED:, and there
+     are siblings prior to the current task with incomplete
+     status."
+  (catch 'dont-block
+    ;; If this is not a todo state change, or if this entry is already DONE,
+    ;; do not block
+    (when (or (not (eq (plist-get change-plist :type) 'todo-state-change))
+	      (member (plist-get change-plist :from)
+		      (cons 'done org-done-keywords)))
+      (throw 'dont-block t))
+    ;; If this task has children, and any are undone, it's blocked
+    (save-excursion
+      (org-back-to-heading t)
+      (let ((this-level (funcall outline-level)))
+	(outline-next-heading)
+	(let ((child-level (funcall outline-level)))
+	  (while (and (not (eobp))
+		      (> child-level this-level))
+	    ;; this todo has children, check whether they are all
+	    ;; completed
+	    (if (and (not (org-entry-is-done-p))
+		     (org-entry-is-todo-p))
+		(throw 'dont-block nil))
+	    (outline-next-heading)
+	    (setq child-level (funcall outline-level))))))
+    ;; Otherwise, if the task's parent has the :ORDERED: property, and
+    ;; any previous siblings are undone, it's blocked
+    (save-excursion
+      (org-back-to-heading t)
+      (when (save-excursion
+	      (ignore-errors
+		(outline-up-heading 1)
+		(org-entry-get (point) "ORDERED")))
+	(let* ((this-level (funcall outline-level))
+	       (current-level this-level))
+	  (while (and (not (bobp))
+		      (= current-level this-level))
+	    (outline-previous-heading)
+	    (setq current-level (funcall outline-level))
+	    (if (= current-level this-level)
+		;; this todo has children, check whether they are all
+		;; completed
+		(if (and (not (org-entry-is-done-p))
+			 (org-entry-is-todo-p))
+		    (throw 'dont-block nil)))))))
+    t))					; don't block
 
 (defun org-update-parent-todo-statistics ()
   "Update any statistics cookie in the parent of the current headline."

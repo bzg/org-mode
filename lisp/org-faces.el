@@ -456,6 +456,11 @@ belong to the weekend.")
   "Face for items scheduled for a certain day."
   :group 'org-faces)
 
+(defface org-agenda-dimmed-todo-face
+  '((((background light)) (:foreground "grey50"))
+    (((background dark)) (:foreground "grey50")))
+  "Face used to dimm blocked tasks in the agenda."
+  :group 'org-faces)
 
 (defface org-scheduled-previously
   (org-compatible-face nil
