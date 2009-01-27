@@ -8411,6 +8411,8 @@ For calling through lisp, arg is also interpreted in the following way:
 				 :position startpos))
 	     dolog now-done-p)
 	(when org-blocker-hook
+	  (setq org-last-todo-state-is-todo
+		(not (member this org-done-keywords)))
 	  (unless (save-excursion
 		    (save-match-data
 		      (run-hook-with-args-until-failure
@@ -12939,7 +12941,7 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
 	     'delete-backward-char 'org-delete-backward-char)
   (org-defkey org-mode-map "|" 'org-force-self-insert))
 
-(defun org-shiftcursor-error ()
+(defun org-modifier-cursor-error ()
   "Throw an error, a modified cursor command was applied in wrong context."
   (error "This command is active in special context like tables, headlines or items"))
 
@@ -12977,7 +12979,7 @@ See the individual commands for more information."
    ((org-at-table-p) (call-interactively 'org-table-delete-column))
    ((org-on-heading-p) (call-interactively 'org-promote-subtree))
    ((org-at-item-p) (call-interactively 'org-outdent-item))
-   (t (org-shiftcursor-error))))
+   (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaright ()
   "Demote subtree or insert table column.
@@ -12989,7 +12991,7 @@ See the individual commands for more information."
    ((org-at-table-p) (call-interactively 'org-table-insert-column))
    ((org-on-heading-p) (call-interactively 'org-demote-subtree))
    ((org-at-item-p) (call-interactively 'org-indent-item))
-   (t (org-shiftcursor-error))))
+   (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaup (&optional arg)
   "Move subtree up or kill table row.
@@ -13001,7 +13003,7 @@ for more information."
    ((org-at-table-p) (call-interactively 'org-table-kill-row))
    ((org-on-heading-p) (call-interactively 'org-move-subtree-up))
    ((org-at-item-p) (call-interactively 'org-move-item-up))
-   (t (org-shiftcursor-error))))
+   (t (org-modifier-cursor-error))))
 (defun org-shiftmetadown (&optional arg)
   "Move subtree down or insert table row.
 Calls `org-move-subtree-down' or `org-table-insert-row' or
@@ -13012,7 +13014,7 @@ commands for more information."
    ((org-at-table-p) (call-interactively 'org-table-insert-row))
    ((org-on-heading-p) (call-interactively 'org-move-subtree-down))
    ((org-at-item-p) (call-interactively 'org-move-item-down))
-   (t (org-shiftcursor-error))))
+   (t (org-modifier-cursor-error))))
 
 (defun org-metaleft (&optional arg)
   "Promote heading or move table column to left.

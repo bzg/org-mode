@@ -5084,7 +5084,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(save-excursion
 	  (and (outline-next-heading)
 	       (org-flag-heading nil)))   ; show the next heading
-	(org-todo arg)
+	(call-interactively 'org-todo)
 	(and (bolp) (forward-char 1))
 	(setq newhead (org-get-heading))
 	(when (and (org-bound-and-true-p
