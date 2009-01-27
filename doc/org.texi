@@ -3194,13 +3194,15 @@ keyword or using completion, you may also apply the following commands:
 @table @kbd
 @kindex C-S-@key{right}
 @kindex C-S-@key{left}
-@item C-S-@key{right}
+@kindex C-u C-u C-c C-t
+@item C-u C-u C-c C-t
+@itemx C-S-@key{right}
 @itemx C-S-@key{left}
 These keys jump from one TODO subset to the next.  In the above example,
-@kbd{C-S-@key{right}} would jump from @code{TODO} or @code{DONE} to
-@code{REPORT}, and any of the words in the second row to @code{CANCELED}.
-Note that this key binding conflicts with @code{shift-selection-mode}
-(@pxref{Conflicts}).
+@kbd{C-u C-u C-c C-t} or @kbd{C-S-@key{right}} would jump from @code{TODO} or
+@code{DONE} to @code{REPORT}, and any of the words in the second row to
+@code{CANCELED}.  Note that the @kbd{C-S-} key binding conflict with
+@code{shift-selection-mode} (@pxref{Conflicts}).
 @kindex S-@key{right}
 @kindex S-@key{left}
 @item S-@key{right}
