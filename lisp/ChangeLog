@@ -1,5 +1,8 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-fast-todo-selection): Make sure TODO selection does
+	not change buffer position.
+
 	* org-list.el (org-toggle-checkbox): Implement adding or removing
 	checkboxes from line or region when called with a prefix
 	argument.
