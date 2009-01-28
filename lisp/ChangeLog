@@ -1,5 +1,9 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-toggle-checkbox): Implement adding or removing
+	checkboxes from line or region when called with a prefix
+	argument.
+
 	* org-rmail.el (org-rmail-store-link): Protect the call to
 	`rmail-narrow-to-non-pruned-header'.
 

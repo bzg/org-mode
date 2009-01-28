@@ -58,6 +58,14 @@ Customize the variable =org-support-shift-select= to use S-cursor
 key for selecting text.  Make sure that you carefully read the
 docstring of that variable first.
 
+*** Adding and removing checkboxes from many lines
+
+The command =C-c C-x C-b= normally toggles checkbox status in the
+current line, or in all lines in the region.  With prefix
+argument it now either adds or removes the checkbox.
+
+This was a requested by Daniel Clemente.
+
 * Version 6.19
 
 ** Overview

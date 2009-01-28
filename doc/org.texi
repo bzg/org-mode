@@ -3601,13 +3601,12 @@ Toggle checkbox at point.  With a prefix argument, set it to @samp{[-]},
 which is considered to be an intermediate state.
 @kindex C-c C-x C-b
 @item C-c C-x C-b
-Toggle checkbox at point.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.
 @itemize @minus
 @item
 If there is an active region, toggle the first checkbox in the region
-and set all remaining boxes to the same status as the first.  If you
-want to toggle all boxes in the region independently, use a prefix
-argument.
+and set all remaining boxes to the same status as the first.  With a prefix
+arg, add or remove the checkbox for all items in the region.
 @item
 If the cursor is in a headline, toggle checkboxes in the region between
 this headline and the next (so @emph{not} the entire subtree).
