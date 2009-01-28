@@ -3319,7 +3319,7 @@ the documentation of `org-diary'."
       (catch :skip
 	(save-match-data
 	  (beginning-of-line)
-	  (setq beg (point) end (progn (outline-next-heading) (point)))
+	  (setq beg (point) end (save-excursion (outline-next-heading) (point)))
 	  (when (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item end)
 	    (goto-char (1+ beg))
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))

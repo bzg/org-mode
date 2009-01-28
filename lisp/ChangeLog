@@ -1,5 +1,8 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-todos): Start search from correct
+	position.
+
 	* org.el (org-fast-todo-selection): Make sure TODO selection does
 	not change buffer position.
 
