@@ -1,5 +1,8 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-special-range): Fix week display in
+	clock tables.
+
 	* org-exp.el (org-get-current-options): Fix bug when in indirect
 	buffer.
 
