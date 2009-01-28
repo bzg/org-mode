@@ -400,15 +400,15 @@ changes."
 (defface org-clock-overlay ;; copied from secondary-selection
   (org-compatible-face nil
     '((((class color) (min-colors 88) (background light))
-       :background "yellow1")
+       (:background "yellow1"))
       (((class color) (min-colors 88) (background dark))
-       :background "SkyBlue4")
+       (:background "SkyBlue4"))
       (((class color) (min-colors 16) (background light))
-       :background "yellow")
+       (:background "yellow"))
       (((class color) (min-colors 16) (background dark))
-       :background "SkyBlue4")
+       (:background "SkyBlue4"))
       (((class color) (min-colors 8))
-       :background "cyan" :foreground "black")
+       (:background "cyan" :foreground "black"))
       (t (:inverse-video t))))
     "Basic face for displaying the secondary selection."
     :group 'org-faces)
