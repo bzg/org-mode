@@ -1,5 +1,8 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-rmail.el (org-rmail-store-link): Protect the call to
+	`rmail-narrow-to-non-pruned-header'.
+
 	* org-clock.el (org-clock-special-range): Fix week display in
 	clock tables.
 
