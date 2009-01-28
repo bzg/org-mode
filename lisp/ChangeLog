@@ -1,5 +1,10 @@
 2009-01-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-update-checkbox-count): Update more than one cookie.
+
+	* org.el (org-update-parent-todo-statistics): Update more than one
+	cookie.
+
 	* org-agenda.el (org-agenda-get-todos): Start search from correct
 	position.
 

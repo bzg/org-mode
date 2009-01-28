@@ -343,7 +343,7 @@ the whole buffer."
 	     end-cookie (match-end 1)
 	     cstat (+ cstat (if end-cookie 1 0))
 	     startsearch (point-at-eol)
-	     continue-from (point-at-bol)
+	     continue-from (match-beginning 0)
 	     is-percent (match-beginning 2)
 	     lim (cond
 		  ((org-on-heading-p) (outline-next-heading) (point))

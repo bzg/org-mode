@@ -8569,24 +8569,24 @@ changes.  Such blocking occurs when:
     (catch 'exit
       (save-excursion
 	(setq level (org-up-heading-safe))
-	(unless (and level
-		     (re-search-forward box-re (point-at-eol) t))
+	(unless level
 	  (throw 'exit nil))
-	(setq is-percent (match-end 2))
-	(save-match-data
-	  (unless (outline-next-heading) (throw 'exit nil))
-	  (while (looking-at org-todo-line-regexp)
-	    (setq kwd (match-string 2))
-	    (and kwd (setq cnt-all (1+ cnt-all)))
-	    (and (member kwd org-done-keywords)
-		 (setq cnt-done (1+ cnt-done)))
-	    (condition-case nil
-		(org-forward-same-level 1)
-	      (error (end-of-line 1)))))
-	(replace-match
-	 (if is-percent
-	     (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
-	   (format "[%d/%d]" cnt-done cnt-all)))
+	(while (re-search-forward box-re (point-at-eol) t)
+	  (setq is-percent (match-end 2))
+	  (save-match-data
+	    (unless (outline-next-heading) (throw 'exit nil))
+	    (while (looking-at org-todo-line-regexp)
+	      (setq kwd (match-string 2))
+	      (and kwd (setq cnt-all (1+ cnt-all)))
+	      (and (member kwd org-done-keywords)
+		   (setq cnt-done (1+ cnt-done)))
+	      (condition-case nil
+		  (org-forward-same-level 1)
+		(error (end-of-line 1)))))
+	  (replace-match
+	   (if is-percent
+	       (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
+	     (format "[%d/%d]" cnt-done cnt-all))))
 	(run-hook-with-args 'org-after-todo-statistics-hook
 			    cnt-done (- cnt-all cnt-done))))))
 
