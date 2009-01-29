@@ -4036,18 +4036,20 @@ lang=\"%s\" xml:lang=\"%s\">
 (defun org-export-html-format-image (src)
   "Create image tag with source and attributes."
   (save-match-data
-    (let* ((caption (org-find-text-property-in-string 'org-caption src))
-	   (attr (org-find-text-property-in-string 'org-attributes src))
-	   (label (org-find-text-property-in-string 'org-label src)))
-      (format "<div %sclass=\"figure\">
+    (if (string-match "^ltxpng/" src)
+	(format "<img src=\"%s\"/>" src)
+      (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	     (attr (org-find-text-property-in-string 'org-attributes src))
+	     (label (org-find-text-property-in-string 'org-label src)))
+	(format "<div %sclass=\"figure\">
 <p><img src=\"%s\"%s /></p>%s
 </div>"
-	      (if label (format "id=\"%s\" " label) "")
-	      src
-	      (if (string-match "\\<alt=" (or attr ""))
-		  (concat " " attr )
-		(concat " " attr " alt=\"" src "\""))
-	      (if caption (concat "\n<p>" caption "</p>") "")))))
+		(if label (format "id=\"%s\" " label) "")
+		src
+		(if (string-match "\\<alt=" (or attr ""))
+		    (concat " " attr )
+		  (concat " " attr " alt=\"" src "\""))
+		(if caption (concat "\n<p>" caption "</p>") ""))))))
 
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)
