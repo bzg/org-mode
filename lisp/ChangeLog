@@ -1,5 +1,8 @@
 2009-01-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-remove-or-extract-drawers): Only remove
+	drawers that are unprotected.
+
 	* org.el (org-toggle-ordered-property): New function.
 	(org-mode-map): Add a key for `org-toggle-ordered-property'.
 	(org-org-menu): Add menu entries for TODO dependencies.

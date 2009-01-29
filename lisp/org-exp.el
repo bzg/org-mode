@@ -1767,7 +1767,8 @@ whose content to keep."
 		       "\\|")
 		      "\\):[ \t]*\n\\([^@]*?\n\\)?[ \t]*:END:[ \t]*\n")))
       (while (re-search-forward re nil t)
-	(replace-match "")))))
+	(org-if-unprotected
+	 (replace-match ""))))))
 
 (defun org-export-handle-export-tags (select-tags exclude-tags)
   "Modify the buffer, honoring SELECT-TAGS and EXCLUDE-TAGS.
@@ -2618,7 +2619,6 @@ underlined headlines.  The default is 3."
 		 "\n"))
 	 thetoc have-headings first-heading-pos
 	 table-open table-buffer link desc)
-
     (let ((inhibit-read-only t))
       (org-unmodified
        (remove-text-properties (point-min) (point-max)
@@ -2776,7 +2776,7 @@ underlined headlines.  The default is 3."
 	(if (string-match "\\\\\\\\[ \t]*$" line)
 	    (setq line (replace-match "" t t line)))
 	(if (and org-export-with-fixed-width
-		 (string-match "^\\([ \t]*\\)\\(:\\)" line))
+		 (string-match "^\\([ \t]*\\)\\(:\\( \\|$\\)\\)" line))
 	    (setq line (replace-match "\\1" nil nil line)))
 	(insert line "\n"))))
 
