@@ -48,6 +48,9 @@ DONE.  Here is an example:
 ,** TODO c, needs to wait for (a) and (b)
 #+end_src
 
+The command =C-c C-x o= toggles the value of the =ORDERED=
+property.
+
 The variable =org-agenda-dim-blocked-tasks= controls how blocked
 entries should appear in the agenda, where they can be dimmed or
 even made invisible.

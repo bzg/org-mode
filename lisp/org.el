@@ -8561,6 +8561,18 @@ changes.  Such blocking occurs when:
 		    (throw 'dont-block nil)))))))
     t))					; don't block
 
+(defun org-toggle-ordered-property ()
+  "Toggle the ORDERED property of the current entry."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading)
+    (if (org-entry-get nil "ORDERED")
+	(progn
+	  (org-delete-property "ORDERED")
+	  (message "Subtasks can be completed in arbitrary order or parallel"))
+      (org-entry-put nil "ORDERED" "t")
+      (message "Subtasks must be completed in sequence"))))
+
 (defun org-update-parent-todo-statistics ()
   "Update any statistics cookie in the parent of the current headline."
   (interactive)
@@ -12876,6 +12888,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
+(org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
@@ -13714,6 +13727,16 @@ See the individual commands for more information."
       ["Previous keyword set" org-shiftcontrolright (and (> (length org-todo-sets) 1) (org-on-heading-p))])
      ["Show TODO Tree" org-show-todo-tree t]
      ["Global TODO list" org-todo-list t]
+     "--"
+     ["Enforce dependencies" (customize-variable 'org-enforce-todo-dependencies)
+      :selected org-enforce-todo-dependencies :style toggle :active t]
+     "Settings for tree at point"
+     ["Do Children sequentially" org-toggle-ordered-property :style radio
+      :selected (ignore-errors (org-entry-get nil "ORDERED"))
+      :active org-enforce-todo-dependencies :keys "C-c C-x o"]
+     ["Do Children parallel" org-toggle-ordered-property :style radio
+      :selected (ignore-errors (not (org-entry-get nil "ORDERED")))
+      :active org-enforce-todo-dependencies :keys "C-c C-x o"]
      "--"
      ["Set Priority" org-priority t]
      ["Priority Up" org-shiftup t]

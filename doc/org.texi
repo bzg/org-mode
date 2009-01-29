@@ -3335,6 +3335,12 @@ blocked until all earlier siblings are marked DONE.  Here is an example:
 ** TODO c, needs to wait for (a) and (b)
 @end example
 
+@table @kbd
+@kindex C-c C-x o
+@item C-c C-x o
+Toggle the @code{ORDERED} property of the current entry.
+@end table
+
 If you set the variable @code{org-agenda-dim-blocked-tasks}, TODO entries
 that cannot be closed because of such dependencies will be shown in a dimmed
 font or even made invisible in agenda views (@pxref{Agenda Views}).
