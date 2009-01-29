@@ -384,20 +384,6 @@ This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
 	  (const :tag "Only with braces" {})
 	  (const :tag "Never interpret" nil)))
 
-(defcustom org-export-with-special-strings t
-  "Non-nil means, interpret \"\-\", \"--\" and \"---\" for export.
-When this option is turned on, these strings will be exported as:
-
-\\-  : &shy;
---  : &ndash;
---- :  &mdash;
-
-Not all export backends support this, but HTML does.
-
-This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
-  :group 'org-export-translation
-  :type 'boolean)
-
 (defcustom org-export-with-TeX-macros t
   "Non-nil means, interpret simple TeX-like macros when exporting.
 For example, HTML export converts \\alpha to &alpha; and \\AA to &Aring;.
