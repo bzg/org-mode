@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.20f
+;; Version: 6.20g
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -94,7 +94,7 @@
 
 ;;; Version
 
-(defconst org-version "6.20f"
+(defconst org-version "6.20g"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -13872,9 +13872,9 @@ With optional NODE, go directly to that node."
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
-	'(org-agenda org-archive org-clock org-colview
+	'(org-agenda org-archive org-attach org-clock org-colview
 		     org-exp org-id org-export-latex org-publish
-		     org-remember org-table)))
+		     org-remember org-table org-timer)))
 
 ;;;###autoload
 (defun org-customize ()

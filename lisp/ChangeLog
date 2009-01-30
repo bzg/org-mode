@@ -1,5 +1,10 @@
 2009-01-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer): Provide the timer feature.
+
+	* org.el (org-require-autoloaded-modules): Add a few more files to
+	the list of autoloaded modules.
+
 	* org-agenda.el (org-agenda-todo): Pass ARG to `org-todo'.
 
 2009-01-29  Carsten Dominik  <carsten.dominik@gmail.com>
