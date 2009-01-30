@@ -1,5 +1,9 @@
 2009-01-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-enforce-todo-checkbox-dependencies): New option.
+	(org-block-todo-from-checkboxes): New function.
+	(org-todo): Make tripple prefix arg circumvent blocking.
+
 	* org-timer.el (org-timer): Provide the timer feature.
 
 	* org.el (org-require-autoloaded-modules): Add a few more files to
