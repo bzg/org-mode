@@ -55,6 +55,10 @@ The variable =org-agenda-dim-blocked-tasks= controls how blocked
 entries should appear in the agenda, where they can be dimmed or
 even made invisible.
 
+Furthermore, you can use the variable
+=org-enforce-todo-checkbox-dependencies= to block TODO entries
+from switching to DONE while any checkboxes are unchecked in the entry.
+
 *** Support for shift-selection in Emacs 23
 
 Customize the variable =org-support-shift-select= to use S-cursor
