@@ -1,3 +1,11 @@
+2009-01-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-html-footnotes-section): Ue a more
+	consistent id for footnotes.
+
+	* org-export-latex.el (org-export-latex-classes): Remove the
+	a4paper option from the default styles.
+
 2009-01-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-enforce-todo-checkbox-dependencies): New option.
