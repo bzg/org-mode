@@ -1,6 +1,9 @@
 2009-01-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* org-exp.el (org-export-html-footnotes-section): Ue a more
+	* org-agenda.el (org-agenda-dim-blocked-tasks): Keep dimming
+	blocked entries from setting the blocked tag.
+
+	* org-exp.el (org-export-html-footnotes-section): Use a more
 	consistent id for footnotes.
 
 	* org-export-latex.el (org-export-latex-classes): Remove the
