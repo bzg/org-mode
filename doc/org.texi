@@ -968,12 +968,13 @@ headline marker like @samp{****}.
 Depending on the variables @code{org-yank-adjusted-subtrees} and
 @code{org-yank-folded-subtrees}, Org's internal @code{yank} command will
 paste subtrees folded and in a clever way, using the same command as @kbd{C-c
-C-x C-y}.  With the default settings, level adjustment will take place and
-yanked trees will be folded unless doing so would swallow text previously
-visible.  Any prefix argument to this command will force a normal @code{yank}
-to be executed, with the prefix passed along.  A good way to force a normal
-yank is @kbd{C-u C-y}.  If you use @code{yank-pop} after a yank, it will yank
-previous kill items plainly, without adjustment and folding.
+C-x C-y}.  With the default settings, not level adjustment will take place,
+but the yanked tree will be folded unless doing so would swallow text
+previously visible.  Any prefix argument to this command will force a normal
+@code{yank} to be executed, with the prefix passed along.  A good way to
+force a normal yank is @kbd{C-u C-y}.  If you use @code{yank-pop} after a
+yank, it will yank previous kill items plainly, without adjustment and
+folding.
 @kindex C-c C-w
 @item C-c C-w
 Refile entry or region to a different location.  @xref{Refiling notes}.
@@ -2794,7 +2795,8 @@ link and description parts of the link.
 @c
 @cindex following links
 @kindex C-c C-o
-@item C-c C-o
+@kindex RET
+@item C-c C-o @r{or} @key{RET}
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
 the corresponding links, and execute the command in a shell link.  When the
@@ -3231,15 +3233,13 @@ key after each keyword, in parenthesis.  For example:
         (sequence "|" "CANCELED(c)")))
 @end lisp
 
-If you then press @code{C-u C-c C-t} followed by the selection key, the
-entry will be switched to this state.  @key{SPC} can be used to remove
-any TODO keyword from an entry.  Should you like this way of selecting
-TODO states a lot, you might want to set the variable
-@code{org-use-fast-todo-selection} to @code{t} and make this behavior
-the default.  Check also the variable
+If you then press @code{C-c C-t} followed by the selection key, the entry
+will be switched to this state.  @key{SPC} can be used to remove any TODO
+keyword from an entry.@footnote{Check also the variable
 @code{org-fast-tag-selection-include-todo}, it allows to change the TODO
-state through the tags interface (@pxref{Setting tags}), in case you
-like to mingle the two concepts.
+state through the tags interface (@pxref{Setting tags}), in case you like to
+mingle the two concepts.  Note that this means you need to come up with
+unique keys across both sets of keywords.}
 
 @node Per-file keywords, Faces for TODO keywords, Fast access to TODO states, TODO extensions
 @subsection Setting up keywords for individual files

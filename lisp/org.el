@@ -689,7 +689,7 @@ text after the yank would be swallowed into a folded tree by this action."
   :group 'org-edit-structure
   :type 'boolean)
 
-(defcustom org-yank-adjusted-subtrees t
+(defcustom org-yank-adjusted-subtrees nil
   "Non-nil means, when yanking subtrees, adjust the level.
 With this setting, `org-paste-subtree' is used to insert the subtree, see
 this function for details."
@@ -1113,7 +1113,7 @@ Needs to be set before org.el is loaded."
   :group 'org-link-follow
   :type 'boolean)
 
-(defcustom org-return-follows-link nil
+(defcustom org-return-follows-link t
   "Non-nil means, on links RET will follow the link.
 Needs to be set before org.el is loaded."
   :group 'org-link-follow
@@ -1565,7 +1565,7 @@ more information."
   :type '(choice (const sequence)
 		 (const type)))
 
-(defcustom org-use-fast-todo-selection 'prefix
+(defcustom org-use-fast-todo-selection t
   "Non-nil means, use the fast todo selection scheme with C-c C-t.
 This variable describes if and under what circumstances the cycling
 mechanism for TODO keywords will be replaced by a single-key, direct
@@ -1636,8 +1636,9 @@ TODO state changes
   "Non-nil means, undone TODO entries will block switching the parent to DONE.
 Also, if a parent has an :ORDERED: property, switching an entry to DONE will
 be blocked if any prior sibling is not yet done.
-You need to set this variable through the customize interface, or to
-restart emacs after changing the value."
+This variable needs to be set before org.el is loaded, and you need to
+restart Emacs after a change to make the change effective.  The only way
+to change is while Emacs is running is through the customize interface."
   :set (lambda (var val)
 	 (set var val)
 	 (if val
@@ -1653,8 +1654,9 @@ restart emacs after changing the value."
 When this is nil, checkboxes have no influence on switching TODO states.
 When non-nil, you first need to check off all check boxes before the TODO
 entry can be switched to DONE.
-You need to set this variable through the customize interface, or to
-restart emacs after changing the value."
+This variable needs to be set before org.el is loaded, and you need to
+restart Emacs after a change to make the change effective.  The only way
+to change is while Emacs is running is through the customize interface."
   :set (lambda (var val)
 	 (set var val)
 	 (if val
@@ -2043,7 +2045,7 @@ displaying the tags menu is not even shown, until you press C-c again."
   "Non-nil means, fast tags selection interface will also offer TODO states.
 This is an undocumented feature, you should not rely on it.")
 
-(defcustom org-tags-column (if (featurep 'xemacs) -79 -80)
+(defcustom org-tags-column (if (featurep 'xemacs) -76 -77)
   "The column to which tags should be indented in a headline.
 If this number is positive, it specifies the column.  If it is negative,
 it means that the tags should be flushright to that column.  For example,

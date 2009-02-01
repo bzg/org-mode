@@ -1,3 +1,13 @@
+2009-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-yank-adjusted-subtrees, org-return-follows-link)
+	(org-use-fast-todo-selection, org-tags-column): New default
+	setting for variables, based on a poll what typical uses use.
+
+	* org-agenda.el (org-agenda-sorting-strategy)
+	(org-agenda-tags-column): New default setting for variables, based
+	on a poll what typical uses use.
+
 2009-01-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-dim-blocked-tasks): Keep dimming
