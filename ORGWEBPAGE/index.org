@@ -54,9 +54,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 - <2009-01-21 Wed>: Release 6.18c
 - <2009-01-20 Tue>: Release 6.18
 
-* Current Version (6.21a)
+* Current Version (6.21b)
 
-The current version is 6.21a.  To see what has changed in recent
+The current version is 6.21b.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
@@ -69,7 +69,7 @@ a bit behind the website release.
 
 ** The standard distribution
 
-Download as [[file:org-6.21a.zip][zip file]] or [[file:org-6.21a.tar.gz][gzipped tar archive]].  These archives contain
+Download as [[file:org-6.21b.zip][zip file]] or [[file:org-6.21b.tar.gz][gzipped tar archive]].  These archives contain
 both the Lisp file org.el and the documentation in PDF and (TeX)Info
 formats.  Follow the instructions for [[http://orgmode.org/manual/Installation.html#Installation][Installation]] and [[http://orgmode.org/manual/Activation.html#Activation][Activation]].
 

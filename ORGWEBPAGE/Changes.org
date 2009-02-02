@@ -37,6 +37,8 @@ Here are the new default values:
 	(search category-keep)))
 #+end_example
 
+*** Final cleanup for Emacs 21.1 pretest
+
 * Version 6.20
 
 ** Details
