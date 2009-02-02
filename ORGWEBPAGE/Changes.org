@@ -10,12 +10,34 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.20
+* Version 6.21
  :PROPERTIES:
  :VISIBILITY: content
  :END:
 
-This covers everything unp to and including 6.20i.
+* Details
+
+** Changes to some default values of variables:
+
+Here are the new default values:
+
+#+begin_example
+(setq org-return-follows-link t)
+
+(setq org-use-fast-todo-selection t)
+
+(setq org-yank-adjusted-subtrees nil)
+
+(setq org-tags-column -77)
+
+(setq org-agenda-sorting-strategy
+     '((agenda time-up priority-down category-keep)
+	(todo time-up priority-down category-keep)
+	(tags time-up priority-down category-keep)
+	(search category-keep)))
+#+end_example
+
+* Version 6.20
 
 ** Details
 
