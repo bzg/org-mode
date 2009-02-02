@@ -61,7 +61,7 @@ releases, check this detailed list of [[file:Changes.html][user-visible changes]
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
 on Emacs 21 and XEmacs 21.  Emacs 22.2 ships with Org-mode version
-4.67d.  Emacs 23.1 release is expected to ship with 6.20h.  The latest
+4.67d.  Emacs 23.1 release is expected to ship with 6.21b.  The latest
 CVS Emacs trunk usually contains a fairly recent version, but may lag
 a bit behind the website release.
 
