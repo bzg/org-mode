@@ -1,3 +1,10 @@
+2009-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-html-format-image): New argument
+	PAR-OPEN.
+	(org-export-as-html): Pass par-open to
+	`org-export-html-format-image'.
+
 2009-02-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-yank-adjusted-subtrees, org-return-follows-link)
