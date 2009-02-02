@@ -15,9 +15,9 @@
  :VISIBILITY: content
  :END:
 
-* Details
+** Details
 
-** Changes to some default values of variables:
+*** Changes to some default values of variables:
 
 Here are the new default values:
 
