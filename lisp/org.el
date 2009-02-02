@@ -8645,13 +8645,14 @@ changes because there are uncheckd boxes in this entry."
   "Update any statistics cookie in the parent of the current headline."
   (interactive)
   (let ((box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	level (cnt-all 0) (cnt-done 0) is-percent kwd)
+	level (cnt-all 0) (cnt-done 0) is-percent kwd cookie-present)
     (catch 'exit
       (save-excursion
 	(setq level (org-up-heading-safe))
 	(unless level
 	  (throw 'exit nil))
 	(while (re-search-forward box-re (point-at-eol) t)
+	  (setq cnt-all 0 cnt-done 0 cookie-present t)
 	  (setq is-percent (match-end 2))
 	  (save-match-data
 	    (unless (outline-next-heading) (throw 'exit nil))
@@ -8667,8 +8668,9 @@ changes because there are uncheckd boxes in this entry."
 	   (if is-percent
 	       (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
 	     (format "[%d/%d]" cnt-done cnt-all))))
-	(run-hook-with-args 'org-after-todo-statistics-hook
-			    cnt-done (- cnt-all cnt-done))))))
+	(when cookie-present
+	  (run-hook-with-args 'org-after-todo-statistics-hook
+			      cnt-done (- cnt-all cnt-done)))))))
 
 (defvar org-after-todo-statistics-hook nil
   "Hook that is called after a TODO statistics cookie has been updated.
