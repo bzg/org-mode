@@ -1,3 +1,7 @@
+2009-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-exp-blocks.el (org-exp-blocks): Provide this feature.
+
 2009-01-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-depend.el (org-depend-block-todo): Set a tag when a

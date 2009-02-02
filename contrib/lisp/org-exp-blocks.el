@@ -375,4 +375,6 @@ export."
 	       (message (match-string 1 raw))
 	       (match-string 1 raw)))))))
 
+(provide 'org-exp-blocks)
+
 ;;; org-exp-blocks.el ends here
