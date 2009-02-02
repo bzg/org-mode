@@ -1,5 +1,7 @@
 2009-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode): Make dependence stuff work more reliably.
+
 	* org-export-latex.el (org-export-latex-emphasis-alist): Use = and
 	~ as verbatim delimiters.
 

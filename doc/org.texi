@@ -8174,6 +8174,7 @@ tdepth:  @r{The depth of the table of contents.  The defaults are taken from}
 ftoc:    @r{Does the css of the page specify a fixed position for the toc?}
          @r{If yes, the toc will never be displayed as a section.}
 ltoc:    @r{Should there be short contents (children) in each section?}
+         @r{Make this @code{above} it the section should be above initial text.}
 mouse:   @r{Headings are highlighted when the mouse is over them.  Should be}
          @r{@samp{underline} (default) or a background color like @samp{#cccccc}.}
 buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}

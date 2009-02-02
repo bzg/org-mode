@@ -3597,6 +3597,18 @@ The following commands are available:
   (org-set-autofill-regexps)
   (setq indent-line-function 'org-indent-line-function)
   (org-update-radio-target-regexp)
+  ;; Make sure dependence stuff works reliably, even for users who set it
+  ;; too late :-(
+  (if org-enforce-todo-dependencies
+      (add-hook 'org-blocker-hook
+		'org-block-todo-from-children-or-siblings)
+    (remove-hook 'org-blocker-hook
+		 'org-block-todo-from-children-or-siblings))
+  (if org-enforce-todo-checkbox-dependencies
+      (add-hook 'org-blocker-hook
+		'org-block-todo-from-checkboxes)
+    (remove-hook 'org-blocker-hook
+		 'org-block-todo-from-checkboxes))
 
   ;; Comment characters
 ;  (org-set-local 'comment-start "#") ;; FIXME: this breaks wrapping
