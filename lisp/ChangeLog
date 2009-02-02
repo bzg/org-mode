@@ -1,5 +1,8 @@
 2009-02-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-emphasis-alist): Use = and
+	~ as verbatim delimiters.
+
 	* org-exp.el (org-export-html-format-image): New argument
 	PAR-OPEN.
 	(org-export-as-html): Pass par-open to

@@ -165,8 +165,8 @@ to represent the section title."
     ("/" "\\emph{%s}" nil)
     ("_" "\\underline{%s}" nil)
     ("+" "\\texttt{%s}" nil)
-    ("=" "\\verb|%s|" nil)
-    ("~" "\\verb|%s|" t))
+    ("=" "\\verb=%s=" nil)
+    ("~" "\\verb~%s~" t))
   "Alist of LaTeX expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
