@@ -2,6 +2,8 @@
 
 	* org.el (org-get-scheduled-time, org-get-deadline-time): New
 	functions.
+	(org-return-follows-link): Revert making this the default untile
+	issues are resolved.
 
 	* org-agenda.el (org-agenda-skip-if): New conditions timestamp and
 	nottimestamp.
