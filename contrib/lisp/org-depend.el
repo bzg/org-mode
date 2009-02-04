@@ -46,7 +46,16 @@
 ;;      property, to make sure that, when *it* is DONE, the chain will
 ;;      continue.
 ;;
-;; 2) If the TRIGGER property contains any other words like
+;; 2) If an entry contains a TRIGGER property that contains the string
+;;    "chain-siblings-scheduled", then switching that entry to DONE does
+;;    the following actions, similarly to "chain-siblings(KEYWORD)":
+;;    - The sibling receives the same scheduled time as the entry
+;;      marked as DONE (or, in the case, in which there is no scheduled
+;;      time, the sibling does not get any either).
+;;    - The sibling also gets the same TRIGGER property
+;;      "chain-siblings-scheduled", so the chain can continue.
+;;
+;; 3) If the TRIGGER property contains any other words like
 ;;    XYZ(KEYWORD), these are treated as entry id's with keywords.  That
 ;;    means, Org-mode will search for an entry with the ID property XYZ
 ;;    and switch that entry to KEYWORD as well.
@@ -118,6 +127,22 @@
   :group 'org
   :type 'boolean)
 
+(defmacro org-depend-act-on-sibling (trigger-val &rest rest)
+  "Perform a set of actions on the next sibling, if it exists,
+copying the sibling spec TRIGGER-VAL to the next sibling."
+  `(catch 'exit
+     (save-excursion
+       (goto-char pos)
+       ;; find the sibling, exit if no more siblings
+       (condition-case nil
+           (outline-forward-same-level 1)
+         (error (throw 'exit t)))
+       ;; mark the sibling TODO
+       ,@rest
+       ;; make sure the sibling will continue the chain
+       (org-entry-add-to-multivalued-property
+        nil "TRIGGER" ,trigger-val))))
+
 (defun org-depend-trigger-todo (change-plist)
   "Trigger new TODO entries after the current is switched to DONE.
 This does two different kinds of triggers:
@@ -126,6 +151,10 @@ This does two different kinds of triggers:
   \"chain-siblings(KEYWORD)\", it goes to the next sibling, marks it
   KEYWORD and also installs the \"chain-sibling\" trigger to continue
   the chain.
+- If the current entry contains a TRIGGER property that contains
+  \"chain-siblings-scheduled\", we go to the next sibling and copy
+  the scheduled time from the current task, also installing the property
+  in the sibling.
 - Any other word (space-separated) like XYZ(KEYWORD) in the TRIGGER
   property is seen as an entry id.  Org-mode finds the entry with the
   corresponding ID property and switches it to the state TODO as well."
@@ -158,18 +187,8 @@ This does two different kinds of triggers:
 	 ((string-match "\\`chain-siblings(\\(.*?\\))\\'" tr)
 	  ;; This is a TODO chain of siblings
 	  (setq kwd (match-string 1 tr))
-	  (catch 'exit
-	    (save-excursion
-	      (goto-char pos)
-	      ;; find the sibling, exit if no more siblings
-	      (condition-case nil
-		  (outline-forward-same-level 1)
-		(error (throw 'exit t)))
-	      ;; mark the sibling TODO
-	      (org-todo kwd)
-	      ;; make sure the sibling will continue the chain
-	      (org-entry-add-to-multivalued-property
-	       nil "TRIGGER" (format "chain-siblings(%s)" kwd)))))
+          (org-depend-act-on-sibling (format "chain-siblings(%s)" kwd)
+                                     (org-todo kwd)))
 
 	 ((string-match "\\`\\(\\S-+\\)(\\(.*?\\))\\'" tr)
 	  ;; This seems to be ENTRY_ID(KEYWORD)
@@ -180,7 +199,13 @@ This does two different kinds of triggers:
 	    ;; there is an entry with this ID, mark it TODO
 	    (save-excursion
 	      (goto-char p1)
-	      (org-todo kwd)))))))))
+	      (org-todo kwd))))
+         ((string-match "\\`chain-siblings-scheduled\\'" tr)
+          (let ((time (org-get-scheduled-time pos)))
+            (when time
+              (org-depend-act-on-sibling
+               "chain-siblings-scheduled"
+               (org-schedule nil time))))))))))
 
 (defun org-depend-block-todo (change-plist)
   "Block turning an entry into a TODO.

@@ -1,3 +1,9 @@
+2009-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-depend.el (org-depend-act-on-sibling): New macro.
+	(org-depend-trigger-todo): Call `org-depend-act-on-sibling',
+	implement reacting on new keyword `chain-sibling-cheduled'.
+
 2009-02-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-exp-blocks.el (org-exp-blocks): Provide this feature.

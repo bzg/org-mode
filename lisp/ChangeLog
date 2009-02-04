@@ -1,5 +1,8 @@
 2009-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-get-scheduled-time, org-get-deadline-time): New
+	functions.
+
 	* org-agenda.el (org-agenda-skip-if): New conditions timestamp and
 	nottimestamp.
 

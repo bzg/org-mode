@@ -8967,6 +8967,22 @@ scheduling will use the corresponding date."
       (org-add-planning-info 'scheduled time 'closed)
       (message "Scheduled to %s" org-last-inserted-timestamp))))
 
+(defun org-get-scheduled-time (pom &optional inherit)
+  "Get the scheduled time as a time tuple, of a format suitable
+for calling org-schedule with, or if there is no scheduling,
+returns nil."
+  (let ((time (org-entry-get pom "SCHEDULED" inherit)))
+    (when time
+      (apply 'encode-time (org-parse-time-string time)))))
+
+(defun org-get-deadline-time (pom &optional inherit)
+  "Get the deadine as a time tuple, of a format suitable for
+calling org-deadlin with, or if there is no scheduling, returns
+nil."
+  (let ((time (org-entry-get pom "DEADLINE" inherit)))
+    (when time
+      (apply 'encode-time (org-parse-time-string time)))))
+
 (defun org-remove-timestamp-with-keyword (keyword)
   "Remove all time stamps with KEYWORD in the current entry."
   (let ((re (concat "\\<" (regexp-quote keyword) " +<[^>\n]+>[ \t]*"))
