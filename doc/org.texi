@@ -10096,6 +10096,8 @@ Skip current entry if it has not been scheduled.
 Skip current entry if it has a deadline.
 @item '(org-agenda-skip-entry-if 'scheduled 'deadline)
 Skip current entry if it has a deadline, or if it is scheduled.
+@item '(org-agenda-skip-entry-if 'timestamp)
+Skip current entry if it has any timestamp, may also be deadline or scheduled.
 @item '(org-agenda-skip-entry 'regexp "regular expression")
 Skip current entry if the regular expression matches in the entry.
 @item '(org-agenda-skip-entry 'notregexp "regular expression")

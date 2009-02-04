@@ -2978,6 +2978,8 @@ scheduled     Check if there is a scheduled cookie
 notscheduled  Check if there is no scheduled cookie
 deadline      Check if there is a deadline
 notdeadline   Check if there is no deadline
+timestamp     Check if there is a timestamp (also deadline or scheduled)
+nottimestamp  Check if there is no timestamp (also deadline or scheduled)
 regexp        Check if regexp matches
 notregexp     Check if regexp does not match.
 
@@ -3004,6 +3006,10 @@ that can be put into `org-agenda-skip-function' for the duration of a command."
 	   (re-search-forward org-deadline-time-regexp end t))
       (and (memq 'notdeadline conditions)
 	   (not (re-search-forward org-deadline-time-regexp end t)))
+      (and (memq 'timestamp conditions)
+	   (re-search-forward org-ts-regexp end t))
+      (and (memq 'nottimestamp conditions)
+	   (not (re-search-forward org-ts-regexp end t)))
       (and (setq m (memq 'regexp conditions))
 	   (stringp (nth 1 m))
 	   (re-search-forward (nth 1 m) end t))
