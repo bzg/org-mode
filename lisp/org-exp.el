@@ -560,10 +560,10 @@ Org-mode file."
   .title  { text-align: center; }
   .todo   { color: red; }
   .done   { color: green; }
-  .tag    { background-color:lightblue; font-weight:normal }
+  .tag    { background-color: #add8e6; font-weight:normal }
   .target { }
-  .timestamp { color: grey }
-  .timestamp-kwd { color: CadetBlue }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
   p.verse { margin-left: 3% }
   pre {
 	border: 1pt solid #AEBDCC;
