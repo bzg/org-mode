@@ -7,6 +7,22 @@
 	* lisp/org-export-generic.el (org-export-generic-format): Fix
 	compatibility issue with Emacs 23.
 
+2009-07-12  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* lisp/org-checklist.el (org-checklist): Add a custom group for
+	org-checklist. The options are all for the unchecked items export
+	function.
+	(org-checklist-export-time-format): Allow customising the
+	timestamp appended to the saved unchecked items list
+	(org-checklist-export-function): Allow customising the output
+	format for the unchecked items list.
+	(org-checklist-export-params): Options for the exporter.
+	(org-checklist-a2ps-params): Printing options.
+	(org-make-checklist-export): Use values from custom vars. Printing
+	is now controlled by the PRINT_EXPORT property in the entry, and
+	the user is only asked if it is missing. Pass the switches to
+	a2ps-buffer properly.
+
 2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* README: List new file org-export-generic.el

@@ -42,11 +42,37 @@
 ;;
 ;;; Code:
 (require 'org)
+(load "a2ps-print" 'no-error)
 
-(defvar export-time-format "%Y%m%d%H%M"
-  "format of timestamp appended to export file")
-(defvar export-function 'org-export-as-ascii
-  "function used to prepare the export file for printing")
+(defgroup org-checklist nil
+  "Extended checklist handling for org"
+  :tag "Org-checklist"
+  :group 'org)
+
+(defcustom org-checklist-export-time-format "%Y%m%d%H%M"
+  "The format of timestamp appended to LIST_EXPORT_BASENAME to
+  make the name of the export file."
+  :link '(function-link format-time-string)
+  :group 'org-checklist
+  :type 'string)
+
+(defcustom org-checklist-export-function 'org-export-as-ascii
+  "function used to prepare the export file for printing"
+  :group 'org-checklist
+  :type '(radio (function-item :tag "ascii text" org-export-as-ascii)
+		(function-item :tag "HTML"  org-export-as-html)
+		(function-item :tag "LaTeX" :value org-export-as-latex)
+		(function-item :tag "XOXO" :value org-export-as-xoxo)))
+
+(defcustom org-checklist-export-params nil
+  "options for the export function file for printing"
+  :group 'org-checklist
+  :type '(repeat string))
+
+(defcustom org-checklist-a2ps-params nil
+  "options for a2ps for printing"
+  :group 'org-checklist
+  :type '(repeat string))
 
 (defun org-reset-checkbox-state-maybe ()
   "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
@@ -54,23 +80,30 @@
   (if (org-entry-get (point) "RESET_CHECK_BOXES")
       (org-reset-checkbox-state-subtree)))
 
+
 (defun org-make-checklist-export ()
   "Produce a checklist containing all unchecked items from a list
 of checkbox items"
   (interactive "*")
   (if (org-entry-get (point) "LIST_EXPORT_BASENAME")
-      (let* ((export-file (concat (org-entry-get (point) "LIST_EXPORT_BASENAME")
-				  "-" (format-time-string export-time-format)
+      (let* ((export-file (concat (org-entry-get (point) "LIST_EXPORT_BASENAME" nil)
+				  "-" (format-time-string
+				       org-checklist-export-time-format)
 				  ".org"))
+	     (print (case (org-entry-get (point) "PRINT_EXPORT" nil)
+		      (("" "nil" nil) nil)
+		      (t t)
+		      (nil (y-or-n-p "Print list? "))))
 	     exported-lines
-	     title)
+	     title "Checklist export")
 	(save-restriction
 	  (save-excursion
 	    (org-narrow-to-subtree)
+	    (org-update-checkbox-count-maybe)
 	    (org-show-subtree)
 	    (goto-char (point-min))
-	    (if (looking-at org-complex-heading-regexp)
-		(setq title (match-string 4)))
+	    (when (looking-at org-complex-heading-regexp)
+	      (setq title (match-string 4)))
 	    (goto-char (point-min))
 	    (let ((end (point-max)))
 	      (while (< (point) end)
@@ -85,14 +118,18 @@ of checkbox items"
 	    (dolist (entry exported-lines) (insert entry))
 	    (org-update-checkbox-count-maybe)
 	    (write-file export-file)
-	    (if (y-or-n-p "Print list? ")
-		((funcall export-function)
-		 (a2ps-buffer))))))))
+	    (if (print)
+		(progn (funcall org-checklist-export-function
+				org-checklist-export-params)
+		       (let* ((current-a2ps-switches a2ps-switches)
+			      (a2ps-switches (append current-a2ps-switches
+						     org-checklist-a2ps-params)))
+			 (a2ps-buffer)))))))))
 
 (defun org-checklist ()
-  (if (member state org-done-keywords)
-      (org-make-checklist-export))
-  (org-reset-checkbox-state-maybe))
+  (when (member state org-done-keywords)
+    (org-make-checklist-export)
+    (org-reset-checkbox-state-maybe)))
 
 (add-hook 'org-after-todo-state-change-hook 'org-checklist)
 
