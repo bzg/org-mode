@@ -4980,6 +4980,14 @@ When you stop working on that task, or when you mark the task done, the
 clock is stopped and the corresponding time interval is recorded.  It
 also computes the total time spent on each subtree of a project.
 
+Normally, the clock does not survive xiting and re-entereing Emacs, but you
+can arrange for the clock information to persisst accress Emacs sessions with
+
+@lisp
+(setq org-clock-persist t)
+(org-clock-persistence-insinuate)
+@end lisp
+
 @table @kbd
 @kindex C-c C-x C-i
 @item C-c C-x C-i

@@ -1,3 +1,8 @@
+2009-02-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clocking work time): Decoment how to make the clock
+	persist from one Emacs session to the next.
+
 2009-01-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (TODO dependencies): Document TODO dependencies on
