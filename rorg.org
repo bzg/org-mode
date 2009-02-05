@@ -5,16 +5,26 @@ this here to get things started.
 
 * Objectives
 ** Import data into R from org
-   Naive implementation would be to use =(org-export-table "tmp.csv")=
-   and =(ess-exec "read.csv("tmp.csv")=.  
-*** implementations
+   Org-mode includes orgtbl-mode, an extremely convenient way of using
+   tabular data in a plain text file.  Currently, spreadsheet
+   functionality is available in org tables using the emacs package
+   calc.  It would be a boon both to org users and R users to allow
+   org tables to be manipulated with the R programming language.  Org
+   tables give R users an easy way to enter and display data; R gives
+   org users a powerful way to perform vector operations, statistical
+   tests, and visualization on their tables.
+
+*** Implementations
+**** naive
+     Naive implementation would be to use =(org-export-table "tmp.csv")=
+     and =(ess-exec "read.csv("tmp.csv")=.  
 **** org-R
      [[file:existing_tools/org-R.el::defun%20org%20R%20export%20to%20csv%20csv%20file%20options][org-R-export-to-csv]]
 **** org-exp-blocks
 **** RweaveOrg
      NA
 
-** easy editing of R code using r-mode from an org buffer
+** Editing R code using r-mode from an org buffer
 ** evaluate R code and make the output available for processing in an org buffer
 ** evaluate R code and format the output for export
 
