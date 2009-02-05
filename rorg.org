@@ -3,18 +3,20 @@
 Please feel free to change the layout of this file, I'm just putting
 this here to get things started.
 
-* objectives
-What are these?
+* Objectives
+** Import data into R from org
+   Naive implementation would be to use =(org-export-table "tmp.csv")=
+   and =(ess-exec "read.csv("tmp.csv")=.  
+*** implementations
+**** org-R
+     [[file:existing_tools/org-R.el::defun%20org%20R%20export%20to%20csv%20csv%20file%20options][org-R-export-to-csv]]
+**** org-exp-blocks
+**** RweaveOrg
+     NA
 
-I'll pre-populate with a quick list from the email to get started
-
-Just to get this out there, there seem to be four kinds of
-functionality we're trying to get here:
-1. import data into R from org
-2. easy editing of R code using r-mode from an org buffer
-3. evaluate R code and make the output available for processing in an
-   org buffer
-4. evaluate R code and format the output for export
+** easy editing of R code using r-mode from an org buffer
+** evaluate R code and make the output available for processing in an org buffer
+** evaluate R code and format the output for export
 
 
 * tasks
