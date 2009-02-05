@@ -80,8 +80,10 @@ Each block export function should accept three argumets..."
   :type 'alist)
 
 (defcustom org-export-interblocks
-  '((r org-export-interblocks-format-R)
-    (R org-export-interblocks-format-R))
+  '(
+    (r org-export-interblocks-format-R)
+    (R org-export-interblocks-format-R)
+    )
   "Use this a-list to associate block types with block exporting
 functions.  The type of a block is determined by the text
 immediately following the '#+BEGIN_' portion of the block header.
@@ -316,8 +318,9 @@ export."
     (goto-char start)
     (interblock-initiate-R-buffer)
     (let (code replacement)
-      (while (and (< (point) end) (re-search-forward "\\\\R{\\(.*\\)}" end t))
+      (while (and (< (point) end) (re-search-forward "\\\\R{\\([^}]*\\)}" end t))
 	(save-match-data (setf code (match-string 1)))
+	(message (format "\R{%s}" code))
 	(setf replacement (interblock-R-command-to-string code))
 	(setf replacement (cond
 			   (htmlp replacement)

@@ -1,0 +1,73 @@
+# -*- mode: org -*-
+#+OPTIONS:  LaTeX:t
+
+* Sweave and org-mode
+  If you're reading a PDF version of this document, you should also
+  look at [[file:testing.Rorg][testing.Rorg]] (the source file) and [[file:testing.org][testing.org]] (the output
+  of the Sweave process).
+
+  Keep in mind that one of the advantages of a block-based approach is
+  using \texttt{C-'} to edit code in its native mode.
+
+** Use the Sweave package for latex formatting
+   Org allows us to issue commands to be included in \{LaTeX} export.
+#+LATEX_HEADER  \usepackage{Sweave}
+
+** R blocks
+   The first argument to an R block when using Sweave is the label for
+   that block.
+
+   Not all R blocks are printed.  Sweave options allow the printing of
+   the evaluated code, the output of the code, both, or neither.
+
+*** R code that is not printed
+#+BEGIN_R  hidden_block, echo=FALSE, results=HIDE
+   a <- 3
+   b <- 6
+#+END_R
+
+*** R code that is printed
+#+BEGIN_R  visible_block
+   c <- 4
+#+END_R
+   
+   We can use block labels to embed blocks by reference (even if they
+   weren't printed before).
+*** R code that references other blocks
+#+BEGIN_R  combined_block
+#+R_CODEREF:  hidden_block
+#+R_CODEREF:  visible_block
+   a + b +c
+#+END_R
+
+** Inline references to R data
+   We can evaluate R code inline.
+*** Used in text
+    The value of =a= is 3.
+
+*** Used in a table
+    | a     | b     | c     | TOTAL         |
+    |-------+-------+-------+---------------|
+    | \R{a} | \R{b} | \R{c} | \R{a + b + c} |
+
+** Single-line R commands
+   If we want a line of R code to be evaluated but not printed,
+   there's a convenient shorthand.  This only works for single lines
+   of R code, but you can have more than one in a row.
+#+R  library(lattice)
+#+R  data(cars)
+
+** Graphics
+   We use values defined elsewhere in the buffer to produce this
+   graph.  The new CAPTION and LABEL arguments work just fine.
+
+#+CAPTION:  speed by distance
+#+LABEL:  fig:speed_by_distance
+#+BEGIN_R  figure.eps
+print(xyplot(speed ~ dist, cars,
+       panel = function (x, y, ...) {
+         panel.xyplot(x, y, ...)
+         panel.abline(h=a)
+         panel.abline(v=b)
+       }))
+#+END_R

@@ -1,0 +1,12 @@
+#+BEGIN_R
+a <- 3
+a
+#+END_R
+
+- the value of a is \R{a}
+- the value of a + 3 is \R{a + 3}  
+
+#+BEGIN_R  hidden_block, echo=FALSE, results=HIDE
+   a <- 3
+   b <- 6
+#+END_R
