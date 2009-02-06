@@ -1,4 +1,15 @@
 #+TITLE: rorg --- R and org-mode
+#+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
+
+* Commentary
+
+** Eric <2009-02-06 Fri 15:41>
+I think we're getting close to a comprehensive set of objectives
+(although since you two are the real R user's I leave that decision up
+to you).  Once we've agreed on a set of objectives and agreed on at
+least to broad strokes of implementation, I think we should start
+listing out and assigning tasks.
+
 
 * Objectives
 ** Send data to R from org
@@ -20,14 +31,26 @@
      files. Org tables are first exported to a temporary csv file
      using [[file:existing_tools/org-R.el::defun%20org%20R%20export%20to%20csv%20csv%20file%20options][org-R-export-to-csv]].
 **** org-exp-blocks
+org-exp-blocks uses [[org-interblock-R-command-to-string]] to send
+commands to an R process running in a comint buffer through ESS.
+org-exp-blocks has no support for dumping table data to R process, or
+vice versa.
+
 **** RweaveOrg
      NA
 
-** evaluate R code from org and deal with output appropriately
+
+** Evaluate R code from org and deal with output appropriately
 *** vector output
     When R code evaluation generates vectors and 2-dimensional arrays,
     this should be formatted appropriately in org buffers (orgtbl-mode) as well
     as in export targets (html, latex)
+    
+    Agreed, if we can convert the vector data to lists then we can use
+    the many orgtbl-to-* functions to convert the list to whatever
+    output format we desire. See `orgtbl-to-orgtbl, `orgtbl-to-latex',
+    `orgtbl-to-html', `orgtbl-to-csv', etc...
+    
 **** Implementations
 ***** org-R
      org-R converts R output (vectors, or matrices / 2d-arrays) to an
@@ -45,11 +68,26 @@
      org file This should have the automatic consequence that it is
      included appropriately in subsequent export targets (html,
      latex).
+
 **** Implementations
 ***** org-R
       org-R does (1) if no output file is specified and (2) otherwise
 ***** org-exp-blocks
+      org-exp-blocks tries to do 2, but I don't think that part was
+      every really working
+
 ***** RweaveOrg
+
+
+** Evaluate R code on export
+At first I was leaning towards leaving the exporting to Sweave, but it
+seems that once we have evaluation or R working, it will not be
+difficult to implement full evaluation of R blocks, one-liners, and
+creation of R graphics on export directly in elisp.
+
+I think that this would be worth the effort since it would eliminate
+the need for using Sweave, and would allow for exportation to any
+target format supported by org-mode.
 
 
 * Notes
@@ -63,6 +101,58 @@
    useful functionality, to be preserved if possible.
 
    Note that upper and lower case are not relevant in block headings.
+
+*** PROPOSED R-block proposal
+I (Eric) propose that we use the syntax of source code blocks as they
+currently exist in org-mode with the addition of *evaluation*,
+*header-arguments*, *exportation*, *single-line-blocks*, and
+*references-to-table-data*.
+
+1) *evaluation*: These blocks can be evaluated through =\C-c\C-c= with
+   a slight addition to the code already present and working in
+   [[file:existing_tools/org-eval-light.el][org-eval-light.el]].  All we should need to add for R support would
+   be an appropriate entry in [[org-eval-light-interpreters]] with a
+   corresponding evaluation function.  For an example usinga
+   org-eval-light see [[* src block evaluation w/org-eval-light]].
+
+2) *header-arguments*: These can be implemented along the lines of
+   Austin's header arguments in [[file:existing_tools/RweaveOrg/org-sweave.el][org-sweave.el]].
+
+3) *exportation*: Should be as similar as possible to that done by
+   Sweave, and hopefully can re-use some of the code currently present
+   in [[file:existing_tools/exp-blocks/org-exp-blocks.el ][org-exp-blocks.el]].
+
+4) *single-line-blocks*: It seems that it is useful to be able to
+   place a single line of R code on a line by itself.  Should we add
+   syntax for this similar to Dan's =#+R:= lines?  I would lean
+   towards something here that can be re-used for any type of source
+   code in the same manner as the =#+begin_src R= blocks, maybe
+   =#+src_R=?
+
+5) *references-to-table-data*: I get this impression that this is
+   vital to the efficient use of R code in an org file, so we should
+   come up with a way to reference table data from a single-line-block
+   or from an R source-code block.  It looks like Dan has already done
+   this in [[file:existing_tools/org-R.el][org-R.el]].
+
+What do you think?  Does this accomplish everything we want to be able
+to do with embedded R source code blocks?
+
+**** src block evaluation w/org-eval-light
+here's an example using org-eval-light.el
+
+first load the org-eval-light.el file
+
+[[elisp:(load (expand-file-name "org-eval-light.el" (expand-file-name "existing_tools" (file-name-directory buffer-file-name))))]]
+
+then press =\C-c\C-c= inside of the following src code snippet.  The
+results should appear in a comment immediately following the source
+code block.  It shouldn't be too hard to add R support to this
+function through the `org-eval-light-interpreters' variable.
+
+#+begin_src shell
+date
+#+end_src
 
 *** Source code blocks 
     Org has an extremely useful method of editing source code and
@@ -104,8 +194,23 @@ a
     have the advantage of accepting options to the Sweave preprocessor
     following the #+BEGIN_R declaration.
 
+** Interaction with the R process
 
-* tasks
+We should take care to implement this in such a way that all of the
+different components which have to interactive with R including:
+- evaluation of source code blocks
+- automatic evaluation on export
+- evaluation of \R{} snippets
+- evaluation of single source code lines
+- sending/recieving vector data
+
+I think we currently have two implementation of interaction with R
+processes; [[file:existing_tools/org-R.el][org-R.el]] and [[file:existing_tools/exp-blocks/org-exp-blocks.el ][org-exp-blocks.el]].  We should be sure to take
+the best of each of these approaches.
+
+
+* Tasks
+
 
 * buffer dictionary
  LocalWords:  DBlocks dblocks
