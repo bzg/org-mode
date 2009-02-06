@@ -247,6 +247,7 @@ snap:
 	make release TAG=snapshot
 	scp RELEASEDIR/org-snapshot.zip cdominik@orgmode.org:orgmode.org/
 	scp RELEASEDIR/org-snapshot.tar.gz cdominik@orgmode.org:orgmode.org/
+	make cleanrel
 
 relup0:
 	make release
