@@ -17,7 +17,7 @@ this here to get things started.
 *** Implementations
 **** naive
      Naive implementation would be to use =(org-export-table "tmp.csv")=
-     and =(ess-exec "read.csv("tmp.csv")=.  
+     and =(ess-exec "read.csv('tmp.csv')")=.  
 **** org-R
      [[file:existing_tools/org-R.el::defun%20org%20R%20export%20to%20csv%20csv%20file%20options][org-R-export-to-csv]]
 **** org-exp-blocks
@@ -25,6 +25,36 @@ this here to get things started.
      NA
 
 ** Editing R code using r-mode from an org buffer
+   Org has an extremely useful method of editing source code and
+   examples in their native modes.  In the case of R code, we want to
+   be able to use the full functionality of ESS mode, including
+   interactive evaluation of code.
+
+*** Implementations
+**** Org
+#+BEGIN_SRC org
+#+BEGIN_SRC r
+
+,## hit C-c ' within this block to enter a temporary buffer in r-mode.
+
+,## while in the temporary buffer, hit C-c C-c on this comment to
+,## evaluate this block
+a <- 3
+a
+
+,## hit C-c ' to exit the temporary buffer
+#+END_SRC     
+#+END_SRC
+
+**** Org-R
+     NA
+
+**** org-exp-blocks
+     NA
+
+**** RweaveOrg
+     See [[file:existing_tools/RweaveOrg/org-sweave.el][org-sweave.el]] and [[file:existing_tools/RweaveOrg/export_testing.R][export_testing.R]]
+
 ** evaluate R code and make the output available for processing in an org buffer
 ** evaluate R code and format the output for export
 
