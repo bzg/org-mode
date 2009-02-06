@@ -2,6 +2,11 @@
 
 	* org-exp.el (org-export-remove-or-extract-drawers): Fix regexp
 	for finding drawers.
+	(org-export-as-ascii, org-export-as-html): Count levels relative
+	to the subtree header.
+	(org-get-min-level): New optional argument OFFSET.
+	(org-export): Make sure point is restored after popping up that
+	window.
 
 	* org.el (org-do-sort): Also take an inactive timestamp if no
 	active one is found.

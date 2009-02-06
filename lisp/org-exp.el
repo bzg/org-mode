@@ -1122,14 +1122,15 @@ value of `org-export-run-in-background'."
 	    (?X org-publish t)
 	    (?A org-publish-all t)))
 	 r1 r2 ass)
-    (save-window-excursion
-      (delete-other-windows)
-      (with-output-to-temp-buffer "*Org Export/Publishing Help*"
-	(princ help))
-      (org-fit-window-to-buffer (get-buffer-window
-				 "*Org Export/Publishing Help*"))
-      (message "Select command: ")
-      (setq r1 (read-char-exclusive)))
+    (save-excursion
+      (save-window-excursion
+	(delete-other-windows)
+	(with-output-to-temp-buffer "*Org Export/Publishing Help*"
+	  (princ help))
+	(org-fit-window-to-buffer (get-buffer-window
+				   "*Org Export/Publishing Help*"))
+	(message "Select command: ")
+	(setq r1 (read-char-exclusive))))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))
       (error "No command associated with key %c" r1))
@@ -2145,13 +2146,14 @@ can work correctly."
 	   (a (assoc rtn alist)))
       (or (cdr a) rtn))))
 
-(defun org-get-min-level (lines)
+(defun org-get-min-level (lines &optional offset)
   "Get the minimum level in LINES."
   (let ((re "^\\(\\*+\\) ") l)
     (catch 'exit
       (while (setq l (pop lines))
 	(if (string-match re l)
-	    (throw 'exit (org-tr-level (length (match-string 1 l))))))
+	    (throw 'exit (org-tr-level (- (length (match-string 1 l))
+					  (or offset 0))))))
       1)))
 
 ;; Variable holding the vector with section numbers
@@ -2540,6 +2542,12 @@ underlined headlines.  The default is 3."
 	      (goto-char rbeg)
 	      (and (org-at-heading-p)
 		   (>= (org-end-of-subtree t t) rend)))))
+	 (level-offset (if subtree-p
+			   (save-excursion
+			     (goto-char rbeg)
+			     (+ (funcall outline-level)
+				(if org-odd-levels-only 1 0)))
+			 0))
 	 (opt-plist (if subtree-p
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
@@ -2610,7 +2618,7 @@ underlined headlines.  The default is 3."
        (remove-text-properties (point-min) (point-max)
 			       '(:org-license-to-kill t))))
 
-    (setq org-min-level (org-get-min-level lines))
+    (setq org-min-level (org-get-min-level lines level-offset))
     (setq org-last-level org-min-level)
     (org-init-section-numbers)
 
@@ -2665,7 +2673,8 @@ underlined headlines.  The default is 3."
 		       ;; This is a headline
 		       (progn
 			 (setq have-headings t)
-			 (setq level (- (match-end 1) (match-beginning 1))
+			 (setq level (- (match-end 1) (match-beginning 1)
+					level-offset)
 			       level (org-tr-level level)
 			       txt (match-string 3 line)
 			       todo
@@ -2735,7 +2744,8 @@ underlined headlines.  The default is 3."
        ((string-match "^\\(\\*+\\)[ \t]+\\(.*\\)" line)
 	;; a Headline
 	(setq first-heading-pos (or first-heading-pos (point)))
-	(setq level (org-tr-level (- (match-end 1) (match-beginning 1)))
+	(setq level (org-tr-level (- (match-end 1) (match-beginning 1)
+				     level-offset))
 	      txt (match-string 2 line))
 	(org-ascii-level-start level txt umax lines))
 
@@ -3208,6 +3218,12 @@ PUB-DIR is set, use this as the publishing directory."
 		(goto-char rbeg)
 		(and (org-at-heading-p)
 		     (>= (org-end-of-subtree t t) rend))))))
+	 (level-offset (if subtree-p
+			   (save-excursion
+			     (goto-char rbeg)
+			     (+ (funcall outline-level)
+				(if org-odd-levels-only 1 0)))
+			 0))
 	 (opt-plist (if subtree-p
 			(org-export-add-subtree-options opt-plist rbeg)
 		      opt-plist))
@@ -3318,7 +3334,7 @@ PUB-DIR is set, use this as the publishing directory."
 
     (message "Exporting...")
 
-    (setq org-min-level (org-get-min-level lines))
+    (setq org-min-level (org-get-min-level lines level-offset))
     (setq org-last-level org-min-level)
     (org-init-section-numbers)
 
@@ -3393,7 +3409,8 @@ lang=\"%s\" xml:lang=\"%s\">
 			;; This is a headline
 			(progn
 			  (setq have-headings t)
-			  (setq level (- (match-end 1) (match-beginning 1))
+			  (setq level (- (match-end 1) (match-beginning 1)
+					 level-offset)
 				level (org-tr-level level)
 				txt (save-match-data
 				      (org-html-expand
@@ -3744,7 +3761,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (cond
 	   ((string-match "^\\(\\*+\\)[ \t]+\\(.*\\)" line)
 	    ;; This is a headline
-	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)))
+	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
+					 level-offset))
 		  txt (match-string 2 line))
 	    (if (string-match quote-re0 txt)
 		(setq txt (replace-match "" t t txt)))
