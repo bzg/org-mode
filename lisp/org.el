@@ -1355,8 +1355,16 @@ For more examples, see the system specific constants
 
 (defcustom org-directory "~/org"
   "Directory with org files.
-This directory will be used as default to prompt for org files.
-Used by the hooks for remember.el."
+This is just a default location to look for Org files.  There is no need
+at all to put your files into this directory.  It is only used in the
+following situations:
+
+1. When a remember template specifies a target file that is not an
+   absolute path.  The path will then be interpreted relative to
+   `org-directory'
+2. When a remember note is filed away in an interactive way (when exiting the
+   note buffer with `C-1 C-c C-c'.  The the user is prompted for an org file,
+   with `org-directory' as the default path."
   :group 'org-refile
   :group 'org-remember
   :type 'directory)
