@@ -3,10 +3,10 @@
 Please feel free to change the layout of this file, I'm just putting
 this here to get things started.
 
-* objectives
-What are these?
+* notes
 
-I'll pre-populate with a quick list from the email to get started
+** objectives
+First and foremost, what do we want to accomplish?
 
 Just to get this out there, there seem to be four kinds of
 functionality we're trying to get here:
@@ -16,7 +16,32 @@ functionality we're trying to get here:
    org buffer
 4. evaluate R code and format the output for export
 
+** block types
+
+Special editing and evaluation of source code in R blocks.
+Unfortunately org-mode how two different block types.  Source code
+blocks which look like the following allow for the special editing of
+code inside of the block through `org-edit-special'.
+
+#+begin_src R
+
+#+end_src
+
+dblocks, which look like the following allow for evaluation of the
+code inside of the block by calling =\C-c\C-c= on the header of the
+block.  This is handy, as org-mode will automatically call
+`org-dblock-write:dblock-type' where dblock-type is the string
+following the =#+BEGIN:= portion of the line.
+
+#+BEGIN: dblock-type
+#+END:
+
+Note that upper and lower case are not relevant in block headings.
+
+I'm leaning towards using the =#+begin_src= blocks, as that is really
+what these blocks contain is source code.
 
 * tasks
 
-
+* buffer dictionary
+ LocalWords:  DBlocks dblocks
