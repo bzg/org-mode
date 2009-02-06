@@ -1,3 +1,8 @@
+2009-02-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-format-latex): Do not convert LaTeX fragments in
+	protected examples.
+
 2009-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-html-style-default): Use color values
