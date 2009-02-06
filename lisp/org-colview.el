@@ -1058,7 +1058,7 @@ of fields."
 		      row))
 	  (setq row (nreverse row))
 	  (unless (and skip-empty-rows
-		       (eq 1 (length (delete "" (delete-dups row)))))
+		       (eq 1 (length (delete "" (delete-dups (copy-sequence row))))))
 	    (push row tbl))))
       (append (list title 'hline) (nreverse tbl)))))
 

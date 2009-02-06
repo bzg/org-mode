@@ -1,5 +1,11 @@
 2009-02-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview-xemacs.el (org-columns-capture-view): Copy before
+	deleting duplicates.
+
+	* org-colview.el (org-columns-capture-view): Copy before
+	deleting duplicates.
+
 	* org-exp.el (org-export-preprocess-string): Fix bug when skipping
 	text before first headline.
 
