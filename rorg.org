@@ -58,28 +58,31 @@ a
 ** evaluate R code and make the output available for processing in an org buffer
 ** evaluate R code and format the output for export
 
-Special editing and evaluation of source code in R blocks.
-Unfortunately org-mode how two different block types.  Source code
-blocks which look like the following allow for the special editing of
-code inside of the block through `org-edit-special'.
+* Notes
+** Special editing and evaluation of source code in R blocks
+   Unfortunately org-mode how two different block types.  I'm leaning
+   towards using the =#+begin_src= blocks, as that is really what
+   these blocks contain is source code.
+
+   Note that upper and lower case are not relevant in block headings.
+
+*** Source code blocks 
+    look like the following allow for the special editing of code
+    inside of the block through `org-edit-special'.
 
 #+begin_src R
 
 #+end_src
 
-dblocks, which look like the following allow for evaluation of the
-code inside of the block by calling =\C-c\C-c= on the header of the
-block.  This is handy, as org-mode will automatically call
-`org-dblock-write:dblock-type' where dblock-type is the string
-following the =#+BEGIN:= portion of the line.
+*** dblocks
+    look like the following allow for evaluation of the code inside of
+    the block by calling =\C-c\C-c= on the header of the block.  This
+    is handy, as org-mode will automatically call
+    `org-dblock-write:dblock-type' where dblock-type is the string
+    following the =#+BEGIN:= portion of the line.
 
 #+BEGIN: dblock-type
 #+END:
-
-Note that upper and lower case are not relevant in block headings.
-
-I'm leaning towards using the =#+begin_src= blocks, as that is really
-what these blocks contain is source code.
 
 * tasks
 
