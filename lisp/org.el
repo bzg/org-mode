@@ -5889,7 +5889,8 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
      ((= dcst ?t)
       (setq extractfun
 	    (lambda (x)
-	      (if (string-match org-ts-regexp x)
+	      (if (or (string-match org-ts-regexp x)
+		      (string-match org-ts-regexp-both x))
 		  (time-to-seconds
 		   (org-time-string-to-time (match-string 0 x)))
 		0))

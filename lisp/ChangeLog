@@ -1,5 +1,8 @@
 2009-02-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-do-sort): Also take an inactive timestamp if no
+	active one is found.
+
 	* org-colview-xemacs.el (org-columns-capture-view): Copy before
 	deleting duplicates.
 
