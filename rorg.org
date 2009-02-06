@@ -24,15 +24,31 @@ this here to get things started.
 **** RweaveOrg
      NA
 
-** Editing R code using r-mode from an org buffer
-   Org has an extremely useful method of editing source code and
-   examples in their native modes.  In the case of R code, we want to
-   be able to use the full functionality of ESS mode, including
-   interactive evaluation of code.
+** evaluate R code and make the output available for processing in an org buffer
+** evaluate R code and format the output for export
 
-*** Implementations
-**** Org
-#+BEGIN_SRC org
+* Notes
+** Special editing and evaluation of source code in R blocks
+   Unfortunately org-mode how two different block types, both useful.
+   In developing RweaveOrg, a third was introduced.
+
+   Eric is leaning towards using the =#+begin_src= blocks, as that is
+   really what these blocks contain is source code.  Austin believes
+   that specifying export options at the beginning of a block is
+   useful functionality, to be preserved if possible.
+
+   Note that upper and lower case are not relevant in block headings.
+
+*** Source code blocks 
+    Org has an extremely useful method of editing source code and
+    examples in their native modes.  In the case of R code, we want to
+    be able to use the full functionality of ESS mode, including
+    interactive evaluation of code.
+
+    Source code blocks look like the following and allow for the
+    special editing of code inside of the block through
+    `org-edit-special'.
+
 #+BEGIN_SRC r
 
 ,## hit C-c ' within this block to enter a temporary buffer in r-mode.
@@ -44,45 +60,25 @@ a
 
 ,## hit C-c ' to exit the temporary buffer
 #+END_SRC     
-#+END_SRC
-
-**** Org-R
-     NA
-
-**** org-exp-blocks
-     NA
-
-**** RweaveOrg
-     See [[file:existing_tools/RweaveOrg/org-sweave.el][org-sweave.el]] and [[file:existing_tools/RweaveOrg/export_testing.R][export_testing.R]]
-
-** evaluate R code and make the output available for processing in an org buffer
-** evaluate R code and format the output for export
-
-* Notes
-** Special editing and evaluation of source code in R blocks
-   Unfortunately org-mode how two different block types.  I'm leaning
-   towards using the =#+begin_src= blocks, as that is really what
-   these blocks contain is source code.
-
-   Note that upper and lower case are not relevant in block headings.
-
-*** Source code blocks 
-    look like the following allow for the special editing of code
-    inside of the block through `org-edit-special'.
-
-#+begin_src R
-
-#+end_src
 
 *** dblocks
-    look like the following allow for evaluation of the code inside of
-    the block by calling =\C-c\C-c= on the header of the block.  This
-    is handy, as org-mode will automatically call
+    dblocks are useful because org-mode will automatically call
     `org-dblock-write:dblock-type' where dblock-type is the string
     following the =#+BEGIN:= portion of the line.
 
+    dblocks look like the following and allow for evaluation of the
+    code inside of the block by calling =\C-c\C-c= on the header of
+    the block.  
+
 #+BEGIN: dblock-type
 #+END:
+
+*** R blocks
+    In developing RweaveOrg, Austin created [[file:existing_tools/RweaveOrg/org-sweave.el][org-sweave.el]].  This
+    allows for the kind of blocks shown in [[file:existing_tools/RweaveOrg/testing.Rorg][testing.Rorg]].  These blocks
+    have the advantage of accepting options to the Sweave preprocessor
+    following the #+BEGIN_R declaration.
+
 
 * tasks
 
