@@ -1,5 +1,8 @@
 2009-02-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-string): Fix bug when skipping
+	text before first headline.
+
 	* org.el (org-format-latex): Do not convert LaTeX fragments in
 	protected examples.
 
