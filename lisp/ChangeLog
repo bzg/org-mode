@@ -1,3 +1,8 @@
+2009-02-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-preprocess-string): Remove clock lines
+	earlier, so that they cannot cotribute to verbatim snippets.
+
 2009-02-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-remove-or-extract-drawers): Fix regexp

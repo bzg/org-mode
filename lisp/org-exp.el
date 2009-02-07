@@ -1561,6 +1561,9 @@ on this string to produce the exported version."
       ;; Protect quoted subtrees
       (org-export-protect-quoted-subtrees)
 
+      ;; Remove clock lines
+      (org-export-remove-clock-lines)
+
       ;; Protect verbatim elements
       (org-export-protect-verbatim)
 
@@ -1568,7 +1571,6 @@ on this string to produce the exported version."
       (org-export-mark-blockquote-and-verse)
 
       ;; Remove timestamps, if the user has requested so
-      (org-export-remove-clock-lines)
       (unless (plist-get parameters :timestamps)
 	(org-export-remove-timestamps))
 
