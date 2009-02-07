@@ -83,7 +83,10 @@ the command line....):
 : git clone git://repo.or.cz/org-mode.git
 
 Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under [[http://orgmode.org/worg/org-faq.php#keeping-current-with-Org-mode-development][How do
-I keep current with Org mode development?]]
+I keep current with Org mode development?]].  For people who cannot
+use git for one reason or another we provide
+[[file:org-snapshot.zip][zip]] or [[file:org-snapshot.tar.gz][tar.gz]]
+snapshot files.
 
 ** Alternative distributions
 
