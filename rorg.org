@@ -1,5 +1,66 @@
 #+TITLE: rorg --- R and org-mode
 #+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
+#+STARTUP: oddeven
+
+* Overview
+
+** Dan [2009-02-08 Sun]
+This project is basically about putting source code into org
+files. This isn't just code to look pretty as a source code example,
+but code to be evaluated. Org files have 3 main export targets: org,
+html and latex. Thus the aim of this project is to produce files in
+those formats that have benefitted in some way from the evaluation of
+source code that is present in the source org file. We have a current
+focus on R code, but we are regarding that more as a working example
+than as a defining feature of the project.
+
+The following are three important questions:
+
+ 1. How is the code placed in the org file?
+ 2. When is the code evaluated?
+ 3. What happens when the code is evaluated?
+
+Let's take them in reverse order, as 1 and 2 can be viewed as
+details of the implementation of 3.
+
+*** What happens when the code is evaluated?
+Code evaluation can have three relevant consequences
+ 1. It produces text/numeric output
+ 2. It produces graphical output
+ 3. It alters the environment by side effect in some other way
+
+I think our aims here are fairly straightforward to specify: in the
+case of (1) we (optionally) incorporate the text output as text in the
+target document. In the case of (2) we either place a link to the
+graphics or (html/latex) include them inline. We don't need to do anything
+about (3), except bear in mind that it's a possibility.
+
+*** When is the code evaluated?
+Let's take the three export targets in turn
+**** Latex
+     Here we have some options. I'll use an asterisk to indicate
+     content which includes the *result* of code evaluation, rather
+     than the code itself.
+      
+***** org \to org* \to latex
+      This is what RweaveOrg does, e.g.
+: Sweave("testing.Rorg", driver=RweaveOrg, syntax=SweaveSyntaxOrg)
+Here testing.Rorg is an org file, and Sweave generates another org
+file, but with the code evaluated.
+
+This is also what org-R does.
+
+***** org \to latex \to \latex*
+      This seems like a possibility to me, but AFAIK we don't have it
+      working. So in the case of R, here you would use something like
+      `org-export-as-latex', and then from R, run Sweave (with the
+      RweaveLatex driver) on the exported latex to generate the latex*
+      file with evaluation results. Since Sweave with RweaveLatex is
+      an established technology that is heavily used in the R
+      community, it would be nice to provide this route as an option,
+      so at any point users can `bail out' and enter a workflow where
+      they treat the latex/noweb as source code to be edited directly
+      (rather than editing a org buffer).
 
 * Commentary
 
@@ -202,7 +263,7 @@ different components which have to interactive with R including:
 - automatic evaluation on export
 - evaluation of \R{} snippets
 - evaluation of single source code lines
-- sending/recieving vector data
+- sending/receiving vector data
 
 I think we currently have two implementation of interaction with R
 processes; [[file:existing_tools/org-R.el][org-R.el]] and [[file:existing_tools/exp-blocks/org-exp-blocks.el ][org-exp-blocks.el]].  We should be sure to take

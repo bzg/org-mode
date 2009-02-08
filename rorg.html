@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+               "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+lang="en" xml:lang="en">
+<head>
+<title>rorg &mdash; R and org-mode</title>
+<meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
+<meta name="generator" content="Org-mode"/>
+<meta name="generated" content="2009-02-05 21:16:20 EST"/>
+<meta name="author" content="Dan"/>
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  html { font-family: Times, serif; font-size: 12pt; }
+  .title  { text-align: center; }
+  .todo   { color: red; }
+  .done   { color: green; }
+  .tag    { background-color:lightblue; font-weight:normal }
+  .target { }
+  .timestamp { color: grey }
+  .timestamp-kwd { color: CadetBlue }
+  p.verse { margin-left: 3% }
+  pre {
+	border: 1pt solid #AEBDCC;
+	background-color: #F3F5F7;
+	padding: 5pt;
+	font-family: courier, monospace;
+        font-size: 90%;
+        overflow:auto;
+  }
+  table { border-collapse: collapse; }
+  td, th { vertical-align: top; }
+  dt { font-weight: bold; }
+  div.figure { padding: 0.5em; }
+  div.figure p { text-align: center; }
+  .linenr { font-size:smaller }
+  .code-highlighted {background-color:#ffff00;}
+  .org-info-js_info-navigation { border-style:none; }
+  #org-info-js_console-label { font-size:10px; font-weight:bold;
+                               white-space:nowrap; }
+  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
+                                 font-weight:bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*/-->
+</script>
+</head><body>
+<h1 class="title">rorg &mdash; R and org-mode</h1>
+
+
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1 Objectives </a>
+<ul>
+<li><a href="#sec-1.1">1.1 Send data to R from org </a>
+<ul>
+<li><a href="#sec-1.1.1">1.1.1 Implementations </a></li>
+</ul>
+</li>
+<li><a href="#sec-1.2">1.2 evaluate R code from org and deal with output appropriately </a>
+<ul>
+<li><a href="#sec-1.2.1">1.2.1 vector output </a></li>
+<li><a href="#sec-1.2.2">1.2.2 graphical output </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-2">2 Notes </a>
+<ul>
+<li><a href="#sec-2.1">2.1 Special editing and evaluation of source code in R blocks </a>
+<ul>
+<li><a href="#sec-2.1.1">2.1.1 Source code blocks </a></li>
+<li><a href="#sec-2.1.2">2.1.2 dblocks </a></li>
+<li><a href="#sec-2.1.3">2.1.3 R blocks </a></li>
+</ul></li>
+</ul>
+</li>
+<li><a href="#sec-3">3 tasks </a></li>
+<li><a href="#sec-4">4 buffer dictionary </a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-1" class="outline-2">
+<h2 id="sec-1">1 Objectives </h2>
+<div id="text-1">
+
+
+</div>
+
+<div id="outline-container-1.1" class="outline-3">
+<h3 id="sec-1.1">1.1 Send data to R from org </h3>
+<div id="text-1.1">
+
+<p>Org-mode includes orgtbl-mode, an extremely convenient way of using
+tabular data in a plain text file.  Currently, spreadsheet
+functionality is available in org tables using the emacs package
+calc.  It would be a boon both to org users and R users to allow
+org tables to be manipulated with the R programming language.  Org
+tables give R users an easy way to enter and display data; R gives
+org users a powerful way to perform vector operations, statistical
+tests, and visualization on their tables.
+</p>
+
+</div>
+
+<div id="outline-container-1.1.1" class="outline-4">
+<h4 id="sec-1.1.1">1.1.1 Implementations </h4>
+<div id="text-1.1.1">
+
+<ul>
+<li id="sec-1.1.1.1">naive <br/>
+Naive implementation would be to use <code>(org-export-table "tmp.csv")</code>
+and <code>(ess-execute "read.csv('tmp.csv')")</code>.  
+</li>
+<li id="sec-1.1.1.2">org-R <br/>
+org-R passes data to R from two sources: org tables, or csv
+files. Org tables are first exported to a temporary csv file
+using <a href="existing_tools/org-R.el">org-R-export-to-csv</a>.
+</li>
+<li id="sec-1.1.1.3">org-exp-blocks <br/>
+</li>
+<li id="sec-1.1.1.4">RweaveOrg <br/>
+NA
+
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2">1.2 evaluate R code from org and deal with output appropriately </h3>
+<div id="text-1.2">
+
+
+</div>
+
+<div id="outline-container-1.2.1" class="outline-4">
+<h4 id="sec-1.2.1">1.2.1 vector output </h4>
+<div id="text-1.2.1">
+
+<p>When R code evaluation generates vectors and 2-dimensional arrays,
+this should be formatted appropriately in org buffers (orgtbl-mode) as well
+as in export targets (html, latex)
+</p><ul>
+<li id="sec-1.2.1.1">Implementations <br/>
+<ul>
+<li id="sec-1.2.1.1.1">org-R <br/>
+org-R converts R output (vectors, or matrices / 2d-arrays) to an
+org table and stores it in the org buffer, or in a separate org
+file (csv output would also be perfectly possible).
+</li>
+<li id="sec-1.2.1.1.2">org-exp-blocks <br/>
+</li>
+<li id="sec-1.2.1.1.3">RweaveOrg <br/>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.2.2" class="outline-4">
+<h4 id="sec-1.2.2">1.2.2 graphical output </h4>
+<div id="text-1.2.2">
+
+<p>R can generate graphical output on a screen graphics device
+(e.g. X11, quartz), and in various standard image file formats
+(png, jpg, ps, pdf, etc). When graphical output is generated by
+evaluation of R code in Org, at least the following two things are desirable:
+</p><ol>
+<li>
+output to screen for immediate viewing is possible
+</li>
+<li>
+graphical output to file is linked to appropriately from the
+org file This should have the automatic consequence that it is
+included appropriately in subsequent export targets (html,
+latex).
+</li>
+</ol>
+<ul>
+<li id="sec-1.2.2.1">Implementations <br/>
+<ul>
+<li id="sec-1.2.2.1.1">org-R <br/>
+org-R does (1) if no output file is specified and (2) otherwise
+</li>
+<li id="sec-1.2.2.1.2">org-exp-blocks <br/>
+</li>
+<li id="sec-1.2.2.1.3">RweaveOrg <br/>
+
+
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">2 Notes </h2>
+<div id="text-2">
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1">2.1 Special editing and evaluation of source code in R blocks </h3>
+<div id="text-2.1">
+
+<p>Unfortunately org-mode how two different block types, both useful.
+In developing RweaveOrg, a third was introduced.
+</p>
+<p>
+Eric is leaning towards using the <code>#+begin_src</code> blocks, as that is
+really what these blocks contain: source code.  Austin believes
+that specifying export options at the beginning of a block is
+useful functionality, to be preserved if possible.
+</p>
+<p>
+Note that upper and lower case are not relevant in block headings.
+</p>
+
+</div>
+
+<div id="outline-container-2.1.1" class="outline-4">
+<h4 id="sec-2.1.1">2.1.1 Source code blocks </h4>
+<div id="text-2.1.1">
+
+<p>Org has an extremely useful method of editing source code and
+examples in their native modes.  In the case of R code, we want to
+be able to use the full functionality of ESS mode, including
+interactive evaluation of code.
+</p>
+<p>
+Source code blocks look like the following and allow for the
+special editing of code inside of the block through
+`org-edit-special'.
+</p>
+
+
+
+<pre class="src src-r">
+
+,<span style="color: #add8e6;">## </span><span style="color: #add8e6;">hit C-c ' within this block to enter a temporary buffer in r-mode.
+</span>
+,<span style="color: #add8e6;">## </span><span style="color: #add8e6;">while in the temporary buffer, hit C-c C-c on this comment to
+</span>,<span style="color: #add8e6;">## </span><span style="color: #add8e6;">evaluate this block
+</span>a <span style="color: #98fb98;">&lt;-</span> 3
+a
+
+,<span style="color: #add8e6;">## </span><span style="color: #add8e6;">hit C-c ' to exit the temporary buffer
+</span></pre>
+
+
+
+
+</div>
+
+</div>
+
+<div id="outline-container-2.1.2" class="outline-4">
+<h4 id="sec-2.1.2">2.1.2 dblocks </h4>
+<div id="text-2.1.2">
+
+<p>dblocks are useful because org-mode will automatically call
+`org-dblock-write:dblock-type' where dblock-type is the string
+following the <code>#+BEGIN:</code> portion of the line.
+</p>
+<p>
+dblocks look like the following and allow for evaluation of the
+code inside of the block by calling <code>\C-c\C-c</code> on the header of
+the block.  
+</p>
+
+</div>
+
+</div>
+
+<div id="outline-container-2.1.3" class="outline-4">
+<h4 id="sec-2.1.3">2.1.3 R blocks </h4>
+<div id="text-2.1.3">
+
+<p>In developing RweaveOrg, Austin created <a href="existing_tools/RweaveOrg/org-sweave.el">org-sweave.el</a>.  This
+allows for the kind of blocks shown in <a href="existing_tools/RweaveOrg/testing.Rorg">testing.Rorg</a>.  These blocks
+have the advantage of accepting options to the Sweave preprocessor
+following the #+BEGIN<sub>R</sub> declaration.
+</p>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">3 tasks </h2>
+<div id="text-3">
+
+
+</div>
+
+</div>
+
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">4 buffer dictionary </h2>
+<div id="text-4">
+
+<p>LocalWords:  DBlocks dblocks
+</p></div>
+</div>
+<div id="postamble"><p class="author"> Author: Dan
+<a href="mailto:dan@Tichodroma">&lt;dan@Tichodroma&gt;</a>
+</p>
+<p class="date"> Date: 2009-02-05 21:16:20 EST</p>
+<p>HTML generated by org-mode 6.20f in emacs 22</p>
+</div></body>
+</html>

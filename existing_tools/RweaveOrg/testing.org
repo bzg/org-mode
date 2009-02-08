@@ -21,34 +21,42 @@
    the evaluated code, the output of the code, both, or neither.
 
 *** R code that is not printed
-#+BEGIN_R:  hidden_block, echo=FALSE, results=HIDE
-   a <- 3
-   b <- 6
-#+END_R
 
 *** R code that is printed
-#+BEGIN_R:  visible_block
-   c <- 4
-#+END_R
+#+BEGIN_LaTeX
+\begin{Schunk}
+\begin{Sinput}
+> c <- 4
+\end{Sinput}
+\end{Schunk}
+#+END_LaTeX
    
    We can use block labels to embed blocks by reference (even if they
    weren't printed before).
 *** R code that references other blocks
-#+BEGIN_R:  combined_block
-#+R_CODEREF:  hidden_block
-#+R_CODEREF:  visible_block
-   a + b +c
-#+END_R
+#+BEGIN_LaTeX
+\begin{Schunk}
+\begin{Sinput}
+> a <- 3
+> b <- 6
+> c <- 4
+> a + b + c
+\end{Sinput}
+\begin{Soutput}
+[1] 13
+\end{Soutput}
+\end{Schunk}
+#+END_LaTeX
 
 ** Inline references to R data
    We can evaluate R code inline.
 *** Used in text
-    The value of =a= is \R{a}.
+    The value of =a= is 3.
 
 *** Used in a table
     | a     | b     | c     | TOTAL         |
     |-------+-------+-------+---------------|
-    | \R{a} | \R{b} | \R{c} | \R{a + b + c} |
+    | 3 | 6 | 4 | 13 |
 
 ** Single-line R commands
    If we want a line of R code to be evaluated but not printed,
@@ -63,12 +71,16 @@
 
 #+CAPTION:  speed by distance
 #+LABEL:  fig:speed_by_distance
-#+BEGIN_R fig=TRUE, eps=FALSE, pdf=TRUE
-require(lattice)
-print(xyplot(speed ~ dist, cars,
-       panel = function (x, y, ...) {
-         panel.xyplot(x, y, ...)
-         panel.abline(h=a)
-         panel.abline(v=b)
-       }))
-#+END_R
+#+BEGIN_LaTeX
+\begin{Schunk}
+\begin{Sinput}
+> require(lattice)
+> print(xyplot(speed ~ dist, cars, panel = function(x, y, ...) {
++     panel.xyplot(x, y, ...)
++     panel.abline(h = a)
++     panel.abline(v = b)
++ }))
+\end{Sinput}
+\end{Schunk}
+#+END_LaTeX
+[[./testing-004.pdf]]

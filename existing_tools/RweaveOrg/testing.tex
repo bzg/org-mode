@@ -1,0 +1,82 @@
+% Created 2009-02-08 Sun 11:18
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{hyperref}
+\usepackage{Sweave}
+
+\title{testing}
+\author{Dan}
+\date{08 February 2009}
+
+\begin{document}
+
+\maketitle
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+\vspace*{1cm}
+
+\section{Sweave and org-mode}
+\label{sec-1}
+
+  If you're reading a PDF version of this document, you should also
+  look at \href{file:///home/dan/src/rorg/existing_tools/RweaveOrg/testing.Rorg}{testing.Rorg} (the source file) and \href{file:///home/dan/src/rorg/existing_tools/RweaveOrg/testing.org}{testing.org} (the output
+  of the Sweave process).
+
+  Keep in mind that one of the advantages of a block-based approach is
+  using \texttt{C-'} to edit code in its native mode.
+
+\subsection{R code that is not printed}
+\label{sec-1.3}
+
+
+\subsection{R code that is printed}
+\label{sec-1.4}
+
+\begin{Schunk}
+\begin{Sinput}
+> c <- 4
+\end{Sinput}
+\end{Schunk}
+   
+   We can use block labels to embed blocks by reference (even if they
+   weren't printed before).
+\subsection{R code that references other blocks}
+\label{sec-1.5}
+
+\begin{Schunk}
+\begin{Sinput}
+> a <- 3
+> b <- 6
+> c <- 4
+> a + b + c
+\end{Sinput}
+\begin{Soutput}
+[1] 13
+\end{Soutput}
+\end{Schunk}
+
+\subsection{Used in text}
+\label{sec-1.7}
+
+    The value of \verb=a= is 3.
+
+\subsection{Used in a table}
+\label{sec-1.8}
+
+
+\begin{center}
+\begin{tabular}{rrrr}
+ a  &  b  &  c  &  TOTAL  \\
+\hline
+ 3  &  6  &  4  &     13  \\
+\end{tabular}
+\end{center}
+
+
+
+
+\end{document}

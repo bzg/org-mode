@@ -64,7 +64,6 @@
 #+CAPTION:  speed by distance
 #+LABEL:  fig:speed_by_distance
 #+BEGIN_R fig=TRUE, eps=FALSE, pdf=TRUE
-require(lattice)
 print(xyplot(speed ~ dist, cars,
        panel = function (x, y, ...) {
          panel.xyplot(x, y, ...)
