@@ -14,6 +14,7 @@ org-annotate-file.el     --- Annotate a file with org syntax
 org-annotation-helper.el --- Call remember directly from Firefox/Opera
 org-bookmark.el          --- Links to bookmarks
 org-browser-url.el       --- Store links to webpages directly from Firefox/Opera
+org-choose.el            --- Use TODO keywords to mark decision states
 org-depend.el            --- TODO dependencies for Org-mode
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval.el              --- The <lisp> tag, adapted from Muse

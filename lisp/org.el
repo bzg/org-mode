@@ -181,6 +181,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  annotation-helper: Call Remember directly from Browser" org-annotation-helper)
 	(const :tag "C  bookmark:          Org links to bookmarks" org-bookmark)
 	(const :tag "C  browser-url:       Store link, directly from Browser" org-browser-url)
+	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  depend:            TODO dependencies for Org-mode" org-depend)
 	(const :tag "C  elisp-symbol:      Org links to emacs-lisp symbols" org-elisp-symbol)
 	(const :tag "C  eval:              Include command output as text" org-eval)
@@ -1483,6 +1484,14 @@ fast, while still showing the whole path to the entry."
   :tag "Org Progress"
   :group 'org-time)
 
+(defvar org-todo-interpretation-widgets
+  '(
+    (:tag "Sequence (cycling hits every state)" sequence)
+    (:tag "Type     (cycling directly to DONE)" type))
+  "The available interpretation symbols for customizing
+ `org-todo-keywords'.
+ Interested libraries should add to this list.")
+
 (defcustom org-todo-keywords '((sequence "TODO" "DONE"))
   "List of TODO entry keyword sequences and their interpretation.
 \\<org-mode-map>This is a list of sequences.
@@ -1532,8 +1541,18 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 		  (cons
 		   (choice
 		    :tag "Interpretation"
-		    (const :tag "Sequence (cycling hits every state)" sequence)
-		    (const :tag "Type     (cycling directly to DONE)" type))
+		    ;;Quick and dirty way to see
+		    ;;`org-todo-interpretations'.  This takes the
+		    ;;place of item arguments
+		    :convert-widget
+		    (lambda (widget)
+		      (widget-put widget 
+				  :args (mapcar 
+					 #'(lambda (x)
+					     (widget-convert 
+					      (cons 'const x)))
+					 org-todo-interpretation-widgets))
+		      widget))
 		   (repeat
 		    (string :tag "Keyword"))))))
 
@@ -3174,7 +3193,7 @@ means to push this value onto the list in the variable.")
     (org-set-local 'org-file-properties nil)
     (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp
-	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "COLUMNS"
+	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "CHOOSE_TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
 		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")))
 	  (splitre "[ \t]+")
@@ -3201,6 +3220,8 @@ means to push this value onto the list in the variable.")
 	      (push (cons 'sequence (org-split-string value splitre)) kwds))
 	     ((equal key "TYP_TODO")
 	      (push (cons 'type (org-split-string value splitre)) kwds))
+ 	     ((equal key "CHOOSE_TODO")
+ 	      (push (cons 'choose (org-split-string value splitre)) kwds))
 	     ((equal key "TAGS")
 	      (setq tags (append tags (org-split-string value splitre))))
 	     ((equal key "COLUMNS")
@@ -3282,28 +3303,32 @@ means to push this value onto the list in the variable.")
       (setq kwds (nreverse kwds))
       (let (inter kws kw)
 	(while (setq kws (pop kwds))
-	  (setq inter (pop kws) sep (member "|" kws)
-		kws0 (delete "|" (copy-sequence kws))
-		kwsa nil
-		kws1 (mapcar
-		      (lambda (x)
-			;;                     1              2
-			(if (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$" x)
-			    (progn
-			      (setq kw (match-string 1 x)
-				    key (and (match-end 2) (match-string 2 x))
-				    log (org-extract-log-state-settings x))
-			      (push (cons kw (and key (string-to-char key))) kwsa)
-			      (and log (push log org-todo-log-states))
-			      kw)
-			  (error "Invalid TODO keyword %s" x)))
-		      kws0)
-		kwsa (if kwsa (append '((:startgroup))
-				      (nreverse kwsa)
-				      '((:endgroup))))
-		hw (car kws1)
-		dws (if sep (org-remove-keyword-keys (cdr sep)) (last kws1))
-		tail (list inter hw (car dws) (org-last dws)))
+ 	  (let ((kws (or
+		      (run-hook-with-args-until-success
+ 		       'org-todo-setup-filter-hook kws) 
+		      kws)))
+	    (setq inter (pop kws) sep (member "|" kws)
+		  kws0 (delete "|" (copy-sequence kws))
+		  kwsa nil
+		  kws1 (mapcar
+			(lambda (x)
+			  ;;                     1              2
+			  (if (string-match "^\\(.*?\\)\\(?:(\\([^!@/]\\)?.*?)\\)?$" x)
+			      (progn
+				(setq kw (match-string 1 x)
+				      key (and (match-end 2) (match-string 2 x))
+				      log (org-extract-log-state-settings x))
+				(push (cons kw (and key (string-to-char key))) kwsa)
+				(and log (push log org-todo-log-states))
+				kw)
+			    (error "Invalid TODO keyword %s" x)))
+			kws0)
+		  kwsa (if kwsa (append '((:startgroup))
+					(nreverse kwsa)
+					'((:endgroup))))
+		  hw (car kws1)
+		  dws (if sep (org-remove-keyword-keys (cdr sep)) (last kws1))
+		  tail (list inter hw (car dws) (org-last dws))))
 	  (add-to-list 'org-todo-heads hw 'append)
 	  (push kws1 org-todo-sets)
 	  (setq org-done-keywords (append org-done-keywords dws nil))
@@ -5126,11 +5151,19 @@ state (TODO by default).  Also with prefix arg, force first state."
       (org-back-to-heading)
       (outline-previous-heading)
       (looking-at org-todo-line-regexp))
-    (if (or arg
-	    (not (match-beginning 2))
-	    (member (match-string 2) org-done-keywords))
-	(insert (car org-todo-keywords-1) " ")
-      (insert (match-string 2) " "))
+    (let*
+        ((new-mark-x
+	  (if (or arg
+		  (not (match-beginning 2))
+		  (member (match-string 2) org-done-keywords))
+ 	      (car org-todo-keywords-1)
+	    (match-string 2)))
+	 (new-mark
+	  (or
+	   (run-hook-with-args-until-success
+	    'org-todo-get-default-hook new-mark-x nil)
+	   new-mark-x)))
+      (insert new-mark " "))
     (when org-provide-todo-statistics
       (org-update-parent-todo-statistics))))
 
@@ -8357,6 +8390,18 @@ this is nil.")
 	      (push (nth 2 e) rtn)))
 	  rtn)))))
 
+(defvar org-todo-setup-filter-hook nil 
+  "Hook for functions that pre-filter todo specs.
+
+Each function takes a todo spec and returns either `nil' or the spec
+transformed into canonical form." )
+ 
+(defvar org-todo-get-default-hook nil
+  "Hook for functions that get a default item for todo.
+ 
+Each function takes arguments (NEW-MARK OLD-MARK) and returns either
+`nil' or a string to be used for the todo mark." )
+
 (defvar org-agenda-headline-snapshot-before-repeat)
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
@@ -8462,15 +8507,18 @@ For calling through lisp, arg is also interpreted in the following way:
 		       ((null member) (or head (car org-todo-keywords-1)))
 		       ((equal this final-done-word) nil) ;; -> make empty
 		       ((null tail) nil) ;; -> first entry
-		       ((eq interpret 'sequence)
-			(car tail))
 		       ((memq interpret '(type priority))
 			(if (eq this-command last-command)
 			    (car tail)
 			  (if (> (length tail) 0)
 			      (or done-word (car org-done-keywords))
 			    nil)))
-		       (t nil)))
+		       (t
+			(car tail))))
+	       (state (or 
+ 		       (run-hook-with-args-until-success
+			'org-todo-get-default-hook state last-state) 
+ 		       state))
 	       (next (if state (concat " " state " ") " "))
 	       (change-plist (list :type 'todo-state-change :from this :to state
 				   :position startpos))
