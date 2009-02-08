@@ -3,10 +3,10 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
 lang="en" xml:lang="en">
 <head>
-<title>rorg &mdash; R and org-mode</title>
+<title>rorg &mdash; Code evaluation in org-mode, with an emphasis on R</title>
 <meta http-equiv="Content-Type" content="text/html;charset=iso-8859-1"/>
 <meta name="generator" content="Org-mode"/>
-<meta name="generated" content="2009-02-05 21:16:20 EST"/>
+<meta name="generated" content="2009-02-08 14:56:13 EST"/>
 <meta name="author" content="Dan"/>
 <style type="text/css">
  <!--/*--><![CDATA[/*><!--*/
@@ -14,10 +14,10 @@ lang="en" xml:lang="en">
   .title  { text-align: center; }
   .todo   { color: red; }
   .done   { color: green; }
-  .tag    { background-color:lightblue; font-weight:normal }
+  .tag    { background-color: #add8e6; font-weight:normal }
   .target { }
-  .timestamp { color: grey }
-  .timestamp-kwd { color: CadetBlue }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
   p.verse { margin-left: 3% }
   pre {
 	border: 1pt solid #AEBDCC;
@@ -64,53 +64,322 @@ lang="en" xml:lang="en">
 /*]]>*/-->
 </script>
 </head><body>
-<h1 class="title">rorg &mdash; R and org-mode</h1>
+<h1 class="title">rorg &mdash; Code evaluation in org-mode, with an emphasis on R</h1>
 
 
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1 Objectives </a>
+<li><a href="#sec-1">Overview (Dan) </a>
 <ul>
-<li><a href="#sec-1.1">1.1 Send data to R from org </a>
+<li><a href="#sec-1.1">Project objectives </a>
 <ul>
-<li><a href="#sec-1.1.1">1.1.1 Implementations </a></li>
+<li><a href="#sec-1.1.1">It produces text/numeric output </a></li>
+<li><a href="#sec-1.1.2">It produces graphical output </a></li>
+<li><a href="#sec-1.1.3">It creates some non-graphics files </a></li>
+<li><a href="#sec-1.1.4">It alters the environment by side effect in some other way </a></li>
 </ul>
 </li>
-<li><a href="#sec-1.2">1.2 evaluate R code from org and deal with output appropriately </a>
+<li><a href="#sec-1.2">Implementation questions </a>
 <ul>
-<li><a href="#sec-1.2.1">1.2.1 vector output </a></li>
-<li><a href="#sec-1.2.2">1.2.2 graphical output </a></li>
+<li><a href="#sec-1.2.1">How is the code placed in the org file? </a></li>
+<li><a href="#sec-1.2.2">When is the code evaluated? </a></li>
+<li><a href="#sec-1.2.3">What is the result of code evaluation? </a></li>
 </ul></li>
 </ul>
 </li>
-<li><a href="#sec-2">2 Notes </a>
+<li><a href="#sec-2">Commentary </a>
 <ul>
-<li><a href="#sec-2.1">2.1 Special editing and evaluation of source code in R blocks </a>
-<ul>
-<li><a href="#sec-2.1.1">2.1.1 Source code blocks </a></li>
-<li><a href="#sec-2.1.2">2.1.2 dblocks </a></li>
-<li><a href="#sec-2.1.3">2.1.3 R blocks </a></li>
-</ul></li>
+<li><a href="#sec-2.1">Eric </a></li>
 </ul>
 </li>
-<li><a href="#sec-3">3 tasks </a></li>
-<li><a href="#sec-4">4 buffer dictionary </a></li>
+<li><a href="#sec-3">Objectives </a>
+<ul>
+<li><a href="#sec-3.1">Send data to R from org </a>
+<ul>
+<li><a href="#sec-3.1.1">Implementations </a></li>
+</ul>
+</li>
+<li><a href="#sec-3.2">Evaluate R code from org and deal with output appropriately </a>
+<ul>
+<li><a href="#sec-3.2.1">vector output </a></li>
+<li><a href="#sec-3.2.2">graphical output </a></li>
+</ul>
+</li>
+<li><a href="#sec-3.3">Evaluate R code on export </a></li>
+</ul>
+</li>
+<li><a href="#sec-4">Notes </a>
+<ul>
+<li><a href="#sec-4.1">Special editing and evaluation of source code in R blocks </a>
+<ul>
+<li><a href="#sec-4.1.1">R-block proposal </a></li>
+<li><a href="#sec-4.1.2">Source code blocks </a></li>
+<li><a href="#sec-4.1.3">dblocks </a></li>
+<li><a href="#sec-4.1.4">R blocks </a></li>
+</ul>
+</li>
+<li><a href="#sec-4.2">Interaction with the R process </a></li>
+</ul>
+</li>
+<li><a href="#sec-5">Tasks </a></li>
+<li><a href="#sec-6">buffer dictionary </a></li>
 </ul>
 </div>
 </div>
 
 <div id="outline-container-1" class="outline-2">
-<h2 id="sec-1">1 Objectives </h2>
+<h2 id="sec-1">Overview (Dan <span class="timestamp">2009-02-08 Sun</span>) </h2>
 <div id="text-1">
 
 
 </div>
 
 <div id="outline-container-1.1" class="outline-3">
-<h3 id="sec-1.1">1.1 Send data to R from org </h3>
+<h3 id="sec-1.1">Project objectives </h3>
 <div id="text-1.1">
+
+<p>This project is basically about putting source code into org
+files. This isn't just code to look pretty as a source code example,
+but code to be evaluated. Org files have 3 main export targets: org,
+html and latex. Thus the aim of this project is to produce files in
+those formats that have benefitted in some way from the evaluation of
+source code that is present in the source org file. We have a current
+focus on R code, but we are regarding that more as a working example
+than as a defining feature of the project.
+</p>
+<p>
+Code evaluation can have three relevant consequences. Our aim is to
+deal with these consequences as follows:
+</p>
+
+</div>
+
+<div id="outline-container-1.1.1" class="outline-4">
+<h4 id="sec-1.1.1">It produces text/numeric output </h4>
+<div id="text-1.1.1">
+
+<p>We (optionally) incorporate the text output as text in the target
+document
+</p></div>
+
+</div>
+
+<div id="outline-container-1.1.2" class="outline-4">
+<h4 id="sec-1.1.2">It produces graphical output </h4>
+<div id="text-1.1.2">
+
+<p>We either link to the graphics or (html/latex) include them inline.
+</p></div>
+
+</div>
+
+<div id="outline-container-1.1.3" class="outline-4">
+<h4 id="sec-1.1.3">It creates some non-graphics files </h4>
+<div id="text-1.1.3">
+
+<p>? We link to other file output
+</p></div>
+
+</div>
+
+<div id="outline-container-1.1.4" class="outline-4">
+<h4 id="sec-1.1.4">It alters the environment by side effect in some other way </h4>
+<div id="text-1.1.4">
+
+<p>We bear this in mind
+</p>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-1.2" class="outline-3">
+<h3 id="sec-1.2">Implementation questions </h3>
+<div id="text-1.2">
+
+<p>These objectives raise three questions:
+</p>
+<ol>
+<li>
+How is the code placed in the org file?
+</li>
+<li>
+When is the code evaluated?
+</li>
+<li>
+What is the result of code evaluation?
+
+</li>
+</ol>
+
+</div>
+
+<div id="outline-container-1.2.1" class="outline-4">
+<h4 id="sec-1.2.1">How is the code placed in the org file? </h4>
+<div id="text-1.2.1">
+
+<p>Using some version of the code block ideas that Eric and Austin
+have worked on. (In addition, an aim of org-R was to allow Org
+users who are not R users to specify R code implicitly, using
+native org syntax. I'd like to maintain that, but it's not central
+to this project.)
+</p>
+</div>
+
+</div>
+
+<div id="outline-container-1.2.2" class="outline-4">
+<h4 id="sec-1.2.2">When is the code evaluated? </h4>
+<div id="text-1.2.2">
+
+<p>Let's use an asterisk to indicate content which includes the
+<b>result</b> of code evaluation, rather than the code itself. Clearly
+we have a requirement for the following transformation:
+</p>
+<p>
+org &rarr; org*
+</p>
+<p>
+Let's say this transformation is effected by a function
+`org-eval-buffer'. This transformation is necessary when the
+target format is org (say you want to update the values in an org
+table, or generate a plot and create an org link to it), and it
+can also be used as the first step by which to reach html and
+latex:
+</p>
+<p>
+org &rarr; org* &rarr; html
+</p>
+<p>
+org &rarr; org* &rarr; latex
+</p>
+<p>
+Thus in principle we can reach our 3 target formats with
+`org-eval-buffer', `org-export-as-latex' and `org-export-as-html'.
+</p>
+<p>
+An extra transformation that we might want is
+</p>
+<p>
+org &rarr; latex
+</p>
+<p>
+I.e. export to latex without evaluation of code, in such a way that R
+code can subsequently be evaluated using
+<code>Sweave(driver=RweaveLatex)</code>, which is what the R community is
+used to. This would provide a `bail out' avenue where users can
+escape org mode and enter a workflow in which the latex/noweb file
+is treated as source.
+</p>
+<ul>
+<li id="sec-1.2.2.1">How do we implement `org-eval-buffer'? <br/>
+
+<p>
+AIUI The following can all be viewed as implementations of
+org-eval-buffer for R code:
+</p>
+<ul>
+<li id="sec-1.2.2.1.1">org-eval-light <br/>
+This is the beginnings of a general evaluation mechanism, that
+could evaluate python, ruby, shell, perl, in addition to R.
+The header says it's based on org-eval, what is org-eval??
+
+</li>
+<li id="sec-1.2.2.1.2">org-R <br/>
+This accomplishes org &rarr; org* in elisp by visiting code blocks
+and evaluating code using ESS.
+
+</li>
+<li id="sec-1.2.2.1.3">RweaveOrg <br/>
+This accomplishes org &rarr; org* using R via
+
+<pre class="example">
+Sweave("file-with-unevaluated-code.org", driver=RweaveOrg, syntax=SweaveSyntaxOrg)
+</pre>
+
+</li>
+<li id="sec-1.2.2.1.4">org-exp-blocks.el <br/>
+Like org-R, this achieves org &rarr; org* in elisp by visiting code
+blocks and using ESS to evaluate R code.
+
+
+</li>
+</ul>
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-1.2.3" class="outline-4">
+<h4 id="sec-1.2.3">What is the result of code evaluation? </h4>
+<div id="text-1.2.3">
+
+<p>Here we have to consider text/numeric output, and graphical
+output. And also the stage at which evaluation occurs
+</p><ul>
+<li id="sec-1.2.3.1">org &rarr; org* <br/>
+<ul>
+<li id="sec-1.2.3.1.1">Text / numerical output <br/>
+In the case of org &rarr; org*, I would argue that, where
+appropriate, it should be stored in org tables. Thus an advantage
+our project would have over Sweave is that tabular output is
+automatically conveqrted to native tables on export to HTML and
+latex.
+</li>
+<li id="sec-1.2.3.1.2">Graphical output <br/>
+We place an org link to the file. This is done already by
+org-R-apply, and by RweaveOrg.
+</li>
+</ul>
+</li>
+<li id="sec-1.2.3.2">latex &rarr; latex* <br/>
+This is done by Sweave(driver=RweaveLatex) and so is out of our hands
+
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-2" class="outline-2">
+<h2 id="sec-2">Commentary </h2>
+<div id="text-2">
+
+
+
+</div>
+
+<div id="outline-container-2.1" class="outline-3">
+<h3 id="sec-2.1">Eric <span class="timestamp">2009-02-06 Fri 15:41</span> </h3>
+<div id="text-2.1">
+
+<p>I think we're getting close to a comprehensive set of objectives
+(although since you two are the real R user's I leave that decision up
+to you).  Once we've agreed on a set of objectives and agreed on at
+least to broad strokes of implementation, I think we should start
+listing out and assigning tasks.
+</p>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-3" class="outline-2">
+<h2 id="sec-3">Objectives </h2>
+<div id="text-3">
+
+
+</div>
+
+<div id="outline-container-3.1" class="outline-3">
+<h3 id="sec-3.1">Send data to R from org </h3>
+<div id="text-3.1">
 
 <p>Org-mode includes orgtbl-mode, an extremely convenient way of using
 tabular data in a plain text file.  Currently, spreadsheet
@@ -124,24 +393,30 @@ tests, and visualization on their tables.
 
 </div>
 
-<div id="outline-container-1.1.1" class="outline-4">
-<h4 id="sec-1.1.1">1.1.1 Implementations </h4>
-<div id="text-1.1.1">
+<div id="outline-container-3.1.1" class="outline-4">
+<h4 id="sec-3.1.1">Implementations </h4>
+<div id="text-3.1.1">
 
 <ul>
-<li id="sec-1.1.1.1">naive <br/>
+<li id="sec-3.1.1.1">naive <br/>
 Naive implementation would be to use <code>(org-export-table "tmp.csv")</code>
 and <code>(ess-execute "read.csv('tmp.csv')")</code>.  
 </li>
-<li id="sec-1.1.1.2">org-R <br/>
+<li id="sec-3.1.1.2">org-R <br/>
 org-R passes data to R from two sources: org tables, or csv
 files. Org tables are first exported to a temporary csv file
 using <a href="existing_tools/org-R.el">org-R-export-to-csv</a>.
 </li>
-<li id="sec-1.1.1.3">org-exp-blocks <br/>
+<li id="sec-3.1.1.3">org-exp-blocks <br/>
+org-exp-blocks uses <a href="#sec-3.1.1.3">org-interblock-R-command-to-string</a> to send
+commands to an R process running in a comint buffer through ESS.
+org-exp-blocks has no support for dumping table data to R process, or
+vice versa.
+
 </li>
-<li id="sec-1.1.1.4">RweaveOrg <br/>
+<li id="sec-3.1.1.4">RweaveOrg <br/>
 NA
+
 
 </li>
 </ul>
@@ -150,31 +425,38 @@ NA
 
 </div>
 
-<div id="outline-container-1.2" class="outline-3">
-<h3 id="sec-1.2">1.2 evaluate R code from org and deal with output appropriately </h3>
-<div id="text-1.2">
+<div id="outline-container-3.2" class="outline-3">
+<h3 id="sec-3.2">Evaluate R code from org and deal with output appropriately </h3>
+<div id="text-3.2">
 
 
 </div>
 
-<div id="outline-container-1.2.1" class="outline-4">
-<h4 id="sec-1.2.1">1.2.1 vector output </h4>
-<div id="text-1.2.1">
+<div id="outline-container-3.2.1" class="outline-4">
+<h4 id="sec-3.2.1">vector output </h4>
+<div id="text-3.2.1">
 
 <p>When R code evaluation generates vectors and 2-dimensional arrays,
 this should be formatted appropriately in org buffers (orgtbl-mode) as well
 as in export targets (html, latex)
-</p><ul>
-<li id="sec-1.2.1.1">Implementations <br/>
+</p>
+<p>
+Agreed, if we can convert the vector data to lists then we can use
+the many orgtbl-to-* functions to convert the list to whatever
+output format we desire. See `orgtbl-to-orgtbl, `orgtbl-to-latex',
+`orgtbl-to-html', `orgtbl-to-csv', etc&hellip;
+</p>
 <ul>
-<li id="sec-1.2.1.1.1">org-R <br/>
+<li id="sec-3.2.1.1">Implementations <br/>
+<ul>
+<li id="sec-3.2.1.1.1">org-R <br/>
 org-R converts R output (vectors, or matrices / 2d-arrays) to an
 org table and stores it in the org buffer, or in a separate org
 file (csv output would also be perfectly possible).
 </li>
-<li id="sec-1.2.1.1.2">org-exp-blocks <br/>
+<li id="sec-3.2.1.1.2">org-exp-blocks <br/>
 </li>
-<li id="sec-1.2.1.1.3">RweaveOrg <br/>
+<li id="sec-3.2.1.1.3">RweaveOrg <br/>
 </li>
 </ul>
 </li>
@@ -183,9 +465,9 @@ file (csv output would also be perfectly possible).
 
 </div>
 
-<div id="outline-container-1.2.2" class="outline-4">
-<h4 id="sec-1.2.2">1.2.2 graphical output </h4>
-<div id="text-1.2.2">
+<div id="outline-container-3.2.2" class="outline-4">
+<h4 id="sec-3.2.2">graphical output </h4>
+<div id="text-3.2.2">
 
 <p>R can generate graphical output on a screen graphics device
 (e.g. X11, quartz), and in various standard image file formats
@@ -200,17 +482,21 @@ graphical output to file is linked to appropriately from the
 org file This should have the automatic consequence that it is
 included appropriately in subsequent export targets (html,
 latex).
+
 </li>
 </ol>
 <ul>
-<li id="sec-1.2.2.1">Implementations <br/>
+<li id="sec-3.2.2.1">Implementations <br/>
 <ul>
-<li id="sec-1.2.2.1.1">org-R <br/>
+<li id="sec-3.2.2.1.1">org-R <br/>
 org-R does (1) if no output file is specified and (2) otherwise
 </li>
-<li id="sec-1.2.2.1.2">org-exp-blocks <br/>
+<li id="sec-3.2.2.1.2">org-exp-blocks <br/>
+org-exp-blocks tries to do 2, but I don't think that part was
+every really working
+
 </li>
-<li id="sec-1.2.2.1.3">RweaveOrg <br/>
+<li id="sec-3.2.2.1.3">RweaveOrg <br/>
 
 
 </li>
@@ -219,20 +505,39 @@ org-R does (1) if no output file is specified and (2) otherwise
 </ul>
 </div>
 </div>
+
+</div>
+
+<div id="outline-container-3.3" class="outline-3">
+<h3 id="sec-3.3">Evaluate R code on export </h3>
+<div id="text-3.3">
+
+<p>At first I was leaning towards leaving the exporting to Sweave, but it
+seems that once we have evaluation or R working, it will not be
+difficult to implement full evaluation of R blocks, one-liners, and
+creation of R graphics on export directly in elisp.
+</p>
+<p>
+I think that this would be worth the effort since it would eliminate
+the need for using Sweave, and would allow for exportation to any
+target format supported by org-mode.
+</p>
+
+</div>
 </div>
 
 </div>
 
-<div id="outline-container-2" class="outline-2">
-<h2 id="sec-2">2 Notes </h2>
-<div id="text-2">
+<div id="outline-container-4" class="outline-2">
+<h2 id="sec-4">Notes </h2>
+<div id="text-4">
 
 
 </div>
 
-<div id="outline-container-2.1" class="outline-3">
-<h3 id="sec-2.1">2.1 Special editing and evaluation of source code in R blocks </h3>
-<div id="text-2.1">
+<div id="outline-container-4.1" class="outline-3">
+<h3 id="sec-4.1">Special editing and evaluation of source code in R blocks </h3>
+<div id="text-4.1">
 
 <p>Unfortunately org-mode how two different block types, both useful.
 In developing RweaveOrg, a third was introduced.
@@ -249,9 +554,91 @@ Note that upper and lower case are not relevant in block headings.
 
 </div>
 
-<div id="outline-container-2.1.1" class="outline-4">
-<h4 id="sec-2.1.1">2.1.1 Source code blocks </h4>
-<div id="text-2.1.1">
+<div id="outline-container-4.1.1" class="outline-4">
+<h4 id="sec-4.1.1"><span class="todo">PROPOSED</span> R-block proposal </h4>
+<div id="text-4.1.1">
+
+<p>I (Eric) propose that we use the syntax of source code blocks as they
+currently exist in org-mode with the addition of <b>evaluation</b>,
+<b>header-arguments</b>, <b>exportation</b>, <b>single-line-blocks</b>, and
+<b>references-to-table-data</b>.
+</p>
+<ol>
+<li>
+<b>evaluation</b>: These blocks can be evaluated through <code>\C-c\C-c</code> with
+a slight addition to the code already present and working in
+<a href="existing_tools/org-eval-light.el">org-eval-light.el</a>.  All we should need to add for R support would
+be an appropriate entry in <a href="#sec-4.1.1">org-eval-light-interpreters</a> with a
+corresponding evaluation function.  For an example usinga
+org-eval-light see <a href="#sec-4.1.1.1">* src block evaluation w/org-eval-light</a>.
+
+</li>
+<li>
+<b>header-arguments</b>: These can be implemented along the lines of
+Austin's header arguments in <a href="existing_tools/RweaveOrg/org-sweave.el">org-sweave.el</a>.
+
+</li>
+<li>
+<b>exportation</b>: Should be as similar as possible to that done by
+Sweave, and hopefully can re-use some of the code currently present
+in <a href="existing_tools/exp-blocks/org-exp-blocks.el ">org-exp-blocks.el</a>.
+
+</li>
+<li>
+<b>single-line-blocks</b>: It seems that it is useful to be able to
+place a single line of R code on a line by itself.  Should we add
+syntax for this similar to Dan's <code>#+R:</code> lines?  I would lean
+towards something here that can be re-used for any type of source
+code in the same manner as the <code>#+begin_src R</code> blocks, maybe
+<code>#+src_R</code>?
+
+</li>
+<li>
+<b>references-to-table-data</b>: I get this impression that this is
+vital to the efficient use of R code in an org file, so we should
+come up with a way to reference table data from a single-line-block
+or from an R source-code block.  It looks like Dan has already done
+this in <a href="existing_tools/org-R.el">org-R.el</a>.
+
+</li>
+</ol>
+
+<p>What do you think?  Does this accomplish everything we want to be able
+to do with embedded R source code blocks?
+</p>
+<ul>
+<li id="sec-4.1.1.1">src block evaluation w/org-eval-light <br/>
+here's an example using org-eval-light.el
+
+<p>
+first load the org-eval-light.el file
+</p>
+<p>
+<i>&lt;elisp:(load (expand-file-name "org-eval-light.el" (expand-file-name "existing_tools" (file-name-directory buffer-file-name))))&gt;</i>
+</p>
+<p>
+then press <code>\C-c\C-c</code> inside of the following src code snippet.  The
+results should appear in a comment immediately following the source
+code block.  It shouldn't be too hard to add R support to this
+function through the `org-eval-light-interpreters' variable.
+</p>
+<p>
+(Dan: The following causes error on export to HTML hence spaces inserted at bol)
+</p>
+<p>
+#+begin<sub>src</sub> shell
+date
+#+end<sub>src</sub>
+</p>
+</li>
+</ul>
+</div>
+
+</div>
+
+<div id="outline-container-4.1.2" class="outline-4">
+<h4 id="sec-4.1.2">Source code blocks </h4>
+<div id="text-4.1.2">
 
 <p>Org has an extremely useful method of editing source code and
 examples in their native modes.  In the case of R code, we want to
@@ -285,9 +672,9 @@ a
 
 </div>
 
-<div id="outline-container-2.1.2" class="outline-4">
-<h4 id="sec-2.1.2">2.1.2 dblocks </h4>
-<div id="text-2.1.2">
+<div id="outline-container-4.1.3" class="outline-4">
+<h4 id="sec-4.1.3">dblocks </h4>
+<div id="text-4.1.3">
 
 <p>dblocks are useful because org-mode will automatically call
 `org-dblock-write:dblock-type' where dblock-type is the string
@@ -303,34 +690,70 @@ the block.
 
 </div>
 
-<div id="outline-container-2.1.3" class="outline-4">
-<h4 id="sec-2.1.3">2.1.3 R blocks </h4>
-<div id="text-2.1.3">
+<div id="outline-container-4.1.4" class="outline-4">
+<h4 id="sec-4.1.4">R blocks </h4>
+<div id="text-4.1.4">
 
 <p>In developing RweaveOrg, Austin created <a href="existing_tools/RweaveOrg/org-sweave.el">org-sweave.el</a>.  This
 allows for the kind of blocks shown in <a href="existing_tools/RweaveOrg/testing.Rorg">testing.Rorg</a>.  These blocks
 have the advantage of accepting options to the Sweave preprocessor
 following the #+BEGIN<sub>R</sub> declaration.
 </p>
-
-</div>
 </div>
 </div>
 
 </div>
 
-<div id="outline-container-3" class="outline-2">
-<h2 id="sec-3">3 tasks </h2>
-<div id="text-3">
+<div id="outline-container-4.2" class="outline-3">
+<h3 id="sec-4.2">Interaction with the R process </h3>
+<div id="text-4.2">
+
+
+<p>
+We should take care to implement this in such a way that all of the
+different components which have to interactive with R including:
+</p><ul>
+<li>
+evaluation of source code blocks
+</li>
+<li>
+automatic evaluation on export
+</li>
+<li>
+evaluation of \R{} snippets
+</li>
+<li>
+evaluation of single source code lines
+</li>
+<li>
+sending/receiving vector data
+
+</li>
+</ul>
+
+<p>I think we currently have two implementations of interaction with R
+processes; <a href="existing_tools/org-R.el">org-R.el</a> and <a href="existing_tools/exp-blocks/org-exp-blocks.el ">org-exp-blocks.el</a>.  We should be sure to take
+the best of each of these approaches.
+</p>
+
+</div>
+</div>
+
+</div>
+
+<div id="outline-container-5" class="outline-2">
+<h2 id="sec-5">Tasks </h2>
+<div id="text-5">
+
 
 
 </div>
 
 </div>
 
-<div id="outline-container-4" class="outline-2">
-<h2 id="sec-4">4 buffer dictionary </h2>
-<div id="text-4">
+<div id="outline-container-6" class="outline-2">
+<h2 id="sec-6">buffer dictionary </h2>
+<div id="text-6">
 
 <p>LocalWords:  DBlocks dblocks
 </p></div>
@@ -338,7 +761,7 @@ following the #+BEGIN<sub>R</sub> declaration.
 <div id="postamble"><p class="author"> Author: Dan
 <a href="mailto:dan@Tichodroma">&lt;dan@Tichodroma&gt;</a>
 </p>
-<p class="date"> Date: 2009-02-05 21:16:20 EST</p>
-<p>HTML generated by org-mode 6.20f in emacs 22</p>
+<p class="date"> Date: 2009-02-08 14:56:13 EST</p>
+<p>HTML generated by org-mode 6.21trans in emacs 22</p>
 </div></body>
 </html>

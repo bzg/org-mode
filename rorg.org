@@ -1,10 +1,10 @@
-#+TITLE: rorg --- R and org-mode
+#+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
 #+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
 #+STARTUP: oddeven
 
-* Overview
-
-** Dan [2009-02-08 Sun]
+* Overview (Dan [2009-02-08 Sun])
+** Project objectives
 This project is basically about putting source code into org
 files. This isn't just code to look pretty as a source code example,
 but code to be evaluated. Org files have 3 main export targets: org,
@@ -14,53 +14,104 @@ source code that is present in the source org file. We have a current
 focus on R code, but we are regarding that more as a working example
 than as a defining feature of the project.
 
-The following are three important questions:
+Code evaluation can have three relevant consequences. Our aim is to
+deal with these consequences as follows:
+
+*** It produces text/numeric output
+    We (optionally) incorporate the text output as text in the target
+    document
+*** It produces graphical output
+    We either link to the graphics or (html/latex) include them inline.
+*** It creates some non-graphics files
+    ? We link to other file output
+*** It alters the environment by side effect in some other way
+    We bear this in mind
+
+** Implementation questions
+   These objectives raise three questions:
 
  1. How is the code placed in the org file?
  2. When is the code evaluated?
- 3. What happens when the code is evaluated?
+ 3. What is the result of code evaluation?
 
-Let's take them in reverse order, as 1 and 2 can be viewed as
-details of the implementation of 3.
-
-*** What happens when the code is evaluated?
-Code evaluation can have three relevant consequences
- 1. It produces text/numeric output
- 2. It produces graphical output
- 3. It alters the environment by side effect in some other way
-
-I think our aims here are fairly straightforward to specify: in the
-case of (1) we (optionally) incorporate the text output as text in the
-target document. In the case of (2) we either place a link to the
-graphics or (html/latex) include them inline. We don't need to do anything
-about (3), except bear in mind that it's a possibility.
+*** How is the code placed in the org file?
+    Using some version of the code block ideas that Eric and Austin
+    have worked on. (In addition, an aim of org-R was to allow Org
+    users who are not R users to specify R code implicitly, using
+    native org syntax. I'd like to maintain that, but it's not central
+    to this project.)
 
 *** When is the code evaluated?
-Let's take the three export targets in turn
-**** Latex
-     Here we have some options. I'll use an asterisk to indicate
-     content which includes the *result* of code evaluation, rather
-     than the code itself.
+    Let's use an asterisk to indicate content which includes the
+    *result* of code evaluation, rather than the code itself. Clearly
+    we have a requirement for the following transformation:
+
+    org \to org*
+
+    Let's say this transformation is effected by a function
+    `org-eval-buffer'. This transformation is necessary when the
+    target format is org (say you want to update the values in an org
+    table, or generate a plot and create an org link to it), and it
+    can also be used as the first step by which to reach html and
+    latex:
+    
+    org \to org* \to html
+
+    org \to org* \to latex
+
+    Thus in principle we can reach our 3 target formats with
+    `org-eval-buffer', `org-export-as-latex' and `org-export-as-html'.
+    
+    An extra transformation that we might want is
+    
+    org \to latex
+
+    I.e. export to latex without evaluation of code, in such a way that R
+    code can subsequently be evaluated using
+    =Sweave(driver=RweaveLatex)=, which is what the R community is
+    used to. This would provide a `bail out' avenue where users can
+    escape org mode and enter a workflow in which the latex/noweb file
+    is treated as source.
+
+**** How do we implement `org-eval-buffer'?
+    
+     AIUI The following can all be viewed as implementations of
+     org-eval-buffer for R code:
+    
+***** org-eval-light
+      This is the beginnings of a general evaluation mechanism, that
+      could evaluate python, ruby, shell, perl, in addition to R.
+      The header says it's based on org-eval, what is org-eval??
       
-***** org \to org* \to latex
-      This is what RweaveOrg does, e.g.
-: Sweave("testing.Rorg", driver=RweaveOrg, syntax=SweaveSyntaxOrg)
-Here testing.Rorg is an org file, and Sweave generates another org
-file, but with the code evaluated.
+***** org-R
+      This accomplishes org \to org* in elisp by visiting code blocks
+      and evaluating code using ESS.
 
-This is also what org-R does.
+***** RweaveOrg
+      This accomplishes org \to org* using R via
+      
+: Sweave("file-with-unevaluated-code.org", driver=RweaveOrg, syntax=SweaveSyntaxOrg)
 
-***** org \to latex \to \latex*
-      This seems like a possibility to me, but AFAIK we don't have it
-      working. So in the case of R, here you would use something like
-      `org-export-as-latex', and then from R, run Sweave (with the
-      RweaveLatex driver) on the exported latex to generate the latex*
-      file with evaluation results. Since Sweave with RweaveLatex is
-      an established technology that is heavily used in the R
-      community, it would be nice to provide this route as an option,
-      so at any point users can `bail out' and enter a workflow where
-      they treat the latex/noweb as source code to be edited directly
-      (rather than editing a org buffer).
+***** org-exp-blocks.el
+      Like org-R, this achieves org \to org* in elisp by visiting code
+      blocks and using ESS to evaluate R code.
+
+
+*** What is the result of code evaluation?
+    Here we have to consider text/numeric output, and graphical
+    output. And also the stage at which evaluation occurs
+***** org \to org*
+****** Text / numerical output
+       In the case of org \to org*, I would argue that, where
+      appropriate, it should be stored in org tables. Thus an advantage
+      our project would have over Sweave is that tabular output is
+      automatically conveqrted to native tables on export to HTML and
+      latex.
+****** Graphical output
+       We place an org link to the file. This is done already by
+       org-R-apply, and by RweaveOrg.
+***** latex \to latex*
+      This is done by Sweave(driver=RweaveLatex) and so is out of our hands
 
 * Commentary
 
@@ -211,9 +262,11 @@ results should appear in a comment immediately following the source
 code block.  It shouldn't be too hard to add R support to this
 function through the `org-eval-light-interpreters' variable.
 
-#+begin_src shell
+(Dan: The following causes error on export to HTML hence spaces inserted at bol)
+
+ #+begin_src shell
 date
-#+end_src
+ #+end_src
 
 *** Source code blocks 
     Org has an extremely useful method of editing source code and
@@ -265,7 +318,7 @@ different components which have to interactive with R including:
 - evaluation of single source code lines
 - sending/receiving vector data
 
-I think we currently have two implementation of interaction with R
+I think we currently have two implementations of interaction with R
 processes; [[file:existing_tools/org-R.el][org-R.el]] and [[file:existing_tools/exp-blocks/org-exp-blocks.el ][org-exp-blocks.el]].  We should be sure to take
 the best of each of these approaches.
 
