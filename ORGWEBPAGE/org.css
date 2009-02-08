@@ -10,7 +10,6 @@
 	background-repeat: no-repeat;
 	background-position: 10px 10px;
 	line-height:1.2em;
-        border-style:none;
   }
 
   h1 {font-size: 14pt;}
@@ -25,6 +24,7 @@
 	height: 600px;
 	line-height: 1.4em;
 	overflow:auto;
+        border-style:none;
   }
 
   #table-of-contents h2 {
