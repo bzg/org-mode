@@ -3704,9 +3704,6 @@ The following commands are available:
 (when org-tab-follows-link
   (org-defkey org-mouse-map [(tab)] 'org-open-at-point)
   (org-defkey org-mouse-map "\C-i" 'org-open-at-point))
-(when org-return-follows-link
-  (org-defkey org-mouse-map [(return)] 'org-open-at-point)
-  (org-defkey org-mouse-map "\C-m" 'org-open-at-point))
 
 (require 'font-lock)
 
@@ -13588,15 +13585,18 @@ See the individual commands for more information."
   (interactive)
   (cond
    ((bobp) (if indent (newline-and-indent) (newline)))
+   ((org-at-table-p)
+    (org-table-justify-field-maybe)
+    (call-interactively 'org-table-next-row))
+   ((and org-return-follows-link
+	 (eq (get-text-property (point) 'face) 'org-link))
+    (call-interactively 'org-open-at-point))
    ((and (org-at-heading-p)
 	 (looking-at
 	  (org-re "\\([ \t]+\\(:[[:alnum:]_@:]+:\\)\\)[ \t]*$")))
     (org-show-entry)
     (end-of-line 1)
     (newline))
-   ((org-at-table-p)
-    (org-table-justify-field-maybe)
-    (call-interactively 'org-table-next-row))
    (t (if indent (newline-and-indent) (newline)))))
 
 (defun org-return-indent ()

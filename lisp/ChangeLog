@@ -1,3 +1,9 @@
+2009-02-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-return): Implement `org-return-follows-link' in the
+	function org-return.  This is more robust than using the mouse
+	map, I think.
+
 2009-02-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-string): Remove clock lines
