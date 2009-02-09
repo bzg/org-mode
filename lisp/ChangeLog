@@ -3,6 +3,9 @@
 	* org.el (org-return): Implement `org-return-follows-link' in the
 	function org-return.  This is more robust than using the mouse
 	map, I think.
+	(org-set-regexps-and-options): Match more general #+TODO lines.
+	(org-make-options-regexp): New optional argument EXTRA, for an
+	extra regexp.
 
 2009-02-07  Carsten Dominik  <carsten.dominik@gmail.com>
 

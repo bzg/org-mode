@@ -3193,9 +3193,10 @@ means to push this value onto the list in the variable.")
     (org-set-local 'org-file-properties nil)
     (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp
-	       '("CATEGORY" "SEQ_TODO" "TYP_TODO" "TODO" "CHOOSE_TODO" "COLUMNS"
+	       '("CATEGORY" "TODO" "COLUMNS"
 		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
-		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")))
+		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE")
+	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
 	  (splitre "[ \t]+")
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
 	  tail sep kws1 prio props ftags drawers
@@ -3220,8 +3221,10 @@ means to push this value onto the list in the variable.")
 	      (push (cons 'sequence (org-split-string value splitre)) kwds))
 	     ((equal key "TYP_TODO")
 	      (push (cons 'type (org-split-string value splitre)) kwds))
- 	     ((equal key "CHOOSE_TODO")
- 	      (push (cons 'choose (org-split-string value splitre)) kwds))
+ 	     ((string-match "\\`\\([a-zA-Z][0-9a-zA-Z_]*\\)_TODO\\'" key)
+	      ;; general TODO-like setup
+ 	      (push (cons (intern (downcase (match-string 1 key)))
+			  (org-split-string value splitre)) kwds))
 	     ((equal key "TAGS")
 	      (setq tags (append tags (org-split-string value splitre))))
 	     ((equal key "COLUMNS")
@@ -15132,12 +15135,13 @@ Show the heading too, if it is currently invisible."
 	   nil))
       (error nil))))
 
-(defun org-make-options-regexp (kwds)
+(defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."
   (concat
    "^"
    "#?[ \t]*\\+\\("
    (mapconcat 'regexp-quote kwds "\\|")
+   (if extra (concat "\\|" extra))
    "\\):[ \t]*"
    "\\(.+\\)"))
 
