@@ -1110,7 +1110,9 @@ links created by planner."
 
 (defcustom org-tab-follows-link nil
   "Non-nil means, on links TAB will follow the link.
-Needs to be set before org.el is loaded."
+Needs to be set before org.el is loaded.
+This really should not be used, it does not make sense, and the
+implementation is bad."
   :group 'org-link-follow
   :type 'boolean)
 
