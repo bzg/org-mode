@@ -470,7 +470,6 @@ NEW-MARK and OLD-MARK are the text of the new and old marks."
      (add-to-list 'org-todo-interpretation-widgets
 		  '(:tag "Choose   (to record decisions)" choose)
 		  'append)
-; CD      (add-to-list 'org-todo-normal-interpretations 'choose))
    ))
 
 
