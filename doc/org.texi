@@ -10340,6 +10340,8 @@ Org-mode website.
 @item
 @i{Alex Bochannek} provided a patch for rounding time stamps.
 @item
+@i{Tom Breton} wrote @file{og-choose.el}.
+@item
 @i{Charles Cave}'s suggestion sparked the implementation of templates
 for Remember.
 @item

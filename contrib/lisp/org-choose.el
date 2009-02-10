@@ -5,7 +5,7 @@
 ;; Copyright (C) 2009  Tom Breton (Tehom)
 
 ;; Author: Tom Breton (Tehom)
-;; Keywords: 
+;; Keywords: outlines, convenience
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,7 +24,40 @@
 
 ;;;_ , Commentary:
 
-;; 
+; This is code to support decision management.  It lets you treat a
+; group of sibling items in org-mode as alternatives in a decision.
+
+; There are no user commands in this file.  You use it by:
+;   * Loading it (manually or by M-x customize-apropos org-modules)
+
+;;   * Setting up at least one set of TODO keywords with the
+;;     interpretation "choose" by either:
+
+;;     * Using the file directive #+CHOOSE_TODO:
+
+;;       * For instance, "#+CHOOSE_TODO: NO(,-) MAYBE(,0) YES"
+
+;;     * Or by M-x customize-apropos org-todo-keywords
+
+;;   * Operating on single items with the TODO commands.
+
+;;     * Use C-S-right to change the keyword set.  Use this to change to
+;;       the "choose" keyword set that you just defined.
+
+;;     * Use S-right to advance the TODO mark to the next setting.  
+
+;;       For "choose", that means you like this alternative more than
+;;       before.  Other alternatives will be automatically demoted to
+;;       keep your settings consistent.
+
+;;     * Use S-left to demote TODO to the previous setting.  
+
+;;       For "choose", that means you don't like this alternative as much
+;;       as before.  Other alternatives will be automatically promoted,
+;;       if this item was all that was keeping them down.
+
+;;     * All the other TODO commands are available and behave essentially
+;;       the normal way.
 
 
 ;;;_ , Requires
@@ -197,7 +230,7 @@ interpretation."
 
 ;;;_  . org-choose-conform-after-promotion
 (defun org-choose-conform-after-promotion (entry-pos keywords highest-ok-ix)
-   ""
+  "Conform the current item after another item was promoted"
    
    (unless
       ;;Skip the entry that triggered this by skipping any entry with
@@ -218,7 +251,8 @@ interpretation."
 (defun org-choose-conform-after-demotion (entry-pos keywords
 					       raise-to-ix
 					       old-highest-ok-ix) 
-   ""
+  "Conform the current item after another item was demoted."
+
    (unless
       ;;Skip the entry that triggered this.
       (= (point) entry-pos)
@@ -235,9 +269,10 @@ interpretation."
 	    (org-todo 
 	       (nth raise-to-ix keywords))))))
 
-;;;_ , org-choose-keep-sensible (the trigger-hook function)
+;;;_ , org-choose-keep-sensible (the org-trigger-hook function)
 (defun org-choose-keep-sensible (change-plist)
-   ""
+  "Bring the other items back into a sensible state after an item's
+setting was changed."
 
    (let*
       (  (from (plist-get change-plist :from))
@@ -330,7 +365,8 @@ interpretation."
 ;;;_ , Getting the default mark
 ;;;_  . org-choose-get-index-in-keywords
 (defun org-choose-get-index-in-keywords (ix all-keywords)
-   "Return index of current entry."
+  "Return the index of the current entry."
+
    (if ix
       (position ix all-keywords
 	 :test #'equal)))
@@ -380,7 +416,10 @@ If there is none, return 0"
 ;;;_  . org-choose-highest-ok
 
 (defun org-choose-highest-other-ok (ix data)
-   ""
+  "Return the highest index that any choose mark can sensibly have,
+given that another mark has index IX.
+DATA must be a `org-choose-mark-data.'."
+
 
    (let
       (		
@@ -401,10 +440,10 @@ If there is none, return 0"
 ;;;_  . org-choose-get-default-mark-index
 
 (defun org-choose-get-default-mark-index (data) 
-   "Get the index of the default mark in a choose interpretation.
+  "Return the index of the default mark in a choose interpretation.
 
-Args are in the same order as the fields of
-`org-choose-mark-data.' and have the same meaning."
+DATA must be a `org-choose-mark-data.'."
+
 
    (or
       (let
