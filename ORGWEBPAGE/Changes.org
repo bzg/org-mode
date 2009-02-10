@@ -21,7 +21,7 @@
 
 Org-choose helps documenting a decision-making process by using
 TODO keywords for different degrees of /chosenness/, and by
-automatically keepting a set of alternatives in a consistent state.
+automatically keeping a set of alternatives in a consistent state.
 
 Documentation for /org-choose.el/ is available [[http://orgmode.org/worg/org-contrib/org-choose.php][here]].
 
