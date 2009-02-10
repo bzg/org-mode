@@ -46,7 +46,7 @@ The main objectives of this project are...
 - [[* export][export]]
 
 
-* Objectives
+* Objectives and Specs
 
 ** evaluation of embedded source code
 
@@ -230,20 +230,8 @@ through the htmlp and latexp variables, and can then create quoted
 
    Note that upper and lower case are not relevant in block headings.
 
-*** block headers/parameters
-regardless of the syntax/format chosen for the source blocks, we will
-need to be able to pass a list of parameters to these blocks.  These
-should include (but should certainly not be limited to)
-- label of the block
-- names of file to which graphical/textual/numerical/tabular output
-  should be written
-- flags for when/if the block should be evaluated (on export etc...)
-- flags for how the results of the export should be displayed/included
-- flags specific to the language of the source block
-- etc...
-
 *** block format
-**** PROPOSED R-block proposal
+**** PROPOSED block format
 I (Eric) propose that we use the syntax of source code blocks as they
 currently exist in org-mode with the addition of *evaluation*,
 *header-arguments*, *exportation*, *single-line-blocks*, and
@@ -275,6 +263,28 @@ currently exist in org-mode with the addition of *evaluation*,
    come up with a way to reference table data from a single-line-block
    or from an R source-code block.  It looks like Dan has already done
    this in [[file:existing_tools/org-R.el][org-R.el]].
+
+Syntax
+
+Multi-line Block
+: #+begin_src lang header-arguments
+:  body
+: #+end
+- lang :: the language of the block (R, shell, elisp, etc...)
+- hader-arguments :: a list of optional arguments which control how
+     the block is evaluated and exported, and how the results are handled
+- body :: the actual body of the block
+
+Single-line Block
+: #+begin_src lang body
+- It's not clear how/if we would include header-arguments into a
+  single line block.  Suggestions? Can we just leave them out?
+
+Include Block
+: #+include_src lang filename header-arguments
+- I think this would be useful, and should be much more work.  That
+  way whole external files of source code could be evaluated as if
+  they were an inline block.
 
 What do you think?  Does this accomplish everything we want to be able
 to do with embedded R source code blocks?
@@ -336,6 +346,18 @@ a
      allows for the kind of blocks shown in [[file:existing_tools/RweaveOrg/testing.Rorg][testing.Rorg]].  These blocks
      have the advantage of accepting options to the Sweave preprocessor
      following the #+BEGIN_R declaration.
+
+*** block headers/parameters
+regardless of the syntax/format chosen for the source blocks, we will
+need to be able to pass a list of parameters to these blocks.  These
+should include (but should certainly not be limited to)
+- label of the block
+- names of file to which graphical/textual/numerical/tabular output
+  should be written
+- flags for when/if the block should be evaluated (on export etc...)
+- flags for how the results of the export should be displayed/included
+- flags specific to the language of the source block
+- etc...
 
 ** Interaction with the R process
 
