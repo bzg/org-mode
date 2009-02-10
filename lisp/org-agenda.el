@@ -219,7 +219,9 @@ you can \"misuse\" it to also add other text to the header.  However,
 			     (const :tag "scheduled" 'scheduled)
 			     (const :tag "not scheduled" 'notscheduled)
 			     (const :tag "deadline" 'deadline)
-			     (const :tag "no deadline" 'notdeadline))))))
+			     (const :tag "no deadline" 'notdeadline)
+			     (const :tag "timestamp" 'timestamp)
+			     (const :tag "no timestamp" 'nottimestamp))))))
 	    (list :tag "Non-standard skipping condition"
 		  :value (org-agenda-skip-function)
 		  (const org-agenda-skip-function)
