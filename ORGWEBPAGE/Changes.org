@@ -50,7 +50,7 @@ This was a request by Hsui-Khuen Tang
 
 *** The default for =org-return-follows-link= is back to =nil=
 
-Setting it to =t= violates Emacs rules to some extend.  The
+Setting it to =t= violates Emacs rules to some extent.  The
 internal implementation of this has been improved, so setting it
 to =t= should now be pretty stable.
 
