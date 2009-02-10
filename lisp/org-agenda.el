@@ -4327,13 +4327,6 @@ So this is just a shortcut for `\\[org-agenda]', available in the agenda."
   (let ((org-agenda-window-setup 'current-window))
     (org-agenda arg)))
 
-(defun org-save-all-org-buffers ()
-  "Save all Org-mode buffers without user confirmation."
-  (interactive)
-  (message "Saving all Org-mode buffers...")
-  (save-some-buffers t 'org-mode-p)
-  (message "Saving all Org-mode buffers... done"))
-
 (defun org-agenda-redo ()
   "Rebuild Agenda.
 When this is the global TODO list, a prefix argument will be interpreted."

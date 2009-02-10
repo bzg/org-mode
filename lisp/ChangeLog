@@ -1,3 +1,8 @@
+2009-02-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-save-all-org-buffers): Moved here from org-agenda.el.
+	(org-revert-all-org-buffers): New command.
+
 2009-02-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-return): Implement `org-return-follows-link' in the

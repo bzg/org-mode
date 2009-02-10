@@ -12269,6 +12269,31 @@ If there is already a time stamp at the cursor position, update it."
 	 (string-to-number (match-string 2 s)))
     0))
 
+;;;; Files
+
+(defun org-save-all-org-buffers ()
+  "Save all Org-mode buffers without user confirmation."
+  (interactive)
+  (message "Saving all Org-mode buffers...")
+  (save-some-buffers t 'org-mode-p)
+  (message "Saving all Org-mode buffers... done"))
+
+(defun org-revert-all-org-buffers ()
+  "Revert all Org-mode buffers.
+Prompt for confirmation when there are unsaved changes."
+  (interactive)
+  (unless (yes-or-no-p "Revert all Org buffers from their files? ")
+    (error "Abort"))
+  (save-excursion
+    (save-window-excursion
+      (mapc
+       (lambda (b)
+	 (when (and (with-current-buffer b (org-mode-p))
+		    (with-current-buffer b buffer-file-name))
+	   (switch-to-buffer b)
+	   (revert-buffer t 'no-confirm)))
+       (buffer-list)))))
+
 ;;;; Agenda files
 
 ;;;###autoload
