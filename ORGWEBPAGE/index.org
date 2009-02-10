@@ -55,9 +55,9 @@ a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about O
 - <2009-01-25 Sun>: Release 6.19
 - <2009-01-20 Tue>: Release 6.18
 
-* Current Version (6.21b)
+* Current Version (6.22)
 
-The current version is 6.21b.  To see what has changed in recent
+The current version is 6.22.  To see what has changed in recent
 releases, check this detailed list of [[file:Changes.html][user-visible changes]].
 
 This package works on Emacs 23 and 22, and (with minor restrictions)
