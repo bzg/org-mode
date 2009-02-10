@@ -10,7 +10,7 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.22 (in preparation)
+* Version 6.22
  :PROPERTIES:
  :VISIBILITY: content
  :END:
@@ -20,13 +20,17 @@
 *** org-choose.el by Tom Breton is now included
 
 Org-choose helps documenting a decision-making process by using
-TODO keywords for different degree of chosenness, and by
-automatically un-choosing the previously chosen alternative when
-another one gets chosen.
+TODO keywords for different degrees of /chosenness/, and by
+automatically keepting a set of alternative in a consistent state.
+
+Documentation for /org-choose.el/ is available [[http://orgmode.org/worg/org-contrib/org-choose.php][here]].
 
 This package inserts itself into Org using hooks, so if other
 people would like to do interesting stuff with TODO keywords for
-special purposes, Tom's code might be a good way to start.
+special purposes, looking at Tom's code might be a good way to
+start.
+
+Thanks to Tom for this interesting contribution!
 
 *** orgmode.org and Worg css works now better on IE
 
@@ -34,7 +38,7 @@ Thanks to Sebastian Rose for making these changes.
 
 *** When exporting a subtree, headline levels are now relative to parent
 
-This was reported by William Henney and is fixed now.
+This was reported as a bug by William Henney and is fixed now.
 
 *** Inactive dates in tables can be used for sorting.
 
@@ -44,11 +48,11 @@ present.
 
 This was a request by Hsui-Khuen Tang
 
-*** The default for org-return-follows-link is back to nil
+*** The default for =org-return-follows-link= is back to =nil=
 
-Setting it to t violates Emacs rules to some extend.  The
+Setting it to =t= violates Emacs rules to some extend.  The
 internal implementation of this has been improved, so setting it
-to t should now be pretty stable.
+to =t= should now be pretty stable.
 
 *** Automatic scheduling of siblings with org-depend.el
 
