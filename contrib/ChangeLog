@@ -1,3 +1,9 @@
+2009-02-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-choose.el (org-choose-get-fn-map-group): Call
+	`org-up-heading-all' instead of `outline-up-heading-all', which
+	does not exist.
+
 2009-02-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-depend.el (org-depend-act-on-sibling): New macro.

@@ -386,9 +386,10 @@ setting was changed."
    
    #'(lambda (fn)
 	(save-excursion
-	   (outline-up-heading-all 1)
-	   (save-restriction
-	      (org-map-entries fn nil 'tree)))))
+	  (unless (org-up-heading-safe)
+	    (error "Chosing is only supported between siblings in a tree, not on top level"))
+	  (save-restriction
+	    (org-map-entries fn nil 'tree)))))
 
 ;;;_  . org-choose-get-highest-mark-index
 
