@@ -10,10 +10,10 @@ but code to be evaluated. Org files have 3 main export targets: org,
 html and latex. Once we have implemented a smooth bi-directional flow
 of data between org-mode formats (including tables, and maybe lists
 and property values) and source-code blocks, we will be able to use
-org-mode's built in export to publish this data in any org-supported
-format using org-mode as an intermediate format.  We have a current
-focus on R code, but we are regarding that more as a working example
-than as a defining feature of the project.
+org-mode's built in export to publish the results of evaluated source
+code in any org-supported format using org-mode as an intermediate
+format.  We have a current focus on R code, but we are regarding that
+more as a working example than as a defining feature of the project.
 
 The main objectives of this project are...
 
@@ -23,16 +23,17 @@ The main objectives of this project are...
 
 - [[* evaluation of embedded source code][evaluation of embedded source code]]
   - [[* execution on demand and on export][execution on demand and on export]]
-  - [[* evaluation of source blocks][evaluation of source blocks]]
+  - [[* source blocks][source blocks]]
   - [[* inline source evaluation][inline source evaluation]]
+  - [[* included source file evaluation][included source file evaluation]] ?? maybe
+  - [[* caching of evaluation][caching of evaluation]]
 - [[* interaction with the source-code's process][interaction with the source-code's process]]
 - [[* output of code evaluation][output of code evaluation]]
   - [[* textual/numeric output][textual/numeric output]]
   - [[* graphical output][graphical output]]
   - [[* file creation][non-graphics file creation]]
   - [[* side effects][side effects]]
-- [[* reference to data and evaluation results][reference to data and evaluation results]]: This could happen in many
-  directions
+- [[* reference to data and evaluation results][reference to data and evaluation results]]
   - [[* reference format][reference format]]
   - [[* source-target pairs][source-target pairs]]
     - [[* source block output from org tables][source block output from org tables]]
@@ -42,7 +43,6 @@ The main objectives of this project are...
     - [[* org table from org table][org table from org table]]
     - [[* org properties from source block][org properties from source block]]
     - [[* org properties from org table][org properties from org table]]
-- [[* caching of evaluation][caching of evaluation]]
 - [[* export][export]]
 
 
@@ -114,10 +114,50 @@ The main objectives of this project are...
       Like org-R, this achieves org \to org* in elisp by visiting code
       blocks and using ESS to evaluate R code.
 
-*** evaluation of source blocks
+*** source blocks
 (see [[* Special editing and evaluation of source code][Special editing and evaluation of source code]])
 
 *** inline source evaluation
+*** included source file evaluation
+It may be nice to be able to include an entire external file of source
+code, and then evaluate and export that code as if it were in the
+file.  The format for such a file inclusion could optionally look like
+the following
+
+: #+include_src filename header_arguments
+
+*** caching of evaluation
+
+Any kind of code that can have a block evaluated could optionally define
+a function to write the output to a file, or to serialize the output of
+the function.  If a document or block is configured to cache input,
+write all cached blocks to their own files and either a) hash them, or
+b) let git and org-attach track them.  Before a block gets eval'd, we
+check to see if it has changed.  If a document or block is configured to
+cache output and a print/serialize function is available, write the
+output of each cached block to its own file.  When the file is eval'd
+and some sort of display is called for, only update the display if the
+output has changed.  Each of these would have an override, presumably
+something like (... & force) that could be triggered with a prefix arg
+to the eval or export function.
+
+For R, I would say
+
+#+begin_src emacs-lisp
+;; fake code that only pretends to work
+(add-hook 'rorg-store-output-hook 
+    '("r" lambda (block-environment block-label)
+        (ess-exec (concat "save.image("
+                          block-environment
+                          ", file = " block-label
+                          ".Rdata, compress=TRUE)"))))
+#+end_src
+
+The idea being that for r blocks that get eval'd, if output needs to be
+stored, you should write the entire environment that was created in that
+block to an Rdata file.
+
+(see [[* block scoping][block scoping]])
 
 ** interaction with the source-code's process
 We should settle on a uniform API for sending code and receiving
@@ -201,13 +241,6 @@ source-target pairs
 **** org properties from source block
 **** org properties from org table
 
-** caching of evaluation
-
-I'm personally not clear on how this would be implemented, but it does
-seem to be important.  I'd be interested to hear how Sweave
-accomplished this.  Should it be based on tracking changes in source
-blocks.
-
 ** export
 once the previous objectives are met export should be fairly simple.
 Basically it will consist of triggering the evaluation of source code
@@ -219,7 +252,7 @@ through the htmlp and latexp variables, and can then create quoted
 
 
 * Notes
-** Special editing and evaluation of source code
+** Block Formats
    Unfortunately org-mode how two different block types, both useful.
    In developing RweaveOrg, a third was introduced.
 
@@ -230,8 +263,7 @@ through the htmlp and latexp variables, and can then create quoted
 
    Note that upper and lower case are not relevant in block headings.
 
-*** block format
-**** PROPOSED block format
+*** PROPOSED block format
 I (Eric) propose that we use the syntax of source code blocks as they
 currently exist in org-mode with the addition of *evaluation*,
 *header-arguments*, *exportation*, *single-line-blocks*, and
@@ -284,16 +316,21 @@ Single-line Block
   single line block.  Suggestions? Can we just leave them out?  Dan:
   I'm not too worried about single line blocks to start off
   with. Their main advantage seems to be that they save 2 lines.
+  Eric: Fair enough, lets not worry about this now, also I would guess
+  that any code simple enough to fit on one line wouldn't need header
+  arguments anyways.
 
 Include Block
 : #+include_src lang filename header-arguments
 - I think this would be useful, and should be much more work (Dan:
-  didn't get the meaning of that last clause!?).  That way whole
-  external files of source code could be evaluated as if they were an
-  inline block. Dan: again I'd say not a massive priority, as I think
-  all the languages we have in mind have facilities for doing this
-  natively, thus I think the desired effect can often be achieved from
-  within a #+begin_src block.
+  didn't get the meaning of that last clause!?).  Eric: scratch that,
+  I meant "*shouldn't* be too much work" :) That way whole external
+  files of source code could be evaluated as if they were an inline
+  block. Dan: again I'd say not a massive priority, as I think all the
+  languages we have in mind have facilities for doing this natively,
+  thus I think the desired effect can often be achieved from within a
+  #+begin_src block.  Eric: Agreed, while this would be a nice thing
+  to include we shouldn't wast too much effort on it in the beginning.
 
 What do you think?  Does this accomplish everything we want to be able
 to do with embedded R source code blocks?
@@ -316,6 +353,7 @@ function through the `org-eval-light-interpreters' variable.
 date
  #+end_src
 
+*** existing formats
 **** Source code blocks 
     Org has an extremely useful method of editing source code and
     examples in their native modes.  In the case of R code, we want to
@@ -360,11 +398,17 @@ a
 regardless of the syntax/format chosen for the source blocks, we will
 need to be able to pass a list of parameters to these blocks.  These
 should include (but should certainly not be limited to)
-- label of the block
-- names of file to which graphical/textual/numerical/tabular output
-  should be written
-- flags for when/if the block should be evaluated (on export etc...)
-- flags for how the results of the export should be displayed/included
+- label or id :: Label of the block, should we provide facilities for
+                 automatically generating a unique one of these?
+- file :: names of file to which graphical/textual/numerical/tabular output
+  should be written.  Do we need this, or should this be controlled
+  through the source code itself?
+- not sure of a good name here :: flags for when/if the block should
+     be evaluated (on export etc...)
+- again can't thing of a concise name :: flags for how the results of
+     the export should be displayed/included
+- scope :: flag indicating whether the block should have a local or
+           global scope
 - flags specific to the language of the source block
 - etc...
 
@@ -376,11 +420,42 @@ different components which have to interactive with R including:
 - automatic evaluation on export
 - evaluation of \R{} snippets
 - evaluation of single source code lines
+- evaluation of included source code files
 - sending/receiving vector data
 
 I think we currently have two implementations of interaction with R
 processes; [[file:existing_tools/org-R.el][org-R.el]] and [[file:existing_tools/exp-blocks/org-exp-blocks.el ][org-exp-blocks.el]].  We should be sure to take
 the best of each of these approaches.
+
+More on the exchange of data at between org-mode and source code
+blocks at [[* reference to data and evaluation results][reference to data and evaluation results]].
+
+** block scoping
+(see [[* caching of evaluation][caching of evaluation]])
+
+This inadvertently raises the issue of scoping.  The pretend function
+pretends that we will create a block-local scope, and that we can save
+just the things in that scope.  Sweave takes the make-everything-global
+approach.  I can see advantages either way.  If we make block-local
+scopes, we can save each one independently, and generally speaking it
+seems like more granularity==more control.  If we make everything
+global, we can refer to entities declared in earlier blocks without
+having to explicitly import those entities into the current block.  I
+think this counts in the "need to think about it early on" category.
+
+If we did want block-local scopes, in R we can start every eval with
+something like
+
+;; fake code that pretends to create a new, empty environment
+(ess-exec (concat block-env " <- new.env()"))
+(ess-exec (concat "eval(" block-contents ", envir=" block-env ")"))
+
+If we decide we want block-scoping, I'm sure Dan and I can figure out
+the right way to do this in R, if he hasn't already.  I haven't thought
+at all about how these scope issues generalize to, say, bash blocks.
+
+Maybe this is something that should be controlled by a header
+argument?
 
 
 * Tasks
