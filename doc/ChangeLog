@@ -1,3 +1,7 @@
+2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (CSS support): Document CSS classes for section numbers.
+
 2009-02-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Clocking work time): Decoment how to make the clock

@@ -1,3 +1,11 @@
+2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-html-level-start): Add a CSS class to section
+	numbers.
+	(org-export-html-toplevel-hlevel): Better documentation of the
+	influence of this variables on H levels and css classes in
+	export.
+
 2009-02-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-custom-commands-local-options): Add

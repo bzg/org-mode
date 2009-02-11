@@ -653,7 +653,13 @@ settings with <style>...</style> tags."
   :type 'string)
 
 (defcustom org-export-html-toplevel-hlevel 2
-  "The <H> level for level 1 headings in HTML export."
+  "The <H> level for level 1 headings in HTML export.
+This is also important for the classes that will be wrapped around headlines
+and outline structure.  If this variable is 1, the top-level headlines will
+be <h1>, and the corresponding classes will be outline-1, section-number-1,
+and outline-text-1.  If this is 2, all of these will get a 2 instead.
+The default for this variable is 2, because we use <h1> for formatting the
+document title."
   :group 'org-export-html
   :type 'string)
 
@@ -4646,12 +4652,16 @@ When TITLE is nil, just close all open levels."
 		(insert "<ul>\n<li>" title "<br/>\n"))))
 	(aset org-levels-open (1- level) t)
 	(setq snumber (org-section-number level))
-	(if (and org-export-with-section-numbers (not body-only))
-	    (setq title (concat snumber " " title)))
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
+	(if (and org-export-with-section-numbers (not body-only))
+	    (setq title (concat
+			 (format "<span class=\"section-number-%d\"> %s</span>"
+				 level snumber)
+			 title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
-	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s%s</h%d>\n<div id=\"text-%s\">\n"
-			snumber level level snumber extra-targets title level snumber))
+	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
+			snumber level level snumber extra-targets
+			title level level snumber))
 	(org-open-par)))))
 
 (defun org-get-text-property-any (pos prop &optional object)
