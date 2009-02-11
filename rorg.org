@@ -253,10 +253,13 @@ currently exist in org-mode with the addition of *evaluation*,
 
 4) *single-line-blocks*: It seems that it is useful to be able to
    place a single line of R code on a line by itself.  Should we add
-   syntax for this similar to Dan's =#+R:= lines?  I would lean
+   syntax for this similar to Dan's =#+RR:= lines?  I would lean
    towards something here that can be re-used for any type of source
    code in the same manner as the =#+begin_src R= blocks, maybe
-   =#+src_R=?
+   =#+src_R=? Dan: I'm fine with this, but don't think single-line
+   blocks are a priority. My =#+R= lines were something totally
+   different: an attempt to have users specify R code implicitly,
+   using org-mode option syntax.
 
 5) *references-to-table-data*: I get this impression that this is
    vital to the efficient use of R code in an org file, so we should
@@ -271,20 +274,26 @@ Multi-line Block
 :  body
 : #+end
 - lang :: the language of the block (R, shell, elisp, etc...)
-- hader-arguments :: a list of optional arguments which control how
+- header-arguments :: a list of optional arguments which control how
      the block is evaluated and exported, and how the results are handled
 - body :: the actual body of the block
 
 Single-line Block
 : #+begin_src lang body
 - It's not clear how/if we would include header-arguments into a
-  single line block.  Suggestions? Can we just leave them out?
+  single line block.  Suggestions? Can we just leave them out?  Dan:
+  I'm not too worried about single line blocks to start off
+  with. Their main advantage seems to be that they save 2 lines.
 
 Include Block
 : #+include_src lang filename header-arguments
-- I think this would be useful, and should be much more work.  That
-  way whole external files of source code could be evaluated as if
-  they were an inline block.
+- I think this would be useful, and should be much more work (Dan:
+  didn't get the meaning of that last clause!?).  That way whole
+  external files of source code could be evaluated as if they were an
+  inline block. Dan: again I'd say not a massive priority, as I think
+  all the languages we have in mind have facilities for doing this
+  natively, thus I think the desired effect can often be achieved from
+  within a #+begin_src block.
 
 What do you think?  Does this accomplish everything we want to be able
 to do with embedded R source code blocks?
