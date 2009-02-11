@@ -8033,12 +8033,12 @@ publishing directory see @ref{Publishing links}.
 
 If you want to specify attributes for links, you can do so using a special
 @code{#+ATTR_HTML} line to define attributes that will be added to the
-@code{<a>} or @code{<img>} tags.  Here is an example that sets @code{alt} and
-@code{title} attributes for an inlined image:
+@code{<a>} or @code{<img>} tags.  Here is an example that sets @code{title}
+and @code{style} attributes for a link:
 
 @example
-#+ATTR_HTML: alt="This is image A" title="Image with no action"
-[[./img/a.jpg]]
+#+ATTR_HTML: title="The Org-mode homepage" style="color:red;"
+[[http://orgmode.org]]
 @end example
 
 @node Images in HTML export, Text areas in HTML export, Links, HTML export
@@ -8060,6 +8060,15 @@ will link to a high resolution version of the image, you could use:
 
 @example
 [[file:highres.jpg][file:thumb.jpg]]
+@end example
+
+If you need to add attributes to an inlines image, use a @code{#+ATTR_HTML},
+for example:
+
+@example
+#+CAPTION: A black cat stalking a spider
+#+ATTR_HTML: alt="cat/spider image" title="one second before action"
+[[./img/a.jpg]]
 @end example
 
 @noindent

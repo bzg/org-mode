@@ -1,6 +1,8 @@
 2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (CSS support): Document CSS classes for section numbers.
+	(Links, Images in HTML export): Better documentation of hot to set
+	attribute for images.
 
 2009-02-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
