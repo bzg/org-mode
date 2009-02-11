@@ -1,5 +1,8 @@
 2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-find-position): Do not swallow an item
+	less indented than the CLOCK line itself.
+
 	* org-exp.el (org-html-level-start): Add a CSS class to section
 	numbers.
 	(org-export-html-toplevel-hlevel): Better documentation of the
