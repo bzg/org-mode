@@ -1096,7 +1096,9 @@ the entry with the heading @samp{Archive} and the tag @samp{ARCHIVE}
 (@pxref{ARCHIVE tag}).  The entry becomes a child of that sibling and in this
 way retains a lot of its original context, including inherited tags and
 approximate position in the outline.
+@kindex C-c $
 @kindex C-c C-x C-s
+@itemx C-c $
 @item C-c C-x C-s
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.  Context information that could be
