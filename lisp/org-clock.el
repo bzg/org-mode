@@ -354,7 +354,8 @@ the clocking selection, associated with the letter `d'."
 	      (sit-for 2)
 	      (throw 'abort nil))
 	     (t
-	      (insert "\n") (backward-char 1)
+	      (insert-before-markers "\n")
+	      (backward-char 1)
 	      (org-indent-line-function)
 	      (insert org-clock-string " ")
 	      (setq org-clock-start-time (current-time))
