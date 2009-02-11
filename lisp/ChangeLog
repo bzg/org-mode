@@ -3,6 +3,8 @@
 	* org-clock.el (org-clock-find-position): Do not swallow an item
 	less indented than the CLOCK line itself.
 	(org-clock-in): Push markers to lin after the clock line.
+	(org-clock-find-position): Handle values of
+	`org-clock-into-drawer' smaller than 2.
 
 	* org-exp.el (org-html-level-start): Add a CSS class to section
 	numbers.

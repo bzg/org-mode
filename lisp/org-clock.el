@@ -395,6 +395,7 @@ the clocking selection, associated with the letter `d'."
 	      last (match-beginning 0)
 	      cnt (1+ cnt)))
       (when (and (integerp org-clock-into-drawer)
+		 last
 		 (>= (1+ cnt) org-clock-into-drawer))
 	;; Wrap current entries into a new drawer
 	(goto-char last)
@@ -420,7 +421,9 @@ the clocking selection, associated with the letter `d'."
 	;; Planning info, skip to after it
 	(beginning-of-line 2)
 	(or (bolp) (newline)))
-      (when (eq t org-clock-into-drawer)
+      (when (or (eq org-clock-into-drawer t)
+		(and (integerp org-clock-into-drawer)
+		     (< org-clock-into-drawer 2)))
 	(insert ":CLOCK:\n:END:\n")
 	(beginning-of-line 0)
 	(org-indent-line-function)
