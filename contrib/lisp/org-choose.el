@@ -499,19 +499,18 @@ NEW-MARK and OLD-MARK are the text of the new and old marks."
 
 ;;;_ , Setting it all up
 
-(eval-after-load 'org
+(eval-after-load "org"
   '(progn
      (add-to-list 'org-todo-setup-filter-hook
-		  #'org-choose-setup-filter) 
+		  #'org-choose-setup-filter)
      (add-to-list 'org-todo-get-default-hook
-		  #'org-choose-get-default-mark) 
+		  #'org-choose-get-default-mark)
      (add-to-list 'org-trigger-hook
 		  #'org-choose-keep-sensible)
      (add-to-list 'org-todo-interpretation-widgets
 		  '(:tag "Choose   (to record decisions)" choose)
 		  'append)
      ))
-
 
 
 ;;;_. Footers
