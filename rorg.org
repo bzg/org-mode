@@ -190,20 +190,20 @@ Are there side-effects which need to be considered aside from those
 internal to the source-code evaluation process?
 
 ** reference to data and evaluation results
-I think this will be very important.  I would suggest that since we
-are using lisp we use lists as our medium of exchange.  Then all we
-need are functions going converting all of our target formats to and
-from lists.  These functions are already provided by for org tables.
+   I think this will be very important.  I would suggest that since we
+   are using lisp we use lists as our medium of exchange.  Then all we
+   need are functions going converting all of our target formats to and
+   from lists.  These functions are already provided by for org tables.
 
-It would be a boon both to org users and R users to allow org tables
-to be manipulated with the R programming language.  Org tables give R
-users an easy way to enter and display data; R gives org users a
-powerful way to perform vector operations, statistical tests, and
-visualization on their tables.
+   It would be a boon both to org users and R users to allow org tables
+   to be manipulated with the R programming language.  Org tables give R
+   users an easy way to enter and display data; R gives org users a
+   powerful way to perform vector operations, statistical tests, and
+   visualization on their tables.
 
-This means that we will need to consider unique id's for source
-blocks, as well as for org tables, and for any other data source or
-target.
+   This means that we will need to consider unique id's for source
+   blocks, as well as for org tables, and for any other data source or
+   target.
 
 *** Implementations
 **** naive
@@ -214,25 +214,71 @@ target.
      files. Org tables are first exported to a temporary csv file
      using [[file:existing_tools/org-R.el::defun%20org%20R%20export%20to%20csv%20csv%20file%20options][org-R-export-to-csv]].
 **** org-exp-blocks
-org-exp-blocks uses [[org-interblock-R-command-to-string]] to send
-commands to an R process running in a comint buffer through ESS.
-org-exp-blocks has no support for dumping table data to R process, or
-vice versa.
+     org-exp-blocks uses [[org-interblock-R-command-to-string]] to send
+     commands to an R process running in a comint buffer through ESS.
+     org-exp-blocks has no support for dumping table data to R process, or
+     vice versa.
 
 **** RweaveOrg
      NA
 
 *** reference format
-This will be tricky, Dan has already come up with a solution for R, I
-need to look more closely at that and we should try to come up with a
-formats for referencing data from source-code in such a way that it
-will be as source-code-language independent as possible.
+    This will be tricky, Dan has already come up with a solution for R, I
+    need to look more closely at that and we should try to come up with a
+    formats for referencing data from source-code in such a way that it
+    will be as source-code-language independent as possible.
+
+**** Dan: thinking aloud re: referencing data from R
+     Suppose in some R code, we want to reference data in an org
+     table. I think that requires the use of 'header arguments', since
+     otherwise, under pure evaluation of a code block without header
+     args, R has no way to locate the data in the org buffer. So that
+     suggests a mechanism like that used by org-R whereby table names
+     or unique entry IDs are used to reference org tables (and indeed
+     potentially row/column ranges within org tables, although that
+     subsetting could also be done in R).
+
+     Specifically what org-R does is write the table to a temp csv
+     file, and tell R the name of that file. However:
+
+     1. We are not limited to a single source of input; the same sort
+        of thing could be done for several sources of input
+
+     2. I don't think we even have to use temp files. An alternative
+        would be to have org pass the table contents as a csv-format
+        string to textConnection() in R, thus creating an arbitrary
+        number of input objects in the appropriate R environment
+        (scope) from which the R code can read data when necessary.
+
+	That suggests a header option syntax something like
+    
+#+begin_src emacs-lisp
+'(:R-obj-name-1 tbl-name-or-id-1 :R-obj-name-2 tbl-name-or-id-2)
+#+end_src emacs-lisp
+
+As a result of passing that option, the code would be able to access
+the data referenced by table-name-or-id-2 via read.table(R-obj-name-1).
+
+An extension of that idea would be to allow remote files to be used as
+data sources. In this case one might need just the remote file (if
+it's a csv file), or if it's an org file then the name of the file
+plus a table reference within that org file. Thus maybe something like
+
+#+begin_src emacs-lisp
+'((R-obj-name-1 . (:tblref tbl-name-or-id-1 :file file-1))
+  (R-obj-name-2 . (:tblref tbl-name-or-id-2 :file file-2)))
+#+end_src emacs-lisp
+
 
 *** source-target pairs
 
-The following can be used for special considerations based on
-source-target pairs
+    The following can be used for special considerations based on
+    source-target pairs
 
+    Dan: I don't quite understand this subtree; Eric -- could you give
+    a little more explanation of this and of your comment above
+    regarding using [[lists as our medium of exchange]]?
+    
 **** source block output from org tables
 **** source block outpt from other source block
 **** source block output from org list
@@ -240,15 +286,16 @@ source-target pairs
 **** org table from org table
 **** org properties from source block
 **** org properties from org table
-
+     
+     
 ** export
-once the previous objectives are met export should be fairly simple.
-Basically it will consist of triggering the evaluation of source code
-blocks with the org-export-preprocess-hook.
+   once the previous objectives are met export should be fairly simple.
+   Basically it will consist of triggering the evaluation of source code
+   blocks with the org-export-preprocess-hook.
 
-This block export evaluation will be aware of the target format
-through the htmlp and latexp variables, and can then create quoted
-=#+begin_html= and =#+begin_latex= blocks appropriately.
+   This block export evaluation will be aware of the target format
+   through the htmlp and latexp variables, and can then create quoted
+   =#+begin_html= and =#+begin_latex= blocks appropriately.
 
 
 * Notes
@@ -395,7 +442,7 @@ a
      following the #+BEGIN_R declaration.
 
 *** block headers/parameters
-regardless of the syntax/format chosen for the source blocks, we will
+Regardless of the syntax/format chosen for the source blocks, we will
 need to be able to pass a list of parameters to these blocks.  These
 should include (but should certainly not be limited to)
 - label or id :: Label of the block, should we provide facilities for
@@ -488,6 +535,7 @@ through the process of fleshing out objectives, and cashing those
 objectives out into tasks.  That said, please feel free to make any
 changes that you see fit.
 
-
+** Dan <2009-02-12 Thu 10:23>
+   Good job Eric with major works on this file.
 * Buffer Dictionary
  LocalWords:  DBlocks dblocks
