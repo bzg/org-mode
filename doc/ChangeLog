@@ -1,3 +1,9 @@
+2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Tracking TODO state changes): Document storing state
+	change notes into a drawer.
+	(Agenda commands): Document the agenda command `z'.
+
 2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (CSS support): Document CSS classes for section numbers.

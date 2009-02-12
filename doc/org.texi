@@ -3416,14 +3416,22 @@ giving you an overview of what has been done.
 
 @node Tracking TODO state changes,  , Closing items, Progress logging
 @subsection Tracking TODO state changes
+@cindex drawer, for state change recording
 
-When TODO keywords are used as workflow states (@pxref{Workflow
-states}), you might want to keep track of when a state change occurred
-and maybe take a note about this change.  Since it is normally too much
-to record a note for every state, Org mode expects configuration on a
-per-keyword basis for this.  This is achieved by adding special markers
-@samp{!} (for a time stamp) and @samp{@@} (for a note) in parenthesis
-after each keyword.  For example, with the setting
+When TODO keywords are used as workflow states (@pxref{Workflow states}), you
+might want to keep track of when a state change occurred and maybe take a
+note about this change.  You can either record just a timestamp, or a
+timestamped note for a change.  These records will be inserted after the
+headline as an itemized list, newest first@footnote{See the variable
+@code{org-log-states-order-reversed}}.  When taking a lot of notes, you might
+want to get the notes out of a way into a drawer (@pxref{Drawers}).
+Customize the variable @code{org-org-log-state-notes-into-drawer} to get this
+behavior - the recommended drawer for this is called @code{LOGBOOK}.
+
+Since it is normally too much to record a note for every state, Org mode
+expects configuration on a per-keyword basis for this.  This is achieved by
+adding special markers @samp{!} (for a time stamp) and @samp{@@} (for a note)
+in parenthesis after each keyword.  For example, with the setting
 
 @lisp
 (setq org-todo-keywords
@@ -6487,6 +6495,12 @@ key for this.
 @item -
 @itemx S-@key{down}
 Decrease the priority of the current item.
+@c
+@kindex z
+@item z
+Add a note to the entry.  This note will be recorded, and then files to the
+same location where state change notes a put.  Depending on
+@code{org-log-state-notes-into-drawer}, this maybe inside a drawer.
 @c
 @kindex C-c C-a
 @item C-c C-a

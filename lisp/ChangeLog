@@ -1,4 +1,10 @@
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
+	* org.el (org-drawers): Add LOGBOOK to the default drawers.
+	(org-log-state-notes-into-drawer): New option.
+	(org-add-log-setup): Place the sate note marker into the drawer,
+	create drawer when necessary.
+
+2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-store-log-note): Fix note indentation when adding
 	notes to end of list.
