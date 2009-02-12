@@ -8109,8 +8109,9 @@ assigns the following special CSS classes to appropriate parts of the
 document - your style specifications may change these, in addition to any of
 the standard classes like for headlines, tables etc.
 @example
-.todo              @r{TODO keywords}
-.done              @r{the DONE keyword}
+.todo              @r{TODO keywords, all not-done states}
+.done              @r{the DONE keywords, all stated the count as done}
+WAITING            @r{Each TODO keyword also uses a class named after itself}
 .timestamp         @r{time stamp}
 .timestamp-kwd     @r{keyword associated with a time stamp, like SCHEDULED}
 .tag               @r{tag in a headline}

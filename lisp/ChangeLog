@@ -1,5 +1,8 @@
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-html): Add TODO keyword as extra
+	class, so that each keyword can get special colors through CSS.
+
 	* org-clock.el (org-clock-out): Add another nil for the previous
 	state into the call to `org-add-log-setup'.
 
