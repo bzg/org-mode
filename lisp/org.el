@@ -1766,7 +1766,7 @@ When nil, only the date will be recorded."
 
 (defcustom org-log-note-headings
   '((done .  "CLOSING NOTE %t")
-    (state . "State %-12s %t")
+    (state . "State %-12s from %-12S %t")
     (note .  "Note taken on %t")
     (clock-out . ""))
   "Headings for notes added to entries.
@@ -1775,6 +1775,7 @@ context, and the cdr is the heading to be used.  The heading may also be the
 empty string.
 %t in the heading will be replaced by a time stamp.
 %s will be replaced by the new TODO state, in double quotes.
+%S will be replaced by the old TODO state, in double quotes.
 %u will be replaced by the user name.
 %U will be replaced by the full user name."
   :group  'org-todo
@@ -8573,10 +8574,10 @@ For calling through lisp, arg is also interpreted in the following way:
 	      ;; It is now done, and it was not done before
 	      (org-add-planning-info 'closed (org-current-time))
 	      (if (and (not dolog) (eq 'note org-log-done))
-		  (org-add-log-setup 'done state 'findpos 'note)))
+		  (org-add-log-setup 'done state this 'findpos 'note)))
 	    (when (and state dolog)
 	      ;; This is a non-nil state, and we need to log it
-	      (org-add-log-setup 'state state 'findpos dolog)))
+	      (org-add-log-setup 'state state this 'findpos dolog)))
 	  ;; Fixup tag positioning
 	  (org-todo-trigger-tag-changes state)
 	  (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
@@ -8927,7 +8928,7 @@ This function is run automatically after each state change to a DONE state."
 		;; make sure we take a note, not only a time stamp
 		(setq org-log-note-how 'note))
 	  ;; Set up for taking a record
-	  (org-add-log-setup 'state (or done-word (car org-done-keywords))
+	  (org-add-log-setup 'state (or done-word (car org-done-keywords)) this
 			     'findpos org-log-repeat)))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
@@ -9152,6 +9153,7 @@ be removed."
 (defvar org-log-note-marker (make-marker))
 (defvar org-log-note-purpose nil)
 (defvar org-log-note-state nil)
+(defvar org-log-note-previous-state nil)
 (defvar org-log-note-how nil)
 (defvar org-log-note-extra nil)
 (defvar org-log-note-window-configuration nil)
@@ -9164,10 +9166,11 @@ The auto-repeater uses this.")
   "Add a note to the current entry.
 This is done in the same way as adding a state change note."
   (interactive)
-  (org-add-log-setup 'note nil 'findpos nil))
+  (org-add-log-setup 'note nil nil 'findpos nil))
 
 (defvar org-property-end-re)
-(defun org-add-log-setup (&optional purpose state findpos how &optional extra)
+(defun org-add-log-setup (&optional purpose state prev-state
+				    findpos how &optional extra)
   "Set up the post command hook to take a note.
 If this is about to TODO state change, the new state is expected in STATE.
 When FINDPOS is non-nil, find the correct position for the note in
@@ -9200,6 +9203,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
       (move-marker org-log-note-marker (point))
       (setq org-log-note-purpose purpose
 	    org-log-note-state state
+	    org-log-note-previous-state prev-state
 	    org-log-note-how how
 	    org-log-note-extra extra)
       (add-hook 'post-command-hook 'org-add-log-note 'append))))
@@ -9231,7 +9235,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
 		     ((eq org-log-note-purpose 'clock-out) "stopped clock")
 		     ((eq org-log-note-purpose 'done)  "closed todo item")
 		     ((eq org-log-note-purpose 'state)
-		      (format "state change to \"%s\"" org-log-note-state))
+		      (format "state change from \"%s\" to \"%s\""
+			      (or org-log-note-previous-state "")
+			      (or org-log-note-state "")))
 		     ((eq org-log-note-purpose 'note)
 		      "this entry")
 		     (t (error "This should not happen")))))
@@ -9261,7 +9267,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			       (current-time)))
 		   (cons "%s" (if org-log-note-state
 				  (concat "\"" org-log-note-state "\"")
-				"")))))
+				""))
+		   (cons "%S" (if org-log-note-previous-state
+				  (concat "\"" org-log-note-previous-state "\"")
+				"\"\"")))))
       (if lines (setq note (concat note " \\\\")))
       (push note lines))
     (when (or current-prefix-arg org-note-abort) (setq lines nil))

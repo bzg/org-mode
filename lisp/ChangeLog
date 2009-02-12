@@ -1,3 +1,18 @@
+2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-out): Add another nil for the previous
+	state into the call to `org-add-log-setup'.
+
+	* org.el (org-log-note-previous-state): New variable.
+	(org-log-note-headings): New %S escape for old state.
+	(org-todo): Call the note setup with the old state as an
+	argument.
+	(org-add-note): Add another nil for the previous state into the
+	call to `org-add-log-setup'.
+	(org-add-log-setup): New argument PREV-STATE.
+	(org-add-log-note): Handle new %S escape.
+	(org-store-log-note): Handle new %S escape.
+
 2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-find-position): Do not swallow an item
