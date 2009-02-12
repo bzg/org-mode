@@ -2163,13 +2163,14 @@ and will not be modified by column formulas.
 
 To assign a formula to a column, type it directly into any field in the
 column, preceded by an equal sign, like @samp{=$1+$2}.  When you press
-@key{TAB} or @key{RET} or @kbd{C-c C-c} with the cursor still in the
-field, the formula will be stored as the formula for the current column,
-evaluated and the current field replaced with the result.  If the field
-contains only @samp{=}, the previously stored formula for this column is
-used.  For each column, Org will only remember the most recently
-used formula.  In the @samp{TBLFM:} line, column formulas will look like
-@samp{$4=$1+$2}.
+@key{TAB} or @key{RET} or @kbd{C-c C-c} with the cursor still in the field,
+the formula will be stored as the formula for the current column, evaluated
+and the current field replaced with the result.  If the field contains only
+@samp{=}, the previously stored formula for this column is used.  For each
+column, Org will only remember the most recently used formula.  In the
+@samp{TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left
+hand side of a column formula can currently not be the name of column, it
+must be the numeric column reference.
 
 Instead of typing an equation into the field, you may also use the
 following command:
