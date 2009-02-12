@@ -1,5 +1,8 @@
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-store-log-note): Fix note indentation when adding
+	notes to end of list.
+
 	* org-exp.el (org-export-as-html): Add TODO keyword as extra
 	class, so that each keyword can get special colors through CSS.
 
