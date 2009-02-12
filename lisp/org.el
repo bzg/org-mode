@@ -1434,7 +1434,11 @@ This is list of cons cells.  Each cell contains:
   - a cons cell (:regexp . \"REGEXP\") with a regular expression matching
     headlines that are refiling targets.
   - a cons cell (:level . N).  Any headline of level N is considered a target.
+    Note that, when `org-odd-levels-only' is set, level corresponds to
+    order in hierarchy, not to the number of stars.
   - a cons cell (:maxlevel . N). Any headline with level <= N is a target.
+    Note that, when `org-odd-levels-only' is set, level corresponds to
+    order in hierarchy, not to the number of stars.
 
 When this variable is nil, all top-level headlines in the current buffer
 are used, equivalent to the value `((nil . (:level . 1))'."

@@ -3966,6 +3966,8 @@ writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{CATEGORY="work"}, respectively.  For example, a search
 @samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
 tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
+In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
+the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
 
 Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
 other properties will slow down the search.
@@ -9221,11 +9223,12 @@ stars are @i{almost} invisible, for example using the color
 @item
 Things become cleaner still if you skip all the even levels and use only odd
 levels 1, 3, 5..., effectively adding two stars to go from one outline level
-to the next.  In this way we get the outline view shown at the beginning of
-this section.  In order to make the structure editing and export commands
-handle this convention correctly, configure the variable
-@code{org-odd-levels-only}, or set this on a per-file basis with one of the
-following lines:
+to the next@footnote{When you need to specify a level for a property search
+or refile targets, @samp{LEVEL=2} will correspond to 3 stars etc.}.  In this
+way we get the outline view shown at the beginning of this section.  In order
+to make the structure editing and export commands handle this convention
+correctly, configure the variable @code{org-odd-levels-only}, or set this on
+a per-file basis with one of the following lines:
 
 @example
 #+STARTUP: odd
@@ -10115,9 +10118,11 @@ meaningful header in the agenda view.
 
 A general way to create custom searches is to base them on a search for
 entries with a certain level limit.  If you want to study all entries with
-your custom search function, simply do a search for @samp{LEVEL>0}, and then
-use @code{org-agenda-skip-function} to select the entries you really want to
-have.
+your custom search function, simply do a search for
+@samp{LEVEL>0}@footnote{Note that, when using @code{org-odd-levels-only}, a
+level number corresponds to order in the hierarchy, not to the number of
+stars.}, and then use @code{org-agenda-skip-function} to select the entries
+you really want to have.
 
 You may also put a Lisp form into @code{org-agenda-skip-function}.  In
 particular, you may use the functions @code{org-agenda-skip-entry-if}

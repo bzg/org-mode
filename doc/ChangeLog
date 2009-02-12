@@ -3,6 +3,8 @@
 	* org.texi (Tracking TODO state changes): Document storing state
 	change notes into a drawer.
 	(Agenda commands): Document the agenda command `z'.
+	(Tag searches, Clean view, Special agenda views): Document the
+	special interpretation of LEVEL when odd levels are used.
 
 2009-02-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
