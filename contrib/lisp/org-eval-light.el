@@ -64,7 +64,7 @@ large example block")
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)\\([^\000]+?\\)#\\+end_src")))
 
-(defcustom org-eval-light-interpreters '("lisp" "emacs-lisp" "ruby" "shell-script")
+(defcustom org-eval-light-interpreters '("lisp" "emacs-lisp" "ruby" "shell")
   "Interpreters allows for evaluation tags.
 This is a list of program names (as strings) that can evaluate code and
 insert the output into an Org-mode buffer.  Valid choices are 
