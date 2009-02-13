@@ -12327,11 +12327,22 @@ If there is already a time stamp at the cursor position, update it."
   (interactive)
   (message "Saving all Org-mode buffers...")
   (save-some-buffers t 'org-mode-p)
+  (when (featurep 'org-id) (org-id-locations-save))
   (message "Saving all Org-mode buffers... done"))
 
 (defun org-revert-all-org-buffers ()
   "Revert all Org-mode buffers.
-Prompt for confirmation when there are unsaved changes."
+Prompt for confirmation when there are unsaved changes.
+Be sure you know what you are doing before letting this function
+overwrite your changes.
+
+This function is useful in a setup where one tracks org files
+with a version control system, to revert on one machine after pulling
+changes from another.  I believe the procedure must be like this:
+
+1. M-x org-save-all-org-buffers
+2. Pull changes from the other machine, resolve conflicts
+3. M-x org-revert-all-org-buffers"
   (interactive)
   (unless (yes-or-no-p "Revert all Org buffers from their files? ")
     (error "Abort"))
@@ -12343,7 +12354,9 @@ Prompt for confirmation when there are unsaved changes."
 		    (with-current-buffer b buffer-file-name))
 	   (switch-to-buffer b)
 	   (revert-buffer t 'no-confirm)))
-       (buffer-list)))))
+       (buffer-list))
+      (when (and (featurep 'org-id) org-id-track-globally)
+	(org-id-locations-load)))))
 
 ;;;; Agenda files
 

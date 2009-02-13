@@ -6339,7 +6339,8 @@ Same as @kbd{r}.
 @kindex C-x C-s
 @item s
 @itemx C-x C-s
-Save all Org buffers in the current Emacs session.
+Save all Org buffers in the current Emacs session, and also the locations of
+IDs.
 @c
 @kindex @key{right}
 @item @key{right}

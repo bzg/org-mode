@@ -1,3 +1,8 @@
+2009-02-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-save-all-org-buffers): Also save id locations.
+	(org-revert-all-org-buffers): Also load id locations.
+
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 	* org.el (org-drawers): Add LOGBOOK to the default drawers.
 	(org-log-state-notes-into-drawer): New option.
