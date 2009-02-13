@@ -1,6 +1,13 @@
 2009-02-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el ("org-plot"): Help loading org-plot.
+	(org-metaleft-hook, org-metaright-hook, org-metaup-hook)
+	(org-metadown-hook, org-shiftmetaleft-hook)
+	(org-shiftmetaright-hook, org-shiftmetaup-hook)
+	(org-shiftmetadown-hook, org-metareturn-hook): New hooks.
+	(org-shiftmetaleft, org-shiftmetaright, org-shiftmetaup)
+	(org-shiftmetadown, org-metaleft, org-metaright, org-metaup)
+	(org-metadown, org-ctrl-c-ctrl-c): Call the appropriate hook.
 
 	* org-publish.el (org-publish-get-base-files): Allow symbol `any'
 	for selecting files with any (and even without) extension.
