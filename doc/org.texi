@@ -8746,8 +8746,8 @@ properties
 @multitable @columnfractions 0.25 0.75
 @item @code{:base-extension}
 @tab Extension (without the dot!) of source files.  This actually is a
-regular expression.  Set this to th symbol @code{any} if you want to select
-any files, even without extension.
+regular expression.  Set this to the symbol @code{any} if you want to get all
+files in @code{:base-directory}, even without extension.
 
 @item @code{:exclude}
 @tab Regular expression to match file names that should not be
