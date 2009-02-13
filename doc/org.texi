@@ -98,6 +98,7 @@ license to the document, as described in section 6 of the license.
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
+* Variable and Faces Index::    Index for variables and faces discussed
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -580,6 +581,7 @@ like this:
 MY PROJECTS    -*- mode: org; -*-
 @end example
 
+@vindex org-insert-mode-line-in-empty-file
 @noindent which will select Org mode for this buffer no matter what
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
@@ -712,6 +714,7 @@ command @command{org-cycle}, which is bound to the @key{TAB} key.
 @section Headlines
 @cindex headlines
 @cindex outline tree
+@vindex org-special-ctrl-a/e
 
 Headlines define the structure of an outline tree.  The headlines in
 Org start with one or more stars, on the left margin@footnote{See
@@ -733,6 +736,7 @@ of @kbd{C-a} and @kbd{C-e} in headlines.}.  For example:
 outline that has whitespace followed by a single star as headline
 starters.  @ref{Clean view} describes a setup to realize this.
 
+@vindex org-cycle-separator-lines
 An empty line after the end of a subtree is considered part of it and
 will be hidden when the subtree is folded.  However, if you leave at
 least two empty lines, one empty line will remain visible after folding
@@ -766,6 +770,8 @@ Org uses just two commands, bound to @key{TAB} and
 '-----------------------------------'
 @end example
 
+@vindex org-cycle-emulate-tab
+@vindex org-cycle-global-at-bob
 The cursor must be on a headline for this to work@footnote{see, however,
 the option @code{org-cycle-emulate-tab}.}.  When the cursor is at the
 beginning of the buffer and the first line is not a headline, then
@@ -821,6 +827,7 @@ negative then go up that many levels.  With a @kbd{C-u} prefix, do not remove
 the previously used indirect buffer.
 @end table
 
+@vindex org-startup-folded
 When Emacs first visits an Org file, the global state is set to
 OVERVIEW, i.e. only the top level headlines are visible.  This can be
 configured through the variable @code{org-startup-folded}, or on a
@@ -874,6 +881,7 @@ Backward to higher level heading.
 Jump to a different place without changing the current outline
 visibility.  Shows the document structure in a temporary buffer, where
 you can use the following keys to find your destination:
+@vindex org-goto-auto-isearch
 @example
 @key{TAB}         @r{Cycle visibility.}
 @key{down} / @key{up}   @r{Next/previous visible headline.}
@@ -886,6 +894,7 @@ u            @r{One level up.}
 0-9          @r{Digit argument.}
 q            @r{Quit}
 @end example
+@vindex org-goto-interface
 See also the variable@code{org-goto-interface}.
 @end table
 
@@ -904,6 +913,7 @@ See also the variable@code{org-goto-interface}.
 @table @kbd
 @kindex M-@key{RET}
 @item M-@key{RET}
+@vindex org-M-RET-may-split-line
 Insert new heading with same level as current.  If the cursor is in a
 plain list item, a new item is created (@pxref{Plain lists}).  To force
 creation of a new headline, use a prefix argument, or first press @key{RET}
@@ -965,6 +975,8 @@ also be specified with a numeric prefix argument, or by yanking after a
 headline marker like @samp{****}.
 @kindex C-y
 @item C-y
+@vindex org-yank-adjusted-subtrees
+@vindex org-yank-folded-subtrees
 Depending on the variables @code{org-yank-adjusted-subtrees} and
 @code{org-yank-folded-subtrees}, Org's internal @code{yank} command will
 paste subtrees folded and in a clever way, using the same command as @kbd{C-c
@@ -1039,22 +1051,26 @@ A headline that is marked with the ARCHIVE tag (@pxref{Tags}) stays at
 its location in the outline tree, but behaves in the following way:
 @itemize @minus
 @item
+@vindex org-cycle-open-archived-trees
 It does not open when you attempt to do so with a visibility cycling
 command (@pxref{Visibility cycling}).  You can force cycling archived
 subtrees with @kbd{C-@key{TAB}}, or by setting the option
 @code{org-cycle-open-archived-trees}.  Also normal outline commands like
 @code{show-all} will open archived subtrees.
 @item
+@vindex org-sparse-tree-open-archived-trees
 During sparse tree construction (@pxref{Sparse trees}), matches in
 archived subtrees are not exposed, unless you configure the option
 @code{org-sparse-tree-open-archived-trees}.
 @item
+@vindex org-agenda-skip-archived-trees
 During agenda view construction (@pxref{Agenda Views}), the content of
 archived trees is ignored unless you configure the option
 @code{org-agenda-skip-archived-trees}, in which case these trees will always
 be included.  In the agenda you can press the @kbd{v} key to get archives
 temporarily included.
 @item
+@vindex org-export-with-archived-trees
 Archived trees are not exported (@pxref{Exporting}), only the headline
 is.  Configure the details using the variable
 @code{org-export-with-archived-trees}.
@@ -1100,6 +1116,7 @@ approximate position in the outline.
 @kindex C-c C-x C-s
 @itemx C-c $
 @item C-c C-x C-s
+@vindex org-archive-location
 Archive the subtree starting at the cursor position to the location
 given by @code{org-archive-location}.  Context information that could be
 lost like the file name, the category, inherited tags, and the TODO
@@ -1136,6 +1153,7 @@ If you would like to have a special ARCHIVE location for a single entry
 or a (sub)tree, give the entry an @code{:ARCHIVE:} property with the
 location as the value (@pxref{Properties and Columns}).
 
+@vindex org-archive-save-context-info
 When a subtree is moved, it receives a number of special properties that
 record context information like the file from where the entry came, it's
 outline path the archiving time etc.  Configure the variable
@@ -1149,6 +1167,10 @@ added.
 @cindex folding, sparse trees
 @cindex occur, command
 
+@vindex org-show-hierarchy-above
+@vindex org-show-following-heading
+@vindex org-show-siblings
+@vindex org-show-entry-below
 An important feature of Org mode is the ability to construct @emph{sparse
 trees} for selected information in an outline tree, so that the entire
 document is folded as much as possible, but the selected information is made
@@ -1167,6 +1189,7 @@ commands can be accessed through a dispatcher:
 This prompts for an extra key to select a sparse-tree creating command.
 @kindex C-c / r
 @item C-c / r
+@vindex org-remove-highlights-with-change
 Occur.  Prompts for a regexp and shows a sparse tree with all matches.  If
 the match is in a headline, the headline is made visible.  If the match is in
 the body of an entry, headline and body are made visible.  In order to
@@ -1180,6 +1203,7 @@ so several calls to this command can be stacked.
 @end table
 
 @noindent
+@vindex org-agenda-custom-commands
 For frequently used sparse trees of specific search strings, you can
 use the variable @code{org-agenda-custom-commands} to define fast
 keyboard access to specific sparse trees.  These commands will then be
@@ -1238,6 +1262,7 @@ separator @samp{ :: } to separate the description @emph{term} from the
 description.
 @end itemize
 
+@vindex org-empty-line-terminates-plain-lists
 Items belonging to the same list must have the same indentation on the first
 line.  In particular, if an ordered list reaches number @samp{10.}, then the
 2--digit numbers must be written left-aligned with the other numbers in the
@@ -1280,6 +1305,7 @@ of an item (the line with the bullet or number).
 @table @kbd
 @kindex @key{TAB}
 @item @key{TAB}
+@vindex org-cycle-include-plain-lists
 Items can be folded just like headline levels if you set the variable
 @code{org-cycle-include-plain-lists}.  The level of an item is then
 given by the indentation of the bullet/number.  Items are always
@@ -1290,6 +1316,7 @@ If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
 fixes the indentation of the current line in a heuristic way.
 @kindex M-@key{RET}
 @item M-@key{RET}
+@vindex org-M-RET-may-split-line
 Insert new item at current level.  With a prefix argument, force a new
 heading (@pxref{Structure editing}).  If this command is used in the middle
 of a line, the line is @emph{split} and the rest of the line becomes the new
@@ -1307,6 +1334,7 @@ Insert a new item with a checkbox (@pxref{Checkboxes}).
 @item S-@key{up}
 @itemx S-@key{down}
 @cindex shift-selection-mode
+@vindex org-support-shift-select
 Jump to the previous/next item in the current list, but only if
 @code{org-support-shift-select} is off.  If not, you can still use paragraph
 jumping commands like @kbd{C-@key{up}} and @kbd{C-@key{down}} to quite
@@ -1346,6 +1374,7 @@ converted into a list item.
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}/@key{right}
+@vindex org-support-shift-select
 This command also cycles bullet styles when the cursor in on the bullet or
 anywhere in an item line, details depending on
 @code{org-support-shift-select}.
@@ -1356,6 +1385,7 @@ anywhere in an item line, details depending on
 @cindex drawers
 @cindex visibility cycling, drawers
 
+@vindex org-drawers
 Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org mode has @emph{drawers}.
 Drawers need to be configured with the variable
@@ -1419,6 +1449,7 @@ Since Org allows multiple references to the same note, you can then use use
 @code{[fn:name]} to create additional references.
 @end table
 
+@vindex org-footnote-auto-label
 Footnote labels can be created automatically, or you create names yourself.
 This is handled by the variable @code{org-footnote-auto-label} and its
 corresponding @code{#+STARTUP} keywords, see the docstring of that variable
@@ -1434,6 +1465,8 @@ The footnote action command.
 When the cursor is on a footnote reference, jump to the definition.  When it
 is at a definition, jump to the (first) reference.
 
+@vindex org-footnote-define-inline
+@vindex org-footnote-section
 Otherwise, create a new footnote.  Depending on the variable
 @code{org-footnote-define-inline}@footnote{The corresponding in-buffer
 setting is: @code{#+STARTUP: fninline} or @code{#+STARTUP: nofninline}}, the
@@ -1552,6 +1585,8 @@ create the above table, you would only type
 fields.  Even faster would be to type @code{|Name|Phone|Age} followed by
 @kbd{C-c @key{RET}}.
 
+@vindex org-enable-table-editor
+@vindex org-table-auto-blank-field
 When typing text into a field, Org treats @key{DEL},
 @key{Backspace}, and all character keys in a special way, so that
 inserting and deleting avoids shifting other fields.  Also, when
@@ -1694,6 +1729,7 @@ be inserted with @kbd{C-y}.
 @c
 @kindex S-@key{RET}
 @item S-@key{RET}
+@vindex org-table-copy-increment
 When current field is empty, copy from first non-empty field above.  When not
 empty, copy current field down to next row and move cursor along with it.
 Depending on the variable @code{org-table-copy-increment}, integer field
@@ -1723,6 +1759,7 @@ buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
 @kbd{C-c |} command (see above under @i{Creation and conversion}).
 @c
 @item M-x org-table-export
+@vindex org-table-export-default-format
 Export the table, by default as a TAB-separated file.  Useful for data
 exchange with, for example, spreadsheet or database programs.  The format
 used to export the file can be configured in the variable
@@ -1779,6 +1816,7 @@ will show the full content.  To edit such a field, use the command
 open a new window with the full field.  Edit it and finish with @kbd{C-c
 C-c}.
 
+@vindex org-startup-align-all-tables
 When visiting a file containing a table with narrowed columns, the
 necessary character hiding has not yet happened, and the table needs to
 be aligned before it looks nice.  Setting the option
@@ -1975,6 +2013,7 @@ see the @samp{E} mode switch below).  If there are no non-empty fields,
 @cindex name, of column or field
 @cindex constants, in calculations
 
+@vindex org-table-formula-constants
 @samp{$name} is interpreted as the name of a column, parameter or
 constant.  Constants are defined globally through the variable
 @code{org-table-formula-constants}, and locally (for the file) through a
@@ -1985,6 +2024,7 @@ line like
 @end example
 
 @noindent
+@vindex constants-unit-system
 Also properties (@pxref{Properties and Columns}) can be used as
 constants in table formulas: For a property @samp{:Xyz:} use the name
 @samp{$PROP_Xyz}, and the property will be searched in the current
@@ -2042,6 +2082,7 @@ like @samp{vmean} and @samp{vsum}.
 
 @cindex format specifier
 @cindex mode, for @file{calc}
+@vindex org-calc-default-modes
 A formula can contain an optional mode string after a semicolon.  This
 string consists of flags to influence Calc and other modes during
 execution.  By default, Org uses the standard Calc modes (precision
@@ -2190,6 +2231,7 @@ will apply it to that many consecutive fields in the current column.
 @cindex formula editing
 @cindex editing, of table formulas
 
+@vindex org-table-use-standard-references
 You can edit individual formulas in the minibuffer or directly in the
 field.  Org can also prepare a special buffer with all active
 formulas of a table.  When offering a formula for editing, Org
@@ -2729,11 +2771,13 @@ must create the key binding yourself) which can be used in any buffer to
 create a link.  The link will be stored for later insertion into an Org
 buffer (see below).
 
+@vindex org-link-to-org-use-id
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
 to the target.  Otherwise it points to the current headline, either by text
 (unsafe), or, if @file{org-id.el} is loaded and @code{org-link-to-org-use-id}
 is set, by ID property.
 
+@vindex org-irc-link-to-logs
 For VM, Rmail, Wanderlust, MH-E, Gnus and BBDB buffers, the link will
 indicate the current article/entry.  For W3 and W3M buffers, the link goes to
 the current URL.  For IRC links, if you set the variable
@@ -2755,6 +2799,7 @@ The key binding @kbd{C-c l} is only a suggestion - see @ref{Installation}.
 @cindex completion, of links
 @cindex inserting links
 @item C-c C-l
+@vindex org-keep-stored-link-after-insertion
 Insert a link.  This prompts for a link to be inserted into the buffer.  You
 can just type a link, using text for an internal link, or one of the link
 type prefixes mentioned in the examples above.  All links stored during the
@@ -2800,6 +2845,7 @@ link and description parts of the link.
 @kindex C-c C-o
 @kindex RET
 @item C-c C-o @r{or} @key{RET}
+@vindex org-file-apps
 Open link at point.  This will launch a web browser for URLs (using
 @command{browse-url-at-point}), run VM/MH-E/Wanderlust/Rmail/Gnus/BBDB for
 the corresponding links, and execute the command in a shell link.  When the
@@ -2822,6 +2868,7 @@ would.  Under Emacs 22, also @kbd{mouse-1} will follow a link.
 @c
 @kindex mouse-3
 @item mouse-3
+@vindex org-display-internal-link-with-indirect-buffer
 Like @kbd{mouse-2}, but force file links to be opened with Emacs, and
 internal links to be displayed in another window@footnote{See the
 variable @code{org-display-internal-link-with-indirect-buffer}}.
@@ -2884,6 +2931,7 @@ abbreviated link looks like this
 @end example
 
 @noindent
+@vindex org-link-abbrev-alist
 where the tag is optional.  Such abbreviations are resolved according to
 the information in the variable @code{org-link-abbrev-alist} that
 relates the linkwords to replacement text.  Here is an example:
@@ -2981,6 +3029,8 @@ cases.  For example, BibTeX database files have many entries like
 because the only unique identification for a BibTeX entry is the
 citation key.
 
+@vindex org-create-file-search-functions
+@vindex org-execute-file-search-functions
 If you come across such a problem, you can write custom functions to set
 the right search string for a particular file type, and to do the search
 for the string in the file.  Using @code{add-hook}, these functions need
@@ -3063,6 +3113,7 @@ with @code{shift-selection-mode}.
 @cindex sparse tree, for TODO
 @item C-c C-v
 @itemx C-c / t
+@vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
 the entire buffer, but shows all TODO items and the headings hierarchy
 above them.  With a prefix argument, search for a specific TODO.  You will be
@@ -3083,6 +3134,7 @@ Insert a new TODO entry below the current one.
 @end table
 
 @noindent
+@vindex org-todo-state-tags-triggers
 Changing a TODO state can also trigger tag changes.  See the docstring of the
 option @code{org-todo-state-tags-triggers} for details.
 
@@ -3090,6 +3142,7 @@ option @code{org-todo-state-tags-triggers} for details.
 @section Extended use of TODO keywords
 @cindex extended TODO keywords
 
+@vindex org-todo-keywords
 By default, marked TODO entries have one of only two states: TODO and
 DONE.  Org mode allows you to classify TODO items in more complex ways
 with @emph{TODO keywords} (stored in @code{org-todo-keywords}).  With
@@ -3236,6 +3289,7 @@ key after each keyword, in parenthesis.  For example:
         (sequence "|" "CANCELED(c)")))
 @end lisp
 
+@vindex org-fast-tag-selection-include-todo
 If you then press @code{C-c C-t} followed by the selection key, the entry
 will be switched to this state.  @key{SPC} can be used to remove any TODO
 keyword from an entry.@footnote{Check also the variable
@@ -3257,9 +3311,10 @@ need one of the following lines, starting in column zero anywhere in the
 file:
 
 @example
-#+SEQ_TODO: TODO FEEDBACK VERIFY | DONE CANCELED
+#+TODO: TODO FEEDBACK VERIFY | DONE CANCELED
 @end example
-or
+@noindent (you may also write @code{#+SEQ_TODO} to be explicit about the
+interpretation, but it means the same as @code{#+TODO}), or
 @example
 #+TYP_TODO: Fred Sara Lucy Mike | DONE
 @end example
@@ -3267,9 +3322,9 @@ or
 A setup for using several sets in parallel would be:
 
 @example
-#+SEQ_TODO: TODO | DONE
-#+SEQ_TODO: REPORT BUG KNOWNCAUSE | FIXED
-#+SEQ_TODO: | CANCELED
+#+TODO: TODO | DONE
+#+TODO: REPORT BUG KNOWNCAUSE | FIXED
+#+TODO: | CANCELED
 @end example
 
 @cindex completion, of option keywords
@@ -3291,6 +3346,9 @@ for the current buffer.}.
 @subsection Faces for TODO keywords
 @cindex faces, for TODO keywords
 
+@vindex org-todo @r{(face)}
+@vindex org-done @r{(face)}
+@vindex org-todo-keyword-faces
 Org mode highlights TODO keywords with special faces: @code{org-todo}
 for keywords indicating that an item still has to be acted upon, and
 @code{org-done} for keywords indicating that an item is finished.  If
@@ -3316,6 +3374,7 @@ necessary, define a special face and use that.
 @cindex TODO dependencies
 @cindex dependencies, of TODO states
 
+@vindex org-enforce-todo-dependencies
 The structure of Org files (hierarchy and lists) makes it easy to define TODO
 dependencies.  Usually, a parent TODO task should not be marked DONE until
 all subtasks (defined as children tasks) are marked as DONE.  And sometimes
@@ -3350,11 +3409,13 @@ Toggle the @code{ORDERED} property of the current entry.
 Change TODO state, circumventin any state blocking.
 @end table
 
+@vindex org-agenda-dim-blocked-tasks
 If you set the variable @code{org-agenda-dim-blocked-tasks}, TODO entries
 that cannot be closed because of such dependencies will be shown in a dimmed
 font or even made invisible in agenda views (@pxref{Agenda Views}).
 
 @cindex checkboxes and TODO dependencies
+@vindex org-enforce-todo-dependencies
 You can also block changes of TODO states by looking at checkboxes
 (@pxref{Checkboxes}).  If you set the variable
 @code{org-enforce-todo-checkbox-dependencies}, an entry that has unchecked
@@ -3418,6 +3479,8 @@ giving you an overview of what has been done.
 @subsection Tracking TODO state changes
 @cindex drawer, for state change recording
 
+@vindex org-log-states-order-reversed
+@vindex org-log-state-notes-into-drawer
 When TODO keywords are used as workflow states (@pxref{Workflow states}), you
 might want to keep track of when a state change occurred and maybe take a
 note about this change.  You can either record just a timestamp, or a
@@ -3425,7 +3488,7 @@ timestamped note for a change.  These records will be inserted after the
 headline as an itemized list, newest first@footnote{See the variable
 @code{org-log-states-order-reversed}}.  When taking a lot of notes, you might
 want to get the notes out of a way into a drawer (@pxref{Drawers}).
-Customize the variable @code{org-org-log-state-notes-into-drawer} to get this
+Customize the variable @code{org-log-state-notes-into-drawer} to get this
 behavior - the recommended drawer for this is called @code{LOGBOOK}.
 
 Since it is normally too much to record a note for every state, Org mode
@@ -3439,6 +3502,7 @@ in parenthesis after each keyword.  For example, with the setting
 @end lisp
 
 @noindent
+@vindex org-log-done
 you not only define global TODO keywords and fast access keys, but also
 request that a time is recorded when the entry is turned into
 DONE@footnote{It is possible that Org mode will record two time stamps
@@ -3459,7 +3523,7 @@ configured.
 You can use the exact same syntax for setting logging preferences local
 to a buffer:
 @example
-#+SEQ_TODO: TODO(t) WAIT(w@@/!) | DONE(d!) CANCELED(c@@)
+#+TODO: TODO(t) WAIT(w@@/!) | DONE(d!) CANCELED(c@@)
 @end example
 
 In order to define logging settings that are local to a subtree or a
@@ -3520,13 +3584,17 @@ agenda buffer with the @kbd{,} command (@pxref{Agenda commands}).
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
+@vindex org-priority-start-cycle-with-default
 Increase/decrease priority of current headline@footnote{See also the option
-@code{org-priority-start-cycle-with-default'}.}.  Note that these keys are
+@code{org-priority-start-cycle-with-default}.}.  Note that these keys are
 also used to modify time stamps (@pxref{Creating timestamps}).  See also
 @ref{Conflicts} for a discussion of the interaction with
 @code{shift-selection-mode}.
 @end table
 
+@vindex org-highest-priority
+@vindex org-lowest-priority
+@vindex org-default-priority
 You can change the range of allowed priorities by setting the variables
 @code{org-highest-priority}, @code{org-lowest-priority}, and
 @code{org-default-priority}.  For an individual buffer, you may set
@@ -3542,6 +3610,7 @@ priority):
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
 
+@vindex org-agenda-todo-list-sublevels
 It is often advisable to break down large tasks into smaller, manageable
 subtasks.  You can do this by creating an outline tree below a TODO item,
 with detailed subtasks on the tree@footnote{To keep subtasks out of the
@@ -3668,6 +3737,7 @@ An excellent way to implement labels and contexts for cross-correlating
 information is to assign @i{tags} to headlines.  Org mode has extensive
 support for tags.
 
+@vindex org-tag-faces
 Every headline can contain a list of tags; they occur at the end of the
 headline.  Tags are normal words containing letters, numbers, @samp{_}, and
 @samp{@@}.  Tags must be preceded and followed by a single colon, e.g.,
@@ -3711,10 +3781,13 @@ level zero that surrounds the entire file.
 @end example
 
 @noindent
+@vindex org-use-tag-inheritance
+@vindex org-tags-exclude-from-inheritance
 To limit tag inheritance to specific tags, or to turn it off entirely, use
 the variables @code{org-use-tag-inheritance} and
 @code{org-tags-exclude-from-inheritance}.
 
+@vindex org-tags-match-list-sublevels
 When a headline matches during a tags search while tag inheritance is turned
 on, all the sublevels in the same tree will (for a simple match form) match
 as well@footnote{This is only true if the search does not involve more
@@ -3737,6 +3810,7 @@ also a special command for inserting tags:
 @kindex C-c C-q
 @item C-c C-q
 @cindex completion, of tags
+@vindex org-tags-column
 Enter new tags for the current headline.  Org mode will either offer
 completion or a special single-key interface for setting tags, see
 below.  After pressing @key{RET}, the tags will be inserted and aligned
@@ -3749,6 +3823,7 @@ demotion, and TODO state changes (@pxref{TODO basics}).
 When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
 
+@vindex org-tag-alist
 Org will support tag insertion based on a @emph{list of tags}.  By
 default this list is constructed dynamically, containing all tags
 currently used in the buffer.  You may also globally specify a hard list
@@ -3804,7 +3879,7 @@ and @samp{@@tennisclub} should be selected.  Multiple such groups are allowed.
 these lines to activate any changes.
 
 @noindent
-To set these mutually exclusive groups in the variable @code{org-mode-alist}
+To set these mutually exclusive groups in the variable @code{org-tags-alist}
 you must use the dummy tags @code{:startgroup} and @code{:endgroup} instead
 of the braces.  The previous example would be set globally by the following
 configuration:
@@ -3862,6 +3937,7 @@ alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
 @samp{Sarah} could be done with @kbd{C-c C-c @key{TAB} S a r a h
 @key{RET} @key{RET}}.
 
+@vindex org-fast-tag-selection-single-key
 If you find that most of the time, you need only a single key press to
 modify your list of tags, set the variable
 @code{org-fast-tag-selection-single-key}.  Then you no longer have to
@@ -3894,6 +3970,7 @@ Create a global list of tag matches from all agenda files.
 @xref{Matching tags and properties}.
 @kindex C-c a M
 @item C-c a M
+@vindex org-tags-match-list-sublevels
 Create a global list of tag matches from all agenda files, but check
 only TODO items and force checking subitems (see variable
 @code{org-tags-match-list-sublevels}).
@@ -3961,6 +4038,7 @@ starting with the letter @samp{W}.
 
 @cindex level, require for tags/property match
 @cindex category, require for tags/property match
+@vindex org-odd-levels-only
 You can also require a headline to be of a certain level or category, by
 writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{CATEGORY="work"}, respectively.  For example, a search
@@ -4047,6 +4125,7 @@ file, use a line like
 #+PROPERTY: NDisks_ALL 1 2 3 4
 @end example
 
+@vindex org-global-properties
 Property values set with the global variable
 @code{org-global-properties} can be inherited by all entries in all
 Org files.
@@ -4180,6 +4259,7 @@ a regular expression and matched against the property values.
 @cindex properties, inheritance
 @cindex inheritance, of properties
 
+@vindex org-use-property-inheritance
 The outline structure of Org mode documents lends itself for an
 inheritance model of properties: If the parent in a tree has a certain
 property, the children can inherit this property.  Org mode does not
@@ -4339,6 +4419,7 @@ in the subtree.
 @tsubheading{Turning column view on and off}
 @kindex C-c C-x C-c
 @item C-c C-x C-c
+@vindex org-columns-default-format
 Create the column view for the local environment.  This command searches
 the hierarchy, up from point, for a @code{:COLUMNS:} property that defines
 a format.  When one is found, the column view table is established for
@@ -4602,6 +4683,7 @@ succession, a time range is inserted.
 @c
 @kindex C-u C-c .
 @item C-u C-c .
+@vindex org-time-stamp-rounding-minutes
 Like @kbd{C-c .}, but use the alternative format which contains date
 and time.  The default time can be rounded to multiples of 5 minutes,
 see the option @code{org-time-stamp-rounding-minutes}.
@@ -4662,6 +4744,7 @@ the following column).
 @cindex date, reading in minibuffer
 @cindex time, reading in minibuffer
 
+@vindex org-read-date-prefer-future
 When Org mode prompts for a date/time, the default is shown as an ISO
 date, and the prompt therefore seems to ask for an ISO date.  But it
 will in fact accept any string containing some date and/or time
@@ -4715,11 +4798,14 @@ the nth such day.  E.g.
 +2tue         --> second tuesday from now.
 @end example
 
+@vindex parse-time-months
+@vindex parse-time-weekdays
 The function understands English month and weekday abbreviations.  If
 you want to use unabbreviated names and/or other languages, configure
 the variables @code{parse-time-months} and @code{parse-time-weekdays}.
 
 @cindex calendar, for selecting date
+@vindex org-popup-calendar-for-date-prompt
 Parallel to the minibuffer prompt, a calendar is popped up@footnote{If
 you don't need/want the calendar, configure the variable
 @code{org-popup-calendar-for-date-prompt}.}.  When you exit the date
@@ -4747,6 +4833,7 @@ M-S-@key{right}/@key{left}   @r{One month forward/backward.}
 @key{RET}           @r{Choose date in calendar.}
 @end example
 
+@vindex org-read-date-display-live
 The actions of the date/time prompt may seem complex, but I assure you they
 will grow on you, and you will start getting annoyed by pretty much any other
 way of entering a date/time out there.  To help you understand what is going
@@ -4760,6 +4847,8 @@ minibuffer@footnote{If you find this distracting, turn the display of with
 @cindex time format, custom
 @cindex date format, custom
 
+@vindex org-display-custom-times
+@vindex org-time-stamp-custom-formats
 Org mode uses the standard ISO notation for dates and times as it is
 defined in ISO 8601.  If you cannot get used to this and require another
 representation of date and time to keep you happy, you can get it by
@@ -4813,6 +4902,7 @@ A time stamp may be preceded by special keywords to facilitate planning:
 Meaning: the task (most likely a TODO item, though not necessarily) is supposed
 to be finished on that date.
 
+@vindex org-deadline-warning-days
 On the deadline date, the task will be listed in the agenda.  In
 addition, the agenda for @emph{today} will carry a warning about the
 approaching or missed deadline, starting
@@ -4835,6 +4925,7 @@ period of 5 days @code{DEADLINE: <2004-02-29 Sun -5d>}.
 Meaning: you are planning to start working on that task on the given
 date.
 
+@vindex org-agenda-skip-scheduled-if-done
 The headline will be listed under the given date@footnote{It will still
 be listed on that date after it has been marked DONE.  If you don't like
 this, set the variable @code{org-agenda-skip-scheduled-if-done}.}.  In
@@ -4892,6 +4983,7 @@ prefix arg, an existing deadline will be removed from the entry.
 @kindex C-c / d
 @cindex sparse tree, for deadlines
 @item C-c / d
+@vindex org-deadline-warning-days
 Create a sparse tree with all deadlines that are either past-due, or
 which will become due within @code{org-deadline-warning-days}.
 With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
@@ -4948,6 +5040,7 @@ actually switch the date like this:
    DEADLINE: <2005-11-01 Tue +1m>
 @end example
 
+@vindex org-log-repeat
 A timestamp@footnote{You can change this using the option
 @code{org-log-repeat}, or the @code{#+STARTUP} options @code{logrepeat},
 @code{lognoterepeat}, and @code{nologrepeat}.  With @code{lognoterepeat}, you
@@ -5004,6 +5097,7 @@ can arrange for the clock information to persisst accress Emacs sessions with
 @table @kbd
 @kindex C-c C-x C-i
 @item C-c C-x C-i
+@vindex org-clock-into-drawer
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
 this item, the multiple CLOCK lines will be wrapped into a
@@ -5015,6 +5109,7 @@ The default task will always be available when selecting a clocking task,
 with letter @kbd{d}.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
+@vindex org-log-note-clock-out
 Stop the clock (clock-out).  This inserts another timestamp at the same
 location where the clock was last started.  It also directly computes
 the resulting time in inserts it after the time range as @samp{=>
@@ -5042,6 +5137,7 @@ Jump to the entry that contains the currently running clock.  With a
 tasks.
 @kindex C-c C-x C-d
 @item C-c C-x C-d
+@vindex org-remove-highlights-with-change
 Display time summaries for each subtree in the current buffer.  This
 puts overlays at the end of each headline, showing the total time
 recorded under that heading, including the time of any subheadings. You
@@ -5144,6 +5240,7 @@ worked on or closed during a day.
 @section Effort estimates
 @cindex effort estimates
 
+@vindex org-effort-property
 If you want to plan your work in a very detailed way, or if you need to
 produce offers with quotations of the estimated work effort, you may want to
 assign effort estimates to entries.  If you are also clocking your work, you
@@ -5162,6 +5259,8 @@ you want to clock your time).  For a specific buffer you can use
 @end example
 
 @noindent
+@vindex org-global-properties
+@vindex org-columns-default-format
 or, even better, you can set up these values globally by customizing the
 variables @code{org-global-properties} and @code{org-columns-default-format}.
 In particular if you want to use this setup also in the agenda, a global
@@ -5172,6 +5271,7 @@ mode, and to use @kbd{S-@key{right}} and @kbd{S-@key{left}} to change the
 value.  The values you enter will immediately be summed up in the hierarchy.
 In the column next to it, any clocked time will be displayed.
 
+@vindex org-agenda-columns-add-appointments-to-effort-sum
 If you switch to column view in the daily/weekly agenda, the effort column
 will summarize the estimated work effort for each day@footnote{Please note
 the pitfalls of summing hierarchical data in a flat list (@pxref{Agenda
@@ -5314,6 +5414,8 @@ use:
    ("Idea" ?i "* %^@{Title@}\n  %i\n  %a" "~/org/JOURNAL.org" "New Ideas")))
 @end example
 
+@vindex org-remember-default-headline
+@vindex org-directory
 @noindent In these entries, the first string is just a name, and the
 character specifies how to select the template.  It is useful if the
 character is also the first letter of the name.  The next string specifies
@@ -5397,6 +5499,7 @@ hyperlink types}), any property you store with
 @code{org-store-link-props} can be accessed in remember templates in a
 similar way.}:
 
+@vindex org-from-is-user-regexp
 @example
 Link type          |  Available keywords
 -------------------+----------------------------------------------
@@ -5427,6 +5530,7 @@ template that will be filled with the previous context information.
 @node Storing notes, Refiling notes, Remember templates, Remember
 @subsection Storing notes
 
+@vindex org-remember-clock-out-on-exit
 When you are finished preparing a note with @i{remember}, you have to press
 @kbd{C-c C-c} to file the note away.  If you have started the clock in the
 remember buffer, you will first be asked if you want to clock out
@@ -5443,6 +5547,7 @@ during the last call to @code{remember}, exit the remember buffer with
 Another special case is @kbd{C-2 C-c C-c} which files the note as a child of
 the currently clocked item.
 
+@vindex org-remember-store-without-prompt
 If you want to store the note directly to a different place, use
 @kbd{C-1 C-c C-c} instead to exit remember@footnote{Configure the
 variable @code{org-remember-store-without-prompt} to make this behavior
@@ -5465,6 +5570,7 @@ u            @r{One level up.}
 Pressing @key{RET} or @key{left} or @key{right}
 then leads to the following result.
 
+@vindex org-reverse-note-order
 @multitable @columnfractions 0.2 0.15 0.65
 @item @b{Cursor position} @tab @b{Key} @tab @b{Note gets inserted}
 @item on headline     @tab @key{RET}              @tab as sublevel of the heading at cursor, first or last
@@ -5496,6 +5602,10 @@ special command:
 @table @kbd
 @kindex C-c C-w
 @item C-c C-w
+@vindex org-reverse-note-order
+@vindex org-refile-targets
+@vindex org-refile-use-outline-path
+@vindex org-outline-path-complete-in-steps
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -5519,6 +5629,7 @@ Jump to the location where @code{org-refile} last moved a tree to.
 @section Attachments
 @cindex attachments
 
+@vindex org-attach-directory
 It is often useful to associate reference material with an outline node/task.
 Small chunks of plain text can simply be stored in the subtree of a project.
 Hyperlinks (@pxref{Hyperlinks}) can be used to establish associations with
@@ -5530,7 +5641,7 @@ located in the @file{data} directory which lives in the same directory where
 your org-file lives@footnote{If you move entries or Org-files from one
 directory to the next, you may want to configure @code{org-attach-directory}
 to contain an absolute path.}.  If you initialize this directory with
-@code{git-init}, Org will automatically commit changes when it sees them.
+@code{git init}, Org will automatically commit changes when it sees them.
 The attachment system has been contributed to Org by John Wiegley.
 
 In cases where this seems better, you can also attach a directory of your
@@ -5551,6 +5662,7 @@ to select a command:
 @table @kbd
 @kindex C-c C-a a
 @item a
+@vindex org-attach-method
 Select a file and move it into the task's attachment directory.  The file
 will be copied, moved, or linked, depending on @code{org-attach-method}.
 Note that hard links are not supported on all systems.
@@ -5573,6 +5685,7 @@ attachments yourself.
 
 @kindex C-c C-a o
 @item o
+@vindex org-file-apps
 Open current task's attachment.  If there are more than one, prompt for a
 file name first.  Opening will follow the rules set by @code{org-file-apps}.
 For more details, see the information on following hyperlinks
@@ -5654,6 +5767,8 @@ buffer}.  This buffer is read-only, but provides commands to visit the
 corresponding locations in the original Org files, and even to
 edit these files remotely.
 
+@vindex org-agenda-window-setup
+@vindex org-agenda-restore-windows-after-quit
 Two variables control how the agenda buffer is displayed and whether the
 window configuration is restored when the agenda exits:
 @code{org-agenda-window-setup} and
@@ -5674,6 +5789,7 @@ window configuration is restored when the agenda exits:
 @cindex agenda files
 @cindex files for agenda
 
+@vindex org-agenda-files
 The information to be shown is normally collected from all @emph{agenda
 files}, the files listed in the variable
 @code{org-agenda-files}@footnote{If the value of that variable is not a
@@ -5774,8 +5890,9 @@ Create the timeline view for the current buffer (@pxref{Timeline}).
 Create a list of entries selected by a boolean expression of keywords
 and/or regular expressions that must or must not occur in the entry.
 @item /
+@vindex org-agenda-text-search-extra-files
 Search for a regular expression in all agenda files and additionally in
-the files listed in @code{org-agenda-multi-occur-extra-files}.  This
+the files listed in @code{org-agenda-text-search-extra-files}.  This
 uses the Emacs command @code{multi-occur}.  A prefix argument can be
 used to specify the number of context lines for each match, default is
 1.
@@ -5827,6 +5944,7 @@ paper agenda, showing all the tasks for the current week or day.
 @cindex org-agenda, command
 @kindex C-c a a
 @item C-c a a
+@vindex org-agenda-ndays
 Compile an agenda for the current week from a list of org files.  The agenda
 shows the entries for each day.  With a numeric prefix@footnote{For backward
 compatibility, the universal prefix @kbd{C-u} causes all TODO entries to be
@@ -5919,6 +6037,7 @@ the TODO entries directly from that buffer (@pxref{Agenda commands}).
 @kindex C-c a T
 @item C-c a T
 @cindex TODO keyword matching
+@vindex org-todo-keywords
 Like the above, but allows selection of a specific TODO keyword.  You
 can also do this by specifying a prefix argument to @kbd{C-c a t}.  With
 a @kbd{C-u} prefix you are prompted for a keyword, and you may also
@@ -5944,11 +6063,13 @@ keywords.  This list can become very long.  There are two ways to keep
 it more compact:
 @itemize @minus
 @item
+@vindex org-agenda-todo-ignore-scheduled
 Some people view a TODO item that has been @emph{scheduled} for
 execution (@pxref{Timestamps}) as no longer @emph{open}.  Configure the
 variable @code{org-agenda-todo-ignore-scheduled} to exclude scheduled
 items from the global TODO list.
 @item
+@vindex org-agenda-todo-list-sublevels
 TODO items may have sublevels to break up the task into subtasks.  In
 such cases it may be enough to list only the highest level TODO headline
 and omit the sublevels from the global list.  Configure the variable
@@ -5976,6 +6097,7 @@ expression with tags, like @samp{+work+urgent-withboss} or
 define a custom command for it (@pxref{Agenda dispatcher}).
 @kindex C-c a M
 @item C-c a M
+@vindex org-tags-match-list-sublevels
 Like @kbd{C-c a m}, but only select headlines that are also TODO items
 and force checking subitems (see variable
 @code{org-tags-match-list-sublevels}).  Matching specific TODO keywords
@@ -6031,6 +6153,7 @@ and @code{wifi}, but not the keyword @code{ethernet}, and which are also
 not matched by the regular expression @code{8\.11[bg]}, meaning to
 exclude both 8.11b and 8.11g.
 
+@vindex org-agenda-text-search-extra-files
 Note that in addition to the agenda files, this command will also search
 the files listed in @code{org-agenda-text-search-extra-files}.
 @end table
@@ -6051,6 +6174,7 @@ projects and define next actions for them.
 List projects that are stuck.
 @kindex C-c a !
 @item C-c a !
+@vindex org-stuck-projects
 Customize the variable @code{org-stuck-projects} to define what a stuck
 project is and how to find it.
 @end table
@@ -6083,6 +6207,7 @@ are not stuck.  The correct customization for this is
 @section Presentation and sorting
 @cindex presentation, of agenda items
 
+@vindex org-agenda-prefix-format
 Before displaying items in an agenda view, Org mode visually prepares
 the items and sorts them.  Each item occupies a single line.  The line
 starts with a @emph{prefix} that contains the @emph{category}
@@ -6170,6 +6295,8 @@ timed entries are embedded in a time grid, like
    20:30-22:15 Marvin escorts the Hitchhikers to the bridge
 @end example
 
+@vindex org-agenda-use-time-grid
+@vindex org-agenda-time-grid
 The time grid can be turned on and off with the variable
 @code{org-agenda-use-time-grid}, and can be configured with
 @code{org-agenda-time-grid}.
@@ -6182,6 +6309,7 @@ Before being inserted into a view, the items are sorted.  How this is
 done depends on the type of view.
 @itemize @bullet
 @item
+@vindex org-agenda-files
 For the daily/weekly agenda, the items for each day are sorted.  The
 default order is to first collect all items containing an explicit
 time-of-day specification.  These entries will be shown at the beginning
@@ -6200,6 +6328,7 @@ For tags matches, items are not sorted at all, but just appear in the
 sequence in which they are found in the agenda files.
 @end itemize
 
+@vindex org-agenda-sorting-strategy
 Sorting can be customized using the variable
 @code{org-agenda-sorting-strategy}, and may also include criteria based on
 the estimated effort of an entry (@pxref{Effort estimates}).
@@ -6255,6 +6384,7 @@ Go to the original location of the item and delete other windows.
 @c
 @kindex f
 @item f
+@vindex org-agenda-start-with-follow-mode
 Toggle Follow mode.  In Follow mode, as you move the cursor through
 the agenda buffer, the other window always shows the corresponding
 location in the org file.  The initial setting for this mode in new
@@ -6270,6 +6400,8 @@ previously used indirect buffer.
 @c
 @kindex l
 @item l
+@vindex org-log-done
+@vindex org-agenda-log-mode-items
 Toggle Logbook mode.  In Logbook mode, entries that were marked DONE while
 logging was on (variable @code{org-log-done}) are shown in the agenda, as are
 entries that have been clocked on that day.  You can configure the entry
@@ -6287,6 +6419,7 @@ included.  To exit archives mode, press @kbd{v} again.
 @c
 @kindex R
 @item R
+@vindex org-agenda-start-with-clockreport-mode
 Toggle Clockreport mode.  In clockreport mode, the daily/weekly agenda will
 always show a table with the clocked times for the timespan and file scope
 covered by the current agenda view.  The initial setting for this mode in new
@@ -6321,6 +6454,8 @@ Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
 @c
 @kindex G
 @item G
+@vindex org-agenda-use-time-grid
+@vindex org-agenda-time-grid
 Toggle the time grid on and off.  See also the variables
 @code{org-agenda-use-time-grid} and @code{org-agenda-time-grid}.
 @c
@@ -6344,6 +6479,7 @@ IDs.
 @c
 @kindex @key{right}
 @item @key{right}
+@vindex org-agenda-ndays
 Display the following @code{org-agenda-ndays} days.  For example, if
 the display covers a week, switch to the following week.  With prefix
 arg, go forward that many times @code{org-agenda-ndays} days.
@@ -6358,6 +6494,7 @@ Go to today.
 @c
 @kindex C-c C-x C-c
 @item C-c C-x C-c
+@vindex org-columns-default-format
 Invoke column view (@pxref{Column view}) in the agenda buffer.  The column
 view format is taken from the entry at point, or (if there is no entry at
 point), from the first entry in the agenda view.  So whatever the format for
@@ -6444,6 +6581,7 @@ original org file.
 @c
 @kindex C-k
 @item C-k
+@vindex org-agenda-confirm-kill
 Delete the current agenda item along with the entire subtree belonging
 to it in the original Org file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
@@ -6466,6 +6604,7 @@ different file.
 @c
 @kindex T
 @item T
+@vindex org-agenda-show-inherited-tags
 Show all tags associated with the current item.  This is useful if you have
 turned off @code{org-agenda-show-inherited-tags}, but still want to see all
 tags of a headline occasionally.
@@ -6501,6 +6640,7 @@ Decrease the priority of the current item.
 @c
 @kindex z
 @item z
+@vindex org-log-state-notes-into-drawer
 Add a note to the entry.  This note will be recorded, and then files to the
 same location where state change notes a put.  Depending on
 @code{org-log-state-notes-into-drawer}, this maybe inside a drawer.
@@ -6613,6 +6753,7 @@ This is a globally available command, and also available in the agenda menu.
 @item C-x C-w
 @cindex exporting agenda views
 @cindex agenda views, exporting
+@vindex org-agenda-exporter-settings
 Write the agenda view to a file.  Depending on the extension of the
 selected file name, the view will be exported as HTML (extension
 @file{.html} or @file{.htm}), Postscript (extension @file{.ps}), or
@@ -6660,6 +6801,7 @@ shortcuts for frequently used searches, either creating an agenda
 buffer, or a sparse tree (the latter covering of course only the current
 buffer).
 @kindex C-c a C
+@vindex org-agenda-custom-commands
 Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable, for
 example by pressing @kbd{C-c a C}.  You can also directly set it with
@@ -6757,6 +6899,7 @@ command @kbd{C-c a o} provides a similar view for office tasks.
 @subsection Setting options for custom commands
 @cindex options, for custom agenda views
 
+@vindex org-agenda-custom-commands
 Org mode contains a number of variables regulating agenda construction
 and display.  The global variables define the behavior for all agenda
 commands, including the custom commands.  However, if you want to change
@@ -6788,6 +6931,7 @@ headline hierarchy above the match, nor the headline following the match
 will be shown.  The command @kbd{C-c a N} will do a text search limited
 to only a single file.
 
+@vindex org-agenda-custom-commands
 For command sets creating a block agenda,
 @code{org-agenda-custom-commands} has two separate spots for setting
 options.  You can add options that should be valid for just a single
@@ -6838,6 +6982,7 @@ only occasionally, use the command
 @item C-x C-w
 @cindex exporting agenda views
 @cindex agenda views, exporting
+@vindex org-agenda-exporter-settings
 Write the agenda view to a file.  Depending on the extension of the
 selected file name, the view will be exported as HTML (extension
 @file{.html} or @file{.htm}), Postscript (extension @file{.ps}),
@@ -6957,6 +7102,7 @@ extent.
 @cindex agenda, pipe
 @cindex Scripts, for agenda processing
 
+@vindex org-agenda-custom-commands
 Org provides commands to access agenda information for the command
 line in emacs batch mode.  This extracted information can be sent
 directly to a printer, or it can be read by a program that does further
@@ -7080,6 +7226,8 @@ This causes the following issues:
 
 @enumerate
 @item
+@vindex org-columns-default-format
+@vindex org-overriding-columns-format
 Org needs to make a decision which @code{COLUMNS} format to use.  Since the
 entries in the agenda are collected from different files, and different files
 may have different @code{COLUMNS} formats, this is a non-trivial problem.
@@ -7186,6 +7334,7 @@ are surrounded with @code{<sub>} and @code{<sup>} tags, respectively.
 @section LaTeX fragments
 @cindex LaTeX fragments
 
+@vindex org-format-latex-header
 With symbols, sub- and superscripts, HTML is pretty much at its end when
 it comes to representing mathematical formulas@footnote{Yes, there is
 MathML, but that is not yet fully supported by many browsers, and there
@@ -7233,6 +7382,7 @@ either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
 @end example
 
 @noindent
+@vindex org-format-latex-options
 If you need any of the delimiter ASCII sequences for other purposes, you
 can configure the option @code{org-format-latex-options} to deselect the
 ones you do not wish to have interpreted by the La@TeX{} converter.
@@ -7307,6 +7457,7 @@ To get a list of all abbreviations, type @kbd{M-x cdlatex-command-help}.
 @item
 @kindex _
 @kindex ^
+@vindex cdlatex-simplify-sub-super-scripts
 Pressing @kbd{_} and @kbd{^} inside a La@TeX{} fragment will insert these
 characters together with a pair of braces.  If you use @key{TAB} to move
 out of the braces, and if the braces surround only a single character or
@@ -7408,6 +7559,7 @@ property @code{EXPORT_TITLE}, that will take precedence.
 @subheading Headings and sections
 @cindex headings and sections, markup rules
 
+@vindex org-headline-levels
 The outline structure of the document as described in @ref{Document
 Structure} forms the basis for defining sections of the exported document.
 However, since the outline structure is also used for (for example) lists of
@@ -7424,6 +7576,7 @@ per file basis with a line
 @subheading Table of contents
 @cindex table of contents, markup rules
 
+@vindex org-export-with-toc
 The table of contents is normally inserted directly before the first headline
 of the file.  If you would like to get it to a different location, insert the
 string @code{[TABLE-OF-CONTENTS]} on a line by itself at the desired
@@ -7447,6 +7600,7 @@ the first line as the document title.  The text will be fully marked up.  If
 you need to include literal HTML or La@TeX{} code, use the special constructs
 described below in the sections for the individual exporters.
 
+@vindex org-export-skip-text-before-1st-heading
 Some people like to use the space before the first headline for setup and
 internal links and therefore would like to control the exported text before
 the first headline in a different way.  You can do so by setting the variable
@@ -7571,6 +7725,7 @@ In line [[(sc)]] we remember the current positon.  [[(jump)][Line (jump)]]
 jumps to point-min.
 @end example
 
+@vindex org-coderef-label-format
 If the syntax for the label format conflicts with the language syntax, use a
 @code{-l} switch to change the format, for example @samp{#+BEGIN_SRC pascal
 -n -r -l "((%s))"}.  See also the variable @code{org-coderef-label-format}.
@@ -7698,6 +7853,7 @@ syntax, it is exported verbatim.
 @cindex HTML entities
 @cindex LaTeX entities
 
+@vindex org-html-entities
 A @TeX{}-like syntax is used to specify special characters.  Where possible,
 these will be transformed into the native format of the exporter back-end.
 Strings like @code{\alpha} will be exported as @code{&alpha;} in the HTML
@@ -7742,6 +7898,8 @@ Toggle the COMMENT keyword at the beginning of an entry.
 @section Selective export
 @cindex export, selective by tags
 
+@vindex org-export-select-tags
+@vindex org-export-exclude-tags
 You may use tags to select the parts of a document that should be exported,
 or to exclude parts from export.  This behavior is governed by two variables:
 @code{org-export-select-tags} and @code{org-export-exclude-tags}.
@@ -7788,6 +7946,9 @@ Insert template with export options, see example below.
 @cindex #+LINK_HOME:
 @cindex #+EXPORT_SELECT_TAGS:
 @cindex #+EXPORT_EXCLUDE_TAGS:
+@vindex user-full-name
+@vindex user-mail-address
+@vindex org-export-default-language
 @example
 #+TITLE:     the title to be shown (default is the buffer name)
 #+AUTHOR:    the author (default taken from @code{user-full-name})
@@ -7871,6 +8032,7 @@ the subtrees are exported.
 @table @kbd
 @kindex C-c C-e
 @item C-c C-e
+@vindex org-export-run-in-background
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
 command.  The prefix arg is passed through to the exporter.  A double prefix
@@ -7883,6 +8045,7 @@ Like @kbd{C-c C-e}, but only export the text that is currently visible
 (i.e. not hidden by outline visibility).
 @kindex C-u C-u C-c C-e
 @item C-u C-u C-c C-e
+@vindex org-export-run-in-background
 Call an the exporter, but reverse the setting of
 @code{org-export-run-in-background}, i.e. request background processing if
 not set, or force processing in the current Emacs process if st.
@@ -8066,6 +8229,7 @@ and @code{style} attributes for a link:
 
 @cindex images, inline in HTML
 @cindex inlining images in HTML
+@vindex org-export-html-inline-images
 HTML export can inline images given as links in the Org file, and
 it can make an image the clickable part of a link.  By
 default@footnote{but see the variable
@@ -8139,6 +8303,11 @@ div.figure         @r{how to format an inlined image}
 .section-number-N  @r{section number in headlines, different for each level}
 @end example
 
+@vindex org-export-html-style-default
+@vindex org-export-html-style-include-default
+@vindex org-export-html-style
+@vindex org-export-html-extra
+@vindex org-export-html-style-default
 Each exported files contains a compact default style that defines these
 classes in a basic way@footnote{This style is defined in the constant
 @code{org-export-html-style-default}, which you should not modify.  To turn
@@ -8220,6 +8389,8 @@ buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}
          @r{default), only one such button will be present.}
 @end example
 
+@vindex org-infojs-options
+@vindex org-export-html-use-infojs
 You can choose default values for these options by customizing the variable
 @code{org-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-export-html-use-infojs}.
@@ -8283,6 +8454,7 @@ Export as LaTeX and then process to PDF, then open the resulting PDF file.
 @end table
 
 @cindex headline levels, for exporting
+@vindex org-latex-low-levels
 In the exported version, the first 3 outline levels will become
 headlines, defining a general document structure.  Additional levels
 will be exported as description lists.  The exporter can ignore them or
@@ -8328,6 +8500,8 @@ All lines between these markers are exported literally
 
 By default, the La@TeX{} output uses the class @code{article}.
 
+@vindex org-export-latex-default-class
+@vindex org-export-latex-classes
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
 @code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
@@ -8376,6 +8550,7 @@ options that can be used in the optional argument of the
 [[./img/sed-hr4049.pdf]]
 @end example
 
+@vindex org-export-latex-inline-image-extensions
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in LaTeX.  The default settings will
 recognize files types that can be included as images during processing by
@@ -8404,6 +8579,10 @@ Export only the visible part of the document.
 @section iCalendar export
 @cindex iCalendar export
 
+@vindex org-icalendar-include-todo
+@vindex org-icalendar-use-deadline
+@vindex org-icalendar-use-scheduled
+@vindex org-icalendar-categories
 Some people like to use Org mode for keeping track of projects, but still
 prefer a standard calendar application for anniversaries and appointments.
 In this case it can be useful to have deadlines and other time-stamped items
@@ -8420,6 +8599,7 @@ locally defined in the heading, and the file/tree category@footnote{To add
 inherited tags or the TODO state, configure the variable
 @code{org-icalendar-categories}.}.
 
+@vindex org-icalendar-store-UID
 The iCalendar standard requires each entry to have a globally unique
 identifier (UID).  Org creates these identifiers during export.  If you set
 the variable @code{org-icalendar-store-UID}, the UID will be stored in the
@@ -8437,16 +8617,20 @@ Create iCalendar entries for the current file and store them in the same
 directory, using a file extension @file{.ics}.
 @kindex C-c C-e I
 @item C-c C-e I
+@vindex org-agenda-files
 Like @kbd{C-c C-e i}, but do this for all files in
 @code{org-agenda-files}.  For each of these files, a separate iCalendar
 file will be written.
 @kindex C-c C-e c
 @item C-c C-e c
+@vindex org-combined-agenda-icalendar-file
 Create a single large iCalendar file from all files in
 @code{org-agenda-files} and write it to the file given by
 @code{org-combined-agenda-icalendar-file}.
 @end table
 
+@vindex org-use-property-inheritance
+@vindex org-icalendar-include-body
 The export will honor SUMMARY, DESCRIPTION and LOCATION@footnote{The LOCATION
 property can be inherited from higher in the hierarchy if you configure
 @code{org-use-property-inheritance} accordingly.} properties if the selected
@@ -8505,6 +8689,7 @@ and many other properties of a project.
 @cindex org-publish-project-alist
 @cindex projects, for publishing
 
+@vindex org-publish-project-alist
 Org-publish is configured almost entirely through setting the value of
 one variable, called @code{org-publish-project-alist}.
 Each element of the list configures one project, and may be in one of
@@ -8561,7 +8746,8 @@ properties
 @multitable @columnfractions 0.25 0.75
 @item @code{:base-extension}
 @tab Extension (without the dot!) of source files.  This actually is a
-regular expression.
+regular expression.  Set this to th symbol @code{any} if you want to select
+any files, even without extension.
 
 @item @code{:exclude}
 @tab Regular expression to match file names that should not be
@@ -8610,6 +8796,52 @@ and La@TeX{} exporters.  In most cases, these properties correspond to user
 variables in Org.  The table below lists these properties along
 with the variable they belong to.  See the documentation string for the
 respective variable for details.
+
+@vindex org-export-html-link-up
+@vindex org-export-html-link-home
+@vindex org-export-default-language
+@vindex org-display-custom-times
+@vindex org-export-headline-levels
+@vindex org-export-with-section-numbers
+@vindex org-export-section-number-format
+@vindex org-export-with-toc
+@vindex org-export-preserve-breaks
+@vindex org-export-with-archived-trees
+@vindex org-export-with-emphasize
+@vindex org-export-with-sub-superscripts
+@vindex org-export-with-special-strings
+@vindex org-export-with-footnotes
+@vindex org-export-with-drawers
+@vindex org-export-with-tags
+@vindex org-export-with-todo-keywords
+@vindex org-export-with-priority
+@vindex org-export-with-TeX-macros
+@vindex org-export-with-LaTeX-fragments
+@vindex org-export-skip-text-before-1st-heading
+@vindex org-export-with-fixed-width
+@vindex org-export-with-timestamps
+@vindex org-export-author-info
+@vindex org-export-creator-info
+@vindex org-export-with-tables
+@vindex org-export-highlight-first-table-line
+@vindex org-export-html-style-include-default
+@vindex org-export-html-style
+@vindex org-export-html-style-extra
+@vindex org-export-html-link-org-files-as-html
+@vindex org-export-html-inline-images
+@vindex org-export-html-extension
+@vindex org-export-html-table-tag
+@vindex org-export-html-expand
+@vindex org-export-html-with-timestamp
+@vindex org-export-publishing-directory
+@vindex org-export-html-preamble
+@vindex org-export-html-postamble
+@vindex org-export-html-auto-preamble
+@vindex org-export-html-auto-postamble
+@vindex user-full-name
+@vindex user-mail-address
+@vindex org-export-select-tags
+@vindex org-export-exclude-tags
 
 @multitable @columnfractions 0.32 0.68
 @item @code{:link-up}               @tab @code{org-export-html-link-up}
@@ -8666,6 +8898,7 @@ both HTML and La@TeX{} exporters, except for @code{:TeX-macros} and
 @code{:LaTeX-fragments}, respectively @code{nil} and @code{t} in the
 La@TeX{} export.
 
+@vindex org-publish-project-alist
 When a property is given a value in @code{org-publish-project-alist},
 its setting overrides the value of the corresponding user variable (if
 any) during publishing.  Options set within a file (@pxref{Export
@@ -8931,6 +9164,7 @@ buffer, press @kbd{C-c C-c} with the cursor still in the line to
 activate the changes immediately.  Otherwise they become effective only
 when the file is visited again in a new Emacs session.
 
+@vindex org-archive-location
 @table @kbd
 @item #+ARCHIVE: %s_done::
 This line sets the archive location for the agenda file.  It applies for
@@ -8946,6 +9180,8 @@ Set the default format for columns view.  This format applies when
 columns view is invoked in location where no @code{COLUMNS} property
 applies.
 @item #+CONSTANTS: name1=value1 ...
+@vindex org-table-formula-constants
+@vindex org-table-formula
 Set file-local values for constants to be used in table formulas.  This
 line set the local variable @code{org-table-formula-constants-local}.
 The global version of this variable is
@@ -8954,13 +9190,18 @@ The global version of this variable is
 Set tags that can be inherited by any entry in the file, including the
 top-level entries.
 @item #+DRAWERS: NAME1 .....
+@vindex org-drawers
 Set the file-local set of drawers.  The corresponding global variable is
 @code{org-drawers}.
 @item #+LINK:  linkword replace
+@vindex org-link-abbrev-alist
 These lines (several are allowed) specify link abbreviations.
 @xref{Link abbreviations}.  The corresponding variable is
 @code{org-link-abbrev-alist}.
 @item #+PRIORITIES: highest lowest default
+@vindex org-highest-priority
+@vindex org-lowest-priority
+@vindex org-default-priority
 This line sets the limits and the default for the priorities.  All three
 must be either letters A-Z or numbers 0-9.  The highest priority must
 have a lower ASCII number that the lowest priority.
@@ -8976,6 +9217,7 @@ as if they had been included in the buffer.  In particular, the file can be
 any other Org mode file with internal setup.  You can visit the file the
 cursor is in the line with @kbd{C-c '}.
 @item #+STARTUP:
+@vindex org-startup-folded
 This line sets options to be used at startup of Org mode, when an
 Org file is being visited.  The first set of options deals with the
 initial visibility of the outline tree.  The corresponding variable for
@@ -8989,6 +9231,7 @@ overview   @r{top-level headlines only}
 content    @r{all headlines}
 showall    @r{no folding at all, show everything}
 @end example
+@vindex org-startup-align-all-tables
 Then there are options for aligning tables upon visiting a file.  This
 is useful in files containing narrowed table columns.  The corresponding
 variable is @code{org-startup-align-all-tables}, with a default value
@@ -8999,6 +9242,9 @@ variable is @code{org-startup-align-all-tables}, with a default value
 align      @r{align all tables}
 noalign    @r{don't align tables on startup}
 @end example
+@vindex org-log-done
+@vindex org-log-note-clock-out
+@vindex org-log-repeat
 Logging closing and reinstating TODO items, and clock intervals
 (variables @code{org-log-done}, @code{org-log-note-clock-out}, and
 @code{org-log-repeat}) can be configured using these options.
@@ -9020,6 +9266,8 @@ nologrepeat        @r{do not record when reinstating repeating item}
 lognoteclock-out   @r{record a note when clocking out}
 nolognoteclock-out @r{don't record a note when clocking out}
 @end example
+@vindex org-hide-leading-stars
+@vindex org-odd-levels-only
 Here are the options for hiding leading stars in outline headings, and for
 indenting outlines.  The corresponding variables are
 @code{org-hide-leading-stars} and @code{org-odd-levels-only}, both with a
@@ -9036,6 +9284,8 @@ noindent   @r{no virtual indentation according to outline level}
 odd        @r{allow only odd outline levels (1,3,...)}
 oddeven    @r{allow all outline levels}
 @end example
+@vindex org-put-time-stamp-overlays
+@vindex org-time-stamp-overlay-formats
 To turn on custom format overlays over time stamps (variables
 @code{org-put-time-stamp-overlays} and
 @code{org-time-stamp-overlay-formats}), use
@@ -9043,6 +9293,7 @@ To turn on custom format overlays over time stamps (variables
 @example
 customtime @r{overlay custom time format}
 @end example
+@vindex constants-unit-system
 The following options influence the table spreadsheet (variable
 @code{constants-unit-system}).
 @cindex @code{constcgs}, STARTUP keyword
@@ -9051,6 +9302,8 @@ The following options influence the table spreadsheet (variable
 constcgs   @r{@file{constants.el} should use the c-g-s unit system}
 constSI    @r{@file{constants.el} should use the SI unit system}
 @end example
+@vindex org-footnote-define-inline
+@vindex org-footnote-auto-label
 To influence footnote settings, use the following keywords.  The
 corresponding variables are @code{org-footnote-define-inline} and
 @code{org-footnote-auto-label}.
@@ -9071,6 +9324,7 @@ fnconfirm   @r{offer automatic label for editing or confirmation}
 fnplain     @r{create [1]-like labels automatically}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
+@vindex org-tag-alist
 These lines (several such lines are allowed) specify the valid tags in
 this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
@@ -9079,10 +9333,10 @@ This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
-@item #+SEQ_TODO:   #+TYP_TODO:
+@item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
+@vindex org-todo-keywords
 These lines set the TODO keywords and their interpretation in the
-current file.  The corresponding variables are @code{org-todo-keywords}
-and @code{org-todo-interpretation}.
+current file.  The corresponding variable is @code{org-todo-keywords}.
 @end table
 
 @node The very busy C-c C-c key, Clean view, In-buffer settings, Miscellaneous
@@ -9180,6 +9434,7 @@ with the headline, like
     more text, now indented
 @end example
 
+@vindex org-adapt-indentation
 A good way to get this indentation is by hand, and Org supports this with
 paragraph filling, line wrapping, and structure editing@footnote{See also the
 variable @code{org-adapt-indentation}.} preserving or adapting the
@@ -9189,6 +9444,7 @@ or text properties.  But I have not yet found a robust and efficient way to
 do this in large files.
 
 @item
+@vindex org-hide-leading-stars
 @emph{Hiding leading stars}@* You can modify the display in such a way that
 all leading stars become invisible.  To do this in a global way, configure
 the variable @code{org-hide-leading-stars} or change this on a per-file basis
@@ -9213,6 +9469,7 @@ With hidden stars, the tree becomes:
 @end example
 
 @noindent
+@vindex org-hide @r{(face)}
 Note that the leading stars are not truly replaced by whitespace, they
 are only fontified with the face @code{org-hide} that uses the
 background color as font color.  If you are not using either white or
@@ -9222,6 +9479,7 @@ stars are @i{almost} invisible, for example using the color
 @code{grey90} on a white background.
 
 @item
+@cindex org-odd-levels-only
 Things become cleaner still if you skip all the even levels and use only odd
 levels 1, 3, 5..., effectively adding two stars to go from one outline level
 to the next@footnote{When you need to specify a level for a property search
@@ -9307,6 +9565,7 @@ packages is using Calc for embedded calculations. @xref{Embedded Mode,
 , Embedded Mode, Calc, GNU Emacs Calc Manual}.
 @cindex @file{constants.el}
 @item @file{constants.el} by Carsten Dominik
+@vindex org-table-formula-constants
 In a table formula (@pxref{The spreadsheet}), it is possible to use
 names for natural constants or units.  Instead of defining your own
 constants in the variable @code{org-table-formula-constants}, install
@@ -9329,6 +9588,7 @@ supports Imenu - all you need to do to get the index is the following:
 (add-hook 'org-mode-hook
           (lambda () (imenu-add-to-menubar "Imenu")))
 @end lisp
+@vindex org-imenu-depth
 By default the index is two levels deep - you can modify the depth using
 the option @code{org-imenu-depth}.
 @item @file{remember.el} by John Wiegley
@@ -9385,6 +9645,7 @@ which makes using @file{footnote.el} unnecessary.
 @table @asis
 
 @cindex @code{shift-selection-mode}
+@vindex org-support-shift-select
 In Emacs 23, @code{shift-selection-mode} is on by default, meaning that
 cursor motions combined with the shift key should start or enlarge regions.
 This conflicts with the use of @kbd{S-@key{cursor}} commands in Org to change
@@ -9398,6 +9659,7 @@ cursor moves across a special context.
 
 @cindex @file{CUA.el}
 @item @file{CUA.el} by Kim. F. Storm
+@vindex org-replace-disputed-keys
 Key bindings in Org conflict with the @kbd{S-<cursor>} keys used by CUA mode
 (as well as pc-select-mode and s-region-mode) to select and extend the
 region.  In fact, Emacs 23 has this built-in in the form of
@@ -9414,6 +9676,7 @@ S-LEFT    ->  M--             S-RIGHT    ->  M-+
 C-S-LEFT  ->  M-S--           C-S-RIGHT  ->  M-S-+
 @end example
 
+@vindex org-disputed-keys
 Yes, these are unfortunately more difficult to remember.  If you want
 to have other replacement keys, look at the variable
 @code{org-disputed-keys}.
@@ -9656,6 +9919,7 @@ The next line calls @code{org-add-link-type} to define a new link type
 with prefix @samp{man}.  The call also contains the name of a function
 that will be called to follow such a link.
 @item
+@vindex org-store-link-functions
 The next line adds a function to @code{org-store-link-functions}, in
 order to allow the command @kbd{C-c l} to record a useful link in a
 buffer displaying a man page.
@@ -9808,6 +10072,7 @@ will then get the following template:
 @end example
 
 @noindent
+@vindex LaTeX-verbatim-environments
 The @code{#+ORGTBL: SEND} line tells Orgtbl mode to use the function
 @code{orgtbl-to-latex} to convert the table into La@TeX{} and to put it
 into the receiver location with name @code{salesfigures}.  You may now
@@ -10114,9 +10379,12 @@ like this:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
+@vindex org-agenda-overriding-header
 Note that this also binds @code{org-agenda-overriding-header} to get a
 meaningful header in the agenda view.
 
+@vindex org-odd-levels-only
+@vindex org-agenda-skip-function
 A general way to create custom searches is to base them on a search for
 entries with a certain level limit.  If you want to study all entries with
 your custom search function, simply do a search for
@@ -10177,6 +10445,7 @@ POM may also be nil, in which case the current entry is used.
 If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
 @end defun
+@vindex org-use-property-inheritance
 @defun org-entry-get pom property &optional inherit
 Get value of PROPERTY for entry at point-or-marker POM.  By default,
 this only looks at properties defined locally in the entry.  If INHERIT
@@ -10269,6 +10538,7 @@ agenda-with-archives
 The remaining args are treated as settings for the skipping facilities of
 the scanner.  The following items can be given here:
 
+@vindex org-agenda-skip-function
 @example
 archive   @r{skip trees with the archive tag}
 comment   @r{skip trees with the COMMENT keyword}
@@ -10548,14 +10818,23 @@ and contributed various ideas and code snippets.
 
 
 @node Main Index, Key Index, History and Acknowledgments, Top
-@unnumbered The Main Index
+@unnumbered Concept Index
 
 @printindex cp
 
-@node Key Index,  , Main Index, Top
+@node Key Index, Variable and Faces Index, Main Index, Top
 @unnumbered Key Index
 
 @printindex ky
+
+@node Variable and Faces Index,  , Key Index, Top
+@unnumbered Variable Index
+
+This is not a complete index of variables and faces, only the ones that are
+mentioned in the manual.  For a more complete list, use @kbd{M-x
+org-customize @key{RET}} and then klick yourself through the tree.
+
+@printindex vr
 
 @bye
 

@@ -21,6 +21,7 @@
 *.toc
 *.tp
 *.vr
+*.vrs
 *.dvi
 *.ps
 orgcard_letter.tex
