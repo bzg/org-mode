@@ -3064,6 +3064,11 @@ collapsed state."
    org-id-get-with-outline-drilling
    org-id-goto org-id-find org-id-store-link))
 
+;; Autoload Plotting Code
+
+(org-autoload "org-plot"
+ '(org-plot/gnuplot))
+
 ;;; Variables for pre-computed regular expressions, all buffer local
 
 (defvar org-drawer-regexp nil

@@ -1,5 +1,10 @@
 2009-02-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el ("org-plot"): Help loading org-plot.
+
+	* org-publish.el (org-publish-get-base-files): Allow symbol `any'
+	for selecting files with any (and even without) extension.
+
 	* org.el (org-save-all-org-buffers): Also save id locations.
 	(org-revert-all-org-buffers): Also load id locations.
 
