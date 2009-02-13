@@ -3058,6 +3058,9 @@ collapsed state."
 ;; Autoload ID code
 
 (declare-function org-id-store-link "org-id")
+(declare-function org-id-locations-load "org-id")
+(declare-function org-id-locations-save "org-id")
+(defvar org-id-track-globally)
 (org-autoload "org-id"
  '(org-id-get-create org-id-new org-id-copy org-id-get
    org-id-get-with-outline-path-completion
@@ -8959,7 +8962,8 @@ This function is run automatically after each state change to a DONE state."
 		;; make sure we take a note, not only a time stamp
 		(setq org-log-note-how 'note))
 	  ;; Set up for taking a record
-	  (org-add-log-setup 'state (or done-word (car org-done-keywords)) this
+	  (org-add-log-setup 'state (or done-word (car org-done-keywords))
+			     last-state
 			     'findpos org-log-repeat)))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
