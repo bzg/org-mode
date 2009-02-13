@@ -2,6 +2,9 @@
 
 	* lisp/org-choose.el (org-choose-get-fn-map-group): Require
 	`org-agenda'.
+	(cl): Require `cl' at runtime.
+	(org-choose-filter-one): Use `org-split-string' for consistency
+	accross Emacs version.
 
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 

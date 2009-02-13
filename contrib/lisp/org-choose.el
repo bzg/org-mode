@@ -63,8 +63,9 @@
 ;;;_ , Requires
 
 (require 'org)
-(eval-when-compile
-   (require 'cl))
+;(eval-when-compile
+;   (require 'cl))
+(require 'cl)
 
 ;;;_. Body
 ;;;_ , The variables
@@ -109,7 +110,7 @@ Each entry is an `org-choose-mark-data.'" )
 	    ;;Split it
 	    (arglist
 	       (let
-		  ((arglist-x (split-string args ",")))
+		  ((arglist-x (org-split-string args ",")))
 		  ;;When string starts with "," `split-string' doesn't
 		  ;;make a first arg, so in that case make one
 		  ;;manually.
