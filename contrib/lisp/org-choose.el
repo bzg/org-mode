@@ -273,7 +273,6 @@ interpretation."
 (defun org-choose-keep-sensible (change-plist)
   "Bring the other items back into a sensible state after an item's
 setting was changed."
-
    (let*
       (  (from (plist-get change-plist :from))
 	 (to (plist-get change-plist :to))
@@ -385,6 +384,7 @@ setting was changed."
    "Return a function to map over the group"
    
    #'(lambda (fn)
+       (require 'org-agenda) ;; `org-map-entries' seems to need it.
 	(save-excursion
 	  (unless (org-up-heading-safe)
 	    (error "Chosing is only supported between siblings in a tree, not on top level"))
@@ -420,7 +420,6 @@ If there is none, return 0"
   "Return the highest index that any choose mark can sensibly have,
 given that another mark has index IX.
 DATA must be a `org-choose-mark-data.'."
-
 
    (let
       (		
