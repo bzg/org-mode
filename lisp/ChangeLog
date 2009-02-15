@@ -2,6 +2,8 @@
 
 	* org.el (org-show-entry): Make this work correctly also if it is
 	the last entry in the file.
+	(org-end-of-line, org-beginning-of-line): Make prefix arg work, by
+	falling back to normal, default command.
 
 	* org-list.el (org-toggle-checkbox): Make double prefix set the
 	checkbox to "[-]".
