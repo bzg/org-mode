@@ -251,6 +251,7 @@ Return t when things worked, nil when we are not in an item."
 (defun org-toggle-checkbox (&optional toggle-presence)
   "Toggle the checkbox in the current line.
 With prefix arg TOGGLE-PRESENCE, add or remove checkboxes.
+With double prefix, set checkbox to [-].
 When there is an active region, toggle status or presence of the checkbox
 in the first line, and make every item in the region have the same
 status or presence, respectively.
@@ -266,13 +267,14 @@ text below the heading."
 	(setq beg (point) end (save-excursion (outline-next-heading) (point))))
        ((org-at-item-checkbox-p)
 	(let ((pos (point)))
-	  (if toggle-presence
+	  (if (equal toggle-presence '(4))
 	      (progn
 		(replace-match "")
 		(goto-char (match-beginning 0))
 		(just-one-space))
 	    (replace-match
-	     (cond ((member (match-string 0) '("[ ]" "[-]")) "[X]")
+	     (cond ((equal toggle-presence '(16)) "[-]")
+		   ((member (match-string 0) '("[ ]" "[-]")) "[X]")
 		   (t "[ ]"))
 	     t t))
 	  (goto-char pos))
