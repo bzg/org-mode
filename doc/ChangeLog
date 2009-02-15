@@ -1,3 +1,7 @@
+2009-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Checkboxes): Update to changed command behavior.
+
 2009-02-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Tracking TODO state changes): Document storing state

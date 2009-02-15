@@ -13709,7 +13709,9 @@ This command does many different things, depending on context:
      ((org-at-item-checkbox-p)
       (call-interactively 'org-toggle-checkbox))
      ((org-at-item-p)
-      (call-interactively 'org-maybe-renumber-ordered-list))
+      (if arg
+	  (call-interactively 'org-toggle-checkbox)
+	(call-interactively 'org-maybe-renumber-ordered-list)))
      ((save-excursion (beginning-of-line 1) (looking-at "#\\+BEGIN:"))
       ;; Dynamic block
       (beginning-of-line 1)

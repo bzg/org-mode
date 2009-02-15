@@ -266,7 +266,7 @@ text below the heading."
        ((org-on-heading-p)
 	(setq beg (point) end (save-excursion (outline-next-heading) (point))))
        ((org-at-item-checkbox-p)
-	(let ((pos (point)))
+	(save-excursion
 	  (if (equal toggle-presence '(4))
 	      (progn
 		(replace-match "")
@@ -276,8 +276,7 @@ text below the heading."
 	     (cond ((equal toggle-presence '(16)) "[-]")
 		   ((member (match-string 0) '("[ ]" "[-]")) "[X]")
 		   (t "[ ]"))
-	     t t))
-	  (goto-char pos))
+	     t t)))
 	(throw 'exit t))
        ((org-at-item-p)
 	;; add a checkbox

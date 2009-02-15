@@ -3695,11 +3695,14 @@ percentage of checkboxes checked (in the above example, this would be
 @table @kbd
 @kindex C-c C-c
 @item C-c C-c
-Toggle checkbox at point.  With a prefix argument, set it to @samp{[-]},
-which is considered to be an intermediate state.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
+double prefix argument, set it to @samp{[-]}, which is considered to be an
+intermediate state.
 @kindex C-c C-x C-b
 @item C-c C-x C-b
-Toggle checkbox status or (with prefix arg) checkbox presence at point.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
+double prefix argument, set it to @samp{[-]}, which is considered to be an
+intermediate state.
 @itemize @minus
 @item
 If there is an active region, toggle the first checkbox in the region
