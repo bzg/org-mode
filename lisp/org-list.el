@@ -707,7 +707,7 @@ with something like \"1.\" or \"2)\"."
     (org-beginning-of-item-list)
     (setq bobp (bobp))
     (looking-at "[ \t]*[0-9]+\\([.)]\\)")
-    (setq fmt (concat "%d" (match-string 1)))
+    (setq fmt (concat "%d" (or (match-string 1) ".")))
     (beginning-of-line 0)
     ;; walk forward and replace these numbers
     (catch 'exit

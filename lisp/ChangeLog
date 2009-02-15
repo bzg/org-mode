@@ -3,6 +3,8 @@
 	* org-list.el (org-toggle-checkbox): Make double prefix set the
 	checkbox to "[-]".
 	(org-fix-bullet-type): Only replace bullet it it is changed.
+	(org-renumber-ordered-list): Handle case when first item does not
+	have a number.
 
 	* org.el (org-add-log-setup): Fix positioning when
 	`org-log-states-order-reversed' is nil.
