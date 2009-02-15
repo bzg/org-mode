@@ -10,11 +10,96 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.22
+* Version 6.23 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
  :END:
 
+** Overview
+** Incompatible changes
+
+- CLOCK lines will now be captured into the LOGBOOK drawer.
+  See below for details.
+
+** Details
+
+*** Capture state change notes into a drawer
+
+State change notes can now be captured into a drawer =LOGBOOK=,
+to keep the entry tidy.  If this is what you want, you will need
+this configuration:
+
+#+begin_src emacs-lisp
+(setq org-log-into-drawer "LOGBOOK")
+#+end_src
+
+Thanks to Wanrong Lin for this proposal.
+
+*** Clock lines are now captured into the LOGBOOK drawer as well
+
+The =CLOCK= drawer will be abandoned, clock lines will now also
+end up in a drawer =LOGBOOK=.  The reason for this is because it
+is a bit useless to have two different drawers for state change
+notes and clock lines.  If you wish to keep the old way, for
+example if you do not want clock lines and state notes in the
+same drawer, use
+
+#+begin_src emacs-lisp
+(setq org-clock-into-drawer "CLOCK")
+#+end_src
+
+*** Added org-R.el to contrib directory
+
+Dan Davison has contributed /org-R.el/ which is now in the
+contrib directory and installs powerful calculation methods
+using the R statistics language.  There is a [[http://orgmode.org/worg/org-tutorials/org-R/org-R.php][tutorial]] on Worg for
+it.
+
+Thanks to Dan for this great contribution.
+
+*** Allow individual formatting of each TODO keyword in HTML export
+
+TODO keywords in HTML export have the CSS class =todo=.  In
+addition to this, each keyword has now itself as class, so you
+could do this in your CSS file:
+
+#+begin_src css
+.todo { font-weight:bold; }
+.done { font-weight:bold; }
+.TODO { color:red; }
+.WAITING { color:orange; }
+.DONE { color:green; }
+#+end_src
+
+Thanks to Wanrong Lin for this request, and to Sebastian Rose for
+help with the implementation.
+*** New hooks for add-ons to tap into context-sensitive commands
+
+Some commands in Org are context-sensitive, they will execute
+different functions depending on context.  The most important
+example is of course =C-c C-c=, but also the =M-cursor= keys fall
+into this category.
+
+Org has now a system of hooks that can be used by add-on packages
+to install their own functionality into these keys.  See the
+docstring of =org-ctrl-c-ctrl-c-hook= for details.  The other
+hooks are named like =org-metaleft-hook= or
+=org-shiftmetaright-hook=.
+
+*** Publishing files irrespective of extension
+
+If you set the =:base-extension= property for a publishing
+project to the symbol =any=, all files in the directory will be
+published, irrespective of extension.
+
+Thanks to Richard Klinda for a patch to this effect.
+
+*** New variable index in the manual
+
+A new index in the manual lists all variables mentioned in the
+manual, about 200.
+
+* Version 6.22
 ** Details
 
 *** org-choose.el by Tom Breton is now included
