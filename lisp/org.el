@@ -14766,9 +14766,16 @@ which make use of the date at the cursor."
     (cond
      ((looking-at "#") (setq column 0))
      ((looking-at "\\*+ ") (setq column 0))
+     ((and (looking-at "[ \t]*:END:")
+	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
+      (save-excursion
+	(goto-char (1- (match-beginning 1)))
+	(setq column (current-column))))
      (t
       (beginning-of-line 0)
-      (while (and (not (bobp)) (looking-at "[ \t]*[\n:#|]"))
+      (while (and (not (bobp)) (looking-at "[ \t]*[\n:#|]")
+		  (not (looking-at "[ \t]*:END:"))
+		  (not (looking-at org-drawer-regexp)))
 	(beginning-of-line 0))
       (cond
        ((looking-at "\\*+[ \t]+")
@@ -14776,6 +14783,12 @@ which make use of the date at the cursor."
 	    (setq column 0)
 	  (goto-char (match-end 0))
 	  (setq column (current-column))))
+       ((looking-at org-drawer-regexp)
+	  (goto-char (1- (match-beginning 1)))
+	  (setq column (current-column)))
+       ((looking-at "\\([ \t]*\\):END:")
+	  (goto-char (match-end 1))
+	  (setq column (current-column)))
        ((org-in-item-p)
 	(org-beginning-of-item)
 	(looking-at "[ \t]*\\(\\S-+\\)[ \t]*\\(\\[[- X]\\][ \t]*\\|.*? :: \\)?")
