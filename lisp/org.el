@@ -15309,9 +15309,10 @@ Show the heading too, if it is currently invisible."
 	  (outline-flag-region
 	   (max (point-min) (1- (point)))
 	   (save-excursion
-	     (re-search-forward
-	      (concat "[\r\n]\\(" outline-regexp "\\)") nil 'move)
-	     (or (match-beginning 1) (point-max)))
+	     (if (re-search-forward
+		  (concat "[\r\n]\\(" outline-regexp "\\)") nil t)
+		 (match-beginning 1)
+	       (point-max)))
 	   nil))
       (error nil))))
 

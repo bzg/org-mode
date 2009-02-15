@@ -1,5 +1,8 @@
 2009-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-show-entry): Make this work correctly also if it is
+	the last entry in the file.
+
 	* org-list.el (org-toggle-checkbox): Make double prefix set the
 	checkbox to "[-]".
 	(org-fix-bullet-type): Only replace bullet it it is changed.
