@@ -1867,7 +1867,7 @@ from the buffer."
 	   (replace-match ""))))))
 
 (defun org-export-remove-clock-lines ()
-  "Remove timestamps and keywords for export."
+  "Remove clock lines for export."
   (let ((re (concat "^[ \t]*" org-clock-string ".*\n?")))
     (while (re-search-forward re nil t)
       (org-if-unprotected

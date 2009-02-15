@@ -1,3 +1,26 @@
+2009-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-add-log-setup): Fix positioning when
+	`org-log-states-order-reversed' is nil.
+
+	* org-clock.el (org-clock-in): Fix positioning when
+	`org-log-states-order-reversed' is nil.
+	(org-clock-find-position): Fix positioning when
+	`org-log-states-order-reversed' is nil.
+
+2009-02-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-into-drawer): Take default from
+	`org-log-into-drawer'.
+	(org-clock-find-position): Look for the correct drawer.
+
+	* org.el (org-log-into-drawer): Renamed from
+	`org-log-state-notes-into-drawer'.
+	(org-log-state-notes-into-drawer): New variable alias.
+	(org-add-log-setup): Make drawer name default to LOGBOOK, not
+	CLOCK.
+	(org-insert-property-drawer): Also skip LOGBOOK drawers.
+
 2009-02-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda): Fix docstring.

@@ -1795,14 +1795,16 @@ empty string.
 (unless (assq 'note org-log-note-headings)
   (push '(note . "%t") org-log-note-headings))
 
-(defcustom org-log-state-notes-into-drawer nil
+(defcustom org-log-into-drawer nil
   "Non-nil means, insert state change notes and time stamps into a drawer.
 When nil, state changes notes will be inserted after the headline and
-any scheduling and clock lines, but not inside a drawer.  When t,
-notes
+any scheduling and clock lines, but not inside a drawer.
+
 The value of this variable should be the name of the drawer to use.
 LOGBOOK is proposed at the default drawer for this purpose, you can
 also set this to a string to define the drawer of your choice.
+
+A value of t is also allowed, representing \"LOGBOOK\".
 
 If this variable is set, `org-log-state-notes-insert-after-drawers'
 will be ognored."
@@ -1810,8 +1812,11 @@ will be ognored."
   :group 'org-progress
   :type '(choice
 	  (const :tag "Not into a drawer" nil)
-	  (const :tag "LOGBOOK" "LOGBOOK")
+	  (const :tag "LOGBOOK" t)
 	  (string :tag "Other")))
+
+(if (fboundp 'defvaralias)
+    (defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer))
 
 (defcustom org-log-state-notes-insert-after-drawers nil
   "Non-nil means, insert state change notes after any drawers in entry.
@@ -1820,7 +1825,7 @@ deadline/scheduled line are skipped.
 When nil, insert notes right after the heading and perhaps the line
 with deadline/scheduling if present.
 
-This variable will have no effect if `org-log-state-notes-into-drawer' is
+This variable will have no effect if `org-log-into-drawer' is
 set."
   :group 'org-todo
   :group 'org-progress
@@ -9212,9 +9217,9 @@ When FINDPOS is non-nil, find the correct position for the note in
 the current entry.  If not, assume that it can be inserted at point.
 HOW is an indicator what kind of note should be created.
 EXTRA is additional text that will be inserted into the notes buffer."
-  (let ((drawer (cond ((stringp org-log-state-notes-into-drawer)
-		       org-log-state-notes-into-drawer)
-		      (org-log-state-notes-into-drawer "LOGBOOK")
+  (let ((drawer (cond ((stringp org-log-into-drawer)
+		       org-log-into-drawer)
+		      (org-log-into-drawer "LOGBOOK")
 		      (t nil))))
     (save-restriction
       (save-excursion
@@ -9230,7 +9235,11 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	   (drawer
 	    (if (re-search-forward (concat "^[ \t]*:" drawer ":[ \t]*$")
 				   nil t)
-		(goto-char (match-end 0))
+		(progn
+		  (goto-char (match-end 0))
+		  (or org-log-states-order-reversed
+		      (and (re-search-forward org-property-end-re nil t)
+			   (goto-char (1- (match-beginning 0))))))
 	      (insert "\n:" drawer ":\n:END:")
 	      (beginning-of-line 0)
 	      (org-indent-line-function)
@@ -10986,8 +10995,13 @@ formats in the current buffer."
     (setq hiddenp (org-invisible-p))
     (end-of-line 1)
     (and (equal (char-after) ?\n) (forward-char 1))
-    (while (looking-at "^[ \t]*\\(:CLOCK:\\|CLOCK\\|:END:\\)")
-      (beginning-of-line 2))
+    (while (looking-at "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|CLOCK:\\|:END:\\)")
+      (if (member (match-string 1) '("CLOCK:" ":END:"))
+	  ;; just skip this line
+	  (beginning-of-line 2)
+	;; Drawer start, find the end
+	(re-search-forward "^\\*+ \\|^[ \t]*:END:" nil t)
+	(beginning-of-line 1)))
     (org-skip-over-state-notes)
     (skip-chars-backward " \t\n\r")
     (if (eq (char-before) ?*) (forward-char 1))
