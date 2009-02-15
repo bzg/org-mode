@@ -761,7 +761,7 @@ Also, fix the indentation."
 	  (skip-chars-forward " \t")
 	  (looking-at "\\S-+ *")
 	  (setq oldbullet (match-string 0))
-	  (replace-match bullet)
+	  (unless (equal bullet oldbullet) (replace-match bullet))
 	  (org-shift-item-indentation (- (length bullet) (length oldbullet))))))
     (goto-line line)
     (org-move-to-column col)
