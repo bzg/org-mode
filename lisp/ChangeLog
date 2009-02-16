@@ -4,6 +4,9 @@
 	property, for sorting.
 	(org-cmp-todo-state): Get the applicable TODO keywords directly
 	from the buffer.
+	(org-run-agenda-series, org-agenda-list, org-search-view)
+	(org-todo-list, org-tags-view): Only fit agenda window when the
+	whole series is done.
 
 	* org.el (org-scan-tags): Add todo state as property, for sorting.
 
