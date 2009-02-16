@@ -166,9 +166,12 @@ you can \"misuse\" it to also add other text to the header.  However,
 (defconst org-agenda-custom-commands-local-options
   `(repeat :tag "Local settings for this command. Remember to quote values"
 	   (choice :tag "Setting"
+	    (list :tag "Heading for this block"
+		  (const org-agenda-overriding-header)
+		  (string :tag "Headline"))
 	    (list :tag "Any variable"
 		  (variable :tag "Variable")
-		  (sexp :tag "Value"))
+		  (sexp :tag "Value (sexp)"))
 	    (list :tag "Files to be searched"
 		  (const org-agenda-files)
 		  (list
@@ -2518,14 +2521,17 @@ given in `org-agenda-start-on-weekday'."
 	     (w1 (org-days-to-iso-week d1))
 	     (w2 (org-days-to-iso-week d2)))
 	(setq s (point))
-	(insert (capitalize (symbol-name (org-agenda-ndays-to-span nd)))
-		"-agenda"
-		(if (< (- d2 d1) 350)
-		    (if (= w1 w2)
-			(format " (W%02d)" w1)
-		      (format " (W%02d-W%02d)" w1 w2))
-		  "")
-		":\n"))
+	(if org-agenda-overriding-header
+	    (insert (org-add-props (copy-sequence org-agenda-overriding-header)
+			nil 'face 'org-agenda-structure) "\n")
+	  (insert (capitalize (symbol-name (org-agenda-ndays-to-span nd)))
+		  "-agenda"
+		  (if (< (- d2 d1) 350)
+		      (if (= w1 w2)
+			  (format " (W%02d)" w1)
+			(format " (W%02d-W%02d)" w1 w2))
+		    "")
+		  ":\n")))
       (add-text-properties s (1- (point)) (list 'face 'org-agenda-structure
 						'org-date-line t)))
     (while (setq d (pop day-numbers))
