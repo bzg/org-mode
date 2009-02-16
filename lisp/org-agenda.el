@@ -4178,10 +4178,19 @@ HH:MM."
 
 (defsubst org-cmp-todo-state (a b)
   "Compare the todo states of strings A and B."
-  (let* ((ta (or (get-text-property 1 'todo-state a) ""))
+  (let* ((ma (or (get-text-property 1 'org-marker a)
+		 (get-text-property 1 'org-hd-marker a)))
+	 (mb (or (get-text-property 1 'org-marker b)
+		 (get-text-property 1 'org-hd-marker b)))
+	 (fa (and ma (marker-buffer ma)))
+	 (fb (and mb (marker-buffer mb)))
+	 (todo-kwds
+	  (or (and fa (with-current-buffer fa org-todo-keywords-1))
+	      (and fb (with-current-buffer fb org-todo-keywords-1))))
+	 (ta (or (get-text-property 1 'todo-state a) ""))
 	 (tb (or (get-text-property 1 'todo-state b) ""))
-	 (la (- (length (member ta org-todo-keywords-for-agenda))))
-	 (lb (- (length (member tb org-todo-keywords-for-agenda))))
+	 (la (- (length (member ta todo-kwds))))
+	 (lb (- (length (member tb todo-kwds))))
 	 (donepa (member ta org-done-keywords-for-agenda))
 	 (donepb (member tb org-done-keywords-for-agenda)))
     (cond ((and donepa (not donepb)) -1)

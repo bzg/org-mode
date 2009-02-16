@@ -2,6 +2,8 @@
 
 	* org-agenda.el (org-agenda-get-sexps): Add todo state as
 	property, for sorting.
+	(org-cmp-todo-state): Get the applicable TODO keywords directly
+	from the buffer.
 
 	* org.el (org-scan-tags): Add todo state as property, for sorting.
 
