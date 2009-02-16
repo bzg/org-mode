@@ -1,5 +1,10 @@
 2009-02-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-sexps): Add todo state as
+	property, for sorting.
+
+	* org.el (org-scan-tags): Add todo state as property, for sorting.
+
 	* org-agenda.el (org-agenda-custom-commands-local-options): Add
 	`org-agenda-overriding-header' as an option.
 	(org-agenda-list): Honor org-agenda-overriding-header'.

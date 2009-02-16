@@ -3491,7 +3491,8 @@ the documentation of `org-diary'."
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp "^&?%%(")
-	 marker category ee txt tags entry result beg b sexp sexp-entry)
+	 marker category ee txt tags entry result beg b sexp sexp-entry
+	 todo-state)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3507,7 +3508,8 @@ the documentation of `org-diary'."
 	(setq result (org-diary-sexp-entry sexp sexp-entry date))
 	(when result
 	  (setq marker (org-agenda-new-marker beg)
-		category (org-get-category beg))
+		category (org-get-category beg)
+		todo-state (org-get-todo-state))
 
 	  (if (string-match "\\S-" result)
 	      (setq txt result)
@@ -3517,7 +3519,7 @@ the documentation of `org-diary'."
                      "" txt category tags 'time))
 	  (org-add-props txt props 'org-marker marker)
 	  (org-add-props txt nil
-	    'org-category category 'date date
+	    'org-category category 'date date 'todo-state todo-state
 	    'type "sexp")
 	  (push txt ee))))
     (nreverse ee)))
