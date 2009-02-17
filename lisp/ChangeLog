@@ -1,5 +1,8 @@
 2009-02-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-olpath-completing-read): Never use ido for this
+	one.
+
 	* org-exp.el (org-export-normalize-links): Use new macro.
 
 	* org-macs.el (org-if-unprotected-at): New macro.

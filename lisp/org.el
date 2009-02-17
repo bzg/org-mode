@@ -8031,7 +8031,8 @@ operation has put the subtree."
 
 (defun org-olpath-completing-read (prompt collection &rest args)
   "Read an outline path like a file name."
-  (let ((thetable collection))
+  (let ((thetable collection)
+	(org-completion-use-ido nil))   ; does not work with ido.
     (apply
      'org-ido-completing-read prompt
      (lambda (string predicate &optional flag)
