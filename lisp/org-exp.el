@@ -2050,7 +2050,7 @@ When it is nil, all comments will be removed."
     (goto-char (point-min))
     (while (re-search-forward re-plain-link nil t)
       (goto-char (1- (match-end 0)))
-      (org-if-unprotected
+      (org-if-unprotected-at (1+ (match-beginning 0))
        (let* ((s (concat (match-string 1) "[[" (match-string 2)
 			 ":" (match-string 3) "]]")))
 	 ;; added 'org-link face to links

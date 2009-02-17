@@ -1,5 +1,9 @@
 2009-02-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-normalize-links): Use new macro.
+
+	* org-macs.el (org-if-unprotected-at): New macro.
+
 	* org-agenda.el (org-agenda-show): Allow numerical prefix
 	arguments to specify how much context should be shown.
 	(org-agenda-cycle-show): New command, could be bound to SPC in
