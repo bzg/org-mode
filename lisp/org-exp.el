@@ -4656,9 +4656,9 @@ When TITLE is nil, just close all open levels."
 	(setq level (+ level org-export-html-toplevel-hlevel -1))
 	(if (and org-export-with-section-numbers (not body-only))
 	    (setq title (concat
-			 (format "<span class=\"section-number-%d\"> %s</span>"
+			 (format "<span class=\"section-number-%d\">%s</span>"
 				 level snumber)
-			 title)))
+			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
 			snumber level level snumber extra-targets
