@@ -1,5 +1,10 @@
 2009-02-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-show): Allow numerical prefix
+	arguments to specify how much context should be shown.
+	(org-agenda-cycle-show): New command, could be bound to SPC in
+	org-agenda-mode-map.
+
 	* org-exp.el (org-html-level-start): Space after section number.
 
 2009-02-16  Carsten Dominik  <carsten.dominik@gmail.com>

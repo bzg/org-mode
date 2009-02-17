@@ -5070,17 +5070,77 @@ If this information is not given, the function uses the tree at point."
   (mouse-set-point ev)
   (org-agenda-goto))
 
-(defun org-agenda-show (&optional full-entry)
+(defun org-agenda-show (&optional more)
   "Display the Org-mode file which contains the item at point.
+The prefix arg causes further revieling:
+
+0   hide the subtree
+1   just show the entry according to defaults.
+2   show the text below the heading
+3   show the entire subtree
+4   show the entire subtree and any LOGBOOK drawers
+5   show the entire subtree and any drawers
 With prefix argument FULL-ENTRY, make the entire entry visible
 if it was hidden in the outline."
-  (interactive "P")
+  (interactive "p")
   (let ((win (selected-window)))
-    (if full-entry
-	(let ((org-show-entry-below t))
-	  (org-agenda-goto t))
-      (org-agenda-goto t))
+    (org-agenda-goto t)
+    (org-recenter-heading 1)
+    (cond
+     ((= more 0)
+      (hide-subtree)
+      (message "Remote: hide subtree"))
+     ((and (interactive-p) (= more 1))
+      (message "Remote: show with default settings"))
+     ((= more 2)
+      (show-entry)
+      (save-excursion
+	(org-back-to-heading)
+	(org-cycle-hide-drawers 'children))
+      (message "Remote: show entry"))
+     ((= more 3)
+      (show-subtree)
+      (save-excursion
+	(org-back-to-heading)
+	(org-cycle-hide-drawers 'subtree))
+      (message "Remote: show subtree"))
+     ((= more 4)
+      (let* ((org-drawers (delete "LOGBOOK" (copy-sequence org-drawers)))
+	     (org-drawer-regexp
+	      (concat "^[ \t]*:\\("
+		      (mapconcat 'regexp-quote org-drawers "\\|")
+		      "\\):[ \t]*$")))
+	(show-subtree)
+	(save-excursion
+	  (org-back-to-heading)
+	  (org-cycle-hide-drawers 'subtree)))
+      (message "Remote: show subtree and LOGBOOK"))
+     ((> more 4)
+      (show-subtree)
+      (message "Remote: show subtree and LOGBOOK")))
     (select-window win)))
+
+(defun org-recenter-heading (n)
+  (save-excursion
+    (org-back-to-heading)
+    (recenter n)))
+
+(defvar org-agenda-cycle-counter nil)
+(defun org-agenda-cycle-show (n)
+  "Show the current entry in another window, with default settings.
+Default settings are taken from `org-show-hierarchy-above' and siblings.
+When use repeadedly in immediate succession, the remote entry will cycle
+through visibility
+
+entry -> subtree -> subtree with logbook"
+  (interactive "p")
+  (when (and (= n 1)
+	     (not (eq last-command this-command)))
+    (setq org-agenda-cycle-counter 0))
+  (setq org-agenda-cycle-counter (1+ org-agenda-cycle-counter))
+  (if (> org-agenda-cycle-counter 4)
+      (setq org-agenda-cycle-counter 0))
+  (org-agenda-show org-agenda-cycle-counter))
 
 (defun org-agenda-recenter (arg)
   "Display the Org-mode file which contains the item at point and recenter."
