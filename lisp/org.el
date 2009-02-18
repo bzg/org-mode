@@ -7044,8 +7044,12 @@ used as the link location instead of reading one interactively."
 	   (fboundp 'ido-completing-read)
 	   (boundp 'ido-mode) ido-mode
 	   (listp (second args)))
-      (apply 'ido-completing-read (concat (car args)) (cdr args))
+      (let ((ido-enter-matching-directory nil))
+	(apply 'ido-completing-read (concat (car args))
+	       (mapcar (lambda (x) (car x)) (nth 1 args))
+	       (cddr args)))
     (apply 'completing-read args)))
+
 
 (defun org-extract-attributes (s)
   "Extract the attributes cookie from a string and set as text property."

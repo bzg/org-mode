@@ -2,6 +2,9 @@
 
 	* org.el (org-get-wdays): Find the warning period also if it is in
 	the wrong place.
+	(org-ido-completing-read): Provide the correct arguments to
+	ido-completing-read and bind `ido-enter-matching-directory' to
+	nil.
 
 2009-02-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
