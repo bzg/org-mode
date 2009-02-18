@@ -1,3 +1,7 @@
+2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-R.el: New file.
+
 2009-02-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-choose.el (org-choose-get-fn-map-group): Require

@@ -1,4 +1,4 @@
-2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
+	* org.el (org-modules): Add an entry for org-R.el.
 
 	* org-agenda.el (org-agenda-todo-ignore-with-date)
 	(org-agenda-todo-ignore-scheduled)
