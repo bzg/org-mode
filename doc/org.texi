@@ -5020,11 +5020,11 @@ or plain time stamp.  In the following example
 ** TODO Pay the rent
    DEADLINE: <2005-10-01 Sat +1m>
 @end example
-the @code{+1m} is a repeater; the intended interpretation is that the
-task has a deadline on <2005-10-01> and repeats itself every (one) month
-starting from that time.  If you need both a repeater and a special
-warning period in a deadline entry, the repeater comes first and the
-warning period last: @code{DEADLINE: <2005-10-01 Sat +1m -3d>}.
+the @code{+1m} is a repeater; the intended interpretation is that the task
+has a deadline on <2005-10-01> and repeats itself every (one) month starting
+from that time.  If you need both a repeater and a special warning period in
+a deadline entry, the repeater should come first and the warning period last:
+@code{DEADLINE: <2005-10-01 Sat +1m -3d>}.
 
 Deadlines and scheduled items produce entries in the agenda when they
 are over-due, so it is important to be able to mark such an entry as
