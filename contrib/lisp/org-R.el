@@ -1,4 +1,4 @@
-;;; org-R.el --- Numerical computation and data visualisation for org-mode using R
+;;; org-R.el --- Computing and data visualisation in Org-mode using R
 
 ;; Copyright (C) 2009
 ;;   Free Software Foundation, Inc.
@@ -27,12 +27,12 @@
 ;;; Commentary:
 
 ;; This file allows R (http://www.r-project.org) code to be applied to
-;; emacs org-mode (http://orgmode.org) tables. When the
-;; result of the analysis is a vector or matrix, it is output back
-;; into the org-mode buffer as a new org table. Alternatively the R
-;; code may be used to plot the data in the org table. It requires R to be
-;; running in an inferior-ess-mode buffer (install Emacs Speaks
-;; Statistics http://ess.r-project.org and issue M-x R). 
+;; emacs org-mode (http://orgmode.org) tables. When the result of the
+;; analysis is a vector or matrix, it is output back into the org-mode
+;; buffer as a new org table. Alternatively the R code may be used to
+;; plot the data in the org table. It requires R to be running in an
+;; inferior-ess-mode buffer (install Emacs Speaks Statistics
+;; http://ess.r-project.org and issue M-x R).
 ;; 
 ;;
 ;; The user interface is via two different options lines in the org
@@ -86,6 +86,16 @@ E.g. barplot(x[,3:5], names.arg=rownames(x))")
 To see a more human-readable version of this, look at the code,
 or type dput(write.org.table) RET at the R (inferior-ess-mode
 buffer) prompt.")
+
+(defun org-R-apply-maybe ()
+  (if (save-excursion
+	(beginning-of-line 1)
+	(looking-at "#\\+RR?:"))
+      (progn (call-interactively 'org-R-apply)
+	     t) ;; to signal that we took action
+    nil)) ;; to signal that we did not
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-R-apply-maybe)
 
 
 (defun org-R-apply ()
