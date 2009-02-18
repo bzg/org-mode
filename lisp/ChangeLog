@@ -1,5 +1,10 @@
 2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-todo-ignore-with-date)
+	(org-agenda-todo-ignore-scheduled)
+	(org-agenda-todo-ignore-deadlines): Mention the variable
+	`org-agenda-tags-todo-honor-ignore-options' in the docstring.
+
 	* org.el (org-get-wdays): Find the warning period also if it is in
 	the wrong place.
 	(org-ido-completing-read): Provide the correct arguments to

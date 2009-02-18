@@ -6067,10 +6067,14 @@ it more compact:
 @itemize @minus
 @item
 @vindex org-agenda-todo-ignore-scheduled
-Some people view a TODO item that has been @emph{scheduled} for
-execution (@pxref{Timestamps}) as no longer @emph{open}.  Configure the
-variable @code{org-agenda-todo-ignore-scheduled} to exclude scheduled
-items from the global TODO list.
+@vindex org-agenda-todo-ignore-deadlines
+@vindex org-agenda-todo-ignore-with-date
+Some people view a TODO item that has been @emph{scheduled} for execution or
+have a @emph{deadline} (@pxref{Timestamps}) as no longer @emph{open}
+Configure the variables @code{org-agenda-todo-ignore-scheduled},
+@code{org-agenda-todo-ignore-deadlines}, and/or
+@code{org-agenda-todo-ignore-with-date} to exclude such items from the
+global TODO list.
 @item
 @vindex org-agenda-todo-list-sublevels
 TODO items may have sublevels to break up the task into subtasks.  In
@@ -6101,10 +6105,12 @@ define a custom command for it (@pxref{Agenda dispatcher}).
 @kindex C-c a M
 @item C-c a M
 @vindex org-tags-match-list-sublevels
-Like @kbd{C-c a m}, but only select headlines that are also TODO items
-and force checking subitems (see variable
-@code{org-tags-match-list-sublevels}).  Matching specific TODO keywords
-together with a tags match is also possible, see @ref{Tag searches}.
+@vindex org-agenda-tags-todo-honor-ignore-options
+Like @kbd{C-c a m}, but only select headlines that are also TODO items and
+force checking subitems (see variable @code{org-tags-match-list-sublevels}).
+To exclude scheduled/deadline items, see the variable
+@code{org-agenda-tags-todo-honor-ignore-options}.  Matching specific TODO
+keywords together with a tags match is also possible, see @ref{Tag searches}.
 @end table
 
 The commands available in the tags list are described in @ref{Agenda

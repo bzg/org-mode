@@ -1,3 +1,8 @@
+2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Global TODO list, Matching tags and properties):
+	Mention more variables.
+
 2009-02-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Checkboxes): Update to changed command behavior.

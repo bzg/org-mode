@@ -454,7 +454,8 @@ You can use this if you prefer to mark mere appointments with a TODO keyword,
 but don't want them to show up in the TODO list.
 When this is set, it also covers deadlines and scheduled items, the settings
 of `org-agenda-todo-ignore-scheduled' and `org-agenda-todo-ignore-deadlines'
-will be ignored."
+will be ignored.
+See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
   :type 'boolean)
@@ -463,7 +464,8 @@ will be ignored."
   "Non-nil means, don't show scheduled entries in the global todo list.
 The idea behind this is that by scheduling it, you have already taken care
 of this item.
-See also `org-agenda-todo-ignore-with-date'."
+See also `org-agenda-todo-ignore-with-date'.
+See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
   :type 'boolean)
@@ -472,7 +474,8 @@ See also `org-agenda-todo-ignore-with-date'."
   "Non-nil means, don't show near deadline entries in the global todo list.
 Near means closer than `org-deadline-warning-days' days.
 The idea behind this is that such items will appear in the agenda anyway.
-See also `org-agenda-todo-ignore-with-date'."
+See also `org-agenda-todo-ignore-with-date'.
+See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
   :type 'boolean)
