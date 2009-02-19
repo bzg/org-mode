@@ -2,6 +2,8 @@
 
 	* org.el (org-block-todo-from-checkboxes): Announce that
 	checkboxes are the culprit.
+	(org-block-todo-from-children-or-siblings): Call
+	`org-up-heading-all instead' of `outline-up-heading'.
 
 	* org-agenda.el (org-agenda-show-1): Renamed from
 	`org-agenda-show'.

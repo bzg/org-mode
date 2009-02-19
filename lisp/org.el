@@ -8695,7 +8695,7 @@ changes.  Such blocking occurs when:
       (org-back-to-heading t)
       (when (save-excursion
 	      (ignore-errors
-		(outline-up-heading 1)
+		(org-up-heading-all 1)
 		(org-entry-get (point) "ORDERED")))
 	(let* ((this-level (funcall outline-level))
 	       (current-level this-level))
