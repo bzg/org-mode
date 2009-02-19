@@ -1,5 +1,7 @@
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.texi (Setting tags): Document newline option.
+
 	* orgcard.tex: Document `C-c C-x o'.
 
 	* org.texi (TODO dependencies, Checkboxes): Document

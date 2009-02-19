@@ -3,6 +3,12 @@
 	* org.el (org-track-ordered-property-with-tag): New option.
 	(org-toggle-ordered-property): Honor
 	`org-track-ordered-property-with-tag'.
+	(org-tag-alist): Add newline options.
+	(org-set-regexps-and-options): Separate option lines imply a
+	newline.
+	(org-set-regexps-and-options, org-assign-fast-keys)
+	(org-fast-todo-selection, org-fast-tag-selection): Handle newline
+	option.
 
 	* org-list.el (org-checkbox-blocked-p): New function.
 	(org-toggle-checkbox): Check for blocking.

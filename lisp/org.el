@@ -2067,7 +2067,8 @@ See the manual for details."
 	   (cons   (string    :tag "Tag name")
 		   (character :tag "Access char"))
 	   (const :tag "Start radio group" (:startgroup))
-	   (const :tag "End radio group" (:endgroup)))))
+	   (const :tag "End radio group" (:endgroup))
+	   (const :tag "New line" (:newline)))))
 
 (defvar org-file-tags nil
   "List of tags that can be inherited by all entries in the file.
@@ -3268,7 +3269,8 @@ means to push this value onto the list in the variable.")
  	      (push (cons (intern (downcase (match-string 1 key)))
 			  (org-split-string value splitre)) kwds))
 	     ((equal key "TAGS")
-	      (setq tags (append tags (org-split-string value splitre))))
+	      (setq tags (append tags (if tags '("\\n") nil)
+				 (org-split-string value splitre))))
 	     ((equal key "COLUMNS")
 	      (org-set-local 'org-columns-default-format value))
 	     ((equal key "LINK")
@@ -3399,6 +3401,7 @@ means to push this value onto the list in the variable.")
 	    (cond
 	     ((equal e "{") (push '(:startgroup) tgs))
 	     ((equal e "}") (push '(:endgroup) tgs))
+	     ((equal e "\\n") (push '(:newline) tgs))
 	     ((string-match (org-re "^\\([[:alnum:]_@]+\\)(\\(.\\))$") e)
 	      (push (cons (match-string 1 e)
 			  (string-to-char (match-string 2 e)))
@@ -3535,6 +3538,7 @@ Respect keys that are already there."
       (cond
        ((equal e '(:startgroup)) (push e new))
        ((equal e '(:endgroup)) (push e new))
+       ((equal e '(:newline)) (push e new))
        (t
 	(setq k (car e) c2 nil)
 	(if (cdr e)
@@ -8897,6 +8901,8 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	   ((equal e '(:endgroup))
 	    (setq ingroup nil cnt 0)
 	    (insert "}\n"))
+	   ((equal e '(:newline))
+	    (insert "\n  "))
 	   (t
 	    (setq tg (car e) c (cdr e))
 	    (if ingroup (push tg (car groups)))
@@ -10348,6 +10354,8 @@ Returns the new tags string, or nil to not change the current settings."
 	 ((equal e '(:endgroup))
 	  (setq ingroup nil cnt 0)
 	  (insert "}\n"))
+	 ((equal e '(:newline))
+	  (insert "\n  "))
 	 (t
 	  (setq tg (car e) c2 nil)
 	  (if (cdr e)

@@ -3887,6 +3887,21 @@ can, instead, set the TAGS option line as:
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end example
 
+@noindent The tags interface will show the available tags in a splash
+window.  If you would to start a new line after a specific tag, insert
+@samp{\n} into the tag list
+
+@example
+#+TAGS: @@work(w)  @@home(h)  @@tennisclub(t) \n laptop(l)  pc(p)
+@end example
+
+@noindent or write them in two lines:
+
+@example
+#+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)
+#+TAGS: laptop(l)  pc(p)
+@end example
+
 @noindent
 You can also group together tags that are mutually exclusive.  By using
 braces, as in:
@@ -3904,7 +3919,8 @@ these lines to activate any changes.
 @noindent
 To set these mutually exclusive groups in the variable @code{org-tags-alist}
 you must use the dummy tags @code{:startgroup} and @code{:endgroup} instead
-of the braces.  The previous example would be set globally by the following
+of the braces.  Similarly, you can use @code{:newline} to indicate a line
+break.  The previous example would be set globally by the following
 configuration:
 
 @lisp
