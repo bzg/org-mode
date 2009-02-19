@@ -3403,7 +3403,12 @@ example:
 @table @kbd
 @kindex C-c C-x o
 @item C-c C-x o
-Toggle the @code{ORDERED} property of the current entry.
+@vindex org-track-ordered-property-with-tag
+Toggle the @code{ORDERED} property of the current entry.  A property is used
+for this behavior because this should be local to the current entry, not
+inherited like a tag.  However, if you would like to @i{track} the value of
+this property with a tag for better visibility, customize the variable
+@code{org-track-ordered-property-with-tag}.
 @kindex C-u C-u C-u C-c C-t
 @item C-u C-u C-u C-c C-t
 Change TODO state, circumventin any state blocking.
@@ -3690,6 +3695,12 @@ the examples above.  With @samp{[%]} you get information about the
 percentage of checkboxes checked (in the above example, this would be
 @samp{[50%]} and @samp{[33%]}, respectively).
 
+@cindex blocking, of checkboxes
+@cindex checkbox blocking
+If the current outline node has an @code{ORDERED} property, checkboxes must
+be checked off in sequence, and an error will be thrown if you try to check
+off a box while there are unchecked boxes bove it.
+
 @noindent The following commands work with checkboxes:
 
 @table @kbd
@@ -3719,6 +3730,15 @@ If there is no active region, just toggle the checkbox at point.
 Insert a new item with a checkbox.
 This works only if the cursor is already in a plain list item
 (@pxref{Plain lists}).
+@kindex C-c C-x o
+@item C-c C-x o
+@vindex org-track-ordered-property-with-tag
+Toggle the @code{ORDERED} property of the entry, to toggle if checkboxes must
+be checked off in sequence.  A property is used for this behavior because
+this should be local to the current entry, not inherited like a tag.
+However, if you would like to @i{track} the value of this property with a tag
+for better visibility, customize the variable
+@code{org-track-ordered-property-with-tag}.
 @kindex C-c #
 @item C-c #
 Update the checkbox statistics in the current outline entry.  When

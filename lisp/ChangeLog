@@ -1,3 +1,12 @@
+2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-track-ordered-property-with-tag): New option.
+	(org-toggle-ordered-property): Honor
+	`org-track-ordered-property-with-tag'.
+
+	* org-list.el (org-checkbox-blocked-p): New function.
+	(org-toggle-checkbox): Check for blocking.
+
 	* org.el (org-modules): Add an entry for org-R.el.
 
 	* org-agenda.el (org-agenda-todo-ignore-with-date)

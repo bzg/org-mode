@@ -8707,17 +8707,42 @@ changes.  Such blocking occurs when:
 		    (throw 'dont-block nil)))))))
     t))					; don't block
 
+(defcustom org-track-ordered-property-with-tag nil
+  "Should the ORDERED property also be shown as a tag?
+The ORDERED property decides if an entry should require subtasks to be
+completed in sequence.  Since a property is not very visible, setting
+this option means that toggling the ORDERED property with the command
+`org-toggle-ordered-property' will also toggle a tag ORDERED.  That tag is
+not relevant for the behavior, but it makes things more visible.
+
+Note that toggling the tag with tags commands will not change the property
+and therefore not influence behavior!
+
+This can be t, meaning the tag ORDERED should be used,  It can also be a
+string to select a different tag for this task."
+  :group 'org-todo
+  :type '(choice
+	  (const :tag "No tracking" nil)
+	  (const :tag "Track with ORDERED tag" t)
+	  (string :tag "Use other tag")))
+
 (defun org-toggle-ordered-property ()
-  "Toggle the ORDERED property of the current entry."
+  "Toggle the ORDERED property of the current entry.
+For better visibility, you can track the value of this property with a tag.
+See variable `org-track-ordered-property-with-tag'."
   (interactive)
-  (save-excursion
-    (org-back-to-heading)
-    (if (org-entry-get nil "ORDERED")
-	(progn
-	  (org-delete-property "ORDERED")
-	  (message "Subtasks can be completed in arbitrary order or parallel"))
-      (org-entry-put nil "ORDERED" "t")
-      (message "Subtasks must be completed in sequence"))))
+  (let* ((t1 org-track-ordered-property-with-tag)
+	 (tag (and t1 (if (stringp t1) t1 "ORDERED"))))
+    (save-excursion
+      (org-back-to-heading)
+      (if (org-entry-get nil "ORDERED")
+	  (progn
+	    (org-delete-property "ORDERED")
+	    (and tag (org-toggle-tag tag 'off))
+	    (message "Subtasks can be completed in arbitrary order"))
+	(org-entry-put nil "ORDERED" "t")
+	(and tag (org-toggle-tag tag 'on))
+	(message "Subtasks must be completed in sequence")))))
 
 (defun org-block-todo-from-checkboxes (change-plist)
   "Block turning an entry into a TODO, using checkboxes.

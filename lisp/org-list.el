@@ -259,7 +259,7 @@ If the cursor is in a headline, apply this to all checkbox items in the
 text below the heading."
   (interactive "P")
   (catch 'exit
-    (let (beg end status first-present first-status)
+    (let (beg end status first-present first-status blocked)
       (cond
        ((org-region-active-p)
 	(setq beg (region-beginning) end (region-end)))
@@ -272,6 +272,9 @@ text below the heading."
 		(replace-match "")
 		(goto-char (match-beginning 0))
 		(just-one-space))
+	    (when (setq blocked (org-checkbox-blocked-p))
+	      (error "Checkbox blocked because of unchecked box in line %d"
+		     blocked))
 	    (replace-match
 	     (cond ((equal toggle-presence '(16)) "[-]")
 		   ((member (match-string 0) '("[ ]" "[-]")) "[X]")
@@ -312,6 +315,28 @@ text below the heading."
 	       (if first-status "[ ]" "[X]") t t)))
 	  (beginning-of-line 2)))))
   (org-update-checkbox-count-maybe))
+
+(defun org-checkbox-blocked-p ()
+  "Is the current checkbox blocked from for being checked now?
+A checkbox is blocked if all of the following conditions are fulfilled:
+
+1. The checkbox is not checked already.
+2. The current entry has the ORDERED property set.
+3. There is an unchecked checkbox in this entry before the current line."
+  (catch 'exit
+    (save-match-data
+      (save-excursion
+	(unless (org-at-item-checkbox-p) (throw 'exit nil))
+	(when (equal (match-string 0) "[X]")
+	  ;; the box is already checked!
+	  (throw 'exit nil))
+	(let ((end (point-at-bol)))
+	  (condition-case nil (org-back-to-heading t)
+	    (error (throw 'exit nil)))
+	  (unless (org-entry-get nil "ORDERED") (throw 'exit nil))
+	  (if (re-search-forward "^[ \t]*[-+*0-9.)] \\[[- ]\\]" end t)
+	      (org-current-line)
+	    nil))))))
 
 (defun org-update-checkbox-count-maybe ()
   "Update checkbox statistics unless turned off by user."

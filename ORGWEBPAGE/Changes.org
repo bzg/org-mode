@@ -107,6 +107,33 @@ Thanks to Richard Klinda for a patch to this effect.
 A new index in the manual lists all variables mentioned in the
 manual, about 200.
 
+*** The ORDERED property also influences checkboxes
+
+When an entry has the ORDERED property set, checkboxes in
+the entry must be completed in order.  This was already the case
+for children TODO items, now it also applies for checkboxes.
+
+Thanks to Rainer Stengele for this proposal.
+
+*** The ORDERED property can be tracked with a tag
+
+The =ORDERED= property is used to flag an entry so that subtasks
+(both children TODO items and checkboxes) must be completed in
+order.  This property is most easily toggled with the command
+=C-c C-x o=.  A property was chosen for this functionality,
+because this should be a behavior local to the current task, not
+inherited like tags.  However, properties are normally
+invisible.  If you would like visual feedback on the state of
+this property, configure the variable
+=org-track-ordered-property-with-tag=.  If you then use =C-c C-x
+o= to toggle the property, a tag will be toggled as well, for
+visual feedback.
+
+Note that the tag itself has no meaning for the behavior of TODO
+items and checkboxes, and that changing the tag with the usual
+tag commands will not influence the property and therefore the
+behavior of TODO and checkbox commands.
+
 * Version 6.22
 ** Details
 

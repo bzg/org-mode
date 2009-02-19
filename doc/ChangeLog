@@ -1,3 +1,10 @@
+2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document `C-c C-x o'.
+
+	* org.texi (TODO dependencies, Checkboxes): Document
+	`org-track-ordered-property-with-tag'.
+
 2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Global TODO list, Matching tags and properties):
