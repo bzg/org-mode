@@ -523,12 +523,19 @@ deadlines are always turned off when the item is DONE."
 
 (defcustom org-agenda-dim-blocked-tasks t
   "Non-nil means, dim blocked tasks in the agenda display.
-This causes some overhead during agenda construction, but if you have turned
-on `org-enforce-todo-dependencies' or any other blocking mechanism, this
-will create useful feedback in the agenda.
-Instead ot t, this variable can also have the value `invisible'.  Then
-blocked tasks will be invisible and only become visible when they
-become unblocked."
+This causes some overhead during agenda construction, but if you
+have turned on `org-enforce-todo-dependencies',
+`org-enforce-todo-checkbox-dependencies', or any other blocking
+mechanism, this will create useful feedback in the agenda.
+
+Instead ot t, this variable can also have the value `invisible'.
+Then blocked tasks will be invisible and only become visible when
+they become unblocked.  An exemption to this behavior is when a task is
+blocked because of unchecked checkboxes below it.  Since checkboxes do
+not show up in the agenda views, making this task invisible you remove any
+trace from agenda views that there is something to do.  Therefore, a task
+that is blocked because of checkboxes will never be made invisible, it
+will only be dimmed."
   :group 'org-agenda-daily/weekly
   :group 'org-agenda-todo-list
   :type '(choice
@@ -2206,10 +2213,12 @@ VALUE defaults to t."
     (let ((inhibit-read-only t)
 	  (org-depend-tag-blocked nil)
 	  (invis (eq org-agenda-dim-blocked-tasks 'invisible))
-	  b e p ov h l)
+	  org-blocked-by-checkboxes
+	  invis1 b e p ov h l)
       (goto-char (point-min))
       (while (let ((pos (next-single-property-change (point) 'todo-state)))
 	       (and pos (goto-char (1+ pos))))
+	(setq org-blocked-by-checkboxes nil invis1 invis)
 	(let ((marker (get-text-property (point) 'org-hd-marker)))
 	  (when (and marker
 		     (not (with-current-buffer (marker-buffer marker)
@@ -2221,10 +2230,11 @@ VALUE defaults to t."
 				     :position marker
 				     :from 'todo
 				     :to 'done))))))
-	    (setq b (if invis (max (point-min) (1- (point))) (point))
+	    (if org-blocked-by-checkboxes (setq invis1 nil))
+	    (setq b (if invis1 (max (point-min) (1- (point))) (point))
 		  e (point-at-eol)
 		  ov (org-make-overlay b e))
-	    (if invis
+	    (if invis1
 		(org-overlay-put ov 'invisible t)
 	      (org-overlay-put ov 'face 'org-agenda-dimmed-todo-face))
 	    (org-overlay-put ov 'org-type 'org-blocked-todo)))))))

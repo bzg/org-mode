@@ -1,8 +1,14 @@
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-block-todo-from-checkboxes): Announce that
+	checkboxes are the culprit.
+
 	* org-agenda.el (org-agenda-show-1): Renamed from
 	`org-agenda-show'.
-	(org-agenda-show): Re-install the old version ofr now.
+	(org-agenda-show): Re-install the old version for now.
+	(org-agenda-dim-blocked-tasks): Update docstring.  Scope a
+	variable into the blokker hook, so that the checkbox checker can
+	anounce that it caused the blocking.
 
 	* org.el (org-track-ordered-property-with-tag): New option.
 	(org-toggle-ordered-property): Honor
