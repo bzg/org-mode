@@ -1,5 +1,9 @@
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-show-1): Renamed from
+	`org-agenda-show'.
+	(org-agenda-show): Re-install the old version ofr now.
+
 	* org.el (org-track-ordered-property-with-tag): New option.
 	(org-toggle-ordered-property): Honor
 	`org-track-ordered-property-with-tag'.

@@ -5073,7 +5073,19 @@ If this information is not given, the function uses the tree at point."
   (mouse-set-point ev)
   (org-agenda-goto))
 
-(defun org-agenda-show (&optional more)
+(defun org-agenda-show (&optional full-entry)
+  "Display the Org-mode file which contains the item at point.
+With prefix argument FULL-ENTRY, make the entire entry visible
+if it was hidden in the outline."
+  (interactive "P")
+  (let ((win (selected-window)))
+    (if full-entry
+	(let ((org-show-entry-below t))
+	  (org-agenda-goto t))
+      (org-agenda-goto t))
+    (select-window win)))
+
+(defun org-agenda-show-1 (&optional more)
   "Display the Org-mode file which contains the item at point.
 The prefix arg causes further revieling:
 
