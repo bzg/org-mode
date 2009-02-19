@@ -134,6 +134,32 @@ items and checkboxes, and that changing the tag with the usual
 tag commands will not influence the property and therefore the
 behavior of TODO and checkbox commands.
 
+*** You may now specify line breaks in the fast tags interface
+
+Up to now, the fast tags interface tried to lump as many tags as
+possible into a single line, with the exception that groups would
+always be on a line by themselves.
+
+Now, if you use several lines to define your tags, like
+
+#+begin_src org
+,#+TAGS: aa(a) bb(b) cc(c)
+,#+TAGS: dd(d) ee(e) ff(f)
+#+end_src
+
+then there will also be a line break after the "cc" tag in the
+fast tag selection interface.  You may also write
+
+#+begin_src org
+,#+TAGS: aa(a) bb(b) cc(c) \n dd(d) ee(e) ff(f)
+#+end_src
+
+to achieve the same effect, and you can use =\n= several times in
+order to produce empty lines.  In =org-tag-alist=, newlines are
+represented as =(:newline)=.
+
+Thanks to Christopher Suckling for a patch to this effect.
+
 * Version 6.22
 ** Details
 
