@@ -51,9 +51,17 @@ same drawer, use
 *** Added org-R.el to contrib directory
 
 Dan Davison has contributed /org-R.el/ which is now in the
-contrib directory and installs powerful calculation methods
-using the R statistics language.  There is a [[http://orgmode.org/worg/org-tutorials/org-R/org-R.php][tutorial]] on Worg for
-it.
+contrib directory.  Org-R performs numerical computations and
+generates graphics.  Data can come from org tables, or from csv
+files; numerical output can be stored in the org buffer as org
+tables, and links are created to files containing graphical
+output.  Although, behind the scenes, it uses R, you do not need
+to know anything about R.  Common operations, such as tabulating
+discrete values in a column of an org table, are available "off
+the shelf" by specifying options on lines starting with =#+R:=.
+However, you can also provide raw R code to be evaluated.  The
+documentation is currently the worg tutorial at
+http://orgmode.org/worg/org-tutorials/org-R/org-R.php
 
 Thanks to Dan for this great contribution.
 
