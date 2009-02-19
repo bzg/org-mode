@@ -4079,15 +4079,18 @@ starting with the letter @samp{W}.
 @cindex category, require for tags/property match
 @vindex org-odd-levels-only
 You can also require a headline to be of a certain level or category, by
-writing instead of any TAG an expression like @samp{LEVEL=3} or
+tapping into the syntax of property searches (@pxref{Property searches})
+and writing instead of any TAG an expression like @samp{LEVEL=3} or
 @samp{CATEGORY="work"}, respectively.  For example, a search
 @samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
 tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
-In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not count
-the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
+In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not
+count the number of stars, but @samp{LEVEL=2} will correspond to 3 stars
+etc.
 
 Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
-other properties will slow down the search.
+other properties will slow down the search for the first property
+accessed.  Any additional property tests are cheap.
 
 @node Properties and Columns, Dates and Times, Tags, Top
 @chapter Properties and Columns
@@ -6237,9 +6240,10 @@ and TODO indicate next actions.  The tag @@SHOP indicates shopping and
 is a next action even without the NEXT tag.  Finally, if the project
 contains the special word IGNORE anywhere, it should not be listed
 either.  In this case you would start by identifying eligible projects
-with a tags/todo match @samp{+PROJECT/-MAYBE-DONE}, and then check for
-TODO, NEXT, @@SHOP, and IGNORE in the subtree to identify projects that
-are not stuck.  The correct customization for this is
+with a tags/todo match@footnote{@ref{Tag searches}}
+@samp{+PROJECT/-MAYBE-DONE}, and then check for TODO, NEXT, @@SHOP, and
+IGNORE in the subtree to identify projects that are not stuck.  The
+correct customization for this is
 
 @lisp
 (setq org-stuck-projects
