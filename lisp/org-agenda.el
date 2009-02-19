@@ -5165,7 +5165,7 @@ entry -> subtree -> subtree with logbook"
   (setq org-agenda-cycle-counter (1+ org-agenda-cycle-counter))
   (if (> org-agenda-cycle-counter 4)
       (setq org-agenda-cycle-counter 0))
-  (org-agenda-show org-agenda-cycle-counter))
+  (org-agenda-show-1 org-agenda-cycle-counter))
 
 (defun org-agenda-recenter (arg)
   "Display the Org-mode file which contains the item at point and recenter."
