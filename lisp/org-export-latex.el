@@ -6,7 +6,7 @@
 ;; Filename: org-export-latex.el
 ;; Version: 6.22trans
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
-;; Maintainer: Bastien Guerry <bzg AT altern DOT org>
+;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
 ;; Description: Converts an org-mode buffer into LaTeX
 ;; URL: http://www.cognition.ens.fr/~guerry/u/org-export-latex.el
@@ -183,6 +183,12 @@ it will be used as a formatting string, passing the title as an
 argument."
   :group 'org-export-latex
   :type 'string)
+
+(defcustom org-export-latex-import-inbuffer-stuff nil
+  "Non-nil means define TeX macros for Org's inbuffer definitions.
+For example \orgTITLE for #+TITLE."
+  :group 'org-export-latex
+  :type 'boolean)
 
 (defcustom org-export-latex-date-format
   "%d %B %Y"
@@ -409,6 +415,8 @@ when PUB-DIR is set, use this as the publishing directory."
 			 (org-export-grab-title-from-buffer))
 		    (file-name-sans-extension
 		     (file-name-nondirectory buffer-file-name))))
+	 (option-defs (and org-export-latex-import-inbuffer-stuff
+			   (org-export-latex-collect-header-macros title)))
 	 (filename (concat (file-name-as-directory
 			    (or pub-dir
 				(org-export-directory :LaTeX ext-plist)))
@@ -429,7 +437,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		      (t (get-buffer-create to-buffer)))
 		   (find-file-noselect filename)))
 	 (odd org-odd-levels-only)
-	 (header (org-export-latex-make-header title opt-plist))
+	 (header (org-export-latex-make-header title opt-plist option-defs))
 	 (skip (cond (subtree-p nil)
 		     (region-p nil)
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
@@ -716,7 +724,7 @@ LEVEL indicates the default depth for export."
 		  (sec-depth (length org-export-latex-sectioning)))
 	      (if (> hl-levels sec-depth) sec-depth hl-levels)))))
 
-(defun org-export-latex-make-header (title opt-plist)
+(defun org-export-latex-make-header (title opt-plist &optional opt-defs)
   "Make the LaTeX header and return it as a string.
 TITLE is the current title from the buffer or region.
 OPT-PLIST is the options plist for current buffer."
@@ -739,6 +747,7 @@ OPT-PLIST is the options plist for current buffer."
      ;; insert additional commands in the header
      (plist-get opt-plist :latex-header-extra)
      org-export-latex-append-header
+     option-defs
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
@@ -796,6 +805,32 @@ If BEG is non-nil, the is the beginning of he region."
 	    :footnotes (plist-get opt-plist :footnotes)))
 	(add-text-properties pt (max pt (1- end))
 			     '(:org-license-to-kill t))))))
+
+(defun org-export-latex-collect-header-macros (&optional title)
+  "Find the various definitions in #+... lines and define TeX macros for them."
+  (let ((re (org-make-options-regexp
+	     '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
+	       "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
+	       "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")))
+	out key val a)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(while (re-search-forward re nil t)
+	  (setq key (upcase (match-string 1))
+		value (match-string 2))
+	  (if (and title (equal key "TITLE"))
+	      (setq value title))
+	  (while (string-match "_" key)
+	    (setq key (replace-match "" t t key)))
+	  (if (setq a (assoc key out))
+	      (setcdr a (concat (cdr a) "\n" value))
+	    (push (cons key value) out))))
+      (mapconcat
+       (lambda (x) (concat "\\def\\org" (car x) "{" (cdr x) "}"))
+       out
+       "\n"))))
 
 (defun org-export-latex-content (content &optional exclude-list)
   "Convert CONTENT string to LaTeX.

@@ -1,3 +1,14 @@
+2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-import-inbuffer-stuff):
+	New option.
+	(org-export-as-latex): Import in-buffer settings as TeX macros.
+	(org-export-latex-make-header): Additional parameter OPT-DEFS.
+	(org-export-latex-collect-header-macros): New function.
+
+	* org.el (org-refile-get-location): Turn off
+	`partial-completion-mode'.
+
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-block-todo-from-checkboxes): Announce that
