@@ -3558,7 +3558,7 @@ the documentation of `org-diary'."
 		(list
 		 (if (memq 'closed items) (concat "\\<" org-closed-string))
 		 (if (memq 'clock items) (concat "\\<" org-clock-string))
-		 (if (memq 'state items) "- State \"\\([a-zA-Z0-9]+\\)\""))))
+		 (if (memq 'state items) "- State \"\\([a-zA-Z0-9]+\\)\".*?"))))
 	 (parts-re (if parts (mapconcat 'identity parts "\\|")
 		     (error "`org-agenda-log-mode-items' is empty")))
 	 (regexp (concat
