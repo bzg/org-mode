@@ -7995,6 +7995,7 @@ Insert template with export options, see example below.
 @cindex #+LINK_HOME:
 @cindex #+EXPORT_SELECT_TAGS:
 @cindex #+EXPORT_EXCLUDE_TAGS:
+@cindex #+LATEX_HEADER:
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
@@ -8009,6 +8010,7 @@ Insert template with export options, see example below.
 #+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+LINK_UP:   the ``up'' link of an exported page
 #+LINK_HOME: the ``home'' link of an exported page
+#+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
 @end example
@@ -8551,13 +8553,15 @@ By default, the La@TeX{} output uses the class @code{article}.
 
 @vindex org-export-latex-default-class
 @vindex org-export-latex-classes
+@cindex #+LATEX_HEADER:
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
 @code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
 property that applies when exporting a region containing only this (sub)tree.
 The class should be listed in @code{org-export-latex-classes}, where you can
 also define the sectioning structure for each class, as well as defining
-additional classes.
+additional classes.  You can also use @code{#+LATEX_HEADER:
+\usepackage@{xyz@}} to add lines to the header.
 
 @node Tables in LaTeX export, Images in LaTeX export, Sectioning structure, LaTeX and PDF export
 @subsection Tables in LaTeX export

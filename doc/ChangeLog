@@ -1,3 +1,8 @@
+2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Export options, Sectioning structure): Document the
+	#+LEATEX_HEADER in-buffer setting.
+
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Setting tags): Document newline option.
