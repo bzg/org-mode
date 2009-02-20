@@ -1,5 +1,9 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-collect-header-macros):
+	Remove fields that are used anyway.
+	(org-export-latex-make-header): Insert the options earlier.
+
 	* org-agenda.el (org-agenda-get-progress): Fix bug with state
 	matching.
 

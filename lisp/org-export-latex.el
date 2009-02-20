@@ -745,9 +745,9 @@ OPT-PLIST is the options plist for current buffer."
 			      (car p) (cadr p))))
 		  org-export-latex-packages-alist "\n"))
      ;; insert additional commands in the header
+     opt-defs
      (plist-get opt-plist :latex-header-extra)
      org-export-latex-append-header
-     opt-defs
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
@@ -809,8 +809,8 @@ If BEG is non-nil, the is the beginning of he region."
 (defun org-export-latex-collect-header-macros (&optional title)
   "Find the various definitions in #+... lines and define TeX macros for them."
   (let ((re (org-make-options-regexp
-	     '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
-	       "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
+	     '("TITLE" "AUTHOR" "DATE" "EMAIL" "OPTIONS" "LANGUAGE"
+	       "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
 	       "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")))
 	out key val a)
     (save-excursion
