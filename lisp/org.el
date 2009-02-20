@@ -1328,9 +1328,9 @@ Possible values for the command are:
                does define this command, but you can overrule/replace it
                here.
  string        A command to be executed by a shell; %s will be replaced
-	       by the path to the file.
+               by the path to the file.
  sexp          A Lisp form which will be evaluated.  The file path will
-	       be available in the Lisp variable `file'.
+               be available in the Lisp variable `file'.
 For more examples, see the system specific constants
 `org-file-apps-defaults-macosx'
 `org-file-apps-defaults-windowsnt'
@@ -13458,9 +13458,18 @@ See the individual commands for more information."
   (cond
    ((run-hook-with-args-until-success 'org-metaleft-hook))
    ((org-at-table-p) (org-call-with-arg 'org-table-move-column 'left))
-   ((or (org-on-heading-p) (org-region-active-p))
+   ((or (org-on-heading-p)
+	(and (org-region-active-p)
+	     (save-excursion
+	       (goto-char (region-beginning))
+	       (org-on-heading-p))))
     (call-interactively 'org-do-promote))
-   ((org-at-item-p) (call-interactively 'org-outdent-item))
+   ((or (org-at-item-p)
+	(and (org-region-active-p)
+	     (save-excursion
+	       (goto-char (region-beginning))
+	       (org-at-item-p))))
+    (call-interactively 'org-outdent-item))
    (t (call-interactively 'backward-word))))
 
 (defun org-metaright (&optional arg)
@@ -13472,9 +13481,18 @@ See the individual commands for more information."
   (cond
    ((run-hook-with-args-until-success 'org-metaright-hook))
    ((org-at-table-p) (call-interactively 'org-table-move-column))
-   ((or (org-on-heading-p) (org-region-active-p))
+   ((or (org-on-heading-p)
+	(and (org-region-active-p)
+	     (save-excursion
+	       (goto-char (region-beginning))
+	       (org-on-heading-p))))
     (call-interactively 'org-do-demote))
-   ((org-at-item-p) (call-interactively 'org-indent-item))
+   ((or (org-at-item-p)
+	(and (org-region-active-p)
+	     (save-excursion
+	       (goto-char (region-beginning))
+	       (org-at-item-p))))
+    (call-interactively 'org-indent-item))
    (t (call-interactively 'forward-word))))
 
 (defun org-metaup (&optional arg)

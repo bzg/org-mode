@@ -185,6 +185,11 @@ Works on both Emacs and XEmacs."
 	  (use-region-p)
 	(and transient-mark-mode mark-active))))) ; Emacs 22 and before
 
+(defun org-cursor-to-region-beginning ()
+  (when (and (org-region-active-p)
+	     (> (point) (region-beginning)))
+    (exchange-point-and-mark)))
+
 ;; Invisibility compatibility
 
 (defun org-add-to-invisibility-spec (arg)

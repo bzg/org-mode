@@ -1,5 +1,13 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-indent-item): Allow point to be at the end of
+	the region.
+
+	* org.el (org-metaleft, org-metaright): Be more accurate about
+	detecting a region where commands apply.
+
+	* org-compat.el (org-cursor-to-region-beginning): New function.
+
 	* org.el (org-priority): Also find invisible heading.
 
 	* org-colview-xemacs.el (org-columns-edit-value): No special
