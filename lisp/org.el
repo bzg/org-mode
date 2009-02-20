@@ -8019,6 +8019,7 @@ operation has put the subtree."
   (unless org-refile-target-table
     (error "No refile targets"))
   (let* ((cbuf (current-buffer))
+	 (partial-completion-mode nil)
 	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
 	 (cfunc (if (and org-refile-use-outline-path
 			 org-outline-path-complete-in-steps)
