@@ -383,8 +383,7 @@ If yes, throw an error indicating that changing it does not make sense."
 Where possible, use the standard interface for changing this line."
   (interactive)
   (org-columns-check-computed)
-  (let* ((external-key key)
-	 (col (current-column))
+  (let* ((col (current-column))
 	 (key (or key (get-char-property (point) 'org-columns-key)))
 	 (value (get-char-property (point) 'org-columns-value))
 	 (bol (point-at-bol)) (eol (point-at-eol))
@@ -405,10 +404,9 @@ Where possible, use the standard interface for changing this line."
       (setq eval '(org-with-point-at pom
 		    (org-edit-headline))))
      ((equal key "TODO")
-      (setq eval '(org-with-point-at pom
-		    (let ((current-prefix-arg
-			   (if external-key current-prefix-arg '(4))))
-		      (call-interactively 'org-todo)))))
+      (setq eval '(org-with-point-at
+		   pom
+		   (call-interactively 'org-todo))))
      ((equal key "PRIORITY")
       (setq eval '(org-with-point-at pom
 		    (call-interactively 'org-priority))))

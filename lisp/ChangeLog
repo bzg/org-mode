@@ -1,5 +1,11 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview-xemacs.el (org-columns-edit-value): No special
+	treatment for `org-todo' prefix.
+
+	* org-colview.el (org-columns-edit-value): No special treatment
+	for `org-todo' prefix.
+
 	* org-remember.el (org-remember-apply-template): Use
 	`org-completing-read-no-ido'.
 
