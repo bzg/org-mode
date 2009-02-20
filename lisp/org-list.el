@@ -7,7 +7,7 @@
 ;;	   Bastien Guerry <bzg AT altern DOT org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.22trans
+;; Version: 6.23
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -48,6 +48,7 @@
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-combine-plists "org" (&rest plists))
+(declare-function org-entry-get "org" (pom property &optional inherit))
 
 (defgroup org-plain-lists nil
   "Options concerning plain lists in Org-mode."

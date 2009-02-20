@@ -10,12 +10,26 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.23 (in preparation)
+* Version 6.23
  :PROPERTIES:
  :VISIBILITY: content
  :END:
 
 ** Overview
+
+- Capture state change notes into a drawer
+- Clock lines are now captured into the LOGBOOK drawer as well
+- Added org-R.el to contrib directory
+- Allow individual formatting of each TODO keyword in HTML export
+- New hooks for add-ons to tap into context-sensitive commands
+- Publishing files irrespective of extension
+- New variable index in the manual
+- The ORDERED property also influences checkboxes
+- The ORDERED property can be tracked with a tag
+- You may now specify line breaks in the fast tags interface
+- When a TODO is blocked by checkboxes, keep it visible in agenda
+- LaTeX can import Org's in-buffer definitions for TITLE, EMAIL etc.
+
 ** Incompatible changes
 
 - CLOCK lines will now be captured into the LOGBOOK drawer.

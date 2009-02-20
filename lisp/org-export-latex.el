@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-export-latex.el
-;; Version: 6.22trans
+;; Version: 6.23
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -747,7 +747,7 @@ OPT-PLIST is the options plist for current buffer."
      ;; insert additional commands in the header
      (plist-get opt-plist :latex-header-extra)
      org-export-latex-append-header
-     option-defs
+     opt-defs
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
@@ -819,14 +819,14 @@ If BEG is non-nil, the is the beginning of he region."
 	(goto-char (point-min))
 	(while (re-search-forward re nil t)
 	  (setq key (upcase (match-string 1))
-		value (match-string 2))
+		val (match-string 2))
 	  (if (and title (equal key "TITLE"))
-	      (setq value title))
+	      (setq val title))
 	  (while (string-match "_" key)
 	    (setq key (replace-match "" t t key)))
 	  (if (setq a (assoc key out))
-	      (setcdr a (concat (cdr a) "\n" value))
-	    (push (cons key value) out))))
+	      (setcdr a (concat (cdr a) "\n" val))
+	    (push (cons key val) out))))
       (mapconcat
        (lambda (x) (concat "\\def\\org" (car x) "{" (cdr x) "}"))
        out
