@@ -93,7 +93,6 @@ license to the document, as described in section 6 of the license.
 * Exporting::                   Sharing and publishing of notes
 * Publishing::                  Create a web site of linked Org files
 * Miscellaneous::               All the rest which did not fit elsewhere
-* Extensions::                  Add-ons for Org mode
 * Hacking::                     How to hack your way around
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
@@ -365,21 +364,18 @@ Miscellaneous
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* Bugs::                        Things which do not work perfectly
 
 Interaction with other packages
 
 * Cooperation::                 Packages Org cooperates with
 * Conflicts::                   Packages that lead to conflicts
 
-Extensions
-
-* Extensions in the contrib directory::  These come with the Org distro
-* Other extensions::            These you have to find on the web.
-
 Hacking
 
+* Hooks::                       Who to reach into Org's internals
+* Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Context-sensitive commands::  How to add functioality to such commands
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -586,14 +582,16 @@ MY PROJECTS    -*- mode: org; -*-
 the file's name is.  See also the variable
 @code{org-insert-mode-line-in-empty-file}.
 
-Many commands in Org work on the region if the region is active.  To make use
-of this, you need to have @code{transient-mark-mode} (@code{zmacs-regions} in
-XEmacs) turned on.  In Emacs 23 this is the default, in Emacs 22 you need to
-do this yourself with
-
+Many commands in Org work on the region if the region is @i{active}.  To make
+use of this, you need to have @code{transient-mark-mode}
+(@code{zmacs-regions} in XEmacs) turned on.  In Emacs 23 this is the default,
+in Emacs 22 you need to do this yourself with
 @lisp
 (transient-mark-mode 1)
 @end lisp
+@noindent If you do not like @code{transient-make-mode}, you can create an
+active region by using the mouse to select a region, or pressing
+@kbd{C-@key{SPC}} twice before moving the cursor.
 
 @node Feedback, Conventions, Activation, Introduction
 @section Feedback
@@ -9118,7 +9116,7 @@ Org uses timestamps to track when a file has changed. The above
 functions normally only publish changed files. You can override this and
 force publishing of all files by giving a prefix argument.
 
-@node Miscellaneous, Extensions, Publishing, Top
+@node Miscellaneous, Hacking, Publishing, Top
 @chapter Miscellaneous
 
 @menu
@@ -9129,8 +9127,8 @@ force publishing of all files by giving a prefix argument.
 * Clean view::                  Getting rid of leading stars in the outline
 * TTY keys::                    Using Org on a tty
 * Interaction::                 Other Emacs packages
-* Bugs::                        Things which do not work perfectly
 @end menu
+
 
 @node Completion, Customization, Miscellaneous, Miscellaneous
 @section Completion
@@ -9383,7 +9381,9 @@ this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
-@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:
+@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:,
+@itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:, 
+@itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
 @item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
@@ -9591,7 +9591,8 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @item @kbd{C-S-@key{right}} @tab @kbd{C-c C-x @key{right}} @tab
 @end multitable
 
-@node Interaction, Bugs, TTY keys, Miscellaneous
+
+@node Interaction,  , TTY keys, Miscellaneous
 @section Interaction with other packages
 @cindex packages, interaction with other
 Org lives in the world of GNU Emacs and interacts in various ways
@@ -9741,159 +9742,18 @@ in the paragraph above about CUA mode also applies here.
 
 @end table
 
-
-@node Bugs,  , Interaction, Miscellaneous
-@section Bugs
-@cindex bugs
-
-Here is a list of things that should work differently, but which I
-have found too hard to fix.
-
-@itemize @bullet
-@item
-If a table field starts with a link, and if the corresponding table
-column is narrowed (@pxref{Narrow columns}) to a width too small to
-display the link, the field would look entirely empty even though it is
-not.  To prevent this, Org throws an error.  The work-around is to
-make the column wide enough to fit the link, or to add some text (at
-least 2 characters) before the link in the same field.
-@item
-Narrowing table columns does not work on XEmacs, because the
-@code{format} function does not transport text properties.
-@item
-Text in an entry protected with the @samp{QUOTE} keyword should not
-autowrap.
-@item
-When the application called by @kbd{C-c C-o} to open a file link fails
-(for example because the application does not exist or refuses to open
-the file), it does so silently.  No error message is displayed.
-@item
-Recalculating a table line applies the formulas from left to right.
-If a formula uses @emph{calculated} fields further down the row,
-multiple recalculation may be needed to get all fields consistent.  You
-may use the command @code{org-table-iterate} (@kbd{C-u C-c *}) to
-recalculate until convergence.
-@item
-The exporters work well, but could be made more efficient.
-@end itemize
-
-
-@node Extensions, Hacking, Miscellaneous, Top
-@appendix Extensions
-
-This appendix lists the extension modules that have been written for Org.
-Many of these extensions live in the @file{contrib} directory of the Org
-distribution, others are available somewhere on the web.
-
-@menu
-* Extensions in the contrib directory::  These come with the Org distro
-* Other extensions::            These you have to find on the web.
-@end menu
-
-@node Extensions in the contrib directory, Other extensions, Extensions, Extensions
-@section Extensions in the @file{contrib} directory
-
-A number of extension are distributed with Org when you download it from its
-homepage.  Please note that these extensions are @emph{not} distributed as
-part of Emacs, so if you use Org as delivered with Emacs, you still need to
-go to @url{http://orgmode.org} to get access to these modules.
-
-@table @asis
-@item @file{org-annotate-file.el} by @i{Philip Jackson}
-Annotate a file with org syntax, in a separate file, with links back to the
-annotated file.
-
-@item @file{org-annotation-helper.el} by @i{Bastien Guerry and Daniel E. German}
-Call @i{remember} directly from Firefox/Opera, or from Adobe Reader.  When
-activating a special link or bookmark, Emacs receives a trigger to create a
-note with a link back to the website.  Requires some setup, a detailed
-description is in @file{contrib/packages/org-annotation-helper}.
-
-@item @file{org-bookmark.el} by @i{Tokuya Kameshima}
-Support for links to Emacs bookmarks.
-
-@item @file{org-depend.el} by @i{Carsten Dominik}
-TODO dependencies for Org-mode.  Make TODO state changes in one entry trigger
-changes in another, or be blocked by the state of another entry.  Also,
-easily create chains of TODO items with exactly one active item at any time.
-
-@item @file{org-elisp-symbol.el} by @i{Bastien Guerry}
-Org links to emacs-lisp symbols.  This can create annotated links that
-exactly point to the definition location of a variable of function.
-
-@item @file{org-eval.el} by @i{Carsten Dominik}
-The @code{<lisp>} tag, adapted from Emacs Wiki and Emacs Muse, allows text to
-be included in a document that is the result of evaluating some code.  Other
-scripting languages like @code{perl} can be supported with this package as
-well.
-
-@item @file{org-eval-light.el} by @i{Eric Schulte}
-User-controlled evaluation of code in an Org buffer.
-
-@item @file{org-exp-blocks.el} by @i{Eric Schulte}
-Preprocess user-defined blocks for export.
-
-@item @file{org-expiry.el} by @i{Bastien Guerry}
-Expiry mechanism for Org entries.
-
-@item @file{org-indent.el} by @i{Carsten Dominik}
-Dynamic indentation of Org outlines.  The plan is to indent an outline
-according to level, but so far this is too hard for a proper and stable
-implementation.  Still, it works somewhat.
-
-@item @file{org-interactive-query.el} by @i{Christopher League}
-Interactive modification of tags queries.  After running a general query in
-Org, this package allows you to narrow down the results by adding more tags
-or keywords.
-
-@item @file{org-mairix.el} by @i{Georg C. F. Greve}
-Hook mairix search into Org for different MUAs.
-
-@item @file{org-man.el} by @i{Carsten Dominik}
-Support for links to manpages in Org-mode.
-
-@item @file{org-mtags.el} by @i{Carsten Dominik}
-Support for some Muse-like tags in Org-mode.  This package allows you to
-write @code{<example>} and @code{<src>} and other syntax copied from Emacs
-Muse, right inside an Org file.  The goal here is to make it easy to publish
-the same file using either org-publish or Muse.
-
-@item @file{org-panel.el} by @i{Lennart Borgman}
-Simplified and display-aided access to some Org commands.
-
-@item @file{org-registry.el} by @i{Bastien Guerry}
-A registry for Org links, to find out from where links point to a given file
-or location.
-
-@item @file{org2rem.el} by @i{Bastien Guerry}
-Convert org appointments into reminders for the @file{remind} program.
-
-@item @file{org-screen.el} by @i{Andrew Hyatt}
-Visit screen sessions through Org-mode links.
-
-@item @file{org-toc.el} by @i{Bastien Guerry}
-Table of contents in a separate buffer, with fast access to sections and easy
-visibility cycling.
-
-@item @file{orgtbl-sqlinsert.el} by @i{Jason Riedy}
-Convert Org-mode tables to SQL insertions.  Documentation for this can be
-found on the Worg pages.
-
-@end table
-
-@node Other extensions,  , Extensions in the contrib directory, Extensions
-@section Other extensions
-
-@i{TO BE DONE}
-
-@node Hacking, History and Acknowledgments, Extensions, Top
+@node Hacking, History and Acknowledgments, Miscellaneous, Top
 @appendix Hacking
+@cindex hacking
 
 This appendix covers some aspects where users can extend the functionality of
 Org.
 
 @menu
+* Hooks::                       Who to reach into Org's internals
+* Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Context-sensitive commands::  How to add functioality to such commands
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -9901,7 +9761,30 @@ Org.
 * Using the mapping API::       Mapping over all or selected entries
 @end menu
 
-@node Adding hyperlink types, Tables in arbitrary syntax, Hacking, Hacking
+@node Hooks, Add-on packages, Hacking, Hacking
+@section Hooks
+@cindex hooks
+
+Org has a large number of hook variables that can be used to add
+functionality to it.  This appendix about hacking is going to illustrate the
+use of some of them.  A complete list of all hooks with documentation is
+maintained by the worg project and can be found at
+@uref{http://orgmode.org/worg/org-configs/org-hooks.php}.
+
+@node Add-on packages, Adding hyperlink types, Hooks, Hacking
+@section Add-on packages
+@cindex add-on packages
+
+A large number of add-on packages have been written by various authors.
+These packages are not part of Emacs, but they are distributed as contributed
+packages with the separate release available at the Org-mode home page at
+@uref{http://orgmode.org}.  The list of contributed packages, along with
+documentation about each package, is maintained by the Worg project at
+@uref{http://orgmode.org/worg/org-contrib/}.
+
+
+
+@node Adding hyperlink types, Context-sensitive commands, Add-on packages, Hacking
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
@@ -9999,7 +9882,43 @@ can also set the @code{:description} property to provide a default for
 the link description when the link is later inserted into an Org
 buffer with @kbd{C-c C-l}.
 
-@node Tables in arbitrary syntax, Dynamic blocks, Adding hyperlink types, Hacking
+@node Context-sensitive commands, Tables in arbitrary syntax, Adding hyperlink types, Hacking
+@section Context-sensitive commands
+@cindex context-sensitive commands, hooks
+@cindex add-ons, context-sensitive commands
+@vindex org-ctrl-c-ctrl-c-hook
+
+Org has several commands that act differently depending on context.  The most
+important example it the @kbd{C-c C-c} (@pxref{The very busy C-c C-c key}).
+Also the @kbd{M-cursor} and @kbd{M-S-cursor} keys do have this property.
+
+Add-ons can tap into this functionality by providing a function that detects
+special context for that add-on and executes functionality appropriate for
+the context.  Here is an example from Dan Davison's @file{org-R.el} which
+allows to evaluate commands based on the @file{R} programming language.  For
+this package, special contexts are lines that start with @code{#+R:} or
+@code{#+RR:}.
+
+@lisp
+(defun org-R-apply-maybe ()
+  "Detect if this is context for org-R and execute R commands."
+  (if (save-excursion
+        (beginning-of-line 1)
+        (looking-at "#\\+RR?:"))
+      (progn (call-interactively 'org-R-apply)
+             t) ;; to signal that we took action
+    nil)) ;; to signal that we did not
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-R-apply-maybe)
+@end lisp
+
+The function first checks if the cursor is in such a line.  If that is the
+case, @code{org-R-apply} is called and the function returns @code{t} to
+signal that action was taken, and @kbd{C-c C-c} will stop looking for other
+contexts.  If the function finds it should do nothing locally, it returns @code{nil} so that other, similar functions can have a try.
+
+
+@node Tables in arbitrary syntax, Dynamic blocks, Context-sensitive commands, Hacking
 @section Tables and lists in arbitrary syntax
 @cindex tables, in other modes
 @cindex lists, in other modes
@@ -10697,7 +10616,7 @@ Org-mode website.
 @item
 @i{Alex Bochannek} provided a patch for rounding time stamps.
 @item
-@i{Tom Breton} wrote @file{og-choose.el}.
+@i{Tom Breton} wrote @file{org-choose.el}.
 @item
 @i{Charles Cave}'s suggestion sparked the implementation of templates
 for Remember.

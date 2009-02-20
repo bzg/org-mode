@@ -2,6 +2,10 @@
 
 	* org.texi (Export options, Sectioning structure): Document the
 	#+LEATEX_HEADER in-buffer setting.
+	(Bugs): Section removed.
+	(Hooks): New section.
+	(Add-on packages): Moved here from old location.
+	(Context-sensitive commands): New section.
 
 2009-02-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
