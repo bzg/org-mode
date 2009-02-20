@@ -1,5 +1,12 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-apply-template): Use
+	`org-completing-read-no-ido'.
+
+	* org.el (org-completing-read-no-ido): New function.
+	(org-make-tags-matcher, org-set-property): Use
+	`org-completing-read-no-ido'.
+
 	* org-export-latex.el (org-export-latex-import-inbuffer-stuff):
 	New option.
 	(org-export-as-latex): Import in-buffer settings as TeX macros.

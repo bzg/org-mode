@@ -7043,6 +7043,10 @@ used as the link location instead of reading one interactively."
     (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
     (apply 'org-ido-completing-read args)))
 
+(defun org-completing-read-no-ido (&rest args)
+  (let (org-completion-use-ido)
+    (apply 'org-completing-read args)))
+
 (defun org-ido-completing-read (&rest args)
   "Completing-read using `ido-mode' speedups if available"
   (if (and org-completion-use-ido
@@ -9838,7 +9842,7 @@ also TODO lines."
     ;; Get a new match request, with completion
     (let ((org-last-tags-completion-table
 	   (org-global-tags-completion-table)))
-      (setq match (org-completing-read
+      (setq match (org-completing-read-no-ido
 		   "Match: " 'org-tags-completion-function nil nil nil
 		   'org-tags-history))))
 
@@ -11082,11 +11086,12 @@ in the current file."
 	  (existing (mapcar 'list (org-property-values prop)))
 	  (val (if allowed
 		   (org-completing-read "Value: " allowed nil 'req-match)
-		 (org-completing-read
-		  (concat "Value" (if (and cur (string-match "\\S-" cur))
-				      (concat "[" cur "]") "")
-			  ": ")
-		  existing nil nil "" nil cur))))
+		 (let (org-completion-use-ido)
+		   (org-completing-read
+		    (concat "Value" (if (and cur (string-match "\\S-" cur))
+					(concat "[" cur "]") "")
+			    ": ")
+		    existing nil nil "" nil cur)))))
      (list prop (if (equal val "") cur val))))
   (unless (equal (org-entry-get nil property) value)
     (org-entry-put nil property value)))
