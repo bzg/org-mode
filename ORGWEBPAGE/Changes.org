@@ -77,11 +77,11 @@ http://orgmode.org/worg/org-tutorials/org-R/org-R.php
 
 Thanks to Dan for this great contribution.
 
-*** Allow individual formatting of each TODO keyword in HTML export
+*** Allow individual formatting of TODO keyword and tags in HTML export
 
 TODO keywords in HTML export have the CSS class =todo= or =done=.
-In addition to this, each keyword has now itself as class, so you
-could do this in your CSS file:
+Tags have the CSS class =tag=.  In addition to this, each keyword
+has now itself as class, so you could do this in your CSS file:
 
 #+begin_src css
 .todo { font-weight:bold; }
@@ -90,6 +90,13 @@ could do this in your CSS file:
 .WAITING { color:orange; }
 .DONE { color:green; }
 #+end_src
+
+If any of your keywords causes conflicts with CSS classes used
+for different purposes (for example a tag "title" would cause a
+conflict with the class used for formatting the document title),
+then you can use the variables =org-export-html-tag-class-prefix=
+and =org-export-html-todo-kwd-class-prefix= to define prefixes
+for the class names for keywords, for example "kwd-".
 
 Thanks to Wanrong Lin for this request, and to Sebastian Rose for
 help with the implementation.

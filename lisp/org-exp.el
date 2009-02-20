@@ -646,6 +646,23 @@ settings with <style>...</style> tags."
 ;;;###autoload
 (put 'org-export-html-style-extra 'safe-local-variable 'stringp)
 
+(defcustom org-export-html-tag-class-prefix ""
+  "Prefix to clas names for TODO keywords.
+Each tag gets a class given by the tag itself, with this prefix.
+The default prefix is empty because it is nice to just use the keyword
+as a class name.  But if you get into conflicts with other, existing
+CSS classes, then this prefic can be very useful."
+  :group 'org-export-html
+  :type 'string)
+
+(defcustom org-export-html-todo-kwd-class-prefix ""
+  "Prefix to clas names for TODO keywords.
+Each TODO keyword gets a class given by the keyword itself, with this prefix.
+The default prefix is empty because it is nice to just use the keyword
+as a class name.  But if you get into conflicts with other, existing
+CSS classes, then this prefic can be very useful."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-html-title-format "<h1 class=\"title\">%s</h1>\n"
   "Format for typesetting the document title in HTML export."
@@ -3744,7 +3761,8 @@ lang=\"%s\" xml:lang=\"%s\">
 					org-done-keywords)
 				"done" "todo")
 			    " " (match-string 2 line)
-			    "\"> " (match-string 2 line)
+			    "\"> " (org-export-html-get-todo-kwd-class-name
+				    (match-string 2 line))
 			    "</span>" (substring line (match-end 2)))))
 
 	  ;; Does this contain a reference to a footnote?
@@ -4631,9 +4649,13 @@ When TITLE is nil, just close all open levels."
 			   (save-match-data
 			     (concat
 			      "&nbsp;&nbsp;&nbsp;<span class=\"tag\">"
-			      (mapconcat 'identity (org-split-string
-						    (match-string 1 title) ":")
-					 "&nbsp;")
+			      (mapconcat
+			       (lambda (x)
+				 (format "<span class=\"%s\">%s</span>"
+					 (org-export-html-get-tag-class-name x)
+					 x))
+			       (org-split-string (match-string 1 title) ":")
+			       "&nbsp;")
 			      "</span>"))
 			 "")
 		       t t title)))
@@ -4669,6 +4691,22 @@ When TITLE is nil, just close all open levels."
   (or (get-text-property pos prop object)
       (and (setq pos (next-single-property-change pos prop object))
 	   (get-text-property pos prop object))))
+
+(defun org-export-html-get-tag-class-name (tag)
+  "Turn tag into a valid class name.
+Replaces invalid characters with \"_\" and then prepends a prefix."
+  (save-match-data
+    (while (string-match "[^a-zA-Z0-9_]" tag)
+      (setq tag (replace-match "_" t t tag))))
+  (concat org-export-html-tag-class-prefix tag))
+
+(defun org-export-html-get-todo-kwd-class-name (kwd)
+  "Turn todo keyword into a valid class name.
+Replaces invalid characters with \"_\" and then prepends a prefix."
+  (save-match-data
+    (while (string-match "[^a-zA-Z0-9_]" kwd)
+      (setq tag (replace-match "_" t t kwd))))
+  (concat org-export-html-todo-kwd-class-prefix kwd))
 
 (defun org-html-level-close (level max-outline-level)
   "Terminate one level in HTML export."

@@ -8334,22 +8334,40 @@ respectively.  For example
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
 
+@vindex org-export-html-todo-kwd-class-prefix
+@vindex org-export-html-tag-class-prefix
 You can also give style information for the exported file.  The HTML exporter
-assigns the following special CSS classes to appropriate parts of the
-document - your style specifications may change these, in addition to any of
-the standard classes like for headlines, tables etc.
+assigns the following special CSS classes@footnote{If the classes on TODO
+keywords and tags lead to conflicts, use the variables
+@code{org-export-html-todo-kwd-class-prefix} and
+@code{org-export-html-tag-class-prefix} to make them unique.} to appropriate
+parts of the document - your style specifications may change these, in
+addition to any of the standard classes like for headlines, tables etc.
 @example
+.title             @r{document title}
+.author            @r{author information}
+.date              @r{publishing date}
 .todo              @r{TODO keywords, all not-done states}
 .done              @r{the DONE keywords, all stated the count as done}
-WAITING            @r{Each TODO keyword also uses a class named after itself}
+.WAITING           @r{each TODO keyword also uses a class named after itself}
 .timestamp         @r{time stamp}
 .timestamp-kwd     @r{keyword associated with a time stamp, like SCHEDULED}
 .tag               @r{tag in a headline}
+._HOME             @r{each tag uses itself as a class, "@@" replaced by "_"}
 .target            @r{target for links}
-div.figure         @r{how to format an inlined image}
 .linenr            @r{the line number in a code example}
 .code-highlighted  @r{for highlighting referenced code lines}
 .section-number-N  @r{section number in headlines, different for each level}
+.footnotes         @r{footnote section headline}
+.footref           @r{a footnote reference (also a <sup>)}
+.footnote          @r{footnote definition paragraph}
+.footnum           @r{footnote number in footnote definition (also <sup>)}
+div.figure         @r{how to format an inlined image}
+div.outline-N      @r{div for outline level N (headline plus text))}
+div.outline-text-N @r{extra div for text at outline level N}
+.src               @r{source code}
+.example           @r{normal example}
+.verse             @r{verse paragraph}
 @end example
 
 @vindex org-export-html-style-default

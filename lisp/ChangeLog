@@ -1,5 +1,15 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-htm-get-tag-class-name)
+	(org-export-htm-get-todo-kwd-class-name): New functions.
+	(org-export-html-tag-class-prefix)
+	(org-export-html-todo-kwd-class-prefix): New options.
+	(org-export-as-html): Call
+	`org-export-html-get-todo-kwd-class-name'.
+	(org-html-level-start): Wrap tags into classes.
+	(org-export-html-get-tag-class-name)
+	(org-export-html-get-todo-kwd-class-name): New functions.
+
 	* org-export-latex.el (org-export-latex-collect-header-macros):
 	Remove fields that are used anyway.
 	(org-export-latex-make-header): Insert the options earlier.
