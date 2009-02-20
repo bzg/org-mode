@@ -9580,7 +9580,7 @@ ACTION can be `set', `up', `down', or a character."
   (setq action (or action 'set))
   (let (current new news have remove)
     (save-excursion
-      (org-back-to-heading)
+      (org-back-to-heading t)
       (if (looking-at org-priority-regexp)
 	  (setq current (string-to-char (match-string 2))
 		have t)

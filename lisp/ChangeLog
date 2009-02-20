@@ -1,5 +1,7 @@
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-priority): Also find invisible heading.
+
 	* org-colview-xemacs.el (org-columns-edit-value): No special
 	treatment for `org-todo' prefix.
 
