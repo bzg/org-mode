@@ -38,11 +38,9 @@ Thanks to Wanrong Lin for this proposal.
 *** Clock lines are now captured into the LOGBOOK drawer as well
 
 The =CLOCK= drawer will be abandoned, clock lines will now also
-end up in a drawer =LOGBOOK=.  The reason for this is because it
-is a bit useless to have two different drawers for state change
-notes and clock lines.  If you wish to keep the old way, for
-example if you do not want clock lines and state notes in the
-same drawer, use
+end up in a drawer =LOGBOOK=.  The reason for this is that it's a
+bit useless to have two different drawers for state change notes
+and clock lines.  If you wish to keep the old way, use
 
 #+begin_src emacs-lisp
 (setq org-clock-into-drawer "CLOCK")
@@ -67,8 +65,8 @@ Thanks to Dan for this great contribution.
 
 *** Allow individual formatting of each TODO keyword in HTML export
 
-TODO keywords in HTML export have the CSS class =todo=.  In
-addition to this, each keyword has now itself as class, so you
+TODO keywords in HTML export have the CSS class =todo= or =done=.
+In addition to this, each keyword has now itself as class, so you
 could do this in your CSS file:
 
 #+begin_src css
@@ -81,6 +79,7 @@ could do this in your CSS file:
 
 Thanks to Wanrong Lin for this request, and to Sebastian Rose for
 help with the implementation.
+
 *** New hooks for add-ons to tap into context-sensitive commands
 
 Some commands in Org are context-sensitive, they will execute
@@ -105,7 +104,7 @@ Thanks to Richard Klinda for a patch to this effect.
 *** New variable index in the manual
 
 A new index in the manual lists all variables mentioned in the
-manual, about 200.
+manual, about 200 variables in total.
 
 *** The ORDERED property also influences checkboxes
 
@@ -159,6 +158,28 @@ order to produce empty lines.  In =org-tag-alist=, newlines are
 represented as =(:newline)=.
 
 Thanks to Christopher Suckling for a patch to this effect.
+
+*** When a TODO is blocked by checkboxes, keep it visible in agenda
+
+When the variable =org-agenda-dim-blocked-tasks= is set to
+=invisible=, tasks that are blocked will not be visible in the
+agenda.  If the blocking is due to child TODO entries, this does
+make sense because the children themselves will show up in the
+TODO list.
+
+However, as John Rakestraw has [[http://thread.gmane.org/gmane.emacs.orgmode/10939][pointed out]], if the blocking is
+done by checkboxes, no trace of these subtasks is left.
+Therefore, when the blocking is done by checkboxes, we now
+overrule the =invisible= setting and replace it with mere dimming
+of the task.
+
+*** LaTeX can import Org's in-buffer definitions for TITLE, EMAIL etc.
+
+If you configure =org-export-latex-import-inbuffer-stuff=,
+in-buffer definitions like #+TITLE will be made available in the
+LaTeX file as =\orgTITLE=.
+
+This was a request by Russel Adams.
 
 * Version 6.22
 ** Details
