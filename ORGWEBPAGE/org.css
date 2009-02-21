@@ -14,18 +14,18 @@
 
   h1 {font-size: 14pt;}
 
-  #table-of-contents {
+#table-of-contents {
 	font-size: 85%;
 	position: fixed;
 	display: block;
 	left: 10px;
 	top: 180px;
 	width: 200px;
-	height: 600px;
+	min-height:60px;
+	max-height:55%;
 	line-height: 1.4em;
 	overflow:auto;
-        border-style:none;
-  }
+}
 
   #table-of-contents h2 {
 	display:none;
