@@ -1,3 +1,7 @@
+2009-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-reload): New command.
+
 2009-02-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-htm-get-tag-class-name)

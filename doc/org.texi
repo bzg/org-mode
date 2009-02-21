@@ -630,14 +630,11 @@ error occurred.  Here is how to produce a useful backtrace:
 
 @enumerate
 @item
-Start a fresh Emacs or XEmacs, and make sure that it will load the
-original Lisp code in @file{org.el} instead of the compiled version in
-@file{org.elc}.  The backtrace contains much more information if it is
-produced with uncompiled code.  To do this, either rename @file{org.elc}
-to something else before starting Emacs, or ask Emacs explicitly to load
-@file{org.el} by using the command line
+Reload uncompiled versions of all Org-mode lisp files.  The backtrace
+contains much more information if it is produced with uncompiled code.
+To do this, use
 @example
-emacs -l /path/to/org.el
+C-u M-x org-reload RET
 @end example
 @item
 Go to the @code{Options} menu and select @code{Enter Debugger on Error}

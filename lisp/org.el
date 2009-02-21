@@ -14260,6 +14260,30 @@ With optional NODE, go directly to that node."
 		     org-remember org-table org-timer)))
 
 ;;;###autoload
+(defun org-reload (&optional uncompiled)
+  "Reload all org lisp files.
+With prefix arg UNCOMPILED, load the uncompiled versions."
+  (interactive "P")
+  (require 'find-func)
+  (let* ((dir (file-name-directory (find-library-name "org")))
+	 (files (directory-files dir t "\\.el\\'"))
+	 (remove-re (concat (if (featurep 'xemacs)
+				"org-colview" "org-colview-xemacs")
+			    "\\'")))
+    (setq files (mapcar 'file-name-sans-extension files))
+    (setq files (mapcar
+		 (lambda (x) (if (string-match remove-re x) nil x))
+		 files))
+    (setq files (delq nil files))
+    (mapc
+     (lambda (f)
+       (if (and (not uncompiled)
+		(file-exists-p (concat f ".elc")))
+	   (load (concat f ".elc") nil nil t)
+	 (load (concat f ".el") nil nil t)))
+     files)))
+
+;;;###autoload
 (defun org-customize ()
   "Call the customize function with org as argument."
   (interactive)
