@@ -678,8 +678,12 @@
 {
   position: absolute;
   width:200px;
+  /*
+    The evil IE-JavaScript hack :-) depends on Picture and y-distance.
+    Added to support small screens (Netbooks...).
+    */
+  height: expression((document.body.clientHeight - 210) + "px");
 }
-
 
 * html h1
 {
