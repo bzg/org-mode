@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.23
+;; Version: 6.23a
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -4705,7 +4705,7 @@ Replaces invalid characters with \"_\" and then prepends a prefix."
 Replaces invalid characters with \"_\" and then prepends a prefix."
   (save-match-data
     (while (string-match "[^a-zA-Z0-9_]" kwd)
-      (setq tag (replace-match "_" t t kwd))))
+      (setq kwd (replace-match "_" t t kwd))))
   (concat org-export-html-todo-kwd-class-prefix kwd))
 
 (defun org-html-level-close (level max-outline-level)
