@@ -1516,7 +1516,7 @@ turn it on by default, for example in Mail mode, with one of:
 @end lisp
 
 When this mode is active and the cursor is on a line that looks to Org like a
-headline of the first line of a list item, most structure editing commands
+headline or the first line of a list item, most structure editing commands
 will work, even if the same keys normally have different functionality in the
 major mode you are using.  If the cursor is not in one of those special
 lines, Orgstruct mode lurks silently in the shadow.  When you use
