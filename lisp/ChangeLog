@@ -10,6 +10,10 @@
 	(org-add-planning-info): Catch the case when there is no planning
 	info yet and the call does not want to add anything, only maybe
 	tries to remove something.
+	(org-special-ctrl-a/e): All value to be a cons cell with separate
+	settings for `C-a. and `C-e'.
+	(org-beginning-of-line, org-end-of-line): Honor separate values
+	for `C-a' and `C-e'.
 
 2009-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
 

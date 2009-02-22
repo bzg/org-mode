@@ -650,23 +650,37 @@ body starts at column 0, indentation is not changed at all."
 
 (defcustom org-special-ctrl-a/e nil
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
+
 When t, `C-a' will bring back the cursor to the beginning of the
 headline text, i.e. after the stars and after a possible TODO keyword.
 In an item, this will be the position after the bullet.
 When the cursor is already at that position, another `C-a' will bring
 it to the beginning of the line.
+
 `C-e' will jump to the end of the headline, ignoring the presence of tags
 in the headline.  A second `C-e' will then jump to the true end of the
 line, after any tags.
+
 When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
 and only a directly following, identical keypress will bring the cursor
-to the special positions."
+to the special positions.
+
+This may also be a cons cell where the behavior for `C-a' and `C-e' is
+set separately."
   :group 'org-edit-structure
   :type '(choice
 	  (const :tag "off" nil)
-	  (const :tag "after bullet first" t)
-	  (const :tag "border first" reversed)))
-
+	  (const :tag "after stars/bullet and before tags first" t)
+	  (const :tag "true line boundary first" reversed)
+	  (cons :tag "Set C-a and C-e separately"
+		(choice :tag "Special C-a"
+			(const :tag "off" nil)
+			(const :tag "after  stars/bullet first" t)
+			(const :tag "before stars/bullet first" reversed))
+		(choice :tag "Special C-e"
+			(const :tag "off" nil)
+			(const :tag "before tags first" t)
+			(const :tag "after tags first" reversed)))))
 (if (fboundp 'defvaralias)
     (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e))
 
@@ -15071,7 +15085,11 @@ If this is a headline, and `org-special-ctrl-a/e' is set, ignore tags on the
 first attempt, and only move to after the tags when the cursor is already
 beyond the end of the headline."
   (interactive "P")
-  (let ((pos (point)) refpos)
+  (let ((pos (point))
+	(special (if (consp org-special-ctrl-a/e)
+		     (car org-special-ctrl-a/e)
+		   org-special-ctrl-a/e))
+	refpos)
     (beginning-of-line 1)
     (if (and arg (fboundp 'move-beginning-of-line))
 	(call-interactively 'move-beginning-of-line)
@@ -15083,14 +15101,14 @@ beyond the end of the headline."
 	      (backward-char 1)
 	      (beginning-of-line 1))
 	  (forward-char 1))))
-    (when org-special-ctrl-a/e
+    (when special
       (cond
        ((and (looking-at org-complex-heading-regexp)
 	     (= (char-after (match-end 1)) ?\ ))
 	(setq refpos (min (1+ (or (match-end 3) (match-end 2) (match-end 1)))
 			  (point-at-eol)))
 	(goto-char
-	 (if (eq org-special-ctrl-a/e t)
+	 (if (eq special t)
 	     (cond ((> pos refpos) refpos)
 		   ((= pos (point)) refpos)
 		   (t (point)))
@@ -15099,7 +15117,7 @@ beyond the end of the headline."
 		 (t refpos)))))
        ((org-at-item-p)
 	(goto-char
-	 (if (eq org-special-ctrl-a/e t)
+	 (if (eq special t)
 	     (cond ((> pos (match-end 4)) (match-end 4))
 		   ((= pos (point)) (match-end 4))
 		   (t (point)))
@@ -15115,29 +15133,31 @@ If this is a headline, and `org-special-ctrl-a/e' is set, ignore tags on the
 first attempt, and only move to after the tags when the cursor is already
 beyond the end of the headline."
   (interactive "P")
-  (if (or (not org-special-ctrl-a/e)
-	  (not (org-on-heading-p))
-	  arg)
-      (call-interactively (if (fboundp 'move-end-of-line)
-			      'move-end-of-line
-			    'end-of-line))
-    (let ((pos (point)))
-      (beginning-of-line 1)
-      (if (looking-at (org-re ".*?\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
-	  (if (eq org-special-ctrl-a/e t)
-	      (if (or (< pos (match-beginning 1))
-		      (= pos (match-end 0)))
-		  (goto-char (match-beginning 1))
-		(goto-char (match-end 0)))
-	    (if (or (< pos (match-end 0)) (not (eq this-command last-command)))
-		(goto-char (match-end 0))
-	      (goto-char (match-beginning 1))))
+  (let ((special (if (consp org-special-ctrl-a/e)
+		     (cdr org-special-ctrl-a/e)
+		   org-special-ctrl-a/e)))
+    (if (or (not special)
+	    (not (org-on-heading-p))
+	    arg)
 	(call-interactively (if (fboundp 'move-end-of-line)
 				'move-end-of-line
-			      'end-of-line)))))
-  (org-no-warnings
-   (and (featurep 'xemacs) (setq zmacs-region-stays t))))
-
+			      'end-of-line))
+      (let ((pos (point)))
+	(beginning-of-line 1)
+	(if (looking-at (org-re ".*?\\([ \t]*\\)\\(:[[:alnum:]_@:]+:\\)[ \t]*$"))
+	    (if (eq special t)
+		(if (or (< pos (match-beginning 1))
+			(= pos (match-end 0)))
+		    (goto-char (match-beginning 1))
+		  (goto-char (match-end 0)))
+	      (if (or (< pos (match-end 0)) (not (eq this-command last-command)))
+		  (goto-char (match-end 0))
+		(goto-char (match-beginning 1))))
+	  (call-interactively (if (fboundp 'move-end-of-line)
+				  'move-end-of-line
+				'end-of-line)))))
+    (org-no-warnings
+     (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
