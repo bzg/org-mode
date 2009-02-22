@@ -7,6 +7,9 @@
 	(orgstruct-make-binding): Detect if item-body context should be
 	seen.
 	(orgstruct-is-++): New variable.
+	(org-add-planning-info): Catch the case when there is no planning
+	info yet and the call does not want to add anything, only maybe
+	tries to remove something.
 
 2009-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
 

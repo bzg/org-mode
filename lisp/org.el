@@ -9177,84 +9177,89 @@ be removed."
   (let (org-time-was-given org-end-time-was-given ts
 			   end default-time default-input)
 
-    (when (and (not time) (memq what '(scheduled deadline)))
-      ;; Try to get a default date/time from existing timestamp
-      (save-excursion
-	(org-back-to-heading t)
-	(setq end (save-excursion (outline-next-heading) (point)))
-	(when (re-search-forward (if (eq what 'scheduled)
-				     org-scheduled-time-regexp
-				   org-deadline-time-regexp)
-				 end t)
-	  (setq ts (match-string 1)
-		default-time
-		(apply 'encode-time (org-parse-time-string ts))
-		default-input (and ts (org-get-compact-tod ts))))))
-    (when what
-      ;; If necessary, get the time from the user
-      (setq time (or time (org-read-date nil 'to-time nil nil
-					 default-time default-input))))
-
-    (when (and org-insert-labeled-timestamps-at-point
-	       (member what '(scheduled deadline)))
-      (insert
-       (if (eq what 'scheduled) org-scheduled-string org-deadline-string) " ")
-      (org-insert-time-stamp time org-time-was-given
-			     nil nil nil (list org-end-time-was-given))
-      (setq what nil))
-    (save-excursion
-      (save-restriction
-	(let (col list elt ts buffer-invisibility-spec)
+    (catch 'exit
+      (when (and (not time) (memq what '(scheduled deadline)))
+	;; Try to get a default date/time from existing timestamp
+	(save-excursion
 	  (org-back-to-heading t)
-	  (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
-	  (goto-char (match-end 1))
-	  (setq col (current-column))
-	  (goto-char (match-end 0))
-	  (if (eobp) (insert "\n") (forward-char 1))
-	  (if (and (not (looking-at outline-regexp))
-		   (looking-at (concat "[^\r\n]*?" org-keyword-time-regexp
-				       "[^\r\n]*"))
-		   (not (equal (match-string 1) org-clock-string)))
-	      (narrow-to-region (match-beginning 0) (match-end 0))
-	    (insert-before-markers "\n")
-	    (backward-char 1)
-	    (narrow-to-region (point) (point))
-	    (and org-adapt-indentation (org-indent-to-column col)))
-	  ;; Check if we have to remove something.
-	  (setq list (cons what remove))
-	  (while list
-	    (setq elt (pop list))
+	  (setq end (save-excursion (outline-next-heading) (point)))
+	  (when (re-search-forward (if (eq what 'scheduled)
+				       org-scheduled-time-regexp
+				     org-deadline-time-regexp)
+				   end t)
+	    (setq ts (match-string 1)
+		  default-time
+		  (apply 'encode-time (org-parse-time-string ts))
+		  default-input (and ts (org-get-compact-tod ts))))))
+      (when what
+	;; If necessary, get the time from the user
+	(setq time (or time (org-read-date nil 'to-time nil nil
+					   default-time default-input))))
+      
+      (when (and org-insert-labeled-timestamps-at-point
+		 (member what '(scheduled deadline)))
+	(insert
+	 (if (eq what 'scheduled) org-scheduled-string org-deadline-string) " ")
+	(org-insert-time-stamp time org-time-was-given
+			       nil nil nil (list org-end-time-was-given))
+	(setq what nil))
+      (save-excursion
+	(save-restriction
+	  (let (col list elt ts buffer-invisibility-spec)
+	    (org-back-to-heading t)
+	    (looking-at (concat outline-regexp "\\( *\\)[^\r\n]*"))
+	    (goto-char (match-end 1))
+	    (setq col (current-column))
+	    (goto-char (match-end 0))
+	    (if (eobp) (insert "\n") (forward-char 1))
+	    (when (and (not what)
+		       (not (looking-at org-keyword-time-not-clock-regexp)))
+	      ;; Nothing to add, nothing to remove...... :-)
+	      (throw 'exit nil))
+	    (if (and (not (looking-at outline-regexp))
+		     (looking-at (concat "[^\r\n]*?" org-keyword-time-regexp
+					 "[^\r\n]*"))
+		     (not (equal (match-string 1) org-clock-string)))
+		(narrow-to-region (match-beginning 0) (match-end 0))
+	      (insert-before-markers "\n")
+	      (backward-char 1)
+	      (narrow-to-region (point) (point))
+	      (and org-adapt-indentation (org-indent-to-column col)))
+	    ;; Check if we have to remove something.
+	    (setq list (cons what remove))
+	    (while list
+	      (setq elt (pop list))
+	      (goto-char (point-min))
+	      (when (or (and (eq elt 'scheduled)
+			     (re-search-forward org-scheduled-time-regexp nil t))
+			(and (eq elt 'deadline)
+			     (re-search-forward org-deadline-time-regexp nil t))
+			(and (eq elt 'closed)
+			     (re-search-forward org-closed-time-regexp nil t)))
+		(replace-match "")
+		(if (looking-at "--+<[^>]+>") (replace-match ""))
+		(if (looking-at " +") (replace-match ""))))
+	    (goto-char (point-max))
+	    (when what
+	      (insert
+	       (if (not (or (bolp) (eq (char-before) ?\ ))) " " "")
+	       (cond ((eq what 'scheduled) org-scheduled-string)
+		     ((eq what 'deadline) org-deadline-string)
+		     ((eq what 'closed) org-closed-string))
+	       " ")
+	      (setq ts (org-insert-time-stamp
+			time
+			(or org-time-was-given
+			    (and (eq what 'closed) org-log-done-with-time))
+			(eq what 'closed)
+			nil nil (list org-end-time-was-given)))
+	      (end-of-line 1))
 	    (goto-char (point-min))
-	    (when (or (and (eq elt 'scheduled)
-			   (re-search-forward org-scheduled-time-regexp nil t))
-		      (and (eq elt 'deadline)
-			   (re-search-forward org-deadline-time-regexp nil t))
-		      (and (eq elt 'closed)
-			   (re-search-forward org-closed-time-regexp nil t)))
-	      (replace-match "")
-	      (if (looking-at "--+<[^>]+>") (replace-match ""))
-	      (if (looking-at " +") (replace-match ""))))
-	  (goto-char (point-max))
-	  (when what
-	    (insert
-	     (if (not (or (bolp) (eq (char-before) ?\ ))) " " "")
-	     (cond ((eq what 'scheduled) org-scheduled-string)
-		   ((eq what 'deadline) org-deadline-string)
-		   ((eq what 'closed) org-closed-string))
-	     " ")
-	    (setq ts (org-insert-time-stamp
-		      time
-		      (or org-time-was-given
-			  (and (eq what 'closed) org-log-done-with-time))
-		      (eq what 'closed)
-		      nil nil (list org-end-time-was-given)))
-	    (end-of-line 1))
-	  (goto-char (point-min))
-	  (widen)
-	  (if (and (looking-at "[ \t]+\n")
-		   (equal (char-before) ?\n))
-	      (delete-region (1- (point)) (point-at-eol)))
-	  ts)))))
+	    (widen)
+	    (if (and (looking-at "[ \t]+\n")
+		     (equal (char-before) ?\n))
+		(delete-region (1- (point)) (point-at-eol)))
+	    ts))))))
 
 (defvar org-log-note-marker (make-marker))
 (defvar org-log-note-purpose nil)
