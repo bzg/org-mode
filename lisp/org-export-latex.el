@@ -388,8 +388,9 @@ when PUB-DIR is set, use this as the publishing directory."
       (error "Need a file name to be able to export")))
 
   (message "Exporting to LaTeX...")
-  (remove-text-properties (point-min) (point-max)
-			  '(:org-license-to-kill nil))
+  (org-unmodified
+   (remove-text-properties (point-min) (point-max)
+			   '(:org-license-to-kill nil)))
   (org-update-radio-target-regexp)
   (org-export-latex-set-initial-vars ext-plist arg)
   (let* ((wcf (current-window-configuration))
@@ -803,8 +804,9 @@ If BEG is non-nil, the is the beginning of he region."
 	    :LaTeX-fragments nil
 	    :timestamps (plist-get opt-plist :timestamps)
 	    :footnotes (plist-get opt-plist :footnotes)))
-	(add-text-properties pt (max pt (1- end))
-			     '(:org-license-to-kill t))))))
+	(org-unmodified
+	 (add-text-properties pt (max pt (1- end))
+			      '(:org-license-to-kill t)))))))
 
 (defun org-export-latex-collect-header-macros (&optional title)
   "Find the various definitions in #+... lines and define TeX macros for them."

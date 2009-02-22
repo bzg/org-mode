@@ -1,5 +1,9 @@
 2009-02-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-as-latex)
+	(org-export-latex-first-lines): Avoid modification flag when
+	adding or removing text properties.
+
 	* org.el (orgstruct++-mode): New function.
 	(turn-on-orgstruct++): Call `orgstruct++-mode'.
 	(org-context-p): Allow detecting item context after the first line
