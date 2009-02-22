@@ -504,8 +504,36 @@ at all about how these scope issues generalize to, say, bash blocks.
 Maybe this is something that should be controlled by a header
 argument?
 
+** =\C-c\C-c= evaluation
+
+With org-mode version at least 6.23, see the documentation for
+[[info:org:Context-sensitive%20commands][info:org:Context-sensitive commands]].
+
 
 * Tasks
+
+
+* Sandbox
+This is a place for code examples
+
+
+** litorgy.el beginning functionality
+After evaluating litorgy.el and litorgy-script.el, you should be able
+to evaluate the following blocks of code by pressing =\C-c\C-c= on the
+header lines.  *Note*: your version of org-mode must be at least 6.23
+or later.
+
+#+begin_src sh
+date
+#+end_src
+
+#+begin_src ruby
+puts Time.now
+#+end_src
+
+#+begin_src python
+print "Hello world!"
+#+end_src
 
 
 * COMMENT Commentary
@@ -537,5 +565,22 @@ changes that you see fit.
 
 ** Dan <2009-02-12 Thu 10:23>
    Good job Eric with major works on this file.
+
+** Eric <2009-02-22 Sun 13:17>
+So I skipped ahead and got started on the fun part.  Namely stubbing
+out some of the basic functionality.  Please don't take any of the
+decisions I've made so far (on things like names, functionality,
+design etc...) as final decisions, I'm of course open to and hoping
+for improvement.
+
+So far [[file:litorgy/litorgy.el][litorgy.el]] and [[file:litorgy/litorgy-script.el][litorgy-script.el]] can be used to evaluate source
+code blocks of simple scripting languages.  It shouldn't be too hard
+(any takers) to write a litorgy-R.el modeled after litorgy-script.el
+to use for evaluating R code files.
+
+See the [[* litorgy.el beginning functionality][Sandbox]] for evaluable examples.
+
+
+
 * Buffer Dictionary
- LocalWords:  DBlocks dblocks
+ LocalWords:  DBlocks dblocks litorgy el
