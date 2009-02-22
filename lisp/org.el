@@ -6267,22 +6267,38 @@ C-c C-c     Set tags / toggle checkbox"
   "Unconditionally turn on `orgstruct-mode'."
   (orgstruct-mode 1))
 
+(defun orgstruct++-mode (&optional arg)
+  "Toggle `orgstruct-mode', the enhanced version of it.
+In addition to setting orgstruct-mode, this also exports all indentation and
+autofilling variables from org-mode into the buffer.  It will also
+recognize item context in multiline items.
+Note that turning off orgstruct-mode will *not* remove the
+indentation/paragraph settings.  This can only be done by refreshing the
+major mode, for example with \[normal-mode]."
+  (interactive "P")
+  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
+  (if (< arg 1)
+      (orgstruct-mode -1)
+    (orgstruct-mode 1)
+    (let (var val)
+      (mapc
+       (lambda (x)
+	 (when (string-match
+		"^\\(paragraph-\\|auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
+		(symbol-name (car x)))
+	   (setq var (car x) val (nth 1 x))
+	   (org-set-local var (if (eq (car-safe val) 'quote) (nth 1 val) val))))
+       org-local-vars)
+      (org-set-local 'orgstruct-is-++ t))))
+
+(defvar orgstruct-is-++ nil
+  "Is orgstruct-mode in ++ version in the current-buffer?")
+(make-variable-buffer-local 'orgstruct-is-++)
+
 ;;;###autoload
 (defun turn-on-orgstruct++ ()
-  "Unconditionally turn on `orgstruct-mode', and force org-mode indentations.
-In addition to setting orgstruct-mode, this also exports all indentation and
-autofilling variables from org-mode into the buffer.  Note that turning
-off orgstruct-mode will *not* remove these additional settings."
-  (orgstruct-mode 1)
-  (let (var val)
-    (mapc
-     (lambda (x)
-       (when (string-match
-	      "^\\(paragraph-\\|auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
-	      (symbol-name (car x)))
-	 (setq var (car x) val (nth 1 x))
-	 (org-set-local var (if (eq (car-safe val) 'quote) (nth 1 val) val))))
-     org-local-vars)))
+  "Unconditionally turn on `orgstruct++-mode'."
+  (orgstruct++-mode 1))
 
 (defun orgstruct-error ()
   "Error when there is no default binding for a structure key."
@@ -6355,7 +6371,10 @@ to execute outside of tables."
 		 "'.")
 	 '(interactive "p")
 	 (list 'if
-	       '(org-context-p 'headline 'item)
+	       `(org-context-p 'headline 'item
+			       (and orgstruct-is-++
+				    ,(and (memq fun '(org-insert-heading org-insert-todo-heading)) t)
+				    'item-body))
 	       (list 'org-run-like-in-org-mode (list 'quote fun))
 	       (list 'let '(orgstruct-mode)
 		     (list 'call-interactively
@@ -6376,7 +6395,9 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 ;;?????????		    (looking-at "\\*+"))
 		    (looking-at outline-regexp))
 	       (and (memq 'item contexts)
-		    (looking-at "[ \t]*\\([-+*] \\|[0-9]+[.)] \\)")))
+		    (looking-at "[ \t]*\\([-+*] \\|[0-9]+[.)] \\)"))
+	       (and (memq 'item-body contexts)
+		    (org-in-item-p)))
       (goto-char pos))))
 
 (defun org-get-local-variables ()

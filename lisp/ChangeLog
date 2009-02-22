@@ -1,3 +1,13 @@
+2009-02-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (orgstruct++-mode): New function.
+	(turn-on-orgstruct++): Call `orgstruct++-mode'.
+	(org-context-p): Allow detecting item context after the first line
+	of an item.
+	(orgstruct-make-binding): Detect if item-body context should be
+	seen.
+	(orgstruct-is-++): New variable.
+
 2009-02-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-reload): New command.

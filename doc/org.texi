@@ -372,7 +372,7 @@ Interaction with other packages
 
 Hacking
 
-* Hooks::                       Who to reach into Org's internals
+* Hooks::                       How to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
 * Context-sensitive commands::  How to add functioality to such commands
@@ -1505,22 +1505,24 @@ you can use the usual commands to follow these links.
 @cindex minor mode for structure editing
 
 If you like the intuitive way the Org mode structure editing and list
-formatting works, you might want to use these commands in other modes
-like Text mode or Mail mode as well.  The minor mode Orgstruct mode
-makes this possible.  You can always toggle the mode with @kbd{M-x
-orgstruct-mode}.  To turn it on by default, for example in Mail mode,
-use
+formatting works, you might want to use these commands in other modes like
+Text mode or Mail mode as well.  The minor mode @code{orgstruct-mode} makes
+this possible.   Toggle the mode with @kbd{M-x orgstruct-mode}, or
+turn it on by default, for example in Mail mode, with one of:
 
 @lisp
 (add-hook 'mail-mode-hook 'turn-on-orgstruct)
+(add-hook 'mail-mode-hook 'turn-on-orgstruct++)
 @end lisp
 
-When this mode is active and the cursor is on a line that looks to
-Org like a headline of the first line of a list item, most
-structure editing commands will work, even if the same keys normally
-have different functionality in the major mode you are using.  If the
-cursor is not in one of those special lines, Orgstruct mode lurks
-silently in the shadow.
+When this mode is active and the cursor is on a line that looks to Org like a
+headline of the first line of a list item, most structure editing commands
+will work, even if the same keys normally have different functionality in the
+major mode you are using.  If the cursor is not in one of those special
+lines, Orgstruct mode lurks silently in the shadow.  When you use
+@code{orgstruct++-mode}, Org will also export indentation and autofill
+settings into that mode, and detect item context after the first line of an
+item.
 
 @node Tables, Hyperlinks, Document Structure, Top
 @chapter Tables
