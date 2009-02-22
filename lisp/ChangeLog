@@ -3,6 +3,8 @@
 	* org-export-latex.el (org-export-as-latex)
 	(org-export-latex-first-lines): Avoid modification flag when
 	adding or removing text properties.
+	(org-export-latex-fontify): Catch error when org-emph-alist has
+	entries that are not defined for LaTeX export.
 
 	* org.el (orgstruct++-mode): New function.
 	(turn-on-orgstruct++): Call `orgstruct++-mode'.
