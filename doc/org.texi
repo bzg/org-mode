@@ -1397,12 +1397,13 @@ look like this:
    After the drawer.
 @end example
 
-Visibility cycling (@pxref{Visibility cycling}) on the headline will
-hide and show the entry, but keep the drawer collapsed to a single line.
-In order to look inside the drawer, you need to move the cursor to the
-drawer line and press @key{TAB} there.  Org mode uses a drawer for
-storing properties (@pxref{Properties and Columns}), and another one for
-storing clock times (@pxref{Clocking work time}).
+Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
+show the entry, but keep the drawer collapsed to a single line.  In order to
+look inside the drawer, you need to move the cursor to the drawer line and
+press @key{TAB} there.  Org mode uses the @code{PROPERTIES} drawer for
+storing properties (@pxref{Properties and Columns}), and you can also arrange
+for state change notes @pxref{Tracking TODO state changes} and clock times
+(@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.
 
 @node Footnotes, Orgstruct mode, Drawers, Document Structure
 @section Footnotes
