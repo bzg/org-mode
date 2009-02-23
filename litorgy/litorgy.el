@@ -95,14 +95,20 @@ don't dump results into buffer."
     (setq result (funcall cmd body params))
     (unless arg (litorgy-insert-result result (assoc :replace params)))))
 
+(defun litorgy-eval-buffer (&optional arg)
+  "Replace EVAL snippets in the entire buffer."
+  (interactive "P")
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward litorgy-regexp nil t)
+      (litorgy-eval-src-block arg))))
+
 (defun litorgy-eval-subtree (&optional arg)
   "Replace EVAL snippets in the entire subtree."
   (interactive "P")
   (save-excursion
     (org-narrow-to-subtree)
-    (goto-char (point-min))
-    (while (re-search-forward litorgy-regexp nil t)
-      (litorgy-eval-src-block arg))
+    (litorgy-eval-buffer)
     (widen)))
 
 (defun litorgy-get-src-block-info ()
