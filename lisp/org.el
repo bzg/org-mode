@@ -928,6 +928,9 @@ links in Org-mode buffers can have an optional tag after a double colon, e.g.
 
      [[linkkey:tag][description]]
 
+The 'linkkey' must be a word word, starting with a letter, followed
+by letters, numbers, '-' or '_'.
+
 If REPLACE is a string, the tag will simply be appended to create the link.
 If the string contains \"%s\", the tag will be inserted there.  Alternatively,
 the placeholder \"%h\" will cause a url-encoded version of the tag to

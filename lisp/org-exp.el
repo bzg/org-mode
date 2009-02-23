@@ -1043,6 +1043,14 @@ modified) list.")
 	  (setq p (plist-put p :latex-header-extra (substring latex-header 1))))
 	(when options
 	  (setq p (org-export-add-options-to-plist p options)))
+	;; Add macro definitions
+	(goto-char (point-min))
+	(while (re-search-forward
+		"^#\\+macro:[ \t]+\\([-a-zA-Z0-9_]+\\)[ \t]+\\(.*?[ \t]*$\\)"
+		nil t)
+	  (setq p (plist-put p (intern (concat ":macro-"
+					       (downcase (match-string 1))))
+			     (match-string 2))))
 	p))))
 
 (defun org-export-add-options-to-plist (p options)
@@ -1524,6 +1532,10 @@ on this string to produce the exported version."
 
       ;; Call the hook
       (run-hooks 'org-export-preprocess-hook)
+
+      ;; Process the macros
+      (org-export-preprocess-apply-macros)
+      (run-hooks 'org-export-preprocess-after-macros-hook)
 
       (untabify (point-min) (point-max))
 
@@ -2269,8 +2281,20 @@ TYPE must be a string, any of:
 	  (pop roman)))
       res)))
 
-(org-number-to-roman 1961)
+;;; Macros
 
+(defun org-export-preprocess-apply-macros ()
+  "Replace macro references."
+  (goto-char (point-min))
+  (let (sy val)
+    (while (re-search-forward "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)}}}" nil t)
+      (setq key (downcase (match-string 1)))
+      (when (setq val (or (plist-get org-export-opt-plist
+				     (intern (concat ":macro-" key)))
+			  (plist-get org-export-opt-plist
+				     (intern (concat ":" key)))))
+	(and (stringp val)
+	     (replace-match val t t))))))
 
 ;;; Include files
 
@@ -2548,6 +2572,9 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 (defvar org-levels-open nil) ; dynamically scoped parameter
 (defvar org-ascii-current-indentation nil) ; For communication
 
+(defvar org-export-opt-plist nil
+  "Contains the current option plist.")
+
 ;;;###autoload
 (defun org-export-as-ascii (arg)
   "Export the outline as a pretty ASCII file.
@@ -2573,9 +2600,10 @@ underlined headlines.  The default is 3."
 			     (+ (funcall outline-level)
 				(if org-odd-levels-only 1 0)))
 			 0))
-	 (opt-plist (if subtree-p
-			(org-export-add-subtree-options opt-plist rbeg)
-		      opt-plist))
+	 (opt-plist (setq org-export-opt-plist
+			  (if subtree-p
+			      (org-export-add-subtree-options opt-plist rbeg)
+			    opt-plist)))
 	 (custom-times org-display-custom-times)
 	 (org-ascii-current-indentation '(0 . 0))
 	 (level 0) line txt
@@ -3249,9 +3277,10 @@ PUB-DIR is set, use this as the publishing directory."
 			     (+ (funcall outline-level)
 				(if org-odd-levels-only 1 0)))
 			 0))
-	 (opt-plist (if subtree-p
-			(org-export-add-subtree-options opt-plist rbeg)
-		      opt-plist))
+	 (opt-plist (setq org-export-opt-plist
+			  (if subtree-p
+			      (org-export-add-subtree-options opt-plist rbeg)
+			    opt-plist)))
 	 ;; The following two are dynamically scoped into other
 	 ;; routines below.
 	 (org-current-export-dir

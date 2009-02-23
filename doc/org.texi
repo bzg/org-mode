@@ -315,6 +315,7 @@ Markup rules
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
+* Macro replacement::           
 
 HTML export
 
@@ -372,7 +373,7 @@ Interaction with other packages
 
 Hacking
 
-* Hooks::                       How to reach into Org's internals
+* Hooks::                       Who to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
 * Context-sensitive commands::  How to add functioality to such commands
@@ -7580,6 +7581,7 @@ markup rule used in an Org mode buffer.
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
+* Macro replacement::           Global replacement of place holdes
 @end menu
 
 @node Document title, Headings and sections, Markup rules, Markup rules
@@ -7926,7 +7928,7 @@ different lengths or a compact set of dots.
 A line consisting of only dashes, and at least 5 of them, will be
 exported as a horizontal line (@samp{<hr/>} in HTML).
 
-@node Comment lines,  , Horizontal rules, Markup rules
+@node Comment lines, Macro replacement, Horizontal rules, Markup rules
 @subheading Comment lines
 @cindex comment lines
 @cindex exporting, not
@@ -7941,6 +7943,20 @@ never be exported.  Also entire subtrees starting with the word
 @item C-c ;
 Toggle the COMMENT keyword at the beginning of an entry.
 @end table
+
+@node Macro replacement,  , Comment lines, Markup rules
+@subheading Macro replacement
+
+You can define text snippets with
+
+@example
+#+MACRO: name   replacement text
+@end example
+
+@noindent which can be referenced anywhere in the document (even in
+code examples) with @code{@{@{@{name@}@}@}}.  In addition to defined macros,
+@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc will reference
+information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
 
 @node Selective export, Export options, Markup rules, Exporting
 @section Selective export

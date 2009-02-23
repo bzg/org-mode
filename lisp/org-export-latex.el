@@ -404,9 +404,10 @@ when PUB-DIR is set, use this as the publishing directory."
 	      (goto-char rbeg)
 	      (and (org-at-heading-p)
 		   (>= (org-end-of-subtree t t) rend)))))
-	 (opt-plist (if subtree-p
-			(org-export-add-subtree-options opt-plist rbeg)
-		      opt-plist))
+	 (opt-plist (setq org-export-opt-plist
+			  (if subtree-p
+			      (org-export-add-subtree-options opt-plist rbeg)
+			    opt-plist)))
 	 ;; Make sure the variable contains the updated values.
 	 (org-export-latex-options-plist opt-plist)
 	 (title (or (and subtree-p (org-export-get-title-from-subtree))
@@ -416,8 +417,6 @@ when PUB-DIR is set, use this as the publishing directory."
 			 (org-export-grab-title-from-buffer))
 		    (file-name-sans-extension
 		     (file-name-nondirectory buffer-file-name))))
-	 (option-defs (and org-export-latex-import-inbuffer-stuff
-			   (org-export-latex-collect-header-macros title)))
 	 (filename (concat (file-name-as-directory
 			    (or pub-dir
 				(org-export-directory :LaTeX ext-plist)))
@@ -438,7 +437,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		      (t (get-buffer-create to-buffer)))
 		   (find-file-noselect filename)))
 	 (odd org-odd-levels-only)
-	 (header (org-export-latex-make-header title opt-plist option-defs))
+	 (header (org-export-latex-make-header title opt-plist))
 	 (skip (cond (subtree-p nil)
 		     (region-p nil)
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
@@ -725,7 +724,7 @@ LEVEL indicates the default depth for export."
 		  (sec-depth (length org-export-latex-sectioning)))
 	      (if (> hl-levels sec-depth) sec-depth hl-levels)))))
 
-(defun org-export-latex-make-header (title opt-plist &optional opt-defs)
+(defun org-export-latex-make-header (title opt-plist)
   "Make the LaTeX header and return it as a string.
 TITLE is the current title from the buffer or region.
 OPT-PLIST is the options plist for current buffer."
@@ -746,7 +745,6 @@ OPT-PLIST is the options plist for current buffer."
 			      (car p) (cadr p))))
 		  org-export-latex-packages-alist "\n"))
      ;; insert additional commands in the header
-     opt-defs
      (plist-get opt-plist :latex-header-extra)
      org-export-latex-append-header
      ;; insert the title
@@ -808,31 +806,10 @@ If BEG is non-nil, the is the beginning of he region."
 	 (add-text-properties pt (max pt (1- end))
 			      '(:org-license-to-kill t)))))))
 
-(defun org-export-latex-collect-header-macros (&optional title)
-  "Find the various definitions in #+... lines and define TeX macros for them."
-  (let ((re (org-make-options-regexp
-	     '("TITLE" "AUTHOR" "DATE" "EMAIL" "OPTIONS" "LANGUAGE"
-	       "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
-	       "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")))
-	out key val a)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char (point-min))
-	(while (re-search-forward re nil t)
-	  (setq key (upcase (match-string 1))
-		val (match-string 2))
-	  (if (and title (equal key "TITLE"))
-	      (setq val title))
-	  (while (string-match "_" key)
-	    (setq key (replace-match "" t t key)))
-	  (if (setq a (assoc key out))
-	      (setcdr a (concat (cdr a) "\n" val))
-	    (push (cons key val) out))))
-      (mapconcat
-       (lambda (x) (concat "\\def\\org" (car x) "{" (cdr x) "}"))
-       out
-       "\n"))))
+(defvar org-export-latex-header-defs nil
+  "The header definitions that might be used in the LaTeX body.")
+(defvar org-export-latex-header-defs-re nil
+  "The header definitions that might be used in the LaTeX body.")
 
 (defun org-export-latex-content (content &optional exclude-list)
   "Convert CONTENT string to LaTeX.
