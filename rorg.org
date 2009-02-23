@@ -24,6 +24,7 @@ The main objectives of this project are...
 - [[* evaluation of embedded source code][evaluation of embedded source code]]
   - [[* execution on demand and on export][execution on demand and on export]]
   - [[* source blocks][source blocks]]
+  - [[* header arguments][header arguments]]
   - [[* inline source evaluation][inline source evaluation]]
   - [[* included source file evaluation][included source file evaluation]] ?? maybe
   - [[* caching of evaluation][caching of evaluation]]
@@ -116,6 +117,14 @@ The main objectives of this project are...
 
 *** source blocks
 (see [[* Special editing and evaluation of source code][Special editing and evaluation of source code]])
+
+*** header arguments
+(see [[* block headers/parameters][block headers/parameters]])
+
+There are going to be many cases where we want to use header arguments
+to change the evaluation options of source code, to pass external
+information to a block of source code and control the inclusion of
+evaluation results.
 
 *** inline source evaluation
 *** included source file evaluation
@@ -269,7 +278,6 @@ plus a table reference within that org file. Thus maybe something like
   (R-obj-name-2 . (:tblref tbl-name-or-id-2 :file file-2)))
 #+end_src emacs-lisp
 
-
 *** source-target pairs
 
     The following can be used for special considerations based on
@@ -286,7 +294,6 @@ plus a table reference within that org file. Thus maybe something like
 **** org table from org table
 **** org properties from source block
 **** org properties from org table
-     
      
 ** export
    once the previous objectives are met export should be fairly simple.
@@ -450,6 +457,17 @@ should include (but should certainly not be limited to)
 - file :: names of file to which graphical/textual/numerical/tabular output
   should be written.  Do we need this, or should this be controlled
   through the source code itself?
+- results :: indication of where the results should be placed, maybe
+             the following values...
+  - append :: *default* meaning just append to the current buffer
+              immediately following the current source block
+  - replace :: like append, but replace any results currently there
+  - file :: save the results in a new file, and place a link to the
+            file into the current buffer immediately following the
+            source code block
+  - table :: save the results into a table, maybe use a table id:range
+             to identify which table and where therein
+  - nil :: meaning just discard the results
 - not sure of a good name here :: flags for when/if the block should
      be evaluated (on export etc...)
 - again can't thing of a concise name :: flags for how the results of
@@ -458,6 +476,8 @@ should include (but should certainly not be limited to)
            global scope
 - flags specific to the language of the source block
 - etc...
+
+I think fleshing out this list is an important next step.
 
 ** Interaction with the R process
 
@@ -523,7 +543,7 @@ to evaluate the following blocks of code by pressing =\C-c\C-c= on the
 header lines.  *Note*: your version of org-mode must be at least 6.23
 or later.
 
-#+begin_src sh
+#+begin_src sh  :replace t
 date
 #+end_src
 
@@ -579,7 +599,6 @@ code blocks of simple scripting languages.  It shouldn't be too hard
 to use for evaluating R code files.
 
 See the [[* litorgy.el beginning functionality][Sandbox]] for evaluable examples.
-
 
 
 * Buffer Dictionary

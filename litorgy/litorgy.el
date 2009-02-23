@@ -1,4 +1,4 @@
-;;; litorgy.el --- literate programing in org-mode 
+;;; litorgy.el --- literate programing in org-mode
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -44,12 +44,6 @@ so then run `litorgy-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'litorgy-execute-src-block-maybe)
 
-(defcustom litorgy-example-size-cutoff 10
-  "Number at lines at which to switch from using the ': '
-org-mode quote sytax to using a '#+BEGIN_EXAMPLE' block"
-  :group 'litorgy
-  :type 'integer)
-
 (defvar litorgy-src-block-regexp nil
   "Regexp used to test when inside of a litorgical src-block")
 
@@ -65,7 +59,7 @@ org-mode quote sytax to using a '#+BEGIN_EXAMPLE' block"
 (defcustom litorgy-interpreters '()
   "Interpreters allows for evaluation tags.
 This is a list of program names (as strings) that can evaluate code and
-insert the output into an Org-mode buffer.  Valid choices are 
+insert the output into an Org-mode buffer.  Valid choices are
 
 R          Evaluate R code
 emacs-lisp Evaluate Emacs Lisp code and display the result
@@ -90,7 +84,7 @@ into the buffer immediately following the block.  Results are
 commented by `litorgy-make-region-example'.  With optional prefix
 don't dump results into buffer."
   (interactive "P")
-  (let* ((info (litorgy-get-current-src-block-info))
+  (let* ((info (litorgy-get-src-block-info))
          (lang (first info))
          (body (second info))
          (params (third info))
@@ -99,7 +93,7 @@ don't dump results into buffer."
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
-    (unless arg (litorgy-insert-result result))))
+    (unless arg (litorgy-insert-result result (assoc :replace params)))))
 
 (defun litorgy-eval-subtree (&optional arg)
   "Replace EVAL snippets in the entire subtree."
@@ -111,7 +105,7 @@ don't dump results into buffer."
       (litorgy-eval-src-block arg))
     (widen)))
 
-(defun litorgy-get-current-src-block-info ()
+(defun litorgy-get-src-block-info ()
   "Return the information of the current source block (the point
 should be on the '#+begin_src' line) as a list of the following
 form.  (language body header-arguments-alist)"
@@ -122,25 +116,44 @@ form.  (language body header-arguments-alist)"
   (let ((lang (litorgy-clean-text-properties (match-string 1)))
         (args (litorgy-clean-text-properties (or (match-string 3) "")))
         (body (litorgy-clean-text-properties (match-string 4))))
-    (list lang body
-          (mapc (lambda (arg)
-                  (if (string-match "\\([^ :]+\\):\\([^ :]+\\)" arg)
-                      (cons (match-string 1 arg) (match-string 2 arg))))
-                (split-string args)))))
+    (list lang body (litorgy-parse-header-arguments args))))
 
-(defun litorgy-insert-result (result)
+(defun litorgy-parse-header-arguments (arg-string)
+  "Parse a string of header arguments returning an alist."
+  (delq nil
+        (mapcar
+         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]*\\)" arg)
+                      (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
+         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:"))))
+
+(defun litorgy-insert-result (result &optional replace)
+  "Insert RESULT into the current buffer after the end of the
+current source block.  With optional argument REPLACE replace any
+existing results currently located after the source block."
+  (if replace (litorgy-remove-result))
   (save-excursion
     (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
     (let ((beg (point))
           (end (progn (insert result)
                       (point))))
-      (message (format "from %S %S" beg end))
       (litorgy-make-region-example beg end))))
 
+(defun litorgy-remove-result ()
+  "Remove the result following the current source block"
+  (save-excursion
+    (re-search-forward "^#\\+end_src" nil t)
+    (forward-char 1)
+    (delete-region (point)
+                   (save-excursion (forward-line 1)
+                                   (while (if (looking-at ": ")
+                                              (progn (while (looking-at ": ")
+                                                       (forward-line 1)) t))
+                                     (forward-line 1))
+                                   (forward-line -1)
+                                   (point)))))
+
 (defun litorgy-make-region-example (beg end)
-  "Comment out region using either the '^:' or the BEGIN_EXAMPLE
-syntax based on the size of the region as compared to
-`litorgy-example-size-cutoff'."
+  "Comment out region using the ': ' org example quote."
   (interactive "*r")
   (let ((size (abs (- (line-number-at-pos end)
 		      (line-number-at-pos beg)))))
@@ -148,14 +161,10 @@ syntax based on the size of the region as compared to
 	(let ((result (buffer-substring beg end)))
 	  (delete-region beg end)
 	  (insert (concat ": " result)))
-      (if (<= size litorgy-example-size-cutoff)
-	  (save-excursion
+      (save-excursion
 	    (goto-char beg)
 	    (dotimes (n size)
-	      (move-beginning-of-line 1) (insert ": ") (forward-line 1)))
-	(let ((result (buffer-substring beg end)))
-	  (delete-region beg end)
-	  (insert (concat "#+BEGIN_EXAMPLE\n" result "#+END_EXAMPLE\n")))))))  
+	      (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
 (defun litorgy-clean-text-properties (text)
   "Strip all properties from text return."
