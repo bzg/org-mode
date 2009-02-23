@@ -529,13 +529,48 @@ argument?
 With org-mode version at least 6.23, see the documentation for
 [[info:org:Context-sensitive%20commands][info:org:Context-sensitive commands]].
 
+** free explicit variables
+Maybe we should have some idea of variables independent of any
+particular type of source code or source block.  These could be
+variables that have a value inside of the scope of the org-mode file,
+and they could be used as a transport mechanism for information
+transfer between org-tables, org-lists, and different source-blocks.
+
+Each type of source code (and org-mode types like tables, lists,
+etc...) would need to implement functions for converting different
+types of data to and from these variables (which would be elisp
+variables).
+
+So for example say we want to read the values from a table into an R
+block, perform some calculations, and then write the results back into
+the table.  We could
+1) assign the table to a variable
+   - the table would be converted into a lisp vector (list of lists)
+   - the vector would be saved in the variable
+2) an R source block would reference the variable
+   - the variable would be instantiated into an R variable (through
+     mechanisms mentioned [[* Dan: thinking aloud re: referencing data from R][elsewhere]])
+   - the R code is executed, and the value of the variable *inside of
+     R* is updated
+   - when the R block finished the value of the variable *globally in
+     the org buffer* would be updated
+3) optionally the global value of the variable would be converted back
+   into an org-mode table and would be used to overwrite the existing
+   table.
+
+What do you think?
+
+This might not be too different from what we were already talking
+about, but I think the introduction of the idea of having variables
+existing independently of any tables or source code blocks is novel
+and probably has some advantages (and probably shortfalls).
+
 
 * Tasks
 
 
 * Sandbox
 This is a place for code examples
-
 
 ** litorgy.el beginning functionality
 After evaluating litorgy.el and litorgy-script.el, you should be able
@@ -554,6 +589,15 @@ puts Time.now
 #+begin_src python
 print "Hello world!"
 #+end_src
+
+
+** free variables
+
+First assign the variable with some sort of interpreted line
+- this is independent of any particular type of source code
+- this could use references to table ranges
+
+#+
 
 
 * COMMENT Commentary
@@ -599,6 +643,13 @@ code blocks of simple scripting languages.  It shouldn't be too hard
 to use for evaluating R code files.
 
 See the [[* litorgy.el beginning functionality][Sandbox]] for evaluable examples.
+
+** Eric <2009-02-23 Mon 15:12>
+While thinking about how to implement the transfer of data between
+source blocks and the containing org-mode file, I decided it *might*
+be useful to explicitly support the existence of variables which exist
+independent of source blocks or tables.  I'd appreciate any
+feedback... (see [[free explicit variables][free explicit variables]])
 
 
 * Buffer Dictionary
