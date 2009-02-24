@@ -3554,7 +3554,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "<pre class=\"example\">\n"))
 	    (insert (org-html-protect (match-string 3 line)) "\n")
 	    (when (or (not lines)
-		      (not (string-match "^[ \t]*\\(:.*\\)"
+		      (not (string-match "^[ \t]*:\\(\\([ \t]\\|$\\)\\(.*\\)\\)"
 					 (car lines))))
 	      (setq infixed nil)
 	      (insert "</pre>\n"))
