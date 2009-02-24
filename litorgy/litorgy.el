@@ -149,6 +149,11 @@ form.  (language body header-arguments-alist)"
 current source block.  With optional argument REPLACE replace any
 existing results currently located after the source block."
   (if replace (litorgy-remove-result))
+  (unless (or (string-equal (substring result -1)
+                            "\n")
+              (string-equal (substring result -1)
+                            "\r"))
+    (setq result (concat result "\n")))
   (save-excursion
     (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
     (let ((beg (point))
