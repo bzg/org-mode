@@ -87,6 +87,8 @@ The main objectives of this project are...
     
      AIUI The following can all be viewed as implementations of
      org-eval-buffer for R code:
+
+     (see this question again posed in [[file:litorgy/litorgy-R.el::Maybe%20the%20following%20be%20replaced%20with%20a%20method%20using%20ess%20execute][litorgy-R.el]])
     
 ***** org-eval-light
       This is the beginnings of a general evaluation mechanism, that
@@ -588,6 +590,15 @@ puts Time.now
 
 #+begin_src python
 print "Hello world!"
+#+end_src
+
+
+** litorgy-R
+
+#+begin_src R :replace t
+a <- 9
+b <- 18
+a + b
 #+end_src
 
 

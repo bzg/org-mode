@@ -56,6 +56,13 @@ so then run `litorgy-execute-src-block'."
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src")))
 
+(defun litorgy-add-interpreter (interpreter)
+  "Add INTERPRETER to `litorgy-interpreters' and update
+`litorgy-src-block-regexp' appropriately."
+  (unless (member interpreter litorgy-interpreters)
+    (setq litorgy-interpreters (cons interpreter litorgy-interpreters))
+    (litorgy-set-interpreters 'litorgy-interpreters litorgy-interpreters)))
+
 (defcustom litorgy-interpreters '()
   "Interpreters allows for evaluation tags.
 This is a list of program names (as strings) that can evaluate code and
@@ -66,7 +73,12 @@ emacs-lisp Evaluate Emacs Lisp code and display the result
 sh         Pass command to the shell and display the result
 perl       The perl interpreter
 python     The python interpreter
-ruby       The ruby interpreter"
+ruby       The ruby interpreter
+
+The source block regexp `litorgy-src-block-regexp' is updated
+when a new interpreter is added to this list through the
+customize interface.  To add interpreters to this variable from
+lisp code use the `litorgy-add-interpreter' function."
   :group 'litorgy
   :set 'litorgy-set-interpreters
   :type '(set :greedy t
