@@ -36,11 +36,12 @@
 (defun litorgy-execute:R (body params)
   "Execute a block of R code with litorgy.  This function is
 called by `litorgy-execute-src-block'."
-  (let (results)
-    (message "executing R code block...")
-    (litorgy-initiate-R-buffer)
-    (mapc (lambda (line) (litorgy-R-input-command line)) (butlast (split-string body "[\r\n]")))
-    (litorgy-R-last-output)))
+  (save-window-excursion
+    (let (results)
+      (message "executing R code block...")
+      (litorgy-initiate-R-buffer)
+      (mapc (lambda (line) (litorgy-R-input-command line)) (butlast (split-string body "[\r\n]")))
+      (litorgy-R-last-output))))
 
 ;; Maybe the following be replaced with a method using `ess-execute',
 ;; I went with the following functions because I wrote them and they
