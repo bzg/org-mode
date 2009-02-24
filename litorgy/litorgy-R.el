@@ -40,14 +40,7 @@ called by `litorgy-execute-src-block'."
     (message "executing R code block...")
     (litorgy-initiate-R-buffer)
     (mapc (lambda (line) (litorgy-R-input-command line)) (butlast (split-string body "[\r\n]")))
-    (litorgy-R-last-output)
-    ;; ;; using litorgy-R-region-to-string
-    ;; (with-temp-buffer
-    ;;   (insert body)
-    ;;   (setq results (litorgy-R-region-to-string (point-min) (point-max)))
-    ;;   (message "finished executing R code block")
-    ;;   results)
-    ))
+    (litorgy-R-last-output)))
 
 ;; Maybe the following be replaced with a method using `ess-execute',
 ;; I went with the following functions because I wrote them and they
@@ -81,13 +74,6 @@ called by `litorgy-execute-src-block'."
       (insert command)
       (comint-send-input)
       (litorgy-R-wait-for-output))))
-
-(defun litorgy-R-region-to-string (start end)
-  "Send a region to R, and return the results as a string."
-  (interactive "r")
-  (comint-send-region (get-buffer-process litorgy-R-buffer) start end)
-  (litorgy-R-wait-for-output)
-  (litorgy-R-last-output))
 
 (defun litorgy-R-wait-for-output ()
   "Wait until output arrives"
