@@ -580,6 +580,9 @@ to evaluate the following blocks of code by pressing =\C-c\C-c= on the
 header lines.  *Note*: your version of org-mode must be at least 6.23
 or later.
 
+To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-script.el][litorgy-script.el]] and
+evaluate them with =M-x eval-buffer=
+
 #+begin_src sh  :replace t
 date
 #+end_src
@@ -594,6 +597,8 @@ print "Hello world!"
 
 
 ** litorgy-R
+To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-R.el][litorgy-R.el]] and evaluate
+them with =M-x eval-buffer=
 
 #+begin_src R :replace t
 a <- 9
@@ -608,7 +613,6 @@ First assign the variable with some sort of interpreted line
 - this is independent of any particular type of source code
 - this could use references to table ranges
 
-#+
 
 
 * COMMENT Commentary
@@ -661,6 +665,12 @@ source blocks and the containing org-mode file, I decided it *might*
 be useful to explicitly support the existence of variables which exist
 independent of source blocks or tables.  I'd appreciate any
 feedback... (see [[free explicit variables][free explicit variables]])
+
+** Eric <2009-02-23 Mon 17:53>
+So as I start populating this file with source code blocks I figure I
+should share this... I don't know if you guys use [[http://code.google.com/p/smart-snippet/][yasnippet]] at all,
+but if you do you might find this [[file:block][block-snippet]] org-mode snippet
+useful (I use it all the time).
 
 
 * Buffer Dictionary
