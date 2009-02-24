@@ -389,8 +389,13 @@ setting was changed."
 	(save-excursion
 	  (unless (org-up-heading-safe)
 	    (error "Chosing is only supported between siblings in a tree, not on top level"))
-	  (save-restriction
-	    (org-map-entries fn nil 'tree)))))
+	  (let
+ 	      ((level (org-reduced-level (org-outline-level))))
+	    (save-restriction
+	      (org-map-entries 
+	       fn
+	       (format "LEVEL=%d" level)
+	       'tree))))))
 
 ;;;_  . org-choose-get-highest-mark-index
 

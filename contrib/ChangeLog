@@ -1,3 +1,8 @@
+2009-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-choose.el (org-choose-get-fn-map-group): Only check
+	true siblings.
+
 2009-02-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-R.el: New file.
