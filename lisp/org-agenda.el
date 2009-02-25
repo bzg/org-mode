@@ -749,6 +749,17 @@ current display in the agenda."
   :tag "Org Agenda Time Grid"
   :group 'org-agenda)
 
+(defcustom org-agenda-search-headline-for-time t
+  "Non-nil means, search headline for a time-of-day.
+If the headline contains a time-of-day in one format or another, it will
+be used to sort the entry into the time sequence of items for a day.
+Some people have time stamps in the headline that refer to the creation
+time or so, and then this produces an unwanted side effect.  If this is
+the case for your, use this variable to turn off searching the headline
+for a time."
+  :group 'org-agenda-time-grid
+  :type 'boolean)
+
 (defcustom org-agenda-use-time-grid t
   "Non-nil means, show a time grid in the agenda schedule.
 A time grid is a set of lines for specific times (like every two hours between
@@ -3890,7 +3901,9 @@ Any match of REMOVE-RE will be removed from TXT."
 	   ;; time, tag, effort are needed for the eval of the prefix format
 	   (tag (if tags (nth (1- (length tags)) tags) ""))
 	   time effort neffort
-	   (ts (if dotime (concat (if (stringp dotime) dotime "") txt)))
+	   (ts (if dotime (concat
+			   (if (stringp dotime) dotime "")
+			   (and org-agenda-search-headline-for-time txt))))
 	   (time-of-day (and dotime (org-get-time-of-day ts)))
 	   stamp plain s0 s1 s2 t1 t2 rtn srp
 	   duration)

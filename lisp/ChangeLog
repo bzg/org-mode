@@ -1,6 +1,9 @@
 2009-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda): Make prefix arg optional.
+	(org-agenda-search-headline-for-time): New option.
+	(org-format-agenda-item): Honor
+	`org-agenda-search-headline-for-time'.
 
 	* org-table.el (orgtbl-self-insert-command): Cluster undo for 20
 	characters.
