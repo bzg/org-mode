@@ -13250,8 +13250,13 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
 
+(define-key org-mode-map "\C-c\C-xr" 'org-reload)
+
 (when (featurep 'xemacs)
   (org-defkey org-mode-map 'button3   'popup-mode-menu))
+
+
+(defvar org-self-insert-command-undo-counter 0)
 
 (defvar org-table-auto-blank-field) ; defined in org-table.el
 (defun org-self-insert-command (N)
@@ -13259,20 +13264,21 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
-  (if (and (org-table-p)
-	   (progn
-	     ;; check if we blank the field, and if that triggers align
-	     (and (featurep 'org-table) org-table-auto-blank-field
-		  (member last-command
-			  '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c))
-		  (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
-		      ;; got extra space, this field does not determine column width
-		      (let (org-table-may-need-update) (org-table-blank-field))
-		    ;; no extra space, this field may determine column width
-		    (org-table-blank-field)))
-	     t)
-	   (eq N 1)
-	   (looking-at "[^|\n]*  |"))
+  (if (and
+       (org-table-p)
+       (progn
+	 ;; check if we blank the field, and if that triggers align
+	 (and (featurep 'org-table) org-table-auto-blank-field
+	      (member last-command
+		      '(org-cycle org-return org-shifttab org-ctrl-c-ctrl-c))
+	      (if (or (equal (char-after) ?\ ) (looking-at "[^|\n]*  |"))
+		  ;; got extra space, this field does not determine column width
+		  (let (org-table-may-need-update) (org-table-blank-field))
+		;; no extra space, this field may determine column width
+		(org-table-blank-field)))
+	 t)
+       (eq N 1)
+       (looking-at "[^|\n]*  |"))
       (let (org-table-may-need-update)
 	(goto-char (1- (match-end 0)))
 	(delete-backward-char 1)
@@ -14265,7 +14271,10 @@ See the individual commands for more information."
      ["Expand This Menu" org-create-customize-menu
       (fboundp 'customize-menu-create)])
     "--"
-    ["Refresh setup" org-mode-restart t]
+    ("Refresh/Reload"
+     ["Refresh setup current buffer" org-mode-restart t]
+     ["Reload Org (after update)" org-reload t]
+     ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x r"])
     ))
 
 (defun org-info (&optional node)

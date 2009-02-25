@@ -637,6 +637,8 @@ To do this, use
 @example
 C-u M-x org-reload RET
 @end example
+or select @code{Org -> Refresh/Reload -> Reload Org uncompiled} from the
+menu.
 @item
 Go to the @code{Options} menu and select @code{Enter Debugger on Error}
 (XEmacs has this option in the @code{Troubleshooting} sub-menu).
