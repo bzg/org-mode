@@ -1444,7 +1444,7 @@ that have been changed along."
 (defvar org-agenda-overriding-restriction nil)
 
 ;;;###autoload
-(defun org-agenda (arg &optional keys restriction)
+(defun org-agenda (&optional arg keys restriction)
   "Dispatch agenda commands to collect entries to the agenda buffer.
 Prompts for a command to execute.  Any prefix arg will be passed
 on to the selected command.  The default selections are:

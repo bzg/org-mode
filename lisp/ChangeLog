@@ -1,5 +1,7 @@
 2009-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda): Make prefix arg optional.
+
 	* org-table.el (orgtbl-self-insert-command): Cluster undo for 20
 	characters.
 
