@@ -894,6 +894,8 @@ or if they are only using it locally."
   "Should default postamble be inserted?  Set by publishing functions.")
 (defvar org-current-export-file nil) ; dynamically scoped parameter
 (defvar org-current-export-dir nil) ; dynamically scoped parameter
+(defvar org-export-opt-plist nil
+  "Contains the current option plist.")
 
 (defconst org-export-plist-vars
   '((:link-up		      nil	  org-export-html-link-up)
@@ -2286,7 +2288,7 @@ TYPE must be a string, any of:
 (defun org-export-preprocess-apply-macros ()
   "Replace macro references."
   (goto-char (point-min))
-  (let (sy val)
+  (let (sy val key)
     (while (re-search-forward "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)}}}" nil t)
       (setq key (downcase (match-string 1)))
       (when (setq val (or (plist-get org-export-opt-plist
@@ -2571,9 +2573,6 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 (defvar org-min-level nil) ; dynamically scoped variable
 (defvar org-levels-open nil) ; dynamically scoped parameter
 (defvar org-ascii-current-indentation nil) ; For communication
-
-(defvar org-export-opt-plist nil
-  "Contains the current option plist.")
 
 ;;;###autoload
 (defun org-export-as-ascii (arg)
