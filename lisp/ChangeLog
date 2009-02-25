@@ -1,3 +1,12 @@
+2009-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (orgtbl-self-insert-command): Cluster undo for 20
+	characters.
+
+	* org.el (org-self-insert-cluster-for-undo): New option.
+	(org-self-insert-command): Cluster undo for 20 characters.
+	(org-self-insert-command-undo-counter): New variable.
+
 2009-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-as-html): Fix problem with closing colone

@@ -10745,6 +10745,9 @@ links, among other things.
 @i{Pete Phillips} helped during the development of the TAGS feature, and
 provided frequent feedback.
 @item
+@i{Martin Pohlack} provided the code snippet to bundle character insertion
+into bundles of 20 for undo.
+@item
 @i{T.V. Raman} reported bugs and suggested improvements.
 @item
 @i{Matthias Rempe} (Oelde) provided ideas, Windows support, and quality

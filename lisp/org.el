@@ -903,6 +903,14 @@ See also the variable `org-table-auto-blank-field'."
 	  (const :tag "on" t)
 	  (const :tag "on, optimized" optimized)))
 
+(defcustom org-self-insert-cluster-for-undo t
+  "Non-nil means cluster self-insert commands for undo when possible.
+If this is set, then, like in the Emacs command loop, 20 consequtive
+characters will be undone together.
+This is configurable, because there is some impact on typing performance."
+  :group 'org-table
+  :type 'boolean)
+
 (defcustom org-table-tab-recognizes-table.el t
   "Non-nil means, TAB will automatically notice a table.el table.
 When it sees such a table, it moves point into it and - if necessary -
@@ -13286,7 +13294,18 @@ overwritten, and the table is not marked as requiring realignment."
 	(self-insert-command N))
     (setq org-table-may-need-update t)
     (self-insert-command N)
-    (org-fix-tags-on-the-fly)))
+    (org-fix-tags-on-the-fly)
+    (if org-self-insert-cluster-for-undo
+	(if (not (eq last-command 'org-self-insert-command))
+	    (setq org-self-insert-command-undo-counter 1)
+	  (if (>= org-self-insert-command-undo-counter 20)
+	      (setq org-self-insert-command-undo-counter 1)
+	    (and (> org-self-insert-command-undo-counter 0)
+		 buffer-undo-list
+		 (not (cadr buffer-undo-list)) ; remove nil entry
+		 (setcdr buffer-undo-list (cddr buffer-undo-list)))
+	    (setq org-self-insert-command-undo-counter
+		  (1+ org-self-insert-command-undo-counter)))))))
 
 (defun org-fix-tags-on-the-fly ()
   (when (and (equal (char-after (point-at-bol)) ?*)

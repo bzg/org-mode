@@ -3568,14 +3568,27 @@ overwritten, and the table is not marked as requiring realignment."
 	(goto-char (match-beginning 0))
 	(self-insert-command N))
     (setq org-table-may-need-update t)
-    (let (orgtbl-mode a)
-      (call-interactively
-       (or (key-binding
-	    (or (and (listp function-key-map)
-		     (setq a (assoc last-input-event function-key-map))
-		     (cdr a))
-		(vector last-input-event)))
-	   'self-insert-command)))))
+    (let* (orgtbl-mode
+	   a
+	   (cmd (or (key-binding
+		     (or (and (listp function-key-map)
+			      (setq a (assoc last-input-event function-key-map))
+			      (cdr a))
+			 (vector last-input-event)))
+	   'self-insert-command)))
+      (call-interactively cmd)
+      (if (and org-self-insert-cluster-for-undo
+	       (eq cmd 'self-insert-command))
+	  (if (not (eq last-command 'orgtbl-self-insert-command))
+	      (setq org-self-insert-command-undo-counter 1)
+	    (if (>= org-self-insert-command-undo-counter 20)
+		(setq org-self-insert-command-undo-counter 1)
+	      (and (> org-self-insert-command-undo-counter 0)
+		   buffer-undo-list
+		   (not (cadr buffer-undo-list)) ; remove nil entry
+		   (setcdr buffer-undo-list (cddr buffer-undo-list)))
+	      (setq org-self-insert-command-undo-counter
+		    (1+ org-self-insert-command-undo-counter))))))))
 
 (defvar orgtbl-exp-regexp "^\\([-+]?[0-9][0-9.]*\\)[eE]\\([-+]?[0-9]+\\)$"
   "Regular expression matching exponentials as produced by calc.")
