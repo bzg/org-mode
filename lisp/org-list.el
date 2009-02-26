@@ -209,7 +209,9 @@ Return t when things worked, nil when we are not in an item."
 					descp))))
 	   (eow (save-excursion (beginning-of-line 1) (looking-at "[ \t]*")
 				(match-end 0)))
-	   (blank-a (cdr (assq 'plain-list-item org-blank-before-new-entry)))
+	   (blank-a (if org-empty-line-terminates-plain-lists
+			nil
+		      (cdr (assq 'plain-list-item org-blank-before-new-entry))))
 	   (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	   pos)
       (if descp (setq checkbox nil))

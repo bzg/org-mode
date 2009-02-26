@@ -1,5 +1,11 @@
 2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-insert-item): Only consider insert empty lines
+	is `org-empty-line-terminates-plain-lists' is not nil.
+
+	* org.el (org-blank-before-new-entry): Mention the dependence on
+	`org-empty-line-terminates-plain-lists' in the docstring.
+
 	* org-publish.el (org-publish-get-project-from-filename): New
 	optional argument UP.  Only find the top project if UP is set.
 	(org-publish-current-project): Find the top encloding project.
