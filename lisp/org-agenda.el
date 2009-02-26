@@ -109,6 +109,20 @@ This is a good place to set options for ps-print and for htmlize."
 	   (variable)
 	   (sexp :tag "Value"))))
 
+(defcustom org-agenda-before-write-hook nil
+  "Hook run in temporary buffer before writing it to an export file.
+A useful function would be `org-agenda-add-entry-text'."
+  :group 'org-agenda-export
+  :type 'hook
+  :options '(org-agenda-add-entry-text))
+
+(defcustom org-agenda-add-entry-text-maxlines 10
+  "Maximum number of entry text lines to be added to agenda.
+This is only relevant when `org-agenda-add-entry-text'
+has beed added to `org-agenda-before-write-hook'."
+  :group 'org-agenda
+  :type 'integer)
+
 (defcustom org-agenda-export-html-style ""
   "The style specification for exported HTML Agenda files.
 If this variable contains a string, it will replace the default <style>
@@ -1995,6 +2009,7 @@ higher priority settings."
 	       (delete-region
 		beg (or (next-single-property-change beg 'org-filtered)
 			(point-max))))
+	     (run-hooks 'org-agenda-before-write-hook)
 	     (cond
 	      ((string-match "\\.html?\\'" file)
 	       (set-buffer (htmlize-buffer (current-buffer)))
@@ -2057,6 +2072,73 @@ VALUE defaults to t."
       (delete-region
        beg (or (next-single-property-change beg 'org-filtered)
 	       (point-max))))))
+
+(defun org-agenda-add-entry-text ()
+  "Add entry text to agenda lines.
+This will add a maximum of `org-agenda-add-entry-text-maxlines' lines of the
+entry text following headings shown in the agenda.
+Drawers will be excluded, also the line with scheduling/deadline info."
+  (let (m txt drawer-re kwd-time-re ind)
+    (goto-char (point-min))
+    (while (not (eobp))
+      (if (not (setq m (get-text-property (point) 'org-hd-marker)))
+	  (beginning-of-line 2)
+	(save-excursion
+	  (with-current-buffer (marker-buffer m)
+	    (if (not (org-mode-p))
+		(setq txt "")
+	      (save-excursion
+		(save-restriction
+		  (widen)
+		  (goto-char m)
+		  (beginning-of-line 2)
+		  (setq txt (buffer-substring (point)
+					      (progn
+						(outline-next-heading) (point)))
+			drawer-re org-drawer-regexp
+			kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
+					    ".*\n?"))
+		  (with-temp-buffer
+		    (insert txt)
+		    (goto-char (point-min))
+		    (while (re-search-forward drawer-re nil t)
+		      (delete-region
+		       (match-beginning 0)
+		       (progn (re-search-forward "^[ \t]*:END:.*\n?" nil 'move)
+			      (point))))
+		    (goto-char (point-min))
+		    (while (re-search-forward kwd-time-re nil t)
+		      (replace-match ""))
+		    (if (re-search-forward "[ \t\n]+\\'" nil t)
+			(replace-match ""))
+		    (goto-char (point-min))
+		    ;; find min indentation
+		    (goto-char (point-min))
+		    (untabify (point-min) (point-max))
+		    (setq ind (org-get-indentation))
+		    (while (not (eobp))
+		      (unless (looking-at "[ \t]*$")
+			(setq ind (min ind (org-get-indentation))))
+		      (beginning-of-line 2))
+		    (goto-char (point-min))
+		    (while (not (eobp))
+		      (unless (looking-at "[ \t]*$")
+			(move-to-column ind)
+			(delete-region (point-at-bol) (point)))
+		      (beginning-of-line 2))
+		    (goto-char (point-min))
+		    (while (and (not (eobp)) (re-search-forward "^" nil t))
+		      (replace-match "    > "))
+		    (goto-char (point-min))
+		    (while (looking-at "[ \t]*\n") (replace-match ""))
+		    (goto-char (point-max))
+		    (when (> (org-current-line)
+			     (1+ org-agenda-add-entry-text-maxlines))
+		      (goto-line (1+ org-agenda-add-entry-text-maxlines))
+		      (backward-char 1))
+		    (setq txt (buffer-substring (point-min) (point)))))))))
+	(end-of-line 1)
+	(if (string-match "\\S-" txt) (insert "\n" txt))))))
 
 (defun org-agenda-collect-markers ()
   "Collect the markers pointing to entries in the agenda buffer."
