@@ -2309,11 +2309,23 @@ Effort estimates given in this property need to have the format H:MM."
 (defconst org-global-properties-fixed
   '(("VISIBILITY_ALL" . "folded children content all"))
   "List of property/value pairs that can be inherited by any entry.
-These are fixed values, for the preset properties.")
 
+These are fixed values, for the preset properties.  The user variable
+that can be used to add to this list is `org-global-properties'.
+
+The entries in this list are cons cells where the car is a property
+name and cdr is a string with the value.  If the value represents
+multiple items like an \"_ALL\" property, separate the items by
+spaces.")
 
 (defcustom org-global-properties nil
   "List of property/value pairs that can be inherited by any entry.
+
+This list will be combined with the constant `org-global-properties-fixed'.
+
+The entries in this list are cons cells where the car is a property
+name and cdr is a string with the value.
+
 You can set buffer-local values for the same purpose in the variable
 `org-file-properties' this by adding lines like
 

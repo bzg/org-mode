@@ -1,5 +1,8 @@
 2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-global-properties-fixed, org-global-properties):
+	Improve documentation string.
+
 	* org-exp.el (org-export-ascii-links-to-notes): New option.
 	(org-export-as-ascii): Handle links better.
 	(org-export-ascii-wrap, org-export-ascii-push-links): New
