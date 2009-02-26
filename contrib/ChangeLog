@@ -1,3 +1,7 @@
+2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org2rem.el: New version from Shatad Pratap.
+
 2009-02-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-choose.el (org-choose-get-fn-map-group): Only check
