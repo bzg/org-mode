@@ -1,3 +1,10 @@
+2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-ascii-links-to-notes): New option.
+	(org-export-as-ascii): Handle links better.
+	(org-export-ascii-wrap, org-export-ascii-push-links): New
+	functions.
+
 2009-02-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda): Make prefix arg optional.

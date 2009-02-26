@@ -498,6 +498,13 @@ Org-mode file."
   :group 'org-export-ascii
   :type '(repeat character))
 
+(defcustom org-export-ascii-links-to-notes t
+  "Non-nil means, convert links to notes before the next headline.
+When nil, the link will be exported in place.  If the line becomes long
+in this way, it will be wrapped."
+  :group 'org-export-ascii
+  :type 'boolean)
+
 (defgroup org-export-xml nil
   "Options specific for XML export of Org-mode files."
   :tag "Org Export XML"
@@ -2664,7 +2671,7 @@ underlined headlines.  The default is 3."
 		  :add-text (plist-get opt-plist :text))
 		 "\n"))
 	 thetoc have-headings first-heading-pos
-	 table-open table-buffer link desc)
+	 table-open table-buffer link-buffer link desc rpl wrap)
     (let ((inhibit-read-only t))
       (org-unmodified
        (remove-text-properties (point-min) (point-max)
@@ -2773,12 +2780,17 @@ underlined headlines.  The default is 3."
 
     (org-init-section-numbers)
     (while (setq line (pop lines))
+      (when (and link-buffer (string-match "^\\*+ " line))
+	(org-export-ascii-push-links link-buffer)
+	(setq link-buffer nil))
+      (setq wrap nil)
       ;; Remove the quoted HTML tags.
       (setq line (org-html-expand-for-ascii line))
       ;; Replace links with the description when possible
       (while (string-match org-bracket-link-regexp line)
 	(setq link (match-string 1 line)
-	      desc (match-string (if (match-end 3) 3 1) line))
+	      desc0 (match-string 3 line)
+	      desc (or desc0 (match-string 1 line)))
 	(if (and (> (length link) 8)
 		 (equal (substring link 0 8) "coderef:"))
 	    (setq line (replace-match
@@ -2787,9 +2799,16 @@ underlined headlines.  The default is 3."
 				      (substring link 8)
 				      org-export-code-refs)))
 			t t line))
-	  (setq line (replace-match
-		      (if (match-end 3) "[\\3]" "[\\1]")
-		      t nil line))))
+	  (setq rpl (concat "[" 
+			    (or (match-string 3 line) (match-string 1 line))
+			    "]"))
+	  (when (and desc0 (not (equal desc0 link)))
+	    (if org-export-ascii-links-to-notes
+		(push (cons desc0 link) link-buffer)
+	      (setq rpl (concat rpl " (" link ")")
+		    wrap (+ (length line) (- (length (match-string 0)))
+			    (length desc)))))
+	  (setq line (replace-match rpl t t line))))
       (when custom-times
 	(setq line (org-translate-time line)))
       (cond
@@ -2825,8 +2844,11 @@ underlined headlines.  The default is 3."
 	    (setq line (replace-match "" t t line)))
 	(if (and org-export-with-fixed-width
 		 (string-match "^\\([ \t]*\\)\\(:\\( \\|$\\)\\)" line))
-	    (setq line (replace-match "\\1" nil nil line)))
+	    (setq line (replace-match "\\1" nil nil line))
+	  (if wrap (setq line (org-export-ascii-wrap line wrap))))
 	(insert line "\n"))))
+
+    (org-export-ascii-push-links link-buffer)
 
     (normal-mode)
 
@@ -2877,8 +2899,8 @@ underlined headlines.  The default is 3."
     (goto-char (match-beginning 2))
     (delete-char 1) (insert "`")
     (goto-char (match-end 2)))
-  (goto-char (point-min))
   ;; Remove target markers
+  (goto-char (point-min))
   (while (re-search-forward  "<<<?\\([^<>]*\\)>>>?\\([ \t]*\\)" nil t)
     (replace-match "\\1\\2")))
 
@@ -2906,6 +2928,37 @@ underlined headlines.  The default is 3."
 	;; We just remove the tags for now.
 	(setq line (replace-match "" nil nil line))))
   line)
+
+
+(defun org-export-ascii-wrap (line where)
+  "Wrap LINE at or before WHERE."
+  (let ((ind (org-get-indentation line))
+	pos)
+    (catch 'found
+      (loop for i from where downto (/ where 2) do
+	    (and (equal (aref line i) ?\ )
+		 (setq pos i)
+		 (throw 'found t))))
+    (if pos
+	(concat (substring line 0 pos) "\n"
+		(make-string ind ?\ )
+		(substring line (1+ pos)))
+      line)))
+			   
+(defun org-export-ascii-push-links (link-buffer)
+  "Push out links in the buffer."
+  (when link-buffer
+    ;; We still have links to push out.
+    (insert "\n")
+    (let ((ind ""))
+      (save-match-data
+	(if (save-excursion
+	      (re-search-backward
+	       "^\\(\\([ \t]*\\)\\|\\(\\*+ \\)\\)[^ \t\n]" nil t))
+	    (setq ind (or (match-string 2)
+			  (make-string (length (match-string 3)) ?\ )))))
+      (mapc (lambda (x) (insert ind "[" (car x) "]: " link)) link-buffer))
+    (insert "\n")))
 
 (defun org-insert-centered (s &optional underline)
   "Insert the string S centered and underline it with character UNDERLINE."
