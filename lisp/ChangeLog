@@ -1,5 +1,9 @@
 2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-get-project-from-filename): New
+	optional argument UP.  Only find the top project if UP is set.
+	(org-publish-current-project): Find the top encloding project.
+
 	* org-agenda.el (org-agenda-before-write-hook)
 	(org-agenda-add-entry-text-maxlines): New options.
 	(org-write-agenda): Run the new hook in the temporary buffer.

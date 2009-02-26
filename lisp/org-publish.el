@@ -469,13 +469,14 @@ matching filenames."
 	  include-list)
     org-publish-temp-files))
 
-(defun org-publish-get-project-from-filename (filename)
+(defun org-publish-get-project-from-filename (filename &optional up)
   "Return the project FILENAME belongs."
   (let* ((project-name (cdr (assoc (expand-file-name filename)
 				   org-publish-files-alist))))
-    (dolist (prj org-publish-project-alist)
-      (if (member project-name (plist-get (cdr prj) :components))
-	  (setq project-name (car prj))))
+    (when up
+      (dolist (prj org-publish-project-alist)
+	(if (member project-name (plist-get (cdr prj) :components))
+	    (setq project-name (car prj)))))
     (assoc project-name org-publish-project-alist)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -742,7 +743,7 @@ the project."
   (interactive "P")
   (org-publish-initialize-files-alist)
   (save-window-excursion
-    (let ((project (org-publish-get-project-from-filename (buffer-file-name)))
+    (let ((project (org-publish-get-project-from-filename (buffer-file-name) 'up))
 	  (org-publish-use-timestamps-flag
 	   (if force nil org-publish-use-timestamps-flag)))
       (if (not project)
