@@ -2025,8 +2025,20 @@ higher priority settings."
 	       (kill-buffer (current-buffer))
 	       (message "HTML written to %s" file))
 	      ((string-match "\\.ps\\'" file)
-	       (ps-print-buffer-with-faces file)
+	       (require 'ps-print)
+	       (flet ((ps-get-buffer-name () "Agenda View"))
+		 (ps-print-buffer-with-faces file))
 	       (message "Postscript written to %s" file))
+	      ((string-match "\\.pdf\\'" file)
+	       (require 'ps-print)
+	       (flet ((ps-get-buffer-name () "Agenda View"))
+		 (ps-print-buffer-with-faces
+		  (concat (file-name-sans-extension file) ".ps")))
+	       (call-process "ps2pdf" nil nil nil
+			     (expand-file-name
+			      (concat (file-name-sans-extension file) ".ps"))
+			     (expand-file-name file))
+	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
 	       (let ((org-agenda-marker-table
 		      (org-create-marker-find-array
@@ -5997,4 +6009,3 @@ belonging to the \"Work\" category."
 ;; arch-tag: 77f7565d-7c4b-44af-a2df-9f6f7070cff1
 
 ;;; org-agenda.el ends here
-

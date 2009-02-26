@@ -4,6 +4,7 @@
 	(org-agenda-add-entry-text-maxlines): New options.
 	(org-write-agenda): Run the new hook in the temporary buffer.
 	(org-agenda-add-entry-text): New function.
+	(org-write-agenda): Implement PDF export, using ps2pdf.
 
 	* org.el (org-global-properties-fixed, org-global-properties):
 	Improve documentation string.

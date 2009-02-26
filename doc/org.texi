@@ -6805,12 +6805,12 @@ This is a globally available command, and also available in the agenda menu.
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
-Write the agenda view to a file.  Depending on the extension of the
-selected file name, the view will be exported as HTML (extension
-@file{.html} or @file{.htm}), Postscript (extension @file{.ps}), or
-plain text (any other extension).  Use the variable
-@code{org-agenda-exporter-settings} to set options for @file{ps-print}
-and for @file{htmlize} to be used during export.
+Write the agenda view to a file.  Depending on the extension of the selected
+file name, the view will be exported as HTML (extension @file{.html} or
+@file{.htm}), Postscript (extension @file{.ps}), PDF
+(extension @file{.pdf}), or plain text (any other extension).  Use the
+variable @code{org-agenda-exporter-settings} to set options for
+@file{ps-print} and for @file{htmlize} to be used during export.
 
 @tsubheading{Quit and Exit}
 @kindex q
@@ -7025,8 +7025,10 @@ yourself.
 If you are away from your computer, it can be very useful to have a printed
 version of some agenda views to carry around.  Org mode can export custom
 agenda views as plain text, HTML@footnote{You need to install Hrvoje Niksic's
-@file{htmlize.el}.}, Postscript, and iCalendar files.  If you want to do this
-only occasionally, use the command
+@file{htmlize.el}.}, Postscript, PDF@footnote{To create PDF output, the
+ghostscript @file{ps2pdf} utility must be installed on the system.  Selecting
+a pdf file with also create the postscript file.}, and iCalendar files.  If
+you want to do this only occasionally, use the command
 
 @table @kbd
 @kindex C-x C-w
@@ -7046,6 +7048,9 @@ export, for example
 (setq org-agenda-exporter-settings
       '((ps-number-of-columns 2)
         (ps-landscape-mode t)
+        (org-agenda-before-write-hook
+            '(org-agenda-add-entry-text))
+        (org-agenda-add-entry-text-maxlines 5)
         (htmlize-output-type 'css)))
 @end lisp
 @end table
