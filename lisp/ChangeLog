@@ -1,5 +1,8 @@
 2009-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-archive.el (org-archive-subtree): Do not add 1 to level if
+	pasting at top level.
+
 	* org-bbdb.el: Improve documentation.
 
 2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
