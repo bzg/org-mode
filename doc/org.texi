@@ -7082,12 +7082,14 @@ Use the variable @code{org-agenda-exporter-settings} to
 set options for @file{ps-print} and for @file{htmlize} to be used during
 export, for example
 
+@vindex org-agenda-add-entry-text-maxlines
+@vindex htmlize-output-type
+@vindex ps-number-of-columns
+@vindex ps-landscape-mode
 @lisp
 (setq org-agenda-exporter-settings
       '((ps-number-of-columns 2)
         (ps-landscape-mode t)
-        (org-agenda-before-write-hook
-            '(org-agenda-add-entry-text))
         (org-agenda-add-entry-text-maxlines 5)
         (htmlize-output-type 'css)))
 @end lisp
@@ -8207,6 +8209,11 @@ the assumption that the first body line indicates the base indentation of
 the body text.  Any indentation larger than this is adjusted to preserve
 the layout relative to the first line.  Should there be lines with less
 indentation than the first, these are left alone.
+
+@vindex org-export-ascii-links-to-notes
+Links will be exported in a footnote-like style, with the descriptive part in
+the text and the link in a note before the next heading.  See the variable
+@code{org-export-ascii-links-to-notes} for details and other options.
 
 @node HTML export, LaTeX and PDF export, ASCII export, Exporting
 @section HTML export
