@@ -893,7 +893,7 @@ u            @r{One level up.}
 q            @r{Quit}
 @end example
 @vindex org-goto-interface
-See also the variable@code{org-goto-interface}.
+See also the variable @code{org-goto-interface}.
 @end table
 
 @node Structure editing, Archiving, Motion, Document Structure
@@ -4141,7 +4141,7 @@ first, and the value after it.  Here is an example:
     :Title:     Goldberg Variations
     :Composer:  J.S. Bach
     :Artist:    Glen Gould
-    :Publisher: Deutsche Grammphon
+    :Publisher: Deutsche Grammophon
     :NDisks:    1
     :END:
 @end example
@@ -4725,17 +4725,19 @@ at an existing time stamp in the buffer, the command is used to modify this
 timestamp instead of inserting a new one.  When this command is used twice in
 succession, a time range is inserted.
 @c
-@kindex C-u C-c .
-@item C-u C-c .
-@vindex org-time-stamp-rounding-minutes
-Like @kbd{C-c .}, but use the alternative format which contains date
-and time.  The default time can be rounded to multiples of 5 minutes,
-see the option @code{org-time-stamp-rounding-minutes}.
-@c
 @kindex C-c !
 @item C-c !
 Like @kbd{C-c .}, but insert an inactive time stamp that will not cause
 an agenda entry.
+@c
+@kindex C-u C-c .
+@kindex C-u C-c !
+@item C-u C-c .
+@itemx C-u C-c !
+@vindex org-time-stamp-rounding-minutes
+Like @kbd{C-c .} and @kbd{C-c !}, but use the alternative format which
+contains date and time.  The default time can be rounded to multiples of 5
+minutes, see the option @code{org-time-stamp-rounding-minutes}.
 @c
 @kindex C-c <
 @item C-c <
