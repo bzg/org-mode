@@ -6051,6 +6051,44 @@ will be made in the agenda:
 %%(diary-anniversary  2 10 1869) Mahatma Gandhi would be %d years old
 @end example
 
+@subsubheading Anniversaries from BBDB
+@cindex BBDB, anniversaries
+@cindex anniversaries, from BBDB
+
+If you are using the Big Brothers Database to store your contacts, you will
+very likely prefer to store anniversaries in BBDB rather than in a
+separate Org or diary file.  Org supports this and will show BBDB
+anniversaries as part of the agenda.  All you need to do is to add the
+following to one your your agenda files:
+
+@example
+* Anniversaries
+  :PROPERTIES:
+  :CATEGORY: Anniv
+  :END
+%%(org-bbdb-anniversaries)
+@end example
+
+You can then go ahead and define anniversaries for a BBDB record.  Basically,
+you need to press @kbd{C-o anniversary @key{RET}} with the cursor in a BBDB
+record and then add the date in the format @code{YYYY-MM-DD}, followed by a
+space and the class of the anniversary (@samp{birthday} or @samp{wedding}, or
+a format string).  If you omit the class, it will default to @samp{birthday}.
+Here are a few examples, the header for the file @file{org-bbdb.el} contains more detailed
+information.
+
+@example
+1973-06-22
+1955-08-02 wedding
+2008-04-14 %s released version 6.01 of Org-mode, %d years ago
+@end example
+
+After a change to BBDB, or for the first agenda display during an Emacs
+session, the agenda display will suffer a short delay as Org updates its hash
+with anniversaries.  However, after that things will be very fast - much
+faster in fact than a long list of @samp{%%(diary-anniversary)} entries in an
+Org or Diary file.
+
 @subsubheading Appointment reminders
 @cindex @file{appt.el}
 @cindex appointment reminders

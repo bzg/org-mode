@@ -1,3 +1,7 @@
+2009-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Weekly/daily agenda): New section.
+
 2009-02-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Orgstruct mode): Describe `orgstruct++-mode'.
