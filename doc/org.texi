@@ -6074,8 +6074,8 @@ you need to press @kbd{C-o anniversary @key{RET}} with the cursor in a BBDB
 record and then add the date in the format @code{YYYY-MM-DD}, followed by a
 space and the class of the anniversary (@samp{birthday} or @samp{wedding}, or
 a format string).  If you omit the class, it will default to @samp{birthday}.
-Here are a few examples, the header for the file @file{org-bbdb.el} contains more detailed
-information.
+Here are a few examples, the header for the file @file{org-bbdb.el} contains
+more detailed information.
 
 @example
 1973-06-22
@@ -6084,10 +6084,10 @@ information.
 @end example
 
 After a change to BBDB, or for the first agenda display during an Emacs
-session, the agenda display will suffer a short delay as Org updates its hash
-with anniversaries.  However, after that things will be very fast - much
-faster in fact than a long list of @samp{%%(diary-anniversary)} entries in an
-Org or Diary file.
+session, the agenda display will suffer a short delay as Org updates it's
+hash with anniversaries.  However, from then on things will be very fast -
+much faster in fact than a long list of @samp{%%(diary-anniversary)} entries
+in an Org or Diary file.
 
 @subsubheading Appointment reminders
 @cindex @file{appt.el}

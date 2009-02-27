@@ -10,11 +10,161 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.23
+* Version 6.24 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
  :END:
 
+** Details
+
+*** PDF export of agenda views
+
+Agenda views can now be exported to PDF files by writing them to
+a file with extension ".pdf".  Internally this works by first
+producing the postscript version and then converting that to PDF
+using the ghostview utility =ps2pdf=.  Make sure that this
+utility is installed on your system.
+
+The postscript version will not be removed, it will stay around.
+
+*** Inline some entry text for Agenda View export
+
+When exporting an agenda view to HTML or PDF for printing or
+remote access, one of the problems can be that information stored
+in entries below the headline is not accessible in that format.
+
+You can now copy some of that information to the agenda view
+before exporting it.  For this you need set the variable 
+=org-agenda-add-entry-text-maxlines= to a number greater than 0.
+
+#+begin_src emacs-lisp
+(setq org-agenda-add-entry-text-maxlines 20)
+#+end_src
+
+Or you can to this with the settings in a special agenda view,
+for example
+
+#+begin_src emacs-lisp
+("A" "" agenda ""
+ ((org-agenda-ndays 1)
+  (org-agenda-add-entry-text-maxlines 5))
+ ("agenda-today.pdf"))
+#+end_src
+
+*** Update of org2rem.el
+
+/org2rem.el/ has been updated significantly and now does a more
+comprehensive job of exporting Org events to remind.
+
+Thanks to Sharad Pratap for this update.
+
+*** Improved ASCII export of links
+
+ASCII export of links works now much better.  If a link has a
+link and a description part which are different, then the
+description will remain in the text while the link part will be
+moved to the end of the current section, before the next heading,
+as a footnote-like construct.
+
+Configure the variable =org-export-ascii-links-to-notes= if you
+prefer the links to be shown in the text.  In this case, Org will
+make an attempt to wrap the line which may have become
+significantly longer by showing the link.
+
+*** Turning off time-of-day search in headline
+
+Some people like to put a creation time stamp into a headline and
+then get confused if the time-of-day found in there shows up as
+the time-of-day of the deadline/scheduling entry for this
+headline.  The reason for this is that Org searches the headline
+for a free-format time when trying to sort the entry into the
+agenda, and that search accidentally finds the time in the
+creation time stamp or something else that happens to look like a
+time.  If this is more painful than useful for you, configure the
+new variable =org-agenda-search-headline-for-time=.
+
+*** Clustering characters for undo
+
+When typing in Org-mode, undo will now remove up to 20 characters
+at a time with a single undo command.  This is how things work
+normally in Emacs, but the special binding of characters in
+Org-mode made this impossible until now.
+
+Thanks to Martin Pohlack for a patch which mimicks the behavior
+of the Emacs command loop for the Org version of self-insert.
+Note that this will not work in headlines and tables because
+typing there will do a lot of extra work.
+
+There might be a small typing performance hit resulting from this
+change - please report in the mailing list if this is noticeable
+and annoying. 
+
+*** New reload command, with keyboard access
+
+There is now a special command to reload all Org Lisp files, so
+that you can stay in your Emacs session while pulling and
+compiling changes to Org.  The command to reload the compiled
+files (if available) is =C-c C-x r=.  If no compiled files are
+found, uncompiled ones will be loaded.  If you want to force
+loading of uncompiled code (great for producing backtraces), use
+a prefix arg: =C-u C-c C-x o=.  Both commands are available in
+the menu as well.
+
+This new command was inspired by one written earlier by Bernt
+Hansen.
+
+*** Macro replacement
+
+A string like ={{{ title }}}= will be replaced by the title of
+the document, ={{{ email }}}= by the email setting of the author
+and similarly for other export settings given in =#+...= lines.
+In addition to that, you can define an arbitrary number of
+macros, for example:
+
+#+begin_src org
+,#+MACRO: myaddress 41 Onestreet, 12345 New York, NY
+...
+,my address is {{{myaddress}}}, see you there.
+#+end_src
+
+Macro replacement is the very first thing that happes during
+export, and macros will be replaced even in source code and other
+protected regions.
+
+*** Separate settings for special C-a and C-e 
+
+The variable `org-special-ctrl-a/e' now allows separate settings
+for =C-a= and =C-e=.  For example
+
+#+begin_src emacs-lisp
+(setq org-special-ctrl-a/e '(reversed . t))
+#+end_src
+
+Thanks to Alan Davis for this proposal.
+
+*** orgstruct++-mode improvements
+
+In addition to =orgstruct-mode= which allows to use some Org-mode
+structure commands in other major modes, there is now a more
+invasive version of this mode: =orgstruct++-mode=.  This mode
+will import all paragraph and line wrapping variables into the
+major mode, so that, for example, during typing the auto-fill
+wrapping of items will work just like in Org-mode.  This change
+is not reversible, so turning off orgstruct++-mode will not
+remove these settings again. =orgstruct++-mode= is most useful in
+text modes like message-mode or =magit-log-edit-mode=.
+Furthermore, =orgstruct++-mode= will recognize plain list context
+not only in the first line of an item, but also further down, so
+that =M-RET= will correctly insert new items.
+
+Thanks to Austin Frank for requesting some of these changes.
+
+*** Promotion and demotion works for regions now
+
+=M-right= and =M-left= now do demote and promote all headlines in
+an active region.
+
+* Version 6.23
 ** Overview
 
 - Capture state change notes into a drawer
