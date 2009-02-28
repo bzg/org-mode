@@ -1,5 +1,8 @@
 2009-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-quit): Delete window only when the
+	frame-setup was not `current-window'.
+
 	* org.el (org-tag-persistent-alist): New option.
 	(org-startup-options): Add keyword `noptag'.
 	(org-fast-todo-selection): Handle :newline correctly.

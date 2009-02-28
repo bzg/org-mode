@@ -4455,7 +4455,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (if org-agenda-columns-active
       (org-columns-quit)
     (let ((buf (current-buffer)))
-      (if (not (one-window-p)) (delete-window))
+      (and (not (eq org-agenda-window-setup 'current-window)) 
+           (not (one-window-p))
+           (delete-window))
       (kill-buffer buf)
       (org-agenda-reset-markers)
       (org-columns-remove-overlays)
