@@ -2781,7 +2781,7 @@ underlined headlines.  The default is 3."
     (org-init-section-numbers)
     (while (setq line (pop lines))
       (when (and link-buffer (string-match "^\\*+ " line))
-	(org-export-ascii-push-links link-buffer)
+	(org-export-ascii-push-links (nreverse link-buffer))
 	(setq link-buffer nil))
       (setq wrap nil)
       ;; Remove the quoted HTML tags.
@@ -2848,7 +2848,7 @@ underlined headlines.  The default is 3."
 	  (if wrap (setq line (org-export-ascii-wrap line wrap))))
 	(insert line "\n"))))
 
-    (org-export-ascii-push-links link-buffer)
+    (org-export-ascii-push-links (nreverse link-buffer))
 
     (normal-mode)
 
@@ -2957,7 +2957,8 @@ underlined headlines.  The default is 3."
 	       "^\\(\\([ \t]*\\)\\|\\(\\*+ \\)\\)[^ \t\n]" nil t))
 	    (setq ind (or (match-string 2)
 			  (make-string (length (match-string 3)) ?\ )))))
-      (mapc (lambda (x) (insert ind "[" (car x) "]: " link)) link-buffer))
+      (mapc (lambda (x) (insert ind "[" (car x) "]: " (cdr x) "\n"))
+	    link-buffer))
     (insert "\n")))
 
 (defun org-insert-centered (s &optional underline)

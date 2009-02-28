@@ -1,3 +1,10 @@
+2009-02-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-ascii): Reverse link buffer before
+	outputting it.
+	(org-export-ascii-push-links): Fix bug with pussing links into the
+	export buffer.
+
 2009-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-archive.el (org-archive-subtree): Do not add 1 to level if
