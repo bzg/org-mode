@@ -1,3 +1,7 @@
+2009-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Setting tags): Document `org-tag-persistent-alist'.
+
 2009-02-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Weekly/daily agenda): New section.

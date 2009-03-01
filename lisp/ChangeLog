@@ -1,3 +1,11 @@
+2009-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-tag-persistent-alist): New option.
+	(org-startup-options): Add keyword `noptag'.
+	(org-fast-todo-selection): Handle :newline correctly.
+	(org-set-tags): Handle :newline correctly.
+	(org-fast-tag-selection): Handle :newline correctly.
+
 2009-02-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-as-ascii): Reverse link buffer before

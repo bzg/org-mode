@@ -2097,6 +2097,26 @@ See the manual for details."
 	   (const :tag "End radio group" (:endgroup))
 	   (const :tag "New line" (:newline)))))
 
+(defcustom org-tag-persistent-alist nil
+  "List of tags that will always appear in all Org-mode files.
+This is in addition to any in buffer settings or customizations
+of `org-tag-alist'.
+When this list is nil, Org-mode will base TAG input on `org-tag-alist'.
+The value of this variable is an alist, the car of each entry must be a
+keyword as a string, the cdr may be a character that is used to select
+that tag through the fast-tag-selection interface.
+See the manual for details.
+To disable these tags on a per-file basis, insert anywhere in the file:
+   #+STARTUP: noptag"
+  :group 'org-tags
+  :type '(repeat
+	  (choice
+	   (cons   (string    :tag "Tag name")
+		   (character :tag "Access char"))
+	   (const :tag "Start radio group" (:startgroup))
+	   (const :tag "End radio group" (:endgroup))
+	   (const :tag "New line" (:newline)))))
+
 (defvar org-file-tags nil
   "List of tags that can be inherited by all entries in the file.
 The tags will be inherited if the variable `org-use-tag-inheritance'
@@ -3255,7 +3275,8 @@ After a match, the following groups carry important information:
     ("fnconfirm" org-footnote-auto-label confirm)
     ("fnplain" org-footnote-auto-label plain)
     ("constcgs" constants-unit-system cgs)
-    ("constSI" constants-unit-system SI))
+    ("constSI" constants-unit-system SI)
+    ("noptag" org-tag-persistent-alist nil))
   "Variable associated with STARTUP options for org-mode.
 Each element is a list of three items: The startup options as written
 in the #+STARTUP line, the corresponding variable, and the value to
@@ -8976,7 +8997,13 @@ Returns the new TODO keyword, or nil if no state change should occur."
 	    (setq ingroup nil cnt 0)
 	    (insert "}\n"))
 	   ((equal e '(:newline))
-	    (insert "\n  "))
+	    (when (not (= cnt 0))
+	      (setq cnt 0)
+	      (insert "\n")
+	      (setq e (car tbl))
+	      (while (equal (car tbl) '(:newline))
+		(insert "\n")
+		(setq tbl (cdr tbl)))))
 	   (t
 	    (setq tg (car e) c (cdr e))
 	    (if ingroup (push tg (car groups)))
@@ -10226,8 +10253,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
       (if just-align
 	  (setq tags current)
 	;; Get a new set of tags from the user
-	(save-excursion
-	  (setq table (or org-tag-alist (org-get-buffer-tags))
+	(save-excursion	
+	  (setq table (append org-tag-persistent-alist
+			      (or org-tag-alist (org-get-buffer-tags)))
 		org-last-tags-completion-table table
 		current-tags (org-split-string current ":")
 		inherited-tags (nreverse
@@ -10434,7 +10462,13 @@ Returns the new tags string, or nil to not change the current settings."
 	  (setq ingroup nil cnt 0)
 	  (insert "}\n"))
 	 ((equal e '(:newline))
-	  (insert "\n  "))
+	  (when (not (= cnt 0))
+	    (setq cnt 0)
+	    (insert "\n")
+	    (setq e (car tbl))
+	    (while (equal (car tbl) '(:newline))
+	      (insert "\n")
+	      (setq tbl (cdr tbl)))))
 	 (t
 	  (setq tg (car e) c2 nil)
 	  (if (cdr e)

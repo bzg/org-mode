@@ -3868,6 +3868,17 @@ in a specific file, add an empty TAGS option line to that file:
 #+TAGS:
 @end example
 
+@vindex org-tag-persistent-alist
+If you have a preferred set of tags that you would like to use in every file,
+in addition to those defined on a per file basis by TAGS option lines, then
+you may specify a list of tags with the variable
+@code{org-tag-persistent-alist}.  You may turn this off on a per file basis
+by adding a STARTUP option line to that file:
+
+@example
+#+STARTUP: noptag
+@end example
+
 By default Org mode uses the standard minibuffer completion facilities for
 entering tags.  However, it also implements another, quicker, tag selection
 method called @emph{fast tag selection}.  This allows you to select and
