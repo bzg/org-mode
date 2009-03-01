@@ -4238,6 +4238,7 @@ ALLTAGS      @r{All tags, including inherited ones.}
 PRIORITY     @r{The priority of the entry, a string with a single letter.}
 DEADLINE     @r{The deadline time string, without the angular brackets.}
 SCHEDULED    @r{The scheduling time stamp, without the angular brackets.}
+CLOSED       @r{When was this entry closed?}
 TIMESTAMP    @r{The first keyword-less time stamp in the entry.}
 TIMESTAMP_IA @r{The first inactive time stamp in the entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
