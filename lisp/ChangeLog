@@ -1,3 +1,8 @@
+2009-03-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-find-position): Better indentation of
+	new clock drawers.
+
 2009-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-quit): Delete window only when the

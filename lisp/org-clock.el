@@ -444,12 +444,12 @@ the clocking selection, associated with the letter `d'."
 		(stringp org-clock-into-drawer)
 		(and (integerp org-clock-into-drawer)
 		     (< org-clock-into-drawer 2)))
+	(org-indent-line-function)
 	(insert ":" drawer ":\n:END:\n")
 	(beginning-of-line 0)
 	(org-indent-line-function)
 	(beginning-of-line 0)
 	(org-flag-drawer t)
-	(org-indent-line-function)
 	(beginning-of-line 2)
 	(or org-log-states-order-reversed
 	    (and (re-search-forward org-property-end-re nil t)
