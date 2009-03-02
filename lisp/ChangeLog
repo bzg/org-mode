@@ -1,5 +1,8 @@
 2009-03-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-get-valid-level): Catch the case where the level
+	change is nil.
+
 	* org-clock.el (org-clock-find-position): Better indentation of
 	new clock drawers.
 

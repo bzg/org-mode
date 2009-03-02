@@ -5358,7 +5358,7 @@ even level numbers will become the next higher odd number."
       (cond ((or (not change) (= 0 change)) (1+ (* 2 (/ level 2))))
 	    ((> change 0) (1+ (* 2 (/ (+ level (* 2 change)) 2))))
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
-    (max 1 (+ level change))))
+    (max 1 (+ level (or change 0)))))
 
 (if (boundp 'define-obsolete-function-alias)
     (if (or (featurep 'xemacs) (< emacs-major-version 23))
