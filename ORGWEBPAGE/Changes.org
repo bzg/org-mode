@@ -51,6 +51,13 @@ for example
  ("agenda-today.pdf"))
 #+end_src
 
+*** Exporting of citations to LaTeX and HTML, using BibTeX
+    
+    Citations can now me made using BibTeX, and will be exported
+    to LaTeX and HTML.  This is implemented in a contributed
+    package by Taru Karttunen, /org-exp-bibtex.el/.  Kudos to
+    Taru for this really nice addition.
+
 *** Update of org2rem.el
 
 /org2rem.el/ has been updated significantly and now does a more
