@@ -3,6 +3,8 @@
 	* org-exp.el (org-export-as-html): Add a "content" div around the
 	entire content of the body tag.
 	(org-export-html-get-bibliography): New function.
+	(org-export-html-validation-link): New variable.
+	(org-export-as-html): Add validation link to exported page.
 
 	* org.el (org-match-sparse-tree): Renamed from
 	`org-tags-sparse-tree'.
