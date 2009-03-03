@@ -1,5 +1,17 @@
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-fontify-priorities): New default value
+	`cookies'.
+	(org-agenda-fontify-priorities): Renamed from
+	org-fontify-priorities.
+
+	* org.el (org-set-font-lock-defaults): Call
+	`org-font-lock-add-priority-faces'.
+	(org-font-lock-add-priority-faces): New function.
+
+	* org-faces.el: (org-set-tag-faces): New option.
+	(org-priority-faces): New variable.
+
 	* org-exp.el (org-export-as-html): Add a "content" div around the
 	entire content of the body tag.
 	(org-export-html-get-bibliography): New function.

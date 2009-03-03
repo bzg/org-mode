@@ -4333,7 +4333,7 @@ between words."
 		     '(2 'org-headline-done t))
 	     nil)
 	   ;; Priorities
-	   (list (concat "\\[#[A-Z0-9]\\]") '(0 'org-special-keyword t))
+	   '(org-font-lock-add-priority-faces)
 	   ;; Tags
 	   '(org-font-lock-add-tag-faces)
 	   ;; Special keywords
@@ -4403,6 +4403,16 @@ If KWD is a number, get the corresponding match group."
 			   (list 'face (org-get-tag-face 1)
 				 'font-lock-fontified t))
       (backward-char 1))))
+
+(defun org-font-lock-add-priority-faces (limit)
+  "Add the special priority faces."
+  (while (re-search-forward "\\[#\\([A-Z0-9]\\)\\]" limit t)
+    (add-text-properties
+     (match-beginning 0) (match-end 0)
+     (list 'face (or (cdr (assoc (char-after (match-beginning 1))
+				 org-priority-faces))
+		     'org-special-keyword)
+	   'font-lock-fontified t))))
 
 (defun org-get-tag-face (kwd)
   "Get the right face for a TODO keyword KWD.

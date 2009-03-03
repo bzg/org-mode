@@ -323,6 +323,18 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
 	   (string :tag "keyword")
 	   (sexp :tag "face"))))
 
+(defcustom org-priority-faces nil
+  "Faces for specific Priorities.
+This is a list of cons cells, with priority character in the car
+and faces in the cdr.  The face can be a symbol, or a property
+list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
+  :group 'org-faces
+  :group 'org-todo
+  :type '(repeat
+	  (cons
+	   (character :tag "Priority")
+	   (sexp :tag "face"))))
+
 (defvar org-tags-special-faces-re nil)
 (defun org-set-tag-faces (var value)
   (set var value)

@@ -193,6 +193,19 @@ of tag/property matches is described.
 A new =<div id=content>= is wrapped around the entire page,
 everything that is inside =<body>=.
 
+*** Faces for priority cookies can now be set freely
+
+The new variable =org-priority-faces= can be used to set faces
+for each priority.
+
+*** In agenda, only priority cookies get the special face
+
+So far, an entire task would get a special face when
+=org-agenda-fontify-priorities= was set.  Now, the default value
+for this variable is the symbol =cookies=, which means that on
+the cookie is fontified.  Set it to =t= if you want the entire
+task headline to be fontified.
+
 * Version 6.23
 ** Overview
 

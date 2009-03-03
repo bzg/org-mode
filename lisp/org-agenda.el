@@ -1069,18 +1069,22 @@ it means that the tags should be flushright to that column.  For example,
 (if (fboundp 'defvaralias)
     (defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column))
 
-(defcustom org-agenda-fontify-priorities t
+(defcustom org-agenda-fontify-priorities 'cookies
   "Non-nil means, highlight low and high priorities in agenda.
 When t, the highest priority entries are bold, lowest priority italic.
+However, settings in org-priority-faces will overrule these faces.
+When this variable is the symbol `cookies', only fontify the
+cookies, not the entire task.
 This may also be an association list of priority faces, whose
 keys are the character values of `org-highest-priority',
 `org-default-priority', and `org-lowest-priority' (the default values
-are ?A, ?B, and ?C, respectively). The face may be a names face,
+are ?A, ?B, and ?C, respectively).  The face may be a named face,
 or a list like `(:background \"Red\")'."
   :group 'org-agenda-line-format
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Defaults" t)
+	  (const :tag "Cookies only" cookies)
 	  (repeat :tag "Specify"
 		  (list (character :tag "Priority" :value ?A)
 			(sexp :tag "face")))))
@@ -2282,14 +2286,14 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	       org-agenda-view-columns-initially)
 	  (org-agenda-columns))
       (when org-agenda-fontify-priorities
-	(org-fontify-priorities))
+	(org-agenda-fontify-priorities))
       (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
 	(org-agenda-dim-blocked-tasks))
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
       )))
 
-(defun org-fontify-priorities ()
+(defun org-agenda-fontify-priorities ()
   "Make highest priority lines bold, and lowest italic."
   (interactive)
   (mapc (lambda (o) (if (eq (org-overlay-get o 'org-type) 'org-priority)
@@ -2305,12 +2309,16 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	      l (or (get-char-property (point) 'org-lowest-priority)
 		    org-lowest-priority)
 	      p (string-to-char (match-string 1))
-	      b (match-beginning 0) e (point-at-eol)
+	      b (match-beginning 0)
+	      e (if (eq org-agenda-fontify-priorities 'cookies)
+		    (match-end 0)
+		  (point-at-eol))
 	      ov (org-make-overlay b e))
 	(org-overlay-put
 	 ov 'face
-	 (cond ((listp org-agenda-fontify-priorities)
-		(cdr (assoc p org-agenda-fontify-priorities)))
+	 (cond ((cdr (assoc p org-priority-faces)))
+	       ((and (listp org-agenda-fontify-priorities)
+		     (cdr (assoc p org-agenda-fontify-priorities)))
 	       ((equal p l) 'italic)
 	       ((equal p h) 'bold)))
 	(org-overlay-put ov 'org-type 'org-priority)))))
