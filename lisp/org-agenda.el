@@ -644,14 +644,16 @@ option will be ignored.."
 
 (defcustom org-agenda-ndays 7
   "Number of days to include in overview display.
-Should be 1 or 7."
+Should be 1 or 7.
+Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type 'number)
 
 (defcustom org-agenda-start-on-weekday 1
   "Non-nil means, start the overview always on the specified weekday.
 0 denotes Sunday, 1 denotes Monday etc.
-When nil, always start on the current day."
+When nil, always start on the current day.
+Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type '(choice (const :tag "Today" nil)
 		 (number :tag "Weekday No.")))
@@ -711,7 +713,8 @@ and timeline buffers."
 	      (const :tag "Sunday" 0)))
 
 (defcustom org-agenda-include-diary nil
-  "If non-nil, include in the agenda entries from the Emacs Calendar's diary."
+  "If non-nil, include in the agenda entries from the Emacs Calendar's diary.
+Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
@@ -869,7 +872,9 @@ categories by priority.
 
 Instead of a single list, this can also be a set of list for specific
 contents, with a context symbol in the car of the list, any of
-`agenda', `todo', `tags' for the corresponding agenda views."
+`agenda', `todo', `tags' for the corresponding agenda views.
+
+Custom commands can bind this variable in the options section."
   :group 'org-agenda-sorting
   :type `(choice
 	  (repeat :tag "General" ,org-sorting-choice)
@@ -955,7 +960,9 @@ the prefix, you could use:
   (setq org-agenda-prefix-format \"  %-11:c% s\")
 
 See also the variables `org-agenda-remove-times-when-in-prefix' and
-`org-agenda-remove-tags'."
+`org-agenda-remove-tags'.
+
+Custom commands can set this variable in the options section."
   :type '(choice
 	  (string :tag "General format")
 	  (list :greedy t :tag "View dependent"
@@ -2226,7 +2233,13 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
 (defvar org-agenda-filter nil)
-(defvar org-agenda-filter-preset nil)
+(defvar org-agenda-filter-preset nil
+  "A preset of the tags filter used for secondary agenda filtering.
+This must be a list of strings, each string must be a single tag preceeded
+by \"+\" or \"-\".
+This variable should not be set directly, but agenda custom commands can
+bind it in the options section.")
+
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
@@ -2562,7 +2575,8 @@ When EMPTY is non-nil, also include days without any entries."
 ;;; Agenda Daily/Weekly
 
 (defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
-(defvar org-agenda-start-day nil) ; dynamically scoped parameter
+(defvar org-agenda-start-day nil  ; dynamically scoped parameter
+"Custom commands can set this variable in the options section.")
 (defvar org-agenda-last-arguments nil
   "The arguments of the previous call to org-agenda")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
@@ -3102,7 +3116,9 @@ This is basically a temporary global variable that can be set and then
 used by user-defined selections using `org-agenda-skip-function'.")
 
 (defvar org-agenda-overriding-header nil
-  "When this is set during todo and tags searches, will replace header.")
+  "When this is set during todo and tags searches, will replace header.
+This variable should not be set directly, but custom commands can bind it
+in the options section.")
 
 (defun org-agenda-skip-subtree-when-regexp-matches ()
   "Checks if the current subtree contains match for `org-agenda-skip-regexp'.

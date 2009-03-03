@@ -6646,10 +6646,14 @@ that entry would be in the original buffer (taken from a property, from a
 
 @kindex /
 @item /
+@vindex org-agenda-filter-preset
 Filter the current agenda view with respect to a tag and/or effort estimates.
-The difference between this and a custom agenda commands is that filtering is
+The difference between this and a custom agenda command is that filtering is
 very fast, so that you can switch quickly between different filters without
-having to recreate the agenda.
+having to recreate the agenda@footnote{Custom commands can preset a filter by
+binding the variable @code{org-agenda-filter-preset} as an option.  This
+filter will then be applied to the view and presist as a basic filter through
+refreshes and more secondary filtering.}
 
 You will be prompted for a tag selection letter.  Pressing @key{TAB} at that
 prompt will offer use completion to select a tag (including any tags that do
