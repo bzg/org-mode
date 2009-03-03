@@ -186,15 +186,11 @@ you can \"misuse\" it to also add other text to the header.  However,
 	    (list :tag "Heading for this block"
 		  (const org-agenda-overriding-header)
 		  (string :tag "Headline"))
-	    (list :tag "Any variable"
-		  (variable :tag "Variable")
-		  (sexp :tag "Value (sexp)"))
 	    (list :tag "Files to be searched"
 		  (const org-agenda-files)
 		  (list
 		   (const :format "" quote)
-		   (repeat
-			   (file))))
+		   (repeat (file))))
 	    (list :tag "Sorting strategy"
 		  (const org-agenda-sorting-strategy)
 		  (list
@@ -221,6 +217,12 @@ you can \"misuse\" it to also add other text to the header.  However,
 	    (list :tag "Deadline Warning days"
 		  (const org-deadline-warning-days)
 		  (integer :value 1))
+	    (list :tag "Tags filter preset"
+		  (const org-agenda-filter-preset)
+		  (list
+		   (const :format "" quote)
+		   (repeat
+		    (string :tag "+tag or -tag"))))
 	    (list :tag "Standard skipping condition"
 		  :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
 		  (const org-agenda-skip-function)
@@ -245,7 +247,10 @@ you can \"misuse\" it to also add other text to the header.  However,
 	    (list :tag "Non-standard skipping condition"
 		  :value (org-agenda-skip-function)
 		  (const org-agenda-skip-function)
-		  (sexp :tag "Function or form (quoted!)"))))
+		  (sexp :tag "Function or form (quoted!)"))
+	    (list :tag "Any variable"
+		  (variable :tag "Variable")
+		  (sexp :tag "Value (sexp)"))))
   "Selection of examples for agenda command settings.
 This will be spliced into the custom type of
 `org-agenda-custom-commands'.")
@@ -2221,10 +2226,12 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
 (defvar org-agenda-filter nil)
+(defvar org-agenda-filter-preset nil)
 (defun org-prepare-agenda (&optional name)
   (setq org-todo-keywords-for-agenda nil)
   (setq org-done-keywords-for-agenda nil)
   (setq org-agenda-filter nil)
+  (put 'org-agenda-filter :preset-filter org-agenda-filter-preset)
   (if org-agenda-multi
       (progn
 	(setq buffer-read-only nil)
@@ -2291,6 +2298,8 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	(org-agenda-dim-blocked-tasks))
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
+      (when (get 'org-agenda-filter :preset-filter)
+	(org-agenda-filter-apply org-agenda-filter))
       )))
 
 (defun org-agenda-fontify-priorities ()
@@ -4498,17 +4507,20 @@ When this is the global TODO list, a prefix argument will be interpreted."
   (interactive)
   (let* ((org-agenda-keep-modes t)
 	 (filter org-agenda-filter)
+	 (preset (get 'org-agenda-filter :preset-filter))
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
 	 (lprops (get 'org-agenda-redo-command 'org-lprops)))
+    (put 'org-agenda-filter :preset-filter nil)
     (and cols (org-columns-quit))
     (message "Rebuilding agenda buffer...")
     (org-let lprops '(eval org-agenda-redo-command))
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil)
     (message "Rebuilding agenda buffer...done")
-    (and filter (org-agenda-filter-apply filter))
+    (put 'org-agenda-filter :preset-filter preset)
+    (and (or filter preset) (org-agenda-filter-apply filter))
     (and cols (interactive-p) (org-agenda-columns))
     (goto-line line)
     (recenter window-line)))
@@ -4571,7 +4583,10 @@ to switch to narrowing."
 	(setq tag (org-ido-completing-read
 		   "Tag: " org-global-tags-completion-table))))
     (cond
-     ((equal char ?/) (org-agenda-filter-by-tag-show-all))
+     ((equal char ?/)
+      (org-agenda-filter-by-tag-show-all)
+      (when (get 'org-agenda-filter :preset-filter)
+	(org-agenda-filter-apply org-agenda-filter)))
      ((or (equal char ?\ )
 	  (setq a (rassoc char alist))
 	  (and (>= char ?0) (<= char ?9)
@@ -4595,7 +4610,8 @@ to switch to narrowing."
 (defun org-agenda-filter-make-matcher ()
   "Create the form that tests a line for the agenda filter."
   (let (f f1)
-    (dolist (x org-agenda-filter)
+    (dolist (x (append (get 'org-agenda-filter :preset-filter)
+		       org-agenda-filter))
       (if (member x '("-" "+"))
 	  (setq f1 '(not tags))
 	(if (string-match "[<=>]" x)
@@ -5012,8 +5028,13 @@ With a double `C-u' prefix arg, show *only* log items, nothing else."
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if (consp org-agenda-show-log) " LogAll"
 		    (if org-agenda-show-log " Log" ""))
-		(if org-agenda-filter
-		    (concat " {" (mapconcat 'identity org-agenda-filter "") "}")
+		(if (or org-agenda-filter (get 'org-agenda-filter
+					       :preset-filter))
+		    (concat " {" (mapconcat
+				  'identity
+				  (append (get 'org-agenda-filter
+					       :preset-filter)
+					  org-agenda-filter) "") "}")
 		  "")
 		(if org-agenda-archives-mode
 		    (if (eq org-agenda-archives-mode t)

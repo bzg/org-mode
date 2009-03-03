@@ -1,5 +1,16 @@
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-custom-commands-local-options): Add
+	option for tags filter preset.
+	(org-prepare-agenda): Store filter preset as a property on the
+	filter variable.
+	(org-finalize-agenda): Call the filter, if there is a preset.
+	(org-agenda-filter-by-tag): Filter again after clearing the
+	filter, when there still is a preset.
+	(org-agenda-filter-make-matcher, org-agenda-set-mode-name):
+	Include the preset filter.
+	(org-agenda-redo): Apply the filter again, also the preset filter.
+
 	* org-exp.el (org-export-as-html): Use IDs in the correct way.
 
 	* org.el (org-uuidgen-p): New funtion.

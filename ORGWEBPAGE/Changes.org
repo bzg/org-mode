@@ -78,6 +78,18 @@ for example
     package by Taru Karttunen, /org-exp-bibtex.el/.  Kudos to
     Taru for this really nice addition.
 
+*** Custom agenda commands can specify a filter preset
+
+If a custom agenda command specified a value for
+=org-agenda-filter-preset= in its options, the initial view of
+the agenda will be filterd by the specified tags.  Applying a
+filter with =/= will then always add to that preset filter,
+clearing the filter with =/ /= will set it back to the preset.
+
+This is in response to a [[http://thread.gmane.org/gmane.emacs.orgmode/11752][thread on the mailing list]], started by
+Daniel Clemente and with great contributions by Bernt Hansen and
+Matt Lundin.
+
 *** Update of org2rem.el
 
 /org2rem.el/ has been updated significantly and now does a more
@@ -97,18 +109,6 @@ Configure the variable =org-export-ascii-links-to-notes= if you
 prefer the links to be shown in the text.  In this case, Org will
 make an attempt to wrap the line which may have become
 significantly longer by showing the link.
-
-*** Turning off time-of-day search in headline
-
-Some people like to put a creation time stamp into a headline and
-then get confused if the time-of-day found in there shows up as
-the time-of-day of the deadline/scheduling entry for this
-headline.  The reason for this is that Org searches the headline
-for a free-format time when trying to sort the entry into the
-agenda, and that search accidentally finds the time in the
-creation time stamp or something else that happens to look like a
-time.  If this is more painful than useful for you, configure the
-new variable =org-agenda-search-headline-for-time=.
 
 *** Clustering characters for undo
 
@@ -191,6 +191,18 @@ Thanks to Austin Frank for requesting some of these changes.
 =M-right= and =M-left= now do demote and promote all headlines in
 an active region.
 
+*** Turning off time-of-day search in headline
+
+Some people like to put a creation time stamp into a headline and
+then get confused if the time-of-day found in there shows up as
+the time-of-day of the deadline/scheduling entry for this
+headline.  The reason for this is that Org searches the headline
+for a free-format time when trying to sort the entry into the
+agenda, and that search accidentally finds the time in the
+creation time stamp or something else that happens to look like a
+time.  If this is more painful than useful for you, configure the
+new variable =org-agenda-search-headline-for-time=.
+
 *** The match syntax for tags/properties is now described in a single place
 
 The manual chapters about tags and about properties now only
@@ -201,6 +213,10 @@ of tag/property matches is described.
 
 A new =<div id=content>= is wrapped around the entire page,
 everything that is inside =<body>=.
+
+This means that you need to update /org-info.js/ (if you have a
+local copy).  Thanks to Sebastian for making these changes so
+quicky.
 
 *** Faces for priority cookies can now be set freely
 
