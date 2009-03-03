@@ -2318,7 +2318,7 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 	 ov 'face
 	 (cond ((cdr (assoc p org-priority-faces)))
 	       ((and (listp org-agenda-fontify-priorities)
-		     (cdr (assoc p org-agenda-fontify-priorities)))
+		     (cdr (assoc p org-agenda-fontify-priorities))))
 	       ((equal p l) 'italic)
 	       ((equal p h) 'bold)))
 	(org-overlay-put ov 'org-type 'org-priority)))))
