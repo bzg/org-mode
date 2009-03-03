@@ -3490,7 +3490,9 @@ lang=\"%s\" xml:lang=\"%s\">
 <meta name=\"generated\" content=\"%s\"/>
 <meta name=\"author\" content=\"%s\"/>
 %s
-</head><body>
+</head>
+<body>
+<div id=\"content\">
 "
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1") date author style))
@@ -4072,7 +4074,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	(if org-export-html-with-timestamp
 	    (insert org-export-html-html-helper-timestamp))
 	(insert (or (plist-get opt-plist :postamble) ""))
-	(insert "</body>\n</html>\n"))
+	(insert "\n</div>\n</body>\n</html>\n"))
 
       (unless (plist-get opt-plist :buffer-will-be-killed)
 	(normal-mode)

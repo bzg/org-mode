@@ -188,6 +188,11 @@ The manual chapters about tags and about properties now only
 refer to the section about agenda views, where the general syntax
 of tag/property matches is described.
 
+*** New div around the entire page in HTMP export
+
+A new =<div id=content>= is wrapped around the entire page,
+everything that is inside =<body>=.
+
 * Version 6.23
 ** Overview
 

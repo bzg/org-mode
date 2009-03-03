@@ -1,5 +1,8 @@
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-html): Add a "content" div around the
+	entire content of the body tag.
+
 	* org.el (org-match-sparse-tree): Renamed from
 	`org-tags-sparse-tree'.
 	(org-tags-sparse-tree): New alias.
