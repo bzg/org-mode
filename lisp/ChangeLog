@@ -1,5 +1,8 @@
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-add-planning-info): Fix bug with looking for keyword
+	only at column 0.
+
 	* org-agenda.el (org-agenda-custom-commands-local-options): Add
 	option for tags filter preset.
 	(org-prepare-agenda): Store filter preset as a property on the

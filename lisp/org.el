@@ -9297,7 +9297,9 @@ be removed."
 	    (goto-char (match-end 0))
 	    (if (eobp) (insert "\n") (forward-char 1))
 	    (when (and (not what)
-		       (not (looking-at org-keyword-time-not-clock-regexp)))
+		       (not (looking-at
+			     (concat "[ \t]*"
+				     org-keyword-time-not-clock-regexp))))
 	      ;; Nothing to add, nothing to remove...... :-)
 	      (throw 'exit nil))
 	    (if (and (not (looking-at outline-regexp))
