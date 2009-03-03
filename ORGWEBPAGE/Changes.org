@@ -15,6 +15,17 @@
  :VISIBILITY: content
  :END:
 
+
+** Incompatible changes
+
+*** New key for creating tags/property sparse trees
+
+The key to produce a sparse tree matching tags and properties is
+now =C-c / m= instead of =C-c a T=.  This is also more consistent
+with the =C-c a m= key for the corresponding agenda view.
+=C-c / T= will still work for now, but it is no longer advertised
+in the documentation and may go away at any time in the future.
+
 ** Details
 
 *** PDF export of agenda views
@@ -134,7 +145,7 @@ macros, for example:
 ,my address is {{{myaddress}}}, see you there.
 #+end_src
 
-Macro replacement is the very first thing that happes during
+Macro replacement is the very first thing that happens during
 export, and macros will be replaced even in source code and other
 protected regions.
 
@@ -170,6 +181,12 @@ Thanks to Austin Frank for requesting some of these changes.
 
 =M-right= and =M-left= now do demote and promote all headlines in
 an active region.
+
+*** The match syntax for tags/properties is now described in a single place
+
+The manual chapters about tags and about properties now only
+refer to the section about agenda views, where the general syntax
+of tag/property matches is described.
 
 * Version 6.23
 ** Overview

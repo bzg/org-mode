@@ -4011,9 +4011,9 @@ information into special lists.
 
 @table @kbd
 @kindex C-c \
-@kindex C-c / T
+@kindex C-c / m
 @item C-c \
-@itemx C-c / T
+@itemx C-c / m
 Create a sparse tree with all headlines matching a tags search.  With a
 @kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
 @kindex C-c a m
@@ -4028,82 +4028,9 @@ only TODO items and force checking subitems (see variable
 @code{org-tags-match-list-sublevels}).
 @end table
 
-@cindex Boolean logic, for tag searches
-A @i{tags} search string can use Boolean operators @samp{&} for AND and
-@samp{|} for OR.  @samp{&} binds more strongly than @samp{|}.
-Parenthesis are currently not implemented.  A tag may also be preceded
-by @samp{-}, to select against it, and @samp{+} is syntactic sugar for
-positive selection.  The AND operator @samp{&} is optional when @samp{+}
-or @samp{-} is present.  Examples:
+The syntax for matching tags is described in @ref{Matching tags and
+properties}.
 
-@table @samp
-@item +work-boss
-Select headlines tagged @samp{:work:}, but discard those also tagged
-@samp{:boss:}.
-@item work|laptop
-Selects lines tagged @samp{:work:} or @samp{:laptop:}.
-@item work|laptop&night
-Like before, but require the @samp{:laptop:} lines to be tagged also
-@samp{:night:}.
-@end table
-
-@cindex TODO keyword matching, with tags search
-You may also test for TODO keywords (@pxref{TODO extensions}) and properties
-(@pxref{Properties and Columns}) at the same time as matching tags.  For a
-guide on how to match properties, see @ref{Property searches}.  To match a
-specific TODO keyword, include an expression like @samp{+TODO="NEXT"} as one
-of the terms in a tags search.
-
-There is also the possibility to end the tags part of the match (which may
-include several terms connected with @samp{|}) with a @samp{/} and then
-specify a Boolean expression just for TODO keywords.  The syntax is then
-similar to the tag matches, but should be applied with consideration: For
-example, a positive selection on several TODO keywords can not meaningfully
-be combined with boolean AND.  However, @emph{negative selection} combined
-with AND can be meaningful.  To make sure that only lines are checked that
-actually have any TODO keyword (resulting in a speed-up), use @kbd{C-c a M},
-or equivalently start the TODO part after the slash with @samp{!}.  Examples:
-
-@table @samp
-@item work+TODO="WAITING"
-Select @samp{:work:}-tagged TODO lines with the specific TODO
-keyword @samp{WAITING}.
-@item work+TODO="WAITING"|home+TODO="WAITING"
-Waiting tasks both at work and at home.
-@item work/WAITING
-Same as the first example.
-@item work/!-WAITING-NEXT
-Select @samp{:work:}-tagged TODO lines that are neither @samp{WAITING}
-nor @samp{NEXT}
-@item work/!+WAITING|+NEXT
-Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
-@samp{NEXT}.
-@end table
-
-@cindex regular expressions, with tags search
-Any element of the tag/todo match can be a regular expression - in this
-case it must be enclosed in curly braces.  For example,
-@samp{work+@{^boss.*@}} matches headlines that contain the tag
-@samp{:work:} and any tag @i{starting} with @samp{boss}.  You may also use a
-regular expression in @samp{TODO=@{^W@}} which would match TODO keywords
-starting with the letter @samp{W}.
-
-@cindex level, require for tags/property match
-@cindex category, require for tags/property match
-@vindex org-odd-levels-only
-You can also require a headline to be of a certain level or category, by
-tapping into the syntax of property searches (@pxref{Property searches})
-and writing instead of any TAG an expression like @samp{LEVEL=3} or
-@samp{CATEGORY="work"}, respectively.  For example, a search
-@samp{+LEVEL=3+boss/-DONE} lists all level three headlines that have the
-tag @samp{boss} and are @emph{not} marked with the TODO keyword DONE.
-In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not
-count the number of stars, but @samp{LEVEL=2} will correspond to 3 stars
-etc.
-
-Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
-other properties will slow down the search for the first property
-accessed.  Any additional property tests are cheap.
 
 @node Properties and Columns, Dates and Times, Tags, Top
 @chapter Properties and Columns
@@ -4235,6 +4162,7 @@ used as keys in the properties drawer:
 TODO         @r{The TODO keyword of the entry.}
 TAGS         @r{The tags defined directly in the headline.}
 ALLTAGS      @r{All tags, including inherited ones.}
+CATEGORY     @r{The category of an entry.}
 PRIORITY     @r{The priority of the entry, a string with a single letter.}
 DEADLINE     @r{The deadline time string, without the angular brackets.}
 SCHEDULED    @r{The scheduling time stamp, without the angular brackets.}
@@ -4251,51 +4179,28 @@ CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}
 @cindex searching, of properties
 
 To create sparse trees and special lists with selection based on properties,
-the same commands are used as for tag searches (@pxref{Tag searches}), and
-the same logic applies.  For example, here is a search string:
+the same commands are used as for tag searches (@pxref{Tag searches}).
+@table @kbd
+@kindex C-c \
+@kindex C-c / m
+@item C-c \
+@itemx C-c / m
+Create a sparse tree with all matching entries.  With a
+@kbd{C-u} prefix argument, ignore headlines that are not a TODO line.
+@kindex C-c a m
+@item C-c a m
+Create a global list of tag/property  matches from all agenda files.
+@xref{Matching tags and properties}.
+@kindex C-c a M
+@item C-c a M
+@vindex org-tags-match-list-sublevels
+Create a global list of tag matches from all agenda files, but check
+only TODO items and force checking subitems (see variable
+@code{org-tags-match-list-sublevels}).
+@end table
 
-@example
-+work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2         \
-         +With=@{Sarah\|Denny@}+SCHEDULED>="<2008-10-11>"
-@end example
-
-@noindent
-The type of comparison will depend on how the comparison value is written:
-@itemize @minus
-@item
-If the comparison value is a plain number, a numerical comparison is done,
-and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
-@samp{>=}, and @samp{<>}.
-@item
-If the comparison value is enclosed in double
-quotes, a string comparison is done, and the same operators are allowed.
-@item
-If the comparison value is enclosed in double quotes @emph{and} angular
-brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
-assumed to be date/time specifications in the standard Org way, and the
-comparison will be done accordingly.  Special values that will be recognized
-are @code{"<now>"} for now (including time), and @code{"<today>"}, and
-@code{"<tomorrow>"} for these days at 0:00 hours, i.e. without a time
-specification.  Also strings like @code{"<+5d>"} or @code{"<-2m>"} with units
-@code{d}, @code{w}, @code{m}, and @code{y} for day, week, month, and year,
-respectively, can be used.
-@item
-If the comparison value is enclosed
-in curly braces, a regexp match is performed, with @samp{=} meaning that the
-regexp matches the property value, and @samp{<>} meaning that it does not
-match.
-@end itemize
-
-So the search string in the example finds entries tagged @samp{:work:} but
-not @samp{:boss:}, which also have a priority value @samp{A}, a
-@samp{:Coffee:} property with the value @samp{unlimited}, an @samp{Effort}
-property that is numerically smaller than 2, a @samp{:With:} property that is
-matched by the regular expression @samp{Sarah\|Denny}, and that are scheduled
-on or after October 11, 2008.
-
-You can configure Org mode to use property inheritance during a search, but
-beware that this can slow down searches considerably.  See @ref{Property
-inheritance} for details.
+The syntax for the search string is described in @ref{Matching tags and
+properties}.
 
 There is also a special command for creating sparse trees based on a
 single property:
@@ -6183,9 +6088,11 @@ and omit the sublevels from the global list.  Configure the variable
 @cindex tags view
 @cindex match view
 
-If headlines in the agenda files are marked with @emph{tags}
-(@pxref{Tags}), you can select headlines based on the tags that apply
-to them and collect them into an agenda buffer.
+If headlines in the agenda files are marked with @emph{tags} (@pxref{Tags}),
+or have properties @pxref{Properties and Columns}, you can select headlines
+based on this meta data and collect them into an agenda buffer.  The match
+syntax described here also applies when creating sparse trees with @kbd{C-c /
+m}.
 
 @table @kbd
 @kindex C-c a m
@@ -6208,6 +6115,132 @@ keywords together with a tags match is also possible, see @ref{Tag searches}.
 
 The commands available in the tags list are described in @ref{Agenda
 commands}.
+
+@subsubheading Match syntax
+
+@cindex Boolean logic, for tag/property searches
+A search string can use Boolean operators @samp{&} for AND and @samp{|} for
+OR.  @samp{&} binds more strongly than @samp{|}.  Parenthesis are currently
+not implemented.  Each element in the search is either a tag, a regular
+rexpression matching tags, or an expression like @code{PROPERTY OPERATOR
+VALUE} with a comparison operator, accessing a property value.  Each element
+may be preceded by @samp{-}, to select against it, and @samp{+} is syntactic
+sugar for positive selection.  The AND operator @samp{&} is optional when
+@samp{+} or @samp{-} is present.  Here are some examples, using only tags.
+
+@table @samp
+@item +work-boss
+Select headlines tagged @samp{:work:}, but discard those also tagged
+@samp{:boss:}.
+@item work|laptop
+Selects lines tagged @samp{:work:} or @samp{:laptop:}.
+@item work|laptop+night
+Like before, but require the @samp{:laptop:} lines to be tagged also
+@samp{:night:}.
+@end table
+
+@cindex regular expressions, with tags search
+Instead of a tag, you may also specify a regular expression enclosed in curly
+braces.  For example,
+@samp{work+@{^boss.*@}} matches headlines that contain the tag
+@samp{:work:} and any tag @i{starting} with @samp{boss}.
+
+@cindex TODO keyword matching, with tags search
+@cindex level, require for tags/property match
+@cindex category, require for tags/property match
+@vindex org-odd-levels-only
+You may also test for properties (@pxref{Properties and Columns}) at the same
+time as matching tags.  The properties may be real properties, or special
+properties that represent other meta data (@pxref{Special properties}).  For
+example, the ``property'' @code{TODO} represents the TODO keyword of the
+entry.  Or, the ``property'' @code{LEVEL} represents the level of an entry.
+So a search @samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines
+that have the tag @samp{boss} and are @emph{not} marked with the TODO keyword
+DONE.  In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not
+count the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
+
+Here are more examples:
+@table @samp
+@item work+TODO="WAITING"
+Select @samp{:work:}-tagged TODO lines with the specific TODO
+keyword @samp{WAITING}.
+@item work+TODO="WAITING"|home+TODO="WAITING"
+Waiting tasks both at work and at home.
+@end table
+
+When matching properties, a number of different operaors can be used to test
+the value of a property.  Here is a complex example:
+
+@example
++work-boss+PRIORITY="A"+Coffee="unlimited"+Effort<2         \
+         +With=@{Sarah\|Denny@}+SCHEDULED>="<2008-10-11>"
+@end example
+
+@noindent
+The type of comparison will depend on how the comparison value is written:
+@itemize @minus
+@item
+If the comparison value is a plain number, a numerical comparison is done,
+and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
+@samp{>=}, and @samp{<>}.
+@item
+If the comparison value is enclosed in double
+quotes, a string comparison is done, and the same operators are allowed.
+@item
+If the comparison value is enclosed in double quotes @emph{and} angular
+brackets (like @samp{DEADLINE<="<2008-12-24 18:30>"}), both values are
+assumed to be date/time specifications in the standard Org way, and the
+comparison will be done accordingly.  Special values that will be recognized
+are @code{"<now>"} for now (including time), and @code{"<today>"}, and
+@code{"<tomorrow>"} for these days at 0:00 hours, i.e. without a time
+specification.  Also strings like @code{"<+5d>"} or @code{"<-2m>"} with units
+@code{d}, @code{w}, @code{m}, and @code{y} for day, week, month, and year,
+respectively, can be used.
+@item
+If the comparison value is enclosed
+in curly braces, a regexp match is performed, with @samp{=} meaning that the
+regexp matches the property value, and @samp{<>} meaning that it does not
+match.
+@end itemize
+
+So the search string in the example finds entries tagged @samp{:work:} but
+not @samp{:boss:}, which also have a priority value @samp{A}, a
+@samp{:Coffee:} property with the value @samp{unlimited}, an @samp{Effort}
+property that is numerically smaller than 2, a @samp{:With:} property that is
+matched by the regular expression @samp{Sarah\|Denny}, and that are scheduled
+on or after October 11, 2008.
+
+Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
+other properties will slow down the search.  However, once you have payed the
+price by accessig one property, testing additional properties is cheap
+again.
+
+You can configure Org mode to use property inheritance during a search, but
+beware that this can slow down searches considerably.  See @ref{Property
+inheritance} for details.
+
+For backward compatibility, and also for typing speed, there is also a
+different way to test TODO states in a search.  For this, terminalte the
+tags/property part of the search string (which may include several terms
+connected with @samp{|}) with a @samp{/} and then specify a Boolean
+expression just for TODO keywords.  The syntax is then similar to that for
+tags, but should be applied with consideration: For example, a positive
+selection on several TODO keywords can not meaningfully be combined with
+boolean AND.  However, @emph{negative selection} combined with AND can be
+meaningful.  To make sure that only lines are checked that actually have any
+TODO keyword (resulting in a speed-up), use @kbd{C-c a M}, or equivalently
+start the TODO part after the slash with @samp{!}.  Examples:
+
+@table @samp
+@item work/WAITING
+Same as @samp{work+TODO="WAITING"}
+@item work/!-WAITING-NEXT
+Select @samp{:work:}-tagged TODO lines that are neither @samp{WAITING}
+nor @samp{NEXT}
+@item work/!+WAITING|+NEXT
+Select @samp{:work:}-tagged TODO lines that are either @samp{WAITING} or
+@samp{NEXT}.
+@end table
 
 @node Timeline, Keyword search, Matching tags and properties, Built-in agenda views
 @subsection Timeline for a single file

@@ -1,3 +1,9 @@
+2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-match-sparse-tree): Renamed from
+	`org-tags-sparse-tree'.
+	(org-tags-sparse-tree): New alias.
+
 2009-03-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-get-valid-level): Catch the case where the level

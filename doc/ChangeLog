@@ -1,3 +1,8 @@
+2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Matching tags and properties): Collect all
+	documentation about tags/property matches here.
+
 2009-03-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Setting tags): Document `org-tag-persistent-alist'.
