@@ -1,5 +1,9 @@
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-html): Use IDs in the correct way.
+
+	* org.el (org-uuidgen-p): New funtion.
+
 	* org-agenda.el (org-agenda-fontify-priorities): New default value
 	`cookies'.
 	(org-agenda-fontify-priorities): Renamed from

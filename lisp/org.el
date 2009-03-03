@@ -14644,6 +14644,10 @@ and end of string."
 		    list)))
     (nreverse list)))
 
+(defun org-uuidgen-p (s)
+  "Is S an ID created by UUIDGEN?"
+  (string-match "\\`[0-9a-f]\\{8\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{12\\}\\'" (downcase s)))
+
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
 If several contexts apply, all are returned.

@@ -3745,7 +3745,9 @@ lang=\"%s\" xml:lang=\"%s\">
 			     id-file (file-name-directory org-current-export-file)))
 	      (setq id-file (concat (file-name-sans-extension id-file)
 				    "." html-extension))
-	      (setq rpl (concat "<a href=\"" id-file "#" path "\""
+	      (setq rpl (concat "<a href=\"" id-file "#"
+				(if (org-uuidgen-p path) "ID-")
+				path "\""
 				attr ">"
 				(org-export-html-format-desc desc)
 				"</a>")))
@@ -4738,6 +4740,7 @@ When TITLE is nil, just close all open levels."
   (let* ((target (and title (org-get-text-property-any 0 'target title)))
 	 (extra-targets
 	  (mapconcat (lambda (x)
+		       (if (org-uuidgen-p x) (setq x (concat "ID-" x)))
 		       (format "<a name=\"%s\" id=\"%s\"></a>"
 			       x x))
 		     (cdr (assoc target org-export-target-aliases))
