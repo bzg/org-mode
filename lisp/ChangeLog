@@ -2,6 +2,7 @@
 
 	* org-exp.el (org-export-as-html): Add a "content" div around the
 	entire content of the body tag.
+	(org-export-html-get-bibliography): New function.
 
 	* org.el (org-match-sparse-tree): Renamed from
 	`org-tags-sparse-tree'.

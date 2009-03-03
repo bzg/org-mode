@@ -4047,9 +4047,12 @@ lang=\"%s\" xml:lang=\"%s\">
 			(or (nth 4 lang-words) "Footnotes")
 			(mapconcat 'identity (nreverse footnotes) "\n"))
 		"\n"))
+      (let ((bib (org-export-html-get-bibliography)))
+	(when bib
+	  (insert "\n" bib "\n")))
       (unless body-only
 	(when (plist-get opt-plist :auto-postamble)
-	  (insert "<div id=\"postamble\">")
+	  (insert "<div id=\"postamble\">\n")
 	  (when (and org-export-author-info author)
 	    (insert "<p class=\"author\"> "
 		    (nth 1 lang-words) ": " author "\n")
@@ -4170,6 +4173,22 @@ lang=\"%s\" xml:lang=\"%s\">
 		(if caption (concat "\n<p>" caption "</p>") "")
 		(if org-par-open "\n<p>" ""))))))
 
+(defun org-export-html-get-bibliography ()
+  "Find bibliography, cut it out and return it."
+  (catch 'exit
+    (let (beg end (cnt 1))
+      (save-excursion
+	(goto-char (point-min))
+	(when (re-search-forward "^[ \t]*<div \\(id\\|class\\)=\"bibliography\"" nil t)
+	  (setq beg (match-beginning 0))
+	  (while (re-search-forward "</?div\\>" nil t)
+	    (setq cnt (+ cnt (if (string= (match-string 0) "<div") +1 -1)))
+	    (when (= cnt 0)
+	      (and (looking-at ">") (forward-char 1))
+	      (setq bib (buffer-substring beg (point)))
+	      (delete-region beg (point))
+	    (throw 'exit bib))))
+	nil))))
 
 (defvar org-table-colgroup-info nil)
 (defun org-format-table-ascii (lines)
