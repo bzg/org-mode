@@ -9823,6 +9823,8 @@ only lines with a TODO keyword are included in the output."
 		  tags))
 	  (when org-use-tag-inheritance
 	    (setcdr (car tags-alist)
+		    (org-remove-uniherited-tags (cdar tags-alist)))
+	    (setcdr (car tags-alist)
 		    (mapcar (lambda (x)
 			      (setq x (copy-sequence x))
 			      (org-add-prop-inherited x))

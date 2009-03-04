@@ -1,3 +1,7 @@
+2009-03-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-scan-tags): Improve tag inheritance.
+
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-add-planning-info): Fix bug with looking for keyword
