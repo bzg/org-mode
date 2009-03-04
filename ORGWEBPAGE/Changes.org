@@ -43,6 +43,15 @@ the cookie is fontified.  Set it to =t= if you want the entire
 task headline to be fontified.
 
 
+*** Tag searches are now case-sensitive
+
+From this release on, tag searches will be case sensitive.  While
+I still think it would be nice to have them case-insensitive,
+this was both an inconsistency (TODO keyword searches have always
+been case-sensitive), and trouble for coding some efficient
+algorithms.  So please make sure that you give the tags with
+correct casing when prompted for a match expression.
+
 ** Details
 
 *** Improved ASCII export of links
