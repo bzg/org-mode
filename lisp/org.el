@@ -9761,13 +9761,15 @@ ACTION can be `set', `up', `down', or a character."
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
 (defvar org-trust-scanner-tags nil
-  "NEVER SET THIS VARIABLE, this is for internal dynamical scoping only.
+  "Should `org-get-tags-at' use the tags fro the scanner.
+This is for internal dynamical scoping only.
 When this is non-nil, the function `org-get-tags-at' will return the value
 of `org-scanner-tags' instead of building the list by itself.  This
 can lead to large speed-ups when the tags scanner is used in a file with
 many entries, and when the list of tags is retrieved, for example to
 obtain a list of properties.  Building the tags list for each entry in such
-a file becomes an N^2 operation.")
+a file becomes an N^2 operation - but with this variable set, it scales
+as N.")
 
 (defun org-scan-tags (action matcher &optional todo-only)
   "Scan headline tags with inheritance and produce output ACTION.
