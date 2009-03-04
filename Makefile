@@ -308,37 +308,37 @@ dummy:
 
 # Dependencies
 
-lisp/org.elc:           lisp/org-macs.elc lisp/org-compat.elc lisp/org-faces.elc
-lisp/org-agenda.elc:       lisp/org.elc
-lisp/org-attach.elc:       lisp/org.elc lisp/org-id.elc
-lisp/org-archive.elc:      lisp/org.elc
-lisp/org-bbdb.elc:         lisp/org.elc
-lisp/org-bibtex.elc:       lisp/org.elc
-lisp/org-clock.elc:        lisp/org.elc
-lisp/org-colview.elc:      lisp/org.elc
-lisp/org-colview-xemacs.elc:      lisp/org.elc
-lisp/org-compat.elc:       lisp/org-macs.elc
-lisp/org-exp.elc:          lisp/org.elc lisp/org-agenda.elc
-lisp/org-export-latex.elc: lisp/org.elc lisp/org-exp.elc
-lisp/org-faces.elc:        lisp/org-macs.elc lisp/org-compat.elc
-lisp/org-footnotes.elc:    lisp/org-macs.elc lisp/org-compat.elc
-lisp/org-gnus.elc:         lisp/org.elc
-lisp/org-id.elc:           lisp/org.elc
-lisp/org-info.elc:         lisp/org.elc
-lisp/org-irc.elc:          lisp/org.elc
-lisp/org-jsinfo.elc:       lisp/org.elc lisp/org-exp.elc
-lisp/org-list.elc:         lisp/org-macs.elc lisp/org-compat.elc
-lisp/org-mac-message.elc:  lisp/org.elc
+lisp/org.elc:           lisp/org-macs.el lisp/org-compat.el lisp/org-faces.el
+lisp/org-agenda.elc:       lisp/org.el
+lisp/org-attach.elc:       lisp/org.el lisp/org-id.el
+lisp/org-archive.elc:      lisp/org.el
+lisp/org-bbdb.elc:         lisp/org.el
+lisp/org-bibtex.elc:       lisp/org.el
+lisp/org-clock.elc:        lisp/org.el
+lisp/org-colview.elc:      lisp/org.el
+lisp/org-colview-xemacs.elc:      lisp/org.el
+lisp/org-compat.elc:       lisp/org-macs.el
+lisp/org-exp.elc:          lisp/org.el lisp/org-agenda.el
+lisp/org-export-latex.elc: lisp/org.el lisp/org-exp.el
+lisp/org-faces.elc:        lisp/org-macs.el lisp/org-compat.el
+lisp/org-footnotes.elc:    lisp/org-macs.el lisp/org-compat.el
+lisp/org-gnus.elc:         lisp/org.el
+lisp/org-id.elc:           lisp/org.el
+lisp/org-info.elc:         lisp/org.el
+lisp/org-irc.elc:          lisp/org.el
+lisp/org-jsinfo.elc:       lisp/org.el lisp/org-exp.el
+lisp/org-list.elc:         lisp/org-macs.el lisp/org-compat.el
+lisp/org-mac-message.elc:  lisp/org.el
 lisp/org-macs.elc:
-lisp/org-mew.elc:          lisp/org.elc
-lisp/org-mhe.elc:          lisp/org.elc
-lisp/org-mouse.elc:        lisp/org.elc
-lisp/org-plot.elc:         lisp/org.elc lisp/org-exp.elc lisp/org-table.elc
+lisp/org-mew.elc:          lisp/org.el
+lisp/org-mhe.elc:          lisp/org.el
+lisp/org-mouse.elc:        lisp/org.el
+lisp/org-plot.elc:         lisp/org.el lisp/org-exp.el lisp/org-table.el
 lisp/org-publish.elc:
-lisp/org-remember.elc:     lisp/org.elc
-lisp/org-rmail.elc:        lisp/org.elc
-lisp/org-table.elc:        lisp/org.elc
-lisp/org-timer.el:         lisp/org.elc
-lisp/org-vm.elc:           lisp/org.elc
-lisp/org-w3m.elc:          lisp/org.elc
-lisp/org-wl.elc:           lisp/org.elc
+lisp/org-remember.elc:     lisp/org.el
+lisp/org-rmail.elc:        lisp/org.el
+lisp/org-table.elc:        lisp/org.el
+lisp/org-timer.elc:         lisp/org.el
+lisp/org-vm.elc:           lisp/org.el
+lisp/org-w3m.elc:          lisp/org.el
+lisp/org-wl.elc:           lisp/org.el
