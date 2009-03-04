@@ -4189,7 +4189,7 @@ lang=\"%s\" xml:lang=\"%s\">
 (defun org-export-html-get-bibliography ()
   "Find bibliography, cut it out and return it."
   (catch 'exit
-    (let (beg end (cnt 1))
+    (let (beg end (cnt 1) bib)
       (save-excursion
 	(goto-char (point-min))
 	(when (re-search-forward "^[ \t]*<div \\(id\\|class\\)=\"bibliography\"" nil t)
