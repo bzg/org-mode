@@ -9758,6 +9758,17 @@ ACTION can be `set', `up', `down', or a character."
 ;;;; Tags
 
 (defvar org-agenda-archives-mode)
+(defvar org-scanner-tags nil
+  "The current tag list while the tags scanner is running.")
+(defvar org-trust-scanner-tags nil
+  "NEVER SET THIS VARIABLE, this is for internal dynamical scoping only.
+When this is non-nil, the function `org-get-tags-at' will return the value
+of `org-scanner-tags' instead of building the list by itself.  This
+can lead to large speed-ups when the tags scanner is used in a file with
+many entries, and when the list of tags is retrieved, for example to
+obtain a list of properties.  Building the tags list for each entry in such
+a file becomes an N^2 operation.")
+
 (defun org-scan-tags (action matcher &optional todo-only)
   "Scan headline tags with inheritance and produce output ACTION.
 
@@ -9820,7 +9831,8 @@ only lines with a TODO keyword are included in the output."
 	  (setq tags-list
 		(if org-use-tag-inheritance
 		    (apply 'append (mapcar 'cdr (reverse tags-alist)))
-		  tags))
+		  tags)
+		org-scanner-tags tags-list)
 	  (when org-use-tag-inheritance
 	    (setcdr (car tags-alist)
 		    (mapcar (lambda (x)
@@ -10157,34 +10169,39 @@ the tags of the current headline come last.
 When LOCAL is non-nil, only return tags from the current headline,
 ignore inherited ones."
   (interactive)
-  (let (tags ltags lastpos parent)
-    (save-excursion
-      (save-restriction
-	(widen)
-	(goto-char (or pos (point)))
-	(save-match-data
-	  (catch 'done
-	    (condition-case nil
-		(progn
-		  (org-back-to-heading t)
-		  (while (not (equal lastpos (point)))
-		    (setq lastpos (point))
-		    (when (looking-at (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
-		      (setq ltags (org-split-string
-				   (org-match-string-no-properties 1) ":"))
-		      (when parent
-			(setq ltags (mapcar 'org-add-prop-inherited ltags)))
-		      (setq tags (append
-				  (if parent
-				      (org-remove-uniherited-tags ltags)
-				    ltags)
-				  tags)))
-		    (or org-use-tag-inheritance (throw 'done t))
-		    (if local (throw 'done t))
-		    (org-up-heading-all 1)
-		    (setq parent t)))
-	      (error nil)))))
-      (append (org-remove-uniherited-tags org-file-tags) tags))))
+  (if (and org-trust-scanner-tags
+	   (or (not pos) (equal pos (point)))
+	   (not local))
+      org-scanner-tags
+    (let (tags ltags lastpos parent)
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (or pos (point)))
+	  (save-match-data
+	    (catch 'done
+	      (condition-case nil
+		  (progn
+		    (org-back-to-heading t)
+		    (while (not (equal lastpos (point)))
+		      (setq lastpos (point))
+		      (when (looking-at
+			     (org-re "[^\r\n]+?:\\([[:alnum:]_@:]+\\):[ \t]*$"))
+			(setq ltags (org-split-string
+				     (org-match-string-no-properties 1) ":"))
+			(when parent
+			  (setq ltags (mapcar 'org-add-prop-inherited ltags)))
+			(setq tags (append
+				    (if parent
+					(org-remove-uniherited-tags ltags)
+				      ltags)
+				    tags)))
+		      (or org-use-tag-inheritance (throw 'done t))
+		      (if local (throw 'done t))
+		      (org-up-heading-all 1)
+		      (setq parent t)))
+		(error nil)))))
+	(append (org-remove-uniherited-tags org-file-tags) tags)))))
 
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
@@ -10673,7 +10690,16 @@ the scanner.  The following items can be given here:
              will be used as value for `org-agenda-skip-function', so whenever
              the the function returns t, FUNC will not be called for that
              entry and search will continue from the point where the
-             function leaves it."
+             function leaves it.
+
+If your function needs to retrieve the tags including inherited tags
+at the *current* entry, you can use the value of the variable
+`org-scanner-tags' which will be much faster than getting the value
+with `org-get-tags-at'.  If your function gets properties with
+`org-entry-properties' at the *current* entry, bind `org-trust-scanner-tags'
+to t around the call to `org-entry-properties' to get the same speedup.
+Note that if your function moves around to retrieve tags and properties at
+a *different* entry, you cannot use these techniques."
   (let* ((org-agenda-archives-mode nil) ; just to make sure
 	 (org-agenda-skip-archived-trees (memq 'archive skip))
 	 (org-agenda-skip-comment-trees (memq 'comment skip))
@@ -10878,7 +10904,7 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 	    )
 
 	  (when (memq which '(all standard))
-	    ;; Get the standard properties, like :PORP: ...
+	    ;; Get the standard properties, like :PROP: ...
 	    (setq range (org-get-property-block beg end))
 	    (when range
 	      (goto-char (car range))

@@ -5,6 +5,11 @@
 	case-sensitive.
 	(org-scan-tags): Use the internal tags list instead of creating it
 	from scratch.
+	(org-trust-scanner-tags, org-scanner-tags): New variables.
+	(org-scan-tags): Set `org-scanner-tags'.
+	(org-get-tags-at): Take advantage of `org-trust-scanner-tags'.
+	(org-map-entries): Document the possible speedup using scanner
+	tags.
 
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
