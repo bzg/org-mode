@@ -9788,7 +9788,7 @@ only lines with a TODO keyword are included in the output."
 				   (buffer-name (buffer-base-buffer)))))))
 	 (case-fold-search nil)
          lspos tags tags-list
-	 (tags-alist (list (cons 0 (mapcar 'downcase org-file-tags))))
+	 (tags-alist (list (cons 0 org-file-tags)))
 	 (llast 0) rtn rtn1 level category i txt
 	 todo marker entry priority)
     (when (not (or (member action '(agenda sparse-tree)) (functionp action)))
@@ -9813,7 +9813,7 @@ only lines with a TODO keyword are included in the output."
 	    (setq i (1- i)))
 	  ;; add the next tags
 	  (when tags
-	    (setq tags (mapcar 'downcase (org-split-string tags ":"))
+	    (setq tags (org-split-string tags ":")
 		  tags-alist
 		  (cons (cons level tags) tags-alist)))
 	  ;; compile tags for current headline
@@ -10030,7 +10030,7 @@ also TODO lines."
 			   `(,po (or ,gv "") ,pv)
 			 `(,po (string-to-number (or ,gv ""))
 			       ,(string-to-number pv) ))))
-		    (t `(member ,(downcase tag) tags-list)))
+		    (t `(member tag tags-list)))
 		mm (if minus (list 'not mm) mm)
 		term rest)
 	  (push mm tagsmatcher))

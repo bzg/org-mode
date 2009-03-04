@@ -1,6 +1,8 @@
 2009-03-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-scan-tags): Improve tag inheritance.
+	(org-scan-tags, org-make-tags-matcher): Make tag comparison
+	case-sensitive.
 
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
