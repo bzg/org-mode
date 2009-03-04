@@ -1,5 +1,9 @@
 2009-03-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example): Mark
+	temporary buffer unmodified, so that it will be killed even if
+	mode like message mode has decided to assign a file name.
+
 	* org.el (org-scan-tags): Improve tag inheritance.
 	(org-scan-tags, org-make-tags-matcher): Make tag comparison
 	case-sensitive.

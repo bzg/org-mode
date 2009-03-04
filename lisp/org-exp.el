@@ -2471,6 +2471,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 			  (funcall mode)
 			(fundamental-mode))
 		      (font-lock-fontify-buffer)
+		      (set-buffer-modified-p nil)
 		      (org-export-htmlize-region-for-paste
 		       (point-min) (point-max))))
 	      (if (string-match "<pre\\([^>]*\\)>\n?" rtn)
