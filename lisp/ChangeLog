@@ -3,6 +3,8 @@
 	* org.el (org-scan-tags): Improve tag inheritance.
 	(org-scan-tags, org-make-tags-matcher): Make tag comparison
 	case-sensitive.
+	(org-scan-tags): Use the internal tags list instead of creating it
+	from scratch.
 
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 

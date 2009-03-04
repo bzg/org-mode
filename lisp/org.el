@@ -9800,8 +9800,8 @@ only lines with a TODO keyword are included in the output."
 	(org-remove-occur-highlights))
       (while (re-search-forward re nil t)
 	(catch :skip
-	  (setq todo (if (match-end 1) (match-string 2))
-		tags (if (match-end 4) (match-string 4)))
+	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))
+		tags (if (match-end 4) (org-match-string-no-properties 4)))
 	  (goto-char (setq lspos (1+ (match-beginning 0))))
 	  (setq level (org-reduced-level (funcall outline-level))
 		category (org-get-category))
@@ -9823,14 +9823,13 @@ only lines with a TODO keyword are included in the output."
 		  tags))
 	  (when org-use-tag-inheritance
 	    (setcdr (car tags-alist)
-		    (org-remove-uniherited-tags (cdar tags-alist)))
-	    (setcdr (car tags-alist)
 		    (mapcar (lambda (x)
 			      (setq x (copy-sequence x))
 			      (org-add-prop-inherited x))
 			    (cdar tags-alist))))
 	  (when (and tags org-use-tag-inheritance
-		     (not (eq t org-use-tag-inheritance)))
+		     (or (not (eq t org-use-tag-inheritance))
+			 org-tags-exclude-from-inheritance))
 	    ;; selective inheritance, remove uninherited ones
 	    (setcdr (car tags-alist)
 		    (org-remove-uniherited-tags (cdar tags-alist))))
@@ -9862,7 +9861,10 @@ only lines with a TODO keyword are included in the output."
 			  (if org-tags-match-list-sublevels
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
-			 category (org-get-tags-at))
+			 category
+			 ;(org-get-tags-at)
+			 tags-list
+			 )
 		    priority (org-get-priority txt))
 	      (goto-char lspos)
 	      (setq marker (org-agenda-new-marker))
