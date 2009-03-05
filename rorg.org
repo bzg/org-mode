@@ -348,6 +348,13 @@ to more difficult debugging).
   allow state changes?
 - Does this matter?
 
+****** passing arguments to resources
+So I(eric) may be getting ahead of myself here, but what do you think
+about the ability to pass arguments to resources.  I'm having visions
+of google map-reduce, processes spread out across multiple machines.
+
+Maybe we could do this by allowing the arguments to be specified?
+
 *** source-target pairs
 
     The following can be used for special considerations based on
@@ -778,4 +785,4 @@ useful (I use it all the time).
 
 
 * Buffer Dictionary
- LocalWords:  DBlocks dblocks litorgy el
+ LocalWords:  DBlocks dblocks litorgy el eric
