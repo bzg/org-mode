@@ -1,3 +1,8 @@
+2009-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-additional-option-like-keywords): Add two more
+	keywords.
+
 2009-03-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example): Mark

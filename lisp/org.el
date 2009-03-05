@@ -8302,6 +8302,7 @@ This function can be used in a hook."
     "BEGIN_QUOTE" "END_QUOTE"
     "BEGIN_VERSE" "END_VERSE"
     "BEGIN_SRC" "END_SRC"
+    "CATEGORY" "COLUMNS"
     "CAPTION" "LABEL" "ATTR_HTML" "ATTR_LaTeX"))
 
 (defcustom org-structure-template-alist
