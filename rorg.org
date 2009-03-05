@@ -280,6 +280,74 @@ plus a table reference within that org file. Thus maybe something like
   (R-obj-name-2 . (:tblref tbl-name-or-id-2 :file file-2)))
 #+end_src emacs-lisp
 
+**** Eric: referencing data in general
+So here's some thoughts for referencing data (henceforth referred to
+as *resources*).  I think this is the next thing we need to tackle for
+implementation to move forward.  We don't need to implement everything
+below right off the bat, but I'd like to get these lists as full as
+possible so we don't make any implementation assumptions which
+preclude real needs.
+
+We need to reference resources of the following types...
+
+- table (list)
+- output from a source code block (list or hash)
+- property values of an outline header (hash)
+- list (list)
+- description list (hash)
+- more?...
+
+All of these resources will live in org files which could be
+
+- the current file (default)
+- another file on the same system (path)
+- another file on the web (url)
+- another file in a git repo (file and commit hash)
+
+What information should each of these resources be able to supply?
+I'm thinking (again not that we'll implement all of these but just to
+think of them)...
+
+- ranges or points of vector data
+- key/value pairs from a hash
+- when the object was last modified
+- commit info (author, date, message, sha, etc...)
+- pointers to the resources upon which the resource relies
+
+So we need a referencing syntax powerful enough to handle all of these
+alternatives.  Maybe something like =path:sha:name:range= where
+
+- path :: is empty for the current file, is a path for files on the
+          same system, and is a url otherwise
+- sha :: is an option git commit indicator
+- name :: is the table/header/source-block name or id for location
+          inside of the org file (this would not be optional)
+- range :: would indicate which information is requested from the
+           resource, so it could be a range to access parts of a
+           table, or the names of properties to be referenced from an
+           outline header
+
+Once we agree on how this should work, I'll try to stub out some code,
+so that we can get some simple subset of this functionality working,
+hopefully something complex enough to do the following...
+- [[* resource reference example][resource-reference-example]]
+
+***** questions
+****** multiple outputs
+Do we want things like a source code block to leave multiple outputs,
+or do we only want them to be able to output one vector or hash?
+
+****** environment (state and side-effects)
+This design assumes that any changes will explicitly pass data in a
+functional programming style.  This makes no assumptions about things
+like source code blocks changing state (in general state changes lead
+to more difficult debugging).
+
+- Do we want to take steps so ensure we do things like execute
+  consecutive R blocks in different environment, or do we want to
+  allow state changes?
+- Does this matter?
+
 *** source-target pairs
 
     The following can be used for special considerations based on
@@ -613,6 +681,42 @@ First assign the variable with some sort of interpreted line
 - this is independent of any particular type of source code
 - this could use references to table ranges
 
+
+
+** resource reference example
+
+This block holds an array of information written in [[http://www.yaml.org][YAML]]
+
+#name: yaml-array
+#+begin_src yaml
+--- 
+- 1
+- 2
+- 3
+- 4
+- 5
+#+end_src
+
+This next block saves the information in the YAML array into the ruby
+variable =ya= and then in ruby it multiplies each variable in the =ya=
+by 2.
+
+#name: ruby-array
+#assign: ya = yaml-array
+#+begin_src ruby
+ya.map{ |e| e * 2 }
+#+end_src
+
+This final block takes the output of the ruby block, and writes it to
+cell =0,0= through =0,3= of the table
+
+#name: example-table
+#assign: self[0, (1..3)] = ruby-array
+| example results |
+|-----------------|
+|                 |
+|                 |
+|                 |
 
 
 * COMMENT Commentary
