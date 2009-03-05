@@ -32,8 +32,8 @@
 (require 'org)
 
 (defun litorgy-execute-src-block-maybe ()
-  "Detect if this is context for a litorgical src-block and run if
-so then run `litorgy-execute-src-block'."
+  "Detect if this is context for a litorgical src-block and if so
+then run `litorgy-execute-src-block'."
   (let ((case-fold-search t))
     (if (save-excursion
           (beginning-of-line 1)

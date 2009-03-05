@@ -1,4 +1,4 @@
-;;; org-R.el --- Numerical computation and data visualisation for org-mode using R
+;;; org-R.el --- Computing and data visualisation in Org-mode using R
 
 ;; Copyright (C) 2009
 ;;   Free Software Foundation, Inc.
@@ -27,12 +27,12 @@
 ;;; Commentary:
 
 ;; This file allows R (http://www.r-project.org) code to be applied to
-;; emacs org-mode (http://orgmode.org) tables. When the
-;; result of the analysis is a vector or matrix, it is output back
-;; into the org-mode buffer as a new org table. Alternatively the R
-;; code may be used to plot the data in the org table. It requires R to be
-;; running in an inferior-ess-mode buffer (install Emacs Speaks
-;; Statistics http://ess.r-project.org and issue M-x R). 
+;; emacs org-mode (http://orgmode.org) tables. When the result of the
+;; analysis is a vector or matrix, it is output back into the org-mode
+;; buffer as a new org table. Alternatively the R code may be used to
+;; plot the data in the org table. It requires R to be running in an
+;; inferior-ess-mode buffer (install Emacs Speaks Statistics
+;; http://ess.r-project.org and issue M-x R).
 ;; 
 ;;
 ;; The user interface is via two different options lines in the org
@@ -87,6 +87,16 @@ To see a more human-readable version of this, look at the code,
 or type dput(write.org.table) RET at the R (inferior-ess-mode
 buffer) prompt.")
 
+(defun org-R-apply-maybe ()
+  (if (save-excursion
+	(beginning-of-line 1)
+	(looking-at "#\\+RR?:"))
+      (progn (call-interactively 'org-R-apply)
+	     t) ;; to signal that we took action
+    nil)) ;; to signal that we did not
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-R-apply-maybe)
+
 
 (defun org-R-apply ()
   "Construct and evaluate an R function call.
@@ -129,7 +139,7 @@ an org table where appropriate."
       (delete-other-windows) ;; FIXME
       (if (plist-get options :showcode) (org-R-showcode code)))))
 
-(defun org-R-apply-to-subtree ()
+(defun org-R-apply-throughout-subtree ()
   "Call org-R-apply in every org-R block in current subtree."
   ;; This currently relies on re-search-forward leaving point after
   ;; the #+RR?: If point were at the beginning of the line, then
@@ -146,7 +156,7 @@ an org table where appropriate."
       (while (looking-at "#\\+RR?")
 	(forward-line)))))
 
-(defun org-R-apply-to-buffer ()
+(defun org-R-apply-throughout-buffer ()
   "Call org-R-apply in every org-R block in the buffer."
   (interactive)
   (save-excursion
@@ -159,7 +169,8 @@ an org table where appropriate."
   
 (defun org-R-construct-code (options)
   "Construct the R function that implements the requested
-behaviour. The body of this function derives from two sources:
+behaviour.
+The body of this function derives from two sources:
 
 1. Explicit R code which is read from lines starting with
 #+RR: by org-R-get-user-code, and
@@ -178,7 +189,7 @@ org-R-off-the-shelf-code."
 	     (when action (concat (org-R-off-the-shelf-code options) ";"))))))
 
 (defun org-R-get-user-code (&optional R)
-  "Read user-supplied R code from #+RR: lines"
+  "Read user-supplied R code from #+RR: lines."
   (let ((case-fold-search t))
     (save-excursion
       (while (looking-at "^#\\+\\(RR?:\\) *\\(.*\\)")
@@ -407,7 +418,9 @@ version?
    ", "))
 
 (defun org-R-make-index-vectors (cols)
-  "COLS is the lisp form given by the `columns:' option. It may
+  "Construct R indexing vectors as strings from lisp form.
+
+COLS is the lisp form given by the `columns:' option. It may
 take the following forms:
 
 1. integer atom        - the number of the column
@@ -768,8 +781,8 @@ in org-table.el.
     p))
 
 (defun org-R-add-options-to-plist (p opt-string op regexp)
-  "Parse a #+R: line and set values in the property list
-p. This function is adapted from similar functions in org-exp.el
+  "Parse a #+R: line and set values in the property list p.
+This function is adapted from similar functions in org-exp.el
 and org-plot.el. It might be a good idea to have a single
 function serving these three files' needs."
   ;; Adapted from org-exp.el and org-plot.el
@@ -791,7 +804,7 @@ function serving these three files' needs."
   )
 (defun org-R-showcode (R)
   "Display R function constructed by org-R in a new R-mode
-buffer"
+buffer."
   (split-window-vertically)
   (switch-to-buffer "*org-table.R*")
   (kill-region (point-min) (point-max))
@@ -804,11 +817,14 @@ buffer"
   )
 
 (defun org-R-get-remote-range (name-or-id form)
-  "This is a refactoring of Carsten's original version. I have
+  "Get a field value or a list of values in a range from table at ID.
+
+This is a refactoring of Carsten's original version. I have
 extracted the first bit of his function and named it
-org-R-find-table (which would presumably be called
-something like org-table-find-table or org-id-find-table if this
-were accepted).
+org-R-find-table (which would presumably be called something like
+org-table-find-table or org-id-find-table if this were accepted).
+
+---
 
 Get a field value or a list of values in a range from table at ID.
 

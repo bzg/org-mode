@@ -569,7 +569,9 @@ and probably has some advantages (and probably shortfalls).
 
 
 * Tasks
-
+** litorgy-R
+*** TODO ability to select which of multiple R sessions is being used (like ess-switch-process in .R buffers)
+*** TODO a header argument specifying silent evaluation (no output)
 
 * Sandbox
 This is a place for code examples
@@ -601,10 +603,13 @@ To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:
 them with =M-x eval-buffer=
 
 #+begin_src R :replace t
+hist(rgamma(20,3,3))
 a <- 9
-b <- 18
+b <- 17
 a + b
 #+end_src
+
+: 26
 
 
 ** free variables
