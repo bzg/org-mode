@@ -1076,10 +1076,10 @@ the currently selected interval size."
     (while (< ts te)
       (or (bolp) (insert "\n"))
       (setq p1 (plist-put p1 :tstart (format-time-string
-				      (car org-time-stamp-formats)
+				      (org-time-stamp-format nil t)
 				      (seconds-to-time ts))))
       (setq p1 (plist-put p1 :tend (format-time-string
-				    (car org-time-stamp-formats)
+				    (org-time-stamp-format nil t)
 				    (seconds-to-time (setq ts (+ ts step))))))
       (insert "\n" (if (eq step0 'day) "Daily report: " "Weekly report starting on: ")
 	      (plist-get p1 :tstart) "\n")

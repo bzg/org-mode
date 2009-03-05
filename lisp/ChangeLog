@@ -1,5 +1,8 @@
 2009-03-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clocktable-steps): Use inactive time stamps
+	for clocktable steps.
+
 	* org.el (org-additional-option-like-keywords): Add two more
 	keywords.
 
