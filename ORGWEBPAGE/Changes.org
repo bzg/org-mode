@@ -10,7 +10,7 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.24 (in preparation)
+* Version 6.24
  :PROPERTIES:
  :VISIBILITY: content
  :END:
@@ -132,12 +132,12 @@ really nice addition.
 
 *** org-collector.el is now a contributed package
 
-/org-collector.el/ provides functions to create tables by by
-collecting and processing properties collected from entries in a
-specific scope like the current tree or file, or even from all
-agenda files.  General lisp expressions can be used to manipulate
-the property values before they are inserted into an org-mode
-table, for example as a dynamic block.
+/org-collector.el/ provides functions to create tables by
+collecting and processing properties from entries in a specific
+scope like the current tree or file, or even from all agenda
+files.  General lisp expressions can be used to manipulate the
+property values before they are inserted into an org-mode table,
+for example as a dynamic block that is easy to update.
 
 Thanks to Eric Schulte for yet another great contribution to
 Org.

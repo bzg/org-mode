@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.23trans
+;; Version: 6.24
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -88,12 +88,12 @@ This is the compiled version of the format.")
 (org-defkey org-columns-map [down]
 	    (lambda () (interactive)
 	      (let ((col (current-column)))
-		(next-line)
+		(org-no-warnings (next-line))
 		(move-to-column col))))
 (org-defkey org-columns-map [up]
 	    (lambda () (interactive)
 	      (let ((col (current-column)))
-		(previous-line) 
+		(org-no-warnings (previous-line))
 		(move-to-column col))))
 (org-defkey org-columns-map [(shift right)] 'org-columns-next-allowed-value)
 (org-defkey org-columns-map "n" 'org-columns-next-allowed-value)
