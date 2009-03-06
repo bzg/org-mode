@@ -3116,13 +3116,14 @@ with @code{shift-selection-mode}.
 @item C-c C-v
 @itemx C-c / t
 @vindex org-todo-keywords
-View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds
-the entire buffer, but shows all TODO items and the headings hierarchy
-above them.  With a prefix argument, search for a specific TODO.  You will be
+View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
+entire buffer, but shows all TODO items and the headings hierarchy above
+them.  With a prefix argument, search for a specific TODO.  You will be
 prompted for the keyword, and you can also give a list of keywords like
-@code{KWD1|KWD2|...}.  With numeric prefix argument N, show the tree for the
-Nth keyword in the variable @code{org-todo-keywords}.  With two prefix
-arguments, find all TODO and DONE entries.
+@code{KWD1|KWD2|...} to list entries that match any one of these keywords.
+With numeric prefix argument N, show the tree for the Nth keyword in the
+variable @code{org-todo-keywords}.  With two prefix arguments, find all TODO
+and DONE entries.
 @kindex C-c a t
 @item C-c a t
 Show the global TODO list.  Collects the TODO items from all agenda
@@ -4028,8 +4029,13 @@ only TODO items and force checking subitems (see variable
 @code{org-tags-match-list-sublevels}).
 @end table
 
-The syntax for matching tags is described in @ref{Matching tags and
-properties}.
+These commands all prompt for a match string which allows basic Boolean logic
+like @samp{+boss+urgent-project1}, to find entries with tags @samp{boss} and
+@samp{urgent}, but not @samp{project1}, or @samp{Kathy|Sally} to find entries
+which are tagged @samp{Kathy} or @samp{Sally}.  The full syntax of the search
+string is rich and allows also matching against TODO keywords, entry levels
+and properties.  For a complete description with many examples, see
+@ref{Matching tags and properties}.
 
 
 @node Properties and Columns, Dates and Times, Tags, Top
@@ -4514,6 +4520,14 @@ You can add formulas to the column view table and you may add plotting
 instructions in front of the table - these will survive an update of the
 block.  If there is a @code{#+TBLFM:} after the table, the table will
 actually be recalculated automatically after an update.
+
+An alternative way to capture and process property values into a table is
+provided by Eric Schulte's @file{org-collector.el} which is a contributed
+package@footnote{Contributed packages are not part of Emacs, but are
+distributed with the main distribution of Org (see
+@uref{http://orgmode.org}).}.  It provides a general API to collect
+properties from entries in a certain scope, and arbitrary Lisp expressions to
+process these values before inserting them into a table or a dynamic block.
 
 @node Property API,  , Column view, Properties and Columns
 @section The Property API
@@ -6012,13 +6026,11 @@ in an Org or Diary file.
 @cindex @file{appt.el}
 @cindex appointment reminders
 
-Org can interact with Emacs appointments notification facility.
-
-To add all the appointments of your agenda files, use the command
-@code{org-agenda-to-appt}.  This commands also lets you filter through
-the list of your appointments and add only those belonging to a specific
-category or matching a regular expression. See the docstring for
-details.
+Org can interact with Emacs appointments notification facility.  To add all
+the appointments of your agenda files, use the command
+@code{org-agenda-to-appt}.  This commands also lets you filter through the
+list of your appointments and add only those belonging to a specific category
+or matching a regular expression. See the docstring for details.
 
 @node Global TODO list, Matching tags and properties, Weekly/daily agenda, Built-in agenda views
 @subsection The global TODO list
@@ -7329,7 +7341,6 @@ For example, here is a Perl program that gets the TODO list from
 Emacs/Org and prints all the items, preceded by a checkbox:
 
 @example
-@group
 #!/usr/bin/perl
 
 # define the Emacs command to run
@@ -7340,15 +7351,12 @@ $agenda = qx@{$cmd 2>/dev/null@};
 
 # loop over all lines
 foreach $line (split(/\n/,$agenda)) @{
-
   # get the individual values
   ($category,$head,$type,$todo,$tags,$date,$time,$extra,
    $priority_l,$priority_n) = split(/,/,$line);
-
   # process and print
   print "[ ] $head\n";
 @}
-@end group
 @end example
 
 @node Agenda column view,  , Custom agenda views, Agenda Views
