@@ -563,7 +563,7 @@ not be modified."
    if(elem.cacheClassTarget)
      target.className = elem.cacheClassTarget;
  }
-/*]]>*/-->
+/*]]>*///-->
 </script>"
 "Basic javascript that is needed by HTML files produced by Org-mode.")
 
@@ -599,7 +599,7 @@ not be modified."
                                white-space:nowrap; }
   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
                                  font-weight:bold; }
-  /*]]>*/-->
+  /*]]>*///-->
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and

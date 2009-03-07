@@ -5,6 +5,8 @@
 	`org-export-html-style-include-scripts'.
 	(org-export-as-html): Honor new option
 	`org-export-html-style-include-scripts'.
+	(org-export-html-scripts, org-export-html-style-default): Fix
+	xml issues with the Safari browser.
 
 2009-03-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
