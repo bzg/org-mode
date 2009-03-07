@@ -535,6 +535,13 @@ in this way, it will be wrapped."
   :group 'org-export-html
   :type '(string :tag "File or URL"))
 
+(defcustom org-export-html-style-include-scripts t
+  "Non-nil means, include the javascript snippets in exported HTML files.
+The actual script is defined in `org-export-html-scripts' and should
+not be modified."
+  :group 'org-export-html
+  :type 'boolean)
+
 (defconst org-export-html-scripts
 "<script type=\"text/javascript\">
 <!--/*--><![CDATA[/*><!--*/
@@ -943,6 +950,7 @@ or if they are only using it locally."
     (:tables		      "|"	  org-export-with-tables)
     (:table-auto-headline     nil	  org-export-highlight-first-table-line)
     (:style-include-default   nil	  org-export-html-style-include-default)
+    (:style-include-scripts   nil	  org-export-html-style-include-scripts)
     (:style		      nil	  org-export-html-style)
     (:style-extra	      nil	  org-export-html-style-extra)
     (:agenda-style	      nil	  org-agenda-export-html-style)
@@ -3318,7 +3326,9 @@ PUB-DIR is set, use this as the publishing directory."
 			    org-export-html-style-default)
 			(plist-get opt-plist :style)
 			(plist-get opt-plist :style-extra)
-			"\n" org-export-html-scripts))
+			"\n"
+			(if (plist-get opt-plist :style-include-scripts)
+			    org-export-html-scripts)))
 	 (html-extension (plist-get opt-plist :html-extension))
 	 (link-validate (plist-get opt-plist :link-validation-function))
 	 valid thetoc have-headings first-heading-pos
