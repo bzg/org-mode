@@ -4081,7 +4081,7 @@ will be prompted for."
 			'font-lock-multiline t 'help-echo help)))
 	     (vp (list 'rear-nonsticky org-nonsticky-props
 		       'keymap org-mouse-map 'mouse-face 'highlight
-		       ' font-lock-multiline t 'help-echo help)))
+		       'font-lock-multiline t 'help-echo help)))
 	;; We need to remove the invisible property here.  Table narrowing
 	;; may have made some of this invisible.
 	(remove-text-properties (match-beginning 0) (match-end 0)
