@@ -1,3 +1,10 @@
+2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-preprocess-string)
+	(org-export-select-backend-specific-text)
+	(org-export-format-source-code-or-example)
+	(org-format-org-table-html): Support docbook export.
+
 2009-03-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-html-style-include-scripts): New option.

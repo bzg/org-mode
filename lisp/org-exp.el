@@ -32,6 +32,7 @@
   (require 'cl))
 
 (declare-function org-export-latex-preprocess "org-export-latex" ())
+(declare-function org-export-docbook-preprocess "org-export-docbook" ())
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 (declare-function htmlize-region "ext:htmlize" (beg end))
@@ -1532,8 +1533,11 @@ on this string to produce the exported version."
   (let* ((htmlp (plist-get parameters :for-html))
 	 (asciip (plist-get parameters :for-ascii))
 	 (latexp (plist-get parameters :for-LaTeX))
-	 (backend (cond (htmlp 'html) (latexp 'latex) (asciip 'ascii)))
-
+	 (docbookp (plist-get parameters :for-docbook))
+	 (backend (cond (htmlp 'html)
+			(latexp 'latex)
+			(asciip 'ascii)
+			(docbookp 'docbook)))
 	 (archived-trees (plist-get parameters :archived-trees))
 	 (inhibit-read-only t)
 	 (drawers org-drawers)
@@ -1677,6 +1681,10 @@ on this string to produce the exported version."
       ;; HTML-specific preprocessing
       (when htmlp
 	(org-export-html-preprocess parameters))
+
+      ;; DocBook-specific preprocessing
+      (when docbookp
+        (org-export-docbook-preprocess parameters))
 
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
@@ -1961,7 +1969,8 @@ from the buffer."
 
 (defun org-export-select-backend-specific-text (backend)
   (let ((formatters
-	 '((html "HTML" "BEGIN_HTML" "END_HTML")
+	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
+           (html "HTML" "BEGIN_HTML" "END_HTML")
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
 	(case-fold-search t)
@@ -2442,7 +2451,8 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 		   (org-count-lines code))
 	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
 		    (match-string 1 opts)))
-      (when (and textareap (eq backend 'html))
+      (when (or (and textareap (eq backend 'html))
+                (eq backend 'docbook))
 	;; we cannot use numbering or highlighting.
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
@@ -2458,6 +2468,14 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 		    (buffer-string))))
       ;; Now backend-specific coding
       (cond
+       ((eq backend 'docbook)
+        (setq rtn (concat "<programlisting><![CDATA[\n"
+                          code
+                          "]]>\n</programlisting>\n"))
+        (concat "\n#+BEGIN_DOCBOOK\n"
+                rtn
+                "\n#+END_DOCBOOK\n\n")
+        )
        ((eq backend 'html)
 	;; We are exporting to HTML
 	(when lang
@@ -4366,7 +4384,10 @@ lang=\"%s\" xml:lang=\"%s\">
 	     fnum "")
 	    html)
       (if colgropen (setq html (cons (car html) (cons "</colgroup>" (cdr html)))))
-      (if caption (push (format "<caption>%s</caption>" caption) html))
+      ;; Since the output of HTML table formatter can also be used in
+      ;; DocBook document, we want to always include the caption to make
+      ;; DocBook XML file valid.
+      (push (format "<caption>%s</caption>" (or caption "")) html)
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
 
