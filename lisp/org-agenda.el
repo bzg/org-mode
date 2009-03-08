@@ -126,6 +126,14 @@ that is listed in the agenda view."
   :group 'org-agenda
   :type 'integer)
 
+(defcustom org-agenda-add-entry-text-descriptive-links t
+  "Non-nil means, export org-links as descriptive links in agenda added text.
+This variable applies to the text added to the agenda when
+`org-agenda-add-entry-text-maxlines' is larger than 0.
+When this variable nil, the URL will (also) be shown."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defcustom org-agenda-export-html-style ""
   "The style specification for exported HTML Agenda files.
 If this variable contains a string, it will replace the default <style>
@@ -2132,6 +2140,15 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 					      ".*\n?"))
 		    (with-temp-buffer
 		      (insert txt)
+		      (when org-agenda-add-entry-text-descriptive-links
+			(goto-char (point-min))
+			(while (org-activate-bracket-links (point-max))
+			  (add-text-properties (match-beginning 0) (match-end 0)
+					       '(face org-link))))
+		      (goto-char (point-min))
+		      (while (re-search-forward org-bracket-link-regexp (point-max) t)
+			(set-text-properties (match-beginning 0) (match-end 0)
+					     nil))
 		      (goto-char (point-min))
 		      (while (re-search-forward drawer-re nil t)
 			(delete-region

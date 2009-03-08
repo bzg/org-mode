@@ -1,5 +1,10 @@
 2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-add-entry-text-descriptive-links): New
+	option.
+	(org-agenda-add-entry-text): Honor
+	`org-agenda-add-entry-text-descriptive-links'.
+
 	* org-export-latex.el (org-export-latex-preprocess): Make all
 	external preprocess functions use a PARAMETER arg.
 
