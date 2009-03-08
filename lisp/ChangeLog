@@ -1,5 +1,13 @@
 2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-page-description)
+	(org-export-page-keywords): New variables.
+	(org-export-plist-vars): Add entries for :keywords and
+	:description.
+	(org-infile-export-plist): Parse for new keywords.
+	(org-get-current-options): Add new keywords
+	(org-export-as-html): Publish description and keywords.
+
 	* org-agenda.el (org-agenda-add-entry-text-descriptive-links): New
 	option.
 	(org-agenda-add-entry-text): Honor

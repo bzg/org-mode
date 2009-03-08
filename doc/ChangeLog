@@ -1,3 +1,8 @@
+2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Export options, Export options, In-buffer settings):
+	Document the new keywords.
+
 2009-03-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Matching tags and properties): Collect all

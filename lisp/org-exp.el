@@ -137,6 +137,16 @@ This should have an association in `org-export-language-setup'."
   :group 'org-export-general
   :type 'string)
 
+(defvar org-export-page-description ""
+  "The page description, for the XHTML meta tag.
+This is best set with the #+DESCRIPTION line in a file, it does not make
+sense to set this globally.")
+
+(defvar org-export-page-keywords ""
+  "The page description, for the XHTML meta tag.
+This is best set with the #+KEYWORDS line in a file, it does not make
+sense to set this globally.")
+
 (defcustom org-export-skip-text-before-1st-heading nil
   "Non-nil means, skip all text before the first headline when exporting.
 When nil, that text is exported as well."
@@ -925,6 +935,8 @@ or if they are only using it locally."
   '((:link-up		      nil	  org-export-html-link-up)
     (:link-home		      nil	  org-export-html-link-home)
     (:language		      nil	  org-export-default-language)
+    (:keywords		      nil	  org-export-page-keywords)
+    (:description             nil	  org-export-page-description)
     (:customtime	      nil	  org-display-custom-times)
     (:headline-levels	      "H"	  org-export-headline-levels)
     (:section-numbers	      "num"	  org-export-with-section-numbers)
@@ -1015,7 +1027,8 @@ modified) list.")
 		 (append
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
-		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS")
+		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
+		    "KEYWORDS" "DESCRIPTION")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options a pr style
 	    latex-header
@@ -1035,6 +1048,9 @@ modified) list.")
 	   ((string-equal key "AUTHOR")(setq p (plist-put p :author val)))
 	   ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
 	   ((string-equal key "DATE") (setq p (plist-put p :date val)))
+	   ((string-equal key "KEYWORDS") (setq p (plist-put p :keywords val)))
+	   ((string-equal key "DESCRIPTION")
+	    (setq p (plist-put p :description val)))
 	   ((string-equal key "LANGUAGE") (setq p (plist-put p :language val)))
 	   ((string-equal key "STYLE")
 	    (setq style (concat style "\n" val)))
@@ -3124,6 +3140,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 #+AUTHOR:    %s
 #+EMAIL:     %s
 #+DATE:      %s
+#+DESCRIPTION: 
+#+KEYWORDS: 
 #+LANGUAGE:  %s
 #+OPTIONS:   H:%d num:%s toc:%s \\n:%s @:%s ::%s |:%s ^:%s -:%s f:%s *:%s <:%s
 #+OPTIONS:   TeX:%s LaTeX:%s skip:%s d:%s todo:%s pri:%s tags:%s
@@ -3424,6 +3442,8 @@ PUB-DIR is set, use this as the publishing directory."
 	 (llt org-plain-list-ordered-item-terminator)
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
+	 (keywords    (plist-get opt-plist :keywords))
+	 (description (plist-get opt-plist :description))
 	 (lang-words  nil)
 	 (head-count  0) cnt
 	 (start       0)
@@ -3528,13 +3548,17 @@ lang=\"%s\" xml:lang=\"%s\">
 <meta name=\"generator\" content=\"Org-mode\"/>
 <meta name=\"generated\" content=\"%s\"/>
 <meta name=\"author\" content=\"%s\"/>
+<meta name=\"description\" content=\"%s\"/>
+<meta name=\"keywords\" content=\"%s\"/>
 %s
 </head>
 <body>
 <div id=\"content\">
 "
 		 language language (org-html-expand title)
-		 (or charset "iso-8859-1") date author style))
+		 (or charset "iso-8859-1")
+		 date author description keywords
+		 style))
 
 	(insert (or (plist-get opt-plist :preamble) ""))
 

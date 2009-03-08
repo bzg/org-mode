@@ -8109,6 +8109,8 @@ Insert template with export options, see example below.
 @cindex #+AUTHOR:
 @cindex #+DATE:
 @cindex #+EMAIL:
+@cindex #+DESCRIPTION:
+@cindex #+KEYWORDS:
 @cindex #+LANGUAGE:
 @cindex #+TEXT:
 @cindex #+OPTIONS:
@@ -8121,16 +8123,18 @@ Insert template with export options, see example below.
 @vindex user-mail-address
 @vindex org-export-default-language
 @example
-#+TITLE:     the title to be shown (default is the buffer name)
-#+AUTHOR:    the author (default taken from @code{user-full-name})
-#+DATE:      A date, fixed, of a format string for @code{format-time-string}
-#+EMAIL:     his/her email address (default from @code{user-mail-address})
-#+LANGUAGE:  language for HTML, e.g. @samp{en} (@code{org-export-default-language})
-#+TEXT:      Some descriptive text to be inserted at the beginning.
-#+TEXT:      Several lines may be given.
-#+OPTIONS:   H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+LINK_UP:   the ``up'' link of an exported page
-#+LINK_HOME: the ``home'' link of an exported page
+#+TITLE:       the title to be shown (default is the buffer name)
+#+AUTHOR:      the author (default taken from @code{user-full-name})
+#+DATE:        a date, fixed, of a format string for @code{format-time-string}
+#+EMAIL:       his/her email address (default from @code{user-mail-address})
+#+DESCRIPTION: the page description, e.g. for the XHTML meta tag
+#+KEYWORDS:    the page keywords, e.g. for the XHTML meta tag
+#+LANGUAGE:    language for HTML, e.g. @samp{en} (@code{org-export-default-language})
+#+TEXT:        Some descriptive text to be inserted at the beginning.
+#+TEXT:        Several lines may be given.
+#+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
+#+LINK_UP:     the ``up'' link of an exported page
+#+LINK_HOME:   the ``home'' link of an exported page
 #+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
@@ -9529,6 +9533,7 @@ keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:,
+@itemx #+DESCRIPTION:, #+KEYWORDS:
 @itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:, 
 @itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
