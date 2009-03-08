@@ -1288,7 +1288,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 (defvar org-latex-entities)   ; defined below
 (defvar org-latex-entities-regexp)   ; defined below
 
-(defun org-export-latex-preprocess ()
+(defun org-export-latex-preprocess (parameters)
   "Clean stuff in the LaTeX export."
   ;; Preserve line breaks
   (goto-char (point-min))

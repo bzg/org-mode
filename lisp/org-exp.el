@@ -31,8 +31,8 @@
 (eval-and-compile
   (require 'cl))
 
-(declare-function org-export-latex-preprocess "org-export-latex" ())
-(declare-function org-export-docbook-preprocess "org-export-docbook" ())
+(declare-function org-export-latex-preprocess "org-export-latex" (parameters))
+(declare-function org-export-docbook-preprocess "org-export-docbook" (parameters))
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 (declare-function htmlize-region "ext:htmlize" (beg end))
@@ -1672,7 +1672,7 @@ on this string to produce the exported version."
       ;; LaTeX-specific preprocessing
       (when latexp
 	(require 'org-export-latex nil)
-	(org-export-latex-preprocess))
+	(org-export-latex-preprocess parameters))
 
       ;; ASCII-specific preprocessing
       (when asciip
@@ -1684,6 +1684,7 @@ on this string to produce the exported version."
 
       ;; DocBook-specific preprocessing
       (when docbookp
+	(require 'org-export-docbook nil)
         (org-export-docbook-preprocess parameters))
 
       ;; Remove or replace comments

@@ -1,9 +1,14 @@
 2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-preprocess): Make all
+	external preprocess functions use a PARAMETER arg.
+
 	* org-exp.el (org-export-preprocess-string)
 	(org-export-select-backend-specific-text)
 	(org-export-format-source-code-or-example)
 	(org-format-org-table-html): Support docbook export.
+	(org-export-preprocess-string): Make all external preprocess
+	functions use a PARAMETER arg.
 
 2009-03-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
