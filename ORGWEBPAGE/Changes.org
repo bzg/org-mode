@@ -130,6 +130,18 @@ LaTeX and HTML.  This is implemented in a contributed package by
 Taru Karttunen, /org-exp-bibtex.el/.  Kudos to Taru for this
 really nice addition.
 
+*** Finally a way to specify keywords and description for HTML export
+
+Use something like
+
+#+begin_src org
+#+DESCRIPTION: This page is all about ....
+#+KEYWORDS: org-mode, indexing, publishing
+#+end_src
+
+To specify the content of the description and keywords meta tags
+for HTML output.
+
 *** org-collector.el is now a contributed package
 
 /org-collector.el/ provides functions to create tables by
