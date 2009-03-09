@@ -1,3 +1,7 @@
+2009-03-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-log-mode-items): Improve docstring.
+
 2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-page-description)

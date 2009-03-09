@@ -755,7 +755,9 @@ This list may contain the following symbols:
 
   closed    Show entries that have been closed on that day.
   clock     Show entries that have received clocked time on that day.
-  state     Show all logged state changes."
+  state     Show all logged state changes.
+Note that instead of changing this variable, you can also press `C-u l' in
+the agenda to display all available LOG items temporarily."
   :group 'org-agenda-daily/weekly
   :type '(set :greedy t (const closed) (const clock) (const state)))
 
