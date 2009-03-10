@@ -1,5 +1,9 @@
 2009-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish-project-alist)
+	(org-publish-projects, org-publish-org-index): Change default anme
+	for the index of file names to "sitemap.org".
+
 	* org-export-latex.el (org-export-latex-tables): Use
 	`org-split-string', for Emacs 21 compatibility.
 
