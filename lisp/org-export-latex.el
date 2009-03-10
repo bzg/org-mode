@@ -1103,7 +1103,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			   (string-match "\\<align=\\([^ \t\n\r,]+\\)" attr)
 			   (match-string 1 attr))
 		floatp (or caption label))
-	  (setq lines (split-string raw-table "\n" t))
+	  (setq lines (org-split-string raw-table "\n"))
 	  (apply 'delete-region (list beg end))
 	  (when org-export-table-remove-special-lines
 	    (setq lines (org-table-clean-before-export lines 'maybe-quoted)))
@@ -1146,7 +1146,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		(mapcar
 		 (lambda(elem)
 		   (or (and (string-match "[ \t]*|-+" elem) 'hline)
-		       (split-string (org-trim elem) "|" t)))
+		       (org-split-string (org-trim elem) "|")))
 		 lines))
 	  (when insert
 	    (insert (org-export-latex-protect-string
