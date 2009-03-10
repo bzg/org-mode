@@ -1,5 +1,8 @@
 2009-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview.el (org-columns-map): Better functions for moving up
+	and down a row, even if `truncate-line' is nil.
+
 	* org.el (org-insert-todo-heading): Make sure the keyword is
 	inserted at the correct position.
 
