@@ -5283,7 +5283,9 @@ state (TODO by default).  Also with prefix arg, force first state."
 	   (run-hook-with-args-until-success
 	    'org-todo-get-default-hook new-mark-x nil)
 	   new-mark-x)))
-      (insert new-mark " "))
+      (beginning-of-line 1)
+      (and (looking-at "\\*+ ") (goto-char (match-end 0))
+	   (insert new-mark " ")))
     (when org-provide-todo-statistics
       (org-update-parent-todo-statistics))))
 

@@ -1,5 +1,8 @@
 2009-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-insert-todo-heading): Make sure the keyword is
+	inserted at the correct position.
+
 	* org-publish.el (org-publish-project-alist)
 	(org-publish-projects, org-publish-org-index): Change default anme
 	for the index of file names to "sitemap.org".
