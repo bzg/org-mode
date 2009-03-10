@@ -338,6 +338,7 @@ LaTeX and PDF export
 Publishing
 
 * Configuration::               Defining projects
+* Uploading files::             How to get files up on the server
 * Sample configuration::        Example projects
 * Triggering publication::      Publication commands
 
@@ -8847,30 +8848,25 @@ you are using.  The FAQ covers this issue.
 @chapter Publishing
 @cindex publishing
 
-Org includes@footnote{@file{org-publish.el} is not distributed with
-Emacs 21, if you are still using Emacs 21, you need you need to download
-this file separately.} a publishing management system that allows you to
-configure automatic HTML conversion of @emph{projects} composed of
-interlinked org files.  This system is called @emph{org-publish}.  You can
-also configure org-publish to automatically upload your exported HTML
-pages and related attachments, such as images and source code files, to
-a web server. Org-publish turns Org into a web-site authoring tool.
+Org includes a publishing management system that allows you to configure
+automatic HTML conversion of @emph{projects} composed of interlinked org
+files.  You can also configure Org to automatically upload your exported HTML
+pages and related attachments, such as images and source code files, to a web
+server.  With htese features, Org becomes a web-site authoring tool.
 
-You can also use Org-publish to convert files into La@TeX{}, or even
-combine HTML and La@TeX{} conversion so that files are available in both
-formats on the server@footnote{Since La@TeX{} files on a server are not
-that helpful, you surely want to perform further conversion on them --
-e.g. convert them to @code{PDF} format.}.
+You can also use Org to convert files into PDF, or even combine HTML and PDF
+conversion so that files are available in both formats on the server.
 
-Org-publish has been contributed to Org by David O'Toole.
+Publishing has been contributed to Org by David O'Toole.
 
 @menu
 * Configuration::               Defining projects
+* Uploading files::             How to get files up on the server
 * Sample configuration::        Example projects
 * Triggering publication::      Publication commands
 @end menu
 
-@node Configuration, Sample configuration, Publishing, Publishing
+@node Configuration, Uploading files, Publishing, Publishing
 @section Configuration
 
 Publishing needs significant configuration to specify files, destination
@@ -8892,43 +8888,42 @@ and many other properties of a project.
 @cindex projects, for publishing
 
 @vindex org-publish-project-alist
-Org-publish is configured almost entirely through setting the value of
-one variable, called @code{org-publish-project-alist}.
-Each element of the list configures one project, and may be in one of
-the two following forms:
+Publishing is configured almost entirely through setting the value of one
+variable, called @code{org-publish-project-alist}.  Each element of the list
+configures one project, and may be in one of the two following forms:
 
 @lisp
-("project-name" :property value :property value ...)
-
+   ("project-name" :property value :property value ...)
 @r{or}
-
-("project-name" :components ("project-name" "project-name" ...))
+   ("project-name" :components ("project-name" "project-name" ...))
 
 @end lisp
 
-In both cases, projects are configured by specifying property values.
-A project defines the set of files that will be published, as well as
-the publishing configuration to use when publishing those files.  When
-a project takes the second form listed above, the individual members
-of the ``components'' property are taken to be components of the
-project, which group together files requiring different publishing
-options. When you publish such a ``meta-project'' all the components
-will also publish.  The @code{:components} are published in the sequence
-provided.
+In both cases, projects are configured by specifying property values.  A
+project defines the set of files that will be published, as well as the
+publishing configuration to use when publishing those files.  When a project
+takes the second form listed above, the individual members of the
+@code{:components} property are taken to be sub-projects, which group
+together files requiring different publishing options.  When you publish such
+a ``meta-project'', all the components will also be published, in the
+sequence given.
 
 @node Sources and destinations, Selecting files, Project alist, Configuration
 @subsection Sources and destinations for files
 @cindex directories, for publishing
 
-Most properties are optional, but some should always be set. In
-particular, org-publish needs to know where to look for source files,
+Most properties are optional, but some should always be set.  In
+particular, Org needs to know where to look for source files,
 and where to put published files.
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:base-directory}
 @tab Directory containing publishing source files
 @item @code{:publishing-directory}
-@tab Directory (possibly remote) where output files will be published.
+@tab Directory where output files will be published.  You can directly
+publish to a webserver using a file name syntax appropriate for
+the Emacs @file{tramp} package.  Or you can publish to a local directory and
+use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
 @tab Function called before starting the publishing process, for example to
 run @code{make} for updating files to be published.
@@ -8969,11 +8964,11 @@ Publishing means that a file is copied to the destination directory and
 possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
 @code{org-publish-org-to-html} which calls the HTML exporter (@pxref{HTML
-export}). But you also can publish your files in La@TeX{} by using the
-function @code{org-publish-org-to-latex} instead, or as PDF files using
+export}).  But you also can publish your as PDF files using
 @code{org-publish-org-to-pdf}.  Other files like images only need to be
-copied to the publishing destination. For non-Org files, you need to provide
-your own publishing function:
+copied to the publishing destination, for this you may use
+@code{org-publish-attachment}.  For non-Org files, you always need to provide
+specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
@@ -8981,13 +8976,10 @@ your own publishing function:
 list of functions, which will all be called in turn.
 @end multitable
 
-The function must accept two arguments: a property list containing at
-least a @code{:publishing-directory} property, and the name of the file
-to be published.  It should take the specified file, make the necessary
+The function must accept two arguments: a property list containing at least a
+@code{:publishing-directory} property, and the name of the file to be
+published.  It should take the specified file, make the necessary
 transformation (if any) and place the result into the destination folder.
-You can write your own publishing function, but @code{org-publish}
-provides one for attachments (files that only need to be copied):
-@code{org-publish-attachment}.
 
 @node Publishing options, Publishing links, Publishing action, Configuration
 @subsection Options for the HTML/LaTeX exporters
@@ -9088,12 +9080,10 @@ respective variable for details.
 @item @code{:auto-preamble}         @tab @code{org-export-html-auto-preamble}
 @item @code{:auto-postamble}        @tab @code{org-export-html-auto-postamble}
 @item @code{:author}                @tab @code{user-full-name}
-@item @code{:email}                 @tab @code{user-mail-address}
+@item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
 @end multitable
-
-If you use several email addresses, separate them by a semi-column.
 
 Most of the @code{org-export-with-*} variables have the same effect in
 both HTML and La@TeX{} exporters, except for @code{:TeX-macros} and
@@ -9117,12 +9107,12 @@ becomes a link to @file{foo.html}.  In this way, you can interlink the
 pages of your "org web" project and the links will work as expected when
 you publish them to HTML.
 
-You may also link to related files, such as images. Provided you are
-careful with relative pathnames, and provided you have also configured
-@code{org-publish} to upload the related files, these links will work
-too. See @ref{Complex example} for an example of this usage.
+You may also link to related files, such as images. Provided you are careful
+with relative pathnames, and provided you have also configured Org to upload
+the related files, these links will work too. See @ref{Complex example} for
+an example of this usage.
 
-Sometime an Org file to be published may contain links that are
+Sometimes an Org file to be published may contain links that are
 only valid in your production environment, but not in the publishing
 location.  In this case, use the property
 
@@ -9145,16 +9135,16 @@ file is part of any project in @code{org-publish-project-alist}.
 @cindex index, of published pages
 
 The following properties may be used to control publishing of an
-index of files or summary page for a given project.
+index of files or a summary page for a given project.
 
 @multitable @columnfractions 0.25 0.75
 @item @code{:auto-index}
-@tab When non-nil, publish an index during org-publish-current-project or
-org-publish-all.
+@tab When non-nil, publish an index during @code{org-publish-current-project}
+or @code{org-publish-all}.
 
 @item @code{:index-filename}
-@tab Filename for output of index. Defaults to @file{index.org} (which
-becomes @file{index.html}).
+@tab Filename for output of index. Defaults to @file{sitemap.org} (which
+becomes @file{sitemap.html}).
 
 @item @code{:index-title}
 @tab Title of index page. Defaults to name of file.
@@ -9165,7 +9155,40 @@ Defaults to @code{org-publish-org-index}, which generates a plain list
 of links to all files in the project.
 @end multitable
 
-@node Sample configuration, Triggering publication, Configuration, Publishing
+@node Uploading files, Sample configuration, Configuration, Publishing
+@section Uploading files
+@cindex rsync
+@cindex unison
+
+For those people already utilising third party sync tools such as
+@file{rsync} or @file{unison}, it might be preferable not to use the built in
+@i{remote} publishing facilities of Org-mode which rely heavily on
+@file{Tramp}.  @file{Tramp}, while very useful and powerful, tends not to be
+so efficient for multiple file transfer and has been known to cause problems
+under heavy usage.
+
+Specialised synchronization utilities offer several advantages.  In addition
+to timestamp comparison, they also do content and permissions/attribute
+checks.  For this reason you might prefer to publish your web to a local
+directory (possibly even @i{in place} with your Org files) and then use
+@file{unison} or @file{rsync} to do the synchronisation with the remote host.
+
+Since Unison (for example) can be configured as to which files to transfer to
+a certain remote destination, it can greatly simplify the project publishing
+definition.  Simply keep all files in the correct location, process your Org
+files with @code{org-publish} and let the synchronization tool do the rest.
+You do not need, in this scenario, to include attachments such as @file{jpg},
+@file{css} or @file{gif} files in the project definition since the 3rd party
+tool syncs them.
+
+Publishing to a local directory is also much faster than to a remote one, so
+that you can afford more easily to republish entire projects.  If you set
+@code{org-publish-use-timestamps-flag} to @code{nil}, you gain the main
+benefit of re-including any changed external files such as source example
+files you might include with @code{#+INCLUDE}.  The timestamp mechanism in
+Org is not smart enough to detect if included files have been modified.
+
+@node Sample configuration, Triggering publication, Uploading files, Publishing
 @section Sample configuration
 
 Below we provide two example configurations.  The first one is a simple
@@ -9249,8 +9272,7 @@ right place on the web server, and publishing images to it.
 @node Triggering publication,  , Sample configuration, Publishing
 @section Triggering publication
 
-Once org-publish is properly configured, you can publish with the
-following functions:
+Once properly configured, Org can publish with the following commands:
 
 @table @kbd
 @item C-c C-e C
@@ -9263,9 +9285,13 @@ Publish only the current file.
 Publish all projects.
 @end table
 
-Org uses timestamps to track when a file has changed. The above
-functions normally only publish changed files. You can override this and
-force publishing of all files by giving a prefix argument.
+@vindex org-publish-use-timestamps-flag
+Org uses timestamps to track when a file has changed. The above functions
+normally only publish changed files. You can override this and force
+publishing of all files by giving a prefix argument, or by customizing the
+variable @code{org-publish-use-timestamps-flag}.  This may be necessary in
+particular if files include other files via @code{#+SETUPFILE:} or
+@code{#+INCLUDE:}
 
 @node Miscellaneous, Hacking, Publishing, Top
 @chapter Miscellaneous

@@ -1,3 +1,7 @@
+2009-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Publishing): Refresh this chapter.
+
 2009-03-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Export options, Export options, In-buffer settings):
