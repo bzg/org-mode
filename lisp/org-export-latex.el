@@ -968,7 +968,7 @@ See the `org-export-latex.el' code for a complete conversion table."
 					     (match-string 3))) "") t t)))))))
 	'(;"^\\([^\n$]*?\\|^\\)\\(\\\\?\\$\\)\\([^\n$]*\\)$"
 	  "\\(\\(\\\\?\\$\\)\\)"
-	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\([a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
+	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\({[^{}]+}\\|[a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
 	  "\\(.\\|^\\)\\(\\\\\\)\\([ \t\n]\\|[a-zA-Z&#%{}\"]+\\)"
 	  "\\(.\\|^\\)\\(&\\)"
 	  "\\(.\\|^\\)\\(#\\)"
@@ -1007,10 +1007,12 @@ Convert CHAR depending on STRING-BEFORE and STRING-AFTER."
 		     (or (eq subsup t)
 			 (and (equal subsup '{}) (eq (string-to-char string-after) ?\{)))
 		     (string-match "[({]?\\([^)}]+\\)[)}]?" string-after))
-		(format "%s$%s{%s}$" string-before char
-			(if (> (match-end 1) (1+ (match-beginning 1)))
-			    (concat "\\mathrm{" (match-string 1 string-after) "}")
-			(match-string 1 string-after))))
+		(org-export-latex-protect-string
+		 (format "%s$%s{%s}$" string-before char
+			 (if (and (> (match-end 1) (1+ (match-beginning 1)))
+				  (not (equal (substring string-after 0 2) "{\\")))
+			     (concat "\\mathrm{" (match-string 1 string-after) "}")
+			   (match-string 1 string-after)))))
 	       ((eq subsup t) (concat string-before "$" char string-after "$"))
 	       (t (org-export-latex-protect-string
 		   (concat string-before "\\" char "{}" string-after)))))

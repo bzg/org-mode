@@ -1,5 +1,8 @@
 2009-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-special-chars)
+	(org-export-latex-treat-sub-super-char): Fix subscript export.
+
 	* org-exp.el (org-create-multibrace-regexp): Do not add
 	backslashes to the class.
 
