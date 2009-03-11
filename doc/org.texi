@@ -10838,6 +10838,8 @@ calculations and improved XEmacs compatibility, in particular by porting
 came up with the idea of properties, and that there should be an API for
 them.
 @item
+@i{Nick Dokos} tracked down several nasty bugs.
+@item
 @i{Kees Dullemond} used to edit projects lists directly in HTML and so
 inspired some of the early development, including HTML export.  He also
 asked for a way to narrow wide table columns.
