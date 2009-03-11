@@ -517,11 +517,22 @@ make
 @end example
 
 @noindent If you are running Org from the distribution directory, this is
-all.  If you want to install into the system directories, use
-
+all.  If you want to install into the system directories, use (as
+administrator)
 @example
 make install
+@end example
+
+Installing Info files is system dependent, because of differences in the
+@file{install-info} program.  In Debian it does copy the info files into the
+correct directory and modifies the info directory file.  In many other
+systems, the files need to be copied to the correct directory separately, and
+@file{install-info} then only modifies the directory file.  Check your system
+documentation to find out which of the following commands you need:
+
+@example
 make install-info
+make install-info-debian
 @end example
 
 @noindent Then add to @file{.emacs}:

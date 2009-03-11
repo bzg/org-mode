@@ -138,6 +138,9 @@ install-info: $(INFOFILES)
 	$(CP) $(INFOFILES) $(infodir)
 	$(INSTALL_INFO) --info-file=$(INFOFILES) --info-dir=$(infodir)
 
+install-info-debian: $(INFOFILES)
+	$(INSTALL_INFO) $(INFOFILES)
+
 install-noutline: xemacs/noutline.elc
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) xemacs/noutline.el xemacs/noutline.elc $(lispdir)
