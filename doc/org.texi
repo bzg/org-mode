@@ -997,6 +997,14 @@ previously visible.  Any prefix argument to this command will force a normal
 force a normal yank is @kbd{C-u C-y}.  If you use @code{yank-pop} after a
 yank, it will yank previous kill items plainly, without adjustment and
 folding.
+@kindex C-c C-x c
+@item C-c C-x c
+Clone a subtree by making a number of sibling copies of it.  You will be
+prompted for the number of copies to make, and you can also specify if any
+time stamps in the entry should be shifted.  This can be useful, for example,
+to create a number of tasks related to a series of lectures to prepare.  For
+more details, see the docstring of the command
+@code{org-clone-subtree-with-time-shift}.
 @kindex C-c C-w
 @item C-c C-w
 Refile entry or region to a different location.  @xref{Refiling notes}.
@@ -4998,6 +5006,8 @@ schedule the marked item.
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling
 @subsection Repeated tasks
+@cindex tasks, repeated
+@cindex repeated tasks
 
 Some tasks need to be repeated again and again.  Org mode helps to
 organize such tasks using a so-called repeater in a DEADLINE, SCHEDULED,
@@ -5065,6 +5075,11 @@ special repeaters markers with @samp{++} and @samp{.+}.  For example:
 
 You may have both scheduling and deadline information for a specific
 task - just make sure that the repeater intervals on both are the same.
+
+An alternative to using a repeater is to create a number of copies of a task
+subtree, with dates shifted in each copy.  The command @kbd{C-c C-x c} was
+created for this purpose, it is described in @ref{Structure editing}.
+
 
 @node Clocking work time, Effort estimates, Deadlines and scheduling, Dates and Times
 @section Clocking work time

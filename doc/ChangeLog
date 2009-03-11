@@ -1,3 +1,8 @@
+2009-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Structure editing): Document the new command
+	`org-clone-subtree-with-time-shift'.
+
 2009-03-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Publishing): Refresh this chapter.

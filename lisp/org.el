@@ -5809,6 +5809,75 @@ If yes, remember the marker and the distance to BEG."
        (progn (org-back-to-heading) (point))
        (progn (org-end-of-subtree t) (point))))))
 
+(defun org-clone-subtree-with-time-shift (n &optional shift)
+  "Clone the task (subtree) at point N times.
+The clones will be inserted as siblings.
+
+In interactive use, the user will be prompted for the number of clones
+to be produced, and for a time SHIFT, which may be a repeater as used
+in time stamps, for example `+3d'.
+
+When a valid repeater is given and the entry contains any time stamps,
+the clones will become a sequence in time, with time stamps in the
+subtree shifted for each clone produced.  If SHIFT is nil or the
+empty string, time stamps will be left alone.
+
+If the original subtree did contain time stamps with a repeater,
+the following will happen:
+- the repeater will be removed in each clone
+- an additional clone will be produced, with the current, unshifted
+  date(s) in the entry.
+- the original entry will be placed *after* all the clones, with
+  repeater intact.
+- the start days in the repeater in the original entry will be shifted
+  to past the last clone.
+I this way you can spell out a number of instances of a repeating task,
+and still retain the repeater to cover future instances of the task."
+  (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
+  (let (beg end template shift-n shift-what doshift nmin nmax (n-no-remove -1))
+    (if (not (and (integerp n) (> n 0)))
+	(error "Invalid number of replications %s" n))
+    (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
+	     (not (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
+				shift)))
+	(error "Invalid shift specification %s" shift))
+    (when doshift
+      (setq shift-n (string-to-number (match-string 1 shift))
+	    shift-what (cdr (assoc (match-string 2 shift)
+				   '(("d" . day) ("w" . week)
+				     ("m" . month) ("y" . year))))))
+    (if (eq shift-what 'week) (setq shift-n (* 7 shift-n) shift-what 'day))
+    (setq nmin 1 nmax n)
+    (org-back-to-heading t)
+    (setq beg (point))
+    (org-end-of-subtree t t)
+    (setq end (point))
+    (setq template (buffer-substring beg end))
+    (when (and doshift
+	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
+      (delete-region beg end)
+      (setq end beg)
+      (setq nmin 0 nmax (1+ nmax) n-no-remove nmax))
+    (goto-char end)
+    (loop for n from nmin to nmax do
+	  (if (not doshift)
+	      (setq task template)
+	    (with-temp-buffer
+	      (insert template)
+	      (org-mode)
+	      (goto-char (point-min))
+	      (while (re-search-forward org-ts-regexp nil t)
+		(org-timestamp-change (* n shift-n) shift-what))
+	      (unless (= n n-no-remove)
+		(goto-char (point-min))
+		(while (re-search-forward org-ts-regexp nil t)
+		  (save-excursion
+		    (goto-char (match-beginning 0))
+		    (if (looking-at "<[^<>\n]+\\( +\\+[0-9]+[dwmy]\\)")
+			(delete-region (match-beginning 1) (match-end 1))))))
+	      (setq task (buffer-string))))
+	  (insert task))
+    (goto-char beg)))
 
 ;;; Outline Sorting
 
@@ -13292,6 +13361,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\\"   'org-match-sparse-tree) ; Minor-mode res.
 (org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)
 (org-defkey org-mode-map "\M-\C-m"  'org-insert-heading)
+(org-defkey org-mode-map "\C-c\C-xc" 'org-clone-subtree-with-time-shift)
 (org-defkey org-mode-map [(control return)] 'org-insert-heading-respect-content)
 (org-defkey org-mode-map [(shift control return)] 'org-insert-todo-heading-respect-content)
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
@@ -14241,6 +14311,8 @@ See the individual commands for more information."
      ["Copy Subtree"  org-copy-special (not (org-at-table-p))]
      ["Cut Subtree"  org-cut-special (not (org-at-table-p))]
      ["Paste Subtree"  org-paste-special (not (org-at-table-p))]
+     "--"
+     ["Clone subtree, shift time" org-clone-subtree-with-time-shift t]
      "--"
      ["Promote Heading" org-metaleft (not (org-at-table-p))]
      ["Promote Subtree" org-shiftmetaleft (not (org-at-table-p))]

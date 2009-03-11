@@ -1,5 +1,7 @@
 2009-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-clone-subtree-with-time-shift): New command.
+
 	* org-export-latex.el (org-export-latex-special-chars)
 	(org-export-latex-treat-sub-super-char): Fix subscript export.
 
