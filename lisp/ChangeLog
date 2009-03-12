@@ -1,3 +1,8 @@
+2009-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-target-internal-links)
+	(org-export-as-html): Protect links specified as #name.
+
 2009-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-clone-subtree-with-time-shift): New command.

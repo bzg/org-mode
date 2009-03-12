@@ -1794,6 +1794,9 @@ the current file."
 	    found props pos cref
 	    (target
 	     (cond
+	      ((= (string-to-char link) ?#)
+	       ;; user wants exactly this link
+	       link)
 	      ((cdr (assoc slink target-alist)))
 	      ((and (string-match "^id:" link)
 		    (cdr (assoc (substring link 3) target-alist))))
@@ -3789,7 +3792,8 @@ lang=\"%s\" xml:lang=\"%s\">
 	     ((equal type "internal")
 	      (setq rpl
 		    (concat
-		     "<a href=\"#"
+		     "<a href=\""
+		     (if (= (string-to-char path) ?#) "" "#")
 		     (org-solidify-link-text
 		      (save-match-data (org-link-unescape path)) nil)
 		     "\"" attr ">"
