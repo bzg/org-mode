@@ -1,3 +1,12 @@
+2009-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-exp-bibtex.el (org-export-bibtex-preprocess): Analyze
+	return value of the call to bibtex2html.
+	(org-export-bibtex-preprocess): Change Class to ID, there can only
+	be one.
+	(org-exp-bibtex-docites): Generalize the regexp looking for
+	citations.
+
 2009-02-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org2rem.el: New version from Shatad Pratap.

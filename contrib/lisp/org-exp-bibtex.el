@@ -86,10 +86,11 @@
 		(setq tmp-files   (cons tmp tmp-files))
 		(setq extra-args (append extra-args `("-citefile" ,tmp)))))
 
-	    (apply 'call-process  (append '("bibtex2html" nil nil nil)
-					  `("-a" "--nodoc"  "--style" ,style "--no-header")
-					  extra-args
-					  (list (concat file ".bib"))))
+	    (when (not (eq 0 (apply 'call-process  (append '("bibtex2html" nil nil nil)
+							   `("-a" "--nodoc"  "--style" ,style "--no-header")
+							   extra-args
+							   (list (concat file ".bib"))))))
+	      (error "Executing bibtex2html failed"))
 
 	    (dolist (f tmp-files) (delete-file f)))
 
@@ -102,7 +103,7 @@
 	      (goto-char (point-min))
 	      (while (re-search-forward "<hr>" nil t)
 		(replace-match "<hr/>" t t))
-	      (concat "\n#+BEGIN_HTML\n<div class=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
+	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
 	 (latexp ;; Latex export
 	  (concat "\n#+LATEX: \\\\bibliographystyle{" style "}"
 		  "\n#+LATEX: \\\\bibliography{" file "}\n"))) t t)))
@@ -124,7 +125,7 @@
     (save-match-data
       (goto-char (point-min))
       (when htmlp
-	(while (re-search-forward "\\\\cite{\\(\\w+\\)}" nil t)
+	(while (re-search-forward "\\\\cite{\\([^}\n]+\\)}" nil t)
 	  (apply fun nil))))))
 
 
