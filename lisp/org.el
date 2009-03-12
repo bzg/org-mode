@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.24b
+;; Version: 6.24c
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -94,7 +94,7 @@
 
 ;;; Version
 
-(defconst org-version "6.24b"
+(defconst org-version "6.24c"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -5834,7 +5834,8 @@ the following will happen:
 I this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
-  (let (beg end template shift-n shift-what doshift nmin nmax (n-no-remove -1))
+  (let (beg end template task 
+	    shift-n shift-what doshift nmin nmax (n-no-remove -1))
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
