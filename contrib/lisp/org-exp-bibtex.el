@@ -28,9 +28,23 @@
 ;; http://www.lri.fr/~filliatr/bibtex2html/
 ;;
 ;; The usage is as follows:
-;; #+BIBLIOGRAPHY: bibfilebasename stylename
+;; #+BIBLIOGRAPHY: bibfilebasename stylename optional-options
 ;; e.g. given foo.bib and using style plain:
-;; #+BIBLIOGRAPHY: foo plain
+;; #+BIBLIOGRAPHY: foo plain option:-d
+;;
+;; Optional options are of the form:
+;;
+;; option:-foobar pass '-foobar' to bibtex2html
+;; e.g.
+;; option:-d sort by date.
+;; option:-a sort as BibTeX (usually by author) *default*
+;; option:-u unsorted i.e. same order as in .bib file
+;; option:-r reverse the sort.
+;; see the bibtex2html man page for more. Multiple options can be combined like:
+;; option:-d option:-r
+;;
+;; Limiting to only the entries cited in the document:
+;; limit:t
 
 ;; For LaTeX export this simply inserts the lines
 ;; \bibliographystyle{plain}
@@ -48,15 +62,37 @@
   (interactive)
   (save-window-excursion
     (setq oebp-cite-plist '())
+
     ;; Convert #+BIBLIOGRAPHY: name style
     (goto-char (point-min))
-    (while (re-search-forward "^#\\+BIBLIOGRAPHY:\\s-+\\(\\w+\\)\\s-+\\(\\w+\\)" nil t)
+    (while (re-search-forward "^#\\+BIBLIOGRAPHY:\\s-+\\(\\w+\\)\\s-+\\(\\w+\\)\\([^\r\n]*\\)" nil t)
       (let ((file  (match-string 1))
-	    (style (match-string 2)))
+	    (style (match-string 2))
+	    (opt   (org-exp-bibtex-options-to-plist (match-string 3))))
 	(replace-match
 	(cond
 	 (htmlp ;; We are exporting to HTML
-	  (call-process "bibtex2html" nil nil nil "--nodoc"  "--style" style "--no-header" (concat file ".bib"))
+	  (let (extra-args cite-list end-hook tmp-files)
+	    (dolist (elt opt)
+	      (when (equal "option" (car elt))
+		(setq extra-args (cons (cdr elt) extra-args))))
+
+
+	    (when (assoc "limit" opt) ;; Limit is true - collect references
+	      (org-exp-bibtex-docites (lambda () (add-to-list 'cite-list (match-string 1))))
+;;	      (message "cites: %s" cite-list)
+	      (let ((tmp (make-temp-file "org-exp-bibtex")))
+		(with-temp-file tmp (dolist (i cite-list) (insert (concat i "\n"))))
+		(setq tmp-files   (cons tmp tmp-files))
+		(setq extra-args (append extra-args `("-citefile" ,tmp)))))
+
+	    (apply 'call-process  (append '("bibtex2html" nil nil nil)
+					  `("-a" "--nodoc"  "--style" ,style "--no-header")
+					  extra-args
+					  (list (concat file ".bib"))))
+
+	    (dolist (f tmp-files) (delete-file f)))
+
 	  (with-temp-buffer
 	    (save-match-data
 	      (insert-file-contents (concat file ".html"))
@@ -65,19 +101,39 @@
 		(setq oebp-cite-plist (cons (cons (match-string 1) (match-string 2)) oebp-cite-plist)))
 	      (goto-char (point-min))
 	      (while (re-search-forward "<hr>" nil t)
-		(replace-match "<hr/>"))
+		(replace-match "<hr/>" t t))
 	      (concat "\n#+BEGIN_HTML\n<div class=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
 	 (latexp ;; Latex export
 	  (concat "\n#+LATEX: \\\\bibliographystyle{" style "}"
-		  "\n#+LATEX: \\\\bibliography{" file "}\n"))))))
+		  "\n#+LATEX: \\\\bibliography{" file "}\n"))) t t)))
+
+
     ;; Convert cites to links in html
-    (goto-char (point-min))
     (when htmlp
-      (while (re-search-forward "\\\\cite{\\(\\w+\\)}" nil t)
-	(let* ((cn (match-string 1))
-	       (cv (assoc cn oebp-cite-plist)))
-	  (replace-match 
-	   (concat "\[_{}[[" cn "][" (if cv (cdr cv) cn) "]]\]")))))))
+      (org-exp-bibtex-docites
+       (lambda () (let* ((cn (match-string 1))
+			 (cv (assoc cn oebp-cite-plist)))
+;;		    (message "L: %s" (concat "\[_{}[[" cn "][" (if cv (cdr cv) cn) "]]\]"))
+		    (replace-match (concat "\[_{}[[#" cn "][" (if cv (cdr cv) cn) "]]\]")) t t))))
+
+
+))
+
+(defun org-exp-bibtex-docites (fun)
+  (save-excursion
+    (save-match-data
+      (goto-char (point-min))
+      (when htmlp
+	(while (re-search-forward "\\\\cite{\\(\\w+\\)}" nil t)
+	  (apply fun nil))))))
+
+
+(defun org-exp-bibtex-options-to-plist (options)
+  (save-match-data
+    (flet ((f (o) (let ((s (split-string o ":"))) (cons (nth 0 s) (nth 1 s)))))
+      (mapcar 'f (split-string options nil t)))))
+
+
 
 
 (add-hook 'org-export-preprocess-hook 'org-export-bibtex-preprocess)
