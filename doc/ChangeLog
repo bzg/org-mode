@@ -1,3 +1,8 @@
+2009-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Creating timestamps, Agenda commands): Document new
+	behavior when changing time stamps.
+
 2009-03-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Structure editing): Document the new command

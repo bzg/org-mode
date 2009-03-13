@@ -1260,10 +1260,10 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "z"        'org-agenda-add-note)
 (org-defkey org-agenda-mode-map "k"        'org-agenda-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-k" 'org-agenda-action)
-(org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-date-later)
-(org-defkey org-agenda-mode-map [(shift left)] 'org-agenda-date-earlier)
-(org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-date-later)
-(org-defkey org-agenda-mode-map [?\C-c ?\C-x (left)] 'org-agenda-date-earlier)
+(org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-do-date-later)
+(org-defkey org-agenda-mode-map [(shift left)] 'org-agenda-do-date-earlier)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-do-date-later)
+(org-defkey org-agenda-mode-map [?\C-c ?\C-x (left)] 'org-agenda-do-date-earlier)
 
 (org-defkey org-agenda-mode-map ">" 'org-agenda-date-prompt)
 (org-defkey org-agenda-mode-map "\C-c\C-s" 'org-agenda-schedule)
@@ -1377,6 +1377,10 @@ The following commands are available:
      "--"
      ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
      ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
+     ["Change Time +1 hour" org-agenda-do-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-right"]
+     ["Change Time -1 hour" org-agenda-do-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u S-left"]
+     ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-right"]
+     ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-left"]
      ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
     ("Clock"
      ["Clock in" org-agenda-clock-in t]
@@ -5635,6 +5639,38 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (org-agenda-change-all-lines newhead hdmarker)
       (beginning-of-line 1))))
 
+(defun org-agenda-do-date-later (arg)
+  (interactive "P")
+  (cond
+   ((or (equal arg '(16))
+	(memq last-command
+	      '(org-agenda-date-later-minutes org-agenda-date-earlier-minutes)))
+    (setq this-command 'org-agenda-date-later-minutes)
+    (org-agenda-date-later-minutes 1))
+   ((or (equal arg '(4))
+	(memq last-command
+	      '(org-agenda-date-later-hours org-agenda-date-earlier-hours)))
+    (setq this-command 'org-agenda-date-later-hours)
+    (org-agenda-date-later-hours 1))
+   (t
+    (org-agenda-date-later (prefix-numeric-value arg)))))
+
+(defun org-agenda-do-date-earlier (arg)
+  (interactive "P")
+  (cond
+   ((or (equal arg '(16))
+	(memq last-command
+	      '(org-agenda-date-later-minutes org-agenda-date-earlier-minutes)))
+    (setq this-command 'org-agenda-date-earlier-minutes)
+    (org-agenda-date-earlier-minutes 1))
+   ((or (equal arg '(4))
+	(memq last-command
+	      '(org-agenda-date-later-hours org-agenda-date-earlier-hours)))
+    (setq this-command 'org-agenda-date-earlier-hours)
+    (org-agenda-date-earlier-hours 1))
+   (t
+    (org-agenda-date-earlier (prefix-numeric-value arg)))))
+
 (defun org-agenda-date-later (arg &optional what)
   "Change the date of this item to one day later."
   (interactive "p")
@@ -5658,6 +5694,28 @@ the same tree node, and the headline of the tree node in the Org-mode file."
   "Change the date of this item to one day earlier."
   (interactive "p")
   (org-agenda-date-later (- arg) what))
+
+(defun org-agenda-date-later-minutes (arg)
+  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
+  (interactive "p")
+  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
+  (org-agenda-date-later arg 'minute))
+
+(defun org-agenda-date-earlier-minutes (arg)
+  "Change the time of this item, in units of `org-time-stamp-rounding-minutes'."
+  (interactive "p")
+  (setq arg (* arg (cadr org-time-stamp-rounding-minutes)))
+  (org-agenda-date-earlier arg 'minute))
+
+(defun org-agenda-date-later-hours (arg)
+  "Change the time of this item, in hour steps."
+  (interactive "p")
+  (org-agenda-date-later arg 'hour))
+
+(defun org-agenda-date-earlier-hours (arg)
+  "Change the time of this item, in hour steps."
+  (interactive "p")
+  (org-agenda-date-earlier arg 'hour))
 
 (defun org-agenda-show-new-time (marker stamp &optional prefix)
   "Show new date stamp via text properties."

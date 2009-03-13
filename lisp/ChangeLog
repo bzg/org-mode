@@ -1,3 +1,14 @@
+2009-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-menu): Add new commands to menu.
+	(org-agenda-do-date-later, org-agenda-do-date-earlier)
+	(org-agenda-date-later-minutes, org-agenda-date-earlier-minutes)
+	(org-agenda-date-later-hours, org-agenda-date-earlier-hours): New
+	commands.
+
+	* org.el (org-timestamp-change): Move end-time along with start
+	time.
+
 2009-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-target-internal-links)
