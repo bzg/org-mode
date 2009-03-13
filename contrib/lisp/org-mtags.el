@@ -65,7 +65,8 @@
 ;;        in Org with the "#+OPTIONS: toc:t" setting.  But it will define
 ;;        the location where the TOC will be placed.
 ;;
-;;   <literal style="STYLE">    ;; only latex and html supported in Org
+;;   <literal style="STYLE">    ;; only latex, html, and docbook supported
+;;        in Org.
 ;;        Needs to be on a line by itself, similarly the </literal> tag.
 ;;
 ;;   <src lang="LANG" switches="-n -r">
@@ -160,6 +161,8 @@ The is done in the entire buffer."
 			  "#+END_LaTeX")
 			 ((member style '("html"))
 			  "#+END_HTML")
+			 ((member style '("docbook"))
+			  "#+END_DOCBOOK")
 			 ((member style '("ascii"))
 			  "#+END_ASCII")))
 	    (setq rpl (cond

@@ -1,3 +1,7 @@
+2009-03-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-mtags.el (org-mtags-replace): Support literal docbook.
+
 2009-03-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-exp-bibtex.el (org-export-bibtex-preprocess): Analyze
