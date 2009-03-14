@@ -15267,7 +15267,7 @@ this line is also exported in fixed-width font."
 	 (end (if regionp (region-end)))
 	 (nlines (or arg (if (and beg end) (count-lines beg end) 1)))
 	 (case-fold-search nil)
-	 (re "[ \t]*\\(:\\)")
+	 (re "[ \t]*\\(: \\)")
 	 off)
     (if regionp
 	(save-excursion
@@ -15281,11 +15281,11 @@ this line is also exported in fixed-width font."
 	    (cond
 	     (arg
 	      (org-move-to-column cc t)
-	      (insert ":\n")
+	      (insert ": \n")
 	      (forward-line -1))
 	     ((and off (looking-at re))
 	      (replace-match "" t t nil 1))
-	     ((not off) (org-move-to-column cc t) (insert ":")))
+	     ((not off) (org-move-to-column cc t) (insert ": ")))
 	    (forward-line 1)))
       (save-excursion
 	(org-back-to-heading)

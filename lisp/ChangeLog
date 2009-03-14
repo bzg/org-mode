@@ -1,3 +1,8 @@
+2009-03-14  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-toggle-fixed-width-section): Bug fix: insert a
+	column and a space, not only a column.
+
 2009-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-export-latex.el (org-export-latex-emphasis-alist): Better
