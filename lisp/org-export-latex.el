@@ -165,12 +165,14 @@ to represent the section title."
     ("/" "\\emph{%s}" nil)
     ("_" "\\underline{%s}" nil)
     ("+" "\\texttt{%s}" nil)
-    ("=" "\\verb=%s=" nil)
-    ("~" "\\verb~%s~" t))
+    ("=" "\\verb" t)
+    ("~" "\\verb" t))
   "Alist of LaTeX expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
 The second element is a formatting string to wrap fontified text with.
+If it is \"\\verb\", Org will automatically select a deimiter
+character that is not in the string.
 The third element decides whether to protect converted text from other
 conversions."
   :group 'org-export-latex
@@ -1203,14 +1205,29 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			   (string-match
 			    "[|\n]" (buffer-substring beg end))))))
 	(setq rpl (concat (match-string 1)
-			  (format (org-export-latex-protect-char-in-string
-				   '("\\" "{" "}") (cadr emph))
-				  (match-string 4))
+			  (org-export-latex-emph-format (cadr emph)
+							(match-string 4))
 			  (match-string 5)))
 	(if (caddr emph)
 	    (setq rpl (org-export-latex-protect-string rpl)))
 	(replace-match rpl t t)))
     (backward-char)))
+
+(defun org-export-latex-emph-format (format string)
+  "Format an emphasis string and handle the \\verb special case."
+  (when (equal format "\\verb")
+    (save-match-data
+      (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
+	(catch 'exit
+	  (loop for i from 0 to (1- (length ll)) do
+		(if (not (string-match (regexp-quote (substring ll i (1+ i)))
+				       string))
+		    (progn
+		      (setq format (concat "\\verb" (substring ll i (1+ i))
+					   "%s" (substring ll i (1+ i))))
+		      (throw 'exit nil))))))))
+  (setq string (org-export-latex-protect-string
+		(format format string))))
 
 (defun org-export-latex-links ()
   ;; Make sure to use the LaTeX hyperref and graphicx package

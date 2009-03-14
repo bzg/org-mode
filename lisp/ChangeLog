@@ -1,5 +1,10 @@
 2009-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-emphasis-alist): Better
+	defaults for verbose emphasis.
+	(org-export-latex-emph-format): New function.
+	(org-export-latex-fontify): Call `org-export-latex-emph-format'.
+
 	* org-agenda.el (org-agenda-menu): Add new commands to menu.
 	(org-agenda-do-date-later, org-agenda-do-date-earlier)
 	(org-agenda-date-later-minutes, org-agenda-date-earlier-minutes)
