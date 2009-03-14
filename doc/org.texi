@@ -6861,9 +6861,9 @@ future.  With a numeric prefix argument, change it by that many days.  For
 example, @kbd{3 6 5 S-@key{right}} will change it by a year.  With a
 @kbd{C-u} prefix, change the time by one hour.  If you immediately repeat the
 command, it will continue to change hours even without the prefix arg.  With
-a double @kbdC-u C-u} prefix, do the same for changing minutes.  The stamp is
-changed in the original org file, but the change is not directly reflected in
-the agenda buffer.  Use @kbd{r} or @kbd{g} to update the buffer.
+a double @kbd{C-u C-u} prefix, do the same for changing minutes.  The stamp
+is changed in the original org file, but the change is not directly reflected
+in the agenda buffer.  Use @kbd{r} or @kbd{g} to update the buffer.
 @c
 @kindex S-@key{left}
 @item S-@key{left}
