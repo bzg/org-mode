@@ -5776,7 +5776,6 @@ be used to request time specification in the time stamp."
 	 (pos (marker-position marker))
 	 (org-insert-labeled-timestamps-at-point nil)
 	 ts)
-    (when type (message "%s" type) (sit-for 3))
     (set-marker-insertion-type marker t)
     (org-with-remote-undo buffer
       (with-current-buffer buffer
