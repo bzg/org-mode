@@ -1252,7 +1252,7 @@ Shell links can be dangerous: just think about a link
 This link would show up in your Org-mode document as \"Google Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
-Just change it to `y-or-n-p' of you want to confirm with a
+Just change it to `y-or-n-p' if you want to confirm with a
 single keystroke rather than having to type \"yes\"."
   :group 'org-link-follow
   :type '(choice
@@ -1269,7 +1269,7 @@ Elisp links can be dangerous: just think about a link
 This link would show up in your Org-mode document as \"Google Search\",
 but really it would remove your entire home directory.
 Therefore we advise against setting this variable to nil.
-Just change it to `y-or-n-p' of you want to confirm with a
+Just change it to `y-or-n-p' if you want to confirm with a
 single keystroke rather than having to type \"yes\"."
   :group 'org-link-follow
   :type '(choice
