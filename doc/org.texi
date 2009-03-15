@@ -4980,16 +4980,6 @@ happen in the line directly following the headline.  When called with a
 prefix arg, an existing deadline will be removed from the entry.
 @c FIXME Any CLOSED timestamp will be removed.????????
 @c
-@kindex C-c / d
-@cindex sparse tree, for deadlines
-@item C-c / d
-@vindex org-deadline-warning-days
-Create a sparse tree with all deadlines that are either past-due, or
-which will become due within @code{org-deadline-warning-days}.
-With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
-prefix, check that many days.  For example, @kbd{C-1 C-c / d} shows
-all deadlines due tomorrow.
-@c
 @kindex C-c C-s
 @item C-c C-s
 Insert @samp{SCHEDULED} keyword along with a stamp.  The insertion will
@@ -5005,6 +4995,24 @@ Mark the current entry for agenda action.  After you have marked the entry
 like this, you can open the agenda or the calendar to find an appropriate
 date.  With the cursor on the selected date, press @kbd{k s} or @kbd{k d} to
 schedule the marked item.
+@c
+@kindex C-c / d
+@cindex sparse tree, for deadlines
+@item C-c / d
+@vindex org-deadline-warning-days
+Create a sparse tree with all deadlines that are either past-due, or
+which will become due within @code{org-deadline-warning-days}.
+With @kbd{C-u} prefix, show all deadlines in the file.  With a numeric
+prefix, check that many days.  For example, @kbd{C-1 C-c / d} shows
+all deadlines due tomorrow.
+@c
+@kindex C-c / b
+@item C-c / b
+Sparse tree for deadlines and scheduled items before a given date.
+@c
+@kindex C-c / a
+@item C-c / a
+Sparse tree for deadlines and scheduled items after a given date.
 @end table
 
 @node Repeated tasks,  , Inserting deadline/schedule, Deadlines and scheduling

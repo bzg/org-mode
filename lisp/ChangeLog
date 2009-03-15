@@ -6,6 +6,8 @@
 	(org-store-log-note): Remove drawer if empty while note is
 	aborted.
 	(org-remove-empty-drawer-at): New function.
+	(org-check-after-date): New command.
+	(org-sparse-tree): New sparse tree command "a".
 
 	* org-exp.el (org-export-as-ascii): Improve export of plain lists.
 

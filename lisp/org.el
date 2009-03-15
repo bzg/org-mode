@@ -9614,17 +9614,21 @@ t      Show entries with a specific TODO keyword.
 m      Show entries selected by a tags/property match.
 p      Enter a property name and its value (both with completion on existing
        names/values) and show entries with that property.
-r      Show entries matching a regular expression
-d      Show deadlines due within `org-deadline-warning-days'."
+r      Show entries matching a regular expression.
+d      Show deadlines due within `org-deadline-warning-days'.
+b      Show deadlines and scheduled items before a date.
+a      Show deadlines and scheduled items after a date."
   (interactive "P")
   (let (ans kwd value)
-    (message "Sparse tree: [/]regexp [t]odo-kwd [m]atch [p]roperty [d]eadlines [b]efore-date")
+    (message "Sparse tree: [/]regexp [t]odo-kwd [m]atch [p]roperty [d]eadlines [b]efore-date [a]fter-date")
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?d)
       (call-interactively 'org-check-deadlines))
      ((equal ans ?b)
       (call-interactively 'org-check-before-date))
+     ((equal ans ?a)
+      (call-interactively 'org-check-after-date))
      ((equal ans ?t)
       (org-show-todo-tree '(4)))
      ((member ans '(?T ?m))
@@ -12128,6 +12132,21 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 		     (org-time-string-to-time (match-string 2))
 		     (org-time-string-to-time date)))))
     (message "%d entries before %s"
+	     (org-occur regexp nil callback) date)))
+
+(defun org-check-after-date (date)
+  "Check if there are deadlines or scheduled entries after DATE."
+  (interactive (list (org-read-date)))
+  (let ((case-fold-search nil)
+	(regexp (concat "\\<\\(" org-deadline-string
+			"\\|" org-scheduled-string
+			"\\) *<\\([^>]+\\)>"))
+	(callback
+	 (lambda () (not
+		     (time-less-p
+		      (org-time-string-to-time (match-string 2))
+		      (org-time-string-to-time date))))))
+    (message "%d entries after %s"
 	     (org-occur regexp nil callback) date)))
 
 (defun org-evaluate-time-range (&optional to-buffer)
