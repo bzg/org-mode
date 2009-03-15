@@ -3,6 +3,9 @@
 	* org.el (org-read-date-history): New variable.
 	(org-read-date): Use new history variable.
 	(org-toggle-heading): Fix bug when used before first headline.
+	(org-store-log-note): Remove drawer if empty while note is
+	aborted.
+	(org-remove-empty-drawer-at): New function.
 
 	* org-exp.el (org-export-as-ascii): Improve export of plain lists.
 
