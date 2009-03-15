@@ -2007,22 +2007,23 @@ so the export commands can easily use it."
 	  (while files
 	    (eval (list 'let (append org-agenda-exporter-settings opts pars)
 			(list 'org-write-agenda
-			      (expand-file-name (pop files) dir) t))))
+			      (expand-file-name (pop files) dir) nil t))))
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
 
-(defun org-write-agenda (file &optional nosettings)
+(defun org-write-agenda (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
 If the extension is .ics, run icalendar export over all files used
 to construct the agenda and limit the export to entries listed in the
 agenda now.
+With prefic argument OPEN, open the new file immediately.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
 the settings have already been scoped and we do not wish to overrule other,
 higher priority settings."
-  (interactive "FWrite agenda to file: ")
+  (interactive "FWrite agenda to file: \nP")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
   (cond
@@ -2088,7 +2089,9 @@ higher priority settings."
 		 (save-buffer 0)
 		 (kill-buffer (current-buffer))
 		 (message "Plain text written to %s" file))))))))
-    (set-buffer org-agenda-buffer-name)))
+    (set-buffer org-agenda-buffer-name))
+  (when open (org-open-file file)))
+
 (defvar org-agenda-filter-overlays nil)
 
 (defun org-agenda-mark-filtered-text ()
