@@ -11547,6 +11547,7 @@ So these are more for recording a certain time/date."
 (defvar org-overriding-default-time nil) ; dynamically scoped
 (defvar org-read-date-overlay nil)
 (defvar org-dcst nil) ; dynamically scoped
+(defvar org-read-date-history nil)
 
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input)
@@ -11673,7 +11674,8 @@ user."
 		(progn
 		  (use-local-map map)
 		  (add-hook 'post-command-hook 'org-read-date-display)
-		  (setq org-ans0 (read-string prompt default-input nil nil))
+		  (setq org-ans0 (read-string prompt default-input
+					      'org-read-date-history nil))
 		  ;; org-ans0: from prompt
 		  ;; org-ans1: from mouse click
 		  ;; org-ans2: from calendar motion
@@ -11686,7 +11688,8 @@ user."
 
      (t ; Naked prompt only
       (unwind-protect
-	  (setq ans (read-string prompt default-input nil timestr))
+	  (setq ans (read-string prompt default-input
+				 'org-read-date-history timestr))
 	(when org-read-date-overlay
 	  (org-delete-overlay org-read-date-overlay)
 	  (setq org-read-date-overlay nil)))))

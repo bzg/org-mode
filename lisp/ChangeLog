@@ -1,5 +1,8 @@
 2009-03-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-read-date-history): New variable.
+	(org-read-date): Use new history variable.
+
 	* org-exp.el (org-export-as-ascii): Improve export of plain lists.
 
 2009-03-14  Bastien Guerry  <bzg@altern.org>
