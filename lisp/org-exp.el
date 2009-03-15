@@ -2894,6 +2894,8 @@ underlined headlines.  The default is 3."
 		   (org-format-table-ascii table-buffer)
 		   "\n") "\n")))
        (t
+	(if (string-match "^\\([ \t]*\\)\\([-+*][ \t]+\\)\\(.*?\\)\\( ::\\)" line)
+	    (setq line (replace-match "\\1\\3:" t nil line)))
 	(setq line (org-fix-indentation line org-ascii-current-indentation))
 	;; Remove forced line breaks
 	(if (string-match "\\\\\\\\[ \t]*$" line)

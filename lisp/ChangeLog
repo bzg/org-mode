@@ -1,3 +1,7 @@
+2009-03-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-ascii): Improve export of plain lists.
+
 2009-03-14  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-toggle-fixed-width-section): Bug fix: insert a
