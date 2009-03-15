@@ -2,6 +2,7 @@
 
 	* org.el (org-read-date-history): New variable.
 	(org-read-date): Use new history variable.
+	(org-toggle-heading): Fix bug when used before first headline.
 
 	* org-exp.el (org-export-as-ascii): Improve export of plain lists.
 

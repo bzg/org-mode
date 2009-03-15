@@ -14210,8 +14210,11 @@ a prefix argument is given, its value determines the number of stars to add."
 				 ?*)
 		  (save-excursion
 		    (re-search-backward org-complex-heading-regexp nil t)
-		    (or (match-string 1) "*"))))
-	       (add-stars (if nstars "" (if org-odd-levels-only "**" "*")))
+		    (or (match-string 1) ""))))
+	       (add-stars (cond (nstars "")
+				((equal stars "") "*")
+				(org-odd-levels-only "**")
+				(t "*")))
 	       (rpl (concat stars add-stars " ")))
 	  (while (< (setq l (1+ l)) l2)
 	    (if itemp
