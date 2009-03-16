@@ -204,7 +204,8 @@ For example \orgTITLE for #+TITLE."
   :type 'boolean)
 
 (defcustom org-export-latex-tables-column-borders nil
-  "When non-nil, group of columns are surrounded with borders."
+  "When non-nil, grouping columns can cause outer vertical lines in tables.
+When nil, grouping causes only separation lines between groups."
   :group 'org-export-latex
   :type 'boolean)
 
@@ -1122,10 +1123,10 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		     (lambda (x)
 		       (setq gr (pop org-table-colgroup-info))
 		       (format "%s%%s%s"
-			       (cond ((eq gr ':start)
-				      (prog1 (if colgropen "|" "")
+			       (cond ((eq gr :start)
+				      (prog1 (if colgropen "|" "|")
 					(setq colgropen t)))
-				     ((eq gr ':startend)
+				     ((eq gr :startend)
 				      (prog1 (if colgropen "|" "|")
 					(setq colgropen nil)))
 				     (t ""))

@@ -1,3 +1,8 @@
+2009-03-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-tables): Fix vertical
+	lines in tables.
+
 2009-03-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-read-date-history): New variable.
