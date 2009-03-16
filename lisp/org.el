@@ -8373,6 +8373,7 @@ This function can be used in a hook."
     "BEGIN_EXAMPLE" "END_EXAMPLE"
     "BEGIN_QUOTE" "END_QUOTE"
     "BEGIN_VERSE" "END_VERSE"
+    "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
     "CATEGORY" "COLUMNS"
     "CAPTION" "LABEL" "ATTR_HTML" "ATTR_LaTeX"))
@@ -8387,6 +8388,8 @@ This function can be used in a hook."
          "<quote>\n?\n</quote>")
     ("v" "#+begin_verse\n?\n#+end_verse"
          "<verse>\n?\n/verse>")
+    ("c" "#+begin_center\n?\n#+end_center"
+         "<center>\n?\n/center>")
     ("l" "#+begin_latex\n?\n#+end_latex"
          "<literal style=\"latex\">\n?\n</literal>")
     ("L" "#+latex: "

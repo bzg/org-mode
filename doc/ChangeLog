@@ -1,3 +1,7 @@
+2009-03-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Paragraphs): Document centering.
+
 2009-03-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Creating timestamps, Agenda commands): Document new

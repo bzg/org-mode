@@ -7855,6 +7855,13 @@ but not any simpler -- Albert Einstein
 #+END_QUOTE
 @end example
 
+If you would like to center some text, do it like this:
+@example
+#+BEGIN_CENTER
+Everything should be made as simple as possible, \\
+but not any simpler
+#+END_CENTER
+@end example
 
 @node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples

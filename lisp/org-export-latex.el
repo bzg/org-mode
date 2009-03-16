@@ -1366,6 +1366,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (while (search-forward "ORG-VERSE-END" nil t)
     (replace-match "\\end{verse}" t t))
 
+  ;; Convert center
+  (goto-char (point-min))
+  (while (search-forward "ORG-CENTER-START" nil t)
+    (replace-match "\\begin{center}" t t))
+  (goto-char (point-min))
+  (while (search-forward "ORG-CENTER-END" nil t)
+    (replace-match "\\end{center}" t t))
+
   ;; Convert horizontal rules
   (goto-char (point-min))
   (while (re-search-forward "^----+.$" nil t)

@@ -1,5 +1,12 @@
 2009-03-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-preprocess): Implement the
+	centering markup.
+
+	* org-exp.el (org-export-mark-blockquote-verse-center): Renamed
+	from `org-export-mark-blockquote-and-verse'.
+	(org-export-as-html): Implement the centering markup.
+
 	* org-export-latex.el (org-export-latex-tables): Fix vertical
 	lines in tables.
 

@@ -1656,8 +1656,8 @@ on this string to produce the exported version."
       ;; Protect verbatim elements
       (org-export-protect-verbatim)
 
-      ;; Blockquotes and verse
-      (org-export-mark-blockquote-and-verse)
+      ;; Blockquotes, verse, and center
+      (org-export-mark-blockquote-verse-center)
 
       ;; Remove timestamps, if the user has requested so
       (unless (plist-get parameters :timestamps)
@@ -2027,7 +2027,7 @@ from the buffer."
 	  ;; No, this is for a different backend, kill it
 	  (delete-region (match-beginning 0) (match-end 0)))))))
 
-(defun org-export-mark-blockquote-and-verse ()
+(defun org-export-mark-blockquote-verse-center ()
   "Mark block quote and verse environments with special cookies.
 These special cookies will later be interpreted by the backend."
   ;; Blockquotes
@@ -2042,6 +2042,12 @@ These special cookies will later be interpreted by the backend."
   (while (re-search-forward "^#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
     (replace-match (if (equal (downcase (match-string 1)) "end")
 		       "ORG-VERSE-END" "ORG-VERSE-START")
+		   t t))
+  ;; Center
+  (goto-char (point-min))
+  (while (re-search-forward "^#\\+\\(begin\\|end\\)_center\\>.*" nil t)
+    (replace-match (if (equal (downcase (match-string 1)) "end")
+		       "ORG-CENTER-END" "ORG-CENTER-START")
 		   t t)))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
@@ -3713,7 +3719,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (insert "\n<hr/>\n"))
 	    (throw 'nextline nil))
 
-	  ;; Blockquotes and verse
+	  ;; Blockquotes, verse, and center
 	  (when (equal "ORG-BLOCKQUOTE-START" line)
 	    (org-close-par-maybe)
 	    (insert "<blockquote>\n<p>\n")
@@ -3729,6 +3735,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (equal "ORG-VERSE-END" line)
 	    (insert "</p>\n")
 	    (setq inverse nil)
+	    (throw 'nextline nil))
+	  (when (equal "ORG-CENTER-START" line)
+	    (org-close-par-maybe)
+	    (insert "\n<p style=\"text-align: center\">\n")
+	    (throw 'nextline nil))
+	  (when (equal "ORG-CENTER-END" line)
+	    (insert "</p>\n")
 	    (throw 'nextline nil))
 	  (when inverse
 	    (let ((i (org-get-string-indentation line)))
