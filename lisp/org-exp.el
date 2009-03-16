@@ -793,10 +793,18 @@ to a file."
 
 (defcustom org-export-htmlize-output-type 'inline-css
   "Output type to be used by htmlize when formatting code snippets.
-Normally this is `inline-css', but if you have defined to appropriate
-classes in your css style file, setting this to `css' means that the
-fontification will use the class names.
-See also the function `org-export-htmlize-generate-css'."
+We use as default  `inline-css', in order to make the resulting
+HTML self-containing.
+However, this will fail when using Emacs in batch mode for export, because
+then no rich font definitions are in place.  It will also not be good if
+people with different Emacs setup contribute HTML files to a website,
+because the fonts will represent the individual setups.  In these cases,
+it is much better to let Org/Htmlize assign classes only, and to use
+a style file to define the look of these classes.
+To get a start for your css file, start Emacs session nnd make sure that
+all the faces you are interested in are defined, for example by loading files
+in all modes you want.  Then, use the command
+\\[org-export-htmlize-generate-css] to extract class definitions."
   :group 'org-export-htmlize
   :type '(choice (const css) (const inline-css)))
 
