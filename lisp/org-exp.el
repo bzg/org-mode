@@ -32,7 +32,7 @@
   (require 'cl))
 
 (declare-function org-export-latex-preprocess "org-export-latex" (parameters))
-(declare-function org-export-docbook-preprocess "org-export-docbook" (parameters))
+(declare-function org-export-docbook-preprocess "org-docbook" (parameters))
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 (declare-function htmlize-region "ext:htmlize" (beg end))
@@ -1164,25 +1164,23 @@ value of `org-export-run-in-background'."
 
 \[a] export as ASCII
 
-\[h] export as HTML
-\[H] export as HTML to temporary buffer
-\[R] export region as HTML
-\[b] export as HTML and browse immediately
-\[x] export as XOXO
+\[h] export as HTML    [H] to temporary buffer   [R] export region
+\[b] export as HTML and open in browser
 
-\[l] export as LaTeX
+\[l] export as LaTeX   [L] to temporary buffer
 \[p] export as LaTeX and process to PDF
 \[d] export as LaTeX, process to PDF, and open the resulting PDF document
-\[L] export as LaTeX to temporary buffer
+
+\[D] export as Docbook             [V] export and view Docbook file
+
+\[x] export as XOXO
 
 \[i] export current file as iCalendar file
 \[I] export all agenda files as iCalendar files
 \[c] export agenda files into combined iCalendar file
 
-\[F] publish current file
-\[P] publish current project
-\[X] publish... (project will be prompted for)
-\[A] publish all projects")
+\[F] publish current file          [P] publish current project
+\[X] publish a project...          [A] publish all projects")
 	 (cmds
 	  '((?t org-insert-export-options-template nil)
 	    (?v org-export-visible nil)
@@ -1192,6 +1190,8 @@ value of `org-export-run-in-background'."
 	    (?H org-export-as-html-to-buffer nil)
 	    (?R org-export-region-as-html nil)
 	    (?x org-export-as-xoxo t)
+	    (?D org-export-as-docbook t)
+	    (?V org-export-as-docbook-and-open t)
 	    (?l org-export-as-latex t)
 	    (?p org-export-as-pdf t)
 	    (?d org-export-as-pdf-and-open t)

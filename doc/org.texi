@@ -295,6 +295,7 @@ Exporting
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to LaTeX, and processing to PDF
+* Docbook export::              Exporting to Docbook
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 
@@ -7714,6 +7715,7 @@ enabled (default in Emacs 23).
 * ASCII export::                Exporting to plain ASCII
 * HTML export::                 Exporting to HTML
 * LaTeX and PDF export::        Exporting to LaTeX, and processing to PDF
+* Docbook export::              Exporting to Docbook
 * XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 @end menu
@@ -8658,7 +8660,7 @@ You can choose default values for these options by customizing the variable
 @code{org-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-export-html-use-infojs}.
 
-@node LaTeX and PDF export, XOXO export, HTML export, Exporting
+@node LaTeX and PDF export, Docbook export, HTML export, Exporting
 @section LaTeX and PDF export
 @cindex LaTeX export
 @cindex PDF export
@@ -8823,7 +8825,25 @@ pdflatex (@file{png}, @file{jpg}, and @file{pdf} files).  If you process your
 files in a different way, you may need to customize the variable
 @code{org-export-latex-inline-image-extensions}.
 
-@node XOXO export, iCalendar export, LaTeX and PDF export, Exporting
+@node Docbook export, XOXO export, LaTeX and PDF export, Exporting
+@section Docbook export
+@cindex Docbook export
+
+The Docbook exporter was contributed to Org by Baoqiu Cui.
+
+@table @kbd
+@kindex C-c C-e D
+@item C-c C-e D
+Export as Docbook file @file{myfile.xml}.
+@kindex C-c C-e V
+@item C-c C-e V
+Export as Docbook file and launch a viewer.
+@kindex C-c C-e v
+@item C-c C-e v D
+Export only the visible part of the document.
+@end table
+
+@node XOXO export, iCalendar export, Docbook, Exporting
 @section XOXO export
 @cindex XOXO export
 
