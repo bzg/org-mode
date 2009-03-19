@@ -6388,6 +6388,8 @@ correct customization for this is
                                "\\<IGNORE\\>"))
 @end lisp
 
+Note that if a project is identified as non-stuck, the subtree of this entry
+will still be search for stuck projets.
 
 @node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda Views
 @section Presentation and sorting

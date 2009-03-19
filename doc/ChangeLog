@@ -1,3 +1,8 @@
+2009-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Stuck projects): Docment that projects identified as
+	un-stuck will still be searchd for stuck sub-projects.
+
 2009-03-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Paragraphs): Document centering.

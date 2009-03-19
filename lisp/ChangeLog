@@ -1,5 +1,13 @@
 2009-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-stuck-projects): Document that the subtree of
+	projects that are not stuck will now be searched for stuck
+	sub-projects.
+	(org-agenda-skip-entry-when-regexp-matches)
+	(org-agenda-skip-entry-when-regexp-matches-in-subtree): New functions.
+	(org-agenda-list-stuck-projects): Use
+	`org-agenda-skip-entry-when-regexp-matches-in-subtree'.
+
 	* org-export-latex.el (org-export-latex-preprocess): Improve
 	export of verses.
 
