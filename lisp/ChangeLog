@@ -1,3 +1,12 @@
+2009-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-preprocess): Improve
+	export of verses.
+
+	* org-exp.el (org-export-as-html): Implement centering as a div
+	rather than a paragraph.  Do a better job with line-end in verse
+	environments.
+
 2009-03-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-open-at-point): Fix tags searches by mouse click.

@@ -1361,10 +1361,21 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Convert verse
   (goto-char (point-min))
   (while (search-forward "ORG-VERSE-START" nil t)
-    (replace-match "\\begin{verse}" t t))
-  (goto-char (point-min))
-  (while (search-forward "ORG-VERSE-END" nil t)
-    (replace-match "\\end{verse}" t t))
+    (replace-match "\\begin{verse}" t t)
+    (beginning-of-line 2)
+    (while (and (not (looking-at "[ \t]*ORG-VERSE-END.*")) (not (eobp)))
+      (when (looking-at "\\([ \t]+\\)\\([^ \t\n]\\)")
+	(goto-char (match-end 1))
+	(replace-match
+	 (org-export-latex-protect-string
+	  (concat "\\hspace*{1cm}" (match-string 2))) t t)
+	(beginning-of-line 1))
+      (unless (looking-at ".*?[^ \t\n].*?\\\\\\\\[ \t]*$")
+	(end-of-line 1)
+	(insert "\\\\"))
+      (beginning-of-line 2))
+    (and (looking-at "[ \t]*ORG-VERSE-END.*")
+	 (replace-match "\\end{verse}" t t)))
 
   ;; Convert center
   (goto-char (point-min))

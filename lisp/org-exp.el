@@ -3722,10 +3722,12 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; Blockquotes, verse, and center
 	  (when (equal "ORG-BLOCKQUOTE-START" line)
 	    (org-close-par-maybe)
-	    (insert "<blockquote>\n<p>\n")
+	    (insert "<blockquote>\n")
+	    (org-open-par)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-BLOCKQUOTE-END" line)
-	    (insert "</p>\n</blockquote>\n")
+	    (org-close-par-maybe)
+	    (insert "\n</blockquote>\n")
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-START" line)
 	    (org-close-par-maybe)
@@ -3738,10 +3740,12 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (throw 'nextline nil))
 	  (when (equal "ORG-CENTER-START" line)
 	    (org-close-par-maybe)
-	    (insert "\n<p style=\"text-align: center\">\n")
+	    (insert "\n<div style=\"text-align: center\">")
+	    (org-open-par)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-CENTER-END" line)
-	    (insert "</p>\n")
+	    (org-close-par-maybe)
+	    (insert "\n</div>")
 	    (throw 'nextline nil))
 	  (when inverse
 	    (let ((i (org-get-string-indentation line)))
@@ -3749,10 +3753,12 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq line (concat (mapconcat 'identity
 						(make-list (* 2 i) "\\nbsp") "")
 				     " " (org-trim line))))
-	      (setq line (concat line "\\\\"))))
+	      (unless (string-match "\\\\\\\\[ \t]*$" line)
+		(setq line (concat line "\\\\")))))
 
 	  ;; make targets to anchors
-	  (while (string-match "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)
+	  (while (string-match
+		  "<<<?\\([^<>]*\\)>>>?\\((INVISIBLE)\\)?[ \t]*\n?" line)
 	    (cond
 	     ((match-end 2)
 	      (setq line (replace-match
