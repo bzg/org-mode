@@ -8137,7 +8137,8 @@ operation has put the subtree."
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
-	(if (and (equal (buffer-file-name) file)
+	(if (and (not goto)
+		 (equal (buffer-file-name) file)
 		 (if regionp
 		     (and (>= pos region-start)
 			  (<= pos region-end))
