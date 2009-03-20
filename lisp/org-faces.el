@@ -343,6 +343,12 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
     (setq org-tags-special-faces-re
 	  (concat ":\\(" (mapconcat 'car value "\\|") "\\):"))))
 
+(defface org-checkbox
+  (org-compatible-face 'bold
+    '((t (:bold t))))
+  "Face for checkboxes"
+  :group 'org-faces)
+
 (defcustom org-tag-faces nil
   "Faces for specific tags.
 This is a list of cons cells, with tags in the car and faces in the cdr.

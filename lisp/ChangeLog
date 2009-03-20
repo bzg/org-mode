@@ -1,5 +1,9 @@
 2009-03-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-font-lock-defaults): Use new checkbox face.
+
+	* org-faces.el (org-checkbox): New face.
+
 	* org-exp.el (org-export-html-preprocess): Only create LaTeX
 	fragement images if there is an export file.
 
