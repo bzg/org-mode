@@ -1,3 +1,8 @@
+2009-03-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-html-preprocess): Only create LaTeX
+	fragement images if there is an export file.
+
 2009-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-stuck-projects): Document that the subtree of

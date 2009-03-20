@@ -3237,7 +3237,8 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
 
 (defun org-export-html-preprocess (parameters)
   ;; Convert LaTeX fragments to images
-  (when (plist-get parameters :LaTeX-fragments)
+  (when (and org-current-export-file
+	     (plist-get parameters :LaTeX-fragments))
     (org-format-latex
      (concat "ltxpng/" (file-name-sans-extension
 			(file-name-nondirectory
