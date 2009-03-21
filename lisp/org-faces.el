@@ -301,6 +301,20 @@ specific tags."
   "Face used for todo keywords that indicate DONE items."
   :group 'org-faces)
 
+(defface org-agenda-done ;; originally copied from font-lock-type-face
+  (org-compatible-face nil
+    '((((class color) (min-colors 16) (background light)) (:foreground "ForestGreen"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "PaleGreen"))
+      (((class color) (min-colors 8)) (:foreground "green"))
+      (t (:bold nil))))
+  "Face used in agenda, to indicate lines switched to DONE.
+This face is used to de-emphasize items that where brightly colord in the
+agenda because they were things to do, or overdue.  The DONE state itself
+is of course immediately visible, but for example a passed deadline is
+\(by default) very bright read.  This face could be simply the default face
+of the frame, for example."
+  :group 'org-faces)
+
 (defface org-headline-done ;; originally copied from font-lock-string-face
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))

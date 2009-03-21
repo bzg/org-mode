@@ -154,6 +154,9 @@ the fonts used by the agenda, here is an example:
           color: #cc6666;
           font-weight: bold;
        }
+       .org-agenda-done {
+          color: #339933;
+       }
        .org-done {
           color: #339933;
        }
@@ -2857,7 +2860,7 @@ in `org-agenda-text-search-extra-files'."
   (org-set-sorting-strategy 'search)
   (org-prepare-agenda "SEARCH")
   (let* ((props (list 'face nil
-		      'done-face 'org-done
+		      'done-face 'org-agenda-done
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
@@ -3536,7 +3539,7 @@ the documentation of `org-diary'."
 (defun org-agenda-get-todos ()
   "Return the TODO information for agenda display."
   (let* ((props (list 'face nil
-		      'done-face 'org-done
+		      'done-face 'org-agenda-done
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
@@ -3814,10 +3817,10 @@ the documentation of `org-diary'."
 	    (setq txt org-agenda-no-heading-message))
 	  (setq priority 100000)
 	  (org-add-props txt props
-	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-done
+	    'org-marker marker 'org-hd-marker hdmarker 'face 'org-agenda-done
 	    'priority priority 'org-category category
 	    'type "closed" 'date date
-	    'undone-face 'org-warning 'done-face 'org-done)
+	    'undone-face 'org-warning 'done-face 'org-agenda-done)
 	  (push txt ee))
 	(goto-char (point-at-eol))))
     (nreverse ee)))
@@ -3898,8 +3901,8 @@ the documentation of `org-diary'."
 		  'todo-state todo-state
 		  'type (if upcomingp "upcoming-deadline" "deadline")
 		  'date (if upcomingp date d2)
-		  'face (if donep 'org-done face)
-		  'undone-face face 'done-face 'org-done)
+		  'face (if donep 'org-agenda-done face)
+		  'undone-face face 'done-face 'org-agenda-done)
 		(push txt ee))))))
     (nreverse ee)))
 
@@ -3917,7 +3920,7 @@ FRACTION is what fraction of the head-warning time has passed."
   (let* ((props (list 'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
-		      'done-face 'org-done
+		      'done-face 'org-agenda-done
 		      'mouse-face 'highlight
 		      'keymap org-agenda-keymap
 		      'help-echo
@@ -3981,7 +3984,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		       (t 'org-scheduled)))
 		(org-add-props txt props
 		  'undone-face face
-		  'face (if donep 'org-done face)
+		  'face (if donep 'org-agenda-done face)
 		  'org-marker (org-agenda-new-marker pos)
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'type (if pastschedp "past-scheduled" "scheduled")

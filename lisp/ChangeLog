@@ -1,5 +1,14 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-export-html-style): Define color for
+	org-agenda-done face.
+	(org-search-view, org-agenda-get-todos, org-agenda-get-progress)
+	(org-agenda-get-deadlines, org-agenda-get-scheduled): Use new face.
+
+	* org.el (org-scan-tags): Use the new face.
+
+	* org-faces.el (org-agenda-done): New face.
+
 	* org.el (org-scan-tags): Test the value org
 	`org-tags-match-list-sublevels'.
 	(org-tags-match-list-sublevels): New allowed value: indented.

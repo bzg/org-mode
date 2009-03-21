@@ -9891,7 +9891,7 @@ only lines with a TODO keyword are included in the output."
 		     (org-re
 		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*$")))
 	 (props (list 'face 'default
-		      'done-face 'org-done
+		      'done-face 'org-agenda-done
 		      'undone-face 'default
 		      'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
