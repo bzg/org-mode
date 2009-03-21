@@ -855,7 +855,10 @@ around it."
 	    (narrow-to-region beg end)
 	    (org-clock-sum))))
       (while (re-search-forward (concat "^" outline-regexp) end t)
-	(push (cons (org-current-line) (org-entry-properties)) cache))
+	(if (and org-columns-skip-arrchived-trees
+		 (looking-at (concat ".*:" org-archive-tag ":")))
+	    (org-end-of-subtree t)
+	  (push (cons (org-current-line) (org-entry-properties)) cache)))
       (when cache
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
 	(org-set-local 'org-columns-current-maxwidths maxwidths)

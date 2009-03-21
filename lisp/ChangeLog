@@ -1,5 +1,7 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-columns-skip-arrchived-trees): New option.
+
 	* org-agenda.el (org-agenda-export-html-style): Define color for
 	org-agenda-done face.
 	(org-search-view, org-agenda-get-todos, org-agenda-get-progress)

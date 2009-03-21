@@ -3066,6 +3066,12 @@ Instead, use the key `v' to cycle the archives-mode in the agenda."
   :group 'org-agenda-skip
   :type 'boolean)
 
+(defcustom org-columns-skip-arrchived-trees t
+  "Non-nil means, irgnore archived trees when creating column view."
+  :group 'org-archive
+  :group 'org-properties
+  :type 'boolean)
+
 (defcustom org-cycle-open-archived-trees nil
   "Non-nil means, `org-cycle' will open archived trees.
 An archived tree is a tree marked with the tag ARCHIVE.
