@@ -1,5 +1,9 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mouse.el (org-mouse-todo-menu): New function.
+	(org-mouse-todo-keywords): Function removed.
+	(org-mouse-context-menu): Use `org-mouse-todo-menu'.
+
 	* org-table.el (org-table-beginning-of-field)
 	(org-table-end-of-field): New commands
 	(org-table-previous-field, org-table-beginning-of-field): Better

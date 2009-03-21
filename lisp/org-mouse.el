@@ -422,7 +422,17 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
    (loop for priority from ?A to org-lowest-priority
 	 collect (char-to-string priority)))
 
+(defun org-mouse-todo-menu (state)
+  "Create the menu with TODO keywords."
+  (append
+   (let ((kwds org-todo-keywords-1))
+     (org-mouse-keyword-menu
+      kwds
+      `(lambda (kwd) (org-todo kwd))
+      (lambda (kwd) (equal state kwd))))))
+
 (defun org-mouse-tag-menu ()		;todo
+  "Create the tags menu"
   (append
    (let ((tags (org-get-tags)))
      (org-mouse-keyword-menu
@@ -439,7 +449,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ["Align Tags Here" (org-set-tags nil t) t]
      ["Align Tags in Buffer" (org-set-tags t t) t]
      ["Set Tags ..." (org-set-tags) t])))
-
 
 
 (defun org-mouse-set-tags (tags)
@@ -621,9 +630,6 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	(set-match-data ',match)
 	(apply ',function rest)))))
 
-(defun org-mouse-todo-keywords ()
-  (if (boundp 'org-todo-keywords-1) org-todo-keywords-1 org-todo-keywords))
-
 (defun org-mouse-match-todo-keyword ()
   (save-excursion
     (org-back-to-heading)
@@ -691,10 +697,10 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 			 (org-mouse-remove-match-and-spaces))))]
        )))
    ((and (org-mouse-looking-at "\\b\\w+" "a-zA-Z0-9_")
-	 (member (match-string 0) (org-mouse-todo-keywords)))
+	 (member (match-string 0) org-todo-keywords-1))
     (popup-menu
      `(nil
-       ,@(org-mouse-keyword-replace-menu (org-mouse-todo-keywords))
+       ,@(org-mouse-todo-menu (match-string 0))
        "--"
        ["Check TODOs" org-show-todo-tree t]
        ["List all TODO keywords" org-todo-list t]
@@ -832,9 +838,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	  "--"
 	  ,@(org-mouse-tag-menu))
 	 ("TODO Status"
-	  ,@(progn (org-mouse-match-todo-keyword)
-		   (org-mouse-keyword-replace-menu (org-mouse-todo-keywords)
-						   1)))
+	  ,@(org-mouse-todo-menu (org-get-todo-state)))
 	 ["Show Tags"
 	  (with-current-buffer org-mouse-main-buffer (org-agenda-show-tags))
 	  :visible (not org-mouse-direct)]
