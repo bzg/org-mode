@@ -1,5 +1,10 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-export-latex.el (org-export-latex-make-header): Apply macros
+	in header.
+
+	* org-exp.el (org-export-apply-macros-in-string): New function.
+
 	* org-export-latex.el (org-export-latex-list-parameters): Fix bug
 	with the definition of a checked box.
 

@@ -2365,6 +2365,14 @@ TYPE must be a string, any of:
 	(and (stringp val)
 	     (replace-match val t t))))))
 
+(defun org-export-apply-macros-in-string (s)
+  "Apply the macros in string S."
+  (when s
+    (with-temp-buffer
+      (insert s)
+      (org-export-preprocess-apply-macros)
+      (buffer-string))))
+
 ;;; Include files
 
 (defun org-export-handle-include-files ()

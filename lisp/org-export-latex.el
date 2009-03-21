@@ -757,7 +757,7 @@ OPT-PLIST is the options plist for current buffer."
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
      ;; insert LaTeX custom header
-     org-export-latex-header
+     (org-export-apply-macros-in-string org-export-latex-header)
      "\n"
      ;; insert information on LaTeX packages
      (when org-export-latex-packages-alist
@@ -768,8 +768,9 @@ OPT-PLIST is the options plist for current buffer."
 			      (car p) (cadr p))))
 		  org-export-latex-packages-alist "\n"))
      ;; insert additional commands in the header
-     (plist-get opt-plist :latex-header-extra)
-     org-export-latex-append-header
+     (org-export-apply-macros-in-string
+      (plist-get opt-plist :latex-header-extra))
+     (org-export-apply-macros-in-string org-export-latex-append-header)
      ;; insert the title
      (format
       "\n\n\\title{%s}\n"
