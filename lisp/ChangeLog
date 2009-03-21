@@ -1,5 +1,16 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview.el (org-colview-initial-truncate-line-value): New
+	variable.
+	(org-columns-remove-overlays): Restore the value of `truncate-lines'.
+	(org-columns): Remember the value of `truncate-lines'.
+
+	* org-colview-xemacs.el (org-colview-initial-truncate-line-value):
+	New variable.
+	(org-columns-remove-overlays): Restore the value of
+	`truncate-lines'.
+	(org-columns): Remember the value of `truncate-lines'.
+
 	* org.el (org-columns-skip-arrchived-trees): New option.
 
 	* org-agenda.el (org-agenda-export-html-style): Define color for

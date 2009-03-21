@@ -295,6 +295,9 @@ for the duration of the command.")
 	  org-columns-previous-hscroll (window-hscroll))
     (force-mode-line-update)))
 
+(defvar org-colview-initial-truncate-line-value nil
+  "Remember the value of `truncate-lines' across colview.")
+
 (defun org-columns-remove-overlays ()
   "Remove all currently active column overlays."
   (interactive)
@@ -312,7 +315,9 @@ for the duration of the command.")
        (let ((inhibit-read-only t))
 	 (remove-text-properties (point-min) (point-max) '(read-only t))))
       (when org-columns-flyspell-was-active
-	(flyspell-mode 1)))))
+	(flyspell-mode 1))
+      (when (local-variable-p 'org-colview-initial-truncate-line-value)
+	(setq truncate-lines org-colview-initial-truncate-line-value)))))
 
 (defun org-columns-cleanup-item (item fmt)
   "Remove from ITEM what is a column in the format FMT."
@@ -684,6 +689,10 @@ around it."
 	(when (org-set-local 'org-columns-flyspell-was-active
 			     (org-bound-and-true-p flyspell-mode))
 	  (flyspell-mode 0))
+	(unless (local-variable-p 'org-colview-initial-truncate-line-value)
+	  (org-set-local 'org-colview-initial-truncate-line-value
+			 truncate-lines))
+	(setq truncate-lines t)	
 	(mapc (lambda (x)
 		(goto-line (car x))
 		(org-columns-display-here (cdr x)))
