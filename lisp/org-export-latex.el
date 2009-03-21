@@ -227,8 +227,8 @@ the %s stands here for the inserted headline and is mandatory."
   :group 'org-export-latex
   :type '(choice (const :tag "Ignore" nil)
 		 (symbol :tag "Convert as descriptive list" description)
-		 (symbol :tag "Convert as descriptive list" itemize)
-		 (symbol :tag "Convert as descriptive list" enumerate)
+		 (symbol :tag "Convert as itemized list" itemize)
+		 (symbol :tag "Convert as enumerated list" enumerate)
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
