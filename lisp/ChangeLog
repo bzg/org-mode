@@ -1,5 +1,9 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-scan-tags): Test the value org
+	`org-tags-match-list-sublevels'.
+	(org-tags-match-list-sublevels): New allowed value: indented.
+
 	* org-export-latex.el (org-export-latex-make-header): Apply macros
 	in header.
 

@@ -2232,7 +2232,10 @@ This variable is semi-obsolete and probably should always be true.  It
 is better to limit inheritance to certain tags using the variables
 `org-use-tag-inheritance' and `org-tags-exclude-from-inheritance'."
   :group 'org-tags
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "No, don't list them" nil)
+	  (const :tag "Yes, do list them" t)
+	  (const :tag "List them, indented with leading dots" indented)))
 
 (defvar org-tags-history nil
   "History of minibuffer reads for tags.")
@@ -9972,11 +9975,10 @@ only lines with a TODO keyword are included in the output."
 	      (setq txt (org-format-agenda-item
 			 ""
 			 (concat
-			  (if org-tags-match-list-sublevels
+			  (if (eq org-tags-match-list-sublevels 'indented)
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
 			 category
-			 ;(org-get-tags-at)
 			 tags-list
 			 )
 		    priority (org-get-priority txt))
