@@ -1,5 +1,7 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-find-position): Fix drawer indentations.
+
 	* org-export-latex.el (org-export-latex-low-levels): More options
 	for how to process lower levels in LaTeX.
 	(org-export-latex-subcontent): Better treatment for lists as a
