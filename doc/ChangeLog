@@ -1,3 +1,11 @@
+2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex:  Document M-e and M-a navigate
+	inside table field.  Fix a number of typos.
+
+	* org.texi (Built-in table editor): Document M-e and M-a navigate
+	inside table field.
+
 2009-03-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Stuck projects): Docment that projects identified as

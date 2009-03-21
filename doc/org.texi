@@ -1656,6 +1656,13 @@ Re-align, move to previous field.
 Re-align the table and move down to next row.  Creates a new row if
 necessary.  At the beginning or end of a line, @key{RET} still does
 NEWLINE, so it can be used to split a table.
+@c
+@kindex M-a
+@item M-a
+Move to beginning of the current table field, or on to the previous field.
+@kindex M-e
+@item M-e
+Move to end of the current table field, or on to the next field.
 
 @tsubheading{Column and row editing}
 @kindex M-@key{left}

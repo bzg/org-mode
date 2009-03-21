@@ -1,5 +1,14 @@
 2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-beginning-of-field)
+	(org-table-end-of-field): New commands
+	(org-table-previous-field, org-table-beginning-of-field): Better
+	error messages.
+	(orgtbl-setup): Include `M-a' and `M-e'.
+
+	* org.el (org-backward-sentence, org-forward-sentence): New
+	commands.
+
 	* org-colview.el (org-colview-initial-truncate-line-value): New
 	variable.
 	(org-columns-remove-overlays): Restore the value of `truncate-lines'.

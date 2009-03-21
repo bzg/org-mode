@@ -827,12 +827,47 @@ Before doing so, re-align the table if necessary."
       (org-table-align))
   (if (org-at-table-hline-p)
       (end-of-line 1))
-  (re-search-backward "|" (org-table-begin))
-  (re-search-backward "|" (org-table-begin))
+  (condition-case nil
+      (progn
+	(re-search-backward "|" (org-table-begin))
+	(re-search-backward "|" (org-table-begin)))
+    (error (error "Cannot move to previous table field")))
   (while (looking-at "|\\(-\\|[ \t]*$\\)")
     (re-search-backward "|" (org-table-begin)))
   (if (looking-at "| ?")
       (goto-char (match-end 0))))
+
+(defun org-table-beginning-of-field (&optional n)
+  "Move to the end of the current table field.
+If already at or after the end, move to the end of the next table field.
+With numeric argument N, move N-1 fields forward first."
+  (interactive "p")
+  (let ((pos (point)))
+    (while (> n 1)
+      (setq n (1- n))
+      (org-table-previous-field))
+    (if (not (re-search-backward "|" (point-at-bol 0) t))
+	(error "No more table fields before the current")
+      (goto-char (match-end 0))
+      (and (looking-at " ") (forward-char 1)))
+    (if (>= (point) pos) (org-table-beginning-of-field 2))))
+
+(defun org-table-end-of-field (&optional n)
+  "Move to the beginning of the current table field.
+If already at or before the beginning, move to the beginning of the
+previous field.
+With numeric argument N, move N-1 fields backward first."
+  (interactive "p")
+  (let ((pos (point)))
+    (while (> n 1)
+      (setq n (1- n))
+      (org-table-next-field))
+    (when (re-search-forward "|" (point-at-eol 1) t)
+      (backward-char 1)
+      (skip-chars-backward " ")
+      (if (and (equal (char-before (point)) ?|) (looking-at " "))
+	  (forward-char 1)))
+    (if (<= (point) pos) (org-table-end-of-field 2))))
 
 (defun org-table-next-row ()
   "Go to the next row (same column) in the current table.
@@ -3387,6 +3422,8 @@ to execute outside of tables."
 	  '("\C-c`"		 org-table-edit-field)
 	  '("\C-c*"		 org-table-recalculate)
 	  '("\C-c^"		 org-table-sort-lines)
+	  '("\M-a"		 org-table-beginning-of-field)
+	  '("\M-e"		 org-table-end-of-field)
 	  '([(control ?#)]       org-table-rotate-recalc-marks)))
 	elt key fun cmd)
     (while (setq elt (pop bindings))
