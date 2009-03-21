@@ -232,7 +232,7 @@ the %s stands here for the inserted headline and is mandatory."
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
-  '(:cbon "\\texttt{[ ]}" :cboff "\\texttt{[ ]}")
+  '(:cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}")
   "Parameters for the LaTeX list exporter.
 These parameters will be passed on to `org-list-to-latex', which in turn
 will pass them (combined with the LaTeX default list parameters) to
