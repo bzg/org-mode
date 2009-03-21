@@ -296,7 +296,8 @@ has been set."
 (defcustom org-replace-disputed-keys nil
   "Non-nil means use alternative key bindings for some keys.
 Org-mode uses S-<cursor> keys for changing timestamps and priorities.
-These keys are also used by other packages like `CUA-mode' or `windmove.el'.
+These keys are also used by other packages like shift-selection-mode'
+\(built into Emacs 23), `CUA-mode' or `windmove.el'.
 If you want to use Org-mode together with one of these other modes,
 or more generally if you would like to move some Org-mode commands to
 other keys, set this variable and configure the keys with the variable

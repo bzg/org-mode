@@ -1767,7 +1767,8 @@ empty, copy current field down to next row and move cursor along with it.
 Depending on the variable @code{org-table-copy-increment}, integer field
 values will be incremented during copy.  Integers that are too large will not
 be incremented.  Also, a @code{0} prefix argument temporarily disables the
-increment.  This key is also used by CUA mode (@pxref{Cooperation}).
+increment.  This key is also used by shift-selection and related modes
+(@pxref{Conflicts}).
 
 @tsubheading{Miscellaneous}
 @kindex C-c `
@@ -4721,7 +4722,7 @@ point (@pxref{Weekly/daily agenda}).
 @item S-@key{left}
 @itemx S-@key{right}
 Change date at cursor by one day.  These key bindings conflict with
-CUA mode (@pxref{Conflicts}).
+shift-selection and related modes (@pxref{Conflicts}).
 @c
 @kindex S-@key{up}
 @kindex S-@key{down}
@@ -4733,8 +4734,8 @@ like @samp{15:30-16:30}, modifying the first time will also shift the second,
 shifting the time block with constant length.  To change the length, modify
 the second time.  Note that if the cursor is in a headline and not at a time
 stamp, these same keys modify the priority of an item.
-(@pxref{Priorities}). The key bindings also conflict with CUA mode
-(@pxref{Conflicts}).
+(@pxref{Priorities}). The key bindings also conflict with shift-selection and
+related modes (@pxref{Conflicts}).
 @c
 @kindex C-c C-y
 @cindex evaluate time range
@@ -9957,7 +9958,7 @@ Key bindings in Org conflict with the @kbd{S-<cursor>} keys used by CUA mode
 (as well as pc-select-mode and s-region-mode) to select and extend the
 region.  In fact, Emacs 23 has this built-in in the form of
 @code{shift-selection-mode}, see previous paragraph.  If you are using Emacs
-23 you probably don't want to use another package for this purpose.  However,
+23, you probably don't want to use another package for this purpose.  However,
 if you prefer to leave these keys to a different package while working in
 Org-mode, configure the variable @code{org-replace-disputed-keys}.  When set,
 Org will move the following key bindings in Org files, and in the agenda
