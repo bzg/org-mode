@@ -215,18 +215,20 @@ Each cell is of the forma \( \"option\" . \"package\" \)."
   :group 'org-export-latex
   :type 'alist)
 
-(defcustom org-export-latex-low-levels 'description
+(defcustom org-export-latex-low-levels 'itemize
   "How to convert sections below the current level of sectioning.
 This is specified by the `org-export-headline-levels' option or the
 value of \"H:\" in Org's #+OPTION line.
 
-This can be either nil (skip the sections), 'description (convert
-the sections as descriptive lists) or a string to be used instead
-of \\section{%s}. In this latter case, the %s stands here for the
-inserted headline and is mandatory."
+This can be either nil (skip the sections), `description', `itemize',
+or `enumerate' (convert the sections as the corresponding list type), or
+a string to be used instead of \\section{%s}.  In this latter case,
+the %s stands here for the inserted headline and is mandatory."
   :group 'org-export-latex
   :type '(choice (const :tag "Ignore" nil)
 		 (symbol :tag "Convert as descriptive list" description)
+		 (symbol :tag "Convert as descriptive list" itemize)
+		 (symbol :tag "Convert as descriptive list" enumerate)
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
@@ -674,13 +676,31 @@ If NUM, export sections as numerical sections."
      ;; At a level under the hl option: we can drop this subsection
      ((> level org-export-latex-sectioning-depth)
       (cond ((eq org-export-latex-low-levels 'description)
-	     (insert (format "\\begin{description}\n\n\\item[%s]%s\n\n"
+	     (if (string-match "% ends low level$"
+			       (buffer-substring (point-at-bol 0) (point)))
+		 (delete-region (point-at-bol 0) (point))
+	       (insert "\\begin{description}\n"))
+	     (insert (format "\n\\item[%s]%s~\n\n"
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
 	     (insert (org-export-latex-content content))
 	     (cond ((stringp subcontent) (insert subcontent))
 		   ((listp subcontent) (org-export-latex-sub subcontent)))
-	     (insert "\\end{description}\n"))
+	     (insert "\\end{description} % ends low level\n"))
+	    ((memq org-export-latex-low-levels '(itemize enumerate))
+	     (if (string-match "% ends low level$"
+			       (buffer-substring (point-at-bol 0) (point)))
+		 (delete-region (point-at-bol 0) (point))
+	       (insert (format "\\begin{%s}\n"
+			       (symbol-name org-export-latex-low-levels))))
+	     (insert (format "\n\\item %s\\\\\n%s\n"
+			     heading
+			     (if label (format "\\label{%s}" label) "")))
+	     (insert (org-export-latex-content content))
+	     (cond ((stringp subcontent) (insert subcontent))
+		   ((listp subcontent) (org-export-latex-sub subcontent)))
+	     (insert (format "\\end{%s} %% ends low level\n"
+			     (symbol-name org-export-latex-low-levels))))
 	    ((stringp org-export-latex-low-levels)
 	     (insert (format org-export-latex-low-levels heading) "\n")
 	     (when label (insert (format "\\label{%s}\n" label)))

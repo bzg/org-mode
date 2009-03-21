@@ -1,3 +1,10 @@
+2009-03-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-export-latex.el (org-export-latex-low-levels): More options
+	for how to process lower levels in LaTeX.
+	(org-export-latex-subcontent): Better treatment for lists as a
+	means of publishing lower levels.
+
 2009-03-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-font-lock-defaults): Use new checkbox face.
