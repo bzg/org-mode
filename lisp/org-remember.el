@@ -228,6 +228,12 @@ user each time a remember buffer with a running clock is filed away.  "
 	  (const :tag "Always" t)
 	  (const :tag "Query user" query)))
 
+(defcustom org-remember-backup-directory nil
+  "Directory where to store all remember buffers, for backup purposes."
+  :group 'org-remember
+  :type '(choice
+	  (const :tag "No backups" nil)
+	  (directory :tag "Directory")))
 
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
@@ -566,6 +572,14 @@ to be run from that hook to function properly."
 	  (re-search-forward "%&" nil t))
     (replace-match "")
     (org-set-local 'org-jump-to-target-location t))
+  (when org-remember-backup-directory
+    (unless (file-directory-p org-remember-backup-directory)
+      (make-directory org-remember-backup-directory))
+    (setq buffer-file-name
+	  (expand-file-name
+	   (format-time-string "remember-%Y-%m-%d-%H-%M-%S")
+	   org-remember-backup-directory))
+    (save-buffer))
   (when (save-excursion
 	  (goto-char (point-min))
 	  (re-search-forward "%!" nil t))
@@ -995,3 +1009,4 @@ See also the variable `org-reverse-note-order'."
 ;; arch-tag: 497f30d0-4bc3-4097-8622-2d27ac5f2698
 
 ;;; org-remember.el ends here
+
