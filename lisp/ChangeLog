@@ -1,5 +1,8 @@
 2009-03-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-read-date-minibiffer-septup-hook): New hook.
+	(org-read-date): Run the new hook.
+
 	* org-mac-message.el (org-mac-flagged-mail): New group.
 	(org-mac-mail-account): New variable.
 	(org-mac-create-flagged-mail, org-mac-insert-flagged-mail): New
