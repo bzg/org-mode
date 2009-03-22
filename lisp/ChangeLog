@@ -1,5 +1,10 @@
 2009-03-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mac-message.el (org-mac-flagged-mail): New group.
+	(org-mac-mail-account): New variable.
+	(org-mac-create-flagged-mail, org-mac-insert-flagged-mail): New
+	commands.
+
 	* org-remember.el (org-remember-backup-directory): New variable.
 	(org-remember-apply-template): Write file to backup directory.
 
