@@ -663,7 +663,10 @@ This is used to stop the clock after a TODO entry is marked DONE,
 and is only done if the variable `org-clock-out-when-done' is not nil."
   (when (and org-clock-out-when-done
 	     (member state org-done-keywords)
-	     (equal (marker-buffer org-clock-marker) (current-buffer))
+	     (equal (or (buffer-base-buffer (marker-buffer org-clock-marker))
+			(marker-buffer org-clock-marker))
+		    (or (buffer-base-buffer (current-buffer))
+			(current-buffer)))
 	     (< (point) org-clock-marker)
 	     (> (save-excursion (outline-next-heading) (point))
 		org-clock-marker))
