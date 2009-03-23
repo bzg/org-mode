@@ -159,7 +159,10 @@ existing results currently located after the source block."
     (let ((beg (point))
           (end (progn (insert result)
                       (point))))
-      (org-toggle-fixed-width-section beg end))))
+      (save-excursion
+        (set-mark beg)
+        (goto-char end)
+        (org-toggle-fixed-width-section nil)))))
 
 (defun litorgy-remove-result ()
   "Remove the result following the current source block"
