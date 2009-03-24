@@ -178,15 +178,14 @@ When nil, do no timestamp checking and always publish all files."
 
 (defcustom org-publish-before-export-hook nil
   "Hook run before export on the Org file.
-If the functions in this hook modify the original Org buffer, the
-modified buffer will be used for export, but the buffer will be
-restored and saved back to its initial state after export."
+The hook may modify the file in arbitrary ways before publishing happens.
+The orgiginal version of the buffer will be restored after publishing."
   :group 'org-publish
   :type 'hook)
 
 (defcustom org-publish-after-export-hook nil
   "Hook run after export on the exported buffer.
-If functions in this hook modify the buffer, it will be saved."
+Any changes made by this hook will be saved."
   :group 'org-publish
   :type 'hook)
 
