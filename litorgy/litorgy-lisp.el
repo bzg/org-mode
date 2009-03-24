@@ -37,7 +37,8 @@
   "Execute a block of emacs-lisp code with litorgy.  This
 function is called by `litorgy-execute-src-block'."
   (save-window-excursion
-    (let ((print-level nil) (print-length nil) results)
+    (let ((vars (litorgy-reference-variables params))
+          (print-level nil) (print-length nil) results)
       (message "executing emacs-lisp code block...")
       (format "%S" (eval (read body))))))
 

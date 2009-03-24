@@ -29,7 +29,7 @@
 ;; Functions for referencing data from the header arguments of a
 ;; litorgical block.  The syntax of such a reference should be
 ;;
-;;   #+VAR: variable-name file resource-id:name
+;;   #+VAR: variable-name=file:resource-id
 ;;
 ;; - variable-name :: the name of the variable to which the value
 ;;                    will be assigned
@@ -52,6 +52,32 @@
 
 ;;; Code:
 (require 'litorgy)
+
+(defun litorgy-reference-variables (params)
+  "Takes a parameter alist, and return an alist of variable
+names, and the string representation of the related value."
+  (mapcar #'litorgy-reference-parse
+   (delq nil (mapcar (lambda (pair) (if (= (car pair) :var) (cdr pair))) params))))
+
+(defun litorgy-reference-parse (reference)
+  "Parse a reference to an external resource returning a list
+with two elements.  The first element of the list will be the
+name of the variable, and the second will be an emacs-lisp
+representation of the value of the variable."
+  (save-excursion
+    (if (string-match "(.+)=(.+)" reference)
+      (let ((var (match-string 1 reference))
+            (ref (match-string 2 reference)))
+        (when (string-match "(.+):(.+)" reference)
+          (find-file (match-string 1 reference))
+          (setf ref (match-string 2 reference)))
+        ;; follow the reference in the current file
+        (case ref
+          ("previous"
+           )
+          ("next")
+          (t ))
+        ))))
 
 (provide 'litorgy-reference)
 ;;; litorgy-reference.el ends here
