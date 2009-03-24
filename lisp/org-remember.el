@@ -229,7 +229,10 @@ user each time a remember buffer with a running clock is filed away.  "
 	  (const :tag "Query user" query)))
 
 (defcustom org-remember-backup-directory nil
-  "Directory where to store all remember buffers, for backup purposes."
+  "Directory where to store all remember buffers, for backup purposes.
+After a remember buffer has been stored successfully, the backup file
+will be removed.  However, if you forget to finish the remember process,
+the file will remain there."
   :group 'org-remember
   :type '(choice
 	  (const :tag "No backups" nil)
@@ -579,7 +582,8 @@ to be run from that hook to function properly."
 	  (expand-file-name
 	   (format-time-string "remember-%Y-%m-%d-%H-%M-%S")
 	   org-remember-backup-directory))
-    (save-buffer))
+    (save-buffer)
+    (setq auto-save-visited-file-name t))
   (when (save-excursion
 	  (goto-char (point-min))
 	  (re-search-forward "%!" nil t))
@@ -760,6 +764,14 @@ See also the variable `org-reverse-note-order'."
   (catch 'quit
     (if org-note-abort (throw 'quit nil))
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
+	   (backup-file
+	    (and buffer-file-name
+		 (equal (file-name-directory buffer-file-name)
+			(file-name-as-directory
+			 (expand-file-name org-remember-backup-directory)))
+		 (string-match "^remember-[0-9]\\{4\\}"
+			       (file-name-nondirectory buffer-file-name))
+		 buffer-file-name))
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
 	   (clockp (equal current-prefix-arg 2))
@@ -965,7 +977,9 @@ See also the variable `org-reverse-note-order'."
 	      (if (and (not visiting)
 		       (not (equal (marker-buffer org-clock-marker)
 				   (current-buffer))))
-		  (kill-buffer (current-buffer)))))))))
+		  (kill-buffer (current-buffer))))
+	    (when backup-file
+	      (delete-file backup-file)))))))
 
   t)    ;; return t to indicate that we took care of this note.
 
