@@ -6184,7 +6184,7 @@ commands}.
 A search string can use Boolean operators @samp{&} for AND and @samp{|} for
 OR.  @samp{&} binds more strongly than @samp{|}.  Parenthesis are currently
 not implemented.  Each element in the search is either a tag, a regular
-rexpression matching tags, or an expression like @code{PROPERTY OPERATOR
+expression matching tags, or an expression like @code{PROPERTY OPERATOR
 VALUE} with a comparison operator, accessing a property value.  Each element
 may be preceded by @samp{-}, to select against it, and @samp{+} is syntactic
 sugar for positive selection.  The AND operator @samp{&} is optional when
@@ -6230,7 +6230,7 @@ keyword @samp{WAITING}.
 Waiting tasks both at work and at home.
 @end table
 
-When matching properties, a number of different operaors can be used to test
+When matching properties, a number of different operators can be used to test
 the value of a property.  Here is a complex example:
 
 @example
