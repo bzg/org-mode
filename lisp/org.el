@@ -2996,6 +2996,13 @@ If yes, offer to stop it and to save the buffer with the changes."
    '(org-timer-start org-timer org-timer-item
 		     org-timer-change-times-in-region)))
 
+;; Autoload org-feed.el
+
+(eval-and-compile
+  (org-autoload
+   "org-feed"
+   '(org-feed-update org-feed-update-all)))
+
 
 ;; Autoload archiving code
 ;; The stuff that is needed for cycling and tags has to be defined here.
@@ -13505,6 +13512,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 
 (define-key org-mode-map "\C-c\C-xr" 'org-reload)
 
+(define-key org-mode-map "\C-c\C-xg" 'org-feed-update-all)
+
 (when (featurep 'xemacs)
   (org-defkey org-mode-map 'button3   'popup-mode-menu))
 
@@ -14442,7 +14451,10 @@ See the individual commands for more information."
      "--"
      ["Set Priority" org-priority t]
      ["Priority Up" org-shiftup t]
-     ["Priority Down" org-shiftdown t])
+     ["Priority Down" org-shiftdown t]
+     "--"
+     ["Get news from feeds" org-feed-update-all t]
+     ["Customize feeds" (customize-variable 'org-feed-alist) t])
     ("TAGS and Properties"
      ["Set Tags" org-set-tags-command t]
      ["Change tag in region" org-change-tag-in-region (org-region-active-p)]
