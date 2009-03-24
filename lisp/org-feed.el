@@ -24,65 +24,78 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
- 
-;; This library allows to create entries in an Org-mode file from
-;; RSS feeds.  
-;; 
-;; Selecting feeds and target locations
-;; -----------------------------------
-;; 
-;; This module is configured through a single variable, `org-feed-alist'.
-;; Here is an example, using a notes/tasks feed from reQall.com.
-;; 
-;;   (setq org-feed-alist
-;;         '(("ReQall"
-;;            "http://www.reqall.com/user/feeds/rss/a1b2c3....."
-;;            "~/org/feeds.org" "ReQall Entries" nil)
-;; 
-;; With this setup, the command `M-x org-feed-update-all' will
-;; collect new entries in the feed at the given URL and create
-;; entries as subheading under the "ReQall Entries" heading in the
-;; file "~/org.feeds.org".  The final entry in this list can be
-;; a filter function to further process the parsed information.  For
-;; example, here we turn entries with "<category>Task</category>"
-;; into TODO entries by adding the keyword to the title:
-;; 
-;;   (setq org-feed-alist
-;;         '(("ReQall"
-;;            "http://www.reqall.com/user/feeds/rss/a1b2c3....."
-;;            "~/org/feeds.org" "ReQall Entries"
-;;            my-raquall-filter)))
+
+;;  This library allows to create entries in an Org-mode file from
+;;  RSS feeds.
 ;;
-;;   (defun my-requall-filter (e)
-;;     (when (equal (plist-get e :category) "Task")
-;;       (setq e (plist-put e :title
-;;                         (concat "TODO " (plist-get e :title)))))
-;;     e)
-;; 
-;; The filter function may also decide that certain feed items
-;; should be ignored, by returning nil instead of the entry.
-;; 
-;; See the docstring of `org-feed-alist' for more details.
-;; 
-;; Keeping track of old GUIDs
-;; --------------------------
-;; 
-;; Since Org allows you to delete, archive, or move outline nodes,
-;; org-feed needs to keep track of all GUIDs in the feed it has
-;; already processed.  It does so by listing them in a special
-;; drawer, FEEDGUIDS, under the heading that received the input of
-;; te feed.  You should add FEEDGUIDS to your list of drawers
-;; in the files that receive feed input:
-;; 
-;;   #+DRAWERS: PROPERTIES LOGBOOK FEEDGUIDS
-;; 
-;; Acknowledgements
-;; ----------------
-;; 
-;; It is based on ideas by Brad Bozarth who implemented it using
-;; shell and awk scripts, and who in this way made me for the first
-;; time look into an RSS feed, showing me how simple this really
-;; was.
+;;  Selecting feeds and target locations
+;;  -----------------------------------
+;;
+;;  This module is configured through a single variable, `org-feed-alist'.
+;;  Here is an example, using a notes/tasks feed from reQall.com.
+;;
+;;    (setq org-feed-alist
+;;          '(("ReQall"
+;;             "http://www.reqall.com/user/feeds/rss/a1b2c3....."
+;;             "~/org/feeds.org" "ReQall Entries" nil)
+;;
+;;  With this setup, the command `M-x org-feed-update-all' will
+;;  collect new entries in the feed at the given URL and create
+;;  entries as subheading under the "ReQall Entries" heading in the
+;;  file "~/org.feeds.org".  The final element in the alist entry in
+;;  this list can be a filter function to further process the parsed
+;;  information.  For example, here we turn entries with
+;;  "<category>Task</category>" into TODO entries by adding the
+;;  keyword to the title:
+;;
+;;    (setq org-feed-alist
+;;          '(("ReQall"
+;;             "http://www.reqall.com/user/feeds/rss/a1b2c3....."
+;;             "~/org/feeds.org" "ReQall Entries"
+;;             my-raquall-filter)))
+;;
+;;    (defun my-requall-filter (e)
+;;      (when (equal (plist-get e :category) "Task")
+;;        (setq e (plist-put e :title
+;;                          (concat "TODO " (plist-get e :title)))))
+;;      e)
+;;
+;;  Another possibility for the filter function would be to format
+;;  the entire Org node for the feed item, by adding the formatted
+;;  entry as a `:formatted-for-org' property:
+;;
+;;
+;;    (defun my-requall-filter (e)
+;;      (setq e (plist-put
+;;               e :formatted-for-org
+;;               (format "* %s\n%s"
+;;                       (plist-get e :title)
+;;                       (plist-get e :description))))
+;;      e)
+;;
+;;  The filter function may also decide that certain feed items
+;;  should be ignored, by returning nil instead of the entry.
+;;
+;;
+;;  Keeping track of old GUIDs
+;;  --------------------------
+;;
+;;  Since Org allows you to delete, archive, or move outline nodes,
+;;  org-feed.el needs to keep track of GUIDs in the feed it has
+;;  already processed.  It does so by listing them in a special
+;;  drawer, FEEDGUIDS, under the heading that received the input of
+;;  te feed.  You should add FEEDGUIDS to your list of drawers
+;;  in the files that receive feed input:
+;;
+;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDGUIDS
+;;
+;;  Acknowledgements
+;;  ----------------
+;;
+;;  org-feed.el is based on ideas by Brad Bozarth who implemented it
+;;  using shell and awk scripts, and who in this way made me for the
+;;  first time look into an RSS feed, showing me how simple this really
+;;  was.
 
 (require 'org)
 
