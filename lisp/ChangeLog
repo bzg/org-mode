@@ -1,6 +1,9 @@
 2009-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* #org-remember.el# (org-remember-backup-directory)
+	* org-exp.el (org-export-as-html): Close local lists depending on
+	indentation, also when starting a table.
+
+	* org-remember.el (org-remember-backup-directory)
 	(org-remember-backup-name): New internal variable.
 
 2009-03-23  Carsten Dominik  <carsten.dominik@gmail.com>

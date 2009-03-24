@@ -3697,6 +3697,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (when (not infixed)
 	      (setq infixed t)
 	      (org-close-par-maybe)
+
 	      (insert "<pre class=\"example\">\n"))
 	    (insert (org-html-protect (match-string 3 line)) "\n")
 	    (when (or (not lines)
@@ -3998,17 +3999,32 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (org-html-level-start level txt umax
 				  (and org-export-with-toc (<= level umax))
 				  head-count)
+	    
 	    ;; QUOTES
 	    (when (string-match quote-re line)
 	      (org-close-par-maybe)
 	      (insert "<pre>")
 	      (setq inquote t)))
 
+	   ((string-match "^[ \t]*- __+[ \t]*$" line)
+	    ;; Explicit list closure
+	    (when local-list-type
+	      (let ((ind (org-get-indentation line)))
+		(while (and local-list-indent
+			    (<= ind (car local-list-indent)))
+		  (org-close-li (car local-list-type))
+		  (insert (format "</%sl>\n" (car local-list-type)))
+		  (pop local-list-type)
+		  (pop local-list-indent))
+		(or local-list-indent (setq in-local-list nil))))
+	    (throw 'nextline nil))
+
 	   ((and org-export-with-tables
 		 (string-match "^\\([ \t]*\\)\\(|\\|\\+-+\\+\\)" line))
-	    (if (not table-open)
-		;; New table starts
-		(setq table-open t table-buffer nil table-orig-buffer nil))
+	    (when (not table-open)
+	      ;; New table starts
+	      (setq table-open t table-buffer nil table-orig-buffer nil))
+
 	    ;; Accumulate lines
 	    (setq table-buffer (cons line table-buffer)
 		  table-orig-buffer (cons origline table-orig-buffer))
