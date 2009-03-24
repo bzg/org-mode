@@ -93,8 +93,8 @@ lisp code use the `litorgy-add-interpreter' function."
 (defun litorgy-execute-src-block (&optional arg)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
-commented by `litorgy-make-region-example'.  With optional prefix
-don't dump results into buffer."
+commented by `org-toggle-fixed-width-section'.  With optional
+prefix don't dump results into buffer."
   (interactive "P")
   (let* ((info (litorgy-get-src-block-info))
          (lang (first info))
@@ -159,7 +159,10 @@ existing results currently located after the source block."
     (let ((beg (point))
           (end (progn (insert result)
                       (point))))
-      (litorgy-make-region-example beg end))))
+      (save-excursion
+        (set-mark beg)
+        (goto-char end)
+        (org-toggle-fixed-width-section nil)))))
 
 (defun litorgy-remove-result ()
   "Remove the result following the current source block"
@@ -174,20 +177,6 @@ existing results currently located after the source block."
                                      (forward-line 1))
                                    (forward-line -1)
                                    (point)))))
-
-(defun litorgy-make-region-example (beg end)
-  "Comment out region using the ': ' org example quote."
-  (interactive "*r")
-  (let ((size (abs (- (line-number-at-pos end)
-		      (line-number-at-pos beg)))))
-    (if (= size 0)
-	(let ((result (buffer-substring beg end)))
-	  (delete-region beg end)
-	  (insert (concat ": " result)))
-      (save-excursion
-	    (goto-char beg)
-	    (dotimes (n size)
-	      (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
 (defun litorgy-clean-text-properties (text)
   "Strip all properties from text return."

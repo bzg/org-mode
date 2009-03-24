@@ -238,6 +238,11 @@ internal to the source-code evaluation process?
     need to look more closely at that and we should try to come up with a
     formats for referencing data from source-code in such a way that it
     will be as source-code-language independent as possible.
+    
+    Org tables already have a sophisticated reference system in place
+    that allows referencing table ranges in other files, as well as
+    specifying constants in the header arguments of a table.  This is
+    described in [[info:org:References]].
 
 **** Dan: thinking aloud re: referencing data from R
      Suppose in some R code, we want to reference data in an org
