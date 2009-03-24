@@ -37,35 +37,36 @@
 ;;    (setq org-feed-alist
 ;;          '(("ReQall"
 ;;             "http://www.reqall.com/user/feeds/rss/a1b2c3....."
-;;             "~/org/feeds.org" "ReQall Entries" nil)
+;;             "~/org/feeds.org" "ReQall Entries")
 ;;
 ;;  With this setup, the command `M-x org-feed-update-all' will
 ;;  collect new entries in the feed at the given URL and create
-;;  entries as subheading under the "ReQall Entries" heading in the
-;;  file "~/org.feeds.org".  The final element in the alist entry in
-;;  this list can be a filter function to further process the parsed
-;;  information.  For example, here we turn entries with
+;;  entries as subheadings under the "ReQall Entries" heading in the
+;;  file "~/org.feeds.org". 
+;;  In addition to these standard arguments, additional keyword-value
+;;  pairs are possible.  For example, here we turn entries with
 ;;  "<category>Task</category>" into TODO entries by adding the
-;;  keyword to the title:
+;;  keyword to the title, usinf the `:filter' argument:
 ;;
 ;;    (setq org-feed-alist
 ;;          '(("ReQall"
 ;;             "http://www.reqall.com/user/feeds/rss/a1b2c3....."
 ;;             "~/org/feeds.org" "ReQall Entries"
-;;             my-raquall-filter)))
+;;             :filter my-reqall-filter)))
 ;;
-;;    (defun my-requall-filter (e)
+;;    (defun my-reqall-filter (e)
 ;;      (when (equal (plist-get e :category) "Task")
 ;;        (setq e (plist-put e :title
 ;;                          (concat "TODO " (plist-get e :title)))))
 ;;      e)
 ;;
-;;  Another possibility for the filter function would be to format
-;;  the entire Org node for the feed item, by adding the formatted
-;;  entry as a `:formatted-for-org' property:
+;;  A `:template' entry in the alist would override the template
+;;  in `org-feed-default-template' for the construction of the outline
+;;  node to be inserted.  Another possibility would be for the filter
+;;  function to create the Org node for the feed item, by adding the
+;;  formatted entry as a `:formatted-for-org' property:
 ;;
-;;
-;;    (defun my-requall-filter (e)
+;;    (defun my-reqall-filter (e)
 ;;      (setq e (plist-put
 ;;               e :formatted-for-org
 ;;               (format "* %s\n%s"
@@ -84,7 +85,7 @@
 ;;  org-feed.el needs to keep track of GUIDs in the feed it has
 ;;  already processed.  It does so by listing them in a special
 ;;  drawer, FEEDGUIDS, under the heading that received the input of
-;;  te feed.  You should add FEEDGUIDS to your list of drawers
+;;  the feed.  You should add FEEDGUIDS to your list of drawers
 ;;  in the files that receive feed input:
 ;;
 ;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDGUIDS
@@ -92,10 +93,14 @@
 ;;  Acknowledgements
 ;;  ----------------
 ;;
-;;  org-feed.el is based on ideas by Brad Bozarth who implemented it
-;;  using shell and awk scripts, and who in this way made me for the
-;;  first time look into an RSS feed, showing me how simple this really
-;;  was.
+;;  org-feed.el is based on ideas by Brad Bozarth who implemented a
+;;  similar mechanism using shell and awk scripts, and who in this
+;;  way made me for the first time look into an RSS feed, showing
+;;  how simple this really was.  Because I wanted to include a
+;;  solution into Org with as few dependencies as possible, I
+;;  reimplemented his ideas in Emacs Lisp.
+
+;;; Code:
 
 (require 'org)
 
@@ -116,33 +121,66 @@ name         a custom name for this feed
 URL          the Feed URL
 file         the target Org file where entries should be listed
 headline     the headline under which entries should be listed
-filter       a filter function to modify the property list before
-             an Org entry is created from it.
+
+Additional argumetns can be given using keyword-value pairs:
+
+:template template-string
+             The template to create an Org node from a feed item
+
+:filter filter-function
+             A function to filter entries before Org nodes are
+             created from them.
+
+If no template is given, the one in `org-feed-default-template' is used.
+See the docstring of that variable for information on the syntax of this
+template.  If creating the node required more logic than a template can
+provide, this task can be delegated to the filter function.
 
 The filter function gets as a argument a property list describing the item.
 That list has a property for each field, for example `:title' for the
 `<title>' field and `:pubDate' for the publication date.  In addition,
 it contains the following properties:
 
-`:item-full-text'   the full text in the <item> tag.
+`:item-full-text'   the full text in the <item> tag
 `:guid-permalink'   t when the guid property is a permalink
 
 The filter function can modify the existing fields before an item
-is constructed from the `:title', `:pubDate', `:link', `:guid', and
-`:description' fields.  For more control, the filter can construct
-the Org item itself, by adding a `:formatted-for-org' property that
-specifies the complete outline node that should be added.
+is constructed using the template.  Or it can construct the node directly,
+by adding a `:formatted-for-org' property that specifies the complete
+outline node that should be added.
 
-If the filter returns nil for some entries, these will be marked as seen
-but *not* inserted into the inbox."
+The filter should return the modified entry property list.  It may also
+return nil to indicate that this entry should not be added to the Org file
+at all."
   :group 'org-feed
   :type '(repeat
-	  (list :value ("" "http://" "" "" nil)
+	  (list :value ("" "http://" "" "")
 	   (string :tag "Name")
 	   (string :tag "Feed URL")
 	   (file :tag "File for inbox")
 	   (string :tag "Headline for inbox")
-	   (symbol :tag "Filter Function"))))
+	   (repeat :inline t
+		   (choice
+		    (list :inline t :tag "Template"
+			  (const :template) (string :tag "Template"))
+		    (list :inline t :tag "Filter"
+			  (const :filter) (symbol :tag "Filter Function")))))))
+
+(defcustom org-feed-default-template "* %h\n  %U\n  %description\n  %a\n"
+  "Template for the Org node created from RSS feed items.
+This is just the default, each feed can specify its own.
+Any fields from the feed item can be interpolated into the template with
+%name, for example %title, %description, %pubDate etc.  In addition, the
+following special escapes are valid as well:
+
+%h      the title, or the first line of the description
+%t      the date as a stamp, either from <pubDate> (if present), or
+        the current date.
+%T      date and time
+%u,%U   like %t,%T, but inactive time stamps
+%a      A link, from <guid> if that is a permalink, else from <link>"
+  :group 'org-feed
+  :type '(string :tag "Template"))
 
 (defcustom org-feed-save-after-adding t
   "Non-nil means, save buffer after adding new feed items."
@@ -165,11 +203,12 @@ of the file pointed to by the URL."
   "Non-nil means, assume feeds to be stable.
 A stable feed is one which only adds and removes items, but never removes
 an item with a given GUID and then later adds it back in.  So if the feed
-is stable, this means we can simple remember the GUIDs present as the ones
-we have seen, and we can forget GUIDs that used to be in the feed but no
-longer are.  So for stable feeds, we only need to remember a limited
-number of GUIDs.  For unstable ones, we need to remember all GUIDs we have
-ever seen, which can be a very long list indeed."
+is stable, this means we can simple remember the GUIDs present in the feed
+at any given time, as the ones we have seen and precessed.  So we can
+forget GUIDs that used to be in the feed but no longer are.
+Thus, for stable feeds, we only need to remember a limited number of GUIDs.
+For unstable ones, we need to remember all GUIDs we have ever seen, which
+can be a very long list indeed."
   :group 'org-feed
   :type 'boolean)
 
@@ -217,7 +256,9 @@ it can be a list structured like an entry in `org-feed-alist'."
 	(feed-url (nth 1 feed))
 	(feed-file (nth 2 feed))
 	(feed-headline (nth 3 feed))
-	(feed-formatter (nth 4 feed))
+	(feed-filter (nth 1 (memq :filter feed)))
+	(feed-template (or (nth 1 (memq :template feed))
+			   org-feed-default-template))
 	feed-buffer feed-pos
 	entries entries2 old-guids current-guids new new-selected e)
     (setq feed-buffer (org-feed-get-feed feed-url))
@@ -238,10 +279,13 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  ;; Format the new entries
 	  (run-hooks 'org-feed-before-adding-hook)
 	  (setq new-selected new)
-	  (when feed-formatter
-	    (setq new-selected (mapcar feed-formatter new-selected)))
-	  (setq new-selected (mapcar 'org-feed-format new-selected))
-	  (setq new-selected (delq nil new-selected))
+	  (when feed-filter
+	    (setq new-selected (mapcar feed-filter new-selected)))
+	  (setq new-selected
+		(delq nil
+		      (mapcar
+		       (lambda (e) (org-feed-format-entry e feed-template))
+		       new-selected)))
 	  ;; Insert the new items
 	  (apply 'org-feed-add-items feed-pos new-selected)
 	  ;; Update the list of seen GUIDs in a drawer
@@ -337,38 +381,57 @@ When REPLACE is non-nil, replace all GUIDs by the new ones."
 	(org-paste-subtree level (plist-get entry :formatted-for-org) 'yank))
       (org-mark-ring-push pos))))
 
-(defun org-feed-format (entry)
+(defun org-feed-format-entry (entry template)
   "Format ENTRY so that it can be inserted into an Org file.
 ENTRY is a property list.  This function adds a `:formatted-for-org' property
 and returns the full property list.
 If that property is already present, nothing changes."
   (unless (or (not entry)                            ; not an entry at all
 	      (plist-get entry :formatted-for-org))  ; already formatted
-    (let (lines fmt tmp indent)
-      (setq lines (org-split-string (or (plist-get entry :description) "???")
+    (let (dlines fmt tmp indent)
+      (setq dlines (org-split-string (or (plist-get entry :description) "???")
 				    "\n")
-	    indent "  ")
-      (setq fmt
-	    (concat
-	     "* " (or (plist-get entry :title) (car lines)) "\n"
-	     (if (setq tmp (plist-get entry :pubDate))
-		 (concat
-		  "  ["
-		  (substring
-		   (format-time-string (cdr org-time-stamp-formats)
-				       (org-read-date t t tmp))
-		   1 -1)
-		  "]\n"))
-	     (concat "  :PROPERTIES:\n  :FEED-GUID: "
-		     (plist-get entry :guid)
-		     "\n  :END:\n")
-	     (mapconcat (lambda (x) (concat indent x)) lines "\n") "\n"
-	     (if (setq tmp (or (and (plist-get entry :guid-permalink)
-				    (plist-get entry :guid))
-			       (plist-get entry :link)))
-		 (concat "  [[" tmp "]]\n")))
-	    entry (plist-put entry :formatted-for-org fmt))))
-      entry)
+	    v-h (or (plist-get entry :title) (car dlines) "???")
+	    time (or (if (plist-get entry :pubDate)
+			 (org-read-date t t (plist-get entry :pubDate)))
+		     (current-time))
+	    v-t (format-time-string (org-time-stamp-format nil nil) time)
+	    v-T (format-time-string (org-time-stamp-format t   nil) time)
+	    v-u (format-time-string (org-time-stamp-format nil t)   time)
+	    v-U (format-time-string (org-time-stamp-format t   t)   time)
+	    v-a (if (setq tmp (or (and (plist-get entry :guid-permalink)
+				       (plist-get entry :guid))
+				  (plist-get entry :link)))
+		    (concat "[[" tmp "]]\n")
+		  ""))
+      (with-temp-buffer
+	(insert template)
+	(debug)
+	(goto-char (point-min))
+	(while (re-search-forward "%\\([a-zA-Z]+\\)" nil t)
+	  (setq name (match-string 1))
+	  (cond
+	   ((member name '("h" "t" "T" "u" "U" "a"))
+	    (replace-match (symbol-value (intern (concat "v-" name))) t t))
+	   ((setq tmp (plist-get entry (intern (concat ":" name))))
+	    (save-excursion
+	      (save-match-data
+		(beginning-of-line 1)
+		(when (looking-at (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
+		  (setq tmp (org-feed-make-indented-block
+			     tmp (org-get-indentation))))))
+	    (replace-match tmp t t))
+	   t))
+	(setq entry (plist-put entry :formatted-for-org (buffer-string))))))
+  entry)
+
+(defun org-feed-make-indented-block (s n)
+  "Add indentaton of N spaces to a multiline string S."
+  (if (not (string-match "\n" s))
+      s
+    (mapconcat 'identity
+	       (org-split-string s "\n")
+	       (concat "\n" (make-string n ?\ )))))
 
 (defun org-feed-get-feed (url)
   "Get the RSS feed file at URL and return the buffer."
