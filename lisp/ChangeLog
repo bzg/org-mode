@@ -1,5 +1,8 @@
 2009-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-feed.el (org-feed-assume-stable): New option.
+	(org-feed-before-adding-hook): New hook.
+
 	* org-exp.el (org-export-as-html): Close local lists depending on
 	indentation, also when starting a table.
 

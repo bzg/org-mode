@@ -148,6 +148,25 @@ of the file pointed to by the URL."
 	  (const :tag "Externally with wget" wget)
 	  (function :tag "Function")))
 
+(defcustom org-feed-assume-stable t
+  "Non-nil means, assume feeds to be stable.
+A stable feed is one which only adds and removes items, but never removes
+an item with a given GUID and then later adds it back in.  So if the feed
+is stable, this means we can simple remember the GUIDs present as the ones
+we have seen, and we can forget GUIDs that used to be in the feed but no
+longer are.  So for stable feeds, we only need to remember a limited
+number of GUIDs.  For unstable ones, we need to remember all GUIDs we have
+ever seen, which can be a very long list indeed."
+  :group 'org-feed
+  :type 'boolean)
+
+(defcustom org-feed-before-adding-hook nil
+  "Hook that is run before adding new feed items to a file.
+You might want to commit the file in its current state to version control,
+for example."
+  :group 'org-feed
+  :type 'hook)
+
 (defcustom org-feed-after-adding-hook nil
   "Hook that is run after new items have been added to a file.
 Depending on `org-feed-save-after-adding', the buffer will already
@@ -155,11 +174,91 @@ have been saved."
   :group 'org-feed
   :type 'hook)
 
-
 (defvar org-feed-buffer "*Org feed*"
   "The buffer used to retrieve a feed.")
 
-(defun org-feed-goto-inbox (file heading)
+;;;###autoload
+(defun org-feed-update-all ()
+  "Get inbox items from all feeds in `org-feed-alist'."
+  (interactive)
+  (let ((nfeeds (length org-feed-alist))
+	(nnew (apply '+  (mapcar 'org-feed-update org-feed-alist))))
+    (message "%s from %d %s"
+	     (cond ((= nnew 0) "No new entries")
+		   ((= nnew 1) "1 new entry")
+		   (t (format "%d new entries" nnew)))
+	     nfeeds
+	     (if (= nfeeds 1) "feed" "feeds"))))
+
+;;;###autoload
+(defun org-feed-update (feed)
+  "Get inbox items from FEED.
+FEED can be a string with an association in `org-feed-alist', or
+it can be a list structured like an entry in `org-feed-alist'."
+  (interactive (list (org-completing-read "Feed name: " org-feed-alist)
+		     current-prefix-arg))
+  (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
+  (unless feed
+    (error "No such feed in `org-feed-alist"))
+  (let ((feed-name (car feed))
+	(feed-url (nth 1 feed))
+	(feed-file (nth 2 feed))
+	(feed-headline (nth 3 feed))
+	(feed-formatter (nth 4 feed))
+	feed-buffer feed-pos
+	entries entries2 old-guids current-guids new new-selected e)
+    (setq feed-buffer (org-feed-get-feed feed-url))
+    (unless (and feed-buffer (bufferp feed-buffer))
+      (error "Cannot get feed %s" feed-name))
+    (setq entries (org-feed-parse-feed feed-buffer)
+	  entries2 entries)
+    (ignore-errors (kill-buffer feed-buffer))
+    (save-excursion
+      (save-window-excursion
+	(setq feed-pos (org-feed-goto-inbox-internal feed-file feed-headline))
+	(setq old-guids (org-feed-get-old-guids feed-pos))
+	(while (setq e (pop entries2))
+	  (unless (member (plist-get e :guid) old-guids)
+	    (push (org-feed-parse-entry e) new)))
+	(if (not new)
+	    (progn (message "No new items in feed %s" feed-name) 0)
+	  ;; Format the new entries
+	  (run-hooks 'org-feed-before-adding-hook)
+	  (setq new-selected new)
+	  (when feed-formatter
+	    (setq new-selected (mapcar feed-formatter new-selected)))
+	  (setq new-selected (mapcar 'org-feed-format new-selected))
+	  (setq new-selected (delq nil new-selected))
+	  ;; Insert the new items
+	  (apply 'org-feed-add-items feed-pos new-selected)
+	  ;; Update the list of seen GUIDs in a drawer
+	  (if org-feed-assume-stable
+	      (apply 'org-feed-add-guids feed-pos 'replace entries)
+	    (apply 'org-feed-add-guids feed-pos nil new))
+	  (goto-char feed-pos)
+	  (show-children)
+	  (when org-feed-save-after-adding
+	    (save-buffer))
+	  (message "Added %d new item%s from feed %s to file %s, heading %s"
+		   (length new) (if (> (length new) 1) "s" "")
+		   feed-name
+		   (file-name-nondirectory feed-file) feed-headline)
+	  (run-hooks 'org-feed-after-adding-hook)
+	  (length new))))))
+
+;;;###autoload
+(defun org-feed-goto-inbox (feed)
+  "Go to the inbox that captures feed FEED."
+  (interactive
+   (list (if (= (length org-feed-alist) 1)
+	     (car org-feed-alist)
+	   (org-completing-read "Feed name: " org-feed-alist))))
+  (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
+  (unless feed
+    (error "No such feed in `org-feed-alist"))
+  (org-feed-goto-inbox (nth 2 feed) (nth 3 feed)))
+
+(defun org-feed-goto-inbox-internal (file heading)
   "Find or create HEADING in FILE.
 Switch to that buffer, and return the position of that headline."
   (find-file file)
@@ -187,14 +286,21 @@ This will find the FEEDGUIDS drawer and extract the IDs."
 			    "[ \t]*\n[ \t]*")
 	nil))))
 
-(defun org-feed-add-guids (pos &rest entries)
-  "Add GUIDs to the headline at POS."
+(defun org-feed-add-guids (pos replace &rest entries)
+  "Add GUIDs for headline at POS.
+When REPLACE is non-nil, replace all GUIDs by the new ones."
   (save-excursion
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t)))
 	  guid)
       (if (re-search-forward "^[ \t]*:FEEDGUIDS:[ \t]*\n" end t)
-	  (goto-char (match-end 0))
+	  (progn
+	    (goto-char (match-end 0))
+	    (when replace
+	      (delete-region (point)
+			     (save-excursion
+			       (and (re-search-forward "^[ \t]*:END:" nil t)
+				    (match-beginning 0))))))
 	(outline-next-heading)
 	(insert "  :FEEDGUIDS:\n  :END:\n")
 	(beginning-of-line 0))
@@ -302,61 +408,6 @@ containing the properties `:guid' and `:item-full-text'."
     (unless (re-search-forward "isPermaLink[ \t]*=[ \t]*\"false\"" nil t)
       (setq entry (plist-put entry :guid-permalink t))))
   entry)
-
-;;;###autoload
-(defun org-feed-update (feed)
-  "Get inbox items from FEED.
-FEED can be a string with an association in `org-feed-alist', or
-it can be a list structured like an entry in `org-feed-alist'."
-  (interactive (list (org-completing-read "Feed name: " org-feed-alist)))
-  (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
-  (unless feed
-    (error "No such feed in `org-feed-alist"))
-  (let ((feed-name (car feed))
-	(feed-url (nth 1 feed))
-	(feed-file (nth 2 feed))
-	(feed-headline (nth 3 feed))
-	(feed-formatter (nth 4 feed))
-	feed-buffer feed-pos
-	entries old-guids new new-selected e)
-    (setq feed-buffer (org-feed-get-feed feed-url))
-    (unless (and feed-buffer (bufferp feed-buffer))
-      (error "Cannot get feed %s" feed-name))
-    (setq entries (org-feed-parse-feed feed-buffer))
-    (ignore-errors (kill-buffer feed-buffer))
-    (save-excursion
-      (save-window-excursion
-	(setq feed-pos (org-feed-goto-inbox feed-file feed-headline))
-	(setq old-guids (org-feed-get-old-guids feed-pos))
-	(while (setq e (pop entries))
-	  (unless (member (plist-get e :guid) old-guids)
-	    (push (org-feed-parse-entry e) new)))
-	(if (not new)
-	    (message "No new items in feed %s" feed-name)
-	  ;; Format the new entries
-	  (setq new-selected new)
-	  (when feed-formatter
-	    (setq new-selected (mapcar feed-formatter new-selected)))
-	  (setq new-selected (mapcar 'org-feed-format new-selected))
-	  (setq new-selected (delq nil new-selected))
-	  ;; Insert them
-	  (apply 'org-feed-add-items feed-pos new-selected)
-	  (apply 'org-feed-add-guids feed-pos new)
-	  (goto-char feed-pos)
-	  (show-children)
-	  (when org-feed-save-after-adding
-	    (save-buffer))
-	  (message "Added %d new item%s from feed %s to file %s, heading %s"
-		   (length new) (if (> (length new) 1) "s" "")
-		   feed-name
-		   (file-name-nondirectory feed-file) feed-headline)
-	  (run-hooks 'org-feed-after-adding-hook))))))
-
-;;;###autoload
-(defun org-feed-update-all ()
-  "Get inbox items from all feeds in `org-feed-alist'."
-  (interactive)
-  (mapc 'org-feed-update org-feed-alist))
 
 (provide 'org-feed)
 
