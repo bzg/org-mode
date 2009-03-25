@@ -2988,8 +2988,6 @@ If yes, offer to stop it and to save the buffer with the changes."
 
 ;; Autoload org-timer.el
 
-;(declare-function org-timer "org-timer")
-
 (eval-and-compile
   (org-autoload
    "org-timer"
@@ -3001,7 +2999,7 @@ If yes, offer to stop it and to save the buffer with the changes."
 (eval-and-compile
   (org-autoload
    "org-feed"
-   '(org-feed-update org-feed-update-all)))
+   '(org-feed-update org-feed-update-all org-feed-goto-inbox)))
 
 
 ;; Autoload archiving code
@@ -13514,6 +13512,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (define-key org-mode-map "\C-c\C-xr" 'org-reload)
 
 (define-key org-mode-map "\C-c\C-xg" 'org-feed-update-all)
+(define-key org-mode-map "\C-c\C-xG" 'org-feed-goto-inbox)
 
 (when (featurep 'xemacs)
   (org-defkey org-mode-map 'button3   'popup-mode-menu))
@@ -14454,7 +14453,8 @@ See the individual commands for more information."
      ["Priority Up" org-shiftup t]
      ["Priority Down" org-shiftdown t]
      "--"
-     ["Get news from feeds" org-feed-update-all t]
+     ["Get news from all feeds" org-feed-update-all t]
+     ["Go to the inbox of a feed..." org-feed-goto-inbox t]
      ["Customize feeds" (customize-variable 'org-feed-alist) t])
     ("TAGS and Properties"
      ["Set Tags" org-set-tags-command t]

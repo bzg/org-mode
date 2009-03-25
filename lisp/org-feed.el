@@ -44,9 +44,9 @@
 ;;  entries as subheadings under the "ReQall Entries" heading in the
 ;;  file "~/org.feeds.org". 
 ;;  In addition to these standard arguments, additional keyword-value
-;;  pairs are possible.  For example, here we turn entries with
-;;  "<category>Task</category>" into TODO entries by adding the
-;;  keyword to the title, usinf the `:filter' argument:
+;;  pairs are possible.  For example, here we deselect entries with
+;;  a description containing "Reqall is typing" using the `:filter'
+;;  argument:
 ;;
 ;;    (setq org-feed-alist
 ;;          '(("ReQall"
@@ -54,41 +54,28 @@
 ;;             "~/org/feeds.org" "ReQall Entries"
 ;;             :filter my-reqall-filter)))
 ;;
-;;    (defun my-reqall-filter (e)
-;;      (when (equal (plist-get e :category) "Task")
-;;        (setq e (plist-put e :title
-;;                          (concat "TODO " (plist-get e :title)))))
-;;      e)
+;;     (defun my-reqall-filter (e)
+;;       (if (string-match "Reqall is typing" (plist-get e :description))
+;;           nil
+;;         e)
 ;;
 ;;  A `:template' entry in the alist would override the template
 ;;  in `org-feed-default-template' for the construction of the outline
-;;  node to be inserted.  Another possibility would be for the filter
-;;  function to create the Org node for the feed item, by adding the
-;;  formatted entry as a `:formatted-for-org' property:
+;;  node to be inserted.  You may also write your own function to format
+;;  the entry and specify it using the `:formatter' keyword.
 ;;
-;;    (defun my-reqall-filter (e)
-;;      (setq e (plist-put
-;;               e :formatted-for-org
-;;               (format "* %s\n%s"
-;;                       (plist-get e :title)
-;;                       (plist-get e :description))))
-;;      e)
-;;
-;;  The filter function may also decide that certain feed items
-;;  should be ignored, by returning nil instead of the entry.
-;;
-;;
-;;  Keeping track of old GUIDs
-;;  --------------------------
+;;  Keeping track of previously added entries
+;;  -----------------------------------------
 ;;
 ;;  Since Org allows you to delete, archive, or move outline nodes,
-;;  org-feed.el needs to keep track of GUIDs in the feed it has
-;;  already processed.  It does so by listing them in a special
-;;  drawer, FEEDGUIDS, under the heading that received the input of
-;;  the feed.  You should add FEEDGUIDS to your list of drawers
-;;  in the files that receive feed input:
+;;  org-feed.el needs to keep track of which feed items have been added
+;;  before, so that they will not be added again.  For this, org-feed.el
+;;  stores information in a special drawer, FEEDSTATUS, under the heading
+;;  that received the input of the feed.  For this reason, each feed must
+;;  have its own headline in an Org file.  You should add FEEDSTATUS
+;;  to your list of drawers in the files that receive feed input:
 ;;
-;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDGUIDS
+;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
 ;;
 ;;  Acknowledgements
 ;;  ----------------
@@ -124,17 +111,17 @@ headline     the headline under which entries should be listed
 
 Additional argumetns can be given using keyword-value pairs:
 
-:template template-string
-             The template to create an Org node from a feed item
-
 :filter filter-function
              A function to filter entries before Org nodes are
              created from them.
 
-If no template is given, the one in `org-feed-default-template' is used.
-See the docstring of that variable for information on the syntax of this
-template.  If creating the node required more logic than a template can
-provide, this task can be delegated to the filter function.
+:template template-string
+             The template to create an Org node from a feed item.
+             For more control, use the `:formatter'.
+
+:formatter formatter-function
+             A function to filter entries before Org nodes are
+             created from them.
 
 The filter function gets as a argument a property list describing the item.
 That list has a property for each field, for example `:title' for the
@@ -144,14 +131,18 @@ it contains the following properties:
 `:item-full-text'   the full text in the <item> tag
 `:guid-permalink'   t when the guid property is a permalink
 
-The filter function can modify the existing fields before an item
-is constructed using the template.  Or it can construct the node directly,
-by adding a `:formatted-for-org' property that specifies the complete
-outline node that should be added.
+The filter function should do only one thing:  decide whether this entry
+is worth being added now to the Org file.  The filter does not need to worry
+if the entry was added in the past, just decide if this is a junk entry,
+or something useful.  Entries with a given GUID will be added only once,
+the first time they pass the filter.
 
-The filter should return the modified entry property list.  It may also
-return nil to indicate that this entry should not be added to the Org file
-at all."
+Entries will be turned onto Org nodes acccording to a template.  If no
+template is given here, `org-feed-default-template' is used.  See the
+docstring of that variable for information on the template syntax.  If
+creating the node requires more logic than a template can provide, define a
+:formatter function that will take an entry and return the formatted Org
+node as a string."
   :group 'org-feed
   :type '(repeat
 	  (list :value ("" "http://" "" "")
@@ -164,9 +155,12 @@ at all."
 		    (list :inline t :tag "Template"
 			  (const :template) (string :tag "Template"))
 		    (list :inline t :tag "Filter"
-			  (const :filter) (symbol :tag "Filter Function")))))))
+			  (const :filter) (symbol :tag "Filter Function"))
+		    (list :inline t :tag "Formatter"
+			  (const :filter) (symbol :tag "Formatter Function"))
+		    )))))
 
-(defcustom org-feed-default-template "* %h\n  %U\n  %description\n  %a\n"
+(defcustom org-feed-default-template "\n* %h\n  %U\n  %description\n  %a\n"
   "Template for the Org node created from RSS feed items.
 This is just the default, each feed can specify its own.
 Any fields from the feed item can be interpolated into the template with
@@ -199,20 +193,7 @@ of the file pointed to by the URL."
 	  (const :tag "Externally with wget" wget)
 	  (function :tag "Function")))
 
-(defcustom org-feed-assume-stable t
-  "Non-nil means, assume feeds to be stable.
-A stable feed is one which only adds and removes items, but never removes
-an item with a given GUID and then later adds it back in.  So if the feed
-is stable, this means we can simple remember the GUIDs present in the feed
-at any given time, as the ones we have seen and precessed.  So we can
-forget GUIDs that used to be in the feed but no longer are.
-Thus, for stable feeds, we only need to remember a limited number of GUIDs.
-For unstable ones, we need to remember all GUIDs we have ever seen, which
-can be a very long list indeed."
-  :group 'org-feed
-  :type 'boolean)
-
-(defcustom org-feed-before-adding-hook nil
+ (defcustom org-feed-before-adding-hook nil
   "Hook that is run before adding new feed items to a file.
 You might want to commit the file in its current state to version control,
 for example."
@@ -247,65 +228,85 @@ have been saved."
   "Get inbox items from FEED.
 FEED can be a string with an association in `org-feed-alist', or
 it can be a list structured like an entry in `org-feed-alist'."
-  (interactive (list (org-completing-read "Feed name: " org-feed-alist)
-		     current-prefix-arg))
+  (interactive (list (org-completing-read "Feed name: " org-feed-alist)))
   (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
   (unless feed
     (error "No such feed in `org-feed-alist"))
-  (let ((feed-name (car feed))
-	(feed-url (nth 1 feed))
-	(feed-file (nth 2 feed))
-	(feed-headline (nth 3 feed))
-	(feed-filter (nth 1 (memq :filter feed)))
-	(feed-template (or (nth 1 (memq :template feed))
-			   org-feed-default-template))
-	feed-buffer feed-pos
-	entries entries2 old-guids current-guids new new-selected e)
-    (setq feed-buffer (org-feed-get-feed feed-url))
-    (unless (and feed-buffer (bufferp feed-buffer))
-      (error "Cannot get feed %s" feed-name))
-    (setq entries (org-feed-parse-feed feed-buffer)
-	  entries2 entries)
-    (ignore-errors (kill-buffer feed-buffer))
-    (save-excursion
-      (save-window-excursion
-	(setq feed-pos (org-feed-goto-inbox-internal feed-file feed-headline))
-	(setq old-guids (org-feed-get-old-guids feed-pos))
-	(while (setq e (pop entries2))
-	  (unless (member (plist-get e :guid) old-guids)
-	    (push (org-feed-parse-entry e) new)))
-	(if (not new)
-	    (progn (message "No new items in feed %s" feed-name) 0)
-	  ;; Format the new entries
-	  (run-hooks 'org-feed-before-adding-hook)
-	  (setq new-selected new)
-	  (when feed-filter
-	    (setq new-selected (mapcar feed-filter new-selected)))
-	  (setq new-selected
-		(delq nil
-		      (mapcar
-		       (lambda (e) (org-feed-format-entry e feed-template))
-		       new-selected)))
+  (catch 'exit
+    (let ((name (car feed))
+	  (url (nth 1 feed))
+	  (file (nth 2 feed))
+	  (headline (nth 3 feed))
+	  (filter (nth 1 (memq :filter feed)))
+	  (formatter (nth 1 (memq :formatter feed)))
+	  (template (or (nth 1 (memq :template feed))
+			org-feed-default-template))
+	  feed-buffer inbox-pos
+	  entries old-status status new e guid)
+      (setq feed-buffer (org-feed-get-feed url))
+      (unless (and feed-buffer (bufferp feed-buffer))
+	(error "Cannot get feed %s" name))
+      (setq entries (org-feed-parse-feed feed-buffer))
+      (ignore-errors (kill-buffer feed-buffer))
+      (save-excursion
+	(save-window-excursion
+	  (setq inbox-pos (org-feed-goto-inbox-internal file headline))
+	  (setq old-status (org-feed-read-previous-status inbox-pos))
+	  ;; Add the "added" status to the appropriate entries
+	  (setq entries (mapcar (lambda (e)
+				  (setq e (plist-put e :added
+						     (nth 1 (assoc 
+							     (plist-get e :guid)
+							     old-status)))))
+				entries))
+	  ;; Find out which entries are new
+	  (setq new (delq nil (mapcar (lambda (e)
+					(if (plist-get e :added) nil e))
+				      entries)))
+	  ;; Parse the entries fully
+	  (setq new (mapcar 'org-feed-parse-entry new))
+	  ;; Run the filter
+	  (when filter
+	    (setq new (delq nil (mapcar filter new))))
+	  (when (not new)
+	    (message "No new items in feed %s" name)
+	    (throw 'exit 0))
+	  ;; Format the new entries into an alist with GUIDs in the car
+	  (setq new (mapcar
+		     (lambda (e)
+		       (list (plist-get e :guid)
+			     (org-feed-format-entry e template formatter)))
+		     new))
+		
+	  ;; Construct the new status
+	  (setq status
+		(mapcar
+		 (lambda (e)
+		   (setq guid (plist-get e :guid))
+		   (list guid (if (assoc guid new) t (plist-get e :added))))
+		 entries))
 	  ;; Insert the new items
-	  (apply 'org-feed-add-items feed-pos new-selected)
-	  ;; Update the list of seen GUIDs in a drawer
-	  (if org-feed-assume-stable
-	      (apply 'org-feed-add-guids feed-pos 'replace entries)
-	    (apply 'org-feed-add-guids feed-pos nil new))
-	  (goto-char feed-pos)
+	  (org-feed-add-items inbox-pos new)
+
+	  ;; Write the new status
+	  (org-feed-write-status inbox-pos status)
+	  
+	  ;; Normalize the visibility of the inbox tree
+	  (goto-char inbox-pos)
+	  (hide-subtree)
 	  (show-children)
-	  (when org-feed-save-after-adding
-	    (save-buffer))
+	  (org-cycle-hide-drawers 'children)
+	  (when org-feed-save-after-adding (save-buffer))
 	  (message "Added %d new item%s from feed %s to file %s, heading %s"
 		   (length new) (if (> (length new) 1) "s" "")
-		   feed-name
-		   (file-name-nondirectory feed-file) feed-headline)
+		   name
+		   (file-name-nondirectory file) headline)
 	  (run-hooks 'org-feed-after-adding-hook)
 	  (length new))))))
 
 ;;;###autoload
 (defun org-feed-goto-inbox (feed)
-  "Go to the inbox that captures feed FEED."
+  "Go to the inbox that captures the feed named FEED."
   (interactive
    (list (if (= (length org-feed-alist) 1)
 	     (car org-feed-alist)
@@ -313,7 +314,7 @@ it can be a list structured like an entry in `org-feed-alist'."
   (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
   (unless feed
     (error "No such feed in `org-feed-alist"))
-  (org-feed-goto-inbox (nth 2 feed) (nth 3 feed)))
+  (org-feed-goto-inbox-internal (nth 2 feed) (nth 3 feed)))
 
 (defun org-feed-goto-inbox-internal (file heading)
   "Find or create HEADING in FILE.
@@ -330,42 +331,37 @@ Switch to that buffer, and return the position of that headline."
       (org-back-to-heading t))
   (point))
 
-(defun org-feed-get-old-guids (pos)
-  "Get the list of old GUIDs from the entry at POS.
-This will find the FEEDGUIDS drawer and extract the IDs."
+(defun org-feed-read-previous-status (pos)
+  "Get the alist of old GUIDs from the entry at POS.
+This will find the FEEDSTATUS drawer and extract the alist."
   (save-excursion
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t))))
       (if (re-search-forward
-	   "^[ \t]*:FEEDGUIDS:[ \t]*\n\\([^\000]*?\\)\n[ \t]*:END:"
+	   "^[ \t]*:FEEDSTATUS:[ \t]*\n\\([^\000]*?\\)\n[ \t]*:END:"
 	   end t)
-	  (org-split-string (org-trim (org-match-string-no-properties 1))
-			    "[ \t]*\n[ \t]*")
+	  (read (match-string 1))
 	nil))))
 
-(defun org-feed-add-guids (pos replace &rest entries)
-  "Add GUIDs for headline at POS.
-When REPLACE is non-nil, replace all GUIDs by the new ones."
+(defun org-feed-write-status (pos status)
+  "Write the feed status to the FEEDSTATUS drawer."
   (save-excursion
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t)))
 	  guid)
-      (if (re-search-forward "^[ \t]*:FEEDGUIDS:[ \t]*\n" end t)
+      (if (re-search-forward "^[ \t]*:FEEDSTATUS:[ \t]*\n" end t)
 	  (progn
 	    (goto-char (match-end 0))
-	    (when replace
-	      (delete-region (point)
-			     (save-excursion
-			       (and (re-search-forward "^[ \t]*:END:" nil t)
-				    (match-beginning 0))))))
+	    (delete-region (point)
+			   (save-excursion
+			     (and (re-search-forward "^[ \t]*:END:" nil t)
+				  (match-beginning 0)))))
 	(outline-next-heading)
-	(insert "  :FEEDGUIDS:\n  :END:\n")
+	(insert "  :FEEDSTATUS:\n  :END:\n")
 	(beginning-of-line 0))
-      (while entries
-	(when (setq guid (plist-get (pop entries) :guid))
-	  (insert "  " guid "\n"))))))
+      (insert (pp-to-string status)))))
 
-(defun org-feed-add-items (pos &rest entries)
+(defun org-feed-add-items (pos entries)
   "Add the formatted items to the headline as POS."
   (let (entry level)
     (save-excursion
@@ -378,19 +374,21 @@ When REPLACE is non-nil, replace all GUIDs by the new ones."
       (beginning-of-line 2)
       (setq pos (point))
       (while (setq entry (pop entries))
-	(org-paste-subtree level (plist-get entry :formatted-for-org) 'yank))
+	(insert "\n")
+	(org-paste-subtree level (nth 1 entry)))
       (org-mark-ring-push pos))))
 
-(defun org-feed-format-entry (entry template)
+(defun org-feed-format-entry (entry template formatter)
   "Format ENTRY so that it can be inserted into an Org file.
 ENTRY is a property list.  This function adds a `:formatted-for-org' property
 and returns the full property list.
 If that property is already present, nothing changes."
-  (unless (or (not entry)                            ; not an entry at all
-	      (plist-get entry :formatted-for-org))  ; already formatted
-    (let (dlines fmt tmp indent)
+  (if formatter
+      (funcall formatter entry)
+    (let (dlines fmt tmp indent time
+		 v-h v-t v-T v-u v-U v-a)
       (setq dlines (org-split-string (or (plist-get entry :description) "???")
-				    "\n")
+				     "\n")
 	    v-h (or (plist-get entry :title) (car dlines) "???")
 	    time (or (if (plist-get entry :pubDate)
 			 (org-read-date t t (plist-get entry :pubDate)))
@@ -406,7 +404,6 @@ If that property is already present, nothing changes."
 		  ""))
       (with-temp-buffer
 	(insert template)
-	(debug)
 	(goto-char (point-min))
 	(while (re-search-forward "%\\([a-zA-Z]+\\)" nil t)
 	  (setq name (match-string 1))
@@ -420,10 +417,8 @@ If that property is already present, nothing changes."
 		(when (looking-at (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
 		  (setq tmp (org-feed-make-indented-block
 			     tmp (org-get-indentation))))))
-	    (replace-match tmp t t))
-	   t))
-	(setq entry (plist-put entry :formatted-for-org (buffer-string))))))
-  entry)
+	    (replace-match tmp t t))))
+	(buffer-string)))))
 
 (defun org-feed-make-indented-block (s n)
   "Add indentaton of N spaces to a multiline string S."
@@ -492,3 +487,13 @@ containing the properties `:guid' and `:item-full-text'."
 ;; arch-tag: 0929b557-9bc4-47f4-9633-30a12dbb5ae2
 
 
+;1. parse all items
+;2. filter with user filter
+;3. Remove GUIDs that we have already *added* before
+;4. Format, using user or built-in formatter
+;5. add new items
+;6. Store the guids from step 2, after the filtering
+;   This means that the feed could go back, have the entry
+;   pass the filter, and then it will be added.;
+
+					;Each item will be added once, when it first passes the filter.
