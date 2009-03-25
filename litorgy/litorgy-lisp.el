@@ -39,48 +39,10 @@ function is called by `litorgy-execute-src-block'."
   (save-window-excursion
     (let ((vars (litorgy-reference-variables params))
           (print-level nil) (print-length nil) results)
-      (message "prefix")
-      (message (format "-%S-" body))
-      (message (format "%S" (stringp body)))
-      (message (format "vars = %S" vars))
-      (setq vars (mapcar (lambda (pair)
-                         (list (intern (car pair))
-                               (mapcar (lambda (row)
-                                         (mapcar #'litorgy-read-cell row))
-                                       (cdr pair))))
-                       vars))
-      (message (format "let = %S" vars))
-      ;; need to find a way of assigning the variables in vars for the
-      ;; context in which body is executed
       (message "executing emacs-lisp code block...")
       (format "%S"
-              (eval `(let ,(mapcar (lambda (var)
-                                     `(,(car var) ',(cdr var)))
-                                   vars)
-                       (message "inside")
-                       (message (format "- %S -" table))
-                       (message (format "- %S -" body))
+              (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                        ,(read body)))))))
-
-(defun litorgy-read-cell (cell)
-  "Convert the string value of CELL to a number if appropriate.
-Otherwise if cell looks like a list (meaning it starts with a
-'(') then read it as lisp, otherwise return it unmodified as a
-string.
-
-This is taken almost directly from `org-read-prop'."
-  (if (and (stringp cell) (not (equal cell "")))
-      (let ((out (string-to-number cell)))
-	(if (equal out 0)
-	    (if (or (equal "(" (substring cell 0 1))
-                    (equal "'" (substring cell 0 1)))
-                (read cell)
-	      (if (string-match "^\\(+0\\|-0\\|0\\)$" cell)
-		  0
-		(progn (set-text-properties 0 (length cell) nil cell)
-		       cell)))
-	  out))
-    cell))
 
 (provide 'litorgy-lisp)
 ;;; litorgy-lisp.el ends here
