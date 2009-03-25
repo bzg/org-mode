@@ -105,7 +105,9 @@ prefix don't dump results into buffer."
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
-    (unless arg (litorgy-insert-result result (assoc :replace params)))))
+    (if arg
+        (message (format "%S" result))
+        (litorgy-insert-result result (assoc :replace params)))))
 
 (defun litorgy-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -156,13 +158,8 @@ existing results currently located after the source block."
     (setq result (concat result "\n")))
   (save-excursion
     (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
-    (let ((beg (point))
-          (end (progn (insert result)
-                      (point))))
-      (save-excursion
-        (set-mark beg)
-        (goto-char end)
-        (org-toggle-fixed-width-section nil)))))
+    (litorgy-examplize-region (point) (progn (insert result) (point)))))
+                                               
 
 (defun litorgy-remove-result ()
   "Remove the result following the current source block"
@@ -177,6 +174,20 @@ existing results currently located after the source block."
                                      (forward-line 1))
                                    (forward-line -1)
                                    (point)))))
+
+(defun litorgy-examplize-region (beg end)
+  "Comment out region using the ': ' org example quote."
+  (interactive "*r")
+  (let ((size (abs (- (line-number-at-pos end)
+		      (line-number-at-pos beg)))))
+    (if (= size 0)
+	(let ((result (buffer-substring beg end)))
+	  (delete-region beg end)
+	  (insert (concat ": " result)))
+      (save-excursion
+	    (goto-char beg)
+	    (dotimes (n size)
+	      (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
 (defun litorgy-clean-text-properties (text)
   "Strip all properties from text return."
