@@ -2,6 +2,7 @@
 
 	* org-agenda.el (org-agenda-get-todos): Fix bug with match-data.
 	(org-agenda-get-todos): Mark file tags as inherited.
+	(org-agenda-list): Always search diary lines for a time.
 
 2009-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 

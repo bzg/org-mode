@@ -2753,7 +2753,7 @@ given in `org-agenda-start-on-weekday'."
 		       :deadline :scheduled :sexp :timestamp))))
 	  (setq rtnall (append rtnall rtn))))
       (if org-agenda-include-diary
-	  (progn
+	  (let ((org-agenda-search-headline-for-time t))
 	    (require 'diary-lib)
 	    (setq rtn (org-get-entries-from-diary date))
 	    (setq rtnall (append rtnall rtn))))
