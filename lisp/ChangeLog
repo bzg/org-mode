@@ -1,3 +1,8 @@
+2009-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-get-todos): Fix bug with match-data.
+	(org-agenda-get-todos): Mark file tags as inherited.
+
 2009-03-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-feed.el (org-feed-assume-stable): New option.
