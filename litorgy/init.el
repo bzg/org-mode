@@ -34,6 +34,7 @@
 (require 'litorgy-reference)
 
 ;; language specific files
+(require 'litorgy-R)
 (require 'litorgy-lisp)
 (require 'litorgy-script)
 
