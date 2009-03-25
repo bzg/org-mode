@@ -9834,7 +9834,7 @@ tty you would rather use @kbd{C-c .} to re-insert the timestamp.
 @item @kbd{S-@key{TAB}}     @tab @kbd{C-u @key{TAB}}       @tab
 @item @kbd{M-@key{left}}    @tab @kbd{C-c C-x l}           @tab @kbd{@key{Esc} @key{left}}
 @item @kbd{M-S-@key{left}}  @tab @kbd{C-c C-x L}           @tab
-@item @kbd{M-@key{right}}   @tab @kbd{C-c C-x i}           @tab @kbd{@key{Esc} @key{right}}
+@item @kbd{M-@key{right}}   @tab @kbd{C-c C-x r}           @tab @kbd{@key{Esc} @key{right}}
 @item @kbd{M-S-@key{right}} @tab @kbd{C-c C-x R}           @tab
 @item @kbd{M-@key{up}}      @tab @kbd{C-c C-x u}           @tab @kbd{@key{Esc} @key{up}}
 @item @kbd{M-S-@key{up}}    @tab @kbd{C-c C-x U}           @tab
