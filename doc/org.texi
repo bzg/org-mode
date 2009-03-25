@@ -8843,7 +8843,7 @@ Export as Docbook file and launch a viewer.
 Export only the visible part of the document.
 @end table
 
-@node XOXO export, iCalendar export, Docbook, Exporting
+@node XOXO export, iCalendar export, Docbook export, Exporting
 @section XOXO export
 @cindex XOXO export
 
