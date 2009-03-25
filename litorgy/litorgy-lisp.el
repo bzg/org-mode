@@ -40,8 +40,10 @@ function is called by `litorgy-execute-src-block'."
     (let ((vars (litorgy-reference-variables params))
           (print-level nil) (print-length nil) results)
       (message "executing emacs-lisp code block...")
-      (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-                       ,(read body))))))
+      (setq results
+            (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
+                     ,(read body))))
+      (if (listp results) results (format "%S" results)))))
 
 (provide 'litorgy-lisp)
 ;;; litorgy-lisp.el ends here
