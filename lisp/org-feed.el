@@ -25,8 +25,11 @@
 ;;
 ;;; Commentary:
 
-;;  This library allows to create entries in an Org-mode file from
-;;  RSS feeds.
+;;  This module allows to create and change entries in an Org-mode
+;;  file triggered by items in an RSS feed.  The basic functionality is
+;;  geared toward simply adding items found in a feed as outline nodes
+;;  in an Org file, but using hooks, other actions can be performed
+;;  including changing entries based on changes of items in the feed.
 ;;
 ;;  Selecting feeds and target locations
 ;;  -----------------------------------
@@ -42,11 +45,14 @@
 ;;  With this setup, the command `M-x org-feed-update-all' will
 ;;  collect new entries in the feed at the given URL and create
 ;;  entries as subheadings under the "ReQall Entries" heading in the
-;;  file "~/org.feeds.org". 
-;;  In addition to these standard arguments, additional keyword-value
-;;  pairs are possible.  For example, here we deselect entries with
-;;  a description containing "Reqall is typing" using the `:filter'
-;;  argument:
+;;  file "~/org.feeds.org".  You can then change and even move these
+;;  entries, and they will not be added again (see below).
+
+;;  In addition to these standard elements, additional keyword-value
+;;  pairs are possible as part of a feed setting.  For example, here
+;;  we de-select entries with a title containing
+;;       "reQall is typing what you said"
+;;  using the `:filter' argument:
 ;;
 ;;    (setq org-feed-alist
 ;;          '(("ReQall"
@@ -55,14 +61,12 @@
 ;;             :filter my-reqall-filter)))
 ;;
 ;;     (defun my-reqall-filter (e)
-;;       (if (string-match "Reqall is typing" (plist-get e :description))
+;;       (if (string-match "reQall is typing what you said"
+;;                         (plist-get e :title))
 ;;           nil
 ;;         e)
 ;;
-;;  A `:template' entry in the alist would override the template
-;;  in `org-feed-default-template' for the construction of the outline
-;;  node to be inserted.  You may also write your own function to format
-;;  the entry and specify it using the `:formatter' keyword.
+;;  See the docstring for `org-feed-alist' for more details.
 ;;
 ;;  Keeping track of previously added entries
 ;;  -----------------------------------------
@@ -77,7 +81,7 @@
 ;;
 ;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
 ;;
-;;  Acknowledgements
+;;  Acknowledgments
 ;;  ----------------
 ;;
 ;;  org-feed.el is based on ideas by Brad Bozarth who implemented a
@@ -109,40 +113,48 @@ URL          the Feed URL
 file         the target Org file where entries should be listed
 headline     the headline under which entries should be listed
 
-Additional argumetns can be given using keyword-value pairs:
-
-:filter filter-function
-             A function to filter entries before Org nodes are
-             created from them.
-
-:template template-string
-             The template to create an Org node from a feed item.
-             For more control, use the `:formatter'.
-
-:formatter formatter-function
-             A function to filter entries before Org nodes are
-             created from them.
-
-The filter function gets as a argument a property list describing the item.
-That list has a property for each field, for example `:title' for the
-`<title>' field and `:pubDate' for the publication date.  In addition,
+Additional arguments can be given using keyword-value pairs.  Many of these
+specify functions that receive one or a list of \"entries\" as their single
+argument.  An entry is a property list that describes a feed item.  The
+property list has properties for each field in the item, for example `:title'
+for the `<title>' field and `:pubDate' for the publication date.  In addition,
 it contains the following properties:
 
 `:item-full-text'   the full text in the <item> tag
 `:guid-permalink'   t when the guid property is a permalink
 
-The filter function should do only one thing:  decide whether this entry
-is worth being added now to the Org file.  The filter does not need to worry
-if the entry was added in the past, just decide if this is a junk entry,
-or something useful.  Entries with a given GUID will be added only once,
-the first time they pass the filter.
+:filter filter-function
+     A function to select interesting entries in the feed.  It gets a single
+     entry as parameter.  It should return the entry if it is relevant, or
+     nil if it is not.
 
-Entries will be turned onto Org nodes acccording to a template.  If no
-template is given here, `org-feed-default-template' is used.  See the
-docstring of that variable for information on the template syntax.  If
-creating the node requires more logic than a template can provide, define a
-:formatter function that will take an entry and return the formatted Org
-node as a string."
+:template template-string
+     The default action on new items in the feed is to add them as children
+     under the headline for the feed.  The template describes how the entry
+     should be formatted.  If not given, it defaults to
+     `org-feed-default-template'. 
+
+:formatter formatter-function
+     Instead of relying on a template, you may specify a function to format
+     the outline node to be inserted as a child.  This function gets passed
+     a property list describing a single feed item, and it should return a
+     string that is a properly formatted Org outline node of level 1.
+
+:new-handler function
+     If adding new items as children to the outline is not what you want
+     to do with new items, define a handler function that is called with
+     a list of all new items in the feed, each one represented as a property
+     list.  The handler should do what needs to be done, and org-feed will
+     mark all items given to this handler as \"handled\", i.e. they will not
+     be passed to this handler again in future readings of the feed.
+     When the handler is called, point will be at the feed headline.
+
+:changed-handler function
+     This function gets passed a list of all entries that have been
+     handled before, but are now still in the feed and have *changed*
+     since last handled (as evidenced by a different sha1 hash).
+     When the handler is called, point will be at the feed headline.
+"
   :group 'org-feed
   :type '(repeat
 	  (list :value ("" "http://" "" "")
@@ -152,12 +164,21 @@ node as a string."
 	   (string :tag "Headline for inbox")
 	   (repeat :inline t
 		   (choice
-		    (list :inline t :tag "Template"
-			  (const :template) (string :tag "Template"))
 		    (list :inline t :tag "Filter"
-			  (const :filter) (symbol :tag "Filter Function"))
+			  (const :filter)
+			  (symbol :tag "Filter Function"))
+		    (list :inline t :tag "Template"
+			  (const :template)
+			  (string :tag "Template"))
 		    (list :inline t :tag "Formatter"
-			  (const :filter) (symbol :tag "Formatter Function"))
+			  (const :formatter)
+			  (symbol :tag "Formatter Function"))
+		    (list :inline t :tag "New items handler"
+			  (const :new-handler)
+			  (symbol :tag "Handler Function"))
+		    (list :inline t :tag "Changed items"
+			  (const :changed-handler)
+			  (symbol :tag "Handler Function"))
 		    )))))
 
 (defcustom org-feed-default-template "\n* %h\n  %U\n  %description\n  %a\n"
@@ -224,7 +245,7 @@ have been saved."
 	     (if (= nfeeds 1) "feed" "feeds"))))
 
 ;;;###autoload
-(defun org-feed-update (feed)
+(defun org-feed-update (feed &optional retrieve-only)
   "Get inbox items from FEED.
 FEED can be a string with an association in `org-feed-alist', or
 it can be a list structured like an entry in `org-feed-alist'."
@@ -239,56 +260,97 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  (headline (nth 3 feed))
 	  (filter (nth 1 (memq :filter feed)))
 	  (formatter (nth 1 (memq :formatter feed)))
+	  (new-handler (nth 1 (memq :new-handler feed)))
+	  (changed-handler (nth 1 (memq :changed-handler feed)))
 	  (template (or (nth 1 (memq :template feed))
 			org-feed-default-template))
 	  feed-buffer inbox-pos
-	  entries old-status status new e guid)
+	  entries old-status status new changed guid-alist e guid olds)
       (setq feed-buffer (org-feed-get-feed url))
       (unless (and feed-buffer (bufferp feed-buffer))
 	(error "Cannot get feed %s" name))
+      (when retrieve-only
+	(throw 'exit feed-buffer))
       (setq entries (org-feed-parse-feed feed-buffer))
       (ignore-errors (kill-buffer feed-buffer))
       (save-excursion
 	(save-window-excursion
 	  (setq inbox-pos (org-feed-goto-inbox-internal file headline))
 	  (setq old-status (org-feed-read-previous-status inbox-pos))
-	  ;; Add the "added" status to the appropriate entries
+	  ;; Add the "handled" status to the appropriate entries
 	  (setq entries (mapcar (lambda (e)
-				  (setq e (plist-put e :added
+				  (setq e (plist-put e :handled
 						     (nth 1 (assoc 
 							     (plist-get e :guid)
 							     old-status)))))
 				entries))
-	  ;; Find out which entries are new
-	  (setq new (delq nil (mapcar (lambda (e)
-					(if (plist-get e :added) nil e))
-				      entries)))
-	  ;; Parse the entries fully
-	  (setq new (mapcar 'org-feed-parse-entry new))
+	  ;; Find out which entries are new and which are changed
+	  (dolist (e entries)
+	    (if (not (plist-get e :handled))
+		(push e new)
+	      (setq olds (nth 2 (assoc (plist-get e :guid) old-status)))
+	      (if (and olds
+		       (not (string= (sha1-string (plist-get e :item-full-text))
+				     olds)))
+		  (push e changed))))
+
+	  ;; Parse the relevant entries fully
+	  (setq new     (mapcar 'org-feed-parse-entry new)
+		changed (mapcar 'org-feed-parse-entry changed))
+
 	  ;; Run the filter
 	  (when filter
-	    (setq new (delq nil (mapcar filter new))))
-	  (when (not new)
+	    (setq new     (delq nil (mapcar filter new))
+		  changed (delq nil (mapcar filter new))))
+
+	  (when (not (or new changed))
 	    (message "No new items in feed %s" name)
 	    (throw 'exit 0))
-	  ;; Format the new entries into an alist with GUIDs in the car
-	  (setq new (mapcar
-		     (lambda (e)
-		       (list (plist-get e :guid)
-			     (org-feed-format-entry e template formatter)))
-		     new))
-		
+
+	  ;; Get alist based on guid, to look up entries
+	  (setq guid-alist
+		(append
+		 (mapcar (lambda (e) (list (plist-get e :guid) e)) new)
+		 (mapcar (lambda (e) (list (plist-get e :guid) e)) changed)))
+
 	  ;; Construct the new status
 	  (setq status
 		(mapcar
 		 (lambda (e)
 		   (setq guid (plist-get e :guid))
-		   (list guid (if (assoc guid new) t (plist-get e :added))))
+		   (list guid
+			 ;; things count as handled if we handle them now,
+			 ;; or if they were handled previously
+			 (if (assoc guid guid-alist) t (plist-get e :handled))
+			 ;; A hash, to detect changes
+			 (sha1-string (plist-get e :item-full-text))))
 		 entries))
-	  ;; Insert the new items
-	  (org-feed-add-items inbox-pos new)
+
+	  ;; Handle new items in the feed
+	  (when new
+	    (if new-handler
+		(progn
+		  (goto-char inbox-pos)
+		  (funcall new-handler new))
+	      ;; No custom handler, do the default adding
+	      ;; Format the new entries into an alist with GUIDs in the car
+	      (setq new-formatted
+		    (mapcar
+		     (lambda (e) (org-feed-format-entry e template formatter))
+		     new)))
+	
+	    ;; Insert the new items
+	    (org-feed-add-items inbox-pos new-formatted))
+
+	  ;; Handle changed items in the feed
+	  (when (and changed-handler changed)
+	    (goto-char inbox-pos)
+	    (funcall changed-handler changed))
 
 	  ;; Write the new status
+	  ;; We do this only now, in case something goes wrong above, so
+	  ;; that would would end up with a status that does not reflect
+	  ;; which items truely have been handled
 	  (org-feed-write-status inbox-pos status)
 	  
 	  ;; Normalize the visibility of the inbox tree
@@ -296,6 +358,8 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  (hide-subtree)
 	  (show-children)
 	  (org-cycle-hide-drawers 'children)
+
+	  ;; Hooks and messages
 	  (when org-feed-save-after-adding (save-buffer))
 	  (message "Added %d new item%s from feed %s to file %s, heading %s"
 		   (length new) (if (> (length new) 1) "s" "")
@@ -315,6 +379,20 @@ it can be a list structured like an entry in `org-feed-alist'."
   (unless feed
     (error "No such feed in `org-feed-alist"))
   (org-feed-goto-inbox-internal (nth 2 feed) (nth 3 feed)))
+
+;;;###autoload
+(defun org-feed-show-raw-feed (feed)
+  "Show the raw feed buffer of a feed."
+  (interactive
+   (list (if (= (length org-feed-alist) 1)
+	     (car org-feed-alist)
+	   (org-completing-read "Feed name: " org-feed-alist))))
+  (if (stringp feed) (setq feed (assoc feed org-feed-alist)))
+  (unless feed
+    (error "No such feed in `org-feed-alist"))
+  (switch-to-buffer
+   (org-feed-update feed 'retrieve-only))
+  (goto-char (point-min)))
 
 (defun org-feed-goto-inbox-internal (file heading)
   "Find or create HEADING in FILE.
@@ -374,8 +452,7 @@ This will find the FEEDSTATUS drawer and extract the alist."
       (beginning-of-line 2)
       (setq pos (point))
       (while (setq entry (pop entries))
-	(insert "\n")
-	(org-paste-subtree level (nth 1 entry)))
+	(org-paste-subtree level entry 'yank))
       (org-mark-ring-push pos))))
 
 (defun org-feed-format-entry (entry template formatter)
