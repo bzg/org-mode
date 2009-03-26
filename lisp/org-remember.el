@@ -583,7 +583,7 @@ to be run from that hook to function properly."
 	   (format-time-string "remember-%Y-%m-%d-%H-%M-%S")
 	   org-remember-backup-directory))
     (save-buffer)
-    (setq auto-save-visited-file-name t))
+    (org-set-local 'auto-save-visited-file-name t))
   (when (save-excursion
 	  (goto-char (point-min))
 	  (re-search-forward "%!" nil t))

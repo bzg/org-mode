@@ -1,3 +1,8 @@
+2009-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-apply-template): Set local
+	variable `auto-save-visited-file-name' instead of global one.
+
 2009-03-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-feed.el: Re-write.
