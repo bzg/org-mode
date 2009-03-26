@@ -6775,8 +6775,11 @@ For file links, arg negates `org-context-in-file-links'."
 	(org-store-link-props :type "calendar" :date cd)))
 
      ((eq major-mode 'w3-mode)
-      (setq cpltxt (url-view-url t)
-	    link (org-make-link cpltxt))
+      (setq cpltxt (if (and (buffer-name)
+			    (not (string-match "Untitled" (buffer-name))))
+		       (buffer-name)
+		     (url-view-url t))
+	    link (org-make-link (url-view-url t)))
       (org-store-link-props :type "w3" :url (url-view-url t)))
 
      ((eq major-mode 'w3m-mode)
