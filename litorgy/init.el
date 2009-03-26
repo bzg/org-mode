@@ -1,4 +1,4 @@
-;;; litorgy-lisp.el --- litorgy functions for lisp code evaluation
+;;; init.el --- loads litorgy
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -26,24 +26,16 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating lisp code
+;; for more information see the comments in litorgy.el
 
 ;;; Code:
+(require 'org)
 (require 'litorgy)
+(require 'litorgy-reference)
 
-(litorgy-add-interpreter "emacs-lisp")
+;; language specific files
+(require 'litorgy-R)
+(require 'litorgy-lisp)
+(require 'litorgy-script)
 
-(defun litorgy-execute:emacs-lisp (body params)
-  "Execute a block of emacs-lisp code with litorgy.  This
-function is called by `litorgy-execute-src-block'."
-  (save-window-excursion
-    (let ((vars (litorgy-reference-variables params))
-          (print-level nil) (print-length nil) results)
-      (message "executing emacs-lisp code block...")
-      (setq results
-            (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-                     ,(read body))))
-      (if (listp results) results (format "%S" results)))))
-
-(provide 'litorgy-lisp)
-;;; litorgy-lisp.el ends here
+;;; init.el ends here

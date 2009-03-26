@@ -1,4 +1,4 @@
-;;; litorgy-lisp.el --- litorgy functions for lisp code evaluation
+;;; litorgy-R.el --- litorgy functions for R code evaluation
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -26,24 +26,21 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating lisp code
+;; Litorgy support for evaluating R code
 
 ;;; Code:
 (require 'litorgy)
 
-(litorgy-add-interpreter "emacs-lisp")
+(litorgy-add-interpreter "emacs-R")
 
-(defun litorgy-execute:emacs-lisp (body params)
-  "Execute a block of emacs-lisp code with litorgy.  This
+(defun litorgy-execute:emacs-R (body params)
+  "Execute a block of emacs-R code with litorgy.  This
 function is called by `litorgy-execute-src-block'."
   (save-window-excursion
     (let ((vars (litorgy-reference-variables params))
-          (print-level nil) (print-length nil) results)
-      (message "executing emacs-lisp code block...")
-      (setq results
-            (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-                     ,(read body))))
-      (if (listp results) results (format "%S" results)))))
+          results)
+      ;;TODO: implement
+      (error "`litorgy-execute:emacs-R' is not implemented"))))
 
-(provide 'litorgy-lisp)
-;;; litorgy-lisp.el ends here
+(provide 'litorgy-R)
+;;; litorgy-R.el ends here

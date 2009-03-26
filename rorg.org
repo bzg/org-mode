@@ -736,6 +736,34 @@ cell =0,0= through =0,3= of the table
 |                 |
 
 
+** litorgy plays with tables
+Alright, this should demonstrate both the ability of litorgy to read
+tables into a lisp source code block, and to then convert the results
+of the source code block into an org table.  It's using the classic
+"lisp is elegant" demonstration transpose function.  To try this
+out...
+
+1. evaluate [[file:litorgy/init.el]] to load litorgy and friends
+2. evaluate the transpose definition =\C-u \C-c\C-c= on the beginning of
+   the source block (prefix arg to inhibit output)
+3. evaluate the next source code block, this should read in the table
+   because of the =:var table=previous=, then transpose the table, and
+   finally it should insert the transposed table into the buffer
+   immediately following the block
+
+#+begin_src emacs-lisp
+(defun transpose (table)
+  (apply #'mapcar* #'list table))
+#+end_src
+
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+begin_src emacs-lisp :var table=previous :replace t
+(transpose table)
+#+end_src
+
+
 * COMMENT Commentary
 I'm seeing this as like commit notes, and a place for less formal
 communication of the goals of our changes.
