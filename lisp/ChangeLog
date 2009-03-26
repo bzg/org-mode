@@ -1,5 +1,12 @@
 2009-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-finalize): Do not set buffer file
+	name to nil.
+	(org-remember-handler): Mark buffer as unmodified.
+	(org-remember-handler): Delete backup file and show message about
+	remaining backup files.
+	(org-remember-auto-remove-backup-files): New option.
+
 	* org.el (org-store-link): Use buffer name as link description in
 	w3-mode buffers.
 	(org-ido-switchb): Fix argument bug for completion.

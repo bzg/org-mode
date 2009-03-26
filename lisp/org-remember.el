@@ -232,11 +232,23 @@ user each time a remember buffer with a running clock is filed away.  "
   "Directory where to store all remember buffers, for backup purposes.
 After a remember buffer has been stored successfully, the backup file
 will be removed.  However, if you forget to finish the remember process,
-the file will remain there."
+the file will remain there.
+See also `org-remember-auto-remove-backup-files'."
   :group 'org-remember
   :type '(choice
 	  (const :tag "No backups" nil)
 	  (directory :tag "Directory")))
+
+(defcustom org-remember-auto-remove-backup-files t
+  "Non-nil means, remove remember backup files after successfully storage.
+When remember is finished successfully, with storing the note at the
+desired target, remove the backup files related to this remember process
+and show a message about remaining backup files, from previous, unfinished
+remember sessions.
+Backup files will only be made at all, when `org-remember-backup-directory'
+is set."
+  :group 'org-remember
+  :type 'boolean)
 
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
@@ -630,8 +642,7 @@ from that hook."
 			(y-or-n-p "The clock is running in this buffer.  Clock out now? "))))
       (let (org-log-note-clock-out) (org-clock-out))))
   (when buffer-file-name
-    (save-buffer)
-    (setq buffer-file-name nil))
+    (save-buffer))
   (remember-finalize))
 
 (defun org-remember-kill ()
@@ -826,6 +837,7 @@ See also the variable `org-reverse-note-order'."
       (goto-char (point-min))
       (setq txt (buffer-string))
       (org-save-markers-in-region (point-min) (point-max))
+      (set-buffer-modified-p nil)
       (when (and (eq org-remember-interactive-interface 'refile)
 		 (not fastp))
 	(org-refile nil (or visiting (find-file-noselect file)))
@@ -978,9 +990,21 @@ See also the variable `org-reverse-note-order'."
 		       (not (equal (marker-buffer org-clock-marker)
 				   (current-buffer))))
 		  (kill-buffer (current-buffer))))
-	    (when backup-file
-	      (delete-file backup-file)))))))
-
+	    (when org-remember-auto-remove-backup-files
+	      (when backup-file
+		(ignore-errors
+		  (delete-file backup-file)
+		  (delete-file (concat backup-file "~"))))
+	      (when org-remember-backup-directory
+		(let ((n (length
+			  (directory-files
+			   org-remember-backup-directory nil
+			   "^remember-.*[0-9]$"))))
+		  (when (> n 0)
+		    (message
+		     "%d backup files (unfinished remember calls) in %s" 
+		     n org-remember-backup-directory))))))))))
+  
   t)    ;; return t to indicate that we took care of this note.
 
 (defun org-do-remember (&optional initial)
