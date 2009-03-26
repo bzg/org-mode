@@ -2,6 +2,7 @@
 
 	* org.el (org-store-link): Use buffer name as link description in
 	w3-mode buffers.
+	(org-ido-switchb): Fix argument bug for completion.
 
 	* org-remember.el (org-remember-apply-template): Set local
 	variable `auto-save-visited-file-name' instead of global one.

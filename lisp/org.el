@@ -12773,7 +12773,7 @@ With two prefix arguments, restrict available buffers to agenda files."
                      (t                 (org-buffer-list)))))
     (switch-to-buffer
      (org-ido-completing-read "Org buffer: "
-                              (mapcar 'buffer-name blist)
+                              (mapcar 'list (mapcar 'buffer-name blist))
                               nil t))))
 
 (defun org-buffer-list (&optional predicate exclude-tmp)
