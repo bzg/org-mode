@@ -107,7 +107,7 @@ prefix don't dump results into buffer."
     (setq result (funcall cmd body params))
     (if arg
         (message (format "%S" result))
-        (litorgy-insert-result result (assoc :replace params)))))
+      (litorgy-insert-result result (assoc :replace params)))))
 
 (defun litorgy-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -143,7 +143,7 @@ form.  (language body header-arguments-alist)"
   (delq nil
         (mapcar
          (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]*\\)" arg)
-                      (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
+                           (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:"))))
 
 (defun litorgy-insert-result (result &optional replace)
@@ -151,21 +151,22 @@ form.  (language body header-arguments-alist)"
 current source block.  With optional argument REPLACE replace any
 existing results currently located after the source block."
   (if replace (litorgy-remove-result (listp result)))
-  (if (and (stringp result)
-           (not (or (string-equal (substring result -1)
-                                  "\n")
-                    (string-equal (substring result -1)
-                                  "\r"))))
-      (setq result (concat result "\n")))
+  (when (and (stringp result)
+             (not (or (string-equal (substring result -1) "\n")
+                      (string-equal (substring result -1) "\r"))))
+    (setq result (concat result "\n")))
   (save-excursion
     (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
     (if (stringp result)
-        (litorgy-examplize-region (point) (progn (insert result) (point))))
-    (insert ;; for now lets assume the result is a table if it's not a string
-     (concat (orgtbl-to-orgtbl result '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
-    (forward-line -1)
-    (org-cycle)))
-                                               
+        (litorgy-examplize-region (point) (progn (insert result) (point)))
+      (progn
+        (insert ;; for now lets assume the result is a table if it's not a string
+         (concat (orgtbl-to-orgtbl
+                  (if (consp (car result)) result (list result))
+                  '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
+        (forward-line -1)
+        (org-cycle)))))
+
 (defun litorgy-remove-result (&optional table)
   "Remove the result following the current source block.  If
 optional argument TABLE is supplied then remove the table
@@ -194,9 +195,9 @@ following the block rather than the fixed width example."
 	  (delete-region beg end)
 	  (insert (concat ": " result)))
       (save-excursion
-	    (goto-char beg)
-	    (dotimes (n size)
-	      (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
+        (goto-char beg)
+        (dotimes (n size)
+          (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
 (defun litorgy-clean-text-properties (text)
   "Strip all properties from text return."
