@@ -45,7 +45,7 @@
 ;;  With this setup, the command `M-x org-feed-update-all' will
 ;;  collect new entries in the feed at the given URL and create
 ;;  entries as subheadings under the "ReQall Entries" heading in the
-;;  file "~/org.feeds.org".  Each feed needs to have its own heading.
+;;  file "~/org-feeds.org".  Each feed needs to have its own heading.
 ;;
 ;;  Besides these standard elements that need to be specified for each
 ;;  feed,, keyword-value pairs can set additional options.  For example,
@@ -65,7 +65,7 @@
 ;;       (if (string-match "reQall is typing what you said"
 ;;                         (plist-get e :title))
 ;;           nil
-;;         e)
+;;         e))
 ;;
 ;;  See the docstring for `org-feed-alist' for more details.
 ;;
