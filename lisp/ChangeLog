@@ -1,5 +1,10 @@
 2009-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-cmp-user-defined): New option.
+	(org-sorting-choice, org-agenda-sorting-strategy): Add the new
+	sorting options.
+	(org-entries-lessp): Apply the new sorting option.
+
 	* org.el (org-block-todo-from-children-or-siblings): Fix bug in
 	blocker code, when an older sibling has children.
 

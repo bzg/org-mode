@@ -6570,7 +6570,9 @@ overdue scheduled or deadline items.
 @item
 For the TODO list, items remain in the order of categories, but within
 each category, sorting takes place according to priority
-(@pxref{Priorities}).
+(@pxref{Priorities}).  The priority used for sorting derives from the
+priority cookie, with additions depending on how close an item is to its due
+or scheduled date.
 @item
 For tags matches, items are not sorted at all, but just appear in the
 sequence in which they are found in the agenda files.

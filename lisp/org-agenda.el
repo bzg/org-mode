@@ -188,7 +188,8 @@ you can \"misuse\" it to also add other text to the header.  However,
     (const tag-down) (const tag-up)
     (const priority-up) (const priority-down)
     (const todo-state-up) (const todo-state-down)
-    (const effort-up) (const effort-down))
+    (const effort-up) (const effort-down)
+    (const user-defined-up) (const user-defined-down))
   "Sorting choices.")
 
 (defconst org-agenda-custom-commands-local-options
@@ -861,20 +862,22 @@ This is a list of symbols which will be used in sequence to determine
 if an entry should be listed before another entry.  The following
 symbols are recognized:
 
-time-up         Put entries with time-of-day indications first, early first
-time-down       Put entries with time-of-day indications first, late first
-category-keep   Keep the default order of categories, corresponding to the
-		sequence in `org-agenda-files'.
-category-up     Sort alphabetically by category, A-Z.
-category-down   Sort alphabetically by category, Z-A.
-tag-up          Sort alphabetically by last tag, A-Z.
-tag-down        Sort alphabetically by last tag, Z-A.
-priority-up     Sort numerically by priority, high priority last.
-priority-down   Sort numerically by priority, high priority first.
-todo-state-up   Sort by todo state, tasks that are done last.
-todo-state-down Sort by todo state, tasks that are done first.
-effort-up       Sort numerically by estimated effort, high effort last.
-effort-down     Sort numerically by estimated effort, high effort first.
+time-up            Put entries with time-of-day indications first, early first
+time-down          Put entries with time-of-day indications first, late first
+category-keep      Keep the default order of categories, corresponding to the
+		   sequence in `org-agenda-files'.
+category-up        Sort alphabetically by category, A-Z.
+category-down      Sort alphabetically by category, Z-A.
+tag-up             Sort alphabetically by last tag, A-Z.
+tag-down           Sort alphabetically by last tag, Z-A.
+priority-up        Sort numerically by priority, high priority last.
+priority-down      Sort numerically by priority, high priority first.
+todo-state-up      Sort by todo state, tasks that are done last.
+todo-state-down    Sort by todo state, tasks that are done first.
+effort-up          Sort numerically by estimated effort, high effort last.
+effort-down        Sort numerically by estimated effort, high effort first.
+user-defined-up    Sort according to `org-agenda-cmp-user-defined', high last.
+user-defined-down  Sort according to `org-agenda-cmp-user-defined', high first.
 
 The different possibilities will be tried in sequence, and testing stops
 if one comparison returns a \"not-equal\".  For example, the default
@@ -904,6 +907,16 @@ Custom commands can bind this variable in the options section."
 		      (repeat ,org-sorting-choice))
 		(cons (const :tag "Strategy for Tags matches" tags)
 		      (repeat ,org-sorting-choice)))))
+
+(defcustom org-agenda-cmp-user-defined nil
+  "A function to define the comparison `user-defined'.
+This function must receive two arguments, agenda entry a and b.
+If a>b, return +1.  If a<b, return -1.  If they are equal as seen by
+the user comparison, return nil.
+When this is defined, you can make `user-defined-up' and `user-defined-down'
+part of an agenda sorting strategy."
+  :group 'org-agenda-sorting
+  :type 'symbol)
 
 (defcustom org-sort-agenda-notime-is-late t
   "Non-nil means, items without time are considered late.
@@ -4458,7 +4471,13 @@ HH:MM."
 	 (tag-up (org-cmp-tag a b))
 	 (tag-down (if tag-up (- tag-up) nil))
 	 (todo-state-up (org-cmp-todo-state a b))
-	 (todo-state-down (if todo-state-up (- todo-state-up) nil)))
+	 (todo-state-down (if todo-state-up (- todo-state-up) nil))
+	 user-defined-up user-defined-down)
+    (if (and org-agenda-cmp-user-defined
+	     (functionp org-agenda-cmp-user-defined))
+	(setq user-defined-up
+	      (funcall org-agenda-cmp-user-defined a b)
+	      user-defined-down (if user-defined-up (- user-defined-up) nil)))
     (cdr (assoc
 	  (eval (cons 'or org-agenda-sorting-strategy-selected))
 	  '((-1 . t) (1 . nil) (nil . nil))))))
