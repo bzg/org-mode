@@ -24,15 +24,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:
-
+;;
 ;;  This module allows to create and change entries in an Org-mode
 ;;  file triggered by items in an RSS feed.  The basic functionality is
-;;  geared toward simply adding items found in a feed as outline nodes
-;;  in an Org file, but using hooks, other actions can be performed
-;;  including changing entries based on changes of items in the feed.
+;;  geared toward simply adding new items found in a feed as outline nodes
+;;  to an Org file.  Using hooks, arbitrary actions can be triggered for
+;;  new or changed items.
 ;;
 ;;  Selecting feeds and target locations
-;;  -----------------------------------
+;;  ------------------------------------
 ;;
 ;;  This module is configured through a single variable, `org-feed-alist'.
 ;;  Here is an example, using a notes/tasks feed from reQall.com.
@@ -45,14 +45,15 @@
 ;;  With this setup, the command `M-x org-feed-update-all' will
 ;;  collect new entries in the feed at the given URL and create
 ;;  entries as subheadings under the "ReQall Entries" heading in the
-;;  file "~/org.feeds.org".  You can then change and even move these
-;;  entries, and they will not be added again (see below).
-
-;;  In addition to these standard elements, additional keyword-value
-;;  pairs are possible as part of a feed setting.  For example, here
-;;  we de-select entries with a title containing
-;;       "reQall is typing what you said"
-;;  using the `:filter' argument:
+;;  file "~/org.feeds.org".  Each feed needs to have its own heading.
+;;
+;;  Besides these standard elements that need to be specified for each
+;;  feed,, keyword-value pairs can set additional options.  For example,
+;;  to de-select transitional entries with a title containing
+;;
+;;                   "reQall is typing what you said",
+;;
+;;  you could use the `:filter' argument:
 ;;
 ;;    (setq org-feed-alist
 ;;          '(("ReQall"
@@ -60,7 +61,7 @@
 ;;             "~/org/feeds.org" "ReQall Entries"
 ;;             :filter my-reqall-filter)))
 ;;
-;;     (defun my-reqall-filter (e)
+;;    (defun my-reqall-filter (e)
 ;;       (if (string-match "reQall is typing what you said"
 ;;                         (plist-get e :title))
 ;;           nil
@@ -68,28 +69,24 @@
 ;;
 ;;  See the docstring for `org-feed-alist' for more details.
 ;;
+;;
 ;;  Keeping track of previously added entries
 ;;  -----------------------------------------
 ;;
 ;;  Since Org allows you to delete, archive, or move outline nodes,
-;;  org-feed.el needs to keep track of which feed items have been added
-;;  before, so that they will not be added again.  For this, org-feed.el
+;;  org-feed.el needs to keep track of which feed items have been handled
+;;  before, so that they will not be handled again.  For this, org-feed.el
 ;;  stores information in a special drawer, FEEDSTATUS, under the heading
-;;  that received the input of the feed.  For this reason, each feed must
-;;  have its own headline in an Org file.  You should add FEEDSTATUS
+;;  that received the input of the feed.  You should add FEEDSTATUS
 ;;  to your list of drawers in the files that receive feed input:
 ;;
-;;    #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
+;;       #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
 ;;
 ;;  Acknowledgments
 ;;  ----------------
 ;;
 ;;  org-feed.el is based on ideas by Brad Bozarth who implemented a
-;;  similar mechanism using shell and awk scripts, and who in this
-;;  way made me for the first time look into an RSS feed, showing
-;;  how simple this really was.  Because I wanted to include a
-;;  solution into Org with as few dependencies as possible, I
-;;  reimplemented his ideas in Emacs Lisp.
+;;  similar mechanism using shell and awk scripts.
 
 ;;; Code:
 
@@ -559,18 +556,7 @@ containing the properties `:guid' and `:item-full-text'."
 
 (provide 'org-feed)
 
-;;; org-feed.el ends here
-
 ;; arch-tag: 0929b557-9bc4-47f4-9633-30a12dbb5ae2
 
+;;; org-feed.el ends here
 
-;1. parse all items
-;2. filter with user filter
-;3. Remove GUIDs that we have already *added* before
-;4. Format, using user or built-in formatter
-;5. add new items
-;6. Store the guids from step 2, after the filtering
-;   This means that the feed could go back, have the entry
-;   pass the filter, and then it will be added.;
-
-					;Each item will be added once, when it first passes the filter.

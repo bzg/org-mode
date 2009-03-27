@@ -236,6 +236,7 @@ Deadlines and scheduling
 Capture
 
 * Remember::                    Capture new tasks/ideas with little interruption
+* RSS Feeds::                   Getting input from RSS feeds
 * Attachments::                 Add files to tasks.
 
 Remember
@@ -5367,10 +5368,11 @@ related to a task (@i{attachments}) in a special directory.
 
 @menu
 * Remember::                    Capture new tasks/ideas with little interruption
+* RSS Feeds::                   Getting input from RSS feeds
 * Attachments::                 Add files to tasks.
 @end menu
 
-@node Remember, Attachments, Capture, Capture
+@node Remember, RSS Feeds, Capture, Capture
 @section Remember
 @cindex @file{remember.el}
 
@@ -5653,7 +5655,52 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Attachments,  , Remember, Capture
+@node RSS Feeds, Attachments, Remember, Capture
+@section RSS feeds
+
+Org has the capablity to add and change entries based on information found in
+RSS feeds.  You could use this to make a task out of each new podcast in a
+podcast feed.  Or you could use a phone-based note-creating service on the
+web to import tasks into Org.
+
+To access feeds, you need to configure the variable @code{org-feed-alist}.
+The docstring of this variable has detailed information.  Here is just an
+example:  
+
+@example
+(setq org-feed-alist
+      '(("ReQall"
+         "http://www.reqall.com/user/feeds/rss/a1b2c3....."
+         "~/org/feeds.org" "ReQall Entries")
+@end example
+
+will configure that new items from the feed provided by @file{reqall.com}
+will result in new entries in the file @file{~/org/feeds.org} under the
+heading @samp{ReQall Entries}, whenever the following command is used:
+
+@table @kbd
+@kindex C-c C-x g
+@item C-c C-x g
+Collect items from the feeds configured in @code{org-feed-alist} and act upon
+them.
+@kindex C-c C-x G
+@item C-c C-x G
+Prompt for a feed name and go to the inbox configured for this feed.
+@end table
+
+Under the same headline, Org will create a drawer @samp{FEEDSTATUS} in which
+it will store information about the status of items in the feed, to avoid
+adding the same item several times.  You should add @samp{FEEDSTATUS} to the
+list of drawers in the file where you collect feed data:
+
+@example
+#+DRAWERS: LOGBOOK PROPERTIES FEEDSTATUS
+@end example
+
+For more information, see the file header of @file{org-feed.el} and the
+docstring of @code{org-feed-alist}.
+
+@node Attachments,  , RSS Feeds, Capture
 @section Attachments
 @cindex attachments
 
