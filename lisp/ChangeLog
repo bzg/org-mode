@@ -1,5 +1,8 @@
 2009-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-block-todo-from-children-or-siblings): Fix bug in
+	blocker code, when an older sibling has children.
+
 	* org-mac-message.el (org-mac-message-get-link): Improve getting
 	links from multiple selected messages.
 

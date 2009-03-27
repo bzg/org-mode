@@ -8910,12 +8910,11 @@ changes.  Such blocking occurs when:
 	(let* ((this-level (funcall outline-level))
 	       (current-level this-level))
 	  (while (and (not (bobp))
-		      (= current-level this-level))
+		      (>= current-level this-level))
 	    (outline-previous-heading)
 	    (setq current-level (funcall outline-level))
 	    (if (= current-level this-level)
-		;; this todo has children, check whether they are all
-		;; completed
+		;; This is a younger sibling, check if it is completed
 		(if (and (not (org-entry-is-done-p))
 			 (org-entry-is-todo-p))
 		    (throw 'dont-block nil)))))))
