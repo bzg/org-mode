@@ -1,3 +1,8 @@
+2009-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-mac-message.el (org-mac-message-get-link): Improve getting
+	links from multiple selected messages.
+
 2009-03-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-finalize): Do not set buffer file

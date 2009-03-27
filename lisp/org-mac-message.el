@@ -4,6 +4,7 @@
 
 ;; Author: John Wiegley <johnw@gnu.org>
 ;;         Christopher Suckling <suckling at gmail dot com>
+
 ;; Version: 6.24trans
 ;; Keywords: outlines, hypermedia, calendar, wp
 
@@ -85,24 +86,47 @@ This will use the command `open' with the message URL."
 This will use applescript to get the message-id and the subject of the
 active mail in AppleMail and make a link out of it."
   (interactive)
-  (insert (org-mac-message-get-link)))
+  (org-mac-message-get-link)
+  (yank))
 
 (defun org-mac-message-get-link ()
   "Insert a link to the messages currently selected in Apple Mail.
 This will use applescript to get the message-id and the subject of the
 active mail in AppleMail and make a link out of it."
-  (let ((subject (do-applescript "tell application \"Mail\"
-	set theMessages to selection
-	subject of beginning of theMessages
-end tell"))
-	(message-id (do-applescript "tell application \"Mail\"
-	set theMessages to selection
-	message id of beginning of theMessages
-end tell")))
-    (org-make-link-string
-     (concat "message://"
-	     (substring message-id 1 (1- (length message-id))))
-     (substring subject 1 (1- (length subject))))))
+  (let* ((as-link-list
+	  (do-applescript
+	   (concat
+	    "tell application \"Mail\"\n"
+	    "set theLinkList to {}\n"
+	    "set theSelection to selection\n"
+	    "repeat with theMessage in theSelection\n"
+	    "set theID to message id of theMessage\n"
+	    "set theSubject to subject of theMessage\n"
+	    "set theLink to \"message://\" & theID & \"::split::\" & theSubject & \"\n\"\n"
+	    "copy theLink to end of theLinkList\n"
+	    "end repeat\n"
+	    "return theLinkList as string\n"
+	    "end tell")))
+	 (link-list (split-string as-link-list "\n"))
+	 split-link
+	 URL
+	 description
+	 orglink
+	 orglink-insert
+	 (orglink-list nil))
+    (while link-list
+      (progn
+	(setq split-link (split-string (pop link-list) "::split::"))
+	(setq URL (car split-link))
+	(setq description (cadr split-link))
+	(if (not (string= URL ""))
+	    (progn
+	      (setq orglink (org-make-link-string URL description))
+	      (push orglink orglink-list)))))
+    (with-temp-buffer      
+      (while orglink-list
+	(insert (concat (pop orglink-list)) "\n"))
+      (kill-region (point-min) (point-max)))))
 
 (defun org-mac-create-flagged-mail ()
   "Create links to flagged messages in a Mail.app account and
