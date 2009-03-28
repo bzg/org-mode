@@ -37,8 +37,9 @@
           (setq litorgy-interpreters (cons cmd litorgy-interpreters))
           (eval
            `(defun ,(intern (concat "litorgy-execute:" cmd)) (body params)
-              (concat "Evaluate a block of " ,cmd " script with litorgy.
-This function is called by `litorgy-execute-src-block'.")
+              ,(concat "Evaluate a block of " cmd " script with litorgy. This function is
+called by `litorgy-execute-src-block'.  This function is an
+automatically generated wrapper for `litorgy-script-execute'.")
               (litorgy-script-execute ,cmd body params))))
         cmds))
 
@@ -51,12 +52,33 @@ executed through litorgy."
 (defun litorgy-script-execute (cmd body params)
   "Run CMD on BODY obeying any options set with PARAMS.
 TODO: currently the params part is not implemented"
-  (message (format "executing source block with %s..." cmd))
-  (with-temp-buffer
-    (insert body)
-    (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-    (message "finished executing source block")
-    (buffer-string)))
+  (message (format "executing %s code block..." cmd))
+  (let ((vars (litorgy-reference-variables params)))
+    (save-window-excursion
+      (with-temp-buffer
+        ;; define any variables
+        (mapcar
+         (lambda (pair)
+           (case (intern cmd)
+             ((sh bash zsh) ;; TODO support table assignment in shell scripts
+              (error (format "table assignment is not supported for %s" cmd)))
+             ((ruby python)
+              (insert (format "%s=%s\n"
+                              (car pair)
+                              (litorgy-table-to-ruby/python (cdr pair)))))
+             ))
+         vars)
+        (insert body)
+        (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
+        (message "finished executing source block")
+        (buffer-string)))))
+
+(defun litorgy-table-to-ruby/python (table)
+  "Convert an elisp table (nested lists) into a string of ruby
+source code specifying a table (nested arrays)."
+  (if (listp table)
+      (concat "[" (mapconcat #'litorgy-table-to-ruby/python table ", ") "]")
+    (format "%S" table)))
 
 (provide 'litorgy-script)
 ;;; litorgy-script.el ends here

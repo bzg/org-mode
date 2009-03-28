@@ -751,12 +751,31 @@ out...
   (apply #'mapcar* #'list table))
 #+end_src
 
+#+TBLNAME: sandbox
 | 1 |       2 | 3 |
 | 4 | schulte | 6 |
 
 #+begin_src emacs-lisp :var table=previous :replace t
 (transpose table)
 #+end_src
+
+#+begin_src emacs-lisp :var table=sandbox :replace t
+(transpose table)
+#+end_src
+
+#+begin_src ruby :var table=sandbox :replace t
+puts table.first.join(" - ")
+#+end_src
+
+: 1 - 2 - 3
+
+#+begin_src python :var table=sandbox :replace t
+print table[0]
+#+end_src
+
+: [1, 2, 3]
+
+
 
 
 * COMMENT Commentary
