@@ -1,3 +1,7 @@
+2009-03-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-reftex-citation): New command.
+
 2009-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-cmp-user-defined): New option.

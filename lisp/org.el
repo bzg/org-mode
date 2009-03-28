@@ -13516,6 +13516,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (define-key org-mode-map "\C-c\C-xg" 'org-feed-update-all)
 (define-key org-mode-map "\C-c\C-xG" 'org-feed-goto-inbox)
 
+(define-key org-mode-map "\C-c\C-x[" 'org-reftex-citation)
+
+
 (when (featurep 'xemacs)
   (org-defkey org-mode-map 'button3   'popup-mode-menu))
 
@@ -15376,6 +15379,36 @@ this line is also exported in fixed-width font."
 		(goto-char (match-end 0))
 		(insert org-quote-string " "))))))))
 
+(defun org-reftex-citation ()
+  "Use reftex-citation to insert a citation into the buffer.
+This looks for a line like
+
+#+BIBLIOGRAPHY: foo plain option:-d
+
+and derives from it that foo.bib is the bbliography file relevant
+for this document.  It then installs the necessary environment for RefTeX
+to work in this buffer and calls `reftex-citation'  to insert a citation
+into the buffer.
+
+Export of such citations to both LaTeX and HTML is handled by the contributed
+package org-exp-bibtex by Taru Karttunen."
+  (interactive)
+  (let ((reftex-docstruct-symbol 'rds)
+	(reftex-cite-format "\\cite{%l}")
+	rds bib)
+    (save-excursion
+      (save-restriction
+	(widen)
+	(let ((case-fold-search t)
+	      (re "^#\\+bibliography:[ \t]+\\([^ \t\n]+\\)"))
+	  (if (not (save-excursion
+		     (or (re-search-forward re nil t)
+			 (re-search-backward re nil t))))
+	      (error "No bibliography defined in file")
+	    (setq bib (concat (match-string 1) ".bib")
+		  rds (list (list 'bib bib)))))))
+    (call-interactively 'reftex-citation)))
+
 ;;;; Functions extending outline functionality
 
 (defun org-beginning-of-line (&optional arg)
@@ -15994,7 +16027,6 @@ Still experimental, may disappear in the future."
                        (and (>= time time1) (<= time time2))))))
     ;; make tree, check each match with the callback
     (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
-
 
 ;;;; Finish up
 
