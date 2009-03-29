@@ -548,6 +548,17 @@ new-frame        Make a new frame each time.  Note that in this case
   :tag "Org Cycle"
   :group 'org-structure)
 
+(defcustom org-cycle-max-level nil
+  "Maximum level which should still be subject to visibility cycling.
+Levels higher than this will, for cycling, be treated as text, not a headline.
+When `org-odd-levels-only' is set, a value of N in this variable actually
+means 2N-1 stars as the limiting headline.
+When nil, cycle all levels."
+  :group 'org-cycle
+  :type '(choice
+	  (const :tag "No limit" nil)
+	  (integer :tag "Maximum level")))
+
 (defcustom org-drawers '("PROPERTIES" "CLOCK" "LOGBOOK")
   "Names of drawers.  Drawers are not opened by cycling on the headline above.
 Drawers only open with a TAB on the drawer line itself.  A drawer looks like
@@ -562,6 +573,7 @@ Drawers can be defined on the per-file basis with a line like:
 
 #+DRAWERS: HIDDEN STATE PROPERTIES"
   :group 'org-structure
+  :group 'org-cycle
   :type '(repeat (string :tag "Drawer Name")))
 
 (defcustom org-cycle-global-at-bob nil
@@ -4469,6 +4481,7 @@ If KWD is a number, get the corresponding match group."
 (make-variable-buffer-local 'org-cycle-subtree-status)
 
 ;;;###autoload
+
 (defun org-cycle (&optional arg)
   "Visibility cycling for Org-mode.
 
@@ -4504,10 +4517,17 @@ If KWD is a number, get the corresponding match group."
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
-  (let* ((outline-regexp
-	  (if (and (org-mode-p) org-cycle-include-plain-lists)
-	      "\\(?:\\*+ \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"
-	    outline-regexp))
+  (let* ((nstars (if org-odd-levels-only
+		     (and org-cycle-max-level (1- (* org-cycle-max-level 2)))
+		   org-cycle-max-level))
+	 (outline-regexp
+	  (cond
+	   ((not (org-mode-p)) outline-regexp)
+	   (org-cycle-include-plain-lists
+	    (concat "\\(?:\\*"
+		    (if nstars (format "\\{1,%d\\} " nstars) "+")
+		    " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
+	   (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
 	 (bob-special (and org-cycle-global-at-bob (bobp)
 			   (not (looking-at outline-regexp))))
 	 (org-cycle-hook
