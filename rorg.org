@@ -764,18 +764,30 @@ out...
 #+end_src
 
 #+begin_src ruby :var table=sandbox :replace t
-puts table.first.join(" - ")
+table.first.join(" - ")
 #+end_src
 
-: 1 - 2 - 3
+: "1 - 2 - 3"
 
 #+begin_src python :var table=sandbox :replace t
-print table[0]
+table[0]
 #+end_src
 
-: [1, 2, 3]
+| 1 | 2 | 3 |
 
+#+begin_src ruby :var table=sandbox :replace t
+table
+#+end_src
 
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+#+begin_src python :var table=sandbox :replace t
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
 
 
 * COMMENT Commentary

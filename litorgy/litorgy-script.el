@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating shell, ruby, and python source code.
+;; Litorgy support for evaluating ruby, and python source code.
 
 ;;; Code:
 (require 'litorgy)
@@ -43,7 +43,7 @@ automatically generated wrapper for `litorgy-script-execute'.")
               (litorgy-script-execute ,cmd body params))))
         cmds))
 
-(defcustom litorgy-script-interpreters '("sh" "bash" "zsh" "ruby" "python")
+(defcustom litorgy-script-interpreters '("ruby" "python")
   "List of interpreters of scripting languages which can be
 executed through litorgy."
   :group 'litorgy
@@ -56,29 +56,51 @@ TODO: currently the params part is not implemented"
   (let ((vars (litorgy-reference-variables params)))
     (save-window-excursion
       (with-temp-buffer
+        (when (string= "ruby" cmd) (insert "def main\n"))
         ;; define any variables
         (mapcar
          (lambda (pair)
-           (case (intern cmd)
-             ((sh bash zsh) ;; TODO support table assignment in shell scripts
-              (error (format "table assignment is not supported for %s" cmd)))
-             ((ruby python)
-              (insert (format "%s=%s\n"
-                              (car pair)
-                              (litorgy-table-to-ruby/python (cdr pair)))))
-             ))
+           (insert (format "%s=%s\n"
+                           (car pair)
+                           (litorgy-script-table-to-ruby/python (cdr pair)))))
          vars)
-        (insert body)
+        (case (intern cmd)
+          ('ruby
+           (insert body)
+           (insert "\nend\n\nputs main.inspect\n"))
+          ('python
+           (insert "def main():\n")
+           (let ((body-lines (split-string body "[\n\r]+" t)))
+             (mapc
+              (lambda (line)
+                (insert (format "\t%s\n" line)))
+              (butlast body-lines))
+             (insert (format "\treturn %s\n" (car (last body-lines)))))
+           (insert "\nprint main()\n")))
+        (message (buffer-string))
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-        (message "finished executing source block")
-        (buffer-string)))))
+        (litorgy-script-table-or-results (buffer-string))))))
 
-(defun litorgy-table-to-ruby/python (table)
+(defun litorgy-script-table-to-ruby/python (table)
   "Convert an elisp table (nested lists) into a string of ruby
 source code specifying a table (nested arrays)."
   (if (listp table)
-      (concat "[" (mapconcat #'litorgy-table-to-ruby/python table ", ") "]")
+      (concat "[" (mapconcat #'litorgy-script-table-to-ruby/python table ", ") "]")
     (format "%S" table)))
+
+(defun litorgy-script-table-or-results (results)
+  "If the results look like a table, then convert them into an
+  Emacs-lisp table, otherwise return the results as a string."
+  (when (string-match "^\\[.+\\]$" results)
+    (setq results
+          ;; somewhat hacky, but thanks to similarities between
+          ;; languages it seems to work
+          (read (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       ", " " " (replace-regexp-in-string
+                                                 "'" "\"" results)))))))
+  results)
 
 (provide 'litorgy-script)
 ;;; litorgy-script.el ends here
