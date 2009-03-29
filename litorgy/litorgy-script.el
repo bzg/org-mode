@@ -1,8 +1,8 @@
 ;;; litorgy-script.el --- litorgy functions for script execution
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
+;; Copyright (C) 2009 Eric Schulte
 
-;; Author: Eric Schulte, Dan Davison, Austin F. Frank
+;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -50,8 +50,7 @@ executed through litorgy."
   :set 'litorgy-script-add-interpreter)
 
 (defun litorgy-script-execute (cmd body params)
-  "Run CMD on BODY obeying any options set with PARAMS.
-TODO: currently the params part is not implemented"
+  "Run CMD on BODY obeying any options set with PARAMS."
   (message (format "executing %s code block..." cmd))
   (let ((vars (litorgy-reference-variables params)))
     (save-window-excursion
@@ -90,7 +89,7 @@ source code specifying a table (nested arrays)."
 
 (defun litorgy-script-table-or-results (results)
   "If the results look like a table, then convert them into an
-  Emacs-lisp table, otherwise return the results as a string."
+Emacs-lisp table, otherwise return the results as a string."
   (when (string-match "^\\[.+\\]$" results)
     (setq results
           ;; somewhat hacky, but thanks to similarities between
