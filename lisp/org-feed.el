@@ -120,6 +120,11 @@ it contains the following properties:
 `:item-full-text'   the full text in the <item> tag
 `:guid-permalink'   t when the guid property is a permalink
 
+:drawer drawer-name
+     The name of the drawer for storing feed information.  The default is
+     \"FEEDSTATUS\".  Using different drawers for different feeds allows
+     several feeds to target the same inbox heading.
+
 :filter filter-function
      A function to select interesting entries in the feed.  It gets a single
      entry as parameter.  It should return the entry if it is relevant, or
@@ -150,8 +155,7 @@ it contains the following properties:
      This function gets passed a list of all entries that have been
      handled before, but are now still in the feed and have *changed*
      since last handled (as evidenced by a different sha1 hash).
-     When the handler is called, point will be at the feed headline.
-"
+     When the handler is called, point will be at the feed headline."
   :group 'org-feed
   :type '(repeat
 	  (list :value ("" "http://" "" "")
@@ -177,6 +181,16 @@ it contains the following properties:
 			  (const :changed-handler)
 			  (symbol :tag "Handler Function"))
 		    )))))
+
+(defcustom org-feed-drawer "FEEDSTATUS"
+  "The name of the drawer for feed status information.
+Each feed may also specify its own drawer name using the `:drawer'
+parameter in `org-feed-alist'.
+Note that in order to make these drawers behave like drawers, they must
+be added to the variable `org-drawers' or configured with a #+DRAWERS
+line."
+  :group 'org-feed
+  :type '(string :tag "Drawer Name"))
 
 (defcustom org-feed-default-template "\n* %h\n  %U\n  %description\n  %a\n"
   "Template for the Org node created from RSS feed items.
@@ -261,6 +275,8 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  (changed-handler (nth 1 (memq :changed-handler feed)))
 	  (template (or (nth 1 (memq :template feed))
 			org-feed-default-template))
+	  (drawer (or (nth 1 (memq :drawer feed))
+		      org-feed-drawer))
 	  feed-buffer inbox-pos
 	  entries old-status status new changed guid-alist e guid olds)
       (setq feed-buffer (org-feed-get-feed url))
@@ -273,7 +289,7 @@ it can be a list structured like an entry in `org-feed-alist'."
       (save-excursion
 	(save-window-excursion
 	  (setq inbox-pos (org-feed-goto-inbox-internal file headline))
-	  (setq old-status (org-feed-read-previous-status inbox-pos))
+	  (setq old-status (org-feed-read-previous-status inbox-pos drawer))
 	  ;; Add the "handled" status to the appropriate entries
 	  (setq entries (mapcar (lambda (e)
 				  (setq e (plist-put e :handled
@@ -348,7 +364,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  ;; We do this only now, in case something goes wrong above, so
 	  ;; that would would end up with a status that does not reflect
 	  ;; which items truely have been handled
-	  (org-feed-write-status inbox-pos status)
+	  (org-feed-write-status inbox-pos drawer status)
 	  
 	  ;; Normalize the visibility of the inbox tree
 	  (goto-char inbox-pos)
@@ -406,25 +422,26 @@ Switch to that buffer, and return the position of that headline."
       (org-back-to-heading t))
   (point))
 
-(defun org-feed-read-previous-status (pos)
+(defun org-feed-read-previous-status (pos drawer)
   "Get the alist of old GUIDs from the entry at POS.
-This will find the FEEDSTATUS drawer and extract the alist."
+This will find DRAWER and extract the alist."
   (save-excursion
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t))))
       (if (re-search-forward
-	   "^[ \t]*:FEEDSTATUS:[ \t]*\n\\([^\000]*?\\)\n[ \t]*:END:"
+	   (concat "^[ \t]*:" drawer ":[ \t]*\n\\([^\000]*?\\)\n[ \t]*:END:")
 	   end t)
 	  (read (match-string 1))
 	nil))))
 
-(defun org-feed-write-status (pos status)
-  "Write the feed status to the FEEDSTATUS drawer."
+(defun org-feed-write-status (pos drawer status)
+  "Write the feed STATUS to DRAWER in entry at POS."
   (save-excursion
     (goto-char pos)
     (let ((end (save-excursion (org-end-of-subtree t t)))
 	  guid)
-      (if (re-search-forward "^[ \t]*:FEEDSTATUS:[ \t]*\n" end t)
+      (if (re-search-forward (concat "^[ \t]*:" drawer ":[ \t]*\n")
+			     end t)
 	  (progn
 	    (goto-char (match-end 0))
 	    (delete-region (point)
@@ -432,7 +449,7 @@ This will find the FEEDSTATUS drawer and extract the alist."
 			     (and (re-search-forward "^[ \t]*:END:" nil t)
 				  (match-beginning 0)))))
 	(outline-next-heading)
-	(insert "  :FEEDSTATUS:\n  :END:\n")
+	(insert "  :" drawer ":\n  :END:\n")
 	(beginning-of-line 0))
       (insert (pp-to-string status)))))
 
