@@ -35,7 +35,7 @@
 
 ;; language specific files
 (require 'litorgy-script)
-(require 'litorgy-R)
 (require 'litorgy-lisp)
+(require 'litorgy-R)
 
 ;;; init.el ends here
