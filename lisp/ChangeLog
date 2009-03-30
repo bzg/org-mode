@@ -1,5 +1,8 @@
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-footnote.el (org-footnote-normalize): When only dorting, do
+	not insert inline notes at the end.
+
 	* org-docbook.el (org-id-find-id-file): Add function declaration.
 
 	* org.el (org-require-autoloaded-modules): Add org-docbook.el.
