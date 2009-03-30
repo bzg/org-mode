@@ -1,5 +1,10 @@
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-modules): Add org-inlinetasks.el
+	(org-cycle): Implement limiting level on cycling.
+
+	* org-inlinetask.el: New file.
+
 	* org.el (org-emphasis-regexp-components): Allow braces in
 	emphasis pre and post match.
 

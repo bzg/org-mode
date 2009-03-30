@@ -167,6 +167,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
 	(const :tag "   jsinfo:            Set up Sebastian Rose's JavaScript org-info.js" org-jsinfo)
+	(const :tag "   inlinetask:        Tasks independent of outline hierarchy" org-inlinetask) 
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
 	(const :tag "   mac-message:       Links to messages in Apple Mail" org-mac-message)
 	(const :tag "   mew                Links to Mew folders/messages" org-mew)
@@ -553,7 +554,11 @@ new-frame        Make a new frame each time.  Note that in this case
 Levels higher than this will, for cycling, be treated as text, not a headline.
 When `org-odd-levels-only' is set, a value of N in this variable actually
 means 2N-1 stars as the limiting headline.
-When nil, cycle all levels."
+When nil, cycle all levels.
+Note that the limiting level of cycling is also influenced by
+`org-inlinetask-min-level'.  When `org-cycle-max-level' is not set but
+`org-inlinetask-min-level' is, cycling will be limited to levels one less
+than its value."
   :group 'org-cycle
   :type '(choice
 	  (const :tag "No limit" nil)
@@ -4482,6 +4487,7 @@ If KWD is a number, get the corresponding match group."
 
 ;;;###autoload
 
+(defvar org-inlinetask-min-level)
 (defun org-cycle (&optional arg)
   "Visibility cycling for Org-mode.
 
@@ -4517,9 +4523,15 @@ If KWD is a number, get the corresponding match group."
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
-  (let* ((nstars (if org-odd-levels-only
-		     (and org-cycle-max-level (1- (* org-cycle-max-level 2)))
-		   org-cycle-max-level))
+  (let* ((limit-level
+	  (or org-cycle-max-level
+	      (and (boundp 'org-inlinetask-min-level)
+		   org-inlinetask-min-level
+		   (1- org-inlinetask-min-level))))
+	 (nstars (and limit-level
+		      (if org-odd-levels-only
+			  (and limit-level (1- (* limit 2)))
+			limit-level)))
 	 (outline-regexp
 	  (cond
 	   ((not (org-mode-p)) outline-regexp)

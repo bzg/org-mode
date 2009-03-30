@@ -1,10 +1,10 @@
-;;; org-inlinetask.el --- Tasks outside the outline hierarchy
-;; Copyright (C) 2008 Free Software Foundation, Inc.
+;;; org-inlinetask.el --- Tasks independent of outline hierarchy
+;; Copyright (C) 2009 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
+;; Version: 6.24trans
 ;;
 ;; This file is not yet part of GNU Emacs.
 ;;
@@ -26,39 +26,81 @@
 ;;
 ;;; Commentary:
 ;;
-
-This module implements inline tasks in Org-mode.  Inline tasks are
-tasks that have all the properties of normal outline nodes, including
-the ability to store meta data like scheduling dates, TODO state, tags
-and properties.  However, these nodes are treated specially by the
-visibility cycling commands and by the export commands.
-
-Visibility cycling exempts these nodes from cycling, so whenever their
-parent is opened, so are these tasks.
-
-Export commands do not treat the tasks as part of the sectioning
-structure, but as a spe
+;; This module implements inline tasks in Org-mode.  Inline tasks are
+;; tasks that have all the properties of normal outline nodes, including
+;; the ability to store meta data like scheduling dates, TODO state, tags
+;; and properties.  However, these nodes are treated specially by the
+;; visibility cycling and export commands.
+;;
+;; Visibility cycling exempts these nodes from cycling. So whenever their
+;; parent is opened, so are these tasks.  This will only work with
+;; `org-cycle', so if you are also using orther commands to show/hide
+;; entries, you will occasionally find these tasks to behave like
+;; all other outline nodes, seemingly splitting the text of the parent
+;; into children.
+;;
+;; Export commands do not treat these nodes as part of the sectioning
+;; structure, but as a special inline text that is either removed, or
+;; formatted in some special way.
+;;
+;; Special fontification of inline tasks, so that they can be immediately
+;; recognized.  From the stars of the headline, only the first and the
+;; last two will be visible, the others will be hidden using the
+;; `org-hide' face.
+;;
+;; An inline task is identified solely by a minimum outline level, given
+;; by the variable `org-inlinetask-min-level', default 15.
+;;
+;; Inline tasks are normally assumed to contain at most a time planning
+;; line (DEADLINE etc) after it, and then any number of drawers, for
+;; example LOGBOOK of PROPERTIES.  No empty lines are allowed.
+;; If you need to have normal text as part of an inline task, you
+;; can do so by adding an "END" headline with the same number of stars,
+;; for example
+;;
+;;    **************** TODO some small task
+;;                     DEADLINE: <2009-03-30 Mon>
+;;                     :PROPERTIES:
+;;                       :SOMETHING: or other
+;;                     :END:
+;;                     And here is some extra text
+;;    **************** END
 
 ;;; Code
+
+(defgroup org-inlinetask nil
+  "Options concerning inline tasks in Org mode."
+  :tag "Org Inline Tasks"
+  :group 'org-structure)
+
+(defcustom org-inlinetask-min-level 15
+  "Minimum level a headline must have before it is treated as an inline task.
+It is strongly recommended that you set `org-cycle-max-level' not at all,
+or to a number smaller than this one.  In fact, when `org-cycle-max-level' is
+not set, it will be assumed to be one less than the value of smaller than
+the value of this variable."
+  :group 'org-inlinetask
+  :type 'boolean)
 
 (defcustom org-inlinetask-export 'arrow+content
   "What should be done with inlinetasks upon export?
 Possible values:
 
 nil            Remove entirely
-arrow          Insert arrow and headline
-arrow+content  Insert arrow and headline, add content like example
-example        Turn headline and content into example"
+arrow          Insert heading in bold, preceeded by an arrow
+arrow+content  Insert arrow and headline, add content below in an
+               #+begin_example box (ugly, but works for now)"
+  :group 'org-inlinetask
   :group 'org-export-general
   :type 'boolean)
 
 (defun org-inlinetask-export-handler ()
-  "Handle headlines with level larger than `org-cycle-max-level'.
+  "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
   (goto-char (point-min))
   (let* ((nstars (if org-odd-levels-only
-		     (1- (* 2 (or org-cycle-max-level 1000)))
-		   (or org-cycle-max-level 1000)))
+		     (1- (* 2 (or org-inlinetask-min-level 200)))
+		   (or org-inlinetask-min-level 200)))
 	 (re1 (format "^\\(\\*\\{%d,\\}\\) .*\n" nstars))
 	 (re2 (concat "^[ \t]*" org-keyword-time-regexp))
 	 headline beg end stars content)
@@ -83,20 +125,20 @@ Either remove headline and meta data, or do special formatting."
       (when (and org-inlinetask-export
 		 (string-match org-complex-heading-regexp headline))
 	(when (memq org-inlinetask-export '(arrow+content arrow))
-	  (insert "\n\n\\Rightarrow *"
+	  (insert "\n\n\\Rightarrow\\Rightarrow\\Rightarrow *"
 		  (if (match-end 2) (concat (match-string 2 headline) " ") "")
 		  (match-string 4 headline) "*\n"))
-	(when (eq org-inlinetask-export 'arrow+content)
+	(when (and content (eq org-inlinetask-export 'arrow+content))
 	  (insert "#+BEGIN_EXAMPLE\n" content "\n#+END_EXAMPLE\n"))
 	(insert "\n")))))
 
 (defun org-inlinetask-fontify (limit)
   "Fontify the inline tasks."
   (let* ((nstars (if org-odd-levels-only
-		     (1- (* 2 (or org-cycle-max-level 1000)))
-		   (or org-cycle-max-level 1000)))
+		     (1- (* 2 (or org-inlinetask-min-level 200)))
+		   (or org-inlinetask-min-level 200)))
 	 (re (concat "^\\(\\*\\)\\(\\*\\{"
-		    (format "%d" (- nstars 2))
+		    (format "%d" (- nstars 3))
 		    ",\\}\\)\\(\\*\\* .*\\)")))
     (while (re-search-forward re limit t)
       (add-text-properties (match-beginning 1) (match-end 1)
