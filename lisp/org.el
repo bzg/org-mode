@@ -14629,7 +14629,7 @@ With optional NODE, go directly to that node."
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-attach org-clock org-colview
-		     org-exp org-id org-export-latex org-docbook.el
+		     org-exp org-id org-export-latex org-docbook
 		     org-publish org-remember org-table org-timer)))
 
 ;;;###autoload
