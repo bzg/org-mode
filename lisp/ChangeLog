@@ -1,5 +1,8 @@
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-emphasis-regexp-components): Allow braces in
+	emphasis pre and post match.
+
 	* org-footnote.el (org-footnote-normalize): When only dorting, do
 	not insert inline notes at the end.
 
