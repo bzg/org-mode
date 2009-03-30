@@ -4530,7 +4530,7 @@ If KWD is a number, get the corresponding match group."
 		   (1- org-inlinetask-min-level))))
 	 (nstars (and limit-level
 		      (if org-odd-levels-only
-			  (and limit-level (1- (* limit 2)))
+			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
 	 (outline-regexp
 	  (cond
