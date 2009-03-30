@@ -254,6 +254,7 @@ Agenda Views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
+* Exporting Agenda Views::      
 * Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
@@ -276,8 +277,6 @@ Custom agenda views
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Exporting Agenda Views::      Writing agendas to files
-* Using the agenda elsewhere::  Using agenda information in other programs
 
 Embedded LaTeX
 
@@ -392,6 +391,7 @@ Hacking
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
+* Extracting agenda information::  Postprocessing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 
@@ -2520,7 +2520,6 @@ functions.
 @end group
 @end example
 
-@page
 @node Org Plot,  , The spreadsheet, Tables
 @section Org Plot
 @cindex graph, in tables
@@ -5865,6 +5864,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
+* Exporting Agenda Views::      
 * Agenda column view::          Using column view for collected entries
 @end menu
 
@@ -7042,7 +7042,7 @@ visit org files will not be removed.
 @end table
 
 
-@node Custom agenda views, Agenda column view, Agenda commands, Agenda Views
+@node Custom agenda views, Exporting Agenda Views, Agenda commands, Agenda Views
 @section Custom agenda views
 @cindex custom agenda views
 @cindex agenda views, custom
@@ -7056,8 +7056,6 @@ dispatcher (@pxref{Agenda dispatcher}), just like the default commands.
 * Storing searches::            Type once, use often
 * Block agenda::                All the stuff you need in a single buffer
 * Setting Options::             Changing the rules
-* Exporting Agenda Views::      Writing agendas to files
-* Using the agenda elsewhere::  Using agenda information in other programs
 @end menu
 
 @node Storing searches, Block agenda, Custom agenda views, Custom agenda views
@@ -7162,7 +7160,7 @@ your agenda for the current week, all TODO items that carry the tag
 @samp{home}, and also all lines tagged with @samp{garden}.  Finally the
 command @kbd{C-c a o} provides a similar view for office tasks.
 
-@node Setting Options, Exporting Agenda Views, Block agenda, Custom agenda views
+@node Setting Options,  , Block agenda, Custom agenda views
 @subsection Setting options for custom commands
 @cindex options, for custom agenda views
 
@@ -7234,8 +7232,8 @@ value is a string, you need to add the double quotes around the value
 yourself.
 
 
-@node Exporting Agenda Views, Using the agenda elsewhere, Setting Options, Custom agenda views
-@subsection Exporting Agenda Views
+@node Exporting Agenda Views, Agenda column view, Custom agenda views, Agenda Views
+@section Exporting Agenda Views
 @cindex agenda views, exporting
 
 If you are away from your computer, it can be very useful to have a printed
@@ -7371,110 +7369,12 @@ which will create the agenda views restricted to the file
 @file{~/org/project.org}, without diary entries and with 30 days
 extent.
 
-@node Using the agenda elsewhere,  , Exporting Agenda Views, Custom agenda views
-@subsection Using agenda information outside of Org
-@cindex agenda, pipe
-@cindex Scripts, for agenda processing
+You can also extract agenda information in a way that allows further
+processing by other programs.  See @ref{Extracting agenda information} for
+more information.
 
-@vindex org-agenda-custom-commands
-Org provides commands to access agenda information for the command
-line in emacs batch mode.  This extracted information can be sent
-directly to a printer, or it can be read by a program that does further
-processing of the data.  The first of these commands is the function
-@code{org-batch-agenda}, that produces an agenda view and sends it as
-ASCII text to STDOUT.  The command takes a single string as parameter.
-If the string has length 1, it is used as a key to one of the commands
-you have configured in @code{org-agenda-custom-commands}, basically any
-key you can use after @kbd{C-c a}.  For example, to directly print the
-current TODO list, you could use
 
-@example
-emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
-@end example
-
-If the parameter is a string with 2 or more characters, it is used as a
-tags/todo match string.  For example, to print your local shopping list
-(all items with the tag @samp{shop}, but excluding the tag
-@samp{NewYork}), you could use
-
-@example
-emacs -batch -l ~/.emacs                                      \
-      -eval '(org-batch-agenda "+shop-NewYork")' | lpr
-@end example
-
-@noindent
-You may also modify parameters on the fly like this:
-
-@example
-emacs -batch -l ~/.emacs                                      \
-   -eval '(org-batch-agenda "a"                               \
-            org-agenda-ndays 30                               \
-            org-agenda-include-diary nil                      \
-            org-agenda-files (quote ("~/org/project.org")))'  \
-   | lpr
-@end example
-
-@noindent
-which will produce a 30 day agenda, fully restricted to the Org file
-@file{~/org/projects.org}, not even including the diary.
-
-If you want to process the agenda data in more sophisticated ways, you
-can use the command @code{org-batch-agenda-csv} to get a comma-separated
-list of values for each agenda item.  Each line in the output will
-contain a number of fields separated by commas.  The fields in a line
-are:
-
-@example
-category     @r{The category of the item}
-head         @r{The headline, without TODO kwd, TAGS and PRIORITY}
-type         @r{The type of the agenda entry, can be}
-                todo               @r{selected in TODO match}
-                tagsmatch          @r{selected in tags match}
-                diary              @r{imported from diary}
-                deadline           @r{a deadline}
-                scheduled          @r{scheduled}
-                timestamp          @r{appointment, selected by timestamp}
-                closed             @r{entry was closed on date}
-                upcoming-deadline  @r{warning about nearing deadline}
-                past-scheduled     @r{forwarded scheduled item}
-                block              @r{entry has date block including date}
-todo         @r{The TODO keyword, if any}
-tags         @r{All tags including inherited ones, separated by colons}
-date         @r{The relevant date, like 2007-2-14}
-time         @r{The time, like 15:00-16:50}
-extra        @r{String with extra planning info}
-priority-l   @r{The priority letter if any was given}
-priority-n   @r{The computed numerical priority}
-@end example
-
-@noindent
-Time and date will only be given if a timestamp (or deadline/scheduled)
-lead to the selection of the item.
-
-A CSV list like this is very easy to use in a post processing script.
-For example, here is a Perl program that gets the TODO list from
-Emacs/Org and prints all the items, preceded by a checkbox:
-
-@example
-#!/usr/bin/perl
-
-# define the Emacs command to run
-$cmd = "emacs -batch -l ~/.emacs -eval '(org-batch-agenda-csv \"t\")'";
-
-# run it and capture the output
-$agenda = qx@{$cmd 2>/dev/null@};
-
-# loop over all lines
-foreach $line (split(/\n/,$agenda)) @{
-  # get the individual values
-  ($category,$head,$type,$todo,$tags,$date,$time,$extra,
-   $priority_l,$priority_n) = split(/,/,$line);
-  # process and print
-  print "[ ] $head\n";
-@}
-@end example
-
-@node Agenda column view,  , Custom agenda views, Agenda Views
+@node Agenda column view,  , Exporting Agenda Views, Agenda Views
 @section Using column view in the agenda
 @cindex column view, in agenda
 @cindex agenda, column view
@@ -9095,21 +8995,20 @@ Export only the visible part of the document.
 @vindex org-icalendar-use-deadline
 @vindex org-icalendar-use-scheduled
 @vindex org-icalendar-categories
-Some people like to use Org mode for keeping track of projects, but still
-prefer a standard calendar application for anniversaries and appointments.
-In this case it can be useful to have deadlines and other time-stamped items
-in Org files show up in the calendar application.  Org mode can export
-calendar information in the standard iCalendar format.  If you also want to
-have TODO entries included in the export, configure the variable
-@code{org-icalendar-include-todo}.  iCalendar export will export plain time
-stamps as VEVENT, and TODO items as VTODO.  It will also create events from
-deadlines that are in non-TODO items.  Deadlines and scheduling dates in TODO
-items will be used to set the start and due dates for the todo
-entry@footnote{See the variables @code{org-icalendar-use-deadline} and
-@code{org-icalendar-use-scheduled}.}.  As categories, it will use the tags
-locally defined in the heading, and the file/tree category@footnote{To add
-inherited tags or the TODO state, configure the variable
-@code{org-icalendar-categories}.}.
+Some people use Org mode for keeping track of projects, but still prefer a
+standard calendar application for anniversaries and appointments.  In this
+case it can be useful to show deadlines and other time-stamped items in Org
+files in the calendar application.  Org mode can export calendar information
+in the standard iCalendar format.  If you also want to have TODO entries
+included in the export, configure the variable
+@code{org-icalendar-include-todo}.  Plain time stamps are exported as VEVENT,
+and TODO items as VTODO.  It will also create events from deadlines that are
+in non-TODO items.  Deadlines and scheduling dates in TODO items will be used
+to set the start and due dates for the todo entry@footnote{See the variables
+@code{org-icalendar-use-deadline} and @code{org-icalendar-use-scheduled}.}.
+As categories, it will use the tags locally defined in the heading, and the
+file/tree category@footnote{To add inherited tags or the TODO state,
+configure the variable @code{org-icalendar-categories}.}.
 
 @vindex org-icalendar-store-UID
 The iCalendar standard requires each entry to have a globally unique
@@ -9161,7 +9060,7 @@ Org includes a publishing management system that allows you to configure
 automatic HTML conversion of @emph{projects} composed of interlinked org
 files.  You can also configure Org to automatically upload your exported HTML
 pages and related attachments, such as images and source code files, to a web
-server.  With htese features, Org becomes a web-site authoring tool.
+server.
 
 You can also use Org to convert files into PDF, or even combine HTML and PDF
 conversion so that files are available in both formats on the server.
@@ -10244,6 +10143,7 @@ Org.
 * Tables in arbitrary syntax::  Orgtbl for LaTeX and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
+* Extracting agenda information::  Postprocessing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 @end menu
@@ -10797,7 +10697,7 @@ example @code{before-save-hook}.  @code{org-update-all-dblocks} is
 written in a way that is does nothing in buffers that are not in
 @code{org-mode}.
 
-@node Special agenda views, Using the property API, Dynamic blocks, Hacking
+@node Special agenda views, Extracting agenda information, Dynamic blocks, Hacking
 @section Special agenda views
 @cindex agenda views, user-defined
 
@@ -10886,7 +10786,123 @@ like this, even without defining a special function:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
-@node Using the property API, Using the mapping API, Special agenda views, Hacking
+@node Extracting agenda information, Using the property API, Special agenda views, Hacking
+@section Extracting agenda information
+@cindex agenda, pipe
+@cindex Scripts, for agenda processing
+
+@vindex org-agenda-custom-commands
+Org provides commands to access agenda information for the command
+line in emacs batch mode.  This extracted information can be sent
+directly to a printer, or it can be read by a program that does further
+processing of the data.  The first of these commands is the function
+@code{org-batch-agenda}, that produces an agenda view and sends it as
+ASCII text to STDOUT.  The command takes a single string as parameter.
+If the string has length 1, it is used as a key to one of the commands
+you have configured in @code{org-agenda-custom-commands}, basically any
+key you can use after @kbd{C-c a}.  For example, to directly print the
+current TODO list, you could use
+
+@example
+emacs -batch -l ~/.emacs -eval '(org-batch-agenda "t")' | lpr
+@end example
+
+If the parameter is a string with 2 or more characters, it is used as a
+tags/todo match string.  For example, to print your local shopping list
+(all items with the tag @samp{shop}, but excluding the tag
+@samp{NewYork}), you could use
+
+@example
+emacs -batch -l ~/.emacs                                      \
+      -eval '(org-batch-agenda "+shop-NewYork")' | lpr
+@end example
+
+@noindent
+You may also modify parameters on the fly like this:
+
+@example
+emacs -batch -l ~/.emacs                                      \
+   -eval '(org-batch-agenda "a"                               \
+            org-agenda-ndays 30                               \
+            org-agenda-include-diary nil                      \
+            org-agenda-files (quote ("~/org/project.org")))'  \
+   | lpr
+@end example
+
+@noindent
+which will produce a 30 day agenda, fully restricted to the Org file
+@file{~/org/projects.org}, not even including the diary.
+
+If you want to process the agenda data in more sophisticated ways, you
+can use the command @code{org-batch-agenda-csv} to get a comma-separated
+list of values for each agenda item.  Each line in the output will
+contain a number of fields separated by commas.  The fields in a line
+are:
+
+@example
+category     @r{The category of the item}
+head         @r{The headline, without TODO kwd, TAGS and PRIORITY}
+type         @r{The type of the agenda entry, can be}
+                todo               @r{selected in TODO match}
+                tagsmatch          @r{selected in tags match}
+                diary              @r{imported from diary}
+                deadline           @r{a deadline}
+                scheduled          @r{scheduled}
+                timestamp          @r{appointment, selected by timestamp}
+                closed             @r{entry was closed on date}
+                upcoming-deadline  @r{warning about nearing deadline}
+                past-scheduled     @r{forwarded scheduled item}
+                block              @r{entry has date block including date}
+todo         @r{The TODO keyword, if any}
+tags         @r{All tags including inherited ones, separated by colons}
+date         @r{The relevant date, like 2007-2-14}
+time         @r{The time, like 15:00-16:50}
+extra        @r{String with extra planning info}
+priority-l   @r{The priority letter if any was given}
+priority-n   @r{The computed numerical priority}
+@end example
+
+@noindent
+Time and date will only be given if a timestamp (or deadline/scheduled)
+lead to the selection of the item.
+
+A CSV list like this is very easy to use in a post processing script.
+For example, here is a Perl program that gets the TODO list from
+Emacs/Org and prints all the items, preceded by a checkbox:
+
+@example
+#!/usr/bin/perl
+
+# define the Emacs command to run
+$cmd = "emacs -batch -l ~/.emacs -eval '(org-batch-agenda-csv \"t\")'";
+
+# run it and capture the output
+$agenda = qx@{$cmd 2>/dev/null@};
+
+# loop over all lines
+foreach $line (split(/\n/,$agenda)) @{
+  # get the individual values
+  ($category,$head,$type,$todo,$tags,$date,$time,$extra,
+   $priority_l,$priority_n) = split(/,/,$line);
+  # process and print
+  print "[ ] $head\n";
+@}
+@end example
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@node Using the property API, Using the mapping API, Extracting agenda information, Hacking
 @section Using the property API
 @cindex API, for properties
 @cindex properties, API

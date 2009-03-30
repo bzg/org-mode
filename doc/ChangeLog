@@ -1,3 +1,7 @@
+2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Exporting agenda information): Section moved.
+
 2009-03-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (RSS Feeds): New section.
