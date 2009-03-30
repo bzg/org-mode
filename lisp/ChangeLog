@@ -2,6 +2,8 @@
 
 	* org.el (org-modules): Add org-inlinetasks.el
 	(org-cycle): Implement limiting level on cycling.
+	(org-move-subtree-down): Fix bug with swapping subtrees at end of
+	buffer.
 
 	* org-inlinetask.el: New file.
 

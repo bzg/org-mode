@@ -5609,6 +5609,7 @@ is signaled in this case."
     (delete-region beg end)
     (or (= beg (point-min)) (outline-flag-region (1- beg) beg nil))
     (or (bobp) (outline-flag-region (1- (point)) (point) nil))
+    (and (not (bolp)) (looking-at "\n") (forward-char 1))
     (let ((bbb (point)))
       (insert-before-markers txt)
       (org-reinstall-markers-in-region bbb)
