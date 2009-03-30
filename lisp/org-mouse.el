@@ -1136,8 +1136,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
        (if (featurep 'xemacs) [button3] [mouse-3])
        'org-mouse-show-context-menu)
      (define-key org-agenda-keymap [down-mouse-3] 'org-mouse-move-tree-start)
-     (define-key org-agenda-keymap [C-mouse-4] 'org-agenda-earlier)
-     (define-key org-agenda-keymap [C-mouse-5] 'org-agenda-later)
+     (define-key org-agenda-keymap (if (featurep 'xemacs) [(control mouse-4)] [C-mouse-4]) 'org-agenda-earlier)
+     (define-key org-agenda-keymap (if (featurep 'xemacs) [(control mouse-5)] [C-mouse-5]) 'org-agenda-later)
      (define-key org-agenda-keymap [drag-mouse-3]
        '(lambda (event) (interactive "e")
 	  (case (org-mouse-get-gesture event)

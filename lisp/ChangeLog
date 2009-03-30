@@ -1,5 +1,7 @@
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mouse.el: XEmacs compatibility fixes
+
 	* org-docbook.el (org-export-as-docbook): Process footnotes like
 	normal text.
 
