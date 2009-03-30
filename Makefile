@@ -88,6 +88,7 @@ LISPF      = 	org.el			\
 		org-mouse.el		\
 		org-publish.el		\
 		org-plot.el		\
+		org-protocol.el		\
 		org-remember.el		\
 		org-rmail.el		\
 		org-table.el		\
@@ -340,6 +341,7 @@ lisp/org-mhe.elc:          lisp/org.el
 lisp/org-mouse.elc:        lisp/org.el
 lisp/org-plot.elc:         lisp/org.el lisp/org-exp.el lisp/org-table.el
 lisp/org-publish.elc:
+lisp/org-protocol.elc:     lisp/org.el
 lisp/org-remember.elc:     lisp/org.el
 lisp/org-rmail.elc:        lisp/org.el
 lisp/org-table.elc:        lisp/org.el
