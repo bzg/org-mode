@@ -1,3 +1,7 @@
+2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-mtags.el: Fix copyright year.
+
 2009-03-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-mtags.el (org-mtags-replace): Support literal docbook.
