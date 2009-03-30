@@ -885,7 +885,10 @@ publishing directory."
 				(format "%s<footnote xml:id=\"%s%s\"><para>%s</para></footnote>"
 					(match-string 1 line)
 					org-export-docbook-footnote-id-prefix
-					num (cdr (assoc num footnote-list)))
+					num
+					(save-match-data
+					  (org-docbook-expand
+					   (cdr (assoc num footnote-list)))))
 				t t line))
 		    (push (cons num 1) footref-seen))))))
 

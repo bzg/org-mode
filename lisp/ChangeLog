@@ -1,5 +1,8 @@
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-as-docbook): Process footnotes like
+	normal text.
+
 	* org.el (org-modules): Add org-inlinetasks.el
 	(org-cycle): Implement limiting level on cycling.
 	(org-move-subtree-down): Fix bug with swapping subtrees at end of
