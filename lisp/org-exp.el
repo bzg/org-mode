@@ -1171,7 +1171,8 @@ value of `org-export-run-in-background'."
 \[p] export as LaTeX and process to PDF
 \[d] export as LaTeX, process to PDF, and open the resulting PDF document
 
-\[D] export as Docbook             [V] export and view Docbook file
+\[D] export as DocBook
+\[V] export as DocBook, process to PDF, and open the resulting PDF document
 
 \[x] export as XOXO
 
@@ -1191,7 +1192,7 @@ value of `org-export-run-in-background'."
 	    (?R org-export-region-as-html nil)
 	    (?x org-export-as-xoxo t)
 	    (?D org-export-as-docbook t)
-	    (?V org-export-as-docbook-and-open t)
+	    (?V org-export-as-docbook-pdf-and-open t)
 	    (?l org-export-as-latex t)
 	    (?p org-export-as-pdf t)
 	    (?d org-export-as-pdf-and-open t)
@@ -1705,11 +1706,11 @@ on this string to produce the exported version."
       ;; HTML-specific preprocessing
       (when htmlp
 	(org-export-html-preprocess parameters))
-
+      
       ;; DocBook-specific preprocessing
       (when docbookp
-	(require 'org-export-docbook nil)
-        (org-export-docbook-preprocess parameters))
+	(require 'org-docbook nil)
+	(org-export-docbook-preprocess parameters))
 
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
@@ -1998,7 +1999,7 @@ from the buffer."
 (defun org-export-select-backend-specific-text (backend)
   (let ((formatters
 	 '((docbook "DOCBOOK" "BEGIN_DOCBOOK" "END_DOCBOOK")
-           (html "HTML" "BEGIN_HTML" "END_HTML")
+	   (html "HTML" "BEGIN_HTML" "END_HTML")
 	   (ascii "ASCII" "BEGIN_ASCII" "END_ASCII")
 	   (latex "LaTeX" "BEGIN_LaTeX" "END_LaTeX")))
 	(case-fold-search t)
@@ -2493,8 +2494,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 		   (org-count-lines code))
 	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
 		    (match-string 1 opts)))
-      (when (or (and textareap (eq backend 'html))
-                (eq backend 'docbook))
+      (when (and textareap (eq backend 'html))
 	;; we cannot use numbering or highlighting.
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
@@ -2511,13 +2511,13 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
       ;; Now backend-specific coding
       (cond
        ((eq backend 'docbook)
-        (setq rtn (concat "<programlisting><![CDATA[\n"
-                          code
-                          "]]>\n</programlisting>\n"))
-        (concat "\n#+BEGIN_DOCBOOK\n"
-                rtn
-                "\n#+END_DOCBOOK\n\n")
-        )
+	(setq rtn (org-export-number-lines rtn 'docbook 0 0 num cont rpllbl fmt))
+	(concat "\n#+BEGIN_DOCBOOK\n"
+		(org-add-props (concat "<programlisting><![CDATA["
+				       rtn
+				       "]]>\n</programlisting>\n")
+		    '(org-protected t))
+		"#+END_DOCBOOK\n"))
        ((eq backend 'html)
 	;; We are exporting to HTML
 	(when lang
@@ -2607,6 +2607,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 					 fmt))
 	     ((eq backend 'ascii) fmt)
 	     ((eq backend 'latex) fmt)
+	     ((eq backend 'docbook) fmt)
 	     (t "")))
 	   (label-format (or label-format org-coderef-label-format))
 	   (label-pre (if (string-match "%s" label-format)
@@ -3091,10 +3092,10 @@ continue to use it.  The prefix arg ARG is passed through to the exporting
 command."
   (interactive
    (list (progn
-	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]uffer with HTML  [x]OXO  [ ]keep buffer")
+	   (message "Export visible: [a]SCII  [h]tml  [b]rowse HTML [H/R]uffer with HTML  [D]ocBook  [x]OXO  [ ]keep buffer")
 	   (read-char-exclusive))
 	 current-prefix-arg))
-  (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?x ?\ )))
+  (if (not (member type '(?a ?\C-a ?b ?\C-b ?h ?D ?x ?\ )))
       (error "Invalid export key"))
   (let* ((binding (cdr (assoc type
 			      '((?a . org-export-as-ascii)
@@ -3104,6 +3105,7 @@ command."
 				(?h . org-export-as-html)
 				(?H . org-export-as-html-to-buffer)
 				(?R . org-export-region-as-html)
+				(?D . org-export-as-docbook)
 				(?x . org-export-as-xoxo)))))
 	 (keepp (equal type ?\ ))
 	 (file buffer-file-name)

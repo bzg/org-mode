@@ -72,6 +72,7 @@ LISPF      = 	org.el			\
 	     	org-compat.el		\
 		org-exp.el		\
 		org-export-latex.el	\
+		org-docbook.el		\
 		org-faces.el		\
 		org-footnote.el		\
 		org-gnus.el		\
@@ -323,6 +324,7 @@ lisp/org-colview-xemacs.elc:      lisp/org.el
 lisp/org-compat.elc:       lisp/org-macs.el
 lisp/org-exp.elc:          lisp/org.el lisp/org-agenda.el
 lisp/org-export-latex.elc: lisp/org.el lisp/org-exp.el
+lisp/org-docbook.elc:      lisp/org.el lisp/org-exp.el
 lisp/org-faces.elc:        lisp/org-macs.el lisp/org-compat.el
 lisp/org-footnotes.elc:    lisp/org-macs.el lisp/org-compat.el
 lisp/org-gnus.elc:         lisp/org.el

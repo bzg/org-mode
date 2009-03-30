@@ -1,3 +1,11 @@
+2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-docbook.el (org-id-find-id-file): Add function declaration.
+
+	* org.el (org-require-autoloaded-modules): Add org-docbook.el.
+
+	* org-docbook.el: New file.
+
 2009-03-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-reftex-citation): New command.
