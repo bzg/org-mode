@@ -99,6 +99,8 @@ First assign the variable with some sort of interpreted line
 
 
 ** resource reference example
+*Note*: this example is largely *defunct*, see the
+[[* litorgy plays with tables][litorgy-plays-with-tables]] section below.
 
 This block holds an array of information written in [[http://www.yaml.org][YAML]]
 
