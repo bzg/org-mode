@@ -78,6 +78,7 @@ LISPF      = 	org.el			\
 		org-gnus.el		\
 		org-id.el		\
 		org-info.el		\
+		org-inlinetask.el	\
 		org-jsinfo.el		\
 		org-irc.el		\
 		org-list.el		\
@@ -331,6 +332,7 @@ lisp/org-footnotes.elc:    lisp/org-macs.el lisp/org-compat.el
 lisp/org-gnus.elc:         lisp/org.el
 lisp/org-id.elc:           lisp/org.el
 lisp/org-info.elc:         lisp/org.el
+lisp/org-inlinetask.elc:
 lisp/org-irc.elc:          lisp/org.el
 lisp/org-jsinfo.elc:       lisp/org.el lisp/org-exp.el
 lisp/org-list.elc:         lisp/org-macs.el lisp/org-compat.el

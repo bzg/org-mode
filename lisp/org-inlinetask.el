@@ -94,6 +94,11 @@ arrow+content  Insert arrow and headline, add content below in an
   :group 'org-export-general
   :type 'boolean)
 
+(defvar org-odd-levels-only)
+(defvar org-keyword-time-regexp)
+(defvar org-drawer-regexp)
+(defvar org-complex-heading-regexp)
+(defvar org-property-end-re)
 (defun org-inlinetask-export-handler ()
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
@@ -122,6 +127,7 @@ Either remove headline and meta data, or do special formatting."
 			(looking-at "END[ \t]*$")))
 	(setq content (buffer-substring beg (1- (point-at-bol))))
 	(delete-region beg (1+ (match-end 0))))
+      (goto-char beg)
       (when (and org-inlinetask-export
 		 (string-match org-complex-heading-regexp headline))
 	(when (memq org-inlinetask-export '(arrow+content arrow))

@@ -1,5 +1,8 @@
 2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-inlinetask.el (org-inlinetask-export-handler): Fix line
+	postion before inserting modified headline.
+
 	* org-agenda.el (org-agenda-compare-effort): Honor
 	`org-sort-agenda-noeffort-is-high'.
 	(org-agenda-filter-by-tag, org-agenda-filter-make-matcher)
