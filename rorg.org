@@ -3,6 +3,261 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
 #+STARTUP: oddeven
 
+
+* Tasks
+** TODO evaluation of shell code as background process? [DED]
+   After C-c C-c on an R code block, the process may appear to block,
+   but C-g can be used to reclaim control of the .org buffer, without
+   interrupting the R evalution. However I believe this is not true
+   of bash/sh evaluation. [Haven't tried other languages]
+** litorgy-R
+*** TODO ability to select which of multiple R sessions is being used
+    (like ess-switch-process in .R buffers)
+*** TODO a header argument specifying silent evaluation (no output)
+
+* Bugs
+** Args out of range error
+   
+The following block resulted in the error below [DED]. It ran without
+error directly in the shell.
+#+begin_src sh
+cd ~/work/genopca
+for platf in ill aff ; do
+    for pop in CEU YRI ASI ; do
+	rm -f $platf/hapmap-genos-$pop-all $platf/hapmap-rs-all
+	cat $platf/hapmap-genos-$pop-* > $platf/hapmap-genos-$pop-all
+	cat $platf/hapmap-rs-* > $platf/hapmap-rs-all
+    done
+done
+#+end_src
+  
+ executing source block with sh...
+finished executing source block
+string-equal: Args out of range: "", -1, 0
+
+
+* Sandbox
+This is a place for code examples
+
+** litorgy.el beginning functionality
+After evaluating litorgy.el and litorgy-script.el, you should be able
+to evaluate the following blocks of code by pressing =\C-c\C-c= on the
+header lines.  *Note*: your version of org-mode must be at least 6.23
+or later.
+
+To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-script.el][litorgy-script.el]] and
+evaluate them with =M-x eval-buffer=
+
+#+begin_src sh  :replace t
+date
+#+end_src
+
+#+begin_src ruby
+puts Time.now
+#+end_src
+
+#+begin_src python
+print "Hello world!"
+#+end_src
+
+
+** litorgy-R
+To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-R.el][litorgy-R.el]] and evaluate
+them with =M-x eval-buffer=
+
+#+begin_src R :replace t
+hist(rgamma(20,3,3))
+a <- 9
+b <- 17
+a + b
+#+end_src
+
+: 26
+
+
+
+** free variables
+
+First assign the variable with some sort of interpreted line
+- this is independent of any particular type of source code
+- this could use references to table ranges
+
+
+
+** resource reference example
+
+This block holds an array of information written in [[http://www.yaml.org][YAML]]
+
+#name: yaml-array
+#+begin_src yaml
+--- 
+- 1
+- 2
+- 3
+- 4
+- 5
+#+end_src
+
+This next block saves the information in the YAML array into the ruby
+variable =ya= and then in ruby it multiplies each variable in the =ya=
+by 2.
+
+#name: ruby-array
+#assign: ya = yaml-array
+#+begin_src ruby
+ya.map{ |e| e * 2 }
+#+end_src
+
+This final block takes the output of the ruby block, and writes it to
+cell =0,0= through =0,3= of the table
+
+#name: example-table
+#assign: self[0, (1..3)] = ruby-array
+| example results |
+|-----------------|
+|                 |
+|                 |
+|                 |
+
+
+** litorgy plays with tables
+Alright, this should demonstrate both the ability of litorgy to read
+tables into a lisp source code block, and to then convert the results
+of the source code block into an org table.  It's using the classic
+"lisp is elegant" demonstration transpose function.  To try this
+out...
+
+1. evaluate [[file:litorgy/init.el]] to load litorgy and friends
+2. evaluate the transpose definition =\C-u \C-c\C-c= on the beginning of
+   the source block (prefix arg to inhibit output)
+3. evaluate the next source code block, this should read in the table
+   because of the =:var table=previous=, then transpose the table, and
+   finally it should insert the transposed table into the buffer
+   immediately following the block
+
+*** Emacs lisp
+
+#+begin_src emacs-lisp
+(defun transpose (table)
+  (apply #'mapcar* #'list table))
+#+end_src
+
+#+TBLNAME: sandbox
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+begin_src emacs-lisp :var table=previous :replace t
+(transpose table)
+#+end_src
+
+#+begin_src emacs-lisp :var table=sandbox :replace t
+(transpose table)
+#+end_src
+
+*** Ruby and Python
+
+#+begin_src ruby :var table=sandbox :replace t
+table.first.join(" - ")
+#+end_src
+
+: "1 - 2 - 3"
+
+#+begin_src python :var table=sandbox :replace t
+table[0]
+#+end_src
+
+| 1 | 2 | 3 |
+
+#+begin_src ruby :var table=sandbox :replace t
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+#+begin_src python :var table=sandbox :replace t
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+*** R
+
+#+begin_src R :replace t
+a <- 9
+b <- 8
+
+#+end_src
+
+#+begin_src R :replace t
+x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
+x
+#+end_src
+
+: -2.059712 -1.299807 -2.518628 -4.319525 -1.944779 -5.345708 -3.921314
+: -2.841109 -0.963475 -2.465979  4.092037  1.299202  1.476687  2.128594
+: 3.200629  1.990952  1.888890  3.561541  3.818319  1.969161
+
+
+
+* COMMENT Commentary
+I'm seeing this as like commit notes, and a place for less formal
+communication of the goals of our changes.
+
+** Eric <2009-02-06 Fri 15:41>
+I think we're getting close to a comprehensive set of objectives
+(although since you two are the real R user's I leave that decision up
+to you).  Once we've agreed on a set of objectives and agreed on at
+least to broad strokes of implementation, I think we should start
+listing out and assigning tasks.
+
+** Eric <2009-02-09 Mon 14:25>
+I've done a fairly destructive edit of this file.  The main goal was
+to enforce a structure on the document that we can use moving forward,
+so that any future objective changes are all made to the main
+objective list.
+
+I apologize for removing sections written by other people.  I did this
+when they were redundant or it was not clear how to fit them into this
+structure.  Rest assured if the previous text wasn't persisted in git
+I would have been much more cautious about removing it.
+
+I hope that this outline structure should be able to remain stable
+through the process of fleshing out objectives, and cashing those
+objectives out into tasks.  That said, please feel free to make any
+changes that you see fit.
+
+** Dan <2009-02-12 Thu 10:23>
+   Good job Eric with major works on this file.
+
+** Eric <2009-02-22 Sun 13:17>
+So I skipped ahead and got started on the fun part.  Namely stubbing
+out some of the basic functionality.  Please don't take any of the
+decisions I've made so far (on things like names, functionality,
+design etc...) as final decisions, I'm of course open to and hoping
+for improvement.
+
+So far [[file:litorgy/litorgy.el][litorgy.el]] and [[file:litorgy/litorgy-script.el][litorgy-script.el]] can be used to evaluate source
+code blocks of simple scripting languages.  It shouldn't be too hard
+(any takers) to write a litorgy-R.el modeled after litorgy-script.el
+to use for evaluating R code files.
+
+See the [[* litorgy.el beginning functionality][Sandbox]] for evaluable examples.
+
+** Eric <2009-02-23 Mon 15:12>
+While thinking about how to implement the transfer of data between
+source blocks and the containing org-mode file, I decided it *might*
+be useful to explicitly support the existence of variables which exist
+independent of source blocks or tables.  I'd appreciate any
+feedback... (see [[free explicit variables][free explicit variables]])
+
+** Eric <2009-02-23 Mon 17:53>
+So as I start populating this file with source code blocks I figure I
+should share this... I don't know if you guys use [[http://code.google.com/p/smart-snippet/][yasnippet]] at all,
+but if you do you might find this [[file:block][block-snippet]] org-mode snippet
+useful (I use it all the time).
+
 * Overview
 This project is basically about putting source code into org
 files. This isn't just code to look pretty as a source code example,
@@ -646,234 +901,6 @@ This might not be too different from what we were already talking
 about, but I think the introduction of the idea of having variables
 existing independently of any tables or source code blocks is novel
 and probably has some advantages (and probably shortfalls).
-
-
-* Tasks
-** TODO evaluation as background process? [DED]
-** litorgy-R
-*** TODO ability to select which of multiple R sessions is being used (like ess-switch-process in .R buffers)
-*** TODO a header argument specifying silent evaluation (no output)
-
-* Sandbox
-This is a place for code examples
-
-** litorgy.el beginning functionality
-After evaluating litorgy.el and litorgy-script.el, you should be able
-to evaluate the following blocks of code by pressing =\C-c\C-c= on the
-header lines.  *Note*: your version of org-mode must be at least 6.23
-or later.
-
-To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-script.el][litorgy-script.el]] and
-evaluate them with =M-x eval-buffer=
-
-#+begin_src sh  :replace t
-date
-#+end_src
-
-#+begin_src ruby
-puts Time.now
-#+end_src
-
-#+begin_src python
-print "Hello world!"
-#+end_src
-
-
-** litorgy-R
-To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-R.el][litorgy-R.el]] and evaluate
-them with =M-x eval-buffer=
-
-#+begin_src R :replace t
-hist(rgamma(20,3,3))
-a <- 9
-b <- 17
-a + b
-#+end_src
-
-: 26
-
-
-** free variables
-
-First assign the variable with some sort of interpreted line
-- this is independent of any particular type of source code
-- this could use references to table ranges
-
-
-
-** resource reference example
-
-This block holds an array of information written in [[http://www.yaml.org][YAML]]
-
-#name: yaml-array
-#+begin_src yaml
---- 
-- 1
-- 2
-- 3
-- 4
-- 5
-#+end_src
-
-This next block saves the information in the YAML array into the ruby
-variable =ya= and then in ruby it multiplies each variable in the =ya=
-by 2.
-
-#name: ruby-array
-#assign: ya = yaml-array
-#+begin_src ruby
-ya.map{ |e| e * 2 }
-#+end_src
-
-This final block takes the output of the ruby block, and writes it to
-cell =0,0= through =0,3= of the table
-
-#name: example-table
-#assign: self[0, (1..3)] = ruby-array
-| example results |
-|-----------------|
-|                 |
-|                 |
-|                 |
-
-
-** litorgy plays with tables
-Alright, this should demonstrate both the ability of litorgy to read
-tables into a lisp source code block, and to then convert the results
-of the source code block into an org table.  It's using the classic
-"lisp is elegant" demonstration transpose function.  To try this
-out...
-
-1. evaluate [[file:litorgy/init.el]] to load litorgy and friends
-2. evaluate the transpose definition =\C-u \C-c\C-c= on the beginning of
-   the source block (prefix arg to inhibit output)
-3. evaluate the next source code block, this should read in the table
-   because of the =:var table=previous=, then transpose the table, and
-   finally it should insert the transposed table into the buffer
-   immediately following the block
-
-*** Emacs lisp
-
-#+begin_src emacs-lisp
-(defun transpose (table)
-  (apply #'mapcar* #'list table))
-#+end_src
-
-#+TBLNAME: sandbox
-| 1 |       2 | 3 |
-| 4 | schulte | 6 |
-
-#+begin_src emacs-lisp :var table=previous :replace t
-(transpose table)
-#+end_src
-
-#+begin_src emacs-lisp :var table=sandbox :replace t
-(transpose table)
-#+end_src
-
-*** Ruby and Python
-
-#+begin_src ruby :var table=sandbox :replace t
-table.first.join(" - ")
-#+end_src
-
-: "1 - 2 - 3"
-
-#+begin_src python :var table=sandbox :replace t
-table[0]
-#+end_src
-
-| 1 | 2 | 3 |
-
-#+begin_src ruby :var table=sandbox :replace t
-table
-#+end_src
-
-| 1 |         2 | 3 |
-| 4 | "schulte" | 6 |
-
-#+begin_src python :var table=sandbox :replace t
-table
-#+end_src
-
-| 1 |         2 | 3 |
-| 4 | "schulte" | 6 |
-
-*** R
-
-#+begin_src R :replace t
-a <- 9
-b <- 8
-
-#+end_src
-
-#+begin_src R :replace t
-x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
-x
-#+end_src
-
-: -2.059712 -1.299807 -2.518628 -4.319525 -1.944779 -5.345708 -3.921314
-: -2.841109 -0.963475 -2.465979  4.092037  1.299202  1.476687  2.128594
-: 3.200629  1.990952  1.888890  3.561541  3.818319  1.969161
-
-
-
-* COMMENT Commentary
-I'm seeing this as like commit notes, and a place for less formal
-communication of the goals of our changes.
-
-** Eric <2009-02-06 Fri 15:41>
-I think we're getting close to a comprehensive set of objectives
-(although since you two are the real R user's I leave that decision up
-to you).  Once we've agreed on a set of objectives and agreed on at
-least to broad strokes of implementation, I think we should start
-listing out and assigning tasks.
-
-** Eric <2009-02-09 Mon 14:25>
-I've done a fairly destructive edit of this file.  The main goal was
-to enforce a structure on the document that we can use moving forward,
-so that any future objective changes are all made to the main
-objective list.
-
-I apologize for removing sections written by other people.  I did this
-when they were redundant or it was not clear how to fit them into this
-structure.  Rest assured if the previous text wasn't persisted in git
-I would have been much more cautious about removing it.
-
-I hope that this outline structure should be able to remain stable
-through the process of fleshing out objectives, and cashing those
-objectives out into tasks.  That said, please feel free to make any
-changes that you see fit.
-
-** Dan <2009-02-12 Thu 10:23>
-   Good job Eric with major works on this file.
-
-** Eric <2009-02-22 Sun 13:17>
-So I skipped ahead and got started on the fun part.  Namely stubbing
-out some of the basic functionality.  Please don't take any of the
-decisions I've made so far (on things like names, functionality,
-design etc...) as final decisions, I'm of course open to and hoping
-for improvement.
-
-So far [[file:litorgy/litorgy.el][litorgy.el]] and [[file:litorgy/litorgy-script.el][litorgy-script.el]] can be used to evaluate source
-code blocks of simple scripting languages.  It shouldn't be too hard
-(any takers) to write a litorgy-R.el modeled after litorgy-script.el
-to use for evaluating R code files.
-
-See the [[* litorgy.el beginning functionality][Sandbox]] for evaluable examples.
-
-** Eric <2009-02-23 Mon 15:12>
-While thinking about how to implement the transfer of data between
-source blocks and the containing org-mode file, I decided it *might*
-be useful to explicitly support the existence of variables which exist
-independent of source blocks or tables.  I'd appreciate any
-feedback... (see [[free explicit variables][free explicit variables]])
-
-** Eric <2009-02-23 Mon 17:53>
-So as I start populating this file with source code blocks I figure I
-should share this... I don't know if you guys use [[http://code.google.com/p/smart-snippet/][yasnippet]] at all,
-but if you do you might find this [[file:block][block-snippet]] org-mode snippet
-useful (I use it all the time).
 
 
 * Buffer Dictionary
