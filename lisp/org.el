@@ -7293,7 +7293,6 @@ used as the link location instead of reading one interactively."
 	       (cddr args)))
     (apply 'completing-read args)))
 
-
 (defun org-extract-attributes (s)
   "Extract the attributes cookie from a string and set as text property."
   (let (a attr (start 0) key value)
@@ -7306,6 +7305,14 @@ used as the link location instead of reading one interactively."
 		attr (plist-put attr (intern key) value))))
       (org-add-props s nil 'org-attr attr))
     s))
+
+(defun org-extract-attributes-from-string (tag)
+  (let (key value attr)
+    (while (string-match "\\([a-zA-Z]+\\)=\"\\([^\"]*\\)\"\\s-?" tag)
+      (setq key (match-string 1 tag) value (match-string 2 tag)
+	    tag (replace-match "" t t tag)
+	    attr (plist-put attr (intern key) value)))
+    (cons tag attr)))
 
 (defun org-attributes-to-string (plist)
   "Format a property list into an HTML attribute list."

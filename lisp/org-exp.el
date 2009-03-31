@@ -4403,18 +4403,25 @@ lang=\"%s\" xml:lang=\"%s\">
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
 
-  (let ((caption (or (get-text-property 0 'org-caption (car lines))
-		     (get-text-property (or (next-single-property-change
-					     0 'org-caption (car lines))
-					    0)
-					'org-caption (car lines))))
-	(head (and org-export-highlight-first-table-line
-		   (delq nil (mapcar
-			      (lambda (x) (string-match "^[ \t]*|-" x))
-			      (cdr lines)))))
-
-	(nlines 0) fnum i
-	tbopen line fields html gr colgropen)
+  (let* ((caption (or (get-text-property 0 'org-caption (car lines))
+		      (get-text-property (or (next-single-property-change
+					      0 'org-caption (car lines))
+					     0)
+					 'org-caption (car lines))))
+	 (attributes (or (get-text-property 0 'org-attributes (car lines))
+			 (get-text-property (or (next-single-property-change
+						 0 'org-attributes (car lines))
+						0)
+					    'org-attributes (car lines))))
+	 (html-table-tag (org-export-splice-attributes
+			  html-table-tag attributes))
+	 (head (and org-export-highlight-first-table-line
+		    (delq nil (mapcar
+			       (lambda (x) (string-match "^[ \t]*|-" x))
+			       (cdr lines)))))
+	 
+	 (nlines 0) fnum i
+	 tbopen line fields html gr colgropen)
     (if splice (setq head nil))
     (unless splice (push (if head "<thead>" "<tbody>") html))
     (setq tbopen t)
@@ -4475,6 +4482,22 @@ lang=\"%s\" xml:lang=\"%s\">
       (push (format "<caption>%s</caption>" (or caption "")) html)
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
+
+(defun org-export-splice-attributes (tag attributes)
+  "Read attributes in string ATTRIBUTES, add and replace in HTML tag TAG."
+  (if (not attributes)
+      tag
+    (let (oldatt newatt)
+      (setq oldatt (org-extract-attributes-from-string tag)
+	    tag (pop oldatt)
+	    newatt (cdr (org-extract-attributes-from-string attributes)))
+      (while newatt
+	(setq oldatt (plist-put oldatt (pop newatt) (pop newatt))))
+      (if (string-match ">" tag)
+	  (setq tag
+		(replace-match (concat (org-attributes-to-string oldatt) ">")
+			       t t tag)))
+      tag)))
 
 (defun org-table-clean-before-export (lines &optional maybe-quoted)
   "Check if the table has a marking column.

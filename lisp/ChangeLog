@@ -1,3 +1,9 @@
+2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-extract-attributes-from-string): New function.
+
+	* org-exp.el (org-export-splice-attributes): New function.
+
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-mouse.el: XEmacs compatibility fixes

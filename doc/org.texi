@@ -323,6 +323,7 @@ HTML export
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
+* Tables in HTML export::       How to modify the formatting of tables
 * Images in HTML export::       How to insert figures into HTML output
 * Text areas in HTML export::   An alternative way to show an example
 * CSS support::                 Changing the appearance of the output
@@ -8314,6 +8315,7 @@ language, but with additional support for tables.
 * HTML Export commands::        How to invoke HTML export
 * Quoting HTML tags::           Using direct HTML in Org mode
 * Links::                       Transformation of links for HTML
+* Tables in HTML export::       How to modify the formatting of tables
 * Images in HTML export::       How to insert figures into HTML output
 * Text areas in HTML export::   An alternative way to show an example
 * CSS support::                 Changing the appearance of the output
@@ -8403,7 +8405,7 @@ All lines between these markers are exported literally
 @end example
 
 
-@node Links, Images in HTML export, Quoting HTML tags, HTML export
+@node Links, Tables in HTML export, Quoting HTML tags, HTML export
 @subsection Links
 
 @cindex links, in HTML export
@@ -8429,7 +8431,22 @@ and @code{style} attributes for a link:
 [[http://orgmode.org]]
 @end example
 
-@node Images in HTML export, Text areas in HTML export, Links, HTML export
+@node Tables in HTML export, Images in HTML export, Links, HTML export
+@subsection Tables
+@cindex tables, in HTML
+@vindex org-export-html-table-tag
+
+Org-mode tables are exported to HTML using the table tag defined in
+@code{org-export-html-table-tag}.  The default setting makes tables without
+cell borders and frame.  If you would like to change this for individual
+tables, place somthing like the following before the table:
+
+@example
+#+CAPTION: This is a table with lines around and between cells
+#+ATTR_HTML: border="2" rules="all" frame="all"
+@end example
+
+@node Images in HTML export, Text areas in HTML export, Tables in HTML export, HTML export
 @subsection Images
 
 @cindex images, inline in HTML
