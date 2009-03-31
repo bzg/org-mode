@@ -930,6 +930,9 @@ agenda entries."
 
 (defcustom org-sort-agenda-noeffort-is-high t
   "Non-nil means, items without effort estimate are sorted as high effort.
+This also applies when filtering an agenda view with respect to the
+< or > effort operator.  Then, tasks with no effort defined will be treated
+as tasks with high effort.
 When nil, such items are sorted as 0 minutes effort."
   :group 'org-agenda-sorting
   :type 'boolean)
@@ -4650,7 +4653,7 @@ to switch to narrowing."
 	char a n tag)
     (unless char
       (message
-       "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<]:effort: "
+       "%s by tag [%s ], [TAB], [/]:off, [+-]:narrow, [>=<?]:effort: "
        (if narrow "Narrow" "Filter") tag-chars)
       (setq char (read-char)))
     (when (member char '(?+ ?-))
@@ -4660,20 +4663,21 @@ to switch to narrowing."
       (message
        "Narrow by tag [%s ], [TAB], [/]:off, [>=<]:effort: " tag-chars)
       (setq char (read-char)))
-    (when (member char '(?< ?> ?=))
+    (when (member char '(?< ?> ?= ??))
       ;; An effort operator
       (setq effort-op (char-to-string char))
-      (loop for i from 0 to 9 do
-	    (setq effort-prompt
-		  (concat
-		   effort-prompt " ["
-		   (if (= i 9) "0" (int-to-string (1+ i)))
-		   "]" (nth i efforts))))
       (setq alist nil) ; to make sure it will be interpreted as effort.
-      (message "Effort%s: %s " effort-op effort-prompt)
-      (setq char (read-char))
-      (when (or (< char ?0) (> char ?9))
-	(error "Need 1-9,0 to select effort" )))
+      (unless (equal char ??)
+	(loop for i from 0 to 9 do
+	      (setq effort-prompt
+		    (concat
+		     effort-prompt " ["
+		     (if (= i 9) "0" (int-to-string (1+ i)))
+		     "]" (nth i efforts))))
+	(message "Effort%s: %s " effort-op effort-prompt)
+	(setq char (read-char))
+	(when (or (< char ?0) (> char ?9))
+	  (error "Need 1-9,0 to select effort" ))))
     (when (equal char ?\t)
       (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
 	(org-set-local 'org-global-tags-completion-table
@@ -4692,6 +4696,9 @@ to switch to narrowing."
 	       (setq n (if (= char ?0) 9 (- char ?0 1))
 		     tag (concat effort-op (nth n efforts))
 		     a (cons tag nil)))
+	  (and (= char ??)
+	       (setq tag "?eff")
+	       a (cons tag nil))
 	  (and tag (setq a (cons tag nil))))
       (org-agenda-filter-by-tag-show-all)
       (setq tag (car a))
@@ -4713,7 +4720,7 @@ to switch to narrowing."
 		       org-agenda-filter))
       (if (member x '("-" "+"))
 	  (setq f1 '(not tags))
-	(if (string-match "[<=>]" x)
+	(if (string-match "[<=>?]" x)
 	    (setq f1 (org-agenda-filter-effort-form x))
 	  (setq f1 (list 'member (downcase (substring x 1)) 'tags)))
 	(if (equal (string-to-char x) ?-)
@@ -4727,7 +4734,10 @@ E looks line \"+<2:25\"."
   (let (op)
     (setq e (substring e 1))
     (setq op (string-to-char e) e (substring e 1))
-    (setq op (if (equal op ?<) '<= (if (equal op ?>) '>= '=)))
+    (setq op (cond ((equal op ?<) '<=)
+		   ((equal op ?>) '>=)
+		   ((equal op ??) op)
+		   (t '=)))
     (list 'org-agenda-compare-effort (list 'quote op)
 	  (org-hh:mm-string-to-minutes e))))
 
@@ -4735,9 +4745,10 @@ E looks line \"+<2:25\"."
   "Compare the effort of the current line with VALUE, using OP.
 If the line does not have an effort defined, return nil."
   (let ((eff (get-text-property (point) 'effort-minutes)))
-    (if (not eff)
-	0 ; we don't have an effort defined, treat as 0
-      (funcall op eff value))))
+    (if (equal op ??)
+	(not eff)
+      (funcall op (or eff (if org-sort-agenda-noeffort-is-high 32767 0))
+	       value))))
 
 (defun org-agenda-filter-apply (filter)
   "Set FILTER as the new agenda filter and apply it."

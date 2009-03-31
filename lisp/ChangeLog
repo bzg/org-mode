@@ -1,5 +1,11 @@
 2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-compare-effort): Honor
+	`org-sort-agenda-noeffort-is-high'.
+	(org-agenda-filter-by-tag, org-agenda-filter-make-matcher)
+	(org-agenda-compare-effort): Implement the "?" operator for
+	finding entries without effort setting.
+
 	* org.el (org-extract-attributes-from-string): New function.
 
 	* org-exp.el (org-export-splice-attributes): New function.

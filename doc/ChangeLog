@@ -1,3 +1,8 @@
+2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Agenda commands): Document the "?" operator to find
+	tasks without effort setting.
+
 2009-03-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Exporting agenda information): Section moved.
