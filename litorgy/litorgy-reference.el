@@ -100,12 +100,16 @@ representation of the value of the variable."
                    (t
                     (goto-char (point-min))
                     (setq direction 1)
-                    (unless (re-search-forward
-                             (concat "^#\\+TBLNAME:[ \t]*" (regexp-quote ref) "[ \t]*$") nil t)
-                      (setq id-loc (org-id-find name-or-id 'marker)
-                            buffer (marker-buffer id-loc)
-                            loc (marker-position id-loc))
-                      (move-marker id-loc nil))))
+                    (unless (let ((regexp (concat "^#\\+TBLNAME:[ \t]*"
+                                                  (regexp-quote ref) "[ \t]*$")))
+                              (or (re-search-forward regexp nil t)
+                                  (re-search-backward regexp nil t)))
+                      ;; ;; TODO: allow searching for table in other buffers
+                      ;; (setq id-loc (org-id-find ref 'marker)
+                      ;;       buffer (marker-buffer id-loc)
+                      ;;       loc (marker-position id-loc))
+                      ;; (move-marker id-loc nil)
+                      (error (format "table '%s' not found in this buffer" ref)))))
                   (while (not (org-at-table-p))
                     (forward-line direction)
                     (if (or (= (point) (point-min)) (= (point) (point-max)))

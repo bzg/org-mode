@@ -1,8 +1,8 @@
 ;;; init.el --- loads litorgy
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
+;; Copyright (C) 2009 Eric Schulte
 
-;; Author: Eric Schulte, Dan Davison, Austin F. Frank
+;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -34,8 +34,8 @@
 (require 'litorgy-reference)
 
 ;; language specific files
-(require 'litorgy-R)
-(require 'litorgy-lisp)
 (require 'litorgy-script)
+(require 'litorgy-lisp)
+(require 'litorgy-R)
 
 ;;; init.el ends here

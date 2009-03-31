@@ -1,8 +1,8 @@
 ;;; litorgy-script.el --- litorgy functions for script execution
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
+;; Copyright (C) 2009 Eric Schulte
 
-;; Author: Eric Schulte, Dan Davison, Austin F. Frank
+;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating shell, ruby, and python source code.
+;; Litorgy support for evaluating ruby, and python source code.
 
 ;;; Code:
 (require 'litorgy)
@@ -37,26 +37,69 @@
           (setq litorgy-interpreters (cons cmd litorgy-interpreters))
           (eval
            `(defun ,(intern (concat "litorgy-execute:" cmd)) (body params)
-              (concat "Evaluate a block of " ,cmd " script with litorgy.
-This function is called by `litorgy-execute-src-block'.")
+              ,(concat "Evaluate a block of " cmd " script with litorgy. This function is
+called by `litorgy-execute-src-block'.  This function is an
+automatically generated wrapper for `litorgy-script-execute'.")
               (litorgy-script-execute ,cmd body params))))
         cmds))
 
-(defcustom litorgy-script-interpreters '("sh" "bash" "zsh" "ruby" "python")
+(defcustom litorgy-script-interpreters '("ruby" "python")
   "List of interpreters of scripting languages which can be
 executed through litorgy."
   :group 'litorgy
   :set 'litorgy-script-add-interpreter)
 
 (defun litorgy-script-execute (cmd body params)
-  "Run CMD on BODY obeying any options set with PARAMS.
-TODO: currently the params part is not implemented"
-  (message (format "executing source block with %s..." cmd))
-  (with-temp-buffer
-    (insert body)
-    (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-    (message "finished executing source block")
-    (buffer-string)))
+  "Run CMD on BODY obeying any options set with PARAMS."
+  (message (format "executing %s code block..." cmd))
+  (let ((vars (litorgy-reference-variables params)))
+    (save-window-excursion
+      (with-temp-buffer
+        (when (string= "ruby" cmd) (insert "def main\n"))
+        ;; define any variables
+        (mapcar
+         (lambda (pair)
+           (insert (format "%s=%s\n"
+                           (car pair)
+                           (litorgy-script-table-to-ruby/python (cdr pair)))))
+         vars)
+        (case (intern cmd)
+          ('ruby
+           (insert body)
+           (insert "\nend\n\nputs main.inspect\n"))
+          ('python
+           (insert "def main():\n")
+           (let ((body-lines (split-string body "[\n\r]+" t)))
+             (mapc
+              (lambda (line)
+                (insert (format "\t%s\n" line)))
+              (butlast body-lines))
+             (insert (format "\treturn %s\n" (car (last body-lines)))))
+           (insert "\nprint main()\n")))
+        (message (buffer-string))
+        (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
+        (litorgy-script-table-or-results (buffer-string))))))
+
+(defun litorgy-script-table-to-ruby/python (table)
+  "Convert an elisp table (nested lists) into a string of ruby
+source code specifying a table (nested arrays)."
+  (if (listp table)
+      (concat "[" (mapconcat #'litorgy-script-table-to-ruby/python table ", ") "]")
+    (format "%S" table)))
+
+(defun litorgy-script-table-or-results (results)
+  "If the results look like a table, then convert them into an
+Emacs-lisp table, otherwise return the results as a string."
+  (when (string-match "^\\[.+\\]$" results)
+    (setq results
+          ;; somewhat hacky, but thanks to similarities between
+          ;; languages it seems to work
+          (read (replace-regexp-in-string
+                 "\\[" "(" (replace-regexp-in-string
+                            "\\]" ")" (replace-regexp-in-string
+                                       ", " " " (replace-regexp-in-string
+                                                 "'" "\"" results)))))))
+  results)
 
 (provide 'litorgy-script)
 ;;; litorgy-script.el ends here

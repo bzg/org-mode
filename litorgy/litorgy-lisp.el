@@ -1,8 +1,8 @@
 ;;; litorgy-lisp.el --- litorgy functions for lisp code evaluation
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
+;; Copyright (C) 2009 Eric Schulte
 
-;; Author: Eric Schulte, Dan Davison, Austin F. Frank
+;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -36,10 +36,10 @@
 (defun litorgy-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with litorgy.  This
 function is called by `litorgy-execute-src-block'."
+  (message "executing emacs-lisp code block...")
   (save-window-excursion
     (let ((vars (litorgy-reference-variables params))
           (print-level nil) (print-length nil) results)
-      (message "executing emacs-lisp code block...")
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                      ,(read body))))

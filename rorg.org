@@ -751,17 +751,70 @@ out...
    finally it should insert the transposed table into the buffer
    immediately following the block
 
+*** Emacs lisp
+
 #+begin_src emacs-lisp
 (defun transpose (table)
   (apply #'mapcar* #'list table))
 #+end_src
 
+#+TBLNAME: sandbox
 | 1 |       2 | 3 |
 | 4 | schulte | 6 |
 
 #+begin_src emacs-lisp :var table=previous :replace t
 (transpose table)
 #+end_src
+
+#+begin_src emacs-lisp :var table=sandbox :replace t
+(transpose table)
+#+end_src
+
+*** Ruby and Python
+
+#+begin_src ruby :var table=sandbox :replace t
+table.first.join(" - ")
+#+end_src
+
+: "1 - 2 - 3"
+
+#+begin_src python :var table=sandbox :replace t
+table[0]
+#+end_src
+
+| 1 | 2 | 3 |
+
+#+begin_src ruby :var table=sandbox :replace t
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+#+begin_src python :var table=sandbox :replace t
+table
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
+*** R
+
+#+begin_src R :replace t
+a <- 9
+b <- 8
+
+#+end_src
+
+#+begin_src R :replace t
+x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
+x
+#+end_src
+
+: -2.059712 -1.299807 -2.518628 -4.319525 -1.944779 -5.345708 -3.921314
+: -2.841109 -0.963475 -2.465979  4.092037  1.299202  1.476687  2.128594
+: 3.200629  1.990952  1.888890  3.561541  3.818319  1.969161
+
 
 
 * COMMENT Commentary
