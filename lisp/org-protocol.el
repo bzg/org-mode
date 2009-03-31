@@ -125,7 +125,13 @@
 
 (require 'org)
 (require 'url)
+(eval-when-compile
+  (require 'cl))
 
+(declare-function org-publish-initialize-files-alist "org-publish"
+		  (&optional refresh))
+(declare-function org-publish-get-project-from-filename "org-publish"
+		  (filename &optional up))
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
@@ -450,6 +456,7 @@ This works, if the file visited is part of a publishing project in
 `org-publish-project-alist'. This functions calls `org-protocol-create' to do
 most of the work."
   (interactive)
+  (require 'org-publish)
   (org-publish-initialize-files-alist)
   (let ((all (or (org-publish-get-project-from-filename buffer-file-name))))
     (if all (org-protocol-create (cdr all))

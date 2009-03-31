@@ -1,5 +1,7 @@
 2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-protocol.el: Declare some functions.
+
 	* org-inlinetask.el (org-inlinetask-export-handler): Fix line
 	postion before inserting modified headline.
 
