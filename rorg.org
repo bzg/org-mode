@@ -8,8 +8,10 @@
 ** TODO evaluation of shell code as background process? [DED]
    After C-c C-c on an R code block, the process may appear to block,
    but C-g can be used to reclaim control of the .org buffer, without
-   interrupting the R evalution. However I believe this is not true
-   of bash/sh evaluation. [Haven't tried other languages]
+   interrupting the R evalution. However I believe this is not true of
+   bash/sh evaluation. [Haven't tried other languages] Perhaps a
+   solution is just to background the individual shell
+   commands.
 ** litorgy-R
 *** TODO ability to select which of multiple R sessions is being used
     (like ess-switch-process in .R buffers)
@@ -66,14 +68,14 @@ To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:
 them with =M-x eval-buffer=
 
 #+begin_src R :replace t
-hist(rgamma(20,3,3))
 a <- 9
 b <- 17
 a + b
 #+end_src
 
-: 26
-
+#+begin_src R
+hist(rgamma(20,3,3))
+#+end_src
 
 
 ** free variables
