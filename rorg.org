@@ -649,6 +649,7 @@ and probably has some advantages (and probably shortfalls).
 
 
 * Tasks
+** TODO evaluation as background process? [DED]
 ** litorgy-R
 *** TODO ability to select which of multiple R sessions is being used (like ess-switch-process in .R buffers)
 *** TODO a header argument specifying silent evaluation (no output)
