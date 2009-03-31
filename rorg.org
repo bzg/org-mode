@@ -3,8 +3,8 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
 #+STARTUP: oddeven
 
-
 * Tasks
+
 ** TODO evaluation of shell code as background process? [DED]
    After C-c C-c on an R code block, the process may appear to block,
    but C-g can be used to reclaim control of the .org buffer, without
@@ -12,10 +12,22 @@
    bash/sh evaluation. [Haven't tried other languages] Perhaps a
    solution is just to background the individual shell
    commands.
+
 ** litorgy-R
 *** TODO ability to select which of multiple R sessions is being used
     (like ess-switch-process in .R buffers)
-*** TODO a header argument specifying silent evaluation (no output)
+
+** TODO a header argument specifying silent evaluation (no output)
+This would be useful across all types of source block.  Currently
+there is a =:replace t= option to control output, this could be
+generalized to an =:output= option which could take the following
+options (maybe more)
+
+- =t= :: this would be the default, and would simply insert the
+         results after the source block
+- =:replace= :: to replace any results which may already be there
+- =nil= :: this would inhibit any insertion of the results
+
 
 * Bugs
 ** Args out of range error
@@ -259,6 +271,7 @@ So as I start populating this file with source code blocks I figure I
 should share this... I don't know if you guys use [[http://code.google.com/p/smart-snippet/][yasnippet]] at all,
 but if you do you might find this [[file:block][block-snippet]] org-mode snippet
 useful (I use it all the time).
+
 
 * Overview
 This project is basically about putting source code into org
