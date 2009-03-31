@@ -76,7 +76,6 @@ executed through litorgy."
               (butlast body-lines))
              (insert (format "\treturn %s\n" (car (last body-lines)))))
            (insert "\nprint main()\n")))
-        (message (buffer-string))
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
         (litorgy-script-table-or-results (buffer-string))))))
 
