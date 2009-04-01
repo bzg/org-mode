@@ -14474,6 +14474,24 @@ See the individual commands for more information."
  ;     :active t :keys "C-u C-c C-x C-s"]
      )
     "--"
+    ("Hyperlinks"
+     ["Store Link (Global)" org-store-link t]
+     ["Insert Link" org-insert-link t]
+     ["Follow Link" org-open-at-point t]
+     "--"
+     ["Next link" org-next-link t]
+     ["Previous link" org-previous-link t]
+     "--"
+     ["Descriptive Links"
+      (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
+      :style radio
+      :selected (member '(org-link) buffer-invisibility-spec)]
+     ["Literal Links"
+      (progn
+	(org-remove-from-invisibility-spec '(org-link)) (org-restart-font-lock))
+      :style radio
+      :selected (not (member '(org-link) buffer-invisibility-spec))])
+    "--"
     ("TODO Lists"
      ["TODO/DONE/-" org-todo t]
      ("Select keyword"
@@ -14556,24 +14574,6 @@ See the individual commands for more information."
      ["Timeline" org-timeline t]
      ["Tags/Property tree" org-match-sparse-tree t])
     "--"
-    ("Hyperlinks"
-     ["Store Link (Global)" org-store-link t]
-     ["Insert Link" org-insert-link t]
-     ["Follow Link" org-open-at-point t]
-     "--"
-     ["Next link" org-next-link t]
-     ["Previous link" org-previous-link t]
-     "--"
-     ["Descriptive Links"
-      (progn (org-add-to-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio
-      :selected (member '(org-link) buffer-invisibility-spec)]
-     ["Literal Links"
-      (progn
-	(org-remove-from-invisibility-spec '(org-link)) (org-restart-font-lock))
-      :style radio
-      :selected (not (member '(org-link) buffer-invisibility-spec))])
-    "--"
     ["Export/Publish..." org-export t]
     ("LaTeX"
      ["Org CDLaTeX mode" org-cdlatex-mode :style toggle
@@ -14582,6 +14582,8 @@ See the individual commands for more information."
      ["Insert math symbol" cdlatex-math-symbol (fboundp 'cdlatex-math-symbol)]
      ["Modify math symbol" org-cdlatex-math-modify
       (org-inside-LaTeX-fragment-p)]
+     ["Insert citation" org-reftex-citation t]
+     "--"
      ["Export LaTeX fragments as images"
       (if (featurep 'org-exp)
 	  (setq org-export-with-LaTeX-fragments
