@@ -86,13 +86,20 @@ the value of this variable."
   "What should be done with inlinetasks upon export?
 Possible values:
 
-nil            Remove entirely
+nil            Remove entirely, headline and \"content\"
 arrow          Insert heading in bold, preceeded by an arrow
 arrow+content  Insert arrow and headline, add content below in an
-               #+begin_example box (ugly, but works for now)"
+               #+begin_example box (ugly, but works for now)
+
+The \"content\" of an inline task is the material below the planning
+line and any drawers, up to a lines wit the same number of stars,
+but containing only the word END."
   :group 'org-inlinetask
   :group 'org-export-general
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Remove entirely" nil)
+	  (const :tag "Headline preceeded by arrow" arrow)
+	  (const :tag "Arrow, headline, + content" arrow+content)))
 
 (defvar org-odd-levels-only)
 (defvar org-keyword-time-regexp)
