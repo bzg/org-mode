@@ -79,7 +79,9 @@
 
 
 	    (when (assoc "limit" opt) ;; Limit is true - collect references
-	      (org-exp-bibtex-docites (lambda () (add-to-list 'cite-list (match-string 1))))
+	      (org-exp-bibtex-docites (lambda ()
+					(dolist (c (org-split-string (match-string 1) ","))
+					  (add-to-list 'cite-list c))))
 ;;	      (message "cites: %s" cite-list)
 	      (let ((tmp (make-temp-file "org-exp-bibtex")))
 		(with-temp-file tmp (dolist (i cite-list) (insert (concat i "\n"))))
@@ -111,6 +113,14 @@
 
     ;; Convert cites to links in html
     (when htmlp
+      ;; Split citation commands with multiple keys
+      (org-exp-bibtex-docites
+       (lambda ()
+	 (let ((keys (save-match-data (org-split-string (match-string 1) ","))))
+	   (when (> (length keys) 1)
+	     (replace-match (mapconcat (lambda (k) (format "\\cite{%s}" k)) keys "")
+			    t t)))))
+      ;; Replace the citation commands with links
       (org-exp-bibtex-docites
        (lambda () (let* ((cn (match-string 1))
 			 (cv (assoc cn oebp-cite-plist)))
