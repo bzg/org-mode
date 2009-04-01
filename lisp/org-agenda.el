@@ -73,7 +73,7 @@ only needed when the text to be killed contains more than N non-white lines."
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)
-	  (number :tag "When more than N lines")))
+	  (integer :tag "When more than N lines")))
 
 (defcustom org-agenda-compact-blocks nil
   "Non-nil means, make the block agenda more compact.
@@ -222,7 +222,7 @@ you can \"misuse\" it to also add other text to the header.  However,
 		  (const org-agenda-start-on-weekday)
 		  (choice :value 1
 			  (const :tag "Today" nil)
-			  (number :tag "Weekday No.")))
+			  (integer :tag "Weekday No.")))
 	    (list :tag "Include data from diary"
 		  (const org-agenda-include-diary)
 		  (boolean))
@@ -594,7 +594,7 @@ N days, just insert a special line indicating the size of the gap."
   :type '(choice
 	  (const :tag "None" nil)
 	  (const :tag "All" t)
-	  (number :tag "at most")))
+	  (integer :tag "at most")))
 
 (defgroup org-agenda-startup nil
   "Options concerning initial settings in the Agenda in Org Mode."
@@ -665,7 +665,7 @@ option will be ignored.."
 Should be 1 or 7.
 Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-agenda-start-on-weekday 1
   "Non-nil means, start the overview always on the specified weekday.
@@ -674,7 +674,7 @@ When nil, always start on the current day.
 Custom commands can set this variable in the options section."
   :group 'org-agenda-daily/weekly
   :type '(choice (const :tag "Today" nil)
-		 (number :tag "Weekday No.")))
+		 (integer :tag "Weekday No.")))
 
 (defcustom org-agenda-show-all-dates t
   "Non-nil means, `org-agenda' shows every day in the selected range.
@@ -757,7 +757,7 @@ When an item is scheduled on a date, it shows up in the agenda on this
 day and will be listed until it is marked done for the number of days
 given here."
   :group 'org-agenda-daily/weekly
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-agenda-log-mode-items '(closed clock)
   "List of items that should be shown in agenda log mode.

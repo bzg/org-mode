@@ -161,7 +161,7 @@ this setting.
 
 This option can also be set with the +OPTIONS line, e.g. \"H:2\"."
   :group 'org-export-general
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-export-with-section-numbers t
   "Non-nil means, add section numbers to headlines when exporting.

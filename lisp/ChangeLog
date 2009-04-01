@@ -1,3 +1,17 @@
+2009-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-faces.el (org-n-level-faces): Fix customization type from
+	number to integer.
+
+	* org-exp.el (org-export-headline-levels): Fix customization type
+	from number to integer.
+
+	* org-agenda.el (org-agenda-confirm-kill)
+	(org-agenda-custom-commands-local-options)
+	(org-timeline-show-empty-dates, org-agenda-ndays)
+	(org-agenda-start-on-weekday, org-scheduled-past-days): Fix
+	customization type from number to integer.
+
 2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-protocol.el: Declare some functions.

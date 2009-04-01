@@ -888,7 +888,7 @@ as possible."
   "The maximum level for Imenu access to Org-mode headlines.
 This also applied for speedbar access."
   :group 'org-imenu-and-speedbar
-  :type 'number)
+  :type 'integer)
 
 (defgroup org-table nil
   "Options concerning tables in Org-mode."
@@ -1450,7 +1450,7 @@ outline-path-completion  Headlines in the current buffer are offered via
 (defcustom org-goto-max-level 5
   "Maximum level to be considered when running org-goto with refile interface."
   :group 'org-refile
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-reverse-note-order nil
   "Non-nil means, store new notes at the beginning of a file or entry.
@@ -2033,7 +2033,7 @@ even if a deadline has a different individual lead time specified.
 Custom commands can set this variable in the options section."
   :group 'org-time
   :group 'org-agenda-daily/weekly
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-read-date-prefer-future t
   "Non-nil means, assume future for incomplete date input from user.
@@ -2090,7 +2090,7 @@ IMPORTANT:  This is a feature whose implementation is and likely will
 remain incomplete.  Really, it is only here because past midnight seems to
 be the favorite working time of John Wiegley :-)"
   :group 'org-time
-  :type 'number)
+  :type 'integer)
 
 (defcustom org-edit-timestamp-down-means-later nil
   "Non-nil means, S-down will increase the time in a time stamp.
