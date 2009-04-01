@@ -11,12 +11,13 @@
 #+LINK_HOME: http://orgmode.org
 
 
-* Version 6.25 (in preparation)
+* Version 6.25
  :PROPERTIES:
  :VISIBILITY: content
  :END:
 
 ** Major new features
+
 *** DocBook export
 
 We now do have a fully functional DocBook exporter, contributed by
@@ -88,6 +89,7 @@ exciting new feature.
 
 
 ** Export
+
 *** Allow modification of table attributes in HTML export
       
 The #+ATTR_HTML line can now be used to set attributes for a
