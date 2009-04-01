@@ -107,7 +107,7 @@ prefix don't dump results into buffer."
     (setq result (funcall cmd body params))
     (if arg
         (message (format "%S" result))
-      (litorgy-insert-result result (assoc :replace params)))))
+      (litorgy-insert-result result (cdr (assoc :results params))))))
 
 (defun litorgy-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -146,28 +146,38 @@ form.  (language body header-arguments-alist)"
                            (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:"))))
 
-(defun litorgy-insert-result (result &optional replace)
+(defun litorgy-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the
-current source block.  With optional argument REPLACE replace any
-existing results currently located after the source block."
-  (if replace (litorgy-remove-result (listp result)))
+current source block.  With optional argument INSERT controls
+insertion of results in the org-mode file.  INSERT can take the
+following values...
+
+t ------ the default options, simply insert the results after the
+         source block
+         
+replace - insert results after the source block replacing any
+          previously inserted results
+
+silent -- no results are inserted"
+  (if (string-equal insert "replace") (litorgy-remove-result (listp result)))
   (if (= (length result) 0)
       (message "no result returned by source block")
-    (when (and (stringp result)
-               (not (or (string-equal (substring result -1) "\n")
-                        (string-equal (substring result -1) "\r"))))
-      (setq result (concat result "\n")))
-    (save-excursion
-      (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
-      (if (stringp result)
-          (litorgy-examplize-region (point) (progn (insert result) (point)))
-        (progn
-          (insert ;; for now lets assume the result is a table if it's not a string
-           (concat (orgtbl-to-orgtbl
-                    (if (consp (car result)) result (list result))
-                    '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
-          (forward-line -1)
-          (org-cycle))))))
+    (unless (string-equal insert "silent")
+      (when (and (stringp result)
+                 (not (or (string-equal (substring result -1) "\n")
+                          (string-equal (substring result -1) "\r"))))
+        (setq result (concat result "\n")))
+      (save-excursion
+        (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
+        (if (stringp result) ;; assume the result is a table if it's not a string
+            (litorgy-examplize-region (point) (progn (insert result) (point)))
+          (progn
+            (insert 
+             (concat (orgtbl-to-orgtbl
+                      (if (consp (car result)) result (list result))
+                      '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
+            (forward-line -1)
+            (org-cycle)))))))
 
 (defun litorgy-remove-result (&optional table)
   "Remove the result following the current source block.  If

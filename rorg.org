@@ -17,7 +17,7 @@
 *** TODO ability to select which of multiple R sessions is being used
     (like ess-switch-process in .R buffers)
 
-** TODO a header argument specifying silent evaluation (no output)
+** DONE a header argument specifying silent evaluation (no output)
 This would be useful across all types of source block.  Currently
 there is a =:replace t= option to control output, this could be
 generalized to an =:output= option which could take the following
@@ -25,8 +25,10 @@ options (maybe more)
 
 - =t= :: this would be the default, and would simply insert the
          results after the source block
-- =:replace= :: to replace any results which may already be there
-- =nil= :: this would inhibit any insertion of the results
+- =replace= :: to replace any results which may already be there
+- =silent= :: this would inhibit any insertion of the results
+
+This is now implemented see the example in the [[* silent evaluation][sandbox]]
 
 
 * Bugs
@@ -215,6 +217,21 @@ x
 : -2.841109 -0.963475 -2.465979  4.092037  1.299202  1.476687  2.128594
 : 3.200629  1.990952  1.888890  3.561541  3.818319  1.969161
 
+
+
+** silent evaluation
+
+#+begin_src ruby
+:im_the_results
+#+end_src
+
+#+begin_src ruby :results silent
+:im_the_results
+#+end_src
+
+#+begin_src ruby :results replace
+:im_the_results
+#+end_src
 
 
 * COMMENT Commentary
