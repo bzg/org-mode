@@ -6768,6 +6768,10 @@ Display the previous dates.
 @item .
 Go to today.
 @c
+@kindex j
+@item j
+Prompt for a date and go there.
+@c
 @kindex C-c C-x C-c
 @item C-c C-x C-c
 @vindex org-columns-default-format
