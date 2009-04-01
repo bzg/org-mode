@@ -10,10 +10,271 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.24
+
+* Version 6.25
  :PROPERTIES:
  :VISIBILITY: content
  :END:
+
+** Major new features
+*** DocBook export
+
+We now do have a fully functional DocBook exporter, contributed by
+Baoqiu Cui.  Simple press =C-c e D= to export the current file to
+DocBook format.  You can also get direct conversion to PDF if you have
+made the correct setup, please the the manual for details.
+
+Kudos to Baoqiu for this fantastic addition, and my personal thanks
+for doing this in a such a smooth way that I did not have to do
+anything myself.
+
+*** Protocols for external access to Emacs and Org
+
+/org-protocol.el/ is a new module that supersedes both
+/org-annotation-helper.el/ and /org-browser.el/ and replaces them
+with a more abstracted interface.  /org-protocol/ intercepts calls
+from emacsclient to trigger custom actions without external
+dependencies.  Only one protocol has to be configured with your
+external applications or the operating system, to trigger an
+arbitrary number of custom actions. Just register your custom
+sub-protocol and handler with the new variable
+`org-protocol-protocol-alist'.
+
+org-protocol comes the with three standard protocol handlers
+- =org-protocol-remember= (subprotocol =remember=) :: Trigger
+  remember 
+- =org-protocol-store-link= (subprotocol =store-link=) :: Store a
+     link 
+- =org-protocol-open-source= (subprotocol =open-source=) :: Find
+     the local source of a remote web page.
+
+Passing data to emacs is now as easy as calling
+
+: emacsclient org-protocol://sub-protocol://data
+
+For more information see the [[http://orgmode.org/worg/org-contrib/org-protocol.php][online documentation]]
+
+Thanks to Sebastian Rose for the really beautiful module.
+
+*** Inline tasks
+      
+Inline tasks are tasks that have all the properties of normal outline
+nodes, including the ability to store meta data like scheduling dates,
+TODO state, tags and properties.  But these tasks are not meant to
+introduce additional outline structure, at least as far as visibility
+cycling and export is concerned.  Therefore they are useful for to add
+tasks for extensive pieces of text, like when writing documents or
+long notes.
+
+This feature is not turned on by default, you need to do configure
+=org-modules= to turn it on, or simple add to you .emacs file:
+
+: (require 'org-inlinetask)
+
+After that, tasks with level 15 (30 when using org-odd-levels-only)
+will be treated as inline tasks, and fontification will make obvious
+which tasks are treated in this way.
+
+*** Input from RSS feeds
+
+Org can now collect tasks from an RSS feed, a great method to get
+stuff from online call and note-taking services into your trusted
+system.  You need to configure the feeds in the variable
+=org-feed-alist=.  The manual contains a short description, more
+detailed information is [[http://orgmode.org/worg/org-contrib/org-feed.php][available on Worg]].
+
+Full credit goes to Brad Bozarth who really [[http://thread.gmane.org/gmane.emacs.orgmode/12251][paved the way]] for this
+exciting new feature.
+
+
+** Export
+*** Allow modification of table attributes in HTML export
+      
+The #+ATTR_HTML line can now be used to set attributes for the
+following table.  Attributes listed in that line will replace
+existing attributes, and add new ones, in
+=org-export-html-table-tag=.  For example
+      
+: #+ATTR_HTML: border="2" rules="all" frame="all"
+: #+CAPTION: Finally a table with lines!
+: | a | b |
+: |---|---|
+: | 1 | 2 |
+
+*** LaTeX low levels as itemize lists
+
+LaTeX export now treats hierarchy levels 4,5, etc as itemize
+lists, not as description lists anymore.  This is more consistent
+with the behavior of HTML export.  You can configure this
+behavior using the variable =org-export-latex-low-levels=.
+
+*** Markup for centering.
+
+Text can be exported centered with
+
+#+begin_src org
+,#+BEGIN_CENTER
+,Everything should be made as simple as possible, \\
+,but not any simpler
+,#+END_CENTER
+#+end_src
+*** Sitemap file is now /sitemap.org/
+    
+Org-publish can produce a list of all files in a project.
+Previously the file containing this list was called "index.org",
+really a brain-dead default because during publication it would
+overwrite the "index.html" file of the website.
+
+The default file name is now "sitemap.org"
+
+*** Protect explicit target links in HTML export
+      
+If a link is =[[#name] [desc]]=, the href produced when exporting
+the file will be exactly href="#name".  So starting a link target
+with # will indicate that there will be an explicit target for
+this.
+
+*** HTML export: Allow "- ___" to explicitly terminate a list
+      
+If a list contains "- ___" as an item, this terminates the list,
+ignoring this item.  This is an experimental feature, it may
+disappear again if we find other ways to deal with literal
+examples right after lists.
+
+See [[http://thread.gmane.org/gmane.emacs.orgmode/12299/focus%3D12312][this mailing list thread]] for more information.
+
+
+** Agenda
+
+*** Changing the time of an entry from the agenda
+
+We now have a way to change the start time of an entry from the
+agenda.  The date is normally changed with S-right/left.  Now, if
+you add a C-u prefix, the hour will be changed.  If you
+immediately press S-right/left again, hours will continue to be
+changed.  A double prefix will do the same for minutes.
+*** Show saved PDF agenda view with prefix arg
+
+When writing an agenda view to a PDF file, supplying a a prefix
+argument =C-u C-x C-w= will get the new file displayed immediately.
+
+This was a request by Alan E Davis.
+
+*** Filter for entries with no effort defined
+
+During secondary agenda filtering, pressing "?" now will install a
+filter that selects entries which do not have an effort defined.
+
+This new model was necessary because we needed to stop interpreting
+entries with no effort defines as 0 effort.  This was inconsistent,
+because for normal agenda sorting, the treatment of these entries
+depends on the variable `org-sort-agenda-noeffort-is-high'.  Now this
+variable is also respected during filtering.
+
+*** Introduce user-defined sorting operators
+      
+The new variable `org-agenda-cmp-user-defined' can contain a function
+to test how two entries should be compared during sorting.
+user-defined-up and user-defined-down can then be part of any sorting
+strategy.
+
+This was a request by Samuel Wales.
+
+*** Indentation of subitems in the agenda
+      
+When a tags/property match does match an entry and it's sublevels, the
+sublevels used to be indented by dots, to indicate that the matches
+likely result from tag inheritance.  This is now no longer the
+default.  You can get this behavior back with
+      
+: (setq org-tags-match-list-sublevels 'indented)
+
+*** Stuck projects search now searches subtrees of unstuck projects
+
+When, during a stuck-project search, a project tree is identified
+as not stuck, so far the search would continue after the end of
+the project tree.  From now on, the search continues in the
+subtree, so that stuck subprojects can still be identified.
+
+
+** Miscellaneous
+
+*** Citations: Use RefTeX to insert citations
+      
+RefTeX can now be used to create a citation in Org-mode buffers.
+Setup the buffer with #+BIBLIOGRAPHY: bibbase style
+and create citations with `C-c C-x ['.
+
+*** Changing time ranges as a block
+
+When using the S-cursor keys to change the first time in a time
+range like 
+
+: <2009-04-01 Wed 14:40-16:40>
+
+then the end time will change along, so that the duration of the
+event will stay the same.
+
+This was a request by Anupam Sengupta.
+
+*** New sparse tree command
+
+A new sparse tree command shows entries with times after a certain
+date.  Keys are =C-c / a=, this command is for symmetry
+with =C-c / b=.
+
+*** Cloning tasks
+
+A new command allows to create clone copies of the current entry,
+with shifted dates in all stamps in the entry.  This is useful to
+create, for example, a series of entries for a limited time
+period.  I am using it to prepare lectures, for example.
+
+*** New face for checkboxes
+
+Checkboxes now have their own face, =org-checkbox=.  This can be
+used for nice effects, for example choosing a face with a box
+around it:
+
+#+begin_src emacs-lisp
+(custom-set-faces
+ (org-checkbox ((t (:background "#444444" :foreground "white"
+                :box (:line-width 1 :style released-button)))))
+#+end_src
+
+*** M-a and M-e for navigation in a table field
+
+In tables fields, the sentence commands =M-a= and =M-e= are
+redefined to jump to the beginning or end of the field.
+
+This was a request by Bastien Guerry.
+
+*** Backup files for remember buffers
+      
+Sometimes users report that they lost data when not immediately
+storing a new remember note, and then later exiting Emacs or
+starting a new remember process.
+
+Now you can set the variable =org-remember-backup-directory=.
+Each remember buffer created will then get its own unique file
+name in that directory, and the file will be removed only if the
+storing of the note to an Org files was successful.
+
+*** org-mac-message.el: New functions to access flagged mail
+      
+Christopher Suckling has added functionality to
+org-mac-message.el.  In particular, you can now select a number
+of messages and easily get links to all of them with one
+command.   For details, see the [[http://orgmode.org/worg/org-contrib/org-mac-message.php][online documentation]].
+
+*** Read-date: New hook
+      
+The new hook `org-read-date-minibuffer-setup-hook' is called when
+setting up the minibuffer for reading a date.  If can be used to
+install new keys into the temporary keymap used there.
+
+
+* Version 6.24
 
 ** Incompatible changes
 
