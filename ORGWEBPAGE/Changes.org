@@ -22,7 +22,7 @@
 We now do have a fully functional DocBook exporter, contributed by
 Baoqiu Cui.  Simple press =C-c e D= to export the current file to
 DocBook format.  You can also get direct conversion to PDF if you have
-made the correct setup, please the the manual for details.
+made the correct setup, please see the manual for details.
 
 Kudos to Baoqiu for this fantastic addition, and my personal thanks
 for doing this in a such a smooth way that I did not have to do
@@ -32,21 +32,20 @@ anything myself.
 
 /org-protocol.el/ is a new module that supersedes both
 /org-annotation-helper.el/ and /org-browser.el/ and replaces them
-with a more abstracted interface.  /org-protocol/ intercepts calls
-from emacsclient to trigger custom actions without external
+with a more abstracted interface.  /org-protocol/ intercepts
+calls from emacsclient to trigger custom actions without external
 dependencies.  Only one protocol has to be configured with your
 external applications or the operating system, to trigger an
 arbitrary number of custom actions. Just register your custom
 sub-protocol and handler with the new variable
-`org-protocol-protocol-alist'.
+=org-protocol-protocol-alist=.
 
-org-protocol comes the with three standard protocol handlers
-- =org-protocol-remember= (subprotocol =remember=) :: Trigger
-  remember 
-- =org-protocol-store-link= (subprotocol =store-link=) :: Store a
-     link 
-- =org-protocol-open-source= (subprotocol =open-source=) :: Find
-     the local source of a remote web page.
+org-protocol comes the with three standard protocol handlers (in
+parenthesis the name of the sub-protocol):
+- =org-protocol-remember= (=remember=) :: Trigger remember
+- =org-protocol-store-link= (=store-link=) :: Store a link
+- =org-protocol-open-source= (=open-source=) :: Find the local
+     source of a remote web page.
 
 Passing data to emacs is now as easy as calling
 
@@ -54,26 +53,27 @@ Passing data to emacs is now as easy as calling
 
 For more information see the [[http://orgmode.org/worg/org-contrib/org-protocol.php][online documentation]]
 
-Thanks to Sebastian Rose for the really beautiful module.
+Thanks to Sebastian Rose for this really beautiful module.
 
 *** Inline tasks
       
-Inline tasks are tasks that have all the properties of normal outline
-nodes, including the ability to store meta data like scheduling dates,
-TODO state, tags and properties.  But these tasks are not meant to
-introduce additional outline structure, at least as far as visibility
-cycling and export is concerned.  Therefore they are useful for to add
-tasks for extensive pieces of text, like when writing documents or
-long notes.
+Inline tasks are tasks that have all the properties of normal
+outline nodes, including the ability to store meta data like
+scheduling dates, TODO state, tags and properties.  But these
+tasks are not meant to introduce additional outline structure, at
+least as far as visibility cycling and export is concerned.  They
+are useful for adding tasks in extensive pieces of text where
+interruption of the flow or restructuring is unwanted.
 
-This feature is not turned on by default, you need to do configure
-=org-modules= to turn it on, or simple add to you .emacs file:
+This feature is not turned on by default, you need to configure
+=org-modules= to turn it on, or simply add to you .emacs file:
 
 : (require 'org-inlinetask)
 
-After that, tasks with level 15 (30 when using org-odd-levels-only)
-will be treated as inline tasks, and fontification will make obvious
-which tasks are treated in this way.
+After that, tasks with level 15 (30 stars when using
+org-odd-levels-only) will be treated as inline tasks, and
+fontification will make obvious which tasks are treated in this
+way.
 
 *** Input from RSS feeds
 
@@ -90,10 +90,10 @@ exciting new feature.
 ** Export
 *** Allow modification of table attributes in HTML export
       
-The #+ATTR_HTML line can now be used to set attributes for the
-following table.  Attributes listed in that line will replace
-existing attributes, and add new ones, in
-=org-export-html-table-tag=.  For example
+The #+ATTR_HTML line can now be used to set attributes for a
+table.  Attributes listed in that line will replace existing
+attributes in =org-export-html-table-tag=, or will add new ones.
+For example
       
 : #+ATTR_HTML: border="2" rules="all" frame="all"
 : #+CAPTION: Finally a table with lines!
@@ -101,12 +101,12 @@ existing attributes, and add new ones, in
 : |---|---|
 : | 1 | 2 |
 
-*** LaTeX low levels as itemize lists
+*** LaTeX low levels are now exported as itemize lists
 
 LaTeX export now treats hierarchy levels 4,5, etc as itemize
-lists, not as description lists anymore.  This is more consistent
-with the behavior of HTML export.  You can configure this
-behavior using the variable =org-export-latex-low-levels=.
+lists, not as description lists as before.  This is more
+consistent with the behavior of HTML export.  You can configure
+this behavior using the variable =org-export-latex-low-levels=.
 
 *** Markup for centering.
 
@@ -118,6 +118,7 @@ Text can be exported centered with
 ,but not any simpler
 ,#+END_CENTER
 #+end_src
+
 *** Sitemap file is now /sitemap.org/
     
 Org-publish can produce a list of all files in a project.
@@ -136,27 +137,31 @@ this.
 
 *** HTML export: Allow "- ___" to explicitly terminate a list
       
-If a list contains "- ___" as an item, this terminates the list,
-ignoring this item.  This is an experimental feature, it may
-disappear again if we find other ways to deal with literal
-examples right after lists.
+If a list contains "- ___" (three underscores) as an item, this
+terminates the list, ignoring this item.  This is an experimental
+feature, it may disappear again if we find other ways to deal
+with literal examples right after lists.
 
-See [[http://thread.gmane.org/gmane.emacs.orgmode/12299/focus%3D12312][this mailing list thread]] for more information.
-
+See [[http://thread.gmane.org/gmane.emacs.orgmode/12299/focus%3D12312][this mailing list thread]] for context.
 
 ** Agenda
 
 *** Changing the time of an entry from the agenda
 
-We now have a way to change the start time of an entry from the
-agenda.  The date is normally changed with S-right/left.  Now, if
-you add a C-u prefix, the hour will be changed.  If you
-immediately press S-right/left again, hours will continue to be
-changed.  A double prefix will do the same for minutes.
+We now have a way to change not only the date, but also the start
+time of an entry from the agenda.  The date is normally changed
+with S-right/left.  Now, if you add a C-u prefix, the hour will
+be changed.  If you immediately press S-right/left again, hours
+will continue to be changed.  A double prefix will do the same
+for minutes.  If the entry has a time range like 14:40-16:00,
+then both times will change, preserving the length of the
+appointment.
+
 *** Show saved PDF agenda view with prefix arg
 
 When writing an agenda view to a PDF file, supplying a a prefix
-argument =C-u C-x C-w= will get the new file displayed immediately.
+argument (=C-u C-x C-w=) will get the new file displayed
+immediately.
 
 This was a request by Alan E Davis.
 
@@ -168,24 +173,28 @@ filter that selects entries which do not have an effort defined.
 This new model was necessary because we needed to stop interpreting
 entries with no effort defines as 0 effort.  This was inconsistent,
 because for normal agenda sorting, the treatment of these entries
-depends on the variable `org-sort-agenda-noeffort-is-high'.  Now this
+depends on the variable =org-sort-agenda-noeffort-is-high=.  Now this
 variable is also respected during filtering.
+
+This new feature resulted from a [[http://thread.gmane.org/gmane.emacs.orgmode/12493][discussion]] with Matt Lundin and
+Bernt Hansen.
 
 *** Introduce user-defined sorting operators
       
-The new variable `org-agenda-cmp-user-defined' can contain a function
-to test how two entries should be compared during sorting.
-user-defined-up and user-defined-down can then be part of any sorting
-strategy.
+The new variable =org-agenda-cmp-user-defined= can contain a
+function to test how two entries should be compared during
+sorting.  The symbols =user-defined-up= and =user-defined-down=
+can then be part of any sorting strategy.
 
 This was a request by Samuel Wales.
 
 *** Indentation of subitems in the agenda
       
-When a tags/property match does match an entry and it's sublevels, the
-sublevels used to be indented by dots, to indicate that the matches
-likely result from tag inheritance.  This is now no longer the
-default.  You can get this behavior back with
+When a tags/property match does match an entry and it's
+sublevels, the sublevels used to be indented by dots, to indicate
+that the matches likely result from tag inheritance.  This is now
+no longer the default, so the subitems will not get special
+indentation.  You can get this behavior back with
       
 : (setq org-tags-match-list-sublevels 'indented)
 
@@ -202,8 +211,17 @@ subtree, so that stuck subprojects can still be identified.
 *** Citations: Use RefTeX to insert citations
       
 RefTeX can now be used to create a citation in Org-mode buffers.
-Setup the buffer with #+BIBLIOGRAPHY: bibbase style
-and create citations with `C-c C-x ['.
+Setup the buffer with 
+
+#+begin_src org
+,#+BIBLIOGRAPHY: bibbase style
+#+end_src
+
+and create citations with =C-c C-x [=.
+
+Together with org-exp-bibtex.el by Taru Karttunen (available as a
+contributed package), this provides a great environment for
+including citations into HTML and LaTeX documents.
 
 *** Changing time ranges as a block
 
@@ -263,13 +281,13 @@ storing of the note to an Org files was successful.
 *** org-mac-message.el: New functions to access flagged mail
       
 Christopher Suckling has added functionality to
-org-mac-message.el.  In particular, you can now select a number
-of messages and easily get links to all of them with one
-command.   For details, see the [[http://orgmode.org/worg/org-contrib/org-mac-message.php][online documentation]].
+/org-mac-message.el/.  In particular, you can now select a number
+of messages and easily get links to all of them with a single
+command.  For details, see the [[http://orgmode.org/worg/org-contrib/org-mac-message.php][online documentation]].
 
 *** Read-date: New hook
       
-The new hook `org-read-date-minibuffer-setup-hook' is called when
+The new hook =org-read-date-minibuffer-setup-hook= is called when
 setting up the minibuffer for reading a date.  If can be used to
 install new keys into the temporary keymap used there.
 
