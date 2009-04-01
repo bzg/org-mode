@@ -1,5 +1,8 @@
 2009-04-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-refile-get-location): Add file name only if not
+	already included in outline path.
+
 	* org-faces.el (org-n-level-faces): Fix customization type from
 	number to integer.
 
