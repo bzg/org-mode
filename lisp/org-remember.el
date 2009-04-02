@@ -386,11 +386,16 @@ to be run from that hook to function properly."
 	     (v-T (format-time-string (cdr org-time-stamp-formats) ct))
 	     (v-u (concat "[" (substring v-t 1 -1) "]"))
 	     (v-U (concat "[" (substring v-T 1 -1) "]"))
-	     ;; `initial' and `annotation' are bound in `remember'
-	     (v-i (if (boundp 'initial) initial))
-	     (v-a (if (and (boundp 'annotation) annotation)
-		      (if (equal annotation "[[]]") "" annotation)
-		    ""))
+	     ;; `initial' and `annotation' are bound in `remember'.
+	     ;; But if the property list has them, we prefer those values
+	     (v-i (or (plist-get org-store-link-plist :initial)
+		      (and (boundp 'initial) initial)
+		      ""))
+	     (v-a (or (plist-get org-store-link-plist :annotation)
+		      (and (boundp 'annotation) annotation)
+		      ""))
+	     ;; Is the link empty?  Then we do not want it...
+	     (v-a (if (equal v-a "[[]]") "" v-a))
 	     (clipboards (remove nil (list v-i
 					   (org-get-x-clipboard 'PRIMARY)
 					   (org-get-x-clipboard 'CLIPBOARD)
@@ -418,10 +423,11 @@ to be run from that hook to function properly."
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
 
-
 	(setq org-store-link-plist
-	      (append (list :annotation v-a :initial v-i)
-		      org-store-link-plist))
+	      (plist-put org-store-link-plist :annotation v-a)
+	      org-store-link-plist
+	      (plist-put org-store-link-plist :initial v-i))
+
 	(unless tpl (setq tpl "") (message "No template") (ding) (sit-for 1))
 	(erase-buffer)
 	(insert (substitute-command-keys
