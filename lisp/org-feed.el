@@ -45,10 +45,11 @@
 ;;  With this setup, the command `M-x org-feed-update-all' will
 ;;  collect new entries in the feed at the given URL and create
 ;;  entries as subheadings under the "ReQall Entries" heading in the
-;;  file "~/org-feeds.org".  Each feed needs to have its own heading.
+;;  file "~/org-feeds.org".  Each feed should normally have its own
+;;  heading - however see the `:drawer' parameter.
 ;;
 ;;  Besides these standard elements that need to be specified for each
-;;  feed,, keyword-value pairs can set additional options.  For example,
+;;  feed, keyword-value pairs can set additional options.  For example,
 ;;  to de-select transitional entries with a title containing
 ;;
 ;;                   "reQall is typing what you said",
@@ -119,6 +120,8 @@ it contains the following properties:
 
 `:item-full-text'   the full text in the <item> tag
 `:guid-permalink'   t when the guid property is a permalink
+
+Here are the keyword-value pair allows in `org-feed-alist'.
 
 :drawer drawer-name
      The name of the drawer for storing feed information.  The default is
