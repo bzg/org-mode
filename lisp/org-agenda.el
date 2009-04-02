@@ -3370,6 +3370,9 @@ MATCH is being ignored."
 		 'type "diary" 'date date))
 	     entries)))))
 
+(defvar org-agenda-cleanup-fancy-diary-hook nil
+  "Hook run when the fancy diary buffer is cleaned up.")
+
 (defun org-agenda-cleanup-fancy-diary ()
   "Remove unwanted stuff in buffer created by `fancy-diary-display'.
 This gets rid of the date, the underline under the date, and
@@ -3389,7 +3392,8 @@ date.  It also removes lines that contain only whitespace."
     (replace-match ""))
   (goto-char (point-min))
   (if (re-search-forward "^Org-mode dummy\n?" nil t)
-      (replace-match "")))
+      (replace-match ""))
+  (run-hooks 'org-agenda-cleanup-fancy-diary-hook))
 
 ;; Make sure entries from the diary have the right text properties.
 (eval-after-load "diary-lib"

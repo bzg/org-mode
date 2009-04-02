@@ -1,5 +1,8 @@
 2009-04-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-cleanup-fancy-diary-hook): New hook.
+	(org-agenda-cleanup-fancy-diary): Call the new hook.
+
 	* org-remember.el (org-remember-apply-template): Take the default
 	for the annotation from the :annotation property.
 
