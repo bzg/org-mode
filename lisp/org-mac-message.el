@@ -107,7 +107,10 @@ active mail in AppleMail and make a link out of it."
 	    "end repeat\n"
 	    "return theLinkList as string\n"
 	    "end tell")))
-	 (link-list (split-string as-link-list "\n"))
+	 (link-list
+	  (mapcar
+	   (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
+	   (split-string as-link-list "[\r\n]+")))
 	 split-link
 	 URL
 	 description
@@ -126,7 +129,8 @@ active mail in AppleMail and make a link out of it."
     (with-temp-buffer      
       (while orglink-list
 	(insert (concat (pop orglink-list)) "\n"))
-      (kill-region (point-min) (point-max)))))
+      (kill-region (point-min) (point-max))
+      (current-kill 0))))
 
 (defun org-mac-create-flagged-mail ()
   "Create links to flagged messages in a Mail.app account and
