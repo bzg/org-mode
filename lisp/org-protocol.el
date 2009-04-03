@@ -147,7 +147,7 @@ for `org-protocol-the-protocol' and sub-procols defined in
 ;;; Variables:
 
 (defconst org-protocol-protocol-alist-default
-  '(("org-remember"    :protocol "remember"    :function org-protocol-remember)
+  '(("org-remember"    :protocol "remember"    :function org-protocol-remember :kill-client t)
     ("org-store-link"  :protocol "store-link"  :function org-protocol-store-link)
     ("org-open-source" :protocol "open-source" :function org-protocol-open-source))
   "Default protocols to use.
@@ -216,7 +216,7 @@ Consider using the interactive functions `org-protocol-create' and
 
 Each element of this list must be of the form:
 
-  (module-name :protocol protocol :function func)
+  (module-name :protocol protocol :function func :kill-client nil)
 
 protocol - protocol to detect in a filename without trailing colon and slashes.
            See rfc1738 section 2.1 for more on this.
@@ -234,6 +234,12 @@ function - function that handles requests with protocol and takes exactly one
            `org-protocol.el provides some support for handling those filenames,
            if you stay with the conventions used for the standard handlers in
            `org-protocol-protocol-alist-default'. See `org-protocol-split-data'.
+
+kill-client - If t, kill the client immediately, once the sub-protocol is
+           detected. This is neccessary for actions that can be interupted by
+           `C-g' to avoid dangeling emacsclients. Note, that all other command
+           line arguments but the this one will be discarded, greedy handlers
+           still receive the whole list of arguments though.
 
 Here is an example:
 
@@ -326,31 +332,26 @@ URL with a character and a slash like so:
 Now template ?b will be used."
 
   (if (and (boundp 'org-stored-links)
-             (fboundp 'org-remember))
-    (let* ((b (generate-new-buffer "*org-protocol*"))
-           (parts (org-protocol-split-data info t))
-           (template (or (and (= 1 (length (car parts))) (pop parts)) "w"))
-           (url (org-protocol-sanitize-uri (car parts)))
-           (type (if (string-match "^\\([a-z]+\\):" url)
-                     (match-string 1 url)))
-           (title (cadr parts))
-           (region (caddr parts))
-           orglink)
-      (setq orglink (org-make-link-string url title))
-      (org-store-link-props :type type
-                            :link url
-                            :region region
-                            :description title)
-      (setq org-stored-links
-            (cons (list url title) org-stored-links))
-      ;; FIXME can't access %a in the template -- how to set annotation?
-      (raise-frame)
-      (kill-new orglink)
-      (set-buffer b)
-      (insert region)
-      (mark-whole-buffer)
-      (org-remember nil (string-to-char template))
-      (kill-buffer b))
+           (fboundp 'org-remember))
+      (let* ((parts (org-protocol-split-data info t))
+             (template (or (and (= 1 (length (car parts))) (pop parts)) "w"))
+             (url (org-protocol-sanitize-uri (car parts)))
+             (type (if (string-match "^\\([a-z]+\\):" url)
+                       (match-string 1 url)))
+             (title (cadr parts))
+             (region (caddr parts))
+             (orglink (org-make-link-string url title))
+             remember-annotation-functions)
+        (setq org-stored-links
+              (cons (list url title) org-stored-links))
+        (kill-new orglink)
+        (org-store-link-props :type type
+                              :link url
+                              :description title
+                              :initial region)
+        (raise-frame)
+        (org-remember nil (string-to-char template)))
+    
     (message "Org-mode not loaded."))
   nil)
 
@@ -393,7 +394,7 @@ The location for a browser's bookmark should look like this:
 
 ;;; Core functions:
 
-(defun org-protocol-check-filename-for-protocol (fname restoffiles)
+(defun org-protocol-check-filename-for-protocol (fname restoffiles client)
   "Detect if `org-protocol-the-protocol' and a known sub-protocol is used in fname.
 Sub-protocols are registered in `org-protocol-protocol-alist' and
 `org-protocol-protocol-alist-default'.
@@ -420,6 +421,8 @@ as filename."
                        (greedy (plist-get (cdr prolist) :greedy))
                        (splitted (split-string fname proto))
                        (result (if greedy restoffiles (cadr splitted))))
+                  (if (plist-get (cdr prolist) :kill-client)
+                      (server-delete-client client t))
                   (when (fboundp func)
                     (unless greedy
                       (throw 'fname (funcall func result)))
@@ -433,11 +436,12 @@ as filename."
   "Advice server-visit-flist to call `org-protocol-modify-filename-for-protocol'."
   (let ((flist (if org-protocol-reverse-list-of-files
                    (reverse  (ad-get-arg 0))
-                 (ad-get-arg 0))))
+                 (ad-get-arg 0)))
+        (client (ad-get-arg 1)))
     (catch 'greedy
       (dolist (var flist)
         (let ((fname  (expand-file-name (car var)))) ;; `\' to `/' on windows. FIXME: could this be done any better?
-          (setq fname (org-protocol-check-filename-for-protocol fname (member var flist)))
+          (setq fname (org-protocol-check-filename-for-protocol fname (member var flist)  client))
           (if (eq fname t) ;; greedy? We need the `t' return value.
               (progn
                 (ad-set-arg 0 nil)
@@ -446,7 +450,6 @@ as filename."
                 (setcar var fname)
               (ad-set-arg 0 (delq var (ad-get-arg 0))))))
         ))))
-
 
 ;;; Org specific functions:
 
