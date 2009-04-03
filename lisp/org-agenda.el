@@ -771,6 +771,14 @@ the agenda to display all available LOG items temporarily."
   :group 'org-agenda-daily/weekly
   :type '(set :greedy t (const closed) (const clock) (const state)))
 
+(defcustom org-agenda-log-mode-add-notes t
+  "Non-nil means, add first line of notes to log entries in agenda views.
+If a log item like a state change or a clock entry is associated with
+notes, the first line of these notes will be added to the entry in the
+agenda display."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
 (defcustom org-agenda-start-with-clockreport-mode nil
   "The initial value of clockreport-mode in a newly created agenda window."
   :group 'org-agenda-startup
@@ -3798,8 +3806,8 @@ the documentation of `org-diary'."
 		     (apply 'encode-time  ; DATE bound by calendar
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
-	 marker hdmarker priority category tags closedp statep state
-	 ee txt timestr rest clocked)
+	 marker hdmarker priority category tags closedp statep clockp state
+	 ee txt extra timestr rest clocked)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -3807,6 +3815,7 @@ the documentation of `org-diary'."
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      closedp (equal (match-string 1) org-closed-string)
 	      statep (equal (string-to-char (match-string 1)) ?-)
+	      clockp (not (or closedp statep))
 	      state (and statep (match-string 2))
 	      category (org-get-category (match-beginning 0))
 	      timestr (buffer-substring (match-beginning 0) (point-at-eol))
@@ -3823,18 +3832,33 @@ the documentation of `org-diary'."
 		     (setq clocked (match-string 2 rest)))
 	    (setq clocked "-")))
 	(save-excursion
+	  (cond
+	   ((not org-agenda-log-mode-add-notes) (setq extra nil))
+	   (statep
+	    (and (looking-at ".*\n[ \t]*\\([^-\n \t].*?\\)[ \t]*$")
+		 (setq extra (match-string 1))))
+	   (clockp
+	    (and (looking-at ".*\n[ \t]*-[ \t]+\\([^-\n \t].*?\\)[ \t]*$")
+		 (setq extra (match-string 1))))
+	   (t (setq extra nil)))
 	  (if (re-search-backward "^\\*+ " nil t)
 	      (progn
 		(goto-char (match-beginning 0))
 		(setq hdmarker (org-agenda-new-marker)
 		      tags (org-get-tags-at))
 		(looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
+		(setq txt (match-string 1))
+		(when extra
+		  (if (string-match "\\([ \t]+\\)\\(:[^ \n\t]*?:\\)[ \t]*$" txt)
+		      (setq txt (concat (substring txt 0 (match-beginning 1))
+					" - " extra " " (match-string 2 txt)))
+		    (setq txt (concat txt " - " extra))))
 		(setq txt (org-format-agenda-item
 			   (cond
 			    (closedp "Closed:    ")
 			    (statep (concat "State:     (" state ")"))
 			    (t (concat "Clocked:   (" clocked  ")")))
-			   (match-string 1) category tags timestr)))
+			   txt category tags timestr)))
 	    (setq txt org-agenda-no-heading-message))
 	  (setq priority 100000)
 	  (org-add-props txt props

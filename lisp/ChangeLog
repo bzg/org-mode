@@ -1,3 +1,9 @@
+2009-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-log-mode-add-notes): New option.
+	(org-agenda-get-progress): Add first notes line to log entry if so
+	desired.
+
 2009-04-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-cleanup-fancy-diary-hook): New hook.
