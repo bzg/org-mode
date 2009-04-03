@@ -11160,6 +11160,8 @@ Org-mode website.
 @item
 @i{Alex Bochannek} provided a patch for rounding time stamps.
 @item
+@i{Brad Bozarth} showed how to pull RSS feed data into Org-mode files.
+@item
 @i{Tom Breton} wrote @file{org-choose.el}.
 @item
 @i{Charles Cave}'s suggestion sparked the implementation of templates
