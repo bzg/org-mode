@@ -38,7 +38,7 @@
 called by `litorgy-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
-    (let ((vars (litorgy-reference-variables params))
+    (let ((vars (litorgy-ref-variables params))
           results)
       (litorgy-R-initiate-R-buffer)
       (litorgy-R-command-to-string body))))

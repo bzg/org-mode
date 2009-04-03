@@ -1,4 +1,4 @@
-;;; litorgy-reference.el --- litorgical functions for referencing external data
+;;; litorgy-ref.el --- litorgical functions for referencing external data
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -73,13 +73,13 @@ This is taken almost directly from `org-read-prop'."
 	  out))
     cell))
 
-(defun litorgy-reference-variables (params)
+(defun litorgy-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the string representation of the related value."
-  (mapcar #'litorgy-reference-parse
+  (mapcar #'litorgy-ref-parse
    (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
 
-(defun litorgy-reference-parse (reference)
+(defun litorgy-ref-parse (reference)
   "Parse a reference to an external resource returning a list
 with two elements.  The first element of the list will be the
 name of the variable, and the second will be an emacs-lisp
@@ -88,7 +88,7 @@ representation of the value of the variable."
     (if (string-match "\\(.+\\)=\\(.+\\)" reference)
         (let ((var (match-string 1 reference))
               (ref (match-string 2 reference))
-              direction)
+              direction type)
           (when (string-match "\\(.+\\):\\(.+\\)" reference)
             (find-file (match-string 1 reference))
             (setf ref (match-string 2 reference)))
@@ -100,23 +100,35 @@ representation of the value of the variable."
                    (t
                     (goto-char (point-min))
                     (setq direction 1)
-                    (unless (let ((regexp (concat "^#\\+TBLNAME:[ \t]*"
+                    (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
                                                   (regexp-quote ref) "[ \t]*$")))
                               (or (re-search-forward regexp nil t)
                                   (re-search-backward regexp nil t)))
-                      ;; ;; TODO: allow searching for table in other buffers
+                      ;; ;; TODO: allow searching for names in other buffers
                       ;; (setq id-loc (org-id-find ref 'marker)
                       ;;       buffer (marker-buffer id-loc)
                       ;;       loc (marker-position id-loc))
                       ;; (move-marker id-loc nil)
-                      (error (format "table '%s' not found in this buffer" ref)))))
-                  (while (not (org-at-table-p))
+                      (error (format "reference '%s' not found in this buffer" ref)))))
+                  (while (not (setq type (litorgy-ref-at-ref-p)))
                     (forward-line direction)
+                    (beginning-of-line)
                     (if (or (= (point) (point-min)) (= (point) (point-max)))
-                        (error "no table found")))
-                  (mapcar (lambda (row)
-                            (mapcar #'litorgy-read-cell row))
-                          (org-table-to-lisp))))))))
+                        (error "reference not found")))
+                  (case type
+                    ('table
+                     (mapcar (lambda (row)
+                                      (mapcar #'litorgy-read-cell row))
+                                    (org-table-to-lisp)))
+                    ('source-block
+                     (litorgy-execute-src-block t)))))))))
 
-(provide 'litorgy-reference)
-;;; litorgy-reference.el ends here
+(defun litorgy-ref-at-ref-p ()
+  "Return the type of reference located at point or nil of none
+of the supported reference types are found.  Supported reference
+types are tables and source blocks."
+  (cond ((org-at-table-p) 'table)
+        ((looking-at "^#\\+BEGIN_SRC") 'source-block)))
+
+(provide 'litorgy-ref)
+;;; litorgy-ref.el ends here

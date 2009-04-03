@@ -31,7 +31,7 @@
 ;;; Code:
 (require 'org)
 (require 'litorgy)
-(require 'litorgy-reference)
+(require 'litorgy-ref)
 
 ;; language specific files
 (require 'litorgy-script)

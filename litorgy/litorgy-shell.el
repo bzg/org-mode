@@ -52,7 +52,7 @@ executed through litorgy."
 (defun litorgy-shell-execute (cmd body params)
   "Run CMD on BODY obeying any options set with PARAMS."
   (message (format "executing %s code block..." cmd))
-  (let ((vars (litorgy-reference-variables params)))
+  (let ((vars (litorgy-ref-variables params)))
     (save-window-excursion
       (with-temp-buffer
         (if (> (length vars) 0)

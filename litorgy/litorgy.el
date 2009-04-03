@@ -94,7 +94,9 @@ lisp code use the `litorgy-add-interpreter' function."
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
 commented by `org-toggle-fixed-width-section'.  With optional
-prefix don't dump results into buffer."
+prefix don't dump results into buffer but rather return the
+results in raw elisp (this is useful for automated execution of a
+source block)."
   (interactive "P")
   (let* ((info (litorgy-get-src-block-info))
          (lang (first info))
@@ -104,9 +106,11 @@ prefix don't dump results into buffer."
          result)
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
+    (when arg
+      (setq params (cons '(:raw . t) params)))
     (setq result (funcall cmd body params))
     (if arg
-        (message (format "%S" result))
+        result
       (litorgy-insert-result result (cdr (assoc :results params))))))
 
 (defun litorgy-eval-buffer (&optional arg)
@@ -132,7 +136,7 @@ form.  (language body header-arguments-alist)"
   (unless (save-excursion
             (beginning-of-line 1)
             (looking-at litorgy-src-block-regexp))
-    (error "not looking at src-block"))
+    (error (format "not looking at src-block (%s)" (point))))
   (let ((lang (litorgy-clean-text-properties (match-string 1)))
         (args (litorgy-clean-text-properties (or (match-string 3) "")))
         (body (litorgy-clean-text-properties (match-string 4))))

@@ -38,12 +38,14 @@
 function is called by `litorgy-execute-src-block'."
   (message "executing emacs-lisp code block...")
   (save-window-excursion
-    (let ((vars (litorgy-reference-variables params))
+    (let ((vars (litorgy-ref-variables params))
           (print-level nil) (print-length nil) results)
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                      ,(read body))))
-      (if (listp results) results (format "%S" results)))))
+      (if (assoc :raw params)
+          results
+        (if (listp results) results (format "%S" results))))))
 
 (provide 'litorgy-lisp)
 ;;; litorgy-lisp.el ends here

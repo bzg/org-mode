@@ -54,6 +54,13 @@ to specify whether the target is a source code block or a table
 (alternately we could just match the first one with the given name
 whether it's a table or a source code block).
 
+At least initially I'll try to implement this so that there is no need
+to specify whether the reference is to a table or a source-code block.
+That seems to be simpler both in terms of use and implementation.
+
+This is currently working only with emacs lisp as in the following
+example in the [[* emacs lisp source reference][emacs lisp source reference]].
+
 
 * Bugs
 ** Args out of range error
@@ -256,6 +263,53 @@ x
 #+begin_src ruby :results replace
 :im_the_results
 #+end_src
+
+
+** referencing other source blocks
+Doing this in emacs-lisp first because it's trivial to convert
+emacs-lisp results to and from emacs-lisp.
+
+*** emacs lisp source reference
+This first example performs a calculation in the first source block
+named =top=, the results of this calculation are then saved into the
+variable =first= by the header argument =:var first=top=, and it is
+used in the calculations of the second source block.
+
+#+SRCNAME: top
+#+begin_src emacs-lisp
+(+ 4 2)
+#+end_src
+
+#+begin_src emacs-lisp :var first=top :results replace
+(* first 3)
+#+end_src
+
+: 18
+
+This example is the same as the previous only the variable being
+passed through is a table rather than a number.
+
+#+begin_src emacs-lisp :results silent
+(defun transpose (table)
+  (apply #'mapcar* #'list table))
+#+end_src
+
+#+TBLNAME: top_table
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
+
+#+SRCNAME: second_src_example
+#+begin_src emacs-lisp :var table=top_table
+(transpose table)
+#+end_src
+
+#+begin_src emacs-lisp :var table=second_src_example
+(transpose table)
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
 
 
 * COMMENT Commentary
