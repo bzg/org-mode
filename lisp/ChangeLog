@@ -1,5 +1,7 @@
 2009-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-progress): Fix regexp bug.
+
 	* org.el (org-block-todo-from-children-or-siblings-or-parent):
 	Renamed from org-block-todo-from-children-or-siblings, and
 	enhanced to look for the parent's status as well.

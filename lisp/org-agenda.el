@@ -3826,7 +3826,7 @@ the documentation of `org-diary'."
 	  (setq rest (substring timestr (match-end 0))
 		timestr (substring timestr 0 (match-end 0)))
 	  (if (and (not closedp) (not statep)
-		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" rest))
+		   (string-match "\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)\\].*?\\([0-9]\\{1,2\\}:[0-9]\\{2\\}\\)" rest))
 	      (progn (setq timestr (concat (substring timestr 0 -1)
 					   "-" (match-string 1 rest) "]"))
 		     (setq clocked (match-string 2 rest)))
