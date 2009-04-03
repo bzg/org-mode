@@ -53,7 +53,7 @@
 ;;; Code:
 (require 'litorgy)
 
-(defun litorgy-read-cell (cell)
+(defun litorgy-read (cell)
   "Convert the string value of CELL to a number if appropriate.
 Otherwise if cell looks like a list (meaning it starts with a
 '(') then read it as lisp, otherwise return it unmodified as a
@@ -118,7 +118,7 @@ representation of the value of the variable."
                   (case type
                     ('table
                      (mapcar (lambda (row)
-                                      (mapcar #'litorgy-read-cell row))
+                                      (mapcar #'litorgy-read row))
                                     (org-table-to-lisp)))
                     ('source-block
                      (litorgy-execute-src-block t)))))))))

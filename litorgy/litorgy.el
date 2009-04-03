@@ -106,8 +106,6 @@ source block)."
          result)
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
-    (when arg
-      (setq params (cons '(:raw . t) params)))
     (setq result (funcall cmd body params))
     (if arg
         result
@@ -136,7 +134,7 @@ form.  (language body header-arguments-alist)"
   (unless (save-excursion
             (beginning-of-line 1)
             (looking-at litorgy-src-block-regexp))
-    (error (format "not looking at src-block (%s)" (point))))
+    (error "not looking at src-block"))
   (let ((lang (litorgy-clean-text-properties (match-string 1)))
         (args (litorgy-clean-text-properties (or (match-string 3) "")))
         (body (litorgy-clean-text-properties (match-string 4))))
@@ -163,6 +161,7 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
+  (unless (listp result) (setq result (format "%S" result)))
   (if (string-equal insert "replace") (litorgy-remove-result (listp result)))
   (if (= (length result) 0)
       (message "no result returned by source block")

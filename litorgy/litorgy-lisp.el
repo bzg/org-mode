@@ -43,9 +43,7 @@ function is called by `litorgy-execute-src-block'."
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                      ,(read body))))
-      (if (assoc :raw params)
-          results
-        (if (listp results) results (format "%S" results))))))
+      results)))
 
 (provide 'litorgy-lisp)
 ;;; litorgy-lisp.el ends here

@@ -58,6 +58,9 @@ At least initially I'll try to implement this so that there is no need
 to specify whether the reference is to a table or a source-code block.
 That seems to be simpler both in terms of use and implementation.
 
+This is now working for emacs-lisp, ruby and python (and mixtures of
+the three) source blocks.  See the examples in the [[* (sandbox) referencing other source blocks][sandbox]].
+
 This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
@@ -265,7 +268,7 @@ x
 #+end_src
 
 
-** referencing other source blocks
+** (sandbox) referencing other source blocks
 Doing this in emacs-lisp first because it's trivial to convert
 emacs-lisp results to and from emacs-lisp.
 
@@ -284,8 +287,6 @@ used in the calculations of the second source block.
 (* first 3)
 #+end_src
 
-: 18
-
 This example is the same as the previous only the variable being
 passed through is a table rather than a number.
 
@@ -303,13 +304,53 @@ passed through is a table rather than a number.
 (transpose table)
 #+end_src
 
-#+begin_src emacs-lisp :var table=second_src_example
+#+begin_src emacs-lisp :var table=second_src_example :results replace
 (transpose table)
 #+end_src
 
-| 1 |         2 | 3 |
-| 4 | "schulte" | 6 |
+*** ruby python
+Now working for ruby
 
+#+srcname: start
+#+begin_src ruby
+89
+#+end_src
+
+#+begin_src ruby :var other=start :results replace
+2 * other
+#+end_src
+
+and for python
+
+#+SRCNAME: start_two
+#+begin_src python
+98
+#+end_src
+
+#+begin_src python :var another=start_two :results replace
+another + 3
+#+end_src
+
+*** mixed languages
+Since all variables are converted into Emacs Lisp it is no problem to
+reference variables specified in another language.
+
+#+SRCNAME: ruby-block
+#+begin_src ruby
+2
+#+end_src
+
+#+SRCNAME: lisp_block
+#+begin_src emacs-lisp :var ruby-variable=ruby-block
+(* ruby-variable 8)
+#+end_src
+
+#+begin_src python :var lisp_var=lisp_block
+lisp_var + 4
+#+end_src
+
+*** R
+not yet implemented
 
 
 * COMMENT Commentary
