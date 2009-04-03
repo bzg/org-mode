@@ -1,5 +1,8 @@
 2009-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-scan-tags): Make tag scan find headline in first
+	line, 2nd attempt.
+
 	* org-agenda.el (org-agenda-get-progress): Fix regexp bug.
 
 	* org.el (org-block-todo-from-children-or-siblings-or-parent):

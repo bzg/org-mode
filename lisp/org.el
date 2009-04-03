@@ -9967,7 +9967,7 @@ MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
 only lines with a TODO keyword are included in the output."
   (require 'org-agenda)
-  (let* ((re (concat "[\n\r]" outline-regexp " *\\(\\<\\("
+  (let* ((re (concat "^" outline-regexp " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
 		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@:]+:\\)?[ \t]*$")))
@@ -10078,7 +10078,8 @@ only lines with a TODO keyword are included in the output."
 	     (t (error "Invalid action")))
 
 	    ;; if we are to skip sublevels, jump to end of subtree
-	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))))
+	    (or org-tags-match-list-sublevels (org-end-of-subtree t))))
+	(and (= (point) lspos) (forward-char 1))))
     (when (and (eq action 'sparse-tree)
 	       (not org-sparse-tree-open-archived-trees))
       (org-hide-archived-subtrees (point-min) (point-max)))
