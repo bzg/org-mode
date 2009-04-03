@@ -161,7 +161,9 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
-  (unless (listp result) (setq result (format "%S" result)))
+  (if (stringp result)
+      (setq result (litorgy-clean-text-properties result))
+    (unless (listp result) (setq result (format "%S" result))))
   (if (string-equal insert "replace") (litorgy-remove-result (listp result)))
   (if (= (length result) 0)
       (message "no result returned by source block")

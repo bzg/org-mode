@@ -239,8 +239,10 @@ table
 #+begin_src R :results replace
 a <- 9
 b <- 8
-
+b*a
 #+end_src
+
+: 72
 
 #+begin_src R :results replace
 x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
@@ -328,8 +330,10 @@ and for python
 #+end_src
 
 #+begin_src python :var another=start_two :results replace
-another + 3
+another*3
 #+end_src
+
+: 294
 
 *** mixed languages
 Since all variables are converted into Emacs Lisp it is no problem to
@@ -351,6 +355,20 @@ lisp_var + 4
 
 *** R
 not yet implemented
+
+#+srcname: first_r
+#+begin_src R :results replace
+a <- 9
+a
+#+end_src
+
+: 9
+
+#+begin_src R :var other=first_r :results replace
+other + 2
+#+end_src
+
+: 11
 
 
 * COMMENT Commentary

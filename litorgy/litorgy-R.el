@@ -40,6 +40,11 @@ called by `litorgy-execute-src-block'."
   (save-window-excursion
     (let ((vars (litorgy-ref-variables params))
           results)
+      (message (format "--%S--" vars))
+      (mapc (lambda (pair)
+              (litorgy-R-input-command
+               (format "%s <- %s" (car pair) (cdr pair))))
+            vars)
       (litorgy-R-initiate-R-buffer)
       (litorgy-R-command-to-string body))))
 
