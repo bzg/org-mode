@@ -2,6 +2,9 @@
 
 	* org.el (org-scan-tags): Make tag scan find headline in first
 	line, 2nd attempt.
+	(org-get-refile-targets): Add the naked file name.
+	(org-refile): Store as top-level entry when only file name was
+	given.
 
 	* org-agenda.el (org-agenda-get-progress): Fix regexp bug.
 

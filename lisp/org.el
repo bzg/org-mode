@@ -1508,8 +1508,12 @@ are used, equivalent to the value `((nil . (:level . 1))'."
 (defcustom org-refile-use-outline-path nil
   "Non-nil means, provide refile targets as paths.
 So a level 3 headline will be available as level1/level2/level3.
+
 When the value is `file', also include the file name (without directory)
-into the path.  When `full-file-path', include the full file path."
+into the path.  In this case, you can also stop the completion after
+the file name, to get entries inserted as top level in the file.
+
+  When `full-file-path', include the full file path."
   :group 'org-refile
   :type '(choice
 	  (const :tag "Not" nil)
@@ -8115,6 +8119,8 @@ on the system \"/user@host:\"."
 	    (set-buffer (if (bufferp f) f (org-get-agenda-file-buffer f)))
 	    (if (bufferp f) (setq f (buffer-file-name (buffer-base-buffer f))))
 	    (setq f (expand-file-name f))
+	    (if (eq org-refile-use-outline-path 'file)
+		(push (list (file-name-nondirectory f) f nil nil) targets))
 	    (save-excursion
 	      (save-restriction
 		(widen)
@@ -8214,6 +8220,7 @@ operation has put the subtree."
 	      re (nth 2 it)
 	      pos (nth 3 it))
 	(if (and (not goto)
+		 pos
 		 (equal (buffer-file-name) file)
 		 (if regionp
 		     (and (>= pos region-start)
@@ -8242,15 +8249,22 @@ operation has put the subtree."
 	    (save-excursion
 	      (save-restriction
 		(widen)
-		(goto-char pos)
-		(looking-at outline-regexp)
-		(setq level (org-get-valid-level (funcall outline-level) 1))
-		(goto-char
-		 (if reversed
-		     (or (outline-next-heading) (point-max))
-		   (or (save-excursion (outline-get-next-sibling))
-		       (org-end-of-subtree t t)
-		       (point-max))))
+		(if pos
+		    (progn
+		      (goto-char pos)
+		      (looking-at outline-regexp)
+		      (setq level (org-get-valid-level (funcall outline-level) 1))
+		      (goto-char
+		       (if reversed
+			   (or (outline-next-heading) (point-max))
+			 (or (save-excursion (outline-get-next-sibling))
+			     (org-end-of-subtree t t)
+			     (point-max)))))
+		  (setq level 1)
+		  (if (not reversed)
+		      (goto-char (point-max))
+		    (goto-char (point-min))
+		    (or (outline-next-heading) (goto-char (point-max)))))
 		(if (not (bolp)) (newline))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level))))
