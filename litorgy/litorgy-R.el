@@ -33,6 +33,23 @@
 
 (litorgy-add-interpreter "R")
 
+(defvar litorgy-R-var-name "litorgy_R_variable")
+
+(defvar litorgy-R-var-as-table
+  "write.org.table <- function (x, write.rownames = TRUE) 
+{
+    if(!is.null(dim(x)) && length(dim(x)) > 2)
+        stop(\"Object must be 1- or 2-dimensional\") ;
+    if(is.vector(x) || is.table(x) || is.factor(x) || is.array(x)) 
+        x <- as.matrix(x) ;
+    if(!(is.matrix(x) || inherits(x, c('matrix', 'data.frame')))) {
+       invisible() ;
+       print(x) ;
+       stop(\"Object not recognised as 1- or 2-dimensional\") ;
+    } ;
+    x
+}")
+
 (defun litorgy-execute:R (body params)
   "Execute a block of R code with litorgy.  This function is
 called by `litorgy-execute-src-block'."
@@ -47,6 +64,28 @@ called by `litorgy-execute-src-block'."
             vars)
       (litorgy-R-initiate-R-buffer)
       (litorgy-R-command-to-string body))))
+
+(defun litorgy-R-table-or-scalar (var-name)
+  "Determine whether the variable in `litorgy-R-buffer' named
+VAR-NAME has any associated dimensions.  If it does have
+dimensions then return it as a list, otherwise just read it as a
+single variable."
+  (if (litorgy-R-multidimensional-p var-name)
+      (litorgy-R-vecotr-to-elisp-list var-name)
+    (read result)))
+
+(defun litorgy-R-multidimensional-p (var-name)
+  "Return t if the variable named VAR-NAME in `litorgy-R-buffer'
+is multidimensional."
+  
+  )
+
+(defun litorgy-R-vector-to-elisp-list (var-name)
+  "Assumes that var-name is multidimensional in which case it
+then converts it's value into an Emacs-lisp list which is
+returned."
+  
+  )
 
 ;; functions for evaluation of R code
 (defvar litorgy-R-buffer nil
