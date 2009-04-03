@@ -1,5 +1,9 @@
 2009-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-block-todo-from-children-or-siblings-or-parent):
+	Renamed from org-block-todo-from-children-or-siblings, and
+	enhanced to look for the parent's status as well.
+
 	* org-agenda.el (org-agenda-log-mode-add-notes): New option.
 	(org-agenda-get-progress): Add first notes line to log entry if so
 	desired.

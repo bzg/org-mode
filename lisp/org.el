@@ -1718,6 +1718,8 @@ TODO state changes
   "Non-nil means, undone TODO entries will block switching the parent to DONE.
 Also, if a parent has an :ORDERED: property, switching an entry to DONE will
 be blocked if any prior sibling is not yet done.
+Finally, if the parent is blocked because of ordered siblings of its own,
+the child will also be blocked.
 This variable needs to be set before org.el is loaded, and you need to
 restart Emacs after a change to make the change effective.  The only way
 to change is while Emacs is running is through the customize interface."
@@ -1725,9 +1727,9 @@ to change is while Emacs is running is through the customize interface."
 	 (set var val)
 	 (if val
 	     (add-hook 'org-blocker-hook
-		       'org-block-todo-from-children-or-siblings)
+		       'org-block-todo-from-children-or-siblings-or-parent)
 	   (remove-hook 'org-blocker-hook
-			'org-block-todo-from-children-or-siblings)))
+			'org-block-todo-from-children-or-siblings-or-parent)))
   :group 'org-todo
   :type 'boolean)
 
@@ -3196,6 +3198,9 @@ collapsed state."
 (defvar org-not-done-regexp nil
   "Matches any of the TODO state keywords except the last one.")
 (make-variable-buffer-local 'org-not-done-regexp)
+(defvar org-not-done-heading-regexp nil
+  "Matches a TODO headline that is not done.")
+(make-variable-buffer-local 'org-not-done-regexp)
 (defvar org-todo-line-regexp nil
   "Matches a headline and puts TODO state into group 2 if present.")
 (make-variable-buffer-local 'org-todo-line-regexp)
@@ -3541,6 +3546,10 @@ means to push this value onto the list in the variable.")
 	    (concat "\\<\\("
 		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
 		    "\\)\\>")
+	    org-not-done-heading-regexp
+	    (concat "^\\(\\*+\\)[ \t]+\\("
+		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
+		    "\\)\\>")
 	    org-todo-line-regexp
 	    (concat "^\\(\\*+\\)[ \t]+\\(?:\\("
 		    (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
@@ -3791,9 +3800,9 @@ The following commands are available:
   ;; too late :-(
   (if org-enforce-todo-dependencies
       (add-hook 'org-blocker-hook
-		'org-block-todo-from-children-or-siblings)
+		'org-block-todo-from-children-or-siblings-or-parent)
     (remove-hook 'org-blocker-hook
-		 'org-block-todo-from-children-or-siblings))
+		 'org-block-todo-from-children-or-siblings-or-parent))
   (if org-enforce-todo-checkbox-dependencies
       (add-hook 'org-blocker-hook
 		'org-block-todo-from-checkboxes)
@@ -8908,7 +8917,7 @@ For calling through lisp, arg is also interpreted in the following way:
 	    (save-excursion
 	      (run-hook-with-args 'org-trigger-hook change-plist))))))))
 
-(defun org-block-todo-from-children-or-siblings (change-plist)
+(defun org-block-todo-from-children-or-siblings-or-parent (change-plist)
   "Block turning an entry into a TODO, using the hierarchy.
 This checks whether the current task should be blocked from state
 changes.  Such blocking occurs when:
@@ -8917,7 +8926,11 @@ changes.  Such blocking occurs when:
 
   2. A task has a parent with the property :ORDERED:, and there
      are siblings prior to the current task with incomplete
-     status."
+     status.
+
+  3. The parent of the task is blocked because it has siblings that should
+     be done first, or is child of a block grandparent TODO entry."
+
   (catch 'dont-block
     ;; If this is not a todo state change, or if this entry is already DONE,
     ;; do not block
@@ -8946,22 +8959,25 @@ changes.  Such blocking occurs when:
     ;; any previous siblings are undone, it's blocked
     (save-excursion
       (org-back-to-heading t)
-      (when (save-excursion
-	      (ignore-errors
-		(org-up-heading-all 1)
-		(org-entry-get (point) "ORDERED")))
-	(let* ((this-level (funcall outline-level))
-	       (current-level this-level))
-	  (while (and (not (bobp))
-		      (>= current-level this-level))
-	    (outline-previous-heading)
-	    (setq current-level (funcall outline-level))
-	    (if (= current-level this-level)
-		;; This is a younger sibling, check if it is completed
-		(if (and (not (org-entry-is-done-p))
-			 (org-entry-is-todo-p))
-		    (throw 'dont-block nil)))))))
-    t))					; don't block
+      (let* ((pos (point))
+	     (parent-pos (and (org-up-heading-safe) (point))))
+	(if (not parent-pos) (throw 'dont-block t)) ; no parent
+	(when (and (org-entry-get (point) "ORDERED")
+		   (forward-line 1)
+		   (re-search-forward org-not-done-heading-regexp pos t))
+	  (throw 'dont-block nil)) ; block, there is an older sibling not done.
+	;; Search further up the hierarchy, to see if an anchestor is blocked
+	(while t
+	  (goto-char parent-pos)
+	  (if (not (looking-at org-not-done-heading-regexp))
+	      (throw 'dont-block t)) ; do not block, parent is not a TODO
+	  (setq pos (point))
+	  (setq parent-pos (and (org-up-heading-safe) (point)))
+	  (if (not parent-pos) (throw 'dont-block t)) ; no parent
+	  (when (and (org-entry-get (point) "ORDERED")
+		     (forward-line 1)
+		     (re-search-forward org-not-done-heading-regexp pos t))
+	    (throw 'dont-block nil))))))) ; block, older sibling not done.
 
 (defcustom org-track-ordered-property-with-tag nil
   "Should the ORDERED property also be shown as a tag?
@@ -15712,7 +15728,11 @@ With argument, move up ARG levels."
 (defun org-up-heading-safe ()
   "Move to the heading line of which the present line is a subheading.
 This version will not throw an error.  It will return the level of the
-headline found, or nil if no higher level is found."
+headline found, or nil if no higher level is found.
+
+Also, this function will be a lot faster than `outline-up-heading',
+because it relies on stars being the outline starters.  This can really
+make a significant difference in outlines with very many siblings."
   (let (start-level re)
     (org-back-to-heading t)
     (setq start-level (funcall outline-level))
