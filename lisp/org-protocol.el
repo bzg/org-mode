@@ -278,6 +278,57 @@ hex-decode each split part."
       split-parts)))
 
 
+(defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
+  "Greedy handlers might recieve a list like this from emacsclient:
+ '( (\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
+where \"/dir/\" is the absolute path to emacsclients working directory. This
+function transforms it into a flat list utilizing `org-protocol-flatten' and
+transforms the elements of that list as follows:
+
+If strip-path is non-nil, remove the \"/dir/\" prefix from all members of
+param-list.
+
+If replacement is string, replace the \"/dir/\" prefix with it.
+
+The first parameter, the one that contains the protocols, is always changed.
+Everything up to the end of the protocols is stripped.
+
+Note, that this function will not work, if you set
+`org-protocol-reverse-list-of-files' to nil!"
+(let* ((l (org-protocol-flatten param-list))
+      (trigger (car l))
+      (len 0)
+      dir
+      ret)
+  (when (string-match "^\\(.*\\)\\(org-protocol:/+[a-zA-z0-9][-_a-zA-z0-9]*:/+\\\\(.*\\)" trigger)
+    (setq dir (match-string 1 trigger))
+    (setq len (length dir))
+    (setcar l (concat dir (match-string 3 trigger))))
+  (if strip-path
+      (progn
+       (dolist (e l ret)
+         (setq ret
+               (append ret 
+                       (list
+                        (if (stringp e)
+                            (if (stringp replacement)
+                                (setq e (concat replacement (substring e len)))
+                              (setq e (substring e len)))
+                          e)))))
+       ret)
+    l)))
+
+
+(defun org-protocol-flatten (l)
+  "Greedy handlers might recieve a list like this from emacsclient:
+ '( (\"/dir/org-protocol:/greedy:/~/path1\" (23 . 12)) (\"/dir/param\")
+where \"/dir/\" is the absolute path to emacsclients working directory. This
+function transforms it into a flat list."
+  (if (null l) ()
+    (if (listp l)
+       (append (org-protocol-flatten (car l)) (org-protocol-flatten (cdr l)))
+      (list l))))
+
 ;;; Standard protocol handlers:
 
 (defun org-protocol-store-link (fname)
