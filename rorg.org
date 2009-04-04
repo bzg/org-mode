@@ -30,12 +30,16 @@ options (maybe more)
 
 This is now implemented see the example in the [[* silent evaluation][sandbox]]
 
+** DONE assign variables from tables in R
+This is now working (see [[* (sandbox table) R][(sandbox-table)-R]]).  Although it's not that
+impressive until we are able to print table results from R.
+
 ** TODO insert 2-D R results as tables
 everything is working but R and shell
 
 *** TODO shells
 
-*** TODO R
+*** DONE R
 
 This has already been tackled by Dan in [[file:existing_tools/org-R.el::defconst%20org%20R%20write%20org%20table%20def][org-R:check-dimensions]].  The
 functions there should be useful in combination with [[http://cran.r-project.org/doc/manuals/R-data.html#Export-to-text-files][R-export-to-csv]]
@@ -50,7 +54,6 @@ scalar in R [[http://tolstoy.newcastle.edu.au/R/help/03a/3733.html][R-scalar-vs-
 deal with trivial vectors (scalars) in R.  I'm tempted to just treat
 them as vectors, but then that would lead to a proliferation of
 trivial 1-cell tables...
-
 
 ** TODO allow variable initialization from source blocks
 Currently it is possible to initialize a variable from an org-mode
@@ -142,7 +145,8 @@ b <- 17
 a + b
 #+end_src
 
-: 26
+| 26 |
+
 
 #+begin_src R
 hist(rgamma(20,3,3))
@@ -257,24 +261,24 @@ table
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |
 
-*** R
+*** (sandbox table) R
 
-#+begin_src R :results replace
-a <- 9
-b <- 8
-b*a
-#+end_src
-
-: 72
+#+TBLNAME: sandbox_r
+| 1 |       2 | 3 |
+| 4 | schulte | 6 |
 
 #+begin_src R :results replace
 x <- c(rnorm(10, mean=-3, sd=1), rnorm(10, mean=3, sd=1))
 x
 #+end_src
 
-: -2.059712 -1.299807 -2.518628 -4.319525 -1.944779 -5.345708 -3.921314
-: -2.841109 -0.963475 -2.465979  4.092037  1.299202  1.476687  2.128594
-: 3.200629  1.990952  1.888890  3.561541  3.818319  1.969161
+#+begin_src R var tabel=sandbox_r :results replace
+tabel
+#+end_src
+
+| 1 |         2 | 3 |
+| 4 | "schulte" | 6 |
+
 
 
 

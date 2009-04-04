@@ -33,7 +33,9 @@
 
 (litorgy-add-interpreter "R")
 
-(defvar litorgy-R-var-name "litorgy_R_variable")
+(defvar litorgy-R-func-name "litorgy_R_main"
+  "This is the main function which wraps each R source code
+block.")
 
 (defun litorgy-execute:R (body params)
   "Execute a block of R code with litorgy.  This function is
@@ -42,25 +44,54 @@ called by `litorgy-execute-src-block'."
   (save-window-excursion
     (let ((vars (litorgy-ref-variables params))
           results)
-      (message (format "--%S--" vars))
-      (mapc (lambda (pair)
-              (litorgy-R-input-command
-               (format "%s <- %s" (car pair) (cdr pair))))
-            vars)
       (litorgy-R-initiate-R-buffer)
-      (litorgy-R-command-to-string body))))
+      (mapc (lambda (pair) (litorgy-R-assign-elisp (car pair) (cdr pair))) vars)
+      (litorgy-R-input-command
+       (format "%s <- function ()\n{\n%s\n}" litorgy-R-func-name body))
+      (litorgy-R-to-elisp litorgy-R-func-name))))
+
+(defun litorgy-R-quote-tsv-field (s)
+  "Quote field S for export to R."
+  (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))
+
+(defun litorgy-R-assign-elisp (name value)
+  "Read the elisp VALUE into a variable named NAME in the current
+R process in `litorgy-R-buffer'."
+  (unless litorgy-R-buffer
+    (error "No active R buffer"))
+  (if (listp value)
+      (let ((transition-file (make-temp-file "litorgy-R-import"))
+            (value (mapcar (lambda (row)
+                             (mapcar (lambda (cell)
+                                       (if (stringp cell)
+                                           cell
+                                         (format "%S" cell))) row)) value)))
+        (with-temp-file transition-file
+          (insert (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field)))
+          (insert "\n"))
+        (litorgy-R-input-command (format "%s <- read.table(\"%s\")" name transition-file)))))
 
 (defun litorgy-R-to-elisp (func-name)
   "Return the result of calling the function named FUNC-NAME in
 `litorgy-R-buffer' as Emacs lisp."
-  (let ((tmp-file (make-temp-file "litorgy-R")))
-    (message (format "temp-file=%s" tmp-file))
+  (let ((tmp-file (make-temp-file "litorgy-R")) result)
     (litorgy-R-input-command
      (format "write.table(%s(), \"%s\", , ,\"\\t\", ,\"nil\", , FALSE, FALSE)" func-name tmp-file))
     (with-temp-buffer
       (org-table-import tmp-file nil)
       (delete-file tmp-file)
-      (org-table-to-lisp))))
+      (setq result (mapcar (lambda (row)
+                             (mapcar #'litorgy-R-read row))
+                           (org-table-to-lisp)))
+      ;; TODO: we may want to scalarize single-element vectors
+      result)))
+
+(defun litorgy-R-read (cell)
+  "Strip nested \"s from around strings in exported R values."
+  (litorgy-read (or (and (stringp cell)
+                         (string-match "\\\"\\(.+\\)\\\"" cell)
+                         (match-string 1 cell))
+                    cell)))
 
 ;; functions for evaluation of R code
 (defvar litorgy-R-buffer nil
@@ -122,15 +153,6 @@ called by `litorgy-execute-src-block'."
                          (match-string 1 line))))
                 ;; drop first, because it's the last line of input
                 (cdr (split-string raw "[\n\r]")))) "\n")))))
-
-(defun litorgy-R-table-or-results (results)
-  "If the results look like a matrix, then convert them into an
-Emacs-lisp table otherwise return the results as a string."
-  ;; TODO: these simple assumptions will probably need some tweaking
-  (when (string-match "[ \f\t\n\r\v]+" results)
-    (concat "(" (mapconcat #'litorgy-R-tale-or-results
-                           (split-string results) " ") ")"))
-  results)
 
 (provide 'litorgy-R)
 ;;; litorgy-R.el ends here
