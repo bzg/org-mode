@@ -142,6 +142,8 @@ b <- 17
 a + b
 #+end_src
 
+: 26
+
 #+begin_src R
 hist(rgamma(20,3,3))
 #+end_src
