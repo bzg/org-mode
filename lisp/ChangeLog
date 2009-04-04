@@ -1,3 +1,9 @@
+2009-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-link-from-string): Pass reference buffer to
+	`org-open-at-point'.
+	(org-open-at-point): New optional argument `reference-buffer'.
+
 2009-04-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-scan-tags): Make tag scan find headline in first

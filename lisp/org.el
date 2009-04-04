@@ -7446,14 +7446,15 @@ Org-mode syntax."
 (defun org-open-link-from-string (s &optional arg)
   "Open a link in the string S, as if it was in Org-mode."
   (interactive "sLink: \nP")
-  (with-temp-buffer
-    (let ((org-inhibit-startup t))
-      (org-mode)
-      (insert s)
-      (goto-char (point-min))
-      (org-open-at-point arg))))
+  (let ((reference-buffer (current-buffer)))
+    (with-temp-buffer
+      (let ((org-inhibit-startup t))
+	(org-mode)
+	(insert s)
+	(goto-char (point-min))
+	(org-open-at-point arg reference-buffer)))))
 
-(defun org-open-at-point (&optional in-emacs)
+(defun org-open-at-point (&optional in-emacs reference-buffer)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
 the end of the current subtree.
@@ -7517,6 +7518,12 @@ application the system uses for this file type."
 	  (throw 'match t)))
       (unless path
 	(error "No link found"))
+
+      ;; switch back to reference buffer
+      ;; needed when if called in a temporary buffer through
+      ;; org-open-link-from-string
+      (and reference-buffer (switch-to-buffer reference-buffer))
+
       ;; Remove any trailing spaces in path
       (if (string-match " +\\'" path)
 	  (setq path (replace-match "" t t path)))
