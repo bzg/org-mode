@@ -2,7 +2,7 @@
 #+TITLE:     Org-Mode: Your Life in Plain Text
 #+LANGUAGE:  en
 #+EMAIL:     carsten at orgmode dot org
-#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t
+#+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t LaTeX:t
 #+STYLE: </style><link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
 #+HTML:  <BASE href="http://orgmode.org/index.html">
@@ -158,6 +158,9 @@ please go to [[http://orgmode.org/worg/][the Worg page]], and start from there.
 
 ** Contributing to Org-mode
 
+\begin{equation}
+a=\sqrt{b}
+\end{equation}
 You can always contribute with ideas and bug reports on the mailing
 list.  If you want to contribute a patch, code snippets, or a full
 add-on, this is very welcome too!  We do distribute good add-ons as
