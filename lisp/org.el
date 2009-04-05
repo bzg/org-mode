@@ -14710,7 +14710,15 @@ With optional NODE, go directly to that node."
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((dir (file-name-directory (find-library-name "org")))
+  (let* ((dir
+	  (if (fboundp 'find-library-name)
+	      (file-name-directory (find-library-name "org"))
+	    (flet ((find-library-name-helper (filename ignored-codesys)
+					     filename)
+		   (find-library-name
+		    (library)
+		    (find-library library nil 'find-library-name-helper)))
+	      (file-name-directory (find-library-name "org")))))
 	 (files (directory-files dir t "\\.el\\'"))
 	 (remove-re (concat (if (featurep 'xemacs)
 				"org-colview" "org-colview-xemacs")

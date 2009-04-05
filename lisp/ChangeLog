@@ -6,6 +6,7 @@
 	case-sensitively.
 	(org-map-continue-from): New variable.
 	(org-scan-tags): Respect values in `org-map-continue-from'.
+	(org-reload): Make XEmacs compatible.
 
 2009-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
