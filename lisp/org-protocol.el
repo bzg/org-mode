@@ -132,6 +132,7 @@
 		  (&optional refresh))
 (declare-function org-publish-get-project-from-filename "org-publish"
 		  (filename &optional up))
+(declare-function server-delete-client proc "server" (&optional noframe))
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
