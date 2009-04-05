@@ -126,6 +126,8 @@ evaluate them with =M-x eval-buffer=
 date
 #+end_src
 
+: Sun Apr  5 10:10:05 PDT 2009
+
 #+begin_src ruby
 puts Time.now
 #+end_src
@@ -279,6 +281,24 @@ tabel
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |
 
+
+
+*** shell
+Now shell commands are converted to tables using =org-table-import=
+and if these tables are non-trivial (i.e. have multiple elements) then
+they are imported as org-mode tables...
+
+#+begin_src sh
+ls -l
+#+end_src
+
+| "total"      | 96 | ""         | ""         |    "" |   "" | "" | ""                |
+| "-rw-r--r--" |  1 | "eschulte" | "eschulte" |    57 | 2009 |  7 | "block"           |
+| "-rw-r--r--" |  1 | "eschulte" | "eschulte" | 35147 | 2009 |  7 | "COPYING"         |
+| "drwxr-xr-x" |  4 | "eschulte" | "eschulte" |  4096 | 2009 | 16 | "existing_tools"  |
+| "drwxr-xr-x" |  2 | "eschulte" | "eschulte" |  4096 | 2009 | 10 | "litorgy"         |
+| "-rw-r--r--" |  1 | "eschulte" | "eschulte" |   277 | 2009 | 15 | "README.markdown" |
+| "-rw-r--r--" |  1 | "eschulte" | "eschulte" | 41385 | 2009 | 10 | "rorg.org"        |
 
 
 

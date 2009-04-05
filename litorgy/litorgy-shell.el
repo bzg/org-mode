@@ -59,7 +59,25 @@ executed through litorgy."
             (error "currently no support for passing variables to shells"))
         (insert body)
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-        (buffer-string)))))
+        (litorgy-shell-to-elisp (buffer-string))))))
+
+(defun litorgy-shell-to-elisp (result)
+  (let ((tmp-file (make-temp-file "litorgy-shell")))
+    (with-temp-file tmp-file
+      (insert result))
+    (with-temp-buffer
+      (org-table-import tmp-file nil)
+      (delete-file tmp-file)
+      (setq result (mapcar (lambda (row)
+                             (mapcar #'litorgy-read row))
+                           (org-table-to-lisp)))
+      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+          (if (consp (car result))
+              (if (null (cdr (car result)))
+                  (caar result)
+                result)
+            (car result))
+        result))))
 
 (provide 'litorgy-shell)
 ;;; litorgy-shell.el ends here
