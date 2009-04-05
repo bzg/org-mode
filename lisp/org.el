@@ -14774,7 +14774,8 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 		  (file-exists-p (concat f ".elc")))
 	     (load (concat f ".elc") nil nil t)
 	   (load (concat f ".el") nil nil t))))
-     files)))
+     files))
+  (org-version))
 
 ;;;###autoload
 (defun org-customize ()
