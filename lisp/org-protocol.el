@@ -294,14 +294,18 @@ If replacement is string, replace the \"/dir/\" prefix with it.
 The first parameter, the one that contains the protocols, is always changed.
 Everything up to the end of the protocols is stripped.
 
-Note, that this function will not work, if you set
-`org-protocol-reverse-list-of-files' to nil!"
-(let* ((l (org-protocol-flatten param-list))
+Note, that this function will always behave as if
+`org-protocol-reverse-list-of-files' was set to t and the returned list will
+reflect that. I.e. emacsclients first parameter will be the first one in the
+returned list."
+(let* ((l (org-protocol-flatten (if org-protocol-reverse-list-of-files
+				    param-list
+				  (reverse param-list))))
       (trigger (car l))
       (len 0)
       dir
       ret)
-  (when (string-match "^\\(.*\\)\\(org-protocol:/+[a-zA-z0-9][-_a-zA-z0-9]*:/+\\\\(.*\\)" trigger)
+  (when (string-match "^\\(.*\\)\\(org-protocol:/+[a-zA-z0-9][-_a-zA-z0-9]*:/+\\)\\(.*\\)" trigger)
     (setq dir (match-string 1 trigger))
     (setq len (length dir))
     (setcar l (concat dir (match-string 3 trigger))))
