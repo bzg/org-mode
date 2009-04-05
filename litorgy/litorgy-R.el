@@ -83,8 +83,13 @@ R process in `litorgy-R-buffer'."
       (setq result (mapcar (lambda (row)
                              (mapcar #'litorgy-R-read row))
                            (org-table-to-lisp)))
-      ;; TODO: we may want to scalarize single-element vectors
-      result)))
+      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+          (if (consp (car result))
+              (if (null (cdr (car result)))
+                  (caar result)
+                result)
+            (car result))
+        result))))
 
 (defun litorgy-R-read (cell)
   "Strip nested \"s from around strings in exported R values."
