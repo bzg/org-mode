@@ -6348,7 +6348,7 @@ on or after October 11, 2008.
 
 Accessing TODO, LEVEL, and CATEGORY during a search is fast.  Accessing any
 other properties will slow down the search.  However, once you have payed the
-price by accessig one property, testing additional properties is cheap
+price by accessing one property, testing additional properties is cheap
 again.
 
 You can configure Org mode to use property inheritance during a search, but
@@ -11030,6 +11030,17 @@ FUNC is a function or a lisp form.  The function will be called without
 arguments, with the cursor positioned at the beginning of the headline.
 The return values of all calls to the function will be collected and
 returned as a list.
+
+The call to FUNC will be wrapped into a save-excursion form, so FUNC
+does not need to preserve point.  After evaluaton, the cursor will be
+moved to the end of the line (presumably of the headline of the
+processed entry) and search continues from there.  Under some
+circumstances, this may not produce the wanted results.  For example,
+if you have removed (e.g. archived) the current (sub)tree it could
+mean that the next entry will be skipped entirely.  In such cases, you
+can specify the position from where search should continue by making
+FUNC set the variable `org-map-continue-from' to the desired buffer
+position.
 
 MATCH is a tags/property/todo match as it is used in the agenda match view.
 Only headlines that are matched by this query will be considered during
