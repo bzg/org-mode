@@ -1,3 +1,10 @@
+2009-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-set-font-lock-defaults): Enforxe space or line end
+	after todo keyword.
+	(org-todo): When changing TODO state, do matching
+	case-sensitively.
+
 2009-04-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-protocol.el (org-protocol-flatten-greedy): New function.

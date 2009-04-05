@@ -4381,7 +4381,7 @@ between words."
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO lines
-	   (list (concat "^\\*+[ \t]+" org-todo-regexp)
+	   (list (concat "^\\*+[ \t]+" org-todo-regexp "\\([ \t]\\|$\\)")
 		 '(1 (org-get-todo-face 1) t))
 	   ;; DONE
 	   (if org-fontify-done-headline
@@ -8764,14 +8764,15 @@ For calling through lisp, arg is also interpreted in the following way:
                      really is a member of `org-todo-keywords'."
   (interactive "P")
   (if (equal arg '(16)) (setq arg 'nextset))
-  (let ((org-blocker-hook org-blocker-hook))
+  (let ((org-blocker-hook org-blocker-hook)
+	(case-fold-search nil))
     (when (equal arg '(64))
       (setq arg nil org-blocker-hook nil))
     (save-excursion
       (catch 'exit
 	(org-back-to-heading)
 	(if (looking-at outline-regexp) (goto-char (1- (match-end 0))))
-	(or (looking-at (concat " +" org-todo-regexp " *"))
+	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|$\\)"))
 	    (looking-at " *"))
 	(let* ((match-data (match-data))
 	       (startpos (point-at-bol))
@@ -8933,7 +8934,7 @@ For calling through lisp, arg is also interpreted in the following way:
 		   (< (point) (+ 2 (or (match-end 2) (match-end 1)))))
 	      (progn
 		(goto-char (or (match-end 2) (match-end 1)))
-		(just-one-space)))
+		(and (looking-at " ") (just-one-space))))
 	  (when org-trigger-hook
 	    (save-excursion
 	      (run-hook-with-args 'org-trigger-hook change-plist))))))))
