@@ -13,9 +13,38 @@
    solution is just to background the individual shell
    commands.
 
-** litorgy-R
-*** TODO ability to select which of multiple R sessions is being used
+   The other languages (aside from emacs lisp) are run through the
+   shell, so if we find a shell solution it should work for them as
+   well.
+   
+   Adding an ampersand seems to be a supported way to run commands in
+   the background (see [[http://www.emacswiki.org/emacs/ExecuteExternalCommand#toc4][external-commands]]).  Although a more extensible
+   solution may involve the use of the [[elisp:(progn (describe-function 'call-process-region) nil)][call-process-region]] function.
+   
+   Going to try this out in a new file [[file:litorgy/litorgy-proc.el][litorgy-proc.el]].  This should
+   contain functions for asynchronously running generic shell commands
+   in the background, and then returning their input.
+
+*** partial update of org-mode buffer
+   The sleekest solution to this may be using a comint buffer, and
+   then defining a filter function which would incrementally interpret
+   the results as they are returned, including insertion into the
+   org-mode buffer.  This may actually cause more problems than it is
+   worth, what with the complexities of identifying the types of
+   incrementally returned results, and the need for maintenance of a
+   process marker in the org buffer.
+
+*** 'working' spinner
+It may be nice and not too difficult to place a spinner on/near the
+evaluating source code block
+
+** TODO ability to select which of multiple R sessions is being used
     (like ess-switch-process in .R buffers)
+
+    Maybe this could be packaged into a header argument, something
+    like =:R_session= which could accept either the name of the
+    session to use, or the string =prompt=, in which case we could use
+    the =ess-switch-process= command to select a new process.
 
 ** DONE a header argument specifying silent evaluation (no output)
 This would be useful across all types of source block.  Currently
@@ -34,10 +63,10 @@ This is now implemented see the example in the [[* silent evaluation][sandbox]]
 This is now working (see [[* (sandbox table) R][(sandbox-table)-R]]).  Although it's not that
 impressive until we are able to print table results from R.
 
-** TODO insert 2-D R results as tables
+** DONE insert 2-D R results as tables
 everything is working but R and shell
 
-*** TODO shells
+*** DONE shells
 
 *** DONE R
 
@@ -55,7 +84,7 @@ deal with trivial vectors (scalars) in R.  I'm tempted to just treat
 them as vectors, but then that would lead to a proliferation of
 trivial 1-cell tables...
 
-** TODO allow variable initialization from source blocks
+** DONE allow variable initialization from source blocks
 Currently it is possible to initialize a variable from an org-mode
 table with a block argument like =table=sandbox= (note that the
 variable doesn't have to named =table=) as in the following example
