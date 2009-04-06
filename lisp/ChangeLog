@@ -1,7 +1,10 @@
 2009-04-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-find-library-name): New function.
+
 	* org.el (org-pre-cycle-hook): New hook.
 	(org-cycle): Call the new hook in appropriate places.
+	(org-reload): Only reload files that have been loaded before.
 
 2009-04-05  Carsten Dominik  <carsten.dominik@gmail.com>
 

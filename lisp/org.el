@@ -2750,7 +2750,6 @@ Normal means, no org-mode-specific context."
 (defvar mark-active)
 
 ;; Various packages
-(declare-function find-library-name             "find-func"  (library))
 (declare-function calendar-absolute-from-iso    "cal-iso"    (date))
 (declare-function calendar-forward-day          "cal-move"   (arg))
 (declare-function calendar-goto-date            "cal-move"   (date))
@@ -7474,7 +7473,7 @@ Org-mode syntax."
 (defun org-open-at-point (&optional in-emacs reference-buffer)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
-the end of the current subtree.
+the end of the current line.
 Normally, files will be opened by an appropriate application.  If the
 optional argument IN-EMACS is non-nil, Emacs will visit the file.
 With a double prefix argument, try to open outside of Emacs, in the
@@ -14727,16 +14726,15 @@ With optional NODE, go directly to that node."
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((dir
-	  (if (fboundp 'find-library-name)
-	      (file-name-directory (find-library-name "org"))
-	    (flet ((find-library-name-helper (filename ignored-codesys)
-					     filename)
-		   (find-library-name
-		    (library)
-		    (find-library library nil 'find-library-name-helper)))
-	      (file-name-directory (find-library-name "org")))))
-	 (files (directory-files dir t "\\.el\\'"))
+  (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
+	 (dir-org (file-name-directory (org-find-library-name "org")))
+	 (dir-org-contrib (ignore-errors
+			   (file-name-directory
+			    (org-find-library-name "org-contribdir"))))
+	 (files
+	  (append (directory-files dir-org t file-re)
+		  (and dir-org-contrib
+		       (directory-files dir-org-contrib t file-re))))
 	 (remove-re (concat (if (featurep 'xemacs)
 				"org-colview" "org-colview-xemacs")
 			    "\\'")))
@@ -14747,10 +14745,11 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
     (setq files (delq nil files))
     (mapc
      (lambda (f)
-       (if (and (not uncompiled)
-		(file-exists-p (concat f ".elc")))
-	   (load (concat f ".elc") nil nil t)
-	 (load (concat f ".el") nil nil t)))
+       (when (featurep (intern (file-name-nondirectory f)))
+	 (if (and (not uncompiled)
+		  (file-exists-p (concat f ".elc")))
+	     (load (concat f ".elc") nil nil t)
+	   (load (concat f ".el") nil nil t))))
      files)))
 
 ;;;###autoload

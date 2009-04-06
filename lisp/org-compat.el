@@ -33,6 +33,8 @@
 
 (require 'org-macs)
 
+(declare-function find-library-name             "find-func"  (library))
+
 (defconst org-xemacs-p (featurep 'xemacs)) ; not used by org.el itself
 (defconst org-format-transports-properties-p
   (let ((x "a"))
@@ -295,6 +297,16 @@ that can be added."
       (org-no-properties (substring string (or from 0) to))
     (substring-no-properties string from to)))
 
+(defun org-find-library-name (library)
+  (if (fboundp 'find-library-name)
+      (file-name-directory (find-library-name library))
+    ; XEmacs does not have `find-library-name'
+    (flet ((find-library-name-helper (filename ignored-codesys)
+				     filename)
+	   (find-library-name (library)
+	    (find-library library nil 'find-library-name-helper)))
+      (file-name-directory (find-library-name library)))))
+
 (defun org-count-lines (s)
   "How many lines in string S?"
   (let ((start 0) (n 1))
@@ -303,6 +315,8 @@ that can be added."
     (if (and (> (length s) 0) (= (aref s (1- (length s))) ?\n))
 	(setq n (1- n)))
     n))
+
+
 
 (provide 'org-compat)
 
