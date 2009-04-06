@@ -1,4 +1,4 @@
-;;; org-mac-message.el --- Links to Apple Mail messages from within Org-mode
+;;; org-mac-message.el --- Links to Apple Mail.app messages from within Org-mode
 
 ;; Copyright (C) 2008, 2009 Free Software Foundation, Inc.
 
@@ -24,18 +24,21 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; This file implements links to Apple Mail messages from within Org-mode.
+;; This file implements links to Apple Mail.app messages from within Org-mode.
 ;; Org-mode does not load this module by default - if you would actually like
 ;; this to happen then configure the variable `org-modules'.
 
 ;; If you would like to create links to all flagged messages in an
-;; Apple Mail account, please customize the variable
-;; org-mac-mail-account and then call one of the following functions:
+;; Apple Mail.app account, please customize the variable
+;; `org-mac-mail-account' and then call one of the following functions:
 
-;; (org-mac-create-flagged-mail) copies a formatted list of links to
+;; (org-mac-message-insert-selected) copies a formatted list of links to
 ;; the kill ring.
 
-;; (org-mac-insert-flagged-mail) searches within an org-mode buffer
+;; (org-mac-message-insert-selected) inserts at point links to any
+;; messages selected in Mail.app.
+
+;; (org-mac-message-insert-flagged) searches within an org-mode buffer
 ;; for a specific heading, creating it if it doesn't exist. Any
 ;; message:// links within the first level of the heading are deleted
 ;; and replaced with links to flagged messages.
@@ -160,9 +163,9 @@ of it."
   (message "Messages copied to kill-ring"))
 
 (defun org-mac-message-insert-selected ()
-  "Insert a link to the messages currently selected in Apple Mail.
+  "Insert a link to the messages currently selected in Mail.app.
 This will use applescript to get the message-id and the subject of the
-active mail in AppleMail and make a link out of it."
+active mail in Mail.app and make a link out of it."
   (interactive)
   (org-mac-message-get-links "s")
   (yank))
