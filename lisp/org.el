@@ -626,6 +626,16 @@ Special case: when 0, never leave empty lines in collapsed view."
   :type 'integer)
 (put 'org-cycle-separator-lines 'safe-local-variable 'integerp)
 
+(defcustom org-pre-cycle-hook nil
+  "Hook that is run before visibility cycling is happening.
+The function(s) in this hook must accept a single argument which indicates
+the new state that will be set right after running this hook.  The
+argument is a symbol.  Before a global state change, it can have the values
+`overview', `content', or `all'.  Before a local state change, it can have
+the values `folded', `children', or `subtree'."
+  :group 'org-cycle
+  :type 'hook)
+
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
 			    org-cycle-hide-drawers
 			    org-cycle-show-empty-lines
@@ -4592,6 +4602,7 @@ If KWD is a number, get the corresponding match group."
 	     (eq org-cycle-global-status 'overview))
 	;; We just created the overview - now do table of contents
 	;; This can be slow in very large buffers, so indicate action
+	(run-hook-with-args 'org-pre-cycle-hook 'contents)
 	(message "CONTENTS...")
 	(org-content)
 	(message "CONTENTS...done")
@@ -4601,6 +4612,7 @@ If KWD is a number, get the corresponding match group."
        ((and (eq last-command this-command)
 	     (eq org-cycle-global-status 'contents))
 	;; We just showed the table of contents - now show everything
+	(run-hook-with-args 'org-pre-cycle-hook 'all)
 	(show-all)
 	(message "SHOW ALL")
 	(setq org-cycle-global-status 'all)
@@ -4608,6 +4620,7 @@ If KWD is a number, get the corresponding match group."
 
        (t
 	;; Default action: go to overview
+	(run-hook-with-args 'org-pre-cycle-hook 'overview)
 	(org-overview)
 	(message "OVERVIEW")
 	(setq org-cycle-global-status 'overview)
@@ -4653,6 +4666,7 @@ If KWD is a number, get the corresponding match group."
 	(cond
 	 ((= eos eoh)
 	  ;; Nothing is hidden behind this heading
+	  (run-hook-with-args 'org-pre-cycle-hook 'empty)
 	  (message "EMPTY ENTRY")
 	  (setq org-cycle-subtree-status nil)
 	  (save-excursion
@@ -4662,6 +4676,7 @@ If KWD is a number, get the corresponding match group."
 	 ((or (>= eol eos)
 	      (not (string-match "\\S-" (buffer-substring eol eos))))
 	  ;; Entire subtree is hidden in one line: open it
+	  (run-hook-with-args 'org-pre-cycle-hook 'children)
 	  (org-show-entry)
 	  (show-children)
 	  (message "CHILDREN")
@@ -4674,12 +4689,14 @@ If KWD is a number, get the corresponding match group."
 	 ((and (eq last-command this-command)
 	       (eq org-cycle-subtree-status 'children))
 	  ;; We just showed the children, now show everything.
+	  (run-hook-with-args 'org-pre-cycle-hook 'subtree)
 	  (org-show-subtree)
 	  (message "SUBTREE")
 	  (setq org-cycle-subtree-status 'subtree)
 	  (run-hook-with-args 'org-cycle-hook 'subtree))
 	 (t
 	  ;; Default action: hide the subtree.
+	  (run-hook-with-args 'org-pre-cycle-hook 'folded)
 	  (hide-subtree)
 	  (message "FOLDED")
 	  (setq org-cycle-subtree-status 'folded)
