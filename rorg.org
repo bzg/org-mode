@@ -1,9 +1,9 @@
 #+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
-#+SEQ_TODO:  TODO PROPOSED | DONE DROPPED MAYBE
+#+SEQ_TODO:  TODO OPEN | DONE RESOLVED
 #+STARTUP: oddeven
 
-* Tasks
+* Tasks [4/6]
 
 ** TODO evaluation of shell code as background process? [DED]
    After C-c C-c on an R code block, the process may appear to block,
@@ -118,8 +118,8 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs
-** Args out of range error
+* Bugs [1/1]
+** RESOLVED Args out of range error
    
 The following block resulted in the error below [DED]. It ran without
 error directly in the shell.
@@ -137,6 +137,11 @@ done
  executing source block with sh...
 finished executing source block
 string-equal: Args out of range: "", -1, 0
+
+the error =string-equal: Args out of range: "", -1, 0= looks like what
+used to be output when the block returned an empty results string.
+This should be fixed in the current version, you should now see the
+following message =no result returned by source block=.
 
 
 * Sandbox
