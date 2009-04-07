@@ -2919,22 +2919,19 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (eval-and-compile
   (org-autoload "org-exp"
 		'(org-export org-export-visible
-   org-insert-export-options-template org-export-as-html-and-open
-   org-export-as-html-batch org-export-as-html-to-buffer
-   org-replace-region-by-html org-export-region-as-html
-   org-export-as-html 
-   org-table-clean-before-export
-   )))
-
-(eval-and-compile
+			     org-insert-export-options-template  
+			     org-table-clean-before-export))
   (org-autoload "org-ascii"
-		'(org-export-as-ascii org-export-ascii-preprocess)))
-(eval-and-compile
+		'(org-export-as-ascii org-export-ascii-preprocess))
+  (org-autoload "org-html"
+		'(org-export-as-html-and-open
+		  org-export-as-html-batch org-export-as-html-to-buffer
+		  org-replace-region-by-html org-export-region-as-html
+		  org-export-as-html))
   (org-autoload "org-icalendar"
 		'(org-export-icalendar-this-file
 		  org-export-icalendar-all-agenda-files
-		  org-export-icalendar-combine-agenda-files)))
-(eval-and-compile
+		  org-export-icalendar-combine-agenda-files))
   (org-autoload "org-xoxo" '(org-export-as-xoxo)))
 
 ;; Declare and autoload functions from org-agenda.el
@@ -14733,7 +14730,7 @@ With optional NODE, go directly to that node."
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-ascii org-attach org-clock org-colview
-		     org-docbook org-exp org-export-latex org-icalendar
+		     org-docbook org-exp org-export-latex org-html org-icalendar
 		     org-id org-publish org-remember org-table
 		     org-timer org-xoxo)))
 

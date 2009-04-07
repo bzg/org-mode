@@ -76,6 +76,7 @@
 (require 'footnote)
 (require 'org)
 (require 'org-exp)
+(require 'org-html)
 
 ;;; Variables:
 

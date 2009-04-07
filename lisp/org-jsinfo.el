@@ -41,6 +41,7 @@
 ;;; Code:
 
 (require 'org-exp)
+(require 'org-html)
 
 (add-to-list 'org-export-inbuffer-options-extra '("INFOJS_OPT" :infojs-opt))
 (add-hook 'org-export-options-filters 'org-infojs-handle-options)

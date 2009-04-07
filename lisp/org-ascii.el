@@ -394,7 +394,6 @@ underlined headlines.  The default is 3."
 	(setq line (replace-match "" nil nil line))))
   line)
 
-
 (defun org-export-ascii-wrap (line where)
   "Wrap LINE at or before WHERE."
   (let ((ind (org-get-indentation line))
