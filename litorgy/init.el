@@ -30,6 +30,7 @@
 
 ;;; Code:
 (require 'org)
+(load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'litorgy)
 (require 'litorgy-ref)
 
@@ -39,4 +40,5 @@
 (require 'litorgy-lisp)
 (require 'litorgy-R)
 
+(message "litorgy loaded")
 ;;; init.el ends here
