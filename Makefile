@@ -62,6 +62,7 @@ INSTALL_INFO=install-info
 # The following variables need to be defined by the maintainer
 LISPF      = 	org.el			\
 		org-agenda.el		\
+		org-ascii.el		\
 	     	org-attach.el		\
 	     	org-archive.el		\
 		org-bbdb.el		\
@@ -316,6 +317,7 @@ dummy:
 
 lisp/org.elc:           lisp/org-macs.el lisp/org-compat.el lisp/org-faces.el
 lisp/org-agenda.elc:       lisp/org.el
+lisp/org-ascii.elc:        lisp/org-exp.el
 lisp/org-attach.elc:       lisp/org.el lisp/org-id.el
 lisp/org-archive.elc:      lisp/org.el
 lisp/org-bbdb.elc:         lisp/org.el

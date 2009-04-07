@@ -2911,14 +2911,14 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(re-search-forward org-table-any-border-regexp nil 1))))
   (message "Mapping tables: done"))
 
-;; Declare and autoload functions from org-exp.el
+;; Declare and autoload functions from org-exp.el  & Co
 
 (declare-function org-default-export-plist "org-exp")
 (declare-function org-infile-export-plist "org-exp")
 (declare-function org-get-current-options "org-exp")
 (eval-and-compile
   (org-autoload "org-exp"
-		'(org-export org-export-as-ascii org-export-visible
+		'(org-export org-export-visible
    org-insert-export-options-template org-export-as-html-and-open
    org-export-as-html-batch org-export-as-html-to-buffer
    org-replace-region-by-html org-export-region-as-html
@@ -2926,6 +2926,11 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
    org-export-icalendar-all-agenda-files
    org-table-clean-before-export
    org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
+
+(eval-and-compile
+  (org-autoload "org-ascii"
+		'(org-export-as-ascii)))
+
 
 ;; Declare and autoload functions from org-agenda.el
 
@@ -14717,7 +14722,7 @@ With optional NODE, go directly to that node."
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-attach org-clock org-colview
-		     org-exp org-id org-export-latex org-docbook
+		     org-exp org-ascii org-id org-export-latex org-docbook
 		     org-publish org-remember org-table org-timer)))
 
 ;;;###autoload
