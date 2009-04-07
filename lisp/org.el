@@ -2922,15 +2922,20 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
    org-insert-export-options-template org-export-as-html-and-open
    org-export-as-html-batch org-export-as-html-to-buffer
    org-replace-region-by-html org-export-region-as-html
-   org-export-as-html org-export-icalendar-this-file
-   org-export-icalendar-all-agenda-files
+   org-export-as-html 
    org-table-clean-before-export
-   org-export-icalendar-combine-agenda-files org-export-as-xoxo)))
+   )))
 
 (eval-and-compile
   (org-autoload "org-ascii"
-		'(org-export-as-ascii)))
-
+		'(org-export-as-ascii org-export-ascii-preprocess)))
+(eval-and-compile
+  (org-autoload "org-icalendar"
+		'(org-export-icalendar-this-file
+		  org-export-icalendar-all-agenda-files
+		  org-export-icalendar-combine-agenda-files)))
+(eval-and-compile
+  (org-autoload "org-xoxo" '(org-export-as-xoxo)))
 
 ;; Declare and autoload functions from org-agenda.el
 
@@ -5332,6 +5337,12 @@ This is a list with the following elements:
 	      (and (match-end 3) (aref (match-string 3) 2))
 	      (org-match-string-no-properties 4)
 	      (org-match-string-no-properties 5)))))
+
+(defun org-get-entry ()
+  "Get the entry text, after heading, entire subtree."
+  (save-excursion
+    (org-back-to-heading t)
+    (buffer-substring (point-at-bol 2) (org-end-of-subtree t))))
 
 (defun org-insert-heading-after-current ()
   "Insert a new heading with same level as current, after current subtree."
@@ -14721,9 +14732,10 @@ With optional NODE, go directly to that node."
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
-	'(org-agenda org-archive org-attach org-clock org-colview
-		     org-exp org-ascii org-id org-export-latex org-docbook
-		     org-publish org-remember org-table org-timer)))
+	'(org-agenda org-archive org-ascii org-attach org-clock org-colview
+		     org-docbook org-exp org-export-latex org-icalendar
+		     org-id org-publish org-remember org-table
+		     org-timer org-xoxo)))
 
 ;;;###autoload
 (defun org-reload (&optional uncompiled)

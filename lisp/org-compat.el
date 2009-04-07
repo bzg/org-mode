@@ -31,6 +31,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (require 'org-macs)
 
 (declare-function find-library-name             "find-func"  (library))

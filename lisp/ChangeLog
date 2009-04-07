@@ -1,5 +1,9 @@
 2009-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el: New file, split out from org-exp.el.
+
+	* org-xoxo.el: New file, split out from org-exp.el.
+
 	* org-ascii.el: New file, split out from org-exp.el.
 
 2009-04-06  Carsten Dominik  <carsten.dominik@gmail.com>

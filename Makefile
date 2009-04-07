@@ -77,6 +77,7 @@ LISPF      = 	org.el			\
 		org-faces.el		\
 		org-footnote.el		\
 		org-gnus.el		\
+		org-icalendar.el	\
 		org-id.el		\
 		org-info.el		\
 		org-inlinetask.el	\
@@ -97,7 +98,8 @@ LISPF      = 	org.el			\
 		org-timer.el		\
 		org-vm.el		\
 		org-w3m.el              \
-		org-wl.el
+		org-wl.el		\
+		org-xoxo.el
 
 LISPFILES0 = $(LISPF:%=lisp/%)
 LISPFILES  = $(LISPFILES0) lisp/org-install.el
@@ -332,6 +334,7 @@ lisp/org-docbook.elc:      lisp/org.el lisp/org-exp.el
 lisp/org-faces.elc:        lisp/org-macs.el lisp/org-compat.el
 lisp/org-footnotes.elc:    lisp/org-macs.el lisp/org-compat.el
 lisp/org-gnus.elc:         lisp/org.el
+lisp/org-icalendar.elc:    lisp/org-exp.el
 lisp/org-id.elc:           lisp/org.el
 lisp/org-info.elc:         lisp/org.el
 lisp/org-inlinetask.elc:
@@ -353,3 +356,4 @@ lisp/org-timer.elc:         lisp/org.el
 lisp/org-vm.elc:           lisp/org.el
 lisp/org-w3m.elc:          lisp/org.el
 lisp/org-wl.elc:           lisp/org.el
+lisp/org-xoxo.elc:         lisp/org-exp.el

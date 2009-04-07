@@ -1,4 +1,4 @@
-;;; org-exp.el --- ASCII export for Org-mode
+;;; org-ascii.el --- ASCII export for Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
 ;;   Free Software Foundation, Inc.
@@ -371,7 +371,7 @@ underlined headlines.  The default is 3."
 	(goto-char beg)))
     (goto-char (point-min))))
 
-(defun org-export-ascii-preprocess ()
+(defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export"
   ;; Put quotes around verbatim text
   (goto-char (point-min))
