@@ -306,7 +306,8 @@ it can be a list structured like an entry in `org-feed-alist'."
 		(push e new)
 	      (setq olds (nth 2 (assoc (plist-get e :guid) old-status)))
 	      (if (and olds
-		       (not (string= (sha1-string (plist-get e :item-full-text))
+		       (not (string= (org-sha1-string
+				      (plist-get e :item-full-text))
 				     olds)))
 		  (push e changed))))
 
@@ -339,7 +340,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 			 ;; or if they were handled previously
 			 (if (assoc guid guid-alist) t (plist-get e :handled))
 			 ;; A hash, to detect changes
-			 (sha1-string (plist-get e :item-full-text))))
+			 (org-sha1-string (plist-get e :item-full-text))))
 		 entries))
 
 	  ;; Handle new items in the feed

@@ -319,7 +319,12 @@ that can be added."
 	(setq n (1- n)))
     n))
 
-
+(defun org-sha1-string (s &optional binary)
+  (if (fboundp 'sha1-string)
+      (sha1-string s binary)
+    (with-temp-buffer
+      (insert s)
+      (sha1-region (point-min) (point-max) binary))))
 
 (provide 'org-compat)
 
