@@ -8797,6 +8797,9 @@ For calling through lisp, arg is also interpreted in the following way:
 	(case-fold-search nil))
     (when (equal arg '(64))
       (setq arg nil org-blocker-hook nil))
+    (when (and org-blocker-hook
+	       (org-entry-get nil "NOBLOCKING"))
+      (setq org-blocker-hook nil))
     (save-excursion
       (catch 'exit
 	(org-back-to-heading)

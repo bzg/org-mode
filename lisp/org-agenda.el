@@ -2424,12 +2424,14 @@ bind it in the options section.")
 		     (not (with-current-buffer (marker-buffer marker)
 			    (save-excursion
 			      (goto-char marker)
-			      (run-hook-with-args-until-failure
-			       'org-blocker-hook
-			       (list :type 'todo-state-change
-				     :position marker
-				     :from 'todo
-				     :to 'done))))))
+			      (if (org-entry-get nil "NOBLOCKING")
+				  t ;; Never block this entry
+				(run-hook-with-args-until-failure
+				 'org-blocker-hook
+				 (list :type 'todo-state-change
+				       :position marker
+				       :from 'todo
+				       :to 'done)))))))
 	    (if org-blocked-by-checkboxes (setq invis1 nil))
 	    (setq b (if invis1 (max (point-min) (1- (point))) (point))
 		  e (point-at-eol)

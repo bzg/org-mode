@@ -1,5 +1,10 @@
 2009-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-todo): Honor the NOBLOCKING property.
+
+	* org-agenda.el (org-agenda-dim-blocked-tasks): Honor the
+	NOBLOCKING property.
+
 	* org.el (org-scan-tags): Fix bug in tag scanner
 
 2009-04-07  Carsten Dominik  <carsten.dominik@gmail.com>
