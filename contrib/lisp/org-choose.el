@@ -388,9 +388,9 @@ setting was changed."
        (require 'org-agenda) ;; `org-map-entries' seems to need it.
 	(save-excursion
 	  (unless (org-up-heading-safe)
-	    (error "Chosing is only supported between siblings in a tree, not on top level"))
+	    (error "Choosing is only supported between siblings in a tree, not on top level"))
 	  (let
- 	      ((level (org-reduced-level (org-outline-level))))
+ 	      ((level (1+ (org-reduced-level (org-outline-level)))))
 	    (save-restriction
 	      (org-map-entries 
 	       fn
