@@ -7085,6 +7085,8 @@ according to FMT (default from `org-email-link-description-format')."
   "Association list of escapes for some characters problematic in links.
 This is the list that is used for internal purposes.")
 
+(defvar org-url-encoding-use-url-hexify nil)
+
 (defconst org-link-escape-chars-browser
   '((?\  . "%20")) ; 32 for the SPC char
   "Association list of escapes for some characters problematic in links.
@@ -7092,31 +7094,35 @@ This is the list that is used before handing over to the browser.")
 
 (defun org-link-escape (text &optional table)
   "Escape characters in TEXT that are problematic for links."
-  (setq table (or table org-link-escape-chars))
-  (when text
-    (let ((re (mapconcat (lambda (x) (regexp-quote
-				      (char-to-string (car x))))
-			 table "\\|")))
-      (while (string-match re text)
-	(setq text
-	      (replace-match
-	       (cdr (assoc (string-to-char (match-string 0 text))
-			   table))
+  (if org-url-encoding-use-url-hexify
+      (url-hexify-string text)
+    (setq table (or table org-link-escape-chars))
+    (when text
+      (let ((re (mapconcat (lambda (x) (regexp-quote
+					(char-to-string (car x))))
+			   table "\\|")))
+	(while (string-match re text)
+	  (setq text
+		(replace-match
+		 (cdr (assoc (string-to-char (match-string 0 text))
+			     table))
 	       t t text)))
-      text)))
+	text))))
 
 (defun org-link-unescape (text &optional table)
   "Reverse the action of `org-link-escape'."
-  (setq table (or table org-link-escape-chars))
-  (when text
-    (let ((re (mapconcat (lambda (x) (regexp-quote (cdr x)))
-			 table "\\|")))
-      (while (string-match re text)
-	(setq text
-	      (replace-match
-	       (char-to-string (car (rassoc (match-string 0 text) table)))
-	       t t text)))
-      text)))
+  (if org-url-encoding-use-url-hexify
+      (url-unhex-string text)
+    (setq table (or table org-link-escape-chars))
+    (when text
+      (let ((re (mapconcat (lambda (x) (regexp-quote (cdr x)))
+			   table "\\|")))
+	(while (string-match re text)
+	  (setq text
+		(replace-match
+		 (char-to-string (car (rassoc (match-string 0 text) table)))
+		 t t text)))
+	text))))
 
 (defun org-xor (a b)
   "Exclusive or."
