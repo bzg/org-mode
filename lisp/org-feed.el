@@ -280,7 +280,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 			org-feed-default-template))
 	  (drawer (or (nth 1 (memq :drawer feed))
 		      org-feed-drawer))
-	  feed-buffer inbox-pos
+	  feed-buffer inbox-pos new-formatted
 	  entries old-status status new changed guid-alist e guid olds)
       (setq feed-buffer (org-feed-get-feed url))
       (unless (and feed-buffer (bufferp feed-buffer))
