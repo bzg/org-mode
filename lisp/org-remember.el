@@ -860,10 +860,6 @@ See also the variable `org-reverse-note-order'."
 	(save-excursion
 	  (save-restriction
 	    (widen)
-	    (and (goto-char (point-min))
-		 (not (re-search-forward "^\\* " nil t))
-		 (insert "\n* " (or (and (stringp heading) heading)
-				    "Notes") "\n"))
 	    (setq reversed (org-notes-order-reversed-p))
 
 	    ;; Find the default location
