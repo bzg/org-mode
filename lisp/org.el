@@ -8241,7 +8241,9 @@ below it are allowed.
 With prefix arg GOTO, the command will only visit the target location,
 not actually move anything.
 With a double prefix `C-u C-u', go to the location where the last refiling
-operation has put the subtree."
+operation has put the subtree.
+
+See also `org-refile-use-outline-path' and `org-completion-use-ido'"
   (interactive "P")
   (let* ((cbuf (current-buffer))
 	 (regionp (org-region-active-p))
