@@ -607,6 +607,7 @@ publishing directory."
 	  ;; End of quote section?
 	  (when (and inquote (string-match "^\\*+ " line))
 	    (insert "]]>\n</programlisting>\n")
+	    (org-export-docbook-open-para)
 	    (setq inquote nil))
 	  ;; Inside a quote section?
 	  (when inquote
@@ -625,7 +626,8 @@ publishing directory."
 		      (not (string-match "^[ \t]*\\(:.*\\)"
 					 (car lines))))
 	      (setq infixed nil)
-	      (insert "]]>\n</programlisting>\n"))
+	      (insert "]]>\n</programlisting>\n")
+	      (org-export-docbook-open-para))
 	    (throw 'nextline nil))
 
 	  ;; Protected HTML
@@ -682,11 +684,13 @@ publishing directory."
 	  (when (equal "ORG-BLOCKQUOTE-END" line)
 	    (org-export-docbook-close-para-maybe)
 	    (insert "</blockquote>\n")
+	    (org-export-docbook-open-para)
 	    (throw 'nextline nil))
 
 	  ;; End of verses
 	  (when (equal "ORG-VERSE-END" line)
 	    (insert "</literallayout>\n</blockquote>\n")
+	    (org-export-docbook-open-para)
 	    (setq inverse nil)
 	    (throw 'nextline nil))
 
@@ -705,6 +709,7 @@ publishing directory."
 	    (org-export-docbook-close-para-maybe)
 	    (insert "</entry></row></tbody>\n"
 		    "</tgroup>\n</informaltable>\n")
+	    (org-export-docbook-open-para)
 	    (throw 'nextline nil))
 
 	  ;; Make targets to anchors.  Note that currently FOP does not

@@ -1,3 +1,11 @@
+2009-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-as-html): Start paragraphs after literal
+	examples.
+
+	* org-docbook.el (org-export-as-docbook): Start paragraphs after
+	literal examples.
+
 2009-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-todo): Honor the NOBLOCKING property.

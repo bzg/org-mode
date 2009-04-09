@@ -761,6 +761,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; end of quote section?
 	  (when (and inquote (string-match "^\\*+ " line))
 	    (insert "</pre>\n")
+	    (org-open-par)
 	    (setq inquote nil))
 	  ;; inside a quote section?
 	  (when inquote
@@ -780,7 +781,8 @@ lang=\"%s\" xml:lang=\"%s\">
 		      (not (string-match "^[ \t]*:\\(\\([ \t]\\|$\\)\\(.*\\)\\)"
 					 (car lines))))
 	      (setq infixed nil)
-	      (insert "</pre>\n"))
+	      (insert "</pre>\n")
+	      (org-open-par))
 	    (throw 'nextline nil))
 
 	  ;; Protected HTML
@@ -814,6 +816,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (equal "ORG-BLOCKQUOTE-END" line)
 	    (org-close-par-maybe)
 	    (insert "\n</blockquote>\n")
+	    (org-open-par)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-START" line)
 	    (org-close-par-maybe)
@@ -822,6 +825,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (throw 'nextline nil))
 	  (when (equal "ORG-VERSE-END" line)
 	    (insert "</p>\n")
+	    (org-open-par)
 	    (setq inverse nil)
 	    (throw 'nextline nil))
 	  (when (equal "ORG-CENTER-START" line)
@@ -832,6 +836,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (when (equal "ORG-CENTER-END" line)
 	    (org-close-par-maybe)
 	    (insert "\n</div>")
+	    (org-open-par)
 	    (throw 'nextline nil))
 	  (when inverse
 	    (let ((i (org-get-string-indentation line)))
