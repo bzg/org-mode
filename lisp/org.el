@@ -14739,8 +14739,9 @@ With optional NODE, go directly to that node."
   (interactive)
   (mapc 'require
 	'(org-agenda org-archive org-ascii org-attach org-clock org-colview
-		     org-docbook org-exp org-export-latex org-html org-icalendar
-		     org-id org-publish org-remember org-table
+		     org-docbook org-exp org-html org-icalendar
+		     org-id org-latex
+		     org-publish org-remember org-table
 		     org-timer org-xoxo)))
 
 ;;;###autoload

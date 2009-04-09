@@ -1,15 +1,14 @@
-;;; org-export-latex.el --- LaTeX exporter for org-mode
+;;; org-latex.el --- LaTeX exporter for org-mode
 ;;
 ;; Copyright (C) 2007, 2008, 2009 Free Software Foundation, Inc.
 ;;
 ;; Emacs Lisp Archive Entry
-;; Filename: org-export-latex.el
+;; Filename: org-latex.el
 ;; Version: 6.25trans
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
 ;; Description: Converts an org-mode buffer into LaTeX
-;; URL: http://www.cognition.ens.fr/~guerry/u/org-export-latex.el
 
 ;; This file is part of GNU Emacs.
 
@@ -30,8 +29,7 @@
 ;;
 ;; This library implements a LaTeX exporter for org-mode.
 ;;
-;; Put this file into your load-path and the following into your ~/.emacs:
-;;   (require 'org-export-latex)
+;; It is part of Org and will be autoloaded
 ;;
 ;; The interactive functions are similar to those of the HTML exporter:
 ;;
@@ -1683,7 +1681,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	    "\\|\\(" (regexp-opt (nreverse rest)) "\\)")))
 
 (provide 'org-export-latex)
+(provide 'org-latex)
 
 ;; arch-tag: 23c2b87d-da04-4c2d-ad2d-1eb6487bc3ad
 
-;;; org-export-latex.el ends here
+;;; org-latex.el ends here

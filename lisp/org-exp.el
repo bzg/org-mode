@@ -31,7 +31,7 @@
 (eval-and-compile
   (require 'cl))
 
-(declare-function org-export-latex-preprocess "org-export-latex" (parameters))
+(declare-function org-export-latex-preprocess "org-latex" (parameters))
 (declare-function org-export-ascii-preprocess "org-ascii" (parameters))
 (declare-function org-export-html-preprocess "org-html" (parameters))
 (declare-function org-export-docbook-preprocess "org-docbook" (parameters))
@@ -1274,7 +1274,7 @@ on this string to produce the exported version."
 
       ;; LaTeX-specific preprocessing
       (when latexp
-	(require 'org-export-latex nil)
+	(require 'org-latex nil)
 	(org-export-latex-preprocess parameters))
 
       ;; ASCII-specific preprocessing
