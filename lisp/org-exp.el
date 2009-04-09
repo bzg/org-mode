@@ -1527,6 +1527,7 @@ from the buffer."
 
 (defun org-export-remove-timestamps ()
   "Remove timestamps and keywords for export."
+  (goto-char (point-min))
   (while (re-search-forward org-maybe-keyword-time-regexp nil t)
     (backward-char 1)
     (org-if-unprotected
@@ -1538,6 +1539,7 @@ from the buffer."
 
 (defun org-export-remove-clock-lines ()
   "Remove clock lines for export."
+  (goto-char (point-min))
   (let ((re (concat "^[ \t]*" org-clock-string ".*\n?")))
     (while (re-search-forward re nil t)
       (org-if-unprotected
