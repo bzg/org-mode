@@ -235,10 +235,14 @@ interpretation."
    
    (unless
       ;;Skip the entry that triggered this by skipping any entry with
-      ;;the same starting position.  Both map and plist use the start
-      ;;of the header line as the position, so we can just compare
-      ;;them with `='
-      (= (point) entry-pos)
+      ;;the same starting position.  plist uses the start of the
+      ;;header line as the position, but map no longer does, so we
+      ;;have to go back to the heading.
+      (= 
+	 (save-excursion
+	    (org-back-to-heading)
+	    (point)) 
+	 entry-pos)
       (let
 	 ((ix
 	     (org-choose-get-entry-index keywords)))
@@ -256,7 +260,11 @@ interpretation."
 
    (unless
       ;;Skip the entry that triggered this.
-      (= (point) entry-pos)
+      (= 
+	 (save-excursion
+	    (org-back-to-heading)
+	    (point))
+	 entry-pos)
       (let
 	 ((ix
 	     (org-choose-get-entry-index keywords)))
@@ -390,7 +398,7 @@ setting was changed."
 	  (unless (org-up-heading-safe)
 	    (error "Choosing is only supported between siblings in a tree, not on top level"))
 	  (let
- 	      ((level (1+ (org-reduced-level (org-outline-level)))))
+ 	      ((level (org-reduced-level (org-outline-level))))
 	    (save-restriction
 	      (org-map-entries 
 	       fn
