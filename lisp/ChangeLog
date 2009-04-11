@@ -1,3 +1,9 @@
+2009-04-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-sort-entries-or-items): Match TODO keywrds
+	case-sensitively, when sorting.
+	(org-priority): Do not match TODO keywords with wrong case.
+
 2009-04-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-feed.el (org-feed-update): Bind the variable

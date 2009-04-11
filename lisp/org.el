@@ -6097,6 +6097,7 @@ WITH-CASE, the sorting considers case as well."
       (narrow-to-region start end)
 
       (let ((dcst (downcase sorting-type))
+	    (case-fold-search nil)
             (now (current-time)))
         (sort-subr
          (/= dcst sorting-type)
@@ -9980,7 +9981,8 @@ ACTION can be `set', `up', `down', or a character."
 	    (replace-match news t t nil 2))
 	(if remove
 	    (error "No priority cookie found in line")
-	  (looking-at org-todo-line-regexp)
+	  (let ((case-fold-search nil))
+	    (looking-at org-todo-line-regexp))
 	  (if (match-end 2)
 	      (progn
 		(goto-char (match-end 2))
