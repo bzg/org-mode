@@ -579,9 +579,11 @@ Each element is a list of 3 items:
 
 (defun org-default-export-plist ()
   "Return the property list with default settings for the export variables."
-  (let ((l org-export-plist-vars) rtn e)
+  (let ((l org-export-plist-vars) rtn e s v)
     (while (setq e (pop l))
-      (setq rtn (cons (car e) (cons (symbol-value (nth 2 e)) rtn))))
+      (setq s (nth 2 e)
+	    v (if (boundp s) (symbol-value s) nil)
+	    rtn (cons s (cons v rtn))))
     rtn))
 
 (defvar org-export-inbuffer-options-extra nil
