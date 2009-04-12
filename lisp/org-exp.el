@@ -583,7 +583,7 @@ Each element is a list of 3 items:
     (while (setq e (pop l))
       (setq s (nth 2 e)
 	    v (if (boundp s) (symbol-value s) nil)
-	    rtn (cons s (cons v rtn))))
+	    rtn (cons (car e) (cons v rtn))))
     rtn))
 
 (defvar org-export-inbuffer-options-extra nil
