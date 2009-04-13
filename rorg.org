@@ -3,15 +3,32 @@
 #+SEQ_TODO:  TODO OPEN | DONE RESOLVED
 #+STARTUP: oddeven
 
-* Tasks [4/6]
-
-** TODO evaluation of shell code as background process? [DED]
-   After C-c C-c on an R code block, the process may appear to block,
-   but C-g can be used to reclaim control of the .org buffer, without
-   interrupting the R evalution. However I believe this is not true of
-   bash/sh evaluation. [Haven't tried other languages] Perhaps a
-   solution is just to background the individual shell
-   commands.
+* Tasks [4/9]
+** TODO selective export of text, code, figures
+   [DED] The litorgy buffer contains everything (code, headings and
+   notes/prose describing what you're up to, textual/numeric/graphical
+   code output, etc). However on export to html / LaTeX one might want
+   to include only a subset of that content. For example you might
+   want to create a presentation of what you've done which omits the
+   code.
+** TODO folding of code blocks?
+   [DED] In similar way to using outline-minor-mode for folding function
+   bodies, can we fold code blocks?  #+begin whatever statements are
+   pretty ugly, and in any case when you're thinking about the overall
+   game plan you don't necessarily want to see the code for each step.
+** TODO conversion of output from interactive shell, R (and python) sessions to litorgy buffers
+   [DED] This would be a nice feature I think. Although a litorgy purist
+   would say that it's working the wrong way round... After some
+   interactive work in a *R* buffer, you save the buffer, maybe edit
+   out some lines, and then convert it to litorgy format for
+   posterity. Same for a shell session either in a *shell* buffer, or
+   pasted from another terminal emulator. And python of course.
+** TODO evaluation of shell code as background process? 
+   After C-c C-c on an R code block, the process may appear to
+   block, but C-g can be used to reclaim control of the .org buffer,
+   without interrupting the R evalution. However I believe this is not
+   true of bash/sh evaluation. [Haven't tried other languages] Perhaps
+   a solution is just to background the individual shell commands.
 
    The other languages (aside from emacs lisp) are run through the
    shell, so if we find a shell solution it should work for them as
@@ -35,8 +52,8 @@
    process marker in the org buffer.
 
 *** 'working' spinner
-It may be nice and not too difficult to place a spinner on/near the
-evaluating source code block
+    It may be nice and not too difficult to place a spinner on/near the
+    evaluating source code block
 
 ** TODO ability to select which of multiple R sessions is being used
     (like ess-switch-process in .R buffers)
