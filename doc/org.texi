@@ -8789,7 +8789,7 @@ pages.  Finally, you can set the alignment string:
 @example
 #+CAPTION: A long table
 #+LABEL: tbl:long
-#+ATTR_LaTeX: longtable align=l|lp{3cm}r|l
+#+ATTR_LaTeX: longtable align=l|lp@{3cm@}r|l
 | ..... | ..... |
 | ..... | ..... |
 @end example
