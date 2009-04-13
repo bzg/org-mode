@@ -1,3 +1,8 @@
+2009-04-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-macs.el (org-maybe-intangible): Add intangible property
+	again to invisible text.
+
 2009-04-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-default-export-plist): Handle undefined
