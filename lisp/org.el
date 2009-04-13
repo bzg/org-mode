@@ -2022,7 +2022,8 @@ To turn this on on a per-file basis, insert anywhere in the file:
   "Custom formats for time stamps.  See `format-time-string' for the syntax.
 These are overlayed over the default ISO format if the variable
 `org-display-custom-times' is set.  Time like %H:%M should be at the
-end of the second format."
+end of the second format.  The custom formats are also honored by export
+commands, if custom time display is turned on at the time of export."
   :group 'org-time
   :type 'sexp)
 

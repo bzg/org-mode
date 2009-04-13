@@ -1,5 +1,12 @@
 2009-04-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-display-custom-times): New variable.
+	(org-export-latex-timestamp-markup): New option.
+	(org-export-latex-set-initial-vars): Remember the local value of
+	`org-display-custom-times'.
+	(org-export-latex-content): Process time stamps.
+	(org-export-latex-time-stamps): New function.
+
 	* org-macs.el (org-maybe-intangible): Add intangible property
 	again to invisible text.
 

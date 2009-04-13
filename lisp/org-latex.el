@@ -56,6 +56,7 @@
 (defvar org-export-latex-append-header nil)
 (defvar org-export-latex-options-plist nil)
 (defvar org-export-latex-todo-keywords-1 nil)
+(defvar org-export-latex-display-custom-times nil)
 (defvar org-export-latex-all-targets-re nil)
 (defvar org-export-latex-add-level 0)
 (defvar org-export-latex-sectioning "")
@@ -193,6 +194,11 @@ For example \orgTITLE for #+TITLE."
 (defcustom org-export-latex-date-format
   "%d %B %Y"
   "Format string for \\date{...}."
+  :group 'org-export-latex
+  :type 'string)
+
+(defcustom org-export-latex-timestamp-markup "\\textit{%s}"
+  "A printf format string to be applied to time stamps."
   :group 'org-export-latex
   :type 'string)
 
@@ -712,6 +718,7 @@ If NUM, export sections as numerical sections."
 EXT-PLIST is an optional additional plist.
 LEVEL indicates the default depth for export."
   (setq org-export-latex-todo-keywords-1 org-todo-keywords-1
+	org-export-latex-display-custom-times org-display-custom-times
 	org-export-latex-all-targets-re
 	(org-make-target-link-regexp (org-all-targets))
 	org-export-latex-options-plist
@@ -840,6 +847,8 @@ conversion types are: quotation-marks, emphasis, sub-superscript,
 links, keywords, lists, tables, fixed-width"
   (with-temp-buffer
    (insert content)
+   (unless (memq 'timestamps exclude-list)
+     (org-export-latex-time-stamps))
    (unless (memq 'quotation-marks exclude-list)
      (org-export-latex-quotation-marks))
    (unless (memq 'emphasis exclude-list)
@@ -920,6 +929,18 @@ links, keywords, lists, tables, fixed-width"
      (plist-get org-export-latex-options-plist :sub-superscript))
     (org-export-latex-links)
     (org-trim (buffer-string))))
+
+(defun org-export-latex-time-stamps ()
+  "Format time stamps."
+  (goto-char (point-min))
+  (let ((org-display-custom-times org-export-latex-display-custom-times))
+    (while (re-search-forward org-ts-regexp-both nil t)
+      (org-if-unprotected-at (1- (point))
+       (replace-match
+	(org-export-latex-protect-string
+	 (format org-export-latex-timestamp-markup
+		 (substring (org-translate-time (match-string 0)) 1 -1)))
+	t t)))))
 
 (defun org-export-latex-quotation-marks ()
   "Export quotation marks depending on language conventions."
