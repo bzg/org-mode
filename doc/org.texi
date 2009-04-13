@@ -8784,12 +8784,12 @@ additional classes.  You can also use @code{#+LATEX_HEADER:
 For LaTeX export of a table, you can specify a label and a caption
 (@pxref{Markup rules}).  You can also use the @code{ATTR_LaTeX} line to
 request a longtable environment for the table, so that it may span several
-pages:
+pages.  Finally, you can set the alignment string:
 
 @example
 #+CAPTION: A long table
 #+LABEL: tbl:long
-#+ATTR_LaTeX: longtable
+#+ATTR_LaTeX: longtable align=l|lp{3cm}r|l
 | ..... | ..... |
 | ..... | ..... |
 @end example
