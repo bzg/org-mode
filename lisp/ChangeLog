@@ -1,5 +1,7 @@
 2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-compat.el (org-sha1-string): Function removed.
+
 	* org.el (org-refile-allow-creating-parent-nodes): New option.
 	(org-refile-get-location): New argument NEW-NODES.
 	(org-refile): Call `org-refile-get-location' with the new

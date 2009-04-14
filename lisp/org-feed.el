@@ -92,6 +92,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'sha1)
 
 (declare-function url-retrieve-synchronously "url" (url))
 
