@@ -62,7 +62,7 @@ which see."
 	  (string :tag "Into Drawer named...")))
 
 (defcustom org-clock-out-when-done t
-  "When non-nil, the clock will be stopped when the relevant entry is marked DONE.
+  "When non-nil, clock will be stopped when the clocked entry is marked DONE.
 A nil value means, clock will keep running until stopped explicitly with
 `C-c C-x C-o', or until the clock is started in a different item."
   :group 'org-clock
@@ -99,26 +99,28 @@ The function is called with point at the beginning of the headline."
   :type 'function)
 
 (defcustom org-clock-string-limit 0
-  "Maximum length of clock strings in the modeline. 0 means no limit"
+  "Maximum length of clock strings in the modeline. 0 means no limit."
   :group 'org-clock
   :type 'integer)
 
 (defcustom org-clock-in-resume nil
-  "If non-nil, when clocking into a task with a clock entry which
-has not been closed, resume the clock from that point"
+  "If non-nil, resume clock when clocking into task with open clock.
+When clocking into a task with a clock entry which has not been closed,
+the clock can be resumed from that point."
   :group 'org-clock
   :type 'boolean)
 
 (defcustom org-clock-persist nil
-  "When non-nil, save the running clock when emacs is closed, and
-  resume it next time emacs is started.
+  "When non-nil, save the running clock when emacs is closed.
+The clock is resumed when emacs restarts.
 When this is t, both the running clock, and the entire clock
 history are saved.  When this is the symbol `clock', only the
 running clock is saved.
 
 When Emacs restarts with saved clock information, the file containing the
 running clock as well as all files mentioned in the clock history will
-be visited."
+be visited.
+All this depends on running `org-clock-persistence-insinuate' in .emacs"
   :group 'org-clock
   :type '(choice
 	  (const :tag "Just the running clock" clock)
@@ -127,18 +129,17 @@ be visited."
 
 (defcustom org-clock-persist-file (convert-standard-filename
 				   "~/.emacs.d/org-clock-save.el")
-  "File to save clock data to"
+  "File to save clock data to."
   :group 'org-clock
   :type 'string)
 
 (defcustom org-clock-persist-query-save nil
-  "When non-nil, ask before saving the current clock on exit"
+  "When non-nil, ask before saving the current clock on exit."
   :group 'org-clock
   :type 'boolean)
 
 (defcustom org-clock-persist-query-resume t
-  "When non-nil, ask before resuming any stored clock during
-load."
+  "When non-nil, ask before resuming any stored clock during load."
   :group 'org-clock
   :type 'boolean)
 
@@ -339,11 +340,11 @@ the clocking selection, associated with the letter `d'."
 			(t "???")))
 	    (setq org-clock-heading (org-propertize org-clock-heading
 						    'face nil))
-	    (org-clock-find-position)
+	    (org-clock-find-position org-clock-in-resume))
 	    (cond
 	     ((and org-clock-in-resume
 		   (looking-at
-		    (concat "^[ \\t]* " org-clock-string
+		    (concat "^[ \t]* " org-clock-string
 			    " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
 			    " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
 	      (message "Matched %s" (match-string 1))
@@ -381,8 +382,10 @@ the clocking selection, associated with the letter `d'."
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
 	    (message "Clock started at %s" ts)))))))
 
-(defun org-clock-find-position ()
-  "Find the location where the next clock line should be inserted."
+(defun org-clock-find-position (find-unclosed)
+  "Find the location where the next clock line should be inserted.
+When FIND-UNCLOSED is non-nil, first check if there is an unclosed clock
+line and position cursor in that line."
   (org-back-to-heading t)
   (catch 'exit
     (let ((beg (save-excursion
@@ -396,6 +399,14 @@ the clocking selection, associated with the letter `d'."
 		      org-clock-into-drawer "LOGBOOK"))
 	  first last ind-last)
       (goto-char beg)
+      (when (and find-unclosed
+		 (re-search-forward
+		  (concat "^[ \t]* " org-clock-string
+			  " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
+			  " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")
+		  end t))
+	(beginning-of-line 1)
+	(throw 'exit t))		 
       (when (eobp) (newline) (setq end (max (point) end)))
       (when (re-search-forward (concat "^[ \t]*:" drawer ":") end t)
 	;; we seem to have a CLOCK drawer, so go there.
@@ -1172,8 +1183,7 @@ The details of what will be saved are regulated by the variable
   "Was the clock file loaded?")
 
 (defun org-clock-load ()
-  "Load various clock-related data from disk, optionally resuming
-a stored clock"
+  "Load clock-related data from disk, maybe resuming a stored clock."
   (when (and org-clock-persist (not org-clock-loaded))
     (let ((filename (expand-file-name org-clock-persist-file))
 	  (org-clock-in-resume 'auto-restart)

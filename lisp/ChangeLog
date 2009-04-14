@@ -1,3 +1,12 @@
+2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el: Fix a number of docstrings.
+	(org-clock-find-position): New argument
+	FIND-UNCLOSED to make the function find an unclosed clock in the
+	entry.
+	(org-clock-in): Call `org-clock-find-position' with the new
+	argument if we might be resuming a clock.
+
 2009-04-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-display-custom-times): New variable.
