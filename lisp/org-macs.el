@@ -85,8 +85,7 @@ In Emacs 22, this is not necessary.  The intangible text property has
 led to problems with flyspell.  These problems are fixed in flyspell.el,
 but we still avoid setting the property in Emacs 22 and later.
 We use a macro so that the test can happen at compilation time."
-;  (if (< emacs-major-version 22)
-  (if (not (= emacs-major-version 22))
+  (if (< emacs-major-version 22)
       `(append '(intangible t) ,props)
     props))
 
