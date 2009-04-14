@@ -8541,31 +8541,32 @@ keywords and tags lead to conflicts, use the variables
 parts of the document - your style specifications may change these, in
 addition to any of the standard classes like for headlines, tables etc.
 @example
-p.author           @r{author information, including email}
-p.date             @r{publishing date}
-p.creator          @r{creator info, about Org-mode version}
-.title             @r{document title}
-.todo              @r{TODO keywords, all not-done states}
-.done              @r{the DONE keywords, all stated the count as done}
-.WAITING           @r{each TODO keyword also uses a class named after itself}
-.timestamp         @r{time stamp}
-.timestamp-kwd     @r{keyword associated with a time stamp, like SCHEDULED}
-.tag               @r{tag in a headline}
-._HOME             @r{each tag uses itself as a class, "@@" replaced by "_"}
-.target            @r{target for links}
-.linenr            @r{the line number in a code example}
-.code-highlighted  @r{for highlighting referenced code lines}
-div.outline-N      @r{div for outline level N (headline plus text))}
-div.outline-text-N @r{extra div for text at outline level N}
-.section-number-N  @r{section number in headlines, different for each level}
-div.figure         @r{how to format an inlined image}
-pre.src            @r{formatted source code}
-pre.example        @r{normal example}
-p.verse            @r{verse paragraph}
-div.footnotes      @r{footnote section headline}
-p.footnote         @r{footnote definition paragraph, containing a footnote}
-.footref           @r{a footnote reference number (always a <sup>)}
-.footnum           @r{footnote number in footnote definition (always <sup>)}
+p.author            @r{author information, including email}
+p.date              @r{publishing date}
+p.creator           @r{creator info, about Org-mode version}
+.title              @r{document title}
+.todo               @r{TODO keywords, all not-done states}
+.done               @r{the DONE keywords, all stated the count as done}
+.WAITING            @r{each TODO keyword also uses a class named after itself}
+.timestamp          @r{time stamp}
+.timestamp-kwd      @r{keyword associated with a time stamp, like SCHEDULED}
+.timestamp-wrapper  @r{span around keyword plus time stamp}
+.tag                @r{tag in a headline}
+._HOME              @r{each tag uses itself as a class, "@@" replaced by "_"}
+.target             @r{target for links}
+.linenr             @r{the line number in a code example}
+.code-highlighted   @r{for highlighting referenced code lines}
+div.outline-N       @r{div for outline level N (headline plus text))}
+div.outline-text-N  @r{extra div for text at outline level N}
+.section-number-N   @r{section number in headlines, different for each level}
+div.figure          @r{how to format an inlined image}
+pre.src             @r{formatted source code}
+pre.example         @r{normal example}
+p.verse             @r{verse paragraph}
+div.footnotes       @r{footnote section headline}
+p.footnote          @r{footnote definition paragraph, containing a footnote}
+.footref            @r{a footnote reference number (always a <sup>)}
+.footnum            @r{footnote number in footnote definition (always <sup>)}
 @end example
 
 @vindex org-export-html-style-default

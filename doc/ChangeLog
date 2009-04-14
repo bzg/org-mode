@@ -1,3 +1,7 @@
+2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (CSS support): Document new class.
+
 2009-03-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Document the "?" operator to find

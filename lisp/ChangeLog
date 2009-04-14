@@ -1,5 +1,8 @@
 2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-html-handle-time-stamps): Wrap time stamps into
+	an additional span element.
+
 	* org-clock.el: Fix a number of docstrings.
 	(org-clock-find-position): New argument
 	FIND-UNCLOSED to make the function find an unclosed clock in the
