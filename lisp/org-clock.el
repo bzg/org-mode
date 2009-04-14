@@ -294,13 +294,13 @@ the clocking selection, associated with the letter `d'."
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
 	(org-clock-out t))
-
+      
       (when (equal select '(16))
 	;; Mark as default clocking task
 	(save-excursion
 	  (org-back-to-heading t)
 	  (move-marker org-clock-default-task (point))))
-
+      
       (setq target-pos (point))  ;; we want to clock in at this location
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
@@ -340,7 +340,7 @@ the clocking selection, associated with the letter `d'."
 			(t "???")))
 	    (setq org-clock-heading (org-propertize org-clock-heading
 						    'face nil))
-	    (org-clock-find-position org-clock-in-resume))
+	    (org-clock-find-position org-clock-in-resume)
 	    (cond
 	     ((and org-clock-in-resume
 		   (looking-at
