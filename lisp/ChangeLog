@@ -1,5 +1,12 @@
 2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-refile-allow-creating-parent-nodes): New option.
+	(org-refile-get-location): New argument NEW-NODES.
+	(org-refile): Call `org-refile-get-location' with the new
+	argument.
+	(org-refile-get-location): Arrange for adding a new child.
+	(org-refile-new-child): New function.
+
 	* org-html.el (org-html-handle-time-stamps): Wrap time stamps into
 	an additional span element.
 

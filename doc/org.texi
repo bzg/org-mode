@@ -5647,6 +5647,7 @@ special command:
 @vindex org-refile-targets
 @vindex org-refile-use-outline-path
 @vindex org-outline-path-complete-in-steps
+@vindex org-refile-allow-creating-parent-nodes
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
 all items in the region) is filed below the target heading as a subitem.
@@ -5657,7 +5658,9 @@ targets, but you can have more complex definitions across a number of files.
 See the variable @code{org-refile-targets} for details.  If you would like to
 select a location via a file-path-like completion along the outline path, see
 the variables @code{org-refile-use-outline-path} and
-@code{org-outline-path-complete-in-steps}.
+@code{org-outline-path-complete-in-steps}.  If you would like to be able to
+create new nodes as new parents for for refiling on the fly, check the
+variable @code{org-refile-allow-creating-parent-nodes}.
 @kindex C-u C-c C-w
 @item C-u C-c C-w
 Use the refile interface to jump to a heading.

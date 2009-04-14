@@ -1543,6 +1543,23 @@ fast, while still showing the whole path to the entry."
   :group 'org-refile
   :type 'boolean)
 
+(defcustom org-refile-allow-creating-parent-nodes nil
+  "Non-nil means, allow to create new nodes as refile targets.
+New nodes are then created by adding \"/new node name\" to the completion
+of an existing node.  When the value of this variable is `confirm',
+new node creation must be confirmed by the user (recommended)
+When nil, the completion must match an existing entry.
+
+Note that, if the new heading is not seen by the criteria
+listed in `org-refile-targets', multiple instances of the same
+heading would be created by trying again to file under the new
+heading."
+  :group 'org-refile
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)
+	  (const :tag "Prompt for confirmation" confirm)))
+
 (defgroup org-todo nil
   "Options concerning TODO items in Org-mode."
   :tag "Org TODO"
@@ -8261,7 +8278,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (setq it (org-refile-get-location
-		      (if goto "Goto: " "Refile to: ") default-buffer))
+		      (if goto "Goto: " "Refile to: ") default-buffer
+		      org-refile-allow-creating-parent-nodes))
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
@@ -8326,7 +8344,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
   (bookmark-jump "org-refile-last-stored")
   (message "This is the location of the last refile"))
 
-(defun org-refile-get-location (&optional prompt default-buffer)
+(defun org-refile-get-location (&optional prompt default-buffer new-nodes)
   "Prompt the user for a refile location, using PROMPT."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path))
@@ -8352,9 +8370,48 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 			   (cdr x))
 		   (cons (concat (car x) extra) (cdr x))))
 	       org-refile-target-table))
-	 (completion-ignore-case t))
-    (assoc (funcall cfunc prompt tbl nil t nil 'org-refile-history)
-	   tbl)))
+	 (completion-ignore-case t)
+	 pa answ parent-target child parent)
+    (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
+			nil 'org-refile-history))
+    (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
+    (if pa
+	pa
+      (when (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
+	(setq parent (match-string 1 answ)
+	      child (match-string 2 answ))
+	(setq parent-target (or (assoc parent tbl) (assoc (concat parent "/") tbl)))
+	(when (and parent-target
+		   (or (eq new-nodes t)
+		       (and (eq new-nodes 'confirm)
+			    (y-or-n-p (format "Create new node \"%s\"? " child)))))
+	  (org-refile-new-child parent-target child))))))
+
+(defun org-refile-new-child (parent-target child)
+  "Use refile target PARENT-TARGET to add new CHILD below it."
+  (unless parent-target
+    (error "Cannot find parent for new node"))
+  (let ((file (nth 1 parent-target))
+	(pos (nth 3 parent-target))
+	level)
+    (with-current-buffer (or (find-buffer-visiting file)
+			     (find-file-noselect file))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (if pos
+	      (goto-char pos)
+	    (goto-char (point-max))
+	    (if (not (bolp)) (newline)))
+	  (when (looking-at outline-regexp)
+	    (setq level (funcall outline-level))
+	    (org-end-of-subtree t t))
+	  (org-back-over-empty-lines)
+	  (insert "\n" (make-string
+			(if pos (org-get-valid-level level 1) 1) ?*)
+		  " " child "\n")
+	  (beginning-of-line 0)
+	  (list (concat (car parent-target) "/" child) file "" (point)))))))
 
 (defun org-olpath-completing-read (prompt collection &rest args)
   "Read an outline path like a file name."
