@@ -1606,7 +1606,7 @@ But it has the disadvantage, that Org-mode's HTML conversions cannot be used."
 	(or b (setq b (substring s 0 (match-beginning 0))))
 	(setq r (concat
 		 r (substring s 0 (match-beginning 0))
-		 "@<span class=\"timestamp-wrapper\">"
+		 " @<span class=\"timestamp-wrapper\">"
 		 (if (match-end 1)
 		     (format "@<span class=\"timestamp-kwd\">%s @</span>"
 			     (match-string 1 s)))
