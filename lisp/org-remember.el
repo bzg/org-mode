@@ -806,7 +806,7 @@ See also the variable `org-reverse-note-order'."
 	   (org-startup-folded nil)
 	   (org-startup-align-all-tables nil)
 	   (org-goto-start-pos 1)
-	   spos exitcmd level reversed txt)
+	   spos exitcmd level reversed txt text-before-node-creation)
       (when (equal current-prefix-arg '(4))
 	(setq visitp t))
       (when previousp
@@ -829,6 +829,7 @@ See also the variable `org-reverse-note-order'."
       (goto-char (point-min))
       (unless (looking-at org-outline-regexp)
 	;; add a headline
+	(setq text-before-node-creation (buffer-string))
 	(insert (concat "* " (current-time-string)
 			" (" (remember-buffer-desc) ")\n"))
 	(backward-char 1)
@@ -855,8 +856,8 @@ See also the variable `org-reverse-note-order'."
 	(throw 'quit t))
       ;; Find the file
       (with-current-buffer (or visiting (find-file-noselect file))
-	(unless (org-mode-p)
-	  (error "Target files for remember notes must be in Org-mode"))
+	(unless (or (org-mode-p) (member heading '(top bottom)))
+	  (error "Target files for notes must be in Org-mode if not filing to top/bottom"))
 	(save-excursion
 	  (save-restriction
 	    (widen)
@@ -865,6 +866,16 @@ See also the variable `org-reverse-note-order'."
 	    ;; Find the default location
 	    (when heading
 	      (cond
+	       ((not (org-mode-p))
+		(if (eq heading 'top)
+		    (goto-char (point-min))
+		  (goto-char (point-max))
+		  (or (bolp) (newline)))
+		(insert text-before-node-creation)
+		(when remember-save-after-remembering
+		  (save-buffer)
+		  (if (not visiting) (kill-buffer (current-buffer))))
+		(throw 'quit t))
 	       ((eq heading 'top)
 		(goto-char (point-min))
 		(or (looking-at org-outline-regexp)

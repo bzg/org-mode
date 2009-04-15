@@ -1,3 +1,8 @@
+2009-04-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-handler): Allow filing to non-org
+	files.
+
 2009-04-15  Magnus Henoch <magnus.henoch@gmail.com>
 
 	* org-feed.el (org-feed-alist): New keyword options.
