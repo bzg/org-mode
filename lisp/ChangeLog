@@ -1,4 +1,11 @@
-2009-04-15  Carsten Dominik  <carsten.dominik@gmail.com>
+2009-04-15  Magnus Henoch <magnus.henoch@gmail.com>
+
+	* org-feed.el (org-feed-alist): New keyword options.
+	(org-feed-update): Use the new options.
+	(org-feed-parse-rss-feed): Renamed from `org-feed-parse-feed'.
+	(org-feed-parse-rss-entry): Renamed from `org-feed-parse-entry'.
+	(org-feed-parse-atom-feed, org-feed-parse-atom-entry): New
+	functions.
 
 	* org-table.el (org-table-fix-formulas): Do not change references
 	to remote tables.

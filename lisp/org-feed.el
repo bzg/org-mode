@@ -159,7 +159,19 @@ Here are the keyword-value pair allows in `org-feed-alist'.
      This function gets passed a list of all entries that have been
      handled before, but are now still in the feed and have *changed*
      since last handled (as evidenced by a different sha1 hash).
-     When the handler is called, point will be at the feed headline."
+     When the handler is called, point will be at the feed headline.
+
+:parse-feed function
+     This function gets passed a buffer, and should return a list of entries,
+     each being a property list containing the `:guid' and `:item-full-text'
+     keys.  The default is `org-feed-parse-rss-feed'; `org-feed-parse-atom-feed'
+     is an alternative.
+
+:parse-entry function
+     This function gets passed an entry as returned by the parse-feed
+     function, and should return the entry with interesting properties added.
+     The default is `org-feed-parse-rss-entry'; `org-feed-parse-atom-entry'
+     is an alternative."
   :group 'org-feed
   :type '(repeat
 	  (list :value ("" "http://" "" "")
@@ -184,6 +196,12 @@ Here are the keyword-value pair allows in `org-feed-alist'.
 		    (list :inline t :tag "Changed items"
 			  (const :changed-handler)
 			  (symbol :tag "Handler Function"))
+                    (list :inline t :tag "Parse Feed"
+                          (const :parse-feed)
+                          (symbol :tag "Parse Feed Function"))
+                    (list :inline t :tag "Parse Entry"
+                          (const :parse-entry)
+                          (symbol :tag "Parse Entry Function"))
 		    )))))
 
 (defcustom org-feed-drawer "FEEDSTATUS"
@@ -281,6 +299,10 @@ it can be a list structured like an entry in `org-feed-alist'."
 			org-feed-default-template))
 	  (drawer (or (nth 1 (memq :drawer feed))
 		      org-feed-drawer))
+          (parse-feed (or (nth 1 (memq :parse-feed feed))
+                          'org-feed-parse-rss-feed))
+          (parse-entry (or (nth 1 (memq :parse-entry feed))
+                           'org-feed-parse-rss-entry))
 	  feed-buffer inbox-pos new-formatted
 	  entries old-status status new changed guid-alist e guid olds)
       (setq feed-buffer (org-feed-get-feed url))
@@ -288,7 +310,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	(error "Cannot get feed %s" name))
       (when retrieve-only
 	(throw 'exit feed-buffer))
-      (setq entries (org-feed-parse-feed feed-buffer))
+      (setq entries (funcall parse-feed feed-buffer))
       (ignore-errors (kill-buffer feed-buffer))
       (save-excursion
 	(save-window-excursion
@@ -307,14 +329,14 @@ it can be a list structured like an entry in `org-feed-alist'."
 		(push e new)
 	      (setq olds (nth 2 (assoc (plist-get e :guid) old-status)))
 	      (if (and olds
-		       (not (string= (org-sha1-string
+		       (not (string= (sha1
 				      (plist-get e :item-full-text))
 				     olds)))
 		  (push e changed))))
 
 	  ;; Parse the relevant entries fully
-	  (setq new     (mapcar 'org-feed-parse-entry new)
-		changed (mapcar 'org-feed-parse-entry changed))
+	  (setq new     (mapcar parse-entry new)
+		changed (mapcar parse-entry changed))
 
 	  ;; Run the filter
 	  (when filter
@@ -341,7 +363,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 			 ;; or if they were handled previously
 			 (if (assoc guid guid-alist) t (plist-get e :handled))
 			 ;; A hash, to detect changes
-			 (org-sha1-string (plist-get e :item-full-text))))
+			 (sha1 (plist-get e :item-full-text))))
 		 entries))
 
 	  ;; Handle new items in the feed
@@ -540,8 +562,8 @@ If that property is already present, nothing changes."
    ((functionp org-feed-retrieve-method)
     (funcall org-feed-retrieve-method url))))
 
-(defun org-feed-parse-feed (buffer)
-  "Parse BUFFER for RS feed entries.
+(defun org-feed-parse-rss-feed (buffer)
+  "Parse BUFFER for RSS feed entries.
 Returns a list of entries, with each entry a property list,
 containing the properties `:guid' and `:item-full-text'."
   (let (entries beg end item guid entry)
@@ -561,7 +583,7 @@ containing the properties `:guid' and `:item-full-text'."
 	(goto-char end))
       (nreverse entries))))
 
-(defun org-feed-parse-entry (entry)
+(defun org-feed-parse-rss-entry (entry)
   "Parse the `:item-full-text' field for xml tags and create new properties."
   (with-temp-buffer
     (insert (plist-get entry :item-full-text))
@@ -575,6 +597,56 @@ containing the properties `:guid' and `:item-full-text'."
     (unless (re-search-forward "isPermaLink[ \t]*=[ \t]*\"false\"" nil t)
       (setq entry (plist-put entry :guid-permalink t))))
   entry)
+
+(defun org-feed-parse-atom-feed (buffer)
+  "Parse BUFFER for Atom feed entries.
+Returns a list of enttries, with each entry a property list,
+containing the properties `:guid' and `:item-full-text'.
+
+The `:item-full-text' property actually contains the sexp
+formatted as a string, not the original XML data."
+  (with-current-buffer buffer
+    (widen)
+    (goto-char (point-min))
+    ;; Skip HTTP headers
+    (search-forward "\n\n")
+    (delete-region (point-min) (point))
+    (let ((feed (car (xml-parse-region (point-min) (point-max)))))
+      (mapcar
+       (lambda (entry)
+         (list
+          :guid (car (xml-node-children (car (xml-get-children entry 'id))))
+          :item-full-text (prin1-to-string entry)))
+       (xml-get-children feed 'entry)))))
+
+(defun org-feed-parse-atom-entry (entry)
+  "Parse the `:item-full-text' as a sexp and create new properties."
+  (let ((xml (car (read-from-string (plist-get entry :item-full-text)))))
+    ;; Get first <link href='foo'/>.
+    (setq entry (plist-put entry :link
+                           (xml-get-attribute
+                            (car (xml-get-children xml 'link))
+                            'href)))
+    ;; Add <title/> as :title.
+    (setq entry (plist-put entry :title
+                           (car (xml-node-children
+                                 (car (xml-get-children xml 'title))))))
+    (let* ((content (car (xml-get-children xml 'content)))
+           (type (xml-get-attribute-or-nil content 'type)))
+      (when content
+        (cond
+         ((string= type "text")
+          ;; We like plain text.
+          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+         ((string= type "html")
+          ;; TODO: convert HTML to Org markup.
+          (setq entry (plist-put entry :description (car (xml-node-children content)))))
+         ((string= type "xhtml")
+          ;; TODO: convert XHTML to Org markup.
+          (setq entry (plist-put entry :description (prin1-to-string (xml-node-children content)))))
+         (t
+          (setq entry (plist-put entry :description (format "Unknown '%s' content." type)))))))
+    entry))
 
 (provide 'org-feed)
 
