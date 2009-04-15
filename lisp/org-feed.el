@@ -101,7 +101,6 @@
   :tag "Org ID"
   :group 'org)
 
-;;;###autoload
 (defcustom org-feed-alist nil
   "Alist specifying RSS feeds that should create inputs for Org.
 Each entry in this list specified an RSS feed tat should be queried
