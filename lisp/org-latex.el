@@ -1096,7 +1096,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		    ".*" ; including the time stamp....
 		    )))
     (while (re-search-forward re nil t)
-      (replace-match (format "\\\\texttt{%s}" (match-string 0)) t))))
+      (replace-match (format "\\texttt{%s}" (match-string 0)) t t))))
 
 (defun org-export-latex-fixed-width (opt)
   "When OPT is non-nil convert fixed-width sections to LaTeX."

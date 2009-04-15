@@ -1,3 +1,7 @@
+2009-04-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-keywords): Fix regexp bug.
+
 2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-compat.el (org-sha1-string): Function removed.
