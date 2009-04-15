@@ -8150,7 +8150,7 @@ The whole set of lines can be inserted into the buffer with @kbd{C-c
 C-e t}.  For individual lines, a good way to make sure the keyword is
 correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
 (@pxref{Completion}).   For a summary of other in-buffer settings not 
-specifically related to export, see @ref{Summary of in-buffer settings}. 
+specifically related to export, see @ref{In-buffer settings}. 
 In particular, note that you can place commonly-used (export) options in 
 a separate file which can be included using @code{#+SETUPFILE}.
 
