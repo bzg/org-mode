@@ -8149,7 +8149,10 @@ additional information.  These lines may be put anywhere in the file.
 The whole set of lines can be inserted into the buffer with @kbd{C-c
 C-e t}.  For individual lines, a good way to make sure the keyword is
 correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
-(@pxref{Completion}).
+(@pxref{Completion}).   For a summary of other in-buffer settings not 
+specifically related to export, see @ref{Summary of in-buffer settings}. 
+In particular, note that you can place commonly-used (export) options in 
+a separate file which can be included using @code{#+SETUPFILE}.
 
 @table @kbd
 @kindex C-c C-e t
@@ -9689,6 +9692,7 @@ have a lower ASCII number that the lowest priority.
 @item #+PROPERTY: Property_Name Value
 This line sets a default inheritance value for entries in the current
 buffer, most useful for specifying the allowed values of a property.
+@cindex #+SETUPFILE
 @item #+SETUPFILE: file
 This line defines a file that holds more in-buffer setup.  Normally this is
 entirely ignored.  Only when the buffer is parsed for option-setting lines
