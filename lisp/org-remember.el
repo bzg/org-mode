@@ -187,8 +187,8 @@ calendar           |  %:type %:date"
 		(choice :tag "Destin. headline"
 		 (string :tag "Specify")
 		 (const :tag "Use `org-remember-default-headline'" nil)
-		 (const :tag "Level 1 at beginning of file" top)
-		 (const :tag "Level 1 at end of file" bottom))
+		 (const :tag "At beginning of file" top)
+		 (const :tag "At end of file" bottom))
 		(choice :tag "Context"
 		 (const :tag "Use in all contexts" nil)
 		 (const :tag "Use in all contexts" t)
