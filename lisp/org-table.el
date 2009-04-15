@@ -4159,6 +4159,7 @@ list of the fields in the rectangle ."
 	  org-table-last-column-widths org-table-last-alignment
 	  org-table-last-column-widths tbeg
 	  buffer loc)
+      (setq form (org-table-convert-refs-to-rc form))
       (save-excursion
 	(save-restriction
 	  (widen)

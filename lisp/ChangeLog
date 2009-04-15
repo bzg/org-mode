@@ -2,6 +2,8 @@
 
 	* org-table.el (org-table-fix-formulas): Do not change references
 	to remote tables.
+	(org-table-get-remote-range): Convert standard coordinates to RC
+	format.
 
 	* org-latex.el (org-export-latex-keywords): Fix regexp bug.
 
