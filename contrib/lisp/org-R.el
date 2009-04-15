@@ -6,7 +6,7 @@
 ;; Author: Dan Davison <davison@stats.ox.ac.uk>
 ;; Keywords: org, R, ESS, tables, graphics
 ;; Homepage: http://www.stats.ox.ac.uk/~davison/software/org-R
-;; Version: 0.05 2009-02-05
+;; Version: 0.06 2009-04-15
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -47,9 +47,13 @@
 ;; table. With point in the first #+R line, M-x org-R-apply
 ;; makes happen whatever has been specified in those lines. 
 
-;; The best documentation is currently the Worg tutorial:
+;; The documentation is currently the Worg tutorial:
 ;;
 ;; http://orgmode.org/worg/org-tutorials/org-R/org-R.php
+;;
+;; changelog:
+;; 2009-04-05 two bug fixes in org-R-eval contributed by David Moffat
+;; 
 
 
 (defconst org-R-skeleton-funcall-1-arg
@@ -499,6 +503,7 @@ atoms, or an atom, i.e. in the form of cases 1-4"
       (mapcar 'f cols)
     (list (f cols))))
   
+
 (defun org-R-eval (R-function csv-file options)
   "Apply an R function to tabular data and receive output as an org table.
 
@@ -521,7 +526,7 @@ inserted above the #+R lines.
 	(output-file (plist-get options :outfile))
 	(title (plist-get options :title))
 	output-format graphics-output-file width height)
-    
+
     (unless (not output-file)
       ;; We are writing output to file. Determine file format and
       ;; location, and open graphics device if necessary.
@@ -538,6 +543,12 @@ inserted above the #+R lines.
 	  (setq output-file
 		(make-temp-file
 		 "org-R-output-" nil (concat "." output-format)))))
+      ;;; MdQ bug fix.
+      ;;; If a filename is given, make sure it's absolute,
+      ;;; as ess-execute needs that later.
+      (if (match-string 1 output-file)
+	  (setq output-file (expand-file-name output-file)) )
+
       (if (eq output-format "jpg") (setq output-format "jpeg"))
       (setq graphics-output-file (not (string-equal output-format "org")))
       (if graphics-output-file ;; open the graphics device
@@ -547,35 +558,41 @@ inserted above the #+R lines.
 		       (format ", width=%d" width))
 		   (if (setq height (plist-get options :height))
 		       (format ", height=%d" height)) ")"))))
-    
+
     ;; Apply R code to table (which is now stored as a csv file)
     ;; does it matter whether this uses ess-command or ess-execute?
-    
+
     ;; First evaluate function definition for R -> org table conversion
-    (ess-execute (replace-regexp-in-string "\n" " " org-R-write-org-table-def)
-		 nil transit-buffer)
-
-    ;; FIXME: why not eval the function def together with the function call
-    ;; as in the commented out line below (it didn't work for some reason)
-    (ess-execute
-     (concat
-      ;; (replace-regexp-in-string "\n" " " org-R-write-org-table-def) ";"
-      (org-R-make-expr R-function csv-file options)) nil transit-buffer)
-
+    ;;; MdQ bug fix.
+    ;;; The following save-excursion has been brought up to here
+    ;;; so that the two ess-execute commands are now within it.
+    ;;; This is because they have the side effect of changing current
+    ;;; buffer to the transit-buffer, which causes error of deleting
+    ;;; the wrong table there, instead of in the org buffer.
     (save-excursion
-      (set-buffer (concat "*" transit-buffer "*"))
+      (ess-execute (replace-regexp-in-string "\n" " " org-R-write-org-table-def)
+		   nil transit-buffer)
+
+      ;; FIXME: why not eval the function def together with the function call
+      ;; as in the commented out line below (it didn't work for some reason)
+      (ess-execute
+       (concat
+	;; (replace-regexp-in-string "\n" " " org-R-write-org-table-def) ";"
+	(org-R-make-expr R-function csv-file options)) nil transit-buffer)
+
+      ;;       (set-buffer (concat "*" transit-buffer "*"))
       (unless (or (looking-at "$")
 		  (string-equal (buffer-substring-no-properties 1 2) "|"))
 	(error "Error in R evaluation:\n%s" (buffer-string))))
-    
-    
+
+
     (if csv-file
 	(unless (and infile
 		     (string-equal (file-name-extension infile) "csv"))
 	  (delete-file csv-file)))
-  
+
     (if graphics-output-file (ess-execute "dev.off()")) ;; Close graphics device
-    
+
     (unless (or graphics-output-file
 		(not (plist-get options :output-to-buffer)))
       ;; Send tabular output to a org buffer as new org
@@ -591,7 +608,7 @@ inserted above the #+R lines.
 	  (if (plist-get options :replace)
 	      (progn ;; kill a table iff in one or one ends on the previous line
 		(delete-region (org-table-begin) (org-table-end))
-		(save-excursion 
+		(save-excursion
 		  (forward-line -1)
 		  (if (looking-at "#\\+TBLNAME")
 		      (delete-region (point) (1+ (point-at-eol))))))))
@@ -604,11 +621,11 @@ inserted above the #+R lines.
     ;; another file. Either way, point is still at the beginning of
     ;; the first #+R line.
     (unless (not output-file)
-      (save-excursion 
+      (save-excursion
 	(forward-line -1)
 	(if (looking-at "\\[\\[file:")
 	    (delete-region (point) (1+ (point-at-eol)))))
-      (insert (org-make-link-string 
+      (insert (org-make-link-string
 	       (concat "file:" output-file)
 	       (unless (plist-get options :inline)
 		 (or title (concat output-format " output")))) "\n"))
