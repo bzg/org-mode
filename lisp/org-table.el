@@ -1882,14 +1882,17 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	    s n a)
 	(when remove
 	  (while (re-search-forward re2 (point-at-eol) t)
-	    (replace-match "")))
+	    (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
+	      (replace-match ""))))
 	(while (re-search-forward re (point-at-eol) t)
-	  (setq s (match-string 1) n (string-to-number s))
-	  (cond
-	   ((setq a (assoc s replace))
-	    (replace-match (concat key (cdr a)) t t))
-	   ((and limit (> n limit))
-	    (replace-match (concat key (int-to-string (+ n delta))) t t))))))))
+	  (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
+	    (setq s (match-string 1) n (string-to-number s))
+	    (cond
+	     ((setq a (assoc s replace))
+	      (replace-match (concat key (cdr a)) t t))
+	     ((and limit (> n limit))
+	      (replace-match (concat key (int-to-string (+ n delta)))
+			     t t)))))))))
 
 (defun org-table-get-specials ()
   "Get the column names and local parameters for this table."
