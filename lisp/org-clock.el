@@ -380,7 +380,8 @@ the clocking selection, associated with the letter `d'."
 	    (org-clock-update-mode-line)
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
-	    (message "Clock started at %s" ts)))))))
+	    (message "Clock started at %s" ts)))))
+    (org-clock-goto nil)))
 
 (defun org-clock-find-position (find-unclosed)
   "Find the location where the next clock line should be inserted.
