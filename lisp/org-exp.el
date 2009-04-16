@@ -1125,6 +1125,8 @@ translations.  There is currently no way for users to extend this.")
 
 (defvar org-export-target-aliases nil
   "Alist of targets with invisible aliases.")
+(defvar org-export-preferred-target-alist nil
+  "Alist of section id's with preferred aliases.")
 (defvar org-export-code-refs nil
   "Alist of code references and line numbers")
 
@@ -1317,19 +1319,24 @@ The new targets are added to TARGET-ALIST, which is also returned."
   (goto-char (point-min))
   (org-init-section-numbers)
   (let ((re (concat "^" org-outline-regexp
-		    "\\| [ \t]*:ID:[ \t]*\\([^ \t\r\n]+\\)"))
-	level target last-section-target a)
+		    "\\| [ \t]*:\\(ID\\|CUSTOM_ID\\):[ \t]*\\([^ \t\r\n]+\\)"))
+	level target last-section-target a id)
     (while (re-search-forward re nil t)
-      (if (match-end 1)
+      (if (match-end 2)
 	  (progn
-	    (push (cons (org-match-string-no-properties 1)
-			target) target-alist)
+	    (setq id (org-match-string-no-properties 2))
+	    (push (cons id target) target-alist)
 	    (setq a (or (assoc last-section-target org-export-target-aliases)
 			(progn
 			  (push (list last-section-target)
 				org-export-target-aliases)
 			  (car org-export-target-aliases))))
-	    (push (caar target-alist) (cdr a)))
+	    (push (caar target-alist) (cdr a))
+	    (when (equal (match-string 1) "CUSTOM_ID")
+	      (if (not (assoc last-section-target
+			      org-export-preferred-target-alist))
+		  (push (cons last-section-target id)
+			org-export-preferred-target-alist))))
 	(setq level (org-reduced-level
 		     (save-excursion (goto-char (point-at-bol))
 				     (org-outline-level))))
@@ -1386,7 +1393,10 @@ the current file."
 	      ((= (string-to-char link) ?#)
 	       ;; user wants exactly this link
 	       link)
-	      ((cdr (assoc slink target-alist)))
+	      ((cdr (assoc slink target-alist))
+	       (or (cdr (assoc (assoc slink target-alist)
+			       org-export-preferred-target-alist))
+		   (cdr (assoc slink target-alist))))
 	      ((and (string-match "^id:" link)
 		    (cdr (assoc (substring link 3) target-alist))))
 	      ((string-match "^(\\(.*\\))$" link)

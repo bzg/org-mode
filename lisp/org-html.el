@@ -594,7 +594,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc item-tag
 	 footnotes footref-seen
-	 id-file
+	 id-file href
 	 )
 
     (let ((inhibit-read-only t))
@@ -733,12 +733,14 @@ lang=\"%s\" xml:lang=\"%s\">
 					      t t line)))
 				(while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				  (setq txt (replace-match "" t t txt)))
+				(setq href (format "sec-%s" snumber))
+				(setq href (or (cdr (assoc href org-export-preferred-target-alist)) href))
 				(push
 				 (format
 				  (if todo
-				      "</li>\n<li><a href=\"#sec-%s\"><span class=\"todo\">%s</span></a>"
-				    "</li>\n<li><a href=\"#sec-%s\">%s</a>")
-				  snumber txt) thetoc)
+				      "</li>\n<li><a href=\"#%s\"><span class=\"todo\">%s</span></a>"
+				    "</li>\n<li><a href=\"#%s\">%s</a>")
+				  href txt) thetoc)
 
 				(setq org-last-level level))
 			    )))
@@ -1811,15 +1813,19 @@ If there are links in the string, don't modify these."
 When TITLE is nil, just close all open levels."
   (org-close-par-maybe)
   (let* ((target (and title (org-get-text-property-any 0 'target title)))
-	 (extra-targets
+	 (extra-targets (assoc target org-export-target-aliases))
+	 (preferred (cdr (assoc target org-export-preferred-target-alist)))
+	 (remove (or preferred target))
+	 (l org-level-max)
+	 snumber href suffix)
+    (setq extra-targets (remove remove extra-targets))
+    (setq extra-targets
 	  (mapconcat (lambda (x)
 		       (if (org-uuidgen-p x) (setq x (concat "ID-" x)))
 		       (format "<a name=\"%s\" id=\"%s\"></a>"
 			       x x))
-		     (cdr (assoc target org-export-target-aliases))
+		     extra-targets
 		     ""))
-	 (l org-level-max)
-	 snumber)
     (while (>= l level)
       (if (aref org-levels-open (1- l))
 	  (progn
@@ -1868,9 +1874,12 @@ When TITLE is nil, just close all open levels."
 				 level snumber)
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
-	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"sec-%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
-			snumber level level snumber extra-targets
-			title level level snumber))
+	(setq href (cdr (assoc (concat "sec-" snumber) org-export-preferred-target-alist)))
+	(setq suffix (or href (concat "sec-" snumber)))
+	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
+			suffix level level href
+			extra-targets
+			title level level suffix))
 	(org-open-par)))))
 
 (defun org-export-html-get-tag-class-name (tag)

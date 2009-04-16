@@ -1,5 +1,13 @@
 2009-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Use custom IDs in the toc.
+
+	* org-exp.el (org-export-preferred-target-alist): New variable.
+	(org-export-define-heading-targets): Find the new CUSTOM_ID
+	property.
+	(org-export-target-internal-links): Target the custom ids when
+	possible.
+
 	* org-latex.el (org-export-latex-preprocess): Better regexp for
 	matching latex macros with arguments.
 
