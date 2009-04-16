@@ -1432,10 +1432,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
      (replace-match (org-export-latex-protect-string "\\hrule") t t)))
 
   ;; Protect LaTeX commands like \command[...]{...} or \command{...}
-  (goto-char (point-min))
-  (while (re-search-forward "\\\\[a-zA-Z]+\\(?:\\[.*\\]\\)?{.*}" nil t)
-    (add-text-properties (match-beginning 0) (match-end 0)
-			 '(org-protected t)))
+  (let ((re (concat "\\\\[a-zA-Z]+\\(?:"
+		    "\\[.*\\]"
+		    "\\)?"
+		    (org-create-multibrace-regexp "{" "}" 3))))
+    (while (re-search-forward re nil t)
+      (add-text-properties (match-beginning 0) (match-end 0)
+			   '(org-protected t))))
 
   ;; Protect LaTeX entities
   (goto-char (point-min))
