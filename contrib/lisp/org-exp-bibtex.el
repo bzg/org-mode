@@ -107,9 +107,9 @@
 		(replace-match "<hr/>" t t))
 	      (concat "\n#+BEGIN_HTML\n<div id=\"bibliography\">\n" (buffer-string) "\n</div>\n#+END_HTML\n"))))
 	 (latexp ;; Latex export
-	  (concat "\n#+LATEX: \\\\bibliographystyle{" style "}"
-		  "\n#+LATEX: \\\\bibliography{" file "}\n"))) t t)))
-
+	  (concat "\n#+LATEX: \\bibliographystyle{" style "}"
+		  "\n#+LATEX: \\bibliography{" file "}\n"))) t t)))
+    
 
     ;; Convert cites to links in html
     (when htmlp
