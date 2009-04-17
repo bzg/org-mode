@@ -1,3 +1,11 @@
+2009-04-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-link-to-org-use-id): New possible value
+	`create-if-interactive-and-no-custom-id'.
+	(org-store-link): Use custom IDs.
+	(org-link-search): Find custom ID properties from #link.
+	(org-default-properties): Add CUSTOM_ID for property completion.
+
 2009-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-as-html): Use custom IDs in the toc.

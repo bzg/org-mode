@@ -2660,14 +2660,23 @@ internal structure of all links, use the menu entry
 @cindex links, internal
 @cindex targets, for links
 
-If the link does not look like a URL, it is considered to be internal in
-the current file.  Links such as @samp{[[My Target]]} or @samp{[[My
-Target][Find my target]]} lead to a text search in the current file.
-The link can be followed with @kbd{C-c C-o} when the cursor is on the
-link, or with a mouse click (@pxref{Handling links}).  The preferred
-match for such a link is a dedicated target: the same string in double
-angular brackets.  Targets may be located anywhere; sometimes it is
-convenient to put them into a comment line. For example
+If the link does not look like a URL, it is considered to be internal in the
+current file.  The most important case is a link like
+@samp{[[#my-custom-id]]} which will link to the entry with the
+@code{CUSTOM_ID} property @samp{my-custom-id}.  Such custom IDs are very good
+for HTML export (@pxref{HTML export}) where they produce pretty section
+links.  You are responsible yourself to make sure these custom IDs are unique
+in a file.
+
+Links such as @samp{[[My Target]]} or @samp{[[My Target][Find my target]]}
+lead to a text search in the current file.
+
+The link can be followed with @kbd{C-c C-o} when the cursor is on the link,
+or with a mouse click (@pxref{Handling links}).  Links to custom IDs will
+point to the corresponding headline.  The preferred match for a text link is
+a @i{dedicated target}: the same string in double angular brackets.  Targets
+may be located anywhere; sometimes it is convenient to put them into a
+comment line. For example
 
 @example
 # <<My Target>>
@@ -2679,12 +2688,16 @@ text before the first headline is usually not exported, so the first such
 target should be after the first headline, or in the line directly before the
 first headline.}.
 
-If no dedicated target exists, Org will search for the words in the
-link.  In the above example the search would be for @samp{my target}.
-Links starting with a star like @samp{*My Target} restrict the search to
-headlines.  When searching, Org mode will first try an exact match, but
-then move on to more and more lenient searches.  For example, the link
-@samp{[[*My Targets]]} will find any of the following:
+If no dedicated target exists, Org will search for the words in the link.  In
+the above example the search would be for @samp{my target}.  Links starting
+with a star like @samp{*My Target} restrict the search to
+headlines@footnote{To insert a link targeting a headline, in-buffer
+completion can be used.  Just type a star followed by a few optional letters
+into the buffer and press @kbd{M-@key{TAB}}.  All headlines in the current
+buffer will be offered as completions.  @xref{Handling links}, for more
+commands creating links.}.  When searching, Org mode will first try an
+exact match, but then move on to more and more lenient searches.  For
+example, the link @samp{[[*My Targets]]} will find any of the following:
 
 @example
 ** My targets
@@ -2692,11 +2705,6 @@ then move on to more and more lenient searches.  For example, the link
 ** my 20 targets are
 @end example
 
-To insert a link targeting a headline, in-buffer completion can be used.
-Just type a star followed by a few optional letters into the buffer and
-press @kbd{M-@key{TAB}}.  All headlines in the current buffer will be
-offered as completions.  @xref{Handling links}, for more commands
-creating links.
 
 Following a link pushes a mark onto Org's own mark ring.  You can
 return to the previous position with @kbd{C-c &}.  Using this command
@@ -2814,23 +2822,43 @@ insert it into an Org file, and to follow the link.
 Store a link to the current location.  This is a @emph{global} command (you
 must create the key binding yourself) which can be used in any buffer to
 create a link.  The link will be stored for later insertion into an Org
-buffer (see below).
+buffer (see below).  What kind of link will be created depends on the current
+buffer: 
 
+@b{Org-mode buffers}@*
 @vindex org-link-to-org-use-id
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
-to the target.  Otherwise it points to the current headline, either by text
-(unsafe), or, if @file{org-id.el} is loaded and @code{org-link-to-org-use-id}
-is set, by ID property.
+to the target.  Otherwise it points to the current headline, which will also
+be the description.
 
+If the headline has a @code{CUSTOM_ID} property, a link to this custom ID
+will be stored.  In addition or alternatively (depending on the value of
+@code{org-link-to-org-use-id}), a globally unique @code{ID} property will be
+created and/or used to construct a link.  So using this command in Org
+buffers will potentially create two links: A human-readable from the custom
+ID, and one that is globally unique and works even if the entry is moved from
+file to file.  Later, when inserting the link, you need to decide which one
+to use.
+
+@b{Email/News clients: VM, Rmail, Wanderlust, MH-E, Gnus}@*
+Pretty much all Emacs mail clients are supported.  The link will point to the
+current article, or, in some GNUS buffers, to the group.  The description is
+constructed from the author and the subject.
+
+@b{Web browsers: W3 and W3M}@*
+Here the link will be the current URL, with the page title as description.
+
+@b{Contacts: BBDB}@*
+Links created in a BBDB buffer will point to the current entry.
+
+@b{Chat: IRC}@*
 @vindex org-irc-link-to-logs
-For VM, Rmail, Wanderlust, MH-E, Gnus and BBDB buffers, the link will
-indicate the current article/entry.  For W3 and W3M buffers, the link goes to
-the current URL.  For IRC links, if you set the variable
-@code{org-irc-link-to-logs} to non-nil then @kbd{C-c l} will store a
-@samp{file:/} style link to the relevant point in the logs for the current
-conversation.  Otherwise an @samp{irc:/} style link to the user/channel/server
-under the point will be stored.
+For IRC links, if you set the variable @code{org-irc-link-to-logs} to
+@code{t}, a @samp{file:/} style link to the relevant point in the logs for
+the current conversation is created.  Otherwise an @samp{irc:/} style link to
+the user/channel/server under the point will be stored.
 
+@b{Other files}@*
 For any other files, the link will point to the file, with a search string
 (@pxref{Search options}) pointing to the contents of the current line.  If
 there is an active region, the selected words will form the basis of the

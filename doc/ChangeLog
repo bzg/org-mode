@@ -1,3 +1,8 @@
+2009-04-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Internal links): Document custom ids for links.
+	(Handling links): Document custom ids for links.
+
 2009-04-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (CSS support): Document new class.

@@ -1086,7 +1086,7 @@ It should match if the message is from the user him/herself."
   :group 'org-link-store
   :type 'regexp)
 
-(defcustom org-link-to-org-use-id 'create-if-interactive
+(defcustom org-link-to-org-use-id 'create-if-interactive-and-no-custom-id
   "Non-nil means, storing a link to an Org file will use entry IDs.
 
 Note that before this variable is even considered, org-id must be loaded,
@@ -1115,9 +1115,11 @@ nil   Never use an ID to make a link, instead link using a text search for
   :group 'org-link-store
   :type '(choice
 	  (const :tag "Create ID to make link" t)
-	  (const :tag "Create if string link interactively"
-		 'create-if-interactive)
-	  (const :tag "Only use existing" 'use-existing)
+	  (const :tag "Create if storing link interactively"
+		 create-if-interactive)
+	  (const :tag "Create if storing link interactively and no CUSTOM_ID is present"
+		 create-if-interactive-and-no-custom-id)
+	  (const :tag "Only use existing" use-existing)
 	  (const :tag "Do not use ID to create link" nil)))
 
 (defcustom org-context-in-file-links t
@@ -6833,7 +6835,7 @@ For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
-  (let (link cpltxt desc description search txt)
+  (let (link cpltxt desc description search txt custom-id)
     (cond
 
      ((run-hook-with-args-until-success 'org-store-link-functions)
@@ -6903,6 +6905,7 @@ For file links, arg negates `org-context-in-file-links'."
 	    link (org-make-link cpltxt)))
 
      ((and buffer-file-name (org-mode-p))
+      (setq custom-id (org-entry-get nil "CUSTOM_ID"))
       (cond
        ((org-in-regexp "<<\\(.*?\\)>>")
 	(setq cpltxt
@@ -6914,6 +6917,9 @@ For file links, arg negates `org-context-in-file-links'."
 	     (or (eq org-link-to-org-use-id t)
 		 (and (eq org-link-to-org-use-id 'create-if-interactive)
 		      (interactive-p))
+		 (and (eq org-link-to-org-use-id 'create-if-interactive-and-no-custom-id)
+		      (interactive-p)
+		      (not custom-id))
 		 (and org-link-to-org-use-id
 		      (condition-case nil
 			  (org-entry-get nil "ID")
@@ -6980,7 +6986,12 @@ For file links, arg negates `org-context-in-file-links'."
 	(progn
 	  (setq org-stored-links
 		(cons (list link desc) org-stored-links))
-	  (message "Stored: %s" (or desc link)))
+	  (message "Stored: %s" (or desc link))
+	  (when custom-id
+	    (setq link (concat "file:" (abbreviate-file-name (buffer-file-name))
+			       "::#" custom-id))
+	    (setq org-stored-links
+		  (cons (list link desc) org-stored-links))))
       (and link (org-make-link-string link desc)))))
 
 (defun org-store-link-props (&rest plist)
@@ -7753,6 +7764,18 @@ in all files.  If AVOID-POS is given, ignore matches near that position."
      ;; First check if there are any special
      ((run-hook-with-args-until-success 'org-execute-file-search-functions s))
      ;; Now try the builtin stuff
+     ((and (equal (string-to-char s0) ?#)
+	   (> (length s0) 1)
+	   (save-excursion
+	     (goto-char (point-min))
+	     (and
+	      (re-search-forward
+	       (concat "^[ \t]*:CUSTOM_ID:[ \t]+" (regexp-quote (substring s0 1)) "[ \t]*$") nil t)
+	      (setq type 'dedicated
+		    pos (match-beginning 0))))
+	   ;; There is an exact target for this
+	   (goto-char pos)
+	   (org-back-to-heading t)))
      ((save-excursion
 	(goto-char (point-min))
 	(and
@@ -11095,7 +11118,7 @@ These are properties that are not defined in the property drawer,
 but in some other way.")
 
 (defconst org-default-properties
-  '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION"
+  '("ARCHIVE" "CATEGORY" "SUMMARY" "DESCRIPTION" "CUSTOM_LINK"
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
     "EXPORT_FILE_NAME" "EXPORT_TITLE" "ORDERED")
