@@ -33,6 +33,7 @@
 (load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'litorgy)
 (require 'litorgy-ref)
+(require 'litorgy-ui)
 
 ;; language specific files
 (require 'litorgy-script)
