@@ -2826,11 +2826,11 @@ buffer (see below).  What kind of link will be created depends on the current
 buffer: 
 
 @b{Org-mode buffers}@*
-@vindex org-link-to-org-use-id
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
 to the target.  Otherwise it points to the current headline, which will also
 be the description.
 
+@vindex org-link-to-org-use-id
 If the headline has a @code{CUSTOM_ID} property, a link to this custom ID
 will be stored.  In addition or alternatively (depending on the value of
 @code{org-link-to-org-use-id}), a globally unique @code{ID} property will be

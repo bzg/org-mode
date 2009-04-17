@@ -1,10 +1,16 @@
 2009-04-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-id.el (org-id-get-with-outline-path-completion): Turn off
+	org-refile-target-verify-function for the duration of the command.
+
 	* org.el (org-link-to-org-use-id): New possible value
 	`create-if-interactive-and-no-custom-id'.
 	(org-store-link): Use custom IDs.
 	(org-link-search): Find custom ID properties from #link.
 	(org-default-properties): Add CUSTOM_ID for property completion.
+	(org-refile-target-verify-function): New option.
+	(org-goto): Turn off org-refile-target-verify-function
+	for the duration of the command.
 
 2009-04-16  Carsten Dominik  <carsten.dominik@gmail.com>
 

@@ -228,6 +228,7 @@ It returns the ID of the entry.  If necessary, the ID is created."
   (let* ((org-refile-targets (or targets '((nil . (:maxlevel . 10)))))
 	 (org-refile-use-outline-path
 	  (if (caar org-refile-targets) 'file t))
+	 (org-refile-target-verify-function nil)
 	 (spos (org-refile-get-location "Entry: "))
 	 (pom (and spos (move-marker (make-marker) (nth 3 spos)
 				     (get-file-buffer (nth 1 spos))))))

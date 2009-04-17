@@ -1501,6 +1501,9 @@ This is list of cons cells.  Each cell contains:
     Note that, when `org-odd-levels-only' is set, level corresponds to
     order in hierarchy, not to the number of stars.
 
+You can set the variable `org-refile-target-verify-function' to a function
+to verify each headline found by the simple critery above.
+
 When this variable is nil, all top-level headlines in the current buffer
 are used, equivalent to the value `((nil . (:level . 1))'."
   :group 'org-refile
@@ -1516,6 +1519,14 @@ are used, equivalent to the value `((nil . (:level . 1))'."
 	    (cons :tag "Regular expression" (const :value :regexp) (regexp))
 	    (cons :tag "Level number" (const :value :level) (integer))
 	    (cons :tag "Max Level number" (const :value :maxlevel) (integer))))))
+
+(defcustom org-refile-target-verify-function nil
+  "Function to verify if the headline at point should be a refile target.
+The function will be called without arguments, with point at the beginning
+of the headline.  It should return t if the headline is a valid target
+for refiling."
+  :group 'org-refile
+  :type 'function)
 
 (defcustom org-refile-use-outline-path nil
   "Non-nil means, provide refile targets as paths.
@@ -5020,6 +5031,7 @@ the headline hierarchy above."
   (interactive "P")
   (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
 	 (org-refile-use-outline-path t)
+	 (org-refile-target-verify-function nil)
 	 (interface
 	  (if (not alternative-interface)
 	      org-goto-interface
@@ -8211,28 +8223,34 @@ on the system \"/user@host:\"."
 		(goto-char (point-min))
 		(while (re-search-forward descre nil t)
 		  (goto-char (point-at-bol))
-		  (when (looking-at org-complex-heading-regexp)
-		    (setq level (org-reduced-level (- (match-end 1) (match-beginning 1)))
-			  txt (org-link-display-format (match-string 4))
-			  re (concat "^" (regexp-quote
-					  (buffer-substring (match-beginning 1)
-							    (match-end 4)))))
-		    (if (match-end 5) (setq re (concat re "[ \t]+"
-						       (regexp-quote
-							(match-string 5)))))
-		    (setq re (concat re "[ \t]*$"))
-		    (when org-refile-use-outline-path
-		      (setq txt (mapconcat 'org-protect-slash
-					   (append
-					    (if (eq org-refile-use-outline-path 'file)
-						(list (file-name-nondirectory
-						       (buffer-file-name (buffer-base-buffer))))
-					      (if (eq org-refile-use-outline-path 'full-file-path)
-						  (list (buffer-file-name (buffer-base-buffer)))))
-					    (org-get-outline-path fast-path-p level txt)
-					    (list txt))
-					   "/")))
-		    (push (list txt f re (point)) targets))
+		  (catch 'next
+		    (when org-refile-target-verify-function
+		      (save-excursion
+			(save-match-data
+			  (or (funcall org-refile-target-verify-function)
+			      (throw 'next t)))))
+		    (when (looking-at org-complex-heading-regexp)
+		      (setq level (org-reduced-level (- (match-end 1) (match-beginning 1)))
+			    txt (org-link-display-format (match-string 4))
+			    re (concat "^" (regexp-quote
+					    (buffer-substring (match-beginning 1)
+							      (match-end 4)))))
+		      (if (match-end 5) (setq re (concat re "[ \t]+"
+							 (regexp-quote
+							  (match-string 5)))))
+		      (setq re (concat re "[ \t]*$"))
+		      (when org-refile-use-outline-path
+			(setq txt (mapconcat 'org-protect-slash
+					     (append
+					      (if (eq org-refile-use-outline-path 'file)
+						  (list (file-name-nondirectory
+							 (buffer-file-name (buffer-base-buffer))))
+						(if (eq org-refile-use-outline-path 'full-file-path)
+						    (list (buffer-file-name (buffer-base-buffer)))))
+					      (org-get-outline-path fast-path-p level txt)
+					      (list txt))
+					     "/")))
+		      (push (list txt f re (point)) targets)))
 		  (goto-char (point-at-eol))))))))
     (message "Getting targets...done")
     (nreverse targets))))
