@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN | DONE RESOLVED
 #+STARTUP: oddeven
 
-* Tasks [4/9]
+* Tasks [5/10]
 ** TODO selective export of text, code, figures
    [DED] The litorgy buffer contains everything (code, headings and
    notes/prose describing what you're up to, textual/numeric/graphical
@@ -11,18 +11,66 @@
    to include only a subset of that content. For example you might
    want to create a presentation of what you've done which omits the
    code.
-** TODO folding of code blocks?
-   [DED] In similar way to using outline-minor-mode for folding function
-   bodies, can we fold code blocks?  #+begin whatever statements are
-   pretty ugly, and in any case when you're thinking about the overall
-   game plan you don't necessarily want to see the code for each step.
-** TODO conversion of output from interactive shell, R (and python) sessions to litorgy buffers
-   [DED] This would be a nice feature I think. Although a litorgy purist
-   would say that it's working the wrong way round... After some
-   interactive work in a *R* buffer, you save the buffer, maybe edit
-   out some lines, and then convert it to litorgy format for
-   posterity. Same for a shell session either in a *shell* buffer, or
-   pasted from another terminal emulator. And python of course.
+
+   [EMS] So I think this should be implemented as a property which can
+   be set globally or on the outline header level (I need to review
+   the mechanics of org-mode properties).  And then as a source block
+   header argument which will apply only to a specific source code
+   block.  A header argument of =:export= with values of
+   
+   - =code= :: just show the code in the source code block
+   - =none= :: don't show the code or the results of the evaluation
+   - =results= :: just show the results of the code evaluation (don't
+                  show the actual code)
+   - =both= :: show both the source code, and the results
+
+   Thinking there should be *two types* of source code blocks.  The
+   first should be the *large blocks* we're used to, and these should
+   default to just showing the code on export (suggestions?).  The
+   other source code block should be smaller *inline blocks*, like the
+   =\R{ code }= blocks.  I'm not sure what the format for these blocks
+   should be, but I think I'll give them their own [[* inline source code blocks][TODO]].
+   
+   Then we can pre-process the blocks using org-exp-blocks.  Which I
+   suppose should be added as a requirement.
+
+   In terms of implementation I think I'll get things working first
+   just on the sourc code block header arguments, and then later add
+   support for reading file/outline-level wide properties.
+
+** TODO inline source code blocks
+   Like the =\R{ code }= blocks
+
+   not sure what the format should be, maybe just something simple
+   like =src_lang{}= where lang is the name of the source code
+   language to be evaluated.
+
+   The biggest problem I see with these is that their main use would
+   be to show the value of a variable, but the variable would need to
+   be assigned through a header argument (aside from in languages like
+   R in which all execution takes place in a session).  Requiring a
+   header argument for a inline blocks defeats the purpose of a small,
+   concise inline-able block.
+
+   Maybe this makes a good case for all source code having the option
+   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
+
+** TODO ability to select which of multiple sessions is being used
+   Increasingly it is looking like we're going to want to run all
+   source code blocks in comint buffer (sessions).  Which will have
+   the benefits of
+   1) allowing background execution
+   2) maintaining state between source-blocks
+      - allowing inline blocks w/o header arguments 
+
+*** R sessions
+    (like ess-switch-process in .R buffers)
+    
+    Maybe this could be packaged into a header argument, something
+    like =:R_session= which could accept either the name of the
+    session to use, or the string =prompt=, in which case we could use
+    the =ess-switch-process= command to select a new process.
+    
 ** TODO evaluation of shell code as background process? 
    After C-c C-c on an R code block, the process may appear to
    block, but C-g can be used to reclaim control of the .org buffer,
@@ -55,13 +103,23 @@
     It may be nice and not too difficult to place a spinner on/near the
     evaluating source code block
 
-** TODO ability to select which of multiple R sessions is being used
-    (like ess-switch-process in .R buffers)
+** TODO conversion of output from interactive shell, R (and python) sessions to litorgy buffers
+   [DED] This would be a nice feature I think. Although a litorgy purist
+   would say that it's working the wrong way round... After some
+   interactive work in a *R* buffer, you save the buffer, maybe edit
+   out some lines, and then convert it to litorgy format for
+   posterity. Same for a shell session either in a *shell* buffer, or
+   pasted from another terminal emulator. And python of course.
 
-    Maybe this could be packaged into a header argument, something
-    like =:R_session= which could accept either the name of the
-    session to use, or the string =prompt=, in which case we could use
-    the =ess-switch-process= command to select a new process.
+** DONE folding of code blocks?
+   [DED] In similar way to using outline-minor-mode for folding function
+   bodies, can we fold code blocks?  #+begin whatever statements are
+   pretty ugly, and in any case when you're thinking about the overall
+   game plan you don't necessarily want to see the code for each Step.
+   
+   Sounds good, and wasn't too hard to implement.  Code blocks should
+   now be fold-able in the same manner as headlines (by pressing TAB
+   on the first line).
 
 ** DONE a header argument specifying silent evaluation (no output)
 This would be useful across all types of source block.  Currently
@@ -910,6 +968,11 @@ Maybe we could do this by allowing the arguments to be specified?
    This block export evaluation will be aware of the target format
    through the htmlp and latexp variables, and can then create quoted
    =#+begin_html= and =#+begin_latex= blocks appropriately.
+   
+   There will also need to be a set of header arguments related to
+   code export.  These would be similar to the results header
+   arguments but would apply to how to handle execution and results
+   during export.
 
 
 * Notes
