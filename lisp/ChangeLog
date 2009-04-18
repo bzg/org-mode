@@ -1,5 +1,11 @@
 2009-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-default-properties): New default properteis for
+	completion.
+
+	* org-exp.el (org-export-add-subtree-options): Add new properties
+	for subtree export.
+
 	* org-docbook.el (org-export-docbook-keywords-markup)
 	(org-export-docbook-timestamp-markup): New options.
 	(org-export-docbook-protect-tags): New function.
