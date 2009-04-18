@@ -277,7 +277,9 @@ decode each split part."
   (let* ((sep (or separator "/+"))
          (split-parts (split-string data sep)))
     (if unhexify
-        (mapcar 'url-unhex-string split-parts)
+	(if (fboundp unhexify)
+	    (mapcar unhexify split-parts)
+	  (mapcar 'org-protocol-unhex-string split-parts))
       split-parts)))
 
 (defun org-protocol-unhex-string(str)
