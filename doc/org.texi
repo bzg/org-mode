@@ -8276,7 +8276,8 @@ for @code{TeX} and @code{LaTeX}, which are respectively @code{t} and
 When exporting only a single subtree by selecting it with @kbd{C-c @@} before
 calling an export command, the subtree can overrule some of the file's export
 settings with properties @code{EXPORT_FILE_NAME}, @code{EXPORT_TITLE},
-@code{EXPORT_TEXT}, and @code{EXPORT_OPTIONS}.
+@code{EXPORT_TEXT}, @code{EXPORT_AUTHOR}, @code{EXPORT_DATE}, and
+@code{EXPORT_OPTIONS}.
 
 @node The export dispatcher, ASCII export, Export options, Exporting
 @section The export dispatcher
