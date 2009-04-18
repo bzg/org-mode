@@ -95,6 +95,10 @@
 (require 'sha1)
 
 (declare-function url-retrieve-synchronously "url" (url))
+(declare-function xml-node-children "xml" (node))
+(declare-function xml-get-children "xml" (node child-name))
+(declare-function xml-get-attribute "xml" (node attribute))
+(declare-function xml-get-attribute-or-nil "xml" (node attribute))
 
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
