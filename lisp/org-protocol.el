@@ -132,7 +132,8 @@
 		  (&optional refresh))
 (declare-function org-publish-get-project-from-filename "org-publish"
 		  (filename &optional up))
-(declare-function server-delete-client proc "server" (&optional noframe))
+(declare-function server-edit "server" ())
+
 
 (defgroup org-protocol nil
   "Intercept calls from emacsclient to trigger custom actions.
@@ -271,13 +272,67 @@ Slashes are sanitized to double slashes here."
 data is that one argument. Data is splitted at each occurrence of separator
  (regexp). If no separator is specified or separator is nil, assume \"/+\".
 The results of that splitting are return as a list. If unhexify is non-nil,
-hex-decode each split part."
+hex-decode each split part. If unhexify is a function, use that function to
+decode each split part."
   (let* ((sep (or separator "/+"))
          (split-parts (split-string data sep)))
     (if unhexify
         (mapcar 'url-unhex-string split-parts)
       split-parts)))
 
+(defun org-protocol-unhex-string(str)
+  "Unhex hexified unicode strings as returned from the JavaScript function
+encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
+  (setq str (or str ""))
+  (let ((tmp "")
+	(case-fold-search t))
+    (while (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str)
+      (let* ((start (match-beginning 0))
+	     (end (match-end 0))
+	     (hex (match-string 0 str))
+	     (replacement (org-protocol-unhex-compound hex)))
+	(setq tmp (concat tmp (substring str 0 start) replacement))
+	(setq str (substring str end))))
+    (setq tmp (concat tmp str))
+    tmp))
+
+
+(defun org-protocol-unhex-compound (hex)
+  "Unhexify unicode hex-chars. E.g. `%C3%B6' is the german Umlaut `ü'."
+  (let* ((bytes (remove "" (split-string hex "%")))
+	 (ret "")
+	 (eat 0)
+	 (sum 0))
+    (while bytes
+      (let* ((b (pop bytes))
+	     (c1 (url-unhex (elt b 0)))
+	     (c2 (url-unhex (elt b 1)))
+	     (val (+ (lsh c1 4) c2))
+	     (shift
+	      (if (= 0 eat) ;; new byte
+		  (if (>= val 252) 6
+		    (if (>= val 248) 5
+		      (if (>= val 240) 4
+			(if (>= val 224) 3
+			  (if (>= val 192) 2 0)))))
+		6))
+	     (xor
+	      (if (= 0 eat) ;; new byte
+		  (if (>= val 252) 252
+		    (if (>= val 248) 248
+		      (if (>= val 240) 240
+			(if (>= val 224) 224
+			  (if (>= val 192) 192 0)))))
+		128)))
+	(if (>= val 192) (setq eat shift))
+	(setq val (logxor val xor))
+	(setq sum (+ (lsh sum shift) val))
+	(if (> eat 0) (setq eat (- eat 1)))
+	(when (= 0 eat)
+	  (setq ret (concat ret (char-to-string sum)))
+	  (setq sum 0))
+	)) ;; end (while bytes
+    ret ))
 
 (defun org-protocol-flatten-greedy (param-list &optional strip-path replacement)
   "Greedy handlers might recieve a list like this from emacsclient:
@@ -477,8 +532,9 @@ as filename."
                        (greedy (plist-get (cdr prolist) :greedy))
                        (splitted (split-string fname proto))
                        (result (if greedy restoffiles (cadr splitted))))
-                  (if (plist-get (cdr prolist) :kill-client)
-                      (server-delete-client client t))
+                  (when (plist-get (cdr prolist) :kill-client)
+		    (message "Greedy org-protocol handler. Killing client.")
+		    (server-edit))
                   (when (fboundp func)
                     (unless greedy
                       (throw 'fname (funcall func result)))

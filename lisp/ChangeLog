@@ -1,5 +1,10 @@
 2009-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-protocol.el (server-edit): Declare `server-edit'.
+	(org-protocol-unhex-string, org-protocol-unhex-compound): New
+	functions.
+	(org-protocol-check-filename-for-protocol): Call `server-edit'.
+
 	* org.el (org-default-properties): New default properteis for
 	completion.
 
