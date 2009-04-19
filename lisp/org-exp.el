@@ -1156,6 +1156,7 @@ on this string to produce the exported version."
 	 target-alist rtn)
 
     (setq org-export-target-aliases nil)
+    (setq org-export-preferred-target-alist nil)
     (setq org-export-code-refs nil)
 
     (with-current-buffer (get-buffer-create " org-mode-tmp")

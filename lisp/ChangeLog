@@ -1,5 +1,8 @@
 2009-04-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-string): Reset the list of
+	preferred targets for each run of the preprocessor.
+
 	* org.el (org-refile-target-verify-function): Improve
 	documentation.
 	(org-get-refile-targets): Respect point being moved by the
