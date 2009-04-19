@@ -1522,9 +1522,15 @@ are used, equivalent to the value `((nil . (:level . 1))'."
 
 (defcustom org-refile-target-verify-function nil
   "Function to verify if the headline at point should be a refile target.
-The function will be called without arguments, with point at the beginning
-of the headline.  It should return t if the headline is a valid target
-for refiling."
+The function will be called without arguments, with point at the
+beginning of the headline.  It should return t and leave point
+where it is if the headline is a valid target for refiling.
+
+If the target should not be selected, the function must return nil.
+In addition to this, it may move point to a place from where the search
+should be continued.  For example, the function may decide that the entire
+subtree of the current entry should be excluded and move point to the end
+of the subtree."
   :group 'org-refile
   :type 'function)
 
@@ -8179,7 +8185,7 @@ on the system \"/user@host:\"."
 (defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
   (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
-	targets txt re files f desc descre fast-path-p level)
+	targets txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
       (while (setq entry (pop entries))
@@ -8227,13 +8233,12 @@ on the system \"/user@host:\"."
 		(widen)
 		(goto-char (point-min))
 		(while (re-search-forward descre nil t)
-		  (goto-char (point-at-bol))
+		  (goto-char (setq pos0 (point-at-bol)))
 		  (catch 'next
 		    (when org-refile-target-verify-function
-		      (save-excursion
-			(save-match-data
-			  (or (funcall org-refile-target-verify-function)
-			      (throw 'next t)))))
+		      (save-match-data
+			(or (funcall org-refile-target-verify-function)
+			    (throw 'next t))))
 		    (when (looking-at org-complex-heading-regexp)
 		      (setq level (org-reduced-level (- (match-end 1) (match-beginning 1)))
 			    txt (org-link-display-format (match-string 4))
@@ -8256,9 +8261,11 @@ on the system \"/user@host:\"."
 					      (list txt))
 					     "/")))
 		      (push (list txt f re (point)) targets)))
-		  (goto-char (point-at-eol))))))))
+		  (when (= (point) pos0)
+		    ;; verification function has not moved point
+		    (goto-char (point-at-eol))))))))))
     (message "Getting targets...done")
-    (nreverse targets))))
+    (nreverse targets)))
 
 (defun org-protect-slash (s)
   (while (string-match "/" s)

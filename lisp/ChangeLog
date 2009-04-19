@@ -1,5 +1,10 @@
 2009-04-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-refile-target-verify-function): Improve
+	documentation.
+	(org-get-refile-targets): Respect point being moved by the
+	verification function.
+
 	* org-latex.el (org-export-latex-timestamp-keyword-markup): New
 	option.
 	(org-export-latex-keywords): Use new option.
