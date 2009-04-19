@@ -10,11 +10,69 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-
-* Version 6.25
+* Version 6.26 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
  :END:
+
+
+** Details
+
+*** custom IDs
+
+Entries can now define a =CUSTOM_ID= property.  This property
+must be a valid ID according to HTML rules, and it will be used
+in HTML export as the main target ID for this entry.  That means,
+both the table of conents and other internal links will
+automatically point to this ID instead of the automatic ID like
+=sec-1.1=.  This is useful to create humar-readable permanent
+links to these location in a document.
+
+The user is responsible to make sure that  custom IDs are unique
+within a file.
+
+Links written like =[[#my-target-name] ]= can be used to target a
+custom ID.
+
+When using =C-c l= to store a link to a headline that has a
+custom ID, Org will now create two links at the same time.  One
+link will be to the custom ID.  The other will be to the globaly
+unique ID property.  When inserting the line with =C-c C-l=, you
+need to decide which one you want to use.  Use the ID links for
+entries that are expected to move from one file to the next.  Use
+custom ID links publishing projects, when you are sure that te
+entry will stay in that file.  See also the variable
+=org-link-to-org-use-id=.
+
+*** Remember to non-org files
+
+If the target headline part of a remember template definition
+entry is =top= or =bottom=, the target file may now be a
+non-Org-mode file.  In this case, the content of the remember
+buffer will be added to that file without enforcing an Org-like
+headline.  Sorry, Russel, that this took so long.
+
+*** New property to turn off todo dependencies locally
+
+Setting the property =NOBLOCKING= will turn off TODO dependency
+checking for this entry.
+
+*** Refile verify
+
+A new function is called to verify tasks that are about to be
+selected as remember targets.  See the new variable
+=org-refile-target-verify-function=.
+
+*** New version org ditaa.jar
+
+Thanks to Stathis Sideris.
+
+*** htmlize.el is now in the contrib directory
+
+The latest version of htmlize.el is now the in the contrib
+directory of Org.  Thanks to Hrvoje Niksic for allowing this.
+
+* Version 6.25
 
 ** Major new features
 
@@ -1688,7 +1746,7 @@ Schulte.
 
     - comment :: Comment blocks with author-specific markup
     - ditaa ::  conversion of ASCII art into pretty png files
-	 using Stathis  Sideris' /ditaa.jar/ program
+	 using Stathis Sideris' /ditaa.jar/ program
     - dot :: creation of graphs in the /dot/ language
     - R :: Sweave type exporting using the R program
 
