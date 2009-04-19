@@ -10,11 +10,10 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.26 (in preparation)
+* Version 6.26
  :PROPERTIES:
  :VISIBILITY: content
  :END:
-
 
 ** Details
 
