@@ -1,3 +1,12 @@
+2009-04-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-rear-nonsticky-at): New defsubst.
+	(org-activate-plain-links, org-activate-angle-links)
+	(org-activate-footnote-links, org-activate-bracket-links)
+	(org-activate-dates, org-activate-target-links)
+	(org-activate-tags): Place the rear-nonsticky properties at the
+	correct location.
+
 2009-04-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-protocol.el (server-edit): Declare `server-edit'.

@@ -4118,6 +4118,8 @@ will be prompted for."
 (defconst org-nonsticky-props
   '(mouse-face highlight keymap invisible intangible help-echo org-linked-text))
 
+(defsubst org-rear-nonsticky-at (pos)
+  (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
 
 (defun org-activate-plain-links (limit)
   "Run through the buffer and add overlays to links."
@@ -4130,9 +4132,8 @@ will be prompted for."
 	    nil
 	  (add-text-properties (match-beginning 0) (match-end 0)
 			       (list 'mouse-face 'highlight
-				     'rear-nonsticky org-nonsticky-props
-				     'keymap org-mouse-map
-				     ))
+				     'keymap org-mouse-map))
+	  (org-rear-nonsticky-at (match-end 0))
 	  (throw 'exit t))))))
 
 (defun org-activate-code (limit)
@@ -4148,9 +4149,8 @@ will be prompted for."
       (progn
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
-				   'rear-nonsticky org-nonsticky-props
-				   'keymap org-mouse-map
-				   ))
+				   'keymap org-mouse-map))
+	(org-rear-nonsticky-at (match-end 0))
 	t)))
 
 (defun org-activate-footnote-links (limit)
@@ -4160,13 +4160,13 @@ will be prompted for."
       (progn
 	(add-text-properties (match-beginning 2) (match-end 2)
 			     (list 'mouse-face 'highlight
-				   'rear-nonsticky org-nonsticky-props
 				   'keymap org-mouse-map
 				   'help-echo
 				   (if (= (point-at-bol) (match-beginning 2))
 				       "Footnote definition"
 				     "Footnote reference")
 				   ))
+	(org-rear-nonsticky-at (match-end 2))
 	t)))
 
 (defun org-activate-bracket-links (limit)
@@ -4178,11 +4178,10 @@ will be prompted for."
 	     ;; but that requires another match, protecting match data,
 	     ;; a lot of overhead for font-lock.
 	     (ip (org-maybe-intangible
-		  (list 'invisible 'org-link 'rear-nonsticky org-nonsticky-props
+		  (list 'invisible 'org-link
 			'keymap org-mouse-map 'mouse-face 'highlight
 			'font-lock-multiline t 'help-echo help)))
-	     (vp (list 'rear-nonsticky org-nonsticky-props
-		       'keymap org-mouse-map 'mouse-face 'highlight
+	     (vp (list 'keymap org-mouse-map 'mouse-face 'highlight
 		       'font-lock-multiline t 'help-echo help)))
 	;; We need to remove the invisible property here.  Table narrowing
 	;; may have made some of this invisible.
@@ -4191,11 +4190,17 @@ will be prompted for."
 	(if (match-end 3)
 	    (progn
 	      (add-text-properties (match-beginning 0) (match-beginning 3) ip)
+	      (org-rear-nonsticky-at (match-beginning 3))
 	      (add-text-properties (match-beginning 3) (match-end 3) vp)
-	      (add-text-properties (match-end 3) (match-end 0) ip))
+	      (org-rear-nonsticky-at (match-end 3))
+	      (add-text-properties (match-end 3) (match-end 0) ip)
+	      (org-rear-nonsticky-at (match-end 0)))
 	  (add-text-properties (match-beginning 0) (match-beginning 1) ip)
+	  (org-rear-nonsticky-at (match-beginning 1))
 	  (add-text-properties (match-beginning 1) (match-end 1) vp)
-	  (add-text-properties (match-end 1) (match-end 0) ip))
+	  (org-rear-nonsticky-at (match-end 1))
+	  (add-text-properties (match-end 1) (match-end 0) ip)
+	  (org-rear-nonsticky-at (match-end 0)))
 	t)))
 
 (defun org-activate-dates (limit)
@@ -4204,8 +4209,8 @@ will be prompted for."
       (progn
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
-				   'rear-nonsticky org-nonsticky-props
 				   'keymap org-mouse-map))
+	(org-rear-nonsticky-at (match-end 0))
 	(when org-display-custom-times
 	  (if (match-end 3)
 	      (org-display-custom-time (match-beginning 3) (match-end 3)))
@@ -4230,10 +4235,10 @@ will be prompted for."
 	  (progn
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 (list 'mouse-face 'highlight
-				       'rear-nonsticky org-nonsticky-props
 				       'keymap org-mouse-map
 				       'help-echo "Radio target link"
 				       'org-linked-text t))
+	    (org-rear-nonsticky-at (match-end 0))
 	    t)))))
 
 (defun org-update-radio-target-regexp ()
@@ -4368,8 +4373,8 @@ between words."
       (progn
 	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
-				   'rear-nonsticky org-nonsticky-props
 				   'keymap org-mouse-map))
+	(org-rear-nonsticky-at (match-end 1))
 	t)))
 
 (defun org-outline-level ()
