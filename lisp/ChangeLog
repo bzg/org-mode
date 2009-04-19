@@ -1,5 +1,9 @@
 2009-04-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-timestamp-keyword-markup): New
+	option.
+	(org-export-latex-keywords): Use new option.
+
 	* org.el (org-rear-nonsticky-at): New defsubst.
 	(org-activate-plain-links, org-activate-angle-links)
 	(org-activate-footnote-links, org-activate-bracket-links)

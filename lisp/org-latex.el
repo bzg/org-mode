@@ -202,6 +202,11 @@ For example \orgTITLE for #+TITLE."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-timestamp-keyword-markup "\\texttt{%s}"
+  "A printf format string to be applied to time stamps."
+  :group 'org-export-latex
+  :type 'string)
+
 (defcustom org-export-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-latex
@@ -1092,11 +1097,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 (defun org-export-latex-keywords ()
   "Convert special keywords to LaTeX."
   (goto-char (point-min))
-  (let ((re (concat org-export-latex-special-keyword-regexp
-		    ".*" ; including the time stamp....
-		    )))
-    (while (re-search-forward re nil t)
-      (replace-match (format "\\texttt{%s}" (match-string 0)) t t))))
+  (while (re-search-forward org-export-latex-special-keyword-regexp nil t)
+    (replace-match (format org-export-latex-timestamp-keyword-markup
+			   (match-string 0)) t t)
+    (save-excursion
+      (beginning-of-line 1)
+      (unless (looking-at ".*\\\\newline[ \t]*$")
+	(end-of-line 1)
+	(insert "\\newline")))))
 
 (defun org-export-latex-fixed-width (opt)
   "When OPT is non-nil convert fixed-width sections to LaTeX."
