@@ -1875,7 +1875,8 @@ When TITLE is nil, just close all open levels."
 			 " " title)))
 	(unless (= head-count 1) (insert "\n</div>\n"))
 	(setq href (cdr (assoc (concat "sec-" snumber) org-export-preferred-target-alist)))
-	(setq suffix (or href (concat "sec-" snumber)))
+	(setq suffix (or href snumber))
+	(setq href (or href (concat "sec-" snumber)))
 	(insert (format "\n<div id=\"outline-container-%s\" class=\"outline-%d\">\n<h%d id=\"%s\">%s%s</h%d>\n<div class=\"outline-text-%d\" id=\"text-%s\">\n"
 			suffix level level href
 			extra-targets
