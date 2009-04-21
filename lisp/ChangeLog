@@ -1,3 +1,12 @@
+2009-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-tab-first-hook)
+	(org-tab-after-check-for-table-hook)
+	(org-tab-after-check-for-cycling-hook): New hooks.
+	(org-cycle-internal-global, org-cycle-internal-local): New
+	functions, split out from `org-cycle'.
+	(org-cycle): Call the new hooks.
+
 2009-04-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-string): Reset the list of

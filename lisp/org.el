@@ -4560,19 +4560,26 @@ If KWD is a number, get the corresponding match group."
 ;;;###autoload
 
 (defvar org-inlinetask-min-level)
+
 (defun org-cycle (&optional arg)
-  "Visibility cycling for Org-mode.
+  "TAB-action and visibility cycling for Org-mode.
+
+This is the command invoked in Org-moe by the TAB key.  It's main purpose
+is outine visibility cycling, but it also invokes other actions
+in special contexts.
 
 - When this function is called with a prefix argument, rotate the entire
   buffer through 3 states (global cycling)
   1. OVERVIEW: Show only top-level headlines.
   2. CONTENTS: Show all headlines of all levels, but no body text.
   3. SHOW ALL: Show everything.
-  When called with two C-u C-u prefixes, switch to the startup visibility,
+  When called with two `C-u C-u' prefixes, switch to the startup visibility,
   determined by the variable `org-startup-folded', and by any VISIBILITY
   properties in the buffer.
-  When called with three C-u C-u C-u prefixed, show the entire buffer,
-  including drawers.
+  When called with three `C-u C-u C-u' prefixed, show the entire buffer,
+  including any drawers.
+
+- When inside a table, re-align the table and move to the next field.
 
 - When point is at the beginning of a headline, rotate the subtree started
   by this line through 3 different states (local cycling)
@@ -4595,186 +4602,200 @@ If KWD is a number, get the corresponding match group."
   But only if also the variable `org-cycle-global-at-bob' is t."
   (interactive "P")
   (org-load-modules-maybe)
-  (let* ((limit-level
-	  (or org-cycle-max-level
-	      (and (boundp 'org-inlinetask-min-level)
-		   org-inlinetask-min-level
-		   (1- org-inlinetask-min-level))))
-	 (nstars (and limit-level
+  (unless (run-hook-with-args-until-success 'org-tab-first-hook)
+    (let* ((limit-level
+	    (or org-cycle-max-level
+		(and (boundp 'org-inlinetask-min-level)
+		     org-inlinetask-min-level
+		     (1- org-inlinetask-min-level))))
+	   (nstars (and limit-level
 		      (if org-odd-levels-only
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
-	 (outline-regexp
-	  (cond
-	   ((not (org-mode-p)) outline-regexp)
-	   (org-cycle-include-plain-lists
-	    (concat "\\(?:\\*"
-		    (if nstars (format "\\{1,%d\\} " nstars) "+")
-		    " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
-	   (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
-	 (bob-special (and org-cycle-global-at-bob (bobp)
-			   (not (looking-at outline-regexp))))
-	 (org-cycle-hook
-	  (if bob-special
-	      (delq 'org-optimize-window-after-visibility-change
-		    (copy-sequence org-cycle-hook))
-	    org-cycle-hook))
-	 (pos (point)))
-
-    (if (or bob-special (equal arg '(4)))
-	;; special case:  use global cycling
-	(setq arg t))
-
-    (cond
-
-     ((equal arg '(16))
-      (org-set-startup-visibility)
-      (message "Startup visibility, plus VISIBILITY properties"))
-
-     ((equal arg '(64))
-      (show-all)
-      (message "Entire buffer visible, including drawers"))
-
-     ((org-at-table-p 'any)
-      ;; Enter the table or move to the next field in the table
-      (or (org-table-recognize-table.el)
-	  (progn
-	    (if arg (org-table-edit-field t)
-	      (org-table-justify-field-maybe)
-	      (call-interactively 'org-table-next-field)))))
-
-     ((eq arg t) ;; Global cycling
-
+	   (outline-regexp
+	    (cond
+	     ((not (org-mode-p)) outline-regexp)
+	     (org-cycle-include-plain-lists
+	      (concat "\\(?:\\*"
+		      (if nstars (format "\\{1,%d\\} " nstars) "+")
+		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
+	     (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
+	   (bob-special (and org-cycle-global-at-bob (bobp)
+			     (not (looking-at outline-regexp))))
+	   (org-cycle-hook
+	    (if bob-special
+		(delq 'org-optimize-window-after-visibility-change
+		      (copy-sequence org-cycle-hook))
+	      org-cycle-hook))
+	   (pos (point)))
+      
+      (if (or bob-special (equal arg '(4)))
+	  ;; special case:  use global cycling
+	  (setq arg t))
+      
       (cond
-       ((and (eq last-command this-command)
-	     (eq org-cycle-global-status 'overview))
-	;; We just created the overview - now do table of contents
-	;; This can be slow in very large buffers, so indicate action
-	(run-hook-with-args 'org-pre-cycle-hook 'contents)
-	(message "CONTENTS...")
-	(org-content)
-	(message "CONTENTS...done")
-	(setq org-cycle-global-status 'contents)
-	(run-hook-with-args 'org-cycle-hook 'contents))
 
-       ((and (eq last-command this-command)
-	     (eq org-cycle-global-status 'contents))
-	;; We just showed the table of contents - now show everything
-	(run-hook-with-args 'org-pre-cycle-hook 'all)
+       ((equal arg '(16))
+	(org-set-startup-visibility)
+	(message "Startup visibility, plus VISIBILITY properties"))
+       
+       ((equal arg '(64))
 	(show-all)
-	(message "SHOW ALL")
-	(setq org-cycle-global-status 'all)
-	(run-hook-with-args 'org-cycle-hook 'all))
+	(message "Entire buffer visible, including drawers"))
 
-       (t
-	;; Default action: go to overview
-	(run-hook-with-args 'org-pre-cycle-hook 'overview)
-	(org-overview)
-	(message "OVERVIEW")
-	(setq org-cycle-global-status 'overview)
-	(run-hook-with-args 'org-cycle-hook 'overview))))
-
-     ((and org-drawers org-drawer-regexp
-	   (save-excursion
-	     (beginning-of-line 1)
-	     (looking-at org-drawer-regexp)))
-      ;; Toggle block visibility
-      (org-flag-drawer
-       (not (get-char-property (match-end 0) 'invisible))))
-
-     ((integerp arg)
-      ;; Show-subtree, ARG levels up from here.
-      (save-excursion
-	(org-back-to-heading)
-	(outline-up-heading (if (< arg 0) (- arg)
-			      (- (funcall outline-level) arg)))
-	(org-show-subtree)))
-
-     ((and (save-excursion (beginning-of-line 1) (looking-at outline-regexp))
-	   (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
-      ;; At a heading: rotate between three different views
-      (org-back-to-heading)
-      (let ((goal-column 0) eoh eol eos)
-	;; First, some boundaries
+       ((org-at-table-p 'any)
+	;; Enter the table or move to the next field in the table
+	(or (org-table-recognize-table.el)
+	    (progn
+	      (if arg (org-table-edit-field t)
+		(org-table-justify-field-maybe)
+		(call-interactively 'org-table-next-field)))))
+       
+       ((run-hook-with-args-until-success
+	 'org-tab-after-check-for-table-hook))
+       
+       ((eq arg t) ;; Global cycling
+	(org-cycle-internal-global))
+       
+       ((and org-drawers org-drawer-regexp
+	     (save-excursion
+	       (beginning-of-line 1)
+	       (looking-at org-drawer-regexp)))
+	;; Toggle block visibility
+	(org-flag-drawer
+	 (not (get-char-property (match-end 0) 'invisible))))
+       
+       ((integerp arg)
+	;; Show-subtree, ARG levels up from here.
 	(save-excursion
 	  (org-back-to-heading)
-	  (save-excursion
-	    (beginning-of-line 2)
-	    (while (and (not (eobp)) ;; this is like `next-line'
-			(get-char-property (1- (point)) 'invisible))
-	      (beginning-of-line 2)) (setq eol (point)))
-	  (outline-end-of-heading)   (setq eoh (point))
-	  (org-end-of-subtree t)
-	  (unless (eobp)
-	    (skip-chars-forward " \t\n")
-	    (beginning-of-line 1) ; in case this is an item
-	    )
-	  (setq eos (1- (point))))
-	;; Find out what to do next and set `this-command'
-	(cond
-	 ((= eos eoh)
-	  ;; Nothing is hidden behind this heading
-	  (run-hook-with-args 'org-pre-cycle-hook 'empty)
-	  (message "EMPTY ENTRY")
-	  (setq org-cycle-subtree-status nil)
-	  (save-excursion
-	    (goto-char eos)
-	    (outline-next-heading)
-	    (if (org-invisible-p) (org-flag-heading nil))))
-	 ((or (>= eol eos)
-	      (not (string-match "\\S-" (buffer-substring eol eos))))
-	  ;; Entire subtree is hidden in one line: open it
-	  (run-hook-with-args 'org-pre-cycle-hook 'children)
-	  (org-show-entry)
-	  (show-children)
-	  (message "CHILDREN")
-	  (save-excursion
-	    (goto-char eos)
-	    (outline-next-heading)
-	    (if (org-invisible-p) (org-flag-heading nil)))
-	  (setq org-cycle-subtree-status 'children)
-	  (run-hook-with-args 'org-cycle-hook 'children))
-	 ((and (eq last-command this-command)
-	       (eq org-cycle-subtree-status 'children))
-	  ;; We just showed the children, now show everything.
-	  (run-hook-with-args 'org-pre-cycle-hook 'subtree)
-	  (org-show-subtree)
-	  (message "SUBTREE")
-	  (setq org-cycle-subtree-status 'subtree)
-	  (run-hook-with-args 'org-cycle-hook 'subtree))
-	 (t
-	  ;; Default action: hide the subtree.
-	  (run-hook-with-args 'org-pre-cycle-hook 'folded)
-	  (hide-subtree)
-	  (message "FOLDED")
-	  (setq org-cycle-subtree-status 'folded)
-	  (run-hook-with-args 'org-cycle-hook 'folded)))))
+	  (outline-up-heading (if (< arg 0) (- arg)
+				(- (funcall outline-level) arg)))
+	  (org-show-subtree)))
+       
+       ((and (save-excursion (beginning-of-line 1) (looking-at outline-regexp))
+	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
+	
+	(org-cycle-internal-local))
+       
+       ;; TAB emulation and template completion
+       (buffer-read-only (org-back-to-heading))
+       
+       ((run-hook-with-args-until-success
+	 'org-tab-after-check-for-cycling-hook))
+       
+       ((org-try-structure-completion))
+       
+       ((org-try-cdlatex-tab))
+       
+       ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
+	     (or (not (bolp))
+		 (not (looking-at outline-regexp))))
+	(call-interactively (global-key-binding "\t")))
+       
+       ((if (and (memq org-cycle-emulate-tab '(white whitestart))
+		 (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
+		 (or (and (eq org-cycle-emulate-tab 'white)
+			  (= (match-end 0) (point-at-eol)))
+		     (and (eq org-cycle-emulate-tab 'whitestart)
+			  (>= (match-end 0) pos))))
+	    t
+	  (eq org-cycle-emulate-tab t))
+	(call-interactively (global-key-binding "\t")))
+       
+       (t (save-excursion
+	    (org-back-to-heading)
+	    (org-cycle)))))))
 
-     ;; TAB emulation and template completion
-     (buffer-read-only (org-back-to-heading))
+(defun org-cycle-internal-global ()
+  "Do the global cycling action."
+  (cond
+   ((and (eq last-command this-command)
+	 (eq org-cycle-global-status 'overview))
+    ;; We just created the overview - now do table of contents
+    ;; This can be slow in very large buffers, so indicate action
+    (run-hook-with-args 'org-pre-cycle-hook 'contents)
+    (message "CONTENTS...")
+    (org-content)
+    (message "CONTENTS...done")
+    (setq org-cycle-global-status 'contents)
+    (run-hook-with-args 'org-cycle-hook 'contents))
+   
+   ((and (eq last-command this-command)
+	 (eq org-cycle-global-status 'contents))
+    ;; We just showed the table of contents - now show everything
+    (run-hook-with-args 'org-pre-cycle-hook 'all)
+    (show-all)
+    (message "SHOW ALL")
+    (setq org-cycle-global-status 'all)
+    (run-hook-with-args 'org-cycle-hook 'all))
+   
+   (t
+    ;; Default action: go to overview
+    (run-hook-with-args 'org-pre-cycle-hook 'overview)
+    (org-overview)
+    (message "OVERVIEW")
+    (setq org-cycle-global-status 'overview)
+    (run-hook-with-args 'org-cycle-hook 'overview))))
 
-     ((org-try-structure-completion))
-
-     ((org-try-cdlatex-tab))
-
-     ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
-	   (or (not (bolp))
-	       (not (looking-at outline-regexp))))
-      (call-interactively (global-key-binding "\t")))
-
-     ((if (and (memq org-cycle-emulate-tab '(white whitestart))
-	       (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
-	       (or (and (eq org-cycle-emulate-tab 'white)
-			(= (match-end 0) (point-at-eol)))
-		   (and (eq org-cycle-emulate-tab 'whitestart)
-			(>= (match-end 0) pos))))
-	  t
-	(eq org-cycle-emulate-tab t))
-      (call-interactively (global-key-binding "\t")))
-
-     (t (save-excursion
-	  (org-back-to-heading)
-	  (org-cycle))))))
+(defun org-cycle-internal-local ()
+  "Do the local cycling action."
+  (org-back-to-heading)
+  (let ((goal-column 0) eoh eol eos)
+    ;; First, some boundaries
+    (save-excursion
+      (org-back-to-heading)
+      (save-excursion
+	(beginning-of-line 2)
+	(while (and (not (eobp)) ;; this is like `next-line'
+		    (get-char-property (1- (point)) 'invisible))
+	  (beginning-of-line 2)) (setq eol (point)))
+      (outline-end-of-heading)   (setq eoh (point))
+      (org-end-of-subtree t)
+      (unless (eobp)
+	(skip-chars-forward " \t\n")
+	(beginning-of-line 1) ; in case this is an item
+	)
+      (setq eos (1- (point))))
+    ;; Find out what to do next and set `this-command'
+    (cond
+     ((= eos eoh)
+      ;; Nothing is hidden behind this heading
+      (run-hook-with-args 'org-pre-cycle-hook 'empty)
+      (message "EMPTY ENTRY")
+      (setq org-cycle-subtree-status nil)
+      (save-excursion
+	(goto-char eos)
+	(outline-next-heading)
+	(if (org-invisible-p) (org-flag-heading nil))))
+     ((or (>= eol eos)
+	  (not (string-match "\\S-" (buffer-substring eol eos))))
+      ;; Entire subtree is hidden in one line: open it
+      (run-hook-with-args 'org-pre-cycle-hook 'children)
+      (org-show-entry)
+      (show-children)
+      (message "CHILDREN")
+      (save-excursion
+	(goto-char eos)
+	(outline-next-heading)
+	(if (org-invisible-p) (org-flag-heading nil)))
+      (setq org-cycle-subtree-status 'children)
+      (run-hook-with-args 'org-cycle-hook 'children))
+     ((and (eq last-command this-command)
+	   (eq org-cycle-subtree-status 'children))
+      ;; We just showed the children, now show everything.
+      (run-hook-with-args 'org-pre-cycle-hook 'subtree)
+      (org-show-subtree)
+      (message "SUBTREE")
+      (setq org-cycle-subtree-status 'subtree)
+      (run-hook-with-args 'org-cycle-hook 'subtree))
+     (t
+      ;; Default action: hide the subtree.
+      (run-hook-with-args 'org-pre-cycle-hook 'folded)
+      (hide-subtree)
+      (message "FOLDED")
+      (setq org-cycle-subtree-status 'folded)
+      (run-hook-with-args 'org-cycle-hook 'folded)))))
 
 ;;;###autoload
 (defun org-global-cycle (&optional arg)
@@ -13925,7 +13946,32 @@ executes context-dependent commands.
 Each function will be called with no arguments.  The function must check
 if the context is appropriate for it to act.  If yes, it should do its
 thing and then return a non-nil value.  If the context is wrong,
-just do nothing.")
+just do nothing and return nil.")
+
+(defvar org-tab-first-hook nil
+  "Hook for functions to attach themselves to TAB.
+See `org-ctrl-c-ctrl-c-hook' for more information.
+This hook runs as the first action when TAB is pressed, even before
+`org-cycle' messes around with the `outline-regexp' to cater for
+inline tasks and plain list item folding.
+If any function in this hook returns t, not other actions like table
+field motion visibility cycling will be done.")
+
+(defvar org-tab-after-check-for-table-hook nil
+  "Hook for functions to attach themselves to TAB.
+See `org-ctrl-c-ctrl-c-hook' for more information.
+This hook runs after it has been established that the cursor is not in a 
+table, but before checking if the cursor is in a headline or if global cycling
+should be done.
+If any function in this hook returns t, not other actions like visibility
+cycling will be done.")
+
+(defvar org-tab-after-check-for-cycling-hook nil
+  "Hook for functions to attach themselves to TAB.
+See `org-ctrl-c-ctrl-c-hook' for more information.
+This hook runs after it has been established that not table field motion and
+not visibility should be done because of current context.  This is probably
+the place where a package like yasnippets can hook in.")
 
 (defvar org-metaleft-hook nil
   "Hook for functions attaching themselves to `M-left'.
