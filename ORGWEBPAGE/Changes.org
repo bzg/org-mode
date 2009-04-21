@@ -987,6 +987,9 @@ argument it now either adds or removes the checkbox.
 This was a requested by Daniel Clemente.
 
 * Version 6.19
+  :PROPERTIES:
+  :CUSTOM_ID: v6.19
+  :END:
 
 ** Overview
    
@@ -1083,6 +1086,9 @@ such a break, but this is useful for footnotes whose
 definitions may not contain empty lines.
 
 * Version 6.18
+  :PROPERTIES:
+  :CUSTOM_ID: v6.18
+  :END:
 ** Incompatible changes
 
 *** Short examples must have a space after the colon
@@ -1175,6 +1181,9 @@ definitions may not contain empty lines.
     command `C-c C-a i' to set this property in an entry.
 
 * Version 6.17
+  :PROPERTIES:
+  :CUSTOM_ID: v6.17
+  :END:
 
 ** Overview
 
@@ -1373,6 +1382,9 @@ remote highlighting possible.
     the current file would not work.
 
 * Version 6.16
+  :PROPERTIES:
+  :CUSTOM_ID: v6.16
+  :END:
   Cleanup of many small bugs, and one new feature.
 
 ** Details
@@ -1384,12 +1396,18 @@ remote highlighting possible.
     left hand side and right hand side of a formula.
 
 * Version 6.15f
+  :PROPERTIES:
+  :CUSTOM_ID: v6.15f
+  :END:
 
   This version reverses the introduction of @0 as a reference to
   the last rwo in a table, because of a conflict with the use of
   @0 for the current row.
 
 * Version 6.15
+  :PROPERTIES:
+  :CUSTOM_ID: v6.15
+  :END:
 ** Overview
 
 - All known LaTeX export issues fixed 
@@ -1539,6 +1557,9 @@ generated tables like the ones using /org-collector.el/ by Eric
 Schulte.
 
 * Version 6.14
+  :PROPERTIES:
+  :CUSTOM_ID: v6.14
+  :END:
 ** Overview
 
    - New relative timer to support timed notes 
@@ -1681,6 +1702,9 @@ Schulte.
 #+end_src
 
 * Version 6.13
+  :PROPERTIES:
+  :CUSTOM_ID: v6.13
+  :END:
 
 ** Overview
 
@@ -1825,6 +1849,9 @@ Schulte.
 *** Many bug fixes again.
     
 * Version 6.12
+  :PROPERTIES:
+  :CUSTOM_ID: v6.12
+  :END:
 ** Overview
 
    - A region of entries can now be refiled with a single command
@@ -1888,6 +1915,9 @@ Schulte.
     problems.
 
 * Version 6.11
+  :PROPERTIES:
+  :CUSTOM_ID: v6.11
+  :END:
 
 ** Overview
 
@@ -2040,6 +2070,9 @@ Schulte.
     when the publishing is over.  At least I hope it works like this.
 
 * Version 6.10
+  :PROPERTIES:
+  :CUSTOM_ID: v6.10
+  :END:
 
 ** Overview
 
@@ -2188,6 +2221,9 @@ Schulte.
     DEADLINE/SCHEDULED/CLOSED information).
 
 * Version 6.09
+  :PROPERTIES:
+  :CUSTOM_ID: v6.09
+  :END:
 ** Incompatible
 *** =org-file-apps= now uses regular expressions, see [[*%20org%20file%20apps%20now%20uses%20regular%20repressions%20instead%20of%20extensions][below]]
 
@@ -2224,6 +2260,9 @@ Schulte.
       customizing the variable =org-attach-file-list-property=.
 
 * Version 6.08
+  :PROPERTIES:
+  :CUSTOM_ID: v6.08
+  :END:
 
 ** Incompatible changes
 
@@ -2301,6 +2340,9 @@ Schulte.
     how to use it, see the [[http://orgmode.org/worg/org-tutorials/org-publish-html-tutorial.php][publishing tutorial]].
 
 * Version 6.07
+  :PROPERTIES:
+  :CUSTOM_ID: v6.07
+  :END:
 
 ** Overview
 
