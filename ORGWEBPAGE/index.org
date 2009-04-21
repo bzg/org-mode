@@ -89,12 +89,14 @@ the latest git version.
 
 ** Alternative distributions
 
-   There are several alternative distributions of Org:
+   There are several alternative distributions of Org.  Some of these
+   are more up-to-date than others, so check if this package really
+   has a recent version
 
-   - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a recent version
+   - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintained by Sebastien Delafond.
    - There is also a package on [[http://aur.archlinux.org/packages.php?do_Details&ID=18206][Archlinux]], by Jiyunatori.
-   - The [[http://packages.debian.org/sid/main/org-mode][Debian package]] is maintained by Sebastien Delafond
-   - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jesse Alama
+   - The [[http://savannah.gnu.org/cvs/%3Fgroup%3Demacs][Emacs CVS]] contains a more-or-less recent version.
+   - The [[http://pdb.finkproject.org/pdb/package.php/org-mode][Fink package]] for Mac OS X by Jesse Alama.
    - The [[https://launchpad.net/~hexmode/+archive][Ubuntu package]] by Mark A. Hershberger.
 
 * Documentation
