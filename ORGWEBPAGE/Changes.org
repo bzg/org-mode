@@ -13,6 +13,7 @@
 * Version 6.26
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.26
  :END:
 
 ** Details
@@ -72,6 +73,9 @@ The latest version of htmlize.el is now the in the contrib
 directory of Org.  Thanks to Hrvoje Niksic for allowing this.
 
 * Version 6.25
+  :PROPERTIES:
+  :CUSTOM_ID: v6.25
+  :END:
 
 ** Major new features
 
@@ -352,6 +356,9 @@ install new keys into the temporary keymap used there.
 
 
 * Version 6.24
+  :PROPERTIES:
+  :CUSTOM_ID: v6.24
+  :END:
 
 ** Incompatible changes
 
@@ -640,6 +647,9 @@ new variable =org-agenda-search-headline-for-time=.
 
 
 * Version 6.23
+  :PROPERTIES:
+  :CUSTOM_ID: v6.23
+  :END:
 ** Overview
 
 - Capture state change notes into a drawer
@@ -828,6 +838,9 @@ LaTeX file as =\orgTITLE=.
 This was a request by Russel Adams.
 
 * Version 6.22
+  :PROPERTIES:
+  :CUSTOM_ID: v6.22
+  :END:
 ** Details
 
 *** org-choose.el by Tom Breton is now included
@@ -882,6 +895,9 @@ The functions =org-agenda-skip-entry-if= and
 This was in response to a request by Saurabh Agrawal.
 
 * Version 6.21
+  :PROPERTIES:
+  :CUSTOM_ID: v6.21
+  :END:
 
 ** Details
 
@@ -908,6 +924,9 @@ Here are the new default values:
 *** Final cleanup for Emacs 21.1 pretest
 
 * Version 6.20
+  :PROPERTIES:
+  :CUSTOM_ID: v6.20
+  :END:
 
 ** Details
 
