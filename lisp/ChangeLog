@@ -1,5 +1,10 @@
 2009-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-goto): Go to recently clocked task if no
+	clock is running.
+
+2009-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
 	* org.el (org-update-parent-todo-statistics): Check for
 	STATISTICS_FROM property.
 

@@ -529,23 +529,30 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (message "Clock canceled"))
 
 (defun org-clock-goto (&optional select)
-  "Go to the currently clocked-in entry.
-With prefix arg SELECT, offer recently clocked tasks."
+  "Go to the currently clocked-in entry, or to the most recently clocked one.
+With prefix arg SELECT, offer recently clocked tasks for selection."
   (interactive "P")
-  (let ((m (if select
-	       (org-clock-select-task "Select task to go to: ")
-	     org-clock-marker)))
-    (if (not (marker-buffer m))
-	(if select
-	    (error "No task selected")
-	  (error "No active clock")))
+  (let* ((recent nil)
+	 (m (cond
+	     (select
+	      (or (org-clock-select-task "Select task to go to: ")
+		  (error "No task selected")))
+	     ((marker-buffer org-clock-marker) org-clock-marker)
+	     ((and (car org-clock-history)
+		   (marker-buffer (car org-clock-history)))
+	      (setq recent t)
+	      (car org-clock-history))
+	     (t (error "No active or recent clock task")))))
     (switch-to-buffer (marker-buffer m))
     (if (or (< m (point-min)) (> m (point-max))) (widen))
     (goto-char m)
     (org-show-entry)
     (org-back-to-heading)
     (org-cycle-hide-drawers 'children)
-    (recenter)))
+    (recenter)
+    (if recent
+	(message "No running clock, this is the most recently clocked task"))))
+
 
 (defvar org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
