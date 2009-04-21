@@ -9249,7 +9249,12 @@ changes because there are uncheckd boxes in this entry."
     (catch 'exit
       (save-excursion
 	(setq level (org-up-heading-safe))
-	(unless level
+	(unless (and level
+		     (not (equal (downcase
+				  (or (org-entry-get
+				       nil "COOKIE_DATA")
+				      ""))
+				 "checkbox")))
 	  (throw 'exit nil))
 	(while (re-search-forward box-re (point-at-eol) t)
 	  (setq cnt-all 0 cnt-done 0 cookie-present t)
@@ -11173,7 +11178,7 @@ but in some other way.")
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
     "EXPORT_FILE_NAME" "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
-    "ORDERED" "NOBLOCKING")
+    "ORDERED" "NOBLOCKING" "COOKIE_DATA")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 

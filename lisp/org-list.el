@@ -371,8 +371,16 @@ the whole buffer."
        (outline-next-heading)
        (setq beg (point) end (point-max)))
      (goto-char end)
-     ;; find each statistic cookie
-     (while (re-search-backward re-find beg t)
+     ;; find each statistics cookie
+     (while (and (re-search-backward re-find beg t)
+		 (not (save-match-data
+			(and (org-on-heading-p)
+
+			     (equal (downcase
+				     (or (org-entry-get
+					  nil "COOKIE_DATA")
+					 ""))
+				    "todo")))))
        (setq beg-cookie (match-beginning 1)
 	     end-cookie (match-end 1)
 	     cstat (+ cstat (if end-cookie 1 0))

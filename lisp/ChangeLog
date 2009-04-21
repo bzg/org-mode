@@ -1,5 +1,11 @@
 2009-04-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-update-parent-todo-statistics): Check for
+	STATISTICS_FROM property.
+
+	* org-list.el (org-update-checkbox-count): Check for
+	STATISTICS_FROM property.
+
 	* org.el (org-tab-first-hook)
 	(org-tab-after-check-for-table-hook)
 	(org-tab-after-check-for-cycling-hook): New hooks.
