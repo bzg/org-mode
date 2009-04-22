@@ -10,7 +10,7 @@
 ;;
 ;;
 ;; Filename: org-protocol.el
-;; Version: 6.26c
+;; Version: 6.26d
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Author: Daniel M German <dmg AT uvic DOT org>
 ;; Author: Sebastian Rose <sebastian_rose AT gmx DOT de>
