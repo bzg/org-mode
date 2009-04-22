@@ -91,6 +91,11 @@ state to switch it to."
   :group 'org-clock
   :type 'integer)
 
+(defcustom org-clock-goto-may-find-recent-task t
+  "Non-nil means, `org-clock-goto' can go to recent task if no active clock."
+  :group 'org-clock
+  :type 'boolean)
+
 (defcustom org-clock-heading-function nil
   "When non-nil, should be a function to create `org-clock-heading'.
 This is the string shown in the mode line when a clock is running.
@@ -538,7 +543,8 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 	      (or (org-clock-select-task "Select task to go to: ")
 		  (error "No task selected")))
 	     ((marker-buffer org-clock-marker) org-clock-marker)
-	     ((and (car org-clock-history)
+	     ((and org-clock-goto-may-find-recent-task
+		   (car org-clock-history)
 		   (marker-buffer (car org-clock-history)))
 	      (setq recent t)
 	      (car org-clock-history))
