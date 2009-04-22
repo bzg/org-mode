@@ -4,7 +4,7 @@
 #+STARTUP: oddeven
 
 * Tasks [5/10]
-** TODO selective export of text, code, figures
+** TODO selective export of text, code, figures [0/2]
    [DED] The litorgy buffer contains everything (code, headings and
    notes/prose describing what you're up to, textual/numeric/graphical
    code output, etc). However on export to html / LaTeX one might want
@@ -12,6 +12,7 @@
    want to create a presentation of what you've done which omits the
    code.
 
+*** TODO export header argument
    [EMS] So I think this should be implemented as a property which can
    be set globally or on the outline header level (I need to review
    the mechanics of org-mode properties).  And then as a source block
@@ -24,6 +25,7 @@
                   show the actual code)
    - =both= :: show both the source code, and the results
 
+*** TODO inline source blocks
    Thinking there should be *two types* of source code blocks.  The
    first should be the *large blocks* we're used to, and these should
    default to just showing the code on export (suggestions?).  The
@@ -525,6 +527,10 @@ other + 2
 #+end_src
 
 : 11
+
+
+
+** (sandboc) selective export
 
 
 
