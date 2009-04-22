@@ -1,4 +1,4 @@
-;;; init.el --- loads litorgy
+;;; litorgy-init.el --- loads litorgy
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -41,5 +41,5 @@
 (require 'litorgy-lisp)
 (require 'litorgy-R)
 
-(message "litorgy loaded")
-;;; init.el ends here
+(provide 'litorgy-init)
+;;; litorgy-init.el ends here

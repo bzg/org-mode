@@ -33,19 +33,23 @@
 ;;; Code:
 (require 'litorgy)
 
-(defadvice org-cycle (around litorgy-ui-org-cycle-src-block activate)
-  "Intercept calls to org-cycle to toggle the visibility of a source code block."
-  (if (save-excursion
+(defun litorgy-ui-src-block-cycle-maybe ()
+  "Detect if this is context for a litorgical src-block and if so
+then run `litorgy-execute-src-block'."
+  (let ((case-fold-search t))
+    (if (save-excursion
           (beginning-of-line 1)
           (looking-at litorgy-src-block-regexp))
-      (litorgy-ui-src-block-cycle)
-    ad-do-it))
+        (progn (call-interactively 'litorgy-ui-src-block-cycle)
+               t) ;; to signal that we took action
+      nil))) ;; to signal that we did not
 
 (defun litorgy-ui-src-block-cycle ()
   "Cycle the visibility of the current source code block"
   (interactive)
   ;; should really do this once in an (org-mode hook)
   (add-to-invisibility-spec '(litorgy-ui . t))
+  (message "trying out source block")
   (save-excursion
     (beginning-of-line)
     (if (re-search-forward litorgy-src-block-regexp nil t)
@@ -56,7 +60,10 @@
                               (overlays-at start)))
               (remove-overlays start end 'invisible 'litorgy-ui)
             (overlay-put (make-overlay start end) 'invisible 'litorgy-ui)))
-      (error "not looking at source code block"))))
+      (error "not looking at a source block"))))
+
+;; org-tab-after-check-for-cycling-hook
+(add-hook 'org-tab-first-hook 'litorgy-ui-src-block-cycle-maybe)
 
 (provide 'litorgy-ui)
 ;;; litorgy-ui ends here
