@@ -556,6 +556,13 @@ deadlines are always turned off when the item is DONE."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
+(defcustom org-agenda-skip-additional-timestamps-same-entry t
+  "When nil, multiple same-day timestamps in entry make multiple agenda lines.
+When non-nil, after the search for timestamps has matched once in an
+entry, the rest of the entry will not be searched."
+  :group 'org-agenda-skip
+  :type 'boolean)
+
 (defcustom org-agenda-skip-timestamp-if-done nil
   "Non-nil means don't select item by timestamp or -range if it is DONE."
   :group 'org-agenda-skip
@@ -3671,9 +3678,9 @@ the documentation of `org-diary'."
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category ee txt timestr tags b0 b3 e3 head
-	 todo-state)
+	 todo-state end-of-match)
     (goto-char (point-min))
-    (while (re-search-forward regexp nil t)
+    (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
 	    b3 (match-beginning 3) e3 (match-end 3))
       (catch :skip
@@ -3730,7 +3737,9 @@ the documentation of `org-diary'."
 			 'todo-state todo-state
 			 'type "timestamp")
 	  (push txt ee))
-	(outline-next-heading)))
+	(if org-agenda-skip-additional-timestamps-same-entry
+	    (outline-next-heading)
+	  (goto-char end-of-match))))
     (nreverse ee)))
 
 (defun org-agenda-get-sexps ()

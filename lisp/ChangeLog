@@ -1,5 +1,10 @@
 2009-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-skip-additional-timestamps-same-entry):
+	New option.
+	(org-agenda-get-timestamps): Honor
+	`org-agenda-skip-additional-timestamps-same-entry'.
+
 	* org-clock.el (org-clock-goto-may-find-recent-task): New option.
 	(org-clock-goto): Find recent task only if
 	`org-clock-goto-may-find-recent-task' allows it.
