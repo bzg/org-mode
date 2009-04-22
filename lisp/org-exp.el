@@ -844,6 +844,7 @@ value of `org-export-run-in-background'."
     ("reg")
     ("macr")
     ("deg")
+    ("pm" . "&plusmn;")
     ("plusmn")
     ("sup2")
     ("sup3")
