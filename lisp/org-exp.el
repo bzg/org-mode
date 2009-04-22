@@ -1447,10 +1447,20 @@ whose content to keep."
 		       (org-delete-all exp-drawers
 				       (copy-sequence all-drawers))
 		       "\\|")
-		      "\\):[ \t]*\n\\([^\000]*?\n\\)?[ \t]*:END:[ \t]*\n")))
+		      "\\):[ \t]*$"))
+	  beg eol)
       (while (re-search-forward re nil t)
 	(org-if-unprotected
-	 (replace-match ""))))))
+	 (setq beg (match-beginning 0)
+	       eol (match-end 0))
+	 (if (re-search-forward "^\\([ \t]*:END:[ \t]*\n?\\)\\|^\\*+[ \t]"
+				nil t)
+	     (if (match-end 1)
+		 ;; terminated in this entry
+		 (progn
+		   (delete-region beg (match-end 1))
+		   (goto-char beg))
+	       (goto-char eol))))))))
 
 (defun org-export-handle-export-tags (select-tags exclude-tags)
   "Modify the buffer, honoring SELECT-TAGS and EXCLUDE-TAGS.
