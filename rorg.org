@@ -229,14 +229,14 @@ following message =no result returned by source block=.
 
 ** TODO ruby arrays not recognized as such
 
-Something is wrong in [[file:litorgy/ligorgy-script.el]] related to the
+Something is wrong in [[file:litorgy/litorgy-script.el]] related to the
 recognition of ruby arrays as such.
 
 #+begin_src ruby :results replace
 [1, 2, 3, 4]
 #+end_src
 
-: 1
+| 1 | 2 | 3 | 4 |
 
 #+begin_src python :results replace
 [1, 2, 3, 4]

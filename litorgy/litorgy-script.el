@@ -48,7 +48,7 @@ automatically generated wrapper for `litorgy-script-execute'.")
 def main
 %s
 end
-puts main
+puts main().inspect
 ")
 
 (defvar litorgy-script-python-wrapper-method
@@ -89,7 +89,9 @@ executed through litorgy."
                 (format "\t%s\n" line))
               (butlast body-lines) "\n")
              (format "\treturn %s\n" (car (last body-lines)))))))
+        ;; (message (buffer-substring (point-min) (point-max))) ;; debug script
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
+        ;; (message (buffer-string)) ;; debug results
         (litorgy-script-table-or-results (buffer-string))))))
 
 (defun litorgy-script-var-to-ruby/python (var)

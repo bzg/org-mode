@@ -33,6 +33,12 @@ This is a source block, and lets see the results
 :the_results
 #+end_src
 
+lets see the source, and results for a ruby array
+#+begin_src ruby :results replace
+[1, 2, 3, 4].map{ |n| n * 2 }
+#+end_src
+
+
 ** emacs-lisp
 
 a table
