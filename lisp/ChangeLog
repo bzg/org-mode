@@ -1,4 +1,11 @@
+2009-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-as-pdf): Use
+	`org-latex-to-pdf-process'.
+
 2009-04-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-latex-to-pdf-process): New option.
 
 	* org-agenda.el (org-agenda-skip-additional-timestamps-same-entry):
 	New option.

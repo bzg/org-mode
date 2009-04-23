@@ -288,10 +288,30 @@ only postscript files can be included."
   :group 'org-export-latex
   :group 'org-export)
 
+(defcustom org-latex-to-pdf-process
+  '("pdflatex -interaction nonstopmode %s"
+    "pdflatex -interaction nonstopmode %s")
+  "Commands to process a LaTeX file to a PDF file.
+This is a list of strings, each of them will be given to the shell
+as a command.  %s in the command will be replaced by the full file name, %b
+by the file base name (i.e. without extension).
+The reason why this is a list is that it usually takes several runs of
+pdflatex, maybe mixed with a call to bibtex.  Org does not have a clever
+mechanism to detect whihc of these commands have to be run to get to a stable
+result, and it also does not do any error checking.
+
+Alternatively, this may be a Lisp function that does the processing, so you
+could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
+THis function should accept the file name as its single argument."
+  :group 'org-export-latex
+  :type '(choice (repeat :tag "Shell command sequence"
+		  (string :tag "Shell command"))
+		 (function)))
+
 (defcustom org-export-pdf-remove-logfiles t
   "Non-nil means, remove the logfiles produced by PDF production.
 These are the .aux, .log, .out, and .toc files."
-  :group 'org-export-latex
+  :group 'org-export-pdf
   :type 'boolean)
 
 ;;; Autoload functions:
@@ -539,13 +559,26 @@ when PUB-DIR is set, use this as the publishing directory."
 				    to-buffer body-only pub-dir))
 	 (file (buffer-file-name lbuf))
 	 (base (file-name-sans-extension (buffer-file-name lbuf)))
-	 (pdffile (concat base ".pdf")))
+	 (pdffile (concat base ".pdf"))
+	 (cmds org-latex-to-pdf-process)
+	 (outbuf (get-buffer-create "*Org PDF LaTeX Output*"))
+	 (bibtex-p (with-current-buffer lbuf
+		     (save-excursion
+		       (goto-char (point-min))
+		       (re-search-forward "\\\\bibliography{" nil t))))
+	 cmd)
+    (with-current-buffer outbuf (erase-buffer))
     (and (file-exists-p pdffile) (delete-file pdffile))
     (message "Processing LaTeX file...")
-    (shell-command (format "pdflatex -interaction nonstopmode %s"
-			   (shell-quote-argument file)))
-    (shell-command (format "pdflatex -interaction nonstopmode %s"
-			   (shell-quote-argument file)))
+    (if (and cmds (symbolp cmds))
+	(funcall cmds file)
+      (while cmds
+	(setq cmd (pop cmds))
+	(while (string-match "%b" cmd)
+	  (setq cmd (replace-match (shell-quote-argument base) t t cmd)))
+	(while (string-match "%s" cmd)
+	  (setq cmd (replace-match (shell-quote-argument file) t t cmd)))
+	(shell-command cmd outbuf outbuf)))
     (message "Processing LaTeX file...done")
     (if (not (file-exists-p pdffile))
 	(error "PDF file was not produced")
