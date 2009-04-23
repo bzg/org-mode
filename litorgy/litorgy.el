@@ -161,19 +161,23 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
+  (message (format "-%S-" result))
   (if (stringp result)
       (setq result (litorgy-clean-text-properties result))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (string-equal insert "replace") (litorgy-remove-result (listp result)))
+  (if (and insert (string-equal insert "replace"))
+      (litorgy-remove-result (listp result)))
   (if (= (length result) 0)
       (message "no result returned by source block")
-    (unless (string-equal insert "silent")
+    (unless (and insert (string-equal insert "silent"))
       (when (and (stringp result)
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-        (re-search-forward "^#\\+end_src" nil t) (open-line 1) (forward-char 2)
+        (if (re-search-forward "^#\\+end_src" nil t)
+            (progn (open-line 1) (forward-char 2))
+          (progn (open-line 1) (forward-char 1)))
         (if (stringp result) ;; assume the result is a table if it's not a string
             (litorgy-examplize-region (point) (progn (insert result) (point)))
           (progn
@@ -183,6 +187,11 @@ silent -- no results are inserted"
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
             (forward-line -1)
             (org-cycle)))))))
+
+(defun litorgy-result-to-org-string (result)
+  "Return RESULT as a string in org-mode format.  This function
+relies on `litorgy-insert-result'."
+  (with-temp-buffer (litorgy-insert-result result) (buffer-string)))
 
 (defun litorgy-remove-result (&optional table)
   "Remove the result following the current source block.  If

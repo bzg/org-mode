@@ -1,0 +1,48 @@
+#+TITLE: Testing Litorgy Export
+#+OPTIONS: toc:nil ^:nil
+
+
+* tests
+
+all the tests
+
+** ruby
+
+source block is here, but is shouldn't be exported...
+
+#+begin_src ruby :results silent :exports none
+class Schulte
+  def initialize
+    puts :eric
+  end
+end
+#+end_src
+
+The source block is here, and lets see the code
+
+#+begin_src ruby :results silent :exports code
+class Schulte
+  def initialize
+    puts :eric
+  end
+end
+#+end_src
+
+This is a source block, and lets see the results
+#+begin_src ruby :exports results :results replace
+:the_results
+#+end_src
+
+** emacs-lisp
+
+a table
+
+#+begin_src emacs-lisp
+'(1 2 3 4 5)
+#+end_src
+
+hidden
+
+#+begin_src emacs-lisp :exports none :results silent
+9
+#+end_src

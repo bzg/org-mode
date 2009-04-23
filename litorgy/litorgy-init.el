@@ -30,10 +30,12 @@
 
 ;;; Code:
 (require 'org)
+(require 'org-exp-blocks)
 (load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'litorgy)
 (require 'litorgy-ref)
 (require 'litorgy-ui)
+(require 'litorgy-exp)
 
 ;; language specific files
 (require 'litorgy-script)
