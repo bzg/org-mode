@@ -3,44 +3,7 @@
 #+SEQ_TODO:  TODO OPEN | DONE RESOLVED
 #+STARTUP: oddeven
 
-* Tasks [4/10]
-** TODO selective export of text, code, figures [1/2]
-   [DED] The litorgy buffer contains everything (code, headings and
-   notes/prose describing what you're up to, textual/numeric/graphical
-   code output, etc). However on export to html / LaTeX one might want
-   to include only a subset of that content. For example you might
-   want to create a presentation of what you've done which omits the
-   code.
-
-*** DONE export header argument
-   [EMS] So I think this should be implemented as a property which can
-   be set globally or on the outline header level (I need to review
-   the mechanics of org-mode properties).  And then as a source block
-   header argument which will apply only to a specific source code
-   block.  A header argument of =:export= with values of
-   
-   - =code= :: just show the code in the source code block
-   - =none= :: don't show the code or the results of the evaluation
-   - =results= :: just show the results of the code evaluation (don't
-                  show the actual code)
-   - =both= :: show both the source code, and the results
-
-this will be done in [[* (sandbox) selective export][(sandbox) selective export]].
-
-*** TODO inline source blocks
-   Thinking there should be *two types* of source code blocks.  The
-   first should be the *large blocks* we're used to, and these should
-   default to just showing the code on export (suggestions?).  The
-   other source code block should be smaller *inline blocks*, like the
-   =\R{ code }= blocks.  I'm not sure what the format for these blocks
-   should be, but I think I'll give them their own [[* inline source code blocks][TODO]].
-   
-   Then we can pre-process the blocks using org-exp-blocks.  Which I
-   suppose should be added as a requirement.
-
-   In terms of implementation I think I'll get things working first
-   just on the sourc code block header arguments, and then later add
-   support for reading file/outline-level wide properties.
+* Tasks [5/10]
 
 ** TODO inline source code blocks
    Like the =\R{ code }= blocks
@@ -129,6 +92,27 @@ this will be done in [[* (sandbox) selective export][(sandbox) selective export]
 *** TODO folding of results
     So, lets do a three-stage tab cycle... First fold the src block,
     then fold the results, then unfold.
+** DONE selective export of text, code, figures
+   [DED] The litorgy buffer contains everything (code, headings and
+   notes/prose describing what you're up to, textual/numeric/graphical
+   code output, etc). However on export to html / LaTeX one might want
+   to include only a subset of that content. For example you might
+   want to create a presentation of what you've done which omits the
+   code.
+
+   [EMS] So I think this should be implemented as a property which can
+   be set globally or on the outline header level (I need to review
+   the mechanics of org-mode properties).  And then as a source block
+   header argument which will apply only to a specific source code
+   block.  A header argument of =:export= with values of
+   
+   - =code= :: just show the code in the source code block
+   - =none= :: don't show the code or the results of the evaluation
+   - =results= :: just show the results of the code evaluation (don't
+                  show the actual code)
+   - =both= :: show both the source code, and the results
+
+this will be done in [[* (sandbox) selective export][(sandbox) selective export]].
 
 ** DONE a header argument specifying silent evaluation (no output)
 This would be useful across all types of source block.  Currently
@@ -202,7 +186,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [1/2]
+* Bugs [2/2]
 ** RESOLVED Args out of range error
    
 The following block resulted in the error below [DED]. It ran without
@@ -227,7 +211,7 @@ used to be output when the block returned an empty results string.
 This should be fixed in the current version, you should now see the
 following message =no result returned by source block=.
 
-** TODO ruby arrays not recognized as such
+** RESOLVED ruby arrays not recognized as such
 
 Something is wrong in [[file:litorgy/litorgy-script.el]] related to the
 recognition of ruby arrays as such.
@@ -243,6 +227,7 @@ recognition of ruby arrays as such.
 #+end_src
 
 | 1 | 2 | 3 | 4 |
+
 
 * Sandbox
 This is a place for code examples
