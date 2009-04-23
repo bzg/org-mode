@@ -13288,35 +13288,36 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
     (save-excursion
       (save-restriction
 	(while (setq file (pop files))
-	  (if (bufferp file)
-	      (set-buffer file)
-	    (org-check-agenda-file file)
-	    (set-buffer (org-get-agenda-file-buffer file)))
-	  (widen)
-	  (setq bmp (buffer-modified-p))
-	  (org-refresh-category-properties)
-	  (setq org-todo-keywords-for-agenda
-		(append org-todo-keywords-for-agenda org-todo-keywords-1))
-	  (setq org-done-keywords-for-agenda
-		(append org-done-keywords-for-agenda org-done-keywords))
-	  (setq org-todo-keyword-alist-for-agenda
-		(append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	  (setq org-tag-alist-for-agenda
-		(append org-tag-alist-for-agenda org-tag-alist))
-
-	  (save-excursion
-	    (remove-text-properties (point-min) (point-max) pall)
-	    (when org-agenda-skip-archived-trees
+	  (catch 'nextfile
+	    (if (bufferp file)
+		(set-buffer file)
+	      (org-check-agenda-file file)
+	      (set-buffer (org-get-agenda-file-buffer file)))
+	    (widen)
+	    (setq bmp (buffer-modified-p))
+	    (org-refresh-category-properties)
+	    (setq org-todo-keywords-for-agenda
+		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
+	    (setq org-done-keywords-for-agenda
+		  (append org-done-keywords-for-agenda org-done-keywords))
+	    (setq org-todo-keyword-alist-for-agenda
+		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+	    (setq org-tag-alist-for-agenda
+		  (append org-tag-alist-for-agenda org-tag-alist))
+	    
+	    (save-excursion
+	      (remove-text-properties (point-min) (point-max) pall)
+	      (when org-agenda-skip-archived-trees
+		(goto-char (point-min))
+		(while (re-search-forward rea nil t)
+		  (if (org-on-heading-p t)
+		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
 	      (goto-char (point-min))
-	      (while (re-search-forward rea nil t)
-		(if (org-on-heading-p t)
-		    (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
-	    (goto-char (point-min))
-	    (setq re (concat "^\\*+ +" org-comment-string "\\>"))
-	    (while (re-search-forward re nil t)
-	      (add-text-properties
-	       (match-beginning 0) (org-end-of-subtree t) pc)))
-	  (set-buffer-modified-p bmp))))
+	      (setq re (concat "^\\*+ +" org-comment-string "\\>"))
+	      (while (re-search-forward re nil t)
+		(add-text-properties
+		 (match-beginning 0) (org-end-of-subtree t) pc)))
+	    (set-buffer-modified-p bmp)))))
     (setq org-todo-keyword-alist-for-agenda
 	  (org-uniquify org-todo-keyword-alist-for-agenda)
 	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))

@@ -1,5 +1,7 @@
 2009-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-prepare-agenda-buffers): Catch a throw to nextfile.
+
 	* org-protocol.el: Remove dependency on url.el.
 	(org-protocol-unhex-compound, org-protocol-open-source): Remove
 	dependency on url.el.
