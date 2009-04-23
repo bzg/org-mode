@@ -124,7 +124,6 @@
 ;;; Code:
 
 (require 'org)
-(require 'url)
 (eval-when-compile
   (require 'cl))
 
@@ -307,8 +306,10 @@ encodeURIComponent. E.g. `%C3%B6' is the german Umlaut `ü'."
 	 (sum 0))
     (while bytes
       (let* ((b (pop bytes))
-	     (c1 (url-unhex (elt b 0)))
-	     (c2 (url-unhex (elt b 1)))
+	     (a (elt b 0))
+	     (b (elt b 1))
+	     (c1 (if (> a ?9) (+ 10 (- a ?A)) (- a ?0)))
+	     (c2 (if (> b ?9) (+ 10 (- b ?A)) (- b ?0)))
 	     (val (+ (lsh c1 4) c2))
 	     (shift
 	      (if (= 0 eat) ;; new byte
@@ -483,7 +484,7 @@ The location for a browser's bookmark should look like this:
   ;; As we enter this function for a match on our protocol, the return value
   ;; defaults to nil.
   (let ((result nil)
-        (f (url-unhex-string fname)))
+        (f (org-protocol-unhex-string fname)))
     (catch 'result
       (dolist (prolist org-protocol-project-alist)
         (let* ((base-url (plist-get (cdr prolist) :base-url))

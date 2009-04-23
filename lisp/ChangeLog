@@ -1,5 +1,9 @@
 2009-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-protocol.el: Remove dependency on url.el.
+	(org-protocol-unhex-compound, org-protocol-open-source): Remove
+	dependency on url.el.
+
 	* org-latex.el (org-export-as-pdf): Use
 	`org-latex-to-pdf-process'.
 
