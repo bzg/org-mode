@@ -1,3 +1,8 @@
+2009-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-store-link): No errors when getting custom id before
+	first headline.
+
 2009-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-prepare-agenda-buffers): Catch a throw to nextfile.

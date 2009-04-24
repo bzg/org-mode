@@ -6949,7 +6949,7 @@ For file links, arg negates `org-context-in-file-links'."
 	    link (org-make-link cpltxt)))
 
      ((and buffer-file-name (org-mode-p))
-      (setq custom-id (org-entry-get nil "CUSTOM_ID"))
+      (setq custom-id (ignore-errors (org-entry-get nil "CUSTOM_ID")))
       (cond
        ((org-in-regexp "<<\\(.*?\\)>>")
 	(setq cpltxt
