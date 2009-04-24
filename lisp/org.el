@@ -15455,7 +15455,7 @@ Counting starts at 1."
   "Like `find-buffer-visiting' but always return the base buffer and
 not an indirect buffer."
   (let ((buf (or (get-file-buffer file)
-		 (find-buffer-visiting file)))
+		 (find-buffer-visiting file))))
     (if buf
 	(or (buffer-base-buffer buf) buf)
       nil)))
