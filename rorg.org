@@ -1,9 +1,36 @@
 #+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
-#+SEQ_TODO:  TODO OPEN | DONE RESOLVED
+#+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [5/10]
+* Tasks [5/13]
+
+** TODO re-implement helper functions from org-R
+Much of the power of org-R seems to be in it's helper functions for
+the quick graphing of tables.  Should we try to re-implement these
+functions on top of litorgy?
+
+I'm thinking this may be useful both to add features to litorgy-R and
+also to potentially suggest extensions of the framework.  For example
+one that comes to mind is the ability to treat a source-code block
+like a function which accepts arguments and returns results. Actually
+this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** TODO source blocks as functions
+
+Allow source code blocks to be called like functions, with arguments
+specified.  We are already able to call a source-code block and assign
+it's return result to a variable.  This would just add the ability to
+specify the values of the arguments to the source code block assuming
+any exist.  For an example see 
+
+** TODO figure out how to handle graphic output
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+How should this work for R?  For example how are files included with
+Sweave?  Would/Should we just mimic the behavior of Sweave with the
+addition of support for poping up graphics during live evaluation of a
+source code block.
 
 ** TODO inline source code blocks
    Like the =\R{ code }= blocks
@@ -555,6 +582,25 @@ class Schulte
 end
 #+end_begin_src
 
+
+
+** (sandbox) source blocks as functions
+
+#+srcname: default
+#+begin_src emacs-lisp
+5
+#+end_src
+
+#+srcname: triple
+#+begin_src emacs-lisp :var n=default :results replace
+(* 3 n)
+#+end_src
+
+: 15
+
+#+begin_src emacs-lisp :var result=triple(:n => 8)
+result
+#+end_src
 
 
 * COMMENT Commentary
