@@ -30,8 +30,8 @@ system.
 [[http://orgmode.org/img/tasks.png]]
 
 - Simplicity :: Org-mode is a simple outliner for note-taking and list
-     management. You can learn the basics for using it in five
-     minutes.  This may be all you need, and Org-mode will not impose
+     management. You can learn the basics for using it in [[http://orgmode.org/worg/org-tutorials/orgtutorial_dto.php][five
+     minutes]].  This may be all you need, and Org-mode will not impose
      more complex features on you.
 - Portability :: Org files are plain text.  You can view and edit them
      in any editor.  Your data is yours forever.  Org-mode runs in
