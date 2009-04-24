@@ -4,6 +4,7 @@
 	(org-agenda-get-progress, org-agenda-get-deadlines)
 	(org-agenda-get-scheduled, org-agenda-get-blocks): Optimizations,
 	in particular, wait as long as possible to collect the tags.
+	(org-stuck-projects): Improve docstring.
 
 	* org.el (org-store-link): No errors when getting custom id before
 	first headline.

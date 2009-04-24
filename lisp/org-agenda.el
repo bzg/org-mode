@@ -424,7 +424,10 @@ This is a list of four items:
 3. A list of tags identifying non-stuck projects.
    If the project subtree contains any headline with one of these tags,
    the project is considered to be not stuck.  If you specify \"*\" as
-   a tag, any tag will mark the project unstuck.
+   a tag, any tag will mark the project unstuck.  Note that this is about
+   the explicit presence of a tag somewhere in the subtree, inherited
+   tags to not count here.  If inherited tags make a project not stuck,
+   use \"-TAG\" in the tags part of the matcher under (1.) above.
 4. An arbitrary regular expression matching non-stuck projects.
 
 If the project turns out to be not stuck, search continues also in the
@@ -440,7 +443,7 @@ or `C-c a #' to produce the list."
 	  (string :tag "Tags/TODO match to identify a project")
 	  (repeat :tag "Projects are *not* stuck if they have an entry with TODO keyword any of" (string))
 	  (repeat :tag "Projects are *not* stuck if they have an entry with TAG being any of" (string))
-	  (regexp :tag "Projects are *not* stuck if this regexp matches\ninside the subtree")))
+	  (regexp :tag "Projects are *not* stuck if this regexp matches inside the subtree")))
 
 (defcustom org-agenda-filter-effort-default-operator "<"
   "The default operator for effort estimate filtering.
