@@ -1,5 +1,10 @@
 2009-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-timestamps)
+	(org-agenda-get-progress, org-agenda-get-deadlines)
+	(org-agenda-get-scheduled, org-agenda-get-blocks): Optimizations,
+	in particular, wait as long as possible to collect the tags.
+
 	* org.el (org-store-link): No errors when getting custom id before
 	first headline.
 	(org-get-tags-at): Use `org-up-heading-safe' when getting tags.
