@@ -2,6 +2,7 @@
 
 	* org.el (org-store-link): No errors when getting custom id before
 	first headline.
+	(org-get-tags-at): Use `org-up-heading-safe' when getting tags.
 
 2009-04-23  Carsten Dominik  <carsten.dominik@gmail.com>
 

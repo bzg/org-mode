@@ -10596,7 +10596,7 @@ ignore inherited ones."
 				    tags)))
 		      (or org-use-tag-inheritance (throw 'done t))
 		      (if local (throw 'done t))
-		      (org-up-heading-all 1)
+		      (or (org-up-heading-safe) (error nil))
 		      (setq parent t)))
 		(error nil)))))
 	(append (org-remove-uniherited-tags org-file-tags) tags)))))
