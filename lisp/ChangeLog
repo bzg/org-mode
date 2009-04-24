@@ -1,5 +1,7 @@
 2009-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-end-of-subtree): Improve speed.
+
 	* org-agenda.el (org-agenda-get-timestamps)
 	(org-agenda-get-progress, org-agenda-get-deadlines)
 	(org-agenda-get-scheduled, org-agenda-get-blocks): Optimizations,

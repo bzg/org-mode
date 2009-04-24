@@ -16119,6 +16119,40 @@ This is like outline-next-sibling, but invisible headings are ok."
 		(forward-char -1))))))
   (point))
 
+(defun org-end-of-subtree (&optional invisible-OK to-heading)
+  ;; This contains an exact copy of the original function, but it uses
+  ;; `org-back-to-heading', to make it work also in invisible
+  ;; trees.  And is uses an invisible-OK argument.
+  ;; Under Emacs this is not needed, but the old outline.el needs this fix.
+  ;; Furthermore, when used inside Org, finding the end of a large subtree
+  ;; with many children and grandchildren etc, this can be much faster
+  ;; than the outline version.
+  (org-back-to-heading invisible-OK)
+  (let ((first t)
+	(level (funcall outline-level)))
+    (if (and (org-mode-p) (< level 1000))
+	;; A true heading (not a plain list item), in Org-mode
+	;; This means we can easily find the end by looking
+	;; only for the right number of stars.  Using a regexp to do
+	;; this is so much faster than using a Lisp loop.
+	(let ((re (concat "^\\*\\{1," (int-to-string level) "\\} ")))
+	  (forward-char 1)
+	  (and (re-search-forward re nil 'move) (beginning-of-line 1)))
+      ;; something else, do it the slow way
+      (while (and (not (eobp))
+		  (or first (> (funcall outline-level) level)))
+	(setq first nil)
+	(outline-next-heading)))
+    (unless to-heading
+      (if (memq (preceding-char) '(?\n ?\^M))
+	  (progn
+	    ;; Go to end of line before heading
+	    (forward-char -1)
+	    (if (memq (preceding-char) '(?\n ?\^M))
+		;; leave blank line before heading
+		(forward-char -1))))))
+  (point))
+
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."
   (outline-flag-region
