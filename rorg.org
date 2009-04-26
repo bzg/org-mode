@@ -32,7 +32,7 @@ Sweave?  Would/Should we just mimic the behavior of Sweave with the
 addition of support for poping up graphics during live evaluation of a
 source code block.
 
-** TODO inline source code blocks
+** TODO inline source code blocks [1/2]
    Like the =\R{ code }= blocks
 
    not sure what the format should be, maybe just something simple
@@ -48,6 +48,15 @@ source code block.
 
    Maybe this makes a good case for all source code having the option
    of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
+
+*** DONE evaluation with \C-c\C-c
+Putting aside the header argument issue for now we can just run these
+with the following default header arguments
+- =:results= :: silent
+- =:exports= :: results
+
+*** TODO inline exportation
+Need to add an interblock hook (or some such) through org-exp-blocks
 
 ** TODO ability to select which of multiple sessions is being used
    Increasingly it is looking like we're going to want to run all

@@ -34,18 +34,19 @@
 (defun litorgy-execute-src-block-maybe ()
   "Detect if this is context for a litorgical src-block and if so
 then run `litorgy-execute-src-block'."
-  (let ((case-fold-search t))
-    (if (save-excursion
-          (beginning-of-line 1)
-          (looking-at litorgy-src-block-regexp))
-        (progn (call-interactively 'litorgy-execute-src-block)
-               t) ;; to signal that we took action
-      nil))) ;; to signal that we did not
+  (let ((info (litorgy-get-src-block-info)))
+    (if info (progn (litorgy-execute-src-block nil info) t) nil)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'litorgy-execute-src-block-maybe)
 
+(defvar litorgy-inline-header-args '((:results . "silent") (:exports . "results"))
+  "Default arguments to use when evaluating an inline source block.")
+
 (defvar litorgy-src-block-regexp nil
   "Regexp used to test when inside of a litorgical src-block")
+
+(defvar litorgy-inline-src-block-regexp nil
+  "Regexp used to test when on an inline litorgical src-block")
 
 (defun litorgy-set-interpreters (var value)
   (set-default var value)
@@ -54,7 +55,12 @@ then run `litorgy-execute-src-block'."
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
-                "\\([^\000]+?\\)#\\+end_src")))
+                "\\([^\000]+?\\)#\\+end_src"))
+  (setq litorgy-inline-src-block-regexp
+	(concat "src_\\("
+		(mapconcat 'regexp-quote value "\\|")
+		"\\)"
+                "{\\([^\n]+\\)}")))
 
 (defun litorgy-add-interpreter (interpreter)
   "Add INTERPRETER to `litorgy-interpreters' and update
@@ -90,15 +96,18 @@ lisp code use the `litorgy-add-interpreter' function."
 	      (const "ruby")))
 
 ;;; functions
-(defun litorgy-execute-src-block (&optional arg)
+(defun litorgy-execute-src-block (&optional arg info)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
 commented by `org-toggle-fixed-width-section'.  With optional
 prefix don't dump results into buffer but rather return the
 results in raw elisp (this is useful for automated execution of a
-source block)."
+source block).
+
+Optionally supply a value for INFO in the form returned by
+`litorgy-get-src-block-info'."
   (interactive "P")
-  (let* ((info (litorgy-get-src-block-info))
+  (let* ((info (or info (litorgy-get-src-block-info)))
          (lang (first info))
          (body (second info))
          (params (third info))
@@ -128,17 +137,25 @@ source block)."
     (widen)))
 
 (defun litorgy-get-src-block-info ()
-  "Return the information of the current source block (the point
-should be on the '#+begin_src' line) as a list of the following
-form.  (language body header-arguments-alist)"
-  (unless (save-excursion
-            (beginning-of-line 1)
-            (looking-at litorgy-src-block-regexp))
-    (error "not looking at src-block"))
-  (let ((lang (litorgy-clean-text-properties (match-string 1)))
-        (args (litorgy-clean-text-properties (or (match-string 3) "")))
-        (body (litorgy-clean-text-properties (match-string 4))))
-    (list lang body (litorgy-parse-header-arguments args))))
+  "Return the information of the current source block as a list
+of the following form.  (language body header-arguments-alist)"
+  (let ((case-fold-search t))
+    (if (save-excursion ;; full source block
+          (beginning-of-line 1)
+          (looking-at litorgy-src-block-regexp))
+        (let ((lang (litorgy-clean-text-properties (match-string 1)))
+              (args (litorgy-clean-text-properties (or (match-string 3) "")))
+              (body (litorgy-clean-text-properties (match-string 4))))
+          (list lang body (litorgy-parse-header-arguments args)))
+      (if (save-excursion ;; inline source block
+            (re-search-backward "[ \f\t\n\r\v]" nil t)
+            (forward-char 1)
+            (looking-at litorgy-inline-src-block-regexp))
+          (let ((lang (litorgy-clean-text-properties (match-string 1)))
+                (args litorgy-inline-header-args)
+                (body (litorgy-clean-text-properties (match-string 2))))
+            (list lang body args))
+        nil)))) ;; indicate that no source block was found
 
 (defun litorgy-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
