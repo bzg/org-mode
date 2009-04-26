@@ -32,32 +32,6 @@ Sweave?  Would/Should we just mimic the behavior of Sweave with the
 addition of support for poping up graphics during live evaluation of a
 source code block.
 
-** TODO inline source code blocks [1/2]
-   Like the =\R{ code }= blocks
-
-   not sure what the format should be, maybe just something simple
-   like =src_lang{}= where lang is the name of the source code
-   language to be evaluated.
-
-   The biggest problem I see with these is that their main use would
-   be to show the value of a variable, but the variable would need to
-   be assigned through a header argument (aside from in languages like
-   R in which all execution takes place in a session).  Requiring a
-   header argument for a inline blocks defeats the purpose of a small,
-   concise inline-able block.
-
-   Maybe this makes a good case for all source code having the option
-   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
-
-*** DONE evaluation with \C-c\C-c
-Putting aside the header argument issue for now we can just run these
-with the following default header arguments
-- =:results= :: silent
-- =:exports= :: results
-
-*** TODO inline exportation
-Need to add an interblock hook (or some such) through org-exp-blocks
-
 ** TODO ability to select which of multiple sessions is being used
    Increasingly it is looking like we're going to want to run all
    source code blocks in comint buffer (sessions).  Which will have
@@ -128,6 +102,32 @@ Need to add an interblock hook (or some such) through org-exp-blocks
 *** TODO folding of results
     So, lets do a three-stage tab cycle... First fold the src block,
     then fold the results, then unfold.
+
+** DONE inline source code blocks [2/2]
+   Like the =\R{ code }= blocks
+
+   not sure what the format should be, maybe just something simple
+   like =src_lang{}= where lang is the name of the source code
+   language to be evaluated.
+
+   The biggest problem I see with these is that their main use would
+   be to show the value of a variable, but the variable would need to
+   be assigned through a header argument (aside from in languages like
+   R in which all execution takes place in a session).  Requiring a
+   header argument for a inline blocks defeats the purpose of a small,
+   concise inline-able block.
+
+   Maybe this makes a good case for all source code having the option
+   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
+
+*** DONE evaluation with \C-c\C-c
+Putting aside the header argument issue for now we can just run these
+with the following default header arguments
+- =:results= :: silent
+- =:exports= :: results
+
+*** DONE inline exportation
+Need to add an interblock hook (or some such) through org-exp-blocks
 ** DONE selective export of text, code, figures
    [DED] The litorgy buffer contains everything (code, headings and
    notes/prose describing what you're up to, textual/numeric/graphical
@@ -531,6 +531,8 @@ Now working for ruby
 2 * other
 #+end_src
 
+: 178
+
 and for python
 
 #+SRCNAME: start_two
@@ -543,6 +545,7 @@ another*3
 #+end_src
 
 : 294
+
 
 *** mixed languages
 Since all variables are converted into Emacs Lisp it is no problem to
@@ -583,14 +586,8 @@ other + 2
 
 ** (sandbox) selective export
 
-#+begin_begin_src :results silent :export code
-class Schulte
-  def initialize
-    puts :eric
-  end
-end
-#+end_begin_src
-
+For exportation tests and examples see (including exportation of
+inline source code blocks) [[file:test-export.org]]
 
 
 ** (sandbox) source blocks as functions

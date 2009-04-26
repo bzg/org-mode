@@ -1,12 +1,11 @@
 #+TITLE: Testing Litorgy Export
-#+OPTIONS: toc:nil ^:nil
+#+OPTIONS: toc:2 ^:nil
 
+* all
 
-* tests
+** full source blocks
 
-all the tests
-
-** ruby
+*** ruby
 
 source block is here, but is shouldn't be exported...
 
@@ -39,7 +38,7 @@ lets see the source, and results for a ruby array
 #+end_src
 
 
-** emacs-lisp
+*** emacs-lisp
 
 a table
 
@@ -52,3 +51,10 @@ hidden
 #+begin_src emacs-lisp :exports none :results silent
 9
 #+end_src
+
+
+** in-line source blocks
+
+This is an inline source code block src_ruby{1 + 6}.  And another
+source block with text output src_emacs-lisp{"eric"}.
+

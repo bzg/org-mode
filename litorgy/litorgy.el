@@ -117,7 +117,7 @@ Optionally supply a value for INFO in the form returned by
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
     (if arg
-        result
+        (progn (message (format "%S" result)) result)
       (litorgy-insert-result result (cdr (assoc :results params))))))
 
 (defun litorgy-eval-buffer (&optional arg)
@@ -143,19 +143,23 @@ of the following form.  (language body header-arguments-alist)"
     (if (save-excursion ;; full source block
           (beginning-of-line 1)
           (looking-at litorgy-src-block-regexp))
-        (let ((lang (litorgy-clean-text-properties (match-string 1)))
-              (args (litorgy-clean-text-properties (or (match-string 3) "")))
-              (body (litorgy-clean-text-properties (match-string 4))))
-          (list lang body (litorgy-parse-header-arguments args)))
+        (litorgy-parse-src-block-match)
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (forward-char 1)
             (looking-at litorgy-inline-src-block-regexp))
-          (let ((lang (litorgy-clean-text-properties (match-string 1)))
-                (args litorgy-inline-header-args)
-                (body (litorgy-clean-text-properties (match-string 2))))
-            (list lang body args))
+          (litorgy-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
+
+(defun litorgy-parse-src-block-match ()
+  (list (litorgy-clean-text-properties (match-string 1))
+        (litorgy-clean-text-properties (match-string 4))
+        (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) "")))))
+
+(defun litorgy-parse-inline-src-block-match ()
+  (list (litorgy-clean-text-properties (match-string 1))
+        (litorgy-clean-text-properties (match-string 2))
+        litorgy-inline-header-args))
 
 (defun litorgy-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
@@ -178,7 +182,6 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
-  (message (format "-%S-" result))
   (if (stringp result)
       (setq result (litorgy-clean-text-properties result))
     (unless (listp result) (setq result (format "%S" result))))
@@ -186,7 +189,8 @@ silent -- no results are inserted"
       (litorgy-remove-result (listp result)))
   (if (= (length result) 0)
       (message "no result returned by source block")
-    (unless (and insert (string-equal insert "silent"))
+    (if (and insert (string-equal insert "silent"))
+        (message (format "%S" result))
       (when (and (stringp result)
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
@@ -203,7 +207,8 @@ silent -- no results are inserted"
                       (if (consp (car result)) result (list result))
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
             (forward-line -1)
-            (org-cycle)))))))
+            (org-cycle))))
+      (message "finished"))))
 
 (defun litorgy-result-to-org-string (result)
   "Return RESULT as a string in org-mode format.  This function

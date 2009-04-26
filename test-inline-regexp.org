@@ -1,6 +1,0 @@
-#+TITLE: testing inline source blocks
-#+OPTIONS: toc:nil ^:nil
-
-This is an inline source code block src_ruby{1 + 3}.
-
-
