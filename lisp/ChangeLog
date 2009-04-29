@@ -1,5 +1,8 @@
 2009-04-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-preprocess): Also protect
+	environments ending in a star.
+
 	* org-list.el (org-at-item-p): Fix regular expression.
 
 2009-04-24  Carsten Dominik  <carsten.dominik@gmail.com>
