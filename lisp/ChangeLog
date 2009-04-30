@@ -1,6 +1,10 @@
 2009-04-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-check-external-command): New defsubst.
+
 	* org.el (org-mode-map): New key for reload.
+	(org-format-latex): Better error message when external programs
+	are not available.
 
 	* org-agenda.el (org-agenda-mode-map): Bind `org-reload'.
 

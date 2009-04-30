@@ -13521,6 +13521,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
 	 (cnt 0) txt link beg end re e checkdir
+	 executables-checked
 	 m n block linkfile movefile ov)
     ;; Check if there are old images files with this prefix, and remove them
     (when (file-directory-p todir)
@@ -13549,6 +13550,14 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	    (unless checkdir ; make sure the directory exists
 	      (setq checkdir t)
 	      (or (file-directory-p todir) (make-directory todir)))
+
+	    (unless executables-checked
+	      (org-check-external-command
+	       "latex" "needed to convert LaTeX fragments to images")
+	      (org-check-external-command
+	       "dvipng" "needed to convert LaTeX fragments to images")
+	      (setq executables-checked t))
+
 	    (org-create-formula-image
 	     txt movefile opt forbuffer)
 	    (if overlays
