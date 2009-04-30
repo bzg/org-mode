@@ -1,5 +1,9 @@
 2009-04-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-mode-map): New key for reload.
+
+	* org-agenda.el (org-agenda-mode-map): Bind `org-reload'.
+
 	* org.el (org-sort-entries-or-items): Explicit sorting function
 	for priorities, needed for XEmacs compatibility.
 

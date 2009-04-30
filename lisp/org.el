@@ -13797,7 +13797,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 
 (define-key org-mode-map "\C-c\C-x\C-c" 'org-columns)
 
-(define-key org-mode-map "\C-c\C-xr" 'org-reload)
+(define-key org-mode-map "\C-c\C-x!" 'org-reload)
 
 (define-key org-mode-map "\C-c\C-xg" 'org-feed-update-all)
 (define-key org-mode-map "\C-c\C-xG" 'org-feed-goto-inbox)

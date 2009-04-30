@@ -1278,6 +1278,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
