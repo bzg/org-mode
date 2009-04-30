@@ -6248,6 +6248,7 @@ WITH-CASE, the sorting considers case as well."
           ((= dcst ?a) 'string<)
           ((= dcst ?t) 'time-less-p)
           ((= dcst ?f) compare-func)
+          ((= dcst ?p) '<)
           (t nil)))))
     (message "Sorting entries...done")))
 
