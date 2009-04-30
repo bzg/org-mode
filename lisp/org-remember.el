@@ -596,12 +596,14 @@ to be run from that hook to function properly."
   (when org-remember-backup-directory
     (unless (file-directory-p org-remember-backup-directory)
       (make-directory org-remember-backup-directory))
+    (org-set-local 'auto-save-file-name-transforms nil)
     (setq buffer-file-name
 	  (expand-file-name
 	   (format-time-string "remember-%Y-%m-%d-%H-%M-%S")
 	   org-remember-backup-directory))
     (save-buffer)
-    (org-set-local 'auto-save-visited-file-name t))
+    (org-set-local 'auto-save-visited-file-name t)
+    (auto-save-mode 1))
   (when (save-excursion
 	  (goto-char (point-min))
 	  (re-search-forward "%!" nil t))
