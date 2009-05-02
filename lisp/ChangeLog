@@ -1,3 +1,14 @@
+2009-05-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-html-after-blockquotes-hook): New hook.
+	(org-export-as-html): Run the new hook.
+
+	* org-latex.el (org-export-latex-after-blockquotes-hook): New hook.
+	(org-export-latex-preprocess): Run the new hook.
+
+	* org-exp.el (org-export-preprocess-after-blockquote-hook): New hook.
+	(org-export-preprocess-string): Run the new hook.
+
 2009-04-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-macs.el (org-check-external-command): New defsubst.

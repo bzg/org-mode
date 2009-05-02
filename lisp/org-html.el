@@ -327,6 +327,11 @@ in all modes you want.  Then, use the command
 (defvar org-export-html-auto-postamble t
   "Should default postamble be inserted?  Set by publishing functions.")
 
+;;; Hooks
+
+(defvar org-export-html-after-blockquotes-hook nil
+  "Hook run during HTML export, after blockquote, verse, center are done.")
+
 ;;; HTML export
 
 (defun org-export-html-preprocess (parameters)
@@ -840,6 +845,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (insert "\n</div>")
 	    (org-open-par)
 	    (throw 'nextline nil))
+	  (run-hooks 'org-export-html-after-blockquotes-hook)
 	  (when inverse
 	    (let ((i (org-get-string-indentation line)))
 	      (if (> i 0)

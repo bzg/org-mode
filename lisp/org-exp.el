@@ -344,6 +344,11 @@ This is run after selection of trees to be exported has happened.
 This selection includes tags-based selection, as well as removal
 of commented and archived trees.")
 
+(defvar org-export-preprocess-after-blockquote-hook nil
+  "Hook for preprocessing an export buffer.
+This is run after blockquote/quote/verse/center have been marked
+with cookies.")
+
 (defvar org-export-preprocess-before-backend-specifics-hook nil
   "Hook run before backend-specific functions are called during preprocessing.")
 
@@ -1250,6 +1255,7 @@ on this string to produce the exported version."
 
       ;; Blockquotes, verse, and center
       (org-export-mark-blockquote-verse-center)
+      (run-hooks 'org-export-preprocess-after-blockquote-hook)
 
       ;; Remove timestamps, if the user has requested so
       (unless (plist-get parameters :timestamps)

@@ -314,6 +314,11 @@ These are the .aux, .log, .out, and .toc files."
   :group 'org-export-pdf
   :type 'boolean)
 
+;;; Hooks
+
+(defvar org-export-latex-after-blockquotes-hook nil
+  "Hook run during LaTeX export, after blockquote, verse, center are done.")
+
 ;;; Autoload functions:
 
 ;;;###autoload
@@ -1467,6 +1472,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (goto-char (point-min))
   (while (search-forward "ORG-CENTER-END" nil t)
     (replace-match "\\end{center}" t t))
+
+  (run-hooks 'org-export-latex-after-blockquotes-hook)
 
   ;; Convert horizontal rules
   (goto-char (point-min))
