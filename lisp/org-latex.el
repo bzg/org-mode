@@ -274,7 +274,7 @@ Note that this depends on the way the LaTeX file is processed.
 The default setting (pdf and jpg) assumes that pdflatex is doing the
 processing.  If you are using latex and dvips or something similar,
 only postscript files can be included."
-  :group 'org-export-html
+  :group 'org-export-latex
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-export-latex-coding-system nil
