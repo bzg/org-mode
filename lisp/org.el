@@ -16108,28 +16108,6 @@ This is like outline-next-sibling, but invisible headings are ok."
       (point))))
 
 (defun org-end-of-subtree (&optional invisible-OK to-heading)
-  ;; This is an exact copy of the original function, but it uses
-  ;; `org-back-to-heading', to make it work also in invisible
-  ;; trees.  And is uses an invisible-OK argument.
-  ;; Under Emacs this is not needed, but the old outline.el needs this fix.
-  (org-back-to-heading invisible-OK)
-  (let ((first t)
-	(level (funcall outline-level)))
-    (while (and (not (eobp))
-		(or first (> (funcall outline-level) level)))
-      (setq first nil)
-      (outline-next-heading))
-    (unless to-heading
-      (if (memq (preceding-char) '(?\n ?\^M))
-	  (progn
-	    ;; Go to end of line before heading
-	    (forward-char -1)
-	    (if (memq (preceding-char) '(?\n ?\^M))
-		;; leave blank line before heading
-		(forward-char -1))))))
-  (point))
-
-(defun org-end-of-subtree (&optional invisible-OK to-heading)
   ;; This contains an exact copy of the original function, but it uses
   ;; `org-back-to-heading', to make it work also in invisible
   ;; trees.  And is uses an invisible-OK argument.
