@@ -87,7 +87,7 @@ not be modified."
    if(elem.cacheClassTarget)
      target.className = elem.cacheClassTarget;
  }
-/*]]>*///-->
+/*]]>*/-->
 </script>"
 "Basic javascript that is needed by HTML files produced by Org-mode.")
 
@@ -123,7 +123,7 @@ not be modified."
                                white-space:nowrap; }
   .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
                                  font-weight:bold; }
-  /*]]>*///-->
+  /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
 Please use the variables `org-export-html-style' and
@@ -1492,30 +1492,24 @@ lang=\"%s\" xml:lang=\"%s\">
     (setq html (nreverse html))
     (unless splice
       ;; Put in col tags with the alignment (unfortunately often ignored...)
-      (push (mapconcat
-	     (lambda (x)
-	       (setq gr (pop org-table-colgroup-info))
-	       (format "%s<col align=\"%s\"></col>%s"
-		       (if (memq gr '(:start :startend))
-			   (prog1
-			       (if colgropen "</colgroup>\n<colgroup>" "<colgroup>")
-			     (setq colgropen t))
-			 "")
-		       (if (> (/ (float x) nlines) org-table-number-fraction)
-			   "right" "left")
-		       (if (memq gr '(:end :startend))
-			   (progn (setq colgropen nil) "</colgroup>")
-			 "")))
-	     fnum "")
+      (push (concat
+	     "<colgroup>"
+	     (mapconcat
+	      (lambda (x)
+		(setq gr (pop org-table-colgroup-info))
+		(format "<col align=\"%s\" />"
+			(if (> (/ (float x) nlines) org-table-number-fraction)
+			    "right" "left")))
+	      fnum "")
+	     "</colgroup>")
 	    html)
-      (if colgropen (setq html (cons (car html) (cons "</colgroup>" (cdr html)))))
+      
       ;; Since the output of HTML table formatter can also be used in
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
       (push (format "<caption>%s</caption>" (or caption "")) html)
       (push html-table-tag html))
     (concat (mapconcat 'identity html "\n") "\n")))
-
 
 (defun org-export-splice-attributes (tag attributes)
   "Read attributes in string ATTRIBUTES, add and replace in HTML tag TAG."
