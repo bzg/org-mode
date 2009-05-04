@@ -1,5 +1,8 @@
 2009-05-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-select-remember-template): For the
+	selection of a valid template.
+
 	* org-latex.el (org-export-region-as-latex): Supply the
 	force-no-subtree argument.
 	(org-export-as-latex): Provide better limits when exporting the
