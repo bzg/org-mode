@@ -62,24 +62,101 @@ in this way, it will be wrapped."
 (defvar org-ascii-current-indentation nil) ; For communication
 
 ;;;###autoload
-(defun org-export-as-ascii (arg)
+(defun org-export-as-ascii-to-buffer (arg)
+  "Call `org-export-as-ascii` with output to a temporary buffer.
+No file is created.  The prefix ARG is passed through to `org-export-as-ascii'."
+  (interactive "P")
+  (org-export-as-ascii arg nil nil "*Org ASCII Export*")
+  (switch-to-buffer-other-window "*Org ASCII Export*"))
+
+;;;###autoload
+(defun org-replace-region-by-ascii (beg end)
+  "Assume the current region has org-mode syntax, and convert it to plain ASCII.
+This can be used in any buffer.  For example, you could write an
+itemized list in org-mode syntax in a Mail buffer and then use this
+command to convert it."
+  (interactive "r")
+  (let (reg ascii buf pop-up-frames)
+    (save-window-excursion
+      (if (org-mode-p)
+	  (setq ascii (org-export-region-as-ascii
+		      beg end t 'string))
+	(setq reg (buffer-substring beg end)
+	      buf (get-buffer-create "*Org tmp*"))
+	(with-current-buffer buf
+	  (erase-buffer)
+	  (insert reg)
+	  (org-mode)
+	  (setq ascii (org-export-region-as-ascii
+		      (point-min) (point-max) t 'string)))
+	(kill-buffer buf)))
+    (delete-region beg end)
+    (insert ascii)))
+
+;;;###autoload
+(defun org-export-region-as-ascii (beg end &optional body-only buffer)
+  "Convert region from BEG to END in org-mode buffer to plain ASCII.
+If prefix arg BODY-ONLY is set, omit file header, footer, and table of
+contents, and only produce the region of converted text, useful for
+cut-and-paste operations.
+If BUFFER is a buffer or a string, use/create that buffer as a target
+of the converted ASCII.  If BUFFER is the symbol `string', return the
+produced ASCII as a string and leave not buffer behind.  For example,
+a Lisp program could call this function in the following way:
+
+  (setq ascii (org-export-region-as-ascii beg end t 'string))
+
+When called interactively, the output buffer is selected, and shown
+in a window.  A non-interactive call will only return the buffer."
+  (interactive "r\nP")
+  (when (interactive-p)
+    (setq buffer "*Org ASCII Export*"))
+  (let ((transient-mark-mode t) (zmacs-regions t)
+	ext-plist rtn)
+    (setq ext-plist (plist-put ext-plist :ignore-subree-p t))
+    (goto-char end)
+    (set-mark (point)) ;; to activate the region
+    (goto-char beg)
+    (setq rtn (org-export-as-ascii
+	       nil nil ext-plist
+	       buffer body-only))
+    (if (fboundp 'deactivate-mark) (deactivate-mark))
+    (if (and (interactive-p) (bufferp rtn))
+	(switch-to-buffer-other-window rtn)
+      rtn)))
+
+;;;###autoload
+(defun org-export-as-ascii (arg &optional hidden ext-plist
+			       to-buffer body-only pub-dir)
   "Export the outline as a pretty ASCII file.
 If there is an active region, export only the region.
 The prefix ARG specifies how many levels of the outline should become
-underlined headlines.  The default is 3."
+underlined headlines, default is 3.    Lower levels will become bulleted
+lists.  When HIDDEN is non-nil, don't display the ASCII buffer.
+EXT-PLIST is a property list with external parameters overriding
+org-mode's default settings, but still inferior to file-local
+settings.  When TO-BUFFER is non-nil, create a buffer with that
+name and export to that buffer.  If TO-BUFFER is the symbol
+`string', don't leave any buffer behind but just return the
+resulting ASCII as a string.  When BODY-ONLY is set, don't produce
+the file header and footer.  When PUB-DIR is set, use this as the
+publishing directory."
   (interactive "P")
   (setq-default org-todo-line-regexp org-todo-line-regexp)
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					ext-plist
 					(org-infile-export-plist)))
 	 (region-p (org-region-active-p))
 	 (rbeg (and region-p (region-beginning)))
 	 (rend (and region-p (region-end)))
 	 (subtree-p
-	  (when region-p
-	    (save-excursion
-	      (goto-char rbeg)
-	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) rend)))))
+	  (if (plist-get opt-plist :ignore-subree-p)
+	      nil
+	    (when region-p
+	      (save-excursion
+		(goto-char rbeg)
+		(and (org-at-heading-p)
+		     (>= (org-end-of-subtree t t) rend))))))
 	 (level-offset (if subtree-p
 			   (save-excursion
 			     (goto-char rbeg)
@@ -97,34 +174,42 @@ underlined headlines.  The default is 3."
 	 (umax-toc nil)
 	 (case-fold-search nil)
 	 (bfname (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
-	 (filename (concat (file-name-as-directory
-			    (org-export-directory :ascii opt-plist))
-			   (file-name-sans-extension
-			    (or (and subtree-p
-				     (org-entry-get (region-beginning)
-						    "EXPORT_FILE_NAME" t))
-				(file-name-nondirectory bfname)))
-			   ".txt"))
-	 (filename (if (equal (file-truename filename)
-			      (file-truename bfname))
-		       (concat filename ".txt")
-		     filename))
-	 (buffer (find-file-noselect filename))
+	 (filename (if to-buffer
+		       nil
+		     (concat (file-name-as-directory
+			      (or pub-dir
+				  (org-export-directory :ascii opt-plist)))
+			     (file-name-sans-extension
+			      (or (and subtree-p
+				       (org-entry-get (region-beginning)
+						      "EXPORT_FILE_NAME" t))
+				  (file-name-nondirectory bfname)))
+			     ".txt")))
+	 (filename (and filename
+			(if (equal (file-truename filename)
+				   (file-truename bfname))
+			    (concat filename ".txt")
+			  filename)))
+	 (buffer (if to-buffer
+		     (cond
+		      ((eq to-buffer 'string)
+		       (get-buffer-create "*Org ASCII Export*"))
+		      (t (get-buffer-create to-buffer)))
+		   (find-file-noselect filename)))
 	 (org-levels-open (make-vector org-level-max nil))
 	 (odd org-odd-levels-only)
 	 (date  (plist-get opt-plist :date))
-	 (author      (plist-get opt-plist :author))
-	 (title       (or (and subtree-p (org-export-get-title-from-subtree))
-			  (plist-get opt-plist :title)
-			  (and (not
-				(plist-get opt-plist :skip-before-1st-heading))
-			       (org-export-grab-title-from-buffer))
-			  (file-name-sans-extension
-			   (file-name-nondirectory bfname))))
-	 (email       (plist-get opt-plist :email))
-	 (language    (plist-get opt-plist :language))
-	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
-;	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]*" org-quote-string "\\>\\)"))
+	 (author (plist-get opt-plist :author))
+	 (title (or (and subtree-p (org-export-get-title-from-subtree))
+		    (plist-get opt-plist :title)
+		    (and (not
+			  (plist-get opt-plist :skip-before-1st-heading))
+			 (org-export-grab-title-from-buffer))
+		    (file-name-sans-extension
+		     (file-name-nondirectory bfname))))
+	 (email (plist-get opt-plist :email))
+	 (language (plist-get opt-plist :language))
+	 (quote-re0 (concat "^[ \t]*" org-quote-string "\\>"))
 	 (todo nil)
 	 (lang-words nil)
 	 (region
@@ -161,7 +246,7 @@ underlined headlines.  The default is 3."
     (setq org-last-level org-min-level)
     (org-init-section-numbers)
 
-    (find-file-noselect filename)
+    (switch-to-buffer buffer)
 
     (setq lang-words (or (assoc language org-export-language-setup)
 			 (assoc "en" org-export-language-setup)))
@@ -182,26 +267,27 @@ underlined headlines.  The default is 3."
 		     umax))
 
     ;; File header
-    (if title (org-insert-centered title ?=))
-    (insert "\n")
-    (if (and (or author email)
-	     org-export-author-info)
-	(insert (concat (nth 1 lang-words) ": " (or author "")
-			(if email (concat " <" email ">") "")
-			"\n")))
+    (unless body-only
+      (if title (org-insert-centered title ?=))
+      (insert "\n")
+      (if (and (or author email)
+	       org-export-author-info)
+	  (insert (concat (nth 1 lang-words) ": " (or author "")
+			  (if email (concat " <" email ">") "")
+			  "\n")))
 
-    (cond
-     ((and date (string-match "%" date))
-      (setq date (format-time-string date)))
-     (date)
-     (t (setq date (format-time-string "%Y-%m-%d %T %Z"))))
+      (cond
+       ((and date (string-match "%" date))
+	(setq date (format-time-string date)))
+       (date)
+       (t (setq date (format-time-string "%Y-%m-%d %T %Z"))))
+      
+      (if (and date org-export-time-stamp-file)
+	  (insert (concat (nth 2 lang-words) ": " date"\n")))
+      
+      (insert "\n\n"))
 
-    (if (and date org-export-time-stamp-file)
-	(insert (concat (nth 2 lang-words) ": " date"\n")))
-
-    (insert "\n\n")
-
-    (if org-export-with-toc
+    (if (and org-export-with-toc (not body-only))
 	(progn
 	  (push (concat (nth 3 lang-words) "\n") thetoc)
 	  (push (concat (make-string (string-width (nth 3 lang-words)) ?=)
@@ -355,7 +441,6 @@ underlined headlines.  The default is 3."
 	(delete-region beg end)
 	(insert (make-string (- end beg) ?\ ))))
 
-    (save-buffer)
     ;; remove display and invisible chars
     (let (beg end)
       (goto-char (point-min))
@@ -369,7 +454,14 @@ underlined headlines.  The default is 3."
 	(setq end (next-single-property-change beg 'org-cwidth))
 	(delete-region beg end)
 	(goto-char beg)))
-    (goto-char (point-min))))
+    (or to-buffer (save-buffer))
+    (goto-char (point-min))
+    (prog1 (if (eq to-buffer 'string)
+	       (prog1 (buffer-substring (point-min) (point-max))
+		 (kill-buffer (current-buffer)))
+	     (current-buffer))
+      (when hidden
+	(delete-window)))))
 
 (defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export"

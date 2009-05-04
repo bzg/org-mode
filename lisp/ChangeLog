@@ -1,5 +1,14 @@
 2009-05-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export, org-export-visible): Support ASCII
+	export to buffer
+
+	* org-ascii.el (org-export-as-ascii-to-buffer)
+	(org-replace-region-by-ascii, org-export-region-as-ascii): New
+	commands.
+	(org-export-as-ascii): Add all the same parameters that are also
+	supported by the other export functions.
+
 	* org-list.el (org-reset-checkbox-state-subtree): Moved here from
 	org-checklist.el.
 	(org-reset-checkbox-state-subtree): Call

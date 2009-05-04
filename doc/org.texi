@@ -8340,6 +8340,9 @@ current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
 @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
+@kindex C-c C-e A
+@item C-c C-e A
+Export to a temporary buffer, do not create a file.
 @kindex C-c C-e v a
 @item C-c C-e v a
 Export only the visible part of the document.
@@ -9567,14 +9570,18 @@ right place on the web server, and publishing images to it.
 Once properly configured, Org can publish with the following commands:
 
 @table @kbd
+@kindex C-c C-e C
 @item C-c C-e C
 Prompt for a specific project and publish all files that belong to it.
+@kindex C-c C-e P
 @item C-c C-e P
 Publish the project containing the current file.
+@kindex C-c C-e F
 @item C-c C-e F
 Publish only the current file.
-@item C-c C-e A
-Publish all projects.
+@kindex C-c C-e E
+@item C-c C-e E
+Publish every project.
 @end table
 
 @vindex org-publish-use-timestamps-flag

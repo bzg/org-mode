@@ -754,7 +754,7 @@ value of `org-export-run-in-background'."
 	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
 
-\[a] export as ASCII
+\[a] export as ASCII   [A] to temporary buffer
 
 \[h] export as HTML    [H] to temporary buffer   [R] export region
 \[b] export as HTML and open in browser
@@ -773,11 +773,12 @@ value of `org-export-run-in-background'."
 \[c] export agenda files into combined iCalendar file
 
 \[F] publish current file          [P] publish current project
-\[X] publish a project...          [A] publish all projects")
+\[X] publish a project...          [E] publish every projects")
 	 (cmds
 	  '((?t org-insert-export-options-template nil)
 	    (?v org-export-visible nil)
 	    (?a org-export-as-ascii t)
+	    (?A org-export-as-ascii-to-buffer t)
 	    (?h org-export-as-html t)
 	    (?b org-export-as-html-and-open t)
 	    (?H org-export-as-html-to-buffer nil)
@@ -795,7 +796,7 @@ value of `org-export-run-in-background'."
 	    (?F org-publish-current-file t)
 	    (?P org-publish-current-project t)
 	    (?X org-publish t)
-	    (?A org-publish-all t)))
+	    (?E org-publish-all t)))
 	 r1 r2 ass)
     (save-excursion
       (save-window-excursion
@@ -2306,6 +2307,7 @@ command."
       (error "Invalid export key"))
   (let* ((binding (cdr (assoc type
 			      '((?a . org-export-as-ascii)
+				(?A . org-export-as-ascii-to-buffer)
 				(?\C-a . org-export-as-ascii)
 				(?b . org-export-as-html-and-open)
 				(?\C-b . org-export-as-html-and-open)
