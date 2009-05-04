@@ -87,7 +87,7 @@ not be modified."
    if(elem.cacheClassTarget)
      target.className = elem.cacheClassTarget;
  }
-/*]]>*/-->
+/*]]>*///-->
 </script>"
 "Basic javascript that is needed by HTML files produced by Org-mode.")
 
