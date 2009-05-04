@@ -1,3 +1,8 @@
+2009-05-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-colview-xemacs.el (org-columns-remove-overlays)
+	(org-columns): Fix call to `local-variable-p'.
+
 2009-05-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-html-after-blockquotes-hook): New hook.

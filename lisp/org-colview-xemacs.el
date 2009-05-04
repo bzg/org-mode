@@ -493,7 +493,8 @@ This is the compiled version of the format.")
        (setq org-columns-overlays nil)
        (let ((inhibit-read-only t))
 	 (remove-text-properties (point-min) (point-max) '(read-only t))))
-      (when (local-variable-p 'org-colview-initial-truncate-line-value)
+      (when (local-variable-p 'org-colview-initial-truncate-line-value
+			      (current-buffer))
 	(setq truncate-lines org-colview-initial-truncate-line-value)))))
 
 
@@ -869,7 +870,8 @@ around it."
 	(setq maxwidths (org-columns-get-autowidth-alist fmt cache))
 	(org-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
-	(unless (local-variable-p 'org-colview-initial-truncate-line-value)
+	(unless (local-variable-p 'org-colview-initial-truncate-line-value
+				  (current-buffer))
 	  (org-set-local 'org-colview-initial-truncate-line-value
 			 truncate-lines))
 	(setq truncate-lines t)	
