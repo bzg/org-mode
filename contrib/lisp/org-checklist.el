@@ -52,22 +52,7 @@
   "Reset all checkboxes in an entry if the `RESET_CHECK_BOXES' property is set"
   (interactive "*")
   (if (org-entry-get (point) "RESET_CHECK_BOXES")
-      (org-reset-checkbox-state)))
-
-(defun org-reset-checkbox-state ()
-  "Reset all checkboxes in an entry"
-  (interactive "*")
-  (save-restriction
-    (save-excursion
-      (org-narrow-to-subtree)
-      (org-show-subtree)
-      (goto-char (point-min))
-      (let ((end (point-max)))
-	(while (< (point) end)
-	  (when (org-at-item-checkbox-p)
-	    (replace-match "[ ]" t t))
-	  (beginning-of-line 2))))
-    (org-update-checkbox-count-maybe)))
+      (org-reset-checkbox-state-subtree)))
 
 (defun org-make-checklist-export ()
   "Produce a checklist containing all unchecked items from a list

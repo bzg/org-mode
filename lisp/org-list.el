@@ -319,6 +319,21 @@ text below the heading."
 	  (beginning-of-line 2)))))
   (org-update-checkbox-count-maybe))
 
+(defun org-reset-checkbox-state-subtree ()
+  "Reset all checkboxes in an entry subtree."
+  (interactive "*")
+  (save-restriction
+    (save-excursion
+      (org-narrow-to-subtree)
+      (org-show-subtree)
+      (goto-char (point-min))
+      (let ((end (point-max)))
+	(while (< (point) end)
+	  (when (org-at-item-checkbox-p)
+	    (replace-match "[ ]" t t))
+	  (beginning-of-line 2))))
+    (org-update-checkbox-count-maybe)))
+
 (defun org-checkbox-blocked-p ()
   "Is the current checkbox blocked from for being checked now?
 A checkbox is blocked if all of the following conditions are fulfilled:
