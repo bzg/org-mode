@@ -1,5 +1,15 @@
 2009-05-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-region-as-latex): Supply the
+	force-no-subtree argument.
+	(org-export-as-latex): Provide better limits when exporting the
+	first line.  When exporting to string, we still want the first
+	lines.
+	(org-export-latex-first-lines): New argument END, to force the end
+	of the region.
+	(org-export-region-as-latex): Use the property list.
+	(org-export-as-latex):
+
 	* org-colview-xemacs.el (org-columns-remove-overlays)
 	(org-columns): Fix call to `local-variable-p'.
 

@@ -374,7 +374,7 @@ contents, and only produce the region of converted text, useful for
 cut-and-paste operations.
 If BUFFER is a buffer or a string, use/create that buffer as a target
 of the converted LaTeX.  If BUFFER is the symbol `string', return the
-produced LaTeX as a string and leave not buffer behind.  For example,
+produced LaTeX as a string and leave no buffer behind.  For example,
 a Lisp program could call this function in the following way:
 
   (setq latex (org-export-region-as-latex beg end t 'string))
@@ -385,12 +385,13 @@ in a window.  A non-interactive call will only retunr the buffer."
   (when (interactive-p)
     (setq buffer "*Org LaTeX Export*"))
   (let ((transient-mark-mode t) (zmacs-regions t)
-	rtn)
+	ext-plist rtn)
+    (setq ext-plist (plist-put ext-plist :ignore-subree-p t))
     (goto-char end)
     (set-mark (point)) ;; to activate the region
     (goto-char beg)
     (setq rtn (org-export-as-latex
-	       nil nil nil
+	       nil nil ext-plist
 	       buffer body-only))
     (if (fboundp 'deactivate-mark) (deactivate-mark))
     (if (and (interactive-p) (bufferp rtn))
@@ -438,11 +439,13 @@ when PUB-DIR is set, use this as the publishing directory."
 	 (rbeg (and region-p (region-beginning)))
 	 (rend (and region-p (region-end)))
 	 (subtree-p
-	  (when region-p
-	    (save-excursion
-	      (goto-char rbeg)
-	      (and (org-at-heading-p)
-		   (>= (org-end-of-subtree t t) rend)))))
+	  (if (plist-get opt-plist :ignore-subree-p)
+	      nil
+	    (when region-p
+	      (save-excursion
+		(goto-char rbeg)
+		(and (org-at-heading-p)
+		     (>= (org-end-of-subtree t t) rend))))))
 	 (opt-plist (setq org-export-opt-plist
 			  (if subtree-p
 			      (org-export-add-subtree-options opt-plist rbeg)
@@ -482,7 +485,13 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
 	 (text (plist-get opt-plist :text))
 	 (first-lines (if skip "" (org-export-latex-first-lines
-				   opt-plist rbeg)))
+				   opt-plist
+				   (if subtree-p
+				       (save-excursion
+					 (goto-char rbeg)
+					 (point-at-bol 2))
+				     rbeg)
+				   (if region-p rend))))
 	 (coding-system (and (boundp 'buffer-file-coding-system)
 			     buffer-file-coding-system))
 	 (coding-system-for-write (or org-export-latex-coding-system
@@ -526,7 +535,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	       "\n\n"))
 
     ;; insert lines before the first headline
-    (unless (or skip (eq to-buffer 'string))
+    (unless skip
       (insert first-lines))
 
     ;; export the content of headlines
@@ -852,16 +861,17 @@ OPT-PLIST is the options plist for current buffer."
 	     (toc (format "\\setcounter{tocdepth}{%s}\n\\tableofcontents\n\\vspace*{1cm}\n"
 			  (plist-get opt-plist :headline-levels))))))))
 
-(defun org-export-latex-first-lines (opt-plist &optional beg)
+(defun org-export-latex-first-lines (opt-plist &optional beg end)
   "Export the first lines before first headline.
-If BEG is non-nil, the is the beginning of he region."
+If BEG is non-nil, it is the beginning of the region.
+If END is non-nil, it is the end of the region."
   (save-excursion
     (goto-char (or beg (point-min)))
-    (if (org-at-heading-p) (beginning-of-line 2))
     (let* ((pt (point))
-	   (end (if (re-search-forward "^\\*+ " nil t)
-		    (goto-char (match-beginning 0))
-		  (goto-char (point-max)))))
+	   (end (or end
+		    (if (re-search-forward "^\\*+ " nil t)
+			(goto-char (match-beginning 0))
+		      (goto-char (point-max))))))
       (prog1
 	  (org-export-latex-content
 	   (org-export-preprocess-string
