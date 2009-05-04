@@ -380,7 +380,7 @@ a Lisp program could call this function in the following way:
   (setq latex (org-export-region-as-latex beg end t 'string))
 
 When called interactively, the output buffer is selected, and shown
-in a window.  A non-interactive call will only retunr the buffer."
+in a window.  A non-interactive call will only return the buffer."
   (interactive "r\nP")
   (when (interactive-p)
     (setq buffer "*Org LaTeX Export*"))
