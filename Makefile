@@ -27,10 +27,8 @@ infodir = $(prefix)/share/info
 ##----------------------------------------------------------------------
 
 # Using emacs in batch mode.
-# BATCH=$(EMACS) -batch -q
-# BATCH=$(EMACS) -batch -q -eval "(add-to-list (quote load-path) \".\")"
 
-BATCH=$(EMACS) -batch -q -eval                             \
+BATCH=$(EMACS) -batch -q -no-site-file -eval                             \
  "(progn (add-to-list (quote load-path) (expand-file-name \"./lisp/\")) \
         (add-to-list (quote load-path) \"$(lispdir)\"))"
 
