@@ -2,6 +2,8 @@
 
 	* org-exp.el (org-export, org-export-visible): Support ASCII
 	export to buffer
+	(org-export-normalize-links): Do not protect the description if it
+	is explicitly given.
 
 	* org-ascii.el (org-export-as-ascii-to-buffer)
 	(org-replace-region-by-ascii, org-export-region-as-ascii): New

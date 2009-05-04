@@ -1794,9 +1794,7 @@ When it is nil, all comments will be removed."
 		  "]"
 		  (if (match-end 3)
 		      (match-string 2)
-		    (concat "[" (org-add-props
-				    (copy-sequence xx)
-				    '(org-protected t))
+		    (concat "[" (copy-sequence xx)
 			    "]"))
 		  "]")))
 	 (put-text-property 0 (length s) 'face 'org-link s)
