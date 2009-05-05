@@ -854,6 +854,14 @@ These are the regions where each line starts with a colon."
 	  (const fundamental-mode)
 	  (function :tag "Other (specify)")))
 
+(defcustom org-edit-src-persistent-message t
+  "Non-nil means show persistent exit help message while editing src examples.
+The message is shown in the header-line, which will be created in the
+first line of the window showing the editing buffer.
+When nil, the message will only be shown intermittently in the echo area."
+  :group 'org-edit-structure
+  :type 'boolean)
+
 (defcustom org-goto-auto-isearch t
   "Non-nil means, typing characters in org-goto starts incremental search."
   :group 'org-edit-structure
@@ -6364,7 +6372,8 @@ the edited version."
       (org-exit-edit-mode)
       (org-set-local 'org-edit-src-beg-marker beg)
       (org-set-local 'org-edit-src-end-marker end)
-      (org-set-local 'header-line-format msg)
+      (and org-edit-src-persistent-message
+	  (org-set-local 'header-line-format msg))
       (message "%s" msg)
       t)))
 
@@ -6372,9 +6381,10 @@ the edited version."
   "Edit the fixed-width ascii drawing at point.
 This must be a region where each line starts with a colon followed by
 a space character.
-An indirect buffer is created, and that buffer is then narrowed to the
-example at point and switched to artist-mode.  When done,
-exit by killing the buffer with \\[org-edit-src-exit]."
+An new buffer is created and the fixed-width region is copied into it,
+and the buffer is switched into `artist-mode' for editing.  When done,
+exit with \\[org-edit-src-exit].  The edited text will then replace
+the fragment in the Org-mode buffer."
   (interactive)
   (let ((line (org-current-line))
 	(case-fold-search t)
@@ -6423,7 +6433,8 @@ exit by killing the buffer with \\[org-edit-src-exit]."
       (org-exit-edit-mode)
       (org-set-local 'org-edit-src-beg-marker beg)
       (org-set-local 'org-edit-src-end-marker end)
-      (org-set-local 'header-line-format msg)
+      (and org-edit-src-persistent-message
+	  (org-set-local 'header-line-format msg))
       (message "%s" msg)
       t)))
 

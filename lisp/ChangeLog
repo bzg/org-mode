@@ -1,5 +1,9 @@
 2009-05-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-edit-src-persistent-message): New option.
+	(org-edit-src-code, org-edit-fixed-width-region): Use the new
+	option.
+
 	* org-clock.el (org-clock-insert-selection-line): Fix prefious
 	patch.
 
