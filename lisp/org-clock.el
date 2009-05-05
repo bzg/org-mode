@@ -242,7 +242,7 @@ of a different task.")
 And return a cons cell with the selection character integer and the marker
 pointing to it."
   (when (marker-buffer marker)
-    (let (file cat task)
+    (let (file cat task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
 	(save-excursion
 	  (save-restriction
@@ -252,8 +252,16 @@ pointing to it."
 		  cat (or (org-get-category)
 			  (progn (org-refresh-category-properties)
 				 (org-get-category)))
-		  task (org-fontify-like-in-org-mode
-			(org-get-heading 'notags) org-odd-levels-only)))))
+		  heading (org-get-heading 'notags)
+		  prefix (save-excursion
+			  (org-back-to-heading t)
+			  (looking-at "\\*+ ")
+			  (match-string 0))
+		  task (substring
+			(org-fontify-like-in-org-mode 
+			 (concat prefix heading)
+			 org-odd-levels-only)
+			(length prefix))))))
       (when (and cat task)
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))
