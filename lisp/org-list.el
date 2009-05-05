@@ -49,6 +49,8 @@
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-combine-plists "org" (&rest plists))
 (declare-function org-entry-get "org" (pom property &optional inherit))
+(declare-function org-narrow-to-subtree "org" ())
+(declare-function org-show-subtree "org" ())
 
 (defgroup org-plain-lists nil
   "Options concerning plain lists in Org-mode."
