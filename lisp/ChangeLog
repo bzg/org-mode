@@ -1,5 +1,9 @@
 2009-05-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-edit-src-code, org-edit-fixed-width-region): Use
+	separate buffer instead of indirect buffer to edit source code.
+	(org-edit-src-exit): Make this function work with the new setup.
+
 	* org-clock.el (org-clock-insert-selection-line): Make sure tasks
 	are properly fontified before shown in the selection menu.
 
