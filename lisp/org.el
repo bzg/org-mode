@@ -6317,9 +6317,10 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 
 (defun org-edit-src-code ()
   "Edit the source code example at point.
-An indirect buffer is created, and that buffer is then narrowed to the
-example at point and switched to the correct language mode.  When done,
-exit by killing the buffer with \\[org-edit-src-exit]."
+The example is copied to a separate buffer, and that buffer is switched
+to the correct language mode.  When done, exit with \\[org-edit-src-exit].
+This will remove the original code in the Org buffer, and replace it with
+the edited version."
   (interactive)
   (let ((line (org-current-line))
 	(case-fold-search t)
@@ -8677,6 +8678,7 @@ This function can be used in a hook."
 (defconst org-additional-option-like-keywords
   '("BEGIN_HTML" "BEGIN_LaTeX" "END_HTML" "END_LaTeX"
     "ORGTBL" "HTML:" "LaTeX:" "BEGIN:" "END:" "TBLFM"
+    "LATEX_HEADER:"
     "BEGIN_EXAMPLE" "END_EXAMPLE"
     "BEGIN_QUOTE" "END_QUOTE"
     "BEGIN_VERSE" "END_VERSE"
