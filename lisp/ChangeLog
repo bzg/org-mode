@@ -1,3 +1,10 @@
+2009-05-05  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-links): Use the property list to
+	retrieve the default image attributes.
+
+	* org-exp.el (org-export-plist-vars): Add a new option.
+
 2009-05-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export, org-export-visible): Support ASCII

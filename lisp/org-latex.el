@@ -1345,7 +1345,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			  "file")))
 	    (coderefp (equal type "coderef"))
 	    (caption (org-find-text-property-in-string 'org-caption raw-path))
-	    (attr (org-find-text-property-in-string 'org-attributes raw-path))
+	    (attr (or (org-find-text-property-in-string 'org-attributes raw-path)
+		      (plist-get org-export-latex-options-plist :latex-image-options)))
 	    (label (org-find-text-property-in-string 'org-label raw-path))
 	    (floatp (or label caption))
 	    imgp radiop
@@ -1380,7 +1381,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	       (concat
 		(if floatp "\\begin{figure}[htb]\n")
 		(format "\\centerline{\\includegraphics[%s]{%s}}\n"
-			(or attr org-export-latex-image-default-option)
+			attr
 			(if (file-name-absolute-p raw-path)
 			    (expand-file-name raw-path)
 			  raw-path))

@@ -576,7 +576,9 @@ much faster."
     (:author		      nil	  user-full-name)
     (:email		      nil	  user-mail-address)
     (:select-tags	      nil	  org-export-select-tags)
-    (:exclude-tags	      nil	  org-export-exclude-tags))
+    (:exclude-tags	      nil	  org-export-exclude-tags)
+
+    (:latex-image-options     nil	  org-export-latex-image-default-option))
   "List of properties that represent export/publishing variables.
 Each element is a list of 3 items:
 1. The property that is used internally, and also for org-publish-project-alist
