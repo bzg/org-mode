@@ -238,6 +238,9 @@ of a different task.")
        (t (error "Invalid task choice %c" rpl))))))
 
 (defun org-clock-insert-selection-line (i marker)
+  "Insert a line for the clock selection menu.
+And return a cons cell with the selection character integer and the marker
+pointing to it."
   (when (marker-buffer marker)
     (let (file cat task)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
@@ -249,7 +252,8 @@ of a different task.")
 		  cat (or (org-get-category)
 			  (progn (org-refresh-category-properties)
 				 (org-get-category)))
-		  task (org-get-heading 'notags)))))
+		  task (org-fontify-like-in-org-mode
+			(org-get-heading 'notags) org-odd-levels-only)))))
       (when (and cat task)
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))

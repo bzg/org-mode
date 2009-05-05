@@ -4490,6 +4490,15 @@ between words."
 		   '(org-font-lock-keywords t nil nil backward-paragraph))
     (kill-local-variable 'font-lock-keywords) nil))
 
+(defun org-fontify-like-in-org-mode (s &optional odd-levels)
+  "Fontify string S like in Org-mode"
+  (with-temp-buffer
+    (insert s)
+    (let ((org-odd-levels-only odd-levels))
+      (org-mode)
+      (font-lock-fontify-buffer)
+      (buffer-string))))
+
 (defvar org-m nil)
 (defvar org-l nil)
 (defvar org-f nil)

@@ -1,5 +1,10 @@
 2009-05-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-insert-selection-line): Make sure tasks
+	are properly fontified before shown in the selection menu.
+
+	* org.el (org-fontify-like-in-org-mode): New function.
+
 	* org-latex.el (org-export-latex-links): Use the property list to
 	retrieve the default image attributes.
 
