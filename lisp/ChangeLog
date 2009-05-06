@@ -1,5 +1,8 @@
 2009-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-get-coderef-format): Use the description
+	is present.
+
 	* org.el (org-sort-entries-or-items): Improve docstring, and make
 	better implementation for time sorting.
 

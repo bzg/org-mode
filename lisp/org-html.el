@@ -965,7 +965,6 @@ lang=\"%s\" xml:lang=\"%s\">
 				"</a>")))
 
 	     ((string= type "coderef")
-
 	      (setq rpl (format "<a href=\"#coderef-%s\" class=\"coderef\" onmouseover=\"CodeHighlightOn(this, 'coderef-%s');\" onmouseout=\"CodeHighlightOff(this, 'coderef-%s');\">%s</a>"
 				path path path
 				(format (org-export-get-coderef-format path (and descp desc))

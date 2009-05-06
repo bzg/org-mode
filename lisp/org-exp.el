@@ -2576,7 +2576,7 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 		   (regexp-quote (concat "(" path ")"))
 		   desc))
 	(replace-match "%s" t t desc)
-      "%s")))
+      (or desc "%s"))))
 
 (provide 'org-exp)
 
