@@ -135,7 +135,7 @@ or if they are only using it locally."
   :group 'org-export-icalendar
   :type 'boolean)
 
-(defcustom org-ical-timezone ""
+(defcustom org-icalendar-timezone ""
   "The time zone string for iCalendar export.
 When nil of the empty string, use the abbreviation retrived from Emacs."
   :group 'org-export-icalendar
@@ -502,8 +502,8 @@ not used right now."
   "Start an iCalendar file by inserting the header."
   (let ((user user-full-name)
 	(name (or name "unknown"))
-	(timezone (if (> length org-ical-timezone)
-		      org-ical-timezone
+	(timezone (if (> (length org-icalendar-timezone) 0)
+		      org-icalendar-timezone
 		    (cadr (current-time-zone)))))
     (princ
      (format "BEGIN:VCALENDAR
