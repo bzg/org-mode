@@ -1,3 +1,10 @@
+2009-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document the key for sorting.
+
+	* org.texi (Structure editing, Plain lists): Improve documentation
+	on sorting.
+
 2009-04-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Internal links): Document custom ids for links.

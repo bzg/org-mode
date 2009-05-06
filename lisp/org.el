@@ -6084,15 +6084,35 @@ With a double prefix argument, also remove duplicate entries."
 
 (defun org-sort-entries-or-items
   (&optional with-case sorting-type getkey-func compare-func property)
-  "Sort entries on a certain level of an outline tree.
+  "Sort entries on a certain level of an outline tree, or plain list items.
 If there is an active region, the entries in the region are sorted.
 Else, if the cursor is before the first entry, sort the top-level items.
 Else, the children of the entry at point are sorted.
+If the cursor is at the first item in a plain list, the list items will be
+sorted.
 
-Sorting can be alphabetically, numerically, and by date/time as given by
-the first time stamp in the entry.  The command prompts for the sorting
-type unless it has been given to the function through the SORTING-TYPE
-argument, which needs to a character, any of (?n ?N ?a ?A ?t ?T ?p ?P ?f ?F).
+Sorting can be alphabetically, numerically, by date/time as given by
+a time stamp, by a property or by priority.
+
+The command prompts for the sorting type unless it has been given to the
+function through the SORTING-TYPE argument, which needs to a character,
+\(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?r ?R ?f ?F).  Here is the
+precise meaning of each character:
+
+n   Numerically, by converting the beginning of the entry/item to a number.
+a   Alphabetically, ignoring the TODO keyword and the priority, if any.
+t   By date/time, either the first active time stamp in the entry, or, if
+    none exist, by the first inactive one.
+    In items, only the first line will be chekced.
+s   By the scheduled date/time.
+d   By deadline date/time.
+c   By creation time, which is assumed to be the first inactive time stamp
+    at the beginning of a line.
+p   By priority according to the cookie.
+r   By the value of a property.
+
+Capital letters will reverse the sort order.
+
 If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies a function to be
 called with point at the beginning of the record.  It must return either
 a string or a number that should serve as the sorting key for that record.
@@ -6155,8 +6175,10 @@ WITH-CASE, the sorting considers case as well."
     (unless sorting-type
       (message
        (if plain-list-p
-	   "Sort %s: [a]lpha [n]umeric [t]ime [f]unc  A/N/T/F means reversed:"
-	 "Sort %s: [a]lpha [n]umeric [t]ime [p]riority p[r]operty todo[o]rder [f]unc  A/N/T/P/O/F means reversed:")
+	   "Sort %s: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:"
+	 "Sort %s: [a]lpha  [n]umeric  [p]riority  p[r]operty  todo[o]rder  [f]unc
+               [t]ime [s ]cheduled  [d]eadline  [c]reated
+               A/N/T/S/D/C/P/O/F means reversed:")
        what)
       (setq sorting-type (read-char-exclusive))
 
@@ -6213,10 +6235,12 @@ WITH-CASE, the sorting considers case as well."
 		  ((= dcst ?a)
 		   (buffer-substring (match-end 0) (point-at-eol)))
 		  ((= dcst ?t)
-		   (if (re-search-forward org-ts-regexp
-					  (point-at-eol) t)
-		       (org-time-string-to-time (match-string 0))
-		     now))
+		   (if (or (re-search-forward org-ts-regexp (point-at-eol) t)
+			   (re-search-forward org-ts-regexp-both
+					      (point-at-eol) t))
+		       (time-to-seconds
+			(org-time-string-to-time (match-string 0)))
+		     (time-to-seconds now)))
 		  ((= dcst ?f)
 		   (if getkey-func
 		       (progn
@@ -6236,12 +6260,29 @@ WITH-CASE, the sorting considers case as well."
 		   (funcall case-func (match-string 4))
 		 nil))
 	      ((= dcst ?t)
-	       (if (re-search-forward org-ts-regexp
-				      (save-excursion
-					(forward-line 2)
-					(point)) t)
-		   (org-time-string-to-time (match-string 0))
-		 now))
+	       (let ((end (save-excursion (outline-next-heading) (point))))
+		 (if (or (re-search-forward org-ts-regexp end t)
+			 (re-search-forward org-ts-regexp-both end t))
+		     (org-time-string-to-time (match-string 0))
+		   (org-time-string-to-time now))))
+	      ((= dcst ?c)
+	       (let ((end (save-excursion (outline-next-heading) (point))))
+		 (if (re-search-forward
+		      (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
+		      end t)
+		     (time-to-seconds (org-time-string-to-time
+				       (match-string 0)))
+		   (time-to-seconds now))))
+	      ((= dcst ?s)
+	       (let ((end (save-excursion (outline-next-heading) (point))))
+		 (if (re-search-forward org-scheduled-time-regexp end t)
+		     (org-time-string-to-time (match-string 1))
+		   (org-time-string-to-time now))))
+	      ((= dcst ?d)
+	       (let ((end (save-excursion (outline-next-heading) (point))))
+		 (if (re-search-forward org-deadline-time-regexp end t)
+		     (org-time-string-to-time (match-string 1))
+		   (org-time-string-to-time now))))
 	      ((= dcst ?p)
 	       (if (re-search-forward org-priority-regexp (point-at-eol) t)
 		   (string-to-char (match-string 2))

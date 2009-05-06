@@ -1,3 +1,8 @@
+2009-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-sort-entries-or-items): Improve docstring, and make
+	better implementation for time sorting.
+
 2009-05-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-edit-src-persistent-message): New option.

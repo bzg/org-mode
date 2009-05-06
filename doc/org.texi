@@ -1026,12 +1026,13 @@ Refile entry or region to a different location.  @xref{Refiling notes}.
 Sort same-level entries.  When there is an active region, all entries in the
 region will be sorted.  Otherwise the children of the current headline are
 sorted.  The command prompts for the sorting method, which can be
-alphabetically, numerically, by time (using the first time stamp in each
-entry), by priority, or by TODO keyword (in the sequence the keywords have
-been defined in the setup).  Reverse sorting is possible as well.  You can
-also supply your own function to extract the sorting key.  With a @kbd{C-u}
-prefix, sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes,
-duplicate entries will also be removed.
+alphabetically, numerically, by time (first time stamp with active preferred,
+creation time, scheduled time, deadline time), by priority, by TODO keyword
+(in the sequence the keywords have been defined in the setup) or by the value
+of a property.  Reverse sorting is possible as well.  You can also supply
+your own function to extract the sorting key.  With a @kbd{C-u} prefix,
+sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes, duplicate
+entries will also be removed.
 @kindex C-x n s
 @item C-x n s
 Narrow buffer to current subtree.
@@ -1413,6 +1414,10 @@ converted into a list item.
 This command also cycles bullet styles when the cursor in on the bullet or
 anywhere in an item line, details depending on
 @code{org-support-shift-select}.
+@kindex C-c ^
+@item C-c ^
+Sort the plain list.  You will be prompted for the sorting method:
+numerically, alphabetically, by time, or by custom function.
 @end table
 
 @node Drawers, Footnotes, Plain lists, Document Structure
