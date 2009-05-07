@@ -267,6 +267,12 @@ This is customizable so that alignment options can be specified."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
+(defcustom org-export-html-table-use-header-tags-for-first-column nil
+  "Non-nil means, format column one in tables with header tags.
+When nil, also column one will use data tags."
+  :group 'org-export-tables
+  :type 'boolean)
+
 (defcustom org-export-html-validation-link nil
   "Non-nil means, add validationlink to postamble of HTML exported files."
   :group 'org-export-html
@@ -1478,7 +1484,8 @@ lang=\"%s\" xml:lang=\"%s\">
 			 (if (and (< i nlines)
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
-			 (if head
+			 (if (or head
+				 (and (= i 0) org-export-html-table-use-header-tags-for-first-column))
 			     (concat (car org-export-table-header-tags) x
 				     (cdr org-export-table-header-tags))
 			   (concat (car org-export-table-data-tags) x

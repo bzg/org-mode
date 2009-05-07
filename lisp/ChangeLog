@@ -1,5 +1,9 @@
 2009-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el
+	(org-export-html-table-use-header-tags-for-first-column): New
+	option.
+
 	* org.el (org-autoload): Fix autoloading of ascii export
 	functions.
 	(org-modules): Add org-special-blocks.
