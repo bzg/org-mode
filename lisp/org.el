@@ -2967,7 +2967,9 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 			     org-insert-export-options-template  
 			     org-table-clean-before-export))
   (org-autoload "org-ascii"
-		'(org-export-as-ascii org-export-ascii-preprocess))
+		'(org-export-as-ascii org-export-ascii-preprocess
+		  org-export-as-ascii-to-buffer org-replace-region-by-ascii
+		  org-export-region-as-ascii))
   (org-autoload "org-html"
 		'(org-export-as-html-and-open
 		  org-export-as-html-batch org-export-as-html-to-buffer

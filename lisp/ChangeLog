@@ -1,3 +1,8 @@
+2009-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-autoload): Fix autoloading of ascii export
+	functions.
+
 2009-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-icalendar.el (org-start-icalendar-file): Use the new option.
