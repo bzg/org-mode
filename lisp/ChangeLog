@@ -2,6 +2,7 @@
 
 	* org.el (org-autoload): Fix autoloading of ascii export
 	functions.
+	(org-modules): Add org-special-blocks.
 
 2009-05-06  Carsten Dominik  <carsten.dominik@gmail.com>
 

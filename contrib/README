@@ -34,6 +34,7 @@ org-R.el                 --- Computation using the R language
 org-registry.el          --- A registry for Org links
 org2rem.el               --- Convert org appointments into reminders
 org-screen.el            --- Visit screen sessions through Org-mode links
+org-special-blocks.el    --- Turn blocks into LaTeX envs and HTML divs
 org-toc.el 	         --- Table of contents for Org-mode buffer
 orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions.
 

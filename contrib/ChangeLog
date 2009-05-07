@@ -1,3 +1,7 @@
+2009-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-special-blocks.el: New file.
+
 2009-04-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-choose.el (org-choose-get-fn-map-group): Fix bug with
