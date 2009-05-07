@@ -307,6 +307,23 @@
 	* org-exp.el (org-export-format-source-code-or-example): Fix
 	bad line numbering when exporting examples in HTML.
 
+2009-07-12  James TD Smith  <ahktenzero@mohorovi.cc>
+
+	* org-colview.el (org-format-time-period): Formats a time in
+	fractional days as days, hours, mins, seconds.
+	(org-columns-display-here): Add special handling for SINCE and
+	SINCE_IA to format for display.
+
+	* org.el (org-time-since): Add a function to get the time since an
+	org timestamp.
+	(org-entry-properties): Add two new special properties: SINCE and
+	SINCE_IA. These give the time since any active or inactive
+	timestamp in an entry.
+	(org-special-properties): Add SINCE, SINCE_IA.
+	(org-tags-sort-function): Add custom declaration for tags
+	sorting function.
+	(org-set-tags): Sort tags if org-tags-sort-function is set
+
 2009-07-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-goto): Find hidden headlines as well.
@@ -870,7 +887,7 @@
 	`org-export-push-to-kill-ring'.
 
 	* org-exp.el (org-export-show-temporary-export-buffer): New
-	option. 
+	option.
 
 	* org-latex.el (org-export-as-latex): Use
 	`org-export-show-temporary-export-buffer'.
