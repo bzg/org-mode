@@ -1,4 +1,4 @@
-;;; litorgy.el --- literate programing in org-mode
+;;; litorgy.el --- literate programming in org-mode
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
