@@ -112,6 +112,12 @@ with \\[org-ctrl-c-ctrl-c\\]."
   :group 'org-plain-lists
   :type 'boolean)
 
+(defcustom org-hierarchical-checkbox-statistics t
+  "Non-nil means, checkbox statistics counts only the state of direct children.
+When nil, all boxes below the cookie are counted."
+  :group 'org-plain-lists
+  :type 'boolean)
+
 (defcustom org-description-max-indent 20
   "Maximum indentation for the second line of a description list.
 When the indentation would be larger than this, it will become
@@ -419,7 +425,10 @@ the whole buffer."
 	       (org-beginning-of-item)
 	       (setq curr-ind (org-get-indentation))
 	       (setq next-ind curr-ind)
-	       (while (and (bolp) (org-at-item-p) (= curr-ind next-ind))
+	       (while (and (bolp) (org-at-item-p)
+			   (if org-hierarchical-checkbox-statistics
+			       (= curr-ind next-ind)
+			     (<= curr-ind next-ind)))
 		 (save-excursion (end-of-line) (setq eline (point)))
 		 (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
@@ -427,7 +436,11 @@ the whole buffer."
 		       (setq c-on (1+ c-on))
 		       )
 		   )
-		 (org-end-of-item)
+		 (if org-hierarchical-checkbox-statistics
+		     (org-end-of-item)
+		   (end-of-line)
+		   (when (re-search-forward org-list-beginning-re lim t)
+		     (beginning-of-line)))
 		 (setq next-ind (org-get-indentation))
 		 )))
 	 (goto-char continue-from)

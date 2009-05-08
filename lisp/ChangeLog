@@ -9,6 +9,10 @@
 
 2009-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-update-checkbox-count): Allow recursive
+	statistics.
+	(org-hierarchical-checkbox-statistics): New option.
+
 	* org.el (org-cycle): Remove erraneous space character.
 
 	* org-icalendar.el (org-icalendar-timezone): Initialize from
