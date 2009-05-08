@@ -1,3 +1,9 @@
+2009-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-format-org-table-html): Specify the scope.
+	(org-format-table-table-html): Specify the scope.
+	(org-export-table-header-tags): Prepare the scope parameter.
+
 2009-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el

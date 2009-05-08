@@ -255,9 +255,11 @@ borders and spacing."
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-table-header-tags '("<th>" . "</th>")
+(defcustom org-export-table-header-tags '("<th scope=\"%s\">" . "</th>")
   "The opening tag for table header fields.
-This is customizable so that alignment options can be specified."
+This is customizable so that alignment options can be specified.
+%s will be filled with the scope of the field, either row or col.
+See also the variable `org-export-html-table-use-header-tags-for-first-column'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
@@ -1484,12 +1486,20 @@ lang=\"%s\" xml:lang=\"%s\">
 			 (if (and (< i nlines)
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
-			 (if (or head
-				 (and (= i 0) org-export-html-table-use-header-tags-for-first-column))
-			     (concat (car org-export-table-header-tags) x
-				     (cdr org-export-table-header-tags))
+			 (cond
+			  (head
+			   (concat
+			    (format (car org-export-table-header-tags) "col")
+			    x
+			    (cdr org-export-table-header-tags)))
+			  ((and (= i 0) org-export-html-table-use-header-tags-for-first-column)
+			   (concat
+			    (format (car org-export-table-header-tags) "row")
+			    x
+			    (cdr org-export-table-header-tags)))
+			  (t
 			   (concat (car org-export-table-data-tags) x
-				   (cdr org-export-table-data-tags))))
+				   (cdr org-export-table-data-tags)))))
 		       fields "")
 		      "</tr>")
 	      html)))
@@ -1540,7 +1550,7 @@ This has the advantage that Org-mode's HTML conversions can be used.
 But it has the disadvantage, that no cell- or row-spanning is allowed."
   (let (line field-buffer
 	     (head org-export-highlight-first-table-line)
-	     fields html empty)
+	     fields html empty i)
     (setq html (concat html-table-tag "\n"))
     (while (setq line (pop lines))
       (setq empty "&nbsp;")
@@ -1558,8 +1568,10 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
 		       (lambda (x)
 			 (if (equal x "") (setq x empty))
 			 (if head
-			     (concat (car org-export-table-header-tags) x
-				     (cdr org-export-table-header-tags))
+			     (concat
+			      (format (car org-export-table-header-tags) "col")
+			      x
+			      (cdr org-export-table-header-tags))
 			   (concat (car org-export-table-data-tags) x
 				   (cdr org-export-table-data-tags))))
 		       field-buffer "\n")
