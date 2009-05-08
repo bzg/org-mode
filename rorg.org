@@ -614,9 +614,11 @@ inline source code blocks) [[file:test-export.org]]
 result
 #+end_src
 
-#+begin_src ruby :var num=9
-var + 4
+#+begin_src ruby :var num="eric"
+num+" schulte"
 #+end_src
+
+: "eric schulte"
 
 
 * COMMENT Commentary

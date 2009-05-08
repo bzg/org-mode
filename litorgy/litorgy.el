@@ -251,5 +251,25 @@ following the block rather than the fixed width example."
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
 
+(defun litorgy-read (cell)
+  "Convert the string value of CELL to a number if appropriate.
+Otherwise if cell looks like a list (meaning it starts with a
+'(') then read it as lisp, otherwise return it unmodified as a
+string.
+
+This is taken almost directly from `org-read-prop'."
+  (if (and (stringp cell) (not (equal cell "")))
+      (let ((out (string-to-number cell)))
+	(if (equal out 0)
+	    (if (or (equal "(" (substring cell 0 1))
+                    (equal "'" (substring cell 0 1)))
+                (read cell)
+	      (if (string-match "^\\(+0\\|-0\\|0\\)$" cell)
+		  0
+		(progn (set-text-properties 0 (length cell) nil cell)
+		       cell)))
+	  out))
+    cell))
+
 (provide 'litorgy)
 ;;; litorgy.el ends here

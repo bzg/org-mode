@@ -53,75 +53,70 @@
 ;;; Code:
 (require 'litorgy)
 
-(defun litorgy-read (cell)
-  "Convert the string value of CELL to a number if appropriate.
-Otherwise if cell looks like a list (meaning it starts with a
-'(') then read it as lisp, otherwise return it unmodified as a
-string.
-
-This is taken almost directly from `org-read-prop'."
-  (if (and (stringp cell) (not (equal cell "")))
-      (let ((out (string-to-number cell)))
-	(if (equal out 0)
-	    (if (or (equal "(" (substring cell 0 1))
-                    (equal "'" (substring cell 0 1)))
-                (read cell)
-	      (if (string-match "^\\(+0\\|-0\\|0\\)$" cell)
-		  0
-		(progn (set-text-properties 0 (length cell) nil cell)
-		       cell)))
-	  out))
-    cell))
-
 (defun litorgy-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
-names, and the string representation of the related value."
+names, and the emacs-lisp representation of the related value."
   (mapcar #'litorgy-ref-parse
    (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
 
+(defun litorgy-ref-literal (ref)
+  "Determine if the right side of a header argument variable
+assignment is a literal value or is a reference to some external
+resource.  If REF is literal then return it's value, otherwise
+return nil."
+  (let ((out (string-to-number ref)))
+    (if (or (not (equal out 0)) (string= ref "0") (string= ref "0.0")) out ;; number
+      (if (string-match "\"\\(.+\\)\"" ref) (read ref) ;; string
+        nil)))) ;; reference
+
 (defun litorgy-ref-parse (reference)
-  "Parse a reference to an external resource returning a list
-with two elements.  The first element of the list will be the
-name of the variable, and the second will be an emacs-lisp
-representation of the value of the variable."
+  "Parse the assignment REFERENCE of a variable specified in a
+header argument.  If the assignment has a literal value return
+that value, otherwise interpret REFERENCE as a reference to an
+external resource returning a list with two elements.  The first
+element of the list will be the name of the variable, and the
+second will be an emacs-lisp representation of the value of the
+variable."
   (save-excursion
     (if (string-match "\\(.+\\)=\\(.+\\)" reference)
-        (let ((var (match-string 1 reference))
-              (ref (match-string 2 reference))
-              direction type)
+        (let* ((var (match-string 1 reference))
+               (ref (match-string 2 reference))
+               (lit (litorgy-ref-literal ref))
+               direction type)
           (when (string-match "\\(.+\\):\\(.+\\)" reference)
             (find-file (match-string 1 reference))
             (setf ref (match-string 2 reference)))
           (cons (intern var)
-                (progn
-                  (cond ;; follow the reference in the current file
-                   ((string= ref "previous") (setq direction -1))
-                   ((string= ref "next") (setq direction 1))
-                   (t
-                    (goto-char (point-min))
-                    (setq direction 1)
-                    (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
-                                                  (regexp-quote ref) "[ \t]*$")))
-                              (or (re-search-forward regexp nil t)
-                                  (re-search-backward regexp nil t)))
-                      ;; ;; TODO: allow searching for names in other buffers
-                      ;; (setq id-loc (org-id-find ref 'marker)
-                      ;;       buffer (marker-buffer id-loc)
-                      ;;       loc (marker-position id-loc))
-                      ;; (move-marker id-loc nil)
-                      (error (format "reference '%s' not found in this buffer" ref)))))
-                  (while (not (setq type (litorgy-ref-at-ref-p)))
-                    (forward-line direction)
-                    (beginning-of-line)
-                    (if (or (= (point) (point-min)) (= (point) (point-max)))
-                        (error "reference not found")))
-                  (case type
-                    ('table
-                     (mapcar (lambda (row)
-                                      (mapcar #'litorgy-read row))
-                                    (org-table-to-lisp)))
-                    ('source-block
-                     (litorgy-execute-src-block t)))))))))
+                (or lit
+                    (progn
+                      (cond ;; follow the reference in the current file
+                       ((string= ref "previous") (setq direction -1))
+                       ((string= ref "next") (setq direction 1))
+                       (t
+                        (goto-char (point-min))
+                        (setq direction 1)
+                        (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
+                                                      (regexp-quote ref) "[ \t]*$")))
+                                  (or (re-search-forward regexp nil t)
+                                      (re-search-backward regexp nil t)))
+                          ;; ;; TODO: allow searching for names in other buffers
+                          ;; (setq id-loc (org-id-find ref 'marker)
+                          ;;       buffer (marker-buffer id-loc)
+                          ;;       loc (marker-position id-loc))
+                          ;; (move-marker id-loc nil)
+                          (error (format "reference '%s' not found in this buffer" ref)))))
+                      (while (not (setq type (litorgy-ref-at-ref-p)))
+                        (forward-line direction)
+                        (beginning-of-line)
+                        (if (or (= (point) (point-min)) (= (point) (point-max)))
+                            (error "reference not found")))
+                      (case type
+                        ('table
+                         (mapcar (lambda (row)
+                                   (mapcar #'litorgy-read row))
+                                 (org-table-to-lisp)))
+                        ('source-block
+                         (litorgy-execute-src-block t))))))))))
 
 (defun litorgy-ref-at-ref-p ()
   "Return the type of reference located at point or nil of none
