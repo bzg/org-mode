@@ -4637,7 +4637,7 @@ in special contexts.
 	     ((not (org-mode-p)) outline-regexp)
 	     (org-cycle-include-plain-lists
 	      (concat "\\(?:\\*"
-		      (if nstars (format "\\{1,%d\\} " nstars) "+")
+		      (if nstars (format "\\{1,%d\\}" nstars) "+")
 		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))
 	     (t (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))))
 	   (bob-special (and org-cycle-global-at-bob (bobp)

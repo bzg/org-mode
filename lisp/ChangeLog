@@ -1,5 +1,7 @@
 2009-05-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-cycle): Remove erraneous space character.
+
 	* org-icalendar.el (org-icalendar-timezone): Initialize from
 	environment.
 
