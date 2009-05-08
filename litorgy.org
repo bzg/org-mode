@@ -1,0 +1,30 @@
+#+OPTIONS: H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+TITLE:   litorgy --- literate programming in org-mode
+#+STARTUP: oddeven
+
+* Some Demo Ideas
+
+** block as function
+** properties
+** use of a table
+** interesting data from bash to R
+
+*** file sizes
+Maybe something like the following which outputs sizes of directories
+under the home directory, and then instead of the trivial =emacs-lisp=
+block we could use an R block to create a nice pie chart of the
+results.
+
+#+srcname: sizes
+#+begin_src bash :results replace
+du -sc ~/*
+#+end_src
+
+#+begin_src emacs-lisp :var sizes=sizes :results replace
+(mapcar #'car sizes)
+#+end_src
+
+*** something using grep
+
+*** something with the kernel
+*** something with processes or user activity
