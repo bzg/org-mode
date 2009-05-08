@@ -24,6 +24,12 @@ it's return result to a variable.  This would just add the ability to
 specify the values of the arguments to the source code block assuming
 any exist.  For an example see 
 
+When a variable appears in a header argument, how do we differentiate
+between it's value being a reference or a literal value?  I guess this
+could work just like a programming language.  If it's escaped or in
+quotes, then we count it as a literal, otherwise we try to look it up
+and evaluate it.
+
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
 
@@ -606,6 +612,10 @@ inline source code blocks) [[file:test-export.org]]
 
 #+begin_src emacs-lisp :var result=triple(:n => 8)
 result
+#+end_src
+
+#+begin_src ruby :var num=9
+var + 4
 #+end_src
 
 
