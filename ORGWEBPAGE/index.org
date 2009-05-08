@@ -9,11 +9,9 @@
 
 
 #+BEGIN_HTML
-<div style="position: fixed; display: block; left: 50px;top: 500px;>
 <a href="http://sourceforge.net/community/cca09/nominate/?project_name=Org-Mode&project_url=http://orgmode.org/"><img
 src="http://sourceforge.net/images/cca/cca_nominate.png"
 border="0"/></a>
-</div>
 <form action="http://www.google.com/cse" id="cse-search-box">
   <div align="right">
     <input type="hidden" name="cx" value="002987994228320350715:2gaddxoioh4" />
