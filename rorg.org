@@ -3,7 +3,21 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [5/13]
+* Tasks [6/14]
+
+** TODO test for litorgy
+since we are accumulating this nice collection of source-code blocks
+in the sandbox section we should make use of them as unit tests.
+What's more, we should be able to actually use litorgy to run these
+tests.
+
+We would just need to cycle over every source code block under the
+sandbox, run it, and assert that the return value is equal to what we
+expect.
+
+I have the feeling that this should be possible using only litorgical
+functions with minimal or no additional elisp.  It would be very cool
+for litorgy to be able to test itself.
 
 ** TODO re-implement helper functions from org-R
 Much of the power of org-R seems to be in it's helper functions for
