@@ -165,9 +165,20 @@ of the following form.  (language body header-arguments-alist)"
   "Parse a string of header arguments returning an alist."
   (delq nil
         (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]*\\)" arg)
+         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
                            (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
-         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:"))))
+         (let (matches holder)
+           (mapcar (lambda (part)
+                     (if (string= (substring part -1) "(")
+                         (setq holder part)
+                       (if holder
+                           (progn
+                             (setq matches (cons (concat holder " :" part) matches))
+                             (setq holder nil))
+                         (setq matches (cons part matches)))))
+                   (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))
+           (message (format "%S" matches))
+           matches))))
 
 (defun litorgy-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the
