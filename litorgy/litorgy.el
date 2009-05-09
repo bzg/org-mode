@@ -96,7 +96,7 @@ lisp code use the `litorgy-add-interpreter' function."
 	      (const "ruby")))
 
 ;;; functions
-(defun litorgy-execute-src-block (&optional arg info)
+(defun litorgy-execute-src-block (&optional arg info params)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
 commented by `org-toggle-fixed-width-section'.  With optional
@@ -105,7 +105,10 @@ results in raw elisp (this is useful for automated execution of a
 source block).
 
 Optionally supply a value for INFO in the form returned by
-`litorgy-get-src-block-info'."
+`litorgy-get-src-block-info'.
+
+Optionally supply a value for PARAMS which will be merged with
+the header arguments specified at the source code block." ; TODO implement!!
   (interactive "P")
   (let* ((info (or info (litorgy-get-src-block-info)))
          (lang (first info))
@@ -167,18 +170,7 @@ of the following form.  (language body header-arguments-alist)"
         (mapcar
          (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
                            (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
-         (let (matches holder)
-           (mapcar (lambda (part)
-                     (if (string= (substring part -1) "(")
-                         (setq holder part)
-                       (if holder
-                           (progn
-                             (setq matches (cons (concat holder " :" part) matches))
-                             (setq holder nil))
-                         (setq matches (cons part matches)))))
-                   (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))
-           (message (format "%S" matches))
-           matches))))
+         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
 (defun litorgy-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the

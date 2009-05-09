@@ -69,54 +69,59 @@ return nil."
       (if (string-match "\"\\(.+\\)\"" ref) (read ref) ;; string
         nil)))) ;; reference
 
-(defun litorgy-ref-parse (reference)
-  "Parse the assignment REFERENCE of a variable specified in a
-header argument.  If the assignment has a literal value return
-that value, otherwise interpret REFERENCE as a reference to an
-external resource returning a list with two elements.  The first
-element of the list will be the name of the variable, and the
-second will be an emacs-lisp representation of the value of the
-variable."
+(defun litorgy-ref-parse (assignment)
+  "Parse a variable ASSIGNMENT in a header argument.  If the
+right hand side of the assignment has a literal value return that
+value, otherwise interpret as a reference to an external resource
+and find it's value using `litorgy-ref-resolve-reference'.
+Return a list with two elements.  The first element of the list
+will be the name of the variable, and the second will be an
+emacs-lisp representation of the value of the variable."
+  (if (string-match "\\(.+\\)=\\(.+\\)" assignment)
+      (let ((var (match-string 1 assignment))
+            (ref (match-string 2 assignment)))
+        (cons (intern var)
+              (or (litorgy-ref-literal ref)
+                  (litorgy-ref-resolve-reference ref))))))
+
+(defun litorgy-ref-resolve-reference (ref)
+  "Resolve the reference and return it's value"
   (save-excursion
-    (if (string-match "\\(.+\\)=\\(.+\\)" reference)
-        (let* ((var (match-string 1 reference))
-               (ref (match-string 2 reference))
-               (lit (litorgy-ref-literal ref))
-               direction type)
-          (when (string-match "\\(.+\\):\\(.+\\)" reference)
-            (find-file (match-string 1 reference))
-            (setf ref (match-string 2 reference)))
-          (cons (intern var)
-                (or lit
-                    (progn
-                      (cond ;; follow the reference in the current file
-                       ((string= ref "previous") (setq direction -1))
-                       ((string= ref "next") (setq direction 1))
-                       (t
-                        (goto-char (point-min))
-                        (setq direction 1)
-                        (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
-                                                      (regexp-quote ref) "[ \t]*$")))
-                                  (or (re-search-forward regexp nil t)
-                                      (re-search-backward regexp nil t)))
-                          ;; ;; TODO: allow searching for names in other buffers
-                          ;; (setq id-loc (org-id-find ref 'marker)
-                          ;;       buffer (marker-buffer id-loc)
-                          ;;       loc (marker-position id-loc))
-                          ;; (move-marker id-loc nil)
-                          (error (format "reference '%s' not found in this buffer" ref)))))
-                      (while (not (setq type (litorgy-ref-at-ref-p)))
-                        (forward-line direction)
-                        (beginning-of-line)
-                        (if (or (= (point) (point-min)) (= (point) (point-max)))
-                            (error "reference not found")))
-                      (case type
-                        ('table
-                         (mapcar (lambda (row)
-                                   (mapcar #'litorgy-read row))
-                                 (org-table-to-lisp)))
-                        ('source-block
-                         (litorgy-execute-src-block t))))))))))
+    (let (direction type args)
+      (when (string-match "\\(.+\\):\\(.+\\)" ref)
+        (find-file (match-string 1 ref))
+        (setf ref (match-string 2 ref)))
+      (cond ;; follow the reference in the current file
+       ((string= ref "previous") (setq direction -1))
+       ((string= ref "next") (setq direction 1))
+       (t
+        (goto-char (point-min))
+        (setq direction 1)
+        (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
+                                      (regexp-quote ref) "[ \t]*$")))
+                  (or (re-search-forward regexp nil t)
+                      (re-search-backward regexp nil t)))
+          ;; ;; TODO: allow searching for names in other buffers
+          ;; (setq id-loc (org-id-find ref 'marker)
+          ;;       buffer (marker-buffer id-loc)
+          ;;       loc (marker-position id-loc))
+          ;; (move-marker id-loc nil)
+          (error (format "reference '%s' not found in this buffer" ref)))))
+      (while (not (setq type (litorgy-ref-at-ref-p)))
+        (forward-line direction)
+        (beginning-of-line)
+        (if (or (= (point) (point-min)) (= (point) (point-max)))
+            (error "reference not found")))
+      (case type
+        ('table
+         (mapcar (lambda (row)
+                   (mapcar #'litorgy-read row))
+                 (org-table-to-lisp)))
+        ('source-block
+         ;; assign any arguments to pass to source block
+         (when (string-match "\(\\(.+\\)\)" ref)
+           (setq args (mapcar (lambda (ref) (cons :var ref)) (split-string ref ",[ \f\t\n\r\v]*"))))
+         (litorgy-execute-src-block t nil args))))))
 
 (defun litorgy-ref-at-ref-p ()
   "Return the type of reference located at point or nil of none

@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [6/14]
+* Tasks [7/14]
 
 ** TODO test for litorgy
 since we are accumulating this nice collection of source-code blocks
@@ -18,17 +18,6 @@ expect.
 I have the feeling that this should be possible using only litorgical
 functions with minimal or no additional elisp.  It would be very cool
 for litorgy to be able to test itself.
-
-** TODO re-implement helper functions from org-R
-Much of the power of org-R seems to be in it's helper functions for
-the quick graphing of tables.  Should we try to re-implement these
-functions on top of litorgy?
-
-I'm thinking this may be useful both to add features to litorgy-R and
-also to potentially suggest extensions of the framework.  For example
-one that comes to mind is the ability to treat a source-code block
-like a function which accepts arguments and returns results. Actually
-this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
 
 ** TODO source blocks as functions
 
@@ -51,6 +40,9 @@ How should this work for R?  For example how are files included with
 Sweave?  Would/Should we just mimic the behavior of Sweave with the
 addition of support for poping up graphics during live evaluation of a
 source code block.
+
+I think the best way to approach this would be to start with an
+example R source-code block and then work up from there.
 
 ** TODO ability to select which of multiple sessions is being used
    Increasingly it is looking like we're going to want to run all
@@ -108,7 +100,18 @@ source code block.
    posterity. Same for a shell session either in a *shell* buffer, or
    pasted from another terminal emulator. And python of course.
 
-** TODO folding of code blocks? [1/2]
+** PROPOSED re-implement helper functions from org-R
+Much of the power of org-R seems to be in it's helper functions for
+the quick graphing of tables.  Should we try to re-implement these
+functions on top of litorgy?
+
+I'm thinking this may be useful both to add features to litorgy-R and
+also to potentially suggest extensions of the framework.  For example
+one that comes to mind is the ability to treat a source-code block
+like a function which accepts arguments and returns results. Actually
+this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE folding of code blocks? [2/2]
    [DED] In similar way to using outline-minor-mode for folding function
    bodies, can we fold code blocks?  #+begin whatever statements are
    pretty ugly, and in any case when you're thinking about the overall
@@ -119,9 +122,13 @@ source code block.
     now be fold-able in the same manner as headlines (by pressing TAB
     on the first line).
 
-*** TODO folding of results
+*** REJECTED folding of results
     So, lets do a three-stage tab cycle... First fold the src block,
     then fold the results, then unfold.
+    
+    There's no way to tell if the results are a table or not w/o
+    actually executing the block which would be too expensive of an
+    operation.
 
 ** DONE inline source code blocks [2/2]
    Like the =\R{ code }= blocks
@@ -286,6 +293,9 @@ recognition of ruby arrays as such.
 
 
 * Sandbox
+  :PROPERTIES:
+  :CUSTOM_ID: sandbox
+  :END:
 This is a place for code examples
 
 ** litorgy.el beginning functionality
@@ -624,7 +634,7 @@ inline source code blocks) [[file:test-export.org]]
 
 : 15
 
-#+begin_src emacs-lisp :var result=triple(:n => 8)
+#+begin_src emacs-lisp :var result=triple(n=8)
 result
 #+end_src
 
