@@ -7356,7 +7356,7 @@ used as the link location instead of reading one interactively."
 	 (desc region)
 	 tmphist ; byte-compile incorrectly complains about this
 	 (link link-location)
-	 entry file)
+	 entry file all-prefixes)
     (cond
      (link-location) ; specified by arg, just use it.
      ((org-in-regexp org-bracket-link-regexp 1)
@@ -7374,26 +7374,12 @@ used as the link location instead of reading one interactively."
 			      (org-remove-angle-brackets (match-string 0)))))
      ((member complete-file '((4) (16)))
       ;; Completing read for file names.
-      (setq file (read-file-name "File: "))
-      (let ((pwd (file-name-as-directory (expand-file-name ".")))
-	    (pwd1 (file-name-as-directory (abbreviate-file-name
-					   (expand-file-name ".")))))
-	(cond
-	 ((equal complete-file '(16))
-	  (setq link (org-make-link
-		      "file:"
-		      (abbreviate-file-name (expand-file-name file)))))
-	 ((string-match (concat "^" (regexp-quote pwd1) "\\(.+\\)") file)
-	  (setq link  (org-make-link "file:" (match-string 1 file))))
-	 ((string-match (concat "^" (regexp-quote pwd) "\\(.+\\)")
-			(expand-file-name file))
-	  (setq link  (org-make-link
-		       "file:" (match-string 1 (expand-file-name file)))))
-	 (t (setq link (org-make-link "file:" file))))))
+      (setq link (org-get-file-link complete-file)))
      (t
       ;; Read link, with completion for stored links.
       (with-output-to-temp-buffer "*Org Links*"
-	(princ "Insert a link.  Use TAB to complete valid link prefixes.\n")
+	(princ "Insert a link.
+Use TAB to complete link prefixes, then RET for type-specific completion support\n")
 	(when org-stored-links
 	  (princ "\nStored links are available with <up>/<down> or M-p/n (most recent with RET):\n\n")
 	  (princ (mapconcat
@@ -7403,24 +7389,31 @@ used as the link location instead of reading one interactively."
       (let ((cw (selected-window)))
 	(select-window (get-buffer-window "*Org Links*"))
 	(setq truncate-lines t)
-	(org-fit-window-to-buffer)
-	(select-window cw))
+	(unless (pos-visible-in-window-p (point-max))
+	  (org-fit-window-to-buffer))
+	(and (window-live-p cw) (select-window cw)))
       ;; Fake a link history, containing the stored links.
       (setq tmphist (append (mapcar 'car org-stored-links)
 			    org-insert-link-history))
+      (setq all-prefixes (append (mapcar 'car org-link-abbrev-alist-local)
+				 (mapcar 'car org-link-abbrev-alist)
+				 org-link-types))
       (unwind-protect
-	  (setq link
-		(let ((org-completion-use-ido nil))
-		  (org-completing-read
-		   "Link: "
-		   (append
-		    (mapcar (lambda (x) (list (concat (car x) ":")))
-			    (append org-link-abbrev-alist-local org-link-abbrev-alist))
-		    (mapcar (lambda (x) (list (concat x ":")))
-			    org-link-types))
-		   nil nil nil
-		   'tmphist
-		   (or (car (car org-stored-links))))))
+	  (progn
+	    (setq link
+		  (let ((org-completion-use-ido nil))
+		    (org-completing-read
+		     "Link: "
+		     (mapcar (lambda (x) (list (concat x ":")))
+			     all-prefixes)
+		     nil nil nil
+		     'tmphist
+		     (or (car (car org-stored-links))))))
+	    (if (or (member link all-prefixes)
+		    (and (equal ":" (substring link -1))
+			 (member (substring link 0 -1) all-prefixes)
+			 (setq link (substring link 0 -1))))
+		(setq link (org-link-try-special-completion link))))
 	(set-window-configuration wcf)
 	(kill-buffer "*Org Links*"))
       (setq entry (assoc link org-stored-links))
@@ -7481,6 +7474,34 @@ used as the link location instead of reading one interactively."
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
     (insert (org-make-link-string link desc))))
+
+(defun org-link-try-special-completion (type)
+  "If there is completion support for link type TAPE, offer it."
+  (let ((fun (intern (concat "org-" type "-complete-link"))))
+    (if (functionp fun)
+	(funcall fun)
+      (read-string "Link (no completion support): " (concat type ":")))))
+
+(defun org-file-complete-link (&optional arg)
+  "Create a file link using completion."
+  (let (file)
+    (setq file (read-file-name "File: "))
+    (let ((pwd (file-name-as-directory (expand-file-name ".")))
+	  (pwd1 (file-name-as-directory (abbreviate-file-name
+					 (expand-file-name ".")))))
+      (cond
+       ((equal arg '(16))
+	(setq link (org-make-link
+		    "file:"
+		    (abbreviate-file-name (expand-file-name file)))))
+       ((string-match (concat "^" (regexp-quote pwd1) "\\(.+\\)") file)
+	(setq link  (org-make-link "file:" (match-string 1 file))))
+       ((string-match (concat "^" (regexp-quote pwd) "\\(.+\\)")
+		      (expand-file-name file))
+	(setq link  (org-make-link
+		     "file:" (match-string 1 (expand-file-name file)))))
+       (t (setq link (org-make-link "file:" file))))))
+  link)
 
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."

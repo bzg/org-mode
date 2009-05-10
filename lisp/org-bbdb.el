@@ -338,6 +338,11 @@ This is used by Org to re-create the anniversary hash table."
     (when text
       (mapconcat 'identity text "; "))))
 
+(defun org-bbdb-complete-link ()
+  "Read a bbdb link with name completion."
+  (concat "bbdb:"
+	  (bbdb-record-name (car (bbdb-completing-read-record "Name: ")))))
+
 (provide 'org-bbdb)
 
 ;; arch-tag: 9e4f275d-d080-48c1-b040-62247f66b5c2
