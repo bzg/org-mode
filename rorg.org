@@ -3,9 +3,9 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [7/14]
+* Tasks [8/14]
 
-** TODO test for litorgy
+** TODO litorgy tests litorgy
 since we are accumulating this nice collection of source-code blocks
 in the sandbox section we should make use of them as unit tests.
 What's more, we should be able to actually use litorgy to run these
@@ -18,20 +18,6 @@ expect.
 I have the feeling that this should be possible using only litorgical
 functions with minimal or no additional elisp.  It would be very cool
 for litorgy to be able to test itself.
-
-** TODO source blocks as functions
-
-Allow source code blocks to be called like functions, with arguments
-specified.  We are already able to call a source-code block and assign
-it's return result to a variable.  This would just add the ability to
-specify the values of the arguments to the source code block assuming
-any exist.  For an example see 
-
-When a variable appears in a header argument, how do we differentiate
-between it's value being a reference or a literal value?  I guess this
-could work just like a programming language.  If it's escaped or in
-quotes, then we count it as a literal, otherwise we try to look it up
-and evaluate it.
 
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
@@ -110,6 +96,20 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE source blocks as functions
+
+Allow source code blocks to be called like functions, with arguments
+specified.  We are already able to call a source-code block and assign
+it's return result to a variable.  This would just add the ability to
+specify the values of the arguments to the source code block assuming
+any exist.  For an example see 
+
+When a variable appears in a header argument, how do we differentiate
+between it's value being a reference or a literal value?  I guess this
+could work just like a programming language.  If it's escaped or in
+quotes, then we count it as a literal, otherwise we try to look it up
+and evaluate it.
 
 ** DONE folding of code blocks? [2/2]
    [DED] In similar way to using outline-minor-mode for folding function
