@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [7/16]
+* Tasks [7/17]
 
 ** TODO share litorgy
 how should we share litorgy?
@@ -14,6 +14,14 @@ how should we share litorgy?
 
 *** examples
 we need to think up some good examples
+
+**** interactive tutorials
+This could be a place to use [[* litorgical assertions][litorgical assertions]].
+
+for example the first step of a tutorial could assert that the version
+of the software-package (or whatever) is equal to some value, then
+source-code blocks could be used with confidence (and executed
+directly from) the rest of the tutorial.
 
 **** answering a text-book question w/code example
 litorgy is an ideal environment enabling both the development and
@@ -38,7 +46,7 @@ du -sc ~/*
 (mapcar #'car sizes)
 #+end_src
 
-** TODO litorgy tests litorgy
+** TODO litorgy tests litorgy [0/1]
 since we are accumulating this nice collection of source-code blocks
 in the sandbox section we should make use of them as unit tests.
 What's more, we should be able to actually use litorgy to run these
@@ -51,28 +59,36 @@ expect.
 I have the feeling that this should be possible using only litorgical
 functions with minimal or no additional elisp.  It would be very cool
 for litorgy to be able to test itself.
+*** TODO litorgical assertions
+These could be used to make assertions about the results of a
+source-code block.  If the assertion fails then the point could be
+moved to the block, and error messages and highlighting etc... could
+ensue
 
 ** TODO integration with org tables
 We should make it easy to call litorgy source blocks from org-mode
 table formulas.  This is practical now that it is possible to pass
-arguments to litorgical source blocks
+arguments to litorgical source blocks.
 
-** TODO inline source code blocks [2/4]
+See the related [[* (sandbox) integration w/org tables][sandbox]] header for tests/examples.
+
+*** digging in org-table.el
+In the past [[file:~/src/org/lisp/org-table.el::org%20table%20el%20The%20table%20editor%20for%20Org%20mode][org-table.el]] has proven difficult to work with.
+
+Should be a hook in [[file:~/src/org/lisp/org-table.el::defun%20org%20table%20eval%20formula%20optional%20arg%20equation][org-table-eval-formula]].
+
+Looks like I need to change this [[file:~/src/org/lisp/org-table.el::if%20lispp][if statement]] (line 2239) into a cond
+expression.
+
+** TODO inline source code blocks [3/5]
    Like the =\R{ code }= blocks
 
    not sure what the format should be, maybe just something simple
-   like =src_lang{}= where lang is the name of the source code
-   language to be evaluated.
+   like =src_lang[]{}= where lang is the name of the source code
+   language to be evaluated, =[]= is optional and contains any header
+   arguments and ={}= contains the code.
 
-   The biggest problem I see with these is that their main use would
-   be to show the value of a variable, but the variable would need to
-   be assigned through a header argument (aside from in languages like
-   R in which all execution takes place in a session).  Requiring a
-   header argument for a inline blocks defeats the purpose of a small,
-   concise inline-able block.
-
-   Maybe this makes a good case for all source code having the option
-   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
+   (see [[* (sandbox) inline source blocks][the-sandbox]])
 
 *** DONE evaluation with \C-c\C-c
 Putting aside the header argument issue for now we can just run these
@@ -82,12 +98,14 @@ with the following default header arguments
 
 *** DONE inline exportation
 Need to add an interblock hook (or some such) through org-exp-blocks
+*** DONE header arguments
+We should make it possible to use header arguments.
+
 *** TODO fontification
 we should color these blocks differently
-*** TODO header arguments
-we should make it possible to use header arguments *or* we should make
-it possible to call other source-code blocks as functions (passing in
-arguments)
+
+*** TODO refine html exportation
+should use a span class, and should show original source in tool-tip
 
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
@@ -645,6 +663,38 @@ num+" schulte"
 
 This is an inline source code block src_ruby{1 + 6}.  And another
 source block with text output src_emacs-lisp{"eric"}.
+
+This is an inline source code block with header
+arguments. src_ruby[:var n=fibbd( n = 0 )]{n}
+
+
+** (sandbox) integration w/org tables
+
+#+begin_src emacs-lisp :results silent
+(defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
+#+end_src
+
+#+srcname: fibbd
+#+begin_src emacs-lisp :var n=2 :results silent
+(fibbd n)
+#+end_src
+
+#+begin_src emacs-lisp :results silent
+(mapcar #'fibbd '(0 1 2 3 4 5 6 7 8))
+#+end_src
+
+| original | fibbd |
+|----------+-------|
+|        0 |       |
+|        1 |       |
+|        2 |       |
+|        3 |       |
+|        4 |       |
+|        5 |       |
+|        6 |       |
+|        7 |       |
+|        8 |       |
+|        9 |       |
 
 
 * COMMENT Commentary

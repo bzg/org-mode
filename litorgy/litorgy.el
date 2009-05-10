@@ -60,6 +60,7 @@ then run `litorgy-execute-src-block'."
 	(concat "src_\\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
+                "\\(\\|\\[\\(.*\\)\\]\\)"
                 "{\\([^\n]+\\)}")))
 
 (defun litorgy-add-interpreter (interpreter)
@@ -161,8 +162,9 @@ of the following form.  (language body header-arguments-alist)"
 
 (defun litorgy-parse-inline-src-block-match ()
   (list (litorgy-clean-text-properties (match-string 1))
-        (litorgy-clean-text-properties (match-string 2))
-        litorgy-inline-header-args))
+        (litorgy-clean-text-properties (match-string 4))
+        (org-combine-plists litorgy-inline-header-args
+                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
 
 (defun litorgy-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
