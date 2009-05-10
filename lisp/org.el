@@ -7374,7 +7374,7 @@ used as the link location instead of reading one interactively."
 			      (org-remove-angle-brackets (match-string 0)))))
      ((member complete-file '((4) (16)))
       ;; Completing read for file names.
-      (setq link (org-get-file-link complete-file)))
+      (setq link (org-file-complete-link complete-file)))
      (t
       ;; Read link, with completion for stored links.
       (with-output-to-temp-buffer "*Org Links*"
@@ -7484,7 +7484,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
 (defun org-file-complete-link (&optional arg)
   "Create a file link using completion."
-  (let (file)
+  (let (file link)
     (setq file (read-file-name "File: "))
     (let ((pwd (file-name-as-directory (expand-file-name ".")))
 	  (pwd1 (file-name-as-directory (abbreviate-file-name
@@ -7500,8 +7500,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		      (expand-file-name file))
 	(setq link  (org-make-link
 		     "file:" (match-string 1 (expand-file-name file)))))
-       (t (setq link (org-make-link "file:" file))))))
-  link)
+       (t (setq link (org-make-link "file:" file)))))
+    link))
 
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."

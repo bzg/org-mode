@@ -106,12 +106,15 @@
 (declare-function bbdb-current-record "ext:bbdb-com"
 		  (&optional planning-on-modifying))
 (declare-function bbdb-name "ext:bbdb-com" (string elidep))
+(declare-function bbdb-completing-read-record "ext:bbdb-com"
+		  (prompt &optional omit-records))
 (declare-function bbdb-record-getprop "ext:bbdb" (record property))
 (declare-function bbdb-record-name "ext:bbdb" (record))
 (declare-function bbdb-records "ext:bbdb"
           (&optional dont-check-disk already-in-db-buffer))
 (declare-function bbdb-split "ext:bbdb" (string separators))
 (declare-function bbdb-string-trim "ext:bbdb" (string))
+
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 
@@ -340,6 +343,7 @@ This is used by Org to re-create the anniversary hash table."
 
 (defun org-bbdb-complete-link ()
   "Read a bbdb link with name completion."
+  (require 'bbdb-com)
   (concat "bbdb:"
 	  (bbdb-record-name (car (bbdb-completing-read-record "Name: ")))))
 
