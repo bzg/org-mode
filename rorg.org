@@ -296,16 +296,9 @@ recognition of ruby arrays as such.
   :PROPERTIES:
   :CUSTOM_ID: sandbox
   :END:
-This is a place for code examples
+To run these examples evaluate [[file:litorgy/litorgy-init.el][litorgy-init.el]]
 
 ** litorgy.el beginning functionality
-After evaluating litorgy.el and litorgy-script.el, you should be able
-to evaluate the following blocks of code by pressing =\C-c\C-c= on the
-header lines.  *Note*: your version of org-mode must be at least 6.23
-or later.
-
-To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-script.el][litorgy-script.el]] and
-evaluate them with =M-x eval-buffer=
 
 #+begin_src sh  :results replace
 date
@@ -314,17 +307,19 @@ date
 : Sun Apr  5 10:10:05 PDT 2009
 
 #+begin_src ruby
-puts Time.now
+Time.now
 #+end_src
 
+: Sat May 09 18:18:33 -0700 2009
+
 #+begin_src python
-print "Hello world!"
+"Hello World"
 #+end_src
+
+: Hello World
 
 
 ** litorgy-R
-To run these examples open both [[file:litorgy/litorgy.el][litorgy.el]], [[file:litorgy/litorgy-R.el][litorgy-R.el]] and evaluate
-them with =M-x eval-buffer=
 
 #+begin_src R :results replace
 a <- 9
@@ -332,58 +327,11 @@ b <- 17
 a + b
 #+end_src
 
-| 26 |
-
+: 26
 
 #+begin_src R
 hist(rgamma(20,3,3))
 #+end_src
-
-
-** free variables
-
-First assign the variable with some sort of interpreted line
-- this is independent of any particular type of source code
-- this could use references to table ranges
-
-
-
-** resource reference example
-*Note*: this example is largely *defunct*, see the
-[[* litorgy plays with tables][litorgy-plays-with-tables]] section below.
-
-This block holds an array of information written in [[http://www.yaml.org][YAML]]
-
-#name: yaml-array
-#+begin_src yaml
---- 
-- 1
-- 2
-- 3
-- 4
-- 5
-#+end_src
-
-This next block saves the information in the YAML array into the ruby
-variable =ya= and then in ruby it multiplies each variable in the =ya=
-by 2.
-
-#name: ruby-array
-#assign: ya = yaml-array
-#+begin_src ruby
-ya.map{ |e| e * 2 }
-#+end_src
-
-This final block takes the output of the ruby block, and writes it to
-cell =0,0= through =0,3= of the table
-
-#name: example-table
-#assign: self[0, (1..3)] = ruby-array
-| example results |
-|-----------------|
-|                 |
-|                 |
-|                 |
 
 
 ** litorgy plays with tables
@@ -403,7 +351,7 @@ out...
 
 *** Emacs lisp
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results silent
 (defun transpose (table)
   (apply #'mapcar* #'list table))
 #+end_src
@@ -412,20 +360,19 @@ out...
 | 1 |       2 | 3 |
 | 4 | schulte | 6 |
 
-#+begin_src emacs-lisp :var table=previous :results replace
-(transpose table)
-#+end_src
-
 #+begin_src emacs-lisp :var table=sandbox :results replace
 (transpose table)
 #+end_src
+
+| 1 |         4 |
+| 2 | "schulte" |
+| 3 |         6 |
 
 #+begin_src emacs-lisp
 '(1 2 3 4 5)
 #+end_src
 
 | 1 | 2 | 3 | 4 | 5 |
-
 
 *** Ruby and Python
 
@@ -473,25 +420,25 @@ tabel
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |
 
-
-
 *** shell
 Now shell commands are converted to tables using =org-table-import=
 and if these tables are non-trivial (i.e. have multiple elements) then
 they are imported as org-mode tables...
 
-#+begin_src sh
+#+begin_src sh :results replace
 ls -l
 #+end_src
 
-| "total"      | 96 | ""         | ""         |    "" |   "" | "" | ""                |
-| "-rw-r--r--" |  1 | "eschulte" | "eschulte" |    57 | 2009 |  7 | "block"           |
-| "-rw-r--r--" |  1 | "eschulte" | "eschulte" | 35147 | 2009 |  7 | "COPYING"         |
-| "drwxr-xr-x" |  4 | "eschulte" | "eschulte" |  4096 | 2009 | 16 | "existing_tools"  |
-| "drwxr-xr-x" |  2 | "eschulte" | "eschulte" |  4096 | 2009 | 10 | "litorgy"         |
-| "-rw-r--r--" |  1 | "eschulte" | "eschulte" |   277 | 2009 | 15 | "README.markdown" |
-| "-rw-r--r--" |  1 | "eschulte" | "eschulte" | 41385 | 2009 | 10 | "rorg.org"        |
-
+| "total"      | 224 | ""         | ""      |    "" | ""    | "" | "" | ""                 |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" | 35147 | "Apr" | 15 | 14 | "COPYING"          |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" |   277 | "Apr" | 15 | 14 | "README.markdown"  |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" |    57 | "Apr" | 15 | 14 | "block"            |
+| "drwxr-xr-x" |   6 | "eschulte" | "staff" |   204 | "Apr" | 15 | 14 | "existing_tools"   |
+| "drwxr-xr-x" |  12 | "eschulte" | "staff" |   408 | "May" |  9 | 18 | "litorgy"          |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" |   790 | "May" |  6 |  6 | "litorgy.org"      |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" | 49904 | "May" |  9 | 18 | "rorg.org"         |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" |  5469 | "Apr" | 26 | 13 | "test-export.html" |
+| "-rw-r--r--" |   1 | "eschulte" | "staff" |   972 | "Apr" | 26 | 13 | "test-export.org"  |
 
 
 ** silent evaluation
@@ -576,7 +523,6 @@ another*3
 
 : 294
 
-
 *** mixed languages
 Since all variables are converted into Emacs Lisp it is no problem to
 reference variables specified in another language.
@@ -595,8 +541,9 @@ reference variables specified in another language.
 lisp_var + 4
 #+end_src
 
+: 20
+
 *** R
-not yet implemented
 
 #+srcname: first_r
 #+begin_src R :results replace
@@ -613,7 +560,6 @@ other + 2
 : 11
 
 
-
 ** (sandbox) selective export
 
 For exportation tests and examples see (including exportation of
@@ -623,7 +569,7 @@ inline source code blocks) [[file:test-export.org]]
 ** (sandbox) source blocks as functions
 
 #+srcname: default
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :results silent
 5
 #+end_src
 
@@ -634,14 +580,16 @@ inline source code blocks) [[file:test-export.org]]
 
 : 15
 
-#+begin_src emacs-lisp :var result=triple(n=default, m=98) :results replace
+#+begin_src emacs-lisp :var result=triple(n=2, m=98) :results replace
 result
 #+end_src
 
-: 15
+: 6
 
+The following just demonstrates the ability to assign variables to
+literal values, which was not implemented until recently.
 
-#+begin_src ruby :var num="eric"
+#+begin_src ruby :var num="eric" :results replace
 num+" schulte"
 #+end_src
 

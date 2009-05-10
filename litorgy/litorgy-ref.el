@@ -37,17 +37,18 @@
 ;; - file :: path to the file containing the resource, or omitted if
 ;;           resource is in the current file
 ;;
-;; - resource-id :: the id or name of the resource, or 'previous' to
-;;                  grab the previous table, or 'next' to grab the
-;;                  next table
+;; - resource-id :: the id or name of the resource
 ;;
 ;; So an example of a simple src block referencing table data in the
 ;; same file would be
 ;;
-;; #+var: table previous
-;; #+begin_src emacs-lisp
-;; (message table)
-;; #+end_src
+;;  #+TBLNAME: sandbox
+;;  | 1 |       2 | 3 |
+;;  | 4 | litorgy | 6 |
+;;
+;;  #+begin_src emacs-lisp :var table=sandbox
+;;  (message table)
+;;  #+end_src
 ;;
 
 ;;; Code:
@@ -57,7 +58,7 @@
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
   (mapcar #'litorgy-ref-parse
-   (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
+          (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
 
 (defun litorgy-ref-parse (assignment)
   "Parse a variable ASSIGNMENT in a header argument.  If the
@@ -67,7 +68,6 @@ and find it's value using `litorgy-ref-resolve-reference'.
 Return a list with two elements.  The first element of the list
 will be the name of the variable, and the second will be an
 emacs-lisp representation of the value of the variable."
-  (message (format "assignment=%S" assignment))
   (if (string-match "\\(.+?\\)=\\(.+\\)" assignment)
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
@@ -88,34 +88,29 @@ return nil."
 (defun litorgy-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
-    (let (direction type args new-ref)
+    (let (type args new-ref)
       ;; assign any arguments to pass to source block
       (when (string-match "\\(.+\\)\(\\(.+\\)\)" ref)
         (save-match-data
           (setq args (mapcar (lambda (ref) (cons :var ref))
-                           (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*"))))
+                             (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*"))))
         (setq ref (match-string 1 ref)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
-      (cond ;; follow the reference in the current file
-       ((string= ref "previous") (setq direction -1))
-       ((string= ref "next") (setq direction 1))
-       (t
-        (goto-char (point-min))
-        (setq direction 1)
-        (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
-                                      (regexp-quote ref) "[ \t]*$")))
-                  (or (re-search-forward regexp nil t)
-                      (re-search-backward regexp nil t)))
-          ;; ;; TODO: allow searching for names in other buffers
-          ;; (setq id-loc (org-id-find ref 'marker)
-          ;;       buffer (marker-buffer id-loc)
-          ;;       loc (marker-position id-loc))
-          ;; (move-marker id-loc nil)
-          (error (format "reference '%s' not found in this buffer" ref)))))
+      (goto-char (point-min))
+      (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
+                                    (regexp-quote ref) "[ \t]*$")))
+                (or (re-search-forward regexp nil t)
+                    (re-search-backward regexp nil t)))
+        ;; ;; TODO: allow searching for names in other buffers
+        ;; (setq id-loc (org-id-find ref 'marker)
+        ;;       buffer (marker-buffer id-loc)
+        ;;       loc (marker-position id-loc))
+        ;; (move-marker id-loc nil)
+        (error (format "reference '%s' not found in this buffer" ref)))
       (while (not (setq type (litorgy-ref-at-ref-p)))
-        (forward-line direction)
+        (forward-line 1)
         (beginning-of-line)
         (if (or (= (point) (point-min)) (= (point) (point-max)))
             (error "reference not found")))
