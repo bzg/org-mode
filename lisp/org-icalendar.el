@@ -137,7 +137,7 @@ or if they are only using it locally."
 
 (defcustom org-icalendar-timezone (getenv "TZ")
   "The time zone string for iCalendar export.
-When nil of the empty string, use the abbreviation retrived from Emacs."
+When nil of the empty string, use the abbreviation retrieved from Emacs."
   :group 'org-export-icalendar
   :type '(choice
 	  (const :tag "Unspecified" nil)
