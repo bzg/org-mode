@@ -634,9 +634,12 @@ inline source code blocks) [[file:test-export.org]]
 
 : 15
 
-#+begin_src emacs-lisp :var result=triple(n=8)
+#+begin_src emacs-lisp :var result=triple(n=default, m=98) :results replace
 result
 #+end_src
+
+: 15
+
 
 #+begin_src ruby :var num="eric"
 num+" schulte"

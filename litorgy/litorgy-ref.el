@@ -59,6 +59,22 @@ names, and the emacs-lisp representation of the related value."
   (mapcar #'litorgy-ref-parse
    (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
 
+(defun litorgy-ref-parse (assignment)
+  "Parse a variable ASSIGNMENT in a header argument.  If the
+right hand side of the assignment has a literal value return that
+value, otherwise interpret as a reference to an external resource
+and find it's value using `litorgy-ref-resolve-reference'.
+Return a list with two elements.  The first element of the list
+will be the name of the variable, and the second will be an
+emacs-lisp representation of the value of the variable."
+  (message (format "assignment=%S" assignment))
+  (if (string-match "\\(.+?\\)=\\(.+\\)" assignment)
+      (let ((var (match-string 1 assignment))
+            (ref (match-string 2 assignment)))
+        (cons (intern var)
+              (or (litorgy-ref-literal ref)
+                  (litorgy-ref-resolve-reference ref))))))
+
 (defun litorgy-ref-literal (ref)
   "Determine if the right side of a header argument variable
 assignment is a literal value or is a reference to some external
@@ -69,25 +85,16 @@ return nil."
       (if (string-match "\"\\(.+\\)\"" ref) (read ref) ;; string
         nil)))) ;; reference
 
-(defun litorgy-ref-parse (assignment)
-  "Parse a variable ASSIGNMENT in a header argument.  If the
-right hand side of the assignment has a literal value return that
-value, otherwise interpret as a reference to an external resource
-and find it's value using `litorgy-ref-resolve-reference'.
-Return a list with two elements.  The first element of the list
-will be the name of the variable, and the second will be an
-emacs-lisp representation of the value of the variable."
-  (if (string-match "\\(.+\\)=\\(.+\\)" assignment)
-      (let ((var (match-string 1 assignment))
-            (ref (match-string 2 assignment)))
-        (cons (intern var)
-              (or (litorgy-ref-literal ref)
-                  (litorgy-ref-resolve-reference ref))))))
-
 (defun litorgy-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
-    (let (direction type args)
+    (let (direction type args new-ref)
+      ;; assign any arguments to pass to source block
+      (when (string-match "\\(.+\\)\(\\(.+\\)\)" ref)
+        (save-match-data
+          (setq args (mapcar (lambda (ref) (cons :var ref))
+                           (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*"))))
+        (setq ref (match-string 1 ref)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
@@ -118,9 +125,6 @@ emacs-lisp representation of the value of the variable."
                    (mapcar #'litorgy-read row))
                  (org-table-to-lisp)))
         ('source-block
-         ;; assign any arguments to pass to source block
-         (when (string-match "\(\\(.+\\)\)" ref)
-           (setq args (mapcar (lambda (ref) (cons :var ref)) (split-string ref ",[ \f\t\n\r\v]*"))))
          (litorgy-execute-src-block t nil args))))))
 
 (defun litorgy-ref-at-ref-p ()

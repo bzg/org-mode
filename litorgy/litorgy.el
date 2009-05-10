@@ -113,7 +113,7 @@ the header arguments specified at the source code block." ; TODO implement!!
   (let* ((info (or info (litorgy-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (params (third info))
+         (params (org-combine-plists (third info) params))
          (cmd (intern (concat "litorgy-execute:" lang)))
          result)
     (unless (member lang litorgy-interpreters)
