@@ -68,7 +68,7 @@ and find it's value using `litorgy-ref-resolve-reference'.
 Return a list with two elements.  The first element of the list
 will be the name of the variable, and the second will be an
 emacs-lisp representation of the value of the variable."
-  (if (string-match "\\(.+?\\)=\\(.+\\)" assignment)
+  (if (string-match "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*" assignment)
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
         (cons (intern var)
@@ -81,7 +81,8 @@ assignment is a literal value or is a reference to some external
 resource.  If REF is literal then return it's value, otherwise
 return nil."
   (let ((out (string-to-number ref)))
-    (if (or (not (equal out 0)) (string= ref "0") (string= ref "0.0")) out ;; number
+    (if (or (not (equal out 0)) (string-match "^[ \f\t\n\r\v]*0\\.?0?[ \f\t\n\r\v]*$" ref))
+        out ;; number
       (if (string-match "\"\\(.+\\)\"" ref) (read ref) ;; string
         nil)))) ;; reference
 
