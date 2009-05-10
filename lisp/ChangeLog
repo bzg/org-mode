@@ -1,5 +1,10 @@
 2009-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el (org-icalendar-include-todo): New allowedvalue
+	`unblocked'.
+	(org-print-icalendar-entries): Respect the new value of
+	`org-icalendar-include-todo'.
+
 	* org.el (org-link-try-special-completion)
 	(org-file-complete-link): New functions.
 	(org-insert-link): Add special completion support for some link

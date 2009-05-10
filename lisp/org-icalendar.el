@@ -97,11 +97,17 @@ all-tags    All tags, including inherited ones."
 	   (const :tag "All tags, including inherited ones" all-tags))))
 
 (defcustom org-icalendar-include-todo nil
-  "Non-nil means, export to iCalendar files should also cover TODO items."
+  "Non-nil means, export to iCalendar files should also cover TODO items.
+Valid values are:
+nil         don't inlcude any TODO items
+t           include all TODO items that are not in a DONE state
+unblocked   include all TODO idems that are not blocked
+all         include both done and not done items."
   :group 'org-export-icalendar
   :type '(choice
 	  (const :tag "None" nil)
 	  (const :tag "Unfinished" t)
+	  (const :tag "Unblocked" unblocked)
 	  (const :tag "All" all)))
 
 (defcustom org-icalendar-include-sexps t
@@ -368,7 +374,8 @@ END:VEVENT\n"
 	  (catch :skip
 	    (org-agenda-skip)
 	    (when (boundp 'org-icalendar-verify-function)
-	      (unless (funcall org-icalendar-verify-function)
+	      (unless (save-match-data
+			(funcall org-icalendar-verify-function))
 		(outline-next-heading)
 		(backward-char 1)
 		(throw :skip nil)))
@@ -376,8 +383,26 @@ END:VEVENT\n"
 	    (setq status (if (member state org-done-keywords)
 			     "COMPLETED" "NEEDS-ACTION"))
 	    (when (and state
-		       (or (not (member state org-done-keywords))
-			   (eq org-icalendar-include-todo 'all))
+		       (cond
+			;; check if the state is one we should use
+			((eq org-icalendar-include-todo 'all)
+			 ;; all should be included
+			 t)
+			((eq org-icalendar-include-todo 'unblocked)
+			 ;; only undone entries that are not blocked
+			 (and (member state org-not-done-keywords)
+			      (or (not org-blocker-hook)
+				  (save-match-data
+				    (run-hook-with-args-until-failure
+				     'org-blocker-hook
+				     (list :type 'todo-state-change
+					   :position (point-at-bol)
+					   :from 'todo
+					   :to 'done))))))
+			((eq org-icalendar-include-todo t)
+			 ;; include everything that is not done
+			 (member state org-not-done-keywords)))
+		       ;; but make sure this is not an archived entry
 		       (not (member org-archive-tag (org-get-tags-at)))
 		       )
 	      (setq hd (match-string 3)
