@@ -1,3 +1,9 @@
+2009-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-exp-blocks.el (org-export-blocks-format-ditaa)
+	(org-export-blocks-format-dot): Support ditaa export also for the
+	docbook exporter.
+
 2009-05-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-special-blocks.el: New file.

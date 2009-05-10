@@ -187,7 +187,7 @@ passed to the ditaa utility as command line arguments."
 			    (org-split-string body "\n")
 			    "\n")))
     (cond 
-     ((or htmlp latexp)
+     ((or htmlp latexp docbookp)
       (with-temp-file data-file (insert body))
       (message (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file))
       (shell-command (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file))
@@ -222,7 +222,7 @@ digraph data_relationships {
 	(args (if (cdr headers) (mapconcat 'identity (cdr headers) " ")))
 	(data-file (make-temp-file "org-ditaa")))
     (cond 
-     ((or htmlp latexp)
+     ((or htmlp latexp docbookp)
       (with-temp-file data-file (insert body))
       (message (concat "dot " data-file " " args " -o " out-file))
       (shell-command (concat "dot " data-file " " args " -o " out-file))
