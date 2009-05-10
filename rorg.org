@@ -665,7 +665,7 @@ This is an inline source code block src_ruby{1 + 6}.  And another
 source block with text output src_emacs-lisp{"eric"}.
 
 This is an inline source code block with header
-arguments. src_ruby[:var n=fibbd( n = 0 )]{n}
+arguments.  src_ruby[:var n=fibbd( n = 0 )]{n}
 
 
 ** (sandbox) integration w/org tables
@@ -683,18 +683,29 @@ arguments. src_ruby[:var n=fibbd( n = 0 )]{n}
 (mapcar #'fibbd '(0 1 2 3 4 5 6 7 8))
 #+end_src
 
-| original | fibbd |
-|----------+-------|
-|        0 |       |
-|        1 |       |
-|        2 |       |
-|        3 |       |
-|        4 |       |
-|        5 |       |
-|        6 |       |
-|        7 |       |
-|        8 |       |
-|        9 |       |
+Something is not working here.  The function `sbe ' works fine when
+called from outside of the table (see the source block below), but
+produces an error when called from inside the table.  I think there
+must be some narrowing going on during intra-table emacs-lisp
+evaluation.
+
+| original | fibbd  |
+|----------+--------|
+|        0 | #ERROR |
+|        1 |        |
+|        2 |        |
+|        3 |        |
+|        4 |        |
+|        5 |        |
+|        6 |        |
+|        7 |        |
+|        8 |        |
+|        9 |        |
+#+TBLFM: @2$2='(sbe 'fibbd (n $1))
+
+#+begin_src emacs-lisp :results silent
+(sbe 'fibbd (n "8"))
+#+end_src
 
 
 * COMMENT Commentary

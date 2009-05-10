@@ -109,7 +109,7 @@ Optionally supply a value for INFO in the form returned by
 `litorgy-get-src-block-info'.
 
 Optionally supply a value for PARAMS which will be merged with
-the header arguments specified at the source code block." ; TODO implement!!
+the header arguments specified at the source code block."
   (interactive "P")
   (let* ((info (or info (litorgy-get-src-block-info)))
          (lang (first info))
@@ -195,7 +195,7 @@ silent -- no results are inserted"
   (if (= (length result) 0)
       (message "no result returned by source block")
     (if (and insert (string-equal insert "silent"))
-        (message (format "%S" result))
+        (progn (message (format "%S" result)) result)
       (when (and (stringp result)
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))

@@ -1,0 +1,84 @@
+;;; litorgy-table.el --- integration for calling litorgical functions from tables
+
+;; Copyright (C) 2009 Eric Schulte
+
+;; Author: Eric Schulte
+;; Keywords: literate programming, reproducible research
+;; Homepage: http://orgmode.org
+;; Version: 0.01
+
+;;; License:
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation; either version 3, or (at your option)
+;; any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs; see the file COPYING.  If not, write to the
+;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+;; Boston, MA 02110-1301, USA.
+
+;;; Commentary:
+
+;; Should allow calling functions from org-mode tables using the
+;; function `sbe' as so...
+;; 
+;; #+begin_src emacs-lisp :results silent
+;; (defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
+;; #+end_src
+;; 
+;; #+srcname: fibbd
+;; #+begin_src emacs-lisp :var n=2 :results silent
+;; (fibbd n)
+;; #+end_src
+;; 
+;; | original | fibbd  |
+;; |----------+--------|
+;; |        0 |        |
+;; |        1 |        |
+;; |        2 |        |
+;; |        3 |        |
+;; |        4 |        |
+;; |        5 |        |
+;; |        6 |        |
+;; |        7 |        |
+;; |        8 |        |
+;; |        9 |        |
+;; #+TBLFM: $2='(sbe 'fibbd (n $1))
+
+;;; Code:
+(require 'litorgy)
+
+(defmacro sbe (source-block &rest variables)
+  "Return the results of calling SOURCE-BLOCK with all assigning
+every variable in VARIABLES.  Each element of VARIABLES should be
+a two element list, who's first element is the name of the
+variable and second element is a string of it's value.  The
+following call to `sbe' would be equivalent to the following
+source code block.
+
+ (sbe 'source-block (n 2) (m 3))
+
+#+begin_src emacs-lisp :var results=source-block(n=2, m=3) :results silent
+results
+#+end_src"
+  (message "sbe: executing source block")
+  (let ((params (eval `(litorgy-parse-header-arguments
+                        (concat ":var results="
+                                (symbol-name ,source-block)
+                                "("
+                                (mapconcat (lambda (var-spec)
+                                             (format "%S=%s" (first var-spec) (second var-spec)))
+                                           ',variables ", ")
+                                ")")))))
+    (message (format "litorgy-execute-src-block emacs-lisp results %S" (org-combine-plists params '((:results . "silent")))))
+    (litorgy-execute-src-block
+     nil (list "emacs-lisp" "results" (org-combine-plists params '((:results . "silent")))))))
+
+;;; litorgy-table.el ends here
