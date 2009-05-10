@@ -1,9 +1,42 @@
-#+OPTIONS:    H:3 num:nil toc:t \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    H:3 num:nil toc:t
 #+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [8/14]
+* Tasks [7/16]
+
+** TODO share litorgy
+how should we share litorgy?
+
+- post to org-mode and ess mailing lists
+- create a litorgy page on worg
+- create a short screencast demonstrating litorgy in action
+
+*** examples
+we need to think up some good examples
+
+**** answering a text-book question w/code example
+litorgy is an ideal environment enabling both the development and
+demonstrationg of the code snippets required as answers to many
+text-book questions.
+
+**** something using tables
+maybe something along the lines of calculations from collected grades
+
+**** file sizes
+Maybe something like the following which outputs sizes of directories
+under the home directory, and then instead of the trivial =emacs-lisp=
+block we could use an R block to create a nice pie chart of the
+results.
+
+#+srcname: sizes
+#+begin_src bash :results replace
+du -sc ~/*
+#+end_src
+
+#+begin_src emacs-lisp :var sizes=sizes :results replace
+(mapcar #'car sizes)
+#+end_src
 
 ** TODO litorgy tests litorgy
 since we are accumulating this nice collection of source-code blocks
@@ -18,6 +51,43 @@ expect.
 I have the feeling that this should be possible using only litorgical
 functions with minimal or no additional elisp.  It would be very cool
 for litorgy to be able to test itself.
+
+** TODO integration with org tables
+We should make it easy to call litorgy source blocks from org-mode
+table formulas.  This is practical now that it is possible to pass
+arguments to litorgical source blocks
+
+** TODO inline source code blocks [2/4]
+   Like the =\R{ code }= blocks
+
+   not sure what the format should be, maybe just something simple
+   like =src_lang{}= where lang is the name of the source code
+   language to be evaluated.
+
+   The biggest problem I see with these is that their main use would
+   be to show the value of a variable, but the variable would need to
+   be assigned through a header argument (aside from in languages like
+   R in which all execution takes place in a session).  Requiring a
+   header argument for a inline blocks defeats the purpose of a small,
+   concise inline-able block.
+
+   Maybe this makes a good case for all source code having the option
+   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
+
+*** DONE evaluation with \C-c\C-c
+Putting aside the header argument issue for now we can just run these
+with the following default header arguments
+- =:results= :: silent
+- =:exports= :: results
+
+*** DONE inline exportation
+Need to add an interblock hook (or some such) through org-exp-blocks
+*** TODO fontification
+we should color these blocks differently
+*** TODO header arguments
+we should make it possible to use header arguments *or* we should make
+it possible to call other source-code blocks as functions (passing in
+arguments)
 
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
@@ -130,31 +200,6 @@ and evaluate it.
     actually executing the block which would be too expensive of an
     operation.
 
-** DONE inline source code blocks [2/2]
-   Like the =\R{ code }= blocks
-
-   not sure what the format should be, maybe just something simple
-   like =src_lang{}= where lang is the name of the source code
-   language to be evaluated.
-
-   The biggest problem I see with these is that their main use would
-   be to show the value of a variable, but the variable would need to
-   be assigned through a header argument (aside from in languages like
-   R in which all execution takes place in a session).  Requiring a
-   header argument for a inline blocks defeats the purpose of a small,
-   concise inline-able block.
-
-   Maybe this makes a good case for all source code having the option
-   of specifying a session.  I'll add that to the [[ability to select which of multiple sessions is being used][session TODO]].
-
-*** DONE evaluation with \C-c\C-c
-Putting aside the header argument issue for now we can just run these
-with the following default header arguments
-- =:results= :: silent
-- =:exports= :: results
-
-*** DONE inline exportation
-Need to add an interblock hook (or some such) through org-exp-blocks
 ** DONE selective export of text, code, figures
    [DED] The litorgy buffer contains everything (code, headings and
    notes/prose describing what you're up to, textual/numeric/graphical
@@ -594,6 +639,12 @@ num+" schulte"
 #+end_src
 
 : "eric schulte"
+
+
+** (sandbox) inline source blocks
+
+This is an inline source code block src_ruby{1 + 6}.  And another
+source block with text output src_emacs-lisp{"eric"}.
 
 
 * COMMENT Commentary
@@ -1305,4 +1356,4 @@ and probably has some advantages (and probably shortfalls).
 
 
 * Buffer Dictionary
- LocalWords:  DBlocks dblocks litorgy el eric
+ LocalWords:  DBlocks dblocks litorgy el eric litorgical fontification
