@@ -69,7 +69,7 @@ options and are taken from `litorgy-inline-header-args'."
         (replace-match replacement t t)))))
 
 (defun litorgy-exp-do-export (lang body params &optional inline)
-  (case (intern (or (cdr (assoc :exports params)) "both"))
+  (case (intern (or (cdr (assoc :exports params)) "code"))
           ('none "")
           ('code (litorgy-exp-code body lang params inline))
           ('results (litorgy-exp-results body lang params inline))
