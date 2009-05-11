@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [7/17]
+* Tasks [8/16]
 
 ** TODO share litorgy
 how should we share litorgy?
@@ -64,21 +64,6 @@ These could be used to make assertions about the results of a
 source-code block.  If the assertion fails then the point could be
 moved to the block, and error messages and highlighting etc... could
 ensue
-
-** TODO integration with org tables
-We should make it easy to call litorgy source blocks from org-mode
-table formulas.  This is practical now that it is possible to pass
-arguments to litorgical source blocks.
-
-See the related [[* (sandbox) integration w/org tables][sandbox]] header for tests/examples.
-
-*** digging in org-table.el
-In the past [[file:~/src/org/lisp/org-table.el::org%20table%20el%20The%20table%20editor%20for%20Org%20mode][org-table.el]] has proven difficult to work with.
-
-Should be a hook in [[file:~/src/org/lisp/org-table.el::defun%20org%20table%20eval%20formula%20optional%20arg%20equation][org-table-eval-formula]].
-
-Looks like I need to change this [[file:~/src/org/lisp/org-table.el::if%20lispp][if statement]] (line 2239) into a cond
-expression.
 
 ** TODO inline source code blocks [3/5]
    Like the =\R{ code }= blocks
@@ -184,6 +169,21 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE integration with org tables
+We should make it easy to call litorgy source blocks from org-mode
+table formulas.  This is practical now that it is possible to pass
+arguments to litorgical source blocks.
+
+See the related [[* (sandbox) integration w/org tables][sandbox]] header for tests/examples.
+
+*** digging in org-table.el
+In the past [[file:~/src/org/lisp/org-table.el::org%20table%20el%20The%20table%20editor%20for%20Org%20mode][org-table.el]] has proven difficult to work with.
+
+Should be a hook in [[file:~/src/org/lisp/org-table.el::defun%20org%20table%20eval%20formula%20optional%20arg%20equation][org-table-eval-formula]].
+
+Looks like I need to change this [[file:~/src/org/lisp/org-table.el::if%20lispp][if statement]] (line 2239) into a cond
+expression.
 
 ** DONE source blocks as functions
 
@@ -689,19 +689,21 @@ produces an error when called from inside the table.  I think there
 must be some narrowing going on during intra-table emacs-lisp
 evaluation.
 
-| original | fibbd  |
-|----------+--------|
-|        0 | #ERROR |
-|        1 |        |
-|        2 |        |
-|        3 |        |
-|        4 |        |
-|        5 |        |
-|        6 |        |
-|        7 |        |
-|        8 |        |
-|        9 |        |
-#+TBLFM: @2$2='(sbe 'fibbd (n $1))
+| original | fibbd |
+|----------+-------|
+|        0 |     1 |
+|        1 |     1 |
+|        2 |     2 |
+|        3 |     3 |
+|        4 |     5 |
+|        5 |     8 |
+|        6 |    13 |
+|        7 |    21 |
+|        8 |    34 |
+|        9 |    55 |
+#+TBLFM: $2='(sbe 'fibbd (n $1))
+
+silent-result
 
 #+begin_src emacs-lisp :results silent
 (sbe 'fibbd (n "8"))

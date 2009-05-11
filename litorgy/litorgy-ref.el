@@ -89,7 +89,8 @@ return nil."
 (defun litorgy-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
-    (let (type args new-ref)
+    (let ((case-fold-search t)
+          type args new-ref) ;; case search?
       ;; assign any arguments to pass to source block
       (when (string-match "\\(.+\\)\(\\(.+\\)\)" ref)
         (save-match-data
@@ -109,7 +110,8 @@ return nil."
         ;;       buffer (marker-buffer id-loc)
         ;;       loc (marker-position id-loc))
         ;; (move-marker id-loc nil)
-        (error (format "reference '%s' not found in this buffer" ref)))
+        (progn (message (format "reference '%s' not found in this buffer" ref))
+               (error (format "reference '%s' not found in this buffer" ref))))
       (while (not (setq type (litorgy-ref-at-ref-p)))
         (forward-line 1)
         (beginning-of-line)

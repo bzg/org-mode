@@ -36,6 +36,7 @@
 (require 'litorgy-ref)
 (require 'litorgy-ui)
 (require 'litorgy-exp)
+(require 'litorgy-table)
 
 ;; language specific files
 (require 'litorgy-script)
