@@ -8165,6 +8165,10 @@ You can define text snippets with
 code examples) with @code{@{@{@{name@}@}@}}.  In addition to defined macros,
 @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc will reference
 information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
+Also, @code{@{@{@{date(FORMAT@}@}@}} and
+@code{@{@{@{modification-time(FORMAT)@}@}@}} refer to current date time and
+to the modification time of the file being exported, respectively.  FORMAT
+should be a format string understood by @code{format-time-string}.
 
 @node Selective export, Export options, Markup rules, Exporting
 @section Selective export

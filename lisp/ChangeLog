@@ -1,3 +1,8 @@
+2009-05-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-infile-export-plist): Add more default macros.
+	(org-export-preprocess-apply-macros): Process macro arguments.
+
 2009-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-icalendar.el (org-icalendar-include-todo): New allowedvalue

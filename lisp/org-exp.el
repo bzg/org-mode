@@ -685,6 +685,20 @@ modified) list.")
 	(when options
 	  (setq p (org-export-add-options-to-plist p options)))
 	;; Add macro definitions
+	(setq p (plist-put p :macro-date "(eval (format-time-string \"$1\"))"))
+	(setq p (plist-put p :macro-time "(eval (format-time-string \"$1\"))"))
+	(setq p (plist-put
+		 p :macro-modification-time
+		 (and (buffer-file-name)
+		      (file-exists-p (buffer-file-name))
+		      (concat
+		       "(eval (format-time-string \"$1\" '"
+		       (prin1-to-string (nth 5 (file-attributes
+						(buffer-file-name))))
+		       "))"))))
+	(setq p (plist-put p :macro-input-file (and (buffer-file-name)
+						    (file-name-nondirectory
+						     (buffer-file-name)))))
 	(goto-char (point-min))
 	(while (re-search-forward
 		"^#\\+macro:[ \t]+\\([-a-zA-Z0-9_]+\\)[ \t]+\\(.*?[ \t]*$\\)"
@@ -1974,13 +1988,29 @@ TYPE must be a string, any of:
 (defun org-export-preprocess-apply-macros ()
   "Replace macro references."
   (goto-char (point-min))
-  (let (sy val key)
-    (while (re-search-forward "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)}}}" nil t)
-      (setq key (downcase (match-string 1)))
+  (let (sy val key args s n)
+    (while (re-search-forward
+	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\(.*?\\))\\)?}}}"
+	    nil t)
+      (setq key (downcase (match-string 1))
+	    args (match-string 3))
       (when (setq val (or (plist-get org-export-opt-plist
 				     (intern (concat ":macro-" key)))
 			  (plist-get org-export-opt-plist
 				     (intern (concat ":" key)))))
+	(save-match-data
+	  (when args
+	    (setq args (org-split-string args ","))
+	    (setq s 0)
+	    (while (string-match "\\$\\([0-9]+\\)" val s)
+	      (setq s (1+ (match-beginning 0))
+		    n (string-to-number (match-string 1 val)))
+	      (and (>= (length args) n)
+		   (setq val (replace-match (nth (1- n) args) t t val)))))
+	  (when (string-match "\\`(eval\\>" val)
+	    (setq val (eval (read val))))
+	  (if (and val (not (stringp val)))
+	      (setq val (format "%s" val))))
 	(and (stringp val)
 	     (replace-match val t t))))))
 
