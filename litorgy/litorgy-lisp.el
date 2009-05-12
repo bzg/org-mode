@@ -42,7 +42,7 @@ function is called by `litorgy-execute-src-block'."
           (print-level nil) (print-length nil) results)
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-                     ,(read body))))
+                     ,(read (concat "(progn " body ")")))))
       results)))
 
 (provide 'litorgy-lisp)

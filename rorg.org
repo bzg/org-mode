@@ -361,27 +361,37 @@ Evaluate all the cells in this table for a comprehensive test of the
 litorgy functionality.
 
 #+TBLNAME: litorgy-tests
-| functionality           | block            |    expected |     results | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| basic evaluation        |                  |             |             | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| emacs lisp              | basic-elisp      |           5 |           5 | pass |
-| shell                   | basic-shell      |           6 |           6 | pass |
-| ruby                    | basic-ruby       |     litorgy |     litorgy | pass |
-| python                  | basic-python     | hello world | hello world | pass |
-| R                       | basic-R          |          13 |          13 | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| tables                  |                  |             |             | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| emacs lisp              | table-elisp      |           3 |           3 | pass |
-| ruby                    | table-ruby       |       1-2-3 |       1-2-3 | pass |
-| python                  | table-python     |           5 |           5 | pass |
-| R                       | table-R          |         3.5 |         3.5 | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| source block references |                  |             |             | pass |
-|-------------------------+------------------+-------------+-------------+------|
-| all languages           | chained-ref-last |       Array |       Array | pass |
-#+TBLFM: $4='(sbe $2)::$5='(if (string= $3 $4) "pass" (format "expected %S but was %S" $3 $4))
+| functionality           | block            | arg |    expected |     results | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| basic evaluation        |                  |     |             |             | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| emacs lisp              | basic-elisp      |     |           5 |           5 | pass |
+| shell                   | basic-shell      |     |           6 |           6 | pass |
+| ruby                    | basic-ruby       |     |     litorgy |     litorgy | pass |
+| python                  | basic-python     |     | hello world | hello world | pass |
+| R                       | basic-R          |     |          13 |          13 | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| tables                  |                  |     |             |             | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| emacs lisp              | table-elisp      |     |           3 |           3 | pass |
+| ruby                    | table-ruby       |     |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python     |     |           5 |           5 | pass |
+| R                       | table-R          |     |         3.5 |         3.5 | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| source block references |                  |     |             |             | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| all languages           | chained-ref-last |     |       Array |       Array | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| source block functions  |                  |     |             |             | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| emacs lisp              | defun-fibb       |     |       fibbd |       fibbd | pass |
+| run over                | Fibonacci        |   0 |           1 |           1 | pass |
+| a                       | Fibonacci        |   1 |           1 |           1 | pass |
+| variety                 | Fibonacci        |   2 |           2 |           2 | pass |
+| of                      | Fibonacci        |   3 |           3 |           3 | pass |
+| different               | Fibonacci        |   4 |           5 |           5 | pass |
+| arguments               | Fibonacci        |   5 |           8 |           8 | pass |
+#+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
 
@@ -468,6 +478,18 @@ and Check that it is still a list
 #+srcname: chained-ref-last
 #+begin_src ruby :var table=chained-ref-third
 table.class.name
+#+end_src
+
+** source blocks as functions
+
+#+srcname: defun-fibb
+#+begin_src emacs-lisp :results silent
+(defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
+#+end_src
+
+#+srcname: fibonacci
+#+begin_src emacs-lisp :results silent :var n=7
+(fibbd n)
 #+end_src
 
 
@@ -817,7 +839,7 @@ evaluation.
 |        7 |    21 |
 |        8 |    34 |
 |        9 |    55 |
-#+TBLFM: $2='(sbe 'fibbd (n $1))
+#+TBLFM: $2='(sbe "fibbd" (n $1))
 
 silent-result
 

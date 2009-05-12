@@ -90,7 +90,7 @@ return nil."
   "Resolve the reference and return it's value"
   (save-excursion
     (let ((case-fold-search t)
-          type args new-ref) ;; case search?
+          type args new-ref result)
       ;; assign any arguments to pass to source block
       (when (string-match "\\(.+\\)\(\\(.*\\)\)" ref)
         (save-match-data
@@ -124,7 +124,8 @@ return nil."
                    (mapcar #'litorgy-read row))
                  (org-table-to-lisp)))
         ('source-block
-         (litorgy-execute-src-block t nil args))))))
+         (setq result (litorgy-execute-src-block t nil args))
+         (if (symbolp result) (format "%S" result) result))))))
 
 (defun litorgy-ref-at-ref-p ()
   "Return the type of reference located at point or nil of none
