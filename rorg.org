@@ -355,6 +355,122 @@ recognition of ruby arrays as such.
 | 1 | 2 | 3 | 4 |
 
 
+* Tests
+
+Evaluate all the cells in this table for a comprehensive test of the
+litorgy functionality.
+
+#+TBLNAME: litorgy-tests
+| functionality           | block            |    expected |     results | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| basic evaluation        |                  |             |             | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| emacs lisp              | basic-elisp      |           5 |           5 | pass |
+| shell                   | basic-shell      |           6 |           6 | pass |
+| ruby                    | basic-ruby       |     litorgy |     litorgy | pass |
+| python                  | basic-python     | hello world | hello world | pass |
+| R                       | basic-R          |          13 |          13 | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| tables                  |                  |             |             | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| emacs lisp              | table-elisp      |           3 |           3 | pass |
+| ruby                    | table-ruby       |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python     |           5 |           5 | pass |
+| R                       | table-R          |         3.5 |         3.5 | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| source block references |                  |             |             | pass |
+|-------------------------+------------------+-------------+-------------+------|
+| all languages           | chained-ref-last |       Array |       Array | pass |
+#+TBLFM: $4='(sbe $2)::$5='(if (string= $3 $4) "pass" (format "expected %S but was %S" $3 $4))
+
+** basic tests
+
+#+srcname: basic-elisp
+#+begin_src emacs-lisp :results silent
+(+ 1 4)
+#+end_src
+
+#+srcname: basic-shell
+#+begin_src sh :results silent
+expr 1 + 5
+#+end_src
+
+
+#+srcname: basic-ruby
+#+begin_src ruby :results silent
+"litorgy"
+#+end_src
+
+#+srcname: basic-python
+#+begin_src python :results silent
+'hello world'
+#+end_src
+
+#+srcname: basic-R
+#+begin_src R :results silent
+b <- 9
+b + 4
+#+end_src
+
+** read tables
+
+#+tblname: test-table
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+#+srcname: table-elisp
+#+begin_src emacs-lisp :results silent :var table=test-table
+(length (car table))
+#+end_src
+
+#+srcname: table-ruby
+#+begin_src ruby :results silent :var table=test-table
+table.first.join("-")
+#+end_src
+
+#+srcname: table-python
+#+begin_src python :var table=test-table
+table[1][1]
+#+end_src
+
+#+srcname: table-R
+#+begin_src R :var table=test-table
+mean(mean(table))
+#+end_src
+
+** references
+
+Lets pass a references through all of our languages...
+
+Lets start by reversing the table from the previous examples
+
+#+srcname: chained-ref-first
+#+begin_src python :var table = test-table
+table.reverse
+#+end_src
+
+Take the first part of the list
+
+#+srcname: chained-ref-second
+#+begin_src R :var table = chained-ref-first
+table[1]
+#+end_src
+
+Turn the numbers into string
+
+#+srcname: chained-ref-third
+#+begin_src emacs-lisp :var table = chained-ref-second
+(mapcar (lambda (el) (format "%S" el)) table)
+#+end_src
+
+and Check that it is still a list
+
+#+srcname: chained-ref-last
+#+begin_src ruby :var table=chained-ref-third
+table.class.name
+#+end_src
+
+
 * Sandbox
   :PROPERTIES:
   :CUSTOM_ID: sandbox

@@ -68,16 +68,19 @@ source code block.
 #+begin_src emacs-lisp :var results=source-block(n=2, m=3) :results silent
 results
 #+end_src"
-  (let ((params (eval `(litorgy-parse-header-arguments
-                        (concat ":var results="
-                                (symbol-name ,source-block)
-                                "("
-                                (mapconcat (lambda (var-spec)
-                                             (format "%S=%s" (first var-spec) (second var-spec)))
-                                           ',variables ", ")
-                                ")")))))
-    (litorgy-execute-src-block
-     nil (list "emacs-lisp" "results" (org-combine-plists params '((:results . "silent")))))))
+  (unless (stringp source-block) (setq source-block (symbol-name source-block)))
+  (if (and source-block (> (length source-block) 0))
+      (let ((params (eval `(litorgy-parse-header-arguments
+                            (concat ":var results="
+                                    ,source-block
+                                    "("
+                                    (mapconcat (lambda (var-spec)
+                                                 (format "%S=%s" (first var-spec) (second var-spec)))
+                                               ',variables ", ")
+                                    ")")))))
+        (litorgy-execute-src-block
+         nil (list "emacs-lisp" "results" (org-combine-plists params '((:results . "silent"))))))
+    ""))
 
 (provide 'litorgy-table)
 ;;; litorgy-table.el ends here

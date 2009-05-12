@@ -92,10 +92,11 @@ return nil."
     (let ((case-fold-search t)
           type args new-ref) ;; case search?
       ;; assign any arguments to pass to source block
-      (when (string-match "\\(.+\\)\(\\(.+\\)\)" ref)
+      (when (string-match "\\(.+\\)\(\\(.*\\)\)" ref)
         (save-match-data
-          (setq args (mapcar (lambda (ref) (cons :var ref))
-                             (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*"))))
+          (if (> (length (match-string 2)) 0)
+              (setq args (mapcar (lambda (ref) (cons :var ref))
+                                 (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*")))))
         (setq ref (match-string 1 ref)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))

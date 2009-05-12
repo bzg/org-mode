@@ -121,8 +121,9 @@ the header arguments specified at the source code block."
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
     (if arg
-        (progn (message (format "%S" result)) result)
-      (litorgy-insert-result result (cdr (assoc :results params))))))
+        (message (if (stringp result) result (format "%S" result)))
+      (litorgy-insert-result result (cdr (assoc :results params))))
+    result))
 
 (defun litorgy-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -264,17 +265,17 @@ string.
 
 This is taken almost directly from `org-read-prop'."
   (if (and (stringp cell) (not (equal cell "")))
-      (let ((out (string-to-number cell)))
-	(if (equal out 0)
-	    (if (or (equal "(" (substring cell 0 1))
-                    (equal "'" (substring cell 0 1)))
-                (read cell)
-	      (if (string-match "^\\(+0\\|-0\\|0\\)$" cell)
-		  0
-		(progn (set-text-properties 0 (length cell) nil cell)
-		       cell)))
-	  out))
+      (if (litorgy-number-p cell)
+          (string-to-number cell)
+        (if (or (equal "(" (substring cell 0 1))
+                (equal "'" (substring cell 0 1)))
+            (read cell)
+          (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
+
+(defun litorgy-number-p (string)
+  "Return t if STRING represents a number"
+  (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
 
 (provide 'litorgy)
 ;;; litorgy.el ends here

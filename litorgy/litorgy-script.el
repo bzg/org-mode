@@ -48,7 +48,8 @@ automatically generated wrapper for `litorgy-script-execute'.")
 def main
 %s
 end
-puts main().inspect
+results = main()
+puts (results.class == String) ? results : results.inspect
 ")
 
 (defvar litorgy-script-python-wrapper-method
@@ -108,12 +109,17 @@ Emacs-lisp table, otherwise return the results as a string."
    (if (string-match "^\\[.+\\]$" results)
        ;; somewhat hacky, but thanks to similarities between languages
        ;; it seems to work
-       (replace-regexp-in-string
+       (litorgy-read
+        (replace-regexp-in-string
         "\\[" "(" (replace-regexp-in-string
                    "\\]" ")" (replace-regexp-in-string
                               ", " " " (replace-regexp-in-string
-                                        "'" "\"" results))))
-     results)))
+                                        "'" "\"" results)))))
+     ;; strip trailing endline
+     (progn
+       (while (string= "\n" (substring results -1))
+         (setq results (substring results 0 -1)))
+       results))))
 
 (provide 'litorgy-script)
 ;;; litorgy-script.el ends here
