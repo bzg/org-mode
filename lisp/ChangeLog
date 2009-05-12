@@ -1,3 +1,11 @@
+2009-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-not-done-keywords)
+	(org-export-latex-done-keywords): New variables.
+	(org-export-latex-todo-keyword-markup): New option.
+	(org-export-latex-set-initial-vars): Remember the TODO keywords.
+	(org-export-latex-keywords-maybe): Apply the TODO markup.
+
 2009-05-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-infile-export-plist): Add more default macros.

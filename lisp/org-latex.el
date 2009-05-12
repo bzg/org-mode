@@ -56,6 +56,8 @@
 (defvar org-export-latex-append-header nil)
 (defvar org-export-latex-options-plist nil)
 (defvar org-export-latex-todo-keywords-1 nil)
+(defvar org-export-latex-not-done-keywords nil)
+(defvar org-export-latex-done-keywords nil)
 (defvar org-export-latex-display-custom-times nil)
 (defvar org-export-latex-all-targets-re nil)
 (defvar org-export-latex-add-level 0)
@@ -197,6 +199,23 @@ For example \orgTITLE for #+TITLE."
   :group 'org-export-latex
   :type 'string)
 
+(defcustom org-export-latex-todo-keyword-markup "\\textbf{%s}"
+  "Markup for TODO keywords, as a printf format.
+This can be a single format for all keywords, a cons cell with separate
+formats for not-done and done states, or an association list with setup
+for individual keywords.  If a keyword shows up for which there is no
+markup defined, the first one in the association list will be used."
+  :group 'org-export-latex
+  :type '(choice 
+	  (string :tag "Default")
+	  (cons :tag "Distinguish undone and done"
+		(string :tag "Not-DONE states")
+		(string :tag "DONE states"))
+	  (repeat :tag "Per keyword markup"
+		  (cons
+		   (string :tag "Keyword")
+		   (string :tag "Markup")))))
+	   
 (defcustom org-export-latex-timestamp-markup "\\textit{%s}"
   "A printf format string to be applied to time stamps."
   :group 'org-export-latex
@@ -770,6 +789,8 @@ If NUM, export sections as numerical sections."
 EXT-PLIST is an optional additional plist.
 LEVEL indicates the default depth for export."
   (setq org-export-latex-todo-keywords-1 org-todo-keywords-1
+	org-export-latex-done-keywords org-done-keywords
+	org-export-latex-not-done-keywords org-not-done-keywords
 	org-export-latex-display-custom-times org-display-custom-times
 	org-export-latex-all-targets-re
 	(org-make-target-link-regexp (org-all-targets))
@@ -944,12 +965,21 @@ links, keywords, lists, tables, fixed-width"
   "Maybe remove keywords depending on rules in REMOVE-LIST."
   (goto-char (point-min))
   (let ((re-todo (mapconcat 'identity org-export-latex-todo-keywords-1 "\\|"))
-	(case-fold-search nil))
+	(case-fold-search nil)
+	(todo-markup org-export-latex-todo-keyword-markup)
+	fmt)
     ;; convert TODO keywords
     (when (re-search-forward (concat "^\\(" re-todo "\\)") nil t)
       (if (plist-get remove-list :todo)
 	  (replace-match "")
-	(replace-match (format "\\textbf{%s}" (match-string 1)) t t)))
+	(setq fmt (cond
+		   ((stringp todo-markup) todo-markup)
+		   ((and (consp todo-markup) (stringp (car todo-markup)))
+		    (if (member (match-string 1) org-export-latex-done-keywords)
+			(cdr todo-markup) (car todo-markup)))
+		   (t (cdr (or (assoc (match-string 1) todo-markup)
+			       (car todo-markup))))))
+	(replace-match (format fmt (match-string 1)) t t)))
     ;; convert priority string
     (when (re-search-forward "\\[\\\\#.\\]" nil t)
       (if (plist-get remove-list :priority)
