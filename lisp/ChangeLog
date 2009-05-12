@@ -1,5 +1,9 @@
 2009-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-yank): Just call `org-yank-generic'.
+	(org-yank-generic): New function, containing the formaer
+	functionality of `org-yank'.
+
 	* org-latex.el (org-export-latex-not-done-keywords)
 	(org-export-latex-done-keywords): New variables.
 	(org-export-latex-todo-keyword-markup): New option.

@@ -15999,12 +15999,24 @@ Any prefix to this command will cause `yank' to be called directly with
 no special treatment.  In particular, a simple `C-u' prefix will just
 plainly yank the text as it is.
 
-\[1] Basically, the test checks if the first non-white line is a heading
+\[1] The test checks if the first non-white line is a heading
     and if there are no other headings with fewer stars."
   (interactive "P")
-  (setq this-command 'yank)
+  (org-yank-generic 'yank arg))
+
+(defun org-yank-generic (command arg)
+  "Perform some yank-like command.
+
+This function implements the behavior described in the `org-yank'
+documentation. However, it has been generalized to work for any
+interactive command with similar behavior."
+
+  ;; pretend to be command COMMAND
+  (setq this-command command)
+
   (if arg
-      (call-interactively 'yank)
+      (call-interactively command)
+
     (let ((subtreep ; is kill a subtree, and the yank position appropriate?
 	   (and (org-kill-is-subtree-p)
 		(or (bolp)
@@ -16019,7 +16031,8 @@ plainly yank the text as it is.
 	      end)
 	  (if (and subtreep org-yank-adjusted-subtrees)
 	      (org-paste-subtree nil nil 'for-yank)
-	    (call-interactively 'yank))
+           (call-interactively command))
+
 	  (setq end (point))
 	  (goto-char beg)
 	  (when (and (bolp) subtreep
@@ -16035,7 +16048,8 @@ plainly yank the text as it is.
 		(error (goto-char end)))))
 	  (when swallowp
 	    (message
-	     "Yanked text not folded because that would swallow text"))
+            "Inserted text not folded because that would swallow text"))
+
 	  (goto-char end)
 	  (skip-chars-forward " \t\n\r")
 	  (beginning-of-line 1)
@@ -16045,7 +16059,7 @@ plainly yank the text as it is.
 	  (org-paste-subtree nil nil 'for-yank)
 	  (push-mark beg 'nomsg)))
        (t
-	(call-interactively 'yank))))))
+       (call-interactively command))))))
 
 (defun org-yank-folding-would-swallow-text (beg end)
   "Would hide-subtree at BEG swallow any text after END?"
