@@ -430,6 +430,11 @@ See `org-publish-org-to' to the list of arguments."
 See `org-publish-org-to' to the list of arguments."
   (org-publish-org-to "html" plist filename pub-dir))
 
+(defun org-publish-org-to-org (plist filename pub-dir)
+  "Publish an org file to HTML.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-org-to "org" plist filename pub-dir))
+
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."

@@ -9279,8 +9279,14 @@ possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
 @code{org-publish-org-to-html} which calls the HTML exporter (@pxref{HTML
 export}).  But you also can publish your as PDF files using
-@code{org-publish-org-to-pdf}.  Other files like images only need to be
-copied to the publishing destination, for this you may use
+@code{org-publish-org-to-pdf}.  If you want to publish the Org file itself,
+but with @i{archived}, @i{commented}, and @i{tag-excluded} trees removed, use
+@code{org-publish-org-to-org} and set the parameters @code{:plain-source}
+and/or @code{:htmlized-source}.  This will produce @file{file.org} and
+@file{file.org.html} in the publishing
+directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
+source and publishing directories are equal.}.  Other files like images only
+need to be copied to the publishing destination, for this you may use
 @code{org-publish-attachment}.  For non-Org files, you always need to provide
 specify the publishing function:
 
@@ -9288,6 +9294,10 @@ specify the publishing function:
 @item @code{:publishing-function}
 @tab Function executing the publication of a file.  This may also be a
 list of functions, which will all be called in turn.
+@item @code{:plain-source}
+@tab Non-nil means, publish plain source.
+@item @code{:htmlized-source}
+@tab Non-nil means, publish htmlized source.
 @end multitable
 
 The function must accept two arguments: a property list containing at least a
@@ -9420,7 +9430,10 @@ something like @samp{[[file:foo.org][The foo]]} or simply
 @samp{file:foo.org.} (@pxref{Hyperlinks}).  Upon publishing this link
 becomes a link to @file{foo.html}.  In this way, you can interlink the
 pages of your "org web" project and the links will work as expected when
-you publish them to HTML.
+you publish them to HTML.  If you also publish the Org source file and want
+to link to that, use an @code{http:} link instead of an @code{file:} link,
+because @code{file:} links are converted to link to the corresponding
+@file{html} file. 
 
 You may also link to related files, such as images. Provided you are careful
 with relative pathnames, and provided you have also configured Org to upload

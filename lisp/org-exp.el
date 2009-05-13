@@ -2396,6 +2396,92 @@ command."
 		(not (get-char-property s 'invisible))))
     s))
 
+;;;###autoload
+(defun org-export-as-org (arg &optional hidden ext-plist
+			      to-buffer body-only pub-dir)
+  "Make a copy wiht not-exporting stuff removed.
+The purpose of this function is to provide a way to export the source
+Org file of a webpage in Org format, but with sensitive and/or irrelevant
+stuff removed.  This command will remove the following:
+
+- archived trees (if the variable `org-export-with-archived-trees' is nil)
+- comment blocks and trees starting with the COMMENT keyword
+- only trees that are consistent with `org-export-select-tags'
+  and `org-export-exclude-tags'.
+
+The only arguments that will be used are EXT-PLIST and PUB-DIR,
+all the others will be ignored (but are present so that the general
+mechanism to call publishing functions will work).
+
+EXT-PLIST is a property list with external parameters overriding
+org-mode's default settings, but still inferior to file-local
+settings.  When PUB-DIR is set, use this as the publishing
+directory."
+  (interactive "P")
+  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					ext-plist
+					(org-infile-export-plist)))
+	 (bfname (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
+	 (filename (concat (file-name-as-directory
+			    (or pub-dir
+				(org-export-directory :org opt-plist)))
+			   (file-name-sans-extension
+			    (file-name-nondirectory bfname))
+			     ".org"))
+	 (filename (and filename
+			(if (equal (file-truename filename)
+				   (file-truename bfname))
+			    (concat filename "-source")
+			  filename)))
+	 (backup-inhibited t)
+	 (buffer (find-file-noselect filename))
+	 (region (buffer-string)))
+    (save-excursion
+      (switch-to-buffer buffer)
+      (erase-buffer)
+      (insert region)
+      (let ((org-inhibit-startup t)) (org-mode))
+      
+      ;; Get rid of archived trees
+      (org-export-remove-archived-trees (plist-get opt-plist :archived-trees))
+      
+      ;; Remove comment environment and comment subtrees
+      (org-export-remove-comment-blocks-and-subtrees)
+      
+      ;; Get rid of excluded trees
+      (org-export-handle-export-tags (plist-get opt-plist :select-tags)
+				     (plist-get opt-plist :exclude-tags))
+      
+      (when (or (plist-get opt-plist :plain-source)
+		(not (or (plist-get opt-plist :plain-source)
+			 (plist-get opt-plist :htmlized-source))))
+	;; Either nothing special is requested (default call)
+	;; or the plain source is explicitly requested
+	;; so: save it
+	(save-buffer))
+      (when (plist-get opt-plist :htmlized-source)
+	;; Make the htmlized version
+	(require 'htmlize)
+	(require 'org-html)
+	(font-lock-fontify-buffer)
+	(let* ((htmlize-output-type 'css)
+	       (newbuf (htmlize-buffer)))
+	  (with-current-buffer newbuf
+	    (when org-export-htmlized-org-css-url
+	      (goto-char (point-min))
+	      (and (re-search-forward
+		    "<style type=\"text/css\">[^\000]*?\n[ \t]*</style>.*"
+		    nil t)
+		   (replace-match
+		    (format
+		     "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
+		     org-export-htmlized-org-css-url)
+		    t t)))
+	    (write-file (concat filename ".html")))
+	  (kill-buffer newbuf)))
+      (set-buffer-modified-p nil)
+      (kill-buffer (current-buffer)))))
+
 (defvar org-archive-location)  ;; gets loaded with the org-archive require.
 (defun org-get-current-options ()
   "Return a string with current options as keyword options.

@@ -1,3 +1,10 @@
+2009-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-as-org): New command.
+	(org-export-as-org): New command.
+
+	* org-publish.el (org-publish-org-to-org): New function.
+
 2009-05-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-yank): Just call `org-yank-generic'.
