@@ -1,5 +1,8 @@
 2009-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-tables-centered): New option.
+	(org-export-latex-tables): Use `org-export-latex-tables-centered'.
+
 	* org-exp.el (org-export-as-org): New command.
 	(org-export-as-org): New command.
 

@@ -231,6 +231,11 @@ markup defined, the first one in the association list will be used."
   :group 'org-export-latex
   :type 'boolean)
 
+(defcustom org-export-latex-tables-centered t
+  "When non-nil, tables are exported in a center environment."
+  :group 'org-export-latex
+  :type 'boolean)
+
 (defcustom org-export-latex-tables-column-borders nil
   "When non-nil, grouping columns can cause outer vertical lines in tables.
 When nil, grouping causes only separation lines between groups."
@@ -1291,7 +1296,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			   (if label (concat "\\\label{" label "}") "")
 			   (or caption "")))
 		      (if longtblp "\\\\\n" "\n")
-		      (if (not longtblp) "\\begin{center}\n")
+		      (if (and org-export-latex-tables-centered (not longtblp))
+			  "\\begin{center}\n")
 		      (if (not longtblp) (concat "\\begin{tabular}{" align "}\n"))
 		      (orgtbl-to-latex
 		       lines
@@ -1305,7 +1311,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 \\endlastfoot" (length org-table-last-alignment))
 					   nil)))
 		      (if (not longtblp) (concat "\n\\end{tabular}"))
-		      (if longtblp "\n" "\n\\end{center}\n")
+		      (if longtblp "\n" (if org-export-latex-tables-centered
+					    "\n\\end{center}\n" "\n"))
 		      (if longtblp
 			  "\\end{longtable}"
 			(if floatp "\\end{table}"))))
