@@ -6085,6 +6085,12 @@ With a double prefix argument, also remove duplicate entries."
 
 (defvar org-priority-regexp) ; defined later in the file
 
+(defvar org-after-sorting-entries-or-items-hook nil
+  "Hook that is run after a bunch of entries or items have been sorted.
+When children are sorted, the cursor is in the parent line when this
+hook gets called.  When a region or a plain list is sorted, the cursor
+will be in the first entry of the sorted region/list.")
+
 (defun org-sort-entries-or-items
   (&optional with-case sorting-type getkey-func compare-func property)
   "Sort entries on a certain level of an outline tree, or plain list items.
@@ -6311,6 +6317,7 @@ WITH-CASE, the sorting considers case as well."
           ((= dcst ?f) compare-func)
           ((= dcst ?p) '<)
           (t nil)))))
+    (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
 
 (defun org-do-sort (table what &optional with-case sorting-type)

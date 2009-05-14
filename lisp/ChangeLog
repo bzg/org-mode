@@ -1,5 +1,8 @@
 2009-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-after-sorting-entries-or-items-hook): New hook.
+	(org-sort-entries-or-items): Run the new hook.
+
 	* org-agenda.el (org-agenda-get-progress): Never take time of day
 	from headline when displaying progress.
 
