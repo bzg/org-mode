@@ -789,6 +789,12 @@ agenda display."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
+(defcustom org-agenda-start-with-log-mode nil
+  "The initial value of log-mode in a newly created agenda window."
+  :group 'org-agenda-startup
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
 (defcustom org-agenda-start-with-clockreport-mode nil
   "The initial value of clockreport-mode in a newly created agenda window."
   :group 'org-agenda-startup
@@ -1252,7 +1258,8 @@ The following commands are available:
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
 	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
-	  org-agenda-show-log nil))
+	  org-agenda-show-log org-agenda-start-with-log-mode))
+
   (easy-menu-change
    '("Agenda") "Agenda Files"
    (append

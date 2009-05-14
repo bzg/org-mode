@@ -1,3 +1,8 @@
+2009-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-start-with-log-mode): New option.
+	(org-agenda-mode): Use `org-agenda-start-with-log-mode'.
+
 2009-05-13  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-tables-centered): New option.
