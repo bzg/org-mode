@@ -1,40 +1,24 @@
 #+TITLE: Examples of Litorgy in Action
 #+OPTIONS: toc:nil num:nil ^:nil
 
-* showing directory sizes
+* size of the rorg repository
 
-This will work for Linux and Mac users, and could be interesting
-especially if combined with a nice R graph.
+This will work for Linux and Mac users, not so sure about shell
+commands for windows users.
 
 To run place the cursor on the =#+begin_src= line of the source block
 labeled directory-pie and press =\C-c\C-c=.
 
-Downsides
-- will take a while to run, especially for users with large home directories
-- Had to employ some emacs-lisp between the shell and R to clean up
-  the data.  (actually those " marks should not have been introduced
-  in the shell output, so this could be simplified somewhat)
-
 #+srcname: directories
 #+begin_src bash :results :replace
-du -sc *
+du -sc * |grep -v total
 #+end_src
 
-#+srcname: cleaner
-#+begin_src emacs-lisp :var table=directories
-(delq nil (mapcar (lambda (el)
-                    (let ((size (car el))
-                          (name (cadr el)))
-                      (setq name (if (string-match "\"\\(.+\\)\"" name)
-                                     (match-string 1 name)
-                                   name))
-                      (unless (or (= size 0)
-                                  (string= name "total"))
-                        (list size name))))
-                  table))
-#+end_src
+[Eric] I sometimes get weird results here, where R will import the
+labels into the third column instead of the second.  I don't entirely
+trust the R table importing mechanisms so far.
 
 #+srcname: directory-pie
-#+begin_src R :var dirs = cleaner
+#+begin_src R :var dirs = directories
 pie(as.vector(t(dirs[1])), labels = as.vector(t(dirs[2])))
 #+end_src
