@@ -333,7 +333,7 @@ with different fontification setup work on the same website.
 When this variable is non-nil, creating an htmlized version of an Org buffer
 using `org-export-as-org' will remove the internal CSS section and replace it
 with a link to this URL."
-  :group
+  :group 'org-export-htmlize
   :type '(choice
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
