@@ -8435,6 +8435,11 @@ on the system \"/user@host:\"."
 (defvar org-refile-history nil
   "History for refiling operations.")
 
+(defvar org-after-refile-insert-hook nil
+  "Hook run after `org-refile' has inserted its stuff at the new location.
+Note that this is still *before* the stuff will be removed from
+the *old* location.")
+
 (defun org-refile (&optional goto default-buffer)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
@@ -8524,7 +8529,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		    (or (outline-next-heading) (goto-char (point-max)))))
 		(if (not (bolp)) (newline))
 		(bookmark-set "org-refile-last-stored")
-		(org-paste-subtree level))))
+		(org-paste-subtree level)
+		(run-hooks 'org-after-refile-insert-hook))))
 	  (if regionp
 	      (delete-region (point) (+ (point) region-length))
 	    (org-cut-subtree))

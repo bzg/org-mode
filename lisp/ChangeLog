@@ -2,6 +2,8 @@
 
 	* org.el (org-after-sorting-entries-or-items-hook): New hook.
 	(org-sort-entries-or-items): Run the new hook.
+	(org-after-refile-insert-hook): New hook.
+	(org-refile): Run `org-after-refile-insert-hook'.
 
 	* org-agenda.el (org-agenda-get-progress): Never take time of day
 	from headline when displaying progress.
