@@ -1,5 +1,11 @@
 2009-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-complex-heading-re): New variable.
+	(org-export-as-latex): Force the correct regexp in the
+	preprocessor buffer.
+	(org-export-latex-set-initial-vars): Set
+	`org-export-latex-complex-heading-re'.
+
 	* org-agenda.el (org-agenda-start-with-log-mode): New option.
 	(org-agenda-mode): Use `org-agenda-start-with-log-mode'.
 

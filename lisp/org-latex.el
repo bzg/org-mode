@@ -56,6 +56,7 @@
 (defvar org-export-latex-append-header nil)
 (defvar org-export-latex-options-plist nil)
 (defvar org-export-latex-todo-keywords-1 nil)
+(defvar org-export-latex-complex-heading-re nil)
 (defvar org-export-latex-not-done-keywords nil)
 (defvar org-export-latex-done-keywords nil)
 (defvar org-export-latex-display-custom-times nil)
@@ -508,6 +509,11 @@ when PUB-DIR is set, use this as the publishing directory."
 		     (region-p nil)
 		     (t (plist-get opt-plist :skip-before-1st-heading))))
 	 (text (plist-get opt-plist :text))
+	 (org-export-preprocess-hook
+	  (cons
+	   `(lambda () (org-set-local 'org-complex-heading-regexp
+				      ,org-export-latex-complex-heading-re))
+	   org-export-preprocess-hook))
 	 (first-lines (if skip "" (org-export-latex-first-lines
 				   opt-plist
 				   (if subtree-p
@@ -796,6 +802,7 @@ LEVEL indicates the default depth for export."
   (setq org-export-latex-todo-keywords-1 org-todo-keywords-1
 	org-export-latex-done-keywords org-done-keywords
 	org-export-latex-not-done-keywords org-not-done-keywords
+	org-export-latex-complex-heading-re org-complex-heading-regexp
 	org-export-latex-display-custom-times org-display-custom-times
 	org-export-latex-all-targets-re
 	(org-make-target-link-regexp (org-all-targets))
