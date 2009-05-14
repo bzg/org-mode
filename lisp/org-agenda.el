@@ -3827,6 +3827,7 @@ the documentation of `org-diary'."
 		     (apply 'encode-time  ; DATE bound by calendar
 			    (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 		    1 11))))
+	 (org-agenda-search-headline-for-time nil)
 	 marker hdmarker priority category tags closedp statep clockp state
 	 ee txt extra timestr rest clocked)
     (goto-char (point-min))
