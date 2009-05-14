@@ -2396,6 +2396,8 @@ command."
 		(not (get-char-property s 'invisible))))
     s))
 
+(defvar org-export-htmlized-org-css-url) ;; defined in org-html.el
+
 ;;;###autoload
 (defun org-export-as-org (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)
