@@ -889,7 +889,9 @@ I.e. to the text after the last item."
 	(catch 'next
 	  (beginning-of-line 2)
 	  (if (looking-at "[ \t]*$")
-	      (throw (if (eobp) 'exit 'next) t))
+	      (if (eobp)
+		  (progn (setq pos (point)) (throw 'exit t))
+		(throw 'next t)))
 	  (skip-chars-forward " \t") (setq ind1 (current-column))
 	  (if (or (< ind1 ind)
 		  (and (= ind1 ind)
