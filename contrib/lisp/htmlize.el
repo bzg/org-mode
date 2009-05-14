@@ -866,9 +866,9 @@ If no rgb.txt file is found, return nil."
   ;; Only works in Emacs 21 and later.
   (let ((size-list
 	 (loop
-	  for f = face then (face-attribute f :inherit)
+	  for f = face then (ignore-errors (face-attribute f :inherit)) ;?????
 	  until (or (not f) (eq f 'unspecified))
-	  for h = (face-attribute f :height)
+	  for h = (ignore-errors (face-attribute f :height)) ;???????
 	  collect (if (eq h 'unspecified) nil h))))
     (reduce 'htmlize-merge-size (cons nil size-list))))
 
