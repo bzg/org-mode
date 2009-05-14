@@ -312,10 +312,10 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [4/5]
+* Bugs [5/5]
 
-** TODO extra quotes for nested string
-It looks like the problem is actually R not reading tables well
+** DONE extra quotes for nested string
+Well R appears to be reading the tables without issue...
 
 these *should* be quoted
 #+srcname: ls
@@ -334,40 +334,19 @@ ls
 | "test-export.html" |
 | "test-export.org"  |
 
-#+srcname: none
-#+begin_src emacs-lisp :var ls = ls :results silent
-(message (format "ls=%S" ls))
-#+end_src
-
-#+srcname: ruby-quote-test
-#+begin_src ruby
-[["3"], ["eric"], ["5"]]
-#+end_src
-
-| "3"    |
-| "eric" |
-| "5"    |
-
-#+srcname: read-quoted-table
-#+begin_src ruby :var tab=ruby-quote-test
+#+srcname: test-quotes
+#+begin_src ruby :var tab=ls
 tab[1][0]
 #+end_src
 
-#+srcname: ruby-no-quotes
-#+begin_src ruby 
-["3", "eric", "9"]
+: README.markdown
+
+#+srcname: test-quotes
+#+begin_src R :var tab=ls
+as.matrix(tab[2,])
 #+end_src
 
-| "3" | "eric" | "9" |
-
-#+srcname: elisp-no-quotes
-#+begin_src emacs-lisp 
-(list "3" "eric" "9")
-#+end_src
-
-| "3" | "eric" | "9" |
-
-
+: README.markdown
 
 ** RESOLVED simple ruby arrays not working
 
