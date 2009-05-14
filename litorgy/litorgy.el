@@ -53,7 +53,7 @@ then run `litorgy-execute-src-block'."
   (setq litorgy-src-block-regexp
 	(concat "#\\+begin_src \\("
 		(mapconcat 'regexp-quote value "\\|")
-		"\\)"
+		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
   (setq litorgy-inline-src-block-regexp

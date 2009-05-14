@@ -312,9 +312,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [2/4]
-** TODO space trailing language name
-fix regexp so it works when there's a space trailing the language name
+* Bugs [3/4]
 
 ** TODO extra quotes for nested string
 when string are 2 deep in org-mode tables their quotes aren't being
@@ -345,6 +343,13 @@ ls
 #+srcname: ruby-quote-test
 #+begin_src ruby
 puts %w(eric michael schulte)
+#+end_src
+** RESOLVED space trailing language name
+fix regexp so it works when there's a space trailing the language name
+
+#+srcname: test-trailing-space
+#+begin_src ruby 
+:schulte
 #+end_src
 
 ** RESOLVED Args out of range error
