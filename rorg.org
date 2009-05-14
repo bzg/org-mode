@@ -312,11 +312,11 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [3/4]
+* Bugs [4/5]
 
 ** TODO extra quotes for nested string
-when string are 2 deep in org-mode tables their quotes aren't being
-stripped
+when string are nested 2 deep in org-mode tables their quotes aren't
+being stripped
 
 these should not be quoted
 #+srcname: ls
@@ -342,8 +342,23 @@ ls
 
 #+srcname: ruby-quote-test
 #+begin_src ruby
-puts %w(eric michael schulte)
+[3, 4, 5]
 #+end_src
+
+** RESOLVED simple ruby arrays not working
+
+As an example eval the following.  Adding a line to test
+
+#+srcname: simple-ruby-array
+#+begin_src ruby
+[3, 4, 5]
+#+end_src
+
+#+srcname: ruby-array-test
+#+begin_src ruby :var ar = simple-ruby-array
+ar.first
+#+end_src
+
 ** RESOLVED space trailing language name
 fix regexp so it works when there's a space trailing the language name
 
@@ -430,6 +445,10 @@ litorgy functionality.
 | of                      | Fibonacci        |   3 |           3 |           3 | pass |
 | different               | Fibonacci        |   4 |           5 |           5 | pass |
 | arguments               | Fibonacci        |   5 |           8 |           8 | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| bug fixing              |                  |     |             |             | pass |
+|-------------------------+------------------+-----+-------------+-------------+------|
+| simple ruby arrays      | ruby-array-test  |     |           3 |           3 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests

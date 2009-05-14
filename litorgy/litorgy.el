@@ -277,5 +277,13 @@ This is taken almost directly from `org-read-prop'."
   "Return t if STRING represents a number"
   (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
 
+(defun litorgy-chomp (string &optional regexp)
+  "Remove any trailing space or carriage returns characters from
+STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
+overwritten by specifying a regexp as a second argument."
+  (while (string-match "[ \f\t\n\r\v]" (substring results -1))
+    (setq results (substring results 0 -1)))
+  results)
+
 (provide 'litorgy)
 ;;; litorgy.el ends here

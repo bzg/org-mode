@@ -1,4 +1,4 @@
-;;; litorgy-script.el --- litorgy functions for script execution
+;;; litorgy-script.el --- litorgy functions for scripting languages
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -92,7 +92,7 @@ executed through litorgy."
              (format "\treturn %s\n" (car (last body-lines)))))))
         ;; (message (buffer-substring (point-min) (point-max))) ;; debug script
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-        ;; (message (buffer-string)) ;; debug results
+        ;; (message (format "shell output = %s" (buffer-string))) ;; debug results
         (litorgy-script-table-or-results (buffer-string))))))
 
 (defun litorgy-script-var-to-ruby/python (var)
@@ -105,21 +105,18 @@ code specifying a var of the same value."
 (defun litorgy-script-table-or-results (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
+  (setq results (litorgy-chomp results))
   (litorgy-read
    (if (string-match "^\\[.+\\]$" results)
        ;; somewhat hacky, but thanks to similarities between languages
        ;; it seems to work
        (litorgy-read
         (replace-regexp-in-string
-        "\\[" "(" (replace-regexp-in-string
-                   "\\]" ")" (replace-regexp-in-string
-                              ", " " " (replace-regexp-in-string
-                                        "'" "\"" results)))))
-     ;; strip trailing endline
-     (progn
-       (while (string= "\n" (substring results -1))
-         (setq results (substring results 0 -1)))
-       results))))
+         "\\[" "(" (replace-regexp-in-string
+                    "\\]" ")" (replace-regexp-in-string
+                               ", " " " (replace-regexp-in-string
+                                         "'" "\"" results)))))
+     (litorgy-chomp results))))
 
 (provide 'litorgy-script)
 ;;; litorgy-script.el ends here
