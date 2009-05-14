@@ -208,7 +208,7 @@ silent -- no results are inserted"
         (if (stringp result) ;; assume the result is a table if it's not a string
             (litorgy-examplize-region (point) (progn (insert result) (point)))
           (progn
-            (insert 
+            (insert ;; TODO ensure that string aren't over-quoted
              (concat (orgtbl-to-orgtbl
                       (if (consp (car result)) result (list result))
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))

@@ -312,7 +312,41 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [2/2]
+* Bugs [2/4]
+** TODO space trailing language name
+fix regexp so it works when there's a space trailing the language name
+
+** TODO extra quotes for nested string
+when string are 2 deep in org-mode tables their quotes aren't being
+stripped
+
+these should not be quoted
+#+srcname: ls
+#+begin_src sh :results replace
+ls
+#+end_src
+
+| "COPYING"          |
+| "README.markdown"  |
+| "block"            |
+| "examples.org"     |
+| "existing_tools"   |
+| "intro.org"        |
+| "litorgy"          |
+| "rorg.org"         |
+| "test-export.html" |
+| "test-export.org"  |
+
+#+srcname: none
+#+begin_src emacs-lisp :var ls = ls :results silent
+(message (format "ls=%S" ls))
+#+end_src
+
+#+srcname: ruby-quote-test
+#+begin_src ruby
+puts %w(eric michael schulte)
+#+end_src
+
 ** RESOLVED Args out of range error
    
 The following block resulted in the error below [DED]. It ran without
