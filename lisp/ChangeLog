@@ -1,3 +1,7 @@
+2009-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-as-html): Add xml declaration.
+
 2009-05-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-after-sorting-entries-or-items-hook): New hook.
