@@ -3,8 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [8/18]
-
+* Tasks [8/19]
 ** PROPOSED re-implement R evaluation using ess-command or ess-execute
    I can't see anything wrong with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
@@ -322,8 +321,12 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [5/7]
+* Bugs [5/8]
 
+** TODO cursor movement when evaluating source blocks
+   E.g. the pie chart example. Despite the save-window-excursion in
+   litorgy-execute:R. (I never learned how to do this properly: org-R
+   jumps all over the place...)
 ** TODO with :results replace, non-table output doesn't replace table output
    And vice versa. E.g. Try this first with table and then with len(table) [DED]
 #+begin_src python :var table=sandbox :results replace
@@ -333,7 +336,6 @@ table
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |
 : 2
-
 
 ** TODO org bug/request: prevent certain org behaviour within code blocks
    E.g. [[]] gets recognised as a link (when there's text inside the
@@ -1018,8 +1020,12 @@ but if you do you might find this [[file:block][block-snippet]] org-mode snippet
 useful (I use it all the time).
 
 ** Dan <2009-05-14 Thu 19:13>
+   Please note that I am at an early stage of learning litorgy /
+   studying the code so I may be misunderstanding things.
    1. removed prefix arg [[2. evaluate the transpose definition =\C-c\C-c= on the beginning of][here]]
-   2. added some tasks and bugs
+   2. changed :replace -> replace 
+   3. added some tasks and bugs
+      
 
 * Overview
 This project is basically about putting source code into org
