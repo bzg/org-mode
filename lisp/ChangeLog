@@ -1,5 +1,8 @@
 2009-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-preprocess-apply-macros): Use semicolon
+	as argument separator in macros.
+
 	* org-html.el (org-export-as-html): Add xml declaration.
 
 2009-05-14  Carsten Dominik  <carsten.dominik@gmail.com>

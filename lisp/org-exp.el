@@ -1988,7 +1988,7 @@ TYPE must be a string, any of:
 (defun org-export-preprocess-apply-macros ()
   "Replace macro references."
   (goto-char (point-min))
-  (let (sy val key args s n)
+  (let (sy val key args args2 s n)
     (while (re-search-forward
 	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\(.*?\\))\\)?}}}"
 	    nil t)
@@ -2000,7 +2000,15 @@ TYPE must be a string, any of:
 				     (intern (concat ":" key)))))
 	(save-match-data
 	  (when args
-	    (setq args (org-split-string args ","))
+	    (setq args (org-split-string args ";") args2 nil)
+	    (while args
+	      (while (string-match "\\\\\\'" (car args))
+		;; repair bad splits
+		(setcar (cdr args) (concat (substring (car args) 0 -1)
+					   ";" (nth 1 args)))
+		(pop args))
+	      (push (pop args) args2))
+	    (setq args (nreverse args2))
 	    (setq s 0)
 	    (while (string-match "\\$\\([0-9]+\\)" val s)
 	      (setq s (1+ (match-beginning 0))
