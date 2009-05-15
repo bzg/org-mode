@@ -69,7 +69,7 @@ R process in `litorgy-R-buffer'."
         (with-temp-file transition-file
           (insert (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field)))
           (insert "\n"))
-        (litorgy-R-input-command (format "%s <- read.table(\"%s\")" name transition-file)))))
+        (litorgy-R-input-command (format "%s <- read.table(\"%s\", as.is=TRUE)" name transition-file)))))
 
 (defun litorgy-R-to-elisp (func-name)
   "Return the result of calling the function named FUNC-NAME in
