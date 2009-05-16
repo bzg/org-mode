@@ -401,10 +401,7 @@ END:VEVENT\n"
 					   :to 'done))))))
 			((eq org-icalendar-include-todo t)
 			 ;; include everything that is not done
-			 (member state org-not-done-keywords)))
-		       ;; but make sure this is not an archived entry
-		       (not (member org-archive-tag (org-get-tags-at)))
-		       )
+			 (member state org-not-done-keywords))))
 	      (setq hd (match-string 3)
 		    summary (org-icalendar-cleanup-string
 			     (org-entry-get nil "SUMMARY"))

@@ -1,3 +1,9 @@
+2009-05-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-icalendar.el (org-print-icalendar-entries): Don't check for
+	archive tag, this is already done by `org-agenda-skip'.
+	data while constructing lost of tags.
+
 2009-05-15  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-preprocess-apply-macros): Use semicolon
