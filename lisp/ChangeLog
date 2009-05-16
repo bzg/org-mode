@@ -1,5 +1,9 @@
 2009-05-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-edit-src-code, org-edit-fixed-width-region): Use a
+	better bufer-generating mechanism.
+	(org-edit-src-find-buffer): New function.
+
 	* org-icalendar.el (org-print-icalendar-entries): Don't check for
 	archive tag, this is already done by `org-agenda-skip'.
 	data while constructing lost of tags.
