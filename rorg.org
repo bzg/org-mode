@@ -1,10 +1,16 @@
 #+OPTIONS:    H:3 num:nil toc:t
 #+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
-#+SEQ_TODO:  TODO OPEN PROPOSED | DONE RESOLVED REJECTED
+#+SEQ_TODO:  TODO OPEN PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [8/19]
-** PROPOSED use textConnection to pass tsv to R?
+* Tasks [8/20]
+** TODO results-type header (scalar/vector)
+In response to a point in Dan's email.  We should allow the user to
+force scalar or vector results.  This could be done with a header
+argument, and the default behavior could be controlled through a
+configuration variable.
+
+** TODO use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
    used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
    think it would be possible to avoid having to write to file by
@@ -19,16 +25,31 @@
    I haven't tried to implement this yet as it's basically just
    fiddling with something that works. The only reason for it I can
    think of would be efficiency and I haven't tested that.
-** PROPOSED re-implement R evaluation using ess-command or ess-execute
+
+   [Eric] Sounds like a good idea, I'll bump this up to TODO
+
+** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
    from a political point of view. Plus of course it has the normal
    benefits of an API (insulates us from any underlying changes etc). [DED]
-** PROPOSED make C-c C-c work anywhere within source code block?
+
+   [Eric] I'll look into this.  I believe that I looked at and
+   rejected these functions initially but now I can't remember why.  I
+   agree with your overall point about using API's where available.  I
+   will take a look back at these and either switch to using the ess
+   commands, or at least articulate under this TODO the reasons for
+   using our custom R-interaction commands.
+
+** TODO make C-c C-c work anywhere within source code block?
    This seems like it would be nice to me, but perhaps it would be
    inefficient or ugly in implementation? I suppose you could search
    forward, and if you find #+end_src before you find #+begin_src,
    then you're inside one. [DED]
+
+   Agreed, I think inside of the =#+srcname: line= would be useful as
+   well.
+
 ** TODO share litorgy
 how should we share litorgy?
 
@@ -336,7 +357,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-* Bugs [5/8]
+* Bugs [6/8]
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
@@ -352,11 +373,37 @@ table
 | 4 | "schulte" | 6 |
 : 2
 
-** TODO org bug/request: prevent certain org behaviour within code blocks
+Yes, this is certainly a problem.  I fear that if we begin replacing
+anything immediately following a source block (regardless of whether
+it matches the type of our current results) we may accidentally delete
+hand written portions of the user's org-mode buffer.
+
+I think that the best solution here would be to actually start
+labeling results with a line that looks something like...
+
+#+results: name
+
+This would have a couple of benefits...
+1) we wouldn't have to worry about possibly deleting non-results
+   (which is currently an issue)
+2) we could reliably replace results even if there are different types
+3) we could reference the results of a source-code block in variable
+   definitions, which would be useful if for example we don't wish to
+   re-run a source-block every time because it is long-running.
+
+Thoughts?  If no-one objects, I believe I will implement the labeling
+of results.
+
+** DEFERRED org bug/request: prevent certain org behaviour within code blocks
    E.g. [[]] gets recognised as a link (when there's text inside the
    brackets). This is bad for R code at least, and more generally
    could be argued to be inappropriate. Is it difficult to get org to
    ignore text in code blocks? [DED]
+   
+   I believe Carsten addressed this recently on the mailing list with
+   the comment that it was indeed a difficult issue.  I believe this
+   may be one area where we could wait for an upstream (org-mode) fix.
+
 ** DONE extra quotes for nested string
 Well R appears to be reading the tables without issue...
 
@@ -391,7 +438,7 @@ as.matrix(tab[2,])
 
 : README.markdown
 
-** RESOLVED simple ruby arrays not working
+** DONE simple ruby arrays not working
 
 As an example eval the following.  Adding a line to test
 
@@ -405,7 +452,7 @@ As an example eval the following.  Adding a line to test
 ar.first
 #+end_src
 
-** RESOLVED space trailing language name
+** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
 
 #+srcname: test-trailing-space
@@ -413,7 +460,7 @@ fix regexp so it works when there's a space trailing the language name
 :schulte
 #+end_src
 
-** RESOLVED Args out of range error
+** DONE Args out of range error
    
 The following block resulted in the error below [DED]. It ran without
 error directly in the shell.
@@ -437,7 +484,7 @@ used to be output when the block returned an empty results string.
 This should be fixed in the current version, you should now see the
 following message =no result returned by source block=.
 
-** RESOLVED ruby arrays not recognized as such
+** DONE ruby arrays not recognized as such
 
 Something is wrong in [[file:litorgy/litorgy-script.el]] related to the
 recognition of ruby arrays as such.
