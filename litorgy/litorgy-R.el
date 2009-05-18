@@ -67,9 +67,13 @@ R process in `litorgy-R-buffer'."
                                            cell
                                          (format "%S" cell))) row)) value)))
         (with-temp-file transition-file
-          (insert (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field)))
+          ;; DED: I think the :sep "\t" is redundant here as
+          ;; orgtbl-to-tsv adds it automatically?
+	  (insert (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field)))
           (insert "\n"))
-        (litorgy-R-input-command (format "%s <- read.table(\"%s\", as.is=TRUE)" name transition-file)))))
+        (litorgy-R-input-command
+	 (format "%s <- read.table(\"%s\", sep=\"\\t\", as.is=TRUE)" name transition-file)))))
+
 
 (defun litorgy-R-to-elisp (func-name)
   "Return the result of calling the function named FUNC-NAME in
@@ -104,6 +108,8 @@ R process in `litorgy-R-buffer'."
 
 (defun litorgy-R-initiate-R-buffer ()
   "If there is not a current R process then create one."
+  ;; DED: Ideally I think we should use ESS mechanisms for this sort
+  ;; of thing. See ess-force-buffer-current.
   (unless (and (buffer-live-p litorgy-R-buffer) (get-buffer litorgy-R-buffer))
     (save-excursion
       (R)

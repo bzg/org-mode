@@ -11,23 +11,10 @@ labeled directory-pie and press =\C-c\C-c=.
 
 #+srcname: directories
 #+begin_src bash :results replace
-du -sc * |grep -v total
+du -sc * |grep -v total | head -n 1
 #+end_src
 
-|   4 | "block"            |
-|  36 | "COPYING"          |
-|   4 | "#dan-notes.org#"  |
-|   4 | "#examples.org#"   |
-|   4 | "examples.org"     |
-| 256 | "existing_tools"   |
-|   4 | "intro.org"        |
-| 144 | "litorgy"          |
-|   4 | "README.markdown"  |
-|  12 | "rorg.html"        |
-|  68 | "#rorg.org#"       |
-|  68 | "rorg.org"         |
-|   8 | "test-export.html" |
-|   4 | "test-export.org"  |
+| 4 | "block" |
 
 [Eric] I sometimes get weird results here, where R will import the
 labels into the third column instead of the second.  I don't entirely
@@ -38,16 +25,3 @@ trust the R table importing mechanisms so far.
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
-|   4 | "block"            |
-|  36 | "COPYING"          |
-|   4 | "dan-notes.org"    |
-|   4 | "#examples.org#"   |
-|   4 | "examples.org"     |
-| 256 | "existing_tools"   |
-|   4 | "intro.org"        |
-| 140 | "litorgy"          |
-|   4 | "README.markdown"  |
-|  12 | "rorg.html"        |
-|  68 | "rorg.org"         |
-|   8 | "test-export.html" |
-|   4 | "test-export.org"  |

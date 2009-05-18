@@ -4,8 +4,23 @@
 #+STARTUP: oddeven
 
 * Tasks [8/19]
+** PROPOSED use textConnection to pass tsv to R?
+   When passing args from the org buffer to R, the following route is
+   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
+   think it would be possible to avoid having to write to file by
+   constructing an R expression in litorgy-R-assign-elisp, something
+   like this
+#+begin_src emacs-lisp
+(litorgy-R-input-command
+ (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
+	  name (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field))))
+#+end_src
+
+   I haven't tried to implement this yet as it's basically just
+   fiddling with something that works. The only reason for it I can
+   think of would be efficiency and I haven't tested that.
 ** PROPOSED re-implement R evaluation using ess-command or ess-execute
-   I can't see anything wrong with the current R evaluation code or
+   I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
    from a political point of view. Plus of course it has the normal
    benefits of an API (insulates us from any underlying changes etc). [DED]
@@ -613,11 +628,11 @@ Time.now
 
 #+begin_src R :results replace
 a <- 9
-b <- 14
+b <- 16
 a + b
 #+end_src
 
-: 23
+: 25
 
 #+begin_src R
 hist(rgamma(20,3,3))
