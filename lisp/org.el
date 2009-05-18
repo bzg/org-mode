@@ -6389,7 +6389,7 @@ the edited version."
 	(org-mode-p (eq major-mode 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
-	lang lang-f single lfmt code begline buffer)
+	ovl lang lang-f single lfmt code begline buffer)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
@@ -6406,8 +6406,24 @@ the edited version."
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (y-or-n-p "Return to existing edit buffer? [n] will revert changes: "))
 	  (switch-to-buffer buffer)
-	(and buffer (kill-buffer buffer))
-	(switch-to-buffer (generate-new-buffer "*Org Edit Src Example*"))
+	(when buffer
+	  (with-current-buffer buffer
+	    (if (boundp 'org-edit-src-overlay)
+		(org-delete-overlay org-edit-src-overlay)))
+	  (kill-buffer buffer))
+	(setq buffer (generate-new-buffer "*Org Edit Src Example*"))
+	(setq ovl (org-make-overlay beg end))
+	(org-overlay-put ovl 'face 'secondary-selection)
+	(org-overlay-put ovl 'edit-buffer buffer)
+	(org-overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
+	(org-overlay-put ovl 'face 'secondary-selection)
+	(org-overlay-put ovl
+			 'keymap
+			 (let ((map (make-sparse-keymap)))
+			   (define-key map [mouse-1] 'org-edit-src-continue)
+			   map))
+	(org-overlay-put ovl :read-only "Leave me alone")
+	(switch-to-buffer buffer)
 	(insert code)
 	(remove-text-properties (point-min) (point-max)
 				'(display nil invisible nil intangible nil))
@@ -6425,10 +6441,18 @@ the edited version."
 	(org-exit-edit-mode)
 	(org-set-local 'org-edit-src-beg-marker beg)
 	(org-set-local 'org-edit-src-end-marker end)
+	(org-set-local 'org-edit-src-overlay ovl)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg)))
       (message "%s" msg)
       t)))
+
+(defun org-edit-src-continue (e)
+  (interactive "e")
+  (mouse-set-point e)
+  (let ((buf (get-char-property (point) 'edit-buffer)))
+    (if buf (switch-to-buffer buf)
+      (error "Something is wrong here"))))
 
 (defun org-edit-src-find-buffer (beg end)
   "Find a source editing buffer that is already editing the region BEG to END."
@@ -6461,7 +6485,7 @@ the fragment in the Org-mode buffer."
 	(org-mode-p (eq major-mode 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
-	beg1 end1 code begline buffer)
+	ovl beg1 end1 code begline buffer)
     (beginning-of-line 1)
     (if (looking-at "[ \t]*[^:\n \t]")
 	nil
@@ -6483,8 +6507,24 @@ the fragment in the Org-mode buffer."
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (y-or-n-p "Return to existing edit buffer? [n] will revert changes: "))
 	  (switch-to-buffer buffer)
-	(and buffer (kill-buffer buffer))
-	(switch-to-buffer (generate-new-buffer "*Org Edit Picture*"))
+	(when buffer
+	  (with-current-buffer buffer
+	    (if (boundp 'org-edit-src-overlay)
+		(org-delete-overlay org-edit-src-overlay)))
+	  (kill-buffer buffer))
+	(setq buffer (generate-new-buffer "*Org Edit Src Example*"))
+	(setq ovl (org-make-overlay beg end))
+	(org-overlay-put ovl 'face 'secondary-selection)
+	(org-overlay-put ovl 'edit-buffer buffer)
+	(org-overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
+	(org-overlay-put ovl 'face 'secondary-selection)
+	(org-overlay-put ovl
+			 'keymap
+			 (let ((map (make-sparse-keymap)))
+			   (define-key map [mouse-1] 'org-edit-src-continue)
+			   map))
+	(org-overlay-put ovl :read-only "Leave me alone")
+	(switch-to-buffer buffer)
 	(insert code)
 	(remove-text-properties (point-min) (point-max)
 				'(display nil invisible nil intangible nil))
@@ -6503,6 +6543,7 @@ the fragment in the Org-mode buffer."
 	(org-exit-edit-mode)
 	(org-set-local 'org-edit-src-beg-marker beg)
 	(org-set-local 'org-edit-src-end-marker end)
+	(org-set-local 'org-edit-src-overlay ovl)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg)))
       (message "%s" msg)
@@ -6594,6 +6635,7 @@ the language, a switch telling of the content should be in a single line."
 		(org-current-line)))
 	(beg org-edit-src-beg-marker)
 	(end org-edit-src-end-marker)
+	(ovl org-edit-src-overlay)
 	(buffer (current-buffer))
 	code)
   (goto-char (point-min))
@@ -6626,6 +6668,7 @@ the language, a switch telling of the content should be in a single line."
   (switch-to-buffer (marker-buffer beg))
   (kill-buffer buffer)
   (goto-char beg)
+  (org-delete-overlay ovl)
   (delete-region beg end)
   (insert code)
   (goto-char beg)
