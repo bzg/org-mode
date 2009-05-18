@@ -10,11 +10,50 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.26
+* Version 6.27
  :PROPERTIES:
  :VISIBILITY: content
  :CUSTOM_ID: v6.26
  :END:
+
+** Details
+
+*** Built-in macros
+    {{{date}}} {{{filename}}}
+
+*** Start Agenda with log mode active
+    Thanks to Beanjamin Andresen.
+
+*** Tables in LaTeX without centering
+
+*** Source file publishing
+
+*** LaTeX: TODO markup configurable
+
+*** Checkboxes: recursive statistics
+Patch by Richard Klinda.
+Check if this ws John's request too.
+
+*** Link completion for files and bbdb names
+
+*** org-export-html-table-use-header-tags-for-first-column
+
+*** contrib/lisp/org-special-blocks.el
+
+Contributed by Chris Gray
+
+*** org-ical-timezone
+
+*** ASCII export to buffer
+    requested by Samuel Wales
+
+*** New relod key C-c C-x !
+
+*** Agenda speed optimizations
+
+*** Properties to disambiguate statistics
+
+* Version 6.26
 
 ** Details
 

@@ -687,7 +687,7 @@ lang=\"%s\" xml:lang=\"%s\">
 <body>
 <div id=\"content\">
 "
-		 (or charset "iso-8859-1")
+;		 (or charset "iso-8859-1")
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords
