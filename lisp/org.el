@@ -9462,7 +9462,8 @@ changes because there are uncheckd boxes in this entry."
 	     (format "[%d/%d]" cnt-done cnt-all))))
 	(when cookie-present
 	  (run-hook-with-args 'org-after-todo-statistics-hook
-			      cnt-done (- cnt-all cnt-done)))))))
+			      cnt-done (- cnt-all cnt-done)))))
+    (run-hooks 'org-todo-statistics-hook)))
 
 (defvar org-after-todo-statistics-hook nil
   "Hook that is called after a TODO statistics cookie has been updated.
@@ -9479,6 +9480,11 @@ when there is a statistics cookie in the headline!
    (let (org-log-done org-log-states)   ; turn off logging
      (org-todo (if (= n-not-done 0) \"DONE\" \"TODO\"))))
 ")
+
+(defvar org-todo-statistics-hook nil
+  "Hook that is run whenever Org thinks TODO statistics should be updated.
+This hook runs even if there is no statisics cookie present, in which case
+`org-after-todo-statistics-hook' would not run.")
 
 (defun org-todo-trigger-tag-changes (state)
   "Apply the changes defined in `org-todo-state-tags-triggers'."

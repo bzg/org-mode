@@ -364,10 +364,16 @@ A checkbox is blocked if all of the following conditions are fulfilled:
 	      (org-current-line)
 	    nil))))))
 
+(defvar org-checkbox-statistics-hook nil
+  "Hook that is run whenever Org thinks checkbox statistics should be updated.
+This hook runs even if `org-provide-checkbox-statistics' is nil, to it can
+be used to implement alternative ways of collecting statistics information.")
+
 (defun org-update-checkbox-count-maybe ()
   "Update checkbox statistics unless turned off by user."
   (when org-provide-checkbox-statistics
-    (org-update-checkbox-count)))
+    (org-update-checkbox-count))
+  (run-hooks 'org-checkbox-statistics-hook))
 
 (defun org-update-checkbox-count (&optional all)
  "Update the checkbox statistics in the current section.

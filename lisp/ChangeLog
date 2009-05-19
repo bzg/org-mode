@@ -1,5 +1,11 @@
 2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-todo-statistics-hook): New hook.
+	(org-update-parent-todo-statistics): Use new hook.
+
+	* org-list.el (org-checkbox-statistics-hook): New hook.
+	(org-update-checkbox-count-maybe): Use new hook.
+
 	* org-ascii.el (org-export-ascii-copy-to-kill): New option.
 	(org-export-as-ascii): Hide export buffer, and copy exported ASCII
 	to kill ring.
