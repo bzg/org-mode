@@ -393,6 +393,10 @@ the whole buffer."
 	  (re-find (concat re "\\|" re-box))
 	  beg-cookie end-cookie is-percent c-on c-off lim
 	  eline curr-ind next-ind continue-from startsearch
+	  (recursive
+	   (or (not org-hierarchical-checkbox-statistics)
+	       (string-match "\\<recursive\\>"
+			     (or (org-entry-get nil "COOKIE_DATA") ""))))
 	  (cstat 0)
 	  )
      (when all
@@ -404,12 +408,11 @@ the whole buffer."
      (while (and (re-search-backward re-find beg t)
 		 (not (save-match-data
 			(and (org-on-heading-p)
-
-			     (equal (downcase
-				     (or (org-entry-get
-					  nil "COOKIE_DATA")
-					 ""))
-				    "todo")))))
+			     (string-match "\\<todo\\>"
+					   (downcase
+					    (or (org-entry-get
+						 nil "COOKIE_DATA")
+						"")))))))
        (setq beg-cookie (match-beginning 1)
 	     end-cookie (match-end 1)
 	     cstat (+ cstat (if end-cookie 1 0))
@@ -432,9 +435,9 @@ the whole buffer."
 	       (setq curr-ind (org-get-indentation))
 	       (setq next-ind curr-ind)
 	       (while (and (bolp) (org-at-item-p)
-			   (if org-hierarchical-checkbox-statistics
-			       (= curr-ind next-ind)
-			     (<= curr-ind next-ind)))
+			   (if recursive
+			       (<= curr-ind next-ind)
+			     (= curr-ind next-ind)))
 		 (save-excursion (end-of-line) (setq eline (point)))
 		 (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
@@ -442,7 +445,7 @@ the whole buffer."
 		       (setq c-on (1+ c-on))
 		       )
 		   )
-		 (if org-hierarchical-checkbox-statistics
+		 (if (not recursive)
 		     (org-end-of-item)
 		   (end-of-line)
 		   (when (re-search-forward org-list-beginning-re lim t)
