@@ -1,5 +1,8 @@
 2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-publish.el (org-publish): Make this function behave
+	correctly in interactive use when called with a prefix argument.
+
 	* org.el (org-todo-statistics-hook): New hook.
 	(org-update-parent-todo-statistics): Use new hook.
 	(org-log-into-drawer): New function.

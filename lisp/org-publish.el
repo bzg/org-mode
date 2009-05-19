@@ -600,18 +600,18 @@ Default for INDEX-FILENAME is 'sitemap.org'."
 ;;;###autoload
 (defun org-publish (project &optional force)
   "Publish PROJECT."
-  (interactive "P")
+  (interactive
+   (list
+    (assoc (org-ido-completing-read
+	    "Publish project: "
+	    org-publish-project-alist nil t)
+	   org-publish-project-alist)
+    current-prefix-arg))
   (setq org-publish-initial-buffer (current-buffer))
   (save-window-excursion
-    (let* ((force current-prefix-arg)
-	   (org-publish-use-timestamps-flag
+    (let* ((org-publish-use-timestamps-flag
 	    (if force nil org-publish-use-timestamps-flag)))
-      (org-publish-projects
-       (list (or project
-		 (assoc (org-ido-completing-read
-			 "Publish project: "
-			 org-publish-project-alist nil t)
-			org-publish-project-alist)))))))
+      (org-publish-projects (list project)))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
