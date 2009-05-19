@@ -33,6 +33,12 @@
   :tag "Org Export ASCII"
   :group 'org-export)
 
+(defcustom org-export-ascii-copy-to-kill t
+  "Non-nil means, copy ASCII export aways to kill ring.
+This makes it easy to generate ASCII and then paste it."
+  :group 'org-export-ascii
+  :type 'boolean)
+
 (defcustom org-export-ascii-underline '(?\$ ?\# ?^ ?\~ ?\= ?\-)
   "Characters for underlining headings in ASCII export.
 In the given sequence, these characters will be used for level 1, 2, ..."
@@ -55,7 +61,6 @@ When nil, the link will be exported in place.  If the line becomes long
 in this way, it will be wrapped."
   :group 'org-export-ascii
   :type 'boolean)
-
 
 ;;; ASCII export
 
@@ -245,12 +250,9 @@ publishing directory."
     (setq org-min-level (org-get-min-level lines level-offset))
     (setq org-last-level org-min-level)
     (org-init-section-numbers)
-
-    (switch-to-buffer buffer)
-
     (setq lang-words (or (assoc language org-export-language-setup)
 			 (assoc "en" org-export-language-setup)))
-    (switch-to-buffer-other-window buffer)
+    (set-buffer buffer)
     (erase-buffer)
     (fundamental-mode)
     ;; create local variables for all options, to make sure all called
@@ -456,12 +458,17 @@ publishing directory."
 	(goto-char beg)))
     (or to-buffer (save-buffer))
     (goto-char (point-min))
-    (prog1 (if (eq to-buffer 'string)
-	       (prog1 (buffer-substring (point-min) (point-max))
-		 (kill-buffer (current-buffer)))
-	     (current-buffer))
-      (when hidden
-	(delete-window)))))
+    (when org-export-ascii-copy-to-kill
+      (kill-new (buffer-string))
+      (when (fboundp 'x-set-selection)
+	(x-set-selection 'PRIMARY (buffer-string))
+	(x-set-selection 'CLIPBOARD (buffer-string)))
+      (message "Exported ASCII pushed to kill ring and clipboard"))
+    ;; Return the buffer or a string, according to how this function was called
+    (if (eq to-buffer 'string)
+	(prog1 (buffer-substring (point-min) (point-max))
+	  (kill-buffer (current-buffer)))
+      (current-buffer))))
 
 (defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export"
