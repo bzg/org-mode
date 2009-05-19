@@ -3572,7 +3572,7 @@ giving you an overview of what has been done.
 @cindex drawer, for state change recording
 
 @vindex org-log-states-order-reversed
-@vindex org-log-state-notes-into-drawer
+@vindex org-log-into-drawer
 When TODO keywords are used as workflow states (@pxref{Workflow states}), you
 might want to keep track of when a state change occurred and maybe take a
 note about this change.  You can either record just a timestamp, or a
@@ -3580,8 +3580,10 @@ timestamped note for a change.  These records will be inserted after the
 headline as an itemized list, newest first@footnote{See the variable
 @code{org-log-states-order-reversed}}.  When taking a lot of notes, you might
 want to get the notes out of a way into a drawer (@pxref{Drawers}).
-Customize the variable @code{org-log-state-notes-into-drawer} to get this
-behavior - the recommended drawer for this is called @code{LOGBOOK}.
+Customize the variable @code{org-log-into-drawer} to get this
+behavior - the recommended drawer for this is called @code{LOGBOOK}.  You can
+also overrule the setting of this variable for a subtree by setting a
+@code{LOG_INTO_DRAWER} property.
 
 Since it is normally too much to record a note for every state, Org mode
 expects configuration on a per-keyword basis for this.  This is achieved by
@@ -6981,10 +6983,10 @@ Decrease the priority of the current item.
 @c
 @kindex z
 @item z
-@vindex org-log-state-notes-into-drawer
+@vindex org-log-into-drawer
 Add a note to the entry.  This note will be recorded, and then files to the
 same location where state change notes a put.  Depending on
-@code{org-log-state-notes-into-drawer}, this maybe inside a drawer.
+@code{org-log-into-drawer}, this maybe inside a drawer.
 @c
 @kindex C-c C-a
 @item C-c C-a

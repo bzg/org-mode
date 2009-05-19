@@ -1,3 +1,8 @@
+2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Tracking TODO state changes): Document the
+	LOG_INTO_DRAWER property.
+
 2009-05-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Literal examples): Document the new implementation for

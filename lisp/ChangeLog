@@ -2,6 +2,11 @@
 
 	* org.el (org-todo-statistics-hook): New hook.
 	(org-update-parent-todo-statistics): Use new hook.
+	(org-log-into-drawer): New function.
+	(org-add-log-setup): Use the new `org-log-into-drawer' function to
+	determine if we should be logging into a drawer.
+	(org-log-into-drawer): Update docstring.
+	(org-default-properties): Add LOG_INTO_DRAWER as a property.
 
 	* org-list.el (org-checkbox-statistics-hook): New hook.
 	(org-update-checkbox-count-maybe): Use new hook.
