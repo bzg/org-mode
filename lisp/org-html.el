@@ -459,7 +459,7 @@ in a window.  A non-interactive call will only return the buffer."
 If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted
-lists.  When HIDDEN is non-nil, don't display the HTML buffer.
+lists.  HIDDEN is obsolete and does nothing.
 EXT-PLIST is a property list with external parameters overriding
 org-mode's default settings, but still inferior to file-local
 settings.  When TO-BUFFER is non-nil, create a buffer with that

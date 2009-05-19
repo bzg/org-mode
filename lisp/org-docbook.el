@@ -369,7 +369,7 @@ in a window.  A non-interactive call will only return the buffer."
 					to-buffer body-only pub-dir)
   "Export the current buffer as a DocBook file.
 If there is an active region, export only the region.  When
-HIDDEN is non-nil, don't display the HTML buffer.  EXT-PLIST is a
+HIDDEN is obsolete and does nothing.  EXT-PLIST is a
 property list with external parameters overriding org-mode's
 default settings, but still inferior to file-local settings.
 When TO-BUFFER is non-nil, create a buffer with that name and

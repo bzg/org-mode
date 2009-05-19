@@ -431,8 +431,9 @@ If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will be exported
 depending on `org-export-latex-low-levels'.  The default is to
-convert them as description lists.  When HIDDEN is non-nil, don't
-display the LaTeX buffer.  EXT-PLIST is a property list with
+convert them as description lists.
+HIDDEN is obsolete and does nothing.
+EXT-PLIST is a property list with
 external parameters overriding org-mode's default settings, but
 still inferior to file-local settings.  When TO-BUFFER is
 non-nil, create a buffer with that name and export to that
