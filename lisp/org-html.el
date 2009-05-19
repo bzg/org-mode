@@ -669,8 +669,7 @@ PUB-DIR is set, use this as the publishing directory."
       (unless body-only
 	;; File header
 	(insert (format
-		 "<?xml version=\"1.0\" encoding=\"%s\"?>
-<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+		 "%s<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
                \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\"
 lang=\"%s\" xml:lang=\"%s\">
@@ -687,7 +686,10 @@ lang=\"%s\" xml:lang=\"%s\">
 <body>
 <div id=\"content\">
 "
-		 (or charset "iso-8859-1")
+		 (if (equal html-extension "php")
+		     "" ; protect php files from short tag problem  FIXME
+		   (format "<?xml version=\"1.0\" encoding=\"%s\"?>\n"
+			   (or charset "iso-8859-1")))
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords
