@@ -1,3 +1,4 @@
+(
 ;;; org-html.el --- HTML export for Org-mode
 
 ;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009
@@ -695,7 +696,7 @@ lang=\"%s\" xml:lang=\"%s\">
 <div id=\"content\">
 "
 		 (format org-export-html-xml-declaration
-			 (or charset "iso-8859-1")))
+			 (or charset "iso-8859-1"))
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords
