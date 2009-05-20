@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [9/20]
+* Tasks [10/20]
 ** TODO results-type header (scalar/vector)
 In response to a point in Dan's email.  We should allow the user to
 force scalar or vector results.  This could be done with a header
@@ -16,6 +16,7 @@ configuration variable.
    think it would be possible to avoid having to write to file by
    constructing an R expression in litorgy-R-assign-elisp, something
    like this
+
 #+begin_src emacs-lisp
 (litorgy-R-input-command
  (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
@@ -27,6 +28,17 @@ configuration variable.
    think of would be efficiency and I haven't tested that.
 
    [Eric] Sounds like a good idea, I'll bump this up to TODO
+
+for quick tests
+
+#+tblname: quick-test
+| 1 | 2 | 3 |
+
+#+begin_src R :var vec=quick-test
+mean(mean(vec))
+#+end_src
+
+: 2
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
@@ -81,25 +93,6 @@ du -sc ~/*
 #+begin_src emacs-lisp :var sizes=sizes :results replace
 (mapcar #'car sizes)
 #+end_src
-
-** TODO litorgy tests litorgy [0/1]
-since we are accumulating this nice collection of source-code blocks
-in the sandbox section we should make use of them as unit tests.
-What's more, we should be able to actually use litorgy to run these
-tests.
-
-We would just need to cycle over every source code block under the
-sandbox, run it, and assert that the return value is equal to what we
-expect.
-
-I have the feeling that this should be possible using only litorgical
-functions with minimal or no additional elisp.  It would be very cool
-for litorgy to be able to test itself.
-*** TODO litorgical assertions
-These could be used to make assertions about the results of a
-source-code block.  If the assertion fails then the point could be
-moved to the block, and error messages and highlighting etc... could
-ensue
 
 ** TODO inline source code blocks [3/5]
    Like the =\R{ code }= blocks
@@ -205,6 +198,28 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE litorgy tests litorgy [1/1]
+since we are accumulating this nice collection of source-code blocks
+in the sandbox section we should make use of them as unit tests.
+What's more, we should be able to actually use litorgy to run these
+tests.
+
+We would just need to cycle over every source code block under the
+sandbox, run it, and assert that the return value is equal to what we
+expect.
+
+I have the feeling that this should be possible using only litorgical
+functions with minimal or no additional elisp.  It would be very cool
+for litorgy to be able to test itself.
+
+This is now done, see [[* Tests]].
+
+*** DEFERRED litorgical assertions (may not be necessary)
+These could be used to make assertions about the results of a
+source-code block.  If the assertion fails then the point could be
+moved to the block, and error messages and highlighting etc... could
+ensue
 
 ** DONE make C-c C-c work anywhere within source code block?
    This seems like it would be nice to me, but perhaps it would be

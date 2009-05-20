@@ -67,13 +67,10 @@ R process in `litorgy-R-buffer'."
                                            cell
                                          (format "%S" cell))) row)) value)))
         (with-temp-file transition-file
-          ;; DED: I think the :sep "\t" is redundant here as
-          ;; orgtbl-to-tsv adds it automatically?
-	  (insert (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field)))
+	  (insert (orgtbl-to-tsv value '(:fmt litorgy-R-quote-tsv-field)))
           (insert "\n"))
         (litorgy-R-input-command
 	 (format "%s <- read.table(\"%s\", sep=\"\\t\", as.is=TRUE)" name transition-file)))))
-
 
 (defun litorgy-R-to-elisp (func-name)
   "Return the result of calling the function named FUNC-NAME in
