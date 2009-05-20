@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [8/20]
+* Tasks [9/20]
 ** TODO results-type header (scalar/vector)
 In response to a point in Dan's email.  We should allow the user to
 force scalar or vector results.  This could be done with a header
@@ -40,15 +40,6 @@ configuration variable.
    will take a look back at these and either switch to using the ess
    commands, or at least articulate under this TODO the reasons for
    using our custom R-interaction commands.
-
-** TODO make C-c C-c work anywhere within source code block?
-   This seems like it would be nice to me, but perhaps it would be
-   inefficient or ugly in implementation? I suppose you could search
-   forward, and if you find #+end_src before you find #+begin_src,
-   then you're inside one. [DED]
-
-   Agreed, I think inside of the =#+srcname: line= would be useful as
-   well.
 
 ** TODO share litorgy
 how should we share litorgy?
@@ -214,6 +205,20 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE make C-c C-c work anywhere within source code block?
+   This seems like it would be nice to me, but perhaps it would be
+   inefficient or ugly in implementation? I suppose you could search
+   forward, and if you find #+end_src before you find #+begin_src,
+   then you're inside one. [DED]
+
+   Agreed, I think inside of the =#+srcname: line= would be useful as
+   well.
+
+#+srcname: testing-out-cc
+#+begin_src emacs-lisp
+'schulte
+#+end_src
 
 ** DONE integration with org tables
 We should make it easy to call litorgy source blocks from org-mode
