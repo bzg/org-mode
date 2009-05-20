@@ -1737,6 +1737,13 @@ entry each time a todo state is changed."
   :group 'org-todo
   :type 'boolean)
 
+(defcustom org-hierarchical-todo-statistics t
+  "Non-nil means, TODO statistics covers just direct children.
+When nil, all entries in the subtree are considered.
+This has only an effect if `org-provide-todo-statistics' is set."
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-after-todo-state-change-hook nil
   "Hook which is run after the state of a TODO item was changed.
 The new state (a string with a TODO keyword, or nil) is available in the
@@ -9442,37 +9449,59 @@ changes because there are uncheckd boxes in this entry."
     t)) ; do not block
 
 (defun org-update-parent-todo-statistics ()
-  "Update any statistics cookie in the parent of the current headline."
+  "Update any statistics cookie in the parent of the current headline.
+When `org-hierarchical-todo-statistics' is nil, statistics will cover
+the entire subtree and this will travel up the hierarchy and update
+statistics everywhere."
   (interactive)
-  (let ((box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
-	level (cnt-all 0) (cnt-done 0) is-percent kwd cookie-present)
+  (let* ((lim 0) prop
+	 (recursive (or (not org-hierarchical-todo-statistics)
+			(string-match
+			 "\\<recursive\\>"
+			 (or (setq prop (org-entry-get
+					 nil "COOKIE_DATA" 'inherit)) ""))))
+	 (lim (or (and prop (marker-position
+			     org-entry-property-inherited-from))
+		  lim))
+	 (first t)
+	 (box-re "\\(\\(\\[[0-9]*%\\]\\)\\|\\(\\[[0-9]*/[0-9]*\\]\\)\\)")
+	 level ltoggle l1
+	 (cnt-all 0) (cnt-done 0) is-percent kwd cookie-present)
     (catch 'exit
       (save-excursion
-	(setq level (org-up-heading-safe))
-	(unless (and level
-		     (not (equal (downcase
-				  (or (org-entry-get
-				       nil "COOKIE_DATA")
-				      ""))
-				 "checkbox")))
-	  (throw 'exit nil))
-	(while (re-search-forward box-re (point-at-eol) t)
-	  (setq cnt-all 0 cnt-done 0 cookie-present t)
-	  (setq is-percent (match-end 2))
-	  (save-match-data
-	    (unless (outline-next-heading) (throw 'exit nil))
-	    (while (looking-at org-todo-line-regexp)
-	      (setq kwd (match-string 2))
-	      (and kwd (setq cnt-all (1+ cnt-all)))
-	      (and (member kwd org-done-keywords)
-		   (setq cnt-done (1+ cnt-done)))
-	      (condition-case nil
-		  (org-forward-same-level 1)
-		(error (end-of-line 1)))))
-	  (replace-match
-	   (if is-percent
-	       (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
-	     (format "[%d/%d]" cnt-done cnt-all))))
+	(beginning-of-line 1)
+	(if (org-at-heading-p)
+	    (setq ltoggle (funcall outline-level))
+	  (error "This should not happen"))
+	(while (and (setq level (org-up-heading-safe))
+		    (or recursive first)
+		    (>= (point) lim))
+	  (setq first nil)
+	  (unless (and level
+		       (not (string-match
+			     "\\<checkbox\\>"
+			     (downcase
+			      (or (org-entry-get
+				   nil "COOKIE_DATA")
+				  "")))))
+	    (throw 'exit nil))
+	  (while (re-search-forward box-re (point-at-eol) t)
+	    (setq cnt-all 0 cnt-done 0 cookie-present t)
+	    (setq is-percent (match-end 2))
+	    (save-match-data
+	      (unless (outline-next-heading) (throw 'exit nil))
+	      (while (and (looking-at org-complex-heading-regexp)
+			  (> (setq l1 (length (match-string 1))) level))
+		(setq kwd (and (or recursive (= l1 ltoggle))
+			       (match-string 2)))
+		(and kwd (setq cnt-all (1+ cnt-all)))
+		(and (member kwd org-done-keywords)
+		     (setq cnt-done (1+ cnt-done)))
+		(outline-next-heading)))
+	    (replace-match
+	     (if is-percent
+		 (format "[%d%%]" (/ (* 100 cnt-done) (max 1 cnt-all)))
+	       (format "[%d/%d]" cnt-done cnt-all)))))
 	(when cookie-present
 	  (run-hook-with-args 'org-after-todo-statistics-hook
 			      cnt-done (- cnt-all cnt-done)))))

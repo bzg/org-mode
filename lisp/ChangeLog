@@ -5,6 +5,13 @@
 	* org-html.el (org-export-html-xml-declaration): New option.
 	(org-export-as-html): Use `org-export-html-xml-declaration'.
 
+	* org-list.el (org-update-checkbox-count): Make property
+	dependent.
+
+	* org.el (org-hierarchical-todo-statistics): New option.
+	(org-update-parent-todo-statistics): Modified to handle recursive
+	statistics.
+
 2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish): Make this function behave
