@@ -27,7 +27,8 @@ configuration variable.
    fiddling with something that works. The only reason for it I can
    think of would be efficiency and I haven't tested that.
 
-   [Eric] Sounds like a good idea, I'll bump this up to TODO
+   [Eric] Sounds like a good idea, I'll bump this up to TODO.  Didn't
+   work after an initial test, but still worth trying.
 
 for quick tests
 
@@ -37,8 +38,6 @@ for quick tests
 #+begin_src R :var vec=quick-test
 mean(mean(vec))
 #+end_src
-
-: 2
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
