@@ -6390,6 +6390,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 (defvar org-edit-src-picture nil)
 (defvar org-edit-src-beg-marker nil)
 (defvar org-edit-src-end-marker nil)
+(defvar org-edit-src-overlay nil)
 
 (define-minor-mode org-exit-edit-mode
   "Minor mode installing a single key binding, \"C-c '\" to exit special edit.")
@@ -9448,6 +9449,7 @@ changes because there are uncheckd boxes in this entry."
 	      (throw 'dont-block nil)))))
     t)) ; do not block
 
+(defvar org-entry-property-inherited-from) ;; defined below
 (defun org-update-parent-todo-statistics ()
   "Update any statistics cookie in the parent of the current headline.
 When `org-hierarchical-todo-statistics' is nil, statistics will cover
