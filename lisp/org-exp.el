@@ -566,6 +566,7 @@ much faster."
     (:convert-org-links	      nil	  org-export-html-link-org-files-as-html)
     (:inline-images	      nil	  org-export-html-inline-images)
     (:html-extension	      nil	  org-export-html-extension)
+    (:xml-declaration         nil	  org-export-html-xml-declaration)
     (:html-table-tag	      nil	  org-export-html-table-tag)
     (:expand-quoted-html      "@"	  org-export-html-expand)
     (:timestamp		      nil	  org-export-html-with-timestamp)

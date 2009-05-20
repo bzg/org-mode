@@ -59,6 +59,13 @@ by the footnotes themselves."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-export-html-xml-declaration
+  "<?xml version=\"1.0\" encoding=\"%s\"?>"
+  "The extension for exported HTML files.
+%s will be replaced with the charset of the exported file."
+  :group 'org-export-html
+  :type 'string)
+
 (defcustom org-export-html-style-include-scripts t
   "Non-nil means, include the javascript snippets in exported HTML files.
 The actual script is defined in `org-export-html-scripts' and should
@@ -669,7 +676,8 @@ PUB-DIR is set, use this as the publishing directory."
       (unless body-only
 	;; File header
 	(insert (format
-		 "%s<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+		 "%s
+<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
                \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
 <html xmlns=\"http://www.w3.org/1999/xhtml\"
 lang=\"%s\" xml:lang=\"%s\">
@@ -686,10 +694,8 @@ lang=\"%s\" xml:lang=\"%s\">
 <body>
 <div id=\"content\">
 "
-		 (if (equal html-extension "php")
-		     "" ; protect php files from short tag problem  FIXME
-		   (format "<?xml version=\"1.0\" encoding=\"%s\"?>\n"
-			   (or charset "iso-8859-1")))
+		 (format org-export-html-xml-declaration
+			 (or charset "iso-8859-1")))
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords

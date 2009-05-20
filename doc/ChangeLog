@@ -1,3 +1,7 @@
+2009-05-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Publishing options): Document :xml-declaration.
+
 2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Tracking TODO state changes): Document the

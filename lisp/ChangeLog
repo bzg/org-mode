@@ -1,3 +1,10 @@
+2009-05-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-plist-vars): Add :xml-declaration.
+
+	* org-html.el (org-export-html-xml-declaration): New option.
+	(org-export-as-html): Use `org-export-html-xml-declaration'.
+
 2009-05-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish): Make this function behave
