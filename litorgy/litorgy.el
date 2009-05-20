@@ -149,25 +149,17 @@ of the following form.  (language body header-arguments-alist)"
     (if (or
          (save-excursion ;; on a #+srcname: line
            (beginning-of-line 1)
-           (and
-            (looking-at "#\\+srcname")
-            (progn
-              (forward-line 1)
-              (looking-at litorgy-src-block-regexp))))
+           (and (looking-at "#\\+srcname") (forward-line 1)
+                (looking-at litorgy-src-block-regexp)))
          (save-excursion ;; on a #+begin_src line
-           (beginning-of-line 1)
-           (looking-at litorgy-src-block-regexp))
+           (beginning-of-line 1) (looking-at litorgy-src-block-regexp))
          (save-excursion ;; inside a src block
            (and
-            (setq middle (point))
-            (re-search-backward "#\\+begin_src" nil t)
-            (setq top (point))
-            (re-search-forward "#\\+end_src" nil t)
+            (setq middle (point)) (re-search-backward "#\\+begin_src" nil t)
+            (setq top (point)) (re-search-forward "#\\+end_src" nil t)
             (setq bottom (point))
-            (< top middle)
-            (< middle bottom)
-            (goto-char top)
-            (looking-at litorgy-src-block-regexp))))
+            (< top middle) (< middle bottom)
+            (goto-char top) (looking-at litorgy-src-block-regexp))))
         (litorgy-parse-src-block-match)
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
