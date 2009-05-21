@@ -1,5 +1,11 @@
 2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview-xemacs.el (org-columns-compute)
+	(org-columns-number-to-string): Fix problems with empty fields.
+
+	* org-colview.el (org-columns-compute)
+	(org-columns-number-to-string): Fix problems with empty fields.
+
 	* org-exp.el (org-export-push-to-kill-ring): New function.
 	(org-export-copy-to-kill-ring): New option.
 

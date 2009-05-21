@@ -1097,7 +1097,8 @@ Don't set this, this is meant for dynamic scoping.")
 	(cond
 	 ((< level last-level)
 	  ;; put the sum of lower levels here as a property
-	  (setq sum (apply fun (aref lvals last-level))
+	  (setq sum (when (aref lvals last-level)
+		      (apply fun (aref lvals last-level)))
 		flag (aref lflag last-level) ; any valid entries from children?
 		str (org-columns-number-to-string sum format printf)
 		str1 (org-add-props (copy-sequence str) nil 'org-computed t 'face 'bold)
@@ -1123,9 +1124,10 @@ Don't set this, this is meant for dynamic scoping.")
 		(aset lflag l nil)))
 	 ((>= level last-level)
 	  ;; add what we have here to the accumulator for this level
-	  (push (org-column-string-to-number (or val "0") format)
+	  (when valflag
+	    (push (org-column-string-to-number val format)
 		(aref lvals level))
-	  (and valflag (aset lflag level t)))
+	    (aset lflag level t)))
 	 (t (error "This should not happen")))))))
 
 (defun org-columns-redo ()
@@ -1163,6 +1165,7 @@ Don't set this, this is meant for dynamic scoping.")
 (defun org-columns-number-to-string (n fmt &optional printf)
   "Convert a computed column number to a string value, according to FMT."
   (cond
+   ((not (numberp n)) "")
    ((memq fmt '(add_times max_times min_times mean_times))
     (let* ((h (floor n)) (m (floor (+ 0.5 (* 60 (- n h))))))
       (format org-time-clocksum-format h m)))
