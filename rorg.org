@@ -4,16 +4,22 @@
 #+STARTUP: oddeven
 
 * Tasks [12/18]
-** TODO results-type header (scalar/vector)
+** TODO results-type header (scalar/vector) [0/1]
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header
    argument, and the default behavior could be controlled through a
    configuration variable.
 
-   Since the source blocks are named with =#+srcname:= lines we can
-   name results with =#+resname:= lines (if the source block has no
-   name then no name is given to the =#+resname:= line on creation,
-   otherwise the name of the source block is used).
+*** TODO results name
+    In order to do this we will need to start naming our results.
+    Since the source blocks are named with =#+srcname:= lines we can
+    name results with =#+resname:= lines (if the source block has no
+    name then no name is given to the =#+resname:= line on creation,
+    otherwise the name of the source block is used).
+
+    This will have the additional benefit of allowing results and
+    source blocks to be located in different places in a buffer (and
+    eventually in different buffers entirely).
    
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
