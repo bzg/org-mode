@@ -3,7 +3,15 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [12/18]
+* Tasks [12/19]
+** TODO resolve references to other buffers
+   This would allow source blocks to call upon tables, source-blocks,
+   and results in other buffers.
+   
+   See...
+   - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
+   - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
+
 ** TODO results-type header (scalar/vector) [0/1]
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header
@@ -20,7 +28,13 @@
     This will have the additional benefit of allowing results and
     source blocks to be located in different places in a buffer (and
     eventually in different buffers entirely).
-   
+
+#+begin_src emacs-lisp 
+'schulte
+#+end_src
+
+#+resname:
+
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
