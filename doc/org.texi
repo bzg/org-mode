@@ -2831,7 +2831,7 @@ Store a link to the current location.  This is a @emph{global} command (you
 must create the key binding yourself) which can be used in any buffer to
 create a link.  The link will be stored for later insertion into an Org
 buffer (see below).  What kind of link will be created depends on the current
-buffer: 
+buffer:
 
 @b{Org-mode buffers}@*
 For Org files, if there is a @samp{<<target>>} at the cursor, the link points
@@ -3580,7 +3580,7 @@ giving you an overview of what has been done.
 
 @vindex org-log-states-order-reversed
 @vindex org-log-into-drawer
-@cindex property: LOG_INTO_DRAWER 
+@cindex property: LOG_INTO_DRAWER
 When TODO keywords are used as workflow states (@pxref{Workflow states}), you
 might want to keep track of when a state change occurred and maybe take a
 note about this change.  You can either record just a timestamp, or a
@@ -4474,6 +4474,12 @@ property        @r{The property that should be edited in this column.}
                 @{X@}       @r{Checkbox status, [X] if all children are [X].}
                 @{X/@}      @r{Checkbox status, [n/m].}
                 @{X%@}      @r{Checkbox status, [n%].}
+                @{min@}     @r{Smallest number in column.}
+                @{max@}     @r{Largest number.}
+                @{mean@}    @r{Arithmetic mean of numbers.}
+                @{:min@}    @r{Smallest time value in column.}
+                @{:max@}    @r{Largest time value.}
+                @{:mean@}   @r{Arithmetic mean of time values.}
 @end example
 
 @noindent
@@ -8240,9 +8246,9 @@ additional information.  These lines may be put anywhere in the file.
 The whole set of lines can be inserted into the buffer with @kbd{C-c
 C-e t}.  For individual lines, a good way to make sure the keyword is
 correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
-(@pxref{Completion}).   For a summary of other in-buffer settings not 
-specifically related to export, see @ref{In-buffer settings}. 
-In particular, note that you can place commonly-used (export) options in 
+(@pxref{Completion}).   For a summary of other in-buffer settings not
+specifically related to export, see @ref{In-buffer settings}.
+In particular, note that you can place commonly-used (export) options in
 a separate file which can be included using @code{#+SETUPFILE}.
 
 @table @kbd
@@ -9480,7 +9486,7 @@ pages of your "org web" project and the links will work as expected when
 you publish them to HTML.  If you also publish the Org source file and want
 to link to that, use an @code{http:} link instead of an @code{file:} link,
 because @code{file:} links are converted to link to the corresponding
-@file{html} file. 
+@file{html} file.
 
 You may also link to related files, such as images. Provided you are careful
 with relative pathnames, and provided you have also configured Org to upload
@@ -9941,7 +9947,7 @@ keys.  The corresponding variable is @code{org-tag-alist}.
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:
-@itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:, 
+@itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
 @itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.

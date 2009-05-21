@@ -1,3 +1,7 @@
+2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Column attributes): Document new colciew operators.
+
 2009-05-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Publishing options): Document :xml-declaration.
