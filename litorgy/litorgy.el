@@ -141,8 +141,49 @@ the header arguments specified at the source code block."
     (litorgy-eval-buffer)
     (widen)))
 
-(defun litorgy-goto-src-block-head ()
-  "Position the point at the beginning of the current source
+(defun litorgy-get-src-block-name ()
+  "Return the name of the current source block if one exists"
+  (let ((case-fold-search t))
+    (save-excursion
+      (goto-char (litorgy-where-is-src-block-head))
+      (if (save-excursion (forward-line -1)
+                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
+          (litorgy-clean-text-properties (match-string 1))))))
+
+(defun litorgy-get-src-block-info ()
+  "Return the information of the current source block as a list
+of the following form.  (language body header-arguments-alist)"
+  (let ((case-fold-search t) head)
+    (if (setq head (litorgy-where-is-src-block-head))
+        (save-excursion (goto-char head) (litorgy-parse-src-block-match))
+      (if (save-excursion ;; inline source block
+            (re-search-backward "[ \f\t\n\r\v]" nil t)
+            (forward-char 1)
+            (looking-at litorgy-inline-src-block-regexp))
+          (litorgy-parse-inline-src-block-match)
+        nil)))) ;; indicate that no source block was found
+
+(defun litorgy-parse-src-block-match ()
+  (list (litorgy-clean-text-properties (match-string 1))
+        (litorgy-clean-text-properties (match-string 4))
+        (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) "")))))
+
+(defun litorgy-parse-inline-src-block-match ()
+  (list (litorgy-clean-text-properties (match-string 1))
+        (litorgy-clean-text-properties (match-string 4))
+        (org-combine-plists litorgy-inline-header-args
+                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
+
+(defun litorgy-parse-header-arguments (arg-string)
+  "Parse a string of header arguments returning an alist."
+  (delq nil
+        (mapcar
+         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
+                           (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
+         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
+
+(defun litorgy-where-is-src-block-head ()
+  "Return the point at the beginning of the current source
 block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
   (let ((initial (point)) top bottom)
@@ -164,46 +205,32 @@ If the point is not on a source block then return nil."
         (goto-char top) (looking-at litorgy-src-block-regexp)
         (point))))))
 
-(defun litorgy-get-src-block-info ()
-  "Return the information of the current source block as a list
-of the following form.  (language body header-arguments-alist)"
-  (let ((case-fold-search t) head)
-    (if (setq head (litorgy-goto-src-block-head))
-        (save-excursion (goto-char head) (litorgy-parse-src-block-match))
-      (if (save-excursion ;; inline source block
-            (re-search-backward "[ \f\t\n\r\v]" nil t)
-            (forward-char 1)
-            (looking-at litorgy-inline-src-block-regexp))
-          (litorgy-parse-inline-src-block-match)
-        nil)))) ;; indicate that no source block was found
+(defun litorgy-find-named-result (name)
+  "Return the location of the result named NAME in the current
+buffer or nil if no such result exists."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward (concat "#\\+resname:[ \t]*" (regexp-quote name)) nil t)
+      (move-beginning-of-line 1) (point))))
 
-(defun litorgy-get-src-block-name ()
-  "Return the name of the current source block if one exists"
-  (let ((case-fold-search t))
-    (save-excursion
-      (goto-char (litorgy-goto-src-block-head))
-      (if (save-excursion (forward-line -1)
-                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
-          (litorgy-clean-text-properties (match-string 1))))))
-
-(defun litorgy-parse-src-block-match ()
-  (list (litorgy-clean-text-properties (match-string 1))
-        (litorgy-clean-text-properties (match-string 4))
-        (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) "")))))
-
-(defun litorgy-parse-inline-src-block-match ()
-  (list (litorgy-clean-text-properties (match-string 1))
-        (litorgy-clean-text-properties (match-string 4))
-        (org-combine-plists litorgy-inline-header-args
-                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
-
-(defun litorgy-parse-header-arguments (arg-string)
-  "Parse a string of header arguments returning an alist."
-  (delq nil
-        (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
-         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
+(defun litorgy-where-is-src-block-result ()
+  "Return the point at the beginning of the result of the current
+source block.  Specifically at the beginning of the #+RESNAME:
+line.  If no result exists for this block then create a
+#+RESNAME: line following the source block."
+  (save-excursion
+    (goto-char (litorgy-where-is-src-block-head))
+    (let ((name (litorgy-get-src-block-name)) end head)
+      (or (and name (message name) (litorgy-find-named-result name))
+          (and (re-search-forward "#\\+end_src" nil t)
+               (progn (move-end-of-line 1) (forward-char 1) (setq end (point))
+                      (or (progn ;; either an unnamed #+resname: line already exists
+                            (re-search-forward "[^ \f\t\n\r\v]" nil t)
+                            (move-beginning-of-line 1) (looking-at "#\\+resname:"))
+                          (progn ;; or we need to back up and make one ourselves
+                            (goto-char end) (open-line 3) (forward-char 1)
+                            (insert "#+resname:") (move-beginning-of-line 1) t)))
+               (point))))))
 
 (defun litorgy-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the
@@ -250,13 +277,6 @@ silent -- no results are inserted"
   "Return RESULT as a string in org-mode format.  This function
 relies on `litorgy-insert-result'."
   (with-temp-buffer (litorgy-insert-result result) (buffer-string)))
-
-(defun litorgy-goto-result ()
-  "Assumes that the point is on or in a source block.  This
-functions will place the point at the beginning of the related
-result line, or if no such line exists it will create one
-immediately following the source block."
-  )
 
 (defun litorgy-remove-result (&optional table)
   "Remove the result following the current source block.  If

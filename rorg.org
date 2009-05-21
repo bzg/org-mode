@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [12/19]
+* Tasks [13/20]
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
    and results in other buffers.
@@ -12,13 +12,13 @@
    - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
    - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
 
-** TODO results-type header (scalar/vector) [0/1]
+** TODO results-type header (scalar/vector)
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header
    argument, and the default behavior could be controlled through a
    configuration variable.
 
-*** TODO results name
+** TODO results name
     In order to do this we will need to start naming our results.
     Since the source blocks are named with =#+srcname:= lines we can
     name results with =#+resname:= lines (if the source block has no
@@ -29,11 +29,19 @@
     source blocks to be located in different places in a buffer (and
     eventually in different buffers entirely).
 
+#+srcname: developing-resnames
 #+begin_src emacs-lisp 
 'schulte
 #+end_src
 
 #+resname:
+
+    Once source blocks are able to find their own =#+resname:= lines
+    we then need to...
+
+*** TODO change the results insertion functions to use these lines
+
+*** TODO teach references to resolve =#+resname= lines.
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
@@ -1793,3 +1801,6 @@ and probably has some advantages (and probably shortfalls).
 
 * Buffer Dictionary
  LocalWords:  DBlocks dblocks litorgy el eric litorgical fontification
+
+
+
