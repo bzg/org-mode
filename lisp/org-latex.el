@@ -260,9 +260,9 @@ a string to be used instead of \\section{%s}.  In this latter case,
 the %s stands here for the inserted headline and is mandatory."
   :group 'org-export-latex
   :type '(choice (const :tag "Ignore" nil)
-		 (symbol :tag "Convert as descriptive list" description)
-		 (symbol :tag "Convert as itemized list" itemize)
-		 (symbol :tag "Convert as enumerated list" enumerate)
+		 (const :tag "Convert as descriptive list" description)
+		 (const :tag "Convert as itemized list" itemize)
+		 (const :tag "Convert as enumerated list" enumerate)
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
