@@ -97,7 +97,7 @@ license to the document, as described in section 6 of the license.
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
-* Variable and Faces Index::    Index for variables and faces discussed
+* Variable Index::              Variables mentiond in the manual
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -11501,13 +11501,13 @@ and contributed various ideas and code snippets.
 
 @printindex cp
 
-@node Key Index, Variable and Faces Index, Main Index, Top
+@node Key Index, Variable Index, Main Index, Top
 @unnumbered Key Index
 
 @printindex ky
 
-@node Variable and Property Index,  , Key Index, Top
-@unnumbered Variable and Property Index
+@node Variable Index,  , Key Index, Top
+@unnumbered Variable Index
 
 This is not a complete index of variables and faces, only the ones that are
 mentioned in the manual.  For a more complete list, use @kbd{M-x
