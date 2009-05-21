@@ -10,7 +10,7 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.27
+* Version 6.27 (in preparation)
  :PROPERTIES:
  :VISIBILITY: content
  :CUSTOM_ID: v6.26
@@ -18,11 +18,31 @@
 
 ** Details
 
-*** Built-in macros
+*** Macros for export
+Macro processing for export has been enhanced:
+
+- You can use arguments in a macro, for example
+#+begin_src org
+#+macro hello Greet the $1: Hello $1
+#+end_src
+  which would turn ={{{hello(world)}}}= into =Greet the world: Hello world=
+
+- More built-in default macros:
+  - date(FORMAT_TIME_STRING) :: Time/Date of export
+  - time(FORMAT_TIME_STRING) :: Same as date
+  - modification-time(FORMAT_TIME_STRING) :: Last modification of file
+  - input-file :: Name of the input file
+    
     {{{date}}} {{{filename}}}
 
+  The new built-in macros have been requested by Daniel Clemente
+
 *** Start Agenda with log mode active
-    Thanks to Beanjamin Andresen.
+Set the new option =org-agenda-start-with-log-mode= to have
+log mode turned on from the start.  Or set this option for
+specific custom commands.
+
+Thanks to Beanjamin Andresen for a patch to this effect.
 
 *** Tables in LaTeX without centering
 
@@ -46,13 +66,21 @@ Contributed by Chris Gray
 
 *** ASCII export to buffer
     requested by Samuel Wales
+*** Push exported stuff to kill ring
+*** Recursive TODO statistics
+*** LOG_INTO_DRAWER property
+    Requested by Daniel J. Sinder
+*** Many new hooks
+*** Macros with arguments, and a few new default macros
 
 *** New relod key C-c C-x !
 
 *** Agenda speed optimizations
-
+    Triggered by reports from Eric S Fraga
 *** Properties to disambiguate statistics
 
+*** New operators for column view
+    Thanks to Mikael Fornius for a patch to this effect.
 * Version 6.26
 
 ** Details
