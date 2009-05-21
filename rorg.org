@@ -3,41 +3,12 @@
 #+SEQ_TODO:  TODO OPEN PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [10/20]
+* Tasks [11/20]
 ** TODO results-type header (scalar/vector)
 In response to a point in Dan's email.  We should allow the user to
 force scalar or vector results.  This could be done with a header
 argument, and the default behavior could be controlled through a
 configuration variable.
-
-** TODO use textConnection to pass tsv to R?
-   When passing args from the org buffer to R, the following route is
-   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
-   think it would be possible to avoid having to write to file by
-   constructing an R expression in litorgy-R-assign-elisp, something
-   like this
-
-#+begin_src emacs-lisp
-(litorgy-R-input-command
- (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
-	  name (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field))))
-#+end_src
-
-   I haven't tried to implement this yet as it's basically just
-   fiddling with something that works. The only reason for it I can
-   think of would be efficiency and I haven't tested that.
-
-   [Eric] Sounds like a good idea, I'll bump this up to TODO.  Didn't
-   work after an initial test, but still worth trying.
-
-for quick tests
-
-#+tblname: quick-test
-| 1 | 2 | 3 |
-
-#+begin_src R :var vec=quick-test
-mean(mean(vec))
-#+end_src
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
@@ -197,6 +168,38 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DEFERRED use textConnection to pass tsv to R?
+   When passing args from the org buffer to R, the following route is
+   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
+   think it would be possible to avoid having to write to file by
+   constructing an R expression in litorgy-R-assign-elisp, something
+   like this
+
+#+begin_src emacs-lisp
+(litorgy-R-input-command
+ (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
+	  name (orgtbl-to-tsv value '(:sep "\t" :fmt litorgy-R-quote-tsv-field))))
+#+end_src
+
+   I haven't tried to implement this yet as it's basically just
+   fiddling with something that works. The only reason for it I can
+   think of would be efficiency and I haven't tested that.
+
+   This Didn't work after an initial test.  I still think this is a
+   good idea (I also think we should try to do something similar when
+   writing out results frmo R to elisp) however as it wouldn't result
+   in any functional changes I'm bumping it down to deferred for
+   now. [Eric]
+
+for quick tests
+
+#+tblname: quick-test
+| 1 | 2 | 3 |
+
+#+begin_src R :var vec=quick-test
+mean(mean(vec))
+#+end_src
 
 ** DONE litorgy tests litorgy [1/1]
 since we are accumulating this nice collection of source-code blocks
