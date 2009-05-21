@@ -30,14 +30,21 @@
     eventually in different buffers entirely).
 
 #+srcname: developing-resnames
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp  :results silent
 'schulte
 #+end_src
 
-#+resname:
-
     Once source blocks are able to find their own =#+resname:= lines
     we then need to...
+
+#+srcname: sbe-w-new-results
+#+begin_src emacs-lisp :results replace
+(sbe "developing-resnames")
+#+end_src
+
+#+resname:
+: schulte
+
 
 *** TODO change the results insertion functions to use these lines
 

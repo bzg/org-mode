@@ -110,7 +110,7 @@ Optionally supply a value for INFO in the form returned by
 
 Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the source code block."
-  (interactive "P")
+  (interactive)
   (let* ((info (or info (litorgy-get-src-block-info)))
          (lang (first info))
          (body (second info))
@@ -120,9 +120,7 @@ the header arguments specified at the source code block."
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
-    (if arg
-        (message (if (stringp result) result (format "%S" result)))
-      (litorgy-insert-result result (cdr (assoc :results params))))
+    (litorgy-insert-result result (cdr (assoc :results params)))
     result))
 
 (defun litorgy-eval-buffer (&optional arg)
@@ -228,7 +226,7 @@ line.  If no result exists for this block then create a
                             (re-search-forward "[^ \f\t\n\r\v]" nil t)
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
                           (progn ;; or we need to back up and make one ourselves
-                            (goto-char end) (open-line 3) (forward-char 1)
+                            (goto-char end) (open-line 2) (forward-char 1)
                             (insert "#+resname:") (move-beginning-of-line 1) t)))
                (point))))))
 
@@ -245,23 +243,20 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
-  (if (stringp result)
+  (if (stringp result) ;; unless results are a list, ensure they're a string
       (setq result (litorgy-clean-text-properties result))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and insert (string-equal insert "replace"))
-      (litorgy-remove-result (listp result)))
+  (if (and insert (string-equal insert "replace")) (litorgy-remove-result))
   (if (= (length result) 0)
       (message "no result returned by source block")
     (if (and insert (string-equal insert "silent"))
         (progn (message (format "%S" result)) result)
-      (when (and (stringp result)
+      (when (and (stringp result) ;; ensure results end in a newline
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-        (if (re-search-forward "^#\\+end_src" nil t)
-            (progn (open-line 1) (forward-char 2))
-          (progn (open-line 1) (forward-char 1)))
+        (goto-char (litorgy-where-is-src-block-result)) (forward-line 1)
         (if (stringp result) ;; assume the result is a table if it's not a string
             (litorgy-examplize-region (point) (progn (insert result) (point)))
           (progn
@@ -278,23 +273,20 @@ silent -- no results are inserted"
 relies on `litorgy-insert-result'."
   (with-temp-buffer (litorgy-insert-result result) (buffer-string)))
 
-(defun litorgy-remove-result (&optional table)
-  "Remove the result following the current source block.  If
-optional argument TABLE is supplied then remove the table
-following the block rather than the fixed width example."
+(defun litorgy-remove-result ()
+  "Remove the result of the current source block."
   (save-excursion
-    (re-search-forward "^#\\+end_src" nil t)
-    (forward-char 1)
+    (goto-char (litorgy-where-is-src-block-result)) (forward-line 1)
     (delete-region (point)
-                   (save-excursion (forward-line 1)
-                                   (if table
-                                       (org-table-end)
-                                     (while (if (looking-at ": ")
-                                                (progn (while (looking-at ": ")
-                                                         (forward-line 1)) t))
-                                       (forward-line 1))
-                                     (forward-line -1)
-                                     (point))))))
+                   (save-excursion
+                     (if (org-at-table-p)
+                         (org-table-end)
+                       (while (if (looking-at ": ")
+                                  (progn (while (looking-at ": ")
+                                           (forward-line 1)) t))
+                         (forward-line 1))
+                       (forward-line -1)
+                       (point))))))
 
 (defun litorgy-examplize-region (beg end)
   "Comment out region using the ': ' org example quote."
