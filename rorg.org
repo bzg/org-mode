@@ -5,11 +5,16 @@
 
 * Tasks [12/18]
 ** TODO results-type header (scalar/vector)
-In response to a point in Dan's email.  We should allow the user to
-force scalar or vector results.  This could be done with a header
-argument, and the default behavior could be controlled through a
-configuration variable.
+   In response to a point in Dan's email.  We should allow the user to
+   force scalar or vector results.  This could be done with a header
+   argument, and the default behavior could be controlled through a
+   configuration variable.
 
+   Since the source blocks are named with =#+srcname:= lines we can
+   name results with =#+resname:= lines (if the source block has no
+   name then no name is given to the =#+resname:= line on creation,
+   otherwise the name of the source block is used).
+   
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
@@ -141,9 +146,12 @@ for quick tests
 #+tblname: quick-test
 | 1 | 2 | 3 |
 
+#+srcname: quick-test-src-blk
 #+begin_src R :var vec=quick-test
 mean(mean(vec))
 #+end_src
+
+: 2
 
 ** DEFERRED Rework Interaction with Running Processes [0/3]
 *** TODO ability to select which of multiple sessions is being used

@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; See rorg.org in this directory for more information
+;; See rorg.org in the parent directory for more information
 
 ;;; Code:
 (require 'org)
@@ -141,32 +141,50 @@ the header arguments specified at the source code block."
     (litorgy-eval-buffer)
     (widen)))
 
+(defun litorgy-goto-src-block-head ()
+  "Position the point at the beginning of the current source
+block.  Specifically at the beginning of the #+BEGIN_SRC line.
+If the point is not on a source block then return nil."
+  (let ((initial (point)) top bottom)
+    (or
+     (save-excursion ;; on a #+srcname: line
+       (beginning-of-line 1)
+       (and (looking-at "#\\+srcname") (forward-line 1)
+            (looking-at litorgy-src-block-regexp)
+            (point)))
+     (save-excursion ;; on a #+begin_src line
+       (beginning-of-line 1)
+       (and (looking-at litorgy-src-block-regexp)
+            (point)))
+     (save-excursion ;; inside a src block
+       (and
+        (re-search-backward "#\\+begin_src" nil t) (setq top (point))
+        (re-search-forward "#\\+end_src" nil t) (setq bottom (point))
+        (< top initial) (< initial bottom)
+        (goto-char top) (looking-at litorgy-src-block-regexp)
+        (point))))))
+
 (defun litorgy-get-src-block-info ()
   "Return the information of the current source block as a list
 of the following form.  (language body header-arguments-alist)"
-  (let ((case-fold-search t)
-        top middle bottom)
-    (if (or
-         (save-excursion ;; on a #+srcname: line
-           (beginning-of-line 1)
-           (and (looking-at "#\\+srcname") (forward-line 1)
-                (looking-at litorgy-src-block-regexp)))
-         (save-excursion ;; on a #+begin_src line
-           (beginning-of-line 1) (looking-at litorgy-src-block-regexp))
-         (save-excursion ;; inside a src block
-           (and
-            (setq middle (point)) (re-search-backward "#\\+begin_src" nil t)
-            (setq top (point)) (re-search-forward "#\\+end_src" nil t)
-            (setq bottom (point))
-            (< top middle) (< middle bottom)
-            (goto-char top) (looking-at litorgy-src-block-regexp))))
-        (litorgy-parse-src-block-match)
+  (let ((case-fold-search t) head)
+    (if (setq head (litorgy-goto-src-block-head))
+        (save-excursion (goto-char head) (litorgy-parse-src-block-match))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (forward-char 1)
             (looking-at litorgy-inline-src-block-regexp))
           (litorgy-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
+
+(defun litorgy-get-src-block-name ()
+  "Return the name of the current source block if one exists"
+  (let ((case-fold-search t))
+    (save-excursion
+      (goto-char (litorgy-goto-src-block-head))
+      (if (save-excursion (forward-line -1)
+                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
+          (litorgy-clean-text-properties (match-string 1))))))
 
 (defun litorgy-parse-src-block-match ()
   (list (litorgy-clean-text-properties (match-string 1))
@@ -232,6 +250,13 @@ silent -- no results are inserted"
   "Return RESULT as a string in org-mode format.  This function
 relies on `litorgy-insert-result'."
   (with-temp-buffer (litorgy-insert-result result) (buffer-string)))
+
+(defun litorgy-goto-result ()
+  "Assumes that the point is on or in a source block.  This
+functions will place the point at the beginning of the related
+result line, or if no such line exists it will create one
+immediately following the source block."
+  )
 
 (defun litorgy-remove-result (&optional table)
   "Remove the result following the current source block.  If
