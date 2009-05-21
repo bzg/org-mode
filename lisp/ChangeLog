@@ -1,5 +1,12 @@
 2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-priority, org-shiftup, org-shiftdown): Disable
+	priority commands.
+
+	* org-agenda.el (org-agenda-priority): Disable priority commands.
+
+	* org.el (org-enable-priority-commands): New option.
+
 	* org-colview-xemacs.el (org-columns-compute)
 	(org-columns-number-to-string): Fix problems with empty fields.
 

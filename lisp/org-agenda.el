@@ -5683,6 +5683,8 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 This changes the line at point, all other lines in the agenda referring to
 the same tree node, and the headline of the tree node in the Org-mode file."
   (interactive)
+  (unless org-enable-priority-commands
+    (error "Priority commands are disabled"))
   (org-agenda-check-no-diary)
   (let* ((marker (or (get-text-property (point) 'org-marker)
 		     (org-agenda-error)))

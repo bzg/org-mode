@@ -2001,6 +2001,13 @@ property to one or more of these keywords."
   :tag "Org Priorities"
   :group 'org-todo)
 
+(defcustom org-enable-priority-commands t
+  "Non-nil means, priority commands are active.
+When nil, these commands will be disabled, so that you never accidentally
+set a priority."
+  :group 'org-priorities
+  :type 'boolean)
+
 (defcustom org-highest-priority ?A
   "The highest priority of TODO items.  A character like ?A, ?B etc.
 Must have a smaller ASCII number than `org-lowest-priority'."
@@ -10313,6 +10320,8 @@ from the `before-change-functions' in the current buffer."
   "Change the priority of an item by ARG.
 ACTION can be `set', `up', `down', or a character."
   (interactive)
+  (unless org-enable-priority-commands
+    (error "Priority commands are disabled"))
   (setq action (or action 'set))
   (let (current new news have remove)
     (save-excursion
@@ -14418,6 +14427,7 @@ depending on context.  See the individual commands for more information."
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-down 'org-timestamp-up)))
    ((and (not (eq org-support-shift-select 'always))
+	 org-enable-priority-commands
 	 (org-on-heading-p))
     (call-interactively 'org-priority-up))
    ((and (not org-support-shift-select) (org-at-item-p))
@@ -14439,6 +14449,7 @@ depending on context.  See the individual commands for more information."
     (call-interactively (if org-edit-timestamp-down-means-later
 			    'org-timestamp-up 'org-timestamp-down)))
    ((and (not (eq org-support-shift-select 'always))
+	 org-enable-priority-commands
 	 (org-on-heading-p))
     (call-interactively 'org-priority-down))
    ((and (not org-support-shift-select) (org-at-item-p))
