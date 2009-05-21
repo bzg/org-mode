@@ -1220,6 +1220,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
   "Keymap for `org-agenda-mode'.")
 
 (defvar org-agenda-menu) ; defined later in this file.
+(defvar org-agenda-restrict) ; defined later in this file.
 (defvar org-agenda-follow-mode nil)
 (defvar org-agenda-clockreport-mode nil)
 (defvar org-agenda-show-log nil)
@@ -1370,6 +1371,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map [(right)] 'org-agenda-later)
 (org-defkey org-agenda-mode-map [(left)] 'org-agenda-earlier)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-c" 'org-agenda-columns)
+(org-defkey org-agenda-mode-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
 
 (org-defkey org-agenda-mode-map "[" 'org-agenda-manipulate-query-add)
 (org-defkey org-agenda-mode-map "]" 'org-agenda-manipulate-query-subtract)
@@ -1481,7 +1483,9 @@ The following commands are available:
       :style toggle :selected org-agenda-archives-mode :active t]
      ["Include archive files" (org-agenda-archives-mode t)
       :style toggle :selected (eq org-agenda-archives-mode t) :active t
-      :keys "C-u v"])
+      :keys "C-u v"]
+     "--"
+     ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
     ["Write view to file" org-write-agenda t]
     ["Rebuild buffer" org-agenda-redo t]
     ["Save all Org-mode Buffers" org-save-all-org-buffers t]

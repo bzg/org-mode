@@ -6876,6 +6876,11 @@ that entry would be in the original buffer (taken from a property, from a
 @code{#+COLUMNS} line, or from the default variable
 @code{org-columns-default-format}), will be used in the agenda.
 
+@kindex C-c C-x >
+@item C-c C-x >
+Remove the restriction lock on the agenda, if it is currently restricted to a
+file or subtree (@pxref{Agenda files}).
+
 @tsubheading{Secondary filtering and query editing}
 @cindex filtering, by tag and effort, in agenda
 @cindex tag filtering, in agenda
