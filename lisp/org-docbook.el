@@ -263,7 +263,8 @@ $ emacs --batch
 No file is created."
   (interactive)
   (org-export-as-docbook nil nil "*Org DocBook Export*")
-  (switch-to-buffer-other-window "*Org DocBook Export*"))
+  (when org-export-show-temporary-export-buffer
+    (switch-to-buffer-other-window "*Org DocBook Export*")))
 
 ;;;###autoload
 (defun org-replace-region-by-docbook (beg end)
@@ -1117,7 +1118,8 @@ publishing directory."
 	(insert "</article>"))
       (or to-buffer (save-buffer))
       (goto-char (point-min))
-      (message "Exporting... done")
+      (or (org-export-push-to-kill-ring "DocBook")
+	  (message "Exporting... done"))
       (if (eq to-buffer 'string)
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))

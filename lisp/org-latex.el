@@ -363,7 +363,8 @@ emacs   --batch
 No file is created.  The prefix ARG is passed through to `org-export-as-latex'."
   (interactive "P")
   (org-export-as-latex arg nil nil "*Org LaTeX Export*")
-  (switch-to-buffer-other-window "*Org LaTeX Export*"))
+  (when org-export-show-temporary-export-buffer
+    (switch-to-buffer-other-window "*Org LaTeX Export*")))
 
 ;;;###autoload
 (defun org-replace-region-by-latex (beg end)
@@ -585,7 +586,8 @@ when PUB-DIR is set, use this as the publishing directory."
     (unless body-only (insert "\n\\end{document}"))
     (or to-buffer (save-buffer))
     (goto-char (point-min))
-    (message "Exporting to LaTeX...done")
+    (or (org-export-push-to-kill-ring "LaTeX")
+	(message "Exporting to LaTeX...done"))
     (prog1
 	(if (eq to-buffer 'string)
 	    (prog1 (buffer-substring (point-min) (point-max))

@@ -1,5 +1,39 @@
 2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-push-to-kill-ring): New function.
+	(org-export-copy-to-kill-ring): New option.
+
+	* org-latex.el (org-export-as-latex): Call
+	`org-export-push-to-kill-ring'.
+
+	* org-html.el (org-export-as-html): Call
+	`org-export-push-to-kill-ring'.
+
+	* org-docbook.el (org-export-as-docbook): Call
+	`org-export-push-to-kill-ring'.
+
+	* org-ascii.el (org-export-as-ascii): Call
+	`org-export-push-to-kill-ring'.
+
+	* org-exp.el (org-export-show-temporary-export-buffer): New
+	option. 
+
+	* org-latex.el (org-export-as-latex): Use
+	`org-export-show-temporary-export-buffer'.
+
+	* org-html.el (org-export-as-html): Use
+	`org-export-show-temporary-export-buffer'.
+
+	* org-docbook.el (org-export-as-docbook): Use
+	`org-export-show-temporary-export-buffer'.
+
+	* org-ascii.el (org-export-as-ascii-to-buffer): Use
+	`org-export-show-temporary-export-buffer'.
+
+	* org-exp.el (org-export-show-temporary-export-buffer): New
+	option.
+	(org-export-push-to-kill-ring): New function.
+
 	* org-colview.el (org-columns-compile-map): New variable.
 	(org-columns-new, org-columns-compute)
 	(org-columns-number-to-string, org-columns-uncompile-format)

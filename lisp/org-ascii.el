@@ -33,12 +33,6 @@
   :tag "Org Export ASCII"
   :group 'org-export)
 
-(defcustom org-export-ascii-copy-to-kill t
-  "Non-nil means, copy ASCII export aways to kill ring.
-This makes it easy to generate ASCII and then paste it."
-  :group 'org-export-ascii
-  :type 'boolean)
-
 (defcustom org-export-ascii-underline '(?\$ ?\# ?^ ?\~ ?\= ?\-)
   "Characters for underlining headings in ASCII export.
 In the given sequence, these characters will be used for level 1, 2, ..."
@@ -72,7 +66,8 @@ in this way, it will be wrapped."
 No file is created.  The prefix ARG is passed through to `org-export-as-ascii'."
   (interactive "P")
   (org-export-as-ascii arg nil nil "*Org ASCII Export*")
-  (switch-to-buffer-other-window "*Org ASCII Export*"))
+  (when org-export-show-temporary-export-buffer
+    (switch-to-buffer-other-window "*Org ASCII Export*")))
 
 ;;;###autoload
 (defun org-replace-region-by-ascii (beg end)
@@ -458,12 +453,8 @@ publishing directory."
 	(goto-char beg)))
     (or to-buffer (save-buffer))
     (goto-char (point-min))
-    (when org-export-ascii-copy-to-kill
-      (kill-new (buffer-string))
-      (when (fboundp 'x-set-selection)
-	(x-set-selection 'PRIMARY (buffer-string))
-	(x-set-selection 'CLIPBOARD (buffer-string)))
-      (message "Exported ASCII pushed to kill ring and clipboard"))
+    (or (org-export-push-to-kill-ring "ASCII")
+	(message "Exporting... done"))
     ;; Return the buffer or a string, according to how this function was called
     (if (eq to-buffer 'string)
 	(prog1 (buffer-substring (point-min) (point-max))

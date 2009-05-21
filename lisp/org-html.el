@@ -399,7 +399,8 @@ emacs   --batch
 No file is created.  The prefix ARG is passed through to `org-export-as-html'."
   (interactive "P")
   (org-export-as-html arg nil nil "*Org HTML Export*")
-  (switch-to-buffer-other-window "*Org HTML Export*"))
+  (when org-export-show-temporary-export-buffer
+    (switch-to-buffer-other-window "*Org HTML Export*")))
 
 ;;;###autoload
 (defun org-replace-region-by-html (beg end)
@@ -1367,7 +1368,8 @@ lang=\"%s\" xml:lang=\"%s\">
 			  (make-string n ?x)))))
       (or to-buffer (save-buffer))
       (goto-char (point-min))
-      (message "Exporting... done")
+      (or (org-export-push-to-kill-ring "HTML")
+	  (message "Exporting... done"))
       (if (eq to-buffer 'string)
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))

@@ -53,6 +53,20 @@
 ;; FIXME
 (defvar org-export-publishing-directory nil)
 
+(defcustom org-export-show-temporary-export-buffer t
+  "Non-nil means, show buffer after exporting to temp buffer.
+When Org exports to a file, the buffer visiting that file is ever
+shown, but remains buried.  However, when exporting to a temporary
+buffer, that buffer is popped up in a second window.  When this variable
+is nil, the buffer remains buried also in these cases."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-copy-to-kill-ring t
+  "Non-nil means, exported stuff will also be pushed onto the kill ring."
+  :group 'org-export-general
+  :type 'boolean)
+
 (defcustom org-export-run-in-background nil
   "Non-nil means export and publishing commands will run in background.
 This works by starting up a separate Emacs process visiting the same file
@@ -67,7 +81,6 @@ If this option is t, the double prefix can be used to exceptionally
 force an export command into the current process."
   :group 'org-export-general
   :type 'boolean)
-
 
 (defcustom org-export-select-tags '("export")
   "Tags that select a tree for export.
@@ -2705,6 +2718,16 @@ stacked delimiters is N.  Escaping delimiters is not possible."
 		   desc))
 	(replace-match "%s" t t desc)
       (or desc "%s"))))
+
+(defun org-export-push-to-kill-ring (format)
+  "Push buffer content to kill ring.
+The depends on the variable `org-export-copy-to-kill'."
+  (when org-export-copy-to-kill-ring
+    (kill-new (buffer-string))
+    (when (fboundp 'x-set-selection)
+      (x-set-selection 'PRIMARY (buffer-string))
+      (x-set-selection 'CLIPBOARD (buffer-string)))
+    (message "%s export done, pushed to kill ring and clipboard" format)))
 
 (provide 'org-exp)
 
