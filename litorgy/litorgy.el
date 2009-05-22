@@ -120,7 +120,9 @@ the header arguments specified at the source code block."
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
-    (litorgy-insert-result result (cdr (assoc :results params)))
+    (if arg
+        (message (format "%S" result))
+      (litorgy-insert-result result (cdr (assoc :results params))))
     result))
 
 (defun litorgy-eval-buffer (&optional arg)
