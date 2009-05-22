@@ -3,7 +3,13 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [13/20]
+* Tasks [13/22]
+** TODO command line execution
+Allow source code blocks to be called form the command line.  This
+will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
+
+This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
+
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
    and results in other buffers.
