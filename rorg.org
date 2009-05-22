@@ -3,7 +3,13 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [13/22]
+* Tasks [13/24]
+** TODO (simple caching) check for named results before source blocks
+see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
+
+** TODO name named results if source block is named
+currently this isn't happening although it should be
+
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
@@ -24,11 +30,28 @@ This will rely upon [[* resolve references to other buffers][resolve references 
    argument, and the default behavior could be controlled through a
    configuration variable.
    
-   
-#+srcname: scalar as 
-#+begin_src language 
-
+#+srcname: task-trivial-vector
+#+begin_src ruby :results replace
+:scalar
 #+end_src
+
+#+resname:
+: :scalar
+
+
+   since it doesn't make sense to turn a vector into a scalar, lets
+   just add a two values...
+   
+   - vector :: forces the results to be a vector (potentially 1 dimensional)
+   - file :: this throws an error if the result isn't a string, and
+             tries to treat it as a path to a file.
+
+   I'm just going to cram all of these into the =:results= header
+   argument.  Then if we allow multiple header arguments it should
+   work out, for example one possible header argument string could be
+   =:results replace vector file=, which would *replace* any existing
+   results forcing the results into an org-mode table, and
+   interpreting any strings as file paths.
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
@@ -446,7 +469,7 @@ example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
 
-* Bugs [9/11]
+* Bugs [9/12]
 
 ** TODO collapsing consecutive newlines in string output
 
