@@ -102,11 +102,13 @@ return nil."
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
       (goto-char (point-min))
-      ;; TODO This should explicitly look for #+resname: lines before
-      ;; looking for #+srcname: lines to avoid re-calculating code
-      (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\|RES\\)NAME:[ \t]*"
+      (unless (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
+                                            (regexp-quote ref) "[ \t]*$"))
+                    (regexp (concat "^#\\+SRCNAME:[ \t]*"
                                     (regexp-quote ref) "[ \t]*$")))
-                (or (re-search-forward regexp nil t)
+                (or (re-search-forward result_regexp nil t)
+                    (re-search-forward result_regexp nil t)
+                    (re-search-forward regexp nil t)
                     (re-search-backward regexp nil t)))
         ;; ;; TODO: allow searching for names in other buffers
         ;; (setq id-loc (org-id-find ref 'marker)

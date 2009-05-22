@@ -1,7 +1,7 @@
 #+TITLE: Examples of Litorgy in Action
 #+OPTIONS: toc:nil num:nil ^:nil
 
-* size of the rorg repository
+* size of the files in your home directory
 
 This will work for Linux and Mac users, not so sure about shell
 commands for windows users.
@@ -14,7 +14,7 @@ labeled directory-pie and press =\C-c\C-c=.
 cd ~ && du -sc * |grep -v total
 #+end_src
 
-#+resname: directory-results
+#+resname: directories
 |       64 | "Desktop"   |
 | 11882808 | "Documents" |
 |  8210024 | "Downloads" |
@@ -30,12 +30,8 @@ cd ~ && du -sc * |grep -v total
 |  5282032 | "src"       |
 |     1264 | "tools"     |
 
-[Eric] I sometimes get weird results here, where R will import the
-labels into the third column instead of the second.  I don't entirely
-trust the R table importing mechanisms so far.
-
 #+srcname: directory-pie
-#+begin_src R :var dirs = directory-results
+#+begin_src R :var dirs = directories
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
