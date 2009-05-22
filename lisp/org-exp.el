@@ -2725,8 +2725,8 @@ The depends on the variable `org-export-copy-to-kill'."
   (when org-export-copy-to-kill-ring
     (kill-new (buffer-string))
     (when (fboundp 'x-set-selection)
-      (x-set-selection 'PRIMARY (buffer-string))
-      (x-set-selection 'CLIPBOARD (buffer-string)))
+      (ignore-errors (x-set-selection 'PRIMARY (buffer-string)))
+      (ignore-errors (x-set-selection 'CLIPBOARD (buffer-string))))
     (message "%s export done, pushed to kill ring and clipboard" format)))
 
 (provide 'org-exp)

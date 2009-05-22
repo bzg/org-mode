@@ -1,5 +1,8 @@
 2009-05-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-push-to-kill-ring): Protect using
+	x-set-selection, because that does not always work.
+
 	* org-agenda.el (org-agenda-list): Apply the new face
 	`org-agenda-date-today'.
 
