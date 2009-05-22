@@ -3,8 +3,7 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [14/26]
-** TODO set =:results silent= when eval with prefix argument
+* Tasks [15/26]
 
 ** TODO (simple caching) check for named results before source blocks
 see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
@@ -230,6 +229,11 @@ mean(mean(vec))
     out some lines, and then convert it to litorgy format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+** DONE set =:results silent= when eval with prefix argument
+
+#+begin_src emacs-lisp
+'silentp
+#+end_src
 ** DONE results-type header (vector/file) [3/3]
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header

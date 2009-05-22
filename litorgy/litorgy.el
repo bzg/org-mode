@@ -34,8 +34,9 @@
 (defun litorgy-execute-src-block-maybe ()
   "Detect if this is context for a litorgical src-block and if so
 then run `litorgy-execute-src-block'."
+  (interactive)
   (let ((info (litorgy-get-src-block-info)))
-    (if info (progn (litorgy-execute-src-block nil info) t) nil)))
+    (if info (progn (litorgy-execute-src-block current-prefix-arg info) t) nil)))
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'litorgy-execute-src-block-maybe)
 
