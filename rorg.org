@@ -23,6 +23,12 @@ This will rely upon [[* resolve references to other buffers][resolve references 
    force scalar or vector results.  This could be done with a header
    argument, and the default behavior could be controlled through a
    configuration variable.
+   
+   
+#+srcname: scalar as 
+#+begin_src language 
+
+#+end_src
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
@@ -115,6 +121,17 @@ source code block.
 
 I think the best way to approach this would be to start with an
 example R source-code block and then work up from there.
+
+** PROPOSED support for passing paths to files between source blocks
+Maybe this should be it's own result type (in addition to scalars and
+vectors).  The reason being that some source-code blocks (for example
+ditaa or anything that results in the creation of a file) may want to
+pass a file path back to org-mode which could then be inserted into
+the org-mode buffer as a link to the file...
+
+This would allow for display of images upon export providing
+functionality similar to =org-exp-blocks= only in a more general
+manner.
 
 ** PROPOSED re-implement helper functions from org-R
 Much of the power of org-R seems to be in it's helper functions for
