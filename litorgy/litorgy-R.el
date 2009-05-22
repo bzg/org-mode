@@ -52,25 +52,24 @@ called by `litorgy-execute-src-block'."
 
 (defun litorgy-R-quote-tsv-field (s)
   "Quote field S for export to R."
-  (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\""))
+  (if (stringp s)
+      (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
+    (format "%S" s)))
 
 (defun litorgy-R-assign-elisp (name value)
   "Read the elisp VALUE into a variable named NAME in the current
 R process in `litorgy-R-buffer'."
-  (unless litorgy-R-buffer
-    (error "No active R buffer"))
-  (if (listp value)
-      (let ((transition-file (make-temp-file "litorgy-R-import"))
-            (value (mapcar (lambda (row)
-                             (mapcar (lambda (cell)
-                                       (if (stringp cell)
-                                           cell
-                                         (format "%S" cell))) row)) value)))
-        (with-temp-file transition-file
-	  (insert (orgtbl-to-tsv value '(:fmt litorgy-R-quote-tsv-field)))
-          (insert "\n"))
-        (litorgy-R-input-command
-	 (format "%s <- read.table(\"%s\", sep=\"\\t\", as.is=TRUE)" name transition-file)))))
+  (unless litorgy-R-buffer (error "No active R buffer"))
+  (litorgy-R-input-command
+   (if (listp value)
+       (let ((transition-file (make-temp-file "litorgy-R-import")))
+         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
+         (unless (listp (car value)) (setq value (list value)))
+         (with-temp-file transition-file
+           (insert (orgtbl-to-tsv value '(:fmt litorgy-R-quote-tsv-field)))
+           (insert "\n"))
+         (format "%s <- read.table(\"%s\", sep=\"\\t\", as.is=TRUE)" name transition-file))
+     (format "%s <- %s" name (litorgy-R-quote-tsv-field value)))))
 
 (defun litorgy-R-to-elisp (func-name)
   "Return the result of calling the function named FUNC-NAME in
