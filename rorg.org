@@ -4,26 +4,6 @@
 #+STARTUP: oddeven
 
 * Tasks [13/25]
-** TODO (simple caching) check for named results before source blocks
-see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
-
-** TODO name named results if source block is named
-currently this isn't happening although it should be
-
-** TODO command line execution
-Allow source code blocks to be called form the command line.  This
-will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
-
-This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
-
-** TODO resolve references to other buffers
-   This would allow source blocks to call upon tables, source-blocks,
-   and results in other buffers.
-   
-   See...
-   - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
-   - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
-
 ** TODO results-type header (vector/file) [1/3]
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header
@@ -71,6 +51,25 @@ the string path of their files, and can add =file= to their results
 header.
 
 *** TODO vector result types
+** TODO (simple caching) check for named results before source blocks
+see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
+
+** TODO name named results if source block is named
+currently this isn't happening although it should be
+
+** TODO command line execution
+Allow source code blocks to be called form the command line.  This
+will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
+
+This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
+
+** TODO resolve references to other buffers
+   This would allow source blocks to call upon tables, source-blocks,
+   and results in other buffers.
+   
+   See...
+   - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
+   - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
 
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or

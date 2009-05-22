@@ -245,13 +245,14 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
+  (if insert (setq insert (split-string insert)))
   (if (stringp result) ;; unless results are a list, ensure they're a string
       (setq result (litorgy-clean-text-properties result))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and insert (string-equal insert "replace")) (litorgy-remove-result))
+  (if (and insert (member "replace" insert)) (litorgy-remove-result))
   (if (= (length result) 0)
       (message "no result returned by source block")
-    (if (and insert (string-equal insert "silent"))
+    (if (and insert (member "silent" insert))
         (progn (message (format "%S" result)) result)
       (when (and (stringp result) ;; ensure results end in a newline
                  (not (or (string-equal (substring result -1) "\n")
@@ -283,11 +284,11 @@ relies on `litorgy-insert-result'."
                    (save-excursion
                      (if (org-at-table-p)
                          (org-table-end)
-                       (while (if (looking-at ": ")
-                                  (progn (while (looking-at ": ")
-                                           (forward-line 1)) t))
-                         (forward-line 1))
-                       (forward-line -1)
+                       (if (while (if (looking-at ": ")
+                                      (progn (while (looking-at ": ")
+                                               (forward-line 1)) t))
+                             (forward-line 1))
+                           (forward-line -1))
                        (point))))))
 
 (defun litorgy-examplize-region (beg end)
