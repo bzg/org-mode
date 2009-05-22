@@ -423,7 +423,24 @@ example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
 
-* Bugs [9/10]
+* Bugs [9/11]
+
+** TODO collapsing consecutive newlines in string output
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results replace
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 	     and this is the second one
+: 	return even a third
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
@@ -774,6 +791,37 @@ table.class.name
 #+begin_src emacs-lisp :results silent :var n=7
 (fibbd n)
 #+end_src
+
+** sbe tests
+Testing the insertion of results into org-mode tables.
+
+#+srcname: multi-line-output
+#+begin_src ruby :results replace
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 	     and this is the second one
+: 	return even a third
+
+#+srcname: multi-line-error
+#+begin_src ruby :results replace
+raise "oh nooooooooooo"
+#+end_src
+
+#+resname:
+: -:5: warning: parenthesize argument(s) for future version
+: -:5:in `main': oh nooooooooooo (RuntimeError)
+: 	from -:8
+
+| the first line ends here... | -:5: warning: parenthesize argument(s) for future version... |
+#+TBLFM: $1='(sbe "multi-line-output")::$2='(sbe "multi-line-error")
 
 
 * Sandbox

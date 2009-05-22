@@ -55,6 +55,11 @@
 ;;; Code:
 (require 'litorgy)
 
+(defun org-table-truncate-at-newline (string)
+  (if (and (stringp string) (string-match "[\n\r]" string))
+      (concat (substring string 0 (match-beginning 0)) "...")
+    string))
+
 (defmacro sbe (source-block &rest variables)
   "Return the results of calling SOURCE-BLOCK with all assigning
 every variable in VARIABLES.  Each element of VARIABLES should be
@@ -69,17 +74,18 @@ source code block.
 results
 #+end_src"
   (unless (stringp source-block) (setq source-block (symbol-name source-block)))
-  (if (and source-block (> (length source-block) 0))
-      (let ((params (eval `(litorgy-parse-header-arguments
-                            (concat ":var results="
-                                    ,source-block
-                                    "("
-                                    (mapconcat (lambda (var-spec)
-                                                 (format "%S=%s" (first var-spec) (second var-spec)))
-                                               ',variables ", ")
-                                    ")")))))
-        (litorgy-execute-src-block t (list "emacs-lisp" "results" params)))
-    ""))
+  (org-table-truncate-at-newline ;; org-table cells can't be multi-line
+   (if (and source-block (> (length source-block) 0))
+       (let ((params (eval `(litorgy-parse-header-arguments
+                             (concat ":var results="
+                                     ,source-block
+                                     "("
+                                     (mapconcat (lambda (var-spec)
+                                                  (format "%S=%s" (first var-spec) (second var-spec)))
+                                                ',variables ", ")
+                                     ")")))))
+         (litorgy-execute-src-block t (list "emacs-lisp" "results" params)))
+     "")))
 
 (provide 'litorgy-table)
 ;;; litorgy-table.el ends here
