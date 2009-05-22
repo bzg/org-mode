@@ -3,63 +3,9 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [13/25]
-** TODO results-type header (vector/file) [2/3]
-   In response to a point in Dan's email.  We should allow the user to
-   force scalar or vector results.  This could be done with a header
-   argument, and the default behavior could be controlled through a
-   configuration variable.
-   
-#+srcname: task-trivial-vector
-#+begin_src ruby :results replace
-:scalar
-#+end_src
+* Tasks [14/26]
+** TODO set =:results silent= when eval with prefix argument
 
-#+resname:
-: :scalar
-
-   since it doesn't make sense to turn a vector into a scalar, lets
-   just add a two values...
-   
-   - vector :: forces the results to be a vector (potentially 1 dimensional)
-   - file :: this throws an error if the result isn't a string, and
-             tries to treat it as a path to a file.
-
-   I'm just going to cram all of these into the =:results= header
-   argument.  Then if we allow multiple header arguments it should
-   work out, for example one possible header argument string could be
-   =:results replace vector file=, which would *replace* any existing
-   results forcing the results into an org-mode table, and
-   interpreting any strings as file paths.
-
-*** DONE multiple =:results= headers
-
-#+srcname: multiple-result-headers
-#+begin_src ruby :results replace silent
-:schulte
-#+end_src
-
-#+resname:
-
-*** DONE file result types
-When inserting into an org-mode buffer create a link with the path
-being the value, and optionally the display being the
-=file-name-nondirectory= if it exists.
-
-#+srcname: task-file-result
-#+begin_src python :results replace file
-"something"
-#+end_src
-
-#+resname:
-[[something][something]]
-
-
-This will be useful because blocks like =ditaa= and =dot= can return
-the string path of their files, and can add =file= to their results
-header.
-
-*** TODO vector result types
 ** TODO (simple caching) check for named results before source blocks
 see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
 
@@ -134,6 +80,16 @@ du -sc ~/*
 (mapcar #'car sizes)
 #+end_src
 
+** TODO figure out how to handle graphic output
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+This should take advantage of the =:results file= option, and
+languages which almost always produce graphical output should set
+=:results file= to true by default.  That would handle placing these
+results in the buffer.  Then if there is a combination of =silent= and
+=file= =:results= headers we could drop the results to a temp buffer
+and pop open that buffer...
+
 ** TODO inline source code blocks [3/5]
    Like the =\R{ code }= blocks
 
@@ -160,17 +116,6 @@ we should color these blocks differently
 
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
-
-** TODO figure out how to handle graphic output
-This is listed under [[* graphical output][graphical output]] in out objectives.
-
-How should this work for R?  For example how are files included with
-Sweave?  Would/Should we just mimic the behavior of Sweave with the
-addition of support for poping up graphics during live evaluation of a
-source code block.
-
-I think the best way to approach this would be to start with an
-example R source-code block and then work up from there.
 
 ** PROPOSED support for passing paths to files between source blocks
 Maybe this should be it's own result type (in addition to scalars and
@@ -285,6 +230,70 @@ mean(mean(vec))
     out some lines, and then convert it to litorgy format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+** DONE results-type header (vector/file) [3/3]
+   In response to a point in Dan's email.  We should allow the user to
+   force scalar or vector results.  This could be done with a header
+   argument, and the default behavior could be controlled through a
+   configuration variable.
+   
+#+srcname: task-trivial-vector
+#+begin_src ruby :results replace vector
+:scalar
+#+end_src
+
+#+resname:
+| ":scalar" |
+
+   since it doesn't make sense to turn a vector into a scalar, lets
+   just add a two values...
+   
+   - vector :: forces the results to be a vector (potentially 1 dimensional)
+   - file :: this throws an error if the result isn't a string, and
+             tries to treat it as a path to a file.
+
+   I'm just going to cram all of these into the =:results= header
+   argument.  Then if we allow multiple header arguments it should
+   work out, for example one possible header argument string could be
+   =:results replace vector file=, which would *replace* any existing
+   results forcing the results into an org-mode table, and
+   interpreting any strings as file paths.
+
+*** DONE multiple =:results= headers
+
+#+srcname: multiple-result-headers
+#+begin_src ruby :results replace silent
+:schulte
+#+end_src
+
+#+resname:
+
+*** DONE file result types
+When inserting into an org-mode buffer create a link with the path
+being the value, and optionally the display being the
+=file-name-nondirectory= if it exists.
+
+#+srcname: task-file-result
+#+begin_src python :results replace file
+"something"
+#+end_src
+
+#+resname:
+[[something][something]]
+
+
+This will be useful because blocks like =ditaa= and =dot= can return
+the string path of their files, and can add =file= to their results
+header.
+
+*** DONE vector result types
+
+#+srcname: task-force-results
+#+begin_src emacs-lisp :results vector
+8
+#+end_src
+
+#+resname:
+| 8 |
 
 ** DONE results name
     In order to do this we will need to start naming our results.
@@ -750,42 +759,43 @@ Evaluate all the cells in this table for a comprehensive test of the
 litorgy functionality.
 
 #+TBLNAME: litorgy-tests
-| functionality           | block                   | arg |    expected |     results | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| basic evaluation        |                         |     |             |             | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp             |     |           5 |           5 | pass |
-| shell                   | basic-shell             |     |           6 |           6 | pass |
-| ruby                    | basic-ruby              |     |     litorgy |     litorgy | pass |
-| python                  | basic-python            |     | hello world | hello world | pass |
-| R                       | basic-R                 |     |          13 |          13 | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| tables                  |                         |     |             |             | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp             |     |           3 |           3 | pass |
-| ruby                    | table-ruby              |     |       1-2-3 |       1-2-3 | pass |
-| python                  | table-python            |     |           5 |           5 | pass |
-| R                       | table-R                 |     |         3.5 |         3.5 | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| source block references |                         |     |             |             | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last        |     |       Array |       Array | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| source block functions  |                         |     |             |             | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb              |     |       fibbd |       fibbd | pass |
-| run over                | Fibonacci               |   0 |           1 |           1 | pass |
-| a                       | Fibonacci               |   1 |           1 |           1 | pass |
-| variety                 | Fibonacci               |   2 |           2 |           2 | pass |
-| of                      | Fibonacci               |   3 |           3 |           3 | pass |
-| different               | Fibonacci               |   4 |           5 |           5 | pass |
-| arguments               | Fibonacci               |   5 |           8 |           8 | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| bug fixing              |                         |     |             |             | pass |
-|-------------------------+-------------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test         |     |           3 |           3 | pass |
-| R number evaluation     | bug-R-number-evaluation |     |           2 |           2 | pass |
-| multi-line ruby blocks  | multi-line-ruby-test    |     |           2 |           2 | pass |
+| functionality           | block                      | arg |    expected |     results | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| basic evaluation        |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
+| shell                   | basic-shell                |     |           6 |           6 | pass |
+| ruby                    | basic-ruby                 |     |     litorgy |     litorgy | pass |
+| python                  | basic-python               |     | hello world | hello world | pass |
+| R                       | basic-R                    |     |          13 |          13 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| tables                  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
+| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python               |     |           5 |           5 | pass |
+| R                       | table-R                    |     |         3.5 |         3.5 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block references |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| all languages           | chained-ref-last           |     |       Array |       Array | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block functions  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
+| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
+| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
+| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
+| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
+| different               | Fibonacci                  |   4 |           5 |           5 | pass |
+| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| bugs and tasks          |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
+| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
@@ -917,6 +927,18 @@ raise "oh nooooooooooo"
 
 | the first line ends here... | -:5: warning: parenthesize argument(s) for future version... |
 #+TBLFM: $1='(sbe "multi-line-output")::$2='(sbe "multi-line-error")
+
+** forcing results types tests
+
+#+srcname: test-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: test-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
 
 
 * Sandbox

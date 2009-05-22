@@ -117,9 +117,14 @@ the header arguments specified at the source code block."
          (params (org-combine-plists (third info) params))
          (cmd (intern (concat "litorgy-execute:" lang)))
          result)
+    ;; (message (format "params=%S" params)) ;; debugging statement
     (unless (member lang litorgy-interpreters)
       (error "Language is not in `litorgy-interpreters': %s" lang))
     (setq result (funcall cmd body params))
+    ;; possibly force result into a vector
+    (if (and (not (listp result)) (cdr (assoc :results params))
+             (member "vector" (split-string (cdr (assoc :results params)))))
+        (setq result (list result)))
     (if arg
         (message (format "%S" result))
       (litorgy-insert-result result (cdr (assoc :results params))))
