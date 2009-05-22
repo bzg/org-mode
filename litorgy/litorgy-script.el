@@ -85,11 +85,9 @@ executed through litorgy."
             vars "\n")
            "\n"
            (let ((body-lines (split-string body "[\n\r]+" t)))
-             (mapconcat
-              (lambda (line)
-                (format "\t%s\n" line))
-              (butlast body-lines) "\n")
-             (format "\treturn %s\n" (car (last body-lines)))))))
+             (concat
+              (mapconcat (lambda (line) (format "\t%s" line)) (butlast body-lines) "\n")
+              (format "\n\treturn %s\n" (car (last body-lines))))))))
         ;; (message (buffer-substring (point-min) (point-max))) ;; debug script
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
         ;; (message (format "shell output = %s" (buffer-string))) ;; debug results

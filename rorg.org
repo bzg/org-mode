@@ -423,12 +423,17 @@ example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
 
-* Bugs [8/10]
+* Bugs [9/10]
 
-** TODO ruby new variable creation
-Ruby doesn't seem able to handle the creation of new variables
+** TODO cursor movement when evaluating source blocks
+   E.g. the pie chart example. Despite the save-window-excursion in
+   litorgy-execute:R. (I never learned how to do this properly: org-R
+   jumps all over the place...)
 
-#+srcname: bug-ruby-number-evaluation
+** DONE ruby new variable creation (multi-line ruby blocks)
+Actually it looks like we were dropping all but the last line.
+
+#+srcname: multi-line-ruby-test
 #+begin_src ruby :var table=bug-numerical-table :results replace
 total = 0
 table.each{|n| total += n}
@@ -436,13 +441,7 @@ total/table.size
 #+end_src
 
 #+resname:
-: -:4:in `main': undefined local variable or method `total' for main:Object (NameError)
-: 	from -:7
-
-** TODO cursor movement when evaluating source blocks
-   E.g. the pie chart example. Despite the save-window-excursion in
-   litorgy-execute:R. (I never learned how to do this properly: org-R
-   jumps all over the place...)
+: 2
 
 ** DONE R code execution seems to choke on certain inputs
 Currently the R code seems to work on vertical (but not landscape)
@@ -674,6 +673,7 @@ litorgy functionality.
 |-------------------------+-------------------------+-----+-------------+-------------+------|
 | simple ruby arrays      | ruby-array-test         |     |           3 |           3 | pass |
 | R number evaluation     | bug-R-number-evaluation |     |           2 |           2 | pass |
+| multi-line ruby blocks  | multi-line-ruby-test    |     |           2 |           2 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
