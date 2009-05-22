@@ -78,8 +78,7 @@ results
                                                  (format "%S=%s" (first var-spec) (second var-spec)))
                                                ',variables ", ")
                                     ")")))))
-        (litorgy-execute-src-block
-         nil (list "emacs-lisp" "results" (org-combine-plists params '((:results . "silent"))))))
+        (litorgy-execute-src-block t (list "emacs-lisp" "results" params)))
     ""))
 
 (provide 'litorgy-table)
