@@ -2820,7 +2820,9 @@ given in `org-agenda-start-on-weekday'."
 				 'org-agenda-date))
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
-	    (if todayp (put-text-property s (1- (point)) 'org-today t))
+ 	    (when todayp 
+ 	      (put-text-property s (1- (point)) 'org-today t)
+ 	      (put-text-property s (1- (point)) 'face 'org-agenda-date-today))
 	    (if rtnall (insert
 			(org-finalize-agenda-entries
 			 (org-agenda-add-time-grid-maybe

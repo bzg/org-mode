@@ -1,3 +1,10 @@
+2009-05-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-list): Apply the new face
+	`org-agenda-date-today'.
+
+	* org-faces.el (org-agenda-date-today): New face.
+
 2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-to-appt): Turn off restriction when

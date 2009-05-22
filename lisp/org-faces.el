@@ -461,6 +461,13 @@ changes."
   (set-face-doc-string 'org-agenda-date
 		       "Face used in agenda for normal days."))
 
+(unless (facep 'org-agenda-date-today)
+  (copy-face 'org-agenda-date 'org-agenda-date-today)
+  (set-face-doc-string 'org-agenda-date-today
+ 		       "Face used in agenda for today.")
+  (when (fboundp 'set-face-attribute)
+    (set-face-attribute 'org-agenda-date-today nil :weight 'bold :italic 't)))
+
 (unless (facep 'org-agenda-date-weekend)
   (copy-face 'org-agenda-date 'org-agenda-date-weekend)
   (set-face-doc-string 'org-agenda-date-weekend
