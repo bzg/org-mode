@@ -423,7 +423,21 @@ example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
 
-* Bugs [7/9]
+* Bugs [7/10]
+
+** TODO ruby new variable creation
+Ruby doesn't seem able to handle the creation of new variables
+
+#+srcname: bug-ruby-number-evaluation
+#+begin_src ruby :var table=bug-numerical-table :results replace
+total = 0
+table.each{|n| total += n}
+total/table.size
+#+end_src
+
+#+resname:
+: -:4:in `main': undefined local variable or method `total' for main:Object (NameError)
+: 	from -:7
 
 ** TODO R code execution seems to choke on certain inputs
 
