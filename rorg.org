@@ -18,38 +18,6 @@
    argument, and the default behavior could be controlled through a
    configuration variable.
 
-** TODO results name
-    In order to do this we will need to start naming our results.
-    Since the source blocks are named with =#+srcname:= lines we can
-    name results with =#+resname:= lines (if the source block has no
-    name then no name is given to the =#+resname:= line on creation,
-    otherwise the name of the source block is used).
-
-    This will have the additional benefit of allowing results and
-    source blocks to be located in different places in a buffer (and
-    eventually in different buffers entirely).
-
-#+srcname: developing-resnames
-#+begin_src emacs-lisp  :results silent
-'schulte
-#+end_src
-
-    Once source blocks are able to find their own =#+resname:= lines
-    we then need to...
-
-#+srcname: sbe-w-new-results
-#+begin_src emacs-lisp :results replace
-(sbe "developing-resnames")
-#+end_src
-
-#+resname:
-: schulte
-
-
-*** TODO change the results insertion functions to use these lines
-
-*** TODO teach references to resolve =#+resname= lines.
-
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
@@ -245,6 +213,37 @@ mean(mean(vec))
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
 
+** DONE results name
+    In order to do this we will need to start naming our results.
+    Since the source blocks are named with =#+srcname:= lines we can
+    name results with =#+resname:= lines (if the source block has no
+    name then no name is given to the =#+resname:= line on creation,
+    otherwise the name of the source block is used).
+
+    This will have the additional benefit of allowing results and
+    source blocks to be located in different places in a buffer (and
+    eventually in different buffers entirely).
+
+#+srcname: developing-resnames
+#+begin_src emacs-lisp  :results silent
+'schulte
+#+end_src
+
+    Once source blocks are able to find their own =#+resname:= lines
+    we then need to...
+
+#+srcname: sbe-w-new-results
+#+begin_src emacs-lisp :results replace
+(sbe "developing-resnames")
+#+end_src
+
+#+resname:
+: schulte
+
+*** TODO change the results insertion functions to use these lines
+
+*** TODO teach references to resolve =#+resname= lines.
+
 ** DONE litorgy tests litorgy [1/1]
 since we are accumulating this nice collection of source-code blocks
 in the sandbox section we should make use of them as unit tests.
@@ -424,13 +423,40 @@ example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
 
-* Bugs [6/8]
+* Bugs [7/9]
+
+** TODO R code execution seems to choke on certain inputs
+
+#+srcname: set-debug-on-error
+#+begin_src emacs-lisp :results silent
+(setq debug-on-error t)
+#+end_src
+
+#+srcname: bug-numerical-table
+#+begin_src emacs-lisp :results silent
+'(1 2 3)
+#+end_src
+
+#+srcname: bug-R-number-evaluation
+#+begin_src R :var table=bug-numerical-table :results silent
+mean(table)
+#+end_src
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
    litorgy-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
-** TODO with :results replace, non-table output doesn't replace table output
+
+** DEFERRED org bug/request: prevent certain org behaviour within code blocks
+   E.g. [[]] gets recognised as a link (when there's text inside the
+   brackets). This is bad for R code at least, and more generally
+   could be argued to be inappropriate. Is it difficult to get org to
+   ignore text in code blocks? [DED]
+   
+   I believe Carsten addressed this recently on the mailing list with
+   the comment that it was indeed a difficult issue.  I believe this
+   may be one area where we could wait for an upstream (org-mode) fix.
+** DONE with :results replace, non-table output doesn't replace table output
    And vice versa. E.g. Try this first with table and then with len(table) [DED]
 #+begin_src python :var table=sandbox :results replace
 table
@@ -460,16 +486,6 @@ This would have a couple of benefits...
 
 Thoughts?  If no-one objects, I believe I will implement the labeling
 of results.
-
-** DEFERRED org bug/request: prevent certain org behaviour within code blocks
-   E.g. [[]] gets recognised as a link (when there's text inside the
-   brackets). This is bad for R code at least, and more generally
-   could be argued to be inappropriate. Is it difficult to get org to
-   ignore text in code blocks? [DED]
-   
-   I believe Carsten addressed this recently on the mailing list with
-   the comment that it was indeed a difficult issue.  I believe this
-   may be one area where we could wait for an upstream (org-mode) fix.
 
 ** DONE extra quotes for nested string
 Well R appears to be reading the tables without issue...
@@ -575,40 +591,41 @@ Evaluate all the cells in this table for a comprehensive test of the
 litorgy functionality.
 
 #+TBLNAME: litorgy-tests
-| functionality           | block            | arg |    expected |     results | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| basic evaluation        |                  |     |             |             | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp      |     |           5 |           5 | pass |
-| shell                   | basic-shell      |     |           6 |           6 | pass |
-| ruby                    | basic-ruby       |     |     litorgy |     litorgy | pass |
-| python                  | basic-python     |     | hello world | hello world | pass |
-| R                       | basic-R          |     |          13 |          13 | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| tables                  |                  |     |             |             | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp      |     |           3 |           3 | pass |
-| ruby                    | table-ruby       |     |       1-2-3 |       1-2-3 | pass |
-| python                  | table-python     |     |           5 |           5 | pass |
-| R                       | table-R          |     |         3.5 |         3.5 | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| source block references |                  |     |             |             | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last |     |       Array |       Array | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| source block functions  |                  |     |             |             | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb       |     |       fibbd |       fibbd | pass |
-| run over                | Fibonacci        |   0 |           1 |           1 | pass |
-| a                       | Fibonacci        |   1 |           1 |           1 | pass |
-| variety                 | Fibonacci        |   2 |           2 |           2 | pass |
-| of                      | Fibonacci        |   3 |           3 |           3 | pass |
-| different               | Fibonacci        |   4 |           5 |           5 | pass |
-| arguments               | Fibonacci        |   5 |           8 |           8 | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| bug fixing              |                  |     |             |             | pass |
-|-------------------------+------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test  |     |           3 |           3 | pass |
+| functionality           | block                   | arg |    expected |     results | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| basic evaluation        |                         |     |             |             | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| emacs lisp              | basic-elisp             |     |           5 |           5 | pass                          |
+| shell                   | basic-shell             |     |           6 |           6 | pass                          |
+| ruby                    | basic-ruby              |     |     litorgy |     litorgy | pass                          |
+| python                  | basic-python            |     | hello world | hello world | pass                          |
+| R                       | basic-R                 |     |          13 |          13 | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| tables                  |                         |     |             |             | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| emacs lisp              | table-elisp             |     |           3 |           3 | pass                          |
+| ruby                    | table-ruby              |     |       1-2-3 |       1-2-3 | pass                          |
+| python                  | table-python            |     |           5 |           5 | pass                          |
+| R                       | table-R                 |     |         3.5 |         3.5 | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| source block references |                         |     |             |             | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| all languages           | chained-ref-last        |     |       Array |       Array | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| source block functions  |                         |     |             |             | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| emacs lisp              | defun-fibb              |     |       fibbd |       fibbd | pass                          |
+| run over                | Fibonacci               |   0 |           1 |           1 | pass                          |
+| a                       | Fibonacci               |   1 |           1 |           1 | pass                          |
+| variety                 | Fibonacci               |   2 |           2 |           2 | pass                          |
+| of                      | Fibonacci               |   3 |           3 |           3 | pass                          |
+| different               | Fibonacci               |   4 |           5 |           5 | pass                          |
+| arguments               | Fibonacci               |   5 |           8 |           8 | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| bug fixing              |                         |     |             |             | pass                          |
+|-------------------------+-------------------------+-----+-------------+-------------+-------------------------------|
+| simple ruby arrays      | ruby-array-test         |     |           3 |           3 | pass                          |
+| R number evaluation     | bug-R-number-evaluation |     |           2 |      #ERROR | expected "2" but was "#ERROR" |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
