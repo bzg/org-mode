@@ -246,8 +246,10 @@ replace - insert results after the source block replacing any
 
 silent -- no results are inserted"
   (if insert (setq insert (split-string insert)))
-  (if (stringp result) ;; unless results are a list, ensure they're a string
-      (setq result (litorgy-clean-text-properties result))
+  (if (stringp result)
+      (progn
+        (setq result (litorgy-clean-text-properties result))
+        (if (member "file" insert) (setq result (litorgy-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
   (if (and insert (member "replace" insert)) (litorgy-remove-result))
   (if (= (length result) 0)
@@ -261,9 +263,11 @@ silent -- no results are inserted"
       (save-excursion
         (goto-char (litorgy-where-is-src-block-result)) (forward-line 1)
         (if (stringp result) ;; assume the result is a table if it's not a string
-            (litorgy-examplize-region (point) (progn (insert result) (point)))
+            (if (member "file" insert)
+                (insert result)
+              (litorgy-examplize-region (point) (progn (insert result) (point))))
           (progn
-            (insert ;; TODO ensure that string aren't over-quoted
+            (insert
              (concat (orgtbl-to-orgtbl
                       (if (consp (car result)) result (list result))
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
@@ -284,12 +288,19 @@ relies on `litorgy-insert-result'."
                    (save-excursion
                      (if (org-at-table-p)
                          (org-table-end)
-                       (if (while (if (looking-at ": ")
-                                      (progn (while (looking-at ": ")
-                                               (forward-line 1)) t))
-                             (forward-line 1))
-                           (forward-line -1))
+                       (while (if (looking-at "\\(: \\|\\[\\[\\)")
+                                  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                                           (forward-line 1)) t))
+                         (forward-line 1))
+                       (forward-line -1)
                        (point))))))
+
+(defun litorgy-result-to-file (result)
+  "Return an `org-mode' link with the path being the value or
+RESULT, and the display being the `file-name-nondirectory' if
+non-nil."
+  (let ((name (file-name-nondirectory result)))
+    (concat "[[" result (if name (concat "][" name "]]") "]]"))))
 
 (defun litorgy-examplize-region (beg end)
   "Comment out region using the ': ' org example quote."

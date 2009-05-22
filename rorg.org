@@ -4,7 +4,7 @@
 #+STARTUP: oddeven
 
 * Tasks [13/25]
-** TODO results-type header (vector/file) [1/3]
+** TODO results-type header (vector/file) [2/3]
    In response to a point in Dan's email.  We should allow the user to
    force scalar or vector results.  This could be done with a header
    argument, and the default behavior could be controlled through a
@@ -41,10 +41,19 @@
 
 #+resname:
 
-*** TODO file result types
+*** DONE file result types
 When inserting into an org-mode buffer create a link with the path
 being the value, and optionally the display being the
 =file-name-nondirectory= if it exists.
+
+#+srcname: task-file-result
+#+begin_src python :results replace file
+"something"
+#+end_src
+
+#+resname:
+[[something][something]]
+
 
 This will be useful because blocks like =ditaa= and =dot= can return
 the string path of their files, and can add =file= to their results
