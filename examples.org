@@ -11,17 +11,31 @@ labeled directory-pie and press =\C-c\C-c=.
 
 #+srcname: directories
 #+begin_src bash :results replace
-du -sc * |grep -v total | head -n 1
+cd ~ && du -sc * |grep -v total
 #+end_src
 
-| 4 | "block" |
+#+resname: directory-results
+|       64 | "Desktop"   |
+| 11882808 | "Documents" |
+|  8210024 | "Downloads" |
+|   879800 | "Library"   |
+|    57344 | "Movies"    |
+|  7590248 | "Music"     |
+|  5307664 | "Pictures"  |
+|        0 | "Public"    |
+|      152 | "Sites"     |
+|        8 | "System"    |
+|       56 | "bin"       |
+|  3274848 | "mail"      |
+|  5282032 | "src"       |
+|     1264 | "tools"     |
 
 [Eric] I sometimes get weird results here, where R will import the
 labels into the third column instead of the second.  I don't entirely
 trust the R table importing mechanisms so far.
 
 #+srcname: directory-pie
-#+begin_src R :var dirs = directories
+#+begin_src R :var dirs = directory-results
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 

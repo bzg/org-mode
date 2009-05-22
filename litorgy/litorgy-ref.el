@@ -102,7 +102,7 @@ return nil."
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
       (goto-char (point-min))
-      (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\)NAME:[ \t]*"
+      (unless (let ((regexp (concat "^#\\+\\(TBL\\|SRC\\|RES\\)NAME:[ \t]*"
                                     (regexp-quote ref) "[ \t]*$")))
                 (or (re-search-forward regexp nil t)
                     (re-search-backward regexp nil t)))
