@@ -235,7 +235,8 @@ line.  If no result exists for this block then create a
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
                           (progn ;; or we need to back up and make one ourselves
                             (goto-char end) (open-line 2) (forward-char 1)
-                            (insert "#+resname:") (move-beginning-of-line 1) t)))
+                            (insert (concat "#+resname:" (if name (concat " " name))))
+                            (move-beginning-of-line 1) t)))
                (point))))))
 
 (defun litorgy-insert-result (result &optional insert)

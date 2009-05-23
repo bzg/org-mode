@@ -3,10 +3,7 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [16/26]
-
-** TODO name named results if source block is named
-currently this isn't happening although it should be
+* Tasks [17/26]
 
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
@@ -226,6 +223,17 @@ mean(mean(vec))
     out some lines, and then convert it to litorgy format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+
+** DONE name named results if source block is named
+currently this isn't happening although it should be
+
+#+srcname: test-naming-named-source-blocks
+#+begin_src emacs-lisp 
+:namer
+#+end_src
+
+#+resname: test-naming-named-source-blocks
+: :namer
 ** DONE (simple caching) check for named results before source blocks
 see the TODO comment in [[file:litorgy/litorgy-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][litorgy-ref.el#litorgy-ref-resolve-reference]]
 ** DONE set =:results silent= when eval with prefix argument
