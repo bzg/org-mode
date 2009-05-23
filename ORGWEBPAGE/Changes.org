@@ -10,7 +10,7 @@
 #+LINK_UP: index.html
 #+LINK_HOME: http://orgmode.org
 
-* Version 6.27 (in preparation)
+* Version 6.27
  :PROPERTIES:
  :VISIBILITY: content
  :CUSTOM_ID: v6.26
@@ -43,17 +43,20 @@ Macro processing for export has been enhanced:
     
   The new built-in macros have been requested by Daniel Clemente.
 
-*** Start Agenda with log mode active
-Set the new option =org-agenda-start-with-log-mode= to have
-log mode turned on from the start.  Or set this option for
-specific custom commands.
+*** Link completion for files and bbdb names
 
-Thanks to Benjamin Andresen for a patch to this effect.
-
-*** Tables in LaTeX without centering
-Set the variable `org-export-latex-tables-centered' to nil if you
-prefer tables not to be horizontally centered.  Note that
-longtable tables are always centered.
+Org now has a general mechanism how modules can provide enhanced
+support (for example through completion) when adding a link.  For
+example, when inserting a link with =C-c C-l=, you can now type
+=file:= followed by =RET= to get completion support for inserting
+a file.  After entering =bbdb:= and =RET=, a completion interface
+will allow to complete names in the BBDB database.  These are the
+only ones implemented right now, but modules that add a link type
+=xyz:= can simple define =org-xyz-complete-link= that should
+return the full link with prefix after aiding the used to create
+the link.  For example, if you have =http= links that you have to
+insert very often, you could define a function
+=org-http-complete-link= to help selecting the most common ones.
 
 *** Source file publishing
 
@@ -72,25 +75,29 @@ to get both the plain org file and an htmlized version that
 looks like your editing buffer published along with the HTML
 exported version.
 
-*** LaTeX: TODO markup configurable
+*** Push exported stuff to kill ring
+
+All exporters now push the produced material onto the kill-ring
+in Emacs, and also to the external clipboard and the primary
+selection to make it easy to paste this under many circumstances.
+
+*** Tables in LaTeX without centering
+Set the variable `org-export-latex-tables-centered' to nil if you
+prefer tables not to be horizontally centered.  Note that
+longtable tables are always centered.
+
+*** LaTeX export: TODO markup configurable
 
 The markup for TODO keywords in LaTeX export is now configurable
 using the variable =org-export-latex-todo-keyword-markup=.
 
-*** Link completion for files and bbdb names
+*** ASCII export to buffer
 
-Org now has a general mechanism how modules can provide enhanced
-support (for example through completion) when adding a link.  For
-example, when inserting a link with =C-c C-l=, you can now type
-=file:= followed by =RET= to get completion support for inserting
-a file.  After entering =bbdb:= and =RET=, a completion interface
-will allow to complete names in the BBDB database.  These are the
-only ones implemented right now, but modules that add a link type
-=xyz:= can simple define =org-xyz-complete-link= that should
-return the full link with prefix after aiding the used to create
-the link.  For example, if you have =http= links that you have to
-insert very often, you could define a function
-=org-http-complete-link= to help selecting the most common ones.
+ASCII export has now the same command variations as the other
+export backends, for example exporting to a temporary buffer
+instead of a file.
+
+The was a request by Samuel Wales.
 
 *** Accessibility improvements for HTTP tables
 
@@ -103,14 +110,6 @@ column, so that also row information can be scoped.  This was
 triggered by a request by Jan Buchal, and as usually Sebastian
 Rose came up with the right implementation.
 
-*** New contributed package /org-special-blocks.el/
-
-The package turns any "undefined" =#+begin_...= blocks into LaTeX
-environments for LaTeX export, and into =<div>= tags for HTML
-export.
-
-Thanks to Chris Gray for this contribution.
-
 *** Timezone information in iCalendar files
 
 The timezone information in iCalendar files is now written in the
@@ -118,19 +117,13 @@ correct format, and can be set in the variable
 =org-ical-timezone=.  This variable is initialized from the =TZ=
 environment variable.
 
-*** ASCII export to buffer
+*** New contributed package /org-special-blocks.el/
 
-ASCII export has now the same command variations as the other
-export backends, for example exporting to a temporary buffer
-instead of a file.
+The package turns any "undefined" =#+begin_...= blocks into LaTeX
+environments for LaTeX export, and into =<div>= tags for HTML
+export.
 
-The was a request by Samuel Wales.
-
-*** Push exported stuff to kill ring
-
-All exporters now push the produced material onto the kill-ring
-in Emacs, and also to the external clipboard and the primary
-selection to make it easy to paste this under many circumstances.
+Thanks to Chris Gray for this contribution.
 
 *** More flexibility about placing logging notes.
 
@@ -144,6 +137,13 @@ Requested by Daniel J. Sinder
 Reloading Org has moved to a new key, =C-c C-x !=, and is now
 also available in the agenda.
 
+*** Start Agenda with log mode active
+Set the new option =org-agenda-start-with-log-mode= to have
+log mode turned on from the start.  Or set this option for
+specific custom commands.
+
+Thanks to Benjamin Andresen for a patch to this effect.
+
 *** Agenda speed optimizations
 
 Depending on circumstances, construction the agenda has become a
@@ -151,6 +151,13 @@ lot faster.
 
 Triggered by Eric S Fraga's reports about using Org on a slow
 computer like a netbook.
+
+*** New face for today in agenda
+
+The date that is today can now be highlighted in the agenda by
+customizing the face =org-agenda-date-today=.
+
+Thanks to Dmitri Minaev for a patch to this effect.
 
 *** Properties to disambiguate statistics
 
@@ -182,13 +189,6 @@ Column view has new operators for computing the minimum,
 maximum, and mean of property values.
 
 Thanks to Mikael Fornius for a patch to this effect.
-
-*** New face =org-agenda-date-today=
-
-The date that is today can now be highlighted in the agenda by
-customizing the face =org-agenda-date-today=.
-
-Thanks to Dmitri Minaev for a patch to this effect.
 
 * Version 6.26
 
