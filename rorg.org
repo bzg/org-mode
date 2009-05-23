@@ -5,20 +5,6 @@
 
 * Tasks [17/26]
 
-** TODO command line execution
-Allow source code blocks to be called form the command line.  This
-will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
-
-This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
-
-** TODO resolve references to other buffers
-   This would allow source blocks to call upon tables, source-blocks,
-   and results in other buffers.
-   
-   See...
-   - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
-   - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
-
 ** TODO re-implement R evaluation using ess-command or ess-execute
    I don't have any complaints with the current R evaluation code or
    behaviour, but I think it would be good to use the ESS functions
@@ -31,6 +17,24 @@ This will rely upon [[* resolve references to other buffers][resolve references 
    will take a look back at these and either switch to using the ess
    commands, or at least articulate under this TODO the reasons for
    using our custom R-interaction commands.
+
+** TODO resolve references to other buffers
+   This would allow source blocks to call upon tables, source-blocks,
+   and results in other buffers.
+   
+   See...
+   - [[file:litorgy/litorgy-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][litorgy-ref.el:searching-in-other-buffers]]
+   - [[file:litorgy/litorgy.el::defun%20litorgy%20find%20named%20result%20name][litorgy.el#litorgy-find-named-result]]
+
+** TODO figure out how to handle graphic output
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+This should take advantage of the =:results file= option, and
+languages which almost always produce graphical output should set
+=:results file= to true by default.  That would handle placing these
+results in the buffer.  Then if there is a combination of =silent= and
+=file= =:results= headers we could drop the results to a temp buffer
+and pop open that buffer...
 
 ** TODO share litorgy
 how should we share litorgy?
@@ -73,15 +77,11 @@ du -sc ~/*
 (mapcar #'car sizes)
 #+end_src
 
-** TODO figure out how to handle graphic output
-This is listed under [[* graphical output][graphical output]] in out objectives.
+** TODO command line execution
+Allow source code blocks to be called form the command line.  This
+will be easy using the =sbe= function in [[file:litorgy/litorgy-table.el][litorgy-table.el]].
 
-This should take advantage of the =:results file= option, and
-languages which almost always produce graphical output should set
-=:results file= to true by default.  That would handle placing these
-results in the buffer.  Then if there is a combination of =silent= and
-=file= =:results= headers we could drop the results to a temp buffer
-and pop open that buffer...
+This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
 
 ** TODO inline source code blocks [3/5]
    Like the =\R{ code }= blocks
