@@ -5349,7 +5349,7 @@ If this information is not given, the function uses the tree at point."
 		     (equal buf (marker-buffer m))
 		     (setq p (marker-position m))
 		     (>= p beg)
-		     (<= p end))
+		     (< p end))
 	    (let ((inhibit-read-only t))
 	      (delete-region (point-at-bol) (1+ (point-at-eol)))))
 	  (beginning-of-line 0))))))

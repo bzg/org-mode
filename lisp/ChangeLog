@@ -1,5 +1,8 @@
 2009-05-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-remove-subtree-entries-from-agenda): Reduce
+	range for marker position checking.
+
 	* org-latex.el (org-export-latex-first-lines): Fix bug when
 	exporting a region.
 
