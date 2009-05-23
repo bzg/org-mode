@@ -402,7 +402,7 @@ changes."
   :group 'org-faces)
 
 (defface org-code
-  (org-compatible-face nil
+  (org-compatible-face 'shadow
     '((((class color grayscale) (min-colors 88) (background light))
        (:foreground "grey50"))
       (((class color grayscale) (min-colors 88) (background dark))
@@ -415,8 +415,28 @@ changes."
   :group 'org-faces
   :version "22.1")
 
+(defface org-meta-line
+  (org-compatible-face 'font-lock-comment-face nil)
+  "Face for meta lines startin with \"#+\"."
+  :group 'org-faces
+  :version "22.1")
+
+(defface org-block
+  (org-compatible-face 'shadow
+    '((((class color grayscale) (min-colors 88) (background light))
+       (:foreground "grey50"))
+      (((class color grayscale) (min-colors 88) (background dark))
+       (:foreground "grey70"))
+      (((class color) (min-colors 8) (background light))
+       (:foreground "green"))
+      (((class color) (min-colors 8) (background dark))
+       (:foreground "yellow"))))
+  "Face text in #+begin ... #+end blocks."
+  :group 'org-faces
+  :version "22.1")
+
 (defface org-verbatim
-  (org-compatible-face nil
+  (org-compatible-face 'shadow
     '((((class color grayscale) (min-colors 88) (background light))
        (:foreground "grey50" :underline t))
       (((class color grayscale) (min-colors 88) (background dark))
