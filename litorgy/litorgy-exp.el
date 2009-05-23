@@ -56,7 +56,7 @@ none ----- do not display either code or results upon export"
 (defun litorgy-exp-inline-src-blocks (start end)
   "Process inline src blocks between START and END for export.
 See `litorgy-exp-src-blocks' for export options, currently the
-options and are taken from `litorgy-inline-header-args'."
+options and are taken from `litorgy-defualt-inline-header-args'."
   (interactive)
   (save-excursion
     (goto-char start)

@@ -40,7 +40,10 @@ then run `litorgy-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'litorgy-execute-src-block-maybe)
 
-(defvar litorgy-inline-header-args '((:results . "silent") (:exports . "results"))
+(defvar litorgy-default-header-args '()
+  "Default arguments to use when evaluating a source block.")
+
+(defvar litorgy-default-inline-header-args '((:results . "silent") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar litorgy-src-block-regexp nil
@@ -172,12 +175,13 @@ of the following form.  (language body header-arguments-alist)"
 (defun litorgy-parse-src-block-match ()
   (list (litorgy-clean-text-properties (match-string 1))
         (litorgy-clean-text-properties (match-string 4))
-        (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) "")))))
+        (org-combine-plists litorgy-default-header-args
+                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
 
 (defun litorgy-parse-inline-src-block-match ()
   (list (litorgy-clean-text-properties (match-string 1))
         (litorgy-clean-text-properties (match-string 4))
-        (org-combine-plists litorgy-inline-header-args
+        (org-combine-plists litorgy-default-inline-header-args
                             (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
 
 (defun litorgy-parse-header-arguments (arg-string)
