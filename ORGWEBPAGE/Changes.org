@@ -166,6 +166,9 @@ clear what kind of statistics a cookie should show  You can now use
 the =COOKIE_DATA= property to disambiguate, by giving it a value
 "todo" or "checkbox".
 
+Thanks to Ulf Stegeman, who was persistent enough to push this
+change past my initial resistance.
+
 *** Checkboxes and TODO items: recursive statistics
 
 Setting the variable =org-hierarchical-checkbox-statistics= to
