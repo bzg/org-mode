@@ -78,11 +78,16 @@ R process in `litorgy-R-buffer'."
     (litorgy-R-input-command
      (format "write.table(%s(), \"%s\", , ,\"\\t\", ,\"nil\", , FALSE, FALSE)" func-name tmp-file))
     (with-temp-buffer
-      (org-table-import tmp-file nil)
-      (delete-file tmp-file)
-      (setq result (mapcar (lambda (row)
-                             (mapcar #'litorgy-R-read row))
-                           (org-table-to-lisp)))
+      (message "before condition")
+      (condition-case nil
+          (progn
+            (org-table-import tmp-file nil)
+            (delete-file tmp-file)
+            (setq result (mapcar (lambda (row)
+                                   (mapcar #'litorgy-R-read row))
+                                 (org-table-to-lisp))))
+        (error nil))
+      (message "after condition")
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
               (if (null (cdr (car result)))

@@ -11,12 +11,49 @@
    from a political point of view. Plus of course it has the normal
    benefits of an API (insulates us from any underlying changes etc). [DED]
 
-   [Eric] I'll look into this.  I believe that I looked at and
-   rejected these functions initially but now I can't remember why.  I
-   agree with your overall point about using API's where available.  I
-   will take a look back at these and either switch to using the ess
-   commands, or at least articulate under this TODO the reasons for
-   using our custom R-interaction commands.
+   I'll look into this.  I believe that I looked at and rejected these
+   functions initially but now I can't remember why.  I agree with
+   your overall point about using API's where available.  I will take
+   a look back at these and either switch to using the ess commands,
+   or at least articulate under this TODO the reasons for using our
+   custom R-interaction commands. [Eric]
+
+   ess-execute
+
+*** ess functions
+   
+#+begin_quote ess-command
+(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
+
+Send the ESS process command COM and delete the output
+from the ESS process buffer.  If an optional second argument BUF exists
+save the output in that buffer. BUF is erased before use.
+COM should have a terminating newline.
+Guarantees that the value of .Last.value will be preserved.
+When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
+will be used in a few places where `a' is proportional to `ess-cmd-delay'.
+#+end_quote
+
+#+begin_quote ess-execute
+(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
+
+Send a command to the ESS process.
+A newline is automatically added to COMMAND.  Prefix arg (or second arg
+INVERT) means invert the meaning of
+`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
+forced to go to the process buffer.  If the output is going to a
+buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
+fourth arg MESSAGE is text to print at the top of the buffer (defaults
+to the command if BUFF is not given.)
+#+end_quote
+
+
+*** out current setup
+
+    1) The body of the R source code block is wrapped in a function
+    2) The function is called inside of a =write.table= function call
+       writing the results to a table
+    3) 
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -547,7 +584,7 @@ This could probably be added to [[file:litorgy/litorgy-script.el][litorgy-script
 (see [[* file result types][file result types]])
 
 
-* Bugs [9/12]
+* Bugs [10/13]
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -580,6 +617,36 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    litorgy-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+
+** DONE error on trivial R results
+
+So I know it's generally not a good idea to squash error without
+handling them, but in this case the error almost always means that
+there was no file contents to be read by =org-table-import=, so I
+think it's ok.
+
+#+srcname: bug-trivial-r1
+#+begin_src R :results replace
+pie(c(1, 2, 3), labels = c(1, 2, 3))
+#+end_src
+
+#+srcname: bug-trivial-r2
+#+begin_src R :results replace
+8
+#+end_src
+
+#+resname: bug-trivial-r2
+: 8
+
+#+srcname: bug-trivial-r3
+#+begin_src R :results replace
+c(1, 2, 3)
+#+end_src
+
+#+resname: bug-trivial-r3
+| 1 |
+| 2 |
+| 3 |
 
 ** DONE ruby new variable creation (multi-line ruby blocks)
 Actually it looks like we were dropping all but the last line.
