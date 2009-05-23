@@ -19,6 +19,7 @@
 ** Details
 
 *** Macros for export
+
 Macro processing for export has been enhanced:
 
 - You can use arguments in a macro, for example
@@ -27,60 +28,168 @@ Macro processing for export has been enhanced:
 #+end_src
   which would turn ={{{hello(world)}}}= into =Greet the world: Hello world=
 
+- The macro value can be an emacs-lisp for to be evaluated at the
+  time of export:
+
+#+begin_src org
+,#+macro: datetime (eval (format-time-string "$1"))
+#+end_src
+
 - More built-in default macros:
   - date(FORMAT_TIME_STRING) :: Time/Date of export
   - time(FORMAT_TIME_STRING) :: Same as date
   - modification-time(FORMAT_TIME_STRING) :: Last modification of file
   - input-file :: Name of the input file
     
-    {{{date}}} {{{filename}}}
-
-  The new built-in macros have been requested by Daniel Clemente
+  The new built-in macros have been requested by Daniel Clemente.
 
 *** Start Agenda with log mode active
 Set the new option =org-agenda-start-with-log-mode= to have
 log mode turned on from the start.  Or set this option for
 specific custom commands.
 
-Thanks to Beanjamin Andresen for a patch to this effect.
+Thanks to Benjamin Andresen for a patch to this effect.
 
 *** Tables in LaTeX without centering
+Set the variable `org-export-latex-tables-centered' to nil if you
+prefer tables not to be horizontally centered.  Note that
+longtable tables are always centered.
 
 *** Source file publishing
 
+It is now easy to publish the Org sources along with, for
+example, HTML files.  In your publishing project, replace
+
+: :publishing-function org-publish-org-to-html
+
+with
+
+:  :publishing-function (org-publish-org-to-html org-publish-org-to-org)
+:  :plain-source t
+:  :htmlized-source t
+
+to get both the plain org file and an htmlized version that
+looks like your editing buffer published along with the HTML
+exported version.
+
 *** LaTeX: TODO markup configurable
 
-*** Checkboxes: recursive statistics
-Patch by Richard Klinda.
-Check if this ws John's request too.
+The markup for TODO keywords in LaTeX export is now configurable
+using the variable =org-export-latex-todo-keyword-markup=.
 
 *** Link completion for files and bbdb names
 
-*** org-export-html-table-use-header-tags-for-first-column
+Org now has a general mechanism how modules can provide enhanced
+support (for example through completion) when adding a link.  For
+example, when inserting a link with =C-c C-l=, you can now type
+=file:= followed by =RET= to get completion support for inserting
+a file.  After entering =bbdb:= and =RET=, a completion interface
+will allow to complete names in the BBDB database.  These are the
+only ones implemented right now, but modules that add a link type
+=xyz:= can simple define =org-xyz-complete-link= that should
+return the full link with prefix after aiding the used to create
+the link.  For example, if you have =http= links that you have to
+insert very often, you could define a function
+=org-http-complete-link= to help selecting the most common ones.
 
-*** contrib/lisp/org-special-blocks.el
+*** Accessibility improvements for HTTP tables
 
-Contributed by Chris Gray
+When exporting tables to HTML, Org now adds =scope= attributes to
+all header fields, in order to support screen readers.
+Setting the variable
+=org-export-html-table-use-header-tags-for-first-column= will
+request using =<th>= instead of =<td>= also in the entire first
+column, so that also row information can be scoped.  This was
+triggered by a request by Jan Buchal, and as usually Sebastian
+Rose came up with the right implementation.
 
-*** org-ical-timezone
+*** New contributed package /org-special-blocks.el/
+
+The package turns any "undefined" =#+begin_...= blocks into LaTeX
+environments for LaTeX export, and into =<div>= tags for HTML
+export.
+
+Thanks to Chris Gray for this contribution.
+
+*** Timezone information in iCalendar files
+
+The timezone information in iCalendar files is now written in the
+correct format, and can be set in the variable
+=org-ical-timezone=.  This variable is initialized from the =TZ=
+environment variable.
 
 *** ASCII export to buffer
-    requested by Samuel Wales
-*** Push exported stuff to kill ring
-*** Recursive TODO statistics
-*** LOG_INTO_DRAWER property
-    Requested by Daniel J. Sinder
-*** Many new hooks
-*** Macros with arguments, and a few new default macros
 
-*** New relod key C-c C-x !
+ASCII export has now the same command variations as the other
+export backends, for example exporting to a temporary buffer
+instead of a file.
+
+The was a request by Samuel Wales.
+
+*** Push exported stuff to kill ring
+
+All exporters now push the produced material onto the kill-ring
+in Emacs, and also to the external clipboard and the primary
+selection to make it easy to paste this under many circumstances.
+
+*** More flexibility about placing logging notes.
+
+Logging into a drawer can now also be set for individual
+subtrees using the =LOG_INTO_DRAWER= property.
+
+Requested by Daniel J. Sinder
+
+*** New reload key
+
+Reloading Org has moved to a new key, =C-c C-x !=, and is now
+also available in the agenda.
 
 *** Agenda speed optimizations
-    Triggered by reports from Eric S Fraga
+
+Depending on circumstances, construction the agenda has become a
+lot faster.
+
+Triggered by Eric S Fraga's reports about using Org on a slow
+computer like a netbook.
+
 *** Properties to disambiguate statistics
 
+When an entry has both check boxes and TODO children, it is not
+clear what kind of statistics a cookie should show  You can now use
+the =COOKIE_DATA= property to disambiguate, by giving it a value
+"todo" or "checkbox".
+
+*** Checkboxes and TODO items: recursive statistics
+
+Setting the variable =org-hierarchical-checkbox-statistics= to
+=nil= will make statistics cookies count all checkboxes in the
+lit hierarchy below it.
+
+Setting the variable =org-hierarchical-todo-statistics= to
+=nil= will do the same for TODO items.
+
+To turn on recursive statistics only for a single subtree, add the
+word "recursive" to the =COOKIE_DATA= property.  Note that you
+can have such a property containing both "todo" or "checkbox" for
+disambiguation, and the word "recursive", separated by a space
+character.
+
+The change for checkboxes was a patch by Richard Klinda.
+
 *** New operators for column view
-    Thanks to Mikael Fornius for a patch to this effect.
+
+Column view has new operators for computing the minimum,
+maximum, and mean of property values.
+
+Thanks to Mikael Fornius for a patch to this effect.
+
+*** New face =org-agenda-date-today=
+
+The date that is today can now be highlighted in the agenda by
+customizing the face =org-agenda-date-today=.
+
+Thanks to Dmitri Minaev for a patch to this effect.
+
 * Version 6.26
 
 ** Details
