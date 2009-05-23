@@ -1,3 +1,8 @@
+2009-05-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-first-lines): Fix bug when
+	exporting a region.
+
 2009-05-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-push-to-kill-ring): Protect using
