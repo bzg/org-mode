@@ -3,57 +3,7 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [18/27]
-
-** TODO re-implement R evaluation using ess-command or ess-execute
-   I don't have any complaints with the current R evaluation code or
-   behaviour, but I think it would be good to use the ESS functions
-   from a political point of view. Plus of course it has the normal
-   benefits of an API (insulates us from any underlying changes etc). [DED]
-
-   I'll look into this.  I believe that I looked at and rejected these
-   functions initially but now I can't remember why.  I agree with
-   your overall point about using API's where available.  I will take
-   a look back at these and either switch to using the ess commands,
-   or at least articulate under this TODO the reasons for using our
-   custom R-interaction commands. [Eric]
-
-   ess-execute
-
-*** ess functions
-   
-#+begin_quote ess-command
-(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
-
-Send the ESS process command COM and delete the output
-from the ESS process buffer.  If an optional second argument BUF exists
-save the output in that buffer. BUF is erased before use.
-COM should have a terminating newline.
-Guarantees that the value of .Last.value will be preserved.
-When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
-will be used in a few places where `a' is proportional to `ess-cmd-delay'.
-#+end_quote
-
-#+begin_quote ess-execute
-(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
-
-Send a command to the ESS process.
-A newline is automatically added to COMMAND.  Prefix arg (or second arg
-INVERT) means invert the meaning of
-`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
-forced to go to the process buffer.  If the output is going to a
-buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
-fourth arg MESSAGE is text to print at the top of the buffer (defaults
-to the command if BUFF is not given.)
-#+end_quote
-
-
-*** out current setup
-
-    1) The body of the R source code block is wrapped in a function
-    2) The function is called inside of a =write.table= function call
-       writing the results to a table
-    3) 
+* Tasks [19/27]
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -203,6 +153,66 @@ mean(mean(vec))
 #+end_src
 
 : 2
+
+** DEFERRED re-implement R evaluation using ess-command or ess-execute
+   I don't have any complaints with the current R evaluation code or
+   behaviour, but I think it would be good to use the ESS functions
+   from a political point of view. Plus of course it has the normal
+   benefits of an API (insulates us from any underlying changes etc). [DED]
+
+   I'll look into this.  I believe that I looked at and rejected these
+   functions initially but now I can't remember why.  I agree with
+   your overall point about using API's where available.  I will take
+   a look back at these and either switch to using the ess commands,
+   or at least articulate under this TODO the reasons for using our
+   custom R-interaction commands. [Eric]
+
+   ess-execute
+
+   Lets just replace =litorgy-R-input-command= with =ess-execute=.
+
+   I tried this, and although it works in some situations, I find that
+   =ess-command= will often just hang indefinitely without returning
+   results.  Also =ess-execute= will occasionally hang, and pops up
+   the buffer containing the results of the command's execution, which
+   is undesirable.  For now these functions can not be used.  Maybe
+   someone more familiar with the ESS code can recommend proper usage
+   of =ess-command= or some other lower-level function which could be
+   used in place of [[file:litorgy/litorgy-R.el::defun%20litorgy%20R%20input%20command%20command][litorgy-R-input-command]].
+
+*** ess functions
+   
+#+begin_quote ess-command
+(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
+
+Send the ESS process command COM and delete the output
+from the ESS process buffer.  If an optional second argument BUF exists
+save the output in that buffer. BUF is erased before use.
+COM should have a terminating newline.
+Guarantees that the value of .Last.value will be preserved.
+When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
+will be used in a few places where `a' is proportional to `ess-cmd-delay'.
+#+end_quote
+
+#+begin_quote ess-execute
+(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
+
+Send a command to the ESS process.
+A newline is automatically added to COMMAND.  Prefix arg (or second arg
+INVERT) means invert the meaning of
+`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
+forced to go to the process buffer.  If the output is going to a
+buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
+fourth arg MESSAGE is text to print at the top of the buffer (defaults
+to the command if BUFF is not given.)
+#+end_quote
+
+*** out current setup
+
+    1) The body of the R source code block is wrapped in a function
+    2) The function is called inside of a =write.table= function call
+       writing the results to a table
+    3) The table is read using =org-table-import=
 
 ** DEFERRED Rework Interaction with Running Processes [0/3]
 *** TODO ability to select which of multiple sessions is being used
@@ -854,6 +864,9 @@ recognition of ruby arrays as such.
 
 Evaluate all the cells in this table for a comprehensive test of the
 litorgy functionality.
+
+*Note*: if you have customized =litorgy-default-header-args= then some
+of these tests may fail.
 
 #+TBLNAME: litorgy-tests
 | functionality           | block                      | arg |    expected |     results | pass |
