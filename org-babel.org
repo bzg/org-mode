@@ -74,8 +74,8 @@ Literate Programming.
    and results in other buffers.
    
    See...
-   - [[file:org-babel/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
-   - [[file:org-babel/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
+   - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
+   - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
 
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
@@ -130,7 +130,7 @@ du -sc ~/*
 
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
-will be easy using the =sbe= function in [[file:org-babel/org-babel-table.el][org-babel-table.el]].
+will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
 
 This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
 
@@ -242,7 +242,7 @@ mean(mean(vec))
    is undesirable.  For now these functions can not be used.  Maybe
    someone more familiar with the ESS code can recommend proper usage
    of =ess-command= or some other lower-level function which could be
-   used in place of [[file:org-babel/org-babel-R.el::defun%20org-babel%20R%20input%20command%20command][org-babel-R-input-command]].
+   used in place of [[file:lisp/org-babel-R.el::defun%20org-babel%20R%20input%20command%20command][org-babel-R-input-command]].
 
 *** ess functions
    
@@ -310,7 +310,7 @@ to the command if BUFF is not given.)
     the background (see [[http://www.emacswiki.org/emacs/ExecuteExternalCommand#toc4][external-commands]]).  Although a more extensible
     solution may involve the use of the [[elisp:(progn (describe-function 'call-process-region) nil)][call-process-region]] function.
     
-    Going to try this out in a new file [[file:org-babel/org-babel-proc.el][org-babel-proc.el]].  This should
+    Going to try this out in a new file [[file:lisp/org-babel-proc.el][org-babel-proc.el]].  This should
     contain functions for asynchronously running generic shell commands
     in the background, and then returning their input.
 
@@ -393,7 +393,7 @@ currently this isn't happening although it should be
 #+resname: test-naming-named-source-blocks
 : :namer
 ** DONE (simple caching) check for named results before source blocks
-see the TODO comment in [[file:org-babel/org-babel-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][org-babel-ref.el#org-babel-ref-resolve-reference]]
+see the TODO comment in [[file:lisp/org-babel-ref.el::TODO%20This%20should%20explicitly%20look%20for%20resname%20lines%20before][org-babel-ref.el#org-babel-ref-resolve-reference]]
 ** DONE set =:results silent= when eval with prefix argument
 
 #+begin_src emacs-lisp
@@ -678,11 +678,11 @@ I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
 Any new language should be implemented in a org-babel-lang.el file.
-Follow the pattern set by [[file:org-babel/org-babel-script.el][org-babel-script.el]], [[file:org-babel/org-babel-shell.el][org-babel-shell.el]] and
-[[file:org-babel/org-babel-R.el][org-babel-R.el]].
+Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
+[[file:lisp/org-babel-R.el][org-babel-R.el]].
 
 *** TODO perl
-This could probably be added to [[file:org-babel/org-babel-script.el][org-babel-script.el]]
+This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
 
 *** TODO java
 
@@ -946,7 +946,7 @@ following message =no result returned by source block=.
 
 ** DONE ruby arrays not recognized as such
 
-Something is wrong in [[file:org-babel/org-babel-script.el]] related to the
+Something is wrong in [[file:lisp/org-babel-script.el]] related to the
 recognition of ruby arrays as such.
 
 #+begin_src ruby :results replace
@@ -1157,7 +1157,7 @@ triv.class.name
   :PROPERTIES:
   :CUSTOM_ID: sandbox
   :END:
-To run these examples evaluate [[file:org-babel/org-babel-init.el][org-babel-init.el]]
+To run these examples evaluate [[file:lisp/org-babel-init.el][org-babel-init.el]]
 
 ** org-babel.el beginning functionality
 
@@ -1202,7 +1202,7 @@ of the source code block into an org table.  It's using the classic
 "lisp is elegant" demonstration transpose function.  To try this
 out...
 
-1. evaluate [[file:org-babel/init.el]] to load org-babel and friends
+1. evaluate [[file:lisp/org-babel-init.el]] to load org-babel and friends
 2. evaluate the transpose definition =\C-c\C-c= on the beginning of
    the source block
 3. evaluate the next source code block, this should read in the table
