@@ -1,4 +1,4 @@
-;;; litorgy-shell.el --- litorgy functions for shell execution
+;;; org-babel-shell.el --- org-babel functions for shell execution
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -26,50 +26,50 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating sh, bash, and zsh shells
+;; Org-Babel support for evaluating sh, bash, and zsh shells
 
 ;;; Code:
-(require 'litorgy)
+(require 'org-babel)
 
-(defun litorgy-shell-add-interpreter (var cmds)
+(defun org-babel-shell-add-interpreter (var cmds)
   (set-default var cmds)
   (mapc (lambda (cmd)
-          (setq litorgy-interpreters (cons cmd litorgy-interpreters))
+          (setq org-babel-interpreters (cons cmd org-babel-interpreters))
           (eval
-           `(defun ,(intern (concat "litorgy-execute:" cmd)) (body params)
-              ,(concat "Evaluate a block of " cmd " shell with litorgy. This function is
-called by `litorgy-execute-src-block'.  This function is an
-automatically generated wrapper for `litorgy-shell-execute'.")
-              (litorgy-shell-execute ,cmd body params))))
+           `(defun ,(intern (concat "org-babel-execute:" cmd)) (body params)
+              ,(concat "Evaluate a block of " cmd " shell with org-babel. This function is
+called by `org-babel-execute-src-block'.  This function is an
+automatically generated wrapper for `org-babel-shell-execute'.")
+              (org-babel-shell-execute ,cmd body params))))
         cmds))
 
-(defcustom litorgy-shell-interpreters '("sh" "bash" "zsh")
+(defcustom org-babel-shell-interpreters '("sh" "bash" "zsh")
   "List of interpreters of shelling languages which can be
-executed through litorgy."
-  :group 'litorgy
-  :set 'litorgy-shell-add-interpreter)
+executed through org-babel."
+  :group 'org-babel
+  :set 'org-babel-shell-add-interpreter)
 
-(defun litorgy-shell-execute (cmd body params)
+(defun org-babel-shell-execute (cmd body params)
   "Run CMD on BODY obeying any options set with PARAMS."
   (message (format "executing %s code block..." cmd))
-  (let ((vars (litorgy-ref-variables params)))
+  (let ((vars (org-babel-ref-variables params)))
     (save-window-excursion
       (with-temp-buffer
         (if (> (length vars) 0)
             (error "currently no support for passing variables to shells"))
         (insert body)
         (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-        (litorgy-shell-to-elisp (buffer-string))))))
+        (org-babel-shell-to-elisp (buffer-string))))))
 
-(defun litorgy-shell-to-elisp (result)
-  (let ((tmp-file (make-temp-file "litorgy-shell")))
+(defun org-babel-shell-to-elisp (result)
+  (let ((tmp-file (make-temp-file "org-babel-shell")))
     (with-temp-file tmp-file
       (insert result))
     (with-temp-buffer
       (org-table-import tmp-file nil)
       (delete-file tmp-file)
       (setq result (mapcar (lambda (row)
-                             (mapcar #'litorgy-read row))
+                             (mapcar #'org-babel-read row))
                            (org-table-to-lisp)))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
@@ -79,5 +79,5 @@ executed through litorgy."
             (car result))
         result))))
 
-(provide 'litorgy-shell)
-;;; litorgy-shell.el ends here
+(provide 'org-babel-shell)
+;;; org-babel-shell.el ends here

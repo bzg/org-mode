@@ -1,4 +1,4 @@
-;;; litorgy-ui.el --- UI elements for litorgy
+;;; org-babel-ui.el --- UI elements for org-babel
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -26,44 +26,44 @@
 
 ;;; Commentary:
 
-;; UI elements of litorgy
+;; UI elements of org-babel
 ;; - code folding
 ;; - marking working code blocks
 
 ;;; Code:
-(require 'litorgy)
+(require 'org-babel)
 
-(defun litorgy-ui-src-block-cycle-maybe ()
-  "Detect if this is context for a litorgical src-block and if so
-then run `litorgy-execute-src-block'."
+(defun org-babel-ui-src-block-cycle-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-execute-src-block'."
   (let ((case-fold-search t))
     (if (save-excursion
           (beginning-of-line 1)
-          (looking-at litorgy-src-block-regexp))
-        (progn (call-interactively 'litorgy-ui-src-block-cycle)
+          (looking-at org-babel-src-block-regexp))
+        (progn (call-interactively 'org-babel-ui-src-block-cycle)
                t) ;; to signal that we took action
       nil))) ;; to signal that we did not
 
-(defun litorgy-ui-src-block-cycle ()
+(defun org-babel-ui-src-block-cycle ()
   "Cycle the visibility of the current source code block"
   (interactive)
   ;; should really do this once in an (org-mode hook)
-  (add-to-invisibility-spec '(litorgy-ui . t))
+  (add-to-invisibility-spec '(org-babel-ui . t))
   (message "trying out source block")
   (save-excursion
     (beginning-of-line)
-    (if (re-search-forward litorgy-src-block-regexp nil t)
+    (if (re-search-forward org-babel-src-block-regexp nil t)
         (let ((start (- (match-beginning 4) 1)) ;; beginning of body
               (end (match-end 0))) ;; end of entire body
           (if (memq t (mapcar (lambda (overlay)
-                                (eq (overlay-get overlay 'invisible) 'litorgy-ui))
+                                (eq (overlay-get overlay 'invisible) 'org-babel-ui))
                               (overlays-at start)))
-              (remove-overlays start end 'invisible 'litorgy-ui)
-            (overlay-put (make-overlay start end) 'invisible 'litorgy-ui)))
+              (remove-overlays start end 'invisible 'org-babel-ui)
+            (overlay-put (make-overlay start end) 'invisible 'org-babel-ui)))
       (error "not looking at a source block"))))
 
 ;; org-tab-after-check-for-cycling-hook
-(add-hook 'org-tab-first-hook 'litorgy-ui-src-block-cycle-maybe)
+(add-hook 'org-tab-first-hook 'org-babel-ui-src-block-cycle-maybe)
 
-(provide 'litorgy-ui)
-;;; litorgy-ui ends here
+(provide 'org-babel-ui)
+;;; org-babel-ui ends here
