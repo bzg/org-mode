@@ -1659,17 +1659,17 @@ from the buffer."
       (when (eq (car fmt) backend)
 	;; This is selected code, put it into the file for real
 	(goto-char (point-min))
-	(while (re-search-forward (concat "^#\\+" (cadr fmt)
+	(while (re-search-forward (concat "^\\([ \t]*\\)#\\+" (cadr fmt)
 					  ":[ \t]*\\(.*\\)") nil t)
-	  (replace-match "\\1" t)
+	  (replace-match "\\1\\2" t)
 	  (add-text-properties
 	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
 	   '(org-protected t))))
       (goto-char (point-min))
       (while (re-search-forward
-	      (concat "^#\\+"
-		      (caddr fmt) "\\>.*\\(\\(\n.*\\)*?\n\\)#\\+"
-		      (cadddr fmt) "\\>.*\n?") nil t)
+	      (concat "^[ \t]*#\\+" (caddr fmt)
+		      "\\>.*\\(\\(\n.*\\)*?\n\\)[ \t]*#\\+" (cadddr fmt)
+		      "\\>.*\n?") nil t)
 	(if (eq (car fmt) backend)
 	    ;; yes, keep this
 	    (add-text-properties (match-beginning 1) (1+ (match-end 1))
