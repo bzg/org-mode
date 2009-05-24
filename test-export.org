@@ -1,4 +1,4 @@
-#+TITLE: Testing Litorgy Export
+#+TITLE: Testing Org-Babel Export
 #+OPTIONS: toc:2 ^:nil
 
 * all

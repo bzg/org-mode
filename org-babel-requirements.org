@@ -720,7 +720,7 @@ useful (I use it all the time).
       
 
 * Buffer Dictionary
- LocalWords:  DBlocks dblocks org-babel el eric litorgical fontification
+ LocalWords:  DBlocks dblocks org-babel el eric fontification
 
 
 

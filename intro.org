@@ -32,8 +32,8 @@
   from the code buffer to view it embedded within an org buffer, which
   may also contain chunks of code in other languages.
   
-* Litorgy
-  Litorgy provides several extensions to the above-described method of
+* Org-Babel
+  Org-Babel provides several extensions to the above-described method of
   working with source code in org mode:
   1. Code block execution for interpreted languages (python, ruby, shell, R, perl)
   2. [...]

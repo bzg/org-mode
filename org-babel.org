@@ -56,8 +56,8 @@ pie(dirs[,1], labels = dirs[,2])
 
 ** communication between people
 
-*** calculation in/on tables (litorgies own tests)
-litorgies own functional tests are contained in a large org-mode
+*** calculation in/on tables (org-babels own tests)
+org-babels own functional tests are contained in a large org-mode
 table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
@@ -98,7 +98,7 @@ how should we share org-babel?
 we need to think up some good examples
 
 **** interactive tutorials
-This could be a place to use [[* litorgical assertions][litorgical assertions]].
+This could be a place to use [[* org-babel assertions][org-babel assertions]].
 
 for example the first step of a tutorial could assert that the version
 of the software-package (or whatever) is equal to some value, then
@@ -505,13 +505,13 @@ We would just need to cycle over every source code block under the
 sandbox, run it, and assert that the return value is equal to what we
 expect.
 
-I have the feeling that this should be possible using only litorgical
+I have the feeling that this should be possible using only org-babel
 functions with minimal or no additional elisp.  It would be very cool
 for org-babel to be able to test itself.
 
 This is now done, see [[* Tests]].
 
-*** DEFERRED litorgical assertions (may not be necessary)
+*** DEFERRED org-babel assertions (may not be necessary)
 These could be used to make assertions about the results of a
 source-code block.  If the assertion fails then the point could be
 moved to the block, and error messages and highlighting etc... could
@@ -534,7 +534,7 @@ ensue
 ** DONE integration with org tables
 We should make it easy to call org-babel source blocks from org-mode
 table formulas.  This is practical now that it is possible to pass
-arguments to litorgical source blocks.
+arguments to org-babel source blocks.
 
 See the related [[* (sandbox) integration w/org tables][sandbox]] header for tests/examples.
 

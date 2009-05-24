@@ -1,9 +1,6 @@
-rorg --- R and org-mode
+org-babel --- enabling communication between programming languages and between people
 ======================
 
-* for information on R see the [R website](http://www.r-project.org/)
 * for information on org see the [Org-Mode website](http://org-mode.org)
-
-Probably would be good to place the main objectives here, once they
-are ironed out.
-
+* for information on org-babel see the org-babel.org file in this
+  directory
