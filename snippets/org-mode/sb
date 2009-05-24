@@ -1,0 +1,6 @@
+#name : #+begin_src...#+end_src
+# --
+#+srcname: ${1:name}
+#+begin_src ${2:language} $3
+$0
+#+end_src
