@@ -1,7 +1,20 @@
-#+TITLE: Examples of Litorgy in Action
+#+TITLE: Litorgy
 #+OPTIONS: toc:nil num:nil ^:nil
 
-* interaction between languages (disk usage in your home directory)
+* litorgy
+
+Litorgy enables *communication* between programming languages and
+between people.
+
+Litorgy provides:
+- communication between programs :: Data passes seamlessly between
+     different programming languages, text, and tables.
+- communication between people :: Data and calculations are embedded
+     in the same document as notes explanations and reports.
+
+** communication between programs
+
+*** interaction between languages (disk usage in your home directory)
 
 This will work for Linux and Mac users, not so sure about shell
 commands for windows users.
@@ -35,18 +48,18 @@ cd ~ && du -sc * |grep -v total
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
-* calculations on tables (grades in a table)
+*** operate on the contents of tables
+*** be called from inside tables
 
-| names      | grade 1 | grade 2 | grade 3 | Total | Letter grade |
-|------------+---------+---------+---------+-------+--------------|
-| student 01 |   91.80 |   96.40 |   97.00 | 95.07 | C            |
-| student 02 |   88.78 |   89.15 |   98.00 | 91.98 | B            |
-| student 03 |   92.00 |   95.14 |   97.00 | 94.71 | B            |
-| student 04 |   84.00 |   74.62 |   88.00 | 82.21 | B            |
 
-Use R to plot distributions...
+** communication between people
 
-* interactive documentation (tutorial)
+*** calculation in/on tables (litorgies own tests)
+litorgies own functional tests are contained in a large org-mode
+table, allowing the test suite to be run be evaluation of the table
+and the results to be collected in the same table.
+
+*** interactive documentation (tutorial)
 
 This would demonstrate applicability to Reproducible Research, and
 Literate Programming.
