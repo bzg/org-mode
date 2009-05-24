@@ -33,7 +33,7 @@
 
 (org-babel-add-interpreter "R")
 
-(defvar org-babel-R-func-name "org-babel_R_main"
+(defvar org-babel-R-func-name "org_babel_R_main"
   "This is the main function which wraps each R source code
 block.")
 

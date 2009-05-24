@@ -696,7 +696,15 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [10/13]
+* Bugs [10/14]
+
+** TODO R-code broke on "org-babel" rename
+
+#+srcname: bug-R-babels
+#+begin_src R 
+8
+#+end_src
+
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -977,7 +985,7 @@ of these tests may fail.
 |-------------------------+----------------------------+-----+-------------+-------------+------|
 | emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
 | shell                   | basic-shell                |     |           6 |           6 | pass |
-| ruby                    | basic-ruby                 |     |     org-babel |     org-babel | pass |
+| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
 | python                  | basic-python               |     | hello world | hello world | pass |
 | R                       | basic-R                    |     |          13 |          13 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
