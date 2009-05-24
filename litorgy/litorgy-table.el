@@ -55,7 +55,7 @@
 ;;; Code:
 (require 'litorgy)
 
-(defun org-table-truncate-at-newline (string)
+(defun litorgy-table-truncate-at-newline (string)
   (if (and (stringp string) (string-match "[\n\r]" string))
       (concat (substring string 0 (match-beginning 0)) "...")
     string))
@@ -74,7 +74,7 @@ source code block.
 results
 #+end_src"
   (unless (stringp source-block) (setq source-block (symbol-name source-block)))
-  (org-table-truncate-at-newline ;; org-table cells can't be multi-line
+  (litorgy-table-truncate-at-newline ;; org-table cells can't be multi-line
    (if (and source-block (> (length source-block) 0))
        (let ((params (eval `(litorgy-parse-header-arguments
                              (concat ":var results="
