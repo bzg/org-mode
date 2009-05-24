@@ -1,6 +1,0 @@
-\contentsline {section}{\numberline {1}Sweave and org-mode}{1}{section.1}
-\contentsline {subsection}{\numberline {1.1}R code that is not printed}{1}{subsection.1.1}
-\contentsline {subsection}{\numberline {1.2}R code that is printed}{1}{subsection.1.2}
-\contentsline {subsection}{\numberline {1.3}R code that references other blocks}{1}{subsection.1.3}
-\contentsline {subsection}{\numberline {1.4}Used in text}{2}{subsection.1.4}
-\contentsline {subsection}{\numberline {1.5}Used in a table}{2}{subsection.1.5}
