@@ -1682,20 +1682,20 @@ from the buffer."
 These special cookies will later be interpreted by the backend."
   ;; Blockquotes
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*"
+  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*"
 			    nil t)
     (replace-match (if (equal (downcase (match-string 1)) "end")
 		       "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
 		   t t))
   ;; Verse
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
+  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
     (replace-match (if (equal (downcase (match-string 1)) "end")
 		       "ORG-VERSE-END" "ORG-VERSE-START")
 		   t t))
   ;; Center
   (goto-char (point-min))
-  (while (re-search-forward "^#\\+\\(begin\\|end\\)_center\\>.*" nil t)
+  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_center\\>.*" nil t)
     (replace-match (if (equal (downcase (match-string 1)) "end")
 		       "ORG-CENTER-END" "ORG-CENTER-START")
 		   t t)))

@@ -7,6 +7,8 @@
 	(org-export-remove-indentation): New function.
 	(org-export-select-backend-specific-text): Allow backend-specific
 	code to be indented.
+	(org-export-mark-blockquote-verse-center): Allow markers to be
+	indented.
 
 	* org.el (org-fontify-meta-lines): New function.
 	(org-set-font-lock-defaults): Call the new fontification
