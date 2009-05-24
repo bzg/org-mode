@@ -80,30 +80,33 @@ emacs-lisp representation of the value of the variable."
 assignment is a literal value or is a reference to some external
 resource.  If REF is literal then return it's value, otherwise
 return nil."
-  (let ((out (string-to-number ref)))
-    (if (or (not (equal out 0)) (string-match "^[ \f\t\n\r\v]*0\\.?0?[ \f\t\n\r\v]*$" ref))
-        out ;; number
-      (if (string-match "\"\\(.+\\)\"" ref) (read ref) ;; string
-        nil)))) ;; reference
+  (let ((out (litorgy-read ref)))
+    (if (equal out ref)
+        (if (string-match "\"\\(.+\\)\"" ref)
+            (read ref))
+      out)))
 
 (defun litorgy-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
     (let ((case-fold-search t)
-          type args new-ref result)
+          type args new-refere new-referent result)
       ;; assign any arguments to pass to source block
-      (when (string-match "\\(.+\\)\(\\(.*\\)\)" ref)
-        (save-match-data
-          (if (> (length (match-string 2)) 0)
+      (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
+        (setq new-refere (match-string 1 ref))
+        (setq new-referent (match-string 2 ref))
+        ;; (message (format "first second %S -- %S" new-refere new-referent)) ;; debugging
+        (when (> (length new-refere) 0)
+          (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
-                                 (split-string (match-string 2 ref) ",[ \f\t\n\r\v]*")))))
-        (setq ref (match-string 1 ref)))
+                                 (split-string new-referent ",[ \f\t\n\r\v]*"))))
+          (setq ref new-refere)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
       (goto-char (point-min))
       (unless (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
-                                            (regexp-quote ref) "[ \t]*$"))
+                                           (regexp-quote ref) "[ \t]*$"))
                     (regexp (concat "^#\\+SRCNAME:[ \t]*"
                                     (regexp-quote ref) "[ \t]*$")))
                 (or (re-search-forward result_regexp nil t)

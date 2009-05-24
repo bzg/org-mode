@@ -3,7 +3,7 @@
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 
-* Tasks [19/27]
+* Tasks [20/28]
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -270,6 +270,44 @@ to the command if BUFF is not given.)
     out some lines, and then convert it to litorgy format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+
+** DONE ensure that table ranges work
+when a table range is passed to litorgy as an argument, it should be
+interpreted as a vector.
+
+| 1 | 2 | simple       |
+| 2 | 3 | Fixnum:1     |
+| 3 | 4 | Array:123456 |
+| 4 | 5 |              |
+| 5 | 6 |              |
+| 6 | 7 |              |
+#+TBLFM: @1$3='(sbe simple-sbe-example (n 4))::@2$3='(sbe task-table-range (n @1$1..@6$1))::@3$3='(sbe task-table-range (n (@1$1..@6$1)))
+
+#+srcname: simple-sbe-example
+#+begin_src emacs-lisp 
+"simple"
+#+end_src
+
+#+srcname: task-table-range
+#+begin_src ruby :var n=simple-sbe-example
+"#{n.class}:#{n}"
+#+end_src
+
+#+srcname: simple-results
+#+begin_src emacs-lisp :var n=task-table-range(n=(1 2 3))
+n
+#+end_src
+
+#+resname: simple-results
+: Array:123
+
+#+srcname: task-arr-referent
+#+begin_src ruby :var ar=(1 2 3)
+ar.size
+#+end_src
+
+#+resname: task-arr-referent
+: 3
 
 ** DONE global variable indicating default to vector output
 how about an alist... =litorgy-default-header-args= this may already
