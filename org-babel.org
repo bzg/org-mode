@@ -1,5 +1,5 @@
 #+OPTIONS:    H:3 num:nil toc:t
-#+TITLE: rorg --- Code evaluation in org-mode, with an emphasis on R
+#+TITLE: org-babel --- facilitating communication between programming languages and people
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
 #+STARTUP: oddeven
 

@@ -1,4 +1,4 @@
-;;; org-babel.el --- literate programming in org-mode
+;;; org-babel.el --- facilitating communication between programming languages and people
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
