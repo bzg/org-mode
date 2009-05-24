@@ -1,4 +1,4 @@
-;;; litorgy-table.el --- integration for calling litorgical functions from tables
+;;; org-babel-table.el --- integration for calling org-babel functions from tables
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -53,9 +53,9 @@
 ;; #+TBLFM: $2='(sbe 'fibbd (n $1))
 
 ;;; Code:
-(require 'litorgy)
+(require 'org-babel)
 
-(defun litorgy-table-truncate-at-newline (string)
+(defun org-babel-table-truncate-at-newline (string)
   (if (and (stringp string) (string-match "[\n\r]" string))
       (concat (substring string 0 (match-beginning 0)) "...")
     string))
@@ -74,9 +74,9 @@ source code block.
 results
 #+end_src"
   (unless (stringp source-block) (setq source-block (symbol-name source-block)))
-  (litorgy-table-truncate-at-newline ;; org-table cells can't be multi-line
+  (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
    (if (and source-block (> (length source-block) 0))
-       (let ((params (eval `(litorgy-parse-header-arguments
+       (let ((params (eval `(org-babel-parse-header-arguments
                              (concat ":var results="
                                      ,source-block
                                      "("
@@ -84,8 +84,8 @@ results
                                                   (format "%S=%s" (first var-spec) (second var-spec)))
                                                 ',variables ", ")
                                      ")")))))
-         (litorgy-execute-src-block t (list "emacs-lisp" "results" params)))
+         (org-babel-execute-src-block t (list "emacs-lisp" "results" params)))
      "")))
 
-(provide 'litorgy-table)
-;;; litorgy-table.el ends here
+(provide 'org-babel-table)
+;;; org-babel-table.el ends here

@@ -1,4 +1,4 @@
-;;; litorgy-init.el --- loads litorgy
+;;; org-babel-init.el --- loads org-babel
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -26,23 +26,23 @@
 
 ;;; Commentary:
 
-;; for more information see the comments in litorgy.el
+;; for more information see the comments in org-babel.el
 
 ;;; Code:
 (require 'org)
 (require 'org-exp-blocks)
 (load "htmlize.el") ;; other versions of htmlize can cause export problems
-(require 'litorgy)
-(require 'litorgy-ref)
-(require 'litorgy-ui)
-(require 'litorgy-exp)
-(require 'litorgy-table)
+(require 'org-babel)
+(require 'org-babel-ref)
+(require 'org-babel-ui)
+(require 'org-babel-exp)
+(require 'org-babel-table)
 
 ;; language specific files
-(require 'litorgy-script)
-(require 'litorgy-shell)
-(require 'litorgy-lisp)
-(require 'litorgy-R)
+(require 'org-babel-script)
+(require 'org-babel-shell)
+(require 'org-babel-lisp)
+(require 'org-babel-R)
 
-(provide 'litorgy-init)
-;;; litorgy-init.el ends here
+(provide 'org-babel-init)
+;;; org-babel-init.el ends here

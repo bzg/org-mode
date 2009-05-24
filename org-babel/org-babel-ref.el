@@ -1,4 +1,4 @@
-;;; litorgy-ref.el --- litorgical functions for referencing external data
+;;; org-babel-ref.el --- org-babel functions for referencing external data
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; Functions for referencing data from the header arguments of a
-;; litorgical block.  The syntax of such a reference should be
+;; org-babel block.  The syntax of such a reference should be
 ;;
 ;;   #+VAR: variable-name=file:resource-id
 ;;
@@ -44,7 +44,7 @@
 ;;
 ;;  #+TBLNAME: sandbox
 ;;  | 1 |       2 | 3 |
-;;  | 4 | litorgy | 6 |
+;;  | 4 | org-babel | 6 |
 ;;
 ;;  #+begin_src emacs-lisp :var table=sandbox
 ;;  (message table)
@@ -52,19 +52,19 @@
 ;;
 
 ;;; Code:
-(require 'litorgy)
+(require 'org-babel)
 
-(defun litorgy-ref-variables (params)
+(defun org-babel-ref-variables (params)
   "Takes a parameter alist, and return an alist of variable
 names, and the emacs-lisp representation of the related value."
-  (mapcar #'litorgy-ref-parse
+  (mapcar #'org-babel-ref-parse
           (delq nil (mapcar (lambda (pair) (if (eq (car pair) :var) (cdr pair))) params))))
 
-(defun litorgy-ref-parse (assignment)
+(defun org-babel-ref-parse (assignment)
   "Parse a variable ASSIGNMENT in a header argument.  If the
 right hand side of the assignment has a literal value return that
 value, otherwise interpret as a reference to an external resource
-and find it's value using `litorgy-ref-resolve-reference'.
+and find it's value using `org-babel-ref-resolve-reference'.
 Return a list with two elements.  The first element of the list
 will be the name of the variable, and the second will be an
 emacs-lisp representation of the value of the variable."
@@ -72,21 +72,21 @@ emacs-lisp representation of the value of the variable."
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
         (cons (intern var)
-              (or (litorgy-ref-literal ref)
-                  (litorgy-ref-resolve-reference ref))))))
+              (or (org-babel-ref-literal ref)
+                  (org-babel-ref-resolve-reference ref))))))
 
-(defun litorgy-ref-literal (ref)
+(defun org-babel-ref-literal (ref)
   "Determine if the right side of a header argument variable
 assignment is a literal value or is a reference to some external
 resource.  If REF is literal then return it's value, otherwise
 return nil."
-  (let ((out (litorgy-read ref)))
+  (let ((out (org-babel-read ref)))
     (if (equal out ref)
         (if (string-match "\"\\(.+\\)\"" ref)
             (read ref))
       out)))
 
-(defun litorgy-ref-resolve-reference (ref)
+(defun org-babel-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
     (let ((case-fold-search t)
@@ -120,7 +120,7 @@ return nil."
         ;; (move-marker id-loc nil)
         (progn (message (format "reference '%s' not found in this buffer" ref))
                (error (format "reference '%s' not found in this buffer" ref))))
-      (while (not (setq type (litorgy-ref-at-ref-p)))
+      (while (not (setq type (org-babel-ref-at-ref-p)))
         (forward-line 1)
         (beginning-of-line)
         (if (or (= (point) (point-min)) (= (point) (point-max)))
@@ -128,18 +128,18 @@ return nil."
       (case type
         ('table
          (mapcar (lambda (row)
-                   (mapcar #'litorgy-read row))
+                   (mapcar #'org-babel-read row))
                  (org-table-to-lisp)))
         ('source-block
-         (setq result (litorgy-execute-src-block t nil args))
+         (setq result (org-babel-execute-src-block t nil args))
          (if (symbolp result) (format "%S" result) result))))))
 
-(defun litorgy-ref-at-ref-p ()
+(defun org-babel-ref-at-ref-p ()
   "Return the type of reference located at point or nil of none
 of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
         ((looking-at "^#\\+BEGIN_SRC") 'source-block)))
 
-(provide 'litorgy-ref)
-;;; litorgy-ref.el ends here
+(provide 'org-babel-ref)
+;;; org-babel-ref.el ends here

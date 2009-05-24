@@ -1,4 +1,4 @@
-;;; litorgy-lisp.el --- litorgy functions for lisp code evaluation
+;;; org-babel-lisp.el --- org-babel functions for lisp code evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -26,24 +26,24 @@
 
 ;;; Commentary:
 
-;; Litorgy support for evaluating lisp code
+;; Org-Babel support for evaluating lisp code
 
 ;;; Code:
-(require 'litorgy)
+(require 'org-babel)
 
-(litorgy-add-interpreter "emacs-lisp")
+(org-babel-add-interpreter "emacs-lisp")
 
-(defun litorgy-execute:emacs-lisp (body params)
-  "Execute a block of emacs-lisp code with litorgy.  This
-function is called by `litorgy-execute-src-block'."
+(defun org-babel-execute:emacs-lisp (body params)
+  "Execute a block of emacs-lisp code with org-babel.  This
+function is called by `org-babel-execute-src-block'."
   (message "executing emacs-lisp code block...")
   (save-window-excursion
-    (let ((vars (litorgy-ref-variables params))
+    (let ((vars (org-babel-ref-variables params))
           (print-level nil) (print-length nil) results)
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                      ,(read (concat "(progn " body ")")))))
       results)))
 
-(provide 'litorgy-lisp)
-;;; litorgy-lisp.el ends here
+(provide 'org-babel-lisp)
+;;; org-babel-lisp.el ends here

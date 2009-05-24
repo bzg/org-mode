@@ -1,4 +1,4 @@
-;;; litorgy.el --- literate programming in org-mode
+;;; org-babel.el --- literate programming in org-mode
 
 ;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
 
@@ -31,50 +31,50 @@
 ;;; Code:
 (require 'org)
 
-(defun litorgy-execute-src-block-maybe ()
-  "Detect if this is context for a litorgical src-block and if so
-then run `litorgy-execute-src-block'."
+(defun org-babel-execute-src-block-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-execute-src-block'."
   (interactive)
-  (let ((info (litorgy-get-src-block-info)))
-    (if info (progn (litorgy-execute-src-block current-prefix-arg info) t) nil)))
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'litorgy-execute-src-block-maybe)
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
-(defvar litorgy-default-header-args '()
+(defvar org-babel-default-header-args '()
   "Default arguments to use when evaluating a source block.")
 
-(defvar litorgy-default-inline-header-args '((:results . "silent") (:exports . "results"))
+(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar litorgy-src-block-regexp nil
-  "Regexp used to test when inside of a litorgical src-block")
+(defvar org-babel-src-block-regexp nil
+  "Regexp used to test when inside of a org-babel src-block")
 
-(defvar litorgy-inline-src-block-regexp nil
-  "Regexp used to test when on an inline litorgical src-block")
+(defvar org-babel-inline-src-block-regexp nil
+  "Regexp used to test when on an inline org-babel src-block")
 
-(defun litorgy-set-interpreters (var value)
+(defun org-babel-set-interpreters (var value)
   (set-default var value)
-  (setq litorgy-src-block-regexp
+  (setq org-babel-src-block-regexp
 	(concat "#\\+begin_src \\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
-  (setq litorgy-inline-src-block-regexp
+  (setq org-babel-inline-src-block-regexp
 	(concat "src_\\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)"
                 "\\(\\|\\[\\(.*\\)\\]\\)"
                 "{\\([^\n]+\\)}")))
 
-(defun litorgy-add-interpreter (interpreter)
-  "Add INTERPRETER to `litorgy-interpreters' and update
-`litorgy-src-block-regexp' appropriately."
-  (unless (member interpreter litorgy-interpreters)
-    (setq litorgy-interpreters (cons interpreter litorgy-interpreters))
-    (litorgy-set-interpreters 'litorgy-interpreters litorgy-interpreters)))
+(defun org-babel-add-interpreter (interpreter)
+  "Add INTERPRETER to `org-babel-interpreters' and update
+`org-babel-src-block-regexp' appropriately."
+  (unless (member interpreter org-babel-interpreters)
+    (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
+    (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
-(defcustom litorgy-interpreters '()
+(defcustom org-babel-interpreters '()
   "Interpreters allows for evaluation tags.
 This is a list of program names (as strings) that can evaluate code and
 insert the output into an Org-mode buffer.  Valid choices are
@@ -86,12 +86,12 @@ perl       The perl interpreter
 python     The python interpreter
 ruby       The ruby interpreter
 
-The source block regexp `litorgy-src-block-regexp' is updated
+The source block regexp `org-babel-src-block-regexp' is updated
 when a new interpreter is added to this list through the
 customize interface.  To add interpreters to this variable from
-lisp code use the `litorgy-add-interpreter' function."
-  :group 'litorgy
-  :set 'litorgy-set-interpreters
+lisp code use the `org-babel-add-interpreter' function."
+  :group 'org-babel
+  :set 'org-babel-set-interpreters
   :type '(set :greedy t
               (const "R")
 	      (const "emacs-lisp")
@@ -101,7 +101,7 @@ lisp code use the `litorgy-add-interpreter' function."
 	      (const "ruby")))
 
 ;;; functions
-(defun litorgy-execute-src-block (&optional arg info params)
+(defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
 commented by `org-toggle-fixed-width-section'.  With optional
@@ -110,20 +110,20 @@ results in raw elisp (this is useful for automated execution of a
 source block).
 
 Optionally supply a value for INFO in the form returned by
-`litorgy-get-src-block-info'.
+`org-babel-get-src-block-info'.
 
 Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the source code block."
   (interactive)
-  (let* ((info (or info (litorgy-get-src-block-info)))
+  (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
          (params (org-combine-plists (third info) params))
-         (cmd (intern (concat "litorgy-execute:" lang)))
+         (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message (format "params=%S" params)) ;; debugging statement
-    (unless (member lang litorgy-interpreters)
-      (error "Language is not in `litorgy-interpreters': %s" lang))
+    (unless (member lang org-babel-interpreters)
+      (error "Language is not in `org-babel-interpreters': %s" lang))
     (setq result (funcall cmd body params))
     ;; possibly force result into a vector
     (if (and (not (listp result)) (cdr (assoc :results params))
@@ -131,60 +131,60 @@ the header arguments specified at the source code block."
         (setq result (list result)))
     (if arg
         (message (format "%S" result))
-      (litorgy-insert-result result (cdr (assoc :results params))))
+      (org-babel-insert-result result (cdr (assoc :results params))))
     result))
 
-(defun litorgy-eval-buffer (&optional arg)
+(defun org-babel-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
   (interactive "P")
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward litorgy-regexp nil t)
-      (litorgy-eval-src-block arg))))
+    (while (re-search-forward org-babel-regexp nil t)
+      (org-babel-eval-src-block arg))))
 
-(defun litorgy-eval-subtree (&optional arg)
+(defun org-babel-eval-subtree (&optional arg)
   "Replace EVAL snippets in the entire subtree."
   (interactive "P")
   (save-excursion
     (org-narrow-to-subtree)
-    (litorgy-eval-buffer)
+    (org-babel-eval-buffer)
     (widen)))
 
-(defun litorgy-get-src-block-name ()
+(defun org-babel-get-src-block-name ()
   "Return the name of the current source block if one exists"
   (let ((case-fold-search t))
     (save-excursion
-      (goto-char (litorgy-where-is-src-block-head))
+      (goto-char (org-babel-where-is-src-block-head))
       (if (save-excursion (forward-line -1)
                           (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
-          (litorgy-clean-text-properties (match-string 1))))))
+          (org-babel-clean-text-properties (match-string 1))))))
 
-(defun litorgy-get-src-block-info ()
+(defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list
 of the following form.  (language body header-arguments-alist)"
   (let ((case-fold-search t) head)
-    (if (setq head (litorgy-where-is-src-block-head))
-        (save-excursion (goto-char head) (litorgy-parse-src-block-match))
+    (if (setq head (org-babel-where-is-src-block-head))
+        (save-excursion (goto-char head) (org-babel-parse-src-block-match))
       (if (save-excursion ;; inline source block
             (re-search-backward "[ \f\t\n\r\v]" nil t)
             (forward-char 1)
-            (looking-at litorgy-inline-src-block-regexp))
-          (litorgy-parse-inline-src-block-match)
+            (looking-at org-babel-inline-src-block-regexp))
+          (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
 
-(defun litorgy-parse-src-block-match ()
-  (list (litorgy-clean-text-properties (match-string 1))
-        (litorgy-clean-text-properties (match-string 4))
-        (org-combine-plists litorgy-default-header-args
-                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
+(defun org-babel-parse-src-block-match ()
+  (list (org-babel-clean-text-properties (match-string 1))
+        (org-babel-clean-text-properties (match-string 4))
+        (org-combine-plists org-babel-default-header-args
+                            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
-(defun litorgy-parse-inline-src-block-match ()
-  (list (litorgy-clean-text-properties (match-string 1))
-        (litorgy-clean-text-properties (match-string 4))
-        (org-combine-plists litorgy-default-inline-header-args
-                            (litorgy-parse-header-arguments (litorgy-clean-text-properties (or (match-string 3) ""))))))
+(defun org-babel-parse-inline-src-block-match ()
+  (list (org-babel-clean-text-properties (match-string 1))
+        (org-babel-clean-text-properties (match-string 4))
+        (org-combine-plists org-babel-default-inline-header-args
+                            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
-(defun litorgy-parse-header-arguments (arg-string)
+(defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (delq nil
         (mapcar
@@ -192,7 +192,7 @@ of the following form.  (language body header-arguments-alist)"
                            (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
-(defun litorgy-where-is-src-block-head ()
+(defun org-babel-where-is-src-block-head ()
   "Return the point at the beginning of the current source
 block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
@@ -201,21 +201,21 @@ If the point is not on a source block then return nil."
      (save-excursion ;; on a #+srcname: line
        (beginning-of-line 1)
        (and (looking-at "#\\+srcname") (forward-line 1)
-            (looking-at litorgy-src-block-regexp)
+            (looking-at org-babel-src-block-regexp)
             (point)))
      (save-excursion ;; on a #+begin_src line
        (beginning-of-line 1)
-       (and (looking-at litorgy-src-block-regexp)
+       (and (looking-at org-babel-src-block-regexp)
             (point)))
      (save-excursion ;; inside a src block
        (and
         (re-search-backward "#\\+begin_src" nil t) (setq top (point))
         (re-search-forward "#\\+end_src" nil t) (setq bottom (point))
         (< top initial) (< initial bottom)
-        (goto-char top) (looking-at litorgy-src-block-regexp)
+        (goto-char top) (looking-at org-babel-src-block-regexp)
         (point))))))
 
-(defun litorgy-find-named-result (name)
+(defun org-babel-find-named-result (name)
   "Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
@@ -223,15 +223,15 @@ buffer or nil if no such result exists."
     (when (re-search-forward (concat "#\\+resname:[ \t]*" (regexp-quote name)) nil t)
       (move-beginning-of-line 1) (point))))
 
-(defun litorgy-where-is-src-block-result ()
+(defun org-babel-where-is-src-block-result ()
   "Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
 #+RESNAME: line following the source block."
   (save-excursion
-    (goto-char (litorgy-where-is-src-block-head))
-    (let ((name (litorgy-get-src-block-name)) end head)
-      (or (and name (message name) (litorgy-find-named-result name))
+    (goto-char (org-babel-where-is-src-block-head))
+    (let ((name (org-babel-get-src-block-name)) end head)
+      (or (and name (message name) (org-babel-find-named-result name))
           (and (re-search-forward "#\\+end_src" nil t)
                (progn (move-end-of-line 1) (forward-char 1) (setq end (point))
                       (or (progn ;; either an unnamed #+resname: line already exists
@@ -243,7 +243,7 @@ line.  If no result exists for this block then create a
                             (move-beginning-of-line 1) t)))
                (point))))))
 
-(defun litorgy-insert-result (result &optional insert)
+(defun org-babel-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the
 current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
@@ -259,10 +259,10 @@ silent -- no results are inserted"
   (if insert (setq insert (split-string insert)))
   (if (stringp result)
       (progn
-        (setq result (litorgy-clean-text-properties result))
-        (if (member "file" insert) (setq result (litorgy-result-to-file result))))
+        (setq result (org-babel-clean-text-properties result))
+        (if (member "file" insert) (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and insert (member "replace" insert)) (litorgy-remove-result))
+  (if (and insert (member "replace" insert)) (org-babel-remove-result))
   (if (= (length result) 0)
       (message "no result returned by source block")
     (if (and insert (member "silent" insert))
@@ -272,11 +272,11 @@ silent -- no results are inserted"
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-        (goto-char (litorgy-where-is-src-block-result)) (forward-line 1)
+        (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
-              (litorgy-examplize-region (point) (progn (insert result) (point))))
+              (org-babel-examplize-region (point) (progn (insert result) (point))))
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
@@ -286,15 +286,15 @@ silent -- no results are inserted"
             (org-cycle))))
       (message "finished"))))
 
-(defun litorgy-result-to-org-string (result)
+(defun org-babel-result-to-org-string (result)
   "Return RESULT as a string in org-mode format.  This function
-relies on `litorgy-insert-result'."
-  (with-temp-buffer (litorgy-insert-result result) (buffer-string)))
+relies on `org-babel-insert-result'."
+  (with-temp-buffer (org-babel-insert-result result) (buffer-string)))
 
-(defun litorgy-remove-result ()
+(defun org-babel-remove-result ()
   "Remove the result of the current source block."
   (save-excursion
-    (goto-char (litorgy-where-is-src-block-result)) (forward-line 1)
+    (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
     (delete-region (point)
                    (save-excursion
                      (if (org-at-table-p)
@@ -306,14 +306,14 @@ relies on `litorgy-insert-result'."
                        (forward-line -1)
                        (point))))))
 
-(defun litorgy-result-to-file (result)
+(defun org-babel-result-to-file (result)
   "Return an `org-mode' link with the path being the value or
 RESULT, and the display being the `file-name-nondirectory' if
 non-nil."
   (let ((name (file-name-nondirectory result)))
     (concat "[[" result (if name (concat "][" name "]]") "]]"))))
 
-(defun litorgy-examplize-region (beg end)
+(defun org-babel-examplize-region (beg end)
   "Comment out region using the ': ' org example quote."
   (interactive "*r")
   (let ((size (abs (- (line-number-at-pos end)
@@ -327,11 +327,11 @@ non-nil."
         (dotimes (n size)
           (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
-(defun litorgy-clean-text-properties (text)
+(defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
 
-(defun litorgy-read (cell)
+(defun org-babel-read (cell)
   "Convert the string value of CELL to a number if appropriate.
 Otherwise if cell looks like a list (meaning it starts with a
 '(') then read it as lisp, otherwise return it unmodified as a
@@ -339,7 +339,7 @@ string.
 
 This is taken almost directly from `org-read-prop'."
   (if (and (stringp cell) (not (equal cell "")))
-      (if (litorgy-number-p cell)
+      (if (org-babel-number-p cell)
           (string-to-number cell)
         (if (or (equal "(" (substring cell 0 1))
                 (equal "'" (substring cell 0 1)))
@@ -347,11 +347,11 @@ This is taken almost directly from `org-read-prop'."
           (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
 
-(defun litorgy-number-p (string)
+(defun org-babel-number-p (string)
   "Return t if STRING represents a number"
   (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
 
-(defun litorgy-chomp (string &optional regexp)
+(defun org-babel-chomp (string &optional regexp)
   "Remove any trailing space or carriage returns characters from
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
@@ -359,5 +359,5 @@ overwritten by specifying a regexp as a second argument."
     (setq results (substring results 0 -1)))
   results)
 
-(provide 'litorgy)
-;;; litorgy.el ends here
+(provide 'org-babel)
+;;; org-babel.el ends here
