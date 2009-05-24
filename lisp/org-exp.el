@@ -2123,7 +2123,7 @@ in the list) and remove property and value from the list in LISTVAR."
 	lang code trans opts)
     (goto-char (point-min))
     (while (re-search-forward
-	    "\\(^#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)#\\+END_SRC.*\\)\\|\\(^#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)#\\+END_EXAMPLE.*\\)"
+	    "\\(^[ \t]*#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\\)\\|\\(^[ \t]*#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\\)"
 	    nil t)
       (if (match-end 1)
 	  ;; src segments
@@ -2169,7 +2169,7 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	;; we cannot use numbering or highlighting.
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
-      (setq rtn code)
+      (setq rtn (org-remove-indentation code))
       (when (equal lang "org")
 	(setq rtn (with-temp-buffer
 		    (insert rtn)

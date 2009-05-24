@@ -1,5 +1,11 @@
 2009-05-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-replace-src-segments-and-examples): FInd
+	indented blocks.
+	(org-export-format-source-code-or-example): Fix indentation of
+	blocks.
+	(org-export-remove-indentation): New function.
+
 	* org.el (org-fontify-meta-lines): New function.
 	(org-set-font-lock-defaults): Call the new fontification
 	function.
