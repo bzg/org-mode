@@ -50,8 +50,10 @@ cd ~ && du -sc * |grep -v total
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
+
 *** operate in/on tables (processing grades)
 
+#+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
 |       1 |    18 | F      |
@@ -77,6 +79,11 @@ end
 #+srcname: random-score-generator
 #+begin_src ruby 
 rand(100)
+#+end_src
+
+#+srcname: show-distribution
+#+begin_src R :var grades=grades-table
+
 #+end_src
 
 
