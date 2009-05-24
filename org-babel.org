@@ -50,8 +50,34 @@ cd ~ && du -sc * |grep -v total
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
-*** operate on the contents of tables
-*** be called from inside tables
+*** operate in/on tables (processing grades)
+
+| student | grade | letter |
+|---------+-------+--------|
+|       1 |    18 | F      |
+|       2 |    85 | B      |
+|       3 |    94 | A      |
+|       4 |    81 | B      |
+|       5 |    72 | C      |
+|       6 |    46 | F      |
+#+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
+
+#+srcname: assign-grade
+#+begin_src ruby :var score=99
+case score
+   when 0..59: "F"
+   when 60..69: "D"
+   when 70..79: "C"
+   when 80..89: "B"
+   when 90..100: "A"
+   else "Invalid Score"
+end
+#+end_src
+
+#+srcname: random-score-generator
+#+begin_src ruby 
+rand(100)
+#+end_src
 
 
 ** communication between people
