@@ -148,6 +148,15 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
   :group 'org-clock
   :type 'boolean)
 
+
+(defcustom org-clock-sound nil
+  "Sound that will play once timer is expired.
+If you don't have alsa, it is better to be .wav file"
+  :group 'org-clock
+  :type 'string
+  )
+
+
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -269,19 +278,6 @@ pointing to it."
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))
 
-(defun org-clock-update-mode-line ()
-  (setq org-mode-line-string
-	(org-propertize
-	 (let ((clock-string (org-clock-get-clock-string))
-	       (help-text "Org-mode clock is running. Mouse-2 to go there."))
-	   (if (and (> org-clock-string-limit 0)
-		    (> (length clock-string) org-clock-string-limit))
-	       (org-propertize (substring clock-string 0 org-clock-string-limit)
-			       'help-echo (concat help-text ": " org-clock-heading))
-	     (org-propertize clock-string 'help-echo help-text)))
-	 'local-map org-clock-mode-line-map
-	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
-  (force-mode-line-update))
 
 (defun org-clock-get-clock-string ()
   "Form a clock-string, that will be show in the mode line.
@@ -289,8 +285,8 @@ If effort estimate was defined for current item, then use 01:30/01:50 format (cl
 If not, then 01:50 format (clocked).
 "
   (let* ((clocked-time (org-clock-get-clocked-time))
-	 (h (floor clocked-time 3600))
-	 (m (floor (- clocked-time (* 3600 h)) 60))
+	 (h (floor clocked-time 60))
+	 (m (- clocked-time (* 60 h)))
 	 )
     (if (and org-clock-effort)
 	(let* ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
@@ -304,16 +300,78 @@ If not, then 01:50 format (clocked).
 	      h m org-clock-heading))
     ))
 
+(defun org-clock-update-mode-line ()
+  (setq org-mode-line-string
+	(org-propertize
+	 (let ((clock-string (org-clock-get-clock-string))
+	       (help-text "Org-mode clock is running. Mouse-2 to go there."))
+	   (if (and (> org-clock-string-limit 0)
+		    (> (length clock-string) org-clock-string-limit))
+	       (org-propertize (substring clock-string 0 org-clock-string-limit)
+			       'help-echo (concat help-text ": " org-clock-heading))
+	     (org-propertize clock-string 'help-echo help-text)))
+	 'local-map org-clock-mode-line-map
+	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
+  (if org-clock-effort (org-clock-notify-once-if-expired))
+  (force-mode-line-update))
+
+(defvar org-clock-notification-was-shown nil
+  "Shows if we have shown notification already.")
+
+(defun org-clock-notify-once-if-expired ()
+  "Show notification if we spent more time then we estimated before.
+Notification is shown only once."
+  (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
+	(clocked-time (org-clock-get-clocked-time)))
+    (if (>= clocked-time effort-in-minutes)
+	(if (not org-clock-notification-was-shown)
+	    (progn (org-clock-play-sound)
+		   (show-notification (format "Task '%s' should be finished by now. (%s)"
+					      org-clock-heading org-clock-effort))
+		   (setq org-clock-notification-was-shown t)))
+      (setq org-clock-notification-was-shown nil) 
+      )
+    ))
+
+(setq org-clock-sound "/usr/share/sounds/purple/login.wav")
+
+(defun show-notification (notification)
+  "Show notification. Use libnotify, if available."
+  (if (program-exists "notify-send")
+      (start-process "emacs-timer-notification" nil "notify-send" notification)
+    (message notification)
+    ))
+
+
+(defun org-clock-play-sound ()
+  "Play sound.
+Use alsa's aplay tool if available."  
+  (if (not (eq nil org-clock-sound))
+      (if (program-exists "aplay")
+	  (start-process "org-clock-play-notification" nil "aplay" org-clock-sound)
+	(play-sound-file org-clock-sound))
+    (progn (beep t) (beep t)))
+  )
+
+(defun program-exists (program-name)
+  "Checks whenever we can locate program and launch it."
+  (if (eq system-type 'gnu/linux)
+      (= 0 (call-process "which" nil nil nil program-name))
+    ))
+
+
 (defun org-clock-get-clocked-time ()
-  ""
-  (let ((currently-clocked-time (- (time-to-seconds (current-time))
-				   (time-to-seconds org-clock-start-time))))
+  "In minutes."
+  (let ((currently-clocked-time (floor (- (time-to-seconds (current-time))
+					  (time-to-seconds org-clock-start-time)) 60)))
     ;; (if org-clock-show-total-time
     ;; 	;; TODO: make total-clocked-time TOTAL, and not current clocked time :)
     ;; 	currently-clocked-time
     currently-clocked-time
     ;; )					
     ))
+
+
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
@@ -504,11 +562,11 @@ line and position cursor in that line."
 		(and (integerp org-clock-into-drawer)
 		     (< org-clock-into-drawer 2)))
 	(insert ":" drawer ":\n:END:\n")
-        (beginning-of-line -1)
-        (org-indent-line-function)
+	(beginning-of-line -1)
+	(org-indent-line-function)
 	(org-flag-drawer t)
-        (beginning-of-line 2)
-        (org-indent-line-function)
+	(beginning-of-line 2)
+	(org-indent-line-function)
 	(beginning-of-line)
 	(or org-log-states-order-reversed
 	    (and (re-search-forward org-property-end-re nil t)
@@ -901,7 +959,7 @@ the currently selected interval size."
 	 ((string-match "\\([0-9]+\\)\\(-\\([wW]?\\)\\([0-9]\\{1,2\\}\\)\\(-\\([0-9]\\{1,2\\}\\)\\)?\\)?" s)
 	  ;;               1        1  2   3       3  4                4  5   6                6  5   2
 	  (setq y (string-to-number (match-string 1 s))
-                wp (and (match-end 3) (match-string 3 s))
+		wp (and (match-end 3) (match-string 3 s))
 		mw (and (match-end 4) (string-to-number (match-string 4 s)))
 		d (and (match-end 6) (string-to-number (match-string 6 s))))
 	  (cond
