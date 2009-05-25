@@ -498,6 +498,7 @@ PUB-DIR is set, use this as the publishing directory."
 	   (org-combine-plists (org-default-export-plist)
 			       ext-plist
 			       (org-infile-export-plist))))
+	 (body-only (or body-only (plist-get opt-plist :body-only)))
 	 (style (concat (if (plist-get opt-plist :style-include-default)
 			    org-export-html-style-default)
 			(plist-get opt-plist :style)
