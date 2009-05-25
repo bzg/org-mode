@@ -6213,7 +6213,7 @@ WITH-CASE, the sorting considers case as well."
        (if plain-list-p
 	   "Sort %s: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:"
 	 "Sort %s: [a]lpha  [n]umeric  [p]riority  p[r]operty  todo[o]rder  [f]unc
-               [t]ime [s ]cheduled  [d]eadline  [c]reated
+               [t]ime [s]cheduled  [d]eadline  [c]reated
                A/N/T/S/D/C/P/O/F means reversed:")
        what)
       (setq sorting-type (read-char-exclusive))
@@ -6274,8 +6274,7 @@ WITH-CASE, the sorting considers case as well."
 		   (if (or (re-search-forward org-ts-regexp (point-at-eol) t)
 			   (re-search-forward org-ts-regexp-both
 					      (point-at-eol) t))
-		       (time-to-seconds
-			(org-time-string-to-time (match-string 0)))
+		       (org-time-string-to-seconds (match-string 0))
 		     (time-to-seconds now)))
 		  ((= dcst ?f)
 		   (if getkey-func
@@ -6299,26 +6298,25 @@ WITH-CASE, the sorting considers case as well."
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (or (re-search-forward org-ts-regexp end t)
 			 (re-search-forward org-ts-regexp-both end t))
-		     (org-time-string-to-time (match-string 0))
-		   (org-time-string-to-time now))))
+		     (org-time-string-to-seconds (match-string 0))
+		   (time-to-seconds now))))
 	      ((= dcst ?c)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward
 		      (concat "^[ \t]*\\[" org-ts-regexp1 "\\]")
 		      end t)
-		     (time-to-seconds (org-time-string-to-time
-				       (match-string 0)))
+		     (org-time-string-to-seconds (match-string 0))
 		   (time-to-seconds now))))
 	      ((= dcst ?s)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward org-scheduled-time-regexp end t)
-		     (org-time-string-to-time (match-string 1))
-		   (org-time-string-to-time now))))
+		     (org-time-string-to-seconds (match-string 1))
+		   (time-to-seconds now))))
 	      ((= dcst ?d)
 	       (let ((end (save-excursion (outline-next-heading) (point))))
 		 (if (re-search-forward org-deadline-time-regexp end t)
-		     (org-time-string-to-time (match-string 1))
-		   (org-time-string-to-time now))))
+		     (org-time-string-to-seconds (match-string 1))
+		   (time-to-seconds now))))
 	      ((= dcst ?p)
 	       (if (re-search-forward org-priority-regexp (point-at-eol) t)
 		   (string-to-char (match-string 2))
@@ -12789,6 +12787,8 @@ days in order to avoid rounding problems."
 
 (defun org-time-string-to-time (s)
   (apply 'encode-time (org-parse-time-string s)))
+(defun org-time-string-to-seconds (s)
+  (time-to-seconds (org-time-string-to-time s)))
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all)
   "Convert a time stamp to an absolute day number.
