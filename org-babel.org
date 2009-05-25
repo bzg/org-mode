@@ -51,7 +51,9 @@ pie(dirs[,1], labels = dirs[,2])
 #+end_src
 
 
-*** operate in/on tables (processing grades)
+*** operations in/on tables
+
+**** tables of grades
 
 #+tblname: grades-table
 | student | grade | letter |
@@ -86,13 +88,13 @@ rand(100)
 
 #+end_src
 
-
-** communication between people
-
-*** calculation in/on tables (org-babels own tests)
+**** functional tests
 org-babels own functional tests are contained in a large org-mode
 table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
+
+
+** communication between people
 
 *** interactive documentation (tutorial)
 
