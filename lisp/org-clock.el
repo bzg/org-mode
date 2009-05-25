@@ -158,6 +158,9 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
 (defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
+(defvar org-clock-effort "" 
+  "Effort estimate of the currently clocking task")
+
 (defvar org-clock-history nil
   "List of marker pointing to recent clocked tasks.")
 
@@ -254,9 +257,9 @@ pointing to it."
 				 (org-get-category)))
 		  heading (org-get-heading 'notags)
 		  prefix (save-excursion
-			  (org-back-to-heading t)
-			  (looking-at "\\*+ ")
-			  (match-string 0))
+			   (org-back-to-heading t)
+			   (looking-at "\\*+ ")
+			   (match-string 0))
 		  task (substring
 			(org-fontify-like-in-org-mode 
 			 (concat prefix heading)
@@ -267,23 +270,50 @@ pointing to it."
 	(cons i marker)))))
 
 (defun org-clock-update-mode-line ()
-  (let* ((delta (- (time-to-seconds (current-time))
-		   (time-to-seconds org-clock-start-time)))
-	 (h (floor delta 3600))
-	 (m (floor (- delta (* 3600 h)) 60)))
-    (setq org-mode-line-string
-	  (org-propertize
-	   (let ((clock-string (format (concat "-[" org-time-clocksum-format " (%s)]")
-				       h m org-clock-heading))
-		 (help-text "Org-mode clock is running. Mouse-2 to go there."))
-	     (if (and (> org-clock-string-limit 0)
-		      (> (length clock-string) org-clock-string-limit))
-		 (org-propertize (substring clock-string 0 org-clock-string-limit)
-			     'help-echo (concat help-text ": " org-clock-heading))
-	       (org-propertize clock-string 'help-echo help-text)))
-	   'local-map org-clock-mode-line-map
-	   'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
-    (force-mode-line-update)))
+  (setq org-mode-line-string
+	(org-propertize
+	 (let ((clock-string (org-clock-get-clock-string))
+	       (help-text "Org-mode clock is running. Mouse-2 to go there."))
+	   (if (and (> org-clock-string-limit 0)
+		    (> (length clock-string) org-clock-string-limit))
+	       (org-propertize (substring clock-string 0 org-clock-string-limit)
+			       'help-echo (concat help-text ": " org-clock-heading))
+	     (org-propertize clock-string 'help-echo help-text)))
+	 'local-map org-clock-mode-line-map
+	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
+  (force-mode-line-update))
+
+(defun org-clock-get-clock-string ()
+  "Form a clock-string, that will be show in the mode line.
+If effort estimate was defined for current item, then use 01:30/01:50 format (clocked/estimated).
+If not, then 01:50 format (clocked).
+"
+  (let* ((clocked-time (org-clock-get-clocked-time))
+	 (h (floor clocked-time 3600))
+	 (m (floor (- clocked-time (* 3600 h)) 60))
+	 )
+    (if (and org-clock-effort)
+	(let* ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
+	       (effort-h (floor effort-in-minutes 60))
+	       (effort-m (- effort-in-minutes (* effort-h 60))) 
+	       )
+	  (format (concat "-[" org-time-clocksum-format "/" org-time-clocksum-format " (%s)]")
+		  h m effort-h effort-m  org-clock-heading)
+	  )
+      (format (concat "-[" org-time-clocksum-format " (%s)]")
+	      h m org-clock-heading))
+    ))
+
+(defun org-clock-get-clocked-time ()
+  ""
+  (let ((currently-clocked-time (- (time-to-seconds (current-time))
+				   (time-to-seconds org-clock-start-time))))
+    ;; (if org-clock-show-total-time
+    ;; 	;; TODO: make total-clocked-time TOTAL, and not current clocked time :)
+    ;; 	currently-clocked-time
+    currently-clocked-time
+    ;; )					
+    ))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
@@ -387,6 +417,7 @@ the clocking selection, associated with the letter `d'."
 		(beginning-of-line 1)
 		(org-indent-line-to (- (org-get-indentation) 2)))
 	      (insert org-clock-string " ")
+	      (setq org-clock-effort (org-get-effort))
 	      (setq org-clock-start-time (current-time))
 	      (setq ts (org-insert-time-stamp org-clock-start-time 'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
@@ -488,48 +519,48 @@ line and position cursor in that line."
 If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (interactive)
   (catch 'exit
-  (if (not (marker-buffer org-clock-marker))
-      (if fail-quietly (throw 'exit t) (error "No active clock")))
-  (let (ts te s h m remove)
-    (save-excursion
-      (set-buffer (marker-buffer org-clock-marker))
-      (save-restriction
-	(widen)
-	(goto-char org-clock-marker)
-	(beginning-of-line 1)
-	(if (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
-		 (equal (match-string 1) org-clock-string))
-	    (setq ts (match-string 2))
-	  (if fail-quietly (throw 'exit nil) (error "Clock start time is gone")))
-	(goto-char (match-end 0))
-	(delete-region (point) (point-at-eol))
-	(insert "--")
-	(setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
-	(setq s (- (time-to-seconds (apply 'encode-time (org-parse-time-string te)))
-		   (time-to-seconds (apply 'encode-time (org-parse-time-string ts))))
-	      h (floor (/ s 3600))
-	      s (- s (* 3600 h))
-	      m (floor (/ s 60))
-	      s (- s (* 60 s)))
-	(insert " => " (format "%2d:%02d" h m))
-	(when (setq remove (and org-clock-out-remove-zero-time-clocks
-				(= (+ h m) 0)))
+    (if (not (marker-buffer org-clock-marker))
+	(if fail-quietly (throw 'exit t) (error "No active clock")))
+    (let (ts te s h m remove)
+      (save-excursion
+	(set-buffer (marker-buffer org-clock-marker))
+	(save-restriction
+	  (widen)
+	  (goto-char org-clock-marker)
 	  (beginning-of-line 1)
+	  (if (and (looking-at (concat "[ \t]*" org-keyword-time-regexp))
+		   (equal (match-string 1) org-clock-string))
+	      (setq ts (match-string 2))
+	    (if fail-quietly (throw 'exit nil) (error "Clock start time is gone")))
+	  (goto-char (match-end 0))
 	  (delete-region (point) (point-at-eol))
-	  (and (looking-at "\n") (> (point-max) (1+ (point)))
-	       (delete-char 1)))
-	(move-marker org-clock-marker nil)
-	(when org-log-note-clock-out
-	  (org-add-log-setup 'clock-out nil nil nil nil
-			     (concat "# Task: " (org-get-heading t) "\n\n")))
-	(when org-clock-mode-line-timer
-	  (cancel-timer org-clock-mode-line-timer)
-	  (setq org-clock-mode-line-timer nil))
-	(setq global-mode-string
-	      (delq 'org-mode-line-string global-mode-string))
-	(force-mode-line-update)
-	(message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
-		 (if remove " => LINE REMOVED" "")))))))
+	  (insert "--")
+	  (setq te (org-insert-time-stamp (current-time) 'with-hm 'inactive))
+	  (setq s (- (time-to-seconds (apply 'encode-time (org-parse-time-string te)))
+		     (time-to-seconds (apply 'encode-time (org-parse-time-string ts))))
+		h (floor (/ s 3600))
+		s (- s (* 3600 h))
+		m (floor (/ s 60))
+		s (- s (* 60 s)))
+	  (insert " => " (format "%2d:%02d" h m))
+	  (when (setq remove (and org-clock-out-remove-zero-time-clocks
+				  (= (+ h m) 0)))
+	    (beginning-of-line 1)
+	    (delete-region (point) (point-at-eol))
+	    (and (looking-at "\n") (> (point-max) (1+ (point)))
+		 (delete-char 1)))
+	  (move-marker org-clock-marker nil)
+	  (when org-log-note-clock-out
+	    (org-add-log-setup 'clock-out nil nil nil nil
+			       (concat "# Task: " (org-get-heading t) "\n\n")))
+	  (when org-clock-mode-line-timer
+	    (cancel-timer org-clock-mode-line-timer)
+	    (setq org-clock-mode-line-timer nil))
+	  (setq global-mode-string
+		(delq 'org-mode-line-string global-mode-string))
+	  (force-mode-line-update)
+	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
+		   (if remove " => LINE REMOVED" "")))))))
 
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
@@ -574,7 +605,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 
 (defvar org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
-  (make-variable-buffer-local 'org-clock-file-total-minutes)
+(make-variable-buffer-local 'org-clock-file-total-minutes)
 
 (defun org-clock-sum (&optional tstart tend)
   "Sum the times for each subtree.
