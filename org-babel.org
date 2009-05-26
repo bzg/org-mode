@@ -16,7 +16,19 @@ Org-Babel provides:
 
 ** communication between programs
 
-*** interaction between languages (disk usage in your home directory)
+Org-Mode supports embedded blocks of source code (in any language)
+inside of Org documents.  Org-Babel allows these blocks of code to be
+executed from within Org-Mode with natural handling of their inputs
+and outputs.
+
+*** simple execution
+with both scalar, file, and table output
+
+
+*** reading information from tables
+
+
+*** reading information from other source blocks (disk usage in your home directory)
 
 This will work for Linux and Mac users, not so sure about shell
 commands for windows users.
@@ -95,6 +107,10 @@ and the results to be collected in the same table.
 
 
 ** communication between people
+Quick overview of Org-Mode's exportation abilities, with links to the
+online Org-Mode documentation, a focus on source-code blocks, and the
+exportation options provided by Org-Babel.
+
 
 *** interactive documentation (tutorial)
 
