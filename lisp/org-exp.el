@@ -2170,13 +2170,16 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 	(setq num nil cont nil lang nil))
       (if keepp (setq rpllbl 'keep))
       (setq rtn (org-remove-indentation code))
-      (when (equal lang "org")
+      (when (string-match "^," rtn)
 	(setq rtn (with-temp-buffer
 		    (insert rtn)
 		    ;; Free up the protected lines
 		    (goto-char (point-min))
 		    (while (re-search-forward "^," nil t)
-		      (replace-match "")
+		      (if (or (equal lang "org")
+			      (save-match-data
+				(looking-at "\\([*#]\\|[ \t]*#\\+\\)")))
+			  (replace-match ""))
 		      (end-of-line 1))
 		    (buffer-string))))
       ;; Now backend-specific coding

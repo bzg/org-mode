@@ -1,3 +1,13 @@
+2009-05-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-format-source-code-or-example): Make
+	editing indented blocks work correctly.
+
+	* org.el (org-edit-src-nindent): New variable.
+	(org-edit-src-code, org-edit-fixed-width-region)
+	(org-edit-src-find-region-and-lang, org-edit-src-exit): Make
+	editing indented blocks work correctly.
+
 2009-05-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-replace-src-segments-and-examples): FInd
