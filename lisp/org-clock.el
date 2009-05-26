@@ -170,6 +170,9 @@ If you don't have alsa, it is better to be .wav file"
 (defvar org-clock-effort "" 
   "Effort estimate of the currently clocking task")
 
+(defvar org-clock-total-time ""
+  "Holds total time, spent on currently clocked item before start of current clock.")
+
 (defvar org-clock-history nil
   "List of marker pointing to recent clocked tasks.")
 
@@ -279,6 +282,14 @@ pointing to it."
 	(cons i marker)))))
 
 
+(defun org-clock-sum-current-item ()
+  "Returns time, clocked on current item in total"
+  (save-restriction
+    (org-narrow-to-subtree)
+    (org-clock-sum)
+    org-clock-file-total-minutes)  
+  )
+
 (defun org-clock-get-clock-string ()
   "Form a clock-string, that will be show in the mode line.
 If effort estimate was defined for current item, then use 01:30/01:50 format (clocked/estimated).
@@ -314,6 +325,17 @@ If not, then 01:50 format (clocked).
 	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
   (if org-clock-effort (org-clock-notify-once-if-expired))
   (force-mode-line-update))
+
+
+(defun org-clock-get-clocked-time ()
+  "In minutes."
+  (let ((currently-clocked-time (floor (- (time-to-seconds (current-time))
+					  (time-to-seconds org-clock-start-time)) 60)))
+    ;; (if  org-clock-effort
+    (+ currently-clocked-time org-clock-total-time)
+    ;; currently-clocked-time
+    ;; )					
+    ))
 
 (defvar org-clock-notification-was-shown nil
   "Shows if we have shown notification already.")
@@ -358,19 +380,6 @@ Use alsa's aplay tool if available."
   (if (eq system-type 'gnu/linux)
       (= 0 (call-process "which" nil nil nil program-name))
     ))
-
-
-(defun org-clock-get-clocked-time ()
-  "In minutes."
-  (let ((currently-clocked-time (floor (- (time-to-seconds (current-time))
-					  (time-to-seconds org-clock-start-time)) 60)))
-    ;; (if org-clock-show-total-time
-    ;; 	;; TODO: make total-clocked-time TOTAL, and not current clocked time :)
-    ;; 	currently-clocked-time
-    currently-clocked-time
-    ;; )					
-    ))
-
 
 
 (defvar org-clock-mode-line-entry nil
@@ -476,6 +485,7 @@ the clocking selection, associated with the letter `d'."
 		(org-indent-line-to (- (org-get-indentation) 2)))
 	      (insert org-clock-string " ")
 	      (setq org-clock-effort (org-get-effort))
+	      (setq org-clock-total-time (org-clock-sum-current-item))
 	      (setq org-clock-start-time (current-time))
 	      (setq ts (org-insert-time-stamp org-clock-start-time 'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
