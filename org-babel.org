@@ -65,8 +65,6 @@ pie(dirs[,1], labels = dirs[,2])
 
 *** operations in/on tables
 
-**** tables of grades
-
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
@@ -100,22 +98,20 @@ rand(100)
 
 #+end_src
 
-**** functional tests
-org-babels own functional tests are contained in a large org-mode
-table, allowing the test suite to be run be evaluation of the table
-and the results to be collected in the same table.
-
 
 ** communication between people
 Quick overview of Org-Mode's exportation abilities, with links to the
 online Org-Mode documentation, a focus on source-code blocks, and the
 exportation options provided by Org-Babel.
 
-
-*** interactive documentation (tutorial)
-
+*** Interactive tutorial
 This would demonstrate applicability to Reproducible Research, and
 Literate Programming.
+
+*** Tests embedded in documentation
+org-babels own functional tests are contained in a large org-mode
+table, allowing the test suite to be run be evaluation of the table
+and the results to be collected in the same table.
 
 
 * Tasks [20/28]
@@ -747,15 +743,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [10/14]
-
-** TODO R-code broke on "org-babel" rename
-
-#+srcname: bug-R-babels
-#+begin_src R 
-8
-#+end_src
-
+* Bugs [11/14]
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -788,6 +776,13 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+
+** DONE R-code broke on "org-babel" rename
+
+#+srcname: bug-R-babels
+#+begin_src R 
+8 * 2
+#+end_src
 
 ** DONE error on trivial R results
 
