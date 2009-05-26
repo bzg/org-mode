@@ -68,11 +68,11 @@ pie(dirs[,1], labels = dirs[,2])
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
-|       1 |    18 | F      |
-|       2 |    85 | B      |
-|       3 |    94 | A      |
-|       4 |    81 | B      |
-|       5 |    72 | C      |
+|       1 |    48 | F      |
+|       2 |    30 | F      |
+|       3 |     0 | F      |
+|       4 |     1 | F      |
+|       5 |    56 | F      |
 |       6 |    46 | F      |
 #+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
 
@@ -95,7 +95,7 @@ rand(100)
 
 #+srcname: show-distribution
 #+begin_src R :var grades=grades-table
-
+hist(grades[,2])
 #+end_src
 
 
@@ -216,6 +216,7 @@ should use a span class, and should show original source in tool-tip
    names in R (these must be unique). But this might require a bit of
    thinking about.
 
+
 #+TBLNAME: egtable
 | col1 | col2    | col3 |
 |------+---------+------|
@@ -226,9 +227,11 @@ should use a span class, and should show original source in tool-tip
 tabel
 #+end_src
 
+Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
 ** TODO pass mutliple reference arguments into R
    Can we do this? I wasn't sure how to supply multiple 'var' header
-   args.
+   args. Just delete this TODO if I'm being dense.
 ** TODO Create objects in top level (global) environment in R?
    At the moment, objects created by computations performed in the
    code block are evaluated in the scope of the
