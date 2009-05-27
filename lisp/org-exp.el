@@ -1754,16 +1754,17 @@ table line.  If it is a link, add it to the line containing the link."
   "Remove comments, or convert to backend-specific format.
 COMMENTSP can be a format string for publishing comments.
 When it is nil, all comments will be removed."
-  (let ((re "^#\\(.*\n?\\)")
+  (let ((re "^\\(#\\|[ \t]*#\\+\\)\\(.*\n?\\)")
 	pos)
     (goto-char (point-min))
     (while (or (looking-at re)
 	       (re-search-forward re nil t))
       (setq pos (match-beginning 0))
-      (if commentsp
+      (if (and commentsp
+	       (not (equal (char-before (match-end 1)) ?+)))
 	  (progn (add-text-properties
 		  (match-beginning 0) (match-end 0) '(org-protected t))
-		 (replace-match (format commentsp (match-string 1)) t t))
+		 (replace-match (format commentsp (match-string 2)) t t))
 	(goto-char (1+ pos))
 	(org-if-unprotected
 	 (replace-match "")
