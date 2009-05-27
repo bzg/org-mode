@@ -708,6 +708,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			   org-export-html-xml-declaration)
 		      (cdr (assoc html-extension org-export-html-xml-declaration))
 		      (cdr (assoc "html" org-export-html-xml-declaration))
+
 		      (t ""))
 		  (or charset "iso-8859-1"))
 		 language language (org-html-expand title)
