@@ -1,3 +1,8 @@
+2009-05-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Structure editing, TODO basics): Document new
+	variables.
+
 2009-05-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Column attributes): Document new colciew operators.

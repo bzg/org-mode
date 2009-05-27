@@ -1817,6 +1817,22 @@ to change is while Emacs is running is through the customize interface."
   :group 'org-todo
   :type 'boolean)
 
+(defcustom org-treat-insert-todo-heading-as-state-change nil
+  "Non-nil means, inserting a TODO heading is treated as state change.
+So when the command \\[org-insert-todo-heading] is used, state change
+logging will apply if appropriate.  When nil, the new TODO item will
+be inserted directly, and no logging will take place."
+  :group 'org-todo
+  :type 'boolean)
+
+(defcustom org-treat-S-cursor-todo-seletion-as-state-change t
+  "Non-nil means, switching TODO states with S-cursor counts as state change.
+This is the default behavior.  However, setting this to nil allows a
+convenient way to select a TODO state and bypass any logging associated
+with that."
+  :group 'org-todo
+  :type 'boolean)
+
 (defcustom org-todo-state-tags-triggers nil
   "Tag changes that should be triggered by TODO state changes.
 This is a list.  Each entry is
@@ -3811,6 +3827,7 @@ This variable is set by `org-before-change-function'.
   "Mode hook for Org-mode, run after the mode was turned on.")
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
+(defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 (defconst org-outline-regexp "\\*+ ")
 
@@ -5495,7 +5512,9 @@ state (TODO by default).  Also with prefix arg, force first state."
 	   new-mark-x)))
       (beginning-of-line 1)
       (and (looking-at "\\*+ ") (goto-char (match-end 0))
-	   (insert new-mark " ")))
+	   (if org-treat-insert-todo-heading-as-state-change
+	       (org-todo new-mark)
+	     (insert new-mark " "))))
     (when org-provide-todo-statistics
       (org-update-parent-todo-statistics))))
 
@@ -9120,6 +9139,7 @@ Each function takes arguments (NEW-MARK OLD-MARK) and returns either
 `nil' or a string to be used for the todo mark." )
 
 (defvar org-agenda-headline-snapshot-before-repeat)
+
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -9278,6 +9298,7 @@ For calling through lisp, arg is also interpreted in the following way:
 				(not (member this org-done-keywords))))
 	  (and logging (org-local-logging logging))
 	  (when (and (or org-todo-log-states org-log-done)
+		     (not org-inhibit-logging)
 		     (not (memq arg '(nextset previousset))))
 	    ;; we need to look at recording a time and note
 	    (setq dolog (or (nth 1 (assoc state org-todo-log-states))
@@ -14475,7 +14496,9 @@ Depending on context, this does one of the following:
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
-    (org-call-with-arg 'org-todo 'right))
+    (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-seletion-as-state-change)))
+      (org-call-with-arg 'org-todo 'right)))		       
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
 	     (org-at-item-bullet-p))
@@ -14505,7 +14528,9 @@ Depending on context, this does one of the following:
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
-    (org-call-with-arg 'org-todo 'left))
+    (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-seletion-as-state-change)))
+      (org-call-with-arg 'org-todo 'left)))
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
 	     (org-at-item-bullet-p))

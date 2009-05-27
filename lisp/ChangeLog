@@ -1,3 +1,14 @@
+2009-05-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-treat-insert-todo-heading-as-state-change)
+	(org-treat-S-cursor-todo-seletion-as-state-change): New
+	variables.
+	(org-insert-todo-heading): Honor
+	`org-treat-insert-todo-heading-as-state-change'.
+	(org-shiftright, org-shiftleft): Honor
+	`org-treat-S-cursor-todo-seletion-as-state-change'.
+	(org-inhibit-logging): New variable.
+
 2009-05-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-remove-subtree-entries-from-agenda): Reduce

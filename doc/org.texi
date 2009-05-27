@@ -958,7 +958,9 @@ current heading, the new heading is placed after the body instead of before
 it.  This command works from anywhere in the entry.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
-Insert new TODO entry with same level as current heading.
+@vindex org-treat-insert-todo-heading-as-state-change
+Insert new TODO entry with same level as current heading.  See also the
+variable @code{org-treat-insert-todo-heading-as-state-change}.
 @kindex C-S-@key{RET}
 @item C-S-@key{RET}
 Insert new TODO entry with same level as current heading.  Like
@@ -3193,12 +3195,14 @@ more information.
 
 @kindex S-@key{right}
 @kindex S-@key{left}
+@vindex org-treat-S-cursor-todo-seletion-as-state-change
 @item S-@key{right}
 @itemx S-@key{left}
 Select the following/preceding TODO state, similar to cycling.  Useful
 mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).  See also @ref{Conflicts} for a discussion of the interaction
-with @code{shift-selection-mode}.
+with @code{shift-selection-mode}.  See also the variable
+@code{org-treat-S-cursor-todo-seletion-as-state-change}.
 @kindex C-c C-v
 @kindex C-c / t
 @cindex sparse tree, for TODO
