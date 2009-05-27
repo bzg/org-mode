@@ -6834,6 +6834,14 @@ major mode, for example with \[normal-mode]."
 	  '([(meta shift down)]   org-shiftmetadown)
 	  '([(meta shift left)]   org-shiftmetaleft)
 	  '([(meta shift right)]  org-shiftmetaright)
+	  '([?\e (up)]            org-metaup)
+	  '([?\e (down)]          org-metadown)
+	  '([?\e (left)]          org-metaleft)
+	  '([?\e (right)]         org-metaright)
+	  '([?\e (shift up)]      org-shiftmetaup)
+	  '([?\e (shift down)]    org-shiftmetadown)
+	  '([?\e (shift left)]    org-shiftmetaleft)
+	  '([?\e (shift right)]   org-shiftmetaright)
 	  '([(shift up)]          org-shiftup)
 	  '([(shift down)]        org-shiftdown)
 	  '([(shift left)]        org-shiftleft)
@@ -6866,6 +6874,16 @@ major mode, for example with \[normal-mode]."
     (org-defkey orgstruct-mode-map [(shift meta return)]
 		(orgstruct-make-binding 'org-insert-todo-heading 107
 				     [(meta return)] "\M-\C-m"))
+
+    (org-defkey orgstruct-mode-map "\e\C-m"
+		(orgstruct-make-binding 'org-insert-heading 108
+				     "\e\C-m" [?\e (return)]))
+    (org-defkey orgstruct-mode-map [?\e (return)]
+		(orgstruct-make-binding 'org-insert-heading 109
+				     [?\e (return)] "\e\C-m"))
+    (org-defkey orgstruct-mode-map [?\e (shift return)]
+		(orgstruct-make-binding 'org-insert-todo-heading 110
+					[?\e (return)] "\e\C-m"))
 
     (unless org-local-vars
       (setq org-local-vars (org-get-local-variables)))
@@ -12252,6 +12270,18 @@ user."
 	    (org-defkey minibuffer-local-map [(meta shift down)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-forward-year 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift left)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-backward-month 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift right)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-forward-month 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift up)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-backward-year 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift down)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-forward-year 1))))
 	    (org-defkey minibuffer-local-map [(shift up)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-backward-week 1))))
@@ -13973,7 +14003,13 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (org-defkey org-mode-map [?\C-c (left)]  'org-shiftleft)
   (org-defkey org-mode-map [?\C-c (right)] 'org-shiftright)
   (org-defkey org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
-  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft))
+  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft)
+  (org-defkey org-mode-map [?\e (tab)] 'org-complete)
+  (org-defkey org-mode-map [?\e (shift return)] 'org-insert-todo-heading)
+  (org-defkey org-mode-map [?\e (shift left)]   'org-shiftmetaleft)
+  (org-defkey org-mode-map [?\e (shift right)]  'org-shiftmetaright)
+  (org-defkey org-mode-map [?\e (shift up)]     'org-shiftmetaup)
+  (org-defkey org-mode-map [?\e (shift down)]   'org-shiftmetadown))
 
   ;; All the other keys
 
