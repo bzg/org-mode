@@ -9010,13 +9010,14 @@ expands them."
 (defun org-complete-expand-structure-template (start cell)
   "Expand a structure template."
   (let* ((musep (org-bound-and-true-p org-mtags-prefer-muse-templates))
-	 (rpl (nth (if musep 2 1) cell)))
+	 (rpl (nth (if musep 2 1) cell))
+	 (ind ""))
     (delete-region start (point))
     (when (string-match "\\`#\\+" rpl)
       (cond
        ((bolp))
        ((not (string-match "\\S-" (buffer-substring (point-at-bol) (point))))
-	(delete-region (point-at-bol) (point)))
+	(setq ind (buffer-substring (point-at-bol) (point))))
        (t (newline))))
     (setq start (point))
     (if (string-match "%file" rpl)
@@ -9027,6 +9028,8 @@ expands them."
 		      (abbreviate-file-name (read-file-name "Include file: ")))
 		    "\"")
 		   t t rpl)))
+    (setq rpl (mapconcat 'identity (split-string rpl "\n")
+			 (concat "\n" ind)))
     (insert rpl)
     (if (re-search-backward "\\?" start t) (delete-char 1))))
 
