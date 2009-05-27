@@ -170,7 +170,7 @@ If you don't have alsa, it is better to be .wav file"
 (defvar org-clock-effort "" 
   "Effort estimate of the currently clocking task")
 
-(defvar org-clock-total-time ""
+(defvar org-clock-total-time nil
   "Holds total time, spent on currently clocked item before start of current clock.")
 
 (defvar org-clock-history nil
@@ -331,10 +331,10 @@ If not, then 01:50 format (clocked).
   "In minutes."
   (let ((currently-clocked-time (floor (- (time-to-seconds (current-time))
 					  (time-to-seconds org-clock-start-time)) 60)))
-    ;; (if  org-clock-effort
-    (+ currently-clocked-time org-clock-total-time)
-    ;; currently-clocked-time
-    ;; )					
+    (if  org-clock-total-time
+	(+ currently-clocked-time org-clock-total-time)
+      currently-clocked-time
+      )					
     ))
 
 (defvar org-clock-notification-was-shown nil
@@ -355,7 +355,6 @@ Notification is shown only once."
       )
     ))
 
-(setq org-clock-sound "/usr/share/sounds/purple/login.wav")
 
 (defun show-notification (notification)
   "Show notification. Use libnotify, if available."
