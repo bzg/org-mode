@@ -68,11 +68,11 @@ pie(dirs[,1], labels = dirs[,2])
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
-|       1 |    18 | F      |
-|       2 |    85 | B      |
-|       3 |    94 | A      |
-|       4 |    81 | B      |
-|       5 |    72 | C      |
+|       1 |    48 | F      |
+|       2 |    30 | F      |
+|       3 |     0 | F      |
+|       4 |     1 | F      |
+|       5 |    56 | F      |
 |       6 |    46 | F      |
 #+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
 
@@ -95,7 +95,7 @@ rand(100)
 
 #+srcname: show-distribution
 #+begin_src R :var grades=grades-table
-
+hist(grades[,2])
 #+end_src
 
 
@@ -115,11 +115,8 @@ and the results to be collected in the same table.
 
 
 * Tasks [20/29]
-
 ** TODO improve the source-block snippet
 [[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
-
-
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -212,6 +209,73 @@ we should color these blocks differently
 
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
+
+** TODO allow tables with hline to be passed as args into R
+   This doesn't seem to work at the moment (example below). It would
+   also be nice to have a natural way for the column names of the org
+   table to become the column names of the R data frame, and to have
+   the option to specify that the first column is to be used as row
+   names in R (these must be unique). But this might require a bit of
+   thinking about.
+
+
+#+TBLNAME: egtable
+| col1 | col2    | col3 |
+|------+---------+------|
+|    1 | 2       |    3 |
+|    4 | schulte |    6 |
+
+#+begin_src R var tabel=egtable
+tabel
+#+end_src
+
+Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** TODO pass mutliple reference arguments into R
+   Can we do this? I wasn't sure how to supply multiple 'var' header
+   args. Just delete this TODO if I'm being dense.
+** TODO Create objects in top level (global) environment in R?
+   At the moment, objects created by computations performed in the
+   code block are evaluated in the scope of the
+   code-block-function-body and therefore disappear when the code
+   block is evaluated {unless you employ some extra trickery like
+   assign('name', object, env=globalenv()) }. I think it will be
+   desirable to also allow for a style wherein objects that are
+   created in one code block persist in the R global environment and
+   can be re-used in a separate block.
+
+   This is what Sweave does, and while I'm not saying we have to be
+   the same as Sweave, it wouldn't be hard for us to provide the same
+   behaviour in this case; if we don't, we risk undeservedly being
+   written off as an oddity by some.
+
+   IOW one aspect of org-babel is that of a sort of functional
+   meta-programming language. This is crazy, in a very good
+   way. Nevertheless, wrt R I think there's going to be a lot of value
+   in providing for a working style in which the objects are stored in
+   the R session, rather than elisp/org buffer. This will be a very
+   familiar working style to lots of people.
+
+   There are no doubt a number of different ways of accomplishing
+   this, the simplest being a hack like adding
+
+#+begin_src R
+for(objname in ls())
+    assign(objname, get(objname), envir=globalenv())
+#+end_src
+
+to the source code block function body. (Maybe wrap it in an on.exit() call).
+
+However this may deserve to be thought about more carefully, perhaps
+with a view to having a uniform approach across languages. E.g. shell
+code blocks have the same semantics at the moment (no persistence of
+variables across code blocks), because the body is evaluated in a new
+bash shell process rather than a running shell. And I guess the same
+is true for python. However, in both these cases, you could imagine
+implementing the alternative in which the body is evaluated in a
+persistent interactive session. It's just that it's particularly
+natural for R, seeing as both ESS and org-babel evaluate commands in a
+single persistent R session.
 
 ** PROPOSED support for passing paths to files between source blocks
 Maybe this should be it's own result type (in addition to scalars and
@@ -1352,6 +1416,7 @@ x
 |  3.58355906547775 |
 |  3.01563442274226 |
 |   1.7634976849927 |
+
 #+begin_src R var tabel=sandbox_r :results replace
 tabel
 #+end_src
