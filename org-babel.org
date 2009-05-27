@@ -114,7 +114,12 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [20/28]
+* Tasks [20/29]
+
+** TODO improve the source-block snippet
+[[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
+
+
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
