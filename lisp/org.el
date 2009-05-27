@@ -4245,6 +4245,12 @@ will be prompted for."
 	     beg (match-end 0)
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
+	   ((or (member dc1 '("caption:" "label:"))
+		(and (match-end 4) (equal dc3 "attr")))
+	    (add-text-properties
+	     beg (match-end 0)
+	     '(font-lock-fontified t face org-meta-line))
+	    t)
 	   (t nil))))))
 
 (defun org-activate-angle-links (limit)

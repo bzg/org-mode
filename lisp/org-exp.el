@@ -1708,11 +1708,11 @@ table line.  If it is a link, add it to the line containing the link."
   (remove-text-properties (point-min) (point-max)
 			  '(org-caption nil org-attributes nil))
   (let ((case-fold-search t)
-	(re (concat "^#\\+caption:[ \t]+\\(.*\\)"
+	(re (concat "^[ \t]*#\\+caption:[ \t]+\\(.*\\)"
 		    "\\|"
-		    "^#\\+attr_" (symbol-name backend) ":[ \t]+\\(.*\\)"
+		    "^[ \t]*#\\+attr_" (symbol-name backend) ":[ \t]+\\(.*\\)"
 		    "\\|"
-		    "^#\\+label:[ \t]+\\(.*\\)"
+		    "^[ \t]*#\\+label:[ \t]+\\(.*\\)"
 		    "\\|"
 		    "^[ \t]*|[^-]"
 		    "\\|"
