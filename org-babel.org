@@ -277,6 +277,35 @@ persistent interactive session. It's just that it's particularly
 natural for R, seeing as both ESS and org-babel evaluate commands in a
 single persistent R session.
 
+*** sessions [Eric]
+
+Thanks for bringing this up.  I think you are absolutely correct that we
+should provide support for a persistent environment (maybe called a
+*session*) in which to evaluate code blocks.  I think the current setup
+demonstrates my personal bias for a functional style of programming
+which is certainly not ideal in all contexts.
+
+While the R function you mention does look like an elegant solution, I
+think we should choose an implementation that would be the same across
+all source code types.  Specifically I think we should allow the user to
+specify an optional *session* as a header variable (when not present we
+assume a default session for each language).  The session name could be
+used to name a comint buffer (like the *R* buffer) in which all
+evaluation would take place (within which variables would retain their
+values --at least once I remove some of the functional method wrappings
+currently in place-- ).
+
+This would allow multiple environments to be used in the same buffer,
+and once this setup was implemented we should be able to fairly easily
+implement commands for jumping between source code blocks and the
+related session buffers, as well as for dumping the last N commands from
+a session into a new or existing source code block.
+
+Please let me know if you foresee any problems with this proposed setup,
+or if you think any parts might be confusing for people coming from
+Sweave.  I'll hopefully find some time to work on this later in the
+week.
+
 ** PROPOSED support for passing paths to files between source blocks
 Maybe this should be it's own result type (in addition to scalars and
 vectors).  The reason being that some source-code blocks (for example
