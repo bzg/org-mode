@@ -34,7 +34,6 @@
 (load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'org-babel)
 (require 'org-babel-ref)
-(require 'org-babel-ui)
 (require 'org-babel-exp)
 (require 'org-babel-table)
 
