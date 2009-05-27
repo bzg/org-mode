@@ -150,8 +150,11 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
 
 
 (defcustom org-clock-sound nil
-  "Sound that will play once timer is expired.
-If you don't have alsa, it is better to be .wav file"
+  "Sound that will used for notifications.
+Possible values:
+* nil. No sound played.
+* any string, that is not a file. Make a beep.
+* file name. If you don't have alsa, it is better to be .wav file"
   :group 'org-clock
   :type 'string
   )
@@ -363,15 +366,18 @@ Notification is shown only once."
     (message notification)
     ))
 
-
+    (play-sound-file org-clock-sound)
+  (message "%s is not a file" org-clock-sound)    
+  )
 (defun org-clock-play-sound ()
-  "Play sound.
+  "Play sound. Controlled by org-clock-sound.
 Use alsa's aplay tool if available."  
-  (if (not (eq nil org-clock-sound))
+  (if (and (not (eq org-clock-sound ""))
+	   (file-exists-p org-clock-sound))
       (if (program-exists "aplay")
 	  (start-process "org-clock-play-notification" nil "aplay" org-clock-sound)
 	(play-sound-file org-clock-sound))
-    (progn (beep t) (beep t)))
+    (progn (beep t) (beep t))c)
   )
 
 (defun program-exists (program-name)
