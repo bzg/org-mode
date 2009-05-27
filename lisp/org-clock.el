@@ -1183,7 +1183,7 @@ the currently selected interval size."
 	       (t (error "invalid formula in clocktable")))
 	    ;; Should we rescue an old formula?
 	    (when (stringp (setq content (plist-get params :content)))
-	      (when (string-match "^\\(#\\+TBLFM:.*\\)" content)
+	      (when (string-match "^\\([ \t]*#\\+TBLFM:.*\\)" content)
 		(setq recalc t)
 		(insert "\n" (match-string 1 (plist-get params :content)))
 		(beginning-of-line 0))))

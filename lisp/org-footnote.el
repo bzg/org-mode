@@ -457,7 +457,7 @@ ENTRY is (fn-label num-mark definition)."
   (beginning-of-line 0)
   (while (and (not (bobp)) (= (char-after) ?#))
     (beginning-of-line 0))
-  (if (looking-at "#\\+TBLFM:") (beginning-of-line 2))
+  (if (looking-at "[ \t]*#\\+TBLFM:") (beginning-of-line 2))
   (end-of-line 1)
   (skip-chars-backward "\n\r\t "))
 

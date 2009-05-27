@@ -1,3 +1,25 @@
+2009-05-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-store-formulas)
+	(org-table-get-stored-formulas, org-table-fix-formulas)
+	(org-table-edit-formulas, orgtbl-ctrl-c-ctrl-c)
+	(orgtbl-gather-send-defs): Allow indented #+TBLFM line.
+
+	* org.el (org-fontify-meta-lines, org-ctrl-c-ctrl-c): Allow
+	indented #+TBLFM line.
+
+	* org-footnote.el (org-footnote-goto-local-insertion-point): Allow
+	indented #+TBLFM line.
+
+	* org-colview.el (org-dblock-write:columnview): Allow indented
+	#+TBLFM line.
+
+	* org-colview-xemacs.el (org-dblock-write:columnview): Allow
+	indented #+TBLFM line.
+
+	* org-clock.el (org-dblock-write:clocktable): Allow indented
+	#+TBLFM line.
+
 2009-05-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example): Make
