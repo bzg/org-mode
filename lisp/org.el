@@ -1825,7 +1825,7 @@ be inserted directly, and no logging will take place."
   :group 'org-todo
   :type 'boolean)
 
-(defcustom org-treat-S-cursor-todo-seletion-as-state-change t
+(defcustom org-treat-S-cursor-todo-selection-as-state-change t
   "Non-nil means, switching TODO states with S-cursor counts as state change.
 This is the default behavior.  However, setting this to nil allows a
 convenient way to select a TODO state and bypass any logging associated
@@ -14533,7 +14533,7 @@ Depending on context, this does one of the following:
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
     (let ((org-inhibit-logging
-	   (not org-treat-S-cursor-todo-seletion-as-state-change)))
+	   (not org-treat-S-cursor-todo-selection-as-state-change)))
       (org-call-with-arg 'org-todo 'right)))		       
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
@@ -14565,7 +14565,7 @@ Depending on context, this does one of the following:
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
     (let ((org-inhibit-logging
-	   (not org-treat-S-cursor-todo-seletion-as-state-change)))
+	   (not org-treat-S-cursor-todo-selection-as-state-change)))
       (org-call-with-arg 'org-todo 'left)))
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
