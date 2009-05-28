@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [20/32]
+* Tasks [20/33]
 ** TODO Create objects in top level (global) environment in R?
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
@@ -192,6 +192,8 @@ in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
 
 Currently I've coppied and begun generalizing the functions for
 interacting with R buffers.
+** TODO fully purge org-babel-R of direct comint interaction
+try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
 
 ** TODO improve the source-block snippet
 
