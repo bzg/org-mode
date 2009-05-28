@@ -4,7 +4,7 @@
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-latex.el
-;; Version: 6.27a
+;; Version: 6.27trans
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Keywords: org, wp, tex
@@ -1549,9 +1549,13 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 
   ;; Protect LaTeX entities
   (goto-char (point-min))
-  (while (re-search-forward org-latex-entities-regexp nil t)
-    (add-text-properties (match-beginning 0) (match-end 0)
-			 '(org-protected t)))
+  (let (a)
+    (while (re-search-forward org-latex-entities-regexp nil t)
+      (if (setq a (assoc (match-string 0) org-latex-entities-exceptions))
+	  (replace-match (org-add-props (nth 1 a) nil 'org-protected t)
+			 t t)
+	(add-text-properties (match-beginning 0) (match-end 0)
+			     '(org-protected t)))))
 
   ;; Replace radio links
   (goto-char (point-min))
@@ -1731,6 +1735,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
    "\\medskip"
    "\\multicolumn"
    "\\multiput"
+   ("\\nbsp" "~")
    "\\newcommand"
    "\\newcounter"
    "\\newenvironment"
@@ -1802,9 +1807,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
    "\\vspace")
  "A list of LaTeX commands to be protected when performing conversion.")
 
+(defvar org-latex-entities-exceptions nil)
+
 (defconst org-latex-entities-regexp
   (let (names rest)
     (dolist (x org-latex-entities)
+      (when (consp x)
+	(add-to-list 'org-latex-entities-exceptions x)
+	(setq x (car x)))
       (if (string-match "[a-z][A-Z]$" x)
 	  (push x names)
 	(push x rest)))

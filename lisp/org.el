@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.27a
+;; Version: 6.27trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -94,7 +94,7 @@
 
 ;;; Version
 
-(defconst org-version "6.27a"
+(defconst org-version "6.27trans"
   "The version number of the file org.el.")
 
 (defun org-version (&optional here)
@@ -1814,6 +1814,22 @@ to change is while Emacs is running is through the customize interface."
 		       'org-block-todo-from-checkboxes)
 	   (remove-hook 'org-blocker-hook
 			'org-block-todo-from-checkboxes)))
+  :group 'org-todo
+  :type 'boolean)
+
+(defcustom org-treat-insert-todo-heading-as-state-change nil
+  "Non-nil means, inserting a TODO heading is treated as state change.
+So when the command \\[org-insert-todo-heading] is used, state change
+logging will apply if appropriate.  When nil, the new TODO item will
+be inserted directly, and no logging will take place."
+  :group 'org-todo
+  :type 'boolean)
+
+(defcustom org-treat-S-cursor-todo-selection-as-state-change t
+  "Non-nil means, switching TODO states with S-cursor counts as state change.
+This is the default behavior.  However, setting this to nil allows a
+convenient way to select a TODO state and bypass any logging associated
+with that."
   :group 'org-todo
   :type 'boolean)
 
@@ -3811,6 +3827,7 @@ This variable is set by `org-before-change-function'.
   "Mode hook for Org-mode, run after the mode was turned on.")
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
+(defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 (defconst org-outline-regexp "\\*+ ")
 
@@ -5495,7 +5512,9 @@ state (TODO by default).  Also with prefix arg, force first state."
 	   new-mark-x)))
       (beginning-of-line 1)
       (and (looking-at "\\*+ ") (goto-char (match-end 0))
-	   (insert new-mark " ")))
+	   (if org-treat-insert-todo-heading-as-state-change
+	       (org-todo new-mark)
+	     (insert new-mark " "))))
     (when org-provide-todo-statistics
       (org-update-parent-todo-statistics))))
 
@@ -6815,6 +6834,14 @@ major mode, for example with \[normal-mode]."
 	  '([(meta shift down)]   org-shiftmetadown)
 	  '([(meta shift left)]   org-shiftmetaleft)
 	  '([(meta shift right)]  org-shiftmetaright)
+	  '([?\e (up)]            org-metaup)
+	  '([?\e (down)]          org-metadown)
+	  '([?\e (left)]          org-metaleft)
+	  '([?\e (right)]         org-metaright)
+	  '([?\e (shift up)]      org-shiftmetaup)
+	  '([?\e (shift down)]    org-shiftmetadown)
+	  '([?\e (shift left)]    org-shiftmetaleft)
+	  '([?\e (shift right)]   org-shiftmetaright)
 	  '([(shift up)]          org-shiftup)
 	  '([(shift down)]        org-shiftdown)
 	  '([(shift left)]        org-shiftleft)
@@ -6847,6 +6874,16 @@ major mode, for example with \[normal-mode]."
     (org-defkey orgstruct-mode-map [(shift meta return)]
 		(orgstruct-make-binding 'org-insert-todo-heading 107
 				     [(meta return)] "\M-\C-m"))
+
+    (org-defkey orgstruct-mode-map "\e\C-m"
+		(orgstruct-make-binding 'org-insert-heading 108
+				     "\e\C-m" [?\e (return)]))
+    (org-defkey orgstruct-mode-map [?\e (return)]
+		(orgstruct-make-binding 'org-insert-heading 109
+				     [?\e (return)] "\e\C-m"))
+    (org-defkey orgstruct-mode-map [?\e (shift return)]
+		(orgstruct-make-binding 'org-insert-todo-heading 110
+					[?\e (return)] "\e\C-m"))
 
     (unless org-local-vars
       (setq org-local-vars (org-get-local-variables)))
@@ -9120,6 +9157,7 @@ Each function takes arguments (NEW-MARK OLD-MARK) and returns either
 `nil' or a string to be used for the todo mark." )
 
 (defvar org-agenda-headline-snapshot-before-repeat)
+
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -9278,6 +9316,7 @@ For calling through lisp, arg is also interpreted in the following way:
 				(not (member this org-done-keywords))))
 	  (and logging (org-local-logging logging))
 	  (when (and (or org-todo-log-states org-log-done)
+		     (not org-inhibit-logging)
 		     (not (memq arg '(nextset previousset))))
 	    ;; we need to look at recording a time and note
 	    (setq dolog (or (nth 1 (assoc state org-todo-log-states))
@@ -12231,6 +12270,18 @@ user."
 	    (org-defkey minibuffer-local-map [(meta shift down)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-forward-year 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift left)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-backward-month 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift right)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-forward-month 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift up)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-backward-year 1))))
+	    (org-defkey minibuffer-local-map [?\e (shift down)]
+	      (lambda () (interactive)
+		(org-eval-in-calendar '(calendar-forward-year 1))))
 	    (org-defkey minibuffer-local-map [(shift up)]
 	      (lambda () (interactive)
 		(org-eval-in-calendar '(calendar-backward-week 1))))
@@ -13952,7 +14003,13 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (org-defkey org-mode-map [?\C-c (left)]  'org-shiftleft)
   (org-defkey org-mode-map [?\C-c (right)] 'org-shiftright)
   (org-defkey org-mode-map [?\C-c ?\C-x (right)] 'org-shiftcontrolright)
-  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft))
+  (org-defkey org-mode-map [?\C-c ?\C-x (left)] 'org-shiftcontrolleft)
+  (org-defkey org-mode-map [?\e (tab)] 'org-complete)
+  (org-defkey org-mode-map [?\e (shift return)] 'org-insert-todo-heading)
+  (org-defkey org-mode-map [?\e (shift left)]   'org-shiftmetaleft)
+  (org-defkey org-mode-map [?\e (shift right)]  'org-shiftmetaright)
+  (org-defkey org-mode-map [?\e (shift up)]     'org-shiftmetaup)
+  (org-defkey org-mode-map [?\e (shift down)]   'org-shiftmetadown))
 
   ;; All the other keys
 
@@ -14475,7 +14532,9 @@ Depending on context, this does one of the following:
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-up-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
-    (org-call-with-arg 'org-todo 'right))
+    (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-selection-as-state-change)))
+      (org-call-with-arg 'org-todo 'right)))		       
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
 	     (org-at-item-bullet-p))
@@ -14505,7 +14564,9 @@ Depending on context, this does one of the following:
    ((org-at-timestamp-p t) (call-interactively 'org-timestamp-down-day))
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
-    (org-call-with-arg 'org-todo 'left))
+    (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-selection-as-state-change)))
+      (org-call-with-arg 'org-todo 'left)))
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
 	     (org-at-item-bullet-p))

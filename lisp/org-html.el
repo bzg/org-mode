@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.27a
+;; Version: 6.27trans
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -60,11 +60,18 @@ by the footnotes themselves."
   :type 'string)
 
 (defcustom org-export-html-xml-declaration
-  "<?xml version=\"1.0\" encoding=\"%s\"?>"
+  '(("html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
+    ("php" . "<?php echo '<?xml version=\"1.0\" encoding=\"%s\" ?>'; ?>"))    
   "The extension for exported HTML files.
-%s will be replaced with the charset of the exported file."
+%s will be replaced with the charset of the exported file.
+This may be a string, or an alist with export extensions
+and corresponding declarations."
   :group 'org-export-html
-  :type 'string)
+  :type '(choice
+	  (string :tag "Single declaration")
+	  (repeat :tag "Dependent on extension"
+		  (cons (string :tag "Extension")
+			(string :tag "Declaration")))))
 
 (defcustom org-export-html-style-include-scripts t
   "Non-nil means, include the javascript snippets in exported HTML files.
@@ -696,8 +703,13 @@ lang=\"%s\" xml:lang=\"%s\">
 <body>
 <div id=\"content\">
 "
-		 (format org-export-html-xml-declaration
-			 (or charset "iso-8859-1"))
+		 (format
+		  (or (and (stringp org-export-html-xml-declaration)
+			   org-export-html-xml-declaration)
+		      (cdr (assoc html-extension org-export-html-xml-declaration))
+		      (cdr (assoc "html" org-export-html-xml-declaration))
+		      (t ""))
+		  (or charset "iso-8859-1"))
 		 language language (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords
