@@ -4204,16 +4204,22 @@ will be prompted for."
 				'(display t invisible t intangible t))
 	t)))
 
-(defun org-fontify-meta-lines (limit)
+(defvar org-protecting-blocks
+  '("src" "example" "latex" "ascii" "html" "docbook")
+  "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
+This is needed for font-lock setup.")
+
+(defun org-fontify-meta-lines-and-blocks (limit)
+  "Fontify #+ lines and blocks, in the correct ways."
   (let ((case-fold-search t))
     (if (re-search-forward
-	 "^\\([ \t]*#\\+\\(\\([a-zA-Z]+:?\\)\\(_[a-zA-Z]+\\)?\\)\\(.*\\)\\)"
+	 "^\\([ \t]*#\\+\\(\\([a-zA-Z]+:?\\)\\(_\\([a-zA-Z]+\\)\\)?\\)\\(.*\\)\\)"
 	 limit t)
 	(let ((beg (match-beginning 0))
 	      (beg1 (line-beginning-position 2))
 	      (dc1 (downcase (match-string 2)))
 	      (dc3 (downcase (match-string 3)))
-	      end end1)
+	      end end1 quoting)
 	  (cond
 	   ((member dc1 '("html:" "ascii:" "latex:" "docbook:"))
 	    ;; a single line of backend-specific content
@@ -4221,23 +4227,27 @@ will be prompted for."
 				    '(display t invisible t intangible t))
 	    (add-text-properties (match-beginning 1) (match-end 3)
 				 '(font-lock-fontified t face org-meta-line))
-	    (add-text-properties (match-beginning 5) (match-end 5)
+	    (add-text-properties (match-beginning 6) (match-end 6)
 				 '(font-lock-fontified t face org-block))
 	    t)
 	   ((and (match-end 4) (equal dc3 "begin"))
 	    ;; Truely a block
+	    (setq quoting (member (downcase (match-string 5))
+				  org-protecting-blocks))
 	    (when (re-search-forward
 		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
 		   nil t)  ;; on purpose, we look further than LIMIT
 	      (setq end (match-end 0) end1 (1- (match-beginning 0)))
-	      (remove-text-properties beg end
-				      '(display t invisible t intangible t))
+	      (when quoting
+		(remove-text-properties beg end
+					'(display t invisible t intangible t)))
 	      (add-text-properties
 	       beg end
 	       '(font-lock-fontified t font-lock-multiline t))
 	      (add-text-properties beg beg1 '(face org-meta-line))
 	      (add-text-properties end1 end '(face org-meta-line))
-	      (add-text-properties beg1 end1 '(face org-block))
+	      (when quoting
+		(add-text-properties beg1 end1 '(face org-block)))
 	      t))
 	   ((not (member (char-after beg) '(?\  ?\t)))
 	    ;; just any other in-buffer setting, but not indented
@@ -4587,7 +4597,7 @@ between words."
 		 '(1 'org-special-keyword t))
 	   '("^#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
-	   '(org-fontify-meta-lines)
+	   '(org-fontify-meta-lines-and-blocks)
 	   )))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     ;; Now set the full font-lock-keywords
