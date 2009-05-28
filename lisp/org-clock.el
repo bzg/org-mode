@@ -289,10 +289,11 @@ pointing to it."
 
 (defun org-clock-sum-current-item ()
   "Returns time, clocked on current item in total"
-  (save-restriction
-    (org-narrow-to-subtree)
-    (org-clock-sum)
-    org-clock-file-total-minutes))
+  (save-excursion
+    (save-restriction
+      (org-narrow-to-subtree)
+      (org-clock-sum)
+      org-clock-file-total-minutes)))
 
 (defun org-clock-get-clock-string ()
   "Form a clock-string, that will be show in the mode line.

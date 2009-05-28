@@ -1,5 +1,8 @@
 2009-05-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-sum-current-item): Fix positioning bug
+	when retrieving total clocked time in the subtree.
+
 	* org.el (org-quoting-blocks): New variable.
 
 2009-05-27  Carsten Dominik  <carsten.dominik@gmail.com>
