@@ -148,17 +148,18 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
   :group 'org-clock
   :type 'boolean)
 
-
 (defcustom org-clock-sound nil
   "Sound that will used for notifications.
 Possible values:
-* nil. No sound played.
-* any string, that is not a file. Make a beep.
-* file name. If you don't have alsa, it is better to be .wav file"
-  :group 'org-clock
-  :type 'string
-  )
 
+nil        no sound played.
+t          standard Emacs beep
+file name  play this sound file.  If not possible, fall back to beep"
+  :group 'org-clock
+  :type '(choice
+	  (const :tag "No sound" nil)
+	  (const :tag "Standard beep" t)
+	  (file :tag "Play sound file")))
 
 ;;; The clock for measuring work time.
 
@@ -174,7 +175,8 @@ Possible values:
   "Effort estimate of the currently clocking task")
 
 (defvar org-clock-total-time nil
-  "Holds total time, spent on currently clocked item before start of current clock.")
+  "Holds total time, spent previously on currently clocked item.
+This does not include the time in the currently running clock.")
 
 (defvar org-clock-history nil
   "List of marker pointing to recent clocked tasks.")
@@ -290,14 +292,13 @@ pointing to it."
   (save-restriction
     (org-narrow-to-subtree)
     (org-clock-sum)
-    org-clock-file-total-minutes)  
-  )
+    org-clock-file-total-minutes))
 
 (defun org-clock-get-clock-string ()
   "Form a clock-string, that will be show in the mode line.
-If effort estimate was defined for current item, then use 01:30/01:50 format (clocked/estimated).
-If not, then 01:50 format (clocked).
-"
+If an effort estimate was defined for current item, use
+01:30/01:50 format (clocked/estimated).
+If not, show simply the clocked time like 01:50."
   (let* ((clocked-time (org-clock-get-clocked-time))
 	 (h (floor clocked-time 60))
 	 (m (- clocked-time (* 60 h)))
@@ -329,16 +330,14 @@ If not, then 01:50 format (clocked).
   (if org-clock-effort (org-clock-notify-once-if-expired))
   (force-mode-line-update))
 
-
 (defun org-clock-get-clocked-time ()
-  "In minutes."
-  (let ((currently-clocked-time (floor (- (time-to-seconds (current-time))
-					  (time-to-seconds org-clock-start-time)) 60)))
-    (if  org-clock-total-time
-	(+ currently-clocked-time org-clock-total-time)
-      currently-clocked-time
-      )					
-    ))
+  "Get the clocked time for the rrent item in minutes.
+The time returned includes the the time spent on this task in
+previous clocking intervals."
+  (let ((currently-clocked-time
+	 (floor (- (time-to-seconds (current-time))
+		   (time-to-seconds org-clock-start-time)) 60)))
+    (+ currently-clocked-time (or org-clock-total-time 0))))
 
 (defvar org-clock-notification-was-shown nil
   "Shows if we have shown notification already.")
@@ -349,38 +348,37 @@ Notification is shown only once."
   (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	(clocked-time (org-clock-get-clocked-time)))
     (if (>= clocked-time effort-in-minutes)
-	(if (not org-clock-notification-was-shown)
-	    (progn (org-clock-play-sound)
-		   (show-notification (format "Task '%s' should be finished by now. (%s)"
-					      org-clock-heading org-clock-effort))
-		   (setq org-clock-notification-was-shown t)))
-      (setq org-clock-notification-was-shown nil) 
-      )
-    ))
+	(unless org-clock-notification-was-shown
+	  (setq org-clock-notification-was-shown t)
+	  (org-clock-play-sound)
+	  (org-show-notification
+	   (format "Task '%s' should be finished by now. (%s)"
+		   org-clock-heading org-clock-effort)))
+      (setq org-clock-notification-was-shown nil))))
 
-
-(defun show-notification (notification)
+(defun org-show-notification (notification)
   "Show notification. Use libnotify, if available."
-  (if (program-exists "notify-send")
-      (start-process "emacs-timer-notification" nil "notify-send" notification)
-    (message notification)
-    ))
+  (if (org-program-exists "notify-send")
+      (start-process "emacs-timer-notification" nil "notify-send" notification))
+  ;; In any case, show in message area
+  (message notification))
 
-    (play-sound-file org-clock-sound)
-  (message "%s is not a file" org-clock-sound)    
-  )
 (defun org-clock-play-sound ()
-  "Play sound. Controlled by org-clock-sound.
-Use alsa's aplay tool if available."  
-  (if (and (not (eq org-clock-sound ""))
-	   (file-exists-p org-clock-sound))
-      (if (program-exists "aplay")
-	  (start-process "org-clock-play-notification" nil "aplay" org-clock-sound)
-	(play-sound-file org-clock-sound))
-    (progn (beep t) (beep t))c)
-  )
+  "Play sound as configured by `org-clock-sound'.
+Use alsa's aplay tool if available."
+  (cond
+   ((not org-clock-sound))
+   ((eq org-clock-sound t) (beep t) (beep t))
+   ((stringp org-clock-sound)
+    (if (file-exists-p org-clock-sound)
+	(if (org-program-exists "aplay")
+	    (start-process "org-clock-play-notification" nil
+			   "aplay" org-clock-sound)
+	  (condition-case nil
+	      (play-sound-file org-clock-sound)
+	    (error (beep t) (beep t))))))))
 
-(defun program-exists (program-name)
+(defun org-program-exists (program-name)
   "Checks whenever we can locate program and launch it."
   (if (eq system-type 'gnu/linux)
       (= 0 (call-process "which" nil nil nil program-name))
@@ -471,7 +469,9 @@ the clocking selection, associated with the letter `d'."
 	      (goto-char (match-end 1))
 	      (setq org-clock-start-time
 		    (apply 'encode-time
-			   (org-parse-time-string (match-string 1)))))
+			   (org-parse-time-string (match-string 1))))
+	      (setq org-clock-effort (org-get-effort))
+	      (setq org-clock-total-time (org-clock-sum-current-item)))
 	     ((eq org-clock-in-resume 'auto-restart)
 	      ;; called from org-clock-load during startup,
 	      ;; do not interrupt, but warn!
@@ -492,7 +492,8 @@ the clocking selection, associated with the letter `d'."
 	      (setq org-clock-effort (org-get-effort))
 	      (setq org-clock-total-time (org-clock-sum-current-item))
 	      (setq org-clock-start-time (current-time))
-	      (setq ts (org-insert-time-stamp org-clock-start-time 'with-hm 'inactive))))
+	      (setq ts (org-insert-time-stamp org-clock-start-time
+					      'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
 	    (or global-mode-string (setq global-mode-string '("")))
 	    (or (memq 'org-mode-line-string global-mode-string)
