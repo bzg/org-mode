@@ -114,9 +114,22 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [20/29]
+* Tasks [20/32]
 ** TODO improve the source-block snippet
+
 [[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
+#+begin_example
+,#name : Chapter title
+,# --
+${1:Chapter}
+${1:$(make-string (string-width text) ?\=)}
+
+$0
+#+end_example
+
+[[file:snippets/org-mode/sb][sb -- snippet]]
+
+waiting for guidance from those more familiar with yasnippets
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
