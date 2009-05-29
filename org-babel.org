@@ -229,6 +229,10 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
+** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
+   I haven't thought about this properly. Just noting it down. What
+   Sweave uses is called "R noweb" (.Rnw).
+
 ** PROPOSED pass multiple reference arguments into R
    Can we do this? I wasn't sure how to supply multiple 'var' header
    args. Just delete this if I'm being dense.
