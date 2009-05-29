@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [20/31]
+* Tasks [20/32]
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -229,10 +229,13 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** TODO pass mutliple reference arguments into R
+** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
+   I haven't thought about this properly. Just noting it down. What
+   Sweave uses is called "R noweb" (.Rnw).
+** PROPOSED pass multiple reference arguments into R
    Can we do this? I wasn't sure how to supply multiple 'var' header
-   args. Just delete this TODO if I'm being dense.
-** TODO Create objects in top level (global) environment in R?
+   args. Just delete this if I'm being dense.
+** PROPOSED Create objects in top level (global) environment in R?
    At the moment, objects created by computations performed in the
    code block are evaluated in the scope of the
    code-block-function-body and therefore disappear when the code
