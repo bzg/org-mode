@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [20/32]
+* Tasks [21/32]
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -233,9 +233,6 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
 
-** PROPOSED pass multiple reference arguments into R
-   Can we do this? I wasn't sure how to supply multiple 'var' header
-   args. Just delete this if I'm being dense.
 ** PROPOSED Create objects in top level (global) environment in R?
    At the moment, objects created by computations performed in the
    code block are evaluated in the scope of the
@@ -300,6 +297,20 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+
+** DONE pass multiple reference arguments into R
+   Can we do this? I wasn't sure how to supply multiple 'var' header
+   args. Just delete this if I'm being dense.
+
+   This should be working, see the following example...
+
+#+srcname: two-arg-example
+#+begin_src R :var n=2 :var m=8
+n + m
+#+end_src
+
+#+resname: two-arg-example
+: 10
 
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
