@@ -1,6 +1,6 @@
 #name : #+begin_src...#+end_src
 # --
-#+srcname: ${1:name}
+${1:$(if (> (length text) 1) "#+srcname:" "")} ${1: }
 #+begin_src ${2:language} $3
 $0
 #+end_src
