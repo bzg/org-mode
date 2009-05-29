@@ -4417,7 +4417,10 @@ This is needed for font-lock setup.")
 			    (regexp-opt
 			     (append (mapcar 'car org-html-entities)
 				     (if (boundp 'org-latex-entities)
-					 org-latex-entities nil))
+					 (mapcar (lambda (x)
+						   (or (car-safe x) x))
+						 org-latex-entities)
+				       nil))
 			     'words))) ; FIXME
 	    ))
     ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
