@@ -55,10 +55,14 @@ to the top of the list.  The `min-colors' attribute will be removed from
 any other entries, and any resulting duplicates will be removed entirely."
   (cond
    ((and inherits (facep inherits)
-	 (not (featurep 'xemacs)) (> emacs-major-version 22))
+	 (not (featurep 'xemacs))
+	 (or (> emacs-major-version 22)
+	     (not specs)))
     ;; In Emacs 23, we use inheritance where possible.
     ;; We only do this in Emacs 23, because only there the outline
     ;; faces have been changed to the original org-mode-level-faces.
+    ;; However, if no face specification is present, we also use
+    ;; inheritance in Emacs 22
     (list (list t :inherit inherits)))
    ((or (featurep 'xemacs) (< emacs-major-version 22))
     ;; These do not understand the `min-colors' attribute.
