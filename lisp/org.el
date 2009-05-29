@@ -15496,13 +15496,14 @@ N may optionally be the number of spaces to remove."
 
 (defun org-do-remove-indentation (&optional n)
   "Remove the maximum common indentation from the buffer."
+  (untabify (point-min) (point-max))
   (let ((min 10000) re)
     (if n
 	(setq min n)
       (goto-char (point-min))
-      (while (re-search-forward "^ +[^ \n]" nil t)
+      (while (re-search-forward "^ *[^ \n]" nil t)
 	(setq min (min min (1- (- (match-end 0) (match-beginning 0)))))))
-    (unless (= min 0)
+    (unless (or (= min 0) (= min 10000))
       (setq re (format "^ \\{%d\\}" min))
       (goto-char (point-min))
       (while (re-search-forward re nil t)
