@@ -128,7 +128,8 @@ return nil."
       (case type
         ('table
          (mapcar (lambda (row)
-                   (mapcar #'org-babel-read row))
+                   (if (and (symbolp row) (equal row 'hline)) row
+		     (mapcar #'org-babel-read row)))
                  (org-table-to-lisp)))
         ('source-block
          (setq result (org-babel-execute-src-block t nil args))

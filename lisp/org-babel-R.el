@@ -62,13 +62,16 @@ R process in `org-babel-R-buffer'."
   (unless org-babel-R-buffer (error "No active R buffer"))
   (org-babel-R-input-command
    (if (listp value)
-       (let ((transition-file (make-temp-file "org-babel-R-import")))
-         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
-         (unless (listp (car value)) (setq value (list value)))
-         (with-temp-file transition-file
-           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
-           (insert "\n"))
-         (format "%s <- read.table(\"%s\", sep=\"\\t\", as.is=TRUE)" name transition-file))
+       (let ((transition-file (make-temp-file "org-babel-R-import"))
+	     has-header)
+	 ;; ensure VALUE has an orgtbl structure (depth of at least 2)
+	 (unless (listp (car value)) (setq value (list value)))
+	 (setq has-header (and (symbolp (cadr value)) (equal (cadr value) 'hline)))
+	 (with-temp-file transition-file
+	   (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
+	   (insert "\n"))
+	 (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
+		 name transition-file (if has-header "TRUE" "FALSE")))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
 
 (defun org-babel-R-to-elisp (func-name)
