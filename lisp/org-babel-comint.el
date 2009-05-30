@@ -33,17 +33,18 @@
 (require 'org-babel)
 
 (defun org-babel-comint-initiate-buffer (buffer ignite)
-  "If BUFFER does not currently have a process use IGNITE to
-create one."
-  (unless (and (buffer-live-p buffer) (get-buffer buffer))
+  "If BUFFER does not exist and currently have a process call
+IGNITE from within BUFFER."
+  (unless (and (buffer-live-p buffer) (get-buffer buffer) (get-buffer-process buffer))
     (save-excursion
-      (eval ignite)
+      (get-buffer-create buffer)
+      (funcall ignite)
       (setf buffer (current-buffer))
       (org-babel-comint-wait-for-output)
       (org-babel-comint-input-command ""))))
 
 (defun org-babel-comint-command-to-string (buffer command)
-  "Send COMMEND to BUFFER's process, and return the results as a string."
+  "Send COMMAND to BUFFER's process, and return the results as a string."
   (org-babel-comint-input-command buffer command)
   (org-babel-comint-last-output buffer))
 
