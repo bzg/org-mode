@@ -233,7 +233,9 @@ line.  If no result exists for this block then create a
     (let ((name (org-babel-get-src-block-name)) end head)
       (or (and name (message name) (org-babel-find-named-result name))
           (and (re-search-forward "#\\+end_src" nil t)
-               (progn (move-end-of-line 1) (forward-char 1) (setq end (point))
+               (progn (move-end-of-line 1)
+		      (if (eobp) (insert "\n") (forward-char 1))
+		      (setq end (point))
                       (or (progn ;; either an unnamed #+resname: line already exists
                             (re-search-forward "[^ \f\t\n\r\v]" nil t)
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
