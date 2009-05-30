@@ -11914,7 +11914,8 @@ formats in the current buffer."
       (setq rtn (append org-special-properties rtn)))
 
     (when include-defaults
-      (mapc (lambda (x) (add-to-list 'rtn x)) org-default-properties))
+      (mapc (lambda (x) (add-to-list 'rtn x)) org-default-properties)
+      (add-to-list 'rtn org-effort-property))
 
     (when include-columns
       (save-excursion
