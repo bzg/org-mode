@@ -232,6 +232,34 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
+   
+   I found a good description of noweb in the following article (see
+   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
+   
+   I think there are two parts to noweb, the construction of
+   documentation and the extraction of source-code (with notangle).
+
+   *documentation*: org-mode handles all of our documentation needs in
+   a manner that I believe is superior to noweb.
+   
+   *source extraction* At this point I don't see anyone writing large
+   applications with 100% of the source code contained in org-babel
+   files, rather I see org-babel files containing things like
+   - notes with active code chunks
+   - interactive tutorials
+   - requirements documents with code running test suites
+   - and of course experimental reports with the code to run the
+     experiment, and perform analysis
+
+   Basically I think the scope of the programs written in org-babel
+   (at least initially) will be small enough that it wont require the
+   addition of a tangle type program to extract all of the source code
+   into a running application.
+
+   On the other hand, since we already have named blocks of source
+   code which reference other blocks on which they rely, this
+   shouldn't be too hard to implement either on our own, or possibly
+   relying on something like noweb/notangle.
 
 ** PROPOSED Create objects in top level (global) environment in R?
    At the moment, objects created by computations performed in the
