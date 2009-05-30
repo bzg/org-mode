@@ -68,12 +68,12 @@ pie(dirs[,1], labels = dirs[,2])
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
-|       1 |    48 | F      |
-|       2 |    30 | F      |
-|       3 |     0 | F      |
-|       4 |     1 | F      |
-|       5 |    56 | F      |
-|       6 |    46 | F      |
+|       1 |    88 | B      |
+|       2 |    63 | D      |
+|       3 |    89 | B      |
+|       4 |     7 | F      |
+|       5 |    86 | B      |
+|       6 |    77 | C      |
 #+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
 
 #+srcname: assign-grade
@@ -537,10 +537,10 @@ to the command if BUFF is not given.)
      evaluating source code block
 
 *** TODO conversion of output from interactive shell, R (and python) sessions to org-babel buffers
-    [DED] This would be a nice feature I think. Although a org-babel purist
-    would say that it's working the wrong way round... After some
-    interactive work in a *R* buffer, you save the buffer, maybe edit
-    out some lines, and then convert it to org-babel format for
+    [DED] This would be a nice feature I think. Although an org-babel
+    purist would say that it's working the wrong way round... After
+    some interactive work in a *R* buffer, you save the buffer, maybe
+    edit out some lines, and then convert it to org-babel format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
 
@@ -843,7 +843,7 @@ and then, if so using =write= to write the data out to a temporary
 file from which emacs can read the data in using =org-table-import=.
 
 Looking into this further, is seems that there is no such thing as a
-scalar in R [[http://tolstoy.newcastle.edu.au/R/help/03a/3733.html][R-scalar-vs-vector]].  In that light I am not sure how to
+scalar in R [[http://tolstoy.newcastle.edu.au/R/help/03a/3733.html][R-scalar-vs-vector]]  In that light I am not sure how to
 deal with trivial vectors (scalars) in R.  I'm tempted to just treat
 them as vectors, but then that would lead to a proliferation of
 trivial 1-cell tables...
@@ -968,7 +968,7 @@ pie(c(1, 2, 3), labels = c(1, 2, 3))
 
 #+srcname: bug-trivial-r3
 #+begin_src R :results replace
-c(1, 2, 3)
+c(1,2,3)
 #+end_src
 
 #+resname: bug-trivial-r3
@@ -1289,8 +1289,13 @@ Lets start by reversing the table from the previous examples
 
 #+srcname: chained-ref-first
 #+begin_src python :var table = test-table
-table.reverse
+table.reverse()
+table
 #+end_src
+
+#+resname: chained-ref-first
+| 4 | 5 | 6 |
+| 1 | 2 | 3 |
 
 Take the first part of the list
 
@@ -1299,6 +1304,10 @@ Take the first part of the list
 table[1]
 #+end_src
 
+#+resname: chained-ref-second
+| 4 |
+| 1 |
+
 Turn the numbers into string
 
 #+srcname: chained-ref-third
@@ -1306,12 +1315,16 @@ Turn the numbers into string
 (mapcar (lambda (el) (format "%S" el)) table)
 #+end_src
 
+#+resname: chained-ref-third
+| "(4)" | "(1)" |
+
 and Check that it is still a list
 
 #+srcname: chained-ref-last
 #+begin_src ruby :var table=chained-ref-third
 table.class.name
 #+end_src
+
 
 ** source blocks as functions
 
