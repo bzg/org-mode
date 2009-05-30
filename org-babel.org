@@ -114,7 +114,102 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [21/32]
+* Tasks [21/34]
+** TODO Create objects in top level (global) environment in R?
+*** initial requirement statement [DED]
+   At the moment, objects created by computations performed in the
+   code block are evaluated in the scope of the
+   code-block-function-body and therefore disappear when the code
+   block is evaluated {unless you employ some extra trickery like
+   assign('name', object, env=globalenv()) }. I think it will be
+   desirable to also allow for a style wherein objects that are
+   created in one code block persist in the R global environment and
+   can be re-used in a separate block.
+
+   This is what Sweave does, and while I'm not saying we have to be
+   the same as Sweave, it wouldn't be hard for us to provide the same
+   behaviour in this case; if we don't, we risk undeservedly being
+   written off as an oddity by some.
+
+   IOW one aspect of org-babel is that of a sort of functional
+   meta-programming language. This is crazy, in a very good
+   way. Nevertheless, wrt R I think there's going to be a lot of value
+   in providing for a working style in which the objects are stored in
+   the R session, rather than elisp/org buffer. This will be a very
+   familiar working style to lots of people.
+
+   There are no doubt a number of different ways of accomplishing
+   this, the simplest being a hack like adding
+
+#+begin_src R
+for(objname in ls())
+    assign(objname, get(objname), envir=globalenv())
+#+end_src
+
+to the source code block function body. (Maybe wrap it in an on.exit() call).
+
+However this may deserve to be thought about more carefully, perhaps
+with a view to having a uniform approach across languages. E.g. shell
+code blocks have the same semantics at the moment (no persistence of
+variables across code blocks), because the body is evaluated in a new
+bash shell process rather than a running shell. And I guess the same
+is true for python. However, in both these cases, you could imagine
+implementing the alternative in which the body is evaluated in a
+persistent interactive session. It's just that it's particularly
+natural for R, seeing as both ESS and org-babel evaluate commands in a
+single persistent R session.
+
+*** sessions [Eric]
+
+Thanks for bringing this up.  I think you are absolutely correct that we
+should provide support for a persistent environment (maybe called a
+*session*) in which to evaluate code blocks.  I think the current setup
+demonstrates my personal bias for a functional style of programming
+which is certainly not ideal in all contexts.
+
+While the R function you mention does look like an elegant solution, I
+think we should choose an implementation that would be the same across
+all source code types.  Specifically I think we should allow the user to
+specify an optional *session* as a header variable (when not present we
+assume a default session for each language).  The session name could be
+used to name a comint buffer (like the *R* buffer) in which all
+evaluation would take place (within which variables would retain their
+values --at least once I remove some of the functional method wrappings
+currently in place-- ).
+
+This would allow multiple environments to be used in the same buffer,
+and once this setup was implemented we should be able to fairly easily
+implement commands for jumping between source code blocks and the
+related session buffers, as well as for dumping the last N commands from
+a session into a new or existing source code block.
+
+Please let me know if you foresee any problems with this proposed setup,
+or if you think any parts might be confusing for people coming from
+Sweave.  I'll hopefully find some time to work on this later in the
+week.
+*** implementation
+in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
+
+Currently I've coppied and begun generalizing the functions for
+interacting with R buffers.
+** TODO fully purge org-babel-R of direct comint interaction
+try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
+
+** TODO improve the source-block snippet
+
+[[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
+#+begin_example
+,#name : Chapter title
+,# --
+${1:Chapter}
+${1:$(make-string (string-width text) ?\=)}
+
+$0
+#+end_example
+
+[[file:snippets/org-mode/sb][sb -- snippet]]
+
+waiting for guidance from those more familiar with yasnippets
 
 ** TODO resolve references to other buffers
    This would allow source blocks to call upon tables, source-blocks,
@@ -260,49 +355,6 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
    code which reference other blocks on which they rely, this
    shouldn't be too hard to implement either on our own, or possibly
    relying on something like noweb/notangle.
-
-** PROPOSED Create objects in top level (global) environment in R?
-   At the moment, objects created by computations performed in the
-   code block are evaluated in the scope of the
-   code-block-function-body and therefore disappear when the code
-   block is evaluated {unless you employ some extra trickery like
-   assign('name', object, env=globalenv()) }. I think it will be
-   desirable to also allow for a style wherein objects that are
-   created in one code block persist in the R global environment and
-   can be re-used in a separate block.
-
-   This is what Sweave does, and while I'm not saying we have to be
-   the same as Sweave, it wouldn't be hard for us to provide the same
-   behaviour in this case; if we don't, we risk undeservedly being
-   written off as an oddity by some.
-
-   IOW one aspect of org-babel is that of a sort of functional
-   meta-programming language. This is crazy, in a very good
-   way. Nevertheless, wrt R I think there's going to be a lot of value
-   in providing for a working style in which the objects are stored in
-   the R session, rather than elisp/org buffer. This will be a very
-   familiar working style to lots of people.
-
-   There are no doubt a number of different ways of accomplishing
-   this, the simplest being a hack like adding
-
-#+begin_src R
-for(objname in ls())
-    assign(objname, get(objname), envir=globalenv())
-#+end_src
-
-to the source code block function body. (Maybe wrap it in an on.exit() call).
-
-However this may deserve to be thought about more carefully, perhaps
-with a view to having a uniform approach across languages. E.g. shell
-code blocks have the same semantics at the moment (no persistence of
-variables across code blocks), because the body is evaluated in a new
-bash shell process rather than a running shell. And I guess the same
-is true for python. However, in both these cases, you could imagine
-implementing the alternative in which the body is evaluated in a
-persistent interactive session. It's just that it's particularly
-natural for R, seeing as both ESS and org-babel evaluate commands in a
-single persistent R session.
 
 ** PROPOSED support for passing paths to files between source blocks
 Maybe this should be it's own result type (in addition to scalars and
