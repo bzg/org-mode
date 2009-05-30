@@ -2142,7 +2142,7 @@ A formula can contain an optional mode string after a semicolon.  This
 string consists of flags to influence Calc and other modes during
 execution.  By default, Org uses the standard Calc modes (precision
 12, angular units degrees, fraction and symbolic modes off).  The display
-format, however, has been changed to @code{(float 5)} to keep tables
+format, however, has been changed to @code{(float 8)} to keep tables
 compact.  The default settings can be configured using the variable
 @code{org-calc-default-modes}.
 

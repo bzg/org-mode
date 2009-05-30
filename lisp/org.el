@@ -9887,7 +9887,7 @@ This function is run automatically after each state change to a DONE state."
   "Make a compact tree which shows all headlines marked with TODO.
 The tree will show the lines where the regexp matches, and all higher
 headlines above the match.
-With a \\[universal-argument] prefix, also show the DONE entries.
+With a \\[universal-argument] prefix, prompt for a regexp to match.
 With a numeric prefix N, construct a sparse tree for the Nth element
 of `org-todo-keywords-1'."
   (interactive "P")

@@ -233,7 +233,7 @@ If there is no timestamp, create one."
     (if (and (fboundp 'set-file-times)
 	     (not newly-created-timestamp))
 	(set-file-times timestamp-file)
-      (call-process "touch" nil 0 nil timestamp-file))))
+      (call-process "touch" nil 0 nil (expand-file-name timestamp-file)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mapping files to project names
