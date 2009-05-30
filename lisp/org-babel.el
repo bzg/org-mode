@@ -295,6 +295,7 @@ relies on `org-babel-insert-result'."
 
 (defun org-babel-remove-result ()
   "Remove the result of the current source block."
+  (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
     (delete-region (point)
