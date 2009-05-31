@@ -68,12 +68,12 @@ pie(dirs[,1], labels = dirs[,2])
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
-|       1 |    88 | B      |
-|       2 |    63 | D      |
-|       3 |    89 | B      |
-|       4 |     7 | F      |
-|       5 |    86 | B      |
-|       6 |    77 | C      |
+|       1 |    99 | A      |
+|       2 |    59 | F      |
+|       3 |    75 | C      |
+|       4 |    15 | F      |
+|       5 |     7 | F      |
+|       6 |    13 | F      |
 #+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
 
 #+srcname: assign-grade
@@ -187,6 +187,14 @@ Please let me know if you foresee any problems with this proposed setup,
 or if you think any parts might be confusing for people coming from
 Sweave.  I'll hopefully find some time to work on this later in the
 week.
+*** further requirement: make it play nicely with ESS [DED]
+    I think something like this would be great. You've probably already
+thought of this, but just to note it down: it would be really nice if
+org-babel's notion of a buffer's 'session/process' played nicely with
+ESS's notion of the buffer's session/process. ESS keeps the current
+process name for a buffer in a buffer-local variable
+ess-local-process-name.
+
 *** implementation
 in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
 
@@ -318,9 +326,20 @@ should use a span class, and should show original source in tool-tip
 |    1 | 2       |    3 |
 |    4 | schulte |    6 |
 
+#+TBLNAME: egtable2
+| 1 |         2 | 3 |
+| 4 | schulte   | 6 |
+
 #+begin_src R var tabel=egtable
 tabel
 #+end_src
+
+#+resname:
+| "col1" | "col2"    | "col3" |
+|--------+-----------+--------|
+|      1 | 2         |      3 |
+|      4 | "schulte" |      6 |
+
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
