@@ -188,12 +188,43 @@ or if you think any parts might be confusing for people coming from
 Sweave.  I'll hopefully find some time to work on this later in the
 week.
 *** further requirement: make it play nicely with ESS [DED]
-    I think something like this would be great. You've probably already
-thought of this, but just to note it down: it would be really nice if
-org-babel's notion of a buffer's 'session/process' played nicely with
-ESS's notion of the buffer's session/process. ESS keeps the current
-process name for a buffer in a buffer-local variable
-ess-local-process-name.
+    I think something like this would be great. You've probably
+already thought of this, but just to note it down: it would be really
+nice if org-babel's notion of a buffer's 'session/process' played
+nicely with ESS's notion of the buffer's session/process. ESS keeps
+the current process name for a buffer in a buffer-local variable
+ess-local-process-name. So one thing we will probably want to do is
+make sure that the *Org Edit Src Example* buffer sets that variable
+appropriately.
+
+While I remember, some possible requests/proposed changes for Carsten
+come to mind in that regard:
+**** a hook called when the src edit buffer is created
+**** Remap C-x C-s to save the source to the org buffer?
+     I've done this personally and I find it essential. I'm using 
+#+begin_src emacs-lisp
+(defun org-edit-src-save ()
+  "Update the parent org buffer with the edited source code, save
+the parent org-buffer, and return to the source code edit
+buffer."
+  (interactive)
+  (let ((p (point)))
+    (org-edit-src-exit)
+    (save-buffer)
+    (org-edit-src-code)
+    (goto-char p)))
+
+(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
+#+end_src     
+    which seems to work.
+**** Rename buffer and minor mode?
+     Something shorter than *Org Edit Src Example* for the buffer
+     name. org-babel is bringing org's source code interaction to a
+     level of maturity where the 'example' is no longer
+     appropriate. And if further keybindings are going to be added to
+     the minor mode then maybe org-edit-src-mode is a better name than
+     org-exit-edit-mode.
+
 
 *** implementation
 in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
