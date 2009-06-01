@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [21/34]
+* Tasks [21/35]
 ** TODO Create objects in top level (global) environment in R?
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
@@ -225,6 +225,18 @@ buffer."
      the minor mode then maybe org-edit-src-mode is a better name than
      org-exit-edit-mode.
 
+*** need to evaluate header arguments whenever we switch to *Org Edit Src* buffer
+    Another thought on this topic: I think we will want users to send chunks
+of code to the interpreter from within the *Org Edit Src* buffer, and I
+think that's what you have in mind already. In ESS that is done using
+the ess-eval-* functions. That seems to imply that the header references
+need to be evaluated and transformed into the target language object
+when we hit C-c ' to enter the *Org Edit Src* buffer (or at least before
+the first time we attempt to evaluate code in that buffer -- I suppose
+there might be an argument for lazy evaluation, in case someone hits C-c
+' but is "just looking" and not actually evaluating anything.) Of course
+if evaluating the reference is computationally intensive then the user
+might have to wait before they get the *Org Edit Src* buffer.
 
 *** implementation
 in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
@@ -374,6 +386,10 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
+** TODO Remove protective commas from # comments before evaluating
+   org inserts protective commas in front of ## comments in language
+   modes that use them. We need to remove them prior to sending code
+   to the interpreter.
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
