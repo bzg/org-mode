@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [21/35]
+* Tasks [22/35]
 ** TODO Create objects in top level (global) environment in R?
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
@@ -386,10 +386,6 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** TODO Remove protective commas from # comments before evaluating
-   org inserts protective commas in front of ## comments in language
-   modes that use them. We need to remove them prior to sending code
-   to the interpreter.
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
@@ -443,20 +439,6 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
-
-** DONE pass multiple reference arguments into R
-   Can we do this? I wasn't sure how to supply multiple 'var' header
-   args. Just delete this if I'm being dense.
-
-   This should be working, see the following example...
-
-#+srcname: two-arg-example
-#+begin_src R :var n=2 :var m=8
-n + m
-#+end_src
-
-#+resname: two-arg-example
-: 10
 
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
@@ -609,6 +591,31 @@ to the command if BUFF is not given.)
     edit out some lines, and then convert it to org-babel format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+
+** DONE Remove protective commas from # comments before evaluating
+   org inserts protective commas in front of ## comments in language
+   modes that use them. We need to remove them prior to sending code
+   to the interpreter.
+
+#+srcname: testing-removal-of-protective-comas
+#+begin_src ruby
+,# this one might break it??
+:comma_protection
+#+end_src
+
+** DONE pass multiple reference arguments into R
+   Can we do this? I wasn't sure how to supply multiple 'var' header
+   args. Just delete this if I'm being dense.
+
+   This should be working, see the following example...
+
+#+srcname: two-arg-example
+#+begin_src R :var n=2 :var m=8
+n + m
+#+end_src
+
+#+resname: two-arg-example
+: 10
 
 ** DONE ensure that table ranges work
 when a table range is passed to org-babel as an argument, it should be
