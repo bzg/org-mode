@@ -34,7 +34,7 @@
 (defun org-babel-script-add-interpreter (var cmds)
   (set-default var cmds)
   (mapc (lambda (cmd)
-          (setq org-babel-interpreters (cons cmd org-babel-interpreters))
+          (org-babel-add-interpreter cmd)
           (eval
            `(defun ,(intern (concat "org-babel-execute:" cmd)) (body params)
               ,(concat "Evaluate a block of " cmd " script with org-babel. This function is
@@ -64,6 +64,8 @@ print main()")
 executed through org-babel."
   :group 'org-babel
   :set 'org-babel-script-add-interpreter)
+
+(mapc #'org-babel-add-interpreter org-babel-script-interpreters)
 
 (defun org-babel-script-execute (cmd body params)
   "Run CMD on BODY obeying any options set with PARAMS."

@@ -115,7 +115,8 @@ and the results to be collected in the same table.
 
 
 * Tasks [22/36]
-** TODO Create objects in top level (global) environment in R? [0/5]
+** TODO Create objects in top level (global) environment [0/5]
+*sessions*
 
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
@@ -283,7 +284,6 @@ org-mode core
 **** DEFERRED a hook called when the src edit buffer is created
 This should be implemented in the org-mode core
      
-
 
 *** DEFERRED send code to inferior process
 Another thought on this topic: I think we will want users to send

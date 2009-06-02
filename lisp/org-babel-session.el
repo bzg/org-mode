@@ -1,8 +1,8 @@
-;;; org-babel-init.el --- loads org-babel
+;;; org-babel-session.el --- session management for org-babel
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
-;; Author: Eric Schulte
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -26,23 +26,21 @@
 
 ;;; Commentary:
 
-;; for more information see the comments in org-babel.el
+;; Org-Babel evaluates code in the context of consistent sessions.
+;; This file will hold functions for interacting with these sections.
+;;
+;; For more information see org-babel.org in the top level directory.
 
 ;;; Code:
-(require 'org)
-(require 'org-exp-blocks)
-(load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'org-babel)
-(require 'org-babel-ref)
-(require 'org-babel-exp)
-(require 'org-babel-table)
-(require 'org-babel-session)
 
-;; language specific files
-(require 'org-babel-script)
-(require 'org-babel-shell)
-(require 'org-babel-lisp)
-(require 'org-babel-R)
+(defcustom org-babel-session-defaults nil
+  "An a-list associating each org-babel interpreter with a
+default session buffer."
+  :group 'org-babel
+  :type 'alist)
 
-(provide 'org-babel-init)
-;;; org-babel-init.el ends here
+
+
+(provide 'org-babel-session)
+;;; org-babel-session.el ends here

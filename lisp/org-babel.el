@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; See rorg.org in the parent directory for more information
+;; See org-babel.org in the parent directory for more information
 
 ;;; Code:
 (require 'org)
@@ -72,6 +72,7 @@ then run `org-babel-execute-src-block'."
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
     (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
+    (add-to-list 'org-babel-session-defaults (cons interpreter (format "org-babel-%s" interpreter)))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
