@@ -48,21 +48,25 @@
 (defun org-compatible-face (inherits specs)
   "Make a compatible face specification.
 If INHERITS is an existing face and if the Emacs version supports it,
-just inherit the face.  If not, use SPECS to define the face.
+just inherit the face.  If INHERITS is set and the Emacs version does
+not support it, copy the face specification from the inheritance face.
+If INHERITS is not given and SPECS is, use SPECS to define the face.
 XEmacs and Emacs 21 do not know about the `min-colors' attribute.
 For them we convert a (min-colors 8) entry to a `tty' entry and move it
 to the top of the list.  The `min-colors' attribute will be removed from
 any other entries, and any resulting duplicates will be removed entirely."
+  (when (and inherits (facep inherits) (not specs))
+    (setq specs (or specs
+		    (get inherits 'saved-face)
+		    (get inherits 'face-defface-spec))))
   (cond
    ((and inherits (facep inherits)
 	 (not (featurep 'xemacs))
-	 (or (> emacs-major-version 22)
-	     (not specs)))
-    ;; In Emacs 23, we use inheritance where possible.
-    ;; We only do this in Emacs 23, because only there the outline
-    ;; faces have been changed to the original org-mode-level-faces.
-    ;; However, if no face specification is present, we also use
-    ;; inheritance in Emacs 22
+	 (>= emacs-major-version 22)
+	 ;; do not inherit outline faces before Emacs 23
+	 (or (>= emacs-major-version 23)
+	     (not (string-match "\\`outline-[0-9]+"
+				(symbol-name inherits)))))
     (list (list t :inherit inherits)))
    ((or (featurep 'xemacs) (< emacs-major-version 22))
     ;; These do not understand the `min-colors' attribute.
