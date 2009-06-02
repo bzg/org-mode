@@ -27,8 +27,8 @@
 ;; export using the `org-export-preprocess-hook'.  It can be used for
 ;; exporting new types of blocks from org-mode files and also for
 ;; changing the default export behavior of existing org-mode blocks.
-;; The `org-export-blocks' and `org-export-interblocks' alist can be
-;; used to control how blocks and the spaces between blocks
+;; The `org-export-blocks' and `org-export-interblocks' variables can
+;; be used to control how blocks and the spaces between blocks
 ;; respectively are processed upon export.
 ;;
 ;; The type of a block is defined as the string following =#+begin_=,
@@ -65,19 +65,58 @@
 ;;      and also replaces \R{} chunks in the file with their result
 ;;      when passed to R.  This require the `R' command which is
 ;;      provided by ESS (Emacs Speaks Statistics).
+;;
+;;; Adding new blocks
+;;
+;; When adding a new block type first define a formatting function
+;; along the same lines as `org-export-blocks-format-dot' and then use
+;; `org-export-blocks-add-block' to add your block type to
+;; `org-export-blocks'.
+
+(defun org-exp-blocks-set (var value)
+  "Set the value of `org-export-blocks' and install fontification."
+  (set var value)
+  (mapc (lambda (spec)
+	  (if (nth 2 spec)
+	      (setq org-protecting-blocks
+		    (delete (symbol-name (car spec))
+			    org-protecting-blocks))
+	    (add-to-list 'org-protecting-blocks
+			 (symbol-name (car spec)))))
+	value))
+
+(defun org-export-blocks-add-block (block-spec)
+  "Add a new block type to `org-export-blocks'.  BLOCK-SPEC
+should be a three element list the first element of which should
+indicate the name of the block, the second element should be the
+formatting function called by `org-export-blocks-preprocess' and
+the third element a flag indicating whether these types of blocks
+should be fontified in org-mode buffers (see
+`org-protecting-blocks').  For example the BLOCK-SPEC for ditaa
+blocks is as follows...
+
+  (ditaa org-export-blocks-format-ditaa nil)"
+  (unless (member block-spec org-export-blocks)
+    (setq org-export-blocks (cons block-spec org-export-blocks))
+    (org-export-blocks-set-blocks 'org-export-blocks)))
 
 (defcustom org-export-blocks
-  '((comment org-export-blocks-format-comment)
-    (ditaa org-export-blocks-format-ditaa)
-    (dot org-export-blocks-format-dot)
-    (r org-export-blocks-format-R)
-    (R org-export-blocks-format-R))
+  '((comment org-export-blocks-format-comment t)
+    (ditaa org-export-blocks-format-ditaa nil)
+    (dot org-export-blocks-format-dot nil)
+    (r org-export-blocks-format-R nil)
+    (R org-export-blocks-format-R nil))
   "Use this a-list to associate block types with block exporting
 functions.  The type of a block is determined by the text
 immediately following the '#+BEGIN_' portion of the block header.
 Each block export function should accept three argumets..."
   :group 'org-export-general
-  :type 'alist)
+  :type '(repeat
+	  (list
+	   (symbol :tag "Block name")
+	   (function :tag "Block formatter")
+	   (boolean :tag "Fontify content as Org syntax")))
+  :set 'org-exp-blocks-set)
 
 (defcustom org-export-interblocks
   '((r org-export-interblocks-format-R)
@@ -186,7 +225,7 @@ passed to the ditaa utility as command line arguments."
 		 (mapconcat (lambda (x) (substring x (if (> (length x) 1) 2 1)))
 			    (org-split-string body "\n")
 			    "\n")))
-    (cond 
+    (cond
      ((or htmlp latexp docbookp)
       (with-temp-file data-file (insert body))
       (message (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file))
@@ -221,7 +260,7 @@ digraph data_relationships {
   (let ((out-file (if headers (car headers)))
 	(args (if (cdr headers) (mapconcat 'identity (cdr headers) " ")))
 	(data-file (make-temp-file "org-ditaa")))
-    (cond 
+    (cond
      ((or htmlp latexp docbookp)
       (with-temp-file data-file (insert body))
       (message (concat "dot " data-file " " args " -o " out-file))
