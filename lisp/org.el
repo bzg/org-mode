@@ -3438,7 +3438,9 @@ After a match, the following groups carry important information:
     ("fnplain" org-footnote-auto-label plain)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI)
-    ("noptag" org-tag-persistent-alist nil))
+    ("noptag" org-tag-persistent-alist nil)
+    ("hideblocks" org-hide-block-startup t)
+    ("nohideblocks" org-hide-block-startup nil))
   "Variable associated with STARTUP options for org-mode.
 Each element is a list of three items: The startup options as written
 in the #+STARTUP line, the corresponding variable, and the value to
@@ -3871,6 +3873,7 @@ The following commands are available:
   (org-install-agenda-files-menu)
   (if org-descriptive-links (org-add-to-invisibility-spec '(org-link)))
   (org-add-to-invisibility-spec '(org-cwidth))
+  (org-add-to-invisibility-spec '(org-hide-block . t))
   (when (featurep 'xemacs)
     (org-set-local 'line-move-ignore-invisible t))
   (org-set-local 'outline-regexp org-outline-regexp)
@@ -4952,6 +4955,7 @@ With a numeric prefix, show all headlines up to that level."
    ((eq org-startup-folded 'content)
     (let ((this-command 'org-cycle) (last-command 'org-cycle))
       (org-cycle '(4)) (org-cycle '(4)))))
+  (if org-hide-block-startup (org-hide-block-all))
   (org-set-visibility-according-to-property 'no-cleanup)
   (org-cycle-hide-archived-subtrees 'all)
   (org-cycle-hide-drawers 'all)
@@ -5127,6 +5131,100 @@ Optional argument N means, put the headline into the Nth line of the window."
   (when (re-search-forward (concat "^\\(" outline-regexp "\\)") nil t)
     (beginning-of-line)
     (recenter (prefix-numeric-value N))))
+
+;;; Folding of blocks
+
+(defcustom org-hide-block-startup nil
+  "Non-nil means, , entering Org-mode will fold all blocks.
+This can also be set in on a per-file basis with
+
+#+STARTUP: hideblocks
+#+STARTUP: showblocks"
+  :group 'org-startup
+  :type 'boolean)
+
+(defconst org-block-regexp
+
+  "^[ \t]*#\\+begin_\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_\\1"
+  "Regular expression for hiding blocks.")
+
+(defvar org-hide-block-overlays nil
+  "Overays hiding blocks.")
+(make-variable-buffer-local 'org-hide-block-overlays)
+
+(defun org-block-map (function &optional start end)
+  "Call func at the head of all source blocks in the current
+buffer.  Optional arguments START and END can be used to limit
+the range."
+  (let ((start (or start (point-min)))
+        (end (or end (point-max))))
+    (save-excursion
+      (goto-char start)
+      (while (and (< (point) end) (re-search-forward org-block-regexp end t))
+	(save-excursion
+	  (save-match-data
+            (goto-char (match-beginning 0))
+            (funcall function)))))))
+
+(defun org-hide-block-toggle-all ()
+  "Toggle the visibility of all blocks in the current buffer."
+  (org-block-map #'org-hide-block-toggle))
+
+(defun org-hide-block-all ()
+  "Fold all blocks in the current buffer."
+  (interactive)
+  (org-show-block-all)
+  (org-block-map #'org-hide-block-toggle-maybe))
+
+(defun org-show-block-all ()
+  "Unfold all blocks in the current buffer."
+  (mapc 'org-delete-overlay org-hide-block-overlays)
+  (setq org-hide-block-overlays nil))
+
+(defun org-hide-block-toggle-maybe ()
+  "Toggle visibility of block at point."
+  (interactive)
+  (let ((case-fold-search t))
+    (if (save-excursion
+          (beginning-of-line 1)
+          (looking-at org-block-regexp))
+        (progn (org-hide-block-toggle)
+               t) ;; to signal that we took action
+      nil))) ;; to signal that we did not
+
+(defun org-hide-block-toggle (&optional force)
+  "Toggle the visibility of the current block."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (if (re-search-forward org-block-regexp nil t)
+        (let ((start (- (match-beginning 4) 1)) ;; beginning of body
+              (end (match-end 0))
+	      ov) ;; end of entire body
+          (if (memq t (mapcar (lambda (overlay)
+                                (eq (org-overlay-get overlay 'invisible)
+				    'org-hide-block))
+                              (org-overlays-at start)))
+	      (if (or (not force) (eq force 'off))
+		  (mapc (lambda (ov)
+			  (when (member ov org-hide-block-overlays)
+			    (setq org-hide-block-overlays
+				  (delq ov org-hide-block-overlays)))
+			  (when (eq (org-overlay-get ov 'invisible)
+				    'org-hide-block)
+			    (org-delete-overlay ov)))
+			(org-overlays-at start)))
+	    (setq ov (make-overlay start end))
+            (org-overlay-put ov 'invisible 'org-hide-block)
+	    (push ov org-hide-block-overlays)))
+      (error "Not looking at a source block"))))
+
+;; org-tab-after-check-for-cycling-hook
+(add-hook 'org-tab-first-hook 'org-hide-block-toggle-maybe)
+;; Remove overlays when changing major mode
+(add-hook 'org-mode-hook
+	  (lambda () (org-add-hook 'change-major-mode-hook
+				   'org-show-block-all 'append 'local)))
 
 ;;; Org-goto
 

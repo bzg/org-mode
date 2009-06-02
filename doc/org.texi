@@ -121,6 +121,7 @@ Document Structure
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
+* Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
 
@@ -715,6 +716,7 @@ edit the structure of the document.
 * Sparse trees::                Matches embedded in context
 * Plain lists::                 Additional structure within an entry
 * Drawers::                     Tucking stuff away
+* Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
 @end menu
@@ -1424,7 +1426,7 @@ Sort the plain list.  You will be prompted for the sorting method:
 numerically, alphabetically, by time, or by custom function.
 @end table
 
-@node Drawers, Footnotes, Plain lists, Document Structure
+@node Drawers, Blocks, Plain lists, Document Structure
 @section Drawers
 @cindex drawers
 @cindex visibility cycling, drawers
@@ -1454,7 +1456,26 @@ storing properties (@pxref{Properties and Columns}), and you can also arrange
 for state change notes @pxref{Tracking TODO state changes} and clock times
 (@pxref{Clocking work time}) to be stored in a drawer @code{LOGBOOK}.
 
-@node Footnotes, Orgstruct mode, Drawers, Document Structure
+@node Blocks, Footnotes, Drawers, Document Structure
+@section Blocks
+
+@vindex org-hide-block-startup
+@cindex blocks, folding
+Org-mode uses begin...end blocks for various purposes from including source
+code examples (@pxref{Literal examples}) to capturing time logging
+information (@pxref{Clocking work time}).  These blocks can be folded and
+unfolded by pressing TAB in the begin line.  You can also get all blocks
+folded at startup by configuring the variable @code{org-hide-block-startup}
+or on a per-file basis by using
+
+@cindex @code{hideblocks}, STARTUP keyword
+@cindex @code{nohideblocks}, STARTUP keyword
+@example
+#+STARTUP: hideblocks
+#+STARTUP: nohideblocks
+@end example
+
+@node Footnotes, Orgstruct mode, Blocks, Document Structure
 @section Footnotes
 @cindex footnotes
 
@@ -9946,6 +9967,15 @@ fnprompt    @r{prompt for footnote labels}
 fnauto      @r{create [fn:1]-like labels automatically (default)}
 fnconfirm   @r{offer automatic label for editing or confirmation}
 fnplain     @r{create [1]-like labels automatically}
+@end example
+@cindex org-hide-block-startup
+To hide blocks on startup, use these keywords. The corresponding variable is
+@code{org-hide-block-startup}.
+@cindex @code{hideblocks}, STARTUP keyword
+@cindex @code{nohideblocks}, STARTUP keyword
+@example
+hideblocks   @r{Hide all begin/end blocks on startup}
+nohideblocks @r{Do not hide blocks on startup}
 @end example
 @item #+TAGS:  TAG1(c1) TAG2(c2)
 @vindex org-tag-alist

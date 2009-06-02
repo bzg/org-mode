@@ -1,3 +1,17 @@
+2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-startup-options): New keywords blockhide and
+	blockshow.
+	(org-mode): Add new invisibility spec.
+	(org-set-startup-visibility): Hide block on startup if so
+	desired.
+	(org-hide-block-startup): New option.
+	(org-block-regexp): New constant.
+	(org-hide-block-overlays): New variable.
+	(org-block-map, org-hide-block-toggle-all, org-hide-block-all)
+	(org-show-block-all, org-hide-block-toggle-maybe)
+	(org-hide-block-toggle): New functions.
+
 2009-05-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-buffer-property-keys): Add Effort property for
