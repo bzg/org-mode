@@ -6867,7 +6867,7 @@ the language, a switch telling of the content should be in a single line."
   (when (org-bound-and-true-p org-edit-src-from-org-mode)
     (goto-char (point-min))
     (while (re-search-forward
-	    (if (org-mode-p) "^\\(.\\)" "^\\([*#]\\|[ \t]*#\\+\\)") nil t)
+	    (if (org-mode-p) "^\\(.\\)" "^\\([*]\\|[ \t]*#\\+\\)") nil t)
       (replace-match ",\\1")))
   (when (org-bound-and-true-p org-edit-src-picture)
     (untabify (point-min) (point-max))

@@ -11,6 +11,8 @@
 	(org-block-map, org-hide-block-toggle-all, org-hide-block-all)
 	(org-show-block-all, org-hide-block-toggle-maybe)
 	(org-hide-block-toggle): New functions.
+	(org-edit-src-exit): Do not quote lines starting with # and no +
+	behind it.
 
 2009-05-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
