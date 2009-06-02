@@ -518,8 +518,14 @@ the clocking selection, associated with the letter `d'."
 
 (defvar msg-extra)
 (defun org-clock-get-sum-start ()
+  "Return the time from which clock times should be counted.
+This is for the currently running clock as it is displayed
+in the mode line.  This function looks at the properties
+LAST_REPEAT and in particular CLOCK_MODELINE_TOTAL and the
+corresponding variable `org-clock-modeline-total' and then
+decides which time to use."
   (let ((cmt (or (org-entry-get nil "CLOCK_MODELINE_TOTAL")
-		 (symbol-name 'org-clock-modeline-total)))
+		 (symbol-name org-clock-modeline-total)))
 	(lr (org-entry-get nil "LAST_REPEAT")))
     (cond
      ((equal cmt "current")
