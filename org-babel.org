@@ -235,13 +235,10 @@ Once this is done every variable should be able to dump regions into
 their inferior-process buffer using major-mode functions.
 
 *** TODO some possible requests/proposed changes for Carsten [2/3]
-While I remember, some possible requests/proposed changes for Carsten
-come to mind in that regard:
+    While I remember, some possible requests/proposed changes for Carsten
+    come to mind in that regard:
 
-**** DEFERRED a hook called when the src edit buffer is created
-This should be implemented in the org-mode core
-
-**** DEFERRED Remap C-x C-s to save the source to the org buffer?
+**** DONE Remap C-x C-s to save the source to the org buffer?
      I've done this personally and I find it essential. I'm using 
 #+begin_src emacs-lisp
 (defun org-edit-src-save ()
@@ -272,7 +269,21 @@ org-mode core
      Maybe we should name the buffer with a combination of the source
      code and the session.  I think that makes sense.
 
-     Are you also suggesting a new org-edit-src minor mode?
+     [ES] Are you also suggesting a new org-edit-src minor mode?
+     [DED] org-exit-edit-mode is a minor mode that already exists:
+
+     Minor mode installing a single key binding, "C-c '" to exit special edit.
+
+     org-edit-src-save now has a binding in that mode, so I guess all
+     I'm saying at this stage is that it's a bit of a misnomer. But
+     perhaps we will also have more functionality to add to that minor
+     mode, making it even more of a misnomer. Perhaps something like
+     org-src-mode would be better.
+
+**** DEFERRED a hook called when the src edit buffer is created
+This should be implemented in the org-mode core
+     
+
 
 *** DEFERRED send code to inferior process
 Another thought on this topic: I think we will want users to send
@@ -306,6 +317,9 @@ being edited.  I think that we should either do this before the buffer
 is opened or not at all, specifically I think we should resolve
 references if the user calls C-c ' with a prefix argument.  Does that
 sound reasonable? [Eric]
+
+Yes [Dan]
+
 ** TODO fully purge org-babel-R of direct comint interaction
 try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
 
