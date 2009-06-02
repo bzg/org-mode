@@ -122,14 +122,13 @@ default: $(ELCFILES)
 
 all:	$(ELCFILES) $(INFOFILES)
 
-up2:
-	make update
-	sudo make install
+up2:	update
+	sudo ${MAKE} install
 
 update:
 	git pull
-	make clean
-	make all
+	${MAKE} clean
+	${MAKE} all
 
 compile: $(ELCFILES0)
 
@@ -138,10 +137,10 @@ install: install-lisp
 doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf
 
 p:
-	make pdf && open doc/org.pdf
+	${MAKE} pdf && open doc/org.pdf
 
 c:
-	make card && gv doc/orgcard.ps
+	${MAKE} card && gv doc/orgcard.ps
 
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
@@ -224,10 +223,10 @@ card:	doc/orgcard.pdf doc/orgcard.ps doc/orgcard_letter.pdf doc/orgcard_letter.p
 distfile:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
 	touch doc/org.texi doc/orgcard.tex # force update
-	make cleancontrib
-	make info
-	make doc
-	make lisp/org-install.el
+	${MAKE} cleancontrib
+	${MAKE} info
+	${MAKE} doc
+	${MAKE} lisp/org-install.el
 	rm -rf org-$(TAG) org-$(TAG).zip
 	$(MKDIR) org-$(TAG)
 	$(MKDIR) org-$(TAG)/xemacs
@@ -244,10 +243,10 @@ distfile:
 
 release:
 	@if [ "X$(TAG)" = "X" ]; then echo "*** No tag ***"; exit 1; fi
-	make distfile
-	make doc
+	${MAKE} distfile
+	${MAKE} doc
 	UTILITIES/gplmanual.pl
-	make html_manual
+	${MAKE} html_manual
 	rm -rf RELEASEDIR
 	$(MKDIR) RELEASEDIR
 	cp org-$(TAG).zip org-$(TAG).tar.gz RELEASEDIR
@@ -262,19 +261,19 @@ upload_manual:
 	rsync -avuz --delete doc/manual/ cdominik@orgmode.org:orgmode.org/manual/
 
 snap:
-	make release TAG=snapshot
+	${MAKE} release TAG=snapshot
 	scp RELEASEDIR/org-snapshot.zip cdominik@orgmode.org:orgmode.org/
 	scp RELEASEDIR/org-snapshot.tar.gz cdominik@orgmode.org:orgmode.org/
-	make cleanrel
+	${MAKE} cleanrel
 
 relup0:
-	make release
-	make upload_release
+	${MAKE} release
+	${MAKE} upload_release
 
 relup:
-	make release
-	make upload_release
-	make upload_manual
+	${MAKE} release
+	${MAKE} upload_release
+	${MAKE} upload_manual
 
 db:
 	grep -e '(debug)' lisp/*el
@@ -297,13 +296,13 @@ cleanrel:
 	rm -rf org-6*zip org-6*tar.gz org-snapshot*
 
 clean:
-	make cleanelc
-	make cleandoc
-	make cleanrel
+	${MAKE} cleanelc
+	${MAKE} cleandoc
+	${MAKE} cleanrel
 	rm -f *~ */*~ */*/*~
 
 cleanall:
-	make clean
+	${MAKE} clean
 	rm -f lisp/org-install.el
 
 .el.elc:
