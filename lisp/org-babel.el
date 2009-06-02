@@ -26,7 +26,7 @@
 
 ;;; Commentary:
 
-;; See rorg.org in the parent directory for more information
+;; See org-babel.org in the parent directory for more information
 
 ;;; Code:
 (require 'org)
@@ -72,6 +72,7 @@ then run `org-babel-execute-src-block'."
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
     (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
+    (add-to-list 'org-babel-session-defaults (cons interpreter (format "org-babel-%s" interpreter)))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
@@ -174,13 +175,13 @@ of the following form.  (language body header-arguments-alist)"
 
 (defun org-babel-parse-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-clean-text-properties (match-string 4))
+        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
         (org-combine-plists org-babel-default-header-args
                             (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
 (defun org-babel-parse-inline-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-clean-text-properties (match-string 4))
+        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
         (org-combine-plists org-babel-default-inline-header-args
                             (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
@@ -333,6 +334,10 @@ non-nil."
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
+
+(defun org-babel-strip-protective-comas (body)
+  "Strip protective comas from bodies of source blocks."
+  (replace-regexp-in-string "^,#" "#" body))
 
 (defun org-babel-read (cell)
   "Convert the string value of CELL to a number if appropriate.

@@ -34,7 +34,7 @@
 (defun org-babel-shell-add-interpreter (var cmds)
   (set-default var cmds)
   (mapc (lambda (cmd)
-          (setq org-babel-interpreters (cons cmd org-babel-interpreters))
+          (org-babel-add-interpreter cmd)
           (eval
            `(defun ,(intern (concat "org-babel-execute:" cmd)) (body params)
               ,(concat "Evaluate a block of " cmd " shell with org-babel. This function is

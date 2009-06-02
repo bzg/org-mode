@@ -68,12 +68,12 @@ pie(dirs[,1], labels = dirs[,2])
 #+tblname: grades-table
 | student | grade | letter |
 |---------+-------+--------|
-|       1 |    88 | B      |
-|       2 |    63 | D      |
-|       3 |    89 | B      |
-|       4 |     7 | F      |
-|       5 |    86 | B      |
-|       6 |    77 | C      |
+|       1 |    99 | A      |
+|       2 |    59 | F      |
+|       3 |    75 | C      |
+|       4 |    15 | F      |
+|       5 |     7 | F      |
+|       6 |    13 | F      |
 #+TBLFM: $2='(sbe random-score-generator)::$3='(sbe assign-grade (score $2))
 
 #+srcname: assign-grade
@@ -114,8 +114,10 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [21/34]
-** TODO Create objects in top level (global) environment in R?
+* Tasks [22/36]
+** TODO Create objects in top level (global) environment [0/5]
+*sessions*
+
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
    code block are evaluated in the scope of the
@@ -187,11 +189,145 @@ Please let me know if you foresee any problems with this proposed setup,
 or if you think any parts might be confusing for people coming from
 Sweave.  I'll hopefully find some time to work on this later in the
 week.
-*** implementation
-in [[file:lisp/org-babel-comint.el][org-babel-comint.el]]
 
-Currently I've coppied and begun generalizing the functions for
-interacting with R buffers.
+*** TODO rework all source codes to use inferior-processes-buffers [0/3]
+
+this will involve...
+1) [ ] creating an a-list of default *session* buffers for each source
+       language
+2) [ ] functions for dumping code to the *session* buffers which can
+       be overridden by each source code language
+3) [ ] functions for retrieving results from the *sessions* buffers
+       which can be overridden by each source code
+
+#+srcname: task-sessions-for-r
+#+begin_src R 
+a <- 9
+b <- 10
+a + b
+#+end_src
+
+*** TODO implement a *session* header argument
+
+use this header argument to override the default *session* buffer
+
+*** TODO remove source bodies from their functional wrappers
+
+The current functional wrappers should be removed in favor of
+incremental evaluation in inferior-source-buffers
+
+*** TODO function to bring up inferior-process buffer
+
+This should be callable from inside of a source-code block in an
+org-mode buffer.  It should evaluate the header arguments, then bring
+up the inf-proc buffer using =pop-to-buffer=.
+
+*** TODO function to dump last N lines from inf-proc buffer into the current source block
+
+Callable with a prefix argument to specify how many lines should be
+dumped into the source-code buffer.
+
+** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
+*** TODO set buffer-local-process variables appropriately [DED]
+    I think something like this would be great. You've probably
+already thought of this, but just to note it down: it would be really
+nice if org-babel's notion of a buffer's 'session/process' played
+nicely with ESS's notion of the buffer's session/process. ESS keeps
+the current process name for a buffer in a buffer-local variable
+ess-local-process-name. So one thing we will probably want to do is
+make sure that the *Org Edit Src Example* buffer sets that variable
+appropriately. [DED]
+
+I had not thought of that, but I agree whole heartedly. [Eric]
+
+Once this is done every variable should be able to dump regions into
+their inferior-process buffer using major-mode functions.
+
+*** TODO some possible requests/proposed changes for Carsten [2/3]
+    While I remember, some possible requests/proposed changes for Carsten
+    come to mind in that regard:
+
+**** DONE Remap C-x C-s to save the source to the org buffer?
+     I've done this personally and I find it essential. I'm using 
+#+begin_src emacs-lisp
+(defun org-edit-src-save ()
+  "Update the parent org buffer with the edited source code, save
+the parent org-buffer, and return to the source code edit
+buffer."
+  (interactive)
+  (let ((p (point)))
+    (org-edit-src-exit)
+    (save-buffer)
+    (org-edit-src-code)
+    (goto-char p)))
+
+(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
+#+end_src     
+    which seems to work.
+
+I think this is great, but I think it should be implemented in the
+org-mode core
+**** TODO Rename buffer and minor mode?
+     Something shorter than *Org Edit Src Example* for the buffer
+     name. org-babel is bringing org's source code interaction to a
+     level of maturity where the 'example' is no longer
+     appropriate. And if further keybindings are going to be added to
+     the minor mode then maybe org-edit-src-mode is a better name than
+     org-exit-edit-mode.
+
+     Maybe we should name the buffer with a combination of the source
+     code and the session.  I think that makes sense.
+
+     [ES] Are you also suggesting a new org-edit-src minor mode?
+     [DED] org-exit-edit-mode is a minor mode that already exists:
+
+     Minor mode installing a single key binding, "C-c '" to exit special edit.
+
+     org-edit-src-save now has a binding in that mode, so I guess all
+     I'm saying at this stage is that it's a bit of a misnomer. But
+     perhaps we will also have more functionality to add to that minor
+     mode, making it even more of a misnomer. Perhaps something like
+     org-src-mode would be better.
+
+**** DEFERRED a hook called when the src edit buffer is created
+This should be implemented in the org-mode core
+     
+
+*** DEFERRED send code to inferior process
+Another thought on this topic: I think we will want users to send
+chunks of code to the interpreter from within the *Org Edit Src*
+buffer, and I think that's what you have in mind already. In ESS that
+is done using the ess-eval-* functions. [DED]
+
+I think we can leave this up to the major-mode in the source code
+buffer, as almost every source-code major mode will have functions for
+doing things like sending regions to the inferior process.  If
+anything we might need to set the value of the buffer local inferior
+process variable. [Eric]
+
+*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
+That seems to imply that the header references need to be evaluated
+and transformed into the target language object when we hit C-c ' to
+enter the *Org Edit Src* buffer [DED]
+
+Good point, I heartily agree that this should be supported [Eric]
+
+(or at least before the first time we attempt to evaluate code in that
+buffer -- I suppose there might be an argument for lazy evaluation, in
+case someone hits C-c ' but is "just looking" and not actually
+evaluating anything.) Of course if evaluating the reference is
+computationally intensive then the user might have to wait before they
+get the *Org Edit Src* buffer. [DED]
+
+I fear that it may be hard to anticipate when the references will be
+needed, some major-modes do on-the-fly evaluation while the buffer is
+being edited.  I think that we should either do this before the buffer
+is opened or not at all, specifically I think we should resolve
+references if the user calls C-c ' with a prefix argument.  Does that
+sound reasonable? [Eric]
+
+Yes [Dan]
+
 ** TODO fully purge org-babel-R of direct comint interaction
 try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
 
@@ -318,9 +454,20 @@ should use a span class, and should show original source in tool-tip
 |    1 | 2       |    3 |
 |    4 | schulte |    6 |
 
+#+TBLNAME: egtable2
+| 1 |         2 | 3 |
+| 4 | schulte   | 6 |
+
 #+begin_src R var tabel=egtable
 tabel
 #+end_src
+
+#+resname:
+| "col1" | "col2"    | "col3" |
+|--------+-----------+--------|
+|      1 | 2         |      3 |
+|      4 | "schulte" |      6 |
+
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
@@ -377,20 +524,6 @@ also to potentially suggest extensions of the framework.  For example
 one that comes to mind is the ability to treat a source-code block
 like a function which accepts arguments and returns results. Actually
 this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
-
-** DONE pass multiple reference arguments into R
-   Can we do this? I wasn't sure how to supply multiple 'var' header
-   args. Just delete this if I'm being dense.
-
-   This should be working, see the following example...
-
-#+srcname: two-arg-example
-#+begin_src R :var n=2 :var m=8
-n + m
-#+end_src
-
-#+resname: two-arg-example
-: 10
 
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
@@ -543,6 +676,31 @@ to the command if BUFF is not given.)
     edit out some lines, and then convert it to org-babel format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
+
+** DONE Remove protective commas from # comments before evaluating
+   org inserts protective commas in front of ## comments in language
+   modes that use them. We need to remove them prior to sending code
+   to the interpreter.
+
+#+srcname: testing-removal-of-protective-comas
+#+begin_src ruby
+,# this one might break it??
+:comma_protection
+#+end_src
+
+** DONE pass multiple reference arguments into R
+   Can we do this? I wasn't sure how to supply multiple 'var' header
+   args. Just delete this if I'm being dense.
+
+   This should be working, see the following example...
+
+#+srcname: two-arg-example
+#+begin_src R :var n=2 :var m=8
+n + m
+#+end_src
+
+#+resname: two-arg-example
+: 10
 
 ** DONE ensure that table ranges work
 when a table range is passed to org-babel as an argument, it should be
