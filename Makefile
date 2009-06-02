@@ -122,6 +122,15 @@ default: $(ELCFILES)
 
 all:	$(ELCFILES) $(INFOFILES)
 
+up2:
+	make update
+	sudo make install
+
+update:
+	git pull
+	make clean
+	make all
+
 compile: $(ELCFILES0)
 
 install: install-lisp
