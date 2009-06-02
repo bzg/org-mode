@@ -6573,6 +6573,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 
 (defvar org-exit-edit-mode-map (make-sparse-keymap))
 (define-key org-exit-edit-mode-map "\C-c'" 'org-edit-src-exit)
+(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
 (defvar org-edit-src-picture nil)
@@ -6893,6 +6894,17 @@ the language, a switch telling of the content should be in a single line."
   (move-marker beg nil)
   (move-marker end nil)))
 
+(defun org-edit-src-save ()
+  "Save parent buffer with current state source-code buffer."
+  (interactive)
+  (let ((p (point)) (m (mark)) msg)
+    (org-edit-src-exit)
+    (save-buffer)
+    (setq msg (current-message))
+    (org-edit-src-code)
+    (push-mark m 'nomessage)
+    (goto-char p)
+    (message (or msg ""))))
 
 ;;; The orgstruct minor mode
 

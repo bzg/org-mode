@@ -1,5 +1,7 @@
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-edit-src-save): New function.
+
 	* org-clock.el (org-clock-out-switch-to-state): New option.
 	(org-clock-out): Honor `org-clock-out-switch-to-state'.
 
