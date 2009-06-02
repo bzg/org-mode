@@ -9927,6 +9927,8 @@ This function is run automatically after each state change to a DONE state."
     (when repeat
       (if (eq org-log-repeat t) (setq org-log-repeat 'state))
       (org-todo (if (eq interpret 'type) last-state head))
+      (org-entry-put nil "LAST_REPEAT" (format-time-string
+					(org-time-stamp-format t t)))
       (when org-log-repeat
 	(if (or (memq 'org-add-log-note (default-value 'post-command-hook))
 		(memq 'org-add-log-note post-command-hook))
