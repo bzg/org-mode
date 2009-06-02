@@ -583,6 +583,16 @@ Drawers can be defined on the per-file basis with a line like:
   :group 'org-cycle
   :type '(repeat (string :tag "Drawer Name")))
 
+(defcustom org-hide-block-startup nil
+  "Non-nil means, , entering Org-mode will fold all blocks.
+This can also be set in on a per-file basis with
+
+#+STARTUP: hideblocks
+#+STARTUP: showblocks"
+  :group 'org-startup
+  :group 'org-cycle
+  :type 'boolean)
+
 (defcustom org-cycle-global-at-bob nil
   "Cycle globally if cursor is at beginning of buffer and not at a headline.
 This makes it possible to do global cycling without having to use S-TAB or
@@ -5134,15 +5144,6 @@ Optional argument N means, put the headline into the Nth line of the window."
     (recenter (prefix-numeric-value N))))
 
 ;;; Folding of blocks
-
-(defcustom org-hide-block-startup nil
-  "Non-nil means, , entering Org-mode will fold all blocks.
-This can also be set in on a per-file basis with
-
-#+STARTUP: hideblocks
-#+STARTUP: showblocks"
-  :group 'org-startup
-  :type 'boolean)
 
 (defconst org-block-regexp
 

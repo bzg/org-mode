@@ -304,15 +304,6 @@ pointing to it."
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))
 
-
-(defun org-clock-sum-current-item (&optional tstart)
-  "Returns time, clocked on current item in total"
-  (save-excursion
-    (save-restriction
-      (org-narrow-to-subtree)
-      (org-clock-sum tstart)
-      org-clock-file-total-minutes)))
-
 (defun org-clock-get-clock-string ()
   "Form a clock-string, that will be show in the mode line.
 If an effort estimate was defined for current item, use
@@ -784,6 +775,14 @@ TSTART and TEND can mark a time range to be considered."
 	    (put-text-property (point) (point-at-eol) :org-clock-minutes time)))))
       (setq org-clock-file-total-minutes (aref ltimes 0)))
     (set-buffer-modified-p bmp)))
+
+(defun org-clock-sum-current-item (&optional tstart)
+  "Returns time, clocked on current item in total"
+  (save-excursion
+    (save-restriction
+      (org-narrow-to-subtree)
+      (org-clock-sum tstart)
+      org-clock-file-total-minutes)))
 
 (defun org-clock-display (&optional total-only)
   "Show subtree times in the entire buffer.
