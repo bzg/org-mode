@@ -114,8 +114,8 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/35]
-** TODO Create objects in top level (global) environment in R? [1/8]
+* Tasks [22/36]
+** TODO Create objects in top level (global) environment in R? [0/5]
 
 *** initial requirement statement [DED]
    At the moment, objects created by computations performed in the
@@ -189,20 +189,36 @@ or if you think any parts might be confusing for people coming from
 Sweave.  I'll hopefully find some time to work on this later in the
 week.
 
+*** TODO rework all source codes to use inferior-processes-buffers
+
+this will involve...
+1) creating a a-list of default *session* buffers for each source language
+2) functions for dumping code to the *session* buffers which can be
+   overridden by each source code language
+3) functions for retrieving results from the *sessions* buffers which
+   can be overridden by each source code
+
 *** TODO implement a *session* header argument
+
+use this header argument to override the default *session* buffer
+
 *** TODO remove source bodies from their functional wrappers
+
 The current functional wrappers should be removed in favor of
 incremental evaluation in inferior-source-buffers
 
 *** TODO function to bring up inferior-process buffer
-This should be callable from inside of a source-code block in an
-org-mode buffer.  It should evaluation the header arguments, then
-bring up the inf-proc buffer using =pop-to-buffer=.
 
-*** TODO function to dump last N lines from inf-proc buffer into source block
+This should be callable from inside of a source-code block in an
+org-mode buffer.  It should evaluate the header arguments, then bring
+up the inf-proc buffer using =pop-to-buffer=.
+
+*** TODO function to dump last N lines from inf-proc buffer into the current source block
+
 Callable with a prefix argument to specify how many lines should be
 dumped into the source-code buffer.
 
+** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
 already thought of this, but just to note it down: it would be really
