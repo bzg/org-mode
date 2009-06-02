@@ -5147,7 +5147,7 @@ Optional argument N means, put the headline into the Nth line of the window."
 
 (defconst org-block-regexp
 
-  "^[ \t]*#\\+begin_\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_\\1"
+  "^[ \t]*#\\+begin_\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_\\1[ \t]*$"
   "Regular expression for hiding blocks.")
 
 (defvar org-hide-block-overlays nil
@@ -6903,7 +6903,7 @@ the language, a switch telling of the content should be in a single line."
     (setq msg (current-message))
     (org-edit-src-code)
     (push-mark m 'nomessage)
-    (goto-char p)
+    (goto-char (min p (point-max)))
     (message (or msg ""))))
 
 ;;; The orgstruct minor mode
