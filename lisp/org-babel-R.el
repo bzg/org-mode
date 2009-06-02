@@ -79,18 +79,18 @@ R process in `org-babel-R-buffer'."
 `org-babel-R-buffer' as Emacs lisp."
   (let ((tmp-file (make-temp-file "org-babel-R")) result)
     (org-babel-R-input-command
-     (format "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=TRUE, quote=FALSE)"
-	     func-name tmp-file))
+     (format "write.table(%s(), \"%s\", , ,\"\\t\", ,\"nil\", , FALSE, FALSE)" func-name tmp-file))
     (with-temp-buffer
+      (message "before condition")
       (condition-case nil
           (progn
             (org-table-import tmp-file nil)
             (delete-file tmp-file)
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-R-read row))
-                                 (org-table-to-lisp)))
-	    (setq result (org-babel-R-set-header-row result)))
+                                 (org-table-to-lisp))))
         (error nil))
+      (message "after condition")
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
               (if (null (cdr (car result)))
@@ -98,20 +98,6 @@ R process in `org-babel-R-buffer'."
                 result)
             (car result))
         result))))
-
-(defun org-babel-R-set-header-row (table)
-  "Check whether the table appears to have (a) genuine
-user-supplied column names, or (b) default column names added
-automatically by R. In case (a), maintain the first row of the
-table as a header row and insert an hline. In case (b), remove
-the first row and return the org table without an hline."
-  (if (string-equal (caar table) "V1")
-      ;; The first row looks like it contains default column names
-      ;; added by R. This condition could be improved so that it
-      ;; checks whether the first row is ("V1" "V2" ... "V$n") where
-      ;; $n is the number of columns.
-      (cdr table)
-    (cons (car table) (cons 'hline (cdr table)))))
 
 (defun org-babel-R-read (cell)
   "Strip nested \"s from around strings in exported R values."
