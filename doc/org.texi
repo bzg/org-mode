@@ -11478,7 +11478,8 @@ of feedback, developed and applied standards to the Org documentation.
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
 @item
-@i{Eric Schulte} wrote @file{org-plot.el}.
+@i{Eric Schulte} wrote @file{org-plot.el} and contributed various patches,
+small features and modules.
 @item
 Linking to VM/BBDB/Gnus was first inspired by @i{Tom Shannon}'s
 @file{organizer-mode.el}.
