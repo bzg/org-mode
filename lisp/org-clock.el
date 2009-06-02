@@ -527,7 +527,7 @@ the clocking selection, associated with the letter `d'."
 	    (org-clock-update-mode-line)
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
-	    (message "Clock started at %s. %s" ts msg-extra)))))))
+	    (message "Clock starts at %s - %s" ts msg-extra)))))))
 
 (defvar msg-extra)
 (defun org-clock-get-sum-start ()
@@ -542,10 +542,10 @@ decides which time to use."
 	(lr (org-entry-get nil "LAST_REPEAT")))
     (cond
      ((equal cmt "current")
-      (setq msg-extra "Showing instance task time.")
+      (setq msg-extra "showing time in current clock instance")
       (current-time))
      ((equal cmt "today")
-      (setq msg-extra "Showing today's task time.")
+      (setq msg-extra "showing today's task time.")
       (let* ((dt (decode-time (current-time))))
 	(setq dt (append (list 0 0 0) (nthcdr 3 dt)))
 	(if org-extend-today-until
@@ -554,12 +554,12 @@ decides which time to use."
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))
 	       (not lr)))
-      (setq msg-extra "Showing entire task time.")
+      (setq msg-extra "showing entire task time.")
       nil)
      ((or (equal cmt "repeat")
 	  (and (or (not cmt) (equal cmt "auto"))
 	       lr))
-      (setq msg-extra "Showing task time since last repeat.")
+      (setq msg-extra "showing task time since last repeat.")
       (if (not lr)
 	  nil
 	(org-time-string-to-time lr)))
