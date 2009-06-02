@@ -1,5 +1,14 @@
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-global-properties-fixed): Add default for
+	CLOCK_MODELINE_TOTAL.
+
+	* org-clock.el (org-clock-sum): Accept lists and strigs as tstart
+	andd tend.
+	(org-clock-sum-current-item): Optional argument TSTART, pass it to
+	org-clock-sum.
+	(org-clock-get-sum-start): New function.
+
 	* org.el (org-startup-options): New keywords blockhide and
 	blockshow.
 	(org-mode): Add new invisibility spec.

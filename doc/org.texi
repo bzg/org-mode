@@ -5252,12 +5252,27 @@ can arrange for the clock information to persisst accress Emacs sessions with
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
 this item, the multiple CLOCK lines will be wrapped into a
-@code{:CLOCK:} drawer (see also the variable
+@code{:LOGBOOK:} drawer (see also the variable
 @code{org-clock-into-drawer}).  When called with a @kbd{C-u} prefix argument,
 select the task from a list of recently clocked tasks.  With two @kbd{C-u
 C-u} prefixes, clock into the task at point and mark it as the default task.
 The default task will always be available when selecting a clocking task,
-with letter @kbd{d}.
+with letter @kbd{d}.@*
+@cindex property: CLOCK_MODELINE_TOTAL
+@cindex property: LAST_REPEAT
+@vindex org-clock-modeline-total
+While the clock is running, the current clocking time is shown in the mode
+line, along with the title of the task.  The clock time shown will be all
+time ever clocked for this task and its children.  If the task is a repeating
+one (@pxref{Repeated tasks}), only the time since the last reset of the task
+@footnote{as recorded by the @code{LAST_REPEAT} property} will be shown.
+More control over what time is shown can be exercised with the
+@code{CLOCK_MODELINE_TOTAL} property.  It may have the values @code{current}
+to show only the current clocking instance, @code{today} to show all time
+clocked on this tasks today (see also the variable
+@code{org-extend-today-until}), @code{all} to include all time, or
+@code{auto} which is the default@footnote{See also the variable
+@code{org-clock-modeline-total}.}.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 @vindex org-log-note-clock-out

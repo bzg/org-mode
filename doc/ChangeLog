@@ -1,3 +1,7 @@
+2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clocking work time): Document the clock time display.
+
 2009-05-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Structure editing, TODO basics): Document new

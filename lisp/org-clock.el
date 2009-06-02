@@ -161,6 +161,24 @@ file name  play this sound file.  If not possible, fall back to beep"
 	  (const :tag "Standard beep" t)
 	  (file :tag "Play sound file")))
 
+(defcustom org-clock-modeline-total 'auto
+  "Default setting for the time included for the modeline clock.
+This can be overruled locally using the CLOCK_MODELINE_TOTAL property.
+Allowed values are:
+
+current  Only the time in the current instance of the clock
+today    All time clocked inot this task today
+repeat   All time clocked into this task since last repeat
+all      All time ever recorded for this task
+auto     Automtically, either `all', or `repeat' for repeating tasks"
+  :group 'org-clock
+  :type '(choice
+	  (const :tag "Current clock" current)
+	  (const :tag "Today's task time" today)
+	  (const :tag "Since last repeat" repeat)
+	  (const :tag "All task time" all)
+	  (const :tag "Automatically, `all' or since `repeat'" auto)))
+
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -287,12 +305,12 @@ pointing to it."
 	(cons i marker)))))
 
 
-(defun org-clock-sum-current-item ()
+(defun org-clock-sum-current-item (&optional tstart)
   "Returns time, clocked on current item in total"
   (save-excursion
     (save-restriction
       (org-narrow-to-subtree)
-      (org-clock-sum)
+      (org-clock-sum tstart)
       org-clock-file-total-minutes)))
 
 (defun org-clock-get-clock-string ()
@@ -399,7 +417,7 @@ the clocking selection, associated with the letter `d'."
   (interactive "P")
   (catch 'abort
     (let ((interrupting (marker-buffer org-clock-marker))
-	  ts selected-task target-pos)
+	  ts selected-task target-pos (msg-extra ""))
       (when (equal select '(4))
 	(setq selected-task (org-clock-select-task "Clock-in on task: "))
 	(if selected-task
@@ -472,7 +490,8 @@ the clocking selection, associated with the letter `d'."
 		    (apply 'encode-time
 			   (org-parse-time-string (match-string 1))))
 	      (setq org-clock-effort (org-get-effort))
-	      (setq org-clock-total-time (org-clock-sum-current-item)))
+	      (setq org-clock-total-time (org-clock-sum-current-item
+					  (org-clock-get-sum-start))))
 	     ((eq org-clock-in-resume 'auto-restart)
 	      ;; called from org-clock-load during startup,
 	      ;; do not interrupt, but warn!
@@ -491,7 +510,8 @@ the clocking selection, associated with the letter `d'."
 		(org-indent-line-to (- (org-get-indentation) 2)))
 	      (insert org-clock-string " ")
 	      (setq org-clock-effort (org-get-effort))
-	      (setq org-clock-total-time (org-clock-sum-current-item))
+	      (setq org-clock-total-time (org-clock-sum-current-item
+					  (org-clock-get-sum-start)))
 	      (setq org-clock-start-time (current-time))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))
@@ -503,7 +523,37 @@ the clocking selection, associated with the letter `d'."
 	    (org-clock-update-mode-line)
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
-	    (message "Clock started at %s" ts)))))))
+	    (message "Clock started at %s. %s" ts msg-extra)))))))
+
+(defvar msg-extra)
+(defun org-clock-get-sum-start ()
+  (let ((cmt (or (org-entry-get nil "CLOCK_MODELINE_TOTAL")
+		 (symbol-name 'org-clock-modeline-total)))
+	(lr (org-entry-get nil "LAST_REPEAT")))
+    (cond
+     ((equal cmt "current")
+      (setq msg-extra "Showing instance task time.")
+      (current-time))
+     ((equal cmt "today")
+      (setq msg-extra "Showing today's task time.")
+      (let* ((dt (decode-time (current-time))))
+	(setq dt (append (list 0 0 0) (nthcdr 3 dt)))
+	(if org-extend-today-until
+	    (setf (nth 2 dt) org-extend-today-until))
+	(apply 'encode-time dt)))
+     ((or (equal cmt "all")
+	  (and (or (not cmt) (equal cmt "auto"))
+	       (not lr)))
+      (setq msg-extra "Showing all task time.")
+      nil)
+     ((or (equal cmt "repeat")
+	  (and (or (not cmt) (equal cmt "auto"))
+	       lr))
+      (setq msg-extra "Showing task time since last repeat.")
+      (if (not lr)
+	  nil
+	(org-time-string-to-time lr)))
+     (t nil))))
 
 (defun org-clock-find-position (find-unclosed)
   "Find the location where the next clock line should be inserted.
@@ -684,7 +734,8 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
 
 (defun org-clock-sum (&optional tstart tend)
   "Sum the times for each subtree.
-Puts the resulting times in minutes as a text property on each headline."
+Puts the resulting times in minutes as a text property on each headline.
+TSTART and TEND can mark a time range to be considered."
   (interactive)
   (let* ((bmp (buffer-modified-p))
 	 (re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
@@ -696,6 +747,10 @@ Puts the resulting times in minutes as a text property on each headline."
 	 (level 0)
 	 ts te dt
 	 time)
+    (if (stringp tstart) (setq tstart (org-time-string-to-seconds tstart)))
+    (if (stringp tend) (setq tend (org-time-string-to-seconds tend)))
+    (if (consp tstart) (setq tstart (time-to-seconds tstart)))
+    (if (consp tend) (setq tend (time-to-seconds tend)))
     (remove-text-properties (point-min) (point-max) '(:org-clock-minutes t))
     (save-excursion
       (goto-char (point-max))

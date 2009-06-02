@@ -2468,7 +2468,8 @@ Effort estimates given in this property need to have the format H:MM."
   :type '(string :tag "Property"))
 
 (defconst org-global-properties-fixed
-  '(("VISIBILITY_ALL" . "folded children content all"))
+  '(("VISIBILITY_ALL" . "folded children content all")
+    ("CLOCK_MODELINE_TOTAL_ALL" . "current today repeat all auto"))
   "List of property/value pairs that can be inherited by any entry.
 
 These are fixed values, for the preset properties.  The user variable
@@ -11637,7 +11638,8 @@ but in some other way.")
     "LOCATION" "LOGGING" "COLUMNS" "VISIBILITY"
     "TABLE_EXPORT_FORMAT" "TABLE_EXPORT_FILE"
     "EXPORT_FILE_NAME" "EXPORT_TITLE" "EXPORT_AUTHOR" "EXPORT_DATE"
-    "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER")
+    "ORDERED" "NOBLOCKING" "COOKIE_DATA" "LOG_INTO_DRAWER"
+    "CLOCK_MODELINE_TOTAL")
   "Some properties that are used by Org-mode for various purposes.
 Being in this list makes sure that they are offered for completion.")
 
