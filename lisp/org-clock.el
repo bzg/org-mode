@@ -86,6 +86,19 @@ state to switch it to."
 	  (string :tag "State")
 	  (symbol :tag "Function")))
 
+(defcustom org-clock-out-switch-to-state nil
+  "Set task to a special todo state after clocking out.
+The value should be the state to which the entry should be
+switched. If the value is a function, it must take one
+parameter (the current TODO state of the item) and return the
+state to switch it to."
+  :group 'org-clock
+  :group 'org-todo
+  :type '(choice
+	  (const :tag "Don't force a state" nil)
+	  (string :tag "State")
+	  (symbol :tag "Function")))
+
 (defcustom org-clock-history-length 5
   "Number of clock tasks to remember in history."
   :group 'org-clock
@@ -541,7 +554,7 @@ decides which time to use."
      ((or (equal cmt "all")
 	  (and (or (not cmt) (equal cmt "auto"))
 	       (not lr)))
-      (setq msg-extra "Showing all task time.")
+      (setq msg-extra "Showing entire task time.")
       nil)
      ((or (equal cmt "repeat")
 	  (and (or (not cmt) (equal cmt "auto"))
@@ -680,6 +693,21 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	    (setq org-clock-mode-line-timer nil))
 	  (setq global-mode-string
 		(delq 'org-mode-line-string global-mode-string))
+	  (when org-clock-out-switch-to-state
+	    (save-excursion
+	      (org-back-to-heading t)
+	      (let ((org-inhibit-logging t))
+		(cond
+		 ((functionp org-clock-out-switch-to-state)
+		  (looking-at org-complex-heading-regexp)
+		  (let ((newstate (funcall org-clock-out-switch-to-state
+					   (match-string 2))))
+		    (if newstate (org-todo newstate))))
+		 ((and org-clock-out-switch-to-state
+		       (not (looking-at (concat outline-regexp "[ \t]*"
+						org-clock-out-switch-to-state
+						"\\>"))))
+		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
 		   (if remove " => LINE REMOVED" "")))))))

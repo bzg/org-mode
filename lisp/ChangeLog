@@ -1,5 +1,8 @@
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-out-switch-to-state): New option.
+	(org-clock-out): Honor `org-clock-out-switch-to-state'.
+
 	* org-compat.el (org-compatible-face): Improve macro.
 
 	* org.el (org-global-properties-fixed): Add default for
