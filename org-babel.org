@@ -341,6 +341,15 @@ this will involve...
 3) functions for retrieving results from the *sessions* buffers which
    can be overridden by each source code
 
+**** R
+
+#+srcname: task-R-with-inf-process-buffer
+#+begin_src R 
+a <- 8
+b <- 9
+a + b
+#+end_src
+
 *** TODO implement a *session* header argument
 
 use this header argument to override the default *session* buffer

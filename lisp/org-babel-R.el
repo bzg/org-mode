@@ -33,10 +33,6 @@
 
 (org-babel-add-interpreter "R")
 
-(defvar org-babel-R-func-name "org_babel_R_main"
-  "This is the main function which wraps each R source code
-block.")
-
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
@@ -46,9 +42,8 @@ called by `org-babel-execute-src-block'."
           results)
       (org-babel-R-initiate-R-buffer)
       (mapc (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)
-      (org-babel-R-input-command
-       (format "%s <- function ()\n{\n%s\n}" org-babel-R-func-name body))
-      (org-babel-R-to-elisp org-babel-R-func-name))))
+      (org-babel-R-input-command body)
+      (org-babel-R-last-value-as-elisp))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
@@ -74,13 +69,12 @@ R process in `org-babel-R-buffer'."
 		 name transition-file (if has-header "TRUE" "FALSE")))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
 
-(defun org-babel-R-to-elisp (func-name)
-  "Return the result of calling the function named FUNC-NAME in
-`org-babel-R-buffer' as Emacs lisp."
+(defun org-babel-R-last-value-as-elisp ()
+  "Return the last value returned by R as Emacs lisp."
   (let ((tmp-file (make-temp-file "org-babel-R")) result)
     (org-babel-R-input-command
-     (format "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
-	     func-name tmp-file))
+     (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
+	      tmp-file))
     (with-temp-buffer
       (condition-case nil
           (progn
@@ -88,9 +82,8 @@ R process in `org-babel-R-buffer'."
             (delete-file tmp-file)
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-R-read row))
-                                 (org-table-to-lisp)))
-	    ;; (setq result (org-babel-R-set-header-row result))
-	    )
+                                 (org-table-to-lisp))))
+        
         (error nil))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
