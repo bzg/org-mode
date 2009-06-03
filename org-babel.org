@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/36]
+* Tasks [22/37]
 ** TODO Create objects in top level (global) environment in R? [0/5]
 
 *** initial requirement statement [DED]
@@ -526,6 +526,25 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und_R", sep="_")
+#+end_src
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + "_y_python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel_speaks"
+(concat msg "_elisp")
+#+end_src
+
 
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
