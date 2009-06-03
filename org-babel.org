@@ -246,13 +246,12 @@ Cons
 - the current functional wrappers may require some changes in order to
   include the existing global context
 
-**** (2) exploit language meta-programming constructs to explicitly evaluate code
+**** (4) exploit language meta-programming constructs to explicitly evaluate code
 Pros
 - only one type of evaluation
 
 Cons
 - some languages may not have sufficient meta-programming constructs
-
 
 *** TODO rework all source codes to use inferior-processes-buffers
 
