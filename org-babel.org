@@ -228,11 +228,17 @@ Possible solutions...
    through =eval= type functions, and use said to evaluate the entire
    blocks in such a way that their environment can be combined with the
    global environment, and their results are still captured.
+5) I believe that most modern languages which support interactive
+   sessions have support for a =last_result= type function, which
+   returns the result of the last input without re-calculation.  If
+   widely enough present this would be the ideal solution to a
+   combination of functional and imperative styles.
 
 None of these solutions seem very desirable, but for now I don't see
 what else would be possible.
 
-Of these options I am leaning towards (1) and (2)
+Of these options I was leaning towards (1) and (4) but now believe
+that if it is possible option (5) will be ideal.
 
 **** (1) both functional and imperative evaluation
 Pros
@@ -252,6 +258,79 @@ Pros
 
 Cons
 - some languages may not have sufficient meta-programming constructs
+
+**** (5) exploit some =last_value= functionality if present
+
+Need to ensure that most languages have such a function, those without
+will simply have to implement their own similar solution...
+
+| language   | =last_value= function       |
+|------------+-----------------------------|
+| R          | .Last.value                 |
+| ruby       | _                           |
+| python     | _                           |
+| shell      | see [[* last command for shells][last command for shells]] |
+| emacs-lisp | see [[* emacs-lisp will be a special case][special-case]]            |
+
+#+srcname: task-last-value
+#+begin_src ruby
+82 + 18
+#+end_src
+
+***** last command for shells
+Do this using the =tee= shell command, and continually pipe the output
+to a file.
+
+Got this idea from the following [[http://linux.derkeiler.com/Mailing-Lists/Fedora/2004-01/0898.html][email-thread]].
+
+suggested from mailing list
+
+#+srcname: bash-save-last-output-to-file
+#+begin_src sh 
+while read line 
+do 
+  bash -c "$line" | tee /tmp/last.out1 
+  mv /tmp/last.out1 /tmp/last.out 
+done
+#+end_src
+
+another proposed solution from the above thread
+
+#+srcname: bash-save-in-variable
+#+begin_src sh 
+#!/bin/bash 
+# so - Save Output. Saves output of command in OUT shell variable. 
+OUT=`$*` 
+echo $OUT 
+#+end_src
+
+and another
+
+#+begin_quote
+.inputrc: 
+"^[k": accept-line 
+"^M": " | tee /tmp/h_lastcmd.out ^[k" 
+
+.bash_profile: 
+export __=/tmp/h_lastcmd.out 
+
+If you try it, Alt-k will stand for the old Enter; use "command $__" to 
+access the last output. 
+
+Best, 
+
+--
+
+Herculano de Lima Einloft Neto
+#+end_quote
+
+***** emacs-lisp will be a special case
+While it is possible for emacs-lisp to be run in a console type
+environment (see the =elim= function) it is *not* possible to run
+emacs-lisp in a different *session*.  Meaning any variable set top
+level of the console environment will be set *everywhere* inside
+emacs.  For this reason I think that it doesn't make any sense to
+worry about session support for emacs-lisp.
 
 *** TODO rework all source codes to use inferior-processes-buffers
 
