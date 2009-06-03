@@ -6537,9 +6537,8 @@ WITH-CASE, the sorting considers case as well."
          nil
          (cond
           ((= dcst ?a) 'string<)
-          ((= dcst ?t) 'time-less-p)
           ((= dcst ?f) compare-func)
-          ((= dcst ?p) '<)
+          ((member dcst '(?p ?t ?s ?d ?c)) '<)
           (t nil)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
