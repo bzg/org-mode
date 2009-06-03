@@ -1,3 +1,9 @@
+2009-06-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-adapt-indentation): Improve documentation.
+	(org-insert-property-drawer): Respect org-adapt-indentation when
+	inserting the drawer.
+
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-edit-src-save): New function.

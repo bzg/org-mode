@@ -686,7 +686,11 @@ lines to the buffer:
 When this is set and the *entire* text in an entry is indented, the
 indentation is increased by one space in a demotion command, and
 decreased by one in a promotion command.  If any line in the entry
-body starts at column 0, indentation is not changed at all."
+body starts at column 0, indentation is not changed at all.
+
+This variable also influences how property drawers and planning
+information is inserted.  When t, these lines drawers will be inserted
+indented.  When nil, they will not be indented."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -12068,7 +12072,9 @@ formats in the current buffer."
   (interactive)
   (org-back-to-heading t)
   (looking-at outline-regexp)
-  (let ((indent (- (match-end 0)(match-beginning 0)))
+  (let ((indent (if org-adapt-indentation
+		    (- (match-end 0)(match-beginning 0))
+		  0))
 	(beg (point))
 	(re (concat "^[ \t]*" org-keyword-time-regexp))
 	end hiddenp)
