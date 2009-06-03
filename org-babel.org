@@ -1,7 +1,7 @@
 #+OPTIONS:    H:3 num:nil toc:t
 #+TITLE: org-babel --- facilitating communication between programming languages and people
 #+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
-#+STARTUP: oddeven
+#+STARTUP: oddeven hideblocks
 
 * Introduction
 
@@ -189,6 +189,70 @@ Please let me know if you foresee any problems with this proposed setup,
 or if you think any parts might be confusing for people coming from
 Sweave.  I'll hopefully find some time to work on this later in the
 week.
+
+*** can functional and interpreted/interactive models coexist?
+
+Even though both of these use the same =*R*= buffer the value of =a=
+is not preserved because it is assigned inside of a functional
+wrapper.
+
+#+srcname: task-R-sessions
+#+begin_src R 
+a <- 9
+b <- 21
+a + b
+#+end_src
+
+#+srcname: task-R-same-session
+#+begin_src R 
+a
+#+end_src
+
+This functional wrapper was implemented in order to efficiently return
+the results of the execution of the entire source code block.  However
+it inhibits the evaluation of source code blocks in the top level,
+which would allow for persistence of variable assignment across
+evaluations.  How can we allow *both* evaluation in the top level, and
+efficient capture of the return value of an entire source code block
+in a language independent manner?
+
+Possible solutions...
+1) we can't so we will have to implement two types of evaluation
+   depending on which is appropriate (functional or imperative)
+2) we remove the functional wrapper and parse the source code block
+   into it's top level statements (most often but not always on line
+   breaks) so that we can isolate the final segment which is our
+   return value.
+3) we add some sort of "#+return" line to the code block
+4) we take advantage of each languages support for meta-programming
+   through =eval= type functions, and use said to evaluate the entire
+   blocks in such a way that their environment can be combined with the
+   global environment, and their results are still captured.
+
+None of these solutions seem very desirable, but for now I don't see
+what else would be possible.
+
+Of these options I am leaning towards (1) and (2)
+
+**** (1) both functional and imperative evaluation
+Pros
+- can take advantage of built in functions for sending regions to the
+  inferior process
+- retains the proven tested and working functional wrappers
+
+Cons
+- introduces the complication of keeping track of which type of
+  evaluation is best suited to a particular context
+- the current functional wrappers may require some changes in order to
+  include the existing global context
+
+**** (2) exploit language meta-programming constructs to explicitly evaluate code
+Pros
+- only one type of evaluation
+
+Cons
+- some languages may not have sufficient meta-programming constructs
+
 
 *** TODO rework all source codes to use inferior-processes-buffers
 
