@@ -79,7 +79,7 @@ R process in `org-babel-R-buffer'."
 `org-babel-R-buffer' as Emacs lisp."
   (let ((tmp-file (make-temp-file "org-babel-R")) result)
     (org-babel-R-input-command
-     (format "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=TRUE, quote=FALSE)"
+     (format "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
 	     func-name tmp-file))
     (with-temp-buffer
       (condition-case nil
@@ -89,7 +89,8 @@ R process in `org-babel-R-buffer'."
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-R-read row))
                                  (org-table-to-lisp)))
-	    (setq result (org-babel-R-set-header-row result)))
+	    ;; (setq result (org-babel-R-set-header-row result))
+	    )
         (error nil))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
@@ -105,7 +106,14 @@ user-supplied column names, or (b) default column names added
 automatically by R. In case (a), maintain the first row of the
 table as a header row and insert an hline. In case (b), remove
 the first row and return the org table without an hline."
-  (if (string-equal (caar table) "V1")
+  (if (or (string-equal (caar table) "V1")
+	  (string-equal (caar table) "x"))
+
+      ;; write.table(1, col.names=TRUE) makes a colname called "x". I
+      ;; think shows that this approach is too much of a hack: we
+      ;; can't take some totally different action just because we see
+      ;; an "x" there that might or might not be a automatic name.
+
       ;; The first row looks like it contains default column names
       ;; added by R. This condition could be improved so that it
       ;; checks whether the first row is ("V1" "V2" ... "V$n") where

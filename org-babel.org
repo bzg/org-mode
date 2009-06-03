@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/36]
+* Tasks [22/37]
 ** TODO Create objects in top level (global) environment [0/5]
 *sessions*
 
@@ -573,7 +573,71 @@ we should color these blocks differently
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
 
-** TODO allow tables with hline to be passed as args into R
+** TODO formulate general rules for handling vectors and tables / matrices with names
+   This is non-trivial, but may be worth doing, in particular to
+   develop a nice framework for sending data to/from R.
+*** Notes
+    In R, indexing vector elements, and rows and columns, using
+    strings rather than integers is an important part of the
+    language.
+ - elements of a vector may have names
+ - matrices and data.frames may have "column names" and "row names"
+   which can be used for indexing
+ - In a data frame, row names *must* be unique
+Examples
+#+begin_example
+> # a named vector
+> vec <- c(a=1, b=2)
+> vec["b"]
+b 
+2 
+> mat <- matrix(1:4, nrow=2, ncol=2, dimnames=list(c("r1","r2"), c("c1","c2")))
+> mat
+   c1 c2
+r1  1  3
+r2  2  4
+> # The names are separate from the data: they do not interfere with operations on the data
+> mat * 3
+   c1 c2
+r1  3  9
+r2  6 12
+> mat["r1","c2"]
+[1] 3
+> df <- data.frame(var1=1:26, var2=26:1, row.names=letters)
+> df$var2
+ [1] 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
+> df["g",]
+  var1 var2
+g    7   20
+#+end_example
+
+ So it's tempting to try to provide support for this in org-babel. For example
+ - allow R to refer to columns of a :var reference by their names
+ - When appropriate, results from R appear in the org buffer with "named
+   columns (and rows)"
+
+   However none (?) of the other languages we are currently supporting
+   really have a native matrix type, let alone "column names" or "row
+   names". Names are used in e.g. python and perl to refer to entries
+   in dicts / hashes.
+
+   It currently seems to me that support for this in org-babel would
+   require setting rules about when org tables are considered to have
+   named columns/fields, and ensuring that (a) languages with a notion
+   of named columns/fields use them appropriately and (b) languages
+   with no such notion do not treat then as data.
+
+ - Org allows something that *looks* like column names to be separated
+   by a hline
+ - Org also allows a row to *function* as column names when special
+   markers are placed in the first column. An hline is unnecessary
+   (indeed hlines are purely cosmetic in org [correct?]
+ - Org does not have a notion of "row names" [correct?]
+    
+   The full org table functionality exeplified [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]] has features that
+   we would not support in e.g. R (like names for the row below).
+   
+*** Initial statement: allow tables with hline to be passed as args into R
    This doesn't seem to work at the moment (example below). It would
    also be nice to have a natural way for the column names of the org
    table to become the column names of the R data frame, and to have
@@ -604,6 +668,24 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und_R", sep="_")
+#+end_src
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + "_y_python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel_speaks"
+(concat msg "_elisp")
+#+end_src
 
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
