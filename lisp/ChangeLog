@@ -3,6 +3,13 @@
 	* org.el (org-adapt-indentation): Improve documentation.
 	(org-insert-property-drawer): Respect org-adapt-indentation when
 	inserting the drawer.
+	(org-remove-flyspell-overlays-in): New function.
+	(org-do-emphasis-faces, org-activate-plain-links)
+	(org-activate-code, org-fontify-meta-lines-and-blocks)
+	(org-activate-angle-links, org-activate-footnote-links)
+	(org-activate-bracket-links, org-activate-dates)
+	(org-activate-target-links, org-activate-tags): Remove flyspell
+	overlays.
 
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 

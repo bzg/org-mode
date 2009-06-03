@@ -4122,16 +4122,19 @@ The time stamps may be either active or inactive.")
 
 (defun org-do-emphasis-faces (limit)
   "Run through the buffer and add overlays to links."
-  (let (rtn)
+  (let (rtn a)
     (while (and (not rtn) (re-search-forward org-emph-re limit t))
       (if (not (= (char-after (match-beginning 3))
 		  (char-after (match-beginning 4))))
 	  (progn
 	    (setq rtn t)
+	    (setq a (assoc (match-string 3) org-emphasis-alist))
 	    (font-lock-prepend-text-property (match-beginning 2) (match-end 2)
 					     'face
-					     (nth 1 (assoc (match-string 3)
-							   org-emphasis-alist)))
+					     (nth 1 a))
+	    (and (nth 4 a)
+		 (org-remove-flyspell-overlays-in
+		  (match-beginning 0) (match-end 0)))
 	    (add-text-properties (match-beginning 2) (match-end 2)
 				 '(font-lock-multiline t))
 	    (when org-hide-emphasis-markers
@@ -4205,6 +4208,7 @@ will be prompted for."
   (catch 'exit
     (let (f)
       (while (re-search-forward org-plain-link-re limit t)
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(setq f (get-text-property (match-beginning 0) 'face))
 	(if (or (eq f 'org-tag)
 		(and (listp f) (memq 'org-tag f)))
@@ -4218,6 +4222,7 @@ will be prompted for."
 (defun org-activate-code (limit)
   (if (re-search-forward "^[ \t]*\\(: .*\n?\\)" limit t)
       (progn
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(remove-text-properties (match-beginning 0) (match-end 0)
 				'(display t invisible t intangible t))
 	t)))
@@ -4241,6 +4246,7 @@ This is needed for font-lock setup.")
 	  (cond
 	   ((member dc1 '("html:" "ascii:" "latex:" "docbook:"))
 	    ;; a single line of backend-specific content
+	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (remove-text-properties (match-beginning 0) (match-end 0)
 				    '(display t invisible t intangible t))
 	    (add-text-properties (match-beginning 1) (match-end 3)
@@ -4285,6 +4291,7 @@ This is needed for font-lock setup.")
   "Run through the buffer and add overlays to links."
   (if (re-search-forward org-angle-link-re limit t)
       (progn
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
@@ -4296,6 +4303,7 @@ This is needed for font-lock setup.")
   (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)" 
 			 limit t)
       (progn
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 2) (match-end 2)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map
@@ -4323,6 +4331,7 @@ This is needed for font-lock setup.")
 		       'font-lock-multiline t 'help-echo help)))
 	;; We need to remove the invisible property here.  Table narrowing
 	;; may have made some of this invisible.
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(remove-text-properties (match-beginning 0) (match-end 0)
 				'(invisible nil))
 	(if (match-end 3)
@@ -4345,6 +4354,7 @@ This is needed for font-lock setup.")
   "Run through the buffer and add overlays to dates."
   (if (re-search-forward org-tsr-regexp-both limit t)
       (progn
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
@@ -4371,6 +4381,7 @@ This is needed for font-lock setup.")
     (let ((case-fold-search t))
       (if (re-search-forward org-target-link-regexp limit t)
 	  (progn
+	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 (list 'mouse-face 'highlight
 				       'keymap org-mouse-map
@@ -4512,6 +4523,7 @@ between words."
 (defun org-activate-tags (limit)
   (if (re-search-forward (org-re "^\\*+.*[ \t]\\(:[[:alnum:]_@:]+:\\)[ \r\n]") limit t)
       (progn
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
@@ -16873,6 +16885,12 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 (defun org-mode-flyspell-verify ()
   "Don't let flyspell put overlays at active buttons."
   (not (get-text-property (point) 'keymap)))
+
+(defun org-remove-flyspell-overlays-in (beg end)
+  "Remove flyspell overlays in region."
+  (and (org-bound-and-true-p flyspell-mode)
+       (fboundp 'flyspell-delete-region-overlays)
+       (flyspell-delete-region-overlays beg end)))
 
 ;; Make `bookmark-jump' show the jump location if it was hidden.
 (eval-after-load "bookmark"
