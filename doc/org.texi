@@ -10354,6 +10354,19 @@ Yes, these are unfortunately more difficult to remember.  If you want
 to have other replacement keys, look at the variable
 @code{org-disputed-keys}.
 
+@item @file{yasnippet.el}
+@cindex @file{yasnippet.el}
+The way Org-mode binds the TAB key (binding to @code{[tab]} instead of
+@code{"\t"}) overrules yasnippets' access to this key.  The following code
+fixed this problem:
+
+@lisp
+(add-hook 'org-mode-hook
+	  (lambda ()
+	    (org-set-local 'yas/trigger-key [tab])
+	    (define-key yas/keymap [tab] 'yas/next-field-group)))
+@end lisp
+
 @item @file{windmove.el} by Hovav Shacham
 @cindex @file{windmove.el}
 Also this package uses the @kbd{S-<cursor>} keys, so everything written
