@@ -53,8 +53,8 @@
 ;;
 ;; changelog:
 ;; 2009-04-05 two bug fixes in org-R-eval contributed by David Moffat
-;; 
-
+;; 2009-05-15 added lwd argument to matplot because it doesn't respect global par settings
+;; 2009-05-15 uncommented set-buffer to transit buffer in org-eval (why was it commented?)
 
 (defconst org-R-skeleton-funcall-1-arg
   "%s(x[%s]%s)"
@@ -316,15 +316,18 @@ org-R-off-the-shelf-code."
        ;;----------------------------------------------------------------------
 
        ((eq action 'plot)
+	(setq R-fun (if (eq nxcols 1) "plot" "matplot"))
 	(setq seq (concat "seq_along("xcols-R")"))
 
 	(setq args (plist-put args :type (if (plist-get options :lines) "\"l\"" "\"p\"")))
 	(setq args (plist-put args :ylab (concat "colnames(x)["xcols-R"]")))
+	(if (string-equal R-fun "matplot")
+	    (setq args (plist-put args :lwd "par(\"lwd\")")))
 	(setq args (concat ", " (org-R-plist-to-R-args args)))
 
-	(concat (format org-R-skeleton-funcall-1-arg
-			(if (eq nxcols 1) "plot" "matplot") matrix-index args)
-		extra-code))
+	(concat
+	 (format org-R-skeleton-funcall-1-arg R-fun matrix-index args)
+	 extra-code))
 	
        ;;----------------------------------------------------------------------
 
@@ -358,13 +361,15 @@ org-R-off-the-shelf-code."
        
        ((eq action 'plot)
 	(unless (eq nxcols 1) (error "Multiple x-columns not implemented for action:plot"))
-	
+	(setq R-fun (if (and (eq nxcols 1) (eq nycols 1)) "plot" "matplot"))
+
 	(setq args
 	      (plist-put
 	       args :ylab
 	       (concat "if(length("ycols-R") == 1) colnames(x)["ycols-R"] else ''")))
 	(setq args (plist-put args :xlab (concat "colnames(x)["xcols-R"]")))
-
+	(if (string-equal R-fun "matplot") ;; matplot doesn't respect par()$lwd
+	    (setq args (plist-put args :lwd "par(\"lwd\")")))
 	(setq args (plist-put args :type (if (plist-get options :lines) "\"l\"" "\"p\"")))
 	
 	(setq args (concat ", " (org-R-plist-to-R-args args)))
@@ -380,10 +385,9 @@ org-R-off-the-shelf-code."
 		      "if(length("ycols-R") > 1) "
 		      "legend(" (org-R-plist-to-R-args largs) ")"))
 	
-	(concat (format org-R-skeleton-funcall-2-args
-			(if (and (eq nxcols 1) (eq nycols 1)) "plot" "matplot")
-			xcols-R ycols-R args)
-		extra-code))
+	(concat
+	 (format org-R-skeleton-funcall-2-args R-fun xcols-R ycols-R args)
+	 extra-code))
        
        ;;----------------------------------------------------------------------
        
@@ -580,7 +584,7 @@ inserted above the #+R lines.
 	;; (replace-regexp-in-string "\n" " " org-R-write-org-table-def) ";"
 	(org-R-make-expr R-function csv-file options)) nil transit-buffer)
 
-      ;;       (set-buffer (concat "*" transit-buffer "*"))
+      (set-buffer (concat "*" transit-buffer "*"))
       (unless (or (looking-at "$")
 		  (string-equal (buffer-substring-no-properties 1 2) "|"))
 	(error "Error in R evaluation:\n%s" (buffer-string))))
