@@ -341,14 +341,26 @@ this will involve...
 3) functions for retrieving results from the *sessions* buffers which
    can be overridden by each source code
 
-**** R
+**** DONE R
 
 #+srcname: task-R-with-inf-process-buffer
 #+begin_src R 
 a <- 8
 b <- 9
+c <- 10
 a + b
 #+end_src
+
+**** TODO Ruby
+
+#+srcname: ruby-use-last-output
+#+begin_src ruby 
+a = 1
+b = 2
+c = 3
+(a + b) * c
+#+end_src
+
 
 *** TODO implement a *session* header argument
 

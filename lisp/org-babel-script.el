@@ -30,7 +30,10 @@
 
 ;;; Code:
 (require 'org-babel)
+(require 'inf-ruby)
+(require 'python)
 
+;; org-babel introduction and formalities
 (defun org-babel-script-add-interpreter (var cmds)
   (set-default var cmds)
   (mapc (lambda (cmd)
@@ -43,22 +46,6 @@ automatically generated wrapper for `org-babel-script-execute'.")
               (org-babel-script-execute ,cmd body params))))
         cmds))
 
-(defvar org-babel-script-ruby-wrapper-method
-  "
-def main
-%s
-end
-results = main()
-puts (results.class == String) ? results : results.inspect
-")
-
-(defvar org-babel-script-python-wrapper-method
-  "
-def main():
-%s
-
-print main()")
-
 (defcustom org-babel-script-interpreters '("ruby" "python")
   "List of interpreters of scripting languages which can be
 executed through org-babel."
@@ -67,33 +54,20 @@ executed through org-babel."
 
 (mapc #'org-babel-add-interpreter org-babel-script-interpreters)
 
-(defun org-babel-script-execute (cmd body params)
-  "Run CMD on BODY obeying any options set with PARAMS."
+;; main execute function used by org-babel
+(defun org-babel-script-execute (interpreter body params)
+  "Pass BODY to INTERPRETER obeying any options set with PARAMS."
   (message (format "executing %s code block..." cmd))
-  (let ((vars (org-babel-ref-variables params)))
-    (save-window-excursion
-      (with-temp-buffer
-        (insert
-         (format
-          (case (intern cmd)
-            ('ruby org-babel-script-ruby-wrapper-method)
-            ('python org-babel-script-python-wrapper-method))
-          (concat
-           (mapconcat ;; define any variables
-            (lambda (pair)
-              (format "\t%s=%s"
-                      (car pair)
-                      (org-babel-script-var-to-ruby/python (cdr pair))))
-            vars "\n")
-           "\n"
-           (let ((body-lines (split-string body "[\n\r]+" t)))
-             (concat
-              (mapconcat (lambda (line) (format "\t%s" line)) (butlast body-lines) "\n")
-              (format "\n\treturn %s\n" (car (last body-lines))))))))
-        ;; (message (buffer-substring (point-min) (point-max))) ;; debug script
-        (shell-command-on-region (point-min) (point-max) cmd nil 'replace)
-        ;; (message (format "shell output = %s" (buffer-string))) ;; debug results
-        (org-babel-script-table-or-results (buffer-string))))))
+  (let* ((vars (org-babel-ref-variables params))
+         (full-body (concat
+                     (mapconcat ;; define any variables
+                      (lambda (pair)
+                        (format "\t%s=%s"
+                                (car pair)
+                                (org-babel-script-var-to-ruby/python (cdr pair))))
+                      vars "\n") body "\n"))) ;; then the source block body
+    (org-babel-script-input-command interpreter full-body)
+    (org-babel-script-table-or-results (org-babel-script-last-value interpreter))))
 
 (defun org-babel-script-var-to-ruby/python (var)
   "Convert an elisp var into a string of ruby or python source
@@ -117,6 +91,56 @@ Emacs-lisp table, otherwise return the results as a string."
                                ", " " " (replace-regexp-in-string
                                          "'" "\"" results)))))
      (org-babel-chomp results))))
+
+;; functions for interacting with comint
+(defvar org-babel-script-ruby-buffer nil
+  "variable to hold the current ruby buffer")
+
+(defvar org-babel-script-python-buffer nil
+  "variable to hold the current python buffer")
+
+(defun org-babel-script-interpreter-buffer (interpreter)
+  (intern (format "org-babel-script-%s-buffer" interpreter)))
+
+(defun org-babel-script-initiate-session (interpreter)
+  "If there is not a current inferior-process-buffer for
+INTERPRETER then create one.  Return the buffer in which the
+session has been created."
+  (save-window-excursion
+    (let ((buffer (org-babel-script-interpreter-buffer interpreter)))
+      (unless (and (buffer-live-p buffer) (get-buffer buffer))
+        (case (intern interpreter)
+          ('ruby (funcall #'run-ruby))
+          ('python (funcall #'run-python)))))))
+
+(defun org-babel-script-wait-for-output (interpreter)
+  "Wait until output arrives"
+  (save-window-excursion
+    (save-match-data
+      (set-buffer (org-babel-script-initiate-session interpreter))
+      (while (progn
+               (goto-char comint-last-input-end)
+               (not (re-search-forward comint-prompt-regexp nil t)))
+        (accept-process-output (get-buffer-process (current-buffer)))))))
+
+(defun org-babel-script-input-command (interpreter cmd)
+  "Pass CMD to INTERPRETER"
+  (comint-send-string (get-buffer-process (org-babel-script-initiate-session interpreter)) (concat cmd "\n"))
+  (org-babel-script-wait-for-output interpreter))
+
+(defun org-babel-script-command-to-string (interpreter cmd)
+  (let ((buffer (org-babel-script-interpreter-buffer interpreter)))
+    (org-babel-script-input-command interpreter cmd)
+    (org-babel-script-last-value interpreter)))
+
+(defun org-babel-script-last-value (interpreter)
+  "Return the last value passed to INTERPRETER"
+  (save-excursion
+    (save-match-data
+      (set-buffer (org-babel-script-initiate-session interpreter))
+      (goto-char (process-mark (get-buffer-process (current-buffer))))
+      (forward-line 0)
+      (org-babel-clean-text-properties (buffer-substring comint-last-input-end (- (point) 1))))))
 
 (provide 'org-babel-script)
 ;;; org-babel-script.el ends here
