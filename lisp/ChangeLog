@@ -1,3 +1,8 @@
+2009-06-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-run-agenda-series): Scope global options also
+	when creating the agenda buffer.
+
 2009-06-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-adapt-indentation): Improve documentation.

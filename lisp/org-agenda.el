@@ -1862,7 +1862,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	   (t (error "Invalid key %c" c))))))))
 
 (defun org-run-agenda-series (name series)
-  (org-prepare-agenda name)
+  (org-let (nth 1 series) '(org-prepare-agenda name))
   (let* ((org-agenda-multi t)
 	 (redo (list 'org-run-agenda-series name (list 'quote series)))
 	 (cmds (car series))
