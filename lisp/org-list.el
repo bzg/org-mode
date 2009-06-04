@@ -1057,7 +1057,8 @@ INDENT is the indentation of the list."
 		 (looking-at (concat "^" indent "[ \t]+\\|^$")))
 	(if (eq (point) (point-max))
 	    (throw 'exit (point-max)))
-	(forward-line 1))) (point)))
+	(forward-line 1)))
+    (point)))
 
 (defun org-list-insert-radio-list ()
   "Insert a radio list template appropriate for this major mode."
