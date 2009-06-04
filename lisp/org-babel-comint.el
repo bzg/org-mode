@@ -36,53 +36,59 @@
 (require 'org-babel)
 (require 'comint)
 
-(defvar org-babel-comint-buffer nil
-  "the buffer currently in use")
+(defun org-babel-ensure-buffer-livep (buffer)
+  (unless (and (buffer-live-p buffer) (get-buffer buffer) (get-buffer-process buffer))
+    (error (format "buffer %s doesn't exist or has no process" buffer))))
 
-(defun org-babel-comint-set-buffer (buffer)
-  (setq org-babel-comint-buffer buffer))
-
-(defun org-babel-ensure-buffer-livep ()
-  (unless (and (buffer-live-p org-babel-comint-buffer) (get-buffer org-babel-comint-buffer) (get-buffer-process org-babel-comint-buffer))
-    (error "`org-babel-comint-buffer' doesn't exist or has no process")))
-
-(defmacro org-babel-comint-in-buffer (&rest body)
+(defmacro org-babel-comint-in-buffer (buffer &rest body)
   `(save-window-excursion
      (save-match-data
-       (org-babel-ensure-buffer-livep)
-       (set-buffer org-babel-comint-buffer)
+       (org-babel-ensure-buffer-livep buffer)
+       (set-buffer buffer)
        ,@body)))
 
-(defun org-babel-comint-wait-for-output ()
+(defun org-babel-comint-wait-for-output (buffer)
   "Wait until output arrives"
-  (org-babel-comint-in-buffer
+  (org-babel-comint-in-buffer buffer
    (while (progn
             (goto-char comint-last-input-end)
             (not (re-search-forward comint-prompt-regexp nil t)))
-     (accept-process-output (get-buffer-process org-babel-comint-buffer)))))
+     (accept-process-output (get-buffer-process buffer)))))
 
-(defun org-babel-comint-input-command (cmd)
-  "Pass CMD to `org-babel-comint-buffer'"
-  (org-babel-comint-in-buffer
-   (goto-char (process-mark (get-buffer-process org-babel-comint-buffer)))
+(defun org-babel-comint-input-command (buffer cmd)
+  "Pass CMD to BUFFER  The input will not be echoed."
+  (org-babel-comint-in-buffer buffer
+   (goto-char (process-mark (get-buffer-process buffer)))
    (insert cmd)
    (comint-send-input)
-   (org-babel-comint-wait-for-output)))
+   (org-babel-comint-wait-for-output buffer)))
 
 (defun org-babel-comint-command-to-string (buffer cmd)
-  (let ((buffer (org-babel-comint-buffer-buffer buffer)))
-    (org-babel-comint-input-command buffer cmd)
-    (org-babel-comint-last-value buffer)))
+  "Pass CMD to BUFFER using `org-babel-comint-input-command', and
+then return the result as a string using
+`org-babel-comint-last-value'."
+  (org-babel-comint-input-command buffer cmd)
+  (org-babel-comint-last-value buffer))
 
-(defun org-babel-comint-last-value ()
-  "Return the last value passed to BUFFER"
-  (org-babel-comint-in-buffer
-   (goto-char (process-mark (get-buffer-process org-babel-comint-buffer)))
+(defun org-babel-comint-last-value (buffer)
+  "Return the last comint output in BUFFER as a string."
+  (org-babel-comint-in-buffer buffer
+   (goto-char (process-mark (get-buffer-process buffer)))
    (forward-line 0)
-   (org-babel-clean-text-properties (buffer-substring comint-last-input-end (- (point) 1)))))
+   (org-babel-clean-text-properties
+    (buffer-substring (+ comint-last-input-end
+                         ;; because comint insists on echoing input
+                         (- comint-last-input-end
+                            comint-last-input-start))
+                      (- (point) 1)))))
 
-;;; debugging functions
-(defun org-babel-comint-pmark ()
-  (org-babel-comint-in-buffer (comint-goto-process-mark) (point)))
+;;; misc debugging helper functions
+(defun org-babel-comint-pmark (buffer)
+  (org-babel-comint-in-buffer buffer (comint-goto-process-mark) (point)))
+
+(defun org-babel-comint-send-invisible (buffer cmd)
+  "send CMD to the process in BUFFER without an echo"
+  (org-babel-comint-in-buffer buffer
+   (funcall comint-input-sender (get-buffer-process (current-buffer)) cmd)))
 
 ;;; org-babel-comint.el ends here
