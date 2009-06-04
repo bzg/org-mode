@@ -584,6 +584,17 @@ when PUB-DIR is set, use this as the publishing directory."
 
     ;; finalization
     (unless body-only (insert "\n\\end{document}"))
+
+    ;; Relocate the table of contents
+    (goto-char (point-min))
+    (when (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
+      (goto-char (point-min))
+      (while (re-search-forward "\\\\tableofcontents\\>[ \t]*\n?" nil t)
+	(replace-match ""))
+      (goto-char (point-min))
+      (and (re-search-forward "\\[TABLE-OF-CONTENTS\\]" nil t)
+	   (replace-match "\\tableofcontents" t t)))
+
     (or to-buffer (save-buffer))
     (goto-char (point-min))
     (or (org-export-push-to-kill-ring "LaTeX")
