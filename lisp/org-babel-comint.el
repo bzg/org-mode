@@ -82,13 +82,5 @@ then return the result as a string using
                             comint-last-input-start))
                       (- (point) 1)))))
 
-;;; misc debugging helper functions
-(defun org-babel-comint-pmark (buffer)
-  (org-babel-comint-in-buffer buffer (comint-goto-process-mark) (point)))
-
-(defun org-babel-comint-send-invisible (buffer cmd)
-  "send CMD to the process in BUFFER without an echo"
-  (org-babel-comint-in-buffer buffer
-   (funcall comint-input-sender (get-buffer-process (current-buffer)) cmd)))
-
+(provide 'org-babel-comint)
 ;;; org-babel-comint.el ends here
