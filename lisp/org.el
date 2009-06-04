@@ -14965,6 +14965,7 @@ This command does many different things, depending on context:
 ;	(org-restart-font-lock)
 	(let ((org-inhibit-startup t)) (org-mode-restart))
 	(message "Local setup has been refreshed"))))
+     ((org-clock-update-time-maybe))
      (t (error "C-c C-c can do nothing useful at this location.")))))
 
 (defun org-mode-restart ()

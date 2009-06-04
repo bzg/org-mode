@@ -1,5 +1,7 @@
 2009-06-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-ctrl-c-ctrl-c): Update clock lines.
+
 	* org-agenda.el (org-run-agenda-series): Scope global options also
 	when creating the agenda buffer.
 
