@@ -38,6 +38,7 @@ button below.</span>
 <input type="hidden" name="business" value="carsten.dominik@gmail.com">
 <input type="hidden" name="item_name" value="Donate to Org-mode">
 <input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="lc" value="US"/>
 <input type="hidden" name="amount">
 <input type="image" align="center"
 src="http://www.paypal.com/en_US/i/btn/x-click-but04.gif" border="0" name="submit" alt="Make payments with PayPal - it's fast, free and secure!">
