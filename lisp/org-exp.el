@@ -2124,32 +2124,33 @@ in the list) and remove property and value from the list in LISTVAR."
 	lang code trans opts)
     (goto-char (point-min))
     (while (re-search-forward
-	    "\\(^[ \t]*#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\\)\\|\\(^[ \t]*#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\\)"
+	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\\)\\|\\(^[ \t]*#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\\)"
 	    nil t)
       (if (match-end 1)
 	  ;; src segments
-	  (setq lang (match-string 2)
-		opts (match-string 3)
-		code (match-string 4))
+	  (setq lang (match-string 3)
+		opts (match-string 4)
+		code (match-string 5))
 	(setq lang nil
-	      opts (match-string 6)
-	      code (match-string 7)))
+	      opts (match-string 7)
+	      code (match-string 8)))
 
       (setq trans (org-export-format-source-code-or-example
-		   backend lang code opts))
+		   backend lang code opts (length (match-string 2))))
       (replace-match trans t t))))
 
 (defvar htmlp)  ;; dynamically scoped
 (defvar latexp)  ;; dynamically scoped
 
-(defun org-export-format-source-code-or-example (backend
-						 lang code &optional opts)
+(defun org-export-format-source-code-or-example
+  (backend lang code &optional opts indent)
   "Format CODE from language LANG and return it formatted for export.
 If LANG is nil, do not add any fontification.
 OPTS contains formatting optons, like `-n' for triggering numbering lines,
 and `+n' for continuing previous numering.
 Code formatting according to language currently only works for HTML.
-Numbering lines works for all three major backends (html, latex, and ascii)."
+Numbering lines works for all three major backends (html, latex, and ascii).
+INDENT was the original indentation of the block."
   (save-match-data
     (let (num cont rtn rpllbl keepp textareap cols rows fmt)
       (setq opts (or opts "")
@@ -2184,80 +2185,82 @@ Numbering lines works for all three major backends (html, latex, and ascii)."
 		      (end-of-line 1))
 		    (buffer-string))))
       ;; Now backend-specific coding
-      (cond
-       ((eq backend 'docbook)
-	(setq rtn (org-export-number-lines rtn 'docbook 0 0 num cont rpllbl fmt))
-	(concat "\n#+BEGIN_DOCBOOK\n"
-		(org-add-props (concat "<programlisting><![CDATA["
-				       rtn
-				       "]]>\n</programlisting>\n")
-		    '(org-protected t))
-		"#+END_DOCBOOK\n"))
-       ((eq backend 'html)
-	;; We are exporting to HTML
-	(when lang
-	  (require 'htmlize nil t)
-	  (when (not (fboundp 'htmlize-region-for-paste))
-	    ;; we do not have htmlize.el, or an old version of it
-	    (setq lang nil)
-	    (message
-	     "htmlize.el 1.34 or later is needed for source code formatting")))
-
-	(if lang
-	    (let* ((mode (and lang (intern (concat lang "-mode"))))
-		   (org-inhibit-startup t)
-		   (org-startup-folded nil))
-	      (setq rtn
-		    (with-temp-buffer
-		      (insert rtn)
-		      (if (functionp mode)
-			  (funcall mode)
-			(fundamental-mode))
-		      (font-lock-fontify-buffer)
-		      (set-buffer-modified-p nil)
-		      (org-export-htmlize-region-for-paste
-		       (point-min) (point-max))))
-	      (if (string-match "<pre\\([^>]*\\)>\n?" rtn)
-		  (setq rtn (replace-match
-			     (format "<pre class=\"src src-%s\">\n" lang)
-			     t t rtn))))
-	  (if textareap
-	      (setq rtn (concat
-			 (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
-				 cols rows)
-			 rtn "</textarea>\n</p>\n"))
-	    (with-temp-buffer
-	      (insert rtn)
-	      (goto-char (point-min))
-	      (while (re-search-forward "[<>&]" nil t)
-		(replace-match (cdr (assq (char-before)
-					  '((?&."&amp;")(?<."&lt;")(?>."&gt;"))))
-			       t t))
-	      (setq rtn (buffer-string)))
-	    (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
-	(unless textareap
-	  (setq rtn (org-export-number-lines rtn 'html 1 1 num
-					     cont rpllbl fmt)))
-	(concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
-       ((eq backend 'latex)
-	(setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
-	(concat "\n#+BEGIN_LaTeX\n"
-		(org-add-props (concat "\\begin{verbatim}\n" rtn "\n\\end{verbatim}\n")
-		    '(org-protected t))
-		"#+END_LaTeX\n\n"))
-       ((eq backend 'ascii)
-	;; This is not HTML or LaTeX, so just make it an example.
-	(setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
-	(concat "#+BEGIN_ASCII\n"
-		(org-add-props
-		    (concat
-		     (mapconcat
-		      (lambda (l) (concat "  " l))
-		      (org-split-string rtn "\n")
-		      "\n")
-		     "\n")
-		    '(org-protected t))
-		"#+END_ASCII\n"))))))
+      (setq rtn
+	    (cond
+	     ((eq backend 'docbook)
+	      (setq rtn (org-export-number-lines rtn 'docbook 0 0 num cont rpllbl fmt))
+	      (concat "\n#+BEGIN_DOCBOOK\n"
+		      (org-add-props (concat "<programlisting><![CDATA["
+					     rtn
+					     "]]>\n</programlisting>\n")
+			  '(org-protected t))
+		      "#+END_DOCBOOK\n"))
+	     ((eq backend 'html)
+	      ;; We are exporting to HTML
+	      (when lang
+		(require 'htmlize nil t)
+		(when (not (fboundp 'htmlize-region-for-paste))
+		  ;; we do not have htmlize.el, or an old version of it
+		  (setq lang nil)
+		  (message
+		   "htmlize.el 1.34 or later is needed for source code formatting")))
+	      
+	      (if lang
+		  (let* ((mode (and lang (intern (concat lang "-mode"))))
+			 (org-inhibit-startup t)
+			 (org-startup-folded nil))
+		    (setq rtn
+			  (with-temp-buffer
+			    (insert rtn)
+			    (if (functionp mode)
+				(funcall mode)
+			      (fundamental-mode))
+			    (font-lock-fontify-buffer)
+			    (set-buffer-modified-p nil)
+			    (org-export-htmlize-region-for-paste
+			     (point-min) (point-max))))
+		    (if (string-match "<pre\\([^>]*\\)>\n?" rtn)
+			(setq rtn (replace-match
+				   (format "<pre class=\"src src-%s\">\n" lang)
+				   t t rtn))))
+		(if textareap
+		    (setq rtn (concat
+			       (format "<p>\n<textarea cols=\"%d\" rows=\"%d\" overflow-x:scroll >\n"
+				       cols rows)
+			       rtn "</textarea>\n</p>\n"))
+		  (with-temp-buffer
+		    (insert rtn)
+		    (goto-char (point-min))
+		    (while (re-search-forward "[<>&]" nil t)
+		      (replace-match (cdr (assq (char-before)
+						'((?&."&amp;")(?<."&lt;")(?>."&gt;"))))
+				     t t))
+		    (setq rtn (buffer-string)))
+		  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
+	      (unless textareap
+		(setq rtn (org-export-number-lines rtn 'html 1 1 num
+						   cont rpllbl fmt)))
+	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
+	     ((eq backend 'latex)
+	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
+	      (concat "\n#+BEGIN_LaTeX\n"
+		      (org-add-props (concat "\\begin{verbatim}\n" rtn "\n\\end{verbatim}\n")
+			  '(org-protected t))
+		      "#+END_LaTeX\n\n"))
+	     ((eq backend 'ascii)
+	      ;; This is not HTML or LaTeX, so just make it an example.
+	      (setq rtn (org-export-number-lines rtn 'ascii 0 0 num cont rpllbl fmt))
+	      (concat "#+BEGIN_ASCII\n"
+		      (org-add-props
+			  (concat
+			   (mapconcat
+			    (lambda (l) (concat "  " l))
+			    (org-split-string rtn "\n")
+			    "\n")
+			   "\n")
+			  '(org-protected t))
+		      "#+END_ASCII\n"))))
+      (org-add-props rtn nil 'original-indentation indent))))
 
 (defun org-export-number-lines (text backend
 				     &optional skip1 skip2 number cont

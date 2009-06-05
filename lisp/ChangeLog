@@ -1,5 +1,8 @@
 2009-06-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example): Remember
+	the original indentation of source code snippets and examples.
+
 	* org-latex.el (org-export-as-latex): Relocate the table of
 	contents.
 
