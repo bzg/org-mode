@@ -1,4 +1,4 @@
-;;; org-jira.el --- add a jira:ticket protocol to org.
+;;; org-jira.el --- add a jira:ticket protocol to Org
 (defconst org-jira-version "0.1")
 ;; Copyright (c)2008 Jonathan Arkell. (by)(nc)(sa)  Some rights reserved.
 ;; Author: Jonathan Arkell <jonnay@jonnay.net>

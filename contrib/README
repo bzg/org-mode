@@ -26,7 +26,9 @@ org-exp-bibtex.el        --- Export citations to LaTeX and HTML
 org-exp-blocks.el        --- Pre-process blocks when exporting org files
 org-indent.el            --- Dynamic outline indentation (does not really work)
 org-interactive-query.el --- Interactive modification of tags query
+org-jira.el              --- Add a jira:ticket protocol to Org
 org-mairix.el 	         --- Hook mairix search into Org for different MUAs
+org-mac-iCal.el          --- Imports events from iCal.app to the Emacs diary
 org-man.el 	         --- Support for links to manpages in Org-mode
 org-mtags.el 	         --- Support for some Muse-like tags in Org-mode
 org-panel.el 	         --- Simple routines for us with bad memory
