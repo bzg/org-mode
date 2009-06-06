@@ -62,16 +62,14 @@ R process in `org-babel-R-buffer'."
   (unless org-babel-R-buffer (error "No active R buffer"))
   (org-babel-R-input-command
    (if (listp value)
-       (let ((transition-file (make-temp-file "org-babel-R-import"))
-	     has-header)
+       (let ((transition-file (make-temp-file "org-babel-R-import")))
 	 ;; ensure VALUE has an orgtbl structure (depth of at least 2)
 	 (unless (listp (car value)) (setq value (list value)))
-	 (setq has-header (and (symbolp (cadr value)) (equal (cadr value) 'hline)))
 	 (with-temp-file transition-file
 	   (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
 	   (insert "\n"))
-	 (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
-		 name transition-file (if has-header "TRUE" "FALSE")))
+	 (format "%s <- read.table(\"%s\", header=FALSE, sep=\"\\t\", as.is=TRUE)"
+		 name transition-file))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
 
 (defun org-babel-R-to-elisp (func-name)
@@ -79,8 +77,9 @@ R process in `org-babel-R-buffer'."
 `org-babel-R-buffer' as Emacs lisp."
   (let ((tmp-file (make-temp-file "org-babel-R")) result)
     (org-babel-R-input-command
-     (format "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
-	     func-name tmp-file))
+     (format
+      "write.table(%s(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
+      func-name tmp-file))
     (with-temp-buffer
       (condition-case nil
           (progn
@@ -88,9 +87,7 @@ R process in `org-babel-R-buffer'."
             (delete-file tmp-file)
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-R-read row))
-                                 (org-table-to-lisp)))
-	    ;; (setq result (org-babel-R-set-header-row result))
-	    )
+                                 (org-table-to-lisp))))
         (error nil))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
@@ -99,27 +96,6 @@ R process in `org-babel-R-buffer'."
                 result)
             (car result))
         result))))
-
-(defun org-babel-R-set-header-row (table)
-  "Check whether the table appears to have (a) genuine
-user-supplied column names, or (b) default column names added
-automatically by R. In case (a), maintain the first row of the
-table as a header row and insert an hline. In case (b), remove
-the first row and return the org table without an hline."
-  (if (or (string-equal (caar table) "V1")
-	  (string-equal (caar table) "x"))
-
-      ;; write.table(1, col.names=TRUE) makes a colname called "x". I
-      ;; think shows that this approach is too much of a hack: we
-      ;; can't take some totally different action just because we see
-      ;; an "x" there that might or might not be a automatic name.
-
-      ;; The first row looks like it contains default column names
-      ;; added by R. This condition could be improved so that it
-      ;; checks whether the first row is ("V1" "V2" ... "V$n") where
-      ;; $n is the number of columns.
-      (cdr table)
-    (cons (car table) (cons 'hline (cdr table)))))
 
 (defun org-babel-R-read (cell)
   "Strip nested \"s from around strings in exported R values."
@@ -134,8 +110,6 @@ the first row and return the org table without an hline."
 
 (defun org-babel-R-initiate-R-buffer ()
   "If there is not a current R process then create one."
-  ;; DED: Ideally I think we should use ESS mechanisms for this sort
-  ;; of thing. See ess-force-buffer-current.
   (unless (and (buffer-live-p org-babel-R-buffer) (get-buffer org-babel-R-buffer))
     (save-excursion
       (R)
