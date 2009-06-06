@@ -349,7 +349,8 @@ If not, show simply the clocked time like 01:50."
 			       'help-echo (concat help-text ": " org-clock-heading))
 	     (org-propertize clock-string 'help-echo help-text)))
 	 'local-map org-clock-mode-line-map
-	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
+	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)
+	 'face 'org-mode-line-clock))
   (if org-clock-effort (org-clock-notify-once-if-expired))
   (force-mode-line-update))
 

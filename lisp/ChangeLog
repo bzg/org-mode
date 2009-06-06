@@ -1,3 +1,10 @@
+2009-06-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-update-mode-line): Apply face
+	org-mode-line-clock.
+
+	* org-faces.el (org-mode-line-clock): New face.
+
 2009-06-05  Tassilo Horn  <tassilo@member.fsf.org>
 
 	* org-gnus.el (org-gnus-store-link): Fix bug where

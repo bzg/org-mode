@@ -613,6 +613,11 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
   "Face used to highlight math latex and other special exporter stuff."
   :group 'org-faces)
 
+(unless (facep 'org-mode-line-clock)
+  (copy-face 'modeline 'org-mode-line-clock)
+  (set-face-doc-string 'org-agenda-date
+		       "Face used for clock display in mode line."))
+
 (provide 'org-faces)
 
 ;; arch-tag: 9dab5f91-c4b9-4d6f-bac3-1f6211ad0a04
