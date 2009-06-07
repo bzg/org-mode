@@ -1,5 +1,7 @@
 2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-indent-line-function): Fix indentation of +#end lines.
+
 	* org-src.el (org-edit-src-get-indentation): New function.
 	(org-edit-src-code): Base indentation on the begin line.
 
