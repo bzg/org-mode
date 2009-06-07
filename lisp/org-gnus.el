@@ -135,7 +135,10 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (newsgroups (mail-header 'newsgroups header))
 	   (x-no-archive (mail-header 'x-no-archive header))
 	   (subject (if (eq major-mode 'gnus-article-mode)
-			(message-fetch-field "subject")
+			(save-restriction
+			  (require 'message)
+			  (message-narrow-to-head-1)
+			  (message-fetch-field "subject"))
 		      (gnus-summary-subject-string)))
 	   desc link)
       (org-store-link-props :type "gnus" :from from :subject subject

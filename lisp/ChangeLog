@@ -1,3 +1,8 @@
+2009-06-07  Tassilo Horn  <tassilo@member.fsf.org>
+
+	* org-gnus.el (org-gnus-store-link): Require message.el in
+	org-gnus-store-link.
+
 2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el: New file, split out of org.el
