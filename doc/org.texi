@@ -1334,12 +1334,13 @@ Here is an example:
 @end group
 @end example
 
-Org supports these lists by tuning filling and wrapping commands to
-deal with them correctly@footnote{Org only changes the filling
-settings for Emacs.  For XEmacs, you should use Kyle E. Jones'
-@file{filladapt.el}.  To turn this on,  put into @file{.emacs}:
-@code{(require 'filladapt)}}, and by exporting them properly
-(@pxref{Exporting}).
+Org supports these lists by tuning filling and wrapping commands to deal with
+them correctly@footnote{Org only changes the filling settings for Emacs.  For
+XEmacs, you should use Kyle E. Jones' @file{filladapt.el}.  To turn this on,
+put into @file{.emacs}: @code{(require 'filladapt)}}, and by exporting them
+properly (@pxref{Exporting}).  Since indentation is what governs the
+structure of these lists, many structural constructs like @code{#+BEGIN_...}
+blocks can be indented to signal that they should be part of a list item.
 
 The following commands act on items when the cursor is in the first line
 of an item (the line with the bullet or number).
@@ -8020,8 +8021,10 @@ Some example from a text file.
 #+END_EXAMPLE
 @end example
 
-For simplicity when using small examples, you can also start the example
-lines with a colon followed by a space.  There may also be additional
+Note that such blocks may be @i{indented} in order to align nicely with
+indented text and in particular with plain list structure (@pxref{Plain
+lists}).  For simplicity when using small examples, you can also start the
+example lines with a colon followed by a space.  There may also be additional
 whitespace before the colon:
 
 @example
