@@ -6808,7 +6808,7 @@ the language, a switch telling of the content should be in a single line."
 	    ("^[ \t]*#\\+begin_docbook.*\n" "\n[ \t]*#\\+end_docbook" "xml")
 	    )))
 	(pos (point))
-	re1 re2 single beg end lang lfmt match-re1)
+	re1 re2 single beg end lang lfmt match-re1 ind)
     (catch 'exit
       (while (setq entry (pop re-list))
 	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)

@@ -1873,8 +1873,7 @@ If there are links in the string, don't modify these."
 	didclose)
     (when ind
       (while (and in-local-list
-		  (or (= ind (car local-list-indent))
-		      (< ind (car local-list-indent))))
+		  (<= ind (car local-list-indent)))
 	(setq didclose t)
 	(org-close-li (car local-list-type))
 	(insert (format "</%sl>\n" (car local-list-type)))
