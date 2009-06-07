@@ -33,6 +33,10 @@
 
 ;;; Code:
 
+(eval-and-compile
+  (unless (fboundp 'declare-function)
+    (defmacro declare-function (fn file &optional arglist fileonly))))
+
 (declare-function org-add-props "org-compat" (string plist &rest props))
 
 (defmacro org-bound-and-true-p (var)
@@ -74,10 +78,6 @@
 	   (if pc-mode (partial-completion-mode -1))
 	   ,@body)
        (if pc-mode (partial-completion-mode 1)))))
-
-(eval-and-compile
-  (unless (fboundp 'declare-function)
-    (defmacro declare-function (fn file &optional arglist fileonly))))
 
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
