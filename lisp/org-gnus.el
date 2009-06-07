@@ -54,6 +54,8 @@ negates this setting for the duration of the command."
 (declare-function gnus-article-show-summary "gnus-art" ())
 (declare-function gnus-summary-last-subject "gnus-sum" ())
 (declare-function message-fetch-field "message" (header &optional not-all))
+(declare-function message-narrow-to-head-1 "message" nil)
+
 (defvar gnus-other-frame-object)
 (defvar gnus-group-name)
 (defvar gnus-article-current)
