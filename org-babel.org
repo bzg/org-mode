@@ -332,6 +332,80 @@ level of the console environment will be set *everywhere* inside
 emacs.  For this reason I think that it doesn't make any sense to
 worry about session support for emacs-lisp.
 
+*** Further thoughts on 'scripting' vs. functional approaches
+
+    These are just thoughts, I don't know how sure I am about this.
+    And again, perhaps I'm not saying anything very radical, just that
+    it would be nice to have some options supporting things like
+    receiving text output in the org buffer.
+
+    I can see that you've already gone some way down the road towards
+    the 'last value' approach, so sorry if my comments come rather
+    late. I am concerned that we are not giving sufficient attention
+    to stdout / the text that is returned by the interpreters. In
+    contrast, many of our potential users will be accustomed to a
+    'scripting' approach, where they are outputting text at various
+    points in the code block, not just at the end. I am leaning
+    towards thinking that we should have 2 modes of evaluation:
+    'script' mode, and 'functional' mode.
+
+    In script mode, evaluation of a code block would result in *all*
+    text output from that code block appearing as output in the org
+    buffer, presumably as an #+begin_example...#+end_example. There
+    could be an :echo option controlling whether the input commands
+    also appear in the output. [This is like Sweave].
+
+    In functional mode, the *result* of the code block is available as
+    an elisp object, and may appear in the org buffer as an org
+    table/string, via the mechanisms you have developed already.
+
+    One thing I'm wondering about is whether, in script mode, there
+    simply should not be a return value. Perhaps this is not so
+    different from what exists: script mode would be new, and what
+    exists currently would be functional mode.
+
+    I think it's likely that, while code evaluation will be exciting
+    to people, a large majority of our users in a large majority of
+    their usage will not attempt to actually use the return value from
+    a source code block in any meaningful way. In that case, it seems
+    rather restrictive to only allow them to see output from the end
+    of the code block.
+
+    Instead I think the most accessible way to introduce org-babel to
+    people, at least while they are learning it, is as an immensely
+    powerful environment in which to embed their 'scripts', which now
+    also allows them to 'run' their 'scripts'. Especially as such
+    people are likely to be the least capable of the user-base, a
+    possible design-rule would be to make the scripting style of usage
+    easy (default?), perhaps requiring a special option to enable a
+    functional style. Those who will use the functional style won't
+    have a problem understanding what's going on, whereas the 'skript
+    kiddies' might not even know the syntax for defining a function in
+    their language of choice. And of course we can allow the user to
+    set a variable in their .emacs controlling the preference, so that
+    functional users are not inconveniennced by having to provide
+    header args the whole time.
+
+    Please don't get the impression that I am down-valuing the
+    functional style of org-babel. I am constantly horrified at the
+    messy 'scripts' that my colleagues produce in perl or R or
+    whatever! Nevertheless that seems to be how a lot of people work.
+    
+    I think you were leaning towards the last-value approach because
+    it offered the possibility of unified code supporting both the
+    single evaluation environment and the functional style. If you
+    agree with any of the above then perhaps it will impact upon this
+    and mean that the code in the two branches has to differ a bit. In
+    that case, functional mode could perhaps after all evaluate each
+    code block in its own environment, thus (re)approaching 'true'
+    functional programming (side-effects are hard to achieve).
+
+#+begin_src sh
+ls > files
+echo "There are `wc -l files` files in this directory"
+
+#+end_src
+
 *** TODO rework all source codes to use inferior-processes-buffers
 
 this will involve...
