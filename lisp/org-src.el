@@ -135,6 +135,7 @@ the edited version."
 	    lang (nth 2 info)
 	    single (nth 3 info)
 	    lfmt (nth 4 info)
+	    nindent (nth 5 info)
 	    lang-f (intern (concat lang "-mode"))
 	    begline (save-excursion (goto-char beg) (org-current-line)))
       (unless (functionp lang-f)
@@ -164,7 +165,7 @@ the edited version."
 	(insert code)
 	(remove-text-properties (point-min) (point-max)
 				'(display nil invisible nil intangible nil))
-	(setq nindent (org-do-remove-indentation))
+	(org-do-remove-indentation)
 	(let ((org-inhibit-startup t))
 	  (funcall lang-f))
 	(set (make-local-variable 'org-edit-src-force-single-line) single)
@@ -231,11 +232,11 @@ the fragment in the Org-mode buffer."
       (if (looking-at "[ \t]*\\(\n\\|\\'\\)")
 	  (setq beg1 (point) end1 beg1)
 	(save-excursion
-	  (if (re-search-backward "^[ \t]*[^:]" nil 'move)
+	  (if (re-search-backward "^[ \t]*[^: \t]" nil 'move)
 	      (setq beg1 (point-at-bol 2))
 	    (setq beg1 (point))))
 	(save-excursion
-	  (if (re-search-forward "^[ \t]*[^:]" nil 'move)
+	  (if (re-search-forward "^[ \t]*[^: \t]" nil 'move)
 	      (setq end1 (1- (match-beginning 0)))
 	    (setq end1 (point))))
 	(goto-line line))
@@ -329,11 +330,12 @@ the language, a switch telling of the content should be in a single line."
 		(setq match-re1 (match-string 0))
 		(setq beg (match-end 0)
 		      lang (org-edit-src-get-lang lang)
-		      lfmt (org-edit-src-get-label-format match-re1))
+		      lfmt (org-edit-src-get-label-format match-re1)
+		      ind (org-edit-src-get-indentation (match-beginning 0)))
 		(if (and (re-search-forward re2 nil t)
 			 (>= (match-end 0) pos))
 		    (throw 'exit (list beg (match-beginning 0)
-				       lang single lfmt))))
+				       lang single lfmt ind))))
 	    (if (or (looking-at re2)
 		    (re-search-forward re2 nil t))
 		(progn
@@ -342,11 +344,13 @@ the language, a switch telling of the content should be in a single line."
 			   (<= (match-beginning 0) pos))
 		      (progn
 			(setq lfmt (org-edit-src-get-label-format
-				    (match-string 0)))
+				    (match-string 0))
+			      ind (org-edit-src-get-indentation
+				   (match-beginning 0)))
 			(throw 'exit
 			       (list (match-end 0) end
 				     (org-edit-src-get-lang lang)
-				     single lfmt))))))))))))
+				     single lfmt ind))))))))))))
 
 (defun org-edit-src-get-lang (lang)
   "Extract the src language."
@@ -367,6 +371,12 @@ the language, a switch telling of the content should be in a single line."
   (save-match-data
     (if (string-match "-l[ \t]+\\\\?\"\\([^\t\r\n\"]+\\)\\\\?\"" s)
 	(match-string 1 s))))
+
+(defun org-edit-src-get-indentation (pos)
+  "Extract the label format."
+  (save-match-data
+    (goto-char pos)
+    (org-get-indentation)))
 
 (defun org-edit-src-exit ()
   "Exit special edit and protect problematic lines."
