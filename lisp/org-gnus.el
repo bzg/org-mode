@@ -53,6 +53,7 @@ negates this setting for the duration of the command."
 ;; Declare external functions and variables
 (declare-function gnus-article-show-summary "gnus-art" ())
 (declare-function gnus-summary-last-subject "gnus-sum" ())
+(declare-function message-fetch-field "message" (header &optional not-all))
 (defvar gnus-other-frame-object)
 (defvar gnus-group-name)
 (defvar gnus-article-current)

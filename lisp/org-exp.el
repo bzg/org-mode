@@ -1681,7 +1681,7 @@ from the buffer."
   "Mark block quote and verse environments with special cookies.
 These special cookies will later be interpreted by the backend."
   ;; Blockquotes
-  (let (type t1 ind beg end beg1 end1)
+  (let (type t1 ind beg end beg1 end1 content)
     (goto-char (point-min))
     (while (re-search-forward
 	    "^\\([ \t]*\\)#\\+\\(begin_\\(\\(block\\)?quote\\|verse\\|center\\)\\>.*\\)"

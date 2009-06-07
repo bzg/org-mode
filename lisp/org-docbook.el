@@ -1149,6 +1149,7 @@ publishing directory."
 
 (defvar in-local-list)
 (defvar local-list-indent)
+(defvar local-list-type)
 (defun org-export-docbook-close-lists-maybe (line)
   (let ((ind (get-text-property 0 'original-indentation line))
 	didclose)

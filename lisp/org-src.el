@@ -34,6 +34,8 @@
 (require 'org-macs)
 (require 'org-compat)
 
+(declare-function org-do-remove-indentation "org" (&optional n))
+
 (defcustom org-edit-src-region-extra nil
   "Additional regexps to identify regions for editing with `org-edit-src-code'.
 For examples see the function `org-edit-src-find-region-and-lang'.
@@ -315,7 +317,7 @@ the language, a switch telling of the content should be in a single line."
 	    ("^[ \t]*#\\+begin_docbook.*\n" "\n[ \t]*#\\+end_docbook" "xml")
 	    )))
 	(pos (point))
-	re1 re2 single beg end lang lfmt match-re1 ind)
+	re1 re2 single beg end lang lfmt match-re1 ind entry)
     (catch 'exit
       (while (setq entry (pop re-list))
 	(setq re1 (car entry) re2 (nth 1 entry) lang (nth 2 entry)

@@ -33,6 +33,8 @@
 
 ;;; Code:
 
+(declare-function org-add-props "org-compat" (string plist &rest props))
+
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
