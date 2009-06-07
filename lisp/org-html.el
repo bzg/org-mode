@@ -841,6 +841,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
+	    (org-export-html-close-lists-maybe line)
 	    (let (par)
 	      (when (re-search-backward
 		     "\\(<p>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
@@ -1864,6 +1865,22 @@ If there are links in the string, don't modify these."
   "Close <li> if necessary."
   (org-close-par-maybe)
   (insert (if (equal type "d") "</dd>\n" "</li>\n")))
+
+(defvar in-local-list)
+(defvar local-list-indent)
+(defun org-export-html-close-lists-maybe (line)
+  (let ((ind (get-text-property 0 'original-indentation line))
+	didclose)
+    (when ind
+      (while (and in-local-list
+		  (or (= ind (car local-list-indent))
+		      (< ind (car local-list-indent))))
+	(setq didclose t)
+	(org-close-li (car local-list-type))
+	(insert (format "</%sl>\n" (car local-list-type)))
+	(pop local-list-type) (pop local-list-indent)
+	(setq in-local-list local-list-indent))
+      (and didclose (org-open-par)))))
 
 (defvar body-only) ; dynamically scoped into this.
 (defun org-html-level-start (level title umax with-toc head-count)
