@@ -1695,9 +1695,9 @@ These special cookies will later be interpreted by the backend."
 	(setq end (1+ (point-at-eol))
 	      end1 (1- (match-beginning 0)))
 	(setq content (org-remove-indentation (buffer-substring beg1 end1)))
-	(setq content (concat "ORG-" (upcase type) "-START\n"
+	(setq content (concat "ORG-" (upcase t1) "-START\n"
 			      content "\n"
-			      "ORG-" (upcase type) "-END\n"))
+			      "ORG-" (upcase t1) "-END\n"))
 	(delete-region beg end)
 	(insert (org-add-props content nil 'original-indentation ind))))))
 
