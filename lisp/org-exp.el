@@ -2121,22 +2121,24 @@ in the list) and remove property and value from the list in LISTVAR."
   "Replace source code segments with special code for export."
   (setq org-export-last-code-line-counter-value 0)
   (let ((case-fold-search t)
-	lang code trans opts)
+	lang code trans opts indent)
     (goto-char (point-min))
     (while (re-search-forward
-	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\\)\\|\\(^[ \t]*#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\\)"
+	    "\\(^\\([ \t]*\\)#\\+BEGIN_SRC:?[ \t]+\\([^ \t\n]+\\)\\(.*\\)\n\\([^\000]+?\n\\)[ \t]*#\\+END_SRC.*\\)\\|\\(^\\([ \t]*\\)#\\+BEGIN_EXAMPLE:?\\(?:[ \t]+\\(.*\\)\\)?\n\\([^\000]+?\n\\)[ \t]*#\\+END_EXAMPLE.*\\)"
 	    nil t)
       (if (match-end 1)
 	  ;; src segments
 	  (setq lang (match-string 3)
 		opts (match-string 4)
-		code (match-string 5))
+		code (match-string 5)
+		indent (length (match-string 2)))
 	(setq lang nil
-	      opts (match-string 7)
-	      code (match-string 8)))
+	      opts (match-string 8)
+	      code (match-string 9)
+	      indent (length (match-string 7))))
 
       (setq trans (org-export-format-source-code-or-example
-		   backend lang code opts (length (match-string 2))))
+		   backend lang code opts indent))
       (replace-match trans t t))))
 
 (defvar htmlp)  ;; dynamically scoped

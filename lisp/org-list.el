@@ -1050,11 +1050,13 @@ cdr is the indentation string."
 
 (defun org-list-end (indent)
   "Return the position of the end of the list.
-INDENT is the indentation of the list."
+INDENT is the indentation of the list, as a string."
   (save-excursion
     (catch 'exit
       (while (or (looking-at org-list-beginning-re)
-		 (looking-at (concat "^" indent "[ \t]+\\|^$")))
+		 (looking-at (concat "^" indent "[ \t]+\\|^$"))
+		 (>= (or (get-text-property (point) 'original-indentation) -1)
+		     (length indent)))
 	(if (eq (point) (point-max))
 	    (throw 'exit (point-max)))
 	(forward-line 1)))

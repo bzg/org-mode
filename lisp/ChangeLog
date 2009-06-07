@@ -1,3 +1,11 @@
+2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-list.el (org-list-end): Respect the stored "original"
+	indentation when determining the end of the list.
+
+	* org-exp.el (org-export-replace-src-segments-and-examples):
+	Remember indentation correctly.
+
 2009-06-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-update-mode-line): Apply face
