@@ -1,5 +1,13 @@
 2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-as-docbook): Better indentation
+	treatment.
+
+	* org-macs.el (org-replace-match-keep-properties): New function.
+
+	* org-exp.el (org-export-mark-blockquote-verse-center): Better
+	preprocessing of center and quote and verse blocks.
+
 	* org-docbook.el (org-export-docbook-close-lists-maybe): New function.
 	(org-export-as-docbook): Close lists when original indentation
 	mandates it.

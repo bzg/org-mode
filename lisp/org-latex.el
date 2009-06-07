@@ -1510,20 +1510,20 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   ;; Convert blockquotes
   (goto-char (point-min))
   (while (search-forward "ORG-BLOCKQUOTE-START" nil t)
-    (replace-match "\\begin{quote}" t t))
+    (org-replace-match-keep-properties "\\begin{quote}" t t))
   (goto-char (point-min))
   (while (search-forward "ORG-BLOCKQUOTE-END" nil t)
-    (replace-match "\\end{quote}" t t))
+    (org-replace-match-keep-properties "\\end{quote}" t t))
 
   ;; Convert verse
   (goto-char (point-min))
   (while (search-forward "ORG-VERSE-START" nil t)
-    (replace-match "\\begin{verse}" t t)
+    (org-replace-match-keep-properties "\\begin{verse}" t t)
     (beginning-of-line 2)
     (while (and (not (looking-at "[ \t]*ORG-VERSE-END.*")) (not (eobp)))
       (when (looking-at "\\([ \t]+\\)\\([^ \t\n]\\)")
 	(goto-char (match-end 1))
-	(replace-match
+	(org-replace-match-keep-properties
 	 (org-export-latex-protect-string
 	  (concat "\\hspace*{1cm}" (match-string 2))) t t)
 	(beginning-of-line 1))
@@ -1532,15 +1532,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(insert "\\\\"))
       (beginning-of-line 2))
     (and (looking-at "[ \t]*ORG-VERSE-END.*")
-	 (replace-match "\\end{verse}" t t)))
+	 (org-replace-match-keep-properties "\\end{verse}" t t)))
 
   ;; Convert center
   (goto-char (point-min))
   (while (search-forward "ORG-CENTER-START" nil t)
-    (replace-match "\\begin{center}" t t))
+    (org-replace-match-keep-properties "\\begin{center}" t t))
   (goto-char (point-min))
   (while (search-forward "ORG-CENTER-END" nil t)
-    (replace-match "\\end{center}" t t))
+    (org-replace-match-keep-properties "\\end{center}" t t))
 
   (run-hooks 'org-export-latex-after-blockquotes-hook)
 

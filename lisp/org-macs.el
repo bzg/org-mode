@@ -245,6 +245,15 @@ This is in contrast to merely setting it to 0."
       (setq plist (cddr plist)))
     p))
 
+
+(defun org-replace-match-keep-properties (newtext &optional fixedcase
+						  literal string)
+  "Like `replace-match', but add the text properties found original text."
+  (setq newtext (org-add-props newtext (text-properties-at
+					(match-beginning 0) string)))
+  (replace-match newtext fixedcase literal string))
+
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668

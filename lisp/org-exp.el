@@ -1681,24 +1681,25 @@ from the buffer."
   "Mark block quote and verse environments with special cookies.
 These special cookies will later be interpreted by the backend."
   ;; Blockquotes
-  (goto-char (point-min))
-  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(block\\)?quote\\>.*"
-			    nil t)
-    (replace-match (if (equal (downcase (match-string 1)) "end")
-		       "ORG-BLOCKQUOTE-END" "ORG-BLOCKQUOTE-START")
-		   t t))
-  ;; Verse
-  (goto-char (point-min))
-  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_verse\\>.*" nil t)
-    (replace-match (if (equal (downcase (match-string 1)) "end")
-		       "ORG-VERSE-END" "ORG-VERSE-START")
-		   t t))
-  ;; Center
-  (goto-char (point-min))
-  (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_center\\>.*" nil t)
-    (replace-match (if (equal (downcase (match-string 1)) "end")
-		       "ORG-CENTER-END" "ORG-CENTER-START")
-		   t t)))
+  (let (type t1 ind beg end beg1 end1)
+    (goto-char (point-min))
+    (while (re-search-forward
+	    "^\\([ \t]*\\)#\\+\\(begin_\\(\\(block\\)?quote\\|verse\\|center\\)\\>.*\\)"
+	    nil t)
+      (setq ind (length (match-string 1))
+	    type (downcase (match-string 3))
+	    t1 (if (equal type "quote") "blockquote" type))
+      (setq beg (match-beginning 0)
+	    beg1 (1+ (match-end 0)))
+      (when (re-search-forward (concat "^[ \t]*#\\+end_" type "\\>.*") nil t)
+	(setq end (1+ (point-at-eol))
+	      end1 (1- (match-beginning 0)))
+	(setq content (org-remove-indentation (buffer-substring beg1 end1)))
+	(setq content (concat "ORG-" (upcase type) "-START\n"
+			      content "\n"
+			      "ORG-" (upcase type) "-END\n"))
+	(delete-region beg end)
+	(insert (org-add-props content nil 'original-indentation ind))))))
 
 (defun org-export-attach-captions-and-attributes (backend target-alist)
   "Move #+CAPTION, #+ATTR_BACKEND, and #+LABEL text into text properties.

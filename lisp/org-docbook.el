@@ -642,9 +642,10 @@ publishing directory."
 	      (org-export-docbook-open-para))
 	    (throw 'nextline nil))
 
+	  (org-export-docbook-close-lists-maybe line)
+
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
-	    (org-export-docbook-close-lists-maybe line)
 	    (let (par)
 	      (when (re-search-backward
 		     "\\(<para>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
@@ -973,7 +974,8 @@ publishing directory."
 		    ((= llt ?\)) "^\\([ \t]*\\)\\(\\([-+*] \\)\\|\\([0-9]+)\\) \\)?\\( *[^ \t\n\r]\\|[ \t]*$\\)")
 		    (t (error "Invalid value of `org-plain-list-ordered-item-terminator'")))
 		   line)
-	      (setq ind (org-get-string-indentation line)
+	      (setq ind (or (get-text-property 0 'original-indentation line)
+			    (org-get-string-indentation line))
 		    item-type (if (match-beginning 4) "o" "u")
 		    starter (if (match-beginning 2)
 				(substring (match-string 2 line) 0 -1))
