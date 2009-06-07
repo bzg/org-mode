@@ -644,6 +644,7 @@ publishing directory."
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
+	    (org-export-docbook-close-lists-maybe line)
 	    (let (par)
 	      (when (re-search-backward
 		     "\\(<para>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
@@ -1143,6 +1144,25 @@ publishing directory."
   (if (equal type "d")
       (insert "</listitem></varlistentry>\n")
     (insert "</listitem>\n")))
+
+(defvar in-local-list)
+(defvar local-list-indent)
+(defun org-export-docbook-close-lists-maybe (line)
+  (let ((ind (get-text-property 0 'original-indentation line))
+	didclose)
+    (when ind
+      (while (and in-local-list
+		  (<= ind (car local-list-indent)))
+	(setq didclose t)
+	(let ((listtype (car local-list-type)))
+	  (org-export-docbook-close-li listtype)
+	  (insert (cond
+		   ((equal listtype "o") "</orderedlist>\n")
+		   ((equal listtype "u") "</itemizedlist>\n")
+		   ((equal listtype "d") "</variablelist>\n"))))
+	(pop local-list-type) (pop local-list-indent)
+	(setq in-local-list local-list-indent))
+      (and didclose (org-export-docbook-open-para)))))
 
 (defun org-export-docbook-level-start (level title)
   "Insert a new level in DocBook export.

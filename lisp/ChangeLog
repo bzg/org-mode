@@ -1,5 +1,9 @@
 2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-docbook-close-lists-maybe): New function.
+	(org-export-as-docbook): Close lists when original indentation
+	mandates it.
+
 	* org-html.el (org-export-html-close-lists-maybe): New function.
 	(org-export-as-html): Close lists when original indentation
 	mandates it.
