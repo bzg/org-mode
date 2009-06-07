@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/37]
+* Tasks [22/38]
 ** TODO Create objects in top level (global) environment [0/5]
 *sessions*
 
@@ -584,6 +584,11 @@ waiting for guidance from those more familiar with yasnippets
    - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
    - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
 
+** TODO figure out how to handle errors during evaluation
+   R has a try function, with error handling, along the lines of
+   python. I bet ruby does too. Maybe more of an issue for functional
+   style; in my proposed scripting style the error just gets dumped to
+   the org buffer and the user is thus alerted.
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
 
