@@ -1,5 +1,11 @@
 2009-06-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-docbook.el (org-export-docbook-close-lists-maybe): Also look
+	at normal indentation.
+
+	* org-html.el (org-export-html-close-lists-maybe): Also look at
+	normal indentation.
+
 	* org-remember.el (org-remember-handler): Abort remember if the
 	buffer is empty.
 

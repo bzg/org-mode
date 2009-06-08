@@ -1872,7 +1872,8 @@ If there are links in the string, don't modify these."
 (defvar local-list-indent)
 (defvar local-list-type)
 (defun org-export-html-close-lists-maybe (line)
-  (let ((ind (get-text-property 0 'original-indentation line))
+  (let ((ind (or (get-text-property 0 'original-indentation line)
+		 (org-get-indentation line)))
 	didclose)
     (when ind
       (while (and in-local-list
