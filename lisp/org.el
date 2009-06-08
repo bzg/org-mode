@@ -4649,7 +4649,8 @@ If KWD is a number, get the corresponding match group."
 	 deactivate-mark buffer-file-name buffer-file-truename)
     (remove-text-properties beg end
 			    '(mouse-face t keymap t org-linked-text t
-					 invisible t intangible t))))
+					 invisible t intangible t
+					 org-no-flyspell t))))
 
 ;;;; Visibility cycling, including org-goto and indirect buffer
 
@@ -16500,13 +16501,15 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 ;; Make flyspell not check words in links, to not mess up our keymap
 (defun org-mode-flyspell-verify ()
   "Don't let flyspell put overlays at active buttons."
-  (not (get-text-property (point) 'keymap)))
+  (and (not (get-text-property (point) 'keymap))
+       (not (get-text-property (point) 'org-no-flyspell))))
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
   (and (org-bound-and-true-p flyspell-mode)
        (fboundp 'flyspell-delete-region-overlays)
-       (flyspell-delete-region-overlays beg end)))
+       (flyspell-delete-region-overlays beg end))
+  (add-text-properties beg end '(org-no-flyspell t)))
 
 ;; Make `bookmark-jump' show the jump location if it was hidden.
 (eval-after-load "bookmark"
