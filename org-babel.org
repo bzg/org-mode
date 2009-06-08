@@ -115,7 +115,7 @@ and the results to be collected in the same table.
 
 
 * Tasks [22/38]
-** TODO Create objects in top level (global) environment [0/5]
+** TODO Create objects in top level (global) environment [0/6]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -450,16 +450,13 @@ for the execution of source-code blocks.
    of implementation and finding which statement is the last
    statement.
 
-*** TODO rework all source codes to use inferior-processes-buffers
+*** TODO rework evaluation lang-by-lang [0/4]
 
-this will involve...
-1) creating a a-list of default *session* buffers for each source language
-2) functions for dumping code to the *session* buffers which can be
-   overridden by each source code language
-3) functions for retrieving results from the *sessions* buffers which
-   can be overridden by each source code
+This should include...
+- STDOUT and functional results
+- sessions in comint buffers
 
-**** DONE R
+**** TODO R
 
 #+srcname: task-R-with-inf-process-buffer
 #+begin_src R 
@@ -479,14 +476,13 @@ c = 3
 (a + b) * c
 #+end_src
 
+**** TODO Python
+
+**** TODO Shells
+
 *** TODO implement a *session* header argument
 
 use this header argument to override the default *session* buffer
-
-*** TODO remove source bodies from their functional wrappers
-
-The current functional wrappers should be removed in favor of
-incremental evaluation in inferior-source-buffers
 
 *** TODO function to bring up inferior-process buffer
 
