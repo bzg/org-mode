@@ -788,11 +788,11 @@ See also the variable `org-reverse-note-order'."
     (replace-match ""))
   (goto-char (point-max))
   (beginning-of-line 1)
-  (while (looking-at "[ \t]*$\\|##.*")
+  (while (and (looking-at "[ \t]*$\\|##.*") (> (point) 1))
     (delete-region (1- (point)) (point-max))
     (beginning-of-line 1))
   (catch 'quit
-    (if org-note-abort (throw 'quit nil))
+    (if org-note-abort (throw 'quit t))
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
 	   (backup-file
 	    (and buffer-file-name
@@ -802,6 +802,16 @@ See also the variable `org-reverse-note-order'."
 		 (string-match "^remember-[0-9]\\{4\\}"
 			       (file-name-nondirectory buffer-file-name))
 		 buffer-file-name))
+
+	   (dummy
+	    (unless (string-match "\\S-" (buffer-string))
+	      (message "Nothing to remember")
+	      (and backup-file
+		   (ignore-errors
+		     (delete-file backup-file)
+		     (delete-file (concat backup-file "~"))))
+	      (set-buffer-modified-p nil)
+	      (throw 'quit t)))
 	   (previousp (and (member current-prefix-arg '((16) 0))
 			   org-remember-previous-location))
 	   (clockp (equal current-prefix-arg 2))

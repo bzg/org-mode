@@ -1,5 +1,8 @@
 2009-06-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-handler): Abort remember if the
+	buffer is empty.
+
 	* org-src.el (org-edit-src-content-indentation): New option.
 	(org-edit-src-exit): Apply extra indentation.
 
