@@ -121,7 +121,7 @@ This will use the command `open' with the message URL."
 			  "set theSubject to subject of theMessage\n"
 			  "set theLink to \"message://\" & theID & \"::split::\" & theSubject & \"\n\"\n"
 			  "copy theLink to end of theLinkList\n"
-			  
+
 			  ;; Report progress through Growl
 			  ;; This "double tell" idiom is described in detail at
 			  ;; http://macscripter.net/viewtopic.php?id=24570 The
@@ -152,7 +152,7 @@ the subject of the message in Mail.app and make a link out
 of it."
   (interactive "sLink to (s)elected or (f)lagged messages: ")
   (message "AppleScript: searching mailboxes...")
-  (let* ((as-link-list 
+  (let* ((as-link-list
 	  (if (string= select-or-flag "s")
 	      (as-get-selected-mail)
 	    (if (string= select-or-flag "f")
@@ -175,7 +175,7 @@ of it."
       (when (not (string= URL ""))
 	(setq orglink (org-make-link-string URL description))
 	(push orglink orglink-list)))
-    (with-temp-buffer      
+    (with-temp-buffer
       (while orglink-list
 	(insert (concat (pop orglink-list)) "\n"))
       (kill-region (point-min) (point-max))
@@ -209,7 +209,7 @@ list of message:// links to flagged mail after heading."
 	      (progn
 		(save-excursion
 		  (while (re-search-forward message-re (save-excursion (outline-next-heading)) t)
-		    
+
 		    (delete-region (match-beginning 0) (match-end 0)))
 		  (insert "\n")
 		  (org-mac-message-get-links "f")

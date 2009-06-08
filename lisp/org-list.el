@@ -1233,7 +1233,7 @@ with overruling parameters for `org-list-to-generic'."
 LIST is as returnd by `org-list-parse-list'.  PARAMS is a property list
 with overruling parameters for `org-list-to-generic'."
   (org-list-to-generic
-   list 
+   list
    (org-combine-plists
     '(:splicep nil :ostart "@itemize @minus" :oend "@end itemize"
 	       :ustart "@enumerate" :uend "@end enumerate"

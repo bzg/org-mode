@@ -528,7 +528,7 @@ See also the variable `org-agenda-tags-todo-honor-ignore-options'."
   "Non-nil means, honor todo-list ...ignore options also in tags-todo search.
 The variables
    `org-agenda-todo-ignore-with-date',
-   `org-agenda-todo-ignore-scheduled' 
+   `org-agenda-todo-ignore-scheduled'
    `org-agenda-todo-ignore-deadlines'
 make the global TODO list skip entries that have time stamps of certain
 kinds.  If this option is set, the same options will also apply for the
@@ -2820,7 +2820,7 @@ given in `org-agenda-start-on-weekday'."
 				 'org-agenda-date))
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
- 	    (when todayp 
+ 	    (when todayp
  	      (put-text-property s (1- (point)) 'org-today t)
  	      (put-text-property s (1- (point)) 'face 'org-agenda-date-today))
 	    (if rtnall (insert
@@ -4630,7 +4630,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   (if org-agenda-columns-active
       (org-columns-quit)
     (let ((buf (current-buffer)))
-      (and (not (eq org-agenda-window-setup 'current-window)) 
+      (and (not (eq org-agenda-window-setup 'current-window))
            (not (one-window-p))
            (delete-window))
       (kill-buffer buf)

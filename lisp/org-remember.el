@@ -1028,9 +1028,9 @@ See also the variable `org-reverse-note-order'."
 			   "^remember-.*[0-9]$"))))
 		  (when (> n 0)
 		    (message
-		     "%d backup files (unfinished remember calls) in %s" 
+		     "%d backup files (unfinished remember calls) in %s"
 		     n org-remember-backup-directory))))))))))
-  
+
   t)    ;; return t to indicate that we took care of this note.
 
 (defun org-do-remember (&optional initial)

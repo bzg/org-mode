@@ -95,7 +95,7 @@ ln    create a hard link.  Note that this is not supported
   "Non-nil means, allow attachment directories be inherited."
   :group 'org-attach
   :type 'boolean)
-  
+
 
 (defvar org-attach-inherited nil
   "Indicates if the last access to the attachment directory was inherited.")

@@ -141,7 +141,7 @@ Here are the keyword-value pair allows in `org-feed-alist'.
      The default action on new items in the feed is to add them as children
      under the headline for the feed.  The template describes how the entry
      should be formatted.  If not given, it defaults to
-     `org-feed-default-template'. 
+     `org-feed-default-template'.
 
 :formatter formatter-function
      Instead of relying on a template, you may specify a function to format
@@ -322,7 +322,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  ;; Add the "handled" status to the appropriate entries
 	  (setq entries (mapcar (lambda (e)
 				  (setq e (plist-put e :handled
-						     (nth 1 (assoc 
+						     (nth 1 (assoc
 							     (plist-get e :guid)
 							     old-status)))))
 				entries))
@@ -381,7 +381,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 		    (mapcar
 		     (lambda (e) (org-feed-format-entry e template formatter))
 		     new)))
-	
+
 	    ;; Insert the new items
 	    (org-feed-add-items inbox-pos new-formatted))
 
@@ -395,7 +395,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  ;; that would would end up with a status that does not reflect
 	  ;; which items truely have been handled
 	  (org-feed-write-status inbox-pos drawer status)
-	  
+
 	  ;; Normalize the visibility of the inbox tree
 	  (goto-char inbox-pos)
 	  (hide-subtree)

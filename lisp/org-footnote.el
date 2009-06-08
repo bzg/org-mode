@@ -57,7 +57,7 @@
 	  "\\]")
   "Regular expression for matching footnotes.")
 
-(defconst org-footnote-definition-re 
+(defconst org-footnote-definition-re
   (org-re "^\\(\\[\\([0-9]+\\|fn:[-_[:word:]]+\\)\\]\\)")
   "Regular expression matching the definition of a footnote.")
 
@@ -363,7 +363,7 @@ referenced sequence."
 		org-footnote-fill-after-inline-note-extraction
 		(fill-paragraph)))
 	 (if (not a) (push (list ref marker def (if idef t nil)) ref-table))))
-      
+
       ;; First find and remove the footnote section
       (goto-char (point-min))
       (cond
@@ -386,7 +386,7 @@ referenced sequence."
 	      (insert "* " org-footnote-section "\n")
 	      (setq ins-point (point))))))
        (t
-	(if (re-search-forward 
+	(if (re-search-forward
 	     (concat "^"
 		     (regexp-quote org-footnote-tag-for-non-org-mode-files)
 		     "[ \t]*$")
@@ -397,7 +397,7 @@ referenced sequence."
 	(delete-region (point) (point-max))
 	(insert "\n\n" org-footnote-tag-for-non-org-mode-files "\n")
 	(setq ins-point (point))))
-      
+
       ;; Insert the footnotes again
       (goto-char (or ins-point (point-max)))
       (setq ref-table (reverse ref-table))

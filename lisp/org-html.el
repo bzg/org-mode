@@ -61,7 +61,7 @@ by the footnotes themselves."
 
 (defcustom org-export-html-xml-declaration
   '(("html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
-    ("php" . "<?php echo '<?xml version=\"1.0\" encoding=\"%s\" ?>'; ?>"))    
+    ("php" . "<?php echo '<?xml version=\"1.0\" encoding=\"%s\" ?>'; ?>"))
   "The extension for exported HTML files.
 %s will be replaced with the charset of the exported file.
 This may be a string, or an alist with export extensions
@@ -1136,7 +1136,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	    (org-html-level-start level txt umax
 				  (and org-export-with-toc (<= level umax))
 				  head-count)
-	    
+
 	    ;; QUOTES
 	    (when (string-match quote-re line)
 	      (org-close-par-maybe)
@@ -1502,7 +1502,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		    (delq nil (mapcar
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
-	 
+
 	 (nlines 0) fnum i
 	 tbopen line fields html gr colgropen)
     (if splice (setq head nil))
@@ -1562,7 +1562,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      fnum "")
 	     "</colgroup>")
 	    html)
-      
+
       ;; Since the output of HTML table formatter can also be used in
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.

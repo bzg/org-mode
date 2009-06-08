@@ -202,7 +202,7 @@ auto     Automtically, either `all', or `repeat' for repeating tasks"
 (defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
-(defvar org-clock-effort "" 
+(defvar org-clock-effort ""
   "Effort estimate of the currently clocking task")
 
 (defvar org-clock-total-time nil
@@ -309,7 +309,7 @@ pointing to it."
 			   (looking-at "\\*+ ")
 			   (match-string 0))
 		  task (substring
-			(org-fontify-like-in-org-mode 
+			(org-fontify-like-in-org-mode
 			 (concat prefix heading)
 			 org-odd-levels-only)
 			(length prefix))))))
@@ -329,7 +329,7 @@ If not, show simply the clocked time like 01:50."
     (if (and org-clock-effort)
 	(let* ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	       (effort-h (floor effort-in-minutes 60))
-	       (effort-m (- effort-in-minutes (* effort-h 60))) 
+	       (effort-m (- effort-in-minutes (* effort-h 60)))
 	       )
 	  (format (concat "-[" org-time-clocksum-format "/" org-time-clocksum-format " (%s)]")
 		  h m effort-h effort-m  org-clock-heading)
@@ -435,13 +435,13 @@ the clocking selection, associated with the letter `d'."
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
 	(org-clock-out t))
-      
+
       (when (equal select '(16))
 	;; Mark as default clocking task
 	(save-excursion
 	  (org-back-to-heading t)
 	  (move-marker org-clock-default-task (point))))
-      
+
       (setq target-pos (point))  ;; we want to clock in at this location
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
@@ -590,7 +590,7 @@ line and position cursor in that line."
 			  " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")
 		  end t))
 	(beginning-of-line 1)
-	(throw 'exit t))		 
+	(throw 'exit t))
       (when (eobp) (newline) (setq end (max (point) end)))
       (when (re-search-forward (concat "^[ \t]*:" drawer ":") end t)
 	;; we seem to have a CLOCK drawer, so go there.

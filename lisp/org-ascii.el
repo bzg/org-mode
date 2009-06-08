@@ -278,10 +278,10 @@ publishing directory."
 	(setq date (format-time-string date)))
        (date)
        (t (setq date (format-time-string "%Y-%m-%d %T %Z"))))
-      
+
       (if (and date org-export-time-stamp-file)
 	  (insert (concat (nth 2 lang-words) ": " date"\n")))
-      
+
       (insert "\n\n"))
 
     (if (and org-export-with-toc (not body-only))
@@ -362,7 +362,7 @@ publishing directory."
 				      (substring link 8)
 				      org-export-code-refs)))
 			t t line))
-	  (setq rpl (concat "[" 
+	  (setq rpl (concat "["
 			    (or (match-string 3 line) (match-string 1 line))
 			    "]"))
 	  (when (and desc0 (not (equal desc0 link)))
@@ -498,7 +498,7 @@ publishing directory."
 		(make-string ind ?\ )
 		(substring line (1+ pos)))
       line)))
-			   
+
 (defun org-export-ascii-push-links (link-buffer)
   "Push out links in the buffer."
   (when link-buffer

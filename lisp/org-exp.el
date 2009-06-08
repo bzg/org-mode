@@ -1335,7 +1335,7 @@ on this string to produce the exported version."
       ;; HTML-specific preprocessing
       (when htmlp
 	(org-export-html-preprocess parameters))
-      
+
       ;; DocBook-specific preprocessing
       (when docbookp
 	(require 'org-docbook nil)
@@ -2207,7 +2207,7 @@ INDENT was the original indentation of the block."
 		  (setq lang nil)
 		  (message
 		   "htmlize.el 1.34 or later is needed for source code formatting")))
-	      
+
 	      (if lang
 		  (let* ((mode (and lang (intern (concat lang "-mode"))))
 			 (org-inhibit-startup t)
@@ -2298,7 +2298,7 @@ INDENT was the original indentation of the block."
 			   (substring label-format (match-end 0))
 			 ""))
 	   (lbl-re
-	    (concat 
+	    (concat
 	     ".*?\\S-.*?\\([ \t]*\\("
 	     (regexp-quote label-pre)
 	     "\\([-a-zA-Z0-9_]+\\)"
@@ -2476,17 +2476,17 @@ directory."
       (erase-buffer)
       (insert region)
       (let ((org-inhibit-startup t)) (org-mode))
-      
+
       ;; Get rid of archived trees
       (org-export-remove-archived-trees (plist-get opt-plist :archived-trees))
-      
+
       ;; Remove comment environment and comment subtrees
       (org-export-remove-comment-blocks-and-subtrees)
-      
+
       ;; Get rid of excluded trees
       (org-export-handle-export-tags (plist-get opt-plist :select-tags)
 				     (plist-get opt-plist :exclude-tags))
-      
+
       (when (or (plist-get opt-plist :plain-source)
 		(not (or (plist-get opt-plist :plain-source)
 			 (plist-get opt-plist :htmlized-source))))

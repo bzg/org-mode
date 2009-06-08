@@ -207,7 +207,7 @@ formats for not-done and done states, or an association list with setup
 for individual keywords.  If a keyword shows up for which there is no
 markup defined, the first one in the association list will be used."
   :group 'org-export-latex
-  :type '(choice 
+  :type '(choice
 	  (string :tag "Default")
 	  (cons :tag "Distinguish undone and done"
 		(string :tag "Not-DONE states")
@@ -216,7 +216,7 @@ markup defined, the first one in the association list will be used."
 		  (cons
 		   (string :tag "Keyword")
 		   (string :tag "Markup")))))
-	   
+
 (defcustom org-export-latex-timestamp-markup "\\textit{%s}"
   "A printf format string to be applied to time stamps."
   :group 'org-export-latex
@@ -1476,7 +1476,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\*?\\)}" nil t)
     (let* ((start (progn (beginning-of-line) (point)))
 	   (end (or (and (re-search-forward
-			  (concat "^[ \t]*\\\\end{" 
+			  (concat "^[ \t]*\\\\end{"
 				  (regexp-quote (match-string 1))
 				  "}") nil t)
 			 (point-at-eol))

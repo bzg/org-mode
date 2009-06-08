@@ -168,7 +168,7 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
 	(const :tag "   jsinfo:            Set up Sebastian Rose's JavaScript org-info.js" org-jsinfo)
-	(const :tag "   inlinetask:        Tasks independent of outline hierarchy" org-inlinetask) 
+	(const :tag "   inlinetask:        Tasks independent of outline hierarchy" org-inlinetask)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
 	(const :tag "   mac-message:       Links to messages in Apple Mail" org-mac-message)
 	(const :tag "   mew                Links to Mew folders/messages" org-mew)
@@ -1626,10 +1626,10 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 		    ;;place of item arguments
 		    :convert-widget
 		    (lambda (widget)
-		      (widget-put widget 
-				  :args (mapcar 
+		      (widget-put widget
+				  :args (mapcar
 					 #'(lambda (x)
-					     (widget-convert 
+					     (widget-convert
 					      (cons 'const x)))
 					 org-todo-interpretation-widgets))
 		      widget))
@@ -2975,7 +2975,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (eval-and-compile
   (org-autoload "org-exp"
 		'(org-export org-export-visible
-			     org-insert-export-options-template  
+			     org-insert-export-options-template
 			     org-table-clean-before-export))
   (org-autoload "org-ascii"
 		'(org-export-as-ascii org-export-ascii-preprocess
@@ -3545,7 +3545,7 @@ means to push this value onto the list in the variable.")
 	(while (setq kws (pop kwds))
  	  (let ((kws (or
 		      (run-hook-with-args-until-success
- 		       'org-todo-setup-filter-hook kws) 
+ 		       'org-todo-setup-filter-hook kws)
 		      kws)))
 	    (setq inter (pop kws) sep (member "|" kws)
 		  kws0 (delete "|" (copy-sequence kws))
@@ -4245,7 +4245,7 @@ will be prompted for."
 
 (defun org-activate-footnote-links (limit)
   "Run through the buffer and add overlays to links."
-  (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)" 
+  (if (re-search-forward "\\(^\\|[^][]\\)\\(\\[\\([0-9]+\\]\\|fn:[^ \t\r\n:]+?[]:]\\)\\)"
 			 limit t)
       (progn
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
@@ -4731,17 +4731,17 @@ in special contexts.
 		      (copy-sequence org-cycle-hook))
 	      org-cycle-hook))
 	   (pos (point)))
-      
+
       (if (or bob-special (equal arg '(4)))
 	  ;; special case:  use global cycling
 	  (setq arg t))
-      
+
       (cond
 
        ((equal arg '(16))
 	(org-set-startup-visibility)
 	(message "Startup visibility, plus VISIBILITY properties"))
-       
+
        ((equal arg '(64))
 	(show-all)
 	(message "Entire buffer visible, including drawers"))
@@ -4753,13 +4753,13 @@ in special contexts.
 	      (if arg (org-table-edit-field t)
 		(org-table-justify-field-maybe)
 		(call-interactively 'org-table-next-field)))))
-       
+
        ((run-hook-with-args-until-success
 	 'org-tab-after-check-for-table-hook))
-       
+
        ((eq arg t) ;; Global cycling
 	(org-cycle-internal-global))
-       
+
        ((and org-drawers org-drawer-regexp
 	     (save-excursion
 	       (beginning-of-line 1)
@@ -4767,7 +4767,7 @@ in special contexts.
 	;; Toggle block visibility
 	(org-flag-drawer
 	 (not (get-char-property (match-end 0) 'invisible))))
-       
+
        ((integerp arg)
 	;; Show-subtree, ARG levels up from here.
 	(save-excursion
@@ -4775,27 +4775,27 @@ in special contexts.
 	  (outline-up-heading (if (< arg 0) (- arg)
 				(- (funcall outline-level) arg)))
 	  (org-show-subtree)))
-       
+
        ((and (save-excursion (beginning-of-line 1) (looking-at outline-regexp))
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
-	
+
 	(org-cycle-internal-local))
-       
+
        ;; TAB emulation and template completion
        (buffer-read-only (org-back-to-heading))
-       
+
        ((run-hook-with-args-until-success
 	 'org-tab-after-check-for-cycling-hook))
-       
+
        ((org-try-structure-completion))
-       
+
        ((org-try-cdlatex-tab))
-       
+
        ((and (eq org-cycle-emulate-tab 'exc-hl-bol)
 	     (or (not (bolp))
 		 (not (looking-at outline-regexp))))
 	(call-interactively (global-key-binding "\t")))
-       
+
        ((if (and (memq org-cycle-emulate-tab '(white whitestart))
 		 (save-excursion (beginning-of-line 1) (looking-at "[ \t]*"))
 		 (or (and (eq org-cycle-emulate-tab 'white)
@@ -4805,7 +4805,7 @@ in special contexts.
 	    t
 	  (eq org-cycle-emulate-tab t))
 	(call-interactively (global-key-binding "\t")))
-       
+
        (t (save-excursion
 	    (org-back-to-heading)
 	    (org-cycle)))))))
@@ -4823,7 +4823,7 @@ in special contexts.
     (message "CONTENTS...done")
     (setq org-cycle-global-status 'contents)
     (run-hook-with-args 'org-cycle-hook 'contents))
-   
+
    ((and (eq last-command this-command)
 	 (eq org-cycle-global-status 'contents))
     ;; We just showed the table of contents - now show everything
@@ -4832,7 +4832,7 @@ in special contexts.
     (message "SHOW ALL")
     (setq org-cycle-global-status 'all)
     (run-hook-with-args 'org-cycle-hook 'all))
-   
+
    (t
     ;; Default action: go to overview
     (run-hook-with-args 'org-pre-cycle-hook 'overview)
@@ -5472,7 +5472,7 @@ frame is not changed."
 	 (or (beginning-of-line 0) t)
 	 (save-match-data
 	   (looking-at "[ \t]*$")))))
-    
+
 (defun org-insert-heading (&optional force-heading)
   "Insert a new heading or item with same depth at point.
 If point is in a plain list and FORCE-HEADING is nil, create a new list item.
@@ -6189,7 +6189,7 @@ the following will happen:
 I this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
-  (let (beg end template task 
+  (let (beg end template task
 	    shift-n shift-what doshift nmin nmax (n-no-remove -1))
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
@@ -7631,7 +7631,7 @@ application the system uses for this file type."
    ((org-at-timestamp-p t) (org-follow-timestamp-link))
    ((or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
     (org-footnote-action))
-   (t 
+   (t
     (let (type path link line search (pos (point)))
       (catch 'match
 	(save-excursion
@@ -8423,7 +8423,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 			(< pos (save-excursion
 				 (org-end-of-subtree t t))))))
 	    (error "Cannot refile to position inside the tree or region"))
-		 
+
 	(setq nbuf (or (find-buffer-visiting file)
 		       (find-file-noselect file)))
 	(if goto
@@ -8955,15 +8955,15 @@ this is nil.")
 	      (push (nth 2 e) rtn)))
 	  rtn)))))
 
-(defvar org-todo-setup-filter-hook nil 
+(defvar org-todo-setup-filter-hook nil
   "Hook for functions that pre-filter todo specs.
 
 Each function takes a todo spec and returns either `nil' or the spec
 transformed into canonical form." )
- 
+
 (defvar org-todo-get-default-hook nil
   "Hook for functions that get a default item for todo.
- 
+
 Each function takes arguments (NEW-MARK OLD-MARK) and returns either
 `nil' or a string to be used for the todo mark." )
 
@@ -9085,9 +9085,9 @@ For calling through lisp, arg is also interpreted in the following way:
 			    nil)))
 		       (t
 			(car tail))))
-	       (state (or 
+	       (state (or
  		       (run-hook-with-args-until-success
-			'org-todo-get-default-hook state last-state) 
+			'org-todo-get-default-hook state last-state)
  		       state))
 	       (next (if state (concat " " state " ") " "))
 	       (change-plist (list :type 'todo-state-change :from this :to state
@@ -9737,7 +9737,7 @@ be removed."
 	;; If necessary, get the time from the user
 	(setq time (or time (org-read-date nil 'to-time nil nil
 					   default-time default-input))))
-      
+
       (when (and org-insert-labeled-timestamps-at-point
 		 (member what '(scheduled deadline)))
 	(insert
@@ -10787,7 +10787,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
       (if just-align
 	  (setq tags current)
 	;; Get a new set of tags from the user
-	(save-excursion	
+	(save-excursion
 	  (setq table (append org-tag-persistent-alist
 			      (or org-tag-alist (org-get-buffer-tags)))
 		org-last-tags-completion-table table
@@ -11156,7 +11156,7 @@ Returns the new tags string, or nil to not change the current settings."
 FUNC is a function or a lisp form.  The function will be called without
 arguments, with the cursor positioned at the beginning of the headline.
 The return values of all calls to the function will be collected and
-returned as a list.  
+returned as a list.
 
 The call to FUNC will be wrapped into a save-excursion form, so FUNC
 does not need to preserve point.  After evaluaton, the cursor will be
@@ -13420,7 +13420,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	    (setq org-tag-alist-for-agenda
 		  (append org-tag-alist-for-agenda org-tag-alist))
-	    
+
 	    (save-excursion
 	      (remove-text-properties (point-min) (point-max) pall)
 	      (when org-agenda-skip-archived-trees
@@ -14097,7 +14097,7 @@ field motion visibility cycling will be done.")
 (defvar org-tab-after-check-for-table-hook nil
   "Hook for functions to attach themselves to TAB.
 See `org-ctrl-c-ctrl-c-hook' for more information.
-This hook runs after it has been established that the cursor is not in a 
+This hook runs after it has been established that the cursor is not in a
 table, but before checking if the cursor is in a headline or if global cycling
 should be done.
 If any function in this hook returns t, not other actions like visibility
@@ -14330,7 +14330,7 @@ depending on context.  See the individual commands for more information."
    ((and (not org-support-shift-select) (org-at-item-p))
     (call-interactively 'org-next-item))
    ((org-clocktable-try-shift 'down arg))
-   (org-support-shift-select 
+   (org-support-shift-select
     (org-call-for-shift-select 'next-line))
    (t (org-shiftselect-error))))
 
@@ -14352,7 +14352,7 @@ Depending on context, this does one of the following:
 	 (org-on-heading-p))
     (let ((org-inhibit-logging
 	   (not org-treat-S-cursor-todo-selection-as-state-change)))
-      (org-call-with-arg 'org-todo 'right)))		       
+      (org-call-with-arg 'org-todo 'right)))
    ((or (and org-support-shift-select
 	     (not (eq org-support-shift-select 'always))
 	     (org-at-item-bullet-p))
@@ -14362,7 +14362,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-next-allowed-value))
    ((org-clocktable-try-shift 'right arg))
-   (org-support-shift-select 
+   (org-support-shift-select
     (org-call-for-shift-select 'forward-char))
    (t (org-shiftselect-error))))
 
@@ -14394,7 +14394,7 @@ Depending on context, this does one of the following:
 	 (org-at-property-p))
     (call-interactively 'org-property-previous-allowed-value))
    ((org-clocktable-try-shift 'left arg))
-   (org-support-shift-select 
+   (org-support-shift-select
     (org-call-for-shift-select 'backward-char))
    (t (org-shiftselect-error))))
 
