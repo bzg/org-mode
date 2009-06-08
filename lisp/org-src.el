@@ -89,6 +89,17 @@ When nil, the message will only be shown intermittently in the echo area."
   :type 'boolean)
 
 
+(defvar org-src-mode-hook nil
+  "Hook  run after Org switched a source code snippet to its Emacs mode.
+This hook will run
+
+- when editing a source code snippet with \"C-c '\".
+- When formatting a source code snippet for export with htmlize.
+
+You may want to use this hook for example to turn off `outline-minor-mode'
+or similar things which you want to have when editing a source code file,
+but which mess up the display of a snippet in Org exported files.")
+
 (defvar org-protecting-blocks
   '("src" "example" "latex" "ascii" "html" "docbook")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
@@ -167,7 +178,8 @@ the edited version."
 				'(display nil invisible nil intangible nil))
 	(org-do-remove-indentation)
 	(let ((org-inhibit-startup t))
-	  (funcall lang-f))
+	  (funcall lang-f)
+	  (run-hooks 'org-src-mode-hook))
 	(set (make-local-variable 'org-edit-src-force-single-line) single)
 	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
 	(when lfmt

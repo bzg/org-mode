@@ -2219,6 +2219,7 @@ INDENT was the original indentation of the block."
 				(funcall mode)
 			      (fundamental-mode))
 			    (font-lock-fontify-buffer)
+			    (run-hooks 'org-src-mode-hook)
 			    (set-buffer-modified-p nil)
 			    (org-export-htmlize-region-for-paste
 			     (point-min) (point-max))))

@@ -1,3 +1,11 @@
+2009-06-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-format-source-code-or-example): Run
+	`org-src-mode-hook'.
+
+	* org-src.el (org-src-mode-hook): New variable.
+	(org-edit-src-code): Run `org-src-mode-hook'.
+
 2009-06-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-indent-line-function): Fix indentation of +#end lines.
