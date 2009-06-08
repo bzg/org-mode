@@ -80,6 +80,14 @@ These are the regions where each line starts with a colon."
 	  (const fundamental-mode)
 	  (function :tag "Other (specify)")))
 
+(defcustom org-edit-src-content-indentation 2
+  "Indentation for the content is a source code block.
+This should be the number of spaces added to the indentation of the #+begin
+line in order to compute the indentation of the block content after
+editing it with \\[org-edit-src-code]."
+  :group 'org-edit-structure
+  :type 'integer)
+
 (defcustom org-edit-src-persistent-message t
   "Non-nil means show persistent exit help message while editing src examples.
 The message is shown in the header-line, which will be created in the
@@ -426,7 +434,8 @@ the language, a switch telling of the content should be in a single line."
     (while (re-search-forward "^" nil t)
       (replace-match ": ")))
   (when nindent
-    (setq nindent (make-string nindent ?\ ))
+    (setq nindent (make-string (+ org-edit-src-content-indentation nindent)
+			       ?\ ))
     (goto-char (point-min))
     (while (re-search-forward "^" nil t)
       (replace-match nindent)))
