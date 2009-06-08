@@ -406,6 +406,50 @@ echo "There are `wc -l files` files in this directory"
 
 #+end_src
 
+*** even more thoughts on evaluation, results, models and options
+
+Thanks Dan, These comments are invaluable.
+
+What do you think about this as a new list of priorities/requirements
+for the execution of source-code blocks.
+
+1)  Sessions
+    1)  we want the evaluation of the source code block to take place in a
+        session which can persist state (variables, current directory,
+        etc...).
+    2)  source code blocks can specify their session with a header argument
+    3)  each session should correspond to an Emacs comint buffer so that the
+        user can drop into the session and experiment with live code
+        evaluation.
+2)  Results
+    1) each source-code block generates some form of results which (as
+       we have already implemented) is transfered into emacs-lisp
+       after which it can be inserted into the org-mode buffer, or
+       used by other source-code blocks
+    2) when the results are translated into emacs-lisp, forced to be
+       interpreted as a scalar (dumping their raw values into the
+       org-mode buffer), as a vector (which is often desirable with R
+       code blocks), or interpreted on the fly (the default option).
+       Note that this is very nearly currently implemented through the
+       [[* DONE results-type header (vector/file)][results-type-header]].
+    3) there should be *two* means of collecting results from the
+       execution of a source code block.  *Either* the value of the
+       last statement of the source code block, or the collection of
+       all that has been passed to STDOUT during the evaluation.
+
+**** header argument or return line
+
+
+   rather than using a header argument to specify how the return value
+   should be passed back, I'm leaning towards the use of a =#+RETURN=
+   line inside the block.  If such a line *is not present* then we
+   default to using STDOUT to collect results, but if such a line *is
+   present* then we use it's value as the results of the block.  I
+   think this will allow for the most elegant specification between
+   functional and script execution.  This also cleans up some issues
+   of implementation and finding which statement is the last
+   statement.
+
 *** TODO rework all source codes to use inferior-processes-buffers
 
 this will involve...
@@ -434,7 +478,6 @@ b = 2
 c = 3
 (a + b) * c
 #+end_src
-
 
 *** TODO implement a *session* header argument
 
