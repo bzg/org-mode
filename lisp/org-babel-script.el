@@ -92,55 +92,22 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      (org-babel-chomp results))))
 
-;; functions for interacting with comint
-(defvar org-babel-script-ruby-buffer nil
-  "variable to hold the current ruby buffer")
+;; functions for interacting with comint sessions
+(defvar org-babel-script-default-ruby-session "org-babel-ruby"
+  "variable to hold the default ruby session")
 
-(defvar org-babel-script-python-buffer nil
-  "variable to hold the current python buffer")
+(defvar org-babel-script-default-python-session "*org-babel-python*"
+  "variable to hold the current python session")
 
-(defun org-babel-script-interpreter-buffer (interpreter)
-  (intern (format "org-babel-script-%s-buffer" interpreter)))
-
-(defun org-babel-script-initiate-session (interpreter)
-  "If there is not a current inferior-process-buffer for
-INTERPRETER then create one.  Return the buffer in which the
-session has been created."
+(defun org-babel-script-initiate-session (interpreter &optional session)
+  "If there is not a current inferior-process-buffer in SESSION
+then create.  Return the initialized session."
   (save-window-excursion
-    (let ((buffer (org-babel-script-interpreter-buffer interpreter)))
-      (unless (and (buffer-live-p buffer) (get-buffer buffer))
-        (case (intern interpreter)
-          ('ruby (funcall #'run-ruby))
-          ('python (funcall #'run-python)))))))
-
-(defun org-babel-script-wait-for-output (interpreter)
-  "Wait until output arrives"
-  (save-window-excursion
-    (save-match-data
-      (set-buffer (org-babel-script-initiate-session interpreter))
-      (while (progn
-               (goto-char comint-last-input-end)
-               (not (re-search-forward comint-prompt-regexp nil t)))
-        (accept-process-output (get-buffer-process (current-buffer)))))))
-
-(defun org-babel-script-input-command (interpreter cmd)
-  "Pass CMD to INTERPRETER"
-  (comint-send-string (get-buffer-process (org-babel-script-initiate-session interpreter)) (concat cmd "\n"))
-  (org-babel-script-wait-for-output interpreter))
-
-(defun org-babel-script-command-to-string (interpreter cmd)
-  (let ((buffer (org-babel-script-interpreter-buffer interpreter)))
-    (org-babel-script-input-command interpreter cmd)
-    (org-babel-script-last-value interpreter)))
-
-(defun org-babel-script-last-value (interpreter)
-  "Return the last value passed to INTERPRETER"
-  (save-excursion
-    (save-match-data
-      (set-buffer (org-babel-script-initiate-session interpreter))
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (forward-line 0)
-      (org-babel-clean-text-properties (buffer-substring comint-last-input-end (- (point) 1))))))
+    (case (if (symbolp interpreter) interpreter (intern interpreter))
+      ('ruby
+       (setq session (or session org-babel-script-default-ruby-session))
+       (funcall #'run-ruby nil session))
+      ('python (funcall #'run-python)))))
 
 (provide 'org-babel-script)
 ;;; org-babel-script.el ends here
