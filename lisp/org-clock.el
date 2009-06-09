@@ -420,6 +420,7 @@ clock into.  When SELECT is `C-u C-u', clock into the current task and mark
 is as the default task, a special task that will always be offered in
 the clocking selection, associated with the letter `d'."
   (interactive "P")
+  (setq org-clock-notification-was-shown nil)
   (catch 'abort
     (let ((interrupting (marker-buffer org-clock-marker))
 	  ts selected-task target-pos (msg-extra ""))
