@@ -1385,11 +1385,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(let ((start 0)
 	      (trans '(("\\" . "\\backslash")
 		       ("~" . "\\ensuremath{\\sim}")
-		       ("^" . "\\ensuremath{\\wedge}")
-		       ("<" . "\\ensuremath{<}")
-		       (">" . "\\ensuremath{>}")))
+		       ("^" . "\\ensuremath{\\wedge}")))
 	      (rtn ""))
-	  (while (string-match "[\\{}$%&_#~^<>]" string)
+	  (while (string-match "[\\{}$%&_#~^]" string)
 	    (setq char (match-string 0 string))
 	    (if (> (match-beginning 0) 0)
 		(setq rtn (concat rtn (substring string

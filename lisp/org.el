@@ -8463,6 +8463,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		(if (not (bolp)) (newline))
 		(bookmark-set "org-refile-last-stored")
 		(org-paste-subtree level)
+		(if (fboundp 'deactivate-mark) (deactivate-mark))
 		(run-hooks 'org-after-refile-insert-hook))))
 	  (if regionp
 	      (delete-region (point) (+ (point) region-length))
