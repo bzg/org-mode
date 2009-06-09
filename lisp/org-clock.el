@@ -369,16 +369,17 @@ previous clocking intervals."
 (defun org-clock-notify-once-if-expired ()
   "Show notification if we spent more time then we estimated before.
 Notification is shown only once."
-  (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
-	(clocked-time (org-clock-get-clocked-time)))
-    (if (>= clocked-time effort-in-minutes)
-	(unless org-clock-notification-was-shown
-	  (setq org-clock-notification-was-shown t)
-	  (org-clock-play-sound)
-	  (org-show-notification
-	   (format "Task '%s' should be finished by now. (%s)"
-		   org-clock-heading org-clock-effort)))
-      (setq org-clock-notification-was-shown nil))))
+  (when (marker-buffer org-clock-marker)
+    (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
+	  (clocked-time (org-clock-get-clocked-time)))
+      (if (>= clocked-time effort-in-minutes)
+	  (unless org-clock-notification-was-shown
+	    (setq org-clock-notification-was-shown t)
+	    (org-clock-play-sound)
+	    (org-show-notification
+	     (format "Task '%s' should be finished by now. (%s)"
+		     org-clock-heading org-clock-effort)))
+	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-show-notification (notification)
   "Show notification. Use libnotify, if available."
