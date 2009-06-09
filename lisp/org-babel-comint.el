@@ -36,14 +36,14 @@
 (require 'org-babel)
 (require 'comint)
 
-(defun org-babel-ensure-buffer-livep (buffer)
-  (unless (and (buffer-live-p buffer) (get-buffer buffer) (get-buffer-process buffer))
-    (error (format "buffer %s doesn't exist or has no process" buffer))))
+(defun org-babel-comint-buffer-livep (buffer)
+  (and (buffer-live-p buffer) (get-buffer buffer) (get-buffer-process buffer)))
 
 (defmacro org-babel-comint-in-buffer (buffer &rest body)
   `(save-window-excursion
      (save-match-data
-       (org-babel-ensure-buffer-livep buffer)
+       (unless (org-babel-comint-buffer-livep buffer)
+         (error (format "buffer %s doesn't exist or has no process" buffer)))
        (set-buffer buffer)
        ,@body)))
 

@@ -33,17 +33,34 @@
 
 (org-babel-add-interpreter "R")
 
+(defvar org-babel-R-buffer "org-babel-R"
+  "Holds the buffer for the current R process")
+
+(defun org-babel-R-initiate-R-buffer ()
+  "If there is not a current R process then create one."
+  (unless (org-babel-comint-buffer-livep org-babel-R-buffer)
+    (save-window-excursion (R) (setf org-babel-R-buffer (current-buffer)))))
+
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
     (let ((vars (org-babel-ref-variables params))
+          (results-params (split-string (cdr (assoc :results params))))
           results)
       (org-babel-R-initiate-R-buffer)
       (mapc (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)
-      (org-babel-R-input-command body)
-      (org-babel-R-last-value-as-elisp))))
+      (cond
+       ((member "script" results-params) ;; collect all output
+        (let ((tmp-file (make-temp-file "org-babel-R-script-output")))
+          (org-babel-comint-input-command org-babel-R-buffer (format "sink(%S)" tmp-file))
+          (org-babel-comint-input-command org-babel-R-buffer body)
+          (org-babel-comint-input-command org-babel-R-buffer "sink()")
+          (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
+       ((member "last" results-params) ;; the value of the last statement
+        (org-babel-comint-input-command org-babel-R-buffer body)
+        (org-babel-R-last-value-as-elisp))))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
@@ -55,7 +72,8 @@ called by `org-babel-execute-src-block'."
   "Read the elisp VALUE into a variable named NAME in the current
 R process in `org-babel-R-buffer'."
   (unless org-babel-R-buffer (error "No active R buffer"))
-  (org-babel-R-input-command
+  (org-babel-comint-input-command
+   org-babel-R-buffer
    (if (listp value)
        (let ((transition-file (make-temp-file "org-babel-R-import")))
 	 ;; ensure VALUE has an orgtbl structure (depth of at least 2)
@@ -70,9 +88,10 @@ R process in `org-babel-R-buffer'."
 (defun org-babel-R-last-value-as-elisp ()
   "Return the last value returned by R as Emacs lisp."
   (let ((tmp-file (make-temp-file "org-babel-R")) result)
-    (org-babel-R-input-command
+    (org-babel-comint-input-command
+     org-babel-R-buffer
      (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
-	      tmp-file))
+             tmp-file))
     (with-temp-buffer
       (condition-case nil
           (progn
@@ -81,7 +100,6 @@ R process in `org-babel-R-buffer'."
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-R-read row))
                                  (org-table-to-lisp))))
-        
         (error nil))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
           (if (consp (car result))
@@ -97,67 +115,6 @@ R process in `org-babel-R-buffer'."
                          (string-match "\\\"\\(.+\\)\\\"" cell)
                          (match-string 1 cell))
                     cell)))
-
-;; functions for evaluation of R code
-(defvar org-babel-R-buffer nil
-  "Holds the buffer for the current R process")
-
-(defun org-babel-R-initiate-R-buffer ()
-  "If there is not a current R process then create one."
-  (unless (and (buffer-live-p org-babel-R-buffer) (get-buffer org-babel-R-buffer))
-    (save-excursion
-      (R)
-      (setf org-babel-R-buffer (current-buffer))
-      (org-babel-R-wait-for-output)
-      (org-babel-R-input-command ""))))
-
-(defun org-babel-R-command-to-string (command)
-  "Send a command to R, and return the results as a string."
-  (org-babel-R-input-command command)
-  (org-babel-R-last-output))
-
-(defun org-babel-R-input-command (command)
-  "Pass COMMAND to the R process running in `org-babel-R-buffer'."
-  (save-excursion
-    (save-match-data
-      (set-buffer org-babel-R-buffer)
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (insert command)
-      (comint-send-input)
-      (org-babel-R-wait-for-output))))
-
-(defun org-babel-R-wait-for-output ()
-  "Wait until output arrives"
-  (save-excursion
-    (save-match-data
-      (set-buffer org-babel-R-buffer)
-      (while (progn
-	       (goto-char comint-last-input-end)
-	       (not (re-search-forward comint-prompt-regexp nil t)))
-	(accept-process-output (get-buffer-process (current-buffer)))))))
-
-(defun org-babel-R-last-output ()
-  "Return the last R output as a string"
-  (save-excursion
-    (save-match-data
-      (set-buffer org-babel-R-buffer)
-      (goto-char (process-mark (get-buffer-process (current-buffer))))
-      (forward-line 0)
-      (let ((raw (buffer-substring comint-last-input-end (- (point) 1)))
-            output output-flag)
-        (mapconcat
-         (lambda (el)
-           (if (stringp el)
-               (format "%s" el)
-             (format "%S" el)))
-         (delq nil
-               (mapcar
-                (lambda (line)
-                  (unless (string-match "^>" line)
-                    (and (string-match "\\[[[:digit:]]+\\] *\\(.*\\)$" line)
-                         (match-string 1 line))))
-                ;; drop first, because it's the last line of input
-                (cdr (split-string raw "[\n\r]")))) "\n")))))
 
 (provide 'org-babel-R)
 ;;; org-babel-R.el ends here

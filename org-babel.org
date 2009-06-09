@@ -468,18 +468,38 @@ for the execution of source-code blocks.
 *** TODO rework evaluation lang-by-lang [0/4]
 
 This should include...
-- STDOUT and functional results
+- functional results working with the comint buffer
+- results headers
+  - script :: return the output of STDOUT
+    - write a macro which runs the first redirection, executes the
+      body, then runs the second redirection
+  - last :: return the value of the last statement
+    - 
+
 - sessions in comint buffers
 
 **** TODO R
 
+- [X] functional results working with comint
+- [X] script results
+- [ ] implement echo
+
+To redirect output to a file, you can use the =sink()= command.
+
 #+srcname: task-R-with-inf-process-buffer
-#+begin_src R 
+#+begin_src R :results replace script scalar
 a <- 8
 b <- 9
 c <- 10
 a + b
+21
+a + b + c
 #+end_src
+
+#+resname: task-R-with-inf-process-buffer
+: [1] 17
+: [1] 21
+: [1] 27
 
 **** TODO Ruby
 
