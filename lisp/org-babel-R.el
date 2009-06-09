@@ -47,8 +47,9 @@ called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
     (let ((vars (org-babel-ref-variables params))
-          (results-params (split-string (cdr (assoc :results params))))
+          (results-params (split-string (or (cdr (assoc :results params)) "")))
           results)
+      ;; (message (format "%S" results-params))
       (org-babel-R-initiate-R-buffer)
       (mapc (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)
       (cond

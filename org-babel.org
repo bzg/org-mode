@@ -465,7 +465,7 @@ for the execution of source-code blocks.
              with the results (this implies the *script* =:results=
              argument as well)
 
-*** TODO rework evaluation lang-by-lang [0/4]
+*** TODO rework evaluation lang-by-lang [1/4]
 
 This should include...
 - functional results working with the comint buffer
@@ -478,16 +478,16 @@ This should include...
 
 - sessions in comint buffers
 
-**** TODO R
+**** DONE R [3/3]
 
 - [X] functional results working with comint
 - [X] script results
-- [ ] implement echo
+- [X] ensure callable by other source block
 
 To redirect output to a file, you can use the =sink()= command.
 
-#+srcname: task-R-with-inf-process-buffer
-#+begin_src R :results replace script scalar
+#+srcname: task_R_B
+#+begin_src R :results replace script
 a <- 8
 b <- 9
 c <- 10
@@ -501,7 +501,26 @@ a + b + c
 : [1] 21
 : [1] 27
 
-**** TODO Ruby
+#+srcname: task-R-use-other-output
+#+begin_src R :var twoentyseven=task_R_B() :results replace script
+83
+twoentyseven
+#+end_src
+
+#+resname: task-R-use-other-output
+: [1] 83
+: [1] 27
+
+#+srcname: name
+#+begin_src emacs-lisp 
+(setq debug-on-error t)
+#+end_src
+
+**** TODO Ruby [0/3]
+
+- [ ] functional results working with comint
+- [ ] script results
+- [ ] ensure callable by other source block
 
 #+srcname: ruby-use-last-output
 #+begin_src ruby 

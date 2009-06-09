@@ -119,7 +119,7 @@ the header arguments specified at the source code block."
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (params (org-combine-plists (third info) params))
+         (params (org-combine-plists params (third info)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message (format "params=%S" params)) ;; debugging statement

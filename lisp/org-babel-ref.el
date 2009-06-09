@@ -132,7 +132,8 @@ return nil."
 		     (mapcar #'org-babel-read row)))
                  (org-table-to-lisp)))
         ('source-block
-         (setq result (org-babel-execute-src-block t nil args))
+         (setq result (org-babel-execute-src-block
+                       t nil (org-combine-plists args '((:results . "last")))))
          (if (symbolp result) (format "%S" result) result))))))
 
 (defun org-babel-ref-at-ref-p ()
