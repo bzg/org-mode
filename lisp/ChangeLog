@@ -1,3 +1,9 @@
+2009-06-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-use-verb): New variable.
+	(org-export-latex-emph-format): Prefer \texttt over \verb when
+	org-export-latex-use-verb is set.
+
 2009-06-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-docbook.el (org-export-docbook-close-lists-maybe): Also look

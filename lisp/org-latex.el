@@ -1367,19 +1367,37 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	(replace-match rpl t t)))
     (backward-char)))
 
+(defvar org-export-latex-use-verb nil)
 (defun org-export-latex-emph-format (format string)
   "Format an emphasis string and handle the \\verb special case."
   (when (equal format "\\verb")
     (save-match-data
-      (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
-	(catch 'exit
-	  (loop for i from 0 to (1- (length ll)) do
-		(if (not (string-match (regexp-quote (substring ll i (1+ i)))
-				       string))
-		    (progn
-		      (setq format (concat "\\verb" (substring ll i (1+ i))
-					   "%s" (substring ll i (1+ i))))
-		      (throw 'exit nil))))))))
+      (if org-export-latex-use-verb
+	  (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
+	    (catch 'exit
+	      (loop for i from 0 to (1- (length ll)) do
+		    (if (not (string-match (regexp-quote (substring ll i (1+ i)))
+					   string))
+			(progn
+			  (setq format (concat "\\verb" (substring ll i (1+ i))
+					       "%s" (substring ll i (1+ i))))
+			  (throw 'exit nil))))))
+	(let ((start 0)
+	      (trans '(("\\" . "\\backslash")
+		       ("~" . "\\ensuremath{\\sim}")
+		       ("^" . "\\ensuremath{\\wedge}")
+		       ("<" . "\\ensuremath{<}")
+		       (">" . "\\ensuremath{>}")))
+	      (rtn ""))
+	  (while (string-match "[\\{}$%&_#~^<>]" string)
+	    (setq char (match-string 0 string))
+	    (if (> (match-beginning 0) 0)
+		(setq rtn (concat rtn (substring string
+						 0 (match-beginning 0)))))
+	    (setq string (substring string (1+ (match-beginning 0))))
+	    (setq char (or (cdr (assoc char trans)) (concat "\\" char))
+		  rtn (concat rtn char)))
+	  (setq string (concat rtn string) format "\\texttt{%s}")))))
   (setq string (org-export-latex-protect-string
 		(format format string))))
 
