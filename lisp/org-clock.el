@@ -355,7 +355,7 @@ If not, show simply the clocked time like 01:50."
   (force-mode-line-update))
 
 (defun org-clock-get-clocked-time ()
-  "Get the clocked time for the rrent item in minutes.
+  "Get the clocked time for the current item in minutes.
 The time returned includes the the time spent on this task in
 previous clocking intervals."
   (let ((currently-clocked-time
