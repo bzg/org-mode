@@ -646,13 +646,15 @@ publishing directory."
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
-	    (let (par)
+	    (debug)
+	    (let (par (ind (get-text-property 0 'original-indentation line)))
 	      (when (re-search-backward
 		     "\\(<para>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
 		(setq par (match-string 1))
 		(replace-match "\\2\n"))
 	      (insert line "\n")
 	      (while (and lines
+			  (or (not ind) (equal ind (get-text-property 0 'original-indentation (car lines))))
 			  (or (= (length (car lines)) 0)
 			      (get-text-property 0 'org-protected (car lines))))
 		(insert (pop lines) "\n"))
@@ -1152,7 +1154,8 @@ publishing directory."
 (defvar local-list-type)
 (defun org-export-docbook-close-lists-maybe (line)
   (let ((ind (or (get-text-property 0 'original-indentation line)
-		 (org-get-indentation line)))
+		 (and (string-match "\\S-" line)
+		      (org-get-indentation line))))
 	didclose)
     (when ind
       (while (and in-local-list
