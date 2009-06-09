@@ -73,6 +73,8 @@
 ;; `org-export-blocks-add-block' to add your block type to
 ;; `org-export-blocks'.
 
+(require 'org)
+
 (defun org-exp-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
   (set var value)
