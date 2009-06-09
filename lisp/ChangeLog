@@ -1,6 +1,8 @@
 2009-06-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-src-mode): Renamed from `org-exit-edit-mode'.
+	(org-edit-src-exit): Better cursor positioning when returning from
+	editing.
 
 	* org-latex.el (org-export-latex-use-verb): New variable.
 	(org-export-latex-emph-format): Prefer \texttt over \verb when
