@@ -71,9 +71,14 @@ executed through org-babel."
     (cond
      ((member "script" results-params) ;; collect all output
       (let ((tmp-file (make-temp-file "org-babel-R-script-output")))
-        (org-babel-comint-input-command org-babel-R-buffer (format "sink(%S)" tmp-file))
-        (org-babel-comint-input-command org-babel-R-buffer body)
-        (org-babel-comint-input-command org-babel-R-buffer "sink()")
+        ;; this is totally not working well
+        (org-babel-script-input-command interpreter (concat
+                                                     "org_babel_io_holder = $stdout;"
+                                                     (format "org_babel_tmp_file_holder = File.open('%s', 'w'); "  tmp-file)
+                                                     "$stdout = org_babel_tmp_file_holder; "
+                                                     body
+                                                     "org_babel_tmp_file_holder.flush; "
+                                                     "$stdout = org_babel_io_holder;"))
         (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
      ((member "last" results-params) ;; the value of the last statement
       (org-babel-script-input-command interpreter full-body)
@@ -126,14 +131,12 @@ then create.  Return the initialized session."
                                              (current-buffer))))))
 
 (defun org-babel-script-input-command (interpreter cmd)
-  (setq cmd (org-babel-chomp cmd))
-  (message (format "input = %S" cmd))
-  (org-babel-comint-input-command (eval (org-babel-script-session interpreter)) cmd))
+  (org-babel-comint-input-command
+   (eval (org-babel-script-session interpreter)) (org-babel-chomp cmd)))
 
 (defun org-babel-script-command-to-string (interpreter cmd)
-  (setq cmd (org-babel-chomp cmd))
-  (message (format "string = %S" cmd))
-  (org-babel-comint-command-to-string (eval (org-babel-script-session interpreter)) cmd))
+  (org-babel-comint-command-to-string
+   (eval (org-babel-script-session interpreter)) (org-babel-chomp cmd)))
 
 (provide 'org-babel-script)
 ;;; org-babel-script.el ends here

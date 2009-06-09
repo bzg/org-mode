@@ -525,16 +525,12 @@ twoentyseven
 - [ ] rename buffer after session
 
 #+srcname: ruby-use-last-output
-#+begin_src ruby :results replace last
+#+begin_src ruby :results replace script
 a = 2
 b = 4
 c = a + b
 c * (a + b)
 #+end_src
-
-#+resname: ruby-use-last-output
-: 36
-
 
 **** TODO Python
 
