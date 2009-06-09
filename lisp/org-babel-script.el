@@ -59,6 +59,7 @@ executed through org-babel."
   "Pass BODY to INTERPRETER obeying any options set with PARAMS."
   (message (format "executing %s code block..." cmd))
   (let* ((vars (org-babel-ref-variables params))
+         (results-params (split-string (or (cdr (assoc :results params)) "")))
          (full-body (concat
                      (mapconcat ;; define any variables
                       (lambda (pair)
@@ -66,8 +67,18 @@ executed through org-babel."
                                 (car pair)
                                 (org-babel-script-var-to-ruby/python (cdr pair))))
                       vars "\n") body "\n"))) ;; then the source block body
-    (org-babel-script-input-command interpreter full-body)
-    (org-babel-script-table-or-results (org-babel-script-last-value interpreter))))
+    (org-babel-script-initiate-session interpreter)
+    (cond
+     ((member "script" results-params) ;; collect all output
+      (let ((tmp-file (make-temp-file "org-babel-R-script-output")))
+        (org-babel-comint-input-command org-babel-R-buffer (format "sink(%S)" tmp-file))
+        (org-babel-comint-input-command org-babel-R-buffer body)
+        (org-babel-comint-input-command org-babel-R-buffer "sink()")
+        (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
+     ((member "last" results-params) ;; the value of the last statement
+      (org-babel-script-input-command interpreter full-body)
+      (org-babel-script-table-or-results
+       (org-babel-script-command-to-string interpreter "_"))))))
 
 (defun org-babel-script-var-to-ruby/python (var)
   "Convert an elisp var into a string of ruby or python source
@@ -93,21 +104,36 @@ Emacs-lisp table, otherwise return the results as a string."
      (org-babel-chomp results))))
 
 ;; functions for interacting with comint sessions
-(defvar org-babel-script-default-ruby-session "org-babel-ruby"
-  "variable to hold the default ruby session")
+(defvar org-babel-script-ruby-session nil)
+(defvar org-babel-script-python-session nil)
 
-(defvar org-babel-script-default-python-session "*org-babel-python*"
-  "variable to hold the current python session")
+(defun org-babel-script-session (interpreter)
+  (case (if (symbolp interpreter) interpreter (intern interpreter))
+          ('ruby 'org-babel-script-ruby-session)
+          ('python 'org-babel-script-python-session)))
 
-(defun org-babel-script-initiate-session (interpreter &optional session)
+(defun org-babel-script-initiate-session (interpreter)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (save-window-excursion
-    (case (if (symbolp interpreter) interpreter (intern interpreter))
-      ('ruby
-       (setq session (or session org-babel-script-default-ruby-session))
-       (funcall #'run-ruby nil session))
-      ('python (funcall #'run-python)))))
+  (case (intern (format "%s" interpreter))
+    ('ruby
+     (setq org-babel-script-ruby-session (save-window-excursion
+                                            (funcall #'run-ruby nil)
+                                            (current-buffer))))
+    ('python
+     (setq org-babel-script-python-session (save-window-excursion
+                                             (funcall #'run-python)
+                                             (current-buffer))))))
+
+(defun org-babel-script-input-command (interpreter cmd)
+  (setq cmd (org-babel-chomp cmd))
+  (message (format "input = %S" cmd))
+  (org-babel-comint-input-command (eval (org-babel-script-session interpreter)) cmd))
+
+(defun org-babel-script-command-to-string (interpreter cmd)
+  (setq cmd (org-babel-chomp cmd))
+  (message (format "string = %S" cmd))
+  (org-babel-comint-command-to-string (eval (org-babel-script-session interpreter)) cmd))
 
 (provide 'org-babel-script)
 ;;; org-babel-script.el ends here

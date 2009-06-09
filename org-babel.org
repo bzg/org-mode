@@ -465,7 +465,7 @@ for the execution of source-code blocks.
              with the results (this implies the *script* =:results=
              argument as well)
 
-*** TODO rework evaluation lang-by-lang [1/4]
+*** TODO rework evaluation lang-by-lang [0/4]
 
 This should include...
 - functional results working with the comint buffer
@@ -478,11 +478,12 @@ This should include...
 
 - sessions in comint buffers
 
-**** DONE R [3/3]
+**** TODO R [3/3]
 
 - [X] functional results working with comint
 - [X] script results
 - [X] ensure callable by other source block
+- [ ] rename buffer after session
 
 To redirect output to a file, you can use the =sink()= command.
 
@@ -516,19 +517,24 @@ twoentyseven
 (setq debug-on-error t)
 #+end_src
 
-**** TODO Ruby [0/3]
+**** TODO Ruby [1/4]
 
-- [ ] functional results working with comint
+- [X] functional results working with comint
 - [ ] script results
 - [ ] ensure callable by other source block
+- [ ] rename buffer after session
 
 #+srcname: ruby-use-last-output
-#+begin_src ruby 
-a = 1
-b = 2
-c = 3
-(a + b) * c
+#+begin_src ruby :results replace last
+a = 2
+b = 4
+c = a + b
+c * (a + b)
 #+end_src
+
+#+resname: ruby-use-last-output
+: 36
+
 
 **** TODO Python
 
