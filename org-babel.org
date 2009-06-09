@@ -413,34 +413,33 @@ Thanks Dan, These comments are invaluable.
 What do you think about this as a new list of priorities/requirements
 for the execution of source-code blocks.
 
-1)  Sessions
-    1)  we want the evaluation of the source code block to take place in a
-        session which can persist state (variables, current directory,
-        etc...).
-    2)  source code blocks can specify their session with a header argument
-    3)  each session should correspond to an Emacs comint buffer so that the
-        user can drop into the session and experiment with live code
-        evaluation.
-2)  Results
-    1) each source-code block generates some form of results which (as
-       we have already implemented) is transfered into emacs-lisp
-       after which it can be inserted into the org-mode buffer, or
-       used by other source-code blocks
-    2) when the results are translated into emacs-lisp, forced to be
-       interpreted as a scalar (dumping their raw values into the
-       org-mode buffer), as a vector (which is often desirable with R
-       code blocks), or interpreted on the fly (the default option).
-       Note that this is very nearly currently implemented through the
-       [[* DONE results-type header (vector/file)][results-type-header]].
-    3) there should be *two* means of collecting results from the
-       execution of a source code block.  *Either* the value of the
-       last statement of the source code block, or the collection of
-       all that has been passed to STDOUT during the evaluation.
+- Sessions
+   1)  we want the evaluation of the source code block to take place in a
+       session which can persist state (variables, current directory,
+       etc...).
+   2)  source code blocks can specify their session with a header argument
+   3)  each session should correspond to an Emacs comint buffer so that the
+       user can drop into the session and experiment with live code
+       evaluation.
+- Results
+  1) each source-code block generates some form of results which (as
+     we have already implemented) is transfered into emacs-lisp
+     after which it can be inserted into the org-mode buffer, or
+     used by other source-code blocks
+  2) when the results are translated into emacs-lisp, forced to be
+     interpreted as a scalar (dumping their raw values into the
+     org-mode buffer), as a vector (which is often desirable with R
+     code blocks), or interpreted on the fly (the default option).
+     Note that this is very nearly currently implemented through the
+     [[* DONE results-type header (vector/file)][results-type-header]].
+  3) there should be *two* means of collecting results from the
+     execution of a source code block.  *Either* the value of the
+     last statement of the source code block, or the collection of
+     all that has been passed to STDOUT during the evaluation.
 
-**** header argument or return line
+**** header argument or return line (*header argument*)
 
-
-   rather than using a header argument to specify how the return value
+   Rather than using a header argument to specify how the return value
    should be passed back, I'm leaning towards the use of a =#+RETURN=
    line inside the block.  If such a line *is not present* then we
    default to using STDOUT to collect results, but if such a line *is
@@ -449,6 +448,22 @@ for the execution of source-code blocks.
    functional and script execution.  This also cleans up some issues
    of implementation and finding which statement is the last
    statement.
+
+   Having given this more thought, I think a header argument is
+   preferable.  The =#+return:= line adds new complicating syntax for
+   something that does little more than we would accomplish through
+   the addition of a header argument.  The only benefit being that we
+   know where the final statement starts, which is not an issue in
+   those languages which contain 'last value' operators.
+
+   new header =:results= arguments
+   - script :: explicitly states that we want to use STDOUT to
+               initialize our results
+   - return_last :: stdout is ignored instead the *value* of the final
+                    statement in the block is returned
+   - echo :: means echo the contents of the source-code block along
+             with the results (this implies the *script* =:results=
+             argument as well)
 
 *** TODO rework evaluation lang-by-lang [0/4]
 
