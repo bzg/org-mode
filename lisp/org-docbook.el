@@ -646,7 +646,6 @@ publishing directory."
 
 	  ;; Protected HTML
 	  (when (get-text-property 0 'org-protected line)
-	    (debug)
 	    (let (par (ind (get-text-property 0 'original-indentation line)))
 	      (when (re-search-backward
 		     "\\(<para>\\)\\([ \t\r\n]*\\)\\=" (- (point) 100) t)
