@@ -100,7 +100,7 @@ blocks is as follows...
   (ditaa org-export-blocks-format-ditaa nil)"
   (unless (member block-spec org-export-blocks)
     (setq org-export-blocks (cons block-spec org-export-blocks))
-    (org-export-blocks-set-blocks 'org-export-blocks)))
+    (org-export-blocks-set 'org-export-blocks)))
 
 (defcustom org-export-blocks
   '((comment org-export-blocks-format-comment t)
