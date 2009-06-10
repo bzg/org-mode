@@ -363,7 +363,7 @@ This is taken almost directly from `org-read-prop'."
   "Remove any trailing space or carriage returns characters from
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
 overwritten by specifying a regexp as a second argument."
-  (while (string-match "[ \f\t\n\r\v]" (substring string -1))
+  (while (and (> (length string) 0) (string-match "[ \f\t\n\r\v]" (substring string -1)))
     (setq string (substring string 0 -1)))
   string)
 
