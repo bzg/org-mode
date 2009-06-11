@@ -115,7 +115,7 @@ and the results to be collected in the same table.
 
 
 * Tasks [22/38]
-** TODO Create objects in top level (global) environment [0/5]
+** TODO Create objects in top level (global) environment [1/5]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -465,38 +465,7 @@ for the execution of source-code blocks.
              with the results (this implies the *script* =:results=
              argument as well)
 
-*** TODO comint notes
-
-Implementing comint integration in [[file:lisp/org-babel-comint.el][org-babel-comint.el]].
-
-Need to have...
-- handling of outputs
-  - split raw output from process by prompts
-  - a ring of the outputs, buffer-local, `org-babel-comint-output-ring'
-  - a switch for dumping all outputs to a buffer
-- inputting commands
-
-Lets drop all this language specific stuff, and just use
-org-babel-comint to split up our outputs, and return either the last
-value of an execution or the combination of values from the
-executions.
-
-**** comint filter functions
-: ;;  comint-input-filter-functions	hook	process-in-a-buffer
-: ;;  comint-output-filter-functions	hook	function modes.
-: ;;  comint-preoutput-filter-functions   hook
-: ;;  comint-input-filter			function ...
-
-#+srcname: obc-filter-ruby
-#+begin_src ruby :results last
-1
-2
-3
-4
-5
-#+end_src
-
-*** TODO rework evaluation lang-by-lang [0/4]
+*** TODO rework evaluation lang-by-lang [1/4]
 
 This should include...
 - functional results working with the comint buffer
@@ -509,12 +478,12 @@ This should include...
 
 - sessions in comint buffers
 
-**** TODO Ruby [3/4]
+**** DONE Ruby [4/4]
 
 - [X] functional results working with comint
 - [X] script results
 - [X] ensure callable by other source block
-- [ ] rename buffer after session
+- [X] rename buffer after session
 
 #+srcname: ruby-use-last-output
 #+begin_src ruby :results replace
@@ -534,6 +503,23 @@ last.flatten.size
 
 #+resname: task-call-use-last-output
 : 4
+
+***** ruby sessions
+
+#+srcname: first-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte = 27
+#+end_src
+
+#+srcname: second-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte + 3
+#+end_src
+
+#+srcname: without-the-right-session
+#+begin_src ruby :results silent
+schulte
+#+end_src
 
 **** TODO R [3/3]
 
@@ -592,6 +578,37 @@ up the inf-proc buffer using =pop-to-buffer=.
 
 Callable with a prefix argument to specify how many lines should be
 dumped into the source-code buffer.
+
+*** REJECTED comint notes
+
+Implementing comint integration in [[file:lisp/org-babel-comint.el][org-babel-comint.el]].
+
+Need to have...
+- handling of outputs
+  - split raw output from process by prompts
+  - a ring of the outputs, buffer-local, `org-babel-comint-output-ring'
+  - a switch for dumping all outputs to a buffer
+- inputting commands
+
+Lets drop all this language specific stuff, and just use
+org-babel-comint to split up our outputs, and return either the last
+value of an execution or the combination of values from the
+executions.
+
+**** comint filter functions
+: ;;  comint-input-filter-functions	hook	process-in-a-buffer
+: ;;  comint-output-filter-functions	hook	function modes.
+: ;;  comint-preoutput-filter-functions   hook
+: ;;  comint-input-filter			function ...
+
+#+srcname: obc-filter-ruby
+#+begin_src ruby :results last
+1
+2
+3
+4
+5
+#+end_src
 
 ** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]

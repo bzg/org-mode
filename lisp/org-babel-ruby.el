@@ -50,7 +50,7 @@ called by `org-babel-execute-src-block'."
                                 (car pair)
                                 (org-babel-ruby-var-to-ruby (cdr pair))))
                       vars "\n") "\n" body "\n")) ;; then the source block body
-         (session (org-babel-ruby-initiate-session))
+         (session (org-babel-ruby-initiate-session (cdr (assoc :session params))))
          (results (org-babel-ruby-evaluate session full-body result-type)))
     (case result-type ;; process results based on the result-type
       ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
@@ -78,15 +78,10 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for interacting with comint sessions
-(defvar org-babel-ruby-session nil)
-
-(defun org-babel-ruby-initiate-session ()
+(defun org-babel-ruby-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (setq org-babel-ruby-session (save-window-excursion
-                                 (funcall #'run-ruby nil)
-                                 (current-buffer))))
+  (save-window-excursion (run-ruby nil session) (current-buffer)))
 
 (defvar org-babel-ruby-last-value-eval "_"
   "When evaluated by Ruby this returns the return value of the last statement.")
