@@ -347,6 +347,39 @@ This is used by Org to re-create the anniversary hash table."
   (concat "bbdb:"
 	  (bbdb-record-name (car (bbdb-completing-read-record "Name: ")))))
 
+(defun org-bbdb-anniv-export-ical ()
+ "Extract anniversaries from BBDB and convert them to icalendar format."
+ (require 'bbdb)
+ (require 'diary-lib)
+ (unless (hash-table-p org-bbdb-anniv-hash)
+   (setq org-bbdb-anniv-hash
+	  (make-hash-table :test 'equal :size 366)))
+ (when (or org-bbdb-updated-p
+           (= 0 (hash-table-count org-bbdb-anniv-hash)))
+   (org-bbdb-make-anniv-hash))
+ 
+ (defun org-bbdb-format-vevent (key recs)
+   (while (setq rec (pop recs))
+     (princ (format "BEGIN:VEVENT
+UID: ANNIV-%4i%02i%02i-%s
+DTSTART:%4i%02i%02i
+SUMMARY:%s\n"
+                      (nth 0 rec)
+                      (nth 0 key)
+                      (nth 1 key)
+		      (mapconcat 'identity
+				 (org-split-string (nth 1 rec) "[^a-zA-Z0-90]+")
+				 "-")
+                      (nth 0 rec)
+                      (nth 0 key)
+                      (nth 1 key)
+                      (nth 1 rec)))
+     (if (setq categ (nth 2 rec))
+         (princ (format "CATEGORIES:%s\n" (upcase categ))))
+     (princ "RRULE:FREQ=YEARLY
+END:VEVENT\n")))
+ (maphash 'org-bbdb-format-vevent org-bbdb-anniv-hash))
+
 (provide 'org-bbdb)
 
 ;; arch-tag: 9e4f275d-d080-48c1-b040-62247f66b5c2

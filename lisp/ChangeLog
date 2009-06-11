@@ -1,5 +1,11 @@
 2009-06-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-icalendar.el (org-icalendar-include-bbdb-anniversaries): New
+	option.
+	(org-export-icalendar): Call `org-bbdb-anniv-export-ical'.
+
+	* org-bbdb.el (org-bbdb-anniv-export-ical): New function.
+
 	* org-list.el (org-get-checkbox-statistics-face): Use the new
 	faces.
 
