@@ -496,7 +496,6 @@ executions.
 5
 #+end_src
 
-
 *** TODO rework evaluation lang-by-lang [0/4]
 
 This should include...
@@ -509,6 +508,32 @@ This should include...
     - 
 
 - sessions in comint buffers
+
+**** TODO Ruby [3/4]
+
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure callable by other source block
+- [ ] rename buffer after session
+
+#+srcname: ruby-use-last-output
+#+begin_src ruby :results replace
+a = 2
+b = 4
+c = a + b
+[a, b, c, 78]
+#+end_src
+
+#+resname: ruby-use-last-output
+| 2 | 4 | 6 | 78 |
+
+#+srcname: task-call-use-last-output
+#+begin_src ruby :var last=ruby-use-last-output :results replace
+last.flatten.size
+#+end_src
+
+#+resname: task-call-use-last-output
+: 4
 
 **** TODO R [3/3]
 
@@ -547,21 +572,6 @@ twoentyseven
 #+srcname: name
 #+begin_src emacs-lisp 
 (setq debug-on-error t)
-#+end_src
-
-**** TODO Ruby [1/4]
-
-- [X] functional results working with comint
-- [ ] script results
-- [ ] ensure callable by other source block
-- [ ] rename buffer after session
-
-#+srcname: ruby-use-last-output
-#+begin_src ruby :results replace script
-a = 2
-b = 4
-c = a + b
-c * (a + b)
 #+end_src
 
 **** TODO Python

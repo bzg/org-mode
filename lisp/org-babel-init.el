@@ -36,10 +36,10 @@
 (require 'org-babel-ref)
 (require 'org-babel-exp)
 (require 'org-babel-table)
-(require 'org-babel-session)
+(require 'org-babel-comint)
 
 ;; language specific files
-(require 'org-babel-script)
+(require 'org-babel-ruby)
 (require 'org-babel-shell)
 (require 'org-babel-lisp)
 (require 'org-babel-R)
