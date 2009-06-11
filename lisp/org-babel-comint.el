@@ -39,18 +39,8 @@
 (defvar org-babel-comint-output-buffer nil
   "this is a string to buffer output, it should be set buffer local")
 
-(defvar org-babel-comint-output-ring nil
-  "ring to hold comint output")
-
-(defvar org-babel-comint-output-ring-size 10
-  "number of output to be help")
-
-(defun org-babel-comint-init (buffer)
-  "Initialize a buffer to use org-babel-comint."
-  (save-excursion
-    (set-buffer buffer)
-    (set (make-local-variable 'org-babel-comint-output-buffer) "")
-    ))
+(defvar org-babel-comint-output-list nil
+  "list to hold comint output")
 
 (defun org-babel-comint-buffer-livep (buffer)
   (and (buffer-live-p buffer) (get-buffer buffer) (get-buffer-process buffer)))
@@ -62,6 +52,20 @@
          (error (format "buffer %s doesn't exist or has no process" buffer)))
        (set-buffer buffer)
        ,@body)))
+
+(defun org-babel-comint-append-output-filter (text)
+  (setq string-buffer (concat string-buffer text))
+  (message (format "buffer0=%s" string-buffer)))
+
+(defmacro org-babel-comint-with-output (&rest body)
+  `(let ((string-buffer ""))
+     (message (format "buffer=1%s" string-buffer))
+     (add-hook 'comint-output-filter-functions 'org-babel-comint-append-output-filter)
+     (condition-case nil (progn ,@body) (t))
+     (message (format "buffer=1%s" string-buffer))
+     (remove-hook 'comint-output-filter-functions 'org-babel-comint-append-output-filter)
+     (message (format "buffer=1%s" string-buffer))
+     string-buffer))
 
 (defun org-babel-comint-wait-for-output (buffer)
   "Wait until output arrives"
@@ -104,42 +108,6 @@ then return the result as a string using
                          (- comint-last-input-end
                             comint-last-input-start))
                       (- (point) 1)))))
-
-;; output filter
-;;
-;; This will collect output, stripping away echo'd inputs, splitting
-;; it by `comint-prompt-regexp', then sticking it into the
-;; `org-babel-comint-output-ring'.
-(defun org-babel-comint-hook ()
-  (set (make-local-variable 'org-babel-comint-output-buffer) "")
-  (set (make-local-variable 'org-babel-comint-output-ring) (make-ring 10)))
-
-(add-hook 'comint-mode-hook 'org-babel-comint-hook)
-
-(defun org-babel-comint-output-filter (text)
-  "Filter the text of org-babel-comint"
-  (setq org-babel-comint-output-buffer (concat org-babel-comint-output-buffer text))
-  (let ((holder (split-string org-babel-comint-output-buffer comint-prompt-regexp)))
-    (when (> (length holder) 1)
-      (mapc (lambda (output) (ring-insert org-babel-comint-output-ring (org-babel-chomp output)))
-            (butlast holder))
-      (setq org-babel-comint-output-buffer (or (cdr (last holder)) "")))))
-
-(add-hook 'comint-output-filter-functions 'org-babel-comint-output-filter)
-
-;; debugging functions
-
-(defun org-babel-show-output-buffer ()
-  (interactive)
-  (message org-babel-comint-output-buffer))
-
-(defun org-babel-show-output-ring-size ()
-  (interactive)
-  (message (format "ring is %d" (ring-size org-babel-comint-output-ring))))
-
-(defun org-babel-show-ring ()
-  (interactive)
-  (message (format "%S" (ring-elements org-babel-comint-output-ring))))
 
 (provide 'org-babel-comint)
 ;;; org-babel-comint.el ends here
