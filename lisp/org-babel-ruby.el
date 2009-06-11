@@ -41,7 +41,7 @@ called by `org-babel-execute-src-block'."
   (let* ((vars (org-babel-ref-variables params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
-                            ((member "output" result-params) 'value)
+                            ((member "value" result-params) 'value)
                             (t 'value)))
          (full-body (concat
                      (mapconcat ;; define any variables
@@ -88,10 +88,10 @@ then create.  Return the initialized session."
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
   "Used to indicate that evaluation is has completed.")
 
-(defun org-babel-ruby-evaluate (buffer body &optional to-return)
-  "Pass BODY to the Ruby process in BUFFER.  If TO-RETURN equals
+(defun org-babel-ruby-evaluate (buffer body &optional result-type)
+  "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
-BODY, if TO-RETURN equals 'value then return the value of the
+BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
     (let ((string-buffer "")
@@ -119,7 +119,7 @@ last statement in BODY."
       ;; split results with `comint-prompt-regexp'
       (setq results (cdr (member org-babel-ruby-eoe-indicator
                                  (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
-      (case to-return
+      (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value (car results))
         (t (reverse results))))))
