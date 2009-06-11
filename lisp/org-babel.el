@@ -359,6 +359,9 @@ This is taken almost directly from `org-read-prop'."
   "Return t if STRING represents a number"
   (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
 
+(defun org-babel-reverse-string (string)
+  (apply 'string (reverse (string-to-list string))))
+
 (defun org-babel-chomp (string &optional regexp)
   "Remove any trailing space or carriage returns characters from
 STRING.  Default regexp used is \"[ \f\t\n\r\v]\" but can be
@@ -366,6 +369,11 @@ overwritten by specifying a regexp as a second argument."
   (while (and (> (length string) 0) (string-match "[ \f\t\n\r\v]" (substring string -1)))
     (setq string (substring string 0 -1)))
   string)
+
+(defun org-babel-trim (string &optional regexp)
+  "Like `org-babel-chomp' only it runs on both the front and back of the string"
+  (org-babel-chomp (org-babel-reverse-string
+                    (org-babel-chomp (org-babel-reverse-string string) regexp)) regexp))
 
 (provide 'org-babel)
 ;;; org-babel.el ends here
