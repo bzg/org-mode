@@ -51,15 +51,15 @@ body inside the protection of `save-window-excursion' and
        (set-buffer buffer)
        ,@body)))
 
-(defun org-babel-comint-append-output-filter (text)
-  (setq string-buffer (concat string-buffer text)))
-
 (defmacro org-babel-comint-with-output (&rest body)
-  `(let ((string-buffer ""))
-     (add-hook 'comint-output-filter-functions 'org-babel-comint-append-output-filter)
-     (condition-case nil (progn ,@body) (t))
-     (remove-hook 'comint-output-filter-functions 'org-babel-comint-append-output-filter)
-     string-buffer))
+  (let ((my-filter (gensym "org-babel-comint-filter")))
+    `(let ((string-buffer ""))
+       (flet ((,my-filter (text)
+                          (setq string-buffer (concat string-buffer text))))
+         (add-hook 'comint-output-filter-functions ',my-filter)
+         (condition-case nil (progn ,@body) (t))
+         (remove-hook 'comint-output-filter-functions ',my-filter))
+       string-buffer)))
 
 (defun org-babel-comint-wait-for-output (buffer)
   "Wait until output arrives"
