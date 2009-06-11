@@ -28,6 +28,8 @@
 
 (require 'org-exp)
 
+(declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
+
 (defgroup org-export-icalendar nil
   "Options specific for iCalendar export of Org-mode files."
   :tag "Org Export iCalendar"

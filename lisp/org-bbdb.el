@@ -348,37 +348,38 @@ This is used by Org to re-create the anniversary hash table."
 	  (bbdb-record-name (car (bbdb-completing-read-record "Name: ")))))
 
 (defun org-bbdb-anniv-export-ical ()
- "Extract anniversaries from BBDB and convert them to icalendar format."
- (require 'bbdb)
- (require 'diary-lib)
- (unless (hash-table-p org-bbdb-anniv-hash)
-   (setq org-bbdb-anniv-hash
+  "Extract anniversaries from BBDB and convert them to icalendar format."
+  (require 'bbdb)
+  (require 'diary-lib)
+  (unless (hash-table-p org-bbdb-anniv-hash)
+    (setq org-bbdb-anniv-hash
 	  (make-hash-table :test 'equal :size 366)))
- (when (or org-bbdb-updated-p
-           (= 0 (hash-table-count org-bbdb-anniv-hash)))
-   (org-bbdb-make-anniv-hash))
- 
- (defun org-bbdb-format-vevent (key recs)
-   (while (setq rec (pop recs))
-     (princ (format "BEGIN:VEVENT
+  (when (or org-bbdb-updated-p
+	    (= 0 (hash-table-count org-bbdb-anniv-hash)))
+    (org-bbdb-make-anniv-hash))
+  (maphash 'org-bbdb-format-vevent org-bbdb-anniv-hash))
+
+(defun org-bbdb-format-vevent (key recs)
+  (let (rec categ)
+    (while (setq rec (pop recs))
+      (princ (format "BEGIN:VEVENT
 UID: ANNIV-%4i%02i%02i-%s
 DTSTART:%4i%02i%02i
 SUMMARY:%s\n"
-                      (nth 0 rec)
-                      (nth 0 key)
-                      (nth 1 key)
-		      (mapconcat 'identity
-				 (org-split-string (nth 1 rec) "[^a-zA-Z0-90]+")
-				 "-")
-                      (nth 0 rec)
-                      (nth 0 key)
-                      (nth 1 key)
-                      (nth 1 rec)))
-     (if (setq categ (nth 2 rec))
-         (princ (format "CATEGORIES:%s\n" (upcase categ))))
-     (princ "RRULE:FREQ=YEARLY
-END:VEVENT\n")))
- (maphash 'org-bbdb-format-vevent org-bbdb-anniv-hash))
+		     (nth 0 rec)
+		     (nth 0 key)
+		     (nth 1 key)
+		     (mapconcat 'identity
+				(org-split-string (nth 1 rec) "[^a-zA-Z0-90]+")
+				"-")
+		     (nth 0 rec)
+		     (nth 0 key)
+		     (nth 1 key)
+		     (nth 1 rec)))
+      (if (setq categ (nth 2 rec))
+	  (princ (format "CATEGORIES:%s\n" (upcase categ))))
+      (princ "RRULE:FREQ=YEARLY
+END:VEVENT\n"))))
 
 (provide 'org-bbdb)
 

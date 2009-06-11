@@ -1386,7 +1386,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (trans '(("\\" . "\\backslash")
 		       ("~" . "\\ensuremath{\\sim}")
 		       ("^" . "\\ensuremath{\\wedge}")))
-	      (rtn ""))
+	      (rtn "") char)
 	  (while (string-match "[\\{}$%&_#~^]" string)
 	    (setq char (match-string 0 string))
 	    (if (> (match-beginning 0) 0)

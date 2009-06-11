@@ -35,6 +35,7 @@
 (require 'org-compat)
 
 (declare-function org-do-remove-indentation "org" (&optional n))
+(declare-function org-get-indentation "org" (&optional line))
 
 (defcustom org-edit-src-region-extra nil
   "Additional regexps to identify regions for editing with `org-edit-src-code'.
