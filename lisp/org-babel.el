@@ -72,7 +72,7 @@ then run `org-babel-execute-src-block'."
 `org-babel-src-block-regexp' appropriately."
   (unless (member interpreter org-babel-interpreters)
     (setq org-babel-interpreters (cons interpreter org-babel-interpreters))
-    (add-to-list 'org-babel-session-defaults (cons interpreter (format "org-babel-%s" interpreter)))
+    ;; (add-to-list 'org-babel-session-defaults (cons interpreter (format "org-babel-%s" interpreter)))
     (org-babel-set-interpreters 'org-babel-interpreters org-babel-interpreters)))
 
 (defcustom org-babel-interpreters '()
@@ -358,6 +358,26 @@ This is taken almost directly from `org-read-prop'."
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
   (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
+
+(defun org-babel-import-elisp-from-file (file-name)
+  "Read the results located at FILE-NAME into an elisp table.  If
+the table is trivial, then return it as a scalar."
+  (with-temp-buffer
+    (condition-case nil
+        (progn
+          (org-table-import file-name nil)
+          (delete-file file-name)
+          (setq result (mapcar (lambda (row)
+                                 (mapcar #'org-babel-R-read row))
+                               (org-table-to-lisp))))
+      (error nil))
+    (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+        (if (consp (car result))
+            (if (null (cdr (car result)))
+                (caar result)
+              result)
+          (car result))
+      result)))
 
 (defun org-babel-reverse-string (string)
   (apply 'string (reverse (string-to-list string))))
