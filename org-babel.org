@@ -115,7 +115,7 @@ and the results to be collected in the same table.
 
 
 * Tasks [22/38]
-** TODO Create objects in top level (global) environment [0/6]
+** TODO Create objects in top level (global) environment [0/5]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -464,6 +464,38 @@ for the execution of source-code blocks.
    - echo :: means echo the contents of the source-code block along
              with the results (this implies the *script* =:results=
              argument as well)
+
+*** TODO comint notes
+
+Implementing comint integration in [[file:lisp/org-babel-comint.el][org-babel-comint.el]].
+
+Need to have...
+- handling of outputs
+  - split raw output from process by prompts
+  - a ring of the outputs, buffer-local, `org-babel-comint-output-ring'
+  - a switch for dumping all outputs to a buffer
+- inputting commands
+
+Lets drop all this language specific stuff, and just use
+org-babel-comint to split up our outputs, and return either the last
+value of an execution or the combination of values from the
+executions.
+
+**** comint filter functions
+: ;;  comint-input-filter-functions	hook	process-in-a-buffer
+: ;;  comint-output-filter-functions	hook	function modes.
+: ;;  comint-preoutput-filter-functions   hook
+: ;;  comint-input-filter			function ...
+
+#+srcname: obc-filter-ruby
+#+begin_src ruby :results last
+1
+2
+3
+4
+5
+#+end_src
+
 
 *** TODO rework evaluation lang-by-lang [0/4]
 
