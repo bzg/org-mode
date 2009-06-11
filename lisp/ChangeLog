@@ -1,3 +1,11 @@
+2009-06-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-list.el (org-get-checkbox-statistics-face): Use the new
+	faces.
+
+	* org-faces.el (org-checkbox-statistics-todo)
+	(org-checkbox-statistics-done): New faces.
+
 2009-06-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-src.el (org-src-mode): Renamed from `org-exit-edit-mode'.

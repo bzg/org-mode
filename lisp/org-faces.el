@@ -363,6 +363,16 @@ list of attributes, like (:foreground \"blue\" :weight bold :underline t)."
   "Face for checkboxes"
   :group 'org-faces)
 
+(unless (facep 'org-checkbox-statistics-todo)
+  (copy-face 'org-todo 'org-checkbox-statistics-todo)
+  (set-face-doc-string 'org-checkbox-statistics-todo
+		       "Face used for unfinished checkbox statistics."))
+
+(unless (facep 'org-checkbox-statistics-done)
+  (copy-face 'org-done 'org-checkbox-statistics-done)
+  (set-face-doc-string 'org-checkbox-statistics-done
+		       "Face used for finished checkbox statistics."))
+
 (defcustom org-tag-faces nil
   "Faces for specific tags.
 This is a list of cons cells, with tags in the car and faces in the cdr.

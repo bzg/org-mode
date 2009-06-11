@@ -484,11 +484,13 @@ the whole buffer."
 The face will be `org-done' when all relevant boxes are checked.  Otherwise
 it will be `org-todo'."
   (if (match-end 1)
-      (if (equal (match-string 1) "100%") 'org-done 'org-todo)
+      (if (equal (match-string 1) "100%")
+	  'org-checkbox-statistics-done
+	'org-checkbox-statistics-todo)
     (if (and (> (match-end 2) (match-beginning 2))
 	     (equal (match-string 2) (match-string 3)))
-	'org-done
-      'org-todo)))
+	'org-checkbox-statistics-done
+      'org-checkbox-statistics-todo)))
 
 (defun org-beginning-of-item ()
   "Go to the beginning of the current hand-formatted item.
