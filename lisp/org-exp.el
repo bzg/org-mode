@@ -28,6 +28,7 @@
 
 (require 'org)
 (require 'org-agenda)
+(require 'org-exp-blocks)
 (eval-and-compile
   (require 'cl))
 
