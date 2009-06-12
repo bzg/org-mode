@@ -131,7 +131,7 @@ the header arguments specified at the source code block."
              (member "vector" (split-string (cdr (assoc :results params)))))
         (setq result (list result)))
     (if arg
-        (message (format "%S" result))
+        (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
       (org-babel-insert-result result (cdr (assoc :results params))))
     result))
 
@@ -269,7 +269,7 @@ silent -- no results are inserted"
   (if (= (length result) 0)
       (message "no result returned by source block")
     (if (and insert (member "silent" insert))
-        (progn (message (format "%S" result)) result)
+        (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
       (when (and (stringp result) ;; ensure results end in a newline
                  (not (or (string-equal (substring result -1) "\n")
                           (string-equal (substring result -1) "\r"))))
