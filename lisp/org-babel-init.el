@@ -39,6 +39,7 @@
 (require 'org-babel-comint)
 
 ;; language specific files
+(add-to-list 'load-path (expand-file-name "langs" (file-name-directory (or load-file-name buffer-file-name))))
 (require 'org-babel-ruby)
 (require 'org-babel-python)
 (require 'org-babel-shell)

@@ -498,11 +498,11 @@ c = a + b
 
 #+srcname: task-call-use-last-output
 #+begin_src ruby :var last=ruby-use-last-output :results replace
-last.flatten.size
+last.flatten.size + 1
 #+end_src
 
 #+resname: task-call-use-last-output
-: 4
+: 5
 
 ***** ruby sessions
 
@@ -570,7 +570,12 @@ tasking + 2
 #+resname: task-use-new-eval
 : 12
 
-**** TODO Shells
+**** TODO Shells [0/5]
+- [ ] functional results working with comint
+- [ ] script results
+- [ ] ensure scalar/vector results args are taken into consideration
+- [ ] ensure callable by other source block
+- [ ] rename buffer after session
 
 *** TODO implement a *session* header argument
 
