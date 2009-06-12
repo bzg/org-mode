@@ -46,7 +46,7 @@ called by `org-babel-execute-src-block'."
          (full-body (concat
                      (mapconcat ;; define any variables
                       (lambda (pair)
-                        (format "\t%s=%s"
+                        (format "%s=%s"
                                 (car pair)
                                 (org-babel-ruby-var-to-ruby (cdr pair))))
                       vars "\n") "\n" body "\n")) ;; then the source block body
