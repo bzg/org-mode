@@ -521,42 +521,35 @@ schulte + 3
 schulte
 #+end_src
 
-**** TODO R [0/4]
+**** TODO R [2/4]
 
-- [ ] functional results working with comint
-- [ ] script results
+- [X] functional results working with comint
+- [X] script results
 - [ ] ensure callable by other source block
 - [ ] rename buffer after session
 
 To redirect output to a file, you can use the =sink()= command.
 
 #+srcname: task_R_B
-#+begin_src R :results replace output scalar
-92
-21
+#+begin_src R :results replace value
+a <- 9
+b <- 10
+b - a
+a + b
 #+end_src
 
 #+resname: task_R_B
-| "[1]" | 92 |
-| "[1]" | 21 |
-
-
-
+: 19
 
 #+srcname: task-R-use-other-output
-#+begin_src R :var twoentyseven=task_R_B() :results replace script
+#+begin_src R :var twoentyseven=task_R_B() :results replace value
 83
 twoentyseven
 #+end_src
 
 #+resname: task-R-use-other-output
-: [1] 83
-: [1] 27
-
-#+srcname: name
-#+begin_src emacs-lisp 
-(setq debug-on-error t)
-#+end_src
+| "[1]" |  1 |
+| "[1]" | 19 |
 
 **** TODO Python
 

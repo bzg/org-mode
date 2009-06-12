@@ -43,16 +43,18 @@ called by `org-babel-execute-src-block'."
            (result-type (cond ((member "output" result-params) 'output)
                               ((member "value" result-params) 'value)
                               (t 'value)))
-           ;; (session (org-babel-R-initiate-session (cdr (assoc :session params))))
-           (session (get-buffer "*R*"))
+           (session (org-babel-R-initiate-session ;; (cdr (assoc :session params))
+                                                  (get-buffer "*R*")))
+           ;; (session (get-buffer "*R*"))
            results)
       ;; assign variables
       (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
+      ;; ;;; debugging statements
+      ;; (message (format "result-type=%S" result-type))
+      ;; (message (format "body=%S" body))
+      ;; (message (format "session=%S" session))
       ;; evaluate body and convert the results to ruby
-      (message (format "result-type=%S" result-type))
-      (message (format "body=%S" body))
       (setq results (org-babel-R-evaluate session body result-type))
-      (message (format "results=%S" results))
       (let ((tmp-file (make-temp-file "org-babel-R")))
         (with-temp-file tmp-file (insert results))
         (org-babel-import-elisp-from-file tmp-file)))))
@@ -84,7 +86,8 @@ R process in `org-babel-R-buffer'."
 
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
-  (unless (org-babel-comint-buffer-livep session)
+  (if (org-babel-comint-buffer-livep session)
+      session
     (save-window-excursion (R) (current-buffer))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
@@ -118,17 +121,22 @@ last statement in BODY."
           (accept-process-output (get-buffer-process buffer)))
         ;; remove filter
         (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; remove echo'd FULL-BODY from input
-      (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
-          (setq string-buffer (substring string-buffer (match-end 0))))
+      ;; ;;; debugging
+      ;; ;; echo raw results
+      ;; (message (format "raw-results=%S" string-buffer))
+      ;; ;; split results
+      (message (format "split-results=%S" (split-string string-buffer comint-prompt-regexp)))
       ;; split results with `comint-prompt-regexp'
       (setq results (let ((broke nil))
                       (delete nil (mapcar (lambda (el)
                                                   (if (or broke
-                                                          (string-match (regexp-quote org-babel-R-eoe-output) el)
-                                                          (= (length el) 0))
-                                                      (progn (setq broke t) nil)
-                                                    el))
+                                                          (and (string-match (regexp-quote org-babel-R-eoe-output) el) (setq broke t)))
+                                                      nil
+                                                    (if (= (length el) 0)
+                                                        nil
+                                                      (if (string-match comint-prompt-regexp el)
+                                                          (substring el (match-end 0))
+                                                        el))))
                                           (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
       (case result-type
         (output (mapconcat #'identity results "\n"))
