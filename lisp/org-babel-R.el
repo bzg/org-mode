@@ -126,11 +126,8 @@ last statement in BODY."
           (accept-process-output (get-buffer-process buffer)))
         ;; remove filter
         (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; ;;; debugging
-      ;; ;; echo raw results
-      ;; (message (format "raw-results=%S" string-buffer))
+      ;; (message (format "raw-results=%S" string-buffer)) ;; debugging
       ;; ;; split results
-      (message (format "split-results=%S" (split-string string-buffer comint-prompt-regexp)))
       ;; split results with `comint-prompt-regexp'
       (setq results (let ((broke nil))
                       (delete nil (mapcar (lambda (el)
@@ -144,8 +141,8 @@ last statement in BODY."
                                                         el))))
                                           (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
       (case result-type
-        (output (mapconcat #'identity results "\n"))
-        (value (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))
+        (output (org-babel-trim (mapconcat #'identity results "\n")))
+        (value (org-babel-trim (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
         (t (reverse results))))))
 
 (provide 'org-babel-R)

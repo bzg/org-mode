@@ -522,36 +522,32 @@ schulte + 3
 schulte
 #+end_src
 
-**** TODO R [3/5]
+**** TODO R [4/5]
 
 - [X] functional results working with comint
 - [X] script results
 - [X] ensure scalar/vector results args are taken into consideration
-- [ ] ensure callable by other source block
+- [X] ensure callable by other source block
 - [ ] rename buffer after session
 
 To redirect output to a file, you can use the =sink()= command.
 
 #+srcname: task_R_B
-#+begin_src R :results replace value vector
+#+begin_src R :results value vector silent
 a <- 9
 b <- 10
 b - a
 a + b
 #+end_src
 
-#+resname: task_R_B
-| 19 |
-
 #+srcname: task-R-use-other-output
 #+begin_src R :var twoentyseven=task_R_B() :results replace value
 83
-twoentyseven
+twoentyseven + 9
 #+end_src
 
 #+resname: task-R-use-other-output
-| "[1]" |  1 |
-| "[1]" | 19 |
+: 28
 
 **** TODO Python
 
@@ -1526,7 +1522,19 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [11/14]
+* Bugs [11/15]
+
+** TODO when reading results from =#+resname= line
+
+Errors when trying to read from resname lines.
+
+#+resname: bug-in-resname
+: 8
+
+#+srcname: bug-in-resname-reader
+#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
+buggy
+#+end_src
 
 ** TODO non-orgtbl formatted lists
 for example
