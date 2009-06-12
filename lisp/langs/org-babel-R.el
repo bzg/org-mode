@@ -90,7 +90,7 @@ R process in `org-babel-R-buffer'."
 
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
-  (message "session is %S" session)
+  (setq session (or session "*R*"))
   (if (org-babel-comint-buffer-livep session)
       session
     (save-window-excursion (R) (rename-buffer (if (bufferp session) (buffer-name session)

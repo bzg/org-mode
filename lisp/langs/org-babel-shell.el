@@ -86,7 +86,9 @@ Emacs-lisp table, otherwise return the results as a string."
 (defun org-babel-shell-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (save-window-excursion (shell session) (current-buffer)))
+  (save-window-excursion (shell session)
+                         (org-babel-comint-wait-for-output (current-buffer))
+                         (current-buffer)))
 
 (defvar org-babel-shell-eoe-indicator "echo 'org_babel_shell_eoe'"
   "Used to indicate that evaluation is has completed.")

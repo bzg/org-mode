@@ -37,7 +37,7 @@
 (require 'comint)
 
 (defun org-babel-comint-buffer-livep (buffer)
-  (let ((buffer (get-buffer buffer)))
+  (let ((buffer (if buffer (get-buffer buffer))))
     (and buffer (buffer-live-p buffer) (get-buffer-process buffer) buffer)))
 
 (defmacro org-babel-comint-in-buffer (buffer &rest body)
