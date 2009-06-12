@@ -43,8 +43,7 @@ called by `org-babel-execute-src-block'."
            (result-type (cond ((member "output" result-params) 'output)
                               ((member "value" result-params) 'value)
                               (t 'value)))
-           (session (org-babel-R-initiate-session ;; (cdr (assoc :session params))
-                                                  (get-buffer "*R*")))
+           (session (org-babel-R-initiate-session (cdr (assoc :session params))))
            results)
       ;; assign variables
       (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
@@ -91,9 +90,11 @@ R process in `org-babel-R-buffer'."
 
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
+  (message "session is %S" session)
   (if (org-babel-comint-buffer-livep session)
       session
-    (save-window-excursion (R) (current-buffer))))
+    (save-window-excursion (R) (rename-buffer (if (bufferp session) (buffer-name session)
+                                                (if (stringp session) session (buffer-name)))) (current-buffer))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
