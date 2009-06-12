@@ -479,7 +479,6 @@ This should include...
 - sessions in comint buffers
 
 **** DONE Ruby [5/5]
-
 - [X] functional results working with comint
 - [X] script results
 - [X] ensure scalar/vector results args are taken into consideration
@@ -549,7 +548,27 @@ twoentyseven + 9
 #+resname: task-R-use-other-output
 : 28
 
-**** TODO Python
+**** TODO Python [4/5]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+- [ ] rename buffer after session
+
+#+srcname: task-new-eval-for-python
+#+begin_src python :results silent output scalar
+8
+9
+10
+#+end_src
+
+#+srcname: task-use-new-eval
+#+begin_src python :var tasking=task-new-eval-for-python() :results replace
+tasking + 2
+#+end_src
+
+#+resname: task-use-new-eval
+: 12
 
 **** TODO Shells
 

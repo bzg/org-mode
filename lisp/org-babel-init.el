@@ -40,6 +40,7 @@
 
 ;; language specific files
 (require 'org-babel-ruby)
+(require 'org-babel-python)
 (require 'org-babel-shell)
 (require 'org-babel-lisp)
 (require 'org-babel-R)
