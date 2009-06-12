@@ -478,16 +478,16 @@ This should include...
 
 - sessions in comint buffers
 
-**** DONE Ruby [4/5]
+**** DONE Ruby [5/5]
 
 - [X] functional results working with comint
 - [X] script results
-- [ ] ensure scalar/vector results args are taken into consideration
+- [X] ensure scalar/vector results args are taken into consideration
 - [X] ensure callable by other source block
 - [X] rename buffer after session
 
 #+srcname: ruby-use-last-output
-#+begin_src ruby :results replace
+#+begin_src ruby :results replace 
 a = 2
 b = 4
 c = a + b

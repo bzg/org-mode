@@ -52,11 +52,16 @@ called by `org-babel-execute-src-block'."
                       vars "\n") "\n" body "\n")) ;; then the source block body
          (session (org-babel-ruby-initiate-session (cdr (assoc :session params))))
          (results (org-babel-ruby-evaluate session full-body result-type)))
-    (case result-type ;; process results based on the result-type
-      ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-                 (with-temp-file tmp-file (insert results))
-                 (org-babel-import-elisp-from-file tmp-file)))
-      ('value (org-babel-ruby-table-or-results results)))))
+    (if (member "scalar" result-params)
+        results
+      (setq results (case result-type ;; process results based on the result-type
+                      ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
+                                 (with-temp-file tmp-file (insert results))
+                                 (org-babel-import-elisp-from-file tmp-file)))
+                      ('value (org-babel-ruby-table-or-results results))))
+      (if (and (member "vector" results) (not (listp results)))
+          (list (list results))
+        results))))
 
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert an elisp var into a string of ruby or python source
