@@ -1,0 +1,10 @@
+
+
+
+* Pic i
+
+[[file:Org-mode-css-2.png]]
+
+* Pic 2
+
+[[file:Org-mode-css.png]]
