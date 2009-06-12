@@ -138,11 +138,19 @@ last statement in BODY."
       ;; split results with `comint-prompt-regexp'
       (setq results (delete org-babel-python-eoe-indicator
                             (cdr (member org-babel-python-eoe-indicator
-                                         (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
+                                         (reverse (mapcar #'org-babel-trim
+                                                          (split-string string-buffer comint-prompt-regexp)))))))
+      (setq results (mapcar #'org-babel-python-read-string results))
       (org-babel-trim (case result-type
                         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
                         (value (car results))
                         (t (reverse results)))))))
+
+(defun org-babel-python-read-string (string)
+  "Strip 's from around ruby string"
+  (if (string-match "'\\([^\000]+\\)'" string)
+      (match-string 1 string)
+    string))
 
 (provide 'org-babel-python)
 ;;; org-babel-python.el ends here

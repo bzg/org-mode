@@ -350,7 +350,7 @@ This is taken almost directly from `org-read-prop'."
       (if (org-babel-number-p cell)
           (string-to-number cell)
         (if (or (equal "(" (substring cell 0 1))
-                (equal "'" (substring cell 0 1)))
+                (equal "'" (substring cell 0 2)))
             (read cell)
           (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
