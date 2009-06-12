@@ -587,7 +587,7 @@ echo $other ' is the old date'
 #+resname: task-call-other-shell
 : $ Fri Jun 12 13:08:37 PDT 2009  is the old date
 
-*** TODO implement a *session* header argument [2/4]
+*** TODO implement a *session* header argument [3/4]
 =:session= header argument to override the default *session* buffer
 
 **** DONE ruby
@@ -625,7 +625,21 @@ what
 #+resname: python-get-from-session
 : 98
 
-**** TODO shell
+**** DONE shell
+
+#+srcname: task-shell-sessions
+#+begin_src sh :session what
+WHAT='patton'
+#+end_src
+
+#+srcname: task-shell-sessions-what
+#+begin_src sh :session what :results replace
+echo $WHAT
+#+end_src
+
+#+resname: task-shell-sessions-what
+: patton
+
 **** TODO R
 *** TODO function to bring up inferior-process buffer
 

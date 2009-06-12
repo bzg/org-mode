@@ -124,10 +124,10 @@ last statement in BODY."
       (setq results (cdr (member org-babel-shell-eoe-output
                                  (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
       ;; (message (format "processed-results=%S" results)) ;; debugging
-      (case result-type
-        (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-        (value (car results))
-        (t (reverse results))))))
+      (or (case result-type
+            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
+            (value (car results))
+            (t (reverse results))) ""))))
 
 (provide 'org-babel-shell)
 ;;; org-babel-shell.el ends here
