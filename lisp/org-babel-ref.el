@@ -1,8 +1,8 @@
 ;;; org-babel-ref.el --- org-babel functions for referencing external data
 
-;; Copyright (C) 2009 Eric Schulte, Dan Davison, Austin F. Frank
+;; Copyright (C) 2009 Eric Schulte, Dan Davison
 
-;; Author: Eric Schulte, Dan Davison, Austin F. Frank
+;; Author: Eric Schulte, Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
