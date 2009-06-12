@@ -1909,9 +1909,12 @@ As an example eval the following.  Adding a line to test
 #+end_src
 
 #+srcname: ruby-array-test
-#+begin_src ruby :var ar = simple-ruby-array
+#+begin_src ruby :var ar = simple-ruby-array :results replace
 ar.first
 #+end_src
+
+#+resname: ruby-array-test
+: 3
 
 ** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
