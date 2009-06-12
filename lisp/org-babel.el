@@ -190,7 +190,7 @@ of the following form.  (language body header-arguments-alist)"
   (delq nil
         (mapcar
          (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (match-string 2 arg))))
+                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
 (defun org-babel-where-is-src-block-head ()
