@@ -521,29 +521,27 @@ schulte + 3
 schulte
 #+end_src
 
-**** TODO R [3/3]
+**** TODO R [0/4]
 
-- [X] functional results working with comint
-- [X] script results
-- [X] ensure callable by other source block
+- [ ] functional results working with comint
+- [ ] script results
+- [ ] ensure callable by other source block
 - [ ] rename buffer after session
 
 To redirect output to a file, you can use the =sink()= command.
 
 #+srcname: task_R_B
-#+begin_src R :results replace script
-a <- 8
-b <- 9
-c <- 10
-a + b
+#+begin_src R :results replace output scalar
+92
 21
-a + b + c
 #+end_src
 
-#+resname: task-R-with-inf-process-buffer
-: [1] 17
-: [1] 21
-: [1] 27
+#+resname: task_R_B
+| "[1]" | 92 |
+| "[1]" | 21 |
+
+
+
 
 #+srcname: task-R-use-other-output
 #+begin_src R :var twoentyseven=task_R_B() :results replace script

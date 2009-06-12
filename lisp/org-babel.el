@@ -362,22 +362,30 @@ This is taken almost directly from `org-read-prop'."
 (defun org-babel-import-elisp-from-file (file-name)
   "Read the results located at FILE-NAME into an elisp table.  If
 the table is trivial, then return it as a scalar."
-  (with-temp-buffer
-    (condition-case nil
-        (progn
-          (org-table-import file-name nil)
-          (delete-file file-name)
-          (setq result (mapcar (lambda (row)
-                                 (mapcar #'org-babel-R-read row))
-                               (org-table-to-lisp))))
-      (error nil))
-    (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
-        (if (consp (car result))
-            (if (null (cdr (car result)))
-                (caar result)
-              result)
-          (car result))
-      result)))
+  (let (result)
+    (with-temp-buffer
+      (condition-case nil
+          (progn
+            (org-table-import file-name nil)
+            (delete-file file-name)
+            (setq result (mapcar (lambda (row)
+                                   (mapcar #'org-babel-string-read row))
+                                 (org-table-to-lisp))))
+        (error nil))
+      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+          (if (consp (car result))
+              (if (null (cdr (car result)))
+                  (caar result)
+                result)
+            (car result))
+        result))))
+
+(defun org-babel-string-read (cell)
+  "Strip nested \"s from around strings in exported R values."
+  (org-babel-read (or (and (stringp cell)
+                           (string-match "\\\"\\(.+\\)\\\"" cell)
+                           (match-string 1 cell))
+                      cell)))
 
 (defun org-babel-reverse-string (string)
   (apply 'string (reverse (string-to-list string))))

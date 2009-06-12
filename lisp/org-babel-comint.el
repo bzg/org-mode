@@ -51,5 +51,26 @@ body inside the protection of `save-window-excursion' and
        (set-buffer buffer)
        ,@body)))
 
+(defun org-babel-comint-input-command (buffer cmd)
+  "Pass CMD to BUFFER  The input will not be echoed."
+  (org-babel-comint-in-buffer buffer
+    (goto-char (process-mark (get-buffer-process buffer)))
+    (insert cmd)
+    (comint-send-input)
+    (org-babel-comint-wait-for-output buffer)))
+
+(defun org-babel-comint-wait-for-output (buffer)
+  "Wait until output arrives.  Note: this is only safe when
+waiting for the result of a single statement (not large blocks of
+code)."
+  (org-babel-comint-in-buffer buffer
+    (while (progn
+             (goto-char comint-last-input-end)
+             (not (and (re-search-forward comint-prompt-regexp nil t)
+                       (goto-char (match-beginning 0))
+                       (string= (face-name (face-at-point))
+                                "comint-highlight-prompt"))))
+      (accept-process-output (get-buffer-process buffer)))))
+
 (provide 'org-babel-comint)
 ;;; org-babel-comint.el ends here

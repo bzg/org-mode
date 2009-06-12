@@ -33,35 +33,29 @@
 
 (org-babel-add-interpreter "R")
 
-(defvar org-babel-R-buffer "org-babel-R"
-  "Holds the buffer for the current R process")
-
-(defun org-babel-R-initiate-R-buffer ()
-  "If there is not a current R process then create one."
-  (unless (org-babel-comint-buffer-livep org-babel-R-buffer)
-    (save-window-excursion (R) (setf org-babel-R-buffer (current-buffer)))))
-
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
-    (let ((vars (org-babel-ref-variables params))
-          (results-params (split-string (or (cdr (assoc :results params)) "")))
-          results)
-      ;; (message (format "%S" results-params))
-      (org-babel-R-initiate-R-buffer)
-      (mapc (lambda (pair) (org-babel-R-assign-elisp (car pair) (cdr pair))) vars)
-      (cond
-       ((member "script" results-params) ;; collect all output
-        (let ((tmp-file (make-temp-file "org-babel-R-script-output")))
-          (org-babel-comint-input-command org-babel-R-buffer (format "sink(%S)" tmp-file))
-          (org-babel-comint-input-command org-babel-R-buffer body)
-          (org-babel-comint-input-command org-babel-R-buffer "sink()")
-          (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
-       ((member "last" results-params) ;; the value of the last statement
-        (org-babel-comint-input-command org-babel-R-buffer body)
-        (org-babel-R-last-value-as-elisp))))))
+    (let* ((vars (org-babel-ref-variables params))
+           (result-params (split-string (or (cdr (assoc :results params)) "")))
+           (result-type (cond ((member "output" result-params) 'output)
+                              ((member "value" result-params) 'value)
+                              (t 'value)))
+           ;; (session (org-babel-R-initiate-session (cdr (assoc :session params))))
+           (session (get-buffer "*R*"))
+           results)
+      ;; assign variables
+      (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
+      ;; evaluate body and convert the results to ruby
+      (message (format "result-type=%S" result-type))
+      (message (format "body=%S" body))
+      (setq results (org-babel-R-evaluate session body result-type))
+      (message (format "results=%S" results))
+      (let ((tmp-file (make-temp-file "org-babel-R")))
+        (with-temp-file tmp-file (insert results))
+        (org-babel-import-elisp-from-file tmp-file)))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
@@ -69,12 +63,12 @@ called by `org-babel-execute-src-block'."
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
     (format "%S" s)))
 
-(defun org-babel-R-assign-elisp (name value)
+(defun org-babel-R-assign-elisp (session name value)
   "Read the elisp VALUE into a variable named NAME in the current
 R process in `org-babel-R-buffer'."
-  (unless org-babel-R-buffer (error "No active R buffer"))
+  (unless session (error "No active R buffer"))
   (org-babel-comint-input-command
-   org-babel-R-buffer
+   session
    (if (listp value)
        (let ((transition-file (make-temp-file "org-babel-R-import")))
 	 ;; ensure VALUE has an orgtbl structure (depth of at least 2)
@@ -86,21 +80,60 @@ R process in `org-babel-R-buffer'."
 		 name transition-file))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
 
-(defun org-babel-R-last-value-as-elisp ()
-  "Return the last value returned by R as Emacs lisp."
-  (let ((tmp-file (make-temp-file "org-babel-R")) result)
-    (org-babel-comint-input-command
-     org-babel-R-buffer
-     (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
-             tmp-file))
-    (org-babel-import-elisp-from-file tmp-file)))
+;; functions for comint evaluation
 
-(defun org-babel-R-read (cell)
-  "Strip nested \"s from around strings in exported R values."
-  (org-babel-read (or (and (stringp cell)
-                         (string-match "\\\"\\(.+\\)\\\"" cell)
-                         (match-string 1 cell))
-                    cell)))
+(defun org-babel-R-initiate-session (session)
+  "If there is not a current R process then create one."
+  (unless (org-babel-comint-buffer-livep session)
+    (save-window-excursion (R) (current-buffer))))
+
+(defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
+(defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
+
+(defun org-babel-R-evaluate (buffer body result-type)
+  "Pass BODY to the R process in BUFFER.  If RESULT-TYPE equals
+'output then return a list of the outputs of the statements in
+BODY, if RESULT-TYPE equals 'value then return the value of the
+last statement in BODY."
+  (org-babel-comint-in-buffer buffer
+    (let* ((string-buffer "")
+           (tmp-file (make-temp-file "org-babel-R"))
+           (last-value-eval
+            (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
+                    tmp-file))
+           (full-body (mapconcat #'org-babel-chomp (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
+           results)
+      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
+        ;; setup filter
+        (add-hook 'comint-output-filter-functions 'my-filt)
+        ;; pass FULL-BODY to process
+        (goto-char (process-mark (get-buffer-process buffer)))
+        (insert full-body)
+        (comint-send-input)
+        ;; wait for end-of-evaluation indicator
+        (while (progn
+                 (goto-char comint-last-input-end)
+                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
+                                           (re-search-forward (regexp-quote org-babel-R-eoe-output) nil t)))))
+          (accept-process-output (get-buffer-process buffer)))
+        ;; remove filter
+        (remove-hook 'comint-output-filter-functions 'my-filt))
+      ;; remove echo'd FULL-BODY from input
+      (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
+          (setq string-buffer (substring string-buffer (match-end 0))))
+      ;; split results with `comint-prompt-regexp'
+      (setq results (let ((broke nil))
+                      (delete nil (mapcar (lambda (el)
+                                                  (if (or broke
+                                                          (string-match (regexp-quote org-babel-R-eoe-output) el)
+                                                          (= (length el) 0))
+                                                      (progn (setq broke t) nil)
+                                                    el))
+                                          (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
+      (case result-type
+        (output (mapconcat #'identity results "\n"))
+        (value (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))
+        (t (reverse results))))))
 
 (provide 'org-babel-R)
 ;;; org-babel-R.el ends here
