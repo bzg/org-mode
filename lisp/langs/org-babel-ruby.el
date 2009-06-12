@@ -54,14 +54,11 @@ called by `org-babel-execute-src-block'."
          (results (org-babel-ruby-evaluate session full-body result-type)))
     (if (member "scalar" result-params)
         results
-      (setq results (case result-type ;; process results based on the result-type
-                      ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-                                 (with-temp-file tmp-file (insert results))
-                                 (org-babel-import-elisp-from-file tmp-file)))
-                      ('value (org-babel-ruby-table-or-results results))))
-      (if (and (member "vector" results) (not (listp results)))
-          (list (list results))
-        results))))
+      (case result-type ;; process results based on the result-type
+        ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
+                   (with-temp-file tmp-file (insert results))
+                   (org-babel-import-elisp-from-file tmp-file)))
+        ('value (org-babel-ruby-table-or-results results))))))
 
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert an elisp var into a string of ruby source code
@@ -125,11 +122,20 @@ last statement in BODY."
           (setq string-buffer (substring string-buffer (match-end 0))))
       ;; split results with `comint-prompt-regexp'
       (setq results (cdr (member org-babel-ruby-eoe-indicator
-                                 (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
+                                 (reverse (mapcar #'org-babel-ruby-read-string
+                                                  (mapcar #'org-babel-trim
+                                                          (split-string string-buffer comint-prompt-regexp)))))))
+      (message "near-final=%S" results)
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value (car results))
         (t (reverse results))))))
+
+(defun org-babel-ruby-read-string (string)
+  "Strip \\\"s from around ruby string"
+  (if (string-match "\"\\([^\000]+\\)\"" string)
+      (match-string 1 string)
+    string))
 
 (provide 'org-babel-ruby)
 ;;; org-babel-ruby.el ends here

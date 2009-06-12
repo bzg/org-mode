@@ -114,7 +114,8 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/38]
+* Tasks [22/41]
+** TODO add a function to jump to a source-block by name
 ** TODO Create objects in top level (global) environment [3/5]
 *sessions*
 
@@ -1976,8 +1977,8 @@ of these tests may fail.
 | basic evaluation        |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
 | emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
-| shell                   | basic-shell                |     |           6 |           6 | pass |
-| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
+| shell                   | basic-shell                |     |           6 | 6           | pass |
+| ruby                    | basic-ruby                 |     |   org-babel | org-babel   | pass |
 | python                  | basic-python               |     | hello world | hello world | pass |
 | R                       | basic-R                    |     |          13 |          13 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
