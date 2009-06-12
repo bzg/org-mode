@@ -1,4 +1,4 @@
-;;; org-babel-python.el --- org-babel functions for python
+;;; org-babel-python.el --- org-babel functions for python evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -64,8 +64,8 @@ called by `org-babel-execute-src-block'."
         results))))
 
 (defun org-babel-python-var-to-python (var)
-  "Convert an elisp var into a string of python or python source
-code specifying a var of the same value."
+  "Convert an elisp var into a string of python source code
+specifying a var of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
     (format "%S" var)))

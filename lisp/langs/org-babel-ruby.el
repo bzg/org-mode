@@ -1,4 +1,4 @@
-;;; org-babel-ruby.el --- org-babel functions for ruby
+;;; org-babel-ruby.el --- org-babel functions for ruby evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -64,8 +64,8 @@ called by `org-babel-execute-src-block'."
         results))))
 
 (defun org-babel-ruby-var-to-ruby (var)
-  "Convert an elisp var into a string of ruby or python source
-code specifying a var of the same value."
+  "Convert an elisp var into a string of ruby source code
+specifying a var of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
     (format "%S" var)))
