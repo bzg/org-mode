@@ -641,6 +641,7 @@ echo $WHAT
 : patton
 
 **** TODO R
+
 *** TODO function to bring up inferior-process buffer
 
 This should be callable from inside of a source-code block in an

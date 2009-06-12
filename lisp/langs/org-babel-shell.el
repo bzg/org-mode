@@ -122,12 +122,18 @@ last statement in BODY."
       ;; (message (format "split-results=%S" (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))) ;; debugging
       ;; split results with `comint-prompt-regexp'
       (setq results (cdr (member org-babel-shell-eoe-output
-                                 (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
-      ;; (message (format "processed-results=%S" results)) ;; debugging
+                                 (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
+                                                  (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
+      (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
       (or (case result-type
             (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
             (value (car results))
             (t (reverse results))) ""))))
+
+(defun org-babel-shell-strip-weird-long-prompt (string)
+  (while (string-match "^% +[\r\n$]+ *" string)
+    (setq string (substring string (match-end 0))))
+  string)
 
 (provide 'org-babel-shell)
 ;;; org-babel-shell.el ends here
