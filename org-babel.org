@@ -1,6 +1,6 @@
-#+OPTIONS:    H:3 num:nil toc:t
 #+TITLE: org-babel --- facilitating communication between programming languages and people
-#+SEQ_TODO:  TODO PROPOSED | DONE DEFERRED REJECTED
+#+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
+#+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: oddeven hideblocks
 
 * Introduction
@@ -114,8 +114,8 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/39]
-** TODO Create objects in top level (global) environment [0/6]
+* Tasks [22/38]
+** TODO Create objects in top level (global) environment [2/5]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -465,39 +465,138 @@ for the execution of source-code blocks.
              with the results (this implies the *script* =:results=
              argument as well)
 
-*** TODO rework evaluation lang-by-lang [0/4]
+*** DONE rework evaluation lang-by-lang [4/4]
 
 This should include...
-- STDOUT and functional results
+- functional results working with the comint buffer
+- results headers
+  - script :: return the output of STDOUT
+    - write a macro which runs the first redirection, executes the
+      body, then runs the second redirection
+  - last :: return the value of the last statement
+    - 
+
 - sessions in comint buffers
 
-**** TODO R
+**** DONE Ruby [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
 
-#+srcname: task-R-with-inf-process-buffer
-#+begin_src R 
-a <- 8
-b <- 9
-c <- 10
+#+srcname: ruby-use-last-output
+#+begin_src ruby :results replace
+a = 2
+b = 4
+c = a + b
+[a, b, c, 78]
+#+end_src
+
+#+resname: ruby-use-last-output
+| 2 | 4 | 6 | 78 |
+
+#+srcname: task-call-use-last-output
+#+begin_src ruby :var last=ruby-use-last-output :results replace
+last.flatten.size + 1
+#+end_src
+
+#+resname: task-call-use-last-output
+: 5
+
+***** ruby sessions
+
+#+srcname: first-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte = 27
+#+end_src
+
+#+srcname: second-ruby-session-task
+#+begin_src ruby :session schulte :results silent
+schulte + 3
+#+end_src
+
+#+srcname: without-the-right-session
+#+begin_src ruby :results silent
+schulte
+#+end_src
+
+**** DONE R [4/4]
+
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+To redirect output to a file, you can use the =sink()= command.
+
+#+srcname: task_R_B
+#+begin_src R :results value vector silent
+a <- 9
+b <- 10
+b - a
 a + b
 #+end_src
 
-**** TODO Ruby
-
-#+srcname: ruby-use-last-output
-#+begin_src ruby 
-a = 1
-b = 2
-c = 3
-(a + b) * c
+#+srcname: task-R-use-other-output
+#+begin_src R :var twoentyseven=task_R_B() :results replace value
+83
+twoentyseven + 9
 #+end_src
 
-**** TODO Python
+#+resname: task-R-use-other-output
+: 28
 
-**** TODO Shells
+**** DONE Python [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
 
-*** TODO implement a *session* header argument
+#+srcname: task-new-eval-for-python
+#+begin_src python :results silent output scalar
+8
+9
+10
+#+end_src
 
-use this header argument to override the default *session* buffer
+#+srcname: task-use-new-eval
+#+begin_src python :var tasking=task-new-eval-for-python() :results replace
+tasking + 2
+#+end_src
+
+#+resname: task-use-new-eval
+: 12
+
+**** DONE Shells [4/4]
+- [X] functional results working with comint
+- [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
+- [X] ensure callable by other source block
+
+#+srcname: task-shell-new-evaluation
+#+begin_src sh :results silent value scalar
+echo 'eric'
+date
+#+end_src
+
+#+srcname: task-call-other-shell
+#+begin_src sh :var other=task-shell-new-evaluation() :results replace  scalar
+echo $other ' is the old date'
+#+end_src
+
+#+resname: task-call-other-shell
+: $ Fri Jun 12 13:08:37 PDT 2009  is the old date
+
+*** TODO implement a *session* header argument [0/4]
+=:session= header argument to override the default *session* buffer
+
+**** TODO R
+
+
+
+**** TODO ruby
+**** TODO python
+**** TODO shell
 
 *** TODO function to bring up inferior-process buffer
 
@@ -509,6 +608,37 @@ up the inf-proc buffer using =pop-to-buffer=.
 
 Callable with a prefix argument to specify how many lines should be
 dumped into the source-code buffer.
+
+*** REJECTED comint notes
+
+Implementing comint integration in [[file:lisp/org-babel-comint.el][org-babel-comint.el]].
+
+Need to have...
+- handling of outputs
+  - split raw output from process by prompts
+  - a ring of the outputs, buffer-local, `org-babel-comint-output-ring'
+  - a switch for dumping all outputs to a buffer
+- inputting commands
+
+Lets drop all this language specific stuff, and just use
+org-babel-comint to split up our outputs, and return either the last
+value of an execution or the combination of values from the
+executions.
+
+**** comint filter functions
+: ;;  comint-input-filter-functions	hook	process-in-a-buffer
+: ;;  comint-output-filter-functions	hook	function modes.
+: ;;  comint-preoutput-filter-functions   hook
+: ;;  comint-input-filter			function ...
+
+#+srcname: obc-filter-ruby
+#+begin_src ruby :results last
+1
+2
+3
+4
+5
+#+end_src
 
 ** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]
@@ -647,7 +777,6 @@ waiting for guidance from those more familiar with yasnippets
    python. I bet ruby does too. Maybe more of an issue for functional
    style; in my proposed scripting style the error just gets dumped to
    the org buffer and the user is thus alerted.
-    
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
 
@@ -889,6 +1018,24 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und_R", sep="_")
+#+end_src
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + "_y_python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel_speaks"
+(concat msg "_elisp")
+#+end_src
 
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
@@ -1471,7 +1618,19 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [11/14]
+* Bugs [11/15]
+
+** TODO when reading results from =#+resname= line
+
+Errors when trying to read from resname lines.
+
+#+resname: bug-in-resname
+: 8
+
+#+srcname: bug-in-resname-reader
+#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
+buggy
+#+end_src
 
 ** TODO non-orgtbl formatted lists
 for example
