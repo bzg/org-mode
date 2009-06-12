@@ -478,10 +478,11 @@ This should include...
 
 - sessions in comint buffers
 
-**** DONE Ruby [4/4]
+**** DONE Ruby [4/5]
 
 - [X] functional results working with comint
 - [X] script results
+- [ ] ensure scalar/vector results args are taken into consideration
 - [X] ensure callable by other source block
 - [X] rename buffer after session
 
@@ -521,17 +522,18 @@ schulte + 3
 schulte
 #+end_src
 
-**** TODO R [2/4]
+**** TODO R [3/5]
 
 - [X] functional results working with comint
 - [X] script results
+- [X] ensure scalar/vector results args are taken into consideration
 - [ ] ensure callable by other source block
 - [ ] rename buffer after session
 
 To redirect output to a file, you can use the =sink()= command.
 
 #+srcname: task_R_B
-#+begin_src R :results replace value
+#+begin_src R :results replace value vector
 a <- 9
 b <- 10
 b - a
@@ -539,7 +541,7 @@ a + b
 #+end_src
 
 #+resname: task_R_B
-: 19
+| 19 |
 
 #+srcname: task-R-use-other-output
 #+begin_src R :var twoentyseven=task_R_B() :results replace value

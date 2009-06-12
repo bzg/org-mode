@@ -45,7 +45,6 @@ called by `org-babel-execute-src-block'."
                               (t 'value)))
            (session (org-babel-R-initiate-session ;; (cdr (assoc :session params))
                                                   (get-buffer "*R*")))
-           ;; (session (get-buffer "*R*"))
            results)
       ;; assign variables
       (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
@@ -53,11 +52,17 @@ called by `org-babel-execute-src-block'."
       ;; (message (format "result-type=%S" result-type))
       ;; (message (format "body=%S" body))
       ;; (message (format "session=%S" session))
+      ;; (message (format "result-params=%S" result-params))
       ;; evaluate body and convert the results to ruby
       (setq results (org-babel-R-evaluate session body result-type))
-      (let ((tmp-file (make-temp-file "org-babel-R")))
-        (with-temp-file tmp-file (insert results))
-        (org-babel-import-elisp-from-file tmp-file)))))
+      (setq results (if (member "scalar" result-params)
+                        results
+                      (let ((tmp-file (make-temp-file "org-babel-R")))
+                        (with-temp-file tmp-file (insert results))
+                        (org-babel-import-elisp-from-file tmp-file))))
+      (if (and (member "vector" result-params) (not (listp results)))
+          (list (list results))
+        results))))
 
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
