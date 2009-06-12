@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/38]
+* Tasks [22/39]
 ** TODO Create objects in top level (global) environment [0/6]
 *sessions*
 
@@ -630,19 +630,24 @@ $0
 
 waiting for guidance from those more familiar with yasnippets
 
-** TODO resolve references to other buffers
+** TODO resolve references to other org buffers/files
    This would allow source blocks to call upon tables, source-blocks,
-   and results in other buffers.
+   and results in other org buffers/files.
    
    See...
    - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
    - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
-
+** TODO resolve references to other non-org files
+   - tabular data in .csv, .tsv etc format
+   - files of interpreted code: anything stopping us giving such files
+     similar status to a source code block?
+   - Would be nice to allow org and non-org files to be remote
 ** TODO figure out how to handle errors during evaluation
    R has a try function, with error handling, along the lines of
    python. I bet ruby does too. Maybe more of an issue for functional
    style; in my proposed scripting style the error just gets dumped to
    the org buffer and the user is thus alerted.
+    
 ** TODO figure out how to handle graphic output
 This is listed under [[* graphical output][graphical output]] in out objectives.
 
@@ -653,6 +658,68 @@ results in the buffer.  Then if there is a combination of =silent= and
 =file= =:results= headers we could drop the results to a temp buffer
 and pop open that buffer...
 
+** TODO Finalise behaviour regarding vector/scalar output
+*** DONE Stop spaces causing vector output
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+[Not any more]
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und R", sep=" ")
+#+end_src
+
+#+resname:
+: org-babel speaks elisp y python und R
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + " y python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel speaks"
+(concat msg " elisp")
+#+end_src
+
+** TODO re-implement helper functions from org-R
+*** Initial statement [Eric]
+    Much of the power of org-R seems to be in it's helper functions for
+    the quick graphing of tables.  Should we try to re-implement these
+    functions on top of org-babel?
+
+    I'm thinking this may be useful both to add features to org-babel-R and
+    also to potentially suggest extensions of the framework.  For example
+    one that comes to mind is the ability to treat a source-code block
+    like a function which accepts arguments and returns results. Actually
+    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+*** Objectives
+    - We want to provide convenient off-the-shelf actions
+      (e.g. plotting data) that make use of our new code evaluation
+      environment but do not require any actual coding.
+*** Design proposal
+    - *Input data* will be specified using the same mechanism as :var
+      references, thus the input data may come from a table, or
+      another source block, and it is initially available as an elisp
+      data structure.
+    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
+      line will apply an *action* to the referenced data.
+    - *Actions correspond to source blocks*: our library of available
+      actions will be a library of org-babel source blocks. Thus the
+      code for executing an action, and the code for dealing with the
+      output of the action will be the same code as for executing
+      source blocks in general
+    - Optionally, the user can have the relevant source block inserted
+      into the org buffer after the (say) #+BABELDO line. This will
+      allow the user to fine tune the action by modifying the code
+      (especially useful for plots).
+    - So maybe a #+BABELDO line will have header args
+      - :data (a reference to a table or source code block)
+      - :action (or should that be :srcname?) which will be something
+        like :action pie-chart, referring to a source block which will
+        be executed with the :data referent passed in using a :var arg.
+      - :showcode or something controlling whether to show the code
+      
 ** TODO share org-babel
 how should we share org-babel?
 
@@ -823,24 +890,6 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
-This simple example of multilingual chaining produces vector output if
-there are spaces in the message and scalar otherwise.
-
-#+begin_src R :var msg=msg-from-python
-paste(msg, "und_R", sep="_")
-#+end_src
-
-#+srcname: msg-from-python
-#+begin_src python :var msg=msg-from-elisp
-msg + "_y_python"
-#+end_src
-
-#+srcname: msg-from-elisp
-#+begin_src emacs-lisp :var msg="org-babel_speaks"
-(concat msg "_elisp")
-#+end_src
-
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
@@ -883,17 +932,6 @@ the org-mode buffer as a link to the file...
 This would allow for display of images upon export providing
 functionality similar to =org-exp-blocks= only in a more general
 manner.
-
-** PROPOSED re-implement helper functions from org-R
-Much of the power of org-R seems to be in it's helper functions for
-the quick graphing of tables.  Should we try to re-implement these
-functions on top of org-babel?
-
-I'm thinking this may be useful both to add features to org-babel-R and
-also to potentially suggest extensions of the framework.  For example
-one that comes to mind is the ability to treat a source-code block
-like a function which accepts arguments and returns results. Actually
-this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
 
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
