@@ -49,9 +49,9 @@ called by `org-babel-execute-src-block'."
                         (format "%s=%s"
                                 (car pair)
                                 (org-babel-python-var-to-python (cdr pair))))
-                      vars "\n") "\n" body "\n")) ;; then the source block body
+                      vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
          (session (org-babel-python-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-python-evaluate session full-body result-type)))
+         (results (org-babel-python-evaluate (org-babel-python-session-buffer session) full-body result-type)))
     (if (member "scalar" result-params)
         results
       (setq results (case result-type ;; process results based on the result-type
@@ -85,11 +85,20 @@ Emacs-lisp table, otherwise return the results as a string."
 
 ;; functions for comint evaluation
 
+(defvar org-babel-python-buffers '(:default . nil))
+
+(defun org-babel-python-session-buffer (session)
+  (cdr (assoc session org-babel-python-buffers)))
+
 (defun org-babel-python-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (let ((python-buffer (or session python-buffer)))
-    (save-window-excursion (run-python nil session) (current-buffer))))
+  (save-window-excursion
+    (let* ((session (if session (intern session) :default))
+           (python-buffer (org-babel-python-session-buffer session)))
+      (run-python)
+      (setq org-babel-python-buffers (cons (cons session python-buffer) (assq-delete-all session org-babel-python-buffers)))
+      session)))
 
 (defvar org-babel-python-last-value-eval "_"
   "When evaluated by Python this returns the return value of the last statement.")
@@ -103,7 +112,7 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
     (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-chomp
+          (full-body (mapconcat #'org-babel-trim
                                 (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
           results)
       (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
@@ -111,7 +120,9 @@ last statement in BODY."
         (add-hook 'comint-output-filter-functions 'my-filt)
         ;; pass FULL-BODY to process
         (goto-char (process-mark (get-buffer-process buffer)))
-        (insert full-body)
+        ;; for some reason python is fussy, and likes enters after every input
+        (mapc (lambda (statement) (insert statement) (comint-send-input))
+              (split-string full-body "[\r\n]+"))
         (comint-send-input)
         ;; wait for end-of-evaluation indicator
         (while (progn
@@ -125,8 +136,9 @@ last statement in BODY."
       (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
           (setq string-buffer (substring string-buffer (match-end 0))))
       ;; split results with `comint-prompt-regexp'
-      (setq results (cdr (member org-babel-python-eoe-indicator
-                                 (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
+      (setq results (delete org-babel-python-eoe-indicator
+                            (cdr (member org-babel-python-eoe-indicator
+                                         (reverse (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
       (org-babel-trim (case result-type
                         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
                         (value (car results))

@@ -587,17 +587,46 @@ echo $other ' is the old date'
 #+resname: task-call-other-shell
 : $ Fri Jun 12 13:08:37 PDT 2009  is the old date
 
-*** TODO implement a *session* header argument [0/4]
+*** TODO implement a *session* header argument [2/4]
 =:session= header argument to override the default *session* buffer
 
-**** TODO R
+**** DONE ruby
 
+#+srcname: task-ruby-named-session
+#+begin_src ruby :session schulte :results replace
+schulte = :in_schulte
+#+end_src
 
+#+resname: task-ruby-named-session
+: :in_schulte
 
-**** TODO ruby
-**** TODO python
+#+srcname: another-in-schulte
+#+begin_src ruby :session schulte 
+schulte
+#+end_src
+
+#+resname: another-in-schulte
+: :in_schulte
+: :in_schulte
+: :in_schulte
+
+**** DONE python
+
+#+srcname: python-session-task
+#+begin_src python :session what :results silent
+what = 98
+#+end_src
+
+#+srcname: python-get-from-session
+#+begin_src python :session what :results replace
+what
+#+end_src
+
+#+resname: python-get-from-session
+: 98
+
 **** TODO shell
-
+**** TODO R
 *** TODO function to bring up inferior-process buffer
 
 This should be callable from inside of a source-code block in an
