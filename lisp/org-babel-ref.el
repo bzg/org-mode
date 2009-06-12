@@ -133,7 +133,7 @@ return nil."
                  (org-table-to-lisp)))
         ('source-block
          (setq result (org-babel-execute-src-block
-                       t nil (org-combine-plists args '((:results . "last")))))
+                       t nil (org-combine-plists args nil)))
          (if (symbolp result) (format "%S" result) result))))))
 
 (defun org-babel-ref-at-ref-p ()
