@@ -34,7 +34,10 @@
 (defvar org-babel-lob-regexp
   (concat "#\\+babel[ \t]*"
 	  "\\([ \t]+\\([^\n]+\\)\\)?\n") ;; match header arguments
-  "Regexp used to test when on a babel library line")
+  "Regexp used to test when on a babel library call line")
+
+(defvar org-babel-lob-inline-regexp nil
+  "Regexp used to test whether at an inline babel library call")
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is a babel library line and if so
@@ -47,8 +50,39 @@ then run `org-babel-lob-execute'."
 
 (defun org-babel-lob-execute ()
   "Execute an org-babel library function."
-  (interactive)
+  (interactive))
   
+(defun org-babel-lob-get-src-block-info ()
+  "This is taken from `org-babel-get-src-block-info'. Maybe we could abstract and unify.
+
+Return the information of the current source block as a list
+of the following form.  (language body header-arguments-alist)"
+  (let ((case-fold-search t) head)
+    (if (setq head (org-babel-lob-where-is-block-head))
+        (save-excursion (goto-char head) (org-babel-lob-parse-lob-line-match))
+      (if (save-excursion ;; inline source block
+            (re-search-backward "[ \f\t\n\r\v]" nil t)
+            (forward-char 1)
+            (looking-at org-babel-lob-inline-regexp))
+          (org-babel-parse-inline-src-block-match)
+        nil)))) ;; indicate that no source block was found
+
+(defun org-babel-lob-parse-lob-line-match ()
+  (list nil ;; no language
+        nil ;; no head
+        (org-combine-plists
+	 org-babel-default-header-args
+	 (org-babel-parse-header-arguments
+	  (org-babel-clean-text-properties
+	   (or (match-string 3) ""))))))
+
+(defun org-babel-lob-where-is-block-head ()
+  "Return point at beginning of #+babel line."
+  (save-excursion
+    (beginning-of-line 1)
+    (and (looking-at org-babel-lob-regexp)
+	 (point))))
+
 
 
 (provide 'org-babel-lob)
