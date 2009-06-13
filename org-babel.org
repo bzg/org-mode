@@ -2022,6 +2022,10 @@ of these tests may fail.
 expr 1 + 5
 #+end_src
 
+#+srcname: date-simple
+#+begin_src sh 
+date
+#+end_src
 
 #+srcname: basic-ruby
 #+begin_src ruby :results silent

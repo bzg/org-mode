@@ -37,7 +37,7 @@
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."
-  (message "executing Shell command block")
+  (message "executing Shell source code block")
   (let* ((vars (org-babel-ref-variables params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
@@ -51,7 +51,7 @@ function is called by `org-babel-execute-src-block'."
                                 (org-babel-shell-var-to-shell (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
          (session (org-babel-shell-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-shell-evaluate session full-body result-type)))
+         (results (org-babel-shell-evaluate (org-babel-shell-session-buffer session) full-body result-type)))
     (if (member "scalar" result-params)
         results
       (setq results (let ((tmp-file (make-temp-file "org-babel-ruby")))
@@ -83,12 +83,24 @@ Emacs-lisp table, otherwise return the results as a string."
 
 ;; functions for comint evaluation
 
+(defvar org-babel-shell-buffers '(:default . nil))
+
+(defun org-babel-shell-session-buffer (session)
+  (cdr (assoc session org-babel-shell-buffers)))
+
 (defun org-babel-shell-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (save-window-excursion (shell session)
-                         (org-babel-comint-wait-for-output (current-buffer))
-                         (current-buffer)))
+  (save-window-excursion
+    (let* ((session (if session (intern session) :default))
+           (shell-buffer (org-babel-shell-session-buffer session))
+           (newp (not (org-babel-comint-buffer-livep shell-buffer))))
+      (shell shell-buffer)
+      (when newp
+        (setq shell-buffer (current-buffer))
+        (org-babel-comint-wait-for-output shell-buffer))
+      (setq org-babel-shell-buffers (cons (cons session shell-buffer) (assq-delete-all session org-babel-shell-buffers)))
+      session)))
 
 (defvar org-babel-shell-eoe-indicator "echo 'org_babel_shell_eoe'"
   "Used to indicate that evaluation is has completed.")
@@ -126,7 +138,7 @@ last statement in BODY."
       (setq results (cdr (member org-babel-shell-eoe-output
                                  (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
                                                   (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
-      (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
+      ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
       (or (case result-type
             (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
             (value (car results))
