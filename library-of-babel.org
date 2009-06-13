@@ -1,0 +1,15 @@
+#+title: The Library of Babel --- off-the-shelf functions for data analysis and plotting using org-babel
+#+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
+#+OPTIONS: H:3 num:nil toc:t
+#+STARTUP: odd hideblocks
+
+[[http://downlode.org/Etext/library_of_babel.html][Full text of Borges short story]]
+
+* Plotting code
+  Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
+#+srcname: plot
+#+begin_src R :var xy=__data__
+plot(xy)
+#+end_src
+
+[[file:/tmp/tmp.org][tem org file]]
