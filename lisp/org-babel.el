@@ -86,6 +86,7 @@ sh         Pass command to the shell and display the result
 perl       The perl interpreter
 python     The python interpreter
 ruby       The ruby interpreter
+babel      A degenerate source block (no body) to implement library-of-babel calls
 
 The source block regexp `org-babel-src-block-regexp' is updated
 when a new interpreter is added to this list through the
@@ -99,7 +100,8 @@ lisp code use the `org-babel-add-interpreter' function."
               (const "sh")
 	      (const "perl")
 	      (const "python")
-	      (const "ruby")))
+	      (const "ruby")
+  	      (const "babel")))
 
 ;;; functions
 (defun org-babel-execute-src-block (&optional arg info params)

@@ -31,58 +31,41 @@
 ;;; Code:
 (require 'org)
 
-(defvar org-babel-lob-regexp
-  (concat "#\\+babel[ \t]*"
-	  "\\([ \t]+\\([^\n]+\\)\\)?\n") ;; match header arguments
-  "Regexp used to test when on a babel library call line")
+(defun org-babel-execute:babel (body params)
+  "Execute a library-of-babel block.
 
-(defvar org-babel-lob-inline-regexp nil
-  "Regexp used to test whether at an inline babel library call")
+  These blocks do not have their own body. Instead they use a :srcname
+  header argument to reference a different source block, whose body
+  they use. Source blocks in the library of babel should use a
+  standard naming scheme for the variable containing the input data
+  for analysis / plotting. E.g. if that variable is always called
+  __data__ then one of these bodyless babel blocks will call a library
+  of babel block using :var __data__=<some reference>
 
-(defun org-babel-lob-execute-maybe ()
-  "Detect if this is a babel library line and if so
-then run `org-babel-lob-execute'."
-  (interactive)
-  (let ((info (org-babel-get-src-block-info)))
-    (if info (progn (org-babel-execute-src-block current-prefix-arg info) t) nil)))
+  This function is called by `org-babel-execute-src-block'."
+  (message "executing babel source code block...")
+  (save-window-excursion
+    (let ((srcname (cdr (assoc :srcname params))))
+      
+      ;; now locate the source block specified by srcname (it might be
+      ;; in the library of babel), and construct a new source block
+      ;; as follows:
+      ;;
+      ;; 1. The lang is the lang of the referenced source block
+      ;; 2. The header args are those from the current #+begin_src babel block
+      ;; 3. The body is from the reference source block
 
-(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-call)
+      ;; If using a library of babel function, then the
+      ;; resposnsibility id on the caller to name the :var arg(s)
+      ;; correctly. We could adopt a standard name such as __data__
+      ;; for the input data for plotting / analysis. Thus in lob
+      ;; source blocks the data variable would be referred to as
+      ;; __data__ in the code, and the babel block would use :var
+      ;; __data__=<some reference>
 
-(defun org-babel-lob-execute ()
-  "Execute an org-babel library function."
-  (interactive))
-  
-(defun org-babel-lob-get-src-block-info ()
-  "This is taken from `org-babel-get-src-block-info'. Maybe we could abstract and unify.
-
-Return the information of the current source block as a list
-of the following form.  (language body header-arguments-alist)"
-  (let ((case-fold-search t) head)
-    (if (setq head (org-babel-lob-where-is-block-head))
-        (save-excursion (goto-char head) (org-babel-lob-parse-lob-line-match))
-      (if (save-excursion ;; inline source block
-            (re-search-backward "[ \f\t\n\r\v]" nil t)
-            (forward-char 1)
-            (looking-at org-babel-lob-inline-regexp))
-          (org-babel-parse-inline-src-block-match)
-        nil)))) ;; indicate that no source block was found
-
-(defun org-babel-lob-parse-lob-line-match ()
-  (list nil ;; no language
-        nil ;; no head
-        (org-combine-plists
-	 org-babel-default-header-args
-	 (org-babel-parse-header-arguments
-	  (org-babel-clean-text-properties
-	   (or (match-string 3) ""))))))
-
-(defun org-babel-lob-where-is-block-head ()
-  "Return point at beginning of #+babel line."
-  (save-excursion
-    (beginning-of-line 1)
-    (and (looking-at org-babel-lob-regexp)
-	 (point))))
-
-
+      ;; Now execute the constructed source block, ensuring that this
+      ;; buffer receives the appropriate output, and only receives a
+      ;; copy of the referenced source block if requested
+)))
 
 (provide 'org-babel-lob)
