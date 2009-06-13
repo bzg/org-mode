@@ -49,8 +49,16 @@ then run `org-babel-execute-src-block'."
 (defvar org-babel-src-block-regexp nil
   "Regexp used to test when inside of a org-babel src-block")
 
+(defvar org-babel-named-src-block-regexp nil
+  "Regexp used to match an org-babel src-block with srcname")
+
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
+
+(defun org-babel-named-src-block-regexp-for-name (name)
+  "Regexp used to match named src block."
+  (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
+	  org-babel-src-block-regexp))
 
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
@@ -60,6 +68,9 @@ then run `org-babel-execute-src-block'."
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
+  (setq org-babel-named-src-block-regexp
+	(concat "#\\+srcname:[ \t]*\\([^ \t\n]+\\)[ \t\n]*"
+		org-babel-src-block-regexp))
   (setq org-babel-inline-src-block-regexp
 	(concat "src_\\("
 		(mapconcat 'regexp-quote value "\\|")
