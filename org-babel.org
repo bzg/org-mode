@@ -1909,12 +1909,9 @@ As an example eval the following.  Adding a line to test
 #+end_src
 
 #+srcname: ruby-array-test
-#+begin_src ruby :var ar = simple-ruby-array :results replace
+#+begin_src ruby :var ar = simple-ruby-array :results silent
 ar.first
 #+end_src
-
-#+resname: ruby-array-test
-: 3
 
 ** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
@@ -1967,7 +1964,6 @@ recognition of ruby arrays as such.
 
 
 * Tests
-
 Evaluate all the cells in this table for a comprehensive test of the
 org-babel functionality.
 
@@ -1975,43 +1971,43 @@ org-babel functionality.
 of these tests may fail.
 
 #+TBLNAME: org-babel-tests
-| functionality           | block                      | arg |    expected |     results | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| basic evaluation        |                            |     |             |             | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| emacs lisp              | basic-elisp                |     |           5 |           5 | pass                            |
-| shell                   | basic-shell                |     |           6 |           6 | pass                            |
-| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass                            |
-| python                  | basic-python               |     | hello world | hello world | pass                            |
-| R                       | basic-R                    |     |          13 |          13 | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| tables                  |                            |     |             |             | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| emacs lisp              | table-elisp                |     |           3 |           3 | pass                            |
-| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass                            |
-| python                  | table-python               |     |           5 |           5 | pass                            |
-| R                       | table-R                    |     |         3.5 |         3.5 | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| source block references |                            |     |             |             | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| all languages           | chained-ref-last           |     |       Array |       Array | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| source block functions  |                            |     |             |             | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass                            |
-| run over                | Fibonacci                  |   0 |           1 |           1 | pass                            |
-| a                       | Fibonacci                  |   1 |           1 |           1 | pass                            |
-| variety                 | Fibonacci                  |   2 |           2 |           2 | pass                            |
-| of                      | Fibonacci                  |   3 |           3 |           3 | pass                            |
-| different               | Fibonacci                  |   4 |           5 |           5 | pass                            |
-| arguments               | Fibonacci                  |   5 |           8 |           8 | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| bugs and tasks          |                            |     |             |             | pass                            |
-|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------|
-| simple ruby arrays      | ruby-array-test            |     |           3 |    :schulte | expected "3" but was ":schulte" |
-| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass                            |
-| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass                            |
-| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass                            |
+| functionality           | block                      | arg |    expected |     results | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| basic evaluation        |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
+| shell                   | basic-shell                |     |           6 |           6 | pass |
+| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
+| python                  | basic-python               |     | hello world | hello world | pass |
+| R                       | basic-R                    |     |          13 |          13 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| tables                  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
+| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python               |     |           5 |           5 | pass |
+| R                       | table-R                    |     |         3.5 |         3.5 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block references |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| all languages           | chained-ref-last           |     |       Array |       Array | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| source block functions  |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
+| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
+| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
+| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
+| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
+| different               | Fibonacci                  |   4 |           5 |           5 | pass |
+| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| bugs and tasks          |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
+| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
