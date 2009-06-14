@@ -11,37 +11,6 @@
 (maphash (lambda (key val) (insert key)) lob)
 
 
-
-* One Liner
-  Here's a different type of syntax that may work.
-
-  This uses one-liners of the form
-
-: #+lob:source-block-name variables
-
-  This takes advantage of the functionality already present in
-  [[file:lisp/org-babel-ref.el][org-babel-ref]] for resolving references to other source blocks which
-  may contain variable specifications.  See the bottom half of
-  [[file:lisp/org-babel-lob.el][org-babel-lob]] for the new implementation.  To test it out load
-  org-babel-lob and press =C-cC-c= on the =#+lob:= line further down.
-
-#+resname: R-plot-default-data
-| 0 | 0 |
-
-#+srcname: my-R-plot
-#+begin_src R :results silent :var data=R-plot-default-data
-plot(data)
-#+end_src
-
-#+tblname: example-R-plot-data
-| 1 |  2 |
-| 2 |  4 |
-| 3 |  9 |
-| 4 | 16 |
-| 5 | 25 |
-
-#+lob:my-R-plot data=example-R-plot-data
-
 * Plotting code
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
 
@@ -53,43 +22,11 @@ plot(data)
 plot(data)
 #+end_src
 
-#+begin_src babel :srcname plot :var data=10
-#+end_src
+#+tblname: example-R-plot-data
+| 1 |  2 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+| 5 | 25 |
 
-#+srcname: plot
-#+begin_src R
-plot(__data__)
-#+end_src
-
-
-
-
-
-#+srcname: plot
-#+begin_src R
-plot(__data__)
-#+end_src
-
-#+resname: plot
-: org_babel_R_eoe
-: org_babel_R_eoe
-
-
-
-
-
-
-
-
-
-
-
-
-#+begin_src R
-79
-#+end_src
-
-#+resname:
-: 79
-: 78
-: 77
+#+lob:R-plot data=example-R-plot-data

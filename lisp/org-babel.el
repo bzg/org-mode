@@ -186,16 +186,15 @@ of the following form.  (language body header-arguments-alist)"
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
 
-(defun org-babel-get-all-src-block-infos ()
-  "Get source-code block info for all blocks in buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((blocks (make-hash-table :test 'equal)))
-      (while (re-search-forward
-	      org-babel-named-src-block-regexp nil t)
-	(puthash (match-string-no-properties 1) ;; srcname
-		 (org-babel-get-src-block-info) blocks)
-	blocks))))
+(defmacro org-babel-map-source-blocks (file &rest body)
+  "Evaluate BODY forms on each source-block in FILE."
+  (declare (indent 1))
+  `(save-window-excursion
+     (find-file ,file) (goto-char (point-min))
+     (while (re-search-forward org-babel-src-block-regexp nil t)
+       (goto-char (match-beginning 0))
+       (save-match-data ,@body)
+       (goto-char (match-end 0)))))
 
 (defun org-babel-parse-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))

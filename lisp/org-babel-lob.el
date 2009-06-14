@@ -30,39 +30,33 @@
 
 ;;; Code:
 (require 'org-babel)
-
-(org-babel-add-interpreter "babel")
-
-(setq org-babel-library-of-babel
-      (progn (set-buffer
-	      (find-file-noselect "../library-of-babel.org"))
-	     (org-babel-get-all-src-block-infos)))
-
-(defun org-babel-execute:babel (body params)
-  "Execute a library-of-babel block.
-
-  These blocks do not have their own body. Instead they use
-  a :srcname header argument to reference a different source
-  block, whose body they use. Source blocks in the library of
-  babel should use a standard naming scheme for the variable
-  containing the input data for analysis / plotting. E.g. if that
-  variable is always called __data__ then one of these bodyless
-  babel blocks will call a library of babel block using :var
-  __data__=<some reference>. The header args from a babel block
-  are appended to the header args from the target block.
-
-  This function is called by `org-babel-execute-src-block'."
-  (message "executing babel source code block...")
-  (save-window-excursion
-    (let* ((srcname (cdr (assoc :srcname params)))
-	   (info (or (save-excursion
-		       (goto-char (org-babel-find-named-block srcname))
-		       (org-babel-get-src-block-info))
-		     (gethash srcname org-babel-library-of-babel))))
-      (org-babel-execute-src-block nil info params))))
-
-;; alternate 1-liner syntax, this uses `seb' from org-babel-table.el
 (require 'org-babel-table)
+
+(defvar org-babel-library-of-babel nil
+  "Library of source-code blocks.  This is an association list.
+Populate the library by adding files to `org-babel-lob-files'.")
+
+(defcustom org-babel-lob-files '()
+  "Files used to populate the `org-babel-library-of-babel'.  To
+add files to this list use the `org-babel-lob-ingest' command."
+  :group 'org-babel
+  :type 'list)
+
+(defun org-babel-lob-ingest (&optional file)
+  "Add all source-blocks defined in FILE to `org-babel-library-of-babel'."
+  (interactive "f")
+  (org-babel-map-source-blocks file
+    (let ((source-name (intern (org-babel-get-src-block-name)))
+          (info (org-babel-get-src-block-info)))
+      (setq org-babel-library-of-babel
+            (cons (cons source-name info)
+                  (assq-delete-all source-name org-babel-library-of-babel))))))
+
+(org-babel-lob-ingest ;; actually add the source-blocks defined in library-of-babel.org
+ (expand-file-name "library-of-babel.org"
+                   (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
+
+;; functions for executing lob one-liners
 
 (defvar org-babel-lob-one-liner-regexp
   "#\\+lob:\\([^ \t\n\r]+\\)\\([ \t]+\\([^\n]+\\)\\)?\n")
@@ -104,7 +98,7 @@ a list of the following form.
                                             (format "%s=%s" (first var-spec) (second var-spec)))
                                           (cdr info) ", ")
                                ")"))))
-    (message "params=%S" params)
     (org-babel-execute-src-block t (list "emacs-lisp" "results" params))))
 
 (provide 'org-babel-lob)
+;;; org-babel-lob.el ends here
