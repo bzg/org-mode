@@ -186,6 +186,17 @@ of the following form.  (language body header-arguments-alist)"
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
 
+(defun org-babel-get-all-src-block-infos ()
+  "Get source-code block info for all blocks in buffer."
+  (save-excursion
+    (goto-char (point-min))
+    (let ((blocks (make-hash-table :test 'equal)))
+      (while (re-search-forward
+	      org-babel-named-src-block-regexp nil t)
+	(puthash (match-string-no-properties 1) ;; srcname
+		 (org-babel-get-src-block-info) blocks)
+	blocks))))
+
 (defun org-babel-parse-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
         (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
