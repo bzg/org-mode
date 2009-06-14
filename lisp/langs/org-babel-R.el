@@ -63,6 +63,14 @@ called by `org-babel-execute-src-block'."
           (list (list results))
         results))))
 
+(defun org-babel-prep-session:R (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-R-initiate-session session))
+         (vars (org-babel-ref-variables params)))
+    (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)))
+
+;; helper functions
+
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
   (if (stringp s)
@@ -86,8 +94,6 @@ R process in `org-babel-R-buffer'."
 		 name transition-file))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
 
-;; functions for comint evaluation
-
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
   (setq session (or session "*R*"))
@@ -105,42 +111,24 @@ R process in `org-babel-R-buffer'."
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
-    (let* ((string-buffer "")
-           (tmp-file (make-temp-file "org-babel-R"))
+    (let* ((tmp-file (make-temp-file "org-babel-R"))
            (last-value-eval
             (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
                     tmp-file))
            (full-body (mapconcat #'org-babel-chomp (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
-           results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        (insert full-body)
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-R-eoe-output) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; (message (format "raw-results=%S" string-buffer)) ;; debugging
-      ;; ;; split results
-      ;; split results with `comint-prompt-regexp'
-      (setq results (let ((broke nil))
+           (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
+                  (insert full-body) (inferior-ess-send-input)))
+           (results (let ((broke nil))
                       (delete nil (mapcar (lambda (el)
-                                                  (if (or broke
-                                                          (and (string-match (regexp-quote org-babel-R-eoe-output) el) (setq broke t)))
-                                                      nil
-                                                    (if (= (length el) 0)
-                                                        nil
-                                                      (if (string-match comint-prompt-regexp el)
-                                                          (substring el (match-end 0))
-                                                        el))))
-                                          (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp))))))
+                                            (if (or broke
+                                                    (and (string-match (regexp-quote org-babel-R-eoe-output) el) (setq broke t)))
+                                                nil
+                                              (if (= (length el) 0)
+                                                  nil
+                                                (if (string-match comint-prompt-regexp el)
+                                                    (substring el (match-end 0))
+                                                  el))))
+                                          (mapcar #'org-babel-trim raw))))))
       (case result-type
         (output (org-babel-trim (mapconcat #'identity results "\n")))
         (value (org-babel-trim (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))

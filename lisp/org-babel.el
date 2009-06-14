@@ -40,6 +40,15 @@ then run `org-babel-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
+(defun org-babel-pop-to-session-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-pop-to-session'."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-pop-to-session current-prefix-arg info) t) nil)))
+
+(add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
+
 (defvar org-babel-default-header-args '()
   "Default arguments to use when evaluating a source block.")
 
@@ -115,6 +124,27 @@ lisp code use the `org-babel-add-interpreter' function."
   	      (const "babel")))
 
 ;;; functions
+(defun org-babel-pop-to-session (&optional arg info)
+  "Pop to the session of the current source-code block.  If
+called with a prefix argument then evaluate the header arguments
+for the source block before entering the session.  Copy the body
+of the source block to the kill ring."
+  (interactive)
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+         (body (second info))
+         (params (third info))
+         (session (cdr (assoc :session params))))
+    (unless (member lang org-babel-interpreters)
+      (error "Language is not in `org-babel-interpreters': %s" lang))
+    ;; copy body to the kill ring
+    (with-temp-buffer (insert (org-babel-trim body)) (copy-region-as-kill (point-min) (point-max)))
+    ;; if called with a prefix argument, then process header arguments
+    (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
+    ;; just to the session using pop-to-buffer
+    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session))
+    (move-end-of-line 1)))
+
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are
@@ -336,16 +366,19 @@ relies on `org-babel-insert-result'."
   (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
-    (delete-region (point)
-                   (save-excursion
-                     (if (org-at-table-p)
-                         (org-table-end)
-                       (while (if (looking-at "\\(: \\|\\[\\[\\)")
-                                  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                                           (forward-line 1)) t))
-                         (forward-line 1))
-                       (forward-line -1)
-                       (point))))))
+    (delete-region (point) (org-babel-result-end))))
+
+(defun org-babel-result-end ()
+  "Return the point at the end of the current set of results"
+  (save-excursion
+    (if (org-at-table-p)
+        (org-table-end)
+      (while (if (looking-at "\\(: \\|\\[\\[\\)")
+                 (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                          (forward-line 1)) t))
+        (forward-line 1))
+      (forward-line -1)
+      (point))))
 
 (defun org-babel-result-to-file (result)
   "Return an `org-mode' link with the path being the value or
@@ -384,17 +417,17 @@ string.
 
 This is taken almost directly from `org-read-prop'."
   (if (and (stringp cell) (not (equal cell "")))
-      (if (org-babel-number-p cell)
-          (string-to-number cell)
-        (if (or (equal "(" (substring cell 0 1))
-                (equal "'" (substring cell 0 2)))
-            (read cell)
-          (progn (set-text-properties 0 (length cell) nil cell) cell)))
+      (or (org-babel-number-p cell)
+          (if (or (equal "(" (substring cell 0 1))
+                  (equal "'" (substring cell 0 2)))
+              (read cell)
+            (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
 
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
-  (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
+  (if (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+      (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)
   "Read the results located at FILE-NAME into an elisp table.  If

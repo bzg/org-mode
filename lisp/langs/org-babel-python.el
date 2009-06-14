@@ -51,7 +51,7 @@ called by `org-babel-execute-src-block'."
                                 (org-babel-python-var-to-python (cdr pair))))
                       vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
          (session (org-babel-python-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-python-evaluate (org-babel-python-session-buffer session) full-body result-type)))
+         (results (org-babel-python-evaluate session full-body result-type)))
     (if (member "scalar" result-params)
         results
       (setq results (case result-type ;; process results based on the result-type
@@ -62,6 +62,23 @@ called by `org-babel-execute-src-block'."
       (if (and (member "vector" results) (not (listp results)))
           (list (list results))
         results))))
+
+(defun org-babel-prep-session:python (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-python-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-python-var-to-python (cdr pair))))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (move-end-of-line 1) (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))))
+
+;; helper functions
 
 (defun org-babel-python-var-to-python (var)
   "Convert an elisp var into a string of python source code
@@ -83,14 +100,12 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for comint evaluation
-
 (defvar org-babel-python-buffers '(:default . nil))
 
 (defun org-babel-python-session-buffer (session)
   (cdr (assoc session org-babel-python-buffers)))
 
-(defun org-babel-python-initiate-session (&optional session)
+(defun org-babel-python-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (save-window-excursion
@@ -99,6 +114,9 @@ then create.  Return the initialized session."
       (run-python)
       (setq org-babel-python-buffers (cons (cons session python-buffer) (assq-delete-all session org-babel-python-buffers)))
       session)))
+
+(defun org-babel-python-initiate-session (&optional session)
+  (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session)))
 
 (defvar org-babel-python-last-value-eval "_"
   "When evaluated by Python this returns the return value of the last statement.")
@@ -111,35 +129,15 @@ then create.  Return the initialized session."
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
-    (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-trim
-                                (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
-          results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        ;; for some reason python is fussy, and likes enters after every input
-        (mapc (lambda (statement) (insert statement) (comint-send-input))
-              (split-string full-body "[\r\n]+"))
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-python-eoe-indicator) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; remove echo'd FULL-BODY from input
-      (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
-          (setq string-buffer (substring string-buffer (match-end 0))))
-      ;; split results with `comint-prompt-regexp'
-      (setq results (delete org-babel-python-eoe-indicator
+    (let* ((full-body (mapconcat #'org-babel-trim
+                                 (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
+           (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
+                  ;; for some reason python is fussy, and likes enters after every input
+                  (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
+                        (split-string full-body "[\r\n]+"))))
+           (results (delete org-babel-python-eoe-indicator
                             (cdr (member org-babel-python-eoe-indicator
-                                         (reverse (mapcar #'org-babel-trim
-                                                          (split-string string-buffer comint-prompt-regexp)))))))
+                                         (reverse (mapcar #'org-babel-trim raw)))))))
       (setq results (mapcar #'org-babel-python-read-string results))
       (org-babel-trim (case result-type
                         (output (mapconcat #'identity (reverse (cdr results)) "\n"))

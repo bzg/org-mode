@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/41]
+* Tasks [25/42]
 ** TODO add a function to jump to a source-block by name
    I've had an initial stab at that in org-babel-find-named-block
    (library-of-babel branch).
@@ -122,7 +122,640 @@ and the results to be collected in the same table.
    At the same time I introduced org-babel-named-src-block-regexp, to
    match src-blocks with srcname.
 
-** TODO Create objects in top level (global) environment [3/5]
+** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
+*** TODO set buffer-local-process variables appropriately [DED]
+    I think something like this would be great. You've probably
+already thought of this, but just to note it down: it would be really
+nice if org-babel's notion of a buffer's 'session/process' played
+nicely with ESS's notion of the buffer's session/process. ESS keeps
+the current process name for a buffer in a buffer-local variable
+ess-local-process-name. So one thing we will probably want to do is
+make sure that the *Org Edit Src Example* buffer sets that variable
+appropriately. [DED]
+
+I had not thought of that, but I agree whole heartedly. [Eric]
+
+Once this is done every variable should be able to dump regions into
+their inferior-process buffer using major-mode functions.
+
+*** TODO some possible requests/proposed changes for Carsten [2/3]
+    While I remember, some possible requests/proposed changes for Carsten
+    come to mind in that regard:
+
+**** DONE Remap C-x C-s to save the source to the org buffer?
+     I've done this personally and I find it essential. I'm using 
+#+begin_src emacs-lisp
+(defun org-edit-src-save ()
+  "Update the parent org buffer with the edited source code, save
+the parent org-buffer, and return to the source code edit
+buffer."
+  (interactive)
+  (let ((p (point)))
+    (org-edit-src-exit)
+    (save-buffer)
+    (org-edit-src-code)
+    (goto-char p)))
+
+(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
+#+end_src     
+    which seems to work.
+
+I think this is great, but I think it should be implemented in the
+org-mode core
+**** TODO Rename buffer and minor mode?
+     Something shorter than *Org Edit Src Example* for the buffer
+     name. org-babel is bringing org's source code interaction to a
+     level of maturity where the 'example' is no longer
+     appropriate. And if further keybindings are going to be added to
+     the minor mode then maybe org-edit-src-mode is a better name than
+     org-exit-edit-mode.
+
+     Maybe we should name the buffer with a combination of the source
+     code and the session.  I think that makes sense.
+
+     [ES] Are you also suggesting a new org-edit-src minor mode?
+     [DED] org-exit-edit-mode is a minor mode that already exists:
+
+     Minor mode installing a single key binding, "C-c '" to exit special edit.
+
+     org-edit-src-save now has a binding in that mode, so I guess all
+     I'm saying at this stage is that it's a bit of a misnomer. But
+     perhaps we will also have more functionality to add to that minor
+     mode, making it even more of a misnomer. Perhaps something like
+     org-src-mode would be better.
+
+**** DEFERRED a hook called when the src edit buffer is created
+This should be implemented in the org-mode core
+     
+
+*** DEFERRED send code to inferior process
+Another thought on this topic: I think we will want users to send
+chunks of code to the interpreter from within the *Org Edit Src*
+buffer, and I think that's what you have in mind already. In ESS that
+is done using the ess-eval-* functions. [DED]
+
+I think we can leave this up to the major-mode in the source code
+buffer, as almost every source-code major mode will have functions for
+doing things like sending regions to the inferior process.  If
+anything we might need to set the value of the buffer local inferior
+process variable. [Eric]
+
+*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
+That seems to imply that the header references need to be evaluated
+and transformed into the target language object when we hit C-c ' to
+enter the *Org Edit Src* buffer [DED]
+
+Good point, I heartily agree that this should be supported [Eric]
+
+(or at least before the first time we attempt to evaluate code in that
+buffer -- I suppose there might be an argument for lazy evaluation, in
+case someone hits C-c ' but is "just looking" and not actually
+evaluating anything.) Of course if evaluating the reference is
+computationally intensive then the user might have to wait before they
+get the *Org Edit Src* buffer. [DED]
+
+I fear that it may be hard to anticipate when the references will be
+needed, some major-modes do on-the-fly evaluation while the buffer is
+being edited.  I think that we should either do this before the buffer
+is opened or not at all, specifically I think we should resolve
+references if the user calls C-c ' with a prefix argument.  Does that
+sound reasonable? [Eric]
+
+Yes [Dan]
+
+** TODO resolve references to other org buffers/files
+   This would allow source blocks to call upon tables, source-blocks,
+   and results in other org buffers/files.
+   
+   See...
+   - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
+   - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
+** TODO resolve references to other non-org files
+   - tabular data in .csv, .tsv etc format
+   - files of interpreted code: anything stopping us giving such files
+     similar status to a source code block?
+   - Would be nice to allow org and non-org files to be remote
+** TODO figure out how to handle errors during evaluation
+   R has a try function, with error handling, along the lines of
+   python. I bet ruby does too. Maybe more of an issue for functional
+   style; in my proposed scripting style the error just gets dumped to
+   the org buffer and the user is thus alerted.
+** TODO figure out how to handle graphic output
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+This should take advantage of the =:results file= option, and
+languages which almost always produce graphical output should set
+=:results file= to true by default.  That would handle placing these
+results in the buffer.  Then if there is a combination of =silent= and
+=file= =:results= headers we could drop the results to a temp buffer
+and pop open that buffer...
+
+** TODO Finalise behaviour regarding vector/scalar output
+*** DONE Stop spaces causing vector output
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+[Not any more]
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und R", sep=" ")
+#+end_src
+
+#+resname:
+: org-babel speaks elisp y python und R
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + " y python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel speaks"
+(concat msg " elisp")
+#+end_src
+
+** TODO re-implement helper functions from org-R
+*** Initial statement [Eric]
+    Much of the power of org-R seems to be in it's helper functions for
+    the quick graphing of tables.  Should we try to re-implement these
+    functions on top of org-babel?
+
+    I'm thinking this may be useful both to add features to org-babel-R and
+    also to potentially suggest extensions of the framework.  For example
+    one that comes to mind is the ability to treat a source-code block
+    like a function which accepts arguments and returns results. Actually
+    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+*** Objectives [Dan]
+    - We want to provide convenient off-the-shelf actions
+      (e.g. plotting data) that make use of our new code evaluation
+      environment but do not require any actual coding.
+*** Initial Design proposal [Dan]
+    - *Input data* will be specified using the same mechanism as :var
+      references, thus the input data may come from a table, or
+      another source block, and it is initially available as an elisp
+      data structure.
+    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
+      line will apply an *action* to the referenced data.
+    - *Actions correspond to source blocks*: our library of available
+      actions will be a library of org-babel source blocks. Thus the
+      code for executing an action, and the code for dealing with the
+      output of the action will be the same code as for executing
+      source blocks in general
+    - Optionally, the user can have the relevant source block inserted
+      into the org buffer after the (say) #+BABELDO line. This will
+      allow the user to fine tune the action by modifying the code
+      (especially useful for plots).
+    - So maybe a #+BABELDO line will have header args
+      - :data (a reference to a table or source code block)
+      - :action (or should that be :srcname?) which will be something
+        like :action pie-chart, referring to a source block which will
+        be executed with the :data referent passed in using a :var arg.
+      - :showcode or something controlling whether to show the code
+      
+*** Modification to design
+    I'm implementing this, at least initially, as a new interpreter
+    named 'babel', which has an empty body. 'babel' blocks take
+    a :srcname header arg, and look for the source-code block with
+    that name. They then execute the referenced block, after first
+    appending their own header args on to the target block's header
+    args.
+
+    If the target block is in the library of babel (a.o.t. e.g. the
+    current buffer), then the code in the block will refer to the
+    input data with a name dictated by convention (e.g. __data__
+    (something which is syntactically legal in all languages...). Thus
+    the babel block will use a :var __data__ = whatever header arg to
+    reference the data to be plotted.
+
+** TODO share org-babel
+how should we share org-babel?
+
+- post to org-mode and ess mailing lists
+- create a org-babel page on worg
+- create a short screencast demonstrating org-babel in action
+
+*** examples
+we need to think up some good examples
+
+**** interactive tutorials
+This could be a place to use [[* org-babel assertions][org-babel assertions]].
+
+for example the first step of a tutorial could assert that the version
+of the software-package (or whatever) is equal to some value, then
+source-code blocks could be used with confidence (and executed
+directly from) the rest of the tutorial.
+
+**** answering a text-book question w/code example
+org-babel is an ideal environment enabling both the development and
+demonstrationg of the code snippets required as answers to many
+text-book questions.
+
+**** something using tables
+maybe something along the lines of calculations from collected grades
+
+**** file sizes
+Maybe something like the following which outputs sizes of directories
+under the home directory, and then instead of the trivial =emacs-lisp=
+block we could use an R block to create a nice pie chart of the
+results.
+
+#+srcname: sizes
+#+begin_src bash :results replace
+du -sc ~/*
+#+end_src
+
+#+begin_src emacs-lisp :var sizes=sizes :results replace
+(mapcar #'car sizes)
+#+end_src
+
+** TODO command line execution
+Allow source code blocks to be called form the command line.  This
+will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
+
+This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
+
+** TODO inline source code blocks [3/5]
+   Like the =\R{ code }= blocks
+
+   not sure what the format should be, maybe just something simple
+   like =src_lang[]{}= where lang is the name of the source code
+   language to be evaluated, =[]= is optional and contains any header
+   arguments and ={}= contains the code.
+
+   (see [[* (sandbox) inline source blocks][the-sandbox]])
+
+*** DONE evaluation with \C-c\C-c
+Putting aside the header argument issue for now we can just run these
+with the following default header arguments
+- =:results= :: silent
+- =:exports= :: results
+
+*** DONE inline exportation
+Need to add an interblock hook (or some such) through org-exp-blocks
+*** DONE header arguments
+We should make it possible to use header arguments.
+
+*** TODO fontification
+we should color these blocks differently
+
+*** TODO refine html exportation
+should use a span class, and should show original source in tool-tip
+
+** TODO formulate general rules for handling vectors and tables / matrices with names
+   This is non-trivial, but may be worth doing, in particular to
+   develop a nice framework for sending data to/from R.
+*** Notes
+    In R, indexing vector elements, and rows and columns, using
+    strings rather than integers is an important part of the
+    language.
+ - elements of a vector may have names
+ - matrices and data.frames may have "column names" and "row names"
+   which can be used for indexing
+ - In a data frame, row names *must* be unique
+Examples
+#+begin_example
+> # a named vector
+> vec <- c(a=1, b=2)
+> vec["b"]
+b 
+2 
+> mat <- matrix(1:4, nrow=2, ncol=2, dimnames=list(c("r1","r2"), c("c1","c2")))
+> mat
+   c1 c2
+r1  1  3
+r2  2  4
+> # The names are separate from the data: they do not interfere with operations on the data
+> mat * 3
+   c1 c2
+r1  3  9
+r2  6 12
+> mat["r1","c2"]
+[1] 3
+> df <- data.frame(var1=1:26, var2=26:1, row.names=letters)
+> df$var2
+ [1] 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
+> df["g",]
+  var1 var2
+g    7   20
+#+end_example
+
+ So it's tempting to try to provide support for this in org-babel. For example
+ - allow R to refer to columns of a :var reference by their names
+ - When appropriate, results from R appear in the org buffer with "named
+   columns (and rows)"
+
+   However none (?) of the other languages we are currently supporting
+   really have a native matrix type, let alone "column names" or "row
+   names". Names are used in e.g. python and perl to refer to entries
+   in dicts / hashes.
+
+   It currently seems to me that support for this in org-babel would
+   require setting rules about when org tables are considered to have
+   named columns/fields, and ensuring that (a) languages with a notion
+   of named columns/fields use them appropriately and (b) languages
+   with no such notion do not treat then as data.
+
+ - Org allows something that *looks* like column names to be separated
+   by a hline
+ - Org also allows a row to *function* as column names when special
+   markers are placed in the first column. An hline is unnecessary
+   (indeed hlines are purely cosmetic in org [correct?]
+ - Org does not have a notion of "row names" [correct?]
+    
+   The full org table functionality exeplified [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]] has features that
+   we would not support in e.g. R (like names for the row below).
+   
+*** Initial statement: allow tables with hline to be passed as args into R
+   This doesn't seem to work at the moment (example below). It would
+   also be nice to have a natural way for the column names of the org
+   table to become the column names of the R data frame, and to have
+   the option to specify that the first column is to be used as row
+   names in R (these must be unique). But this might require a bit of
+   thinking about.
+
+
+#+TBLNAME: egtable
+| col1 | col2    | col3 |
+|------+---------+------|
+|    1 | 2       |    3 |
+|    4 | schulte |    6 |
+
+#+TBLNAME: egtable2
+| 1 |         2 | 3 |
+| 4 | schulte   | 6 |
+
+#+begin_src R var tabel=egtable
+tabel
+#+end_src
+
+#+resname:
+| "col1" | "col2"    | "col3" |
+|--------+-----------+--------|
+|      1 | 2         |      3 |
+|      4 | "schulte" |      6 |
+
+
+Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** PROPOSED add =:none= session argument (for purely functional execution)
+This would allow source blocks to be run in their own new process
+
+These blocks could then also be run in the background.
+
+** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+#+begin_src R :var msg=msg-from-python
+paste(msg, "und_R", sep="_")
+#+end_src
+
+#+srcname: msg-from-python
+#+begin_src python :var msg=msg-from-elisp
+msg + "_y_python"
+#+end_src
+
+#+srcname: msg-from-elisp
+#+begin_src emacs-lisp :var msg="org-babel_speaks"
+(concat msg "_elisp")
+#+end_src
+
+** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
+   I haven't thought about this properly. Just noting it down. What
+   Sweave uses is called "R noweb" (.Rnw).
+   
+   I found a good description of noweb in the following article (see
+   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
+   
+   I think there are two parts to noweb, the construction of
+   documentation and the extraction of source-code (with notangle).
+
+   *documentation*: org-mode handles all of our documentation needs in
+   a manner that I believe is superior to noweb.
+   
+   *source extraction* At this point I don't see anyone writing large
+   applications with 100% of the source code contained in org-babel
+   files, rather I see org-babel files containing things like
+   - notes with active code chunks
+   - interactive tutorials
+   - requirements documents with code running test suites
+   - and of course experimental reports with the code to run the
+     experiment, and perform analysis
+
+   Basically I think the scope of the programs written in org-babel
+   (at least initially) will be small enough that it wont require the
+   addition of a tangle type program to extract all of the source code
+   into a running application.
+
+   On the other hand, since we already have named blocks of source
+   code which reference other blocks on which they rely, this
+   shouldn't be too hard to implement either on our own, or possibly
+   relying on something like noweb/notangle.
+
+** PROPOSED support for passing paths to files between source blocks
+Maybe this should be it's own result type (in addition to scalars and
+vectors).  The reason being that some source-code blocks (for example
+ditaa or anything that results in the creation of a file) may want to
+pass a file path back to org-mode which could then be inserted into
+the org-mode buffer as a link to the file...
+
+This would allow for display of images upon export providing
+functionality similar to =org-exp-blocks= only in a more general
+manner.
+
+** DEFERRED use textConnection to pass tsv to R?
+   When passing args from the org buffer to R, the following route is
+   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
+   think it would be possible to avoid having to write to file by
+   constructing an R expression in org-babel-R-assign-elisp, something
+   like this
+
+#+begin_src emacs-lisp
+(org-babel-R-input-command
+ (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
+	  name (orgtbl-to-tsv value '(:sep "\t" :fmt org-babel-R-quote-tsv-field))))
+#+end_src
+
+   I haven't tried to implement this yet as it's basically just
+   fiddling with something that works. The only reason for it I can
+   think of would be efficiency and I haven't tested that.
+
+   This Didn't work after an initial test.  I still think this is a
+   good idea (I also think we should try to do something similar when
+   writing out results frmo R to elisp) however as it wouldn't result
+   in any functional changes I'm bumping it down to deferred for
+   now. [Eric]
+
+for quick tests
+
+#+tblname: quick-test
+| 1 | 2 | 3 |
+
+#+srcname: quick-test-src-blk
+#+begin_src R :var vec=quick-test
+mean(mean(vec))
+#+end_src
+
+: 2
+
+** DEFERRED re-implement R evaluation using ess-command or ess-execute
+   I don't have any complaints with the current R evaluation code or
+   behaviour, but I think it would be good to use the ESS functions
+   from a political point of view. Plus of course it has the normal
+   benefits of an API (insulates us from any underlying changes etc). [DED]
+
+   I'll look into this.  I believe that I looked at and rejected these
+   functions initially but now I can't remember why.  I agree with
+   your overall point about using API's where available.  I will take
+   a look back at these and either switch to using the ess commands,
+   or at least articulate under this TODO the reasons for using our
+   custom R-interaction commands. [Eric]
+
+   ess-execute
+
+   Lets just replace =org-babel-R-input-command= with =ess-execute=.
+
+   I tried this, and although it works in some situations, I find that
+   =ess-command= will often just hang indefinitely without returning
+   results.  Also =ess-execute= will occasionally hang, and pops up
+   the buffer containing the results of the command's execution, which
+   is undesirable.  For now these functions can not be used.  Maybe
+   someone more familiar with the ESS code can recommend proper usage
+   of =ess-command= or some other lower-level function which could be
+   used in place of [[file:lisp/org-babel-R.el::defun%20org-babel%20R%20input%20command%20command][org-babel-R-input-command]].
+
+*** ess functions
+   
+#+begin_quote ess-command
+(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
+
+Send the ESS process command COM and delete the output
+from the ESS process buffer.  If an optional second argument BUF exists
+save the output in that buffer. BUF is erased before use.
+COM should have a terminating newline.
+Guarantees that the value of .Last.value will be preserved.
+When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
+will be used in a few places where `a' is proportional to `ess-cmd-delay'.
+#+end_quote
+
+#+begin_quote ess-execute
+(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
+
+Send a command to the ESS process.
+A newline is automatically added to COMMAND.  Prefix arg (or second arg
+INVERT) means invert the meaning of
+`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
+forced to go to the process buffer.  If the output is going to a
+buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
+fourth arg MESSAGE is text to print at the top of the buffer (defaults
+to the command if BUFF is not given.)
+#+end_quote
+
+*** out current setup
+
+    1) The body of the R source code block is wrapped in a function
+    2) The function is called inside of a =write.table= function call
+       writing the results to a table
+    3) The table is read using =org-table-import=
+
+** DEFERRED Rework Interaction with Running Processes [2/5]
+*** DONE robust to errors interrupting execution
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
+*** DEFERRED use =C-g= keyboard-quit to push processing into the background
+This may be possible using the `run-with-timer' command.
+
+I have no idea how this could work...
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
+*** TODO ability to select which of multiple sessions is being used
+    Increasingly it is looking like we're going to want to run all
+    source code blocks in comint buffer (sessions).  Which will have
+    the benefits of
+    1) allowing background execution
+    2) maintaining state between source-blocks
+       - allowing inline blocks w/o header arguments 
+
+**** R sessions
+     (like ess-switch-process in .R buffers)
+     
+     Maybe this could be packaged into a header argument, something
+     like =:R_session= which could accept either the name of the
+     session to use, or the string =prompt=, in which case we could use
+     the =ess-switch-process= command to select a new process.
+     
+*** TODO evaluation of shell code as background process? 
+    After C-c C-c on an R code block, the process may appear to
+    block, but C-g can be used to reclaim control of the .org buffer,
+    without interrupting the R evalution. However I believe this is not
+    true of bash/sh evaluation. [Haven't tried other languages] Perhaps
+    a solution is just to background the individual shell commands.
+
+    The other languages (aside from emacs lisp) are run through the
+    shell, so if we find a shell solution it should work for them as
+    well.
+    
+    Adding an ampersand seems to be a supported way to run commands in
+    the background (see [[http://www.emacswiki.org/emacs/ExecuteExternalCommand#toc4][external-commands]]).  Although a more extensible
+    solution may involve the use of the [[elisp:(progn (describe-function 'call-process-region) nil)][call-process-region]] function.
+    
+    Going to try this out in a new file [[file:lisp/org-babel-proc.el][org-babel-proc.el]].  This should
+    contain functions for asynchronously running generic shell commands
+    in the background, and then returning their input.
+
+**** partial update of org-mode buffer
+    The sleekest solution to this may be using a comint buffer, and
+    then defining a filter function which would incrementally interpret
+    the results as they are returned, including insertion into the
+    org-mode buffer.  This may actually cause more problems than it is
+    worth, what with the complexities of identifying the types of
+    incrementally returned results, and the need for maintenance of a
+    process marker in the org buffer.
+
+**** 'working' spinner
+     It may be nice and not too difficult to place a spinner on/near the
+     evaluating source code block
+
+*** TODO conversion of output from interactive shell, R (and python) sessions to org-babel buffers
+    [DED] This would be a nice feature I think. Although an org-babel
+    purist would say that it's working the wrong way round... After
+    some interactive work in a *R* buffer, you save the buffer, maybe
+    edit out some lines, and then convert it to org-babel format for
+    posterity. Same for a shell session either in a *shell* buffer, or
+    pasted from another terminal emulator. And python of course.
+
+** DEFERRED improve the source-block snippet
+any real improvement seems somewhat beyond the ability of yasnippet
+for now.
+
+[[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
+#+begin_example
+,#name : Chapter title
+,# --
+${1:Chapter}
+${1:$(make-string (string-width text) ?\=)}
+
+$0
+#+end_example
+
+[[file:snippets/org-mode/sb][sb -- snippet]]
+
+waiting for guidance from those more familiar with yasnippets
+
+** DONE fully purge org-babel-R of direct comint interaction
+try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
+
+** DONE Create objects in top level (global) environment [5/5]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -664,13 +1297,43 @@ a + b
 a + b
 #+end_src
 
-*** TODO function to bring up inferior-process buffer
+*** DONE function to bring up inferior-process buffer [4/4]
 
 This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
 up the inf-proc buffer using =pop-to-buffer=.
 
-*** TODO function to dump last N lines from inf-proc buffer into the current source block
+For lack of a better place, lets add this to the
+`org-shiftmetadown-hook' hook.
+
+**** DONE ruby
+
+#+srcname: task-ruby-pop-to-session
+#+begin_src ruby :var num=9 :var another="something else"
+num.times{|n| puts another}
+#+end_src
+
+**** DONE python
+
+#+srcname: task-python-pop-to-session
+#+begin_src python :var num=9 :var another="something else"
+another * num
+#+end_src
+**** DONE R
+
+#+srcname: task-R-pop-to-session
+#+begin_src R :var a=9 :var b=8
+a * b
+#+end_src
+
+**** DONE shell
+
+#+srcname: task-shell-pop-sessions
+#+begin_src sh :var NAME="eric"
+echo $NAME
+#+end_src
+
+*** DEFERRED function to dump last N lines from inf-proc buffer into the current source block
 
 Callable with a prefix argument to specify how many lines should be
 dumped into the source-code buffer.
@@ -705,613 +1368,6 @@ executions.
 4
 5
 #+end_src
-
-** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
-*** TODO set buffer-local-process variables appropriately [DED]
-    I think something like this would be great. You've probably
-already thought of this, but just to note it down: it would be really
-nice if org-babel's notion of a buffer's 'session/process' played
-nicely with ESS's notion of the buffer's session/process. ESS keeps
-the current process name for a buffer in a buffer-local variable
-ess-local-process-name. So one thing we will probably want to do is
-make sure that the *Org Edit Src Example* buffer sets that variable
-appropriately. [DED]
-
-I had not thought of that, but I agree whole heartedly. [Eric]
-
-Once this is done every variable should be able to dump regions into
-their inferior-process buffer using major-mode functions.
-
-*** TODO some possible requests/proposed changes for Carsten [2/3]
-    While I remember, some possible requests/proposed changes for Carsten
-    come to mind in that regard:
-
-**** DONE Remap C-x C-s to save the source to the org buffer?
-     I've done this personally and I find it essential. I'm using 
-#+begin_src emacs-lisp
-(defun org-edit-src-save ()
-  "Update the parent org buffer with the edited source code, save
-the parent org-buffer, and return to the source code edit
-buffer."
-  (interactive)
-  (let ((p (point)))
-    (org-edit-src-exit)
-    (save-buffer)
-    (org-edit-src-code)
-    (goto-char p)))
-
-(define-key org-exit-edit-mode-map "\C-x\C-s" 'org-edit-src-save)
-#+end_src     
-    which seems to work.
-
-I think this is great, but I think it should be implemented in the
-org-mode core
-**** TODO Rename buffer and minor mode?
-     Something shorter than *Org Edit Src Example* for the buffer
-     name. org-babel is bringing org's source code interaction to a
-     level of maturity where the 'example' is no longer
-     appropriate. And if further keybindings are going to be added to
-     the minor mode then maybe org-edit-src-mode is a better name than
-     org-exit-edit-mode.
-
-     Maybe we should name the buffer with a combination of the source
-     code and the session.  I think that makes sense.
-
-     [ES] Are you also suggesting a new org-edit-src minor mode?
-     [DED] org-exit-edit-mode is a minor mode that already exists:
-
-     Minor mode installing a single key binding, "C-c '" to exit special edit.
-
-     org-edit-src-save now has a binding in that mode, so I guess all
-     I'm saying at this stage is that it's a bit of a misnomer. But
-     perhaps we will also have more functionality to add to that minor
-     mode, making it even more of a misnomer. Perhaps something like
-     org-src-mode would be better.
-
-**** DEFERRED a hook called when the src edit buffer is created
-This should be implemented in the org-mode core
-     
-
-*** DEFERRED send code to inferior process
-Another thought on this topic: I think we will want users to send
-chunks of code to the interpreter from within the *Org Edit Src*
-buffer, and I think that's what you have in mind already. In ESS that
-is done using the ess-eval-* functions. [DED]
-
-I think we can leave this up to the major-mode in the source code
-buffer, as almost every source-code major mode will have functions for
-doing things like sending regions to the inferior process.  If
-anything we might need to set the value of the buffer local inferior
-process variable. [Eric]
-
-*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
-That seems to imply that the header references need to be evaluated
-and transformed into the target language object when we hit C-c ' to
-enter the *Org Edit Src* buffer [DED]
-
-Good point, I heartily agree that this should be supported [Eric]
-
-(or at least before the first time we attempt to evaluate code in that
-buffer -- I suppose there might be an argument for lazy evaluation, in
-case someone hits C-c ' but is "just looking" and not actually
-evaluating anything.) Of course if evaluating the reference is
-computationally intensive then the user might have to wait before they
-get the *Org Edit Src* buffer. [DED]
-
-I fear that it may be hard to anticipate when the references will be
-needed, some major-modes do on-the-fly evaluation while the buffer is
-being edited.  I think that we should either do this before the buffer
-is opened or not at all, specifically I think we should resolve
-references if the user calls C-c ' with a prefix argument.  Does that
-sound reasonable? [Eric]
-
-Yes [Dan]
-
-** TODO fully purge org-babel-R of direct comint interaction
-try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
-
-** TODO improve the source-block snippet
-
-[[file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name%20Chapter%20title][file:~/src/emacs-starter-kit/src/snippets/text-mode/rst-mode/chap::name Chapter title]]
-#+begin_example
-,#name : Chapter title
-,# --
-${1:Chapter}
-${1:$(make-string (string-width text) ?\=)}
-
-$0
-#+end_example
-
-[[file:snippets/org-mode/sb][sb -- snippet]]
-
-waiting for guidance from those more familiar with yasnippets
-
-** TODO resolve references to other org buffers/files
-   This would allow source blocks to call upon tables, source-blocks,
-   and results in other org buffers/files.
-   
-   See...
-   - [[file:lisp/org-babel-ref.el::TODO%20allow%20searching%20for%20names%20in%20other%20buffers][org-babel-ref.el:searching-in-other-buffers]]
-   - [[file:lisp/org-babel.el::defun%20org-babel%20find%20named%20result%20name][org-babel.el#org-babel-find-named-result]]
-** TODO resolve references to other non-org files
-   - tabular data in .csv, .tsv etc format
-   - files of interpreted code: anything stopping us giving such files
-     similar status to a source code block?
-   - Would be nice to allow org and non-org files to be remote
-** TODO figure out how to handle errors during evaluation
-   R has a try function, with error handling, along the lines of
-   python. I bet ruby does too. Maybe more of an issue for functional
-   style; in my proposed scripting style the error just gets dumped to
-   the org buffer and the user is thus alerted.
-** TODO figure out how to handle graphic output
-This is listed under [[* graphical output][graphical output]] in out objectives.
-
-This should take advantage of the =:results file= option, and
-languages which almost always produce graphical output should set
-=:results file= to true by default.  That would handle placing these
-results in the buffer.  Then if there is a combination of =silent= and
-=file= =:results= headers we could drop the results to a temp buffer
-and pop open that buffer...
-
-** TODO Finalise behaviour regarding vector/scalar output
-*** DONE Stop spaces causing vector output
-This simple example of multilingual chaining produces vector output if
-there are spaces in the message and scalar otherwise.
-
-[Not any more]
-
-#+begin_src R :var msg=msg-from-python
-paste(msg, "und R", sep=" ")
-#+end_src
-
-#+resname:
-: org-babel speaks elisp y python und R
-
-#+srcname: msg-from-python
-#+begin_src python :var msg=msg-from-elisp
-msg + " y python"
-#+end_src
-
-#+srcname: msg-from-elisp
-#+begin_src emacs-lisp :var msg="org-babel speaks"
-(concat msg " elisp")
-#+end_src
-
-** TODO re-implement helper functions from org-R
-*** Initial statement [Eric]
-    Much of the power of org-R seems to be in it's helper functions for
-    the quick graphing of tables.  Should we try to re-implement these
-    functions on top of org-babel?
-
-    I'm thinking this may be useful both to add features to org-babel-R and
-    also to potentially suggest extensions of the framework.  For example
-    one that comes to mind is the ability to treat a source-code block
-    like a function which accepts arguments and returns results. Actually
-    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
-*** Objectives [Dan]
-    - We want to provide convenient off-the-shelf actions
-      (e.g. plotting data) that make use of our new code evaluation
-      environment but do not require any actual coding.
-*** Initial Design proposal [Dan]
-    - *Input data* will be specified using the same mechanism as :var
-      references, thus the input data may come from a table, or
-      another source block, and it is initially available as an elisp
-      data structure.
-    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
-      line will apply an *action* to the referenced data.
-    - *Actions correspond to source blocks*: our library of available
-      actions will be a library of org-babel source blocks. Thus the
-      code for executing an action, and the code for dealing with the
-      output of the action will be the same code as for executing
-      source blocks in general
-    - Optionally, the user can have the relevant source block inserted
-      into the org buffer after the (say) #+BABELDO line. This will
-      allow the user to fine tune the action by modifying the code
-      (especially useful for plots).
-    - So maybe a #+BABELDO line will have header args
-      - :data (a reference to a table or source code block)
-      - :action (or should that be :srcname?) which will be something
-        like :action pie-chart, referring to a source block which will
-        be executed with the :data referent passed in using a :var arg.
-      - :showcode or something controlling whether to show the code
-      
-*** Modification to design
-    I'm implementing this, at least initially, as a new interpreter
-    named 'babel', which has an empty body. 'babel' blocks take
-    a :srcname header arg, and look for the source-code block with
-    that name. They then execute the referenced block, after first
-    appending their own header args on to the target block's header
-    args.
-
-    If the target block is in the library of babel (a.o.t. e.g. the
-    current buffer), then the code in the block will refer to the
-    input data with a name dictated by convention (e.g. __data__
-    (something which is syntactically legal in all languages...). Thus
-    the babel block will use a :var __data__ = whatever header arg to
-    reference the data to be plotted.
-
-** TODO share org-babel
-how should we share org-babel?
-
-- post to org-mode and ess mailing lists
-- create a org-babel page on worg
-- create a short screencast demonstrating org-babel in action
-
-*** examples
-we need to think up some good examples
-
-**** interactive tutorials
-This could be a place to use [[* org-babel assertions][org-babel assertions]].
-
-for example the first step of a tutorial could assert that the version
-of the software-package (or whatever) is equal to some value, then
-source-code blocks could be used with confidence (and executed
-directly from) the rest of the tutorial.
-
-**** answering a text-book question w/code example
-org-babel is an ideal environment enabling both the development and
-demonstrationg of the code snippets required as answers to many
-text-book questions.
-
-**** something using tables
-maybe something along the lines of calculations from collected grades
-
-**** file sizes
-Maybe something like the following which outputs sizes of directories
-under the home directory, and then instead of the trivial =emacs-lisp=
-block we could use an R block to create a nice pie chart of the
-results.
-
-#+srcname: sizes
-#+begin_src bash :results replace
-du -sc ~/*
-#+end_src
-
-#+begin_src emacs-lisp :var sizes=sizes :results replace
-(mapcar #'car sizes)
-#+end_src
-
-** TODO command line execution
-Allow source code blocks to be called form the command line.  This
-will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
-
-This will rely upon [[* resolve references to other buffers][resolve references to other buffers]].
-
-** TODO inline source code blocks [3/5]
-   Like the =\R{ code }= blocks
-
-   not sure what the format should be, maybe just something simple
-   like =src_lang[]{}= where lang is the name of the source code
-   language to be evaluated, =[]= is optional and contains any header
-   arguments and ={}= contains the code.
-
-   (see [[* (sandbox) inline source blocks][the-sandbox]])
-
-*** DONE evaluation with \C-c\C-c
-Putting aside the header argument issue for now we can just run these
-with the following default header arguments
-- =:results= :: silent
-- =:exports= :: results
-
-*** DONE inline exportation
-Need to add an interblock hook (or some such) through org-exp-blocks
-*** DONE header arguments
-We should make it possible to use header arguments.
-
-*** TODO fontification
-we should color these blocks differently
-
-*** TODO refine html exportation
-should use a span class, and should show original source in tool-tip
-
-** TODO formulate general rules for handling vectors and tables / matrices with names
-   This is non-trivial, but may be worth doing, in particular to
-   develop a nice framework for sending data to/from R.
-*** Notes
-    In R, indexing vector elements, and rows and columns, using
-    strings rather than integers is an important part of the
-    language.
- - elements of a vector may have names
- - matrices and data.frames may have "column names" and "row names"
-   which can be used for indexing
- - In a data frame, row names *must* be unique
-Examples
-#+begin_example
-> # a named vector
-> vec <- c(a=1, b=2)
-> vec["b"]
-b 
-2 
-> mat <- matrix(1:4, nrow=2, ncol=2, dimnames=list(c("r1","r2"), c("c1","c2")))
-> mat
-   c1 c2
-r1  1  3
-r2  2  4
-> # The names are separate from the data: they do not interfere with operations on the data
-> mat * 3
-   c1 c2
-r1  3  9
-r2  6 12
-> mat["r1","c2"]
-[1] 3
-> df <- data.frame(var1=1:26, var2=26:1, row.names=letters)
-> df$var2
- [1] 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10  9  8  7  6  5  4  3  2  1
-> df["g",]
-  var1 var2
-g    7   20
-#+end_example
-
- So it's tempting to try to provide support for this in org-babel. For example
- - allow R to refer to columns of a :var reference by their names
- - When appropriate, results from R appear in the org buffer with "named
-   columns (and rows)"
-
-   However none (?) of the other languages we are currently supporting
-   really have a native matrix type, let alone "column names" or "row
-   names". Names are used in e.g. python and perl to refer to entries
-   in dicts / hashes.
-
-   It currently seems to me that support for this in org-babel would
-   require setting rules about when org tables are considered to have
-   named columns/fields, and ensuring that (a) languages with a notion
-   of named columns/fields use them appropriately and (b) languages
-   with no such notion do not treat then as data.
-
- - Org allows something that *looks* like column names to be separated
-   by a hline
- - Org also allows a row to *function* as column names when special
-   markers are placed in the first column. An hline is unnecessary
-   (indeed hlines are purely cosmetic in org [correct?]
- - Org does not have a notion of "row names" [correct?]
-    
-   The full org table functionality exeplified [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]] has features that
-   we would not support in e.g. R (like names for the row below).
-   
-*** Initial statement: allow tables with hline to be passed as args into R
-   This doesn't seem to work at the moment (example below). It would
-   also be nice to have a natural way for the column names of the org
-   table to become the column names of the R data frame, and to have
-   the option to specify that the first column is to be used as row
-   names in R (these must be unique). But this might require a bit of
-   thinking about.
-
-
-#+TBLNAME: egtable
-| col1 | col2    | col3 |
-|------+---------+------|
-|    1 | 2       |    3 |
-|    4 | schulte |    6 |
-
-#+TBLNAME: egtable2
-| 1 |         2 | 3 |
-| 4 | schulte   | 6 |
-
-#+begin_src R var tabel=egtable
-tabel
-#+end_src
-
-#+resname:
-| "col1" | "col2"    | "col3" |
-|--------+-----------+--------|
-|      1 | 2         |      3 |
-|      4 | "schulte" |      6 |
-
-
-Another example is in the [[*operations%20in%20on%20tables][grades example]].
-
-** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
-This simple example of multilingual chaining produces vector output if
-there are spaces in the message and scalar otherwise.
-
-#+begin_src R :var msg=msg-from-python
-paste(msg, "und_R", sep="_")
-#+end_src
-
-#+srcname: msg-from-python
-#+begin_src python :var msg=msg-from-elisp
-msg + "_y_python"
-#+end_src
-
-#+srcname: msg-from-elisp
-#+begin_src emacs-lisp :var msg="org-babel_speaks"
-(concat msg "_elisp")
-#+end_src
-
-** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
-   I haven't thought about this properly. Just noting it down. What
-   Sweave uses is called "R noweb" (.Rnw).
-   
-   I found a good description of noweb in the following article (see
-   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
-   
-   I think there are two parts to noweb, the construction of
-   documentation and the extraction of source-code (with notangle).
-
-   *documentation*: org-mode handles all of our documentation needs in
-   a manner that I believe is superior to noweb.
-   
-   *source extraction* At this point I don't see anyone writing large
-   applications with 100% of the source code contained in org-babel
-   files, rather I see org-babel files containing things like
-   - notes with active code chunks
-   - interactive tutorials
-   - requirements documents with code running test suites
-   - and of course experimental reports with the code to run the
-     experiment, and perform analysis
-
-   Basically I think the scope of the programs written in org-babel
-   (at least initially) will be small enough that it wont require the
-   addition of a tangle type program to extract all of the source code
-   into a running application.
-
-   On the other hand, since we already have named blocks of source
-   code which reference other blocks on which they rely, this
-   shouldn't be too hard to implement either on our own, or possibly
-   relying on something like noweb/notangle.
-
-** PROPOSED support for passing paths to files between source blocks
-Maybe this should be it's own result type (in addition to scalars and
-vectors).  The reason being that some source-code blocks (for example
-ditaa or anything that results in the creation of a file) may want to
-pass a file path back to org-mode which could then be inserted into
-the org-mode buffer as a link to the file...
-
-This would allow for display of images upon export providing
-functionality similar to =org-exp-blocks= only in a more general
-manner.
-
-** DEFERRED use textConnection to pass tsv to R?
-   When passing args from the org buffer to R, the following route is
-   used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
-   think it would be possible to avoid having to write to file by
-   constructing an R expression in org-babel-R-assign-elisp, something
-   like this
-
-#+begin_src emacs-lisp
-(org-babel-R-input-command
- (format  "%s <- read.table(textConnection(\"%s\"), sep=\"\\t\", as.is=TRUE)"
-	  name (orgtbl-to-tsv value '(:sep "\t" :fmt org-babel-R-quote-tsv-field))))
-#+end_src
-
-   I haven't tried to implement this yet as it's basically just
-   fiddling with something that works. The only reason for it I can
-   think of would be efficiency and I haven't tested that.
-
-   This Didn't work after an initial test.  I still think this is a
-   good idea (I also think we should try to do something similar when
-   writing out results frmo R to elisp) however as it wouldn't result
-   in any functional changes I'm bumping it down to deferred for
-   now. [Eric]
-
-for quick tests
-
-#+tblname: quick-test
-| 1 | 2 | 3 |
-
-#+srcname: quick-test-src-blk
-#+begin_src R :var vec=quick-test
-mean(mean(vec))
-#+end_src
-
-: 2
-
-** DEFERRED re-implement R evaluation using ess-command or ess-execute
-   I don't have any complaints with the current R evaluation code or
-   behaviour, but I think it would be good to use the ESS functions
-   from a political point of view. Plus of course it has the normal
-   benefits of an API (insulates us from any underlying changes etc). [DED]
-
-   I'll look into this.  I believe that I looked at and rejected these
-   functions initially but now I can't remember why.  I agree with
-   your overall point about using API's where available.  I will take
-   a look back at these and either switch to using the ess commands,
-   or at least articulate under this TODO the reasons for using our
-   custom R-interaction commands. [Eric]
-
-   ess-execute
-
-   Lets just replace =org-babel-R-input-command= with =ess-execute=.
-
-   I tried this, and although it works in some situations, I find that
-   =ess-command= will often just hang indefinitely without returning
-   results.  Also =ess-execute= will occasionally hang, and pops up
-   the buffer containing the results of the command's execution, which
-   is undesirable.  For now these functions can not be used.  Maybe
-   someone more familiar with the ESS code can recommend proper usage
-   of =ess-command= or some other lower-level function which could be
-   used in place of [[file:lisp/org-babel-R.el::defun%20org-babel%20R%20input%20command%20command][org-babel-R-input-command]].
-
-*** ess functions
-   
-#+begin_quote ess-command
-(ess-command COM &optional BUF SLEEP NO-PROMPT-CHECK)
-
-Send the ESS process command COM and delete the output
-from the ESS process buffer.  If an optional second argument BUF exists
-save the output in that buffer. BUF is erased before use.
-COM should have a terminating newline.
-Guarantees that the value of .Last.value will be preserved.
-When optional third arg SLEEP is non-nil, `(sleep-for (* a SLEEP))'
-will be used in a few places where `a' is proportional to `ess-cmd-delay'.
-#+end_quote
-
-#+begin_quote ess-execute
-(ess-execute COMMAND &optional INVERT BUFF MESSAGE)
-
-Send a command to the ESS process.
-A newline is automatically added to COMMAND.  Prefix arg (or second arg
-INVERT) means invert the meaning of
-`ess-execute-in-process-buffer'.  If INVERT is 'buffer, output is
-forced to go to the process buffer.  If the output is going to a
-buffer, name it *BUFF*.	 This buffer is erased before use.  Optional
-fourth arg MESSAGE is text to print at the top of the buffer (defaults
-to the command if BUFF is not given.)
-#+end_quote
-
-*** out current setup
-
-    1) The body of the R source code block is wrapped in a function
-    2) The function is called inside of a =write.table= function call
-       writing the results to a table
-    3) The table is read using =org-table-import=
-
-** DEFERRED Rework Interaction with Running Processes [0/3]
-*** TODO ability to select which of multiple sessions is being used
-    Increasingly it is looking like we're going to want to run all
-    source code blocks in comint buffer (sessions).  Which will have
-    the benefits of
-    1) allowing background execution
-    2) maintaining state between source-blocks
-       - allowing inline blocks w/o header arguments 
-
-**** R sessions
-     (like ess-switch-process in .R buffers)
-     
-     Maybe this could be packaged into a header argument, something
-     like =:R_session= which could accept either the name of the
-     session to use, or the string =prompt=, in which case we could use
-     the =ess-switch-process= command to select a new process.
-     
-*** TODO evaluation of shell code as background process? 
-    After C-c C-c on an R code block, the process may appear to
-    block, but C-g can be used to reclaim control of the .org buffer,
-    without interrupting the R evalution. However I believe this is not
-    true of bash/sh evaluation. [Haven't tried other languages] Perhaps
-    a solution is just to background the individual shell commands.
-
-    The other languages (aside from emacs lisp) are run through the
-    shell, so if we find a shell solution it should work for them as
-    well.
-    
-    Adding an ampersand seems to be a supported way to run commands in
-    the background (see [[http://www.emacswiki.org/emacs/ExecuteExternalCommand#toc4][external-commands]]).  Although a more extensible
-    solution may involve the use of the [[elisp:(progn (describe-function 'call-process-region) nil)][call-process-region]] function.
-    
-    Going to try this out in a new file [[file:lisp/org-babel-proc.el][org-babel-proc.el]].  This should
-    contain functions for asynchronously running generic shell commands
-    in the background, and then returning their input.
-
-**** partial update of org-mode buffer
-    The sleekest solution to this may be using a comint buffer, and
-    then defining a filter function which would incrementally interpret
-    the results as they are returned, including insertion into the
-    org-mode buffer.  This may actually cause more problems than it is
-    worth, what with the complexities of identifying the types of
-    incrementally returned results, and the need for maintenance of a
-    process marker in the org buffer.
-
-**** 'working' spinner
-     It may be nice and not too difficult to place a spinner on/near the
-     evaluating source code block
-
-*** TODO conversion of output from interactive shell, R (and python) sessions to org-babel buffers
-    [DED] This would be a nice feature I think. Although an org-babel
-    purist would say that it's working the wrong way round... After
-    some interactive work in a *R* buffer, you save the buffer, maybe
-    edit out some lines, and then convert it to org-babel format for
-    posterity. Same for a shell session either in a *shell* buffer, or
-    pasted from another terminal emulator. And python of course.
 
 ** DONE Remove protective commas from # comments before evaluating
    org inserts protective commas in front of ## comments in language
@@ -1699,19 +1755,61 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [11/15]
+* Bugs [15/20]
+** TODO ruby evaluation not working under ubuntu emacs 23
+   With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
+   following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
 
-** TODO when reading results from =#+resname= line
+#+begin_example
+run-ruby is an interactive compiled Lisp function.
 
-Errors when trying to read from resname lines.
+(run-ruby cmd)
 
-#+resname: bug-in-resname
-: 8
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
 
-#+srcname: bug-in-resname-reader
-#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
-buggy
+   So, I may have a non-standard inf-ruby.el.  Here's my version of
+   run-ruby.
+
+#+begin_example 
+run-ruby is an interactive Lisp function in `inf-ruby.el'.
+
+(run-ruby &optional COMMAND NAME)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+   It seems we could either bundle my version of inf-ruby.el (as it's
+   the newest).  Or we could change the use of `run-ruby' so that it
+   is robust across multiple distributions.  I think I'd prefer the
+   former, unless the older version of inf-ruby is actually bundled
+   with emacs, in which case maybe we should go out of our way to
+   support it.  Thoughts?
+
+** TODO weird escaped characters in shell prompt break shell evaluation
+   E.g. this doesn't work. Should the shell sessions set a sane prompt
+   when they start up? Or is it a question of altering
+   comint-prompt-regexp? Or altering org-babel regexps?
+   
+#+begin_src sh   
+   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
+   prompt_col=$red
+   prompt_char='>'
+   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
 #+end_src
+
+   I just pushed a good amount of changes, could you see if your shell
+   problems still exist?
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -1744,6 +1842,44 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+** DONE test failing forcing vector results with =test-forced-vector-results= ruby code block
+Note that this only seems to happen the *second* time the test table
+is evaluated
+
+#+srcname: bug-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: bug-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
+
+mysteriously this seems to be fixed...
+** DONE defunct R sessions
+Sometimes an old R session will turn defunct, and newly inserted code
+will not be evaluated (leading to a hang).
+
+This seems to be fixed by using `inferior-ess-send-input' rather than `comint-send-input'.
+** DONE ruby fails on first call to non-default session
+
+#+srcname: bug-new-session
+#+begin_src ruby :session is-new
+:patton
+#+end_src
+
+** DONE when reading results from =#+resname= line
+
+Errors when trying to read from resname lines.
+
+#+resname: bug-in-resname
+: 8
+
+#+srcname: bug-in-resname-reader
+#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
+buggy
+#+end_src
 
 ** DONE R-code broke on "org-babel" rename
 
@@ -1924,14 +2060,12 @@ as.matrix(tab[2,])
 
 As an example eval the following.  Adding a line to test
 
-#+srcname: simple-ruby-array
-#+begin_src ruby
-[3, 4, 5]
-#+end_src
+#+tblname: simple-ruby-array
+| 3 | 4 | 5 |
 
 #+srcname: ruby-array-test
 #+begin_src ruby :var ar = simple-ruby-array :results silent
-ar.first
+ar.first.first
 #+end_src
 
 ** DONE space trailing language name
@@ -2029,6 +2163,15 @@ of these tests may fail.
 | R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
 | multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
 | forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| sessions                |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------|
+| set ruby session        | set-ruby-session-var       |     |        :set |        :set | pass |
+| get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
+| set python session      | set-python-session-var     |     |         set |         set | pass |
+| get from python session | get-python-session-var     |     |           4 |           4 | pass |
+| set R session           | set-R-session-var          |     |         set |         set | pass |
+| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
@@ -2044,7 +2187,7 @@ expr 1 + 5
 #+end_src
 
 #+srcname: date-simple
-#+begin_src sh 
+#+begin_src sh :results silent
 date
 #+end_src
 
@@ -2146,7 +2289,7 @@ table.class.name
 (fibbd n)
 #+end_src
 
-** sbe tests
+** sbe tests (these don't seem to be working...)
 Testing the insertion of results into org-mode tables.
 
 #+srcname: multi-line-output
@@ -2160,9 +2303,7 @@ even a third"
 #+end_src
 
 #+resname:
-: the first line ends here
-: 	     and this is the second one
-: 	return even a third
+: the first line ends here\n\n\n     and this is the second one\n\neven a third
 
 #+srcname: multi-line-error
 #+begin_src ruby :results replace
@@ -2170,9 +2311,7 @@ raise "oh nooooooooooo"
 #+end_src
 
 #+resname:
-: -:5: warning: parenthesize argument(s) for future version
-: -:5:in `main': oh nooooooooooo (RuntimeError)
-: 	from -:8
+: oh nooooooooooo
 
 | the first line ends here... | -:5: warning: parenthesize argument(s) for future version... |
 #+TBLFM: $1='(sbe "multi-line-output")::$2='(sbe "multi-line-error")
@@ -2187,6 +2326,41 @@ raise "oh nooooooooooo"
 #+srcname: test-forced-vector-results
 #+begin_src ruby :var triv=test-trivial-vector :results silent
 triv.class.name
+#+end_src
+
+** sessions
+
+#+srcname: set-ruby-session-var
+#+begin_src ruby :session rb-new-testing :results silent
+var = [1, 2, 3]
+:set
+#+end_src
+
+#+srcname: get-ruby-session-var
+#+begin_src ruby :session rb-new-testing :results silent
+var.size
+#+end_src
+
+#+srcname: set-python-session-var
+#+begin_src python :session py-testing
+var=4
+'set'
+#+end_src
+
+#+srcname: get-python-session-var
+#+begin_src python :session py-testing
+var
+#+end_src
+
+#+srcname: set-R-session-var
+#+begin_src R :session R-testing
+a <- 5
+'set'
+#+end_src
+
+#+srcname: get-R-session-var
+#+begin_src R :session R-testing
+a
 #+end_src
 
 
@@ -2240,7 +2414,7 @@ of the source code block into an org table.  It's using the classic
 out...
 
 1. evaluate [[file:lisp/org-babel-init.el]] to load org-babel and friends
-2. evaluate the transpose definition =\C-c\C-c= on the beginning of
+2. evaluate the transpose definition =\C-c\\C-c= on the beginning of
    the source block
 3. evaluate the next source code block, this should read in the table
    because of the =:var table=previous=, then transpose the table, and

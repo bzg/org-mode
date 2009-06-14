@@ -60,6 +60,27 @@ called by `org-babel-execute-src-block'."
                    (org-babel-import-elisp-from-file tmp-file)))
         ('value (org-babel-ruby-table-or-results results))))))
 
+(defun org-babel-prep-session:ruby (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  ;; (message "params=%S" params) ;; debugging
+  (let* ((session (org-babel-ruby-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-ruby-var-to-ruby (cdr pair))))
+                     vars)))
+    ;; (message "vars=%S" vars) ;; debugging
+    (org-babel-comint-in-buffer session
+      (sit-for .5) (goto-char (point-max))
+      (mapc (lambda (var)
+              (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)
+              (sit-for .1) (goto-char (point-max))) var-lines))))
+
+;; helper functions
+
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert an elisp var into a string of ruby source code
 specifying a var of the same value."
@@ -71,7 +92,7 @@ specifying a var of the same value."
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
-   (if (string-match "^\\[.+\\]$" results)
+   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
        (org-babel-read
         (replace-regexp-in-string
          "\\[" "(" (replace-regexp-in-string
@@ -80,12 +101,14 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for comint evaluation
-
 (defun org-babel-ruby-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (save-window-excursion (run-ruby nil session) (current-buffer)))
+  (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+    (if (org-babel-comint-buffer-livep session-buffer)
+        session-buffer
+      (sit-for .5)
+      (org-babel-ruby-initiate-session session))))
 
 (defvar org-babel-ruby-last-value-eval "_"
   "When evaluated by Ruby this returns the return value of the last statement.")
@@ -97,39 +120,17 @@ then create.  Return the initialized session."
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (org-babel-comint-in-buffer buffer
-    (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-chomp
-                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
-          results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        (insert full-body)
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-ruby-eoe-indicator) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; remove echo'd FULL-BODY from input
-      (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
-          (setq string-buffer (substring string-buffer (match-end 0))))
-      ;; split results with `comint-prompt-regexp'
-      (setq results (cdr (member org-babel-ruby-eoe-indicator
-                                 (reverse (mapcar #'org-babel-ruby-read-string
-                                                  (mapcar #'org-babel-trim
-                                                          (split-string string-buffer comint-prompt-regexp)))))))
-      (message "near-final=%S" results)
-      (case result-type
-        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (car results))
-        (t (reverse results))))))
+  (let* ((full-body (mapconcat #'org-babel-chomp
+                               (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+         (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
+                (insert full-body) (comint-send-input nil t)))
+         (results (cdr (member org-babel-ruby-eoe-indicator
+                               (reverse (mapcar #'org-babel-ruby-read-string
+                                                (mapcar #'org-babel-trim raw)))))))
+    (case result-type
+      (output (mapconcat #'identity (reverse (cdr results)) "\n"))
+      (value (car results))
+      (t (reverse results)))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"

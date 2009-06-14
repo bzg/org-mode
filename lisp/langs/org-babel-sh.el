@@ -1,4 +1,4 @@
-;;; org-babel-shell.el --- org-babel functions for shell evaluation
+;;; org-babel-sh.el --- org-babel functions for shell evaluation
 
 ;; Copyright (C) 2009 Eric Schulte
 
@@ -48,27 +48,44 @@ function is called by `org-babel-execute-src-block'."
                       (lambda (pair)
                         (format "%s=%s"
                                 (car pair)
-                                (org-babel-shell-var-to-shell (cdr pair))))
+                                (org-babel-sh-var-to-sh (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
-         (session (org-babel-shell-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-shell-evaluate (org-babel-shell-session-buffer session) full-body result-type)))
+         (session (org-babel-sh-initiate-session (cdr (assoc :session params))))
+         (results (org-babel-sh-evaluate session full-body result-type)))
     (if (member "scalar" result-params)
         results
-      (setq results (let ((tmp-file (make-temp-file "org-babel-ruby")))
+      (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
                       (with-temp-file tmp-file (insert results))
                       (org-babel-import-elisp-from-file tmp-file)))
       (if (and (member "vector" results) (not (listp results)))
           (list (list results))
         results))))
 
-(defun org-babel-shell-var-to-shell (var)
+(defun org-babel-prep-session:sh (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-sh-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-sh-var-to-sh (cdr pair))))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))))
+
+;; helper functions
+
+(defun org-babel-sh-var-to-sh (var)
   "Convert an elisp var into a string of shell commands
 specifying a var of the same value."
   (if (listp var)
-      (concat "[" (mapconcat #'org-babel-shell-var-to-shell var ", ") "]")
+      (concat "[" (mapconcat #'org-babel-sh-var-to-sh var ", ") "]")
     (format "%S" var)))
 
-(defun org-babel-shell-table-or-results (results)
+(defun org-babel-sh-table-or-results (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
@@ -81,73 +98,57 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for comint evaluation
+(defvar org-babel-sh-buffers '(:default . nil))
 
-(defvar org-babel-shell-buffers '(:default . nil))
+(defun org-babel-sh-session-buffer (session)
+  (cdr (assoc session org-babel-sh-buffers)))
 
-(defun org-babel-shell-session-buffer (session)
-  (cdr (assoc session org-babel-shell-buffers)))
-
-(defun org-babel-shell-initiate-session (&optional session)
+(defun org-babel-sh-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (save-window-excursion
     (let* ((session (if session (intern session) :default))
-           (shell-buffer (org-babel-shell-session-buffer session))
-           (newp (not (org-babel-comint-buffer-livep shell-buffer))))
-      (shell shell-buffer)
+           (sh-buffer (org-babel-sh-session-buffer session))
+           (newp (not (org-babel-comint-buffer-livep sh-buffer))))
+      (if (and sh-buffer (get-buffer sh-buffer) (not (buffer-live-p sh-buffer)))
+          (setq sh-buffer nil))
+      (shell sh-buffer)
       (when newp
-        (setq shell-buffer (current-buffer))
-        (org-babel-comint-wait-for-output shell-buffer))
-      (setq org-babel-shell-buffers (cons (cons session shell-buffer) (assq-delete-all session org-babel-shell-buffers)))
+        (setq sh-buffer (current-buffer))
+        (org-babel-comint-wait-for-output sh-buffer))
+      (setq org-babel-sh-buffers (cons (cons session sh-buffer) (assq-delete-all session org-babel-sh-buffers)))
       session)))
 
-(defvar org-babel-shell-eoe-indicator "echo 'org_babel_shell_eoe'"
+(defun org-babel-sh-initiate-session (&optional session)
+  (org-babel-sh-session-buffer (org-babel-sh-initiate-session-by-key session)))
+
+(defvar org-babel-sh-eoe-indicator "echo 'org_babel_sh_eoe'"
   "Used to indicate that evaluation is has completed.")
-(defvar org-babel-shell-eoe-output "org_babel_shell_eoe"
+(defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "Used to indicate that evaluation is has completed.")
 
-(defun org-babel-shell-evaluate (buffer body &optional result-type)
+(defun org-babel-sh-evaluate (buffer body &optional result-type)
   "Pass BODY to the Shell process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (org-babel-comint-in-buffer buffer
-    (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-chomp
-                                (list body org-babel-shell-eoe-indicator) "\n"))
-          results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        (insert full-body)
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-shell-eoe-output) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; (message (format "raw-results=%S" string-buffer)) ;; debugging
-      ;; (message (format "split-results=%S" (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))) ;; debugging
-      ;; split results with `comint-prompt-regexp'
-      (setq results (cdr (member org-babel-shell-eoe-output
-                                 (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
-                                                  (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
-      ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
-      (or (case result-type
-            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-            (value (car results))
-            (t (reverse results))) ""))))
+  (let* ((full-body (mapconcat #'org-babel-chomp
+                               (list body org-babel-sh-eoe-indicator) "\n"))
+         (raw (org-babel-comint-with-output buffer org-babel-sh-eoe-output nil
+                (insert full-body) (comint-send-input nil t)))
+         (results (cdr (member org-babel-sh-eoe-output
+                                    (reverse (mapcar #'org-babel-sh-strip-weird-long-prompt
+                                                     (mapcar #'org-babel-trim raw)))))))
+    ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
+    (or (case result-type
+          (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
+          (value (car results))
+          (t (reverse results))) "")))
 
-(defun org-babel-shell-strip-weird-long-prompt (string)
+(defun org-babel-sh-strip-weird-long-prompt (string)
   (while (string-match "^% +[\r\n$]+ *" string)
     (setq string (substring string (match-end 0))))
   string)
 
-(provide 'org-babel-shell)
-;;; org-babel-shell.el ends here
+(provide 'org-babel-sh)
+;;; org-babel-sh.el ends here

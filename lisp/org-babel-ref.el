@@ -105,16 +105,17 @@ return nil."
         (find-file (match-string 1 ref))
         (setf ref (match-string 2 ref)))
       (goto-char (point-min))
-      (unless (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
-                                           (regexp-quote ref) "[ \t]*$"))
-                    (regexp (concat "^#\\+SRCNAME:[ \t]*"
-                                    (regexp-quote ref) "[ \t]*$")))
-                (or (re-search-forward result_regexp nil t)
-                    (re-search-forward result_regexp nil t)
-                    (re-search-forward regexp nil t)
-                    (re-search-backward regexp nil t)
-                    ;; check the Library of Babel
-                    (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
+      (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
+                                       (regexp-quote ref) "[ \t]*$"))
+                (regexp (concat "^#\\+SRCNAME:[ \t]*"
+                                (regexp-quote ref) "[ \t]*$")))
+            (or (re-search-forward result_regexp nil t)
+                (re-search-forward result_regexp nil t)
+                (re-search-forward regexp nil t)
+                (re-search-backward regexp nil t)
+                ;; check the Library of Babel
+                (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
+          (goto-char (match-beginning 0))
         ;; ;; TODO: allow searching for names in other buffers
         ;; (setq id-loc (org-id-find ref 'marker)
         ;;       buffer (marker-buffer id-loc)
@@ -130,11 +131,8 @@ return nil."
           (if (or (= (point) (point-min)) (= (point) (point-max)))
               (error "reference not found"))))
       (case type
-        ('table
-         (mapcar (lambda (row)
-                   (if (and (symbolp row) (equal row 'hline)) row
-		     (mapcar #'org-babel-read row)))
-                 (org-table-to-lisp)))
+        ('results-line (org-babel-ref-read-result))
+        ('table (org-babel-ref-read-table))
         ('source-block
          (setq result (org-babel-execute-src-block
                        t nil (org-combine-plists args nil)))
@@ -146,7 +144,33 @@ return nil."
 of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
-        ((looking-at "^#\\+BEGIN_SRC") 'source-block)))
+        ((looking-at "^#\\+BEGIN_SRC") 'source-block)
+        ((looking-at "^#\\+RESNAME:") 'results-line)))
+
+(defun org-babel-ref-read-result ()
+  "Read the result at `point' into emacs-lisp."
+  (cond
+   ((org-at-table-p) (org-babel-ref-read-table))
+   ((looking-at ": ")
+    (let ((result-string
+           (org-babel-trim
+            (mapconcat (lambda (line) (if (and (> (length line) 1)
+                                               (string= ": " (substring line 0 2)))
+                                          (substring line 2)
+                                        line))
+                       (split-string
+                        (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
+                       "\n"))))
+      (or (org-babel-number-p result-string) result-string)))
+   ((looking-at "^#\\+RESNAME:")
+    (save-excursion (forward-line 1) (org-babel-ref-read-result)))))
+
+(defun org-babel-ref-read-table ()
+  "Read the table at `point' into emacs-lisp."
+  (mapcar (lambda (row)
+            (if (and (symbolp row) (equal row 'hline)) row
+              (mapcar #'org-babel-read row)))
+          (org-table-to-lisp)))
 
 (provide 'org-babel-ref)
 ;;; org-babel-ref.el ends here
