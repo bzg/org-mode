@@ -95,6 +95,7 @@ then create.  Return the initialized session."
     (let* ((session (if session (intern session) :default))
            (shell-buffer (org-babel-shell-session-buffer session))
            (newp (not (org-babel-comint-buffer-livep shell-buffer))))
+      (message "initiating shell buffer %S" shell-buffer)
       (shell shell-buffer)
       (when newp
         (setq shell-buffer (current-buffer))
@@ -115,7 +116,7 @@ last statement in BODY."
   (let* ((full-body (mapconcat #'org-babel-chomp
                                (list body org-babel-shell-eoe-indicator) "\n"))
          (raw (org-babel-comint-with-output buffer org-babel-shell-eoe-output nil
-                (insert full-body) (comint-send-input)))
+                (insert full-body) (comint-send-input nil t)))
          (results (cdr (member org-babel-shell-eoe-output
                                     (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
                                                      (mapcar #'org-babel-trim raw)))))))

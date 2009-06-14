@@ -104,7 +104,7 @@ last statement in BODY."
   (let* ((full-body (mapconcat #'org-babel-chomp
                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
-                (insert full-body) (comint-send-input)))
+                (insert full-body) (comint-send-input nil t)))
          (results (cdr (member org-babel-ruby-eoe-indicator
                                (reverse (mapcar #'org-babel-ruby-read-string
                                                 (mapcar #'org-babel-trim raw)))))))

@@ -115,7 +115,7 @@ last statement in BODY."
                                  (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                   ;; for some reason python is fussy, and likes enters after every input
-                  (mapc (lambda (statement) (insert statement) (comint-send-input))
+                  (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
                         (split-string full-body "[\r\n]+"))))
            (results (delete org-babel-python-eoe-indicator
                             (cdr (member org-babel-python-eoe-indicator
