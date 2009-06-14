@@ -694,6 +694,13 @@ a * b
 #+end_src
 
 **** TODO shell
+
+#+srcname: task-shell-pop-sessions
+#+begin_src sh :var NAME="eric"
+echo $NAME
+#+end_src
+
+
 *** TODO function to dump last N lines from inf-proc buffer into the current source block
 
 Callable with a prefix argument to specify how many lines should be

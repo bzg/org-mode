@@ -51,7 +51,7 @@ function is called by `org-babel-execute-src-block'."
                                 (org-babel-shell-var-to-shell (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
          (session (org-babel-shell-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-shell-evaluate (org-babel-shell-session-buffer session) full-body result-type)))
+         (results (org-babel-shell-evaluate session full-body result-type)))
     (if (member "scalar" result-params)
         results
       (setq results (let ((tmp-file (make-temp-file "org-babel-ruby")))
@@ -60,6 +60,23 @@ function is called by `org-babel-execute-src-block'."
       (if (and (member "vector" results) (not (listp results)))
           (list (list results))
         results))))
+
+(defun org-babel-prep-session:sh (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-shell-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-shell-var-to-shell (cdr pair))))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))))
+
+;; helper functions
 
 (defun org-babel-shell-var-to-shell (var)
   "Convert an elisp var into a string of shell commands
@@ -81,14 +98,12 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for comint evaluation
-
 (defvar org-babel-shell-buffers '(:default . nil))
 
 (defun org-babel-shell-session-buffer (session)
   (cdr (assoc session org-babel-shell-buffers)))
 
-(defun org-babel-shell-initiate-session (&optional session)
+(defun org-babel-shell-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (save-window-excursion
@@ -102,6 +117,9 @@ then create.  Return the initialized session."
         (org-babel-comint-wait-for-output shell-buffer))
       (setq org-babel-shell-buffers (cons (cons session shell-buffer) (assq-delete-all session org-babel-shell-buffers)))
       session)))
+
+(defun org-babel-python-shell-initiate-session (&optional session)
+  (org-babel-shell-session-buffer (org-babel-shell-initiate-session-by-key session)))
 
 (defvar org-babel-shell-eoe-indicator "echo 'org_babel_shell_eoe'"
   "Used to indicate that evaluation is has completed.")
