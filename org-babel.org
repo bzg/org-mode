@@ -677,11 +677,17 @@ For lack of a better place, lets add this to the
 
 #+srcname: task-ruby-pop-to-session
 #+begin_src ruby :var num=9 :var another="something else"
+num.times{|n| puts another}
+#+end_src
+
+**** TODO python
+
+#+srcname: task-python-pop-to-session
+#+begin_src python :var num=9 :var another="something else"
 num.times{|n| puts n}
 #+end_src
 
 **** TODO R
-**** TODO python
 **** TODO shell
 *** TODO function to dump last N lines from inf-proc buffer into the current source block
 

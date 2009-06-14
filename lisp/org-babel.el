@@ -125,7 +125,7 @@ of the source block to the kill ring."
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     ;; copy body to the kill ring
-    (with-temp-buffer (insert body) (copy-region-as-kill (point-min) (point-max)))
+    (with-temp-buffer (insert (org-babel-trim body)) (copy-region-as-kill (point-min) (point-max)))
     ;; if called with a prefix argument, then process header arguments
     (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
     ;; just to the session using pop-to-buffer
