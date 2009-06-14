@@ -1811,6 +1811,13 @@ of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
    I just pushed a good amount of changes, could you see if your shell
    problems still exist?
 
+   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
+   org-babel-sh.el, raw gets the value
+
+("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
+
+and therefore (member org-babel-sh-eoe-output ...) fails
+
 ** TODO non-orgtbl formatted lists
 for example
 
