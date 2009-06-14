@@ -85,7 +85,11 @@ Emacs-lisp table, otherwise return the results as a string."
 (defun org-babel-ruby-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (save-window-excursion (run-ruby nil session) (current-buffer)))
+  (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+    (if (org-babel-comint-buffer-livep session-buffer)
+        session-buffer
+      (sit-for .5)
+      (org-babel-ruby-initiate-session session))))
 
 (defvar org-babel-ruby-last-value-eval "_"
   "When evaluated by Ruby this returns the return value of the last statement.")
