@@ -850,7 +850,9 @@ lang=\"%s\" xml:lang=\"%s\">
 		(replace-match "\\2\n"))
 	      (insert line "\n")
 	      (while (and lines
-			  (or (not ind) (equal ind (get-text-property 0 'original-indentation (car lines))))
+			  (or (= (length (car lines)) 0)
+			      (not ind)
+			      (equal ind (get-text-property 0 'original-indentation (car lines))))
 			  (or (= (length (car lines)) 0)
 			      (get-text-property 0 'org-protected (car lines))))
 		(insert (pop lines) "\n"))
