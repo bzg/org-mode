@@ -1718,7 +1718,10 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [12/15]
+* Bugs [12/16]
+** TODO ruby fails on first call to non-default session
+
+
 ** TODO non-orgtbl formatted lists
 for example
 
