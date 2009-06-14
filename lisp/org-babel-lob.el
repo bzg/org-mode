@@ -58,8 +58,7 @@ add files to this list use the `org-babel-lob-ingest' command."
 
 ;; functions for executing lob one-liners
 
-(defvar org-babel-lob-one-liner-regexp
-  "#\\+lob:\\([^ \t\n\r]+\\)\\([ \t]+\\([^\n]+\\)\\)?\n")
+(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\n]+\\)\n")
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel
@@ -80,24 +79,10 @@ a list of the following form.
     (save-excursion
       (move-beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
-          (cons (org-babel-clean-text-properties (match-string 1))
-                (delq nil (mapcar (lambda (assignment)
-                                    (save-match-data
-                                      (if (string-match "\\(.+\\)=\\(.+\\)" assignment)
-                                          (list (org-babel-clean-text-properties (match-string 1 assignment))
-                                                (org-babel-clean-text-properties (match-string 2 assignment)))
-                                        nil)))
-                                  (split-string (match-string 3)))))))))
+          (org-babel-clean-text-properties (match-string 1))))))
 
 (defun org-babel-lob-execute (info)
-  (let ((params (org-babel-parse-header-arguments
-                       (concat ":var results="
-                               (car info)
-                               "("
-                               (mapconcat (lambda (var-spec)
-                                            (format "%s=%s" (first var-spec) (second var-spec)))
-                                          (cdr info) ", ")
-                               ")"))))
+  (let ((params (org-babel-parse-header-arguments (concat ":var results=" info))))
     (org-babel-execute-src-block t (list "emacs-lisp" "results" params))))
 
 (provide 'org-babel-lob)

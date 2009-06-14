@@ -29,4 +29,4 @@ plot(data)
 | 4 | 16 |
 | 5 | 25 |
 
-#+lob:R-plot data=example-R-plot-data
+#+lob: R-plot(data=example-R-plot-data)
