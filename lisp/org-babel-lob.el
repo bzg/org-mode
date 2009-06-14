@@ -48,6 +48,9 @@ add files to this list use the `org-babel-lob-ingest' command."
   (org-babel-map-source-blocks file
     (let ((source-name (intern (org-babel-get-src-block-name)))
           (info (org-babel-get-src-block-info)))
+      ;; remove :var elements from params
+      ;; (once we have a better way of combining parameter lists then we won't have to do this)
+      (setf (third info) (assq-delete-all :var (third info)))
       (setq org-babel-library-of-babel
             (cons (cons source-name info)
                   (assq-delete-all source-name org-babel-library-of-babel))))))

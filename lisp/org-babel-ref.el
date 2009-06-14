@@ -90,7 +90,7 @@ return nil."
   "Resolve the reference and return it's value"
   (save-excursion
     (let ((case-fold-search t)
-          type args new-refere new-referent result)
+          type args new-refere new-referent result lob-info)
       ;; assign any arguments to pass to source block
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
@@ -112,7 +112,9 @@ return nil."
                 (or (re-search-forward result_regexp nil t)
                     (re-search-forward result_regexp nil t)
                     (re-search-forward regexp nil t)
-                    (re-search-backward regexp nil t)))
+                    (re-search-backward regexp nil t)
+                    ;; check the Library of Babel
+                    (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
         ;; ;; TODO: allow searching for names in other buffers
         ;; (setq id-loc (org-id-find ref 'marker)
         ;;       buffer (marker-buffer id-loc)
@@ -120,11 +122,13 @@ return nil."
         ;; (move-marker id-loc nil)
         (progn (message (format "reference '%s' not found in this buffer" ref))
                (error (format "reference '%s' not found in this buffer" ref))))
-      (while (not (setq type (org-babel-ref-at-ref-p)))
-        (forward-line 1)
-        (beginning-of-line)
-        (if (or (= (point) (point-min)) (= (point) (point-max)))
-            (error "reference not found")))
+      (if lob-info
+          (setq type 'lob)
+        (while (not (setq type (org-babel-ref-at-ref-p)))
+          (forward-line 1)
+          (beginning-of-line)
+          (if (or (= (point) (point-min)) (= (point) (point-max)))
+              (error "reference not found"))))
       (case type
         ('table
          (mapcar (lambda (row)
@@ -134,7 +138,8 @@ return nil."
         ('source-block
          (setq result (org-babel-execute-src-block
                        t nil (org-combine-plists args nil)))
-         (if (symbolp result) (format "%S" result) result))))))
+         (if (symbolp result) (format "%S" result) result))
+        ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
 
 (defun org-babel-ref-at-ref-p ()
   "Return the type of reference located at point or nil of none
