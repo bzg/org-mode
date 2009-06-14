@@ -112,15 +112,14 @@ BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
     (let* ((full-body (mapconcat #'org-babel-trim
-                                (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
+                                 (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                   ;; for some reason python is fussy, and likes enters after every input
                   (mapc (lambda (statement) (insert statement) (comint-send-input))
                         (split-string full-body "[\r\n]+"))))
-           results)
-      (setq results (delete org-babel-python-eoe-indicator
+           (results (delete org-babel-python-eoe-indicator
                             (cdr (member org-babel-python-eoe-indicator
-                                         (reverse (mapcar #'org-babel-trim raw))))))
+                                         (reverse (mapcar #'org-babel-trim raw)))))))
       (setq results (mapcar #'org-babel-python-read-string results))
       (org-babel-trim (case result-type
                         (output (mapconcat #'identity (reverse (cdr results)) "\n"))

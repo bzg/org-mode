@@ -101,11 +101,9 @@ last statement in BODY."
                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                 (insert full-body) (comint-send-input)))
-         results)
-    ;; clean up results
-    (setq results (cdr (member org-babel-ruby-eoe-indicator
+         (results (cdr (member org-babel-ruby-eoe-indicator
                                (reverse (mapcar #'org-babel-ruby-read-string
-                                                (mapcar #'org-babel-trim raw))))))
+                                                (mapcar #'org-babel-trim raw)))))))
     (case result-type
       (output (mapconcat #'identity (reverse (cdr results)) "\n"))
       (value (car results))
