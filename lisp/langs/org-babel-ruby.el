@@ -62,7 +62,7 @@ called by `org-babel-execute-src-block'."
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (message "prep called with %S %S" session params)
+  ;; (message "params=%S" params) ;; debugging
   (let* ((session (org-babel-ruby-initiate-session session))
          (vars (org-babel-ref-variables params))
          (var-lines (mapcar ;; define any variables
@@ -71,10 +71,13 @@ called by `org-babel-execute-src-block'."
                                (car pair)
                                (org-babel-ruby-var-to-ruby (cdr pair))))
                      vars)))
+    ;; (message "vars=%S" vars) ;; debugging
     (org-babel-comint-in-buffer session
+      (sit-for .5) (goto-char (point-max))
       (mapc (lambda (var)
               (insert var) (comint-send-input nil t)
-              (org-babel-comint-wait-for-output session)) var-lines))))
+              (org-babel-comint-wait-for-output session)
+              (sit-for .1) (goto-char (point-max))) var-lines))))
 
 ;; helper functions
 
