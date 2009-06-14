@@ -664,7 +664,7 @@ a + b
 a + b
 #+end_src
 
-*** TODO function to bring up inferior-process buffer [1/4]
+*** TODO function to bring up inferior-process buffer [2/4]
 
 This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
@@ -680,11 +680,11 @@ For lack of a better place, lets add this to the
 num.times{|n| puts another}
 #+end_src
 
-**** TODO python
+**** DONE python
 
 #+srcname: task-python-pop-to-session
 #+begin_src python :var num=9 :var another="something else"
-num.times{|n| puts n}
+another * num
 #+end_src
 
 **** TODO R

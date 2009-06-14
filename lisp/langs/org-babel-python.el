@@ -51,7 +51,7 @@ called by `org-babel-execute-src-block'."
                                 (org-babel-python-var-to-python (cdr pair))))
                       vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
          (session (org-babel-python-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-python-evaluate (org-babel-python-session-buffer session) full-body result-type)))
+         (results (org-babel-python-evaluate session full-body result-type)))
     (if (member "scalar" result-params)
         results
       (setq results (case result-type ;; process results based on the result-type
@@ -62,6 +62,23 @@ called by `org-babel-execute-src-block'."
       (if (and (member "vector" results) (not (listp results)))
           (list (list results))
         results))))
+
+(defun org-babel-prep-session:python (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-python-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-python-var-to-python (cdr pair))))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (move-end-of-line 1) (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))))
+
+;; helper functions
 
 (defun org-babel-python-var-to-python (var)
   "Convert an elisp var into a string of python source code
@@ -83,14 +100,12 @@ Emacs-lisp table, otherwise return the results as a string."
                                          "'" "\"" results)))))
      results)))
 
-;; functions for comint evaluation
-
 (defvar org-babel-python-buffers '(:default . nil))
 
 (defun org-babel-python-session-buffer (session)
   (cdr (assoc session org-babel-python-buffers)))
 
-(defun org-babel-python-initiate-session (&optional session)
+(defun org-babel-python-initiate-session-by-key (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
   (save-window-excursion
@@ -99,6 +114,9 @@ then create.  Return the initialized session."
       (run-python)
       (setq org-babel-python-buffers (cons (cons session python-buffer) (assq-delete-all session org-babel-python-buffers)))
       session)))
+
+(defun org-babel-python-initiate-session (&optional session)
+  (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session)))
 
 (defvar org-babel-python-last-value-eval "_"
   "When evaluated by Python this returns the return value of the last statement.")

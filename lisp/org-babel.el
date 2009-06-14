@@ -129,7 +129,8 @@ of the source block to the kill ring."
     ;; if called with a prefix argument, then process header arguments
     (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
     ;; just to the session using pop-to-buffer
-    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session))))
+    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session))
+    (move-end-of-line 1)))
 
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and dump the results
