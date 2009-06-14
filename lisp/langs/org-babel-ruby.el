@@ -60,6 +60,24 @@ called by `org-babel-execute-src-block'."
                    (org-babel-import-elisp-from-file tmp-file)))
         ('value (org-babel-ruby-table-or-results results))))))
 
+(defun org-babel-prep-session:ruby (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (message "prep called with %S %S" session params)
+  (let* ((session (org-babel-ruby-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-ruby-var-to-ruby (cdr pair))))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var)
+              (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)) var-lines))))
+
+;; helper functions
+
 (defun org-babel-ruby-var-to-ruby (var)
   "Convert an elisp var into a string of ruby source code
 specifying a var of the same value."
@@ -79,8 +97,6 @@ Emacs-lisp table, otherwise return the results as a string."
                                ", " " " (replace-regexp-in-string
                                          "'" "\"" results)))))
      results)))
-
-;; functions for comint evaluation
 
 (defun org-babel-ruby-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION

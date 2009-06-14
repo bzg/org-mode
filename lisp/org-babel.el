@@ -40,6 +40,15 @@ then run `org-babel-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
+(defun org-babel-pop-to-session-maybe ()
+  "Detect if this is context for a org-babel src-block and if so
+then run `org-babel-pop-to-session'."
+  (interactive)
+  (let ((info (org-babel-get-src-block-info)))
+    (if info (progn (org-babel-pop-to-session current-prefix-arg info) t) nil)))
+
+(add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
+
 (defvar org-babel-default-header-args '()
   "Default arguments to use when evaluating a source block.")
 
@@ -102,6 +111,26 @@ lisp code use the `org-babel-add-interpreter' function."
 	      (const "ruby")))
 
 ;;; functions
+(defun org-babel-pop-to-session (&optional arg info)
+  "Pop to the session of the current source-code block.  If
+called with a prefix argument then evaluate the header arguments
+for the source block before entering the session.  Copy the body
+of the source block to the kill ring."
+  (interactive)
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+         (body (second info))
+         (params (third info))
+         (session (cdr (assoc :session params))))
+    (unless (member lang org-babel-interpreters)
+      (error "Language is not in `org-babel-interpreters': %s" lang))
+    ;; copy body to the kill ring
+    (with-temp-buffer (insert body) (copy-region-as-kill (point-min) (point-max)))
+    ;; if called with a prefix argument, then process header arguments
+    (if arg (funcall (intern (concat "org-babel-prep-session:" lang)) session params))
+    ;; just to the session using pop-to-buffer
+    (pop-to-buffer (funcall (intern (format "org-babel-%s-initiate-session" lang)) session))))
+
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block, and dump the results
 into the buffer immediately following the block.  Results are

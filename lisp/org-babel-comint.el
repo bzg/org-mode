@@ -47,9 +47,9 @@ body inside the protection of `save-window-excursion' and
   (declare (indent 1))
   `(save-window-excursion
      (save-match-data
-       (unless (org-babel-comint-buffer-livep buffer)
-         (error (format "buffer %s doesn't exist or has no process" buffer)))
-       (set-buffer buffer)
+       (unless (org-babel-comint-buffer-livep ,buffer)
+         (error (format "buffer %s doesn't exist or has no process" ,buffer)))
+       (set-buffer ,buffer)
        ,@body)))
 
 (defmacro org-babel-comint-with-output (buffer eoe-indicator remove-echo &rest body)

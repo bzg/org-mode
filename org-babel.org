@@ -122,7 +122,7 @@ and the results to be collected in the same table.
    At the same time I introduced org-babel-named-src-block-regexp, to
    match src-blocks with srcname.
 
-** TODO Create objects in top level (global) environment [3/5]
+** TODO Create objects in top level (global) environment [3/9]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -664,7 +664,7 @@ a + b
 a + b
 #+end_src
 
-*** TODO function to bring up inferior-process buffer
+*** TODO function to bring up inferior-process buffer [1/4]
 
 This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
@@ -673,6 +673,16 @@ up the inf-proc buffer using =pop-to-buffer=.
 For lack of a better place, lets add this to the
 `org-shiftmetadown-hook' hook.
 
+**** DONE ruby
+
+#+srcname: task-ruby-pop-to-session
+#+begin_src ruby :var num=9 :var another="something else"
+num.times{|n| puts n}
+#+end_src
+
+**** TODO R
+**** TODO python
+**** TODO shell
 *** TODO function to dump last N lines from inf-proc buffer into the current source block
 
 Callable with a prefix argument to specify how many lines should be
