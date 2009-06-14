@@ -111,7 +111,7 @@ last statement in BODY."
                     tmp-file))
            (full-body (mapconcat #'org-babel-chomp (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
-                  (insert full-body) (comint-send-input)))
+                  (insert full-body) (inferior-ess-send-input)))
            (results (let ((broke nil))
                       (delete nil (mapcar (lambda (el)
                                             (if (or broke
