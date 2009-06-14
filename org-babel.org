@@ -1256,7 +1256,26 @@ to the command if BUFF is not given.)
        writing the results to a table
     3) The table is read using =org-table-import=
 
-** DEFERRED Rework Interaction with Running Processes [0/3]
+** DEFERRED Rework Interaction with Running Processes [2/5]
+*** DONE robust to errors interrupting execution
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
+*** DEFERRED use =C-g= keyboard-quit to push processing into the background
+This may be possible using the `run-with-timer' command.
+
+I have no idea how this could work...
+
+#+srcname: long-runner-ruby
+#+begin_src ruby :results silent
+  sleep(10)
+  :patton_is_an_grumpy
+#+end_src
+
 *** TODO ability to select which of multiple sessions is being used
     Increasingly it is looking like we're going to want to run all
     source code blocks in comint buffer (sessions).  Which will have
