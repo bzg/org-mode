@@ -1718,21 +1718,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [14/18]
-** TODO test failing forcing vector results with =test-forced-vector-results= ruby code block
-Note that this only seems to happen the *second* time the test table
-is evaluated
-
-#+srcname: bug-trivial-vector
-#+begin_src emacs-lisp :results vector silent
-8
-#+end_src
-
-#+srcname: bug-forced-vector-results
-#+begin_src ruby :var triv=test-trivial-vector :results silent
-triv.class.name
-#+end_src
-
+* Bugs [15/18]
 ** TODO non-orgtbl formatted lists
 for example
 
@@ -1764,6 +1750,21 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+** DONE test failing forcing vector results with =test-forced-vector-results= ruby code block
+Note that this only seems to happen the *second* time the test table
+is evaluated
+
+#+srcname: bug-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: bug-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
+
+mysteriously this seems to be fixed...
 ** DONE defunct R sessions
 Sometimes an old R session will turn defunct, and newly inserted code
 will not be evaluated (leading to a hang).
