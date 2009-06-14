@@ -33,6 +33,11 @@
 
 (org-babel-add-interpreter "babel")
 
+(setq org-babel-library-of-babel
+      (progn (set-buffer
+	      (find-file-noselect "../library-of-babel.org"))
+	     (org-babel-get-all-src-block-infos)))
+
 (defun org-babel-execute:babel (body params)
   "Execute a library-of-babel block.
 
@@ -49,28 +54,11 @@
   This function is called by `org-babel-execute-src-block'."
   (message "executing babel source code block...")
   (save-window-excursion
-    (save-excursion
-      (org-babel-find-named-block (cdr (assoc :srcname params))))
-    (let ((block (match-string 0)))
-      (search-forward "#+end_src" nil t)
-      (forward-line 1)
-      (insert "\n")
-      (insert block)
-      (beginning-of-line)
-      (org-babel-execute-src-block nil nil params))))
-
-(defun org-babel-lob-parse-buffer ()
-  "Read all source-code blocks in buffer into memory."
-  (save-excursion
-    (goto-char (point-min))
-    (let ((blocks (make-hash-table)))
-      (while (re-search-forward
-	      org-babel-named-src-block-regexp nil t)
-	(puthash (match-string-no-properties 1)        ;; srcname
-		 (list (cons :lang (match-string-no-properties 2))
-		       (cons :body (match-string-no-properties 5))
-		       (cons :params (match-string-no-properties 3)))
-		 blocks))
-      blocks)))
+    (let* ((srcname (cdr (assoc :srcname params)))
+	   (info (or (save-excursion
+		       (goto-char (org-babel-find-named-block srcname))
+		       (org-babel-get-src-block-info))
+		     (gethash srcname org-babel-library-of-babel))))
+      (org-babel-execute-src-block nil info params))))
 
 (provide 'org-babel-lob)
