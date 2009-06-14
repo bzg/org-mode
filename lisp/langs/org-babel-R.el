@@ -63,6 +63,14 @@ called by `org-babel-execute-src-block'."
           (list (list results))
         results))))
 
+(defun org-babel-prep-session:R (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-R-initiate-session session))
+         (vars (org-babel-ref-variables params)))
+    (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)))
+
+;; helper functions
+
 (defun org-babel-R-quote-tsv-field (s)
   "Quote field S for export to R."
   (if (stringp s)
@@ -85,8 +93,6 @@ R process in `org-babel-R-buffer'."
 	 (format "%s <- read.table(\"%s\", header=FALSE, sep=\"\\t\", as.is=TRUE)"
 		 name transition-file))
      (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
-
-;; functions for comint evaluation
 
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
