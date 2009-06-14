@@ -70,6 +70,7 @@ specifying a var of the same value."
 (defun org-babel-ruby-table-or-results (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
+  (message "results are %s" results)
   (org-babel-read
    (if (string-match "^\\[.+\\]$" results)
        (org-babel-read
