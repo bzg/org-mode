@@ -299,16 +299,19 @@ relies on `org-babel-insert-result'."
   (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
-    (delete-region (point)
-                   (save-excursion
-                     (if (org-at-table-p)
-                         (org-table-end)
-                       (while (if (looking-at "\\(: \\|\\[\\[\\)")
-                                  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                                           (forward-line 1)) t))
-                         (forward-line 1))
-                       (forward-line -1)
-                       (point))))))
+    (delete-region (point) (org-babel-result-end))))
+
+(defun org-babel-result-end ()
+  "Return the point at the end of the current set of results"
+  (save-excursion
+    (if (org-at-table-p)
+        (org-table-end)
+      (while (if (looking-at "\\(: \\|\\[\\[\\)")
+                 (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                          (forward-line 1)) t))
+        (forward-line 1))
+      (forward-line -1)
+      (point))))
 
 (defun org-babel-result-to-file (result)
   "Return an `org-mode' link with the path being the value or
@@ -347,17 +350,17 @@ string.
 
 This is taken almost directly from `org-read-prop'."
   (if (and (stringp cell) (not (equal cell "")))
-      (if (org-babel-number-p cell)
-          (string-to-number cell)
-        (if (or (equal "(" (substring cell 0 1))
-                (equal "'" (substring cell 0 2)))
-            (read cell)
-          (progn (set-text-properties 0 (length cell) nil cell) cell)))
+      (or (org-babel-number-p cell)
+          (if (or (equal "(" (substring cell 0 1))
+                  (equal "'" (substring cell 0 2)))
+              (read cell)
+            (progn (set-text-properties 0 (length cell) nil cell) cell)))
     cell))
 
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
-  (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string))
+  (if (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+      (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)
   "Read the results located at FILE-NAME into an elisp table.  If

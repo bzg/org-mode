@@ -52,6 +52,31 @@ body inside the protection of `save-window-excursion' and
        (set-buffer buffer)
        ,@body)))
 
+(defmacro org-babel-comint-with-output (buffer eoe-indicator remove-echo &rest body)
+  "Evaluate BODY in BUFFER, wait until EOE-INDICATOR appears in
+output, then return all process output."
+  (declare (indent 3))
+  `(org-babel-comint-in-buffer buffer
+     (let ((string-buffer ""))
+       (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
+         ;; setup filter
+         (add-hook 'comint-output-filter-functions 'my-filt)
+         ;; pass FULL-BODY to process
+         (goto-char (process-mark (get-buffer-process (current-buffer))))
+         (progn ,@body)
+         ;; wait for end-of-evaluation indicator
+         (while (progn
+                  (goto-char comint-last-input-end)
+                  (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
+                                            (re-search-forward (regexp-quote ,eoe-indicator) nil t)))))
+           (accept-process-output (get-buffer-process (current-buffer))))
+         ;; remove filter
+         (remove-hook 'comint-output-filter-functions 'my-filt))
+       ;; remove echo'd FULL-BODY from input
+       (if (and ,remove-echo (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote ,full-body)) string-buffer))
+           (setq raw (substring string-buffer (match-end 0))))
+       (split-string string-buffer comint-prompt-regexp))))
+
 (defun org-babel-comint-input-command (buffer cmd)
   "Pass CMD to BUFFER  The input will not be echoed."
   (org-babel-comint-in-buffer buffer

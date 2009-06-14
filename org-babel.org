@@ -1699,19 +1699,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [11/15]
-
-** TODO when reading results from =#+resname= line
-
-Errors when trying to read from resname lines.
-
-#+resname: bug-in-resname
-: 8
-
-#+srcname: bug-in-resname-reader
-#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
-buggy
-#+end_src
+* Bugs [12/15]
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -1744,6 +1732,18 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+
+** DONE when reading results from =#+resname= line
+
+Errors when trying to read from resname lines.
+
+#+resname: bug-in-resname
+: 8
+
+#+srcname: bug-in-resname-reader
+#+begin_src emacs-lisp :var buggy=bug-in-resname() :results silent
+buggy
+#+end_src
 
 ** DONE R-code broke on "org-babel" rename
 
