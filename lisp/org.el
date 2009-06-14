@@ -3794,6 +3794,7 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
+(defvar org-inhibit-blocking nil)        ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 (defconst org-outline-regexp "\\*+ ")
 
@@ -9003,7 +9004,8 @@ For calling through lisp, arg is also interpreted in the following way:
     (when (equal arg '(64))
       (setq arg nil org-blocker-hook nil))
     (when (and org-blocker-hook
-	       (org-entry-get nil "NOBLOCKING"))
+	       (or org-inhibit-blocking
+		   (org-entry-get nil "NOBLOCKING")))
       (setq org-blocker-hook nil))
     (save-excursion
       (catch 'exit
@@ -14352,6 +14354,8 @@ Depending on context, this does one of the following:
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
     (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-selection-as-state-change))
+	  (org-inhibit-blocking
 	   (not org-treat-S-cursor-todo-selection-as-state-change)))
       (org-call-with-arg 'org-todo 'right)))
    ((or (and org-support-shift-select
@@ -14384,6 +14388,8 @@ Depending on context, this does one of the following:
    ((and (not (eq org-support-shift-select 'always))
 	 (org-on-heading-p))
     (let ((org-inhibit-logging
+	   (not org-treat-S-cursor-todo-selection-as-state-change))
+	  (org-inhibit-blocking
 	   (not org-treat-S-cursor-todo-selection-as-state-change)))
       (org-call-with-arg 'org-todo 'left)))
    ((or (and org-support-shift-select
