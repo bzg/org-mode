@@ -2060,6 +2060,8 @@ of these tests may fail.
 | get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
 | set python session      | set-python-session-var     |     |         set |         set | pass |
 | get from python session | get-python-session-var     |     |           4 |           4 | pass |
+| set R session           | set-R-session-var          |     |         set |         set | pass |
+| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
