@@ -109,11 +109,6 @@ You may want to use this hook for example to turn off `outline-minor-mode'
 or similar things which you want to have when editing a source code file,
 but which mess up the display of a snippet in Org exported files.")
 
-(defvar org-protecting-blocks
-  '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
-  "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
-This is needed for font-lock setup.")
-
 ;;; Editing source examples
 
 (defvar org-src-mode-map (make-sparse-keymap))

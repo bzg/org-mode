@@ -2771,6 +2771,11 @@ Use customize to modify this, or restart Emacs after changing it."
 	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
+(defvar org-protecting-blocks
+  '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
+  "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
+This is needed for font-lock setup.")
+
 ;;; Miscellaneous options
 
 (defgroup org-completion nil
