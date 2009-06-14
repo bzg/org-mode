@@ -112,37 +112,18 @@ then create.  Return the initialized session."
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (org-babel-comint-in-buffer buffer
-    (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-chomp
-                                (list body org-babel-shell-eoe-indicator) "\n"))
-          results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        (insert full-body)
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-shell-eoe-output) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; (message (format "raw-results=%S" string-buffer)) ;; debugging
-      ;; (message (format "split-results=%S" (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))) ;; debugging
-      ;; split results with `comint-prompt-regexp'
-      (setq results (cdr (member org-babel-shell-eoe-output
-                                 (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
-                                                  (mapcar #'org-babel-trim (split-string string-buffer comint-prompt-regexp)))))))
-      ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
-      (or (case result-type
-            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-            (value (car results))
-            (t (reverse results))) ""))))
+  (let* ((full-body (mapconcat #'org-babel-chomp
+                               (list body org-babel-shell-eoe-indicator) "\n"))
+         (raw (org-babel-comint-with-output buffer org-babel-shell-eoe-output nil
+                (insert full-body) (comint-send-input)))
+         (results (cdr (member org-babel-shell-eoe-output
+                                    (reverse (mapcar #'org-babel-shell-strip-weird-long-prompt
+                                                     (mapcar #'org-babel-trim raw)))))))
+    ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
+    (or (case result-type
+          (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
+          (value (car results))
+          (t (reverse results))) "")))
 
 (defun org-babel-shell-strip-weird-long-prompt (string)
   (while (string-match "^% +[\r\n$]+ *" string)
