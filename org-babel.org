@@ -114,7 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [22/41]
+* Tasks [22/42]
 ** TODO add a function to jump to a source-block by name
    I've had an initial stab at that in org-babel-find-named-block
    (library-of-babel branch).
@@ -670,6 +670,9 @@ This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
 up the inf-proc buffer using =pop-to-buffer=.
 
+For lack of a better place, lets add this to the
+`org-shiftmetadown-hook' hook.
+
 *** TODO function to dump last N lines from inf-proc buffer into the current source block
 
 Callable with a prefix argument to specify how many lines should be
@@ -705,6 +708,11 @@ executions.
 4
 5
 #+end_src
+
+** TODO add =:none= session argument (for purely functional execution)
+This would allow source blocks to be run in their own new process
+
+These blocks could then also be run in the background.
 
 ** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]
