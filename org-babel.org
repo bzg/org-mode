@@ -1700,7 +1700,6 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 
 
 * Bugs [12/15]
-
 ** TODO non-orgtbl formatted lists
 for example
 

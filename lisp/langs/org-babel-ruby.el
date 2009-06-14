@@ -102,7 +102,7 @@ last statement in BODY."
          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                 (insert full-body) (comint-send-input)))
          results)
-    ;; split results with `comint-prompt-regexp'
+    ;; clean up results
     (setq results (cdr (member org-babel-ruby-eoe-indicator
                                (reverse (mapcar #'org-babel-ruby-read-string
                                                 (mapcar #'org-babel-trim raw))))))

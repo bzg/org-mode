@@ -111,35 +111,16 @@ then create.  Return the initialized session."
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
   (org-babel-comint-in-buffer buffer
-    (let ((string-buffer "")
-          (full-body (mapconcat #'org-babel-trim
+    (let* ((full-body (mapconcat #'org-babel-trim
                                 (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
-          results)
-      (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
-        ;; setup filter
-        (add-hook 'comint-output-filter-functions 'my-filt)
-        ;; pass FULL-BODY to process
-        (goto-char (process-mark (get-buffer-process buffer)))
-        ;; for some reason python is fussy, and likes enters after every input
-        (mapc (lambda (statement) (insert statement) (comint-send-input))
-              (split-string full-body "[\r\n]+"))
-        (comint-send-input)
-        ;; wait for end-of-evaluation indicator
-        (while (progn
-                 (goto-char comint-last-input-end)
-                 (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                           (re-search-forward (regexp-quote org-babel-python-eoe-indicator) nil t)))))
-          (accept-process-output (get-buffer-process buffer)))
-        ;; remove filter
-        (remove-hook 'comint-output-filter-functions 'my-filt))
-      ;; remove echo'd FULL-BODY from input
-      (if (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote full-body)) string-buffer)
-          (setq string-buffer (substring string-buffer (match-end 0))))
-      ;; split results with `comint-prompt-regexp'
+           (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
+                  ;; for some reason python is fussy, and likes enters after every input
+                  (mapc (lambda (statement) (insert statement) (comint-send-input))
+                        (split-string full-body "[\r\n]+"))))
+           results)
       (setq results (delete org-babel-python-eoe-indicator
                             (cdr (member org-babel-python-eoe-indicator
-                                         (reverse (mapcar #'org-babel-trim
-                                                          (split-string string-buffer comint-prompt-regexp)))))))
+                                         (reverse (mapcar #'org-babel-trim raw))))))
       (setq results (mapcar #'org-babel-python-read-string results))
       (org-babel-trim (case result-type
                         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
