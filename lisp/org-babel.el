@@ -127,6 +127,7 @@ the header arguments specified at the source code block."
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (setq result (funcall cmd body params))
     ;; possibly force result into a vector
+    (message "with %s result %S" lang result)
     (if (and (not (listp result)) (cdr (assoc :results params))
              (member "vector" (split-string (cdr (assoc :results params)))))
         (setq result (list result)))
