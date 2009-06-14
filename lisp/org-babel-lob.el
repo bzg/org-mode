@@ -61,4 +61,50 @@
 		     (gethash srcname org-babel-library-of-babel))))
       (org-babel-execute-src-block nil info params))))
 
+;; alternate 1-liner syntax, this uses `seb' from org-babel-table.el
+(require 'org-babel-table)
+
+(defvar org-babel-lob-one-liner-regexp
+  "#\\+lob:\\([^ \t\n\r]+\\)\\([ \t]+\\([^\n]+\\)\\)?\n")
+
+(defun org-babel-lob-execute-maybe ()
+  "Detect if this is context for a org-babel Library Of Babel
+src-block and if so then run the appropriate source block from
+the Library."
+  (interactive)
+  (let ((info (org-babel-lob-get-info)))
+    (if info (progn (org-babel-lob-execute info) t) nil)))
+
+(add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
+
+(defun org-babel-lob-get-info ()
+  "Return the information of the current Library of Babel line as
+a list of the following form.
+
+  (source-block-name header-arguments-alist)"
+  (let ((case-fold-search t))
+    (save-excursion
+      (move-beginning-of-line 1)
+      (if (looking-at org-babel-lob-one-liner-regexp)
+          (cons (org-babel-clean-text-properties (match-string 1))
+                (delq nil (mapcar (lambda (assignment)
+                                    (save-match-data
+                                      (if (string-match "\\(.+\\)=\\(.+\\)" assignment)
+                                          (list (org-babel-clean-text-properties (match-string 1 assignment))
+                                                (org-babel-clean-text-properties (match-string 2 assignment)))
+                                        nil)))
+                                  (split-string (match-string 3)))))))))
+
+(defun org-babel-lob-execute (info)
+  (let ((params (org-babel-parse-header-arguments
+                       (concat ":var results="
+                               (car info)
+                               "("
+                               (mapconcat (lambda (var-spec)
+                                            (format "%s=%s" (first var-spec) (second var-spec)))
+                                          (cdr info) ", ")
+                               ")"))))
+    (message "params=%S" params)
+    (org-babel-execute-src-block t (list "emacs-lisp" "results" params))))
+
 (provide 'org-babel-lob)
