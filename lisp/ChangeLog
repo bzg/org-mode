@@ -1,3 +1,7 @@
+2009-06-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-open-non-existing-files): Improve docstring.
+
 2009-06-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-icalendar.el (org-icalendar-include-bbdb-anniversaries): New

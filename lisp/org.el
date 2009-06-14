@@ -1224,7 +1224,10 @@ changes to the current buffer."
 
 (defcustom org-open-non-existing-files nil
   "Non-nil means, `org-open-file' will open non-existing files.
-When nil, an error will be generated."
+When nil, an error will be generated.
+This variable applies only to external applications because they
+might choke on non-existing files.  If the link is to a file that
+will be openend in Emacs, the variable is ignored."
   :group 'org-link-follow
   :type 'boolean)
 
