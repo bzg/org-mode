@@ -110,7 +110,7 @@ then create.  Return the initialized session."
     (let* ((session (if session (intern session) :default))
            (sh-buffer (org-babel-sh-session-buffer session))
            (newp (not (org-babel-comint-buffer-livep sh-buffer))))
-      (if (and (get-buffer sh-buffer) (not (buffer-live-p sh-buffer)))
+      (if (and sh-buffer (get-buffer sh-buffer) (not (buffer-live-p sh-buffer)))
           (setq sh-buffer nil))
       (shell sh-buffer)
       (when newp

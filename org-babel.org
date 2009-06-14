@@ -2003,14 +2003,12 @@ as.matrix(tab[2,])
 
 As an example eval the following.  Adding a line to test
 
-#+srcname: simple-ruby-array
-#+begin_src ruby :results silent
-[3, 4, 5]
-#+end_src
+#+tblname: simple-ruby-array
+| 3 | 4 | 5 |
 
 #+srcname: ruby-array-test
 #+begin_src ruby :var ar = simple-ruby-array :results silent
-ar.first
+ar.first.first
 #+end_src
 
 ** DONE space trailing language name
@@ -2104,6 +2102,7 @@ of these tests may fail.
 |-------------------------+----------------------------+-----+-------------+-------------+------|
 | bugs and tasks          |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
+|                         |                            |     |             |             | pass |
 | simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
 | R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
 | multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
