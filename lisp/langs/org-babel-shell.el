@@ -51,10 +51,11 @@ function is called by `org-babel-execute-src-block'."
                                 (org-babel-shell-var-to-shell (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
          (session (org-babel-shell-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-shell-evaluate (org-babel-shell-session-buffer session) full-body result-type)))
+         (results (org-babel-shell-evaluate (org-babel-shell-session-buffer session)
+					    full-body result-type)))
     (if (member "scalar" result-params)
         results
-      (setq results (let ((tmp-file (make-temp-file "org-babel-ruby")))
+      (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
                       (with-temp-file tmp-file (insert results))
                       (org-babel-import-elisp-from-file tmp-file)))
       (if (and (member "vector" results) (not (listp results)))

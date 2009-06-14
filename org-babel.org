@@ -1718,7 +1718,35 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [15/18]
+* Bugs [15/20]
+** TODO ruby evaluation not working under ubuntu emacs 23
+   With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
+   following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
+
+#+begin_example
+run-ruby is an interactive compiled Lisp function.
+
+(run-ruby cmd)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+** TODO weird escaped characters in shell prompt break shell evaluation
+   E.g. this doesn't work. Should the shell sessions set a sane prompt
+   when they start up? Or is it a question of altering
+   comint-prompt-regexp? Or altering org-babel regexps?
+   
+#+begin_src sh   
+   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
+   prompt_col=$red
+   prompt_char='>'
+   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
+#+end_src
 ** TODO non-orgtbl formatted lists
 for example
 
@@ -2036,52 +2064,52 @@ org-babel functionality.
 of these tests may fail.
 
 #+TBLNAME: org-babel-tests
-| functionality           | block                      | arg |    expected |     results | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| basic evaluation        |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
-| shell                   | basic-shell                |     |           6 |           6 | pass |
-| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
-| python                  | basic-python               |     | hello world | hello world | pass |
-| R                       | basic-R                    |     |          13 |          13 | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| tables                  |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
-| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
-| python                  | table-python               |     |           5 |           5 | pass |
-| R                       | table-R                    |     |         3.5 |         3.5 | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block references |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last           |     |       Array |       Array | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block functions  |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
-| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
-| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
-| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
-| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
-| different               | Fibonacci                  |   4 |           5 |           5 | pass |
-| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| bugs and tasks          |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
-| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
-| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
-| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| sessions                |                            |     |             |             | pass |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| set ruby session        | set-ruby-session-var       |     |        :set |        :set | pass |
-| get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
-| set python session      | set-python-session-var     |     |         set |         set | pass |
-| get from python session | get-python-session-var     |     |           4 |           4 | pass |
-| set R session           | set-R-session-var          |     |         set |         set | pass |
-| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
+| functionality           | block                      | arg |    expected |     results | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| basic evaluation        |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass                                  |
+| shell                   | basic-shell                |     |           6 |         nil | expected "6" but was "nil"            |
+| ruby                    | basic-ruby                 |     |   org-babel |      #ERROR | expected "org-babel" but was "#ERROR" |
+| python                  | basic-python               |     | hello world | hello world | pass                                  |
+| R                       | basic-R                    |     |          13 |          13 | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| tables                  |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| emacs lisp              | table-elisp                |     |           3 |           3 | pass                                  |
+| ruby                    | table-ruby                 |     |       1-2-3 |      #ERROR | expected "1-2-3" but was "#ERROR"     |
+| python                  | table-python               |     |           5 |           5 | pass                                  |
+| R                       | table-R                    |     |         3.5 |         3.5 | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| source block references |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| all languages           | chained-ref-last           |     |       Array |      #ERROR | expected "Array" but was "#ERROR"     |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| source block functions  |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass                                  |
+| run over                | Fibonacci                  |   0 |           1 |           1 | pass                                  |
+| a                       | Fibonacci                  |   1 |           1 |           1 | pass                                  |
+| variety                 | Fibonacci                  |   2 |           2 |           2 | pass                                  |
+| of                      | Fibonacci                  |   3 |           3 |           3 | pass                                  |
+| different               | Fibonacci                  |   4 |           5 |           5 | pass                                  |
+| arguments               | Fibonacci                  |   5 |           8 |           8 | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| bugs and tasks          |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| simple ruby arrays      | ruby-array-test            |     |           3 |      #ERROR | expected "3" but was "#ERROR"         |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass                                  |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |      #ERROR | expected "2" but was "#ERROR"         |
+| forcing vector results  | test-forced-vector-results |     |       Array |      #ERROR | expected "Array" but was "#ERROR"     |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| sessions                |                            |     |             |             | pass                                  |
+|-------------------------+----------------------------+-----+-------------+-------------+---------------------------------------|
+| set ruby session        | set-ruby-session-var       |     |        :set |      #ERROR | expected ":set" but was "#ERROR"      |
+| get from ruby session   | get-ruby-session-var       |     |           3 |      #ERROR | expected "3" but was "#ERROR"         |
+| set python session      | set-python-session-var     |     |         set |         set | pass                                  |
+| get from python session | get-python-session-var     |     |           4 |           4 | pass                                  |
+| set R session           | set-R-session-var          |     |         set |         set | pass                                  |
+| get from R session      | get-R-session-var          |     |           5 |           5 | pass                                  |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
@@ -2097,7 +2125,7 @@ expr 1 + 5
 #+end_src
 
 #+srcname: date-simple
-#+begin_src sh 
+#+begin_src sh :results silent
 date
 #+end_src
 
