@@ -89,7 +89,6 @@ return nil."
 (defun org-babel-ref-resolve-reference (ref)
   "Resolve the reference and return it's value"
   (save-excursion
-    (message "processing ref %S from %d" ref (point))
     (let ((case-fold-search t)
           type args new-refere new-referent result)
       ;; assign any arguments to pass to source block
@@ -107,27 +106,26 @@ return nil."
         (setf ref (match-string 2 ref)))
       (goto-char (point-min))
       (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
-                                           (regexp-quote ref) "[ \t]*$"))
-                    (regexp (concat "^#\\+SRCNAME:[ \t]*"
-                                    (regexp-quote ref) "[ \t]*$")))
-                (or (re-search-forward result_regexp nil t)
-                    (re-search-forward result_regexp nil t)
-                    (re-search-forward regexp nil t)
-                    (re-search-backward regexp nil t)))
+                                       (regexp-quote ref) "[ \t]*$"))
+                (regexp (concat "^#\\+SRCNAME:[ \t]*"
+                                (regexp-quote ref) "[ \t]*$")))
+            (or (re-search-forward result_regexp nil t)
+                (re-search-forward result_regexp nil t)
+                (re-search-forward regexp nil t)
+                (re-search-backward regexp nil t)))
           (goto-char (match-beginning 0))
-          ;; ;; TODO: allow searching for names in other buffers
-          ;; (setq id-loc (org-id-find ref 'marker)
-          ;;       buffer (marker-buffer id-loc)
-          ;;       loc (marker-position id-loc))
-          ;; (move-marker id-loc nil)
-          (progn (message (format "reference '%s' not found in this buffer" ref))
-                 (error (format "reference '%s' not found in this buffer" ref))))
+        ;; ;; TODO: allow searching for names in other buffers
+        ;; (setq id-loc (org-id-find ref 'marker)
+        ;;       buffer (marker-buffer id-loc)
+        ;;       loc (marker-position id-loc))
+        ;; (move-marker id-loc nil)
+        (progn (message (format "reference '%s' not found in this buffer" ref))
+               (error (format "reference '%s' not found in this buffer" ref))))
       (while (not (setq type (org-babel-ref-at-ref-p)))
         (forward-line 1)
         (beginning-of-line)
         (if (or (= (point) (point-min)) (= (point) (point-max)))
             (error "reference not found")))
-      (message "type=%S point=%d" type (point))
       (case type
         ('results-line (org-babel-ref-read-result))
         ('table (org-babel-ref-read-table))
