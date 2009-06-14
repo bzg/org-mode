@@ -122,7 +122,7 @@ and the results to be collected in the same table.
    At the same time I introduced org-babel-named-src-block-regexp, to
    match src-blocks with srcname.
 
-** TODO Create objects in top level (global) environment [3/9]
+** TODO Create objects in top level (global) environment [4/5]
 *sessions*
 
 *** initial requirement statement [DED]
@@ -664,7 +664,7 @@ a + b
 a + b
 #+end_src
 
-*** TODO function to bring up inferior-process buffer [3/4]
+*** DONE function to bring up inferior-process buffer [4/4]
 
 This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
@@ -693,13 +693,12 @@ another * num
 a * b
 #+end_src
 
-**** TODO shell
+**** DONE shell
 
 #+srcname: task-shell-pop-sessions
 #+begin_src sh :var NAME="eric"
 echo $NAME
 #+end_src
-
 
 *** TODO function to dump last N lines from inf-proc buffer into the current source block
 
