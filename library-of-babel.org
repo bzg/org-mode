@@ -3,18 +3,59 @@
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: odd hideblocks
 
+[[http://downlode.org/Etext/library_of_babel.html][Full text of the Borges short story]]
+
 (setq lob (org-babel-lob-parse-buffer))
 (setq x (gethash 'plot lob))
 (hash-table-count lob)
 (maphash (lambda (key val) (insert key)) lob)
 
-[[http://downlode.org/Etext/library_of_babel.html][Full text of the Borges short story]]
+
 
 * Plotting code
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
 #+srcname: plot
-#+begin_src R :var xy=__data__
-plot(xy)
+#+begin_src R
+plot(data)
 #+end_src
 
-[[file:/tmp/tmp.org][tem org file]]
+#+begin_src babel :srcname plot :var data=10
+#+end_src
+
+#+srcname: plot
+#+begin_src R
+plot(__data__)
+#+end_src
+
+
+
+
+
+#+srcname: plot
+#+begin_src R
+plot(__data__)
+#+end_src
+
+#+resname: plot
+: org_babel_R_eoe
+: org_babel_R_eoe
+
+
+
+
+
+
+
+
+
+
+
+
+#+begin_src R
+79
+#+end_src
+
+#+resname:
+: 79
+: 78
+: 77

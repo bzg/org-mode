@@ -50,10 +50,14 @@
   (message "executing babel source code block...")
   (save-window-excursion
     (save-excursion
-      (org-babel-goto-srcname (cdr (assoc :srcname params))))
-    (forward-line 1)
-    (insert (match-string 0))
-    (org-babel-execute-src-block nil nil params)))
+      (org-babel-find-named-block (cdr (assoc :srcname params))))
+    (let ((block (match-string 0)))
+      (search-forward "#+end_src" nil t)
+      (forward-line 1)
+      (insert "\n")
+      (insert block)
+      (beginning-of-line)
+      (org-babel-execute-src-block nil nil params))))
 
 (defun org-babel-lob-parse-buffer ()
   "Read all source-code blocks in buffer into memory."
@@ -64,8 +68,8 @@
 	      org-babel-named-src-block-regexp nil t)
 	(puthash (match-string-no-properties 1)        ;; srcname
 		 (list (cons :lang (match-string-no-properties 2))
-		       (cons :body (match-string-no-properties 3))
-		       (cons :params (match-string-no-properties 4)))
+		       (cons :body (match-string-no-properties 5))
+		       (cons :params (match-string-no-properties 3)))
 		 blocks))
       blocks)))
 
