@@ -1720,10 +1720,24 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 
 * Bugs [13/18]
 ** TODO defunct R sessions
-sometimes an old R session will turn defunct, and newly inserted code
-will not be evaluated (leading to a hang)
+Sometimes an old R session will turn defunct, and newly inserted code
+will not be evaluated (leading to a hang).
 
 ** TODO test failing forcing vector results with =test-forced-vector-results= ruby code block
+Note that this only seems to happen the *second* time the test table
+is evaluated
+
+
+#+srcname: bug-trivial-vector
+#+begin_src emacs-lisp :results vector silent
+8
+#+end_src
+
+#+srcname: bug-forced-vector-results
+#+begin_src ruby :var triv=test-trivial-vector :results silent
+triv.class.name
+#+end_src
+
 ** TODO non-orgtbl formatted lists
 for example
 
