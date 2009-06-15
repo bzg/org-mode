@@ -49,7 +49,7 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
-(defvar org-babel-default-header-args '()
+(defvar org-babel-default-header-args '((:session . "none"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))

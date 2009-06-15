@@ -104,11 +104,12 @@ Emacs-lisp table, otherwise return the results as a string."
 (defun org-babel-ruby-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
 then create.  Return the initialized session."
-  (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
-    (if (org-babel-comint-buffer-livep session-buffer)
-        session-buffer
-      (sit-for .5)
-      (org-babel-ruby-initiate-session session))))
+  (unless (string= session "none")
+    (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+      (if (org-babel-comint-buffer-livep session-buffer)
+          session-buffer
+        (sit-for .5)
+        (org-babel-ruby-initiate-session session)))))
 
 (defvar org-babel-ruby-last-value-eval "_"
   "When evaluated by Ruby this returns the return value of the last statement.")
@@ -124,7 +125,8 @@ last statement in BODY."
                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                 (insert full-body) (comint-send-input nil t)))
-         (results (cdr (member org-babel-ruby-eoe-indicator
+         (results 
+          (cdr (member org-babel-ruby-eoe-indicator
                                (reverse (mapcar #'org-babel-ruby-read-string
                                                 (mapcar #'org-babel-trim raw)))))))
     (case result-type
