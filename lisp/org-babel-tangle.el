@@ -1,8 +1,8 @@
-;;; org-babel-init.el --- loads org-babel
+;;; org-babel-tangle.el --- Extract source code from org-mode files
 
-;; Copyright (C) 2009 Eric Schulte
+;; Copyright (C) 2009 Dan Davison, Eric Schulte
 
-;; Author: Eric Schulte
+;; Author: Dan Davison, Eric Schulte
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 ;; Version: 0.01
@@ -26,27 +26,10 @@
 
 ;;; Commentary:
 
-;; for more information see the comments in org-babel.el
+;; Extract the code from source blocks out into raw source-code files.
 
 ;;; Code:
-(require 'org)
-(require 'org-exp-blocks)
-(load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'org-babel)
-(require 'org-babel-ref)
-(require 'org-babel-exp)
-(require 'org-babel-table)
-(require 'org-babel-comint)
-(require 'org-babel-lob)
-(require 'org-babel-tangle)
 
-;; language specific files
-(add-to-list 'load-path (expand-file-name "langs" (file-name-directory (or load-file-name buffer-file-name))))
-(require 'org-babel-ruby)
-(require 'org-babel-python)
-(require 'org-babel-sh)
-(require 'org-babel-lisp)
-(require 'org-babel-R)
-
-(provide 'org-babel-init)
-;;; org-babel-init.el ends here
+(provide 'org-babel-tangle)
+;;; org-babel-tangle.el ends here
