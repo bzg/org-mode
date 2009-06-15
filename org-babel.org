@@ -114,16 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [26/42]
-** TODO add a function to jump to a source-block by name
-   I've had an initial stab at that in org-babel-find-named-block
-   (library-of-babel branch).
-
-   At the same time I introduced org-babel-named-src-block-regexp, to
-   match src-blocks with srcname.
-
-   
-
+* Tasks [27/42]
 ** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
@@ -748,6 +739,16 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+** DONE add a function to jump to a source-block by name
+   I've had an initial stab at that in org-babel-find-named-block
+   (library-of-babel branch).
+
+   At the same time I introduced org-babel-named-src-block-regexp, to
+   match src-blocks with srcname.
+
+   This is now working with the command
+   `org-babel-goto-named-source-block', all we need is a good key
+   binding.
 
 ** DONE add =:none= session argument (for purely functional execution) [4/4]
 This would allow source blocks to be run in their own new process

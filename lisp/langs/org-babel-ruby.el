@@ -38,7 +38,6 @@
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
-  (message "params=%S" params)
   (let* ((vars (org-babel-ref-variables params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
