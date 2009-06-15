@@ -58,9 +58,6 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-src-block-regexp nil
   "Regexp used to test when inside of a org-babel src-block")
 
-(defvar org-babel-named-src-block-regexp nil
-  "Regexp used to match an org-babel src-block with srcname")
-
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
 
@@ -77,9 +74,6 @@ then run `org-babel-pop-to-session'."
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
-  (setq org-babel-named-src-block-regexp
-	(concat "#\\+srcname:[ \t]*\\([^ \t\n]+\\)[ \t\n]*"
-		org-babel-src-block-regexp))
   (setq org-babel-inline-src-block-regexp
 	(concat "src_\\("
 		(mapconcat 'regexp-quote value "\\|")
