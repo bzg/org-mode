@@ -497,7 +497,7 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** PROPOSED add =:none= session argument (for purely functional execution) [0/4]
+** PROPOSED add =:none= session argument (for purely functional execution) [1/4]
 This would allow source blocks to be run in their own new process
 
 - These blocks could then also be run in the background (since we can
@@ -519,15 +519,21 @@ Down-sides to sessions
 - can't run in background
 - litter emacs with session buffers
 
-*** TODO ruby
+*** DONE ruby
 
 #+srcname: ruby-task-no-session
-#+begin_src ruby :session none
+#+begin_src ruby :results replace value
+puts :eric
 puts :schulte
 [1, 2, 3]
 #+end_src
 
+#+resname: ruby-task-no-session
+| 1 | 2 | 3 |
+
 *** TODO R
+
+
 *** TODO python
 *** TODO sh
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?

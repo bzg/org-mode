@@ -115,10 +115,14 @@ then create.  Return the initialized session."
   "When evaluated by Ruby this returns the return value of the last statement.")
 (defvar org-babel-ruby-eoe-indicator ":org_babel_ruby_eoe"
   "Used to indicate that evaluation is has completed.")
-(defun org-babel-ruby-last-value-writer (file-name)
-  "Return a ruby statement to write the last value out to
-FILE-NAME."
-  (format "File.open('w', '%s'){|f| f < _}.write" file-name))
+(defvar org-babel-ruby-wrapper-method
+  "
+def main()
+%s
+end
+results = main()
+File.open('%s', 'w'){ |f| f.write((results.class == String) ? results : results.inspect) }
+")
 
 (defun org-babel-ruby-evaluate (buffer body &optional result-type)
   "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
@@ -128,22 +132,32 @@ last statement in BODY."
   (let ((full-body (mapconcat #'org-babel-chomp
                               (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
         raw result)
-    (if (and (stringp buffer) (string= buffer "none"))
+    (if (not session)
         ;; external process evaluation
-        (let ((tmp-file (make-temp-file "ruby-functional-results")))
-          ()
-          )
-        ;; comint session evaluation
-        (setq raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
-                    (insert full-body) (comint-send-input nil t)))
+        (save-window-excursion
+          (with-temp-buffer
+            (case result-type
+              (output
+               (insert body)
+               ;; (message "buffer=%s" (buffer-string)) ;; debugging
+               (shell-command-on-region (point-min) (point-max) "ruby" 'replace)
+               (buffer-string))
+              (value
+               (let ((tmp-file (make-temp-file "ruby-functional-results")))
+                 (insert (format org-babel-ruby-wrapper-method body tmp-file))
+                 ;; (message "buffer=%s" (buffer-string)) ;; debugging
+                 (shell-command-on-region (point-min) (point-max) "ruby")
+                 (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
+      ;; comint session evaluation
+      (setq raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
+                  (insert full-body) (comint-send-input nil t)))
       (setq results
             (cdr (member org-babel-ruby-eoe-indicator
                          (reverse (mapcar #'org-babel-ruby-read-string
-                                          (mapcar #'org-babel-trim raw)))))))
-    (case result-type
-      (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-      (value (car results))
-      (t (reverse results)))))
+                                          (mapcar #'org-babel-trim raw))))))
+      (case result-type
+        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
+        (value (car results))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"
