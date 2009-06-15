@@ -120,12 +120,12 @@ last statement in BODY."
         (case result-type
           (output
            (with-temp-file in-tmp-file (insert body))
-           (message "R --slave --no-save < '%s' > '%s'" in-tmp-file out-tmp-file)
+           ;; (message "R --slave --no-save < '%s' > '%s'" in-tmp-file out-tmp-file)
            (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'" in-tmp-file out-tmp-file)))
           (value
            (with-temp-file in-tmp-file
              (insert (format org-babel-R-wrapper-method body out-tmp-file)))
-           (message "R --no-save < '%s'" in-tmp-file)
+           ;; (message "R --no-save < '%s'" in-tmp-file)
            (shell-command (format "R --no-save < '%s'" in-tmp-file))))
         (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
     ;; comint session evaluation
