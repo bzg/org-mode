@@ -38,6 +38,7 @@
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
+  (message "params=%S" params)
   (let* ((vars (org-babel-ref-variables params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
@@ -147,13 +148,14 @@ last statement in BODY."
                (shell-command-on-region (point-min) (point-max) "ruby"))
              (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
     ;; comint session evaluation
-    (let ((full-body (mapconcat #'org-babel-chomp
-                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
-          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
-                 (insert full-body) (comint-send-input nil t)))
-          (results (cdr (member org-babel-ruby-eoe-indicator
-                                (reverse (mapcar #'org-babel-ruby-read-string
-                                                 (mapcar #'org-babel-trim raw)))))))
+    (message "session evaluation")
+    (let* ((full-body (mapconcat #'org-babel-chomp
+                                 (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+           (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
+                  (insert full-body) (comint-send-input nil t)))
+           (results (cdr (member org-babel-ruby-eoe-indicator
+                                 (reverse (mapcar #'org-babel-ruby-read-string
+                                                  (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value (car results))))))
