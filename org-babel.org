@@ -1303,8 +1303,11 @@ This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
 up the inf-proc buffer using =pop-to-buffer=.
 
-For lack of a better place, lets add this to the
-`org-shiftmetadown-hook' hook.
+For lack of a better place, lets add this to the `org-metadown-hook'
+hook.
+
+To give this a try, place the cursor on a source block with variables,
+(optionally git a prefix argument) then hold meta and press down.
 
 **** DONE ruby
 
@@ -1776,7 +1779,14 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 
 ("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
 
-and therefore (member org-babel-sh-eoe-output ...) fails
+   and therefore (member org-babel-sh-eoe-output ...) fails
+
+   I think that `comint-prompt-regexp' needs to be altered to match
+   the shell prompt.  This shouldn't be too difficult to do by hand,
+   using the `regexp-builder' command and should probably be part of
+   the user's regular emacs init.  I can't think of a way for us to
+   set this automatically, and we are SOL without a regexp to match
+   the prompt.
 
 ** TODO non-orgtbl formatted lists
 for example
