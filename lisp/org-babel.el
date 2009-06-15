@@ -272,15 +272,10 @@ If the point is not on a source block then return nil."
 (defun org-babel-goto-named-source-block (&optional name)
   "Go to a named source-code block."
   (interactive "ssource-block name: ")
-  (let ((S (format "#+srcname: %s" name)))
+  (let ((point (org-babel-find-named-block name)))
     (if point
         ;; taken from `org-open-at-point'
-        (progn
-          (switch-to-buffer-other-window
-           (org-get-buffer-for-internal-link (current-buffer)))
-          (org-mark-ring-push)
-          (condition-case nil (org-link-search (format "#+srcname: %s" name))
-            (error (progn (widen) (org-link-search (format "#+srcname: %s" name))))))
+        (progn (goto-char point) (org-show-context))
       (message "source-code block '%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-block (name)
