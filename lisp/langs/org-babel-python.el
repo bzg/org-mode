@@ -116,33 +116,65 @@ then create.  Return the initialized session."
       session)))
 
 (defun org-babel-python-initiate-session (&optional session)
-  (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session)))
+  (unless (string= session "none")
+    (org-babel-python-session-buffer (org-babel-python-initiate-session-by-key session))))
 
 (defvar org-babel-python-last-value-eval "_"
   "When evaluated by Python this returns the return value of the last statement.")
 (defvar org-babel-python-eoe-indicator "'org_babel_python_eoe'"
   "Used to indicate that evaluation is has completed.")
+(defvar org-babel-python-wrapper-method
+  "
+def main():
+%s
+
+open('%s', 'w').write( str(main()) )")
 
 (defun org-babel-python-evaluate (buffer body &optional result-type)
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (org-babel-comint-in-buffer buffer
-    (let* ((full-body (mapconcat #'org-babel-trim
-                                 (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
-           (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
-                  ;; for some reason python is fussy, and likes enters after every input
-                  (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
-                        (split-string full-body "[\r\n]+"))))
-           (results (delete org-babel-python-eoe-indicator
-                            (cdr (member org-babel-python-eoe-indicator
-                                         (reverse (mapcar #'org-babel-trim raw)))))))
-      (setq results (mapcar #'org-babel-python-read-string results))
-      (org-babel-trim (case result-type
-                        (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-                        (value (car results))
-                        (t (reverse results)))))))
+  (if (not session)
+      ;; external process evaluation
+      (save-window-excursion
+        (case result-type
+          (output
+           (with-temp-buffer
+             (insert body)
+             ;; (message "buffer=%s" (buffer-string)) ;; debugging
+             (shell-command-on-region (point-min) (point-max) "python" 'replace)
+             (buffer-string)))
+          (value
+           (let ((tmp-file (make-temp-file "python-functional-results")))
+             (with-temp-buffer
+               (insert (format org-babel-python-wrapper-method
+                               (let ((lines (split-string (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
+                                 (concat
+                                  (mapconcat
+                                   (lambda (line) (format "\t%s" line))
+                                   (butlast lines) "\n")
+                                  (format "\n\treturn %s" (last lines))))
+                               tmp-file))
+               (message "buffer=%s" (buffer-string)) ;; debugging
+               (shell-command-on-region (point-min) (point-max) "python"))
+             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+    ;; comint session evaluation
+    (org-babel-comint-in-buffer buffer
+      (let* ((full-body (mapconcat #'org-babel-trim
+                                   (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
+             (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
+                    ;; for some reason python is fussy, and likes enters after every input
+                    (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
+                          (split-string full-body "[\r\n]+"))))
+             (results (delete org-babel-python-eoe-indicator
+                              (cdr (member org-babel-python-eoe-indicator
+                                           (reverse (mapcar #'org-babel-trim raw)))))))
+        (setq results (mapcar #'org-babel-python-read-string results))
+        (org-babel-trim (case result-type
+                          (output (mapconcat #'identity (reverse (cdr results)) "\n"))
+                          (value (car results))
+                          (t (reverse results))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around ruby string"

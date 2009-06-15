@@ -497,7 +497,7 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** PROPOSED add =:none= session argument (for purely functional execution) [1/4]
+** PROPOSED add =:none= session argument (for purely functional execution) [2/4]
 This would allow source blocks to be run in their own new process
 
 - These blocks could then also be run in the background (since we can
@@ -531,14 +531,17 @@ puts :schulte
 #+resname: ruby-task-no-session
 | "eric"    |
 | "schulte" |
-*** TODO python
+*** DONE python
 
 #+srcname: task-python-none-session
-#+begin_src python :results replace
+#+begin_src python :session none :results replace value
 print 'something'
 print 'output'
 [1, 2, 3]
 #+end_src
+
+#+resname: task-python-none-session
+| 1 | 2 | 3 |
 
 *** TODO sh
 
