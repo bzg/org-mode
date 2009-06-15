@@ -38,5 +38,18 @@ language, and the cdr should be a list containing the extension
 and shebang(#!) line to use when writing out the language to
 file.")
 
+(defun org-bable-tangle ()
+  "Extract the bodies of all source code blocks form the current
+file into their own source-specific files."
+  (interactive)
+  (let (by-lang)
+    (org-babel-map-source-blocks (buffer-file-name)
+      (let ((link (progn (org-store-link nil) (pop org-stored-links)))
+            (source-name (intern (org-babel-get-src-block-name)))
+            (info (org-babel-get-src-block-info)))
+        ;; once collected these can be added to by-lang and then
+        ;; dropped out to buffers
+        ))))
+
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here
