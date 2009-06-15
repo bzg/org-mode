@@ -497,7 +497,7 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** PROPOSED add =:none= session argument (for purely functional execution) [2/4]
+** PROPOSED add =:none= session argument (for purely functional execution) [3/4]
 This would allow source blocks to be run in their own new process
 
 - These blocks could then also be run in the background (since we can
@@ -543,7 +543,17 @@ print 'output'
 #+resname: task-python-none-session
 | 1 | 2 | 3 |
 
-*** TODO sh
+*** DONE sh
+
+#+srcname: task-session-none-sh
+#+begin_src sh :results replace
+echo "first"
+echo "second"
+#+end_src
+
+#+resname: task-session-none-sh
+| "first"  |
+| "second" |
 
 *** TODO R
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
@@ -1802,7 +1812,12 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [16/20]
+* Bugs [16/21]
+** PROPOSED external shell execution can't isolate return values
+I have no idea how to do this as of yet.  The result is that when
+shell functions are run w/o a session there is no difference between
+the =output= and =value= result arguments.
+
 ** TODO weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
