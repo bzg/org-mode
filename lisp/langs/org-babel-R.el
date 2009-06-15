@@ -39,21 +39,24 @@ called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
     (let* ((vars (org-babel-ref-variables params))
+           (full-body (concat
+                       (mapconcat ;; define any variables
+                        (lambda (pair)
+                          (org-babel-R-assign-elisp (car pair) (cdr pair)))
+                        vars "\n") "\n" body "\n"))
            (result-params (split-string (or (cdr (assoc :results params)) "")))
            (result-type (cond ((member "output" result-params) 'output)
                               ((member "value" result-params) 'value)
                               (t 'value)))
            (session (org-babel-R-initiate-session (cdr (assoc :session params))))
            results)
-      ;; assign variables
-      (mapc (lambda (pair) (org-babel-R-assign-elisp session (car pair) (cdr pair))) vars)
       ;; ;;; debugging statements
       ;; (message (format "result-type=%S" result-type))
       ;; (message (format "body=%S" body))
       ;; (message (format "session=%S" session))
       ;; (message (format "result-params=%S" result-params))
       ;; evaluate body and convert the results to ruby
-      (setq results (org-babel-R-evaluate session body result-type))
+      (setq results (org-babel-R-evaluate session full-body result-type))
       (setq results (if (member "scalar" result-params)
                         results
                       (let ((tmp-file (make-temp-file "org-babel-R")))
@@ -77,22 +80,18 @@ called by `org-babel-execute-src-block'."
       (concat "\"" (mapconcat 'identity (split-string s "\"") "\"\"") "\"")
     (format "%S" s)))
 
-(defun org-babel-R-assign-elisp (session name value)
-  "Read the elisp VALUE into a variable named NAME in the current
-R process in `org-babel-R-buffer'."
-  (unless session (error "No active R buffer"))
-  (org-babel-comint-input-command
-   session
-   (if (listp value)
-       (let ((transition-file (make-temp-file "org-babel-R-import")))
-	 ;; ensure VALUE has an orgtbl structure (depth of at least 2)
-	 (unless (listp (car value)) (setq value (list value)))
-	 (with-temp-file transition-file
-	   (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
-	   (insert "\n"))
-	 (format "%s <- read.table(\"%s\", header=FALSE, sep=\"\\t\", as.is=TRUE)"
-		 name transition-file))
-     (format "%s <- %s" name (org-babel-R-quote-tsv-field value)))))
+(defun org-babel-R-assign-elisp (name value)
+  "Read the elisp VALUE into a variable named NAME."
+  (if (listp value)
+      (let ((transition-file (make-temp-file "org-babel-R-import")))
+        ;; ensure VALUE has an orgtbl structure (depth of at least 2)
+        (unless (listp (car value)) (setq value (list value)))
+        (with-temp-file transition-file
+          (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
+          (insert "\n"))
+        (format "%s <- read.table(\"%s\", header=FALSE, sep=\"\\t\", as.is=TRUE)"
+                name transition-file))
+    (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
 (defun org-babel-R-initiate-session (session)
   "If there is not a current R process then create one."
