@@ -1755,47 +1755,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [15/20]
-** TODO ruby evaluation not working under ubuntu emacs 23
-   With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
-   following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
-
-#+begin_example
-run-ruby is an interactive compiled Lisp function.
-
-(run-ruby cmd)
-
-Run an inferior Ruby process, input and output via buffer *ruby*.
-If there is a process already running in `*ruby*', switch to that buffer.
-With argument, allows you to edit the command line (default is value
-of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
-(after the `comint-mode-hook' is run).
-(Type C-h m in the process buffer for a list of commands.)
-#+end_example
-
-   So, I may have a non-standard inf-ruby.el.  Here's my version of
-   run-ruby.
-
-#+begin_example 
-run-ruby is an interactive Lisp function in `inf-ruby.el'.
-
-(run-ruby &optional COMMAND NAME)
-
-Run an inferior Ruby process, input and output via buffer *ruby*.
-If there is a process already running in `*ruby*', switch to that buffer.
-With argument, allows you to edit the command line (default is value
-of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
-(after the `comint-mode-hook' is run).
-(Type C-h m in the process buffer for a list of commands.)
-#+end_example
-
-   It seems we could either bundle my version of inf-ruby.el (as it's
-   the newest).  Or we could change the use of `run-ruby' so that it
-   is robust across multiple distributions.  I think I'd prefer the
-   former, unless the older version of inf-ruby is actually bundled
-   with emacs, in which case maybe we should go out of our way to
-   support it.  Thoughts?
-
+* Bugs [16/20]
 ** TODO weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
@@ -1849,6 +1809,49 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+** DONE ruby evaluation not working under ubuntu emacs 23
+   With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
+   following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
+
+#+begin_example
+run-ruby is an interactive compiled Lisp function.
+
+(run-ruby cmd)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+   So, I may have a non-standard inf-ruby.el.  Here's my version of
+   run-ruby.
+
+#+begin_example 
+run-ruby is an interactive Lisp function in `inf-ruby.el'.
+
+(run-ruby &optional COMMAND NAME)
+
+Run an inferior Ruby process, input and output via buffer *ruby*.
+If there is a process already running in `*ruby*', switch to that buffer.
+With argument, allows you to edit the command line (default is value
+of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
+(after the `comint-mode-hook' is run).
+(Type C-h m in the process buffer for a list of commands.)
+#+end_example
+
+   It seems we could either bundle my version of inf-ruby.el (as it's
+   the newest).  Or we could change the use of `run-ruby' so that it
+   is robust across multiple distributions.  I think I'd prefer the
+   former, unless the older version of inf-ruby is actually bundled
+   with emacs, in which case maybe we should go out of our way to
+   support it.  Thoughts?
+
+   I think for now I'll just include the latest [[file:util/inf-ruby.el][inf-ruby.el]] in the
+   newly created utility directory.  I doubt anyone would have a
+   problem using the latest version of this file.
 ** DONE test failing forcing vector results with =test-forced-vector-results= ruby code block
 Note that this only seems to happen the *second* time the test table
 is evaluated
