@@ -500,7 +500,24 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
 ** PROPOSED add =:none= session argument (for purely functional execution)
 This would allow source blocks to be run in their own new process
 
-These blocks could then also be run in the background.
+- These blocks could then also be run in the background (since we can
+  detach and just wait for the process to signal that it has terminated)
+- We wouldn't be drowning in session buffers after running the tests
+- we can re-use much of the session code to run in a more /functional/
+  mode
+
+While session provide a lot of cool features, like persistent
+environments, [[* DONE function to bring up inferior-process buffer][pop-to-session]], and hints at exportation for
+org-babel-tangle, they also have some down sides and I'm thinking that
+session-based execution maybe shouldn't be the default behavior.
+
+Down-sides to sessions
+- *much* more complicated than functional evaluation
+  - maintaining the state of the session has weird issues
+  - waiting for evaluation to finish
+  - prompt issues like [[* TODO weird escaped characters in shell prompt break shell evaluation][shell-prompt-escapes-bug]]
+- can't run in background
+- litter emacs with session buffers
 
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
