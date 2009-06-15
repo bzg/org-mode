@@ -159,7 +159,7 @@ the header arguments specified at the source code block."
          (params (org-combine-plists params (third info)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    ;; (message (format "params=%S" params)) ;; debugging statement
+    ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (setq result (funcall cmd body params))
@@ -236,8 +236,9 @@ of the following form.  (language body header-arguments-alist)"
   "Parse a string of header arguments returning an alist."
   (delq nil
         (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))))
+         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))
+                         (cons (intern (concat ":" arg)) nil)))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
 (defun org-babel-where-is-src-block-head ()
