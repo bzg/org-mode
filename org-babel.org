@@ -522,20 +522,27 @@ Down-sides to sessions
 *** DONE ruby
 
 #+srcname: ruby-task-no-session
-#+begin_src ruby :results replace value
+#+begin_src ruby :results replace output
 puts :eric
 puts :schulte
 [1, 2, 3]
 #+end_src
 
 #+resname: ruby-task-no-session
-| 1 | 2 | 3 |
+| "eric"    |
+| "schulte" |
+*** TODO python
+
+#+srcname: task-python-none-session
+#+begin_src python :results replace
+print 'something'
+print 'output'
+[1, 2, 3]
+#+end_src
+
+*** TODO sh
 
 *** TODO R
-
-
-*** TODO python
-*** TODO sh
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
 there are spaces in the message and scalar otherwise.

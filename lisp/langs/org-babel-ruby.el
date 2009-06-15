@@ -129,32 +129,31 @@ File.open('%s', 'w'){ |f| f.write((results.class == String) ? results : results.
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
 last statement in BODY."
-  (let ((full-body (mapconcat #'org-babel-chomp
-                              (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
-        raw result)
-    (if (not session)
-        ;; external process evaluation
-        (save-window-excursion
-          (with-temp-buffer
-            (case result-type
-              (output
-               (insert body)
+  (if (not session)
+      ;; external process evaluation
+      (save-window-excursion
+        (case result-type
+          (output
+           (with-temp-buffer
+             (insert body)
+             ;; (message "buffer=%s" (buffer-string)) ;; debugging
+             (shell-command-on-region (point-min) (point-max) "ruby" 'replace)
+             (buffer-string)))
+          (value
+           (let ((tmp-file (make-temp-file "ruby-functional-results")))
+             (with-temp-buffer
+               (insert (format org-babel-ruby-wrapper-method body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
-               (shell-command-on-region (point-min) (point-max) "ruby" 'replace)
-               (buffer-string))
-              (value
-               (let ((tmp-file (make-temp-file "ruby-functional-results")))
-                 (insert (format org-babel-ruby-wrapper-method body tmp-file))
-                 ;; (message "buffer=%s" (buffer-string)) ;; debugging
-                 (shell-command-on-region (point-min) (point-max) "ruby")
-                 (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
-      ;; comint session evaluation
-      (setq raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
-                  (insert full-body) (comint-send-input nil t)))
-      (setq results
-            (cdr (member org-babel-ruby-eoe-indicator
-                         (reverse (mapcar #'org-babel-ruby-read-string
-                                          (mapcar #'org-babel-trim raw))))))
+               (shell-command-on-region (point-min) (point-max) "ruby"))
+             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+    ;; comint session evaluation
+    (let ((full-body (mapconcat #'org-babel-chomp
+                                (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+          (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
+                 (insert full-body) (comint-send-input nil t)))
+          (results (cdr (member org-babel-ruby-eoe-indicator
+                                (reverse (mapcar #'org-babel-ruby-read-string
+                                                 (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
         (value (car results))))))
