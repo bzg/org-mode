@@ -156,7 +156,7 @@ last statement in BODY."
                                    (butlast lines) "\n")
                                   (format "\n\treturn %s" (last lines))))
                                tmp-file))
-               (message "buffer=%s" (buffer-string)) ;; debugging
+               ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
              (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
     ;; comint session evaluation
