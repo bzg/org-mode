@@ -49,7 +49,7 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
-(defvar org-babel-default-header-args '()
+(defvar org-babel-default-header-args '((:session . "none"))
   "Default arguments to use when evaluating a source block.")
 
 (defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
@@ -57,9 +57,6 @@ then run `org-babel-pop-to-session'."
 
 (defvar org-babel-src-block-regexp nil
   "Regexp used to test when inside of a org-babel src-block")
-
-(defvar org-babel-named-src-block-regexp nil
-  "Regexp used to match an org-babel src-block with srcname")
 
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
@@ -77,9 +74,6 @@ then run `org-babel-pop-to-session'."
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
                 "\\([^\000]+?\\)#\\+end_src"))
-  (setq org-babel-named-src-block-regexp
-	(concat "#\\+srcname:[ \t]*\\([^ \t\n]+\\)[ \t\n]*"
-		org-babel-src-block-regexp))
   (setq org-babel-inline-src-block-regexp
 	(concat "src_\\("
 		(mapconcat 'regexp-quote value "\\|")
@@ -165,7 +159,7 @@ the header arguments specified at the source code block."
          (params (org-combine-plists params (third info)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    ;; (message (format "params=%S" params)) ;; debugging statement
+    ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (setq result (funcall cmd body params))
@@ -242,8 +236,9 @@ of the following form.  (language body header-arguments-alist)"
   "Parse a string of header arguments returning an alist."
   (delq nil
         (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))))
+         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))
+                         (cons (intern (concat ":" arg)) nil)))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
 (defun org-babel-where-is-src-block-head ()
@@ -269,6 +264,15 @@ If the point is not on a source block then return nil."
         (goto-char top) (looking-at org-babel-src-block-regexp)
         (point))))))
 
+(defun org-babel-goto-named-source-block (&optional name)
+  "Go to a named source-code block."
+  (interactive "ssource-block name: ")
+  (let ((point (org-babel-find-named-block name)))
+    (if point
+        ;; taken from `org-open-at-point'
+        (progn (goto-char point) (org-show-context))
+      (message "source-code block '%s' not found in this buffer" name))))
+
 (defun org-babel-find-named-block (name)
   "Find a named source-code block.
 Return the location of the source block identified by
@@ -277,11 +281,10 @@ according to org-babel-named-src-block-regexp."
   (save-excursion
     (let ((case-fold-search t)
 	  (regexp (org-babel-named-src-block-regexp-for-name name)) msg)
-      (unless (or (re-search-forward regexp nil t)
-		  (re-search-backward regexp nil t))
-	(progn (setq msg (format "source-code block '%s' not found in this buffer" name))
-	       (message msg) (error msg))))
-    (point)))
+      (goto-char (point-min))
+      (when (or (re-search-forward regexp nil t)
+                (re-search-backward regexp nil t))
+        (match-beginning 0)))))
 
 (defun org-babel-find-named-result (name)
   "Return the location of the result named NAME in the current

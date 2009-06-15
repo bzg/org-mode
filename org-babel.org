@@ -114,14 +114,7 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 
-* Tasks [25/42]
-** TODO add a function to jump to a source-block by name
-   I've had an initial stab at that in org-babel-find-named-block
-   (library-of-babel branch).
-
-   At the same time I introduced org-babel-named-src-block-regexp, to
-   match src-blocks with srcname.
-
+* Tasks [27/42]
 ** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
@@ -497,28 +490,6 @@ tabel
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
 
-** PROPOSED add =:none= session argument (for purely functional execution)
-This would allow source blocks to be run in their own new process
-
-- These blocks could then also be run in the background (since we can
-  detach and just wait for the process to signal that it has terminated)
-- We wouldn't be drowning in session buffers after running the tests
-- we can re-use much of the session code to run in a more /functional/
-  mode
-
-While session provide a lot of cool features, like persistent
-environments, [[* DONE function to bring up inferior-process buffer][pop-to-session]], and hints at exportation for
-org-babel-tangle, they also have some down sides and I'm thinking that
-session-based execution maybe shouldn't be the default behavior.
-
-Down-sides to sessions
-- *much* more complicated than functional evaluation
-  - maintaining the state of the session has weird issues
-  - waiting for evaluation to finish
-  - prompt issues like [[* TODO weird escaped characters in shell prompt break shell evaluation][shell-prompt-escapes-bug]]
-- can't run in background
-- litter emacs with session buffers
-
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
 there are spaces in the message and scalar otherwise.
@@ -768,6 +739,88 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+** DONE add a function to jump to a source-block by name
+   I've had an initial stab at that in org-babel-find-named-block
+   (library-of-babel branch).
+
+   At the same time I introduced org-babel-named-src-block-regexp, to
+   match src-blocks with srcname.
+
+   This is now working with the command
+   `org-babel-goto-named-source-block', all we need is a good key
+   binding.
+
+** DONE add =:none= session argument (for purely functional execution) [4/4]
+This would allow source blocks to be run in their own new process
+
+- These blocks could then also be run in the background (since we can
+  detach and just wait for the process to signal that it has terminated)
+- We wouldn't be drowning in session buffers after running the tests
+- we can re-use much of the session code to run in a more /functional/
+  mode
+
+While session provide a lot of cool features, like persistent
+environments, [[* DONE function to bring up inferior-process buffer][pop-to-session]], and hints at exportation for
+org-babel-tangle, they also have some down sides and I'm thinking that
+session-based execution maybe shouldn't be the default behavior.
+
+Down-sides to sessions
+- *much* more complicated than functional evaluation
+  - maintaining the state of the session has weird issues
+  - waiting for evaluation to finish
+  - prompt issues like [[* TODO weird escaped characters in shell prompt break shell evaluation][shell-prompt-escapes-bug]]
+- can't run in background
+- litter emacs with session buffers
+
+*** DONE ruby
+
+#+srcname: ruby-task-no-session
+#+begin_src ruby :results replace output
+puts :eric
+puts :schulte
+[1, 2, 3]
+#+end_src
+
+#+resname: ruby-task-no-session
+| "eric"    |
+| "schulte" |
+*** DONE python
+
+#+srcname: task-python-none-session
+#+begin_src python :session none :results replace value
+print 'something'
+print 'output'
+[1, 2, 3]
+#+end_src
+
+#+resname: task-python-none-session
+| 1 | 2 | 3 |
+
+*** DONE sh
+
+#+srcname: task-session-none-sh
+#+begin_src sh :results replace
+echo "first"
+echo "second"
+#+end_src
+
+#+resname: task-session-none-sh
+| "first"  |
+| "second" |
+
+*** DONE R
+
+#+srcname: task-no-session-R
+#+begin_src R :results replace output
+a <- 8
+b <- 9
+a + b
+b - a
+#+end_src
+
+#+resname: task-no-session-R
+| "[1]" | 17 |
+| "[1]" |  1 |
 
 ** DONE fully purge org-babel-R of direct comint interaction
 try to remove all code under the [[file:lisp/org-babel-R.el::functions%20for%20evaluation%20of%20R%20code][;; functions for evaluation of R code]] line
@@ -1775,7 +1828,12 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [16/20]
+* Bugs [16/21]
+** PROPOSED external shell execution can't isolate return values
+I have no idea how to do this as of yet.  The result is that when
+shell functions are run w/o a session there is no difference between
+the =output= and =value= result arguments.
+
 ** TODO weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
@@ -2368,35 +2426,35 @@ triv.class.name
 ** sessions
 
 #+srcname: set-ruby-session-var
-#+begin_src ruby :session rb-new-testing :results silent
+#+begin_src ruby :session :results silent
 var = [1, 2, 3]
 :set
 #+end_src
 
 #+srcname: get-ruby-session-var
-#+begin_src ruby :session rb-new-testing :results silent
+#+begin_src ruby :session :results silent
 var.size
 #+end_src
 
 #+srcname: set-python-session-var
-#+begin_src python :session py-testing
+#+begin_src python :session
 var=4
 'set'
 #+end_src
 
 #+srcname: get-python-session-var
-#+begin_src python :session py-testing
+#+begin_src python :session
 var
 #+end_src
 
 #+srcname: set-R-session-var
-#+begin_src R :session R-testing
+#+begin_src R :session
 a <- 5
 'set'
 #+end_src
 
 #+srcname: get-R-session-var
-#+begin_src R :session R-testing
+#+begin_src R :session
 a
 #+end_src
 
