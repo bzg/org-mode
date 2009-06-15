@@ -395,6 +395,28 @@ non-nil."
         (dotimes (n size)
           (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
+(defun org-babel-merge-params (&rest plists)
+  "Combine all parameter association lists in PLISTS.  Later
+elements of PLISTS override the values of previous element.  This
+takes into account the specific parameter when merging lists."
+  (let (parameters)
+    (mapc (lambda (plist)
+            (mapc (lambda (pair)
+                    (case (car pair)
+                      (:var
+                       ;; we want only one specification per variable
+                       (let ((vars (cons (cdr pair) (cdr (assoc :var params))))
+                             (refs (mapcar (lambda (var)
+                                             (if (string-match "\\(.+\\)=\\(.+\\)" var)
+                                                 (match-string))))))
+                         
+                         )
+                       )
+                      (t (setq parameters (cons pair (assq-delete-all
+                                                      (car pair) parameters))))))
+                  plist))
+          plists)))
+
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
