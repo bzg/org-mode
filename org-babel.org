@@ -500,7 +500,24 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
 ** PROPOSED add =:none= session argument (for purely functional execution)
 This would allow source blocks to be run in their own new process
 
-These blocks could then also be run in the background.
+- These blocks could then also be run in the background (since we can
+  detach and just wait for the process to signal that it has terminated)
+- We wouldn't be drowning in session buffers after running the tests
+- we can re-use much of the session code to run in a more /functional/
+  mode
+
+While session provide a lot of cool features, like persistent
+environments, [[* DONE function to bring up inferior-process buffer][pop-to-session]], and hints at exportation for
+org-babel-tangle, they also have some down sides and I'm thinking that
+session-based execution maybe shouldn't be the default behavior.
+
+Down-sides to sessions
+- *much* more complicated than functional evaluation
+  - maintaining the state of the session has weird issues
+  - waiting for evaluation to finish
+  - prompt issues like [[* TODO weird escaped characters in shell prompt break shell evaluation][shell-prompt-escapes-bug]]
+- can't run in background
+- litter emacs with session buffers
 
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
@@ -1303,8 +1320,11 @@ This should be callable from inside of a source-code block in an
 org-mode buffer.  It should evaluate the header arguments, then bring
 up the inf-proc buffer using =pop-to-buffer=.
 
-For lack of a better place, lets add this to the
-`org-shiftmetadown-hook' hook.
+For lack of a better place, lets add this to the `org-metadown-hook'
+hook.
+
+To give this a try, place the cursor on a source block with variables,
+(optionally git a prefix argument) then hold meta and press down.
 
 **** DONE ruby
 
@@ -1755,8 +1775,68 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [15/20]
-** TODO ruby evaluation not working under ubuntu emacs 23
+* Bugs [16/20]
+** TODO weird escaped characters in shell prompt break shell evaluation
+   E.g. this doesn't work. Should the shell sessions set a sane prompt
+   when they start up? Or is it a question of altering
+   comint-prompt-regexp? Or altering org-babel regexps?
+   
+#+begin_src sh   
+   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
+   prompt_col=$red
+   prompt_char='>'
+   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
+#+end_src
+
+   I just pushed a good amount of changes, could you see if your shell
+   problems still exist?
+
+   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
+   org-babel-sh.el, raw gets the value
+
+("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
+
+   and therefore (member org-babel-sh-eoe-output ...) fails
+
+   I think that `comint-prompt-regexp' needs to be altered to match
+   the shell prompt.  This shouldn't be too difficult to do by hand,
+   using the `regexp-builder' command and should probably be part of
+   the user's regular emacs init.  I can't think of a way for us to
+   set this automatically, and we are SOL without a regexp to match
+   the prompt.
+
+** TODO non-orgtbl formatted lists
+for example
+
+#+srcname: this-doesn't-match-orgtbl
+#+begin_src emacs-lisp :results replace
+'((:results . "replace"))
+#+end_src
+
+#+resname: this-doesn't-match-orgtbl
+
+** TODO collapsing consecutive newlines in string output
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results replace
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 	     and this is the second one
+: 	return even a third
+
+** TODO cursor movement when evaluating source blocks
+   E.g. the pie chart example. Despite the save-window-excursion in
+   org-babel-execute:R. (I never learned how to do this properly: org-R
+   jumps all over the place...)
+** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
 
@@ -1796,59 +1876,9 @@ of `ruby-program-name').  Runs the hooks `inferior-ruby-mode-hook'
    with emacs, in which case maybe we should go out of our way to
    support it.  Thoughts?
 
-** TODO weird escaped characters in shell prompt break shell evaluation
-   E.g. this doesn't work. Should the shell sessions set a sane prompt
-   when they start up? Or is it a question of altering
-   comint-prompt-regexp? Or altering org-babel regexps?
-   
-#+begin_src sh   
-   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
-   prompt_col=$red
-   prompt_char='>'
-   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
-#+end_src
-
-   I just pushed a good amount of changes, could you see if your shell
-   problems still exist?
-
-   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
-   org-babel-sh.el, raw gets the value
-
-("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
-
-and therefore (member org-babel-sh-eoe-output ...) fails
-
-** TODO non-orgtbl formatted lists
-for example
-
-#+srcname: this-doesn't-match-orgtbl
-#+begin_src emacs-lisp :results replace
-'((:results . "replace"))
-#+end_src
-
-#+resname: this-doesn't-match-orgtbl
-
-** TODO collapsing consecutive newlines in string output
-
-#+srcname: multi-line-string-output
-#+begin_src ruby :results replace
-"the first line ends here
-
-
-     and this is the second one
-
-even a third"
-#+end_src
-
-#+resname:
-: the first line ends here
-: 	     and this is the second one
-: 	return even a third
-
-** TODO cursor movement when evaluating source blocks
-   E.g. the pie chart example. Despite the save-window-excursion in
-   org-babel-execute:R. (I never learned how to do this properly: org-R
-   jumps all over the place...)
+   I think for now I'll just include the latest [[file:util/inf-ruby.el][inf-ruby.el]] in the
+   newly created utility directory.  I doubt anyone would have a
+   problem using the latest version of this file.
 ** DONE test failing forcing vector results with =test-forced-vector-results= ruby code block
 Note that this only seems to happen the *second* time the test table
 is evaluated

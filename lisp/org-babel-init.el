@@ -31,7 +31,6 @@
 ;;; Code:
 (require 'org)
 (require 'org-exp-blocks)
-(load "htmlize.el") ;; other versions of htmlize can cause export problems
 (require 'org-babel)
 (require 'org-babel-ref)
 (require 'org-babel-exp)
@@ -47,6 +46,17 @@
 (require 'org-babel-sh)
 (require 'org-babel-lisp)
 (require 'org-babel-R)
+
+;; load utility files
+(let ((util-dir (expand-file-name
+                 "util"
+                 (expand-file-name
+                  ".."
+                  (file-name-directory (or load-file-name buffer-file-name))))))
+  ;; other versions of htmlize can cause export problems
+  (load (expand-file-name "htmlize.el" util-dir))
+  ;; the newest version of inf-ruby.el is required by org-babel-ruby.el
+  (load (expand-file-name "inf-ruby.el" util-dir)))
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here
