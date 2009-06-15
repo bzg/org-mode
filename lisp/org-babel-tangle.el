@@ -31,5 +31,12 @@
 ;;; Code:
 (require 'org-babel)
 
+(defvar org-babel-tangle-langs nil
+  "Association list matching source-block languages.  The car of
+each element should be a string indicating the source block
+language, and the cdr should be a list containing the extension
+and shebang(#!) line to use when writing out the language to
+file.")
+
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here

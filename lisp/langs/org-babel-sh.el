@@ -34,6 +34,8 @@
 
 (org-babel-add-interpreter "sh")
 
+(add-to-list 'org-babel-tangle-langs '("sh" "sh" "#!/usr/bin/env sh"))
+
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."

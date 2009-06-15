@@ -33,6 +33,8 @@
 
 (org-babel-add-interpreter "emacs-lisp")
 
+(add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
+
 (defun org-babel-execute:emacs-lisp (body params)
   "Execute a block of emacs-lisp code with org-babel.  This
 function is called by `org-babel-execute-src-block'."

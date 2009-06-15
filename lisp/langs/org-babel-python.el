@@ -34,6 +34,8 @@
 
 (org-babel-add-interpreter "python")
 
+(add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
+
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
 called by `org-babel-execute-src-block'."

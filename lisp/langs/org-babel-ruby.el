@@ -34,6 +34,8 @@
 
 (org-babel-add-interpreter "ruby")
 
+(add-to-list 'org-babel-tangle-langs '("ruby" "rb" "#!/usr/bin/env ruby"))
+
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block'."

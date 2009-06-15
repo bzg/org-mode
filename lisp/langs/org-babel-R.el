@@ -33,6 +33,8 @@
 
 (org-babel-add-interpreter "R")
 
+(add-to-list 'org-babel-tangle-langs '("R" "r"))
+
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
