@@ -363,6 +363,20 @@ previous clocking intervals."
 		   (time-to-seconds org-clock-start-time)) 60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
+(defun org-clock-increase-effort-estimate (add-effort)
+ "Add to or set the effort estimate of the item currently being clocked.
+This will update the \"Effort\" property of currently clocked item, and
+the mode line."
+ (interactive "sHow much to add? (hh:mm or mm)? ")
+ (when (org-clock-is-active)
+   (let ((add-effort-minutes (org-hh:mm-string-to-minutes add-effort)))
+     (setq org-clock-effort
+	   (org-minutes-to-hh:mm-string
+	    (+ add-effort-minutes
+	       (org-hh:mm-string-to-minutes (or org-clock-effort "")))))
+     (org-entry-put org-clock-marker "Effort" org-clock-effort)
+     (org-clock-update-mode-line))))
+
 (defvar org-clock-notification-was-shown nil
   "Shows if we have shown notification already.")
 
@@ -1450,6 +1464,11 @@ The details of what will be saved are regulated by the variable
   "Set up hooks for clock persistence"
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save))
+
+
+;; Suggested bindings
+(org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-increase-effort-estimate)
+(global-set-key "\C-c\C-x\C-e" 'org-clock-increase-effort-estimate)
 
 (provide 'org-clock)
 

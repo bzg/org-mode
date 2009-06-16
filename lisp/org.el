@@ -3024,6 +3024,10 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
+(defun org-clock-is-active ()
+ "Return non-nil if clock is currently running.
+The return value is actually the clock marker."
+ (marker-buffer org-clock-marker))
 
 (eval-and-compile
   (org-autoload
@@ -13101,11 +13105,18 @@ If there is already a time stamp at the cursor position, update it."
     (format org-time-clocksum-format h m)))
 
 (defun org-hh:mm-string-to-minutes (s)
-  "Convert a string H:MM to a number of minutes."
-  (if (string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
-      (+ (* (string-to-number (match-string 1 s)) 60)
-	 (string-to-number (match-string 2 s)))
-    0))
+  "Convert a string H:MM to a number of minutes.
+If the string is just a number, interprete it as minutes.
+In fact, the first hh:mm or number in the string will be taken,
+there can be extra stuff in the string.
+If no number is found, the return value is 0."
+  (cond
+   ((string-match "\\([0-9]+\\):\\([0-9]+\\)" s)
+    (+ (* (string-to-number (match-string 1 s)) 60)
+       (string-to-number (match-string 2 s))))
+   ((string-match "\\([0-9]+\\)" s)
+    (string-to-number (match-string 2 s)))
+   (t 0)))
 
 ;;;; Files
 
