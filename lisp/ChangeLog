@@ -1,5 +1,7 @@
 2009-06-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp-blocks.el: Declare functions and variables.
+
 	* org-remember.el (org-remember-templates): Allow the headline
 	element to be a function.
 	(org-remember-apply-template): If the headline is a function, call

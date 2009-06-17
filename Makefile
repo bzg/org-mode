@@ -70,6 +70,7 @@ LISPF      = 	org.el			\
 	     	org-colview-xemacs.el	\
 	     	org-compat.el		\
 		org-exp.el		\
+		org-exp-blocks.el	\
 		org-docbook.el		\
 		org-faces.el		\
 		org-feed.el		\
@@ -338,6 +339,7 @@ lisp/org-colview.elc:	lisp/org.el
 lisp/org-colview-xemacs.elc:	lisp/org.el
 lisp/org-compat.elc:	lisp/org-macs.el
 lisp/org-exp.elc:	lisp/org.el lisp/org-agenda.el
+lisp/org-exp-blocks.elc: lisp/org.el
 lisp/org-latex.elc:	lisp/org.el lisp/org-exp.el
 lisp/org-docbook.elc:	lisp/org.el lisp/org-exp.el
 lisp/org-faces.elc:	lisp/org-macs.el lisp/org-compat.el

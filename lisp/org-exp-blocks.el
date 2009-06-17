@@ -74,7 +74,18 @@
 
 (require 'org)
 
-(defun org-exp-blocks-set (var value)
+(defvar comint-last-input-end)
+(defvar comint-prompt-regexp)
+(defvar comint-last-input-end)
+(defvar htmlp)
+(defvar latexp)
+(defvar docbookp)
+(defvar asciip)
+
+(declare-function comint-send-input "comint" (&optional no-newline artificial))
+(declare-function R "ess" nil)
+
+(defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
   (set var value)
   (mapc (lambda (spec)
@@ -85,21 +96,6 @@
 	    (add-to-list 'org-protecting-blocks
 			 (symbol-name (car spec)))))
 	value))
-
-(defun org-export-blocks-add-block (block-spec)
-  "Add a new block type to `org-export-blocks'.  BLOCK-SPEC
-should be a three element list the first element of which should
-indicate the name of the block, the second element should be the
-formatting function called by `org-export-blocks-preprocess' and
-the third element a flag indicating whether these types of blocks
-should be fontified in org-mode buffers (see
-`org-protecting-blocks').  For example the BLOCK-SPEC for ditaa
-blocks is as follows...
-
-  (ditaa org-export-blocks-format-ditaa nil)"
-  (unless (member block-spec org-export-blocks)
-    (setq org-export-blocks (cons block-spec org-export-blocks))
-    (org-export-blocks-set 'org-export-blocks)))
 
 (defcustom org-export-blocks
   '((comment org-export-blocks-format-comment t)
@@ -117,7 +113,22 @@ Each block export function should accept three argumets..."
 	   (symbol :tag "Block name")
 	   (function :tag "Block formatter")
 	   (boolean :tag "Fontify content as Org syntax")))
-  :set 'org-exp-blocks-set)
+  :set 'org-export-blocks-set)
+
+(defun org-export-blocks-add-block (block-spec)
+  "Add a new block type to `org-export-blocks'.  BLOCK-SPEC
+should be a three element list the first element of which should
+indicate the name of the block, the second element should be the
+formatting function called by `org-export-blocks-preprocess' and
+the third element a flag indicating whether these types of blocks
+should be fontified in org-mode buffers (see
+`org-protecting-blocks').  For example the BLOCK-SPEC for ditaa
+blocks is as follows...
+
+  (ditaa org-export-blocks-format-ditaa nil)"
+  (unless (member block-spec org-export-blocks)
+    (setq org-export-blocks (cons block-spec org-export-blocks))
+    (org-export-blocks-set 'org-export-blocks org-export-blocks)))
 
 (defcustom org-export-interblocks
   '((r org-export-interblocks-format-R)
@@ -308,6 +319,7 @@ other backends, it converts the comment into an EXAMPLE segment."
 (defvar interblock-R-buffer nil
   "Holds the buffer for the current R process")
 
+(defvar count) ; dynamicaly scoped from `org-export-blocks-preprocess'?
 (defun org-export-blocks-format-R (body &rest headers)
   "Process R blocks and replace \R{} forms outside the blocks
 with their values as determined by R."
