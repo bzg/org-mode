@@ -180,7 +180,7 @@ specified in BLOCKS which default to the value of
 	  (blocks org-export-blocks-witheld)
 	  (case-fold-search t)
 	  (types '())
-	  type func start end)
+	  indentation type func start end)
       (flet ((interblock (start end type)
 			 (save-match-data
 			   (when (setf func (cadr (assoc type org-export-interblocks)))
@@ -188,16 +188,22 @@ specified in BLOCKS which default to the value of
 	(goto-char (point-min))
 	(setf start (point))
 	(while (re-search-forward
-		"^#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)#\\+end_\\S-+.*" nil t)
-	  (save-match-data (setf type (intern (match-string 1))))
+		"^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]\\([^\000]*?\\)[\r\n][ \t]*#\\+end_\\S-+.*" nil t)
+          (save-match-data (setq indentation (length (match-string 1))))
+	  (save-match-data (setf type (intern (match-string 2))))
 	  (unless (memq type types) (setf types (cons type types)))
 	  (setf end (save-match-data (match-beginning 0)))
 	  (interblock start end type)
 	  (if (setf func (cadr (assoc type org-export-blocks)))
-	      (replace-match (save-match-data
-			       (if (memq type blocks)
-				   ""
-				 (apply func (match-string 3) (split-string (match-string 2) " ")))) t t))
+	      (progn
+                (replace-match (save-match-data
+                                 (if (memq type blocks)
+                                     ""
+                                   (apply func (save-match-data (org-remove-indentation (match-string 4)))
+                                          (split-string (match-string 3) " ")))) t t)
+                ;; indent the replaced match
+                (indent-region (match-beginning 0) (match-end 0) indentation)
+                ))
 	  (setf start (save-match-data (match-end 0))))
 	(mapcar (lambda (type)
 		  (interblock start (point-max) type))
