@@ -186,6 +186,7 @@ calendar           |  %:type %:date"
 		 (const :tag "Use `org-default-notes-file'" nil))
 		(choice :tag "Destin. headline"
 		 (string :tag "Specify")
+		 (function :tag "Function")
 		 (const :tag "Use `org-remember-default-headline'" nil)
 		 (const :tag "At beginning of file" top)
 		 (const :tag "At end of file" bottom))
@@ -431,6 +432,8 @@ to be run from that hook to function properly."
 
 	(when (functionp file)
 	  (setq file (funcall file)))
+	(when (functionp headline)
+	  (setq headline (funcall headline)))
 	(when (and file (not (file-name-absolute-p file)))
 	  (setq file (expand-file-name file org-directory)))
 
