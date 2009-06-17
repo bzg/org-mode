@@ -13115,7 +13115,7 @@ If no number is found, the return value is 0."
     (+ (* (string-to-number (match-string 1 s)) 60)
        (string-to-number (match-string 2 s))))
    ((string-match "\\([0-9]+\\)" s)
-    (string-to-number (match-string 2 s)))
+    (string-to-number (match-string 1 s)))
    (t 0)))
 
 ;;;; Files
@@ -14986,10 +14986,15 @@ See the individual commands for more information."
      ["Insert Timer String" org-timer t]
      ["Insert Timer Item" org-timer-item t])
     ("Logging work"
-     ["Clock in" org-clock-in t]
+     ["Clock in" org-clock-in :active t :keys "C-c C-x C-i"]
+     ["Switch task" (lambda () (interactive) (org-clock-in '(4))) :active t :keys "C-u C-c C-x C-i"]
      ["Clock out" org-clock-out t]
      ["Clock cancel" org-clock-cancel t]
+     "--"
+     ["Mark as default task" org-clock-mark-default-task t]
+     ["Clock in, mark as default" (lambda () (interactive) (org-clock-in '(16))) :active t :keys "C-u C-u C-c C-x C-i"]
      ["Goto running clock" org-clock-goto t]
+     "--"
      ["Display times" org-clock-display t]
      ["Create clock table" org-clock-report t]
      "--"

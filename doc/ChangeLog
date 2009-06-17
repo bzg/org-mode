@@ -1,3 +1,8 @@
+2009-06-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Clocking work time): Document the key to update effort
+	estimates.
+
 2009-06-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Clocking work time): Document the clock time display.

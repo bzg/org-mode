@@ -5273,7 +5273,9 @@ to show only the current clocking instance, @code{today} to show all time
 clocked on this tasks today (see also the variable
 @code{org-extend-today-until}), @code{all} to include all time, or
 @code{auto} which is the default@footnote{See also the variable
-@code{org-clock-modeline-total}.}.
+@code{org-clock-modeline-total}.}.@*
+Clicking with @kbd{mouse-1} onto the mode line entry will pop up a menu with
+clocking options.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 @vindex org-log-note-clock-out
@@ -5284,8 +5286,12 @@ HH:MM}.  See the variable @code{org-log-note-clock-out} for the
 possibility to record an additional note together with the clock-out
 time stamp@footnote{The corresponding in-buffer setting is:
 @code{#+STARTUP: lognoteclock-out}}.
+@kindex C-c C-x C-e
+@item C-c C-x C-e
+Update the effort estimate for the current clock task.
 @kindex C-c C-y
-@item C-c C-y
+@kindex C-c C-c
+@item C-c C-y @ @ @r{or}@ @ C-c C-c
 Recompute the time interval after changing one of the time stamps.  This
 is only necessary if you edit the time stamps directly.  If you change
 them with @kbd{S-@key{cursor}} keys, the update is automatic.

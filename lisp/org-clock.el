@@ -222,6 +222,16 @@ of a different task.")
 
 (defvar org-clock-mode-line-map (make-sparse-keymap))
 (define-key org-clock-mode-line-map [mode-line mouse-2] 'org-clock-goto)
+(define-key org-clock-mode-line-map [mode-line mouse-1] 'org-clock-menu)
+
+(defun org-clock-menu ()
+  (interactive)
+  (popup-menu
+   '("Clock"
+     ["Clock out" org-clock-out t]
+     ["Change effort estimate" org-clock-modify-effort-estimate t]
+     ["Go to clock entry" org-clock-goto t]
+     ["Switch task" (lambda () (interactive) (org-clock-in '(4))) :active t :keys "C-u C-c C-x C-i"])))
 
 (defun org-clock-history-push (&optional pos buffer)
   "Push a marker to the clock history."
@@ -342,7 +352,7 @@ If not, show simply the clocked time like 01:50."
   (setq org-mode-line-string
 	(org-propertize
 	 (let ((clock-string (org-clock-get-clock-string))
-	       (help-text "Org-mode clock is running. Mouse-2 to go there."))
+	       (help-text "Org-mode clock is running.\nmouse-1 shows a menu\nmouse-2 will jump to task"))
 	   (if (and (> org-clock-string-limit 0)
 		    (> (length clock-string) org-clock-string-limit))
 	       (org-propertize (substring clock-string 0 org-clock-string-limit)
@@ -363,17 +373,36 @@ previous clocking intervals."
 		   (time-to-seconds org-clock-start-time)) 60)))
     (+ currently-clocked-time (or org-clock-total-time 0))))
 
-(defun org-clock-increase-effort-estimate (add-effort)
+(defun org-clock-modify-effort-estimate (&optional value)
  "Add to or set the effort estimate of the item currently being clocked.
+VALUE can be a number of minutes, or a string with forat hh:mm or mm.
+WHen the strig starts with a + or a - sign, the current value of the effort
+property will be changed by that amount.
 This will update the \"Effort\" property of currently clocked item, and
 the mode line."
- (interactive "sHow much to add? (hh:mm or mm)? ")
+ (interactive)
  (when (org-clock-is-active)
-   (let ((add-effort-minutes (org-hh:mm-string-to-minutes add-effort)))
-     (setq org-clock-effort
-	   (org-minutes-to-hh:mm-string
-	    (+ add-effort-minutes
-	       (org-hh:mm-string-to-minutes (or org-clock-effort "")))))
+   (let ((current org-clock-effort) sign)
+     (unless value
+       ;; Prompt user for a value or a change
+       (setq value
+	     (read-string
+	      (format "Set effort (hh:mm or mm%s): "
+		      (if current
+			  (format ", prefix + to add to %s" org-clock-effort)
+			"")))))
+     (when (stringp value)
+       ;; A string.  See if it is a delta
+       (setq sign (string-to-char value))
+       (if (member sign '(?- ?+))
+	   (setq current (org-hh:mm-string-to-minutes (substring current 1)))
+	 (setq current 0))
+       (setq value (org-hh:mm-string-to-minutes value))
+       (if (equal ?- sign)
+	   (setq value (- current value))
+	 (if (equal ?+ sign) (setq value (+ current value)))))
+     (setq value (max 0 value)
+	   org-clock-effort (org-minutes-to-hh:mm-string value))
      (org-entry-put org-clock-marker "Effort" org-clock-effort)
      (org-clock-update-mode-line))))
 
@@ -454,9 +483,7 @@ the clocking selection, associated with the letter `d'."
 
       (when (equal select '(16))
 	;; Mark as default clocking task
-	(save-excursion
-	  (org-back-to-heading t)
-	  (move-marker org-clock-default-task (point))))
+	(org-clock-mark-default-task))
 
       (setq target-pos (point))  ;; we want to clock in at this location
       (save-excursion
@@ -545,6 +572,14 @@ the clocking selection, associated with the letter `d'."
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
 	    (message "Clock starts at %s - %s" ts msg-extra)))))))
+
+(defun org-clock-mark-default-task ()
+  "Mark current task as default task."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading t)
+    (move-marker org-clock-default-task (point))))
+
 
 (defvar msg-extra)
 (defun org-clock-get-sum-start ()
@@ -1467,8 +1502,7 @@ The details of what will be saved are regulated by the variable
 
 
 ;; Suggested bindings
-(org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-increase-effort-estimate)
-(global-set-key "\C-c\C-x\C-e" 'org-clock-increase-effort-estimate)
+(org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)
 
 (provide 'org-clock)
 

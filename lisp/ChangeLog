@@ -1,3 +1,15 @@
+2009-06-17  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-menu): New function.
+	(org-clock-update-mode-line): Update help string.
+	(org-clock-modify-effort-estimate): New function.
+	(org-clock-mark-default-task): New function.
+
+	* org.el (org-hh:mm-string-to-minutes): Also take just a number of
+	minutes as input.
+	(org-org-menu): Add new clocking stuff.
+	(org-clock-is-active): New function.
+
 2009-06-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-open-non-existing-files): Improve docstring.
