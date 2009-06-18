@@ -2145,6 +2145,7 @@ in the list) and remove property and value from the list in LISTVAR."
 
 (defvar htmlp)  ;; dynamically scoped
 (defvar latexp)  ;; dynamically scoped
+(defvar org-export-latex-verbatim-wrap) ;; defined in org-latex.el
 
 (defun org-export-format-source-code-or-example
   (backend lang code &optional opts indent)
@@ -2249,7 +2250,8 @@ INDENT was the original indentation of the block."
 	     ((eq backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
 	      (concat "\n#+BEGIN_LaTeX\n"
-		      (org-add-props (concat "\\begin{verbatim}\n" rtn "\n\\end{verbatim}\n")
+		      (org-add-props (concat (car org-export-latex-verbatim-wrap)
+					     rtn (cdr org-export-LaTeX-verbatim-wrap))
 			  '(org-protected t))
 		      "#+END_LaTeX\n\n"))
 	     ((eq backend 'ascii)

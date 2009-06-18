@@ -274,6 +274,18 @@ will pass them (combined with the LaTeX default list parameters) to
   :group 'org-export-latex
   :type 'plist)
 
+(defcustom org-export-latex-verbatim-wrap
+  '("\\begin{verbatim}\n" . "\\end{verbatim}\n")
+  "Environment to be wrapped around a fixed-width section in LaTeX export.
+This is a cons with two strings, to be added before and after the
+fixed-with text.
+
+Defaults to \\begin{verbatim} and \\end{verbatim}."
+  :group 'org-export_translation
+  :group 'org-export-latex
+  :type '(cons (string :tag "Open")
+	       (string :tag "Close")))
+
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
   "A plist of keywords to remove from headlines. OBSOLETE.

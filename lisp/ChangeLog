@@ -1,5 +1,10 @@
 2009-06-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-verbatim-wrap): New option.
+
+	* org-exp.el (org-export-format-source-code-or-example): Use
+	`org-export-latex-verbatim-wrap'.
+
 	* org.el (org-clone-subtree-with-time-shift): Also shift inactive
 	time stamps.
 
