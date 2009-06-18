@@ -102,7 +102,13 @@ If it is a character, it will be repeated to fill the window width."
 
 (defcustom org-agenda-exporter-settings nil
   "Alist of variable/value pairs that should be active during agenda export.
-This is a good place to set options for ps-print and for htmlize."
+This is a good place to set options for ps-print and for htmlize.
+Note that the way this is implemented, the values will be evaluated
+before assigned to the variables.  So make sure to quote values you do
+*not* want evaluated, for example
+
+   (setq org-agenda-exporter-settings
+         '((ps-print-color-p 'black-white)))"
   :group 'org-agenda-export
   :type '(repeat
 	  (list
