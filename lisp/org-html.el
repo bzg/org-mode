@@ -283,6 +283,35 @@ This is customizable so that alignment options can be specified."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
+(defcustom org-export-table-row-tags '("<tr>" . "</tr>")
+  "The opening tag for table data fields.
+This is customizable so that alignment options can be specified.
+Instead of strings, these ca be Lisp forms that will be evaluated
+for each row in order to construct the table row tags.  During evaluation,
+the variable `head' will be true when this is a header line, nil when this
+is a body line.  And the variable `nline' will contain the line number,
+starting from 1 in the first header line.  For example
+
+  (setq org-export-table-row-tags
+        (cons '(if head
+                   \"<tr>\"
+                 (if (= (mod nline 2) 1)
+                     \"<tr class=\\\"tr-odd\\\">\"
+                   \"<tr class=\\\"tr-even\\\">\"))
+              \"</tr>\"))
+
+will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
+  :group 'org-export-tables
+  :type '(cons 
+	  (choice :tag "Opening tag"
+		  (string :tag "Specify")
+		  (sexp))
+	  (choice :tag "Closing tag"
+		  (string :tag "Specify")
+		  (sexp))))
+
+
+
 (defcustom org-export-html-table-use-header-tags-for-first-column nil
   "Non-nil means, format column one in tables with header tags.
 When nil, also column one will use data tags."
@@ -1506,8 +1535,8 @@ lang=\"%s\" xml:lang=\"%s\">
 			       (lambda (x) (string-match "^[ \t]*|-" x))
 			       (cdr lines)))))
 
-	 (nlines 0) fnum i
-	 tbopen line fields html gr colgropen)
+	 (nline 0) fnum i
+	 tbopen line fields html gr colgropen rowstart rowend)
     (if splice (setq head nil))
     (unless splice (push (if head "<thead>" "<tbody>") html))
     (setq tbopen t)
@@ -1524,12 +1553,14 @@ lang=\"%s\" xml:lang=\"%s\">
 	;; Break the line into fields
 	(setq fields (org-split-string line "[ \t]*|[ \t]*"))
 	(unless fnum (setq fnum (make-vector (length fields) 0)))
-	(setq nlines (1+ nlines) i -1)
-	(push (concat "<tr>"
+	(setq nline (1+ nline) i -1
+	      rowstart (eval (car org-export-table-row-tags))
+	      rowend (eval (cdr org-export-table-row-tags)))
+	(push (concat rowstart
 		      (mapconcat
 		       (lambda (x)
 			 (setq i (1+ i))
-			 (if (and (< i nlines)
+			 (if (and (< i nline)
 				  (string-match org-table-number-regexp x))
 			     (incf (aref fnum i)))
 			 (cond
@@ -1547,7 +1578,7 @@ lang=\"%s\" xml:lang=\"%s\">
 			   (concat (car org-export-table-data-tags) x
 				   (cdr org-export-table-data-tags)))))
 		       fields "")
-		      "</tr>")
+		      rowend)
 	      html)))
     (unless splice (if tbopen (push "</tbody>" html)))
     (unless splice (push "</table>\n" html))
@@ -1560,7 +1591,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (lambda (x)
 		(setq gr (pop org-table-colgroup-info))
 		(format "<col align=\"%s\" />"
-			(if (> (/ (float x) nlines) org-table-number-fraction)
+			(if (> (/ (float x) nline) org-table-number-fraction)
 			    "right" "left")))
 	      fnum "")
 	     "</colgroup>")

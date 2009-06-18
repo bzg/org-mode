@@ -1,3 +1,10 @@
+2009-06-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-table-row-tags): New option.
+	(org-format-org-table-html): Rename `nlines' to `nline', use new
+	option.
+
+
 2009-06-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp-blocks.el: Declare functions and variables.
