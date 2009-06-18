@@ -1081,27 +1081,36 @@ containing the title row and all other rows.  Each row is a list
 of fields."
   (save-excursion
     (let* ((title (mapcar 'cadr org-columns-current-fmt-compiled))
+	   (re-comment (concat "\\*+[ \t]+" org-comment-string "\\>"))
+	   (re-archive (concat ".*:" org-archive-tag ":"))
 	   (n (length title)) row tbl)
       (goto-char (point-min))
       (while (re-search-forward "^\\(\\*+\\) " nil t)
-	(when (and (or (null maxlevel)
-                       (>= maxlevel
-                           (if org-odd-levels-only
-                               (/ (1+ (length (match-string 1))) 2)
-                             (length (match-string 1)))))
-                   (get-char-property (match-beginning 0) 'org-columns-key))
-	  (setq row nil)
-	  (loop for i from 0 to (1- n) do
-		(push
-		 (org-quote-vert
-		  (or (get-char-property (+ (match-beginning 0) i) 'org-columns-value-modified)
-		      (get-char-property (+ (match-beginning 0) i) 'org-columns-value)
-		      ""))
-		 row))
-	  (setq row (nreverse row))
-	  (unless (and skip-empty-rows
-		       (eq 1 (length (delete "" (delete-dups (copy-sequence row))))))
-	    (push row tbl))))
+	(catch 'next
+	  (when (and (or (null maxlevel)
+			 (>= maxlevel
+			     (if org-odd-levels-only
+				 (/ (1+ (length (match-string 1))) 2)
+			       (length (match-string 1)))))
+		     (get-char-property (match-beginning 0) 'org-columns-key))
+	    (when (save-excursion
+		    (goto-char (point-at-bol))
+		    (or (looking-at re-comment)
+			(looking-at re-archive)))
+	      (org-end-of-subtree t)
+	      (throw 'next t))
+	    (setq row nil)
+	    (loop for i from 0 to (1- n) do
+		  (push
+		   (org-quote-vert
+		    (or (get-char-property (+ (match-beginning 0) i) 'org-columns-value-modified)
+			(get-char-property (+ (match-beginning 0) i) 'org-columns-value)
+			""))
+		   row))
+	    (setq row (nreverse row))
+	    (unless (and skip-empty-rows
+			 (eq 1 (length (delete "" (delete-dups (copy-sequence row))))))
+	      (push row tbl)))))
       (append (list title 'hline) (nreverse tbl)))))
 
 (defun org-dblock-write:columnview (params)

@@ -2,9 +2,11 @@
 
 	* org-colview.el (org-columns-capture-view): Protect vertical bars
 	in column values.
+	(org-columns-capture-view): Exclude comment and archived trees.
 
 	* org-colview-xemacs.el (org-columns-capture-view): Protect
 	vertical bars in column values.
+	(org-columns-capture-view): Exclude comment and archived trees.
 
 	* org.el (org-quote-vert): New function.
 
