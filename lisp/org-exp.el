@@ -2251,7 +2251,7 @@ INDENT was the original indentation of the block."
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
 	      (concat "\n#+BEGIN_LaTeX\n"
 		      (org-add-props (concat (car org-export-latex-verbatim-wrap)
-					     rtn (cdr org-export-LaTeX-verbatim-wrap))
+					     rtn (cdr org-export-latex-verbatim-wrap))
 			  '(org-protected t))
 		      "#+END_LaTeX\n\n"))
 	     ((eq backend 'ascii)
