@@ -6235,7 +6235,7 @@ and still retain the repeater to cover future instances of the task."
 	      (insert template)
 	      (org-mode)
 	      (goto-char (point-min))
-	      (while (re-search-forward org-ts-regexp nil t)
+	      (while (re-search-forward org-ts-regexp-both nil t)
 		(org-timestamp-change (* n shift-n) shift-what))
 	      (unless (= n n-no-remove)
 		(goto-char (point-min))

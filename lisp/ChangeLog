@@ -1,5 +1,8 @@
 2009-06-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-clone-subtree-with-time-shift): Also shift inactive
+	time stamps.
+
 	* org-html.el (org-export-table-row-tags): New option.
 	(org-format-org-table-html): Rename `nlines' to `nline', use new
 	option.
