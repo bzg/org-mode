@@ -15365,6 +15365,12 @@ and end of string."
 		    list)))
     (nreverse list)))
 
+(defun org-quote-vert (s)
+  "Replace \"|\" with \"\\vert\"."
+  (while (string-match "|" s)
+    (setq s (replace-match "\\vert" t t s)))
+  s)
+
 (defun org-uuidgen-p (s)
   "Is S an ID created by UUIDGEN?"
   (string-match "\\`[0-9a-f]\\{8\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{12\\}\\'" (downcase s)))

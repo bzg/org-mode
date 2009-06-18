@@ -1282,11 +1282,13 @@ of fields."
               (goto-char (match-beginning 0))
               (setq row nil)
               (loop for i from 0 to (1- n) do
-		    (push (or (get-char-property (point)
-						 'org-columns-value-modified)
-			      (get-char-property (point) 'org-columns-value)
-			      "")
-			  row)
+		    (push 
+		     (org-quote-vert
+		      (or (get-char-property (point)
+					     'org-columns-value-modified)
+			  (get-char-property (point) 'org-columns-value)
+			  ""))
+		     row)
 		    (org-columns-forward-char))
               (setq row (nreverse row))
               (unless (and skip-empty-rows

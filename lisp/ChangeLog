@@ -1,5 +1,13 @@
 2009-06-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-colview.el (org-columns-capture-view): Protect vertical bars
+	in column values.
+
+	* org-colview-xemacs.el (org-columns-capture-view): Protect
+	vertical bars in column values.
+
+	* org.el (org-quote-vert): New function.
+
 	* org-latex.el (org-export-latex-verbatim-wrap): New option.
 
 	* org-exp.el (org-export-format-source-code-or-example): Use

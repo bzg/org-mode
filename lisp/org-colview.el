@@ -1092,10 +1092,12 @@ of fields."
                    (get-char-property (match-beginning 0) 'org-columns-key))
 	  (setq row nil)
 	  (loop for i from 0 to (1- n) do
-		(push (or (get-char-property (+ (match-beginning 0) i) 'org-columns-value-modified)
-			  (get-char-property (+ (match-beginning 0) i) 'org-columns-value)
-			  "")
-		      row))
+		(push
+		 (org-quote-vert
+		  (or (get-char-property (+ (match-beginning 0) i) 'org-columns-value-modified)
+		      (get-char-property (+ (match-beginning 0) i) 'org-columns-value)
+		      ""))
+		 row))
 	  (setq row (nreverse row))
 	  (unless (and skip-empty-rows
 		       (eq 1 (length (delete "" (delete-dups (copy-sequence row))))))
