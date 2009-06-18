@@ -3321,7 +3321,8 @@ MATCH is being ignored."
   (let* ((org-agenda-skip-function
 	  'org-agenda-skip-entry-when-regexp-matches-in-subtree)
 	 ;; We could have used org-agenda-skip-if here.
-	 (org-agenda-overriding-header "List of stuck projects: ")
+	 (org-agenda-overriding-header
+	  (or org-agenda-overriding-header "List of stuck projects: "))
 	 (matcher (nth 0 org-stuck-projects))
 	 (todo (nth 1 org-stuck-projects))
 	 (todo-wds (if (member "*" todo)
