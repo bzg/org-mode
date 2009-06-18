@@ -18,6 +18,7 @@
 *.log
 *.pdf
 *.pg
+*.pgs
 *.toc
 *.tp
 *.vr
