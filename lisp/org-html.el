@@ -286,7 +286,7 @@ This is customizable so that alignment options can be specified."
 (defcustom org-export-table-row-tags '("<tr>" . "</tr>")
   "The opening tag for table data fields.
 This is customizable so that alignment options can be specified.
-Instead of strings, these ca be Lisp forms that will be evaluated
+Instead of strings, these can be Lisp forms that will be evaluated
 for each row in order to construct the table row tags.  During evaluation,
 the variable `head' will be true when this is a header line, nil when this
 is a body line.  And the variable `nline' will contain the line number,
