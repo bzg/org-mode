@@ -11898,7 +11898,7 @@ Return the position where this entry starts, or nil if there is no such entry."
 	(when (re-search-forward
 	       (concat "^[ \t]*:ID:[ \t]+" (regexp-quote id) "[ \t]*$")
 	       nil t)
-	  (org-back-to-heading)
+	  (org-back-to-heading t)
 	  (point))))))
 
 ;;;; Timestamps
