@@ -1204,6 +1204,7 @@ using this method is @emph{strongly} deprecated as it is incompatible
 with the outline structure of the document.  The correct method for
 setting multiple archive locations in a buffer is using properties.}:
 
+@cindex #+ARCHIVE
 @example
 #+ARCHIVE: %s_done::
 @end example
@@ -1449,6 +1450,7 @@ numerically, alphabetically, by time, or by custom function.
 @node Drawers, Blocks, Plain lists, Document Structure
 @section Drawers
 @cindex drawers
+@cindex #+DRAWERS
 @cindex visibility cycling, drawers
 
 @vindex org-drawers
@@ -2108,6 +2110,7 @@ see the @samp{E} mode switch below).  If there are no non-empty fields,
 @cindex references, named
 @cindex name, of column or field
 @cindex constants, in calculations
+@cindex #+CONSTANTS
 
 @vindex org-table-formula-constants
 @samp{$name} is interpreted as the name of a column, parameter or
@@ -2144,6 +2147,7 @@ numbers.
 @cindex references, to a different table
 @cindex name, of column or field
 @cindex constants, in calculations
+@cindex #+TBLNAME
 
 You may also reference constants, fields and ranges from a different table,
 either in the current file or even in a different file.  The syntax is
@@ -2266,6 +2270,7 @@ press @key{TAB} or @key{RET} or @kbd{C-c C-c} with the cursor still in
 the field, the formula will be stored as the formula for this field,
 evaluated, and the current field replaced with the result.
 
+@cindex #+TBLFM
 Formulas are stored in a special line starting with @samp{#+TBLFM:}
 directly below the table.  If you typed the equation in the 4th field of
 the 3rd data line in the table, the formula will look like
@@ -2578,6 +2583,7 @@ functions.
 @section Org-Plot
 @cindex graph, in tables
 @cindex plot tables using gnuplot
+@cindex #+PLOT
 
 Org-Plot can produce 2D and 3D graphs of information stored in org tables
 using @file{Gnuplot} @uref{http://www.gnuplot.info/} and @file{gnuplot-mode}
@@ -3093,6 +3099,7 @@ doing besides Emacs hacking with @code{[[ads:Dominik,C]]}.
 If you need special abbreviations just for a single Org buffer, you
 can define them in the file with
 
+@cindex #+LINK
 @example
 #+LINK: bugzilla  http://10.1.2.9/bugzilla/show_bug.cgi?id=
 #+LINK: google    http://www.google.com/search?q=%s
@@ -3442,6 +3449,9 @@ unique keys across both sets of keywords.}
 @subsection Setting up keywords for individual files
 @cindex keyword options
 @cindex per-file keywords
+@cindex #+TODO
+@cindex #+TYP_TODO
+@cindex #+SEQ_TODO
 
 It can be very useful to use different aspects of the TODO mechanism in
 different files.  For file-local settings, you need to add special lines
@@ -3753,6 +3763,7 @@ these values (highest, lowest, default) like this (please make sure that
 the highest priority is earlier in the alphabet than the lowest
 priority):
 
+@cindex #+PRIORITIES
 @example
 #+PRIORITIES: A C B
 @end example
@@ -3959,6 +3970,7 @@ explicitly marked with those tags.  You can also set tags that all entries in
 a file should inherit just as if these tags were defined in a hypothetical
 level zero that surrounds the entire file.
 
+@cindex #+FILETAGS
 @example
 #+FILETAGS: :Peter:Boss:Secret:
 @end example
@@ -4013,6 +4025,7 @@ currently used in the buffer.  You may also globally specify a hard list
 of tags with the variable @code{org-tag-alist}.  Finally you can set
 the default tags for a given file with lines like
 
+@cindex #+TAGS
 @example
 #+TAGS: @@work @@home @@tennisclub
 #+TAGS: laptop car pc sailboat
@@ -4266,6 +4279,7 @@ publishers and the number of disks in a box like this:
 If you want to set properties that can be inherited by any entry in a
 file, use a line like
 @cindex property, _ALL
+@cindex #+PROPERTY
 @example
 #+PROPERTY: NDisks_ALL 1 2 3 4
 @end example
@@ -4475,6 +4489,7 @@ done by defining a column format line.
 
 To define a column format for an entire file, use a line like
 
+@cindex #+COLUMNS
 @example
 #+COLUMNS: %25ITEM %TAGS %PRIORITY %TODO
 @end example
@@ -7917,6 +7932,7 @@ summarizes the markup rules used in an Org-mode buffer.
 @noindent
 The title of the exported document is taken from the special line
 
+@cindex #+TITLE
 @example
 #+TITLE: This is the title of the document
 @end example
@@ -7945,6 +7961,7 @@ levels will become itemized lists.  You can change the location of this
 switch globally by setting the variable @code{org-headline-levels}, or on a
 per-file basis with a line
 
+@cindex #+OPTIONS
 @example
 #+OPTIONS: H:4
 @end example
@@ -8013,6 +8030,7 @@ a line break within a paragraph, use @samp{\\} at the end of a line.
 To keep the line breaks in a region, but otherwise use normal formatting, you
 can use this construct, which can also be used to format poetry.
 
+@cindex #+BEGIN_VERSE
 @example
 #+BEGIN_VERSE
  Great clouds overhead
@@ -8027,6 +8045,7 @@ When quoting a passage from another document, it is customary to format this
 as a paragraph that is indented on both the left and the right margin.  You
 can include quotations in Org-mode documents like this:
 
+@cindex #+BEGIN_QUOTE
 @example
 #+BEGIN_QUOTE
 Everything should be made as simple as possible,
@@ -8035,6 +8054,7 @@ but not any simpler -- Albert Einstein
 @end example
 
 If you would like to center some text, do it like this:
+@cindex #+BEGIN_CENTER
 @example
 #+BEGIN_CENTER
 Everything should be made as simple as possible, \\
@@ -8268,6 +8288,7 @@ exported as a horizontal line (@samp{<hr/>} in HTML).
 @subheading Comment lines
 @cindex comment lines
 @cindex exporting, not
+@cindex #+BEGIN_COMMENT
 
 Lines starting with @samp{#} in column zero are treated as comments and will
 never be exported.  Also entire subtrees starting with the word
@@ -8282,21 +8303,24 @@ Toggle the COMMENT keyword at the beginning of an entry.
 
 @node Macro replacement,  , Comment lines, Markup rules
 @subheading Macro replacement
+@cindex macro replacement, during export
+@cindex #+MACRO
 
 You can define text snippets with
 
 @example
-#+MACRO: name   replacement text
+#+MACRO: name   replacement text $1, $2 are arguments
 @end example
 
 @noindent which can be referenced anywhere in the document (even in
-code examples) with @code{@{@{@{name@}@}@}}.  In addition to defined macros,
-@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will reference
-information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
-Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
-@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time and
-to the modification time of the file being exported, respectively.  @var{FORMAT}
-should be a format string understood by @code{format-time-string}.
+code examples) with @code{@{@{@{name(arg1,arg2)@}@}@}}.  In addition to
+defined macros, @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc.,
+will reference information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and
+similar lines.  Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
+@code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
+and to the modification time of the file being exported, respectively.
+@var{FORMAT} should be a format string understood by
+@code{format-time-string}.
 
 @node Selective export, Export options, Markup rules, Exporting
 @section Selective export
@@ -8609,6 +8633,8 @@ which should be interpreted as such, mark them with @samp{@@} as in
 simple tags.  For more extensive HTML that should be copied verbatim to
 the exported file use either
 
+@cindex #+HTML
+@cindex #+BEGIN_HTML
 @example
 #+HTML: Literal HTML code for export
 @end example
@@ -8644,6 +8670,7 @@ If you want to specify attributes for links, you can do so using a special
 @code{<a>} or @code{<img>} tags.  Here is an example that sets @code{title}
 and @code{style} attributes for a link:
 
+@cindex #+ATTR_HTML
 @example
 #+ATTR_HTML: title="The Org-mode homepage" style="color:red;"
 [[http://orgmode.org]]
@@ -8659,6 +8686,7 @@ Org-mode tables are exported to HTML using the table tag defined in
 cell borders and frame.  If you would like to change this for individual
 tables, place somthing like the following before the table:
 
+@cindex #+CAPTION
 @example
 #+CAPTION: This is a table with lines around and between cells
 #+ATTR_HTML: border="2" rules="all" frame="all"
@@ -8689,6 +8717,7 @@ will link to a high resolution version of the image, you could use:
 If you need to add attributes to an inlines image, use a @code{#+ATTR_HTML},
 for example:
 
+@cindex #+CAPTION
 @example
 #+CAPTION: A black cat stalking a spider
 #+ATTR_HTML: alt="cat/spider image" title="one second before action"
@@ -8778,6 +8807,7 @@ settings, or add to them by using the variables @code{org-export-html-style}
 granular settings, like file-local settings).  To set the latter variable
 individually for each file, you can use
 
+@cindex #+STYLE
 @example
 #+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 @end example
@@ -8813,6 +8843,7 @@ customize-variable @key{RET} org-modules @key{RET}} to convince yourself that
 this is indeed the case.  All it then takes to make use of the program is
 adding a single line to the Org file:
 
+@cindex #+INFOJS_OPT
 @example
 #+INFOJS_OPT: view:info toc:nil
 @end example
@@ -8943,6 +8974,8 @@ inserted into the La@TeX{} file.  This includes simple macros like
 you can add special code that should only be present in La@TeX{} export with
 the following constructs:
 
+@cindex #+LaTeX
+@cindex #+BEGIN_LaTeX
 @example
 #+LaTeX: Literal LaTeX code for export
 @end example
@@ -8966,6 +8999,7 @@ By default, the La@TeX{} output uses the class @code{article}.
 @vindex org-export-latex-default-class
 @vindex org-export-latex-classes
 @cindex #+LATEX_HEADER
+@cindex #+LATEX_CLASS
 @cindex property, LATEX_CLASS
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
@@ -8985,6 +9019,9 @@ For La@TeX{} export of a table, you can specify a label and a caption
 request a longtable environment for the table, so that it may span several
 pages.  Finally, you can set the alignment string:
 
+@cindex #+CAPTION
+@cindex #+LABEL
+@cindex #+ATTR_LaTeX
 @example
 #+CAPTION: A long table
 #+LABEL: tbl:long
@@ -9009,6 +9046,9 @@ element.  Finally, you can use an @code{#+ATTR_LaTeX:} line to specify the
 options that can be used in the optional argument of the
 @code{\includegraphics} macro.
 
+@cindex #+CAPTION
+@cindex #+LABEL
+@cindex #+ATTR_LaTeX
 @example
 #+CAPTION:    The black-body emission of the disk around HR 4049
 #+LABEL:      fig:SED-HR4049
@@ -9086,6 +9126,8 @@ Export only the visible part of the document.
 You can quote DocBook code in Org files and copy it verbatim into exported
 DocBook file with the following constructs:
 
+@cindex #+DOCBOOK
+@cindex #+BEGIN_DOCBOOK
 @example
 #+DOCBOOK: Literal DocBook code for export
 @end example
@@ -9170,6 +9212,9 @@ variable @code{org-export-docbook-default-image-attributes}, the former
 overwrites the latter.  Here is an example about how image attributes can be
 set:
 
+@cindex #+CAPTION
+@cindex #+LABEL
+@cindex #+ATTR_DOCBOOK
 @example
 #+CAPTION:    The logo of Org mode
 #+LABEL:      unicorn-svg
@@ -9921,6 +9966,7 @@ as if they had been included in the buffer.  In particular, the file can be
 any other Org mode file with internal setup.  You can visit the file the
 cursor is in the line with @kbd{C-c '}.
 @item #+STARTUP:
+@cindex #+STARTUP:
 @vindex org-startup-folded
 This line sets options to be used at startup of Org mode, when an
 Org file is being visited.  The first set of options deals with the
@@ -10195,7 +10241,7 @@ stars are @i{almost} invisible, for example using the color
 @code{grey90} on a white background.
 
 @item
-@cindex org-odd-levels-only
+@vindex org-odd-levels-only
 Things become cleaner still if you skip all the even levels and use only odd
 levels 1, 3, 5..., effectively adding two stars to go from one outline level
 to the next@footnote{When you need to specify a level for a property search
@@ -10660,6 +10706,7 @@ between these lines, replacing whatever was there before.  For example:
 Just above the source table, we put a special line that tells
 Orgtbl mode how to translate this table and where to install it.  For
 example:
+@cindex #+ORGTBL
 @example
 #+ORGTBL: SEND table_name translation_function arguments....
 @end example
@@ -10919,6 +10966,7 @@ parameters.
 Here is a La@TeX{} example.  Let's say that you have this in your
 La@TeX{} file:
 
+@cindex #+ORGLIST
 @example
 % BEGIN RECEIVE ORGLST to-buy
 % END RECEIVE ORGLST to-buy
