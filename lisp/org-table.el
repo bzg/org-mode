@@ -3452,6 +3452,16 @@ to execute outside of tables."
       (orgtbl-make-binding 'org-table-previous-field 104
 			   [(shift tab)] [(tab)] "\C-i"))
 
+    (org-defkey orgtbl-mode-map [S-iso-lefttab]
+      (orgtbl-make-binding 'org-table-previous-field 107
+			   [S-iso-lefttab] [backtab] [(shift tab)]
+			   [(tab)] "\C-i"))
+
+    (org-defkey orgtbl-mode-map [backtab]
+      (orgtbl-make-binding 'org-table-previous-field 108
+			   [backtab] [S-iso-lefttab] [(shift tab)]
+			   [(tab)] "\C-i"))
+
     (org-defkey orgtbl-mode-map "\M-\C-m"
       (orgtbl-make-binding 'org-table-wrap-region 105
 			   "\M-\C-m" [(meta return)]))
