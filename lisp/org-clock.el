@@ -781,7 +781,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
 With prefix arg SELECT, offer recently clocked tasks for selection."
-  (interactive "P")
+  (interactive "@P")
   (let* ((recent nil)
 	 (m (cond
 	     (select
