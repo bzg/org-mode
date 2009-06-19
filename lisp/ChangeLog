@@ -1,5 +1,7 @@
 2009-06-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp-blocks.el (org-ditaa-jar-path): Fix default ditaa path.
+
 	* org-exp.el (org-infile-export-plist): Get macros also from
 	#+SETUPFILE.
 

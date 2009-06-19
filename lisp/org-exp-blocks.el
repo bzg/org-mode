@@ -217,14 +217,14 @@ specified in BLOCKS which default to the value of
 ;;--------------------------------------------------------------------------------
 ;; ditaa: create images from ASCII art using the ditaa utility
 (defvar org-ditaa-jar-path (expand-file-name
-			"ditaa.jar"
-			(file-name-as-directory
-			 (expand-file-name
-			  "scripts"
-			  (file-name-as-directory
-			   (expand-file-name
-			    ".."
-			    (file-name-directory (or load-file-name buffer-file-name)))))))
+			    "ditaa.jar"
+			    (file-name-as-directory
+			     (expand-file-name
+			      "scripts"
+			      (file-name-as-directory
+			       (expand-file-name
+				"../contrib"
+				(file-name-directory (or load-file-name buffer-file-name)))))))
   "Path to the ditaa jar executable")
 
 (defun org-export-blocks-format-ditaa (body &rest headers)
