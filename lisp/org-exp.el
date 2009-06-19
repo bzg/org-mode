@@ -642,10 +642,10 @@ modified) list.")
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
-		    "KEYWORDS" "DESCRIPTION")
+		    "KEYWORDS" "DESCRIPTION" "MACRO")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options a pr style
-	    latex-header
+	    latex-header macros
 	    ext-setup-or-nil setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
@@ -682,6 +682,8 @@ modified) list.")
 	    (setq p (plist-put p :select-tags (org-split-string val))))
 	   ((string-equal key "EXPORT_EXCLUDE_TAGS")
 	    (setq p (plist-put p :exclude-tags (org-split-string val))))
+	   ((string-equal key "MACRO")
+	    (push val macros))
 	   ((equal key "SETUPFILE")
 	    (setq setup-contents (org-file-contents
 				  (expand-file-name
@@ -715,13 +717,12 @@ modified) list.")
 	(setq p (plist-put p :macro-input-file (and (buffer-file-name)
 						    (file-name-nondirectory
 						     (buffer-file-name)))))
-	(goto-char (point-min))
-	(while (re-search-forward
-		"^#\\+macro:[ \t]+\\([-a-zA-Z0-9_]+\\)[ \t]+\\(.*?[ \t]*$\\)"
-		nil t)
-	  (setq p (plist-put p (intern (concat ":macro-"
-					       (downcase (match-string 1))))
-			     (match-string 2))))
+	(while (setq val (pop macros))
+	  (when (string-match "^\\([-a-zA-Z0-9_]+\\)[ \t]+\\(.*?[ \t]*$\\)" val)
+	    (setq p (plist-put
+		     p (intern
+			(concat ":macro-" (downcase (match-string 1 val))))
+		     (match-string 2)))))
 	p))))
 
 (defun org-export-add-options-to-plist (p options)

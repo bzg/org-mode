@@ -1,3 +1,8 @@
+2009-06-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-infile-export-plist): Get macros also from
+	#+SETUPFILE.
+
 2009-06-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-colview.el (org-columns-capture-view): Protect vertical bars
