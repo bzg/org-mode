@@ -40,7 +40,7 @@
 (declare-function org-infojs-options-inbuffer-template "org-jsinfo" ())
 (declare-function org-export-htmlize-region-for-paste "org-html" (beg end))
 (declare-function htmlize-buffer "htmlize" (&optional buffer))
-
+(autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 (defgroup org-export nil
   "Options for exporting org-listings."
   :tag "Org Export"
@@ -800,6 +800,7 @@ value of `org-export-run-in-background'."
 \[V] export as DocBook, process to PDF, and open the resulting PDF document
 
 \[x] export as XOXO
+\[g] export using Wes Hardaker's generic exporter
 
 \[i] export current file as iCalendar file
 \[I] export all agenda files as iCalendar files
@@ -817,6 +818,7 @@ value of `org-export-run-in-background'."
 	    (?H org-export-as-html-to-buffer nil)
 	    (?R org-export-region-as-html nil)
 	    (?x org-export-as-xoxo t)
+	    (?g org-export-generic t)
 	    (?D org-export-as-docbook t)
 	    (?V org-export-as-docbook-pdf-and-open t)
 	    (?l org-export-as-latex t)

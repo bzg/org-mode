@@ -1,3 +1,9 @@
+2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* README: List new file org-export-generic.el
+
+	* lisp/org-export-generic.el: New file.
+
 2009-05-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-exp-blocks.el (org-export-blocks-format-ditaa)

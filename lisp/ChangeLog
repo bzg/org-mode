@@ -1,3 +1,9 @@
+2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-generic): Autoload the generic exporter
+	function.
+	(org-export): Implement the `g' key for the generic exporter.
+
 2009-06-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (orgtbl-setup): Add a binding for `S-iso-lefttab',
