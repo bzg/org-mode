@@ -1,5 +1,8 @@
 2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-store-link): Better default description for link to
+	Org-mode headline.
+
 	* org-exp.el (org-export-generic): Autoload the generic exporter
 	function.
 	(org-export): Implement the `g' key for the generic exporter.
