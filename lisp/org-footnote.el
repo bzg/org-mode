@@ -45,6 +45,7 @@
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
 (declare-function org-end-of-subtree "org"  (&optional invisible-ok to-heading))
+(defvar org-odd-levels-only) ;; defined in org.el
 
 (defconst org-footnote-re
   (concat "[^][\n]"   ; to make sure it is not at the beginning of a line
