@@ -1,3 +1,14 @@
+2009-06-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-clock.el (org-clock-in-hook): New hook.
+	(org-clock-in): Run `org-clock-in-hook.
+	(org-clock-out-hook): New hook.
+	(org-clock-out): Run `org-clock-out-hook.
+	(org-clock-cancel-hook): New hook.
+	(org-clock-cancel): Run `org-clock-cancel-hook.
+	(org-clock-goto-hook): New hook.
+	(org-clock-goto): Run `org-clock-goto-hook.
+
 2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-store-link): Better default description for link to

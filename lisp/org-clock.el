@@ -192,6 +192,16 @@ auto     Automtically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
+(defvar org-clock-in-hook nil
+  "Hook run when starting the clock.")
+(defvar org-clock-out-hook nil
+  "Hook run when stopping the current clock.")
+
+(defvar org-clock-cancel-hook nil
+  "Hook run when cancelling the current clock.")
+(defvar org-clock-goto-hook nil
+  "Hook run when selecting the currently clocked-in entry.")
+
 ;;; The clock for measuring work time.
 
 (defvar org-mode-line-string "")
@@ -571,7 +581,8 @@ the clocking selection, associated with the letter `d'."
 	    (org-clock-update-mode-line)
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
-	    (message "Clock starts at %s - %s" ts msg-extra)))))))
+	    (message "Clock starts at %s - %s" ts msg-extra)
+	    (run-hooks 'org-click-in-hook)))))))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."
@@ -762,7 +773,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
 	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
-		   (if remove " => LINE REMOVED" "")))))))
+		   (if remove " => LINE REMOVED" ""))
+          (run-hooks 'org-clock-out-hook))))))
 
 (defun org-clock-cancel ()
   "Cancel the running clock be removing the start timestamp."
@@ -776,7 +788,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
   (force-mode-line-update)
-  (message "Clock canceled"))
+  (message "Clock canceled")
+  (run-hooks 'org-clock-cancel-hook))
 
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
@@ -802,8 +815,8 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (org-cycle-hide-drawers 'children)
     (recenter)
     (if recent
-	(message "No running clock, this is the most recently clocked task"))))
-
+	(message "No running clock, this is the most recently clocked task"))
+    (run-hooks 'org-clock-goto-hook)))
 
 (defvar org-clock-file-total-minutes nil
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
