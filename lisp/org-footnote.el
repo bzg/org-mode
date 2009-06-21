@@ -322,8 +322,18 @@ Org-mode exporters.
 When SORT-ONLY is set, only sort the footnote definitions into the
 referenced sequence."
   ;; This is based on Paul's function, but rewritten.
-  (let ((count 0) ref def idef ref-table beg beg1 marker a before
-	ins-point)
+  (let* ((limit-level
+	  (and (boundp 'org-inlinetask-min-level)
+	       org-inlinetask-min-level
+	       (1- org-inlinetask-min-level)))
+	 (nstars (and limit-level
+		      (if org-odd-levels-only
+			  (and limit-level (1- (* limit-level 2)))
+			limit-level)))
+	 (outline-regexp
+	  (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ ")))
+	 (count 0)
+	 ref def idef ref-table beg beg1 marker a before ins-point)
      (save-excursion
       ;; Now find footnote references, and extract the definitions
       (goto-char (point-min))
