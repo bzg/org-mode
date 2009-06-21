@@ -573,7 +573,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		 (make-string sp2 ?\ ) "%%%s%ds" (make-string sp1 ?\ ) "|"))
 	 (hfmt1 (concat
 		 (make-string sp2 ?-) "%s" (make-string sp1 ?-) "+"))
-	 emptystrings links dates emph narrow fmax f1 len c e)
+	 emptystrings links dates emph narrow falign falign1 fmax f1 len c e)
     (untabify beg end)
     (remove-text-properties beg end '(org-cwidth t org-dwidth t display t))
     ;; Check if we have links or dates
@@ -594,7 +594,9 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     ;; Check if we are narrowing any columns
     (goto-char beg)
     (setq narrow (and org-format-transports-properties-p
-		      (re-search-forward "<[0-9]+>" end t)))
+		      (re-search-forward "<[rl]?[0-9]+>" end t)))
+    (goto-char beg)
+    (setq falign (re-search-forward "<[rl][0-9]*>" end t))
     ;; Get the rows
     (setq lines (org-split-string
 		 (buffer-substring beg end) "\n"))
@@ -629,12 +631,14 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     (while (< (setq i (1+ i)) maxfields)   ;; Loop over all columns
       (setq column (mapcar (lambda (x) (or (nth i x) "")) fields))
       ;; Check if there is an explicit width specified
-      (when narrow
-	(setq c column fmax nil)
+      (when (or narrow falign)
+	(setq c column fmax nil falign1 nil)
 	(while c
 	  (setq e (pop c))
-	  (if (and (stringp e) (string-match "^<\\([0-9]+\\)>$" e))
-	      (setq fmax (string-to-number (match-string 1 e)) c nil)))
+	  (when (and (stringp e) (string-match "^<\\([rl]\\)?\\([0-9]+\\)?>$" e))
+	    (if (match-end 1) (setq falign1 (match-string 1 e)))
+	    (if (match-end 2)
+		(setq fmax (string-to-number (match-string 2 e)) c nil))))
 	;; Find fields that are wider than fmax, and shorten them
 	(when fmax
 	  (loop for xx in column do
@@ -654,14 +658,16 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
       ;; Get the maximum width for each column
       (push (apply 'max 1 (mapcar 'org-string-width column)) lengths)
       ;; Get the fraction of numbers, to decide about alignment of the column
-      (setq cnt 0 frac 0.0)
-      (loop for x in column do
-	    (if (equal x "")
-		nil
-	      (setq frac ( / (+ (* frac cnt)
-				(if (string-match org-table-number-regexp x) 1 0))
-			     (setq cnt (1+ cnt))))))
-      (push (>= frac org-table-number-fraction) typenums))
+      (if falign1
+	  (push (equal (downcase falign1) "r") typenums)
+	(setq cnt 0 frac 0.0)
+	(loop for x in column do
+	      (if (equal x "")
+		  nil
+		(setq frac ( / (+ (* frac cnt)
+				  (if (string-match org-table-number-regexp x) 1 0))
+			       (setq cnt (1+ cnt))))))
+	(push (>= frac org-table-number-fraction) typenums)))
     (setq lengths (nreverse lengths) typenums (nreverse typenums))
 
     ;; Store the alignment of this table, for later editing of single fields

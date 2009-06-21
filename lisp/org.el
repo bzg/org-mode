@@ -4522,6 +4522,7 @@ between words."
 	   '("^[ \t]*|\\(?:.*?|\\)? *\\(:?=[^|\n]*\\)" (1 'org-formula t))
 	   '("^[ \t]*| *\\([#*]\\) *|" (1 'org-formula t))
 	   '("^[ \t]*|\\( *\\([$!_^/]\\) *|.*\\)|" (1 'org-formula t))
+	   '("| *\\(<[lr]?[0-9]*>\\)" (1 'org-formula t))
 	   ;; Drawers
 	   (list org-drawer-regexp '(0 'org-special-keyword t))
 	   (list "^[ \t]*:END:" '(0 'org-special-keyword t))
@@ -4529,8 +4530,6 @@ between words."
 	   (list org-property-re
 		 '(1 'org-special-keyword t)
 		 '(3 'org-property-value t))
-	   (if org-format-transports-properties-p
-	       '("| *\\(<[0-9]+>\\) *" (1 'org-formula t)))
 	   ;; Links
 	   (if (memq 'tag lk) '(org-activate-tags (1 'org-tag prepend)))
 	   (if (memq 'angle lk) '(org-activate-angle-links (0 'org-link t)))

@@ -1,5 +1,15 @@
 2009-06-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-font-lock-defaults): Adapt formatting to capture
+	new alignment strings.
+
+	* org-table.el (orgtbl-self-insert-command): Add yas/expand to
+	command list.
+	(org-table-align): Check for forced align type.
+
+	* org.el (org-self-insert-command): Add yas/expand to command
+	list.
+
 	* org-clock.el (org-clock-in-hook): New hook.
 	(org-clock-in): Run `org-clock-in-hook.
 	(org-clock-out-hook): New hook.

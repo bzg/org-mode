@@ -1880,11 +1880,15 @@ it off with
 @noindent Then the only table command that still works is
 @kbd{C-c C-c} to do a manual re-align.
 
-@node Narrow columns, Column groups, Built-in table editor, Tables
-@section Narrow columns
+@node Column width and aligment, Column groups, Built-in table editor, Tables
+@section Column width and aligment
 @cindex narrow columns in tables
+@cindex alignment in tables
 
-The width of columns is automatically determined by the table editor.
+The width of columns is automatically determined by the table editor.  And
+also the alignment of a column is determined automatically from the fraction
+of number-like versus non-number fields in the column.
+
 Sometimes a single field or a few fields need to carry more text,
 leading to inconveniently wide columns.  To limit@footnote{This feature
 does not work on XEmacs.} the width of a column, one field anywhere in
@@ -1926,6 +1930,11 @@ on a per-file basis with:
 #+STARTUP: align
 #+STARTUP: noalign
 @end example
+
+If you would like to overrule the automatic aligment of number-rich columns
+to the right and of string-rich column to the left, you and use @samp{<r>} or
+@samp{<l>} in a similar fashion.  You may also combine alignment and field
+width like this: @samp{<l10>}.
 
 @node Column groups, Orgtbl mode, Narrow columns, Tables
 @section Column groups
