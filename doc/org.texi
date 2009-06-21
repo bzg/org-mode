@@ -149,7 +149,7 @@ Archiving
 Tables
 
 * Built-in table editor::       Simple tables
-* Narrow columns::              Stop wasting space in tables
+* Column width and alignment::  Overrule the automatic settings
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities
@@ -255,7 +255,7 @@ Capture
 * Remember::                    Capture new tasks/ideas with little interruption
 * Attachments::                 Add files to tasks.
 * RSS Feeds::                   Getting input from RSS feeds
-* Protocols::                   External (e.g. Browser) access to Emacs and Org
+* Protocols::                   External (@eg Browser) access to Emacs and Org
 
 Remember
 
@@ -1634,14 +1634,14 @@ calculator).
 
 @menu
 * Built-in table editor::       Simple tables
-* Narrow columns::              Stop wasting space in tables
+* Column width and alignment::  Overrule the automatic settings
 * Column groups::               Grouping to trigger vertical lines
 * Orgtbl mode::                 The table editor as minor mode
 * The spreadsheet::             The table editor has spreadsheet capabilities
 * Org-Plot::                    Plotting from org tables
 @end menu
 
-@node Built-in table editor, Narrow columns, Tables, Tables
+@node Built-in table editor, Column width and alignment, Tables, Tables
 @section The built-in table editor
 @cindex table editor, built-in
 
@@ -1838,9 +1838,9 @@ increment.  This key is also used by shift-selection and related modes
 @tsubheading{Miscellaneous}
 @kindex C-c `
 @item C-c `
-Edit the current field in a separate window.  This is useful for fields
-that are not fully visible (@pxref{Narrow columns}).  When called with a
-@kbd{C-u} prefix, just make the full field visible, so that it can be
+Edit the current field in a separate window.  This is useful for fields that
+are not fully visible (@pxref{Column width and alignment}).  When called with
+a @kbd{C-u} prefix, just make the full field visible, so that it can be
 edited in place.
 @c
 @item M-x org-table-import
@@ -1880,8 +1880,8 @@ it off with
 @noindent Then the only table command that still works is
 @kbd{C-c C-c} to do a manual re-align.
 
-@node Column width and aligment, Column groups, Built-in table editor, Tables
-@section Column width and aligment
+@node Column width and alignment, Column groups, Built-in table editor, Tables
+@section Column width and alignment
 @cindex narrow columns in tables
 @cindex alignment in tables
 
@@ -1936,7 +1936,7 @@ to the right and of string-rich column to the left, you and use @samp{<r>} or
 @samp{<l>} in a similar fashion.  You may also combine alignment and field
 width like this: @samp{<l10>}.
 
-@node Column groups, Orgtbl mode, Narrow columns, Tables
+@node Column groups, Orgtbl mode, Column width and alignment, Tables
 @section Column groups
 @cindex grouping columns in tables
 
