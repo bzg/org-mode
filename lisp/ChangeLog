@@ -1,3 +1,9 @@
+2009-06-22  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-clock-out): Update line after clocking
+	out.
+	(org-agenda-highlight-todo): Fix bug with highlighting.
+
 2009-06-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-font-lock-defaults): Adapt formatting to capture

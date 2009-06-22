@@ -4432,7 +4432,7 @@ HH:MM."
 	  (setq re (get-text-property (point) 'org-todo-regexp))
 	  (goto-char (+ (point) (or (get-text-property (point) 'prefix-length) 0)))
 	  (when (looking-at (concat "[ \t]*\\.*\\(" re "\\) +"))
-	    (add-text-properties (match-beginning 0) (match-end 0)
+	    (add-text-properties (match-beginning 0) (match-end 1)
 				 (list 'face (org-get-todo-face 1)))
 	    (let ((s (buffer-substring (match-beginning 1) (match-end 1))))
 	      (delete-region (match-beginning 1) (1- (match-end 0)))
@@ -6024,15 +6024,26 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	  (org-cycle-hide-drawers 'children)
 	  (org-clock-in arg)
 	  (setq newhead (org-get-heading)))
-	(org-agenda-change-all-lines newhead hdmarker t)))))
+	(org-agenda-change-all-lines newhead hdmarker)))))
 
 (defun org-agenda-clock-out (&optional arg)
   "Stop the currently running clock."
   (interactive "P")
   (unless (marker-buffer org-clock-marker)
     (error "No running clock"))
-  (org-with-remote-undo (marker-buffer org-clock-marker)
-    (org-clock-out)))
+  (let ((marker (make-marker)) newhead)
+    (org-with-remote-undo (marker-buffer org-clock-marker)
+      (with-current-buffer (marker-buffer org-clock-marker)
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char org-clock-marker)
+	    (org-back-to-heading t)
+	    (move-marker marker (point))
+	    (org-clock-out)
+	    (setq newhead (org-get-heading))))))
+    (org-agenda-change-all-lines newhead marker)
+    (move-marker marker nil)))
 
 (defun org-agenda-clock-cancel (&optional arg)
   "Cancel the currently running clock."
