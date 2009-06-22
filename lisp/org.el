@@ -8384,7 +8384,7 @@ on the system \"/user@host:\"."
 Note that this is still *before* the stuff will be removed from
 the *old* location.")
 
-(defun org-refile (&optional goto default-buffer)
+(defun org-refile (&optional goto default-buffer rfloc)
   "Move the entry at point to another heading.
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.  This list is created before each use
@@ -8404,6 +8404,8 @@ not actually move anything.
 With a double prefix `C-u C-u', go to the location where the last refiling
 operation has put the subtree.
 
+RFLOC can be a refile location obtained in a different way.
+
 See also `org-refile-use-outline-path' and `org-completion-use-ido'"
   (interactive "P")
   (let* ((cbuf (current-buffer))
@@ -8419,9 +8421,10 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	    (error "The region is not a (sequence of) subtree(s)")))
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
-      (when (setq it (org-refile-get-location
-		      (if goto "Goto: " "Refile to: ") default-buffer
-		      org-refile-allow-creating-parent-nodes))
+      (when (setq it (or rfloc
+			 (org-refile-get-location
+			  (if goto "Goto: " "Refile to: ") default-buffer
+			  org-refile-allow-creating-parent-nodes)))
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
@@ -9141,11 +9144,13 @@ For calling through lisp, arg is also interpreted in the following way:
 				(not (member this org-done-keywords))))
 	  (and logging (org-local-logging logging))
 	  (when (and (or org-todo-log-states org-log-done)
-		     (not org-inhibit-logging)
+		     (not (eq org-inhibit-logging t))
 		     (not (memq arg '(nextset previousset))))
 	    ;; we need to look at recording a time and note
 	    (setq dolog (or (nth 1 (assoc state org-todo-log-states))
 			    (nth 2 (assoc this org-todo-log-states))))
+	    (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
+		(setq dolog 'time))
 	    (when (and state
 		       (member state org-not-done-keywords)
 		       (not (member this org-not-done-keywords)))

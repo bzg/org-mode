@@ -1,3 +1,15 @@
+2009-06-24  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-mode): Reset list of marks.
+	(org-agenda-mode-map): Define new keys for refile and bulk action.
+	(org-agenda-menu): Add menu itesm for refile and bulk action.
+	(org-agenda-refile): New function.
+	(org-agenda-set-tags): Optional arguments TAG and ONOFF.
+	(org-agenda-marked-entries): New variable.
+	(org-agenda-bulk-select, org-agenda-remove-bulk-action-overlays)
+	(org-agenda-remove-all-bulk-action-marks)
+	(org-agenda-bulk-action): New functions/commands.
+
 2009-06-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-get-file-contents): Protect org-like lines in

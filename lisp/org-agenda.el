@@ -1246,7 +1246,8 @@ The following commands are available:
   (interactive)
   (kill-all-local-variables)
   (setq org-agenda-undo-list nil
-	org-agenda-pending-undo-list nil)
+	org-agenda-pending-undo-list nil
+	org-agenda-marked-entries nil)
   (setq major-mode 'org-agenda-mode)
   ;; Keep global-font-lock-mode from turning on font-lock-mode
   (org-set-local 'font-lock-global-modes (list 'not major-mode))
@@ -1292,6 +1293,9 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
+(org-defkey org-agenda-mode-map "s"        'org-agenda-bulk-select)
+(org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
@@ -1342,7 +1346,6 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
 (org-defkey org-agenda-mode-map "\C-x\C-w" 'org-write-agenda)
-(org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "T" 'org-agenda-show-tags)
@@ -1407,11 +1410,17 @@ The following commands are available:
     ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
     "--"
     ["Cycle TODO" org-agenda-todo t]
-    ("Archive"
+    ("Archive and Refile"
      ["Toggle ARCHIVE tag" org-agenda-toggle-archive-tag t]
      ["Move to archive sibling" org-agenda-archive-to-archive-sibling t]
-     ["Archive subtree" org-agenda-archive t])
+     ["Archive subtree" org-agenda-archive t]
+     ["Refile" org-agenda-refile t])
     ["Delete subtree" org-agenda-kill t]
+    ("Bulk action"
+     ["Toggle mark entry" org-agenda-bulk-select t]
+     ["Act on all marked" org-agenda-bulk-action t]
+     ["Unmark all entries" org-agenda-remove-all-bulk-action-marks :active t :keys "C-u s"])
+    "--"
     ["Add note" org-agenda-add-note t]
     "--"
     ["Goto Today" org-agenda-goto-today (org-agenda-check-type nil 'agenda 'timeline)]
@@ -2826,9 +2835,9 @@ given in `org-agenda-start-on-weekday'."
 				 'org-agenda-date))
 	    (put-text-property s (1- (point)) 'org-date-line t)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
- 	    (when todayp
- 	      (put-text-property s (1- (point)) 'org-today t)
- 	      (put-text-property s (1- (point)) 'face 'org-agenda-date-today))
+	    (when todayp
+	      (put-text-property s (1- (point)) 'org-today t)
+	      (put-text-property s (1- (point)) 'face 'org-agenda-date-today))
 	    (if rtnall (insert
 			(org-finalize-agenda-entries
 			 (org-agenda-add-time-grid-maybe
@@ -5361,6 +5370,28 @@ If this information is not given, the function uses the tree at point."
 	      (delete-region (point-at-bol) (1+ (point-at-eol)))))
 	  (beginning-of-line 0))))))
 
+(defun org-agenda-refile (&optional goto rfloc)
+  "Refile the item at point."
+  (interactive "P")
+  (let* ((marker (or (get-text-property (point) 'org-hd-marker)
+		     (org-agenda-error)))
+	 (buffer (marker-buffer marker))
+	 (pos (marker-position marker))
+	 (rfloc (or rfloc
+		    (org-refile-get-location
+		     (if goto "Goto: " "Refile to: ") buffer
+		     org-refile-allow-creating-parent-nodes))))
+    (with-current-buffer buffer
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char marker)
+	  (org-remove-subtree-entries-from-agenda)
+	  (org-refile goto buffer rfloc))))))
+
+
+
+
 (defun org-agenda-open-link ()
   "Follow the link in the current line, if any."
   (interactive)
@@ -5721,7 +5752,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
       (beginning-of-line 1))))
 
 ;; FIXME: should fix the tags property of the agenda line.
-(defun org-agenda-set-tags ()
+(defun org-agenda-set-tags (&optional tag onoff)
   "Set tags for the current headline."
   (interactive)
   (org-agenda-check-no-diary)
@@ -5744,7 +5775,9 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	    (and (outline-next-heading)
 		 (org-flag-heading nil)))   ; show the next heading
 	  (goto-char pos)
-	  (call-interactively 'org-set-tags)
+	  (if tag
+	      (org-toggle-tag tag onoff)
+	    (call-interactively 'org-set-tags))
 	  (end-of-line 1)
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)
@@ -6196,6 +6229,119 @@ This is a command that has to be installed in `calendar-mode-map'."
     (with-output-to-temp-buffer "*Dates*"
       (princ s))
     (org-fit-window-to-buffer (get-buffer-window "*Dates*"))))
+
+;;; Bulk commands
+
+(defvar org-agenda-marked-entries nil
+  "List of markers that refer to marked entries in the agenda.")
+
+(defun org-agenda-bulk-select (&optional remove-all)
+  "Toggle marking the entry at point for future bulk action.
+With `C-u' prefix arg, run an action for all marked entries.
+With double `C-u C-u' prefix arg, remove all marks."
+  (interactive "P")
+  (if remove-all
+      (org-agenda-remove-all-bulk-action-marks)
+    (org-agenda-check-no-diary)
+    (let* ((m (get-text-property (point) 'org-hd-marker))
+	   ov)
+      (if (eq (get-char-property (point-at-bol) 'type)
+	      'org-marked-entry-overlay)
+	  (progn
+	    (org-agenda-remove-bulk-action-overlays
+	     (point-at-bol) (+ 2 (point-at-bol)))
+	    (setq org-agenda-marked-entries
+		  (delete (get-text-property (point-at-bol) 'org-hd-marker)
+			  org-agenda-marked-entries)))
+	(unless m (error "Nothing to mark at point"))
+	(push m org-agenda-marked-entries)
+	(setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
+	(org-overlay-display ov ">>"
+			     (org-get-todo-face "TODO")
+			     'evaporate)
+	(org-overlay-put ov 'type 'org-marked-entry-overlay)
+	(beginning-of-line 2)))))
+
+(defun org-agenda-remove-bulk-action-overlays (&optional beg end)
+  "Remove the mark overlays between BEG and END in the agenda buffer.
+BEG and END default to the buffer limits.
+
+This only removes the overlays, it does not remove the markers
+from the list in `org-agenda-marked-entries'."
+  (interactive)
+  (mapc (lambda (ov)
+	  (and (eq (org-overlay-get ov 'type) 'org-marked-entry-overlay)
+	       (org-delete-overlay ov)))
+	(org-overlays-in (or beg (point-min)) (or end (point-max)))))
+
+(defun org-agenda-remove-all-bulk-action-marks ()
+  "Remove all marks in the agenda buffer.
+This will remove the markers, and the overlays."
+  (interactive)
+  (mapc (lambda (m) (move-marker m nil)) org-agenda-marked-entries)
+  (setq org-agenda-marked-entries nil)
+  (org-agenda-remove-bulk-action-overlays (point-min) (point-max)))
+
+(defun org-agenda-bulk-action ()
+  "Execute an remote-editing action on all marked entries."
+  (interactive)
+  (unless org-agenda-marked-entries
+    (error "No entries are marked"))
+  (message "Action: [r]efile [$]archive [A]rch-to-sib [t]odo [+]tag [-]tag")
+  (let* ((action (read-char-exclusive))
+	 (entries (reverse org-agenda-marked-entries))
+	 cmd rfloc state e (cnt 0))
+    (cond
+     ((equal action ?$)
+      (setq cmd '(org-agenda-archive)))
+     
+     ((equal action ?A)
+      (setq cmd '(org-agenda-archive-to-archive-sibling)))
+     
+     ((member action '(?r ?w))
+      (setq rfloc (org-refile-get-location
+		   "Refile to: "
+		   (marker-buffer (car org-agenda-marked-entries))
+		   org-refile-allow-creating-parent-nodes))
+      (setcar (nthcdr 3 rfloc)
+	      (move-marker (make-marker) (nth 3 rfloc)
+			   (or (get-file-buffer (nth 1 rfloc))
+			       (find-buffer-visiting (nth 1 rfloc))
+			       (error "This should not happen"))))
+      
+      (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc))))
+     
+     ((equal action ?t)
+      (setq state (org-ido-completing-read
+		   "Todo state: "
+		   (with-current-buffer (marker-buffer (car entries))
+		     (mapcar 'list org-todo-keywords-1))))
+      (setq cmd `(let ((org-inhibit-blocking t)
+		       (org-inhibit-logging 'note))
+		   (org-agenda-todo ,state))))
+     
+     ((memq action '(?- ?+))
+      (setq tag (org-ido-completing-read
+		 (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
+		 (with-current-buffer (marker-buffer (car entries))
+		   (delq nil
+			 (mapcar (lambda (x)
+				   (if (stringp (car x)) x)) org-tag-alist)))))
+      (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
+     
+     (t (error "Invalid bulk action")))
+    
+    ;; Now loop over all markers and apply cmd
+    (while (setq e (pop entries))
+      (goto-char
+       (or (text-property-any (point-min) (point-max) 'org-hd-marker e)
+	   (error "Cannot find entry for marker %s" e)))
+      (eval cmd)
+      (setq org-agenda-marked-entries (delete e org-agenda-marked-entries))
+      (setq cnt (1+ cnt)))
+    (setq org-agenda-marked-entries nil)
+    (org-agenda-remove-all-bulk-action-marks)
+    (message "Acted on %d entries" cnt)))
 
 ;;; Appointment reminders
 

@@ -7075,6 +7075,10 @@ to it in the original Org file.  If the text to be deleted remotely
 is longer than one line, the kill needs to be confirmed by the user.  See
 variable @code{org-agenda-confirm-kill}.
 @c
+@kindex C-c C-w
+@item C-c C-w
+Refile the entry at point.
+@c
 @kindex a
 @item a
 Toggle the ARCHIVE tag for the current headline.
@@ -7199,6 +7203,31 @@ Cancel the currently running clock.
 @kindex J
 @item J
 Jump to the running clock in another window.
+
+@tsubheading{Bulk remote editing selected entries}
+@cindex remote editing, bulk, from agenda
+
+@kindex s
+@item s
+Mark the entry at point for bulk editing.  If the entry is already marked,
+remove the mark from it.  With double prefix, remove all marks.
+
+@kindex B
+@item B
+Bulk action: Act on all marked entries in the agenda.  This will prompt for
+another key to select the action to be applied:
+@example
+r  @r{Prompt for a single refile target and move all entries.  The entries}
+   @r{will no longer be in the agenda, refresh (@kbd{g}) to bring them back.}
+$  @r{Archive all selected entries.}
+A  @r{Archive entries by moving them to their respective archive siblings.}
+t  @r{Change TODO state.  This prompts for a single TODO keyword and}
+   @r{changes the state of all selected entries, bypasing blocking and}
+   @r{suppressig logging notes (but not time stamps).}
++  @r{Add a tag to all selected entries.}
+-  @r{Remove a tag from all selected entries.}
+@end example
+
 
 @tsubheading{Calendar commands}
 @cindex calendar commands, from agenda
