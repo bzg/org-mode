@@ -722,7 +722,7 @@ modified) list.")
 	    (setq p (plist-put
 		     p (intern
 			(concat ":macro-" (downcase (match-string 1 val))))
-		     (match-string 2)))))
+		     (match-string 2 val)))))
 	p))))
 
 (defun org-export-add-options-to-plist (p options)

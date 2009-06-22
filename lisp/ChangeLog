@@ -1,5 +1,8 @@
 2009-06-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-infile-export-plist): Fix bug in macro
+	processing.
+
 	* org-agenda.el (org-agenda-clock-out): Update line after clocking
 	out.
 	(org-agenda-highlight-todo): Fix bug with highlighting.
