@@ -378,8 +378,7 @@ END:VEVENT\n"
 		     (nth 0 rec) (nth 0 key) (nth 1 key)
 		     (nth 1 rec) 
 		     (concat (capitalize categ) " " (nth 1 rec))
-		     categ))))
-  (maphash 'org-bbdb-format-vevent org-bbdb-anniv-hash))
+		     categ)))))
 
 (provide 'org-bbdb)
 
