@@ -1,6 +1,6 @@
 ;;; org-elisp-symbol.el --- Org links to emacs-lisp symbols
 ;;
-;; Copyright 2007 Bastien Guerry
+;; Copyright 2007, 2008, 2009 Bastien Guerry
 ;;
 ;; Author: bzg AT altern DOT org
 ;; Version: 0.2
@@ -25,7 +25,7 @@
 ;;
 ;; Org-mode already lets you store/insert links to emacs-lisp files,
 ;; just like any other file.  This package lets you precisely link to
-;; any emacs-lisp symbol and access uesful information about the symbol.
+;; any emacs-lisp symbol and access useful information about the symbol.
 ;;
 ;; Here is the list of available properties when linking from a elisp-symbol:
 ;;
