@@ -2099,6 +2099,12 @@ is a string, prepend it to the first line instead of PREFIX."
 	(insert (or prefix1 prefix))
 	(setq prefix1 nil)
 	(beginning-of-line 2)))
+    (buffer-string)
+    (goto-char (point-min))
+    (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
+      (goto-char (match-beginning 0))
+      (insert ",")
+      (end-of-line 1))
     (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)
@@ -2230,7 +2236,7 @@ INDENT was the original indentation of the block."
 			    (set-buffer-modified-p nil)
 			    (org-export-htmlize-region-for-paste
 			     (point-min) (point-max))))
-		    (if (string-match "<pre\\([^>]*\\)>\n?" rtn)
+		    (if (string-match "<pre\\([^>]*\\)>\n*" rtn)
 			(setq rtn (replace-match
 				   (format "<pre class=\"src src-%s\">" lang)
 				   t t rtn))))

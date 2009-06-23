@@ -1,5 +1,9 @@
 2009-06-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-get-file-contents): Protect org-like lines in
+	included files.
+	(org-export-format-source-code-or-example): Remove newlines.
+
 	* org-latex.el (org-export-latex-links): Check for no-description
 	marking.
 
