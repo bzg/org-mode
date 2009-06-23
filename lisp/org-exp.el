@@ -1800,7 +1800,8 @@ When it is nil, all comments will be removed."
 (defun org-export-normalize-links ()
   "Convert all links to bracket links, and expand link abbreviations."
   (let ((re-plain-link (concat "\\([^[<]\\)" org-plain-link-re))
-	(re-angle-link (concat "\\([^[]\\)" org-angle-link-re)))
+	(re-angle-link (concat "\\([^[]\\)" org-angle-link-re))
+	nodesc)
     (goto-char (point-min))
     (while (re-search-forward re-plain-link nil t)
       (goto-char (1- (match-end 0)))
@@ -1821,13 +1822,14 @@ When it is nil, all comments will be removed."
     (goto-char (point-min))
     (while (re-search-forward org-bracket-link-regexp nil t)
       (goto-char (1- (match-end 0)))
+      (setq nodesc (not (match-end 3)))
       (org-if-unprotected
        (let* ((xx (save-match-data
 		    (org-translate-link
 		     (org-link-expand-abbrev (match-string 1)))))
 	      (s (concat
 		  "[[" (org-add-props (copy-sequence xx)
-			   nil 'org-protected t)
+			   nil 'org-protected t 'org-no-description nodesc)
 		  "]"
 		  (if (match-end 3)
 		      (match-string 2)

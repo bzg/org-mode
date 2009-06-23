@@ -1450,7 +1450,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 			      (expand-file-name
 			       raw-path)
 			      org-export-latex-inline-image-extensions)
-			     (equal desc full-raw-path))
+			     (or (get-text-property 0 'org-no-description
+						    raw-path)
+				 (equal desc full-raw-path)))
 			(setq imgp t)
 		      (progn (when (string-match "\\(.+\\)::.+" raw-path)
 			       (setq raw-path (match-string 1 raw-path)))

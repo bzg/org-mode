@@ -1,7 +1,11 @@
 2009-06-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-links): Check for no-description
+	marking.
+
 	* org-exp.el (org-export-preprocess-apply-macros): Switch macro
 	argument separator back to comma.
+	(org-export-normalize-links): Mark links without description.
 
 2009-06-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
