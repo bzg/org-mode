@@ -2021,7 +2021,7 @@ TYPE must be a string, any of:
 				     (intern (concat ":" key)))))
 	(save-match-data
 	  (when args
-	    (setq args (org-split-string args ";") args2 nil)
+	    (setq args (org-split-string args ",[ \t]*") args2 nil)
 	    (while args
 	      (while (string-match "\\\\\\'" (car args))
 		;; repair bad splits

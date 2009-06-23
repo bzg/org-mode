@@ -1,3 +1,8 @@
+2009-06-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-preprocess-apply-macros): Switch macro
+	argument separator back to comma.
+
 2009-06-22  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-infile-export-plist): Fix bug in macro
