@@ -11573,6 +11573,8 @@ and being able to quickly restrict the agenda to a subtree.
 @item
 @i{Todd Neal} provided patches for links to Info files and Elisp forms.
 @item
+@i{Greg Newman} refreshed the unicorn logo into its current form.
+@item
 @i{Tim O'Callaghan} suggested in-file links, search options for general
 file links, and TAGS.
 @item
