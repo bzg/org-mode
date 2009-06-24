@@ -21,13 +21,24 @@ system.
   <img src="http://orgmode.org/img/tasks.png" style="border:1px solid
   black; width:400px" alt="http://orgmode.org/img/tasks.png" />
   </td>
-  <td><a href="http://sourceforge.net/community/cca09/vote"><h3 align=center>Vote for
-  Org-mode</h3></a><span style="font-size: 80%;">We are finalists in the
+<td>
+
+<h3 align=center>Vote for
+  Org-mode</h3><span style="font-size: 80%;">Org-mode is a finalist in the
   2009 Sourceforge Community Choice Awards in the final category <i>Most
   Likely to Change the Way you do Everything</i>.  This is a fantastic
-      opportunity to make more people aware of this package.  Please go <a href="http://sourceforge.net/community/cca09/vote">vote for Org-mode</a></td>
+  opportunity to make more people aware of this package.  Please
+  <a href="http://sf.net/awards/cca/badge_img.php?f=401">go vote for Org-mode.</a>
+<a href="http://sf.net/community/cca09/vote/?f=401"></br>
+  <img border=0 src="http://sf.net/awards/cca/badge_img.php?f=401" style="vertical-align:top;">
+</a>
+
+</td>
   </tr>
   <tr>
+
+
+
   <td style="vertical-align:bottom;">
   <div style="float:bottom; border:0px solid black; padding:3px
   vertical-align:bottom;">
@@ -52,6 +63,12 @@ system.
   </form>
   </div>
   </td>
+
+  <td>
+
+</td> 
+
+
   </tr>
   </table>
 #+end_html
