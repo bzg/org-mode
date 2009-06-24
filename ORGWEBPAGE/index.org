@@ -3,7 +3,6 @@
 #+LANGUAGE:  en
 #+EMAIL:     carsten at orgmode dot org
 #+OPTIONS:   H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t *:t TeX:t author:nil <:t LaTeX:t
-#+STYLE: <link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
 #+HTML:  <BASE href="http://orgmode.org/index.html">
 
