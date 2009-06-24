@@ -12,9 +12,17 @@
 	line-height:1.2em;
   }
 
+  .logo-link {
+        position: fixed;
+        top: 0px;
+        left: 0px;
+        width: 190px;
+        height: 190px;
+  }
+ 
   h1 {font-size: 14pt;}
 
-#table-of-contents {
+  #table-of-contents {
 	font-size: 85%;
 	position: fixed;
 	display: block;
@@ -25,7 +33,7 @@
 	max-height:55%;
 	line-height: 1.4em;
 	overflow:auto;
-}
+  }
 
   #table-of-contents h2 {
 	display:none;
