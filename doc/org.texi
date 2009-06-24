@@ -1931,7 +1931,7 @@ on a per-file basis with:
 #+STARTUP: noalign
 @end example
 
-If you would like to overrule the automatic aligment of number-rich columns
+If you would like to overrule the automatic alignment of number-rich columns
 to the right and of string-rich column to the left, you and use @samp{<r>} or
 @samp{<l>} in a similar fashion.  You may also combine alignment and field
 width like this: @samp{<l10>}.
@@ -6550,7 +6550,7 @@ beware that this can slow down searches considerably.  See @ref{Property
 inheritance}, for details.
 
 For backward compatibility, and also for typing speed, there is also a
-different way to test TODO states in a search.  For this, terminalte the
+different way to test TODO states in a search.  For this, terminate the
 tags/property part of the search string (which may include several terms
 connected with @samp{|}) with a @samp{/} and then specify a Boolean
 expression just for TODO keywords.  The syntax is then similar to that for
@@ -7222,8 +7222,8 @@ r  @r{Prompt for a single refile target and move all entries.  The entries}
 $  @r{Archive all selected entries.}
 A  @r{Archive entries by moving them to their respective archive siblings.}
 t  @r{Change TODO state.  This prompts for a single TODO keyword and}
-   @r{changes the state of all selected entries, bypasing blocking and}
-   @r{suppressig logging notes (but not time stamps).}
+   @r{changes the state of all selected entries, bypassing blocking and}
+   @r{suppressing logging notes (but not time stamps).}
 +  @r{Add a tag to all selected entries.}
 -  @r{Remove a tag from all selected entries.}
 @end example
