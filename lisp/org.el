@@ -7068,7 +7068,7 @@ For file links, arg negates `org-context-in-file-links'."
 	  desc (or desc cpltxt))
     (if (equal desc "NONE") (setq desc nil))
 
-    (if (and (interactive-p) link)
+    (if (and (or (interactive-p) executing-kbd-macro) link)
 	(progn
 	  (setq org-stored-links
 		(cons (list link desc) org-stored-links))
