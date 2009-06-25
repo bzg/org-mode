@@ -1236,6 +1236,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
   "Hook for org-agenda-mode, run after the mode is turned on.")
 (defvar org-agenda-type nil)
 (defvar org-agenda-force-single-file nil)
+(defvar org-agenda-marked-entries) ;; Defined further down in this file
 
 (defun org-agenda-mode ()
   "Mode for time-sorted view on action items in Org-mode files.
@@ -6290,7 +6291,7 @@ This will remove the markers, and the overlays."
   (message "Action: [r]efile [$]archive [A]rch-to-sib [t]odo [+]tag [-]tag")
   (let* ((action (read-char-exclusive))
 	 (entries (reverse org-agenda-marked-entries))
-	 cmd rfloc state e (cnt 0))
+	 cmd rfloc state e tag (cnt 0))
     (cond
      ((equal action ?$)
       (setq cmd '(org-agenda-archive)))
