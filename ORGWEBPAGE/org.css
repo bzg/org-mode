@@ -5,19 +5,13 @@
 	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 11pt;
 	text-align: left;
-	background-image: url(img/org-mode-unicorn.png);
-	background-attachment: fixed;
-	background-repeat: no-repeat;
-	background-position: 30px 10px;
 	line-height:1.2em;
   }
 
   .logo-link {
         position: fixed;
-        top: 0px;
-        left: 0px;
-        width: 190px;
-        height: 190px;
+        top: 10px;
+        left: 30px;
   }
  
   h1 {font-size: 14pt;}
