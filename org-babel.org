@@ -3,6 +3,11 @@
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: oddeven hideblocks
 
+Through Org-Babel Org-Mode can communicate with programming languages.
+Code contained in source-code blocks can be evaluated passing and
+receiving data to and from org-mode files, tables, other source-code
+blocks, and interactive comint buffers.
+
 * Introduction
 
 Org-Babel enables *communication* between programming languages and
