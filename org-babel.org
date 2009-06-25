@@ -8,6 +8,20 @@ Code contained in source-code blocks can be evaluated passing and
 receiving data to and from org-mode files, tables, other source-code
 blocks, and interactive comint buffers.
 
+In this document:
+- The [[* Introduction][Introduction]] :: provides a brief overview of the design and use
+     of Org-Babel including tutorials and examples.
+- The [[* Tasks][Tasks]] :: section contains current and past tasks roughly ordered
+     by TODO state, then importance or date-completed.  This would be
+     a good place to suggest ideas for development.
+- The [[* Bugs][Bugs]] :: section contains bug reports.
+- The [[* Tests][Tests]] :: section consists of a large table which can be
+     evaluated to run Org-Babel's functional test suite.  This
+     provides a good overview of the current functionality with
+     pointers to example source blocks.
+- The [[* Sandbox][Sandbox]] :: demonstrates much of the early/basic functionality
+     through commented source-code blocks.
+
 * Introduction
 
 Org-Babel enables *communication* between programming languages and
@@ -29,9 +43,7 @@ and outputs.
 *** simple execution
 with both scalar, file, and table output
 
-
 *** reading information from tables
-
 
 *** reading information from other source blocks (disk usage in your home directory)
 
@@ -66,7 +78,6 @@ cd ~ && du -sc * |grep -v total
 #+begin_src R :var dirs = directories
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
-
 
 *** operations in/on tables
 
@@ -117,6 +128,9 @@ Literate Programming.
 org-babels own functional tests are contained in a large org-mode
 table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
+
+*** Emacs initialization files stored in Org-Mode buffers
+Once org-babel-tangle is completed this could be a very compelling use case.
 
 
 ** features
