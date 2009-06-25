@@ -4,9 +4,10 @@
 #+STARTUP: oddeven hideblocks
 
 Through Org-Babel Org-Mode can communicate with programming languages.
-Code contained in source-code blocks can be evaluated passing and
-receiving data to and from org-mode files, tables, other source-code
-blocks, and interactive comint buffers.
+Code contained in source-code blocks can be evaluated and data can
+pass seamlessly between different programming languages, Org-Mode
+constructs (tables, file links, example text) and interactive comint
+buffers.
 
 In this document:
 - The [[* Introduction][Introduction]] :: provides a brief overview of the design and use
@@ -22,6 +23,10 @@ In this document:
 - The [[* Sandbox][Sandbox]] :: demonstrates much of the early/basic functionality
      through commented source-code blocks.
 
+Also see the [[file:library-of-babel.org][Library of Babel]] an extensible collection of ready-made
+and easily-shortcut-callable source-code blocks for handling common
+tasks.
+
 * Introduction
 
 Org-Babel enables *communication* between programming languages and
@@ -29,7 +34,8 @@ between people.
 
 Org-Babel provides:
 - communication between programs :: Data passes seamlessly between
-     different programming languages, text, and tables.
+     different programming languages, Org-Mode constructs (tables,
+     file links, example text) and interactive comint buffers.
 - communication between people :: Data and calculations are embedded
      in the same document as notes explanations and reports.
 
