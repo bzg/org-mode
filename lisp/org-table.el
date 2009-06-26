@@ -3548,7 +3548,7 @@ to execute outside of tables."
 
 (defun orgtbl-ctrl-c-ctrl-c (arg)
   "If the cursor is inside a table, realign the table.
-It it is a table to be sent away to a receiver, do it.
+If it is a table to be sent away to a receiver, do it.
 With prefix arg, also recompute table."
   (interactive "P")
   (let ((pos (point)) action)

@@ -5163,7 +5163,8 @@ With a double `C-u' prefix arg, show *only* log items, nothing else."
 	   (if org-agenda-show-log "on" "off")))
 
 (defun org-agenda-archives-mode (&optional with-files)
-  "Toggle log mode in an agenda buffer."
+  "Toggle inclusion of items in trees marked with :ARCHIVE:.
+When called with a prefix argument, include all archive files as well."
   (interactive "P")
   (setq org-agenda-archives-mode
 	(if with-files t (if org-agenda-archives-mode nil 'trees)))
