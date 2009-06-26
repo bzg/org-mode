@@ -691,3 +691,10 @@
 {
   margin-top:10px;
 }
+
+* html .logo-link
+{
+    position: absolute;
+    top: 10px;
+    left: 30px;
+}
