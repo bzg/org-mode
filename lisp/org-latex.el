@@ -645,9 +645,15 @@ when PUB-DIR is set, use this as the publishing directory."
       (while cmds
 	(setq cmd (pop cmds))
 	(while (string-match "%b" cmd)
-	  (setq cmd (replace-match (shell-quote-argument base) t t cmd)))
+	  (setq cmd (replace-match 
+		     (save-match-data
+		       (shell-quote-argument base))
+		     t t cmd)))
 	(while (string-match "%s" cmd)
-	  (setq cmd (replace-match (shell-quote-argument file) t t cmd)))
+	  (setq cmd (replace-match
+		     (save-match-data
+		       (shell-quote-argument file))
+		     t t cmd)))
 	(shell-command cmd outbuf outbuf)))
     (message "Processing LaTeX file...done")
     (if (not (file-exists-p pdffile))

@@ -5189,7 +5189,7 @@ the range."
 				    'org-hide-block)
 			    (org-delete-overlay ov)))
 			(org-overlays-at start)))
-	    (setq ov (make-overlay start end))
+	    (setq ov (org-make-overlay start end))
             (org-overlay-put ov 'invisible 'org-hide-block)
 	    (push ov org-hide-block-overlays)))
       (error "Not looking at a source block"))))
