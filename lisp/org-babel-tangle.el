@@ -42,7 +42,8 @@ file.")
   "Extract the bodies of all source code blocks form the current
 file into their own source-specific files."
   (interactive)
-  (let (blocks)
+  (let ((base-name (file-name-sans-extension (buffer-file-name)))
+        blocks)
     ;; blocks will be two nested association lists, first grouped by
     ;; language, then by session, the contents of the second a-list
     ;; will be source-code blocks
@@ -74,14 +75,25 @@ file into their own source-specific files."
               (she-bang (second lang-specs))
               (by-session (cdr by-lang)))
          ;; if there are multiple sessions then break out by session
-         ))
-     )
-    ))
+         (if (> (length by-session) 1)
+             (mapc (lambda (session-pair)
+                     (org-babel-tangle-specs-to-file
+                      (format "%s-%s.%s" base-name (car session-pair) ext) (cdr session-pair) she-bang))
+                   by-session)
+           (org-babel-tangle-specs-to-file (format "%s.%s" base-name ext) ext she-bang))))
+     blocks)))
+
+(defun org-babel-tangle-specs-to-file (filename specs &optional she-bang)
+  "Take a list of source-block specifications in SPECS and write
+it out to FILENAME."
+  (with-temp-file filename
+    (when she-bang (insert she-bang))
+    (insert (mapconcat #'org-babel-spec-to-string specs "\n"))))
 
 (defun org-babel-spec-to-string (spec)
   "Return the string version of spec suitable for inclusion in a
 source code file."
-  )
+  (message spec))
 
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here
