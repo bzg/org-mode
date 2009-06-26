@@ -66,7 +66,26 @@ file into their own source-specific files."
     ;; blocks should contain all source-blocks organized by language
     ;; and session
     (message "block = %S" blocks)
-    blocks))
+    (mapc ;; for every language create a file
+     (lambda (by-lang)
+       (let ((lang (car by-lang))
+             (by-session (cdr by-lang)))
+         (if (> (length by-session) 1)
+             )
+         ))
+     )
+    ))
+
+(defun org-babel-tangle-specs-to-file (filename specs)
+  "Take a list of source-block specifications in SPECS and write
+it out to FILENAME."
+  (with-temp-file filename
+    (insert (mapconcat #'org-babel-spec-to-string specs "\n"))))
+
+(defun org-babel-spec-to-string (spec)
+  "Return the string version of spec suitable for inclusion in a
+source code file."
+  )
 
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here
