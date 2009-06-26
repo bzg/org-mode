@@ -1236,7 +1236,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
   "Hook for org-agenda-mode, run after the mode is turned on.")
 (defvar org-agenda-type nil)
 (defvar org-agenda-force-single-file nil)
-(defvar org-agenda-marked-entries) ;; Defined further down in this file
+(defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
 
 (defun org-agenda-mode ()
   "Mode for time-sorted view on action items in Org-mode files.
@@ -1248,7 +1248,7 @@ The following commands are available:
   (kill-all-local-variables)
   (setq org-agenda-undo-list nil
 	org-agenda-pending-undo-list nil
-	org-agenda-marked-entries nil)
+	org-agenda-bulk-marked-entries nil)
   (setq major-mode 'org-agenda-mode)
   ;; Keep global-font-lock-mode from turning on font-lock-mode
   (org-set-local 'font-lock-global-modes (list 'not major-mode))
@@ -1295,7 +1295,9 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
-(org-defkey org-agenda-mode-map "s"        'org-agenda-bulk-select)
+(org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
+(org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
+(org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
@@ -1317,7 +1319,6 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "j"        'org-agenda-goto-date)
 (org-defkey org-agenda-mode-map "d"        'org-agenda-day-view)
 (org-defkey org-agenda-mode-map "w"        'org-agenda-week-view)
-(org-defkey org-agenda-mode-map "m"        'org-agenda-month-view)
 (org-defkey org-agenda-mode-map "y"        'org-agenda-year-view)
 (org-defkey org-agenda-mode-map "\C-c\C-z" 'org-agenda-add-note)
 (org-defkey org-agenda-mode-map "z"        'org-agenda-add-note)
@@ -1338,7 +1339,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "f" 'org-agenda-follow-mode)
 (org-defkey org-agenda-mode-map "R" 'org-agenda-clockreport-mode)
 (org-defkey org-agenda-mode-map "l" 'org-agenda-log-mode)
-(org-defkey org-agenda-mode-map "v" 'org-agenda-archives-mode)
+(org-defkey org-agenda-mode-map "v" 'org-agenda-view-mode-dispatch)
 (org-defkey org-agenda-mode-map "D" 'org-agenda-toggle-diary)
 (org-defkey org-agenda-mode-map "G" 'org-agenda-toggle-time-grid)
 (org-defkey org-agenda-mode-map "r" 'org-agenda-redo)
@@ -1348,6 +1349,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
 (org-defkey org-agenda-mode-map "\C-x\C-w" 'org-write-agenda)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
+(org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "T" 'org-agenda-show-tags)
 (org-defkey org-agenda-mode-map "n" 'next-line)
@@ -1418,9 +1420,9 @@ The following commands are available:
      ["Refile" org-agenda-refile t])
     ["Delete subtree" org-agenda-kill t]
     ("Bulk action"
-     ["Toggle mark entry" org-agenda-bulk-select t]
+     ["Toggle mark entry" org-agenda-bulk-mark t]
      ["Act on all marked" org-agenda-bulk-action t]
-     ["Unmark all entries" org-agenda-remove-all-bulk-action-marks :active t :keys "C-u s"])
+     ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
     "--"
     ["Add note" org-agenda-add-note t]
     "--"
@@ -1472,14 +1474,22 @@ The following commands are available:
      ["Create iCalendar file" org-export-icalendar-combine-agenda-files t])
     "--"
     ("View"
-     ["Day View" org-agenda-day-view :active (org-agenda-check-type nil 'agenda)
-      :style radio :selected (equal org-agenda-ndays 1)]
-     ["Week View" org-agenda-week-view :active (org-agenda-check-type nil 'agenda)
-      :style radio :selected (equal org-agenda-ndays 7)]
-     ["Month View" org-agenda-month-view :active (org-agenda-check-type nil 'agenda)
-      :style radio :selected (member org-agenda-ndays '(28 29 30 31))]
-     ["Year View" org-agenda-year-view :active (org-agenda-check-type nil 'agenda)
-      :style radio :selected (member org-agenda-ndays '(365 366))]
+     ["Day View" org-agenda-day-view
+      :active (org-agenda-check-type nil 'agenda)
+      :style radio :selected (equal org-agenda-ndays 1)
+      :keys "v d  (or just d)"]
+     ["Week View" org-agenda-week-view
+      :active (org-agenda-check-type nil 'agenda)
+      :style radio :selected (equal org-agenda-ndays 7)
+      :keys "v w  (or just w)"]
+     ["Month View" org-agenda-month-view
+      :active (org-agenda-check-type nil 'agenda)
+      :style radio :selected (member org-agenda-ndays '(28 29 30 31))
+      :keys "v m"]
+     ["Year View" org-agenda-year-view
+      :active (org-agenda-check-type nil 'agenda)
+      :style radio :selected (member org-agenda-ndays '(365 366))
+      :keys "v y"]
      "--"
      ["Include Diary" org-agenda-toggle-diary
       :style toggle :selected org-agenda-include-diary
@@ -1494,12 +1504,14 @@ The following commands are available:
     "--"
      ["Show Logbook entries" org-agenda-log-mode
       :style toggle :selected org-agenda-show-log
-      :active (org-agenda-check-type nil 'agenda 'timeline)]
+      :active (org-agenda-check-type nil 'agenda 'timeline)
+      :keys "v l (or just l)"]
      ["Include archived trees" org-agenda-archives-mode
-      :style toggle :selected org-agenda-archives-mode :active t]
+      :style toggle :selected org-agenda-archives-mode :active t
+      :keys "v a"]
      ["Include archive files" (org-agenda-archives-mode t)
       :style toggle :selected (eq org-agenda-archives-mode t) :active t
-      :keys "C-u v"]
+      :keys "v A"]
      "--"
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
     ["Write view to file" org-write-agenda t]
@@ -4979,6 +4991,20 @@ With prefix ARG, go backward that many times the current span."
   (interactive "p")
   (org-agenda-later (- arg)))
 
+(defun org-agenda-view-mode-dispatch ()
+  "Call one of the view mode commands."
+  (interactive)
+  (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files")
+  (let ((a (read-char-exclusive)))
+    (case a
+      (?d (call-interactively 'org-agenda-day-view))
+      (?w (call-interactively 'org-agenda-week-view))
+      (?m (call-interactively 'org-agenda-month-view))
+      (?y (call-interactively 'org-agenda-year-view))
+      (?l (call-interactively 'org-agenda-log-mode))
+      (?a (call-interactively 'org-agenda-archives-mode))
+      (?A (org-agenda-archives-mode 'files)))))
+
 (defun org-agenda-day-view (&optional day-of-year)
   "Switch to daily view for agenda.
 With argument DAY-OF-YEAR, switch to that day of the year."
@@ -6234,64 +6260,71 @@ This is a command that has to be installed in `calendar-mode-map'."
 
 ;;; Bulk commands
 
-(defvar org-agenda-marked-entries nil
+(defvar org-agenda-bulk-marked-entries nil
   "List of markers that refer to marked entries in the agenda.")
 
-(defun org-agenda-bulk-select (&optional remove-all)
-  "Toggle marking the entry at point for future bulk action.
-With `C-u' prefix arg, run an action for all marked entries.
-With double `C-u C-u' prefix arg, remove all marks."
-  (interactive "P")
-  (if remove-all
-      (org-agenda-remove-all-bulk-action-marks)
-    (org-agenda-check-no-diary)
-    (let* ((m (get-text-property (point) 'org-hd-marker))
-	   ov)
-      (if (eq (get-char-property (point-at-bol) 'type)
-	      'org-marked-entry-overlay)
-	  (progn
-	    (org-agenda-remove-bulk-action-overlays
-	     (point-at-bol) (+ 2 (point-at-bol)))
-	    (setq org-agenda-marked-entries
-		  (delete (get-text-property (point-at-bol) 'org-hd-marker)
-			  org-agenda-marked-entries)))
-	(unless m (error "Nothing to mark at point"))
-	(push m org-agenda-marked-entries)
-	(setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
-	(org-overlay-display ov ">>"
-			     (org-get-todo-face "TODO")
-			     'evaporate)
-	(org-overlay-put ov 'type 'org-marked-entry-overlay)
-	(beginning-of-line 2)))))
+(defun org-agenda-bulk-mark ()
+  "Mark the entry at point for future bulk action."
+  (interactive)
+  (org-agenda-check-no-diary)
+  (let* ((m (get-text-property (point) 'org-hd-marker))
+	 ov)
+    (unless (eq (get-char-property (point-at-bol) 'type)
+		'org-marked-entry-overlay)
+      (unless m (error "Nothing to mark at point"))
+      (push m org-agenda-bulk-marked-entries)
+      (setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
+      (org-overlay-display ov ">>"
+			   (org-get-todo-face "TODO")
+			   'evaporate)
+      (org-overlay-put ov 'type 'org-marked-entry-overlay))
+    (beginning-of-line 2)
+    (message "%d entries marked for bulk action"
+	     (length org-agenda-bulk-marked-entries))))
 
-(defun org-agenda-remove-bulk-action-overlays (&optional beg end)
+(defun org-agenda-bulk-unmark ()
+  "Unmark the entry at point for future bulk action."
+  (interactive)
+  (when (eq (get-char-property (point-at-bol) 'type)
+	    'org-marked-entry-overlay)
+    (org-agenda-bulk-remove-overlays
+     (point-at-bol) (+ 2 (point-at-bol)))
+    (setq org-agenda-bulk-marked-entries
+	  (delete (get-text-property (point-at-bol) 'org-hd-marker)
+		  org-agenda-bulk-marked-entries)))
+  (beginning-of-line 2)
+  (message "%d entries marked for bulk action"
+	   (length org-agenda-bulk-marked-entries)))
+
+
+(defun org-agenda-bulk-remove-overlays (&optional beg end)
   "Remove the mark overlays between BEG and END in the agenda buffer.
 BEG and END default to the buffer limits.
 
 This only removes the overlays, it does not remove the markers
-from the list in `org-agenda-marked-entries'."
+from the list in `org-agenda-bulk-marked-entries'."
   (interactive)
   (mapc (lambda (ov)
 	  (and (eq (org-overlay-get ov 'type) 'org-marked-entry-overlay)
 	       (org-delete-overlay ov)))
 	(org-overlays-in (or beg (point-min)) (or end (point-max)))))
 
-(defun org-agenda-remove-all-bulk-action-marks ()
+(defun org-agenda-bulk-remove-all-marks ()
   "Remove all marks in the agenda buffer.
 This will remove the markers, and the overlays."
   (interactive)
-  (mapc (lambda (m) (move-marker m nil)) org-agenda-marked-entries)
-  (setq org-agenda-marked-entries nil)
-  (org-agenda-remove-bulk-action-overlays (point-min) (point-max)))
+  (mapc (lambda (m) (move-marker m nil)) org-agenda-bulk-marked-entries)
+  (setq org-agenda-bulk-marked-entries nil)
+  (org-agenda-bulk-remove-overlays (point-min) (point-max)))
 
 (defun org-agenda-bulk-action ()
   "Execute an remote-editing action on all marked entries."
   (interactive)
-  (unless org-agenda-marked-entries
+  (unless org-agenda-bulk-marked-entries
     (error "No entries are marked"))
   (message "Action: [r]efile [$]archive [A]rch-to-sib [t]odo [+]tag [-]tag")
   (let* ((action (read-char-exclusive))
-	 (entries (reverse org-agenda-marked-entries))
+	 (entries (reverse org-agenda-bulk-marked-entries))
 	 cmd rfloc state e tag (cnt 0))
     (cond
      ((equal action ?$)
@@ -6303,7 +6336,7 @@ This will remove the markers, and the overlays."
      ((member action '(?r ?w))
       (setq rfloc (org-refile-get-location
 		   "Refile to: "
-		   (marker-buffer (car org-agenda-marked-entries))
+		   (marker-buffer (car org-agenda-bulk-marked-entries))
 		   org-refile-allow-creating-parent-nodes))
       (setcar (nthcdr 3 rfloc)
 	      (move-marker (make-marker) (nth 3 rfloc)
@@ -6339,10 +6372,10 @@ This will remove the markers, and the overlays."
        (or (text-property-any (point-min) (point-max) 'org-hd-marker e)
 	   (error "Cannot find entry for marker %s" e)))
       (eval cmd)
-      (setq org-agenda-marked-entries (delete e org-agenda-marked-entries))
+      (setq org-agenda-bulk-marked-entries (delete e org-agenda-bulk-marked-entries))
       (setq cnt (1+ cnt)))
-    (setq org-agenda-marked-entries nil)
-    (org-agenda-remove-all-bulk-action-marks)
+    (setq org-agenda-bulk-marked-entries nil)
+    (org-agenda-bulk-remove-all-marks)
     (message "Acted on %d entries" cnt)))
 
 ;;; Appointment reminders

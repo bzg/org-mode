@@ -1,3 +1,8 @@
+2009-06-26  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-mode-map): Modify bulk action keys.
+	(org-agenda-view-mode-dispatch): New function.
+
 2009-06-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-mode): Reset list of marks.

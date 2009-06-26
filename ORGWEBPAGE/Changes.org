@@ -17,11 +17,12 @@ agenda to bring it up from it's new context.
 
 *** Bulk action
 
-You can now use the =s= key to select entries in the agenda.
+You can now use the =m= key to mark entries in the agenda.  =u=
+will unmark the etry at point, and =U= will unmark everything.
 When one or more entries have been selected, the =B= key will
 execute an action on all selected entries.  I believe this bulk
 action makes mainly sense for the commands that require answering
-interactive prompts.  So far the supported actions are 
+interactive prompts.  So far the supported actions are
 
  - Refile all selected entries to a single destination
  - Archive all selected entries
@@ -30,6 +31,17 @@ interactive prompts.  So far the supported actions are
  - Add or remove a tag to/from all selected entries
 
 We can add more actions, if you convince me they make sense.
+
+*** Modified keys
+
+To make room for the new Bulk action commands, some keys in the
+agenda buffer had to move:
+
+There is a new command bound to the =v= key, it dispatches
+various view mode changes.  Month and year view are now only
+available as =v m= and =v y=, respectively.  Turning on
+inclusion of archive trees and files (unsed to be on =v=) is
+now on =v a= and =v A=.
 
 ** Improvements related to =#+begin= blocks
 

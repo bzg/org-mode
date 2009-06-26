@@ -6869,8 +6869,9 @@ numeric prefix argument N, go up to level N and then take that tree.  If N is
 negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
 previously used indirect buffer.
 @c
+@kindex v l
 @kindex l
-@item l
+@item v l @ @r{or short} @ l
 @vindex org-log-done
 @vindex org-agenda-log-mode-items
 Toggle Logbook mode.  In Logbook mode, entries that were marked DONE while
@@ -6881,12 +6882,14 @@ types that should be included in log mode using the variable
 all possible logbook entries, including state changes.  When called with two
 prefix args @kbd{C-u C-u}, show only logging information, nothing else.
 @c
-@kindex v
-@item v
+@kindex v a
+@kindex v A
+@item v a
+@itemx v A
 Toggle Archives mode.  In Archives mode, trees that are marked
-@code{ARCHIVED} are also scanned when producing the agenda.  When you call
-this command with a @kbd{C-u} prefix argument, even all archive files are
-included.  To exit archives mode, press @kbd{v} again.
+@code{ARCHIVED} are also scanned when producing the agenda.  When you use the
+capital @kbd{A}, even all archive files are included.  To exit archives mode,
+press @kbd{v a} again.
 @c
 @kindex R
 @item R
@@ -6903,11 +6906,16 @@ agenda buffers can be set with the variable
 @item o
 Delete other windows.
 @c
+@kindex v d
 @kindex d
+@kindex v w
 @kindex w
-@kindex m
-@kindex y
-@item d w m y
+@kindex v m
+@kindex v y
+@item v d @ @r{or short} @ d
+@itemx v w @ @r{or short} @ w
+@itemx v m
+@itemx v y
 Switch to day/week/month/year view.  When switching to day or week view,
 this setting becomes the default for subsequent agenda commands.  Since
 month and year views are slow to create, they do not become the default.
@@ -7207,10 +7215,17 @@ Jump to the running clock in another window.
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
 
-@kindex s
+@kindex m
 @item s
-Mark the entry at point for bulk editing.  If the entry is already marked,
-remove the mark from it.  With double prefix, remove all marks.
+Mark the entry at point for bulk action.
+
+@kindex u
+@item u
+Unmark entry for bulk action.
+
+@kindex U
+@item U
+Unmark all marked entries for bulk action.
 
 @kindex B
 @item B
