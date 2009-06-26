@@ -12,6 +12,8 @@ buffers.
 In this document:
 - The [[* Introduction][Introduction]] :: provides a brief overview of the design and use
      of Org-Babel including tutorials and examples.
+- In [[* Getting started][Getting Started]] :: find instructions for installing org-babel
+     into your emacs configuration.
 - The [[* Tasks][Tasks]] :: section contains current and past tasks roughly ordered
      by TODO state, then importance or date-completed.  This would be
      a good place to suggest ideas for development.
