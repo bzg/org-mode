@@ -68,19 +68,15 @@ file into their own source-specific files."
     (message "block = %S" blocks)
     (mapc ;; for every language create a file
      (lambda (by-lang)
-       (let ((lang (car by-lang))
-             (by-session (cdr by-lang)))
-         (if (> (length by-session) 1)
-             )
+       (let* ((lang (car by-lang))
+              (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
+              (ext (first lang-specs))
+              (she-bang (second lang-specs))
+              (by-session (cdr by-lang)))
+         ;; if there are multiple sessions then break out by session
          ))
      )
     ))
-
-(defun org-babel-tangle-specs-to-file (filename specs)
-  "Take a list of source-block specifications in SPECS and write
-it out to FILENAME."
-  (with-temp-file filename
-    (insert (mapconcat #'org-babel-spec-to-string specs "\n"))))
 
 (defun org-babel-spec-to-string (spec)
   "Return the string version of spec suitable for inclusion in a
