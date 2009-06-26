@@ -27,6 +27,7 @@ Also see the [[file:library-of-babel.org][Library of Babel]] an extensible colle
 and easily-shortcut-callable source-code blocks for handling common
 tasks.
 
+
 * Introduction
 
 Org-Babel enables *communication* between programming languages and
@@ -176,6 +177,16 @@ collected after evaluation.
             block.  In this case all printed output is collected
             throughout the execution of the block.  This can be
             thought of as similar to a "script" style of evaluation.
+
+
+* Getting started
+Add the following lines to your .emacs, replacing the path as
+appropriate. A good place to check that things are up and running
+would then be [[#sandbox][the sandbox]].
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/org-babel/lisp")
+  (require 'org-babel-init)
+#+end_src
 
 
 * Tasks [27/42]
