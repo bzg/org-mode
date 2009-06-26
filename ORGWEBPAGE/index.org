@@ -91,7 +91,7 @@ system.
      for Web and PDF [[http://orgmode.org][Authoring]], and much more.
 - Support :: Org-mode is supported by an active [[id:0B280B26-A3AB-4E5C-B4EE-B7FFC52C4D26][mailing list]] where
      questions are answered quickly and effectively.
-- It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is free, like Emacs.
+- It's free! :: Org is [[http://en.wikipedia.org/wiki/Open-source_software][open source software]], it is [[http://www.gnu.org/licenses/licenses.html#GPL][free]], like Emacs.
 
 If you'd like to know what other people have said about Org-mode, take
 a look at our [[http://orgmode.org/worg/org-quotes.php][collected quotes about Org]].
