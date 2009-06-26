@@ -27,6 +27,7 @@ Also see the [[file:library-of-babel.org][Library of Babel]] an extensible colle
 and easily-shortcut-callable source-code blocks for handling common
 tasks.
 
+
 * Introduction
 
 Org-Babel enables *communication* between programming languages and
@@ -176,6 +177,16 @@ collected after evaluation.
             block.  In this case all printed output is collected
             throughout the execution of the block.  This can be
             thought of as similar to a "script" style of evaluation.
+
+
+* Getting started
+Add the following lines to your .emacs, replacing the path as
+appropriate. A good place to check that things are up and running
+would then be [[#sandbox][the sandbox]].
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/org-babel/lisp")
+  (require 'org-babel-init)
+#+end_src
 
 
 * Tasks [27/42]
@@ -330,60 +341,6 @@ msg + " y python"
 #+begin_src emacs-lisp :var msg="org-babel speaks"
 (concat msg " elisp")
 #+end_src
-
-** TODO re-implement helper functions from org-R
-*** Initial statement [Eric]
-    Much of the power of org-R seems to be in it's helper functions for
-    the quick graphing of tables.  Should we try to re-implement these
-    functions on top of org-babel?
-
-    I'm thinking this may be useful both to add features to org-babel-R and
-    also to potentially suggest extensions of the framework.  For example
-    one that comes to mind is the ability to treat a source-code block
-    like a function which accepts arguments and returns results. Actually
-    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
-*** Objectives [Dan]
-    - We want to provide convenient off-the-shelf actions
-      (e.g. plotting data) that make use of our new code evaluation
-      environment but do not require any actual coding.
-*** Initial Design proposal [Dan]
-    - *Input data* will be specified using the same mechanism as :var
-      references, thus the input data may come from a table, or
-      another source block, and it is initially available as an elisp
-      data structure.
-    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
-      line will apply an *action* to the referenced data.
-    - *Actions correspond to source blocks*: our library of available
-      actions will be a library of org-babel source blocks. Thus the
-      code for executing an action, and the code for dealing with the
-      output of the action will be the same code as for executing
-      source blocks in general
-    - Optionally, the user can have the relevant source block inserted
-      into the org buffer after the (say) #+BABELDO line. This will
-      allow the user to fine tune the action by modifying the code
-      (especially useful for plots).
-    - So maybe a #+BABELDO line will have header args
-      - :data (a reference to a table or source code block)
-      - :action (or should that be :srcname?) which will be something
-        like :action pie-chart, referring to a source block which will
-        be executed with the :data referent passed in using a :var arg.
-      - :showcode or something controlling whether to show the code
-      
-*** Modification to design
-    I'm implementing this, at least initially, as a new interpreter
-    named 'babel', which has an empty body. 'babel' blocks take
-    a :srcname header arg, and look for the source-code block with
-    that name. They then execute the referenced block, after first
-    appending their own header args on to the target block's header
-    args.
-
-    If the target block is in the library of babel (a.o.t. e.g. the
-    current buffer), then the code in the block will refer to the
-    input data with a name dictated by convention (e.g. __data__
-    (something which is syntactically legal in all languages...). Thus
-    the babel block will use a :var __data__ = whatever header arg to
-    reference the data to be plotted.
-
 ** TODO share org-babel
 how should we share org-babel?
 
@@ -553,6 +510,63 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
+
+** TODO re-implement helper functions from org-R
+*** Initial statement [Eric]
+    Much of the power of org-R seems to be in it's helper functions for
+    the quick graphing of tables.  Should we try to re-implement these
+    functions on top of org-babel?
+
+    I'm thinking this may be useful both to add features to org-babel-R and
+    also to potentially suggest extensions of the framework.  For example
+    one that comes to mind is the ability to treat a source-code block
+    like a function which accepts arguments and returns results. Actually
+    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+*** Objectives [Dan]
+    - We want to provide convenient off-the-shelf actions
+      (e.g. plotting data) that make use of our new code evaluation
+      environment but do not require any actual coding.
+*** Initial Design proposal [Dan]
+    - *Input data* will be specified using the same mechanism as :var
+      references, thus the input data may come from a table, or
+      another source block, and it is initially available as an elisp
+      data structure.
+    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
+      line will apply an *action* to the referenced data.
+    - *Actions correspond to source blocks*: our library of available
+      actions will be a library of org-babel source blocks. Thus the
+      code for executing an action, and the code for dealing with the
+      output of the action will be the same code as for executing
+      source blocks in general
+    - Optionally, the user can have the relevant source block inserted
+      into the org buffer after the (say) #+BABELDO line. This will
+      allow the user to fine tune the action by modifying the code
+      (especially useful for plots).
+    - So maybe a #+BABELDO line will have header args
+      - :data (a reference to a table or source code block)
+      - :action (or should that be :srcname?) which will be something
+        like :action pie-chart, referring to a source block which will
+        be executed with the :data referent passed in using a :var arg.
+      - :showcode or something controlling whether to show the code
+      
+*** Modification to design
+    I'm implementing this, at least initially, as a new interpreter
+    named 'babel', which has an empty body. 'babel' blocks take
+    a :srcname header arg, and look for the source-code block with
+    that name. They then execute the referenced block, after first
+    appending their own header args on to the target block's header
+    args.
+
+    If the target block is in the library of babel (a.o.t. e.g. the
+    current buffer), then the code in the block will refer to the
+    input data with a name dictated by convention (e.g. __data__
+    (something which is syntactically legal in all languages...). Thus
+    the babel block will use a :var __data__ = whatever header arg to
+    reference the data to be plotted.
+
+*** Current design
+    This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
+    ready-made source blocks designed to carry out useful common tasks.
 
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
@@ -2287,50 +2301,50 @@ of these tests may fail.
 #+TBLNAME: org-babel-tests
 | functionality           | block                      | arg |    expected |     results | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| basic evaluation        |                            |     |             |             | pass |
+| basic evaluation        |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
-| shell                   | basic-shell                |     |           6 |           6 | pass |
-| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
-| python                  | basic-python               |     | hello world | hello world | pass |
-| R                       | basic-R                    |     |          13 |          13 | pass |
+| emacs lisp              | basic-elisp                |     |           5 |             |      |
+| shell                   | basic-shell                |     |           6 |             |      |
+| ruby                    | basic-ruby                 |     |   org-babel |             |      |
+| python                  | basic-python               |     | hello world |             |      |
+| R                       | basic-R                    |     |          13 |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| tables                  |                            |     |             |             | pass |
+| tables                  |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
-| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
-| python                  | table-python               |     |           5 |           5 | pass |
-| R                       | table-R                    |     |         3.5 |         3.5 | pass |
+| emacs lisp              | table-elisp                |     |           3 |             |      |
+| ruby                    | table-ruby                 |     |       1-2-3 |             |      |
+| python                  | table-python               |     |           5 |             |      |
+| R                       | table-R                    |     |         3.5 |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block references |                            |     |             |             | pass |
+| source block references |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last           |     |       Array |       Array | pass |
+| all languages           | chained-ref-last           |     |       Array |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block functions  |                            |     |             |             | pass |
+| source block functions  |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
-| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
-| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
-| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
-| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
-| different               | Fibonacci                  |   4 |           5 |           5 | pass |
-| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
+| emacs lisp              | defun-fibb                 |     |       fibbd |             |      |
+| run over                | Fibonacci                  |   0 |           1 |             |      |
+| a                       | Fibonacci                  |   1 |           1 |             |      |
+| variety                 | Fibonacci                  |   2 |           2 |             |      |
+| of                      | Fibonacci                  |   3 |           3 |             |      |
+| different               | Fibonacci                  |   4 |           5 |             |      |
+| arguments               | Fibonacci                  |   5 |           8 |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| bugs and tasks          |                            |     |             |             | pass |
+| bugs and tasks          |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
-| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
-| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
-| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
+| simple ruby arrays      | ruby-array-test            |     |           3 |             |      |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |             |      |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |             |      |
+| forcing vector results  | test-forced-vector-results |     |       Array |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| sessions                |                            |     |             |             | pass |
+| sessions                |                            |     |             |             |      |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| set ruby session        | set-ruby-session-var       |     |        :set |        :set | pass |
-| get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
-| set python session      | set-python-session-var     |     |         set |         set | pass |
-| get from python session | get-python-session-var     |     |           4 |           4 | pass |
-| set R session           | set-R-session-var          |     |         set |         set | pass |
-| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
+| set ruby session        | set-ruby-session-var       |     |        :set |             |      |
+| get from ruby session   | get-ruby-session-var       |     |           3 |             |      |
+| set python session      | set-python-session-var     |     |         set |             |      |
+| get from python session | get-python-session-var     |     |           4 |             |      |
+| set R session           | set-R-session-var          |     |         set |             |      |
+| get from R session      | get-R-session-var          |     |           5 |             |      |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
@@ -2554,9 +2568,13 @@ Time.now
 
 #+begin_src R :results replace
 a <- 9
-b <- 16
+b <- 17
 a + b
 #+end_src
+
+#+resname:
+: 26
+
 
 : 25
 
