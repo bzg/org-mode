@@ -257,12 +257,23 @@ value of \"H:\" in Org's #+OPTION line.
 This can be either nil (skip the sections), `description', `itemize',
 or `enumerate' (convert the sections as the corresponding list type), or
 a string to be used instead of \\section{%s}.  In this latter case,
-the %s stands here for the inserted headline and is mandatory."
+the %s stands here for the inserted headline and is mandatory.
+
+It may also be a list of three string to define a user-defined environment
+that should be used.  The first string should be the like
+\"\\begin{itemize}\", the second should be like \"\\item %s %s\" with up
+to two occurrences of %s for the title and a lable, respectively.  The third
+string should be like \"\\end{itemize\"."
   :group 'org-export-latex
   :type '(choice (const :tag "Ignore" nil)
 		 (const :tag "Convert as descriptive list" description)
 		 (const :tag "Convert as itemized list" itemize)
 		 (const :tag "Convert as enumerated list" enumerate)
+		 (list  :tag "User-defined environment"
+			:value ("\\begin{itemize}" "\\end{itemize}" "\\item %s")
+			(string :tag "Start")
+			(string :tag "End")
+			(string :tag "item"))
 		 (string :tag "Use a section string" :value "\\subparagraph{%s}")))
 
 (defcustom org-export-latex-list-parameters
@@ -819,6 +830,21 @@ If NUM, export sections as numerical sections."
 		   ((listp subcontent) (org-export-latex-sub subcontent)))
 	     (insert (format "\\end{%s} %% ends low level\n"
 			     (symbol-name org-export-latex-low-levels))))
+
+	    ((listp org-export-latex-low-levels)
+	     (if (string-match "% ends low level$"
+			       (buffer-substring (point-at-bol 0) (point)))
+		 (delete-region (point-at-bol 0) (point))
+	       (insert (car org-export-latex-low-levels) "\n"))
+	     (insert (format (nth 2 org-export-latex-low-levels)
+			     heading
+			     (if label (format "\\label{%s}" label) "")))
+	     (insert (org-export-latex-content content))
+	     (cond ((stringp subcontent) (insert subcontent))
+		   ((listp subcontent) (org-export-latex-sub subcontent)))
+	     (insert (nth 1 org-export-latex-low-levels)
+		     " %% ends low level\n"))
+
 	    ((stringp org-export-latex-low-levels)
 	     (insert (format org-export-latex-low-levels heading) "\n")
 	     (when label (insert (format "\\label{%s}\n" label)))

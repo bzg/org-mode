@@ -1,5 +1,9 @@
 2009-06-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-low-levels): Allow user-defined
+	environment.
+	(org-export-latex-subcontent): Handle user-defined environment.
+
 	* org-agenda.el (org-agenda-view-mode-dispatch): Add more keys to
 	the View dispatcher.
 
