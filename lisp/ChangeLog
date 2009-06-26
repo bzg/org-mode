@@ -1,5 +1,8 @@
 2009-06-26  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-view-mode-dispatch): Add more keys to
+	the View dispatcher.
+
 	* org.el (org-hide-block-toggle): Use `org-make-overlay' instead of
 	`make-overlay'.
 

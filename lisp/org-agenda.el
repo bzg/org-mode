@@ -4994,7 +4994,8 @@ With prefix ARG, go backward that many times the current span."
 (defun org-agenda-view-mode-dispatch ()
   "Call one of the view mode commands."
   (interactive)
-  (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files")
+  (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files
+       clock[R]eport          time[G]rid                include[D]iary")
   (let ((a (read-char-exclusive)))
     (case a
       (?d (call-interactively 'org-agenda-day-view))
@@ -5003,7 +5004,12 @@ With prefix ARG, go backward that many times the current span."
       (?y (call-interactively 'org-agenda-year-view))
       (?l (call-interactively 'org-agenda-log-mode))
       (?a (call-interactively 'org-agenda-archives-mode))
-      (?A (org-agenda-archives-mode 'files)))))
+      (?A (org-agenda-archives-mode 'files))
+      (?R (call-interactively 'org-agenda-clockreport-mode))
+      (?G (call-interactively 'org-agenda-toggle-time-grid))
+      (?D (call-interactively 'org-agenda-toggle-diary))
+      (?q (message "Abort"))
+      (otherwise (error "Invalid key" )))))
 
 (defun org-agenda-day-view (&optional day-of-year)
   "Switch to daily view for agenda.
