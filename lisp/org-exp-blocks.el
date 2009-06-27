@@ -73,7 +73,7 @@
 ;; `org-export-blocks'.
 
 (eval-when-compile
-  (require 'cl)
+  (require 'cl))
 (require 'org)
 
 (defvar comint-last-input-end)
