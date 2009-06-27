@@ -1,3 +1,6 @@
+#+TITLE: Testing Org-Babel Tangling
+#+OPTIONS: toc:2 ^:nil
+
 * Some file
 
 Some text here
@@ -8,6 +11,20 @@ echo "line 2"
 #+END_SRC
 
 more text
+
+#+srcname: ruby-no-session
+#+begin_src ruby 
+  def hello
+    puts "hello world"
+  end
+#+end_src
+
+
+#+srcname: first-ruby-block
+#+begin_src ruby :session special
+:block_the_first
+#+end_src
+
 
 ** Some subsection
 
@@ -38,3 +55,24 @@ foo foo bar baz
 echo "line 5"
 echo "line 6"
 #+END_SRC
+
+
+** Ruby blocks
+
+#+srcname: another-ruby-block
+#+begin_src ruby :session special
+holder = 98
+#+end_src
+
+
+#+srcname: ruby-plus-2
+#+begin_src ruby :session special
+def plus_two(n)
+  n + 2
+end
+#+end_src
+
+#+srcname: final-ruby
+#+begin_src ruby :session special
+plus_two(holder)
+#+end_src

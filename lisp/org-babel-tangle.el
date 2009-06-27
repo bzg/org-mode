@@ -74,7 +74,7 @@ file into their own source-specific files."
                         blocks))))
       ;; blocks should contain all source-blocks organized by language
       ;; and session
-      (message "blocks=%S" blocks) ;; debugging
+      ;; (message "blocks=%S" blocks) ;; debugging
       (mapc ;; for every language create a file
        (lambda (by-lang)
          (let* ((lang (car by-lang))
