@@ -2,8 +2,7 @@
 
 Some text here
 
-#+CHUNK file1.sh 1
-#+BEGIN_SRC bash
+#+BEGIN_SRC sh
 echo "line 1"
 echo "line 2"
 #+END_SRC
@@ -12,15 +11,13 @@ more text
 
 ** Some subsection
 
-#+CHUNK file1.sh 2
-#+BEGIN_SRC bash
-echo "line 5"
-echo "line 6"
+#+BEGIN_SRC sh
+echo "line 3"
+echo "line 4"
 #+END_SRC
 
 blah blah blah
 
-#+CHUNK README.txt 1
 #+BEGIN_EXAMPLE
 text line 1
 text line 2
@@ -29,8 +26,7 @@ text line 3
 
 foo foo bar baz
 
-#+CHUNK file1.sh 1.5
-#+BEGIN_SRC bash
-echo "line 3"
-echo "line 4"
+#+BEGIN_SRC sh
+echo "line 5"
+echo "line 6"
 #+END_SRC
