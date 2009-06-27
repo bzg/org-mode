@@ -72,6 +72,8 @@
 ;; `org-export-blocks-add-block' to add your block type to
 ;; `org-export-blocks'.
 
+(eval-when-compile
+  (require 'cl)
 (require 'org)
 
 (defvar comint-last-input-end)
