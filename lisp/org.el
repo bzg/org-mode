@@ -1064,7 +1064,7 @@ It should match if the message is from the user him/herself."
   "Non-nil means, storing a link to an Org file will use entry IDs.
 
 Note that before this variable is even considered, org-id must be loaded,
-to please customize `org-modules' and turn it on.
+so please customize `org-modules' and turn it on.
 
 The variable can have the following values:
 
@@ -1080,6 +1080,10 @@ create-if-interactive
       creates a link.  If you do want to get an ID link in a remember
       template to an entry not having an ID, create it first by
       explicitly creating a link to it, using `C-c C-l' first.
+
+create-if-interactive-and-no-custom-id
+      Like create-if-interactive, but do not create an ID if there is
+      a CUSTOM_ID property defined in the entry.  This is the default.
 
 use-existing
       Use existing ID, do not create one.
