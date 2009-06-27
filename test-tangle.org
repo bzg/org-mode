@@ -24,6 +24,14 @@ text line 2
 text line 3
 #+END_EXAMPLE
 
+more stuff
+
+#+srcname: i-have-a-name
+#+begin_src sh 
+echo "I have a name"
+#+end_src
+
+
 foo foo bar baz
 
 #+BEGIN_SRC sh
