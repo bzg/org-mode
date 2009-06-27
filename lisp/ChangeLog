@@ -1,5 +1,8 @@
 2009-06-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-write-agenda): Make sure org-icalendar is
+	loaded.
+
 	* org.el (org-map-entries): No longer force
 	`org-tags-match-list-sublevels' to t during a todo-only tags
 	search.

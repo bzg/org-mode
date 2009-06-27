@@ -2157,6 +2157,7 @@ higher priority settings."
 			     (expand-file-name file))
 	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
+	       (require 'org-icalendar)
 	       (let ((org-agenda-marker-table
 		      (org-create-marker-find-array
 		       (org-agenda-collect-markers)))
