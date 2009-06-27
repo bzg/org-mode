@@ -1012,16 +1012,17 @@ lang=\"%s\" xml:lang=\"%s\">
 		   (setq id-file (org-id-find-id-file path)))
 	      ;; This is an id: link to another file (if it was the same file,
 	      ;; it would have become an internal link...)
-	      (setq id-file (file-relative-name
-			     id-file (file-name-directory org-current-export-file)))
-	      (setq id-file (concat (file-name-sans-extension id-file)
-				    "." html-extension))
-	      (setq rpl (concat "<a href=\"" id-file "#"
-				(if (org-uuidgen-p path) "ID-")
-				path "\""
-				attr ">"
-				(org-export-html-format-desc desc)
-				"</a>")))
+	      (save-match-data
+		(setq id-file (file-relative-name
+			       id-file (file-name-directory org-current-export-file)))
+		(setq id-file (concat (file-name-sans-extension id-file)
+				      "." html-extension))
+		(setq rpl (concat "<a href=\"" id-file "#"
+				  (if (org-uuidgen-p path) "ID-")
+				  path "\""
+				  attr ">"
+				  (org-export-html-format-desc desc)
+				  "</a>"))))
 	     ((member type '("http" "https"))
 	      ;; standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-html-inline-images)
