@@ -404,13 +404,6 @@ non-nil."
         (dotimes (n size)
           (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
-(defmacro org-babel-alist-pop (key alist)
-  "Return the `assoc' of KEY in ALIST, and remove all elements of
-ALIST matching KEY with `assq-delete-all'."
-  `(let ((results (assoc ,key ,alist)))
-     (setq ,alist (assq-delete-all ,key ,alist))
-     results))
-
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
