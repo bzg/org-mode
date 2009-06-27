@@ -29,6 +29,7 @@
 ;; for more information see the comments in org-babel.el
 
 ;;; Code:
+(require 'cl)
 (require 'org)
 (require 'org-exp-blocks)
 (require 'org-babel)
