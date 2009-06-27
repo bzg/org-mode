@@ -2323,10 +2323,6 @@ the sublevels of a headline matching a tag search often also match
 the same search.  Listing all of them can create very long lists.
 Setting this variable to nil causes subtrees of a match to be skipped.
 
-As a special case, if the tag search is restricted to TODO items, the
-value of this variable is ignored and sublevels are always checked, to
-make sure all corresponding TODO items find their way into the list.
-
 This variable is semi-obsolete and probably should always be true.  It
 is better to limit inheritance to certain tags using the variables
 `org-use-tag-inheritance' and `org-tags-exclude-from-inheritance'."
@@ -11230,7 +11226,7 @@ a *different* entry, you cannot use these techniques."
 	 (org-agenda-skip-comment-trees (memq 'comment skip))
 	 (org-agenda-skip-function
 	  (car (org-delete-all '(comment archive) skip)))
-	 (org-tags-match-list-sublevels t)
+; ?????? (org-tags-match-list-sublevels t)
 	 matcher file res
 	 org-todo-keywords-for-agenda
 	 org-done-keywords-for-agenda
