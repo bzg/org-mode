@@ -793,12 +793,13 @@ publishing directory."
 		   (setq id-file (org-id-find-id-file path)))
 	      ;; This is an id: link to another file (if it was the same file,
 	      ;; it would have become an internal link...)
-	      (setq id-file (file-relative-name
-			     id-file (file-name-directory org-current-export-file)))
-	      (setq id-file (concat (file-name-sans-extension id-file)
-				    org-export-docbook-extension))
-	      (setq rpl (format "<link xlink:href=\"%s#%s\">%s</link>"
-				id-file path (org-export-docbook-format-desc desc))))
+	      (save-match-data
+		(setq id-file (file-relative-name
+			       id-file (file-name-directory org-current-export-file)))
+		(setq id-file (concat (file-name-sans-extension id-file)
+				      org-export-docbook-extension))
+		(setq rpl (format "<link xlink:href=\"%s#%s\">%s</link>"
+				  id-file path (org-export-docbook-format-desc desc)))))
 	     ((member type '("http" "https"))
 	      ;; Standard URL, just check if we need to inline an image
 	      (if (and (or (eq t org-export-docbook-inline-images)
