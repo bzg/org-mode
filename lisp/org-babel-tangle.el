@@ -95,7 +95,8 @@ file into their own source-specific files."
                          (to-file (format "%s-%s.%s" base-name (car session-pair) ext) (cdr session-pair)))
                        by-session)
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
-       blocks))))
+       blocks)
+      (message "tangled %d source-code blocks" block-counter))))
 
 (defun org-babel-spec-to-string (spec)
   "Insert the source-code specified by SPEC into the current
