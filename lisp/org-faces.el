@@ -258,21 +258,21 @@ column view defines special faces for each outline level.  See the file
   '((((class color) (background light)) (:underline t))
     (((class color) (background dark)) (:underline t))
     (t (:underline t)))
-  "Face for links."
+  "Face for link targets."
   :group 'org-faces)
 
 (defface org-date
   '((((class color) (background light)) (:foreground "Purple" :underline t))
     (((class color) (background dark)) (:foreground "Cyan" :underline t))
     (t (:underline t)))
-  "Face for links."
+  "Face for date/time stamps."
   :group 'org-faces)
 
 (defface org-sexp-date
   '((((class color) (background light)) (:foreground "Purple"))
     (((class color) (background dark)) (:foreground "Cyan"))
     (t (:underline t)))
-  "Face for links."
+  "Face for diary-like sexp date specifications."
   :group 'org-faces)
 
 (defface org-tag
