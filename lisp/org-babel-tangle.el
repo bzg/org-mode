@@ -44,37 +44,8 @@ file into their own source-specific files."
   (interactive)
   (save-excursion
     (let ((base-name (file-name-sans-extension (buffer-file-name)))
-          (block-counter 0)
-          blocks)
-      ;; blocks will be two nested association lists, first grouped by
-      ;; language, then by session, the contents of the second a-list
-      ;; will be source-code blocks
-      (org-babel-map-source-blocks (buffer-file-name)
-        (setq block-counter (+ 1 block-counter))
-        (let* ((link (progn (call-interactively 'org-store-link)
-                            (org-babel-clean-text-properties (car (pop org-stored-links)))))
-               
-               (source-name (intern (or (org-babel-get-src-block-name)
-                                        (format "block-%d" block-counter))))
-               (info (org-babel-get-src-block-info))
-               (lang (first info))
-               (body (second info))
-               (params (third info))
-               (spec (list link source-name params body))
-               (session (cdr (assoc :session params)))
-               by-lang by-session)
-          ;; add the spec for this block to blocks under it's lang and session
-          (setq by-lang (cdr (assoc lang blocks)))
-          (setq blocks (delq (assoc lang blocks) blocks))
-          (setq by-session (cdr (assoc session by-lang)))
-          (setq by-lang (delq (assoc session by-lang) by-lang))
-          (setq blocks (cons ;; by-language
-                        (cons lang (cons ;; by-session
-                                    (cons session (cons spec by-session)) by-lang))
-                        blocks))))
-      ;; blocks should contain all source-blocks organized by language
-      ;; and session
-      ;; (message "blocks=%S" blocks) ;; debugging
+          (blocks (org-babel-collect-blocks))
+          (block-counter 0))
       (mapc ;; for every language create a file
        (lambda (by-lang)
          (let* ((lang (car by-lang))
@@ -92,11 +63,45 @@ file into their own source-specific files."
              ;; if there are multiple sessions then break out by session
              (if (> (length by-session) 1)
                  (mapc (lambda (session-pair)
+                         (setq block-counter (+ block-counter (length (cdr session-pair))))
                          (to-file (format "%s-%s.%s" base-name (car session-pair) ext) (cdr session-pair)))
                        by-session)
+               (setq block-counter (+ block-counter (length (cdr (car by-session)))))
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
        blocks)
       (message "tangled %d source-code blocks" block-counter))))
+
+(defun org-babel-collect-blocks ()
+  "Collect all source blocks in the current org-mode file.
+Return two nested association lists, first grouped by language,
+then by session, the contents will be source-code block
+specifications of the form used by `org-babel-spec-to-string'."
+  (let ((block-counter 0) blocks)
+    (org-babel-map-source-blocks (buffer-file-name)
+      (setq block-counter (+ 1 block-counter))
+      (let* ((link (progn (call-interactively 'org-store-link)
+                          (org-babel-clean-text-properties (car (pop org-stored-links)))))
+             (source-name (intern (or (org-babel-get-src-block-name)
+                                      (format "block-%d" block-counter))))
+             (info (org-babel-get-src-block-info))
+             (lang (first info))
+             (body (second info))
+             (params (third info))
+             (spec (list link source-name params body))
+             (session (cdr (assoc :session params)))
+             by-lang by-session)
+        ;; add the spec for this block to blocks under it's lang and session
+        (setq by-lang (cdr (assoc lang blocks)))
+        (setq blocks (delq (assoc lang blocks) blocks))
+        (setq by-session (cdr (assoc session by-lang)))
+        (setq by-lang (delq (assoc session by-lang) by-lang))
+        (setq blocks (cons ;; by-language
+                      (cons lang (cons ;; by-session
+                                  (cons session (cons spec by-session)) by-lang))
+                      blocks))))
+    ;; blocks should contain all source-blocks organized by language and session
+    ;; (message "blocks=%S" blocks) ;; debugging
+    blocks))
 
 (defun org-babel-spec-to-string (spec)
   "Insert the source-code specified by SPEC into the current
