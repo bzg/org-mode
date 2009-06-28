@@ -316,12 +316,12 @@ and `org-export-with-tags' instead."
   :type 'string)
 
 (defcustom org-export-latex-inline-image-extensions
-  '("pdf" "jpeg" "jpg" "png")
+  '("pdf" "jpeg" "jpg" "png" "ps" "eps")
   "Extensions of image files that can be inlined into LaTeX.
-Note that this depends on the way the LaTeX file is processed.
-The default setting (pdf and jpg) assumes that pdflatex is doing the
-processing.  If you are using latex and dvips or something similar,
-only postscript files can be included."
+Note that the image extension *actually* allowed depend on the way the
+LaTeX file is processed.  When used with pdflatex, pdf, jpg and png images
+are OK.  When processing through dvi to Postscript, only ps and eps are
+allowed.  The default we use here encompasses both."
   :group 'org-export-latex
   :type '(repeat (string :tag "Extension")))
 

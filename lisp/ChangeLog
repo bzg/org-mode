@@ -1,3 +1,8 @@
+2009-06-28  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-inline-image-extensions): Add ps
+	and eps extensions.
+
 2009-06-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-write-agenda): Make sure org-icalendar is
