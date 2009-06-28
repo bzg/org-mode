@@ -3166,7 +3166,8 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
   (org-compile-prefix-format 'tags)
   (org-set-sorting-strategy 'tags)
   (let* ((org-tags-match-list-sublevels
-	  (if todo-only t org-tags-match-list-sublevels))
+;??????	  (if todo-only t org-tags-match-list-sublevels))
+	  org-tags-match-list-sublevels)
 	 (completion-ignore-case t)
 	 rtn rtnall files file pos matcher
 	 buffer)
