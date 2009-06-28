@@ -44,7 +44,6 @@ file into their own source-specific files."
   (interactive)
   (save-excursion
     (let ((base-name (file-name-sans-extension (buffer-file-name)))
-          (blocks (org-babel-collect-blocks))
           (block-counter 0))
       (mapc ;; for every language create a file
        (lambda (by-lang)
@@ -68,7 +67,7 @@ file into their own source-specific files."
                        by-session)
                (setq block-counter (+ block-counter (length (cdr (car by-session)))))
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
-       blocks)
+       (org-babel-collect-blocks))
       (message "tangled %d source-code blocks" block-counter))))
 
 (defun org-babel-collect-blocks ()
