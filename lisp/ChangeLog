@@ -1,3 +1,11 @@
+2009-06-30  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-feed.el (org-feed-update): fix problem with non-existing
+	buffer.
+	(org-feed-skip-http-headers): New function.
+	(org-feed-get-feed): Call `org-feed-skip-http-headers'.
+	(org-feed-get-feed): Fix command line arguments for curl.
+
 2009-06-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-inline-image-extensions): Add ps

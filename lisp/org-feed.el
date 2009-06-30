@@ -309,7 +309,7 @@ it can be a list structured like an entry in `org-feed-alist'."
 	  feed-buffer inbox-pos new-formatted
 	  entries old-status status new changed guid-alist e guid olds)
       (setq feed-buffer (org-feed-get-feed url))
-      (unless (and feed-buffer (bufferp feed-buffer))
+      (unless (and feed-buffer (bufferp (get-buffer feed-buffer)))
 	(error "Cannot get feed %s" name))
       (when retrieve-only
 	(throw 'exit feed-buffer))
@@ -549,18 +549,28 @@ If that property is already present, nothing changes."
 	       (org-split-string s "\n")
 	       (concat "\n" (make-string n ?\ )))))
 
+(defun org-feed-skip-http-headers (buffer)
+  "Remove HTTP headers from BUFFER, and return it.
+Assumes headers are indeed present!"
+  (with-current-buffer buffer
+    (widen)
+    (goto-char (point-min))
+    (search-forward "\n\n")
+    (delete-region (point-min) (point))
+    buffer))
+
 (defun org-feed-get-feed (url)
   "Get the RSS feed file at URL and return the buffer."
   (cond
    ((eq org-feed-retrieve-method 'url-retrieve-synchronously)
-    (url-retrieve-synchronously url))
+    (org-feed-skip-http-headers (url-retrieve-synchronously url)))
    ((eq org-feed-retrieve-method 'curl)
     (ignore-errors (kill-buffer org-feed-buffer))
-    (call-process "curl" nil org-feed-buffer nil url)
+    (call-process "curl" nil org-feed-buffer nil "--silent" url)
     org-feed-buffer)
    ((eq org-feed-retrieve-method 'wget)
     (ignore-errors (kill-buffer org-feed-buffer))
-    (call-process "curl" nil org-feed-buffer nil "-q" "-O" "-" url)
+    (call-process "wget" nil org-feed-buffer nil "-q" "-O" "-" url)
     org-feed-buffer)
    ((functionp org-feed-retrieve-method)
     (funcall org-feed-retrieve-method url))))
@@ -610,10 +620,6 @@ The `:item-full-text' property actually contains the sexp
 formatted as a string, not the original XML data."
   (with-current-buffer buffer
     (widen)
-    (goto-char (point-min))
-    ;; Skip HTTP headers
-    (search-forward "\n\n")
-    (delete-region (point-min) (point))
     (let ((feed (car (xml-parse-region (point-min) (point-max)))))
       (mapcar
        (lambda (entry)
