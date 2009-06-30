@@ -2778,7 +2778,7 @@ stacked delimiters is N.  Escaping delimiters is not possible."
   "Push buffer content to kill ring.
 The depends on the variable `org-export-copy-to-kill'."
   (when org-export-copy-to-kill-ring
-    (kill-new (buffer-string))
+    (org-kill-new (buffer-string))
     (when (fboundp 'x-set-selection)
       (ignore-errors (x-set-selection 'PRIMARY (buffer-string)))
       (ignore-errors (x-set-selection 'CLIPBOARD (buffer-string))))

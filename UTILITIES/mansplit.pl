@@ -28,9 +28,8 @@ $contents = <<EOF;
 <li><a name="toc_Exporting" href="Exporting.html#Exporting">12 Exporting</a>
 <li><a name="toc_Publishing" href="Publishing.html#Publishing">13 Publishing</a>
 <li><a name="toc_Miscellaneous" href="Miscellaneous.html#Miscellaneous">14 Miscellaneous</a>
-<li><a name="toc_Extensions" href="Extensions.html#Extensions">A Extensions</a>
-<li><a name="toc_Hacking" href="Hacking.html#Hacking">B Hacking</a>
-<li><a name="toc_History-and-Acknowledgments" href="History-and-Acknowledgments.html#History-and-Acknowledgments">C History and Acknowledgments</a>
+<li><a name="toc_Hacking" href="Hacking.html#Hacking">A Hacking</a>
+<li><a name="toc_History-and-Acknowledgments" href="History-and-Acknowledgments.html#History-and-Acknowledgments">B History and Acknowledgments</a>
 <li><a name="toc_Main-Index" href="Main-Index.html#Main-Index">Main Index</a>
 <li><a name="toc_Key-Index" href="Key-Index.html#Key-Index">Key Index</a>
 </li></ul>

@@ -327,6 +327,11 @@ that can be added."
 	(setq n (1- n)))
     n))
 
+(defun org-kill-new (string &rest args)
+  (remove-text-properties 0 (length string) '(line-prefix t wrap-prefix t)
+			  string)
+  (apply 'kill-new string args))
+
 (provide 'org-compat)
 
 ;; arch-tag: a0a0579f-e68c-4bdf-9e55-93768b846bbe

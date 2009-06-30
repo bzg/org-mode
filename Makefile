@@ -79,6 +79,7 @@ LISPF      = 	org.el			\
 		org-html.el		\
 		org-icalendar.el	\
 		org-id.el		\
+		org-indent.el		\
 		org-info.el		\
 		org-inlinetask.el	\
 		org-jsinfo.el		\
@@ -349,6 +350,7 @@ lisp/org-gnus.elc:	lisp/org.el
 lisp/org-html.elc:	lisp/org-exp.el
 lisp/org-icalendar.elc:	lisp/org-exp.el
 lisp/org-id.elc:	lisp/org.el
+lisp/org-indent.elc:	lisp/org.el lisp/org-macs.el lisp/org-compat.el
 lisp/org-info.elc:	lisp/org.el
 lisp/org-inlinetask.elc:
 lisp/org-irc.elc:	lisp/org.el

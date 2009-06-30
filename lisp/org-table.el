@@ -721,6 +721,16 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
     ;; Replace the old one
     (delete-region beg end)
     (move-marker end nil)
+    (if (equal (char-before) ?\n)
+	;; This hack is for org-indent, to force redisplay of the
+	;; line prefix of the first line. Apparently the redisplay
+	;; is tied to the newline, which is, I think, a bug.
+	;; To force this redisplay, we remove and re-insert the
+	;; newline, so that the redisplay engine thinks it belongs
+	;; to the changed text.
+	(progn
+	  (backward-delete-char 1)
+	  (insert "\n")))
     (move-marker org-table-aligned-begin-marker (point))
     (insert new)
     (move-marker org-table-aligned-end-marker (point))

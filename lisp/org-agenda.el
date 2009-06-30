@@ -4292,6 +4292,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	(setq rtn (concat (eval org-prefix-format-compiled) txt)))
 
       ;; And finally add the text properties
+      (remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
       (org-add-props rtn nil
 	'org-category (downcase category)
 	'tags (mapcar 'org-downcase-keep-props tags)

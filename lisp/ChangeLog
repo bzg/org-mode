@@ -1,3 +1,25 @@
+2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-startup-indented): New option.
+	(org-startup-options): Add new options indent and noindent.
+	(org-unfontify-region): Remove line-prefix and wrap-prefix
+	properties.
+	(org-after-demote-entry-hook, org-after-promote-entry-hook): New
+	hooks.
+	(org-promote, org-demote): Run the new hooks.
+
+	* org-table.el (org-table-align): Replace leading \n as well.
+
+	* org-exp.el (org-export-push-to-kill-ring): Remove `line-prefix'
+	and `line-wrap' text properties.
+
+	* org-compat.el (org-kill-new): New function.
+
+	* org-agenda.el (org-format-agenda-item): Remove `line-prefix' and
+	`line-wrap' text properties.
+
+	* org-indent.el: New file.
+
 2009-08-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-provide-todo-statistics): Tweak docstring.

@@ -871,6 +871,10 @@ the previously used indirect buffer.
 @end table
 
 @vindex org-startup-folded
+@cindex @code{overview}, STARTUP keyword
+@cindex @code{content}, STARTUP keyword
+@cindex @code{showall}, STARTUP keyword
+
 When Emacs first visits an Org file, the global state is set to
 OVERVIEW, @ie only the top level headlines are visible.  This can be
 configured through the variable @code{org-startup-folded}, or on a
@@ -10054,12 +10058,14 @@ any other Org mode file with internal setup.  You can visit the file the
 cursor is in the line with @kbd{C-c '}.
 @item #+STARTUP:
 @cindex #+STARTUP:
-@vindex org-startup-folded
 This line sets options to be used at startup of Org mode, when an
-Org file is being visited.  The first set of options deals with the
-initial visibility of the outline tree.  The corresponding variable for
-global default settings is @code{org-startup-folded}, with a default
-value @code{t}, which means @code{overview}.
+Org file is being visited.
+
+The first set of options deals with the initial visibility of the outline
+tree.  The corresponding variable for global default settings is
+@code{org-startup-folded}, with a default value @code{t}, which means
+@code{overview}.
+@vindex org-startup-folded
 @cindex @code{overview}, STARTUP keyword
 @cindex @code{content}, STARTUP keyword
 @cindex @code{showall}, STARTUP keyword
@@ -10068,6 +10074,17 @@ overview   @r{top-level headlines only}
 content    @r{all headlines}
 showall    @r{no folding at all, show everything}
 @end example
+
+@vindex org-startup-indented
+@cindex @code{indent}, STARTUP keyword
+@cindex @code{noindent}, STARTUP keyword
+Dynamic virtual indentation is controlled by the variable
+@code{org-startup-indented}@footnote{Emacs 23 and Org-mode 6.29 are required}
+@example
+indent     @r{start with @code{org-indent-mode} turned on}
+noindent   @r{start with @code{org-indent-mode} turned off}
+@end example
+
 @vindex org-startup-align-all-tables
 Then there are options for aligning tables upon visiting a file.  This
 is useful in files containing narrowed table columns.  The corresponding
@@ -10254,13 +10271,11 @@ block is updated.
 @cindex odd-levels-only outlines
 @cindex clean outline view
 
-Some people find it noisy and distracting that the Org headlines start
-with a potentially large number of stars, and that text below the headlines
-is not indented.  This is not really a problem when you are writing a book
-where the outline headings are really section headlines.  However, in a more
-list-oriented outline, it is clear that an indented structure is a lot
-cleaner, as can be seen by comparing the two columns in the following
-example:
+Some people find it noisy and distracting that the Org headlines start with a
+potentially large number of stars, and that text below the headlines is not
+indented.  While this is no problem when writing a book where the outline
+headings are really section headlines, in a more list-oriented outline,
+indented structure is a lot cleaner:
 
 @example
 @group
@@ -10275,8 +10290,28 @@ more text                        |          more text
 @end example
 
 @noindent
-It is non-trivial to make such a look work in Emacs, but Org contains three
-separate features that, combined, achieve just that.
+If you are using Emacs 23 and at least version 6.29 of Org, this kind of view
+can be achieved dynamically at display time using @code{org-indent-mode}.  In
+this minor mode, all lines are prefixed for display with the necessary amount
+of space.  Also headlines are prefixed with additional stars, so that the
+amount of indentation shifts by two@footnote{See the variable
+@code{org-indent-indentation-per-level}.}  spaces per level.  All headline
+stars but the last one are made invisible using the @code{org-hide}
+face@footnote{Turning on @code{org-indent-mode} sets
+@code{org-hide-leading-stars} to @code{t} and @code{org-adapt-indentation} to
+@code{nil}.} - see below under @samp{2.} for more information on how this
+works.  You can turn on @code{org-indent-mode} for all files by customizing
+the variable @code{org-startup-indented}, or you can turn it on for
+individual files using
+
+@example
+#+STARTUP: indent
+@end example
+
+If you want a similar effect in earlier version of Emacs and/or Org, or if
+you want the indentation to be hard space characters so that the plain text
+file looks as similar as possible to the Emacs display, Org supports you in
+the following way:
 
 @enumerate
 @item
@@ -10290,13 +10325,9 @@ with the headline, like
 @end example
 
 @vindex org-adapt-indentation
-A good way to get this indentation is by hand, and Org supports this with
-paragraph filling, line wrapping, and structure editing@footnote{See also the
-variable @code{org-adapt-indentation}.} preserving or adapting the
-indentation as appropriate.  A different approach would be to have a way to
-automatically indent lines according to outline structure by adding overlays
-or text properties.  But I have not yet found a robust and efficient way to
-do this in large files.
+Org supports this with paragraph filling, line wrapping, and structure
+editing@footnote{See also the variable @code{org-adapt-indentation}.},
+preserving or adapting the indentation as appropriate.
 
 @item
 @vindex org-hide-leading-stars
@@ -10307,10 +10338,8 @@ with
 
 @example
 #+STARTUP: hidestars
+#+STARTUP: showstars
 @end example
-
-@noindent
-Note that the opposite behavior is selected with @code{showstars}.
 
 With hidden stars, the tree becomes:
 
@@ -10325,13 +10354,12 @@ With hidden stars, the tree becomes:
 
 @noindent
 @vindex org-hide @r{(face)}
-Note that the leading stars are not truly replaced by whitespace, they
-are only fontified with the face @code{org-hide} that uses the
-background color as font color.  If you are not using either white or
-black background, you may have to customize this face to get the wanted
-effect.  Another possibility is to set this font such that the extra
-stars are @i{almost} invisible, for example using the color
-@code{grey90} on a white background.
+The leading stars are not truly replaced by whitespace, they are only
+fontified with the face @code{org-hide} that uses the background color as
+font color.  If you are not using either white or black background, you may
+have to customize this face to get the wanted effect.  Another possibility is
+to set this font such that the extra stars are @i{almost} invisible, for
+example using the color @code{grey90} on a white background.
 
 @item
 @vindex org-odd-levels-only
