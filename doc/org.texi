@@ -16,16 +16,15 @@
 @finalout
 
 @c Macro definitions
-@hyphenation{time-stamp time-stamps time-stamp-ing time-stamp-ed}
-@c I created macros for the ``id est'' abbreviation; if you are Strunkian
-@c then use the ``i.e.,'' expansion, otherwise use ``i.e.@:''.
+@iftex
+@c @hyphenation{time-stamp time-stamps time-stamp-ing time-stamp-ed}
+@end iftex
 @macro Ie {}
 I.e.,
 @end macro
 @macro ie {}
 i.e.,
 @end macro
-@c Similarly, there are macros for the ``exempli gratia'' abbreviation.
 @macro Eg {}
 E.g.,
 @end macro
