@@ -77,8 +77,8 @@ heading will be exposed in a children' view."
   :group 'org-plain-lists
   :type '(choice
 	  (const :tag "Never" nil)
-	  (const :tag "With cursor in plain list (recommended)" t)))
-	  (const :tag "As children of outline headings" integrate)
+	  (const :tag "With cursor in plain list (recommended)" t)
+	  (const :tag "As children of outline headings" integrate)))
 
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
