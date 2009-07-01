@@ -1587,7 +1587,7 @@ location with a prefix argument, offer the same menu as @kbd{C-c C-x f}.
 @kindex C-c C-o
 @kindex mouse-1
 @kindex mouse-2
-@item C-c C-c  @r{or} mouse-1/2
+@item C-c C-o  @r{or} mouse-1/2
 Footnote labels are also links to the corresponding definition/reference, and
 you can use the usual commands to follow these links.
 @end table
