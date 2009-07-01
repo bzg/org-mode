@@ -1570,6 +1570,7 @@ s   @r{Sort the footnote definitions by reference sequence.  During editing,}
     @r{sequence.  If you want them sorted, use this command, which will}
     @r{also move entries according to @code{org-footnote-section}.}
 r   @r{Renumber the simple @code{fn:N} footnotes.}
+S   @r{Short for first @code{r}, then @code{s} action.}
 n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}

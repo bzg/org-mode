@@ -296,13 +296,16 @@ With prefix arg SPECIAL, offer additional commands in a menu."
   (let (tmp c)
     (cond
      (special
-      (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  convert to [n]umeric  |  [d]elete")
+      (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  [S]=r+s |->[n]umeric  |  [d]elete")
       (setq c (read-char-exclusive))
       (cond
        ((equal c ?s)
 	(org-footnote-normalize 'sort))
        ((equal c ?r)
 	(org-footnote-renumber-fn:N))
+       ((equal c ?S)
+	(org-footnote-renumber-fn:N)
+	(org-footnote-normalize 'sort))
        ((equal c ?n)
 	(org-footnote-normalize))
        ((equal c ?d)
