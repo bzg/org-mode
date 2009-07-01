@@ -1,5 +1,8 @@
 2009-07-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-footnote.el (org-footnote-renumber-fn:N): New command.
+	(org-footnote-action): Offer renumbering.
+
 	* org.el (org-cycle): Honor the `integrate' value of
 	org-cycle-include-plain-lists'.
 

@@ -296,11 +296,13 @@ With prefix arg SPECIAL, offer additional commands in a menu."
   (let (tmp c)
     (cond
      (special
-      (message "Footnotes: [s]ort  |  convert to [n]umeric  |  [d]elete")
+      (message "Footnotes: [s]ort  |  [r]enumber fn:N  |  convert to [n]umeric  |  [d]elete")
       (setq c (read-char-exclusive))
       (cond
        ((equal c ?s)
 	(org-footnote-normalize 'sort))
+       ((equal c ?r)
+	(org-footnote-renumber-fn:N))
        ((equal c ?n)
 	(org-footnote-normalize))
        ((equal c ?d)
@@ -507,6 +509,24 @@ and all references of a footnote label."
 	    (incf ndef))))
       (message "%d definition(s) of and %d reference(s) of footnote %s removed"
 	       ndef nref label))))
+
+(defun org-footnote-renumber-fn:N ()
+  "Renumber the simple footnotes like fn:17 into a sequence in the document."
+  (interactive)
+  (let (map i (n 0))
+    (save-excursion
+      (save-restriction
+	(widen)
+	(goto-char (point-min))
+	(while (re-search-forward "\\[fn:\\([0-9]+\\)[]:]" nil t)
+	  (setq i (string-to-number (match-string 1)))
+	  (when (and (string-match "\\S-" (buffer-substring
+					   (point-at-bol) (match-beginning 0)))
+		     (not (assq i map)))
+	    (push (cons i (number-to-string (incf n))) map)))
+	(goto-char (point-min))
+	(while (re-search-forward "\\(\\[fn:\\)\\([0-9]+\\)\\([]:]\\)" nil t)
+	  (replace-match (concat "\\1" (cdr (assq (string-to-number (match-string 2)) map)) "\\3")))))))
 
 (provide 'org-footnote)
 
