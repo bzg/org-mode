@@ -139,7 +139,13 @@ table, allowing the test suite to be run be evaluation of the table
 and the results to be collected in the same table.
 
 *** Emacs initialization files stored in Org-Mode buffers
-Once org-babel-tangle is completed this could be a very compelling use case.
+Using `org-babel-tangle' it is possible to embed your Emacs
+initialization into org-mode files.  This allows for folding,
+note-taking, todo's etc... embedded with the source-code of your Emacs
+initialization, and through org-mode's publishing features aids in
+sharing your customizations with others.
+
+**** my customization
 
 
 ** features
