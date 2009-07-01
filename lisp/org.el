@@ -15805,8 +15805,16 @@ which make use of the date at the cursor."
   (org-set-local 'comment-start-skip "^#+[ \t]*")
   (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|]")
   ;; The paragraph starter includes hand-formatted lists.
-  (org-set-local 'paragraph-start
-		 "\f\\|[ 	]*$\\|\\*+ \\|\f\\|[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)\\|[ \t]*[:|]")
+  (org-set-local 
+   'paragraph-start
+   (concat
+    "\f" "\\|"
+    "[ 	]*$" "\\|"
+    "\\*+ " "\\|"
+    "[ \t]*\\([-+*][ \t]+\\|[0-9]+[.)][ \t]+\\)" "\\|"
+    "[ \t]*[:|]" "\\|"
+    "\\$\\$" "\\|"
+    "\\\\\\(begin\\|end\\|[][]\\)"))
   ;; Inhibit auto-fill for headers, tables and fixed-width lines.
   ;; But only if the user has not turned off tables or fixed-width regions
   (org-set-local

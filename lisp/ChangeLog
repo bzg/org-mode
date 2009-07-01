@@ -1,3 +1,8 @@
+2009-07-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-set-autofill-regexps): Improve the paragraph-start
+	regexp to work better with LaTeX commands.
+
 2009-06-30  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-feed.el (org-feed-update): fix problem with non-existing
