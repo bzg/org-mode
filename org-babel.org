@@ -1,5 +1,5 @@
 #+TITLE: org-babel --- facilitating communication between programming languages and people
-#+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
+#+SEQ_TODO: TODO PROPOSED STARTED | DONE DEFERRED REJECTED
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: oddeven hideblocks
 
@@ -198,7 +198,34 @@ would then be [[#sandbox][the sandbox]].
 
 
 * Tasks [27/42]
-** TODO support for working with =*Org Edit Src Example*= buffers [1/4]
+** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
+*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
+That seems to imply that the header references need to be evaluated
+and transformed into the target language object when we hit C-c ' to
+enter the *Org Edit Src* buffer [DED]
+
+Good point, I heartily agree that this should be supported [Eric]
+
+(or at least before the first time we attempt to evaluate code in that
+buffer -- I suppose there might be an argument for lazy evaluation, in
+case someone hits C-c ' but is "just looking" and not actually
+evaluating anything.) Of course if evaluating the reference is
+computationally intensive then the user might have to wait before they
+get the *Org Edit Src* buffer. [DED]
+
+I fear that it may be hard to anticipate when the references will be
+needed, some major-modes do on-the-fly evaluation while the buffer is
+being edited.  I think that we should either do this before the buffer
+is opened or not at all, specifically I think we should resolve
+references if the user calls C-c ' with a prefix argument.  Does that
+sound reasonable? [Eric]
+
+Yes [Dan]
+
+[Dan] So now that we have org-src-mode and org-src-mode-hook, I guess
+org-babel should do this by using the hook to make sure that, when C-c
+C-' is issued on a source block, any references are resolved and
+assignments are made in the appropriate session.
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
 already thought of this, but just to note it down: it would be really
@@ -213,8 +240,19 @@ I had not thought of that, but I agree whole heartedly. [Eric]
 
 Once this is done every variable should be able to dump regions into
 their inferior-process buffer using major-mode functions.
+*** DEFERRED send code to inferior process
+Another thought on this topic: I think we will want users to send
+chunks of code to the interpreter from within the *Org Edit Src*
+buffer, and I think that's what you have in mind already. In ESS that
+is done using the ess-eval-* functions. [DED]
 
-*** TODO some possible requests/proposed changes for Carsten [2/3]
+I think we can leave this up to the major-mode in the source code
+buffer, as almost every source-code major mode will have functions for
+doing things like sending regions to the inferior process.  If
+anything we might need to set the value of the buffer local inferior
+process variable. [Eric]
+
+*** DONE some possible requests/proposed changes for Carsten [4/4]
     While I remember, some possible requests/proposed changes for Carsten
     come to mind in that regard:
 
@@ -238,7 +276,8 @@ buffer."
 
 I think this is great, but I think it should be implemented in the
 org-mode core
-**** TODO Rename buffer and minor mode?
+
+**** DEFERRED Rename buffer and minor mode?
      Something shorter than *Org Edit Src Example* for the buffer
      name. org-babel is bringing org's source code interaction to a
      level of maturity where the 'example' is no longer
@@ -259,45 +298,10 @@ org-mode core
      perhaps we will also have more functionality to add to that minor
      mode, making it even more of a misnomer. Perhaps something like
      org-src-mode would be better.
-
-**** DEFERRED a hook called when the src edit buffer is created
-This should be implemented in the org-mode core
+**** DONE Changed minor mode name and added hooks
      
-
-*** DEFERRED send code to inferior process
-Another thought on this topic: I think we will want users to send
-chunks of code to the interpreter from within the *Org Edit Src*
-buffer, and I think that's what you have in mind already. In ESS that
-is done using the ess-eval-* functions. [DED]
-
-I think we can leave this up to the major-mode in the source code
-buffer, as almost every source-code major mode will have functions for
-doing things like sending regions to the inferior process.  If
-anything we might need to set the value of the buffer local inferior
-process variable. [Eric]
-
-*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
-That seems to imply that the header references need to be evaluated
-and transformed into the target language object when we hit C-c ' to
-enter the *Org Edit Src* buffer [DED]
-
-Good point, I heartily agree that this should be supported [Eric]
-
-(or at least before the first time we attempt to evaluate code in that
-buffer -- I suppose there might be an argument for lazy evaluation, in
-case someone hits C-c ' but is "just looking" and not actually
-evaluating anything.) Of course if evaluating the reference is
-computationally intensive then the user might have to wait before they
-get the *Org Edit Src* buffer. [DED]
-
-I fear that it may be hard to anticipate when the references will be
-needed, some major-modes do on-the-fly evaluation while the buffer is
-being edited.  I think that we should either do this before the buffer
-is opened or not at all, specifically I think we should resolve
-references if the user calls C-c ' with a prefix argument.  Does that
-sound reasonable? [Eric]
-
-Yes [Dan]
+**** DEFERRED a hook called when the src edit buffer is created
+     This should be implemented in the org-mode core
 
 ** TODO resolve references to other org buffers/files
    This would allow source blocks to call upon tables, source-blocks,
@@ -349,12 +353,13 @@ msg + " y python"
 #+begin_src emacs-lisp :var msg="org-babel speaks"
 (concat msg " elisp")
 #+end_src
-** TODO share org-babel
+** STARTED share org-babel [1/4]
 how should we share org-babel?
 
-- post to org-mode and ess mailing lists
-- create a org-babel page on worg
-- create a short screencast demonstrating org-babel in action
+*** DONE post to org-mode
+*** TODO post to ess mailing list
+*** TODO create a org-babel page on worg
+*** TODO create a short screencast demonstrating org-babel in action
 
 *** examples
 we need to think up some good examples
@@ -1914,40 +1919,20 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [16/21]
+* Bugs [17/23]
+** TODO Allow source blocks to be recognised when #+ are not first characters on the line
+   I think Carsten has recently altered the core so that #+ can have
+   preceding whitespace, at least for literal/code examples. org-babel
+   should support this.
+** PROPOSED make :results replace the default?
+   I'm tending to think that appending results to pre-existing results
+   creates mess, and that the cleaner `replace' option should be the
+   default. E.g. when a source block creates an image, we would want
+   that to be updated, rather than have a new one be added.
 ** PROPOSED external shell execution can't isolate return values
 I have no idea how to do this as of yet.  The result is that when
 shell functions are run w/o a session there is no difference between
 the =output= and =value= result arguments.
-
-** TODO weird escaped characters in shell prompt break shell evaluation
-   E.g. this doesn't work. Should the shell sessions set a sane prompt
-   when they start up? Or is it a question of altering
-   comint-prompt-regexp? Or altering org-babel regexps?
-   
-#+begin_src sh   
-   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
-   prompt_col=$red
-   prompt_char='>'
-   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
-#+end_src
-
-   I just pushed a good amount of changes, could you see if your shell
-   problems still exist?
-
-   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
-   org-babel-sh.el, raw gets the value
-
-("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
-
-   and therefore (member org-babel-sh-eoe-output ...) fails
-
-   I think that `comint-prompt-regexp' needs to be altered to match
-   the shell prompt.  This shouldn't be too difficult to do by hand,
-   using the `regexp-builder' command and should probably be part of
-   the user's regular emacs init.  I can't think of a way for us to
-   set this automatically, and we are SOL without a regexp to match
-   the prompt.
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -1980,6 +1965,35 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+
+** DEFERRED weird escaped characters in shell prompt break shell evaluation
+   E.g. this doesn't work. Should the shell sessions set a sane prompt
+   when they start up? Or is it a question of altering
+   comint-prompt-regexp? Or altering org-babel regexps?
+   
+#+begin_src sh   
+   black=30 ; red=31 ; green=32 ; yellow=33 ; blue=34 ; magenta=35 ; cyan=36 ; white=37
+   prompt_col=$red
+   prompt_char='>'
+   export PS1="\[\033[${prompt_col}m\]\w${prompt_char} \[\033[0m\]"
+#+end_src
+
+   I just pushed a good amount of changes, could you see if your shell
+   problems still exist?
+
+   The problem's still there. Specifically, aIui, at [[file:lisp/langs/org-babel-sh.el::raw%20org%20babel%20comint%20with%20output%20buffer%20org%20babel%20sh%20eoe%20output%20nil%20insert%20full%20body%20comint%20send%20input%20nil%20t][this line]] of
+   org-babel-sh.el, raw gets the value
+
+("" "[0m Sun Jun 14 19:26:24 EDT 2009\n" "[0m org_babel_sh_eoe\n" "[0m ")
+
+   and therefore (member org-babel-sh-eoe-output ...) fails
+
+   I think that `comint-prompt-regexp' needs to be altered to match
+   the shell prompt.  This shouldn't be too difficult to do by hand,
+   using the `regexp-builder' command and should probably be part of
+   the user's regular emacs init.  I can't think of a way for us to
+   set this automatically, and we are SOL without a regexp to match
+   the prompt.
 ** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
@@ -2163,7 +2177,7 @@ mean(mean(table))
 mean(table)
 #+end_src
 
-** DEFERRED org bug/request: prevent certain org behaviour within code blocks
+** DONE org bug/request: prevent certain org behaviour within code blocks
    E.g. [[]] gets recognised as a link (when there's text inside the
    brackets). This is bad for R code at least, and more generally
    could be argued to be inappropriate. Is it difficult to get org to
@@ -2172,6 +2186,9 @@ mean(table)
    I believe Carsten addressed this recently on the mailing list with
    the comment that it was indeed a difficult issue.  I believe this
    may be one area where we could wait for an upstream (org-mode) fix.
+
+   [Dan] Carsten has fixed this now in the core.
+
 ** DONE with :results replace, non-table output doesn't replace table output
    And vice versa. E.g. Try this first with table and then with len(table) [DED]
 #+begin_src python :var table=sandbox :results replace
