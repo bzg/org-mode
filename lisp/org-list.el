@@ -57,15 +57,28 @@
   :tag "Org Plain lists"
   :group 'org-structure)
 
-(defcustom org-cycle-include-plain-lists nil
-  "Non-nil means, include plain lists into visibility cycling.
-This means that during cycling, plain list items will *temporarily* be
-interpreted as outline headlines with a level given by 1000+i where i is the
-indentation of the bullet.  In all other operations, plain list items are
-not seen as headlines.	For example, you cannot assign a TODO keyword to
-such an item."
+(defcustom org-cycle-include-plain-lists t
+  "When t, make TAB cycle visibility on plain list items.
+
+Cycling plain lists works only when the cursor is on a plain list
+item.  When the cursor is on an outline heading, plain lists are
+treated as text.  This is the most stable way of handling this,
+which is why it is the default.
+
+When this is the symbol `integrate', then during cycling, plain
+list items will *temporarily* be interpreted as outline headlines
+with a level given by 1000+i where i is the indentation of the
+bullet.  This setting can lead to strange effects when switching
+visibility to `children', because the first \"child\" in a
+subtree decides what children should be listed.  If that first
+\"child\" is a plain list item with an implied large level
+number, all true children and grand children of the outline
+heading will be exposed in a children' view."
   :group 'org-plain-lists
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "With cursor in plain list (recommended)" t)))
+	  (const :tag "As children of outline headings" integrate)
 
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.

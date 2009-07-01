@@ -1368,11 +1368,12 @@ of an item (the line with the bullet or number).
 @kindex @key{TAB}
 @item @key{TAB}
 @vindex org-cycle-include-plain-lists
-Items can be folded just like headline levels if you set the variable
-@code{org-cycle-include-plain-lists}.  The level of an item is then
-given by the indentation of the bullet/number.  Items are always
-subordinate to real headlines, however; the hierarchies remain
-completely separated.
+Items can be folded just like headline levels.  Normally this works only if
+the cursor is on a plain list item.  For more details, see the variable
+@code{org-cycle-include-plain-lists}. to @code{integrate}, plain list items
+will be treated like low-level.  The level of an item is then given by the
+indentation of the bullet/number.  Items are always subordinate to real
+headlines, however; the hierarchies remain completely separated.
 
 If @code{org-cycle-include-plain-lists} has not been set, @key{TAB}
 fixes the indentation of the current line in a heuristic way.

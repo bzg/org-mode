@@ -4730,7 +4730,8 @@ in special contexts.
 	   (outline-regexp
 	    (cond
 	     ((not (org-mode-p)) outline-regexp)
-	     (org-cycle-include-plain-lists
+	     ((or (eq org-cycle-include-plain-lists 'integrate)
+		  (and org-cycle-include-plain-lists (org-at-item-p)))
 	      (concat "\\(?:\\*"
 		      (if nstars (format "\\{1,%d\\}" nstars) "+")
 		      " \\|\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) \\)"))

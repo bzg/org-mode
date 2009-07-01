@@ -1,5 +1,11 @@
 2009-07-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-cycle): Honor the `integrate' value of
+	org-cycle-include-plain-lists'.
+
+	* org-list.el (org-cycle-include-plain-lists): New allowed value
+	`internal'.  Improve the docstring.
+
 	* org.el (org-set-autofill-regexps): Improve the paragraph-start
 	regexp to work better with LaTeX commands.
 
