@@ -6330,7 +6330,7 @@ This will remove the markers, and the overlays."
   (interactive)
   (unless org-agenda-bulk-marked-entries
     (error "No entries are marked"))
-  (message "Action: [r]efile [$]archive [A]rch-to-sib [t]odo [+]tag [-]tag")
+  (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
   (let* ((action (read-char-exclusive))
 	 (entries (reverse org-agenda-bulk-marked-entries))
 	 cmd rfloc state e tag (cnt 0))
@@ -6371,7 +6371,22 @@ This will remove the markers, and the overlays."
 			 (mapcar (lambda (x)
 				   (if (stringp (car x)) x)) org-tag-alist)))))
       (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
-     
+
+     ((memq action '(?s ?d))
+      (let* ((date (org-read-date
+		    nil nil nil
+		    (if (eq action ?s) "(Re)Schedule to" "Set Deadline to")))
+	     (ans org-read-date-final-answer)
+	     (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
+	(setq cmd `(let* ((bound (fboundp 'read-string))
+			  (old (and bound (symbol-function 'read-string))))
+		     (unwind-protect
+			 (progn
+			   (fset 'read-string (lambda (&rest ignore) ,ans))
+			   (call-interactively ',c1))
+		       (if bound
+			   (fset 'read-string old)
+			 (fmakunbound 'read-string)))))))
      (t (error "Invalid bulk action")))
     
     ;; Now loop over all markers and apply cmd

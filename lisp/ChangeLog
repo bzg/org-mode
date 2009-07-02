@@ -1,5 +1,12 @@
 2009-07-02  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-bulk-action): Add scheduling and
+	setting the deadline.
+
+	* org.el (org-read-date-final-answer): New variable.
+	(org-read-date): Store the final answer string, including the date
+	from the calendar, for reuse by agenda bulk commands.
+
 	* org-publish.el (org-publish-attachment): Fix publishing of
 	attachments.
 

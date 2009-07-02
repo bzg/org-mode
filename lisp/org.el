@@ -12005,6 +12005,7 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-overlay nil)
 (defvar org-dcst nil) ; dynamically scoped
 (defvar org-read-date-history nil)
+(defvar org-read-date-final-answer nil)
 
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input)
@@ -12165,6 +12166,7 @@ user."
 	  (setq org-read-date-overlay nil)))))
 
     (setq final (org-read-date-analyze ans def defdecode))
+    (setq org-read-date-final-answer ans)
 
     (if to-time
 	(apply 'encode-time final)
