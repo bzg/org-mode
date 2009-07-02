@@ -4184,11 +4184,13 @@ list of the fields in the rectangle ."
 	  (save-excursion
 	    (goto-char (point-min))
 	    (if (re-search-forward
-		 (concat "^#\\+TBLNAME:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
+		 (concat "^#[ \t]*\\+TBLNAME:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
 		 nil t)
 		(setq buffer (current-buffer) loc (match-beginning 0))
-	      (setq id-loc (org-id-find name-or-id 'marker)
-		    buffer (marker-buffer id-loc)
+	      (setq id-loc (org-id-find name-or-id 'marker))
+	      (unless (and id-loc (markerp id-loc))
+		(error "Can't find remote table \"%s\"" name-or-id))
+	      (setq buffer (marker-buffer id-loc)
 		    loc (marker-position id-loc))
 	      (move-marker id-loc nil)))
 	  (switch-to-buffer buffer)
