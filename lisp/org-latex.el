@@ -1549,7 +1549,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 		     (point-at-eol))))
       (if end
 	  (add-text-properties start end '(org-protected t))
-	(goto-char (point-at-eol))))))
+	(goto-char (point-at-eol)))))
 
   ;; Preserve math snippets
 
