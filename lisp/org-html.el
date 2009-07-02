@@ -61,7 +61,7 @@ by the footnotes themselves."
 
 (defcustom org-export-html-xml-declaration
   '(("html" . "<?xml version=\"1.0\" encoding=\"%s\"?>")
-    ("php" . "<?php echo '<?xml version=\"1.0\" encoding=\"%s\" ?>'; ?>"))
+    ("php" . "<?php echo \"<?xml version=\\\"1.0\\\" encoding=\\\"%s\\\" ?>\"; ?>"))
   "The extension for exported HTML files.
 %s will be replaced with the charset of the exported file.
 This may be a string, or an alist with export extensions
