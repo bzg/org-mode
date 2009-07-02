@@ -443,7 +443,9 @@ See `org-publish-org-to' to the list of arguments."
     (make-directory pub-dir t))
   (or (equal (expand-file-name (file-name-directory filename))
 	     (file-name-as-directory (expand-file-name pub-dir)))
-      (copy-file filename pub-dir t)))
+      (copy-file filename
+		 (expand-file-name (file-name-nondirectory filename) pub-dir)
+		 t)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Publishing files, sets of files, and indices
