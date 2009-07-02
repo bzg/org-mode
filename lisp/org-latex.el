@@ -1542,13 +1542,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   (goto-char (point-min))
   (while (re-search-forward "^[ \t]*\\\\begin{\\([a-zA-Z]+\\*?\\)}" nil t)
     (let* ((start (progn (beginning-of-line) (point)))
-	   (end (or (and (re-search-forward
-			  (concat "^[ \t]*\\\\end{"
-				  (regexp-quote (match-string 1))
-				  "}") nil t)
-			 (point-at-eol))
-		    (point-max))))
-      (add-text-properties start end '(org-protected t))))
+	   (end (and (re-search-forward
+		      (concat "^[ \t]*\\\\end{"
+			      (regexp-quote (match-string 1))
+			      "}") nil t)
+		     (point-at-eol))))
+      (if end
+	  (add-text-properties start end '(org-protected t))
+	(goto-char (point-at-eol))))))
 
   ;; Preserve math snippets
 
