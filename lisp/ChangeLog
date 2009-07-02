@@ -2,6 +2,7 @@
 
 	* org-latex.el (org-export-latex-quotation-marks): Fix export of
 	quotation makrs in parenthesis.
+	(org-remove-initial-hash): New function.
 
 	* org-table.el (org-table-get-remote-range): Find #+TBLNAME also
 	when indented.

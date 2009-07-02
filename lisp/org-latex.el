@@ -1517,10 +1517,15 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				     (org-solidify-link-text raw-path) desc)))
 	     ((not type)
 	      (insert (format "\\hyperref[%s]{%s}"
-			      (org-solidify-link-text raw-path) desc)))
+			      (org-remove-initial-hash
+			       (org-solidify-link-text raw-path)) desc)))
 	     (path (insert (format "\\href{%s}{%s}" path desc)))
 	     (t (insert "\\texttt{" desc "}")))))))
 
+(defun org-remove-initial-hash (s)
+  (if (string-match "\\`#" s)
+      (substring s 1)
+    s))
 (defvar org-latex-entities)   ; defined below
 (defvar org-latex-entities-regexp)   ; defined below
 (defvar org-latex-entities-exceptions)   ; defined below
