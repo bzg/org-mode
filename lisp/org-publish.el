@@ -192,13 +192,20 @@ Any changes made by this hook will be saved."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Timestamp-related functions
 
-(defun org-publish-timestamp-filename (filename)
+(defun org-publish-timestamp-filename (filename &optional pub-dir pub-func)
   "Return path to timestamp file for filename FILENAME."
+  (setq filename (concat filename "::" (or pub-dir "") "::"
+			 (format "%s" (or pub-func ""))))
   (concat (file-name-as-directory org-publish-timestamp-directory)
 	  "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
-(defun org-publish-needed-p (filename)
-  "Return `t' if FILENAME should be published."
+(defun org-publish-needed-p (filename &optional pub-dir pub-func true-pub-dir)
+  "Return `t' if FILENAME should be published in PUB-DIR using PUB-FUNC.
+TRUE-PUB-DIR is there the file will truely end up.  Currently we are not using
+this - maybe it can eventually be used to check if the file is present at
+the target location, and how old it is.  Right ow we cannot do this, because
+we do not know under what file name the file will be stored - the publishing
+function can still decide about that independently."
   (let ((rtn
 	 (if org-publish-use-timestamps-flag
 	     (if (file-exists-p org-publish-timestamp-directory)
@@ -208,20 +215,22 @@ Any changes made by this hook will be saved."
 			    org-publish-timestamp-directory)
 		   ;; there is a timestamp, check if FILENAME is newer
 		   (file-newer-than-file-p
-		    filename (org-publish-timestamp-filename filename)))
+		    filename (org-publish-timestamp-filename
+			      filename pub-dir pub-func)))
 	       (make-directory org-publish-timestamp-directory)
 	       t)
 	   ;; don't use timestamps, always return t
 	   t)))
     (if rtn
-	(message "Publishing file %s" filename)
+	(message "Publishing file %s using `%s'" filename pub-func)
       (message   "Skipping unmodified file %s" filename))
     rtn))
 
-(defun org-publish-update-timestamp (filename)
+(defun org-publish-update-timestamp (filename &optional pub-dir pub-func)
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
-  (let ((timestamp-file (org-publish-timestamp-filename filename))
+  (let ((timestamp-file (org-publish-timestamp-filename
+			 filename pub-dir pub-func))
 	newly-created-timestamp)
     (if (not (file-exists-p timestamp-file))
 	;; create timestamp file if needed
@@ -452,41 +461,45 @@ See `org-publish-org-to' to the list of arguments."
 
 (defun org-publish-file (filename &optional project)
   "Publish file FILENAME from PROJECT."
-  (when (org-publish-needed-p filename)
-    (let* ((project
-	    (or project
-		(or (org-publish-get-project-from-filename filename)
-		    (if (y-or-n-p
-			 (format "%s is not in a project.  Re-read the list of projects files? "
-				 (abbreviate-file-name filename)))
-			;; If requested, re-initialize the list of projects files
-			(progn (org-publish-initialize-files-alist t)
-			       (or (org-publish-get-project-from-filename filename)
-				   (error "File %s not part of any known project"
-					  (abbreviate-file-name filename))))
-		      (error "Can't publish file outside of a project")))))
-	   (project-plist (cdr project))
-	   (ftname (file-truename filename))
-	   (publishing-function
-	    (or (plist-get project-plist :publishing-function)
-		'org-publish-org-to-html))
-	   (base-dir (file-name-as-directory
-		      (file-truename (plist-get project-plist :base-directory))))
-	   (pub-dir (file-name-as-directory
-		     (file-truename (plist-get project-plist :publishing-directory))))
-	   tmp-pub-dir)
-      (setq tmp-pub-dir
-	    (file-name-directory
-	     (concat pub-dir
-		     (and (string-match (regexp-quote base-dir) ftname)
-			  (substring ftname (match-end 0))))))
-      (if (listp publishing-function)
-	  ;; allow chain of publishing functions
-	  (mapc (lambda (f)
-		  (funcall f project-plist filename tmp-pub-dir))
-		publishing-function)
-	(funcall publishing-function project-plist filename tmp-pub-dir)))
-    (org-publish-update-timestamp filename)))
+  (let* ((project
+	  (or project
+	      (or (org-publish-get-project-from-filename filename)
+		  (if (y-or-n-p
+		       (format "%s is not in a project.  Re-read the list of projects files? "
+			       (abbreviate-file-name filename)))
+		      ;; If requested, re-initialize the list of projects files
+		      (progn (org-publish-initialize-files-alist t)
+			     (or (org-publish-get-project-from-filename filename)
+				 (error "File %s not part of any known project"
+					(abbreviate-file-name filename))))
+		    (error "Can't publish file outside of a project")))))
+	 (project-plist (cdr project))
+	 (ftname (file-truename filename))
+	 (publishing-function
+	  (or (plist-get project-plist :publishing-function)
+	      'org-publish-org-to-html))
+	 (base-dir (file-name-as-directory
+		    (file-truename (plist-get project-plist :base-directory))))
+	 (pub-dir (file-name-as-directory
+		   (file-truename (plist-get project-plist :publishing-directory))))
+	 tmp-pub-dir)
+    (setq tmp-pub-dir
+	  (file-name-directory
+	   (concat pub-dir
+		   (and (string-match (regexp-quote base-dir) ftname)
+			(substring ftname (match-end 0))))))
+    (if (listp publishing-function)
+	;; allow chain of publishing functions
+	(mapc (lambda (f)
+		(when (org-publish-needed-p filename pub-dir f tmp-pub-dir)
+		  (funcall f project-plist filename tmp-pub-dir)
+		  (org-publish-update-timestamp filename pub-dir f)))
+	      publishing-function)
+      (when (org-publish-needed-p filename pub-dir publishing-function
+				  tmp-pub-dir)
+	(funcall publishing-function project-plist filename tmp-pub-dir)
+	(org-publish-update-timestamp
+	 filename pub-dir publishing-function)))))
 
 (defun org-publish-projects (projects)
   "Publish all files belonging to the PROJECTS alist.
