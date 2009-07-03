@@ -3414,6 +3414,8 @@ After a match, the following groups carry important information:
     ("fnprompt" org-footnote-auto-label nil)
     ("fnconfirm" org-footnote-auto-label confirm)
     ("fnplain" org-footnote-auto-label plain)
+    ("fnadjust" org-footnote-auto-adjust t)
+    ("nofnadjust" org-footnote-auto-adjust nil)
     ("constcgs" constants-unit-system cgs)
     ("constSI" constants-unit-system SI)
     ("noptag" org-tag-persistent-alist nil)

@@ -112,6 +112,23 @@ plain      Automatically create plain number labels like [1]"
 	  (const :tag "Offer automatic [fn:N] for editing" confirm)
 	  (const :tag "Create automatic [N]" plain)))
 
+(defcustom org-footnote-auto-adjust nil
+  "Non-nil means, automatically adjust footnotes after insert/delete.
+When this is t, after each insertion or deletion of a footnote,
+simple fn:N footnotes will be renumbered, and all footnotes will be sorted.
+If you want to have just sorting or just renumbering, set this variable
+to `sort' or `renumber'.
+
+The main values of this variable can be set with in-buffer options:
+
+#+STARTUP: fnadjust
+#+STARTUP: nofnadjust"
+  :group 'org-footnote
+  :type '(choice
+	  (const :tag "Renumber" renumber)
+	  (const :tag "Sort" sort)
+	  (const :tag "Renumber and Sort" t)))
+
 (defcustom org-footnote-fill-after-inline-note-extraction nil
   "Non-nil means, fill paragraphs after extracting footnotes.
 When extracting inline footnotes, the lengths of lines can change a lot.
@@ -247,10 +264,12 @@ or new, let the user edit the definition of the footnote."
       (message "New reference to existing note"))
      (org-footnote-define-inline
       (insert "[" label ": ]")
-      (backward-char 1))
+      (backward-char 1)
+      (org-footnote-auto-adjust-maybe))
      (t
       (insert "[" label "]")
-      (org-footnote-create-definition label)))))
+      (org-footnote-create-definition label)
+      (org-footnote-auto-adjust-maybe)))))
 
 (defun org-footnote-create-definition (label)
   "Start the definition of a footnote with label LABEL."
@@ -322,7 +341,7 @@ With prefix arg SPECIAL, offer additional commands in a menu."
 ;;;###autoload
 (defun org-footnote-normalize (&optional sort-only for-preprocessor)
   "Collect the footnotes in various formats and normalize them.
-This find the different sorts of footnotes allowed in Org, and
+This finds the different sorts of footnotes allowed in Org, and
 normalizes them to the usual [N] format that is understood by the
 Org-mode exporters.
 When SORT-ONLY is set, only sort the footnote definitions into the
@@ -510,6 +529,7 @@ and all references of a footnote label."
 	      (goto-char (point-max)))
 	    (delete-region beg (point))
 	    (incf ndef))))
+      (org-footnote-auto-adjust-maybe)
       (message "%d definition(s) of and %d reference(s) of footnote %s removed"
 	       ndef nref label))))
 
@@ -530,6 +550,20 @@ and all references of a footnote label."
 	(goto-char (point-min))
 	(while (re-search-forward "\\(\\[fn:\\)\\([0-9]+\\)\\([]:]\\)" nil t)
 	  (replace-match (concat "\\1" (cdr (assq (string-to-number (match-string 2)) map)) "\\3")))))))
+
+(defun org-footnote-auto-adjust-maybe ()
+  "Renumber and/or sort footnotes according to user settings."
+  (when (memq org-footnote-auto-adjust '(t renumber))
+    (org-footnote-renumber-fn:N))
+  (when (memq org-footnote-auto-adjust '(t sort))
+    (let ((label (nth 1 (org-footnote-at-definition-p))))
+      (org-footnote-normalize 'sort)
+      (when label
+	(goto-char (point-min))
+	(and (re-search-forward (concat "^\\[" (regexp-quote label) "\\]")
+				nil t)
+	     (progn (insert " ") 
+		    (just-one-space)))))))
 
 (provide 'org-footnote)
 

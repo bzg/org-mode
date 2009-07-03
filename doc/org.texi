@@ -1524,7 +1524,9 @@ LaTeX}).  Here are the valid references:
 
 @table @code
 @item [1]
-A plain numeric footnote marker.
+A plain numeric footnote marker.  Compatible with @file{footnote.el}, but not
+recommended because somthing like @samp{[1]} could easily be part of a code
+snippet.
 @item [fn:name]
 A named footnote reference, where @code{name} is a unique label word, or, for
 simplicity of automatic creation, a number.
@@ -1555,6 +1557,7 @@ is at a definition, jump to the (first) reference.
 
 @vindex org-footnote-define-inline
 @vindex org-footnote-section
+@vindex org-footnote-auto-adjust
 Otherwise, create a new footnote.  Depending on the variable
 @code{org-footnote-define-inline}@footnote{The corresponding in-buffer
 setting is: @code{#+STARTUP: fninline} or @code{#+STARTUP: nofninline}}, the
@@ -1568,18 +1571,27 @@ options is offered:
 s   @r{Sort the footnote definitions by reference sequence.  During editing,}
     @r{Org makes no effort to sort footnote definitions into a particular}
     @r{sequence.  If you want them sorted, use this command, which will}
-    @r{also move entries according to @code{org-footnote-section}.}
-r   @r{Renumber the simple @code{fn:N} footnotes.}
+    @r{also move entries according to @code{org-footnote-section}.  Automatic}
+    @r{sorting after each insertion/deletion can be configured using the}
+    @r{variable @code{org-footnote-auto-adjust}.}
+r   @r{Renumber the simple @code{fn:N} footnotes.  Automatic renumbering}
+    @r{after each insertion/deletion can be configured using the variable}
+    @r{@code{org-footnote-auto-adjust}.}
 S   @r{Short for first @code{r}, then @code{s} action.}
 n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
-    @r{meant to be the final step before finishing a document (@eg{} sending}
+    @r{meant to be the final step before finishing a document (e.g. sending}
     @r{off an email).  The exporters do this automatically, and so could}
     @r{something like @code{message-send-hook}.}
 d   @r{Delete the footnote at point, and all definitions of and references}
     @r{to it.}
 @end example
+Depending on the variable @code{org-footnote-auto-adjust}@footnote{the
+corresponding in-buffer options are @code{fnadjust} and @code{nofnadjust}.},
+renumbering and sorting footnotes can be automatic after each insertion or
+deletion.
+
 @kindex C-c C-c
 @item C-c C-c
 If the cursor is on a footnote reference, jump to the definition.  If it is a
@@ -10114,16 +10126,19 @@ constSI    @r{@file{constants.el} should use the SI unit system}
 @end example
 @vindex org-footnote-define-inline
 @vindex org-footnote-auto-label
+@vindex org-footnote-auto-adjust
 To influence footnote settings, use the following keywords.  The
-corresponding variables are @code{org-footnote-define-inline} and
-@code{org-footnote-auto-label}.
+corresponding variables are @code{org-footnote-define-inline},
+@code{org-footnote-auto-label}, and @code{org-footnote-auto-adjust}.
 @cindex @code{fninline}, STARTUP keyword
-@cindex @code{fnnoinline}, STARTUP keyword
+@cindex @code{nofninline}, STARTUP keyword
 @cindex @code{fnlocal}, STARTUP keyword
 @cindex @code{fnprompt}, STARTUP keyword
 @cindex @code{fnauto}, STARTUP keyword
 @cindex @code{fnconfirm}, STARTUP keyword
 @cindex @code{fnplain}, STARTUP keyword
+@cindex @code{fnadjust}, STARTUP keyword
+@cindex @code{nofnadjust}, STARTUP keyword
 @example
 fninline    @r{define footnotes inline}
 fnnoinline  @r{define footnotes in separate section}
@@ -10132,6 +10147,8 @@ fnprompt    @r{prompt for footnote labels}
 fnauto      @r{create [fn:1]-like labels automatically (default)}
 fnconfirm   @r{offer automatic label for editing or confirmation}
 fnplain     @r{create [1]-like labels automatically}
+fnadjust    @r{automatically renumber and sort footnotes}
+nofnadjust  @r{do not renumber and sort automatically}
 @end example
 @cindex org-hide-block-startup
 To hide blocks on startup, use these keywords. The corresponding variable is

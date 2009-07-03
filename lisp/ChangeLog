@@ -1,5 +1,13 @@
 2009-07-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-footnote.el (org-footnote-auto-adjust): New option.
+	(org-footnote-auto-adjust-maybe): New function.
+	(org-footnote-new, org-footnote-delete): Call
+	`org-footnote-auto-adjust-maybe'.
+
+	* org.el (org-startup-options): Add new footnote-related
+	keywords.
+
 	* org-publish.el (org-publish-timestamp-filename): Additional
 	arguments PUB-DIR and PUB-FUNC, which are included in the hash.
 	(org-publish-needed-p): Additional arguments PUB-DIR PUB-FUNC
