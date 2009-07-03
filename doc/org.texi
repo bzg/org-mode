@@ -2172,7 +2172,8 @@ where NAME can be the name of a table in the current file as set by a
 @code{#+TBLNAME: NAME} line before the table.  It can also be the ID of an
 entry, even in a different file, and the reference then refers to the first
 table in that entry.  REF is an absolute field or range reference as
-described above, valid in the referenced table.
+described above for example @code{@@3$3} or @code{$somename}, valid in the
+referenced table.
 
 @node Formula syntax for Calc, Formula syntax for Lisp, References, The spreadsheet
 @subsection Formula syntax for Calc
