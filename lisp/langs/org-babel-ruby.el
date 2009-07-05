@@ -150,8 +150,10 @@ last statement in BODY."
              (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
     ;; comint session evaluation
     (message "session evaluation")
-    (let* ((full-body (mapconcat #'org-babel-chomp
-                                 (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+    (let* ((full-body
+	    (mapconcat
+	     #'org-babel-chomp
+	     (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                   (insert full-body) (comint-send-input nil t)))
            (results (cdr (member org-babel-ruby-eoe-indicator
