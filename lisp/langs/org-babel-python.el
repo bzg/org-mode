@@ -79,7 +79,7 @@ specifying a var of the same value."
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
     (format "%S" var)))
 
-(defun org-babel-python-table-or-results (results)
+(defun org-babel-python-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
@@ -153,7 +153,8 @@ last statement in BODY."
 		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
-             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+             (org-babel-python-table-or-string
+	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((full-body
@@ -170,7 +171,7 @@ last statement in BODY."
         (setq results (mapcar #'org-babel-python-read-string results))
         (case result-type
 	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
-	  (value (org-babel-python-table-or-results (org-babel-trim (car results)))))))))
+	  (value (org-babel-python-table-or-string (org-babel-trim (car results)))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around ruby string"
