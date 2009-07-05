@@ -222,23 +222,27 @@ of the following form.  (language body header-arguments-alist)"
 
 (defun org-babel-parse-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
+        (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
         (org-combine-plists org-babel-default-header-args
-                            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
+			    (org-babel-parse-header-arguments
+			     (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
 (defun org-babel-parse-inline-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
+        (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
         (org-combine-plists org-babel-default-inline-header-args
-                            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) ""))))))
+			    (org-babel-parse-header-arguments
+			     (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (delq nil
         (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))
-                         (cons (intern (concat ":" arg)) nil)))
+         (lambda (arg)
+	   (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+	       (cons (intern (concat ":" (match-string 1 arg)))
+		     (org-babel-chomp (match-string 2 arg)))
+	     (cons (intern (concat ":" arg)) nil)))
          (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
 
 (defun org-babel-where-is-src-block-head ()
@@ -408,8 +412,8 @@ non-nil."
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
 
-(defun org-babel-strip-protective-comas (body)
-  "Strip protective comas from bodies of source blocks."
+(defun org-babel-strip-protective-commas (body)
+  "Strip protective commas from bodies of source blocks."
   (replace-regexp-in-string "^,#" "#" body))
 
 (defun org-babel-read (cell)
