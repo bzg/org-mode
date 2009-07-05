@@ -52,18 +52,8 @@ called by `org-babel-execute-src-block'."
                                 (car pair)
                                 (org-babel-python-var-to-python (cdr pair))))
                       vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-         (session (org-babel-python-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-python-evaluate session full-body result-type)))
-    (if (member "scalar" result-params)
-        results
-      (setq results (case result-type ;; process results based on the result-type
-                      ('output (let ((tmp-file (make-temp-file "org-babel-python")))
-                                 (with-temp-file tmp-file (insert results))
-                                 (org-babel-import-elisp-from-file tmp-file)))
-                      ('value (org-babel-python-table-or-results results))))
-      (if (and (member "vector" results) (not (listp results)))
-          (list (list results))
-        results))))
+         (session (org-babel-python-initiate-session (cdr (assoc :session params)))))
+    (org-babel-python-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
