@@ -155,20 +155,74 @@ the header arguments specified at the source code block."
          (lang (first info))
          (body (second info))
          (params (org-combine-plists params (third info)))
+	 (result-params (split-string (or (cdr (assoc :results params)) "")))
+         (result-type (cond ((member "output" result-params) 'output)
+                            ((member "value" result-params) 'value)
+                            (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
-    (setq result (funcall cmd body params))
-    ;; possibly force result into a vector
-    (if (and (not (listp result)) (cdr (assoc :results params))
-             (member "vector" (split-string (cdr (assoc :results params)))))
-        (setq result (list result)))
+    (setq result (org-babel-process-result (funcall cmd body params) result-type))
     (if arg
         (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
       (org-babel-insert-result result (cdr (assoc :results params))))
     result))
+			      
+(defun org-babel-process-result (result result-type)
+  result)
+;; python
+;;    (if (member "scalar" result-params)
+;;        results
+;;   (setq result (case result-type ;; process results based on the result-type
+;; 		 ('output (let ((tmp-file (make-temp-file "org-babel-python")))
+;;                                  (with-temp-file tmp-file (insert results))
+;;                                  (org-babel-import-elisp-from-file tmp-file)))
+;; 		 ('value (org-babel-python-table-or-results results))))
+;;       (if (and (member "vector" results) (not (listp results)))
+;;           (list (list results))
+;;         results))))
+  
+
+;; ;; sh
+;;     (if (member "scalar" result-params)
+;;         results
+;;       (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
+;;                       (with-temp-file tmp-file (insert results))
+;;                       (org-babel-import-elisp-from-file tmp-file)))
+;;       (if (and (member "vector" results) (not (listp results)))
+;;           (list (list results))
+;;         results))))
+
+;; ;; R
+;;       (setq results (if (member "scalar" result-params)
+;;                         results
+;;                       (let ((tmp-file (make-temp-file "org-babel-R")))
+;;                         (with-temp-file tmp-file (insert results))
+;;                         (org-babel-import-elisp-from-file tmp-file))))
+;;       (if (and (member "vector" result-params) (not (listp results)))
+;;           (list (list results))
+;;         results))))
+
+
+;; ;; ruby
+;;     (if (member "scalar" result-params)
+;;         results
+;;       (case result-type ;; process results based on the result-type
+;;         ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
+;;                    (with-temp-file tmp-file (insert results))
+;;                    (org-babel-import-elisp-from-file tmp-file)))
+;;         ('value (org-babel-ruby-table-or-results results))))))
+
+
+
+;; ;; rest of org-babel-execute-src-block
+
+;;     ;; possibly force result into a vector
+;;     (if (and (not (listp result)) (cdr (assoc :results params))
+;;              (member "vector" (split-string (cdr (assoc :results params)))))
+;;         (setq result (list result)))
+;;     result))
 
 (defun org-babel-eval-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
