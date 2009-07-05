@@ -168,10 +168,9 @@ last statement in BODY."
                               (cdr (member org-babel-python-eoe-indicator
                                            (reverse (mapcar #'org-babel-trim raw)))))))
         (setq results (mapcar #'org-babel-python-read-string results))
-        (org-babel-trim (case result-type
-                          (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-                          (value (car results))
-                          (t (reverse results))))))))
+        (case result-type
+	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
+	  (value (org-babel-python-table-or-results (org-babel-trim (car results)))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around ruby string"
