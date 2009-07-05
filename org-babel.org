@@ -2645,12 +2645,14 @@ out...
 table.first.join(" - ")
 #+end_src
 
-: "1 - 2 - 3"
+#+resname:
+: 1 - 2 - 3
 
-#+begin_src python :var table=sandbox :results replace
+#+begin_src python :var table=sandbox
 table[0]
 #+end_src
 
+#+resname:
 | 1 | 2 | 3 |
 
 #+begin_src ruby :var table=sandbox :results replace
