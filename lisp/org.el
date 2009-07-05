@@ -16395,7 +16395,8 @@ Show the heading too, if it is currently invisible."
 		  (concat "[\r\n]\\(" outline-regexp "\\)") nil t)
 		 (match-beginning 1)
 	       (point-max)))
-	   nil))
+	   nil)
+	  (org-cycle-hide-drawers 'children))
       (error nil))))
 
 (defun org-make-options-regexp (kwds &optional extra)
