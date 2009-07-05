@@ -154,7 +154,7 @@ last statement in BODY."
                                                   (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (car results))))))
+        (value (org-babel-ruby-table-or-results (car results)))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"
