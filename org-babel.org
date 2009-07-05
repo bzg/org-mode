@@ -25,10 +25,9 @@ In this document:
 - The [[* Sandbox][Sandbox]] :: demonstrates much of the early/basic functionality
      through commented source-code blocks.
 
-Also see the [[file:library-of-babel.org][Library of Babel]] an extensible collection of ready-made
+Also see the [[file:library-of-babel.org][Library of Babel]], an extensible collection of ready-made
 and easily-shortcut-callable source-code blocks for handling common
 tasks.
-
 
 * Introduction
 
@@ -1913,7 +1912,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [17/23]
+* Bugs [17/24]
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
