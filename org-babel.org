@@ -2568,18 +2568,21 @@ To run these examples evaluate [[file:lisp/org-babel-init.el][org-babel-init.el]
 date
 #+end_src
 
-: Thu May 14 18:52:25 EDT 2009
+#+resname:
+: Sun Jul  5 18:54:39 EDT 2009
 
 #+begin_src ruby
 Time.now
 #+end_src
 
-: Thu May 14 18:59:09 -0400 2009
+#+resname:
+: Sun Jul 05 18:54:35 -0400 2009
 
 #+begin_src python
 "Hello World"
 #+end_src
 
+#+resname:
 : Hello World
 
 
@@ -2587,20 +2590,16 @@ Time.now
 
 #+begin_src R :results replace
 a <- 9
-b <- 17
+b <- 16
 a + b
 #+end_src
 
 #+resname:
-: 26
-
-
 : 25
 
 #+begin_src R
 hist(rgamma(20,3,3))
 #+end_src
-
 
 ** org-babel plays with tables
 Alright, this should demonstrate both the ability of org-babel to read
@@ -2638,6 +2637,7 @@ out...
 '(1 2 3 4 5)
 #+end_src
 
+#+resname:
 | 1 | 2 | 3 | 4 | 5 |
 
 *** Ruby and Python
@@ -2646,17 +2646,28 @@ out...
 table.first.join(" - ")
 #+end_src
 
-: "1 - 2 - 3"
+#+resname:
+: 1 - 2 - 3
 
-#+begin_src python :var table=sandbox :results replace
+#+begin_src python :var table=sandbox
 table[0]
 #+end_src
+
+#+resname:
+: [1, 2, 3]
+
+
+
 
 | 1 | 2 | 3 |
 
 #+begin_src ruby :var table=sandbox :results replace
 table
 #+end_src
+
+#+resname:
+: [[1, 2, 3], [4, "schulte", 6]]
+
 
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |
