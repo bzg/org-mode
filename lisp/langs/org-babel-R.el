@@ -50,23 +50,8 @@ called by `org-babel-execute-src-block'."
            (result-type (cond ((member "output" result-params) 'output)
                               ((member "value" result-params) 'value)
                               (t 'value)))
-           (session (org-babel-R-initiate-session (cdr (assoc :session params))))
-           results)
-      ;; ;;; debugging statements
-      ;; (message (format "result-type=%S" result-type))
-      ;; (message (format "body=%S" body))
-      ;; (message (format "session=%S" session))
-      ;; (message (format "result-params=%S" result-params))
-      ;; evaluate body and convert the results to ruby
-      (setq results (org-babel-R-evaluate session full-body result-type))
-      (setq results (if (member "scalar" result-params)
-                        results
-                      (let ((tmp-file (make-temp-file "org-babel-R")))
-                        (with-temp-file tmp-file (insert results))
-                        (org-babel-import-elisp-from-file tmp-file))))
-      (if (and (member "vector" result-params) (not (listp results)))
-          (list (list results))
-        results))))
+           (session (org-babel-R-initiate-session (cdr (assoc :session params)))))
+      (org-babel-R-evaluate session full-body result-type))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -156,8 +141,8 @@ last statement in BODY."
         (case result-type
           (output (org-babel-trim (mapconcat #'identity results "\n")))
           (value (org-babel-trim
-		  (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
-          (t (reverse results)))))))
+		  (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))))
+
 
 (provide 'org-babel-R)
 ;;; org-babel-R.el ends here
