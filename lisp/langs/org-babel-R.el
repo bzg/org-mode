@@ -121,12 +121,11 @@ last statement in BODY."
         (case result-type
           (output
            (with-temp-file in-tmp-file (insert body))
-           ;; (message "R --slave --no-save < '%s' > '%s'" in-tmp-file out-tmp-file)
-           (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'" in-tmp-file out-tmp-file)))
+           (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'"
+					    in-tmp-file out-tmp-file)))
           (value
            (with-temp-file in-tmp-file
              (insert (format org-babel-R-wrapper-method body out-tmp-file)))
-           ;; (message "R --no-save < '%s'" in-tmp-file)
            (shell-command (format "R --no-save < '%s'" in-tmp-file))))
         (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
     ;; comint session evaluation
@@ -135,23 +134,29 @@ last statement in BODY."
              (last-value-eval
               (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
                       tmp-file))
-             (full-body (mapconcat #'org-babel-chomp (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
+             (full-body (mapconcat #'org-babel-chomp
+				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
                     (insert full-body) (inferior-ess-send-input)))
-             (results (let ((broke nil))
-                        (delete nil (mapcar (lambda (el)
-                                              (if (or broke
-                                                      (and (string-match (regexp-quote org-babel-R-eoe-output) el) (setq broke t)))
-                                                  nil
-                                                (if (= (length el) 0)
-                                                    nil
-                                                  (if (string-match comint-prompt-regexp el)
-                                                      (substring el (match-end 0))
-                                                    el))))
-                                            (mapcar #'org-babel-trim raw))))))
+             (results
+	      (let ((broke nil))
+		(delete
+		 nil
+		 (mapcar (lambda (el)
+			   (if (or broke
+				   (and (string-match (regexp-quote org-babel-R-eoe-output)
+						      el) (setq broke t)))
+			       nil
+			     (if (= (length el) 0)
+				 nil
+			       (if (string-match comint-prompt-regexp el)
+				   (substring el (match-end 0))
+				 el))))
+			 (mapcar #'org-babel-trim raw))))))
         (case result-type
           (output (org-babel-trim (mapconcat #'identity results "\n")))
-          (value (org-babel-trim (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
+          (value (org-babel-trim
+		  (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))
           (t (reverse results)))))))
 
 (provide 'org-babel-R)
