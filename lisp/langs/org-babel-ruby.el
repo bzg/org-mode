@@ -83,7 +83,7 @@ specifying a var of the same value."
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
     (format "%S" var)))
 
-(defun org-babel-ruby-table-or-results (results)
+(defun org-babel-ruby-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
@@ -140,7 +140,8 @@ last statement in BODY."
                (insert (format org-babel-ruby-wrapper-method body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "ruby"))
-             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+             (org-babel-ruby-table-or-string
+	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
     (message "session evaluation")
     (let* ((full-body
@@ -154,7 +155,7 @@ last statement in BODY."
                                                   (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (org-babel-ruby-table-or-results (car results)))))))
+        (value (org-babel-ruby-table-or-string (car results)))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"
