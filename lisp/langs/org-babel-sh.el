@@ -52,16 +52,8 @@ function is called by `org-babel-execute-src-block'."
                                 (car pair)
                                 (org-babel-sh-var-to-sh (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
-         (session (org-babel-sh-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-sh-evaluate session full-body result-type)))
-    (if (member "scalar" result-params)
-        results
-      (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
-                      (with-temp-file tmp-file (insert results))
-                      (org-babel-import-elisp-from-file tmp-file)))
-      (if (and (member "vector" results) (not (listp results)))
-          (list (list results))
-        results))))
+         (session (org-babel-sh-initiate-session (cdr (assoc :session params)))))
+    (org-babel-sh-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
