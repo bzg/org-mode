@@ -9802,7 +9802,7 @@ directory on the local machine.
          :table-of-contents nil
          :style "<link rel=\"stylesheet\"
                 href=\"../other/mystyle.css\"
-                type=\"text/css\">")))
+                type=\"text/css\"/>")))
 @end lisp
 
 @node Complex example,  , Simple example, Sample configuration
@@ -9838,7 +9838,7 @@ right place on the web server, and publishing images to it.
           :section-numbers nil
           :table-of-contents nil
           :style "<link rel=\"stylesheet\"
-                  href=\"../other/mystyle.css\" type=\"text/css\">"
+                  href=\"../other/mystyle.css\" type=\"text/css\"/>"
           :auto-preamble t
           :auto-postamble nil)
 
