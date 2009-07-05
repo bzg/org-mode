@@ -140,21 +140,26 @@ last statement in BODY."
           (value
            (let ((tmp-file (make-temp-file "python-functional-results")))
              (with-temp-buffer
-               (insert (format org-babel-python-wrapper-method
-                               (let ((lines (split-string (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
-                                 (concat
-                                  (mapconcat
-                                   (lambda (line) (format "\t%s" line))
-                                   (butlast lines) "\n")
-                                  (format "\n\treturn %s" (last lines))))
-                               tmp-file))
+               (insert
+		(format
+		 org-babel-python-wrapper-method
+		 (let ((lines (split-string
+			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
+		   (concat
+		    (mapconcat
+		     (lambda (line) (format "\t%s" line))
+		     (butlast lines) "\n")
+		    (format "\n\treturn %s" (last lines))))
+		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
              (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
-      (let* ((full-body (mapconcat #'org-babel-trim
-                                   (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
+      (let* ((full-body
+	      (mapconcat 
+	       #'org-babel-trim
+	       (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                     ;; for some reason python is fussy, and likes enters after every input
                     (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
