@@ -250,6 +250,7 @@ publishing directory."
     (set-buffer buffer)
     (erase-buffer)
     (fundamental-mode)
+    (org-install-letbind)
     ;; create local variables for all options, to make sure all called
     ;; functions get the correct information
     (mapc (lambda (x)

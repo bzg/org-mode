@@ -8447,6 +8447,7 @@ Insert template with export options, see example below.
 @cindex #+LANGUAGE
 @cindex #+TEXT
 @cindex #+OPTIONS
+@cindex #+BIND
 @cindex #+LINK_UP
 @cindex #+LINK_HOME
 @cindex #+EXPORT_SELECT_TAGS
@@ -8466,6 +8467,7 @@ Insert template with export options, see example below.
 #+TEXT:        Some descriptive text to be inserted at the beginning.
 #+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
+#+BIND:        lisp-var lisp-val, e.g.: org-export-latex-low-levels itemize
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
 #+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
@@ -10166,7 +10168,8 @@ this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
-@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+OPTIONS, #+DATE:,
+@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
+@itemx #+OPTIONS:, #+BIND:
 @itemx #+DESCRIPTION:, #+KEYWORDS:
 @itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
 @itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:

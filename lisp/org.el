@@ -8727,7 +8727,8 @@ This function can be used in a hook."
     "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
     "CATEGORY" "COLUMNS"
-    "CAPTION" "LABEL"))
+    "CAPTION" "LABEL"
+    "BIND"))
 
 (defcustom org-structure-template-alist
   '(

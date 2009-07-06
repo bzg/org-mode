@@ -642,10 +642,10 @@ modified) list.")
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE" "LATEX_HEADER"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
-		    "KEYWORDS" "DESCRIPTION" "MACRO")
+		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    p key val text options a pr style
-	    latex-header macros
+	    latex-header macros letbind
 	    ext-setup-or-nil setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
@@ -674,6 +674,8 @@ modified) list.")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")
 	    (setq options (concat val " " options)))
+	   ((string-equal key "BIND")
+	    (push (read (concat "(" val ")")) letbind))
 	   ((string-equal key "LINK_UP")
 	    (setq p (plist-put p :link-up val)))
 	   ((string-equal key "LINK_HOME")
@@ -697,6 +699,7 @@ modified) list.")
 			    "\n" setup-contents "\n"
 			    (substring ext-setup-or-nil start)))))))
 	(setq p (plist-put p :text text))
+	(setq p (plist-put p :let-bind letbind))
 	(when style (setq p (plist-put p :style-extra style)))
 	(when latex-header
 	  (setq p (plist-put p :latex-header-extra (substring latex-header 1))))
@@ -724,6 +727,12 @@ modified) list.")
 			(concat ":macro-" (downcase (match-string 1 val))))
 		     (match-string 2 val)))))
 	p))))
+
+(defun org-install-letbind ()
+  "Install the values from #+BIND lines as local variables."
+  (let ((letbind (plist-get org-export-opt-plist :let-bind)))
+    (while letbind
+      (org-set-local (caar letbind) (nth 1 (pop letbind))))))
 
 (defun org-export-add-options-to-plist (p options)
   "Parse an OPTIONS line and set values in the property list P."
@@ -1216,6 +1225,7 @@ on this string to produce the exported version."
 
       (let ((org-inhibit-startup t)) (org-mode))
       (setq case-fold-search t)
+      (org-install-letbind)
 
       ;; Call the hook
       (run-hooks 'org-export-preprocess-hook)
@@ -2449,7 +2459,7 @@ command."
 ;;;###autoload
 (defun org-export-as-org (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)
-  "Make a copy wiht not-exporting stuff removed.
+  "Make a copy with not-exporting stuff removed.
 The purpose of this function is to provide a way to export the source
 Org file of a webpage in Org format, but with sensitive and/or irrelevant
 stuff removed.  This command will remove the following:
@@ -2491,6 +2501,7 @@ directory."
       (erase-buffer)
       (insert region)
       (let ((org-inhibit-startup t)) (org-mode))
+      (org-install-letbind)
 
       ;; Get rid of archived trees
       (org-export-remove-archived-trees (plist-get opt-plist :archived-trees))

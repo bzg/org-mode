@@ -1,5 +1,22 @@
 2009-07-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-set-local): Make a local variable, do not make
+	the variable buffer-local!
+
+	* org-latex.el (org-export-as-latex): Call `org-install-letbind'.
+
+	* org-html.el (org-export-as-html): Call `org-install-letbind'.
+
+	* org-docbook.el (org-export-as-docbook): Call
+	`org-install-letbind'.
+
+	* org-ascii.el (org-export-as-ascii): Call `org-install-letbind'.
+
+	* org-exp.el (org-infile-export-plist): Read BIND lines.
+	(org-install-letbind): New function.
+	(org-export-as-org, org-export-preprocess-string): Call
+	`org-install-letbind'.
+
 	* org-src.el (org-edit-src-exit): Untabify the example before
 	returning to Org.
 

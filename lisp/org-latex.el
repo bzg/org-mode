@@ -575,6 +575,7 @@ when PUB-DIR is set, use this as the publishing directory."
 
     (set-buffer buffer)
     (erase-buffer)
+    (org-install-letbind)
 
     (and (fboundp 'set-buffer-file-coding-system)
 	 (set-buffer-file-coding-system coding-system-for-write))

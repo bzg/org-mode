@@ -187,7 +187,7 @@ we turn off invisibility temporarily.  Use this in a `let' form."
 
 (defsubst org-set-local (var value)
   "Make VAR local in current buffer and set it to VALUE."
-  (set (make-variable-buffer-local var) value))
+  (set (make-local-variable var) value))
 
 (defsubst org-mode-p ()
   "Check if the current buffer is in Org-mode."
