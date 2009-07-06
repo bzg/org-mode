@@ -160,21 +160,20 @@ the header arguments specified at the source code block."
                             ((member "value" result-params) 'value)
                             (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
-         result)
-    (message (format "params=%S" params)) ;; debugging
+	 result)
+    ;; (message (format "params=%S" params)) ;; debugging
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
+    (when arg (setq result-params (cons "silent" result-params)))
     (setq result (org-babel-process-result (funcall cmd body params) result-type))
-    (if arg
-        (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
-      (org-babel-insert-result result (cdr (assoc :results params))))
-    result))
+    (org-babel-insert-result result result-params)
+    (case result-type (output nil) (value result))))
 			      
 (defun org-babel-process-result (result result-type)
   "This doesn't do anything currently.
 
 You can see below the various fragments of results-processing
-  code that where present in the language-specific files. Out of
+  code that were present in the language-specific files. Out of
   those fragments, I've moved the
   org-babel-python-table-or-results and
   org-babel-import-elisp-from-file functionality into the
@@ -399,7 +398,6 @@ replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
-  (if insert (setq insert (split-string insert)))
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
