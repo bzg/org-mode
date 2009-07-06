@@ -80,6 +80,26 @@ heading will be exposed in a children' view."
 	  (const :tag "With cursor in plain list (recommended)" t)
 	  (const :tag "As children of outline headings" integrate)))
 
+(defcustom org-list-demote-modify-bullet nil
+  "Default bullet type installed when demoting an item.
+This is an association list, for each bullet type, this alist will point
+to the bulled that should be used when this item is demoted."
+  :group 'org-plain-lists
+  :type '(repeat
+	  (cons
+	   (choice :tag "If the current bullet is  "
+		   (const "-")
+		   (const "+")
+		   (const "*")
+		   (const "1.")
+		   (const "1)"))
+	   (choice :tag "demotion will change it to"
+		   (const "-")
+		   (const "+")
+		   (const "*")
+		   (const "1.")
+		   (const "1)")))))
+
 (defcustom org-plain-list-ordered-item-terminator t
   "The character that makes a line with leading number an ordered list item.
 Valid values are ?. and ?\).  To get both terminators, use t.  While
@@ -604,11 +624,12 @@ Error if not at a plain list, or if this is the first item in the list."
 	     (error "On first item")))))
 
 (defun org-first-list-item-p ()
-  "Is this heading the item in a plain list?"
+  "Is this heading the first item in a plain list?"
   (unless (org-at-item-p)
     (error "Not at a plain list item"))
-  (org-beginning-of-item)
-  (= (point) (save-excursion (org-beginning-of-item-list))))
+  (save-excursion
+    (org-beginning-of-item)
+    (= (point) (save-excursion (org-beginning-of-item-list)))))
 
 (defun org-move-item-down ()
   "Move the plain list item at point down, i.e. swap with following item.
@@ -817,7 +838,7 @@ with something like \"1.\" or \"2)\"."
     (goto-line line)
     (org-move-to-column col)))
 
-(defun org-fix-bullet-type ()
+(defun org-fix-bullet-type (&optional force-bullet)
   "Make sure all items in this list have the same bullet as the first item.
 Also, fix the indentation."
   (interactive)
@@ -831,7 +852,7 @@ Also, fix the indentation."
     (beginning-of-line 1)
     ;; find out what the bullet type is
     (looking-at "[ \t]*\\(\\S-+\\)")
-    (setq bullet (concat (match-string 1) " "))
+    (setq bullet (concat (or force-bullet (match-string 1)) " "))
     (if (and org-list-two-spaces-after-bullet-regexp
 	     (string-match org-list-two-spaces-after-bullet-regexp bullet))
 	(setq bullet (concat bullet " ")))
@@ -898,7 +919,6 @@ I.e. to the first item in this list."
 	    (when (org-at-item-p) (setq pos (point-at-bol)))))))
     (goto-char pos)))
 
-
 (defun org-end-of-item-list ()
   "Go to the end of the current item list.
 I.e. to the text after the last item."
@@ -941,8 +961,9 @@ I.e. to the text after the last item."
   (and (org-region-active-p) (org-cursor-to-region-beginning))
   (unless (org-at-item-p)
     (error "Not on an item"))
-  (save-excursion
-    (let (beg end ind ind1 tmp delta ind-down ind-up)
+  (let (beg end ind ind1 ind-bul delta ind-down ind-up firstp)
+    (setq firstp (org-first-list-item-p))
+    (save-excursion
       (setq end (and (org-region-active-p) (region-end)))
       (if (memq last-command '(org-shiftmetaright org-shiftmetaleft))
 	  (setq beg org-last-indent-begin-marker
@@ -952,10 +973,10 @@ I.e. to the text after the last item."
 	(org-end-of-item)
 	(setq end (move-marker org-last-indent-end-marker (or end (point)))))
       (goto-char beg)
-      (setq tmp (org-item-indent-positions)
-	    ind (car tmp)
-	    ind-down (nth 2 tmp)
-	    ind-up (nth 1 tmp)
+      (setq ind-bul (org-item-indent-positions)
+	    ind (caar ind-bul)
+	    ind-down (car (nth 2 ind-bul))
+	    ind-up (car (nth 1 ind-bul))
 	    delta (if (> arg 0)
 		      (if ind-down (- ind-down ind) 2)
 		    (if ind-up (- ind-up ind) -2)))
@@ -965,13 +986,16 @@ I.e. to the text after the last item."
 	(skip-chars-forward " \t") (setq ind1 (current-column))
 	(delete-region (point-at-bol) (point))
 	(or (eolp) (org-indent-to-column (+ ind1 delta)))
-	(beginning-of-line 2))))
-  (org-fix-bullet-type)
-  (org-maybe-renumber-ordered-list-safe)
-  (save-excursion
-    (beginning-of-line 0)
-    (condition-case nil (org-beginning-of-item) (error nil))
-    (org-maybe-renumber-ordered-list-safe)))
+	(beginning-of-line 2)))
+    (org-fix-bullet-type
+     (and (> arg 0)
+	  (not firstp)
+	  (cdr (assoc (cdr (nth 0 ind-down)) org-list-demote-modify-bullet))))
+    (org-maybe-renumber-ordered-list-safe)
+    (save-excursion
+      (beginning-of-line 0)
+      (condition-case nil (org-beginning-of-item) (error nil))
+      (org-maybe-renumber-ordered-list-safe))))
 
 (defun org-item-indent-positions ()
   "Return indentation for plain list items.
@@ -980,13 +1004,15 @@ parent indentation and the indentation a child should have.
 Assumes cursor in item line."
   (let* ((bolpos (point-at-bol))
 	 (ind (org-get-indentation))
-	 ind-down ind-up pos)
+	 (bullet (org-get-bullet))
+	 ind-down ind-up bullet-up bullet-down pos)
     (save-excursion
       (org-beginning-of-item-list)
       (skip-chars-backward "\n\r \t")
       (when (org-in-item-p)
 	(org-beginning-of-item)
-	(setq ind-up (org-get-indentation))))
+	(setq ind-up (org-get-indentation))
+	(setq bullet-up (org-get-bullet))))
     (setq pos (point))
     (save-excursion
       (cond
@@ -994,14 +1020,24 @@ Assumes cursor in item line."
 	       (error nil))
 	     (or (forward-char 1) t)
 	     (re-search-forward "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\*\\)\\( \\|$\\)" bolpos t))
-	(setq ind-down (org-get-indentation)))
+	(setq ind-down (org-get-indentation)
+	      bullet-down (org-get-bullet)))
        ((and (goto-char pos)
 	     (org-at-item-p))
 	(goto-char (match-end 0))
 	(skip-chars-forward " \t")
-	(setq ind-down (current-column)))))
-    (list ind ind-up ind-down)))
+	(setq ind-down (current-column)
+	      bullet-down (org-get-bullet)))))
+    (list (cons ind bullet)
+	  (cons ind-up bullet-up)
+	  (cons ind-down bullet-down))))
 
+(defun org-get-bullet ()
+  (save-excursion
+    (goto-char (point-at-bol))
+    (and (looking-at
+	  "^\\([ \t]*\\([-+]\\|\\([0-9]+[.)]\\)\\)\\|[ \t]+\\(\\*\\)\\)\\( \\|$\\)")
+	 (or (match-string 2) (match-string 4)))))
 
 ;;; Send and receive lists
 
