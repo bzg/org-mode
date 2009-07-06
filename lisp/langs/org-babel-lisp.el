@@ -35,13 +35,12 @@
 
 (add-to-list 'org-babel-tangle-langs '("emacs-lisp" "el"))
 
-(defun org-babel-execute:emacs-lisp (body params)
+(defun org-babel-execute:emacs-lisp (session body vars result-type)
   "Execute a block of emacs-lisp code with org-babel.  This
 function is called by `org-babel-execute-src-block'."
   (message "executing emacs-lisp code block...")
   (save-window-excursion
-    (let ((vars (org-babel-ref-variables params))
-          (print-level nil) (print-length nil) results)
+    (let ((print-level nil) (print-length nil) results)
       (setq results
             (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
                      ,(read (concat "(progn " body ")")))))
