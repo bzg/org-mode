@@ -126,7 +126,7 @@ open('%s', 'w').write( str(main()) )")
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion

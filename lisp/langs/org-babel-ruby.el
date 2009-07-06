@@ -123,7 +123,7 @@ File.open('%s', 'w'){ |f| f.write((results.class == String) ? results : results.
   "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion
@@ -143,7 +143,6 @@ last statement in BODY."
              (org-babel-ruby-table-or-string
 	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
-    (message "session evaluation")
     (let* ((full-body
 	    (mapconcat
 	     #'org-babel-chomp

@@ -161,6 +161,7 @@ the header arguments specified at the source code block."
                             (t 'value)))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
+    (message (format "params=%S" params)) ;; debugging
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (setq result (org-babel-process-result (funcall cmd body params) result-type))
@@ -171,6 +172,15 @@ the header arguments specified at the source code block."
 			      
 (defun org-babel-process-result (result result-type)
   result)
+;; ;; ruby
+;;     (if (member "scalar" result-params)
+;;         results
+;;       (case result-type ;; process results based on the result-type
+;;         ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
+;;                    (with-temp-file tmp-file (insert results))
+;;                    (org-babel-import-elisp-from-file tmp-file)))
+;;         ('value (org-babel-ruby-table-or-results results))))))
+
 ;; python
 ;;    (if (member "scalar" result-params)
 ;;        results
@@ -203,17 +213,6 @@ the header arguments specified at the source code block."
 ;;       (if (and (member "vector" result-params) (not (listp results)))
 ;;           (list (list results))
 ;;         results))))
-
-
-;; ;; ruby
-;;     (if (member "scalar" result-params)
-;;         results
-;;       (case result-type ;; process results based on the result-type
-;;         ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-;;                    (with-temp-file tmp-file (insert results))
-;;                    (org-babel-import-elisp-from-file tmp-file)))
-;;         ('value (org-babel-ruby-table-or-results results))))))
-
 
 
 ;; ;; rest of org-babel-execute-src-block

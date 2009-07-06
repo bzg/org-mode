@@ -98,7 +98,7 @@ write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.na
   "Pass BODY to the R process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (let ((in-tmp-file (make-temp-file "R-in-functional-results"))
@@ -107,12 +107,13 @@ last statement in BODY."
           (output
            (with-temp-file in-tmp-file (insert body))
            (shell-command-to-string (format "R --slave --no-save < '%s' > '%s'"
-					    in-tmp-file out-tmp-file)))
+					    in-tmp-file out-tmp-file))
+	   (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
           (value
            (with-temp-file in-tmp-file
              (insert (format org-babel-R-wrapper-method body out-tmp-file)))
-           (shell-command (format "R --no-save < '%s'" in-tmp-file))))
-        (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
+           (shell-command (format "R --no-save < '%s'" in-tmp-file))
+	   (org-babel-import-elisp-from-file out-tmp-file))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((tmp-file (make-temp-file "org-babel-R"))
@@ -140,8 +141,7 @@ last statement in BODY."
 			 (mapcar #'org-babel-trim raw))))))
         (case result-type
           (output (org-babel-trim (mapconcat #'identity results "\n")))
-          (value (org-babel-trim
-		  (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))))
+          (value (org-babel-import-elisp-from-file tmp-file)))))))
 
 
 (provide 'org-babel-R)

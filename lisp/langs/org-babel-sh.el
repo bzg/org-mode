@@ -130,13 +130,20 @@ last statement in BODY."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion
-        (with-temp-buffer ;; TODO: figure out how to return non-output values from shell scripts
+        (with-temp-buffer
           (insert body)
           ;; (message "buffer=%s" (buffer-string)) ;; debugging
           (shell-command-on-region (point-min) (point-max) "sh" 'replace)
-          (buffer-string)))
+	  (case result-type
+	    (output (buffer-string))
+	    (value ;; TODO: figure out how to return non-output values from shell scripts
+	     (let ((tmp-file (make-temp-file "org-babel-sh"))
+		   (results (buffer-string)))
+	       (with-temp-file tmp-file (insert results))
+	       (org-babel-import-elisp-from-file tmp-file))))))
     ;; comint session evaluation
-    (let* ((full-body (mapconcat #'org-babel-chomp
+    (let* ((tmp-file (make-temp-file "org-babel-sh"))
+	   (full-body (mapconcat #'org-babel-chomp
                                  (list body org-babel-sh-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-sh-eoe-output nil
                   (insert full-body) (comint-send-input nil t)))
@@ -146,8 +153,8 @@ last statement in BODY."
       ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
       (or (case result-type
             (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-            (value (car results))
-            (t (reverse results))) ""))))
+            (value (with-temp-file tmp-file (insert (car results)))
+		   (org-babel-import-elisp-from-file tmp-file)))) "")))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   (while (string-match "^% +[\r\n$]+ *" string)
