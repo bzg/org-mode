@@ -36,24 +36,19 @@
 
 (add-to-list 'org-babel-tangle-langs '("ruby" "rb" "#!/usr/bin/env ruby"))
 
-(defun org-babel-execute:ruby (body params)
+(defun org-babel-execute:ruby (session body vars result-type)
   "Execute a block of Ruby code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Ruby source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-ruby-var-to-ruby (cdr pair))))
-                      vars "\n") "\n" body "\n")) ;; then the source block body
-         (session (org-babel-ruby-initiate-session (cdr (assoc :session params)))))
-    (org-babel-ruby-evaluate session full-body result-type)))
+  (let ((augmented-body (concat
+		    (mapconcat ;; define any variables
+		     (lambda (pair)
+		       (format "%s=%s"
+			       (car pair)
+			       (org-babel-ruby-var-to-ruby (cdr pair))))
+		     vars "\n") "\n" body "\n")) ;; then the source block body
+	(session (org-babel-ruby-initiate-session session)))
+    (org-babel-ruby-evaluate session augmented-body result-type)))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -143,12 +138,12 @@ last statement in BODY, as elisp."
              (org-babel-ruby-table-or-string
 	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
-    (let* ((full-body
+    (let* ((augmented-body
 	    (mapconcat
 	     #'org-babel-chomp
 	     (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
-                  (insert full-body) (comint-send-input nil t)))
+                  (insert augmented-body) (comint-send-input nil t)))
            (results (cdr (member org-babel-ruby-eoe-indicator
                                  (reverse (mapcar #'org-babel-ruby-read-string
                                                   (mapcar #'org-babel-trim raw)))))))

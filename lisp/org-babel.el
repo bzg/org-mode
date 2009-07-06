@@ -155,6 +155,8 @@ the header arguments specified at the source code block."
          (lang (first info))
          (body (second info))
          (params (org-combine-plists params (third info)))
+	 (session (cdr (assoc :session params)))
+	 (vars (org-babel-ref-variables params))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
                             ((member "value" result-params) 'value)
@@ -165,7 +167,7 @@ the header arguments specified at the source code block."
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
-    (setq result (org-babel-process-result (funcall cmd body params) result-type))
+    (setq result (org-babel-process-result (funcall cmd session body vars result-type) result-type))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
 			      

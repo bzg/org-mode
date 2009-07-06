@@ -35,23 +35,18 @@
 
 (add-to-list 'org-babel-tangle-langs '("R" "r"))
 
-(defun org-babel-execute:R (body params)
+(defun org-babel-execute:R (session body vars result-type)
   "Execute a block of R code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing R source code block...")
   (save-window-excursion
-    (let* ((vars (org-babel-ref-variables params))
-           (full-body (concat
-                       (mapconcat ;; define any variables
-                        (lambda (pair)
-                          (org-babel-R-assign-elisp (car pair) (cdr pair)))
-                        vars "\n") "\n" body "\n"))
-           (result-params (split-string (or (cdr (assoc :results params)) "")))
-           (result-type (cond ((member "output" result-params) 'output)
-                              ((member "value" result-params) 'value)
-                              (t 'value)))
-           (session (org-babel-R-initiate-session (cdr (assoc :session params)))))
-      (org-babel-R-evaluate session full-body result-type))))
+    (let ((augmented-body (concat
+		      (mapconcat ;; define any variables
+		       (lambda (pair)
+			 (org-babel-R-assign-elisp (car pair) (cdr pair)))
+		       vars "\n") "\n" body "\n"))
+	  (session (org-babel-R-initiate-session session)))
+      (org-babel-R-evaluate session augmented-body result-type))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -120,10 +115,10 @@ last statement in BODY, as elisp."
              (last-value-eval
               (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
                       tmp-file))
-             (full-body (mapconcat #'org-babel-chomp
+             (augmented-body (mapconcat #'org-babel-chomp
 				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
-                    (insert full-body) (inferior-ess-send-input)))
+                    (insert augmented-body) (inferior-ess-send-input)))
              (results
 	      (let ((broke nil))
 		(delete
