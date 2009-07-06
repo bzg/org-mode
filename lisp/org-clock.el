@@ -582,7 +582,7 @@ the clocking selection, associated with the letter `d'."
 	    (setq org-clock-mode-line-timer
 		  (run-with-timer 60 60 'org-clock-update-mode-line))
 	    (message "Clock starts at %s - %s" ts msg-extra)
-	    (run-hooks 'org-click-in-hook)))))))
+	    (run-hooks 'org-clock-in-hook)))))))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."

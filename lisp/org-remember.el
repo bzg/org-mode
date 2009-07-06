@@ -349,7 +349,7 @@ RET at beg-of-buf -> Append to file as level 2 headline
 			   (setq char0 (read-char-exclusive))
 			   (when (and (not (assoc char0 templates))
 				      (not (equal char0 ?\C-g)))
-			     (message "No suche template \"%c\"" char0)
+			     (message "No such template \"%c\"" char0)
 			     (ding) (sit-for 1)
 			     (setq char0 nil)))
 			 (when (equal char0 ?\C-g)
