@@ -384,9 +384,11 @@ with a link to this URL."
 ;;; Variables, constants, and parameter plists
 
 (defvar org-export-html-preamble nil
-  "Preamble, to be inserted just before <body>.  Set by publishing functions.")
+  "Preamble, to be inserted just before <body>.  Set by publishing functions.
+This may also be a function, building and inserting the preamble.")
 (defvar org-export-html-postamble nil
-  "Preamble, to be inserted just after </body>.  Set by publishing functions.")
+  "Preamble, to be inserted just after </body>.  Set by publishing functions.
+This may also be a function, building and inserting the postamble.")
 (defvar org-export-html-auto-preamble t
   "Should default preamble be inserted?  Set by publishing functions.")
 (defvar org-export-html-auto-postamble t
@@ -606,6 +608,7 @@ PUB-DIR is set, use this as the publishing directory."
 			       (file-name-sans-extension
 				(file-name-nondirectory buffer-file-name)))
 			  "UNTITLED"))
+	 (dummy (setq opt-plist (plist-put opt-plist :title title)))
 	 (html-table-tag (plist-get opt-plist :html-table-tag))
 	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
 	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]+" org-quote-string "\\>\\)"))
@@ -746,7 +749,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 date author description keywords
 		 style))
 
-	(insert (or (plist-get opt-plist :preamble) ""))
+        (org-export-html-insert-plist-item opt-plist :preamble opt-plist)
 
 	(when (plist-get opt-plist :auto-preamble)
 	  (if title (insert (format org-export-html-title-format
@@ -1373,7 +1376,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 	(if org-export-html-with-timestamp
 	    (insert org-export-html-html-helper-timestamp))
-	(insert (or (plist-get opt-plist :postamble) ""))
+        (org-export-html-insert-plist-item opt-plist :postamble opt-plist)
 	(insert "\n</div>\n</body>\n</html>\n"))
 
       (unless (plist-get opt-plist :buffer-will-be-killed)
@@ -1425,6 +1428,13 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (prog1 (buffer-substring (point-min) (point-max))
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
+
+(defun org-export-html-insert-plist-item (plist key &rest args)
+  (let ((item (plist-get plist key)))
+    (cond ((functionp item) 
+           (apply item args))
+          (item
+           (insert item)))))
 
 (defun org-export-html-format-href (s)
   "Make sure the S is valid as a href reference in an XHTML document."

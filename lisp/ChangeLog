@@ -1,5 +1,10 @@
 2009-07-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Insert the title into the
+	option plist.
+	(org-export-html-insert-plist-item): New function.
+	(org-export-as-html): Call `org-export-html-insert-plist-item'.
+
 	* org-macs.el (org-set-local): Make a local variable, do not make
 	the variable buffer-local!
 
