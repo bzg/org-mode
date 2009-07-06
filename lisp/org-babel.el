@@ -171,7 +171,22 @@ the header arguments specified at the source code block."
     result))
 			      
 (defun org-babel-process-result (result result-type)
-  result)
+  "This doesn't do anything currently.
+
+You can see below the various fragments of results-processing
+  code that where present in the language-specific files. Out of
+  those fragments, I've moved the
+  org-babel-python-table-or-results and
+  org-babel-import-elisp-from-file functionality into the
+  org-babel-*-evaluate functions. I think those should only be
+  used in the :results value case, as in the 'output case we are
+  not concerned with creating elisp versions of results.
+
+The rest of the functionality below, concerned with vectorising
+or scalarising results is commented out, has not yet been
+replaced, and may need to be reinstated in this function. "
+
+ result)
 ;; ;; ruby
 ;;     (if (member "scalar" result-params)
 ;;         results
