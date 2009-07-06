@@ -408,6 +408,7 @@ the language, a switch telling of the content should be in a single line."
 	(buffer (current-buffer))
 	(nindent org-edit-src-nindent)
 	code line)
+    (untabify (point-min) (point-max))
     (save-excursion
       (goto-char (point-min))
       (if (looking-at "[ \t\n]*\n") (replace-match ""))
