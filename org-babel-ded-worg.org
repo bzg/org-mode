@@ -1,0 +1,97 @@
+#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
+#+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
+#+TITLE:      org-babel: execution of source code blocks in org-mode
+#+AUTHOR:     Dan Davison
+#+EMAIL:      davison at stats dot ox dot ac dot uk
+#+LANGUAGE:   en
+#+CATEGORY:   worg
+
+* Introduction
+  Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
+  support]] for blocks of source code examples in the org-mode core.
+  1. source code execution
+  2. arguments to source code blocks
+  
+* Basic org-babel functionality
+*** Source code execution
+    For interpreted languages such as shell, python, R etc, org-babel
+    allows source blocks to be *executed*: the code is passed to the
+    interpreter and you have control over what is done with the
+    results of excecution. E.g. place point anywhere in the following
+    block and use C-c C-c to run the code:
+
+#+begin_src sh
+    date
+    hostname
+    whoami
+#+end_src
+
+#+resname:
+: Sun Jul  5 18:49:46 EDT 2009
+: Tichodroma
+: dan
+
+
+
+*** What happens to the results?
+    Org-babel provides two fundamentally different modes for capturing
+    the results of code evaluation, specified by the :results header
+    argument:
+**** :results value
+     This means that the 'result' of code evaluation is defined to be
+     the *value* of the last statement in the block. Thus with this
+     setting, one can view the code block as a function with a return
+     value. And not only can one view it that way, but you can
+     actually use the return value of one source block as input for
+     another (see later). This setting is the default.
+**** :results output
+     With this setting, org-babel captures all the text output of the
+     code block and places it in the org buffer. One can think of this
+     as a 'scripting' mode: the code block contains a series of
+     commands, and you get the output of all the commands. Unlike in
+     the 'functional' mode specified by =:results value=, the code
+     block has no return value. (This mode will be familiar to Sweave
+     users).
+**** Additional :results settings
+     
+
+
+*** Arguments to source code blocks
+    In addition to evaluation of code blocks, org-babel allows them to
+    be parameterised (i.e. have arguments). Thus source code blocks
+    now have the status of *functions*.
+
+*** Internals
+    For those interested in hacking org-babel, it's worth going
+    through what actually happened there:
+***** org-babel-execute-src
+      1. parses source block info (recognises language, looks for
+	 arguments (there aren't any))
+      2. calls
+***** org-babel-execute:LANG
+      1. resolves referenced variables (there aren't any)
+      2. assigns any referenced variables and evaluates body
+***** org-babel-LANG-evaluate
+      Returns a string corresponding to either output or value of block.
+
+#+resname:
+: Sun Jul  5 14:17:31 EDT 2009
+
+
+#+begin_src R :results output
+    date()
+#+end_src
+
+#+resname:
+: Sun Jul  5 14:00:20 2009
+
+
+#+begin_src python
+    import time
+    time.ctime()
+#+end_src
+    
+#+resname:
+: Sun Jul  5 14:13:07 2009
