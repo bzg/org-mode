@@ -308,7 +308,9 @@ this heading."
 	       (if (eq this-buffer buffer)
 		   (concat "under heading: " heading)
 		 (concat "in file: " (abbreviate-file-name afile))))))
-  (org-reveal))
+  (org-reveal)
+  (if (looking-at "^[ \t]*$")
+      (outline-next-visible-heading 1)))
 
 (defun org-archive-to-archive-sibling ()
   "Archive the current heading by moving it under the archive sibling.
@@ -360,7 +362,9 @@ sibling does not exist, it will be created at the end of the subtree."
       (hide-subtree)
       (org-cycle-show-empty-lines 'folded)
       (goto-char pos)))
-  (org-reveal))
+  (org-reveal)
+  (if (looking-at "^[ \t]*$")
+      (outline-next-visible-heading 1)))
 
 (defun org-archive-all-done (&optional tag)
   "Archive sublevels of the current tree without open TODO items.
