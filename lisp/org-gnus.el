@@ -132,7 +132,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 		     ;; "From" followed by a space, which cannot be parsed as
 		     ;; header line, so we skip it.
                      (when (looking-at "From ")
-                       (next-line))
+		       (beginning-of-line 2))
 		     (mail-header-extract-no-properties)))
 	   (from (mail-header 'from header))
 	   (message-id (org-remove-angle-brackets
