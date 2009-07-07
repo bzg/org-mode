@@ -990,7 +990,7 @@ I.e. to the text after the last item."
     (org-fix-bullet-type
      (and (> arg 0)
 	  (not firstp)
-	  (cdr (assoc (cdr (nth 0 ind-down)) org-list-demote-modify-bullet))))
+	  (cdr (assoc (cdr (nth 0 ind-bul)) org-list-demote-modify-bullet))))
     (org-maybe-renumber-ordered-list-safe)
     (save-excursion
       (beginning-of-line 0)
