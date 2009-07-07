@@ -1,3 +1,10 @@
+2009-07-07  Tassilo Horn  <tassilo@member.fsf.org>
+
+	* org-gnus.el (org-gnus-store-link): Skip mbox specific first line
+	that cannot be parsed as header line.  Bug reported by Andreas
+	Rottmann <a.rottmann@gmx.at> in <87zlblscr0.fsf@delenn.lan> on the
+	org mode list.
+
 2009-06-17  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* Makefile (LISPF): Add org-exp-blocks.el.

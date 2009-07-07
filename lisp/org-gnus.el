@@ -128,6 +128,11 @@ If `org-store-link' was called with a prefix arg the meaning of
 	   (header (with-current-buffer gnus-article-buffer
 		     (gnus-summary-toggle-header 1)
 		     (goto-char (point-min))
+		     ;; mbox files may contain a first line starting with
+		     ;; "From" followed by a space, which cannot be parsed as
+		     ;; header line, so we skip it.
+                     (when (looking-at "From ")
+                       (next-line))
 		     (mail-header-extract-no-properties)))
 	   (from (mail-header 'from header))
 	   (message-id (org-remove-angle-brackets
