@@ -1,3 +1,8 @@
+2009-07-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-html-home/up-format): New option.
+	(org-export-as-html): Insert the up and HOME links.
+
 2009-07-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-html.el (org-export-as-html): Insert the title into the

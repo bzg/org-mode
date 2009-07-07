@@ -221,6 +221,19 @@ CSS classes, then this prefic can be very useful."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-export-html-home/up-format
+  "<div style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
+ <a accesskey=\"h\" href=\"%s\"> UP </a>
+ |
+ <a accesskey=\"H\" href=\"%s\"> HOME </a>
+</div>"
+  "Snippet used to insert the HOME and UP links.  This is a format,
+the first %s will receive the UP link, the second the HOME link.
+If both `org-export-html-link-up' and `org-export-html-link-home' are
+empty, the entire snippet will be ignored."
+  :group 'org-export-html
+  :type 'string)
+
 (defcustom org-export-html-toplevel-hlevel 2
   "The <H> level for level 1 headings in HTML export.
 This is also important for the classes that will be wrapped around headlines
@@ -608,6 +621,12 @@ PUB-DIR is set, use this as the publishing directory."
 			       (file-name-sans-extension
 				(file-name-nondirectory buffer-file-name)))
 			  "UNTITLED"))
+	 (link-up (and (plist-get opt-plist :link-up)
+		       (string-match "\\S-" (plist-get opt-plist :link-up))
+		       (plist-get opt-plist :link-up)))
+	 (link-home (and (plist-get opt-plist :link-home)
+			(string-match "\\S-" (plist-get opt-plist :link-home))
+			(plist-get opt-plist :link-home)))
 	 (dummy (setq opt-plist (plist-put opt-plist :title title)))
 	 (html-table-tag (plist-get opt-plist :html-table-tag))
 	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
@@ -724,6 +743,7 @@ PUB-DIR is set, use this as the publishing directory."
 <html xmlns=\"http://www.w3.org/1999/xhtml\"
 lang=\"%s\" xml:lang=\"%s\">
 <head>
+%s
 <title>%s</title>
 <meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>
 <meta name=\"generator\" content=\"Org-mode\"/>
@@ -744,7 +764,15 @@ lang=\"%s\" xml:lang=\"%s\">
 
 		      "")
 		  (or charset "iso-8859-1"))
-		 language language (org-html-expand title)
+		 language language
+		 (if (or link-up link-home)
+		     (concat
+		      (format org-export-html-home/up-format
+			      (or link-up link-home)
+			      (or link-home link-up))
+		      "\n")
+		   "")
+		 (org-html-expand title)
 		 (or charset "iso-8859-1")
 		 date author description keywords
 		 style))
