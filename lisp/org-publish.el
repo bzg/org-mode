@@ -244,6 +244,16 @@ If there is no timestamp, create one."
 	(set-file-times timestamp-file)
       (call-process "touch" nil 0 nil (expand-file-name timestamp-file)))))
 
+(defun org-publish-remove-all-timestamps ()
+  "Remove all files in the timstamp directory."
+  (debug)
+  (let ((dir org-publish-timestamp-directory)
+	files)
+    (when (and (file-exists-p dir)
+	       (file-directory-p dir))
+      (mapc 'delete-file (directory-files dir 'full "[^.]\\'")))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Mapping files to project names
 
@@ -631,8 +641,11 @@ Default for INDEX-FILENAME is 'sitemap.org'."
 ;;;###autoload
 (defun org-publish-all (&optional force)
   "Publish all projects.
-With prefix argument, force publish all files."
+With prefix argument, remove all files in the timestamp
+directory and force publishing all files."
   (interactive "P")
+  (when force
+    (org-publish-remove-all-timestamps))
   (org-publish-initialize-files-alist)
   (save-window-excursion
     (let ((org-publish-use-timestamps-flag

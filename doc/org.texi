@@ -9881,10 +9881,10 @@ Publish every project.
 @vindex org-publish-use-timestamps-flag
 Org uses timestamps to track when a file has changed. The above functions
 normally only publish changed files. You can override this and force
-publishing of all files by giving a prefix argument, or by customizing the
-variable @code{org-publish-use-timestamps-flag}.  This may be necessary in
-particular if files include other files via @code{#+SETUPFILE:} or
-@code{#+INCLUDE:}.
+publishing of all files by giving a prefix argument to any of the commands
+above, or by customizing the variable @code{org-publish-use-timestamps-flag}.
+This may be necessary in particular if files include other files via
+@code{#+SETUPFILE:} or @code{#+INCLUDE:}.
 
 @node Miscellaneous, Hacking, Publishing, Top
 @chapter Miscellaneous
