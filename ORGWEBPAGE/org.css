@@ -1,36 +1,16 @@
 @media all
 {
   body {
-	margin: 10px 6% 10px 250px;
-	font-family: Verdana, Helvetica, sans-serif;
 	font-size: 11pt;
 	text-align: left;
 	line-height:1.2em;
   }
 
-  .logo-link {
-        position: fixed;
-        top: 10px;
-        left: 30px;
-  }
- 
   h1 {font-size: 14pt;}
 
   #table-of-contents {
 	font-size: 85%;
-	position: fixed;
-	display: block;
-	left: 10px;
-	top: 180px;
-	width: 200px;
-	min-height:60px;
-	max-height:55%;
 	line-height: 1.4em;
-	overflow:auto;
-  }
-
-  #table-of-contents h2 {
-	display:none;
   }
 
   #table-of-contents ul {
@@ -94,7 +74,6 @@
 	-moz-opacity: 1;
 	filter: alpha(opacity=100);
   }
-
 
   .org-info-search-highlight
   {
@@ -658,43 +637,169 @@
     font-weight: bold;
   }
 
-}  /* END OF @media screen */
+}  /* END OF @media all */
 
 
-/* These style are only for IE: */
-
-* html {
-  overflow-y: hidden;
-  padding-bottom:0px;
-  margin:0px;
-}
-* html body
+@media screen
 {
-  height: 100%;
-  overflow-y: auto;
-  font-size: 100%;
-  margin: 0px 0px 0px 250px;
-  padding: 0px 10% 0px 0px;
-}
-* html #table-of-contents
-{
-  position: absolute;
-  width:200px;
-  /*
-    The evil IE-JavaScript hack :-) depends on Picture and y-distance.
-    Added to support small screens (Netbooks...).
-    */
-  height: expression((document.body.clientHeight - 210) + "px");
-}
+  body {
+	margin: 10px 6% 10px 250px;
+	font-family: Verdana, Helvetica, sans-serif;
+  }
 
-* html h1
-{
-  margin-top:10px;
-}
+  .logo-link {
+    position: fixed;
+    top: 10px;
+    left: 30px;
+  }
 
-* html .logo-link
-{
+  #table-of-contents {
+	position: fixed;
+	display: block;
+	left: 10px;
+	top: 180px;
+	width: 200px;
+	min-height:60px;
+	max-height:55%;
+	overflow:auto;
+  }
+
+  #table-of-contents h2 {
+	display:none;
+  }
+
+
+
+  /* These style are only for IE: */
+
+  * html {
+    overflow-y: hidden;
+    padding-bottom:0px;
+    margin:0px;
+  }
+
+  * html body {
+    height: 100%;
+    overflow-y: auto;
+    font-size: 100%;
+    margin: 0px 0px 0px 250px;
+    padding: 0px 10% 0px 0px;
+  }
+
+  * html #table-of-contents {
+    position: absolute;
+    width:200px;
+    /*
+      The evil IE-JavaScript hack :-) depends on Picture and y-distance.
+      Added to support small screens (Netbooks...).
+      */
+    height: expression((document.body.clientHeight - 210) + "px");
+  }
+
+  * html h1 {
+    margin-top:10px;
+  }
+
+  * html .logo-link {
     position: absolute;
     top: 10px;
     left: 30px;
+  }
+
+}  /* END OF @media screen */
+
+
+
+
+/* Printing */
+
+
+
+@page
+{
+	margin-top:3cm;
+    margin-bottom:2.5cm;
 }
+
+@page :left
+{
+  margin-left:1.5cm;
+  margin-right:2cm;
+}
+
+@page :right
+{
+  margin-left:2cm;
+  margin-right:1.5cm;
+}
+
+
+@media print
+{
+  body {
+	margin:0px;
+	font-family: Verdana, Helvetica, sans-serif;
+  }
+
+  div {
+    orphans:2;
+  }
+
+  p {
+    orphans:2;
+  }
+
+  li {
+    orphans:2;
+  }
+
+  .logo-link {
+    top: 10px;
+    left: 30px;
+  }
+
+  #table-of-contents h2 {
+    margin-top:1.5cm;
+    page-break-before:auto;
+    border-style:none;
+  }
+
+  #text-table-of-contents {
+    width:50%;
+    margin-top:1cm;
+    margin-left:0cm;
+    margin-right:auto;
+    text-align:left;
+  }
+
+  #table-of-contents ul {
+    text-align:left;
+  }
+
+  h2 {
+    page-break-before:always;
+  }
+
+  pre {
+    page-break-inside:avoid;
+  }
+
+  /* Hide all org-info.js stuff for printing: */
+
+  div#org-info-js_console-container {
+    display:none;
+  }
+
+  div.org-info-js_local-toc {
+    display:none;
+  }
+
+  table.org-info-js_info-navigation {
+    display:none;
+  }
+  div.org-info-js_header-navigation {
+    display:none;
+    visibility:hidden; /* needed to overwrite the hardcoded style setting... */
+  }
+
+}  /* END OF @media print */
