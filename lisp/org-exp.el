@@ -318,7 +318,7 @@ e.g. \"timestamp:nil\"."
   :type 'boolean)
 
 (defcustom org-export-remove-timestamps-from-toc t
-  "If nil, remove timestamps from the table of contents entries."
+  "If t, remove timestamps from the table of contents entries."
   :group 'org-export-general
   :type 'boolean)
 
