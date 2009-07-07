@@ -398,24 +398,30 @@ non-nil."
 (defun org-babel-merge-params (&rest plists)
   "Combine all parameter association lists in PLISTS.  Later
 elements of PLISTS override the values of previous element.  This
-takes into account the specific parameter when merging lists."
-  (let (parameters)
+takes into account some special considerations for certain
+parameters when merging lists."
+  (let (params results vars var ref)
     (mapc (lambda (plist)
             (mapc (lambda (pair)
                     (case (car pair)
                       (:var
                        ;; we want only one specification per variable
-                       (let ((vars (cons (cdr pair) (cdr (assoc :var params))))
-                             (refs (mapcar (lambda (var)
-                                             (if (string-match "\\(.+\\)=\\(.+\\)" var)
-                                                 (match-string))))))
-                         
-                         )
-                       )
-                      (t (setq parameters (cons pair (assq-delete-all
-                                                      (car pair) parameters))))))
+		       (when (string-match "\\(.+\\)=\\(.+\\)" (cdr pair))
+			 ;; TODO: When is this not true? Can there be whitespace around the '='?
+			 (setq var (match-string 1 (cdr pair))
+			       ref (match-string 2 (cdr pair))
+			       vars (cons (cons var ref) (assq-delete-all var vars)))))
+		      (:results
+		       ;; maintain list of unique :results specifications
+		       (setq results (org-uniquify (append (split-string (cdr pair)) results))))
+                      (t
+		       ;; replace: this covers e.g. :session
+		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
                   plist))
-          plists)))
+          plists)
+    (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
+    (while vars (setq params (cons (cons :var (pop vars)) params)))
+    (cons (cons :results (mapconcat 'identity results " ")) params)))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
