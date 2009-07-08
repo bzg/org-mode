@@ -176,6 +176,11 @@ When nil, do no timestamp checking and always publish all files."
   :group 'org-publish
   :type 'directory)
 
+(defcustom org-publish-list-skipped-files t
+  "Non-nil means, show message about files *not* published."
+  :group 'org-publish
+  :type 'boolean)
+
 (defcustom org-publish-before-export-hook nil
   "Hook run before export on the Org file.
 The hook may modify the file in arbitrary ways before publishing happens.
@@ -223,7 +228,8 @@ function can still decide about that independently."
 	   t)))
     (if rtn
 	(message "Publishing file %s using `%s'" filename pub-func)
-      (message   "Skipping unmodified file %s" filename))
+      (when org-publish-list-skipped-files
+	(message   "Skipping unmodified file %s" filename)))
     rtn))
 
 (defun org-publish-update-timestamp (filename &optional pub-dir pub-func)
