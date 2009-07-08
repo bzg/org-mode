@@ -36,19 +36,24 @@
 
 (add-to-list 'org-babel-tangle-langs '("python" "py" "#!/usr/bin/env python"))
 
-(defun org-babel-execute:python (session body vars result-type)
+(defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Python source code block")
-  (let ((augmented-body (concat
-			 (mapconcat ;; define any variables
-			  (lambda (pair)
-			    (format "%s=%s"
-				    (car pair)
-				    (org-babel-python-var-to-python (cdr pair))))
-			  vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-	(session (org-babel-python-initiate-session session)))
-    (org-babel-python-evaluate session augmented-body result-type)))
+  (let* ((vars (org-babel-ref-variables params))
+         (result-params (split-string (or (cdr (assoc :results params)) "")))
+         (result-type (cond ((member "output" result-params) 'output)
+                            ((member "value" result-params) 'value)
+                            (t 'value)))
+         (full-body (concat
+                     (mapconcat ;; define any variables
+                      (lambda (pair)
+                        (format "%s=%s"
+                                (car pair)
+                                (org-babel-python-var-to-python (cdr pair))))
+                      vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+         (session (org-babel-python-initiate-session (cdr (assoc :session params)))))
+    (org-babel-python-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -152,14 +157,14 @@ last statement in BODY, as elisp."
 	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
-      (let* ((augmented-body
+      (let* ((full-body
 	      (mapconcat 
 	       #'org-babel-trim
 	       (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                     ;; for some reason python is fussy, and likes enters after every input
                     (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
-                          (split-string augmented-body "[\r\n]+"))))
+                          (split-string full-body "[\r\n]+"))))
              (results (delete org-babel-python-eoe-indicator
                               (cdr (member org-babel-python-eoe-indicator
                                            (reverse (mapcar #'org-babel-trim raw)))))))

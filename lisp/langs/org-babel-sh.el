@@ -36,19 +36,24 @@
 
 (add-to-list 'org-babel-tangle-langs '("sh" "sh" "#!/usr/bin/env sh"))
 
-(defun org-babel-execute:sh (session body vars result-type)
+(defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
 function is called by `org-babel-execute-src-block'."
   (message "executing Shell source code block")
-  (let ((augmented-body (concat
-		    (mapconcat ;; define any variables
-		     (lambda (pair)
-		       (format "%s=%s"
-			       (car pair)
-			       (org-babel-sh-var-to-sh (cdr pair))))
-		     vars "\n") "\n" body "\n\n")) ;; then the source block body
-	(session (org-babel-sh-initiate-session (cdr (assoc :session params)))))
-    (org-babel-sh-evaluate session augmented-body result-type)))
+  (let* ((vars (org-babel-ref-variables params))
+         (result-params (split-string (or (cdr (assoc :results params)) "")))
+         (result-type (cond ((member "output" result-params) 'output)
+                            ((member "value" result-params) 'value)
+                            (t 'value)))
+         (full-body (concat
+                     (mapconcat ;; define any variables
+                      (lambda (pair)
+                        (format "%s=%s"
+                                (car pair)
+                                (org-babel-sh-var-to-sh (cdr pair))))
+                      vars "\n") "\n" body "\n\n")) ;; then the source block body
+         (session (org-babel-sh-initiate-session (cdr (assoc :session params)))))
+    (org-babel-sh-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -138,10 +143,10 @@ last statement in BODY."
 	       (org-babel-import-elisp-from-file tmp-file))))))
     ;; comint session evaluation
     (let* ((tmp-file (make-temp-file "org-babel-sh"))
-	   (augmented-body (mapconcat #'org-babel-chomp
+	   (full-body (mapconcat #'org-babel-chomp
                                  (list body org-babel-sh-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-sh-eoe-output nil
-                  (insert augmented-body) (comint-send-input nil t)))
+                  (insert full-body) (comint-send-input nil t)))
            (results (cdr (member org-babel-sh-eoe-output
                                  (reverse (mapcar #'org-babel-sh-strip-weird-long-prompt
                                                   (mapcar #'org-babel-trim raw)))))))
