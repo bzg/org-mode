@@ -1923,18 +1923,11 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [17/23]
+* Bugs [18/23]
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
    should support this.
-** TODO make :results replace the default?
-   I'm tending to think that appending results to pre-existing results
-   creates mess, and that the cleaner `replace' option should be the
-   default. E.g. when a source block creates an image, we would want
-   that to be updated, rather than have a new one be added.
-   
-   I agree.
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -1946,10 +1939,11 @@ for example
 
 #+resname: this-doesn't-match-orgtbl
 
+
 ** TODO collapsing consecutive newlines in string output
 
 #+srcname: multi-line-string-output
-#+begin_src ruby :results replace
+#+begin_src ruby :results output
 "the first line ends here
 
 
@@ -1958,10 +1952,8 @@ for example
 even a third"
 #+end_src
 
-#+resname:
-: the first line ends here
-: 	     and this is the second one
-: 	return even a third
+#+resname: multi-line-string-output
+
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
@@ -1984,6 +1976,11 @@ That fact combined with the tenancy to all ways use standard out in
 shell scripts led me to treat these two options (=output= and =value=)
 as identical in shell evaluation.  Not ideal but maybe good enough for
 the moment.
+
+In the `results' branch I've changed this so that they're not quite
+identical: output results in raw stdout contents, whereas value
+converts it to elisp, perhaps to a table if it looks tabular. This is
+the same for the other languages. [Dan]
 
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
@@ -2013,6 +2010,13 @@ the moment.
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+** DONE make :results replace the default?
+   I'm tending to think that appending results to pre-existing results
+   creates mess, and that the cleaner `replace' option should be the
+   default. E.g. when a source block creates an image, we would want
+   that to be updated, rather than have a new one be added.
+   
+   I agree.
 ** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
