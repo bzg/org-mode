@@ -290,9 +290,9 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-parse-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
         (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
-        (org-combine-plists org-babel-default-header-args
-			    (org-babel-parse-header-arguments
-			     (org-babel-clean-text-properties (or (match-string 3) ""))))))
+        (org-babel-merge-params org-babel-default-header-args
+				(org-babel-parse-header-arguments
+				 (org-babel-clean-text-properties (or (match-string 3) ""))))))
 
 (defun org-babel-parse-inline-src-block-match ()
   (list (org-babel-clean-text-properties (match-string 1))
