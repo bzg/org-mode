@@ -7,6 +7,12 @@
 #+STYLE: <link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 
 
+
+#+begin_html
+<!-- The logo links to the root of the website -->
+<a href="/"><img src="http://orgmode.org/img/org-mode-unicorn.png" class="logo-link" /></a>
+#+end_html
+
 #*Org - an Emacs Mode for Notes, Project Planning, and Authoring*
 #+begin_html
   <table>
@@ -27,8 +33,6 @@
 #+end_html
 
 #+begin_html
-    <!-- The logo links to the root of the website -->
-    <a href="/"><img src="http://orgmode.org/img/org-mode-unicorn.png" class="logo-link" /></a>
     <table width="100%">
     <tr>
     <td rowspan="2">
