@@ -811,7 +811,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
     (if (or (< m (point-min)) (> m (point-max))) (widen))
     (goto-char m)
     (org-show-entry)
-    (org-back-to-heading)
+    (org-back-to-heading t)
     (org-cycle-hide-drawers 'children)
     (recenter)
     (if recent

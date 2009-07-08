@@ -6176,7 +6176,7 @@ If yes, remember the marker and the distance to BEG."
   (save-excursion
     (save-match-data
       (narrow-to-region
-       (progn (org-back-to-heading) (point))
+       (progn (org-back-to-heading t) (point))
        (progn (org-end-of-subtree t) (point))))))
 
 (defun org-clone-subtree-with-time-shift (n &optional shift)

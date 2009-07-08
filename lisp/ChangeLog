@@ -1,5 +1,9 @@
 2009-07-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-goto): Find hidden headlines as well.
+
+	* org.el (org-narrow-to-subtree): Find hidden headlines as well.
+
 	* org-plot.el (org-plot/add-options-to-plist): Add timeind
 	option.
 
