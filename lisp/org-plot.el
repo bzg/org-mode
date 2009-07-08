@@ -64,6 +64,7 @@ Returns the resulting property list."
 		  ("file"    . :file)
 		  ("labels"  . :labels)
 		  ("map"     . :map)
+                  ("timeind" . :timeind)
 		  ("timefmt" . :timefmt)))
 	    (multiples '("set" "line"))
 	    (regexp ":\\([\"][^\"]+?[\"]\\|[(][^)]+?[)]\\|[^ \t\n\r;,.]*\\)")

@@ -1,3 +1,8 @@
+2009-07-08  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-plot.el (org-plot/add-options-to-plist): Add timeind
+	option.
+
 2009-07-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-publish.el (org-publish-remove-all-timestamps): New function.
