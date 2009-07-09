@@ -292,7 +292,7 @@ This is a cons with two strings, to be added before and after the
 fixed-with text.
 
 Defaults to \\begin{verbatim} and \\end{verbatim}."
-  :group 'org-export_translation
+  :group 'org-export-translation
   :group 'org-export-latex
   :type '(cons (string :tag "Open")
 	       (string :tag "Close")))
@@ -929,7 +929,7 @@ OPT-PLIST is the options plist for current buffer."
      ;; insert author info
      (if (plist-get opt-plist :author-info)
 	 (format "\\author{%s}\n"
-		 (or author user-full-name))
+		 (org-export-latex-fontify-headline (or author user-full-name)));????????????????????
        (format "%%\\author{%s}\n"
 	       (or author user-full-name)))
      ;; insert the date
@@ -1161,10 +1161,11 @@ See the `org-export-latex.el' code for a complete conversion table."
 					     sub-superscript
 					     (match-string 2)
 					     (match-string 1)
-					     (match-string 3))) "") t t)))))))
+					     (match-string 3))) "") t t)
+		       (backward-char 1)))))))
 	'(;"^\\([^\n$]*?\\|^\\)\\(\\\\?\\$\\)\\([^\n$]*\\)$"
 	  "\\(\\(\\\\?\\$\\)\\)"
-	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\({[^{}]+}\\|[a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
+	  "\\([a-za-z0-9]+\\|[ \t\n]\\|\\b\\|\\\\\\)\\(_\\|\\^\\)\\({[^{}]+}\\|[a-za-z0-9]+\\|[ \t\n]\\|[:punct:]\\|)\\|{[a-za-z0-9]+}\\|([a-za-z0-9]+)\\)"
 	  "\\(.\\|^\\)\\(\\\\\\)\\([ \t\n]\\|[a-zA-Z&#%{}\"]+\\)"
 	  "\\(.\\|^\\)\\(&\\)"
 	  "\\(.\\|^\\)\\(#\\)"
