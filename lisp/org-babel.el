@@ -154,7 +154,8 @@ the header arguments specified at the source code block."
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (params (org-combine-plists params (third info)))
+         (params (org-babel-merge-params
+		  (third info) (org-babel-get-src-block-function-args) params))
 	 (result-params (split-string (or (cdr (assoc :results params)) "")))
          (result-type (cond ((member "output" result-params) 'output)
                             ((member "value" result-params) 'value)
@@ -259,7 +260,7 @@ replaced, and may need to be reinstated in this function. "
     (save-excursion
       (goto-char (org-babel-where-is-src-block-head))
       (if (save-excursion (forward-line -1)
-                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
+                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
           (org-babel-clean-text-properties (match-string 1))))))
 
 (defun org-babel-get-src-block-info ()
@@ -274,6 +275,11 @@ of the following form.  (language body header-arguments-alist)"
             (looking-at org-babel-inline-src-block-regexp))
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
+
+(defun org-babel-get-src-block-function-args ()
+  (when (org-babel-get-src-block-name)
+    (mapcar (lambda (ref) (cons :var ref))
+	    (split-string (match-string 2) ",[ \f\t\n\r\v]*"))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
