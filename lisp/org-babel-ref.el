@@ -87,7 +87,7 @@ return nil."
       out)))
 
 (defun org-babel-ref-resolve-reference (ref)
-  "Resolve the reference and return it's value"
+  "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
           type args new-refere new-referent result lob-info)
@@ -140,7 +140,7 @@ return nil."
         ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
 
 (defun org-babel-ref-at-ref-p ()
-  "Return the type of reference located at point or nil of none
+  "Return the type of reference located at point or nil if none
 of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
