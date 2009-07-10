@@ -256,12 +256,15 @@ replaced, and may need to be reinstated in this function. "
 
 (defun org-babel-get-src-block-name ()
   "Return the name of the current source block if one exists"
-  (let ((case-fold-search t))
-    (save-excursion
-      (goto-char (org-babel-where-is-src-block-head))
-      (if (save-excursion (forward-line -1)
-                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
-          (org-babel-clean-text-properties (match-string 1))))))
+  (let ((case-fold-search t)
+	(head (org-babel-where-is-src-block-head)))
+    (when head
+      (save-excursion
+	(goto-char head)
+	(if (save-excursion
+	      (forward-line -1)
+	      (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+	    (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list

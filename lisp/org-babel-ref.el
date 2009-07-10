@@ -108,7 +108,7 @@ return nil."
       (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
                                        (regexp-quote ref) "[ \t]*$"))
                 (regexp (concat "^#\\+SRCNAME:[ \t]*"
-                                (regexp-quote ref) "[ \t]*$")))
+                                (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
             (or (re-search-forward result_regexp nil t)
                 (re-search-forward result_regexp nil t)
                 (re-search-forward regexp nil t)
