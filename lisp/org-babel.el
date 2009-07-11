@@ -255,16 +255,26 @@ replaced, and may need to be reinstated in this function. "
     (widen)))
 
 (defun org-babel-get-src-block-name ()
-  "Return the name of the current source block if one exists"
+  "Return the name of the current source block if one exists.
+
+This function is analogous to org-babel-lob-get-info. For both
+functions, after they are called, (match-string 1) matches the
+function name, and (match-string 2) matches the function
+arguments inside the parentheses. I think perhaps these functions
+should be renamed to bring out this similarity, perhaps involving
+the word 'call'."
   (let ((case-fold-search t)
 	(head (org-babel-where-is-src-block-head)))
-    (when head
-      (save-excursion
-	(goto-char head)
-	(if (save-excursion
-	      (forward-line -1)
-	      (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
-	    (org-babel-clean-text-properties (match-string 1)))))))
+    (if head
+	(save-excursion
+	  (goto-char head)
+	  (if (save-excursion
+		(forward-line -1)
+		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+	      (org-babel-clean-text-properties (match-string 1))))
+      ;; Try testing if we're on a lob one-liner; if so use the LoB
+      ;; function call as the name
+      (org-babel-lob-get-info))))
 
 (defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list
@@ -282,7 +292,8 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-get-src-block-function-args ()
   (when (org-babel-get-src-block-name)
     (mapcar (lambda (ref) (cons :var ref))
-	    (split-string (match-string 2) ",[ \f\t\n\r\v]*"))))
+	    (split-string (org-babel-clean-text-properties (match-string 2))
+			  ",[ \f\t\n\r\v]*"))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -378,10 +389,12 @@ source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
 #+RESNAME: line following the source block."
   (save-excursion
-    (goto-char (org-babel-where-is-src-block-head))
-    (let ((name (org-babel-get-src-block-name)) end head)
+    (let ((on-lob-line (progn (beginning-of-line 1)
+			      (looking-at org-babel-lob-one-liner-regexp)))
+	  (name (org-babel-get-src-block-name)) end head)
+      (unless on-lob-line (goto-char (org-babel-where-is-src-block-head)))
       (or (and name (message name) (org-babel-find-named-result name))
-          (and (re-search-forward "#\\+end_src" nil t)
+          (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
 		      (setq end (point))

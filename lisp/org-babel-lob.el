@@ -62,7 +62,7 @@ add files to this list use the `org-babel-lob-ingest' command."
 
 ;; functions for executing lob one-liners
 
-(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\([^\n]+\\)\n")
+(defvar org-babel-lob-one-liner-regexp "#\\+lob:[ \t]+\\(.+?\\)\(\\(.*\\)\)")
 
 (defun org-babel-lob-execute-maybe ()
   "Detect if this is context for a org-babel Library Of Babel
@@ -75,19 +75,27 @@ the Library."
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-lob-execute-maybe)
 
 (defun org-babel-lob-get-info ()
-  "Return the information of the current Library of Babel line as
-a list of the following form.
+  "Return the function call supplied on the current Library of
+Babel line as a string.
 
-  (source-block-name header-arguments-alist)"
+This function is analogous to org-babel-get-src-block-name. For
+both functions, after they are called, (match-string 1) matches
+the function name, and (match-string 2) matches the function
+arguments inside the parentheses. I think perhaps these functions
+should be renamed to bring out this similarity, perhaps involving
+the word 'call'."
   (let ((case-fold-search t))
     (save-excursion
       (move-beginning-of-line 1)
       (if (looking-at org-babel-lob-one-liner-regexp)
-          (org-babel-clean-text-properties (match-string 1))))))
+          (org-babel-clean-text-properties 
+	   (format "%s(%s)" (match-string 1) (match-string 2)))))))
 
 (defun org-babel-lob-execute (info)
-  (let ((params (org-babel-parse-header-arguments (concat ":var results=" info))))
-    (org-babel-execute-src-block t (list "emacs-lisp" "results" params))))
+  (let ((params (org-babel-merge-params
+		 org-babel-default-header-args
+		 (org-babel-parse-header-arguments (concat ":var results=" info)))))
+    (org-babel-execute-src-block nil (list "emacs-lisp" "results" params))))
 
 (provide 'org-babel-lob)
 ;;; org-babel-lob.el ends here
