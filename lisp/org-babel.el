@@ -504,9 +504,9 @@ parameters when merging lists."
                     (case (car pair)
                       (:var
                        ;; we want only one specification per variable
-		       (when (string-match "\\(.+\\)=\\(.+\\)" (cdr pair))
+		       (when (string-match "\\([^= \f\t\n\r\v]+\\)=\\([^ \f\t\n\r\v]+\\)" (cdr pair))
 			 ;; TODO: When is this not true? Can there be whitespace around the '='?
-			 (setq var (match-string 1 (cdr pair))
+			 (setq var (intern (match-string 1 (cdr pair)))
 			       ref (match-string 2 (cdr pair))
 			       vars (cons (cons var ref) (assq-delete-all var vars)))))
 		      (:results
