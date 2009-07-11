@@ -271,10 +271,7 @@ the word 'call'."
 	  (if (save-excursion
 		(forward-line -1)
 		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
-	      (org-babel-clean-text-properties (match-string 1))))
-      ;; Try testing if we're on a lob one-liner; if so use the LoB
-      ;; function call as the name
-      (org-babel-lob-get-info))))
+	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list
@@ -392,7 +389,8 @@ line.  If no result exists for this block then create a
   (save-excursion
     (let ((on-lob-line (progn (beginning-of-line 1)
 			      (looking-at org-babel-lob-one-liner-regexp)))
-	  (name (org-babel-get-src-block-name)) end head)
+	  (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
+	  end head)
       (unless on-lob-line (goto-char (org-babel-where-is-src-block-head)))
       (or (and name (message name) (org-babel-find-named-result name))
           (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
