@@ -321,14 +321,15 @@ of the following form.  (language body header-arguments-alist)"
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
-  (delq nil
-        (mapcar
-         (lambda (arg)
-	   (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
-	       (cons (intern (concat ":" (match-string 1 arg)))
-		     (org-babel-chomp (match-string 2 arg)))
-	     (cons (intern (concat ":" arg)) nil)))
-         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
+  (if (> (length arg-string) 0)
+      (delq nil
+	    (mapcar
+	     (lambda (arg)
+	       (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+		   (cons (intern (concat ":" (match-string 1 arg)))
+			 (org-babel-chomp (match-string 2 arg)))
+		 (cons (intern (concat ":" arg)) nil)))
+	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
 
 (defun org-babel-where-is-src-block-head ()
   "Return the point at the beginning of the current source
