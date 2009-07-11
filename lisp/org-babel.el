@@ -387,10 +387,10 @@ source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
 #+RESNAME: line following the source block."
   (save-excursion
-    (let ((on-lob-line (progn (beginning-of-line 1)
-			      (looking-at org-babel-lob-one-liner-regexp)))
-	  (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
-	  end head)
+    (let* ((on-lob-line (progn (beginning-of-line 1)
+			       (looking-at org-babel-lob-one-liner-regexp)))
+	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
+	   end head)
       (unless on-lob-line (goto-char (org-babel-where-is-src-block-head)))
       (or (and name (message name) (org-babel-find-named-result name))
           (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
