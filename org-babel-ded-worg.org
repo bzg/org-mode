@@ -16,22 +16,41 @@
   
 * Basic org-babel functionality
 *** Source code execution
-    For interpreted languages such as shell, python, R etc, org-babel
-    allows source blocks to be *executed*: the code is passed to the
+    For interpreted languages such as shell, python, R, etc, org-babel
+    allows source blocks to be executed: the code is passed to the
     interpreter and you have control over what is done with the
     results of excecution. E.g. place point anywhere in the following
     block and use C-c C-c to run the code:
 
-#+begin_src sh
-    date
-    hostname
-    whoami
+#+begin_src python :results output
+import time
+x = 4
+print("hello\n")
+#print time.ctime()
+print [5, 10]
 #+end_src
 
 #+resname:
-: Sun Jul  5 18:49:46 EDT 2009
-: Tichodroma
-: dan
+: hello
+: 510
+
+#+begin_src R :results value
+x = 4
+date()
+c(5, 10)
+#+end_src
+
+#+resname:
+|  5 |
+| 10 |
+
+
+
+
+
+
+
+
 
 
 
@@ -57,12 +76,13 @@
 **** Additional :results settings
      
 
-
+     
 *** Arguments to source code blocks
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
     now have the status of *functions*.
 
+    
 *** Internals
     For those interested in hacking org-babel, it's worth going
     through what actually happened there:
@@ -95,3 +115,5 @@
     
 #+resname:
 : Sun Jul  5 14:13:07 2009
+
+    

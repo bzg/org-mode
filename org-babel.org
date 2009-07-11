@@ -1913,7 +1913,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [17/23]
+* Bugs [17/26]
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
@@ -1959,6 +1959,36 @@ even a third"
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+
+** TODO are the org-babel-trim s necessary?
+   at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
+   not org-babel-ruby-evaluate
+** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
+   And at other occurrences of org-combine-plists?
+
+** TODO #+lob: calls fail if reference has single character name
+*** This doesn't work
+#+lob: R-plot(data=X)
+
+#+tblname: X
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+*** But this is OK
+#+tblname: XX
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+#+lob: R-plot(data=XX)
+
 
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
@@ -2129,19 +2159,13 @@ tables
 "schulte"
 #+end_src
 
+
 #+begin_src R :var num=little-fake
 num
 #+end_src
 
 #+resname:
 : schulte
-: 11
-: 11
-: 11
-: schulte
-: 9
-: 9
-: 11
 
 #+srcname: set-debug-on-error
 #+begin_src emacs-lisp :results silent
@@ -2153,13 +2177,18 @@ num
 '(1 2 3)
 #+end_src
 
+
+
+
 #+srcname: bug-R-number-evaluation
-#+begin_src R :var table=bug-numerical-table :results replace
+#+begin_src R :var table=bug-numerical-table
 mean(mean(table))
 #+end_src
 
 #+resname:
 : 2
+
+
 
 #+tblname: bug-vert-table
 | 1 |
@@ -2260,6 +2289,10 @@ As an example eval the following.  Adding a line to test
 ar.first.first
 #+end_src
 
+
+
+
+
 ** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
 
@@ -2310,6 +2343,9 @@ recognition of ruby arrays as such.
 | 1 | 2 | 3 | 4 |
 
 
+
+
+
 * Tests
 Evaluate all the cells in this table for a comprehensive test of the
 org-babel functionality.
@@ -2320,38 +2356,38 @@ of these tests may fail.
 #+TBLNAME: org-babel-tests
 | functionality           | block                      | arg |    expected |     results | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| basic evaluation        |                            |     |             |             |      |
+| basic evaluation        |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp                |     |           5 |             |      |
-| shell                   | basic-shell                |     |           6 |             |      |
-| ruby                    | basic-ruby                 |     |   org-babel |             |      |
-| python                  | basic-python               |     | hello world |             |      |
-| R                       | basic-R                    |     |          13 |             |      |
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
+| shell                   | basic-shell                |     |           6 | 6           | pass |
+| ruby                    | basic-ruby                 |     |   org-babel | org-babel   | pass |
+| python                  | basic-python               |     | hello world | hello world | pass |
+| R                       | basic-R                    |     |          13 | 13          | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| tables                  |                            |     |             |             |      |
+| tables                  |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp                |     |           3 |             |      |
-| ruby                    | table-ruby                 |     |       1-2-3 |             |      |
-| python                  | table-python               |     |           5 |             |      |
-| R                       | table-R                    |     |         3.5 |             |      |
+| emacs lisp              | table-elisp                |     |           3 | 3           | pass |
+| ruby                    | table-ruby                 |     |       1-2-3 | 1-2-3       | pass |
+| python                  | table-python               |     |           5 | 5           | pass |
+| R                       | table-R                    |     |         3.5 | 3.5         | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block references |                            |     |             |             |      |
+| source block references |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last           |     |       Array |             |      |
+| all languages           | chained-ref-last           |     |       Array | Array       | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block functions  |                            |     |             |             |      |
+| source block functions  |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb                 |     |       fibbd |             |      |
-| run over                | Fibonacci                  |   0 |           1 |             |      |
-| a                       | Fibonacci                  |   1 |           1 |             |      |
-| variety                 | Fibonacci                  |   2 |           2 |             |      |
-| of                      | Fibonacci                  |   3 |           3 |             |      |
-| different               | Fibonacci                  |   4 |           5 |             |      |
-| arguments               | Fibonacci                  |   5 |           8 |             |      |
+| emacs lisp              | defun-fibb                 |     |       fibbd | fibbd       | pass |
+| run over                | Fibonacci                  |   0 |           1 | 1           | pass |
+| a                       | Fibonacci                  |   1 |           1 | 1           | pass |
+| variety                 | Fibonacci                  |   2 |           2 | 2           | pass |
+| of                      | Fibonacci                  |   3 |           3 | 3           | pass |
+| different               | Fibonacci                  |   4 |           5 | 5           | pass |
+| arguments               | Fibonacci                  |   5 |           8 | 8           | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| bugs and tasks          |                            |     |             |             |      |
-|-------------------------+----------------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test            |     |           3 |             |      |
+| bugs and tasks          |                            |     |             |             | pass |
+|-------------------------+----------------------------+-----+-------------+-------------+------| |  | 
+| simple ruby arrays      | ruby-array-test            |     |           3 | 3           |      |
 | R number evaluation     | bug-R-number-evaluation    |     |           2 |             |      |
 | multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |             |      |
 | forcing vector results  | test-forced-vector-results |     |       Array |             |      |
@@ -2373,10 +2409,18 @@ of these tests may fail.
 (+ 1 4)
 #+end_src
 
+
+
+
+
+
 #+srcname: basic-shell
 #+begin_src sh :results silent
 expr 1 + 5
 #+end_src
+
+
+
 
 #+srcname: date-simple
 #+begin_src sh :results silent
@@ -2388,16 +2432,26 @@ date
 "org-babel"
 #+end_src
 
+
+
+
 #+srcname: basic-python
 #+begin_src python :results silent
 'hello world'
 #+end_src
+
+
+
 
 #+srcname: basic-R
 #+begin_src R :results silent
 b <- 9
 b + 4
 #+end_src
+
+
+
+
 
 ** read tables
 
@@ -2410,20 +2464,33 @@ b + 4
 (length (car table))
 #+end_src
 
+
+
+
 #+srcname: table-ruby
 #+begin_src ruby :results silent :var table=test-table
 table.first.join("-")
 #+end_src
+
+
+
 
 #+srcname: table-python
 #+begin_src python :var table=test-table
 table[1][1]
 #+end_src
 
+
+
+
 #+srcname: table-R
 #+begin_src R :var table=test-table
 mean(mean(table))
 #+end_src
+
+
+
+
 
 ** references
 
@@ -2469,6 +2536,10 @@ and Check that it is still a list
 table.class.name
 #+end_src
 
+
+
+
+
 ** source blocks as functions
 
 #+srcname: defun-fibb
@@ -2476,10 +2547,32 @@ table.class.name
 (defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
 #+end_src
 
+
+
+
 #+srcname: fibonacci
 #+begin_src emacs-lisp :results silent :var n=7
 (fibbd n)
 #+end_src
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ** sbe tests (these don't seem to be working...)
 Testing the insertion of results into org-mode tables.
@@ -2600,6 +2693,8 @@ a + b
 #+begin_src R
 hist(rgamma(20,3,3))
 #+end_src
+
+
 
 ** org-babel plays with tables
 Alright, this should demonstrate both the ability of org-babel to read

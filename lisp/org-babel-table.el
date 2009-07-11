@@ -63,8 +63,8 @@
 (defmacro sbe (source-block &rest variables)
   "Return the results of calling SOURCE-BLOCK with all assigning
 every variable in VARIABLES.  Each element of VARIABLES should be
-a two element list, who's first element is the name of the
-variable and second element is a string of it's value.  The
+a two element list, whose first element is the name of the
+variable and second element is a string of its value.  The
 following call to `sbe' would be equivalent to the following
 source code block.
 
