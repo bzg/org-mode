@@ -115,7 +115,7 @@ return nil."
                 (re-search-backward regexp nil t)
                 ;; check the Library of Babel
                 (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
-          (goto-char (match-beginning 0))
+          (unless lob-info (goto-char (match-beginning 0)))
         ;; ;; TODO: allow searching for names in other buffers
         ;; (setq id-loc (org-id-find ref 'marker)
         ;;       buffer (marker-buffer id-loc)
