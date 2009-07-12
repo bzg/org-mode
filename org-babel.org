@@ -191,7 +191,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [27/42]
+* Tasks [28/43]
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -574,7 +574,6 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
 *** Current design
     This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
     ready-made source blocks designed to carry out useful common tasks.
-
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
 there are spaces in the message and scalar otherwise.
@@ -824,6 +823,8 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+
+** DONE LoB: allow output in buffer
 ** DONE add a function to jump to a source-block by name
    I've had an initial stab at that in org-babel-find-named-block
    (library-of-babel branch).
@@ -1913,7 +1914,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [17/26]
+* Bugs [17/28]
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
@@ -1963,33 +1964,35 @@ even a third"
 ** TODO are the org-babel-trim s necessary?
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
-** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
-   And at other occurrences of org-combine-plists?
+** results branch bugs
+*** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
+    And at other occurrences of org-combine-plists?
+*** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
+    I haven't fixed this yet. org-babel-ref-resolve-reference moves
+    point around, inside a save-excursion. Somehow when it comes to
+    inserting the results (after possible further recursive calls to
+    org-babel-ref-resolve-reference), point hasn't gone back to the
+    lob line.
+*** TODO LoB: output to buffer adds creeping blank lines
+   Compare the results of
+#+lob: python-add(a=5, b=17)
 
-** TODO #+lob: calls fail if reference has single character name
-*** This doesn't work
-#+lob: R-plot(data=X)
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
 
-#+tblname: X
-| 1 |     1 |
-| 2 |    .5 |
-| 3 | .3333 |
-| 4 |   .25 |
-| 5 |    .2 |
-| 6 | .1666 |
+#+begin_src python
+23
+#+end_src
 
-*** But this is OK
-#+tblname: XX
-| 1 |     1 |
-| 2 |    .5 |
-| 3 | .3333 |
-| 4 |   .25 |
-| 5 |    .2 |
-| 6 | .1666 |
+#+resname:
+: 23
+---------------------
 
-#+lob: R-plot(data=XX)
-
-
+   Hmm, it's a bit confusing. I think it's to do with the fact that
+   LoB removes the entire (#+resname and result) and starts from
+   scratch, whereas #+begin_src only removes the result. I haven't
+   worked out what the correct fix is yet.
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
@@ -2018,6 +2021,30 @@ even a third"
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+
+** DONE LoB: calls fail if reference has single character name
+   commit 21d058869df1ff23f4f8cc26f63045ac9c0190e2
+**** This doesn't work
+#+lob: R-plot(data=X)
+
+#+tblname: X
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+**** But this is OK
+#+tblname: XX
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+#+lob: R-plot(data=XX)
 ** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
