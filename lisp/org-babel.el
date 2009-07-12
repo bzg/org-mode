@@ -500,11 +500,11 @@ takes into account some special considerations for certain
 parameters when merging lists."
   (let (params results vars var ref)
     (mapc (lambda (plist)
-            (mapc (lambda (pair)
-                    (case (car pair)
-                      (:var
-                       ;; we want only one specification per variable
-		       (when (string-match "\\([^= \f\t\n\r\v]+\\)=\\([^ \f\t\n\r\v]+\\)" (cdr pair))
+	    (mapc (lambda (pair)
+		    (case (car pair)
+		      (:var
+		       ;; we want only one specification per variable
+		       (when (string-match "^\\([^= \f\t\n\r\v]+\\)=\\([^\f\n\r\v]+\\)$" (cdr pair))
 			 ;; TODO: When is this not true? Can there be whitespace around the '='?
 			 (setq var (intern (match-string 1 (cdr pair)))
 			       ref (match-string 2 (cdr pair))
