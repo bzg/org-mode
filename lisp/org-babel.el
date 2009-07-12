@@ -512,11 +512,11 @@ parameters when merging lists."
 		      (:results
 		       ;; maintain list of unique :results specifications
 		       (setq results (org-uniquify (append (split-string (cdr pair)) results))))
-                      (t
+		      (t
 		       ;; replace: this covers e.g. :session
 		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
-                  plist))
-          plists)
+		  plist))
+	  plists)
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
     (cons (cons :results (mapconcat 'identity results " ")) params)))

@@ -110,7 +110,8 @@ then create.  Return the initialized session."
       (when newp
         (setq sh-buffer (current-buffer))
         (org-babel-comint-wait-for-output sh-buffer))
-      (setq org-babel-sh-buffers (cons (cons session sh-buffer) (assq-delete-all session org-babel-sh-buffers)))
+      (setq org-babel-sh-buffers (cons (cons session sh-buffer)
+				       (assq-delete-all session org-babel-sh-buffers)))
       session)))
 
 (defun org-babel-sh-initiate-session (&optional session)

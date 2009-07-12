@@ -76,14 +76,15 @@ results
   (unless (stringp source-block) (setq source-block (symbol-name source-block)))
   (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
    (if (and source-block (> (length source-block) 0))
-       (let ((params (eval `(org-babel-parse-header-arguments
-                             (concat ":var results="
-                                     ,source-block
-                                     "("
-                                     (mapconcat (lambda (var-spec)
-                                                  (format "%S=%s" (first var-spec) (second var-spec)))
-                                                ',variables ", ")
-                                     ")")))))
+       (let ((params
+	      (eval `(org-babel-parse-header-arguments
+		      (concat ":var results="
+			      ,source-block
+			      "("
+			      (mapconcat (lambda (var-spec)
+					   (format "%S=%s" (first var-spec) (second var-spec)))
+					 ',variables ", ")
+			      ")")))))
          (org-babel-execute-src-block t (list "emacs-lisp" "results" params)))
      "")))
 

@@ -104,7 +104,8 @@ then create.  Return the initialized session."
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
       (run-python)
-      (setq org-babel-python-buffers (cons (cons session python-buffer) (assq-delete-all session org-babel-python-buffers)))
+      (setq org-babel-python-buffers (cons (cons session python-buffer)
+					   (assq-delete-all session org-babel-python-buffers)))
       session)))
 
 (defun org-babel-python-initiate-session (&optional session)

@@ -57,8 +57,9 @@ add files to this list use the `org-babel-lob-ingest' command."
                     (assq-delete-all source-name org-babel-library-of-babel)))))))
 
 (org-babel-lob-ingest ;; actually add the source-blocks defined in library-of-babel.org
- (expand-file-name "library-of-babel.org"
-                   (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
+ (expand-file-name
+  "library-of-babel.org"
+  (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
 
 ;; functions for executing lob one-liners
 

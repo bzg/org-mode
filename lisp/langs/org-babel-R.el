@@ -86,8 +86,10 @@ called by `org-babel-execute-src-block'."
     (setq session (or session "*R*"))
     (if (org-babel-comint-buffer-livep session)
         session
-      (save-window-excursion (R) (rename-buffer (if (bufferp session) (buffer-name session)
-                                                  (if (stringp session) session (buffer-name)))) (current-buffer)))))
+      (save-window-excursion
+	(R)
+	(rename-buffer (if (bufferp session) (buffer-name session)
+			 (if (stringp session) session (buffer-name)))) (current-buffer)))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
