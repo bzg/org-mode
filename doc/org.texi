@@ -632,7 +632,7 @@ in Emacs 22 you need to do this yourself with
 @lisp
 (transient-mark-mode 1)
 @end lisp
-@noindent If you do not like @code{transient-make-mode}, you can create an
+@noindent If you do not like @code{transient-mark-mode}, you can create an
 active region by using the mouse to select a region, or pressing
 @kbd{C-@key{SPC}} twice before moving the cursor.
 
