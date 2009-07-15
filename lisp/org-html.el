@@ -368,7 +368,7 @@ people with different Emacs setup contribute HTML files to a website,
 because the fonts will represent the individual setups.  In these cases,
 it is much better to let Org/Htmlize assign classes only, and to use
 a style file to define the look of these classes.
-To get a start for your css file, start Emacs session nnd make sure that
+To get a start for your css file, start Emacs session and make sure that
 all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
 \\[org-export-htmlize-generate-css] to extract class definitions."
