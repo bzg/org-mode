@@ -39,11 +39,11 @@ and shebang(#!) line to use when writing out the language to
 file.")
 
 (defun org-babel-load-file (file)
-  "Load the contents of the Emacs Lisp source code blocks in
-FILE.  This function will first export the source code using
-`org-babel-tangle' and then load the resulting file using
-`load-file'."
-  (load-file (org-babel-tangle-file "emacs-lisp")))
+  "Load the contents of the Emacs Lisp source code blocks in the
+org-mode formatted FILE.  This function will first export the
+source code using `org-babel-tangle' and then load the resulting
+file using `load-file'."
+  (mapc #'load-file (org-babel-tangle-file "emacs-lisp")))
 
 (defun org-babel-tangle-file (file &optional lang)
   "Extract the bodies of all source code blocks in FILE with
@@ -59,7 +59,8 @@ language."
   (interactive)
   (save-excursion
     (let ((base-name (file-name-sans-extension (buffer-file-name)))
-          (block-counter 0))
+          (block-counter 0)
+          path-collector)
       (mapc ;; for every language create a file
        (lambda (by-lang)
          (let* ((lang (car by-lang))
@@ -69,6 +70,7 @@ language."
                 (she-bang (second lang-specs))
                 (by-session (cdr by-lang)))
            (flet ((to-file (filename specs)
+                           (add-to-list 'path-collector filename)
                            (with-temp-file filename
                              (funcall lang-f)
                              (when she-bang (insert (concat she-bang "\n")))
@@ -85,7 +87,8 @@ language."
                (setq block-counter (+ block-counter (length (cdr (car by-session)))))
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
        (org-babel-collect-blocks lang))
-      (message "tangled %d source-code blocks" block-counter))))
+      (message "tangled %d source-code blocks" block-counter)
+      path-collector)))
 
 (defun org-babel-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
