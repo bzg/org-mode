@@ -1,5 +1,5 @@
 #+TITLE: org-babel --- facilitating communication between programming languages and people
-#+SEQ_TODO: TODO PROPOSED STARTED | DONE DEFERRED REJECTED
+#+SEQ_TODO: PROPOSED TODO STARTED | DONE DEFERRED REJECTED
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: oddeven hideblocks
 
@@ -25,10 +25,9 @@ In this document:
 - The [[* Sandbox][Sandbox]] :: demonstrates much of the early/basic functionality
      through commented source-code blocks.
 
-Also see the [[file:library-of-babel.org][Library of Babel]] an extensible collection of ready-made
+Also see the [[file:library-of-babel.org][Library of Babel]], an extensible collection of ready-made
 and easily-shortcut-callable source-code blocks for handling common
 tasks.
-
 
 * Introduction
 
@@ -197,7 +196,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [27/42]
+* Tasks [27/43]
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -329,6 +328,17 @@ languages which almost always produce graphical output should set
 results in the buffer.  Then if there is a combination of =silent= and
 =file= =:results= headers we could drop the results to a temp buffer
 and pop open that buffer...
+** TODO =\C-c \C-o= to open results of source block
+by adding a =defadvice= to =org-open-at-point= we can use the common
+=\C-c \C-o= keybinding to open the results of a source-code block.
+This would be especially useful for source-code blocks which generate
+graphical results and insert a file link as the results in the
+org-mode buffer.  (see [[* figure out how to handle graphic output][TODO figure out how to handle graphic output]]).
+This could also act reasonably with other results types...
+
+- file :: use org-open-at-point to open the file
+- scalar :: open results unquoted in a new buffer
+- tabular :: export the table to a new buffer and open that buffer
 
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
@@ -1919,20 +1929,11 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 
-* Bugs [17/23]
+* Bugs [18/23]
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
    should support this.
-** PROPOSED make :results replace the default?
-   I'm tending to think that appending results to pre-existing results
-   creates mess, and that the cleaner `replace' option should be the
-   default. E.g. when a source block creates an image, we would want
-   that to be updated, rather than have a new one be added.
-** PROPOSED external shell execution can't isolate return values
-I have no idea how to do this as of yet.  The result is that when
-shell functions are run w/o a session there is no difference between
-the =output= and =value= result arguments.
 
 ** TODO non-orgtbl formatted lists
 for example
@@ -1944,10 +1945,11 @@ for example
 
 #+resname: this-doesn't-match-orgtbl
 
+
 ** TODO collapsing consecutive newlines in string output
 
 #+srcname: multi-line-string-output
-#+begin_src ruby :results replace
+#+begin_src ruby :results output
 "the first line ends here
 
 
@@ -1956,15 +1958,35 @@ for example
 even a third"
 #+end_src
 
-#+resname:
-: the first line ends here
-: 	     and this is the second one
-: 	return even a third
+#+resname: multi-line-string-output
+
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
    org-babel-execute:R. (I never learned how to do this properly: org-R
    jumps all over the place...)
+   
+** PROPOSED external shell execution can't isolate return values
+I have no idea how to do this as of yet.  The result is that when
+shell functions are run w/o a session there is no difference between
+the =output= and =value= result arguments.
+
+Yea, I don't know how to do this either.  I searched extensively on
+how to isolate the *last* output of a series of shell commands (see
+[[* last command for
+ shells][last command for shells]]).  The results of the search were basically
+that it was not possible (or at least not accomplish-able with a
+reasonable amount of effort).
+
+That fact combined with the tenancy to all ways use standard out in
+shell scripts led me to treat these two options (=output= and =value=)
+as identical in shell evaluation.  Not ideal but maybe good enough for
+the moment.
+
+In the `results' branch I've changed this so that they're not quite
+identical: output results in raw stdout contents, whereas value
+converts it to elisp, perhaps to a table if it looks tabular. This is
+the same for the other languages. [Dan]
 
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
@@ -1994,6 +2016,13 @@ even a third"
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+** DONE make :results replace the default?
+   I'm tending to think that appending results to pre-existing results
+   creates mess, and that the cleaner `replace' option should be the
+   default. E.g. when a source block creates an image, we would want
+   that to be updated, rather than have a new one be added.
+   
+   I agree.
 ** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
@@ -2652,12 +2681,14 @@ out...
 table.first.join(" - ")
 #+end_src
 
-: "1 - 2 - 3"
+#+resname:
+: 1 - 2 - 3
 
-#+begin_src python :var table=sandbox :results replace
+#+begin_src python :var table=sandbox
 table[0]
 #+end_src
 
+#+resname:
 | 1 | 2 | 3 |
 
 #+begin_src ruby :var table=sandbox :results replace
