@@ -200,10 +200,16 @@ would then be [[#sandbox][the sandbox]].
 
 
 * Tasks [27/44]
-** TODO singe-function tangling and loading elisp from literate org-mode file [2/2]
+** TODO singe-function tangling and loading elisp from literate org-mode file [2/3]
 
 This function should tangle the org-mode file for elisp, and then call
 `load-file' on the resulting tangled file.
+
+#+srcname: test-loading-embedded-emacs-lisp
+#+begin_src emacs-lisp 
+  (org-babel-load-file "test-tangle.org")
+  (list test-tangle-loading test-tangle-advert)
+#+end_src
 
 *** DONE add optional language limiter to org-babel-tangle
 This should check to see if there is any need to re-export
@@ -211,13 +217,15 @@ This should check to see if there is any need to re-export
 *** DONE ensure that org-babel-tangle returns the path to the tangled file(s)
 
 #+srcname: test-return-value-of-org-babel-tangle
-#+begin_src emacs-lisp 
+#+begin_src emacs-lisp :results replace
   (mapcar #'file-name-nondirectory (org-babel-tangle-file "test-tangle.org" "emacs-lisp"))
 #+end_src
 
 #+resname:
 | "test-tangle.el" |
 
+*** TODO only tangle the file if it's actually necessary
+compare the ages of the files
 
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
