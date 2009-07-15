@@ -144,7 +144,10 @@ note-taking, todo's etc... embedded with the source-code of your Emacs
 initialization, and through org-mode's publishing features aids in
 sharing your customizations with others.
 
-**** my customization
+It may be worthwhile to create a fork of Phil Hagelberg's
+[[http://github.com/technomancy/emacs-starter-kit/tree/master][emacs-starter-kit]] which uses literate org-mode files for all of the
+actual elisp customization.  These org-mode files could then be
+exported to html and used to populate the repositories wiki on [[http://github.com/][github]].
 
 
 ** features
@@ -196,7 +199,17 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [27/43]
+* Tasks [27/44]
+** TODO singe-function tangling and loading elisp from literate org-mode file [0/2]
+
+This function should tangle the org-mode file for elisp, and then call
+`load-file' on the resulting tangled file.
+
+*** TODO add optional language limiter to org-babel-tangle
+This should check to see if there is any need to re-export
+
+*** TODO ensure that org-babel-tangle returns the path to the tangled file(s)
+
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
