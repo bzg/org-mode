@@ -200,12 +200,12 @@ would then be [[#sandbox][the sandbox]].
 
 
 * Tasks [27/44]
-** TODO singe-function tangling and loading elisp from literate org-mode file [0/2]
+** TODO singe-function tangling and loading elisp from literate org-mode file [1/2]
 
 This function should tangle the org-mode file for elisp, and then call
 `load-file' on the resulting tangled file.
 
-*** TODO add optional language limiter to org-babel-tangle
+*** DONE add optional language limiter to org-babel-tangle
 This should check to see if there is any need to re-export
 
 *** TODO ensure that org-babel-tangle returns the path to the tangled file(s)

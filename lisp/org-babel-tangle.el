@@ -38,6 +38,13 @@ language, and the cdr should be a list containing the extension
 and shebang(#!) line to use when writing out the language to
 file.")
 
+(defun org-babel-load-file (file)
+  "Load the contents of the Emacs Lisp source code blocks in
+FILE.  This function will first export the source code using
+`org-babel-tangle' and then load the resulting file using
+`load-file'."
+  (load-file (org-babel-tangle-file "emacs-lisp")))
+
 (defun org-babel-tangle-file (file &optional lang)
   "Extract the bodies of all source code blocks in FILE with
 `org-babel-tangle'.  Optional argument LANG can be used to limit
