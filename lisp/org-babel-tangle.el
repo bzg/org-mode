@@ -43,13 +43,26 @@ file.")
 org-mode formatted FILE.  This function will first export the
 source code using `org-babel-tangle' and then load the resulting
 file using `load-file'."
-  (mapc #'load-file (org-babel-tangle-file "emacs-lisp")))
+  (let ((loadable-file (first (org-babel-tangle-file file "emacs-lisp"))))
+    (message "loading %s" loadable-file)
+    (unless (file-exists-p loadable-file)
+      (error "can't load file that doesn't exist"))
+    (load-file loadable-file)
+    (message "loaded %s" loadable-file)))
 
 (defun org-babel-tangle-file (file &optional lang)
   "Extract the bodies of all source code blocks in FILE with
 `org-babel-tangle'.  Optional argument LANG can be used to limit
 the exported source code blocks by language."
-  (save-window-excursion (find-file file) (org-babel-tangle lang)))
+  (flet ((age (file)
+              (time-to-seconds
+               (time-subtract (current-time)
+                              (sixth (file-attributes file))))))
+    (let ((target-file (concat (file-name-sans-extension file) "."
+                               (second (assoc lang org-babel-tangle-langs)))))
+      (if (and lang (file-exists-p target-file) (> (age file) (age target-file)))
+          (list target-file)
+        (save-window-excursion (find-file file) (org-babel-tangle lang))))))
 
 (defun org-babel-tangle (&optional lang)
   "Extract the bodies of all source code blocks from the current
