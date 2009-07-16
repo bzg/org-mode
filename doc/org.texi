@@ -8198,7 +8198,7 @@ an example:
 #+BEGIN_SRC emacs-lisp -n -r
 (save-excursion                  (ref:sc)
    (goto-char (point-min))       (ref:jump)
-#+END SRC
+#+END_SRC
 In line [[(sc)]] we remember the current positon.  [[(jump)][Line (jump)]]
 jumps to point-min.
 @end example
