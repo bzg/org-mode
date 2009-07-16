@@ -2248,7 +2248,7 @@ INDENT was the original indentation of the block."
 			     (point-min) (point-max))))
 		    (if (string-match "<pre\\([^>]*\\)>\n*" rtn)
 			(setq rtn (replace-match
-				   (format "<pre class=\"src src-%s\">" lang)
+				   (format "<pre class=\"src src-%s\">\n" lang)
 				   t t rtn))))
 		(if textareap
 		    (setq rtn (concat
