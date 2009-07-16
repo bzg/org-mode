@@ -238,20 +238,22 @@ replaced, and may need to be reinstated in this function. "
 ;;         (setq result (list result)))
 ;;     result))
 
-(defun org-babel-eval-buffer (&optional arg)
+(defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
   (interactive "P")
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward org-babel-regexp nil t)
-      (org-babel-eval-src-block arg))))
+    (while (re-search-forward org-babel-src-block-regexp nil t)
+      (goto-char (match-beginning 0))
+      (org-babel-execute-src-block arg)
+      (goto-char (match-end 0)))))
 
-(defun org-babel-eval-subtree (&optional arg)
+(defun org-babel-execute-subtree (&optional arg)
   "Replace EVAL snippets in the entire subtree."
   (interactive "P")
   (save-excursion
     (org-narrow-to-subtree)
-    (org-babel-eval-buffer)
+    (org-babel-execute-buffer)
     (widen)))
 
 (defun org-babel-get-src-block-name ()
