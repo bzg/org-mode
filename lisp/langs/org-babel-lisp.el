@@ -40,11 +40,9 @@
 function is called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing emacs-lisp code block...")
   (save-window-excursion
-    (let ((print-level nil) (print-length nil) results)
-      (setq results
-            (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
-                     ,(read (concat "(progn " body ")")))))
-      results)))
+    (let ((print-level nil) (print-length nil))
+      (eval `(let ,(mapcar (lambda (var) `(,(car var) ',(cdr var))) vars)
+	       ,(read (concat "(progn " body ")")))))))
 
 (provide 'org-babel-lisp)
 ;;; org-babel-lisp.el ends here
