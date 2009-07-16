@@ -426,7 +426,9 @@ silent -- no results are inserted"
     (unless (listp result) (setq result (format "%S" result))))
   (if (and insert (member "replace" insert)) (org-babel-remove-result))
   (if (= (length result) 0)
-      (message "no result returned by source block")
+      (if (member "value" result-params)
+	  (message "No result returned by source block")
+	(message "Source block produced no output"))
     (if (and insert (member "silent" insert))
         (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
       (when (and (stringp result) ;; ensure results end in a newline
