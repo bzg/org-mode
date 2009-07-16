@@ -144,8 +144,8 @@ the command line....):
 
 Some more information about this can be found in the [[http://orgmode.org/worg/org-faq.php][FAQ]], under [[http://orgmode.org/worg/org-faq.php#keeping-current-with-Org-mode-development][How do
 I keep current with Org mode development?]].  For people who cannot use
-git, we provide [[file:org-snapshot.zip][zip]] or [[file:org-snapshot.tar.gz][tar.gz]] snapshot release files corresponding to
-the latest git version.
+git, we provide [[file:org-latest.zip][zip]] or [[file:org-latest.tar.gz][tar.gz]] snapshot release files updated each hour
+and corresponding to the latest git version.
 
 ** Alternative distributions
 
