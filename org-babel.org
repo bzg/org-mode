@@ -2032,6 +2032,11 @@ the same for the other languages. [Dan]
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
 ** results branch bugs
+*** TODO elisp reference fails for literal number
+#+srcname: elisp-test(a=4)
+#+begin_src emacs-lisp 
+(message a)
+#+end_src
 *** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
     And at other occurrences of org-combine-plists?
 *** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
