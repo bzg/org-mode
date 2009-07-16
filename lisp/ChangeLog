@@ -3,6 +3,8 @@
 	* org.el (org-special-ctrl-a/e): Explicitely bind the value
 	'reversed for this option to the "true line boundary first"
 	behavior.
+	(org-tags-match-list-sublevels): Document the 'indented value for
+	this variable.
 
 	* org-latex.el (org-export-latex-first-lines): Fix problem with
 	publishing the region.

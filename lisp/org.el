@@ -2322,6 +2322,9 @@ see the variable `org-use-tag-inheritance'."
 This variable applies to tags/property searches, and also to stuck
 projects because this search is based on a tags match as well.
 
+When set to the symbol `indented', sublevels are indented with
+leading dots.
+
 Because of tag inheritance (see variable `org-use-tag-inheritance'),
 the sublevels of a headline matching a tag search often also match
 the same search.  Listing all of them can create very long lists.
