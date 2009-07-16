@@ -11184,7 +11184,7 @@ The return values of all calls to the function will be collected and
 returned as a list.
 
 The call to FUNC will be wrapped into a save-excursion form, so FUNC
-does not need to preserve point.  After evaluaton, the cursor will be
+does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
 circumstances, this may not produce the wanted results.  For example,
