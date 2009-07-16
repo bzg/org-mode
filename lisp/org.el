@@ -710,8 +710,8 @@ in the headline.  A second `C-e' will then jump to the true end of the
 line, after any tags.
 
 When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
-and only a directly following, identical keypress will bring the cursor
-to the special positions.
+going to the true line boundary first.  Only a directly following, identical
+keypress will bring the cursor to the special positions.
 
 This may also be a cons cell where the behavior for `C-a' and `C-e' is
 set separately."
