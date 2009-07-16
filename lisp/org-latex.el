@@ -960,9 +960,10 @@ If END is non-nil, it is the end of the region."
   (save-excursion
     (goto-char (or beg (point-min)))
     (let* ((pt (point))
-	   (end (if (re-search-forward "^\\*+ " end t)
-		    (goto-char (match-beginning 0))
-		  (goto-char (point-max)))))
+	   (end (or end
+		    (if (re-search-forward "^\\*+ " end t)
+			(goto-char (match-beginning 0))
+		      (goto-char (point-max))))))
       (prog1
 	  (org-export-latex-content
 	   (org-export-preprocess-string

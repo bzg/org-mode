@@ -1,3 +1,11 @@
+2009-07-16  Bastien Guerry  <bzg@altern.org>
+
+	* org-latex.el (org-export-latex-first-lines): Fix problem with
+	publishing the region.
+
+	* org-exp.el (org-export-format-source-code-or-example): Fix
+	bad line numbering when exporting examples in HTML.
+
 2009-07-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-goto): Find hidden headlines as well.
