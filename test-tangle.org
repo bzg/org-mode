@@ -76,3 +76,12 @@ end
 #+begin_src ruby :session special
 plus_two(holder)
 #+end_src
+
+
+** Emacs Lisp initialization stuff
+
+#+srcname: lets-set-some-variables
+#+begin_src emacs-lisp 
+  (setq test-tangle-loading "org-babel tangles")
+  (setq test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
+#+end_src

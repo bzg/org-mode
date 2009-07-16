@@ -38,13 +38,42 @@ language, and the cdr should be a list containing the extension
 and shebang(#!) line to use when writing out the language to
 file.")
 
-(defun org-babel-tangle ()
+(defun org-babel-load-file (file)
+  "Load the contents of the Emacs Lisp source code blocks in the
+org-mode formatted FILE.  This function will first export the
+source code using `org-babel-tangle' and then load the resulting
+file using `load-file'."
+  (let ((loadable-file (first (org-babel-tangle-file file "emacs-lisp"))))
+    (message "loading %s" loadable-file)
+    (unless (file-exists-p loadable-file)
+      (error "can't load file that doesn't exist"))
+    (load-file loadable-file)
+    (message "loaded %s" loadable-file)))
+
+(defun org-babel-tangle-file (file &optional lang)
+  "Extract the bodies of all source code blocks in FILE with
+`org-babel-tangle'.  Optional argument LANG can be used to limit
+the exported source code blocks by language."
+  (flet ((age (file)
+              (time-to-seconds
+               (time-subtract (current-time)
+                              (sixth (file-attributes file))))))
+    (let ((target-file (concat (file-name-sans-extension file) "."
+                               (second (assoc lang org-babel-tangle-langs)))))
+      (if (and lang (file-exists-p target-file) (> (age file) (age target-file)))
+          (list target-file)
+        (save-window-excursion (find-file file) (org-babel-tangle lang))))))
+
+(defun org-babel-tangle (&optional lang)
   "Extract the bodies of all source code blocks from the current
-file into their own source-specific files."
+file into their own source-specific files.  Optional argument
+LANG can be used to limit the exported source code blocks by
+language."
   (interactive)
   (save-excursion
     (let ((base-name (file-name-sans-extension (buffer-file-name)))
-          (block-counter 0))
+          (block-counter 0)
+          path-collector)
       (mapc ;; for every language create a file
        (lambda (by-lang)
          (let* ((lang (car by-lang))
@@ -54,6 +83,7 @@ file into their own source-specific files."
                 (she-bang (second lang-specs))
                 (by-session (cdr by-lang)))
            (flet ((to-file (filename specs)
+                           (add-to-list 'path-collector filename)
                            (with-temp-file filename
                              (funcall lang-f)
                              (when she-bang (insert (concat she-bang "\n")))
@@ -69,14 +99,17 @@ file into their own source-specific files."
                        by-session)
                (setq block-counter (+ block-counter (length (cdr (car by-session)))))
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
-       (org-babel-collect-blocks))
-      (message "tangled %d source-code blocks" block-counter))))
+       (org-babel-collect-blocks lang))
+      (message "tangled %d source-code blocks" block-counter)
+      path-collector)))
 
-(defun org-babel-collect-blocks ()
+(defun org-babel-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
 Return two nested association lists, first grouped by language,
 then by session, the contents will be source-code block
-specifications of the form used by `org-babel-spec-to-string'."
+specifications of the form used by `org-babel-spec-to-string'.
+Optional argument LANG can be used to limit the collected source
+code blocks by language."
   (let ((block-counter 0) blocks)
     (org-babel-map-source-blocks (buffer-file-name)
       (setq block-counter (+ 1 block-counter))
@@ -85,21 +118,22 @@ specifications of the form used by `org-babel-spec-to-string'."
              (source-name (intern (or (org-babel-get-src-block-name)
                                       (format "block-%d" block-counter))))
              (info (org-babel-get-src-block-info))
-             (lang (first info))
+             (src-lang (first info))
              (body (second info))
              (params (third info))
              (spec (list link source-name params body))
              (session (cdr (assoc :session params)))
              by-lang by-session)
-        ;; add the spec for this block to blocks under it's lang and session
-        (setq by-lang (cdr (assoc lang blocks)))
-        (setq blocks (delq (assoc lang blocks) blocks))
-        (setq by-session (cdr (assoc session by-lang)))
-        (setq by-lang (delq (assoc session by-lang) by-lang))
-        (setq blocks (cons ;; by-language
-                      (cons lang (cons ;; by-session
-                                  (cons session (cons spec by-session)) by-lang))
-                      blocks))))
+        (unless (and lang (not (string= lang src-lang))) ;; maybe limit by language
+          ;; add the spec for this block to blocks under it's language and session
+          (setq by-lang (cdr (assoc src-lang blocks)))
+          (setq blocks (delq (assoc src-lang blocks) blocks))
+          (setq by-session (cdr (assoc session by-lang)))
+          (setq by-lang (delq (assoc session by-lang) by-lang))
+          (setq blocks (cons ;; by-language
+                        (cons src-lang (cons ;; by-session
+                                        (cons session (cons spec by-session)) by-lang))
+                        blocks)))))
     ;; blocks should contain all source-blocks organized by language and session
     ;; (message "blocks=%S" blocks) ;; debugging
     blocks))
