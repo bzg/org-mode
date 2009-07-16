@@ -200,7 +200,11 @@ would then be [[#sandbox][the sandbox]].
 
 
 
-* Tasks [28/44]
+* Tasks [29/47]
+** TODO make tangle files read-only?
+   With a file-local variable setting?
+** TODO fold source blocks on #+srcname line?
+   I.e., as well as on #+begin_src line.
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -1983,7 +1987,6 @@ for example
 
 #+resname: this-doesn't-match-orgtbl
 
-
 ** TODO collapsing consecutive newlines in string output
 
 #+srcname: multi-line-string-output
@@ -1997,7 +2000,6 @@ even a third"
 #+end_src
 
 #+resname: multi-line-string-output
-
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
@@ -2389,7 +2391,6 @@ As an example eval the following.  Adding a line to test
 #+begin_src ruby :var ar = simple-ruby-array :results silent
 ar.first.first
 #+end_src
-
 
 
 
