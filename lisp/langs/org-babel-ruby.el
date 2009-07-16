@@ -38,21 +38,16 @@
 
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Ruby source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-ruby-var-to-ruby (cdr pair))))
-                      vars "\n") "\n" body "\n")) ;; then the source block body
-         (session (org-babel-ruby-initiate-session (cdr (assoc :session params)))))
+  (let ((full-body (concat
+		    (mapconcat ;; define any variables
+		     (lambda (pair)
+		       (format "%s=%s"
+			       (car pair)
+			       (org-babel-ruby-var-to-ruby (cdr pair))))
+		     vars "\n") "\n" body "\n")) ;; then the source block body
+	(session (org-babel-ruby-initiate-session session)))
     (org-babel-ruby-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:ruby (session params)

@@ -38,21 +38,16 @@
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
-function is called by `org-babel-execute-src-block'."
+function is called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Shell source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
+  (let* ((full-body (concat
                      (mapconcat ;; define any variables
                       (lambda (pair)
                         (format "%s=%s"
                                 (car pair)
                                 (org-babel-sh-var-to-sh (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
-         (session (org-babel-sh-initiate-session (cdr (assoc :session params)))))
+         (session (org-babel-sh-initiate-session session)))
     (org-babel-sh-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:sh (session params)

@@ -37,20 +37,15 @@
 
 (defun org-babel-execute:R (body params)
   "Execute a block of R code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing R source code block...")
   (save-window-excursion
-    (let* ((vars (org-babel-ref-variables params))
-           (full-body (concat
-                       (mapconcat ;; define any variables
-                        (lambda (pair)
-                          (org-babel-R-assign-elisp (car pair) (cdr pair)))
-                        vars "\n") "\n" body "\n"))
-           (result-params (split-string (or (cdr (assoc :results params)) "")))
-           (result-type (cond ((member "output" result-params) 'output)
-                              ((member "value" result-params) 'value)
-                              (t 'value)))
-           (session (org-babel-R-initiate-session (cdr (assoc :session params)))))
+    (let ((full-body (concat
+		      (mapconcat ;; define any variables
+		       (lambda (pair)
+			 (org-babel-R-assign-elisp (car pair) (cdr pair)))
+		       vars "\n") "\n" body "\n"))
+	  (session (org-babel-R-initiate-session session)))
       (org-babel-R-evaluate session full-body result-type))))
 
 (defun org-babel-prep-session:R (session params)
