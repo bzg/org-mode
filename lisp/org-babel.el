@@ -190,12 +190,14 @@ the header arguments specified at the source code block."
 
 (defun org-babel-get-src-block-name ()
   "Return the name of the current source block if one exists"
-  (let ((case-fold-search t))
+  (let ((case-fold-search t)
+	(head (org-babel-where-is-src-block-head)))
     (save-excursion
-      (goto-char (org-babel-where-is-src-block-head))
-      (if (save-excursion (forward-line -1)
-                          (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
-          (org-babel-clean-text-properties (match-string 1))))))
+      (when head
+	(goto-char head)
+	(if (save-excursion (forward-line -1)
+			    (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
+	    (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list
@@ -308,8 +310,9 @@ source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
 #+RESNAME: line following the source block."
   (save-excursion
-    (goto-char (org-babel-where-is-src-block-head))
-    (let ((name (org-babel-get-src-block-name)) end head)
+    (let ((name (org-babel-get-src-block-name)) 
+	  (head (org-babel-where-is-src-block-head)) end)
+      (when head (goto-char head))
       (or (and name (message name) (org-babel-find-named-result name))
           (and (re-search-forward "#\\+end_src" nil t)
                (progn (move-end-of-line 1)
@@ -353,7 +356,8 @@ silent -- no results are inserted"
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-        (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
+	(let ((existing-result (org-babel-where-is-src-block-result)))
+	  (when existing-result (goto-char existing-result) (forward-line 1)))
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
