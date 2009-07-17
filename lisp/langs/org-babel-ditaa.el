@@ -45,6 +45,9 @@
 
 (add-to-list 'org-babel-tangle-langs '("ditaa" "ditaa"))
 
+(defvar org-babel-default-header-args:ditaa '((:results . "file"))
+  "Default arguments to use when evaluating a ditaa source block.")
+
 (defun org-babel-execute:ditaa (body params)
   "Execute a block of Ditaa code with org-babel.  This function is
 called by `org-babel-execute-src-block'."

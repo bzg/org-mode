@@ -199,7 +199,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [28/44]
+* Tasks [29/45]
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -843,6 +843,11 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+** DONE allow default header arguments by language
+org-babel-default-header-args:lang-name
+
+An example of when this is useful is for languages which always return
+files as their results (e.g. [[*** ditaa][ditaa]], and [[*** gnuplot][gnuplot]]).
 ** DONE singe-function tangling and loading elisp from literate org-mode file [3/3]
 
 This function should tangle the org-mode file for elisp, and then call
@@ -1961,7 +1966,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 #+srcname: implementing-ditaa
-#+begin_src ditaa :results replace file :file blue.png :cmdline -r
+#+begin_src ditaa :results replace :file blue.png :cmdline -r
 +---------+
 | cBLU    |
 |         |
@@ -2417,50 +2422,50 @@ of these tests may fail.
 #+TBLNAME: org-babel-tests
 | functionality           | block                      | arg |    expected |     results | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| basic evaluation        |                            |     |             |             |      |
+| basic evaluation        |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | basic-elisp                |     |           5 |             |      |
-| shell                   | basic-shell                |     |           6 |             |      |
-| ruby                    | basic-ruby                 |     |   org-babel |             |      |
-| python                  | basic-python               |     | hello world |             |      |
-| R                       | basic-R                    |     |          13 |             |      |
+| emacs lisp              | basic-elisp                |     |           5 |           5 | pass |
+| shell                   | basic-shell                |     |           6 |           6 | pass |
+| ruby                    | basic-ruby                 |     |   org-babel |   org-babel | pass |
+| python                  | basic-python               |     | hello world | hello world | pass |
+| R                       | basic-R                    |     |          13 |          13 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| tables                  |                            |     |             |             |      |
+| tables                  |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | table-elisp                |     |           3 |             |      |
-| ruby                    | table-ruby                 |     |       1-2-3 |             |      |
-| python                  | table-python               |     |           5 |             |      |
-| R                       | table-R                    |     |         3.5 |             |      |
+| emacs lisp              | table-elisp                |     |           3 |           3 | pass |
+| ruby                    | table-ruby                 |     |       1-2-3 |       1-2-3 | pass |
+| python                  | table-python               |     |           5 |           5 | pass |
+| R                       | table-R                    |     |         3.5 |         3.5 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block references |                            |     |             |             |      |
+| source block references |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| all languages           | chained-ref-last           |     |       Array |             |      |
+| all languages           | chained-ref-last           |     |       Array |       Array | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| source block functions  |                            |     |             |             |      |
+| source block functions  |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| emacs lisp              | defun-fibb                 |     |       fibbd |             |      |
-| run over                | Fibonacci                  |   0 |           1 |             |      |
-| a                       | Fibonacci                  |   1 |           1 |             |      |
-| variety                 | Fibonacci                  |   2 |           2 |             |      |
-| of                      | Fibonacci                  |   3 |           3 |             |      |
-| different               | Fibonacci                  |   4 |           5 |             |      |
-| arguments               | Fibonacci                  |   5 |           8 |             |      |
+| emacs lisp              | defun-fibb                 |     |       fibbd |       fibbd | pass |
+| run over                | Fibonacci                  |   0 |           1 |           1 | pass |
+| a                       | Fibonacci                  |   1 |           1 |           1 | pass |
+| variety                 | Fibonacci                  |   2 |           2 |           2 | pass |
+| of                      | Fibonacci                  |   3 |           3 |           3 | pass |
+| different               | Fibonacci                  |   4 |           5 |           5 | pass |
+| arguments               | Fibonacci                  |   5 |           8 |           8 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| bugs and tasks          |                            |     |             |             |      |
+| bugs and tasks          |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| simple ruby arrays      | ruby-array-test            |     |           3 |             |      |
-| R number evaluation     | bug-R-number-evaluation    |     |           2 |             |      |
-| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |             |      |
-| forcing vector results  | test-forced-vector-results |     |       Array |             |      |
+| simple ruby arrays      | ruby-array-test            |     |           3 |           3 | pass |
+| R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
+| multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
+| forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| sessions                |                            |     |             |             |      |
+| sessions                |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
-| set ruby session        | set-ruby-session-var       |     |        :set |             |      |
-| get from ruby session   | get-ruby-session-var       |     |           3 |             |      |
-| set python session      | set-python-session-var     |     |         set |             |      |
-| get from python session | get-python-session-var     |     |           4 |             |      |
-| set R session           | set-R-session-var          |     |         set |             |      |
-| get from R session      | get-R-session-var          |     |           5 |             |      |
+| set ruby session        | set-ruby-session-var       |     |        :set |        :set | pass |
+| get from ruby session   | get-ruby-session-var       |     |           3 |           3 | pass |
+| set python session      | set-python-session-var     |     |         set |         set | pass |
+| get from python session | get-python-session-var     |     |           4 |           4 | pass |
+| set R session           | set-R-session-var          |     |         set |         set | pass |
+| get from R session      | get-R-session-var          |     |           5 |           5 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 
 ** basic tests
