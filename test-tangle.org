@@ -1,5 +1,5 @@
-#+TITLE: Testing Org-Babel Tangling
 #+OPTIONS: toc:2 ^:nil
+#+TITLE: Testing Org-Babel Tangling
 
 * Some file
 
@@ -80,7 +80,7 @@ plus_two(holder)
 
 ** Emacs Lisp initialization stuff
 
-#+srcname: lets-set-some-variables
+#+srcname: lets-set-some-variables()
 #+begin_src emacs-lisp 
   (setq test-tangle-loading "org-babel tangles")
   (setq test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
