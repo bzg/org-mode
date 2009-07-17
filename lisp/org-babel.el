@@ -310,7 +310,7 @@ of the following form.  (language body header-arguments-alist)"
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
-	  (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
+	  (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
 	   (if (boundp lang-headers) (eval lang-headers) nil)
@@ -320,7 +320,7 @@ of the following form.  (language body header-arguments-alist)"
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
-          (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
+          (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
           (org-combine-plists
            org-babel-default-inline-header-args
            (if (boundp lang-headers) (eval lang-headers) nil)
