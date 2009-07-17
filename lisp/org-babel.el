@@ -160,8 +160,8 @@ the header arguments specified at the source code block."
 	 (result-params (third processed-params))
 	 (result-type (fourth processed-params))
          (cmd (intern (concat "org-babel-execute:" lang)))
-	 result)
-    ;; (message (format "params=%S" params)) ;; debugging
+         result)
+    ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
@@ -414,8 +414,8 @@ line.  If no result exists for this block then create a
     (let* ((on-lob-line (progn (beginning-of-line 1)
 			       (looking-at org-babel-lob-one-liner-regexp)))
 	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
-	   end head)
-      (unless on-lob-line (goto-char (org-babel-where-is-src-block-head)))
+	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
+      (when head (goto-char head))
       (or (and name (message name) (org-babel-find-named-result name))
           (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
                (progn (move-end-of-line 1)
@@ -460,7 +460,8 @@ silent -- no results are inserted"
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-        (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
+	(let ((existing-result (org-babel-where-is-src-block-result)))
+	  (when existing-result (goto-char existing-result) (forward-line 1)))
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
