@@ -10849,9 +10849,9 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	  (setq tags (replace-match ":" t t tags))))
 
       (if org-tags-sort-function
-	  (setq tags (mapconcat 'identity
-				(sort (org-split-string tags (org-re "[^[:alnum:]_@]+"))
-				      org-tags-sort-function) ":")))
+      	  (setq tags (mapconcat 'identity
+      				(sort (org-split-string tags (org-re "[^[:alnum:]_@]+"))
+      				      org-tags-sort-function) ":")))
 
       (if (string-match "\\`[\t ]*\\'" tags)
           (setq tags "")
