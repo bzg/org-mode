@@ -198,12 +198,14 @@ would then be [[#sandbox][the sandbox]].
   (require 'org-babel-init)
 #+end_src
 
-
-* Tasks [29/47]
+* Tasks [0/0]
 ** TODO make tangle files read-only?
    With a file-local variable setting?
 ** TODO fold source blocks on #+srcname line?
    I.e., as well as on #+begin_src line.
+** TODO take default values for header args from properties
+   Use file-wide and subtree wide properties to set default values for
+   header args.
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
