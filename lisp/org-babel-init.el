@@ -58,6 +58,7 @@
 (require 'org-babel-sh)
 (require 'org-babel-lisp)
 (require 'org-babel-R)
+(require 'org-babel-ditaa)
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here

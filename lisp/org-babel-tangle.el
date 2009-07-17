@@ -44,7 +44,6 @@ org-mode formatted FILE.  This function will first export the
 source code using `org-babel-tangle' and then load the resulting
 file using `load-file'."
   (let ((loadable-file (first (org-babel-tangle-file file "emacs-lisp"))))
-    (message "loading %s" loadable-file)
     (unless (file-exists-p loadable-file)
       (error "can't load file that doesn't exist"))
     (load-file loadable-file)
