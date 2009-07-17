@@ -307,15 +307,14 @@ of the following form.  (language body header-arguments-alist)"
        (goto-char (match-end 0)))))
 
 (defun org-babel-parse-src-block-match ()
-(defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
-    (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
-        (org-babel-merge-params
-         org-babel-default-header-args
-         (if (boundp lang-headers) (eval lang-headers) nil)
-         (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
+    (list lang
+	  (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
+	  (org-babel-merge-params
+	   org-babel-default-header-args
+	   (if (boundp lang-headers) (eval lang-headers) nil)
+	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
 (defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
