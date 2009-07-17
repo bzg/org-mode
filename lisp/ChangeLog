@@ -1,7 +1,6 @@
 2009-07-17  James TD Smith  <ahktenzero@mohorovi.cc>
 
-	* org.el (org-tags-sort-function): New option.  Users can now use
-	their own function to sort tags.
+	* org.el (org-tags-sort-function): New option for sorting tags.
 	(org-set-tags): Use the new option to sort tags.
 
 2009-07-17  Bastien Guerry  <bzg@altern.org>
