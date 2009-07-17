@@ -1974,8 +1974,16 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** TODO gnuplot
+*** STARTED gnuplot
 (see [[* file result types][file result types]])
+
+- a required =file= header argument
+- a =cmdline= header argument
+- to add variables
+  - scalar variables should be replaced in the body of the gnuplot code
+  - vector variables should be exported to tab-separated files, and
+    the variable names should be replaced with the path to the files
+
 *** TODO dot
 (see [[* file result types][file result types]])
 
