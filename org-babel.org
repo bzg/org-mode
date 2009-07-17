@@ -1944,7 +1944,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [0/5]
+** TODO Add languages [1/6]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
@@ -1957,11 +1957,11 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 
 *** TODO java
 
-*** STARTED ditaa
+*** DONE ditaa
 (see [[* file result types][file result types]])
 
 #+srcname: implementing-ditaa
-#+begin_src ditaa :results replace file :file blue.png
+#+begin_src ditaa :results replace file :file blue.png :cmdline -r
 +---------+
 | cBLU    |
 |         |
@@ -1974,6 +1974,8 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
+*** TODO gnuplot
+(see [[* file result types][file result types]])
 *** TODO dot
 (see [[* file result types][file result types]])
 
