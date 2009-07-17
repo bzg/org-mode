@@ -1957,8 +1957,22 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 
 *** TODO java
 
-*** TODO ditaa
+*** STARTED ditaa
 (see [[* file result types][file result types]])
+
+#+srcname: implementing-ditaa
+#+begin_src ditaa :results file :file blue.png
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname: implementing-ditaa
+[[blue.png][blue.png]]
 
 *** TODO dot
 (see [[* file result types][file result types]])
