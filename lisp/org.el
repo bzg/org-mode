@@ -2339,6 +2339,15 @@ is better to limit inheritance to certain tags using the variables
 	  (const :tag "Yes, do list them" t)
 	  (const :tag "List them, indented with leading dots" indented)))
 
+(defcustom org-tags-sort-function nil
+  "When set, tags are sorted using this function as a comparator"
+  :group 'org-tags
+  :type '(choice
+	  (const :tag "No sorting" nil)
+	  (const :tag "Alphabetical" string<)
+	  (const :tag "Reverse alphabetical" string>)
+	  (function :tag "Custom function" nil)))
+
 (defvar org-tags-history nil
   "History of minibuffer reads for tags.")
 (defvar org-last-tags-completion-table nil
@@ -10838,6 +10847,11 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
+
+      (if org-tags-sort-function
+	  (setq tags (mapconcat 'identity
+				(sort (org-split-string tags (org-re "[^[:alnum:]_@]+"))
+				      org-tags-sort-function) ":")))
 
       (if (string-match "\\`[\t ]*\\'" tags)
           (setq tags "")
