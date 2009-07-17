@@ -5330,18 +5330,20 @@ with letter @kbd{d}.@*
 @vindex org-clock-modeline-total
 While the clock is running, the current clocking time is shown in the mode
 line, along with the title of the task.  The clock time shown will be all
-time ever clocked for this task and its children.  If the task is a repeating
-one (@pxref{Repeated tasks}), only the time since the last reset of the task
-@footnote{as recorded by the @code{LAST_REPEAT} property} will be shown.
-More control over what time is shown can be exercised with the
-@code{CLOCK_MODELINE_TOTAL} property.  It may have the values @code{current}
-to show only the current clocking instance, @code{today} to show all time
-clocked on this tasks today (see also the variable
+time ever clocked for this task and its children.  If the task has an effort
+estimate (@pxref{Effort estimates}), the mode line displays the current
+clocking time against it@footnote{To add an effort estimate ``on the fly'',
+hook a function doing this to @code{org-clock-in-prepare-hook}.}  If the task
+is a repeating one (@pxref{Repeated tasks}), only the time since the last
+reset of the task @footnote{as recorded by the @code{LAST_REPEAT} property}
+will be shown.  More control over what time is shown can be exercised with
+the @code{CLOCK_MODELINE_TOTAL} property.  It may have the values
+@code{current} to show only the current clocking instance, @code{today} to
+show all time clocked on this tasks today (see also the variable
 @code{org-extend-today-until}), @code{all} to include all time, or
 @code{auto} which is the default@footnote{See also the variable
-@code{org-clock-modeline-total}.}.@*
-Clicking with @kbd{mouse-1} onto the mode line entry will pop up a menu with
-clocking options.
+@code{org-clock-modeline-total}.}.@* Clicking with @kbd{mouse-1} onto the
+mode line entry will pop up a menu with clocking options.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 @vindex org-log-note-clock-out

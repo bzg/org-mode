@@ -192,6 +192,11 @@ auto     Automtically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
+(defvar org-clock-in-prepare-hook nil
+  "Hook run when preparing the clock.
+This hook is run before anything happens to the task that
+you want to clock in.  For example, you can use this hook
+to add an effort property.")
 (defvar org-clock-in-hook nil
   "Hook run when starting the clock.")
 (defvar org-clock-out-hook nil
@@ -496,6 +501,7 @@ the clocking selection, associated with the letter `d'."
 	(org-clock-mark-default-task))
 
       (setq target-pos (point))  ;; we want to clock in at this location
+      (run-hooks 'org-clock-in-prepare-hook)
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
 	  ;; There is a selected task, move to the correct buffer

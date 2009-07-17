@@ -1,3 +1,10 @@
+2009-07-17  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Clocking work time): Add documentation about
+	displaying the current clocking time against the effort estimate.
+	Also add a footnote about using `org-clock-in-prepare-hook' to add
+	an effort estimate on the fly, just before clocking it.
+
 2009-07-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Footnotes): Document automatic renumbering and
