@@ -144,14 +144,13 @@ assumes that the appropriate major-mode is set.  SPEC has the
 form
 
   (link source-name params body)"
-  (let ((link (first spec))
-	(source-name (second spec))
-	(body (fourth spec))
-	(comment-padding "* "))
-    (flet ((insert-comment (text)
-			   (comment-region (point) (progn (insert text) (point)))))
+  (flet ((insert-comment (text)
+                         (comment-region (point) (progn (insert text) (point)))))
+    (let ((link (first spec))
+          (source-name (second spec))
+          (body (fourth spec)))
       (insert "\n\n")
-      (insert-comment (format "* [[%s][%s]]" (org-link-escape link) source-name))
+      (insert-comment (format "[[%s][%s]]" (org-link-escape link) source-name))
       (insert (format "\n%s\n" (org-babel-chomp body)))
       (insert-comment (format "%s ends here" source-name))
       (insert "\n"))))
