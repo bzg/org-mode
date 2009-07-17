@@ -199,7 +199,11 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [29/45]
+* Tasks [29/46]
+** TODO take default values for header args from properties
+Use file-wide and subtree wide properties to set default values for
+header args.
+
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
