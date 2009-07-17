@@ -198,10 +198,13 @@ would then be [[#sandbox][the sandbox]].
   (require 'org-babel-init)
 #+end_src
 
-* Tasks [0/0]
-** TODO make tangle files read-only?
-   With a file-local variable setting?
-** TODO fold source blocks on #+srcname line?
+
+* Tasks [30/49]
+** TODO make tangle files read-only
+   With a file-local variable setting, yea that makes sense.  Maybe
+   the header should reference the related org-mode file.
+
+** TODO fold source blocks on #+srcname line
    I.e., as well as on #+begin_src line.
 ** TODO take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
@@ -1981,7 +1984,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 +----+----+
 #+end_src
 
-#+resname: implementing-ditaa
+#+resname:
 [[file:blue.png][blue.png]]
 
 *** STARTED gnuplot
