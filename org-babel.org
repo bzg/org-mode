@@ -1961,7 +1961,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 (see [[* file result types][file result types]])
 
 #+srcname: implementing-ditaa
-#+begin_src ditaa :results file :file blue.png
+#+begin_src ditaa :results replace file :file blue.png
 +---------+
 | cBLU    |
 |         |
@@ -1972,7 +1972,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+end_src
 
 #+resname: implementing-ditaa
-[[blue.png][blue.png]]
+[[file:blue.png][blue.png]]
 
 *** TODO dot
 (see [[* file result types][file result types]])
