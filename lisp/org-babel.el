@@ -165,30 +165,30 @@ the header arguments specified at the source code block."
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
-    (setq result
-	  (org-babel-process-result 
-	   (multiple-value-bind (session vars result-params result-type) processed-params
-	     (funcall cmd body params)) result-type))
+    (setq result (multiple-value-bind (session vars result-params result-type) processed-params
+		   (funcall cmd body params)))
+    (if (eq result-type 'value)
+	(setq result (org-babel-process-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
 
-(defun org-babel-process-result (result result-type)
-  "This doesn't do anything currently.
+(defun org-babel-process-result (result result-params)
+  "Process returned value for insertion in buffer.
 
-You can see below the various fragments of results-processing
-  code that were present in the language-specific files. Out of
-  those fragments, I've moved the
-  org-babel-python-table-or-results and
-  org-babel-import-elisp-from-file functionality into the
-  org-babel-*-evaluate functions. I think those should only be
-  used in the :results value case, as in the 'output case we are
-  not concerned with creating elisp versions of results.
+Currently, this function forces to table output if :results
+vector has been supplied.
 
-The rest of the functionality below, concerned with vectorising
-or scalarising results is commented out, has not yet been
-replaced, and may need to be reinstated in this function. "
+  You can see below the various fragments of results-processing
+code that were present in the language-specific files. Out of
+those fragments, I've moved the org-babel-python-table-or-results
+and org-babel-import-elisp-from-file functionality into the
+org-babel-*-evaluate functions. I think those should only be used
+in the :results value case, as in the 'output case we are not
+concerned with creating elisp versions of results. "
 
- result)
+  (if (and (member "vector" result-params) (not (listp result)))
+      (list (list result))
+         result))
 ;; ;; ruby
 ;;     (if (member "scalar" result-params)
 ;;         results
