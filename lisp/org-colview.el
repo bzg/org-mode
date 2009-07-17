@@ -712,7 +712,7 @@ around it."
     (":max"  max_times         max)
     (":min"  min_times         min)
     (":mean" mean_times        (lambda (&rest x) (/ (apply '+ x) (float (length x))))))
-  "Operator <-> format,fuction map.
+  "Operator <-> format,function map.
 Used to compile/uncompile columns format and completing read in
 interactive function org-columns-new.")
 
@@ -730,7 +730,8 @@ interactive function org-columns-new.")
 	(setq width (string-to-number width))
       (setq width nil))
     (setq fmt (org-ido-completing-read "Summary [none]: "
-				       (mapcar (lambda (x) (list (symbol-name (cadr x)))) org-columns-compile-map)
+				       (mapcar (lambda (x) (list (symbol-name (cadr x)))) 
+					       org-columns-compile-map)
 				       nil t))
     (setq fmt (intern fmt)
 	  fun (cadr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
