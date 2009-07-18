@@ -2039,15 +2039,8 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot
+*** STARTED gnuplot [2/6]
 (see [[* file result types][file result types]])
-
-- a =file= header argument
-- a =cmdline= header argument
-- to add variables
-  - scalar variables should be replaced in the body of the gnuplot code
-  - vector variables should be exported to tab-separated files, and
-    the variable names should be replaced with the path to the files
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
 #+TBLNAME: gnuplot-data
@@ -2073,6 +2066,18 @@ set title "Implementing Gnuplot"
 plot "data" using 1:2 with lines
 #+end_src
 
+**** DONE add variables
+     - scalar variables should be replaced in the body of the gnuplot code
+     - vector variables should be exported to tab-separated files, and
+       the variable names should be replaced with the path to the files
+
+**** DONE direct plotting w/o session
+**** TODO a =file= header argument
+to specify a file holding the results
+
+**** TODO helpers from org-plot.el
+**** TODO header argument specifying 3D data
+**** TODO gnuplot sessions
 *** TODO dot
 (see [[* file result types][file result types]])
 
