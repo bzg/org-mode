@@ -83,9 +83,14 @@ cd ~ && du -sc * |grep -v total
 |     1264 | "tools"     |
 
 #+srcname: directory-pie
-#+begin_src R :var dirs = directories
+#+begin_src R :var dirs = directories :session R-pie-example
 pie(dirs[,1], labels = dirs[,2])
 #+end_src
+
+
+
+
+
 
 *** operations in/on tables
 
@@ -210,6 +215,8 @@ would then be [[#sandbox][the sandbox]].
    line?  This would be nice as it would allow folding of lengthy
    output. Sometimes one will want to see stdout just to check
    everything looks OK, and then fold it away.
+
+   I'm addressing this in branch 'examplizing-output'.
 
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
@@ -2036,7 +2043,17 @@ plot "data" using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [19/30]
+* Bugs [20/31]
+** TODO prompt characters appearing in output with R
+#+begin_src R :session *R* :results output
+  x <- 6
+  y <- 8
+  3
+#+end_src      
+
+#+resname:
+: > [1] 3
+
 ** TODO o-b-execute-subtree overwrites heading when subtree is folded
 *** Example
     Try M-x org-babel-execute-subtree with the subtree folded and
@@ -2073,11 +2090,6 @@ even a third"
 #+end_src
 
 #+resname: multi-line-string-output
-
-** TODO cursor movement when evaluating source blocks
-   E.g. the pie chart example. Despite the save-window-excursion in
-   org-babel-execute:R. (I never learned how to do this properly: org-R
-   jumps all over the place...)
    
 ** PROPOSED external shell execution can't isolate return values
 I have no idea how to do this as of yet.  The result is that when
@@ -2171,6 +2183,13 @@ b=5
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+
+** DONE cursor movement when evaluating source blocks
+   E.g. the pie chart example. Despite the save-window-excursion in
+   org-babel-execute:R. (I never learned how to do this properly: org-R
+   jumps all over the place...)
+
+   I don't see this now [ded]
 
 ** DONE LoB: calls fail if reference has single character name
    commit 21d058869df1ff23f4f8cc26f63045ac9c0190e2
