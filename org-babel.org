@@ -205,7 +205,8 @@ would then be [[#sandbox][the sandbox]].
    but should larger amounts of output be in a
    \#+begin_example...\#+end_example block? What's the cutoff? > 1 line?
 ** TODO make tangle files read-only?
-   With a file-local variable setting? 
+   With a file-local variable setting, yea that makes sense.  Maybe
+   the header should reference the related org-mode file.
 ** TODO take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.
