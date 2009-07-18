@@ -52,7 +52,7 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-default-header-args '((:session . "none") (:results . "replace"))
   "Default arguments to use when evaluating a source block.")
 
-(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
+(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "code"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar org-babel-src-block-regexp nil
@@ -189,56 +189,6 @@ concerned with creating elisp versions of results. "
   (if (and (member "vector" result-params) (not (listp result)))
       (list (list result))
          result))
-;; ;; ruby
-;;     (if (member "scalar" result-params)
-;;         results
-;;       (case result-type ;; process results based on the result-type
-;;         ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-;;                    (with-temp-file tmp-file (insert results))
-;;                    (org-babel-import-elisp-from-file tmp-file)))
-;;         ('value (org-babel-ruby-table-or-results results))))))
-
-;; python
-;;    (if (member "scalar" result-params)
-;;        results
-;;   (setq result (case result-type ;; process results based on the result-type
-;; 		 ('output (let ((tmp-file (make-temp-file "org-babel-python")))
-;;                                  (with-temp-file tmp-file (insert results))
-;;                                  (org-babel-import-elisp-from-file tmp-file)))
-;; 		 ('value (org-babel-python-table-or-results results))))
-;;       (if (and (member "vector" results) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-  
-
-;; ;; sh
-;;     (if (member "scalar" result-params)
-;;         results
-;;       (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
-;;                       (with-temp-file tmp-file (insert results))
-;;                       (org-babel-import-elisp-from-file tmp-file)))
-;;       (if (and (member "vector" results) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-
-;; ;; R
-;;       (setq results (if (member "scalar" result-params)
-;;                         results
-;;                       (let ((tmp-file (make-temp-file "org-babel-R")))
-;;                         (with-temp-file tmp-file (insert results))
-;;                         (org-babel-import-elisp-from-file tmp-file))))
-;;       (if (and (member "vector" result-params) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-
-
-;; ;; rest of org-babel-execute-src-block
-
-;;     ;; possibly force result into a vector
-;;     (if (and (not (listp result)) (cdr (assoc :results params))
-;;              (member "vector" (split-string (cdr (assoc :results params)))))
-;;         (setq result (list result)))
-;;     result))
 
 (defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -321,7 +271,7 @@ of the following form.  (language body header-arguments-alist)"
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
           (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
-          (org-combine-plists
+          (org-babel-merge-params
            org-babel-default-inline-header-args
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
@@ -436,9 +386,9 @@ current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
 following values...
 
-t ------ the default options, simply insert the results after the
+t ------ the default option, simply insert the results after the
          source block
-         
+
 replace - insert results after the source block replacing any
           previously inserted results
 
@@ -539,7 +489,7 @@ parameters when merging lists."
 			       vars (cons (cons var ref) (assq-delete-all var vars)))))
 		      (:results
 		       ;; maintain list of unique :results specifications
-		       (setq results (org-uniquify (append (split-string (cdr pair)) results))))
+		       (setq results (org-babel-merge-results results (split-string (cdr pair)))))
 		      (t
 		       ;; replace: this covers e.g. :session
 		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
@@ -548,6 +498,26 @@ parameters when merging lists."
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
     (cons (cons :results (mapconcat 'identity results " ")) params)))
+
+(defun org-babel-merge-results (&rest result-params)
+  "Combine all result parameter lists in RESULT-PARAMS taking
+into account the fact that some groups of result params are
+mutually exclusive."
+  (let ((exclusive-groups '(("file" "vector" "scalar")
+                            ("replace" "silent")))
+        output)
+    (mapc (lambda (new-params)
+            (mapc (lambda (new-param)
+                    (mapc (lambda (exclusive-group)
+                            (when (member new-param exclusive-group)
+                              (mapcar (lambda (excluded-param)
+                                        (setq output (delete excluded-param output)))
+                                      exclusive-group)))
+                          exclusive-groups)
+                    (setq output (org-uniquify (cons new-param output))))
+                  new-params))
+          result-params)
+    output))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."

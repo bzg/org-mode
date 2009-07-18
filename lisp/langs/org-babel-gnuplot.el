@@ -41,7 +41,7 @@
 
 (add-to-list 'org-babel-tangle-langs '("gnuplot" "gnuplot"))
 
-(defvar org-babel-default-header-args:gnuplot '((:results . "file"))
+(defvar org-babel-default-header-args:gnuplot '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a gnuplot source block.")
 
 (defvar org-babel-gnuplot-timestamp-fmt nil)
