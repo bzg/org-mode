@@ -1,3 +1,11 @@
+2009-07-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-activate-plain-links): Make single-match.
+	(org-adapt-indentation): Fix docstring.
+
+	* org-macs.el (org-unmodified): Turn of modification hooks while
+	running this macro.
+
 2009-07-08  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-clock.el (org-clock-goto): Find hidden headlines as well.

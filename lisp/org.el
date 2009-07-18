@@ -684,15 +684,26 @@ lines to the buffer:
   :type 'boolean)
 
 (defcustom org-adapt-indentation t
-  "Non-nil means, adapt indentation when promoting and demoting.
-When this is set and the *entire* text in an entry is indented, the
-indentation is increased by one space in a demotion command, and
-decreased by one in a promotion command.  If any line in the entry
-body starts at column 0, indentation is not changed at all.
+  "Non-nil means, adapt indentation to outline node level.
 
-This variable also influences how property drawers and planning
-information is inserted.  When t, these lines drawers will be inserted
-indented.  When nil, they will not be indented."
+When this variable is set, Org assumes that you write outlines by
+indenting text in each node to align with the headline (after the stars).
+The following issues are influenced by this variable:
+
+- When this is set and the *entire* text in an entry is indented, the
+  indentation is increased by one space in a demotion command, and
+  decreased by one in a promotion command.  If any line in the entry
+  body starts at column 0, indentation is not changed at all.
+
+- Property drawers and planning information is inserted indented when
+  this variable s set.  When nil, they will not be indented.
+
+- TAB indents a line relative to context.  The lines below a headline
+  will be indented when this variable is set.
+
+Note that this is all about true indentation, by adding and removing
+spaces.  See also `org-indent.el' which does level-dependent indentation
+in a virtual way, i.e. only for display in Emacs."
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -3808,7 +3819,7 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-startup nil)        ; Dynamically-scoped param.
 (defvar org-agenda-keep-modes nil)      ; Dynamically-scoped param.
 (defvar org-inhibit-logging nil)        ; Dynamically-scoped param.
-(defvar org-inhibit-blocking nil)        ; Dynamically-scoped param.
+(defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 (defconst org-outline-regexp "\\*+ ")
 
@@ -4171,17 +4182,18 @@ will be prompted for."
   "Run through the buffer and add overlays to links."
   (catch 'exit
     (let (f)
-      (while (re-search-forward org-plain-link-re limit t)
-	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	(setq f (get-text-property (match-beginning 0) 'face))
-	(if (or (eq f 'org-tag)
-		(and (listp f) (memq 'org-tag f)))
-	    nil
-	  (add-text-properties (match-beginning 0) (match-end 0)
-			       (list 'mouse-face 'highlight
-				     'keymap org-mouse-map))
-	  (org-rear-nonsticky-at (match-end 0))
-	  (throw 'exit t))))))
+      (if (re-search-forward org-plain-link-re limit t)
+	  (progn
+	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	    (setq f (get-text-property (match-beginning 0) 'face))
+	    (if (or (eq f 'org-tag)
+		    (and (listp f) (memq 'org-tag f)))
+		nil
+	      (add-text-properties (match-beginning 0) (match-end 0)
+				   (list 'mouse-face 'highlight
+					 'keymap org-mouse-map))
+	      (org-rear-nonsticky-at (match-end 0)))
+	    t)))))
 
 (defun org-activate-code (limit)
   (if (re-search-forward "^[ \t]*\\(: .*\n?\\)" limit t)

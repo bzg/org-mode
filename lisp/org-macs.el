@@ -46,7 +46,9 @@
 (defmacro org-unmodified (&rest body)
   "Execute body without changing `buffer-modified-p'."
   `(set-buffer-modified-p
-    (prog1 (buffer-modified-p) ,@body)))
+    (prog1 (buffer-modified-p)
+      (let (before-change-functions after-change-functions)
+	,@body))))
 
 (defmacro org-re (s)
   "Replace posix classes in regular expression."
