@@ -476,8 +476,9 @@ non-nil."
 elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
-  (let (params results vars var ref)
+  (let (params results exports vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
+                    ;; maintain exclusivity of mutually exclusive parameters
                     (let (output)
                       (mapc (lambda (new-params)
                               (mapc (lambda (new-param)
@@ -502,18 +503,21 @@ parameters when merging lists."
                                  ref (match-string 2 (cdr pair))
                                  vars (cons (cons var ref) (assq-delete-all var vars)))))
                         (:results
-                         ;; maintain list of unique :results specifications
                          (setq results (e-merge '(("file" "vector" "scalar")
                                                   ("replace" "silent"))
                                                 results (split-string (cdr pair)))))
-                        (t
-                         ;; replace: this covers e.g. :session
-                         (setq params (cons pair (assq-delete-all	(car pair) params))))))
+                        (:exports
+                         (setq exports (e-merge '(("code" "results" "both"))
+                                                exports (split-string (cdr pair)))))
+                        (t ;; replace: this covers e.g. :session
+                         (setq params (cons pair (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
-    (cons (cons :results (mapconcat 'identity results " ")) params)))
+    (cons (cons :exports (mapconcat 'identity exports " "))
+          (cons (cons :results (mapconcat 'identity results " "))
+                params))))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."

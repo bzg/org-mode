@@ -204,7 +204,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [30/50]
+* Tasks [31/51]
 ** PROPOSED optional timestamp for output
    Add option to place an (inactive) timestamp at the #+resname, to
    record when that output was generated.
@@ -888,6 +888,15 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+** DONE exclusive =exports= params
+   
+#+srcname: implement-export-exclusivity
+#+begin_src ruby 
+:this_is_a_test
+#+end_src
+
+#+resname:
+: :this_is_a_test
 ** DONE LoB: allow output in buffer
 ** DONE allow default header arguments by language
 org-babel-default-header-args:lang-name
