@@ -52,7 +52,7 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-default-header-args '((:session . "none") (:results . "replace"))
   "Default arguments to use when evaluating a source block.")
 
-(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
+(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "code"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar org-babel-src-block-regexp nil
