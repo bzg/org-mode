@@ -204,13 +204,13 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [31/51]
+* Tasks [32/51]
 ** PROPOSED optional timestamp for output
    Add option to place an (inactive) timestamp at the #+resname, to
    record when that output was generated.
 
 *** source code block timestamps (optional addition)
-    If we did this would we then want to place a timestamp on the
+    [Eric] If we did this would we then want to place a timestamp on the
     source-code block, so that we would know if the results are
     current or out of date?  This would have the effect of caching the
     results of calculations and then only re-running if the
@@ -219,27 +219,16 @@ would then be [[#sandbox][the sandbox]].
     timestamps of any tables or source-code blocks referenced by the
     original source-code block.
 
+    [Dan] I do remember getting frustrated by Sweave always having to
+    re-do everything, so this could be desirable, as long as it's easy
+    to over-ride of course. I'm not sure it should be the default
+    behaviour unless we are very confident that it works well.
+
 **** maintaining source-code block timestamps
      It may make sense to add a hook to `org-edit-special' which could
      update the source-code blocks timestamp.  If the user edits the
      contents of a source-code block directly I can think of no
      efficient way of maintaining the timestamp.
-
-** TODO use example block for large amounts of stdout output?
-   We're currently `examplizing' with : at the beginning of the line,
-   but should larger amounts of output be in a
-   \#+begin_example...\#+end_example block? What's the cutoff? > 1
-   line?  This would be nice as it would allow folding of lengthy
-   output. Sometimes one will want to see stdout just to check
-   everything looks OK, and then fold it away.
-
-   I'm addressing this in branch 'examplizing-output'.
-
-   Yea, that makes sense.  (either that or allow folding of large
-   blocks escaped with =:=).
-
-   Proposed cutoff of 10 lines, we can save this value in a user
-   customizable variable.
 
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
@@ -889,6 +878,22 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+
+** DONE use example block for large amounts of stdout output?
+   We're currently `examplizing' with : at the beginning of the line,
+   but should larger amounts of output be in a
+   \#+begin_example...\#+end_example block? What's the cutoff? > 1
+   line?  This would be nice as it would allow folding of lengthy
+   output. Sometimes one will want to see stdout just to check
+   everything looks OK, and then fold it away.
+
+   I'm addressing this in branch 'examplizing-output'.
+   Yea, that makes sense.  (either that or allow folding of large
+   blocks escaped with =:=).
+
+   Proposed cutoff of 10 lines, we can save this value in a user
+   customizable variable.
+*** DONE add ability to remove such results
 ** DONE exclusive =exports= params
    
 #+srcname: implement-export-exclusivity
@@ -2075,8 +2080,15 @@ plot "data" using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [20/32]
+* Bugs [21/34]
 ** TODO avoid stripping whitespace from output when :results output
+** TODO problem with newlines in output when :results value
+#+begin_src python :results value
+'\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0
 ** TODO prompt characters appearing in output with R
 #+begin_src R :session *R* :results output
   x <- 6
@@ -2156,18 +2168,13 @@ the same for the other languages. [Dan]
 #+end_src
 ** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
    And at other occurrences of org-combine-plists?
-** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
-   I haven't fixed this yet. org-babel-ref-resolve-reference moves
-   point around, inside a save-excursion. Somehow when it comes to
-   inserting the results (after possible further recursive calls to
-   org-babel-ref-resolve-reference), point hasn't gone back to the
-   lob line.
 ** TODO creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. E.g.
 
 #+begin_src sh
 b=5
 #+end_src
+
 
    Compare the results of
 #+lob: python-add(a=5, b=17)
@@ -2188,6 +2195,9 @@ b=5
    LoB removes the entire (#+resname and result) and starts from
    scratch, whereas #+begin_src only removes the result. I haven't
    worked out what the correct fix is yet.
+** TODO LoB is not populated on startup
+   org-babel-library-of-babel is nil for me on startup. I have to
+   evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
@@ -2216,6 +2226,28 @@ b=5
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+** DONE LoB: with output to buffer, not working in buffers other than library-of-babel.org
+*** Initial report
+   I haven't fixed this yet. org-babel-ref-resolve-reference moves
+   point around, inside a save-excursion. Somehow when it comes to
+   inserting the results (after possible further recursive calls to
+   org-babel-ref-resolve-reference), point hasn't gone back to the
+   lob line.
+
+#+tblname: test-data
+| 1 |    1 |
+| 2 |   .5 |
+| 3 | .333 |
+
+#+lob: R-plot(data=test-data)
+
+#+lob: python-add(a=2, b=9)
+
+#+resname: python-add(a=2, b=9)
+: 11
+
+*** Now
+    I think this got fixed in the bugfixes before merging results into master.
 
 ** DONE cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in

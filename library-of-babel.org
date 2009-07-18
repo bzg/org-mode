@@ -11,7 +11,6 @@
 #+srcname: R-plot(data=R-plot-example-data)
 #+begin_src R :session *R*
 plot(data)
-"R plot complete"
 #+end_src
 
 #+tblname: R-plot-example-data
@@ -24,7 +23,7 @@ plot(data)
 #+lob: R-plot(data=R-plot-example-data)
 
 #+resname: R-plot(data=R-plot-example-data)
-: R plot complete
+: nil
 
 * Etc
 #+srcname: python-identity(a=1)
