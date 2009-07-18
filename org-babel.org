@@ -220,13 +220,19 @@ would then be [[#sandbox][the sandbox]].
      contents of a source-code block directly I can think of no
      efficient way of maintaining the timestamp.
 
-** PROPOSED use example block for large amounts of stdout output?
+** TODO use example block for large amounts of stdout output?
    We're currently `examplizing' with : at the beginning of the line,
    but should larger amounts of output be in a
    \#+begin_example...\#+end_example block? What's the cutoff? > 1
    line?  This would be nice as it would allow folding of lengthy
    output. Sometimes one will want to see stdout just to check
    everything looks OK, and then fold it away.
+
+   Yea, that makes sense.  (either that or allow folding of large
+   blocks escaped with =:=).
+
+   Proposed cutoff of 10 lines, we can save this value in a user
+   customizable variable.
 
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
