@@ -321,7 +321,7 @@ of the following form.  (language body header-arguments-alist)"
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
           (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
-          (org-combine-plists
+          (org-babel-merge-params
            org-babel-default-inline-header-args
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
