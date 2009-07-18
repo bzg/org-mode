@@ -234,6 +234,7 @@ would then be [[#sandbox][the sandbox]].
    everything looks OK, and then fold it away.
 
    I'm addressing this in branch 'examplizing-output'.
+
    Yea, that makes sense.  (either that or allow folding of large
    blocks escaped with =:=).
 
