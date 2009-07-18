@@ -220,19 +220,13 @@ would then be [[#sandbox][the sandbox]].
      contents of a source-code block directly I can think of no
      efficient way of maintaining the timestamp.
 
-** TODO use example block for large amounts of stdout output?
+** PROPOSED use example block for large amounts of stdout output?
    We're currently `examplizing' with : at the beginning of the line,
    but should larger amounts of output be in a
    \#+begin_example...\#+end_example block? What's the cutoff? > 1
    line?  This would be nice as it would allow folding of lengthy
    output. Sometimes one will want to see stdout just to check
    everything looks OK, and then fold it away.
-
-   Yea, that makes sense.  (either that or allow folding of large
-   blocks escaped with =:=).
-
-   Proposed cutoff of 10 lines, we can save this value in a user
-   customizable variable.
 
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
@@ -2018,15 +2012,8 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot
+*** STARTED gnuplot [2/6]
 (see [[* file result types][file result types]])
-
-- a =file= header argument
-- a =cmdline= header argument
-- to add variables
-  - scalar variables should be replaced in the body of the gnuplot code
-  - vector variables should be exported to tab-separated files, and
-    the variable names should be replaced with the path to the files
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
 #+TBLNAME: gnuplot-data
@@ -2051,6 +2038,19 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 set title "Implementing Gnuplot"
 plot "data" using 1:2 with lines
 #+end_src
+
+**** DONE add variables
+     - scalar variables should be replaced in the body of the gnuplot code
+     - vector variables should be exported to tab-separated files, and
+       the variable names should be replaced with the path to the files
+
+**** DONE direct plotting w/o session
+**** TODO a =file= header argument
+to specify a file holding the results
+
+**** TODO helpers from org-plot.el
+**** TODO header argument specifying 3D data
+**** TODO gnuplot sessions
 
 *** TODO dot
 (see [[* file result types][file result types]])
