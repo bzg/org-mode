@@ -451,11 +451,15 @@ relies on `org-babel-insert-result'."
   (save-excursion
     (if (org-at-table-p)
         (org-table-end)
-      (while (if (looking-at "\\(: \\|\\[\\[\\)")
-                 (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                          (forward-line 1)) t))
-        (forward-line 1))
-      (forward-line -1)
+      (let ((case-fold-search nil))
+	(if (looking-at-p "#\\+begin_example")
+	    (search-forward "#+end_example" nil t)
+	  (progn
+	    (while (if (looking-at "\\(: \\|\\[\\[\\)")
+		       (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+				(forward-line 1)) t))
+	      (forward-line 1))
+	    (forward-line -1))))
       (point))))
 
 (defun org-babel-result-to-file (result)
