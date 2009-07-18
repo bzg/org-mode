@@ -477,47 +477,43 @@ elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
   (let (params results vars var ref)
-    (mapc (lambda (plist)
-	    (mapc (lambda (pair)
-		    (case (car pair)
-		      (:var
-		       ;; we want only one specification per variable
-		       (when (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=[ \t]*\\([^\f\n\r\v]+\\)$" (cdr pair))
-			 ;; TODO: When is this not true?
-			 (setq var (intern (match-string 1 (cdr pair)))
-			       ref (match-string 2 (cdr pair))
-			       vars (cons (cons var ref) (assq-delete-all var vars)))))
-		      (:results
-		       ;; maintain list of unique :results specifications
-		       (setq results (org-babel-merge-results results (split-string (cdr pair)))))
-		      (t
-		       ;; replace: this covers e.g. :session
-		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
-		  plist))
-	  plists)
+    (flet ((e-merge (exclusive-groups &rest result-params)
+                    (let (output)
+                      (mapc (lambda (new-params)
+                              (mapc (lambda (new-param)
+                                      (mapc (lambda (exclusive-group)
+                                              (when (member new-param exclusive-group)
+                                                (mapcar (lambda (excluded-param)
+                                                          (setq output (delete excluded-param output)))
+                                                        exclusive-group)))
+                                            exclusive-groups)
+                                      (setq output (org-uniquify (cons new-param output))))
+                                    new-params))
+                            result-params)
+                      output)))
+      (mapc (lambda (plist)
+              (mapc (lambda (pair)
+                      (case (car pair)
+                        (:var
+                         ;; we want only one specification per variable
+                         (when (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=[ \t]*\\([^\f\n\r\v]+\\)$" (cdr pair))
+                           ;; TODO: When is this not true?
+                           (setq var (intern (match-string 1 (cdr pair)))
+                                 ref (match-string 2 (cdr pair))
+                                 vars (cons (cons var ref) (assq-delete-all var vars)))))
+                        (:results
+                         ;; maintain list of unique :results specifications
+                         (setq results (e-merge '(("file" "vector" "scalar")
+                                                  ("replace" "silent"))
+                                                results (split-string (cdr pair)))))
+                        (t
+                         ;; replace: this covers e.g. :session
+                         (setq params (cons pair (assq-delete-all	(car pair) params))))))
+                    plist))
+            plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
     (cons (cons :results (mapconcat 'identity results " ")) params)))
-
-(defun org-babel-merge-results (&rest result-params)
-  "Combine all result parameter lists in RESULT-PARAMS taking
-into account the fact that some groups of result params are
-mutually exclusive."
-  (let ((exclusive-groups '(("file" "vector" "scalar")
-                            ("replace" "silent")))
-        output)
-    (mapc (lambda (new-params)
-            (mapc (lambda (new-param)
-                    (mapc (lambda (exclusive-group)
-                            (when (member new-param exclusive-group)
-                              (mapcar (lambda (excluded-param)
-                                        (setq output (delete excluded-param output)))
-                                      exclusive-group)))
-                          exclusive-groups)
-                    (setq output (org-uniquify (cons new-param output))))
-                  new-params))
-          result-params)
-    output))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
