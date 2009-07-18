@@ -189,56 +189,6 @@ concerned with creating elisp versions of results. "
   (if (and (member "vector" result-params) (not (listp result)))
       (list (list result))
          result))
-;; ;; ruby
-;;     (if (member "scalar" result-params)
-;;         results
-;;       (case result-type ;; process results based on the result-type
-;;         ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-;;                    (with-temp-file tmp-file (insert results))
-;;                    (org-babel-import-elisp-from-file tmp-file)))
-;;         ('value (org-babel-ruby-table-or-results results))))))
-
-;; python
-;;    (if (member "scalar" result-params)
-;;        results
-;;   (setq result (case result-type ;; process results based on the result-type
-;; 		 ('output (let ((tmp-file (make-temp-file "org-babel-python")))
-;;                                  (with-temp-file tmp-file (insert results))
-;;                                  (org-babel-import-elisp-from-file tmp-file)))
-;; 		 ('value (org-babel-python-table-or-results results))))
-;;       (if (and (member "vector" results) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-
-
-;; ;; sh
-;;     (if (member "scalar" result-params)
-;;         results
-;;       (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
-;;                       (with-temp-file tmp-file (insert results))
-;;                       (org-babel-import-elisp-from-file tmp-file)))
-;;       (if (and (member "vector" results) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-
-;; ;; R
-;;       (setq results (if (member "scalar" result-params)
-;;                         results
-;;                       (let ((tmp-file (make-temp-file "org-babel-R")))
-;;                         (with-temp-file tmp-file (insert results))
-;;                         (org-babel-import-elisp-from-file tmp-file))))
-;;       (if (and (member "vector" result-params) (not (listp results)))
-;;           (list (list results))
-;;         results))))
-
-
-;; ;; rest of org-babel-execute-src-block
-
-;;     ;; possibly force result into a vector
-;;     (if (and (not (listp result)) (cdr (assoc :results params))
-;;              (member "vector" (split-string (cdr (assoc :results params)))))
-;;         (setq result (list result)))
-;;     result))
 
 (defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
