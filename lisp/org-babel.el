@@ -61,6 +61,14 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
 
+(defvar org-babel-min-lines-for-block-output 2
+  "If number of lines of output is equal to or exceeds this
+  value, the output is placed in a
+  #+begin_example...#+end_example block. Otherwise the output is
+  marked as literal by inserting colons at the starts of the
+  lines. This variable only takes effect if the :results output
+  option is in effect.")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
@@ -462,14 +470,21 @@ non-nil."
   (interactive "*r")
   (let ((size (abs (- (line-number-at-pos end)
 		      (line-number-at-pos beg)))))
-    (if (= size 0)
-	(let ((result (buffer-substring beg end)))
-	  (delete-region beg end)
-	  (insert (concat ": " result)))
-      (save-excursion
-        (goto-char beg)
-        (dotimes (n size)
-          (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
+    (save-excursion
+      (cond ((= size 0)
+	     (error "This should be impossible: a newline was appended to result if missing")
+	     (let ((result (buffer-substring beg end)))
+	       (delete-region beg end)
+	       (insert (concat ": " result))))
+	    ((< size org-babel-min-lines-for-block-output)
+	     (goto-char beg)
+	     (dotimes (n size)
+	       (move-beginning-of-line 1) (insert ": ") (forward-line 1)))
+	    (t
+	     (goto-char beg)
+	     (insert "#+begin_example\n")
+	     (forward-char (- end beg))
+	     (insert "#+end_example\n"))))))
 
 (defun org-babel-merge-params (&rest plists)
   "Combine all parameter association lists in PLISTS.  Later
