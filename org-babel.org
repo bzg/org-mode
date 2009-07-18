@@ -199,13 +199,21 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [30/49]
-** TODO make tangle files read-only
+* Tasks [30/50]
+** PROPOSED optional timestamp for output
+   Add option to place an (inactive) timestamp at the #+resname, to
+   record when that output was generated.
+** PROPOSED use example block for large amounts of stdout output?
+   We're currently `examplizing' with : at the beginning of the line,
+   but should larger amounts of output be in a
+   \#+begin_example...\#+end_example block? What's the cutoff? > 1
+   line?  This would be nice as it would allow folding of lengthy
+   output. Sometimes one will want to see stdout just to check
+   everything looks OK, and then fold it away.
+
+** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
-
-** TODO fold source blocks on #+srcname line
-   I.e., as well as on #+begin_src line.
 ** TODO take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.
@@ -1984,7 +1992,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 +----+----+
 #+end_src
 
-#+resname:
+#+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
 *** STARTED gnuplot
@@ -2028,7 +2036,15 @@ plot "data" using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [18/23]
+* Bugs [19/30]
+** TODO o-b-execute-subtree overwrites heading when subtree is folded
+*** Example
+    Try M-x org-babel-execute-subtree with the subtree folded and
+    point at the beginning of the heading line.
+#+begin_src sh
+size=5
+#+end_src
+
 ** TODO Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
    preceding whitespace, at least for literal/code examples. org-babel
@@ -2088,21 +2104,26 @@ the same for the other languages. [Dan]
 ** TODO are the org-babel-trim s necessary?
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
-** results branch bugs
-*** TODO elisp reference fails for literal number
+** TODO elisp reference fails for literal number
 #+srcname: elisp-test(a=4)
 #+begin_src emacs-lisp 
 (message a)
 #+end_src
-*** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
-    And at other occurrences of org-combine-plists?
-*** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
-    I haven't fixed this yet. org-babel-ref-resolve-reference moves
-    point around, inside a save-excursion. Somehow when it comes to
-    inserting the results (after possible further recursive calls to
-    org-babel-ref-resolve-reference), point hasn't gone back to the
-    lob line.
-*** TODO LoB: output to buffer adds creeping blank lines
+** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
+   And at other occurrences of org-combine-plists?
+** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
+   I haven't fixed this yet. org-babel-ref-resolve-reference moves
+   point around, inside a save-excursion. Somehow when it comes to
+   inserting the results (after possible further recursive calls to
+   org-babel-ref-resolve-reference), point hasn't gone back to the
+   lob line.
+** TODO creeping blank lines
+   There's still inappropriate addition of blank lines in some circumstances. E.g.
+
+#+begin_src sh
+b=5
+#+end_src
+
    Compare the results of
 #+lob: python-add(a=5, b=17)
 
@@ -2453,7 +2474,6 @@ As an example eval the following.  Adding a line to test
 #+begin_src ruby :var ar = simple-ruby-array :results silent
 ar.first.first
 #+end_src
-
 
 ** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
