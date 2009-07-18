@@ -61,6 +61,14 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
 
+(defvar org-babel-min-lines-for-block-output 10
+  "If number of lines of output is equal to or exceeds this
+  value, the output is placed in a
+  #+begin_example...#+end_example block. Otherwise the output is
+  marked as literal by inserting colons at the starts of the
+  lines. This variable only takes effect if the :results output
+  option is in effect.")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
@@ -168,11 +176,11 @@ the header arguments specified at the source code block."
     (setq result (multiple-value-bind (session vars result-params result-type) processed-params
 		   (funcall cmd body params)))
     (if (eq result-type 'value)
-	(setq result (org-babel-process-result result result-params)))
+	(setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
 
-(defun org-babel-process-result (result result-params)
+(defun org-babel-process-value-result (result result-params)
   "Process returned value for insertion in buffer.
 
 Currently, this function forces to table output if :results
@@ -443,11 +451,15 @@ relies on `org-babel-insert-result'."
   (save-excursion
     (if (org-at-table-p)
         (org-table-end)
-      (while (if (looking-at "\\(: \\|\\[\\[\\)")
-                 (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                          (forward-line 1)) t))
-        (forward-line 1))
-      (forward-line -1)
+      (let ((case-fold-search nil))
+	(if (looking-at-p "#\\+begin_example")
+	    (search-forward "#+end_example" nil t)
+	  (progn
+	    (while (if (looking-at "\\(: \\|\\[\\[\\)")
+		       (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+				(forward-line 1)) t))
+	      (forward-line 1))
+	    (forward-line -1))))
       (point))))
 
 (defun org-babel-result-to-file (result)
@@ -462,14 +474,21 @@ non-nil."
   (interactive "*r")
   (let ((size (abs (- (line-number-at-pos end)
 		      (line-number-at-pos beg)))))
-    (if (= size 0)
-	(let ((result (buffer-substring beg end)))
-	  (delete-region beg end)
-	  (insert (concat ": " result)))
-      (save-excursion
-        (goto-char beg)
-        (dotimes (n size)
-          (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
+    (save-excursion
+      (cond ((= size 0)
+	     (error "This should be impossible: a newline was appended to result if missing")
+	     (let ((result (buffer-substring beg end)))
+	       (delete-region beg end)
+	       (insert (concat ": " result))))
+	    ((< size org-babel-min-lines-for-block-output)
+	     (goto-char beg)
+	     (dotimes (n size)
+	       (move-beginning-of-line 1) (insert ": ") (forward-line 1)))
+	    (t
+	     (goto-char beg)
+	     (insert "#+begin_example\n")
+	     (forward-char (- end beg))
+	     (insert "#+end_example\n"))))))
 
 (defun org-babel-merge-params (&rest plists)
   "Combine all parameter association lists in PLISTS.  Later
