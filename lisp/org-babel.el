@@ -61,7 +61,7 @@ then run `org-babel-pop-to-session'."
 (defvar org-babel-inline-src-block-regexp nil
   "Regexp used to test when on an inline org-babel src-block")
 
-(defvar org-babel-min-lines-for-block-output 2
+(defvar org-babel-min-lines-for-block-output 10
   "If number of lines of output is equal to or exceeds this
   value, the output is placed in a
   #+begin_example...#+end_example block. Otherwise the output is
