@@ -434,7 +434,7 @@ This function detects an URL, title and optinal text, separated by '/'
 The location for a browser's bookmark has to look like this:
 
   javascript:location.href='org-protocol://remember://'+ \\
-        encodeURIComponent(location.href)+ \\
+        encodeURIComponent(location.href)+'/' \\
         encodeURIComponent(document.title)+'/'+ \\
         encodeURIComponent(window.getSelection())
 
