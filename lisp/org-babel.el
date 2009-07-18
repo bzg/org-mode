@@ -176,11 +176,11 @@ the header arguments specified at the source code block."
     (setq result (multiple-value-bind (session vars result-params result-type) processed-params
 		   (funcall cmd body params)))
     (if (eq result-type 'value)
-	(setq result (org-babel-process-result result result-params)))
+	(setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
 
-(defun org-babel-process-result (result result-params)
+(defun org-babel-process-value-result (result result-params)
   "Process returned value for insertion in buffer.
 
 Currently, this function forces to table output if :results
