@@ -71,8 +71,9 @@ during execution of body."
                ;; wait for end-of-evaluation indicator
                (while (progn
                         (goto-char comint-last-input-end)
-                        (not (save-excursion (and (re-search-forward comint-prompt-regexp nil t)
-                                                  (re-search-forward (regexp-quote ,eoe-indicator) nil t)))))
+                        (not (save-excursion
+			       (and (re-search-forward comint-prompt-regexp nil t)
+				    (re-search-forward (regexp-quote ,eoe-indicator) nil t)))))
                  (accept-process-output (get-buffer-process (current-buffer)))
                  ;; ;; thought this would allow async background running, but I was wrong...
                  ;; (run-with-timer .5 .5 'accept-process-output (get-buffer-process (current-buffer)))
@@ -80,7 +81,9 @@ during execution of body."
            ;; remove filter
            (remove-hook 'comint-output-filter-functions 'my-filt)))
        ;; remove echo'd FULL-BODY from input
-       (if (and ,remove-echo (string-match (replace-regexp-in-string "\n" "\r\n" (regexp-quote ,full-body)) string-buffer))
+       (if (and ,remove-echo
+		(string-match
+		 (replace-regexp-in-string "\n" "\r\n" (regexp-quote ,full-body)) string-buffer))
            (setq raw (substring string-buffer (match-end 0))))
        (split-string string-buffer comint-prompt-regexp))))
 

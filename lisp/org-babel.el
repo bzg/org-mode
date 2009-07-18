@@ -49,10 +49,10 @@ then run `org-babel-pop-to-session'."
 
 (add-hook 'org-metadown-hook 'org-babel-pop-to-session-maybe)
 
-(defvar org-babel-default-header-args '((:session . "none"))
+(defvar org-babel-default-header-args '((:session . "none") (:results . "replace"))
   "Default arguments to use when evaluating a source block.")
 
-(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "results"))
+(defvar org-babel-default-inline-header-args '((:results . "silent") (:exports . "code"))
   "Default arguments to use when evaluating an inline source block.")
 
 (defvar org-babel-src-block-regexp nil
@@ -100,7 +100,6 @@ sh         Pass command to the shell and display the result
 perl       The perl interpreter
 python     The python interpreter
 ruby       The ruby interpreter
-babel      A degenerate source block (no body) to implement library-of-babel calls
 
 The source block regexp `org-babel-src-block-regexp' is updated
 when a new interpreter is added to this list through the
@@ -114,8 +113,7 @@ lisp code use the `org-babel-add-interpreter' function."
               (const "sh")
 	      (const "perl")
 	      (const "python")
-	      (const "ruby")
-  	      (const "babel")))
+	      (const "ruby")))
 
 ;;; functions
 (defun org-babel-pop-to-session (&optional arg info)
@@ -156,48 +154,78 @@ the header arguments specified at the source code block."
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
-         (params (org-combine-plists params (third info)))
+         (params (org-babel-merge-params
+		  (third info) (org-babel-get-src-block-function-args) params))
+	 (processed-params (org-babel-process-params params))
+	 (result-params (third processed-params))
+	 (result-type (fourth processed-params))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
     ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
-    (setq result (funcall cmd body params))
-    ;; possibly force result into a vector
-    (if (and (not (listp result)) (cdr (assoc :results params))
-             (member "vector" (split-string (cdr (assoc :results params)))))
-        (setq result (list result)))
-    (if arg
-        (message (replace-regexp-in-string "%" "%%" (format "%S" result)))
-      (org-babel-insert-result result (cdr (assoc :results params))))
-    result))
+    (when arg (setq result-params (cons "silent" result-params)))
+    (setq result (multiple-value-bind (session vars result-params result-type) processed-params
+		   (funcall cmd body params)))
+    (if (eq result-type 'value)
+	(setq result (org-babel-process-result result result-params)))
+    (org-babel-insert-result result result-params)
+    (case result-type (output nil) (value result))))
 
-(defun org-babel-eval-buffer (&optional arg)
+(defun org-babel-process-result (result result-params)
+  "Process returned value for insertion in buffer.
+
+Currently, this function forces to table output if :results
+vector has been supplied.
+
+  You can see below the various fragments of results-processing
+code that were present in the language-specific files. Out of
+those fragments, I've moved the org-babel-python-table-or-results
+and org-babel-import-elisp-from-file functionality into the
+org-babel-*-evaluate functions. I think those should only be used
+in the :results value case, as in the 'output case we are not
+concerned with creating elisp versions of results. "
+
+  (if (and (member "vector" result-params) (not (listp result)))
+      (list (list result))
+         result))
+
+(defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
   (interactive "P")
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward org-babel-regexp nil t)
-      (org-babel-eval-src-block arg))))
+    (while (re-search-forward org-babel-src-block-regexp nil t)
+      (goto-char (match-beginning 0))
+      (org-babel-execute-src-block arg)
+      (goto-char (match-end 0)))))
 
-(defun org-babel-eval-subtree (&optional arg)
+(defun org-babel-execute-subtree (&optional arg)
   "Replace EVAL snippets in the entire subtree."
   (interactive "P")
   (save-excursion
     (org-narrow-to-subtree)
-    (org-babel-eval-buffer)
+    (org-babel-execute-buffer)
     (widen)))
 
 (defun org-babel-get-src-block-name ()
-  "Return the name of the current source block if one exists"
+  "Return the name of the current source block if one exists.
+
+This function is analogous to org-babel-lob-get-info. For both
+functions, after they are called, (match-string 1) matches the
+function name, and (match-string 2) matches the function
+arguments inside the parentheses. I think perhaps these functions
+should be renamed to bring out this similarity, perhaps involving
+the word 'call'."
   (let ((case-fold-search t)
 	(head (org-babel-where-is-src-block-head)))
-    (save-excursion
-      (when head
-	(goto-char head)
-	(if (save-excursion (forward-line -1)
-			    (looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)"))
-	    (org-babel-clean-text-properties (match-string 1)))))))
+    (if head
+	(save-excursion
+	  (goto-char head)
+	  (if (save-excursion
+		(forward-line -1)
+		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
   "Return the information of the current source block as a list
@@ -212,6 +240,12 @@ of the following form.  (language body header-arguments-alist)"
           (org-babel-parse-inline-src-block-match)
         nil)))) ;; indicate that no source block was found
 
+(defun org-babel-get-src-block-function-args ()
+  (when (org-babel-get-src-block-name)
+    (mapcar (lambda (ref) (cons :var ref))
+	    (split-string (org-babel-clean-text-properties (match-string 2))
+			  ",[ \f\t\n\r\v]*"))))
+
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
   (declare (indent 1))
@@ -225,31 +259,48 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
-    (list (org-babel-clean-text-properties (match-string 1))
-        (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
-        (org-combine-plists
-         org-babel-default-header-args
-         (if (boundp lang-headers) (eval lang-headers) nil)
-         (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
+    (list lang
+	  (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
+	  (org-babel-merge-params
+	   org-babel-default-header-args
+	   (if (boundp lang-headers) (eval lang-headers) nil)
+	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
 (defun org-babel-parse-inline-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
-          (org-babel-strip-protective-comas (org-babel-clean-text-properties (match-string 4)))
-          (org-combine-plists
+          (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
+          (org-babel-merge-params
            org-babel-default-inline-header-args
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
-  (delq nil
-        (mapcar
-         (lambda (arg) (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
-                           (cons (intern (concat ":" (match-string 1 arg))) (org-babel-chomp (match-string 2 arg)))
-                         (cons (intern (concat ":" arg)) nil)))
-         (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t))))
+  (if (> (length arg-string) 0)
+      (delq nil
+	    (mapcar
+	     (lambda (arg)
+	       (if (string-match "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)" arg)
+		   (cons (intern (concat ":" (match-string 1 arg)))
+			 (org-babel-chomp (match-string 2 arg)))
+		 (cons (intern (concat ":" arg)) nil)))
+	     (split-string (concat " " arg-string) "[ \f\t\n\r\v]+:" t)))))
+
+(defun org-babel-process-params (params)
+  "Parse params and resolve references.
+
+Return a list (session vars result-params result-type). These are
+made available to the org-babel-execute:LANG functions via
+multiple-value-bind."
+  (let* ((session (cdr (assoc :session params)))
+	 (vars (org-babel-ref-variables params))
+	 (result-params (split-string (or (cdr (assoc :results params)) "")))
+	 (result-type (cond ((member "output" result-params) 'output)
+			    ((member "value" result-params) 'value)
+			    (t 'value))))
+    (list session vars result-params result-type)))
 
 (defun org-babel-where-is-src-block-head ()
   "Return the point at the beginning of the current source
@@ -310,11 +361,13 @@ source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
 #+RESNAME: line following the source block."
   (save-excursion
-    (let ((name (org-babel-get-src-block-name)) 
-	  (head (org-babel-where-is-src-block-head)) end)
+    (let* ((on-lob-line (progn (beginning-of-line 1)
+			       (looking-at org-babel-lob-one-liner-regexp)))
+	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
+	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
       (or (and name (message name) (org-babel-find-named-result name))
-          (and (re-search-forward "#\\+end_src" nil t)
+          (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
 		      (setq end (point))
@@ -333,22 +386,24 @@ current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
 following values...
 
-t ------ the default options, simply insert the results after the
+t ------ the default option, simply insert the results after the
          source block
-         
+
 replace - insert results after the source block replacing any
           previously inserted results
 
 silent -- no results are inserted"
-  (if insert (setq insert (split-string insert)))
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
         (if (member "file" insert) (setq result (org-babel-result-to-file result))))
     (unless (listp result) (setq result (format "%S" result))))
-  (if (and insert (member "replace" insert)) (org-babel-remove-result))
+  (if (and insert (member "replace" insert) (not (member "silent" insert)))
+      (org-babel-remove-result))
   (if (= (length result) 0)
-      (message "no result returned by source block")
+      (if (member "value" result-params)
+	  (message "No result returned by source block")
+	(message "Source block produced no output"))
     (if (and insert (member "silent" insert))
         (progn (message (replace-regexp-in-string "%" "%%" (format "%S" result))) result)
       (when (and (stringp result) ;; ensure results end in a newline
@@ -416,12 +471,60 @@ non-nil."
         (dotimes (n size)
           (move-beginning-of-line 1) (insert ": ") (forward-line 1))))))
 
+(defun org-babel-merge-params (&rest plists)
+  "Combine all parameter association lists in PLISTS.  Later
+elements of PLISTS override the values of previous element.  This
+takes into account some special considerations for certain
+parameters when merging lists."
+  (let (params results vars var ref)
+    (mapc (lambda (plist)
+	    (mapc (lambda (pair)
+		    (case (car pair)
+		      (:var
+		       ;; we want only one specification per variable
+		       (when (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*=[ \t]*\\([^\f\n\r\v]+\\)$" (cdr pair))
+			 ;; TODO: When is this not true?
+			 (setq var (intern (match-string 1 (cdr pair)))
+			       ref (match-string 2 (cdr pair))
+			       vars (cons (cons var ref) (assq-delete-all var vars)))))
+		      (:results
+		       ;; maintain list of unique :results specifications
+		       (setq results (org-babel-merge-results results (split-string (cdr pair)))))
+		      (t
+		       ;; replace: this covers e.g. :session
+		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
+		  plist))
+	  plists)
+    (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
+    (while vars (setq params (cons (cons :var (pop vars)) params)))
+    (cons (cons :results (mapconcat 'identity results " ")) params)))
+
+(defun org-babel-merge-results (&rest result-params)
+  "Combine all result parameter lists in RESULT-PARAMS taking
+into account the fact that some groups of result params are
+mutually exclusive."
+  (let ((exclusive-groups '(("file" "vector" "scalar")
+                            ("replace" "silent")))
+        output)
+    (mapc (lambda (new-params)
+            (mapc (lambda (new-param)
+                    (mapc (lambda (exclusive-group)
+                            (when (member new-param exclusive-group)
+                              (mapcar (lambda (excluded-param)
+                                        (setq output (delete excluded-param output)))
+                                      exclusive-group)))
+                          exclusive-groups)
+                    (setq output (org-uniquify (cons new-param output))))
+                  new-params))
+          result-params)
+    output))
+
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
   (set-text-properties 0 (length text) nil text) text)
 
-(defun org-babel-strip-protective-comas (body)
-  "Strip protective comas from bodies of source blocks."
+(defun org-babel-strip-protective-commas (body)
+  "Strip protective commas from bodies of source blocks."
   (replace-regexp-in-string "^,#" "#" body))
 
 (defun org-babel-read (cell)

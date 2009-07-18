@@ -38,30 +38,17 @@
 
 (defun org-babel-execute:sh (body params)
   "Execute a block of Shell commands with org-babel.  This
-function is called by `org-babel-execute-src-block'."
+function is called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Shell source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
+  (let* ((full-body (concat
                      (mapconcat ;; define any variables
                       (lambda (pair)
                         (format "%s=%s"
                                 (car pair)
                                 (org-babel-sh-var-to-sh (cdr pair))))
                       vars "\n") "\n" body "\n\n")) ;; then the source block body
-         (session (org-babel-sh-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-sh-evaluate session full-body result-type)))
-    (if (member "scalar" result-params)
-        results
-      (setq results (let ((tmp-file (make-temp-file "org-babel-shell")))
-                      (with-temp-file tmp-file (insert results))
-                      (org-babel-import-elisp-from-file tmp-file)))
-      (if (and (member "vector" results) (not (listp results)))
-          (list (list results))
-        results))))
+         (session (org-babel-sh-initiate-session session)))
+    (org-babel-sh-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:sh (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -118,7 +105,8 @@ then create.  Return the initialized session."
       (when newp
         (setq sh-buffer (current-buffer))
         (org-babel-comint-wait-for-output sh-buffer))
-      (setq org-babel-sh-buffers (cons (cons session sh-buffer) (assq-delete-all session org-babel-sh-buffers)))
+      (setq org-babel-sh-buffers (cons (cons session sh-buffer)
+				       (assq-delete-all session org-babel-sh-buffers)))
       session)))
 
 (defun org-babel-sh-initiate-session (&optional session)
@@ -138,13 +126,20 @@ last statement in BODY."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion
-        (with-temp-buffer ;; TODO: figure out how to return non-output values from shell scripts
+        (with-temp-buffer
           (insert body)
           ;; (message "buffer=%s" (buffer-string)) ;; debugging
           (shell-command-on-region (point-min) (point-max) "sh" 'replace)
-          (buffer-string)))
+	  (case result-type
+	    (output (buffer-string))
+	    (value ;; TODO: figure out how to return non-output values from shell scripts
+	     (let ((tmp-file (make-temp-file "org-babel-sh"))
+		   (results (buffer-string)))
+	       (with-temp-file tmp-file (insert results))
+	       (org-babel-import-elisp-from-file tmp-file))))))
     ;; comint session evaluation
-    (let* ((full-body (mapconcat #'org-babel-chomp
+    (let* ((tmp-file (make-temp-file "org-babel-sh"))
+	   (full-body (mapconcat #'org-babel-chomp
                                  (list body org-babel-sh-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-sh-eoe-output nil
                   (insert full-body) (comint-send-input nil t)))
@@ -154,8 +149,8 @@ last statement in BODY."
       ;; (message (replace-regexp-in-string "%" "%%" (format "processed-results=%S" results))) ;; debugging
       (or (case result-type
             (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
-            (value (car results))
-            (t (reverse results))) ""))))
+            (value (with-temp-file tmp-file (insert (car results)))
+		   (org-babel-import-elisp-from-file tmp-file)))) "")))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   (while (string-match "^% +[\r\n$]+ *" string)

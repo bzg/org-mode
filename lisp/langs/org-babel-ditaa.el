@@ -45,7 +45,7 @@
 
 (add-to-list 'org-babel-tangle-langs '("ditaa" "ditaa"))
 
-(defvar org-babel-default-header-args:ditaa '((:results . "file"))
+(defvar org-babel-default-header-args:ditaa '((:results . "file") (:exports . "results"))
   "Default arguments to use when evaluating a ditaa source block.")
 
 (defun org-babel-execute:ditaa (body params)

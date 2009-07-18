@@ -5,28 +5,37 @@
 
 [[http://downlode.org/Etext/library_of_babel.html][Full text of the Borges short story]]
 
-(setq lob (org-babel-lob-parse-buffer))
-(setq x (gethash 'plot lob))
-(hash-table-count lob)
-(maphash (lambda (key val) (insert key)) lob)
-
-
 * Plotting code
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
 
-#+resname: R-plot-default-data
-| 0 | 0 |
-
-#+srcname: R-plot
-#+begin_src R :results silent :var data=R-plot-default-data
+#+srcname: R-plot(data=R-plot-example-data)
+#+begin_src R :session *R*
 plot(data)
+"R plot complete"
 #+end_src
 
-#+tblname: example-R-plot-data
+#+tblname: R-plot-example-data
 | 1 |  2 |
 | 2 |  4 |
 | 3 |  9 |
 | 4 | 16 |
 | 5 | 25 |
 
-#+lob: R-plot(data=example-R-plot-data)
+#+lob: R-plot(data=R-plot-example-data)
+
+#+resname: R-plot(data=R-plot-example-data)
+: R plot complete
+
+* Etc
+#+srcname: python-identity(a=1)
+#+begin_src python
+a
+#+end_src
+
+#+srcname: python-add(a=1, b=2)
+#+begin_src python
+a + b
+#+end_src
+
+
+

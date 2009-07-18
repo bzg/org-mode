@@ -63,8 +63,8 @@
 (defmacro sbe (source-block &rest variables)
   "Return the results of calling SOURCE-BLOCK with all assigning
 every variable in VARIABLES.  Each element of VARIABLES should be
-a two element list, who's first element is the name of the
-variable and second element is a string of it's value.  The
+a two element list, whose first element is the name of the
+variable and second element is a string of its value.  The
 following call to `sbe' would be equivalent to the following
 source code block.
 
@@ -76,14 +76,15 @@ results
   (unless (stringp source-block) (setq source-block (symbol-name source-block)))
   (org-babel-table-truncate-at-newline ;; org-table cells can't be multi-line
    (if (and source-block (> (length source-block) 0))
-       (let ((params (eval `(org-babel-parse-header-arguments
-                             (concat ":var results="
-                                     ,source-block
-                                     "("
-                                     (mapconcat (lambda (var-spec)
-                                                  (format "%S=%s" (first var-spec) (second var-spec)))
-                                                ',variables ", ")
-                                     ")")))))
+       (let ((params
+	      (eval `(org-babel-parse-header-arguments
+		      (concat ":var results="
+			      ,source-block
+			      "("
+			      (mapconcat (lambda (var-spec)
+					   (format "%S=%s" (first var-spec) (second var-spec)))
+					 ',variables ", ")
+			      ")")))))
          (org-babel-execute-src-block t (list "emacs-lisp" "results" params)))
      "")))
 

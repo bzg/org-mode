@@ -84,8 +84,12 @@ options and are taken from `org-babel-defualt-inline-header-args'."
             (if (string-match "\n$" body) "" "\n"))))
 
 (defun org-babel-exp-results (body lang params &optional inline)
+  ;; I expect there's a good reason why not, but would it be possible
+  ;; to use org-babel-execute-src-block here? [ded]
   (let* ((cmd (intern (concat "org-babel-execute:" lang)))
-         (result (funcall cmd body params))
+         (result
+	  (multiple-value-bind (session vars result-params result-type)
+	      (org-babel-process-params params) (funcall cmd body params)))
          (result-as-org (org-babel-result-to-org-string result)))
     (if inline
         (format "=%s=" result)

@@ -38,29 +38,17 @@
 
 (defun org-babel-execute:ruby (body params)
   "Execute a block of Ruby code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Ruby source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-ruby-var-to-ruby (cdr pair))))
-                      vars "\n") "\n" body "\n")) ;; then the source block body
-         (session (org-babel-ruby-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-ruby-evaluate session full-body result-type)))
-    (if (member "scalar" result-params)
-        results
-      (case result-type ;; process results based on the result-type
-        ('output (let ((tmp-file (make-temp-file "org-babel-ruby")))
-                   (with-temp-file tmp-file (insert results))
-                   (org-babel-import-elisp-from-file tmp-file)))
-        ('value (org-babel-ruby-table-or-results results))))))
+  (let ((full-body (concat
+		    (mapconcat ;; define any variables
+		     (lambda (pair)
+		       (format "%s=%s"
+			       (car pair)
+			       (org-babel-ruby-var-to-ruby (cdr pair))))
+		     vars "\n") "\n" body "\n")) ;; then the source block body
+	(session (org-babel-ruby-initiate-session session)))
+    (org-babel-ruby-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:ruby (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -90,7 +78,7 @@ specifying a var of the same value."
       (concat "[" (mapconcat #'org-babel-ruby-var-to-ruby var ", ") "]")
     (format "%S" var)))
 
-(defun org-babel-ruby-table-or-results (results)
+(defun org-babel-ruby-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
@@ -130,7 +118,7 @@ File.open('%s', 'w'){ |f| f.write((results.class == String) ? results : results.
   "Pass BODY to the Ruby process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion
@@ -147,11 +135,13 @@ last statement in BODY."
                (insert (format org-babel-ruby-wrapper-method body tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "ruby"))
-             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+             (org-babel-ruby-table-or-string
+	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
-    (message "session evaluation")
-    (let* ((full-body (mapconcat #'org-babel-chomp
-                                 (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
+    (let* ((full-body
+	    (mapconcat
+	     #'org-babel-chomp
+	     (list body org-babel-ruby-last-value-eval org-babel-ruby-eoe-indicator) "\n"))
            (raw (org-babel-comint-with-output buffer org-babel-ruby-eoe-indicator t
                   (insert full-body) (comint-send-input nil t)))
            (results (cdr (member org-babel-ruby-eoe-indicator
@@ -159,7 +149,7 @@ last statement in BODY."
                                                   (mapcar #'org-babel-trim raw)))))))
       (case result-type
         (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-        (value (car results))))))
+        (value (org-babel-ruby-table-or-string (car results)))))))
 
 (defun org-babel-ruby-read-string (string)
   "Strip \\\"s from around ruby string"

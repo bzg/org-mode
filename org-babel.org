@@ -199,7 +199,16 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [29/45]
+* Tasks [30/49]
+** TODO make tangle files read-only
+   With a file-local variable setting, yea that makes sense.  Maybe
+   the header should reference the related org-mode file.
+
+** TODO fold source blocks on #+srcname line
+   I.e., as well as on #+begin_src line.
+** TODO take default values for header args from properties
+   Use file-wide and subtree wide properties to set default values for
+   header args.
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -593,7 +602,6 @@ Another example is in the [[*operations%20in%20on%20tables][grades example]].
 *** Current design
     This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
     ready-made source blocks designed to carry out useful common tasks.
-
 ** PROPOSED Are we happy with current behaviour regarding vector/scalar output?
 This simple example of multilingual chaining produces vector output if
 there are spaces in the message and scalar otherwise.
@@ -843,6 +851,7 @@ $0
 [[file:snippets/org-mode/sb][sb -- snippet]]
 
 waiting for guidance from those more familiar with yasnippets
+** DONE LoB: allow output in buffer
 ** DONE allow default header arguments by language
 org-babel-default-header-args:lang-name
 
@@ -882,7 +891,6 @@ This should check to see if there is any need to re-export
 | "test-tangle.el" |
 
 *** DONE only tangle the file if it's actually necessary
-compare the ages of the files
 ** DONE add a function to jump to a source-block by name
    I've had an initial stab at that in org-babel-find-named-block
    (library-of-babel branch).
@@ -1976,7 +1984,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 +----+----+
 #+end_src
 
-#+resname: implementing-ditaa
+#+resname:
 [[file:blue.png][blue.png]]
 
 *** STARTED gnuplot
@@ -2036,7 +2044,6 @@ for example
 
 #+resname: this-doesn't-match-orgtbl
 
-
 ** TODO collapsing consecutive newlines in string output
 
 #+srcname: multi-line-string-output
@@ -2050,7 +2057,6 @@ even a third"
 #+end_src
 
 #+resname: multi-line-string-output
-
 
 ** TODO cursor movement when evaluating source blocks
    E.g. the pie chart example. Despite the save-window-excursion in
@@ -2079,6 +2085,43 @@ identical: output results in raw stdout contents, whereas value
 converts it to elisp, perhaps to a table if it looks tabular. This is
 the same for the other languages. [Dan]
 
+** TODO are the org-babel-trim s necessary?
+   at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
+   not org-babel-ruby-evaluate
+** results branch bugs
+*** TODO elisp reference fails for literal number
+#+srcname: elisp-test(a=4)
+#+begin_src emacs-lisp 
+(message a)
+#+end_src
+*** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]] and [[file:lisp/org-babel.el::params%20org%20combine%20plists%20params%20third%20info][here]]?
+    And at other occurrences of org-combine-plists?
+*** TODO LoB: with output to buffer, not working in buffers other than library-of-babel.org
+    I haven't fixed this yet. org-babel-ref-resolve-reference moves
+    point around, inside a save-excursion. Somehow when it comes to
+    inserting the results (after possible further recursive calls to
+    org-babel-ref-resolve-reference), point hasn't gone back to the
+    lob line.
+*** TODO LoB: output to buffer adds creeping blank lines
+   Compare the results of
+#+lob: python-add(a=5, b=17)
+
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
+
+#+begin_src python
+23
+#+end_src
+
+#+resname:
+: 23
+---------------------
+
+   Hmm, it's a bit confusing. I think it's to do with the fact that
+   LoB removes the entire (#+resname and result) and starts from
+   scratch, whereas #+begin_src only removes the result. I haven't
+   worked out what the correct fix is yet.
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
@@ -2107,6 +2150,31 @@ the same for the other languages. [Dan]
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+
+** DONE LoB: calls fail if reference has single character name
+   commit 21d058869df1ff23f4f8cc26f63045ac9c0190e2
+**** This doesn't work
+#+lob: R-plot(data=X)
+
+#+tblname: X
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+**** But this is OK
+#+tblname: XX
+| 1 |     1 |
+| 2 |    .5 |
+| 3 | .3333 |
+| 4 |   .25 |
+| 5 |    .2 |
+| 6 | .1666 |
+
+#+lob: R-plot(data=XX)
+
 ** DONE make :results replace the default?
    I'm tending to think that appending results to pre-existing results
    creates mess, and that the cleaner `replace' option should be the
@@ -2114,6 +2182,7 @@ the same for the other languages. [Dan]
    that to be updated, rather than have a new one be added.
    
    I agree.
+
 ** DONE ruby evaluation not working under ubuntu emacs 23
    With emacs 23.0.91.1 on ubuntu, for C-h f run-ruby I have the
    following, which seems to conflict with [[file:lisp/langs/org-babel-ruby.el::let%20session%20buffer%20save%20window%20excursion%20run%20ruby%20nil%20session%20current%20buffer][this line]] in org-babel-ruby.el.
@@ -2255,19 +2324,13 @@ tables
 "schulte"
 #+end_src
 
+
 #+begin_src R :var num=little-fake
 num
 #+end_src
 
 #+resname:
 : schulte
-: 11
-: 11
-: 11
-: schulte
-: 9
-: 9
-: 11
 
 #+srcname: set-debug-on-error
 #+begin_src emacs-lisp :results silent
@@ -2279,13 +2342,18 @@ num
 '(1 2 3)
 #+end_src
 
+
+
+
 #+srcname: bug-R-number-evaluation
-#+begin_src R :var table=bug-numerical-table :results replace
+#+begin_src R :var table=bug-numerical-table
 mean(mean(table))
 #+end_src
 
 #+resname:
 : 2
+
+
 
 #+tblname: bug-vert-table
 | 1 |
@@ -2386,6 +2454,7 @@ As an example eval the following.  Adding a line to test
 ar.first.first
 #+end_src
 
+
 ** DONE space trailing language name
 fix regexp so it works when there's a space trailing the language name
 
@@ -2434,6 +2503,10 @@ recognition of ruby arrays as such.
 #+end_src
 
 | 1 | 2 | 3 | 4 |
+
+
+
+
 
 
 * Tests
@@ -2491,6 +2564,9 @@ of these tests may fail.
 | set R session           | set-R-session-var          |     |         set |         set | pass |
 | get from R session      | get-R-session-var          |     |           5 |           5 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
+#+TBLFM: $5=""::$6=""
+
+The second line (followed by replacing '[]' with '') can be used to blank out the table results, in the absence of a better method.
 
 ** basic tests
 
@@ -2499,10 +2575,12 @@ of these tests may fail.
 (+ 1 4)
 #+end_src
 
+
 #+srcname: basic-shell
 #+begin_src sh :results silent
 expr 1 + 5
 #+end_src
+
 
 #+srcname: date-simple
 #+begin_src sh :results silent
@@ -2514,16 +2592,19 @@ date
 "org-babel"
 #+end_src
 
+
 #+srcname: basic-python
 #+begin_src python :results silent
 'hello world'
 #+end_src
+
 
 #+srcname: basic-R
 #+begin_src R :results silent
 b <- 9
 b + 4
 #+end_src
+
 
 ** read tables
 
@@ -2536,20 +2617,24 @@ b + 4
 (length (car table))
 #+end_src
 
+
 #+srcname: table-ruby
 #+begin_src ruby :results silent :var table=test-table
 table.first.join("-")
 #+end_src
+
 
 #+srcname: table-python
 #+begin_src python :var table=test-table
 table[1][1]
 #+end_src
 
+
 #+srcname: table-R
 #+begin_src R :var table=test-table
 mean(mean(table))
 #+end_src
+
 
 ** references
 
@@ -2595,6 +2680,7 @@ and Check that it is still a list
 table.class.name
 #+end_src
 
+
 ** source blocks as functions
 
 #+srcname: defun-fibb
@@ -2602,10 +2688,17 @@ table.class.name
 (defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
 #+end_src
 
+
 #+srcname: fibonacci
 #+begin_src emacs-lisp :results silent :var n=7
 (fibbd n)
 #+end_src
+
+
+
+
+
+
 
 ** sbe tests (these don't seem to be working...)
 Testing the insertion of results into org-mode tables.
@@ -2694,18 +2787,21 @@ To run these examples evaluate [[file:lisp/org-babel-init.el][org-babel-init.el]
 date
 #+end_src
 
-: Thu May 14 18:52:25 EDT 2009
+#+resname:
+: Sun Jul  5 18:54:39 EDT 2009
 
 #+begin_src ruby
 Time.now
 #+end_src
 
-: Thu May 14 18:59:09 -0400 2009
+#+resname:
+: Sun Jul 05 18:54:35 -0400 2009
 
 #+begin_src python
 "Hello World"
 #+end_src
 
+#+resname:
 : Hello World
 
 
@@ -2713,19 +2809,17 @@ Time.now
 
 #+begin_src R :results replace
 a <- 9
-b <- 17
+b <- 16
 a + b
 #+end_src
 
 #+resname:
-: 26
-
-
 : 25
 
 #+begin_src R
 hist(rgamma(20,3,3))
 #+end_src
+
 
 
 ** org-babel plays with tables
@@ -2764,6 +2858,7 @@ out...
 '(1 2 3 4 5)
 #+end_src
 
+#+resname:
 | 1 | 2 | 3 | 4 | 5 |
 
 *** Ruby and Python
@@ -2779,12 +2874,14 @@ table.first.join(" - ")
 table[0]
 #+end_src
 
-#+resname:
-| 1 | 2 | 3 |
 
 #+begin_src ruby :var table=sandbox :results replace
 table
 #+end_src
+
+#+resname:
+: [[1, 2, 3], [4, "schulte", 6]]
+
 
 | 1 |         2 | 3 |
 | 4 | "schulte" | 6 |

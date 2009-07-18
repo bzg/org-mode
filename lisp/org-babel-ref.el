@@ -68,7 +68,8 @@ and find it's value using `org-babel-ref-resolve-reference'.
 Return a list with two elements.  The first element of the list
 will be the name of the variable, and the second will be an
 emacs-lisp representation of the value of the variable."
-  (if (string-match "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*" assignment)
+  (if (string-match
+       "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*" assignment)
       (let ((var (match-string 1 assignment))
             (ref (match-string 2 assignment)))
         (cons (intern var)
@@ -87,7 +88,7 @@ return nil."
       out)))
 
 (defun org-babel-ref-resolve-reference (ref)
-  "Resolve the reference and return it's value"
+  "Resolve the reference and return its value"
   (save-excursion
     (let ((case-fold-search t)
           type args new-refere new-referent result lob-info)
@@ -108,14 +109,14 @@ return nil."
       (if (let ((result_regexp (concat "^#\\+\\(TBL\\|RES\\)NAME:[ \t]*"
                                        (regexp-quote ref) "[ \t]*$"))
                 (regexp (concat "^#\\+SRCNAME:[ \t]*"
-                                (regexp-quote ref) "[ \t]*$")))
+                                (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
             (or (re-search-forward result_regexp nil t)
                 (re-search-forward result_regexp nil t)
                 (re-search-forward regexp nil t)
                 (re-search-backward regexp nil t)
                 ;; check the Library of Babel
                 (setq lob-info (cdr (assoc (intern ref) org-babel-library-of-babel)))))
-          (goto-char (match-beginning 0))
+          (unless lob-info (goto-char (match-beginning 0)))
         ;; ;; TODO: allow searching for names in other buffers
         ;; (setq id-loc (org-id-find ref 'marker)
         ;;       buffer (marker-buffer id-loc)
@@ -140,7 +141,7 @@ return nil."
         ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
 
 (defun org-babel-ref-at-ref-p ()
-  "Return the type of reference located at point or nil of none
+  "Return the type of reference located at point or nil if none
 of the supported reference types are found.  Supported reference
 types are tables and source blocks."
   (cond ((org-at-table-p) 'table)

@@ -38,32 +38,17 @@
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Python source code block")
-  (let* ((vars (org-babel-ref-variables params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
-         (result-type (cond ((member "output" result-params) 'output)
-                            ((member "value" result-params) 'value)
-                            (t 'value)))
-         (full-body (concat
-                     (mapconcat ;; define any variables
-                      (lambda (pair)
-                        (format "%s=%s"
-                                (car pair)
-                                (org-babel-python-var-to-python (cdr pair))))
-                      vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
-         (session (org-babel-python-initiate-session (cdr (assoc :session params))))
-         (results (org-babel-python-evaluate session full-body result-type)))
-    (if (member "scalar" result-params)
-        results
-      (setq results (case result-type ;; process results based on the result-type
-                      ('output (let ((tmp-file (make-temp-file "org-babel-python")))
-                                 (with-temp-file tmp-file (insert results))
-                                 (org-babel-import-elisp-from-file tmp-file)))
-                      ('value (org-babel-python-table-or-results results))))
-      (if (and (member "vector" results) (not (listp results)))
-          (list (list results))
-        results))))
+  (let ((full-body (concat
+		    (mapconcat ;; define any variables
+		     (lambda (pair)
+		       (format "%s=%s"
+			       (car pair)
+			       (org-babel-python-var-to-python (cdr pair))))
+		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+	(session (org-babel-python-initiate-session session)))
+    (org-babel-python-evaluate session full-body result-type)))
 
 (defun org-babel-prep-session:python (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -89,7 +74,7 @@ specifying a var of the same value."
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
     (format "%S" var)))
 
-(defun org-babel-python-table-or-results (results)
+(defun org-babel-python-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
   (org-babel-read
@@ -114,7 +99,8 @@ then create.  Return the initialized session."
     (let* ((session (if session (intern session) :default))
            (python-buffer (org-babel-python-session-buffer session)))
       (run-python)
-      (setq org-babel-python-buffers (cons (cons session python-buffer) (assq-delete-all session org-babel-python-buffers)))
+      (setq org-babel-python-buffers (cons (cons session python-buffer)
+					   (assq-delete-all session org-babel-python-buffers)))
       session)))
 
 (defun org-babel-python-initiate-session (&optional session)
@@ -136,7 +122,7 @@ open('%s', 'w').write( str(main()) )")
   "Pass BODY to the Python process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
-last statement in BODY."
+last statement in BODY, as elisp."
   (if (not session)
       ;; external process evaluation
       (save-window-excursion
@@ -150,21 +136,27 @@ last statement in BODY."
           (value
            (let ((tmp-file (make-temp-file "python-functional-results")))
              (with-temp-buffer
-               (insert (format org-babel-python-wrapper-method
-                               (let ((lines (split-string (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
-                                 (concat
-                                  (mapconcat
-                                   (lambda (line) (format "\t%s" line))
-                                   (butlast lines) "\n")
-                                  (format "\n\treturn %s" (last lines))))
-                               tmp-file))
+               (insert
+		(format
+		 org-babel-python-wrapper-method
+		 (let ((lines (split-string
+			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
+		   (concat
+		    (mapconcat
+		     (lambda (line) (format "\t%s" line))
+		     (butlast lines) "\n")
+		    (format "\n\treturn %s" (last lines))))
+		 tmp-file))
                ;; (message "buffer=%s" (buffer-string)) ;; debugging
                (shell-command-on-region (point-min) (point-max) "python"))
-             (with-temp-buffer (insert-file-contents tmp-file) (buffer-string))))))
+             (org-babel-python-table-or-string
+	      (with-temp-buffer (insert-file-contents tmp-file) (buffer-string)))))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
-      (let* ((full-body (mapconcat #'org-babel-trim
-                                   (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
+      (let* ((full-body
+	      (mapconcat 
+	       #'org-babel-trim
+	       (list body org-babel-python-last-value-eval org-babel-python-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-python-eoe-indicator t
                     ;; for some reason python is fussy, and likes enters after every input
                     (mapc (lambda (statement) (insert statement) (comint-send-input nil t))
@@ -173,10 +165,9 @@ last statement in BODY."
                               (cdr (member org-babel-python-eoe-indicator
                                            (reverse (mapcar #'org-babel-trim raw)))))))
         (setq results (mapcar #'org-babel-python-read-string results))
-        (org-babel-trim (case result-type
-                          (output (mapconcat #'identity (reverse (cdr results)) "\n"))
-                          (value (car results))
-                          (t (reverse results))))))))
+        (case result-type
+	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
+	  (value (org-babel-python-table-or-string (org-babel-trim (car results)))))))))
 
 (defun org-babel-python-read-string (string)
   "Strip 's from around ruby string"
