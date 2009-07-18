@@ -1,5 +1,8 @@
 2009-07-18  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-get-refile-targets): Fix bug: don't ignore case when
+	building the list of targets.
+
 	* org-remember.el (org-remember-delete-empty-lines-at-end): New
 	option.
 	(org-remember-handler): Use the new option.

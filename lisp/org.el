@@ -8283,7 +8283,9 @@ on the system \"/user@host:\"."
 
 (defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
-  (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
+  (let ((case-fold-search nil)
+	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
+	(entries (or org-refile-targets '((nil . (:level . 1)))))
 	targets txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
