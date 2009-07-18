@@ -209,7 +209,7 @@ concerned with creating elisp versions of results. "
 ;;       (if (and (member "vector" results) (not (listp results)))
 ;;           (list (list results))
 ;;         results))))
-  
+
 
 ;; ;; sh
 ;;     (if (member "scalar" result-params)
@@ -436,9 +436,9 @@ current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
 following values...
 
-t ------ the default options, simply insert the results after the
+t ------ the default option, simply insert the results after the
          source block
-         
+
 replace - insert results after the source block replacing any
           previously inserted results
 
@@ -539,7 +539,7 @@ parameters when merging lists."
 			       vars (cons (cons var ref) (assq-delete-all var vars)))))
 		      (:results
 		       ;; maintain list of unique :results specifications
-		       (setq results (org-uniquify (append (split-string (cdr pair)) results))))
+		       (setq results (org-babel-merge-results results (split-string (cdr pair)))))
 		      (t
 		       ;; replace: this covers e.g. :session
 		       (setq params (cons pair (assq-delete-all	(car pair) params))))))
@@ -548,6 +548,26 @@ parameters when merging lists."
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
     (cons (cons :results (mapconcat 'identity results " ")) params)))
+
+(defun org-babel-merge-results (&rest result-params)
+  "Combine all result parameter lists in RESULT-PARAMS taking
+into account the fact that some groups of result params are
+mutually exclusive."
+  (let ((exclusive-groups '(("file" "vector" "scalar")
+                            ("replace" "silent")))
+        output)
+    (mapc (lambda (new-params)
+            (mapc (lambda (new-param)
+                    (mapc (lambda (exclusive-group)
+                            (when (member new-param exclusive-group)
+                              (mapcar (lambda (excluded-param)
+                                        (setq output (delete excluded-param output)))
+                                      exclusive-group)))
+                          exclusive-groups)
+                    (setq output (org-uniquify (cons new-param output))))
+                  new-params))
+          result-params)
+    output))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
