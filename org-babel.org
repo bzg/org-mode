@@ -2065,7 +2065,8 @@ plot "data" using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [20/31]
+* Bugs [20/32]
+** TODO avoid stripping whitespace from output when :results output
 ** TODO prompt characters appearing in output with R
 #+begin_src R :session *R* :results output
   x <- 6
