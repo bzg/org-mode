@@ -208,7 +208,24 @@ would then be [[#sandbox][the sandbox]].
 ** PROPOSED optional timestamp for output
    Add option to place an (inactive) timestamp at the #+resname, to
    record when that output was generated.
-** PROPOSED use example block for large amounts of stdout output?
+
+*** source code block timestamps (optional addition)
+    If we did this would we then want to place a timestamp on the
+    source-code block, so that we would know if the results are
+    current or out of date?  This would have the effect of caching the
+    results of calculations and then only re-running if the
+    source-code has changed.  For the caching to work we would need to
+    check not only the timestamp on a source-code block, but also the
+    timestamps of any tables or source-code blocks referenced by the
+    original source-code block.
+
+**** maintaining source-code block timestamps
+     It may make sense to add a hook to `org-edit-special' which could
+     update the source-code blocks timestamp.  If the user edits the
+     contents of a source-code block directly I can think of no
+     efficient way of maintaining the timestamp.
+
+** TODO use example block for large amounts of stdout output?
    We're currently `examplizing' with : at the beginning of the line,
    but should larger amounts of output be in a
    \#+begin_example...\#+end_example block? What's the cutoff? > 1
@@ -217,6 +234,11 @@ would then be [[#sandbox][the sandbox]].
    everything looks OK, and then fold it away.
 
    I'm addressing this in branch 'examplizing-output'.
+   Yea, that makes sense.  (either that or allow folding of large
+   blocks escaped with =:=).
+
+   Proposed cutoff of 10 lines, we can save this value in a user
+   customizable variable.
 
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
