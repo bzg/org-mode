@@ -116,9 +116,15 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-gnuplot-initiate-session session))
-         (vars (org-babel-ref-variables params)))
-    
-    ))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapconc
+                     (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
+                     vars)))
+    (org-babel-comint-in-buffer session
+      (mapc (lambda (var-line)
+              (insert var-line) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)
+              (sit-for .1) (goto-char (point-max))) var-lines))))
 
 (defun org-babel-gnuplot-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
