@@ -123,9 +123,12 @@ rand(100)
 #+end_src
 
 #+srcname: show-distribution
-#+begin_src R :var grades=grades-table
-hist(grades[,2])
+#+begin_src R :var grades=grades-table :session *R*
+hist(grades$grade)
 #+end_src
+
+
+
 
 
 ** communication between people
@@ -204,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [33/51]
+* Tasks [32/50]
 ** PROPOSED optional timestamp for output
    Add option to place an (inactive) timestamp at the #+resname, to
    record when that output was generated.
@@ -368,6 +371,11 @@ results in the buffer.  Then if there is a combination of =silent= and
 =file= =:results= headers we could drop the results to a temp buffer
 and pop open that buffer...
 
+*** TODO R graphics to screen means session evaluation
+    If R graphical output is going to screen then evaluation must be
+    in a session, otherwise the graphics will disappear as soon as the
+    R process dies.
+
 *** Adding to a discussion started in email
     I'm not deeply wedded to these ideas, just noting them down. I'm
     probably just thinking of R and haven't really thought about how
@@ -524,10 +532,22 @@ we should color these blocks differently
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
 
-** TODO formulate general rules for handling vectors and tables / matrices with names
-   This is non-trivial, but may be worth doing, in particular to
-   develop a nice framework for sending data to/from R.
-*** Notes
+** STARTED Column (and row) names of tables in R input/output
+*** DONE column names
+    This has been implemented: Automatic on input to R; optional in output.
+*** TODO row names
+    Perhaps add a :rownames header arg. This would be an integer
+    (usually 1) which would have the effect of post-processing all the
+    variables created in the R session in the following way: if the
+    integer is j, set the row names to the contents of column j and
+    delete column j. Perhaps it is artificial to allow this integer to
+    take any value other than 1. The default would be nil which would
+    mean no such behaviour.
+*** Old notes
+    [I don't think it's as problematic as this makes out]
+    This is non-trivial, but may be worth doing, in particular to
+    develop a nice framework for sending data to/from R.
+**** Notes
     In R, indexing vector elements, and rows and columns, using
     strings rather than integers is an important part of the
     language.
@@ -588,7 +608,7 @@ g    7   20
    The full org table functionality exeplified [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]] has features that
    we would not support in e.g. R (like names for the row below).
    
-*** Initial statement: allow tables with hline to be passed as args into R
+**** Initial statement: allow tables with hline to be passed as args into R
    This doesn't seem to work at the moment (example below). It would
    also be nice to have a natural way for the column names of the org
    table to become the column names of the R data frame, and to have
@@ -607,7 +627,7 @@ g    7   20
 | 1 |         2 | 3 |
 | 4 | schulte   | 6 |
 
-#+begin_src R var tabel=egtable
+#+begin_src R :var tabel=egtable :colnames t
 tabel
 #+end_src
 
@@ -2118,7 +2138,7 @@ to specify a file holding the results
 (see [[* file result types][file result types]])
 
 
-* Bugs [21/34]
+* Bugs [22/34]
 ** TODO avoid stripping whitespace from output when :results output
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
@@ -2199,11 +2219,6 @@ the same for the other languages. [Dan]
 ** TODO are the org-babel-trim s necessary?
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
-** TODO elisp reference fails for literal number
-#+srcname: elisp-test(a=4)
-#+begin_src emacs-lisp 
-(message a)
-#+end_src
 ** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
    And at other occurrences of org-combine-plists?
 ** TODO creeping blank lines
@@ -2645,6 +2660,12 @@ recognition of ruby arrays as such.
 #+end_src
 
 | 1 | 2 | 3 | 4 |
+** REJECTED elisp reference fails for literal number
+   That's a bug in Dan's elisp, not in org-babel.
+#+srcname: elisp-test(a=4)
+#+begin_src emacs-lisp 
+(message a)
+#+end_src
 
 
 
