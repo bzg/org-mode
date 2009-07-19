@@ -92,7 +92,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
 write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)")
 
-(defun org-babel-R-evaluate (buffer body result-type colnames)
+(defun org-babel-R-evaluate (buffer body result-type column-names-p)
   "Pass BODY to the R process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
