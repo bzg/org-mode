@@ -2,6 +2,7 @@
 
 	* org-exp.el (org-export-format-source-code-or-example): Fix bug
 	that did not enumerate first line.
+	(org-export-mark-radio-links): Skip matches in links.
 
 2009-07-18  Carsten Dominik  <carsten.dominik@gmail.com>
 

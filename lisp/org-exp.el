@@ -1792,8 +1792,12 @@ When it is nil, all comments will be removed."
     (goto-char (point-min))
     (when re-radio
       (while (re-search-forward re-radio nil t)
-	(org-if-unprotected
-	 (replace-match "\\1[[\\2]]"))))))
+	(unless
+	    (save-match-data
+	      (or (org-in-regexp org-bracket-link-regexp)
+		  (org-in-regexp org-plain-link-re)))
+	  (org-if-unprotected
+	   (replace-match "\\1[[\\2]]")))))))
 
 (defun org-export-remove-special-table-lines ()
   "Remove tables lines that are used for internal purposes."
