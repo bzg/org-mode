@@ -2248,7 +2248,7 @@ INDENT was the original indentation of the block."
 			     (point-min) (point-max))))
 		    (if (string-match "<pre\\([^>]*\\)>\n*" rtn)
 			(setq rtn (replace-match
-				   (format "<pre class=\"src src-%s\">" lang)
+				   (format "<pre class=\"src src-%s\">\n" lang)
 				   t t rtn))))
 		(if textareap
 		    (setq rtn (concat
@@ -2263,10 +2263,12 @@ INDENT was the original indentation of the block."
 						'((?&."&amp;")(?<."&lt;")(?>."&gt;"))))
 				     t t))
 		    (setq rtn (buffer-string)))
-		  (setq rtn (concat "<pre class=\"example\">" rtn "</pre>\n"))))
+		  (setq rtn (concat "<pre class=\"example\">\n" rtn "</pre>\n"))))
 	      (unless textareap
 		(setq rtn (org-export-number-lines rtn 'html 1 1 num
 						   cont rpllbl fmt)))
+	      (if (string-match "\\(\\`<[^>]*>\\)\n" rtn)
+		  (setq rtn (replace-match "\\1" t nil rtn)))
 	      (concat "\n#+BEGIN_HTML\n" (org-add-props rtn '(org-protected t)) "\n#+END_HTML\n\n"))
 	     ((eq backend 'latex)
 	      (setq rtn (org-export-number-lines rtn 'latex 0 0 num cont rpllbl fmt))
