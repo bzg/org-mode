@@ -126,22 +126,21 @@ last statement in BODY, as elisp."
         (case result-type
           (value (org-babel-R-process-value-result
 		  (org-babel-import-elisp-from-file tmp-file) column-names-p))
-          (output 
-	   (setq broke nil results
-		 (delete
-		  nil
-		  (mapcar (lambda (el)
-			    (if (or broke
-				    (and (string-match (regexp-quote org-babel-R-eoe-output) el)
-					 (setq broke t)))
-				nil
-			      (if (= (length el) 0)
-				  nil
-				(if (string-match comint-prompt-regexp el)
-				    (substring el (match-end 0))
-				  el))))
-			  (mapcar #'org-babel-chomp raw))))
-	   (mapconcat #'identity results "\n")))))))
+          (output
+	   (flet ((extractor
+		   (el)
+		   (if (or broke
+			   (and (string-match (regexp-quote org-babel-R-eoe-output) el)
+				(setq broke t)))
+		       nil
+		     (if (= (length el) 0)
+			 nil
+		       (if (string-match comint-prompt-regexp el)
+			   (substring el (match-end 0))
+			 el)))))
+	     (mapconcat
+	      #'identity
+	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value prior to return to org-babel.
