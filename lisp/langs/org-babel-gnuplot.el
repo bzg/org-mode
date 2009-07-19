@@ -54,7 +54,13 @@ called by `org-babel-execute-src-block'."
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
          (cmdline (cdr (assoc :cmdline params)))
-         (in-file (make-temp-file "org-babel-ditaa")))
+         (in-file (make-temp-file "org-babel-ditaa"))
+	 (title (plist-get params :title))
+         (lines (plist-get params :line))
+	 (sets (plist-get params :set))         
+	 (x-labels (plist-get params :xlabels))
+	 (y-labels (plist-get params :ylabels))
+	 (time-ind (plist-get params :timeind)))
     ;; insert variables into code body
     (mapc
      (lambda (pair)
@@ -67,7 +73,30 @@ called by `org-babel-execute-src-block'."
                    (cdr pair) (make-temp-file "org-babel-gnuplot") params)
                 (cdr pair)) body)))
      vars)
-    (with-temp-buffer ;; evaluate the code body with gnuplot
+    ;; append header argument settings to body
+    (when title (add-to-script (format "set title '%s'" title))) ;; title
+    (when lines (mapc (lambda (el) (add-to-script el)) lines)) ;; line
+    (when sets ;; set
+      (mapc (lambda (el) (add-to-script (format "set %s" el))) sets))
+    (when x-labels ;; x labels (xtics)
+      (add-to-script
+       (format "set xtics (%s)"
+               (mapconcat (lambda (pair)
+                            (format "\"%s\" %d" (cdr pair) (car pair)))
+                          x-labels ", "))))
+    (when y-labels ;; y labels (ytics)
+      (add-to-script
+       (format "set ytics (%s)"
+               (mapconcat (lambda (pair)
+                            (format "\"%s\" %d" (cdr pair) (car pair)))
+                          y-labels ", "))))
+    (when time-ind ;; timestamp index
+      (add-to-script "set xdata time")
+      (add-to-script (concat "set timefmt \""
+                             (or timefmt ;; timefmt passed to gnuplot
+                                 "%Y-%m-%d-%H:%M:%S") "\"")))
+    ;; evaluate the code body with gnuplot
+    (with-temp-buffer
       (insert (concat body "\n"))
       (gnuplot-mode)
       (gnuplot-send-buffer-to-gnuplot))

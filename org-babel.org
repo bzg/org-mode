@@ -2075,7 +2075,10 @@ plot "data" using 1:2 with lines
 **** TODO a =file= header argument
 to specify a file holding the results
 
-**** TODO helpers from org-plot.el
+**** STARTED helpers from org-plot.el
+there are a variety of helpers in org-plot which can be fit nicely
+into custom gnuplot header arguments
+
 **** TODO header argument specifying 3D data
 **** TODO gnuplot sessions
 *** TODO dot
