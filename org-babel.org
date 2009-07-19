@@ -2095,7 +2095,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [2/7]
+*** STARTED gnuplot [3/7]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2128,8 +2128,16 @@ plot "data" using 1:2 with lines
        the variable names should be replaced with the path to the files
 
 **** DONE direct plotting w/o session
-**** TODO gnuplot support for column/row names
+**** DEFERRED gnuplot support for column/row names
 This should be implemented along the lines of the [[* STARTED Column (and row) names of tables in R input/output][R-colname-support]].
+
+We can do something similar to the :labels param in org-plot, we just
+have to be careful to ensure that each label is aligned with the
+related data file.
+
+This may be walking too close to an entirely prebuilt plotting tool
+rather than straight gnuplot code evaluation.  For now I think this
+can wait.
 
 **** TODO a =file= header argument
 to specify a file holding the results
