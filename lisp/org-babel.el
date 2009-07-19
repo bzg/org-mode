@@ -578,14 +578,14 @@ the table is trivial, then return it as a scalar."
             (setq result (mapcar (lambda (row)
                                    (mapcar #'org-babel-string-read row))
                                  (org-table-to-lisp))))
-        (error nil))
-      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
-          (if (consp (car result))
-              (if (null (cdr (car result)))
-                  (caar result)
-                result)
-            (car result))
-        result))))
+        (error nil)))
+    (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+	(if (consp (car result))
+	    (if (null (cdr (car result)))
+		(caar result)
+	      result)
+	  (car result))
+      result)))
 
 (defun org-babel-string-read (cell)
   "Strip nested \"s from around strings in exported R values."

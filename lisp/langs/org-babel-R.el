@@ -45,8 +45,9 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 		       (lambda (pair)
 			 (org-babel-R-assign-elisp (car pair) (cdr pair)))
 		       vars "\n") "\n" body "\n"))
-	  (session (org-babel-R-initiate-session session)))
-      (org-babel-R-evaluate session full-body result-type))))
+	  (session (org-babel-R-initiate-session session))
+	  (column-names-p (cdr (assoc :colnames params))))
+      (org-babel-R-evaluate session full-body result-type column-names-p))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -71,8 +72,8 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
         (with-temp-file transition-file
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
-        (format "%s <- read.table(\"%s\", header=FALSE, sep=\"\\t\", as.is=TRUE)"
-                name transition-file))
+        (format "%s <- read.table(\"%s\", header=%s, sep=\"\\t\", as.is=TRUE)"
+                name transition-file (if (eq (second value) 'hline) "TRUE" "FALSE")))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
 (defun org-babel-R-initiate-session (session)
@@ -89,9 +90,9 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
 (defvar org-babel-R-eoe-output "[1] \"org_babel_R_eoe\"")
 (defvar org-babel-R-wrapper-method "main <- function ()\n{\n%s\n}
-write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)")
+write.table(main(), file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)")
 
-(defun org-babel-R-evaluate (buffer body result-type)
+(defun org-babel-R-evaluate (buffer body result-type colnames)
   "Pass BODY to the R process in BUFFER.  If RESULT-TYPE equals
 'output then return a list of the outputs of the statements in
 BODY, if RESULT-TYPE equals 'value then return the value of the
@@ -108,15 +109,16 @@ last statement in BODY, as elisp."
 	   (with-temp-buffer (insert-file-contents out-tmp-file) (buffer-string)))
           (value
            (with-temp-file in-tmp-file
-             (insert (format org-babel-R-wrapper-method body out-tmp-file)))
+             (insert (format org-babel-R-wrapper-method
+			     body out-tmp-file (if column-names-p "TRUE" "FALSE"))))
            (shell-command (format "R --no-save < '%s'" in-tmp-file))
-	   (org-babel-import-elisp-from-file out-tmp-file))))
+	   (org-babel-R-process-value-result
+	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((tmp-file (make-temp-file "org-babel-R"))
              (last-value-eval
-              (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=FALSE, quote=FALSE)"
-                      tmp-file))
+              (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if column-names-p "TRUE" "FALSE")))
              (full-body (mapconcat #'org-babel-chomp
 				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
@@ -137,9 +139,18 @@ last statement in BODY, as elisp."
 				 el))))
 			 (mapcar #'org-babel-trim raw))))))
         (case result-type
-          (output (org-babel-trim (mapconcat #'identity results "\n")))
-          (value (org-babel-import-elisp-from-file tmp-file)))))))
+          (output (org-babel-chomp (mapconcat #'identity results "\n")))
+          (value (org-babel-R-process-value-result
+		  (org-babel-import-elisp-from-file tmp-file) column-names-p)))))))
 
+(defun org-babel-R-process-value-result (result column-names-p)
+  "R-specific processing of return value prior to return to org-babel.
+
+Currently, insert hline if column names in output have been requested."
+  (if column-names-p
+      (cons (car result) (cons 'hline (cdr result)))
+    result))
+  
 
 (provide 'org-babel-R)
 ;;; org-babel-R.el ends here
