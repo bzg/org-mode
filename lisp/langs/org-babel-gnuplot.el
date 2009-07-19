@@ -36,6 +36,7 @@
 
 ;;; Code:
 (require 'org-babel)
+(require 'gnuplot)
 
 (org-babel-add-interpreter "gnuplot")
 
@@ -102,7 +103,33 @@ called by `org-babel-execute-src-block'."
       (gnuplot-send-buffer-to-gnuplot))
     out-file))
 
-(defun org-babel-prep-session:gnuplot (session params))
+(defun org-babel-prep-session:gnuplot (session params)
+  "Prepare SESSION according to the header arguments specified in PARAMS."
+  (let* ((session (org-babel-gnuplot-initiate-session session))
+         (vars (org-babel-ref-variables params))
+         (var-lines (mapcar ;; define any variables
+                     (lambda (pair)
+                       (format "%s=%s"
+                               (car pair)
+                               (org-babel-ruby-var-to-ruby (cdr pair))))
+                     vars)))
+    ;; (message "vars=%S" vars) ;; debugging
+    (org-babel-comint-in-buffer session
+      (sit-for .5) (goto-char (point-max))
+      (mapc (lambda (var)
+              (insert var) (comint-send-input nil t)
+              (org-babel-comint-wait-for-output session)
+              (sit-for .1) (goto-char (point-max))) var-lines))))
+
+(defun org-babel-gnuplot-initiate-session (&optional session)
+  "If there is not a current inferior-process-buffer in SESSION
+then create.  Return the initialized session."
+  (unless (string= session "none")
+    (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
+      (if (org-babel-comint-buffer-livep session-buffer)
+          session-buffer
+        (sit-for .5)
+        (org-babel-ruby-initiate-session session)))))
 
 (defun org-babel-gnuplot-quote-timestamp-field (s)
   "Convert field S from timestamp to Unix time and export to gnuplot."

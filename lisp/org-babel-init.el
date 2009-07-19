@@ -59,6 +59,7 @@
 (require 'org-babel-lisp)
 (require 'org-babel-R)
 (require 'org-babel-ditaa)
+(require 'org-babel-gnuplot)
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here
