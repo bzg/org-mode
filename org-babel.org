@@ -2095,7 +2095,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [3/7]
+*** STARTED gnuplot [3/8]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2121,6 +2121,8 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 set title "Implementing Gnuplot"
 plot "data" using 1:2 with lines
 #+end_src
+
+
 
 **** DONE add variables
      - scalar variables should be replaced in the body of the gnuplot code
@@ -2148,6 +2150,15 @@ into custom gnuplot header arguments
 
 **** TODO header argument specifying 3D data
 **** TODO gnuplot sessions
+Working on this, not sure how to rename a gnuplot session.
+
+**** TODO gnuplot LoB functionality
+
+maybe some of this helper driven plotting functionality should be
+packaged into Library of Babel functions.
+
+- [[http://www.nabble.com/How-to-use-table-header-as-title-inside-for-loops--td22414504.html][table-header-as-columns]]
+
 *** TODO dot
 (see [[* file result types][file result types]])
 

@@ -47,32 +47,41 @@
 
 (defvar org-babel-gnuplot-timestamp-fmt nil)
 
+(defun org-babel-gnuplot-process-vars (params)
+  "Extract variables from PARAMS and process the variables
+dumping all vectors into files returning an association list of
+variable names and the value to be used in the gnuplot code."
+  (mapcar
+   (lambda (pair)
+     (cons
+      (car pair) ;; variable name
+      (if (listp (cdr pair)) ;; variable value
+          (org-babel-gnuplot-table-to-data
+           (cdr pair) (make-temp-file "org-babel-gnuplot") params)
+        (cdr pair))))
+   (org-babel-ref-variables params)))
+
 (defun org-babel-execute:gnuplot (body params)
   "Execute a block of Gnuplot code with org-babel.  This function is
 called by `org-babel-execute-src-block'."
   (message "executing Gnuplot source code block")
-  (let* ((vars (org-babel-ref-variables params))
+  (let* ((vars (org-babel-gnuplot-process-vars params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
          (cmdline (cdr (assoc :cmdline params)))
          (in-file (make-temp-file "org-babel-ditaa"))
 	 (title (plist-get params :title))
          (lines (plist-get params :line))
-	 (sets (plist-get params :set))         
+	 (sets (plist-get params :set))
 	 (x-labels (plist-get params :xlabels))
 	 (y-labels (plist-get params :ylabels))
 	 (time-ind (plist-get params :timeind)))
     ;; insert variables into code body
     (mapc
      (lambda (pair)
-       (message "resolving %S" pair) ;; debugging
        (setq body
              (replace-regexp-in-string
-              (regexp-quote (format "%s" (car pair)))
-              (if (listp (cdr pair))
-                  (org-babel-gnuplot-table-to-data
-                   (cdr pair) (make-temp-file "org-babel-gnuplot") params)
-                (cdr pair)) body)))
+              (regexp-quote (format "%s" (car pair))) (cdr pair) body)))
      vars)
     ;; append header argument settings to body
     (when title (add-to-script (format "set title '%s'" title))) ;; title
@@ -106,30 +115,17 @@ called by `org-babel-execute-src-block'."
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
   (let* ((session (org-babel-gnuplot-initiate-session session))
-         (vars (org-babel-ref-variables params))
-         (var-lines (mapcar ;; define any variables
-                     (lambda (pair)
-                       (format "%s=%s"
-                               (car pair)
-                               (org-babel-ruby-var-to-ruby (cdr pair))))
-                     vars)))
-    ;; (message "vars=%S" vars) ;; debugging
-    (org-babel-comint-in-buffer session
-      (sit-for .5) (goto-char (point-max))
-      (mapc (lambda (var)
-              (insert var) (comint-send-input nil t)
-              (org-babel-comint-wait-for-output session)
-              (sit-for .1) (goto-char (point-max))) var-lines))))
+         (vars (org-babel-ref-variables params)))
+    
+    ))
 
 (defun org-babel-gnuplot-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session."
+then create.  Return the initialized session.  The current
+`gnuplot-mode' doesn't provide support for multiple sessions."
   (unless (string= session "none")
-    (let ((session-buffer (save-window-excursion (run-ruby nil session) (current-buffer))))
-      (if (org-babel-comint-buffer-livep session-buffer)
-          session-buffer
-        (sit-for .5)
-        (org-babel-ruby-initiate-session session)))))
+    (save-window-excursion (gnuplot-send-string-to-gnuplot "" "line")
+                           (current-buffer))))
 
 (defun org-babel-gnuplot-quote-timestamp-field (s)
   "Convert field S from timestamp to Unix time and export to gnuplot."
