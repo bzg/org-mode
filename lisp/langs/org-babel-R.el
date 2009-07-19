@@ -46,8 +46,8 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 			 (org-babel-R-assign-elisp (car pair) (cdr pair)))
 		       vars "\n") "\n" body "\n"))
 	  (session (org-babel-R-initiate-session session))
-	  (colnames (cdr (assoc :colnames params))))
-      (org-babel-R-evaluate session full-body result-type colnames))))
+	  (column-names-p (cdr (assoc :colnames params))))
+      (org-babel-R-evaluate session full-body result-type column-names-p))))
 
 (defun org-babel-prep-session:R (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
@@ -110,14 +110,15 @@ last statement in BODY, as elisp."
           (value
            (with-temp-file in-tmp-file
              (insert (format org-babel-R-wrapper-method
-			     body out-tmp-file (if colnames "TRUE" "FALSE"))))
+			     body out-tmp-file (if column-names-p "TRUE" "FALSE"))))
            (shell-command (format "R --no-save < '%s'" in-tmp-file))
-	   (org-babel-import-elisp-from-file out-tmp-file colnames))))
+	   (org-babel-R-process-value-result
+	    (org-babel-import-elisp-from-file out-tmp-file) column-names-p))))
     ;; comint session evaluation
     (org-babel-comint-in-buffer buffer
       (let* ((tmp-file (make-temp-file "org-babel-R"))
              (last-value-eval
-              (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if colnames "TRUE" "FALSE")))
+              (format "write.table(.Last.value, file=\"%s\", sep=\"\\t\", na=\"nil\",row.names=FALSE, col.names=%s, quote=FALSE)" tmp-file (if column-names-p "TRUE" "FALSE")))
              (full-body (mapconcat #'org-babel-chomp
 				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
@@ -139,8 +140,17 @@ last statement in BODY, as elisp."
 			 (mapcar #'org-babel-trim raw))))))
         (case result-type
           (output (org-babel-chomp (mapconcat #'identity results "\n")))
-          (value (org-babel-import-elisp-from-file tmp-file colnames)))))))
+          (value (org-babel-R-process-value-result
+		  (org-babel-import-elisp-from-file tmp-file) column-names-p)))))))
 
+(defun org-babel-R-process-value-result (result column-names-p)
+  "R-specific processing of return value prior to return to org-babel.
+
+Currently, insert hline if column names in output have been requested."
+  (if column-names-p
+      (cons (car result) (cons 'hline (cdr result)))
+    result))
+  
 
 (provide 'org-babel-R)
 ;;; org-babel-R.el ends here

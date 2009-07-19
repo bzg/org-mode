@@ -566,7 +566,7 @@ This is taken almost directly from `org-read-prop'."
   (if (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
       (string-to-number string)))
 
-(defun org-babel-import-elisp-from-file (file-name &optional colnames)
+(defun org-babel-import-elisp-from-file (file-name)
   "Read the results located at FILE-NAME into an elisp table.  If
 the table is trivial, then return it as a scalar."
   (let (result)
@@ -579,15 +579,13 @@ the table is trivial, then return it as a scalar."
                                    (mapcar #'org-babel-string-read row))
                                  (org-table-to-lisp))))
         (error nil)))
-    (if colnames
-	(setq result (cons (car result) (cons 'hline (cdr result))))
-      (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
-	  (if (consp (car result))
-	      (if (null (cdr (car result)))
-		  (caar result)
-		result)
-	    (car result))
-	result))))
+    (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
+	(if (consp (car result))
+	    (if (null (cdr (car result)))
+		(caar result)
+	      result)
+	  (car result))
+      result)))
 
 (defun org-babel-string-read (cell)
   "Strip nested \"s from around strings in exported R values."
