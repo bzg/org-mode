@@ -487,7 +487,7 @@ ENTRY is (fn-label num-mark definition)."
 
 (defun org-footnote-goto-local-insertion-point ()
   "Find insertion point for footnote, just before next outline heading."
-  (outline-next-heading)
+  (org-with-limited-levels (outline-next-heading))
   (or (bolp) (newline))
   (beginning-of-line 0)
   (while (and (not (bobp)) (= (char-after) ?#))

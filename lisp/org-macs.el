@@ -257,7 +257,21 @@ This is in contrast to merely setting it to 0."
 					(match-beginning 0) string)))
   (replace-match newtext fixedcase literal string))
 
+(defmacro org-with-limited-levels (&rest body)
+  "Execute BODY with limited number of outline levels."
+  `(let* ((outline-regexp (org-get-limited-outline-regexp)))
+     ,@body))
 
+(defun org-get-limited-outline-regexp ()
+  "Return outline-regexp with limited number of levels.
+The number of levels is controlled by "
+  (if (or (not (org-mode-p)) (not (featurep 'org-inlinetask)))
+
+      outline-regexp
+    (let* ((limit-level (1- org-inlinetask-min-level))
+	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))
+      (format "\\*\\{1,%d\\} " nstars))))
+		     
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668

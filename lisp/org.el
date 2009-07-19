@@ -6936,7 +6936,8 @@ For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
-  (let (link cpltxt desc description search txt custom-id)
+  (let ((outline-regexp org-get-limited-outline-regexp)
+	link cpltxt desc description search txt custom-id)
     (cond
 
      ((run-hook-with-args-until-success 'org-store-link-functions)
@@ -8497,6 +8498,8 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	  (if regionp
 	      (delete-region (point) (+ (point) region-length))
 	    (org-cut-subtree))
+	  (when (featurep 'org-inlinetask)
+	    (org-inlinetask-remove-END-maybe))
 	  (setq org-markers-to-move nil)
 	  (message "Refiled to \"%s\"" (car it))))))
   (org-reveal))

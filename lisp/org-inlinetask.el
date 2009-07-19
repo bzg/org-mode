@@ -65,6 +65,14 @@
 ;;                     :END:
 ;;                     And here is some extra text
 ;;    **************** END
+;;
+;; Also, if you want to use refiling and archiving for inline tasks,
+;; The END line must be present to make things work properly.
+;;
+;; This package installs one new comand:
+;;
+;; C-c C-x t      Insert a new inline task with END line
+
 
 ;;; Code
 
@@ -106,6 +114,16 @@ but containing only the word END."
 (defvar org-drawer-regexp)
 (defvar org-complex-heading-regexp)
 (defvar org-property-end-re)
+
+(defun org-inlinetask-insert-task ()
+  "Insert an inline task."
+  (interactive)
+  (or (bolp) (newline))
+  (insert (make-string org-inlinetask-min-level ?*) " \n"
+	  (make-string org-inlinetask-min-level ?*) " END\n")
+  (end-of-line -1))
+(define-key org-mode-map "\C-c\C-xt" 'org-inlinetask-insert-task)
+
 (defun org-inlinetask-export-handler ()
   "Handle headlines with level larger or equal to `org-inlinetask-min-level'.
 Either remove headline and meta data, or do special formatting."
@@ -160,6 +178,12 @@ Either remove headline and meta data, or do special formatting."
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face shadow font-lock-fontified t)))))
+
+(defun org-inlinetask-remove-END-maybe ()
+  "Remove an END line when present."
+  (when (looking-at (format "\\([ \t]*\n\\)*\\*\\{%d,\\}[ \t]+END[ \t]*$"
+			    org-inlinetask-min-level))
+    (replace-match "")))
 
 (eval-after-load "org-exp"
   '(add-hook 'org-export-preprocess-after-tree-selection-hook
