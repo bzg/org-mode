@@ -207,7 +207,24 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [32/50]
+* Tasks [35/55]
+** PROPOSED allow `anonymous' function block with function call args?
+   My question here is simply whether we're going to allow
+#+begin_src python(arg=ref)
+# whatever
+#+end_src
+
+but with preference given to
+#+srcname blockname(arg=ref)
+** PROPOSED allow :result as synonym for :results?
+** PROPOSED allow 'output mode to return stdout as value?
+   Maybe we should allow this. In fact, if block x is called
+   with :results output, and it references blocks y and z, then
+   shouldn't the output of x contain a concatenation of the outputs of
+   y and z, together with x's own output? That would raise the
+   question of what happens if y is defined with :results output and z
+   with :results value. I guess z's (possibly vector/tabular) output
+   would be inside a literal example block containing the whole lot.
 ** PROPOSED optional timestamp for output
    Add option to place an (inactive) timestamp at the #+resname, to
    record when that output was generated.
@@ -357,6 +374,13 @@ org-mode core
      similar status to a source code block?
    - Would be nice to allow org and non-org files to be remote
 ** TODO figure out how to handle errors during evaluation
+   I expect it will be hard to do this properly, but ultimately it
+   would be nice to be able to specify somewhere to receive STDERR,
+   and to be warned if it is non-empty.
+
+   Probably simpler in non-session evaluation than session? At least
+   the mechanism will be different I guess.
+
    R has a try function, with error handling, along the lines of
    python. I bet ruby does too. Maybe more of an issue for functional
    style; in my proposed scripting style the error just gets dumped to
@@ -532,17 +556,86 @@ we should color these blocks differently
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
 
-** STARTED Column (and row) names of tables in R input/output
-*** DONE column names
-    This has been implemented: Automatic on input to R; optional in output.
-*** TODO row names
-    Perhaps add a :rownames header arg. This would be an integer
+** TODO LoB: re-implement plotting and analysis functions from org-R
+   I'll do this soon, now that we things are a bit more settled and we
+   have column names in R.
+** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
+   I haven't thought about this properly. Just noting it down. What
+   Sweave uses is called "R noweb" (.Rnw).
+   
+   I found a good description of noweb in the following article (see
+   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
+   
+   I think there are two parts to noweb, the construction of
+   documentation and the extraction of source-code (with notangle).
+
+   *documentation*: org-mode handles all of our documentation needs in
+   a manner that I believe is superior to noweb.
+   
+   *source extraction* At this point I don't see anyone writing large
+   applications with 100% of the source code contained in org-babel
+   files, rather I see org-babel files containing things like
+   - notes with active code chunks
+   - interactive tutorials
+   - requirements documents with code running test suites
+   - and of course experimental reports with the code to run the
+     experiment, and perform analysis
+
+   Basically I think the scope of the programs written in org-babel
+   (at least initially) will be small enough that it wont require the
+   addition of a tangle type program to extract all of the source code
+   into a running application.
+
+   On the other hand, since we already have named blocks of source
+   code which reference other blocks on which they rely, this
+   shouldn't be too hard to implement either on our own, or possibly
+   relying on something like noweb/notangle.
+
+** PROPOSED support for passing paths to files between source blocks
+Maybe this should be it's own result type (in addition to scalars and
+vectors).  The reason being that some source-code blocks (for example
+ditaa or anything that results in the creation of a file) may want to
+pass a file path back to org-mode which could then be inserted into
+the org-mode buffer as a link to the file...
+
+This would allow for display of images upon export providing
+functionality similar to =org-exp-blocks= only in a more general
+manner.
+** DEFERRED Support rownames and other org babel table features?
+
+   The full org table features are detailed in the manual [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]].
+
+*** rownames
+   Perhaps add a :rownames header arg. This would be an integer
     (usually 1) which would have the effect of post-processing all the
     variables created in the R session in the following way: if the
     integer is j, set the row names to the contents of column j and
     delete column j. Perhaps it is artificial to allow this integer to
     take any value other than 1. The default would be nil which would
     mean no such behaviour.
+
+    Actually I don't know about that. If multiple variables are passed
+    in, it's not appropriate to alter them all in the same way. The
+    rownames specification would normally refer to just one of the
+    variables. For now maybe just say this has to be done in R. E.g.
+
+#+TBLNAME: sample-sizes
+  | collection      | size | exclude | include | exclude2 | include2 |
+  |-----------------+------+---------+---------+----------+----------|
+  | 58C             | 2936 |       8 |    2928 |      256 |     2680 |
+  | MS              | 5852 |     771 |    5081 |      771 |     5081 |
+  | NBS             | 2929 |      64 |    2865 |      402 |     2527 |
+  | POBI            | 2717 |       1 |    2716 |        1 |     2716 |
+  | 58C+MS+NBS+POBI |      |         |   13590 |          |    13004 |
+#+TBLFM: @2$4=@2$2 - @2$3::@2$6=@2$2 - @2$5::@3$4=@3$2-@3$3::@3$6=@3$2 - @3$5::@4$4=@4$2 - @4$3::@4$6=@4$2 - @4$5::@5$4=@5$2-@5$3::@5$6=@5$2 - @5$5::@6$4=vsum(@2$4..@5$4)::@6$6=vsum(@2$6..@5$6)
+
+#+srcname: make-size-table(size=sample-sizes)
+#+begin_src R 
+  rownames(size) <- size[,1]
+  size <- size[,-1]
+#+end_src
+
+
 *** Old notes
     [I don't think it's as problematic as this makes out]
     This is non-trivial, but may be worth doing, in particular to
@@ -639,106 +732,6 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
-
-** TODO re-implement helper functions from org-R
-*** Initial statement [Eric]
-    Much of the power of org-R seems to be in it's helper functions for
-    the quick graphing of tables.  Should we try to re-implement these
-    functions on top of org-babel?
-
-    I'm thinking this may be useful both to add features to org-babel-R and
-    also to potentially suggest extensions of the framework.  For example
-    one that comes to mind is the ability to treat a source-code block
-    like a function which accepts arguments and returns results. Actually
-    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
-*** Objectives [Dan]
-    - We want to provide convenient off-the-shelf actions
-      (e.g. plotting data) that make use of our new code evaluation
-      environment but do not require any actual coding.
-*** Initial Design proposal [Dan]
-    - *Input data* will be specified using the same mechanism as :var
-      references, thus the input data may come from a table, or
-      another source block, and it is initially available as an elisp
-      data structure.
-    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
-      line will apply an *action* to the referenced data.
-    - *Actions correspond to source blocks*: our library of available
-      actions will be a library of org-babel source blocks. Thus the
-      code for executing an action, and the code for dealing with the
-      output of the action will be the same code as for executing
-      source blocks in general
-    - Optionally, the user can have the relevant source block inserted
-      into the org buffer after the (say) #+BABELDO line. This will
-      allow the user to fine tune the action by modifying the code
-      (especially useful for plots).
-    - So maybe a #+BABELDO line will have header args
-      - :data (a reference to a table or source code block)
-      - :action (or should that be :srcname?) which will be something
-        like :action pie-chart, referring to a source block which will
-        be executed with the :data referent passed in using a :var arg.
-      - :showcode or something controlling whether to show the code
-      
-*** Modification to design
-    I'm implementing this, at least initially, as a new interpreter
-    named 'babel', which has an empty body. 'babel' blocks take
-    a :srcname header arg, and look for the source-code block with
-    that name. They then execute the referenced block, after first
-    appending their own header args on to the target block's header
-    args.
-
-    If the target block is in the library of babel (a.o.t. e.g. the
-    current buffer), then the code in the block will refer to the
-    input data with a name dictated by convention (e.g. __data__
-    (something which is syntactically legal in all languages...). Thus
-    the babel block will use a :var __data__ = whatever header arg to
-    reference the data to be plotted.
-
-*** Current design
-    This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
-    ready-made source blocks designed to carry out useful common tasks.
-
-** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
-   I haven't thought about this properly. Just noting it down. What
-   Sweave uses is called "R noweb" (.Rnw).
-   
-   I found a good description of noweb in the following article (see
-   the [[http://www.cs.tufts.edu/~nr/pubs/lpsimp.pdf][pdf]]).
-   
-   I think there are two parts to noweb, the construction of
-   documentation and the extraction of source-code (with notangle).
-
-   *documentation*: org-mode handles all of our documentation needs in
-   a manner that I believe is superior to noweb.
-   
-   *source extraction* At this point I don't see anyone writing large
-   applications with 100% of the source code contained in org-babel
-   files, rather I see org-babel files containing things like
-   - notes with active code chunks
-   - interactive tutorials
-   - requirements documents with code running test suites
-   - and of course experimental reports with the code to run the
-     experiment, and perform analysis
-
-   Basically I think the scope of the programs written in org-babel
-   (at least initially) will be small enough that it wont require the
-   addition of a tangle type program to extract all of the source code
-   into a running application.
-
-   On the other hand, since we already have named blocks of source
-   code which reference other blocks on which they rely, this
-   shouldn't be too hard to implement either on our own, or possibly
-   relying on something like noweb/notangle.
-
-** PROPOSED support for passing paths to files between source blocks
-Maybe this should be it's own result type (in addition to scalars and
-vectors).  The reason being that some source-code blocks (for example
-ditaa or anything that results in the creation of a file) may want to
-pass a file path back to org-mode which could then be inserted into
-the org-mode buffer as a link to the file...
-
-This would allow for display of images upon export providing
-functionality similar to =org-exp-blocks= only in a more general
-manner.
 
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
@@ -932,6 +925,70 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+
+** DONE extensible library of callable source blocks
+*** Current design
+    This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
+    ready-made source blocks designed to carry out useful common tasks.
+*** Initial statement [Eric]
+    Much of the power of org-R seems to be in it's helper functions for
+    the quick graphing of tables.  Should we try to re-implement these
+    functions on top of org-babel?
+
+    I'm thinking this may be useful both to add features to org-babel-R and
+    also to potentially suggest extensions of the framework.  For example
+    one that comes to mind is the ability to treat a source-code block
+    like a function which accepts arguments and returns results. Actually
+    this can be it's own TODO (see [[* source blocks as functions][source blocks as functions]]).
+*** Objectives [Dan]
+    - We want to provide convenient off-the-shelf actions
+      (e.g. plotting data) that make use of our new code evaluation
+      environment but do not require any actual coding.
+*** Initial Design proposal [Dan]
+    - *Input data* will be specified using the same mechanism as :var
+      references, thus the input data may come from a table, or
+      another source block, and it is initially available as an elisp
+      data structure.
+    - We introduce a new #+ line, e.g.  #+BABELDO. C-c C-c on that
+      line will apply an *action* to the referenced data.
+    - *Actions correspond to source blocks*: our library of available
+      actions will be a library of org-babel source blocks. Thus the
+      code for executing an action, and the code for dealing with the
+      output of the action will be the same code as for executing
+      source blocks in general
+    - Optionally, the user can have the relevant source block inserted
+      into the org buffer after the (say) #+BABELDO line. This will
+      allow the user to fine tune the action by modifying the code
+      (especially useful for plots).
+    - So maybe a #+BABELDO line will have header args
+      - :data (a reference to a table or source code block)
+      - :action (or should that be :srcname?) which will be something
+        like :action pie-chart, referring to a source block which will
+        be executed with the :data referent passed in using a :var arg.
+      - :showcode or something controlling whether to show the code
+      
+*** Modification to design
+    I'm implementing this, at least initially, as a new interpreter
+    named 'babel', which has an empty body. 'babel' blocks take
+    a :srcname header arg, and look for the source-code block with
+    that name. They then execute the referenced block, after first
+    appending their own header args on to the target block's header
+    args.
+
+    If the target block is in the library of babel (a.o.t. e.g. the
+    current buffer), then the code in the block will refer to the
+    input data with a name dictated by convention (e.g. __data__
+    (something which is syntactically legal in all languages...). Thus
+    the babel block will use a :var __data__ = whatever header arg to
+    reference the data to be plotted.
+
+** DONE Column names in R input/output
+   This has been implemented: Automatic on input to R; optional in
+   output. Note that this equates column names with the header row in
+   an org table; whereas org actually has a mechanism whereby a row
+   with a '!' in the first field defines column names. I have not
+   attempted to support these org table mechanisms yet. See [[*Support%20rownames%20and%20other%20org%20babel%20table%20features][this
+   DEFERRED todo item]].
 ** DONE use example block for large amounts of stdout output?
    We're currently `examplizing' with : at the beginning of the line,
    but should larger amounts of output be in a
@@ -2138,8 +2195,90 @@ to specify a file holding the results
 (see [[* file result types][file result types]])
 
 
-* Bugs [22/34]
+* Bugs [22/36]
+** TODO Default args
+   This would be good thing to address soon. I'm imagining that
+   e.g. here, the 'caller' block would return the answer 30. I believe
+   there's a few issues here: i.e. the naked 'a' without a reference
+   is not understood; the default arg b=6 is not understood.
+
+#+srcname: adder(a, b=6)
+#+begin_src python 
+a+b
+#+end_src
+
+#+srcname: caller(var=adder(a=24))
+#+begin_src python 
+var
+#+end_src
+** TODO function calls in #+srcname: refs
+   
+   My srcname references don't seem to be working for function
+   calls. This needs fixing.
+   
+#+srcname: called
+#+begin_src python 
+56
+#+end_src
+
+srcname function call doesn't work for calling a source block
+#+srcname: caller(var1=called())
+#+begin_src python 
+var1
+#+end_src
+
+They do work for a simple reference
+#+srcname: caller(var1=56)
+#+begin_src python 
+var1
+#+end_src
+
+#+resname: caller
+: 56
+
+#+srcname: caller2
+#+begin_src python :var var1=called() 
+var1
+#+end_src
+
+#+resname:
+: 56
+** TODO creeping blank lines
+   There's still inappropriate addition of blank lines in some circumstances. 
+
+   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
+   removes the entire (#+resname and result) and starts from scratch,
+   whereas #+begin_src only removes the result. I haven't worked out
+   what the correct fix is yet. Maybe the right thing to do is to make
+   sure that those functions (o-b-remove-result et al.) are neutral
+   with respect to newlines. Sounds easy, but...
+
+   E.g.
+
+#+begin_src sh
+b=5
+#+end_src
+
+
+
+   Compare the results of
+#+lob: python-add(a=5, b=17)
+
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
+
+#+begin_src python
+23
+#+end_src
+
+#+resname:
+: 23
+---------------------
+
 ** TODO avoid stripping whitespace from output when :results output
+   This may be partly solved by using o-b-chomp rather than o-b-trim
+   in the o-b-LANG-evaluate functions.
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
@@ -2147,6 +2286,87 @@ to specify a file holding the results
 
 #+resname:
 : 0
+
+Whereas I was hoping for
+
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is some sort of non-printing char / quoting issue I think. Note
+that
+
+#+begin_src python :results value
+'\\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0\n1\n2\n3
+
+Also, note that
+#+begin_src python :results output
+print('\n'.join(map(str, range(4))))
+#+end_src
+
+#+resname:
+: 0
+: 1
+: 2
+: 3
+
+*** collapsing consecutive newlines in string output
+    
+    This is an example of the same bug
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+This doesn't produce anything at all now. I believe that's because
+I've changed things so that :results output really does *not* get the
+value of the block, only the STDOUT. So if we add a print statement
+this works OK.
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+print "the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 
+: 
+:      and this is the second one
+: 
+: even a third
+
+However, the behaviour with :results value is wrong
+
+#+srcname: multi-line-string-value
+#+begin_src ruby
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: 0
+
 ** TODO prompt characters appearing in output with R
 #+begin_src R :session *R* :results output
   x <- 6
@@ -2179,20 +2399,6 @@ for example
 #+end_src
 
 #+resname: this-doesn't-match-orgtbl
-
-** TODO collapsing consecutive newlines in string output
-
-#+srcname: multi-line-string-output
-#+begin_src ruby :results output
-"the first line ends here
-
-
-     and this is the second one
-
-even a third"
-#+end_src
-
-#+resname: multi-line-string-output
    
 ** PROPOSED external shell execution can't isolate return values
 I have no idea how to do this as of yet.  The result is that when
@@ -2221,33 +2427,6 @@ the same for the other languages. [Dan]
    not org-babel-ruby-evaluate
 ** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
    And at other occurrences of org-combine-plists?
-** TODO creeping blank lines
-   There's still inappropriate addition of blank lines in some circumstances. E.g.
-
-#+begin_src sh
-b=5
-#+end_src
-
-
-   Compare the results of
-#+lob: python-add(a=5, b=17)
-
-#+resname: python-add(a=5, b=17)
-: 22
---------------------------------
-
-#+begin_src python
-23
-#+end_src
-
-#+resname:
-: 23
----------------------
-
-   Hmm, it's a bit confusing. I think it's to do with the fact that
-   LoB removes the entire (#+resname and result) and starts from
-   scratch, whereas #+begin_src only removes the result. I haven't
-   worked out what the correct fix is yet.
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.

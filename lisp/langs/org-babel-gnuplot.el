@@ -48,9 +48,11 @@
 
 (defun org-babel-execute:gnuplot (body params)
   "Execute a block of Gnuplot code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Gnuplot source code block")
-  (let* ((vars (org-babel-ref-variables params))
+  (let* (;; should be able to lose the next two lines but I don't know
+	 ;; how to test it so not doing it now.
+	 (vars (org-babel-ref-variables params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
          (cmdline (cdr (assoc :cmdline params)))
