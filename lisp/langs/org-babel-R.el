@@ -138,7 +138,7 @@ last statement in BODY, as elisp."
 				 el))))
 			 (mapcar #'org-babel-trim raw))))))
         (case result-type
-          (output (org-babel-trim (mapconcat #'identity results "\n")))
+          (output (org-babel-chomp (mapconcat #'identity results "\n")))
           (value (org-babel-import-elisp-from-file tmp-file colnames)))))))
 
 
