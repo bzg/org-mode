@@ -7370,11 +7370,13 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		  (let ((org-completion-use-ido nil))
 		    (org-completing-read
 		     "Link: "
-		     (mapcar (lambda (x) (list (concat x ":")))
-			     all-prefixes)
+		     (append 
+		      (mapcar (lambda (x) (list (concat x ":")))
+			      all-prefixes)
+		      (mapcar 'car org-stored-links))
 		     nil nil nil
 		     'tmphist
-		     (or (car (car org-stored-links))))))
+		     (car (car org-stored-links)))))
 	    (if (or (member link all-prefixes)
 		    (and (equal ":" (substring link -1))
 			 (member (substring link 0 -1) all-prefixes)
@@ -7442,7 +7444,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (insert (org-make-link-string link desc))))
 
 (defun org-link-try-special-completion (type)
-  "If there is completion support for link type TAPE, offer it."
+  "If there is completion support for link type TYPE, offer it."
   (let ((fun (intern (concat "org-" type "-complete-link"))))
     (if (functionp fun)
 	(funcall fun)

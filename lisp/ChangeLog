@@ -1,6 +1,8 @@
 2009-07-19  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (orgstruct++-mode): Fix typo in docstring.
+	(org-insert-link): Clean up: (or (...)) => (...)
+	(org-insert-link): Use TAB for stored links completion.
 
 2009-07-18  Bastien Guerry  <bzg@altern.org>
 
