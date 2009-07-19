@@ -122,26 +122,25 @@ last statement in BODY, as elisp."
              (full-body (mapconcat #'org-babel-chomp
 				   (list body last-value-eval org-babel-R-eoe-indicator) "\n"))
              (raw (org-babel-comint-with-output buffer org-babel-R-eoe-output nil
-                    (insert full-body) (inferior-ess-send-input)))
-             (results
-	      (let ((broke nil))
-		(delete
-		 nil
-		 (mapcar (lambda (el)
-			   (if (or broke
-				   (and (string-match (regexp-quote org-babel-R-eoe-output)
-						      el) (setq broke t)))
-			       nil
-			     (if (= (length el) 0)
-				 nil
-			       (if (string-match comint-prompt-regexp el)
-				   (substring el (match-end 0))
-				 el))))
-			 (mapcar #'org-babel-chomp raw))))))
+                    (insert full-body) (inferior-ess-send-input))) broke results)
         (case result-type
-          (output (mapconcat #'identity results "\n"))
           (value (org-babel-R-process-value-result
-		  (org-babel-import-elisp-from-file tmp-file) column-names-p)))))))
+		  (org-babel-import-elisp-from-file tmp-file) column-names-p))
+          (output
+	   (flet ((extractor
+		   (el)
+		   (if (or broke
+			   (and (string-match (regexp-quote org-babel-R-eoe-output) el)
+				(setq broke t)))
+		       nil
+		     (if (= (length el) 0)
+			 nil
+		       (if (string-match comint-prompt-regexp el)
+			   (substring el (match-end 0))
+			 el)))))
+	     (mapconcat
+	      #'identity
+	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
 
 (defun org-babel-R-process-value-result (result column-names-p)
   "R-specific processing of return value prior to return to org-babel.
