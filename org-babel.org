@@ -390,10 +390,13 @@ This is listed under [[* graphical output][graphical output]] in out objectives.
 
 This should take advantage of the =:results file= option, and
 languages which almost always produce graphical output should set
-=:results file= to true by default.  That would handle placing these
-results in the buffer.  Then if there is a combination of =silent= and
-=file= =:results= headers we could drop the results to a temp buffer
-and pop open that buffer...
+=:results file= to true by default (this is currently done for the
+gnuplot and ditaa languages).  That would handle placing these results
+in the buffer.  Then if there is a combination of =silent= and =file=
+=:results= headers we could drop the results to a temp buffer and pop
+open that buffer...
+
+Display of file results is addressed in the [[* =\C-c \C-o= to open results of source block][open-results-task]].
 
 *** TODO R graphics to screen means session evaluation
     If R graphical output is going to screen then evaluation must be
@@ -2149,7 +2152,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [2/6]
+*** STARTED gnuplot [2/7]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2182,6 +2185,9 @@ plot "data" using 1:2 with lines
        the variable names should be replaced with the path to the files
 
 **** DONE direct plotting w/o session
+**** TODO gnuplot support for column/row names
+This should be implemented along the lines of the [[* STARTED Column (and row) names of tables in R input/output][R-colname-support]].
+
 **** TODO a =file= header argument
 to specify a file holding the results
 
