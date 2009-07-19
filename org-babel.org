@@ -2201,7 +2201,7 @@ to specify a file holding the results
 (see [[* file result types][file result types]])
 
 
-* Bugs [22/36]
+* Bugs [23/36]
 ** TODO Default args
    This would be good thing to address soon. I'm imagining that
    e.g. here, the 'caller' block would return the answer 30. I believe
@@ -2217,38 +2217,11 @@ a+b
 #+begin_src python 
 var
 #+end_src
-** TODO function calls in #+srcname: refs
-   
-   My srcname references don't seem to be working for function
-   calls. This needs fixing.
-   
-#+srcname: called
-#+begin_src python 
-56
-#+end_src
+** TODO allow srcname to omit function call parentheses
+   Someone needs to revisit those regexps. Is there an argument for
+   moving some of the regexps used to match function calls into
+   defvars? (i.e. in o-b.el and o-b-ref.el)
 
-srcname function call doesn't work for calling a source block
-#+srcname: caller(var1=called())
-#+begin_src python 
-var1
-#+end_src
-
-They do work for a simple reference
-#+srcname: caller(var1=56)
-#+begin_src python 
-var1
-#+end_src
-
-#+resname: caller
-: 56
-
-#+srcname: caller2
-#+begin_src python :var var1=called() 
-var1
-#+end_src
-
-#+resname:
-: 56
 ** TODO creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. 
 
@@ -2464,6 +2437,48 @@ the same for the other languages. [Dan]
    the user's regular emacs init.  I can't think of a way for us to
    set this automatically, and we are SOL without a regexp to match
    the prompt.
+** DONE function calls in #+srcname: refs
+   
+   My srcname references don't seem to be working for function
+   calls. This needs fixing.
+   
+#+srcname: called()
+#+begin_src python 
+59
+#+end_src
+
+srcname function call doesn't work for calling a source block
+#+srcname: caller(var1=called())
+#+begin_src python
+var1
+#+end_src
+
+#+resname: caller
+: 59
+
+
+
+
+
+
+They do work for a simple reference
+#+srcname: caller2(var1=56)
+#+begin_src python 
+var1
+#+end_src
+
+#+resname: caller2
+: 59
+
+
+and they do work for :var header arg
+#+srcname: caller3
+#+begin_src python :var var1=called() 
+var1
+#+end_src
+
+#+resname:
+: 58
 ** DONE LoB: with output to buffer, not working in buffers other than library-of-babel.org
 *** Initial report
    I haven't fixed this yet. org-babel-ref-resolve-reference moves
@@ -2915,6 +2930,7 @@ of these tests may fail.
 | get from R session      | get-R-session-var          |     |           5 |           5 | pass |
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 #+TBLFM: $5=""::$6=""
+
 
 The second TBLFM line (followed by replacing '[]' with '') can be used
 to blank out the table results, in the absence of a better method.

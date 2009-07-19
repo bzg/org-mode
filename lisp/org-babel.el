@@ -232,7 +232,7 @@ the word 'call'."
 	  (goto-char head)
 	  (if (save-excursion
 		(forward-line -1)
-		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ \f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\(\\(.*\\)\)"))
 	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
@@ -360,7 +360,8 @@ according to org-babel-named-src-block-regexp."
 buffer or nil if no such result exists."
   (save-excursion
     (goto-char (point-min))
-    (when (re-search-forward (concat "#\\+resname:[ \t]*" (regexp-quote name)) nil t)
+    (when (re-search-forward ;; ellow end-of-buffer in following regexp?
+	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (move-beginning-of-line 1) (point))))
 
 (defun org-babel-where-is-src-block-result ()
