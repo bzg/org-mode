@@ -137,9 +137,9 @@ last statement in BODY, as elisp."
 			       (if (string-match comint-prompt-regexp el)
 				   (substring el (match-end 0))
 				 el))))
-			 (mapcar #'org-babel-trim raw))))))
+			 (mapcar #'org-babel-chomp raw))))))
         (case result-type
-          (output (org-babel-chomp (mapconcat #'identity results "\n")))
+          (output (mapconcat #'identity results "\n"))
           (value (org-babel-R-process-value-result
 		  (org-babel-import-elisp-from-file tmp-file) column-names-p)))))))
 
