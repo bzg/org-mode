@@ -2119,12 +2119,14 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+srcname: implementing-gnuplot
 #+begin_src gnuplot :var data=gnuplot-data
 set title "Implementing Gnuplot"
-plot "data" using 1:2 with lines
+plot data using 1:2 with lines
 #+end_src
 
-
-
 **** DONE add variables
+     gnuplot 4.2 and up support user defined variables.  This is how
+     we will handle variables with org-babel (meaning we will need to
+     require gnuplot 4.2 and up for variable support).
+
      - scalar variables should be replaced in the body of the gnuplot code
      - vector variables should be exported to tab-separated files, and
        the variable names should be replaced with the path to the files

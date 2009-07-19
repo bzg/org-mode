@@ -77,12 +77,13 @@ called by `org-babel-execute-src-block'."
 	 (y-labels (plist-get params :ylabels))
 	 (time-ind (plist-get params :timeind)))
     ;; insert variables into code body
-    (mapc
-     (lambda (pair)
-       (setq body
-             (replace-regexp-in-string
-              (regexp-quote (format "%s" (car pair))) (cdr pair) body)))
-     vars)
+    (setq body
+          (concat
+           (mapconcat
+            (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
+            vars "\n")
+           "\n"
+           body))
     ;; append header argument settings to body
     (when title (add-to-script (format "set title '%s'" title))) ;; title
     (when lines (mapc (lambda (el) (add-to-script el)) lines)) ;; line
