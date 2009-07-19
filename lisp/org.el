@@ -6620,12 +6620,12 @@ C-c C-c     Set tags / toggle checkbox"
 
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
-In addition to setting orgstruct-mode, this also exports all indentation and
-autofilling variables from org-mode into the buffer.  It will also
+In addition to setting orgstruct-mode, this also exports all indentation 
+and autofilling variables from org-mode into the buffer.  It will also
 recognize item context in multiline items.
 Note that turning off orgstruct-mode will *not* remove the
 indentation/paragraph settings.  This can only be done by refreshing the
-major mode, for example with \[normal-mode]."
+major mode, for example with \\[normal-mode]."
   (interactive "P")
   (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
   (if (< arg 1)

@@ -1,3 +1,7 @@
+2009-07-19  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (orgstruct++-mode): Fix typo in docstring.
+
 2009-07-18  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-get-refile-targets): Fix bug: don't ignore case when
