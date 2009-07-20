@@ -271,7 +271,7 @@ Agenda Views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      
+* Exporting Agenda Views::
 * Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
@@ -2337,7 +2337,7 @@ the formula will be stored as the formula for the current column, evaluated
 and the current field replaced with the result.  If the field contains only
 @samp{=}, the previously stored formula for this column is used.  For each
 column, Org will only remember the most recently used formula.  In the
-@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left-hand 
+@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left-hand
 side of a column formula cannot currently be the name of column, it
 must be the numeric column reference.
 
@@ -5800,7 +5800,7 @@ the currently clocked item.
 If you want to store the note directly to a different place, use
 @kbd{C-1 C-c C-c} instead to exit Remember@footnote{Configure the
 variable @code{org-remember-store-without-prompt} to make this behavior
-the default.}.  The handler will then first prompt for a target file---if 
+the default.}.  The handler will then first prompt for a target file---if
 you press @key{RET}, the value specified for the template is used.
 Then the command offers the headings tree of the selected file, with the
 cursor position at the default headline (if you specified one in the
@@ -6094,7 +6094,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      
+* Exporting Agenda Views::
 * Agenda column view::          Using column view for collected entries
 @end menu
 
@@ -6533,7 +6533,7 @@ If the comparison value is a plain number, a numerical comparison is done,
 and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
 @samp{>=}, and @samp{<>}.
 @item
-If the comparison value is enclosed in double-quotes, 
+If the comparison value is enclosed in double-quotes,
 a string comparison is done, and the same operators are allowed.
 @item
 If the comparison value is enclosed in double-quotes @emph{and} angular
@@ -11533,7 +11533,7 @@ thoughts and plans.  @emph{Visibility cycling} and @emph{structure
 editing} were originally implemented in the package
 @file{outline-magic.el}, but quickly moved to the more general
 @file{org.el}.  As this environment became comfortable for project
-planning, the next step was adding @emph{TODO entries}, basic 
+planning, the next step was adding @emph{TODO entries}, basic
 @emph{timestamps}, and @emph{table support}.  These areas highlighted the two main
 goals that Org still has today: to be a new, outline-based,
 plain text mode with innovative and intuitive editing features, and to
