@@ -258,7 +258,7 @@ Capture
 
 Remember
 
-* Setting up Remember::         Some code for .emacs to get things going
+* Setting up Remember for Org:: Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
@@ -5604,14 +5604,14 @@ with specific templates.  It also allows you to select the location where a
 note should be stored interactively, on the fly.
 
 @menu
-* Setting up Remember::         Some code for .emacs to get things going
+* Setting up Remember for Org::  
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
 @end menu
 
-@node Setting up Remember, Remember templates, Remember, Remember
-@subsection Setting up Remember
+@node Setting up Remember for Org, Remember templates, Remember, Remember
+@subsection Setting up Remember for Org
 
 The following customization will tell Remember to use Org files as
 target, and to create annotations compatible with Org links.
@@ -5645,7 +5645,7 @@ using the @kbd{k r} key combination.  With this access, any timestamps
 inserted by the selected Remember template (see below) will default to
 the cursor date in the agenda, rather than to the current date.
 
-@node Remember templates, Storing notes, Setting up Remember, Remember
+@node Remember templates, Storing notes, Setting up Remember for Org, Remember
 @subsection Remember templates
 @cindex templates, for Remember
 
