@@ -1,3 +1,9 @@
+2009-07-20  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-refile-get-location): Tamper with refile history o
+	that history contains compete matches instead of the entered
+	string.
+
 2009-07-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-store-link): Never store a link to an inline task.

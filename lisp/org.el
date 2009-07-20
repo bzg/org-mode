@@ -6936,7 +6936,7 @@ For file links, arg negates `org-context-in-file-links'."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
-  (let ((outline-regexp org-get-limited-outline-regexp)
+  (let ((outline-regexp (org-get-limited-outline-regexp))
 	link cpltxt desc description search txt custom-id)
     (cond
 
@@ -8542,7 +8542,9 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 			nil 'org-refile-history))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
     (if pa
-	pa
+	(progn
+	  (setcar org-refile-history (car pa))
+	  pa)
       (when (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
 	(setq parent (match-string 1 answ)
 	      child (match-string 2 answ))
