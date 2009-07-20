@@ -549,6 +549,7 @@ make
 @noindent If you are running Org from the distribution directory, this is
 all.  If you want to install into the system directories, use (as
 administrator)
+
 @example
 make install
 @end example
