@@ -2095,7 +2095,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [3/8]
+*** STARTED gnuplot [4/8]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2117,7 +2117,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 |             1.3 |          0.19615368 |           0.21730748 |
 
 #+srcname: implementing-gnuplot
-#+begin_src gnuplot :var data=gnuplot-data
+#+begin_src gnuplot :var data=gnuplot-data :results silent
 set title "Implementing Gnuplot"
 plot data using 1:2 with lines
 #+end_src
@@ -2144,8 +2144,16 @@ This may be walking too close to an entirely prebuilt plotting tool
 rather than straight gnuplot code evaluation.  For now I think this
 can wait.
 
-**** TODO a =file= header argument
+**** DONE a =file= header argument
 to specify a file holding the results
+
+#+srcname: gnuplot-to-file-implementation
+#+begin_src gnuplot :file plot.png :var data=gnuplot-data
+plot data using 1:2, data using 1:3 with lines
+#+end_src
+
+#+resname:
+[[file:plot.png][plot.png]]
 
 **** STARTED helpers from org-plot.el
 there are a variety of helpers in org-plot which can be fit nicely

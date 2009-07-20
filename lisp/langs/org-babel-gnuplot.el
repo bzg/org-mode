@@ -68,6 +68,8 @@ called by `org-babel-execute-src-block'."
   (let* ((vars (org-babel-gnuplot-process-vars params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
+         (term (or (cdr (assoc :term params))
+                   (when out-file (file-name-extension out-file))))
          (cmdline (cdr (assoc :cmdline params)))
          (in-file (make-temp-file "org-babel-ditaa"))
 	 (title (plist-get params :title))
@@ -75,43 +77,47 @@ called by `org-babel-execute-src-block'."
 	 (sets (plist-get params :set))
 	 (x-labels (plist-get params :xlabels))
 	 (y-labels (plist-get params :ylabels))
-	 (time-ind (plist-get params :timeind)))
-    ;; insert variables into code body
-    (setq body
-          (concat
-           (mapconcat
-            (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
-            vars "\n")
-           "\n"
-           body))
-    ;; append header argument settings to body
-    (when title (add-to-script (format "set title '%s'" title))) ;; title
-    (when lines (mapc (lambda (el) (add-to-script el)) lines)) ;; line
-    (when sets ;; set
-      (mapc (lambda (el) (add-to-script (format "set %s" el))) sets))
-    (when x-labels ;; x labels (xtics)
-      (add-to-script
-       (format "set xtics (%s)"
-               (mapconcat (lambda (pair)
-                            (format "\"%s\" %d" (cdr pair) (car pair)))
-                          x-labels ", "))))
-    (when y-labels ;; y labels (ytics)
-      (add-to-script
-       (format "set ytics (%s)"
-               (mapconcat (lambda (pair)
-                            (format "\"%s\" %d" (cdr pair) (car pair)))
-                          y-labels ", "))))
-    (when time-ind ;; timestamp index
-      (add-to-script "set xdata time")
-      (add-to-script (concat "set timefmt \""
-                             (or timefmt ;; timefmt passed to gnuplot
+	 (timefmt (plist-get params :timefmt))
+         (time-ind (or (plist-get params :timeind)
+                       (when timefmt 1))))
+    (flet ((add-to-body (text)
+                        (setq body (concat text "\n" body))))
+      ;; append header argument settings to body
+      (when title (add-to-body (format "set title '%s'" title))) ;; title
+      (when lines (mapc (lambda (el) (add-to-body el)) lines)) ;; line
+      (when sets
+        (mapc (lambda (el) (add-to-body (format "set %s" el))) sets))
+      (when x-labels
+        (add-to-body
+         (format "set xtics (%s)"
+                 (mapconcat (lambda (pair)
+                              (format "\"%s\" %d" (cdr pair) (car pair)))
+                            x-labels ", "))))
+      (when y-labels
+        (add-to-body
+         (format "set ytics (%s)"
+                 (mapconcat (lambda (pair)
+                              (format "\"%s\" %d" (cdr pair) (car pair)))
+                            y-labels ", "))))
+      (when time-ind
+        (add-to-body "set xdata time")
+        (add-to-body (concat "set timefmt \""
+                             (or timefmt
                                  "%Y-%m-%d-%H:%M:%S") "\"")))
-    ;; evaluate the code body with gnuplot
-    (with-temp-buffer
-      (insert (concat body "\n"))
-      (gnuplot-mode)
-      (gnuplot-send-buffer-to-gnuplot))
-    out-file))
+      (when out-file (add-to-body (format "set output \"%s\"" out-file)))
+      (when term (add-to-body (format "set term %s" term)))
+      ;; insert variables into code body: this should happen last
+      ;; placing the variables at the *top* of the code in case their
+      ;; values are used later
+      (add-to-body (mapconcat
+                    (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
+                    vars "\n"))
+      ;; evaluate the code body with gnuplot
+      (with-temp-buffer
+        (insert (concat body "\n"))
+        (gnuplot-mode)
+        (gnuplot-send-buffer-to-gnuplot))
+      out-file)))
 
 (defun org-babel-prep-session:gnuplot (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
