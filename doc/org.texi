@@ -5604,7 +5604,7 @@ with specific templates.  It also allows you to select the location where a
 note should be stored interactively, on the fly.
 
 @menu
-* Setting up Remember for Org::  
+* Setting up Remember for Org:: Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
