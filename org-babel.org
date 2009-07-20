@@ -2236,7 +2236,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [1/6]
+** TODO Add languages [2/6]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
@@ -2266,7 +2266,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [7/8]
+*** DONE gnuplot [7/7]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2371,13 +2371,6 @@ plot data using 1:2 with lines
 
 #+resname:
 [[file:session.png][session.png]]
-
-**** TODO gnuplot LoB functionality
-
-maybe some of this helper driven plotting functionality should be
-packaged into Library of Babel functions.
-
-- [[http://www.nabble.com/How-to-use-table-header-as-title-inside-for-loops--td22414504.html][table-header-as-columns]]
 
 *** TODO dot
 (see [[* file result types][file result types]])
