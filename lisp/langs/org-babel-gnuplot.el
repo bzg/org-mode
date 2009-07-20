@@ -66,7 +66,6 @@ variable names and the value to be used in the gnuplot code."
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Gnuplot source code block")
   (let* ((vars (org-babel-gnuplot-process-vars params))
-         (result-params (split-string (or (cdr (assoc :results params)) "")))
          (out-file (cdr (assoc :file params)))
          (term (or (cdr (assoc :term params))
                    (when out-file (file-name-extension out-file))))
