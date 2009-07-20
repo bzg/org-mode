@@ -5591,15 +5591,16 @@ related to a task (@i{attachments}) in a special directory.
 @section Remember
 @cindex @file{remember.el}
 
-The Remember package by John Wiegley lets you store quick notes with
-little interruption of your work flow.  See
-@uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
-information.  It is an excellent way to add new notes and tasks to
-Org files.  Org significantly expands the possibilities of
-Remember: You may define templates for different note types, and
-associate target files and headlines with specific templates.  It also
-allows you to select the location where a note should be stored
-interactively, on the fly.
+The Remember package by John Wiegley lets you store quick notes with little
+interruption of your work flow.  It is an excellent way to add new notes and
+tasks to Org files.  The @code{remember.el} package is part of Emacs 23, not
+Emacs 22.  See @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for
+more information.
+
+Org significantly expands the possibilities of Remember: You may define
+templates for different note types, and associate target files and headlines
+with specific templates.  It also allows you to select the location where a
+note should be stored interactively, on the fly.
 
 @menu
 * Setting up Remember::         Some code for .emacs to get things going
