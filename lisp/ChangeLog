@@ -1,5 +1,10 @@
 2009-07-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-mac-message.el (org-mac-message-get-links): Improve
+	docstring.  Make argument SELECT-OR-FLAGGED optional, default to
+	"s".  Fix the return value.
+	(org-mac-message-insert-flagged): Simplify.
+
 	* org.el (org-refile-get-location): Tamper with refile history o
 	that history contains compete matches instead of the entered
 	string.

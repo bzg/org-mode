@@ -145,12 +145,15 @@ This will use the command `open' with the message URL."
 	  "return theLinkList as string\n"
     "end tell")))
 
-(defun org-mac-message-get-links (select-or-flag)
-  "Create links to the messages currently selected or flagged in
-Mail.app.  This will use AppleScript to get the message-id and
-the subject of the message in Mail.app and make a link out
-of it."
+(defun org-mac-message-get-links (&optional select-or-flag)
+  "Create links to the messages currently selected or flagged in Mail.app.
+This will use AppleScript to get the message-id and the subject of the
+messages in Mail.app and make a link out of it.
+When SELECT-OR-FLAG is \"s\", get the selected messages (this is also
+the default).  When SELECT-OR-FLAG is \"f\", get the flagged messages.
+The Org-syntax text will be pushed to the kill ring, and also returned."
   (interactive "sLink to (s)elected or (f)lagged messages: ")
+  (setq select-or-flag (or select-or-flag "s"))
   (message "AppleScript: searching mailboxes...")
   (let* ((as-link-list
 	  (if (string= select-or-flag "s")
@@ -162,12 +165,7 @@ of it."
 	  (mapcar
 	   (lambda (x) (if (string-match "\\`\"\\(.*\\)\"\\'" x) (setq x (match-string 1 x))) x)
 	   (split-string as-link-list "[\r\n]+")))
-	 split-link
-	 URL
-	 description
-	 orglink
-	 orglink-insert
-	 (orglink-list nil))
+	 split-link URL description orglink orglink-insert rtn orglink-list)
     (while link-list
       (setq split-link (split-string (pop link-list) "::split::"))
       (setq URL (car split-link))
@@ -175,28 +173,24 @@ of it."
       (when (not (string= URL ""))
 	(setq orglink (org-make-link-string URL description))
 	(push orglink orglink-list)))
-    (with-temp-buffer
-      (while orglink-list
-	(insert (concat (pop orglink-list)) "\n"))
-      (kill-region (point-min) (point-max))
-      (current-kill 0)))
-  (message "Messages copied to kill-ring"))
+    (setq rtn (mapconcat 'identity orglink-list "\n"))
+    (kill-new rtn)
+    rtn))
 
 (defun org-mac-message-insert-selected ()
   "Insert a link to the messages currently selected in Mail.app.
 This will use applescript to get the message-id and the subject of the
 active mail in Mail.app and make a link out of it."
   (interactive)
-  (org-mac-message-get-links "s")
-  (yank))
+  (insert (org-mac-message-get-links "s")))
 
 ;; The following line is for backward compatibility
 (defalias 'org-mac-message-insert-link 'org-mac-message-insert-selected)
 
 (defun org-mac-message-insert-flagged (org-buffer org-heading)
-  "Asks for an org buffer and a heading within it. If heading
-exists, delete all message:// links within heading's first
-level. If heading doesn't exist, create it at point-max. Insert
+  "Asks for an org buffer and a heading within it, and replace message links.
+If heading exists, delete all message:// links within heading's first
+level.  If heading doesn't exist, create it at point-max.  Insert
 list of message:// links to flagged mail after heading."
   (interactive "bBuffer in which to insert links: \nsHeading after which to insert links: ")
   (save-excursion
@@ -208,22 +202,16 @@ list of message:// links to flagged mail after heading."
 	  (if (not (eobp))
 	      (progn
 		(save-excursion
-		  (while (re-search-forward message-re (save-excursion (outline-next-heading)) t)
-
+		  (while (re-search-forward
+			  message-re (save-excursion (outline-next-heading)) t)
 		    (delete-region (match-beginning 0) (match-end 0)))
-		  (insert "\n")
-		  (org-mac-message-get-links "f")
-		  (yank))
+		  (insert "\n" (org-mac-message-get-links "f")))
 		(flush-lines "^$" (point) (outline-next-heading)))
-	    (insert "\n")
-	    (org-mac-message-get-links "f")
-	    (yank))
+	    (insert "\n" (org-mac-message-get-links "f")))
 	(goto-char (point-max))
 	(insert "\n")
 	(org-insert-heading)
-	(insert (concat org-heading "\n"))
-	(org-mac-message-get-links "f")
-	(yank)))))
+	(insert org-heading "\n" (org-mac-message-get-links "f"))))))
 
 (provide 'org-mac-message)
 
