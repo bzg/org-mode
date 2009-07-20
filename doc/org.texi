@@ -512,7 +512,7 @@ XEmacs package, please skip this section and go directly to
 
 If you have downloaded Org from the Web, either as a distribution @file{.zip}
 or @file{.tar} file, or as a Git archive, you must take the following steps
-to install it: Go into the unpacked Org distribution directory and edit the
+to install it: go into the unpacked Org distribution directory and edit the
 top section of the file @file{Makefile}.  You must set the name of the Emacs
 binary (likely either @file{emacs} or @file{xemacs}), and the paths to the
 directories where local Lisp and Info files are kept.  If you don't have
@@ -2150,7 +2150,7 @@ line like
 @vindex constants-unit-system
 @pindex constants.el
 Also properties (@pxref{Properties and Columns}) can be used as
-constants in table formulas: For a property @samp{:Xyz:} use the name
+constants in table formulas: for a property @samp{:Xyz:} use the name
 @samp{$PROP_Xyz}, and the property will be searched in the current
 outline entry and in the hierarchy above it.  If you have the
 @file{constants.el} package, it will also be used to resolve constants,
@@ -2539,7 +2539,7 @@ makes use of these features:
 @end group
 @end example
 
-@noindent @b{Important}: Please note that for these special tables,
+@noindent @b{Important}: please note that for these special tables,
 recalculating the table with @kbd{C-u C-c *} will only affect rows that
 are marked @samp{#} or @samp{*}, and fields that have a formula assigned
 to the field itself.  The column formulas are not applied in rows with
@@ -2684,7 +2684,7 @@ Defaults to @samp{%Y-%m-%d-%H:%M:%S}.
 If you want total control, you can specify a script file (place the file name
 between double-quotes) which will be used to plot.  Before plotting, every
 instance of @code{$datafile} in the specified script will be replaced with
-the path to the generated data file.  Note: Even if you set this option, you
+the path to the generated data file.  Note: even if you set this option, you
 may still want to specify the plot type, as that can impact the content of
 the data file.
 @end table
@@ -2922,7 +2922,7 @@ If the headline has a @code{CUSTOM_ID} property, a link to this custom ID
 will be stored.  In addition or alternatively (depending on the value of
 @code{org-link-to-org-use-id}), a globally unique @code{ID} property will be
 created and/or used to construct a link.  So using this command in Org
-buffers will potentially create two links: A human-readable from the custom
+buffers will potentially create two links: a human-readable from the custom
 ID, and one that is globally unique and works even if the entry is moved from
 file to file.  Later, when inserting the link, you need to decide which one
 to use.
@@ -3695,7 +3695,7 @@ when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes---if you have configured
 both, the state change recording note will take precedence and cancel
 the @samp{Closing Note}.}, and that a note is recorded when switching to
-WAIT or CANCELED.  The setting for WAIT is even more special: The
+WAIT or CANCELED.  The setting for WAIT is even more special: the
 @samp{!} after the slash means that in addition to the note taken when
 entering the state, a timestamp should be recorded when @i{leaving} the
 WAIT state, if and only if the @i{target} state does not configure
@@ -4438,7 +4438,7 @@ a regular expression and matched against the property values.
 
 @vindex org-use-property-inheritance
 The outline structure of Org-mode documents lends itself for an
-inheritance model of properties: If the parent in a tree has a certain
+inheritance model of properties: if the parent in a tree has a certain
 property, the children can inherit this property.  Org mode does not
 turn this on by default, because it can slow down property searches
 significantly and is often not needed.  However, if you find inheritance
@@ -4959,7 +4959,7 @@ is in there and derive anything you have not specified from the
 and time, but when modifying an existing timestamp, or when entering
 the second stamp of a range, it is taken from the stamp in the buffer.
 When filling in information, Org mode assumes that most of the time you
-will want to enter a date in the future: If you omit the month/year and
+will want to enter a date in the future: if you omit the month/year and
 the given day/month is @i{before} today, it will assume that you mean a
 future date@footnote{See the variable
 @code{org-read-date-prefer-future}.}.
@@ -5598,7 +5598,7 @@ tasks to Org files.  The @code{remember.el} package is part of Emacs 23, not
 Emacs 22.  See @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for
 more information.
 
-Org significantly expands the possibilities of Remember: You may define
+Org significantly expands the possibilities of Remember: you may define
 templates for different note types, and associate target files and headlines
 with specific templates.  It also allows you to select the location where a
 note should be stored interactively, on the fly.
@@ -5627,10 +5627,10 @@ target, and to create annotations compatible with Org links.
 The last line binds the command @code{org-remember} to a global
 key@footnote{Please select your own key, @kbd{C-c r} is only a
 suggestion.}.  @code{org-remember} basically just calls Remember,
-but it makes a few things easier: If there is an active region, it will
+but it makes a few things easier: if there is an active region, it will
 automatically copy the region into the Remember buffer.  It also allows
 to jump to the buffer and location where Remember notes are being
-stored: Just call @code{org-remember} with a prefix argument.  If you
+stored: just call @code{org-remember} with a prefix argument.  If you
 use two prefix arguments, Org jumps to the location where the last
 remember note was stored.
 
@@ -6573,7 +6573,7 @@ different way to test TODO states in a search.  For this, terminate the
 tags/property part of the search string (which may include several terms
 connected with @samp{|}) with a @samp{/} and then specify a Boolean
 expression just for TODO keywords.  The syntax is then similar to that for
-tags, but should be applied with care: For example, a positive
+tags, but should be applied with care: for example, a positive
 selection on several TODO keywords cannot meaningfully be combined with
 boolean AND.  However, @emph{negative selection} combined with AND can be
 meaningful.  To make sure that only lines are checked that actually have any
@@ -6716,7 +6716,7 @@ associated with the item.
 The category is a broad label assigned to each agenda item.  By default,
 the category is simply derived from the file name, but you can also
 specify it with a special line in the buffer, like this@footnote{For
-backward compatibility, the following also works: If there are several
+backward compatibility, the following also works: if there are several
 such lines in a file, each specifies the category for the text below it.
 The first category also applies to any text before the first CATEGORY
 line.  However, using this method is @emph{strongly} deprecated as it is
@@ -7248,7 +7248,7 @@ Unmark all marked entries for bulk action.
 
 @kindex B
 @item B
-Bulk action: Act on all marked entries in the agenda.  This will prompt for
+Bulk action: act on all marked entries in the agenda.  This will prompt for
 another key to select the action to be applied:
 @example
 r  @r{Prompt for a single refile target and move all entries.  The entries}
@@ -7519,7 +7519,7 @@ the results for GARDEN tags query in the opposite order,
 
 As you see, the values and parentheses setting is a little complex.
 When in doubt, use the customize interface to set this variable---it
-fully supports its structure.  Just one caveat: When setting options in
+fully supports its structure.  Just one caveat: when setting options in
 this interface, the @emph{values} are just Lisp expressions.  So if the
 value is a string, you need to add the double-quotes around the value
 yourself.
@@ -11535,7 +11535,7 @@ editing} were originally implemented in the package
 @file{org.el}.  As this environment became comfortable for project
 planning, the next step was adding @emph{TODO entries}, basic 
 @emph{timestamps}, and @emph{table support}.  These areas highlighted the two main
-goals that Org still has today: To be a new, outline-based,
+goals that Org still has today: to be a new, outline-based,
 plain text mode with innovative and intuitive editing features, and to
 incorporate project planning functionality directly into a notes file.
 
