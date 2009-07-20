@@ -2266,7 +2266,7 @@ This could probably be added to [[file:lisp/org-babel-script.el][org-babel-scrip
 #+resname: implementing-ditaa
 [[file:blue.png][blue.png]]
 
-*** STARTED gnuplot [6/8]
+*** STARTED gnuplot [7/8]
 (see [[* file result types][file result types]])
 
 #+PLOT: title:"Citas" ind:1 deps:(3) type:2d with:histograms set:"yrange [0:]"
@@ -2355,9 +2355,22 @@ These should all be in place by now.
 
 #+end_src
 
-**** STARTED gnuplot sessions
+**** DONE gnuplot sessions
 Working on this, we won't support multiple sessions as `gnuplot-mode'
 isn't setup for such things.
+
+Also we can't display results with the default :none session, so for
+gnuplot we really want the default behavior to be :default, and to
+only run a :none session when explicitly specified.
+
+#+srcname: implementing-gnuplot-sessions
+#+begin_src gnuplot :var data=gnuplot-data :session none :file session.png
+set title "Implementing Gnuplot Sessions"
+plot data using 1:2 with lines
+#+end_src
+
+#+resname:
+[[file:session.png][session.png]]
 
 **** TODO gnuplot LoB functionality
 

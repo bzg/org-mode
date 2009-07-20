@@ -42,7 +42,8 @@
 
 (add-to-list 'org-babel-tangle-langs '("gnuplot" "gnuplot"))
 
-(defvar org-babel-default-header-args:gnuplot '((:results . "file") (:exports . "results"))
+(defvar org-babel-default-header-args:gnuplot
+  '((:results . "file") (:exports . "results") (:session . nil))
   "Default arguments to use when evaluating a gnuplot source block.")
 
 (defvar org-babel-gnuplot-timestamp-fmt nil)
@@ -112,10 +113,16 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
                     (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
                     vars "\n"))
       ;; evaluate the code body with gnuplot
-      (with-temp-buffer
-        (insert (concat body "\n"))
-        (gnuplot-mode)
-        (gnuplot-send-buffer-to-gnuplot))
+      (if (string= session "none")
+          (let ((script-file (make-temp-file "org-babel-gnuplot-script")))
+            (with-temp-file script-file
+              (insert (concat body "\n")))
+            (message "gnuplot \"%s\"" script-file)
+            (message (shell-command-to-string (format "gnuplot \"%s\"" script-file))))
+        (with-temp-buffer
+          (insert (concat body "\n"))
+          (gnuplot-mode)
+          (gnuplot-send-buffer-to-gnuplot)))
       out-file)))
 
 (defun org-babel-prep-session:gnuplot (session params)
@@ -156,7 +163,6 @@ then create.  Return the initialized session.  The current
   "Export TABLE to DATA-FILE in a format readable by gnuplot.
 Pass PARAMS through to `orgtbl-to-generic' when exporting TABLE."
   (with-temp-file data-file
-    (message "table = %S" table)
     (make-local-variable 'org-babel-gnuplot-timestamp-fmt)
     (setq org-babel-gnuplot-timestamp-fmt (or
                                            (plist-get params :timefmt)
