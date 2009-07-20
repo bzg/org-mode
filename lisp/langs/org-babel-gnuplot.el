@@ -63,7 +63,7 @@ variable names and the value to be used in the gnuplot code."
 
 (defun org-babel-execute:gnuplot (body params)
   "Execute a block of Gnuplot code with org-babel.  This function is
-called by `org-babel-execute-src-block'."
+called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Gnuplot source code block")
   (let* ((vars (org-babel-gnuplot-process-vars params))
          (result-params (split-string (or (cdr (assoc :results params)) "")))
