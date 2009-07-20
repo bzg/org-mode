@@ -2852,7 +2852,7 @@ Normal means, no org-mode-specific context."
 (declare-function org-agenda-copy-local-variable "org-agenda" (var))
 (declare-function org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
 		  "org-agenda" (&optional end))
-
+(declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
 (declare-function parse-time-string "parse-time" (string))
 (declare-function remember "remember" (&optional initial))
 (declare-function remember-buffer-desc "remember" ())

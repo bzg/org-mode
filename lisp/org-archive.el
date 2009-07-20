@@ -32,6 +32,8 @@
 
 (require 'org)
 
+(declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+
 (defcustom org-archive-sibling-heading "Archive"
   "Name of the local archive sibling that is used to archive entries locally.
 Locally means: in the tree, under a sibling.

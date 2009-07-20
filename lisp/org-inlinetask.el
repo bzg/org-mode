@@ -76,6 +76,8 @@
 
 ;;; Code
 
+(require 'org)
+
 (defgroup org-inlinetask nil
   "Options concerning inline tasks in Org mode."
   :tag "Org Inline Tasks"

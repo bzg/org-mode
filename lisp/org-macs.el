@@ -262,6 +262,8 @@ This is in contrast to merely setting it to 0."
   `(let* ((outline-regexp (org-get-limited-outline-regexp)))
      ,@body))
 
+(defvar org-odd-levels-only) ; defined in org.el
+(defvar org-inlinetask-min-level) ; defined in org-inlinetask.el
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by "
