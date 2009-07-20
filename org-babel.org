@@ -266,12 +266,13 @@ would then be [[#sandbox][the sandbox]].
       if c == '=':
           new = Node()
           node.daughters = [node.daughters, new]
+          new.parent = node
           node = new
           whereami = "refname"
       if c == ',':
           whereami = "varname"
           varnum += 1
-      elif c == '(':
+      elif c == ')':
           node = node.parent
       elif c == ' ':
           pass
