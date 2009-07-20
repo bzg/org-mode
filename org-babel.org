@@ -207,7 +207,121 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [35/55]
+* Tasks [35/57]
+** PROPOSED implement fully recursive evaluation machinery
+   The current parser / evaluator fails with greater levels of nested
+   function block calls (example below). If we want to overcome this I
+   think we'd have to redesign some of the evaluation
+   mechanism. Seeing as we are also facing issues like dealing with
+   default argument values, and seeing as we now know how we want the
+   library of babel to behave in addition to the source blocks, now
+   might be a good time to think about this. It would be nice to do
+   the full thing at some point, but otoh we may not consider it a
+   massive priority.
+   
+   AIui, there are two stages: (i) construct a parse tree, and (ii)
+   evaluate it and return the value at the root. In the parse tree
+   each node represents an unevaluated value (either a literal value
+   or a reference). Node v may have descendent nodes, which represent
+   values upon which node v's evaluation depends. Once that tree is
+   constructed, then we evaluate the nodes from the tips towards the
+   root (a post-order traversal).
+
+   [This would also provide a solution for concatenating the STDOUTs
+   of called blocks, which is a [[*allow%20output%20mode%20to%20return%20stdout%20as%20value][task below]]; we concatenate them in
+   whatever order the traversal is done in.]
+
+   In addition to the variable references (i.e. daughter nodes), each
+   node would contain the information needed to evaluate that node
+   (e.g. lang body). Then we would pass a function postorder over the
+   tree which would call o-b-execute-src-block at each node, finally
+   returning the value at the root.
+
+   Fwiw I made a very tentative small start at stubbing this out in
+   org-babel-call.el in the 'evaluation' branch. And I've made a start
+   at sketching a parsing algorithm below.
+
+*** Parse tree algorithm
+    Seeing as we're just trying to parse a string like
+    f(a=1,b=g(c=2,d=3)) it shouldn't be too hard. But of course there
+    are 'proper' parsers written in elisp out there,
+    e.g. [[http://cedet.sourceforge.net/semantic.shtml][Semantic]]. Perhaps we can find what we need -- our syntax is
+    pretty much the same as python and R isn't it?
+
+    Or, a complete hack, but maybe it would be we easy to transform it
+    to XML and then parse that with some existing tool?
+    
+    But if we're doing it ourselves, something very vaguely like this?
+    (I'm sure there're lots of problems with this)
+
+#+srcname: org-babel-call-parse(call)
+#+begin_src python 
+  ## we are currently reading a reference name: the name of the root function
+  whereami = "refname"
+  node = root = Node()
+  for c in call_string:
+      if c == '(':
+          varnum = 0
+          whereami = "varname" # now we're reading a variable name
+      if c == '=':
+          new = Node()
+          node.daughters = [node.daughters, new]
+          node = new
+          whereami = "refname"
+      if c == ',':
+          whereami = "varname"
+          varnum += 1
+      elif c == '(':
+          node = node.parent
+      elif c == ' ':
+          pass
+      else:
+          if whereami = "varname":
+              node.varnames[varnum] += c
+          elif whereami = "refname":
+              node.name += c
+#+end_src
+    
+*** Example that fails
+    
+#+srcname: adder(a=0, b=0)
+#+begin_src python 
+a+b
+#+end_src
+
+#+srcname: one()
+#+begin_src python :results silent
+1
+#+end_src
+
+This works
+#+srcname: level-one-nesting
+#+begin_src python :var arg=adder(a=one(),b=one())
+arg
+#+end_src
+
+But this doesn't
+#+srcname: level-one-nesting
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
+arg
+#+end_src
+
+** PROPOSED Default args
+   This would be good thing to address soon. I'm imagining that
+   e.g. here, the 'caller' block would return the answer 30. I believe
+   there's a few issues here: i.e. the naked 'a' without a reference
+   is not understood; the default arg b=6 is not understood.
+
+#+srcname: adder(a, b=6)
+#+begin_src python 
+a+b
+#+end_src
+
+#+srcname: caller(var=adder(a=24))
+#+begin_src python 
+var
+#+end_src
+
 ** PROPOSED allow `anonymous' function block with function call args?
    My question here is simply whether we're going to allow
 #+begin_src python(arg=ref)
@@ -358,7 +472,7 @@ org-mode core
      org-src-mode would be better.
 **** DONE Changed minor mode name and added hooks
      
-**** DEFERRED a hook called when the src edit buffer is created
+**** DONE a hook called when the src edit buffer is created
      This should be implemented in the org-mode core
 
 ** TODO resolve references to other org buffers/files
@@ -459,7 +573,6 @@ This could also act reasonably with other results types...
 - file :: use org-open-at-point to open the file
 - scalar :: open results unquoted in a new buffer
 - tabular :: export the table to a new buffer and open that buffer
-
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
 This simple example of multilingual chaining produces vector output if
@@ -2201,22 +2314,7 @@ to specify a file holding the results
 (see [[* file result types][file result types]])
 
 
-* Bugs [23/36]
-** TODO Default args
-   This would be good thing to address soon. I'm imagining that
-   e.g. here, the 'caller' block would return the answer 30. I believe
-   there's a few issues here: i.e. the naked 'a' without a reference
-   is not understood; the default arg b=6 is not understood.
-
-#+srcname: adder(a, b=6)
-#+begin_src python 
-a+b
-#+end_src
-
-#+srcname: caller(var=adder(a=24))
-#+begin_src python 
-var
-#+end_src
+* Bugs [24/36]
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
@@ -2254,10 +2352,6 @@ b=5
 #+resname:
 : 23
 ---------------------
-
-** TODO avoid stripping whitespace from output when :results output
-   This may be partly solved by using o-b-chomp rather than o-b-trim
-   in the o-b-LANG-evaluate functions.
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
@@ -2409,6 +2503,10 @@ the same for the other languages. [Dan]
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+
+** DONE avoid stripping whitespace from output when :results output
+   This may be partly solved by using o-b-chomp rather than o-b-trim
+   in the o-b-LANG-evaluate functions.
 ** DEFERRED weird escaped characters in shell prompt break shell evaluation
    E.g. this doesn't work. Should the shell sessions set a sane prompt
    when they start up? Or is it a question of altering
