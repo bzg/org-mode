@@ -5038,6 +5038,7 @@ This function is the default value of the hook `org-cycle-hook'."
      ((eq state 'children) (or (org-subtree-end-visible-p) (recenter 1)))
      ((eq state 'subtree)  (or (org-subtree-end-visible-p) (recenter 1))))))
 
+;; FIXME: no longer in use
 (defun org-compact-display-after-subtree-move ()
   "Show a compacter version of the tree of the entry's parent."
   (save-excursion
@@ -5049,6 +5050,45 @@ This function is the default value of the hook `org-cycle-hook'."
 	  (org-cycle-show-empty-lines 'children)
 	  (org-cycle-hide-drawers 'children))
       (org-overview))))
+
+(defun org-remove-empty-overlays-at (pos)
+  "Remove outline overlays that do not contain non-white stuff."
+  (mapc
+   (lambda (o)
+     (and (eq 'outline (org-overlay-get o 'invisible))
+	  (not (string-match "\\S-" (buffer-substring (org-overlay-start o)
+							(org-overlay-end o))))
+	  (org-delete-overlay o)))
+   (org-overlays-at pos)))
+
+(defun org-clean-visibility-after-subtree-move ()
+  "Fix visibility issues after moving a subtree."
+  ;; First, find a reasonable region to look at:
+  ;; Start two siblings above, end three below
+  (let* ((beg (save-excursion
+		(and (outline-get-last-sibling)
+		     (outline-get-last-sibling))
+		(point)))
+	 (end (save-excursion 
+		(and (outline-get-next-sibling)
+		     (outline-get-next-sibling)
+		     (outline-get-next-sibling))
+		(if (org-at-heading-p)
+		    (point-at-eol)
+		  (point))))
+	 (level (looking-at "\\*+"))
+	 (re (if level (concat "^" (regexp-quote (match-string 0)) " "))))
+    (save-excursion
+      (save-restriction
+	(narrow-to-region beg end)
+	(when re
+	  ;; Properly fold already folded siblings
+	  (goto-char (point-min))
+	  (while (re-search-forward re nil t)
+	    (if (save-excursion (goto-char (point-at-eol)) (org-invisible-p))
+		(hide-entry))))
+	(org-cycle-show-empty-lines 'overview)
+	(org-cycle-hide-drawers 'overview)))))
 
 (defun org-cycle-show-empty-lines (state)
   "Show empty lines above all visible headlines.
@@ -5932,6 +5972,7 @@ is signaled in this case."
     (setq txt (buffer-substring beg end))
     (org-save-markers-in-region beg end)
     (delete-region beg end)
+    (org-remove-empty-overlays-at beg)
     (or (= beg (point-min)) (outline-flag-region (1- beg) beg nil))
     (or (bobp) (outline-flag-region (1- (point)) (point) nil))
     (and (not (bolp)) (looking-at "\n") (forward-char 1))
@@ -5953,12 +5994,12 @@ is signaled in this case."
 	  (kill-line (- ne-ins ne-beg)) (point)))
       (insert (make-string (- ne-ins ne-beg) ?\n)))
     (move-marker ins-point nil)
-    (org-compact-display-after-subtree-move)
-    (org-show-empty-lines-in-parent)
-    (unless folded
+    (if folded
+	(hide-entry)
       (org-show-entry)
       (show-children)
-      (org-cycle-hide-drawers 'children))))
+      (org-cycle-hide-drawers 'children))
+    (org-clean-visibility-after-subtree-move)))
 
 (defvar org-subtree-clip ""
   "Clipboard for cut and paste of subtrees.
