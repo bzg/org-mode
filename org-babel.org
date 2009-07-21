@@ -241,6 +241,53 @@ would then be [[#sandbox][the sandbox]].
    org-babel-call.el in the 'evaluation' branch. And I've made a start
    at sketching a parsing algorithm below.
 
+*** discussion
+I believe that this issue should be addressed as a bug rather than as
+a point for new development.   The code in [[file:lisp/org-babel-ref.el][org-babel-ref.el]] already
+resolves variable references in a recursive manner which *should* work
+in the same manner regardless of the depth of the number of nested
+function calls.  This recursive evaluation has the effect of
+implicitly constructing the parse tree that your are thinking of
+constructing explicitly.
+
+Through using some of the commented out debugging statements in
+[[file:lisp/org-babel-ref.el][org-babel-ref.el]] I have looked at what may be going wrong in the
+current evaluation setup, and it seems that nested variables are being
+set using the =:var= header argument, and these variables are being
+overridden by the *default* variables which are being entered through
+the new functional syntax (see the demonstration header below).
+
+I believe that once this bug is fixed we should be back to fully
+resolution of nested arguments.  We should capture this functionality
+in a test to ensure that we continue to test it as we move forward.  I
+can take a look at implementing this once I get a chance.
+
+**** demonstration
+
+After uncommenting the debugging statements located [[file:lisp/org-babel-ref.el::message%20format%20first%20second%20S%20S%20new%20refere%20new%20referent%20debugging][here]] and more
+importantly [[file:lisp/org-babel-ref.el::message%20nested%20args%20S%20args%20debugging][here]], we can see that the current reference code does
+evaluate the references correctly, and it uses the =:var= header
+argument to set =a=8=, however the default variables specified using
+the functional syntax in =adder(a=3, b=2)= is overriding this
+specification.
+
+#+srcname: adder(a=3, b=2)
+#+begin_src python 
+a + b
+#+end_src
+
+#+resname: adder
+: 5
+
+
+#+srcname: after-adder(arg=adder(a=8))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: after-adder
+: 5
+
 *** Parse tree algorithm
     Seeing as we're just trying to parse a string like
     f(a=1,b=g(c=2,d=3)) it shouldn't be too hard. But of course there
