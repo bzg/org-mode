@@ -2436,15 +2436,17 @@ a+b
 : 30
 
 ****** DONE Rely on defaults
-#+lob: adder1( )
+#+lob: adder1()
 
-#+resname: adder1( )
+#+resname: adder1()
 : 30
 
 ## should be 30
 ## OK, but
-******* TODO empty parens () not recognised as lob call
+******* DONE empty parens () not recognised as lob call
 	E.g. remove spaces between parens above
+
+        updated [[file:lisp/org-babel-lob.el::defvar%20org%20babel%20lob%20one%20liner%20regexp%20lob%20t%20n%20n%20t%20n][org-babel-lob-one-liner-regexp]]
 
 ****** TODO One supplied, one default
 #+lob: adder1(a=0)
