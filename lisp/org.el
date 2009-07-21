@@ -12409,7 +12409,7 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
   "Eval FORM in the calendar window and return to current window.
 Also, store the cursor date in variable org-ans2."
   (let ((sw (selected-window)))
-    (select-window (get-buffer-window "*Calendar*"))
+    (select-window (get-buffer-window "*Calendar*" t))
     (eval form)
     (when (and (not keepdate) (calendar-cursor-to-date))
       (let* ((date (calendar-cursor-to-date))
