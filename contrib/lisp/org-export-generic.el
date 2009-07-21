@@ -1005,7 +1005,7 @@ REVERSE means to reverse the list if the plist match is a list
 	 subtype)
     (cond
      ((null prefixtype) "")
-     ((and len (characterp prefixtype))
+     ((and len (char-or-string-p prefixtype) (not (stringp prefixtype)))
       ;; sequence of chars
       (concat (make-string len prefixtype) "\n"))
      ((stringp prefixtype)
