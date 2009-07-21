@@ -263,7 +263,6 @@ in a test to ensure that we continue to test it as we move forward.  I
 can take a look at implementing this once I get a chance.
 
 **** demonstration
-
 After uncommenting the debugging statements located [[file:lisp/org-babel-ref.el::message%20format%20first%20second%20S%20S%20new%20refere%20new%20referent%20debugging][here]] and more
 importantly [[file:lisp/org-babel-ref.el::message%20nested%20args%20S%20args%20debugging][here]], we can see that the current reference code does
 evaluate the references correctly, and it uses the =:var= header
@@ -271,22 +270,45 @@ argument to set =a=8=, however the default variables specified using
 the functional syntax in =adder(a=3, b=2)= is overriding this
 specification.
 
-#+srcname: adder(a=3, b=2)
+***** doesn't work with functional syntax
+
+#+srcname: adder-func(a=3, b=2)
 #+begin_src python 
 a + b
 #+end_src
 
-#+resname: adder
+#+resname: adder-func
 : 5
 
-
-#+srcname: after-adder(arg=adder(a=8))
+#+srcname: after-adder-func(arg=adder-func(a=8))
 #+begin_src python 
 arg
 #+end_src
 
-#+resname: after-adder
+#+resname: after-adder-func
 : 5
+
+***** still does work with =:var= syntax
+
+so it looks like regardless of the syntax used we're not overriding
+the default argument values.
+
+#+srcname: adder-header
+#+begin_src python :var a=3 :var b=2
+a + b
+#+end_src
+
+#+resname: adder-header
+: 5
+
+#+srcname: after-adder-header
+#+begin_src python :var arg=adder-header(a=8, b=0)
+arg
+#+end_src
+
+#+resname: after-adder-header
+: 5
+
 
 *** Parse tree algorithm
     Seeing as we're just trying to parse a string like

@@ -96,11 +96,12 @@ return nil."
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
         (setq new-referent (match-string 2 ref))
-        ;; (message (format "first second %S -- %S" new-refere new-referent)) ;; debugging
+        (message (format "first second %S -- %S" new-refere new-referent)) ;; debugging
         (when (> (length new-refere) 0)
           (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
                                  (split-string new-referent ",[ \f\t\n\r\v]*"))))
+          (message "nested args = %S" args)
           (setq ref new-refere)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
