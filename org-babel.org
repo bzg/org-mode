@@ -2357,7 +2357,7 @@ plot data using 1:2 with lines
               node.name += c
 #+end_src
     
-*** discussion
+*** discussion / investigation
 I believe that this issue should be addressed as a bug rather than as
 a point for new development.   The code in [[file:lisp/org-babel-ref.el][org-babel-ref.el]] already
 resolves variable references in a recursive manner which *should* work
@@ -2377,6 +2377,17 @@ I believe that once this bug is fixed we should be back to fully
 resolution of nested arguments.  We should capture this functionality
 in a test to ensure that we continue to test it as we move forward.  I
 can take a look at implementing this once I get a chance.
+
+Looks like the problem may be in [[file:lisp/org-babel.el::defun%20org%20babel%20merge%20params%20rest%20plists][org-babel-merge-params]], which seems
+to be trampling the provided :vars values.
+
+Nope, now it seems that we are actually looking up the results line,
+rather than the actual source-code block, which would make sense given
+that the results-line will return the same value regardless of the
+arguments supplied.  See the output of this [[file:lisp/org-babel-ref.el::message%20type%20S%20type%20debugging][debug-statement]].
+
+We need to be sure that we don't read from a =#+resname:= line when we
+have a non-nil set of arguments.
 
 **** demonstration
 After uncommenting the debugging statements located [[file:lisp/org-babel-ref.el::message%20format%20first%20second%20S%20S%20new%20refere%20new%20referent%20debugging][here]] and more
@@ -2448,18 +2459,18 @@ a+b
 
         updated [[file:lisp/org-babel-lob.el::defvar%20org%20babel%20lob%20one%20liner%20regexp%20lob%20t%20n%20n%20t%20n][org-babel-lob-one-liner-regexp]]
 
-****** TODO One supplied, one default
+****** DONE One supplied, one default
 #+lob: adder1(a=0)
 
 #+resname: adder1(a=0)
-: 30
 ## should be 10
+: 20
 
 #+lob: adder1(b=0)
 
 #+resname: adder1(b=0)
-: 30
 ## should be 10
+: 10
 
 ****** TODO Both supplied
 #+lob: adder1(a=1,b=2)

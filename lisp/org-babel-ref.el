@@ -96,12 +96,12 @@ return nil."
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
         (setq new-referent (match-string 2 ref))
-        (message (format "first second %S -- %S" new-refere new-referent)) ;; debugging
+        (message "new-refere=%S, new-referent=%S" new-refere new-referent) ;; debugging
         (when (> (length new-refere) 0)
           (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
                                  (split-string new-referent ",[ \f\t\n\r\v]*"))))
-          (message "nested args = %S" args)
+          (message "args=%S" args)
           (setq ref new-refere)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
@@ -111,8 +111,10 @@ return nil."
                                        (regexp-quote ref) "[ \t]*$"))
                 (regexp (concat "^#\\+SRCNAME:[ \t]*"
                                 (regexp-quote ref) "\\(\(.*\)\\)?" "[ \t]*$")))
-            (or (re-search-forward result_regexp nil t)
-                (re-search-forward result_regexp nil t)
+            ;; goto ref in the current buffer
+            (or (and (not args)
+                     (or (re-search-forward result_regexp nil t)
+                         (re-search-forward result_regexp nil t)))
                 (re-search-forward regexp nil t)
                 (re-search-backward regexp nil t)
                 ;; check the Library of Babel
@@ -132,12 +134,12 @@ return nil."
           (beginning-of-line)
           (if (or (= (point) (point-min)) (= (point) (point-max)))
               (error "reference not found"))))
+      (message "type=%S" type) ;; debugging
       (case type
         ('results-line (org-babel-ref-read-result))
         ('table (org-babel-ref-read-table))
         ('source-block
-         (setq result (org-babel-execute-src-block
-                       t nil (org-combine-plists args nil)))
+         (setq result (org-babel-execute-src-block t nil args))
          (if (symbolp result) (format "%S" result) result))
         ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
 

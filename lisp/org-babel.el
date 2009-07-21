@@ -159,6 +159,7 @@ Optionally supply a value for INFO in the form returned by
 Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the source code block."
   (interactive)
+  (message "supplied params=%S" params)
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
@@ -169,7 +170,7 @@ the header arguments specified at the source code block."
 	 (result-type (fourth processed-params))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    ;; (message "params=%S" params) ;; debugging statement
+    (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
