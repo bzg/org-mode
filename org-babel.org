@@ -2472,13 +2472,12 @@ a+b
 ## should be 10
 : 10
 
-****** TODO Both supplied
+****** DONE Both supplied
 #+lob: adder1(a=1,b=2)
 
 #+resname: adder1(a=1,b=2)
-: 30
-
 ## should be 3
+: 3
 
 **** One arg lacks default in definition
 #+srcname: adder2(a=10,b)
