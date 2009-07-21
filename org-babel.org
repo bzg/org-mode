@@ -2281,6 +2281,244 @@ plot data using 1:2 with lines
 
 
 * Bugs [24/36]
+** TODO Fix nested evaluation
+   The current parser / evaluator fails with greater levels of nested
+   function block calls (example below).
+
+*** Initial statement [ded]
+    If we want to overcome this I think we'd have to redesign some of
+    the evaluation mechanism. Seeing as we are also facing issues like
+    dealing with default argument values, and seeing as we now know
+    how we want the library of babel to behave in addition to the
+    source blocks, now might be a good time to think about this. It
+    would be nice to do the full thing at some point, but otoh we may
+    not consider it a massive priority.
+    
+    AIui, there are two stages: (i) construct a parse tree, and (ii)
+    evaluate it and return the value at the root. In the parse tree
+    each node represents an unevaluated value (either a literal value
+    or a reference). Node v may have descendent nodes, which represent
+    values upon which node v's evaluation depends. Once that tree is
+    constructed, then we evaluate the nodes from the tips towards the
+    root (a post-order traversal).
+
+    [This would also provide a solution for concatenating the STDOUTs
+    of called blocks, which is a [[*allow%20output%20mode%20to%20return%20stdout%20as%20value][task below]]; we concatenate them in
+    whatever order the traversal is done in.]
+
+    In addition to the variable references (i.e. daughter nodes), each
+    node would contain the information needed to evaluate that node
+    (e.g. lang body). Then we would pass a function postorder over the
+    tree which would call o-b-execute-src-block at each node, finally
+    returning the value at the root.
+
+    Fwiw I made a very tentative small start at stubbing this out in
+    org-babel-call.el in the 'evaluation' branch. And I've made a start
+    at sketching a parsing algorithm below.
+**** Parse tree algorithm
+    Seeing as we're just trying to parse a string like
+    f(a=1,b=g(c=2,d=3)) it shouldn't be too hard. But of course there
+    are 'proper' parsers written in elisp out there,
+    e.g. [[http://cedet.sourceforge.net/semantic.shtml][Semantic]]. Perhaps we can find what we need -- our syntax is
+    pretty much the same as python and R isn't it?
+
+    Or, a complete hack, but maybe it would be we easy to transform it
+    to XML and then parse that with some existing tool?
+    
+    But if we're doing it ourselves, something very vaguely like this?
+    (I'm sure there're lots of problems with this)
+
+#+srcname: org-babel-call-parse(call)
+#+begin_src python 
+  ## we are currently reading a reference name: the name of the root function
+  whereami = "refname"
+  node = root = Node()
+  for c in call_string:
+      if c == '(':
+          varnum = 0
+          whereami = "varname" # now we're reading a variable name
+      if c == '=':
+          new = Node()
+          node.daughters = [node.daughters, new]
+          new.parent = node
+          node = new
+          whereami = "refname"
+      if c == ',':
+          whereami = "varname"
+          varnum += 1
+      elif c == ')':
+          node = node.parent
+      elif c == ' ':
+          pass
+      else:
+          if whereami = "varname":
+              node.varnames[varnum] += c
+          elif whereami = "refname":
+              node.name += c
+#+end_src
+    
+
+*** 
+*** discussion
+I believe that this issue should be addressed as a bug rather than as
+a point for new development.   The code in [[file:lisp/org-babel-ref.el][org-babel-ref.el]] already
+resolves variable references in a recursive manner which *should* work
+in the same manner regardless of the depth of the number of nested
+function calls.  This recursive evaluation has the effect of
+implicitly constructing the parse tree that your are thinking of
+constructing explicitly.
+
+Through using some of the commented out debugging statements in
+[[file:lisp/org-babel-ref.el][org-babel-ref.el]] I have looked at what may be going wrong in the
+current evaluation setup, and it seems that nested variables are being
+set using the =:var= header argument, and these variables are being
+overridden by the *default* variables which are being entered through
+the new functional syntax (see the demonstration header below).
+
+I believe that once this bug is fixed we should be back to fully
+resolution of nested arguments.  We should capture this functionality
+in a test to ensure that we continue to test it as we move forward.  I
+can take a look at implementing this once I get a chance.
+
+**** demonstration
+     
+After uncommenting the debugging statements located [[file:lisp/org-babel-ref.el::message%20format%20first%20second%20S%20S%20new%20refere%20new%20referent%20debugging][here]] and more
+importantly [[file:lisp/org-babel-ref.el::message%20nested%20args%20S%20args%20debugging][here]], we can see that the current reference code does
+evaluate the references correctly, and it uses the =:var= header
+argument to set =a=8=, however the default variables specified using
+the functional syntax in =adder(a=3, b=2)= is overriding this
+specification.
+
+#+srcname: adder-test(a=3, b=2)
+#+begin_src python 
+a + b
+#+end_src
+
+#+resname: adder-test
+
+: 5
+
+#+srcname: after-adder(arg=adder-test(a=8))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: after-adder
+
+: []
+
+*** Set of test cases
+**** Both defaults provided in definition
+#+srcname: adder1(a=10,b=20)
+#+begin_src python
+a+b
+#+end_src
+
+#+resname: adder1
+: 30
+
+****** DONE Rely on defaults
+#+lob: adder1( )
+
+#+resname: adder1( )
+: 30
+
+## should be 30
+## OK, but
+******* TODO empty parens () not recognised as lob call
+	E.g. remove spaces between parens above
+
+****** TODO One supplied, one default
+#+lob: adder1(a=0)
+
+#+resname: adder1(a=0)
+: 30
+## should be 10
+
+#+lob: adder1(b=0)
+
+#+resname: adder1(b=0)
+: 30
+## should be 10
+
+****** TODO Both supplied
+#+lob: adder1(a=1,b=2)
+
+#+resname: adder1(a=1,b=2)
+: 30
+
+## should be 3
+
+**** One arg lacks default in definition
+#+srcname: adder2(a=10,b)
+#+begin_src python
+a+b
+#+end_src
+****** TODO Rely on defaults (one of which is missing)
+#+lob: adder2( )
+
+[no output]
+
+## should be error: b has no default
+
+****** TODO Default over-ridden
+#+lob: adder2(a=1)
+
+[no output ]
+## should be error: b has no default
+
+****** DONE Missing default supplied
+#+lob: adder2(b=1)
+
+#+resname: adder2(b=1)
+: 11
+
+## should be 11
+## OK
+
+****** DONE One over-ridden, one supplied
+#+lob: adder2(a=1,b=2)
+
+#+resname: adder2(a=1,b=2)
+: 3
+## should be 3
+
+*** Example that fails
+    
+#+srcname: adder(a=0, b=99)
+#+begin_src python 
+a+b
+#+end_src
+
+#+resname: adder
+: 99
+
+
+#+srcname: one()
+#+begin_src python :results silent
+2
+#+end_src
+
+
+#+srcname: level-one-nesting
+#+begin_src python :var arg=adder(a=one(),b=one())
+arg
+#+end_src
+
+#+resname:
+: 99
+
+#+srcname: level-one-nesting
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname:
+: 99
+
+
+
+
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
