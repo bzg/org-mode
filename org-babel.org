@@ -208,6 +208,9 @@ would then be [[#sandbox][the sandbox]].
 
 
 * Tasks [35/57]
+** PROPOSED raise elisp error when source-blocks return errors
+Not sure how/if this would work, but it may be desirable.
+
 ** PROPOSED Default args
    This would be good thing to address soon. I'm imagining that
    e.g. here, the 'caller' block would return the answer 30. I believe
@@ -2484,12 +2487,18 @@ a+b
 #+begin_src python
 a+b
 #+end_src
-****** TODO Rely on defaults (one of which is missing)
+****** DEFERRED Rely on defaults (one of which is missing)
 #+lob: adder2( )
 
 [no output]
 
 ## should be error: b has no default
+
+Maybe we should let the programming language handle this case.  For
+example python spits out an error in the =#+lob= line above.  Maybe
+rather than catching these errors our-selves we should raise an error
+when the source-block returns an error.  I'll propose a [[* PROPOSED raise elisp error when source-blocks return errors][task]] for this
+idea, I'm not sure how/if it would work...
 
 ****** TODO Default over-ridden
 #+lob: adder2(a=1)
