@@ -2284,7 +2284,7 @@ plot data using 1:2 with lines
 
 
 * Bugs [24/36]
-** TODO Fix nested evaluation
+** STARTED Fix nested evaluation
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
 
@@ -2533,8 +2533,8 @@ a+b
 #+end_src
 
 #+resname: adder
-: 99
 
+: 99
 
 #+srcname: one()
 #+begin_src python :results silent
@@ -2548,7 +2548,7 @@ arg
 #+end_src
 
 #+resname:
-: 99
+: 4
 
 #+srcname: level-one-nesting
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
@@ -2557,6 +2557,20 @@ arg
 
 #+resname:
 : 99
+
+*** TODO deeply nested arguments still fails
+
+#+srcname: level-one-nesting
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname:
+: 99
+
+results in this error
+
+: progn: reference 'one(' not found in this buffer
 
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
