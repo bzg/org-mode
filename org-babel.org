@@ -2569,8 +2569,19 @@ arg
 : 99
 
 results in this error
+: supplied params=nil
+: new-refere="adder", new-referent="a=adder(a=one(),b=one()),b=adder(a=one(),b=one())"
+: args=((:var . "a=adder(a=one()") (:var . "b=one())") (:var . "b=adder(a=one()") (:var . "b=one())"))
+: type=source-block
+: supplied params=((:var . "a=adder(a=one()") (:var . "b=one())") (:var . "b=adder(a=one()") (:var . "b=one())"))
+: new-refere="adder", new-referent="a=one("
+: args=((:var . "a=one("))
+: type=source-block
+: supplied params=((:var . "a=one("))
+: reference 'one(' not found in this buffer
 
-: progn: reference 'one(' not found in this buffer
+Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20arguments%20to%20pass%20to%20source%20block][org-babel-ref-resolve-reference]] so that
+it only matches when the parenthesis are balanced.
 
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
