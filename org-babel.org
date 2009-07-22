@@ -2500,8 +2500,11 @@ rather than catching these errors our-selves we should raise an error
 when the source-block returns an error.  I'll propose a [[* PROPOSED raise elisp error when source-blocks return errors][task]] for this
 idea, I'm not sure how/if it would work...
 
-****** TODO Default over-ridden
+****** DEFERRED Default over-ridden
 #+lob: adder2(a=1)
+
+See the above [[* DEFERRED Rely on defaults (one of which is missing)][deferred]] and the new proposed [[* PROPOSED raise elisp error when source-blocks return errors][task]], I think it may be
+more flexible to allow the source block language to handle the error.
 
 [no output ]
 ## should be error: b has no default
