@@ -207,25 +207,9 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [35/57]
+* Tasks [61/93]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
-
-** PROPOSED Default args
-   This would be good thing to address soon. I'm imagining that
-   e.g. here, the 'caller' block would return the answer 30. I believe
-   there's a few issues here: i.e. the naked 'a' without a reference
-   is not understood; the default arg b=6 is not understood.
-
-#+srcname: adder(a, b=6)
-#+begin_src python 
-a+b
-#+end_src
-
-#+srcname: caller(var=adder(a=24))
-#+begin_src python 
-var
-#+end_src
 
 ** PROPOSED allow `anonymous' function block with function call args?
    My question here is simply whether we're going to allow
@@ -946,6 +930,22 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+
+** DONE Default args
+   This would be good thing to address soon. I'm imagining that
+   e.g. here, the 'caller' block would return the answer 30. I believe
+   there's a few issues here: i.e. the naked 'a' without a reference
+   is not understood; the default arg b=6 is not understood.
+
+#+srcname: adder(a, b=6)
+#+begin_src python 
+a+b
+#+end_src
+
+#+srcname: caller(var=adder(a=24))
+#+begin_src python :results silent
+var
+#+end_src
 
 ** DONE extensible library of callable source blocks
 *** Current design
@@ -2283,7 +2283,6 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [25/36]
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
@@ -3237,7 +3236,7 @@ recognition of ruby arrays as such.
 
 
 
-
+: 30
 * Tests
 Evaluate all the cells in this table for a comprehensive test of the
 org-babel functionality.
