@@ -96,12 +96,12 @@ return nil."
       (when (string-match "^\\(.+?\\)\(\\(.*\\)\)$" ref)
         (setq new-refere (match-string 1 ref))
         (setq new-referent (match-string 2 ref))
-        (message "new-refere=%S, new-referent=%S" new-refere new-referent) ;; debugging
+        ;; (message "new-refere=%S, new-referent=%S" new-refere new-referent) ;; debugging
         (when (> (length new-refere) 0)
           (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
                                  (org-babel-ref-split-args new-referent))))
-          (message "args=%S" args)
+          ;; (message "args=%S" args) ;; debugging
           (setq ref new-refere)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
         (find-file (match-string 1 ref))
@@ -134,7 +134,7 @@ return nil."
           (beginning-of-line)
           (if (or (= (point) (point-min)) (= (point) (point-max)))
               (error "reference not found"))))
-      (message "type=%S" type) ;; debugging
+      ;; (message "type=%S" type) ;; debugging
       (case type
         ('results-line (org-babel-ref-read-result))
         ('table (org-babel-ref-read-table))

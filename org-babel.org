@@ -2283,8 +2283,8 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [24/36]
-** STARTED Fix nested evaluation
+* Bugs [25/36]
+** DONE Fix nested evaluation
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
 
