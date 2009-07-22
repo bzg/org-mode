@@ -2558,7 +2558,7 @@ arg
 #+resname:
 : 99
 
-*** TODO deeply nested arguments still fails
+*** DONE deeply nested arguments still fails
 
 #+srcname: level-one-nesting
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
@@ -2566,7 +2566,7 @@ arg
 #+end_src
 
 #+resname:
-: 99
+: 8
 
 results in this error
 : supplied params=nil
@@ -2581,7 +2581,8 @@ results in this error
 : reference 'one(' not found in this buffer
 
 Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20arguments%20to%20pass%20to%20source%20block][org-babel-ref-resolve-reference]] so that
-it only matches when the parenthesis are balanced.
+it only matches when the parenthesis are balanced.  Maybe look at
+[[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
 
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for

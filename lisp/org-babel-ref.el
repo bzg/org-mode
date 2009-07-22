@@ -100,7 +100,7 @@ return nil."
         (when (> (length new-refere) 0)
           (if (> (length new-referent) 0)
               (setq args (mapcar (lambda (ref) (cons :var ref))
-                                 (split-string new-referent ",[ \f\t\n\r\v]*"))))
+                                 (org-babel-ref-split-args new-referent))))
           (message "args=%S" args)
           (setq ref new-refere)))
       (when (string-match "\\(.+\\):\\(.+\\)" ref)
@@ -142,6 +142,23 @@ return nil."
          (setq result (org-babel-execute-src-block t nil args))
          (if (symbolp result) (format "%S" result) result))
         ('lob (setq result (org-babel-execute-src-block t lob-info args)))))))
+
+(defun org-babel-ref-split-args (arg-string)
+  "Split ARG-STRING into top-level arguments of balanced parenthesis."
+  (let ((index 0) (depth 0) (buffer "") holder return)
+    ;; crawl along string, splitting at any ","s which are on the top level
+    (while (< index (length arg-string))
+      (setq holder (substring arg-string index (+ 1 index)))
+      (setq buffer (concat buffer holder))
+      (setq index (+ 1 index))
+      (cond
+       ((string= holder ",")
+        (when (= depth 0)
+          (setq return (reverse (cons (substring buffer 0 -1) return)))
+          (setq buffer "")))
+       ((string= holder "(") (setq depth (+ 1 depth)))
+       ((string= holder ")") (setq depth (- 1 depth)))))
+    (reverse (cons buffer return))))
 
 (defun org-babel-ref-at-ref-p ()
   "Return the type of reference located at point or nil if none
