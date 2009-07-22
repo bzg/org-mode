@@ -2772,6 +2772,53 @@ Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20argume
 it only matches when the parenthesis are balanced.  Maybe look at
 [[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
 
+*** Still some problems with deeply nested arguments and defaults
+**** TODO Nesting problem I
+     Try inserting a space between the 'a=3,' and 'b=4'. It changes the result from 10 to 12
+
+#+srcname: deeply-nested-args-bug-I()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3,b=4),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-I
+
+: 10
+
+**** TODO Nesting problem II
+     This generates parsing errors
+#+srcname: deeply-nested-args-bug-II()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+arg
+#+end_src
+
+
+**** TODO Why does this give 8?
+#+srcname: deeply-nested-args-bug-2()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-2
+: 8
+
+**** TODO Problem with empty argument list
+     This gives empty list with () and 'no output' with ( )
+#+srcname: x()
+#+begin_src python :var arg=adder()
+arg
+#+end_src
+
+#+resname: x
+: []
+
+
+
+
+
+
+
+
 ** DONE avoid stripping whitespace from output when :results output
    This may be partly solved by using o-b-chomp rather than o-b-trim
    in the o-b-LANG-evaluate functions.
