@@ -2284,6 +2284,194 @@ plot data using 1:2 with lines
 
 
 * Bugs [25/36]
+** TODO allow srcname to omit function call parentheses
+   Someone needs to revisit those regexps. Is there an argument for
+   moving some of the regexps used to match function calls into
+   defvars? (i.e. in o-b.el and o-b-ref.el)
+
+** TODO creeping blank lines
+   There's still inappropriate addition of blank lines in some circumstances. 
+
+   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
+   removes the entire (#+resname and result) and starts from scratch,
+   whereas #+begin_src only removes the result. I haven't worked out
+   what the correct fix is yet. Maybe the right thing to do is to make
+   sure that those functions (o-b-remove-result et al.) are neutral
+   with respect to newlines. Sounds easy, but...
+
+   E.g.
+
+#+begin_src sh
+b=5
+#+end_src
+
+
+
+   Compare the results of
+#+lob: python-add(a=5, b=17)
+
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
+
+#+begin_src python
+23
+#+end_src
+
+#+resname:
+: 23
+---------------------
+** TODO problem with newlines in output when :results value
+#+begin_src python :results value
+'\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0
+
+Whereas I was hoping for
+
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is some sort of non-printing char / quoting issue I think. Note
+that
+
+#+begin_src python :results value
+'\\n'.join(map(str, range(4)))
+#+end_src
+
+#+resname:
+: 0\n1\n2\n3
+
+Also, note that
+#+begin_src python :results output
+print('\n'.join(map(str, range(4))))
+#+end_src
+
+#+resname:
+: 0
+: 1
+: 2
+: 3
+
+*** collapsing consecutive newlines in string output
+    
+    This is an example of the same bug
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+This doesn't produce anything at all now. I believe that's because
+I've changed things so that :results output really does *not* get the
+value of the block, only the STDOUT. So if we add a print statement
+this works OK.
+
+#+srcname: multi-line-string-output
+#+begin_src ruby :results output
+print "the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: the first line ends here
+: 
+: 
+:      and this is the second one
+: 
+: even a third
+
+However, the behaviour with :results value is wrong
+
+#+srcname: multi-line-string-value
+#+begin_src ruby
+"the first line ends here
+
+
+     and this is the second one
+
+even a third"
+#+end_src
+
+#+resname:
+: 0
+
+** TODO prompt characters appearing in output with R
+#+begin_src R :session *R* :results output
+  x <- 6
+  y <- 8
+  3
+#+end_src      
+
+#+resname:
+: > [1] 3
+
+** TODO o-b-execute-subtree overwrites heading when subtree is folded
+*** Example
+    Try M-x org-babel-execute-subtree with the subtree folded and
+    point at the beginning of the heading line.
+#+begin_src sh
+size=5
+#+end_src
+
+** TODO Allow source blocks to be recognised when #+ are not first characters on the line
+   I think Carsten has recently altered the core so that #+ can have
+   preceding whitespace, at least for literal/code examples. org-babel
+   should support this.
+
+** TODO non-orgtbl formatted lists
+for example
+
+#+srcname: this-doesn't-match-orgtbl
+#+begin_src emacs-lisp :results replace
+'((:results . "replace"))
+#+end_src
+
+#+resname: this-doesn't-match-orgtbl
+   
+** PROPOSED external shell execution can't isolate return values
+I have no idea how to do this as of yet.  The result is that when
+shell functions are run w/o a session there is no difference between
+the =output= and =value= result arguments.
+
+Yea, I don't know how to do this either.  I searched extensively on
+how to isolate the *last* output of a series of shell commands (see
+[[* last command for
+ shells][last command for shells]]).  The results of the search were basically
+that it was not possible (or at least not accomplish-able with a
+reasonable amount of effort).
+
+That fact combined with the tenancy to all ways use standard out in
+shell scripts led me to treat these two options (=output= and =value=)
+as identical in shell evaluation.  Not ideal but maybe good enough for
+the moment.
+
+In the `results' branch I've changed this so that they're not quite
+identical: output results in raw stdout contents, whereas value
+converts it to elisp, perhaps to a table if it looks tabular. This is
+the same for the other languages. [Dan]
+
+** TODO are the org-babel-trim s necessary?
+   at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
+   not org-babel-ruby-evaluate
+** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
+   And at other occurrences of org-combine-plists?
+** TODO LoB is not populated on startup
+   org-babel-library-of-babel is nil for me on startup. I have to
+   evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
 ** DONE Fix nested evaluation
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
@@ -2560,7 +2748,7 @@ arg
 
 *** DONE deeply nested arguments still fails
 
-#+srcname: level-one-nesting
+#+srcname: deeply-nested-args-bug
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
 arg
 #+end_src
@@ -2583,195 +2771,6 @@ results in this error
 Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20arguments%20to%20pass%20to%20source%20block][org-babel-ref-resolve-reference]] so that
 it only matches when the parenthesis are balanced.  Maybe look at
 [[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
-
-** TODO allow srcname to omit function call parentheses
-   Someone needs to revisit those regexps. Is there an argument for
-   moving some of the regexps used to match function calls into
-   defvars? (i.e. in o-b.el and o-b-ref.el)
-
-** TODO creeping blank lines
-   There's still inappropriate addition of blank lines in some circumstances. 
-
-   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
-   removes the entire (#+resname and result) and starts from scratch,
-   whereas #+begin_src only removes the result. I haven't worked out
-   what the correct fix is yet. Maybe the right thing to do is to make
-   sure that those functions (o-b-remove-result et al.) are neutral
-   with respect to newlines. Sounds easy, but...
-
-   E.g.
-
-#+begin_src sh
-b=5
-#+end_src
-
-
-
-   Compare the results of
-#+lob: python-add(a=5, b=17)
-
-#+resname: python-add(a=5, b=17)
-: 22
---------------------------------
-
-#+begin_src python
-23
-#+end_src
-
-#+resname:
-: 23
----------------------
-** TODO problem with newlines in output when :results value
-#+begin_src python :results value
-'\n'.join(map(str, range(4)))
-#+end_src
-
-#+resname:
-: 0
-
-Whereas I was hoping for
-
-| 0 |
-| 1 |
-| 2 |
-| 3 |
-
-This is some sort of non-printing char / quoting issue I think. Note
-that
-
-#+begin_src python :results value
-'\\n'.join(map(str, range(4)))
-#+end_src
-
-#+resname:
-: 0\n1\n2\n3
-
-Also, note that
-#+begin_src python :results output
-print('\n'.join(map(str, range(4))))
-#+end_src
-
-#+resname:
-: 0
-: 1
-: 2
-: 3
-
-*** collapsing consecutive newlines in string output
-    
-    This is an example of the same bug
-
-#+srcname: multi-line-string-output
-#+begin_src ruby :results output
-"the first line ends here
-
-
-     and this is the second one
-
-even a third"
-#+end_src
-
-This doesn't produce anything at all now. I believe that's because
-I've changed things so that :results output really does *not* get the
-value of the block, only the STDOUT. So if we add a print statement
-this works OK.
-
-#+srcname: multi-line-string-output
-#+begin_src ruby :results output
-print "the first line ends here
-
-
-     and this is the second one
-
-even a third"
-#+end_src
-
-#+resname:
-: the first line ends here
-: 
-: 
-:      and this is the second one
-: 
-: even a third
-
-However, the behaviour with :results value is wrong
-
-#+srcname: multi-line-string-value
-#+begin_src ruby
-"the first line ends here
-
-
-     and this is the second one
-
-even a third"
-#+end_src
-
-#+resname:
-: 0
-
-** TODO prompt characters appearing in output with R
-#+begin_src R :session *R* :results output
-  x <- 6
-  y <- 8
-  3
-#+end_src      
-
-#+resname:
-: > [1] 3
-
-** TODO o-b-execute-subtree overwrites heading when subtree is folded
-*** Example
-    Try M-x org-babel-execute-subtree with the subtree folded and
-    point at the beginning of the heading line.
-#+begin_src sh
-size=5
-#+end_src
-
-** TODO Allow source blocks to be recognised when #+ are not first characters on the line
-   I think Carsten has recently altered the core so that #+ can have
-   preceding whitespace, at least for literal/code examples. org-babel
-   should support this.
-
-** TODO non-orgtbl formatted lists
-for example
-
-#+srcname: this-doesn't-match-orgtbl
-#+begin_src emacs-lisp :results replace
-'((:results . "replace"))
-#+end_src
-
-#+resname: this-doesn't-match-orgtbl
-   
-** PROPOSED external shell execution can't isolate return values
-I have no idea how to do this as of yet.  The result is that when
-shell functions are run w/o a session there is no difference between
-the =output= and =value= result arguments.
-
-Yea, I don't know how to do this either.  I searched extensively on
-how to isolate the *last* output of a series of shell commands (see
-[[* last command for
- shells][last command for shells]]).  The results of the search were basically
-that it was not possible (or at least not accomplish-able with a
-reasonable amount of effort).
-
-That fact combined with the tenancy to all ways use standard out in
-shell scripts led me to treat these two options (=output= and =value=)
-as identical in shell evaluation.  Not ideal but maybe good enough for
-the moment.
-
-In the `results' branch I've changed this so that they're not quite
-identical: output results in raw stdout contents, whereas value
-converts it to elisp, perhaps to a table if it looks tabular. This is
-the same for the other languages. [Dan]
-
-** TODO are the org-babel-trim s necessary?
-   at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
-   not org-babel-ruby-evaluate
-** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
-   And at other occurrences of org-combine-plists?
-** TODO LoB is not populated on startup
-   org-babel-library-of-babel is nil for me on startup. I have to
-   evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
 
 ** DONE avoid stripping whitespace from output when :results output
    This may be partly solved by using o-b-chomp rather than o-b-trim
@@ -3286,6 +3285,7 @@ of these tests may fail.
 | R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
 | multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
 | forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
+| deeply nested arguments | deeply-nested-args-bug     |     |           8 |           8 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
 | sessions                |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
