@@ -525,7 +525,8 @@ parameters when merging lists."
                                  vars (cons (cons var ref) (assq-delete-all var vars)))))
                         (:results
                          (setq results (e-merge '(("file" "vector" "scalar")
-                                                  ("replace" "silent"))
+                                                  ("replace" "silent")
+                                                  ("output" "value"))
                                                 results (split-string (cdr pair)))))
                         (:exports
                          (setq exports (e-merge '(("code" "results" "both"))
