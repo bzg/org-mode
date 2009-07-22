@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [61/93]
+* Tasks [36/57]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -2283,6 +2283,7 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
+* Bugs [25/36]
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
@@ -3237,6 +3238,8 @@ recognition of ruby arrays as such.
 
 
 : 30
+
+
 * Tests
 Evaluate all the cells in this table for a comprehensive test of the
 org-babel functionality.
