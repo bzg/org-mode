@@ -12031,6 +12031,14 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-history nil)
 (defvar org-read-date-final-answer nil)
 
+(defmacro org-save-frame-excursion (&rest body)
+  "Eval BODY and return to the currently selected frame."
+  (let ((frame-var (gensym "FRAME")))
+    `(let ((,frame-var (selected-frame)))
+       (unwind-protect
+           (progn ,@body)
+         (select-frame-set-input-focus ,frame-var)))))
+
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input)
   "Read a date, possibly a time, and make things smooth for the user.
@@ -12109,78 +12117,79 @@ user."
      (org-read-date-popup-calendar
       (save-excursion
 	(save-window-excursion
-	  (calendar)
-	  (calendar-forward-day (- (time-to-days def)
-				   (calendar-absolute-from-gregorian
-				    (calendar-current-date))))
-	  (org-eval-in-calendar nil t)
-	  (let* ((old-map (current-local-map))
-		 (map (copy-keymap calendar-mode-map))
-		 (minibuffer-local-map (copy-keymap minibuffer-local-map)))
-	    (org-defkey map (kbd "RET") 'org-calendar-select)
-	    (org-defkey map (if (featurep 'xemacs) [button1] [mouse-1])
-	      'org-calendar-select-mouse)
-	    (org-defkey map (if (featurep 'xemacs) [button2] [mouse-2])
-	      'org-calendar-select-mouse)
-	    (org-defkey minibuffer-local-map [(meta shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-month 1))))
-	    (org-defkey minibuffer-local-map [(meta shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-month 1))))
-	    (org-defkey minibuffer-local-map [(meta shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-year 1))))
-	    (org-defkey minibuffer-local-map [(meta shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-year 1))))
-	    (org-defkey minibuffer-local-map [?\e (shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-month 1))))
-	    (org-defkey minibuffer-local-map [?\e (shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-month 1))))
-	    (org-defkey minibuffer-local-map [?\e (shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-year 1))))
-	    (org-defkey minibuffer-local-map [?\e (shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-year 1))))
-	    (org-defkey minibuffer-local-map [(shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-week 1))))
-	    (org-defkey minibuffer-local-map [(shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-week 1))))
-	    (org-defkey minibuffer-local-map [(shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-day 1))))
-	    (org-defkey minibuffer-local-map [(shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-day 1))))
-	    (org-defkey minibuffer-local-map ">"
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(scroll-calendar-left 1))))
-	    (org-defkey minibuffer-local-map "<"
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(scroll-calendar-right 1))))
-	    (run-hooks 'org-read-date-minibuffer-setup-hook)
-	    (unwind-protect
-		(progn
-		  (use-local-map map)
-		  (add-hook 'post-command-hook 'org-read-date-display)
-		  (setq org-ans0 (read-string prompt default-input
-					      'org-read-date-history nil))
-		  ;; org-ans0: from prompt
-		  ;; org-ans1: from mouse click
-		  ;; org-ans2: from calendar motion
-		  (setq ans (concat org-ans0 " " (or org-ans1 org-ans2))))
-	      (remove-hook 'post-command-hook 'org-read-date-display)
-	      (use-local-map old-map)
-	      (when org-read-date-overlay
-		(org-delete-overlay org-read-date-overlay)
-		(setq org-read-date-overlay nil)))))))
-
+	  (org-save-frame-excursion
+	   (calendar)
+	   (calendar-forward-day (- (time-to-days def)
+				    (calendar-absolute-from-gregorian
+				     (calendar-current-date))))
+	   (org-eval-in-calendar nil t)
+	   (let* ((old-map (current-local-map))
+		  (map (copy-keymap calendar-mode-map))
+		  (minibuffer-local-map (copy-keymap minibuffer-local-map)))
+	     (org-defkey map (kbd "RET") 'org-calendar-select)
+	     (org-defkey map (if (featurep 'xemacs) [button1] [mouse-1])
+			 'org-calendar-select-mouse)
+	     (org-defkey map (if (featurep 'xemacs) [button2] [mouse-2])
+			 'org-calendar-select-mouse)
+	     (org-defkey minibuffer-local-map [(meta shift left)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-month 1))))
+	     (org-defkey minibuffer-local-map [(meta shift right)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-month 1))))
+	     (org-defkey minibuffer-local-map [(meta shift up)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-year 1))))
+	     (org-defkey minibuffer-local-map [(meta shift down)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-year 1))))
+	     (org-defkey minibuffer-local-map [?\e (shift left)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-month 1))))
+	     (org-defkey minibuffer-local-map [?\e (shift right)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-month 1))))
+	     (org-defkey minibuffer-local-map [?\e (shift up)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-year 1))))
+	     (org-defkey minibuffer-local-map [?\e (shift down)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-year 1))))
+	     (org-defkey minibuffer-local-map [(shift up)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-week 1))))
+	     (org-defkey minibuffer-local-map [(shift down)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-week 1))))
+	     (org-defkey minibuffer-local-map [(shift left)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-backward-day 1))))
+	     (org-defkey minibuffer-local-map [(shift right)]
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(calendar-forward-day 1))))
+	     (org-defkey minibuffer-local-map ">"
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(scroll-calendar-left 1))))
+	     (org-defkey minibuffer-local-map "<"
+			 (lambda () (interactive)
+			   (org-eval-in-calendar '(scroll-calendar-right 1))))
+	     (run-hooks 'org-read-date-minibuffer-setup-hook)
+	     (unwind-protect
+		 (progn
+		   (use-local-map map)
+		   (add-hook 'post-command-hook 'org-read-date-display)
+		   (setq org-ans0 (read-string prompt default-input
+					       'org-read-date-history nil))
+		   ;; org-ans0: from prompt
+		   ;; org-ans1: from mouse click
+		   ;; org-ans2: from calendar motion
+		   (setq ans (concat org-ans0 " " (or org-ans1 org-ans2))))
+	       (remove-hook 'post-command-hook 'org-read-date-display)
+	       (use-local-map old-map)
+	       (when org-read-date-overlay
+		 (org-delete-overlay org-read-date-overlay)
+		 (setq org-read-date-overlay nil))))))))
+     
      (t ; Naked prompt only
       (unwind-protect
 	  (setq ans (read-string prompt default-input
@@ -12188,10 +12197,10 @@ user."
 	(when org-read-date-overlay
 	  (org-delete-overlay org-read-date-overlay)
 	  (setq org-read-date-overlay nil)))))
-
+    
     (setq final (org-read-date-analyze ans def defdecode))
     (setq org-read-date-final-answer ans)
-
+    
     (if to-time
 	(apply 'encode-time final)
       (if (and (boundp 'org-time-was-given) org-time-was-given)
@@ -12199,6 +12208,7 @@ user."
 		  (nth 5 final) (nth 4 final) (nth 3 final)
 		  (nth 2 final) (nth 1 final))
 	(format "%04d-%02d-%02d" (nth 5 final) (nth 4 final) (nth 3 final))))))
+
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
