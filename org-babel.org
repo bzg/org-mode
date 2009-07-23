@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [38/58]
+* Tasks [37/58]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -257,6 +257,9 @@ but with preference given to
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
 
+** TODO take default values for header args from properties
+   Use file-wide and subtree wide properties to set default values for
+   header args.
 ** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
@@ -928,20 +931,6 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
-
-** DONE take default values for header args from properties
-   Use file-wide and subtree wide properties to set default values for
-   header args.
-
-*** I have non-standard properties
-    :PROPERTIES:
-    :results:  silent
-    :END:
-
-#+srcname: test-implement-silent
-#+begin_src emacs-lisp 
-(+ 1 3)
-#+end_src
 ** DONE add =:tangle= family of header arguments
 values are
 - no :: don't include source-code block when tangling
