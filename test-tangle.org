@@ -90,3 +90,13 @@ plus_two(holder)
 #+begin_src emacs-lisp :tangle no
   (setq test-tangle-i-should-not-exist "hopefully I'm not included")
 #+end_src
+
+*** Emacs Lisp (not to be tangled)
+    :PROPERTIES:
+    :tangle:   no
+    :END:
+
+#+srcname: i-also-shouldnt-be-tangled
+#+begin_src emacs-lisp 
+  (setq test-tangle-me-either "i also shouldn't be tangled")
+#+end_src
