@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [37/58]
+* Tasks [37/59]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -566,6 +566,15 @@ should use a span class, and should show original source in tool-tip
 ** TODO LoB: re-implement plotting and analysis functions from org-R
    I'll do this soon, now that we things are a bit more settled and we
    have column names in R.
+** PROPOSED Creating presentations
+   The [[mairix:t:@@9854.1246500519@gamaville.dokosmarshall.org][recent thread]] containing posts by Nick Dokos and Sebastian
+   Vaubán on exporting to beamer looked very interesting, but I
+   haven't had time to try it out yet. I would really like it if,
+   eventually, we can generate a presentation (with graphics generated
+   by code blocks) from the same org file that contains all the notes
+   and code etc. I just wanted that to be on record in this document;
+   I don't have anything more profound to say about it at the moment,
+   and I'm not sure to what extent it is an org-babel issue.
 ** PROPOSED conversion between org-babel and noweb (e.g. .Rnw) format
    I haven't thought about this properly. Just noting it down. What
    Sweave uses is called "R noweb" (.Rnw).
@@ -2842,13 +2851,6 @@ arg
 
 #+resname: x
 : []
-
-
-
-
-
-
-
 
 ** DONE avoid stripping whitespace from output when :results output
    This may be partly solved by using o-b-chomp rather than o-b-trim
