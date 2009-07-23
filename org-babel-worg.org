@@ -2,8 +2,8 @@
 #+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
-#+TITLE:      org-babel: execution of source code blocks in org-mode
-#+AUTHOR:     Dan Davison
+#+TITLE:      org-babel: executable source code blocks in org-mode
+#+AUTHOR:     Dan Davison, Eric Schulte
 #+EMAIL:      davison at stats dot ox dot ac dot uk
 #+LANGUAGE:   en
 #+CATEGORY:   worg
@@ -44,16 +44,6 @@ c(5, 10)
 |  5 |
 | 10 |
 
-
-
-
-
-
-
-
-
-
-
 *** What happens to the results?
     Org-babel provides two fundamentally different modes for capturing
     the results of code evaluation, specified by the :results header
@@ -75,47 +65,20 @@ c(5, 10)
      users).
 **** Additional :results settings
      
-
-     
 *** Arguments to source code blocks
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
     now have the status of *functions*.
 
-    
-*** Internals
-    For those interested in hacking org-babel, it's worth going
-    through what actually happened there:
-***** org-babel-execute-src
-      1. parses source block info (recognises language, looks for
-	 arguments (there aren't any))
-      2. calls
-***** org-babel-execute:LANG
-      1. resolves referenced variables (there aren't any)
-      2. assigns any referenced variables and evaluates body
-***** org-babel-LANG-evaluate
-      Returns a string corresponding to either output or value of block.
-
-#+resname:
-: Sun Jul  5 14:17:31 EDT 2009
-
-
-#+begin_src R :results output
-    date()
-#+end_src
-
-#+resname:
-: Sun Jul  5 14:00:20 2009
-
-
-#+begin_src python
-    import time
-    time.ctime()
-#+end_src
-    
-#+resname:
-: Sun Jul  5 14:13:07 2009
-
+* A meta-programming language for org-mode
+* Spreadsheet plugins for org-mode in any language
+* Reproducible research
+  - output vs. value mode
+  - file & graphical output
+  - controlling export
+* Literate programming
+  - org-babel-tangle
+  - org-babel-load-file
 * Reference / Documentation
 
 *** Source Code block syntax
