@@ -1,3 +1,8 @@
+2009-07-23  Bastien Guerry  <bzg@altern.org>
+
+	* org-clock.el (org-show-notification-handler): New option.
+	(org-show-notification): Use the new option.
+
 2009-07-21  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-eval-in-calendar): Fix a bug about calendar

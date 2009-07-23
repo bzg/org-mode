@@ -192,6 +192,15 @@ auto     Automtically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
+(defcustom org-show-notification-handler nil
+  "Function or program to send notification with.
+The function or program will be called with the notification
+string as argument."
+  :group 'org-clock
+  :type '(choice
+	  (string :tag "Program")
+	  (function :tag "Function")))
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -441,10 +450,17 @@ Notification is shown only once."
 
 (defun org-show-notification (notification)
   "Show notification. Use libnotify, if available."
-  (if (org-program-exists "notify-send")
-      (start-process "emacs-timer-notification" nil "notify-send" notification))
-  ;; In any case, show in message area
-  (message notification))
+  (cond ((functionp org-show-notification-handler)
+	 (funcall org-show-notification-handler notification))
+	((stringp org-show-notification-handler)
+	 (start-process "emacs-timer-notification" nil 
+			org-show-notification-handler notification))
+	((org-program-exists "notify-send")
+	 (start-process "emacs-timer-notification" nil 
+			"notify-send" notification))
+	;; Maybe the handler will send a message, so only use message as
+	;; a fall back option
+	(t (message notification))))
 
 (defun org-clock-play-sound ()
   "Play sound as configured by `org-clock-sound'.
