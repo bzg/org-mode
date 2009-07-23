@@ -1,3 +1,8 @@
+2009-07-23  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Literal examples): Update to reflect the new behavior
+	of the -n -r -k switches when exporting source code examples.
+
 2009-07-21  Dan Davison <davison@stats.ox.ac.uk>  (tiny change)
 
 	* org.texi (Structure editing): Add information about `C-c *',

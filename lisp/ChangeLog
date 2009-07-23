@@ -1,5 +1,10 @@
 2009-07-23  Bastien Guerry  <bzg@altern.org>
 
+	* org-exp.el (org-export-number-lines): Allow whitespace in code
+	references.  Allow the -r switch to remove the references in the
+	source code even when the lines are not numbered: the labels can
+	be explicit enough.
+
 	* org.el (org-fontify-whole-heading-line): New option.
 	(org-set-font-lock-defaults): Use the new option.
 
