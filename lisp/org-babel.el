@@ -454,7 +454,7 @@ relies on `org-babel-insert-result'."
     (if (org-at-table-p)
         (org-table-end)
       (let ((case-fold-search nil))
-	(if (looking-at-p "#\\+begin_example")
+	(if (looking-at "#\\+begin_example")
 	    (search-forward "#+end_example" nil t)
 	  (progn
 	    (while (if (looking-at "\\(: \\|\\[\\[\\)")
