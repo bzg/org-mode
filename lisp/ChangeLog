@@ -1,3 +1,15 @@
+2009-07-23  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-cycle-internal-local): Improved version of finding
+	next visible line.
+	(org-cycle-hide-drawers): Only hide drawers if this is really
+	necessary.
+	(outline-end-of-subtree): Make `outline-end-of-subtree' use the
+	org-version of this function in Org-mode.  We use advice to
+	implement this change, so that future changes to this function in
+	outline.el wil be handled properly.
+	(org-forward-same-level, org-backward-same-level): New commands.
+
 2009-07-21  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-remove-empty-overlays-at)
