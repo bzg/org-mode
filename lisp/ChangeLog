@@ -1,5 +1,8 @@
 2009-07-23  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-fontify-whole-heading-line): New option.
+	(org-set-font-lock-defaults): Use the new option.
+
 	* org-clock.el (org-show-notification-handler): New option.
 	(org-show-notification): Use the new option.
 

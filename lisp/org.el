@@ -2660,6 +2660,13 @@ Changing this variable requires a restart of Emacs to take effect."
   :group 'org-font-lock
   :type 'boolean)
 
+(defcustom org-fontify-whole-heading-line nil
+  "Non-nil means fontify the whole line for headings.
+This is useful when setting a background color for the
+org-leve-* faces."
+  :group 'org-font-lock
+  :type 'boolean)
+
 (defcustom org-highlight-latex-fragments-and-specials nil
   "Non-nil means, fontify what is treated specially by the exporters."
   :group 'org-font-lock
@@ -4527,8 +4534,12 @@ between words."
 	   ;; Call the hook
 	   '(org-font-lock-hook)
 	   ;; Headlines
-	   '("^\\(\\**\\)\\(\\* \\)\\(.*\\)" (1 (org-get-level-face 1))
-	     (2 (org-get-level-face 2)) (3 (org-get-level-face 3)))
+	   `(,(if org-fontify-whole-heading-line
+		  "^\\(\\**\\)\\(\\* \\)\\(.*\xa\\)"
+		"^\\(\\**\\)\\(\\* \\)\\(.*\\)")
+	     (1 (org-get-level-face 1))
+	     (2 (org-get-level-face 2)) 
+	     (3 (org-get-level-face 3)))
 	   ;; Table lines
 	   '("^[ \t]*\\(\\(|\\|\\+-[-+]\\).*\\S-\\)"
 	     (1 'org-table t))
