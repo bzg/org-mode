@@ -497,7 +497,7 @@ non-nil."
 elements of PLISTS override the values of previous element.  This
 takes into account some special considerations for certain
 parameters when merging lists."
-  (let (params results exports vars var ref)
+  (let (params results exports tangle vars var ref)
     (flet ((e-merge (exclusive-groups &rest result-params)
                     ;; maintain exclusivity of mutually exclusive parameters
                     (let (output)
@@ -531,15 +531,19 @@ parameters when merging lists."
                         (:exports
                          (setq exports (e-merge '(("code" "results" "both"))
                                                 exports (split-string (cdr pair)))))
+                        (:tangle
+                         (setq tangle (e-merge '(("yes" "no"))
+                                               tangle (split-string (cdr pair)))))
                         (t ;; replace: this covers e.g. :session
                          (setq params (cons pair (assq-delete-all (car pair) params))))))
                     plist))
             plists))
     (setq vars (mapcar (lambda (pair) (format "%s=%s" (car pair) (cdr pair))) vars))
     (while vars (setq params (cons (cons :var (pop vars)) params)))
-    (cons (cons :exports (mapconcat 'identity exports " "))
-          (cons (cons :results (mapconcat 'identity results " "))
-                params))))
+    (cons (cons :tangle (mapconcat 'identity tangle " "))
+          (cons (cons :exports (mapconcat 'identity exports " "))
+                (cons (cons :results (mapconcat 'identity results " "))
+                      params)))))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."

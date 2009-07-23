@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [36/57]
+* Tasks [37/58]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -256,6 +256,7 @@ but with preference given to
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
+
 ** TODO take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.
@@ -930,6 +931,12 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+** DONE add =:tangle= family of header arguments
+values are
+- no :: don't include source-code block when tangling
+- yes :: do include source-code block when tangling
+
+this is tested in [[file:test-tangle.org::*Emacs%20Lisp%20initialization%20stuff][test-tangle.org]]
 
 ** DONE Default args
    This would be good thing to address soon. I'm imagining that
