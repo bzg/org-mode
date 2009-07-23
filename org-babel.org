@@ -388,7 +388,8 @@ org-mode core
    python. I bet ruby does too. Maybe more of an issue for functional
    style; in my proposed scripting style the error just gets dumped to
    the org buffer and the user is thus alerted.
-** TODO figure out how to handle graphic output
+** STARTED figure out how to handle graphic output
+   
 This is listed under [[* graphical output][graphical output]] in out objectives.
 
 This should take advantage of the =:results file= option, and
@@ -2283,7 +2284,7 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [25/36]
+* Bugs [24/37]
 ** TODO allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
@@ -2442,6 +2443,22 @@ for example
 
 #+resname: this-doesn't-match-orgtbl
    
+** PROPOSED allow un-named arguments
+
+#+srcname: f(x)
+#+begin_src python 
+x
+#+end_src
+
+#+lob: f(5)
+
+## produces no output
+
+ It's not essential but would be nice for this to work. To do it
+properly, would mean that we'd have to specify rules for how a string
+of supplied arguments (some possibly named) interact with the
+arguments in the definition (some possibly with defaults) to give
+values to the variables in the funbction body.
 ** PROPOSED external shell execution can't isolate return values
 I have no idea how to do this as of yet.  The result is that when
 shell functions are run w/o a session there is no difference between
@@ -2472,7 +2489,7 @@ the same for the other languages. [Dan]
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
-** DONE Fix nested evaluation
+** TODO Fix nested evaluation and default args
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
 
@@ -2636,7 +2653,6 @@ a+b
 
 #+resname: adder1
 : 30
-
 ****** DONE Rely on defaults
 #+lob: adder1()
 
@@ -2654,8 +2670,9 @@ a+b
 #+lob: adder1(a=0)
 
 #+resname: adder1(a=0)
-## should be 10
 : 20
+
+## should be 20
 
 #+lob: adder1(b=0)
 
@@ -2667,9 +2684,8 @@ a+b
 #+lob: adder1(a=1,b=2)
 
 #+resname: adder1(a=1,b=2)
-## should be 3
-: 3
 
+: 3
 **** One arg lacks default in definition
 #+srcname: adder2(a=10,b)
 #+begin_src python
@@ -2703,6 +2719,7 @@ more flexible to allow the source block language to handle the error.
 #+resname: adder2(b=1)
 : 11
 
+
 ## should be 11
 ## OK
 
@@ -2711,6 +2728,7 @@ more flexible to allow the source block language to handle the error.
 
 #+resname: adder2(a=1,b=2)
 : 3
+
 ## should be 3
 
 *** Example that fails
@@ -2725,26 +2743,32 @@ a+b
 : 99
 
 #+srcname: one()
-#+begin_src python :results silent
-2
+#+begin_src python
+1
 #+end_src
 
+#+resname: one
+: 1
 
-#+srcname: level-one-nesting
+
+
+#+srcname: level-one-nesting()
 #+begin_src python :var arg=adder(a=one(),b=one())
 arg
 #+end_src
 
-#+resname:
+#+resname: level-one-nesting
+
 : 4
 
-#+srcname: level-one-nesting
+
+#+srcname: level-one-nesting()
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
 arg
 #+end_src
 
 #+resname:
-: 99
+: 12
 
 *** DONE deeply nested arguments still fails
 
@@ -2754,9 +2778,9 @@ arg
 #+end_src
 
 #+resname:
-: 8
+: 4
 
-results in this error
+**** Used to result in this error
 : supplied params=nil
 : new-refere="adder", new-referent="a=adder(a=one(),b=one()),b=adder(a=one(),b=one())"
 : args=((:var . "a=adder(a=one()") (:var . "b=one())") (:var . "b=adder(a=one()") (:var . "b=one())"))
