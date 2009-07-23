@@ -85,3 +85,8 @@ plus_two(holder)
   (setq test-tangle-loading "org-babel tangles")
   (setq test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
 #+end_src
+
+#+srcname: i-shouldnt-be-tangled
+#+begin_src emacs-lisp :tangle no
+  (setq test-tangle-i-should-not-exist "hopefully I'm not included")
+#+end_src

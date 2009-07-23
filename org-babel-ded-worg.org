@@ -116,4 +116,68 @@ c(5, 10)
 #+resname:
 : Sun Jul  5 14:13:07 2009
 
-    
+* Reference / Documentation
+
+*** Source Code block syntax
+
+The basic syntax of source-code blocks is as follows:
+
+: #+srcname: name
+: #+begin_src language header-arguments
+: body
+: #+end_src
+
+- name :: This name is associated with the source-code block.  This is
+     similar to the =#+TBLNAME= lines which can be used to name tables
+     in org-mode files.  By referencing the srcname of a source-code
+     block it is possible to evaluate the block for other places,
+     files, or from inside tables.
+- language :: The language of the code in the source-code block, valid
+     values must be members of `org-babel-interpreters'.
+- header-arguments :: Header arguments control many facets of the
+     input to, evaluation of, and output of source-code blocks.  See
+     the [[* Header Arguments][Header Arguments]] section for a complete review of available
+     header arguments.
+- body :: The actual source code which will be evaluated.  This can be
+          edited with `org-edit-special'.
+
+**** Header Arguments
+
+- results :: results arguments specify what should be done with the
+             output of source-code blocks
+  - The following options are mutually exclusive, and specify how the
+    results should be collected from the source-code block
+    - value ::
+    - output :: 
+  - The following options are mutually exclusive and specify what type
+    of results the code block will return
+    - vector :: specifies that the results should be interpreted as a
+                multidimensional vector (even if the vector is
+                trivial), and will be inserted into the org-mode file
+                as a table
+    - scalar :: specifies that the results should be interpreted as a
+                scalar value, and will be inserted into the org-mode
+                file as quoted text
+    - file :: specifies that the results should be interpreted as the
+              path to a file, and will be inserted into the org-mode
+              file as a link
+  - The following options specify how the results should be inserted
+    into the org-mode file
+    - replace :: the current results replace any previously inserted
+                 results from the code block
+    - silent :: rather than being inserted into the org-mode file the
+                results are echoed into the message bar
+- exports :: exports arguments specify what should be included in html
+             or latex exports of the org-mode file
+  - code :: the body of code is included into the exported file
+  - results :: the results of evaluating the code is included in the
+               exported file
+  - both :: both the code and results are included in the exported
+            file
+  - none :: nothing is included in the exported file
+- tangle :: tangle arguments specify whether or not the source-code
+            block should be included in tangled extraction of
+            source-code files
+  - on :: the source-code block is included in tangled files
+  - off :: the source-code block is ignored when tangling
+

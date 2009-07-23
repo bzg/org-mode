@@ -98,11 +98,11 @@ language."
                        by-session)
                (setq block-counter (+ block-counter (length (cdr (car by-session)))))
                (to-file (format "%s.%s" base-name ext) (cdr (car by-session)))))))
-       (org-babel-collect-blocks lang))
+       (org-babel-tangle-collect-blocks lang))
       (message "tangled %d source-code blocks" block-counter)
       path-collector)))
 
-(defun org-babel-collect-blocks (&optional lang)
+(defun org-babel-tangle-collect-blocks (&optional lang)
   "Collect all source blocks in the current org-mode file.
 Return two nested association lists, first grouped by language,
 then by session, the contents will be source-code block
@@ -123,16 +123,17 @@ code blocks by language."
              (spec (list link source-name params body))
              (session (cdr (assoc :session params)))
              by-lang by-session)
-        (unless (and lang (not (string= lang src-lang))) ;; maybe limit by language
-          ;; add the spec for this block to blocks under it's language and session
-          (setq by-lang (cdr (assoc src-lang blocks)))
-          (setq blocks (delq (assoc src-lang blocks) blocks))
-          (setq by-session (cdr (assoc session by-lang)))
-          (setq by-lang (delq (assoc session by-lang) by-lang))
-          (setq blocks (cons ;; by-language
-                        (cons src-lang (cons ;; by-session
-                                        (cons session (cons spec by-session)) by-lang))
-                        blocks)))))
+        (unless (string= (cdr (assoc :tangle params)) "no") ;; maybe skip
+          (unless (and lang (not (string= lang src-lang))) ;; maybe limit by language
+            ;; add the spec for this block to blocks under it's language and session
+            (setq by-lang (cdr (assoc src-lang blocks)))
+            (setq blocks (delq (assoc src-lang blocks) blocks))
+            (setq by-session (cdr (assoc session by-lang)))
+            (setq by-lang (delq (assoc session by-lang) by-lang))
+            (setq blocks (cons ;; by-language
+                          (cons src-lang (cons ;; by-session
+                                          (cons session (cons spec by-session)) by-lang))
+                          blocks))))))
     ;; blocks should contain all source-blocks organized by language and session
     ;; (message "blocks=%S" blocks) ;; debugging
     blocks))
