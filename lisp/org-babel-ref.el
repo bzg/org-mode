@@ -158,7 +158,7 @@ return nil."
           (setq buffer "")))
        ((string= holder "(") (setq depth (+ depth 1)))
        ((string= holder ")") (setq depth (- depth 1)))))
-    (reverse (cons buffer return))))
+    (mapcar #'org-babel-trim (reverse (cons buffer return)))))
 
 (defun org-babel-ref-at-ref-p ()
   "Return the type of reference located at point or nil if none

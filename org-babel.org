@@ -2284,7 +2284,7 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [25/37]
+* Bugs [26/37]
 ** TODO creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. 
 
@@ -2484,7 +2484,7 @@ the same for the other languages. [Dan]
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
-** TODO Fix nested evaluation and default args
+** DONE Fix nested evaluation and default args
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
 
@@ -2766,7 +2766,7 @@ arg
 #+end_src
 
 #+resname:
-: nil
+: 4
 
 **** Used to result in this error
 : supplied params=nil
@@ -2784,9 +2784,9 @@ Need to change the regexp in [[file:lisp/org-babel-ref.el::assign%20any%20argume
 it only matches when the parenthesis are balanced.  Maybe look at
 [[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
 
-*** Still some problems with deeply nested arguments and defaults
+*** DONE Still some problems with deeply nested arguments and defaults
 **** sandbox
-**** TODO Parsing / defaults bug
+**** DONE Parsing / defaults bug
      Try inserting a space between 'a=0,' and 'b=0' and comparing results
 #+srcname: parsing-defaults-bug()
 #+begin_src python :var arg=adder(a=adder(a=0,b=0))
@@ -2796,6 +2796,17 @@ arg
 #+resname: parsing-defaults-bug
 
 : 99
+
+#+srcname: deeply-nested-args-bug-orig()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-orig
+
+: 10
+
+
 **** DONE Nesting problem II
      This generates parsing errors
 
@@ -2870,7 +2881,6 @@ arg
 
 
 
-
 *** DONE Arg lacking default
    This would be good thing to address soon. I'm imagining that
    e.g. here, the 'caller' block would return the answer 30. I believe
@@ -2888,7 +2898,6 @@ a+b
 #+begin_src python :results silent
 var
 #+end_src
-
 
 ** DONE allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
