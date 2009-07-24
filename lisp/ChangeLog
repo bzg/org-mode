@@ -1,3 +1,10 @@
+2009-07-24  Bastien Guerry  <bzg@altern.org>
+
+	* org-id.el (org-id-uuid-program): New option to set the name of
+	the uuidgen program.
+	(org-id-method): Use `org-id-uuid-program'.
+	(org-id-new): Use `org-id-uuid-program'.
+
 2009-07-23  Bastien Guerry  <bzg@altern.org>
 
 	* org-exp.el (org-export-number-lines): Allow whitespace in code
