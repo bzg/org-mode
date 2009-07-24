@@ -2300,12 +2300,7 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [24/37]
-** TODO allow srcname to omit function call parentheses
-   Someone needs to revisit those regexps. Is there an argument for
-   moving some of the regexps used to match function calls into
-   defvars? (i.e. in o-b.el and o-b-ref.el)
-
+* Bugs [25/37]
 ** TODO creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. 
 
@@ -2840,8 +2835,8 @@ arg
 #+end_src
 
 #+resname: deeply-nested-args-bug-2
-: 8
 
+: 8
 **** TODO Problem with empty argument list
      This gives empty list with () and 'no output' with ( )
 #+srcname: x()
@@ -2851,6 +2846,23 @@ arg
 
 #+resname: x
 : []
+** DONE allow srcname to omit function call parentheses
+   Someone needs to revisit those regexps. Is there an argument for
+   moving some of the regexps used to match function calls into
+   defvars? (i.e. in o-b.el and o-b-ref.el)
+
+   This seems to work now. It still might be a good idea to separate
+   out some of the key regexps into defvars at some point.
+
+#+srcname: omit-parens-test
+#+begin_src ruby :results output
+3.times {puts 'x'}
+#+end_src
+
+#+resname:
+: x
+: x
+: x
 
 ** DONE avoid stripping whitespace from output when :results output
    This may be partly solved by using o-b-chomp rather than o-b-trim
