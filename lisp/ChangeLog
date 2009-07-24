@@ -1,5 +1,8 @@
 2009-07-24  Bastien Guerry  <bzg@altern.org>
 
+	* org-list.el (org-list-beginning-re): Bugfix: don't use * when
+	trying to find the beginning of a list.
+
 	* org-exp.el (org-get-file-contents): Use a new argument: markup.
 	When present, tell org-get-file-contents not to protect org-like
 	lines.

@@ -159,7 +159,7 @@ When the indentation would be larger than this, it will become
   :type 'integer)
 
 (defvar org-list-beginning-re
-  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +\\(.*\\)$")
+  "^\\([ \t]*\\)\\([-+]\\|[0-9]+[.)]\\) +\\(.*\\)$")
 
 (defcustom org-list-radio-list-templates
   '((latex-mode "% BEGIN RECEIVE ORGLST %n
