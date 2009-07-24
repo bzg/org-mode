@@ -2786,20 +2786,21 @@ it only matches when the parenthesis are balanced.  Maybe look at
 
 *** Still some problems with deeply nested arguments and defaults
 **** sandbox
-**** TODO Nesting problem I
-     Try inserting a space between the 'a=3,' and 'b=4'. It changes the result from 10 to 105
-
-#+srcname: deeply-nested-args-bug-I()
-#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
+**** TODO Parsing / defaults bug
+     Try inserting a space between 'a=0,' and 'b=0' and comparing results
+#+srcname: parsing-defaults-bug()
+#+begin_src python :var arg=adder(a=adder(a=0,b=0))
 arg
 #+end_src
 
-#+resname: deeply-nested-args-bug-I
+#+resname: parsing-defaults-bug
 
-: 105
-
+: 99
 **** DONE Nesting problem II
      This generates parsing errors
+
+     Fixed: c2bef96b7f644c05be5a38cad6ad1d28723533aa
+
 #+srcname: deeply-nested-args-bug-II-1()
 #+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=2,b=4)))
 arg
@@ -2816,7 +2817,6 @@ arg
 
 #+resname: deeply-nested-args-bug-II-original
 : 8
-
 
 
 
@@ -2843,7 +2843,6 @@ arg
 
 #+resname:
 : 99
-
 
 
 
