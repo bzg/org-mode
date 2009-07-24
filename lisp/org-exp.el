@@ -2093,14 +2093,16 @@ TYPE must be a string, any of:
 	    (setq start (format "#+begin_%s %s\n" markup switches)
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
-	(insert (org-get-file-contents (expand-file-name file) prefix prefix1))
+	(insert (org-get-file-contents (expand-file-name file) prefix prefix1 markup))
 	(or (bolp) (newline))
 	(insert (or end ""))))))
 
-(defun org-get-file-contents (file &optional prefix prefix1)
+(defun org-get-file-contents (file &optional prefix prefix1 markup)
   "Get the contents of FILE and return them as a string.
 If PREFIX is a string, prepend it to each line.  If PREFIX1
-is a string, prepend it to the first line instead of PREFIX."
+is a string, prepend it to the first line instead of PREFIX.
+If MARKUP, don't protect org-like lines, the exporter will
+take care of the block they are in."
   (with-temp-buffer
     (insert-file-contents file)
     (when (or prefix prefix1)
@@ -2110,11 +2112,12 @@ is a string, prepend it to the first line instead of PREFIX."
 	(setq prefix1 nil)
 	(beginning-of-line 2)))
     (buffer-string)
-    (goto-char (point-min))
-    (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
-      (goto-char (match-beginning 0))
-      (insert ",")
-      (end-of-line 1))
+    (unless markup
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
+	(goto-char (match-beginning 0))
+	(insert ",")
+	(end-of-line 1)))
     (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)

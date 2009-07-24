@@ -1,5 +1,9 @@
 2009-07-24  Bastien Guerry  <bzg@altern.org>
 
+	* org-exp.el (org-get-file-contents): Use a new argument: markup.
+	When present, tell org-get-file-contents not to protect org-like
+	lines.
+
 	* org-id.el (org-id-uuid-program): New option to set the name of
 	the uuidgen program.
 	(org-id-method): Use `org-id-uuid-program'.
