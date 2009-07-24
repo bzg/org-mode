@@ -475,16 +475,13 @@ the whole buffer."
 		 (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
 			 (setq c-off (1+ c-off))
-		       (setq c-on (1+ c-on))
-		       )
-		   )
+		       (setq c-on (1+ c-on))))
 		 (if (not recursive)
 		     (org-end-of-item)
 		   (end-of-line)
 		   (when (re-search-forward org-list-beginning-re lim t)
 		     (beginning-of-line)))
-		 (setq next-ind (org-get-indentation))
-		 )))
+		 (setq next-ind (org-get-indentation)))))
 	 (goto-char continue-from)
 	 ;; update cookie
 	 (when end-cookie
