@@ -2798,12 +2798,26 @@ arg
 
 : 105
 
-**** TODO Nesting problem II
+**** DONE Nesting problem II
      This generates parsing errors
 #+srcname: deeply-nested-args-bug-II-1()
-#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=1,b=4)))
+#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=2,b=4)))
 arg
 #+end_src
+
+#+resname: deeply-nested-args-bug-II-1
+
+: 106
+
+#+srcname: deeply-nested-args-bug-II-original()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-original
+: 8
+
+
 
 
 **** DONE Why does this give 8?

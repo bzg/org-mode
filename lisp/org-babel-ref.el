@@ -156,8 +156,8 @@ return nil."
         (when (= depth 0)
           (setq return (reverse (cons (substring buffer 0 -1) return)))
           (setq buffer "")))
-       ((string= holder "(") (setq depth (+ 1 depth)))
-       ((string= holder ")") (setq depth (- 1 depth)))))
+       ((string= holder "(") (setq depth (+ depth 1)))
+       ((string= holder ")") (setq depth (- depth 1)))))
     (reverse (cons buffer return))))
 
 (defun org-babel-ref-at-ref-p ()
