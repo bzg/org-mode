@@ -2800,10 +2800,11 @@ arg
 
 **** TODO Nesting problem II
      This generates parsing errors
-#+srcname: deeply-nested-args-bug-II()
-#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+#+srcname: deeply-nested-args-bug-II-1()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=1,b=4)))
 arg
 #+end_src
+
 
 **** DONE Why does this give 8?
      It was picking up the wrong definition of adder
