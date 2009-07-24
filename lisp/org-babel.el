@@ -252,8 +252,7 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-get-src-block-function-args ()
   (when (org-babel-get-src-block-name)
     (mapcar (lambda (ref) (cons :var ref))
-	    (split-string (org-babel-clean-text-properties (match-string 2))
-			  ",[ \f\t\n\r\v]*"))))
+	    (org-babel-ref-split-args (match-string 2)))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
