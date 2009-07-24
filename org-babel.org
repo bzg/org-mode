@@ -2284,7 +2284,7 @@ plot data using 1:2 with lines
 (see [[* file result types][file result types]])
 
 
-* Bugs [26/37]
+* Bugs [27/38]
 ** TODO creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. 
 
@@ -2484,6 +2484,34 @@ the same for the other languages. [Dan]
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+** DONE #+srcname arg parsing bug
+#+srcname: test-zz(arg=adder(a=1, b=1))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: test-zz
+: 2
+
+
+#+srcname: test-zz-nasty(arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3))))
+#+begin_src python 
+arg
+#+end_src
+
+#+resname: test-zz-nasty
+: 40
+
+
+
+#+srcname: test-zz-hdr-arg
+#+begin_src python :var arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3)))
+arg
+#+end_src
+
+#+resname:
+: 40
+
 ** DONE Fix nested evaluation and default args
    The current parser / evaluator fails with greater levels of nested
    function block calls (example below).
@@ -2855,6 +2883,63 @@ arg
 #+resname:
 : 99
 
+#+srcname: deeply-nested-args-bug-orig()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-orig
+
+: 10
+
+
+**** DONE Nesting problem II
+     This generates parsing errors
+
+     Fixed: c2bef96b7f644c05be5a38cad6ad1d28723533aa
+
+#+srcname: deeply-nested-args-bug-II-1()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=adder(a=2,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-1
+
+: 106
+
+#+srcname: deeply-nested-args-bug-II-original()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=adder(a=1,b=4)))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-II-original
+: 8
+
+
+
+**** DONE Why does this give 8?
+     It was picking up the wrong definition of adder
+#+srcname: deeply-nested-args-bug-2()
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()))
+arg
+#+end_src
+
+#+resname: deeply-nested-args-bug-2
+
+: 101
+
+**** DONE Problem with empty argument list
+     This gives empty list with () and 'no output' with ( )
+
+     I think this is OK now.
+
+#+srcname: x
+#+begin_src python :var arg=adder( )
+arg
+#+end_src
+
+#+resname:
+: 99
 
 
 
@@ -2879,6 +2964,13 @@ arg
 
 
 
+
+
+
+#+srcname: test-zz(arg=adder(a=adder(a=19,b=adder(a=5,b=2)),b=adder(a=adder(a=1,b=9),b=adder(a=1,b=3))))
+#+begin_src python 
+arg
+#+end_src
 
 
 *** DONE Arg lacking default
