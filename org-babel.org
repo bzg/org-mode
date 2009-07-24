@@ -948,22 +948,6 @@ values are
 
 this is tested in [[file:test-tangle.org::*Emacs%20Lisp%20initialization%20stuff][test-tangle.org]]
 
-** DONE Default args
-   This would be good thing to address soon. I'm imagining that
-   e.g. here, the 'caller' block would return the answer 30. I believe
-   there's a few issues here: i.e. the naked 'a' without a reference
-   is not understood; the default arg b=6 is not understood.
-
-#+srcname: adder(a, b=6)
-#+begin_src python 
-a+b
-#+end_src
-
-#+srcname: caller(var=adder(a=24))
-#+begin_src python :results silent
-var
-#+end_src
-
 ** DONE extensible library of callable source blocks
 *** Current design
     This is covered by the [[file:library-of-babel.org][Library of Babel]], which will contain
@@ -2749,20 +2733,14 @@ more flexible to allow the source block language to handle the error.
 a+b
 #+end_src
 
-#+resname: adder
 
-: 99
 
 #+srcname: one()
 #+begin_src python
 1
 #+end_src
 
-#+resname: one
-: 1
-
-
-
+**** nesting
 #+srcname: level-one-nesting()
 #+begin_src python :var arg=adder(a=one(),b=one())
 arg
@@ -2770,8 +2748,7 @@ arg
 
 #+resname: level-one-nesting
 
-: 4
-
+: nil
 
 #+srcname: level-one-nesting()
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=one(),b=one()))
@@ -2789,7 +2766,7 @@ arg
 #+end_src
 
 #+resname:
-: 4
+: nil
 
 **** Used to result in this error
 : supplied params=nil
@@ -2808,17 +2785,18 @@ it only matches when the parenthesis are balanced.  Maybe look at
 [[http://www.gnu.org/software/emacs/elisp/html_node/List-Motion.html][this]].
 
 *** Still some problems with deeply nested arguments and defaults
+**** sandbox
 **** TODO Nesting problem I
-     Try inserting a space between the 'a=3,' and 'b=4'. It changes the result from 10 to 12
+     Try inserting a space between the 'a=3,' and 'b=4'. It changes the result from 10 to 105
 
 #+srcname: deeply-nested-args-bug-I()
-#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3,b=4),b=one()))
+#+begin_src python :var arg=adder(a=adder(a=one(),b=one()),b=adder(a=adder(a=3, b=4),b=one()))
 arg
 #+end_src
 
 #+resname: deeply-nested-args-bug-I
 
-: 10
+: 105
 
 **** TODO Nesting problem II
      This generates parsing errors
@@ -2827,8 +2805,8 @@ arg
 arg
 #+end_src
 
-
-**** TODO Why does this give 8?
+**** DONE Why does this give 8?
+     It was picking up the wrong definition of adder
 #+srcname: deeply-nested-args-bug-2()
 #+begin_src python :var arg=adder(a=adder(a=one(),b=one()))
 arg
@@ -2836,16 +2814,68 @@ arg
 
 #+resname: deeply-nested-args-bug-2
 
-: 8
-**** TODO Problem with empty argument list
+: 101
+
+**** DONE Problem with empty argument list
      This gives empty list with () and 'no output' with ( )
-#+srcname: x()
-#+begin_src python :var arg=adder()
+
+     I think this is OK now.
+
+#+srcname: x
+#+begin_src python :var arg=adder( )
 arg
 #+end_src
 
-#+resname: x
-: []
+#+resname:
+: 99
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*** DONE Arg lacking default
+   This would be good thing to address soon. I'm imagining that
+   e.g. here, the 'caller' block would return the answer 30. I believe
+   there's a few issues here: i.e. the naked 'a' without a reference
+   is not understood; the default arg b=6 is not understood.
+
+#+srcname: adder-with-arg-lacking-default(a, b=6)
+#+begin_src python 
+a+b
+#+end_src
+
+
+
+#+srcname: caller(var=adder-with-arg-lacking-default(a=24))
+#+begin_src python :results silent
+var
+#+end_src
+
+
 ** DONE allow srcname to omit function call parentheses
    Someone needs to revisit those regexps. Is there an argument for
    moving some of the regexps used to match function calls into
