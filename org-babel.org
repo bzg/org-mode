@@ -499,7 +499,7 @@ I had not thought of that, but I agree whole heartedly. [Eric]
 
 Once this is done every variable should be able to dump regions into
 their inferior-process buffer using major-mode functions.
-*** DEFERRED send code to inferior process
+*** REJECTED send code to inferior process
 Another thought on this topic: I think we will want users to send
 chunks of code to the interpreter from within the *Org Edit Src*
 buffer, and I think that's what you have in mind already. In ESS that
