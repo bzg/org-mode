@@ -464,6 +464,21 @@ This could also act reasonably with other results types...
 - file :: use org-open-at-point to open the file
 - scalar :: open results unquoted in a new buffer
 - tabular :: export the table to a new buffer and open that buffer
+
+#+srcname: task-opening-results-of-blocks
+#+begin_src ditaa :results replace :file blue.png :cmdline -r
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname:
+
+
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
 This simple example of multilingual chaining produces vector output if
@@ -2314,7 +2329,6 @@ dot("$(2a,0)$",(2,0),N+E);
 
 #+resname:
 [[file:asymptote-test.png][asymptote-test.png]]
-
 
 *** DONE ruby
 *** DONE python

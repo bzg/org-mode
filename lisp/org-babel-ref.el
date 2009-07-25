@@ -136,8 +136,8 @@ return nil."
               (error "reference not found"))))
       ;; (message "type=%S" type) ;; debugging
       (case type
-        ('results-line (org-babel-ref-read-result))
-        ('table (org-babel-ref-read-table))
+        ('results-line (org-babel-read-result))
+        ('table (org-babel-read-table))
         ('source-block
          (setq result (org-babel-execute-src-block t nil args))
          (if (symbolp result) (format "%S" result) result))
@@ -167,31 +167,6 @@ types are tables and source blocks."
   (cond ((org-at-table-p) 'table)
         ((looking-at "^#\\+BEGIN_SRC") 'source-block)
         ((looking-at "^#\\+RESNAME:") 'results-line)))
-
-(defun org-babel-ref-read-result ()
-  "Read the result at `point' into emacs-lisp."
-  (cond
-   ((org-at-table-p) (org-babel-ref-read-table))
-   ((looking-at ": ")
-    (let ((result-string
-           (org-babel-trim
-            (mapconcat (lambda (line) (if (and (> (length line) 1)
-                                               (string= ": " (substring line 0 2)))
-                                          (substring line 2)
-                                        line))
-                       (split-string
-                        (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
-                       "\n"))))
-      (or (org-babel-number-p result-string) result-string)))
-   ((looking-at "^#\\+RESNAME:")
-    (save-excursion (forward-line 1) (org-babel-ref-read-result)))))
-
-(defun org-babel-ref-read-table ()
-  "Read the table at `point' into emacs-lisp."
-  (mapcar (lambda (row)
-            (if (and (symbolp row) (equal row 'hline)) row
-              (mapcar #'org-babel-read row)))
-          (org-table-to-lisp)))
 
 (provide 'org-babel-ref)
 ;;; org-babel-ref.el ends here

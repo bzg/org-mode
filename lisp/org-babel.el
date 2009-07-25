@@ -389,6 +389,31 @@ line.  If no result exists for this block then create a
                             (move-beginning-of-line 1) t)))
                (point))))))
 
+(defun org-babel-read-result ()
+  "Read the result at `point' into emacs-lisp."
+  (cond
+   ((org-at-table-p) (org-babel-read-table))
+   ((looking-at ": ")
+    (let ((result-string
+           (org-babel-trim
+            (mapconcat (lambda (line) (if (and (> (length line) 1)
+                                               (string= ": " (substring line 0 2)))
+                                          (substring line 2)
+                                        line))
+                       (split-string
+                        (buffer-substring (point) (org-babel-result-end)) "[\r\n]+")
+                       "\n"))))
+      (or (org-babel-number-p result-string) result-string)))
+   ((looking-at "^#\\+RESNAME:")
+    (save-excursion (forward-line 1) (org-babel-read-result)))))
+
+(defun org-babel-read-table ()
+  "Read the table at `point' into emacs-lisp."
+  (mapcar (lambda (row)
+            (if (and (symbolp row) (equal row 'hline)) row
+              (mapcar #'org-babel-read row)))
+          (org-table-to-lisp)))
+
 (defun org-babel-insert-result (result &optional insert)
   "Insert RESULT into the current buffer after the end of the
 current source block.  With optional argument INSERT controls
@@ -434,6 +459,28 @@ silent -- no results are inserted"
             (forward-line -1)
             (org-cycle))))
       (message "finished"))))
+
+(defun org-babel-open-src-block-result ()
+  (interactive)
+  "If `point' is on a src block then open the results of the
+source code block, otherwise return nil."
+  (when (org-babel-get-src-block-info)
+    (save-excursion
+      ;; go to the results, if there aren't any then run the block
+      (goto-char (or (org-babel-where-is-src-block-result)
+                     (progn (org-babel-execute-src-block)
+                            (org-babel-where-is-src-block-result))))
+      ;; open the results
+      (if (looking-at org-bracket-link-regexp)
+          ;; file
+          (org-open-at-point)
+        ;; vector or scalar
+        (let ((results (org-babel-read-result)))
+          (pop-to-buffer (get-buffer-create "org-babel-results"))
+          (delete-region (point-min) (point-max))
+          (if (listp results)
+              (insert (orgtbl-to-tsv results))
+            (insert results)))))))
 
 (defun org-babel-result-to-org-string (result)
   "Return RESULT as a string in org-mode format.  This function
