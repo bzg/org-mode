@@ -364,7 +364,7 @@ buffer or nil if no such result exists."
 	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
       (move-beginning-of-line 1) (point))))
 
-(defun org-babel-where-is-src-block-result ()
+(defun org-babel-where-is-src-block-result (&optional insert)
   "Return the point at the beginning of the result of the current
 source block.  Specifically at the beginning of the #+RESNAME:
 line.  If no result exists for this block then create a
@@ -383,7 +383,7 @@ line.  If no result exists for this block then create a
                       (or (progn ;; either an unnamed #+resname: line already exists
                             (re-search-forward "[^ \f\t\n\r\v]" nil t)
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
-                          (progn ;; or we need to back up and make one ourselves
+                          (when insert ;; or (with optional insert) we need to back up and make one ourselves
                             (goto-char end) (open-line 2) (forward-char 1)
                             (insert (concat "#+resname:" (if name (concat " " name))))
                             (move-beginning-of-line 1) t)))
@@ -445,7 +445,7 @@ silent -- no results are inserted"
                           (string-equal (substring result -1) "\r"))))
         (setq result (concat result "\n")))
       (save-excursion
-	(let ((existing-result (org-babel-where-is-src-block-result)))
+	(let ((existing-result (org-babel-where-is-src-block-result t)))
 	  (when existing-result (goto-char existing-result) (forward-line 1)))
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
@@ -470,10 +470,10 @@ source code block, otherwise return nil."
       (goto-char (or (org-babel-where-is-src-block-result)
                      (progn (org-babel-execute-src-block)
                             (org-babel-where-is-src-block-result))))
+      (move-end-of-line 1) (forward-char 1)
       ;; open the results
       (if (looking-at org-bracket-link-regexp)
-          ;; file
-          (org-open-at-point)
+          (org-open-at-point) ;; file
         ;; vector or scalar
         (let ((results (org-babel-read-result)))
           (pop-to-buffer (get-buffer-create "org-babel-results"))
@@ -491,7 +491,7 @@ relies on `org-babel-insert-result'."
   "Remove the result of the current source block."
   (interactive)
   (save-excursion
-    (goto-char (org-babel-where-is-src-block-result)) (forward-line 1)
+    (goto-char (org-babel-where-is-src-block-result t)) (forward-line 1)
     (delete-region (point) (org-babel-result-end))))
 
 (defun org-babel-result-end ()

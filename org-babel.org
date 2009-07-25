@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [37/59]
+* Tasks [36/58]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -453,7 +453,7 @@ In interactive use we might want to allow the user to choose between
 screen and file output. In non-interactive use such as export, it
 would be file output (subject to the :exports directives).
 
-** TODO =\C-c \C-o= to open results of source block
+** STARTED =\C-c \C-o= to open results of source block
 by adding a =defadvice= to =org-open-at-point= we can use the common
 =\C-c \C-o= keybinding to open the results of a source-code block.
 This would be especially useful for source-code blocks which generate
@@ -477,6 +477,8 @@ This could also act reasonably with other results types...
 #+end_src
 
 #+resname:
+[[file:blue.png][blue.png]]
+
 
 
 ** TODO Finalise behaviour regarding vector/scalar output
