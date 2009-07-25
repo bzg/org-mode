@@ -2141,7 +2141,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [3/6]
+** TODO Add languages [9/11]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
@@ -2151,9 +2151,7 @@ Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]]
 
 *** TODO perl
 This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
-
 *** TODO java
-
 *** DONE ditaa
 (see [[* file result types][file result types]])
 
@@ -2292,8 +2290,37 @@ digraph data_relationships {
 #+resname:
 [[file:test-dot.png][test-dot.png]]
 
-*** TODO asymptote
+*** DONE asymptote
 (see [[* file result types][file result types]])
+
+for information on asymptote see http://asymptote.sourceforge.net
+
+#+begin_src asymptote :file asymptote-test.png
+import graph;
+
+size(0,4cm);
+
+real f(real t) {return 1+cos(t);}
+
+path g=polargraph(f,0,2pi,operator ..)--cycle;
+filldraw(g,pink);
+
+xaxis("$x$",above=true);
+yaxis("$y$",above=true);
+
+dot("$(a,0)$",(1,0),N);
+dot("$(2a,0)$",(2,0),N+E);
+#+end_src
+
+#+resname:
+[[file:asymptote-test.png][asymptote-test.png]]
+
+
+*** DONE ruby
+*** DONE python
+*** DONE R
+*** DONE emacs-lisp
+*** DONE sh
 
 
 * Bugs [27/38]

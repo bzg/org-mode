@@ -60,6 +60,8 @@
 (require 'org-babel-R)
 (require 'org-babel-ditaa)
 (require 'org-babel-gnuplot)
+(require 'org-babel-dot)
+(require 'org-babel-asymptote)
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here
