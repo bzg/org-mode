@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
 
-* Tasks [36/58]
+* Tasks [37/58]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -452,52 +452,6 @@ above would have a couple of points in its favour:
 In interactive use we might want to allow the user to choose between
 screen and file output. In non-interactive use such as export, it
 would be file output (subject to the :exports directives).
-
-** STARTED =\C-c \C-o= to open results of source block
-by adding a =defadvice= to =org-open-at-point= we can use the common
-=\C-c \C-o= keybinding to open the results of a source-code block.
-This would be especially useful for source-code blocks which generate
-graphical results and insert a file link as the results in the
-org-mode buffer.  (see [[* figure out how to handle graphic output][TODO figure out how to handle graphic output]]).
-This could also act reasonably with other results types...
-
-- file :: use org-open-at-point to open the file
-- scalar :: open results unquoted in a new buffer
-- tabular :: export the table to a new buffer and open that buffer
-
-#+srcname: task-opening-results-of-blocks
-#+begin_src ditaa :results replace :file blue.png :cmdline -r
-+---------+
-| cBLU    |
-|         |
-|    +----+
-|    |cPNK|
-|    |    |
-+----+----+
-#+end_src
-
-#+resname:
-[[file:blue.png][blue.png]]
-
-#+srcname: task-open-vector
-#+begin_src emacs-lisp
-'((1 2) (3 4))
-#+end_src
-
-#+resname:
-| 1 | 2 |
-| 3 | 4 |
-
-#+srcname: task-open-scalar
-#+begin_src emacs-lisp 
-3
-#+end_src
-
-#+resname:
-: 3
-
-
-
 
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
@@ -976,6 +930,60 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+
+** DONE =\C-c \C-o= to open results of source block
+by adding a =defadvice= to =org-open-at-point= we can use the common
+=\C-c \C-o= keybinding to open the results of a source-code block.
+This would be especially useful for source-code blocks which generate
+graphical results and insert a file link as the results in the
+org-mode buffer.  (see [[* figure out how to handle graphic output][TODO figure out how to handle graphic output]]).
+This could also act reasonably with other results types...
+
+- file :: use org-open-at-point to open the file
+- scalar :: open results unquoted in a new buffer
+- tabular :: export the table to a new buffer and open that buffer
+
+when called with a prefix argument the block is re-run
+
+#+srcname: task-opening-results-of-blocks
+#+begin_src ditaa :results replace :file blue.png :cmdline -r
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname:
+[[file:blue.png][blue.png]]
+
+#+srcname: task-open-vector
+#+begin_src emacs-lisp
+'((1 2) (3 4))
+#+end_src
+
+#+resname:
+| 1 | 2 |
+| 3 | 4 |
+
+#+srcname: task-open-scalar
+#+begin_src ruby :results output
+  8.times do |n|
+    puts "row #{n}"
+  end
+#+end_src
+
+#+resname:
+: row 0
+: row 1
+: row 2
+: row 3
+: row 4
+: row 5
+: row 6
+: row 7
 ** DONE add =:tangle= family of header arguments
 values are
 - no :: don't include source-code block when tangling

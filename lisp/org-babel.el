@@ -44,9 +44,8 @@ then run `org-babel-execute-src-block'."
   "If `point' is on a source code block, then open that block's
 results with `org-babel-open-src-block-results', otherwise defer
 to `org-open-at-point'."
-  (message "opening at point")
-  (or (org-babel-open-src-block-result)
-      ad-do-it))
+  (interactive "P")
+  (or (call-interactively #'org-babel-open-src-block-result) ad-do-it))
 
 (defun org-babel-pop-to-session-maybe ()
   "Detect if this is context for a org-babel src-block and if so
@@ -194,8 +193,7 @@ the header arguments specified at the source code block."
 source code block, otherwise return nil.  With optional prefix
 argument RE-RUN the source-code block is evaluated even if
 results already exist."
-  (interactive)
-  (message "opening src block results")
+  (interactive "P")
   (when (org-babel-get-src-block-info)
     (save-excursion
       ;; go to the results, if there aren't any then run the block
@@ -205,14 +203,18 @@ results already exist."
       (move-end-of-line 1) (forward-char 1)
       ;; open the results
       (if (looking-at org-bracket-link-regexp)
-          (org-open-at-point) ;; file
-        ;; vector or scalar
+          ;; file results
+          (org-open-at-point)
         (let ((results (org-babel-read-result)))
-          (pop-to-buffer (get-buffer-create "org-babel-results"))
-          (delete-region (point-min) (point-max))
-          (if (listp results)
-              (insert (orgtbl-to-tsv (list results) nil))
-            (insert results))))
+          (flet ((echo-res (result)
+                           (if (stringp result) result (format "%S" result))))
+            (pop-to-buffer (get-buffer-create "org-babel-results"))
+            (delete-region (point-min) (point-max))
+            (if (listp results)
+                ;; table result
+                (insert (orgtbl-to-generic results '(:sep "\t" :fmt echo-res)))
+              ;; scalar result
+              (insert (echo-res results))))))
       t)))
 
 (defun org-babel-process-value-result (result result-params)
