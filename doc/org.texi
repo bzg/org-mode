@@ -1437,13 +1437,8 @@ list.  Finally, even without an active region, a normal line will be
 converted into a list item.
 @kindex C-c *
 @item C-c *
-Turn a normal line or plain list item into a headline (so that it
-becomes a subheading at its location). Also turn a headline into a
-normal line by removing the stars. If there is an active region, turn
-all lines in the region into headlines. If the first line in the
-region was an item, turn only the item lines into headlines. Finally,
-if the first line is a headline, remove the stars from all headlines
-in the region.
+Turn a plain list item into a headline (so that it becomes a subheading at
+its location). @xref{Structure editing}, for a detailed explanation.
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}/@key{right}

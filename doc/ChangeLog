@@ -1,3 +1,8 @@
+2009-07-25  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Plain lists): Remove duplicate explanation about the
+	`C-c *' command.
+
 2009-07-23  Bastien Guerry  <bzg@altern.org>
 
 	* org.texi (Literal examples): Update to reflect the new behavior
