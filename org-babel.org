@@ -3536,7 +3536,7 @@ of these tests may fail.
 | R number evaluation     | bug-R-number-evaluation    |     |           2 |           2 | pass |
 | multi-line ruby blocks  | multi-line-ruby-test       |     |           2 |           2 | pass |
 | forcing vector results  | test-forced-vector-results |     |       Array |       Array | pass |
-| deeply nested arguments | deeply-nested-args-bug     |     |           8 |           8 | pass |
+| deeply nested arguments | deeply-nested-args-bug     |     |           4 |           4 | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
 | sessions                |                            |     |             |             | pass |
 |-------------------------+----------------------------+-----+-------------+-------------+------|
