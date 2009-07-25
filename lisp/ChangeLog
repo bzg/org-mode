@@ -1,3 +1,8 @@
+2009-07-25  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-eval-in-calendar): Select the right frame.
+	(org-save-frame-excursion): Remove this macro.
+
 2009-07-24  Bastien Guerry  <bzg@altern.org>
 
 	* org-list.el (org-list-beginning-re): Bugfix: don't use * when

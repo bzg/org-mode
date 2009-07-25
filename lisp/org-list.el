@@ -1139,6 +1139,7 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
+      ;; bzg use org-list-find-true-beginning here?
       (goto-char (car (org-list-item-beginning)))
       (beginning-of-line 0)
       (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
