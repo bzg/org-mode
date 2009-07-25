@@ -206,7 +206,7 @@ would then be [[#sandbox][the sandbox]].
   (require 'org-babel-init)
 #+end_src
 
-
+  
 * Tasks [37/59]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
@@ -260,7 +260,8 @@ but with preference given to
 ** TODO take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.
-** TODO support for working with =*Org Edit Src Example*= buffers [2/4]
+** TODO support for working with =*Org Edit Src Example*= buffers [2/5]
+*** TODO name edit buffer according to #+srcname (and language?)
 *** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
 and transformed into the target language object when we hit C-c ' to
@@ -464,30 +465,6 @@ This could also act reasonably with other results types...
 - file :: use org-open-at-point to open the file
 - scalar :: open results unquoted in a new buffer
 - tabular :: export the table to a new buffer and open that buffer
-** TODO Finalise behaviour regarding vector/scalar output
-*** DONE Stop spaces causing vector output
-This simple example of multilingual chaining produces vector output if
-there are spaces in the message and scalar otherwise.
-
-[Not any more]
-
-#+srcname: msg-from-R(msg=msg-from-python)
-#+begin_src R
-paste(msg, "und R", sep=" ")
-#+end_src
-
-#+resname:
-: org-babel speaks elisp y python und R
-
-#+srcname: msg-from-python(msg=msg-from-elisp)
-#+begin_src python
-msg + " y python"
-#+end_src
-
-#+srcname: msg-from-elisp(msg="org-babel speaks")
-#+begin_src emacs-lisp
-(concat msg " elisp")
-#+end_src
 ** STARTED share org-babel [1/4]
 how should we share org-babel?
 
@@ -941,6 +918,29 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+** DONE Stop spaces causing vector output
+This simple example of multilingual chaining produces vector output if
+there are spaces in the message and scalar otherwise.
+
+[Not any more]
+
+#+srcname: msg-from-R(msg=msg-from-python)
+#+begin_src R
+paste(msg, "und R", sep=" ")
+#+end_src
+
+#+resname:
+: org-babel speaks elisp y python und R
+
+#+srcname: msg-from-python(msg=msg-from-elisp)
+#+begin_src python
+msg + " y python"
+#+end_src
+
+#+srcname: msg-from-elisp(msg="org-babel speaks")
+#+begin_src emacs-lisp
+(concat msg " elisp")
+#+end_src
 ** DONE add =:tangle= family of header arguments
 values are
 - no :: don't include source-code block when tangling
