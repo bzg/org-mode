@@ -479,6 +479,24 @@ This could also act reasonably with other results types...
 #+resname:
 [[file:blue.png][blue.png]]
 
+#+srcname: task-open-vector
+#+begin_src emacs-lisp
+'((1 2) (3 4))
+#+end_src
+
+#+resname:
+| 1 | 2 |
+| 3 | 4 |
+
+#+srcname: task-open-scalar
+#+begin_src emacs-lisp 
+3
+#+end_src
+
+#+resname:
+: 3
+
+
 
 
 ** TODO Finalise behaviour regarding vector/scalar output
