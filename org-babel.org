@@ -2365,39 +2365,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [27/38]
-** TODO creeping blank lines
-   There's still inappropriate addition of blank lines in some circumstances. 
-
-   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
-   removes the entire (#+resname and result) and starts from scratch,
-   whereas #+begin_src only removes the result. I haven't worked out
-   what the correct fix is yet. Maybe the right thing to do is to make
-   sure that those functions (o-b-remove-result et al.) are neutral
-   with respect to newlines. Sounds easy, but...
-
-   E.g.
-
-#+begin_src sh
-b=5
-#+end_src
-
-
-
-   Compare the results of
-#+lob: python-add(a=5, b=17)
-
-#+resname: python-add(a=5, b=17)
-: 22
---------------------------------
-
-#+begin_src python
-23
-#+end_src
-
-#+resname:
-: 23
----------------------
+* Bugs [28/38]
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
@@ -2565,6 +2533,38 @@ the same for the other languages. [Dan]
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+** DONE creeping blank lines
+   There's still inappropriate addition of blank lines in some circumstances. 
+
+   Hmm, it's a bit confusing. It's to do with o-b-remove-result. LoB
+   removes the entire (#+resname and result) and starts from scratch,
+   whereas #+begin_src only removes the result. I haven't worked out
+   what the correct fix is yet. Maybe the right thing to do is to make
+   sure that those functions (o-b-remove-result et al.) are neutral
+   with respect to newlines. Sounds easy, but...
+
+   E.g.
+
+#+begin_src sh
+b=5
+#+end_src
+
+
+
+   Compare the results of
+#+lob: adder(a=5, b=17)
+
+#+resname: python-add(a=5, b=17)
+: 22
+--------------------------------
+
+#+begin_src python
+23
+#+end_src
+
+#+resname:
+: 23
+---------------------
 ** DONE #+srcname arg parsing bug
 #+srcname: test-zz(arg=adder(a=1, b=1))
 #+begin_src python 
