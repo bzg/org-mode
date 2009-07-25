@@ -40,6 +40,14 @@ then run `org-babel-execute-src-block'."
 
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-execute-src-block-maybe)
 
+(defadvice org-open-at-point (around org-babel-open-at-point activate)
+  "If `point' is on a source code block, then open that block's
+results with `org-babel-open-src-block-results', otherwise defer
+to `org-open-at-point'."
+  (message "opening at point")
+  (or (org-babel-open-src-block-result)
+      ad-do-it))
+
 (defun org-babel-pop-to-session-maybe ()
   "Detect if this is context for a org-babel src-block and if so
 then run `org-babel-pop-to-session'."
@@ -180,6 +188,32 @@ the header arguments specified at the source code block."
 	(setq result (org-babel-process-value-result result result-params)))
     (org-babel-insert-result result result-params)
     (case result-type (output nil) (value result))))
+
+(defun org-babel-open-src-block-result (&optional re-run)
+  "If `point' is on a src block then open the results of the
+source code block, otherwise return nil.  With optional prefix
+argument RE-RUN the source-code block is evaluated even if
+results already exist."
+  (interactive)
+  (message "opening src block results")
+  (when (org-babel-get-src-block-info)
+    (save-excursion
+      ;; go to the results, if there aren't any then run the block
+      (goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
+                     (progn (org-babel-execute-src-block)
+                            (org-babel-where-is-src-block-result))))
+      (move-end-of-line 1) (forward-char 1)
+      ;; open the results
+      (if (looking-at org-bracket-link-regexp)
+          (org-open-at-point) ;; file
+        ;; vector or scalar
+        (let ((results (org-babel-read-result)))
+          (pop-to-buffer (get-buffer-create "org-babel-results"))
+          (delete-region (point-min) (point-max))
+          (if (listp results)
+              (insert (orgtbl-to-tsv (list results) nil))
+            (insert results))))
+      t)))
 
 (defun org-babel-process-value-result (result result-params)
   "Process returned value for insertion in buffer.
@@ -459,30 +493,6 @@ silent -- no results are inserted"
             (forward-line -1)
             (org-cycle))))
       (message "finished"))))
-
-(defun org-babel-open-src-block-result (&optional re-run)
-  (interactive)
-  "If `point' is on a src block then open the results of the
-source code block, otherwise return nil.  With optional prefix
-argument RE-RUN the source-code block is evaluated even if
-results already exist."
-  (when (org-babel-get-src-block-info)
-    (save-excursion
-      ;; go to the results, if there aren't any then run the block
-      (goto-char (or (and (not re-run) (org-babel-where-is-src-block-result))
-                     (progn (org-babel-execute-src-block)
-                            (org-babel-where-is-src-block-result))))
-      (move-end-of-line 1) (forward-char 1)
-      ;; open the results
-      (if (looking-at org-bracket-link-regexp)
-          (org-open-at-point) ;; file
-        ;; vector or scalar
-        (let ((results (org-babel-read-result)))
-          (pop-to-buffer (get-buffer-create "org-babel-results"))
-          (delete-region (point-min) (point-max))
-          (if (listp results)
-              (insert (orgtbl-to-tsv (list results) nil))
-            (insert results)))))))
 
 (defun org-babel-result-to-org-string (result)
   "Return RESULT as a string in org-mode format.  This function
