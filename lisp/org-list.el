@@ -139,9 +139,9 @@ use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
 
 (defcustom org-provide-checkbox-statistics t
   "Non-nil means, update checkbox statistics after insert and toggle.
-When this is set, checkbox statistics is updated each time you either insert
-a new checkbox with \\[org-insert-todo-heading] or toggle a checkbox
-with \\[org-ctrl-c-ctrl-c\\]."
+When this is set, checkbox statistics is updated each time you
+either insert a new checkbox with \\[org-insert-todo-heading] or
+toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
   :group 'org-plain-lists
   :type 'boolean)
 
