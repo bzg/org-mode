@@ -2,6 +2,8 @@
 
 	* org.el (org-mode-map): Define new key `C-c C-*': convert a plain
 	list to a subtree, preserving the structure of the list.
+	(org-set-emph-re): Make the last element optional in the regexp.
+	This regexp now matches an emphasized string at the end of a line.
 
 	* org-list.el (org-list-goto-true-beginning)
 	(org-list-make-subtree, org-list-make-subtrees): New functions.

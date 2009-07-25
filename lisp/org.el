@@ -2724,7 +2724,7 @@ org-leve-* faces."
 		    "[^" border "]"
 		    "\\)"
 		    "\\3\\)"
-		    "\\([" post "]\\|$\\)"))
+		    "\\([" post "]\\|$\\)?"))
       (setq org-verbatim-re
 	    (concat "\\([" pre "]\\|^\\)"
 		    "\\("
@@ -2736,7 +2736,7 @@ org-leve-* faces."
 		    "[^" border "]"
 		    "\\)"
 		    "\\3\\)"
-		    "\\([" post  "]\\|$\\)")))))
+		    "\\([" post  "]\\|$\\)?")))))
 
 (defcustom org-emphasis-regexp-components
   '(" \t('\"{" "- \t.,:!?;'\")}" " \t\r\n,\"'" "." 1)
