@@ -2141,7 +2141,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [4/6]
+** TODO Add languages [9/11]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
@@ -2315,6 +2315,12 @@ dot("$(2a,0)$",(2,0),N+E);
 #+resname:
 [[file:asymptote-test.png][asymptote-test.png]]
 
+
+*** DONE ruby
+*** DONE python
+*** DONE R
+*** DONE emacs-lisp
+*** DONE sh
 
 
 * Bugs [27/38]
