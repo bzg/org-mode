@@ -112,7 +112,7 @@ license to the document, as described in section 6 of the license.
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
-* Variable Index::              Variables mentiond in the manual
+* Variable Index::              Variables mentioned in the manual
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -333,7 +333,7 @@ Markup rules
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holdes
+* Macro replacement::           Global replacement of place holders
 
 HTML export
 
@@ -405,7 +405,7 @@ Hacking
 * Hooks::                       Who to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functioality to such commands
+* Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -3877,28 +3877,28 @@ checked.
 @cindex property, COOKIE_DATA
 The @samp{[2/4]} and @samp{[1/3]} in the first and second line are cookies
 indicating how many checkboxes present in this entry have been checked off,
-and the total number of checkboxes present.  This can give you an idea on
-how many checkboxes remain, even without opening a folded entry.  The cookies
-can be placed into a headline or into (the first line of) a plain list item.
+and the total number of checkboxes present.  This can give you an idea on how
+many checkboxes remain, even without opening a folded entry.  The cookies can
+be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
-@code{org-recursive-checkbox-statistics} if you want such cookes to represent
-the all checkboxes below the cookie, not just the direct children.}.  You
-have to insert the cookie yourself by typing either @samp{[/]} or @samp{[%]}.
-With @samp{[/]} you get an @samp{n out of m} result, as in the examples
-above.  With @samp{[%]} you get information about the percentage of
-checkboxes checked (in the above example, this would be @samp{[50%]} and
-@samp{[33%]}, respectively).  In a headline, a cookie can count either
-checkboxes below the heading or TODO states of children, and it will display
-whatever was changed last.  Set the property @code{COOKIE_DATA} to either
-@samp{checkbox} or @samp{todo} to resolve this issue.
+@code{org-recursive-checkbox-statistics} if you want such cookies to
+represent the all checkboxes below the cookie, not just the direct
+children.}.  You have to insert the cookie yourself by typing either
+@samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
+result, as in the examples above.  With @samp{[%]} you get information about
+the percentage of checkboxes checked (in the above example, this would be
+@samp{[50%]} and @samp{[33%]}, respectively).  In a headline, a cookie can
+count either checkboxes below the heading or TODO states of children, and it
+will display whatever was changed last.  Set the property @code{COOKIE_DATA}
+to either @samp{checkbox} or @samp{todo} to resolve this issue.
 
 @cindex blocking, of checkboxes
 @cindex checkbox blocking
 @cindex property, ORDERED
 If the current outline node has an @code{ORDERED} property, checkboxes must
 be checked off in sequence, and an error will be thrown if you try to check
-off a box while there are unchecked boxes bove it.
+off a box while there are unchecked boxes above it.
 
 @noindent The following commands work with checkboxes:
 
@@ -5002,7 +5002,7 @@ the nth such day.  @Eg
 +4            --> same as above
 +2w           --> two weeks from today
 ++5           --> five days from default date
-+2tue         --> second tuesday from now.
++2tue         --> second Tuesday from now.
 @end example
 
 @vindex parse-time-months
@@ -5309,7 +5309,7 @@ When you stop working on that task, or when you mark the task done, the
 clock is stopped and the corresponding time interval is recorded.  It
 also computes the total time spent on each subtree of a project.
 
-Normally, the clock does not survive exiting and re-entereing Emacs, but you
+Normally, the clock does not survive exiting and re-entering Emacs, but you
 can arrange for the clock information to persist across Emacs sessions with
 
 @lisp
@@ -5987,7 +5987,7 @@ same directory for attachments as the parent does.
 @section RSS feeds
 @cindex RSS feeds
 
-Org has the capablity to add and change entries based on information found in
+Org has the capability to add and change entries based on information found in
 RSS feeds.  You could use this to make a task out of each new podcast in a
 podcast feed.  Or you could use a phone-based note-creating service on the
 web to import tasks into Org.  To access feeds, you need to configure the
@@ -6692,7 +6692,7 @@ correct customization for this is
 @end lisp
 
 Note that if a project is identified as non-stuck, the subtree of this entry
-will still be searched for stuck projets.
+will still be searched for stuck projects.
 
 @node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda Views
 @section Presentation and sorting
@@ -7027,7 +7027,7 @@ The difference between this and a custom agenda command is that filtering is
 very fast, so that you can switch quickly between different filters without
 having to recreate the agenda@footnote{Custom commands can preset a filter by
 binding the variable @code{org-agenda-filter-preset} as an option.  This
-filter will then be applied to the view and presist as a basic filter through
+filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.}
 
 You will be prompted for a tag selection letter.  Pressing @key{TAB} at that
@@ -8002,7 +8002,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holdes
+* Macro replacement::           Global replacement of place holders
 @end menu
 
 @node Document title, Headings and sections, Markup rules, Markup rules
@@ -8145,7 +8145,7 @@ but not any simpler
 @node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples
 @cindex literal examples, markup rules
-@cindex code line refenences, markup rules
+@cindex code line references, markup rules
 
 You can include literal examples that should not be subjected to
 markup.  Such examples will be typeset in monospace, so this is well suited
@@ -8210,7 +8210,7 @@ Here is an example:
 (save-excursion                  (ref:sc)
    (goto-char (point-min))       (ref:jump)
 #+END_SRC
-In line [[(sc)]] we remember the current positon.  [[(jump)][Line (jump)]]
+In line [[(sc)]] we remember the current position.  [[(jump)][Line (jump)]]
 jumps to point-min.
 @end example
 
@@ -9285,7 +9285,7 @@ also specified, it will be exported as an @code{xml:id} attribute of the
 Image attributes supported by the @code{imagedata} element, like @code{align}
 or @code{width}, can be specified in two ways: you can either customize
 variable @code{org-export-docbook-default-image-attributes} or use the
-@code{#+ATTR_DOCBOOK:} line.  Attributes sepcified in variable
+@code{#+ATTR_DOCBOOK:} line.  Attributes specified in variable
 @code{org-export-docbook-default-image-attributes} are applied to all inline
 images in the Org file to be exported (unless they are overwritten by image
 attributes specified in @code{#+ATTR_DOCBOOK:} lines).
@@ -9760,18 +9760,18 @@ of links to all files in the project.
 @cindex rsync
 @cindex unison
 
-For those people already utilising third party sync tools such as
+For those people already utilizing third party sync tools such as
 @command{rsync} or @command{unison}, it might be preferable not to use the built in
 @i{remote} publishing facilities of Org mode which rely heavily on
 Tramp.  Tramp, while very useful and powerful, tends not to be
 so efficient for multiple file transfer and has been known to cause problems
 under heavy usage.
 
-Specialised synchronization utilities offer several advantages.  In addition
+Specialized synchronization utilities offer several advantages.  In addition
 to timestamp comparison, they also do content and permissions/attribute
 checks.  For this reason you might prefer to publish your web to a local
 directory (possibly even @i{in place} with your Org files) and then use
-@file{unison} or @file{rsync} to do the synchronisation with the remote host.
+@file{unison} or @file{rsync} to do the synchronization with the remote host.
 
 Since Unison (for example) can be configured as to which files to transfer to
 a certain remote destination, it can greatly simplify the project publishing
@@ -10574,7 +10574,7 @@ Org.
 * Hooks::                       Who to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functioality to such commands
+* Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -11433,7 +11433,7 @@ The return values of all calls to the function will be collected and
 returned as a list.
 
 The call to FUNC will be wrapped into a save-excursion form, so FUNC
-does not need to preserve point.  After evaluaton, the cursor will be
+does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
 circumstances, this may not produce the wanted results.  For example,
