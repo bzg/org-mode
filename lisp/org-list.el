@@ -1102,6 +1102,41 @@ cdr is the indentation string."
 	(progn (goto-char (point-min)) (point))
       (cons (match-beginning 0) (match-string 1)))))
 
+(defun org-list-goto-true-beginning ()
+  "Go to the beginning of the list at point."
+  (beginning-of-line 1)
+  (while (looking-at org-list-beginning-re)
+    (beginning-of-line 0))
+  (progn
+    (re-search-forward org-list-beginning-re nil t)
+    (goto-char (match-beginning 0))))
+  
+(defun org-list-make-subtree ()
+  "Convert the plain list at point into a subtree."
+  (interactive)
+  (org-list-goto-true-beginning)
+  (let ((list (org-list-parse-list t)) nstars)
+    (save-excursion 
+      (if (condition-case nil
+	      (org-back-to-heading)
+	    (error nil))
+	  (progn (re-search-forward org-complex-heading-regexp nil t)
+		 (setq nstars (length (match-string 1))))
+	(setq nstars 0)))
+    (org-list-make-subtrees list (1+ nstars))))
+
+(defun org-list-make-subtrees (list level)
+  "Convert LIST into subtrees starting at LEVEL."
+  (if (symbolp (car list))
+      (org-list-make-subtrees (cdr list) level)
+    (mapcar (lambda (item)
+	      (if (stringp item)
+		  (insert (make-string 
+			   (if org-odd-levels-only 
+			       (1- (* 2 level)) level) ?*) " " item "\n")
+		(org-list-make-subtrees item (1+ level))))
+	    list)))
+
 (defun org-list-end (indent)
   "Return the position of the end of the list.
 INDENT is the indentation of the list, as a string."
@@ -1139,8 +1174,7 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      ;; bzg use org-list-find-true-beginning here?
-      (goto-char (car (org-list-item-beginning)))
+      (org-list-find-true-beginning)
       (beginning-of-line 0)
       (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
 	(if maybe
