@@ -1,5 +1,8 @@
 2009-07-25  Bastien Guerry  <bzg@altern.org>
 
+	* org-clock.el (org-dblock-write:clocktable): Add a new option
+	:timestamp which allows display of timestamps in clock reports.
+
 	* org.el (org-mode-map): Define new key `C-c C-*': convert a plain
 	list to a subtree, preserving the structure of the list.
 	(org-set-emph-re): Make the last element optional in the regexp.

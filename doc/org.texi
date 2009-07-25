@@ -5439,6 +5439,8 @@ new table.  The @samp{BEGIN} line can specify options:
              @r{As a special case, @samp{:formula %} adds a column with % time.}
              @r{If you do not specify a formula here, any existing formula.}
              @r{below the clock table will survive updates and be evaluated.}
+:timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
+             @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
 @end example
 To get a clock summary of the current level 1 tree, for the current
 day, you could write

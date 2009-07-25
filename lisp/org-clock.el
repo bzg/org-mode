@@ -1192,11 +1192,12 @@ the currently selected interval size."
 	   (maxlevel (or (plist-get params :maxlevel) 3))
 	   (step (plist-get params :step))
 	   (emph (plist-get params :emphasize))
+	   (timestamp (plist-get params :timestamp))
 	   (ts (plist-get params :tstart))
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
-	   ipos time p level hlc hdl content recalc formula pcol
+	   ipos time p level hlc hdl tsp props content recalc formula pcol
 	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list st)
       (setq org-clock-file-total-minutes nil)
       (when step
@@ -1301,10 +1302,18 @@ the currently selected interval size."
 				       (save-match-data
 					 (org-make-org-heading-search-string
 					  (match-string 2))))
-			       (match-string 2))))
+			       (match-string 2)))
+			tsp (when timestamp
+			      (setq props (org-entry-properties (point)))
+			      (or (cdr (assoc "SCHEDULED" props))
+				  (cdr (assoc "TIMESTAMP" props))
+				  (cdr (assoc "DEADLINE" props))
+				  (cdr (assoc "TIMESTAMP_IA" props)))))
 		  (if (and (not multifile) (= level 1)) (push "|-" tbl))
 		  (push (concat
-			 "| " (int-to-string level) "|" hlc hdl hlc " |"
+			 "| " (int-to-string level) "|" 
+			 (if timestamp (concat tsp "|") "") 
+			 hlc hdl hlc " |"
 			 (make-string (1- level) ?|)
 			 hlc (org-minutes-to-hh:mm-string time) hlc
 			 " |") tbl))))))
@@ -1323,12 +1332,12 @@ the currently selected interval size."
 		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
 	   (if scope-is-list "|File" "")
-	   "|L|Headline|Time|\n")
+	   "|L|" (if timestamp "Timestamp|" "") "Headline|Time|\n")
 	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
 	   (if scope-is-list "|" "")
-	   "|"
+	   (if timestamp "|Timestamp|" "|")
 	   "*Total time*| *"
 	   (org-minutes-to-hh:mm-string (or total-time 0))
 	   "*|\n|-\n")
