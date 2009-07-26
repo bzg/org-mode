@@ -15601,6 +15601,16 @@ really on, so that the block visually is on the match."
 	    (goto-char pos)
 	    (org-reveal)))))))
 
+(defun org-occur-link-in-agenda-files ()
+  "Create a link and search for it in the agendas.
+The link is not stored in `org-stored-links', it is just created
+for the search purpose."
+  (interactive)
+  (let ((link (condition-case nil
+		  (org-store-link nil)
+		(error "Unable to create a link from here"))))
+    (org-occur-in-agenda-files (regexp-quote link))))
+
 (defun org-uniquify (list)
   "Remove duplicate elements from LIST."
   (let (res)
