@@ -256,6 +256,7 @@ VALUE can be `on', `off', or `pause'."
 (defvar org-timer-timer1 nil)
 (defvar org-timer-timer2 nil)
 (defvar org-timer-timer3 nil)
+(defvar org-timer-last-timer nil)
 
 (defun org-timer-reset-timers ()
   "Reset all timers."
@@ -278,9 +279,7 @@ VALUE can be `on', `off', or `pause'."
 	   (not org-timer-timer3))
       (message "No timer set")
     (let* ((rtime (decode-time
-		   (time-subtract (timer--time (or org-timer-timer3
-						   org-timer-timer2
-						   org-timer-timer1))
+		   (time-subtract (timer--time org-timer-last-timer)
 				  (current-time))))
 	   (rsecs (nth 0 rtime))
 	   (rmins (nth 1 rtime)))
@@ -315,7 +314,8 @@ VALUE can be `on', `off', or `pause'."
 		    (setq timer-set t
 			  timer
 			  (run-with-timer secs nil 'org-show-notification
-					  (format "%s: time out" hl)))))
+					  (format "%s: time out" hl))
+			  org-timer-last-timer timer)))
 	      '(org-timer-timer1
 		org-timer-timer2
 		org-timer-timer3)))))
