@@ -1704,10 +1704,15 @@ by a letter in parenthesis, like TODO(t)."
 
 (defcustom org-provide-todo-statistics t
   "Non-nil means, update todo statistics after insert and toggle.
-When this is set, todo statistics is updated in the parent of the current
-entry each time a todo state is changed."
+ALL-HEADLINES means update todo statistics by including headlines
+with no TODO keyword as well.  When this is set, todo statistics
+is updated in the parent of the current entry each time a todo
+state is changed."
   :group 'org-todo
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "For TODO entries" t)
+	  (const :tag "By all headlines" 'all-headlines)
+	  (const :tag "No TODO statistics" nil)))
 
 (defcustom org-hierarchical-todo-statistics t
   "Non-nil means, TODO statistics covers just direct children.
@@ -4538,7 +4543,7 @@ between words."
 		  "^\\(\\**\\)\\(\\* \\)\\(.*\xa\\)"
 		"^\\(\\**\\)\\(\\* \\)\\(.*\\)")
 	     (1 (org-get-level-face 1))
-	     (2 (org-get-level-face 2)) 
+	     (2 (org-get-level-face 2))
 	     (3 (org-get-level-face 3)))
 	   ;; Table lines
 	   '("^[ \t]*\\(\\(|\\|\\+-[-+]\\).*\\S-\\)"
@@ -6631,7 +6636,7 @@ C-c C-c     Set tags / toggle checkbox"
 
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
-In addition to setting orgstruct-mode, this also exports all indentation 
+In addition to setting orgstruct-mode, this also exports all indentation
 and autofilling variables from org-mode into the buffer.  It will also
 recognize item context in multiline items.
 Note that turning off orgstruct-mode will *not* remove the
@@ -7381,7 +7386,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		  (let ((org-completion-use-ido nil))
 		    (org-completing-read
 		     "Link: "
-		     (append 
+		     (append
 		      (mapcar (lambda (x) (list (concat x ":")))
 			      all-prefixes)
 		      (mapcar 'car org-stored-links))
@@ -8743,8 +8748,8 @@ This function can be used in a hook."
 ;;;; Completion
 
 (defconst org-additional-option-like-keywords
-  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML" 
-    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook" 
+  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML"
+    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook"
     "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:"  "ATTR_LaTeX"
     "BEGIN:" "END:"
     "ORGTBL" "TBLFM:" "TBLNAME:"
@@ -9403,7 +9408,10 @@ statistics everywhere."
 			  (> (setq l1 (length (match-string 1))) level))
 		(setq kwd (and (or recursive (= l1 ltoggle))
 			       (match-string 2)))
-		(and kwd (setq cnt-all (1+ cnt-all)))
+		(if (eq org-provide-todo-statistics 'all-headlines)
+		    (setq cnt-all (1+ cnt-all))
+		  (if org-provide-todo-statistics
+		      (and kwd (setq cnt-all (1+ cnt-all)))))
 		(and (member kwd org-done-keywords)
 		     (setq cnt-done (1+ cnt-done)))
 		(outline-next-heading)))
@@ -12191,7 +12199,7 @@ user."
 	      (when org-read-date-overlay
 		(org-delete-overlay org-read-date-overlay)
 		(setq org-read-date-overlay nil)))))))
-     
+
      (t ; Naked prompt only
       (unwind-protect
 	  (setq ans (read-string prompt default-input
@@ -12199,10 +12207,10 @@ user."
 	(when org-read-date-overlay
 	  (org-delete-overlay org-read-date-overlay)
 	  (setq org-read-date-overlay nil)))))
-    
+
     (setq final (org-read-date-analyze ans def defdecode))
     (setq org-read-date-final-answer ans)
-    
+
     (if to-time
 	(apply 'encode-time final)
       (if (and (boundp 'org-time-was-given) org-time-was-given)
@@ -15850,7 +15858,7 @@ which make use of the date at the cursor."
   (org-set-local 'comment-start-skip "^#+[ \t]*")
   (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|]")
   ;; The paragraph starter includes hand-formatted lists.
-  (org-set-local 
+  (org-set-local
    'paragraph-start
    (concat
     "\f" "\\|"
