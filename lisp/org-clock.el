@@ -358,19 +358,15 @@ If an effort estimate was defined for current item, use
 If not, show simply the clocked time like 01:50."
   (let* ((clocked-time (org-clock-get-clocked-time))
 	 (h (floor clocked-time 60))
-	 (m (- clocked-time (* 60 h)))
-	 )
+	 (m (- clocked-time (* 60 h))))
     (if (and org-clock-effort)
 	(let* ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	       (effort-h (floor effort-in-minutes 60))
-	       (effort-m (- effort-in-minutes (* effort-h 60)))
-	       )
+	       (effort-m (- effort-in-minutes (* effort-h 60))))
 	  (format (concat "-[" org-time-clocksum-format "/" org-time-clocksum-format " (%s)]")
-		  h m effort-h effort-m  org-clock-heading)
-	  )
+		  h m effort-h effort-m  org-clock-heading))
       (format (concat "-[" org-time-clocksum-format " (%s)]")
-	      h m org-clock-heading))
-    ))
+	      h m org-clock-heading))))
 
 (defun org-clock-update-mode-line ()
   (setq org-mode-line-string
