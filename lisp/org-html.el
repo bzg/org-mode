@@ -1624,19 +1624,27 @@ lang=\"%s\" xml:lang=\"%s\">
     (unless splice (push "</table>\n" html))
     (setq html (nreverse html))
     (unless splice
-      ;; Put in col tags with the alignment (unfortunately often ignored...)
-      (push (concat
-	     "<colgroup>"
-	     (mapconcat
-	      (lambda (x)
-		(setq gr (pop org-table-colgroup-info))
-		(format "<col align=\"%s\" />"
-			(if (> (/ (float x) nline) org-table-number-fraction)
-			    "right" "left")))
-	      fnum "")
-	     "</colgroup>")
+      ;; Put in col tags with the alignment (unfortuntely often ignored...)
+      (unless (car org-table-colgroup-info)
+	(setq org-table-colgroup-info
+	      (cons :start (cdr org-table-colgroup-info))))
+      (push (mapconcat
+	     (lambda (x)
+	       (setq gr (pop org-table-colgroup-info))
+	       (format "%s<col align=\"%s\"></col>%s"
+		       (if (memq gr '(:start :startend))
+			   (prog1
+			       (if colgropen "</colgroup>\n<colgroup>" "<colgroup>")
+			     (setq colgropen t))
+			 "")
+		       (if (> (/ (float x) nline) org-table-number-fraction)
+			   "right" "left")
+		       (if (memq gr '(:end :startend))
+			   (progn (setq colgropen nil) "</colgroup>")
+			 "")))
+	     fnum "")
 	    html)
-
+      (if colgropen (setq html (cons (car html) (cons "</colgroup>" (cdr html)))))
       ;; Since the output of HTML table formatter can also be used in
       ;; DocBook document, we want to always include the caption to make
       ;; DocBook XML file valid.
