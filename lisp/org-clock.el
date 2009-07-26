@@ -445,7 +445,9 @@ Notification is shown only once."
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-show-notification (notification)
-  "Show notification. Use libnotify, if available."
+  "Show notification.  
+Use `org-show-notification-handler' if defined,
+use libnotify if available, or fall back on a message."
   (cond ((functionp org-show-notification-handler)
 	 (funcall org-show-notification-handler notification))
 	((stringp org-show-notification-handler)
