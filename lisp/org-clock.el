@@ -476,9 +476,7 @@ Use alsa's aplay tool if available."
 (defun org-program-exists (program-name)
   "Checks whenever we can locate program and launch it."
   (if (eq system-type 'gnu/linux)
-      (= 0 (call-process "which" nil nil nil program-name))
-    ))
-
+      (= 0 (call-process "which" nil nil nil program-name))))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
@@ -608,7 +606,6 @@ the clocking selection, associated with the letter `d'."
   (save-excursion
     (org-back-to-heading t)
     (move-marker org-clock-default-task (point))))
-
 
 (defvar msg-extra)
 (defun org-clock-get-sum-start ()
@@ -1539,7 +1536,6 @@ The details of what will be saved are regulated by the variable
   "Set up hooks for clock persistence"
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save))
-
 
 ;; Suggested bindings
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)
