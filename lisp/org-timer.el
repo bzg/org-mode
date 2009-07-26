@@ -253,6 +253,73 @@ VALUE can be `on', `off', or `pause'."
 	  (concat " <" (substring (org-timer-value-string) 0 -1) ">"))
     (force-mode-line-update)))
 
+(defvar org-timer-timer1 nil)
+(defvar org-timer-timer2 nil)
+(defvar org-timer-timer3 nil)
+
+(defun org-timer-reset-timers ()
+  "Reset all timers."
+  (interactive)
+  (mapcar (lambda(timer) 
+	    (when (eval timer)
+	      (cancel-timer timer)
+	      (setq timer nil)))
+	  '(org-timer-timer1
+	    org-timer-timer2
+	    org-timer-timer3))
+  (message "All timers reset"))
+
+(defun org-timer-show-remaining-time ()
+  "Display the remaining time before the timer ends."
+  (interactive)
+  (require 'time)
+  (if (and (not org-timer-timer1)
+	   (not org-timer-timer2)
+	   (not org-timer-timer3))
+      (message "No timer set")
+    (let* ((rtime (decode-time
+		   (time-subtract (timer--time (or org-timer-timer3
+						   org-timer-timer2
+						   org-timer-timer1))
+				  (current-time))))
+	   (rsecs (nth 0 rtime))
+	   (rmins (nth 1 rtime)))
+      (message "%d minutes %d secondes left before next time out" 
+	       rmins rsecs))))
+
+(defun org-timer-set-timer (minutes)
+  "Set a timer."
+  (interactive "sTime out in (min)? ")
+  (if (not (string-match "[0-9]+" minutes))
+      (org-timer-show-remaining-time)
+    (let* ((mins (string-to-number (match-string 0 minutes)))
+	   (secs (* mins 60))
+	   (hl (cond 
+		((string-match "Org Agenda" (buffer-name))
+		 (let* ((marker (or (get-text-property (point) 'org-marker)
+				    (org-agenda-error)))
+			(hdmarker (or (get-text-property (point) 'org-hd-marker)
+				      marker))
+			(pos (marker-position marker)))
+		   (with-current-buffer (marker-buffer marker)
+		     (widen)
+		     (goto-char pos)
+		     (org-show-entry)
+		     (setq heading (org-get-heading)))))
+		((eq major-mode 'org-mode)
+		 (org-get-heading))
+		(t (error "Not in an Org buffer"))))
+	   timer-set)
+      (mapcar (lambda(timer) 
+		(if (not (or (eval timer) timer-set))
+		    (setq timer-set t
+			  timer
+			  (run-with-timer secs nil 'org-show-notification
+					  (format "%s: time out" hl)))))
+	      '(org-timer-timer1
+		org-timer-timer2
+		org-timer-timer3)))))
+  
 (provide 'org-timer)
 
 ;; arch-tag: 97538f8c-3871-4509-8f23-1e7b3ff3d107

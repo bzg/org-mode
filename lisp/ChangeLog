@@ -1,5 +1,14 @@
 2009-07-26  Bastien Guerry  <bzg@altern.org>
 
+	* org-agenda.el (org-agenda-mode-map): New key for
+	org-timer-set-timer called from the agenda.
+
+	* org.el (org-mode-map): New key for org-timer-set-timer.
+
+	* org-timer.el (org-timer-reset-timers)
+	(org-timer-show-remaining-time, org-timer-set-timer): New
+	functions.
+
 	* org-clock.el (org-show-notification): Update the docstring.
 
 	* org.el (org-provide-todo-statistics): Allow new value
