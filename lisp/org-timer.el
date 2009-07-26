@@ -286,6 +286,7 @@ VALUE can be `on', `off', or `pause'."
       (message "%d minutes %d secondes left before next time out" 
 	       rmins rsecs))))
 
+;;;###autoload
 (defun org-timer-set-timer (minutes)
   "Set a timer."
   (interactive "sTime out in (min)? ")
