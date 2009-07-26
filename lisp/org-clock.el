@@ -430,7 +430,7 @@ the mode line."
   "Shows if we have shown notification already.")
 
 (defun org-clock-notify-once-if-expired ()
-  "Show notification if we spent more time then we estimated before.
+  "Show notification if we spent more time than we estimated before.
 Notification is shown only once."
   (when (marker-buffer org-clock-marker)
     (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
