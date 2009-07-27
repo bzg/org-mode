@@ -547,7 +547,7 @@ make
 @end example
 
 @noindent If you are running Org from the distribution directory, this is
-all.  If you want to install into the system directories, use (as
+all.  If you want to install Org into the system directories, use (as
 administrator)
 
 @example
