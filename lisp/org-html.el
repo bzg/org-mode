@@ -920,13 +920,6 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (and par (insert "<p>\n")))
 	    (throw 'nextline nil))
 
-	  ;; Horizontal line
-	  (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
-	    (if org-par-open
-		(insert "\n</p>\n<hr/>\n<p>\n")
-	      (insert "\n<hr/>\n"))
-	    (throw 'nextline nil))
-
 	  ;; Blockquotes, verse, and center
 	  (when (equal "ORG-BLOCKQUOTE-START" line)
 	    (org-close-par-maybe)
@@ -1305,6 +1298,13 @@ lang=\"%s\" xml:lang=\"%s\">
 			     "<b>[X]</b>"
 			   "<b>[<span style=\"visibility:hidden;\">X</span>]</b>")
 			   t t line))))
+
+	    ;; Horizontal line
+	    (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" line)
+	      (if org-par-open
+		  (insert "\n</p>\n<hr/>\n<p>\n")
+		(insert "\n<hr/>\n"))
+	      (throw 'nextline nil))
 
 	    ;; Empty lines start a new paragraph.  If hand-formatted lists
 	    ;; are not fully interpreted, lines starting with "-", "+", "*"
