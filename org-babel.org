@@ -2587,7 +2587,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [28/38]
+* Bugs [29/38]
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
@@ -2750,11 +2750,12 @@ the same for the other languages. [Dan]
 ** TODO are the org-babel-trim s necessary?
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
-** TODO use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
-   And at other occurrences of org-combine-plists?
+
 ** TODO LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+** DONE use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
+   And at other occurrences of org-combine-plists?
 ** DONE creeping blank lines
    There's still inappropriate addition of blank lines in some circumstances. 
 
