@@ -1,5 +1,8 @@
 2009-07-27  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-refile): Bugfix: save-excursion before reading the
+	refile target, otherwise cursor moves might confuse `org-refile'.
+
 	* org-html.el (org-export-as-html): Bugfix: correctly convert the
 	footnote reference before the footnote itself.
 

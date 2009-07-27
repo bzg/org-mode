@@ -8464,9 +8464,10 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (setq it (or rfloc
-			 (org-refile-get-location
-			  (if goto "Goto: " "Refile to: ") default-buffer
-			  org-refile-allow-creating-parent-nodes)))
+			 (save-excursion
+			   (org-refile-get-location
+			    (if goto "Goto: " "Refile to: ") default-buffer
+			    org-refile-allow-creating-parent-nodes))))
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
