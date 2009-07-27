@@ -3129,7 +3129,10 @@ If yes, offer to stop it and to save the buffer with the changes."
   (org-autoload
    "org-timer"
    '(org-timer-start org-timer org-timer-item
-		     org-timer-change-times-in-region)))
+		     org-timer-change-times-in-region
+		     org-timer-set-timer
+		     org-timer-reset-timers
+		     org-timer-show-remaining-time)))
 
 ;; Autoload org-feed.el
 
