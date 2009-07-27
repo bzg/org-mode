@@ -1,5 +1,9 @@
 2009-07-27  Bastien Guerry  <bzg@altern.org>
 
+	* org-html.el (org-export-html-footnote-format): New option for
+	formatting the footnote reference.
+	(org-export-as-html): Use the new option.
+
 	* org.el (org-provide-todo-statistics): Allow a list of TODO
 	keywords to compute statistics against headlines containing a
 	keyword from this list.

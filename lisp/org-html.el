@@ -31,6 +31,11 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 
+(defgroup org-export-html nil
+  "Options specific for HTML export of Org-mode files."
+  :tag "Org Export HTML"
+  :group 'org-export)
+
 (defcustom org-export-html-footnotes-section "<div id=\"footnotes\">
 <h2 class=\"footnotes\">%s: </h2>
 <div id=\"text-footnotes\">
@@ -44,10 +49,11 @@ by the footnotes themselves."
   :group 'org-export-html
   :type 'string)
 
-(defgroup org-export-html nil
-  "Options specific for HTML export of Org-mode files."
-  :tag "Org Export HTML"
-  :group 'org-export)
+(defcustom org-export-html-footnote-format "<sup>%s</sup>"
+  "The format for the footnote reference.
+%s will be replaced by the footnote reference itself."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-html-coding-system nil
   "Coding system for HTML export, defaults to buffer-file-coding-system."
@@ -1175,7 +1181,9 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq line
 			(replace-match
 			 (format
-			  "%s<sup><a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a></sup>"
+			  (concat "%s"
+				  (format org-export-html-footnote-format
+					  "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"))
 			  (match-string 1 line) n extra n n)
 			 t t line))))))
 
