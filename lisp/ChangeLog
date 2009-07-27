@@ -1,5 +1,8 @@
 2009-07-27  Bastien Guerry  <bzg@altern.org>
 
+	* org-protocol.el (org-protocol-default-template-key): New
+	option.
+
 	* org.el (org-refile): Bugfix: save-excursion before reading the
 	refile target, otherwise cursor moves might confuse `org-refile'.
 
