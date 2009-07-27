@@ -1,5 +1,10 @@
 2009-07-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-make-header): Only insert title
+	if one is defined.
+
+	* org.el (org-make-options-regexp): Allow empty values.
+
 	* org-html.el (org-export-as-html): Move hrule detection to after
 	plain list handling.
 

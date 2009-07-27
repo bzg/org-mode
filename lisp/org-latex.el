@@ -940,9 +940,10 @@ OPT-PLIST is the options plist for current buffer."
      ;; beginning of the document
      "\n\\begin{document}\n\n"
      ;; insert the title command
-     (if (string-match "%s" org-export-latex-title-command)
-	 (format org-export-latex-title-command title)
-       org-export-latex-title-command)
+     (when (string-match "\\S-" title)
+       (if (string-match "%s" org-export-latex-title-command)
+	   (format org-export-latex-title-command title)
+	 org-export-latex-title-command))
      "\n\n"
      ;; table of contents
      (when (and org-export-with-toc
