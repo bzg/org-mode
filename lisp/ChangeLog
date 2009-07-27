@@ -1,3 +1,11 @@
+2009-07-27  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-provide-todo-statistics): Allow a list of TODO
+	keywords to compute statistics against headlines containing a
+	keyword from this list.
+	(org-update-parent-todo-statistics): Possibly use the new allowed
+	value of `org-provide-todo-statistics'.
+
 2009-07-26  Bastien Guerry  <bzg@altern.org>
 
 	* org-timer.el: Add autoload cookie.

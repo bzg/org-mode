@@ -1705,14 +1705,18 @@ by a letter in parenthesis, like TODO(t)."
 (defcustom org-provide-todo-statistics t
   "Non-nil means, update todo statistics after insert and toggle.
 ALL-HEADLINES means update todo statistics by including headlines
-with no TODO keyword as well.  When this is set, todo statistics
-is updated in the parent of the current entry each time a todo
-state is changed."
+with no TODO keyword as well.  A list of TODO keywords means the
+same, but skip keywords that are not in this list.
+
+When this is set, todo statistics is updated in the parent of the
+current entry each time a todo state is changed."
   :group 'org-todo
   :type '(choice
-	  (const :tag "For TODO entries" t)
-	  (const :tag "By all headlines" 'all-headlines)
-	  (const :tag "No TODO statistics" nil)))
+	  (const :tag "Yes, only for TODO entries" t)
+	  (const :tag "Yes, including all entries" 'all-headlines)
+	  (repeat :tag "Yes, for TODOs in this list"
+		  (string :tag "TODO keyword"))
+	  (other :tag "No TODO statistics" nil)))
 
 (defcustom org-hierarchical-todo-statistics t
   "Non-nil means, TODO statistics covers just direct children.
@@ -9408,9 +9412,12 @@ statistics everywhere."
 			  (> (setq l1 (length (match-string 1))) level))
 		(setq kwd (and (or recursive (= l1 ltoggle))
 			       (match-string 2)))
-		(if (eq org-provide-todo-statistics 'all-headlines)
+		(if (or (eq org-provide-todo-statistics 'all-headlines)
+			(and (listp org-provide-todo-statistics)
+			     (or (member kwd org-provide-todo-statistics)
+				 (member kwd org-done-keywords))))
 		    (setq cnt-all (1+ cnt-all))
-		  (if org-provide-todo-statistics
+		  (if (eq org-provide-todo-statistics t)
 		      (and kwd (setq cnt-all (1+ cnt-all)))))
 		(and (member kwd org-done-keywords)
 		     (setq cnt-done (1+ cnt-done)))
