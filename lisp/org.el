@@ -14789,15 +14789,16 @@ If there is no active region, only the current line is considered.
 If the first line is a heading, remove the stars from all headlines
 in the region.
 
-If the first line is a plain list item, turn all plain list items into
-headings.
+If the first line is a plain list item, turn all plain list items
+into headings.
 
-If the first line is a normal line, turn each and every line in the region
-into a heading.
+If the first line is a normal line, turn each and every line in the 
+region into a heading.
 
-When converting a line into a heading, the number of stars is chosen
-such that the lines become children of the current entry.  However, when
-a prefix argument is given, its value determines the number of stars to add."
+When converting a line into a heading, the number of stars is chosen 
+such that the lines become children of the current entry.  However, 
+when a prefix argument is given, its value determines the number of 
+stars to add."
   (interactive "P")
   (let (l2 l itemp beg end)
     (if (org-region-active-p)
@@ -14822,8 +14823,8 @@ a prefix argument is given, its value determines the number of stars to add."
 		    (make-string (prefix-numeric-value current-prefix-arg)
 				 ?*)
 		  (save-excursion
-		    (re-search-backward org-complex-heading-regexp nil t)
-		    (or (match-string 1) ""))))
+		    (if (re-search-backward org-complex-heading-regexp nil t)
+			(match-string 1) ""))))
 	       (add-stars (cond (nstars "")
 				((equal stars "") "*")
 				(org-odd-levels-only "**")

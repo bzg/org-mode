@@ -1,5 +1,8 @@
 2009-07-27  Bastien Guerry  <bzg@altern.org>
 
+	* org.el (org-toggle-heading): Bugfix: correctly convert list
+	items before the first headline.
+
 	* org-html.el (org-export-html-footnote-format): New option for
 	formatting the footnote reference.
 	(org-export-as-html): Use the new option.
