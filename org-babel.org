@@ -269,8 +269,8 @@ but with preference given to
    mechanism similar to :export: and :noexport: to control evaluation
    on a per-subtree basis.
    
-** TODO support for working with =*Org Edit Src Example*= buffers [3/5]
-*** Patch against org source. 
+** TODO support for working with =*Org Edit Src Example*= buffers [4/6]
+*** STARTED Patch against org source. 
     I've worked on several related changes to source code edit buffer
     behaviour in the org core.  My current patch (below) does the
     following. Detailed explanation / working notes are below.
@@ -458,7 +458,7 @@ index 2083c77..2be21e6 100644
 
 *** DONE name edit buffer according to #+srcname (and language?)
     See above patch agains org.
-*** TODO optionally evaluate header references when we switch to =*Org Edit Src*= buffer
+*** DONE optionally evaluate header references when we switch to =*Org Edit Src*= buffer
 That seems to imply that the header references need to be evaluated
 and transformed into the target language object when we hit C-c ' to
 enter the *Org Edit Src* buffer [DED]
@@ -485,6 +485,19 @@ Yes [Dan]
 org-babel should do this by using the hook to make sure that, when C-c
 C-' is issued on a source block, any references are resolved and
 assignments are made in the appropriate session.
+
+#+tblname: my-little-table
+| 1 | 2 |
+| 3 | 4 |
+
+#+srcname: resolve-vars-on-edit
+#+begin_src ruby :var table=my-little-table :results silent :session test
+  table.size.times.do |n|
+    puts n
+  end
+#+end_src
+
+
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
 already thought of this, but just to note it down: it would be really
