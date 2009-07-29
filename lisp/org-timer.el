@@ -29,6 +29,8 @@
 
 (require 'org)
 
+(declare-function org-show-notification "org-clock" (parameters))
+
 (defvar org-timer-start-time nil
   "t=0 for the running timer.")
 
