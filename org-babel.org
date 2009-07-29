@@ -2600,7 +2600,26 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [29/38]
+* Bugs [29/39]
+** TODO export problems when support for a language is missing
+we should come up with a way to gracefully degrade when support for a
+specific language is missing
+
+> To demonstrate creation of documents, open the "test-export.org" file in
+> the base of the org-babel directory, and export it as you would any
+> other org-mode file.  The "exports" header argument controls how
+> source-code blocks are exported, with the following options
+>
+> - none :: no part of the source-code block is exported in the document
+> - results :: only the output of the evaluated block is exported
+> - code :: the code itself is exported
+> - both :: both the code and results are exported
+
+I have this error showing up:
+
+executing Ruby source code block
+apply: Searching for program: no such file or directory, irb
+
 ** TODO problem with newlines in output when :results value
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
