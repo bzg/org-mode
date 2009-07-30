@@ -240,7 +240,7 @@ being generated at =ruby-nuweb.rb= with the following contents
 : puts "                            Ruby                            "
 : puts "---------------------------footer---------------------------"
 
-** TODO re-work tangling system
+** STARTED re-work tangling system
 Sometimes when tangling a file (e.g. when extracting elisp from a
 org-mode file) we want to get nearly every source-code block.
 
@@ -250,6 +250,17 @@ literate programming along the Nuweb model)
 
 I'm not sure how we can devise a single simple tangling system that
 naturally fits both of these use cases.
+
+*** new setup
+the =tangle= header argument will default to =no= meaning source-code
+blocks will *not* be exported by default.  In order for a source-code
+block to be tangled it needs to have an output file specified.  This
+can happen in two ways...
+
+1) a file-wide default output file can be passed to `org-babel-tangle'
+   which will then be used for all blocks
+2) if the value of the =tangle= header argument is anything other than
+   =no= or =yes= then it is used as the file name
 
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
