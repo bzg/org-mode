@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [38/61]
+* Tasks [39/61]
 ** TODO new reference syntax *inside* source code blocks
 This is from an email discussion on the org-mode mailing list with
 Sébastien.  The goal here is to mimic the source-block reference style
@@ -240,7 +240,7 @@ being generated at =ruby-nuweb.rb= with the following contents
 : puts "                            Ruby                            "
 : puts "---------------------------footer---------------------------"
 
-** STARTED re-work tangling system
+** DONE re-work tangling system
 Sometimes when tangling a file (e.g. when extracting elisp from a
 org-mode file) we want to get nearly every source-code block.
 
@@ -272,7 +272,6 @@ can happen in two ways...
 
 #+resname:
 : succeed
-
 
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.

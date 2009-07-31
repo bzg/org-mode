@@ -13,7 +13,7 @@ echo "line 2"
 more text
 
 #+srcname: ruby-no-session
-#+begin_src ruby 
+#+begin_src ruby :tangle yes
   def hello
     puts "hello world"
   end
@@ -21,7 +21,7 @@ more text
 
 
 #+srcname: first-ruby-block
-#+begin_src ruby :session special
+#+begin_src ruby :session special :tangle trivial-symbol
 :block_the_first
 #+end_src
 
