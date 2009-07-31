@@ -240,39 +240,6 @@ being generated at =ruby-nuweb.rb= with the following contents
 : puts "                            Ruby                            "
 : puts "---------------------------footer---------------------------"
 
-** DONE re-work tangling system
-Sometimes when tangling a file (e.g. when extracting elisp from a
-org-mode file) we want to get nearly every source-code block.
-
-Sometimes we want to only extract those source-code blocks which
-reference a indicate that they should be extracted (e.g. traditional
-literate programming along the Nuweb model)
-
-I'm not sure how we can devise a single simple tangling system that
-naturally fits both of these use cases.
-
-*** new setup
-the =tangle= header argument will default to =no= meaning source-code
-blocks will *not* be exported by default.  In order for a source-code
-block to be tangled it needs to have an output file specified.  This
-can happen in two ways...
-
-1) a file-wide default output file can be passed to `org-babel-tangle'
-   which will then be used for all blocks
-2) if the value of the =tangle= header argument is anything other than
-   =no= or =yes= then it is used as the file name
-
-#+srcname: test-new-tangling
-#+begin_src emacs-lisp 
-  (org-babel-load-file "test-tangle.org")
-  (if (string= test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
-      "succeed"
-    "fail")
-#+end_src
-
-#+resname:
-: succeed
-
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -1205,6 +1172,39 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+
+** DONE re-work tangling system
+Sometimes when tangling a file (e.g. when extracting elisp from a
+org-mode file) we want to get nearly every source-code block.
+
+Sometimes we want to only extract those source-code blocks which
+reference a indicate that they should be extracted (e.g. traditional
+literate programming along the Nuweb model)
+
+I'm not sure how we can devise a single simple tangling system that
+naturally fits both of these use cases.
+
+*** new setup
+the =tangle= header argument will default to =no= meaning source-code
+blocks will *not* be exported by default.  In order for a source-code
+block to be tangled it needs to have an output file specified.  This
+can happen in two ways...
+
+1) a file-wide default output file can be passed to `org-babel-tangle'
+   which will then be used for all blocks
+2) if the value of the =tangle= header argument is anything other than
+   =no= or =yes= then it is used as the file name
+
+#+srcname: test-new-tangling
+#+begin_src emacs-lisp 
+  (org-babel-load-file "test-tangle.org")
+  (if (string= test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
+      "succeed"
+    "fail")
+#+end_src
+
+#+resname:
+: succeed
 
 ** DONE =\C-c \C-o= to open results of source block
 by adding a =defadvice= to =org-open-at-point= we can use the common

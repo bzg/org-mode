@@ -141,6 +141,12 @@ The basic syntax of source-code blocks is as follows:
 - tangle :: tangle arguments specify whether or not the source-code
             block should be included in tangled extraction of
             source-code files
-  - on :: the source-code block is included in tangled files
-  - off :: the source-code block is ignored when tangling
+  - yes :: the source-code block is exported to a source-code file
+           named after the basename (name w/o extension) of the
+           org-mode file
+  - no :: (default) the source-code block is not exported to a
+          source-code file
+  - other :: any other string passed to the =tangle= header argument
+             is interpreted as a file basename to which the block will
+             be exported
 
