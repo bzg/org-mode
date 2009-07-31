@@ -4740,6 +4740,7 @@ in special contexts.
                From this state, you can move to one of the children
                and zoom in further.
   3. SUBTREE:  Show the entire subtree, including body text.
+  If there is no subtree, switch directly from CHILDREN to FOLDED.
 
 - When there is a numeric prefix, go up to a heading with level ARG, do
   a `show-subtree' and return to the previous cursor position.  If ARG
@@ -4937,11 +4938,20 @@ in special contexts.
      ((and (eq last-command this-command)
 	   (eq org-cycle-subtree-status 'children))
       ;; We just showed the children, now show everything.
-      (run-hook-with-args 'org-pre-cycle-hook 'subtree)
-      (org-show-subtree)
-      (message "SUBTREE")
-      (setq org-cycle-subtree-status 'subtree)
-      (run-hook-with-args 'org-cycle-hook 'subtree))
+      (if (save-excursion
+	    (beginning-of-line 2)
+	    (re-search-forward org-complex-heading-regexp eos t))
+	  (progn
+	    (run-hook-with-args 'org-pre-cycle-hook 'subtree)
+	    (org-show-subtree)
+	    (message "SUBTREE")
+	    (setq org-cycle-subtree-status 'subtree)
+	    (run-hook-with-args 'org-cycle-hook 'subtree))
+	(run-hook-with-args 'org-pre-cycle-hook 'folded)
+	(hide-subtree)
+	(message "FOLDED (NO SUBTREE)")
+	(setq org-cycle-subtree-status 'folded)
+	(run-hook-with-args 'org-cycle-hook 'folded)))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)

@@ -2,6 +2,10 @@
 
 	* org.el (org-make-link-regexps): Don't exclude parentheses from
 	`org-plain-link-re'
+	(org-cycle-internal-local): When locally cycling, switch directly
+	from CHILDREN to FOLDED if there is no subtree
+	(org-cycle): Update the docstring to document the new behavior of
+	`org-cycle-internal-local'.
 
 2009-07-29  Nicolas Goaziou <n.goaziou@neuf.fr>  (tiny change)
 
