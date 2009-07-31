@@ -262,6 +262,18 @@ can happen in two ways...
 2) if the value of the =tangle= header argument is anything other than
    =no= or =yes= then it is used as the file name
 
+#+srcname: test-new-tangling
+#+begin_src emacs-lisp 
+  (org-babel-load-file "test-tangle.org")
+  (if (string= test-tangle-advert "use org-babel-tangle for all your emacs initialization files!!")
+      "succeed"
+    "fail")
+#+end_src
+
+#+resname:
+: succeed
+
+
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 

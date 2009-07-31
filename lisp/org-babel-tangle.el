@@ -49,6 +49,7 @@ file using `load-file'."
                               (sixth (file-attributes file))))))
     (let* ((base-name (file-name-sans-extension file))
            (exported-file (concat base-name ".el")))
+      (message "building %s" exported-file) ;; debugging
       ;; tangle if the org-mode file is newer than the elisp file
       (unless (and (file-exists-p exported-file) (> (age file) (age exported-file)))
         (org-babel-tangle-file file base-name "emacs-lisp"))
@@ -87,13 +88,15 @@ exported source code blocks by language."
               (let* ((tangle (cdr (assoc :tangle params)))
                      (base-name (or (when (not (or (string= tangle "yes")
                                                    (string= tangle "no")))
-                                      tangle)
+                                      (when (> (length tangle) 0) tangle))
                                     target-file))
                      (file-name (when base-name
                                   (concat base-name "." ext))))
+                (message "tangle=%S base-name=%S file-name=%S" tangle base-name file-name)
                 (when file-name
                   ;; delete any old versions of file
-                  (unless (member file-name path-collector)
+                  (when (and (file-exists-p file-name)
+                             (not (member file-name path-collector)))
                     (delete-file file-name))
                   ;; drop source-block to file
                   (with-temp-buffer
