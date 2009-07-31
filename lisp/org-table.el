@@ -1403,15 +1403,21 @@ should be done in reverse order."
 
 
 (defun org-table-cut-region (beg end)
-  "Copy region in table to the clipboard and blank all relevant fields."
-  (interactive "r")
+  "Copy region in table to the clipboard and blank all relevant fields.
+If there is no active region, use just the field at point."
+  (interactive (list
+		(if (org-region-active-p) (region-beginning) (point))
+		(if (org-region-active-p) (region-end) (point))))
   (org-table-copy-region beg end 'cut))
 
 (defun org-table-copy-region (beg end &optional cut)
   "Copy rectangular region in table to clipboard.
 A special clipboard is used which can only be accessed
 with `org-table-paste-rectangle'."
-  (interactive "rP")
+  (interactive (list
+		(if (org-region-active-p) (region-beginning) (point))
+		(if (org-region-active-p) (region-end) (point))
+		current-prefix-arg))
   (let* (l01 c01 l02 c02 l1 c1 l2 c2 ic1 ic2
 	 region cols
 	 (rpl (if cut "  " nil)))
