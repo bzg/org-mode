@@ -49,7 +49,6 @@ file using `load-file'."
                               (sixth (file-attributes file))))))
     (let* ((base-name (file-name-sans-extension file))
            (exported-file (concat base-name ".el")))
-      ;; (message "building %s" exported-file) ;; debugging
       ;; tangle if the org-mode file is newer than the elisp file
       (unless (and (file-exists-p exported-file) (> (age file) (age exported-file)))
         (org-babel-tangle-file file base-name "emacs-lisp"))
@@ -74,7 +73,7 @@ exported source code blocks by language."
   (save-excursion
     (let ((block-counter 0)
           path-collector)
-      (mapc ;; for every language create a file
+      (mapc ;; map over all languages
        (lambda (by-lang)
          (let* ((lang (car by-lang))
                 (specs (cdr by-lang))
@@ -164,6 +163,49 @@ form
       (insert (format "\n%s\n" (org-babel-chomp body)))
       (insert-comment (format "%s ends here" source-name))
       (insert "\n"))))
+
+(defun org-babel-expand-noweb-references (&optional info parent-buffer)
+  "This function expands Noweb style references in the body of
+the current source-code block.  The reference must be inside of a
+comment or it will be skipped.  For example the following
+reference would be replaced with the body of the source-code
+block named 'example-block' (assuming the '#' character starts a
+comment) .
+
+# <<example-block>>
+
+This function must be called from inside of the buffer containing
+the source-code block which holds BODY."
+  (interactive)
+  (let* ((parent-buffer (or parent-buffer (current-buffer)))
+         (info (or info (org-babel-get-src-block-info)))
+         (lang (first info))
+         (body (second info))
+         (new-body "") index source-name)
+    (with-temp-buffer
+      (insert body) (goto-char (point-min))
+      (funcall (intern (concat lang "-mode")))
+      (setq index (point))
+      (while (and (re-search-forward "<<\\(.+\\)>>" nil t)
+                  (save-match-data (comment-beginning)))
+        (save-match-data (setf source-name (match-string 1)))
+        ;; add interval to new-body
+        (goto-char (match-end 0))
+        (setq new-body (concat new-body (buffer-substring index (point))))
+        (setq index (point))
+        ;; if found, add body of referenced source-block
+        (setq new-body
+              (concat new-body
+                      (save-excursion
+                        (set-buffer parent-buffer)
+                        (let ((point (org-babel-find-named-block source-name)))
+                          (if point
+                              (save-excursion
+                                (goto-char point)
+                                (concat "\n" (second (org-babel-get-src-block-info))))
+                            ""))))))
+      (setq new-body (concat new-body (buffer-substring index (point-max)))))
+    new-body))
 
 (provide 'org-babel-tangle)
 ;;; org-babel-tangle.el ends here

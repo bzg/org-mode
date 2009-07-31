@@ -208,10 +208,10 @@ would then be [[#sandbox][the sandbox]].
 
   
 * Tasks [39/61]
-** TODO new reference syntax *inside* source code blocks
+** STARTED new reference syntax *inside* source code blocks
 This is from an email discussion on the org-mode mailing list with
 Sébastien.  The goal here is to mimic the source-block reference style
-of Nuweb.  Upon export and/or tangle these references could be
+of Noweb.  Upon export and/or tangle these references could be
 replaced with the actual body of the referenced source-code block.
 
 See the following for an example.
@@ -227,14 +227,14 @@ puts "---------------------------footer---------------------------"
 #+end_src
 
 #+srcname: ems-ruby-print-message
-#+begin_src ruby :file ruby-nuweb.rb
+#+begin_src ruby :file ruby-noweb.rb
   # <<ems-ruby-print-header>>
   puts "                            Ruby                            "
   # <<ems-ruby-print-footer>>
 #+end_src
 
 Upon export the previous source-code block would result in a file
-being generated at =ruby-nuweb.rb= with the following contents
+being generated at =ruby-noweb.rb= with the following contents
 
 : puts "---------------------------header---------------------------"
 : puts "                            Ruby                            "
@@ -1179,7 +1179,7 @@ org-mode file) we want to get nearly every source-code block.
 
 Sometimes we want to only extract those source-code blocks which
 reference a indicate that they should be extracted (e.g. traditional
-literate programming along the Nuweb model)
+literate programming along the Noweb model)
 
 I'm not sure how we can devise a single simple tangling system that
 naturally fits both of these use cases.

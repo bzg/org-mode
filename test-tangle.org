@@ -19,11 +19,17 @@ more text
   end
 #+end_src
 
-
 #+srcname: first-ruby-block
 #+begin_src ruby :session special :tangle trivial-symbol
 :block_the_first
 #+end_src
+
+#+srcname: ruby-with-noweb-references
+#+begin_src ruby 
+  # <<ruby-no-session>>
+  hello()
+#+end_src
+
 
 
 ** Some subsection
