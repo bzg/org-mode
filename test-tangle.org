@@ -13,7 +13,7 @@ echo "line 2"
 more text
 
 #+srcname: ruby-no-session
-#+begin_src ruby :tangle yes
+#+begin_src ruby
   def hello
     puts "hello world"
   end
@@ -25,7 +25,7 @@ more text
 #+end_src
 
 #+srcname: ruby-with-noweb-references
-#+begin_src ruby 
+#+begin_src ruby :tangle yes
   # <<ruby-no-session>>
   hello()
 #+end_src

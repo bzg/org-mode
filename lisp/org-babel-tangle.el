@@ -132,7 +132,7 @@ code blocks by language."
                                       (format "block-%d" block-counter))))
              (info (org-babel-get-src-block-info))
              (src-lang (first info))
-             (body (second info))
+             (body (org-babel-expand-noweb-references info))
              (params (third info))
              (spec (list link source-name params body))
              by-lang)
@@ -176,35 +176,34 @@ comment) .
 
 This function must be called from inside of the buffer containing
 the source-code block which holds BODY."
-  (interactive)
   (let* ((parent-buffer (or parent-buffer (current-buffer)))
          (info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
          (new-body "") index source-name)
-    (with-temp-buffer
-      (insert body) (goto-char (point-min))
-      (funcall (intern (concat lang "-mode")))
-      (setq index (point))
-      (while (and (re-search-forward "<<\\(.+\\)>>" nil t)
-                  (save-match-data (comment-beginning)))
-        (save-match-data (setf source-name (match-string 1)))
-        ;; add interval to new-body
-        (goto-char (match-end 0))
-        (setq new-body (concat new-body (buffer-substring index (point))))
+    (flet ((nb-add (text)
+                   (setq new-body (concat new-body text))))
+      (with-temp-buffer
+        (insert body) (goto-char (point-min))
+        (funcall (intern (concat lang "-mode")))
         (setq index (point))
-        ;; if found, add body of referenced source-block
-        (setq new-body
-              (concat new-body
-                      (save-excursion
-                        (set-buffer parent-buffer)
-                        (let ((point (org-babel-find-named-block source-name)))
-                          (if point
-                              (save-excursion
-                                (goto-char point)
-                                (concat "\n" (second (org-babel-get-src-block-info))))
-                            ""))))))
-      (setq new-body (concat new-body (buffer-substring index (point-max)))))
+        (while (and (re-search-forward "<<\\(.+\\)>>" nil t)
+                    (save-match-data (comment-beginning)))
+          (save-match-data (setf source-name (match-string 1)))
+          ;; add interval to new-body
+          (goto-char (match-end 0))
+          (nb-add (buffer-substring index (point)))
+          (setq index (point))
+          ;; if found, add body of referenced source-block
+          (nb-add (save-excursion
+                    (set-buffer parent-buffer)
+                    (let ((point (org-babel-find-named-block source-name)))
+                      (if point
+                          (save-excursion
+                            (goto-char point)
+                            (concat "\n" (second (org-babel-get-src-block-info))))
+                        "")))))
+        (nb-add (buffer-substring index (point-max)))))
     new-body))
 
 (provide 'org-babel-tangle)
