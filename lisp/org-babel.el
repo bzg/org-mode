@@ -159,7 +159,7 @@ Optionally supply a value for INFO in the form returned by
 Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the source code block."
   (interactive)
-  (message "supplied params=%S" params)
+  ;; (message "supplied params=%S" params) ;; debugging
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (first info))
          (body (second info))
@@ -170,7 +170,7 @@ the header arguments specified at the source code block."
 	 (result-type (fourth processed-params))
          (cmd (intern (concat "org-babel-execute:" lang)))
          result)
-    (message "params=%S" params) ;; debugging statement
+    ;; (message "params=%S" params) ;; debugging statement
     (unless (member lang org-babel-interpreters)
       (error "Language is not in `org-babel-interpreters': %s" lang))
     (when arg (setq result-params (cons "silent" result-params)))
@@ -247,7 +247,7 @@ concerned with creating elisp versions of results. "
 
   (if (and (member "vector" result-params) (not (listp result)))
       (list (list result))
-         result))
+    result))
 
 (defun org-babel-execute-buffer (&optional arg)
   "Replace EVAL snippets in the entire buffer."
@@ -314,6 +314,19 @@ of the following form.  (language body header-arguments-alist)"
        (save-match-data ,@body)
        (goto-char (match-end 0)))))
 
+(defun org-babel-params-from-properties ()
+  "Return an association list of any source block params which
+may be specified in the properties of the current outline entry."
+  (let ((org-babel-header-args '("results" "exports" "tangle")))
+    (delq nil
+          (mapcar
+           (lambda (header-arg)
+             (let ((val (org-entry-get (point) header-arg)))
+               (when val
+                 ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
+                 (cons (intern (concat ":" header-arg)) val))))
+           org-babel-header-args))))
+
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
@@ -321,6 +334,7 @@ of the following form.  (language body header-arguments-alist)"
 	  (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
+           (org-babel-params-from-properties)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
@@ -331,6 +345,7 @@ of the following form.  (language body header-arguments-alist)"
           (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
           (org-babel-merge-params
            org-babel-default-inline-header-args
+           (org-babel-params-from-properties)
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments (org-babel-clean-text-properties (or (match-string 3) "")))))))
 
