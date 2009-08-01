@@ -1,3 +1,11 @@
+2009-08-01  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-table.el (org-table-error-on-row-ref-crossing-hline):
+	Variable made obsolete.
+	(org-table-relative-ref-may-cross-hline): New option.
+	(org-table-find-row-type): Honow the new option
+	`org-table-relative-ref-may-cross-hline'.
+
 2009-07-31  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-table.el (org-table-cut-region, org-table-copy-region): Work

@@ -247,12 +247,28 @@ Automatically means, when TAB or RET or C-c C-c are pressed in the line."
   :type 'boolean)
 
 (defcustom org-table-error-on-row-ref-crossing-hline t
-  "Non-nil means, a relative row reference that tries to cross a hline errors.
-When nil, the reference will silently be to the field just next to the hline.
-Coming from below, it will be the field below the hline, coming from
-above, it will be the field above the hline."
+  "OBSOLETE VARIABLE, please see `org-table-relative-ref-may-cross-hline'."
   :group 'org-table
   :type 'boolean)
+
+(defcustom org-table-relative-ref-may-cross-hline t
+  "Non-nil means, reltive formula references may cross hlines.
+Here are the allowed values:
+
+nil    Relative references may not cross hlines.  They will reference the
+       field next to the hline instead.  Coming from below, the reference
+       will be to the field below the hline.  Coming from above, it will be
+       to the field above.
+t      Relative references may cros hlines.
+error  An attempt to cross a hline will throw an error.
+
+It is probably good to never set this variable to nil, for the sake of
+portability of tables."
+  :group 'org-table-calculation
+  :type '(choice
+	  (const :tag "Allow to cross" t)
+	  (const :tag "Stick to hline" nil)
+	  (const :tag "Error on attempt to cross" error)))
 
 (defgroup org-table-import-export nil
   "Options concerning table import and export in Org-mode."
@@ -2404,9 +2420,13 @@ and TABLE is a vector with line types."
 		  (>= i 0) (< i l)
 		  (not (eq (aref table i) type))
 		  (if (and relative (eq (aref table i) 'hline))
-		      (if org-table-error-on-row-ref-crossing-hline
-			  (error "Row descriptor %s used in line %d crosses hline" desc cline)
-			(progn (setq i (- i (if backwards -1 1)) n 1) nil))
+		      (cond
+		       ((eq org-table-relative-ref-may-cross-hline t) t)
+		       ((eq org-table-relative-ref-may-cross-hline 'error)
+			(error "Row descriptor %s used in line %d crosses hline" desc cline))
+		       (t (setq i (- i (if backwards -1 1))
+				n 1)
+			  nil))
 		    t)))
       (setq n (1- n)))
     (if (or (< i 0) (>= i l))

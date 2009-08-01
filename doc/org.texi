@@ -2072,9 +2072,7 @@ starts with a hline above the header, it does not count.}, @samp{II} to
 the second, etc@.  @samp{-I} refers to the first such line above the
 current line, @samp{+I} to the first such line below the current line.
 You can also write @samp{III+2} which is the second data line after the
-third hline in the table.  Relative row numbers like @samp{-3} will not
-cross hlines if the current line is too close to the hline.  Instead,
-the value directly at the hline is used.
+third hline in the table.
 
 @samp{0} refers to the current row and column.  Also, if you omit
 either the column or the row part of the reference, the current
@@ -2087,8 +2085,8 @@ Org's references with @emph{signed} numbers are floating
 references because the same reference operator can reference different
 fields depending on the field being calculated by the formula.
 
-As a special case, references like @samp{$LR5} and @samp{$LR12} can be used to
-refer in a stable way to the 5th and 12th field in the last row of the
+As a special case, references like @samp{$LR5} and @samp{$LR12} can be used
+to refer in a stable way to the 5th and 12th field in the last row of the
 table.
 
 Here are a few examples:
