@@ -3,6 +3,7 @@
 .Rhistory
 .Rdata
 data
+other
 # tangled files
 test-tangle.sh
 test-tangle-none.rb
