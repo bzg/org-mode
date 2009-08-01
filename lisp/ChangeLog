@@ -1,5 +1,8 @@
 2009-08-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-read-date): Make sure the calendar is in the current
+	frame.
+
 	* org-table.el (org-table-error-on-row-ref-crossing-hline):
 	Variable made obsolete.
 	(org-table-relative-ref-may-cross-hline): New option.
