@@ -2097,14 +2097,16 @@ TYPE must be a string, any of:
 	    (setq start (format "#+begin_%s %s\n" markup switches)
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
-	(insert (org-get-file-contents (expand-file-name file) prefix prefix1))
+	(insert (org-get-file-contents (expand-file-name file) prefix prefix1 markup))
 	(or (bolp) (newline))
 	(insert (or end ""))))))
 
-(defun org-get-file-contents (file &optional prefix prefix1)
+(defun org-get-file-contents (file &optional prefix prefix1 markup)
   "Get the contents of FILE and return them as a string.
 If PREFIX is a string, prepend it to each line.  If PREFIX1
-is a string, prepend it to the first line instead of PREFIX."
+is a string, prepend it to the first line instead of PREFIX.
+If MARKUP, don't protect org-like lines, the exporter will
+take care of the block they are in."
   (with-temp-buffer
     (insert-file-contents file)
     (when (or prefix prefix1)
@@ -2114,11 +2116,12 @@ is a string, prepend it to the first line instead of PREFIX."
 	(setq prefix1 nil)
 	(beginning-of-line 2)))
     (buffer-string)
-    (goto-char (point-min))
-    (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
-      (goto-char (match-beginning 0))
-      (insert ",")
-      (end-of-line 1))
+    (unless markup
+      (goto-char (point-min))
+      (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
+	(goto-char (match-beginning 0))
+	(insert ",")
+	(end-of-line 1)))
     (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)
@@ -2299,8 +2302,6 @@ INDENT was the original indentation of the block."
 (defun org-export-number-lines (text backend
 				     &optional skip1 skip2 number cont
 				     replace-labels label-format)
-  (if (and (not number) (not (eq replace-labels 'keep)))
-      (setq replace-labels nil)) ;; must use names if no numbers
   (setq skip1 (or skip1 0) skip2 (or skip2 0))
   (if (not cont) (setq org-export-last-code-line-counter-value 0))
   (with-temp-buffer
@@ -2332,7 +2333,7 @@ INDENT was the original indentation of the block."
 	    (concat
 	     ".*?\\S-.*?\\([ \t]*\\("
 	     (regexp-quote label-pre)
-	     "\\([-a-zA-Z0-9_]+\\)"
+	     "\\([-a-zA-Z0-9_ ]+\\)"
 	     (regexp-quote label-post)
 	     "\\)\\)"))
 	   ref)
@@ -2342,17 +2343,28 @@ INDENT was the original indentation of the block."
 	(if number
 	    (insert (format fm (incf n)))
 	  (forward-char 1))
-	(when (and (not (eq replace-labels 'keep))
-		   (looking-at lbl-re))
+	(when (looking-at lbl-re) 
 	  (setq ref (match-string 3))
-	  (if replace-labels
-	      (progn
-		(delete-region (match-beginning 1) (match-end 1))
-		(push (cons ref n) org-export-code-refs))
-	    (goto-char (match-beginning 2))
-	    (delete-region (match-beginning 2) (match-end 2))
-	    (insert "(" ref ")")
-	    (push (cons ref (concat "(" ref ")")) org-export-code-refs))
+	  (cond ((numberp replace-labels)
+		 ;; remove labels; use numbers for references when lines
+		 ;; are numbered, use labels otherwise
+		 (delete-region (match-beginning 1) (match-end 1))
+		 (push (cons ref (if (> n 0) n ref)) org-export-code-refs))
+		((eq replace-labels 'keep)
+		 ;; don't remove labels; use numbers for references when
+		 ;; lines are numbered, use labels otherwise
+		 (goto-char (match-beginning 2))
+		 (delete-region (match-beginning 2) (match-end 2))
+		 (insert "(" ref ")")
+		 (push (cons ref (if (> n 0) n (concat "(" ref ")"))) 
+		       org-export-code-refs))
+		(t 
+		 ;; don't remove labels and don't use numbers for
+		 ;; references
+		 (goto-char (match-beginning 2))
+		 (delete-region (match-beginning 2) (match-end 2))
+		 (insert "(" ref ")")
+		 (push (cons ref (concat "(" ref ")")) org-export-code-refs)))
 	  (when (eq backend 'html)
 	    (save-excursion
 	      (beginning-of-line 1)

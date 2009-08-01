@@ -1391,6 +1391,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
 (org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
+(org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
 
 (defvar org-agenda-keymap (copy-keymap org-agenda-mode-map)
   "Local keymap for agenda entries from Org-mode.")

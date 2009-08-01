@@ -57,7 +57,7 @@ there are kept outside the narrowed region."
 (defcustom org-coderef-label-format "(ref:%s)"
   "The default coderef format.
 This format string will be used to search for coderef labels in literal
-examples (EXAMPLE and SRC blocks).  The format can be overwritten
+examples (EXAMPLE and SRC blocks).  The format can be overwritten in
 an individual literal example with the -f option, like
 
 #+BEGIN_SRC pascal +n -r -l \"((%s))\"

@@ -721,8 +721,8 @@ in the headline.  A second `C-e' will then jump to the true end of the
 line, after any tags.
 
 When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
-and only a directly following, identical keypress will bring the cursor
-to the special positions.
+going to the true line boundary first.  Only a directly following, identical
+keypress will bring the cursor to the special positions.
 
 This may also be a cons cell where the behavior for `C-a' and `C-e' is
 set separately."
@@ -1715,10 +1715,19 @@ by a letter in parenthesis, like TODO(t)."
 
 (defcustom org-provide-todo-statistics t
   "Non-nil means, update todo statistics after insert and toggle.
-When this is set, todo statistics is updated in the parent of the current
-entry each time a todo state is changed."
+ALL-HEADLINES means update todo statistics by including headlines
+with no TODO keyword as well.  A list of TODO keywords means the
+same, but skip keywords that are not in this list.
+
+When this is set, todo statistics is updated in the parent of the
+current entry each time a todo state is changed."
   :group 'org-todo
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "Yes, only for TODO entries" t)
+	  (const :tag "Yes, including all entries" 'all-headlines)
+	  (repeat :tag "Yes, for TODOs in this list"
+		  (string :tag "TODO keyword"))
+	  (other :tag "No TODO statistics" nil)))
 
 (defcustom org-hierarchical-todo-statistics t
   "Non-nil means, TODO statistics covers just direct children.
@@ -2333,6 +2342,9 @@ see the variable `org-use-tag-inheritance'."
 This variable applies to tags/property searches, and also to stuck
 projects because this search is based on a tags match as well.
 
+When set to the symbol `indented', sublevels are indented with
+leading dots.
+
 Because of tag inheritance (see variable `org-use-tag-inheritance'),
 the sublevels of a headline matching a tag search often also match
 the same search.  Listing all of them can create very long lists.
@@ -2346,6 +2358,15 @@ is better to limit inheritance to certain tags using the variables
 	  (const :tag "No, don't list them" nil)
 	  (const :tag "Yes, do list them" t)
 	  (const :tag "List them, indented with leading dots" indented)))
+
+(defcustom org-tags-sort-function nil
+  "When set, tags are sorted using this function as a comparator"
+  :group 'org-tags
+  :type '(choice
+	  (const :tag "No sorting" nil)
+	  (const :tag "Alphabetical" string<)
+	  (const :tag "Reverse alphabetical" string>)
+	  (function :tag "Custom function" nil)))
 
 (defvar org-tags-history nil
   "History of minibuffer reads for tags.")
@@ -2659,6 +2680,13 @@ Changing this variable requires a restart of Emacs to take effect."
   :group 'org-font-lock
   :type 'boolean)
 
+(defcustom org-fontify-whole-heading-line nil
+  "Non-nil means fontify the whole line for headings.
+This is useful when setting a background color for the
+org-leve-* faces."
+  :group 'org-font-lock
+  :type 'boolean)
+
 (defcustom org-highlight-latex-fragments-and-specials nil
   "Non-nil means, fontify what is treated specially by the exporters."
   :group 'org-font-lock
@@ -2716,7 +2744,7 @@ Changing this variable requires a restart of Emacs to take effect."
 		    "[^" border "]"
 		    "\\)"
 		    "\\3\\)"
-		    "\\([" post "]\\|$\\)"))
+		    "\\([" post "]\\|$\\)?"))
       (setq org-verbatim-re
 	    (concat "\\([" pre "]\\|^\\)"
 		    "\\("
@@ -2728,7 +2756,7 @@ Changing this variable requires a restart of Emacs to take effect."
 		    "[^" border "]"
 		    "\\)"
 		    "\\3\\)"
-		    "\\([" post  "]\\|$\\)")))))
+		    "\\([" post  "]\\|$\\)?")))))
 
 (defcustom org-emphasis-regexp-components
   '(" \t('\"{" "- \t.,:!?;'\")}" " \t\r\n,\"'" "." 1)
@@ -3112,7 +3140,10 @@ If yes, offer to stop it and to save the buffer with the changes."
   (org-autoload
    "org-timer"
    '(org-timer-start org-timer org-timer-item
-		     org-timer-change-times-in-region)))
+		     org-timer-change-times-in-region
+		     org-timer-set-timer
+		     org-timer-reset-timers
+		     org-timer-show-remaining-time)))
 
 ;; Autoload org-feed.el
 
@@ -4040,7 +4071,7 @@ This should be called after the variable `org-link-types' has changed."
 	org-plain-link-re
 	(concat
 	 "\\<\\(" (mapconcat 'identity org-link-types "\\|") "\\):"
-	 "\\([^]\t\n\r<>() ]+[^]\t\n\r<>,.;() ]\\)")
+	 "\\([^]\t\n\r<> ]+[^]\t\n\r<>,.; ]\\)")
 	org-bracket-link-regexp
 	"\\[\\[\\([^][]+\\)\\]\\(\\[\\([^][]+\\)\\]\\)?\\]"
 	org-bracket-link-analytic-regexp
@@ -4527,8 +4558,12 @@ between words."
 	   ;; Call the hook
 	   '(org-font-lock-hook)
 	   ;; Headlines
-	   '("^\\(\\**\\)\\(\\* \\)\\(.*\\)" (1 (org-get-level-face 1))
-	     (2 (org-get-level-face 2)) (3 (org-get-level-face 3)))
+	   `(,(if org-fontify-whole-heading-line
+		  "^\\(\\**\\)\\(\\* \\)\\(.*\xa\\)"
+		"^\\(\\**\\)\\(\\* \\)\\(.*\\)")
+	     (1 (org-get-level-face 1))
+	     (2 (org-get-level-face 2))
+	     (3 (org-get-level-face 3)))
 	   ;; Table lines
 	   '("^[ \t]*\\(\\(|\\|\\+-[-+]\\).*\\S-\\)"
 	     (1 'org-table t))
@@ -4717,6 +4752,7 @@ in special contexts.
                From this state, you can move to one of the children
                and zoom in further.
   3. SUBTREE:  Show the entire subtree, including body text.
+  If there is no subtree, switch directly from CHILDREN to FOLDED.
 
 - When there is a numeric prefix, go up to a heading with level ARG, do
   a `show-subtree' and return to the previous cursor position.  If ARG
@@ -4922,11 +4958,20 @@ in special contexts.
      ((and (eq last-command this-command)
 	   (eq org-cycle-subtree-status 'children))
       ;; We just showed the children, now show everything.
-      (run-hook-with-args 'org-pre-cycle-hook 'subtree)
-      (org-show-subtree)
-      (message "SUBTREE")
-      (setq org-cycle-subtree-status 'subtree)
-      (run-hook-with-args 'org-cycle-hook 'subtree))
+      (if (save-excursion
+	    (beginning-of-line 2)
+	    (re-search-forward org-complex-heading-regexp eos t))
+	  (progn
+	    (run-hook-with-args 'org-pre-cycle-hook 'subtree)
+	    (org-show-subtree)
+	    (message "SUBTREE")
+	    (setq org-cycle-subtree-status 'subtree)
+	    (run-hook-with-args 'org-cycle-hook 'subtree))
+	(run-hook-with-args 'org-pre-cycle-hook 'folded)
+	(hide-subtree)
+	(message "FOLDED (NO SUBTREE)")
+	(setq org-cycle-subtree-status 'folded)
+	(run-hook-with-args 'org-cycle-hook 'folded)))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)
@@ -6672,12 +6717,12 @@ C-c C-c     Set tags / toggle checkbox"
 
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
-In addition to setting orgstruct-mode, this also exports all indentation and
-autofilling variables from org-mode into the buffer.  It will also
+In addition to setting orgstruct-mode, this also exports all indentation
+and autofilling variables from org-mode into the buffer.  It will also
 recognize item context in multiline items.
 Note that turning off orgstruct-mode will *not* remove the
 indentation/paragraph settings.  This can only be done by refreshing the
-major mode, for example with \[normal-mode]."
+major mode, for example with \\[normal-mode]."
   (interactive "P")
   (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
   (if (< arg 1)
@@ -7423,11 +7468,13 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		  (let ((org-completion-use-ido nil))
 		    (org-completing-read
 		     "Link: "
-		     (mapcar (lambda (x) (list (concat x ":")))
-			     all-prefixes)
+		     (append
+		      (mapcar (lambda (x) (list (concat x ":")))
+			      all-prefixes)
+		      (mapcar 'car org-stored-links))
 		     nil nil nil
 		     'tmphist
-		     (or (car (car org-stored-links))))))
+		     (car (car org-stored-links)))))
 	    (if (or (member link all-prefixes)
 		    (and (equal ":" (substring link -1))
 			 (member (substring link 0 -1) all-prefixes)
@@ -7495,7 +7542,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (insert (org-make-link-string link desc))))
 
 (defun org-link-try-special-completion (type)
-  "If there is completion support for link type TAPE, offer it."
+  "If there is completion support for link type TYPE, offer it."
   (let ((fun (intern (concat "org-" type "-complete-link"))))
     (if (functionp fun)
 	(funcall fun)
@@ -8336,7 +8383,9 @@ on the system \"/user@host:\"."
 
 (defun org-get-refile-targets (&optional default-buffer)
   "Produce a table with refile targets."
-  (let ((entries (or org-refile-targets '((nil . (:level . 1)))))
+  (let ((case-fold-search nil)
+	;; otherwise org confuses "TODO" as a kw and "Todo" as a word
+	(entries (or org-refile-targets '((nil . (:level . 1)))))
 	targets txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
@@ -8490,9 +8539,10 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (setq it (or rfloc
-			 (org-refile-get-location
-			  (if goto "Goto: " "Refile to: ") default-buffer
-			  org-refile-allow-creating-parent-nodes)))
+			 (save-excursion
+			   (org-refile-get-location
+			    (if goto "Goto: " "Refile to: ") default-buffer
+			    org-refile-allow-creating-parent-nodes))))
 	(setq file (nth 1 it)
 	      re (nth 2 it)
 	      pos (nth 3 it))
@@ -8785,8 +8835,8 @@ This function can be used in a hook."
 ;;;; Completion
 
 (defconst org-additional-option-like-keywords
-  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML" 
-    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook" 
+  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML"
+    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook"
     "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:"  "ATTR_LaTeX"
     "BEGIN:" "END:"
     "ORGTBL" "TBLFM:" "TBLNAME:"
@@ -9445,7 +9495,13 @@ statistics everywhere."
 			  (> (setq l1 (length (match-string 1))) level))
 		(setq kwd (and (or recursive (= l1 ltoggle))
 			       (match-string 2)))
-		(and kwd (setq cnt-all (1+ cnt-all)))
+		(if (or (eq org-provide-todo-statistics 'all-headlines)
+			(and (listp org-provide-todo-statistics)
+			     (or (member kwd org-provide-todo-statistics)
+				 (member kwd org-done-keywords))))
+		    (setq cnt-all (1+ cnt-all))
+		  (if (eq org-provide-todo-statistics t)
+		      (and kwd (setq cnt-all (1+ cnt-all)))))
 		(and (member kwd org-done-keywords)
 		     (setq cnt-done (1+ cnt-done)))
 		(outline-next-heading)))
@@ -10905,6 +10961,11 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	  ;; No boolean logic, just a list
 	  (setq tags (replace-match ":" t t tags))))
 
+      (if org-tags-sort-function
+      	  (setq tags (mapconcat 'identity
+      				(sort (org-split-string tags (org-re "[^[:alnum:]_@]+"))
+      				      org-tags-sort-function) ":")))
+
       (if (string-match "\\`[\t ]*\\'" tags)
           (setq tags "")
 	(unless (string-match ":$" tags) (setq tags (concat tags ":")))
@@ -11253,7 +11314,7 @@ The return values of all calls to the function will be collected and
 returned as a list.
 
 The call to FUNC will be wrapped into a save-excursion form, so FUNC
-does not need to preserve point.  After evaluaton, the cursor will be
+does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
 circumstances, this may not produce the wanted results.  For example,
@@ -12167,51 +12228,51 @@ user."
 		 (minibuffer-local-map (copy-keymap minibuffer-local-map)))
 	    (org-defkey map (kbd "RET") 'org-calendar-select)
 	    (org-defkey map (if (featurep 'xemacs) [button1] [mouse-1])
-	      'org-calendar-select-mouse)
+			'org-calendar-select-mouse)
 	    (org-defkey map (if (featurep 'xemacs) [button2] [mouse-2])
-	      'org-calendar-select-mouse)
+			'org-calendar-select-mouse)
 	    (org-defkey minibuffer-local-map [(meta shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-month 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-month 1))))
 	    (org-defkey minibuffer-local-map [(meta shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-month 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-month 1))))
 	    (org-defkey minibuffer-local-map [(meta shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-year 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-year 1))))
 	    (org-defkey minibuffer-local-map [(meta shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-year 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-year 1))))
 	    (org-defkey minibuffer-local-map [?\e (shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-month 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-month 1))))
 	    (org-defkey minibuffer-local-map [?\e (shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-month 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-month 1))))
 	    (org-defkey minibuffer-local-map [?\e (shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-year 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-year 1))))
 	    (org-defkey minibuffer-local-map [?\e (shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-year 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-year 1))))
 	    (org-defkey minibuffer-local-map [(shift up)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-week 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-week 1))))
 	    (org-defkey minibuffer-local-map [(shift down)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-week 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-week 1))))
 	    (org-defkey minibuffer-local-map [(shift left)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-backward-day 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-backward-day 1))))
 	    (org-defkey minibuffer-local-map [(shift right)]
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(calendar-forward-day 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(calendar-forward-day 1))))
 	    (org-defkey minibuffer-local-map ">"
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(scroll-calendar-left 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(scroll-calendar-left 1))))
 	    (org-defkey minibuffer-local-map "<"
-	      (lambda () (interactive)
-		(org-eval-in-calendar '(scroll-calendar-right 1))))
+			(lambda () (interactive)
+			  (org-eval-in-calendar '(scroll-calendar-right 1))))
 	    (run-hooks 'org-read-date-minibuffer-setup-hook)
 	    (unwind-protect
 		(progn
@@ -12247,6 +12308,7 @@ user."
 		  (nth 5 final) (nth 4 final) (nth 3 final)
 		  (nth 2 final) (nth 1 final))
 	(format "%04d-%02d-%02d" (nth 5 final) (nth 4 final) (nth 3 final))))))
+
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
@@ -12456,15 +12518,17 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 (defun org-eval-in-calendar (form &optional keepdate)
   "Eval FORM in the calendar window and return to current window.
 Also, store the cursor date in variable org-ans2."
-  (let ((sw (selected-window)))
-    (select-window (get-buffer-window "*Calendar*"))
+  (let ((sf (selected-frame))
+	(sw (selected-window)))
+    (select-window (get-buffer-window "*Calendar*" t))
     (eval form)
     (when (and (not keepdate) (calendar-cursor-to-date))
       (let* ((date (calendar-cursor-to-date))
 	     (time (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
 	(setq org-ans2 (format-time-string "%Y-%m-%d" time))))
     (org-move-overlay org-date-ovl (1- (point)) (1+ (point)) (current-buffer))
-    (select-window sw)))
+    (select-window sw)
+    (select-frame-set-input-focus sf)))
 
 (defun org-calendar-select ()
   "Return to `org-read-date' with the date currently selected.
@@ -14004,7 +14068,9 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-e" 'org-export)
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
-(org-defkey org-mode-map "\C-c\C-xf" 'org-footnote-action)
+(org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
+(org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
+;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
 (org-defkey org-mode-map "\C-c\C-x\C-k" 'org-mark-entry-for-agenda-action)
 (org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
@@ -14024,6 +14090,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
+(org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
 
 (org-defkey org-mode-map "\C-c\C-x."    'org-timer)
 (org-defkey org-mode-map "\C-c\C-x-"    'org-timer-item)
@@ -14807,15 +14874,16 @@ If there is no active region, only the current line is considered.
 If the first line is a heading, remove the stars from all headlines
 in the region.
 
-If the first line is a plain list item, turn all plain list items into
-headings.
+If the first line is a plain list item, turn all plain list items
+into headings.
 
-If the first line is a normal line, turn each and every line in the region
-into a heading.
+If the first line is a normal line, turn each and every line in the 
+region into a heading.
 
-When converting a line into a heading, the number of stars is chosen
-such that the lines become children of the current entry.  However, when
-a prefix argument is given, its value determines the number of stars to add."
+When converting a line into a heading, the number of stars is chosen 
+such that the lines become children of the current entry.  However, 
+when a prefix argument is given, its value determines the number of 
+stars to add."
   (interactive "P")
   (let (l2 l itemp beg end)
     (if (org-region-active-p)
@@ -14840,8 +14908,8 @@ a prefix argument is given, its value determines the number of stars to add."
 		    (make-string (prefix-numeric-value current-prefix-arg)
 				 ?*)
 		  (save-excursion
-		    (re-search-backward org-complex-heading-regexp nil t)
-		    (or (match-string 1) ""))))
+		    (if (re-search-backward org-complex-heading-regexp nil t)
+			(match-string 1) ""))))
 	       (add-stars (cond (nstars "")
 				((equal stars "") "*")
 				(org-odd-levels-only "**")
@@ -15626,6 +15694,16 @@ really on, so that the block visually is on the match."
 	    (goto-char pos)
 	    (org-reveal)))))))
 
+(defun org-occur-link-in-agenda-files ()
+  "Create a link and search for it in the agendas.
+The link is not stored in `org-stored-links', it is just created
+for the search purpose."
+  (interactive)
+  (let ((link (condition-case nil
+		  (org-store-link nil)
+		(error "Unable to create a link from here"))))
+    (org-occur-in-agenda-files (regexp-quote link))))
+
 (defun org-uniquify (list)
   "Remove duplicate elements from LIST."
   (let (res)
@@ -15884,7 +15962,7 @@ which make use of the date at the cursor."
   (org-set-local 'comment-start-skip "^#+[ \t]*")
   (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|]")
   ;; The paragraph starter includes hand-formatted lists.
-  (org-set-local 
+  (org-set-local
    'paragraph-start
    (concat
     "\f" "\\|"
@@ -16422,12 +16500,12 @@ This is like outline-next-sibling, but invisible headings are ok."
 	(outline-next-heading)))
     (unless to-heading
       (if (memq (preceding-char) '(?\n ?\^M))
-	  (progn
-	    ;; Go to end of line before heading
-	    (forward-char -1)
-	    (if (memq (preceding-char) '(?\n ?\^M))
-		;; leave blank line before heading
-		(forward-char -1))))))
+    	  (progn
+    	    ;; Go to end of line before heading
+    	    (forward-char -1)
+    	    (if (memq (preceding-char) '(?\n ?\^M))
+    		;; leave blank line before heading
+    		(forward-char -1))))))
   (point))
 
 (defadvice outline-end-of-subtree (around prefer-org-version activate compile)

@@ -31,6 +31,11 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
 
+(defgroup org-export-html nil
+  "Options specific for HTML export of Org-mode files."
+  :tag "Org Export HTML"
+  :group 'org-export)
+
 (defcustom org-export-html-footnotes-section "<div id=\"footnotes\">
 <h2 class=\"footnotes\">%s: </h2>
 <div id=\"text-footnotes\">
@@ -44,10 +49,11 @@ by the footnotes themselves."
   :group 'org-export-html
   :type 'string)
 
-(defgroup org-export-html nil
-  "Options specific for HTML export of Org-mode files."
-  :tag "Org Export HTML"
-  :group 'org-export)
+(defcustom org-export-html-footnote-format "<sup>%s</sup>"
+  "The format for the footnote reference.
+%s will be replaced by the footnote reference itself."
+  :group 'org-export-html
+  :type 'string)
 
 (defcustom org-export-html-coding-system nil
   "Coding system for HTML export, defaults to buffer-file-coding-system."
@@ -315,7 +321,7 @@ starting from 1 in the first header line.  For example
 
 will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
   :group 'org-export-tables
-  :type '(cons 
+  :type '(cons
 	  (choice :tag "Opening tag"
 		  (string :tag "Specify")
 		  (sexp))
@@ -368,7 +374,7 @@ people with different Emacs setup contribute HTML files to a website,
 because the fonts will represent the individual setups.  In these cases,
 it is much better to let Org/Htmlize assign classes only, and to use
 a style file to define the look of these classes.
-To get a start for your css file, start Emacs session nnd make sure that
+To get a start for your css file, start Emacs session and make sure that
 all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
 \\[org-export-htmlize-generate-css] to extract class definitions."
@@ -1155,7 +1161,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; Does this contain a reference to a footnote?
 	  (when org-export-with-footnotes
 	    (setq start 0)
-	    (while (string-match "\\([^* \t].*?\\)\\[\\([0-9]+\\)\\]" line start)
+	    (while (string-match "\\([^* \t].*\\)?\\[\\([0-9]+\\)\\]" line start)
 	      (if (get-text-property (match-beginning 2) 'org-protected line)
 		  (setq start (match-end 2))
 		(let ((n (match-string 2 line)) extra a)
@@ -1168,7 +1174,9 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq line
 			(replace-match
 			 (format
-			  "%s<sup><a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a></sup>"
+			  (concat (if (match-string 1 line) "%s" "")
+			 	  (format org-export-html-footnote-format
+			 		  "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"))
 			  (match-string 1 line) n extra n n)
 			 t t line))))))
 
@@ -1323,8 +1331,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		(let ((n (match-string 1 line)))
 		  (setq org-par-open t
 			line (replace-match
-			      (format "<p class=\"footnote\"><sup><a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a></sup>" n n n) t t line)))))
-
+			      (format "<p class=\"footnote\">"
+				      (format org-export-html-footnote-format
+					      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
+				      n n n) t t line)))))
 	    ;; Check if the line break needs to be conserved
 	    (cond
 	     ((string-match "\\\\\\\\[ \t]*$" line)
@@ -1370,7 +1380,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  (replace-match "" t t)))
       (when footnotes
 	(insert (format org-export-html-footnotes-section
-			(or (nth 4 lang-words) "Footnotes")
+			(nth 4 lang-words)
 			(mapconcat 'identity (nreverse footnotes) "\n"))
 		"\n"))
       (let ((bib (org-export-html-get-bibliography)))
@@ -1459,7 +1469,7 @@ lang=\"%s\" xml:lang=\"%s\">
 
 (defun org-export-html-insert-plist-item (plist key &rest args)
   (let ((item (plist-get plist key)))
-    (cond ((functionp item) 
+    (cond ((functionp item)
            (apply item args))
           (item
            (insert item)))))

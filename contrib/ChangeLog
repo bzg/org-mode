@@ -1,3 +1,8 @@
+2009-07-21  Wes Hardaker <wjhns209@hardakers.net>  (tiny change)
+
+	* lisp/org-export-generic.el (org-export-generic-format): Fix
+	compatibility issue with Emacs 23.
+
 2009-06-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* README: List new file org-export-generic.el

@@ -346,7 +346,7 @@ line directly before or after the table."
 	(gnuplot-send-buffer-to-gnuplot))
       ;; cleanup
       (bury-buffer (get-buffer "*gnuplot*"))
-      (delete-file data-file))))
+      (run-with-idle-timer 0.1 nil (lambda () (delete-file data-file))))))
 
 (provide 'org-plot)
 

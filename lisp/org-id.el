@@ -79,11 +79,16 @@
   :tag "Org ID"
   :group 'org)
 
+(defcustom org-id-uuid-program "uuidgen"
+  "The uuidgen program."
+  :group 'org-id
+  :type 'string)
 
 (defcustom org-id-method
   (condition-case nil
       (if (string-match "\\`[-0-9a-fA-F]\\{36\\}\\'"
-			(org-trim (shell-command-to-string "uuidgen")))
+			(org-trim (shell-command-to-string 
+				   org-id-uuid-program)))
 	  'uuidgen
 	'org)
     (error 'org))
@@ -301,7 +306,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
     (if (equal prefix ":") (setq prefix ""))
     (cond
      ((eq org-id-method 'uuidgen)
-      (setq unique (org-trim (shell-command-to-string "uuidgen"))))
+      (setq unique (org-trim (shell-command-to-string org-id-uuid-program))))
      ((eq org-id-method 'org)
       (let* ((etime (org-id-reverse-string (org-id-time-to-b36)))
 	     (postfix (if org-id-include-domain

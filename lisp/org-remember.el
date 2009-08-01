@@ -197,6 +197,11 @@ calendar           |  %:type %:date"
 			 (symbol :tag "Major mode"))
 		 (function :tag "Perform a check against function")))))
 
+(defcustom org-remember-delete-empty-lines-at-end t
+  "Non-nil means clean up final empty lines in remember buffer."
+  :group 'org-remember
+  :type 'boolean)
+
 (defcustom org-remember-before-finalize-hook nil
   "Hook that is run right before a remember process is finalized.
 The remember buffer is still current when this hook runs."
@@ -746,6 +751,8 @@ The user is queried for the template."
 	(goto-char (match-beginning 0))
       (error "Target headline not found: %s" heading))))
 
+;; FIXME (bzg): let's clean up of final empty lines happen only once
+;; (see the org-remember-delete-empty-lines-at-end option below)
 ;;;###autoload
 (defun org-remember-handler ()
   "Store stuff from remember.el into an org file.
@@ -789,11 +796,12 @@ See also the variable `org-reverse-note-order'."
   (goto-char (point-min))
   (while (looking-at "^[ \t]*\n\\|^##.*\n")
     (replace-match ""))
-  (goto-char (point-max))
-  (beginning-of-line 1)
-  (while (and (looking-at "[ \t]*$\\|##.*") (> (point) 1))
-    (delete-region (1- (point)) (point-max))
-    (beginning-of-line 1))
+  (when org-remember-delete-empty-lines-at-end
+    (goto-char (point-max))
+    (beginning-of-line 1)
+    (while (and (looking-at "[ \t]*$\\|##.*") (> (point) 1))
+      (delete-region (1- (point)) (point-max))
+      (beginning-of-line 1)))
   (catch 'quit
     (if org-note-abort (throw 'quit t))
     (let* ((visitp (org-bound-and-true-p org-jump-to-target-location))
@@ -848,10 +856,11 @@ See also the variable `org-reverse-note-order'."
       (setq current-prefix-arg nil)
       ;; Modify text so that it becomes a nice subtree which can be inserted
       ;; into an org tree.
-      (goto-char (point-min))
-      (if (re-search-forward "[ \t\n]+\\'" nil t)
-	  ;; remove empty lines at end
-	  (replace-match ""))
+      (when org-remember-delete-empty-lines-at-end
+      	(goto-char (point-min))
+      	(if (re-search-forward "[ \t\n]+\\'" nil t)
+      	    ;; remove empty lines at end
+      	    (replace-match "")))
       (goto-char (point-min))
       (unless (looking-at org-outline-regexp)
 	;; add a headline
@@ -862,11 +871,13 @@ See also the variable `org-reverse-note-order'."
 	(when org-adapt-indentation
 	  (while (re-search-forward "^" nil t)
 	    (insert "  "))))
-      (goto-char (point-min))
-      (if (re-search-forward "\n[ \t]*\n[ \t\n]*\\'" nil t)
-	  (replace-match "\n\n")
-	(if (re-search-forward "[ \t\n]*\\'")
-	    (replace-match "\n")))
+      ;; Delete final empty lines
+      (when org-remember-delete-empty-lines-at-end
+	(goto-char (point-min))
+	(if (re-search-forward "\n[ \t]*\n[ \t\n]*\\'" nil t)
+	    (replace-match "\n\n")
+	  (if (re-search-forward "[ \t\n]*\\'")
+	      (replace-match "\n"))))
       (goto-char (point-min))
       (setq txt (buffer-string))
       (org-save-markers-in-region (point-min) (point-max))

@@ -192,6 +192,20 @@ auto     Automtically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
+(defcustom org-show-notification-handler nil
+  "Function or program to send notification with.
+The function or program will be called with the notification
+string as argument."
+  :group 'org-clock
+  :type '(choice
+	  (string :tag "Program")
+	  (function :tag "Function")))
+
+(defvar org-clock-in-prepare-hook nil
+  "Hook run when preparing the clock.
+This hook is run before anything happens to the task that
+you want to clock in.  For example, you can use this hook
+to add an effort property.")
 (defvar org-clock-in-hook nil
   "Hook run when starting the clock.")
 (defvar org-clock-out-hook nil
@@ -344,19 +358,15 @@ If an effort estimate was defined for current item, use
 If not, show simply the clocked time like 01:50."
   (let* ((clocked-time (org-clock-get-clocked-time))
 	 (h (floor clocked-time 60))
-	 (m (- clocked-time (* 60 h)))
-	 )
+	 (m (- clocked-time (* 60 h))))
     (if (and org-clock-effort)
 	(let* ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
 	       (effort-h (floor effort-in-minutes 60))
-	       (effort-m (- effort-in-minutes (* effort-h 60)))
-	       )
+	       (effort-m (- effort-in-minutes (* effort-h 60))))
 	  (format (concat "-[" org-time-clocksum-format "/" org-time-clocksum-format " (%s)]")
-		  h m effort-h effort-m  org-clock-heading)
-	  )
+		  h m effort-h effort-m  org-clock-heading))
       (format (concat "-[" org-time-clocksum-format " (%s)]")
-	      h m org-clock-heading))
-    ))
+	      h m org-clock-heading))))
 
 (defun org-clock-update-mode-line ()
   (setq org-mode-line-string
@@ -420,7 +430,7 @@ the mode line."
   "Shows if we have shown notification already.")
 
 (defun org-clock-notify-once-if-expired ()
-  "Show notification if we spent more time then we estimated before.
+  "Show notification if we spent more time than we estimated before.
 Notification is shown only once."
   (when (marker-buffer org-clock-marker)
     (let ((effort-in-minutes (org-hh:mm-string-to-minutes org-clock-effort))
@@ -435,11 +445,20 @@ Notification is shown only once."
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-show-notification (notification)
-  "Show notification. Use libnotify, if available."
-  (if (org-program-exists "notify-send")
-      (start-process "emacs-timer-notification" nil "notify-send" notification))
-  ;; In any case, show in message area
-  (message notification))
+  "Show notification.  
+Use `org-show-notification-handler' if defined,
+use libnotify if available, or fall back on a message."
+  (cond ((functionp org-show-notification-handler)
+	 (funcall org-show-notification-handler notification))
+	((stringp org-show-notification-handler)
+	 (start-process "emacs-timer-notification" nil 
+			org-show-notification-handler notification))
+	((org-program-exists "notify-send")
+	 (start-process "emacs-timer-notification" nil 
+			"notify-send" notification))
+	;; Maybe the handler will send a message, so only use message as
+	;; a fall back option
+	(t (message notification))))
 
 (defun org-clock-play-sound ()
   "Play sound as configured by `org-clock-sound'.
@@ -459,9 +478,7 @@ Use alsa's aplay tool if available."
 (defun org-program-exists (program-name)
   "Checks whenever we can locate program and launch it."
   (if (eq system-type 'gnu/linux)
-      (= 0 (call-process "which" nil nil nil program-name))
-    ))
-
+      (= 0 (call-process "which" nil nil nil program-name))))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
@@ -496,6 +513,7 @@ the clocking selection, associated with the letter `d'."
 	(org-clock-mark-default-task))
 
       (setq target-pos (point))  ;; we want to clock in at this location
+      (run-hooks 'org-clock-in-prepare-hook)
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
 	  ;; There is a selected task, move to the correct buffer
@@ -540,7 +558,7 @@ the clocking selection, associated with the letter `d'."
 		   (looking-at
 		    (concat "^[ \t]* " org-clock-string
 			    " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}"
-			    " +\\sw+ +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
+			    " +\\sw+\.? +[012][0-9]:[0-5][0-9]\\)\\][ \t]*$")))
 	      (message "Matched %s" (match-string 1))
 	      (setq ts (concat "[" (match-string 1) "]"))
 	      (goto-char (match-end 1))
@@ -590,7 +608,6 @@ the clocking selection, associated with the letter `d'."
   (save-excursion
     (org-back-to-heading t)
     (move-marker org-clock-default-task (point))))
-
 
 (defvar msg-extra)
 (defun org-clock-get-sum-start ()
@@ -1170,11 +1187,12 @@ the currently selected interval size."
 	   (maxlevel (or (plist-get params :maxlevel) 3))
 	   (step (plist-get params :step))
 	   (emph (plist-get params :emphasize))
+	   (timestamp (plist-get params :timestamp))
 	   (ts (plist-get params :tstart))
 	   (te (plist-get params :tend))
 	   (block (plist-get params :block))
 	   (link (plist-get params :link))
-	   ipos time p level hlc hdl content recalc formula pcol
+	   ipos time p level hlc hdl tsp props content recalc formula pcol
 	   cc beg end pos tbl tbl1 range-text rm-file-column scope-is-list st)
       (setq org-clock-file-total-minutes nil)
       (when step
@@ -1279,10 +1297,18 @@ the currently selected interval size."
 				       (save-match-data
 					 (org-make-org-heading-search-string
 					  (match-string 2))))
-			       (match-string 2))))
+			       (match-string 2)))
+			tsp (when timestamp
+			      (setq props (org-entry-properties (point)))
+			      (or (cdr (assoc "SCHEDULED" props))
+				  (cdr (assoc "TIMESTAMP" props))
+				  (cdr (assoc "DEADLINE" props))
+				  (cdr (assoc "TIMESTAMP_IA" props)))))
 		  (if (and (not multifile) (= level 1)) (push "|-" tbl))
 		  (push (concat
-			 "| " (int-to-string level) "|" hlc hdl hlc " |"
+			 "| " (int-to-string level) "|" 
+			 (if timestamp (concat tsp "|") "") 
+			 hlc hdl hlc " |"
 			 (make-string (1- level) ?|)
 			 hlc (org-minutes-to-hh:mm-string time) hlc
 			 " |") tbl))))))
@@ -1301,12 +1327,12 @@ the currently selected interval size."
 		(if block (concat ", for " range-text ".") "")
 		"\n\n"))
 	   (if scope-is-list "|File" "")
-	   "|L|Headline|Time|\n")
+	   "|L|" (if timestamp "Timestamp|" "") "Headline|Time|\n")
 	  (setq total-time (or total-time org-clock-file-total-minutes))
 	  (insert-before-markers
 	   "|-\n|"
 	   (if scope-is-list "|" "")
-	   "|"
+	   (if timestamp "|Timestamp|" "|")
 	   "*Total time*| *"
 	   (org-minutes-to-hh:mm-string (or total-time 0))
 	   "*|\n|-\n")
@@ -1512,7 +1538,6 @@ The details of what will be saved are regulated by the variable
   "Set up hooks for clock persistence"
   (add-hook 'org-mode-hook 'org-clock-load)
   (add-hook 'kill-emacs-hook 'org-clock-save))
-
 
 ;; Suggested bindings
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)

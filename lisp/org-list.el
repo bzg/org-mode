@@ -139,9 +139,9 @@ use \\[org-ctrl-c-ctrl-c] to trigger renumbering."
 
 (defcustom org-provide-checkbox-statistics t
   "Non-nil means, update checkbox statistics after insert and toggle.
-When this is set, checkbox statistics is updated each time you either insert
-a new checkbox with \\[org-insert-todo-heading] or toggle a checkbox
-with \\[org-ctrl-c-ctrl-c\\]."
+When this is set, checkbox statistics is updated each time you
+either insert a new checkbox with \\[org-insert-todo-heading] or
+toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
   :group 'org-plain-lists
   :type 'boolean)
 
@@ -159,7 +159,7 @@ When the indentation would be larger than this, it will become
   :type 'integer)
 
 (defvar org-list-beginning-re
-  "^\\([ \t]*\\)\\([-+*]\\|[0-9]+[.)]\\) +\\(.*\\)$")
+  "^\\([ \t]*\\)\\([-+]\\|[0-9]+[.)]\\) +\\(.*\\)$")
 
 (defcustom org-list-radio-list-templates
   '((latex-mode "% BEGIN RECEIVE ORGLST %n
@@ -475,16 +475,13 @@ the whole buffer."
 		 (if (re-search-forward re-box eline t)
 		     (if (member (match-string 2) '("[ ]" "[-]"))
 			 (setq c-off (1+ c-off))
-		       (setq c-on (1+ c-on))
-		       )
-		   )
+		       (setq c-on (1+ c-on))))
 		 (if (not recursive)
 		     (org-end-of-item)
 		   (end-of-line)
 		   (when (re-search-forward org-list-beginning-re lim t)
 		     (beginning-of-line)))
-		 (setq next-ind (org-get-indentation))
-		 )))
+		 (setq next-ind (org-get-indentation)))))
 	 (goto-char continue-from)
 	 ;; update cookie
 	 (when end-cookie
@@ -1105,6 +1102,41 @@ cdr is the indentation string."
 	(progn (goto-char (point-min)) (point))
       (cons (match-beginning 0) (match-string 1)))))
 
+(defun org-list-goto-true-beginning ()
+  "Go to the beginning of the list at point."
+  (beginning-of-line 1)
+  (while (looking-at org-list-beginning-re)
+    (beginning-of-line 0))
+  (progn
+    (re-search-forward org-list-beginning-re nil t)
+    (goto-char (match-beginning 0))))
+  
+(defun org-list-make-subtree ()
+  "Convert the plain list at point into a subtree."
+  (interactive)
+  (org-list-goto-true-beginning)
+  (let ((list (org-list-parse-list t)) nstars)
+    (save-excursion 
+      (if (condition-case nil
+	      (org-back-to-heading)
+	    (error nil))
+	  (progn (re-search-forward org-complex-heading-regexp nil t)
+		 (setq nstars (length (match-string 1))))
+	(setq nstars 0)))
+    (org-list-make-subtrees list (1+ nstars))))
+
+(defun org-list-make-subtrees (list level)
+  "Convert LIST into subtrees starting at LEVEL."
+  (if (symbolp (car list))
+      (org-list-make-subtrees (cdr list) level)
+    (mapcar (lambda (item)
+	      (if (stringp item)
+		  (insert (make-string 
+			   (if org-odd-levels-only 
+			       (1- (* 2 level)) level) ?*) " " item "\n")
+		(org-list-make-subtrees item (1+ level))))
+	    list)))
+
 (defun org-list-end (indent)
   "Return the position of the end of the list.
 INDENT is the indentation of the list, as a string."
@@ -1142,7 +1174,7 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      (goto-char (car (org-list-item-beginning)))
+      (org-list-find-true-beginning)
       (beginning-of-line 0)
       (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
 	(if maybe

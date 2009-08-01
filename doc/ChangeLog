@@ -1,3 +1,40 @@
+2009-07-26  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Clocking work time): Add documentation for the
+	new :timetamp option when creating a clock report.
+
+2009-07-26  Dan Griswold <dgriswol@rochester.rr.com>  (tiny change)
+
+	* org.texi (Paragraphs): Fix many typos.
+
+2009-07-25  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Plain lists): Remove duplicate explanation about the
+	`C-c *' command.
+
+2009-07-23  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Literal examples): Update to reflect the new behavior
+	of the -n -r -k switches when exporting source code examples.
+
+2009-07-21  Dan Davison <davison@stats.ox.ac.uk>  (tiny change)
+
+	* org.texi (Structure editing): Add information about `C-c *',
+	converting a plain list into a list of Org items.
+
+2009-07-20  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Remember): Small rephrasing of the paragraph
+	describing remember.el.  Also mentioned that remember.el is part
+	of Emacs 23, not Emacs 22.
+
+2009-07-17  Bastien Guerry  <bzg@altern.org>
+
+	* org.texi (Clocking work time): Add documentation about
+	displaying the current clocking time against the effort estimate.
+	Also add a footnote about using `org-clock-in-prepare-hook' to add
+	an effort estimate on the fly, just before clocking it.
+
 2009-07-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Footnotes): Document automatic renumbering and

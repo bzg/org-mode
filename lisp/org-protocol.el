@@ -254,6 +254,11 @@ Here is an example:
   :group 'org-protocol
   :type '(alist))
 
+(defcustom org-protocol-default-template-key "w"
+  "The default org-remember-templates key to use."
+  :group 'org-protocol
+  :type 'string)
+
 
 ;;; Helper functions:
 
@@ -434,12 +439,13 @@ This function detects an URL, title and optinal text, separated by '/'
 The location for a browser's bookmark has to look like this:
 
   javascript:location.href='org-protocol://remember://'+ \\
-        encodeURIComponent(location.href)+ \\
+        encodeURIComponent(location.href)+'/' \\
         encodeURIComponent(document.title)+'/'+ \\
         encodeURIComponent(window.getSelection())
 
-By default the template character ?w is used. But you may prepend the encoded
-URL with a character and a slash like so:
+By default, it uses the character `org-protocol-default-template-key',
+which should be associated with a template in `org-remember-templates'.
+But you may prepend the encoded URL with a character and a slash like so:
 
   javascript:location.href='org-protocol://org-store-link://b/'+ ...
 
@@ -448,7 +454,8 @@ Now template ?b will be used."
   (if (and (boundp 'org-stored-links)
            (fboundp 'org-remember))
       (let* ((parts (org-protocol-split-data info t))
-             (template (or (and (= 1 (length (car parts))) (pop parts)) "w"))
+             (template (or (and (= 1 (length (car parts))) (pop parts)) 
+			   org-protocol-default-template-key))
              (url (org-protocol-sanitize-uri (car parts)))
              (type (if (string-match "^\\([a-z]+\\):" url)
                        (match-string 1 url)))
@@ -582,7 +589,6 @@ most of the work."
                (substitute-command-keys"\\[org-protocol-create]")))))
 
 
-
 (defun org-protocol-create(&optional project-plist)
   "Create a new org-protocol project interactively.
 An org-protocol project is an entry in `org-protocol-project-alist'
@@ -630,8 +636,7 @@ project-plist is the CDR of an element in `org-publish-project-alist', reuse
                                  :online-suffix ,strip-suffix
                                  :working-suffix ,working-suffix))
                   org-protocol-project-alist))
-      (customize-save-variable 'org-protocol-project-alist org-protocol-project-alist))
-))
+      (customize-save-variable 'org-protocol-project-alist org-protocol-project-alist))))
 
 (provide 'org-protocol)
 ;;; org-protocol.el ends here

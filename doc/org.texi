@@ -112,7 +112,7 @@ license to the document, as described in section 6 of the license.
 * History and Acknowledgments::  How Org came into being
 * Main Index::                  An index of Org's concepts and features
 * Key Index::                   Key bindings and where they are described
-* Variable Index::              Variables mentiond in the manual
+* Variable Index::              Variables mentioned in the manual
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -258,7 +258,7 @@ Capture
 
 Remember
 
-* Setting up Remember::         Some code for .emacs to get things going
+* Setting up Remember for Org:: Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
@@ -271,7 +271,7 @@ Agenda Views
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      
+* Exporting Agenda Views::
 * Agenda column view::          Using column view for collected entries
 
 The built-in agenda views
@@ -333,7 +333,7 @@ Markup rules
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holdes
+* Macro replacement::           Global replacement of place holders
 
 HTML export
 
@@ -405,7 +405,7 @@ Hacking
 * Hooks::                       Who to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functioality to such commands
+* Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -512,7 +512,7 @@ XEmacs package, please skip this section and go directly to
 
 If you have downloaded Org from the Web, either as a distribution @file{.zip}
 or @file{.tar} file, or as a Git archive, you must take the following steps
-to install it: Go into the unpacked Org distribution directory and edit the
+to install it: go into the unpacked Org distribution directory and edit the
 top section of the file @file{Makefile}.  You must set the name of the Emacs
 binary (likely either @file{emacs} or @file{xemacs}), and the paths to the
 directories where local Lisp and Info files are kept.  If you don't have
@@ -547,8 +547,9 @@ make
 @end example
 
 @noindent If you are running Org from the distribution directory, this is
-all.  If you want to install into the system directories, use (as
+all.  If you want to install Org into the system directories, use (as
 administrator)
+
 @example
 make install
 @end example
@@ -632,7 +633,7 @@ in Emacs 22 you need to do this yourself with
 @lisp
 (transient-mark-mode 1)
 @end lisp
-@noindent If you do not like @code{transient-make-mode}, you can create an
+@noindent If you do not like @code{transient-mark-mode}, you can create an
 active region by using the mouse to select a region, or pressing
 @kbd{C-@key{SPC}} twice before moving the cursor.
 
@@ -1434,6 +1435,10 @@ region when calling this, all lines will be converted to list items.  If the
 first line already was a list item, any item markers will be removed from the
 list.  Finally, even without an active region, a normal line will be
 converted into a list item.
+@kindex C-c *
+@item C-c *
+Turn a plain list item into a headline (so that it becomes a subheading at
+its location). @xref{Structure editing}, for a detailed explanation.
 @kindex S-@key{left}
 @kindex S-@key{right}
 @item S-@key{left}/@key{right}
@@ -2147,7 +2152,7 @@ line like
 @vindex constants-unit-system
 @pindex constants.el
 Also properties (@pxref{Properties and Columns}) can be used as
-constants in table formulas: For a property @samp{:Xyz:} use the name
+constants in table formulas: for a property @samp{:Xyz:} use the name
 @samp{$PROP_Xyz}, and the property will be searched in the current
 outline entry and in the hierarchy above it.  If you have the
 @file{constants.el} package, it will also be used to resolve constants,
@@ -2334,7 +2339,7 @@ the formula will be stored as the formula for the current column, evaluated
 and the current field replaced with the result.  If the field contains only
 @samp{=}, the previously stored formula for this column is used.  For each
 column, Org will only remember the most recently used formula.  In the
-@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left-hand 
+@samp{#+TBLFM:} line, column formulas will look like @samp{$4=$1+$2}.  The left-hand
 side of a column formula cannot currently be the name of column, it
 must be the numeric column reference.
 
@@ -2536,7 +2541,7 @@ makes use of these features:
 @end group
 @end example
 
-@noindent @b{Important}: Please note that for these special tables,
+@noindent @b{Important}: please note that for these special tables,
 recalculating the table with @kbd{C-u C-c *} will only affect rows that
 are marked @samp{#} or @samp{*}, and fields that have a formula assigned
 to the field itself.  The column formulas are not applied in rows with
@@ -2681,7 +2686,7 @@ Defaults to @samp{%Y-%m-%d-%H:%M:%S}.
 If you want total control, you can specify a script file (place the file name
 between double-quotes) which will be used to plot.  Before plotting, every
 instance of @code{$datafile} in the specified script will be replaced with
-the path to the generated data file.  Note: Even if you set this option, you
+the path to the generated data file.  Note: even if you set this option, you
 may still want to specify the plot type, as that can impact the content of
 the data file.
 @end table
@@ -2919,7 +2924,7 @@ If the headline has a @code{CUSTOM_ID} property, a link to this custom ID
 will be stored.  In addition or alternatively (depending on the value of
 @code{org-link-to-org-use-id}), a globally unique @code{ID} property will be
 created and/or used to construct a link.  So using this command in Org
-buffers will potentially create two links: A human-readable from the custom
+buffers will potentially create two links: a human-readable from the custom
 ID, and one that is globally unique and works even if the entry is moved from
 file to file.  Later, when inserting the link, you need to decide which one
 to use.
@@ -3692,7 +3697,7 @@ when you are using both @code{org-log-done} and state change logging.
 However, it will never prompt for two notes---if you have configured
 both, the state change recording note will take precedence and cancel
 the @samp{Closing Note}.}, and that a note is recorded when switching to
-WAIT or CANCELED.  The setting for WAIT is even more special: The
+WAIT or CANCELED.  The setting for WAIT is even more special: the
 @samp{!} after the slash means that in addition to the note taken when
 entering the state, a timestamp should be recorded when @i{leaving} the
 WAIT state, if and only if the @i{target} state does not configure
@@ -3870,28 +3875,28 @@ checked.
 @cindex property, COOKIE_DATA
 The @samp{[2/4]} and @samp{[1/3]} in the first and second line are cookies
 indicating how many checkboxes present in this entry have been checked off,
-and the total number of checkboxes present.  This can give you an idea on
-how many checkboxes remain, even without opening a folded entry.  The cookies
-can be placed into a headline or into (the first line of) a plain list item.
+and the total number of checkboxes present.  This can give you an idea on how
+many checkboxes remain, even without opening a folded entry.  The cookies can
+be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
-@code{org-recursive-checkbox-statistics} if you want such cookes to represent
-the all checkboxes below the cookie, not just the direct children.}.  You
-have to insert the cookie yourself by typing either @samp{[/]} or @samp{[%]}.
-With @samp{[/]} you get an @samp{n out of m} result, as in the examples
-above.  With @samp{[%]} you get information about the percentage of
-checkboxes checked (in the above example, this would be @samp{[50%]} and
-@samp{[33%]}, respectively).  In a headline, a cookie can count either
-checkboxes below the heading or TODO states of children, and it will display
-whatever was changed last.  Set the property @code{COOKIE_DATA} to either
-@samp{checkbox} or @samp{todo} to resolve this issue.
+@code{org-recursive-checkbox-statistics} if you want such cookies to
+represent the all checkboxes below the cookie, not just the direct
+children.}.  You have to insert the cookie yourself by typing either
+@samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
+result, as in the examples above.  With @samp{[%]} you get information about
+the percentage of checkboxes checked (in the above example, this would be
+@samp{[50%]} and @samp{[33%]}, respectively).  In a headline, a cookie can
+count either checkboxes below the heading or TODO states of children, and it
+will display whatever was changed last.  Set the property @code{COOKIE_DATA}
+to either @samp{checkbox} or @samp{todo} to resolve this issue.
 
 @cindex blocking, of checkboxes
 @cindex checkbox blocking
 @cindex property, ORDERED
 If the current outline node has an @code{ORDERED} property, checkboxes must
 be checked off in sequence, and an error will be thrown if you try to check
-off a box while there are unchecked boxes bove it.
+off a box while there are unchecked boxes above it.
 
 @noindent The following commands work with checkboxes:
 
@@ -4435,7 +4440,7 @@ a regular expression and matched against the property values.
 
 @vindex org-use-property-inheritance
 The outline structure of Org-mode documents lends itself for an
-inheritance model of properties: If the parent in a tree has a certain
+inheritance model of properties: if the parent in a tree has a certain
 property, the children can inherit this property.  Org mode does not
 turn this on by default, because it can slow down property searches
 significantly and is often not needed.  However, if you find inheritance
@@ -4956,7 +4961,7 @@ is in there and derive anything you have not specified from the
 and time, but when modifying an existing timestamp, or when entering
 the second stamp of a range, it is taken from the stamp in the buffer.
 When filling in information, Org mode assumes that most of the time you
-will want to enter a date in the future: If you omit the month/year and
+will want to enter a date in the future: if you omit the month/year and
 the given day/month is @i{before} today, it will assume that you mean a
 future date@footnote{See the variable
 @code{org-read-date-prefer-future}.}.
@@ -4995,7 +5000,7 @@ the nth such day.  @Eg
 +4            --> same as above
 +2w           --> two weeks from today
 ++5           --> five days from default date
-+2tue         --> second tuesday from now.
++2tue         --> second Tuesday from now.
 @end example
 
 @vindex parse-time-months
@@ -5302,7 +5307,7 @@ When you stop working on that task, or when you mark the task done, the
 clock is stopped and the corresponding time interval is recorded.  It
 also computes the total time spent on each subtree of a project.
 
-Normally, the clock does not survive exiting and re-entereing Emacs, but you
+Normally, the clock does not survive exiting and re-entering Emacs, but you
 can arrange for the clock information to persist across Emacs sessions with
 
 @lisp
@@ -5328,18 +5333,20 @@ with letter @kbd{d}.@*
 @vindex org-clock-modeline-total
 While the clock is running, the current clocking time is shown in the mode
 line, along with the title of the task.  The clock time shown will be all
-time ever clocked for this task and its children.  If the task is a repeating
-one (@pxref{Repeated tasks}), only the time since the last reset of the task
-@footnote{as recorded by the @code{LAST_REPEAT} property} will be shown.
-More control over what time is shown can be exercised with the
-@code{CLOCK_MODELINE_TOTAL} property.  It may have the values @code{current}
-to show only the current clocking instance, @code{today} to show all time
-clocked on this tasks today (see also the variable
+time ever clocked for this task and its children.  If the task has an effort
+estimate (@pxref{Effort estimates}), the mode line displays the current
+clocking time against it@footnote{To add an effort estimate ``on the fly'',
+hook a function doing this to @code{org-clock-in-prepare-hook}.}  If the task
+is a repeating one (@pxref{Repeated tasks}), only the time since the last
+reset of the task @footnote{as recorded by the @code{LAST_REPEAT} property}
+will be shown.  More control over what time is shown can be exercised with
+the @code{CLOCK_MODELINE_TOTAL} property.  It may have the values
+@code{current} to show only the current clocking instance, @code{today} to
+show all time clocked on this tasks today (see also the variable
 @code{org-extend-today-until}), @code{all} to include all time, or
 @code{auto} which is the default@footnote{See also the variable
-@code{org-clock-modeline-total}.}.@*
-Clicking with @kbd{mouse-1} onto the mode line entry will pop up a menu with
-clocking options.
+@code{org-clock-modeline-total}.}.@* Clicking with @kbd{mouse-1} onto the
+mode line entry will pop up a menu with clocking options.
 @kindex C-c C-x C-o
 @item C-c C-x C-o
 @vindex org-log-note-clock-out
@@ -5430,6 +5437,8 @@ new table.  The @samp{BEGIN} line can specify options:
              @r{As a special case, @samp{:formula %} adds a column with % time.}
              @r{If you do not specify a formula here, any existing formula.}
              @r{below the clock table will survive updates and be evaluated.}
+:timestamp   @r{A timestamp for the entry, when available.  Look for SCHEDULED,}
+             @r{DEADLINE, TIMESTAMP and TIMESTAMP_IA, in this order.}
 @end example
 To get a clock summary of the current level 1 tree, for the current
 day, you could write
@@ -5587,25 +5596,26 @@ related to a task (@i{attachments}) in a special directory.
 @section Remember
 @cindex @file{remember.el}
 
-The Remember package by John Wiegley lets you store quick notes with
-little interruption of your work flow.  See
-@uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for more
-information.  It is an excellent way to add new notes and tasks to
-Org files.  Org significantly expands the possibilities of
-Remember: You may define templates for different note types, and
-associate target files and headlines with specific templates.  It also
-allows you to select the location where a note should be stored
-interactively, on the fly.
+The Remember package by John Wiegley lets you store quick notes with little
+interruption of your work flow.  It is an excellent way to add new notes and
+tasks to Org files.  The @code{remember.el} package is part of Emacs 23, not
+Emacs 22.  See @uref{http://www.emacswiki.org/cgi-bin/wiki/RememberMode} for
+more information.
+
+Org significantly expands the possibilities of Remember: you may define
+templates for different note types, and associate target files and headlines
+with specific templates.  It also allows you to select the location where a
+note should be stored interactively, on the fly.
 
 @menu
-* Setting up Remember::         Some code for .emacs to get things going
+* Setting up Remember for Org:: Some code for .emacs to get things going
 * Remember templates::          Define the outline of different note types
 * Storing notes::               Directly get the note to where it belongs
 * Refiling notes::              Moving a note or task to a project
 @end menu
 
-@node Setting up Remember, Remember templates, Remember, Remember
-@subsection Setting up Remember
+@node Setting up Remember for Org, Remember templates, Remember, Remember
+@subsection Setting up Remember for Org
 
 The following customization will tell Remember to use Org files as
 target, and to create annotations compatible with Org links.
@@ -5621,10 +5631,10 @@ target, and to create annotations compatible with Org links.
 The last line binds the command @code{org-remember} to a global
 key@footnote{Please select your own key, @kbd{C-c r} is only a
 suggestion.}.  @code{org-remember} basically just calls Remember,
-but it makes a few things easier: If there is an active region, it will
+but it makes a few things easier: if there is an active region, it will
 automatically copy the region into the Remember buffer.  It also allows
 to jump to the buffer and location where Remember notes are being
-stored: Just call @code{org-remember} with a prefix argument.  If you
+stored: just call @code{org-remember} with a prefix argument.  If you
 use two prefix arguments, Org jumps to the location where the last
 remember note was stored.
 
@@ -5639,7 +5649,7 @@ using the @kbd{k r} key combination.  With this access, any timestamps
 inserted by the selected Remember template (see below) will default to
 the cursor date in the agenda, rather than to the current date.
 
-@node Remember templates, Storing notes, Setting up Remember, Remember
+@node Remember templates, Storing notes, Setting up Remember for Org, Remember
 @subsection Remember templates
 @cindex templates, for Remember
 
@@ -5794,7 +5804,7 @@ the currently clocked item.
 If you want to store the note directly to a different place, use
 @kbd{C-1 C-c C-c} instead to exit Remember@footnote{Configure the
 variable @code{org-remember-store-without-prompt} to make this behavior
-the default.}.  The handler will then first prompt for a target file---if 
+the default.}.  The handler will then first prompt for a target file---if
 you press @key{RET}, the value specified for the template is used.
 Then the command offers the headings tree of the selected file, with the
 cursor position at the default headline (if you specified one in the
@@ -5977,7 +5987,7 @@ same directory for attachments as the parent does.
 @section RSS feeds
 @cindex RSS feeds
 
-Org has the capablity to add and change entries based on information found in
+Org has the capability to add and change entries based on information found in
 RSS feeds.  You could use this to make a task out of each new podcast in a
 podcast feed.  Or you could use a phone-based note-creating service on the
 web to import tasks into Org.  To access feeds, you need to configure the
@@ -6088,7 +6098,7 @@ window configuration is restored when the agenda exits:
 * Presentation and sorting::    How agenda items are prepared for display
 * Agenda commands::             Remote editing of Org trees
 * Custom agenda views::         Defining special searches and views
-* Exporting Agenda Views::      
+* Exporting Agenda Views::
 * Agenda column view::          Using column view for collected entries
 @end menu
 
@@ -6527,7 +6537,7 @@ If the comparison value is a plain number, a numerical comparison is done,
 and the allowed operators are @samp{<}, @samp{=}, @samp{>}, @samp{<=},
 @samp{>=}, and @samp{<>}.
 @item
-If the comparison value is enclosed in double-quotes, 
+If the comparison value is enclosed in double-quotes,
 a string comparison is done, and the same operators are allowed.
 @item
 If the comparison value is enclosed in double-quotes @emph{and} angular
@@ -6567,7 +6577,7 @@ different way to test TODO states in a search.  For this, terminate the
 tags/property part of the search string (which may include several terms
 connected with @samp{|}) with a @samp{/} and then specify a Boolean
 expression just for TODO keywords.  The syntax is then similar to that for
-tags, but should be applied with care: For example, a positive
+tags, but should be applied with care: for example, a positive
 selection on several TODO keywords cannot meaningfully be combined with
 boolean AND.  However, @emph{negative selection} combined with AND can be
 meaningful.  To make sure that only lines are checked that actually have any
@@ -6682,7 +6692,7 @@ correct customization for this is
 @end lisp
 
 Note that if a project is identified as non-stuck, the subtree of this entry
-will still be searched for stuck projets.
+will still be searched for stuck projects.
 
 @node Presentation and sorting, Agenda commands, Built-in agenda views, Agenda Views
 @section Presentation and sorting
@@ -6710,7 +6720,7 @@ associated with the item.
 The category is a broad label assigned to each agenda item.  By default,
 the category is simply derived from the file name, but you can also
 specify it with a special line in the buffer, like this@footnote{For
-backward compatibility, the following also works: If there are several
+backward compatibility, the following also works: if there are several
 such lines in a file, each specifies the category for the text below it.
 The first category also applies to any text before the first CATEGORY
 line.  However, using this method is @emph{strongly} deprecated as it is
@@ -7017,7 +7027,7 @@ The difference between this and a custom agenda command is that filtering is
 very fast, so that you can switch quickly between different filters without
 having to recreate the agenda@footnote{Custom commands can preset a filter by
 binding the variable @code{org-agenda-filter-preset} as an option.  This
-filter will then be applied to the view and presist as a basic filter through
+filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.}
 
 You will be prompted for a tag selection letter.  Pressing @key{TAB} at that
@@ -7242,7 +7252,7 @@ Unmark all marked entries for bulk action.
 
 @kindex B
 @item B
-Bulk action: Act on all marked entries in the agenda.  This will prompt for
+Bulk action: act on all marked entries in the agenda.  This will prompt for
 another key to select the action to be applied:
 @example
 r  @r{Prompt for a single refile target and move all entries.  The entries}
@@ -7513,7 +7523,7 @@ the results for GARDEN tags query in the opposite order,
 
 As you see, the values and parentheses setting is a little complex.
 When in doubt, use the customize interface to set this variable---it
-fully supports its structure.  Just one caveat: When setting options in
+fully supports its structure.  Just one caveat: when setting options in
 this interface, the @emph{values} are just Lisp expressions.  So if the
 value is a string, you need to add the double-quotes around the value
 yourself.
@@ -7992,7 +8002,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * TeX macros and LaTeX fragments::  Create special, rich export.
 * Horizontal rules::            A line across the page
 * Comment lines::               Some lines will not be exported
-* Macro replacement::           Global replacement of place holdes
+* Macro replacement::           Global replacement of place holders
 @end menu
 
 @node Document title, Headings and sections, Markup rules, Markup rules
@@ -8135,7 +8145,7 @@ but not any simpler
 @node Literal examples, Include files, Paragraphs, Markup rules
 @subheading Literal examples
 @cindex literal examples, markup rules
-@cindex code line refenences, markup rules
+@cindex code line references, markup rules
 
 You can include literal examples that should not be subjected to
 markup.  Such examples will be typeset in monospace, so this is well suited
@@ -8182,22 +8192,25 @@ switch to the end of the @code{BEGIN} line, to get the lines of the example
 numbered.  If you use a @code{+n} switch, the numbering from the previous
 numbered snippet will be continued in the current one.  In literal examples,
 Org will interpret strings like @samp{(ref:name)} as labels, and use them as
-targets for special hyperlinks like @code{[[(name)]]} (@ie the reference
-name enclosed in single parenthesis).  In HTML, hovering the mouse over such
-a link will remote-highlight the corresponding code line, which is kind of
-cool.  If the example/src snippet is numbered, you can also add a @code{-r}
-switch.  Then labels will be @i{removed} from the source code and the links
-will be @i{replaced}@footnote{If you want to explain the use of such labels
-themelves in org-mode example code, you can use the @code{-k} switch to make
-sure they are not touched.} with line numbers from the code listing.  Here is
-an example:
+targets for special hyperlinks like @code{[[(name)]]} (@ie the reference name
+enclosed in single parenthesis).  In HTML, hovering the mouse over such a
+link will remote-highlight the corresponding code line, which is kind of
+cool.
+
+You can also add a @code{-r} switch which @i{removes} the labels from the
+source code@footnote{Adding @code{-k} to @code{-n -r} will @i{keep} the
+labels in the source code while using line numbers for the links, which might
+be useful to explain those in an org-mode example code.}.  With the @code{-n}
+switch, links to these references will be labeled by the line numbers from
+the code listing, otherwise links will use the labels with no parentheses.
+Here is an example:
 
 @example
 #+BEGIN_SRC emacs-lisp -n -r
 (save-excursion                  (ref:sc)
    (goto-char (point-min))       (ref:jump)
-#+END SRC
-In line [[(sc)]] we remember the current positon.  [[(jump)][Line (jump)]]
+#+END_SRC
+In line [[(sc)]] we remember the current position.  [[(jump)][Line (jump)]]
 jumps to point-min.
 @end example
 
@@ -9272,7 +9285,7 @@ also specified, it will be exported as an @code{xml:id} attribute of the
 Image attributes supported by the @code{imagedata} element, like @code{align}
 or @code{width}, can be specified in two ways: you can either customize
 variable @code{org-export-docbook-default-image-attributes} or use the
-@code{#+ATTR_DOCBOOK:} line.  Attributes sepcified in variable
+@code{#+ATTR_DOCBOOK:} line.  Attributes specified in variable
 @code{org-export-docbook-default-image-attributes} are applied to all inline
 images in the Org file to be exported (unless they are overwritten by image
 attributes specified in @code{#+ATTR_DOCBOOK:} lines).
@@ -9747,18 +9760,18 @@ of links to all files in the project.
 @cindex rsync
 @cindex unison
 
-For those people already utilising third party sync tools such as
+For those people already utilizing third party sync tools such as
 @command{rsync} or @command{unison}, it might be preferable not to use the built in
 @i{remote} publishing facilities of Org mode which rely heavily on
 Tramp.  Tramp, while very useful and powerful, tends not to be
 so efficient for multiple file transfer and has been known to cause problems
 under heavy usage.
 
-Specialised synchronization utilities offer several advantages.  In addition
+Specialized synchronization utilities offer several advantages.  In addition
 to timestamp comparison, they also do content and permissions/attribute
 checks.  For this reason you might prefer to publish your web to a local
 directory (possibly even @i{in place} with your Org files) and then use
-@file{unison} or @file{rsync} to do the synchronisation with the remote host.
+@file{unison} or @file{rsync} to do the synchronization with the remote host.
 
 Since Unison (for example) can be configured as to which files to transfer to
 a certain remote destination, it can greatly simplify the project publishing
@@ -10561,7 +10574,7 @@ Org.
 * Hooks::                       Who to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
-* Context-sensitive commands::  How to add functioality to such commands
+* Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for La@TeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
@@ -11420,7 +11433,7 @@ The return values of all calls to the function will be collected and
 returned as a list.
 
 The call to FUNC will be wrapped into a save-excursion form, so FUNC
-does not need to preserve point.  After evaluaton, the cursor will be
+does not need to preserve point.  After evaluation, the cursor will be
 moved to the end of the line (presumably of the headline of the
 processed entry) and search continues from there.  Under some
 circumstances, this may not produce the wanted results.  For example,
@@ -11527,9 +11540,9 @@ thoughts and plans.  @emph{Visibility cycling} and @emph{structure
 editing} were originally implemented in the package
 @file{outline-magic.el}, but quickly moved to the more general
 @file{org.el}.  As this environment became comfortable for project
-planning, the next step was adding @emph{TODO entries}, basic 
+planning, the next step was adding @emph{TODO entries}, basic
 @emph{timestamps}, and @emph{table support}.  These areas highlighted the two main
-goals that Org still has today: To be a new, outline-based,
+goals that Org still has today: to be a new, outline-based,
 plain text mode with innovative and intuitive editing features, and to
 incorporate project planning functionality directly into a notes file.
 
