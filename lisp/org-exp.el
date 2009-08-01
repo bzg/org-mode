@@ -2509,7 +2509,9 @@ directory."
 	 (filename (and filename
 			(if (equal (file-truename filename)
 				   (file-truename bfname))
-			    (concat filename "-source")
+			    (concat (file-name-sans-extension filename)
+				    "-source."
+				    (file-name-extension filename))
 			  filename)))
 	 (backup-inhibited t)
 	 (buffer (find-file-noselect filename))

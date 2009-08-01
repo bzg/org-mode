@@ -1,5 +1,8 @@
 2009-08-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-as-org): Insert the "-source" string
+	before the extension.
+
 	* org.el (org-read-date): Make sure the calendar is in the current
 	frame.
 	(org-set-emph-re): Remove the ? from the post-match.
