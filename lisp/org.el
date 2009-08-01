@@ -4559,7 +4559,7 @@ between words."
 	   '(org-font-lock-hook)
 	   ;; Headlines
 	   `(,(if org-fontify-whole-heading-line
-		  "^\\(\\**\\)\\(\\* \\)\\(.*\xa\\)"
+		  "^\\(\\**\\)\\(\\* \\)\\(.*\n?\\)"
 		"^\\(\\**\\)\\(\\* \\)\\(.*\\)")
 	     (1 (org-get-level-face 1))
 	     (2 (org-get-level-face 2))

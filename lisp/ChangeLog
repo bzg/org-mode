@@ -5,6 +5,9 @@
 	(org-set-emph-re): Remove the ? from the post-match.
 	(org-emphasis-regexp-components): Add backslash to the
 	postmatch class.
+	(org-set-font-lock-defaults): Write \n instead of \xa, and make it
+	optional so that also lines at the end of the buffers will still
+	be matched as headlines.
 
 	* org-table.el (org-table-error-on-row-ref-crossing-hline):
 	Variable made obsolete.
