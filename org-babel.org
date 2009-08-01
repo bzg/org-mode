@@ -2499,7 +2499,13 @@ Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]]
 *** TODO perl
 This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
 *** TODO java
-*** TODO SQL
+*** STARTED SQL
+
+#+srcname: sql-example
+#+begin_src sql 
+  show tables;
+#+end_src
+
 *** DONE ditaa
 (see [[* file result types][file result types]])
 
