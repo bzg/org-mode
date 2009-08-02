@@ -64,5 +64,11 @@
 (require 'org-babel-asymptote)
 (require 'org-babel-sql)
 
+;; load the library of babel
+(org-babel-lob-ingest (expand-file-name
+                       "library-of-babel.org"
+                       (expand-file-name ".."
+                                         (file-name-directory (or load-file-name buffer-file-name)))))
+
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here

@@ -2704,7 +2704,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [29/39]
+* Bugs [30/39]
 ** TODO export problems when support for a language is missing
 we should come up with a way to gracefully degrade when support for a
 specific language is missing
@@ -2887,9 +2887,31 @@ the same for the other languages. [Dan]
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
 
-** TODO LoB is not populated on startup
+** DONE LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
    evaluate the [[file:lisp/org-babel-lob.el::][org-babel-lob-ingest]] line manually.
+
+#+tblname: R-plot-example-data
+| 1 |  2 |
+| 2 |  4 |
+| 3 |  9 |
+| 4 | 16 |
+| 5 | 25 |
+
+#+lob: R-plot(data=R-plot-example-data)
+
+
+
+   I've added a section to [[file:lisp/org-babel-init.el][org-babel-init.el]] which will load the
+   library of babel on startup.
+
+   Note that this needs to be done in [[file:lisp/org-babel-init.el][org-babel-init.el]] rather than in
+   [[file:lisp/org-babel-lob.el][org-babel-lob.el]], not entirely sure why, something about it being
+   required directly?
+
+   Also, I'm now having the file closed if it wasn't being visited by
+   a buffer before being loaded.
+
 ** DONE use new merge function [[file:lisp/org-babel-ref.el::t%20nil%20org%20combine%20plists%20args%20nil][here]]?
    And at other occurrences of org-combine-plists?
 ** DONE creeping blank lines

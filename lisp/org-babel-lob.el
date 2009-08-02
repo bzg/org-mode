@@ -49,17 +49,9 @@ add files to this list use the `org-babel-lob-ingest' command."
     (let ((source-name (intern (org-babel-get-src-block-name)))
           (info (org-babel-get-src-block-info)))
       (when source-name
-        ;; remove :var elements from params
-        ;; (once we have a better way of combining parameter lists then we won't have to do this)
-        (setf (third info) (assq-delete-all :var (third info)))
         (setq org-babel-library-of-babel
               (cons (cons source-name info)
                     (assq-delete-all source-name org-babel-library-of-babel)))))))
-
-(org-babel-lob-ingest ;; actually add the source-blocks defined in library-of-babel.org
- (expand-file-name
-  "library-of-babel.org"
-  (expand-file-name ".." (file-name-directory (or load-file-name buffer-file-name)))))
 
 ;; functions for executing lob one-liners
 
