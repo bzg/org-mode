@@ -1716,8 +1716,9 @@ by a letter in parenthesis, like TODO(t)."
 (defcustom org-provide-todo-statistics t
   "Non-nil means, update todo statistics after insert and toggle.
 ALL-HEADLINES means update todo statistics by including headlines
-with no TODO keyword as well.  A list of TODO keywords means the
-same, but skip keywords that are not in this list.
+with no TODO keyword as well, counting them as not done.
+A list of TODO keywords means the same, but skip keywords that are
+not in this list.
 
 When this is set, todo statistics is updated in the parent of the
 current entry each time a todo state is changed."
