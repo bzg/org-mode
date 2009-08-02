@@ -1144,6 +1144,7 @@ to the command if BUFF is not given.)
 *** test-header with properties
     :PROPERTIES:
     :tangle:   yes
+    :var:      def=8
     :END:
 
 Ahh... as is so often the case, just had to wrap
@@ -1154,8 +1155,9 @@ Ahh... as is so often the case, just had to wrap
 
 #+srcname: default-props-implementation
 #+begin_src emacs-lisp :tangle no :var my-lis=why-def-props-cause-probs :results silent
-(length my-lis)
+(+ (length my-lis) def)
 #+end_src
+
 ** DONE new reference syntax *inside* source code blocks
 This is from an email discussion on the org-mode mailing list with
 Sébastien.  The goal here is to mimic the source-block reference style

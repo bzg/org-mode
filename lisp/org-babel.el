@@ -325,7 +325,7 @@ may be specified in the properties of the current outline entry."
                (when val
                  ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
                  (cons (intern (concat ":" header-arg)) val))))
-           '("results" "exports" "tangle")))))
+           '("results" "exports" "tangle" "var")))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
