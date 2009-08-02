@@ -688,7 +688,8 @@ lines to the buffer:
 When this is set and the *entire* text in an entry is indented, the
 indentation is increased by one space in a demotion command, and
 decreased by one in a promotion command.  If any line in the entry
-body starts at column 0, indentation is not changed at all.
+body starts with some text at column 0, indentation is not changed 
+at all.
 
 This variable also influences how property drawers and planning
 information is inserted.  When t, these lines drawers will be inserted
