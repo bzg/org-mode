@@ -10307,12 +10307,11 @@ ACTION can be `set', `up', `down', or a character."
 		(goto-char (match-end 2))
 		(insert " [#" news "]"))
 	    (goto-char (match-beginning 3))
-	    (insert "[#" news "] ")))))
-    (org-preserve-lc (org-set-tags nil 'align))
+	    (insert "[#" news "] "))))
+      (org-preserve-lc (org-set-tags nil 'align)))
     (if remove
 	(message "Priority removed")
       (message "Priority of current item set to %s" news))))
-
 
 (defun org-get-priority (s)
   "Find priority cookie and return priority."
