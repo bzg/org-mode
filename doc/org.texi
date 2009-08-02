@@ -4479,7 +4479,7 @@ subtree (@pxref{Tracking TODO state changes}).
 @section Column view
 
 A great way to view and edit properties in an outline tree is
-@emph{column view}.  In column view, each outline item is turned into a
+@emph{column view}.  In column view, each outline node is turned into a
 table row.  Columns in this table provide access to properties of the
 entries.  Org mode implements columns by overlaying a tabular structure
 over the headline of each item.  While the headlines have been turned
@@ -4611,13 +4611,15 @@ in the subtree.
 @kindex C-c C-x C-c
 @item C-c C-x C-c
 @vindex org-columns-default-format
-Create the column view for the local environment.  This command searches
-the hierarchy, up from point, for a @code{:COLUMNS:} property that defines
-a format.  When one is found, the column view table is established for
-the entire tree, starting from the entry that contains the @code{:COLUMNS:}
-property.  If none is found, the format is taken from the @code{#+COLUMNS}
-line or from the variable @code{org-columns-default-format}, and column
-view is established for the current entry and its subtree.
+Turn on column view.  If the cursor is before the first headline in the file,
+column view is turned on for the entire file, using the @code{#+COLUMNS}
+definition.  If the cusor is somewhere inside the outline, this command
+searches the hierarchy, up from point, for a @code{:COLUMNS:} property that
+defines a format.  When one is found, the column view table is established
+for the tree starting at the entry that contains the @code{:COLUMNS:}
+property.  If no such property is found, the format is taken from the
+@code{#+COLUMNS} line or from the variable @code{org-columns-default-format},
+and column view is established for the current entry and its subtree.
 @kindex r
 @item r
 Recreate the column view, to include recent changes made in the buffer.
