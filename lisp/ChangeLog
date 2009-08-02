@@ -1,3 +1,7 @@
+2009-08-02  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-id.el (org-id-open): Honor `org-link-frame-setup'.
+
 2009-08-01  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-as-org): Insert the "-source" string
