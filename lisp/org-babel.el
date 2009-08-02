@@ -317,7 +317,7 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-params-from-properties ()
   "Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
-  (let ((org-babel-header-args '("results" "exports" "tangle")))
+  (save-match-data
     (delq nil
           (mapcar
            (lambda (header-arg)
@@ -325,7 +325,7 @@ may be specified in the properties of the current outline entry."
                (when val
                  ;; (message "param-from-property %s=%s" header-arg val) ;; debugging statement
                  (cons (intern (concat ":" header-arg)) val))))
-           org-babel-header-args))))
+           '("results" "exports" "tangle")))))
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))

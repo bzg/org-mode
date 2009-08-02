@@ -207,7 +207,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [40/61]
+* Tasks [41/61]
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -257,18 +257,6 @@ but with preference given to
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
 
-** TODO take default values for header args from properties
-   Use file-wide and subtree wide properties to set default values for
-   header args.
-   
-   [DED] One thing I'm finding when working with R is that an org file
-   may contain many source blocks, but that I just want to evaluate a
-   subset of them. Typically this is in order to take up where I left
-   off: I need to recreate a bunch of variables in the session
-   environment. I'm thinking maybe we want to use a tag-based
-   mechanism similar to :export: and :noexport: to control evaluation
-   on a per-subtree basis.
-   
 ** TODO support for working with =*Org Edit Src Example*= buffers [4/6]
 *** STARTED Patch against org source. 
     I've worked on several related changes to source code edit buffer
@@ -1140,6 +1128,34 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+
+** DONE take default values for header args from properties
+   Use file-wide and subtree wide properties to set default values for
+   header args.
+   
+   [DED] One thing I'm finding when working with R is that an org file
+   may contain many source blocks, but that I just want to evaluate a
+   subset of them. Typically this is in order to take up where I left
+   off: I need to recreate a bunch of variables in the session
+   environment. I'm thinking maybe we want to use a tag-based
+   mechanism similar to :export: and :noexport: to control evaluation
+   on a per-subtree basis.
+
+*** test-header with properties
+    :PROPERTIES:
+    :tangle:   yes
+    :END:
+
+Ahh... as is so often the case, just had to wrap
+`org-babel-params-from-properties' in a `save-match-data' form.
+
+#+tblname: why-def-props-cause-probs
+| 1 | 2 | 3 | 4 |
+
+#+srcname: default-props-implementation
+#+begin_src emacs-lisp :tangle no :var my-lis=why-def-props-cause-probs :results silent
+(length my-lis)
+#+end_src
 ** DONE new reference syntax *inside* source code blocks
 This is from an email discussion on the org-mode mailing list with
 Sébastien.  The goal here is to mimic the source-block reference style
