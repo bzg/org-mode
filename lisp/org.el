@@ -15064,6 +15064,7 @@ See the individual commands for more information."
     "--"
     ("Hyperlinks"
      ["Store Link (Global)" org-store-link t]
+     ["Find existing link to here" org-occur-link-in-agenda-files t]
      ["Insert Link" org-insert-link t]
      ["Follow Link" org-open-at-point t]
      "--"
@@ -15703,7 +15704,7 @@ for the search purpose."
   (interactive)
   (let ((link (condition-case nil
 		  (org-store-link nil)
-		(error "Unable to create a link from here"))))
+		(error "Unable to create a link to here"))))
     (org-occur-in-agenda-files (regexp-quote link))))
 
 (defun org-uniquify (list)
