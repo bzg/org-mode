@@ -33,6 +33,16 @@
 ;; file will have to be implemented engine by engine.
 ;;
 ;; Also SQL evaluation generally takes place inside of a database.
+;;
+;; For now lets just allow a generic ':cmdline' header argument.
+;;
+;; TODO:
+;;
+;; - support for sessions
+;; - add more useful header arguments (user, passwd, database, etc...)
+;; - support for more engines (currently only supports mysql)
+;; - what's a reasonable way to drop table data into SQL?
+;; 
 
 ;;; Code:
 (require 'org-babel)
@@ -45,26 +55,26 @@
   "Execute a block of Sql code with org-babel.  This function is
 called by `org-babel-execute-src-block' via multiple-value-bind."
   (message "executing Sql source code block")
-  )
+  (let* ((result-params (split-string (or (cdr (assoc :results params)) "")))
+         (cmdline (cdr (assoc :cmdline params)))
+         (engine (cdr (assoc :engine params)))
+         (in-file (make-temp-file "org-babel-sql-in"))
+         (out-file (or (cdr (assoc :out-file params))
+                       (make-temp-file "org-babel-sql-out")))
+         (command (case (intern engine)
+                    ('mysql (format "mysql %s -e \"source %s\" > %s"
+                                    (or cmdline "") in-file out-file))
+                    (t (error "no support for the %s sql engine")))))
+    (with-temp-file in-file (insert body))
+    (message command)
+    (shell-command command)
+    (with-temp-buffer
+      (org-table-import out-file nil)
+      (org-table-to-lisp))))
 
 (defun org-babel-prep-session:sql (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  ;; (message "params=%S" params) ;; debugging
-  )
-
-;; helper functions
-
-(defun org-babel-sql-var-to-sql (var)
-  "Convert an elisp var into a string of sql source code
-specifying a var of the same value."
-  (if (listp var)
-      (concat "[" (mapconcat #'org-babel-sql-var-to-sql var ", ") "]")
-    (format "%S" var)))
-
-(defun org-babel-sql-table-or-string (results)
-  "If the results look like a table, then convert them into an
-Emacs-lisp table, otherwise return the results as a string."
-  )
+  (error "sql sessions not yet implemented"))
 
 (provide 'org-babel-sql)
 ;;; org-babel-sql.el ends here
