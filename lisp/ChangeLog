@@ -105,6 +105,13 @@
 	* org-macs.el (org-unmodified): Turn of modification hooks while
 	running this macro.
 
+2009-08-02  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-adapt-indentation): Slightly improve the docstring.
+	(org-occur): Sends an error when the user inputs an empty string.
+	(org-priority): Bugfix: the tag alignement should happen within
+	save-excursion.
+
 2009-07-31  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-make-link-regexps): Don't exclude parentheses from

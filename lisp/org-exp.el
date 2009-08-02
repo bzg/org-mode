@@ -2504,8 +2504,7 @@ directory."
 			    (or pub-dir
 				(org-export-directory :org opt-plist)))
 			   (file-name-sans-extension
-			    (file-name-nondirectory bfname))
-			     ".org"))
+			    (file-name-nondirectory bfname))))
 	 (filename (and filename
 			(if (equal (file-truename filename)
 				   (file-truename bfname))

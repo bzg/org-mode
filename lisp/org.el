@@ -693,7 +693,7 @@ The following issues are influenced by this variable:
 - When this is set and the *entire* text in an entry is indented, the
   indentation is increased by one space in a demotion command, and
   decreased by one in a promotion command.  If any line in the entry
-  body starts at column 0, indentation is not changed at all.
+  body starts with text at column 0, indentation is not changed at all.
 
 - Property drawers and planning information is inserted indented when
   this variable s set.  When nil, they will not be indented.
@@ -10207,6 +10207,8 @@ command.
 If CALLBACK is non-nil, it is a function which is called to confirm
 that the match should indeed be shown."
   (interactive "sRegexp: \nP")
+  (when (equal regexp "")
+    (error "Regexp cannot be empty"))
   (unless keep-previous
     (org-remove-occur-highlights nil nil t))
   (push (cons regexp callback) org-occur-parameters)
@@ -10374,12 +10376,11 @@ ACTION can be `set', `up', `down', or a character."
 		(goto-char (match-end 2))
 		(insert " [#" news "]"))
 	    (goto-char (match-beginning 3))
-	    (insert "[#" news "] ")))))
-    (org-preserve-lc (org-set-tags nil 'align))
+	    (insert "[#" news "] "))))
+      (org-preserve-lc (org-set-tags nil 'align)))
     (if remove
 	(message "Priority removed")
       (message "Priority of current item set to %s" news))))
-
 
 (defun org-get-priority (s)
   "Find priority cookie and return priority."
