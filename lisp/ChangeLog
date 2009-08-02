@@ -1,6 +1,7 @@
 2009-08-02  Bastien Guerry  <bzg@altern.org>
 
 	* org.el (org-adapt-indentation): Slightly improve the docstring.
+	(org-occur): Sends an error when the user inputs an empty string.
 
 	* org-exp.el (org-export-as-org): Use file-source.org format
 	instead of file.org-source.

@@ -10138,6 +10138,8 @@ command.
 If CALLBACK is non-nil, it is a function which is called to confirm
 that the match should indeed be shown."
   (interactive "sRegexp: \nP")
+  (when (equal regexp "")
+    (error "Regexp cannot be empty"))
   (unless keep-previous
     (org-remove-occur-highlights nil nil t))
   (push (cons regexp callback) org-occur-parameters)
