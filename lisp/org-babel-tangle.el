@@ -187,8 +187,7 @@ the source-code block which holds BODY."
         (insert body) (goto-char (point-min))
         (funcall (intern (concat lang "-mode")))
         (setq index (point))
-        (while (and (re-search-forward "<<\\(.+\\)>>" nil t)
-                    (save-match-data (comment-beginning)))
+        (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
           (save-match-data (setf source-name (match-string 1)))
           ;; add interval to new-body
           (goto-char (match-end 0))
