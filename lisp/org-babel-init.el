@@ -62,6 +62,7 @@
 (require 'org-babel-gnuplot)
 (require 'org-babel-dot)
 (require 'org-babel-asymptote)
+(require 'org-babel-sql)
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here
