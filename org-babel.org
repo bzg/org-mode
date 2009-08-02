@@ -2704,7 +2704,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [30/39]
+* Bugs [31/40]
 ** TODO export problems when support for a language is missing
 we should come up with a way to gracefully degrade when support for a
 specific language is missing
@@ -2882,10 +2882,65 @@ In the `results' branch I've changed this so that they're not quite
 identical: output results in raw stdout contents, whereas value
 converts it to elisp, perhaps to a table if it looks tabular. This is
 the same for the other languages. [Dan]
+   
+** TODO adding blank line when source-block produces no output
 
-** TODO are the org-babel-trim s necessary?
+#+srcname: show-org-babel-trim
+#+begin_src sh 
+find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
+#+end_src
+
+** DONE are the org-babel-trim s necessary?
    at the end of e.g. org-babel-R-evaluate, org-babel-python-evaluate, but
    not org-babel-ruby-evaluate
+   
+   I think it depends on the language, if we find that extra blank
+   lines are being inserted in a particular language that is a good
+   indication that the trim or chomp functions may be appropriate.
+
+   org-babel-trim and the related org-babel-chomp are use throughout
+   org-babel...
+
+#+srcname: show-org-babel-trim-usage
+#+begin_src sh :results output
+find lisp/ \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH org-babel-trim {} \;
+#+end_src
+
+#+resname:
+#+begin_example
+lisp//langs/org-babel-python.el:49:		     vars "\n") "\n" (org-babel-trim body) "\n")) ;; then the source block body
+lisp//langs/org-babel-python.el:143:			       (org-remove-indentation (org-babel-trim body)) "[\r\n]")))
+lisp//langs/org-babel-python.el:158:	       #'org-babel-trim
+lisp//langs/org-babel-python.el:166:                                           (reverse (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-python.el:169:	  (output (org-babel-trim (mapconcat #'identity (reverse (cdr results)) "\n")))
+lisp//langs/org-babel-python.el:170:	  (value (org-babel-python-table-or-string (org-babel-trim (car results)))))))))
+lisp//langs/org-babel-ruby.el:149:                                                  (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-sh.el:148:                                                  (mapcar #'org-babel-trim raw)))))))
+lisp//langs/org-babel-sh.el:151:            (output (org-babel-trim (mapconcat #'org-babel-trim (reverse results) "\n")))
+lisp//org-babel-ref.el:161:    (mapcar #'org-babel-trim (reverse (cons buffer return)))))
+lisp//org-babel.el:198:    (with-temp-buffer (insert (org-babel-trim body)) (copy-region-as-kill (point-min) (point-max)))
+lisp//org-babel.el:465:           (org-babel-trim
+lisp//org-babel.el:706:(defun org-babel-trim (string &optional regexp)
+#+end_example
+
+#+srcname: show-org-babel-chomp-usage
+#+begin_src sh :results output
+find lisp/ \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH org-babel-chomp {} \;
+#+end_src
+
+#+resname:
+#+begin_example
+lisp//langs/org-babel-R.el:122:             (full-body (mapconcat #'org-babel-chomp
+lisp//langs/org-babel-R.el:143:	      (delete nil (mapcar #'extractor (mapcar #'org-babel-chomp raw))) "\n"))))))))
+lisp//langs/org-babel-ruby.el:143:	     #'org-babel-chomp
+lisp//langs/org-babel-sh.el:142:	   (full-body (mapconcat #'org-babel-chomp
+lisp//org-babel-tangle.el:163:      (insert (format "\n%s\n" (org-babel-chomp body)))
+lisp//org-babel.el:362:			 (org-babel-chomp (match-string 2 arg)))
+lisp//org-babel.el:698:(defun org-babel-chomp (string &optional regexp)
+lisp//org-babel.el:707:  "Like `org-babel-chomp' only it runs on both the front and back of the string"
+lisp//org-babel.el:708:  (org-babel-chomp (org-babel-reverse-string
+lisp//org-babel.el:709:                    (org-babel-chomp (org-babel-reverse-string string) regexp)) regexp))
+#+end_example
 
 ** DONE LoB is not populated on startup
    org-babel-library-of-babel is nil for me on startup. I have to
