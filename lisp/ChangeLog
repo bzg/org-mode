@@ -1,5 +1,8 @@
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-export): Also work in file-less
+	buffers.
+
 	* org.el (org-startup-indented): New option.
 	(org-startup-options): Add new options indent and noindent.
 	(org-unfontify-region): Remove line-prefix and wrap-prefix

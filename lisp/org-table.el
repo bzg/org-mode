@@ -487,8 +487,9 @@ property, locally or anywhere up in the hierarchy."
 	(error "Abort")))
     (if (file-directory-p file)
 	(error "This is a directory path, not a file"))
-    (if (equal (file-truename file)
-	       (file-truename (buffer-file-name)))
+    (if (and (buffer-file-name)
+	     (equal (file-truename file)
+		    (file-truename (buffer-file-name))))
 	(error "Please specify a file name that is different from current"))
     (unless format
       (setq deffmt-readable org-table-export-default-format)
