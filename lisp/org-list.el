@@ -36,6 +36,8 @@
 
 (defvar org-blank-before-new-entry)
 (defvar org-M-RET-may-split-line)
+(defvar org-complex-heading-regexp)
+(defvar org-odd-levels-only)
 
 (declare-function org-invisible-p "org" ())
 (declare-function org-on-heading-p "org" (&optional invisible-ok))
@@ -1174,7 +1176,7 @@ this list."
   (catch 'exit
     (unless (org-at-item-p) (error "Not at a list"))
     (save-excursion
-      (org-list-find-true-beginning)
+      (org-list-goto-true-beginning)
       (beginning-of-line 0)
       (unless (looking-at "#\\+ORGLST: *SEND +\\([a-zA-Z0-9_]+\\) +\\([^ \t\r\n]+\\)\\( +.*\\)?")
 	(if maybe

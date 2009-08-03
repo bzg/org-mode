@@ -30,6 +30,7 @@
 (require 'org)
 
 (declare-function org-show-notification "org-clock" (parameters))
+(declare-function org-agenda-error "org-agenda" ())
 
 (defvar org-timer-start-time nil
   "t=0 for the running timer.")
@@ -263,13 +264,13 @@ VALUE can be `on', `off', or `pause'."
 (defun org-timer-reset-timers ()
   "Reset all timers."
   (interactive)
-  (mapcar (lambda(timer) 
-	    (when (eval timer)
-	      (cancel-timer timer)
-	      (setq timer nil)))
-	  '(org-timer-timer1
-	    org-timer-timer2
-	    org-timer-timer3))
+  (mapc (lambda(timer) 
+	  (when (eval timer)
+	    (cancel-timer timer)
+	    (setq timer nil)))
+	'(org-timer-timer1
+	  org-timer-timer2
+	  org-timer-timer3))
   (message "All timers reset"))
 
 (defun org-timer-show-remaining-time ()
@@ -307,7 +308,7 @@ VALUE can be `on', `off', or `pause'."
 		     (widen)
 		     (goto-char pos)
 		     (org-show-entry)
-		     (setq heading (org-get-heading)))))
+		     (org-get-heading))))
 		((eq major-mode 'org-mode)
 		 (org-get-heading))
 		(t (error "Not in an Org buffer"))))

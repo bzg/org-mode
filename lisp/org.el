@@ -565,6 +565,11 @@ new-frame        Make a new frame each time.  Note that in this case
   :tag "Org Cycle"
   :group 'org-structure)
 
+(defcustom org-cycle-skip-children-state-if-no-children t
+  "Non-nil means, skip CHILDREN state in entries that don't have any."
+  :group 'org-cycle
+  :type 'boolean)
+
 (defcustom org-cycle-max-level nil
   "Maximum level which should still be subject to visibility cycling.
 Levels higher than this will, for cycling, be treated as text, not a headline.
@@ -4935,10 +4940,11 @@ in special contexts.
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
   (org-back-to-heading)
-  (let ((goal-column 0) eoh eol eos)
+  (let ((goal-column 0) eoh eol eos level has-children children-skipped)
     ;; First, some boundaries
     (save-excursion
       (org-back-to-heading)
+      (setq level (funcall outline-level))
       (save-excursion
 	(beginning-of-line 2)
 	(if (or (featurep 'xemacs) (<= emacs-major-version 21))
@@ -4953,6 +4959,10 @@ in special contexts.
 	    (or (bolp) (beginning-of-line 2))))
 	(setq eol (point)))
       (outline-end-of-heading)   (setq eoh (point))
+      (save-excursion
+	(outline-next-heading)
+	(setq has-children (and (org-at-heading-p t)
+				(> (funcall outline-level) level))))
       (org-end-of-subtree t)
       (unless (eobp)
 	(skip-chars-forward " \t\n")
@@ -4970,9 +4980,12 @@ in special contexts.
 	(goto-char eos)
 	(outline-next-heading)
 	(if (org-invisible-p) (org-flag-heading nil))))
-     ((or (>= eol eos)
-	  (not (string-match "\\S-" (buffer-substring eol eos))))
-      ;; Entire subtree is hidden in one line: open it
+     ((and (or (>= eol eos)
+	       (not (string-match "\\S-" (buffer-substring eol eos))))
+	   (or has-children
+	       (not (setq children-skipped
+			  org-cycle-skip-children-state-if-no-children))))
+      ;; Entire subtree is hidden in one line: children view
       (run-hook-with-args 'org-pre-cycle-hook 'children)
       (org-show-entry)
       (show-children)
@@ -4984,22 +4997,14 @@ in special contexts.
       (setq org-cycle-subtree-status 'children)
       (run-hook-with-args 'org-cycle-hook 'children))
      ((and (eq last-command this-command)
-	   (eq org-cycle-subtree-status 'children))
+	   (or children-skipped
+	       (eq org-cycle-subtree-status 'children)))
       ;; We just showed the children, now show everything.
-      (if (save-excursion
-	    (beginning-of-line 2)
-	    (re-search-forward org-complex-heading-regexp eos t))
-	  (progn
-	    (run-hook-with-args 'org-pre-cycle-hook 'subtree)
-	    (org-show-subtree)
-	    (message "SUBTREE")
-	    (setq org-cycle-subtree-status 'subtree)
-	    (run-hook-with-args 'org-cycle-hook 'subtree))
-	(run-hook-with-args 'org-pre-cycle-hook 'folded)
-	(hide-subtree)
-	(message "FOLDED (NO SUBTREE)")
-	(setq org-cycle-subtree-status 'folded)
-	(run-hook-with-args 'org-cycle-hook 'folded)))
+      (run-hook-with-args 'org-pre-cycle-hook 'subtree)
+      (org-show-subtree)
+      (message (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
+      (setq org-cycle-subtree-status 'subtree)
+      (run-hook-with-args 'org-cycle-hook 'subtree))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)

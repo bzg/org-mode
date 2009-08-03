@@ -1,5 +1,14 @@
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-list.el (org-list-send-list): Call
+	`org-list-goto-true-beginning' instead of
+	`org-list-find-true-beginning', which does not exist.
+
+	* org-timer.el (org-timer-reset-timers): Use `mapc'.
+	(org-timer-set-timer): Do not assign to heading.
+
+	* org-id.el (org-id-open): Quote function name.
+
 	* org-macs.el (org-unmodified): Turn off recording undo
 	information while running inside the macro.
 

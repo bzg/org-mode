@@ -590,7 +590,7 @@ optional argument MARKERP, return the position as a new marker."
 	     '((find-file . switch-to-buffer)
 	       (find-file-other-window . switch-to-buffer-other-window)
 	       (find-file-other-frame . switch-to-buffer-other-frame))))
-	   switch-to-buffer-other-window))
+	   'switch-to-buffer-other-window))
     (if (not (equal (current-buffer) (marker-buffer m)))
 	(funcall cmd (marker-buffer m)))
     (goto-char m)
