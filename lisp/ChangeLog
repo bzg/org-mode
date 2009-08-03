@@ -1,5 +1,8 @@
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-unmodified): Turn off recording undo
+	information while running inside the macro.
+
 	* org-indent.el (org-hide-leading-stars-before-indent-mode): New
 	variable.
 	(org-indent-mode): Remember and restore value of

@@ -44,10 +44,12 @@
   `(and (boundp (quote ,var)) ,var))
 
 (defmacro org-unmodified (&rest body)
-  "Execute body without changing `buffer-modified-p'."
+  "Execute body without changing `buffer-modified-p'.
+Also, do not record undo information."
   `(set-buffer-modified-p
     (prog1 (buffer-modified-p)
-      (let (before-change-functions after-change-functions)
+      (let ((buffer-undo-list t)
+	    before-change-functions after-change-functions)
 	,@body))))
 
 (defmacro org-re (s)
