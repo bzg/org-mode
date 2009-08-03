@@ -49,7 +49,10 @@
   ;; other versions of htmlize can cause export problems
   (load (expand-file-name "htmlize.el" util-dir))
   ;; the newest version of inf-ruby.el is required by org-babel-ruby.el
-  (load (expand-file-name "inf-ruby.el" util-dir)))
+  (load (expand-file-name "inf-ruby.el" util-dir))
+  ;; gnuplot mode
+  (load (expand-file-name "gnuplot.el"
+                          (expand-file-name "gnuplot-mode.0.6.0" util-dir))))
 
 ;; language specific files
 (add-to-list 'load-path (expand-file-name "langs" (file-name-directory (or load-file-name buffer-file-name))))
