@@ -307,7 +307,7 @@ of the following form.  (language body header-arguments-alist)"
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
   (declare (indent 1))
-  `(let ((visited-p (get-buffer (file-name-nondirectory file))))
+  `(let ((visited-p (get-buffer (file-name-nondirectory ,file))))
      (save-window-excursion
        (find-file ,file) (goto-char (point-min))
        (while (re-search-forward org-babel-src-block-regexp nil t)
