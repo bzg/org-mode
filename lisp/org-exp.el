@@ -2511,7 +2511,7 @@ directory."
 				   (file-truename bfname))
 			    (concat (file-name-sans-extension filename)
 				    "-source."
-				    (file-name-extension filename)))))
+				    (file-name-extension filename))
 			  filename)))
 	 (backup-inhibited t)
 	 (buffer (find-file-noselect filename))
