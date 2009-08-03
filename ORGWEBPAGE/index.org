@@ -24,11 +24,6 @@
   planning, and authoring with a fast and effective plain-text
   system.
   </td>
-  <td>
-  <a href="http://sf.net/community/cca09/vote/?f=401"><br />
-    <img src="http://sf.net/awards/cca/badge_img.php?f=401" style="border-style:none;vertical-align:top;" alt="" />
-  </td>
-  </tr>
   </table>
 #+end_html
 
@@ -37,7 +32,7 @@
     <tr>
       <td rowspan="2">
         <img src="http://orgmode.org/img/tasks.png" 
-             style="border:1px solid black; width:400px" 
+             style="border:1px solid black; width:500px" 
              alt="http://orgmode.org/img/tasks.png" />
       </td>
       

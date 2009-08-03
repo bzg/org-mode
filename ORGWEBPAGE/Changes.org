@@ -4,9 +4,338 @@
 <a href="/"><img src="http://orgmode.org/img/org-mode-unicorn.png" class="logo-link" /></a>
 #+end_html
 
-* Version 6.28
+#+STARTUP: indent hidestars
+
+* Version 6.29
  :PROPERTIES:
  :VISIBILITY: content
+ :CUSTOM_ID: v6.29
+ :END:
+
+** Structure editing and cycling
+
+*** New minor mode =org-indent-mode=
+
+This mode implements outline indentation similar to clean view,
+but in a dynamic and virtual way, at display time.  I have wanted
+this functionality for years and tried several implementations,
+all unworkable.  Emacs 23 has finally made it possible.  So this
+solution is for Emacs 23 only, and I am not sure yet how stable
+it really is.  Time will tell.
+
+Currently I do not recommend to turn it on globally using
+the variable =org-startup-indented=.  But you can turn it on
+for a particular buffer using
+
+#+begin_src org
+  ,#+STARTUP: indent
+#+end_src
+
+Turning on this minor mode automatically turns on
+=org-hide-leading-stars=, and it turns off
+=org-adapt-indentation=.
+
+*** Skip CHILDREN state if there are no children
+
+When a subtree does not have any children, visibility
+cycling now skips the CHILDREN state.  You can customize
+this behavior with the variable
+=org-cycle-skip-children-state-if-no-children=.
+
+*** Nodes without keyword can now be counted for statistics
+
+See the variable =org-provide-todo-statistics= for details.
+It can be the symbol =all-headings=, or a list of TODO
+states to consider.
+
+This was requested by David A. Gershman.
+
+*** New function =org-list-make-subtree=
+
+This function converts the plain list at point into a
+subtree, preserving the list structure.  The key for this
+command is =C-c C-*=.  Thanks to Ilya Shlyakhter for this
+suggestion.
+
+*** Headlines can be fontified to the right window border
+
+Use the variable =org-fontify-whole-heading-line= to turn
+this on.  Then headline fontification will include the final
+newline.  If your setup for headline faces includes a
+background different from the default background, this setup
+creates a visual line across the window.
+
+*** Inline tasks have become better citizens
+
+The new key =C-c C-x t= inserts an inline task including an
+END line.  Inline tasks play along with (i,e, are ignored
+by) link creation and footnotes.  Inline tasks with an =END=
+line can be refiled and archived.  During the refile/archive
+operation, the tasks become normal tasks and the =END= line
+disappears.
+
+These improvements reflect reports and requests by Peter
+Westlake and Matt Lundin.
+
+*** Archive subtree and move to next visible task
+
+When archiving a task, the cursor now ends up on the next
+headline, so the repeated application of the archiving
+command will archive successive tasks.
+
+Thanks to Bernt Hansen for a patch to this effect.
+
+*** Renumbering the fn:N-like footnotes
+
+The new footnote action =r= will renumber simple =fn:N=
+footnotes in the current document.  The action =S= will
+first do the renumbering and then sort the footnotes (the
+=s= action).
+
+This was a request by Andreas Röhler.
+
+*** Automatic sorting and renumbering
+
+Customize the new variable =org-footnote-auto-adjust= or use
+the =#+STARTUP= option =fnadjust= to get automatic
+renumbering and sorting of footnotes after each
+insertion/deletion.
+
+This was a request by Andreas Röhler.
+
+*** Improvements to plain-list-cycling with TAB.
+
+TAB now by default cycles visibility in plain lists if the
+cursor is at a plain list item.  This corresponds to the new
+default value =t= of =org-cycle-include-plain-lists=.  If
+you want to treat plain list items as part of the outline
+hierarchy during cycling of outline headings (this is what a
+=t= value used to mean), set this variable to =integrate=.
+
+*** Force bullet type changes during plain list demotion
+
+We now have a mechanism to force a particular bullet type
+when demoting a plain list item.  See the variable
+=org-list-demote-modify-bullet= for details.
+
+This was a request by Rainer Stengele.
+
+
+** Tables
+
+*** Relative row references may now cross hlines
+
+A relative row reference like @-1 in a table may now reach
+across a horizontal separator line.  I hope this will not
+break any important tables out there, but I think it is the
+right thing to do.
+
+The sole original reason for not allowing such crossing was
+to implement running averages of one column in the next.
+This can now be done using field formulas near the beginning
+and end of the column, and a column formula for the central
+part.
+
+See the variable =org-table-relative-ref-may-cross-hline=
+for more details.
+
+*** Cut or copy single fields
+
+=C-c C-x C-w= and =C-c C-x M-w= now act on single table
+fields if there is no active region defined.
+
+** Links
+
+*** Find agenda files linking to the current location
+
+The new command =org-occur-link-in-agenda-files= creates a
+link like =org=store-link= would, and then searches all
+agenda files for this link.  So for example, you could be in
+a GNUS message, trying to find tasks that have links to this
+message.
+
+*** Include stored links into link completion
+
+When inserting a link with =C-c C-l=, TAB completion will
+now not only access link prefixes, but also the stored
+links.
+
+
+** Agenda
+
+*** Bulk commands: Add Schedule and Deadline processing
+
+Agenda bulk commands on marked entries now can also set the
+scheduling date or a deadline.  Normally, all entries will
+be set to the specified date.  However, when writing the
+change as "++5d" or "++2w", then each time stamp will
+independently be shifted by that amount.
+
+*** Tags-todo searches: No longer force to list sublevels
+
+For historic reasons, =org-tags-match-list-sublevels= was
+forced to =t= in tags-todo agenda searches.  Now we no
+longer do this and accept the user setting of this variable.
+
+Thanks to Patrick Bahr for bringing this up.
+
+
+** Export
+
+*** Use file-source.org format instead of file.org-source
+
+When publishing the source Org file to the source directory
+(i.e. if the publishing directory is the same as the source
+directory), then the file name will now look like
+=file-source.org= and =file-source.org.html=.  Note that if you
+do use this kind of setup, you probably want to specify
+
+#+begin_src emacs-lisp
+:exclude "-source\.org"
+#+end_src
+
+in your publishing project, to avoid that a new generation of
+=-source= files is created each time you publish the project.
+
+*** LaTeX export: Skip title command when there is no title
+
+Using =#+TITLE:= without a value makes the LaTeX export
+ignore the value of =org-export-latex-title-command=.
+
+*** New option =org-export-html-footnote-format=
+
+This defines the format for footnote references.  This
+string must contain =%s= which will be replaced by the
+footnote label.
+
+*** More export options for source code examples
+
+Allow whitespace in code references.  Allow the =-r= switch
+to remove the references in the source code even when the
+lines are not numbered: the labels can be explicit enough.
+Note that =-r -k= is the same as no switch at all.
+
+Thanks to Ulf Stegemann for bring this up.
+
+*** LaTeX export: Allow more environment for low-level headings
+
+The user can now define a non-standard environment or macro
+to handle export of low-level headings to LaTeX.
+
+For details, see the variable =org-export-latex-low-levels=.
+
+*** LaTeX export: Add postscript file extensions for images
+
+Some people process LaTeX files not directly to pdf, but go
+through dvi and then to ps or pdf.  In that case, allowed
+images are ps and eps files, not pdf and jpg.
+
+This commit adds the two extensions, so that export using
+that alternative path can be supported better.  However, it
+is up to the user to make sure that the images are actually
+compatible with the backend.
+
+*** HTML export: Show UP and HOME links
+
+=org-export-html-link-up= and =org-export-html-link-home=
+are now also inserted into normal HTML export, above the
+page title.
+
+*** General mechanism for local variable settings
+
+Many different people want to set many different variables
+in a buffer-local way for export.  This cannot be done with
+file variables, because the Org buffer is not current while
+the exporter is running.
+
+Lots of variables can be set with the =#+OPTIONS= lines, but
+finding abbreviations goes only so far.
+
+Therefore we have now a general mechanism that can be used
+to bind variables during export operations.
+
+A line like:
+
+#+begin_src org
+  ,#+BIND: variable value
+#+end_src
+
+will bind the variable to value.  For example, the line
+
+#+begin_src org
+  ,#+OPTIONS: toc:nil
+#+end_src
+
+can now equivalently be written as
+
+#+begin_src org
+  ,#+BIND: org-export-with-toc nil
+#+end_src
+
+*** Clean out publishing timestamp directory
+
+When changing the publishing setup, old timestamp files can
+be left behind.  Forcing publishing of all projects with
+=C-u C-c C-e E= will remove all existing timestamp files.
+
+** Miscellaneous
+
+*** Calendar for reading a date forced into current frame.
+
+Separate-frame setup for calendar had caused problems in
+AquaEmacs.
+
+*** Set timers for headlines
+
+You can now set a timer related to any headline, like an
+alarm clock.  Three new commands have been defined:
+
+- org-timer-set-timer :: bound to =C-c C-x ;= in Org buffers
+  and to =;= in Org agenda buffers.  This function sets a
+  timer for the headline the cursor is currently it.  Up to
+  three timers can be used at any time.
+
+- org-timer-show-remaining-time :: Show the remaining time
+  for the last timer set.
+
+- org-timer-cancel-timers :: Cancel all timers.
+
+This functionality was requested by Samuel Wales and
+emulates that of /tea-time.el/ -- see the emacswiki doc at
+
+      http://www.emacswiki.org/emacs/tea-time
+
+*** Clock reports may include a time stamp
+
+Using =:timetamp t= as an option in a clock report now
+allows insertion of the timestamp for the clocked entry.
+Timestamps are searched for in this order: =SCHEDULING=,
+=TIMESTAMP=, =DEADLINE= and =TIMESTAMP_IA=.
+
+*** New option =org-id-uuid-program=
+
+On some systems, =uuidgen= is named =uuid=.
+
+*** Clock notification handler made configurable
+
+See the variable =org-show-notification-handler=.
+
+*** New option =org-tags-sort-function=.
+
+This allows tags to be sorted by =string<=, =string>=, or a
+custom function.
+
+Thanks to James TD Smith for a patch to this effect.
+
+*** Improvements for org-feed.el
+
+But fixes, and allowing to choose between =wget= and =curl=.
+
+Thanks to Christopher League for a patch to this effect.
+
+
+* Version 6.28
+ :PROPERTIES:
  :CUSTOM_ID: v6.28
  :END:
 
@@ -66,20 +395,20 @@ under outline headings.  For example:
   ,    #+begin_example
   ,    here we have an example
   ,    #+end_example
-  ,     
+  ,
   ,    - a plain list
   ,      - a sublist item
   ,        - a second sublist item
-  
+
   ,          #+begin_center
   ,           centering within the plain list item
   ,          #+end_center
-  
+
   ,      #+begin_example
   ,       This example does terminate the sublist,
   ,       the indentation of the #+begin line counts.
   ,      #+end_example
-  
+
   ,    - but the top level plain lists continues here
 #+end_src
 
@@ -151,7 +480,7 @@ and have them bound to a key (use an upper-case letter for user
 export definitions).
 
 Thanks to Wes Hardaker for this contribution with a lot of
-potential. 
+potential.
 *** New contributed modules org-mac-iCal.el by Christopher Suckling
 
 See the [[http://orgmode.org/worg/org-contrib/org-mac-iCal.php][documentation on Worg]].
