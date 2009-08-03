@@ -196,6 +196,9 @@ useful to make it evver so slightly different."
 			  '(line-prefix nil wrap-prefix nil) string)
   string)
 
+(defvar org-indent-outline-re (concat "^" org-outline-regexp)
+  "Outline heading regexp.")
+
 (defun org-indent-add-properties (beg end)
   "Add indentation properties between BEG and END.
 Assumes that BEG is at the beginning of a line."
@@ -206,7 +209,7 @@ Assumes that BEG is at the beginning of a line."
 	 (goto-char beg)
 	 (while (not exit)
 	   (setq e end)
-	   (if (not (re-search-forward org-outline-regexp nil t))
+	   (if (not (re-search-forward org-indent-outline-re nil t))
 	       (setq e (point-max) exit t)
 	     (setq e (match-beginning 0))
 	     (if (>= e end) (setq exit t))
