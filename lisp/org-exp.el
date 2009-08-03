@@ -2504,13 +2504,14 @@ directory."
 			    (or pub-dir
 				(org-export-directory :org opt-plist)))
 			   (file-name-sans-extension
-			    (file-name-nondirectory bfname))))
+			    (file-name-nondirectory bfname))
+			   ".org"))
 	 (filename (and filename
 			(if (equal (file-truename filename)
 				   (file-truename bfname))
 			    (concat (file-name-sans-extension filename)
 				    "-source."
-				    (file-name-extension filename))
+				    (file-name-extension filename)))))
 			  filename)))
 	 (backup-inhibited t)
 	 (buffer (find-file-noselect filename))
