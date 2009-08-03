@@ -216,7 +216,7 @@ the edited version."
 (defun org-edit-src-find-buffer (beg end)
   "Find a source editing buffer that is already editing the region BEG to END."
   (catch 'exit
-    (mapc 
+    (mapc
      (lambda (b)
        (with-current-buffer b
 	 (if (and (string-match "\\`*Org Edit " (buffer-name))

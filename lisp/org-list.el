@@ -1112,13 +1112,13 @@ cdr is the indentation string."
   (progn
     (re-search-forward org-list-beginning-re nil t)
     (goto-char (match-beginning 0))))
-  
+
 (defun org-list-make-subtree ()
   "Convert the plain list at point into a subtree."
   (interactive)
   (org-list-goto-true-beginning)
   (let ((list (org-list-parse-list t)) nstars)
-    (save-excursion 
+    (save-excursion
       (if (condition-case nil
 	      (org-back-to-heading)
 	    (error nil))
@@ -1133,8 +1133,8 @@ cdr is the indentation string."
       (org-list-make-subtrees (cdr list) level)
     (mapcar (lambda (item)
 	      (if (stringp item)
-		  (insert (make-string 
-			   (if org-odd-levels-only 
+		  (insert (make-string
+			   (if org-odd-levels-only
 			       (1- (* 2 level)) level) ?*) " " item "\n")
 		(org-list-make-subtrees item (1+ level))))
 	    list)))

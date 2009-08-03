@@ -275,7 +275,7 @@ The number of levels is controlled by "
     (let* ((limit-level (1- org-inlinetask-min-level))
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))
       (format "\\*\\{1,%d\\} " nstars))))
-		     
+
 (provide 'org-macs)
 
 ;; arch-tag: 7e6a73ce-aac9-4fc0-9b30-ce6f89dc6668

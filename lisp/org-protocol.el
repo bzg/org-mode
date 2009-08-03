@@ -454,7 +454,7 @@ Now template ?b will be used."
   (if (and (boundp 'org-stored-links)
            (fboundp 'org-remember))
       (let* ((parts (org-protocol-split-data info t))
-             (template (or (and (= 1 (length (car parts))) (pop parts)) 
+             (template (or (and (= 1 (length (car parts))) (pop parts))
 			   org-protocol-default-template-key))
              (url (org-protocol-sanitize-uri (car parts)))
              (type (if (string-match "^\\([a-z]+\\):" url)

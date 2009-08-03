@@ -5156,7 +5156,7 @@ This function is the default value of the hook `org-cycle-hook'."
 		(and (outline-get-last-sibling)
 		     (outline-get-last-sibling))
 		(point)))
-	 (end (save-excursion 
+	 (end (save-excursion
 		(and (outline-get-next-sibling)
 		     (outline-get-next-sibling)
 		     (outline-get-next-sibling))
@@ -14925,12 +14925,12 @@ in the region.
 If the first line is a plain list item, turn all plain list items
 into headings.
 
-If the first line is a normal line, turn each and every line in the 
+If the first line is a normal line, turn each and every line in the
 region into a heading.
 
-When converting a line into a heading, the number of stars is chosen 
-such that the lines become children of the current entry.  However, 
-when a prefix argument is given, its value determines the number of 
+When converting a line into a heading, the number of stars is chosen
+such that the lines become children of the current entry.  However,
+when a prefix argument is given, its value determines the number of
 stars to add."
   (interactive "P")
   (let (l2 l itemp beg end)

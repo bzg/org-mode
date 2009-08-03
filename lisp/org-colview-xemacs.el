@@ -1291,7 +1291,7 @@ of fields."
 		  (throw 'next t))
 		(setq row nil)
 		(loop for i from 0 to (1- n) do
-		      (push 
+		      (push
 		       (org-quote-vert
 			(or (get-char-property (point)
 					       'org-columns-value-modified)

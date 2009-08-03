@@ -2343,7 +2343,7 @@ INDENT was the original indentation of the block."
 	(if number
 	    (insert (format fm (incf n)))
 	  (forward-char 1))
-	(when (looking-at lbl-re) 
+	(when (looking-at lbl-re)
 	  (setq ref (match-string 3))
 	  (cond ((numberp replace-labels)
 		 ;; remove labels; use numbers for references when lines
@@ -2356,9 +2356,9 @@ INDENT was the original indentation of the block."
 		 (goto-char (match-beginning 2))
 		 (delete-region (match-beginning 2) (match-end 2))
 		 (insert "(" ref ")")
-		 (push (cons ref (if (> n 0) n (concat "(" ref ")"))) 
+		 (push (cons ref (if (> n 0) n (concat "(" ref ")")))
 		       org-export-code-refs))
-		(t 
+		(t
 		 ;; don't remove labels and don't use numbers for
 		 ;; references
 		 (goto-char (match-beginning 2))

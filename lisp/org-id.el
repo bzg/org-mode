@@ -87,7 +87,7 @@
 (defcustom org-id-method
   (condition-case nil
       (if (string-match "\\`[-0-9a-fA-F]\\{36\\}\\'"
-			(org-trim (shell-command-to-string 
+			(org-trim (shell-command-to-string
 				   org-id-uuid-program)))
 	  'uuidgen
 	'org)

@@ -6339,10 +6339,10 @@ This will remove the markers, and the overlays."
     (cond
      ((equal action ?$)
       (setq cmd '(org-agenda-archive)))
-     
+
      ((equal action ?A)
       (setq cmd '(org-agenda-archive-to-archive-sibling)))
-     
+
      ((member action '(?r ?w))
       (setq rfloc (org-refile-get-location
 		   "Refile to: "
@@ -6353,9 +6353,9 @@ This will remove the markers, and the overlays."
 			   (or (get-file-buffer (nth 1 rfloc))
 			       (find-buffer-visiting (nth 1 rfloc))
 			       (error "This should not happen"))))
-      
+
       (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc))))
-     
+
      ((equal action ?t)
       (setq state (org-ido-completing-read
 		   "Todo state: "
@@ -6364,7 +6364,7 @@ This will remove the markers, and the overlays."
       (setq cmd `(let ((org-inhibit-blocking t)
 		       (org-inhibit-logging 'note))
 		   (org-agenda-todo ,state))))
-     
+
      ((memq action '(?- ?+))
       (setq tag (org-ido-completing-read
 		 (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
@@ -6390,7 +6390,7 @@ This will remove the markers, and the overlays."
 			   (fset 'read-string old)
 			 (fmakunbound 'read-string)))))))
      (t (error "Invalid bulk action")))
-    
+
     ;; Now loop over all markers and apply cmd
     (while (setq e (pop entries))
       (goto-char

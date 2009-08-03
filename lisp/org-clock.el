@@ -445,16 +445,16 @@ Notification is shown only once."
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-show-notification (notification)
-  "Show notification.  
+  "Show notification.
 Use `org-show-notification-handler' if defined,
 use libnotify if available, or fall back on a message."
   (cond ((functionp org-show-notification-handler)
 	 (funcall org-show-notification-handler notification))
 	((stringp org-show-notification-handler)
-	 (start-process "emacs-timer-notification" nil 
+	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
 	((org-program-exists "notify-send")
-	 (start-process "emacs-timer-notification" nil 
+	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
 	;; Maybe the handler will send a message, so only use message as
 	;; a fall back option
@@ -1306,8 +1306,8 @@ the currently selected interval size."
 				  (cdr (assoc "TIMESTAMP_IA" props)))))
 		  (if (and (not multifile) (= level 1)) (push "|-" tbl))
 		  (push (concat
-			 "| " (int-to-string level) "|" 
-			 (if timestamp (concat tsp "|") "") 
+			 "| " (int-to-string level) "|"
+			 (if timestamp (concat tsp "|") "")
 			 hlc hdl hlc " |"
 			 (make-string (1- level) ?|)
 			 hlc (org-minutes-to-hh:mm-string time) hlc

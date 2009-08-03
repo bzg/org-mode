@@ -657,7 +657,7 @@ when PUB-DIR is set, use this as the publishing directory."
       (while cmds
 	(setq cmd (pop cmds))
 	(while (string-match "%b" cmd)
-	  (setq cmd (replace-match 
+	  (setq cmd (replace-match
 		     (save-match-data
 		       (shell-quote-argument base))
 		     t t cmd)))

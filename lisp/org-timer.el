@@ -264,7 +264,7 @@ VALUE can be `on', `off', or `pause'."
 (defun org-timer-reset-timers ()
   "Reset all timers."
   (interactive)
-  (mapc (lambda(timer) 
+  (mapc (lambda(timer)
 	  (when (eval timer)
 	    (cancel-timer timer)
 	    (setq timer nil)))
@@ -286,7 +286,7 @@ VALUE can be `on', `off', or `pause'."
 				  (current-time))))
 	   (rsecs (nth 0 rtime))
 	   (rmins (nth 1 rtime)))
-      (message "%d minutes %d secondes left before next time out" 
+      (message "%d minutes %d secondes left before next time out"
 	       rmins rsecs))))
 
 ;;;###autoload
@@ -297,7 +297,7 @@ VALUE can be `on', `off', or `pause'."
       (org-timer-show-remaining-time)
     (let* ((mins (string-to-number (match-string 0 minutes)))
 	   (secs (* mins 60))
-	   (hl (cond 
+	   (hl (cond
 		((string-match "Org Agenda" (buffer-name))
 		 (let* ((marker (or (get-text-property (point) 'org-marker)
 				    (org-agenda-error)))
@@ -313,7 +313,7 @@ VALUE can be `on', `off', or `pause'."
 		 (org-get-heading))
 		(t (error "Not in an Org buffer"))))
 	   timer-set)
-      (mapcar (lambda(timer) 
+      (mapcar (lambda(timer)
 		(if (not (or (eval timer) timer-set))
 		    (setq timer-set t
 			  timer
@@ -323,7 +323,7 @@ VALUE can be `on', `off', or `pause'."
 	      '(org-timer-timer1
 		org-timer-timer2
 		org-timer-timer3)))))
-  
+
 (provide 'org-timer)
 
 ;; arch-tag: 97538f8c-3871-4509-8f23-1e7b3ff3d107

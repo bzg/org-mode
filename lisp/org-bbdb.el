@@ -376,7 +376,7 @@ END:VEVENT\n"
 				(org-split-string (nth 1 rec) "[^a-zA-Z0-90]+")
 				"-")
 		     (nth 0 rec) (nth 0 key) (nth 1 key)
-		     (nth 1 rec) 
+		     (nth 1 rec)
 		     (concat (capitalize categ) " " (nth 1 rec))
 		     categ)))))
 

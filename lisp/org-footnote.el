@@ -562,7 +562,7 @@ and all references of a footnote label."
 	(goto-char (point-min))
 	(and (re-search-forward (concat "^\\[" (regexp-quote label) "\\]")
 				nil t)
-	     (progn (insert " ") 
+	     (progn (insert " ")
 		    (just-one-space)))))))
 
 (provide 'org-footnote)

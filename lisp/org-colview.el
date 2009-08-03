@@ -729,10 +729,11 @@ interactive function org-columns-new.")
     (if (string-match "\\S-" width)
 	(setq width (string-to-number width))
       (setq width nil))
-    (setq fmt (org-ido-completing-read "Summary [none]: "
-				       (mapcar (lambda (x) (list (symbol-name (cadr x)))) 
-					       org-columns-compile-map)
-				       nil t))
+    (setq fmt (org-ido-completing-read
+	       "Summary [none]: "
+	       (mapcar (lambda (x) (list (symbol-name (cadr x))))
+		       org-columns-compile-map)
+	       nil t))
     (setq fmt (intern fmt)
 	  fun (cadr (assoc fmt (mapcar 'cdr org-columns-compile-map))))
     (if (eq fmt 'none) (setq fmt nil))
