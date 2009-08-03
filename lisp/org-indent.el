@@ -53,6 +53,8 @@ It will be set in `org-indent-initialize'.")
 (defvar org-indent-stars nil
   "Vector with all indentation star strings.
 It will be set in `org-indent-initialize'.")
+(defvar org-hide-leading-stars-before-indent-mode nil
+  "Used locally")
 
 (defcustom org-indent-boundary-char ?\   ; comment to protect space char
   "The end of the virtual indentation strings, a single-character string.
@@ -134,6 +136,8 @@ FIXME:  How to update when broken?"
 	  (when org-indent-mode-turns-off-org-adapt-indentation
 	    (org-set-local 'org-adapt-indentation nil))
 	  (when org-indent-mode-turns-on-hiding-stars
+	    (org-set-local 'org-hide-leading-stars-before-indent-mode
+			   org-hide-leading-stars)
 	    (org-set-local 'org-hide-leading-stars t))
 	  (make-local-variable 'buffer-substring-filters)
 	  (add-to-list 'buffer-substring-filters
@@ -150,6 +154,9 @@ FIXME:  How to update when broken?"
 	(save-restriction
 	  (org-indent-remove-properties (point-min) (point-max))
 	  (kill-local-variable 'org-adapt-indentation)
+	  (when (boundp 'org-hide-leading-stars-before-indent-mode)
+	    (org-set-local 'org-hide-leading-stars
+			   org-hide-leading-stars-before-indent-mode))
 	  (setq buffer-substring-filters
 		(delq 'org-indent-remove-properties-from-string
 		      buffer-substring-filters))

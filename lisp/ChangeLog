@@ -1,5 +1,10 @@
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-indent.el (org-hide-leading-stars-before-indent-mode): New
+	variable.
+	(org-indent-mode): Remember and restore value of
+	org-hide-leading-stars before `org-indent-mode'.
+
 	* org-table.el (org-table-export): Also work in file-less
 	buffers.
 
