@@ -8,3 +8,4 @@ other
 test-tangle.sh
 test-tangle-none.rb
 test-tangle-special.rb
+test-tangle-load.el

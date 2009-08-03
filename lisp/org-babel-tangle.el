@@ -142,8 +142,11 @@ code blocks by language."
             (setq by-lang (cdr (assoc src-lang blocks)))
             (setq blocks (delq (assoc src-lang blocks) blocks))
             (setq blocks (cons (cons src-lang (cons spec by-lang)) blocks))))))
+    ;; ensure blocks in the correct order
+    (setq blocks
+          (mapcar (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang)))) blocks))
     ;; blocks should contain all source-blocks organized by language
-    ;; (message "blocks=%S" blocks) ;; debugging
+    (message "blocks=%S" blocks) ;; debugging
     blocks))
 
 (defun org-babel-spec-to-string (spec)

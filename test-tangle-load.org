@@ -1,0 +1,18 @@
+#+TITLE: testing org-babel-load
+#+OPTIONS: toc:nil num:nil ^:nil
+
+* elisp blocks
+
+** lets look at the order
+
+#+begin_src emacs-lisp 
+(message "I'm the first")
+#+end_src
+
+#+begin_src emacs-lisp
+(message "I'm the second")
+#+end_src
+
+#+begin_src emacs-lisp
+(message "I'm the third")
+#+end_src
