@@ -1,5 +1,8 @@
 2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-timer.el (org-timer-cancel-timers): Renamed from
+	`org-timer-cancel-timers'.
+
 	* org.el (org-cycle-internal-local): Fix problem with finding next
 	invisible line.
 

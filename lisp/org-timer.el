@@ -261,7 +261,7 @@ VALUE can be `on', `off', or `pause'."
 (defvar org-timer-timer3 nil)
 (defvar org-timer-last-timer nil)
 
-(defun org-timer-reset-timers ()
+(defun org-timer-cancel-timers ()
   "Reset all timers."
   (interactive)
   (mapc (lambda(timer)
