@@ -66,6 +66,7 @@
 (require 'org-babel-dot)
 (require 'org-babel-asymptote)
 (require 'org-babel-sql)
+(require 'org-babel-css)
 
 ;; load the library of babel
 (org-babel-lob-ingest (expand-file-name
