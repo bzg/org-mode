@@ -2,13 +2,16 @@
 #+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
-#+TITLE:      org-babel: executable source code blocks in org-mode
+#+TITLE:      Org-babel
 #+AUTHOR:     Dan Davison, Eric Schulte
 #+EMAIL:      davison at stats dot ox dot ac dot uk
 #+LANGUAGE:   en
 #+CATEGORY:   worg
 
 #+begin_html 
+  <div id="subtitle">
+    <p>executable source code blocks in org-mode</p>
+  </div>
   <div id="logo">
     <p>
       <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />

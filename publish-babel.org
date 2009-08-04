@@ -35,4 +35,9 @@ publishing.  Publish a project with =C-c C-e X=.
       text-align:center;
       margin-top:-1em;
   }
+  
+  #subtitle {
+      float:center;
+      text-align:center;
+  }
 #+end_src

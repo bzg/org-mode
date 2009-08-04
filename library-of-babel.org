@@ -1,9 +1,12 @@
-#+title: The Library of Babel --- off-the-shelf functions for data analysis and plotting using org-babel
+#+title: The Library of Babel
 #+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: odd hideblocks
 
 #+begin_html 
+  <div id="subtitle">
+    <p>off-the-shelf functions for data analysis and plotting using <a href="org-babel-worg.html">org-babel</a></p>
+  </div>
   <div id="logo">
     <p>
       <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
