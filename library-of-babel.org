@@ -3,7 +3,14 @@
 #+OPTIONS: H:3 num:nil toc:t
 #+STARTUP: odd hideblocks
 
-[[http://downlode.org/Etext/library_of_babel.html][Full text of the Borges short story]]
+#+begin_html 
+  <div id="logo">
+    <p>
+      <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
+      <div id="attr"><a href="http://downlode.org/Etext/library_of_babel.html">Full text of the Borges short story</a></div>
+    </p>  
+  </div>
+#+end_html
 
 * Plotting code
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.

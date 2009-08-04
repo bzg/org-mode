@@ -1,0 +1,9 @@
+  #logo {
+      float:right;
+  }
+  
+  #logo #attr {
+      float:center;
+      text-align:center;
+      margin-top:-1em;
+  }

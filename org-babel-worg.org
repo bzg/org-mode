@@ -8,6 +8,15 @@
 #+LANGUAGE:   en
 #+CATEGORY:   worg
 
+#+begin_html 
+  <div id="logo">
+    <p>
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />
+      <div id="attr">from <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a></div>
+    </p>  
+  </div>
+#+end_html
+
 * Introduction
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
@@ -72,6 +81,17 @@ c(5, 10)
 
 * A meta-programming language for org-mode
 * Spreadsheet plugins for org-mode in any language
+* Library of Babel
+Org-babel support saving of source-code blocks in a library from which
+they can be call in any org-mode file.  This library is called the
+[[file:library-of-babel.org][Library of Babel]].  It is possible to add source-code blocks from any
+org-mode file to the library by calling
+
+#+srcname: add-file-to-lob
+#+begin_src emacs-lisp 
+(org-babel-lob-ingest "path/to/file.org")
+#+end_src
+
 * Reproducible research
   - output vs. value mode
   - file & graphical output

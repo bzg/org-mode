@@ -1,0 +1,38 @@
+#+TITLE: Tools for publishing Org-babel documentation
+#+OPTIONS: toc:nil num:nil ^:nil
+
+* org-babel-documentation Project
+
+This defines the =org-babel-documentation= project, for ease of
+publishing.  Publish a project with =C-c C-e X=.
+
+#+begin_src emacs-lisp :results silent
+  (setq org-babel-dir (file-name-directory (or load-file-name buffer-file-name)))
+  (unless (boundp 'org-publish-project-alist)
+    (setq org-publish-project-alist nil))
+  (setq org-publish-project-alist
+        (cons
+         `("org-babel-documentation"
+           :base-directory ,org-babel-dir
+           :base-extension "org"
+           :exclude "org-babel.org"
+           :publishing-directory ,(expand-file-name "doc" org-babel-dir)
+           :index-filename "org-babel-worg.org"
+           :auto-postamble nil
+           :style "<link rel=\"stylesheet\"href=\"stylesheet.css\"type=\"text/css\">")
+         org-publish-project-alist))
+#+end_src
+
+* org-babel-documentation stylesheet
+
+#+begin_src css :tangle doc/stylesheet
+  #logo {
+      float:right;
+  }
+  
+  #logo #attr {
+      float:center;
+      text-align:center;
+      margin-top:-1em;
+  }
+#+end_src
