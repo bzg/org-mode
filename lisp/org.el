@@ -3028,8 +3028,10 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
       (while (re-search-forward org-table-any-line-regexp nil t)
 	(message "Mapping tables: %d%%" (/ (* 100.0 (point)) (buffer-size)))
 	(beginning-of-line 1)
-	(if (looking-at org-table-line-regexp)
-	    (save-excursion (funcall function)))
+	(when (looking-at org-table-line-regexp)
+	  (save-excursion (funcall function))
+	  (or (looking-at org-table-line-regexp)
+	      (forward-char 1)))
 	(re-search-forward org-table-any-border-regexp nil 1))))
   (message "Mapping tables: done"))
 

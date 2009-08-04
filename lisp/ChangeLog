@@ -1,5 +1,8 @@
 2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-table-map-tables): Make sure cursor is back at table
+	beginning after funcall.
+
 	* org-agenda.el (org-agenda-bulk-action): Make sure parents are
 	handled before children, and do not error if an entry is not
 	found, probably because it hase been remove when the parent was
