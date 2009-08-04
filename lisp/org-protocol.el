@@ -1,36 +1,30 @@
 ;;; org-protocol.el --- Intercept calls from emacsclient to trigger custom actions.
 ;;
 ;; Copyright (c) 2008, 2009
-;;          Bastien Guerry <bzg AT altern DOT org>,
-;;          Daniel German <dmg AT uvic DOT org>,
-;;          Sebastian Rose <sebastian_rose AT gmx DOT de>,
-;;          Ross Patterson <me AT rpatterson DOT net>
-;;          David Moffat
-;;          (will be FSF when done)
+;;          Free Software Foundation, Inc.
 ;;
-;;
-;; Filename: org-protocol.el
-;; Version: 6.29a
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Author: Daniel M German <dmg AT uvic DOT org>
 ;; Author: Sebastian Rose <sebastian_rose AT gmx DOT de>
 ;; Author: Ross Patterson <me AT rpatterson DOT net>
 ;; Maintainer: Sebastian Rose <sebastian_rose AT gmx DOT de>
 ;; Keywords: org, emacsclient, wp
+;; Version: 6.29a
 
-;; This file is not part of GNU Emacs.
-
-;; This program is free software: you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+;;
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
 ;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
-;; See <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Commentary:
