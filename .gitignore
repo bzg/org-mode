@@ -1,5 +1,6 @@
 *~
 *.html
+*.css
 .Rhistory
 .Rdata
 data
