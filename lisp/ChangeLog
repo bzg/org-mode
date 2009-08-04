@@ -1,5 +1,8 @@
 2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-html.el (org-export-as-html): Fix parenthesis error in
+	footnore code.
+
 	* org-timer.el (org-timer-cancel-timers): Renamed from
 	`org-timer-cancel-timers'.
 

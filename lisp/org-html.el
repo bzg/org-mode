@@ -1331,10 +1331,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		(let ((n (match-string 1 line)))
 		  (setq org-par-open t
 			line (replace-match
-			      (format "<p class=\"footnote\">"
+			      (concat "<p class=\"footnote\">"
 				      (format org-export-html-footnote-format
-					      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
-				      n n n) t t line)))))
+					      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>"
+					      n n n) t t line))))))
 	    ;; Check if the line break needs to be conserved
 	    (cond
 	     ((string-match "\\\\\\\\[ \t]*$" line)
