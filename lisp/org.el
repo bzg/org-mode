@@ -8582,10 +8582,13 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	 (region-length (and regionp (- region-end region-start)))
 	 (filename (buffer-file-name (buffer-base-buffer cbuf)))
 	 pos it nbuf file re level reversed)
-    (when regionp (goto-char region-start)
-	  (unless (org-kill-is-subtree-p
-		   (buffer-substring region-start region-end))
-	    (error "The region is not a (sequence of) subtree(s)")))
+    (when regionp
+      (goto-char region-start)
+      (or (bolp) (goto-char (point-at-bol)))
+      (setq region-start (point))
+      (unless (org-kill-is-subtree-p
+	       (buffer-substring region-start region-end))
+	(error "The region is not a (sequence of) subtree(s)")))
     (if (equal goto '(16))
 	(org-refile-goto-last-stored)
       (when (setq it (or rfloc
@@ -8689,13 +8692,22 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		   (cons (concat (car x) extra) (cdr x))))
 	       org-refile-target-table))
 	 (completion-ignore-case t)
-	 pa answ parent-target child parent)
+	 pa answ parent-target child parent old-hist)
+    (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
 			nil 'org-refile-history))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
-    (if pa
+    (if pa 
 	(progn
-	  (setcar org-refile-history (car pa))
+	  (when (or (not org-refile-history)
+		    (not (eq old-hist org-refile-history))
+		    (not (equal (car pa) (car org-refile-history))))
+	    (setq org-refile-history
+		  (cons (car pa) (if (assoc (car org-refile-history) tbl)
+				     org-refile-history
+				   (cdr org-refile-history))))
+	    (if (equal (car org-refile-history) (nth 1 org-refile-history))
+		(pop org-refile-history)))
 	  pa)
       (when (string-match "\\`\\(.*\\)/\\([^/]+\\)\\'" answ)
 	(setq parent (match-string 1 answ)
