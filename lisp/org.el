@@ -16562,7 +16562,9 @@ This is like outline-next-sibling, but invisible headings are ok."
 (defadvice outline-end-of-subtree (around prefer-org-version activate compile)
   "Use Org version in org-mode, for dramatic speed-up."
   (if (eq major-mode 'org-mode)
-      (org-end-of-subtree)
+      (progn
+	(org-end-of-subtree nil t)
+	(backward-char 1))
     ad-do-it))
 
 (defun org-forward-same-level (arg &optional invisible-ok)
