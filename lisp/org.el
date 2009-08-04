@@ -7637,7 +7637,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	   (listp (second args)))
       (let ((ido-enter-matching-directory nil))
 	(apply 'ido-completing-read (concat (car args))
-	       (mapcar (lambda (x) (car x)) (nth 1 args))
+	       (if (consp (car (nth 1 args)))
+		   (mapcar (lambda (x) (car x)) (nth 1 args))
+		 (nth 1 args))
 	       (cddr args)))
     (apply 'completing-read args)))
 
