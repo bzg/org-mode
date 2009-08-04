@@ -4957,7 +4957,8 @@ in special contexts.
 	  (while (and (not (eobp)) ;; this is like `next-line'
 		      (get-char-property (1- (point)) 'invisible))
 	    (goto-char (next-single-char-property-change (point) 'invisible))
-	    (or (bolp) (beginning-of-line 2))))
+;;;???	    (or (bolp) (beginning-of-line 2))))
+	    (and (eolp) (beginning-of-line 2))))
 	(setq eol (point)))
       (outline-end-of-heading)   (setq eoh (point))
       (save-excursion

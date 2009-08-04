@@ -1,3 +1,8 @@
+2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-cycle-internal-local): Fix problem with finding next
+	invisible line.
+
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-list.el (org-list-send-list): Call
