@@ -3,7 +3,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 6.29
+@set VERSION 6.29a
 @set DATE August 2009
 
 @c Version and Contact Info
