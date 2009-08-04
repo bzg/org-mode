@@ -34,7 +34,7 @@
 
 (org-babel-add-interpreter "css")
 
-(add-to-list 'org-babel-tangle-langs '("css" "css"))
+(add-to-list 'org-babel-tangle-langs '("css" "css" nil t))
 
 (defun org-babel-execute:css (body params)
   "Execute a block of CSS code with org-babel.  This function is
