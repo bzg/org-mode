@@ -9562,7 +9562,11 @@ but with @i{archived}, @i{commented}, and @i{tag-excluded} trees removed, use
 and/or @code{:htmlized-source}.  This will produce @file{file.org} and
 @file{file.org.html} in the publishing
 directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
-source and publishing directories are equal.}.  Other files like images only
+source and publishing directories are equal.  Note that with this kind of
+setup, you need to add @code{:exclude "-source\\.org"} to the project
+definition in @code{org-publish-project-alist} to avoid that the published
+source files will be considered as new org files the next time the project is
+published.}.  Other files like images only
 need to be copied to the publishing destination, for this you may use
 @code{org-publish-attachment}.  For non-Org files, you always need to
 specify the publishing function:
