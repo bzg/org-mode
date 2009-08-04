@@ -10,7 +10,7 @@
 ;;
 ;;
 ;; Filename: org-protocol.el
-;; Version: 6.28trans
+;; Version: 6.29
 ;; Author: Bastien Guerry <bzg AT altern DOT org>
 ;; Author: Daniel M German <dmg AT uvic DOT org>
 ;; Author: Sebastian Rose <sebastian_rose AT gmx DOT de>

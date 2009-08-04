@@ -6,7 +6,7 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 6.28trans
+;; Version: 6.29
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -6335,7 +6335,7 @@ This will remove the markers, and the overlays."
   (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
   (let* ((action (read-char-exclusive))
 	 (entries (reverse org-agenda-bulk-marked-entries))
-	 cmd rfloc state e tag (cnt 0) (cntskip 0))
+	 cmd rfloc state e tag pos (cnt 0) (cntskip 0))
     (cond
      ((equal action ?$)
       (setq cmd '(org-agenda-archive)))
