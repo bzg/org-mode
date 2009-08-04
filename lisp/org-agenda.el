@@ -6335,7 +6335,7 @@ This will remove the markers, and the overlays."
   (message "Bulk: [r]efile [$]archive [A]rch->sib [t]odo [+/-]tag [s]chedule [d]eadline")
   (let* ((action (read-char-exclusive))
 	 (entries (reverse org-agenda-bulk-marked-entries))
-	 cmd rfloc state e tag (cnt 0))
+	 cmd rfloc state e tag (cnt 0) (cntskip 0))
     (cond
      ((equal action ?$)
       (setq cmd '(org-agenda-archive)))
@@ -6391,17 +6391,35 @@ This will remove the markers, and the overlays."
 			 (fmakunbound 'read-string)))))))
      (t (error "Invalid bulk action")))
 
+    ;; Sort the markers, to make sure that parents are handled before children
+    (setq entries (sort entries
+			(lambda (a b)
+			  (cond
+			   ((equal (marker-buffer a) (marker-buffer b))
+			    (< (marker-position a) (marker-position b)))
+			   (t
+			    (string< (buffer-name (marker-buffer a))
+				     (buffer-name (marker-buffer b))))))))
+
     ;; Now loop over all markers and apply cmd
     (while (setq e (pop entries))
-      (goto-char
-       (or (text-property-any (point-min) (point-max) 'org-hd-marker e)
-	   (error "Cannot find entry for marker %s" e)))
-      (eval cmd)
-      (setq org-agenda-bulk-marked-entries (delete e org-agenda-bulk-marked-entries))
-      (setq cnt (1+ cnt)))
+      (setq pos (text-property-any (point-min) (point-max) 'org-hd-marker e))
+      (if (not pos)
+	  (progn (message "Skipping removed entry at %s" e)
+		 (setq cntskip (1+ cntskip)))
+	(goto-char pos)
+	(eval cmd)
+	(setq org-agenda-bulk-marked-entries
+	      (delete e org-agenda-bulk-marked-entries))
+	(setq cnt (1+ cnt))))
     (setq org-agenda-bulk-marked-entries nil)
     (org-agenda-bulk-remove-all-marks)
-    (message "Acted on %d entries" cnt)))
+    (message "Acted on %d entries%s"
+	     cnt
+	     (if (= cntskip 0)
+		 ""
+	       (format ", skipped %d (disappeared before their turn)"
+		       cntskip)))))
 
 ;;; Appointment reminders
 
