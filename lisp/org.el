@@ -4998,10 +4998,11 @@ in special contexts.
 	(if (org-invisible-p) (org-flag-heading nil)))
       (setq org-cycle-subtree-status 'children)
       (run-hook-with-args 'org-cycle-hook 'children))
-     ((and (eq last-command this-command)
-	   (or children-skipped
+     ((or children-skipped
+	  (and (eq last-command this-command)
 	       (eq org-cycle-subtree-status 'children)))
-      ;; We just showed the children, now show everything.
+      ;; We just showed the children, or no children are there,
+      ;; now show everything.
       (run-hook-with-args 'org-pre-cycle-hook 'subtree)
       (org-show-subtree)
       (message (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
