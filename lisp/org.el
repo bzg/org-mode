@@ -6143,7 +6143,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
       (save-excursion (outline-end-of-heading)
 		      (setq folded (org-invisible-p)))
       (condition-case nil
-	  (outline-forward-same-level (1- n))
+	  (org-forward-same-level (1- n) t)
 	(error nil))
       (org-end-of-subtree t t))
     (org-back-over-empty-lines)
@@ -16588,7 +16588,7 @@ This is like outline-next-sibling, but invisible headings are ok."
   "Move forward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading."
   (interactive "p")
-  (org-back-to-heading)
+  (org-back-to-heading invisible-ok)
   (org-on-heading-p)
   (let* ((level (- (match-end 0) (match-beginning 0) 1))
 	 (re (format "^\\*\\{1,%d\\} " level))

@@ -2,6 +2,9 @@
 
 	* org.el (org-paste-subtree): Test the kill ring entry if it is
 	going to be used.
+	(org-copy-subtree): Use `org-forward-same-level'.
+	(org-forward-same-level): Respect the `invisibe-ok' arg for
+	back-to-heading.
 
 2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
