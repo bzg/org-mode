@@ -51,6 +51,16 @@
   :tag "Org Export General"
   :group 'org-export)
 
+(defcustom org-export-allow-BIND 'confirm
+  "Non-nil means, allow #+BIND to define local variable values for export.
+This is a potential security risk, which is why the user must confirm the
+use of these lines."
+  :group 'org-export-general
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)
+	  (const :tag "Make the user confirm for each file" confirm)))
+
 ;; FIXME
 (defvar org-export-publishing-directory nil)
 
@@ -704,7 +714,8 @@ modified) list.")
 			    "\n" setup-contents "\n"
 			    (substring ext-setup-or-nil start)))))))
 	(setq p (plist-put p :text text))
-	(setq p (plist-put p :let-bind letbind))
+	(when (and letbind (org-export-confirm-letbind))
+	  (setq p (plist-put p :let-bind letbind)))
 	(when style (setq p (plist-put p :style-extra style)))
 	(when latex-header
 	  (setq p (plist-put p :latex-header-extra (substring latex-header 1))))
@@ -732,6 +743,18 @@ modified) list.")
 			(concat ":macro-" (downcase (match-string 1 val))))
 		     (match-string 2 val)))))
 	p))))
+
+(defvar org-export-allow-BIND-local nil)
+(defun org-export-confirm-letbind ()
+  "Can we use #+BIND values during export?"
+  (cond
+   ((not org-export-allow-BIND) nil)
+   ((eq org-export-allow-BIND t) t)
+   (t
+    (if (local-variable-p 'org-export-allow-BIND-local)
+	org-export-allow-BIND-local
+      (org-set-local 'org-export-allow-BIND-local
+		     (yes-or-no-p "Allow BIND values in this buffer? "))))))
 
 (defun org-install-letbind ()
   "Install the values from #+BIND lines as local variables."

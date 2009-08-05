@@ -8485,6 +8485,7 @@ Insert template with export options, see example below.
 #+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+BIND:        lisp-var lisp-val, e.g.: org-export-latex-low-levels itemize
+               @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
 #+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
