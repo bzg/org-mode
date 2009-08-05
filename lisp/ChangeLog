@@ -1,5 +1,8 @@
 2009-08-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-first-lines): Fix bug with
+	finding the end of the first lines.
+
 	* org.el (org-create-formula-image): Remove the -E option for
 	dvipng.
 
