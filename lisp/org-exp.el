@@ -746,15 +746,16 @@ modified) list.")
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
-  "Can we use #+BIND values during export?"
+  "Can we use #+BIND values during export?
+By default this will ask fro confirmation by the user, to divert possible
+security risks."
   (cond
    ((not org-export-allow-BIND) nil)
    ((eq org-export-allow-BIND t) t)
-   (t
-    (if (local-variable-p 'org-export-allow-BIND-local)
-	org-export-allow-BIND-local
-      (org-set-local 'org-export-allow-BIND-local
-		     (yes-or-no-p "Allow BIND values in this buffer? "))))))
+   ((local-variable-p 'org-export-allow-BIND-local (current-buffer))
+    org-export-allow-BIND-local)
+   (t (org-set-local 'org-export-allow-BIND-local
+		     (yes-or-no-p "Allow BIND values in this buffer? ")))))
 
 (defun org-install-letbind ()
   "Install the values from #+BIND lines as local variables."
