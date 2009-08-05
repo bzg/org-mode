@@ -95,7 +95,7 @@ of checkbox items"
 		      (t t)
 		      (nil (y-or-n-p "Print list? "))))
 	     exported-lines
-	     title "Checklist export")
+	     (title "Checklist export"))
 	(save-restriction
 	  (save-excursion
 	    (org-narrow-to-subtree)
