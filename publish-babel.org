@@ -1,5 +1,7 @@
 #+TITLE: Tools for publishing Org-babel documentation
-#+OPTIONS: toc:nil num:nil ^:nil
+#+OPTIONS: toc:t h:3 num:nil ^:nil
+
+This file contains the code required to export the documentation of Org-babel.
 
 * org-babel-documentation Project
 
@@ -24,6 +26,9 @@ publishing.  Publish a project with =C-c C-e X=.
 #+end_src
 
 * org-babel-documentation stylesheet
+
+Calling =org-babel-tangle= in this file will export the css file for
+the Org-babel documentation.
 
 #+begin_src css :tangle doc/stylesheet
   #logo {

@@ -15,7 +15,10 @@
   <div id="logo">
     <p>
       <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />
-      <div id="attr">from <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a></div>
+      <div id="attr">
+        from
+        <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a>
+      </div>
     </p>  
   </div>
 #+end_html
@@ -25,6 +28,16 @@
   support]] for blocks of source code examples in the org-mode core.
   1. source code execution
   2. arguments to source code blocks
+  3. exportation of source code blocks to files (literate programming)
+
+* Getting started
+  Add the following lines to your .emacs, replacing the path as
+  appropriate. A good place to check that things are up and running
+  would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
+#+begin_src emacs-lisp
+  (add-to-list 'load-path "/path/to/org-babel/lisp")
+  (require 'org-babel-init)
+#+end_src
   
 * Basic org-babel functionality
 *** Source code execution
@@ -85,10 +98,14 @@ c(5, 10)
 * A meta-programming language for org-mode
 * Spreadsheet plugins for org-mode in any language
 * Library of Babel
-Org-babel support saving of source-code blocks in a library from which
-they can be call in any org-mode file.  This library is called the
-[[file:library-of-babel.org][Library of Babel]].  It is possible to add source-code blocks from any
-org-mode file to the library by calling
+  What about those source code blocks which are so useful you want to
+  have them available in every org-mode buffer?
+
+  The [[file:library-of-babel.org][Library of Babel]] is an extensible collection of ready-made and
+  easily-shortcut-callable source-code blocks for handling common
+  tasks.  Org-babel comes pre-populated with the source-code blocks
+  located in the [[file:library-of-babel.org][library-of-babel.org]] file. It is possible to add
+  source-code blocks from any org-mode file to the library by calling
 
 #+srcname: add-file-to-lob
 #+begin_src emacs-lisp 

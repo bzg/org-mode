@@ -1,7 +1,7 @@
-#+title: The Library of Babel
+#+title:    The Library of Babel
 #+SEQ_TODO: TODO PROPOSED | DONE DEFERRED REJECTED
-#+OPTIONS: H:3 num:nil toc:t
-#+STARTUP: odd hideblocks
+#+OPTIONS:  H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+STARTUP:  odd hideblocks
 
 #+begin_html 
   <div id="subtitle">
@@ -13,12 +13,28 @@
   <div id="logo">
     <p>
       <img src="images/library-of-babel.png"  alt="images/tower-of-babel.png" />
-      <div id="attr">from <a href="http://asymptotia.com/category/books/">asymptotia</a></div>
+      <div id="attr">
+        from <a href="http://www.poetryfoundation.org/harriet/2008/01/random-poetry-02/">poetryfoundation.org</a>
+      </div>
     </p>  
   </div>
 #+end_html
 
+* Introduction
+  The Library of Babel is an extensible collection of ready-made and
+  easily-shortcut-callable source-code blocks for handling common
+  tasks.  Org-babel comes pre-populated with the source-code blocks
+  located in this file. It is possible to add source-code blocks from
+  any org-mode file to the library by calling
+
+#+srcname: add-file-to-lob
+#+begin_src emacs-lisp 
+(org-babel-lob-ingest "path/to/file.org")
+#+end_src
+
 * Plotting code
+
+** R
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and beyond, if present, are ignored.
 
 #+srcname: R-plot(data=R-plot-example-data)
@@ -38,7 +54,9 @@ plot(data)
 #+resname: R-plot(data=R-plot-example-data)
 : nil
 
-* Etc
+** Gnuplot
+
+* Misc
 #+srcname: python-identity(a=1)
 #+begin_src python
 a
