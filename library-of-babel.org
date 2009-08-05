@@ -25,12 +25,8 @@
   easily-shortcut-callable source-code blocks for handling common
   tasks.  Org-babel comes pre-populated with the source-code blocks
   located in this file. It is possible to add source-code blocks from
-  any org-mode file to the library by calling
-
-#+srcname: add-file-to-lob
-#+begin_src emacs-lisp 
-(org-babel-lob-ingest "path/to/file.org")
-#+end_src
+  any org-mode file to the library by calling =(org-babel-lob-ingest
+  "path/to/file.org")=.
 
 * Plotting code
 
