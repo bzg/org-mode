@@ -605,10 +605,15 @@ Each element is a list of 3 items:
 
 (defun org-default-export-plist ()
   "Return the property list with default settings for the export variables."
-  (let ((l org-export-plist-vars) rtn e s v)
+  (let* ((infile (org-infile-export-plist))
+	 (letbind (plist-get infile :let-bind))
+	 (l org-export-plist-vars) rtn e s v)
     (while (setq e (pop l))
       (setq s (nth 2 e)
-	    v (if (boundp s) (symbol-value s) nil)
+	    v (cond
+	       ((assq s letbind) (nth 1 (assq s letbind)))
+	       ((boundp s) (symbol-value s))
+	       (t nil))
 	    rtn (cons (car e) (cons v rtn))))
     rtn))
 

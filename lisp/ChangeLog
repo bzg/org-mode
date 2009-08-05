@@ -1,5 +1,7 @@
 2009-08-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-default-export-plist): Respect #+BIND.
+
 	* org.el (org-paste-subtree): Test the kill ring entry if it is
 	going to be used.
 	(org-copy-subtree): Use `org-forward-same-level'.
