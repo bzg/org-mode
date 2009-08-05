@@ -6184,12 +6184,13 @@ When FOR-YANK is set, this is called by `org-yank'.  In this case, do not
 move back over whitespace before inserting, and move point to the end of
 the inserted text when done."
   (interactive "P")
+  (setq tree (or tree (and kill-ring (current-kill 0))))
   (unless (org-kill-is-subtree-p tree)
     (error "%s"
      (substitute-command-keys
       "The kill is not a (set of) tree(s) - please use \\[yank] to yank anyway")))
   (let* ((visp (not (org-invisible-p)))
-	 (txt (or tree (and kill-ring (current-kill 0))))
+	 (txt tree)
 	 (^re (concat "^\\(" outline-regexp "\\)"))
 	 (re  (concat "\\(" outline-regexp "\\)"))
 	 (^re_ (concat "\\(\\*+\\)[  \t]*"))
