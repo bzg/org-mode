@@ -13961,7 +13961,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(progn (message "Failed to create dvi file from %s" texfile) nil)
       (condition-case nil
 	  (call-process "dvipng" nil nil nil
-			"-E" "-fg" fg "-bg" bg
+			"-fg" fg "-bg" bg
 			"-D" dpi
 			;;"-x" scale "-y" scale
 			"-T" "tight"
