@@ -218,7 +218,32 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [41/61]
+* Tasks [41/62]
+** PROPOSED new results types (org, html, latex)
+   Thanks to Tom Short for this recommendation.
+
+   - raw or org :: in which case the results are implemented raw, unquoted
+                   into the org-mode file.  This would also handle links as
+                   source block output.
+   - html :: the results are inserted inside of a #+BEGIN_HTML block
+   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
+
+   It might look like:
+: #+begin_src R :session *R* :results org
+: cat("***** This is a table\n")
+: cat("| 1 | 2 | 3 |\n")
+: cat("[[http://google.com][Google it here]]\n"
+: #+end_src
+:        
+: #+resname:
+: ***** This is a table
+: | 1 | 2 | 3 |
+[[http://google.com][: Google it here]]
+
+We actually might want to remove the =#+resname= line if the results
+type is org-mode, not sure...  Either way I don't think there is a
+good way to capture/remove org type results.
+
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
