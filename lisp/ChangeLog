@@ -1,3 +1,11 @@
+2009-08-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-move-subtree-down): Hide subtree if it was folded,
+	not just the body.
+
+	* org-remember.el (org-remember-finalize): Avoid buffer-modified
+	messages.
+
 2009-08-05  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-first-lines): Fix bug with

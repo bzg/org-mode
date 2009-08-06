@@ -6101,7 +6101,7 @@ is signaled in this case."
       (insert (make-string (- ne-ins ne-beg) ?\n)))
     (move-marker ins-point nil)
     (if folded
-	(hide-entry)
+	(hide-subtree)
       (org-show-entry)
       (show-children)
       (org-cycle-hide-drawers 'children))

@@ -669,7 +669,7 @@ from that hook."
 			(y-or-n-p "The clock is running in this buffer.  Clock out now? "))))
       (let (org-log-note-clock-out) (org-clock-out))))
   (when buffer-file-name
-    (save-buffer))
+    (do-auto-save))
   (remember-finalize))
 
 (defun org-remember-kill ()
