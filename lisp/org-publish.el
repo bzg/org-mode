@@ -4,7 +4,7 @@
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
 ;; Keywords: hypermedia, outlines, wp
-;; Version: 6.29c
+;; Version: 6.29trans
 
 ;; This file is part of GNU Emacs.
 ;;
