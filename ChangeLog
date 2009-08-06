@@ -1,3 +1,8 @@
+2009-08-06  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* ORGWEBPAGE/index.org: Document that Emacs 23.1 ships with
+	Org-mode 6.21b.
+
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* UTILITIES/mansplit.pl: Fix short contents.
