@@ -1,5 +1,7 @@
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-modules): Add org-track.el.
+
 	* org-agenda.el (org-agenda-bulk-marked-p): New function.
 	(org-agenda-bulk-mark, org-agenda-bulk-unmark): Use
 	`org-agenda-bulk-marked-p'.

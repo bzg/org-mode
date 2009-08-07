@@ -1,3 +1,7 @@
+2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-track.el: New file.
+
 2009-08-03  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-indent.el: File removed.
