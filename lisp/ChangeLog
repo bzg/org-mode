@@ -1,5 +1,8 @@
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-insert-heading): When respecting content, do not
+	convert current line to headline.
+
 	* org-clock.el (org-clock-save-markers-for-cut-and-paste): Also
 	cheeeeeck the hd marker
 	(org-clock-in): Also set the hd marker.

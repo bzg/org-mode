@@ -5665,6 +5665,7 @@ but create the new headline after the current line."
 	  ;; insert before the current line
 	  (open-line (if blank 2 1)))
 	 ((and (bolp)
+	       (not org-insert-heading-respect-content)
 	       (or (bobp)
 		   (save-excursion
 		     (backward-char 1) (not (org-invisible-p)))))
