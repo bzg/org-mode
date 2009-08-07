@@ -2420,11 +2420,32 @@ bind it in the options section.")
 	(org-agenda-fontify-priorities))
       (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
 	(org-agenda-dim-blocked-tasks))
+      (org-agenda-mark-clocking-task)
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
       (when (get 'org-agenda-filter :preset-filter)
 	(org-agenda-filter-apply org-agenda-filter))
       )))
+
+(defun org-agenda-mark-clocking-task ()
+  "Mark the current clock entry in the agenda if it is present."
+  (mapc (lambda (o)
+	  (if (eq (org-overlay-get o 'type) 'org-agenda-clocking)
+	      (org-delete-overlay o)))
+	(org-overlays-in (point-min) (point-max)))
+  (when (marker-buffer org-clock-hd-marker)
+    (save-excursion
+      (goto-char (point-min))
+      (let (s ov)
+	(while (setq s (next-single-property-change (point) 'org-hd-marker))
+	  (goto-char s)
+	  (when (equal (get-text-property (point) 'org-hd-marker)
+		       org-clock-hd-marker)
+	    (setq ov (org-make-overlay (point-at-bol) (1+ (point-at-eol))))
+	    (org-overlay-put ov 'type 'org-agenda-clocking)
+	    (org-overlay-put ov 'face 'org-agenda-clocking)
+	    (org-overlay-put ov 'help-echo
+			     "The clock is running in this item")))))))
 
 (defun org-agenda-fontify-priorities ()
   "Make highest priority lines bold, and lowest italic."

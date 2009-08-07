@@ -277,6 +277,7 @@ of a different task.")
 (defun org-clock-save-markers-for-cut-and-paste (beg end)
   "Save relative positions of markers in region."
   (org-check-and-save-marker org-clock-marker beg end)
+  (org-check-and-save-marker org-clock-hd-marker beg end)
   (org-check-and-save-marker org-clock-default-task beg end)
   (org-check-and-save-marker org-clock-interrupted-task beg end)
   (mapc (lambda (m) (org-check-and-save-marker m beg end))
@@ -592,6 +593,9 @@ the clocking selection, associated with the letter `d'."
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
+	    (move-marker org-clock-hd-marker
+			 (save-excursion (org-back-to-heading t) (point))
+			 (buffer-base-buffer))
 	    (or global-mode-string (setq global-mode-string '("")))
 	    (or (memq 'org-mode-line-string global-mode-string)
 		(setq global-mode-string
@@ -765,6 +769,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	    (and (looking-at "\n") (> (point-max) (1+ (point)))
 		 (delete-char 1)))
 	  (move-marker org-clock-marker nil)
+	  (move-marker org-clock-hd-marker nil)
 	  (when org-log-note-clock-out
 	    (org-add-log-setup 'clock-out nil nil nil nil
 			       (concat "# Task: " (org-get-heading t) "\n\n")))
@@ -802,6 +807,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (set-buffer (marker-buffer org-clock-marker))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol)))
+  (move-marker 'org-clock-marker nil)
+  (move-marker 'org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
   (force-mode-line-update)

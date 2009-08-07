@@ -3086,6 +3086,8 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")
+(defvar org-clock-hd-marker (make-marker)
+  "Marker recording the last clock-in, but the headline position.")
 (defun org-clock-is-active ()
  "Return non-nil if clock is currently running.
 The return value is actually the clock marker."

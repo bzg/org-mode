@@ -1,5 +1,18 @@
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-save-markers-for-cut-and-paste): Also
+	cheeeeeck the hd marker
+	(org-clock-in): Also set the hd marker.
+	(org-clock-out): Also set the hd marker.
+	(org-clock-cancel): Reset markers.
+
+	* org.el (org-clock-hd-marker): New marker.
+
+	* org-faces.el (org-agenda-clocking): New face.
+
+	* org-agenda.el (org-agenda-mark-clocking-task): New function.
+	(org-finalize-agenda): call `org-agenda-mark-clocking-task'.
+
 	* org.el (org-modules): Add org-track.el.
 
 	* org-agenda.el (org-agenda-bulk-marked-p): New function.
