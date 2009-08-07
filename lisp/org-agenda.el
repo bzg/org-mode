@@ -6273,14 +6273,17 @@ This is a command that has to be installed in `calendar-mode-map'."
 (defvar org-agenda-bulk-marked-entries nil
   "List of markers that refer to marked entries in the agenda.")
 
+(defun org-agenda-bulk-marked-p ()
+  (eq (get-char-property (point-at-bol) 'type)
+      'org-marked-entry-overlay))
+
 (defun org-agenda-bulk-mark ()
   "Mark the entry at point for future bulk action."
   (interactive)
   (org-agenda-check-no-diary)
   (let* ((m (get-text-property (point) 'org-hd-marker))
 	 ov)
-    (unless (eq (get-char-property (point-at-bol) 'type)
-		'org-marked-entry-overlay)
+    (unless (org-agenda-bulk-marked-p)
       (unless m (error "Nothing to mark at point"))
       (push m org-agenda-bulk-marked-entries)
       (setq ov (org-make-overlay (point-at-bol) (+ 2 (point-at-bol))))
@@ -6295,8 +6298,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 (defun org-agenda-bulk-unmark ()
   "Unmark the entry at point for future bulk action."
   (interactive)
-  (when (eq (get-char-property (point-at-bol) 'type)
-	    'org-marked-entry-overlay)
+  (when (org-agenda-bulk-marked-p)
     (org-agenda-bulk-remove-overlays
      (point-at-bol) (+ 2 (point-at-bol)))
     (setq org-agenda-bulk-marked-entries
@@ -6306,6 +6308,12 @@ This is a command that has to be installed in `calendar-mode-map'."
   (message "%d entries marked for bulk action"
 	   (length org-agenda-bulk-marked-entries)))
 
+(defun org-agenda-bulk-toggle ()
+ "Toggle marking the entry at point for bulk action."
+ (interactive)
+ (if (org-agenda-bulk-marked-p)
+     (org-agenda-bulk-unmark)
+   (org-agenda-bulk-mark)))
 
 (defun org-agenda-bulk-remove-overlays (&optional beg end)
   "Remove the mark overlays between BEG and END in the agenda buffer.

@@ -1,3 +1,10 @@
+2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-bulk-marked-p): New function.
+	(org-agenda-bulk-mark, org-agenda-bulk-unmark): Use
+	`org-agenda-bulk-marked-p'.
+	(org-agenda-bulk-toggle): New command.
+
 2009-08-06  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-move-subtree-down): Hide subtree if it was folded,
