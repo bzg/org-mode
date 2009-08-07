@@ -1,5 +1,13 @@
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-skip-scheduled-if-deadline-is-shown):
+	New option
+	(org-agenda-get-day-entries): Remember deadline results and pass
+	them on into the function getting the scheduling information.
+	(org-agenda-get-scheduled): Accept deadline results as parameters
+	and maybe skip some entries.
+	(org-agenda-skip-scheduled-if-deadline-is-shown): New option.
+
 	* org.el (org-insert-heading): When respecting content, do not
 	convert current line to headline.
 

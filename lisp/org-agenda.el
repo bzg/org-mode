@@ -555,6 +555,23 @@ is DONE."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
+(defcustom org-agenda-skip-scheduled-if-deadline-is-shown nil
+  "Non-nil means skip scheduling line if same entry shows because of deadline.
+In the agenda of today, an entry can show up multiple times because
+it is both scheduled and has a nearby deadline, and maybe a plain time
+stamp as well.
+When this variable is t, then only the deadline is shown and the fact that
+the entry is scheduled today or was scheduled previously is not shown.
+When this variable is nil, the entry will be shown several times.  When
+the variable is the symbol `not-today', then skip scheduled previously,
+but not scheduled today."
+  :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)
+	  (const :tag "Not when scheduled today" not-today)))
+
 (defcustom org-agenda-skip-deadline-if-done nil
   "Non-nil means don't show deadlines when the corresponding item is done.
 When nil, the deadline is still shown and should give you a happy feeling.
@@ -3603,7 +3620,7 @@ the documentation of `org-diary'."
 	 (buffer (if (file-exists-p file)
 		     (org-get-agenda-file-buffer file)
 		   (error "No such file %s" file)))
-	 arg results rtn)
+	 arg results rtn deadline-results)
     (if (not buffer)
 	;; If file does not exist, make sure an error message ends up in diary
 	(list (format "ORG-AGENDA-ERROR: No such org-file %s" file))
@@ -3633,13 +3650,14 @@ the documentation of `org-diary'."
 		  (setq rtn (org-agenda-get-sexps))
 		  (setq results (append results rtn)))
 		 ((eq arg :scheduled)
-		  (setq rtn (org-agenda-get-scheduled))
+		  (setq rtn (org-agenda-get-scheduled deadline-results))
 		  (setq results (append results rtn)))
 		 ((eq arg :closed)
 		  (setq rtn (org-agenda-get-progress))
 		  (setq results (append results rtn)))
 		 ((eq arg :deadline)
 		  (setq rtn (org-agenda-get-deadlines))
+		  (setq deadline-results (copy-sequence rtn))
 		  (setq results (append results rtn))))))))
 	results))))
 
@@ -4042,7 +4060,7 @@ FRACTION is what fraction of the head-warning time has passed."
       (while (setq f (pop faces))
 	(if (>= fraction (car f)) (throw 'exit (cdr f)))))))
 
-(defun org-agenda-get-scheduled ()
+(defun org-agenda-get-scheduled (&optional deadline-results)
   "Return the scheduled information for agenda display."
   (let* ((props (list 'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
@@ -4056,6 +4074,12 @@ FRACTION is what fraction of the head-warning time has passed."
 	 (regexp org-scheduled-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
+	 mm
+	 (deadline-position-alist
+	  (mapcar (lambda (a) (and (setq mm (get-text-property
+					     0 'org-hd-marker a))
+				   (cons (marker-position mm) a)))
+		  deadline-results))
 	 d2 diff pos pos1 category tags donep
 	 ee txt head pastschedp todo-state face timestr s)
     (goto-char (point-min))
@@ -4088,6 +4112,12 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-end 0))
 		  (setq pos1 (match-beginning 0))
+		  (if (and
+		       (or (eq t org-agenda-skip-scheduled-if-deadline-is-shown)
+			   (and org-agenda-skip-scheduled-if-deadline-is-shown
+				pastschedp))
+		       (setq mm (assoc pos1 deadline-position-alist)))
+		      (throw :skip nil))
 		  (setq tags (org-get-tags-at))
 		  (setq head (buffer-substring-no-properties
 			      (point)
