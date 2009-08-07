@@ -1,5 +1,8 @@
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-get-file-contents): Only quote org lines when
+	the markup is src or example.
+
 	* org-agenda.el (org-agenda-skip-scheduled-if-deadline-is-shown):
 	New option
 	(org-agenda-get-day-entries): Remember deadline results and pass

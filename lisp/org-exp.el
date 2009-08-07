@@ -2136,6 +2136,7 @@ If PREFIX is a string, prepend it to each line.  If PREFIX1
 is a string, prepend it to the first line instead of PREFIX.
 If MARKUP, don't protect org-like lines, the exporter will
 take care of the block they are in."
+  (if (stringp markup) (setq markup (downcase markup)))
   (with-temp-buffer
     (insert-file-contents file)
     (when (or prefix prefix1)
@@ -2145,7 +2146,7 @@ take care of the block they are in."
 	(setq prefix1 nil)
 	(beginning-of-line 2)))
     (buffer-string)
-    (unless markup
+    (when (member markup '("src" "example"))
       (goto-char (point-min))
       (while (re-search-forward "^\\(\\*\\|[ \t]*#\\)" nil t)
 	(goto-char (match-beginning 0))
