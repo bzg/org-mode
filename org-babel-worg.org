@@ -31,7 +31,12 @@
   3. exportation of source code blocks to files (literate programming)
 
 * Getting started
-  Add the following lines to your .emacs, replacing the path as
+  Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
+#+begin_src sh
+git clone git://github.com/eschulte/org-babel.git
+#+end_src
+
+  And add the following lines to your .emacs, replacing the path as
   appropriate. A good place to check that things are up and running
   would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
 #+begin_src emacs-lisp
