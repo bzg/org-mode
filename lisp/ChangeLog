@@ -1,3 +1,8 @@
+2009-08-08  Bastien Guerry  <bzg@altern.org>
+
+	* org.el (org-iswitchb): Fix bug when aborting the `org-iswitchb'
+	command before actually switching to a buffer.
+
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-get-file-contents): Only quote org lines when

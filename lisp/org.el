@@ -13396,8 +13396,8 @@ Due to some yet unresolved reason, the global function
 		      (mapcar 'buffer-name blist)))))
 	 (switch-to-buffer
 	  (iswitchb-read-buffer
-	   "Switch-to: " nil t))
-	 (or enabled (iswitchb-mode -1))))))
+	   "Switch-to: " nil t)))
+	 (or enabled (iswitchb-mode -1)))))
 
 ;;;###autoload
 (defun org-ido-switchb (&optional arg)
