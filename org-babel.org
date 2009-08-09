@@ -2743,7 +2743,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [31/40]
+* Bugs [32/40]
 ** TODO export problems when support for a language is missing
 we should come up with a way to gracefully degrade when support for a
 specific language is missing
@@ -2868,12 +2868,6 @@ even a third"
 #+begin_src sh
 size=5
 #+end_src
-
-** TODO Allow source blocks to be recognised when #+ are not first characters on the line
-   I think Carsten has recently altered the core so that #+ can have
-   preceding whitespace, at least for literal/code examples. org-babel
-   should support this.
-
 ** TODO non-orgtbl formatted lists
 for example
 
@@ -2927,6 +2921,26 @@ the same for the other languages. [Dan]
 #+srcname: show-org-babel-trim
 #+begin_src sh 
 find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
+#+end_src
+
+** DONE Allow source blocks to be recognised when #+ are not first characters on the line
+   I think Carsten has recently altered the core so that #+ can have
+   preceding whitespace, at least for literal/code examples. org-babel
+   should support this.
+
+#+srcname: testing-indentation
+   #+begin_src emacs-lisp :results silent
+   (message "i'm indented")
+   #+end_src
+
+#+srcname: testing-non-indentation
+#+begin_src emacs-lisp :results silent
+(message "I'm not indented")
+#+end_src
+
+#+srcname: i-resolve-references-to-the-indented
+#+begin_src emacs-lisp :var speech=testing-indentation :results silent
+(message "I said %s" speech)
 #+end_src
 
 ** DONE are the org-babel-trim s necessary?

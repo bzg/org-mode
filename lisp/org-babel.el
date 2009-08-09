@@ -98,7 +98,7 @@ then run `org-babel-pop-to-session'."
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
   (setq org-babel-src-block-regexp
-	(concat "#\\+begin_src \\("
+	(concat "^[ \t]*#\\+begin_src \\("
 		(mapconcat 'regexp-quote value "\\|")
 		"\\)[ \t]*"
                 "\\([ \t]+\\([^\n]+\\)\\)?\n" ;; match header arguments
@@ -331,9 +331,14 @@ may be specified in the properties of the current outline entry."
 
 (defun org-babel-parse-src-block-match ()
   (let* ((lang (org-babel-clean-text-properties (match-string 1)))
-         (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
+         (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
+         (body (org-babel-clean-text-properties (match-string 4))))
     (list lang
-	  (org-babel-strip-protective-commas (org-babel-clean-text-properties (match-string 4)))
+          (with-temp-buffer ;; get src block body removing properties, protective commas, and indentation
+            (save-match-data
+              (insert (org-babel-strip-protective-commas body))
+              (org-do-remove-indentation)
+              (buffer-string)))
 	  (org-babel-merge-params
 	   org-babel-default-header-args
            (org-babel-params-from-properties)
