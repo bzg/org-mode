@@ -8178,11 +8178,13 @@ Here is an example
 @cindex formatting source code, markup rules
 If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
-look like the fontified Emacs buffer@footnote{Currently this works only for
-the HTML backend, and requires the @file{htmlize.el} package version 1.34 or
-later.}.  This is done with the @samp{src} block, where you also need to
-specify the name of the major mode that should be used to fontify the
-example:
+look like the fontified Emacs buffer@footnote{Currently this works for the
+HTML backend, and requires the @file{htmlize.el} package version 1.34 or
+later.  It also works for LaTeX with the listings package, if you turn on the
+option @code{org-export-latex-listings} and make sure that the listings
+package is inclluded by the LaTeX header.}.  This is done with the @samp{src}
+block, where you also need to specify the name of the major mode that should
+be used to fontify the example:
 @cindex #+BEGIN_SRC
 
 @example
@@ -9664,6 +9666,7 @@ respective variable for details.
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
+@item @code{:latex-listings}        @tab @code{org-export-latex-listings}
 @item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
 @item @code{:timestamps}            @tab @code{org-export-with-timestamps}

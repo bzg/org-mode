@@ -245,7 +245,7 @@ When nil, grouping causes only separation lines between groups."
 
 (defcustom org-export-latex-packages-alist nil
   "Alist of packages to be inserted in the header.
-Each cell is of the forma \( \"option\" . \"package\" \)."
+Each cell is of the format \( \"option\" . \"package\" \)."
   :group 'org-export-latex
   :type 'alist)
 
@@ -296,6 +296,34 @@ Defaults to \\begin{verbatim} and \\end{verbatim}."
   :group 'org-export-latex
   :type '(cons (string :tag "Open")
 	       (string :tag "Close")))
+
+(defcustom org-export-latex-listings nil
+  "Non-nil means, export source code using the listings package.
+This package will fontify source code, possibly even with color.
+If you want to use this, you also need to make LaTeX use the
+listings package, and if you want to have color, the color
+package.  Just add these to `org-export-latex-packages-alist',
+for example using customize, or with something like
+
+  (require 'org-latex)
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"listings\"))
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"color\"))"
+  :group 'org-export-latex
+  :type 'boolean)
+
+(defcustom org-export-latex-listings-langs
+  '(:emacs-lisp "Lisp" :lisp "Lisp"
+		:c "C" :cc "C++"
+		:fortran "fortran"
+		:perl "Perl" :cperl "Perl" :python "Python" :ruby "Ruby"
+		:html "HTML" :xml "XML"
+		:tex "TeX" :latex "TeX"
+		:shell-script "bash")
+  "Property list mapping languages to their listing language counterpart.
+Yhe keys ar ethe major mode symbol, the calues are the string that should be
+inserted as the language parameter for the listings package."
+  :group 'org-export-latex
+  :type 'plist)
 
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)

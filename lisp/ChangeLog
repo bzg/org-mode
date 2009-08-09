@@ -1,3 +1,11 @@
+2009-08-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-listings)
+	(org-export-latex-listings-langs): New options.
+
+	* org-exp.el (org-export-format-source-code-or-example): Use
+	listing package if requested by the user.
+
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-get-file-contents): Only quote org lines when

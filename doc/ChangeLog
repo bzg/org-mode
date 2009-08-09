@@ -1,3 +1,8 @@
+2009-08-09  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.texi (Literal examples): Document that source code can be
+	exported to LaTeX using the listings package.
+
 2009-08-04  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Publishing action): Improve documentation of file
