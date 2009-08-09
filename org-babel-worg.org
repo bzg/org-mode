@@ -14,12 +14,13 @@
   </div>
   <div id="logo">
     <p>
-      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
+           title="And the Lord said, Behold, the people is one, and they have all one language; and this they begin to do; and now nothing will be restrained from them, which they have imagined to do. Go to, let us go down, and there confound their language, that they may not understand one another's speech. So the Lord scattered them abroad from thence upon the face of all the earth: and they left off to build the city. Therefore is the name of it called Babel; because the Lord did there confound the language of all the earth: and from thence did the Lord scatter them abroad upon the face of all the earth. Genesis 11:1-9"/>
       <div id="attr">
         from
         <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a>
       </div>
-    </p>  
+    </p>
   </div>
 #+end_html
 
