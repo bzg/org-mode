@@ -52,19 +52,23 @@ git clone git://github.com/eschulte/org-babel.git
     results of excecution. E.g. place point anywhere in the following
     block and use C-c C-c to run the code:
 
+[[http://www.ruby-lang.org/][Ruby]] source code
 #+begin_src ruby
 "This file was last evaluated on #{Date.today}"
 #+end_src
 
+Results of Ruby evaluation
 #+resname:
 : This file was last evaluated on 2009-08-09
 
+[[http://www.r-project.org/][R]] source code
 #+begin_src R :results value
 x = 4
 date()
 c(5, 10)
 #+end_src
 
+Results of R evaluation
 #+resname:
 |  5 |
 | 10 |
@@ -90,7 +94,7 @@ c(5, 10)
      users).
 **** Additional :results settings
      
-*** QUOTE Arguments to source code blocks
+*** Arguments to source code blocks
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
     now have the status of *functions*.
