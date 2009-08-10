@@ -1,3 +1,8 @@
+2009-08-10  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-preprocess-apply-macros): Allow newlines
+	in macro calls.
+
 2009-08-09  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-listings)

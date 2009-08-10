@@ -2057,7 +2057,7 @@ TYPE must be a string, any of:
   (goto-char (point-min))
   (let (sy val key args args2 s n)
     (while (re-search-forward
-	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\(.*?\\))\\)?}}}"
+	    "{{{\\([a-zA-Z][-a-zA-Z0-9_]*\\)\\((\\([^\000]*?\\))\\)?}}}"
 	    nil t)
       (setq key (downcase (match-string 1))
 	    args (match-string 3))
@@ -2067,7 +2067,7 @@ TYPE must be a string, any of:
 				     (intern (concat ":" key)))))
 	(save-match-data
 	  (when args
-	    (setq args (org-split-string args ",[ \t]*") args2 nil)
+	    (setq args (org-split-string args ",[ \t\n]*") args2 nil)
 	    (while args
 	      (while (string-match "\\\\\\'" (car args))
 		;; repair bad splits
