@@ -141,6 +141,46 @@ Results of Emacs Lisp code evaluation
 | 1 | 3 | 8 | 21 | 55 | 144 | 377 | 987 | 2584 | 6765 |
 
 * A meta-programming language for org-mode
+
+Since information can pass freely between source-code blocks and
+org-mode tables you can mix and match languages using each language
+for those tasks to which it is suited.  This makes Org-mode files with
+Org-babel into a kind of meta-functional programming language in which
+functions from many languages can work together.
+
+As an example, lets take some system diagnostics in the shell, and
+then graph them with R.
+
+1. Shell source code
+#+srcname: directories
+   #+begin_src bash :results replace
+   cd ~ && du -sc * |grep -v total
+   #+end_src
+2. Results of the shell source code (on my system, grab this org-mode
+   files and try running it on your own)
+#+resname: directories
+|       72 | "Desktop"   |
+| 12156104 | "Documents" |
+|  3482440 | "Downloads" |
+|  2901720 | "Library"   |
+|    57344 | "Movies"    |
+| 16548024 | "Music"     |
+|      120 | "News"      |
+|  7649472 | "Pictures"  |
+|        0 | "Public"    |
+|   152224 | "Sites"     |
+|        8 | "System"    |
+|       56 | "bin"       |
+|  3821872 | "mail"      |
+| 10605392 | "src"       |
+|     1264 | "tools"     |
+3. R source code (which calls the previous shell source code)
+#+srcname: directory-pie
+   #+begin_src R :var dirs = directories :session R-pie-example
+   pie(dirs[,1], labels = dirs[,2])
+   #+end_src
+4. Results of R code [[file:images/dirs.png]]
+
 * Spreadsheet plugins for org-mode in any language
 * Library of Babel
   What about those source code blocks which are so useful you want to
