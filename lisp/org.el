@@ -4451,7 +4451,15 @@ will be prompted for."
   "Regular expression for highlighting export special stuff.")
 (defvar org-match-substring-regexp)
 (defvar org-match-substring-with-braces-regexp)
-(defvar org-export-html-special-string-regexps)
+
+;; This should be with the exporter code, but we also use if for font-locking
+(defconst org-export-html-special-string-regexps
+  '(("\\\\-" . "&shy;")
+    ("---\\([^-]\\)" . "&mdash;\\1")
+    ("--\\([^-]\\)" . "&ndash;\\1")
+    ("\\.\\.\\." . "&hellip;"))
+  "Regular expressions for special string conversion.")
+
 
 (defun org-compute-latex-and-specials-regexp ()
   "Compute regular expression for stuff treated specially by exporters."

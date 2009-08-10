@@ -1,5 +1,8 @@
 2009-08-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-export-html-special-string-regexps): Definition
+	moved into org.el
+
 	* org-exp.el (org-export-preprocess-apply-macros): Allow newlines
 	in macro calls.
 
