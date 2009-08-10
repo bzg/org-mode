@@ -9056,11 +9056,14 @@ At all other locations, this simply calls the value of
 		     (setq type :opt)
 		     (require 'org-exp)
 		     (append
-		      (mapcar
-		       (lambda (x)
-			 (string-match "^#\\+\\(\\([A-Z_]+:?\\).*\\)" x)
-			 (cons (match-string 2 x) (match-string 1 x)))
-		       (org-split-string (org-get-current-options) "\n"))
+		      (delq nil
+			    (mapcar
+			     (lambda (x)
+			       (if (string-match
+				    "^#\\+\\(\\([A-Z_]+:?\\).*\\)" x)
+				   (cons (match-string 2 x)
+					 (match-string 1 x))))
+			     (org-split-string (org-get-current-options) "\n")))
 		      (mapcar 'list org-additional-option-like-keywords)))
 		    (startup
 		     (setq type :startup)
