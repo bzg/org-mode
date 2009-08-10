@@ -2744,7 +2744,44 @@ dot("$(2a,0)$",(2,0),N+E);
 
 
 * Bugs [32/40]
-** TODO export problems when support for a language is missing
+** PROPOSED require users to explicitly turn on each language
+As we continue to add more languages to org-babel, many of which will
+require new major-modes we need to re-think how languages are added to
+org-babel.
+
+Currently we are requiring all available languages in the
+[[file:lisp/org-babel-init.el][org-babel-init.el]] file.  I think we need to change this to a user
+setting so that only the language which have their requirements met
+(in terms of system executables and emacs major modes) are loaded.  It
+is one more step for install, but it seems to me to be the only
+solution.  Thoughts?
+
+*** proposed
+
+we add something like the following to the instillation instructions  
+
+#+begin_src emacs-lisp
+;; Uncomment each of the following require lines if you want org-babel
+;; to support that language.  Each language has a comment explaining
+;; it's dependencies.  See the related files in lisp/langs for more
+;; detailed explanations of requirements.
+;; 
+;; (require 'org-babel-ruby)      ;; inf-ruby mode, ruby and irb must be installed on your system
+;; (require 'org-babel-python)    ;; python-mode
+;; (require 'org-babel-R)         ;; ess-mode
+;; (require 'org-babel-gnuplot)   ;; gnuplot-mode
+;; (require 'org-babel-dot)       ;; dot be installed on your system
+;; (require 'org-babel-asymptote) ;; asymptote be installed on your system
+;; (require 'org-babel-ditaa)     ;; ditaa be installed on your system
+;; (require 'org-babel-sql)       ;; none
+;; (require 'org-babel-css)       ;; none
+#+end_src
+
+note that =org-babel-sh=, =org-babel-emacs-lisp=, and
+ are not included in the list as they can safely be
+assumed to work on any system.
+
+*** impetus
 we should come up with a way to gracefully degrade when support for a
 specific language is missing
 
