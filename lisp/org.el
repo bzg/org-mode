@@ -13902,7 +13902,11 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(while (re-search-forward re nil t)
 	  (when (and (or (not at) (equal (cdr at) (match-beginning n)))
 		     (not (get-text-property (match-beginning n)
-					     'org-protected)))
+					     'org-protected))
+		     (or (not overlays)
+			 (not (eq (get-char-property (match-beginning n)
+						     'org-overlay-type)
+				  'org-latex-overlay))))
 	    (setq txt (match-string n)
 		  beg (match-beginning n) end (match-end n)
 		  cnt (1+ cnt)
@@ -13926,7 +13930,13 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	     txt movefile opt forbuffer)
 	    (if overlays
 		(progn
+		  (mapc (lambda (o)
+			  (if (eq (org-overlay-get o 'org-overlay-type)
+				  'org-latex-overlay)
+			      (org-delete-overlay o)))
+			(org-overlays-in beg end))
 		  (setq ov (org-make-overlay beg end))
+		  (org-overlay-put ov 'org-overlay-type 'org-latex-overlay)
 		  (if (featurep 'xemacs)
 		      (progn
 			(org-overlay-put ov 'invisible t)

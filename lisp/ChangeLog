@@ -1,5 +1,7 @@
 2009-08-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-format-latex): Avoid nested overlays.
+
 	* org-latex.el (org-export-latex-listings-langs): Add a few more
 	languages.
 
