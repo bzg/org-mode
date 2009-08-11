@@ -1,3 +1,8 @@
+2009-08-11  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-latex.el (org-export-latex-tables): Remove save-excursion
+	around `org-table-align'.
+
 2009-08-10  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-export-html-special-string-regexps): Definition

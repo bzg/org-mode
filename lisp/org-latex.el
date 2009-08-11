@@ -1309,8 +1309,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
   "Convert tables to LaTeX and INSERT it."
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)|" nil t)
-    ;; FIXME really need to save-excursion?
-    (save-excursion (org-table-align))
+    (org-table-align)
     (let* ((beg (org-table-begin))
 	   (end (org-table-end))
 	   (raw-table (buffer-substring beg end))
