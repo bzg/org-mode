@@ -218,7 +218,13 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [41/62]
+* Tasks [41/64]
+** TODO org-bable-tangle: no default extension if one already exists
+** TODO source-name visible in LaTeX and html exports
+Maybe this should be done in backend specific manners.
+
+The listings package may provide for naming a source-code block...
+
 ** PROPOSED new results types (org, html, latex)
    Thanks to Tom Short for this recommendation.
 
