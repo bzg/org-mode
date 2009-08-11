@@ -1,5 +1,8 @@
 2009-08-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-listings-langs): Add a few more
+	languages.
+
 	* org-exp.el (org-export-preprocess-apply-macros): Make sure to
 	ignore newlines and space before the first macro argument.
 

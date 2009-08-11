@@ -318,7 +318,10 @@ for example using customize, or with something like
 		:perl "Perl" :cperl "Perl" :python "Python" :ruby "Ruby"
 		:html "HTML" :xml "XML"
 		:tex "TeX" :latex "TeX"
-		:shell-script "bash")
+		:shell-script "bash"
+		:gnuplot "Gnuplot"
+		:ocaml "Caml" :caml "Caml"
+		:sql "SQL")
   "Property list mapping languages to their listing language counterpart.
 Yhe keys ar ethe major mode symbol, the calues are the string that should be
 inserted as the language parameter for the listings package."
