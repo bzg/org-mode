@@ -1,3 +1,7 @@
+2009-08-12  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-exp.el (org-export-interpolate-newlines): New function.
+
 2009-08-11  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-format-latex): Avoid nested overlays.

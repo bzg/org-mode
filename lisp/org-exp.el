@@ -742,8 +742,13 @@ modified) list.")
 	    (setq p (plist-put
 		     p (intern
 			(concat ":macro-" (downcase (match-string 1 val))))
-		     (match-string 2 val)))))
+		     (org-export-interpolate-newlines (match-string 2 val))))))
 	p))))
+
+(defun org-export-interpolate-newlines (s)
+  (while (string-match "\\\\n" s)
+    (setq s (replace-match "\n" t t s)))
+  s)
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
