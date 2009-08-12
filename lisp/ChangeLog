@@ -1,5 +1,8 @@
 2009-08-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-set-regexps-and-options): Make sure the list of done
+	keywords is not invalid.
+
 	* org-exp.el (org-export-interpolate-newlines): New function.
 
 2009-08-11  Carsten Dominik  <carsten.dominik@gmail.com>

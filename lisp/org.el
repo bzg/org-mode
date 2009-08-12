@@ -3697,7 +3697,8 @@ means to push this value onto the list in the variable.")
 
       ;; Compute the regular expressions and other local variables
       (if (not org-done-keywords)
-	  (setq org-done-keywords (list (org-last org-todo-keywords-1))))
+	  (setq org-done-keywords (and org-todo-keywords-1
+				       (list (org-last org-todo-keywords-1)))))
       (setq org-ds-keyword-length (+ 2 (max (length org-deadline-string)
 					    (length org-scheduled-string)
 					    (length org-clock-string)
