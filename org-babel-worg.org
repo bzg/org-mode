@@ -1,4 +1,4 @@
-#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    H:3 num:nil toc:1 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
@@ -96,6 +96,9 @@ Results of R evaluation
 **** Additional :results settings
      
 *** Arguments to source code blocks
+    :PROPERTIES:
+    :CUSTOM_ID: arguments-to-source-code-blocks
+    :END:
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
     now have the status of *functions*.
@@ -182,6 +185,68 @@ then graph them with R.
 4. Results of R code [[file:images/dirs.png]]
 
 * Spreadsheet plugins for org-mode in any language
+
+*NOTE*: Maybe in-addition-to/in-stead-of this example we should do a
+more traditional "spreadsheet" example with R [Eric]
+
+Not only can Org-babel pass entire tables of data to source code
+blocks (see [[arguments-to-source-code-blocks]]), Org-babel can also be
+used to call source code blocks from *within* tables using the
+Org-mode's [[http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet][existing spreadsheet functionality]].
+
+In fact the functional test suite for Org-babel is implemented as a
+large Org-mode table.  To run the entire test suite you simple
+evaluate the table =C-u C-c C-c=, and all of the tests are run
+updating the table with pass/fail statistics.
+
+Here's a sample of our test suite.
+
+#+TBLNAME: org-babel-tests
+| functionality    | block        | arg |    expected |     results | pass |
+|------------------+--------------+-----+-------------+-------------+------|
+| basic evaluation |              |     |             |             | pass |
+|------------------+--------------+-----+-------------+-------------+------|
+| emacs lisp       | basic-elisp  |   2 |           4 |           4 | pass |
+| shell            | basic-shell  |     |           6 |           6 | pass |
+| ruby             | basic-ruby   |     |   org-babel |   org-babel | pass |
+| python           | basic-python |     | hello world | hello world | pass |
+| R                | basic-R      |     |          13 |          13 | pass |
+#+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
+#+TBLFM: $5=""::$6=""
+
+** code blocks for tests
+
+#+srcname: basic-elisp
+#+begin_src emacs-lisp :var n=7
+(* 2 n)
+#+end_src
+
+#+srcname: basic-shell
+#+begin_src sh :results silent
+expr 1 + 5
+#+end_src
+
+#+srcname: date-simple
+#+begin_src sh :results silent
+date
+#+end_src
+
+#+srcname: basic-ruby
+#+begin_src ruby :results silent
+"org-babel"
+#+end_src
+
+#+srcname: basic-python
+#+begin_src python :results silent
+'hello world'
+#+end_src
+
+#+srcname: basic-R
+#+begin_src R :results silent
+b <- 9
+b + 4
+#+end_src
+
 * Library of Babel
   What about those source code blocks which are so useful you want to
   have them available in every org-mode buffer?
