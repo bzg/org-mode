@@ -323,7 +323,7 @@ for example using customize, or with something like
 		:ocaml "Caml" :caml "Caml"
 		:sql "SQL")
   "Property list mapping languages to their listing language counterpart.
-Yhe keys ar ethe major mode symbol, the calues are the string that should be
+The key is the major mode symbol, the value is the string that should be
 inserted as the language parameter for the listings package."
   :group 'org-export-latex
   :type 'plist)
