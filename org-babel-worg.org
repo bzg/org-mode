@@ -1,4 +1,4 @@
-#+OPTIONS:    H:3 num:nil toc:1 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
+#+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
 #+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
@@ -25,6 +25,9 @@
 #+end_html
 
 * Introduction
+  :PROPERTIES:
+  :CUSTOM_ID: introduction
+  :END:
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
   1. source code execution
@@ -32,6 +35,9 @@
   3. exportation of source code blocks to files (literate programming)
 
 * Getting started
+  :PROPERTIES:
+  :CUSTOM_ID: getting-started
+  :END:
   Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
 #+begin_src sh
 git clone git://github.com/eschulte/org-babel.git
@@ -46,7 +52,13 @@ git clone git://github.com/eschulte/org-babel.git
 #+end_src
   
 * Basic org-babel functionality
+  :PROPERTIES:
+  :CUSTOM_ID: basic-functionality
+  :END:
 *** Source code execution
+    :PROPERTIES:
+    :CUSTOM_ID: source-code-execution
+    :END:
     For interpreted languages such as shell, python, R, etc, org-babel
     allows source blocks to be executed: the code is passed to the
     interpreter and you have control over what is done with the
@@ -75,6 +87,9 @@ Results of R evaluation
 | 10 |
 
 *** What happens to the results?
+    :PROPERTIES:
+    :CUSTOM_ID: results
+    :END:
     Org-babel provides two fundamentally different modes for capturing
     the results of code evaluation, specified by the :results header
     argument:
@@ -144,6 +159,9 @@ Results of Emacs Lisp code evaluation
 | 1 | 3 | 8 | 21 | 55 | 144 | 377 | 987 | 2584 | 6765 |
 
 * A meta-programming language for org-mode
+  :PROPERTIES:
+  :CUSTOM_ID: meta-programming-language
+  :END:
 
 Since information can pass freely between source-code blocks and
 org-mode tables you can mix and match languages using each language
@@ -185,6 +203,9 @@ then graph them with R.
 4. Results of R code [[file:images/dirs.png]]
 
 * Spreadsheet plugins for org-mode in any language
+  :PROPERTIES:
+  :CUSTOM_ID: spreadsheet
+  :END:
 
 *NOTE*: Maybe in-addition-to/in-stead-of this example we should do a
 more traditional "spreadsheet" example with R [Eric]
@@ -214,7 +235,7 @@ Here's a sample of our test suite.
 #+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
 #+TBLFM: $5=""::$6=""
 
-** code blocks for tests
+*** code blocks for tests
 
 #+srcname: basic-elisp
 #+begin_src emacs-lisp :var n=7
@@ -248,6 +269,9 @@ b + 4
 #+end_src
 
 * Library of Babel
+  :PROPERTIES:
+  :CUSTOM_ID: library-of-babel
+  :END:
   What about those source code blocks which are so useful you want to
   have them available in every org-mode buffer?
 
@@ -263,6 +287,9 @@ b + 4
 #+end_src
 
 * Reproducible Research
+  :PROPERTIES:
+  :CUSTOM_ID: reproducable-research
+  :END:
 #+begin_quote 
 An article about computational science in a scientific publication is
 not the scholarship itself, it is merely advertising of the
@@ -292,9 +319,15 @@ only RR tool which allows multiple languages and data to coexist and
 cooperate inside of a single document.
 
 * Literate programming
+  :PROPERTIES:
+  :CUSTOM_ID: literate-programming
+  :END:
   - org-babel-tangle
   - org-babel-load-file
 * Reference / Documentation
+  :PROPERTIES:
+  :CUSTOM_ID: reference-and-documentation
+  :END:
 
 *** Source Code block syntax
 
