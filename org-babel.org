@@ -2782,7 +2782,47 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [32/40]
+* Bugs [32/41]
+** TODO Python session evaluation bug
+   The following block evaluates correctly with :session none
+   (set :results to output), but fails with session-based evaluation
+   (with :results value, as below, you see the error message)
+
+   I edebug'ed it and it seems fine until [[file:lisp/langs/org-babel-python.el::comint%20session%20evaluation%20org%20babel%20comint%20in%20buffer%20buffer%20let%20full%20body][we go to comint]].
+
+#+begin_src python :session pysession :results value
+  import os
+  from subprocess import *
+  
+  chunk = 10000
+  format = '.gen.gz'
+  
+  cc = [('58C','NBS'),
+        ('58C','POBI'),
+        ('NBS','POBI')]
+  
+  for outdir in ['none', 'noscots', 'lax', 'strict']:
+      outdir = os.path.join('exclusion-study', outdir)
+      for case, control in cc:
+          outfile = os.path.join(outdir, '%s-vs-%s-direct' % (case, control))
+          cmd = 'snptest %s -frequentist 1 -hwe ' % ('-gen_gz' if format == '.gen.gz' else '')
+          cmd += '-cases %s %s ' % (case + format, case + '.sample')
+          cmd += '-controls %s %s ' % (control + format, control + '.sample')
+          cmd += '-exclude_samples %s ' % os.path.join(outdir, 'exclusions')
+          cmd += '-o %s ' % outfile
+          cmd += '-chunk %d ' % chunk
+          cmd += '> %s' % outfile + '.log'
+          # os.system(cmd)
+          print(cmd)
+#+end_src
+
+#+resname:
+: File "<stdin>", line 14
+:     _
+:     ^
+: SyntaxError: invalid syntax
+
+
 ** PROPOSED require users to explicitly turn on each language
 As we continue to add more languages to org-babel, many of which will
 require new major-modes we need to re-think how languages are added to
