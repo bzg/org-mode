@@ -14,16 +14,20 @@
   </div>
   <div id="logo">
     <p>
-      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png" />
+      <img src="images/tower-of-babel.png"  alt="images/tower-of-babel.png"
+           title="And the Lord said, Behold, the people is one, and they have all one language; and this they begin to do; and now nothing will be restrained from them, which they have imagined to do. Genesis 11:1-9"/>
       <div id="attr">
         from
         <a href="http://www.flickr.com/photos/23379658@N05/" title=""><b>Martijn Streefkerk</b></a>
       </div>
-    </p>  
+    </p>
   </div>
 #+end_html
 
 * Introduction
+  :PROPERTIES:
+  :CUSTOM_ID: introduction
+  :END:
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
   1. source code execution
@@ -31,7 +35,15 @@
   3. exportation of source code blocks to files (literate programming)
 
 * Getting started
-  Add the following lines to your .emacs, replacing the path as
+  :PROPERTIES:
+  :CUSTOM_ID: getting-started
+  :END:
+  Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
+#+begin_src sh
+git clone git://github.com/eschulte/org-babel.git
+#+end_src
+
+  And add the following lines to your .emacs, replacing the path as
   appropriate. A good place to check that things are up and running
   would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
 #+begin_src emacs-lisp
@@ -40,36 +52,44 @@
 #+end_src
   
 * Basic org-babel functionality
+  :PROPERTIES:
+  :CUSTOM_ID: basic-functionality
+  :END:
 *** Source code execution
+    :PROPERTIES:
+    :CUSTOM_ID: source-code-execution
+    :END:
     For interpreted languages such as shell, python, R, etc, org-babel
     allows source blocks to be executed: the code is passed to the
     interpreter and you have control over what is done with the
     results of excecution. E.g. place point anywhere in the following
     block and use C-c C-c to run the code:
 
-#+begin_src python :results output
-import time
-x = 4
-print("hello\n")
-#print time.ctime()
-print [5, 10]
+[[http://www.ruby-lang.org/][Ruby]] source code
+#+begin_src ruby
+"This file was last evaluated on #{Date.today}"
 #+end_src
 
+Results of Ruby evaluation
 #+resname:
-: hello
-: 510
+: This file was last evaluated on 2009-08-09
 
+[[http://www.r-project.org/][R]] source code
 #+begin_src R :results value
 x = 4
 date()
 c(5, 10)
 #+end_src
 
+Results of R evaluation
 #+resname:
 |  5 |
 | 10 |
 
 *** What happens to the results?
+    :PROPERTIES:
+    :CUSTOM_ID: results
+    :END:
     Org-babel provides two fundamentally different modes for capturing
     the results of code evaluation, specified by the :results header
     argument:
@@ -91,13 +111,167 @@ c(5, 10)
 **** Additional :results settings
      
 *** Arguments to source code blocks
+    :PROPERTIES:
+    :CUSTOM_ID: arguments-to-source-code-blocks
+    :END:
     In addition to evaluation of code blocks, org-babel allows them to
     be parameterised (i.e. have arguments). Thus source code blocks
     now have the status of *functions*.
 
+Inputs for fibonacci-seq
+
+#+tblname: fibonacci-inputs
+| 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |  9 | 10 |
+| 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
+
+in the Org-mode buffer this looks like
+: #+tblname: fibonacci-inputs
+: | 1 | 2 | 3 | 4 |  5 |  6 |  7 |  8 |  9 | 10 |
+: | 2 | 4 | 6 | 8 | 10 | 12 | 14 | 16 | 18 | 20 |
+
+[[http://www.gnu.org/software/emacs/manual/elisp.html][Emacs Lisp]] source code
+#+srcname: fibonacci-seq
+#+begin_src emacs-lisp :var fib-inputs=fibonacci-inputs
+  (defun fibonacci (n)
+    (if (or (= n 0) (= n 1))
+        n
+      (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+  
+  (mapcar (lambda (row)
+            (mapcar #'fibonacci row)) fib-inputs)
+#+end_src
+
+in the Org-mode buffer this looks like
+: #+srcname: fibonacci-seq
+: #+begin_src emacs-lisp :var fib-inputs=fibonacci-inputs
+:   (defun fibonacci (n)
+:     (if (or (= n 0) (= n 1))
+:         n
+:       (+ (fibonacci (- n 1)) (fibonacci (- n 2)))))
+:   
+:   (mapcar (lambda (row)
+:             (mapcar #'fibonacci row)) fib-inputs)
+: #+end_src
+
+Results of Emacs Lisp code evaluation
+#+resname:
+| 1 | 1 | 2 |  3 |  5 |   8 |  13 |  21 |   34 |   55 |
+| 1 | 3 | 8 | 21 | 55 | 144 | 377 | 987 | 2584 | 6765 |
+
 * A meta-programming language for org-mode
+  :PROPERTIES:
+  :CUSTOM_ID: meta-programming-language
+  :END:
+
+Since information can pass freely between source-code blocks and
+org-mode tables you can mix and match languages using each language
+for those tasks to which it is suited.  This makes Org-mode files with
+Org-babel into a kind of meta-functional programming language in which
+functions from many languages can work together.
+
+As an example, lets take some system diagnostics in the shell, and
+then graph them with R.
+
+1. Shell source code
+#+srcname: directories
+   #+begin_src bash :results replace
+   cd ~ && du -sc * |grep -v total
+   #+end_src
+2. Results of the shell source code (on my system, grab this org-mode
+   files and try running it on your own)
+#+resname: directories
+|       72 | "Desktop"   |
+| 12156104 | "Documents" |
+|  3482440 | "Downloads" |
+|  2901720 | "Library"   |
+|    57344 | "Movies"    |
+| 16548024 | "Music"     |
+|      120 | "News"      |
+|  7649472 | "Pictures"  |
+|        0 | "Public"    |
+|   152224 | "Sites"     |
+|        8 | "System"    |
+|       56 | "bin"       |
+|  3821872 | "mail"      |
+| 10605392 | "src"       |
+|     1264 | "tools"     |
+3. R source code (which calls the previous shell source code)
+#+srcname: directory-pie
+   #+begin_src R :var dirs = directories :session R-pie-example
+   pie(dirs[,1], labels = dirs[,2])
+   #+end_src
+4. Results of R code [[file:images/dirs.png]]
+
 * Spreadsheet plugins for org-mode in any language
+  :PROPERTIES:
+  :CUSTOM_ID: spreadsheet
+  :END:
+
+*NOTE*: Maybe in-addition-to/in-stead-of this example we should do a
+more traditional "spreadsheet" example with R [Eric]
+
+Not only can Org-babel pass entire tables of data to source code
+blocks (see [[arguments-to-source-code-blocks]]), Org-babel can also be
+used to call source code blocks from *within* tables using the
+Org-mode's [[http://orgmode.org/manual/The-spreadsheet.html#The-spreadsheet][existing spreadsheet functionality]].
+
+In fact the functional test suite for Org-babel is implemented as a
+large Org-mode table.  To run the entire test suite you simple
+evaluate the table =C-u C-c C-c=, and all of the tests are run
+updating the table with pass/fail statistics.
+
+Here's a sample of our test suite.
+
+#+TBLNAME: org-babel-tests
+| functionality    | block        | arg |    expected |     results | pass |
+|------------------+--------------+-----+-------------+-------------+------|
+| basic evaluation |              |     |             |             | pass |
+|------------------+--------------+-----+-------------+-------------+------|
+| emacs lisp       | basic-elisp  |   2 |           4 |           4 | pass |
+| shell            | basic-shell  |     |           6 |           6 | pass |
+| ruby             | basic-ruby   |     |   org-babel |   org-babel | pass |
+| python           | basic-python |     | hello world | hello world | pass |
+| R                | basic-R      |     |          13 |          13 | pass |
+#+TBLFM: $5='(if (= (length $3) 1) (progn (message (format "running %S" '(sbe $2 (n $3)))) (sbe $2 (n $3))) (sbe $2))::$6='(if (string= $4 $5) "pass" (format "expected %S but was %S" $4 $5))
+#+TBLFM: $5=""::$6=""
+
+*** code blocks for tests
+
+#+srcname: basic-elisp
+#+begin_src emacs-lisp :var n=7
+(* 2 n)
+#+end_src
+
+#+srcname: basic-shell
+#+begin_src sh :results silent
+expr 1 + 5
+#+end_src
+
+#+srcname: date-simple
+#+begin_src sh :results silent
+date
+#+end_src
+
+#+srcname: basic-ruby
+#+begin_src ruby :results silent
+"org-babel"
+#+end_src
+
+#+srcname: basic-python
+#+begin_src python :results silent
+'hello world'
+#+end_src
+
+#+srcname: basic-R
+#+begin_src R :results silent
+b <- 9
+b + 4
+#+end_src
+
 * Library of Babel
+  :PROPERTIES:
+  :CUSTOM_ID: library-of-babel
+  :END:
   What about those source code blocks which are so useful you want to
   have them available in every org-mode buffer?
 
@@ -112,14 +286,48 @@ c(5, 10)
 (org-babel-lob-ingest "path/to/file.org")
 #+end_src
 
-* Reproducible research
-  - output vs. value mode
-  - file & graphical output
-  - controlling export
+* Reproducible Research
+  :PROPERTIES:
+  :CUSTOM_ID: reproducable-research
+  :END:
+#+begin_quote 
+An article about computational science in a scientific publication is
+not the scholarship itself, it is merely advertising of the
+scholarship. The actual scholarship is the complete software
+development environment and the complete set of instructions which
+generated the figures. -- D. Donoho
+#+end_quote
+
+[[http://reproducibleresearch.net/index.php/Main_Page][Reproducible Research]] (RR) is the practice of distributing along with
+an article of research all data, code, and tools required to reproduce
+the results discussed in the paper.  As such the paper becomes not
+only a document describing the research but a complete laboratory
+reproducing the research.
+
+Org-mode already has exceptional support for [[http://orgmode.org/manual/Exporting.html#Exporting][exporting to html and
+LaTeX]].  Org-babel makes Org-mode a tool for RR by *activating* the
+data and source code embedded into Org-mode documents making the
+entire document executable.  This makes it not only possible, but
+natural to distribute research in a format that encourages readers to
+recreate your results, and perform their own analysis.
+
+Existing RR tools like [[http://en.wikipedia.org/wiki/Sweave][Sweave]] provide for the embedding of [[http://www.r-project.org/][R]] code into
+LaTeX documents.  While this is very useful, such documents often
+still require a large degree of "glue code" in the form of external
+shell scripts, python scripts, and Makefiles.  To my knowledge
+Org-babl is the only RR tool which allows multiple languages and data
+to coexist and cooperate inside of a single document.
+
 * Literate programming
+  :PROPERTIES:
+  :CUSTOM_ID: literate-programming
+  :END:
   - org-babel-tangle
   - org-babel-load-file
 * Reference / Documentation
+  :PROPERTIES:
+  :CUSTOM_ID: reference-and-documentation
+  :END:
 
 *** Source Code block syntax
 

@@ -17,7 +17,7 @@ publishing.  Publish a project with =C-c C-e X=.
          `("org-babel-documentation"
            :base-directory ,org-babel-dir
            :base-extension "org"
-           :exclude "org-babel.org"
+           :exclude ,(regexp-opt-group '("org-babel.org" "test-export.org" "test-tangle.org" "test-tangle-load.org"))
            :publishing-directory ,(expand-file-name "doc" org-babel-dir)
            :index-filename "org-babel-worg.org"
            :auto-postamble nil
