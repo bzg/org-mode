@@ -2849,7 +2849,17 @@ This is needed for font-lock setup.")
   "Non-nil means, use ido completion wherever possible.
 Note that `ido-mode' must be active for this variable to be relevant.
 If you decide to turn this variable on, you might well want to turn off
-`org-outline-path-complete-in-steps'."
+`org-outline-path-complete-in-steps'.
+See also `org-completion-use-iswitchb'."
+  :group 'org-completion
+  :type 'boolean)
+
+(defcustom org-completion-use-iswitchb nil
+  "Non-nil means, use iswitchb completion wherever possible.
+Note that `iswitchb-mode' must be active for this variable to be relevant.
+If you decide to turn this variable on, you might well want to turn off
+`org-outline-path-complete-in-steps'.
+Note that thi variable has only an effect if `org-completion-use-ido' is nil."
   :group 'org-completion
   :type 'boolean)
 
@@ -6552,13 +6562,13 @@ WITH-CASE, the sorting considers case as well."
 
       (and (= (downcase sorting-type) ?f)
            (setq getkey-func
-                 (org-ido-completing-read "Sort using function: "
+                 (org-icompleting-read "Sort using function: "
                                   obarray 'fboundp t nil nil))
            (setq getkey-func (intern getkey-func)))
 
       (and (= (downcase sorting-type) ?r)
            (setq property
-                 (org-ido-completing-read "Property: "
+                 (org-icompleting-read "Property: "
 				  (mapcar 'list (org-buffer-property-keys t))
                                   nil t))))
 
@@ -7529,7 +7539,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
       (unwind-protect
 	  (progn
 	    (setq link
-		  (let ((org-completion-use-ido nil))
+		  (let ((org-completion-use-ido nil)
+			(org-completion-use-iswitchb nil))
 		    (org-completing-read
 		     "Link: "
 		     (append
@@ -7639,14 +7650,23 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	 (copy-keymap minibuffer-local-completion-map)))
     (org-defkey minibuffer-local-completion-map " " 'self-insert-command)
     (org-defkey minibuffer-local-completion-map "?" 'self-insert-command)
-    (apply 'org-ido-completing-read args)))
+    (apply 'org-icompleting-read args)))
 
-(defun org-completing-read-no-ido (&rest args)
-  (let (org-completion-use-ido)
+(defun org-completing-read-no-i (&rest args)
+  (let (org-completion-use-ido org-completion-use-iswitchb)
     (apply 'org-completing-read args)))
 
-(defun org-ido-completing-read (&rest args)
-  "Completing-read using `ido-mode' speedups if available"
+(defun org-iswitchb-completing-read (prompt choices &rest args)
+  "Use iswitch as a completing-read replacement to choose from choices.
+PROMPT is a string to prompt with.  CHOICES is a list of strings to choose
+from."
+  (let ((iswitchb-make-buflist-hook
+         (lambda ()
+           (setq iswitchb-temp-buflist choices))))
+    (iswitchb-read-buffer prompt)))
+
+(defun org-icompleting-read (&rest args)
+  "Completing-read using `ido-mode' or `iswitchb' speedups if available"
   (if (and org-completion-use-ido
 	   (fboundp 'ido-completing-read)
 	   (boundp 'ido-mode) ido-mode
@@ -7657,7 +7677,13 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		   (mapcar (lambda (x) (car x)) (nth 1 args))
 		 (nth 1 args))
 	       (cddr args)))
-    (apply 'completing-read args)))
+    (if (and org-completion-use-iswitchb
+	     (boundp 'iswitchb-mode) iswitchb-mode
+	     (listp (second args)))
+	(apply 'org-iswitchb-completing-read (concat (car args))
+	       (mapcar (lambda (x) (car x)) (nth 1 args))
+	       (cddr args))
+      (apply 'completing-read args))))
 
 (defun org-extract-attributes (s)
   "Extract the attributes cookie from a string and set as text property."
@@ -8694,7 +8720,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 	 (cfunc (if (and org-refile-use-outline-path
 			 org-outline-path-complete-in-steps)
 		    'org-olpath-completing-read
-		  'org-ido-completing-read))
+		  'org-icompleting-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
 	 (filename (and cfn (expand-file-name cfn)))
 	 (tbl (mapcar
@@ -8764,9 +8790,10 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 (defun org-olpath-completing-read (prompt collection &rest args)
   "Read an outline path like a file name."
   (let ((thetable collection)
-	(org-completion-use-ido nil))   ; does not work with ido.
+	(org-completion-use-ido nil)	   ; does not work with ido.
+	(org-completion-use-iswitchb nil)) ; or iswitchb 
     (apply
-     'org-ido-completing-read prompt
+     'org-icompleting-read prompt
      (lambda (string predicate &optional flag)
        (let (rtn r f (l (length string)))
 	 (cond
@@ -9263,7 +9290,7 @@ For calling through lisp, arg is also interpreted in the following way:
 			     (or (not org-use-fast-todo-selection)
 				 (not org-todo-key-trigger)))
 			;; Read a state with completion
-			(org-ido-completing-read
+			(org-icompleting-read
 			 "State: " (mapcar (lambda(x) (list x))
 					   org-todo-keywords-1)
 			 nil t))
@@ -9864,7 +9891,7 @@ of `org-todo-keywords-1'."
 	(kwd-re
 	 (cond ((null arg) org-not-done-regexp)
 	       ((equal arg '(4))
-		(let ((kwd (org-ido-completing-read "Keyword (or KWD1|KWD2|...): "
+		(let ((kwd (org-icompleting-read "Keyword (or KWD1|KWD2|...): "
 					    (mapcar 'list org-todo-keywords-1))))
 		  (concat "\\("
 			  (mapconcat 'identity (org-split-string kwd "|") "\\|")
@@ -10250,9 +10277,9 @@ a      Show deadlines and scheduled items after a date."
      ((member ans '(?T ?m))
       (call-interactively 'org-match-sparse-tree))
      ((member ans '(?p ?P))
-      (setq kwd (org-ido-completing-read "Property: "
+      (setq kwd (org-icompleting-read "Property: "
 				 (mapcar 'list (org-buffer-property-keys))))
-      (setq value (org-ido-completing-read "Value: "
+      (setq value (org-icompleting-read "Value: "
 				   (mapcar 'list (org-property-values kwd))))
       (unless (string-match "\\`{.*}\\'" value)
 	(setq value (concat "\"" value "\"")))
@@ -10700,7 +10727,7 @@ also TODO lines."
     ;; Get a new match request, with completion
     (let ((org-last-tags-completion-table
 	   (org-global-tags-completion-table)))
-      (setq match (org-completing-read-no-ido
+      (setq match (org-completing-read-no-i
 		   "Match: " 'org-tags-completion-function nil nil nil
 		   'org-tags-history))))
 
@@ -11037,7 +11064,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 		  (let ((org-add-colon-after-tag-completion t))
 		    (org-trim
 		     (org-without-partial-completion
-		      (org-ido-completing-read "Tags: " 'org-tags-completion-function
+		      (org-icompleting-read "Tags: " 'org-tags-completion-function
 				       nil nil current 'org-tags-history)))))))
 	(while (string-match "[-+&]+" tags)
 	  ;; No boolean logic, just a list
@@ -11085,7 +11112,7 @@ This works in the agenda, and also in an org-mode buffer."
 		(if (org-mode-p)
 		    (org-get-buffer-tags)
 		  (org-global-tags-completion-table))))
-	   (org-ido-completing-read
+	   (org-icompleting-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
 	    'org-tags-history))
 	 (progn
@@ -11304,7 +11331,7 @@ Returns the new tags string, or nil to not change the current settings."
 		  (if exit-after-next (setq exit-after-next 'now)))
 		 ((= c ?\t)
 		  (condition-case nil
-		      (setq tg (org-ido-completing-read
+		      (setq tg (org-icompleting-read
 				"Tag: "
 				(or buffer-tags
 				    (with-current-buffer buf
@@ -11974,7 +12001,7 @@ in the current file."
   (interactive
    (let* ((completion-ignore-case t)
 	  (keys (org-buffer-property-keys nil t t))
-	  (prop0 (org-ido-completing-read "Property: " (mapcar 'list keys)))
+	  (prop0 (org-icompleting-read "Property: " (mapcar 'list keys)))
 	  (prop (if (member prop0 keys)
 		    prop0
 		  (or (cdr (assoc (downcase prop0)
@@ -11986,7 +12013,7 @@ in the current file."
 	  (existing (mapcar 'list (org-property-values prop)))
 	  (val (if allowed
 		   (org-completing-read "Value: " allowed nil 'req-match)
-		 (let (org-completion-use-ido)
+		 (let (org-completion-use-ido org-completion-use-iswitchb)
 		   (org-completing-read
 		    (concat "Value" (if (and cur (string-match "\\S-" cur))
 					(concat "[" cur "]") "")
@@ -12000,7 +12027,7 @@ in the current file."
   "In the current entry, delete PROPERTY."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-ido-completing-read
+	  (prop (org-icompleting-read
 		 "Property: " (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
@@ -12012,7 +12039,7 @@ in the current file."
   "Remove PROPERTY globally, from all entries."
   (interactive
    (let* ((completion-ignore-case t)
-	  (prop (org-ido-completing-read
+	  (prop (org-icompleting-read
 		 "Globally remove property: "
 		 (mapcar 'list (org-buffer-property-keys)))))
      (list prop)))
@@ -13412,8 +13439,8 @@ Due to some yet unresolved reason, the global function
 	 (or enabled (iswitchb-mode -1)))))
 
 ;;;###autoload
-(defun org-ido-switchb (&optional arg)
-  "Use `org-ido-completing-read' to prompt for an Org buffer to switch to.
+(defun org-iswitchb (&optional arg)
+  "Use `org-icompleting-read' to prompt for an Org buffer to switch to.
 With a prefix argument, restrict available to files.
 With two prefix arguments, restrict available buffers to agenda files."
   (interactive "P")
@@ -13421,9 +13448,12 @@ With two prefix arguments, restrict available buffers to agenda files."
                      ((equal arg '(16)) (org-buffer-list 'agenda))
                      (t                 (org-buffer-list)))))
     (switch-to-buffer
-     (org-ido-completing-read "Org buffer: "
+     (org-icompleting-read "Org buffer: "
                               (mapcar 'list (mapcar 'buffer-name blist))
                               nil t))))
+
+;;;###autoload
+(defalias 'org-ido-switchb 'org-iswitchb)
 
 (defun org-buffer-list (&optional predicate exclude-tmp)
   "Return a list of Org buffers.
