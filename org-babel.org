@@ -225,7 +225,7 @@ Maybe this should be done in backend specific manners.
 
 The listings package may provide for naming a source-code block...
 
-** PROPOSED new results types (org, html, latex)
+** STARTED new results types (org, html, latex)
    Thanks to Tom Short for this recommendation.
 
    - raw or org :: in which case the results are implemented raw, unquoted
@@ -249,6 +249,35 @@ The listings package may provide for naming a source-code block...
 We actually might want to remove the =#+resname= line if the results
 type is org-mode, not sure...  Either way I don't think there is a
 good way to capture/remove org type results.
+
+*** raw
+
+Added a =raw= results header argument, which will insert the results
+of a source-code block into an org buffer un-escaped.  Also, if the
+results look like a table, then the table will be aligned.
+
+#+srcname: raw-table-demonstration
+#+begin_src ruby :results output raw
+  puts "| root | square |"
+  puts "|---"
+  10.times do |n|
+    puts "| #{n} | #{n*n} |"
+  end
+#+end_src
+
+#+resname:
+| root | square |
+|------+--------|
+|    0 |      0 |
+|    1 |      1 |
+|    2 |      4 |
+|    3 |      9 |
+|    4 |     16 |
+|    5 |     25 |
+|    6 |     36 |
+|    7 |     49 |
+|    8 |     64 |
+|    9 |     81 |
 
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.

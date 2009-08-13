@@ -522,7 +522,10 @@ silent -- no results are inserted"
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
-              (org-babel-examplize-region (point) (progn (insert result) (point))))
+              (if (or (member "raw" insert) (member "org" insert))
+                  (progn (save-excursion (insert result))
+                         (if (org-at-table-p) (org-cycle)))
+                (org-babel-examplize-region (point) (progn (insert result) (point)))))
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
