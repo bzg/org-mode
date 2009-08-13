@@ -711,13 +711,46 @@ msg + " y python"
 #+begin_src emacs-lisp
 (concat msg " elisp")
 #+end_src
-** STARTED share org-babel [1/4]
+** STARTED share org-babel [1/5]
 how should we share org-babel?
 
 *** DONE post to org-mode
 *** TODO post to ess mailing list
 *** TODO create a org-babel page on worg
 *** TODO create a short screencast demonstrating org-babel in action
+*** PROPOSED a peer-reviewed publication?
+
+    The following notes are biased towards statistics-oriented
+    journals because ESS and Sweave are written by people associated
+    with / in statistics departments. But I am sure there are suitable
+    journals out there for an article on using org mode for
+    reproducible research (and literate programming etc).
+
+    Clearly, we would invite Carsten to be involved with this.
+
+     ESS is described in a peer-reviewed journal article:
+     Emacs Speaks Statistics: A Multiplatform, Multipackage Development Environment for Statistical Analysis  [Abstract]
+     Journal of Computational & Graphical Statistics 13(1), 247-261
+     Rossini, A.J, Heiberger, R.M., Sparapani, R.A., Maechler, M., Hornik, K. (2004) 
+     [[http://www.amstat.org/publications/jcgs.cfm][Journal of Computational and Graphical Statistics]]
+
+     Also [[http://www.amstat.org/publications/jss.cfm][Journal of Statistical Software]] Established in 1996, the
+     Journal of Statistical Software publishes articles, book reviews,
+     code snippets, and software reviews. The contents are freely
+     available online. For both articles and code snippets, the source
+     code is published along with the paper.
+
+    Sweave has a paper: 
+
+    Friedrich Leisch and Anthony J. Rossini. Reproducible statistical
+    research. Chance, 16(2):46-50, 2003. [ bib ]
+
+    also
+
+    Friedrich Leisch. Sweave: Dynamic generation of statistical reports
+    using literate data analysis. In Wolfgang Härdle and Bernd Rönz,
+    editors, Compstat 2002 - Proceedings in Computational Statistics,
+    pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
 
 *** examples
 we need to think up some good examples
