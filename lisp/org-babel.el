@@ -556,10 +556,9 @@ relies on `org-babel-insert-result'."
       (let ((case-fold-search nil))
 	(if (looking-at "#\\+begin_example")
 	    (search-forward "#+end_example" nil t)
-	  (while (if (looking-at "\\(: \\|\\[\\[\\)")
-                     (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                              (forward-line 1)) t))
-            (forward-line 1))))
+	  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                   (forward-line 1))
+                 (forward-line 1))))
       (point))))
 
 (defun org-babel-result-to-file (result)
