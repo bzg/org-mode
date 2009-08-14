@@ -4957,10 +4957,9 @@ Negative selection means, regexp must not match for selection of an entry."
 (defun org-agenda-manipulate-query (char)
   (cond
    ((memq org-agenda-type '(timeline agenda))
-    (if (y-or-n-p "Re-display with inactive time stamps included? ")
-	(let ((org-agenda-include-inactive-timestamps t))
-	  (org-agenda-redo))
-      (error "Abort")))
+    (let ((org-agenda-include-inactive-timestamps t))
+      (org-agenda-redo))
+    (message "Display now includes inactive timestamps as well"))
    ((eq org-agenda-type 'search)
     (org-add-to-string
      'org-agenda-query-string

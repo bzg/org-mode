@@ -7078,14 +7078,18 @@ the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
 @kindex @{
 @kindex @}
 @item [ ] @{ @}
-In the @i{search view} (@pxref{Keyword search}), these keys add new search
-words (@kbd{[} and @kbd{]}) or new regular expressions (@kbd{@{} and
-@kbd{@}}) to the query string.  The opening bracket/brace will add a positive
-search term prefixed by @samp{+}, indicating that this search term @i{must}
-occur/match in the entry.  The closing bracket/brace will add a negative
-search term which @i{must not} occur/match in the entry for it to be
+@table @i
+@item @r{in} search view
+add new search words (@kbd{[} and @kbd{]}) or new regular expressions
+(@kbd{@{} and @kbd{@}}) to the query string.  The opening bracket/brace will
+add a positive search term prefixed by @samp{+}, indicating that this search
+term @i{must} occur/match in the entry.  The closing bracket/brace will add a
+negative search term which @i{must not} occur/match in the entry for it to be
 selected.
-
+@item @r{in} weekly/daily agenda @r{or}
+@itemx @r{in} timeline view
+Redisplay with inactive timestamps included.
+@end table
 
 @tsubheading{Remote editing}
 @cindex remote editing, from agenda
