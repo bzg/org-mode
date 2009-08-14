@@ -957,6 +957,7 @@ See also the variable @code{org-goto-interface}.
 @cindex pasting, of subtrees
 @cindex cutting, of subtrees
 @cindex copying, of subtrees
+@cindex sorting, of subtrees
 @cindex subtrees, cut and paste
 
 @table @kbd
