@@ -2819,7 +2819,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [32/41]
+* Bugs [33/41]
 ** TODO Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
@@ -2858,7 +2858,6 @@ dot("$(2a,0)$",(2,0),N+E);
 :     _
 :     ^
 : SyntaxError: invalid syntax
-
 
 ** PROPOSED require users to explicitly turn on each language
 As we continue to add more languages to org-babel, many of which will
@@ -3069,12 +3068,14 @@ identical: output results in raw stdout contents, whereas value
 converts it to elisp, perhaps to a table if it looks tabular. This is
 the same for the other languages. [Dan]
    
-** TODO adding blank line when source-block produces no output
+** DONE adding blank line when source-block produces no output
 
 #+srcname: show-org-babel-trim
-#+begin_src sh 
+#+begin_src sh
 find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
 #+end_src
+
+#+resname:
 
 ** DONE Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have

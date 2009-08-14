@@ -545,7 +545,7 @@ relies on `org-babel-insert-result'."
   (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result t)) (forward-line 1)
-    (delete-region (point) (org-babel-result-end))))
+    (delete-region (save-excursion (move-beginning-of-line 0) (point)) (org-babel-result-end))))
 
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results"
