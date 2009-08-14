@@ -551,7 +551,7 @@ relies on `org-babel-insert-result'."
   "Return the point at the end of the current set of results"
   (save-excursion
     (if (org-at-table-p)
-        (org-table-end)
+        (progn (goto-char (org-table-end)) (forward-line 1) (point))
       (let ((case-fold-search nil))
 	(if (looking-at "#\\+begin_example")
 	    (search-forward "#+end_example" nil t)

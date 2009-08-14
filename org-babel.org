@@ -3029,7 +3029,15 @@ for example
 #+end_src
 
 #+resname: this-doesn't-match-orgtbl
-   
+
+#+srcname: this-probably-also-wont-work
+#+begin_src emacs-lisp :results replace
+'(eric schulte)
+#+end_src
+
+#+resname:
+| eric | schulte |
+
 ** PROPOSED allow un-named arguments
 
 #+srcname: f(x)
