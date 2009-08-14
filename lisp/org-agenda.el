@@ -1806,7 +1806,8 @@ s   Search for keywords                 C   Configure custom agenda commands
 	  (delete-region (point) (point-max))
 	  (while (setq entry (pop custom1))
 	    (setq key (car entry) desc (nth 1 entry)
-		  type (nth 2 entry) match (nth 3 entry))
+		  type (nth 2 entry)
+		  match (org-no-properties (copy-sequence (nth 3 entry))))
 	    (if (> (length key) 1)
 		(add-to-list 'prefixes (string-to-char key))
 	      (insert

@@ -11241,7 +11241,7 @@ Returns the new tags string, or nil to not change the current settings."
 	      (insert "\n")
 	      (setq tbl (cdr tbl)))))
 	 (t
-	  (setq tg (car e) c2 nil)
+	  (setq tg (copy-sequence (car e)) c2 nil)
 	  (if (cdr e)
 	      (setq c (cdr e))
 	    ;; automatically assign a character.

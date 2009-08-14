@@ -1,3 +1,11 @@
+2009-08-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-fast-tag-selection): Avoid text properties on tags
+	in the alist.
+
+	* org-agenda.el (org-agenda-get-restriction-and-command): Avoid
+	text properties on the match element.
+
 2009-08-12  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-set-regexps-and-options): Make sure the list of done
