@@ -2819,7 +2819,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [34/41]
+* Bugs [35/41]
 ** TODO Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
@@ -2915,7 +2915,7 @@ I have this error showing up:
 executing Ruby source code block
 apply: Searching for program: no such file or directory, irb
 
-** TODO problem with newlines in output when :results value
+** DONE problem with newlines in output when :results value
 
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
@@ -2923,10 +2923,26 @@ apply: Searching for program: no such file or directory, irb
 
 #+resname:
 : 0
-
+: 1
+: 2
+: 3
 
 Whereas I was hoping for
 
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is now working, it doesn't return as a table because the value
+returned is technically a string.  To return the table mentioned above
+try something like the following.
+
+#+begin_src python
+[[0], [1], [2], [3]]
+#+end_src
+
+#+resname:
 | 0 |
 | 1 |
 | 2 |

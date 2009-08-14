@@ -668,7 +668,8 @@ This is taken almost directly from `org-read-prop'."
 
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
-  (if (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+  (if (and (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+           (= (match-end 0) (length string)))
       (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)
