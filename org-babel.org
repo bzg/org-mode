@@ -786,7 +786,15 @@ how should we share org-babel?
     editors, Compstat 2002 - Proceedings in Computational Statistics,
     pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
 
+    also
+
+    We could also look at the Journals publishing these [[http://www.reproducibleresearch.net/index.php/RR_links#Articles_about_RR_.28chronologically.29][Reproducible
+    Research articles]].
+    
 *** PROPOSED an article in [[http://journal.r-project.org/][The R Journal]]
+This looks good.  It seems that their main topic to software tools for
+use by R programmers, and Org-babel is certainly that.
+
 *** examples
 we need to think up some good examples
 
