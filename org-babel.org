@@ -2819,7 +2819,7 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [33/41]
+* Bugs [34/41]
 ** TODO Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
@@ -3020,7 +3020,7 @@ even a third"
 #+begin_src sh
 size=5
 #+end_src
-** TODO non-orgtbl formatted lists
+** DONE non-orgtbl formatted lists
 for example
 
 #+srcname: this-doesn't-match-orgtbl
@@ -3029,6 +3029,7 @@ for example
 #+end_src
 
 #+resname: this-doesn't-match-orgtbl
+| (:results . "replace") |
 
 #+srcname: this-probably-also-wont-work
 #+begin_src emacs-lisp :results replace

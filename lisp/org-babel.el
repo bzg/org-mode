@@ -529,7 +529,7 @@ silent -- no results are inserted"
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
-                      (if (consp (car result)) result (list result))
+                      (if (listp (cdr (car result))) result (list result))
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
             (forward-line -1)
             (org-cycle))))
