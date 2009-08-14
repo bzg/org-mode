@@ -2819,8 +2819,8 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [35/41]
-** TODO Python session evaluation bug
+* Bugs [36/41]
+** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
    (with :results value, as below, you see the error message)
@@ -2844,6 +2844,7 @@ dot("$(2a,0)$",(2,0),N+E);
           outfile = os.path.join(outdir, '%s-vs-%s-direct' % (case, control))
           cmd = 'snptest %s -frequentist 1 -hwe ' % ('-gen_gz' if format == '.gen.gz' else '')
           cmd += '-cases %s %s ' % (case + format, case + '.sample')
+
           cmd += '-controls %s %s ' % (control + format, control + '.sample')
           cmd += '-exclude_samples %s ' % os.path.join(outdir, 'exclusions')
           cmd += '-o %s ' % outfile
@@ -2854,10 +2855,20 @@ dot("$(2a,0)$",(2,0),N+E);
 #+end_src
 
 #+resname:
-: File "<stdin>", line 14
-:     _
-:     ^
-: SyntaxError: invalid syntax
+#+begin_example
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-NBS-direct -chunk 10000 > exclusion-study/none/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-POBI-direct -chunk 10000 > exclusion-study/none/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/none/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-NBS-direct -chunk 10000 > exclusion-study/noscots/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-NBS-direct -chunk 10000 > exclusion-study/lax/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-POBI-direct -chunk 10000 > exclusion-study/lax/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/lax/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-NBS-direct -chunk 10000 > exclusion-study/strict/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-POBI-direct -chunk 10000 > exclusion-study/strict/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/strict/NBS-vs-POBI-direct.log
+#+end_example
 
 ** PROPOSED require users to explicitly turn on each language
 As we continue to add more languages to org-babel, many of which will
@@ -3101,8 +3112,6 @@ the same for the other languages. [Dan]
 #+begin_src sh
 find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
 #+end_src
-
-#+resname:
 
 ** DONE Allow source blocks to be recognised when #+ are not first characters on the line
    I think Carsten has recently altered the core so that #+ can have
