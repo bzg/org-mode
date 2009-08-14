@@ -1,3 +1,8 @@
+2009-08-14  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* lisp/org-exp-bibtex.el (org-export-bibtex-preprocess): Use a
+	safer regular expression.
+
 2009-08-07  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* lisp/org-track.el: New file.

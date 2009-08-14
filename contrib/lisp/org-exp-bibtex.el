@@ -65,7 +65,7 @@
 
     ;; Convert #+BIBLIOGRAPHY: name style
     (goto-char (point-min))
-    (while (re-search-forward "^#\\+BIBLIOGRAPHY:\\s-+\\(\\w+\\)\\s-+\\(\\w+\\)\\([^\r\n]*\\)" nil t)
+    (while (re-search-forward "^#\\+BIBLIOGRAPHY:[ \t]+\\(\\S-+\\)[ \t]+\\(\\S-+\\)\\([^\r\n]*\\)" nil t)
       (let ((file  (match-string 1))
 	    (style (match-string 2))
 	    (opt   (org-exp-bibtex-options-to-plist (match-string 3))))
