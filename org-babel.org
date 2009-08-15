@@ -2945,6 +2945,19 @@ Whereas I was hoping for
 | 2 |
 | 3 |
 
+*Note*: to generate the above you can try using the new =raw= results
+header.
+
+#+begin_src python :results value raw
+'|'+'|\n|'.join(map(str, range(4)))+'|'
+#+end_src
+
+#+resname:
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
 This is now working, it doesn't return as a table because the value
 returned is technically a string.  To return the table mentioned above
 try something like the following.
