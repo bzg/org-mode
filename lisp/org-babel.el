@@ -93,7 +93,7 @@ then run `org-babel-pop-to-session'."
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
-	  org-babel-src-block-regexp))
+	  (substring org-babel-src-block-regexp 1)))
 
 (defun org-babel-set-interpreters (var value)
   (set-default var value)

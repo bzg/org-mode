@@ -1,5 +1,5 @@
 #+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
-#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate hideblocks
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
 #+TITLE:      Org-babel
@@ -322,8 +322,75 @@ to coexist and cooperate inside of a single document.
   :PROPERTIES:
   :CUSTOM_ID: literate-programming
   :END:
-  - org-babel-tangle
-  - org-babel-load-file
+
+[[http://en.wikipedia.org/wiki/Literate_programming][Literate Programming]] (LP) is a style of programming in which the final
+product is a work of literature (i.e. is intended for human
+consumption) which is structured in such a way that machine readable
+source code can be automatically extracted from the primary document.
+
+LP tools support two main operations, *weaving* (the extraction of
+human-consumable documentation) and *tangling* (the extraction of
+computer-consumable code).
+
+- weave :: Org-mode's [[http://orgmode.org/manual/Exporting.html#Exporting][existing exporting functionality]] enables the
+           generation of html or LaTeX documentation.
+
+- tangle :: The =org-babel-tangle= function can be used to extract
+            code from LP Org-mode files into source code files which
+            can then be compiled and used by a computer.
+
+            The organization of the source code blocks in the created
+            files is controlled through both the use of =tangle=
+            [[header-arguments][header arguments]] and through the expansion of [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] syntax
+            source block references.  These are demonstrated in the
+            [[literate-programming-example][following example]].
+
+*** Literate Programming Example
+    :PROPERTIES:
+    :CUSTOM_ID: literate-programming-example
+    :END:
+
+Tangling functionality is controlled by the =tangle= family of
+[[header-arguments]].  These arguments can be used to turn tangling on or
+off (the default) on the source code block, or the outline heading
+level.
+
+The following demonstrates the combination of three source code blocks
+into a single source code file using =org-babel-tangle=.
+
+The following two blocks will not be tangled by default since it has
+no =tangle= header argument.
+
+#+srcname: hello-world-prefix
+#+begin_src sh 
+  echo "/-----------------------------------------------------------\\"
+#+end_src
+
+#+srcname: hello-world-postfix
+#+begin_src sh 
+  echo "\-----------------------------------------------------------/"
+#+end_src
+
+The third block does have a =tangle= header argument indicating the
+name of the file to which it should be written.  It also has Noweb
+style references to the two previous source code blocks which will be
+expanded on tangling to include them in the output file as well.
+
+#+srcname: hello-world
+#+begin_src sh :tangle hello
+  # <<hello-world-prefix>>
+  echo "|                       hello world                         |"
+  # <<hello-world-postfix>>
+#+end_src
+
+Calling =org-babel-tangle= will result in the following being written
+to the =hello.sh= file.
+
+#+srcname: hello-world-output
+#+begin_src sh 
+
+#+end_src
+
 * Reference / Documentation
   :PROPERTIES:
   :CUSTOM_ID: reference-and-documentation
@@ -353,6 +420,9 @@ The basic syntax of source-code blocks is as follows:
           edited with `org-edit-special'.
 
 **** Header Arguments
+     :PROPERTIES:
+     :CUSTOM_ID: header-arguments
+     :END:
 
 - results :: results arguments specify what should be done with the
              output of source-code blocks
