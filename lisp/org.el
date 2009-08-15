@@ -4786,7 +4786,7 @@ If KWD is a number, get the corresponding match group."
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org-mode.
 
-This is the command invoked in Org-moe by the TAB key.  It's main purpose
+This is the command invoked in Org-mode by the TAB key.  Its main purpose
 is outine visibility cycling, but it also invokes other actions
 in special contexts.
 

@@ -370,7 +370,7 @@ with their values as determined by R."
 
 (defun org-export-interblocks-format-R (start end)
   "This is run over parts of the org-file which are between R
-blocks.  It's main use is to expand the \R{stuff} chunks for
+blocks.  Its main use is to expand the \R{stuff} chunks for
 export."
   (save-excursion
     (goto-char start)

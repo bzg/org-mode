@@ -173,7 +173,7 @@ We use a macro so that the test can happen at compilation time."
 
 (defsubst org-check-external-command (cmd &optional use no-error)
   "Check if external progam CMD for USE exists, error if not.
-When the program does exist, return it's path.
+When the program does exist, return its path.
 When it does not exist and NO-ERROR is set, return nil.
 Otherwise, throw an error.  The optional argument USE can describe what this
 program is needed for, so that the error message can be more informative."

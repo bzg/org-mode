@@ -563,7 +563,7 @@ optional argument MARKERP, return the position as a new marker."
 ;; so we do have to add it to `org-store-link-functions'.
 
 (defun org-id-store-link ()
-  "Store a link to the current entry, using it's ID."
+  "Store a link to the current entry, using its ID."
   (interactive)
   (let* ((link (org-make-link "id:" (org-id-get-create)))
 	 (desc (save-excursion

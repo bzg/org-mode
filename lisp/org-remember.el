@@ -256,6 +256,18 @@ is set."
   :group 'org-remember
   :type 'boolean)
 
+(defcustom org-remember-warn-about-backups t
+  "Non-nil means warn about backup files in `org-remember-backup-directory'.
+
+Set this to nil if you find that you don't need the warning.
+
+If you cancel remember calls frequently and know when they
+contain useful information (because you know that you made an
+error or emacs crashed, for example) nil is more useful.  In the
+opposite case, the default, t, is more useful."
+  :group 'org-remember
+  :type 'boolean)
+
 (defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
 (defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
 
@@ -1050,7 +1062,8 @@ See also the variable `org-reverse-note-order'."
 			  (directory-files
 			   org-remember-backup-directory nil
 			   "^remember-.*[0-9]$"))))
-		  (when (> n 0)
+		  (when (and org-remember-warn-about-backups
+                             (> n 0))
 		    (message
 		     "%d backup files (unfinished remember calls) in %s"
 		     n org-remember-backup-directory))))))))))
