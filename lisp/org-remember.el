@@ -596,7 +596,7 @@ to be run from that hook to function properly."
 			   propprompt
 			   (mapcar 'list (org-split-string allowed "[ \t]+"))
 			   nil 'req-match)
-			(org-completing-read-no-ido propprompt existing nil nil
+			(org-completing-read-no-i propprompt existing nil nil
 					     "" nil ""))))
 	      (org-set-property prop val)))
 	   (char
@@ -609,7 +609,7 @@ to be run from that hook to function properly."
 				   nil nil (list org-end-time-was-given)))
 	   (t
 	    (let (org-completion-use-ido)
-	      (insert (org-completing-read-no-ido
+	      (insert (org-completing-read-no-i
 		       (concat (if prompt prompt "Enter string")
 			       (if default (concat " [" default "]"))
 			       ": ")

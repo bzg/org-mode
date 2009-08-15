@@ -6173,6 +6173,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
     (setq end (point))
     (goto-char beg0)
     (when (> end beg)
+      (debug)
       (setq org-subtree-clip-folded folded)
       (when (or cut force-store-markers)
 	(org-save-markers-in-region beg end))
