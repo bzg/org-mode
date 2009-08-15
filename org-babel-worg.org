@@ -323,27 +323,38 @@ to coexist and cooperate inside of a single document.
   :CUSTOM_ID: literate-programming
   :END:
 
-[[http://en.wikipedia.org/wiki/Literate_programming][Literate Programming]] (LP) is a style of programming in which the final
-product is a work of literature (i.e. is intended for human
-consumption) which is structured in such a way that machine readable
-source code can be automatically extracted from the primary document.
+#+begin_quote 
+Let us change our traditional attitude to the con- struction of
+programs: Instead of imagining that our main task is to instruct a
+/computer/ what to do, let us concentrate rather on explaining to
+/human beings/ what we want a computer to do.
 
-LP tools support two main operations, *weaving* (the extraction of
-human-consumable documentation) and *tangling* (the extraction of
-computer-consumable code).
+The practitioner of literate programming can be regarded as an
+essayist, whose main concern is with exposition and excellence of
+style. Such an author, with thesaurus in hand, chooses the names of
+variables carefully and explains what each variable means. He or she
+strives for a program that is comprehensible because its concepts have
+been introduced in an order that is best for human understanding,
+using a mixture of formal and informal methods that reinforce each
+other.
 
-- weave :: Org-mode's [[http://orgmode.org/manual/Exporting.html#Exporting][existing exporting functionality]] enables the
-           generation of html or LaTeX documentation.
+ -- Donald Knuth
+#+end_quote
 
-- tangle :: The =org-babel-tangle= function can be used to extract
-            code from LP Org-mode files into source code files which
-            can then be compiled and used by a computer.
+Org-babel supports [[http://en.wikipedia.org/wiki/Literate_programming][Literate Programming]] (LP) by allowing the act of
+programming to take place inside of Org-mode documents.  The Org-mode
+file can then be exported (*woven* in LP speak) to html or LaTeX for
+consumption by a human, and the embedded source code can be extracted
+(*tangled* in LP speak) into structured source code files for
+consumption by a computer.
 
-            The organization of the source code blocks in the created
-            files is controlled through both the use of =tangle=
-            [[header-arguments][header arguments]] and through the expansion of [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] syntax
-            source block references.  These are demonstrated in the
-            [[literate-programming-example][following example]].
+To support these operations Org-babel relies on Org-mode's [[http://orgmode.org/manual/Exporting.html#Exporting][existing
+exporting functionality]] for *weaving* of documentation, and on the
+=org-babel-tangle= function which makes use of [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] [[reference-expansion][reference syntax]]
+for *tangling* of code files.
+
+The [[literate-programming-example][following example]] demonstrates the process of *tangling* in
+Org-babel.
 
 *** Literate Programming Example
     :PROPERTIES:
@@ -358,37 +369,65 @@ level.
 The following demonstrates the combination of three source code blocks
 into a single source code file using =org-babel-tangle=.
 
-The following two blocks will not be tangled by default since it has
-no =tangle= header argument.
+The following two blocks will not be tangled by default since they
+have no =tangle= header arguments.
 
 #+srcname: hello-world-prefix
-#+begin_src sh 
+#+begin_src sh :exports none
   echo "/-----------------------------------------------------------\\"
 #+end_src
 
+: #+srcname: hello-world-prefix
+: #+begin_src sh :exports none
+:   echo "/-----------------------------------------------------------\\"
+: #+end_src
+
 #+srcname: hello-world-postfix
-#+begin_src sh 
+#+begin_src sh :exports none
   echo "\-----------------------------------------------------------/"
 #+end_src
 
+: #+srcname: hello-world-postfix
+: #+begin_src sh :exports none
+:   echo "\-----------------------------------------------------------/"
+: #+end_src
+
+
 The third block does have a =tangle= header argument indicating the
-name of the file to which it should be written.  It also has Noweb
+name of the file to which it should be written.  It also has [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
 style references to the two previous source code blocks which will be
-expanded on tangling to include them in the output file as well.
+expanded during tangling to include them in the output file as well.
 
 #+srcname: hello-world
-#+begin_src sh :tangle hello
+#+begin_src sh :tangle hello :exports none
   # <<hello-world-prefix>>
   echo "|                       hello world                         |"
   # <<hello-world-postfix>>
 #+end_src
+
+: #+srcname: hello-world
+: #+begin_src sh :tangle hello :exports none
+:   # <<hello-world-prefix>>
+:   echo "|                       hello world                         |"
+:   # <<hello-world-postfix>>
+: #+end_src
 
 Calling =org-babel-tangle= will result in the following being written
 to the =hello.sh= file.
 
 #+srcname: hello-world-output
 #+begin_src sh 
-
+  #!/usr/bin/env sh
+  # generated by org-babel-tangle
+  
+  # [[file:~/src/org-babel/org-babel-worg.org::#literate-programming-example][block-16]]
+  # <<hello-world-prefix>>
+  echo "/-----------------------------------------------------------\\"
+  
+  echo "|                       hello world                         |"
+  # <<hello-world-postfix>>
+  echo "\-----------------------------------------------------------/"
+  # block-16 ends here
 #+end_src
 
 * Reference / Documentation
@@ -419,7 +458,7 @@ The basic syntax of source-code blocks is as follows:
 - body :: The actual source code which will be evaluated.  This can be
           edited with `org-edit-special'.
 
-**** Header Arguments
+*** Header Arguments
      :PROPERTIES:
      :CUSTOM_ID: header-arguments
      :END:
@@ -467,4 +506,12 @@ The basic syntax of source-code blocks is as follows:
   - other :: any other string passed to the =tangle= header argument
              is interpreted as a file basename to which the block will
              be exported
+
+*** Noweb reference syntax
+The [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] Literate Programming system allows named blocks of code to
+be referenced by using a =<<code-block-name>>= syntax.  When a
+document is tangled these references are replaced with the named code.
+An example is provided in the [[literate-programming-example]] in this
+document.
+
 
