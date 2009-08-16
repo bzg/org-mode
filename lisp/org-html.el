@@ -1161,7 +1161,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	  ;; Does this contain a reference to a footnote?
 	  (when org-export-with-footnotes
 	    (setq start 0)
-	    (while (string-match "\\([^* \t].*\\)?\\[\\([0-9]+\\)\\]" line start)
+	    (while (string-match "\\([^* \t].*?\\)\\[\\([0-9]+\\)\\]" line start)
 	      (if (get-text-property (match-beginning 2) 'org-protected line)
 		  (setq start (match-end 2))
 		(let ((n (match-string 2 line)) extra a)
@@ -1174,10 +1174,10 @@ lang=\"%s\" xml:lang=\"%s\">
 		  (setq line
 			(replace-match
 			 (format
-			  (concat (if (match-string 1 line) "%s" "")
+			  (concat "%s"
 			 	  (format org-export-html-footnote-format
 			 		  "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"))
-			  (match-string 1 line) n extra n n)
+			  (or (match-string 1 line) "") n extra n n)
 			 t t line))))))
 
 	  (cond
@@ -1331,10 +1331,11 @@ lang=\"%s\" xml:lang=\"%s\">
 		(let ((n (match-string 1 line)))
 		  (setq org-par-open t
 			line (replace-match
-			      (concat "<p class=\"footnote\">"
-				      (format org-export-html-footnote-format
-					      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>"
-					      n n n) t t line))))))
+			      (format
+			       (concat "<p class=\"footnote\">"
+				       (format org-export-html-footnote-format
+					       "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>"))
+			       n n n) t t line)))))
 	    ;; Check if the line break needs to be conserved
 	    (cond
 	     ((string-match "\\\\\\\\[ \t]*$" line)

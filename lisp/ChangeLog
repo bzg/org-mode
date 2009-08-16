@@ -1,3 +1,8 @@
+2009-08-16  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-html.el (org-export-as-html): Fix bug in footnote regexp.
+	(org-export-as-html): Format footnotes correctly.
+
 2009-08-14  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-fast-tag-selection): Avoid text properties on tags
