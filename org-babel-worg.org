@@ -68,6 +68,7 @@
        ;; (require 'org-babel-ditaa)     ;; ditaa
        ;; (require 'org-babel-dot)       ;; dot
        ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
+       ;; (require 'org-babel-ocaml)     ;; ocaml, and tuareg-mode
        ;; (require 'org-babel-python)    ;; python, and python-mode
        ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby mode
        ;; (require 'org-babel-sql)       ;; none

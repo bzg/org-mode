@@ -2618,13 +2618,31 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [10/13]
+** TODO Add languages [10/14]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
 Any new language should be implemented in a org-babel-lang.el file.
 Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
 [[file:lisp/org-babel-R.el][org-babel-R.el]].
+
+*** STARTED ocaml [1/3]
+
+- [X] Working for the simple case (no arguments, simple output)
+- [ ] correct handling of vector/list output
+- [ ] ability to import arguments
+
+#+begin_src ocaml
+let rec fib x =
+  match x with
+    | 0 -> 1
+    | 1 -> 1
+    | n -> fib(n - 1) + fib(n - 2) in
+  fib 12
+#+end_src
+
+#+resname:
+: - : int = 233
 
 *** TODO perl
 This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]

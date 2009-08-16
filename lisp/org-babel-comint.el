@@ -58,7 +58,7 @@ output, then return all process output.  This ensures that the
 filter is removed in case of an error or user `keyboard-quit'
 during execution of body."
   (declare (indent 3))
-  `(org-babel-comint-in-buffer buffer
+  `(org-babel-comint-in-buffer ,buffer
      (let ((string-buffer ""))
        (flet ((my-filt (text) (setq string-buffer (concat string-buffer text))))
          ;; setup filter
