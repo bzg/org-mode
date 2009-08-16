@@ -50,7 +50,7 @@
   (expand-file-name ".."
                     (file-name-directory
                      (or load-file-name buffer-file-name)))
-  "The directory holding the library-of-bael")
+  "The directory holding the library-of-babel")
 (defun org-babel-load-library-of-babel ()
   (org-babel-lob-ingest (expand-file-name "library-of-babel.org" org-babel-lob-dir)))
 
