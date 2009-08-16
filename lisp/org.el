@@ -13984,6 +13984,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
+  (require 'org-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
@@ -14005,7 +14006,17 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
     (with-temp-file texfile
       (insert org-format-latex-header
+	      (if org-export-latex-packages-alist
+		  (concat "\n"
+			  (mapconcat (lambda(p)
+				       (if (equal "" (car p))
+					   (format "\\usepackage{%s}" (cadr p))
+					 (format "\\usepackage[%s]{%s}"
+						 (car p) (cadr p))))
+				     org-export-latex-packages-alist "\n"))
+		"")
 	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
+    (debug)
     (let ((dir default-directory))
       (condition-case nil
 	  (progn

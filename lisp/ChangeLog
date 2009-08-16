@@ -1,5 +1,11 @@
 2009-08-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-latex.el (org-export-latex-packages-alist): Fix
+	customization type.
+
+	* org.el (org-create-formula-image): Also use
+	`org-export-latex-packages-alist'.
+
 	* org-html.el (org-export-as-html): Fix bug in footnote regexp.
 	(org-export-as-html): Format footnotes correctly.
 
