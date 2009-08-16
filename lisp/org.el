@@ -8952,7 +8952,8 @@ This function can be used in a hook."
     "BEGIN_SRC" "END_SRC"
     "CATEGORY" "COLUMNS"
     "CAPTION" "LABEL"
-    "BIND"))
+    "BIND"
+    "MACRO"))
 
 (defcustom org-structure-template-alist
   '(
