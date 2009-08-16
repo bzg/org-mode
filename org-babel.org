@@ -795,6 +795,23 @@ how should we share org-babel?
 This looks good.  It seems that their main topic to software tools for
 use by R programmers, and Org-babel is certainly that.
 
+*** existing similar tools
+try to collect pointers to similar tools 
+
+Reproducible Research
+- [[http://en.wikipedia.org/wiki/Sweave][Sweave]]
+
+Literate Programming
+- [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
+- [[http://www-cs-faculty.stanford.edu/~knuth/cweb.html][Cweb]]
+- [[http://www.lri.fr/~filliatr/ocamlweb/][OCamlWeb]]
+
+Meta Functional Programming
+- ?
+
+Programmable Spreadsheet
+- ?
+
 *** examples
 we need to think up some good examples
 
