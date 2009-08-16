@@ -46,7 +46,7 @@
 (add-to-list 'org-babel-tangle-langs '("ocaml" "ml"))
 
 (defvar org-babel-ocaml-eoe-indicator "\"org-babel-ocaml-eoe\";;")
-(defvar org-babel-ocaml-eoe-output "- : string = \"org-babel-ocaml-eoe\"")
+(defvar org-babel-ocaml-eoe-output "org-babel-ocaml-eoe")
 
 (defun org-babel-execute:ocaml (body params)
   "Execute a block of Ocaml code with org-babel.  This function
@@ -54,23 +54,68 @@ is called by `org-babel-execute-src-block' with the following
 variables pre-set using `multiple-value-bind'.
 
   (session vars result-params result-type)"
-  (message "executing Ocaml source code block")
+  (message "executing ocaml source code block")
   (let* ((full-body (concat
                      (mapconcat
                       (lambda (pair) (format "let %s = %s;" (car pair) (cdr pair)))
                       vars "\n") "\n" body "\n"))
-         (session (get-buffer (org-babel-prep-session:ocaml session params)))
+         (session (org-babel-prep-session:ocaml session params))
          (raw (org-babel-comint-with-output session org-babel-ocaml-eoe-output t
-                (insert full-body)
-                (insert ";;")
+                (insert (concat (org-babel-chomp full-body) " ;;"))
                 (comint-send-input nil t)
                 (insert org-babel-ocaml-eoe-indicator)
                 (comint-send-input nil t))))
-    (org-babel-trim (car raw))))
+    (org-babel-ocaml-parse-output (org-babel-trim (car raw)))))
 
 (defun org-babel-prep-session:ocaml (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (tuareg-run-caml) tuareg-interactive-buffer-name)
+  (let ((tuareg-interactive-buffer-name (if (and (not (string= session "none"))
+                                                 (not (string= session "default"))
+                                                 (stringp session))
+                                            session
+                                          tuareg-interactive-buffer-name)))
+    (save-window-excursion (tuareg-run-caml)
+                           (get-buffer tuareg-interactive-buffer-name))))
+
+(defun org-babel-ocaml-parse-output (output)
+  (let ((regexp "%s = \\(.+\\)$"))
+    (cond
+     ((string-match (format regexp "string") output)
+      (org-babel-read (match-string 1 output)))
+     ((or (string-match (format regexp "int") output)
+          (string-match (format regexp "float") output))
+      (string-to-number (match-string 1 output)))
+     ((string-match (format regexp "list") output)
+      (org-babel-ocaml-read-list (match-string 1 output)))
+     ((string-match (format regexp "array") output)
+      (org-babel-ocaml-read-array (match-string 1 output)))
+     (t (message "don't recognize type of %s" output) output))))
+
+(defun org-babel-ocaml-read-list (results)
+  "If the results look like a table, then convert them into an
+Emacs-lisp table, otherwise return the results as a string."
+  (org-babel-read
+   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
+       (org-babel-read
+        (replace-regexp-in-string
+         "\\[" "(" (replace-regexp-in-string
+                    "\\]" ")" (replace-regexp-in-string
+                               "; " " " (replace-regexp-in-string
+                                         "'" "\"" results)))))
+     results)))
+
+(defun org-babel-ocaml-read-array (results)
+  "If the results look like a table, then convert them into an
+Emacs-lisp table, otherwise return the results as a string."
+  (org-babel-read
+   (if (and (stringp results) (string-match "^\\[.+\\]$" results))
+       (org-babel-read
+        (replace-regexp-in-string
+         "\\[|" "(" (replace-regexp-in-string
+                    "|\\]" ")" (replace-regexp-in-string
+                               "; " " " (replace-regexp-in-string
+                                         "'" "\"" results)))))
+     results)))
 
 (provide 'org-babel-ocaml)
 ;;; org-babel-ocaml.el ends here

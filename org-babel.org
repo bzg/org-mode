@@ -2626,10 +2626,10 @@ Any new language should be implemented in a org-babel-lang.el file.
 Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
 [[file:lisp/org-babel-R.el][org-babel-R.el]].
 
-*** STARTED ocaml [1/3]
+*** STARTED ocaml [2/3]
 
 - [X] Working for the simple case (no arguments, simple output)
-- [ ] correct handling of vector/list output
+- [X] correct handling of vector/list output
 - [ ] ability to import arguments
 
 #+begin_src ocaml
@@ -2642,7 +2642,28 @@ let rec fib x =
 #+end_src
 
 #+resname:
-: - : int = 233
+: 233
+
+#+begin_src ocaml
+"string"
+#+end_src
+
+#+resname:
+: "string"
+
+#+begin_src ocaml
+[1; 2; 3; 4]
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 |
+
+#+begin_src ocaml
+[|"ocaml"; "array"|]
+#+end_src
+
+#+resname:
+| "ocaml" | "array" |
 
 *** TODO perl
 This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
