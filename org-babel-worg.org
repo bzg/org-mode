@@ -38,18 +38,44 @@
   :PROPERTIES:
   :CUSTOM_ID: getting-started
   :END:
-  Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
-#+begin_src sh
-git clone git://github.com/eschulte/org-babel.git
-#+end_src
 
-  And add the following lines to your .emacs, replacing the path as
-  appropriate. A good place to check that things are up and running
-  would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
-#+begin_src emacs-lisp
-  (add-to-list 'load-path "/path/to/org-babel/lisp")
-  (require 'org-babel-init)
-#+end_src
+  1) Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
+     #+begin_src sh
+     git clone git://github.com/eschulte/org-babel.git
+     #+end_src
+
+  2) Add the following lines to your .emacs, replacing the path as
+     appropriate. A good place to check that things are up and running
+     would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
+     #+begin_src emacs-lisp
+       (add-to-list 'load-path "/path/to/org-babel/lisp")
+       (require 'org-babel-init)
+     #+end_src
+
+  3) Then activate the subset of supported Org-babel languages which
+     you will want to be able to execute on your system.  The
+     following can be added to your .emacs and used to activate
+     languages.  It includes a brief list of the requirements for each
+     language.
+     #+begin_src emacs-lisp 
+       ;; Uncomment each of the following require lines if you want org-babel
+       ;; to support that language.  Each language has a comment explaining
+       ;; it's dependencies.  See the related files in lisp/langs for more
+       ;; detailed explanations of requirements.
+       ;; (require 'org-babel-R)         ;; R and ess-mode
+       ;; (require 'org-babel-asymptote) ;; asymptote
+       ;; (require 'org-babel-css)       ;; none
+       ;; (require 'org-babel-ditaa)     ;; ditaa
+       ;; (require 'org-babel-dot)       ;; dot
+       ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
+       ;; (require 'org-babel-python)    ;; python, and python-mode
+       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby mode
+       ;; (require 'org-babel-sql)       ;; none
+       ;; 
+       ;; Once you've activated languages, load the library of babel for
+       ;; pre-built helpers in the languages you will be using.
+       (org-babel-load-library-of-babel)
+     #+end_src
   
 * Basic org-babel functionality
   :PROPERTIES:
@@ -295,7 +321,9 @@ An article about computational science in a scientific publication is
 not the scholarship itself, it is merely advertising of the
 scholarship. The actual scholarship is the complete software
 development environment and the complete set of instructions which
-generated the figures. -- D. Donoho
+generated the figures.
+
+-- D. Donoho
 #+end_quote
 
 [[http://reproducibleresearch.net/index.php/Main_Page][Reproducible Research]] (RR) is the practice of distributing along with
