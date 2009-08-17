@@ -314,8 +314,8 @@ recreate your results, and perform their own analysis.
 Existing RR tools like [[http://en.wikipedia.org/wiki/Sweave][Sweave]] provide for the embedding of [[http://www.r-project.org/][R]] code into
 LaTeX documents.  While this is very useful, such documents often
 still require a large degree of "glue code" in the form of external
-shell scripts, python scripts, and Makefiles.  To my knowledge
-Org-babl is the only RR tool which allows multiple languages and data
+shell scripts, python scripts, and Makefiles.  To our knowledge
+Org-babel is the only RR tool which allows multiple languages and data
 to coexist and cooperate inside of a single document.
 
 * Literate programming
@@ -398,3 +398,5 @@ The basic syntax of source-code blocks is as follows:
              is interpreted as a file basename to which the block will
              be exported
 
+
+     
