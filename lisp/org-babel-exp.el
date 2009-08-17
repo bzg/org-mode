@@ -31,16 +31,17 @@
 ;;; Code:
 (require 'org-babel)
 (require 'org-exp-blocks)
-(add-to-list 'org-export-blocks '(src org-babel-exp-src-blocks))
+(org-export-blocks-add-block '(src org-babel-exp-src-blocks nil))
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 
 (defun org-babel-exp-src-blocks (body &rest headers)
   "Process src block for export.  Depending on the 'export'
 headers argument in replace the source code block with...
 
-both ---- the default, display the code and the results
+both ---- display the code and the results
 
-code ---- display the code inside the block but do not process
+code ---- the default, display the code inside the block but do
+          not process
 
 results - process the block and replace it with the results of
           execution
@@ -48,7 +49,7 @@ results - process the block and replace it with the results of
 none ----- do not display either code or results upon export"
   (interactive)
   (unless headers (error "org-babel can't process a source block without knowing the source code"))
-  (message "org-babel processing...")
+  (message "org-babel-exp processing...")
   (let ((lang (car headers))
         (params (org-babel-parse-header-arguments (mapconcat #'identity (cdr headers) " "))))
     (org-babel-exp-do-export lang body params)))
@@ -70,12 +71,12 @@ options and are taken from `org-babel-defualt-inline-header-args'."
 
 (defun org-babel-exp-do-export (lang body params &optional inline)
   (case (intern (or (cdr (assoc :exports params)) "code"))
-          ('none "")
-          ('code (org-babel-exp-code body lang params inline))
-          ('results (org-babel-exp-results body lang params inline))
-          ('both (concat (org-babel-exp-code body lang params inline)
-                     "\n\n"
-                     (org-babel-exp-results body lang params inline)))))
+    ('none "")
+    ('code (org-babel-exp-code body lang params inline))
+    ('results (org-babel-exp-results body lang params inline))
+    ('both (concat (org-babel-exp-code body lang params inline)
+                   "\n\n"
+                   (org-babel-exp-results body lang params inline)))))
 
 (defun org-babel-exp-code (body lang params &optional inline)
   (if inline
