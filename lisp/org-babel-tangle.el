@@ -216,7 +216,8 @@ the source-code block which holds BODY."
                       (if point
                           (save-excursion
                             (goto-char point)
-                            (concat "\n" (second (org-babel-get-src-block-info))))
+                            (concat "\n" (org-babel-expand-noweb-references
+                                          (org-babel-get-src-block-info))))
                         "")))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
