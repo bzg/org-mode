@@ -34,6 +34,12 @@
 ;;
 ;; 2) we are adding the "file" and "cmdline" header arguments
 
+;;; Requirements:
+
+;; - gnuplot :: http://www.gnuplot.info/
+;; 
+;; - gnuplot-mode :: http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html
+
 ;;; Code:
 (require 'org-babel)
 (require 'gnuplot)

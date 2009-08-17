@@ -40,39 +40,19 @@
 (require 'org-babel-lob)
 (require 'org-babel-tangle)
 
-;; load utility files
-(let ((util-dir (expand-file-name
-                 "util"
-                 (expand-file-name
-                  ".."
-                  (file-name-directory (or load-file-name buffer-file-name))))))
-  ;; other versions of htmlize can cause export problems
-  (load (expand-file-name "htmlize.el" util-dir))
-  ;; the newest version of inf-ruby.el is required by org-babel-ruby.el
-  (load (expand-file-name "inf-ruby.el" util-dir))
-  ;; gnuplot mode
-  (load (expand-file-name "gnuplot.el"
-                          (expand-file-name "gnuplot-mode.0.6.0" util-dir))))
-
 ;; language specific files
 (add-to-list 'load-path (expand-file-name "langs" (file-name-directory (or load-file-name buffer-file-name))))
-(require 'org-babel-ruby)
-(require 'org-babel-python)
-(require 'org-babel-sh)
 (require 'org-babel-lisp)
-(require 'org-babel-R)
-(require 'org-babel-ditaa)
-(require 'org-babel-gnuplot)
-(require 'org-babel-dot)
-(require 'org-babel-asymptote)
-(require 'org-babel-sql)
-(require 'org-babel-css)
+(require 'org-babel-sh)
 
-;; load the library of babel
-(org-babel-lob-ingest (expand-file-name
-                       "library-of-babel.org"
-                       (expand-file-name ".."
-                                         (file-name-directory (or load-file-name buffer-file-name)))))
+;; Library of babel
+(defvar org-babel-lob-dir
+  (expand-file-name ".."
+                    (file-name-directory
+                     (or load-file-name buffer-file-name)))
+  "The directory holding the library-of-babel")
+(defun org-babel-load-library-of-babel ()
+  (org-babel-lob-ingest (expand-file-name "library-of-babel.org" org-babel-lob-dir)))
 
 (provide 'org-babel-init)
 ;;; org-babel-init.el ends here

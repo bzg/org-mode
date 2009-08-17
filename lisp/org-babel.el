@@ -93,7 +93,7 @@ then run `org-babel-pop-to-session'."
 (defun org-babel-named-src-block-regexp-for-name (name)
   "Regexp used to match named src block."
   (concat "#\\+srcname:[ \t]*" (regexp-quote name) "[ \t\n]*"
-	  org-babel-src-block-regexp))
+	  (substring org-babel-src-block-regexp 1)))
 
 (defun org-babel-set-interpreters (var value)
   (set-default var value)
@@ -522,11 +522,15 @@ silent -- no results are inserted"
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
-              (org-babel-examplize-region (point) (progn (insert result) (point))))
+              (if (or (member "raw" insert) (member "org" insert))
+                  (progn (save-excursion (insert result))
+                         (if (org-at-table-p) (org-cycle)))
+                (org-babel-examplize-region (point) (progn (insert result) (point)))))
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
-                      (if (consp (car result)) result (list result))
+                      (if (and (listp (car result)) (listp (cdr (car result))))
+                          result (list result))
                       '(:fmt (lambda (cell) (format "%S" cell)))) "\n"))
             (forward-line -1)
             (org-cycle))))
@@ -542,22 +546,19 @@ relies on `org-babel-insert-result'."
   (interactive)
   (save-excursion
     (goto-char (org-babel-where-is-src-block-result t)) (forward-line 1)
-    (delete-region (point) (org-babel-result-end))))
+    (delete-region (save-excursion (move-beginning-of-line 0) (point)) (org-babel-result-end))))
 
 (defun org-babel-result-end ()
   "Return the point at the end of the current set of results"
   (save-excursion
     (if (org-at-table-p)
-        (org-table-end)
+        (progn (goto-char (org-table-end)) (forward-line 1) (point))
       (let ((case-fold-search nil))
 	(if (looking-at "#\\+begin_example")
 	    (search-forward "#+end_example" nil t)
-	  (progn
-	    (while (if (looking-at "\\(: \\|\\[\\[\\)")
-		       (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-				(forward-line 1)) t))
-	      (forward-line 1))
-	    (forward-line -1))))
+	  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                   (forward-line 1))
+                 (forward-line 1))))
       (point))))
 
 (defun org-babel-result-to-file (result)
@@ -666,7 +667,8 @@ This is taken almost directly from `org-read-prop'."
 
 (defun org-babel-number-p (string)
   "Return t if STRING represents a number"
-  (if (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+  (if (and (string-match "^[[:digit:]]*\\.?[[:digit:]]*$" string)
+           (= (match-end 0) (length string)))
       (string-to-number string)))
 
 (defun org-babel-import-elisp-from-file (file-name)

@@ -1,5 +1,5 @@
 #+OPTIONS:    H:3 num:nil toc:2 \n:nil @:t ::t |:t ^:t -:t f:t *:t TeX:t LaTeX:t skip:nil d:(HIDE) tags:not-in-toc
-#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate
+#+STARTUP:    align fold nodlcheck hidestars oddeven lognotestate hideblocks
 #+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
 #+TAGS:       Write(w) Update(u) Fix(f) Check(c) 
 #+TITLE:      Org-babel
@@ -38,18 +38,45 @@
   :PROPERTIES:
   :CUSTOM_ID: getting-started
   :END:
-  Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
-#+begin_src sh
-git clone git://github.com/eschulte/org-babel.git
-#+end_src
 
-  And add the following lines to your .emacs, replacing the path as
-  appropriate. A good place to check that things are up and running
-  would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
-#+begin_src emacs-lisp
-  (add-to-list 'load-path "/path/to/org-babel/lisp")
-  (require 'org-babel-init)
-#+end_src
+  1) Grab the latest code from the git repo at [[http://github.com/eschulte/org-babel/tree/master][github/org-babel]]
+     #+begin_src sh
+     git clone git://github.com/eschulte/org-babel.git
+     #+end_src
+
+  2) Add the following lines to your .emacs, replacing the path as
+     appropriate. A good place to check that things are up and running
+     would the examples in [[* Basic org-babel functionality][Basic org-babel functionality]].
+     #+begin_src emacs-lisp
+       (add-to-list 'load-path "/path/to/org-babel/lisp")
+       (require 'org-babel-init)
+     #+end_src
+
+  3) Then activate the subset of supported Org-babel languages which
+     you will want to be able to execute on your system.  The
+     following can be added to your .emacs and used to activate
+     languages.  It includes a brief list of the requirements for each
+     language.
+     #+begin_src emacs-lisp 
+       ;; Uncomment each of the following require lines if you want org-babel
+       ;; to support that language.  Each language has a comment explaining
+       ;; it's dependencies.  See the related files in lisp/langs for more
+       ;; detailed explanations of requirements.
+       ;; (require 'org-babel-R)         ;; R and ess-mode
+       ;; (require 'org-babel-asymptote) ;; asymptote
+       ;; (require 'org-babel-css)       ;; none
+       ;; (require 'org-babel-ditaa)     ;; ditaa
+       ;; (require 'org-babel-dot)       ;; dot
+       ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
+       ;; (require 'org-babel-ocaml)     ;; ocaml, and tuareg-mode
+       ;; (require 'org-babel-python)    ;; python, and python-mode
+       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby mode
+       ;; (require 'org-babel-sql)       ;; none
+       ;; 
+       ;; Once you've activated languages, load the library of babel for
+       ;; pre-built helpers in the languages you will be using.
+       (org-babel-load-library-of-babel)
+     #+end_src
   
 * Basic org-babel functionality
   :PROPERTIES:
@@ -295,7 +322,9 @@ An article about computational science in a scientific publication is
 not the scholarship itself, it is merely advertising of the
 scholarship. The actual scholarship is the complete software
 development environment and the complete set of instructions which
-generated the figures. -- D. Donoho
+generated the figures.
+
+-- D. Donoho
 #+end_quote
 
 [[http://reproducibleresearch.net/index.php/Main_Page][Reproducible Research]] (RR) is the practice of distributing along with
@@ -322,8 +351,114 @@ to coexist and cooperate inside of a single document.
   :PROPERTIES:
   :CUSTOM_ID: literate-programming
   :END:
-  - org-babel-tangle
-  - org-babel-load-file
+
+#+begin_quote 
+Let us change our traditional attitude to the con- struction of
+programs: Instead of imagining that our main task is to instruct a
+/computer/ what to do, let us concentrate rather on explaining to
+/human beings/ what we want a computer to do.
+
+The practitioner of literate programming can be regarded as an
+essayist, whose main concern is with exposition and excellence of
+style. Such an author, with thesaurus in hand, chooses the names of
+variables carefully and explains what each variable means. He or she
+strives for a program that is comprehensible because its concepts have
+been introduced in an order that is best for human understanding,
+using a mixture of formal and informal methods that reinforce each
+other.
+
+ -- Donald Knuth
+#+end_quote
+
+Org-babel supports [[http://en.wikipedia.org/wiki/Literate_programming][Literate Programming]] (LP) by allowing the act of
+programming to take place inside of Org-mode documents.  The Org-mode
+file can then be exported (*woven* in LP speak) to html or LaTeX for
+consumption by a human, and the embedded source code can be extracted
+(*tangled* in LP speak) into structured source code files for
+consumption by a computer.
+
+To support these operations Org-babel relies on Org-mode's [[http://orgmode.org/manual/Exporting.html#Exporting][existing
+exporting functionality]] for *weaving* of documentation, and on the
+=org-babel-tangle= function which makes use of [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] [[reference-expansion][reference syntax]]
+for *tangling* of code files.
+
+The [[literate-programming-example][following example]] demonstrates the process of *tangling* in
+Org-babel.
+
+*** Literate Programming Example
+    :PROPERTIES:
+    :CUSTOM_ID: literate-programming-example
+    :END:
+
+Tangling functionality is controlled by the =tangle= family of
+[[header-arguments]].  These arguments can be used to turn tangling on or
+off (the default) on the source code block, or the outline heading
+level.
+
+The following demonstrates the combination of three source code blocks
+into a single source code file using =org-babel-tangle=.
+
+The following two blocks will not be tangled by default since they
+have no =tangle= header arguments.
+
+#+srcname: hello-world-prefix
+#+begin_src sh :exports none
+  echo "/-----------------------------------------------------------\\"
+#+end_src
+
+: #+srcname: hello-world-prefix
+: #+begin_src sh :exports none
+:   echo "/-----------------------------------------------------------\\"
+: #+end_src
+
+#+srcname: hello-world-postfix
+#+begin_src sh :exports none
+  echo "\-----------------------------------------------------------/"
+#+end_src
+
+: #+srcname: hello-world-postfix
+: #+begin_src sh :exports none
+:   echo "\-----------------------------------------------------------/"
+: #+end_src
+
+
+The third block does have a =tangle= header argument indicating the
+name of the file to which it should be written.  It also has [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
+style references to the two previous source code blocks which will be
+expanded during tangling to include them in the output file as well.
+
+#+srcname: hello-world
+#+begin_src sh :tangle hello :exports none
+  # <<hello-world-prefix>>
+  echo "|                       hello world                         |"
+  # <<hello-world-postfix>>
+#+end_src
+
+: #+srcname: hello-world
+: #+begin_src sh :tangle hello :exports none
+:   # <<hello-world-prefix>>
+:   echo "|                       hello world                         |"
+:   # <<hello-world-postfix>>
+: #+end_src
+
+Calling =org-babel-tangle= will result in the following being written
+to the =hello.sh= file.
+
+#+srcname: hello-world-output
+#+begin_src sh 
+  #!/usr/bin/env sh
+  # generated by org-babel-tangle
+  
+  # [[file:~/src/org-babel/org-babel-worg.org::#literate-programming-example][block-16]]
+  # <<hello-world-prefix>>
+  echo "/-----------------------------------------------------------\\"
+  
+  echo "|                       hello world                         |"
+  # <<hello-world-postfix>>
+  echo "\-----------------------------------------------------------/"
+  # block-16 ends here
+#+end_src
+
 * Reference / Documentation
   :PROPERTIES:
   :CUSTOM_ID: reference-and-documentation
@@ -352,7 +487,10 @@ The basic syntax of source-code blocks is as follows:
 - body :: The actual source code which will be evaluated.  This can be
           edited with `org-edit-special'.
 
-**** Header Arguments
+*** Header Arguments
+     :PROPERTIES:
+     :CUSTOM_ID: header-arguments
+     :END:
 
 - results :: results arguments specify what should be done with the
              output of source-code blocks
@@ -398,5 +536,9 @@ The basic syntax of source-code blocks is as follows:
              is interpreted as a file basename to which the block will
              be exported
 
-
-     
+*** Noweb reference syntax
+The [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]] Literate Programming system allows named blocks of code to
+be referenced by using a =<<code-block-name>>= syntax.  When a
+document is tangled these references are replaced with the named code.
+An example is provided in the [[literate-programming-example]] in this
+document.

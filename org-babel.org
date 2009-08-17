@@ -225,7 +225,7 @@ Maybe this should be done in backend specific manners.
 
 The listings package may provide for naming a source-code block...
 
-** PROPOSED new results types (org, html, latex)
+** STARTED new results types (org, html, latex)
    Thanks to Tom Short for this recommendation.
 
    - raw or org :: in which case the results are implemented raw, unquoted
@@ -249,6 +249,35 @@ The listings package may provide for naming a source-code block...
 We actually might want to remove the =#+resname= line if the results
 type is org-mode, not sure...  Either way I don't think there is a
 good way to capture/remove org type results.
+
+*** raw
+
+Added a =raw= results header argument, which will insert the results
+of a source-code block into an org buffer un-escaped.  Also, if the
+results look like a table, then the table will be aligned.
+
+#+srcname: raw-table-demonstration
+#+begin_src ruby :results output raw
+  puts "| root | square |"
+  puts "|---"
+  10.times do |n|
+    puts "| #{n} | #{n*n} |"
+  end
+#+end_src
+
+#+resname:
+| root | square |
+|------+--------|
+|    0 |      0 |
+|    1 |      1 |
+|    2 |      4 |
+|    3 |      9 |
+|    4 |     16 |
+|    5 |     25 |
+|    6 |     36 |
+|    7 |     49 |
+|    8 |     64 |
+|    9 |     81 |
 
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
@@ -757,7 +786,32 @@ how should we share org-babel?
     editors, Compstat 2002 - Proceedings in Computational Statistics,
     pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
 
+    also
+
+    We could also look at the Journals publishing these [[http://www.reproducibleresearch.net/index.php/RR_links#Articles_about_RR_.28chronologically.29][Reproducible
+    Research articles]].
+    
 *** PROPOSED an article in [[http://journal.r-project.org/][The R Journal]]
+This looks good.  It seems that their main topic to software tools for
+use by R programmers, and Org-babel is certainly that.
+
+*** existing similar tools
+try to collect pointers to similar tools 
+
+Reproducible Research
+- [[http://en.wikipedia.org/wiki/Sweave][Sweave]]
+
+Literate Programming
+- [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
+- [[http://www-cs-faculty.stanford.edu/~knuth/cweb.html][Cweb]]
+- [[http://www.lri.fr/~filliatr/ocamlweb/][OCamlWeb]]
+
+Meta Functional Programming
+- ?
+
+Programmable Spreadsheet
+- ?
+
 *** examples
 we need to think up some good examples
 
@@ -2581,13 +2635,52 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [10/13]
+** TODO Add languages [10/14]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
 Any new language should be implemented in a org-babel-lang.el file.
 Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
 [[file:lisp/org-babel-R.el][org-babel-R.el]].
+
+*** STARTED ocaml [2/3]
+
+- [X] Working for the simple case (no arguments, simple output)
+- [X] correct handling of vector/list output
+- [ ] ability to import arguments
+
+#+begin_src ocaml
+let rec fib x =
+  match x with
+    | 0 -> 1
+    | 1 -> 1
+    | n -> fib(n - 1) + fib(n - 2) in
+  fib 12
+#+end_src
+
+#+resname:
+: 233
+
+#+begin_src ocaml
+"string"
+#+end_src
+
+#+resname:
+: "string"
+
+#+begin_src ocaml
+[1; 2; 3; 4]
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 |
+
+#+begin_src ocaml
+[|"ocaml"; "array"|]
+#+end_src
+
+#+resname:
+| "ocaml" | "array" |
 
 *** TODO perl
 This could probably be added to [[file:lisp/org-babel-script.el][org-babel-script.el]]
@@ -2782,8 +2875,8 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [32/41]
-** TODO Python session evaluation bug
+* Bugs [37/41]
+** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
    (with :results value, as below, you see the error message)
@@ -2807,6 +2900,7 @@ dot("$(2a,0)$",(2,0),N+E);
           outfile = os.path.join(outdir, '%s-vs-%s-direct' % (case, control))
           cmd = 'snptest %s -frequentist 1 -hwe ' % ('-gen_gz' if format == '.gen.gz' else '')
           cmd += '-cases %s %s ' % (case + format, case + '.sample')
+
           cmd += '-controls %s %s ' % (control + format, control + '.sample')
           cmd += '-exclude_samples %s ' % os.path.join(outdir, 'exclusions')
           cmd += '-o %s ' % outfile
@@ -2817,13 +2911,22 @@ dot("$(2a,0)$",(2,0),N+E);
 #+end_src
 
 #+resname:
-: File "<stdin>", line 14
-:     _
-:     ^
-: SyntaxError: invalid syntax
+#+begin_example
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-NBS-direct -chunk 10000 > exclusion-study/none/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/58C-vs-POBI-direct -chunk 10000 > exclusion-study/none/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/none/exclusions -o exclusion-study/none/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/none/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-NBS-direct -chunk 10000 > exclusion-study/noscots/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/58C-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/noscots/exclusions -o exclusion-study/noscots/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/noscots/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-NBS-direct -chunk 10000 > exclusion-study/lax/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/58C-vs-POBI-direct -chunk 10000 > exclusion-study/lax/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/lax/exclusions -o exclusion-study/lax/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/lax/NBS-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls NBS.gen.gz NBS.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-NBS-direct -chunk 10000 > exclusion-study/strict/58C-vs-NBS-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases 58C.gen.gz 58C.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/58C-vs-POBI-direct -chunk 10000 > exclusion-study/strict/58C-vs-POBI-direct.log
+snptest -gen_gz -frequentist 1 -hwe -cases NBS.gen.gz NBS.sample -controls POBI.gen.gz POBI.sample -exclude_samples exclusion-study/strict/exclusions -o exclusion-study/strict/NBS-vs-POBI-direct -chunk 10000 > exclusion-study/strict/NBS-vs-POBI-direct.log
+#+end_example
 
-
-** PROPOSED require users to explicitly turn on each language
+** DONE require users to explicitly turn on each language
 As we continue to add more languages to org-babel, many of which will
 require new major-modes we need to re-think how languages are added to
 org-babel.
@@ -2845,20 +2948,19 @@ we add something like the following to the instillation instructions
 ;; it's dependencies.  See the related files in lisp/langs for more
 ;; detailed explanations of requirements.
 ;; 
-;; (require 'org-babel-ruby)      ;; inf-ruby mode, ruby and irb must be installed on your system
-;; (require 'org-babel-python)    ;; python-mode
 ;; (require 'org-babel-R)         ;; ess-mode
-;; (require 'org-babel-gnuplot)   ;; gnuplot-mode
-;; (require 'org-babel-dot)       ;; dot be installed on your system
 ;; (require 'org-babel-asymptote) ;; asymptote be installed on your system
-;; (require 'org-babel-ditaa)     ;; ditaa be installed on your system
-;; (require 'org-babel-sql)       ;; none
 ;; (require 'org-babel-css)       ;; none
+;; (require 'org-babel-ditaa)     ;; ditaa be installed on your system
+;; (require 'org-babel-dot)       ;; dot be installed on your system
+;; (require 'org-babel-gnuplot)   ;; gnuplot-mode
+;; (require 'org-babel-python)    ;; python-mode
+;; (require 'org-babel-ruby)      ;; inf-ruby mode, ruby and irb must be installed on your system
+;; (require 'org-babel-sql)       ;; none
 #+end_src
 
-note that =org-babel-sh=, =org-babel-emacs-lisp=, and
- are not included in the list as they can safely be
-assumed to work on any system.
+note that =org-babel-sh=, =org-babel-emacs-lisp= are not included in
+the list as they can safely be assumed to work on any system.
 
 *** impetus
 we should come up with a way to gracefully degrade when support for a
@@ -2879,16 +2981,47 @@ I have this error showing up:
 executing Ruby source code block
 apply: Searching for program: no such file or directory, irb
 
-** TODO problem with newlines in output when :results value
+** DONE problem with newlines in output when :results value
+
 #+begin_src python :results value
 '\n'.join(map(str, range(4)))
 #+end_src
 
 #+resname:
 : 0
+: 1
+: 2
+: 3
 
 Whereas I was hoping for
 
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+*Note*: to generate the above you can try using the new =raw= results
+header.
+
+#+begin_src python :results value raw
+'|'+'|\n|'.join(map(str, range(4)))+'|'
+#+end_src
+
+#+resname:
+| 0 |
+| 1 |
+| 2 |
+| 3 |
+
+This is now working, it doesn't return as a table because the value
+returned is technically a string.  To return the table mentioned above
+try something like the following.
+
+#+begin_src python
+[[0], [1], [2], [3]]
+#+end_src
+
+#+resname:
 | 0 |
 | 1 |
 | 2 |
@@ -2984,7 +3117,7 @@ even a third"
 #+begin_src sh
 size=5
 #+end_src
-** TODO non-orgtbl formatted lists
+** DONE non-orgtbl formatted lists
 for example
 
 #+srcname: this-doesn't-match-orgtbl
@@ -2992,8 +3125,17 @@ for example
 '((:results . "replace"))
 #+end_src
 
-#+resname: this-doesn't-match-orgtbl
-   
+#+resname:
+| (:results . "replace") |
+
+#+srcname: this-probably-also-wont-work
+#+begin_src emacs-lisp :results replace
+'(eric schulte)
+#+end_src
+
+#+resname:
+| eric | schulte |
+
 ** PROPOSED allow un-named arguments
 
 #+srcname: f(x)
@@ -3032,10 +3174,10 @@ identical: output results in raw stdout contents, whereas value
 converts it to elisp, perhaps to a table if it looks tabular. This is
 the same for the other languages. [Dan]
    
-** TODO adding blank line when source-block produces no output
+** DONE adding blank line when source-block produces no output
 
 #+srcname: show-org-babel-trim
-#+begin_src sh 
+#+begin_src sh
 find . \( -path \*/SCCS -o -path \*/RCS -o -path \*/CVS -o -path \*/MCVS -o -path \*/.svn -o -path \*/.git -o -path \*/.hg -o -path \*/.bzr -o -path \*/_MTN -o -path \*/_darcs -o -path \*/\{arch\} \) -prune -o  -type f \( -iname \*.el \) -exec grep -i -nH -e org-babel-trim {} \;
 #+end_src
 
