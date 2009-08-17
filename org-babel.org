@@ -2875,7 +2875,8 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [37/41]
+* Bugs [37/42]
+** TODO failing to write srcname to resname when evaluating a named block
 ** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
