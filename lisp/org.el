@@ -15384,13 +15384,14 @@ information about your Org-mode version and configuration."
 	 (erase-buffer)
 	 (insert "You are about to submit a bug report to the Org-mode mailing list.
 
-The bug reporter would like to add your Org-mode and Outline
-configuration to the bug report.  This greatly simplifies the work of the
-maintainer, so please consider doing that.
+The bug reporter would like to add your Org-mode and Outline configuration
+to the bug report.  This greatly simplifies the work of the maintainer
+and other experts on the mailing list, so please consider doing that.
 
 HOWEVER, some variables you have customized may contain private information
-like names of customers.  So if you answer yes to the prompt, you might want
-to check and remove such private information before sending the email.")
+like names of customers or girlfriends.  So if you answer yes to the prompt,
+you might want to check and remove such private information before sending
+the email.")
 	 (add-text-properties (point-min) (point-max) '(face org-warning))
 	 (ding)
 	 (when (yes-or-no-p "Include your Org-mode configuration ")
