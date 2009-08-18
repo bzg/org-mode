@@ -1,3 +1,8 @@
+2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-get-restriction-and-command): Remove
+	properties only if MATCH really is a string.
+
 2009-08-16  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-latex.el (org-export-latex-packages-alist): Fix

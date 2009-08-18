@@ -1807,7 +1807,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	  (while (setq entry (pop custom1))
 	    (setq key (car entry) desc (nth 1 entry)
 		  type (nth 2 entry)
-		  match (org-no-properties (copy-sequence (nth 3 entry))))
+		  match (nth 3 entry))
 	    (if (> (length key) 1)
 		(add-to-list 'prefixes (string-to-char key))
 	      (insert
@@ -1833,6 +1833,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 		 (t "???"))
 		(cond
 		 ((stringp match)
+		  (setq match (copy-sequence match))
 		  (org-add-props match nil 'face 'org-warning))
 		 (match
 		  (format "set of %d commands" (length match)))
