@@ -218,8 +218,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [41/64]
-** TODO org-bable-tangle: no default extension if one already exists
+* Tasks [42/64]
 ** TODO source-name visible in LaTeX and html exports
 Maybe this should be done in backend specific manners.
 
@@ -278,7 +277,6 @@ results look like a table, then the table will be aligned.
 |    7 |     49 |
 |    8 |     64 |
 |    9 |     81 |
-
 ** PROPOSED raise elisp error when source-blocks return errors
 Not sure how/if this would work, but it may be desirable.
 
@@ -323,7 +321,6 @@ but with preference given to
      update the source-code blocks timestamp.  If the user edits the
      contents of a source-code block directly I can think of no
      efficient way of maintaining the timestamp.
-
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
@@ -633,7 +630,6 @@ org-mode core
      
 **** DONE a hook called when the src edit buffer is created
      This should be implemented in the org-mode core
-
 ** TODO resolve references to other org buffers/files
    This would allow source blocks to call upon tables, source-blocks,
    and results in other org buffers/files.
@@ -721,7 +717,6 @@ above would have a couple of points in its favour:
 In interactive use we might want to allow the user to choose between
 screen and file output. In non-interactive use such as export, it
 would be file output (subject to the :exports directives).
-
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
 This simple example of multilingual chaining produces vector output if
@@ -845,7 +840,6 @@ du -sc ~/*
 #+begin_src emacs-lisp :var sizes=sizes :results replace
 (mapcar #'car sizes)
 #+end_src
-
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
@@ -878,7 +872,6 @@ we should color these blocks differently
 
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
-
 ** TODO LoB: re-implement plotting and analysis functions from org-R
    I'll do this soon, now that we things are a bit more settled and we
    have column names in R.
@@ -1064,7 +1057,6 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
-
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
    used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
@@ -1179,7 +1171,6 @@ I have no idea how this could work...
     edit out some lines, and then convert it to org-babel format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
-
 ** DEFERRED improve the source-block snippet
 any real improvement seems somewhat beyond the ability of yasnippet
 for now.
@@ -1257,7 +1248,7 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
-
+** DONE org-bable-tangle: no default extension if one already exists
 ** DONE take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.

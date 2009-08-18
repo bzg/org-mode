@@ -106,7 +106,9 @@ exported source code blocks by language."
                                      ((> (length tangle) 0) tangle))
                                     target-file))
                      (file-name (when base-name
-                                  (concat base-name "." ext))))
+                                  (if (string= base-name
+                                               (file-name-sans-extension base-name))
+                                      (concat base-name "." ext) base-name))))
                 ;; ;; debugging
                 ;; (message "tangle=%S base-name=%S file-name=%S"
                 ;;          tangle base-name file-name)
