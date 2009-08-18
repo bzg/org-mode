@@ -102,10 +102,22 @@
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
-  (let ((version (format "Org-mode version %s" org-version)))
-    (message version)
-    (if here
-	(insert version))))
+  (let* ((org-version org-version)
+	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
+    (if (file-exists-p (expand-file-name ".git" dir))
+	(progn
+	 (shell-command (concat "cd " dir " && git describe --abbrev=4 HEAD"))
+	 (save-excursion
+	   (set-buffer "*Shell Command Output*")
+	   (goto-char (point-min))
+	   (replace-regexp "-" ".")
+	   (goto-char (point-min))
+	   (re-search-forward "[^\n]+")
+	   (setq org-version (concat org-version " (" (match-string 0) ")")))))
+    (let ((version (format "Org-mode version %s" org-version)))
+      (message version)
+      (if here
+	  (insert version)))))
 
 ;;; Compatibility constants
 
