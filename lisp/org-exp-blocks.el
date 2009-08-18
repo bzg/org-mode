@@ -203,9 +203,8 @@ specified in BLOCKS which default to the value of
                                      ""
                                    (apply func (save-match-data (org-remove-indentation (match-string 4)))
                                           (split-string (match-string 3) " ")))) t t)
-                ;; indent the replaced match
-                (indent-region (match-beginning 0) (match-end 0) indentation)
-                ))
+                ;; indent block
+                (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
 	  (setf start (save-match-data (match-end 0))))
 	(mapcar (lambda (type)
 		  (interblock start (point-max) type))

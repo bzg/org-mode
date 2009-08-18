@@ -1,5 +1,8 @@
 2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp-blocks.el (org-export-blocks-preprocess): Use
+	`indent-code-rigidly' to indent.
+
 	* org-agenda.el (org-agenda-get-restriction-and-command): Remove
 	properties only if MATCH really is a string.
 
