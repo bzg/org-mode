@@ -4994,7 +4994,7 @@ in special contexts.
 	(skip-chars-forward " \t\n")
 	(beginning-of-line 1) ; in case this is an item
 	)
-      (setq eos (1- (point))))
+      (setq eos (if (eobp) (point) (1- (point)))))
     ;; Find out what to do next and set `this-command'
     (cond
      ((= eos eoh)
