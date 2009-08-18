@@ -103,6 +103,7 @@
 With prefix arg HERE, insert it at point."
   (interactive "P")
   (let* ((org-version org-version)
+	 (git-version)
 	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
     (if (file-exists-p (expand-file-name ".git" dir))
 	(progn
@@ -113,7 +114,11 @@ With prefix arg HERE, insert it at point."
 	   (replace-regexp "-" ".")
 	   (goto-char (point-min))
 	   (re-search-forward "[^\n]+")
-	   (setq org-version (concat org-version " (" (match-string 0) ")")))))
+	   (setq git-version (match-string 0))
+	   (shell-command (concat "cd " dir " && git diff-index --name-only HEAD --"))
+	   (unless (eql 1 (point-max))
+	     (setq git-version (concat git-version ".dirty")))
+	   (setq org-version (concat org-version " (" git-version ")")))))
     (let ((version (format "Org-mode version %s" org-version)))
       (message version)
       (if here
