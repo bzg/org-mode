@@ -93,6 +93,7 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\section{%s}" . "\\section*{%s}")
      ("\\subsection{%s}" . "\\subsection*{%s}")
@@ -105,6 +106,7 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -117,6 +119,7 @@
 \\usepackage[T1]{fontenc}
 \\usepackage{graphicx}
 \\usepackage{longtable}
+\\usepackage{soul}
 \\usepackage{hyperref}"
      ("\\part{%s}" . "\\part*{%s}")
      ("\\chapter{%s}" . "\\chapter*{%s}")
@@ -166,7 +169,7 @@ to represent the section title."
   '(("*" "\\textbf{%s}" nil)
     ("/" "\\emph{%s}" nil)
     ("_" "\\underline{%s}" nil)
-    ("+" "\\texttt{%s}" nil)
+    ("+" "\\st{%s}" nil)
     ("=" "\\verb" t)
     ("~" "\\verb" t))
   "Alist of LaTeX expressions to convert emphasis fontifiers.
