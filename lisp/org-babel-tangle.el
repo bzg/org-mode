@@ -39,6 +39,15 @@ shebang(#!) line to use when writing out the language to file,
 and an optional flag indicating that the language is not
 commentable.")
 
+;; This is just a place holder until this variable (or comparable) is
+;; inserted into org-mode
+(defcustom org-src-lang-modes
+  '(:ocaml "tuareg")
+  "Property list mapping languages to their major mode.
+The key is the language name, the value is the string that should
+be inserted as the name of the major mode."
+  :type 'plist)
+
 (defun org-babel-load-file (file)
   "Load the contents of the Emacs Lisp source code blocks in the
 org-mode formatted FILE.  This function will first export the
