@@ -120,9 +120,9 @@ With prefix arg HERE, insert it at point."
 	     (setq git-version (concat git-version ".dirty")))
 	   (setq org-version (concat org-version " (" git-version ")")))))
     (let ((version (format "Org-mode version %s" org-version)))
+      (if here (insert version))
       (message version)
-      (if here
-	  (insert version)))))
+      version)))
 
 ;;; Compatibility constants
 
@@ -15346,6 +15346,7 @@ See the individual commands for more information."
      "--"
      ["Expand This Menu" org-create-customize-menu
       (fboundp 'customize-menu-create)])
+    ["Send bug report" org-submit-bug-report t]
     "--"
     ("Refresh/Reload"
      ["Refresh setup current buffer" org-mode-restart t]
@@ -15358,6 +15359,61 @@ See the individual commands for more information."
 With optional NODE, go directly to that node."
   (interactive)
   (info (format "(org)%s" (or node ""))))
+
+;;;###autoload
+(defun org-submit-bug-report ()
+  "Submit a bug report on Org-mode via mail.
+
+Don't hesitate to report any problems or inaccurate documentation.
+
+If you don't have setup sending mail from (X)Emacs, please copy the
+output buffer into your mail program, as it gives us important
+information about your Org-mode version and configuration."
+  (interactive)
+  (require 'reporter)
+  (org-load-modules-maybe)
+  (org-require-autoloaded-modules)
+  (let ((reporter-prompt-for-summary-p "Bug report subject: "))
+    (reporter-submit-bug-report
+     "emacs-orgmode@gnu.org"
+     (org-version)
+     (let (list)
+       (save-window-excursion
+	 (switch-to-buffer (get-buffer-create "*Warn about privacy*"))
+	 (delete-other-windows)
+	 (erase-buffer)
+	 (insert "You are about to submit a bug report to the Org-mode mailing list.
+
+The bug reporter would like to add your Org-mode and Outline
+configuration to the bug report.  This greatly simplifies the work of the
+maintainer, so please consider doing that.
+
+HOWEVER, some variables you have customized may contain private information
+like names of customers.  So if you answer yes to the prompt, you might want
+to check and remove such private information before sending the email.")
+	 (add-text-properties (point-min) (point-max) '(face org-warning))
+	 (ding)
+	 (when (yes-or-no-p "Include your Org-mode configuration ")
+	   (mapatoms
+	    (lambda (v)
+	      (and (boundp v)
+		   (string-match "\\`\\(org-\\|outline-\\)" (symbol-name v))
+		   (or (and (symbol-value v)
+			    (string-match "\\(-hook\\|-function\\)\\'" (symbol-name v)))
+		       (and
+			(get v 'custom-type) (get v 'standard-value)
+			(not (equal (symbol-value v) (eval (car (get v 'standard-value)))))))
+		   (push v list)))))
+	 (kill-buffer (get-buffer "*Warn about privacy*"))
+	 list))
+     nil nil
+     "Remember to cover the basics, that is, what you expected to happen and
+what in fact did happen.  You don't know hoe to make a good report?  See
+
+     http://orgmode.org/manual/Feedback.html#Feedback
+
+Your bug report will be posted to the Org-mode mailing list.
+------------------------------------------------------------------------")))
 
 (defun org-install-agenda-files-menu ()
   (let ((bl (buffer-list)))

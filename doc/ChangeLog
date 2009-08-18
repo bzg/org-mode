@@ -2,6 +2,7 @@
 
 	* org.texi (Agenda commands): Improve documentation of the keys to
 	include inactive time stamps into the agenda view.
+	(Feedback): Document the new bug report command.
 
 2009-08-14  Dan Davison <davison@stats.ox.ac.uk>  (tiny change)
 

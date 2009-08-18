@@ -646,15 +646,23 @@ active region by using the mouse to select a region, or pressing
 
 If you find problems with Org, or if you have questions, remarks, or ideas
 about it, please mail to the Org mailing list @email{emacs-orgmode@@gnu.org}.
-If you are not a member of the mailing list, your mail will be reviewed by a
-moderator and then passed through to the list.
+If you are not a member of the mailing list, your mail will be passed to the
+list after a moderator has approved it.
 
-For bug reports, please provide as much information as possible,
-including the version information of Emacs (@kbd{C-h v emacs-version
-@key{RET}}) and Org (@kbd{C-h v org-version @key{RET}}), as well as
-the Org related setup in @file{.emacs}.  If an error occurs, a
-backtrace can be very useful (see below on how to create one).  Often a
-small example file helps, along with clear information about:
+For bug reports, please provide as much information as possible, including
+the version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
+(@kbd{M-x org-version @key{RET}}), as well as the Org related setup in
+@file{.emacs}.  The easiest way to do this is to use the command
+@example
+@kbd{M-x org-submit-bug-report}
+@end example
+@noindent which will put all this information into an Emacs mail buffer so
+that you only need to add your description.  If you re not sending the Email
+from within Emacs, please copy and paste the content into your Email program.
+
+If an error occurs, a backtrace can be very useful (see below on how to
+create one).  Often a small example file helps, along with clear information
+about:
 
 @enumerate
 @item What exactly did you do?
