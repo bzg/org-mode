@@ -1,8 +1,12 @@
 2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-emphasis-regexp-components): Add "`" to set of
+	pre-emphasis characters.
+
 	* org-latex.el (org-export-latex-classes): Always include the soul
 	package.
 	(org-export-latex-emphasis-alist): Use \st for strikethough.
+	(org-export-latex-fontify): Fix emphasis in quotes.
 
 	* org-exp-blocks.el (org-export-blocks-preprocess): Use
 	`indent-code-rigidly' to indent.
