@@ -1,5 +1,10 @@
 2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-hierarchical-todo-statistics): Improve docstring.
+
+	* org-list.el (org-hierarchical-checkbox-statistics): Improve
+	docstring.
+
 	* org.el (org-emphasis-regexp-components): Add "`" to set of
 	pre-emphasis characters.
 

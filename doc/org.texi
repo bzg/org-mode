@@ -3803,6 +3803,7 @@ priority):
 @node Breaking down tasks, Checkboxes, Priorities, TODO Items
 @section Breaking tasks down into subtasks
 @cindex tasks, breaking down
+@cindex statistics, for TODO items
 
 @vindex org-agenda-todo-list-sublevels
 It is often advisable to break down large tasks into smaller, manageable
@@ -3827,6 +3828,19 @@ If a heading has both checkboxes and TODO children below it, the meaning of
 the statistics cookie become ambiguous.  Set the property
 @code{COOKIE_DATA} to either @samp{checkbox} or @samp{todo} to resolve
 this issue.
+
+If you would like to have the statistics cookie count any TODO entries in the
+subtree (not just direct children), confgure the variable
+@code{org-hierarchical-todo-statistics}.  To do this for a single subtree,
+include the word @samp{recursive} into the value of the @code{COOKIE_DATA}
+property.
+
+@example
+* Parent capturing statistics [2/20]
+  :PROPERTIES:
+  :COOKIE_DATA: todo recursive
+  :END:
+@end example
 
 If you would like a TODO entry to automatically change to DONE
 when all children are done, you can use the following setup:
@@ -3885,7 +3899,7 @@ many checkboxes remain, even without opening a folded entry.  The cookies can
 be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
-@code{org-recursive-checkbox-statistics} if you want such cookies to
+@code{org-hierarchical-checkbox-statistics} if you want such cookies to
 represent the all checkboxes below the cookie, not just the direct
 children.}.  You have to insert the cookie yourself by typing either
 @samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}

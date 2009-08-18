@@ -1752,7 +1752,9 @@ current entry each time a todo state is changed."
 (defcustom org-hierarchical-todo-statistics t
   "Non-nil means, TODO statistics covers just direct children.
 When nil, all entries in the subtree are considered.
-This has only an effect if `org-provide-todo-statistics' is set."
+This has only an effect if `org-provide-todo-statistics' is set.
+To set this to nil for only a single subtree, use a COOKIE_DATA
+property and include the word \"recursive\" into the value."
   :group 'org-todo
   :type 'boolean)
 

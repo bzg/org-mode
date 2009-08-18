@@ -149,7 +149,9 @@ toggle a checkbox with \\[org-ctrl-c-ctrl-c]."
 
 (defcustom org-hierarchical-checkbox-statistics t
   "Non-nil means, checkbox statistics counts only the state of direct children.
-When nil, all boxes below the cookie are counted."
+When nil, all boxes below the cookie are counted.
+This can be set to nil on a per-node basis using a COCKIE_DATA property
+with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
