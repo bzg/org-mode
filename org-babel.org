@@ -218,67 +218,11 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [42/64]
+* Tasks [43/63]
 ** TODO source-name visible in LaTeX and html exports
 Maybe this should be done in backend specific manners.
 
 The listings package may provide for naming a source-code block...
-
-** STARTED new results types (org, html, latex)
-   Thanks to Tom Short for this recommendation.
-
-   - raw or org :: in which case the results are implemented raw, unquoted
-                   into the org-mode file.  This would also handle links as
-                   source block output.
-   - html :: the results are inserted inside of a #+BEGIN_HTML block
-   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
-
-   It might look like:
-: #+begin_src R :session *R* :results org
-: cat("***** This is a table\n")
-: cat("| 1 | 2 | 3 |\n")
-: cat("[[http://google.com][Google it here]]\n"
-: #+end_src
-:        
-: #+resname:
-: ***** This is a table
-: | 1 | 2 | 3 |
-[[http://google.com][: Google it here]]
-
-We actually might want to remove the =#+resname= line if the results
-type is org-mode, not sure...  Either way I don't think there is a
-good way to capture/remove org type results.
-
-*** raw
-
-Added a =raw= results header argument, which will insert the results
-of a source-code block into an org buffer un-escaped.  Also, if the
-results look like a table, then the table will be aligned.
-
-#+srcname: raw-table-demonstration
-#+begin_src ruby :results output raw
-  puts "| root | square |"
-  puts "|---"
-  10.times do |n|
-    puts "| #{n} | #{n*n} |"
-  end
-#+end_src
-
-#+resname:
-| root | square |
-|------+--------|
-|    0 |      0 |
-|    1 |      1 |
-|    2 |      4 |
-|    3 |      9 |
-|    4 |     16 |
-|    5 |     25 |
-|    6 |     36 |
-|    7 |     49 |
-|    8 |     64 |
-|    9 |     81 |
-** PROPOSED raise elisp error when source-blocks return errors
-Not sure how/if this would work, but it may be desirable.
 
 ** PROPOSED allow `anonymous' function block with function call args?
    My question here is simply whether we're going to allow
@@ -1248,6 +1192,99 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+** DONE new results types (org, html, latex)
+   Thanks to Tom Short for this recommendation.
+
+   - raw or org :: in which case the results are implemented raw, unquoted
+                   into the org-mode file.  This would also handle links as
+                   source block output.
+   - html :: the results are inserted inside of a #+BEGIN_HTML block
+   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
+
+   It might look like:
+: #+begin_src R :session *R* :results org
+: cat("***** This is a table\n")
+: cat("| 1 | 2 | 3 |\n")
+: cat("[[http://google.com][Google it here]]\n"
+: #+end_src
+:        
+: #+resname:
+: ***** This is a table
+: | 1 | 2 | 3 |
+[[http://google.com][: Google it here]]
+
+We actually might want to remove the =#+resname= line if the results
+type is org-mode, not sure...  Either way I don't think there is a
+good way to capture/remove org type results.
+
+*** LaTeX
+#+srcname: latex-results
+#+begin_src emacs-lisp :results latex
+"this should be inside of a LaTeX block"
+#+end_src
+
+#+resname:
+#+BEGIN_LaTeX
+this should be inside of a LaTeX block
+#+END_LaTeX
+
+*** Html
+#+srcname: html-results
+#+begin_src emacs-lisp :results html
+"this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long"
+#+end_src
+
+#+resname:
+#+BEGIN_HTML
+this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long
+#+END_HTML
+
+*** raw
+
+Added a =raw= results header argument, which will insert the results
+of a source-code block into an org buffer un-escaped.  Also, if the
+results look like a table, then the table will be aligned.
+
+#+srcname: raw-table-demonstration
+#+begin_src ruby :results output raw
+  puts "| root | square |"
+  puts "|---"
+  10.times do |n|
+    puts "| #{n} | #{n*n} |"
+  end
+#+end_src
+
+#+resname:
+| root | square |
+|------+--------|
+|    0 |      0 |
+|    1 |      1 |
+|    2 |      4 |
+|    3 |      9 |
+|    4 |     16 |
+|    5 |     25 |
+|    6 |     36 |
+|    7 |     49 |
+|    8 |     64 |
+|    9 |     81 |
+
+Not sure how/if this would work, but it may be desirable.
 ** DONE org-bable-tangle: no default extension if one already exists
 ** DONE take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for

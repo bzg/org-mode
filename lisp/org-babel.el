@@ -492,13 +492,24 @@ current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
 following values...
 
-t ------ the default option, simply insert the results after the
-         source block
+replace - (default option) insert results after the source block
+          replacing any previously inserted results
 
-replace - insert results after the source block replacing any
-          previously inserted results
+silent -- no results are inserted
 
-silent -- no results are inserted"
+raw ----- results are added directly to the org-mode file.  This
+          is a good option if you code block will output org-mode
+          formatted text.
+
+org ----- this is the same as the 'raw' option
+
+html ---- results are added inside of a #+BEGIN_HTML block.  This
+          is a good option if you code block will output html
+          formatted text.
+
+latex --- results are added inside of a #+BEGIN_LATEX block.
+          This is a good option if you code block will output
+          latex formatted text."
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
@@ -522,10 +533,14 @@ silent -- no results are inserted"
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
-              (if (or (member "raw" insert) (member "org" insert))
-                  (progn (save-excursion (insert result))
-                         (if (org-at-table-p) (org-cycle)))
-                (org-babel-examplize-region (point) (progn (insert result) (point)))))
+              (if (member "html" insert)
+                  (insert (format "#+BEGIN_HTML\n%s#+END_HTML\n" result))
+                (if (member "latex" insert)
+                    (insert (format "#+BEGIN_LaTeX\n%s#+END_LaTeX\n" result))
+                  (if (or (member "raw" insert) (member "org" insert))
+                      (progn (save-excursion (insert result))
+                             (if (org-at-table-p) (org-cycle)))
+                    (org-babel-examplize-region (point) (progn (insert result) (point)))))))
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
@@ -553,12 +568,20 @@ relies on `org-babel-insert-result'."
   (save-excursion
     (if (org-at-table-p)
         (progn (goto-char (org-table-end)) (forward-line 1) (point))
-      (let ((case-fold-search nil))
-	(if (looking-at "#\\+begin_example")
-	    (search-forward "#+end_example" nil t)
-	  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                   (forward-line 1))
-                 (forward-line 1))))
+      (let ((case-fold-search t))
+        (cond
+         ((looking-at "#\\+begin_latex")
+          (search-forward "#+end_latex" nil t)
+          (forward-line 2))
+         ((looking-at "#\\+begin_html")
+          (search-forward "#+end_html" nil t)
+          (forward-line 2))
+         ((looking-at "#\\+begin_example")
+          (search-forward "#+end_example" nil t)
+          (forward-line 2))
+         (t (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                     (forward-line 1))
+                   (forward-line 1)))))
       (point))))
 
 (defun org-babel-result-to-file (result)
@@ -621,10 +644,11 @@ parameters when merging lists."
                                  ref (match-string 2 (cdr pair))
                                  vars (cons (cons var ref) (assq-delete-all var vars)))))
                         (:results
-                         (setq results (e-merge '(("file" "vector" "scalar")
-                                                  ("replace" "silent")
-                                                  ("output" "value"))
-                                                results (split-string (cdr pair)))))
+                         (setq results (e-merge
+                                        '(("file" "vector" "scalar" "raw" "org" "html" "latex")
+                                          ("replace" "silent")
+                                          ("output" "value"))
+                                        results (split-string (cdr pair)))))
                         (:exports
                          (setq exports (e-merge '(("code" "results" "both"))
                                                 exports (split-string (cdr pair)))))
