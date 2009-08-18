@@ -2920,8 +2920,8 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [37/43]
-** TODO stripping indentation from source-code blocks
+* Bugs [38/43]
+** DONE stripping indentation from source-code blocks
 This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
 
 ** TODO failing to write srcname to resname when evaluating a named block
