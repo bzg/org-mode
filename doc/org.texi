@@ -6898,37 +6898,6 @@ Display the entire subtree of the current item in an indirect buffer.  With a
 numeric prefix argument N, go up to level N and then take that tree.  If N is
 negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
 previously used indirect buffer.
-@c
-@kindex v l
-@kindex l
-@item v l @ @r{or short} @ l
-@vindex org-log-done
-@vindex org-agenda-log-mode-items
-Toggle Logbook mode.  In Logbook mode, entries that were marked DONE while
-logging was on (variable @code{org-log-done}) are shown in the agenda, as are
-entries that have been clocked on that day.  You can configure the entry
-types that should be included in log mode using the variable
-@code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
-all possible logbook entries, including state changes.  When called with two
-prefix args @kbd{C-u C-u}, show only logging information, nothing else.
-@c
-@kindex v a
-@kindex v A
-@item v a
-@itemx v A
-Toggle Archives mode.  In Archives mode, trees that are marked
-@code{ARCHIVED} are also scanned when producing the agenda.  When you use the
-capital @kbd{A}, even all archive files are included.  To exit archives mode,
-press @kbd{v a} again.
-@c
-@kindex R
-@item R
-@vindex org-agenda-start-with-clockreport-mode
-Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
-always show a table with the clocked times for the timespan and file scope
-covered by the current agenda view.  The initial setting for this mode in new
-agenda buffers can be set with the variable
-@code{org-agenda-start-with-clockreport-mode}.
 
 @tsubheading{Change display}
 @cindex display changing, in agenda
@@ -6960,6 +6929,44 @@ be mapped to the interval 1938-2037.
 @kindex D
 @item D
 Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
+@c
+@kindex v l
+@kindex l
+@item v l @ @r{or short} @ l
+@vindex org-log-done
+@vindex org-agenda-log-mode-items
+Toggle Logbook mode.  In Logbook mode, entries that were marked DONE while
+logging was on (variable @code{org-log-done}) are shown in the agenda, as are
+entries that have been clocked on that day.  You can configure the entry
+types that should be included in log mode using the variable
+@code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
+all possible logbook entries, including state changes.  When called with two
+prefix args @kbd{C-u C-u}, show only logging information, nothing else.
+@c
+@kindex v [
+@kindex [
+@item v [ @ @r{or short} @ [
+Include inactive timestamps into the current view.  Only for weekly/daily
+agenda and timeline views.
+@c
+@kindex v a
+@kindex v A
+@item v a
+@itemx v A
+Toggle Archives mode.  In Archives mode, trees that are marked
+@code{ARCHIVED} are also scanned when producing the agenda.  When you use the
+capital @kbd{A}, even all archive files are included.  To exit archives mode,
+press @kbd{v a} again.
+@c
+@kindex v R
+@kindex R
+@item v R @ @r{or short} @ R
+@vindex org-agenda-start-with-clockreport-mode
+Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
+always show a table with the clocked times for the timespan and file scope
+covered by the current agenda view.  The initial setting for this mode in new
+agenda buffers can be set with the variable
+@code{org-agenda-start-with-clockreport-mode}.
 @c
 @kindex G
 @item G
@@ -7086,9 +7093,6 @@ add a positive search term prefixed by @samp{+}, indicating that this search
 term @i{must} occur/match in the entry.  The closing bracket/brace will add a
 negative search term which @i{must not} occur/match in the entry for it to be
 selected.
-@item @r{in} weekly/daily agenda @r{or}
-@itemx @r{in} timeline view
-Redisplay with inactive timestamps included.
 @end table
 
 @tsubheading{Remote editing}

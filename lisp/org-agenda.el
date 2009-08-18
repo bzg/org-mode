@@ -5051,7 +5051,7 @@ With prefix ARG, go backward that many times the current span."
   "Call one of the view mode commands."
   (interactive)
   (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files
-       clock[R]eport          time[G]rid                include[D]iary")
+       clock[R]eport      time[G]rid      [[]inactive      include[D]iary")
   (let ((a (read-char-exclusive)))
     (case a
       (?d (call-interactively 'org-agenda-day-view))
@@ -5064,6 +5064,10 @@ With prefix ARG, go backward that many times the current span."
       (?R (call-interactively 'org-agenda-clockreport-mode))
       (?G (call-interactively 'org-agenda-toggle-time-grid))
       (?D (call-interactively 'org-agenda-toggle-diary))
+      (?\[ (let ((org-agenda-include-inactive-timestamps t))
+	     (org-agenda-check-type t 'timeline 'agenda)
+	     (org-agenda-redo))
+	   (message "Display now includes inactive timestamps as well"))
       (?q (message "Abort"))
       (otherwise (error "Invalid key" )))))
 
