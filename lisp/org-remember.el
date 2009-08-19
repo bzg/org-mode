@@ -552,7 +552,7 @@ to be run from that hook to function properly."
 		    (org-global-tags-completion-table
 		     (if (equal char "G") (org-agenda-files) (and file (list file)))))
 		   (org-add-colon-after-tag-completion t)
-		   (ins (org-ido-completing-read
+		   (ins (org-icompleting-read
 			 (if prompt (concat prompt ": ") "Tags: ")
 			 'org-tags-completion-function nil nil nil
 			 'org-tags-history)))

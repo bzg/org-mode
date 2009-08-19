@@ -1,3 +1,20 @@
+2009-08-19  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-remember.el (org-remember-apply-template): Use
+	org-icompleting-read.
+
+	* org-publish.el (org-publish): Use org-icompleting-read.
+
+	* org-colview.el (org-columns-edit-value, org-columns-new)
+	(org-insert-columns-dblock): Use org-icompleting-read.
+
+	* org-colview-xemacs.el (org-columns-edit-value)
+	(org-columns-new, org-insert-columns-dblock): Use
+	org-icompleting-read.
+
+	* org-attach.el (org-attach-delete-one, org-attach-open): Use
+	org-icompleting-read.
+
 2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-hierarchical-todo-statistics): Improve docstring.

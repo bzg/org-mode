@@ -632,7 +632,7 @@ Default for INDEX-FILENAME is 'sitemap.org'."
   "Publish PROJECT."
   (interactive
    (list
-    (assoc (org-ido-completing-read
+    (assoc (org-icompleting-read
 	    "Publish project: "
 	    org-publish-project-alist nil t)
 	   org-publish-project-alist)
