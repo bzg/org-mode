@@ -1,3 +1,7 @@
+2009-08-19  Friedrich Delgado Friedrichs <friedel@nomaden.org>  (tiny change)
+
+	* org.el (org-flag-drawer): More useful error.
+
 2009-08-19  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-remember.el (org-remember-apply-template): Use

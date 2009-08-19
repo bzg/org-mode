@@ -5291,7 +5291,7 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
 	     "^[ \t]*:END:"
 	     (save-excursion (outline-next-heading) (point)) t)
 	    (outline-flag-region b (point-at-eol) flag)
-	  (error ":END: line missing"))))))
+	  (error ":END: line missing at position %s" b))))))
 
 (defun org-subtree-end-visible-p ()
   "Is the end of the current subtree visible?"
