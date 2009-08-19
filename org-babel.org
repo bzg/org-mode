@@ -2920,11 +2920,21 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [38/43]
+* Bugs [39/43]
 ** DONE stripping indentation from source-code blocks
 This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
 
-** TODO failing to write srcname to resname when evaluating a named block
+** DONE failing to write srcname to resname when evaluating a named block
+
+#+srcname: please-name-my-result
+#+begin_src emacs-lisp 
+"I'm the result"
+#+end_src
+
+#+resname: please-name-my-result
+: I'm the result
+
+
 ** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation

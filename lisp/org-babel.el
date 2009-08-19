@@ -272,10 +272,16 @@ concerned with creating elisp versions of results. "
 
 This function is analogous to org-babel-lob-get-info. For both
 functions, after they are called, (match-string 1) matches the
-function name, and (match-string 2) matches the function
+function name, and (match-string 3) matches the function
 arguments inside the parentheses. I think perhaps these functions
 should be renamed to bring out this similarity, perhaps involving
-the word 'call'."
+the word 'call'.
+
+Currently the function `org-babel-get-src-block-function-args'
+relies on the match-data from a match in this function.  I think
+splitting a match and the use of it's data is bad form, and we
+should re-work these two functions, perhaps combining them into
+one function which returns more data than just the name. [Eric]"
   (let ((case-fold-search t)
 	(head (org-babel-where-is-src-block-head)))
     (if head
@@ -283,7 +289,10 @@ the word 'call'."
 	  (goto-char head)
 	  (if (save-excursion
 		(forward-line -1)
-		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+                ;; the second match of this regexp is used later to
+                ;; find arguments in the "functional" style, where
+                ;; they are passed as part of the source name line
+		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
@@ -302,7 +311,7 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-get-src-block-function-args ()
   (when (org-babel-get-src-block-name)
     (mapcar (lambda (ref) (cons :var ref))
-	    (org-babel-ref-split-args (match-string 2)))))
+	    (org-babel-ref-split-args (match-string 3)))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -434,7 +443,7 @@ buffer or nil if no such result exists."
     (goto-char (point-min))
     (when (re-search-forward ;; ellow end-of-buffer in following regexp?
 	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
-      (move-beginning-of-line 1) (point))))
+      (move-beginning-of-line 0) (point))))
 
 (defun org-babel-where-is-src-block-result (&optional insert)
   "Return the point at the beginning of the result of the current
@@ -447,7 +456,7 @@ line.  If no result exists for this block then create a
 	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
-      (or (and name (message name) (org-babel-find-named-result name))
+      (or (and name (org-babel-find-named-result name))
           (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
@@ -455,7 +464,8 @@ line.  If no result exists for this block then create a
                       (or (progn ;; either an unnamed #+resname: line already exists
                             (re-search-forward "[^ \f\t\n\r\v]" nil t)
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
-                          (when insert ;; or (with optional insert) we need to back up and make one ourselves
+                          ;; or (with optional insert) we need to back up and make one ourselves
+                          (when insert
                             (goto-char end) (open-line 2) (forward-char 1)
                             (insert (concat "#+resname:" (if name (concat " " name))))
                             (move-beginning-of-line 1) t)))
