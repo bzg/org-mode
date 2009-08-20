@@ -52,6 +52,24 @@ plot(data)
 
 ** Gnuplot
 
+* Table/Matrix manipulation
+
+Elegant lisp code for transposing a matrix.
+
+#+tblname: transpose-example
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |
+
+#+srcname: transpose
+#+begin_src emacs-lisp :var table=transpose-example
+  (apply #'mapcar* #'list table)
+#+end_src
+
+#+resname:
+| 1 | 4 |
+| 2 | 5 |
+| 3 | 6 |
+
 * Misc
 #+srcname: python-identity(a=1)
 #+begin_src python

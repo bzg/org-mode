@@ -272,10 +272,16 @@ concerned with creating elisp versions of results. "
 
 This function is analogous to org-babel-lob-get-info. For both
 functions, after they are called, (match-string 1) matches the
-function name, and (match-string 2) matches the function
+function name, and (match-string 3) matches the function
 arguments inside the parentheses. I think perhaps these functions
 should be renamed to bring out this similarity, perhaps involving
-the word 'call'."
+the word 'call'.
+
+Currently the function `org-babel-get-src-block-function-args'
+relies on the match-data from a match in this function.  I think
+splitting a match and the use of it's data is bad form, and we
+should re-work these two functions, perhaps combining them into
+one function which returns more data than just the name. [Eric]"
   (let ((case-fold-search t)
 	(head (org-babel-where-is-src-block-head)))
     (if head
@@ -283,7 +289,10 @@ the word 'call'."
 	  (goto-char head)
 	  (if (save-excursion
 		(forward-line -1)
-		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\(\\(.*\\)\)"))
+                ;; the second match of this regexp is used later to
+                ;; find arguments in the "functional" style, where
+                ;; they are passed as part of the source name line
+		(looking-at "#\\+srcname:[ \f\t\n\r\v]*\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)"))
 	      (org-babel-clean-text-properties (match-string 1)))))))
 
 (defun org-babel-get-src-block-info ()
@@ -302,7 +311,7 @@ of the following form.  (language body header-arguments-alist)"
 (defun org-babel-get-src-block-function-args ()
   (when (org-babel-get-src-block-name)
     (mapcar (lambda (ref) (cons :var ref))
-	    (org-babel-ref-split-args (match-string 2)))))
+	    (org-babel-ref-split-args (match-string 3)))))
 
 (defmacro org-babel-map-source-blocks (file &rest body)
   "Evaluate BODY forms on each source-block in FILE."
@@ -434,7 +443,7 @@ buffer or nil if no such result exists."
     (goto-char (point-min))
     (when (re-search-forward ;; ellow end-of-buffer in following regexp?
 	   (concat "#\\+resname:[ \t]*" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
-      (move-beginning-of-line 1) (point))))
+      (move-beginning-of-line 0) (point))))
 
 (defun org-babel-where-is-src-block-result (&optional insert)
   "Return the point at the beginning of the result of the current
@@ -447,7 +456,7 @@ line.  If no result exists for this block then create a
 	   (name (if on-lob-line (org-babel-lob-get-info) (org-babel-get-src-block-name)))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head))) end)
       (when head (goto-char head))
-      (or (and name (message name) (org-babel-find-named-result name))
+      (or (and name (org-babel-find-named-result name))
           (and (or on-lob-line (re-search-forward "#\\+end_src" nil t))
                (progn (move-end-of-line 1)
 		      (if (eobp) (insert "\n") (forward-char 1))
@@ -455,7 +464,8 @@ line.  If no result exists for this block then create a
                       (or (progn ;; either an unnamed #+resname: line already exists
                             (re-search-forward "[^ \f\t\n\r\v]" nil t)
                             (move-beginning-of-line 1) (looking-at "#\\+resname:"))
-                          (when insert ;; or (with optional insert) we need to back up and make one ourselves
+                          ;; or (with optional insert) we need to back up and make one ourselves
+                          (when insert
                             (goto-char end) (open-line 2) (forward-char 1)
                             (insert (concat "#+resname:" (if name (concat " " name))))
                             (move-beginning-of-line 1) t)))
@@ -492,13 +502,24 @@ current source block.  With optional argument INSERT controls
 insertion of results in the org-mode file.  INSERT can take the
 following values...
 
-t ------ the default option, simply insert the results after the
-         source block
+replace - (default option) insert results after the source block
+          replacing any previously inserted results
 
-replace - insert results after the source block replacing any
-          previously inserted results
+silent -- no results are inserted
 
-silent -- no results are inserted"
+raw ----- results are added directly to the org-mode file.  This
+          is a good option if you code block will output org-mode
+          formatted text.
+
+org ----- this is the same as the 'raw' option
+
+html ---- results are added inside of a #+BEGIN_HTML block.  This
+          is a good option if you code block will output html
+          formatted text.
+
+latex --- results are added inside of a #+BEGIN_LATEX block.
+          This is a good option if you code block will output
+          latex formatted text."
   (if (stringp result)
       (progn
         (setq result (org-babel-clean-text-properties result))
@@ -522,10 +543,14 @@ silent -- no results are inserted"
         (if (stringp result) ;; assume the result is a table if it's not a string
             (if (member "file" insert)
                 (insert result)
-              (if (or (member "raw" insert) (member "org" insert))
-                  (progn (save-excursion (insert result))
-                         (if (org-at-table-p) (org-cycle)))
-                (org-babel-examplize-region (point) (progn (insert result) (point)))))
+              (if (member "html" insert)
+                  (insert (format "#+BEGIN_HTML\n%s#+END_HTML\n" result))
+                (if (member "latex" insert)
+                    (insert (format "#+BEGIN_LaTeX\n%s#+END_LaTeX\n" result))
+                  (if (or (member "raw" insert) (member "org" insert))
+                      (progn (save-excursion (insert result))
+                             (if (org-at-table-p) (org-cycle)))
+                    (org-babel-examplize-region (point) (progn (insert result) (point)))))))
           (progn
             (insert
              (concat (orgtbl-to-orgtbl
@@ -553,12 +578,20 @@ relies on `org-babel-insert-result'."
   (save-excursion
     (if (org-at-table-p)
         (progn (goto-char (org-table-end)) (forward-line 1) (point))
-      (let ((case-fold-search nil))
-	(if (looking-at "#\\+begin_example")
-	    (search-forward "#+end_example" nil t)
-	  (progn (while (looking-at "\\(: \\|\\[\\[\\)")
-                   (forward-line 1))
-                 (forward-line 1))))
+      (let ((case-fold-search t))
+        (cond
+         ((looking-at "#\\+begin_latex")
+          (search-forward "#+end_latex" nil t)
+          (forward-line 2))
+         ((looking-at "#\\+begin_html")
+          (search-forward "#+end_html" nil t)
+          (forward-line 2))
+         ((looking-at "#\\+begin_example")
+          (search-forward "#+end_example" nil t)
+          (forward-line 2))
+         (t (progn (while (looking-at "\\(: \\|\\[\\[\\)")
+                     (forward-line 1))
+                   (forward-line 1)))))
       (point))))
 
 (defun org-babel-result-to-file (result)
@@ -621,10 +654,11 @@ parameters when merging lists."
                                  ref (match-string 2 (cdr pair))
                                  vars (cons (cons var ref) (assq-delete-all var vars)))))
                         (:results
-                         (setq results (e-merge '(("file" "vector" "scalar")
-                                                  ("replace" "silent")
-                                                  ("output" "value"))
-                                                results (split-string (cdr pair)))))
+                         (setq results (e-merge
+                                        '(("file" "vector" "scalar" "raw" "org" "html" "latex")
+                                          ("replace" "silent")
+                                          ("output" "value"))
+                                        results (split-string (cdr pair)))))
                         (:exports
                          (setq exports (e-merge '(("code" "results" "both"))
                                                 exports (split-string (cdr pair)))))

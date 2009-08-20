@@ -218,69 +218,11 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [41/64]
-** TODO org-bable-tangle: no default extension if one already exists
+* Tasks [43/63]
 ** TODO source-name visible in LaTeX and html exports
 Maybe this should be done in backend specific manners.
 
 The listings package may provide for naming a source-code block...
-
-** STARTED new results types (org, html, latex)
-   Thanks to Tom Short for this recommendation.
-
-   - raw or org :: in which case the results are implemented raw, unquoted
-                   into the org-mode file.  This would also handle links as
-                   source block output.
-   - html :: the results are inserted inside of a #+BEGIN_HTML block
-   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
-
-   It might look like:
-: #+begin_src R :session *R* :results org
-: cat("***** This is a table\n")
-: cat("| 1 | 2 | 3 |\n")
-: cat("[[http://google.com][Google it here]]\n"
-: #+end_src
-:        
-: #+resname:
-: ***** This is a table
-: | 1 | 2 | 3 |
-[[http://google.com][: Google it here]]
-
-We actually might want to remove the =#+resname= line if the results
-type is org-mode, not sure...  Either way I don't think there is a
-good way to capture/remove org type results.
-
-*** raw
-
-Added a =raw= results header argument, which will insert the results
-of a source-code block into an org buffer un-escaped.  Also, if the
-results look like a table, then the table will be aligned.
-
-#+srcname: raw-table-demonstration
-#+begin_src ruby :results output raw
-  puts "| root | square |"
-  puts "|---"
-  10.times do |n|
-    puts "| #{n} | #{n*n} |"
-  end
-#+end_src
-
-#+resname:
-| root | square |
-|------+--------|
-|    0 |      0 |
-|    1 |      1 |
-|    2 |      4 |
-|    3 |      9 |
-|    4 |     16 |
-|    5 |     25 |
-|    6 |     36 |
-|    7 |     49 |
-|    8 |     64 |
-|    9 |     81 |
-
-** PROPOSED raise elisp error when source-blocks return errors
-Not sure how/if this would work, but it may be desirable.
 
 ** PROPOSED allow `anonymous' function block with function call args?
    My question here is simply whether we're going to allow
@@ -323,7 +265,6 @@ but with preference given to
      update the source-code blocks timestamp.  If the user edits the
      contents of a source-code block directly I can think of no
      efficient way of maintaining the timestamp.
-
 ** TODO make tangle files read-only?
    With a file-local variable setting, yea that makes sense.  Maybe
    the header should reference the related org-mode file.
@@ -633,7 +574,6 @@ org-mode core
      
 **** DONE a hook called when the src edit buffer is created
      This should be implemented in the org-mode core
-
 ** TODO resolve references to other org buffers/files
    This would allow source blocks to call upon tables, source-blocks,
    and results in other org buffers/files.
@@ -721,7 +661,6 @@ above would have a couple of points in its favour:
 In interactive use we might want to allow the user to choose between
 screen and file output. In non-interactive use such as export, it
 would be file output (subject to the :exports directives).
-
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
 This simple example of multilingual chaining produces vector output if
@@ -845,7 +784,6 @@ du -sc ~/*
 #+begin_src emacs-lisp :var sizes=sizes :results replace
 (mapcar #'car sizes)
 #+end_src
-
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
@@ -878,7 +816,6 @@ we should color these blocks differently
 
 *** TODO refine html exportation
 should use a span class, and should show original source in tool-tip
-
 ** TODO LoB: re-implement plotting and analysis functions from org-R
    I'll do this soon, now that we things are a bit more settled and we
    have column names in R.
@@ -1064,7 +1001,6 @@ tabel
 
 
 Another example is in the [[*operations%20in%20on%20tables][grades example]].
-
 ** DEFERRED use textConnection to pass tsv to R?
    When passing args from the org buffer to R, the following route is
    used: arg in buffer -> elisp -> tsv on file -> data frame in R. I
@@ -1179,7 +1115,6 @@ I have no idea how this could work...
     edit out some lines, and then convert it to org-babel format for
     posterity. Same for a shell session either in a *shell* buffer, or
     pasted from another terminal emulator. And python of course.
-
 ** DEFERRED improve the source-block snippet
 any real improvement seems somewhat beyond the ability of yasnippet
 for now.
@@ -1257,7 +1192,100 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+** DONE new results types (org, html, latex)
+   Thanks to Tom Short for this recommendation.
 
+   - raw or org :: in which case the results are implemented raw, unquoted
+                   into the org-mode file.  This would also handle links as
+                   source block output.
+   - html :: the results are inserted inside of a #+BEGIN_HTML block
+   - latex :: the results are inserted inside of a #+BEGIN_LATEX block
+
+   It might look like:
+: #+begin_src R :session *R* :results org
+: cat("***** This is a table\n")
+: cat("| 1 | 2 | 3 |\n")
+: cat("[[http://google.com][Google it here]]\n"
+: #+end_src
+:        
+: #+resname:
+: ***** This is a table
+: | 1 | 2 | 3 |
+[[http://google.com][: Google it here]]
+
+We actually might want to remove the =#+resname= line if the results
+type is org-mode, not sure...  Either way I don't think there is a
+good way to capture/remove org type results.
+
+*** LaTeX
+#+srcname: latex-results
+#+begin_src emacs-lisp :results latex
+"this should be inside of a LaTeX block"
+#+end_src
+
+#+resname:
+#+BEGIN_LaTeX
+this should be inside of a LaTeX block
+#+END_LaTeX
+
+*** Html
+#+srcname: html-results
+#+begin_src emacs-lisp :results html
+"this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long"
+#+end_src
+
+#+resname:
+#+BEGIN_HTML
+this should be inside of a HTML block
+
+
+
+and more
+
+
+
+is long
+#+END_HTML
+
+*** raw
+
+Added a =raw= results header argument, which will insert the results
+of a source-code block into an org buffer un-escaped.  Also, if the
+results look like a table, then the table will be aligned.
+
+#+srcname: raw-table-demonstration
+#+begin_src ruby :results output raw
+  puts "| root | square |"
+  puts "|---"
+  10.times do |n|
+    puts "| #{n} | #{n*n} |"
+  end
+#+end_src
+
+#+resname:
+| root | square |
+|------+--------|
+|    0 |      0 |
+|    1 |      1 |
+|    2 |      4 |
+|    3 |      9 |
+|    4 |     16 |
+|    5 |     25 |
+|    6 |     36 |
+|    7 |     49 |
+|    8 |     64 |
+|    9 |     81 |
+
+Not sure how/if this would work, but it may be desirable.
+** DONE org-bable-tangle: no default extension if one already exists
 ** DONE take default values for header args from properties
    Use file-wide and subtree wide properties to set default values for
    header args.
@@ -2635,7 +2663,7 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [10/14]
+** TODO Add languages [11/15]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
@@ -2701,6 +2729,23 @@ Things left to do
 | "Database"           |
 | "information_schema" |
 | "test"               |
+
+*** DONE SASS
+Sass is a very nice extension of CSS, which is much nicer to read and
+write (see [[http://sass-lang.com/][sass-lang]]).
+
+#+srcname: sass-example
+#+begin_src sass :file stylesheet.css :results file
+  #me
+    position: absolute
+    top: 1em
+    left: 1em
+    .head
+      text-align: center
+#+end_src
+
+#+resname:
+[[file:stylesheet.css][stylesheet.css]]
 
 *** DONE CSS
 trivial [[file:lisp/langs/org-babel-css.el][org-babel-css.el]]
@@ -2875,7 +2920,21 @@ dot("$(2a,0)$",(2,0),N+E);
 *** DONE sh
 
 
-* Bugs [37/41]
+* Bugs [39/43]
+** DONE stripping indentation from source-code blocks
+This is a problem in [[file:lisp/org-babel-exp.el][org-babel-exp.el]].
+
+** DONE failing to write srcname to resname when evaluating a named block
+
+#+srcname: please-name-my-result
+#+begin_src emacs-lisp 
+"I'm the result"
+#+end_src
+
+#+resname: please-name-my-result
+: I'm the result
+
+
 ** DONE Python session evaluation bug
    The following block evaluates correctly with :session none
    (set :results to output), but fails with session-based evaluation
