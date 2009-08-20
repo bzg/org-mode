@@ -5364,24 +5364,34 @@ the range."
     (beginning-of-line)
     (if (re-search-forward org-block-regexp nil t)
         (let ((start (- (match-beginning 4) 1)) ;; beginning of body
-              (end (match-end 0))
-	      ov) ;; end of entire body
+              (end (match-end 0)) ;; end of entire body
+              ov)
           (if (memq t (mapcar (lambda (overlay)
                                 (eq (org-overlay-get overlay 'invisible)
 				    'org-hide-block))
                               (org-overlays-at start)))
-	      (if (or (not force) (eq force 'off))
-		  (mapc (lambda (ov)
-			  (when (member ov org-hide-block-overlays)
-			    (setq org-hide-block-overlays
-				  (delq ov org-hide-block-overlays)))
-			  (when (eq (org-overlay-get ov 'invisible)
-				    'org-hide-block)
-			    (org-delete-overlay ov)))
-			(org-overlays-at start)))
-	    (setq ov (org-make-overlay start end))
+              (if (or (not force) (eq force 'off))
+                  (mapc (lambda (ov)
+                          (when (member ov org-hide-block-overlays)
+                            (setq org-hide-block-overlays
+                                  (delq ov org-hide-block-overlays)))
+                          (when (eq (org-overlay-get ov 'invisible)
+                                    'org-hide-block)
+                            (org-delete-overlay ov)))
+                        (org-overlays-at start)))
+            (setq ov (org-make-overlay start end))
             (org-overlay-put ov 'invisible 'org-hide-block)
-	    (push ov org-hide-block-overlays)))
+            ;; make the block accessible to isearch
+            (org-overlay-put
+             ov 'isearch-open-invisible
+             (lambda (ov)
+               (when (member ov org-hide-block-overlays)
+                 (setq org-hide-block-overlays
+                       (delq ov org-hide-block-overlays)))
+               (when (eq (org-overlay-get ov 'invisible)
+                         'org-hide-block)
+                 (org-delete-overlay ov))))
+            (push ov org-hide-block-overlays)))
       (error "Not looking at a source block"))))
 
 ;; org-tab-after-check-for-cycling-hook
