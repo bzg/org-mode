@@ -784,6 +784,57 @@ du -sc ~/*
 #+begin_src emacs-lisp :var sizes=sizes :results replace
 (mapcar #'car sizes)
 #+end_src
+*** Answer to question on list
+From: Hector Villafuerte <hectorvd@gmail.com>
+Subject: [Orgmode] Merge tables
+Date: Wed, 19 Aug 2009 10:08:40 -0600
+To: emacs-orgmode@gnu.org
+
+Hi,
+I've just discovered Org and are truly impressed with it; using it for
+more and more tasks.
+
+Here's what I want to do: I have 2 tables with the same number of rows
+(one row per subject). I would like to make just one big table by
+copying the second table to the right of the first one. This is a
+no-brainer in a spreadsheet but my attempts in Org have failed. Any
+ideas?
+
+By the way, thanks for this great piece of software!
+-- 
+ hector
+
+**** Suppose the tables are as follows
+#+tblname: tab1
+| a | b | c |
+|---+---+---|
+| 1 | 2 | 3 |
+| 7 | 8 | 9 |
+
+#+tblname: tab2
+|  d |  e |  f |
+|----+----+----|
+|  4 |  5 |  6 |
+| 10 | 11 | 12 |
+
+**** Here is an answer using R in org-babel
+
+#+srcname: column-bind(a=tab1, b=tab2)
+#+begin_src R :colnames t
+cbind(a, b)
+#+end_src
+
+#+resname: column-bind
+| "a" | "b" | "c" | "d" | "e" | "f" |
+|-----+-----+-----+-----+-----+-----|
+|   1 |   2 |   3 |   4 |   5 |   6 |
+|   7 |   8 |   9 |  10 |  11 |  12 |
+
+
+**** Alternatively
+     Use org-table-export, do it in external spreadsheet software,
+     then org-table-import
+
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
