@@ -15547,6 +15547,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
       (display-buffer buf)
       (sit-for 0))))
 
+(defun org-in-commented-line ()
+  "Is point in a line starting with `#'?"
+  (equal (char-after (point-at-bol)) ?#))
+
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
   "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
   (if (and marker (marker-buffer marker)

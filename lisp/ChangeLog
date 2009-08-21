@@ -1,3 +1,7 @@
+2009-08-21  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-in-commented-line): New function.
+
 2009-08-20  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.el (org-hide-block-toggle): Make folded blocks searchable.
