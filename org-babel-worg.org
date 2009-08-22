@@ -386,7 +386,7 @@ for *tangling* of code files.
 The [[literate-programming-example][following example]] demonstrates the process of *tangling* in
 Org-babel.
 
-*** Literate Programming Example
+*** Simple Literate Programming Example (Noweb syntax)
     :PROPERTIES:
     :CUSTOM_ID: literate-programming-example
     :END:
@@ -459,6 +459,75 @@ to the =hello.sh= file.
   echo "\-----------------------------------------------------------/"
   # block-16 ends here
 #+end_src
+
+*** Emacs Initialization with Org-babel
+Org-babel has special support for embedding your emacs initialization
+into Org-mode files.  The =org-babel-load-file= function can be used
+to load the emacs lisp embedded in a literate Org-mode file in the
+same way that you might load a regular elisp file.
+
+This allows you to have all the niceness of Org-mode (folding, tags,
+notes, html export, etc...) available in your emacs initialization.
+
+To try this out either see the simple [[literate-emacs-init][Literate Emacs Initialization]]
+example directly below, or check out the Org-babel Literate
+Programming version of Phil Hagelberg's excellent [[http://github.com/technomancy/emacs-starter-kit/tree/master][emacs-starter-kit]]
+available at [[http://github.com/eschulte/emacs-starter-kit/tree/master][Org-babel-emacs-starter-kit]].
+
+***** Literate Emacs Initialization
+      :PROPERTIES:
+      :CUSTOM_ID: literate-emacs-init
+      :END:
+
+For a simple example of usage follow these 4 steps.
+
+1) create a directory named =.emacs.d= in the base of your home
+   directory.
+   #+begin_src sh 
+   mkdir ~/.emacs.d
+   #+end_src
+2) checkout the latest versions of Org-mode and Org-babel into the src
+   subdirectory of this new directory
+   #+begin_src sh
+   cd ~/.emacs.d
+   mkdir src
+   cd src
+   git clone git://repo.or.cz/org-mode.git
+   git clone git://github.com/eschulte/org-babel.git
+   #+end_src
+3) place the following in a file called =init.el= in your emacs
+   initialization directory (=~/.emacs.d=).
+   #+srcname: emacs-init
+   #+begin_src emacs-lisp 
+     ;;; init.el --- Where all the magic begins
+     ;;
+     ;; This file loads both
+     ;; - Org-mode : http://orgmode.org/ and
+     ;; - Org-babel: http://eschulte.github.com/org-babel/
+     ;;
+     ;; It then loads the rest of our Emacs initialization from Emacs lisp
+     ;; embedded in literate Org-mode files.
+     
+     ;; Load up Org Mode and Org Babel for elisp embedded in Org Mode files
+     (setq dotfiles-dir (file-name-directory (or (buffer-file-name) load-file-name)))
+     (add-to-list 'load-path (expand-file-name
+                              "lisp" (expand-file-name
+                                      "org" (expand-file-name
+                                             "src" dotfiles-dir))))
+     (add-to-list 'load-path (expand-file-name
+                              "lisp" (expand-file-name
+                                      "org-babel" (expand-file-name
+                                                   "src" dotfiles-dir))))
+     (require 'org-babel-init)
+     
+     ;; load up all literate org-mode files in this directory
+     (mapc #'org-babel-load-file (directory-files ditfiles-dir t "\\.org$"))
+     
+     ;;; init.el ends here
+   #+end_src
+4) Implement all of your emacs customizations inside of elisp
+   source-code blocks located in Org-mode files in this directory.
+   They will be loaded by emacs on startup.
 
 * Reference / Documentation
   :PROPERTIES:
