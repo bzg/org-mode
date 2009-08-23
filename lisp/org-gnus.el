@@ -51,8 +51,7 @@ negates this setting for the duration of the command."
   :type 'boolean)
 
 ;; Declare external functions and variables
-(declare-function gnus-article-show-summary "gnus-art" ())
-(declare-function gnus-summary-last-subject "gnus-sum" ())
+(declare-function gnus-summary-article-header "gnus-sum" (&optional number))
 (declare-function message-fetch-field "message" (header &optional not-all))
 (declare-function message-narrow-to-head-1 "message" nil)
 
@@ -122,8 +121,25 @@ If `org-store-link' was called with a prefix arg the meaning of
 	(org-add-link-props :link link :description desc)
 	link)))
 
-   ((memq major-mode '(gnus-summary-mode gnus-article-mode))
-    (and (eq major-mode 'gnus-summary-mode) (gnus-summary-show-article))
+   ((eq major-mode 'gnus-summary-mode)
+    (let* ((group gnus-newsgroup-name)
+    	   (header (save-excursion (gnus-summary-article-header)))
+	   (from (aref header 2))
+	   (message-id (org-remove-angle-brackets (aref header 4)))
+	   (date (aref header 3))
+	   (to (cdr (assoc 'To (aref header 9))))
+	   (newsgroups (cdr (assoc 'newsgroup (aref header 9))))
+	   (x-no-archive (cdr (assoc 'x-no-archive (aref header 9))))
+	   (subject (aref header 1))
+	   desc link)
+      (org-store-link-props :type "gnus" :from from :subject subject
+			    :message-id message-id :group group :to to)
+      (setq desc (org-email-link-description)
+	    link (org-gnus-article-link group newsgroups message-id x-no-archive))
+      (org-add-link-props :link link :description desc)
+      link))
+
+   ((eq major-mode 'gnus-article-mode)
     (let* ((group gnus-newsgroup-name)
 	   (header (with-current-buffer gnus-article-buffer
 		     (gnus-summary-toggle-header 1)

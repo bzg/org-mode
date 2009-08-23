@@ -1,3 +1,9 @@
+2009-08-23  Bastien Guerry  <bzg@altern.org>
+
+	* org-gnus.el (org-gnus-store-link): Handle `gnus-summary-mode'
+	and `gnus-article-mode' separately.
+	(gnus-summary-article-header): Fix the declare-function.
+
 2009-08-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-exp.el (org-export-format-source-code-or-example): Translate
