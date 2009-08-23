@@ -415,7 +415,7 @@ Hacking
 
 Tables and lists in arbitrary syntax
 
-* Radio tables::                Sending and receiving
+* Radio tables::                Sending and receiving radio tables
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
 * Radio lists::                 Doing the same for lists
@@ -10850,7 +10850,7 @@ or Texinfo.)
 
 
 @menu
-* Radio tables::                Sending and receiving
+* Radio tables::                Sending and receiving radio tables
 * A LaTeX example::             Step by step, almost a tutorial
 * Translator functions::        Copy and modify
 * Radio lists::                 Doing the same for lists
