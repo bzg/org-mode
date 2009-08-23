@@ -14049,7 +14049,6 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 				     org-export-latex-packages-alist "\n"))
 		"")
 	      "\n\\begin{document}\n" string "\n\\end{document}\n"))
-    (debug)
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
