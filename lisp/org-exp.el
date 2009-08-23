@@ -2323,10 +2323,14 @@ INDENT was the original indentation of the block."
                           (if org-export-latex-listings
                               (concat
                                (if lang
-                                   (let* ((lang-sym (intern (concat ":" lang)))
-                                          (lstlang (or (plist-get org-export-latex-listings-langs
-                                                                  lang-sym)
-                                                       lang)))
+                                   (let*
+				       ((lang-sym (intern lang))
+					(lstlang
+					 (or (cadr
+					      (assq
+					       lang-sym
+					       org-export-latex-listings-langs))
+					     lang)))
                                      (format "\\lstset{language=%s}\n" lstlang))
                                  "")
                                "\\begin{lstlisting}\n"

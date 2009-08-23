@@ -318,21 +318,27 @@ for example using customize, or with something like
   :type 'boolean)
 
 (defcustom org-export-latex-listings-langs
-  '(:emacs-lisp "Lisp" :lisp "Lisp"
-		:c "C" :cc "C++"
-		:fortran "fortran"
-		:perl "Perl" :cperl "Perl" :python "Python" :ruby "Ruby"
-		:html "HTML" :xml "XML"
-		:tex "TeX" :latex "TeX"
-		:shell-script "bash"
-		:gnuplot "Gnuplot"
-		:ocaml "Caml" :caml "Caml"
-		:sql "SQL")
-  "Property list mapping languages to their listing language counterpart.
-The key is the major mode symbol, the value is the string that should be
-inserted as the language parameter for the listings package."
+  '((emacs-lisp "Lisp") (lisp "Lisp")
+    (c "C") (cc "C++")
+    (fortran "fortran")
+    (perl "Perl") (cperl "Perl") (python "Python") (ruby "Ruby")
+    (html "HTML") (xml "XML")
+    (tex "TeX") (latex "TeX")
+    (shell-script "bash")
+    (gnuplot "Gnuplot")
+    (ocaml "Caml") (caml "Caml")
+    (sql "SQL"))
+  "Alist mapping languages to their listing language counterpart.
+The key is a symbol, the major mode symbol without the \"-mode\".
+The value is the string that should be inserted as the language parameter
+for the listings package.  If the mode name and the listings name are
+the same, the language does not need an entry in this list - but it does not
+hurt if it is present."
   :group 'org-export-latex
-  :type 'plist)
+  :type '(repeat
+	  (list
+	   (symbol :tag "Major mode       ")
+	   (string :tag "Listings language"))))
 
 (defcustom org-export-latex-remove-from-headlines
   '(:todo nil :priority nil :tags nil)
