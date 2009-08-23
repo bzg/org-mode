@@ -21,7 +21,10 @@ publishing.  Publish a project with =C-c C-e X=.
            :publishing-directory ,(expand-file-name "doc" org-babel-dir)
            :index-filename "org-babel-worg.org"
            :auto-postamble nil
-           :style "<link rel=\"stylesheet\"href=\"stylesheet.css\"type=\"text/css\">")
+           :style "<link rel=\"stylesheet\"href=\"stylesheet.css\"type=\"text/css\">"
+           :publishing-function (org-publish-org-to-html org-publish-org-to-org)
+           :plain-source t
+           :htmlized-source t)
          org-publish-project-alist))
 #+end_src
 
