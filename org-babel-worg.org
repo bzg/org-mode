@@ -127,6 +127,20 @@ Results of R evaluation
 |  5 |
 | 10 |
 
+[[http://ditaa.sourceforge.net/][ditaa]] source code
+#+begin_src ditaa :file images/blue.png :cmdline -r
++---------+
+| cBLU    |
+|         |
+|    +----+
+|    |cPNK|
+|    |    |
++----+----+
+#+end_src
+
+#+resname:
+[[file:images/blue.png]]
+
 *** What happens to the results?
     :PROPERTIES:
     :CUSTOM_ID: results
