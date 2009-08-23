@@ -33,6 +33,11 @@
   :PROPERTIES:
   :CUSTOM_ID: introduction
   :END:
+  Org-babel is an extension to the very excellent [[http://orgmode.org/][Org-mode]], and [[http://www.gnu.org/software/emacs/][Emacs]]
+  major mode for doing almost anything with plain text.  If you are
+  not familiar with Org-mode please take a moment to read [[http://orgmode.org/][the Org-mode
+  homepage]] before continuing.
+
   Org-babel provides the following modifications to [[http://orgmode.org/manual/Literal-examples.html][the existing
   support]] for blocks of source code examples in the org-mode core.
   1. interactive source code execution
