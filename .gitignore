@@ -1,6 +1,6 @@
 *~
 *.html
-doc/*.org
+doc/*
 *.css
 .Rhistory
 .Rdata
