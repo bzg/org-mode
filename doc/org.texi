@@ -11112,12 +11112,10 @@ others can benefit from your work.
 @cindex radio lists
 @cindex org-list-insert-radio-list
 
-Sending and receiving radio lists works exactly the same way than
-sending and receiving radio tables (@pxref{Radio tables}) @footnote{You
-need to load the @code{org-export-latex.el} package to use radio lists
-since the relevant code is there for now.}.  As for radio tables, you
-can insert radio lists templates in HTML, La@TeX{} and Texinfo modes by
-calling @code{org-list-insert-radio-list}.
+Sending and receiving radio lists works exactly the same way than sending and
+receiving radio tables (@pxref{Radio tables}).  As for radio tables, you can
+insert radio lists templates in HTML, La@TeX{} and Texinfo modes by calling
+@code{org-list-insert-radio-list}.
 
 Here are the differences with radio tables:
 
