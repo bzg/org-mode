@@ -1,5 +1,11 @@
 2009-08-23  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-format-source-code-or-example): Translate
+	language.
+
+	* org-src.el (org-src-lang-modes): New variable
+	(org-edit-src-code): Translate language.
+
 	* org-exp.el (org-export-format-source-code-or-example): Deal wit
 	the new structure of the `org-export-latex-listings-langs'
 	variable.

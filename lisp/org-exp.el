@@ -2278,7 +2278,15 @@ INDENT was the original indentation of the block."
 		   "htmlize.el 1.34 or later is needed for source code formatting")))
 
 	      (if lang
-		  (let* ((mode (and lang (intern (concat lang "-mode"))))
+		  (let* ((lang-m (when lang
+                                   (or (cdr (assoc lang org-src-lang-modes))
+                                       lang)))
+                         (mode (and lang-m (intern
+					    (concat
+					     (if (symbolp lang-m)
+						 (symbol-name lang-m)
+					       lang-m)
+					     "-mode"))))
 			 (org-inhibit-startup t)
 			 (org-startup-folded nil))
 		    (setq rtn

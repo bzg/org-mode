@@ -109,6 +109,21 @@ You may want to use this hook for example to turn off `outline-minor-mode'
 or similar things which you want to have when editing a source code file,
 but which mess up the display of a snippet in Org exported files.")
 
+(defcustom org-src-lang-modes
+  '("ocaml" . tuareg)
+  "Alist mapping languages to their major mode.
+The key is the language name, the value is the string that should
+be inserted as the name of the major mode.  For many languages this is
+simple, but for language where this is not the case, this variable
+provides a way to simplify things on the user side.
+For example, there is no ocaml-mode in Emacs, but the mode to use is
+`tuareg-mode'."
+  :group 'org-edit-structure
+  :type '(repeat
+	  (cons
+	   (string "Language name")
+	   (symbol "Major mode"))))
+
 ;;; Editing source examples
 
 (defvar org-src-mode-map (make-sparse-keymap))
@@ -151,7 +166,9 @@ the edited version."
       (setq beg (move-marker beg (nth 0 info))
 	    end (move-marker end (nth 1 info))
 	    code (buffer-substring-no-properties beg end)
-	    lang (nth 2 info)
+	    lang (or (cdr (assoc (nth 2 info) org-src-lang-modes))
+                     (nth 2 info))
+	    lang (if (symbolp lang) (symbol-name lang) lang)
 	    single (nth 3 info)
 	    lfmt (nth 4 info)
 	    nindent (nth 5 info)
