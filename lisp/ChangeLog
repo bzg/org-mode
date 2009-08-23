@@ -1,5 +1,11 @@
 2009-08-23  Bastien Guerry  <bzg@altern.org>
 
+	* org-timer.el (org-timer-set-timer): Use `org-notify' and play a
+	sound when showing the notification.
+
+	* org-clock.el (org-notify): New function.
+	(org-clock-notify-once-if-expired): Use `org-notify'.
+
 	* org-gnus.el (org-gnus-store-link): Handle `gnus-summary-mode'
 	and `gnus-article-mode' separately.
 	(gnus-summary-article-header): Fix the declare-function.

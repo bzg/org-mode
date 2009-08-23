@@ -317,8 +317,8 @@ VALUE can be `on', `off', or `pause'."
 		(if (not (or (eval timer) timer-set))
 		    (setq timer-set t
 			  timer
-			  (run-with-timer secs nil 'org-show-notification
-					  (format "%s: time out" hl))
+			  (run-with-timer
+			   secs nil 'org-notify (format "%s: time out" hl) t)
 			  org-timer-last-timer timer)))
 	      '(org-timer-timer1
 		org-timer-timer2
