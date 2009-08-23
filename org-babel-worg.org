@@ -33,7 +33,7 @@
   :PROPERTIES:
   :CUSTOM_ID: introduction
   :END:
-  Org-babel is an extension to the very excellent [[http://orgmode.org/][Org-mode]], and [[http://www.gnu.org/software/emacs/][Emacs]]
+  Org-babel is an extension to the very excellent [[http://orgmode.org/][Org-mode]]; an [[http://www.gnu.org/software/emacs/][Emacs]]
   major mode for doing almost anything with plain text.  If you are
   not familiar with Org-mode please take a moment to read [[http://orgmode.org/][the Org-mode
   homepage]] before continuing.
