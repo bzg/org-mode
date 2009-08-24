@@ -128,7 +128,6 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-mode-map (make-sparse-keymap))
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
-(define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
 (defvar org-edit-src-picture nil)
@@ -185,7 +184,8 @@ the edited version."
 	    (if (boundp 'org-edit-src-overlay)
 		(org-delete-overlay org-edit-src-overlay)))
 	  (kill-buffer buffer))
-	(setq buffer (generate-new-buffer "*Org Edit Src Example*"))
+	(setq buffer (generate-new-buffer
+		      (concat "*Org Src " (file-name-nondirectory buffer-file-name) "[" lang "]*")))
 	(setq ovl (org-make-overlay beg end))
 	(org-overlay-put ovl 'face 'secondary-selection)
 	(org-overlay-put ovl 'edit-buffer buffer)
@@ -203,8 +203,7 @@ the edited version."
 				'(display nil invisible nil intangible nil))
 	(org-do-remove-indentation)
 	(let ((org-inhibit-startup t))
-	  (funcall lang-f)
-	  (org-src-mode))
+	  (funcall lang-f))
 	(set (make-local-variable 'org-edit-src-force-single-line) single)
 	(set (make-local-variable 'org-edit-src-from-org-mode) org-mode-p)
 	(when lfmt
@@ -218,6 +217,8 @@ the edited version."
 	(org-set-local 'org-edit-src-end-marker end)
 	(org-set-local 'org-edit-src-overlay ovl)
 	(org-set-local 'org-edit-src-nindent nindent)
+	(org-src-mode)
+	(set-buffer-modified-p nil)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg)))
       (message "%s" msg)
@@ -318,6 +319,7 @@ the fragment in the Org-mode buffer."
 	  (replace-match ""))
 	(org-goto-line (1+ (- line begline)))
 	(org-src-mode)
+	(set-buffer-modified-p nil)
 	(org-set-local 'org-edit-src-beg-marker beg)
 	(org-set-local 'org-edit-src-end-marker end)
 	(org-set-local 'org-edit-src-overlay ovl)
@@ -417,8 +419,8 @@ the language, a switch telling of the content should be in a single line."
 (defun org-edit-src-exit ()
   "Exit special edit and protect problematic lines."
   (interactive)
-  (unless (string-match "\\`*Org Edit " (buffer-name (current-buffer)))
-    (error "This is not an sub-editing buffer, something is wrong..."))
+  (unless org-edit-src-from-org-mode
+    (error "This is not a sub-editing buffer, something is wrong..."))
   (let ((beg org-edit-src-beg-marker)
 	(end org-edit-src-end-marker)
 	(ovl org-edit-src-overlay)
@@ -458,10 +460,10 @@ the language, a switch telling of the content should be in a single line."
       (while (re-search-forward "^" nil t)
       (replace-match nindent)))
     (setq code (buffer-string))
+    (set-buffer-modified-p nil)
     (switch-to-buffer (marker-buffer beg))
     (kill-buffer buffer)
     (goto-char beg)
-    (org-delete-overlay ovl)
     (delete-region beg end)
     (insert code)
     (goto-char beg)
@@ -480,6 +482,19 @@ the language, a switch telling of the content should be in a single line."
     (push-mark m 'nomessage)
     (goto-char (min p (point-max)))
     (message (or msg ""))))
+
+(defun org-src-mode-configure-edit-buffer ()
+  (when org-edit-src-from-org-mode
+    (setq buffer-offer-save t)
+    (setq buffer-file-name
+	  (concat (buffer-file-name (marker-buffer org-edit-src-beg-marker))
+		  "[" (buffer-name) "]"))
+    (set (if (featurep 'xemacs) 'write-contents-hooks 'write-contents-functions)
+	 '(org-edit-src-save))
+    (org-add-hook 'kill-buffer-hook
+		  '(lambda () (org-delete-overlay org-edit-src-overlay)) nil 'local)))
+
+(org-add-hook 'org-src-mode-hook 'org-src-mode-configure-edit-buffer)
 
 (provide 'org-src)
 
