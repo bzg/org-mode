@@ -2236,72 +2236,80 @@ Drawers will be excluded, also the line with scheduling/deadline info."
       (while (not (eobp))
 	(if (not (setq m (get-text-property (point) 'org-hd-marker)))
 	    (beginning-of-line 2)
-	  (save-excursion
-	    (with-current-buffer (marker-buffer m)
-	      (if (not (org-mode-p))
-		  (setq txt "")
-		(save-excursion
-		  (save-restriction
-		    (widen)
-		    (goto-char m)
-		    (beginning-of-line 2)
-		    (setq txt (buffer-substring
-			       (point)
-			       (progn (outline-next-heading) (point)))
-			  drawer-re org-drawer-regexp
-			  kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
-					      ".*\n?"))
-		    (with-temp-buffer
-		      (insert txt)
-		      (when org-agenda-add-entry-text-descriptive-links
-			(goto-char (point-min))
-			(while (org-activate-bracket-links (point-max))
-			  (add-text-properties (match-beginning 0) (match-end 0)
-					       '(face org-link))))
-		      (goto-char (point-min))
-		      (while (re-search-forward org-bracket-link-regexp (point-max) t)
-			(set-text-properties (match-beginning 0) (match-end 0)
-					     nil))
-		      (goto-char (point-min))
-		      (while (re-search-forward drawer-re nil t)
-			(delete-region
-			 (match-beginning 0)
-			 (progn (re-search-forward
-				 "^[ \t]*:END:.*\n?" nil 'move)
-				(point))))
-		      (goto-char (point-min))
-		      (while (re-search-forward kwd-time-re nil t)
-			(replace-match ""))
-		      (if (re-search-forward "[ \t\n]+\\'" nil t)
-			  (replace-match ""))
-		      (goto-char (point-min))
-		      ;; find min indentation
-		      (goto-char (point-min))
-		      (untabify (point-min) (point-max))
-		      (setq ind (org-get-indentation))
-		      (while (not (eobp))
-			(unless (looking-at "[ \t]*$")
-			  (setq ind (min ind (org-get-indentation))))
-			(beginning-of-line 2))
-		      (goto-char (point-min))
-		      (while (not (eobp))
-			(unless (looking-at "[ \t]*$")
-			  (move-to-column ind)
-			  (delete-region (point-at-bol) (point)))
-			(beginning-of-line 2))
-		      (goto-char (point-min))
-		      (while (and (not (eobp)) (re-search-forward "^" nil t))
-			(replace-match "    > "))
-		      (goto-char (point-min))
-		      (while (looking-at "[ \t]*\n") (replace-match ""))
-		      (goto-char (point-max))
-		      (when (> (org-current-line)
-			       (1+ org-agenda-add-entry-text-maxlines))
-			(goto-line (1+ org-agenda-add-entry-text-maxlines))
-			(backward-char 1))
-		      (setq txt (buffer-substring (point-min) (point)))))))))
+	  (setq txt (org-agenda-get-some-entry-text
+		     m org-agenda-add-entry-text-maxlines))
 	  (end-of-line 1)
 	  (if (string-match "\\S-" txt) (insert "\n" txt)))))))
+
+(defun org-agenda-get-some-entry-text (marker n-lines)
+  "Extract entry text from MARKER, at most N-LINES lines.
+This will ignore drawers etc, just get the text."
+  (let (txt)
+    (save-excursion
+      (with-current-buffer (marker-buffer marker)
+	(if (not (org-mode-p))
+	    (setq txt "")
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char marker)
+	      (beginning-of-line 2)
+	      (setq txt (buffer-substring
+			 (point)
+			 (progn (outline-next-heading) (point)))
+		    drawer-re org-drawer-regexp
+		    kwd-time-re (concat "^[ \t]*" org-keyword-time-regexp
+					".*\n?"))
+	      (with-temp-buffer
+		(insert txt)
+		(when org-agenda-add-entry-text-descriptive-links
+		  (goto-char (point-min))
+		  (while (org-activate-bracket-links (point-max))
+		    (add-text-properties (match-beginning 0) (match-end 0)
+					 '(face org-link))))
+		(goto-char (point-min))
+		(while (re-search-forward org-bracket-link-regexp (point-max) t)
+		  (set-text-properties (match-beginning 0) (match-end 0)
+				       nil))
+		(goto-char (point-min))
+		(while (re-search-forward drawer-re nil t)
+		  (delete-region
+		   (match-beginning 0)
+		   (progn (re-search-forward
+			   "^[ \t]*:END:.*\n?" nil 'move)
+			  (point))))
+		(goto-char (point-min))
+		(while (re-search-forward kwd-time-re nil t)
+		  (replace-match ""))
+		(if (re-search-forward "[ \t\n]+\\'" nil t)
+		    (replace-match ""))
+		(goto-char (point-min))
+		;; find min indentation
+		(goto-char (point-min))
+		(untabify (point-min) (point-max))
+		(setq ind (org-get-indentation))
+		(while (not (eobp))
+		  (unless (looking-at "[ \t]*$")
+		    (setq ind (min ind (org-get-indentation))))
+		  (beginning-of-line 2))
+		(goto-char (point-min))
+		(while (not (eobp))
+		  (unless (looking-at "[ \t]*$")
+		    (move-to-column ind)
+		    (delete-region (point-at-bol) (point)))
+		  (beginning-of-line 2))
+		(goto-char (point-min))
+		(while (and (not (eobp)) (re-search-forward "^" nil t))
+		  (replace-match "    > "))
+		(goto-char (point-min))
+		(while (looking-at "[ \t]*\n") (replace-match ""))
+		(goto-char (point-max))
+		(when (> (org-current-line)
+			 (1+ n-lines))
+		  (goto-line (1+ n-lines))
+		  (backward-char 1))
+		(setq txt (buffer-substring (point-min) (point)))))))))
+    txt))
 
 (defun org-agenda-collect-markers ()
   "Collect the markers pointing to entries in the agenda buffer."
@@ -6567,6 +6575,57 @@ belonging to the \"Work\" category."
 	     (= date today))
 	(and (< h org-extend-today-until)
 	     (= date (1- today))))))
+
+;;; Experimental code
+
+(defcustom org-agenda-entry-text-maxlines 5
+  "Number of text lines to be added when `E' is presed in the agenda."
+  :group 'org-agenda
+  :type 'integer)
+
+(defun org-agenda-show-some-context ()
+  "Add some text from te entry as context to the current line."
+  (let (m txt o)
+    (setq m (get-text-property (point) 'org-hd-marker))
+    (unless (marker-buffer m)
+      (error "No marker points to an entry here"))
+    (setq txt (concat "\n" (org-no-properties
+			    (org-agenda-get-some-entry-text
+			     m org-agenda-entry-text-maxlines))))
+    (when (string-match "\\S-" txt)
+      (setq o (org-make-overlay (point-at-bol) (point-at-eol)))
+      (org-overlay-put o 'evaporate t)
+      (org-overlay-put o 'org-overlay-type 'agenda-entry-content)
+      (org-overlay-put o 'after-string txt))))
+
+(defun org-agenda-toggle-entry-contents ()
+  "Toggle the display of entry context."
+  (interactive)
+  (or (org-agenda-remove-entry-contents)
+      (org-agenda-add-entry-contents)))
+
+(org-defkey org-agenda-mode-map "E" 'org-agenda-toggle-entry-contents)
+(org-defkey org-agenda-keymap "E" 'org-agenda-toggle-entry-contents)
+
+(defun org-agenda-add-entry-contents ()
+  "Add entry context for all agenda lines."
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (beginning-of-line 1)
+    (while (not (bobp))
+      (when (get-text-property (point) 'org-hd-marker)
+	(org-agenda-show-some-context))
+      (beginning-of-line 0))))
+
+(defun org-agenda-remove-entry-contents ()
+  "Remove any shown entry context."
+  (delq nil
+	(mapcar (lambda (o)
+		  (if (eq (org-overlay-get o 'org-overlay-type)
+			  'agenda-entry-content)
+		      (progn (org-delete-overlay o) t)))
+		(org-overlays-in (point-min) (point-max)))))
 
 (provide 'org-agenda)
 

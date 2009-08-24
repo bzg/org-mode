@@ -1,5 +1,9 @@
 2009-08-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-get-some-entry-text): New function.
+	(org-agenda-add-entry-text): Use
+	`org-agenda-get-some-entry-text'.
+
 	* org.el (org-cycle-separator-lines): Update docstring.
 	(org-cycle-show-empty-lines): Handle negative values for
 	`org-cycle-show-empty-lines'.
