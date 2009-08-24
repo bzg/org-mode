@@ -1,5 +1,9 @@
 2009-08-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-cycle-separator-lines): Update docstring.
+	(org-cycle-show-empty-lines): Handle negative values for
+	`org-cycle-show-empty-lines'.
+
 	* org-remember.el (org-remember-escaped-%): New function.
 	(org-remember-apply-template): Use `org-remember-escaped-%' to
 	detect escaped % signs.

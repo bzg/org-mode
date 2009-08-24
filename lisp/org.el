@@ -673,6 +673,9 @@ So the default 2 means, at least 2 empty lines after the end of a subtree
 are needed to produce free space between a collapsed subtree and the
 following headline.
 
+If the number is negative, and the number of empty lines is at least -N,
+all empty lines are shown.
+
 Special case: when 0, never leave empty lines in collapsed view."
   :group 'org-cycle
   :type 'integer)
@@ -5231,16 +5234,16 @@ The region to be covered depends on STATE when called through
 `org-cycle-hook'.  Lisp program can use t for STATE to get the
 entire buffer covered.  Note that an empty line is only shown if there
 are at least `org-cycle-separator-lines' empty lines before the headline."
-  (when (> org-cycle-separator-lines 0)
+  (when (not (= org-cycle-separator-lines 0))
     (save-excursion
-      (let* ((n org-cycle-separator-lines)
+      (let* ((n (abs org-cycle-separator-lines))
 	     (re (cond
 		  ((= n 1) "\\(\n[ \t]*\n\\*+\\) ")
 		  ((= n 2) "^[ \t]*\\(\n[ \t]*\n\\*+\\) ")
 		  (t (let ((ns (number-to-string (- n 2))))
 		       (concat "^\\(?:[ \t]*\n\\)\\{" ns "," ns "\\}"
 			       "[ \t]*\\(\n[ \t]*\n\\*+\\) ")))))
-	     beg end)
+	     beg end b e)
 	(cond
 	 ((memq state '(overview contents t))
 	  (setq beg (point-min) end (point-max)))
@@ -5251,9 +5254,15 @@ are at least `org-cycle-separator-lines' empty lines before the headline."
 	(when beg
 	  (goto-char beg)
 	  (while (re-search-forward re end t)
-	    (if (not (get-char-property (match-end 1) 'invisible))
-		(outline-flag-region
-		 (match-beginning 1) (match-end 1) nil)))))))
+	    (unless (get-char-property (match-end 1) 'invisible)
+	      (setq e (match-end 1))
+	      (if (< org-cycle-separator-lines 0)
+		  (setq b (save-excursion
+			    (goto-char (match-beginning 0))
+			    (org-back-over-empty-lines)
+			    (point)))
+		(setq b (match-beginning 1)))
+	      (outline-flag-region b e nil)))))))
   ;; Never hide empty lines at the end of the file.
   (save-excursion
     (goto-char (point-max))
