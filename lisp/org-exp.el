@@ -1846,6 +1846,12 @@ When it is nil, all comments will be removed."
 		       (point-at-eol))
       (end-of-line 1))))
 
+(defun org-export-protect-sub-super (s)
+  (save-match-data
+    (while (string-match "\\([^\\\\]\\)\\([_^]\\)" s)
+      (setq s (replace-match "\\1\\\\\\2" nil nil s)))
+    s))
+
 (defun org-export-normalize-links ()
   "Convert all links to bracket links, and expand link abbreviations."
   (let ((re-plain-link (concat "\\([^[<]\\)" org-plain-link-re))
@@ -1855,8 +1861,11 @@ When it is nil, all comments will be removed."
     (while (re-search-forward re-plain-link nil t)
       (goto-char (1- (match-end 0)))
       (org-if-unprotected-at (1+ (match-beginning 0))
-       (let* ((s (concat (match-string 1) "[[" (match-string 2)
-			 ":" (match-string 3) "]]")))
+       (let* ((s (concat (match-string 1)
+			 "[[" (match-string 2) ":" (match-string 3)
+			 "][" (match-string 2) ":" (org-export-protect-sub-super
+						    (match-string 3))
+			 "]]")))
 	 ;; added 'org-link face to links
 	 (put-text-property 0 (length s) 'face 'org-link s)
 	 (replace-match s t t))))
@@ -1864,8 +1873,11 @@ When it is nil, all comments will be removed."
     (while (re-search-forward re-angle-link nil t)
       (goto-char (1- (match-end 0)))
       (org-if-unprotected
-       (let* ((s (concat (match-string 1) "[[" (match-string 2)
-			 ":" (match-string 3) "]]")))
+       (let* ((s (concat (match-string 1)
+			 "[[" (match-string 2) ":" (match-string 3)
+			 "][" (match-string 2) ":" (org-export-protect-sub-super
+						    )(match-string 3)
+			 "]]")))
 	 (put-text-property 0 (length s) 'face 'org-link s)
 	 (replace-match s t t))))
     (goto-char (point-min))

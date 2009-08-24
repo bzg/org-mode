@@ -1,5 +1,9 @@
 2009-08-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-exp.el (org-export-protect-sub-super): New function.
+	(org-export-normalize-links): Protect the url of plain links from
+	supscript and superscript processing.
+
 	* org-remember.el (org-remember-escaped-%): New function.
 	(org-remember-apply-template): Use `org-remember-escaped-%' to
 	detect escaped % signs.
