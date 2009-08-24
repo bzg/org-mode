@@ -507,6 +507,9 @@ replace - (default option) insert results after the source block
 
 silent -- no results are inserted
 
+file ---- the results are interpreted as a file path, and are
+          inserted into the buffer using the Org-mode file syntax
+
 raw ----- results are added directly to the org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.

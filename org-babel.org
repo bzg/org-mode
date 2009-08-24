@@ -218,12 +218,7 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [43/63]
-** TODO source-name visible in LaTeX and html exports
-Maybe this should be done in backend specific manners.
-
-The listings package may provide for naming a source-code block...
-
+* Tasks [46/63]
 ** PROPOSED allow `anonymous' function block with function call args?
    My question here is simply whether we're going to allow
 #+begin_src python(arg=ref)
@@ -497,7 +492,6 @@ assignments are made in the appropriate session.
   end
 #+end_src
 
-
 *** TODO set buffer-local-process variables appropriately [DED]
     I think something like this would be great. You've probably
 already thought of this, but just to note it down: it would be really
@@ -586,81 +580,6 @@ org-mode core
    - files of interpreted code: anything stopping us giving such files
      similar status to a source code block?
    - Would be nice to allow org and non-org files to be remote
-** TODO figure out how to handle errors during evaluation
-   I expect it will be hard to do this properly, but ultimately it
-   would be nice to be able to specify somewhere to receive STDERR,
-   and to be warned if it is non-empty.
-
-   Probably simpler in non-session evaluation than session? At least
-   the mechanism will be different I guess.
-
-   R has a try function, with error handling, along the lines of
-   python. I bet ruby does too. Maybe more of an issue for functional
-   style; in my proposed scripting style the error just gets dumped to
-   the org buffer and the user is thus alerted.
-** STARTED figure out how to handle graphic output
-   
-This is listed under [[* graphical output][graphical output]] in out objectives.
-
-This should take advantage of the =:results file= option, and
-languages which almost always produce graphical output should set
-=:results file= to true by default (this is currently done for the
-gnuplot and ditaa languages).  That would handle placing these results
-in the buffer.  Then if there is a combination of =silent= and =file=
-=:results= headers we could drop the results to a temp buffer and pop
-open that buffer...
-
-Display of file results is addressed in the [[* =\C-c \C-o= to open results of source block][open-results-task]].
-
-*** TODO R graphics to screen means session evaluation
-    If R graphical output is going to screen then evaluation must be
-    in a session, otherwise the graphics will disappear as soon as the
-    R process dies.
-
-*** Adding to a discussion started in email
-    I'm not deeply wedded to these ideas, just noting them down. I'm
-    probably just thinking of R and haven't really thought about how
-    this fits with the other graphics-generating languages.
-Dan:
-> I used the approach below to get graphical file output
-> today, which is one idea at least. Maybe it could be linked up with
-> your :results file variable. (Or do we need a :results image for R?)
->
-Eric:
-I don't think we need a special image results variable, but I may be
-missing what the code below accomplishes.  Would the task I added about
-adding org-open-at-point functionality to source code blocks take care
-of this need?
-
-Dan: I'm not sure. I think the ability for a script to generate both
-text and graphical output might be a natural expectation, at least for
-R users.
-
->
-> Dan
->
-> #+srcname: cohort-scatter-plots-2d(org_babel_graphical_output_file="cohort-scatter-plots-2d.png")
-> #+begin_src R 
->   if(exists("org_babel_output_file"))
->       png(filename=org_babel_graphical_output_file, width=1000, height=1000)
->   ## plotting code in here
->   if(exists("org_babel_graphical_output_file")) dev.off()
-> #+end_src
-
-Dan: Yes, the results :file option is nice for dealing with graphical
-output, and that could well be enough. Something based on the scheme
-above would have a couple of points in its favour:
-1. It's easy to switch between output going to on-screen graphics and
-   output going to file: Output will go to screen unless a string variable
-   with a standard name (e.g. ""org_babel_graphical_output_file"")
-   exists in which case it will go to the file indicated by the value
-   of that variable.
-2. The block can return a result / script output, as well as produce
-   graphical output.
-
-In interactive use we might want to allow the user to choose between
-screen and file output. In non-interactive use such as export, it
-would be file output (subject to the :exports directives).
 ** TODO Finalise behaviour regarding vector/scalar output
 *** DONE Stop spaces causing vector output
 This simple example of multilingual chaining produces vector output if
@@ -834,7 +753,6 @@ cbind(a, b)
 **** Alternatively
      Use org-table-export, do it in external spreadsheet software,
      then org-table-import
-
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
@@ -921,6 +839,28 @@ the org-mode buffer as a link to the file...
 This would allow for display of images upon export providing
 functionality similar to =org-exp-blocks= only in a more general
 manner.
+** DEFERRED figure out how to handle errors during evaluation
+   I expect it will be hard to do this properly, but ultimately it
+   would be nice to be able to specify somewhere to receive STDERR,
+   and to be warned if it is non-empty.
+
+   Probably simpler in non-session evaluation than session? At least
+   the mechanism will be different I guess.
+
+   R has a try function, with error handling, along the lines of
+   python. I bet ruby does too. Maybe more of an issue for functional
+   style; in my proposed scripting style the error just gets dumped to
+   the org buffer and the user is thus alerted.
+
+   For now I think the current behavior of returning any error
+   messages generated by the source language is sufficient.
+** DEFERRED source-name visible in LaTeX and html exports
+Maybe this should be done in backend specific manners.
+
+The listings package may provide for naming a source-code block...
+
+Actually there is no obvious simple and attractive way to implement
+this.  Closing this issue for now.
 ** DEFERRED Support rownames and other org babel table features?
 
    The full org table features are detailed in the manual [[http://orgmode.org/manual/Advanced-features.html#Advanced-features][here]].
@@ -1243,6 +1183,74 @@ to the command if BUFF is not given.)
     2) The function is called inside of a =write.table= function call
        writing the results to a table
     3) The table is read using =org-table-import=
+** DONE figure out how to handle graphic output
+   
+This is listed under [[* graphical output][graphical output]] in out objectives.
+
+This should take advantage of the =:results file= option, and
+languages which almost always produce graphical output should set
+=:results file= to true by default (this is currently done for the
+gnuplot and ditaa languages).  That would handle placing these results
+in the buffer.  Then if there is a combination of =silent= and =file=
+=:results= headers we could drop the results to a temp buffer and pop
+open that buffer...
+
+Display of file results is addressed in the [[* =\C-c \C-o= to open results of source block][open-results-task]].
+
+I think this is done for now.  With the ability of the file option it
+is now possible to save images directly to a file.  Then calling
+=\C-c\C-o= with point on the source block will open the related
+results.
+
+*** R graphics to screen means session evaluation
+    If R graphical output is going to screen then evaluation must be
+    in a session, otherwise the graphics will disappear as soon as the
+    R process dies.
+
+*** Adding to a discussion started in email
+    I'm not deeply wedded to these ideas, just noting them down. I'm
+    probably just thinking of R and haven't really thought about how
+    this fits with the other graphics-generating languages.
+Dan:
+> I used the approach below to get graphical file output
+> today, which is one idea at least. Maybe it could be linked up with
+> your :results file variable. (Or do we need a :results image for R?)
+>
+Eric:
+I don't think we need a special image results variable, but I may be
+missing what the code below accomplishes.  Would the task I added about
+adding org-open-at-point functionality to source code blocks take care
+of this need?
+
+Dan: I'm not sure. I think the ability for a script to generate both
+text and graphical output might be a natural expectation, at least for
+R users.
+
+>
+> Dan
+>
+> #+srcname: cohort-scatter-plots-2d(org_babel_graphical_output_file="cohort-scatter-plots-2d.png")
+> #+begin_src R 
+>   if(exists("org_babel_output_file"))
+>       png(filename=org_babel_graphical_output_file, width=1000, height=1000)
+>   ## plotting code in here
+>   if(exists("org_babel_graphical_output_file")) dev.off()
+> #+end_src
+
+Dan: Yes, the results :file option is nice for dealing with graphical
+output, and that could well be enough. Something based on the scheme
+above would have a couple of points in its favour:
+1. It's easy to switch between output going to on-screen graphics and
+   output going to file: Output will go to screen unless a string variable
+   with a standard name (e.g. ""org_babel_graphical_output_file"")
+   exists in which case it will go to the file indicated by the value
+   of that variable.
+2. The block can return a result / script output, as well as produce
+   graphical output.
+
+In interactive use we might want to allow the user to choose between
+screen and file output. In non-interactive use such as export, it
+would be file output (subject to the :exports directives).
 ** DONE new results types (org, html, latex)
    Thanks to Tom Short for this recommendation.
 
