@@ -109,7 +109,10 @@ which is viewable through the web browser.
     allows source blocks to be executed: the code is passed to the
     interpreter and you have control over what is done with the
     results of excecution. E.g. place point anywhere in the following
-    block and use C-c C-c to run the code:
+    block and use =C-c C-c= to run the code:
+    
+    *Note:* calling =C-c C-o= on a source-code block will open the
+    blocks results
 
 [[http://www.ruby-lang.org/][Ruby]] source code
 #+begin_src ruby
