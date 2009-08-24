@@ -5742,8 +5742,9 @@ more than one template) and then prepare the buffer like
 @end example
 
 @noindent
-During expansion of the template, special @kbd{%}-escapes allow dynamic
-insertion of content:
+During expansion of the template, special @kbd{%}-escapes@footnote{If you
+need one of these sequences literally, escape the @kbd{%} with a backslash.}
+allow dynamic insertion of content:
 @example
 %^@{@var{prompt}@}  @r{prompt the user for a string and replace this sequence with it.}
             @r{You may specify a default value and a completion table with}
