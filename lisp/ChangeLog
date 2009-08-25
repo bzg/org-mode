@@ -1,5 +1,7 @@
 2009-08-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-gnus.el (org-gnus-store-link): Simplify.
+
 	* org.el (org-latex-regexps): Don't add extra empty lines for
 	display formulas.
 

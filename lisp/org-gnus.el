@@ -120,56 +120,26 @@ If `org-store-link' was called with a prefix arg the meaning of
 	      link desc)
 	(org-add-link-props :link link :description desc)
 	link)))
-
-   ((eq major-mode 'gnus-summary-mode)
+   
+   ((memq major-mode '(gnus-summary-mode gnus-article-mode))
     (let* ((group gnus-newsgroup-name)
-    	   (header (save-excursion (gnus-summary-article-header)))
-	   (from (aref header 2))
-	   (message-id (org-remove-angle-brackets (aref header 4)))
-	   (date (aref header 3))
-	   (to (cdr (assoc 'To (aref header 9))))
-	   (newsgroups (cdr (assoc 'newsgroup (aref header 9))))
-	   (x-no-archive (cdr (assoc 'x-no-archive (aref header 9))))
-	   (subject (aref header 1))
+   	   (header (with-current-buffer gnus-summary-buffer
+		     (gnus-summary-article-header)))
+	   (extra (mail-header-extra header))
+	   (from (mail-header-from header))
+	   (message-id (org-remove-angle-brackets (mail-header-id header)))
+	   (date (mail-header-date header))
+	   (to (cdr (assoc 'To extra)))
+	   (newsgroups (cdr (assoc 'newsgroup extra)))
+	   (x-no-archive (cdr (assoc 'x-no-archive extra)))
+	   (subject (mail-header-subject header))
 	   desc link)
       (org-store-link-props :type "gnus" :from from :subject subject
 			    :message-id message-id :group group :to to)
       (setq desc (org-email-link-description)
-	    link (org-gnus-article-link group newsgroups message-id x-no-archive))
+	    link (org-gnus-article-link 
+		  group	newsgroups message-id x-no-archive))
       (org-add-link-props :link link :description desc)
-      link))
-
-   ((eq major-mode 'gnus-article-mode)
-    (let* ((group gnus-newsgroup-name)
-	   (header (with-current-buffer gnus-article-buffer
-		     (gnus-summary-toggle-header 1)
-		     (goto-char (point-min))
-		     ;; mbox files may contain a first line starting with
-		     ;; "From" followed by a space, which cannot be parsed as
-		     ;; header line, so we skip it.
-                     (when (looking-at "From ")
-		       (beginning-of-line 2))
-		     (mail-header-extract-no-properties)))
-	   (from (mail-header 'from header))
-	   (message-id (org-remove-angle-brackets
-			(mail-header 'message-id header)))
-	   (date (mail-header 'date header))
-	   (to (mail-header 'to header))
-	   (newsgroups (mail-header 'newsgroups header))
-	   (x-no-archive (mail-header 'x-no-archive header))
-	   (subject (if (eq major-mode 'gnus-article-mode)
-			(save-restriction
-			  (require 'message)
-			  (message-narrow-to-head-1)
-			  (message-fetch-field "subject"))
-		      (gnus-summary-subject-string)))
-	   desc link)
-      (org-store-link-props :type "gnus" :from from :subject subject
-			    :message-id message-id :group group :to to)
-      (setq desc (org-email-link-description)
-	    link (org-gnus-article-link group newsgroups message-id x-no-archive))
-      (org-add-link-props :link link :description desc)
-      (gnus-summary-toggle-header -1)
       link))))
 
 (defun org-gnus-open (path)
