@@ -79,8 +79,9 @@ exported source code blocks by language."
          (let* ((lang (car by-lang))
                 (specs (cdr by-lang))
                 (lang-f (intern (concat
-                                 (or (symbol-name
-                                      (cdr (assoc lang org-src-lang-modes)))
+                                 (or (and (cdr (assoc lang org-src-lang-modes))
+                                          (symbol-name
+                                           (cdr (assoc lang org-src-lang-modes))))
                                      lang)
                                  "-mode")))
                 (lang-specs (cdr (assoc lang org-babel-tangle-langs)))
@@ -213,8 +214,9 @@ the source-code block which holds BODY."
                    (setq new-body (concat new-body text))))
       (with-temp-buffer
         (insert body) (goto-char (point-min))
-        (funcall (intern (concat (or (symbol-name
-                                      (cdr (assoc lang org-src-lang-modes)))
+        (funcall (intern (concat (or (and (cdr (assoc lang org-src-lang-modes))
+                                          (symbol-name
+                                           (cdr (assoc lang org-src-lang-modes))))
                                      lang) "-mode")))
         (setq index (point))
         (while (and (re-search-forward "<<\\(.+\\)>>" nil t))
