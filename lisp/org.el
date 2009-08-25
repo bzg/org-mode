@@ -13944,8 +13944,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
     ("$1" "\\([^$]\\)\\(\\$[^ 	\r\n,;.$]\\$\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
     ("$" "\\([^$]\\)\\(\\(\\$\\([^ 	\r\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ 	\r\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
     ("\\(" "\\\\([^\000]*?\\\\)" 0 nil)
-    ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 t)
-    ("$$" "\\$\\$[^\000]*?\\$\\$" 0 t))
+    ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 nil)
+    ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
   "Regular expressions for matching embedded LaTeX.")
 
 (defun org-format-latex (prefix &optional dir overlays msg at forbuffer)

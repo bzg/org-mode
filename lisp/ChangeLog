@@ -1,3 +1,8 @@
+2009-08-25  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org.el (org-latex-regexps): Don't add extra empty lines for
+	display formulas.
+
 2009-08-24  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-get-some-entry-text): New function.
