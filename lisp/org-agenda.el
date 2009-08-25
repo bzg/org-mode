@@ -5491,17 +5491,48 @@ If this information is not given, the function uses the tree at point."
 	  (org-remove-subtree-entries-from-agenda)
 	  (org-refile goto buffer rfloc))))))
 
+(defun org-agenda-open-link (&optional arg)
+  "Follow the link in the current line, if any.
+Also looks in the `after-string' character property, if that is set."
+  (interactive "P")
+  (let* ((txt (concat (buffer-substring (point-at-bol) (point-at-eol))
+		      "\n"
+		      (get-char-property (point) 'after-string)))
+	 (re (concat "\\(" org-bracket-link-regexp "\\)\\|"
+		     "\\(" org-angle-link-re "\\)\\|"
+		     "\\(" org-plain-link-re "\\)"))
+	 (marker (or (get-text-property (point) 'org-hd-marker)
+		     (get-text-property (point) 'org-marker)))
+	 (buffer (and marker (marker-buffer marker)))
+	 links c link (cnt 0))
+    (with-temp-buffer
+      (insert txt)
+      (org-agenda-copy-local-variable 'org-link-abbrev-alist-local)
+      (goto-char (point-min))
+      (while (re-search-forward re nil t)
+	(push (match-string 0) links))
+      (setq links (reverse links))
+      (unless links (error "No links"))
 
-
-
-(defun org-agenda-open-link ()
-  "Follow the link in the current line, if any."
-  (interactive)
-  (org-agenda-copy-local-variable 'org-link-abbrev-alist-local)
-  (save-excursion
-    (save-restriction
-      (narrow-to-region (point-at-bol) (point-at-eol))
-      (org-open-at-point))))
+      (unless (and (integerp arg) (>= (length links) arg))
+	(save-excursion
+	  (save-window-excursion
+	    (with-output-to-temp-buffer "*Select Link*"
+	      (princ "Select link\n\n")
+	      (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))
+		    links))
+	    (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
+	    (message "Select link to open:")
+	    (setq c (read-char-exclusive))
+	      (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
+	(setq arg (- c ?0)))
+      
+      (unless (and (integerp arg) (>= (length links) arg))
+	(error "Invalid link selection"))
+      (setq link (nth (1- arg) links)
+	    arg nil)
+      (with-current-buffer (or buffer (current-buffer))
+	(org-open-link-from-string link)))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."
