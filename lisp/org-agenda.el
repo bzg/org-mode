@@ -5496,17 +5496,19 @@ If this information is not given, the function uses the tree at point."
 
 (defun org-agenda-open-link (&optional arg)
   "Follow the link in the current line, if any.
-Also looks in the `after-string' character property, if that is set."
+This looks for a link in the displayed lin in the agenda.  It also looks
+at the text of the entry itself."
   (interactive "P")
-  (let* ((txt (concat (buffer-substring (point-at-bol) (point-at-eol))
+  (let* ((marker (or (get-text-property (point) 'org-hd-marker)
+		     (get-text-property (point) 'org-marker)))
+	 (buffer (and marker (marker-buffer marker)))
+	 (txt (concat (buffer-substring (point-at-bol) (point-at-eol))
 		      "\n"
-		      (get-char-property (point) 'after-string)))
+		      (and marker
+			   (org-agenda-get-some-entry-text marker 100))))
 	 (re (concat "\\(" org-bracket-link-regexp "\\)\\|"
 		     "\\(" org-angle-link-re "\\)\\|"
 		     "\\(" org-plain-link-re "\\)"))
-	 (marker (or (get-text-property (point) 'org-hd-marker)
-		     (get-text-property (point) 'org-marker)))
-	 (buffer (and marker (marker-buffer marker)))
 	 links c link (cnt 0))
     (with-temp-buffer
       (insert txt)
@@ -5520,6 +5522,7 @@ Also looks in the `after-string' character property, if that is set."
       (unless (and (integerp arg) (>= (length links) arg))
 	(save-excursion
 	  (save-window-excursion
+	    (delete-other-windows)
 	    (with-output-to-temp-buffer "*Select Link*"
 	      (princ "Select link\n\n")
 	      (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))

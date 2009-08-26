@@ -6924,6 +6924,12 @@ numeric prefix argument N, go up to level N and then take that tree.  If N is
 negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
 previously used indirect buffer.
 
+@kindex C-c C-o
+@item C-c C-o
+Follow a link in the entry.  This will offer a selection of any links in the
+text belonging to the referenced Org node.  If there is only one link, it
+will be followed without a selection prompt.
+
 @tsubheading{Change display}
 @cindex display changing, in agenda
 @kindex o
