@@ -5481,18 +5481,17 @@ If this information is not given, the function uses the tree at point."
 		       (org-agenda-error)))
 	   (buffer (marker-buffer marker))
 	   (pos (marker-position marker))
-	   (rfloc))
-      (setq rfloc (or rfloc
+	   (rfloc (or rfloc
 		      (org-refile-get-location
 		       (if goto "Goto: " "Refile to: ") buffer
 		       org-refile-allow-creating-parent-nodes))))
-    (with-current-buffer buffer
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char marker)
-	  (org-remove-subtree-entries-from-agenda)
-	  (org-refile goto buffer rfloc))))))
+      (with-current-buffer buffer
+	(save-excursion
+	  (save-restriction
+	    (widen)
+	    (goto-char marker)
+	    (org-remove-subtree-entries-from-agenda)
+	    (org-refile goto buffer rfloc)))))))
 
 (defun org-agenda-open-link (&optional arg)
   "Follow the link in the current line, if any.
