@@ -5475,14 +5475,17 @@ If this information is not given, the function uses the tree at point."
 (defun org-agenda-refile (&optional goto rfloc)
   "Refile the item at point."
   (interactive "P")
-  (let* ((marker (or (get-text-property (point) 'org-hd-marker)
-		     (org-agenda-error)))
-	 (buffer (marker-buffer marker))
-	 (pos (marker-position marker))
-	 (rfloc (or rfloc
-		    (org-refile-get-location
-		     (if goto "Goto: " "Refile to: ") buffer
-		     org-refile-allow-creating-parent-nodes))))
+  (if (equal goto '(16))
+      (org-refile-goto-last-stored)
+    (let* ((marker (or (get-text-property (point) 'org-hd-marker)
+		       (org-agenda-error)))
+	   (buffer (marker-buffer marker))
+	   (pos (marker-position marker))
+	   (rfloc))
+      (setq rfloc (or rfloc
+		      (org-refile-get-location
+		       (if goto "Goto: " "Refile to: ") buffer
+		       org-refile-allow-creating-parent-nodes))))
     (with-current-buffer buffer
       (save-excursion
 	(save-restriction
