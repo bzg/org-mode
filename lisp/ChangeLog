@@ -1,3 +1,7 @@
+2009-08-26  Bernt Hansen  <bernt@norang.ca>  (tiny change)
+
+	* org-clock.el (org-notify): Bugfix.
+
 2009-08-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-open-link): Handle multiple links and
