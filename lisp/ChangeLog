@@ -1,5 +1,7 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-parse-time-string): Better error message.
+
 	* org-macs.el (org-goto-line): New defsubst.
 
 	* org.el (org-open-file, org-change-tag-in-region)

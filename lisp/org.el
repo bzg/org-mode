@@ -13156,7 +13156,7 @@ hour and minute fields will be nil if not given."
 	    (string-to-number (match-string 3 s))
 	    (string-to-number (match-string 2 s))
 	    nil nil nil)
-    (make-list 9 0)))
+    (error "Not a standard Org-mode time string: %s" s)))
 
 (defun org-timestamp-up (&optional arg)
   "Increase the date item at the cursor by one.
