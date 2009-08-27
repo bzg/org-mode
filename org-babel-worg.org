@@ -74,7 +74,8 @@ which is viewable through the web browser.
      you will want to be able to execute on your system.  The
      following can be added to your .emacs and used to activate
      languages.  It includes a brief list of the requirements for each
-     language.
+     language.  *Note*: this also serves as the list of languages
+     currently supported by Org-babel.
      #+begin_src emacs-lisp 
        ;; Uncomment each of the following require lines if you want org-babel
        ;; to support that language.  Each language has a comment explaining
