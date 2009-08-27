@@ -1610,7 +1610,7 @@ that have been changed along."
 			    (not (car pending-undo-list)))
 		  (pop pending-undo-list))
 		(undo-more 1))))))
-    (goto-line line)
+    (org-goto-line line)
     (message "`%s' undone (buffer %s)" cmd (buffer-name rembuf))))
 
 (defun org-verify-change-for-undo (l1 l2)
@@ -1820,7 +1820,7 @@ s   Search for keywords                 C   Configure custom agenda commands
 	(while t
 	  (setq custom1 custom)
 	  (when (eq rmheader t)
-	    (goto-line 1)
+	    (org-goto-line 1)
 	    (re-search-forward ":" nil t)
 	    (delete-region (match-end 0) (point-at-eol))
 	    (forward-char 1)
@@ -2331,7 +2331,7 @@ This will ignore drawers etc, just get the text."
 		(goto-char (point-max))
 		(when (> (org-current-line)
 			 n-lines)
-		  (goto-line (1+ n-lines))
+		  (org-goto-line (1+ n-lines))
 		  (backward-char 1))
 		(setq txt (buffer-substring (point-min) (point)))))))))
     txt))
@@ -4839,7 +4839,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (put 'org-agenda-filter :preset-filter preset)
     (and (or filter preset) (org-agenda-filter-apply filter))
     (and cols (interactive-p) (org-agenda-columns))
-    (goto-line line)
+    (org-goto-line line)
     (recenter window-line)))
 
 

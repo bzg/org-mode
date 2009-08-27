@@ -1,5 +1,36 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-macs.el (org-goto-line): New defsubst.
+
+	* org.el (org-open-file, org-change-tag-in-region)
+	(org-fast-tag-show-exit): Don't use `goto-line'.
+
+	* org-table.el (org-table-align, org-table-insert-column)
+	(org-table-delete-column, org-table-move-column)
+	(org-table-sort-lines, org-table-copy-region)
+	(org-table-paste-rectangle, org-table-wrap-region)
+	(org-table-get-specials, org-table-rotate-recalc-marks)
+	(org-table-get-range, org-table-recalculate)
+	(org-table-edit-formulas, org-table-fedit-convert-buffer)
+	(org-table-show-reference, org-table-highlight-rectangle): Don't
+	use `goto-line'.
+
+	* org-src.el (org-edit-src-code, org-edit-fixed-width-region)
+	(org-edit-src-exit): Don't use `goto-line'.
+
+	* org-macs.el (org-preserve-lc): Don't use `goto-line'.
+
+	* org-list.el (org-renumber-ordered-list, org-fix-bullet-type):
+	Don't use `goto-line'.
+
+	* org-exp.el (org-export-number-lines): Don't use `goto-line'.
+
+	* org-colview.el (org-columns, org-columns-redo)
+	(org-agenda-columns): Don't use `goto-line'.
+
+	* org-colview-xemacs.el (org-columns, org-agenda-columns): Don't
+	use `goto-line'.
+
 	* org-agenda.el (org-agenda-mode): Force visual line motion off.
 	(org-agenda-add-entry-text-maxlines): Improve docstring.
 	(org-agenda-start-with-entry-text-mode): New option.
@@ -19,6 +50,9 @@
 	(org-agenda-entry-text-mode): New command.
 	(org-agenda-set-mode-name): Add entry text mode to the mode line
 	string.
+	(org-agenda-undo, org-agenda-get-restriction-and-command)
+	(org-agenda-get-some-entry-text, org-agenda-redo): Don't use
+	`goto-line'.
 
 2009-08-26  Bernt Hansen  <bernt@norang.ca>  (tiny change)
 

@@ -836,7 +836,7 @@ with something like \"1.\" or \"2)\"."
 	  (goto-char (match-beginning 2))
 	  (insert (setq new (format fmt (setq n (1+ n)))))
 	  (org-shift-item-indentation (- (length new) (length old))))))
-    (goto-line line)
+    (org-goto-line line)
     (org-move-to-column col)))
 
 (defun org-fix-bullet-type (&optional force-bullet)
@@ -874,7 +874,7 @@ Also, fix the indentation."
 	  (setq oldbullet (match-string 0))
 	  (unless (equal bullet oldbullet) (replace-match bullet))
 	  (org-shift-item-indentation (- (length bullet) (length oldbullet))))))
-    (goto-line line)
+    (org-goto-line line)
     (org-move-to-column col)
     (if (string-match "[0-9]" bullet)
 	(org-renumber-ordered-list 1))))

@@ -8429,7 +8429,7 @@ If the file does not exist, an error is thrown."
 	  (eq cmd 'emacs))
       (funcall (cdr (assq 'file org-link-frame-setup)) file)
       (widen)
-      (if line (goto-line line)
+      (if line (org-goto-line line)
 	(if search (org-link-search search))))
      ((consp cmd)
       (let ((file (convert-standard-filename file)))
@@ -11168,7 +11168,7 @@ This works in the agenda, and also in an org-mode buffer."
     (goto-char beg)
     (setq l1 (org-current-line))
     (loop for l from l1 to l2 do
-	  (goto-line l)
+	  (org-goto-line l)
 	  (setq m (get-text-property (point) 'org-hd-marker))
 	  (when (or (and (org-mode-p) (org-on-heading-p))
 		    (and agendap m))
@@ -11219,7 +11219,7 @@ This works in the agenda, and also in an org-mode buffer."
 
 (defun org-fast-tag-show-exit (flag)
   (save-excursion
-    (goto-line 3)
+    (org-goto-line 3)
     (if (re-search-forward "[ \t]+Next change exits" (point-at-eol) t)
 	(replace-match ""))
     (when flag

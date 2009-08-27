@@ -876,7 +876,7 @@ around it."
 			 truncate-lines))
 	(setq truncate-lines t)
 	(mapc (lambda (x)
-		(goto-line (car x))
+		(org-goto-line (car x))
 		(org-columns-display-here (cdr x)))
 	      cache)))))
 
@@ -1515,7 +1515,7 @@ and tailing newline characters."
 	(org-set-local 'org-columns-current-maxwidths maxwidths)
 	(org-columns-display-here-title)
 	(mapc (lambda (x)
-		(goto-line (car x))
+		(org-goto-line (car x))
 		(org-columns-display-here (cdr x)))
 	      cache)
 	(when org-agenda-columns-show-summaries

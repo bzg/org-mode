@@ -694,7 +694,7 @@ around it."
 			 truncate-lines))
 	(setq truncate-lines t)
 	(mapc (lambda (x)
-		(goto-line (car x))
+		(org-goto-line (car x))
 		(org-columns-display-here (cdr x)))
 	      cache)))))
 
@@ -959,7 +959,7 @@ Don't set this, this is meant for dynamic scoping.")
 	  (call-interactively 'org-columns)
 	(org-agenda-redo)
 	(call-interactively 'org-agenda-columns)))
-    (goto-line line)
+    (org-goto-line line)
     (move-to-column col))
   (message "Recomputing columns...done"))
 
@@ -1303,7 +1303,7 @@ and tailing newline characters."
 			     (org-bound-and-true-p flyspell-mode))
 	  (flyspell-mode 0))
 	(mapc (lambda (x)
-		(goto-line (car x))
+		(org-goto-line (car x))
 		(org-columns-display-here (cdr x)))
 	      cache)
 	(when org-agenda-columns-show-summaries
