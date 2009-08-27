@@ -2256,7 +2256,7 @@ This will add a maximum of `org-agenda-add-entry-text-maxlines' lines of the
 entry text following headings shown in the agenda.
 Drawers will be excluded, also the line with scheduling/deadline info."
   (when (> org-agenda-add-entry-text-maxlines 0)
-    (let (m txt drawer-re kwd-time-re ind)
+    (let (m txt)
       (goto-char (point-min))
       (while (not (eobp))
 	(if (not (setq m (get-text-property (point) 'org-hd-marker)))
@@ -2269,7 +2269,7 @@ Drawers will be excluded, also the line with scheduling/deadline info."
 (defun org-agenda-get-some-entry-text (marker n-lines)
   "Extract entry text from MARKER, at most N-LINES lines.
 This will ignore drawers etc, just get the text."
-  (let (txt)
+  (let (txt drawer-re kwd-time-re ind)
     (save-excursion
       (with-current-buffer (marker-buffer marker)
 	(if (not (org-mode-p))

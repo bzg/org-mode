@@ -102,10 +102,9 @@
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
-  (let* ((org-version org-version)
+  (let* ((version org-version)
 	 (git-version)
-	 (dir (concat (file-name-directory (locate-library "org")) "../" ))
-	 (version))
+	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
     (if (and (file-exists-p (expand-file-name ".git" dir))
 	     (executable-find "git"))
 	(let ((pwd (substring (pwd) 10)))
@@ -120,9 +119,9 @@ With prefix arg HERE, insert it at point."
 		(shell-command "git diff-index --name-only HEAD --")
 		(unless (eql 1 (point-max))
 		  (setq git-version (concat git-version ".dirty")))
-		(setq org-version (concat org-version " (" git-version ")")))
+		(setq version (concat version " (" git-version ")")))
 	    (cd pwd))))
-    (setq version (format "Org-mode version %s" org-version))
+    (setq version (format "Org-mode version %s" version))
     (if here (insert version))
     (message version)
     version))
@@ -13457,31 +13456,6 @@ changes from another.  I believe the procedure must be like this:
 
 ;;;###autoload
 (defun org-iswitchb (&optional arg)
-  "Use `iswitchb-read-buffer' to prompt for an Org buffer to switch to.
-With a prefix argument, restrict available to files.
-With two prefix arguments, restrict available buffers to agenda files.
-
-Due to some yet unresolved reason, the global function
-`iswitchb-mode' needs to be active for this function to work."
-  (interactive "P")
-  (require 'iswitchb)
-  (let ((enabled iswitchb-mode) blist)
-    (or enabled (iswitchb-mode 1))
-    (setq blist (cond ((equal arg '(4)) (org-buffer-list 'files))
-		      ((equal arg '(16)) (org-buffer-list 'agenda))
-		      (t (org-buffer-list))))
-   (unwind-protect
-       (let ((iswitchb-make-buflist-hook
-	      (lambda ()
-		(setq iswitchb-temp-buflist
-		      (mapcar 'buffer-name blist)))))
-	 (switch-to-buffer
-	  (iswitchb-read-buffer
-	   "Switch-to: " nil t)))
-	 (or enabled (iswitchb-mode -1)))))
-
-;;;###autoload
-(defun org-iswitchb (&optional arg)
   "Use `org-icompleting-read' to prompt for an Org buffer to switch to.
 With a prefix argument, restrict available to files.
 With two prefix arguments, restrict available buffers to agenda files."
@@ -14024,6 +13998,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	      (delete-region beg end)
 	      (insert link))))))))
 
+(defvar org-export-latex-packages-alist) ;; defined in org-latex.el
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image (string tofile options buffer)
   (require 'org-latex)

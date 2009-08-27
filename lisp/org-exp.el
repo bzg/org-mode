@@ -1876,7 +1876,7 @@ When it is nil, all comments will be removed."
        (let* ((s (concat (match-string 1)
 			 "[[" (match-string 2) ":" (match-string 3)
 			 "][" (match-string 2) ":" (org-export-protect-sub-super
-						    )(match-string 3)
+						    (match-string 3))
 			 "]]")))
 	 (put-text-property 0 (length s) 'face 'org-link s)
 	 (replace-match s t t))))

@@ -38,6 +38,7 @@
 (require 'org-macs)
 (require 'org-compat)
 
+(declare-function org-in-commented-line "org" ())
 (declare-function org-in-regexp "org" (re &optional nlines visually))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function outline-next-heading "outline")
