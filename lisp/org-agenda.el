@@ -128,7 +128,11 @@ This is only relevant when `org-agenda-add-entry-text' is part of
 `org-agenda-before-write-hook', which it is by default.
 When this is 0, nothing will happen.  When it is greater than 0, it
 specifies the maximum number of lines that will be added for each entry
-that is listed in the agenda view."
+that is listed in the agenda view.
+
+Note that this variable is not used during display, only when exporting
+the agenda.  For agenda display, see org-agenda-entry-text-mode and the
+variable `org-agenda-entry-text-maxlines'."
   :group 'org-agenda
   :type 'integer)
 
@@ -650,6 +654,20 @@ Needs to be set before org.el is loaded."
   "The initial value of follow-mode in a newly created agenda window."
   :group 'org-agenda-startup
   :type 'boolean)
+
+(defcustom org-agenda-start-with-entry-text-mode nil
+  "The initial value of entry-text-mode in a newly created agenda window."
+  :group 'org-agenda-startup
+  :type 'boolean)
+
+(defcustom org-agenda-entry-text-maxlines 5
+  "Number of text lines to be added when `E' is presed in the agenda.
+
+Note that this variable only used during agenda display.  Add add entry text
+when exporting the agenda, configure the variable
+`org-agenda-add-entry-ext-maxlines'."
+  :group 'org-agenda
+  :type 'integer)
 
 (defvar org-agenda-include-inactive-timestamps nil
   "Non-nil means, include inactive time stamps in agenda and timeline.")
@@ -1245,6 +1263,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-restrict) ; defined later in this file.
 (defvar org-agenda-follow-mode nil)
+(defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
 (defvar org-agenda-show-log nil)
 (defvar org-agenda-redo-command nil)
@@ -1284,6 +1303,7 @@ The following commands are available:
 			 buffer-substring-filters)))
   (unless org-agenda-keep-modes
     (setq org-agenda-follow-mode org-agenda-start-with-follow-mode
+	  org-agenda-entry-text-mode org-agenda-start-with-entry-text-mode
 	  org-agenda-clockreport-mode org-agenda-start-with-clockreport-mode
 	  org-agenda-show-log org-agenda-start-with-log-mode))
 
@@ -1356,6 +1376,7 @@ The following commands are available:
 
 (org-defkey org-agenda-mode-map "f" 'org-agenda-follow-mode)
 (org-defkey org-agenda-mode-map "R" 'org-agenda-clockreport-mode)
+(org-defkey org-agenda-mode-map "E" 'org-agenda-entry-text-mode)
 (org-defkey org-agenda-mode-map "l" 'org-agenda-log-mode)
 (org-defkey org-agenda-mode-map "v" 'org-agenda-view-mode-dispatch)
 (org-defkey org-agenda-mode-map "D" 'org-agenda-toggle-diary)
@@ -1520,6 +1541,9 @@ The following commands are available:
      ["Show clock report" org-agenda-clockreport-mode
       :style toggle :selected org-agenda-clockreport-mode
       :active (org-agenda-check-type nil 'agenda)]
+     ["Show some entry text" org-agenda-entry-text-mode
+      :style toggle :selected org-agenda-entry-text-mode
+      :active t]
     "--"
      ["Show Logbook entries" org-agenda-log-mode
       :style toggle :selected org-agenda-show-log
@@ -2306,7 +2330,7 @@ This will ignore drawers etc, just get the text."
 		(while (looking-at "[ \t]*\n") (replace-match ""))
 		(goto-char (point-max))
 		(when (> (org-current-line)
-			 (1+ n-lines))
+			 n-lines)
 		  (goto-line (1+ n-lines))
 		  (backward-char 1))
 		(setq txt (buffer-substring (point-min) (point)))))))))
@@ -2449,6 +2473,9 @@ bind it in the options section.")
       (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
 	(org-agenda-dim-blocked-tasks))
       (org-agenda-mark-clocking-task)
+      (when org-agenda-entry-text-mode
+	(org-agenda-entry-text-hide)
+	(org-agenda-entry-text-show))	
       (run-hooks 'org-finalize-agenda-hook)
       (setq org-agenda-type (get-text-property (point) 'org-agenda-type))
       (when (get 'org-agenda-filter :preset-filter)
@@ -2600,6 +2627,43 @@ no longer in use."
   "Save relative positions of markers in region."
   (mapc (lambda (m) (org-check-and-save-marker m beg end))
 	org-agenda-markers))
+
+;;; Entry text mode
+
+(defun org-agenda-entry-text-show-here ()
+  "Add some text from te entry as context to the current line."
+  (let (m txt o)
+    (setq m (get-text-property (point) 'org-hd-marker))
+    (unless (marker-buffer m)
+      (error "No marker points to an entry here"))
+    (setq txt (concat "\n" (org-no-properties
+			    (org-agenda-get-some-entry-text
+			     m org-agenda-entry-text-maxlines))))
+    (when (string-match "\\S-" txt)
+      (setq o (org-make-overlay (point-at-bol) (point-at-eol)))
+      (org-overlay-put o 'evaporate t)
+      (org-overlay-put o 'org-overlay-type 'agenda-entry-content)
+      (org-overlay-put o 'after-string txt))))
+
+(defun org-agenda-entry-text-show ()
+  "Add entry context for all agenda lines."
+  (interactive)
+  (save-excursion
+    (goto-char (point-max))
+    (beginning-of-line 1)
+    (while (not (bobp))
+      (when (get-text-property (point) 'org-hd-marker)
+	(org-agenda-entry-text-show-here))
+      (beginning-of-line 0))))
+
+(defun org-agenda-entry-text-hide ()
+  "Remove any shown entry context."
+  (delq nil
+	(mapcar (lambda (o)
+		  (if (eq (org-overlay-get o 'org-overlay-type)
+			  'agenda-entry-content)
+		      (progn (org-delete-overlay o) t)))
+		(org-overlays-in (point-min) (point-max)))))
 
 ;;; Agenda timeline
 
@@ -5060,7 +5124,7 @@ With prefix ARG, go backward that many times the current span."
   "Call one of the view mode commands."
   (interactive)
   (message "View: [d]ay [w]eek [m]onth [y]ear [l]og [L]og-all [a]rch-trees [A]rch-files
-       clock[R]eport      time[G]rid      [[]inactive      include[D]iary")
+       clock[R]eport   time[G]rid   [[]inactive  [E]ntryText   include[D]iary")
   (let ((a (read-char-exclusive)))
     (case a
       (?d (call-interactively 'org-agenda-day-view))
@@ -5068,9 +5132,11 @@ With prefix ARG, go backward that many times the current span."
       (?m (call-interactively 'org-agenda-month-view))
       (?y (call-interactively 'org-agenda-year-view))
       (?l (call-interactively 'org-agenda-log-mode))
+      (?f (call-interactively 'org-agenda-follow-mode))
       (?a (call-interactively 'org-agenda-archives-mode))
       (?A (org-agenda-archives-mode 'files))
       (?R (call-interactively 'org-agenda-clockreport-mode))
+      (?E (call-interactively 'org-agenda-entry-text-mode))
       (?G (call-interactively 'org-agenda-toggle-time-grid))
       (?D (call-interactively 'org-agenda-toggle-diary))
       (?\[ (let ((org-agenda-include-inactive-timestamps t))
@@ -5236,6 +5302,22 @@ so that the date SD will be in that range."
   (message "Follow mode is %s"
 	   (if org-agenda-follow-mode "on" "off")))
 
+(defun org-agenda-entry-text-mode (&optional arg)
+  "Toggle entry text mode in an agenda buffer."
+  (interactive "P")
+  (if (integerp arg)
+      (setq org-agenda-entry-text-mode t)
+    (setq org-agenda-entry-text-mode (not org-agenda-entry-text-mode)))
+  (org-agenda-entry-text-hide)
+  (and org-agenda-entry-text-mode
+       (let ((org-agenda-entry-text-maxlines
+	      (if (integerp arg) arg org-agenda-entry-text-maxlines)))
+	 (org-agenda-entry-text-show)))
+  (org-agenda-set-mode-name)
+  (message "Entry text mode is %s.  Maximum number of lines is %d"
+	   (if org-agenda-entry-text-mode "on" "off")
+	   (if (integerp arg) arg org-agenda-entry-text-maxlines)))
+
 (defun org-agenda-clockreport-mode ()
   "Toggle clocktable mode in an agenda buffer."
   (interactive)
@@ -5309,6 +5391,7 @@ When called with a prefix argument, include all archive files as well."
 		(if (equal org-agenda-ndays 1) " Day"    "")
 		(if (equal org-agenda-ndays 7) " Week"   "")
 		(if org-agenda-follow-mode     " Follow" "")
+		(if org-agenda-entry-text-mode " ETxt"   "")
 		(if org-agenda-include-diary   " Diary"  "")
 		(if org-agenda-use-time-grid   " Grid"   "")
 		(if (consp org-agenda-show-log) " LogAll"
@@ -6612,57 +6695,6 @@ belonging to the \"Work\" category."
 	     (= date today))
 	(and (< h org-extend-today-until)
 	     (= date (1- today))))))
-
-;;; Experimental code
-
-(defcustom org-agenda-entry-text-maxlines 5
-  "Number of text lines to be added when `E' is presed in the agenda."
-  :group 'org-agenda
-  :type 'integer)
-
-(defun org-agenda-show-some-context ()
-  "Add some text from te entry as context to the current line."
-  (let (m txt o)
-    (setq m (get-text-property (point) 'org-hd-marker))
-    (unless (marker-buffer m)
-      (error "No marker points to an entry here"))
-    (setq txt (concat "\n" (org-no-properties
-			    (org-agenda-get-some-entry-text
-			     m org-agenda-entry-text-maxlines))))
-    (when (string-match "\\S-" txt)
-      (setq o (org-make-overlay (point-at-bol) (point-at-eol)))
-      (org-overlay-put o 'evaporate t)
-      (org-overlay-put o 'org-overlay-type 'agenda-entry-content)
-      (org-overlay-put o 'after-string txt))))
-
-(defun org-agenda-toggle-entry-contents ()
-  "Toggle the display of entry context."
-  (interactive)
-  (or (org-agenda-remove-entry-contents)
-      (org-agenda-add-entry-contents)))
-
-(org-defkey org-agenda-mode-map "E" 'org-agenda-toggle-entry-contents)
-(org-defkey org-agenda-keymap "E" 'org-agenda-toggle-entry-contents)
-
-(defun org-agenda-add-entry-contents ()
-  "Add entry context for all agenda lines."
-  (interactive)
-  (save-excursion
-    (goto-char (point-max))
-    (beginning-of-line 1)
-    (while (not (bobp))
-      (when (get-text-property (point) 'org-hd-marker)
-	(org-agenda-show-some-context))
-      (beginning-of-line 0))))
-
-(defun org-agenda-remove-entry-contents ()
-  "Remove any shown entry context."
-  (delq nil
-	(mapcar (lambda (o)
-		  (if (eq (org-overlay-get o 'org-overlay-type)
-			  'agenda-entry-content)
-		      (progn (org-delete-overlay o) t)))
-		(org-overlays-in (point-min) (point-max)))))
 
 (provide 'org-agenda)
 

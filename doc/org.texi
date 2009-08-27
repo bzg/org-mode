@@ -6957,6 +6957,25 @@ argument as well.  For example, @kbd{200712 w} will jump to week 12 in
 2007.  If such a year specification has only one or two digits, it will
 be mapped to the interval 1938-2037.
 @c
+@kindex @key{right}
+@item @key{right}
+@vindex org-agenda-ndays
+Display the following @code{org-agenda-ndays} days.  For example, if
+the display covers a week, switch to the following week.  With prefix
+arg, go forward that many times @code{org-agenda-ndays} days.
+@c
+@kindex @key{left}
+@item @key{left}
+Display the previous dates.
+@c
+@kindex .
+@item .
+Go to today.
+@c
+@kindex j
+@item j
+Prompt for a date and go there.
+@c
 @kindex D
 @item D
 Toggle the inclusion of diary entries.  See @ref{Weekly/daily agenda}.
@@ -6999,6 +7018,17 @@ covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-clockreport-mode}.
 @c
+@kindex v E
+@kindex E
+@item v E @ @r{or short} @ E
+@vindex org-agenda-start-with-entry-text-mode
+@vindex org-agenda-entry-text-maxlines
+Toggle entry text mode.  In entry text mode, a number of lines from the Org
+outline node referenced by an agenda line will be displayed below the line.
+The maximum number of lines is given by the variable
+@code{org-agenda-entry-text-maxlines}.  Calling this command with a numeric
+prefix argument will temporarily modify that number to the prefix value.
+@c
 @kindex G
 @item G
 @vindex org-agenda-use-time-grid
@@ -7023,25 +7053,6 @@ Same as @kbd{r}.
 @itemx C-x C-s
 Save all Org buffers in the current Emacs session, and also the locations of
 IDs.
-@c
-@kindex @key{right}
-@item @key{right}
-@vindex org-agenda-ndays
-Display the following @code{org-agenda-ndays} days.  For example, if
-the display covers a week, switch to the following week.  With prefix
-arg, go forward that many times @code{org-agenda-ndays} days.
-@c
-@kindex @key{left}
-@item @key{left}
-Display the previous dates.
-@c
-@kindex .
-@item .
-Go to today.
-@c
-@kindex j
-@item j
-Prompt for a date and go there.
 @c
 @kindex C-c C-x C-c
 @item C-c C-x C-c

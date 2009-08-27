@@ -1,3 +1,9 @@
+2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: DOcument the `E' key in the agenda.
+
+	* org.texi (Agenda commands): Document entry text mode.
+
 2009-08-18  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org.texi (Agenda commands): Improve documentation of the keys to

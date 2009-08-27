@@ -1,6 +1,24 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-mode): Force visual line motion off.
+	(org-agenda-add-entry-text-maxlines): Improve docstring.
+	(org-agenda-start-with-entry-text-mode): New option.
+	(org-agenda-entry-text-maxlines): New option.
+	(org-agenda-entry-text-mode): New variable.
+	(org-agenda-mode): Set initial value of
+	`org-agenda-entry-text-mode'.
+	(org-agenda-mode-map): Add the `E' key.
+	(org-agenda-menu): Add entry text mode to the menu.
+	(org-agenda-get-some-entry-text): Fix line count bug.
+	(org-finalize-agenda): Apply entry text mode if appropriate.
+	(org-agenda-entry-text-show-here): New function.
+	(org-agenda-entry-text-show): New function.
+	(org-agenda-entry-text-hide): New function.
+	(org-agenda-view-mode-dispatch): Add entry text mode to the view
+	key menu.
+	(org-agenda-entry-text-mode): New command.
+	(org-agenda-set-mode-name): Add entry text mode to the mode line
+	string.
 
 2009-08-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
