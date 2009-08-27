@@ -86,9 +86,10 @@ which is viewable through the web browser.
        ;; (require 'org-babel-ditaa)     ;; ditaa
        ;; (require 'org-babel-dot)       ;; dot
        ;; (require 'org-babel-gnuplot)   ;; gnuplot, and gnuplot-mode
+       ;; (require 'org-babel-haskell)   ;; haskell, haskell-mode, inf-haskell
        ;; (require 'org-babel-ocaml)     ;; ocaml, and tuareg-mode
        ;; (require 'org-babel-python)    ;; python, and python-mode
-       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby mode
+       ;; (require 'org-babel-ruby)      ;; ruby, irb, ruby-mode, and inf-ruby
        ;; (require 'org-babel-sass)      ;; sass, sass-mode
        ;; (require 'org-babel-sql)       ;; none
        ;; 

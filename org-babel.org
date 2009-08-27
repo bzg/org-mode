@@ -2722,13 +2722,36 @@ This is currently working only with emacs lisp as in the following
 example in the [[* emacs lisp source reference][emacs lisp source reference]].
 
 
-** TODO Add languages [11/15]
+** TODO Add languages [12/16]
 I'm sure there are many more that aren't listed here.  Please add
 them, and bubble any that you particularly care about up to the top.
 
 Any new language should be implemented in a org-babel-lang.el file.
 Follow the pattern set by [[file:lisp/org-babel-script.el][org-babel-script.el]], [[file:lisp/org-babel-shell.el][org-babel-shell.el]] and
 [[file:lisp/org-babel-R.el][org-babel-R.el]].
+
+*** DONE Haskell
+#+begin_src haskell
+"hello Haskell"
+#+end_src
+
+#+resname:
+: hello Haskell
+
+#+begin_src haskell
+  let fac n = if n == 0 then 1 else n * fac (n - 1)
+  fac 4
+#+end_src
+
+#+resname:
+: 24
+
+#+begin_src haskell
+[1, 2, 3, 4, 5]
+#+end_src
+
+#+resname:
+| 1 | 2 | 3 | 4 | 5 |
 
 *** STARTED ocaml [2/3]
 
