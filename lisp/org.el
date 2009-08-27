@@ -16796,7 +16796,7 @@ Stop at the first and last subheadings of a superior heading."
   (outline-flag-region
    (point)
    (save-excursion
-     (outline-end-of-subtree) (outline-next-heading) (point))
+     (org-end-of-subtree t t))
    nil))
 
 (defun org-show-entry ()

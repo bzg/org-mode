@@ -719,9 +719,6 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 			      (append (pop fields) emptystrings))
 		   hfmt))
 	       lines ""))
-    ;; Replace the old one
-    (delete-region beg end)
-    (move-marker end nil)
     (if (equal (char-before) ?\n)
 	;; This hack is for org-indent, to force redisplay of the
 	;; line prefix of the first line. Apparently the redisplay
@@ -734,6 +731,9 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	  (insert "\n")))
     (move-marker org-table-aligned-begin-marker (point))
     (insert new)
+    ;; Replace the old one
+    (delete-region (point) end)
+    (move-marker end nil)
     (move-marker org-table-aligned-end-marker (point))
     (when (and orgtbl-mode (not (org-mode-p)))
       (goto-char org-table-aligned-begin-marker)

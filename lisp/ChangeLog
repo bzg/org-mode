@@ -1,6 +1,10 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-table.el (org-table-align): Change the order of reinsertion
+	and deletion, to avoid problems with overlays following the table.
+
 	* org.el (org-parse-time-string): Better error message.
+	(org-show-subtree): Use org-end-of-subtree.
 
 	* org-macs.el (org-goto-line): New defsubst.
 
