@@ -1,5 +1,7 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-agenda.el (org-agenda-mode-map): New keys for time motion.
+
 	* org-table.el (org-table-align): Change the order of reinsertion
 	and deletion, to avoid problems with overlays following the table.
 

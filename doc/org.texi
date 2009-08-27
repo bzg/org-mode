@@ -6908,8 +6908,8 @@ Go to the original location of the item in another window.  Under Emacs
 @itemx @key{RET}
 Go to the original location of the item and delete other windows.
 @c
-@kindex f
-@item f
+@kindex F
+@item F
 @vindex org-agenda-start-with-follow-mode
 Toggle Follow mode.  In Follow mode, as you move the cursor through
 the agenda buffer, the other window always shows the corresponding
@@ -6917,8 +6917,8 @@ location in the Org file.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-follow-mode}.
 @c
-@kindex b
-@item b
+@kindex C-c C-x b
+@item C-c C-x b
 Display the entire subtree of the current item in an indirect buffer.  With a
 numeric prefix argument N, go up to level N and then take that tree.  If N is
 negative, go up that many levels.  With a @kbd{C-u} prefix, do not remove the
@@ -6957,16 +6957,16 @@ argument as well.  For example, @kbd{200712 w} will jump to week 12 in
 2007.  If such a year specification has only one or two digits, it will
 be mapped to the interval 1938-2037.
 @c
-@kindex @key{right}
-@item @key{right}
+@kindex f
+@item f
 @vindex org-agenda-ndays
-Display the following @code{org-agenda-ndays} days.  For example, if
-the display covers a week, switch to the following week.  With prefix
-arg, go forward that many times @code{org-agenda-ndays} days.
+Go forward in time to display the following @code{org-agenda-ndays} days.
+For example, if the display covers a week, switch to the following week.
+With prefix arg, go forward that many times @code{org-agenda-ndays} days.
 @c
-@kindex @key{left}
-@item @key{left}
-Display the previous dates.
+@kindex b
+@item b
+Go backward in time to display earlier dates.
 @c
 @kindex .
 @item .

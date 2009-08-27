@@ -1,6 +1,11 @@
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
-	* orgcard.tex: DOcument the `E' key in the agenda.
+	* orgcard.tex: Document the new keys for agenda time motion.
+
+	* org.texi (Agenda commands): Document the new keys fro agenda
+	time motion.
+
+	* orgcard.tex: Document the `E' key in the agenda.
 
 	* org.texi (Agenda commands): Document entry text mode.
 
