@@ -446,7 +446,7 @@ Notification is shown only once."
 
 (defun org-notify (notification &optional play-sound)
   "Send a NOTIFICATION and maybe PLAY-SOUND."
-  (org-show-notification (notification))
+  (org-show-notification notification)
   (if play-sound (org-clock-play-sound)))
 
 (defun org-show-notification (notification)
