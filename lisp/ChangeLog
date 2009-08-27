@@ -1,3 +1,7 @@
+2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* org-agenda.el (org-agenda-mode): Force visual line motion off.
+
 2009-08-25  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* org-agenda.el (org-agenda-open-link): Handle multiple links and
