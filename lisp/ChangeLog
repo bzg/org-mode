@@ -158,7 +158,6 @@
 	* org-latex.el (org-export-latex-classes): Always include the soul
 	package.
 	(org-export-latex-emphasis-alist): Use \st for strikethough.
-	(org-export-latex-fontify): Fix emphasis in quotes.
 
 	* org-exp-blocks.el (org-export-blocks-preprocess): Use
 	`indent-code-rigidly' to indent.

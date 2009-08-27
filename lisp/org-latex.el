@@ -1440,7 +1440,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
       (unless emph
 	(message "`org-export-latex-emphasis-alist' has no entry for formatting triggered by \"%s\""
 		 (match-string 3)))
-      (unless (or (get-text-property (- (point) 3) 'org-protected)
+      (unless (or (get-text-property (1- (point)) 'org-protected)
 		  (save-excursion
 		    (goto-char (match-beginning 1))
 		    (save-match-data
