@@ -382,6 +382,17 @@ code and the command that is used to create the image..
 -- Carsten
 #+end_quote
 
+
+#+begin_quote 
+(sha1 stuff) seems to work.
+
+org-feed.el has a (require 'sha1) and org-publish.el uses it too.
+
+-- Bernt
+#+end_quote
+
+
+
 ** TODO support for working with =*Org Edit Src Example*= buffers [4/6]
 *** STARTED Patch against org source. 
     I've worked on several related changes to source code edit buffer
