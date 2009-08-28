@@ -1,5 +1,7 @@
 2009-08-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-remember.el (org-remember-templates): Documentation fix.
+
 	* org.el (org-move-subtree-down): Use `org-get-next-sibling' and
 	`org-get-last-sibling' instead of the outline versions of these
 	functions.
