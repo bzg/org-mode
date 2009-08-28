@@ -5203,13 +5203,13 @@ This function is the default value of the hook `org-cycle-hook'."
   ;; First, find a reasonable region to look at:
   ;; Start two siblings above, end three below
   (let* ((beg (save-excursion
-		(and (outline-get-last-sibling)
-		     (outline-get-last-sibling))
+		(and (org-get-last-sibling)
+		     (org-get-last-sibling))
 		(point)))
 	 (end (save-excursion
-		(and (outline-get-next-sibling)
-		     (outline-get-next-sibling)
-		     (outline-get-next-sibling))
+		(and (org-get-next-sibling)
+		     (org-get-next-sibling)
+		     (org-get-next-sibling))
 		(if (org-at-heading-p)
 		    (point-at-eol)
 		  (point))))
@@ -6099,8 +6099,8 @@ is signaled in this case."
   "Move the current subtree down past ARG headlines of the same level."
   (interactive "p")
   (setq arg (prefix-numeric-value arg))
-  (let ((movfunc (if (> arg 0) 'outline-get-next-sibling
-		   'outline-get-last-sibling))
+  (let ((movfunc (if (> arg 0) 'org-get-next-sibling
+		   'org-get-last-sibling))
 	(ins-point (make-marker))
 	(cnt (abs arg))
 	beg beg0 end txt folded ne-beg ne-end ne-ins ins-end)
@@ -8719,7 +8719,7 @@ See also `org-refile-use-outline-path' and `org-completion-use-ido'"
 		      (goto-char
 		       (if reversed
 			   (or (outline-next-heading) (point-max))
-			 (or (save-excursion (outline-get-next-sibling))
+			 (or (save-excursion (org-get-next-sibling))
 			     (org-end-of-subtree t t)
 			     (point-max)))))
 		  (setq level 1)
@@ -16685,6 +16685,20 @@ This is like outline-next-sibling, but invisible headings are ok."
     (if (or (eobp) (< (funcall outline-level) level))
 	nil
       (point))))
+
+(defun org-get-last-sibling ()
+  "Move to previous heading of the same level, and return point.
+If there is no such heading, return nil."
+  (let ((opoint (point))
+	(level (funcall outline-level)))
+    (outline-previous-heading)
+    (when (and (/= (point) opoint) (outline-on-heading-p t))
+      (while (and (> (funcall outline-level) level)
+		  (not (bobp)))
+	(outline-previous-heading))
+      (if (< (funcall outline-level) level)
+	  nil
+        (point)))))
 
 (defun org-end-of-subtree (&optional invisible-OK to-heading)
   ;; This contains an exact copy of the original function, but it uses
