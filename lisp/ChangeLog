@@ -1,5 +1,8 @@
 2009-08-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-remove-timestamp-with-keyword): Only remove in
+	entry, not in subtree.
+
 	* org-src.el (org-src-lang-modes): Add abbreviation elisp for
 	emacs lisp.
 

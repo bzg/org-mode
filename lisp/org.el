@@ -10045,7 +10045,7 @@ nil."
     (save-excursion
       (org-back-to-heading t)
       (setq beg (point))
-      (org-end-of-subtree t t)
+      (outline-next-heading)
       (while (re-search-backward re beg t)
 	(replace-match "")
 	(if (and (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
