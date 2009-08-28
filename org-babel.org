@@ -218,51 +218,169 @@ would then be [[#sandbox][the sandbox]].
 #+end_src
 
   
-* Tasks [46/63]
-** PROPOSED allow `anonymous' function block with function call args?
-   My question here is simply whether we're going to allow
-#+begin_src python(arg=ref)
-# whatever
+* Tasks [47/64]
+** STARTED share org-babel [1/6]
+how should we share org-babel?
+*** DONE post to org-mode
+*** TODO post to ess mailing list
+*** TODO create a org-babel page on worg
+*** TODO create a short screencast demonstrating org-babel in action
+*** PROPOSED a peer-reviewed publication?
+
+    The following notes are biased towards statistics-oriented
+    journals because ESS and Sweave are written by people associated
+    with / in statistics departments. But I am sure there are suitable
+    journals out there for an article on using org mode for
+    reproducible research (and literate programming etc).
+
+    Clearly, we would invite Carsten to be involved with this.
+
+     ESS is described in a peer-reviewed journal article:
+     Emacs Speaks Statistics: A Multiplatform, Multipackage Development Environment for Statistical Analysis  [Abstract]
+     Journal of Computational & Graphical Statistics 13(1), 247-261
+     Rossini, A.J, Heiberger, R.M., Sparapani, R.A., Maechler, M., Hornik, K. (2004) 
+     [[http://www.amstat.org/publications/jcgs.cfm][Journal of Computational and Graphical Statistics]]
+
+     Also [[http://www.amstat.org/publications/jss.cfm][Journal of Statistical Software]] Established in 1996, the
+     Journal of Statistical Software publishes articles, book reviews,
+     code snippets, and software reviews. The contents are freely
+     available online. For both articles and code snippets, the source
+     code is published along with the paper.
+
+    Sweave has a paper: 
+
+    Friedrich Leisch and Anthony J. Rossini. Reproducible statistical
+    research. Chance, 16(2):46-50, 2003. [ bib ]
+
+    also
+
+    Friedrich Leisch. Sweave: Dynamic generation of statistical reports
+    using literate data analysis. In Wolfgang Härdle and Bernd Rönz,
+    editors, Compstat 2002 - Proceedings in Computational Statistics,
+    pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
+
+    also
+
+    We could also look at the Journals publishing these [[http://www.reproducibleresearch.net/index.php/RR_links#Articles_about_RR_.28chronologically.29][Reproducible
+    Research articles]].
+    
+*** PROPOSED an article in [[http://journal.r-project.org/][The R Journal]]
+This looks good.  It seems that their main topic to software tools for
+use by R programmers, and Org-babel is certainly that.
+
+*** existing similar tools
+try to collect pointers to similar tools 
+
+Reproducible Research
+- [[http://en.wikipedia.org/wiki/Sweave][Sweave]]
+
+Literate Programming
+- [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
+- [[http://www-cs-faculty.stanford.edu/~knuth/cweb.html][Cweb]]
+- [[http://www.lri.fr/~filliatr/ocamlweb/][OCamlWeb]]
+
+Meta Functional Programming
+- ?
+
+Programmable Spreadsheet
+- ?
+
+*** examples
+we need to think up some good examples
+
+**** interactive tutorials
+This could be a place to use [[* org-babel assertions][org-babel assertions]].
+
+for example the first step of a tutorial could assert that the version
+of the software-package (or whatever) is equal to some value, then
+source-code blocks could be used with confidence (and executed
+directly from) the rest of the tutorial.
+
+**** answering a text-book question w/code example
+org-babel is an ideal environment enabling both the development and
+demonstrationg of the code snippets required as answers to many
+text-book questions.
+
+**** something using tables
+maybe something along the lines of calculations from collected grades
+
+**** file sizes
+Maybe something like the following which outputs sizes of directories
+under the home directory, and then instead of the trivial =emacs-lisp=
+block we could use an R block to create a nice pie chart of the
+results.
+
+#+srcname: sizes
+#+begin_src bash :results replace
+du -sc ~/*
 #+end_src
 
-but with preference given to
-#+srcname blockname(arg=ref)
-** PROPOSED allow :result as synonym for :results?
-** PROPOSED allow 'output mode to return stdout as value?
-   Maybe we should allow this. In fact, if block x is called
-   with :results output, and it references blocks y and z, then
-   shouldn't the output of x contain a concatenation of the outputs of
-   y and z, together with x's own output? That would raise the
-   question of what happens if y is defined with :results output and z
-   with :results value. I guess z's (possibly vector/tabular) output
-   would be inside a literal example block containing the whole lot.
-** PROPOSED optional timestamp for output
-   Add option to place an (inactive) timestamp at the #+resname, to
-   record when that output was generated.
+#+begin_src emacs-lisp :var sizes=sizes :results replace
+(mapcar #'car sizes)
+#+end_src
+*** Answer to question on list
+From: Hector Villafuerte <hectorvd@gmail.com>
+Subject: [Orgmode] Merge tables
+Date: Wed, 19 Aug 2009 10:08:40 -0600
+To: emacs-orgmode@gnu.org
 
-*** source code block timestamps (optional addition)
-    [Eric] If we did this would we then want to place a timestamp on the
-    source-code block, so that we would know if the results are
-    current or out of date?  This would have the effect of caching the
-    results of calculations and then only re-running if the
-    source-code has changed.  For the caching to work we would need to
-    check not only the timestamp on a source-code block, but also the
-    timestamps of any tables or source-code blocks referenced by the
-    original source-code block.
+Hi,
+I've just discovered Org and are truly impressed with it; using it for
+more and more tasks.
 
-    [Dan] I do remember getting frustrated by Sweave always having to
-    re-do everything, so this could be desirable, as long as it's easy
-    to over-ride of course. I'm not sure it should be the default
-    behaviour unless we are very confident that it works well.
+Here's what I want to do: I have 2 tables with the same number of rows
+(one row per subject). I would like to make just one big table by
+copying the second table to the right of the first one. This is a
+no-brainer in a spreadsheet but my attempts in Org have failed. Any
+ideas?
 
-**** maintaining source-code block timestamps
-     It may make sense to add a hook to `org-edit-special' which could
-     update the source-code blocks timestamp.  If the user edits the
-     contents of a source-code block directly I can think of no
-     efficient way of maintaining the timestamp.
-** TODO make tangle files read-only?
-   With a file-local variable setting, yea that makes sense.  Maybe
-   the header should reference the related org-mode file.
+By the way, thanks for this great piece of software!
+-- 
+ hector
+
+**** Suppose the tables are as follows
+#+tblname: tab1
+| a | b | c |
+|---+---+---|
+| 1 | 2 | 3 |
+| 7 | 8 | 9 |
+
+#+tblname: tab2
+|  d |  e |  f |
+|----+----+----|
+|  4 |  5 |  6 |
+| 10 | 11 | 12 |
+
+**** Here is an answer using R in org-babel
+
+#+srcname: column-bind(a=tab1, b=tab2)
+#+begin_src R :colnames t
+cbind(a, b)
+#+end_src
+
+#+resname: column-bind
+| "a" | "b" | "c" | "d" | "e" | "f" |
+|-----+-----+-----+-----+-----+-----|
+|   1 |   2 |   3 |   4 |   5 |   6 |
+|   7 |   8 |   9 |  10 |  11 |  12 |
+
+
+**** Alternatively
+     Use org-table-export, do it in external spreadsheet software,
+     then org-table-import
+** TODO sha1 hash based caching
+   :PROPERTIES:
+   :CUSTOM_ID: sha1-caching
+   :END:
+
+#+begin_quote 
+I wonder if we should consider some cashing of images, also for
+export.  I think we could have an alist with sha1 hashes as keys and
+image files as values.  The sha1 hash could be made from the entire
+code and the command that is used to create the image..
+
+-- Carsten
+#+end_quote
 
 ** TODO support for working with =*Org Edit Src Example*= buffers [4/6]
 *** STARTED Patch against org source. 
@@ -604,155 +722,6 @@ msg + " y python"
 #+begin_src emacs-lisp
 (concat msg " elisp")
 #+end_src
-** STARTED share org-babel [1/6]
-how should we share org-babel?
-*** DONE post to org-mode
-*** TODO post to ess mailing list
-*** TODO create a org-babel page on worg
-*** TODO create a short screencast demonstrating org-babel in action
-*** PROPOSED a peer-reviewed publication?
-
-    The following notes are biased towards statistics-oriented
-    journals because ESS and Sweave are written by people associated
-    with / in statistics departments. But I am sure there are suitable
-    journals out there for an article on using org mode for
-    reproducible research (and literate programming etc).
-
-    Clearly, we would invite Carsten to be involved with this.
-
-     ESS is described in a peer-reviewed journal article:
-     Emacs Speaks Statistics: A Multiplatform, Multipackage Development Environment for Statistical Analysis  [Abstract]
-     Journal of Computational & Graphical Statistics 13(1), 247-261
-     Rossini, A.J, Heiberger, R.M., Sparapani, R.A., Maechler, M., Hornik, K. (2004) 
-     [[http://www.amstat.org/publications/jcgs.cfm][Journal of Computational and Graphical Statistics]]
-
-     Also [[http://www.amstat.org/publications/jss.cfm][Journal of Statistical Software]] Established in 1996, the
-     Journal of Statistical Software publishes articles, book reviews,
-     code snippets, and software reviews. The contents are freely
-     available online. For both articles and code snippets, the source
-     code is published along with the paper.
-
-    Sweave has a paper: 
-
-    Friedrich Leisch and Anthony J. Rossini. Reproducible statistical
-    research. Chance, 16(2):46-50, 2003. [ bib ]
-
-    also
-
-    Friedrich Leisch. Sweave: Dynamic generation of statistical reports
-    using literate data analysis. In Wolfgang Härdle and Bernd Rönz,
-    editors, Compstat 2002 - Proceedings in Computational Statistics,
-    pages 575-580. Physica Verlag, Heidelberg, 2002. ISBN 3-7908-1517-9.
-
-    also
-
-    We could also look at the Journals publishing these [[http://www.reproducibleresearch.net/index.php/RR_links#Articles_about_RR_.28chronologically.29][Reproducible
-    Research articles]].
-    
-*** PROPOSED an article in [[http://journal.r-project.org/][The R Journal]]
-This looks good.  It seems that their main topic to software tools for
-use by R programmers, and Org-babel is certainly that.
-
-*** existing similar tools
-try to collect pointers to similar tools 
-
-Reproducible Research
-- [[http://en.wikipedia.org/wiki/Sweave][Sweave]]
-
-Literate Programming
-- [[http://www.cs.tufts.edu/~nr/noweb/][Noweb]]
-- [[http://www-cs-faculty.stanford.edu/~knuth/cweb.html][Cweb]]
-- [[http://www.lri.fr/~filliatr/ocamlweb/][OCamlWeb]]
-
-Meta Functional Programming
-- ?
-
-Programmable Spreadsheet
-- ?
-
-*** examples
-we need to think up some good examples
-
-**** interactive tutorials
-This could be a place to use [[* org-babel assertions][org-babel assertions]].
-
-for example the first step of a tutorial could assert that the version
-of the software-package (or whatever) is equal to some value, then
-source-code blocks could be used with confidence (and executed
-directly from) the rest of the tutorial.
-
-**** answering a text-book question w/code example
-org-babel is an ideal environment enabling both the development and
-demonstrationg of the code snippets required as answers to many
-text-book questions.
-
-**** something using tables
-maybe something along the lines of calculations from collected grades
-
-**** file sizes
-Maybe something like the following which outputs sizes of directories
-under the home directory, and then instead of the trivial =emacs-lisp=
-block we could use an R block to create a nice pie chart of the
-results.
-
-#+srcname: sizes
-#+begin_src bash :results replace
-du -sc ~/*
-#+end_src
-
-#+begin_src emacs-lisp :var sizes=sizes :results replace
-(mapcar #'car sizes)
-#+end_src
-*** Answer to question on list
-From: Hector Villafuerte <hectorvd@gmail.com>
-Subject: [Orgmode] Merge tables
-Date: Wed, 19 Aug 2009 10:08:40 -0600
-To: emacs-orgmode@gnu.org
-
-Hi,
-I've just discovered Org and are truly impressed with it; using it for
-more and more tasks.
-
-Here's what I want to do: I have 2 tables with the same number of rows
-(one row per subject). I would like to make just one big table by
-copying the second table to the right of the first one. This is a
-no-brainer in a spreadsheet but my attempts in Org have failed. Any
-ideas?
-
-By the way, thanks for this great piece of software!
--- 
- hector
-
-**** Suppose the tables are as follows
-#+tblname: tab1
-| a | b | c |
-|---+---+---|
-| 1 | 2 | 3 |
-| 7 | 8 | 9 |
-
-#+tblname: tab2
-|  d |  e |  f |
-|----+----+----|
-|  4 |  5 |  6 |
-| 10 | 11 | 12 |
-
-**** Here is an answer using R in org-babel
-
-#+srcname: column-bind(a=tab1, b=tab2)
-#+begin_src R :colnames t
-cbind(a, b)
-#+end_src
-
-#+resname: column-bind
-| "a" | "b" | "c" | "d" | "e" | "f" |
-|-----+-----+-----+-----+-----+-----|
-|   1 |   2 |   3 |   4 |   5 |   6 |
-|   7 |   8 |   9 |  10 |  11 |  12 |
-
-
-**** Alternatively
-     Use org-table-export, do it in external spreadsheet software,
-     then org-table-import
 ** TODO command line execution
 Allow source code blocks to be called form the command line.  This
 will be easy using the =sbe= function in [[file:lisp/org-babel-table.el][org-babel-table.el]].
@@ -788,6 +757,26 @@ should use a span class, and should show original source in tool-tip
 ** TODO LoB: re-implement plotting and analysis functions from org-R
    I'll do this soon, now that we things are a bit more settled and we
    have column names in R.
+** PROPOSED allow `anonymous' function block with function call args?
+   My question here is simply whether we're going to allow
+#+begin_src python(arg=ref)
+# whatever
+#+end_src
+
+but with preference given to
+#+srcname blockname(arg=ref)
+** PROPOSED allow :result as synonym for :results?
+** PROPOSED allow 'output mode to return stdout as value?
+   Maybe we should allow this. In fact, if block x is called
+   with :results output, and it references blocks y and z, then
+   shouldn't the output of x contain a concatenation of the outputs of
+   y and z, together with x's own output? That would raise the
+   question of what happens if y is defined with :results output and z
+   with :results value. I guess z's (possibly vector/tabular) output
+   would be inside a literal example block containing the whole lot.
+** PROPOSED make tangle files read-only?
+   With a file-local variable setting, yea that makes sense.  Maybe
+   the header should reference the related org-mode file.
 ** PROPOSED Creating presentations
    The [[mairix:t:@@9854.1246500519@gamaville.dokosmarshall.org][recent thread]] containing posts by Nick Dokos and Sebastian
    Vaubán on exporting to beamer looked very interesting, but I
@@ -839,6 +828,33 @@ the org-mode buffer as a link to the file...
 This would allow for display of images upon export providing
 functionality similar to =org-exp-blocks= only in a more general
 manner.
+** DEFERRED optional timestamp for output
+   *DEFERRED*: I'm deferring this in deference to the better caching
+   system proposed by Carsten. (see [[sha1-caching]])
+
+   Add option to place an (inactive) timestamp at the #+resname, to
+   record when that output was generated.
+
+*** source code block timestamps (optional addition)
+    [Eric] If we did this would we then want to place a timestamp on the
+    source-code block, so that we would know if the results are
+    current or out of date?  This would have the effect of caching the
+    results of calculations and then only re-running if the
+    source-code has changed.  For the caching to work we would need to
+    check not only the timestamp on a source-code block, but also the
+    timestamps of any tables or source-code blocks referenced by the
+    original source-code block.
+
+    [Dan] I do remember getting frustrated by Sweave always having to
+    re-do everything, so this could be desirable, as long as it's easy
+    to over-ride of course. I'm not sure it should be the default
+    behaviour unless we are very confident that it works well.
+
+**** maintaining source-code block timestamps
+     It may make sense to add a hook to `org-edit-special' which could
+     update the source-code blocks timestamp.  If the user edits the
+     contents of a source-code block directly I can think of no
+     efficient way of maintaining the timestamp.
 ** DEFERRED figure out how to handle errors during evaluation
    I expect it will be hard to do this properly, but ultimately it
    would be nice to be able to specify somewhere to receive STDERR,
