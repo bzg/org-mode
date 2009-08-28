@@ -5589,40 +5589,8 @@ at the text of the entry itself."
 	 (txt (concat (buffer-substring (point-at-bol) (point-at-eol))
 		      "\n"
 		      (and marker
-			   (org-agenda-get-some-entry-text marker 100))))
-	 (re (concat "\\(" org-bracket-link-regexp "\\)\\|"
-		     "\\(" org-angle-link-re "\\)\\|"
-		     "\\(" org-plain-link-re "\\)"))
-	 links c link (cnt 0))
-    (with-temp-buffer
-      (insert txt)
-      (org-agenda-copy-local-variable 'org-link-abbrev-alist-local)
-      (goto-char (point-min))
-      (while (re-search-forward re nil t)
-	(push (match-string 0) links))
-      (setq links (reverse links))
-      (unless links (error "No links"))
-
-      (unless (and (integerp arg) (>= (length links) arg))
-	(save-excursion
-	  (save-window-excursion
-	    (delete-other-windows)
-	    (with-output-to-temp-buffer "*Select Link*"
-	      (princ "Select link\n\n")
-	      (mapc (lambda (l) (princ (format "[%d] %s\n" (incf cnt) l)))
-		    links))
-	    (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
-	    (message "Select link to open:")
-	    (setq c (read-char-exclusive))
-	      (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
-	(setq arg (- c ?0)))
-      
-      (unless (and (integerp arg) (>= (length links) arg))
-	(error "Invalid link selection"))
-      (setq link (nth (1- arg) links)
-	    arg nil)
-      (with-current-buffer (or buffer (current-buffer))
-	(org-open-link-from-string link)))))
+			   (org-agenda-get-some-entry-text marker 100)))))
+    (org-offer-links-from-string txt arg buffer)))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."

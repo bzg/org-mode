@@ -1,5 +1,8 @@
 2009-08-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org.el (org-open-at-point): When on headline, offer all strings
+	in entry.
+
 	* org-remember.el (org-remember-templates): Documentation fix.
 
 	* org.el (org-move-subtree-down): Use `org-get-next-sibling' and
