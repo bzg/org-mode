@@ -1,5 +1,8 @@
 2009-08-28  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-src.el (org-src-lang-modes): Add abbreviation elisp for
+	emacs lisp.
+
 	* org.el (org-open-at-point): When on headline, offer all strings
 	in entry.
 
