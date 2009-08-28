@@ -2595,7 +2595,7 @@ All lines that should be recalculated should be marked with @samp{#}
 or @samp{*}.
 @item /
 Do not export this line.  Useful for lines that contain the narrowing
-@samp{<N>} markers.
+@samp{<N>} markers or column group markers.
 @end table
 
 Finally, just to whet your appetite for what can be done with the
