@@ -1,7 +1,16 @@
 2009-08-29  Carsten Dominik  <carsten.dominik@gmail.com>
 
+	* org-clock.el (org-clock-modify-effort-estimate): Emit message
+	about new effort.
+
+	* org.el (org-set-effort): New function.
+	(org-mode-map): New key for effort setting command.
+
 	* org-agenda.el (org-agenda): Keep window setup when calling
 	agenda from within agenda window.
+	(org-agenda-mode-map): New keys for effort setting commands.
+	(org-agenda-menu): Add effort setting commands to menu.
+	(org-agenda-set-property, org-agenda-set-effort): New functions.
 
 	* org-latex.el (org-export-latex-tables): Fix
 	`org-table-last-alignment' and `org-table-last-column-widths' if

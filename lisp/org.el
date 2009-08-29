@@ -11673,6 +11673,35 @@ Being in this list makes sure that they are offered for completion.")
       (call-interactively 'org-compute-property-at-point))
      (t (error "No such property action %c" c)))))
 
+(defun org-set-effort (&optional value)
+  "Set the effort property of the current entry.
+With numerical prefix arg, use the nth allowed value, 0 stands for the 10th
+allowed value."
+  (interactive "P")
+  (if (equal value 0) (setq value 10))
+  (let* ((completion-ignore-case t)
+	 (prop org-effort-property)
+	 (cur (org-entry-get nil prop))
+	 (allowed (org-property-get-allowed-values nil prop 'table))
+	 (existing (mapcar 'list (org-property-values prop)))
+	 (val (cond
+	       ((stringp value) value)
+	       ((and allowed (integerp value))
+		(or (car (nth (1- value) allowed))
+		    (car (org-last allowed))))
+	       (allowed
+		(org-completing-read "Value: " allowed nil 'req-match))
+	       (t
+		(let (org-completion-use-ido org-completion-use-iswitchb)
+		  (org-completing-read
+		   (concat "Value " (if (and cur (string-match "\\S-" cur))
+					(concat "[" cur "]") "")
+			   ": ")
+		   existing nil nil "" nil cur))))))
+    (unless (equal (org-entry-get nil prop) val)
+      (org-entry-put nil prop val))
+    (message "%s is now %s" prop val)))
+
 (defun org-at-property-p ()
   "Is the cursor in a property line?"
   ;; FIXME: Does not check if we are actually in the drawer.
@@ -12104,7 +12133,7 @@ in the current file."
 		   (org-completing-read "Value: " allowed nil 'req-match)
 		 (let (org-completion-use-ido org-completion-use-iswitchb)
 		   (org-completing-read
-		    (concat "Value" (if (and cur (string-match "\\S-" cur))
+		    (concat "Value " (if (and cur (string-match "\\S-" cur))
 					(concat "[" cur "]") "")
 			    ": ")
 		    existing nil nil "" nil cur)))))
@@ -14286,6 +14315,7 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
+(org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)

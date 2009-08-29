@@ -1,3 +1,10 @@
+2009-08-29  Carsten Dominik  <carsten.dominik@gmail.com>
+
+	* orgcard.tex: Document new effort setting commands.
+
+	* org.texi (Effort estimates): Document new effort setting
+	commands.
+
 2009-08-27  Carsten Dominik  <carsten.dominik@gmail.com>
 
 	* orgcard.tex: Document the new keys for agenda time motion.

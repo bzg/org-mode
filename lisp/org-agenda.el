@@ -1330,25 +1330,24 @@ The following commands are available:
 (org-defkey org-agenda-mode-map [(tab)]    'org-agenda-goto)
 (org-defkey org-agenda-mode-map "\C-m"     'org-agenda-switch-to)
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
-(org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
-(org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
+(org-defkey org-agenda-mode-map "\C-c$"    'org-agenda-archive)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-s" 'org-agenda-archive)
 (org-defkey org-agenda-mode-map "$"        'org-agenda-archive)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-archive-to-archive-sibling)
 (org-defkey org-agenda-mode-map "\C-c\C-o" 'org-agenda-open-link)
 (org-defkey org-agenda-mode-map " "        'org-agenda-show)
-(org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
 (org-defkey org-agenda-mode-map [(control shift right)] 'org-agenda-todo-nextset)
 (org-defkey org-agenda-mode-map [(control shift left)]  'org-agenda-todo-previousset)
 (org-defkey org-agenda-mode-map "\C-c\C-xb" 'org-agenda-tree-to-indirect-buffer)
-(org-defkey org-agenda-mode-map "b"        'org-agenda-tree-to-indirect-buffer)
 (org-defkey org-agenda-mode-map "o"        'delete-other-windows)
 (org-defkey org-agenda-mode-map "L"        'org-agenda-recenter)
+(org-defkey org-agenda-mode-map "\C-c\C-t" 'org-agenda-todo)
 (org-defkey org-agenda-mode-map "t"        'org-agenda-todo)
 (org-defkey org-agenda-mode-map "a"        'org-agenda-toggle-archive-tag)
 (org-defkey org-agenda-mode-map ":"        'org-agenda-set-tags)
@@ -1383,7 +1382,11 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "G" 'org-agenda-toggle-time-grid)
 (org-defkey org-agenda-mode-map "r" 'org-agenda-redo)
 (org-defkey org-agenda-mode-map "g" 'org-agenda-redo)
-(org-defkey org-agenda-mode-map "e" 'org-agenda-execute)
+(org-defkey org-agenda-mode-map "e" 'org-agenda-set-effort)
+(org-defkey org-agenda-mode-map "\C-c\C-xe" 'org-agenda-set-effort)
+(org-defkey org-agenda-mode-map "\C-c\C-x\C-e"
+	    'org-clock-modify-effort-estimate)
+(org-defkey org-agenda-mode-map "\C-c\C-xp" 'org-agenda-set-property)
 (org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
 (org-defkey org-agenda-mode-map "\C-x\C-w" 'org-write-agenda)
@@ -1493,11 +1496,15 @@ The following commands are available:
      ["Change Time +  min" org-agenda-date-later :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-right"]
      ["Change Time -  min" org-agenda-date-earlier :active (org-agenda-check-type nil 'agenda 'timeline) :keys "C-u C-u S-left"]
      ["Change Date to ..." org-agenda-date-prompt (org-agenda-check-type nil 'agenda 'timeline)])
-    ("Clock"
+    ("Clock and Effort"
      ["Clock in" org-agenda-clock-in t]
      ["Clock out" org-agenda-clock-out t]
      ["Clock cancel" org-agenda-clock-cancel t]
-     ["Goto running clock" org-clock-goto t])
+     ["Goto running clock" org-clock-goto t]
+     "--"
+     ["Set Effort" org-agenda-set-effort t]
+     ["Change clocked effort" org-clock-modify-effort-estimate
+      (org-clock-is-active)])
     ("Priority"
      ["Set Priority" org-agenda-priority t]
      ["Increase Priority" org-agenda-priority-up t]
@@ -4404,7 +4411,7 @@ Any match of REMOVE-RE will be removed from TXT."
 		(error nil)))
 	(when effort
 	  (setq neffort (org-hh:mm-string-to-minutes effort)
-		effort (setq effort (concat "[" effort"]" )))))
+		effort (setq effort (concat "[" effort "]" )))))
 
       (when remove-re
 	(while (string-match remove-re txt)
@@ -5979,6 +5986,53 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	  (setq newhead (org-get-heading)))
 	(org-agenda-change-all-lines newhead hdmarker)
 	(beginning-of-line 1)))))
+
+(defun org-agenda-set-property ()
+  "Set a property for the current headline."
+  (interactive)
+  (org-agenda-check-no-diary)
+  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
+  (let* ((hdmarker (or (get-text-property (point) 'org-hd-marker)
+		       (org-agenda-error)))
+	 (buffer (marker-buffer hdmarker))
+	 (pos (marker-position hdmarker))
+	 (inhibit-read-only t)
+	 newhead)
+    (org-with-remote-undo buffer
+      (with-current-buffer buffer
+	(widen)
+	(goto-char pos)
+	(save-excursion
+	  (org-show-context 'agenda))
+	(save-excursion
+	  (and (outline-next-heading)
+	       (org-flag-heading nil)))   ; show the next heading
+	(goto-char pos)
+	(call-interactively 'org-set-property)))))
+
+(defun org-agenda-set-effort ()
+  "Set the effort property for the current headline."
+  (interactive)
+  (org-agenda-check-no-diary)
+  (org-agenda-show)   ;;; FIXME This is a stupid hack and should not be needed
+  (let* ((hdmarker (or (get-text-property (point) 'org-hd-marker)
+		       (org-agenda-error)))
+	 (buffer (marker-buffer hdmarker))
+	 (pos (marker-position hdmarker))
+	 (inhibit-read-only t)
+	 newhead)
+    (org-with-remote-undo buffer
+      (with-current-buffer buffer
+	(widen)
+	(goto-char pos)
+	(save-excursion
+	  (org-show-context 'agenda))
+	(save-excursion
+	  (and (outline-next-heading)
+	       (org-flag-heading nil)))   ; show the next heading
+	(goto-char pos)
+	(call-interactively 'org-set-effort)
+	(end-of-line 1)))))
 
 (defun org-agenda-toggle-archive-tag ()
   "Toggle the archive tag for the current entry."

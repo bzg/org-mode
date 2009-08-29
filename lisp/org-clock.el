@@ -425,7 +425,8 @@ the mode line."
      (setq value (max 0 value)
 	   org-clock-effort (org-minutes-to-hh:mm-string value))
      (org-entry-put org-clock-marker "Effort" org-clock-effort)
-     (org-clock-update-mode-line))))
+     (org-clock-update-mode-line)
+     (message "Effort is now %s" org-clock-effort))))
 
 (defvar org-clock-notification-was-shown nil
   "Shows if we have shown notification already.")
